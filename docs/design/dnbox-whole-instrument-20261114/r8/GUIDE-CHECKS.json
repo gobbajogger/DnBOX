@@ -1,0 +1,496 @@
+{
+  "classification": "Producer final local Chromium proposal-only guide check; not firmware/audio/device/independent acceptance",
+  "html_sha256": "83bef5fb58cacf2119cd2431bdf77e1d97ce6b65a496792f4e58dd8defdf1d3e",
+  "passed": 11,
+  "total": 11,
+  "checks": [
+    {
+      "name": "64 retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "motion retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "copy retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "cue retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "record retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "panic retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "gen retained guide endpoint",
+      "pass": true
+    },
+    {
+      "name": "Native held TIE readout and bounds",
+      "pass": true
+    },
+    {
+      "name": "Native held REST readout and bounds",
+      "pass": true
+    },
+    {
+      "name": "Native held NOTE readout and bounds",
+      "pass": true
+    },
+    {
+      "name": "No browser exception",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "staged_states": 44,
+  "traces": [
+    {
+      "guide": "64",
+      "stage": 1,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "64",
+      "stage": 2,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 1,
+      "held": 64,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "64",
+      "stage": 3,
+      "view": "PART",
+      "part": 0,
+      "pattern": 1,
+      "held": 64,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "64",
+      "stage": 4,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "64",
+      "stage": 5,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "64",
+      "stage": 6,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 2,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "motion",
+      "stage": 1,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": true
+    },
+    {
+      "guide": "motion",
+      "stage": 2,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": true
+    },
+    {
+      "guide": "motion",
+      "stage": 3,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": true
+    },
+    {
+      "guide": "motion",
+      "stage": 4,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "motion",
+      "stage": 5,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "motion",
+      "stage": 6,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "copy",
+      "stage": 1,
+      "view": "HOME",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "copy",
+      "stage": 2,
+      "view": "HOME",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "copy",
+      "stage": 3,
+      "view": "HOME",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "copy",
+      "stage": 4,
+      "view": "HOME",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "copy",
+      "stage": 5,
+      "view": "HOME",
+      "part": 0,
+      "pattern": 6,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "cue",
+      "stage": 1,
+      "view": "SEQ",
+      "part": 0,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "cue",
+      "stage": 2,
+      "view": "SEQ",
+      "part": 1,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "cue",
+      "stage": 3,
+      "view": "HOME",
+      "part": 1,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "cue",
+      "stage": 4,
+      "view": "HOME",
+      "part": 1,
+      "pattern": 2,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "cue",
+      "stage": 5,
+      "view": "HOME",
+      "part": 1,
+      "pattern": 2,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "record",
+      "stage": 1,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": true
+    },
+    {
+      "guide": "record",
+      "stage": 2,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": true
+    },
+    {
+      "guide": "record",
+      "stage": 3,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": 3,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "record",
+      "stage": 4,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": 3,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "record",
+      "stage": 5,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "record",
+      "stage": 6,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": true
+    },
+    {
+      "guide": "record",
+      "stage": 7,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": 3,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "record",
+      "stage": 8,
+      "view": "SEQ",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "panic",
+      "stage": 1,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "panic",
+      "stage": 2,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "panic",
+      "stage": 3,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "panic",
+      "stage": 4,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "panic",
+      "stage": 5,
+      "view": "PART",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 1,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 2,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 3,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": 3,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 4,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": 3,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 5,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 6,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 7,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 8,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": true,
+      "rec": false
+    },
+    {
+      "guide": "gen",
+      "stage": 9,
+      "view": "GEN",
+      "part": 3,
+      "pattern": 1,
+      "held": -1,
+      "playing": false,
+      "rec": false
+    }
+  ]
+}

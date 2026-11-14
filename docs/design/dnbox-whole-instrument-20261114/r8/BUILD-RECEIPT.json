@@ -1,0 +1,17 @@
+{
+  "file": "DnBOX-R8-mobile-comparisons.pdf",
+  "bytes": 384975,
+  "sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b",
+  "source_commit": "9b82d94dbc259cee7a00dcc6285522c36b8db3ba",
+  "source_manifest_sha256": "f29b41196d1f317306d970765dd1d487f1c8cd3f1c34e1046e8aeb1a4007f0da",
+  "target_revision": "R8 corrective prototype",
+  "source_images": "All30 native images reuse exact R7 pixels; no redraw or R8 frame-execution claim",
+  "page_points": [
+    390,
+    844
+  ],
+  "body_points": 15,
+  "minor_points": 13,
+  "footer_points": 12,
+  "classification": "Mobile presentation companion; not new UI or independent acceptance; real iOS NOT_RUN"
+}

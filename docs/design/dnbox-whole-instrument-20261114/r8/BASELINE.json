@@ -1,0 +1,18 @@
+{
+  "base_commit": "9b82d94dbc259cee7a00dcc6285522c36b8db3ba",
+  "base_generator_sha256": "d0088bd7ab1bfb0fc9f2e93174aa2dfdd2a5cd9f8b90c768e4bf93a726bf8a8a",
+  "working_generator_sha256": "071c63e0478256662d084b1983a58f29ba19c6d36dc5b7f4a5f6371fdfb75041",
+  "changes": [
+    "Commit previous intentional GEN edit before acquiring another cell focus",
+    "Commit GEN focus before REC transition clears press/held state",
+    "Shared SEQ/GEN cyclic GATE and XOR ACCENT/SLIDE control grammar; GATE clears endpoint and preserves accent/slide",
+    "GEN cell transaction includes only its owned chance-lane data; unrelated motion is preserved"
+  ],
+  "status": "Frozen corrective source for existing independent affected assessment, not accepted",
+  "R7": "Immutable; same incumbent review continues",
+  "source_contract": "3c41 ui.c4651\u20134666; actual current positive GATE cycle reported by incumbent; fresh actual accent/slide still pending",
+  "files": {
+    "proposal.js": "53657ce2eb1befe6472416b3885339f38a5fd8044cc150a81ae28a9521c75d0f",
+    "generator-proposal.js": "071c63e0478256662d084b1983a58f29ba19c6d36dc5b7f4a5f6371fdfb75041"
+  }
+}

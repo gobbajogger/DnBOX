@@ -1,0 +1,132 @@
+{
+  "classification": "Producer targeted model/DOM checks; no independent, firmware, audio or device proof",
+  "mode": "r7",
+  "base_html_sha256": "131db6ae9aa436274735d9dca3602f7d902c3c1a32453a302d118ed6f70a2659",
+  "generator_sha256": "d0088bd7ab1bfb0fc9f2e93174aa2dfdd2a5cd9f8b90c768e4bf93a726bf8a8a",
+  "base_renderer_sha256": "e422f74492445d5be186822ddd3041ed6f09613e51a8469afacda21126e0c7e6",
+  "executed_html_sha256": "131db6ae9aa436274735d9dca3602f7d902c3c1a32453a302d118ed6f70a2659",
+  "checks": [
+    {
+      "name": "Two held-cell edits retain two Undo transactions",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "notes": [
+          56,
+          57
+        ],
+        "undo": 0,
+        "redo": 1
+      }
+    },
+    {
+      "name": "REC entry commits correction before retiring focus",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "notes": 56,
+        "rec": true,
+        "undo": 0,
+        "redo": 0
+      }
+    },
+    {
+      "name": "GEN repeated GATE turns cycle in direction 1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "gate": "TIE"
+      }
+    },
+    {
+      "name": "GEN repeated GATE turns cycle in direction -1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "gate": "REST"
+      }
+    },
+    {
+      "name": "GEN accent XOR turns 1x2",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": true
+      }
+    },
+    {
+      "name": "GEN accent XOR turns -1x1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": false
+      }
+    },
+    {
+      "name": "GEN slide XOR turns 1x2",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": true
+      }
+    },
+    {
+      "name": "GEN slide XOR turns -1x1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": false
+      }
+    },
+    {
+      "name": "SEQ repeated GATE turns cycle in direction 1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "gate": "TIE"
+      }
+    },
+    {
+      "name": "SEQ repeated GATE turns cycle in direction -1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "gate": "REST"
+      }
+    },
+    {
+      "name": "SEQ accent XOR turns 1x2",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": true
+      }
+    },
+    {
+      "name": "SEQ accent XOR turns -1x1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": false
+      }
+    },
+    {
+      "name": "SEQ slide XOR turns 1x2",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": true
+      }
+    },
+    {
+      "name": "SEQ slide XOR turns -1x1",
+      "pass": false,
+      "detail": {
+        "pass": false,
+        "value": false
+      }
+    }
+  ],
+  "passed": 0,
+  "total": 14
+}

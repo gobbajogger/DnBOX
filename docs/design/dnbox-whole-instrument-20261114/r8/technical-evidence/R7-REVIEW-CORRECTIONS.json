@@ -1,0 +1,18 @@
+{
+  "source": "3c41ef4bedf9701f549ce2752b73306e2fab1eb8",
+  "full_R7_review_sha256": "c086c179d6ad0203b46226193f2172ac6806d03ed1b8f482e7055eb690f4e737",
+  "canonical_R7_manifest_sha256": "f29b41196d1f317306d970765dd1d487f1c8cd3f1c34e1046e8aeb1a4007f0da",
+  "manifest_transport": "Review intake had one extra LF only; canonical bytes+LF SHA4b9b16bf418c253c389a897438a6c98eb79de69ea667ec1e2e46d40adf9b09c4; all105 payloads remained exact. Original seal unchanged.",
+  "source_contract": "ui.c4651\u20134666: modulo3 gate, accent/slide XOR, endpoint rules. Native actual current positive gate cycle and same-direction accent toggles qualified in the R7 review; raw cycles not calibrated detents.",
+  "prototype_source_changes": [
+    "Commit original GEN focus before replacement",
+    "Commit original GEN correction before REC retirement",
+    "Shared heldGateTurn and heldFlagTurn across SEQ/GEN"
+  ],
+  "limits": [
+    "Native full history grouping/capacity and audio not simulated",
+    "No firmware/device execution",
+    "R8 independent affected assessment pending",
+    "Whole-overhaul acceptance remains open"
+  ]
+}

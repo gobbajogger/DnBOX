@@ -1,0 +1,104 @@
+{
+  "state": "R8_FROZEN_FOR_EXISTING_AFFECTED_REVIEW; WHOLE_OVERHAUL_INCOMPLETE",
+  "classification": "Corrective design proposal; no runtime implementation or independent acceptance",
+  "reviewed_predecessor": "9b82d94dbc259cee7a00dcc6285522c36b8db3ba",
+  "predecessor_review_sha256": "c086c179d6ad0203b46226193f2172ac6806d03ed1b8f482e7055eb690f4e737",
+  "effective_model_effort_service": "Not exposed",
+  "changes": [
+    "GEN edit history survives focus/REC boundaries with original release owners",
+    "GEN/SEQ source GATE cycle and accent/slide XOR/endpoint grammar",
+    "Readable mobile PDF at390width, native240 images,15pt main text",
+    "Preflight: owned GEN chance-lane transactions remain recoverable without touching unrelated motion"
+  ],
+  "primary": [
+    {
+      "file": "workbench.html",
+      "bytes": 1972425,
+      "sha256": "83bef5fb58cacf2119cd2431bdf77e1d97ce6b65a496792f4e58dd8defdf1d3e"
+    },
+    {
+      "file": "proposal.js",
+      "bytes": 93613,
+      "sha256": "53657ce2eb1befe6472416b3885339f38a5fd8044cc150a81ae28a9521c75d0f"
+    },
+    {
+      "file": "physical-role-router.js",
+      "bytes": 5141,
+      "sha256": "5d605654638e5fd6985e40edd3efcb94f4581f618ce8ab1bee6826e4c3696ce8"
+    },
+    {
+      "file": "generator-math.js",
+      "bytes": 2904,
+      "sha256": "bbd76ceab51f96c884937d7ce045f4dd9d332daf61543e413671e588d2a17845"
+    },
+    {
+      "file": "generator-proposal.js",
+      "bytes": 16865,
+      "sha256": "071c63e0478256662d084b1983a58f29ba19c6d36dc5b7f4a5f6371fdfb75041"
+    },
+    {
+      "file": "DnBOX-R8-mobile-comparisons.pdf",
+      "bytes": 384975,
+      "sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b"
+    }
+  ],
+  "checks": [
+    {
+      "file": "CORRECTION-CHECKS.json",
+      "passed": 35,
+      "total": 35,
+      "sha256": "a0d3474c05ed03053ea4785b83d344d15ab04396af13e50670d48e85f6565970",
+      "html_sha256": "83bef5fb58cacf2119cd2431bdf77e1d97ce6b65a496792f4e58dd8defdf1d3e",
+      "pdf_sha256": null
+    },
+    {
+      "file": "GUIDE-CHECKS.json",
+      "passed": 11,
+      "total": 11,
+      "sha256": "8405212107b939a082a914d70372aea6d79ffc064c57940fe8d3eed84efdf35b",
+      "html_sha256": "83bef5fb58cacf2119cd2431bdf77e1d97ce6b65a496792f4e58dd8defdf1d3e",
+      "pdf_sha256": null
+    },
+    {
+      "file": "MOBILE-READABILITY-CHECKS.json",
+      "passed": 135,
+      "total": 135,
+      "sha256": "2c82c71e582fb5f294c2809228cc18bff2f1281148bef94a02656502b255357c",
+      "html_sha256": null,
+      "pdf_sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b"
+    }
+  ],
+  "reuse": {
+    "native_proposal_stills": "All15 exact R7 stills; no new R8 frame-execution claim",
+    "actual_before": "All22 exact current3c41 reference PNGs",
+    "math": "Same generator-math.js and132 source-vector receipt; unchanged exact scope reused",
+    "Settings": "Exact original component/pair pixels and prior scoped proof; no component edit",
+    "prior_proof": "technical-evidence/reused-r7 keeps original input identities, not relabeled execution"
+  },
+  "presentation": {
+    "pages": 33,
+    "pdf_width_points": 390,
+    "main_body_points": 15,
+    "secondary_points": 13,
+    "native_fitwidth_pixel_matches": 30,
+    "owner_preview": "Mobile PDF plus3representative390px PNG pages; full verification separately retained",
+    "iOS_device": "NOT_RUN"
+  },
+  "review": "Same existing affected reviewer is next; no admission by this writer. Prior completed R7 review is not acceptance of R8.",
+  "remaining": [
+    "Full FX/controller and real-peer/clock loss-rejoin",
+    "Valid populated BREAK live/slice/release",
+    "Running/poly/expressive capture and durable save/recovery",
+    "Reserved preset/held-note\u2192selected capture strategy\u2192lifecycle",
+    "Settings common status and held-note continuity",
+    "Comparator adoption, physical recognition/latency and whole audible acceptance"
+  ],
+  "limits": [
+    "Native full-project history pool/grouping/automatic mutation not simulated",
+    "No firmware build/edit/device/release/merge",
+    "Current actual before is3c41/0.0.26 Elite; accepted d158 matching UI not executed",
+    "Historical25.x Settings separate",
+    "No calibrated battery percentage or charging state invented"
+  ],
+  "fresh_native_proposal_frames": "Three affected GATE cycle240x240 browser frames/white readouts checked; initial15curated stills remain explicitly reused R7."
+}

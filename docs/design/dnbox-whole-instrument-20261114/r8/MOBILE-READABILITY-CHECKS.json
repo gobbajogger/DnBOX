@@ -1,0 +1,1199 @@
+{
+  "classification": "Producer mobile PDF raster/pixel/link/text verification; not design acceptance or real iOS/device test",
+  "pdf_sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b",
+  "source_commit": "9b82d94dbc259cee7a00dcc6285522c36b8db3ba",
+  "pages": 33,
+  "fit_width_pixels": 390,
+  "main_body_font_pixels_at_fit": 15,
+  "minor_font_pixels_at_fit": 13,
+  "old_A4_body_font_pixels_at_fit": 5.699880861906652,
+  "passed": 135,
+  "total": 135,
+  "checks": [
+    {
+      "name": "Phone page geometry 1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 1",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 1",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 2",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 2",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair drum",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels drum",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 3",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 3",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 3",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 4",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 4",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair juno",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels juno",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 5",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 5",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 6",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 6",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 6",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair miami-native",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels miami-native",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 7",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 7",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 7",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 8",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 8",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 8",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair sequence64",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels sequence64",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 9",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 9",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 9",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 10",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 10",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 10",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair motion",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels motion",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 11",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 11",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 11",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 12",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 12",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 12",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair copy",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels copy",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 13",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 13",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 13",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 14",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 14",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 14",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair cue",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels cue",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 15",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 15",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 15",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 16",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 16",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 16",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair record",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels record",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 17",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 17",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 17",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 18",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 18",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 18",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair song",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels song",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 19",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 19",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 19",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 20",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 20",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 20",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair panic",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels panic",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 21",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 21",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 21",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 22",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 22",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 22",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair clip",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels clip",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 23",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 23",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 23",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 24",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 24",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 24",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair break",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels break",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 25",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 25",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 26",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 26",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 26",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair mix909",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels mix909",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 27",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 27",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 27",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 28",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 28",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 28",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair gen-normal",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels gen-normal",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 29",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 29",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 29",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 30",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 30",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Unchanged embedded native pair gen-held",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual phone-fit native pixels gen-held",
+      "pass": true,
+      "detail": [
+        {
+          "rect": [
+            75.0,
+            364.0,
+            315.0,
+            604.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        },
+        {
+          "rect": [
+            75.0,
+            93.0,
+            315.0,
+            333.0
+          ],
+          "native240": true,
+          "pixel_identical_at390fit": true
+        }
+      ]
+    },
+    {
+      "name": "Phone page geometry 31",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 31",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 31",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 32",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 32",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 32",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Phone page geometry 33",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Actual fit-width raster390x844 33",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Phone text remains within page 33",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "Fifteen distinct paired workflow pages",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "All30native images remain exact at actual390px fit",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "Owner body/minor text at least13px fit width",
+      "pass": true,
+      "detail": {
+        "minimum": 13.0,
+        "body": 15,
+        "page_scale_at390": 1.0
+      }
+    },
+    {
+      "name": "Fifteen working in-document workflow links",
+      "pass": true,
+      "detail": {
+        "target_page_xrefs": [
+          23,
+          27,
+          31,
+          35,
+          39,
+          43,
+          47,
+          51,
+          55,
+          59,
+          63,
+          67,
+          71,
+          75,
+          79
+        ]
+      }
+    },
+    {
+      "name": "Predecessor limitations and pending R8 assessment remain explicit",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "No private routing/paths/identifiers in owner PDF",
+      "pass": true,
+      "detail": null
+    }
+  ],
+  "image_pages": [
+    {
+      "page": 2,
+      "id": "drum"
+    },
+    {
+      "page": 4,
+      "id": "juno"
+    },
+    {
+      "page": 6,
+      "id": "miami-native"
+    },
+    {
+      "page": 8,
+      "id": "sequence64"
+    },
+    {
+      "page": 10,
+      "id": "motion"
+    },
+    {
+      "page": 12,
+      "id": "copy"
+    },
+    {
+      "page": 14,
+      "id": "cue"
+    },
+    {
+      "page": 16,
+      "id": "record"
+    },
+    {
+      "page": 18,
+      "id": "song"
+    },
+    {
+      "page": 20,
+      "id": "panic"
+    },
+    {
+      "page": 22,
+      "id": "clip"
+    },
+    {
+      "page": 24,
+      "id": "break"
+    },
+    {
+      "page": 26,
+      "id": "mix909"
+    },
+    {
+      "page": 28,
+      "id": "gen-normal"
+    },
+    {
+      "page": 30,
+      "id": "gen-held"
+    }
+  ],
+  "representative_renders": [
+    {
+      "file": "verification/fit-390/page-01.png",
+      "sha256": "0189faf82af6e257599adf2cec734b11539d39855a851a6b080e5cea1d4d63a6",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-02.png",
+      "sha256": "8943566055579929cd84e21e8fc0fc7e60fa6378ae778ecbb91580a88543772e",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-03.png",
+      "sha256": "b98c6b560f8c55a01b8fd41ccdfc6f845ac10b6a2249738b24a971462799645d",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-10.png",
+      "sha256": "18b541f28c57c15a2b6d9b1fcf07ff2558c2234633bf862594e5d16d53224433",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-11.png",
+      "sha256": "4686c5f88f93d23b3a5edf062d7ac8e2d4b15dd9d8c555053394b1f6907bebb3",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-16.png",
+      "sha256": "5d7a98c99c0af3a4ccab6af1e3e422a93fd4f1fd7bb6fd7f2999a200dffa2e97",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-17.png",
+      "sha256": "732fb8c93fb11d5142202cabf76c7ddac7d41dd3b19b6783fa0743cc2c962bc5",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-28.png",
+      "sha256": "60069dd26ce6eec8e74b8d4383b0c0e8425bdf09f3302ef2d19931dca1ae55c2",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-29.png",
+      "sha256": "a65b38675ca91474c654557b4f5b1d1fca698d4aa52e7308a8682bbb24483a9f",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-30.png",
+      "sha256": "ffd4884953f6e7165887b9456ad4c354d112be54ad6f41c213fca541595802e4",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-31.png",
+      "sha256": "3a35adae804b72c2a9752e876ae6f51540c184e592f7f08ec58bf55bd22ca914",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-32.png",
+      "sha256": "7820f6c054d1301e7a2635ed555faa2c50f23992591c26fe21f483e5b62743c1",
+      "pixels": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "verification/fit-390/page-33.png",
+      "sha256": "1a519ccb7fea61282108374aab336cd1490a762ea1b5e3dd47171cb230b29c1c",
+      "pixels": [
+        390,
+        844
+      ]
+    }
+  ],
+  "limits": [
+    "Actual iOS device opening NOT_RUN",
+    "Native images unchanged; no firmware/proposal rerender",
+    "R7 known model defects remain; successor corrections separate"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "classification": "Producer final exact-input/privacy/link packaging checks; not independent acceptance",
+  "html_sha256": "83bef5fb58cacf2119cd2431bdf77e1d97ce6b65a496792f4e58dd8defdf1d3e",
+  "checks": [
+    {
+      "file": "CORRECTION-CHECKS.json",
+      "passed": 35,
+      "total": 35
+    },
+    {
+      "file": "GUIDE-CHECKS.json",
+      "passed": 11,
+      "total": 11
+    },
+    {
+      "file": "MOBILE-READABILITY-CHECKS.json",
+      "passed": 135,
+      "total": 135
+    }
+  ],
+  "privacy_issues": [],
+  "missing_links": [],
+  "visual_reuse": "15R7still PNGs exact; three new R8 gate-state renders separate",
+  "iOS": "NOT_RUN"
+}
