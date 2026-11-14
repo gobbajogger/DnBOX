@@ -1,0 +1,498 @@
+{
+  "classification": "Producer MODEL/DOM source-contract checks; no firmware, independent, device or audio proof",
+  "input_html_sha256": "1b46efbc425e7922b7dd8772d41dc18c0ab88c9612e606eb2f33c2b386917163",
+  "source_contract": "current3c41 ui.c4009\u20134034; O_ASK precedence at3997\u20134008",
+  "checks": [
+    {
+      "name": "Exact LIST Undo restores note, leaves REC/transport/list and consumes releases",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Redo restores note and preserves list caller",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 1,
+        "list": 2,
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 1,
+        "list": 2,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Undo preserves existing REC/transport (False, True)",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Redo preserves existing REC/transport (False, True)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Undo preserves existing REC/transport (True, False)",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Redo preserves existing REC/transport (True, False)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Undo preserves existing REC/transport (True, True)",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": true,
+        "playing": true,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": true,
+        "playing": true,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "LIST Redo preserves existing REC/transport (True, True)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": true,
+        "playing": true,
+        "overlay": "LIST",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": true,
+        "playing": true,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "Empty LIST Undo consumes PATCH without changing REC",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "Empty LIST Redo consumes PATCH without changing transport",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "Old physical cell release after LIST Undo does not reapply/duplicate edit",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 1,
+        "held": -1,
+        "physical": [],
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "Plain LIST REC retains its ordinary command",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": true,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "Plain LIST PLAY retains its ordinary transport command",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "undo": 0,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "name": "No-overlay Undo/Redo remains available",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": null,
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": null,
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    }
+  ],
+  "traces": [
+    {
+      "case": "exact reviewer Undo reproducer",
+      "stage": "PATCH held",
+      "state": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [
+          "PATCH"
+        ],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "case": "exact reviewer Undo reproducer",
+      "stage": "REC down",
+      "state": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH",
+          "SEQ REC"
+        ],
+        "usedButtons": [
+          "SEQ REC",
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "case": "exact reviewer Undo reproducer",
+      "stage": "REC release",
+      "state": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH"
+        ],
+        "usedButtons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": []
+      }
+    },
+    {
+      "case": "exact reviewer Undo reproducer",
+      "stage": "PATCH release",
+      "state": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "page": 0,
+        "list": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "usedButtons": [],
+        "held": -1,
+        "physical": []
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 14,
+  "total": 14
+}

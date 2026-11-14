@@ -1,0 +1,279 @@
+{
+  "classification": "Producer targeted model/DOM checks; no independent, firmware, audio or device proof",
+  "mode": "R8-scope-recheck-on-successor",
+  "base_html_sha256": "131db6ae9aa436274735d9dca3602f7d902c3c1a32453a302d118ed6f70a2659",
+  "generator_sha256": "fe9becc7205e499341d0d15c5b3a843bd876d05d32d5da6e3448d447999799c3",
+  "base_renderer_sha256": "53657ce2eb1befe6472416b3885339f38a5fd8044cc150a81ae28a9521c75d0f",
+  "executed_html_sha256": "1b46efbc425e7922b7dd8772d41dc18c0ab88c9612e606eb2f33c2b386917163",
+  "checks": [
+    {
+      "name": "Two held-cell edits retain two Undo transactions",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "notes": [
+          55,
+          57
+        ],
+        "undo": 0,
+        "redo": 2
+      }
+    },
+    {
+      "name": "REC entry commits correction before retiring focus",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "notes": 55,
+        "rec": true,
+        "undo": 0,
+        "redo": 1
+      }
+    },
+    {
+      "name": "Redo after REC keeps record/transport/view",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Redo restores both edits; original release order True",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Redo restores both edits; original release order False",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Physical cancellation preserves correction history and retires owner",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Pad cancellation retains intentional edit transaction",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "View transition commits once without retargeting old release",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Undo while held and release cannot duplicate correction",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Aliased key release keeps remaining pad edit owner",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Final alias release commits exactly once",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Physical REC button route also commits original edit",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Selection-only handoffs create no data history",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "List transition commits once and old release does not retarget",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Cue adoption commits original pattern and preserves destination",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "GEN chance-only Undo removes its newly allocated lane",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Chance Redo restores the original cell value",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Held chance Undo and release do not recommit or touch unrelated motion",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "Two focus transactions restore their notes and chance together",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "GEN repeated GATE turns cycle in direction 1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "gate": "NOTE"
+      }
+    },
+    {
+      "name": "GEN repeated GATE turns cycle in direction -1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "gate": "NOTE"
+      }
+    },
+    {
+      "name": "GEN accent XOR turns 1x2",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": false
+      }
+    },
+    {
+      "name": "GEN accent XOR turns -1x1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": true
+      }
+    },
+    {
+      "name": "GEN slide XOR turns 1x2",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": false
+      }
+    },
+    {
+      "name": "GEN slide XOR turns -1x1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": true
+      }
+    },
+    {
+      "name": "GEN GATE clears endpoint and retains accent/slide",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "GEN original edited-cell release keeps note and retires owner",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "SEQ repeated GATE turns cycle in direction 1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "gate": "NOTE"
+      }
+    },
+    {
+      "name": "SEQ repeated GATE turns cycle in direction -1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "gate": "NOTE"
+      }
+    },
+    {
+      "name": "SEQ accent XOR turns 1x2",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": false
+      }
+    },
+    {
+      "name": "SEQ accent XOR turns -1x1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": true
+      }
+    },
+    {
+      "name": "SEQ slide XOR turns 1x2",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": false
+      }
+    },
+    {
+      "name": "SEQ slide XOR turns -1x1",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "value": true
+      }
+    },
+    {
+      "name": "SEQ GATE clears endpoint and retains accent/slide",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    },
+    {
+      "name": "SEQ original edited-cell release keeps note and retires owner",
+      "pass": true,
+      "detail": {
+        "pass": true
+      }
+    }
+  ],
+  "passed": 35,
+  "total": 35
+}

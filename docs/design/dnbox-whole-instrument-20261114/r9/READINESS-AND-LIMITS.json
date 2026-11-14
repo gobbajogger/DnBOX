@@ -1,0 +1,66 @@
+{
+  "state": "FROZEN_CORRECTIVE_DESIGN_SOURCE; AFFECTED_INDEPENDENT_REVIEW_PENDING; WHOLE_OVERHAUL_INCOMPLETE",
+  "base_head": "bece3d1762116d7cd31afd0b83cc93dd9031a009",
+  "base_tree": "0a2f282666cd0e39642d3b33ab960d0047f0f877",
+  "base_manifest_sha256": "0d1847046f159bd0a4540a20a153b6334175ce3933a9f9299df2aa4a0201b4ca",
+  "html": {
+    "bytes": 1972639,
+    "sha256": "1b46efbc425e7922b7dd8772d41dc18c0ab88c9612e606eb2f33c2b386917163"
+  },
+  "generator": {
+    "bytes": 17096,
+    "sha256": "fe9becc7205e499341d0d15c5b3a843bd876d05d32d5da6e3448d447999799c3"
+  },
+  "changes": [
+    "PATCH+REC/PLAY prioritizes history under LIST and consumes original releases; ASK/clip precedence retained",
+    "BT+GEN K5–K8 consumes native no-motion gesture before scalar/cell dispatch; no value/history edit or modeled SAVE on release",
+    "Outer walkthrough version/limit prose updated; no native LCD layout change"
+  ],
+  "checks": [
+    {
+      "file": "LIST-HISTORY-CHECKS.json",
+      "sha256": "7527299e3329672a5827fca5089cca9349f970717237eed62447b3902ccd5ba1",
+      "passed": 14,
+      "total": 14
+    },
+    {
+      "file": "GEN-SAVE-CHECKS.json",
+      "sha256": "2ec007ac52606158be8415c8cd8a3e86e89b1826628889e29c4372e7df91a8ea",
+      "passed": 19,
+      "total": 19
+    },
+    {
+      "file": "RETAINED-GEN-CHECKS.json",
+      "sha256": "3f311f1edb6abc4d98a1222d5705eb8632f60cfed244abf24c7d7ec183f805a8",
+      "passed": 35,
+      "total": 35
+    }
+  ],
+  "source_contract": "Current3c41ui.c3989–4042,4667–4674 and2803–2807. Executed current firmware remains3c41, not R9.",
+  "visuals": {
+    "status": "Unchanged visual references, no new R9 PNG/PDF execution claim",
+    "mobile_pdf": "../r8/DnBOX-R8-mobile-comparisons.pdf",
+    "pdf_sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b",
+    "pdf_pages": 33,
+    "native_initial_stills": "15 exact originalR7 proposal PNGs retained through R8",
+    "native_correction_frames": "3 originalR8 GATE-state renders retained",
+    "actual_before": "Original3c41/0.0.26 Elite; historicalSettings25.x remains distinct",
+    "iOS": "NOT_RUN"
+  },
+  "unchanged_proof": "132generator math vectors, prior broader source/Settings/physical/guide/mobile proofs keep exact original identities; not relabeled R9 execution.",
+  "effective_model_effort_service": "Not exposed",
+  "remaining": [
+    "Full FX/controller and actual send→return→master correction/replay",
+    "Valid populatedBREAK/release",
+    "RealLoopy/SMC clock/loss/rejoin",
+    "Running/poly/expressive capture, selectedCP2strategy→CP3lifecycle and durable save/recovery",
+    "ReservedCP1/Settings/commonstatus/heldnote continuity",
+    "Comparator adoption, wholeproject history and wholeaudible acceptance"
+  ],
+  "limits": [
+    "No firmware implementation/build/device/release/merge",
+    "Full native project-history pool/grouping remains unmodeled",
+    "No private independent report, captures, audio, executable, SDK or firmware bytes in this packet",
+    "Producer local Chromium proposal checks are separate from authentic current emulator and independent NodeMODEL_ONLY execution"
+  ]
+}

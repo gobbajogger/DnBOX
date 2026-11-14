@@ -1,0 +1,120 @@
+{
+  "format": "DnBOX-R9-owned-delta-manifest-v1",
+  "self_excluded": true,
+  "classification": "Corrective prototype source/producer proof; inherited visual/source inputs stay pinned toR8",
+  "base_head": "bece3d1762116d7cd31afd0b83cc93dd9031a009",
+  "files": [
+    {
+      "file": "GEN-SAVE-CHECKS.json",
+      "bytes": 12812,
+      "sha256": "2ec007ac52606158be8415c8cd8a3e86e89b1826628889e29c4372e7df91a8ea",
+      "git_blob": "11a90805e91c63bd897ed1ade33ba14ebe6f13e2",
+      "mode": "100644"
+    },
+    {
+      "file": "LIST-HISTORY-CHECKS.json",
+      "bytes": 10721,
+      "sha256": "7527299e3329672a5827fca5089cca9349f970717237eed62447b3902ccd5ba1",
+      "git_blob": "4f6ecd65b95063796f3700b73580012117091503",
+      "mode": "100644"
+    },
+    {
+      "file": "R8-GEN-SAVE-FAILED-TRACE.json",
+      "bytes": 16673,
+      "sha256": "b23dfb3ba38a0b7bd469abc07face973f94566cd5e7c985358c26b0673824206",
+      "git_blob": "8f27b2f04904c5789094fed7d0fbf1d864944212",
+      "mode": "100644"
+    },
+    {
+      "file": "R8-LIST-FAILED-TRACE.json",
+      "bytes": 10655,
+      "sha256": "89dfe0c57e848bcb543abda976fcbc6296157802e24d3d0eef0511ff54da2ae6",
+      "git_blob": "9554e925d7e904e9cde39234fca4afac8123e8af",
+      "mode": "100644"
+    },
+    {
+      "file": "READINESS-AND-LIMITS.json",
+      "bytes": 3145,
+      "sha256": "738472fadce13c5b6045d65b173805116f5b87f7564bd3807a26ff030333d2dc",
+      "git_blob": "8143093ea167a45489d61e35b79e3cf6c7becbcc",
+      "mode": "100644"
+    },
+    {
+      "file": "README.md",
+      "bytes": 2086,
+      "sha256": "9c41ef1690f6275c6be1568988ec37e3520f96987cd4eff6472c25e80ecf2f04",
+      "git_blob": "a32e85a49225e20cf0de5423dbce6b9d3d8db33e",
+      "mode": "100644"
+    },
+    {
+      "file": "RETAINED-GEN-CHECKS.json",
+      "bytes": 6074,
+      "sha256": "3f311f1edb6abc4d98a1222d5705eb8632f60cfed244abf24c7d7ec183f805a8",
+      "git_blob": "d58f5f001108cb308e76ecb6ce3861dd069d017f",
+      "mode": "100644"
+    },
+    {
+      "file": "build_successor.py",
+      "bytes": 2723,
+      "sha256": "0d7f6eb65668594dd96b8401f5e21749cf5ed550c894dd32adf55b8f7668beb5",
+      "git_blob": "f5790d11d0d8316c9ed4e78dce7d6d66886c299c",
+      "mode": "100644"
+    },
+    {
+      "file": "check_gen_save_modifier.py",
+      "bytes": 4925,
+      "sha256": "bf19e6a6596bb872dd44a13b1a9ea11ebb322e839024487c963316fdcf8658e4",
+      "git_blob": "ff2ff3d760098a76c8937deb372bff399e579261",
+      "mode": "100644"
+    },
+    {
+      "file": "check_overlay_history.py",
+      "bytes": 6051,
+      "sha256": "b9a6333142aa8079b03511ef8d1118825f0de8e9657c047d6c9ad5cb3aab3435",
+      "git_blob": "04541fa73eabd2b2306dc63ff0ebf3768710bf79",
+      "mode": "100644"
+    },
+    {
+      "file": "check_retained_gen.py",
+      "bytes": 11140,
+      "sha256": "00cab5cce98853db6080a897b16d8358023c0199f77e034bb36c3314496ae196",
+      "git_blob": "51275325f0aa72f44f78f5adcf3ac006f82e01e0",
+      "mode": "100644"
+    },
+    {
+      "file": "generator-math.js",
+      "bytes": 2904,
+      "sha256": "bbd76ceab51f96c884937d7ce045f4dd9d332daf61543e413671e588d2a17845",
+      "git_blob": "25a455257dd300ab9126a971c450b09ef8356cf5",
+      "mode": "100644"
+    },
+    {
+      "file": "generator-proposal.js",
+      "bytes": 17096,
+      "sha256": "fe9becc7205e499341d0d15c5b3a843bd876d05d32d5da6e3448d447999799c3",
+      "git_blob": "50d060da2be0a97a5564bda9ac13024825462825",
+      "mode": "100644"
+    },
+    {
+      "file": "physical-role-router.js",
+      "bytes": 5141,
+      "sha256": "5d605654638e5fd6985e40edd3efcb94f4581f618ce8ab1bee6826e4c3696ce8",
+      "git_blob": "3d0010df20ff70fc997d39808c49d235c6a8ce6b",
+      "mode": "100644"
+    },
+    {
+      "file": "proposal.js",
+      "bytes": 93613,
+      "sha256": "53657ce2eb1befe6472416b3885339f38a5fd8044cc150a81ae28a9521c75d0f",
+      "git_blob": "04594a453d47cb5f84cd549f66aec9637425be98",
+      "mode": "100644"
+    },
+    {
+      "file": "workbench.html",
+      "bytes": 1972639,
+      "sha256": "1b46efbc425e7922b7dd8772d41dc18c0ab88c9612e606eb2f33c2b386917163",
+      "git_blob": "72ea124349b60bb6cd94c90e635c15e7ced0a96e",
+      "mode": "100644"
+    }
+  ]
+}
