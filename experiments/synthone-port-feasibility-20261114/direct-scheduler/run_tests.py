@@ -42,7 +42,7 @@ def main():
         for name,data in entries.items():
             destination=staged[group]/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
     local=out/'closure/scheduler'
-    local_files=['scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
+    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
     local_manifest=[]
     for name in local_files:
         data=(root/name).read_bytes();destination=local/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)

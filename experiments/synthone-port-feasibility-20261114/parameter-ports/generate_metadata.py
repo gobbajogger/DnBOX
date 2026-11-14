@@ -50,8 +50,8 @@ out = ROOT / "generated"
 out.mkdir(exist_ok=True)
 emit(out / "parameter_map.hpp", '''// Generated from pinned public master metadata. MIT notices in the parent experiment.
 #pragma once
-#include <cstddef>
-#include <cstdint>
+#include <stddef.h>
+#include <stdint.h>
 namespace synthone_ports {
 constexpr unsigned parameter_count = 150;
 constexpr unsigned selected_count = 46;

@@ -1,18 +1,18 @@
 {
   "schema": 1,
-  "scope": "Runtime/oracle storage split, complete-instance alias/lifetime and typed canonical fixture; generated oracle.cpp and runtime event/render arithmetic unchanged",
+  "scope": "Freestanding runtime native portability and compiler-evaluated layout; no firmware link/resource/CPU/device acceptance",
   "files": [
     {
       "path": "scheduler.hpp",
-      "bytes": 5219,
-      "sha256": "da76e5b800f092fae5bf0547dc949f9785dc3d4c6853d03b474c433e4ca4a535",
-      "git_blob_sha": "313616b9daddc9ce1a374d94bc2288e3926e9169"
+      "bytes": 5230,
+      "sha256": "8af1434ea35e5a3eafa1fe1b116ebd5c5b1af2b550e7018631bd0abb71d0b8dc",
+      "git_blob_sha": "9b0f8d7d910ccf1139ed228317c12e3ed60579a8"
     },
     {
       "path": "scheduler.cpp",
-      "bytes": 14324,
-      "sha256": "e706b7c669f52863d5fbb97677d4c8f0800fdb9c6829f81823dd483ecdc8f6b1",
-      "git_blob_sha": "a3edd161d9b6a478f77798ef2f0f3f433375a5f7"
+      "bytes": 14213,
+      "sha256": "fbdbae59a829d66f85e6eaad7b8b0c99d6da6d09e2729eeb7acf89b4289a5479",
+      "git_blob_sha": "418f9c8c3e0e7ced6080334316fef728c41fcc95"
     },
     {
       "path": "tests/scheduler_test.cpp",
@@ -22,9 +22,9 @@
     },
     {
       "path": "run_tests.py",
-      "bytes": 8023,
-      "sha256": "a96ae1bb1055682cf67daf90f053bb704ae1c761dfd505b2632f684c6e4fff35",
-      "git_blob_sha": "23cf06c8b1f1f8281fdb04473e6326bddbc0458b"
+      "bytes": 8041,
+      "sha256": "64d280533dd95273a7195c947e8f1415150f3efb5350b41d9792296a75f107e9",
+      "git_blob_sha": "7cc296d027a6c2fa2fb2262049d12c69ecadc72f"
     },
     {
       "path": "mutation_checks.py",
@@ -35,14 +35,14 @@
     {
       "path": "DEPENDENCIES.json",
       "bytes": 8793,
-      "sha256": "b553d6273e9ae819fd306a70c8372ad42857365303f9a23a8c01da0f6f18cf8b",
-      "git_blob_sha": "433b86a77a704ac6705ddf71d17f67d1428a1387"
+      "sha256": "60e4909375d099a1783605210945769e556dac33c690cbc11042da6e31c206c9",
+      "git_blob_sha": "5714a90bb313de24dcf610d1a689ffe77cb88495"
     },
     {
       "path": "README.md",
-      "bytes": 14014,
-      "sha256": "0120dbfb4345b28a7e3aec5e34934f02a3dc83a19a945bec0bb13bf1f631119d",
-      "git_blob_sha": "b151c31b252496f2f44ba2475a764b804c325cda"
+      "bytes": 17954,
+      "sha256": "f18a26fc84f6b5e69835f49275553f4f8f02fa1681eaa0eafc0340eb687683df",
+      "git_blob_sha": "ff7dc6dee36f51e9ca57c4231adfec4d02936490"
     },
     {
       "path": "oracle/generate.py",
@@ -91,8 +91,32 @@
       "bytes": 39,
       "sha256": "6d9dd2863a77d46eb538f9032b69297ef450edf9afcd2b99ed117d80a0cb1a74",
       "git_blob_sha": "f5b12847bf65ebf58c92f376a2045bf10e05c7e6"
+    },
+    {
+      "path": "fixed_array.hpp",
+      "bytes": 591,
+      "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+      "git_blob_sha": "8039d3dc33a01beda447768e8f392e0229857f40"
+    },
+    {
+      "path": "run_native.py",
+      "bytes": 9390,
+      "sha256": "15e3b556d7460ed504b14d245b1c6f30df767b26e695cc7868230af2b296ab58",
+      "git_blob_sha": "45cf95eda7bf0802cd1b052668b40bc6f4f0877a"
+    },
+    {
+      "path": "NATIVE-TOOLCHAIN.json",
+      "bytes": 4991,
+      "sha256": "56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e",
+      "git_blob_sha": "e6432728b8e14b7b781d3b24e9fe8347db5b0efb"
+    },
+    {
+      "path": "tests/native_inputs_test.py",
+      "bytes": 5250,
+      "sha256": "60723198aa102b9c6b7f60a3581f659cc06bf82084fd803b2814cc8749e8aee5",
+      "git_blob_sha": "2e071856b14fa57937aa0dc9c60dc29b8fad2698"
     }
   ],
-  "origin_source_manifest_sha256": "635a89a453e5133c443ea2bca4a61f366748d2a87146e6cc1d471b2171eff0bc",
-  "baseline_commit": "46b06ada4009e5047cd3bd4a153b8e3b76c46713"
+  "origin_source_manifest_sha256": "2b7cdc90cd7f3399c0b3dd08ed32e3ec997e0d1a006caea77c19dca1c902e48f",
+  "baseline_commit": "b0013c8a8d7209a155494f5e9b4952dedde87ba2"
 }

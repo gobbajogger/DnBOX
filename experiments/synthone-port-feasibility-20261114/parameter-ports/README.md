@@ -128,3 +128,10 @@ and keep musical resets distinct from parameter restore. Complete frontend sette
 event/mono scheduling, concurrency, engine/FX integration, target qualification and
 whole-instrument acceptance remain open. License notices and original module
 attribution remain in the sibling experiment files pinned by the dependency manifest.
+
+
+## Freestanding target-portability successor
+
+The native consumer exposed unavailable C++ standard-library wrapper headers. The structural map now includes standard C `stddef.h`/`stdint.h`; the implementation uses C `math.h` finite classification and `UINTPTR_MAX`. No target/history/coefficient formula, selected map, output ordering, public declaration or source half-time/restore behavior changes. The metadata generator, strict source/dependency/verifier identities and consumer pins are updated together; historical review/results remain tied to their original input closure.
+
+Fresh O2 changed-input proof passes all 1,073,850 outputs and 329,314 seven-field selected-state comparisons, with zero action heap calls. Input guards pass six positives and 51 negatives across three Python modes; eleven mutations rebuild/link before attributable runtime failures. Native compilation of the actual changed map/Ports succeeds through the direct-scheduler freestanding runner, but this is not target execution, link, CPU, fit or device proof.

@@ -15,7 +15,7 @@ import tempfile
 from types import ModuleType
 
 ROOT = Path(__file__).resolve().parent
-EXPECTED_VERIFIER_SHA256 = "6870f7644af8e8d974143a60b56b1e722ff3cbcd1205911cf591692ef7ff6ce3"
+EXPECTED_VERIFIER_SHA256 = "a8f381634c73c0c6fc4977a13fbee5283add5d4d055baf6dc831b8df636a5ac4"
 
 
 def require(condition, message):

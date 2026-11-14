@@ -2,13 +2,13 @@
 #pragma once
 #include "shared_graph.hpp"
 #include "parameter_ports.hpp"
-#include <array>
-#include <cstddef>
+#include "fixed_array.hpp"
+#include <stddef.h>
 
 namespace s1scheduler {
 struct NoteNumber { int noteNumber, transpose, velocity; };
 struct Held {
-    std::array<NoteNumber,128> values{};
+    FixedArray<NoteNumber,128> values{};
     int count = 0;
     NoteNumber &operator[](size_t i) { return values[i]; }
     const NoteNumber &operator[](size_t i) const { return values[i]; }
@@ -35,8 +35,8 @@ public:
     void playingNotesDidChange() {}
     void beatCounterDidChange() {}
 
-    std::array<S1NoteState,6> poly{};
-    std::array<S1NoteState,6> *noteStates = &poly;
+    FixedArray<S1NoteState,6> poly{};
+    FixedArray<S1NoteState,6> *noteStates = &poly;
     S1NoteState mono{};
     S1NoteState *monoNote = &mono;
     int polyphony = 6, playingNoteStatesIndex = 0;

@@ -74,3 +74,26 @@ The default sanitizer runner compiles successfully but exits 1 because LeakSanit
 Measured host `sizeof` on this compiler/ABI (8-byte pointers, 4-byte float): common State 11,064 bytes, Scheduler/RuntimeState 11,480 bytes, Oracle/OracleState 18,912 bytes. Baseline Scheduler was 19,312 bytes; the measured runtime object difference is 7,832 bytes, including moved delay tokens. This is a host layout result, not target RAM savings, external payload cost or native acceptance. Object addresses/padding are not canonical serialized state.
 
 `STATE-SPLIT-RESULT.json` and `STATE-SPLIT-REVIEW.md` describe only this successor. Original `RESULT.json` and `REVIEW.md` remain unchanged historical baseline proof. Unchanged graph, portable-control and bank suites are reused under their recorded input pins, not replayed. No firmware, SDK, supplied bank, audio, native resources/CPU, complete-engine, device, merge or release acceptance is claimed.
+
+
+## Freestanding target-portability successor
+
+The #940 source/host acceptance above did not establish that its C++ standard-library headers were available on the embedded compiler. A real pi32v2 preflight compiled fourteen DSP/voice units but rejected Scheduler, Ports and its structural map at missing `cstddef`. This successor uses ordinary C headers and classification/limit names, plus a minimal owned `FixedArray` implementing only indexed/range access needed by the scheduler. It introduces no fake standard library or heap container and rewrites no DSP/event arithmetic. Parameter-port formulas/maps, all original oracle bodies and current source histories stay unchanged. The control supplier's strict input identities and the scheduler consumer's dependency identities are refreshed together.
+
+Fresh changed-input O2 and Os scheduler fixtures each pass 54 cases, 18,162 frames, 19,302 canonical snapshots and 648 events. The same fresh ASan/UBSan/float-cast-overflow fixture passes with leak detection disabled; the default run still fails because LeakSanitizer cannot operate under ptrace here. Ten scheduler mutations compile/link and fail runtime assertions. The changed control supplier's full O2 proof passes 1,073,850 output comparisons and 329,314 selected seven-field snapshots; its 51 input negatives and eleven compiled runtime mutations pass detection. These are host/source results, not target execution or acoustic acceptance.
+
+`run_native.py` requires explicit public dependency roots and the existing Linux JieLi toolchain root. It pins the compiler and every used toolchain header through `NATIVE-TOOLCHAIN.json`, stages only authenticated public runtime inputs, uses a minimal fixed compiler child environment rather than inheriting ambient driver/loader/search controls, disables default include directories, and records full native dependency/object identities. It produces seventeen runtime objects and a separate compiler-evaluated layout object; it does not link firmware, embed table payloads or run target DSP.
+
+```sh
+python3 run_native.py --experiment-root /path/to/verified/experiment \
+  --controls-root /path/to/verified/control-module \
+  --toolchain-root /path/to/jieli-linux-toolchains-20260730.1 \
+  --build-root /path/to/isolated/native-output
+```
+
+With this exact pi32v2 r3/mfprev1 profile, the compiler reports 4-byte pointers, 4-byte float, 8-byte double, Scheduler/RuntimeState 9,956 bytes, common State 9,552 bytes, compact Ports 396 bytes, seven note DSP-object banks 3,108 bytes and 53 table descriptors 1,484 bytes. These are genuine target-ABI type sizes, not free pool, linked app size, stack high-water or fit. Host layout remains separate. Exact link, current Juno co-residency/resources, bounded immutable table-read placement, workload/CPU, full-engine/global-FX, firmware/device and release qualification remain open. Native objects, toolchain/SDK bytes and generated tables are not public artifacts.
+
+The maintained policy/nightly pin is not automatically a current Juno integration source. Any combined firmware budget must name its actual non-denied source closure and retain its integration owner. The separate exact-row aliases in #936 still need a scheduler composition proof and an actual bounded lossless target-read representation; raw float storage must not be assumed to fit app flash or existing user/sample regions.
+
+
+Independent portability review found that inherited `CCC_OVERRIDE_OPTIONS` could enable finite-math assumptions despite the recorded strict argv. The repaired native runner inherits no ambient variables and supplies only fixed system PATH/locale plus its owned temporary directory. Its regression first failed on changed executable sections, then required all seventeen runtime objects' executable sections to match across clean and poisoned parent environments. This is an object-level reproducibility check, not target execution or acoustic proof.

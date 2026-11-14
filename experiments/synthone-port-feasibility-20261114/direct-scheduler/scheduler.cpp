@@ -1,10 +1,9 @@
 #include "scheduler.hpp"
 #include "wave_frequencies.h"
-#include <cassert>
-#include <cmath>
-#include <cstring>
-#include <cstdint>
-#include <limits>
+#include <assert.h>
+#include <math.h>
+#include <string.h>
+#include <stdint.h>
 
 namespace s1scheduler {
 void Held::remove(size_t i) {
@@ -23,18 +22,18 @@ void EmptySequencer::process(float *p,const Held &) const {
 namespace {
 bool overlap(const void *a,size_t an,const void *b,size_t bn) {
     const auto x=reinterpret_cast<uintptr_t>(a), y=reinterpret_cast<uintptr_t>(b);
-    if(x>std::numeric_limits<uintptr_t>::max()-an || y>std::numeric_limits<uintptr_t>::max()-bn) return true;
+    if(x>UINTPTR_MAX-an || y>UINTPTR_MAX-bn) return true;
     return x<y+bn && y<x+an;
 }
 bool payload(const float *p,size_t n,float bound,InstanceSpan self) {
     if(!p || n!=4097 || overlap(p,n*sizeof(float),self.data,self.bytes)) return false;
-    for(size_t i=0;i<n;++i) if(!std::isfinite(p[i]) || p[i]<-bound || p[i]>bound) return false;
-    return p[4096]==0.f && !std::signbit(p[4096]);
+    for(size_t i=0;i<n;++i) if(!isfinite(p[i]) || p[i]<-bound || p[i]>bound) return false;
+    return p[4096]==0.f && !signbit(p[4096]);
 }
 bool values_valid(const float *p,size_t n) {
     if(!p || n!=150 || p[arpIsOn]!=0) return false;
     for(unsigned i=0;i<150;++i)
-        if(!std::isfinite(p[i]) || p[i]<minimums[i] || p[i]>maximums[i]) return false;
+        if(!isfinite(p[i]) || p[i]<minimums[i] || p[i]>maximums[i]) return false;
     return true;
 }
 }
@@ -45,7 +44,7 @@ bool State::valid_init(const synthone_shared::Tables &tables,int rate,const floa
        !tuning || tuning_count!=128 || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
        overlap(&tables,sizeof tables,self.data,self.bytes)) return false;
     for(unsigned i=0;i<128;++i)
-        if(!std::isfinite(tuning[i]) || tuning[i]<=0 || tuning[i]>rate*.5f) return false;
+        if(!isfinite(tuning[i]) || tuning[i]<=0 || tuning[i]>rate*.5f) return false;
     for(unsigned i=0;i<52;++i) {
         const auto &r=tables.morph[i];
         if(r.band!=i/4 || static_cast<unsigned>(r.shape)!=i%4 ||
@@ -58,14 +57,14 @@ void State::init_graph(const synthone_shared::Tables &tables,int rate,const floa
     // Each concrete sibling validates all inputs before replacing a live instance.
     context_={}; context_output_=0; context_.out=&context_output_;
     context_.sr=rate; context_.nchan=1; context_.len=5ul*static_cast<unsigned>(rate);
-    std::memcpy(context_.filename,"test.wav",sizeof "test.wav"); sp=&context_;
+    memcpy(context_.filename,"test.wav",sizeof "test.wav"); sp=&context_;
     tuningTable=tuning;
     for(unsigned i=0;i<53;++i) {
         auto &d=descriptors_[i]; d={}; sp_ftbl_init(sp,&d,4096);
         d.tbl=const_cast<float *>(i<52?tables.morph[i].samples:tables.sine); d.del=0;
         if(i<52) ft_array[i]=&d; else sine=&d;
     }
-    std::memcpy(ft_frequencyBand,tables.frequency_band,sizeof ft_frequencyBand);
+    memcpy(ft_frequencyBand,tables.frequency_band,sizeof ft_frequencyBand);
     lfo1_0_1=lfo2_0_1=lfo3_0_1=0; lfo1_1_0=lfo2_1_0=lfo3_1_0=0;
     lfo1Smooth=lfo2Smooth=0; monoFrequencySmooth=261.6255653006f;
     monoFrequency=440.f*exp2((60.f-69.f)/12.f);
@@ -97,7 +96,7 @@ bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,c
 }
 bool RuntimeState::restore_runtime(const float *values,size_t count,InstanceSpan self) {
     if(!valid_restore(values,count,self)) return false;
-    float saved[150]; std::memcpy(saved,values,sizeof saved);
+    float saved[150]; memcpy(saved,values,sizeof saved);
     if(!compactPorts.restore(saved,150,sp->sr)) return false;
     restore_graph();
     return true;
@@ -136,11 +135,11 @@ void State::initializeNoteStates() {
 }
 double State::tuningTableNoteToHz(int note) const { return tuningTable[clamp(note,0,127)]; }
 bool State::valid_parameter(unsigned p,float v) const {
-    return initialized_ && p<150 && std::isfinite(v) && (p!=arpIsOn || v==0.f);
+    return initialized_ && p<150 && isfinite(v) && (p!=arpIsOn || v==0.f);
 }
 bool State::valid_event(int pitch,int velocity,float frequency) const {
     return initialized_ && parameters[arpIsOn]==0 && sequencer.pending_empty && pitch>=0 && pitch<128 &&
-        velocity>=0 && velocity<=127 && std::isfinite(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
+        velocity>=0 && velocity<=127 && isfinite(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
 }
 bool State::valid_output_span(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self) const {
     if(!initialized_ || !l || !r || n>65536 || offset>65536-n || parameters[arpIsOn]!=0 || !sequencer.pending_empty) return false;

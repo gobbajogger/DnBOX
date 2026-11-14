@@ -1,7 +1,6 @@
 #include "parameter_ports.hpp"
-#include <cmath>
-#include <cstdint>
-#include <limits>
+#include <math.h>
+#include <stdint.h>
 
 namespace synthone_ports {
 namespace {
@@ -10,7 +9,7 @@ constexpr float maximum_half_time = .99f;
 // Covers every current physical metadata range (largest maximum is 48000).
 constexpr float maximum_target_magnitude = 48000.f;
 bool valid_target(float value) {
-    return std::isfinite(value) && value >= -maximum_target_magnitude && value <= maximum_target_magnitude;
+    return isfinite(value) && value >= -maximum_target_magnitude && value <= maximum_target_magnitude;
 }
 bool valid_rate(int rate) { return rate == 44100 || rate == 48000 || rate == 96000; }
 float clamp_half_time(float value) {
@@ -19,7 +18,7 @@ float clamp_half_time(float value) {
 bool span(const void *pointer, size_t bytes, uintptr_t &begin, uintptr_t &end) {
     if (!pointer) return false;
     begin = reinterpret_cast<uintptr_t>(pointer);
-    if (begin > std::numeric_limits<uintptr_t>::max() - bytes) return false;
+    if (begin > UINTPTR_MAX - bytes) return false;
     end = begin + bytes;
     return true;
 }
@@ -71,7 +70,7 @@ bool Ports::restore(const float *values, size_t value_count, int sample_rate) {
 }
 
 bool Ports::update_half_time(float half_time) {
-    if (!outputs_ || !std::isfinite(half_time) ||
+    if (!outputs_ || !isfinite(half_time) ||
         half_time < minimum_half_time || half_time > maximum_half_time) return false;
     common_.htime = half_time;
     return true;
@@ -79,7 +78,7 @@ bool Ports::update_half_time(float half_time) {
 
 bool Ports::set_resolved_target(unsigned parameter, float value) {
     if (!outputs_ || parameter >= parameter_count || !valid_target(value)) return false;
-    if (parameter == half_time_parameter && !std::isfinite(outputs_[parameter])) return false;
+    if (parameter == half_time_parameter && !isfinite(outputs_[parameter])) return false;
     const auto slot = selected_slots[parameter];
     if (slot == unsmoothed_slot) outputs_[parameter] = value;
     else selected_[slot].target = value;
