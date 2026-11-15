@@ -1,0 +1,41 @@
+{
+  "schema": "dnbox-reviewed-host-held-owner-source-subset/1",
+  "kind": "Exact plaintext preservation; no native/runtime/full-suite adoption",
+  "sourceFreezeSHA256": "6f889564d5a94f8bc1fe4fed33997e6e23240d42a1bffa5282a6b9072c9432b7",
+  "sourceClosureSHA256": "3fe0d364fdb55ed3fb41568717ebba63dd4cad533abbded98f9dafdbc089c55e",
+  "independentReviewSHA256": "3b283497817139ce4a9461d78b61fcbd44dab7129b7aa344b90614cbf28b87bb",
+  "files": [
+    {
+      "path": "HOST-ORACLE.patch",
+      "bytes": 5175,
+      "sha256": "5554a561b80871d59178813c040d21ab4228a57e8532fd9c65252787bcdcfaf0",
+      "gitBlob": "a23253ee3c1e4c6df216805c49c53beb13ca7da7"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3323,
+      "sha256": "c9941ab52c6eebd34f9c03d21d906b5e258867e05d52a1bcc969078111825dcc",
+      "gitBlob": "cca72d56a0968347db226d7dd2b03c957e517e50"
+    },
+    {
+      "path": "REVIEW-SUMMARY.json",
+      "bytes": 6702,
+      "sha256": "a3790d308804886c9466d7af73428457294b2821c00ce4ed03097642010bd294",
+      "gitBlob": "228ef6618dec988cf4922fa3be4c43605e631116"
+    },
+    {
+      "path": "test_engine_host_held_owner.py",
+      "bytes": 3268,
+      "sha256": "8c5eb77698e18da58a7893e0eb4294072c08a640cc2b4d3469e8178a29707da7",
+      "gitBlob": "c70d781d874c8afd259fd6470789c4f8bdd794fa"
+    }
+  ],
+  "excluded": [
+    "SDK/toolchain",
+    "compiled/native/firmware/controller binaries",
+    "full private source/proof corpus",
+    "raw captures/PCM/audio",
+    "private reports/model artifacts",
+    "shared integration/lease or release"
+  ]
+}

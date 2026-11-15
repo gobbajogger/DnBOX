@@ -1,0 +1,118 @@
+{
+  "schema": "dnbox-host-held-owner-public-review-summary/1",
+  "kind": "Faithful derived summary, not complete private report",
+  "originalReportSHA256": "3b283497817139ce4a9461d78b61fcbd44dab7129b7aa344b90614cbf28b87bb",
+  "completedUTC": "2026-11-15T21:05:55.226677+00:00",
+  "outcome": "ACCEPT_BOUNDED_HOST_ORACLE_AND_TEST_REGISTRATION",
+  "findings": [],
+  "input": {
+    "freezeSHA256": "6f889564d5a94f8bc1fe4fed33997e6e23240d42a1bffa5282a6b9072c9432b7",
+    "declaredPayloads": 20,
+    "sourceFiles": 5449,
+    "sourceClosureSHA256": "3fe0d364fdb55ed3fb41568717ebba63dd4cad533abbded98f9dafdbc089c55e",
+    "baseFreezeSHA256": "2701f13d3c333c242a236aef1ea009337be025879c6fdec36c4950f46cc699c7",
+    "intakeUTC": "2026-11-15T20:59:55.653078+00:00",
+    "sourceChanges": [
+      "firmware/src/app/engine.c",
+      "tests/host/test_engine_host_held_owner.py",
+      "tests/run_tests.sh"
+    ]
+  },
+  "sourceAssessment": [
+    {
+      "anchor": "firmware/src/app/engine.c:1825-1857",
+      "result": "PASS",
+      "detail": "The only engine delta is the exact engine_bass_keys_held function inside the pre-existing X0X_HOST guard. Removing that function leaves the base and candidate engine source byte-identical. No target/native runtime branch, calls, DSP, ownership/release implementation, transport or mapping changes."
+    },
+    {
+      "anchor": "firmware/src/app/engine.c:1827-1840; firmware/src/app/original_runtime.h:19-20,34-35",
+      "result": "PASS",
+      "detail": "Actual five legacy rows are indexed only for input<ORIGINAL_INPUT_REMOTE. Optional REMOTE uses its distinct pointer and null is skipped. Key range is 0..127. Any nonzero uint8 count marks the appropriate one of two bass bits; signed shifts are bounded by actual NBASS=2 (seq/pattern.h:17). A non-null remote pointer retains its existing caller-owned valid-128-byte lifetime contract. The observer does not write or release anything."
+    },
+    {
+      "anchor": "tests/host/test_engine_host_held_owner.py:7-61",
+      "result": "PASS",
+      "detail": "Compiles the actual selected function body against the real runtime header, not a six-row surrogate. Its explicit NBASS=2 matches the actual project macro. Adjacent poisoned fields expose invalid reads; bound/unbound remote and all 2 voices x 6 sources x 128 keys are exercised. This is held-storage observation, not audible-tail, target scheduling or remote-protocol proof."
+    },
+    {
+      "anchor": "tests/run_tests.sh:299",
+      "result": "PASS",
+      "detail": "Exactly one original-runner registration added; removing that line leaves the original script byte-identical. Scoped selector executes the real normal and strict UBSan modes and reports this selected test ok. Existing package skip note remains in its log; no full-suite or zero-skip claim."
+    }
+  ],
+  "independentChecks": {
+    "baselineFunctionalRED": {
+      "result": "PASS_AS_EXPECTED_NEGATIVE",
+      "method": "Exact accepted-base observer body compiled with the unchanged new harness and real candidate header, whose identity matches base. Compiler success is recorded separately from runtime failure.",
+      "normal": "exit1, FAIL1 zero-held assertion",
+      "strictUBSan": "exit1, index5 out of bounds for uint8_t[5][128]"
+    },
+    "newExactRegression": {
+      "result": "PASS",
+      "normalChecks": 6156,
+      "nonrecoveringUBSanBoundsChecks": 6156,
+      "directAndOriginalSelector": true
+    },
+    "runtimeNegativeControls": {
+      "result": "PASS_AS_EXPECTED_NEGATIVE",
+      "controls": [
+        "omit optional REMOTE: runtime assertion at check2563",
+        "omit key127: runtime assertion at check511",
+        "omit voice B: runtime assertion at check4",
+        "remove null guard: nonrecovering null-load UBSan error"
+      ],
+      "allCompiledBeforeRuntimeFailure": true
+    },
+    "independentStorageModelAndNonmutation": {
+      "result": "PASS",
+      "checksPerVariant": 106082,
+      "variants": [
+        "O0",
+        "O2",
+        "Os",
+        "O2 nonrecovering UBSan+bounds+float-cast-overflow"
+      ],
+      "coverage": "Every distinct same-voice source pair at every key, independent owner release, nonzero 128/255 counts, two voices, mixed remote binding and 30,000 deterministic operations. Separate model computes expected mask; complete struct/remote byte snapshots ensure observation writes no state."
+    },
+    "originalComposedFeatures": {
+      "result": "PASS",
+      "checks": 1413,
+      "failures": 0,
+      "variants": [
+        "normal",
+        "strictUBSan+bounds+float-cast-overflow"
+      ]
+    },
+    "originalPanicCutover": {
+      "result": "PASS",
+      "checks": 122,
+      "failures": 0,
+      "variants": [
+        "normal",
+        "strictUBSan+bounds+float-cast-overflow"
+      ]
+    }
+  },
+  "failurePreservation": {
+    "producerSetup": "Missing-include and signed-mask -Werror logs authenticated and inspected. They are setup failures, not functional RED evidence.",
+    "reviewerSetup": "Initial skip-remote mutant used untyped integer zero branches, rejected by -Werror pointer/integer conditional mismatch. Log retained; not counted as runtime evidence. Typed-null corrected control compiled, then failed the real REMOTE assertion. Only reviewer-owned /tmp source was changed.",
+    "existingGates": "Original LSan/ptrace failures remain FAIL; leaks-disabled diagnostics are not leak/full-gate proof. No LSan run or waiver here. Host Clang/lua5.1/Chromium prerequisite gaps remain unqualified. Earlier strict baseline remains 449 total /275 ok /174 FAIL, not arithmetically updated."
+  },
+  "notRunOrClaimed": [
+    "Full suite: NOT_RUN in this review. Other owners ongoing affected/full-suite outputs are not inputs or acceptance here.",
+    "Native target build/ELF/BIN/resource fit: NOT_RUN; only source guard confinement accepted. No new native image identity claim.",
+    "Target timing, CPU, stack, audible stuck-note symptom, device/browser, transport and product/release gates: NOT_RUN/unwaived.",
+    "No source-chain adoption, lease change, source/Git/ref/device/service/publication mutation or optional guard/inline diagnostic review."
+  ],
+  "sourceStability": {
+    "verifiedUTC": "2026-11-15T21:05:55.224064+00:00",
+    "freezeSHA256": "6f889564d5a94f8bc1fe4fed33997e6e23240d42a1bffa5282a6b9072c9432b7",
+    "payloads": 20,
+    "sourceFiles": 5449,
+    "sourceClosureSHA256": "3fe0d364fdb55ed3fb41568717ebba63dd4cad533abbded98f9dafdbc089c55e",
+    "allHashesUnchanged": true,
+    "sourcePathSetExact": true,
+    "candidateWrites": false
+  },
+  "laterProducerResults": "Separate later affected/full-runner outputs are not this independent acceptance. No full-suite/native/lease/product claim."
+}
