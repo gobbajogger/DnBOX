@@ -1,0 +1,2896 @@
+{
+  "order": [
+    {
+      "position": 0,
+      "id": 0,
+      "identifier": "neonvolumeControl",
+      "field_literal": "0x100809a60",
+      "store_pc": "0x100259214"
+    },
+    {
+      "position": 1,
+      "id": 7,
+      "identifier": "neoncutoffLayer1",
+      "field_literal": "0x100809ba0",
+      "store_pc": "0x100259214"
+    },
+    {
+      "position": 2,
+      "id": 8,
+      "identifier": "neonresonanceLayer1",
+      "field_literal": "0x100809ba8",
+      "store_pc": "0x100259218"
+    },
+    {
+      "position": 3,
+      "id": 11,
+      "identifier": "neonverbEnable",
+      "field_literal": "0x100809c30",
+      "store_pc": "0x100259220"
+    },
+    {
+      "position": 4,
+      "id": 13,
+      "identifier": "neonverbSize",
+      "field_literal": "0x100809c40",
+      "store_pc": "0x100259220"
+    },
+    {
+      "position": 5,
+      "id": 14,
+      "identifier": "neonverbLoCut",
+      "field_literal": "0x100809c48",
+      "store_pc": "0x100259228"
+    },
+    {
+      "position": 6,
+      "id": 15,
+      "identifier": "neonverbMix",
+      "field_literal": "0x100809c50",
+      "store_pc": "0x100259230"
+    },
+    {
+      "position": 7,
+      "id": 24,
+      "identifier": "neondelayEnable",
+      "field_literal": "0x100809c90",
+      "store_pc": "0x100259238"
+    },
+    {
+      "position": 8,
+      "id": 25,
+      "identifier": "neondelayTime",
+      "field_literal": "0x100809ca0",
+      "store_pc": "0x100259240"
+    },
+    {
+      "position": 9,
+      "id": 26,
+      "identifier": "neondelayFeedback",
+      "field_literal": "0x100809ca8",
+      "store_pc": "0x100259248"
+    },
+    {
+      "position": 10,
+      "id": 27,
+      "identifier": "neondelayMix",
+      "field_literal": "0x100809c98",
+      "store_pc": "0x100259250"
+    },
+    {
+      "position": 11,
+      "id": 86,
+      "identifier": "neonoscRange",
+      "field_literal": "0x100809bd0",
+      "store_pc": "0x100259258"
+    },
+    {
+      "position": 12,
+      "id": 12,
+      "identifier": "neonverbTypeII",
+      "field_literal": "0x100809c38",
+      "store_pc": "0x100259260"
+    },
+    {
+      "position": 13,
+      "id": 118,
+      "identifier": "neonisTempoSyncd",
+      "field_literal": "0x100809d88",
+      "store_pc": "0x100259268"
+    },
+    {
+      "position": 14,
+      "id": 22,
+      "identifier": "neonautopanRate",
+      "field_literal": "0x100809c80",
+      "store_pc": "0x100259270"
+    },
+    {
+      "position": 15,
+      "id": 23,
+      "identifier": "neonautopanDepth",
+      "field_literal": "0x100809c88",
+      "store_pc": "0x100259278"
+    },
+    {
+      "position": 16,
+      "id": 17,
+      "identifier": "neoncompressorAmount",
+      "field_literal": "0x100809c58",
+      "store_pc": "0x100259280"
+    },
+    {
+      "position": 17,
+      "id": 16,
+      "identifier": "neonstereoWiden",
+      "field_literal": "0x100809cd0",
+      "store_pc": "0x100259288"
+    },
+    {
+      "position": 18,
+      "id": 32,
+      "identifier": "neonmonoEnable",
+      "field_literal": "0x100809d60",
+      "store_pc": "0x100259290"
+    },
+    {
+      "position": 19,
+      "id": 33,
+      "identifier": "neonlegatoEnable",
+      "field_literal": "0x100809d50",
+      "store_pc": "0x100259298"
+    },
+    {
+      "position": 20,
+      "id": 35,
+      "identifier": "neonglideTime",
+      "field_literal": "0x100809d68",
+      "store_pc": "0x1002592a0"
+    },
+    {
+      "position": 21,
+      "id": 1,
+      "identifier": "neonpulseVolume",
+      "field_literal": "0x100809a88",
+      "store_pc": "0x1002592a8"
+    },
+    {
+      "position": 22,
+      "id": 3,
+      "identifier": "neonsawVolume",
+      "field_literal": "0x100809ab8",
+      "store_pc": "0x1002592b0"
+    },
+    {
+      "position": 23,
+      "id": 201,
+      "identifier": "neonnoiseVolume",
+      "field_literal": "0x100809a90",
+      "store_pc": "0x1002592b8"
+    },
+    {
+      "position": 24,
+      "id": 202,
+      "identifier": "neonsubVolume",
+      "field_literal": "0x100809a98",
+      "store_pc": "0x1002592c0"
+    },
+    {
+      "position": 25,
+      "id": 28,
+      "identifier": "neonhighPassCutoff",
+      "field_literal": "0x100809bc0",
+      "store_pc": "0x1002592c8"
+    },
+    {
+      "position": 26,
+      "id": 63,
+      "identifier": "neonarpEnable",
+      "field_literal": "0x100809d10",
+      "store_pc": "0x1002592c8"
+    },
+    {
+      "position": 27,
+      "id": 64,
+      "identifier": "neonarpType",
+      "field_literal": "0x100809d18",
+      "store_pc": "0x1002592d4"
+    },
+    {
+      "position": 28,
+      "id": 65,
+      "identifier": "neonarpOctave",
+      "field_literal": "0x100809d28",
+      "store_pc": "0x1002592d4"
+    },
+    {
+      "position": 29,
+      "id": 66,
+      "identifier": "neonarpInterval",
+      "field_literal": "0x100809d20",
+      "store_pc": "0x1002592d8"
+    },
+    {
+      "position": 30,
+      "id": 142,
+      "identifier": "neonseqEnable",
+      "field_literal": "0x100809ef8",
+      "store_pc": "0x1002592e0"
+    },
+    {
+      "position": 31,
+      "id": 144,
+      "identifier": "neonseqGate",
+      "field_literal": "0x100809f08",
+      "store_pc": "0x1002592e8"
+    },
+    {
+      "position": 32,
+      "id": 143,
+      "identifier": "neonseqDivision",
+      "field_literal": "0x100809f00",
+      "store_pc": "0x1002592f0"
+    },
+    {
+      "position": 33,
+      "id": 145,
+      "identifier": "neonseqTotalSteps",
+      "field_literal": "0x100809f10",
+      "store_pc": "0x1002592f8"
+    },
+    {
+      "position": 34,
+      "id": 36,
+      "identifier": "neonattack",
+      "field_literal": "0x100809d90",
+      "store_pc": "0x100259300"
+    },
+    {
+      "position": 35,
+      "id": 37,
+      "identifier": "neondecay",
+      "field_literal": "0x100809d98",
+      "store_pc": "0x100259308"
+    },
+    {
+      "position": 36,
+      "id": 38,
+      "identifier": "neonsustain",
+      "field_literal": "0x100809da0",
+      "store_pc": "0x100259310"
+    },
+    {
+      "position": 37,
+      "id": 39,
+      "identifier": "neonrelease",
+      "field_literal": "0x100809da8",
+      "store_pc": "0x100259318"
+    },
+    {
+      "position": 38,
+      "id": 115,
+      "identifier": "neonadsrLinkEnable",
+      "field_literal": "0x100809d70",
+      "store_pc": "0x100259320"
+    },
+    {
+      "position": 39,
+      "id": 116,
+      "identifier": "neonadsrFilterLinkEnable",
+      "field_literal": "0x100809d78",
+      "store_pc": "0x100259328"
+    },
+    {
+      "position": 40,
+      "id": 119,
+      "identifier": "neonattack2",
+      "field_literal": "0x100809db0",
+      "store_pc": "0x100259330"
+    },
+    {
+      "position": 41,
+      "id": 120,
+      "identifier": "neondecay2",
+      "field_literal": "0x100809db8",
+      "store_pc": "0x100259338"
+    },
+    {
+      "position": 42,
+      "id": 121,
+      "identifier": "neonsustain2",
+      "field_literal": "0x100809dc0",
+      "store_pc": "0x100259340"
+    },
+    {
+      "position": 43,
+      "id": 122,
+      "identifier": "neonrelease2",
+      "field_literal": "0x100809dc8",
+      "store_pc": "0x100259348"
+    },
+    {
+      "position": 44,
+      "id": 40,
+      "identifier": "neonchorusIEnable",
+      "field_literal": "0x100809e28",
+      "store_pc": "0x100259350"
+    },
+    {
+      "position": 45,
+      "id": 41,
+      "identifier": "neonchorusIIEnable",
+      "field_literal": "0x100809e30",
+      "store_pc": "0x100259358"
+    },
+    {
+      "position": 46,
+      "id": 42,
+      "identifier": "neonchorusRate",
+      "field_literal": "0x100809e38",
+      "store_pc": "0x100259360"
+    },
+    {
+      "position": 47,
+      "id": 43,
+      "identifier": "neonchorusDepth",
+      "field_literal": "0x100809e40",
+      "store_pc": "0x100259368"
+    },
+    {
+      "position": 48,
+      "id": 44,
+      "identifier": "neonchorusMix",
+      "field_literal": "0x100809e48",
+      "store_pc": "0x100259370"
+    },
+    {
+      "position": 49,
+      "id": 208,
+      "identifier": "neonchorusVersion",
+      "field_literal": "0x100809e50",
+      "store_pc": "0x100259378"
+    },
+    {
+      "position": 50,
+      "id": 59,
+      "identifier": "neonunison",
+      "field_literal": "0x100809cf0",
+      "store_pc": "0x100259380"
+    },
+    {
+      "position": 51,
+      "id": 60,
+      "identifier": "neonunisonDetune",
+      "field_literal": "0x100809cf8",
+      "store_pc": "0x100259388"
+    },
+    {
+      "position": 52,
+      "id": 61,
+      "identifier": "neonunisonStereo",
+      "field_literal": "0x100809d00",
+      "store_pc": "0x100259390"
+    },
+    {
+      "position": 53,
+      "id": 62,
+      "identifier": "neonunisonType",
+      "field_literal": "0x100809d08",
+      "store_pc": "0x100259398"
+    },
+    {
+      "position": 54,
+      "id": 57,
+      "identifier": "neonfmModCents",
+      "field_literal": "0x100809d40",
+      "store_pc": "0x1002593a0"
+    },
+    {
+      "position": 55,
+      "id": 129,
+      "identifier": "neonfilterCutoff",
+      "field_literal": "0x100809e90",
+      "store_pc": "0x1002593a8"
+    },
+    {
+      "position": 56,
+      "id": 130,
+      "identifier": "neonfilterRez",
+      "field_literal": "0x100809e98",
+      "store_pc": "0x1002593b0"
+    },
+    {
+      "position": 57,
+      "id": 131,
+      "identifier": "neonfilterTracking",
+      "field_literal": "0x100809ea0",
+      "store_pc": "0x1002593b8"
+    },
+    {
+      "position": 58,
+      "id": 132,
+      "identifier": "neonfilterAttack",
+      "field_literal": "0x100809ea8",
+      "store_pc": "0x1002593c0"
+    },
+    {
+      "position": 59,
+      "id": 133,
+      "identifier": "neonfilterDecay",
+      "field_literal": "0x100809eb0",
+      "store_pc": "0x1002593c8"
+    },
+    {
+      "position": 60,
+      "id": 134,
+      "identifier": "neonfilterSustain",
+      "field_literal": "0x100809eb8",
+      "store_pc": "0x1002593d0"
+    },
+    {
+      "position": 61,
+      "id": 135,
+      "identifier": "neonfilterRelease",
+      "field_literal": "0x100809ec0",
+      "store_pc": "0x1002593d8"
+    },
+    {
+      "position": 62,
+      "id": 136,
+      "identifier": "neonfilterStrength",
+      "field_literal": "0x100809ec8",
+      "store_pc": "0x1002593e0"
+    },
+    {
+      "position": 63,
+      "id": 137,
+      "identifier": "neonfilterVelocity",
+      "field_literal": "0x100809ed0",
+      "store_pc": "0x1002593e8"
+    },
+    {
+      "position": 64,
+      "id": 138,
+      "identifier": "neonpitchAttack",
+      "field_literal": "0x100809ed8",
+      "store_pc": "0x1002593f0"
+    },
+    {
+      "position": 65,
+      "id": 139,
+      "identifier": "neonpitchDecay",
+      "field_literal": "0x100809ee0",
+      "store_pc": "0x1002593f8"
+    },
+    {
+      "position": 66,
+      "id": 140,
+      "identifier": "neonpitchSustain",
+      "field_literal": "0x100809ee8",
+      "store_pc": "0x100259400"
+    },
+    {
+      "position": 67,
+      "id": 141,
+      "identifier": "neonpitchRelease",
+      "field_literal": "0x100809ef0",
+      "store_pc": "0x100259408"
+    },
+    {
+      "position": 68,
+      "id": 72,
+      "identifier": "neonlayer1Semi",
+      "field_literal": "0x100809dd0",
+      "store_pc": "0x100259410"
+    },
+    {
+      "position": 69,
+      "id": 73,
+      "identifier": "neonlayer2Semi",
+      "field_literal": "0x100809e00",
+      "store_pc": "0x100259418"
+    },
+    {
+      "position": 70,
+      "id": 74,
+      "identifier": "neonlayer1Detune",
+      "field_literal": "0x100809dd8",
+      "store_pc": "0x100259420"
+    },
+    {
+      "position": 71,
+      "id": 75,
+      "identifier": "neonlayer2Detune",
+      "field_literal": "0x100809e08",
+      "store_pc": "0x100259428"
+    },
+    {
+      "position": 72,
+      "id": 206,
+      "identifier": "neonaTuning",
+      "field_literal": "0x10080a0f0",
+      "store_pc": "0x100259430"
+    },
+    {
+      "position": 73,
+      "id": 212,
+      "identifier": "neonkeyLockEnable",
+      "field_literal": "0x10080a0d8",
+      "store_pc": "0x100259438"
+    },
+    {
+      "position": 74,
+      "id": 213,
+      "identifier": "neonkeyLockRoot",
+      "field_literal": "0x10080a0e0",
+      "store_pc": "0x100259440"
+    },
+    {
+      "position": 75,
+      "id": 214,
+      "identifier": "neonkeyLockScale",
+      "field_literal": "0x10080a0e8",
+      "store_pc": "0x100259448"
+    },
+    {
+      "position": 76,
+      "id": 82,
+      "identifier": "neonlayer1Waveform",
+      "field_literal": "0x100809aa8",
+      "store_pc": "0x100259450"
+    },
+    {
+      "position": 77,
+      "id": 83,
+      "identifier": "neonlayer2Waveform",
+      "field_literal": "0x100809ac8",
+      "store_pc": "0x100259458"
+    },
+    {
+      "position": 78,
+      "id": 104,
+      "identifier": "neontremoloRate",
+      "field_literal": "0x100809a78",
+      "store_pc": "0x100259460"
+    },
+    {
+      "position": 79,
+      "id": 103,
+      "identifier": "neontremoloDepth",
+      "field_literal": "0x100809a80",
+      "store_pc": "0x100259468"
+    },
+    {
+      "position": 80,
+      "id": 105,
+      "identifier": "neonvibratoSemitones",
+      "field_literal": "0x100809a70",
+      "store_pc": "0x100259470"
+    },
+    {
+      "position": 81,
+      "id": 106,
+      "identifier": "neonvibratoRate",
+      "field_literal": "0x100809a68",
+      "store_pc": "0x100259478"
+    },
+    {
+      "position": 82,
+      "id": 107,
+      "identifier": "neoncrushEnable",
+      "field_literal": "0x100809bd8",
+      "store_pc": "0x100259480"
+    },
+    {
+      "position": 83,
+      "id": 108,
+      "identifier": "neoncrushAmount",
+      "field_literal": "0x100809be8",
+      "store_pc": "0x100259488"
+    },
+    {
+      "position": 84,
+      "id": 109,
+      "identifier": "neoncrushBitRate",
+      "field_literal": "0x100809bf0",
+      "store_pc": "0x100259490"
+    },
+    {
+      "position": 85,
+      "id": 5,
+      "identifier": "neonlayer1Sound",
+      "field_literal": "0x100809c10",
+      "store_pc": "0x100259498"
+    },
+    {
+      "position": 86,
+      "id": 6,
+      "identifier": "neonlayer2Sound",
+      "field_literal": "0x100809c18",
+      "store_pc": "0x1002594a0"
+    },
+    {
+      "position": 87,
+      "id": 203,
+      "identifier": "neonpad1Destination",
+      "field_literal": "0x100809c20",
+      "store_pc": "0x1002594a8"
+    },
+    {
+      "position": 88,
+      "id": 204,
+      "identifier": "neonpad2Destination",
+      "field_literal": "0x100809c28",
+      "store_pc": "0x1002594b0"
+    },
+    {
+      "position": 89,
+      "id": 147,
+      "identifier": "neonseqStep1Offset",
+      "field_literal": "0x100809f20",
+      "store_pc": "0x1002594b8"
+    },
+    {
+      "position": 90,
+      "id": 148,
+      "identifier": "neonseqStep2Offset",
+      "field_literal": "0x100809f28",
+      "store_pc": "0x1002594c0"
+    },
+    {
+      "position": 91,
+      "id": 149,
+      "identifier": "neonseqStep3Offset",
+      "field_literal": "0x100809f30",
+      "store_pc": "0x1002594c8"
+    },
+    {
+      "position": 92,
+      "id": 150,
+      "identifier": "neonseqStep4Offset",
+      "field_literal": "0x100809f38",
+      "store_pc": "0x1002594d0"
+    },
+    {
+      "position": 93,
+      "id": 151,
+      "identifier": "neonseqStep5Offset",
+      "field_literal": "0x100809f40",
+      "store_pc": "0x1002594d8"
+    },
+    {
+      "position": 94,
+      "id": 152,
+      "identifier": "neonseqStep6Offset",
+      "field_literal": "0x100809f48",
+      "store_pc": "0x1002594e0"
+    },
+    {
+      "position": 95,
+      "id": 153,
+      "identifier": "neonseqStep7Offset",
+      "field_literal": "0x100809f50",
+      "store_pc": "0x1002594e8"
+    },
+    {
+      "position": 96,
+      "id": 154,
+      "identifier": "neonseqStep8Offset",
+      "field_literal": "0x100809f58",
+      "store_pc": "0x1002594f0"
+    },
+    {
+      "position": 97,
+      "id": 155,
+      "identifier": "neonseqStep9Offset",
+      "field_literal": "0x100809f60",
+      "store_pc": "0x1002594f8"
+    },
+    {
+      "position": 98,
+      "id": 156,
+      "identifier": "neonseqStep10Offset",
+      "field_literal": "0x100809f68",
+      "store_pc": "0x100259500"
+    },
+    {
+      "position": 99,
+      "id": 157,
+      "identifier": "neonseqStep11Offset",
+      "field_literal": "0x100809f70",
+      "store_pc": "0x100259508"
+    },
+    {
+      "position": 100,
+      "id": 158,
+      "identifier": "neonseqStep12Offset",
+      "field_literal": "0x100809f78",
+      "store_pc": "0x100259510"
+    },
+    {
+      "position": 101,
+      "id": 159,
+      "identifier": "neonseqStep13Offset",
+      "field_literal": "0x100809f80",
+      "store_pc": "0x100259518"
+    },
+    {
+      "position": 102,
+      "id": 160,
+      "identifier": "neonseqStep14Offset",
+      "field_literal": "0x100809f88",
+      "store_pc": "0x100259520"
+    },
+    {
+      "position": 103,
+      "id": 161,
+      "identifier": "neonseqStep15Offset",
+      "field_literal": "0x100809f90",
+      "store_pc": "0x100259528"
+    },
+    {
+      "position": 104,
+      "id": 162,
+      "identifier": "neonseqStep16Offset",
+      "field_literal": "0x100809f98",
+      "store_pc": "0x100259530"
+    },
+    {
+      "position": 105,
+      "id": 163,
+      "identifier": "neonseqStep1Toggle",
+      "field_literal": "0x100809fa0",
+      "store_pc": "0x100259538"
+    },
+    {
+      "position": 106,
+      "id": 164,
+      "identifier": "neonseqStep2Toggle",
+      "field_literal": "0x100809fa8",
+      "store_pc": "0x100259540"
+    },
+    {
+      "position": 107,
+      "id": 165,
+      "identifier": "neonseqStep3Toggle",
+      "field_literal": "0x100809fb0",
+      "store_pc": "0x100259548"
+    },
+    {
+      "position": 108,
+      "id": 166,
+      "identifier": "neonseqStep4Toggle",
+      "field_literal": "0x100809fb8",
+      "store_pc": "0x100259550"
+    },
+    {
+      "position": 109,
+      "id": 167,
+      "identifier": "neonseqStep5Toggle",
+      "field_literal": "0x100809fc0",
+      "store_pc": "0x100259558"
+    },
+    {
+      "position": 110,
+      "id": 168,
+      "identifier": "neonseqStep6Toggle",
+      "field_literal": "0x100809fc8",
+      "store_pc": "0x100259560"
+    },
+    {
+      "position": 111,
+      "id": 169,
+      "identifier": "neonseqStep7Toggle",
+      "field_literal": "0x100809fd0",
+      "store_pc": "0x100259568"
+    },
+    {
+      "position": 112,
+      "id": 170,
+      "identifier": "neonseqStep8Toggle",
+      "field_literal": "0x100809fd8",
+      "store_pc": "0x100259570"
+    },
+    {
+      "position": 113,
+      "id": 171,
+      "identifier": "neonseqStep9Toggle",
+      "field_literal": "0x100809fe0",
+      "store_pc": "0x100259578"
+    },
+    {
+      "position": 114,
+      "id": 172,
+      "identifier": "neonseqStep10Toggle",
+      "field_literal": "0x100809fe8",
+      "store_pc": "0x100259580"
+    },
+    {
+      "position": 115,
+      "id": 173,
+      "identifier": "neonseqStep11Toggle",
+      "field_literal": "0x100809ff0",
+      "store_pc": "0x100259588"
+    },
+    {
+      "position": 116,
+      "id": 174,
+      "identifier": "neonseqStep12Toggle",
+      "field_literal": "0x100809ff8",
+      "store_pc": "0x100259590"
+    },
+    {
+      "position": 117,
+      "id": 175,
+      "identifier": "neonseqStep13Toggle",
+      "field_literal": "0x10080a000",
+      "store_pc": "0x100259598"
+    },
+    {
+      "position": 118,
+      "id": 176,
+      "identifier": "neonseqStep14Toggle",
+      "field_literal": "0x10080a008",
+      "store_pc": "0x1002595a0"
+    },
+    {
+      "position": 119,
+      "id": 177,
+      "identifier": "neonseqStep15Toggle",
+      "field_literal": "0x10080a010",
+      "store_pc": "0x1002595a8"
+    },
+    {
+      "position": 120,
+      "id": 178,
+      "identifier": "neonseqStep16Toggle",
+      "field_literal": "0x10080a018",
+      "store_pc": "0x1002595b0"
+    },
+    {
+      "position": 121,
+      "id": 179,
+      "identifier": "neonmodwheelDestination",
+      "field_literal": "0x100809ad8",
+      "store_pc": "0x1002595b8"
+    },
+    {
+      "position": 122,
+      "id": 181,
+      "identifier": "neonlfo1Dest1Param",
+      "field_literal": "0x10080a028",
+      "store_pc": "0x1002595c0"
+    },
+    {
+      "position": 123,
+      "id": 180,
+      "identifier": "neonlfo1Dest1BaseValue",
+      "field_literal": "0x10080a020",
+      "store_pc": "0x1002595c8"
+    },
+    {
+      "position": 124,
+      "id": 183,
+      "identifier": "neonlfo1Dest2Param",
+      "field_literal": "0x10080a038",
+      "store_pc": "0x1002595d0"
+    },
+    {
+      "position": 125,
+      "id": 182,
+      "identifier": "neonlfo1Dest2BaseValue",
+      "field_literal": "0x10080a030",
+      "store_pc": "0x1002595d8"
+    },
+    {
+      "position": 126,
+      "id": 88,
+      "identifier": "neonlfo1Rate",
+      "field_literal": "0x100809b20",
+      "store_pc": "0x1002595e0"
+    },
+    {
+      "position": 127,
+      "id": 89,
+      "identifier": "neonlfo1Amount",
+      "field_literal": "0x100809b28",
+      "store_pc": "0x1002595e8"
+    },
+    {
+      "position": 128,
+      "id": 91,
+      "identifier": "neonlfo1DelayTime",
+      "field_literal": "0x100809b38",
+      "store_pc": "0x1002595f0"
+    },
+    {
+      "position": 129,
+      "id": 93,
+      "identifier": "neonlfo3DelayTime",
+      "field_literal": "0x100809b48",
+      "store_pc": "0x1002595f8"
+    },
+    {
+      "position": 130,
+      "id": 94,
+      "identifier": "neonlfo1Waveform",
+      "field_literal": "0x100809b50",
+      "store_pc": "0x100259600"
+    },
+    {
+      "position": 131,
+      "id": 185,
+      "identifier": "neonlfo2Dest1Param",
+      "field_literal": "0x10080a048",
+      "store_pc": "0x100259608"
+    },
+    {
+      "position": 132,
+      "id": 184,
+      "identifier": "neonlfo2Dest1BaseValue",
+      "field_literal": "0x10080a040",
+      "store_pc": "0x100259610"
+    },
+    {
+      "position": 133,
+      "id": 187,
+      "identifier": "neonlfo2Dest2Param",
+      "field_literal": "0x10080a058",
+      "store_pc": "0x100259618"
+    },
+    {
+      "position": 134,
+      "id": 186,
+      "identifier": "neonlfo2Dest2BaseValue",
+      "field_literal": "0x10080a050",
+      "store_pc": "0x100259620"
+    },
+    {
+      "position": 135,
+      "id": 96,
+      "identifier": "neonlfo2Rate",
+      "field_literal": "0x100809b60",
+      "store_pc": "0x100259628"
+    },
+    {
+      "position": 136,
+      "id": 97,
+      "identifier": "neonlfo2Amount",
+      "field_literal": "0x100809b68",
+      "store_pc": "0x100259630"
+    },
+    {
+      "position": 137,
+      "id": 98,
+      "identifier": "neonlfo2Waveform",
+      "field_literal": "0x100809b70",
+      "store_pc": "0x100259638"
+    },
+    {
+      "position": 138,
+      "id": 189,
+      "identifier": "neonlfo3Dest1Param",
+      "field_literal": "0x10080a068",
+      "store_pc": "0x100259640"
+    },
+    {
+      "position": 139,
+      "id": 188,
+      "identifier": "neonlfo3Dest1BaseValue",
+      "field_literal": "0x10080a060",
+      "store_pc": "0x100259648"
+    },
+    {
+      "position": 140,
+      "id": 191,
+      "identifier": "neonlfo3Dest2Param",
+      "field_literal": "0x10080a078",
+      "store_pc": "0x100259650"
+    },
+    {
+      "position": 141,
+      "id": 190,
+      "identifier": "neonlfo3Dest2BaseValue",
+      "field_literal": "0x10080a070",
+      "store_pc": "0x100259658"
+    },
+    {
+      "position": 142,
+      "id": 100,
+      "identifier": "neonlfo3Rate",
+      "field_literal": "0x100809b80",
+      "store_pc": "0x100259660"
+    },
+    {
+      "position": 143,
+      "id": 101,
+      "identifier": "neonlfo3Amount",
+      "field_literal": "0x100809b88",
+      "store_pc": "0x100259664"
+    },
+    {
+      "position": 144,
+      "id": 102,
+      "identifier": "neonlfo3Waveform",
+      "field_literal": "0x100809b90",
+      "store_pc": "0x100259668"
+    },
+    {
+      "position": 145,
+      "id": 192,
+      "identifier": "neonlfo1Mode",
+      "field_literal": "0x10080a080",
+      "store_pc": "0x10025966c"
+    },
+    {
+      "position": 146,
+      "id": 193,
+      "identifier": "neonlfo2Mode",
+      "field_literal": "0x10080a088",
+      "store_pc": "0x100259670"
+    },
+    {
+      "position": 147,
+      "id": 194,
+      "identifier": "neonlfo3Mode",
+      "field_literal": "0x10080a090",
+      "store_pc": "0x100259674"
+    },
+    {
+      "position": 148,
+      "id": 123,
+      "identifier": "neonvintageMode",
+      "field_literal": "0x10080a0b0",
+      "store_pc": "0x100259678"
+    },
+    {
+      "position": 149,
+      "id": 124,
+      "identifier": "neonglobalBend",
+      "field_literal": "0x10080a0b8",
+      "store_pc": "0x10025967c"
+    },
+    {
+      "position": 150,
+      "id": 125,
+      "identifier": "neonlayer1Bend",
+      "field_literal": "0x10080a0c0",
+      "store_pc": "0x100259680"
+    },
+    {
+      "position": 151,
+      "id": 126,
+      "identifier": "neonlayer2Bend",
+      "field_literal": "0x10080a0c8",
+      "store_pc": "0x100259684"
+    },
+    {
+      "position": 152,
+      "id": 198,
+      "identifier": "neonlfoSnapbackEnable",
+      "field_literal": "0x100809ae0",
+      "store_pc": "0x100259688"
+    },
+    {
+      "position": 153,
+      "id": 199,
+      "identifier": "neonlfo2SnapbackEnable",
+      "field_literal": "0x100809ae8",
+      "store_pc": "0x10025968c"
+    },
+    {
+      "position": 154,
+      "id": 200,
+      "identifier": "neonlfo3SnapbackEnable",
+      "field_literal": "0x100809af0",
+      "store_pc": "0x100259690"
+    },
+    {
+      "position": 155,
+      "id": 195,
+      "identifier": "neonlfo1HzEnable",
+      "field_literal": "0x10080a098",
+      "store_pc": "0x100259694"
+    },
+    {
+      "position": 156,
+      "id": 196,
+      "identifier": "neonlfo2HzEnable",
+      "field_literal": "0x10080a0a0",
+      "store_pc": "0x100259698"
+    },
+    {
+      "position": 157,
+      "id": 197,
+      "identifier": "neonlfo3HzEnable",
+      "field_literal": "0x10080a0a8",
+      "store_pc": "0x10025969c"
+    },
+    {
+      "position": 158,
+      "id": 87,
+      "identifier": "neonlfo1Enable",
+      "field_literal": "0x100809b18",
+      "store_pc": "0x1002596a0"
+    },
+    {
+      "position": 159,
+      "id": 95,
+      "identifier": "neonlfo2Enable",
+      "field_literal": "0x100809b58",
+      "store_pc": "0x1002596a4"
+    },
+    {
+      "position": 160,
+      "id": 99,
+      "identifier": "neonlfo3Enable",
+      "field_literal": "0x100809b78",
+      "store_pc": "0x1002596a8"
+    },
+    {
+      "position": 161,
+      "id": 205,
+      "identifier": "neonfixedVelocityEnable",
+      "field_literal": "0x10080a0d0",
+      "store_pc": "0x1002596ac"
+    },
+    {
+      "position": 162,
+      "id": 209,
+      "identifier": "neonfilterType",
+      "field_literal": "0x100809b98",
+      "store_pc": "0x1002596b0"
+    },
+    {
+      "position": 163,
+      "id": 78,
+      "identifier": "neonlayer1PWM",
+      "field_literal": "0x100809de8",
+      "store_pc": "0x1002596b4"
+    },
+    {
+      "position": 164,
+      "id": 79,
+      "identifier": "neonlayer2PWM",
+      "field_literal": "0x100809e18",
+      "store_pc": "0x1002596bc"
+    },
+    {
+      "position": 165,
+      "id": 210,
+      "identifier": "neonlayer1PWMEnable",
+      "field_literal": "0x100809df0",
+      "store_pc": "0x1002596c0"
+    },
+    {
+      "position": 166,
+      "id": 211,
+      "identifier": "neonlayer2PWMEnable",
+      "field_literal": "0x100809e20",
+      "store_pc": "0x1002596c8"
+    },
+    {
+      "position": 167,
+      "id": 215,
+      "identifier": "neonj60v2Rate",
+      "field_literal": "0x100809e58",
+      "store_pc": "0x1002596cc"
+    },
+    {
+      "position": 168,
+      "id": 216,
+      "identifier": "neonj60v2Depth",
+      "field_literal": "0x100809e60",
+      "store_pc": "0x1002596d4"
+    },
+    {
+      "position": 169,
+      "id": 217,
+      "identifier": "neonj60v2Mix",
+      "field_literal": "0x100809e68",
+      "store_pc": "0x1002596d8"
+    }
+  ],
+  "defaults": [
+    {
+      "id": 0,
+      "identifier": "neonvolumeControl",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 1,
+      "identifier": "neonpulseVolume",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 2,
+      "identifier": "neonlayer1OscMode",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 3,
+      "identifier": "neonsawVolume",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 4,
+      "identifier": "neonlayer2OscMode",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 5,
+      "identifier": "neonlayer1Sound",
+      "leaf": "0x10001f314",
+      "kind": "literal_binary32",
+      "bits": "40000000"
+    },
+    {
+      "id": 6,
+      "identifier": "neonlayer2Sound",
+      "leaf": "0x10001f314",
+      "kind": "literal_binary32",
+      "bits": "40000000"
+    },
+    {
+      "id": 7,
+      "identifier": "neoncutoffLayer1",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 8,
+      "identifier": "neonresonanceLayer1",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 9,
+      "identifier": "neoncutoffLayer2",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 10,
+      "identifier": "neonresonanceLayer2",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 11,
+      "identifier": "neonverbEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 12,
+      "identifier": "neonverbTypeII",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 13,
+      "identifier": "neonverbSize",
+      "leaf": "0x10001f468",
+      "kind": "literal_binary32",
+      "bits": "3f333333"
+    },
+    {
+      "id": 14,
+      "identifier": "neonverbLoCut",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 15,
+      "identifier": "neonverbMix",
+      "leaf": "0x10001f2f4",
+      "kind": "literal_binary32",
+      "bits": "3ecccccd"
+    },
+    {
+      "id": 16,
+      "identifier": "neonstereoWiden",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 17,
+      "identifier": "neoncompressorAmount",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 18,
+      "identifier": "neoncompThreshold",
+      "leaf": "0x10001f39c",
+      "kind": "inverse_parameter",
+      "conversion_id": 18,
+      "input_double": -12.0,
+      "minimum": -30.0,
+      "maximum": 10.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 19,
+      "identifier": "neoncompHeadroom",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 20,
+      "identifier": "neoncompAttack",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 21,
+      "identifier": "neoncompPostGain",
+      "leaf": "0x10001f490",
+      "kind": "inverse_parameter",
+      "conversion_id": 21,
+      "input_double": 1.0,
+      "minimum": -10.0,
+      "maximum": 12.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 22,
+      "identifier": "neonautopanRate",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 23,
+      "identifier": "neonautopanDepth",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 24,
+      "identifier": "neondelayEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 25,
+      "identifier": "neondelayTime",
+      "leaf": "0x10001f344",
+      "kind": "literal_binary32",
+      "bits": "3e99999a"
+    },
+    {
+      "id": 26,
+      "identifier": "neondelayFeedback",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 27,
+      "identifier": "neondelayMix",
+      "leaf": "0x10001f2f4",
+      "kind": "literal_binary32",
+      "bits": "3ecccccd"
+    },
+    {
+      "id": 28,
+      "identifier": "neonhighPassCutoff",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 29,
+      "identifier": "neonhighPassRez",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 30,
+      "identifier": "neonbandPassWidth",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 31,
+      "identifier": "neonfreeFormHertz",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 32,
+      "identifier": "neonmonoEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 33,
+      "identifier": "neonlegatoEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 34,
+      "identifier": "neonglideEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 35,
+      "identifier": "neonglideTime",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 36,
+      "identifier": "neonattack",
+      "leaf": "0x10001f31c",
+      "kind": "literal_binary32",
+      "bits": "3b03126f"
+    },
+    {
+      "id": 37,
+      "identifier": "neondecay",
+      "leaf": "0x10001f304",
+      "kind": "literal_binary32",
+      "bits": "3c23d70a"
+    },
+    {
+      "id": 38,
+      "identifier": "neonsustain",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 39,
+      "identifier": "neonrelease",
+      "leaf": "0x10001f2e4",
+      "kind": "literal_binary32",
+      "bits": "3dcccccd"
+    },
+    {
+      "id": 40,
+      "identifier": "neonchorusIEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 41,
+      "identifier": "neonchorusIIEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 42,
+      "identifier": "neonchorusRate",
+      "leaf": "0x10001f4c0",
+      "kind": "literal_binary32",
+      "bits": "3eced917"
+    },
+    {
+      "id": 43,
+      "identifier": "neonchorusDepth",
+      "leaf": "0x10001f3c0",
+      "kind": "literal_binary32",
+      "bits": "3e4ed917"
+    },
+    {
+      "id": 44,
+      "identifier": "neonchorusMix",
+      "leaf": "0x10001f38c",
+      "kind": "literal_binary32",
+      "bits": "3f0147ae"
+    },
+    {
+      "id": 45,
+      "identifier": "neonlayer1LowNote",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 46,
+      "identifier": "neonlayer1HighNote",
+      "leaf": "0x10001f354",
+      "kind": "inverse_parameter",
+      "conversion_id": 46,
+      "input_double": 127.0,
+      "minimum": 0.0,
+      "maximum": 127.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 47,
+      "identifier": "neonlayer2LowNote",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 48,
+      "identifier": "neonlayer2HighNote",
+      "leaf": "0x10001f354",
+      "kind": "inverse_parameter",
+      "conversion_id": 48,
+      "input_double": 127.0,
+      "minimum": 0.0,
+      "maximum": 127.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 49,
+      "identifier": "neonflangerEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 50,
+      "identifier": "neonflangerRate",
+      "leaf": "0x10001f33c",
+      "kind": "literal_binary32",
+      "bits": "3e800000"
+    },
+    {
+      "id": 51,
+      "identifier": "neonflangerDepth",
+      "leaf": "0x10001f33c",
+      "kind": "literal_binary32",
+      "bits": "3e800000"
+    },
+    {
+      "id": 52,
+      "identifier": "neonringMod",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 53,
+      "identifier": "neonringModDepth",
+      "leaf": "0x10001f3d0",
+      "kind": "literal_binary32",
+      "bits": "3f23d70a"
+    },
+    {
+      "id": 54,
+      "identifier": "neonringModMix",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 55,
+      "identifier": "neonfmDrumMode",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 56,
+      "identifier": "neonfmModTime",
+      "leaf": "0x10001f344",
+      "kind": "literal_binary32",
+      "bits": "3e99999a"
+    },
+    {
+      "id": 57,
+      "identifier": "neonfmModCents",
+      "leaf": "0x10001f478",
+      "kind": "inverse_parameter",
+      "conversion_id": 57,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 60.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 58,
+      "identifier": "neonfmDestination",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 59,
+      "identifier": "neonunison",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 60,
+      "identifier": "neonunisonDetune",
+      "leaf": "0x10001f2f4",
+      "kind": "literal_binary32",
+      "bits": "3ecccccd"
+    },
+    {
+      "id": 61,
+      "identifier": "neonunisonStereo",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 62,
+      "identifier": "neonunisonType",
+      "leaf": "0x10001f4f0",
+      "kind": "inverse_parameter",
+      "conversion_id": 62,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 5.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 63,
+      "identifier": "neonarpEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 64,
+      "identifier": "neonarpType",
+      "leaf": "0x10001f434",
+      "kind": "inverse_parameter",
+      "conversion_id": 64,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 6.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 65,
+      "identifier": "neonarpOctave",
+      "leaf": "0x10001f3b4",
+      "kind": "inverse_parameter",
+      "conversion_id": 65,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 3.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 66,
+      "identifier": "neonarpInterval",
+      "leaf": "0x10001f414",
+      "kind": "inverse_parameter",
+      "conversion_id": 66,
+      "input_double": 12.0,
+      "minimum": 0.0,
+      "maximum": 12.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 67,
+      "identifier": "neonoscSync",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 68,
+      "identifier": "neonphaserEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 69,
+      "identifier": "neonphaserSpeed",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 70,
+      "identifier": "neonphaserFeedback",
+      "leaf": "0x10001f4d0",
+      "kind": "inverse_parameter",
+      "conversion_id": 70,
+      "input_double": 0.3,
+      "minimum": 0.0,
+      "maximum": 0.8,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 71,
+      "identifier": "neonphaserNotch",
+      "leaf": "0x10001f3f0",
+      "kind": "inverse_parameter",
+      "conversion_id": 71,
+      "input_double": 1000.0,
+      "minimum": 100.0,
+      "maximum": 3000.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 72,
+      "identifier": "neonlayer1Semi",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 73,
+      "identifier": "neonlayer2Semi",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 74,
+      "identifier": "neonlayer1Detune",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 75,
+      "identifier": "neonlayer2Detune",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 76,
+      "identifier": "neonlayer1Pan",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 77,
+      "identifier": "neonlayer2Pan",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 78,
+      "identifier": "neonlayer1PWM",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 79,
+      "identifier": "neonlayer2PWM",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 80,
+      "identifier": "neonlayer1RetroMode",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 81,
+      "identifier": "neonlayer2RetroMode",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 82,
+      "identifier": "neonlayer1Waveform",
+      "leaf": "0x10001f3a8",
+      "kind": "inverse_parameter",
+      "conversion_id": 82,
+      "input_double": 2.0,
+      "minimum": 0.0,
+      "maximum": 3.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 83,
+      "identifier": "neonlayer2Waveform",
+      "leaf": "0x10001f508",
+      "kind": "inverse_parameter",
+      "conversion_id": 83,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 3.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 84,
+      "identifier": "neonlayer1FilterType",
+      "leaf": "0x10001f334",
+      "kind": "inverse_parameter",
+      "conversion_id": 84,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 85,
+      "identifier": "neonlayer2FilterType",
+      "leaf": "0x10001f334",
+      "kind": "inverse_parameter",
+      "conversion_id": 85,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 86,
+      "identifier": "neonoscRange",
+      "leaf": "0x10001f484",
+      "kind": "inverse_parameter",
+      "conversion_id": 86,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 87,
+      "identifier": "neonlfo1Enable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 88,
+      "identifier": "neonlfo1Rate",
+      "leaf": "0x10001f404",
+      "kind": "literal_binary32",
+      "bits": "3e4ccccd"
+    },
+    {
+      "id": 89,
+      "identifier": "neonlfo1Amount",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 90,
+      "identifier": "neonlfo1Amount2",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 91,
+      "identifier": "neonlfo1DelayTime",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 92,
+      "identifier": "neonlfo2DelayTime",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 93,
+      "identifier": "neonlfo3DelayTime",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 94,
+      "identifier": "neonlfo1Waveform",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 95,
+      "identifier": "neonlfo2Enable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 96,
+      "identifier": "neonlfo2Rate",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 97,
+      "identifier": "neonlfo2Amount",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 98,
+      "identifier": "neonlfo2Waveform",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 99,
+      "identifier": "neonlfo3Enable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 100,
+      "identifier": "neonlfo3Rate",
+      "leaf": "0x10001f44c",
+      "kind": "inverse_parameter",
+      "conversion_id": 100,
+      "input_double": 0.11,
+      "minimum": 0.0,
+      "maximum": 10.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 101,
+      "identifier": "neonlfo3Amount",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 102,
+      "identifier": "neonlfo3Waveform",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 103,
+      "identifier": "neontremoloDepth",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 104,
+      "identifier": "neontremoloRate",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 105,
+      "identifier": "neonvibratoSemitones",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 106,
+      "identifier": "neonvibratoRate",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 107,
+      "identifier": "neoncrushEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 108,
+      "identifier": "neoncrushAmount",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 109,
+      "identifier": "neoncrushBitRate",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 110,
+      "identifier": "neoncrushMix",
+      "leaf": "0x10001f4b0",
+      "kind": "literal_binary32",
+      "bits": "3f46e979"
+    },
+    {
+      "id": 111,
+      "identifier": "neondistortionEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 112,
+      "identifier": "neondistortionAmount",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 113,
+      "identifier": "neondistortionMix",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 114,
+      "identifier": "neonlayerMix",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 115,
+      "identifier": "neonadsrLinkEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 116,
+      "identifier": "neonadsrFilterLinkEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 117,
+      "identifier": "neonfilterLinkEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 118,
+      "identifier": "neonisTempoSyncd",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 119,
+      "identifier": "neonattack2",
+      "leaf": "0x10001f31c",
+      "kind": "literal_binary32",
+      "bits": "3b03126f"
+    },
+    {
+      "id": 120,
+      "identifier": "neondecay2",
+      "leaf": "0x10001f304",
+      "kind": "literal_binary32",
+      "bits": "3c23d70a"
+    },
+    {
+      "id": 121,
+      "identifier": "neonsustain2",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 122,
+      "identifier": "neonrelease2",
+      "leaf": "0x10001f2e4",
+      "kind": "literal_binary32",
+      "bits": "3dcccccd"
+    },
+    {
+      "id": 123,
+      "identifier": "neonvintageMode",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 124,
+      "identifier": "neonglobalBend",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 125,
+      "identifier": "neonlayer1Bend",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 126,
+      "identifier": "neonlayer2Bend",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 127,
+      "identifier": "neonfilterRezBoostEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 128,
+      "identifier": "neonfilterEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 129,
+      "identifier": "neonfilterCutoff",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 130,
+      "identifier": "neonfilterRez",
+      "leaf": "0x10001f2e4",
+      "kind": "literal_binary32",
+      "bits": "3dcccccd"
+    },
+    {
+      "id": 131,
+      "identifier": "neonfilterTracking",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 132,
+      "identifier": "neonfilterAttack",
+      "leaf": "0x10001f31c",
+      "kind": "literal_binary32",
+      "bits": "3b03126f"
+    },
+    {
+      "id": 133,
+      "identifier": "neonfilterDecay",
+      "leaf": "0x10001f304",
+      "kind": "literal_binary32",
+      "bits": "3c23d70a"
+    },
+    {
+      "id": 134,
+      "identifier": "neonfilterSustain",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 135,
+      "identifier": "neonfilterRelease",
+      "leaf": "0x10001f2e4",
+      "kind": "literal_binary32",
+      "bits": "3dcccccd"
+    },
+    {
+      "id": 136,
+      "identifier": "neonfilterStrength",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 137,
+      "identifier": "neonfilterVelocity",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 138,
+      "identifier": "neonpitchAttack",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 139,
+      "identifier": "neonpitchDecay",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 140,
+      "identifier": "neonpitchSustain",
+      "leaf": "0x10001f440",
+      "kind": "inverse_parameter",
+      "conversion_id": 140,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 2.5,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 141,
+      "identifier": "neonpitchRelease",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 142,
+      "identifier": "neonseqEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 143,
+      "identifier": "neonseqDivision",
+      "leaf": "0x10001f3e0",
+      "kind": "literal_binary32",
+      "bits": "3f2e147b"
+    },
+    {
+      "id": 144,
+      "identifier": "neonseqGate",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 145,
+      "identifier": "neonseqTotalSteps",
+      "leaf": "0x10001f364",
+      "kind": "literal_binary32",
+      "bits": "3ef5c28f"
+    },
+    {
+      "id": 146,
+      "identifier": "neonseqDestination",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 147,
+      "identifier": "neonseqStep1Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 148,
+      "identifier": "neonseqStep2Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 149,
+      "identifier": "neonseqStep3Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 150,
+      "identifier": "neonseqStep4Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 151,
+      "identifier": "neonseqStep5Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 152,
+      "identifier": "neonseqStep6Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 153,
+      "identifier": "neonseqStep7Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 154,
+      "identifier": "neonseqStep8Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 155,
+      "identifier": "neonseqStep9Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 156,
+      "identifier": "neonseqStep10Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 157,
+      "identifier": "neonseqStep11Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 158,
+      "identifier": "neonseqStep12Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 159,
+      "identifier": "neonseqStep13Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 160,
+      "identifier": "neonseqStep14Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 161,
+      "identifier": "neonseqStep15Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 162,
+      "identifier": "neonseqStep16Offset",
+      "leaf": "0x10001f2d4",
+      "kind": "literal_binary32",
+      "bits": "3f000000"
+    },
+    {
+      "id": 163,
+      "identifier": "neonseqStep1Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 164,
+      "identifier": "neonseqStep2Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 165,
+      "identifier": "neonseqStep3Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 166,
+      "identifier": "neonseqStep4Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 167,
+      "identifier": "neonseqStep5Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 168,
+      "identifier": "neonseqStep6Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 169,
+      "identifier": "neonseqStep7Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 170,
+      "identifier": "neonseqStep8Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 171,
+      "identifier": "neonseqStep9Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 172,
+      "identifier": "neonseqStep10Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 173,
+      "identifier": "neonseqStep11Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 174,
+      "identifier": "neonseqStep12Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 175,
+      "identifier": "neonseqStep13Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 176,
+      "identifier": "neonseqStep14Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 177,
+      "identifier": "neonseqStep15Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 178,
+      "identifier": "neonseqStep16Toggle",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 179,
+      "identifier": "neonmodwheelDestination",
+      "leaf": "0x10001f45c",
+      "kind": "inverse_parameter",
+      "conversion_id": 179,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 6.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 180,
+      "identifier": "neonlfo1Dest1BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 181,
+      "identifier": "neonlfo1Dest1Param",
+      "leaf": "0x10001f380",
+      "kind": "inverse_parameter",
+      "conversion_id": 181,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 182,
+      "identifier": "neonlfo1Dest2BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 183,
+      "identifier": "neonlfo1Dest2Param",
+      "leaf": "0x10001f4a4",
+      "kind": "inverse_parameter",
+      "conversion_id": 183,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 184,
+      "identifier": "neonlfo2Dest1BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 185,
+      "identifier": "neonlfo2Dest1Param",
+      "leaf": "0x10001f514",
+      "kind": "inverse_parameter",
+      "conversion_id": 185,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 186,
+      "identifier": "neonlfo2Dest2BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 187,
+      "identifier": "neonlfo2Dest2Param",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 188,
+      "identifier": "neonlfo3Dest1BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 189,
+      "identifier": "neonlfo3Dest1Param",
+      "leaf": "0x10001f4e4",
+      "kind": "inverse_parameter",
+      "conversion_id": 189,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 190,
+      "identifier": "neonlfo3Dest2BaseValue",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 191,
+      "identifier": "neonlfo3Dest2Param",
+      "leaf": "0x10001f4fc",
+      "kind": "inverse_parameter",
+      "conversion_id": 191,
+      "input_double": 0.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 192,
+      "identifier": "neonlfo1Mode",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 193,
+      "identifier": "neonlfo2Mode",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 194,
+      "identifier": "neonlfo3Mode",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 195,
+      "identifier": "neonlfo1HzEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 196,
+      "identifier": "neonlfo2HzEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 197,
+      "identifier": "neonlfo3HzEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 198,
+      "identifier": "neonlfoSnapbackEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 199,
+      "identifier": "neonlfo2SnapbackEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 200,
+      "identifier": "neonlfo3SnapbackEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 201,
+      "identifier": "neonnoiseVolume",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 202,
+      "identifier": "neonsubVolume",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 203,
+      "identifier": "neonpad1Destination",
+      "leaf": "0x10001f49c",
+      "kind": "literal_binary32",
+      "bits": "40400000"
+    },
+    {
+      "id": 204,
+      "identifier": "neonpad2Destination",
+      "leaf": "0x10001f314",
+      "kind": "literal_binary32",
+      "bits": "40000000"
+    },
+    {
+      "id": 205,
+      "identifier": "neonfixedVelocityEnable",
+      "leaf": "0x10001f2dc",
+      "kind": "literal_binary32",
+      "bits": "3f800000"
+    },
+    {
+      "id": 206,
+      "identifier": "neonaTuning",
+      "leaf": "0x10001f420",
+      "kind": "inverse_parameter",
+      "conversion_id": 206,
+      "input_double": 440.0,
+      "minimum": 200.0,
+      "maximum": 600.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 207,
+      "identifier": "neonempty",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 208,
+      "identifier": "neonchorusVersion",
+      "leaf": "0x10001f374",
+      "kind": "inverse_parameter",
+      "conversion_id": 208,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 209,
+      "identifier": "neonfilterType",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 210,
+      "identifier": "neonlayer1PWMEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 211,
+      "identifier": "neonlayer2PWMEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 212,
+      "identifier": "neonkeyLockEnable",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 213,
+      "identifier": "neonkeyLockRoot",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 214,
+      "identifier": "neonkeyLockScale",
+      "leaf": "0x10001f2e0",
+      "kind": "literal_binary32",
+      "bits": "00000000"
+    },
+    {
+      "id": 215,
+      "identifier": "neonj60v2Rate",
+      "leaf": "0x10001f32c",
+      "kind": "inverse_parameter",
+      "conversion_id": 215,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 216,
+      "identifier": "neonj60v2Depth",
+      "leaf": "0x10001f32c",
+      "kind": "inverse_parameter",
+      "conversion_id": 216,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    },
+    {
+      "id": 217,
+      "identifier": "neonj60v2Mix",
+      "leaf": "0x10001f32c",
+      "kind": "inverse_parameter",
+      "conversion_id": 217,
+      "input_double": 1.0,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "taper": 1.0,
+      "expression": "Float(pow((input-minimum)/(maximum-minimum),1/taper))",
+      "platform_pow_words": "NOT_ESTABLISHED"
+    }
+  ]
+}
