@@ -1,0 +1,41 @@
+{
+  "schema": "dnbox-reviewed-native-fixture-source-subset/1",
+  "kind": "Plaintext exact-preservation subset; not complete source or product acceptance",
+  "sourceFreezeSHA256": "2701f13d3c333c242a236aef1ea009337be025879c6fdec36c4950f46cc699c7",
+  "sourceClosureSHA256": "dc39b232d1f12de4740240791149ac37e2c75763358027e3bc164deab80c9339",
+  "independentReviewSHA256": "ee5c038d3421ce20f3bc9adb833e7d29fd65b085bc2cea20c6e5f72d9f82918c",
+  "files": [
+    {
+      "path": "FIXTURE-COMPATIBILITY.patch",
+      "bytes": 11870,
+      "sha256": "6d76ebfd43059f2e85ea9508c090a0bdcad6b51cd915876005edf2811a2ddbea",
+      "gitBlob": "b9cd5f656cd0367014d6fa4111a3e9b71b0883a6"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4170,
+      "sha256": "4ab4bdefb8a8647b85c9ffe84d66cc13adcc3b8b0455e9eb0048c237c76a4206",
+      "gitBlob": "e629901ecb2b649b365871bf5864c263e2c4dd59"
+    },
+    {
+      "path": "REFERENCE-PROVENANCE.json",
+      "bytes": 1586,
+      "sha256": "9f3a30ad932318b345097e2b8edb181459aa5e070f310a82bd76a60912ffebed",
+      "gitBlob": "44150b84e7df494b89876281a046a5d0a02326e7"
+    },
+    {
+      "path": "REVIEW-SUMMARY.json",
+      "bytes": 10447,
+      "sha256": "b6afddd0b86e629d51ddd2c98f1a74989ae89c468564ad55dc44e3aed2e14a06",
+      "gitBlob": "1d07636905b29b941a0810a3fecb3980b3ef80ae"
+    }
+  ],
+  "excluded": [
+    "SDK/toolchain",
+    "compiled/native/controller/firmware binaries",
+    "private source corpus",
+    "private reports/logs",
+    "raw captures/PCM/audio/device state",
+    "shared-ref/runtime adoption"
+  ]
+}

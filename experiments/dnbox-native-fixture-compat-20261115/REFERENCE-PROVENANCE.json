@@ -1,0 +1,44 @@
+{
+  "schema": "dnbox-authentic-808-reference-provenance/1",
+  "source": "Primary authenticated public Git data",
+  "repository": "gobbajogger/X0X37-for-Loopy-Pro",
+  "historicalCommit": "2456968ba39b521610364f3ea17a118b456269c0",
+  "rawCommitBytes": 390,
+  "commitObjectSHAValidated": true,
+  "treeChain": [
+    {
+      "tree": "97792a22f84b8fd891e120aedb53a6b70118fc5a",
+      "entry": "firmware",
+      "mode": "40000",
+      "id": "95fdd5668f3488d433347e114e4ebe3a3cfef46e"
+    },
+    {
+      "tree": "95fdd5668f3488d433347e114e4ebe3a3cfef46e",
+      "entry": "src",
+      "mode": "40000",
+      "id": "a2e8f009d9c6655a1371e2726e860b23662814cb"
+    },
+    {
+      "tree": "a2e8f009d9c6655a1371e2726e860b23662814cb",
+      "entry": "app",
+      "mode": "40000",
+      "id": "fcc771c366d4c9c95f2d412671376789189340c4"
+    }
+  ],
+  "appTree": "fcc771c366d4c9c95f2d412671376789189340c4",
+  "sourceFiles": [
+    {
+      "path": "firmware/src/app/engine.c",
+      "bytes": 96613,
+      "gitBlob": "f675c64227bb2782d6ef7592d3ab5642aa5a023e"
+    },
+    {
+      "path": "firmware/src/app/original_presets.inc",
+      "bytes": 9673,
+      "gitBlob": "49a84544b8fd32c4c5fec7ef41ed76052eb320f5"
+    }
+  ],
+  "referencePathOutputsByteExact": true,
+  "localHistoryLimit": "Only the exact required original commit/four trees/two blobs were restored. Current qualification HEAD is UNBORN; no authored current commit or complete historical checkout is asserted.",
+  "publicPayloadLimit": "No raw Git object store, PCM, capture, binary, SDK/toolchain or private report is in this plaintext subset."
+}

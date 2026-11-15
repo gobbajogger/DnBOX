@@ -1,0 +1,228 @@
+{
+  "schema": "dnbox-native-fixture-public-review-summary/1",
+  "kind": "Faithful derived summary, not the complete private report",
+  "originalReportSHA256": "ee5c038d3421ce20f3bc9adb833e7d29fd65b085bc2cea20c6e5f72d9f82918c",
+  "scope": "Independent affected test-compatibility source/evidence review only",
+  "intakeUTC": "2026-11-15T20:20:09Z",
+  "sealedUTC": "2026-11-15T20:37:24.888646+00:00",
+  "verdict": "ACCEPT bounded fixture/reference compatibility; no actionable defects found",
+  "findings": [],
+  "freezeSHA256": "2701f13d3c333c242a236aef1ea009337be025879c6fdec36c4950f46cc699c7",
+  "fullSourceClosureSHA256": "dc39b232d1f12de4740240791149ac37e2c75763358027e3bc164deab80c9339",
+  "finalImmutability": {
+    "all49DeclaredPayloadsExact": true,
+    "all5448SourcePathsAndBaseMappingsExact": true,
+    "existingTestChanges": [
+      "tests/host/drone_profile_compat_test.c",
+      "tests/host/editor_ota_dispatch_test.c",
+      "tests/host/engine_808_scratch_alias_test.sh",
+      "tests/host/engine_brk_mute_test.c",
+      "tests/host/engine_output_window_headless_test.c",
+      "tests/host/project_protocol_test.c",
+      "tests/host/sample_integrity_dispatch_test.c",
+      "tests/host/smp_begin_cancel_test.c",
+      "tests/host/test_original_runtime_lost_off.py"
+    ],
+    "newProbeHeader": [
+      "tests/host/native_hook_fixture_probe.h"
+    ],
+    "productionSourceChanges": [],
+    "candidateSourceGitDeviceWrites": false
+  },
+  "semanticAssessment": {
+    "observableProbe": {
+      "anchors": [
+        "tests/host/native_hook_fixture_probe.h:9-27",
+        "tests/host/editor_ota_dispatch_test.c:170-175"
+      ],
+      "assessment": "Real native-binding types/prototypes, tick/time and payload observations; valid claim drains before downstream editor/OTA. Dependency test doubles are explicit for unrelated owners; real tested editor/OTA/render bodies are unchanged. This does not test remote framing/core/queue/engine/device behavior."
+    },
+    "droneStorage": {
+      "anchors": [
+        "tests/host/drone_profile_compat_test.c:178-196",
+        "tests/host/drone_profile_compat_test.c:377-384",
+        "tests/host/drone_profile_compat_test.c:451-458"
+      ],
+      "assessment": "Missing REMOTE storage retains INVALID negatives and no-mutation checks. Valid caller-owned128-byte plane restores original unavailable-domain assertions. Five embedded rows are bounded by their actual sizeof dimension, with separate REMOTE checks; no nonexistent sixth-row indexing or weakened legacy/source-isolation assertions."
+    },
+    "lostOffExtraction": {
+      "anchor": "tests/host/test_original_runtime_lost_off.py:37-51",
+      "assessment": "Exact production runtime_key_row helper added to the real transitive extraction closure, not a fallback implementation; original lifetime oracle preserved."
+    },
+    "enginePublication": {
+      "anchors": [
+        "tests/host/engine_brk_mute_test.c:15-19,166-173",
+        "tests/host/engine_output_window_headless_test.c:6-18,88-96"
+      ],
+      "assessment": "Unrelated native audio/revision boundaries are observable while actual engine/PCM/control bodies and abrupt-cut/guard/partial-CPU2 checks remain. Historical reference expects absent revision callback; current engine requires observed callback."
+    }
+  },
+  "independentChecks": {
+    "sevenOriginalBaselineCallers": "All seven authentic REDs reproduced in isolated accepted host-closure baseline; missing interfaces/real Drone assertion retained.",
+    "ordinaryRepairedCallers": [
+      "project protocol PASS",
+      "editor/OTA routing PASS",
+      "engine BREAK mute and audible abrupt-cut positive control PASS",
+      "sample begin-cancel PASS",
+      "sample-integrity dispatch PASS"
+    ],
+    "unchangedCallerUBSanFloatCast": "Four applicable actual callers PASS with strict nonrecovering UBSan/float-cast SAN_FLAGS.",
+    "runtimeNegatives": [
+      "missing tick: compiled then expected runtime assertion FAIL",
+      "missing payload: compiled then expected runtime assertion FAIL",
+      "ignored valid native claim: compiled then expected downstream-drain assertion FAIL"
+    ],
+    "originalDefaultDrone": "FAIL LeakSanitizer under ptrace; shipping normal395244 checks PASS before sanitizer exit.",
+    "originalDefaultLostOff": "FAIL LeakSanitizer under ptrace; available GCC normal/UBSan527/661 checks PASS before sanitizer exit.",
+    "separateLeaksDisabledDiagnostics": {
+      "Drone": "Original unchanged script passes normal/sanitized shipping395244 and historical6097 checks plus real dependency closure checks. Diagnostic only, not original leak/full-gate PASS.",
+      "lostOff": "Every available GCC normal/UBSan/ASan shipping/historical variant passes527/661 checks. Host Clang variants remain explicitly NOT_RUN. Diagnostic only."
+    },
+    "original808Script": {
+      "completeIndependentRun": "PASS exit0; original current script body not rewritten",
+      "matrix": [
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 0,
+          "baseCurrentBytes": 591360,
+          "baseCurrentSha256": "f3577b5c22cbe82b3bb0a069c2906cb6cb483100151f50c91827b30c4f76b06d",
+          "partialCleanBytes": 197120,
+          "partialCleanSha256": "de43fecb8ebb25c5475d4baf9394fbcfc31ecc2c72afbcac3dc5edb11ef3ba10"
+        },
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 1,
+          "baseCurrentBytes": 591360,
+          "baseCurrentSha256": "f3577b5c22cbe82b3bb0a069c2906cb6cb483100151f50c91827b30c4f76b06d",
+          "partialCleanBytes": 197120,
+          "partialCleanSha256": "de43fecb8ebb25c5475d4baf9394fbcfc31ecc2c72afbcac3dc5edb11ef3ba10"
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 0,
+          "baseCurrentBytes": 591360,
+          "baseCurrentSha256": "f3577b5c22cbe82b3bb0a069c2906cb6cb483100151f50c91827b30c4f76b06d",
+          "partialCleanBytes": 197120,
+          "partialCleanSha256": "de43fecb8ebb25c5475d4baf9394fbcfc31ecc2c72afbcac3dc5edb11ef3ba10"
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 1,
+          "baseCurrentBytes": 591360,
+          "baseCurrentSha256": "f3577b5c22cbe82b3bb0a069c2906cb6cb483100151f50c91827b30c4f76b06d",
+          "partialCleanBytes": 197120,
+          "partialCleanSha256": "de43fecb8ebb25c5475d4baf9394fbcfc31ecc2c72afbcac3dc5edb11ef3ba10"
+        }
+      ],
+      "revisionObservations": [
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 0,
+          "owner": "base",
+          "calls": 0,
+          "expectedCurrent": 0
+        },
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 0,
+          "owner": "new",
+          "calls": 258,
+          "expectedCurrent": 1
+        },
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 1,
+          "owner": "base",
+          "calls": 0,
+          "expectedCurrent": 0
+        },
+        {
+          "mode": "normal",
+          "DEV_WOBBLE": 1,
+          "owner": "new",
+          "calls": 258,
+          "expectedCurrent": 1
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 0,
+          "owner": "base",
+          "calls": 0,
+          "expectedCurrent": 0
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 0,
+          "owner": "new",
+          "calls": 258,
+          "expectedCurrent": 1
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 1,
+          "owner": "base",
+          "calls": 0,
+          "expectedCurrent": 0
+        },
+        {
+          "mode": "san",
+          "DEV_WOBBLE": 1,
+          "owner": "new",
+          "calls": 258,
+          "expectedCurrent": 1
+        }
+      ],
+      "assertionAndOneBitPCMControls": "Actual compiled probe assertion and cmp one-bit mismatch both halt before success text.",
+      "sanitizerScope": "Original script already uses detect_leaks=0; ASan/UBSan proof is not leak proof."
+    }
+  },
+  "historicalReference": {
+    "commit": "2456968ba39b521610364f3ea17a118b456269c0",
+    "rawAuthenticatedObjectCount": 7,
+    "commitTreesBlobsAllExact": true,
+    "commitTreePathChain": [
+      {
+        "tree": "97792a22f84b8fd891e120aedb53a6b70118fc5a",
+        "entry": "firmware",
+        "mode": "40000",
+        "id": "95fdd5668f3488d433347e114e4ebe3a3cfef46e"
+      },
+      {
+        "tree": "95fdd5668f3488d433347e114e4ebe3a3cfef46e",
+        "entry": "src",
+        "mode": "40000",
+        "id": "a2e8f009d9c6655a1371e2726e860b23662814cb"
+      },
+      {
+        "tree": "a2e8f009d9c6655a1371e2726e860b23662814cb",
+        "entry": "app",
+        "mode": "40000",
+        "id": "fcc771c366d4c9c95f2d412671376789189340c4"
+      }
+    ],
+    "appTree": "fcc771c366d4c9c95f2d412671376789189340c4",
+    "engineBlob": "f675c64227bb2782d6ef7592d3ab5642aa5a023e",
+    "presetsBlob": "49a84544b8fd32c4c5fec7ef41ed76052eb320f5",
+    "actualScriptInputFilesMatchFrozenReferenceBlobs": true,
+    "referenceGitShowReadOnly": true,
+    "currentHEAD": "UNBORN; no authored/current checkout commit or complete history claimed",
+    "signedAuthorshipClaim": false
+  },
+  "retainedGates": {
+    "fullStrictBaseline": {
+      "total": 449,
+      "ok": 275,
+      "fail": 174,
+      "notRun": 0
+    },
+    "fullSuiteVerdict": "Original H6 FAIL remains; no fresh full-suite run, subtraction of failure classes or zero-inner-skip claim.",
+    "originalLSanFailures": "Remain FAIL, not waived by separate diagnostics.",
+    "hostClang": "NOT_RUN, not installed; authenticated JieLi x86-host codegen probe remains unsupported.",
+    "lua51Chromium": "Original prerequisite failures unresolved/unqualified in this review.",
+    "newTargetBuildFitTimingIntegration": "NOT_RUN; production bytes unchanged is not a fresh whole-candidate native/resource/product build.",
+    "leasesAdoptionDelivery": "Unchanged; no source/ref/device/service/publication action or product-gate waiver."
+  },
+  "reviewOnlySetupFailureSummary": "Review-owned CompletedProcess assertion and an extra mutant initially failed setup/compilation; neither counted as runtime or candidate failure. Corrected review controls and a fresh complete808 original-script run supplied the final runtime evidence.",
+  "reviewRelease": "Independent affected review complete; no further reviewer hold.",
+  "laterProducerStage": "Official local Lua5.1 restoration and a separate full strict combined-source run are later producer work, not independent acceptance in this report. No later suite verdict is included here."
+}

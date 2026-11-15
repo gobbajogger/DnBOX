@@ -1,0 +1,247 @@
+--- a/tests/host/drone_profile_compat_test.c
++++ b/tests/host/drone_profile_compat_test.c
+@@ -175,6 +175,17 @@
+     CHECK(!memcmp(&part, &expected, sizeof part));
+     CHECK(original_runtime_prepare(&part, 130) == -3);
+     CHECK(original_runtime_param(&part, 0, 0.2f) == -3);
++    /* REMOTE is additive caller-owned storage, not a sixth embedded row.
++     * Missing storage must fail without touching the legacy part. Preserve
++     * all original unavailable assertions for every valid bound source. */
++    CHECK(original_runtime_key(&part, ORIGINAL_INPUT_REMOTE, 60, 100) == ORIGINAL_RUNTIME_INVALID);
++    CHECK(original_runtime_key(&part, ORIGINAL_INPUT_REMOTE, 60, 0) == ORIGINAL_RUNTIME_INVALID);
++    CHECK(original_runtime_release_source(&part, ORIGINAL_INPUT_REMOTE) == ORIGINAL_RUNTIME_INVALID);
++    CHECK(original_runtime_cut_source(&part, ORIGINAL_INPUT_REMOTE) == ORIGINAL_RUNTIME_INVALID);
++    CHECK(!memcmp(&part, &expected, sizeof part));
++    static uint8_t remote_plane[128];
++    memset(remote_plane, 0, sizeof remote_plane);
++    part.remote_keys = expected.remote_keys = remote_plane;
+     for (unsigned source = 0; source < ORIGINAL_INPUT_COUNT; ++source) {
+         CHECK(original_runtime_key(&part, source, 60, 100) == -3);
+         CHECK(original_runtime_key(&part, source, 60, 0) == -3);
+@@ -182,6 +193,7 @@
+         CHECK(original_runtime_cut_source(&part, source) == -3);
+     }
+     CHECK(!memcmp(&part, &expected, sizeof part));
++    for (unsigned key = 0; key < 128; ++key) CHECK(remote_plane[key] == 0);
+     CHECK(!original_runtime_active(&part) && !original_runtime_owned(&part));
+     float level = 9, mod = 9, values[4] = {9,9,9,9}; unsigned state = 9, down = 9;
+     CHECK(!original_runtime_voice_view(&part, &level, &mod, &state, &down));
+@@ -362,8 +374,11 @@
+ {
+     CHECK(replacement_part.kind == 2 && replacement_part.status == -3);
+     CHECK(!original_runtime_active(&replacement_part) && !original_runtime_owned(&replacement_part));
+-    for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s)
++    /* Five embedded legacy planes; REMOTE is a separate optional pointer. */
++    for (unsigned s = 0; s < sizeof replacement_part.keys / sizeof replacement_part.keys[0]; ++s)
+         for (unsigned key = 0; key < 128; ++key) CHECK(!replacement_part.keys[s][key]);
++    if (replacement_part.remote_keys)
++        for (unsigned key = 0; key < 128; ++key) CHECK(!replacement_part.remote_keys[key]);
+     const uint8_t *dsp = (const uint8_t *)&replacement_part.dsp;
+     for (unsigned i = 0; i < sizeof replacement_part.dsp; ++i) CHECK(dsp[i] == 0);
+ }
+@@ -433,7 +448,8 @@
+         for (unsigned key = 0; key < 128; ++key)
+             CHECK(!p->keys[source][key] && !p->stale[source][key] && !p->stale_ttl[source][key]);
+         for (unsigned lane = 0; lane < 4; ++lane) CHECK(!p->stale_pending[source][lane]);
+-        for (unsigned input = 0; input < ORIGINAL_INPUT_COUNT; ++input) if (input != source) {
++        CHECK(p->remote_keys == before.remote_keys && !p->remote_keys);
++        for (unsigned input = 0; input < sizeof p->keys / sizeof p->keys[0]; ++input) if (input != source) {
+             CHECK(!memcmp(p->keys[input], before.keys[input], sizeof p->keys[input]));
+             if (input < ORIGINAL_INPUT_KEYS) {
+                 CHECK(!memcmp(p->stale[input], before.stale[input], sizeof p->stale[input]));
+--- a/tests/host/editor_ota_dispatch_test.c
++++ b/tests/host/editor_ota_dispatch_test.c
+@@ -7,6 +7,7 @@
+ #undef ota_service
+ #undef main
+ #include "editor_definitions.inc"
++#include "native_hook_fixture_probe.h"
+ 
+ static struct { uint32_t mode, recovery, at; } ed_project;
+ static struct { unsigned ota_req, uboot_req; } usb;
+@@ -166,6 +167,12 @@
+     host_reply(identity, sizeof identity);
+     bad += check("session consumer accepts next valid OTA frame", ota_take() == 7 && !rx_full && ota_dec[2] == 0x11);
+     bad += check("no session/flash/reset/platform operation invoked", !requests && !committed && !bad_erase && !platform_errors);
++    /* A claimed dependency frame must be drained before either downstream
++     * editor/OTA owner sees it. This is routing, not a protocol decoder test. */
++    reset_case(); fixture_native_claim_next = 1; inject(ctl, sizeof ctl); poll();
++    bad += check("native hook claim drains before editor/OTA", !rx_full &&
++                 !dispatches && !ota_polls && !fixture_native_claim_next);
++    fixture_native_observed();
+     puts(bad ? "EDITOR/OTA DISPATCH FAILED" : "EDITOR/OTA DISPATCH PASS (host source routing only)");
+     return bad != 0;
+ }
+--- a/tests/host/engine_808_scratch_alias_test.sh
++++ b/tests/host/engine_808_scratch_alias_test.sh
+@@ -35,7 +35,8 @@
+  for v in base new; do
+   src=$D/engine-base.c; [ $v = new ] && src=firmware/src/app/engine.c
+   cc $F -Dseq_until_event=output_window_until_event -Dplat_cpu2_run=output_window_cpu2_run -Dplat_cpu2_wait=output_window_cpu2_wait -c $src -o $D/eng-$v.o
+-  cc $F -DOW_LO=0 -DOW_HI=3 tests/host/engine_output_window_headless_test.c $U $D/eng-$v.o -lm -o $D/h-$v
++  hooks=0; [ "$v" != new ] || hooks=1
++  cc $F -DENGINE_WINDOW_NATIVE_HOOKS=$hooks -DOW_LO=0 -DOW_HI=3 tests/host/engine_output_window_headless_test.c $U $D/eng-$v.o -lm -o $D/h-$v
+   ASAN_OPTIONS=detect_leaks=0 $D/h-$v $D/$mode-$dw-$v.pcm > $D/$mode-$dw-$v.log
+   tail -1 $D/$mode-$dw-$v.log
+  done
+@@ -44,7 +45,7 @@
+  # a core-1 job that failed half done: the output equals this engine's clean deferred run
+  # (the old engine rendered the 808 and BREAK twice there: not a reference)
+  for r in 3 1; do
+-  cc $F -DOW_LO=$r -DOW_HI=$((r+1)) tests/host/engine_output_window_headless_test.c $U $D/eng-new.o -lm -o $D/h-m$r
++  cc $F -DENGINE_WINDOW_NATIVE_HOOKS=1 -DOW_LO=$r -DOW_HI=$((r+1)) tests/host/engine_output_window_headless_test.c $U $D/eng-new.o -lm -o $D/h-m$r
+   ASAN_OPTIONS=detect_leaks=0 $D/h-m$r $D/$mode-$dw-m$r.pcm > $D/$mode-$dw-m$r.log
+   tail -1 $D/$mode-$dw-m$r.log
+  done
+--- a/tests/host/engine_brk_mute_test.c
++++ b/tests/host/engine_brk_mute_test.c
+@@ -12,6 +12,10 @@
+ #define X0X_IMA_TABLES_DEFINE
+ #include "../../firmware/src/dsp/breaks.c"
+ #include "production_engine_runtime_status.inc"
++
++#include "../../firmware/src/app/dnr_remote/native_binding.h"
++static unsigned fixture_native_audio_calls;
++void dnr_engine_audio(void) { ++fixture_native_audio_calls; }
+ 
+ static seq_t seq;
+ static breaks_t brk;
+@@ -163,7 +167,9 @@
+ {
+     int32_t out[512];
+     captured_count = 0;
++    unsigned native_before = fixture_native_audio_calls;
+     engine_render(out, 256);
++    CHECK(fixture_native_audio_calls > native_before, "actual render calls native audio boundary");
+     CHECK(captured_count == 256, "real engine_render rendered exactly one block");
+ }
+ 
+--- a/tests/host/engine_output_window_headless_test.c
++++ b/tests/host/engine_output_window_headless_test.c
+@@ -4,6 +4,15 @@
+  * definitions stand in for production engine methods. */
+ #include "engine_window_platform.inc"
+ #include <assert.h>
++#include "../../firmware/src/app/dnr_remote/native_binding.h"
++/* Revision publication belongs to the UI/core owner, outside this actual
++ * engine/output-window differential. Observe it; do not replace engine code. */
++static unsigned fixture_native_revisions;
++void dnr_native_changed(void) { ++fixture_native_revisions; }
++#ifndef ENGINE_WINDOW_NATIVE_HOOKS
++#define ENGINE_WINDOW_NATIVE_HOOKS 0
++#endif
++
+ project_t proj;
+ static void boot(void)
+ {
+@@ -76,5 +85,13 @@
+         }
+     }
+     assert(nonzero&&jobs&&joins&&deferred);assert(!fclose(f));
++#if ENGINE_WINDOW_NATIVE_HOOKS
++    assert(fixture_native_revisions > 0);
++#else
++    assert(fixture_native_revisions == 0);
++#endif
++    printf("native revision boundary: %u calls; expected-current=%u\n",
++           fixture_native_revisions, (unsigned)ENGINE_WINDOW_NATIVE_HOOKS);
++
+     printf("PASS engine output windows: %u blocks; %u jobs/%u joins; nonzero=%u; 0/1/255/256/cap300, uneven splits, fallback/deferred/partial CPU2, guard words\n",blocks,jobs,joins,nonzero);return 0;
+ }
+--- a/tests/host/native_hook_fixture_probe.h
++++ b/tests/host/native_hook_fixture_probe.h
+@@ -0,0 +1,28 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Observable dependency boundary for editor/OTA/sample unit fixtures only.
++ * Real editor bodies and ownership are tested; no remote protocol, queue,
++ * native engine, device or transport admission is claimed by this probe. */
++#ifndef NATIVE_HOOK_FIXTURE_PROBE_H
++#define NATIVE_HOOK_FIXTURE_PROBE_H
++#include <assert.h>
++#include <string.h>
++#include "../../firmware/src/app/dnr_remote/native_binding.h"
++static unsigned fixture_native_ticks, fixture_native_payloads;
++static uint32_t fixture_native_last_now;
++static int fixture_native_claim_next;
++void dnr_native_tick(uint32_t now)
++{ ++fixture_native_ticks; fixture_native_last_now = now; }
++int dnr_native_payload(const uint8_t *p, size_t n, uint32_t now,
++                      uint8_t out[DNR2_FRAME_BYTES], unsigned *reply_n)
++{
++    assert(fixture_native_ticks && now == fixture_native_last_now);
++    assert(p && n && out && reply_n);
++    ++fixture_native_payloads;
++    memset(out, 0, DNR2_FRAME_BYTES); /* initialized probe span, not a wire reply */
++    *reply_n = 0;
++    if (fixture_native_claim_next) { fixture_native_claim_next = 0; return 1; }
++    return 0; /* this legacy editor fixture has no remote-core state */
++}
++static void fixture_native_observed(void)
++{ assert(fixture_native_ticks && fixture_native_payloads); }
++#endif
+--- a/tests/host/project_protocol_test.c
++++ b/tests/host/project_protocol_test.c
+@@ -9,6 +9,7 @@
+ #define X0X_BLE 0
+ #define X0X_DRUM_TABLES_DEFINE              /* x0x.h pulls drum909 tanh helpers */
+ #include "../../firmware/src/app/x0x.h"
++#include "native_hook_fixture_probe.h"
+ 
+ static uint8_t flash_image[0x100000];
+ #define SMP_USER_XIP(k) (flash_image + SMP_USER_OFF(k))
+@@ -257,5 +258,6 @@
+         op(70, 0, 0, 0); assert(!held && adopts == 1);
+     }
+     puts("project protocol: staging, exact chunks, CRC/capacity, confirmation, timeout and full sample headers ok");
++    fixture_native_observed();
+     return 0;
+ }
+--- a/tests/host/sample_integrity_dispatch_test.c
++++ b/tests/host/sample_integrity_dispatch_test.c
+@@ -9,6 +9,7 @@
+ #define X0X_BLE 0
+ #define X0X_DRUM_TABLES_DEFINE              /* x0x.h pulls drum909 tanh helpers */
+ #include "../../firmware/src/app/x0x.h"
++#include "native_hook_fixture_probe.h"
+ 
+ static uint8_t flash_image[0x100000];
+ #define SMP_USER_XIP(k) (flash_image + SMP_USER_OFF(k))
+@@ -135,6 +136,7 @@
+             out[pos++] = p[i + j] & 127;
+         }
+     }
++    fixture_native_observed();
+     return pos;
+ }
+ static void u21(uint8_t *p, uint32_t n)
+--- a/tests/host/smp_begin_cancel_test.c
++++ b/tests/host/smp_begin_cancel_test.c
+@@ -8,6 +8,7 @@
+ #define X0X_BLE 0
+ #define X0X_DRUM_TABLES_DEFINE              /* x0x.h pulls drum909 tanh helpers */
+ #include "../../firmware/src/app/x0x.h"
++#include "native_hook_fixture_probe.h"
+ 
+ static uint8_t flash_image[0x100000];
+ #define SMP_USER_XIP(k) (flash_image + SMP_USER_OFF(k))
+@@ -308,5 +309,6 @@
+         assert(usr_nz[0] == 0);
+         puts("smp begin-cancel: higher-sector mid-WRITE abandon fail-closed ok");
+     }
+-    return 0;
+-}
++    fixture_native_observed();
++    return 0;
++}
+--- a/tests/host/test_original_runtime_lost_off.py
++++ b/tests/host/test_original_runtime_lost_off.py
+@@ -36,7 +36,8 @@
+ 
+ # Keep the actual transitive closure in dependency order. Missing production
+ # helpers must fail here or at compilation, never acquire a fake fallback.
+-selected = [extract('int original_runtime_kind_available('),
++selected = [extract('static uint8_t *runtime_key_row('),
++            extract('int original_runtime_kind_available('),
+             extract('static int runtime_unavailable('),
+             extract('static int runtime_result('),
+             extract('static int key_held('),
