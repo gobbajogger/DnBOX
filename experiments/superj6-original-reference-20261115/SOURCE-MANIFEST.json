@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "scope": "Only reviewed/plain-source experiment subset plus fixture-free tests; no binary/private input payload.",
+  "files": [
+    {
+      "path": "EVIDENCE.json",
+      "bytes": 1837,
+      "sha256": "25dc422043f033f1f8fb07d6331102ce875ade8532b045ee9637743a5e353108",
+      "git_blob": "c34ff96263b4d3f3a1814df3580b258428977919"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1065,
+      "sha256": "ea20aff5120bba16d7584a2e12b60fdd775d4bb8195440caf67fccba476c8972",
+      "git_blob": "1d3a7a21d6a5ea9c4ed86507c48f6b0ec9478d22"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5001,
+      "sha256": "dd55e75f6c54e7f9cfe6a5a244148606199df75399b25f36f6a9d9c7c402d277",
+      "git_blob": "af30ad67b2cbce179702d45b112a55479d6ccc72"
+    },
+    {
+      "path": "sampler/DunneCore/Common/ADSREnvelope.cpp",
+      "bytes": 4236,
+      "sha256": "4e856e5ea890a8d2b737552f72a434703c8240e789ccd28234b015a320df2997",
+      "git_blob": "0fb42f1f12087d4450a63f314c3505341d904cf9"
+    },
+    {
+      "path": "sampler/DunneCore/Common/ADSREnvelope.h",
+      "bytes": 2628,
+      "sha256": "7ff86d3fa0d4b008b083e127a034177ddb66cd642c5535c515fc969826a7fac8",
+      "git_blob": "b92d8dc45d2c1bbdfc84c32ad6b94fc9d7a60411"
+    },
+    {
+      "path": "sampler/DunneCore/Common/AHDSHREnvelope.cpp",
+      "bytes": 6064,
+      "sha256": "604aa39d835ce241c69345ae98429514ad9ac1ad79a7b701e00de57d9429516b",
+      "git_blob": "16d5f8f21f15a028935dfd2cdba9b23157a72aca"
+    },
+    {
+      "path": "sampler/DunneCore/Common/AHDSHREnvelope.h",
+      "bytes": 3659,
+      "sha256": "0ba1f89aa690bdf584d6d7d226e6c07c4119e2a8590f61df5461806c09d59186",
+      "git_blob": "096216da7f4f73020c854efbaa6a3533037ea8d0"
+    },
+    {
+      "path": "sampler/DunneCore/Common/EnvelopeGeneratorBase.cpp",
+      "bytes": 3864,
+      "sha256": "841b017e837bb830074eff3a124d1ebbee6a30246f67cd76b9af3db04103d065",
+      "git_blob": "4429f3b5427da954fc09874bf396ed056fa11111"
+    },
+    {
+      "path": "sampler/DunneCore/Common/EnvelopeGeneratorBase.h",
+      "bytes": 3042,
+      "sha256": "ae573a431c5a018b7cc1f8d3a6907c1909113e1e8e1deebab80e2b0287d7af8a",
+      "git_blob": "cd6b11e7a764107c13139952ca55ddd83c1badf3"
+    },
+    {
+      "path": "sampler/DunneCore/Common/FunctionTable.cpp",
+      "bytes": 5523,
+      "sha256": "55d586055b9fbcbf4b5926e7d6fb40e5714a7a48fe7993b45544dac43f454922",
+      "git_blob": "07cd16937bd9a532a2e21d17a1d6a6bfb2bc9be5"
+    },
+    {
+      "path": "sampler/DunneCore/Common/FunctionTable.h",
+      "bytes": 5448,
+      "sha256": "ddfc4a09de45dd6c4865af534dd1e5118a0925e6e78d71af192af249efbfd773",
+      "git_blob": "b2ed5e0ef914c417f5ea3a3d71861555dd0daa62"
+    },
+    {
+      "path": "sampler/DunneCore/Common/LinearRamper.h",
+      "bytes": 1980,
+      "sha256": "94112d4202ef7ad96ccfd2f2525a6fd0e1cfffc4ba361545179af8b0bfb4f785",
+      "git_blob": "1628f05ac2608e5e1d1a153198fd4f0d70a1d13c"
+    },
+    {
+      "path": "sampler/DunneCore/Common/OriginalSmoothPassFilter.h",
+      "bytes": 2365,
+      "sha256": "7165b4983ef98223fdd6bcaaefefa59bfc010ab860b8cd5576a9503ebf9d19ce",
+      "git_blob": "a2add910eaca64c1d0b2e01db399d32f8ce8921e"
+    },
+    {
+      "path": "sampler/DunneCore/Common/ResonantLowPassFilter.cpp",
+      "bytes": 2970,
+      "sha256": "ec7e7cb38d4dd393154c9b8ce5b4374cd99c121c5cdb0b31443b10f609c68a0a",
+      "git_blob": "cc689d69a999c93551b2c4ca1ec80539068ee951"
+    },
+    {
+      "path": "sampler/DunneCore/Common/ResonantLowPassFilter.h",
+      "bytes": 1539,
+      "sha256": "aebba67c228ff30df61ee11690f3970d48644b84c4cb6e9370a7f35066bf2090",
+      "git_blob": "24e14840c64a885071a3602aa37f93017d597a58"
+    },
+    {
+      "path": "sampler/DunneCore/Common/SustainPedalLogic.cpp",
+      "bytes": 1571,
+      "sha256": "d5732d517eb7e3b591bb9ac911e3d54c514f0cdc1dc725085c5a618bc28cbc7b",
+      "git_blob": "b4c4a51d229d8dec9089aacfb2d33e629ce72f48"
+    },
+    {
+      "path": "sampler/DunneCore/Common/SustainPedalLogic.h",
+      "bytes": 663,
+      "sha256": "6ae32643cc244859b232659c8d05f5b194e1165b85b511debb3d8b25d96214ef",
+      "git_blob": "3332bd06846a22fc9b385bfdaad66eaa63cdcd37"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/CoreSampler.cpp",
+      "bytes": 21312,
+      "sha256": "5a918e637409a613a76b51c9499dcade87bc1d578cc6893e2da9ebca207b0dd2",
+      "git_blob": "13beb0c5a00b0be77dad595331b6f2e555fa9805"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/CoreSampler.h",
+      "bytes": 5596,
+      "sha256": "46f3cbea37c644b512b84bf40946cf2402164d09e0ee6477e97ae23b88a9dd9a",
+      "git_blob": "0a75513961998aaf1502cafd18ff798fc7a9c664"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/SampleBuffer.cpp",
+      "bytes": 1109,
+      "sha256": "54fc6e068e02ea32ab039ca9e5a728cbcd8f99740f2de80656a8a4723f854d8c",
+      "git_blob": "a12642397f1bbce7c63d78e88c830115728c7142"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/SampleBuffer.h",
+      "bytes": 2765,
+      "sha256": "bac1884f159786d2f609460bd07c4dc7c634fe30ac052f870d9c617dc6875d23",
+      "git_blob": "7dd6d78d9a678ceed6b15122af653c0b02386858"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/SampleOscillator.h",
+      "bytes": 2043,
+      "sha256": "624f5ca2bc0df7ee00cbcff87df5845cf7f9c7891803efbf91fe5e009dd89b20",
+      "git_blob": "a53cb8d137e3d6d885dbedd6aec7d0cc1a854755"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/SamplerVoice.cpp",
+      "bytes": 10043,
+      "sha256": "4a2e2a1e10b6b28af6d7aca8efa8e0bf697299a079c45ff54a90cfdacd61b553",
+      "git_blob": "fc9f713de2210272b1e133fe73d39d85e348aff3"
+    },
+    {
+      "path": "sampler/DunneCore/Sampler/SamplerVoice.h",
+      "bytes": 3933,
+      "sha256": "fcf0a64b6490ffbff43a9cdab02add6742bc03f911b7fa6c12b53dc5c4e02bd4",
+      "git_blob": "3fa6056f586ad2dfe2925fa76025a15aa46a6f50"
+    },
+    {
+      "path": "sampler/include/Sampler_Typedefs.h",
+      "bytes": 712,
+      "sha256": "39bc28d096c360760c9e7f4b508910d565b625bc2c6b73ace8f094c49dc01196",
+      "git_blob": "49faac0274d98c8bf4dd692333da70320da1f32a"
+    },
+    {
+      "path": "sampler/tests/controls_external.cpp",
+      "bytes": 3497,
+      "sha256": "77a295c3c870ac5e03369d966e4c41ef5d2b6ceca440cd06f5f2d3fc7dbe8910",
+      "git_blob": "de9179fd7f0e7a08f913cda6c2e26724d4130b56"
+    },
+    {
+      "path": "sampler/tests/lifecycle.cpp",
+      "bytes": 2047,
+      "sha256": "72bf9e08042b6afa6f62678765a9b58b303e6dc20e72b45467128000c4f81bad",
+      "git_blob": "3f470e2c66878b66547c0ea91d7b1fc2a1d78bc7"
+    },
+    {
+      "path": "sampler/tests/music_external.cpp",
+      "bytes": 2299,
+      "sha256": "3ed5d7a690f63ab6600154e662a642576168462b15a416d6350f1bf7b5e2e676",
+      "git_blob": "b335d1306dcf2350ca821b70377077678a519894"
+    },
+    {
+      "path": "tests/run_host.py",
+      "bytes": 3493,
+      "sha256": "058a5fc57896f4bc19b3e997a0930c65ebc3be705d5510e220a80427a4394413",
+      "git_blob": "ec7ad54bcbefc94d4d5c503a1a9dd91f6cfde0af"
+    },
+    {
+      "path": "timing/review_regressions.cpp",
+      "bytes": 1255,
+      "sha256": "f41caf9821689100ab543fc303e142dc45dffd8c2802cbbfb223220bf7785076",
+      "git_blob": "0903a14a3f491f2fec96865b3d048a692f4769bc"
+    },
+    {
+      "path": "timing/saga_core.hpp",
+      "bytes": 8344,
+      "sha256": "ca5f80dcd3400221a855991737b93744421954f16395b019da7650cd5be43a19",
+      "git_blob": "6245ff3e4711c21b760ba0a9b5461840153a7a43"
+    },
+    {
+      "path": "timing/tests.cpp",
+      "bytes": 5719,
+      "sha256": "7ab20675b0368c8c7ede03726e0af2447947dd5233542a336b1e1c4e46147b6e",
+      "git_blob": "ca5c4903bd13a4cacd80e78ecd828bb5bc277278"
+    }
+  ],
+  "excluded": [
+    "original app/AU",
+    "assembly",
+    "samples/waveform/PCM",
+    "presetbanks",
+    "SDK/toolchain",
+    "compiled outputs",
+    "private reports"
+  ]
+}

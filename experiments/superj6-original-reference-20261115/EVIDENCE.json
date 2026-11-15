@@ -1,0 +1,42 @@
+{
+  "scope": "Source preservation only; incomplete original port, no device delivery",
+  "public_upstream": {
+    "repository": "AudioKit/DunneAudioKit",
+    "commit": "be581d08158ea4556a54298f75814d23ff7db886",
+    "license": "MIT"
+  },
+  "sampler": {
+    "qualified_review_sha256": "a82f22a8cbe42296473f4b1b994346f8fcc86165f4d604fae2afdb3f0a7911d5",
+    "qualified_seal_sha256": "56866f0c36736ac3683c7378ae365dd97f9e3e43be1d33bfaa6e75f533f4df51",
+    "recorded_component_cases": 25,
+    "stereo_frames_per_variant": 872448,
+    "variants": [
+      "O2",
+      "Os",
+      "nonrecovering ASan+UBSan+floatcast with detect_leaks=0"
+    ],
+    "lifecycle_sites": [
+      "start",
+      "restartNewNote",
+      "restartNewNoteLegato"
+    ],
+    "default_leak_sanitizer": "FAIL under ptrace; no leak pass",
+    "reviewed_reference_manifest_sha256": "cc159b2c8481e03d5ca1c857d803acb2003895ab9e2f9b3c10fa63b99eed5ebf"
+  },
+  "timing": {
+    "source_manifest_sha256": "de69863c5fe2bfb7e11a03474fed57c598cedf716b5bedc61d533c4e68f41058",
+    "proof": "Static-derived equations and own host regressions only, no original sequencer execution",
+    "qualified_review_sha256": "ad2fde316ca2352b2dea394953665d2ae1d8d15d36b393597a8e6eabec6ef111",
+    "qualified_seal_sha256": "93eda06df323587e013524c6f8a175875c38b35ca008ba583be4e2fe0d00ecdf",
+    "independent_assertions": 524390,
+    "original_execution": false
+  },
+  "public_package_review": "Exact final source-manifest packaging review is recorded with the source-delivery receipt; this file does not assert a firmware or device pass.",
+  "not_claimed": [
+    "Full original preset audio fidelity",
+    "General API or realtime safety",
+    "Full original effects and all parameters",
+    "Native math policy/whole-app fit/CPU/audio deadline",
+    "Hardware/device/zero-dropout acceptance"
+  ]
+}

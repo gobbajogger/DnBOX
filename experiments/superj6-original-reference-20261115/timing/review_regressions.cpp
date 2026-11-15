@@ -1,0 +1,6 @@
+#include "saga_core.hpp"
+#include <cstdio>
+using namespace j6_saga;
+static bool grouping(){State s;s.settings.running=1;s.settings.tempo=30;s.settings.extra_octaves=0;s.transport_change=false;s.held={60};s.generated={57};const double delta=(43./44100.)*(30./60.);s.next_step=delta;s.next_gate_end=delta;auto x=process(s,{43,44100,0,false});return x.status==Status::ok&&x.admitted_step&&x.events.size()==2&&x.events[0].note==57&&x.events[0].velocity==0&&x.events[1].note==60;}
+static bool shrink(){State s;s.settings.running=1;s.settings.extra_octaves=0;s.settings.division=1.-8./17.;s.transport_change=false;s.held={60,61,62,63,64,65,66};for(int i=0;i<4;++i){auto x=process(s,{0,48000,double(i),true});if(x.status!=Status::ok||!x.admitted_step)return false;s=x.next;}if(s.arp_index!=4)return false;s.held={60,64,67};auto x=process(s,{0,48000,4,true});if(x.status!=Status::ok||!x.admitted_step||x.events.back().note!=64||x.next.arp_index!=0)return false;auto y=process(x.next,{0,48000,5,true});return y.status==Status::ok&&y.admitted_step&&y.events.back().note==60;}
+int main(){bool a=grouping(),b=shrink();std::printf("source-derived grouping_boundary=%s natural_pool_shrink=%s; no original execution\n",a?"PASS":"FAIL",b?"PASS":"FAIL");return a&&b?0:1;}
