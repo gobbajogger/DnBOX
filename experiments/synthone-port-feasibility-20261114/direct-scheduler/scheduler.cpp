@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 #include "reader/runtime_note.hpp"
+#include "compact_note.hpp"
 #include "wave_frequencies.h"
 #include <assert.h>
 #include <math.h>
@@ -88,7 +89,7 @@ bool State::valid_restore(const float *values,size_t count,InstanceSpan self) co
 bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,const float *values,
                                 size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
     if(!valid_init(tables,rate,values,count,tuning,tuning_count,self)) return false;
-    reader_={};reader_active_=false;
+    reader_={};reader_active_=false;compact_={};compact_active_=false;
     compactPorts.teardown();
     init_graph(tables,rate,tuning);
     // Validation already establishes valid disjoint outputs/controls and rate.
@@ -121,14 +122,45 @@ bool RuntimeState::init_reader_runtime(const synthone_shared::Tables &tables,con
     if(!init_runtime(tables,rate,values,count,tuning,tuning_count,self))return false;
     reader_=candidate;reader_active_=true;return true;
 }
+bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
+        int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
+    // Authenticate the WHOLE final owner before dereferencing candidate metadata.
+    if(overlap(&tables,sizeof tables,self.data,self.bytes) || !packed || count!=150 || tuning_count!=128 ||
+       (rate!=44100&&rate!=48000&&rate!=96000) ||
+       overlap(packed,bytes,self.data,self.bytes) || overlap(packed,bytes,&tables,sizeof tables) ||
+       overlap(values,150*sizeof(float),self.data,self.bytes) || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
+       overlap(packed,bytes,values,150*sizeof(float)) || overlap(packed,bytes,tuning,128*sizeof(float)) ||
+       reinterpret_cast<uintptr_t>(values)%alignof(float) || reinterpret_cast<uintptr_t>(tuning)%alignof(float) ||
+       !values_valid(values,count) || !tuning || !tables.sine || tables.sine_count!=4097 ||
+       reinterpret_cast<uintptr_t>(tables.sine)%alignof(float) ||
+       overlap(packed,bytes,tables.sine,4097*sizeof(float)))return false;
+    for(unsigned i=0;i<128;++i)if(!isfinite(tuning[i])||tuning[i]<=0||tuning[i]>rate*.5f)return false;
+    for(unsigned i=0;i<52;++i){const auto &r=tables.morph[i];
+        if(r.samples||r.count!=4097||r.band!=i/4||static_cast<unsigned>(r.shape)!=i%4)return false;}
+    for(unsigned i=0;i<13;++i){uint32_t actual,expected;memcpy(&actual,&tables.frequency_band[i],4);memcpy(&expected,&wave_frequencies[i],4);if(actual!=expected)return false;}
+    if(!payload(tables.sine,tables.sine_count,1.f,self))return false;
+    s1c_binding candidate{};if(!s1c_bind(&candidate,packed,bytes))return false;
+    // Container band metadata must agree with the original immutable topology.
+    const auto *data=static_cast<const unsigned char*>(packed);
+    for(unsigned i=0;i<13;++i){uint32_t w=static_cast<uint32_t>(data[1316+4*i])|
+        (static_cast<uint32_t>(data[1317+4*i])<<8)|(static_cast<uint32_t>(data[1318+4*i])<<16)|
+        (static_cast<uint32_t>(data[1319+4*i])<<24),expected;memcpy(&expected,&wave_frequencies[i],4);if(w!=expected)return false;}
+    // All fallible cold admission is complete before retiring a live instance.
+    compactPorts.teardown();init_graph(tables,rate,tuning);
+    if(!compactPorts.init(parameters,150,values,150,rate))return false;
+    restore_graph();reader_={};reader_active_=false;compact_=candidate;compact_active_=true;return true;
+}
 bool RuntimeState::valid_runtime_output(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self) const {
     if(n>65536||offset>65536-n)return false;
     const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
+    if(compact_active_&&(reinterpret_cast<uintptr_t>(l)%alignof(float)||reinterpret_cast<uintptr_t>(r)%alignof(float)||
+       overlap(l,bytes,compact_.bytes,compact_.byte_count)||overlap(r,bytes,compact_.bytes,compact_.byte_count)))return false;
     if(reader_active_&&(overlap(l,bytes,reader_.bytes,reader_.byte_count)||
                        overlap(r,bytes,reader_.bytes,reader_.byte_count)))return false;
     return valid_output_span(l,r,n,offset,self);
 }
 bool RuntimeState::restore_runtime(const float *values,size_t count,InstanceSpan self) {
+    if(compact_active_&&reinterpret_cast<uintptr_t>(values)%alignof(float))return false;
     if(!valid_restore(values,count,self)) return false;
     float saved[150]; memcpy(saved,values,sizeof saved);
     if(!compactPorts.restore(saved,150,sp->sr)) return false;
@@ -297,12 +329,14 @@ bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         processLfo(); sequencer.process(parameters,heldNoteNumbersAE);
         if(parameters[isMono]>0) {
             if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
-                if(reader_active_) { if(!s1scheduler_reader::run_note(mono,offset+i,l,r,reader_))return false; }
+                if(compact_active_) { if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false; }
+                else if(reader_active_) { if(!s1scheduler_reader::run_note(mono,offset+i,l,r,reader_))return false; }
                 else mono.run(offset+i,l,r);
             }
         } else for(auto &note:poly)
             if(note.rootNoteNumber!=-1 && note.stage!=S1NoteState::stageOff) {
-                if(reader_active_) { if(!s1scheduler_reader::run_note(note,offset+i,l,r,reader_))return false; }
+                if(compact_active_) { if(!s1scheduler_compact::run_note(note,offset+i,l,r,compact_))return false; }
+                else if(reader_active_) { if(!s1scheduler_reader::run_note(note,offset+i,l,r,reader_))return false; }
                 else note.run(offset+i,l,r);
             }
         trace(1,i);

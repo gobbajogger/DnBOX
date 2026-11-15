@@ -4,6 +4,7 @@
 #include "parameter_ports.hpp"
 #include "fixed_array.hpp"
 #include "reader/direct_reader.h"
+#include "compact-reader/compact.h"
 #include <stddef.h>
 
 namespace s1scheduler {
@@ -88,6 +89,8 @@ public:
         if(trace_fn) trace_fn(*this,phase,frame,trace_context);
     }
     bool using_reader() const { return reader_active_; }
+    bool using_compact() const { return compact_active_; }
+    const s1c_binding &compact_binding() const { return compact_; }
     const s1_morph_binding &reader_binding() const { return reader_; }
 protected:
     RuntimeState() = default;
@@ -97,6 +100,9 @@ protected:
     bool init_reader_runtime(const synthone_shared::Tables &, const void *, size_t,
                       int, const float *, size_t, const float *, size_t, InstanceSpan);
     bool valid_runtime_output(float *,float *,unsigned,unsigned,InstanceSpan) const;
+    bool init_compact_runtime(const synthone_shared::Tables &,const void *,size_t,int,const float *,size_t,const float *,size_t,InstanceSpan);
+    s1c_binding compact_{};
+    bool compact_active_ = false;
     s1_morph_binding reader_{};
     bool reader_active_ = false;
 };
@@ -118,6 +124,21 @@ public:
     bool init_reader(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
               int rate,const float *values,size_t count,const float *tuning,size_t tuning_count) {
         return init_reader_runtime(tables,packed,bytes,rate,values,count,tuning,tuning_count,{this,sizeof *this});
+    }
+    // Metadata-only compact reader stage; no runtime morph payload pointers.
+    // tables has52 NULL morph samples with exact4097-count/shape/band metadata,
+    // original13 bands and a real4097-float sine. packed is fully cold admitted
+    // structurally; canonical digest/source authentication is the loader's job.
+    // ALL borrowed inputs must be live/mapped/readable and disjoint from this
+    // WHOLE final owner. Values and Tables are borrowed only during init;
+    // packed/sine/tuning stay immutable/live until successful reinit or teardown.
+    // False preserves the whole prior owner. Objects cannot relocate or race.
+    // Output guards cover whole owner, packed/sine/tuning including offset
+    // prefix; no full-block rollback is promised after illegal input mutation.
+    // Caller must not forge/mutate internal pointers/metadata or binding.
+    bool init_compact_metadata(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
+              int rate,const float *values,size_t count,const float *tuning,size_t tuning_count) {
+        return init_compact_runtime(tables,packed,bytes,rate,values,count,tuning,tuning_count,{this,sizeof *this});
     }
     // Source restoreValues note/control boundary only; absent FX/rates excluded.
     bool restore(const float *values, size_t count) {

@@ -1,12 +1,20 @@
 {
-  "schema": 1,
-  "scope": "Runtime-only immutable direct-word morph read seam; original oracle/member/C morph unchanged; raw Tables retained; no codec/placement/executable/firmware/CPU/device acceptance",
+  "schema": 2,
+  "frozen_utc": "2026-11-15T06:23:15.932210+00:00",
+  "scope": "PRIVATE metadata-only compact Scheduler source candidate; arp-off pre-FX differential only, not full-port/fit",
+  "source_parent": "29e499596a4ee6f1e4eeac067795ec06a446a01f",
   "files": [
     {
       "path": ".gitignore",
       "bytes": 39,
       "sha256": "6d9dd2863a77d46eb538f9032b69297ef450edf9afcd2b99ed117d80a0cb1a74",
       "git_blob_sha": "f5b12847bf65ebf58c92f376a2045bf10e05c7e6"
+    },
+    {
+      "path": "COMPACT-METADATA.md",
+      "bytes": 4927,
+      "sha256": "6ce5b6cdce5afadb152aebf35be23603edea2fd1b9dcb7dc5ab2455a87496c9f",
+      "git_blob_sha": "d96dbb1562e54333221c3914d75880e2030bb6a4"
     },
     {
       "path": "DEPENDENCIES.json",
@@ -25,6 +33,42 @@
       "bytes": 27422,
       "sha256": "6b857ec15d3dbe68e3c7b4df891fb76d8ffe40f856a058ee1ecd42cdb1bb9a44",
       "git_blob_sha": "0d558109894270c3834ee579bcebe6d5ac6fd0d1"
+    },
+    {
+      "path": "compact-reader/compact.c",
+      "bytes": 7127,
+      "sha256": "db99f6c29c9e51d5b37d150f9ce984c54d780ec5874d8f16029458d1ff0ea59d",
+      "git_blob_sha": "6ed2023da07bc9964025cac690e67a1e1cb5ee46"
+    },
+    {
+      "path": "compact-reader/compact.h",
+      "bytes": 1688,
+      "sha256": "6899920139862016acbdec4a88949e376972b3529fd29617af1a5cf6aae521b4",
+      "git_blob_sha": "96c7504aadd9656627073d4d9acc2793d6567277"
+    },
+    {
+      "path": "compact-reader/compact_morph.c",
+      "bytes": 3143,
+      "sha256": "95a47bfa0c717d4747055dc72524ae0cb5287757bbaeccb614a3eed0cf1d3573",
+      "git_blob_sha": "8830facdaae4caf207866d81f74f55c25aca9b9f"
+    },
+    {
+      "path": "compact-reader/compact_morph.h",
+      "bytes": 1633,
+      "sha256": "7d0fc18c3ee8cd1cbd5475d1ac90223bb2fe2fc4d7505364dcb2a3b5ec33beba",
+      "git_blob_sha": "03fc469d3206ef757343e228ec8226e1f96de974"
+    },
+    {
+      "path": "compact_note.cpp",
+      "bytes": 11838,
+      "sha256": "197e7a51aa9a8807fec7ed032c53182b2f28f891e89c7fd9e7ec293c0db332a6",
+      "git_blob_sha": "299f6cbe884bbb1531ff54c4e137aab683721d74"
+    },
+    {
+      "path": "compact_note.hpp",
+      "bytes": 187,
+      "sha256": "a60abde6f97fda1f63cb182b6521420ff3cf0d22711239956a7cca080cec28a2",
+      "git_blob_sha": "d4e1bd466c6050c067ae228eba61edd2aa98c139"
     },
     {
       "path": "fixed_array.hpp",
@@ -136,33 +180,39 @@
     },
     {
       "path": "run_native.py",
-      "bytes": 10337,
-      "sha256": "1ff996400f8bafaf7192450ff984a54e4820068488a56ae21f453c838ae691ff",
-      "git_blob_sha": "b98948b9babeda7b2ffb956eb3352e2caa500ddc"
+      "bytes": 10783,
+      "sha256": "e2a42cba94a1052725f2b51808b537e7ffbebd67638e7e425e82e1fca413972f",
+      "git_blob_sha": "c72e612e4463a10bffde35c1e9f1c398cea2d5b9"
     },
     {
       "path": "run_tests.py",
-      "bytes": 9753,
-      "sha256": "8db9fff309ad5a881fe9d653a71a0828a7c11b8966cd42b4b479dff1994f9f16",
-      "git_blob_sha": "dc044244a5106fd927ccb63d5e6fbc83ff249de9"
+      "bytes": 10950,
+      "sha256": "397ad8b8c9d798cb943ef2d82583ea3d576ce0aa9ad9169437a3ce3a218effab",
+      "git_blob_sha": "5f6f7bbc3e1dc4a25af6a97a3bc64996789741ff"
     },
     {
       "path": "scheduler.cpp",
-      "bytes": 16881,
-      "sha256": "60a87209b4cf6a0318e24b2a54d2098c353d905927960c0bbfa0d0f3a9e9280a",
-      "git_blob_sha": "48c410bb2726aa513b714d10d21144cdf82a419f"
+      "bytes": 20025,
+      "sha256": "8b74716d589bd71136f63a9b9c5181d670a13afb0edbcd1d7395fc96b9f60efb",
+      "git_blob_sha": "10e1b70de0ef5f51e8ce02e5f5823757d5e9ab73"
     },
     {
       "path": "scheduler.hpp",
-      "bytes": 6188,
-      "sha256": "bb7d2c73771213766d58ee0105ca2f498dbb950a268db5b3603c64359e1bd3f9",
-      "git_blob_sha": "644aa71149786e5b2ff98088565008770ca0aeec"
+      "bytes": 7747,
+      "sha256": "13f190ef2f060613f720e4ef3c52ee77f300fd904c50ff372f775e61c9a7cb07",
+      "git_blob_sha": "13c0fcdc3fb35a3beb4e66250b34dfa926829282"
     },
     {
       "path": "tests/alias_composition_test.cpp",
       "bytes": 13615,
       "sha256": "cd998af63cdac6c9d28b4300c3376cc46a24337ef242da899ea92105ef161192",
       "git_blob_sha": "8c4791565fa8a775dc0c5204e2106d91d06b2131"
+    },
+    {
+      "path": "tests/compact_scheduler_test.cpp",
+      "bytes": 28599,
+      "sha256": "618453231d587ea1c28b530d2d6166d736b3cac75cc43d2a68117876e98c8f58",
+      "git_blob_sha": "53f0b1e9522635858660f42c67b5dfc7fd2fa07b"
     },
     {
       "path": "tests/direct_reader_test.c",
@@ -195,6 +245,12 @@
       "git_blob_sha": "86c2743b414ff4b19081fd0008b06523b9c50b31"
     }
   ],
-  "origin_source_manifest_sha256": "03e8c7dd175027352fce18266c2c2c1677e2b2cdd0a9e3396f9aea1b011412ed",
-  "baseline_commit": "1c4c0fff8142226e9daee90db94b362cac40ded3"
+  "untouched_oracle": "original#943 oracle files and generator byte-identical",
+  "limits": [
+    "Full both-engine feature/seq/arp/FX/pad endpoint not met",
+    "No native executable/product fit/CPU/device",
+    "DefaultLSanptraceFAIL, SAME leak-disabled sanitizer pass only"
+  ],
+  "revision": "R2-canonical-frequency-band-words",
+  "affected_change": "Compact initializer checks metadata AND packed original bands bitwise; three +/-0 regression cases; no original DSP/oracle arithmetic change"
 }

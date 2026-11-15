@@ -13,17 +13,17 @@ import tempfile
 
 COMPILER_SHA256 = 'c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f'
 TOOLCHAIN_INPUTS_SHA256 = '56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e'
-LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json']
+LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp']
 LAYOUT = '''#include "scheduler.hpp"
 struct LayoutAccess : s1scheduler::RuntimeState {
     static constexpr unsigned notes() { return sizeof(((LayoutAccess*)0)->objects_); }
     static constexpr unsigned descriptors() { return sizeof(((LayoutAccess*)0)->descriptors_); }
 };
 extern "C" __attribute__((used,section(".s1layout"))) const unsigned s1_layout[] = {
-  0x53314c31,2,sizeof(void*),sizeof(float),sizeof(double),
+  0x53314c31,3,sizeof(void*),sizeof(float),sizeof(double),
   sizeof(s1scheduler::State),sizeof(s1scheduler::RuntimeState),sizeof(s1scheduler::Scheduler),
   sizeof(synthone_ports::Ports),sizeof(S1NoteState),sizeof(s1scheduler::Held),
-  LayoutAccess::notes(),LayoutAccess::descriptors(),alignof(s1scheduler::Scheduler),sizeof(s1_morph_binding),alignof(s1_morph_binding)
+  LayoutAccess::notes(),LayoutAccess::descriptors(),alignof(s1scheduler::Scheduler),sizeof(s1_morph_binding),alignof(s1_morph_binding),sizeof(s1c_binding),alignof(s1c_binding)
 };
 '''
 
@@ -101,7 +101,7 @@ def main():
     subprocess.run([__import__('sys').executable,str(closure/'scheduler/reader/generate.py'),'--experiment-root',str(closure/'experiment'),'--output-dir',str(derived)],check=True,env=env,stdout=subprocess.DEVNULL)
     for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
         require((derived/name).read_bytes()==(closure/'scheduler/reader'/name).read_bytes(),'native reader derivation mismatch: '+name)
-    units=[('direct_reader',closure/'scheduler/reader/direct_reader.c','c'),('runtime_morph',closure/'scheduler/reader/morph_compute.c','c'),('runtime_note',closure/'scheduler/reader/runtime_note.cpp','c++'),('scheduler',closure/'scheduler/scheduler.cpp','c++'),('ports',closure/'controls/parameter_ports.cpp','c++'),('parameter_map',closure/'controls/generated/parameter_map.cpp','c++'),('voice',closure/'experiment/probe/portable_voice.cpp','c++')]
+    units=[('compact_reader',closure/'scheduler/compact-reader/compact.c','c'),('compact_morph',closure/'scheduler/compact-reader/compact_morph.c','c'),('compact_note',closure/'scheduler/compact_note.cpp','c++'),('direct_reader',closure/'scheduler/reader/direct_reader.c','c'),('runtime_morph',closure/'scheduler/reader/morph_compute.c','c'),('runtime_note',closure/'scheduler/reader/runtime_note.cpp','c++'),('scheduler',closure/'scheduler/scheduler.cpp','c++'),('ports',closure/'controls/parameter_ports.cpp','c++'),('parameter_map',closure/'controls/generated/parameter_map.cpp','c++'),('voice',closure/'experiment/probe/portable_voice.cpp','c++')]
     units += [(name,core/'Soundpipe/modules'/(name+'.c'),'c') for name in ['base','ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']]
     units += [('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c')]
     layout=out/'layout.cpp';layout.write_text(LAYOUT);expected[layout.resolve()]=digest(layout.read_bytes())
@@ -125,9 +125,9 @@ def main():
         machine,sections=elf_sections(obj)
         sizes={key:sum(s['bytes'] for s in sections.values() if s['flags']&2 and pred(s)) for key,pred in [('executable',lambda s:s['flags']&4),('readonly',lambda s:not s['flags']&5),('writable',lambda s:s['flags']&1 and s['type']!=8),('bss',lambda s:s['flags']&1 and s['type']==8)]}
         results.append({'name':name,'command':command,'exit':q.returncode,'source_sha256':digest(source.read_bytes()),'object_sha256':digest(obj.read_bytes()),'elf_machine':machine,'allocated_section_bytes':sizes,'dependencies':dependencies})
-    _,sections=elf_sections(out/'layout.o');raw=sections['.s1layout']['data'];require(len(raw)==16*4,'native layout size mismatch')
-    values=struct.unpack('<16I',raw);require(values[:2]==(0x53314c31,2),'native layout signature mismatch')
-    labels=['pointer','float','double','State','RuntimeState','Scheduler','Ports','S1NoteState','Held','note_objects_7','table_descriptors_53','Scheduler_alignment','direct_binding','direct_binding_alignment']
+    _,sections=elf_sections(out/'layout.o');raw=sections['.s1layout']['data'];require(len(raw)==18*4,'native layout size mismatch')
+    values=struct.unpack('<18I',raw);require(values[:2]==(0x53314c31,3),'native layout signature mismatch')
+    labels=['pointer','float','double','State','RuntimeState','Scheduler','Ports','S1NoteState','Held','note_objects_7','table_descriptors_53','Scheduler_alignment','direct_binding','direct_binding_alignment','compact_binding','compact_binding_alignment']
     result={'started_at':started_at,'completed_at':datetime.now(timezone.utc).isoformat(),'scope':'Freestanding runtime native objects and compiler-evaluated layout only; no executable/firmware link, table placement, resource-floor, CPU or device acceptance','compiler_sha256':COMPILER_SHA256,'compiler_child_environment':env,'source_manifest_sha256':digest((root/'SOURCE-MANIFEST.json').read_bytes()),'compiled_sources':source_records,'toolchain_headers':system_headers,'units':results,'runtime_objects':len(units),'layout':dict(zip(labels,values[2:])),'not_run':['native executable/firmware link','combined Juno/app resources','table storage/read workload','CPU/device qualification']}
     (out/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps({'runtime_objects':len(units),'layout':result['layout'],'result_directory':str(out),'link':'NOT_RUN'}))
