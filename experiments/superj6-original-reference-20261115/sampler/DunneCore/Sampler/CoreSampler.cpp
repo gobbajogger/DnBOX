@@ -191,6 +191,61 @@ void CoreSampler::setNoteFrequency(int noteNumber, float noteFrequency)
 
 // re-compute keyMap[] so every MIDI note number is automatically mapped to the sample buffer
 // closest in pitch
+bool CoreSampler::loadBorrowedPcm16(const SampleDescriptor& source,float rate,
+                                    int channels,int frames,const unsigned char *bytes,
+                                    std::size_t byteCount)
+{
+    // Cold caller-owned read-only view; all views/voices must be quiescent for load/unload.
+    // Caller guarantees readable immutable external storage, disjoint from ALL owner
+    // allocations, alive until every referencing voice and buffer has been released.
+    // The checked known spans do not discover arbitrary pointer ownership/lifetime.
+    if(!bytes||!std::isfinite(rate)||rate<8000.f||rate>192000.f||
+       channels<1||channels>2||frames<1||frames>16777216||
+       byteCount!=std::size_t(channels)*std::size_t(frames)*2)return false;
+    const std::uintptr_t begin=reinterpret_cast<std::uintptr_t>(bytes);
+    if(byteCount>UINTPTR_MAX-begin)return false;
+    const std::uintptr_t end=begin+byteCount;
+    auto overlaps=[&](const void *p,std::size_t n)->bool{
+        if(!p||!n)return false;
+        const std::uintptr_t a=reinterpret_cast<std::uintptr_t>(p);
+        if(n>UINTPTR_MAX-a)return true;
+        return begin<a+n&&a<end;
+    };
+    if(overlaps(this,sizeof(*this))||overlaps(data.get(),sizeof(InternalData)))return false;
+    for(auto p:data->sampleBufferList){
+        if(overlaps(p,sizeof(*p))||overlaps(p->samples,p->ownedSampleWords*sizeof(float)))return false;
+    }
+    auto midi=[](int n){return n>=-1&&n<=127;};
+    if(!midi(source.noteNumber)||!midi(source.minimumNoteNumber)||!midi(source.maximumNoteNumber)||
+       !midi(source.minimumVelocity)||!midi(source.maximumVelocity)||
+       !std::isfinite(source.noteFrequency)||source.noteFrequency<=0.f||
+       !std::isfinite(source.startPoint)||!std::isfinite(source.endPoint)||
+       !std::isfinite(source.loopStartPoint)||!std::isfinite(source.loopEndPoint))return false;
+    if(source.minimumNoteNumber>=0&&source.maximumNoteNumber>=0&&source.minimumNoteNumber>source.maximumNoteNumber)return false;
+    if(source.minimumVelocity>=0&&source.maximumVelocity>=0&&source.minimumVelocity>source.maximumVelocity)return false;
+    const float first=source.startPoint>0.f?source.startPoint:0.f;
+    const float last=source.endPoint>0.f?source.endPoint:float(frames-1);
+    if(first<0.f||first>last||last>=float(frames))return false;
+    float loopEnd=source.loopEndPoint==0.f?float(frames-1):source.loopEndPoint;
+    float loopStart=source.loopStartPoint;
+    if(source.isLooping){
+        loopStart=loopStart>1.f?loopStart:last*loopStart;
+        loopEnd=loopEnd>1.f?loopEnd:last*loopEnd;
+        if(loopStart<first)loopStart=first;
+        if(loopEnd>last)loopEnd=last;
+        if(loopStart<0.f||loopStart>loopEnd)return false;
+    }
+    auto p=new DunneCore::KeyMappedSampleBuffer();
+    if(!p->initBorrowedPcm16(rate,channels,frames,bytes,byteCount)){delete p;return false;}
+    p->noteNumber=source.noteNumber;p->noteFrequency=source.noteFrequency;
+    p->minimumNoteNumber=source.minimumNoteNumber;p->maximumNoteNumber=source.maximumNoteNumber;
+    p->minimumVelocity=source.minimumVelocity;p->maximumVelocity=source.maximumVelocity;
+    p->startPoint=first;p->endPoint=last;p->isLooping=source.isLooping;
+    if(source.isLooping){p->loopStartPoint=loopStart;p->loopEndPoint=loopEnd;}
+    data->sampleBufferList.push_back(p);
+    return true;
+}
+
 void CoreSampler::buildSimpleKeyMap()
 {
     // clear out the old mapping entirely

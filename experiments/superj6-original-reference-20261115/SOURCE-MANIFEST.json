@@ -4,9 +4,9 @@
   "files": [
     {
       "path": "EVIDENCE.json",
-      "bytes": 3107,
-      "sha256": "272ab899de868d43cd414f7adac643698ba5bf101c5a1fbc2cf26d07814cc7e3",
-      "git_blob": "727eebe1e222ae683005a5e40f084b60f98cbfa3"
+      "bytes": 4957,
+      "sha256": "20f3bf51bb02b49c661be3a9984aefca84204645ce6d2820eff654fc8dd0b802",
+      "git_blob": "48c9324eaaf2a99c5e4bb9eb8e8aa033d2a08aad"
     },
     {
       "path": "LICENSE",
@@ -16,9 +16,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 5855,
-      "sha256": "b5aee05c00fc469c1585651b309dfdabbee59aa17b0d243abe1dc479be86b399",
-      "git_blob": "e4ce849f4f89a8f8d6ba09ab361df2fc4e0a5a99"
+      "bytes": 8289,
+      "sha256": "00045df7093da4d5254ac8d6acfae6bdb6d4eb280425b2ab615f9454a356a972",
+      "git_blob": "e2c9e50c2d2073c0fec25e303a8f8cad889aad24"
     },
     {
       "path": "sampler/DunneCore/Common/ADSREnvelope.cpp",
@@ -82,9 +82,9 @@
     },
     {
       "path": "sampler/DunneCore/Common/OriginalOTAFilter.h",
-      "bytes": 5264,
-      "sha256": "69eef11c13960ceaedc2d11903c762f906a7a5432c08c4484683765c6f71d833",
-      "git_blob": "a8df75bd72f13e1d1b97f87a3ba9343b1bf76e73"
+      "bytes": 5644,
+      "sha256": "2433c6c4b063fe2451d219f0f25fc04ab6867efa36b2e006e8ab53c2f51f8cf2",
+      "git_blob": "59aa6f168d2eaa2ec00a23b81c3a70a80dbcd3fb"
     },
     {
       "path": "sampler/DunneCore/Common/OriginalSmoothPassFilter.h",
@@ -129,28 +129,58 @@
       "git_blob": "3332bd06846a22fc9b385bfdaad66eaa63cdcd37"
     },
     {
+      "path": "sampler/DunneCore/Common/fma32.c",
+      "bytes": 33503,
+      "sha256": "71a67e9a07caa496f2b55c4f1630fcde707dfe3d03730693b9e28dc6aa0da8e2",
+      "git_blob": "791213c5fa292a198a67e9dfcc34bb0a8c2c6070"
+    },
+    {
+      "path": "sampler/DunneCore/Common/fma32.h",
+      "bytes": 750,
+      "sha256": "be30ef7f2e2afd6436cd17676d754b5c495ffce7782f927dff933ce246ba635c",
+      "git_blob": "31d1f763016d27566f5605c21fee9da8466871b9"
+    },
+    {
+      "path": "sampler/DunneCore/Common/numeric_boundary.c",
+      "bytes": 4526,
+      "sha256": "33718492ace518e604022b8fc2250c4fd92248f800e85858e734243ac1ce5c55",
+      "git_blob": "82e3e31002205b73a1b172e4a6f51236b64f73e9"
+    },
+    {
+      "path": "sampler/DunneCore/Common/numeric_boundary.h",
+      "bytes": 446,
+      "sha256": "5174f51e87b87589b15212c3adabb72b65f48b8fee0fc0716e1c43b805b27342",
+      "git_blob": "bb0d7e2b821ac5d6e9d95c99e43722b5ad4fd326"
+    },
+    {
+      "path": "sampler/DunneCore/Common/ota_math.hpp",
+      "bytes": 206,
+      "sha256": "355fcfac0c656dcf753060112ed2b859001ab74f5f0b72a18b724bc7b78a13fa",
+      "git_blob": "1409c5f9cccf342aaa36303dd5297b07ba0ffa38"
+    },
+    {
       "path": "sampler/DunneCore/Sampler/CoreSampler.cpp",
-      "bytes": 22529,
-      "sha256": "9d31d179a3cbffaac4bcde5027424617645f93fcd40b424bdcd4bcb8c3652086",
-      "git_blob": "218669f129e71c1c878d4cb5923794756e09f32a"
+      "bytes": 25893,
+      "sha256": "874edd45525d55841fa429575853dd8c40fa4518732497429cce4d99f28cee21",
+      "git_blob": "2602ff22b469686667388e12afe186c8c51d4d69"
     },
     {
       "path": "sampler/DunneCore/Sampler/CoreSampler.h",
-      "bytes": 5893,
-      "sha256": "ed1ea40663b8b0db53f58eed60dcec03c31825429713c7118c79f0c8c6c0447f",
-      "git_blob": "b8ef9aa522e95e2aae35726df3012ad1ab95c015"
+      "bytes": 6254,
+      "sha256": "72e0dad55a8a63c31502695b0e36499728f9aecc196d7060220eba9f384784d7",
+      "git_blob": "e82beee9ccfeefec1deb91195326b2873dbffa1f"
     },
     {
       "path": "sampler/DunneCore/Sampler/SampleBuffer.cpp",
-      "bytes": 1109,
-      "sha256": "54fc6e068e02ea32ab039ca9e5a728cbcd8f99740f2de80656a8a4723f854d8c",
-      "git_blob": "a12642397f1bbce7c63d78e88c830115728c7142"
+      "bytes": 3060,
+      "sha256": "6f97b18412c3ba9db9f8e494de35022c16a3d08825f173cd366a340830434230",
+      "git_blob": "6d8725b6bf297d2744fa3168c9c9182198bea39c"
     },
     {
       "path": "sampler/DunneCore/Sampler/SampleBuffer.h",
-      "bytes": 2765,
-      "sha256": "bac1884f159786d2f609460bd07c4dc7c634fe30ac052f870d9c617dc6875d23",
-      "git_blob": "7dd6d78d9a678ceed6b15122af653c0b02386858"
+      "bytes": 3956,
+      "sha256": "8fe75e333b2ef8e468db90cec18aafaeeb54b43d8705f80f4e39295052a0f60d",
+      "git_blob": "bf9006ae309fa8c15398dad9e1f2589c5a161c6b"
     },
     {
       "path": "sampler/DunneCore/Sampler/SampleOscillator.h",
@@ -171,10 +201,22 @@
       "git_blob": "4e0db68c48decdd1d410a0ebd0e44669702a08d2"
     },
     {
+      "path": "sampler/Math-license.BSD3",
+      "bytes": 1738,
+      "sha256": "145ea96b4a4a04a1a7738d2a2bf9e830f861971e69606187b018d9e8fc0b95c7",
+      "git_blob": "b5690face082dc71bc7a8c612db03daad9605696"
+    },
+    {
       "path": "sampler/include/Sampler_Typedefs.h",
       "bytes": 712,
       "sha256": "39bc28d096c360760c9e7f4b508910d565b625bc2c6b73ace8f094c49dc01196",
       "git_blob": "49faac0274d98c8bf4dd692333da70320da1f32a"
+    },
+    {
+      "path": "sampler/tests/borrow_pcm16.cpp",
+      "bytes": 3563,
+      "sha256": "e75355ebeb9bd7225bf82318c7b5ee0ca0cd4f6b00e1f637756cd1af33efbc44",
+      "git_blob": "e5276479e400b048fbbd058fdfd4ff46144c5613"
     },
     {
       "path": "sampler/tests/controls_external.cpp",
@@ -208,9 +250,9 @@
     },
     {
       "path": "tests/run_host.py",
-      "bytes": 3564,
-      "sha256": "44234a306e6800f951b633dc521118599921b37eaa87ea11b5864a36d57e52a1",
-      "git_blob": "0e2169f4928b4fc44f8b93bad75292f67b477ca9"
+      "bytes": 4253,
+      "sha256": "176a627bc5c1271e6e32bde3e23b81d6a9634dfd1e5292e38c5dd4becffa613b",
+      "git_blob": "fc33ca526aa6a68d927c84dbff16910c85107efb"
     },
     {
       "path": "timing/review_regressions.cpp",
@@ -230,14 +272,5 @@
       "sha256": "7ab20675b0368c8c7ede03726e0af2447947dd5233542a336b1e1c4e46147b6e",
       "git_blob": "ca5c4903bd13a4cacd80e78ecd828bb5bc277278"
     }
-  ],
-  "excluded": [
-    "originalapp/AU",
-    "assembly",
-    "sample/waveform/PCM",
-    "rawbanks",
-    "SDK/toolchain",
-    "compiledoutputs",
-    "private reports"
   ]
 }

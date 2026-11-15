@@ -41,6 +41,10 @@ public:
     
     /// call to load samples
     void loadSampleData(SampleDataDescriptor& sdd);
+    // Cold borrowed PCM view, no sample allocation; see SampleBuffer lifetime contract.
+    // All owner calls serialized. Rejects are input-domain preflight, not arbitrary pointer safety.
+    bool loadBorrowedPcm16(const SampleDescriptor& source,float rate,int channels,int frames,
+                          const unsigned char *bytes,std::size_t byteCount);
 
     /// call to unload samples, freeing memory
     void unloadAllSamples();

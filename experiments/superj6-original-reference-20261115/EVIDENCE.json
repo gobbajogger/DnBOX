@@ -5,7 +5,24 @@
     "commit": "be581d08158ea4556a54298f75814d23ff7db886",
     "license": "MIT"
   },
-  "sampler": {
+  "timing": {
+    "source_manifest_sha256": "de69863c5fe2bfb7e11a03474fed57c598cedf716b5bedc61d533c4e68f41058",
+    "proof": "Static-derived equations and own host regressions only, no original sequencer execution",
+    "qualified_review_sha256": "ad2fde316ca2352b2dea394953665d2ae1d8d15d36b393597a8e6eabec6ef111",
+    "qualified_seal_sha256": "93eda06df323587e013524c6f8a175875c38b35ca008ba583be4e2fe0d00ecdf",
+    "independent_assertions": 524390,
+    "original_execution": false
+  },
+  "public_package_review": "Exact final source-manifest packaging review is recorded with the source-delivery receipt; this file does not assert a firmware or device pass.",
+  "not_claimed": [
+    "Full original preset audio fidelity",
+    "General API or realtime safety",
+    "Full original effects and all parameters",
+    "Native math policy/whole-app fit/CPU/audio deadline",
+    "Hardware/device/zero-dropout acceptance",
+    "Admitted device PCM storage, general alias/lifetime ownership discovery or allocation-free runtime"
+  ],
+  "historical_sampler_before_composition": {
     "qualified_review_sha256": "4177949da8982cd4d6cda5fd485394924b84e1d16f6d831cf9ccdf941d15d552",
     "qualified_seal_sha256": "d589df45d0844426e888479275e68568799fdd5e8ea5d9a8e4d257e0d5f47356",
     "recorded_component_cases": 42,
@@ -32,23 +49,33 @@
     "prior_source_review_sha256": "decace25272be2c29772d6655250b3beed5b6a70bd851524b69913479cb795c4",
     "independent_own_source_checks_scope": "Earlier unchanged filter/envelope review only, not all current app behavior"
   },
-  "timing": {
-    "source_manifest_sha256": "de69863c5fe2bfb7e11a03474fed57c598cedf716b5bedc61d533c4e68f41058",
-    "proof": "Static-derived equations and own host regressions only, no original sequencer execution",
-    "qualified_review_sha256": "ad2fde316ca2352b2dea394953665d2ae1d8d15d36b393597a8e6eabec6ef111",
-    "qualified_seal_sha256": "93eda06df323587e013524c6f8a175875c38b35ca008ba583be4e2fe0d00ecdf",
-    "independent_assertions": 524390,
-    "original_execution": false
+  "sampler_composition": {
+    "source_manifest_sha256": "a34c314db37f6901c57ff06c0fbb29f405f54da0a807e191d6672eadc2c6e57f",
+    "parent_source_manifest_sha256": "0455f7d05848d0ec645105a0d746d342a92978287f2611a28f2b31474711ea46",
+    "parent_host_review_sha256": "4ecee96efb7c94ee8ec2140565f6ab9040be663cedfd444b3f53f935189b35df",
+    "parent_host_seal_sha256": "4feb53951e06838a2f05c2ec9304efd06c1c9cf9b3717275c08163602ca8cc86",
+    "recorded_component_cases_per_storage_per_variant": 42,
+    "stereo_frames_per_storage_per_variant": 942080,
+    "storage_modes": [
+      "ownedfloat",
+      "borrowedPCM16"
+    ],
+    "source_borrow_checks_per_variant": 1999840,
+    "independent_parent_extra_checks": 2334,
+    "actual_packed_words": 3906453,
+    "actual_packed_records": 12,
+    "avoided_float_payload_bytes": 15625812,
+    "still_required_source_pcm_bytes": 7812906,
+    "math_composed": true,
+    "native_return_type_repair": "Explicit bool lambda return only; parent authentic native compile failure retained, not waived.",
+    "qualified_affected_review": "Exact affected source and public-package review recorded with delivery receipt; no product admission implied.",
+    "default_LSan": "FAIL under ptrace; same leaks0 passes separately, no leak proof.",
+    "qualified_affected_review_sha256": "e0e044fc0b29003130ff7d0d57b6711e43b28223ddb230d41ffe95ea705d7cf8",
+    "producer_composed_result_sha256": "a5c9f97cf1da2227c93a5c88c889b4c2f74971bff0368aa629a19b69e8ebceca",
+    "qualified_math_reference_manifest_sha256": "8c465b026f2212738026339c44f55a6a162d70a836728e28727f8fb47c322459",
+    "qualified_math_review_sha256": "a12a007ca88f29fd4ca7f5d201a86baaeb37540740e4360b42b62c1a42b5361b"
   },
-  "public_package_review": "Exact final source-manifest packaging review is recorded with the source-delivery receipt; this file does not assert a firmware or device pass.",
-  "not_claimed": [
-    "Full original preset audio fidelity",
-    "General API or realtime safety",
-    "Full original effects and all parameters",
-    "Native math policy/whole-app fit/CPU/audio deadline",
-    "Hardware/device/zero-dropout acceptance"
-  ],
-  "native_filter_diagnostics": {
+  "historical_native_filter_diagnostics": {
     "all6api_elf_sha256": "f79121972da6edb42164f716fc4aca6e7b6122eb4bc55eb7bf55b5aebf7c00fb",
     "all6api_undefined": 0,
     "all6api_double_helpers": 16,
