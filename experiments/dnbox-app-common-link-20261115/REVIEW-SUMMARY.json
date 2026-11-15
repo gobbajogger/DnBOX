@@ -1,0 +1,38 @@
+{
+  "scope": "Faithful derived review summary, not verbatim report or product acceptance",
+  "sourceFreezeSha256": "d2d19973fb1040ea401ae54c689186c0f6c24a70dae597babfec30e8327e1552",
+  "independentCodeReviewSha256": "89a714fb12055b1db423b9df81b5d71445c45ae8bed60f5a842d4c41ba97fe12",
+  "manifestCorrectionRecheckSha256": "589d8d0d53bd50a147ae90ac109d7677967cd530ade42f011d4f9609624682de",
+  "sourceFiles": 5447,
+  "delta": {
+    "existingEntryPaths": 12,
+    "newManifestTest": 1,
+    "productionProtocolControlDSPUIChanges": 0
+  },
+  "independentChecks": {
+    "newManifestTests": 3,
+    "unchangedBuildContractTests": 14,
+    "normalAndOptimizedPython": "PASS",
+    "baselineOrdinaryHostLink": "RED missing authentic dnr2 units",
+    "candidateOrdinaryHostLink": "PASS genuine shared units",
+    "originalReleaseUI": "Normal and original-script detect_leaks=0 ASan/UBSan modes each pass 35,961 checks / 97 captures, byte-identical; NOT leak proof.",
+    "nativeEvidence": "All exact inputs/commands/fourELFBIN identities matched previously independently rebuilt H6; reused, not newly rebuilt"
+  },
+  "fullStrictSuite": {
+    "candidate": "separate unchanged H6 profile",
+    "result": "FAIL",
+    "topLevelResults": 449,
+    "ok": 275,
+    "fail": 174,
+    "topLevelNotRun": 0,
+    "innerExecution": "No blanket zero-inner-skip claim"
+  },
+  "integrationSanitizer": "Original LSan-ptrace FAIL remains FAIL. Separate same-binary leak-disabled diagnostic is not original/full-suite acceptance.",
+  "notAdmitted": [
+    "Shared integration lease/adoption",
+    "Actual later USB/BLE transport/full UI/full engines composition",
+    "Whole-suite zero-fail zero-skip qualification",
+    "Target no-slower/stack high-water/deadline",
+    "Browser/device/publication/release"
+  ]
+}

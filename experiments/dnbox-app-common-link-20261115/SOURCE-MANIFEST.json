@@ -1,0 +1,34 @@
+{
+  "schema": "dnbox-app-common-link-public-subset/1",
+  "scope": "Reviewed plaintext patch/test/docs only; no standalone runtime, SDK, captures, audio or binary payload",
+  "baseSourceFreezeSha256": "2158c18ddf65396b7330acce5e86571d4f566332a8047dcecdf2a7fb6afe38f6",
+  "sourceFreezeSha256": "d2d19973fb1040ea401ae54c689186c0f6c24a70dae597babfec30e8327e1552",
+  "files": [
+    {
+      "path": "APP-COMMON-CLOSURE.patch",
+      "bytes": 9655,
+      "sha256": "802f38582d1f88deab0cde2a8c09d226dbd3f9ff08daf866ffa91cbcc5af1afd",
+      "gitBlob": "84e01d70c4224dfe4bc476a4609a5617db6a7dd2"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3634,
+      "sha256": "6225e98f1aeb30984ee245d10d3f00224883ead6cb002055e16bc6f4c8d4368f",
+      "gitBlob": "a4b27d52770873b3c48712bbbdf8538401604daf"
+    },
+    {
+      "path": "REVIEW-SUMMARY.json",
+      "bytes": 1777,
+      "sha256": "a3ddefa2c1ee44fc2a2cd055368e3c857db6bbfadb4fe03b379bea351da47f6b",
+      "gitBlob": "d9fd5f1072363913cc89bd62f6399ad39e92ec78"
+    },
+    {
+      "path": "test_app_common_link_units.py",
+      "bytes": 1275,
+      "sha256": "2e052fe72ed0c21f4d0acfaf7adc93ef2d126803058d0209b3546e5bcb4eae74",
+      "gitBlob": "03a7f6c724cbdfea1b425bd3cc791d099f78221a"
+    }
+  ],
+  "supersedesPublicSubsetSha256": "8154856f6b27675b90d379ad9bbc7c6b954f743b7071d1a767d5fadfd34e8d43",
+  "correction": "Documentation only: explicitly bound original UI sanitizer detect_leaks=0 scope; code/patch/test unchanged."
+}
