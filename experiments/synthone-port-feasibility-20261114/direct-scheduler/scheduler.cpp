@@ -1,4 +1,5 @@
 #include "scheduler.hpp"
+#include "reader/runtime_note.hpp"
 #include "wave_frequencies.h"
 #include <assert.h>
 #include <math.h>
@@ -87,12 +88,45 @@ bool State::valid_restore(const float *values,size_t count,InstanceSpan self) co
 bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,const float *values,
                                 size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
     if(!valid_init(tables,rate,values,count,tuning,tuning_count,self)) return false;
+    reader_={};reader_active_=false;
     compactPorts.teardown();
     init_graph(tables,rate,tuning);
     // Validation already establishes valid disjoint outputs/controls and rate.
     if(!compactPorts.init(parameters,150,values,150,rate)) return false;
     restore_graph();
     return true;
+}
+bool RuntimeState::init_reader_runtime(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
+        int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
+    if(overlap(&tables,sizeof tables,self.data,self.bytes) || !packed ||
+       bytes!=S1_MORPH_DIRECT_BYTES || count!=150 || tuning_count!=128 ||
+       overlap(packed,bytes,self.data,self.bytes) || overlap(packed,bytes,&tables,sizeof tables) || tables.sine_count!=4097 ||
+       overlap(packed,bytes,values,150*sizeof(float)) || overlap(packed,bytes,tuning,128*sizeof(float)) ||
+       overlap(packed,bytes,tables.sine,4097*sizeof(float)) ||
+       reinterpret_cast<uintptr_t>(packed)%alignof(float) ||
+       reinterpret_cast<uintptr_t>(values)%alignof(float) ||
+       reinterpret_cast<uintptr_t>(tuning)%alignof(float) ||
+       reinterpret_cast<uintptr_t>(tables.sine)%alignof(float)) return false;
+    // Independent expected topology, not the reader's mapping implementation.
+    static const unsigned char logical[52]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+        16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
+        40,41,42,43,44,45,46,47,44,45,48,49};
+    const auto *data=static_cast<const unsigned char*>(packed);
+    for(unsigned i=0;i<52;++i)
+        if(tables.morph[i].samples!=reinterpret_cast<const float*>(data+static_cast<size_t>(logical[i])*4097*sizeof(float)))return false;
+    if(!valid_init(tables,rate,values,count,tuning,tuning_count,self))return false;
+    s1_morph_binding candidate{};
+    if(!s1_morph_bind_direct(&candidate,packed,bytes))return false;
+    // All replacement inputs are admitted before any live state is retired.
+    if(!init_runtime(tables,rate,values,count,tuning,tuning_count,self))return false;
+    reader_=candidate;reader_active_=true;return true;
+}
+bool RuntimeState::valid_runtime_output(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self) const {
+    if(n>65536||offset>65536-n)return false;
+    const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
+    if(reader_active_&&(overlap(l,bytes,reader_.bytes,reader_.byte_count)||
+                       overlap(r,bytes,reader_.bytes,reader_.byte_count)))return false;
+    return valid_output_span(l,r,n,offset,self);
 }
 bool RuntimeState::restore_runtime(const float *values,size_t count,InstanceSpan self) {
     if(!valid_restore(values,count,self)) return false;
@@ -262,9 +296,15 @@ bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         }
         processLfo(); sequencer.process(parameters,heldNoteNumbersAE);
         if(parameters[isMono]>0) {
-            if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) mono.run(offset+i,l,r);
+            if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
+                if(reader_active_) { if(!s1scheduler_reader::run_note(mono,offset+i,l,r,reader_))return false; }
+                else mono.run(offset+i,l,r);
+            }
         } else for(auto &note:poly)
-            if(note.rootNoteNumber!=-1 && note.stage!=S1NoteState::stageOff) note.run(offset+i,l,r);
+            if(note.rootNoteNumber!=-1 && note.stage!=S1NoteState::stageOff) {
+                if(reader_active_) { if(!s1scheduler_reader::run_note(note,offset+i,l,r,reader_))return false; }
+                else note.run(offset+i,l,r);
+            }
         trace(1,i);
     }
     return true;

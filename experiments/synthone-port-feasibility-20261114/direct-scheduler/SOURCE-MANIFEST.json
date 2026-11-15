@@ -1,36 +1,12 @@
 {
   "schema": 1,
-  "scope": "Exact immutable alias host/scheduler composition; runtime and original oracle arithmetic unchanged; no native storage/link/fit/CPU/device acceptance",
+  "scope": "Runtime-only immutable direct-word morph read seam; original oracle/member/C morph unchanged; raw Tables retained; no codec/placement/executable/firmware/CPU/device acceptance",
   "files": [
     {
-      "path": "scheduler.hpp",
-      "bytes": 5230,
-      "sha256": "8af1434ea35e5a3eafa1fe1b116ebd5c5b1af2b550e7018631bd0abb71d0b8dc",
-      "git_blob_sha": "9b0f8d7d910ccf1139ed228317c12e3ed60579a8"
-    },
-    {
-      "path": "scheduler.cpp",
-      "bytes": 14213,
-      "sha256": "fbdbae59a829d66f85e6eaad7b8b0c99d6da6d09e2729eeb7acf89b4289a5479",
-      "git_blob_sha": "418f9c8c3e0e7ced6080334316fef728c41fcc95"
-    },
-    {
-      "path": "tests/scheduler_test.cpp",
-      "bytes": 21372,
-      "sha256": "af5117c4aaefa65a4b4381d996e604eff87a1fde26a3361a3f257a11d9e1f162",
-      "git_blob_sha": "86c2743b414ff4b19081fd0008b06523b9c50b31"
-    },
-    {
-      "path": "run_tests.py",
-      "bytes": 8458,
-      "sha256": "85d290e5e009eba32119456570af507b5d7e31774b5b67e158f65f4ec8b4ea80",
-      "git_blob_sha": "897a09bccdfa1c999bb7536cc0f4ed3fce10fd6e"
-    },
-    {
-      "path": "mutation_checks.py",
-      "bytes": 6108,
-      "sha256": "da32764a6b1d0fbc0f079e4655753fa993c3e93a62b953275d31916fd7f8a543",
-      "git_blob_sha": "4c10e56fa82f24cfdd55b36d2acdb23973685d6c"
+      "path": ".gitignore",
+      "bytes": 39,
+      "sha256": "6d9dd2863a77d46eb538f9032b69297ef450edf9afcd2b99ed117d80a0cb1a74",
+      "git_blob_sha": "f5b12847bf65ebf58c92f376a2045bf10e05c7e6"
     },
     {
       "path": "DEPENDENCIES.json",
@@ -39,58 +15,16 @@
       "git_blob_sha": "5714a90bb313de24dcf610d1a689ffe77cb88495"
     },
     {
+      "path": "NATIVE-TOOLCHAIN.json",
+      "bytes": 4991,
+      "sha256": "56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e",
+      "git_blob_sha": "e6432728b8e14b7b781d3b24e9fe8347db5b0efb"
+    },
+    {
       "path": "README.md",
-      "bytes": 22800,
-      "sha256": "ebe6ce21d1d9c37fe38e95c8ed2f7d08ff34fa3f8cf17fe54e4c82e6594e55de",
-      "git_blob_sha": "e94212ae30782d0ebd4e9e075a7f82a165cdfa7a"
-    },
-    {
-      "path": "oracle/generate.py",
-      "bytes": 16341,
-      "sha256": "eb3194acb907950d64f635a1120cf52fb5d8b98dd65ccf4794a73a9ef0ca4175",
-      "git_blob_sha": "90838c48aafa51bf33b28b678a47204c06a46609"
-    },
-    {
-      "path": "oracle/state.hpp",
-      "bytes": 2563,
-      "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
-      "git_blob_sha": "419cc659262c7001317ebeb4c88e4b4236207318"
-    },
-    {
-      "path": "oracle/oracle.hpp",
-      "bytes": 2501,
-      "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
-      "git_blob_sha": "5c9bdf8004a48c9c135556cb539051766bd90ed0"
-    },
-    {
-      "path": "oracle/oracle.cpp",
-      "bytes": 15017,
-      "sha256": "7526b71d59063dca29c9dbd41a64e01414f46fe31974784e3eb18e1d505e498c",
-      "git_blob_sha": "a861d7fb50845e271b23e96fc3b69e1edc7a6d40"
-    },
-    {
-      "path": "oracle/MANIFEST.json",
-      "bytes": 14898,
-      "sha256": "7621bc06fd13969e5ceb6a7182ee12b6760911a9c29c8de613a750caecf1060a",
-      "git_blob_sha": "964c334671c9703c90f578bdae719512c3a4301c"
-    },
-    {
-      "path": "notices/SynthOne-MIT.txt",
-      "bytes": 1075,
-      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
-      "git_blob_sha": "be8551b835e760f321887b531d2f09d8ffa05c5a"
-    },
-    {
-      "path": "notices/AudioKit-4.9.2-MIT.txt",
-      "bytes": 1085,
-      "sha256": "b9aad96b49e7afcadb3f351b733de24577924b3ba48c82a3e07393d8b9f96c5e",
-      "git_blob_sha": "e99249a865bfbacdeeda22e965268a42ff638913"
-    },
-    {
-      "path": ".gitignore",
-      "bytes": 39,
-      "sha256": "6d9dd2863a77d46eb538f9032b69297ef450edf9afcd2b99ed117d80a0cb1a74",
-      "git_blob_sha": "f5b12847bf65ebf58c92f376a2045bf10e05c7e6"
+      "bytes": 27422,
+      "sha256": "6b857ec15d3dbe68e3c7b4df891fb76d8ffe40f856a058ee1ecd42cdb1bb9a44",
+      "git_blob_sha": "0d558109894270c3834ee579bcebe6d5ac6fd0d1"
     },
     {
       "path": "fixed_array.hpp",
@@ -99,30 +33,168 @@
       "git_blob_sha": "8039d3dc33a01beda447768e8f392e0229857f40"
     },
     {
+      "path": "mutation_checks.py",
+      "bytes": 6108,
+      "sha256": "da32764a6b1d0fbc0f079e4655753fa993c3e93a62b953275d31916fd7f8a543",
+      "git_blob_sha": "4c10e56fa82f24cfdd55b36d2acdb23973685d6c"
+    },
+    {
+      "path": "notices/AudioKit-4.9.2-MIT.txt",
+      "bytes": 1085,
+      "sha256": "b9aad96b49e7afcadb3f351b733de24577924b3ba48c82a3e07393d8b9f96c5e",
+      "git_blob_sha": "e99249a865bfbacdeeda22e965268a42ff638913"
+    },
+    {
+      "path": "notices/SynthOne-MIT.txt",
+      "bytes": 1075,
+      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "git_blob_sha": "be8551b835e760f321887b531d2f09d8ffa05c5a"
+    },
+    {
+      "path": "oracle/MANIFEST.json",
+      "bytes": 14898,
+      "sha256": "7621bc06fd13969e5ceb6a7182ee12b6760911a9c29c8de613a750caecf1060a",
+      "git_blob_sha": "964c334671c9703c90f578bdae719512c3a4301c"
+    },
+    {
+      "path": "oracle/generate.py",
+      "bytes": 16341,
+      "sha256": "eb3194acb907950d64f635a1120cf52fb5d8b98dd65ccf4794a73a9ef0ca4175",
+      "git_blob_sha": "90838c48aafa51bf33b28b678a47204c06a46609"
+    },
+    {
+      "path": "oracle/oracle.cpp",
+      "bytes": 15017,
+      "sha256": "7526b71d59063dca29c9dbd41a64e01414f46fe31974784e3eb18e1d505e498c",
+      "git_blob_sha": "a861d7fb50845e271b23e96fc3b69e1edc7a6d40"
+    },
+    {
+      "path": "oracle/oracle.hpp",
+      "bytes": 2501,
+      "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+      "git_blob_sha": "5c9bdf8004a48c9c135556cb539051766bd90ed0"
+    },
+    {
+      "path": "oracle/state.hpp",
+      "bytes": 2563,
+      "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+      "git_blob_sha": "419cc659262c7001317ebeb4c88e4b4236207318"
+    },
+    {
+      "path": "reader/DERIVATION.json",
+      "bytes": 1879,
+      "sha256": "2820f8abfdb46b2b6d88e05d974c7161270a21971522a85252d3a7f4554db084",
+      "git_blob_sha": "1a38e75ff771b7e96a4cc93fd8ca9c0586ce530b"
+    },
+    {
+      "path": "reader/direct_reader.c",
+      "bytes": 2370,
+      "sha256": "bfbcd1fdc437e5be79e34bd32406046037599ee69011c9aff3aaa35bad9646ca",
+      "git_blob_sha": "9d688b237d11ac33470ab37200aa4188305f63f8"
+    },
+    {
+      "path": "reader/direct_reader.h",
+      "bytes": 1157,
+      "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+      "git_blob_sha": "0207ff61c8122e2f39e156c58a690cf06ee46b8c"
+    },
+    {
+      "path": "reader/generate.py",
+      "bytes": 6411,
+      "sha256": "ce54d06e5edee400799325f0d98e9e8812b92b89d80570aee5daaf37968d8e6d",
+      "git_blob_sha": "32fdbdec08ba2b3718e8db3b0db45aefcf38fe30"
+    },
+    {
+      "path": "reader/morph_compute.c",
+      "bytes": 3192,
+      "sha256": "882bf2072ee1faa653c7a627f04edc046772a056e76a0b85c7e96d4c4e53eec3",
+      "git_blob_sha": "51cb9f0dec08dd6d854ed23dd0517291dc15b815"
+    },
+    {
+      "path": "reader/morph_compute.h",
+      "bytes": 484,
+      "sha256": "6511254e505de28456aaf64428e2b2f6bb468ac7b681c1e5e950dc34c455e1d0",
+      "git_blob_sha": "5b2fa90ad304e3423f085199851e41ba312dde6e"
+    },
+    {
+      "path": "reader/runtime_note.cpp",
+      "bytes": 11811,
+      "sha256": "b331d9bf140632564e6abd18b0ee5da6cf7576df6692b49b1bd110896bd2bcbc",
+      "git_blob_sha": "0fe20eedb03d1220a3314a201823cb21dca06489"
+    },
+    {
+      "path": "reader/runtime_note.hpp",
+      "bytes": 182,
+      "sha256": "2943c6d7ab1d283e8518fb52d9f93ffd9a74249f6c5f677f224a068673ee0d80",
+      "git_blob_sha": "0b07fa122d55b89b95419c9b3d6ce2ae335c1c29"
+    },
+    {
+      "path": "reader_mutation_checks.py",
+      "bytes": 8939,
+      "sha256": "9c8dd07beed515408c0d91f80d1a6daa4d535bedf72772fc1e1244e0c8318877",
+      "git_blob_sha": "53618a253932adb039ba05ed02ca74405833c1ad"
+    },
+    {
       "path": "run_native.py",
-      "bytes": 9390,
-      "sha256": "15e3b556d7460ed504b14d245b1c6f30df767b26e695cc7868230af2b296ab58",
-      "git_blob_sha": "45cf95eda7bf0802cd1b052668b40bc6f4f0877a"
+      "bytes": 10337,
+      "sha256": "1ff996400f8bafaf7192450ff984a54e4820068488a56ae21f453c838ae691ff",
+      "git_blob_sha": "b98948b9babeda7b2ffb956eb3352e2caa500ddc"
     },
     {
-      "path": "NATIVE-TOOLCHAIN.json",
-      "bytes": 4991,
-      "sha256": "56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e",
-      "git_blob_sha": "e6432728b8e14b7b781d3b24e9fe8347db5b0efb"
+      "path": "run_tests.py",
+      "bytes": 9753,
+      "sha256": "8db9fff309ad5a881fe9d653a71a0828a7c11b8966cd42b4b479dff1994f9f16",
+      "git_blob_sha": "dc044244a5106fd927ccb63d5e6fbc83ff249de9"
     },
     {
-      "path": "tests/native_inputs_test.py",
-      "bytes": 5250,
-      "sha256": "60723198aa102b9c6b7f60a3581f659cc06bf82084fd803b2814cc8749e8aee5",
-      "git_blob_sha": "2e071856b14fa57937aa0dc9c60dc29b8fad2698"
+      "path": "scheduler.cpp",
+      "bytes": 16881,
+      "sha256": "60a87209b4cf6a0318e24b2a54d2098c353d905927960c0bbfa0d0f3a9e9280a",
+      "git_blob_sha": "48c410bb2726aa513b714d10d21144cdf82a419f"
+    },
+    {
+      "path": "scheduler.hpp",
+      "bytes": 6188,
+      "sha256": "bb7d2c73771213766d58ee0105ca2f498dbb950a268db5b3603c64359e1bd3f9",
+      "git_blob_sha": "644aa71149786e5b2ff98088565008770ca0aeec"
     },
     {
       "path": "tests/alias_composition_test.cpp",
       "bytes": 13615,
       "sha256": "cd998af63cdac6c9d28b4300c3376cc46a24337ef242da899ea92105ef161192",
       "git_blob_sha": "8c4791565fa8a775dc0c5204e2106d91d06b2131"
+    },
+    {
+      "path": "tests/direct_reader_test.c",
+      "bytes": 3752,
+      "sha256": "ec87dc69d17e6e6f86bef2d37d76627f7595b352d68121681f1987f4fd2a964b",
+      "git_blob_sha": "34e37d1ea94aa2327343c2d0bb3f5eb77ad3a73e"
+    },
+    {
+      "path": "tests/morph_reader_test.c",
+      "bytes": 4614,
+      "sha256": "750958ac0d94298005059994b7a0f6d8050cfea9ed1a55a4b3d67c9b3b824677",
+      "git_blob_sha": "5639ae9ec28cea98513b53192b138a9843975289"
+    },
+    {
+      "path": "tests/native_inputs_test.py",
+      "bytes": 5250,
+      "sha256": "74c0ea362c3b879625bda60c9a00338ce3b9866139fc14491f83fab94964e7ad",
+      "git_blob_sha": "9d25b8be2ab05358fee90ad516ce733ac9c99a79"
+    },
+    {
+      "path": "tests/reader_scheduler_test.cpp",
+      "bytes": 17358,
+      "sha256": "7ce2fe51f4c46c53b963911f175324c4aa7a1426e7e12f757b6cce8b6685407b",
+      "git_blob_sha": "7baf2fe6c9910b89f87f00eb4dd2f023dbc62990"
+    },
+    {
+      "path": "tests/scheduler_test.cpp",
+      "bytes": 21372,
+      "sha256": "af5117c4aaefa65a4b4381d996e604eff87a1fde26a3361a3f257a11d9e1f162",
+      "git_blob_sha": "86c2743b414ff4b19081fd0008b06523b9c50b31"
     }
   ],
-  "origin_source_manifest_sha256": "d138334eb8a6eb800b1022a8d58b828aafe149d2408d1e3977184bdd46c8d58c",
-  "baseline_commit": "bb6745d6f794d4befe6d03610e51400891bb25e1"
+  "origin_source_manifest_sha256": "03e8c7dd175027352fce18266c2c2c1677e2b2cdd0a9e3396f9aea1b011412ed",
+  "baseline_commit": "1c4c0fff8142226e9daee90db94b362cac40ded3"
 }

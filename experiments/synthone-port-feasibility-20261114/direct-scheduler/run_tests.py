@@ -15,6 +15,7 @@ def main():
     p.add_argument('--master-root',type=Path,required=True)
     p.add_argument('--tables',type=Path,required=True)
     p.add_argument('--variant',choices=['o2','os','sanitize'],default='o2')
+    p.add_argument('--reader-composition',action='store_true',help='Compare runtime-only direct reader against unchanged oracle')
     p.add_argument('--alias-composition',action='store_true',help='Compare exact packed aliases with the distinct-row oracle')
     p.add_argument('--smoke',action='store_true',help='Run only the portable consumer binding smoke, preserving full prior fixture evidence separately')
     p.add_argument('--build-root',type=Path,help='Optional isolated directory for this run and its staged closure')
@@ -43,13 +44,15 @@ def main():
         for name,data in entries.items():
             destination=staged[group]/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
     local=out/'closure/scheduler'
-    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
+    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','tests/reader_scheduler_test.cpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
     local_manifest=[]
     for name in local_files:
         data=(root/name).read_bytes();destination=local/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
         local_manifest.append({'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
     (out/'COMPILED-SOURCES.json').write_text(json.dumps(local_manifest,indent=2)+'\n')
     test_source=local/'tests/scheduler_test.cpp'
+    if sum((a.alias_composition,a.reader_composition,a.smoke))>1: raise SystemExit('choose exactly one specialized fixture')
+    if a.reader_composition: test_source=local/'tests/reader_scheduler_test.cpp'
     if a.alias_composition and a.smoke: raise SystemExit('choose alias composition or smoke, not both')
     if a.alias_composition: test_source=local/'tests/alias_composition_test.cpp'
     if a.smoke:
@@ -85,6 +88,10 @@ int main(int argc,char**argv) {
     for name in ['oracle.hpp','oracle.cpp','MANIFEST.json']:
         if (generated/name).read_bytes()!=(local/'oracle'/name).read_bytes():
             raise SystemExit('actual-source oracle binding mismatch: '+name)
+    reader_generated=out/'reader-binding'
+    subprocess.run([__import__('sys').executable,str(local/'reader/generate.py'),'--experiment-root',str(staged['experiment']),'--output-dir',str(reader_generated)],check=True,stdout=subprocess.DEVNULL)
+    for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
+        if (reader_generated/name).read_bytes()!=(local/'reader'/name).read_bytes(): raise SystemExit('reader source derivation mismatch: '+name)
     core=staged['experiment']/'audiokit-4.9.2/AudioKit/Core'
     includes=[local,staged['experiment']/'probe',staged['experiment']/'shared-graph',staged['controls'],core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav']
     flags=['-fno-builtin','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-misleading-indentation']
@@ -104,12 +111,12 @@ int main(int argc,char**argv) {
     for name in ['base','ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']:
         dest=out/(name+'.o');objects.append(dest)
         command([os.environ.get('CC','cc'),'-std=gnu99','-DNO_LIBSNDFILE']+flags+['-Wno-error']+inc+['-c',core/'Soundpipe/modules'/(name+'.c'),'-o',dest])
-    sources=[('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c'),('voice',staged['experiment']/'probe/portable_voice.cpp','c++'),('parameter_map',staged['controls']/'generated/parameter_map.cpp','c++'),('ports',staged['controls']/'parameter_ports.cpp','c++'),('scheduler',local/'scheduler.cpp','c++'),('oracle',local/'oracle/oracle.cpp','c++'),('test',test_source,'c++')]
+    sources=[('direct_reader',local/'reader/direct_reader.c','c'),('runtime_morph',local/'reader/morph_compute.c','c'),('runtime_note',local/'reader/runtime_note.cpp','c++'),('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c'),('voice',staged['experiment']/'probe/portable_voice.cpp','c++'),('parameter_map',staged['controls']/'generated/parameter_map.cpp','c++'),('ports',staged['controls']/'parameter_ports.cpp','c++'),('scheduler',local/'scheduler.cpp','c++'),('oracle',local/'oracle/oracle.cpp','c++'),('test',test_source,'c++')]
     for name,source,lang in sources:
         dest=out/(name+'.o');objects.append(dest)
         command([os.environ.get('CC' if lang=='c' else 'CXX','cc' if lang=='c' else 'c++'),'-std=gnu99' if lang=='c' else '-std=c++11','-DNO_LIBSNDFILE']+flags+(['-Wno-error'] if name in ['morph','voice'] else [])+inc+['-c',source,'-o',dest])
     binary=out/'scheduler_test'
-    command([os.environ.get('CXX','c++')]+flags+objects+(['-Wl,--wrap=sp_oscmorph2d_compute'] if a.alias_composition else [])+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
+    command([os.environ.get('CXX','c++')]+flags+objects+(['-Wl,--wrap=sp_oscmorph2d_compute'] if a.alias_composition else ['-Wl,--wrap=s1_runtime_morph_compute','-Wl,--wrap=s1_morph_read_word'] if a.reader_composition else [])+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
     env=dict(build_env,ASAN_OPTIONS='detect_leaks=1')
     result=subprocess.run([str(binary),str(staged_tables)],text=True,capture_output=True,env=env)
     (out/'stdout.txt').write_text(result.stdout);(out/'stderr.txt').write_text(result.stderr)

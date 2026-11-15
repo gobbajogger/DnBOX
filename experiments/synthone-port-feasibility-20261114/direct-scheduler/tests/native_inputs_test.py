@@ -68,11 +68,11 @@ def main():
         (out/(name+'.stdout')).write_text(q.stdout);(out/(name+'.stderr')).write_text(q.stderr)
         require(q.returncode==0,'native strict-profile build failed: '+name+' '+q.stderr)
         summary=json.loads(q.stdout);build=Path(summary['result_directory'])
-        report=json.loads((build/'RESULT.json').read_text());require(report['runtime_objects']==17,'native profile object count')
+        report=json.loads((build/'RESULT.json').read_text());require(report['runtime_objects']==20,'native profile object count')
         profile={unit['name']:executable_sections(build/(unit['name']+'.o')) for unit in report['units'] if unit['name']!='layout'}
         profiles.append(profile)
     require(profiles[0]==profiles[1],'ambient CCC_OVERRIDE_OPTIONS changed native executable sections')
-    result={'scope':'native input rejection plus object-level strict numeric environment invariant; no target execution/fit','cases':results,'driver_override_invariant':True,'native_profile_builds':2,'runtime_objects_compared':17}
+    result={'scope':'native input rejection plus object-level strict numeric environment invariant; no target execution/fit','cases':results,'driver_override_invariant':True,'native_profile_builds':2,'runtime_objects_compared':20}
     (out/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({'cases':len(results),'all_rejected_before_build':True,'driver_override_invariant':True,'result_directory':str(out)}))
 
 if __name__=='__main__':main()

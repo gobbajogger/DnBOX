@@ -3,6 +3,7 @@
 #include "shared_graph.hpp"
 #include "parameter_ports.hpp"
 #include "fixed_array.hpp"
+#include "reader/direct_reader.h"
 #include <stddef.h>
 
 namespace s1scheduler {
@@ -86,11 +87,18 @@ public:
     void trace(unsigned phase, unsigned frame) const {
         if(trace_fn) trace_fn(*this,phase,frame,trace_context);
     }
+    bool using_reader() const { return reader_active_; }
+    const s1_morph_binding &reader_binding() const { return reader_; }
 protected:
     RuntimeState() = default;
     bool init_runtime(const synthone_shared::Tables &, int, const float *, size_t,
                       const float *, size_t, InstanceSpan);
     bool restore_runtime(const float *, size_t, InstanceSpan);
+    bool init_reader_runtime(const synthone_shared::Tables &, const void *, size_t,
+                      int, const float *, size_t, const float *, size_t, InstanceSpan);
+    bool valid_runtime_output(float *,float *,unsigned,unsigned,InstanceSpan) const;
+    s1_morph_binding reader_{};
+    bool reader_active_ = false;
 };
 
 // Concrete wrappers authenticate the entire final object, not its common base.
@@ -105,12 +113,18 @@ public:
               size_t count, const float *tuning, size_t tuning_count) {
         return init_runtime(tables,rate,values,count,tuning,tuning_count,{this,sizeof *this});
     }
+    // First reader slice retains all real Tables pointers and validates their
+    // exact packed address mapping. This is not a metadata-only codec binding.
+    bool init_reader(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
+              int rate,const float *values,size_t count,const float *tuning,size_t tuning_count) {
+        return init_reader_runtime(tables,packed,bytes,rate,values,count,tuning,tuning_count,{this,sizeof *this});
+    }
     // Source restoreValues note/control boundary only; absent FX/rates excluded.
     bool restore(const float *values, size_t count) {
         return restore_runtime(values,count,{this,sizeof *this});
     }
     bool valid_output(float *l, float *r, unsigned n, unsigned offset) const {
-        return valid_output_span(l,r,n,offset,{this,sizeof *this});
+        return valid_runtime_output(l,r,n,offset,{this,sizeof *this});
     }
     bool set_target(unsigned parameter, float resolved_value);
     bool start(int pitch, int velocity, float ignored_frequency = 1.f);
