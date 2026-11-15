@@ -15,6 +15,7 @@ def main():
     p.add_argument('--master-root',type=Path,required=True)
     p.add_argument('--tables',type=Path,required=True)
     p.add_argument('--variant',choices=['o2','os','sanitize'],default='o2')
+    p.add_argument('--alias-composition',action='store_true',help='Compare exact packed aliases with the distinct-row oracle')
     p.add_argument('--smoke',action='store_true',help='Run only the portable consumer binding smoke, preserving full prior fixture evidence separately')
     p.add_argument('--build-root',type=Path,help='Optional isolated directory for this run and its staged closure')
     a=p.parse_args()
@@ -42,13 +43,15 @@ def main():
         for name,data in entries.items():
             destination=staged[group]/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
     local=out/'closure/scheduler'
-    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
+    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py']
     local_manifest=[]
     for name in local_files:
         data=(root/name).read_bytes();destination=local/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
         local_manifest.append({'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
     (out/'COMPILED-SOURCES.json').write_text(json.dumps(local_manifest,indent=2)+'\n')
     test_source=local/'tests/scheduler_test.cpp'
+    if a.alias_composition and a.smoke: raise SystemExit('choose alias composition or smoke, not both')
+    if a.alias_composition: test_source=local/'tests/alias_composition_test.cpp'
     if a.smoke:
         # Reuse the unchanged canonical snapshot/NoHeap/Pair helpers, without
         # executing the current full-suite entry point or its 54 cases.
@@ -106,7 +109,7 @@ int main(int argc,char**argv) {
         dest=out/(name+'.o');objects.append(dest)
         command([os.environ.get('CC' if lang=='c' else 'CXX','cc' if lang=='c' else 'c++'),'-std=gnu99' if lang=='c' else '-std=c++11','-DNO_LIBSNDFILE']+flags+(['-Wno-error'] if name in ['morph','voice'] else [])+inc+['-c',source,'-o',dest])
     binary=out/'scheduler_test'
-    command([os.environ.get('CXX','c++')]+flags+objects+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
+    command([os.environ.get('CXX','c++')]+flags+objects+(['-Wl,--wrap=sp_oscmorph2d_compute'] if a.alias_composition else [])+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
     env=dict(build_env,ASAN_OPTIONS='detect_leaks=1')
     result=subprocess.run([str(binary),str(staged_tables)],text=True,capture_output=True,env=env)
     (out/'stdout.txt').write_text(result.stdout);(out/'stderr.txt').write_text(result.stderr)

@@ -69,7 +69,7 @@ static void record(Snapshot&z,const S1NoteState&a,bool initialized){
     record(z,*a.morphCrossFade);record(z,*a.filterCrossFade);record(z,*a.subOsc);record(z,*a.fmOsc);
     record(z,*a.noise);record(z,*a.loPass);record(z,*a.bandPass);record(z,*a.hiPass);
 }
-static Snapshot common_capture(const State&a){
+static Snapshot common_capture(const State&a,bool include_table_addresses=true){
     Snapshot z;
     F(parameters);F(playingNoteStatesIndex);F(monoFrequency);F(monoFrequencySmooth);F(previousProcessMonoPolyStatus);
     F(resetted);F(initializedNoteStates);F(processSampleCounter);
@@ -82,7 +82,7 @@ static Snapshot common_capture(const State&a){
     F(lfo1_0_1);F(lfo1_1_0);F(lfo2_0_1);F(lfo2_1_0);F(lfo3_0_1);F(lfo3_1_0);F(lfo1Smooth);F(lfo2Smooth);
     z.put(a.sp->sr);z.put(a.sp->rand);z.put(a.sp->pos);z.put(*a.sp->out);z.put(a.sp->nchan);z.put(a.sp->len);z.put(a.sp->filename);
     z.put(a.ft_frequencyBand);z.put(a.initialized());
-    for(unsigned i=0;i<53;++i){const auto&d=i<52?*a.ft_array[i]:*a.sine;z.put(d.size);z.put(d.lobits);z.put(d.lomask);z.put(d.lodiv);z.put(d.sicvt);z.put(d.del);z.put(d.tbl);}
+    for(unsigned i=0;i<53;++i){const auto&d=i<52?*a.ft_array[i]:*a.sine;z.put(d.size);z.put(d.lobits);z.put(d.lomask);z.put(d.lodiv);z.put(d.sicvt);z.put(d.del);if(include_table_addresses)z.put(d.tbl);else z.put(i);}
     return z;
 }
 static Snapshot capture(const RuntimeState&a){

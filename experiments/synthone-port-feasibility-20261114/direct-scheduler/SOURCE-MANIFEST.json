@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Freestanding runtime native portability and compiler-evaluated layout; no firmware link/resource/CPU/device acceptance",
+  "scope": "Exact immutable alias host/scheduler composition; runtime and original oracle arithmetic unchanged; no native storage/link/fit/CPU/device acceptance",
   "files": [
     {
       "path": "scheduler.hpp",
@@ -16,15 +16,15 @@
     },
     {
       "path": "tests/scheduler_test.cpp",
-      "bytes": 21297,
-      "sha256": "28399895e363578e2f0a8243b68048b3cb2fa1cfb2b8165d960330b59f85f994",
-      "git_blob_sha": "3507810c6b2fb5349afe49ab12eedc25779f5cfe"
+      "bytes": 21372,
+      "sha256": "af5117c4aaefa65a4b4381d996e604eff87a1fde26a3361a3f257a11d9e1f162",
+      "git_blob_sha": "86c2743b414ff4b19081fd0008b06523b9c50b31"
     },
     {
       "path": "run_tests.py",
-      "bytes": 8041,
-      "sha256": "64d280533dd95273a7195c947e8f1415150f3efb5350b41d9792296a75f107e9",
-      "git_blob_sha": "7cc296d027a6c2fa2fb2262049d12c69ecadc72f"
+      "bytes": 8458,
+      "sha256": "85d290e5e009eba32119456570af507b5d7e31774b5b67e158f65f4ec8b4ea80",
+      "git_blob_sha": "897a09bccdfa1c999bb7536cc0f4ed3fce10fd6e"
     },
     {
       "path": "mutation_checks.py",
@@ -40,9 +40,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 17954,
-      "sha256": "f18a26fc84f6b5e69835f49275553f4f8f02fa1681eaa0eafc0340eb687683df",
-      "git_blob_sha": "ff7dc6dee36f51e9ca57c4231adfec4d02936490"
+      "bytes": 22800,
+      "sha256": "ebe6ce21d1d9c37fe38e95c8ed2f7d08ff34fa3f8cf17fe54e4c82e6594e55de",
+      "git_blob_sha": "e94212ae30782d0ebd4e9e075a7f82a165cdfa7a"
     },
     {
       "path": "oracle/generate.py",
@@ -115,8 +115,14 @@
       "bytes": 5250,
       "sha256": "60723198aa102b9c6b7f60a3581f659cc06bf82084fd803b2814cc8749e8aee5",
       "git_blob_sha": "2e071856b14fa57937aa0dc9c60dc29b8fad2698"
+    },
+    {
+      "path": "tests/alias_composition_test.cpp",
+      "bytes": 13615,
+      "sha256": "cd998af63cdac6c9d28b4300c3376cc46a24337ef242da899ea92105ef161192",
+      "git_blob_sha": "8c4791565fa8a775dc0c5204e2106d91d06b2131"
     }
   ],
-  "origin_source_manifest_sha256": "2b7cdc90cd7f3399c0b3dd08ed32e3ec997e0d1a006caea77c19dca1c902e48f",
-  "baseline_commit": "b0013c8a8d7209a155494f5e9b4952dedde87ba2"
+  "origin_source_manifest_sha256": "d138334eb8a6eb800b1022a8d58b828aafe149d2408d1e3977184bdd46c8d58c",
+  "baseline_commit": "bb6745d6f794d4befe6d03610e51400891bb25e1"
 }
