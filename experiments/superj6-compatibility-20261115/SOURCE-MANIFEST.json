@@ -1,0 +1,70 @@
+{
+  "format": "sj6x-original-proxy-source/1",
+  "scope": "Isolated ORIGINAL approximate proxy, NOT AudioKit originalJ6/source/model/fidelity or firmware",
+  "files": [
+    {
+      "path": "sj6x.c",
+      "bytes": 6787,
+      "sha256": "f933ae088a3a5162626cc3c3dddd723573b6b5bf852a96ea0832244a12ca9b37",
+      "git_blob_sha": "1b396033fef15cab33472f9a23216cc5e67651d4"
+    },
+    {
+      "path": "sj6x.h",
+      "bytes": 1989,
+      "sha256": "b3048011106af2b6007a05dca09391ebce514516a96092ca07ec2f2bb94ef8e5",
+      "git_blob_sha": "385205dde2cb34931ec5716ab7481d4aae7af578"
+    },
+    {
+      "path": "projection.py",
+      "bytes": 5530,
+      "sha256": "8f846b5f09e7cbfd80229621645452b718e443c0a7ca9a54f70789c248cb458b",
+      "git_blob_sha": "8ea962eb52b6e68b87a84be7777ce44bafe0e2f9"
+    },
+    {
+      "path": "test_projection.py",
+      "bytes": 3844,
+      "sha256": "58d201ee6899d4d76997f68305654db6730da973c6c3b5145c5766b8e167a440",
+      "git_blob_sha": "b5e1d48ce8c756b5178a7939136bc68dffa13bc8"
+    },
+    {
+      "path": "test_sj6x.c",
+      "bytes": 3173,
+      "sha256": "a861fe17d52e5990386bffc72d95a685736e125ef90024418eeaf8d78654c188",
+      "git_blob_sha": "534f5b3ee05d43f0adc59cb9ec51b0270945e4af"
+    },
+    {
+      "path": "run_corpus.py",
+      "bytes": 6598,
+      "sha256": "06c6633c43f686d3cb3238a5a2e8218b09cfc5b233cb94c8259fe6e6c22f8150",
+      "git_blob_sha": "df6aed6c0a8a7010b56825987f23dc07f217136e"
+    },
+    {
+      "path": "run_tests.py",
+      "bytes": 3495,
+      "sha256": "245d40c30d15803fc0ac2c47341382f73a1d546df0aadf9690176fba3e316acc",
+      "git_blob_sha": "81235d005b9739c23c7e0f9ec4cd306dcaaebf1e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7503,
+      "sha256": "8ffeb68722d6919275d4c58cebabd057b69be8b102ddfc4b98d557655fbfae9d",
+      "git_blob_sha": "60d0bd3c87d17baf0f16ab1fa4877ce7c1b6dc15"
+    }
+  ],
+  "dependencies": {
+    "observation_commit": "3eaf1ad2d4de3c181e628916f64a3186baf0e7c7",
+    "observation_schema_sha256": "dc949084c01b1d377c53b7d9d6075a53d4a44ec4cf5763d649068256babda3ad",
+    "observation_mapping_sha256": "b3316e6ff8a18141b9d2aff874aacf04bfd9cb0f6411e0a6ce2733e1a4d68912",
+    "native_public_libc_commit": "035026fe70059af35e25c7c121b40f318b732fe3",
+    "native_public_libc_path": "firmware/src/libc.c",
+    "native_public_libc_blob": "40628a590ae4e130402c16a292e1b11629d1d1ee"
+  },
+  "excluded": [
+    "raw banks/envelopes/patch exports",
+    "IPA/model/proprietary source",
+    "SDK/toolchains",
+    "binaries/audio",
+    "private reports"
+  ],
+  "license": "GPL-3.0-only original project source; no original J6 license inferred"
+}
