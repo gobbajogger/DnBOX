@@ -1,0 +1,42 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {keyGeometry,wireSurface} from './surface.mjs';
+class E extends EventTarget{constructor(){super();this.attrs={};this.disabled=false;this.hidden=false;const s=new Set();this.classList={toggle:(k,on)=>on?s.add(k):s.delete(k),contains:k=>s.has(k)};}setAttribute(k,v){this.attrs[k]=v;}setPointerCapture(){}fire(name,p={}){const e=new Event(name,{cancelable:true});for(const[k,v]of Object.entries(p))Object.defineProperty(e,k,{value:v});this.dispatchEvent(e);}}
+const base=(held=0,grid=true)=>({physical:{held,padHeld:0},state:{gridPadAvailable:grid,keys:0},leds:{keys:0}});
+function setup(send=null){const commands=[],keys=Array.from({length:37},()=>new E()),pads=Array.from({length:16},()=>new E()),holdKey=new E(),holdPad=new E(),win=new E(),doc=new E();let selected=0;const s=wireSurface({send:send??(async(...a)=>commands.push(a)),keys,pads,holdKey,holdPad,keyValue:()=>selected,padValue:()=>0,win,doc});return {s,keys,pads,holdKey,holdPad,win,doc,commands,select:n=>selected=n};}
+test('geometry preserves22white15black C3-C6 identities and exact37IDs',()=>{const k=keyGeometry();assert.equal(k.length,37);assert.equal(k.filter(x=>!x.black).length,22);assert.equal(k.filter(x=>x.black).length,15);assert.equal(k[0].label,'C3');assert.equal(k[36].label,'C6');assert.equal(k[36].x,630);assert.deepEqual(k.map(x=>x.id),Array.from({length:37},(_,i)=>i));});
+test('direct key36 and selected key0 route physical100/0 with original ownership',async()=>{const x=setup();x.s.update(base());x.keys[36].fire('pointerdown',{pointerId:9,button:0});x.holdKey.fire('keydown',{key:'Enter',repeat:false});x.select(17);x.holdKey.fire('keyup',{key:'Enter'});x.keys[36].fire('pointerup',{pointerId:9});assert.deepEqual(x.commands,[['physical',36,100],['physical',0,100],['physical',0,0],['physical',36,0]]);});
+test('direct and selector same key share count; no intent displayed as acknowledged press',()=>{const x=setup();x.s.update(base());x.keys[0].fire('pointerdown',{pointerId:1,button:0});x.holdKey.fire('keydown',{key:' ',repeat:false});assert.equal(x.keys[0].classList.contains('key-pressed'),false);assert.equal(x.keys[0].attrs['aria-pressed'],'false');x.keys[0].fire('pointerup',{pointerId:1});assert.deepEqual(x.commands,[['physical',0,100]]);x.holdKey.fire('keyup',{key:' '});assert.deepEqual(x.commands,[['physical',0,100],['physical',0,0]]);});
+test('acknowledged37-bit feedback retains bit36 and nativeLEDs remain central27 only',()=>{const x=setup(),f=base(2**36+1);f.leds.keys=1;x.s.update(f);assert.equal(x.keys[36].classList.contains('key-pressed'),true);assert.equal(x.keys[0].attrs['aria-pressed'],'true');assert.equal(x.keys[5].classList.contains('key-led'),true);assert.equal(x.keys[0].classList.contains('key-led'),false);assert.equal(x.keys[36].classList.contains('key-led'),false);assert.equal(x.keys.every(k=>!k.disabled),true);});
+test('pads guard unavailable mode but always release original held pad after mode changes',()=>{const x=setup();x.s.update(base(0,false));x.pads[0].fire('pointerdown',{pointerId:1,button:0});assert.deepEqual(x.commands,[]);x.s.update(base());x.pads[0].fire('pointerdown',{pointerId:1,button:0});x.s.update(base(0,false));x.pads[0].fire('pointercancel',{pointerId:1});assert.deepEqual(x.commands,[['pad',0,1],['pad',0,0]]);});
+test('fixtureload releases source owners and host before changingfixture; laterkeyup no duplicate',async()=>{const x=setup();x.s.update(base());x.keys[2].fire('keydown',{key:'Enter',repeat:false});await x.s.loadFixture(8);x.keys[2].fire('keyup',{key:'Enter'});assert.deepEqual(x.commands,[['physical',2,100],['physical',2,0],['release'],['fixture',8]]);});
+test('windowblur/hide/releaseAll clear counted and host heldstate',async()=>{for(const event of ['blur','hide','reset']){const x=setup();x.s.update(base());x.pads[0].fire('pointerdown',{pointerId:4,button:0});if(event==='blur')x.win.fire('blur');if(event==='hide'){x.doc.hidden=true;x.doc.fire('visibilitychange');}if(event==='reset')await x.s.releaseAll();assert.equal(x.s.active,false);assert.deepEqual(x.commands,[['pad',0,1],['pad',0,0],['release']]);}});
+test('missing/invalidphysicalmetadata refuses to invent acknowledgedkeyfeedback',()=>{const x=setup();for(const n of [-1,2**37,NaN,1.5,'1'])assert.throws(()=>x.s.update(base(n)),/physical/);assert.throws(()=>x.s.update({state:{},leds:{}}),/physical/);});
+
+test('pad amber is C-owned padHeld not aggregate key or browser intent',()=>{const x=setup(),f=base(32);f.state.keys=1;x.s.update(f);assert.equal(x.pads[0].classList.contains('pressed'),false);f.physical.padHeld=32769;x.s.update(f);assert.equal(x.pads[0].classList.contains('pressed'),true);assert.equal(x.pads[15].attrs['aria-pressed'],'true');f.physical.held=0;x.s.update(f);assert.equal(x.pads[0].classList.contains('pressed'),true);});
+test('failed host release prevents fixture replacement and is reported',async()=>{const x=setup(),sent=[],errors=[];const s=wireSurface({send:async(...a)=>{sent.push(a);if(a[0]==='release')throw Error('transport unavailable');},keys:x.keys,pads:x.pads,holdKey:new E(),holdPad:new E(),keyValue:()=>0,padValue:()=>0,win:new E(),doc:new E(),onError:e=>errors.push(e.message)});await assert.rejects(()=>s.loadFixture(8),/transport/);assert.deepEqual(sent,[['release']]);assert.deepEqual(errors,['transport unavailable']);});
+
+test('F2 fixture transition blocks all new owners across deferred ordered host release',async()=>{
+ const sent=[];let finish;const gate=new Promise(r=>finish=r);let queue=Promise.resolve();
+ const x=setup((...a)=>{const work=queue.then(async()=>{sent.push(a);if(a[0]==='release')await gate;});queue=work.catch(()=>{});return work;});
+ x.s.update(base());const loading=x.s.loadFixture(8);await Promise.resolve();
+ x.s.update(base());x.keys[0].fire('pointerdown',{pointerId:1,button:0});x.holdKey.fire('keydown',{key:'Enter',repeat:false});
+ assert.throws(()=>x.s.pressLesson('during','physical',36),/transition/);finish();await loading;await queue;
+ assert.deepEqual(sent,[['release'],['fixture',8]]);assert.equal(x.s.active,false);
+ x.keys[0].fire('pointerdown',{pointerId:2,button:0});await queue;assert.deepEqual(sent.at(-1),['physical',0,100]);
+});
+test('F3 disposed API is guarded and teardown idempotent',async()=>{
+ const x=setup();x.s.update(base());await x.s.destroy();const prior=x.commands.length;
+ assert.throws(()=>x.s.pressLesson('after','physical',36),/disposed/);
+ assert.throws(()=>x.s.releaseLesson('after'),/disposed/);assert.throws(()=>x.s.update(base()),/disposed/);
+ await assert.rejects(()=>x.s.loadFixture(8),/disposed/);assert.throws(()=>x.s.releaseAll(),/disposed/);
+ x.keys[36].fire('pointerdown',{pointerId:3,button:0});await x.s.destroy();
+ assert.equal(x.s.active,false);assert.equal(x.commands.length,prior);
+});
+test('destroy during pending fixture prevents post-teardown fixture send',async()=>{
+ let finish;const gate=new Promise(r=>finish=r),sent=[];const x=setup(async(...a)=>{sent.push(a);if(a[0]==='release')await gate;});
+ x.s.update(base());const loading=x.s.loadFixture(8);const closed=x.s.destroy();finish();
+ await assert.rejects(()=>loading,/disposed/);await closed;assert.equal(sent.some(a=>a[0]==='fixture'),false);assert.equal(x.s.active,false);
+});
+test('lesson admission fails closed before the first valid C acknowledgement',()=>{const x=setup();assert.throws(()=>x.s.pressLesson('early','physical',36),/acknowledgement/);assert.equal(x.s.active,false);assert.deepEqual(x.commands,[]);});
+test('lesson cannot bypass a rejected reset until fresh valid C acknowledgement',async()=>{const sent=[],x=setup(async(...a)=>{sent.push(a);if(a[0]==='release')throw Error('release rejected');});x.s.update(base());await assert.rejects(()=>x.s.releaseAll(),/rejected/);assert.throws(()=>x.s.pressLesson('bypass','physical',36),/acknowledgement/);assert.equal(x.s.active,false);assert.deepEqual(sent,[['release']]);x.s.update(base());x.s.pressLesson('fresh','physical',36);assert.deepEqual(sent.at(-1),['physical',36,100]);});
+test('alternate hold aria-disabled returns to acknowledged availability after reset and fixture',async()=>{for(const action of ['reset','fixture']){const x=setup();x.s.update(base());if(action==='reset')await x.s.releaseAll();else await x.s.loadFixture(8);x.s.update(base());assert.equal(x.holdKey.disabled,false);assert.equal(x.holdPad.disabled,false);assert.equal(x.holdKey.attrs['aria-disabled'],'false');assert.equal(x.holdPad.attrs['aria-disabled'],'false');}});

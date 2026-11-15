@@ -1,0 +1,8 @@
+{
+  "repository": "gobbajogger/X0X37-for-Loopy-Pro",
+  "commit": "431d0db82cbadca761fb32c6548ca4765875324f",
+  "path": "web/dnbox/controls.js",
+  "blob": "bcbd15eeef70a7688a6ee340622719864d69e49f",
+  "license_blob": "7085c906c5d905fb71ba05c5d0221c4c1f79c118",
+  "adaptation": "Preserves heldRouter per-token and per-control counts; changes target API to physical100/0 and pad1/0; extracts reusable momentary/cancellation mount helpers. No MIDI_BASE or emulator pitch mapping copied."
+}
