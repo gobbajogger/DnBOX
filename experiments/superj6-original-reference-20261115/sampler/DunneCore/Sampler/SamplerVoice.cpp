@@ -13,9 +13,13 @@ namespace DunneCore
         leftFilter.init(sampleRate);
         rightFilter.init(sampleRate);
         leftSmoothFilter.init(sampleRate);
+        leftSyrupFilter.init(sampleRate);rightSyrupFilter.init(sampleRate);
+        leftOTAFilter.init(float(sampleRate));rightOTAFilter.init(float(sampleRate));
         rightSmoothFilter.init(sampleRate);
         ampEnvelope.init();
         filterEnvelope.init();
+        otaFilterEnvelope.pParameters=filterEnvelope.pParameters;
+        otaFilterEnvelope.init(ADSREnvelope::kOriginalOTA);
         pitchEnvelope.init();
         vibratoLFO.waveTable.sinusoid();
         vibratoLFO.init(sampleRate/CORESAMPLER_CHUNKSIZE, 5.0f);
@@ -42,7 +46,9 @@ namespace DunneCore
         rightFilter.updateSampleRate(double(samplingRate));
         leftSmoothFilter.updateSampleRate(double(samplingRate));
         rightSmoothFilter.updateSampleRate(double(samplingRate));
-        filterEnvelope.start();
+        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
+        filterEnvelope.start();otaFilterEnvelope.start();
 
         pitchEnvelope.start();
 
@@ -70,6 +76,8 @@ namespace DunneCore
         rightFilter.updateSampleRate(double(samplingRate));
         leftSmoothFilter.updateSampleRate(double(samplingRate));
         rightSmoothFilter.updateSampleRate(double(samplingRate));
+        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
         oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
         glideSemitones = 0.0f;
@@ -90,7 +98,7 @@ namespace DunneCore
         newSampleBuffer = buffer;
         ampEnvelope.restart();
         noteVolume = volume;
-        filterEnvelope.restart();
+        filterEnvelope.restart();otaFilterEnvelope.restart();
         pitchEnvelope.restart();
         restartVoiceLFOIfNeeded();
     }
@@ -102,6 +110,8 @@ namespace DunneCore
         rightFilter.updateSampleRate(double(samplingRate));
         leftSmoothFilter.updateSampleRate(double(samplingRate));
         rightSmoothFilter.updateSampleRate(double(samplingRate));
+        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
         oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
         float previousGlideSemitones = glideSemitones;
@@ -122,7 +132,7 @@ namespace DunneCore
         newSampleBuffer = buffer;
         ampEnvelope.restart();
         noteVolume = volume;
-        filterEnvelope.restart();
+        filterEnvelope.restart();otaFilterEnvelope.restart();
         pitchEnvelope.restart();
         restartVoiceLFOIfNeeded();
     }
@@ -131,7 +141,7 @@ namespace DunneCore
     {
         if (!loopThruRelease) oscillator.isLooping = false;
         ampEnvelope.release();
-        filterEnvelope.release();
+        filterEnvelope.release();otaFilterEnvelope.release();
         pitchEnvelope.release();
     }
     
@@ -140,7 +150,7 @@ namespace DunneCore
         noteNumber = -1;
         ampEnvelope.reset();
         volumeRamper.init(0.0f);
-        filterEnvelope.reset();
+        filterEnvelope.reset();otaFilterEnvelope.reset();
         pitchEnvelope.reset();
     }
 
@@ -200,6 +210,7 @@ namespace DunneCore
         float pitchOffsetModified = pitchOffset + glideSemitones + pitchEnvelopeSemitones + voiceLFOSemitones;
         oscillator.setPitchOffsetSemitones(pitchOffsetModified);
 
+        const float otaEnv=otaFilterEnvelope.getSample();
         // negative value of cutoffMultiple means filters are disabled
         if (cutoffMultiple < 0.0f)
         {
@@ -208,16 +219,32 @@ namespace DunneCore
         else
         {
             isFilterEnabled = true;
-            float noteHz = noteFrequency * powf(2.0f, (pitchOffsetModified) / 12.0f);
-            float baseFrequency = std::fma(keyTracking, noteHz - MIDDLE_C_HZ, MIDDLE_C_HZ);
-            float envStrength = std::fma(cutoffEnvelopeVelocityScaling, noteVolume, 1.0f - cutoffEnvelopeVelocityScaling);
-            double cutoffFrequency = baseFrequency * std::fma(cutoffEnvelopeStrength * envStrength, filterEnvelope.getSample(), 1.0f + cutoffMultiple);
-            if(useJunoFilter) {
-                leftSmoothFilter.setParameters(cutoffFrequency,resLinear);
-                rightSmoothFilter.setParameters(cutoffFrequency,resLinear);
+            float noteHz = noteFrequency * powf(2.0f, pitchOffsetModified / 12.0f);
+            float env=filterEnvelope.getSample();
+            if(useOTAFilter){
+                const float vel=std::fma(cutoffEnvelopeVelocityScaling,noteVolume,1.f-cutoffEnvelopeVelocityScaling);
+                float amount=cutoffEnvelopeStrength*14.f;amount=amount*vel;amount=otaEnv*amount;
+                const float key=keyTracking*std::log2(std::max(noteHz,1.f)/MIDDLE_C_HZ);
+                const float cutoff=std::min(std::max(std::max(userCutoff,3.f)*std::exp2(amount+key),3.f),30000.f);
+                const float q=(-20.f*std::log10(std::max(resLinear,.00009999999747378752f)))/18.989999771118164f;
+                leftOTAFilter.setParameters(double(cutoff),double(q),sampleCount);rightOTAFilter.setParameters(double(cutoff),double(q),sampleCount);
+            } else if(useSyrupFilter){
+                // The recorded component32=false path is note-relative.
+                // The separate vintageFilterADSR=true laws are not admitted here.
+                const float baseFrequency=std::fma(keyTracking,noteHz-MIDDLE_C_HZ,MIDDLE_C_HZ);
+                const float envStrength=std::fma(cutoffEnvelopeVelocityScaling,noteVolume,1.f-cutoffEnvelopeVelocityScaling);
+                const double cutoff=baseFrequency*std::fma(cutoffEnvelopeStrength*envStrength,env,1.f+cutoffMultiple);
+                leftSyrupFilter.fourPole=rightSyrupFilter.fourPole=syrup24;
+                leftSyrupFilter.setParameters(cutoff,resLinear);rightSyrupFilter.setParameters(cutoff,resLinear);
             } else {
-                leftFilter.setParameters(cutoffFrequency, resLinear);
-                rightFilter.setParameters(cutoffFrequency, resLinear);
+                float baseFrequency = std::fma(keyTracking, noteHz - MIDDLE_C_HZ, MIDDLE_C_HZ);
+                float envStrength = std::fma(cutoffEnvelopeVelocityScaling, noteVolume, 1.0f - cutoffEnvelopeVelocityScaling);
+                double cutoffFrequency = baseFrequency * std::fma(cutoffEnvelopeStrength * envStrength, env, 1.0f + cutoffMultiple);
+                if(useJunoFilter) {
+                    leftSmoothFilter.setParameters(cutoffFrequency,resLinear);rightSmoothFilter.setParameters(cutoffFrequency,resLinear);
+                } else {
+                    leftFilter.setParameters(cutoffFrequency,resLinear);rightFilter.setParameters(cutoffFrequency,resLinear);
+                }
             }
         }
         
@@ -228,13 +255,16 @@ namespace DunneCore
     {
         for (int i=0; i < sampleCount; i++)
         {
-            float gain = tempGain * volumeRamper.getNextValue();
+            float envelopeGain=volumeRamper.getNextValue();
+            float gain = tempGain * envelopeGain;
             float leftSample, rightSample;
-            if (oscillator.getSamplePair(sampleBuffer, sampleCount, &leftSample, &rightSample, gain))
+            if (oscillator.getSamplePair(sampleBuffer, sampleCount, &leftSample, &rightSample, useOTAFilter&&isFilterEnabled?1.f:useSyrupFilter&&isFilterEnabled?tempGain:gain))
                 return true;
             if (isFilterEnabled)
             {
-                if(useJunoFilter) {
+                if(useOTAFilter){*leftOutput++ += gain*leftOTAFilter.process(leftSample);*rightOutput++ += gain*rightOTAFilter.process(rightSample);}
+                else if(useSyrupFilter){*leftOutput++ += envelopeGain*leftSyrupFilter.process(leftSample);*rightOutput++ += envelopeGain*rightSyrupFilter.process(rightSample);}
+                else if(useJunoFilter) {
                     *leftOutput++ += leftSmoothFilter.process(leftSample);
                     *rightOutput++ += rightSmoothFilter.process(rightSample);
                 } else {

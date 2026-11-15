@@ -111,6 +111,8 @@ public:
     bool isFilterEnabled, restartVoiceLFO;
     bool useJunoFilter=false; // Requested original componentID33.
     bool activeJunoFilter=false;
+    bool useSyrupFilter=false,activeSyrupFilter=false,syrup24=false;
+    bool useOTAFilter=false,activeOTAFilter=false;float userCutoff=1000.f;
     float filterModeGain=1.f;
     
     // performance parameters

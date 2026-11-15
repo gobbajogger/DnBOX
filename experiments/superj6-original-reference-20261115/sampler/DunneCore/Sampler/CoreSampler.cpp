@@ -409,13 +409,17 @@ void CoreSampler::render(unsigned channelCount, unsigned sampleCount, float *out
     float *pOutLeft = outBuffers[0];
     float *pOutRight = outBuffers[1];
     bool fadingOut=false;
-    if (activeJunoFilter!=useJunoFilter) {
+    if (activeJunoFilter!=useJunoFilter || activeSyrupFilter!=useSyrupFilter || activeOTAFilter!=useOTAFilter) {
         if (filterModeGain>0.f) fadingOut=true;
         else {
             activeJunoFilter=useJunoFilter;
+            activeSyrupFilter=useSyrupFilter;
+            activeOTAFilter=useOTAFilter;
             for(int i=0;i<MAX_POLYPHONY;++i) {
                 auto& v=data->voice[i];
-                if(activeJunoFilter) {
+                if(activeOTAFilter){v.leftOTAFilter.clear();v.rightOTAFilter.clear();}
+                else if(activeSyrupFilter){v.leftSyrupFilter.init(currentSampleRate);v.rightSyrupFilter.init(currentSampleRate);}
+                else if(activeJunoFilter) {
                     v.leftSmoothFilter.init(currentSampleRate);
                     v.rightSmoothFilter.init(currentSampleRate);
                 } else {
@@ -437,6 +441,7 @@ void CoreSampler::render(unsigned channelCount, unsigned sampleCount, float *out
     {
         pVoice->restartVoiceLFO = restartVoiceLFO;
         pVoice->useJunoFilter = activeJunoFilter;
+        pVoice->useOTAFilter=activeOTAFilter;pVoice->useSyrupFilter = activeSyrupFilter;pVoice->userCutoff=userCutoff;pVoice->syrup24=syrup24;
         int nn = pVoice->noteNumber;
         if (nn >= 0)
         {

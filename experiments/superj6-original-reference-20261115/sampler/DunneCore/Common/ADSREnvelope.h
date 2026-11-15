@@ -42,7 +42,8 @@ namespace DunneCore
         {
             kLinear,        // all segments linear
             kAnalogLike,    // models CEM3310 integrated circuit
-            kLinearInDb     // decay and release are linear-in-dB
+            kOriginalOTA = 3,
+            kLinearInDb = 2     // decay and release are linear-in-dB
         };
 
         void init(CurvatureType curvatureType = kAnalogLike);
@@ -69,6 +70,7 @@ namespace DunneCore
         }
 
     protected:
+        CurvatureType currentCurvature = kAnalogLike;
         MultiSegmentEnvelopeGenerator env;
         MultiSegmentEnvelopeGenerator::Descriptor envDesc;
     };

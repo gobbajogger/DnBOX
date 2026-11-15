@@ -10,6 +10,8 @@
 #include "FunctionTable.h"
 #include "ResonantLowPassFilter.h"
 #include "OriginalSmoothPassFilter.h"
+#include "OriginalSyrupFilter.h"
+#include "OriginalOTAFilter.h"
 #include "LinearRamper.h"
 
 // process samples in "chunks" this size
@@ -31,8 +33,11 @@ namespace DunneCore
         ResonantLowPassFilter leftFilter, rightFilter;
         OriginalSmoothPassFilter leftSmoothFilter, rightSmoothFilter;
         bool useJunoFilter=false;
+        OriginalSyrupFilter leftSyrupFilter,rightSyrupFilter;
+        OriginalOTAFilter leftOTAFilter,rightOTAFilter;
+        bool useOTAFilter=false;bool useSyrupFilter=false; float userCutoff=1000.f; bool syrup24=false;
         AHDSHREnvelope ampEnvelope;
-        ADSREnvelope filterEnvelope, pitchEnvelope;
+        ADSREnvelope filterEnvelope, pitchEnvelope,otaFilterEnvelope;
 
         // per-voice vibrato LFO
         FunctionTableOscillator vibratoLFO;
@@ -83,7 +88,7 @@ namespace DunneCore
         void init(double sampleRate);
 
         void updateAmpAdsrParameters() { ampEnvelope.updateParams(); }
-        void updateFilterAdsrParameters() { filterEnvelope.updateParams(); }
+        void updateFilterAdsrParameters() { filterEnvelope.updateParams();otaFilterEnvelope.updateParams(); }
         void updatePitchAdsrParameters() { pitchEnvelope.updateParams(); }
         
         void start(unsigned noteNumber,

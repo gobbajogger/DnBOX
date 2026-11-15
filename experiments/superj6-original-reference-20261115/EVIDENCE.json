@@ -6,10 +6,10 @@
     "license": "MIT"
   },
   "sampler": {
-    "qualified_review_sha256": "a82f22a8cbe42296473f4b1b994346f8fcc86165f4d604fae2afdb3f0a7911d5",
-    "qualified_seal_sha256": "56866f0c36736ac3683c7378ae365dd97f9e3e43be1d33bfaa6e75f533f4df51",
-    "recorded_component_cases": 25,
-    "stereo_frames_per_variant": 872448,
+    "qualified_review_sha256": "decace25272be2c29772d6655250b3beed5b6a70bd851524b69913479cb795c4",
+    "qualified_seal_sha256": "12c1bb161364700667354a1356b8a346112ad0af773983ee1b2c4cff3e37153a",
+    "recorded_component_cases": 27,
+    "stereo_frames_per_variant": 880640,
     "variants": [
       "O2",
       "Os",
@@ -21,7 +21,10 @@
       "restartNewNoteLegato"
     ],
     "default_leak_sanitizer": "FAIL under ptrace; no leak pass",
-    "reviewed_reference_manifest_sha256": "cc159b2c8481e03d5ca1c857d803acb2003895ab9e2f9b3c10fa63b99eed5ebf"
+    "reviewed_reference_manifest_sha256": "0b0ee6a20398e708e5ad67a1cdda20891e1b1ccc1be91efe8621f25fa83b518e",
+    "prior_review_sha256": "a82f22a8cbe42296473f4b1b994346f8fcc86165f4d604fae2afdb3f0a7911d5",
+    "independent_own_source_checks": 22947,
+    "new_filter_families": "Sample-mode Syrup and OTA; each has one original recorded configuration"
   },
   "timing": {
     "source_manifest_sha256": "de69863c5fe2bfb7e11a03474fed57c598cedf716b5bedc61d533c4e68f41058",
@@ -38,5 +41,16 @@
     "Full original effects and all parameters",
     "Native math policy/whole-app fit/CPU/audio deadline",
     "Hardware/device/zero-dropout acceptance"
-  ]
+  ],
+  "native_filter_diagnostics": {
+    "all6api_elf_sha256": "f79121972da6edb42164f716fc4aca6e7b6122eb4bc55eb7bf55b5aebf7c00fb",
+    "all6api_undefined": 0,
+    "all6api_double_helpers": 16,
+    "OTA_float_ingress_elf_sha256": "de181c8adc5f520f977facfc6677ccbf10f63312ae624ba56eb29d2e3b181bb4",
+    "OTA_float_ingress_double_helpers": 4,
+    "native_policy_pass": false,
+    "Syrup_state_bytes": 92,
+    "OTA_state_bytes": 144,
+    "not_firmware_or_fit": true
+  }
 }

@@ -4,9 +4,9 @@
   "files": [
     {
       "path": "EVIDENCE.json",
-      "bytes": 1837,
-      "sha256": "25dc422043f033f1f8fb07d6331102ce875ade8532b045ee9637743a5e353108",
-      "git_blob": "c34ff96263b4d3f3a1814df3580b258428977919"
+      "bytes": 2541,
+      "sha256": "be1b98c7127a952b0c36159944d16f5e93dd64a1effd42be3a2530a563cafdd2",
+      "git_blob": "019dae531a31ea66cabe4c8c439574e291c1a3a9"
     },
     {
       "path": "LICENSE",
@@ -16,21 +16,21 @@
     },
     {
       "path": "README.md",
-      "bytes": 5001,
-      "sha256": "dd55e75f6c54e7f9cfe6a5a244148606199df75399b25f36f6a9d9c7c402d277",
-      "git_blob": "af30ad67b2cbce179702d45b112a55479d6ccc72"
+      "bytes": 6253,
+      "sha256": "b30c5d18e7a630bb869c7e9ea425a3861fb5dbb428b109dfe0c67af1deac1036",
+      "git_blob": "c73ddd1369d39d363c097199ef16c71300149fc8"
     },
     {
       "path": "sampler/DunneCore/Common/ADSREnvelope.cpp",
-      "bytes": 4236,
-      "sha256": "4e856e5ea890a8d2b737552f72a434703c8240e789ccd28234b015a320df2997",
-      "git_blob": "0fb42f1f12087d4450a63f314c3505341d904cf9"
+      "bytes": 4963,
+      "sha256": "7e26ad11c9053430762f44cc48e3ac509b315d10e8ddcae89dd28510582640ab",
+      "git_blob": "a399fbbd4e664d9154ad0bef9375fb4f03fc3a62"
     },
     {
       "path": "sampler/DunneCore/Common/ADSREnvelope.h",
-      "bytes": 2628,
-      "sha256": "7ff86d3fa0d4b008b083e127a034177ddb66cd642c5535c515fc969826a7fac8",
-      "git_blob": "b92d8dc45d2c1bbdfc84c32ad6b94fc9d7a60411"
+      "bytes": 2716,
+      "sha256": "f659590031356f0b2474395cb0e1a9a682e3cb151b347cc70ebf64a4e48a2d65",
+      "git_blob": "3e2863f9de0965037ecad8950175699bf8a9905f"
     },
     {
       "path": "sampler/DunneCore/Common/AHDSHREnvelope.cpp",
@@ -75,10 +75,22 @@
       "git_blob": "1628f05ac2608e5e1d1a153198fd4f0d70a1d13c"
     },
     {
+      "path": "sampler/DunneCore/Common/OriginalOTAFilter.h",
+      "bytes": 5264,
+      "sha256": "69eef11c13960ceaedc2d11903c762f906a7a5432c08c4484683765c6f71d833",
+      "git_blob": "a8df75bd72f13e1d1b97f87a3ba9343b1bf76e73"
+    },
+    {
       "path": "sampler/DunneCore/Common/OriginalSmoothPassFilter.h",
       "bytes": 2365,
       "sha256": "7165b4983ef98223fdd6bcaaefefa59bfc010ab860b8cd5576a9503ebf9d19ce",
       "git_blob": "a2add910eaca64c1d0b2e01db399d32f8ce8921e"
+    },
+    {
+      "path": "sampler/DunneCore/Common/OriginalSyrupFilter.h",
+      "bytes": 2240,
+      "sha256": "351541165e1a0ee73573548c8a02c546020cf1d3c4310f7a8dbd5dd13a1ff184",
+      "git_blob": "c77d4f5151ee868f175de2005ed5bc72c6abe141"
     },
     {
       "path": "sampler/DunneCore/Common/ResonantLowPassFilter.cpp",
@@ -106,15 +118,15 @@
     },
     {
       "path": "sampler/DunneCore/Sampler/CoreSampler.cpp",
-      "bytes": 21312,
-      "sha256": "5a918e637409a613a76b51c9499dcade87bc1d578cc6893e2da9ebca207b0dd2",
-      "git_blob": "13beb0c5a00b0be77dad595331b6f2e555fa9805"
+      "bytes": 21835,
+      "sha256": "ef7d6a00d5fcfae2fe9b9e5a870335d386729903854465738f0172f7e90337c0",
+      "git_blob": "7f09927f34571094ffb5de027b6600c6d4194896"
     },
     {
       "path": "sampler/DunneCore/Sampler/CoreSampler.h",
-      "bytes": 5596,
-      "sha256": "46f3cbea37c644b512b84bf40946cf2402164d09e0ee6477e97ae23b88a9dd9a",
-      "git_blob": "0a75513961998aaf1502cafd18ff798fc7a9c664"
+      "bytes": 5740,
+      "sha256": "335420d340d8c512ed4555594078dbf149fd0b803e6f2e6e98d6bc59a9fa7783",
+      "git_blob": "db667bf0cc66f33b81315f914b099f0786837b23"
     },
     {
       "path": "sampler/DunneCore/Sampler/SampleBuffer.cpp",
@@ -136,15 +148,15 @@
     },
     {
       "path": "sampler/DunneCore/Sampler/SamplerVoice.cpp",
-      "bytes": 10043,
-      "sha256": "4a2e2a1e10b6b28af6d7aca8efa8e0bf697299a079c45ff54a90cfdacd61b553",
-      "git_blob": "fc9f713de2210272b1e133fe73d39d85e348aff3"
+      "bytes": 13132,
+      "sha256": "47e9470bf5180de5c2190c13194932483cf9a9cd8af3eb6101a16a7589a081f9",
+      "git_blob": "03ee4952274395dd95638a150be31692b0f3c274"
     },
     {
       "path": "sampler/DunneCore/Sampler/SamplerVoice.h",
-      "bytes": 3933,
-      "sha256": "fcf0a64b6490ffbff43a9cdab02add6742bc03f911b7fa6c12b53dc5c4e02bd4",
-      "git_blob": "3fa6056f586ad2dfe2925fa76025a15aa46a6f50"
+      "bytes": 4270,
+      "sha256": "75cd81504de2c6259c62e09c6b6264cde87a989cfbe96c3d96012cf24773f9da",
+      "git_blob": "48c9df987fa0ba0cf26fa1a89145f08685c8c61b"
     },
     {
       "path": "sampler/include/Sampler_Typedefs.h",
@@ -154,9 +166,9 @@
     },
     {
       "path": "sampler/tests/controls_external.cpp",
-      "bytes": 3497,
-      "sha256": "77a295c3c870ac5e03369d966e4c41ef5d2b6ceca440cd06f5f2d3fc7dbe8910",
-      "git_blob": "de9179fd7f0e7a08f913cda6c2e26724d4130b56"
+      "bytes": 3628,
+      "sha256": "b7166cdea8986de0702c50ce11267a8c2805499539b1f98cbe5466f7d88af94f",
+      "git_blob": "8b9cf5f6fc766d9665618dc496cb5e74bfccbb2e"
     },
     {
       "path": "sampler/tests/lifecycle.cpp",
@@ -196,12 +208,9 @@
     }
   ],
   "excluded": [
-    "original app/AU",
-    "assembly",
-    "samples/waveform/PCM",
-    "presetbanks",
-    "SDK/toolchain",
-    "compiled outputs",
-    "private reports"
+    "Original app/AU and assembly",
+    "Private sample/waveform/PCM, preset banks and binary fixture plans",
+    "SDK/toolchain/library/binary inputs or outputs",
+    "Private review/recovery/analysis reports"
   ]
 }
