@@ -1,0 +1,337 @@
+--- a/firmware/src/app/dnr_remote/native_catalog_pin.h
++++ b/firmware/src/app/dnr_remote/native_catalog_pin.h
+@@ -1,8 +1,17 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+-/* Generated from canonical source-host catalog v3; host build recomputes and
+- * rejects any descriptor drift. Not a generic preset/schema compatibility pin. */
++/* Canonical source-host catalog pins; host init recomputes every descriptor.
++ * The alternate catalog is only for explicit historical host-test builds.
++ * It is never a native/device profile or a change to shipping availability. */
++#if defined(DNR_HOST_HISTORICAL_CATALOG)
++#if !defined(X0X_HOST) || !X0X_DRONE_RUNTIME_ENABLED || DNR_HOST_HISTORICAL_CATALOG != 1
++#error Historical catalog requires the explicit historical host-test profile
++#endif
++#define DNR_NATIVE_CATALOG_CRC UINT32_C(0x26c95557)
++#define DNR_NATIVE_CATALOG_COUNT 407u
++#else
+ #define DNR_NATIVE_CATALOG_CRC UINT32_C(0x0d0db2c8)
+ #define DNR_NATIVE_CATALOG_COUNT 395u
+ #if X0X_DRONE_RUNTIME_ENABLED
+ #error Regenerate and qualify remote catalog for changed engine availability
+ #endif
++#endif
+--- a/tests/host/drone_admission_test.sh
++++ b/tests/host/drone_admission_test.sh
+@@ -17,7 +17,7 @@
+ [ "$engines" = 1 ] || { echo 'FAIL production engine source selection' >&2;exit 1; }
+ for profile in shipping historical; do
+  profile_flags=
+- [ "$profile" != historical ] || profile_flags=-DX0X_DRONE_RUNTIME_ENABLED=1
++ [ "$profile" != historical ] || profile_flags='-DX0X_DRONE_RUNTIME_ENABLED=1 -DDNR_HOST_HISTORICAL_CATALOG=1'
+  for mode in normal sanitized; do
+   flags=-O2
+   [ "$mode" != sanitized ] || flags='-O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer'
+--- /dev/null
++++ b/tests/host/host_catalog_profile_test.c
+@@ -0,0 +1,29 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Real host/native catalog enumeration and endpoint initialization, no writes. */
++#define main x0x_catalog_original_host_main
++#include "../../host/x0x_host.c"
++#undef main
++static unsigned checks;
++#define CHECK(x) do{++checks;if(!(x)){fprintf(stderr,"FAIL catalog line%d: %s\n",__LINE__,#x);return 1;}}while(0)
++int main(void){
++ const uint32_t high[3]={0x10203040,0x50607080,0x90a0b0c0};
++ CHECK(!native_ready);CHECK(!dnr_native_init(0,high));CHECK(!native_ready);
++ CHECK(!dnr_native_init(42,0));CHECK(!native_ready);
++ CHECK(dnr_native_init(42,high));CHECK(native_ready);
++ CHECK(native_remote.host.catalog_crc==DNR_NATIVE_CATALOG_CRC);
++ CHECK(native_remote.host.control_count==DNR_NATIVE_CATALOG_COUNT);
++ CHECK(!dnr_native_init(43,high));CHECK(native_remote.unit==42);
++ dnr2_command cmd={0};cmd.version=2;cmd.client=7;cmd.request=1;cmd.op=DNR2_HELLO;
++ dnr2_reply reply=dnr_native_command(&cmd,0);
++ CHECK(reply.status==DNR2_OK);CHECK(reply.control==DNR_NATIVE_CATALOG_COUNT);CHECK(reply.value==DNR_NATIVE_CATALOG_CRC);
++ CHECK(!memcmp(reply.unit_high,high,sizeof high));
++ unsigned count=0;
++ for(unsigned id=1;id<4096u+4u*64u;id++){
++  pref_t ref;int bank;const x0x_param_t*d=native_descriptor((uint16_t)id,&ref,&bank);if(!d)continue;
++  printf("ROW\t%u\t%u\t%u\t%s\n",id,DNR2_U32,d->max,d->name);count++;
++ }
++ for(unsigned key=0;key<37;key++){printf("ROW\t%u\t%u\t127\tKEY\n",5000+key,DNR2_HELD);count++;}
++ CHECK(count==DNR_NATIVE_CATALOG_COUNT);
++ printf("CATALOG profile=%u count=%u crc=%08x checks=%u PASS\n",X0X_DRONE_RUNTIME_ENABLED,count,DNR_NATIVE_CATALOG_CRC,checks);
++ return 0;
++}
+--- /dev/null
++++ b/tests/host/host_catalog_profile_test.sh
+@@ -0,0 +1,41 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-3.0-only
++# Real runtime metadata/init proof for both source profiles; no device/transport.
++set -eu
++cd "$(dirname "$0")/../.."
++OUT=${1:-build/host/host-catalog-profile}
++mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
++. tests/host/original_build.sh
++sh host/build_host.sh --generate-only > "$OUT/generate.log" 2>&1
++python3 tests/host/test_host_catalog_profiles.py > "$OUT/profile-guards.log" 2>&1
++for profile in shipping historical; do
++ profile_flags=
++ [ "$profile" != historical ] || profile_flags='-DX0X_DRONE_RUNTIME_ENABLED=1 -DDNR_HOST_HISTORICAL_CATALOG=1'
++ for mode in normal ubsan; do
++  flags=-O2
++  [ "$mode" != ubsan ] || flags='-O1 -g -fsanitize=undefined,bounds,float-cast-overflow -fno-sanitize-recover=all'
++  exe="$OUT/$profile-$mode"
++  ${CC:-cc} -std=c99 $flags -w -DX0X_HOST $ORIGINAL_FLAGS $profile_flags -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen tests/host/host_catalog_profile_test.c $ORIGINAL_SOURCES -lm -o "$exe" > "$exe.compile.log" 2>&1
++  "$exe" > "$exe.log" 2> "$exe.stderr"
++  test ! -s "$exe.stderr"
++  tail -1 "$exe.log"
++ done
++ cmp "$OUT/$profile-normal.log" "$OUT/$profile-ubsan.log"
++done
++python3 - "$OUT" <<'PROFILE_CHECK'
++import sys,zlib,struct
++from pathlib import Path
++out=Path(sys.argv[1]);allrows={}
++for profile,count,crc in [('shipping',395,0x0d0db2c8),('historical',407,0x26c95557)]:
++ rows=[];raw=bytearray()
++ for line in (out/(profile+'-normal.log')).read_text().splitlines():
++  if not line.startswith('ROW\t'):continue
++  _,id,kind,maximum,name=line.split('\t');id,kind,maximum=map(int,[id,kind,maximum]);rows.append((id,kind,maximum,name));raw+=struct.pack('<HBB',id,kind,maximum)+name.encode()+b'\0'
++ assert len(rows)==count and len({x[0] for x in rows})==count and zlib.crc32(raw)==crc
++ allrows[profile]=rows
++s={r[0]:r for r in allrows['shipping']};h={r[0]:r for r in allrows['historical']}
++assert all(h[k]==v for k,v in s.items())
++expected={4096+2*64+voice*32+i for voice in range(2) for i in range(6)}
++assert set(h)-set(s)==expected and not(set(s)-set(h))
++print('Independent Python CRC/row comparison: shipping395 retained exactly; historical12 source-Drone rows only: PASS')
++PROFILE_CHECK
+--- a/tests/host/legacy_303_project_test.sh
++++ b/tests/host/legacy_303_project_test.sh
+@@ -23,7 +23,7 @@
+ import importlib.util
+ spec=importlib.util.spec_from_file_location('build','tools/build.py')
+ b=importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
+-print(' '.join(['firmware/src/dsp/drum909.c','firmware/src/dsp/drum808.c','firmware/src/dsp/x0x_param.c','firmware/src/dsp/breaks.c','firmware/src/dsp/fxbus.c','firmware/src/dsp/master.c','firmware/src/seq/sequencer.c','firmware/src/seq/tb3po.c','firmware/src/seq/pattern.c','firmware/src/seq/motion.c','firmware/src/app/engine.c','firmware/src/app/factory_banks.c',*b.ORIGINAL_SYNTH_UNITS,*b.ORIGINAL_SYNTH_BACKENDS]))
++print(' '.join(['firmware/src/'+u for u in b.HOST_UNITS]+['firmware/src/app/factory_banks.c',*b.ORIGINAL_SYNTH_UNITS,*b.ORIGINAL_SYNTH_BACKENDS]))
+ PY
+ ) > "$OUT/cc.log" 2>&1 || { cat "$OUT/cc.log"; exit 1; }
+ "$OUT/probe" "$OUT/v3.bin" "$OUT/v6.bin"
+--- a/tests/host/test_app_common_link_units.py
++++ b/tests/host/test_app_common_link_units.py
+@@ -17,4 +17,6 @@
+   for c in common:self.assertIn('-Os',c);self.assertNotIn('-O2',c);self.assertIn('-ffp-contract=off',c)
+  def test_host_entry_uses_shared_manifest(self):
+   self.assertIn('build.HOST_UNITS',(ROOT/'host/build_host.sh').read_text())
++ def test_legacy_project_caller_uses_shared_manifest(self):
++  self.assertIn('for u in b.HOST_UNITS',(ROOT/'tests/host/legacy_303_project_test.sh').read_text())
+ if __name__=='__main__':unittest.main()
+--- /dev/null
++++ b/tests/host/test_host_catalog_profiles.py
+@@ -0,0 +1,17 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Compile the real catalog pin: historical opt-in is host-test-only, never native."""
++import os,shlex,subprocess,tempfile
++from pathlib import Path
++ROOT=Path(__file__).resolve().parents[2]
++HEADER='firmware/src/app/dnr_remote/native_catalog_pin.h'
++def main():
++ cases=[('shipping-host',['-DX0X_HOST','-DX0X_DRONE_RUNTIME_ENABLED=0'],0,395,0x0d0db2c8),('shipping-native',['-DX0X_DRONE_RUNTIME_ENABLED=0'],0,395,0x0d0db2c8),('qualified-historical-host',['-DX0X_HOST','-DX0X_DRONE_RUNTIME_ENABLED=1','-DDNR_HOST_HISTORICAL_CATALOG=1'],0,407,0x26c95557),('unqualified-historical-host',['-DX0X_HOST','-DX0X_DRONE_RUNTIME_ENABLED=1'],1,0,0),('historical-native',['-DX0X_DRONE_RUNTIME_ENABLED=1','-DDNR_HOST_HISTORICAL_CATALOG=1'],1,0,0),('wrong-profile-value',['-DX0X_HOST','-DX0X_DRONE_RUNTIME_ENABLED=1','-DDNR_HOST_HISTORICAL_CATALOG=0'],1,0,0),('profile-without-historical',['-DX0X_HOST','-DX0X_DRONE_RUNTIME_ENABLED=0','-DDNR_HOST_HISTORICAL_CATALOG=1'],1,0,0)]
++ for name,flags,reject,count,crc in cases:
++  text='#include <stdint.h>\n#include "'+HEADER+'"\n'
++  if not reject:text+='typedef char count_pin[(DNR_NATIVE_CATALOG_COUNT=='+str(count)+')?1:-1];\ntypedef char crc_pin[(DNR_NATIVE_CATALOG_CRC==UINT32_C('+str(crc)+'))?1:-1];\n'
++  q=subprocess.run(shlex.split(os.environ.get('CC','cc'))+['-std=c99','-fsyntax-only','-x','c','-I'+str(ROOT),*flags,'-'],input=text.encode(),capture_output=True)
++  if bool(q.returncode)!=bool(reject):raise SystemExit(name+' expected reject='+str(reject)+' got '+str(q.returncode)+'\n'+q.stderr.decode())
++  if reject and b'error:'not in q.stderr:raise SystemExit('not an actual preprocessor rejection:'+name)
++  print(name+': PASS')
++if __name__=='__main__':main()
+--- /dev/null
++++ b/tests/host/test_host_catalog_scheduler.py
+@@ -0,0 +1,47 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Exercise the exact runner's generated-header lock; callback is only a scheduling probe."""
++import re,subprocess,tempfile,unittest
++from pathlib import Path
++ROOT=Path(__file__).resolve().parents[2]
++def function(text,name,next_marker):
++ match=re.search(r'(?m)^'+re.escape(name)+r'\(\) \{',text)
++ if not match:raise ValueError('missing actual function: '+name)
++ start=match.start();end=text.index(next_marker,start)
++ return text[start:end]
++def script(jobs):
++ t=(ROOT/'tests/run_tests.sh').read_text()
++ selected=[function(t,'test_class','# Prepare fixtures'),function(t,'needs_gen','gen_wait()'),function(t,'gen_wait','gen_lock()'),function(t,'gen_lock','gen_unlock()').replace('gen_lock()','original_gen_lock()',1),function(t,'gen_unlock','gen_nonfont()'),function(t,'run','note()')]
++ # Exact run()/class/wait/lock bodies; only the work callback is an explicit spy.
++ setup=r"""
++set -eu
++OUT=build/host;RES=$OUT/.results;X0X_TESTS=host-catalog-profiles
++GEN_FAILED=0;JOBS=@@JOBS@@;PHASE=1;T_SEQ=0;X0X_PYTHONUSERBASE=fixture
++mkdir -p "$OUT/iso/.lock-gen" "$RES"
++mkfifo slots
++exec 3<>slots
++printf 'slot\n' >&3
++"""
++ finish=r"""
++gen_lock() { : > attempted-lock; original_gen_lock; }
++run_one() { [ -d "$OUT/iso/.lock-gen" ] || : > missing-lock; echo entered >> callback; }
++run host-catalog-profiles true
++n=0
++while [ ! -e attempted-lock ] && [ ! -e callback ] && [ $n -lt 250 ]; do sleep 0.02; n=$((n+1)); done
++if [ -e callback ]; then echo 'FAIL catalog callback entered while generation lock held' >&2; exit 1; fi
++[ -e attempted-lock ] || { echo 'FAIL catalog worker never reached generation lock' >&2; exit 1; }
++rmdir "$OUT/iso/.lock-gen"
++wait
++[ -e callback ] && [ "$(wc -l < callback)" = 1 ] && [ ! -e missing-lock ] && [ ! -d "$OUT/iso/.lock-gen" ] || { echo 'FAIL catalog lock ownership/release' >&2; exit 1; }
++test_class host-catalog-profiles
++[ "$TEST_CLASS" = G ]
++printf 'PASS actual runner catalog serialization and lock release\n'
++"""
++ return setup.replace('@@JOBS@@',str(jobs))+'\n'.join(selected)+finish
++class Scheduling(unittest.TestCase):
++ def test_catalog_waits_for_existing_generation_owner(self):
++  for jobs in (2,4):
++   with self.subTest(jobs=jobs),tempfile.TemporaryDirectory(prefix='dnbox-catalog-scheduler-')as td:
++    p=Path(td)/'probe.sh';p.write_text(script(jobs));q=subprocess.run(['sh',str(p)],cwd=td,capture_output=True,timeout=10)
++    self.assertEqual(q.returncode,0,q.stderr.decode());self.assertIn(b'PASS actual runner',q.stdout)
++if __name__=='__main__':unittest.main()
+--- a/tests/host/test_host_setup.py
++++ b/tests/host/test_host_setup.py
+@@ -45,6 +45,8 @@
+         # composition and private-input verification have separate unit tests.
+         (self.root / "tools/build.py").write_text('''
+ import os
++# Explicit manifest provider for this shell-dispatch fixture, not fake DSP.
++HOST_UNITS = ["dispatch_fixture.c", "app/dnr_remote/protocol-v2/remote_core.c", "app/dnr_remote/protocol-v2/remote_wire.c", "app/dnr_remote/protocol-v2/boot_incarnation.c"]
+ ORIGINAL_SYNTH_UNITS = ["original_fixture.c"]
+ ORIGINAL_SYNTH_BACKENDS = ["original_backend_fixture.c"]
+ def synth_build_config():
+@@ -101,6 +103,8 @@
+         self.assertIn("-DFIXTURE=1", argv)
+         self.assertIn("-DSECOND=2", argv)
+         self.assertIn("host/x0x_host.c", argv)
++        for unit in ["dispatch_fixture.c", "app/dnr_remote/protocol-v2/remote_core.c", "app/dnr_remote/protocol-v2/remote_wire.c", "app/dnr_remote/protocol-v2/boot_incarnation.c"]:
++            self.assertEqual(argv.count("firmware/src/" + unit), 1)
+         self.assertEqual(argv[-1], "-lm")
+         self.assertEqual(record["marker"], "inherited")
+         self.assertTrue((self.root / "build/host/custom").is_file())
+--- /dev/null
++++ b/tests/host/test_source_materialization.py
+@@ -0,0 +1,41 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++import hashlib,importlib.util,json,tempfile,unittest
++from pathlib import Path
++ROOT=Path(__file__).resolve().parents[2]
++s=importlib.util.spec_from_file_location('materializer',ROOT/'tools/materialize_reviewed_source.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
++class Modes(unittest.TestCase):
++ def setUp(self):
++  self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name);self.src=self.root/'src';self.src.mkdir();(self.src/'run.sh').write_bytes(b'#!/bin/sh\nexit 0\n');(self.src/'data').write_bytes(b'plain');self.rows=[{'path':n,'bytes':len((self.src/n).read_bytes()),'sha256':hashlib.sha256((self.src/n).read_bytes()).hexdigest(),'mode':mode}for n,mode in [('run.sh','100755'),('data','100644')]];self.mf=self.root/'manifest.json';self.out=self.root/'out'
++ def save(self):
++  self.mf.write_text(json.dumps({'files':self.rows}));return hashlib.sha256(self.mf.read_bytes()).hexdigest()
++ def call(self,pin=None):return m.materialize(self.src,self.mf,pin or self.save(),self.out)
++ def test_exact_modes_restored_from_authenticated_manifest(self):
++  (self.src/'run.sh').chmod(0o644);r=self.call();self.assertTrue(r['allDestinationSHA256AndModes']);self.assertEqual((self.out/'run.sh').stat().st_mode&0o777,0o755);self.assertEqual((self.out/'data').stat().st_mode&0o777,0o644);self.assertEqual((self.src/'run.sh').stat().st_mode&0o777,0o644)
++ def test_existing_output_is_untouched(self):
++  self.out.mkdir();(self.out/'keep').write_text('last good')
++  with self.assertRaises(ValueError):self.call()
++  self.assertEqual((self.out/'keep').read_text(),'last good');self.assertEqual(len(list(self.out.iterdir())),1)
++ def test_bad_hash_rejected_before_output(self):
++  self.rows[1]['sha256']='0'*64
++  with self.assertRaises(ValueError):self.call()
++  self.assertFalse(self.out.exists())
++ def test_bad_path_and_duplicate_rejected_before_output(self):
++  for bad in ['../escape','/absolute','x/../run.sh','./run.sh']:
++   with self.subTest(bad=bad):
++    self.rows[0]['path']=bad
++    with self.assertRaises(ValueError):self.call()
++    self.assertFalse(self.out.exists())
++  self.rows[0]['path']='data'
++  with self.assertRaises(ValueError):self.call()
++ def test_bad_mode_and_pin_rejected_before_output(self):
++  self.rows[0]['mode']='100777'
++  with self.assertRaises(ValueError):self.call()
++  self.rows[0]['mode']='100755';self.save()
++  with self.assertRaises(ValueError):self.call('0'*64)
++  self.assertFalse(self.out.exists())
++ def test_symlink_source_rejected_before_output(self):
++  (self.src/'run.sh').unlink();(self.src/'run.sh').symlink_to(self.src/'data')
++  with self.assertRaises(ValueError):self.call()
++  self.assertFalse(self.out.exists())
++if __name__=='__main__':unittest.main()
+--- a/tests/run_tests.sh
++++ b/tests/run_tests.sh
+@@ -86,7 +86,7 @@
+ # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
+ test_class() {
+     case "$1" in
+-    drum909-tanh-pair|engine-808-scratch-alias) TEST_CLASS=G ;;
++    drum909-tanh-pair|engine-808-scratch-alias|host-catalog-profiles) TEST_CLASS=G ;;
+     install-slots-web) TEST_CLASS=W ;;
+     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
+     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
+@@ -297,6 +297,10 @@
+ W="-O2 -ffp-contract=off -Wall -Wextra -Wdouble-promotion -Werror"
+ # Composed 0.0.25 regressions exercise the production UI, engine, storage and MIDI paths.
+ run engine-host-held-owner python3 tests/host/test_engine_host_held_owner.py
++run host-catalog-profiles sh tests/host/host_catalog_profile_test.sh
++run host-catalog-scheduler python3 tests/host/test_host_catalog_scheduler.py
++run app-common-link-units python3 tests/host/test_app_common_link_units.py
++run source-materialization python3 tests/host/test_source_materialization.py
+ run composed-features sh tests/host/composed_features_test.sh
+ run juno6-runtime sh tests/host/juno6_runtime_test.sh "$OUT/juno6-runtime"
+ run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
+--- /dev/null
++++ b/tools/materialize_reviewed_source.py
+@@ -0,0 +1,49 @@
++#!/usr/bin/env python3
++# SPDX-License-Identifier: GPL-3.0-only
++"""Optional exact regular-source materializer; preserves authenticated executable modes.
++
++Only creates a new output tree. Existing outputs are never changed. Source and
++manifest must be immutable through the call. A failed copy is not a usable tree;
++partial outputs are retained for diagnosis, never silently declared complete.
++No archive extraction, symlinks, network, shell execution or security settings.
++"""
++import argparse,hashlib,json,os,stat
++from pathlib import Path
++def sha(b):return hashlib.sha256(b).hexdigest()
++def materialize(source,manifest,pin,output):
++ source=Path(source).resolve(strict=True);manifest=Path(manifest);output=Path(output)
++ raw=manifest.read_bytes()
++ if sha(raw)!=pin:raise ValueError('manifest pin mismatch')
++ data=json.loads(raw);files=data['files'];seen=set();checked=[]
++ if not isinstance(files,list)or not files:raise ValueError('empty or invalid files')
++ if output.exists()or output.is_symlink():raise ValueError('output already exists')
++ out=output.parent.resolve(strict=True)/output.name
++ if out==source or source in out.parents:raise ValueError('output inside source')
++ for f in files:
++  name=f['path'];rel=Path(name)
++  if not isinstance(name,str)or not name or rel.is_absolute()or '..'in rel.parts or name in seen or str(rel)!=name:raise ValueError('invalid/duplicate relative path')
++  seen.add(name)
++  if f['mode']not in('100644','100755'):raise ValueError('unsupported source mode')
++  if type(f['bytes'])is not int or f['bytes']<0:raise ValueError('invalid byte length')
++  p=source/rel
++  for a in [p,*p.parents]:
++   if a==source:break
++   if a.is_symlink():raise ValueError('symlink source component')
++  if not stat.S_ISREG(p.stat().st_mode):raise ValueError('not regular source')
++  b=p.read_bytes()
++  if len(b)!=f['bytes']or sha(b)!=f['sha256']:raise ValueError('source bytes mismatch: '+name)
++  checked.append((p,f))
++ output.mkdir(exist_ok=False)
++ for p,f in checked:
++  b=p.read_bytes()
++  if len(b)!=f['bytes']or sha(b)!=f['sha256']:raise ValueError('source changed during copy')
++  dst=output/f['path'];dst.parent.mkdir(parents=True,exist_ok=True);dst.write_bytes(b)
++  dst.chmod(0o755 if f['mode']=='100755'else 0o644)
++ for p,f in checked:
++  dst=output/f['path'];b=dst.read_bytes();mode=dst.stat().st_mode&0o777
++  if len(b)!=f['bytes']or sha(b)!=f['sha256']or mode!=(0o755 if f['mode']=='100755'else 0o644):raise ValueError('output verification failed')
++ if manifest.read_bytes()!=raw:raise ValueError('manifest changed during copy')
++ return {'schema':'dnbox-regular-source-materialization/1','sourceManifestSHA256':pin,'files':len(checked),'bytes':sum(f['bytes']for _,f in checked),'allDestinationSHA256AndModes':True,'output':str(output),'limits':'Regular immutable sources only; not a native build, runtime test or integration admission. Partial output on error must not be consumed.'}
++def main():
++ p=argparse.ArgumentParser();p.add_argument('--source',required=True,type=Path);p.add_argument('--manifest',required=True,type=Path);p.add_argument('--pin',required=True);p.add_argument('--out',required=True,type=Path);a=p.parse_args();print(json.dumps(materialize(a.source,a.manifest,a.pin,a.out),indent=2))
++if __name__=='__main__':main()

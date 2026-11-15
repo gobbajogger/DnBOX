@@ -1,0 +1,31 @@
+{
+  "schema": "dnbox-reviewed-source-preservation-subset/1",
+  "sourceFreezeR2SHA256": "73aec589ee57646f661acef45c8afccb1919a36b7a393f01df97636607493ec9",
+  "files": [
+    {
+      "path": "HOST-CATALOG-CALLER-MODE.patch",
+      "bytes": 21362,
+      "sha256": "225f394a19a7f1d7e909c558015a04095fa8777c7e62d3f16dad6a23cbedc457",
+      "gitBlob": "173f140c4815bfa446612ea5684b48df6c52e8ab"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4743,
+      "sha256": "88443b42aa33567e2aed609b528e0cba8494e99bc4c4e35c638b716839a0c5f3",
+      "gitBlob": "aeeec0e5c86e2029f07fc30161d094f8180aaef5"
+    },
+    {
+      "path": "REVIEW-SUMMARY.json",
+      "bytes": 6069,
+      "sha256": "dcfd4d6375aab2ef51b615ee456750baa53a94e9c0e7fe9e86094dded0049be3",
+      "gitBlob": "ff88d2f1d1d6adf587c2e6e9e214e891cf3ef3cc"
+    },
+    {
+      "path": "materialize_reviewed_source.py",
+      "bytes": 3247,
+      "sha256": "51b710d009273a2ac431a09c251e00f6880b8659afef6fbc7ad6569e3980d94e",
+      "gitBlob": "f68c6f29ef53c33619645649ba8891fdbc5e1cca"
+    }
+  ],
+  "scope": "Four plaintext payloads plus manifest; unapplied source preservation only; no private/binary data."
+}

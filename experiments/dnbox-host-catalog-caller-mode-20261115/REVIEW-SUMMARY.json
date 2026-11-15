@@ -1,0 +1,75 @@
+{
+  "schema": "dnbox-derived-host-catalog-mode-review-summary/1",
+  "derivedNotVerbatim": true,
+  "sourceFreezeR1SHA256": "c9a15343983eb585e7ff5a11232c538a0840587618736d9117623d02422d81c6",
+  "sourceFreezeR2SHA256": "73aec589ee57646f661acef45c8afccb1919a36b7a393f01df97636607493ec9",
+  "sourceClosureR2SHA256": "40e9d5a6dbc6c34659aef08382167271247c8c31e2c541a5e3eaad10b92a3bdc",
+  "sourceFiles": 5455,
+  "changedFromHostObserverBase": [
+    "firmware/src/app/dnr_remote/native_catalog_pin.h",
+    "tests/host/drone_admission_test.sh",
+    "tests/host/host_catalog_profile_test.c",
+    "tests/host/host_catalog_profile_test.sh",
+    "tests/host/legacy_303_project_test.sh",
+    "tests/host/test_app_common_link_units.py",
+    "tests/host/test_host_catalog_profiles.py",
+    "tests/host/test_host_catalog_scheduler.py",
+    "tests/host/test_host_setup.py",
+    "tests/host/test_source_materialization.py",
+    "tests/run_tests.sh",
+    "tools/materialize_reviewed_source.py"
+  ],
+  "independentR1ReportSHA256": "0cc04dd4107d3b7fa8db0dd8e9cc2ea5dfc8ecefb80e0839bb487938a29a25d4",
+  "independentR2ReportSHA256": "0537a26e52a3c85afd61b830c85cd36b691133b9afc0304ecb3de17160805790",
+  "R1Disposition": "CHANGES_REQUESTED; retained",
+  "R2Disposition": "ACCEPT_BOUNDED_SCHEDULER; HC-CAT-1 CLOSED; unchanged R1 passing evidence identity-verified/reused",
+  "R1BoundedEvidence": [
+    {
+      "scope": "Source/profile guard",
+      "result": "PASS",
+      "detail": "Exactly eleven declared byte paths changed. All DSP, runtime, host platform, native_binding.inc, actual native-init recomputation, control descriptors, lineup availability implementation and existing assertions remain byte-identical. Shipping host and nonhost pin expansions are identical to accepted base. Whole actual shipping host test translation-unit preprocessing is byte-identical under old/new pin headers (743266 bytes; SHA256 af20a8c18e9378518cb18b50e080fde7e9674667f5efda46de49f182c57fb8f9). No native ELF/BIN result is inferred."
+    },
+    {
+      "scope": "Historical catalog",
+      "result": "PASS",
+      "anchors": [
+        "firmware/src/app/dnr_remote/native_catalog_pin.h:5-17",
+        "firmware/src/app/dnr_remote/native_binding.inc:68-95"
+      ],
+      "detail": "Explicit qualified historical host profile passes. Seven actual guard cases pass in normal and optimized Python modes; independent missing-engine, invalid engine=2 in actual runtime-header context and negative-profile compile controls reject. Accepted-base real historical guard RED reproduced. Production host dnr_native_init still recomputes descriptor CRC/count and rejects drift. Nonhost/native target uses the unchanged shipping pin path; its runtime does not gain host CRC enumeration."
+    },
+    {
+      "scope": "Actual runtime/init/HELLO/catalog",
+      "result": "PASS",
+      "variants": [
+        "shipping O2",
+        "shipping O1 nonrecovering UBSan+bounds+float-cast-overflow",
+        "historical O2",
+        "historical O1 nonrecovering UBSan+bounds+float-cast-overflow"
+      ],
+      "checksPerVariant": 16,
+      "detail": "Original actual C/scripts rebuilt independently. Invalid init identity, successful init, no reinit, real HELLO CRC/count/unit-high and catalog counts pass. Normal/sanitized full metadata outputs are identical. Independently serialized metadata, custom bitwise CRC32 and zlib CRC32 agree: shipping395/0d0db2c8, historical407/26c95557. All395 shipping rows identical; only12 two-voice six-scalar Drone rows added. This is historical host-test catalog qualification, not production Drone admission or new transport qualification."
+    },
+    {
+      "scope": "Runtime mutation controls",
+      "result": "PASS_AS_EXPECTED_NEGATIVES",
+      "detail": "Actual init translation unit compiled and linked against the 71 real shared app/backend units. One-bit shipping CRC mutation and count395->396 mutation each compile/link, then runtime fails at dnr_native_init(42,high). Only owned /tmp pin header was altered and restored; frozen candidate never changed."
+    },
+    {
+      "scope": "Legacy303 caller",
+      "result": "PASS",
+      "detail": "Exact original base caller in isolated current shipping source reproduces real unresolved dnr2 link RED. Candidate unchanged script with HOST_UNITS passes21 checks for the two authenticated historical fixtures. Original compile flags, fixture bodies and assertions preserved. This caller was run in its original ordinary mode, not claimed as a sanitizer run."
+    },
+    {
+      "scope": "Shell dispatch and inventory",
+      "result": "PASS",
+      "detail": "12 host-setup tests and4 common-unit inventory tests pass normal and optimized. The shell fixture now explicitly provides current HOST_UNITS and checks exactly-once dispatch of all four fixture/common units. It remains an intentionally mocked shell-dispatch test; genuine catalog/legacy builds independently exercise real source units."
+    },
+    {
+      "scope": "Pinned regular-source materializer",
+      "result": "PASS_WITH_EXPLICIT_CANONICAL_ROOT_PRECONDITIONS",
+      "detail": "Exact unchanged utility independently materializes all5454 files/67127773 bytes to new /tmp output with every authenticated hash/size/mode verified. Six original tests pass normal and optimized. Twelve additional tests with subcases cover malformed/duplicate/traversal paths, invalid lengths/modes/hash, empty list, symlink leaf/ancestor, directories/FIFO, existing file/directory/live/broken-symlink output, containment, source+manifest nonmutation, independent destination inodes, and simulated post-prevalidation source/manifest drift. Expected failed copies remain partial and do not report success. Immutability and exclusive output-parent ownership remain required, not enforced as a filesystem sandbox."
+    }
+  ],
+  "scope": "Source/host/profile/materialization and affected scheduling only, not fullsuite/leak/native/target/device/adoption/lease. Root aliases canonicalized/internal source symlinks reject; immutable source and exclusive output-parent preconditions remain."
+}
