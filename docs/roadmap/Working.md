@@ -215,13 +215,13 @@ Use only permitted native Dot owners and genuinely disjoint subagents. Do not cr
 
 ## COMP1
 
-**Current disposition:** Root remains accountable coordinator and explicitly delegated this exact queue correction to the firmware/program owner. Predecessor bounded editor snapshots are historical, not a live source claim.
+**Current disposition:** The existing private R4 performance-companion packet retains its historical scoped source/notes/transport acceptance; its public component export remains refused. That is not physical MIDI, current firmware two-way sync or hosted delivery. The current requested website remote is a touch-friendly extension for sequencer/piano-roll, drum, sound, mix/FX, pattern and project workflows, not a duplicate keybed or a scalar-only endpoint. Current native DNR2 control/ownership work is an intermediate, unadmitted slice.
 
-**Owner:** Dot website/tools owner is the current named executor. Root coordinates; protected private delivery/refusals and uncertain incumbent leases remain.
+**Owner:** The existing Dot website/tools owner owns the comprehensive companion/remote website implementation and has consumed the full extension direction; the existing Dot firmware/program owner owns the native state/edit/transaction contract and resource integration. Protected frozen companion source/delivery boundaries and export refusals remain intact; this does not acquire an old private source lease.
 
-**Exact input/evidence:** current coordinated execution above, reviewed #948/#949 source and unchanged scoped input/acceptance receipts below; these are distinct source profiles.
+**Exact input/evidence:** The original COMP1 request and R4/#923 receipts below remain the historical evidence. Current source-supported workflows are traced against [#937](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/937); atomic and two-way-sync acceptance remains [#52](Pending.md#52)/[#104](Pending.md#104), not satisfied by the companion packet. New private browser/native source and actual C interop remain separately pinned, unadmitted evidence, not public component delivery.
 
-**Next action:** Keep real heads/owners/intake/holds synchronized, preserve original records and route final adoption through actual #914 recovery/incumbent integration, not a fabricated queue.
+**Next action:** Complete the useful touch-extension interface and native capability/state contracts together: real drum sequencing and piano-roll editing, sound/mix/FX, single-pattern/selected-part operations and safe project workflows. Verify actual target/current/queued feedback, owner-scoped releases, revisions/conflicts, multi-client isolation and reconnect on desktop/mobile. Reuse permitted prior interfaces and unchanged scoped proof without reconstructing/exporting the refused component. Close actual resource and browser/device gates before enabling physical control; do not stop at keybed notes or claim a new public delivery.
 
 **Reconciled observation (2026-11-14 13:30–13:33 UTC):** Current fields below supersede dated activity snapshots; exact action/consumption times remain unknown unless stated. Model Sol 6.1/Astra only for new or resumed tasks where selectable; requested versus effective settings remain separate.
 
