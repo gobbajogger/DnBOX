@@ -15,6 +15,9 @@ struct Held {
     NoteNumber &operator[](size_t i) { return values[i]; }
     const NoteNumber &operator[](size_t i) const { return values[i]; }
     void remove(size_t i);
+    bool remove_checked(size_t i);
+    bool insert_checked(NoteNumber value,size_t i);
+    bool valid_count() const { return count>=0 && count<=128; }
     void insert(NoteNumber value, size_t i);
     void clear() { count = 0; }
 };
@@ -25,8 +28,11 @@ struct EmptySequencer {
     unsigned resets = 0;
     void reset(bool) { pending_empty = true; ++resets; }
     void process(float *, const Held &) const;
+    bool process_checked(const float *,const Held &) const;
 };
 struct InstanceSpan { const void *data; size_t bytes; };
+// Own source-zero-phase initializer; original general Soundpipe init is unchanged.
+int init_morph_checked(sp_data*,sp_oscmorph2d*,sp_ftbl**,int,int,float*,SPFLOAT);
 class State : public S1DSPKernel {
 public:
     State(const State &) = delete;
@@ -54,13 +60,15 @@ public:
     bool valid_parameter(unsigned, float) const;
     bool valid_event(int pitch, int velocity, float frequency) const;
 protected:
+    template<int (*Init)(sp_data*,sp_oscmorph2d*,sp_ftbl**,int,int,float*,SPFLOAT)>
+    void initialize_note_objects();
     State() = default;
     State(State &&) = delete;
     State &operator=(State &&) = delete;
     bool valid_init(const synthone_shared::Tables &, int, const float *, size_t,
-                    const float *, size_t, InstanceSpan) const;
-    bool valid_restore(const float *, size_t, InstanceSpan) const;
-    bool valid_output_span(float *, float *, unsigned, unsigned, InstanceSpan) const;
+                    const float *, size_t, InstanceSpan, bool full_sequence=false) const;
+    bool valid_restore(const float *, size_t, InstanceSpan, bool full_sequence=false) const;
+    bool valid_output_span(float *, float *, unsigned, unsigned, InstanceSpan, bool full_sequence=false) const;
     void init_graph(const synthone_shared::Tables &, int, const float *);
     void restore_graph();
     struct NoteObjects {
@@ -81,6 +89,7 @@ protected:
 // Only the compact control representation belongs to the runtime.
 class RuntimeState : public State {
 public:
+    void initializeNoteStates();
     synthone_ports::Ports compactPorts;
     using Trace = void (*)(const RuntimeState &,unsigned,unsigned,void *);
     Trace trace_fn = nullptr;
@@ -96,11 +105,11 @@ protected:
     RuntimeState() = default;
     bool init_runtime(const synthone_shared::Tables &, int, const float *, size_t,
                       const float *, size_t, InstanceSpan);
-    bool restore_runtime(const float *, size_t, InstanceSpan);
+    bool restore_runtime(const float *, size_t, InstanceSpan, bool full_sequence=false);
     bool init_reader_runtime(const synthone_shared::Tables &, const void *, size_t,
                       int, const float *, size_t, const float *, size_t, InstanceSpan);
-    bool valid_runtime_output(float *,float *,unsigned,unsigned,InstanceSpan) const;
-    bool init_compact_runtime(const synthone_shared::Tables &,const void *,size_t,int,const float *,size_t,const float *,size_t,InstanceSpan);
+    bool valid_runtime_output(float *,float *,unsigned,unsigned,InstanceSpan,bool full_sequence=false) const;
+    bool init_compact_runtime(const synthone_shared::Tables &,const void *,size_t,int,const float *,size_t,const float *,size_t,InstanceSpan,bool full_sequence=false);
     s1c_binding compact_{};
     bool compact_active_ = false;
     s1_morph_binding reader_{};

@@ -1,8 +1,8 @@
 {
   "schema": 2,
-  "frozen_utc": "2026-11-15T06:23:15.932210+00:00",
-  "scope": "PRIVATE metadata-only compact Scheduler source candidate; arp-off pre-FX differential only, not full-port/fit",
-  "source_parent": "29e499596a4ee6f1e4eeac067795ec06a446a01f",
+  "frozen_utc": "2026-11-15T08:19:03.868487+00:00",
+  "scope": "PRIVATE R2 full sequence/arp+checked platform+original C++ dispatch candidate; F1 tuning/control/restore domain corrected, awaiting independent affected recheck; no product/FX/fit acceptance",
+  "source_parent": "69203861fae38a09b02fb94598a847f799af30fc",
   "files": [
     {
       "path": ".gitignore",
@@ -23,6 +23,12 @@
       "git_blob_sha": "5714a90bb313de24dcf610d1a689ffe77cb88495"
     },
     {
+      "path": "NATIVE-SDK-CXX.json",
+      "bytes": 47706,
+      "sha256": "2f2d2e4a941b59b70c67e9a27a6634df94f1092265a71ad902c31ea04a76bea1",
+      "git_blob_sha": "c596d63bd924bbde446a060ecc9ba465849e13d9"
+    },
+    {
       "path": "NATIVE-TOOLCHAIN.json",
       "bytes": 4991,
       "sha256": "56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e",
@@ -33,6 +39,18 @@
       "bytes": 27422,
       "sha256": "6b857ec15d3dbe68e3c7b4df891fb76d8ffe40f856a058ee1ecd42cdb1bb9a44",
       "git_blob_sha": "0d558109894270c3834ee579bcebe6d5ac6fd0d1"
+    },
+    {
+      "path": "SOURCE-SEQUENCE-CONTRACT.md",
+      "bytes": 4682,
+      "sha256": "0c8bc4b2ba375256d96a0923bb984674b1e8020b61ae20b4acca0fafa2fd6e97",
+      "git_blob_sha": "c28f02396b4b11a4575c797f0172b4579b4e129f"
+    },
+    {
+      "path": "checked_domain.cpp",
+      "bytes": 1564,
+      "sha256": "69fcee427114c16b175b37def4019b33c92443f6f80062d45fdad201738e53cf",
+      "git_blob_sha": "e02b8602ab350a8cc014a169c46c89b4b205009e"
     },
     {
       "path": "compact-reader/compact.c",
@@ -75,6 +93,24 @@
       "bytes": 591,
       "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
       "git_blob_sha": "8039d3dc33a01beda447768e8f392e0229857f40"
+    },
+    {
+      "path": "full_oracle.cpp",
+      "bytes": 15066,
+      "sha256": "b277765fe76447b81c55da91e4b70ed1d28f5151971a4f956cd2c187bc516fe2",
+      "git_blob_sha": "6187993cfa7bfe854970bd1220108787dad199b9"
+    },
+    {
+      "path": "full_oracle.hpp",
+      "bytes": 2696,
+      "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+      "git_blob_sha": "dcbb953e308530f0689f7aca6403a5c4c47524d9"
+    },
+    {
+      "path": "full_oracle_state.hpp",
+      "bytes": 2045,
+      "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+      "git_blob_sha": "901296410e9cf1282741b5cae765d69561d29831"
     },
     {
       "path": "mutation_checks.py",
@@ -180,33 +216,93 @@
     },
     {
       "path": "run_native.py",
-      "bytes": 10783,
-      "sha256": "e2a42cba94a1052725f2b51808b537e7ffbebd67638e7e425e82e1fca413972f",
-      "git_blob_sha": "c72e612e4463a10bffde35c1e9f1c398cea2d5b9"
+      "bytes": 13176,
+      "sha256": "42f62c305c214fd1baa73f70c3835ffdfc26e03b367a319f7475742abfe2e062",
+      "git_blob_sha": "a59823c7d8be1a9f67ae59613478c544cfd41d3f"
     },
     {
       "path": "run_tests.py",
-      "bytes": 10950,
-      "sha256": "397ad8b8c9d798cb943ef2d82583ea3d576ce0aa9ad9169437a3ce3a218effab",
-      "git_blob_sha": "5f6f7bbc3e1dc4a25af6a97a3bc64996789741ff"
+      "bytes": 13400,
+      "sha256": "01ec01d0b547830842667bc2106ea3c2bd5d969258cf04e9f3b922f97fc5ccf6",
+      "git_blob_sha": "974a48b6ba1787702d6e6cee0b022fd38ea9a6cb"
     },
     {
       "path": "scheduler.cpp",
-      "bytes": 20025,
-      "sha256": "8b74716d589bd71136f63a9b9c5181d670a13afb0edbcd1d7395fc96b9f60efb",
-      "git_blob_sha": "10e1b70de0ef5f51e8ce02e5f5823757d5e9ab73"
+      "bytes": 20674,
+      "sha256": "eb4013053339164cb9a0ac736c1cdd5af5eaa22d3ab8b3bb36e603f27912bd59",
+      "git_blob_sha": "ef5184d83a6c982f060c96bce8511daf532e2322"
     },
     {
       "path": "scheduler.hpp",
-      "bytes": 7747,
-      "sha256": "13f190ef2f060613f720e4ef3c52ee77f300fd904c50ff372f775e61c9a7cb07",
-      "git_blob_sha": "13c0fcdc3fb35a3beb4e66250b34dfa926829282"
+      "bytes": 8431,
+      "sha256": "62c42d10aca53f77e75afb46cc5f79e4eaf93a8d89caa8d8f8c08fad959646f8",
+      "git_blob_sha": "755838985b7116ac3ae52afb173d30fe81f0c6dc"
+    },
+    {
+      "path": "source-sequence/SOURCE-INPUTS.json",
+      "bytes": 1605,
+      "sha256": "e86392d0facda677b3c976ace92d6413e547556db9e70e835d1f39296fd7d651",
+      "git_blob_sha": "e7edcb573c3168e504eff2cb4c167bb5b764976c"
+    },
+    {
+      "path": "source-sequence/SynthOne-MIT.txt",
+      "bytes": 1075,
+      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "git_blob_sha": "be8551b835e760f321887b531d2f09d8ffa05c5a"
+    },
+    {
+      "path": "source-sequence/original_sequence.hpp",
+      "bytes": 20259,
+      "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+      "git_blob_sha": "8cce0cce9f1db5dbd0731f339aa130c453674fb4"
+    },
+    {
+      "path": "source-sequence/sequence_types.hpp",
+      "bytes": 4646,
+      "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+      "git_blob_sha": "08004f5217975d4d49a75cc4f787cb3aec2293cc"
+    },
+    {
+      "path": "source-sequence/source_sequence.hpp",
+      "bytes": 7011,
+      "sha256": "2bdcd31c701dca784eb61bd52eba811bbb0c8af1bf5add1f25f9cbc0fb7fde7b",
+      "git_blob_sha": "5af785a47a9e7a9445eda868c04f041fbe591ffd"
+    },
+    {
+      "path": "source-sequence/test_sequence.cpp",
+      "bytes": 6847,
+      "sha256": "323ce1845ba885b5e4b664023dad0d790df9441fb9b3e1ee30f9a66346ca0a9c",
+      "git_blob_sha": "1a43e7396e2cf8b228df563a278f4532a23c0f51"
+    },
+    {
+      "path": "source-sequence/verify_source.py",
+      "bytes": 3305,
+      "sha256": "56006d1812dd66f00f0a93b06f8bab4493285854a45e778c862fa5f5708faeec",
+      "git_blob_sha": "0bcac2359910da583f21f8a0b80c1cb3b1cd0eef"
+    },
+    {
+      "path": "source_scheduler.cpp",
+      "bytes": 8188,
+      "sha256": "b09c3d65f6e8263b7632d7535ee406f148b5d4ef2e5294305c7d3fefde85a2d5",
+      "git_blob_sha": "52cef512a2e1928dbe5d83a3c91793fb4c24e684"
+    },
+    {
+      "path": "source_scheduler.hpp",
+      "bytes": 2192,
+      "sha256": "d6046152bd8f9725a859850196bc50ab9fb222ffd3db4b17f1ed360f166261ed",
+      "git_blob_sha": "b3946207b9555d8000200da18cc6d8489e4ace35"
     },
     {
       "path": "tests/alias_composition_test.cpp",
       "bytes": 13615,
       "sha256": "cd998af63cdac6c9d28b4300c3376cc46a24337ef242da899ea92105ef161192",
       "git_blob_sha": "8c4791565fa8a775dc0c5204e2106d91d06b2131"
+    },
+    {
+      "path": "tests/checked_domain_test.cpp",
+      "bytes": 2187,
+      "sha256": "fd2b56081ac9a17491f3b7c500fe602f93c307ed94f43d54793a212dae5e749e",
+      "git_blob_sha": "ff0b465dacf945402d7e5097e7858f15de7976d3"
     },
     {
       "path": "tests/compact_scheduler_test.cpp",
@@ -243,6 +339,12 @@
       "bytes": 21372,
       "sha256": "af5117c4aaefa65a4b4381d996e604eff87a1fde26a3361a3f257a11d9e1f162",
       "git_blob_sha": "86c2743b414ff4b19081fd0008b06523b9c50b31"
+    },
+    {
+      "path": "tests/source_scheduler_test.cpp",
+      "bytes": 7753,
+      "sha256": "99361eff1f5272dc8fb2cd25060965db208a726abb8cd8335132d72840556410",
+      "git_blob_sha": "a1e2de11b3ab490f1d000dbe8a4c9dfb32daa259"
     }
   ],
   "untouched_oracle": "original#943 oracle files and generator byte-identical",
@@ -251,6 +353,6 @@
     "No native executable/product fit/CPU/device",
     "DefaultLSanptraceFAIL, SAME leak-disabled sanitizer pass only"
   ],
-  "revision": "R2-canonical-frequency-band-words",
-  "affected_change": "Compact initializer checks metadata AND packed original bands bitwise; three +/-0 regression cases; no original DSP/oracle arithmetic change"
+  "revision": "WORKING-broad-platform-feature-successor-checked-init",
+  "affected_change": "Checked own-runtime operations and source-zero-phase initializer; original general/assert methods and successful shared initialization body preserved, no numeric DSP changes"
 }

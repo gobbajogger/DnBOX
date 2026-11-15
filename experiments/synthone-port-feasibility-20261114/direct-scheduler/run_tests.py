@@ -15,6 +15,8 @@ def main():
     p.add_argument('--master-root',type=Path,required=True)
     p.add_argument('--tables',type=Path,required=True)
     p.add_argument('--compact',type=Path,help='Optional metadata-only compact differential fixture; legacy raw CLI stays unchanged')
+    p.add_argument('--sequence-upstream-root',type=Path,help='Authenticated public six-file sequence/oracle source root for --full-sequence')
+    p.add_argument('--full-sequence',action='store_true',help='Full original sequence/arp source-composition experiment')
     p.add_argument('--variant',choices=['o2','os','sanitize'],default='o2')
     p.add_argument('--reader-composition',action='store_true',help='Compare runtime-only direct reader against unchanged oracle')
     p.add_argument('--alias-composition',action='store_true',help='Compare exact packed aliases with the distinct-row oracle')
@@ -32,6 +34,14 @@ def main():
             if len(data)!=entry['bytes'] or hashlib.sha256(data).hexdigest()!=entry['sha256']:
                 raise SystemExit('dependency identity mismatch: '+group+'/'+entry['path'])
             verified[group][entry['path']]=data
+    if a.full_sequence:
+        if not a.sequence_upstream_root:raise SystemExit('--full-sequence requires exact --sequence-upstream-root')
+        bases['sequence-upstream']=a.sequence_upstream_root.resolve();verified['sequence-upstream']={}
+        sequence_manifest=json.loads((root/'source-sequence/SOURCE-INPUTS.json').read_text())
+        for entry in sequence_manifest['sources']+[sequence_manifest['parameter']]:
+            data=(bases['sequence-upstream']/entry['path']).read_bytes()
+            if hashlib.sha256(data).hexdigest()!=entry['sha256'] or hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()!=entry['blob']:raise SystemExit('exact original sequence input mismatch: '+entry['path'])
+            verified['sequence-upstream'][entry['path']]=data
     tables=a.tables.resolve();data=tables.read_bytes();expected=manifest['table_payload']
     if len(data)!=expected['bytes'] or hashlib.sha256(data).hexdigest()!=expected['sha256']:
         raise SystemExit('table payload identity mismatch')
@@ -50,14 +60,21 @@ def main():
         for name,data in entries.items():
             destination=staged[group]/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
     local=out/'closure/scheduler'
-    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','tests/reader_scheduler_test.cpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','tests/compact_scheduler_test.cpp']
+    local_files=['fixed_array.hpp','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','tests/reader_scheduler_test.cpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','tests/compact_scheduler_test.cpp','checked_domain.cpp','tests/checked_domain_test.cpp','source_scheduler.hpp','source_scheduler.cpp','full_oracle_state.hpp','full_oracle.hpp','full_oracle.cpp','source-sequence/original_sequence.hpp','tests/source_scheduler_test.cpp','source-sequence/source_sequence.hpp','source-sequence/sequence_types.hpp','source-sequence/verify_source.py','source-sequence/SOURCE-INPUTS.json','source-sequence/SynthOne-MIT.txt']
     local_manifest=[]
     for name in local_files:
         data=(root/name).read_bytes();destination=local/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
         local_manifest.append({'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
     (out/'COMPILED-SOURCES.json').write_text(json.dumps(local_manifest,indent=2)+'\n')
+    if a.full_sequence:
+        subprocess.run([__import__('sys').executable,str(local/'source-sequence/verify_source.py'),'--upstream-root',str(staged['sequence-upstream'])],check=True)
+        expected_oracle=(local/'oracle/oracle.cpp').read_text().replace('#include \"oracle.hpp\"','#include \"full_oracle.hpp\"').replace('Oracle::','FullOracle::')
+        if expected_oracle!=(local/'full_oracle.cpp').read_text():raise SystemExit('full original note/scheduler oracle bodies changed')
     test_source=local/('tests/compact_scheduler_test.cpp' if a.compact else 'tests/scheduler_test.cpp')
     if sum((a.alias_composition,a.reader_composition,a.smoke))>1: raise SystemExit('choose exactly one specialized fixture')
+    if a.full_sequence:
+        if not a.compact:raise SystemExit('full sequence requires authenticated compact fixture')
+        test_source=local/'tests/source_scheduler_test.cpp'
     if a.reader_composition: test_source=local/'tests/reader_scheduler_test.cpp'
     if a.alias_composition and a.smoke: raise SystemExit('choose alias composition or smoke, not both')
     if a.alias_composition: test_source=local/'tests/alias_composition_test.cpp'
@@ -119,10 +136,12 @@ int main(int argc,char**argv) {
     for name in ['base','ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']:
         dest=out/(name+'.o');objects.append(dest)
         command([os.environ.get('CC','cc'),'-std=gnu99','-DNO_LIBSNDFILE']+flags+['-Wno-error']+inc+['-c',core/'Soundpipe/modules'/(name+'.c'),'-o',dest])
-    sources=[('compact_reader',local/'compact-reader/compact.c','c'),('compact_morph',local/'compact-reader/compact_morph.c','c'),('compact_note',local/'compact_note.cpp','c++'),('direct_reader',local/'reader/direct_reader.c','c'),('runtime_morph',local/'reader/morph_compute.c','c'),('runtime_note',local/'reader/runtime_note.cpp','c++'),('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c'),('voice',staged['experiment']/'probe/portable_voice.cpp','c++'),('parameter_map',staged['controls']/'generated/parameter_map.cpp','c++'),('ports',staged['controls']/'parameter_ports.cpp','c++'),('scheduler',local/'scheduler.cpp','c++'),('oracle',local/'oracle/oracle.cpp','c++'),('test',test_source,'c++')]
+    sources=[('checked_domain',local/'checked_domain.cpp','c++'),('compact_reader',local/'compact-reader/compact.c','c'),('compact_morph',local/'compact-reader/compact_morph.c','c'),('compact_note',local/'compact_note.cpp','c++'),('direct_reader',local/'reader/direct_reader.c','c'),('runtime_morph',local/'reader/morph_compute.c','c'),('runtime_note',local/'reader/runtime_note.cpp','c++'),('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c'),('voice',staged['experiment']/'probe/portable_voice.cpp','c++'),('parameter_map',staged['controls']/'generated/parameter_map.cpp','c++'),('ports',staged['controls']/'parameter_ports.cpp','c++'),('scheduler',local/'scheduler.cpp','c++'),('oracle',local/'oracle/oracle.cpp','c++'),('test',test_source,'c++')]
+    if a.full_sequence:
+        sources.insert(0,('source_scheduler',local/'source_scheduler.cpp','c++'));sources.insert(0,('full_oracle',local/'full_oracle.cpp','c++'))
     for name,source,lang in sources:
         dest=out/(name+'.o');objects.append(dest)
-        command([os.environ.get('CC' if lang=='c' else 'CXX','cc' if lang=='c' else 'c++'),'-std=gnu99' if lang=='c' else '-std=c++11','-DNO_LIBSNDFILE']+flags+(['-Wno-error'] if name in ['morph','voice'] else [])+inc+['-c',source,'-o',dest])
+        command([os.environ.get('CC' if lang=='c' else 'CXX','cc' if lang=='c' else 'c++'),'-std=gnu99' if lang=='c' else '-std=c++17' if a.full_sequence else '-std=c++11','-DNO_LIBSNDFILE']+flags+(['-Wno-error'] if name in ['morph','voice'] else ['-Wno-reorder'] if a.full_sequence and lang=='c++' else [])+inc+['-c',source,'-o',dest])
     binary=out/'scheduler_test'
     command([os.environ.get('CXX','c++')]+flags+objects+(['-Wl,--wrap=sp_oscmorph2d_compute'] if a.alias_composition else ['-Wl,--wrap=s1_runtime_morph_compute','-Wl,--wrap=s1_morph_read_word'] if a.reader_composition else [])+(['-Wl,--wrap=s1c_read'] if a.compact else [])+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
     env=dict(build_env,ASAN_OPTIONS='detect_leaks=1')

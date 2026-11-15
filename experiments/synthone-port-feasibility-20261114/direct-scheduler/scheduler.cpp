@@ -32,17 +32,17 @@ bool payload(const float *p,size_t n,float bound,InstanceSpan self) {
     for(size_t i=0;i<n;++i) if(!isfinite(p[i]) || p[i]<-bound || p[i]>bound) return false;
     return p[4096]==0.f && !signbit(p[4096]);
 }
-bool values_valid(const float *p,size_t n) {
-    if(!p || n!=150 || p[arpIsOn]!=0) return false;
+bool values_valid(const float *p,size_t n,bool full_sequence=false) {
+    if(!p || n!=150 || (!full_sequence && p[arpIsOn]!=0)) return false;
     for(unsigned i=0;i<150;++i)
         if(!isfinite(p[i]) || p[i]<minimums[i] || p[i]>maximums[i]) return false;
     return true;
 }
 }
 bool State::valid_init(const synthone_shared::Tables &tables,int rate,const float *values,
-                       size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) const {
+                       size_t count,const float *tuning,size_t tuning_count,InstanceSpan self,bool full_sequence) const {
     if((rate!=44100 && rate!=48000 && rate!=96000) ||
-       overlap(values,150*sizeof(float),self.data,self.bytes) || !values_valid(values,count) ||
+       overlap(values,150*sizeof(float),self.data,self.bytes) || !values_valid(values,count,full_sequence) ||
        !tuning || tuning_count!=128 || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
        overlap(&tables,sizeof tables,self.data,self.bytes)) return false;
     for(unsigned i=0;i<128;++i)
@@ -81,10 +81,10 @@ void State::init_graph(const synthone_shared::Tables &tables,int rate,const floa
     resetted=false; processSampleCounter=0; sequencer={};
     initialized_=true;
 }
-bool State::valid_restore(const float *values,size_t count,InstanceSpan self) const {
+bool State::valid_restore(const float *values,size_t count,InstanceSpan self,bool full_sequence) const {
     return initialized_ &&
         (values==parameters || !overlap(values,150*sizeof(float),self.data,self.bytes)) &&
-        values_valid(values,count);
+        values_valid(values,count,full_sequence);
 }
 bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,const float *values,
                                 size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
@@ -123,7 +123,7 @@ bool RuntimeState::init_reader_runtime(const synthone_shared::Tables &tables,con
     reader_=candidate;reader_active_=true;return true;
 }
 bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
-        int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
+        int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self,bool full_sequence) {
     // Authenticate the WHOLE final owner before dereferencing candidate metadata.
     if(overlap(&tables,sizeof tables,self.data,self.bytes) || !packed || count!=150 || tuning_count!=128 ||
        (rate!=44100&&rate!=48000&&rate!=96000) ||
@@ -131,7 +131,7 @@ bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,co
        overlap(values,150*sizeof(float),self.data,self.bytes) || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
        overlap(packed,bytes,values,150*sizeof(float)) || overlap(packed,bytes,tuning,128*sizeof(float)) ||
        reinterpret_cast<uintptr_t>(values)%alignof(float) || reinterpret_cast<uintptr_t>(tuning)%alignof(float) ||
-       !values_valid(values,count) || !tuning || !tables.sine || tables.sine_count!=4097 ||
+       !values_valid(values,count,full_sequence) || !tuning || !tables.sine || tables.sine_count!=4097 ||
        reinterpret_cast<uintptr_t>(tables.sine)%alignof(float) ||
        overlap(packed,bytes,tables.sine,4097*sizeof(float)))return false;
     for(unsigned i=0;i<128;++i)if(!isfinite(tuning[i])||tuning[i]<=0||tuning[i]>rate*.5f)return false;
@@ -150,18 +150,18 @@ bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,co
     if(!compactPorts.init(parameters,150,values,150,rate))return false;
     restore_graph();reader_={};reader_active_=false;compact_=candidate;compact_active_=true;return true;
 }
-bool RuntimeState::valid_runtime_output(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self) const {
+bool RuntimeState::valid_runtime_output(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self,bool full_sequence) const {
     if(n>65536||offset>65536-n)return false;
     const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
     if(compact_active_&&(reinterpret_cast<uintptr_t>(l)%alignof(float)||reinterpret_cast<uintptr_t>(r)%alignof(float)||
        overlap(l,bytes,compact_.bytes,compact_.byte_count)||overlap(r,bytes,compact_.bytes,compact_.byte_count)))return false;
     if(reader_active_&&(overlap(l,bytes,reader_.bytes,reader_.byte_count)||
                        overlap(r,bytes,reader_.bytes,reader_.byte_count)))return false;
-    return valid_output_span(l,r,n,offset,self);
+    return valid_output_span(l,r,n,offset,self,full_sequence);
 }
-bool RuntimeState::restore_runtime(const float *values,size_t count,InstanceSpan self) {
+bool RuntimeState::restore_runtime(const float *values,size_t count,InstanceSpan self,bool full_sequence) {
     if(compact_active_&&reinterpret_cast<uintptr_t>(values)%alignof(float))return false;
-    if(!valid_restore(values,count,self)) return false;
+    if(!valid_restore(values,count,self,full_sequence)) return false;
     float saved[150]; memcpy(saved,values,sizeof saved);
     if(!compactPorts.restore(saved,150,sp->sr)) return false;
     restore_graph();
@@ -174,7 +174,10 @@ void State::restore_graph() {
     // must explicitly establish reset(true) before this direct-event domain.
     sequencer.reset(true);
 }
-void State::initializeNoteStates() {
+void State::initializeNoteStates() {initialize_note_objects<sp_oscmorph2d_init>();}
+void RuntimeState::initializeNoteStates() {initialize_note_objects<init_morph_checked>();}
+template<int (*Init)(sp_data*,sp_oscmorph2d*,sp_ftbl**,int,int,float*,SPFLOAT)>
+void State::initialize_note_objects() {
     if(initializedNoteStates) return;
     initializedNoteStates=true;
     for(unsigned i=0;i<7;++i) {
@@ -185,10 +188,10 @@ void State::initializeNoteStates() {
         v.subOsc=&o.sub; v.fmOsc=&o.fm; v.noise=&o.noise;
         v.loPass=&o.lowpass; v.bandPass=&o.bandpass; v.hiPass=&o.highpass;
         sp_adsr_init(sp,v.adsr); sp_adsr_init(sp,v.fadsr);
-        sp_oscmorph2d_init(sp,v.oscmorph1,ft_array,4,13,ft_frequencyBand,0);
+        Init(sp,v.oscmorph1,ft_array,4,13,ft_frequencyBand,0);
         v.oscmorph1->freq=0; v.oscmorph1->amp=0; v.oscmorph1->wtpos=0;
         v.oscmorph1->enableBandlimit=parameters[oscBandlimitEnable]; v.oscmorph1->bandlimitIndexOverride=-1;
-        sp_oscmorph2d_init(sp,v.oscmorph2,ft_array,4,13,ft_frequencyBand,0);
+        Init(sp,v.oscmorph2,ft_array,4,13,ft_frequencyBand,0);
         v.oscmorph2->freq=0; v.oscmorph2->amp=0; v.oscmorph2->wtpos=0;
         v.oscmorph2->enableBandlimit=parameters[oscBandlimitEnable]; v.oscmorph2->bandlimitIndexOverride=-1;
         sp_crossfade_init(sp,v.morphCrossFade); sp_crossfade_init(sp,v.filterCrossFade);
@@ -204,11 +207,11 @@ bool State::valid_parameter(unsigned p,float v) const {
     return initialized_ && p<150 && isfinite(v) && (p!=arpIsOn || v==0.f);
 }
 bool State::valid_event(int pitch,int velocity,float frequency) const {
-    return initialized_ && parameters[arpIsOn]==0 && sequencer.pending_empty && pitch>=0 && pitch<128 &&
+    return initialized_ && heldNoteNumbers.valid_count() && heldNoteNumbersAE.valid_count() && parameters[arpIsOn]==0 && sequencer.pending_empty && pitch>=0 && pitch<128 &&
         velocity>=0 && velocity<=127 && isfinite(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
 }
-bool State::valid_output_span(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self) const {
-    if(!initialized_ || !l || !r || n>65536 || offset>65536-n || parameters[arpIsOn]!=0 || !sequencer.pending_empty) return false;
+bool State::valid_output_span(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self,bool full_sequence) const {
+    if(!initialized_ || !l || !r || n>65536 || offset>65536-n || (!full_sequence && (parameters[arpIsOn]!=0 || !sequencer.pending_empty))) return false;
     const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
     if(overlap(l,bytes,r,bytes) || overlap(l,bytes,self.data,self.bytes) || overlap(r,bytes,self.data,self.bytes) ||
        overlap(l,bytes,tuningTable,128*sizeof(float)) || overlap(r,bytes,tuningTable,128*sizeof(float))) return false;
@@ -220,8 +223,8 @@ bool Scheduler::set_target(unsigned p,float v) {
 }
 bool Scheduler::start(int pitch,int velocity,float ignored_frequency) {
     if(!valid_event(pitch,velocity,ignored_frequency)) return false;
-    for(int i=0;i<heldNoteNumbers.count;++i) if(heldNoteNumbers[i].noteNumber==pitch) { heldNoteNumbers.remove(i); break; }
-    heldNoteNumbers.insert({pitch,static_cast<int>(parameters[transpose]),velocity},0);
+    for(int i=0;i<heldNoteNumbers.count;++i) if(heldNoteNumbers[i].noteNumber==pitch) { if(!heldNoteNumbers.remove_checked(i))return false; break; }
+    if(!heldNoteNumbers.insert_checked({pitch,static_cast<int>(parameters[transpose]),velocity},0))return false;
     heldNoteNumbersAE=heldNoteNumbers;
     on_valid(pitch,velocity,tuningTableNoteToHz(pitch+static_cast<int>(parameters[transpose])));
     return true;
@@ -258,7 +261,7 @@ void Scheduler::on_valid(int pitch,int velocity,float frequency) {
 }
 bool Scheduler::stop(int pitch) {
     if(!valid_event(pitch,0,0)) return false;
-    for(int i=0;i<heldNoteNumbers.count;++i) if(heldNoteNumbers[i].noteNumber==pitch) {heldNoteNumbers.remove(i);break;}
+    for(int i=0;i<heldNoteNumbers.count;++i) if(heldNoteNumbers[i].noteNumber==pitch) {if(!heldNoteNumbers.remove_checked(i))return false;break;}
     heldNoteNumbersAE=heldNoteNumbers; off_valid(pitch); return true;
 }
 bool Scheduler::off(int pitch) { if(!valid_event(pitch,0,0)) return false; off_valid(pitch); return true; }
@@ -326,7 +329,7 @@ bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         if(parameters[isMono]!=previousProcessMonoPolyStatus) {
             previousProcessMonoPolyStatus=parameters[isMono]; reset(); sequencer.reset(true);
         }
-        processLfo(); sequencer.process(parameters,heldNoteNumbersAE);
+        processLfo(); if(!sequencer.process_checked(parameters,heldNoteNumbersAE))return false;
         if(parameters[isMono]>0) {
             if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
                 if(compact_active_) { if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false; }

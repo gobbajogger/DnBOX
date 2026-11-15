@@ -1,0 +1,1141 @@
+{
+  "sdk_version": "AC79NN_SDK_V1.2.14_2026-10-13",
+  "archive_sha256": "929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6",
+  "scope": "Authentic SDK C++ header closure metadata only; no SDK content redistributed",
+  "headers": [
+    {
+      "path": "__availability",
+      "bytes": 13824,
+      "sha256": "51eaa3409dc7b438c65e3082db0786bacab780cef276c8f6669d772e5a6a6201",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__availability"
+    },
+    {
+      "path": "__bit_reference",
+      "bytes": 53237,
+      "sha256": "39a28b4b23718a9cbd0ffc2fab3a6663dbb99387f9085ce84e66e25598e29300",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__bit_reference"
+    },
+    {
+      "path": "__bits",
+      "bytes": 4712,
+      "sha256": "8b6ed9474ab51e90b4fd1beefff74a33c7eb5542cf4d6d39c60d156297a7317e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__bits"
+    },
+    {
+      "path": "__bsd_locale_defaults.h",
+      "bytes": 2105,
+      "sha256": "dd806af48fa7d0aa8732f26a2bf4625856fa8fbce1f61f117bb2b65bc4439f3d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__bsd_locale_defaults.h"
+    },
+    {
+      "path": "__bsd_locale_fallbacks.h",
+      "bytes": 4056,
+      "sha256": "2e68310950eead3311fd9fa397d9bbb72e3394ff2f5181d754ef95b514c51985",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__bsd_locale_fallbacks.h"
+    },
+    {
+      "path": "__config",
+      "bytes": 48724,
+      "sha256": "1ecea71a69fcc88a4ed7bf290ac60ec92eb351ee0c3cc0a1808ade179540bcaf",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__config"
+    },
+    {
+      "path": "__cxxabi_config.h",
+      "bytes": 3076,
+      "sha256": "e7c739c85785845f88d52b97eaee8338340946434f1589b878370d7b03ac8815",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__cxxabi_config.h"
+    },
+    {
+      "path": "__debug",
+      "bytes": 8079,
+      "sha256": "3cf236277542073c220d46bc2b8cebd041a88d46216913712ea72f4f87bb68f4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__debug"
+    },
+    {
+      "path": "__errc",
+      "bytes": 9244,
+      "sha256": "f15577f4c431b3f2bda90309c5259b935220bcc378854bc307ad9f70c71d3465",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__errc"
+    },
+    {
+      "path": "__functional_03",
+      "bytes": 44712,
+      "sha256": "538c6b6ca5887ab459fe1031968188ff945c36fe9ae6e093c0cc0da5b9faf85d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__functional_03"
+    },
+    {
+      "path": "__functional_base",
+      "bytes": 18280,
+      "sha256": "307dc46c2a2bb00064cf4b4d07248ae27808096217b623f88d63a03fcdae8375",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__functional_base"
+    },
+    {
+      "path": "__functional_base_03",
+      "bytes": 6413,
+      "sha256": "82cbfdb3a43677444fc92b4f74b764f245afa2101fa67a851ee30c4b966777f8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__functional_base_03"
+    },
+    {
+      "path": "__hash_table",
+      "bytes": 100602,
+      "sha256": "9d63570f646170466417442b39a5473520e2b1bf91fa807291a9ece3f8848e3f",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__hash_table"
+    },
+    {
+      "path": "__libcpp_version",
+      "bytes": 6,
+      "sha256": "cc9f23a77ecea60b29786c934ac6c3f8fbe766405b3dc3f2b4b02679be56ba88",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__libcpp_version"
+    },
+    {
+      "path": "__locale",
+      "bytes": 56572,
+      "sha256": "4c95ccb0ee43374f207f220b9ffc3ee553584e1c80e1164a9e1c648ee09110a4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__locale"
+    },
+    {
+      "path": "__memory/allocator_traits.h",
+      "bytes": 16214,
+      "sha256": "1d4a79f4efc3736cc098cc6f594a4522eb12b11582a4552fd2c6b0d501824120",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__memory/allocator_traits.h"
+    },
+    {
+      "path": "__memory/base.h",
+      "bytes": 3040,
+      "sha256": "b3533be77b40882e261505fd097a9fc6eeb0d8a3161efd4dc2304afe93e6f1ec",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__memory/base.h"
+    },
+    {
+      "path": "__memory/pointer_traits.h",
+      "bytes": 5211,
+      "sha256": "670b0a6f5123e0fe4b74ff2387836bdc95af0b8245916cb809851b877af12d27",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__memory/pointer_traits.h"
+    },
+    {
+      "path": "__memory/utilities.h",
+      "bytes": 2706,
+      "sha256": "5ecc3bded94883d69c7a07f14bb1b7e1c4f0f30f1be9a181ad25fa8436a39a09",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__memory/utilities.h"
+    },
+    {
+      "path": "__mutex_base",
+      "bytes": 16381,
+      "sha256": "1a0e74b6324850d2348fb53d74e95b5f5c4455c99566c291642e49f90df03105",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__mutex_base"
+    },
+    {
+      "path": "__node_handle",
+      "bytes": 6074,
+      "sha256": "6a8d1b5867095843feb5c5974902c1b65cdb8bf32f03199dd393366983375d3a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__node_handle"
+    },
+    {
+      "path": "__nullptr",
+      "bytes": 1734,
+      "sha256": "3ae4cecb126730c52b9b0de609014580f3bc37f24fde9ada2a4bb2f4bb61bbb4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__nullptr"
+    },
+    {
+      "path": "__split_buffer",
+      "bytes": 22150,
+      "sha256": "ea34fb24065cb8e90ab56a033c3e8cee8d55fed89a5e708cd2b0b92eacccb96d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__split_buffer"
+    },
+    {
+      "path": "__sso_allocator",
+      "bytes": 2484,
+      "sha256": "d2c9a5492a7c52adbbc9589158982aa4c1f7b27e6b2d84d7615a412932ff0490",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__sso_allocator"
+    },
+    {
+      "path": "__std_stream",
+      "bytes": 10568,
+      "sha256": "1f448f846d817539f39f22904136fbefc73de05defbec2838d1246c224718b44",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__std_stream"
+    },
+    {
+      "path": "__string",
+      "bytes": 47157,
+      "sha256": "4d6f5edb7202d6745d3ed8c0a0107b9a893cb284fcbd7e58f8a96b2ad33b4a69",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__string"
+    },
+    {
+      "path": "__support/android/locale_bionic.h",
+      "bytes": 1735,
+      "sha256": "2fd10c81f8a1f9634d6cdcecdc6a54c09a14a6544466a696f91b8492d3311abd",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/android/locale_bionic.h"
+    },
+    {
+      "path": "__support/fuchsia/xlocale.h",
+      "bytes": 712,
+      "sha256": "9fb85bbd986e5e0032ba2f0a4abee532f32c432b3537ce9ab3184cb3e5f3f44c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/fuchsia/xlocale.h"
+    },
+    {
+      "path": "__support/ibm/limits.h",
+      "bytes": 3612,
+      "sha256": "aad5a89b1e97ed6406db3f62f9222719b049322c25f0bbe33135bebe305ba944",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/ibm/limits.h"
+    },
+    {
+      "path": "__support/ibm/locale_mgmt_aix.h",
+      "bytes": 2572,
+      "sha256": "eec2b14680b835a8700349c799eb067d535795bcc71b6f1bdafe69e1aedb91f8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/ibm/locale_mgmt_aix.h"
+    },
+    {
+      "path": "__support/ibm/nanosleep.h",
+      "bytes": 1240,
+      "sha256": "d75a6bc4f9ea6e3d0368f6be9249b3dbb490bff4f6ee6dfb599b418804152e5a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/ibm/nanosleep.h"
+    },
+    {
+      "path": "__support/ibm/support.h",
+      "bytes": 1696,
+      "sha256": "2a8089e937faddaf328feb14336ab20b9a4c49ac68bb1946d996645656428470",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/ibm/support.h"
+    },
+    {
+      "path": "__support/ibm/xlocale.h",
+      "bytes": 6088,
+      "sha256": "6fc3a00d21b93f462b49669ed7ee9d76379665deeabb4db33767dcb1345aef63",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/ibm/xlocale.h"
+    },
+    {
+      "path": "__support/musl/xlocale.h",
+      "bytes": 1780,
+      "sha256": "d527c879afeb8b7698bebff5a51cd1634670377bc41b41494626d49bc6cdb2a8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/musl/xlocale.h"
+    },
+    {
+      "path": "__support/newlib/xlocale.h",
+      "bytes": 843,
+      "sha256": "e146df963cb79200966b12cc0317b2de06b9fedd7ad5c97ec5dbb57a009d5f76",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/newlib/xlocale.h"
+    },
+    {
+      "path": "__support/nuttx/xlocale.h",
+      "bytes": 619,
+      "sha256": "ea0a5b46bf428854cf98076065329de6c52ffc0b0265e20d4954f1195f19a416",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/nuttx/xlocale.h"
+    },
+    {
+      "path": "__support/openbsd/xlocale.h",
+      "bytes": 606,
+      "sha256": "c1131ffd23a6c14e7a341a3c47011cb06fa8cafdfee7a03f507bf383ed7b5b44",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/openbsd/xlocale.h"
+    },
+    {
+      "path": "__support/solaris/floatingpoint.h",
+      "bytes": 476,
+      "sha256": "61192165d1889cca5e429a3039e8608f42eee906179ee053b81c593eea986578",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/solaris/floatingpoint.h"
+    },
+    {
+      "path": "__support/solaris/wchar.h",
+      "bytes": 1229,
+      "sha256": "639b3b32429a24238b3b52dbe42e98857a2b1eaf95706f312e94cbd9df579f8b",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/solaris/wchar.h"
+    },
+    {
+      "path": "__support/solaris/xlocale.h",
+      "bytes": 2384,
+      "sha256": "fc4ffa53d9b506afbe75a3095dd70970d8006b1a28700ade84b2bc4315fe98de",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/solaris/xlocale.h"
+    },
+    {
+      "path": "__support/win32/limits_msvc_win32.h",
+      "bytes": 2633,
+      "sha256": "aa52addd1d07d8c44307c82ed6b65831d31b998ef73e82cf18f3cb604adc9998",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/win32/limits_msvc_win32.h"
+    },
+    {
+      "path": "__support/win32/locale_win32.h",
+      "bytes": 9395,
+      "sha256": "e3c504be0ea5d1a74862b83f5d9cb466b18f6ffe03c74e2d07d88ba8f01821ad",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/win32/locale_win32.h"
+    },
+    {
+      "path": "__support/xlocale/__nop_locale_mgmt.h",
+      "bytes": 1437,
+      "sha256": "5ff1154cd62c5eaa3684d4319b9adeba24660e470395bd0233b5a3fd258ac5e6",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/xlocale/__nop_locale_mgmt.h"
+    },
+    {
+      "path": "__support/xlocale/__posix_l_fallback.h",
+      "bytes": 4432,
+      "sha256": "46cd5c53aad41ef17974a11d3ca21d5bdb1ab4ef6860370e72c16bee1975bdc8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/xlocale/__posix_l_fallback.h"
+    },
+    {
+      "path": "__support/xlocale/__strtonum_fallback.h",
+      "bytes": 2194,
+      "sha256": "67b845438cc7ae785d15e92075ff63c02f3c97fc7e116efa87218a4632b5d036",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__support/xlocale/__strtonum_fallback.h"
+    },
+    {
+      "path": "__threading_support",
+      "bytes": 21404,
+      "sha256": "168a74a124d1e433220e315f6e141ef17c3d9e332daf2653a7196274145a3354",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__threading_support"
+    },
+    {
+      "path": "__tree",
+      "bytes": 101939,
+      "sha256": "ce6f6c6ba0353a04e366fb5f669ac9ba33c9fa3351518e4504b9d5f0bec23543",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__tree"
+    },
+    {
+      "path": "__tuple",
+      "bytes": 20675,
+      "sha256": "01dc75a17de7b7cda18db8276316ad56e0ab8a91431516e916f615024688965a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__tuple"
+    },
+    {
+      "path": "__undef_macros",
+      "bytes": 1047,
+      "sha256": "081f0a08312dd2a8e7617cdaf6b702f594c0cc31e59549b7b7e77f53ade95544",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/__undef_macros"
+    },
+    {
+      "path": "algorithm",
+      "bytes": 211951,
+      "sha256": "3e932e7f75729281b9a4bdcdec9c00dd1bb96cdb5cfef06edef14fcbea7a0ad7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/algorithm"
+    },
+    {
+      "path": "any",
+      "bytes": 19624,
+      "sha256": "9b722951c191a885a7a076866bcefb23dd6861c8d840cfdd97948b8458f722d4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/any"
+    },
+    {
+      "path": "array",
+      "bytes": 20901,
+      "sha256": "91c037e4113664517be1753909114674b3ae70c2f4d1aafbefbb2101694ddba5",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/array"
+    },
+    {
+      "path": "atomic",
+      "bytes": 101888,
+      "sha256": "189285fbf59e1467b91ad57484a334c32928461ac612563c0dd8a396076d3764",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/atomic"
+    },
+    {
+      "path": "barrier",
+      "bytes": 10369,
+      "sha256": "dc82dd6120cacc9eaf859d40015a1f6e90d196debfbaaac8fa6d2034c13db48c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/barrier"
+    },
+    {
+      "path": "bit",
+      "bytes": 10541,
+      "sha256": "cee72b9ec448b9a4f28b6c52998dde19a445cb6ecca716f1963032464e0463f4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/bit"
+    },
+    {
+      "path": "bitset",
+      "bytes": 33820,
+      "sha256": "512ab5f09e379eab4a68a9b92ca667b340f7c49236bb1a82d9f35302ff5b718d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/bitset"
+    },
+    {
+      "path": "cassert",
+      "bytes": 559,
+      "sha256": "bac7b4195733184e7823c76342eb462362af2101db9189d37437d97a90512b86",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cassert"
+    },
+    {
+      "path": "ccomplex",
+      "bytes": 640,
+      "sha256": "1b3687368b8ed17e4b7c5c0b1e7d65f60902b9506608a91c4ea3b0002328e8e7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ccomplex"
+    },
+    {
+      "path": "cctype",
+      "bytes": 1758,
+      "sha256": "0a6d4c0172f9c173ff40d5441dd327acdf5c57b7238fe888c2ae9c4252e756f9",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cctype"
+    },
+    {
+      "path": "cerrno",
+      "bytes": 669,
+      "sha256": "d55619e17c898fdbea290157674f9c9d8d7343ca75e115e87b5336430b9850c7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cerrno"
+    },
+    {
+      "path": "cfenv",
+      "bytes": 1601,
+      "sha256": "f23cb53f5d1ea1faa3f424e9e651d6efdd69af75b1d4ca7d00c7baf11cb02f09",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cfenv"
+    },
+    {
+      "path": "cfloat",
+      "bytes": 1427,
+      "sha256": "a7b6e3e6ee7153873d0e4e8d7f35d0ca77701b9749bb8adec8cfc9c4d162d9fb",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cfloat"
+    },
+    {
+      "path": "charconv",
+      "bytes": 18430,
+      "sha256": "b0b3c7179100ada895081cb8a41f736b9b6e23f5c51704dad1b7dd4a2dde805f",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/charconv"
+    },
+    {
+      "path": "chrono",
+      "bytes": 116361,
+      "sha256": "e5ddd4c3ea2f0a4c128704fab49513e71f316264ad7dd771a127fcd6f60e0b37",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/chrono"
+    },
+    {
+      "path": "cinttypes",
+      "bytes": 3518,
+      "sha256": "92ee5558f4bd9eac4ba44a28d83d017242e89d4dc38945d68ba2832b7265085f",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cinttypes"
+    },
+    {
+      "path": "ciso646",
+      "bytes": 595,
+      "sha256": "9f0c4c2f3d2fdae53aaabba376b3793e05c643de8c4d73cb95c142bd3a68a1ed",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ciso646"
+    },
+    {
+      "path": "climits",
+      "bytes": 907,
+      "sha256": "e775c5a34897c6b3fbccc9214ab145103436b43483bc35e3a2abb40e7c517696",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/climits"
+    },
+    {
+      "path": "clocale",
+      "bytes": 998,
+      "sha256": "e2533f0ca78cb4bef8ebb98b36b22bf22637a53fb2ea20af62a72af232550e7e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/clocale"
+    },
+    {
+      "path": "cmath",
+      "bytes": 17102,
+      "sha256": "300927b52b9ef2ccbb3073cad93bf9f7a81bdd439ce6b9bee38a3623a325a110",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cmath"
+    },
+    {
+      "path": "codecvt",
+      "bytes": 21128,
+      "sha256": "5b2aad1da8d824b948eb48b0fde44286b0692935338ca3a7c958a747c49862d6",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/codecvt"
+    },
+    {
+      "path": "compare",
+      "bytes": 31034,
+      "sha256": "f3dfa9704bd937250af6ac42f0b2623d9a66f4cf451004a115e6d9defdd2488a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/compare"
+    },
+    {
+      "path": "complex",
+      "bytes": 46480,
+      "sha256": "0aec6d37461bc9cc455c127dd10e16a32a4ba3cd9c2ca2bfeebcd33a9ec7ddff",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/complex"
+    },
+    {
+      "path": "complex.h",
+      "bytes": 739,
+      "sha256": "580570a3a1b62ac9902844ac46f81ebe74fd6acc3df162b4388932c6d33ba03d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/complex.h"
+    },
+    {
+      "path": "concepts",
+      "bytes": 4846,
+      "sha256": "cfe92c14b9f37da2e44787fa6b04e73bbc730a537c7bc532fef75415154c6e23",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/concepts"
+    },
+    {
+      "path": "condition_variable",
+      "bytes": 7606,
+      "sha256": "7adec4a2faec8d1a639df9542c09e718be46be53f9ab6a2954c1e7845ab2dd87",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/condition_variable"
+    },
+    {
+      "path": "csetjmp",
+      "bytes": 813,
+      "sha256": "e32bf52e385fd81101afaad8b2a246a146d555c3a863157e03ef2a9cade00d3e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/csetjmp"
+    },
+    {
+      "path": "csignal",
+      "bytes": 964,
+      "sha256": "62ca809c9e992d478bbc4df5498792a84df1bee47c98d52bb0fcef54d46ddea0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/csignal"
+    },
+    {
+      "path": "cstdarg",
+      "bytes": 903,
+      "sha256": "aabb34c140c30ae8dac7a944367e513cd8e0082b525633183b58e63d8eec3081",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstdarg"
+    },
+    {
+      "path": "cstdbool",
+      "bytes": 721,
+      "sha256": "132d5dc06522ba4c3e72d1a8f278331ba0ab7bc8d49066d28c025deb66fe4f63",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstdbool"
+    },
+    {
+      "path": "cstddef",
+      "bytes": 5413,
+      "sha256": "26c7a8cfa43e3d6691afca669d6271e67a64462ec99a4afc80fa0af8b5805645",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstddef"
+    },
+    {
+      "path": "cstdint",
+      "bytes": 2798,
+      "sha256": "a03f7f41872b9591e8ccac6785a37c2b4fd23e897feb4d82c9f20430e10f2657",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstdint"
+    },
+    {
+      "path": "cstdio",
+      "bytes": 4413,
+      "sha256": "8fde8a81591d7afb3a4a4bb3f80df7a61b6dacd53d8b2ae0c503e3702c39a1b2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstdio"
+    },
+    {
+      "path": "cstdlib",
+      "bytes": 4807,
+      "sha256": "68d6ae744b82446d03eea33af9782b34e8ec0b323ff25281be5cfa204aa93511",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstdlib"
+    },
+    {
+      "path": "cstring",
+      "bytes": 2554,
+      "sha256": "e8ebf2fbb378b64572ad8c039397e899a08c1999301b1a247f3a51c8fbdae9c2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cstring"
+    },
+    {
+      "path": "ctgmath",
+      "bytes": 650,
+      "sha256": "11420f984b2e2bffcbe4555c979f058fa30b49af10bdbd9d38e974e6d9fbf388",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ctgmath"
+    },
+    {
+      "path": "ctime",
+      "bytes": 2458,
+      "sha256": "ec376534c53ce43db13327bc0d9134e7d5f1bf64db6ca191bae8b9c580988452",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ctime"
+    },
+    {
+      "path": "ctype.h",
+      "bytes": 1149,
+      "sha256": "950f00b7b74314a83d3283e003f4753a79de0bc56688e3c9a979115181016951",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ctype.h"
+    },
+    {
+      "path": "cwchar",
+      "bytes": 6285,
+      "sha256": "6a3d246b9c191357aac9054f6c40371ece497bddf3b4c34eabf5e592fac212e5",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cwchar"
+    },
+    {
+      "path": "cwctype",
+      "bytes": 1691,
+      "sha256": "b0f9cedd3d1c26a4713ea99b8f429e3cf996c13c5f9a7093711c5a1c2f99bead",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cwctype"
+    },
+    {
+      "path": "cxxabi.h",
+      "bytes": 6445,
+      "sha256": "54023bfdc600e083f9d458bd5462a2c5c563b12e194faf22bde27c2fa9653225",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/cxxabi.h"
+    },
+    {
+      "path": "deque",
+      "bytes": 108905,
+      "sha256": "a145124c6fa1cdc1f772171c9ce46625a19256e8637f9989543390c6b4678a96",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/deque"
+    },
+    {
+      "path": "errno.h",
+      "bytes": 5148,
+      "sha256": "3740a46ef652d170901c56c2c4d2c53e7c87bfa2a91faed21984554718251251",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/errno.h"
+    },
+    {
+      "path": "exception",
+      "bytes": 9524,
+      "sha256": "3e33ff1de794482e282dff20c714612fec4397e2535e214001fc857e05360b63",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/exception"
+    },
+    {
+      "path": "execution",
+      "bytes": 595,
+      "sha256": "0309dcc2e46bd2fa621e8c18ab5c90971c13a4862784be3d768ef908417bbcac",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/execution"
+    },
+    {
+      "path": "experimental/__config",
+      "bytes": 3321,
+      "sha256": "0c5031f44663172b48441a08bc8019aa77473911881b96cc0681787ac9783ce6",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/__config"
+    },
+    {
+      "path": "experimental/__memory",
+      "bytes": 2744,
+      "sha256": "7c4a690b1d665f2516cf84fb37b31b25f8f58cb553840a7df5137de394d39dd6",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/__memory"
+    },
+    {
+      "path": "experimental/algorithm",
+      "bytes": 1455,
+      "sha256": "27a69f0a842261e37c0d7210e62b713b768076d4f2747b1ebba21fca56c0a2a1",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/algorithm"
+    },
+    {
+      "path": "experimental/coroutine",
+      "bytes": 10314,
+      "sha256": "e4acfcd5354f3f067bca4479888ddbfe77370414636946e1ee14af53354f175c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/coroutine"
+    },
+    {
+      "path": "experimental/deque",
+      "bytes": 1150,
+      "sha256": "e7528d7cebb83b55dabae903c45a2b448725ca304cea236d7e978a80af56dce7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/deque"
+    },
+    {
+      "path": "experimental/filesystem",
+      "bytes": 9152,
+      "sha256": "39e402f329e292b07f537e82c8ff18d603c553863c665b1f3a7937b9bec69b49",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/filesystem"
+    },
+    {
+      "path": "experimental/forward_list",
+      "bytes": 1213,
+      "sha256": "4a2865d1adcfcf2e6e3e31a50cb1839c9eea9e65306c114ce606f1bd4bfd94aa",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/forward_list"
+    },
+    {
+      "path": "experimental/functional",
+      "bytes": 17728,
+      "sha256": "327721e517a0bb01760009509b60b181dbd91cf146102016b3b51b65ea992ff5",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/functional"
+    },
+    {
+      "path": "experimental/iterator",
+      "bytes": 3907,
+      "sha256": "97e96605777a0341e9c465e7108365b37278c5b769ef216412fdad0058cbd519",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/iterator"
+    },
+    {
+      "path": "experimental/list",
+      "bytes": 1140,
+      "sha256": "3f99ea05587ba43c83a3e27e3ea6140e3a8976366ca425152435e61e148cfc86",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/list"
+    },
+    {
+      "path": "experimental/map",
+      "bytes": 1705,
+      "sha256": "8039e44cdf0b0488260e627b58f67ba2379e46c49eeea1c733b558d15289df2c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/map"
+    },
+    {
+      "path": "experimental/memory_resource",
+      "bytes": 13371,
+      "sha256": "ce6272d919740cd7157a683d643aabca3d4975e32d8b129e893a0f8a73892845",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/memory_resource"
+    },
+    {
+      "path": "experimental/propagate_const",
+      "bytes": 20522,
+      "sha256": "33585b7572a3dfea28d64236d88edb43b3665e7ff010ac04ddf7f655d45872c0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/propagate_const"
+    },
+    {
+      "path": "experimental/regex",
+      "bytes": 1793,
+      "sha256": "578737882cd8df1c38ee6a8597f97bcca281ae23bafc2cf887d17b6f6bf8b900",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/regex"
+    },
+    {
+      "path": "experimental/set",
+      "bytes": 1636,
+      "sha256": "b0e2c54e2cb74eb85b06d4754136e044d0cbccd723a6d98955e31ea60637aca7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/set"
+    },
+    {
+      "path": "experimental/simd",
+      "bytes": 61330,
+      "sha256": "c600123ff18a741282f6646e2513d5dacc5d565bebb052dcf46076f2b17e09b9",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/simd"
+    },
+    {
+      "path": "experimental/string",
+      "bytes": 1781,
+      "sha256": "d9a0ea681ccd773ad6126835b1064b7742b0945304e1f3e6bd4f4026d3d2330e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/string"
+    },
+    {
+      "path": "experimental/type_traits",
+      "bytes": 5484,
+      "sha256": "1d95862ff064fa24dc19d3d7ff5ad227d1aad77dbb6a2b153409ae32053fb77b",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/type_traits"
+    },
+    {
+      "path": "experimental/unordered_map",
+      "bytes": 2022,
+      "sha256": "834c9230641828d372d36d8a7e8ce8ef0a18675127edee5d3364ca99ec8f89f2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/unordered_map"
+    },
+    {
+      "path": "experimental/unordered_set",
+      "bytes": 1825,
+      "sha256": "3cf73243c7a722a0351ef6cc4fd967902e4e1c259526623d14f35e81e271ca7a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/unordered_set"
+    },
+    {
+      "path": "experimental/utility",
+      "bytes": 1033,
+      "sha256": "492917ce2e81c1f525c4a57ae05d57c9f85e13693293c5dad1fa488e6fc7b060",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/utility"
+    },
+    {
+      "path": "experimental/vector",
+      "bytes": 1161,
+      "sha256": "61059af32e50bcbf6b5fa684c00ea17c08c294ce52fa09251dd029234b8907a0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/experimental/vector"
+    },
+    {
+      "path": "ext/__hash",
+      "bytes": 3203,
+      "sha256": "00b8255ed7522f35dbbacc14baeac40656b93f194c55fb8964a03fea1cf5a86e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ext/__hash"
+    },
+    {
+      "path": "ext/hash_map",
+      "bytes": 38755,
+      "sha256": "aa0453a82a66d66b4d5129a3534ea670728ab052e783507df8964a1febf63581",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ext/hash_map"
+    },
+    {
+      "path": "ext/hash_set",
+      "bytes": 24801,
+      "sha256": "73b309709eda1ccdf9e54803bd47c2969f1e1aad751a8d8316804b7849422b35",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ext/hash_set"
+    },
+    {
+      "path": "fenv.h",
+      "bytes": 1863,
+      "sha256": "6149a5c239fa69568ec9e76702a8e635ddd9d5d881965816c271588634018b29",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/fenv.h"
+    },
+    {
+      "path": "filesystem",
+      "bytes": 91501,
+      "sha256": "d5a51b8223182566a2a4e1baff3c7786679716a783d2b1cd8f7c15f27f839393",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/filesystem"
+    },
+    {
+      "path": "float.h",
+      "bytes": 1621,
+      "sha256": "2d84c521eb891eac14870dc90de28f33f8f6fd51b1f8200280f73a4a96e56154",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/float.h"
+    },
+    {
+      "path": "forward_list",
+      "bytes": 62573,
+      "sha256": "d4937146543fb858ce9a4478fb1d1066483afedc7e6c7d754416357921a878d2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/forward_list"
+    },
+    {
+      "path": "fstream",
+      "bytes": 55531,
+      "sha256": "eae098086fee2d12f1aa1a78b351aed935cf3ae9b90e459c3c9e012ce15b97a0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/fstream"
+    },
+    {
+      "path": "functional",
+      "bytes": 103079,
+      "sha256": "deddaee8c993204e8b610f12ce0d89dcfea0706b059973092e4825ec3eaea92c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/functional"
+    },
+    {
+      "path": "future",
+      "bytes": 68096,
+      "sha256": "2fc300b5807f8a9b0c2b9c1e897717bcc8da5658f005cfe0b3695a533625238c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/future"
+    },
+    {
+      "path": "initializer_list",
+      "bytes": 2842,
+      "sha256": "be7ebd1afa2d8c9270f38d1d40f422b4b6ad64ed3005568830d6b1cdd07b99c8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/initializer_list"
+    },
+    {
+      "path": "inttypes.h",
+      "bytes": 3889,
+      "sha256": "49105e3371a36b8dc5404de20e61952bd7e7835aca20c47fc65ccb641040f7ff",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/inttypes.h"
+    },
+    {
+      "path": "iomanip",
+      "bytes": 18280,
+      "sha256": "b67865c17839352c4509f1a219de974168f8f31a9bca8540837cde41de3b253d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/iomanip"
+    },
+    {
+      "path": "ios",
+      "bytes": 24912,
+      "sha256": "e1b18471e18634f2517c09a91828857e361c8ac0a99b9b4028ddd0f83dfaec0e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ios"
+    },
+    {
+      "path": "iosfwd",
+      "bytes": 11116,
+      "sha256": "9d4468cb6014fc8270c212c3c439e467f3e9121f901d50f7394ff53308be7f1a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/iosfwd"
+    },
+    {
+      "path": "iostream",
+      "bytes": 1391,
+      "sha256": "51c66fc2c463d232666955b268db47b5b05437e614e17655052ab4867adea25c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/iostream"
+    },
+    {
+      "path": "istream",
+      "bytes": 48096,
+      "sha256": "fa9eb17194e75ef402240f3174c476f8f628b84f2959bf69857283fd63b612d0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/istream"
+    },
+    {
+      "path": "iterator",
+      "bytes": 72891,
+      "sha256": "49d5d660cbaf6685d021a46ecaf00a9dc990b72ee9769954109eaa4d389164a9",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/iterator"
+    },
+    {
+      "path": "latch",
+      "bytes": 2546,
+      "sha256": "56f0fe76f231dcda48d211e8e590fc8e32987115d1f5b1bc7d40047760eff808",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/latch"
+    },
+    {
+      "path": "limits",
+      "bytes": 40663,
+      "sha256": "9a8c5471a0705889a7560dad74da4fba8cee70a354a1e57614b2a96153cb935e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/limits"
+    },
+    {
+      "path": "limits.h",
+      "bytes": 1472,
+      "sha256": "4c083b008caebadeab9bfc45f4450acf9cf4a488272344a66cbaf1fe4322ab25",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/limits.h"
+    },
+    {
+      "path": "list",
+      "bytes": 80436,
+      "sha256": "7e48af3e9e5e08f835730858b6176f4df5a249be7457c03a70f54c961688f8ec",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/list"
+    },
+    {
+      "path": "locale",
+      "bytes": 156085,
+      "sha256": "f0e871b967f99294a74c18f639ff1aa6a8539a75e995c4f538d214b192bf7552",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/locale"
+    },
+    {
+      "path": "locale.h",
+      "bytes": 902,
+      "sha256": "510565b67498b138e0176195108a7f1a18799955547f8ad2d7e12bd1aac11011",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/locale.h"
+    },
+    {
+      "path": "map",
+      "bytes": 84661,
+      "sha256": "d31def470188d6e199d4de9c195bd909e88c4e8f5da06e64a91f57f39f0fa41d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/map"
+    },
+    {
+      "path": "math.h",
+      "bytes": 51743,
+      "sha256": "71121d3f6338b19f2162ed103fbac176c70989e6256a723fdc518bd820ba92fb",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/math.h"
+    },
+    {
+      "path": "memory",
+      "bytes": 136135,
+      "sha256": "542d7562aae8bdaad8ca0c761928d5d92dca65fbac979342e017e495e7a9e609",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/memory"
+    },
+    {
+      "path": "module.modulemap",
+      "bytes": 12432,
+      "sha256": "82a2e67cdb9aa4fc7b659062b9d30685ba7632c0db54a477e5c37c8f5530df5f",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/module.modulemap"
+    },
+    {
+      "path": "mutex",
+      "bytes": 17675,
+      "sha256": "652f1d3ff9818aa2bc99b95a6bd275b148ffd10a2ccf31be790b55dcb405d1da",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/mutex"
+    },
+    {
+      "path": "new",
+      "bytes": 13795,
+      "sha256": "e65dd5b31ad8671bd63f1afdddd1f802da70847d403e4d46d0c53acbc1757b8a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/new"
+    },
+    {
+      "path": "numbers",
+      "bytes": 6896,
+      "sha256": "ae6cf2b64a9ad2c3c2b49a2fd21e2c501ae3718d9c9ff07a73fdfa331bdddaa3",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/numbers"
+    },
+    {
+      "path": "numeric",
+      "bytes": 22891,
+      "sha256": "fdc444ac20867f681caa791e388eccfa5582ea6516fe9ea7e33c882783e18f6b",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/numeric"
+    },
+    {
+      "path": "optional",
+      "bytes": 42619,
+      "sha256": "389d7f53b8ae05a7dc8eb09c3a7e9610f73a2d58f22c6d884366c25517201448",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/optional"
+    },
+    {
+      "path": "ostream",
+      "bytes": 32925,
+      "sha256": "4d9f6034f4c0255f734c5ed09445d4229032ab650ef7fc2dee97430712d6b0bc",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ostream"
+    },
+    {
+      "path": "queue",
+      "bytes": 27991,
+      "sha256": "1903f73b79ba33b0346280c1e5585ec71cfad42efd224256871db67bffd6e132",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/queue"
+    },
+    {
+      "path": "random",
+      "bytes": 239294,
+      "sha256": "ef96c2bd4e68a5065057d175100604112a8a44ecb20662777130c9edb49b5a53",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/random"
+    },
+    {
+      "path": "ratio",
+      "bytes": 16429,
+      "sha256": "4cf158f26a77b9b4a851d153755aa16bb3645f83df853f269de90f6d7a288f02",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/ratio"
+    },
+    {
+      "path": "regex",
+      "bytes": 227531,
+      "sha256": "98e0aab1b2e4cd95b6349c4586eb2817261825b675a6002f3b82c3a477d7fdb4",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/regex"
+    },
+    {
+      "path": "scoped_allocator",
+      "bytes": 25740,
+      "sha256": "c6e661440ac5d16ec97692aea1207cbd460b1bf390499ebde95cb15667ce1eda",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/scoped_allocator"
+    },
+    {
+      "path": "semaphore",
+      "bytes": 6746,
+      "sha256": "bc4404070fbf3043d8ba2952b0625bee00620300293b3aea9adb572b57e4b902",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/semaphore"
+    },
+    {
+      "path": "set",
+      "bytes": 57324,
+      "sha256": "b6120af54540ed6ba06073448fa20fb48a7004ffc9b85996d439d748023032bf",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/set"
+    },
+    {
+      "path": "setjmp.h",
+      "bytes": 802,
+      "sha256": "f30e7fd679a1738b9d9f4a1a12c6a41334d5946ff0a28374d06bc624a80e41ee",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/setjmp.h"
+    },
+    {
+      "path": "shared_mutex",
+      "bytes": 15125,
+      "sha256": "bea0ef6d211df139cde573b26c9d8ec5a3176ce0018d8c72aef8ae03bad3678f",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/shared_mutex"
+    },
+    {
+      "path": "span",
+      "bytes": 23017,
+      "sha256": "a9910c6e60fec4983c9209b9c5949a280d09dd228612e14bdecb074496bb95c8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/span"
+    },
+    {
+      "path": "sstream",
+      "bytes": 30970,
+      "sha256": "cdadae7e7d14f8efbba5f4f693ec70db669d4cc2a844e0256c43f37650ce38bc",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/sstream"
+    },
+    {
+      "path": "stack",
+      "bytes": 10092,
+      "sha256": "74031c407b1170954fb760aa3e4305ad561703fc9e7a6ca51475325c84d8a182",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stack"
+    },
+    {
+      "path": "stdbool.h",
+      "bytes": 815,
+      "sha256": "888270d1d26ffc56121ce454bbf386f4e61a11d7eea2e5ef153860e6611e355d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stdbool.h"
+    },
+    {
+      "path": "stddef.h",
+      "bytes": 1105,
+      "sha256": "c9335177258bce67e86514599356ff456361345b3961eb6292c37c69d03043e5",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stddef.h"
+    },
+    {
+      "path": "stdexcept",
+      "bytes": 7806,
+      "sha256": "6a33506c21d6829df6c6028f0f41aa4a7a01e3e4e80925a6aa5cb659985113e1",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stdexcept"
+    },
+    {
+      "path": "stdint.h",
+      "bytes": 2328,
+      "sha256": "b58da07f11b3f7aa75146285829a7ac8ec2ee1971a4316890d07e38b9bb163ea",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stdint.h"
+    },
+    {
+      "path": "stdio.h",
+      "bytes": 3521,
+      "sha256": "777cfa4abaf423cfbc0f9b6500c2bf5fe260dc867338e905e7a34418c32d2aed",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stdio.h"
+    },
+    {
+      "path": "stdlib.h",
+      "bytes": 5286,
+      "sha256": "22db9f61e833939d561f3bda50be384d7c953d215288275bc60ea90029f09906",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/stdlib.h"
+    },
+    {
+      "path": "streambuf",
+      "bytes": 14475,
+      "sha256": "a688fc93143322114af62bd40e078c1965e128f2a6bca6dfba4062df810d7d48",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/streambuf"
+    },
+    {
+      "path": "string",
+      "bytes": 169198,
+      "sha256": "59fc2d10b82ed37f7cda7302c7f8e82369d030b4f5325709a2b1d4812f868ad0",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/string"
+    },
+    {
+      "path": "string.h",
+      "bytes": 5024,
+      "sha256": "d30db4473aec090b6fbd83f01f2fcea6b63935657a9d40bb69f651bfbda189f2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/string.h"
+    },
+    {
+      "path": "string_view",
+      "bytes": 35593,
+      "sha256": "fb435d79173787a2f73f815de7574549a6303aab5d27d4b2e537a24807e0b2c2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/string_view"
+    },
+    {
+      "path": "strstream",
+      "bytes": 11466,
+      "sha256": "b5d4a766d20278e382cf32d3c391c1446e9199a95fda3b2981b39075df46e19d",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/strstream"
+    },
+    {
+      "path": "system_error",
+      "bytes": 14227,
+      "sha256": "b3cc2b6c02566d1b3e07f0ca263d9d8db02389fb219b63462b46f871f40c9544",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/system_error"
+    },
+    {
+      "path": "tgmath.h",
+      "bytes": 732,
+      "sha256": "4cfa46765545a5edd08dc4872249f65d732063f57a7945e69d50d2f6a15cf8e7",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/tgmath.h"
+    },
+    {
+      "path": "thread",
+      "bytes": 11453,
+      "sha256": "3b3d5930ddfd649a47eabd0a3856c6ef1f184c0f17859a3475afdc9c90335b4e",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/thread"
+    },
+    {
+      "path": "tuple",
+      "bytes": 56601,
+      "sha256": "938c3c99b0f7139593ae8b69bf3e23f6ff160d56635dc7e5a747752777f06b34",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/tuple"
+    },
+    {
+      "path": "type_traits",
+      "bytes": 148940,
+      "sha256": "bc205615c8b3bc8c698a0ed6211470796381e0b743f0601e2c6dcbe1cb749771",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/type_traits"
+    },
+    {
+      "path": "typeindex",
+      "bytes": 2831,
+      "sha256": "73ba53eecf774673a84647091d47fe897daa6904f7b9da2c3b14b5f351939ac1",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/typeindex"
+    },
+    {
+      "path": "typeinfo",
+      "bytes": 12338,
+      "sha256": "7ca2fd7ec925771c2a90b7af79d0476f6174b360fb721ac3c441a19e202b076c",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/typeinfo"
+    },
+    {
+      "path": "unordered_map",
+      "bytes": 106932,
+      "sha256": "c41c8f26cb6cdc4195741a777f6844fddb2e1488fd8f90424500c141faf812f1",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/unordered_map"
+    },
+    {
+      "path": "unordered_set",
+      "bytes": 73946,
+      "sha256": "f183158022a6d51b17eba35ddc680a9152a5961bcf97c0ee47e6769020508000",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/unordered_set"
+    },
+    {
+      "path": "utility",
+      "bytes": 49967,
+      "sha256": "cf9da224f01414ca60dc9edc52c397dc7a6fee3782c7237644eb9d2b37c615d2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/utility"
+    },
+    {
+      "path": "valarray",
+      "bytes": 133995,
+      "sha256": "c305507fcf50d7132d3b86e8902117dd51b1eef63379089f1b652b1245065d64",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/valarray"
+    },
+    {
+      "path": "variant",
+      "bytes": 64813,
+      "sha256": "34ad147946fa5e4c929513945fb6a1dc983b61cb68c686f328f17ef16bf601c8",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/variant"
+    },
+    {
+      "path": "vector",
+      "bytes": 111943,
+      "sha256": "2cf8040752805a1feb89c26d2a09c21a2195d4233dc431b8426bdf89275a61a9",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/vector"
+    },
+    {
+      "path": "version",
+      "bytes": 22620,
+      "sha256": "ff91f05807d444cba51e78937246cca568631712b332ae6fda28cd4c3e4ff36a",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/version"
+    },
+    {
+      "path": "wchar.h",
+      "bytes": 8776,
+      "sha256": "a910aff423885db3ab76db6a9763ea7473caf6737ab6451850ceac23a38c8177",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/wchar.h"
+    },
+    {
+      "path": "wctype.h",
+      "bytes": 1599,
+      "sha256": "3a31621e3a18f3e86a7ef7f59fac2853bb96dd5ccabebc177d8498bd37c7d4d2",
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/include_lib/c++/include/wctype.h"
+    }
+  ]
+}
