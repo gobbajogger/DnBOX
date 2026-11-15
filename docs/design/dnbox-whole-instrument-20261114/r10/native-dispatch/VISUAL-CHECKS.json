@@ -1,0 +1,469 @@
+{
+  "classification": "Producer Chromium proposal-only native renders and bounded dispatch checks; no firmware/device/independent acceptance",
+  "html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "frames": [
+    {
+      "file": "clear-909-question.png",
+      "bytes": 21060,
+      "sha256": "36c0f935a3a72397970c607930764eb5cec3075ba64c5777d58f961bbdea7cdd",
+      "bounds": [
+        {
+          "text": "909 SEQ",
+          "x": 5,
+          "y": 1,
+          "width": 44.99583435058594,
+          "height": 14
+        },
+        {
+          "text": "1",
+          "x": 119.60102844238281,
+          "y": 3,
+          "width": 3.3989715576171875,
+          "height": 11
+        },
+        {
+          "text": "UNSAVED",
+          "x": 62.240753173828125,
+          "y": 5,
+          "width": 33.759246826171875,
+          "height": 9
+        },
+        {
+          "text": "125",
+          "x": 158.82394409179688,
+          "y": 0,
+          "width": 20.176055908203125,
+          "height": 16
+        },
+        {
+          "text": "P1 SEQUENCE",
+          "x": 8,
+          "y": 158,
+          "width": 57.92559814453125,
+          "height": 11
+        },
+        {
+          "text": "LENGTH",
+          "x": 12.46612548828125,
+          "y": 171,
+          "width": 35.0677490234375,
+          "height": 11
+        },
+        {
+          "text": "16st",
+          "x": 17.47997283935547,
+          "y": 210,
+          "width": 25.040054321289062,
+          "height": 16
+        },
+        {
+          "text": "RATE",
+          "x": 78.76907348632812,
+          "y": 171,
+          "width": 22.46185302734375,
+          "height": 11
+        },
+        {
+          "text": "1/16",
+          "x": 77.823974609375,
+          "y": 210,
+          "width": 24.35205078125,
+          "height": 16
+        },
+        {
+          "text": "BLACK: TRACK  WHITE: STEP  PATCH+BLK: MUTE",
+          "x": 4,
+          "y": 229,
+          "width": 189.56979370117188,
+          "height": 10
+        },
+        {
+          "text": "1\u201316 / 16",
+          "x": 164.5850067138672,
+          "y": 173,
+          "width": 30.829986572265625,
+          "height": 10
+        },
+        {
+          "text": "KICK",
+          "x": 168.75592803955078,
+          "y": 212,
+          "width": 22.488143920898438,
+          "height": 12
+        },
+        {
+          "text": "CLEAR 909?",
+          "x": 79.52308654785156,
+          "y": 32,
+          "width": 80.95382690429688,
+          "height": 17
+        },
+        {
+          "text": "P1 \u00b7 NOTES / LOCKS / MOTION",
+          "x": 52.10350036621094,
+          "y": 61,
+          "width": 135.79299926757812,
+          "height": 12
+        },
+        {
+          "text": "SHARED FX / MASTER MOTION TOO",
+          "x": 46.46000671386719,
+          "y": 82,
+          "width": 147.07998657226562,
+          "height": 11
+        },
+        {
+          "text": "SCALE YES",
+          "x": 37.634117126464844,
+          "y": 131,
+          "width": 60.73176574707031,
+          "height": 14
+        },
+        {
+          "text": "PATCH NO",
+          "x": 144.84011840820312,
+          "y": 131,
+          "width": 54.31976318359375,
+          "height": 14
+        },
+        {
+          "text": "PLAY: CANCEL + STOP",
+          "x": 4,
+          "y": 229,
+          "width": 85.68992614746094,
+          "height": 10
+        }
+      ]
+    },
+    {
+      "file": "held-PART-LIST-base-edit.png",
+      "bytes": 17927,
+      "sha256": "dd834bdc435de76c4f31348572d400c46453860084bee739d34679200e9d4ee1",
+      "bounds": [
+        {
+          "text": "CHICAGO B",
+          "x": 5,
+          "y": 1,
+          "width": 59.009765625,
+          "height": 14
+        },
+        {
+          "text": "1",
+          "x": 119.60102844238281,
+          "y": 3,
+          "width": 3.3989715576171875,
+          "height": 11
+        },
+        {
+          "text": "125",
+          "x": 158.82394409179688,
+          "y": 0,
+          "width": 20.176055908203125,
+          "height": 16
+        },
+        {
+          "text": "1 OSCILLATOR",
+          "x": 8,
+          "y": 24,
+          "width": 54.089935302734375,
+          "height": 10
+        },
+        {
+          "text": "K5 6",
+          "x": 214.9400177001953,
+          "y": 24,
+          "width": 17.059982299804688,
+          "height": 10
+        },
+        {
+          "text": "WAVE",
+          "x": 21.975006103515625,
+          "y": 37,
+          "width": 22.04998779296875,
+          "height": 10
+        },
+        {
+          "text": "1%",
+          "x": 45.71308898925781,
+          "y": 55,
+          "width": 12.286911010742188,
+          "height": 11
+        },
+        {
+          "text": "GLIDE",
+          "x": 80.40501403808594,
+          "y": 37,
+          "width": 23.189971923828125,
+          "height": 10
+        },
+        {
+          "text": "14%",
+          "x": 99.15812683105469,
+          "y": 55,
+          "width": 17.841873168945312,
+          "height": 11
+        },
+        {
+          "text": "2 FILTER 1",
+          "x": 8,
+          "y": 74,
+          "width": 39.11993408203125,
+          "height": 10
+        },
+        {
+          "text": "CUTOFF",
+          "x": 17.610015869140625,
+          "y": 87,
+          "width": 30.77996826171875,
+          "height": 10
+        },
+        {
+          "text": "25%",
+          "x": 38.65113830566406,
+          "y": 105,
+          "width": 19.348861694335938,
+          "height": 11
+        },
+        {
+          "text": "PEAK",
+          "x": 81.39000701904297,
+          "y": 87,
+          "width": 21.219985961914062,
+          "height": 10
+        },
+        {
+          "text": "75%",
+          "x": 98.19013977050781,
+          "y": 105,
+          "width": 18.809860229492188,
+          "height": 11
+        },
+        {
+          "text": "ENV",
+          "x": 142.84500885009766,
+          "y": 87,
+          "width": 16.309982299804688,
+          "height": 10
+        },
+        {
+          "text": "+56%",
+          "x": 151.5911865234375,
+          "y": 105,
+          "width": 24.4088134765625,
+          "height": 11
+        },
+        {
+          "text": "3 FILTER 2",
+          "x": 8,
+          "y": 124,
+          "width": 40.76994323730469,
+          "height": 10
+        },
+        {
+          "text": "BITE",
+          "x": 23.990013122558594,
+          "y": 137,
+          "width": 18.019973754882812,
+          "height": 10
+        },
+        {
+          "text": "83%",
+          "x": 38.67314147949219,
+          "y": 155,
+          "width": 19.326858520507812,
+          "height": 11
+        },
+        {
+          "text": "GNAW",
+          "x": 80.16500854492188,
+          "y": 137,
+          "width": 23.66998291015625,
+          "height": 10
+        },
+        {
+          "text": "0%",
+          "x": 102.53509521484375,
+          "y": 155,
+          "width": 14.46490478515625,
+          "height": 11
+        },
+        {
+          "text": "4 ENVELOPE",
+          "x": 8,
+          "y": 174,
+          "width": 49.42994689941406,
+          "height": 10
+        },
+        {
+          "text": "K5 A 27%",
+          "x": 12.680015563964844,
+          "y": 182,
+          "width": 36.63996887207031,
+          "height": 10
+        },
+        {
+          "text": "K6 D 40%",
+          "x": 71.11502075195312,
+          "y": 182,
+          "width": 37.76995849609375,
+          "height": 10
+        },
+        {
+          "text": "K7 S 57%",
+          "x": 131.05502319335938,
+          "y": 182,
+          "width": 35.88995361328125,
+          "height": 10
+        },
+        {
+          "text": "K8 R 17%",
+          "x": 190.50001525878906,
+          "y": 182,
+          "width": 34.999969482421875,
+          "height": 10
+        },
+        {
+          "text": "< >",
+          "x": 7,
+          "y": 228,
+          "width": 11.3599853515625,
+          "height": 10
+        },
+        {
+          "text": "PARA",
+          "x": 50,
+          "y": 228,
+          "width": 21.089996337890625,
+          "height": 10
+        },
+        {
+          "text": "SCALE: ALL",
+          "x": 103,
+          "y": 228,
+          "width": 45.669952392578125,
+          "height": 10
+        },
+        {
+          "text": "1-4",
+          "x": 223.26002502441406,
+          "y": 228,
+          "width": 11.739974975585938,
+          "height": 10
+        },
+        {
+          "text": "WAVE",
+          "x": 9,
+          "y": 26,
+          "width": 28.665008544921875,
+          "height": 13
+        },
+        {
+          "text": "1%",
+          "x": 211.47898864746094,
+          "y": 26,
+          "width": 14.521011352539062,
+          "height": 13
+        },
+        {
+          "text": "GLIDE",
+          "x": 9,
+          "y": 48,
+          "width": 30.14703369140625,
+          "height": 13
+        },
+        {
+          "text": "14%",
+          "x": 204.9139862060547,
+          "y": 48,
+          "width": 21.086013793945312,
+          "height": 13
+        },
+        {
+          "text": "CUTOFF",
+          "x": 9,
+          "y": 70,
+          "width": 40.0140380859375,
+          "height": 13
+        },
+        {
+          "text": "25%",
+          "x": 203.1329803466797,
+          "y": 70,
+          "width": 22.867019653320312,
+          "height": 13
+        },
+        {
+          "text": "PEAK",
+          "x": 9,
+          "y": 92,
+          "width": 27.586029052734375,
+          "height": 13
+        },
+        {
+          "text": "75%",
+          "x": 203.7699737548828,
+          "y": 92,
+          "width": 22.230026245117188,
+          "height": 13
+        },
+        {
+          "text": "ENV",
+          "x": 9,
+          "y": 114,
+          "width": 21.203018188476562,
+          "height": 13
+        },
+        {
+          "text": "+56%",
+          "x": 197.15298461914062,
+          "y": 114,
+          "width": 28.847015380859375,
+          "height": 13
+        },
+        {
+          "text": "BITE",
+          "x": 9,
+          "y": 136,
+          "width": 23.426025390625,
+          "height": 13
+        },
+        {
+          "text": "83%",
+          "x": 203.1589813232422,
+          "y": 136,
+          "width": 22.841018676757812,
+          "height": 13
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "clear-909-question text fits native240",
+      "pass": true
+    },
+    {
+      "name": "Clear retains original YES/NO actions and adds pattern/shared scope before confirmation",
+      "pass": true
+    },
+    {
+      "name": "held-PART-LIST-base-edit text fits native240",
+      "pass": true
+    },
+    {
+      "name": "LIST preview carries original held owner but no step lock",
+      "pass": true
+    },
+    {
+      "name": "PATCH tempo upper clamp retains HOME and original release",
+      "pass": true
+    },
+    {
+      "name": "PATCH tempo lower clamp retains HOME and original release",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "passed": 6,
+  "total": 6
+}

@@ -1,0 +1,284 @@
+{
+  "classification": "Producer MODEL/DOM source-dispatch checks; no native-current/device/independent confirmation",
+  "source_contract": "3c41ui.c2846\u20132853,3034\u20133041,4030\u20134034,4554\u20134570",
+  "html_sha256": "1b46efbc425e7922b7dd8772d41dc18c0ab88c9612e606eb2f33c2b386917163",
+  "checks": [
+    {
+      "name": "HeldSEQ\u2192PARA\u2192LIST lowerknob edits base, not step lane",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "view": "PART",
+        "overlay": "LIST",
+        "held": 3,
+        "base": null,
+        "lanes": {
+          "0:3:3:CHICAGO:0": {
+            "pattern": 0,
+            "part": 3,
+            "key": "3:CHICAGO:0",
+            "values": [
+              null,
+              null,
+              1,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "applied": null,
+            "recReq": false,
+            "holdReq": false,
+            "holdLeft": 0,
+            "lastRec": null,
+            "quiet": 0
+          }
+        },
+        "press": {
+          "step": 3,
+          "input": 2,
+          "sourcePart": 3,
+          "pattern": 1,
+          "time": 0,
+          "created": true,
+          "used": true
+        }
+      }
+    },
+    {
+      "name": "ClosingLIST restores same held lock owner without changing note on release",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "base": null,
+        "lane": {
+          "pattern": 0,
+          "part": 3,
+          "key": "3:CHICAGO:0",
+          "values": [
+            null,
+            null,
+            2,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "applied": null,
+          "recReq": false,
+          "holdReq": false,
+          "holdLeft": 0,
+          "lastRec": null,
+          "quiet": 0
+        },
+        "held": -1,
+        "physical": {}
+      }
+    },
+    {
+      "name": "HOME PATCH+K2 owns tempo and consumes release, running False",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "tempo": 125,
+        "view": "SONG",
+        "playing": false,
+        "buttons": []
+      }
+    },
+    {
+      "name": "HOME PATCH+K2 owns tempo and consumes release, running True",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "tempo": 125,
+        "view": "SONG",
+        "playing": true,
+        "buttons": []
+      }
+    },
+    {
+      "name": "HeldSEQ PATCH+K2 owns tempo rather than chance",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "tempo": 125,
+        "view": "HOME",
+        "lanes": {},
+        "note": 55
+      }
+    },
+    {
+      "name": "StoppedSEQ BT+REC asks clear and consumes BT, existingREC False",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "overlay": null,
+        "askType": null,
+        "rec": true,
+        "playing": false,
+        "consumed": false,
+        "heldSave": false,
+        "clearRequest": null,
+        "note": "SAVE request only; result lifecycle not modeled"
+      }
+    },
+    {
+      "name": "StoppedSEQ BT+REC asks clear and consumes BT, existingREC True",
+      "pass": false,
+      "actual": {
+        "pass": false,
+        "overlay": null,
+        "askType": null,
+        "rec": false,
+        "playing": false,
+        "consumed": false,
+        "heldSave": false,
+        "clearRequest": null,
+        "note": "SAVE request only; result lifecycle not modeled"
+      }
+    },
+    {
+      "name": "ASK masks BT+REC without replacing question or arming REC",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "rec": false
+      }
+    },
+    {
+      "name": "Clip keeps BT+REC in host route without local clear/REC",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "clipOn": true,
+        "requests": [
+          {
+            "type": "SEQ REC host request"
+          }
+        ],
+        "rec": false,
+        "overlay": null
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 2,
+  "total": 9
+}

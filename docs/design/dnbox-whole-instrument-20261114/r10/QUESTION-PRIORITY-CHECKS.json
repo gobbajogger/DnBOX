@@ -1,0 +1,945 @@
+{
+  "classification": "Producer MODEL/DOM inherited-parity regression checks; no firmware/device/storage/independent proof",
+  "html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "source_contract": "3c41 play_question.h b981dc579ded10c535272c217d653afb0637991b; ui.c3964\u20134006",
+  "checks": [
+    {
+      "name": "ASK PATCH+PLAY performs Redo without cancelling question or changing caller/transport",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK Redo preserves existingREC/transport (False, True)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": true,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": true,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK Redo preserves existingREC/transport (True, False)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": true,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": true,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK Redo preserves existingREC/transport (True, True)",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": true,
+        "playing": true,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": true,
+        "playing": true,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK Redo consumes PATCH release even when PATCH is released before PLAY",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "Empty Redo still leaves ASK/caller/transport intact",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 0,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "OrdinaryASK PLAY answersNO then toggles once; caller None running False",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "OrdinaryASK PLAY answersNO then toggles once; caller None running True",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "OrdinaryASK PLAY answersNO then toggles once; caller LIST running False",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "OrdinaryASK PLAY answersNO then toggles once; caller LIST running True",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK PATCH+REC is masked before PATCH release",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH"
+        ]
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "Unused PATCH release answersNO to originalLIST caller without undo",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "Ordinary REC alone is still masked by ASK",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK lower knobs remain masked, not history or value changes",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 0,
+        "redo": 1
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "ASK REC with an availableUndo entry stays masked",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": [
+          "PATCH"
+        ]
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "MaskedREC then PATCH release cancels to caller without applyingUndo",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "LIST",
+        "askType": null,
+        "copyRequest": null,
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "Existing occupiedCOPY question retains its real caller during Redo",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "view": "HOME",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "HOME",
+        "list": 0,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "GEN occupiedCOPY caller also staysGEN after Redo and originalreleases",
+      "pass": true,
+      "expected": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "view": "GEN",
+        "undo": 1,
+        "redo": 0,
+        "buttons": []
+      },
+      "actual": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 0,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "OrdinaryPLAY cancels occupiedCOPY without copying and toggles once",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "HOME",
+        "undo": 0,
+        "redo": 1,
+        "buttons": []
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": true,
+        "overlay": null,
+        "askType": null,
+        "copyRequest": null,
+        "view": "HOME",
+        "list": 0,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "name": "Local ASK Redo exception does not take over clip host transport",
+      "pass": true,
+      "expected": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "view": "CLIP",
+        "undo": 0,
+        "redo": 1,
+        "clipOn": true,
+        "clipRequests": [
+          {
+            "type": "SEQ PLAY host request"
+          }
+        ]
+      },
+      "actual": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "CLIP",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": true,
+        "clipRequests": [
+          {
+            "type": "SEQ PLAY host request"
+          }
+        ]
+      }
+    }
+  ],
+  "traces": [
+    {
+      "stage": "PATCH held",
+      "state": {
+        "note": 55,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 0,
+        "redo": 1,
+        "buttons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "stage": "PLAY down",
+      "state": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [
+          "PATCH",
+          "SEQ PLAY"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "stage": "PLAY up",
+      "state": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [
+          "PATCH"
+        ],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    },
+    {
+      "stage": "PATCH up",
+      "state": {
+        "note": 56,
+        "rec": false,
+        "playing": false,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "copyRequest": {
+          "source": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "dest": 5
+        },
+        "view": "GEN",
+        "list": 2,
+        "page": 0,
+        "undo": 1,
+        "redo": 0,
+        "buttons": [],
+        "held": -1,
+        "physical": [],
+        "clipOn": false,
+        "clipRequests": []
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 20,
+  "total": 20
+}

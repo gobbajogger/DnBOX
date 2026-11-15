@@ -1,0 +1,471 @@
+{
+  "classification": "Producer MODEL/DOM source-contract checks; no firmware, independent, actual-save or device proof",
+  "input_html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "source_contract": "3c41 ui.c4667\u20134672 consumes lower physical SAVE+knob; motion_forget2803ff ignores nonR_ENG including GEN refs",
+  "checks": [
+    {
+      "name": "GEN page0 SAVE+K5 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K5 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K6 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K6 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K7 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K7 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K8 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page0 SAVE+K8 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K5 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K5 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K6 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K6 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K7 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K7 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K8 direction1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "GEN page1 SAVE+K8 direction-1 consumes no-motion gesture/release without data/history edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "configuration": {
+          "density": 70,
+          "accent": 40,
+          "slide": 25,
+          "range": 2,
+          "root": 9,
+          "scale": 0,
+          "base": 2,
+          "mutate": 0,
+          "seed": 1441
+        },
+        "consumedAtTurn": true,
+        "undo": 0,
+        "redo": 0,
+        "rec": false,
+        "playing": false,
+        "heldSave": false,
+        "buttons": [],
+        "releaseTrace": [],
+        "note": "Current GEN lower controls have no motion lane; values unchanged and BT release consumed"
+      }
+    },
+    {
+      "name": "SAVE+GEN knob preserves earlier intentional history",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "note": 56,
+        "undo": 1,
+        "redo": 0
+      }
+    },
+    {
+      "name": "LIST retains underlying GEN SAVE+lower-knob precedence",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "LIST",
+        "consumed": true,
+        "undo": 0
+      }
+    },
+    {
+      "name": "Existing PART SAVE+knob still clears its motion lane without editing base",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "remainingLanes": [],
+        "consumed": true
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 19,
+  "total": 19
+}

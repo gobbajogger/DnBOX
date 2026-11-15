@@ -1,0 +1,131 @@
+{
+  "state": "FROZEN_CORRECTIVE_DESIGN_SOURCE; INDEPENDENT_AFFECTED_ASSESSMENT_PENDING; WHOLE_OVERHAUL_INCOMPLETE",
+  "base_head": "0fdaa20c8ca641bc5bc930f46307f979db8b6d9f",
+  "base_tree": "d7df555c68172bf088151c9d610ff116502c1e54",
+  "base_manifest_sha256": "9dbe352afe925ba5e0d9eebbab14dd8d528a665f002a9eb1d32e4beddae5b84c",
+  "primary": [
+    {
+      "file": "workbench.html",
+      "bytes": 1979099,
+      "sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe"
+    },
+    {
+      "file": "proposal.js",
+      "bytes": 94108,
+      "sha256": "e030c70f34e56b4ad1e1f82367a8e57f30b5c46cad386752c4ad5f2dc6ba2dac"
+    },
+    {
+      "file": "generator-proposal.js",
+      "bytes": 22912,
+      "sha256": "0c86e02a6733e3a1d671a6befdeabdd00bd9bb3ca9578a5cad346993a4df00b1"
+    },
+    {
+      "file": "physical-role-router.js",
+      "bytes": 5141,
+      "sha256": "5d605654638e5fd6985e40edd3efcb94f4581f618ce8ab1bee6826e4c3696ce8"
+    },
+    {
+      "file": "generator-math.js",
+      "bytes": 2904,
+      "sha256": "bbd76ceab51f96c884937d7ce045f4dd9d332daf61543e413671e588d2a17845"
+    }
+  ],
+  "changes": [
+    "Shared source-priority resolver retains clip, selectiveASK, history, clear, tempo and SAVE ownership; original releases stay consumed",
+    "LIST lower sound edits target base, not held-step locks; closing LIST restores the original held owner",
+    "PATCH+K2 edits tempo20..275, retains caller and consumes PATCHrelease",
+    "BT+REC asks CLEAR selected part, preservesREC/transport and consumes BT; confirm targets then-current pattern and all owned lanes, including909 sharedFX/master motion",
+    "Isolated clear/tempo UndoRedo preserves other modeled data; native quiet grouping/bytepool and active-capture endpoint finalization are not simulated",
+    "Keyboard labels follow modeled MIDI at current octave; accessible labels preserve source hardware-map names, no measured pitch claim",
+    "ASK PATCH+PLAY Redo retains question/caller/REC/transport; ordinaryPLAY cancels then togglesonce; ASKREC remains masked",
+    "Native question buttons/Redo acknowledgement retained; compact clear prompt adds pattern and scope before confirmation"
+  ],
+  "checks": [
+    {
+      "file": "QUESTION-PRIORITY-CHECKS.json",
+      "sha256": "42d78387b8889063a2921b9cc434a1f53f832c8dcafaebcf28c9654f9b4339e5",
+      "passed": 20,
+      "total": 20
+    },
+    {
+      "file": "DISPATCH-CHECKS.json",
+      "sha256": "5dd64df01fe3a6a5a7f163f454de2cd60a96de5982400f909b38237026045efa",
+      "passed": 9,
+      "total": 9
+    },
+    {
+      "file": "CLEAR-RECOVERY-CHECKS.json",
+      "sha256": "2a78e39af8c42004415877acd2fb88e5ce23c76e26e9ca18dc37413d88b42e4d",
+      "passed": 14,
+      "total": 14
+    },
+    {
+      "file": "KEY-LABEL-CHECKS.json",
+      "sha256": "cc9363ab99159cf6d594e333c105763086b3d44ea6208d73fb2fa5849a1662b6",
+      "passed": 3,
+      "total": 3
+    },
+    {
+      "file": "LIST-HISTORY-CHECKS.json",
+      "sha256": "fba6b5349827cc56895a6d4007f125d9b304ffe5cb0b864cf2041212b016ec52",
+      "passed": 14,
+      "total": 14
+    },
+    {
+      "file": "GEN-SAVE-CHECKS.json",
+      "sha256": "e8469edf78f683016eb558f3d57bbfa47cb2eede7a83558d0aa5458c758d645c",
+      "passed": 19,
+      "total": 19
+    },
+    {
+      "file": "RETAINED-GEN-CHECKS.json",
+      "sha256": "4b5bb7e6adc446aed371deb75f1a40b1b165d170f82628f9db2bc618ca8bb882",
+      "passed": 35,
+      "total": 35
+    },
+    {
+      "file": "native-modal/FEEDBACK-CHECKS.json",
+      "sha256": "9b41fdf5208a40a69a25a9e37c25c7c3e1092b0b4f08f1c9c979deb43a609048",
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "file": "native-dispatch/VISUAL-CHECKS.json",
+      "sha256": "dd87076f1ac46cde932caf48b2410099343b7b4d007cc7635714f6dd067b6100",
+      "passed": 6,
+      "total": 6
+    }
+  ],
+  "source_contract": {
+    "source": "3c41ef4bedf9701f549ce2752b73306e2fab1eb8",
+    "header": "source/play_question.h",
+    "header_git_blob": "b981dc579ded10c535272c217d653afb0637991b",
+    "header_sha256": "f76a890cf5510941f0f79a173c0fb20698029d2d7f24bdf367bd3702bcbd791d",
+    "ui": "ui.c2846\u20132854,3963\u20134048,4554\u20134570,4632\u20134678; clear/pattern/lane contracts in companion ledger",
+    "source_not_edited": true,
+    "ui_sha256": "6083a134562af8b774c268b858b7d5ddf132cfa1a30440e2e6f7a944b9f12846"
+  },
+  "visuals": {
+    "new": "Four labeled producer native240 modal/LIST frames from this exact HTML; not newly rendered whole-design comparisons or current firmware screenshots",
+    "actual_reference": "Authentic current3c41 occupied-P6/GEN/Redo question exists in private verification; raw review capture is not republished in this source packet",
+    "equivalence": "ASK GEN70/40/25/2 visible context is retained; original occupied-target content, prior pitch/history and power fixture not claimed identical. CLEAR adds same-part pattern/scope, uses native buttons. LIST screenshot is a Chicago proposal state, not a fabricated same-state909 actual pair.",
+    "inherited_mobile_pdf": "../r8/DnBOX-R8-mobile-comparisons.pdf",
+    "pdf_sha256": "aa3891e7ebc99232adf1d9f77400aec9845911a26a4ca89b5eb6e086e2dbad1b",
+    "other_stills": "R7/R8 original identities retained; no R10 re-execution claim",
+    "iOS_glare_tactile": "NOT_RUN"
+  },
+  "limits": [
+    "Correction of inherited parity; original R9 LIST/SAVE repairs stay intact",
+    "No numerical rating or acceptance from case counts",
+    "Full native project history pool/grouping outside bounded GEN model remains unmodeled",
+    "No firmware edit/build/device/release/merge; no candidate firmware exists",
+    "No private report/manifest/capture/audio/SDK/WASM/FWSC in export",
+    "Full FX/controller/BREAK/realpeer/recording/recovery and reserved CP interfaces remain open",
+    "Current clear pattern and lane reads are not claimed atomic under cue progression",
+    "Active capture finalization can affect other bass endpoints in native firmware; modeled clear checks are idle or REC-armed with no active capture",
+    "No exact source quiet/record-pass history grouping or global native project bytepool is simulated",
+    "Fresh current motion write/return/clear was NOT_ESTABLISHED in independent R9 review; model lane checks are separate",
+    "Settings lower quick-access/list density and held-note continuity feedback belongs to its existing component owner"
+  ],
+  "effective_model_effort_service": "Not exposed"
+}

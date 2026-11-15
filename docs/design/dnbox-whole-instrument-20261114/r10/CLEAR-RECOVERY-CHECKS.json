@@ -1,0 +1,230 @@
+{
+  "classification": "Producer modeled isolated clear/tempo data and recovery checks; native quiet grouping, active capture endpoints and audio are not simulated",
+  "html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "checks": [
+    {
+      "name": "Clear request itself leaves all data/REC/transport unchanged",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "ASK",
+        "askType": "CLEAR_PART",
+        "rec": false,
+        "playing": false
+      }
+    },
+    {
+      "name": "YES clears every909voice/accent and owned lanes, preserves settings/sound/other parts",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "steps": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ],
+        "accent": [],
+        "length": 64,
+        "rate": 2,
+        "lanes": [
+          "otherPart",
+          "otherPattern"
+        ],
+        "rec": false,
+        "playing": false,
+        "overlay": null
+      }
+    },
+    {
+      "name": "Isolated clear Undo restores part and removed lane without touching unrelated data",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "musicRestored": true,
+        "lanes": [
+          "otherPart",
+          "otherPattern",
+          "fx"
+        ],
+        "rec": false,
+        "playing": false
+      }
+    },
+    {
+      "name": "Clear Redo reapplies same target; source sound/settings stay",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "lanes": [
+          "otherPart",
+          "otherPattern"
+        ],
+        "length": 64
+      }
+    },
+    {
+      "name": "Clear NO restores LIST caller and retains complete musical data",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "LIST",
+        "rec": false,
+        "playing": false
+      }
+    },
+    {
+      "name": "PlainPLAY cancels clear then toggles once, retaining musical data",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": null,
+        "playing": true,
+        "rec": false
+      }
+    },
+    {
+      "name": "Native part argument is stable but confirm follows its then-current pattern",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "current": 1,
+        "p1": [
+          1,
+          5,
+          9,
+          13
+        ],
+        "p2": [],
+        "lanes": [
+          "fx",
+          "otherPart"
+        ]
+      }
+    },
+    {
+      "name": "Bass clear removes flags/lane-backed metadata but preserves pitch/velocity/config",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "cell": {
+          "gate": "REST",
+          "note": 55,
+          "velocity": 100,
+          "accent": false,
+          "slide": false,
+          "end": 0
+        },
+        "length": 16,
+        "transpose": 24
+      }
+    },
+    {
+      "name": "Bass clear Undo restores opaque metadata and flags exactly",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "cell": {
+          "gate": "NOTE",
+          "note": 55,
+          "velocity": 100,
+          "accent": true,
+          "slide": true,
+          "end": 7,
+          "chord": {
+            "opaque": [
+              55,
+              59,
+              62
+            ]
+          },
+          "capturedSoundPresent": true
+        }
+      }
+    },
+    {
+      "name": "BREAK clear removes stored step/slice intents, preserves fixture settings",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "data": {
+          "steps": [],
+          "slice": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "length": 16,
+          "settings": {
+            "loopA": 1,
+            "loopB": 2,
+            "countA": 8
+          }
+        }
+      }
+    },
+    {
+      "name": "Clear leaves REC flag armed when it was already armed",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "rec": true,
+        "playing": false
+      }
+    },
+    {
+      "name": "PATCH wins over BT for REC: Undo, not CLEAR/REC",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "note": 55,
+        "overlay": null,
+        "rec": false,
+        "buttons": [
+          "BT"
+        ]
+      }
+    },
+    {
+      "name": "Tempo correction Undo/Redo owns tempo, not previous GEN edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "tempo": 125,
+        "note": 56
+      }
+    },
+    {
+      "name": "Redo restores isolated tempo edit",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "tempo": 126,
+        "note": 56
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 14,
+  "total": 14
+}

@@ -1,0 +1,212 @@
+{
+  "classification": "Producer MODEL/DOM source-dispatch checks; no native-current/device/independent confirmation",
+  "source_contract": "3c41ui.c2846\u20132853,3034\u20133041,4030\u20134034,4554\u20134570",
+  "html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "checks": [
+    {
+      "name": "HeldSEQ\u2192PARA\u2192LIST lowerknob edits base, not step lane",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "view": "PART",
+        "overlay": "LIST",
+        "held": 3,
+        "base": 1,
+        "lanes": {},
+        "press": {
+          "step": 3,
+          "input": 2,
+          "sourcePart": 3,
+          "pattern": 1,
+          "time": 0,
+          "created": true,
+          "used": false
+        }
+      }
+    },
+    {
+      "name": "ClosingLIST restores same held lock owner without changing note on release",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "base": 1,
+        "lane": {
+          "pattern": 0,
+          "part": 3,
+          "key": "3:CHICAGO:0",
+          "values": [
+            null,
+            null,
+            2,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "applied": null,
+          "recReq": false,
+          "holdReq": false,
+          "holdLeft": 0,
+          "lastRec": null,
+          "quiet": 0
+        },
+        "held": -1,
+        "physical": {}
+      }
+    },
+    {
+      "name": "HOME PATCH+K2 owns tempo and consumes release, running False",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "tempo": 126,
+        "view": "HOME",
+        "playing": false,
+        "buttons": []
+      }
+    },
+    {
+      "name": "HOME PATCH+K2 owns tempo and consumes release, running True",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "tempo": 126,
+        "view": "HOME",
+        "playing": true,
+        "buttons": []
+      }
+    },
+    {
+      "name": "HeldSEQ PATCH+K2 owns tempo rather than chance",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "tempo": 126,
+        "view": "SEQ",
+        "lanes": {},
+        "note": 55
+      }
+    },
+    {
+      "name": "StoppedSEQ BT+REC asks clear and consumes BT, existingREC False",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "ASK",
+        "askType": "CLEAR_PART",
+        "rec": false,
+        "playing": false,
+        "consumed": true,
+        "heldSave": false,
+        "clearRequest": {
+          "part": 0,
+          "requestedPattern": 0
+        },
+        "note": "Current CLEAR stores the selected part; confirmation uses its then-current pattern, including all owned lanes"
+      }
+    },
+    {
+      "name": "StoppedSEQ BT+REC asks clear and consumes BT, existingREC True",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "ASK",
+        "askType": "CLEAR_PART",
+        "rec": true,
+        "playing": false,
+        "consumed": true,
+        "heldSave": false,
+        "clearRequest": {
+          "part": 0,
+          "requestedPattern": 0
+        },
+        "note": "Current CLEAR stores the selected part; confirmation uses its then-current pattern, including all owned lanes"
+      }
+    },
+    {
+      "name": "ASK masks BT+REC without replacing question or arming REC",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "overlay": "ASK",
+        "askType": "COPY",
+        "rec": false
+      }
+    },
+    {
+      "name": "Clip keeps BT+REC in host route without local clear/REC",
+      "pass": true,
+      "actual": {
+        "pass": true,
+        "clipOn": true,
+        "requests": [
+          {
+            "type": "SEQ REC host request"
+          }
+        ],
+        "rec": false,
+        "overlay": null
+      }
+    }
+  ],
+  "errors": [],
+  "passed": 9,
+  "total": 9
+}

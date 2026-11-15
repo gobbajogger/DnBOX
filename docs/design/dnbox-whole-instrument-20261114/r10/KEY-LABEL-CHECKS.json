@@ -1,0 +1,47 @@
+{
+  "classification": "Producer software inspection-label/endpoint consistency only; controller-map octave names and actual pitch remain distinct",
+  "html_sha256": "b3996df9a2779af0ba13c2dd8bf9f471ff1ae54c378a0e8d69b0d83a12b9c1fe",
+  "checks": [
+    {
+      "name": "PART outerkey octave0",
+      "pass": true,
+      "want": {
+        "note": 36,
+        "model_label": "C2"
+      },
+      "actual": {
+        "note": 36,
+        "text": "p0C2",
+        "aria": "Physical input 0; modeled MIDI 36 C2 at octave 0 when pitch route admitted; source hardware-map C3"
+      }
+    },
+    {
+      "name": "PART outerkey octave1",
+      "pass": true,
+      "want": {
+        "note": 48,
+        "model_label": "C3"
+      },
+      "actual": {
+        "note": 48,
+        "text": "p0C3",
+        "aria": "Physical input 0; modeled MIDI 48 C3 at octave 1 when pitch route admitted; source hardware-map C3"
+      }
+    },
+    {
+      "name": "GEN REC centralkey octave0",
+      "pass": true,
+      "want": {
+        "note": 41,
+        "model_label": "F2"
+      },
+      "actual": {
+        "note": 41,
+        "text": "p5F2",
+        "aria": "Physical input 5; modeled MIDI 41 F2 at octave 0 when pitch route admitted; source hardware-map F3"
+      }
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}
