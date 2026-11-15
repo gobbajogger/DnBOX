@@ -71,7 +71,17 @@ static int physical_word(const view*v,unsigned row,unsigned sample,uint32_t*out)
  if(mode==0)value=u32(v->b+p+2+4*i);
  else{
  uint32_t code=0;const size_t packed=p+2+4*anchors;
- for(unsigned k=0;k<width;k++){const unsigned bit=i*width+k;if((v->b[packed+bit/8]>>(bit%8))&1U)code|=UINT32_C(1)<<k;}
+ if(width){
+ const unsigned bit=i*width,shift=bit&7U,bytes=(shift+width+7U)/8U;
+ const unsigned char*bits=v->b+packed+bit/8U;
+ code=bits[0];
+ if(bytes>1)code|=(uint32_t)bits[1]<<8;
+ if(bytes>2)code|=(uint32_t)bits[2]<<16;
+ if(bytes>3)code|=(uint32_t)bits[3]<<24;
+ code>>=shift;
+ if(bytes>4)code|=(uint32_t)bits[4]<<(32U-shift);
+ if(width<32)code&=(UINT32_C(1)<<width)-1U;
+ }
  const uint32_t base=u32(v->b+p+2);
  if(mode==1)value=base+code;
  else{
@@ -116,9 +126,10 @@ int s1c_bind(s1c_binding*out,const void*data,size_t n){
  const s1c_binding candidate={(const unsigned char*)data,n,S1C_TAG};*out=candidate;return 1;
 }
 int s1c_read(const s1c_binding*b,unsigned row,unsigned sample,uint32_t*out){
- if(row>=52||sample>=4097||!s1c_binding_valid(b)||!extent(out,sizeof *out)||((uintptr_t)out%__alignof__(uint32_t))||
-    overlap(out,sizeof *out,b,sizeof *b)||overlap(out,sizeof *out,b->bytes,b->byte_count))return 0;
+ if(row>=52||sample>=4097||!extent(b,sizeof *b)||((uintptr_t)b%__alignof__(s1c_binding))||b->format_tag!=S1C_TAG)return 0;
  view v;if(!header(b->bytes,b->byte_count,&v))return 0;
+ if(!extent(out,sizeof *out)||((uintptr_t)out%__alignof__(uint32_t))||
+    overlap(out,sizeof *out,b,sizeof *b)||overlap(out,sizeof *out,b->bytes,b->byte_count))return 0;
  const unsigned physical=row<48?row:row==48?44:row==49?45:row-2;uint32_t w;
  if(!physical_word(&v,physical,sample,&w)||!word_valid(w))return 0;*out=w;return 1;
 }

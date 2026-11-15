@@ -1,8 +1,8 @@
 {
   "schema": 2,
-  "frozen_utc": "2026-11-15T08:19:03.868487+00:00",
-  "scope": "PRIVATE R2 full sequence/arp+checked platform+original C++ dispatch candidate; F1 tuning/control/restore domain corrected, awaiting independent affected recheck; no product/FX/fit acceptance",
-  "source_parent": "69203861fae38a09b02fb94598a847f799af30fc",
+  "frozen_utc": "2026-11-15T21:06:11.416411+00:00",
+  "scope": "Frozen affected-review candidate: exact stateless extraction and one header evaluation; inherited full sequence source unchanged; NO product/native CPU/fit admission",
+  "source_parent": "be225d86c9c7f2085aedc40b012a629d27f86682",
   "files": [
     {
       "path": ".gitignore",
@@ -53,10 +53,16 @@
       "git_blob_sha": "e02b8602ab350a8cc014a169c46c89b4b205009e"
     },
     {
+      "path": "compact-reader/PACKED-EXTRACTION.md",
+      "bytes": 3012,
+      "sha256": "9cb86b286615061ae8b5e8d1f79f3f104c3aceb2e2b856d2c57a3c4ea2dcb257",
+      "git_blob_sha": "647ce71dd1402d8c816825fdfa49954fb53d5b7d"
+    },
+    {
       "path": "compact-reader/compact.c",
-      "bytes": 7127,
-      "sha256": "db99f6c29c9e51d5b37d150f9ce984c54d780ec5874d8f16029458d1ff0ea59d",
-      "git_blob_sha": "6ed2023da07bc9964025cac690e67a1e1cb5ee46"
+      "bytes": 7460,
+      "sha256": "a5e63c119d98b6708d6809c7bec093104a9299aac6b95fd3ac51fb90c880e7b5",
+      "git_blob_sha": "ff530c13bc3060bc88d4379d75521a0eb32081a0"
     },
     {
       "path": "compact-reader/compact.h",
@@ -75,6 +81,30 @@
       "bytes": 1633,
       "sha256": "7d0fc18c3ee8cd1cbd5475d1ac90223bb2fe2fc4d7505364dcb2a3b5ec33beba",
       "git_blob_sha": "03fc469d3206ef757343e228ec8226e1f96de974"
+    },
+    {
+      "path": "compact-reader/extract_test.c",
+      "bytes": 2883,
+      "sha256": "82243bcdd1129277ef51f2a7108010f096cf74add7f10779fdb10d3f9a20616e",
+      "git_blob_sha": "e4861ecf4bdd19346a2abdf16371977307afb9eb"
+    },
+    {
+      "path": "compact-reader/public_guard_test.c",
+      "bytes": 2808,
+      "sha256": "e8df341423b641c705e76a08e9352db9355c13531a3b291c0475d71efc74bbc6",
+      "git_blob_sha": "7ede9be20a4156b0392a1e494df3ea2429eb4b38"
+    },
+    {
+      "path": "compact-reader/run_word_checks.py",
+      "bytes": 4008,
+      "sha256": "d3bb9fce81255436127cb76cf5a6637ee325aee6abd945eb4b70cdca89d7e027",
+      "git_blob_sha": "539bda04f83b11c71c46c05e3497f35c7d48e6a3"
+    },
+    {
+      "path": "compact-reader/test_words.c",
+      "bytes": 4862,
+      "sha256": "94e5d6bd6dbba441b47144417e97c29fd03ff92dd8392a2950239996a856a0ae",
+      "git_blob_sha": "c2217840f03f5f0cf0c782160f80bad38ef68041"
     },
     {
       "path": "compact_note.cpp",
@@ -353,6 +383,17 @@
     "No native executable/product fit/CPU/device",
     "DefaultLSanptraceFAIL, SAME leak-disabled sanitizer pass only"
   ],
-  "revision": "WORKING-broad-platform-feature-successor-checked-init",
-  "affected_change": "Checked own-runtime operations and source-zero-phase initializer; original general/assert methods and successful shared initialization body preserved, no numeric DSP changes"
+  "revision": "packed-extraction-r2",
+  "affected_change": {
+    "predecessor_manifest_sha256": "7b965d6b4917abcaebe87ac9aac859dd2f1cb72b5a1bbd81ca8572cc4a321901",
+    "one_changed_predecessor_file": "compact-reader/compact.c",
+    "new_plain_files": [
+      "compact-reader/PACKED-EXTRACTION.md",
+      "compact-reader/extract_test.c",
+      "compact-reader/public_guard_test.c",
+      "compact-reader/run_word_checks.py",
+      "compact-reader/test_words.c"
+    ],
+    "limits": "No flagged V6/control65 intake; corpus/compact binaries/SDK content excluded. Inherited NATIVE-SDK-CXX.json is unchanged public metadata only"
+  }
 }
