@@ -1,0 +1,343 @@
+{
+  "actual_issue_count": 6,
+  "actual_issue_numbers": [
+    2,
+    3,
+    4,
+    285,
+    832,
+    833
+  ],
+  "actual_read_count": 56,
+  "actual_read_evidence": [
+    {
+      "observed_at": "2026-11-15T23:40:59.576Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro",
+      "sha256": "9ea6dcbdf99f63899eaef13e015a0a495e8c3f9534188b1f52899719eb541936"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:00.665Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=1",
+      "sha256": "2534dd1e4878209ce7fe4a14760bfa74f6268bf1b89a440ef2057497aada523e"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:01.703Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=2",
+      "sha256": "aad5fb17c28f1fe76b013ff693cae7dd2d2f038cf3772468dc3353e44f724cd1"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:02.714Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=3",
+      "sha256": "0ca95ec531c98493425571a581a9165857391b32443132bc9267817aefec9663"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:04.004Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=4",
+      "sha256": "22d81ee243d5b4eb94034aa0652000cfdbd69f4d941a17c724c09d0309a35abf"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:05.153Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=5",
+      "sha256": "33c022db80e1255fd1a67d46fb4456296536576cf25ed53390974ae2cab78440"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:06.326Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=6",
+      "sha256": "457dd68633a3f2192969ba6909bb1f0ac569d28ab8034a79933487be3ce1a93f"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:07.392Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=7",
+      "sha256": "a696bf98d2aa8943dbf21bc9e8731c4c64e8ce35e17d60b099d8dffbc3ab44a1"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:08.565Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=8",
+      "sha256": "c6eaa9c4266a109264cce6f7e03dbec8ded73c8e52825e59c3dc0db4b643c0a0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:09.793Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=9",
+      "sha256": "c4b50bc9a840983a7057e8a04411e836bd1cf3583f0cdafda5bf3bf2f7d549a0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:10.639Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=10",
+      "sha256": "8d1b26dba36da783e1defe2a99f47cecfe71b318f92939cca145b9339f15313b"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:10.966Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=11",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:11.275Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/2",
+      "sha256": "d5d7c3ea3cd02f4359a45b384977fd76311f8a6526f0be722c35a49c4066be68"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:12.037Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/2/timeline?per_page=100&page=1",
+      "sha256": "099b70a65a680ef2c3d86170a91675a0b60b719ece921b18cfdb36bc4bccb055"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:12.471Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/2/timeline?per_page=100&page=2",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:12.851Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/2/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:13.181Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/2",
+      "sha256": "d5d7c3ea3cd02f4359a45b384977fd76311f8a6526f0be722c35a49c4066be68"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:13.479Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/3",
+      "sha256": "c7436b0efc4c8f9ce10f908f0df2f03f16bb51c500cc31680677e51aecb49361"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:14.015Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/3/timeline?per_page=100&page=1",
+      "sha256": "7afe08ca3ef1292a83839cc394a27d9804ae7a296be550cf3455c1bddc80940e"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:14.373Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/3/timeline?per_page=100&page=2",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:14.713Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/3/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:15.045Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/3",
+      "sha256": "c7436b0efc4c8f9ce10f908f0df2f03f16bb51c500cc31680677e51aecb49361"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:15.398Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/4",
+      "sha256": "02fc6fc221215f5ebf29321db1a619abb5d5f82ac79047f2e7d3e8682de205ba"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:15.922Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/4/timeline?per_page=100&page=1",
+      "sha256": "2ab61e42a875022d2dca73a95e179a80fd91d8fc8d6a7385c1c2682f27f0aef8"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:16.340Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/4/timeline?per_page=100&page=2",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:16.688Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/4/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:17.051Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/4",
+      "sha256": "02fc6fc221215f5ebf29321db1a619abb5d5f82ac79047f2e7d3e8682de205ba"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:17.407Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/285",
+      "sha256": "6b2dfa9c116656d58b7ebd5ffc1bef86d8ca486eb4a0b84b61cc909d691046b0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:17.743Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/285/timeline?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:18.041Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/285/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:18.401Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/285",
+      "sha256": "6b2dfa9c116656d58b7ebd5ffc1bef86d8ca486eb4a0b84b61cc909d691046b0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:18.790Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832",
+      "sha256": "14115eef360c51b504ea138fa371e0852117f08ae6bc2a605b8dc4978b3ad4dc"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:19.728Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=1",
+      "sha256": "00ff0d5e6134cc3c00fe005e492fbdb53b3e08196abdd62d6f51868068aab514"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:20.545Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=2",
+      "sha256": "e8be0a325d840122a9c7f5f5c1beb487eb2e728a88b8799a644e099d764377ff"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:21.265Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=3",
+      "sha256": "0f13b7ed75a87d1072e21022b18d02a606e9933327f6a25df550858fe2d93b1f"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:21.964Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=4",
+      "sha256": "1e99852a1582d691ec6a3a2770e7687bd4c9d291211a85c8ed3787b3502aba7e"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:22.702Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=5",
+      "sha256": "848c43573e9d4e88f9e9af6f94a949f75b3b8aacefdcb70e2cb1e5c7cc15ed25"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:23.348Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=6",
+      "sha256": "2a72f971bfd99fd579549a3c372b69ae643a6fafb307113101d45083b4f0aeaf"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:23.840Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/timeline?per_page=100&page=7",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:24.351Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:24.721Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/832",
+      "sha256": "14115eef360c51b504ea138fa371e0852117f08ae6bc2a605b8dc4978b3ad4dc"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:25.022Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/833",
+      "sha256": "9bb916e4b2c3d3bcabb748506743b0320b798affcdf902c73be7995d668fe932"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:25.329Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/833/timeline?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:25.649Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/833/reactions?per_page=100&page=1",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:25.970Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues/833",
+      "sha256": "9bb916e4b2c3d3bcabb748506743b0320b798affcdf902c73be7995d668fe932"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:27.285Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=1",
+      "sha256": "2534dd1e4878209ce7fe4a14760bfa74f6268bf1b89a440ef2057497aada523e"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:28.269Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=2",
+      "sha256": "aad5fb17c28f1fe76b013ff693cae7dd2d2f038cf3772468dc3353e44f724cd1"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:29.324Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=3",
+      "sha256": "0ca95ec531c98493425571a581a9165857391b32443132bc9267817aefec9663"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:30.396Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=4",
+      "sha256": "22d81ee243d5b4eb94034aa0652000cfdbd69f4d941a17c724c09d0309a35abf"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:31.455Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=5",
+      "sha256": "33c022db80e1255fd1a67d46fb4456296536576cf25ed53390974ae2cab78440"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:32.612Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=6",
+      "sha256": "457dd68633a3f2192969ba6909bb1f0ac569d28ab8034a79933487be3ce1a93f"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:33.755Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=7",
+      "sha256": "a696bf98d2aa8943dbf21bc9e8731c4c64e8ce35e17d60b099d8dffbc3ab44a1"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:34.963Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=8",
+      "sha256": "c6eaa9c4266a109264cce6f7e03dbec8ded73c8e52825e59c3dc0db4b643c0a0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:36.187Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=9",
+      "sha256": "c4b50bc9a840983a7057e8a04411e836bd1cf3583f0cdafda5bf3bf2f7d549a0"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:36.872Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=10",
+      "sha256": "8d1b26dba36da783e1defe2a99f47cecfe71b318f92939cca145b9339f15313b"
+    },
+    {
+      "observed_at": "2026-11-15T23:41:37.164Z",
+      "path": "/repos/gobbajogger/X0X37-for-Loopy-Pro/issues?state=all&per_page=100&page=11",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  ],
+  "capture_sha256": "8794749d9b453b44079b5c70f2a44939a6fa03de35fc1c14876dad7663aabad0",
+  "captured_at": "2026-11-15T23:41:37.342Z",
+  "claim": null,
+  "continuity_verified": false,
+  "dispatch_receiver_action": "NOT_RUN_NO_AUTHORIZED_NEW_CLAIM",
+  "final_code_replay": {
+    "exit": 2,
+    "historical_capture_end": "2026-11-15T23:41:37.342Z",
+    "runtime_delivery": "NOT_VERIFIED",
+    "state": "DISPLAY_ONLY",
+    "status": "PASS_FOR_READ_PROCESSING"
+  },
+  "issue_collection_entries_per_scan": 949,
+  "no_external_writes": true,
+  "original_helper_sha256": "0da8dcbed75f5ac9b89550be01f14a3093a95017bd4ca4e032d776b720362d7e",
+  "owner_id": 255244738,
+  "owner_opening_reaction_count": 0,
+  "owner_vote_consumption": "NOT_RUN_NO_REAL_VOTE",
+  "proof_planner": {
+    "reason": "tools/local_proof_plan.py is absent at verified nightly b30b31b20b5b9d3aa162ce63bb198e3a96a6c3bc; maintained docs/rules/local-proof.md harness matrix applied",
+    "status": "NOT_RUN"
+  },
+  "repository_id": 1426904592,
+  "request": "#120",
+  "result_state": "DISPLAY_ONLY",
+  "runtime_delivery": "NOT_VERIFIED",
+  "schema": 1,
+  "source_closure": {
+    "canonical_roadmap": "e8f2f1f6eb2918e37d9e01ffd584e893f3aa81a4",
+    "firmware_nightly": "b30b31b20b5b9d3aa162ce63bb198e3a96a6c3bc",
+    "original_intake_source": "b96ff47cd8cfe7720e864ee025a8da8a012ac411"
+  },
+  "source_tests_docs": {
+    "coordination/requests/FEATURE_INBOX.md": "b04a7a5953d65ab7f10b1eeb3ad0562f3c1bcbae10562852b5c77ab73f98d842",
+    "coordination/requests/feature_inbox.py": "da63413e6f040f99ec4be3b45b40f8fa5fd87d2fe15edac31f07442bc267a3ce",
+    "coordination/requests/feature_intake.py": "b3a5fad1e50ed49155c9b2ba28d0f5634b4915f12a2572f6aae6a0a3a6694a30",
+    "tests/feature_inbox_test.py": "2ab40f05c7b6292d9064a70df990e5ca0f03a477f4a56e011d2f2c90987ef02c",
+    "tests/feature_intake_test.py": "dd9731d4e66cba3c8d069aa4e08250c2632096a92fe76ba124c6ea4ac443e3a1"
+  },
+  "state": "IMPLEMENTED_HOST_TESTED_LIVE_READ_ONLY_CONTINUITY_UNAVAILABLE",
+  "tests": {
+    "collector_and_corrections": 19,
+    "normal": "PASS",
+    "optimized": "PASS",
+    "original_plus_nullable_regression": 26,
+    "py_compile": "PASS",
+    "total": 45
+  },
+  "timeline_item_count_832": 543
+}
