@@ -1,0 +1,45 @@
+{
+  "schema": "dnbox-reviewed-source-preservation/1",
+  "createdUTC": "2026-11-15T16:02:47.785736+00:00",
+  "sourceFreezeSHA256": "afe0d3aa989895ddfc83f29bf54b5c24e5d1274859fd9bf8a7df53d9b7352f60",
+  "sourceOnly": true,
+  "files": [
+    {
+      "path": "PRESERVATION.md",
+      "bytes": 3283,
+      "sha256": "d0f1213b129fe6a76eb095afcc00e6aad89c94ff1927ce50dc85731ff06179d1",
+      "gitBlob": "6a64d3dcccfcf716025fbd08affc279144427e97"
+    },
+    {
+      "path": "README-v4-original.md",
+      "bytes": 3128,
+      "sha256": "d16188f06186903bedf3a460eddd69227ffb68a16f6d6ff6bd4e3c4597755191",
+      "gitBlob": "463725eec46209a8fe80323bb1ba69ca24f9b2da"
+    },
+    {
+      "path": "gen_drum_samples.py",
+      "bytes": 15603,
+      "sha256": "ff2a5d642d30b495fe6b1ddc7c6646ff9211333c082bbfd744cf2f6f6cc1dedc",
+      "gitBlob": "5dc7f7da33dbfdbccf46c584a367ed6d477c996f"
+    },
+    {
+      "path": "generated/x0x_drum_tables.h",
+      "bytes": 43176,
+      "sha256": "9235c69643359a1d9e4f692e754d25e8b9a4014b9e41886eed995d8aaf100eb5",
+      "gitBlob": "545c3f3a563154889f72e4851141dd3de96f8830"
+    },
+    {
+      "path": "test_exp_exact.c",
+      "bytes": 29749,
+      "sha256": "727c54385b14db9524ff2b4287d41717b4e769480138ff31ee93f9182ccc6271",
+      "gitBlob": "c005959b0f1f71979ec4779ae2653cf93d36841a"
+    }
+  ],
+  "integration": "Not wired; existing incumbent integration ownership preserved",
+  "nativeQualification": "bounded PRETRANSPORT build, not complete firmware or target timing",
+  "independentEvidence": {
+    "wordStreamSHA256": "c8c351223b0c805e68f88c917c5ed0a8b4983277681e2a1b43251627ffbd3faf",
+    "resultSHA256": "9fe1dcf156a5002de659692a491f53c6c07c7dbfc143c7078e4a1d81240e109d",
+    "nativeRebuildSHA256": "238dc5d5cffd58e747f2ebfc97c8f5adf28a56d02702a2df8414f04c234039c4"
+  }
+}
