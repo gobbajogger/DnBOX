@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "scope": "Only reviewed/plain-source experiment subset plus fixture-free tests; no binary/private input payload.",
+  "scope": "Only plain source/tests/docs; no binary/private input payload",
   "files": [
     {
       "path": "EVIDENCE.json",
-      "bytes": 2541,
-      "sha256": "be1b98c7127a952b0c36159944d16f5e93dd64a1effd42be3a2530a563cafdd2",
-      "git_blob": "019dae531a31ea66cabe4c8c439574e291c1a3a9"
+      "bytes": 3107,
+      "sha256": "272ab899de868d43cd414f7adac643698ba5bf101c5a1fbc2cf26d07814cc7e3",
+      "git_blob": "727eebe1e222ae683005a5e40f084b60f98cbfa3"
     },
     {
       "path": "LICENSE",
@@ -16,9 +16,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 6253,
-      "sha256": "b30c5d18e7a630bb869c7e9ea425a3861fb5dbb428b109dfe0c67af1deac1036",
-      "git_blob": "c73ddd1369d39d363c097199ef16c71300149fc8"
+      "bytes": 5855,
+      "sha256": "b5aee05c00fc469c1585651b309dfdabbee59aa17b0d243abe1dc479be86b399",
+      "git_blob": "e4ce849f4f89a8f8d6ba09ab361df2fc4e0a5a99"
     },
     {
       "path": "sampler/DunneCore/Common/ADSREnvelope.cpp",
@@ -75,6 +75,12 @@
       "git_blob": "1628f05ac2608e5e1d1a153198fd4f0d70a1d13c"
     },
     {
+      "path": "sampler/DunneCore/Common/OriginalAnalyticOscillator.h",
+      "bytes": 2745,
+      "sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3",
+      "git_blob": "3febeb72475dd7390aae4ca22185e2c853fe92e2"
+    },
+    {
       "path": "sampler/DunneCore/Common/OriginalOTAFilter.h",
       "bytes": 5264,
       "sha256": "69eef11c13960ceaedc2d11903c762f906a7a5432c08c4484683765c6f71d833",
@@ -91,6 +97,12 @@
       "bytes": 2240,
       "sha256": "351541165e1a0ee73573548c8a02c546020cf1d3c4310f7a8dbd5dd13a1ff184",
       "git_blob": "c77d4f5151ee868f175de2005ed5bc72c6abe141"
+    },
+    {
+      "path": "sampler/DunneCore/Common/OriginalWhiteNoise.h",
+      "bytes": 753,
+      "sha256": "813b25b8d4bd8f81acd1f41ba8332bd4371cfcaa60cf2b0470b8b5bf473707ac",
+      "git_blob": "a121e5f1f2288d0e9da6cc44844969f2b1e3cceb"
     },
     {
       "path": "sampler/DunneCore/Common/ResonantLowPassFilter.cpp",
@@ -118,15 +130,15 @@
     },
     {
       "path": "sampler/DunneCore/Sampler/CoreSampler.cpp",
-      "bytes": 21835,
-      "sha256": "ef7d6a00d5fcfae2fe9b9e5a870335d386729903854465738f0172f7e90337c0",
-      "git_blob": "7f09927f34571094ffb5de027b6600c6d4194896"
+      "bytes": 22529,
+      "sha256": "9d31d179a3cbffaac4bcde5027424617645f93fcd40b424bdcd4bcb8c3652086",
+      "git_blob": "218669f129e71c1c878d4cb5923794756e09f32a"
     },
     {
       "path": "sampler/DunneCore/Sampler/CoreSampler.h",
-      "bytes": 5740,
-      "sha256": "335420d340d8c512ed4555594078dbf149fd0b803e6f2e6e98d6bc59a9fa7783",
-      "git_blob": "db667bf0cc66f33b81315f914b099f0786837b23"
+      "bytes": 5893,
+      "sha256": "ed1ea40663b8b0db53f58eed60dcec03c31825429713c7118c79f0c8c6c0447f",
+      "git_blob": "b8ef9aa522e95e2aae35726df3012ad1ab95c015"
     },
     {
       "path": "sampler/DunneCore/Sampler/SampleBuffer.cpp",
@@ -148,15 +160,15 @@
     },
     {
       "path": "sampler/DunneCore/Sampler/SamplerVoice.cpp",
-      "bytes": 13132,
-      "sha256": "47e9470bf5180de5c2190c13194932483cf9a9cd8af3eb6101a16a7589a081f9",
-      "git_blob": "03ee4952274395dd95638a150be31692b0f3c274"
+      "bytes": 15781,
+      "sha256": "85b75e3e75521f827e8cefdcb2b223c8b5f33efb56c919280b4785a0b8dab991",
+      "git_blob": "7ac46664b994e5e251a985b962b5f60ed6ce98bd"
     },
     {
       "path": "sampler/DunneCore/Sampler/SamplerVoice.h",
-      "bytes": 4270,
-      "sha256": "75cd81504de2c6259c62e09c6b6264cde87a989cfbe96c3d96012cf24773f9da",
-      "git_blob": "48c9df987fa0ba0cf26fa1a89145f08685c8c61b"
+      "bytes": 4668,
+      "sha256": "51aa0704f3d2baf02dc6015f2951831629b3559190bedb53ba46c827945a185a",
+      "git_blob": "4e0db68c48decdd1d410a0ebd0e44669702a08d2"
     },
     {
       "path": "sampler/include/Sampler_Typedefs.h",
@@ -166,9 +178,9 @@
     },
     {
       "path": "sampler/tests/controls_external.cpp",
-      "bytes": 3628,
-      "sha256": "b7166cdea8986de0702c50ce11267a8c2805499539b1f98cbe5466f7d88af94f",
-      "git_blob": "8b9cf5f6fc766d9665618dc496cb5e74bfccbb2e"
+      "bytes": 3843,
+      "sha256": "1260888c5d8a7306725c35880eccaefada2449f7bc4618fd7317f8d88ebdea84",
+      "git_blob": "b213942ffd507ba4db54d7b4723cd9267cec403c"
     },
     {
       "path": "sampler/tests/lifecycle.cpp",
@@ -183,10 +195,22 @@
       "git_blob": "b335d1306dcf2350ca821b70377077678a519894"
     },
     {
+      "path": "sampler/tests/review_lifecycle.cpp",
+      "bytes": 2120,
+      "sha256": "79d58d0c4e911263ea5491e220fdb3428497a2d5dfe0702359838687223fe210",
+      "git_blob": "52acf646ab2e0e1b35c795e1274f0c58db981829"
+    },
+    {
+      "path": "sampler/tests/source_laws.cpp",
+      "bytes": 3516,
+      "sha256": "47dea3af28e0cb730cf311b0dbca0aa54dc98ddc91be3c2bd4e968f618f2a7f9",
+      "git_blob": "b8edcd3ce8ccefc15cd9c9f487f5957fcc35b8a5"
+    },
+    {
       "path": "tests/run_host.py",
-      "bytes": 3493,
-      "sha256": "058a5fc57896f4bc19b3e997a0930c65ebc3be705d5510e220a80427a4394413",
-      "git_blob": "ec7ad54bcbefc94d4d5c503a1a9dd91f6cfde0af"
+      "bytes": 3564,
+      "sha256": "44234a306e6800f951b633dc521118599921b37eaa87ea11b5864a36d57e52a1",
+      "git_blob": "0e2169f4928b4fc44f8b93bad75292f67b477ca9"
     },
     {
       "path": "timing/review_regressions.cpp",
@@ -208,9 +232,12 @@
     }
   ],
   "excluded": [
-    "Original app/AU and assembly",
-    "Private sample/waveform/PCM, preset banks and binary fixture plans",
-    "SDK/toolchain/library/binary inputs or outputs",
-    "Private review/recovery/analysis reports"
+    "originalapp/AU",
+    "assembly",
+    "sample/waveform/PCM",
+    "rawbanks",
+    "SDK/toolchain",
+    "compiledoutputs",
+    "private reports"
   ]
 }

@@ -12,6 +12,8 @@
 #include "OriginalSmoothPassFilter.h"
 #include "OriginalSyrupFilter.h"
 #include "OriginalOTAFilter.h"
+#include "OriginalAnalyticOscillator.h"
+#include "OriginalWhiteNoise.h"
 #include "LinearRamper.h"
 
 // process samples in "chunks" this size
@@ -35,6 +37,10 @@ namespace DunneCore
         bool useJunoFilter=false;
         OriginalSyrupFilter leftSyrupFilter,rightSyrupFilter;
         OriginalOTAFilter leftOTAFilter,rightOTAFilter;
+        OriginalAnalyticOscillator synthOsc;
+        OriginalWhiteNoise whiteNoiseOsc;
+        bool whiteNoise=false,pendingWhiteNoise=false,vintageFilterADSR=false;
+        bool isOSC=false,oscSaw=false,oscTriangle=false,oscSine=false,oscPWM=false;float oscPWMWidth=.5f;
         bool useOTAFilter=false;bool useSyrupFilter=false; float userCutoff=1000.f; bool syrup24=false;
         AHDSHREnvelope ampEnvelope;
         ADSREnvelope filterEnvelope, pitchEnvelope,otaFilterEnvelope;
@@ -95,10 +101,10 @@ namespace DunneCore
                    float sampleRate,
                    float frequency,
                    float volume,
-                   SampleBuffer *sampleBuffer);
-        void restartNewNote(unsigned noteNumber, float sampleRate, float frequency, float volume, SampleBuffer *buffer);
+                   SampleBuffer *sampleBuffer, bool noise=false);
+        void restartNewNote(unsigned noteNumber, float sampleRate, float frequency, float volume, SampleBuffer *buffer, bool noise=false);
         void restartNewNoteLegato(unsigned noteNumber, float sampleRate, float frequency);
-        void restartSameNote(float volume, SampleBuffer *sampleBuffer);
+        void restartSameNote(float volume, SampleBuffer *sampleBuffer, bool noise=false);
         void release(bool loopThruRelease);
         void stop();
         

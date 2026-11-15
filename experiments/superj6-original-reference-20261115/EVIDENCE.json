@@ -6,10 +6,10 @@
     "license": "MIT"
   },
   "sampler": {
-    "qualified_review_sha256": "decace25272be2c29772d6655250b3beed5b6a70bd851524b69913479cb795c4",
-    "qualified_seal_sha256": "12c1bb161364700667354a1356b8a346112ad0af773983ee1b2c4cff3e37153a",
-    "recorded_component_cases": 27,
-    "stereo_frames_per_variant": 880640,
+    "qualified_review_sha256": "4177949da8982cd4d6cda5fd485394924b84e1d16f6d831cf9ccdf941d15d552",
+    "qualified_seal_sha256": "d589df45d0844426e888479275e68568799fdd5e8ea5d9a8e4d257e0d5f47356",
+    "recorded_component_cases": 42,
+    "stereo_frames_per_variant": 942080,
     "variants": [
       "O2",
       "Os",
@@ -21,10 +21,16 @@
       "restartNewNoteLegato"
     ],
     "default_leak_sanitizer": "FAIL under ptrace; no leak pass",
-    "reviewed_reference_manifest_sha256": "0b0ee6a20398e708e5ad67a1cdda20891e1b1ccc1be91efe8621f25fa83b518e",
+    "reviewed_reference_manifest_sha256": "a9e683566855292100d3b60e89a85f1f2dc575d08fe1f57ddd8171a32ba4f720",
     "prior_review_sha256": "a82f22a8cbe42296473f4b1b994346f8fcc86165f4d604fae2afdb3f0a7911d5",
     "independent_own_source_checks": 22947,
-    "new_filter_families": "Sample-mode Syrup and OTA; each has one original recorded configuration"
+    "new_filter_families": "Sample-mode Syrup and OTA; each has one original recorded configuration",
+    "source_derived_checks": 402464,
+    "source_lifecycle_regression_checks": 389,
+    "independent_own_reuse_checks": 4768,
+    "new_qualified_domains": "Analyticfallback saw/triangle/sine/PWM, defaultwhiteNoise and analyticreset timing ONLY; custommodels/noisecoloration/activevintagefiltered PCM/otherfilter lifecycle remainunqualified",
+    "prior_source_review_sha256": "decace25272be2c29772d6655250b3beed5b6a70bd851524b69913479cb795c4",
+    "independent_own_source_checks_scope": "Earlier unchanged filter/envelope review only, not all current app behavior"
   },
   "timing": {
     "source_manifest_sha256": "de69863c5fe2bfb7e11a03474fed57c598cedf716b5bedc61d533c4e68f41058",

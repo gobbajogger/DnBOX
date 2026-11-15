@@ -1,0 +1,20 @@
+{
+  "original_OTA_sha256": "69eef11c13960ceaedc2d11903c762f906a7a5432c08c4484683765c6f71d833",
+  "accepted_FMA_source_sha256": "71a67e9a07caa496f2b55c4f1630fcde707dfe3d03730693b9e28dc6aa0da8e2",
+  "conversion_upstream_git_blob": "6074bb8455f0500c3275cf9c2466d2cdfe3d55d0",
+  "OTA_FMA_sites_replaced": 36,
+  "OTA_double_casts_replaced": 2,
+  "OTA_reverse_transform_exact": true,
+  "unchanged_API_state_grouping_constants": true,
+  "conversion_edits": [
+    "retain upstream f64_to_f32 integer algorithm and full notice",
+    "replace includes by exact small representation types/macros",
+    "local flags context and reuse accepted static integer roundPack/jam helpers",
+    "fixed RNE/gradual/canonicalNaN policy inherited from accepted FMA32"
+  ],
+  "outputs": {
+    "candidate/OriginalOTAFilter.h": "2433c6c4b063fe2451d219f0f25fc04ab6867efa36b2e006e8ab53c2f51f8cf2",
+    "baseline/OriginalOTA-FMA-only.h": "beb490b60365933032579be2a4051d91b53d1cd307a57f8715891188a5d0f43b",
+    "math/numeric_boundary.c": "33718492ace518e604022b8fc2250c4fd92248f800e85858e734243ac1ce5c55"
+  }
+}

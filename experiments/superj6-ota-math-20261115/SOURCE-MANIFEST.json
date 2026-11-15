@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "scope": "Only plain source/tests/docs, no excluded input or compiled payload",
+  "files": [
+    {
+      "path": "COPYING.SoftFloat.txt",
+      "bytes": 1738,
+      "sha256": "145ea96b4a4a04a1a7738d2a2bf9e830f861971e69606187b018d9e8fc0b95c7",
+      "git_blob": "b5690face082dc71bc7a8c612db03daad9605696"
+    },
+    {
+      "path": "DERIVATION.json",
+      "bytes": 1080,
+      "sha256": "14c752f31ab84e9ab276e0c5e04744dbfea8e45b2bb14b9ea847445100ab832f",
+      "git_blob": "8fadc1d1857fbf16fe8f75f2321ee0f7e06f7532"
+    },
+    {
+      "path": "EVIDENCE.json",
+      "bytes": 1692,
+      "sha256": "413239b158882e2886e3ebe91deaad5e0ced553fee1b289cfd9372800dd84ddd",
+      "git_blob": "a8aef8f699c3526f96dfc4a0311b2721fda8457b"
+    },
+    {
+      "path": "LICENSE.AudioKit",
+      "bytes": 1065,
+      "sha256": "ea20aff5120bba16d7584a2e12b60fdd775d4bb8195440caf67fccba476c8972",
+      "git_blob": "1d3a7a21d6a5ea9c4ed86507c48f6b0ec9478d22"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3758,
+      "sha256": "727b00f35b02792f55f9476018182f238d2a960c23d501245a53f01e177425ba",
+      "git_blob": "80ca741087f81d00cc8c5e4d46a920bb1406ee7b"
+    },
+    {
+      "path": "accepted-fma/tests/corners.c",
+      "bytes": 1793,
+      "sha256": "d9ef4abe85cf0f49c8783c7aa4b0294873b8df602b95a5690b3cd5b56a184be4",
+      "git_blob": "bcc111d94d7ecb25ea6a040b31944e9382147ac9"
+    },
+    {
+      "path": "baseline/OriginalOTA-FMA-only.h",
+      "bytes": 5612,
+      "sha256": "beb490b60365933032579be2a4051d91b53d1cd307a57f8715891188a5d0f43b",
+      "git_blob": "494d4f306be8e45e80576dce439342f87ece6a97"
+    },
+    {
+      "path": "baseline/OriginalOTAFilter.h",
+      "bytes": 5264,
+      "sha256": "69eef11c13960ceaedc2d11903c762f906a7a5432c08c4484683765c6f71d833",
+      "git_blob": "a8df75bd72f13e1d1b97f87a3ba9343b1bf76e73"
+    },
+    {
+      "path": "candidate/OriginalOTAFilter.h",
+      "bytes": 5644,
+      "sha256": "2433c6c4b063fe2451d219f0f25fc04ab6867efa36b2e006e8ab53c2f51f8cf2",
+      "git_blob": "59aa6f168d2eaa2ec00a23b81c3a70a80dbcd3fb"
+    },
+    {
+      "path": "derive_integration.py",
+      "bytes": 3857,
+      "sha256": "077497c22bc1e9520d17a8716bb6942ccc74b86f847dd8a2b6e8e99be52fcb82",
+      "git_blob": "1a8996100b14ed687d8d91d89901a1902d8f2503"
+    },
+    {
+      "path": "math/fma32.c",
+      "bytes": 33503,
+      "sha256": "71a67e9a07caa496f2b55c4f1630fcde707dfe3d03730693b9e28dc6aa0da8e2",
+      "git_blob": "791213c5fa292a198a67e9dfcc34bb0a8c2c6070"
+    },
+    {
+      "path": "math/fma32.h",
+      "bytes": 750,
+      "sha256": "be30ef7f2e2afd6436cd17676d754b5c495ffce7782f927dff933ce246ba635c",
+      "git_blob": "31d1f763016d27566f5605c21fee9da8466871b9"
+    },
+    {
+      "path": "math/numeric_boundary.c",
+      "bytes": 4526,
+      "sha256": "33718492ace518e604022b8fc2250c4fd92248f800e85858e734243ac1ce5c55",
+      "git_blob": "82e3e31002205b73a1b172e4a6f51236b64f73e9"
+    },
+    {
+      "path": "math/numeric_boundary.h",
+      "bytes": 446,
+      "sha256": "5174f51e87b87589b15212c3adabb72b65f48b8fee0fc0716e1c43b805b27342",
+      "git_blob": "bb0d7e2b821ac5d6e9d95c99e43722b5ad4fd326"
+    },
+    {
+      "path": "math/ota_math.hpp",
+      "bytes": 206,
+      "sha256": "355fcfac0c656dcf753060112ed2b859001ab74f5f0b72a18b724bc7b78a13fa",
+      "git_blob": "1409c5f9cccf342aaa36303dd5297b07ba0ffa38"
+    },
+    {
+      "path": "run_host.py",
+      "bytes": 2358,
+      "sha256": "2c2a4490f86232ea3864349d3fd22b88c89848d706ce87129b2b7b6b44f60ef2",
+      "git_blob": "caf805bba316c9dc89d2af839d5ccd7e11bb5fb0"
+    },
+    {
+      "path": "tests/conversion.c",
+      "bytes": 3632,
+      "sha256": "f8a3e2d4ad76aed28fa268ab9bcb0e4fe244a282d5547880ea1bea9f57121c7f",
+      "git_blob": "e9a94c7fe1cc092ae0739f21a8c1407585d70b60"
+    },
+    {
+      "path": "tests/conversion_oracle.py",
+      "bytes": 3396,
+      "sha256": "2ade60e70972c3ad2c4db2447db4cd86a93f97d8d243d67e832367a43fdf6b2d",
+      "git_blob": "0bc48bb1fdf4ddad76ddf43bef5620f3e1cb43fa"
+    },
+    {
+      "path": "tests/native_api.cpp",
+      "bytes": 547,
+      "sha256": "9e0a50c58f9dbccb473e966523436066a48d153d6fa4aa29a8ea74e7b620e431",
+      "git_blob": "fc02ed04920df732fe69b5e2d76bf86b5403db15"
+    },
+    {
+      "path": "tests/ota_equivalence.cpp",
+      "bytes": 3382,
+      "sha256": "701c1203d58fbd0958d6b956b2ac008f96e5ec7316d6db9e13f8d80f194bd9ec",
+      "git_blob": "889d79f9db4be22ee8d26e351343128f97053845"
+    },
+    {
+      "path": "upstream-new/f64_to_f32.c",
+      "bytes": 3477,
+      "sha256": "48e998019d76613444c6f20e5d272464abd2657795830905dcf629bb18d90529",
+      "git_blob": "6074bb8455f0500c3275cf9c2466d2cdfe3d55d0"
+    },
+    {
+      "path": "upstream-new/s_f64UIToCommonNaN.c",
+      "bytes": 205,
+      "sha256": "686149b1313688d9e38acfa30385d809cc949315ed17719ea4e31b9bc60b1f96",
+      "git_blob": "861b2696589370d44eb446994ad57482b47e5580"
+    },
+    {
+      "path": "verify_host.py",
+      "bytes": 3316,
+      "sha256": "26aa57fc5fe3a852c7bcc76319f35d6757e1154305d17a2443fcbd9761a3a96f",
+      "git_blob": "5ccaa0d63841bd2713ae184e4b3b3838835a15e0"
+    }
+  ]
+}

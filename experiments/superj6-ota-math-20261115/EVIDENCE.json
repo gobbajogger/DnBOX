@@ -1,0 +1,46 @@
+{
+  "scope": "Qualified bounded finite-RNE source only; no fullsampler/original/target/device or nativepolicy admission",
+  "private_reviewed_source_manifest_sha256": "8c465b026f2212738026339c44f55a6a162d70a836728e28727f8fb47c322459",
+  "independent_review_sha256": "a12a007ca88f29fd4ca7f5d201a86baaeb37540740e4360b42b62c1a42b5361b",
+  "independent_seal_sha256": "bbe5415e456aee387cbe3c57bd41752005e8531181baca969924e818ca648a77",
+  "primary_repository": "ucb-bar/berkeley-softfloat-3",
+  "primary_commit": "07ebd29db0cfb55723a79fbbffe99103ef38e305",
+  "primary_tree": "b496c8187bd6e6111166ace40eb4323a0ed2573a",
+  "host": {
+    "variants": [
+      "O2",
+      "Os",
+      "nonrecoveringASanUBSanFloatcastLeaks0"
+    ],
+    "OTA_histories": 56,
+    "stereo_or_mono_frames": "458752 scalar OTA frames pervariant, not fullpreset audio",
+    "parameter_lifecycle_events": 27041,
+    "exact_output_state_checks": 17177618,
+    "host_cast_cases": 2000026,
+    "signed_subnormal_roundtrips": 16777214,
+    "integer_conversion_oracle_cases": 1145012,
+    "independent_extra_integer_cases": 60000,
+    "default_LSan": "FAIL underptrace; SAMEleaks0pass isnotleakproof"
+  },
+  "native": {
+    "authentic_pi32v2": true,
+    "variants": [
+      "Os",
+      "O2"
+    ],
+    "retained_real_APIs": 3,
+    "public_double_ABI_retained": true,
+    "df_helper_counts": [
+      4,
+      1,
+      0
+    ],
+    "integrated_undefined": 0,
+    "state_bytes": 144,
+    "align": 4,
+    "execution": false,
+    "policy_admission": false,
+    "fit_CPU_device": false
+  },
+  "public_packaging_review": "Separate exact manifest review required; mathematical source review does not itself approve this transport package"
+}

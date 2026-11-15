@@ -112,7 +112,9 @@ public:
     bool useJunoFilter=false; // Requested original componentID33.
     bool activeJunoFilter=false;
     bool useSyrupFilter=false,activeSyrupFilter=false,syrup24=false;
-    bool useOTAFilter=false,activeOTAFilter=false;float userCutoff=1000.f;
+    bool useOTAFilter=false,activeOTAFilter=false;
+    bool whiteNoise=false,vintageFilterADSR=false;
+    bool isOSC=false,oscSaw=false,oscTriangle=false,oscSine=false,oscPWM=false;float oscPWMWidth=.5f;float userCutoff=1000.f;
     float filterModeGain=1.f;
     
     // performance parameters

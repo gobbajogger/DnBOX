@@ -1,3 +1,4 @@
+#include <atomic>
 // Copyright AudioKit. All Rights Reserved.
 
 #include "CoreSampler.h"
@@ -73,6 +74,10 @@ CoreSampler::CoreSampler()
         pVoice->filterEnvelope.pParameters = &data->filterEnvelopeParameters;
         pVoice->pitchEnvelope.pParameters = &data->pitchEnvelopeParameters;
         pVoice->noteFrequency = 0.0f;
+        // Original global seed ticket pool; source atomic semantics retained.
+        static std::atomic<std::uint32_t> noiseTickets{0x6d2b79f5u};
+        const std::uint32_t ticket=noiseTickets.fetch_add(0x9e3779b9u,std::memory_order_acq_rel);
+        pVoice->whiteNoiseOsc.seed=DunneCore::OriginalWhiteNoise::fromCounter(ticket);
         pVoice->glideSecPerOctave = &glideRate;
     }
     
@@ -301,7 +306,7 @@ void CoreSampler::play(unsigned noteNumber, unsigned velocity, bool anotherKeyWa
             {
                 DunneCore::KeyMappedSampleBuffer *pBuf = lookupSample(noteNumber, velocity);
                 if (pBuf == 0) return;  // don't crash if someone forgets to build map
-                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf);
+                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf, whiteNoise);
             }
             lastPlayedNoteNumber = noteNumber;
             return;
@@ -313,9 +318,9 @@ void CoreSampler::play(unsigned noteNumber, unsigned velocity, bool anotherKeyWa
             DunneCore::KeyMappedSampleBuffer *pBuf = lookupSample(noteNumber, velocity);
             if (pBuf == 0) return;  // don't crash if someone forgets to build map
             if (pVoice->noteNumber >= 0)
-                pVoice->restartNewNote(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf);
+                pVoice->restartNewNote(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf, whiteNoise);
             else
-                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf);
+                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf, whiteNoise);
             lastPlayedNoteNumber = noteNumber;
             return;
         }
@@ -330,7 +335,7 @@ void CoreSampler::play(unsigned noteNumber, unsigned velocity, bool anotherKeyWa
             DunneCore::KeyMappedSampleBuffer *pBuf = lookupSample(noteNumber, velocity);
             if (pBuf == 0) return; // don't crash if someone forgets to build map
             // re-start the note
-            pVoice->restartSameNote(velocity / 127.0f, pBuf);
+            pVoice->restartSameNote(velocity / 127.0f, pBuf, whiteNoise);
             return;
         }
         
@@ -344,7 +349,7 @@ void CoreSampler::play(unsigned noteNumber, unsigned velocity, bool anotherKeyWa
                 // found a free voice: assign it to play this note
                 DunneCore::KeyMappedSampleBuffer *pBuf = lookupSample(noteNumber, velocity);
                 if (pBuf == 0) return;  // don't crash if someone forgets to build map
-                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf);
+                pVoice->start(noteNumber, currentSampleRate, noteFrequency, velocity / 127.0f, pBuf, whiteNoise);
                 lastPlayedNoteNumber = noteNumber;
                 return;
             }
@@ -372,9 +377,9 @@ void CoreSampler::stop(unsigned noteNumber, bool immediate)
             DunneCore::KeyMappedSampleBuffer *pBuf = lookupSample(key, velocity);
             if (pBuf == 0) return;  // don't crash if someone forgets to build map
             if (pVoice->noteNumber >= 0)
-                pVoice->restartNewNote(key, currentSampleRate, data->tuningTable[key], velocity / 127.0f, pBuf);
+                pVoice->restartNewNote(key, currentSampleRate, data->tuningTable[key], velocity / 127.0f, pBuf, whiteNoise);
             else
-                pVoice->start(key, currentSampleRate, data->tuningTable[key], velocity / 127.0f, pBuf);
+                pVoice->start(key, currentSampleRate, data->tuningTable[key], velocity / 127.0f, pBuf, whiteNoise);
         }
     }
     else
@@ -441,6 +446,8 @@ void CoreSampler::render(unsigned channelCount, unsigned sampleCount, float *out
     {
         pVoice->restartVoiceLFO = restartVoiceLFO;
         pVoice->useJunoFilter = activeJunoFilter;
+        pVoice->vintageFilterADSR=vintageFilterADSR;
+        pVoice->isOSC=isOSC;pVoice->oscSaw=oscSaw;pVoice->oscTriangle=oscTriangle;pVoice->oscSine=oscSine;pVoice->oscPWM=oscPWM;pVoice->oscPWMWidth=std::min(std::max(oscPWMWidth,.029999999329447746f),.5f);
         pVoice->useOTAFilter=activeOTAFilter;pVoice->useSyrupFilter = activeSyrupFilter;pVoice->userCutoff=userCutoff;pVoice->syrup24=syrup24;
         int nn = pVoice->noteNumber;
         if (nn >= 0)
