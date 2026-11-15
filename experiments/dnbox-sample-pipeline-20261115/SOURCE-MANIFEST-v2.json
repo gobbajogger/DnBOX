@@ -1,0 +1,74 @@
+{
+  "created_utc": "2026-11-15T09:16:14.934084+00:00",
+  "source_pin": "3c41ef4bedf9701f549ce2752b73306e2fab1eb8",
+  "files": [
+    {
+      "path": "selected_bank.py",
+      "bytes": 5357,
+      "sha256": "e4d0bdc296cbe678160d3ea5fd2f5804ce237b64694288fb4c817027121f08ed",
+      "git_blob": "fd763965812a907e1d4cf748c81b6da08565f18d"
+    },
+    {
+      "path": "test_selected_bank.py",
+      "bytes": 4669,
+      "sha256": "7fb09596798ad7a07cc2d3fa3a8ff39c9e47f7550efce97d1abb227aed570335",
+      "git_blob": "96273c262b791dde25a3b0ae5a6859490e140a97"
+    },
+    {
+      "path": "sample_asset_plan.py",
+      "bytes": 7723,
+      "sha256": "f8c7f3399abc1b69830627f636df2bba507b67b8f06ec8c49a226ba322f1e55e",
+      "git_blob": "fc13778b768f70a6e7d404c0e52757ea92ab0070"
+    },
+    {
+      "path": "test_sample_asset_plan.py",
+      "bytes": 4074,
+      "sha256": "feca81f8ea24a266a8f757effac9a2710638851f57ace7ef6207d8d51d687222",
+      "git_blob": "fb4fd1fe2d80e05d9f8ddfb336c2b8d674713a69"
+    },
+    {
+      "path": "native-slot-pipeline.c",
+      "bytes": 2104,
+      "sha256": "ea2472b67dfd068fb280e25f22d10c3d5119eacfade652dbd4b5e8bca0b6257b",
+      "git_blob": "445720667e63241c433aeed7e59bc0cadf41dc0e"
+    },
+    {
+      "path": "run_native_slot_pipeline.py",
+      "bytes": 4296,
+      "sha256": "614a72d0534c203d8558fd48d290544c7908d0d495b41cda1f777fc3f06760bf",
+      "git_blob": "98a67f22843251a15e10f2bde17f84edc1a2c22d"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5022,
+      "sha256": "7e2e9c4d4d2311916febe6d9432e55f35db8b1325a57b4545d06e588d82ea1ea",
+      "git_blob": "0b29f156804023dfbfacdd95aef7662615c4e34a"
+    }
+  ],
+  "public_source_only": [
+    "selected_bank.py",
+    "test_selected_bank.py",
+    "sample_asset_plan.py",
+    "test_sample_asset_plan.py",
+    "native-slot-pipeline.c",
+    "run_native_slot_pipeline.py",
+    "README.md"
+  ],
+  "private_excluded": [
+    "audio",
+    "bank/header assets",
+    "FSMP images",
+    "raw backup",
+    "native binaries",
+    "private proof traces"
+  ],
+  "parser_dependency_sha256": "869c66e44c769b8bee6d5f8d520cc3e0a0051652f41da6342685aed11748a534",
+  "actual_producer_evidence": {
+    "fresh_process32subsets80renders": "55357acc46fecdc74910f91dba40e19cbc0fb298cc4c70040a74f4ea8a40872c",
+    "silent_and_exactcapacity": "623810654a7a17477821a0461ab64ed61c6c0b35cd137b4859bde645e9f7954e"
+  },
+  "limits": [
+    "Not independently reaccepted until affected review",
+    "No device/browser/targetfit/installation qualification"
+  ]
+}
