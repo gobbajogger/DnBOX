@@ -1,0 +1,155 @@
+{
+  "schema": "dnbox-h6-public-scoped-review-summary/1",
+  "sourceFreezeSha256": "2158c18ddf65396b7330acce5e86571d4f566332a8047dcecdf2a7fb6afe38f6",
+  "independentReportSha256": "6c83701d70987688178555daa0a864da69b27a259f35cd6157d67015eb9420d4",
+  "independentReportEndUTC": "2026-11-15T17:47:23.683144+00:00",
+  "h6Source": {
+    "freeze": "2158c18ddf65396b7330acce5e86571d4f566332a8047dcecdf2a7fb6afe38f6",
+    "fileIdentitiesChecked": 25,
+    "finalAllExact": true,
+    "baseCount": 5445,
+    "candidateCount": 5446,
+    "changed": [
+      "firmware/src/app/ui.c"
+    ],
+    "added": [
+      "tests/host/h6_header_phase_test.c"
+    ],
+    "removed": []
+  },
+  "native": {
+    "elite": {
+      "binBytes": 544456,
+      "binSha256": "e5cea50d1238111f30d2b2c762a65cdadb82ed3a2123ed1382b6a949121f380e",
+      "elfSha256": "d49609e6cdafbe91956b4a5ccfc3e730ea9d4e9453a36f04bf4ea19021144b8c",
+      "flashFree": 8216,
+      "flashMarginAbove8192": 24,
+      "poolFree": 8332,
+      "ramFreeIncludingGaps": 284,
+      "sections": {
+        ".text": {
+          "address": "0x2000120",
+          "size": 540548
+        },
+        ".ram_text": {
+          "address": "0x1c00400",
+          "size": 2708
+        },
+        ".c1_text": {
+          "address": "0x1c00e94",
+          "size": 608
+        },
+        ".data": {
+          "address": "0x1c08000",
+          "size": 588
+        },
+        ".c1stack": {
+          "address": "0x1c74000",
+          "size": 4608
+        },
+        ".bss": {
+          "address": "0x1c08250",
+          "size": 97428
+        },
+        ".pool": {
+          "address": "0x1c20000",
+          "size": 335732
+        },
+        ".xpool": {
+          "address": "0x1c75200",
+          "size": 9216
+        },
+        ".noinit": {
+          "address": "0x1c7c000",
+          "size": 308
+        },
+        ".ble_ram": {
+          "address": "0x1c7c400",
+          "size": 3888
+        }
+      },
+      "removedNamedPriorSymbols": [],
+      "unchangedEXP_ADPCM_tanhBytes": true,
+      "softDouble": [],
+      "codeSizes": {
+        "cv_text_clip": 502,
+        "draw_header": 3126
+      }
+    },
+    "pro": {
+      "binBytes": 544444,
+      "binSha256": "0739a8ed71cf556b41e7c81471f8f7b47c0a356908d750b6156f8105a8af5423",
+      "elfSha256": "6ece90f6f89ce4faf4c6ff709f4da9f3f1e5388628bafb003fe4c1d425a53a8b",
+      "flashFree": 8228,
+      "flashMarginAbove8192": 36,
+      "poolFree": 8332,
+      "ramFreeIncludingGaps": 284,
+      "sections": {
+        ".text": {
+          "address": "0x2000120",
+          "size": 540536
+        },
+        ".ram_text": {
+          "address": "0x1c00400",
+          "size": 2708
+        },
+        ".c1_text": {
+          "address": "0x1c00e94",
+          "size": 608
+        },
+        ".data": {
+          "address": "0x1c08000",
+          "size": 588
+        },
+        ".c1stack": {
+          "address": "0x1c74000",
+          "size": 4608
+        },
+        ".bss": {
+          "address": "0x1c08250",
+          "size": 97428
+        },
+        ".pool": {
+          "address": "0x1c20000",
+          "size": 335732
+        },
+        ".xpool": {
+          "address": "0x1c75200",
+          "size": 9216
+        },
+        ".noinit": {
+          "address": "0x1c7c000",
+          "size": 308
+        },
+        ".ble_ram": {
+          "address": "0x1c7c400",
+          "size": 3884
+        }
+      },
+      "removedNamedPriorSymbols": [],
+      "unchangedEXP_ADPCM_tanhBytes": true,
+      "softDouble": [],
+      "codeSizes": {
+        "cv_text_clip": 502,
+        "draw_header": 3126
+      }
+    }
+  },
+  "normalChecks": 642,
+  "nonrecoveringSanitizerChecks": 642,
+  "leakDetectionDisabled": true,
+  "uint8TruthPairs": 65536,
+  "authenticBaselineRedReproduced": true,
+  "verdict": "bounded semantic/source/native PASS; not integrated/product-qualified",
+  "combinedImageBuilt": false,
+  "notIncluded": [
+    "V5 font successor",
+    "latest USB/BLE transport",
+    "full revised UI",
+    "complete new engine ports",
+    "full host suite",
+    "target no-slower/cycles/audio/frame/stack highwater",
+    "browser/emulator/device qualification",
+    "shared integration adoption or release"
+  ]
+}

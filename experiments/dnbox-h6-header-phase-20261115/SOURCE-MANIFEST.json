@@ -1,0 +1,39 @@
+{
+  "schema": "dnbox-h6-source-preservation/1",
+  "scope": "reviewed exact patch, actual-C test, derived evidence and documentation; no runtime wiring",
+  "baseRepository": "gobbajogger/X0X37-for-Loopy-Pro",
+  "sourceFreezeSha256": "2158c18ddf65396b7330acce5e86571d4f566332a8047dcecdf2a7fb6afe38f6",
+  "files": [
+    {
+      "path": "H6-header-phase.patch",
+      "bytes": 683,
+      "sha256": "6d2417e16263999629a49406ebfa57c0a72feae142f90c46af8a2dfd5dac1a67",
+      "gitBlob": "185c080bf8186a0019161fa0614bec5d11330f3c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3375,
+      "sha256": "c41677f7c1a82b7ac8af1cea29a2a2f0cacd9bd3f2a2bcda436979f3296f975b",
+      "gitBlob": "151ca7255c9530523ea52dc246d7e3e84a790ffd"
+    },
+    {
+      "path": "REVIEW-SUMMARY.json",
+      "bytes": 4163,
+      "sha256": "e1851880ee13f0448cd263a16f3f78984f92c7ff43aaebcaa75bf41806a09d31",
+      "gitBlob": "2b8054126b3792bddc08e5ca0bf710539181ae94"
+    },
+    {
+      "path": "h6_header_phase_test.c",
+      "bytes": 1891,
+      "sha256": "92ee3131e29eb6456d3c367188c68fa8201bef877dbd98ca4e0cf96274ab7dfb",
+      "gitBlob": "f94d66c834e55e72173a292b938f658d978a99b7"
+    }
+  ],
+  "exclusions": [
+    "native binaries and packages",
+    "SDK/toolchain/fonts/audio",
+    "private full source/recovery artifacts",
+    "unreviewed diagnostics",
+    "shipping source edits"
+  ]
+}
