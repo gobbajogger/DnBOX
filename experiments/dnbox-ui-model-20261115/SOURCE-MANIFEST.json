@@ -1,0 +1,66 @@
+{
+  "classification": "Source-only overlay; no embedded fonts, captures, runtime, firmware binary, raw review or execution metadata",
+  "candidateSHA256": "05cf1e7ce46a2efa630955375192b71215bc8741baa808bbd17f0c1619661d6b",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2521,
+      "sha256": "7059f4068f02eca75c33c403818d60e37b3e082e9703c2a4f3826122b889b31e",
+      "gitBlob": "9cacc4e3ca3953bb567489b517b732cf5db29ee2"
+    },
+    {
+      "path": "modules/frame-client-lifecycle.js",
+      "bytes": 2320,
+      "sha256": "cbfdb99fa78c4e1f0ad2bfd49e71ea1bde580722640392d5232011174b2c203d",
+      "gitBlob": "1eb73180296ff125043721b367abce352d3c84f0"
+    },
+    {
+      "path": "modules/frame-transport-lifecycle.js",
+      "bytes": 4574,
+      "sha256": "80cda727d039d33de4a37754f12c99bac5829120ebf517cd997af301bfd29b8a",
+      "gitBlob": "3f1abe8d395c22c8250ca59f81b4d8c1a1ea0099"
+    },
+    {
+      "path": "modules/settings-host.js",
+      "bytes": 6330,
+      "sha256": "8d40356bc6d422184ce6a6961664091606274c8473ccc2facefd69ad371a76b2",
+      "gitBlob": "29b246247922c06cd56d450e4dea0e4976dd2c46"
+    },
+    {
+      "path": "modules/settings-native-skin.js",
+      "bytes": 5514,
+      "sha256": "096af87c2f8a400283c9a7e5d2167c9b51464b52bd2a0fb053d66b45e223d6fb",
+      "gitBlob": "f85b668ef284b70e7df8e468a0ec3419e9a52ac0"
+    },
+    {
+      "path": "modules/settings-ui.js",
+      "bytes": 5026,
+      "sha256": "344c3fe8ed313a8f9dc38167d727068b3ebc766b383752b6f81de25ab03ddd7e",
+      "gitBlob": "754cd00220ecfeb9c14fa44e83625df94c3320f7"
+    },
+    {
+      "path": "modules/source-wave.js",
+      "bytes": 1168,
+      "sha256": "ad547e8074d98c7067ec13eb530ec8a3823721c8019823035e8dd8bc94311c3f",
+      "gitBlob": "86b32b228d6b0b0cca1da5abc45c49804c41c5ad"
+    },
+    {
+      "path": "tests/README.md",
+      "bytes": 698,
+      "sha256": "4365abbcd17e7206d8e3f33fd03edf31db62d263d9b051607ce00e3f9c05e002",
+      "gitBlob": "97ad083f71019619ede45c4329f823c139d95c63"
+    },
+    {
+      "path": "tests/loader.cjs",
+      "bytes": 6041,
+      "sha256": "6f5f8aa09e570c027970ee17938125cacdb75e6ed832c48b6e1b05837712442a",
+      "gitBlob": "4e2e3371c2da2451dd510e349b4836cbcb34f424"
+    },
+    {
+      "path": "tests/ordering-checks.cjs",
+      "bytes": 5569,
+      "sha256": "f825d9d98f6d601177b0d72eb5cd9a5bb6df2f9510ce9316e7e1d08def412699",
+      "gitBlob": "9d64a8bccc00482aecf6e2234f75351cad8b250e"
+    }
+  ]
+}
