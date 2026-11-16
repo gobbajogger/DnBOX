@@ -247,8 +247,7 @@ void engine_bass_tune(int steps);      /* global Tune, signed steps (0 = concert
 void engine_volume(int32_t *out_lr, uint32_t n);   /* ISR, after engine_render (and the USB tap) */
 void engine_apply_sound(const sound_t *s);                  /* queue every value (load, init) */
 void engine_sound_defaults(sound_t *s);                     /* each engine's power-on values */
-void engine_sound_centre_drum_pans(sound_t *s);
-void engine_sound_clamp_pans(sound_t *s);                  /* every pan into L50 .. R50 (load) */             /* every drum voice's PAN (its last pot) to centre */
+void engine_sound_centre_drum_pans(sound_t *s);             /* every drum voice's PAN (its last pot) to centre */
 void engine_drum(int kit, int voice, float vel);            /* play now (keys) */
 void engine_bass_on(int part, int note, int accent, int slide);
 void engine_bass_on_velocity(int part, int note, int accent, int slide, int velocity);

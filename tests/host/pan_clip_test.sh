@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# The pan clip at 50: every entry point, the law, knob travel, load and readout/marker.
+# Pan display L50..C..R50 over raw 0..127: no clamp, display-step edits, byte-identical legacy load, readout/marker.
 set -eu
 cd "$(dirname "$0")/../.."
 export SMC_UI_TEST_FILE=tests/host/pan_clip_test.c

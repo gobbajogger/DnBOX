@@ -266,7 +266,6 @@ static int load_sound(sound_t *dst)
     if ((uint32_t)n != sizeof *dst + 4u || get32(io_buf) != PROJ_FORMAT) return -9;
     __builtin_memcpy(dst, io_buf + 4u, sizeof *dst);
     if (engine_bass_sound_validate(dst)) return -9;
-    engine_sound_clamp_pans(dst);                 /* legacy pans past the clip load as L50 / R50 */
     stored_known[OBJ_SOUND] = 1;
     stored_hash[OBJ_SOUND] = hash_of(io_buf, (uint32_t)n);
     return 0;

@@ -840,8 +840,6 @@ static uint8_t smc_scaled(pref_t r)
     if (!d || !d->max || r.kind == R_ACT || r.kind == R_HDR || r.kind == R_NONE)
         return 0;
     v = pref_get(r);
-    if (is_pan(r))
-        return (uint8_t)x0x_pan_to_travel(v);         /* the full knob travel is L50 .. R50 */
     return (uint8_t)((v * 127 + d->max / 2) / d->max);
 }
 
@@ -1612,7 +1610,7 @@ static void smc_fader(int n, uint8_t v)
             goto show;
         smc.picked |= bit;
     } else crossed = 0;                /* acquisition must publish even an equal saved value */
-    nv = is_pan(r) ? x0x_pan_from_travel(v) : (v * d->max + 63) / 127;   /* pan: no dead travel past the clip */
+    nv = (v * d->max + 63) / 127;
     if (crossed || nv != pref_get(r)) {
         pref_set(r, nv);
         if (r.kind == R_ENG)

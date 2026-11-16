@@ -832,22 +832,6 @@ X0X_COLD void engine_sound_centre_drum_pans(sound_t *s)
         }
 }
 
-/* the pan clip (x0x_pan_clamp) on a sound as loaded: a legacy pan past L50 / R50 becomes the clip;
- * the file format and every other pot are untouched */
-X0X_COLD void engine_sound_clamp_pans(sound_t *s)
-{
-    int t, v;
-    for (v = 0; v < NPARTS; v++)
-        s->v[T_MIX][v][MX_PAN] = (uint8_t)x0x_pan_clamp(s->v[T_MIX][v][MX_PAN]);
-    for (t = T_909; t <= T_808; t++)
-        for (v = 0; v < NDRUM && v < NVOICES_MAX; v++) {
-            int i = engine_nparams(t, v) - 1;           /* PAN is every voice's last pot */
-            const x0x_param_t *p = engine_param(t, v, i);
-            if (p && p->max == 127 && p->name[0] == 'P' && p->name[1] == 'a' && p->name[2] == 'n' && !p->name[3])
-                s->v[t][v][i] = (uint8_t)x0x_pan_clamp(s->v[t][v][i]);
-        }
-}
-
 X0X_COLD void engine_apply_sound(const sound_t *s)
 {
     int t, v, i;

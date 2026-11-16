@@ -9,37 +9,37 @@
 #pragma once
 #include <stdint.h>
 
-/* X0X's pan: a balance law, pot 14..114 (clamped, below), 64 = centre. Centre is 1 on both sides exactly (a centred
+/* X0X's pan: a balance law, pot 0..127, 64 = centre. Centre is 1 on both sides exactly (a centred
  * mix is the mono one, bit for bit); toward a side the other fades along a quarter cosine and the
  * near side stays at 1. cosine: a 5-term even polynomial, |error| < 2e-4 over the quarter turn.
  * Bodies live in x0x_param.c so 808 / 909 / engine share one copy (was static inline per TU). */
 void x0x_pan_gains(int pot, float *l, float *r);
 
-/* Pan clips at 50 either side (L50 .. C .. R50). Storage keeps the pot format (raw 0..127, 64 =
- * centre, so files stay compatible); every entry point clamps through x0x_pan_clamp to 14..114.
- * A legacy value past the clip plays, reads and marks exactly as the clip (L50 / R50). */
-enum { X0X_PAN_C = 64, X0X_PAN_SPAN = 50, X0X_PAN_MIN = X0X_PAN_C - X0X_PAN_SPAN, X0X_PAN_MAX = X0X_PAN_C + X0X_PAN_SPAN };
-static inline int x0x_pan_clamp(int pot)
+/* Pan DISPLAY: L50 .. C .. R50 over the unchanged full range. Storage, the law above, MIDI / Remote CC,
+ * presets and loads stay raw 0..127 (64 = centre), never clamped: hard left (0) and right (127) stay.
+ *   x0x_pan_disp(raw) = clamp(round_half_away((raw - 64) * 50 / 63), -50, +50)   raw 0 and 1 both read L50
+ *   x0x_pan_raw(d)    = 64 + round_half_away(d * 63 / 50), d = -50 -> 0, d = +50 -> 127 (both ends reachable)
+ * x0x_pan_disp(x0x_pan_raw(d)) == d for every d; an edit moves in display steps (one detent = one step).
+ * Readouts print the display value; markers sit at x0x_pan_pos, from the same value. */
+static inline int x0x_div_half_away(int n, int d)                  /* n / d rounded half away from 0, d > 0 */
 {
-    return pot < X0X_PAN_MIN ? X0X_PAN_MIN : pot > X0X_PAN_MAX ? X0X_PAN_MAX : pot;
+    return n >= 0 ? (2 * n + d) / (2 * d) : -((2 * -n + d) / (2 * d));
 }
-/* an absolute control's full travel (0..127, e.g. a fader or SMC knob) onto L50 .. R50, no dead
- * travel: 0 -> 14, 64 -> 64, 127 -> 114 */
-static inline int x0x_pan_from_travel(int t)
+static inline int x0x_pan_disp(int raw)
 {
-    t = t < 0 ? 0 : t > 127 ? 127 : t;
-    return t <= 64 ? X0X_PAN_MIN + (t * X0X_PAN_SPAN + 32) / 64 : X0X_PAN_C + ((t - 64) * X0X_PAN_SPAN + 31) / 63;
+    int d = x0x_div_half_away((raw - 64) * 50, 63);
+    return d < -50 ? -50 : d > 50 ? 50 : d;
 }
-/* the inverse, for pickup against the stored value: 14 -> 0, 64 -> 64, 114 -> 127 */
-static inline int x0x_pan_to_travel(int pot)
+static inline int x0x_pan_raw(int d)
 {
-    pot = x0x_pan_clamp(pot);
-    return pot <= X0X_PAN_C ? ((pot - X0X_PAN_MIN) * 64 + 25) / X0X_PAN_SPAN : 64 + ((pot - X0X_PAN_C) * 63 + 25) / X0X_PAN_SPAN;
+    if (d <= -50)
+        return 0;
+    if (d >= 50)
+        return 127;
+    return 64 + x0x_div_half_away(d * 63, 50);
 }
-/* a marker's offset along a w-pixel rail: L50 at 0, C at w / 2, R50 at w (readout and marker share it) */
-static inline int x0x_pan_pos(int pot, int w) { return (x0x_pan_clamp(pot) - X0X_PAN_MIN) * w / (2 * X0X_PAN_SPAN); }
-/* the signed amount a readout prints: -50 .. 0 .. +50 (L50 .. C .. R50) */
-static inline int x0x_pan_amount(int pot) { return x0x_pan_clamp(pot) - X0X_PAN_C; }
+/* a marker's offset along a w-pixel rail: L50 at 0, C at w / 2, R50 at w */
+static inline int x0x_pan_pos(int raw, int w) { return (x0x_pan_disp(raw) + 50) * w / 100; }
 
 /* a pan gain gliding toward its target over a block of n samples (one pole, ~10 ms): returns the
  * per-sample step for a linear ramp from *cur, and moves *cur to where the block ends. Settled, the

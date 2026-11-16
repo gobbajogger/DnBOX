@@ -468,7 +468,7 @@ run ble-link-epoch-reset sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmwar
 run ble-disconnect-status sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src/ble -o $OUT/ble_disconnect_status_test tests/host/ble_disconnect_status_test.c firmware/src/ble/ble_midi_host.c && $OUT/ble_disconnect_status_test"
 if [ "$PIL_SKIP" = 1 ]; then not_run smc-reachability Pillow; else run smc-reachability sh tests/host/smc_reachability_test.sh; fi
 run smc-pickup-acceptance sh tests/host/smc_pickup_acceptance_test.sh
-run pan-clip sh tests/host/pan_clip_test.sh          # pan clips at L50 / R50 at every entry point (setter, law, knobs, load, readout, markers)
+run pan-clip sh tests/host/pan_clip_test.sh          # pan reads L50..C..R50 over unclamped raw 0..127 (display steps, hard L/R, legacy load byte-identical)
 run smc-lock sh tests/host/smc_lock_test.sh
 run smc-lock-beat sh tests/host/smc_lock_beat_test.sh
 run smc-multi-peer sh tests/host/smc_multi_peer_test.sh

@@ -5,13 +5,12 @@
 
 void x0x_pan_gains(int pot, float *l, float *r)
 {
-    float q;
-    float x, c;
-    pot = x0x_pan_clamp(pot);                     /* the clip: past L50 / R50 plays as L50 / R50 */
-    q = (float)(pot - 64) / 64.0f;                /* symmetric: L50 and R50 mirror exactly */
+    float q = pot >= 64 ? (float)(pot - 64) / 63.0f : (float)(pot - 64) / 64.0f, x, c;
     x = q * 1.5707963f;
     x *= x;
     c = 1.0f + x * (-0.5f + x * (0.041666667f + x * (-0.0013888889f + x * 0.0000248016f)));
+    if (pot <= 0 || pot >= 127)
+        c = 0.0f;                                 /* hard over: nothing on the far side, exactly */
     *l = q > 0.0f ? c : 1.0f;
     *r = q < 0.0f ? c : 1.0f;
 }
