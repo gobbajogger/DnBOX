@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:55 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 05:06 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -115,3 +115,5 @@ Complete694 callback characterization at521963 finished on two hosts: each520,50
 Optional resource diagnostic implemented only in host bench: per-thread faults/switches/CPU-time and CPU IDs bracket the unchanged timed region, never exclude a miss and remain NOT_QUALIFIED. Twelve focused tests PASS. Eight-program instrumented25 wall/23 CPU misses,0nonfinite;0misses had recorded page faults,8 had switches. Default-mode control7/7 misses remains red. All8 diagnostic FNV digests agree with prior tracer-bound outputs, not full oracle proof. No runtime changed. Next inspect a block-scoped static-sequence validation reuse with fallback if a sequence control ever becomes smoothed, retaining dynamic checks and exact original behavior.
 
 Static sequence admission candidate: real instrumentation red129 calls/128frames -> normal1; synthetic future-smoothed sequence map red1/expected129 -> fallback129. Full public/boundary and dynamic per-sample checks retained, no owner fields/arithmetic changes. Original38-suite354,907,688 checks/114,196frames/120,289 snapshots PASS0fail/heap; frontend and12-scene576k exact replay unchanged audio4b32746b…. Native31units+layout compile7972/4, unlinked executable+132B, other sections unchanged. Native final raw scope string miscount preserved with explicit31+1 correction. Full694 frozen source/common-FX replay running; independent review and all timing/app/native gates remain open. See docs/sound/v2-sequence-static.
+
+Frozen6a7 full factory replay completed:694 programs/66,624,000 frames/0 different words/0 nonfinite. All1,388 actual PCM lengths/SHA256 match prior frozen manifest68c7f2d1, preserving tested output beyond shared-new-wrapper comparison. Independent normal static admission/source review PASS; hardened synthetic future-map fallback129 validations PASS producer replay. Evidence under docs/sound/v2-sequence-static; common-FX/source-only limits remain, S1/S2 not complete. Candidate8-program callback pilot now measures separately; no operation-count-to-timing inference. All denied LFS/Swift/trace actions remain stopped; outputs preserved.
