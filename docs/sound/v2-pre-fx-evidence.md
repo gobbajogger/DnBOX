@@ -34,3 +34,16 @@ application rendering, device xruns, target binary reproducibility, or Elite/Pro
 all-engine fit. S1/S2/S6 remain FAIL, and Local gate has not run. The retained
 commands and source hash list are trusted build inputs, not a sandbox for arbitrary
 third-party commands. No raw audio or toolchain binaries are included in Git.
+
+## Exact input and invocation records
+
+SHA-256 checksums (local trusted retained closure; no raw assets published):
+
+- `source-build/CLOSURE-SHA256.json`: `bb32c1e7d5518586ba33dfb68ef700c5db3fded87183e2298504e90597ab7125`
+- `source-build/COMPILED-SOURCES.json`: `f955cb8ab9f57e404ae8fba3a1668c5d1bc25a2d58ce227515cda41e06fb109d`
+- `source-build/commands.json`: `2e272154660d48449e278c3205fff0d78200b23a7c2649685bc08c57f3f937c5`
+- `fresh-output/commands.json`: `75f73576f15e6352ee39c97af7fcb0a76ccf63a73a24a6cb6be4fb5bd2e043bd`
+- `source-build/public-morphs.f32`: `0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5`
+- `source-build/compact.bin`: `a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5`
+
+Independent test-and-merge review at e3e156c1323840d9db516e5aad6940b2cff71cb5: source-path binding and harness guards inspected; all three regressions independently rerun PASS. Bounded component-integrity approval only, not rule 9 Local approval.

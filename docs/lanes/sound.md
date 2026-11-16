@@ -17,7 +17,7 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 | S3 | FAIL | Existing 64-control schema/model component checks do not prove full routed engine |
 | S4 | FAIL | Original 14/56 comparison input available; complete intended-engine A/B pending |
 | S5 | FAIL | Complete 640/12-bank mapping not verified |
-| S6 | FAIL | Prior baseline native links are not combined all-engine fit; exact stock-memory proof pending |
+| S6 | FAIL | Native pi32v2 pre-FX owner10532 bytes measured; historical baseline margin172 is340 below rule minimum; no combined fit. See sound-memory.md |
 | S7 | FAIL | Consolidated still contains Drone; coordinated removal required |
 
 ## Now / next
@@ -31,6 +31,8 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 - Local baseline Git history has absent older objects: exact HEAD tree is available and exported; remote connector is authoritative for ancestry and writes.
 
 - Evidence defect fixed: old adapter runner hashed source but reused old dependency objects. Regression reproduced this; new runner recompiles every object and rejects link inputs without a compile command. Independent review caught unbound compile paths and missing harness detection; both regressions now pass with full 89-file closure verification and exactly one adapter substitution. Source build still requires a trusted separately pinned closure.
+
+- Native ABI probe: pinned compiler rejects C++17; C++14 plus matching toolchain includes compiles type probe. Actual10532-byte pre-FX owner excludes FX and is not a link result. Integ notified of baseline margin shortfall.
 
 ## Top risks
 1. Original DSP graph and complete factory bank differ from the component adapter evidence.
