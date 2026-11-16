@@ -51,3 +51,6 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Expanded production pads/settings cases across all22drum voices, emitted parameter pages,16pads, BREAK parameter pages and closed/list/help contexts. Before:2160 toggle failures. After:7096 assertions PASS.
 - Held-step-release regression PASS144 (both kits/voices and all four banks); existing HOME/GLOBE clear/copy regression PASS. Full host suite and all F5 playback/LED combinations remain pending; no fullF5 acceptance claimed.
 - Exact logs:docs/evidence/fwui/parameter-pads/. No device operation occurred.
+
+## Remote formatter handoff
+- Exported exact current Chicago/Miami pref_value_of readouts at every descriptor raw value, pinned to production b6be480c and source-file SHA256. Per-engine JSON under700KB at docs/evidence/fwui/formatter/. Capture describes boot factory preset state only, explicitly NOT_ADMITTED as runtime qualification. SuperJ6/SynthOne generic-percent fallback is not exported.
