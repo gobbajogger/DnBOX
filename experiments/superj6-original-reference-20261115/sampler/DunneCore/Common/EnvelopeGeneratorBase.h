@@ -1,8 +1,10 @@
 // Copyright AudioKit. All Rights Reserved.
 
 #pragma once
+#include <cstdint>
 #include <vector>
 #include <cmath>
+#include "f64_bits.hpp"
 
 namespace DunneCore
 {
@@ -19,36 +21,37 @@ namespace DunneCore
     class ExponentialSegmentGenerator
     {
     public:
-        void reset(float initialValue, float targetValue, float tco, int segmentLengthSamples);
+        void reset(std::uint64_t initialValue, std::uint64_t targetValue, std::uint64_t tco, int segmentLengthSamples);
 
         inline float getValue()
         {
-            return float(isHorizontal ? target : output);
+            return original_conductor_v1::f64_to_f32(isHorizontal ? target : output);
         }
 
         inline bool getSample(float& out)
         {
             if (isHorizontal)
             {
-                out = float(target);
+                out = original_conductor_v1::f64_to_f32(target);
                 if (segLength < 0) return false;        // non-timed "sustain"segment
                 else return (++tcount >= segLength);    // timed "hold" segment
             }
             else
             {
                 if (isLinear)
-                    output += coefficient;
+                    output = original_conductor_v1::f64_add(output, coefficient);
                 else
-                    output = std::fma(coefficient, output, offset);
-                bool overshoot = isRising ? (output >= target) : (output <= target);
+                    output = original_conductor_v1::f64_fma(coefficient, output, offset);
+                bool overshoot = isRising ? original_conductor_v1::f64_ge(output, target) : original_conductor_v1::f64_le(output, target);
                 if (overshoot) output = target;
-                out = float(output);
+                out = original_conductor_v1::f64_to_f32(output);
                 return overshoot;
             }
         }
 
     protected:
-        float output, target, offset, coefficient;
+        // Binary64 bits. The recurrence matches the original double envelope.
+        std::uint64_t output, target, offset, coefficient;
         bool isRising;
         bool isHorizontal;
         int tcount, segLength;
@@ -60,9 +63,9 @@ namespace DunneCore
     public:
         struct SegmentDescriptor
         {
-            float initialValue;
-            float finalValue;
-            float tco;
+            std::uint64_t initialValue;
+            std::uint64_t finalValue;
+            std::uint64_t tco;
             int lengthSamples;
         };
         typedef std::vector<SegmentDescriptor> Descriptor;
@@ -95,7 +98,7 @@ namespace DunneCore
         int curSegIndex;
 
         void setupCurSeg();
-        void setupCurSeg(float initValue);
+        void setupCurSeg(std::uint64_t initValue);
         bool skipEmptySegments();
     };
 

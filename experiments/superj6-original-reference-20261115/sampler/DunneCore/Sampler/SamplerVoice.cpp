@@ -34,9 +34,9 @@ namespace DunneCore
     {
         synthOsc.reset();whiteNoise=pendingWhiteNoise=noise;whiteNoiseOsc.reset();
         sampleBuffer = buffer;
-        oscillator.indexPoint = buffer->startPoint;
-        oscillator.increment = (buffer->sampleRate / sampleRate) * (frequency / buffer->noteFrequency);
-        oscillator.multiplier = 1.0f;
+        oscillator.setIndex(buffer->startPoint);
+        oscillator.setIncrement((buffer->sampleRate / sampleRate) * (frequency / buffer->noteFrequency));
+        oscillator.multiplierBits = 0x3ff0000000000000ULL;
         oscillator.isLooping = buffer->isLooping;
         
         noteVolume = volume;
@@ -82,7 +82,7 @@ namespace DunneCore
         leftSyrupFilter.updateSampleRate(float(samplingRate));rightSyrupFilter.updateSampleRate(float(samplingRate));
         leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
-        oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
+        oscillator.setIncrement((sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency));
         glideSemitones = 0.0f;
         if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0f && noteFrequency != frequency)
         {
@@ -116,7 +116,7 @@ namespace DunneCore
         leftSyrupFilter.updateSampleRate(float(samplingRate));rightSyrupFilter.updateSampleRate(float(samplingRate));
         leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
-        oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
+        oscillator.setIncrement((sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency));
         float previousGlideSemitones = glideSemitones;
         glideSemitones = 0.0f;
         if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0f)
@@ -177,8 +177,8 @@ namespace DunneCore
                 tempGain = masterVolume * noteVolume;
                 volumeRamper.reinit(ampEnvelope.getSample(), sampleCount);
                 sampleBuffer = newSampleBuffer;whiteNoise=pendingWhiteNoise;whiteNoiseOsc.reset();synthOsc.restart();
-                oscillator.increment = (sampleBuffer->sampleRate / samplingRate) * (noteFrequency / sampleBuffer->noteFrequency);
-                oscillator.indexPoint = sampleBuffer->startPoint;
+                oscillator.setIncrement((sampleBuffer->sampleRate / samplingRate) * (noteFrequency / sampleBuffer->noteFrequency));
+                oscillator.setIndex(sampleBuffer->startPoint);
                 oscillator.isLooping = sampleBuffer->isLooping;
             }
         }

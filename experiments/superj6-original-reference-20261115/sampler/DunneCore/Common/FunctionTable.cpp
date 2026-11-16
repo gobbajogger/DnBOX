@@ -54,8 +54,12 @@ namespace DunneCore
         if (waveTable.empty()) init();
 
         auto nTableSize = waveTable.size();
-        for (int i=0; i < nTableSize; i++)
-            waveTable[i] = amplitude * std::sin(float(i)/nTableSize * 2.0f * 3.1415927410125732f);
+        for (int i=0; i < nTableSize; i++) {
+            const std::uint64_t turns = original_conductor_v1::f64_mul(
+                original_conductor_v1::f64_mul(original_conductor_v1::f64_div(original_conductor_v1::f64_from_i64(i), original_conductor_v1::f64_from_i64(std::int64_t(nTableSize))), 0x4000000000000000ULL),
+                0x400921fb54442d18ULL);
+            waveTable[i] = original_conductor_v1::f64_to_f32(original_conductor_v1::f64_mul(original_conductor_v1::f64_from_f32(amplitude), original_conductor_v1::f64_sin(turns)));
+        }
     }
 
     // A variation of sinusoid() which adds a tiny bit of 2nd harmonic, producing a tone closer to
@@ -66,10 +70,13 @@ namespace DunneCore
         if (waveTable.empty()) init();
 
         auto nTableSize = waveTable.size();
-        for (int i = 0; i < nTableSize; i++)
-            waveTable[i] = (float)(amplitude *
-                (std::sin(float(i) / nTableSize * 2.0f * 3.1415927410125732f) + 0.015f * std::sin(float(i) / nTableSize * 4.0f * 3.1415927410125732f))
-                );
+        for (int i = 0; i < nTableSize; i++) {
+            const std::uint64_t base = original_conductor_v1::f64_div(original_conductor_v1::f64_from_i64(i), original_conductor_v1::f64_from_i64(std::int64_t(nTableSize)));
+            const std::uint64_t fundamental = original_conductor_v1::f64_sin(original_conductor_v1::f64_mul(original_conductor_v1::f64_mul(base, 0x4000000000000000ULL), 0x400921fb54442d18ULL));
+            const std::uint64_t second = original_conductor_v1::f64_sin(original_conductor_v1::f64_mul(original_conductor_v1::f64_mul(base, 0x4010000000000000ULL), 0x400921fb54442d18ULL));
+            const std::uint64_t shaped = original_conductor_v1::f64_add(fundamental, original_conductor_v1::f64_mul(original_conductor_v1::f64_from_f32(0.015f), second));
+            waveTable[i] = original_conductor_v1::f64_to_f32(original_conductor_v1::f64_mul(original_conductor_v1::f64_from_f32(amplitude), shaped));
+        }
     }
 
     void FunctionTable::square(float amplitude, float dutyCycle)
@@ -139,7 +146,7 @@ namespace DunneCore
         waveTable.init(tableLength);
         sampleRateHz = sampleRate;
         phase = 0.0f;
-        phaseDelta = (float)(frequency / sampleRate);
+        phaseDelta = original_conductor_v1::f64_to_f32(original_conductor_v1::f64_div(original_conductor_v1::f64_from_f32(frequency), original_conductor_v1::f64_from_f32(sampleRate)));
     }
     
     void FunctionTableOscillator::deinit()
@@ -149,7 +156,7 @@ namespace DunneCore
     
     void FunctionTableOscillator::setFrequency(float frequency)
     {
-        phaseDelta = (float)(frequency / sampleRateHz);
+        phaseDelta = original_conductor_v1::f64_to_f32(original_conductor_v1::f64_div(original_conductor_v1::f64_from_f32(frequency), original_conductor_v1::f64_from_f32(sampleRateHz)));
     }
 
     // Initialize WaveShaper's lookup table to an identity

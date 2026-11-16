@@ -1,6 +1,7 @@
 // Isolated original-Saga behavioral port. Own source; see README.md.
 // Static-derived provenance and unqualified integration boundaries are documented.
 #pragma once
+#include "f64_bits.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -26,12 +27,22 @@ inline std::optional<float> rate_knob(float k) {
  if(!duration(stored))return {};
  return stored;
 }
-inline std::optional<float> snap(float beat,float d,float offset) {
- if(!std::isfinite(beat)||!std::isfinite(d)||!std::isfinite(offset)||d<=0.f)return {};
- const float q=(beat-offset)/d-1e-9f;
- const float value=offset+d*std::ceil(q);
- if(!std::isfinite(q)||!std::isfinite(value))return {};
+// Beat positions are IEEE binary64 bit patterns. The 1e-9 grid bias is applied
+// with integer arithmetic so offsets such as 6e-10 match the binary64 snap.
+inline std::optional<std::uint64_t> snap_f64(std::uint64_t beat,std::uint64_t d,std::uint64_t offset) {
+ using namespace original_conductor_v1;
+ constexpr std::uint64_t kEps=0x3e112e0be826d695ULL;
+ if(!f64_finite(beat)||!f64_finite(d)||!f64_finite(offset)||!f64_gt(d,0))return {};
+ const std::uint64_t q=f64_sub(f64_div(f64_sub(beat,offset),d),kEps);
+ const std::uint64_t value=f64_add(offset,f64_mul(d,f64_ceil(q)));
+ if(!f64_finite(q)||!f64_finite(value))return {};
  return value;
+}
+inline std::optional<float> snap(float beat,float d,float offset) {
+ using namespace original_conductor_v1;
+ auto exact=snap_f64(f64_from_f32(beat),f64_from_f32(d),f64_from_f32(offset));
+ if(!exact)return {};
+ return f64_to_f32(*exact);
 }
 struct Pool { Status status{Status::ok};std::vector<int> notes; };
 inline Pool arp_pool(const std::vector<std::uint8_t>& held,float octave,float interval,float raw) {

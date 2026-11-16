@@ -31,7 +31,7 @@ int main(){
   else{const float span=22050.f-base;expected=base+span*((.3f*vel)*e);if(hz>130.80999755859375f){float ratio=hz/130.80999755859375f;float power=std::max(1.f/(12.f-std::log2(ratio)),.0416666679084301f);expected+=(((std::pow(ratio,power)-1.f)*key)*span)/3.3299999237060547f;}expected=std::max(12.f,std::min(expected,22050.f));}
   CK(!v.prepToGetSamples(16,1,0,bypass?-1.f:3.f,key,.3f,.4f,.7f,0,0,5));
   CK(v.isFilterEnabled==!bypass);
-  CK((syrup?v.leftSyrupFilter.lastCutoff:v.leftSmoothFilter.cutoff)==expected);
+  CK(syrup?v.leftSyrupFilter.lastCutoff==expected:original_conductor_v1::f64_to_f32(v.leftSmoothFilter.cutoff)==expected);
   auto seed=v.whiteNoiseOsc.seed;v.stop();CK(!v.whiteNoise&&!v.pendingWhiteNoise&&v.whiteNoiseOsc.seed!=seed);CK(v.synthOsc.phase==0&&v.synthOsc.increment==0);for(float h:v.synthOsc.down)CK(h==0);
  }
  std::printf("PASS %u source-derived checks: controls/noise/lifecycle/vintage law; not original execution or active-vintage PCM proof\n",checks);

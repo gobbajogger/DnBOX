@@ -18,7 +18,8 @@ int main(){
  else v.restartNewNoteLegato(60,96000,261.6255653005986f);
  auto retained=[](const OriginalSmoothPassFilter&a,const OriginalSmoothPassFilter&b){return a.x1==b.x1&&a.x2==b.x2&&a.y1==b.y1&&a.y2==b.y2&&a.first==b.first&&std::memcmp(a.c,b.c,sizeof a.c)==0&&a.cutoff==b.cutoff&&a.resonance==b.resonance;};
  if(!retained(l,v.leftSmoothFilter)||!retained(r,v.rightSmoothFilter)){std::fprintf(stderr,"FAIL original voice rate update reset SmoothPass histories/current coefficients/first/parameters\n");return 1;}
- if(v.leftSmoothFilter.rate!=96000||v.rightSmoothFilter.rate!=96000||v.leftSmoothFilter.smoothing==l.smoothing||std::memcmp(v.leftSmoothFilter.target,l.target,sizeof l.target)==0)return 3;
+ const auto rate96000=original_conductor_v1::f64_from_f32(96000.f);
+ if(v.leftSmoothFilter.rate!=rate96000||v.rightSmoothFilter.rate!=rate96000||v.leftSmoothFilter.smoothing==l.smoothing||std::memcmp(v.leftSmoothFilter.target,l.target,sizeof l.target)==0)return 3;
  }
  std::puts("PASS three original-compatible start/restart/legato rate updates preserves histories/current coefficients/first/parameters and updates rate/smoothing/targets; own-source regression, not original execution");
 }

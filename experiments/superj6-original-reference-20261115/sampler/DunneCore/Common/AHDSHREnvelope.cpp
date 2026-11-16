@@ -2,10 +2,10 @@
 
 #include "AHDSHREnvelope.h"
 
-#include <cmath>
-
 namespace DunneCore
 {
+    static std::uint64_t W(float x) { return original_conductor_v1::f64_from_f32(x); }
+    static std::uint64_t E(std::uint64_t x) { return original_conductor_v1::f64_exp(x); }
 
     AHDSHREnvelopeParameters::AHDSHREnvelopeParameters()
         : sampleRateHz(44100.0f) // a guess, will be overridden later by a call to init(,,,,)
@@ -49,40 +49,41 @@ namespace DunneCore
         int attackSamples = int(pParameters->attackSamples);
         int holdSamples = int(pParameters->holdSamples);
         int decaySamples = int(pParameters->decaySamples);
-        float sustainFraction = float(pParameters->sustainFraction);
+        const std::uint64_t sustainFraction = W(pParameters->sustainFraction);
         int releaseHoldSamples = int(pParameters->releaseHoldSamples);
         int releaseSamples = int(pParameters->releaseSamples);
+        const std::uint64_t z = 0, one = W(1.f);
 
         envDesc.clear();
-        envDesc.push_back({ 0.0f, 0.0f, 0.0f, -1 });               // kIdle: 0 forever
-        envDesc.push_back({ 1.0f, 0.0f, 0.0f, silenceSamples });   // kSilence in 10 mSec
+        envDesc.push_back({ z, z, z, -1 });               // kIdle: 0 forever
+        envDesc.push_back({ one, z, z, silenceSamples });   // kSilence in 10 mSec
 
         if (curvatureType == kAnalogLike)
         {
-            envDesc.push_back({ 0.0f, 1.0f, std::exp(-1.5f), attackSamples });                          // kAttack
-            envDesc.push_back({ 1.0f, 1.0f, 0.0f, holdSamples });                                  // kHold
-            envDesc.push_back({ 1.0f, sustainFraction, std::exp(-4.95f), decaySamples });              // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });                   // kSustain
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, releaseHoldSamples });   // kReleaseHold
-            envDesc.push_back({ sustainFraction, 0.0f, std::exp(-4.95f), releaseSamples });            // kRelease
+            envDesc.push_back({ z, one, E(0xbff8000000000000ULL), attackSamples });                          // kAttack
+            envDesc.push_back({ one, one, z, holdSamples });                                  // kHold
+            envDesc.push_back({ one, sustainFraction, E(0xc013cccccccccccdULL), decaySamples });              // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, z, -1 });                   // kSustain
+            envDesc.push_back({ sustainFraction, sustainFraction, z, releaseHoldSamples });   // kReleaseHold
+            envDesc.push_back({ sustainFraction, z, E(0xc013cccccccccccdULL), releaseSamples });            // kRelease
         }
         else if (curvatureType == kLinearInDb)
         {
-            envDesc.push_back({ 0.0f, 1.0f, 0.99999f, attackSamples });                            // kAttack
-            envDesc.push_back({ 1.0f, 1.0f, 0.0f, holdSamples });                                  // kHold
-            envDesc.push_back({ 1.0f, sustainFraction, std::exp(-11.05f), decaySamples });             // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });                   // kSustain
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, releaseHoldSamples });   // kReleaseHold
-            envDesc.push_back({ sustainFraction, 0.0f, std::exp(-11.05f), releaseSamples });           // kRelease
+            envDesc.push_back({ z, one, 0x3fefffeb074a771dULL, attackSamples });                            // kAttack
+            envDesc.push_back({ one, one, z, holdSamples });                                  // kHold
+            envDesc.push_back({ one, sustainFraction, E(0xc02619999999999aULL), decaySamples });             // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, z, -1 });                   // kSustain
+            envDesc.push_back({ sustainFraction, sustainFraction, z, releaseHoldSamples });   // kReleaseHold
+            envDesc.push_back({ sustainFraction, z, E(0xc02619999999999aULL), releaseSamples });           // kRelease
         }
         else
         {
-            envDesc.push_back({ 0.0f, 1.0f, 0.0f, attackSamples });                                // kAttack
-            envDesc.push_back({ 1.0f, 1.0f, 0.0f, holdSamples });                                  // kHold
-            envDesc.push_back({ 1.0f, sustainFraction, 0.0f, decaySamples });                     // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });                   // kSustain
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, releaseHoldSamples });   // kReleaseHold
-            envDesc.push_back({ sustainFraction, 0.0f, 0.0f, releaseSamples });                   // kRelease
+            envDesc.push_back({ z, one, z, attackSamples });                                // kAttack
+            envDesc.push_back({ one, one, z, holdSamples });                                  // kHold
+            envDesc.push_back({ one, sustainFraction, z, decaySamples });                     // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, z, -1 });                   // kSustain
+            envDesc.push_back({ sustainFraction, sustainFraction, z, releaseHoldSamples });   // kReleaseHold
+            envDesc.push_back({ sustainFraction, z, z, releaseSamples });                   // kRelease
         }
 
         env.reset(&envDesc);
@@ -91,11 +92,12 @@ namespace DunneCore
     void AHDSHREnvelope::updateParams()
     {
         if (envDesc.size() < 8) return;
-        float sustainFraction = float(pParameters->sustainFraction);
+        const std::uint64_t sustainFraction = W(pParameters->sustainFraction);
+        const std::uint64_t one = W(1.f);
 
         envDesc[kAttack].lengthSamples = int(pParameters->attackSamples);
-        envDesc[kHold].initialValue = 1.0f;
-        envDesc[kHold].finalValue = 1.0f;
+        envDesc[kHold].initialValue = one;
+        envDesc[kHold].finalValue = one;
         envDesc[kHold].lengthSamples = int(pParameters->holdSamples);
         envDesc[kDecay].finalValue = sustainFraction;
         envDesc[kDecay].lengthSamples = int(pParameters->decaySamples);
@@ -120,9 +122,10 @@ namespace DunneCore
     void AHDSHREnvelope::release()
     {
         //update the 'release section' envelope values to be where the envelope currently is
-        envDesc[kReleaseHold].initialValue = env.getValue();
-        envDesc[kReleaseHold].finalValue = env.getValue();
-        envDesc[kRelease].initialValue = env.getValue();
+        const std::uint64_t here = W(env.getValue());
+        envDesc[kReleaseHold].initialValue = here;
+        envDesc[kReleaseHold].finalValue = here;
+        envDesc[kRelease].initialValue = here;
         env.advanceToSegment(kReleaseHold);
     }
 

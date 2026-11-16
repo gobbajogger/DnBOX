@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <cmath>
+#include "f64_bits.hpp"
 
 namespace DunneCore
 {
@@ -51,7 +52,11 @@ namespace DunneCore
             
             float si = waveTable[ri];
             float sj = waveTable[rj];
-            return (float)std::fma(1.0f - float(f), float(si), float(f * sj));
+            const std::uint64_t mixed = original_conductor_v1::f64_fma(
+                original_conductor_v1::f64_sub(0x3ff0000000000000ULL, original_conductor_v1::f64_from_f32(f)),
+                original_conductor_v1::f64_from_f32(si),
+                original_conductor_v1::f64_from_f32(f * sj));
+            return original_conductor_v1::f64_to_f32(mixed);
         }
         
         // functions for use by class WaveShaper (see comments in .cpp file)

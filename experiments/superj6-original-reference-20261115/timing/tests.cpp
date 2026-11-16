@@ -1,14 +1,16 @@
 #include "saga_core.hpp"
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <set>
 using namespace j6_saga;
 static unsigned checks=0;
+static std::uint64_t D(double x){std::uint64_t u;std::memcpy(&u,&x,8);return u;}
 #define CHECK(x) do { if(!(x)){std::fprintf(stderr,"FAIL %s:%d %s\n",__FILE__,__LINE__,#x);return 1;}++checks; }while(0)
 int main(){
  for(unsigned i=0;i<divisions.size();++i){auto d=duration(1.f-float(i)/17.f);CHECK(d&&*d==divisions[i]);}
  CHECK(*duration(.5f)==1.5f);CHECK(*duration(*rate_knob(0))==4.f);CHECK(*duration(*rate_knob(.5f))==.5f);CHECK(*duration(*rate_knob(1))==.0625f);
- CHECK(*snap(1.f,.5f,0)==1.f);CHECK(*snap(1.f+4e-10f,.5f,0)==1.f);CHECK(*snap(1.f+6e-10f,.5f,0)==1.f);CHECK(*snap(1.f+1e-7f,.5f,0)==1.5f);CHECK(*snap(-.1f,.5f,0)==0.f);CHECK(*snap(1.f,.5f,.25f)==1.25f);
+ CHECK(*snap_f64(D(1),D(.5),D(0))==D(1));CHECK(*snap_f64(D(1+4e-10),D(.5),D(0))==D(1));CHECK(*snap_f64(D(1+6e-10),D(.5),D(0))==D(1.5));CHECK(*snap_f64(D(-.1),D(.5),D(0))==D(0));CHECK(*snap_f64(D(1),D(.5),D(.25))==D(1.25));
  const std::vector<std::uint8_t> held{60,64,67};
  const std::vector<std::vector<int>> expected{{60,64,67},{67,64,60},{60,64,67,64},{60,60,64,64,67,67,64,64}};
  for(int m=0;m<4;++m){auto p=arp_pool(held,0,12,m);CHECK(p.status==Status::ok&&p.notes==expected[m]);}
@@ -38,8 +40,9 @@ int main(){
  s.generated={52,71};s.settings.running=1;s.settings.gate=1;s.next_gate_end=20;s.previous_beat=5;s.next_step=6;auto rw=process(s,{16,48000,.2f,true});CHECK(rw.status==Status::ok&&rw.events.size()==2&&rw.events[0].note==52&&rw.events[1].note==71&&rw.next.next_step==.5f&&!rw.admitted_step);
  s.settings.running=0;s.previous_beat=0;s.next_gate_end=0;auto stop=process(s,{0,48000,1,false});CHECK(stop.status==Status::ok&&stop.events.size()==2&&stop.next.previous_beat==0);
  for(int m=4;m<=6;++m){State r;r.settings.running=1;r.settings.arp_type=m;r.held={60};auto x=process(r,{0,48000,0,false});CHECK(x.status==Status::unresolved_random&&x.events.empty()&&x.next.transport_change==r.transport_change&&x.next.generated==r.generated&&x.next.step==r.step);}
+ for(double bad:{std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::infinity(),-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::max()})CHECK(!snap_f64(D(bad),D(.5),D(0)));
  for(float bad:{std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::infinity(),-std::numeric_limits<float>::infinity(),std::numeric_limits<float>::max()}){
-  CHECK(!duration(bad));CHECK(!snap(bad,.5f,0));auto x=process(s,{16,bad,0,false});
+  CHECK(!duration(bad));auto x=process(s,{16,bad,0,false});
   if(std::isfinite(bad))CHECK(x.status==Status::ok);
   else CHECK(x.status==Status::invalid_input&&x.events.empty()&&x.next.generated==s.generated);
  }
