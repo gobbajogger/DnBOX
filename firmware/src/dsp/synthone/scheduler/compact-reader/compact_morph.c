@@ -68,7 +68,7 @@ int s1c_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFL
     SPFLOAT f11,f21,f12,f22;
     if(!s1c_read_quad(binding,(unsigned)row1,(unsigned)row2,(unsigned)pos,
                      (unsigned)((pos+1)%ftp1->size),words)) return SP_NOT_OK;
-    memcpy(&f11,words,4);memcpy(&f21,words+1,4);memcpy(&f12,words+2,4);memcpy(&f22,words+3,4);
+    __builtin_memcpy(&f11,words,4);__builtin_memcpy(&f21,words+1,4);__builtin_memcpy(&f12,words+2,4);__builtin_memcpy(&f22,words+3,4);
 
     v1 = (1 - wtfrac) * 
         f11 + 
