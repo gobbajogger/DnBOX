@@ -1,0 +1,62 @@
+[
+  {
+    "model": "elite",
+    "file": "elite-probe.log",
+    "raw_sha256": "52703b9c9c72f60d403a5f463db32d40b2fd45827d94fabfc282d8c894f82488",
+    "public_sha256": "cdd10dbd3f8eeb4fcf67656bb342701048827649a1e5d70dfbdaed345cf53d11"
+  },
+  {
+    "model": "elite",
+    "file": "elite-baseline.log",
+    "raw_sha256": "cdc09bf9f86adf46be05004f7568e2de18057dc0f85441926099ce3182e49a30",
+    "public_sha256": "7c89f55345a4985bcdad06651da99c174392f2fa7df0685a2f0a44d2b81bd72f"
+  },
+  {
+    "model": "elite",
+    "file": "elite-probe.map",
+    "raw_sha256": "abdd5e64b04c2807a6dbf01437c74efd6da93ff830b395bd3a04884f10c46c3d",
+    "public_sha256": "abdd5e64b04c2807a6dbf01437c74efd6da93ff830b395bd3a04884f10c46c3d"
+  },
+  {
+    "model": "elite",
+    "file": "elite-baseline.map",
+    "raw_sha256": "d4ee3d298c3699bc7d03b28eb6b63d5fc40284ab10e4ee398003364f3e200b6b",
+    "public_sha256": "d4ee3d298c3699bc7d03b28eb6b63d5fc40284ab10e4ee398003364f3e200b6b"
+  },
+  {
+    "model": "elite",
+    "file": "elite-receipt.json",
+    "raw_sha256": "a80bfe9b7d4aad024b3b846407b340836db1e3131b4f4bc6a0cb32e0a81b9bd1",
+    "public_sha256": "221a907a2bb4e11c412c37da43ec79eca96d31b269baff7f9424e23183a9f84f"
+  },
+  {
+    "model": "pro",
+    "file": "pro-probe.log",
+    "raw_sha256": "e73c774937761bec7543890b237059920fd22929fee8298e0e6535f75a772625",
+    "public_sha256": "12a9490605306aa3cf887da6cad19ca25a9814e829c88d2daaf7f4e230a7276b"
+  },
+  {
+    "model": "pro",
+    "file": "pro-baseline.log",
+    "raw_sha256": "9df629c2ef657db1fd72e43958c13408a2899f96835aba649320de342bcdfa58",
+    "public_sha256": "e12c382c4239cfbf1f57521f9843401b09d26ad1478335d0c4f03b14ec930a1c"
+  },
+  {
+    "model": "pro",
+    "file": "pro-probe.map",
+    "raw_sha256": "71f7cdce78f4d1b33ba9468954d5426f7e50dc16dc578928a513a94682f0e2f9",
+    "public_sha256": "71f7cdce78f4d1b33ba9468954d5426f7e50dc16dc578928a513a94682f0e2f9"
+  },
+  {
+    "model": "pro",
+    "file": "pro-baseline.map",
+    "raw_sha256": "524e7ca932a2694ef66336f8ec073d139b7d8c2c19793c31d274d575fd606b0c",
+    "public_sha256": "524e7ca932a2694ef66336f8ec073d139b7d8c2c19793c31d274d575fd606b0c"
+  },
+  {
+    "model": "pro",
+    "file": "pro-receipt.json",
+    "raw_sha256": "400de697b3a972007e28507d8868e9cd54e13a93daee3c5aaecdff1d6608db0b",
+    "public_sha256": "a301b25c5730ad844084aced54ed8d64db8c9ea650034cca8a14fd69e413d467"
+  }
+]

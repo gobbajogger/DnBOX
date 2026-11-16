@@ -799,3 +799,7 @@ Exact fef9 independent default native Elite/Pro builds completed: XIP free3268/3
 The source default is already X0X_DEV_PADCAL=1 (app/x0x.h), so explicit1 repeats the existing enabled configuration rather than newly qualifying it. Exact7f6 producer builds: enabled1 Elite/Pro XIP3268/3276B and RAM1096B; disabled0 XIP5140/5152B and RAM1528B. Both retain poolmargin836B. Public logs preserve raw/public hashes. Disabled0 removes calibration functionality; these bytes are NOT assumed available for a feature-preserving protocol addition and defaults remain unchanged. Full Local, device and native endpoint checks remain open.
 
 Repeated mistake: commit subjects omitted the RULES6 type/lane and next-deliverable format. Future subjects must use <type>(integ): <change> | next: <deliverable>; do not rewrite published history.
+
+## Actual linked protocol code diagnostic
+
+On exact7f6 with default PADCAL1, baseline map-only ELF identity passed both models; adding the reviewed derived core/wire while retaining all eight public API roots consumed2192B, leaving1076/1084B XIP. Core state692B, decoder/catalog/glue/transport, stack and IRQ latency remain omitted/unqualified. Thus only52/60B beyond reserve remain in this experiment, not an admitted endpoint. This is eight-entry API cost, not a minimal-endpoint lower bound. Source was unchanged and no entry executed/device written. Four wrapper control-flow regression fixtures pass separately. See evidence/integ-protocol-link; full host-stage intake remains independently owned.
