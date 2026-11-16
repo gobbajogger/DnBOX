@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "exit": 0,
+  "source_commit": "3e41e4b37c91a8f30542f3cd0724c6a518d588fd",
+  "manifest_sha256": "f1f81de316efd844838eb819ea914266cda9cbb28dbe35a8649eb074f637f2fc",
+  "source_sha256": {
+    "firmware/src/dsp/synthone/scheduler/compact-reader/compact.c": "f46f1c92a5fd5e2ad3869c58c123de3b4bd17f7a31c88fa5519919c71b463499",
+    "firmware/src/dsp/synthone/scheduler/compact-reader/compact.h": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+    "tests/host/synthone_compact_quad_test.c": "a3db889f47266d8fa7a3ab4f83b52b8020d04da309123a50b80047b609fccd7c",
+    "tests/host/run_synthone_compact_quad.py": "b1739f7d1d69ab6170cf4dda8f5894fb3646aa535caee94ced8bbdbb14c672ac"
+  },
+  "input_sha256": {
+    "compact.c": "a5e63c119d98b6708d6809c7bec093104a9299aac6b95fd3ac51fb90c880e7b5",
+    "compact.h": "6899920139862016acbdec4a88949e376972b3529fd29617af1a5cf6aae521b4",
+    "compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5"
+  },
+  "pack_bytes": 165292,
+  "command": "cd /workspace/quad-distinct-3e41/source && env -u ASAN_OPTIONS -u LSAN_OPTIONS -u UBSAN_OPTIONS python3 tests/host/run_synthone_compact_quad.py --original-reader /workspace/quad-distinct-3e41/original --pack /workspace/quad-distinct-3e41/compact.bin --output /workspace/quad-distinct-3e41/result --sanitize",
+  "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "sanitizers": [
+    "address",
+    "undefined",
+    "default LeakSanitizer"
+  ],
+  "options": {
+    "ASAN_OPTIONS": null,
+    "LSAN_OPTIONS": null,
+    "UBSAN_OPTIONS": null,
+    "LD_PRELOAD": null
+  },
+  "benchmark_tracer": {
+    "pid": 180090,
+    "observed_tracer_pid": 0,
+    "samples": 2624,
+    "scope": "passive observations, not continuous trace-state proof"
+  },
+  "result_counts": {
+    "scalar_word_comparisons": 44313152,
+    "physical_word_evaluations": [
+      4,
+      2,
+      2,
+      1
+    ],
+    "row_validations": 2,
+    "transactional_invalid_alias_bounds_and_late_failure_checks": "PASS"
+  },
+  "source_and_original_inputs_before_after_verified_unchanged": true,
+  "actual_non_system_dependency_closure": {
+    "original.d": [
+      "original/compact.c",
+      "original/compact.h"
+    ],
+    "test.d": [
+      "test.c",
+      "candidate/compact.c",
+      "candidate/compact.h"
+    ]
+  },
+  "dependency_scope": "Compiler -MMD; excludes system headers/toolchain closure.",
+  "runtime_libraries": [
+    "libasan.so.8",
+    "libubsan.so.1",
+    "libc.so.6"
+  ],
+  "executable": {
+    "bytes": 231160,
+    "sha256": "031e9f2723bb4644b32af2a886ebf0e6db8eb19fa70f03e117fed0e1513f2765"
+  },
+  "complete_run_log": {
+    "bytes": 271,
+    "sha256": "62b0e65640dc73dfb0590829d7e9244e73e80f96e2eb4d072d97796c6bc12bdb"
+  },
+  "complete_stdout_stderr": {
+    "bytes": 272,
+    "sha256": "a4f6fdae5b959c6d38152c3f5dcae03f5ea7426117e32c8747725dca3a6658f9"
+  },
+  "output_directory": "/workspace/quad-distinct-3e41",
+  "scope": "Bounded compact-reader source/component evidence only; no audio, timing, native fit or whole-lane qualification."
+}
