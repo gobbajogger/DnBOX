@@ -715,6 +715,11 @@ run control-recompile sh tests/host/control_recompile_test.sh
 run chicago-span-hold sh tests/host/chicago_span_hold_test.sh
 run fma-exact-identity sh tests/host/fma_exact_identity_test.sh
 run chicago-coef-cache sh tests/host/chicago_coef_cache_test.sh
+run fxbus-coef-cache sh tests/host/fxbus_coef_cache_test.sh   # zl-coefcache eb93c3ba/b5be0b83
+run chicago-peaking-coef-cache sh tests/host/chicago_peaking_coef_cache_test.sh   # 527059a5
+run vca-sustain sh tests/host/vca_sustain_test.sh   # 3c2ad0ec
+run chicago-ens-hoist python3 tests/host/run_chicago_ens_hoist.py   # 5b158ba2
+run chicago-modulation-hoist python3 tests/host/run_chicago_modulation_hoist.py   # c994d659
 run audio-stress sh tests/host/audio_stress_test.sh
 run synth-param-jump sh tests/host/synth_param_jump_test.sh
 run param-write-sources sh tests/host/param_write_sources_test.sh
