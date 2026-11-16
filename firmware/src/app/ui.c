@@ -1172,11 +1172,12 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         }
         return;
     }
-    if (is_pan(r)) {                                     /* L64 .. C .. R63 */
+    if (is_pan(r)) {                                     /* L50 .. C .. R50; engine stays 0..127 */
         if (v == 64)
             put_s(num, "C");
         else
-            put_i(put_s(num, v < 64 ? "L" : "R"), v < 64 ? 64 - v : v - 64);
+            put_i(put_s(num, v < 64 ? "L" : "R"),
+                  v < 64 ? ((64 - v) * 50 + 32) / 64 : ((v - 64) * 50 + 31) / 63);
         return;
     }
     switch (r.kind) {

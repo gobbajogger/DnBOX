@@ -23,3 +23,8 @@ None.
 
 ## Conflicts
 Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-prep.zip governs this lane; no inherited historical approval is treated as current instruction.
+
+## Verified partial progress (not checklist acceptance)
+- Pan formatter changed from L64/C/R63 to L50/C/R50; engine values and audio panning unchanged. Production host regression checks all 128 values across MIX and 22 drum voices, 8925 assertions. Before: endpoint assertion fails; after: PASS. Battery icon and remaining F4 checks remain unqualified.
+- Exact e742 drum first-slice attempt failed before rendering: checked-in instrument.py requires absent firmware/src/app/ui_drum_voice.inc, while current renderer is inline draw_drum in ui.c. No107-defect count transferred from historical source. Next route: extend matching current production host fixtures; do not reconstruct candidate source merely to satisfy stale instrumentation.
+- Native resource baseline underway under independent test-and-merge ownership. Full gate, hardware, independent review and all-screen geometry NOT_RUN at this head.
