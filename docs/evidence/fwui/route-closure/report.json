@@ -1,0 +1,116 @@
+{
+  "schema": "dnbox-render-dispatch-coverage/1",
+  "coverageComplete": false,
+  "routes": [
+    {
+      "id": "draw_drum",
+      "calls": 8,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_303",
+      "calls": 28,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_drum_voice",
+      "calls": 201,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_part_sound",
+      "calls": 48,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_break",
+      "calls": 12,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_home",
+      "calls": 34,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_song",
+      "calls": 30,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_fx",
+      "calls": 30,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_mix",
+      "calls": 66,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_perf",
+      "calls": 20,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_readout",
+      "calls": 1,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_list",
+      "calls": 84,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_ask",
+      "calls": 2,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "draw_help",
+      "calls": 2,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "padcal-body",
+      "calls": 0,
+      "status": "NOT_RUN",
+      "reason": "Device renderer is substituted in this host fixture; route entry is not renderer evidence."
+    },
+    {
+      "id": "clip-wait-body",
+      "calls": 1,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "clip-grid-body",
+      "calls": 1,
+      "status": "NOT_RUN",
+      "reason": "Device renderer is substituted in this host fixture; route entry is not renderer evidence."
+    },
+    {
+      "id": "smc-body",
+      "calls": 2,
+      "status": "OBSERVED"
+    },
+    {
+      "id": "project-transfer-header",
+      "calls": 1,
+      "status": "OBSERVED"
+    }
+  ],
+  "sourceInputManifestSHA256": "f681a04ba4c27d5d9ddd3c2eec3992f14a781a9a4e5971ea03a3ffce01a44f9a",
+  "sourceUI_SHA256": "a01c6ffecd57344d34f9b7a52ca3e95487d376b693600ad60532a1977a8741a6",
+  "instrumentedFiles": [
+    "firmware/src/app/ui.c",
+    "firmware/src/app/ui_drum_voice.inc"
+  ],
+  "instrumentedSHA256": {
+    "firmware/src/app/ui_drum_voice.inc": "f919298a6c965a74d2ba1ccb69db6c68e272f7f5f21236f7660f7a81bf33dd9e",
+    "tests/host/ui_route_coverage_test.c": "4c03a96f7497ff7009309f79efc6fa776965e44908971c6063a0f97849829e1a",
+    "firmware/src/app/ui.c": "9300d0fd044d74df0a4aa4844fa9d480399c68b3b6da6e42642c4ad660c0bab8"
+  },
+  "sourceClosureVerifiedAfterRun": true,
+  "limits": "Function/branch entry counts only. No pixel, style, complete state inventory, hardware or lane qualification. No PNGs saved."
+}

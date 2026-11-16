@@ -890,3 +890,7 @@ The evidence bundle also preserves independently executed ca0bbb reference compa
 
 ## Roadmap status reconciliation
 - Replaced stale Working table with verified 50823d5/c9f09 draft scopes, unchanged consolidated targets, actual ca0bbb reference outcomes and terminal 2d86 affected-host 45 PASS / 2 FAIL. Pending BREAK headroom now uses 2d86, not historical 7e398. No lane marked complete; two-selector corrected managed replay remains QA-owned after FWUI review.
+
+## Two-selector corrected host checkpoint
+- Compose complete reviewed FWUI dcf64/ad726 test/docs delta over integ50823d5 historical808 repair and reconciled ledger. All23 donor blobs verified; firmware production remains byte-identical2d86. Original-release fixture preserves real queue/adoption assertions; default sanitizer remains unqualified until actual managed replay.
+- QA owns exactly the two previously failed selectors (original-release-ui and engine-808-scratch-alias), plus new isolated regression checks as needed; no full-suite or native rerun, no changes to completed2d86 receipts. Restore exact historical include from the published receipt before the808 comparison. Full Local remains open.

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
-import re,unittest
-from run import FUNCTIONS,BRANCHES,ROUTES,instrument
+import re,unittest,tempfile
+from pathlib import Path
+from run import FUNCTIONS,BRANCHES,ROUTES,instrument,verify_closure,sha
 
 def sources():
     ui='#include "x0x.h"\n'
@@ -34,4 +35,18 @@ class InstrumentTests(unittest.TestCase):
     def test_similar_outside_branch_not_counted(self):
         ui,d=sources();ui+='void unrelated(void)\n{\n'+BRANCHES['smc-body']+' untouched(); }\n}\n'
         u,_=instrument(ui,d);self.assertIn(BRANCHES['smc-body']+' untouched(); }',u)
+class ClosureTests(unittest.TestCase):
+    def test_exact_original_and_generated_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'a').write_text('original');(root/'b').write_text('instrumented');(root/'harness').write_text('observer')
+            original={'a':sha(root/'a'),'b':'prior-original-hash'}
+            changed={'b':sha(root/'b'),'harness':sha(root/'harness')}
+            verify_closure(root,original,changed)
+            for name in ('a','b','harness'):
+                prior=(root/name).read_bytes();(root/name).write_bytes(prior+b'changed')
+                with self.assertRaisesRegex(ValueError,'Source closure changed: '+name):verify_closure(root,original,changed)
+                (root/name).write_bytes(prior)
+    def test_missing_input_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError,'Source closure changed'):verify_closure(Path(directory),{'missing':'hash'}, {})
 if __name__=='__main__':unittest.main()
