@@ -6,6 +6,10 @@
 #include <time.h>
 #include <inttypes.h>
 #include <cstdlib>
+#ifdef DNBOX_CALLBACK_RUSAGE
+#include <sys/resource.h>
+#include <sched.h>
+#endif
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -35,7 +39,13 @@ static bool missed(uint64_t elapsed, unsigned frames, unsigned rate) {
     return elapsed > uint64_t(frames) * 1000000000ull / rate;
 }
 int main(int argc, char **argv) {
+#ifdef DNBOX_CALLBACK_RUSAGE
+    CHECK(argc == 9); // extra resource diagnostic CSV, never qualification
+    FILE *resources = std::fopen(argv[8], "w"); CHECK(resources);
+    std::fprintf(resources, "preset,block,minor_faults,major_faults,voluntary_switches,involuntary_switches,user_ns,system_ns,cpu_before,cpu_after\n");
+#else
     CHECK(argc == 8); // original table, pack, commands, CSV, JSONL, count, diagnostic FTZ
+#endif
     // Observe this benchmark process, not its Python parent's tracer state.
     int benchmark_tracer_pid = -1;
     if (FILE *status = std::fopen("/proc/self/status", "r")) {
@@ -89,6 +99,11 @@ int main(int argc, char **argv) {
         double energy = 0; float peak = 0;
         for (unsigned block = 0; block < 750; ++block) {
             float left[128]{}, right[128]{}; context.left = left; context.right = right;
+#ifdef DNBOX_CALLBACK_RUSAGE
+            rusage before{}, after{};
+            const int cpu_before = sched_getcpu();
+            CHECK(getrusage(RUSAGE_THREAD, &before) == 0);
+#endif
             const uint64_t wall_start = clock_ns(CLOCK_MONOTONIC);
             const uint64_t cpu_start = clock_ns(CLOCK_THREAD_CPUTIME_ID);
             {
@@ -105,6 +120,16 @@ int main(int argc, char **argv) {
             }
             const uint64_t cpu = clock_ns(CLOCK_THREAD_CPUTIME_ID) - cpu_start;
             const uint64_t wall = clock_ns(CLOCK_MONOTONIC) - wall_start;
+#ifdef DNBOX_CALLBACK_RUSAGE
+            CHECK(getrusage(RUSAGE_THREAD, &after) == 0);
+            const int cpu_after = sched_getcpu();
+            auto timeval_ns = [](const timeval &t) { return int64_t(t.tv_sec) * 1000000000ll + int64_t(t.tv_usec) * 1000ll; };
+            std::fprintf(resources, "%u,%u,%ld,%ld,%ld,%ld,%" PRId64 ",%" PRId64 ",%d,%d\n", preset, block,
+                after.ru_minflt - before.ru_minflt, after.ru_majflt - before.ru_majflt,
+                after.ru_nvcsw - before.ru_nvcsw, after.ru_nivcsw - before.ru_nivcsw,
+                timeval_ns(after.ru_utime) - timeval_ns(before.ru_utime),
+                timeval_ns(after.ru_stime) - timeval_ns(before.ru_stime), cpu_before, cpu_after);
+#endif
             const bool wm = missed(wall, 128, 48000), cm = missed(cpu, 128, 48000);
             wall_misses += wm; cpu_misses += cm; max_wall = std::max(max_wall, wall); max_cpu = std::max(max_cpu, cpu);
             std::fprintf(csv, "%u,%u,128,48000,%" PRIu64 ",%" PRIu64 ",%u,%u\n", preset, block, wall, cpu, unsigned(wm), unsigned(cm));
@@ -120,6 +145,9 @@ int main(int argc, char **argv) {
         std::fprintf(json, "{\"preset\":%u,\"callbacks\":750,\"frames\":96000,\"wall_misses\":%" PRIu64 ",\"cpu_misses\":%" PRIu64 ",\"max_wall_ns\":%" PRIu64 ",\"max_cpu_ns\":%" PRIu64 ",\"nonfinite_words\":%" PRIu64 ",\"peak\":%.9g,\"energy\":%.17g,\"diagnostic_fnv64\":\"%016" PRIx64 "\"}\n", preset, wall_misses, cpu_misses, max_wall, max_cpu, nonfinite, peak, energy, hash);
         std::fflush(csv); std::fflush(json);
     }
+#ifdef DNBOX_CALLBACK_RUSAGE
+    CHECK(!std::fclose(resources));
+#endif
     CHECK(!std::fclose(csv) && !std::fclose(json) && !std::fclose(input));
     std::printf("{\"programs\":%u,\"callbacks\":%u,\"frames\":%u,\"wall_misses\":%" PRIu64 ",\"cpu_misses\":%" PRIu64 ",\"nonfinite_words\":%" PRIu64 ",\"scope\":\"host control/render/common FX deadline measurement, fixed fixture tuning; not device XRUN or app qualification\"}\n", requested, requested * 750, requested * 96000, total_wall_misses, total_cpu_misses, total_nonfinite);
     return total_wall_misses || total_cpu_misses || total_nonfinite ? 1 : 0;

@@ -70,6 +70,43 @@ class DeadlineTrace(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'benchmark tracer'):
                 m.parse_benchmark_tracer(text)
 
+    def resource_csv(self, root, change=None, count=750):
+        path = root / 'resources.csv'
+        with path.open('w') as stream:
+            writer = csv.writer(stream)
+            writer.writerow(['preset', 'block', 'minor_faults', 'major_faults', 'voluntary_switches', 'involuntary_switches', 'user_ns', 'system_ns', 'cpu_before', 'cpu_after'])
+            for i in range(count):
+                row = [0, i, 0, 0, 0, 0, 1000, 0, 0, 0]
+                if i == 0 and change: change(row)
+                writer.writerow(row)
+        return path
+
+    def test_resource_miss_association_not_exclusion(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            def miss(row): row[4], row[6] = 3000000, 1
+            def faults(row): row[2], row[5], row[9] = 2, 1, 1
+            result = m.summarize_resources(self.resource_csv(root, faults), self.write(root, miss), 1)
+            self.assertEqual(result['miss_rows'], 1)
+            self.assertEqual(result['miss_rows_with_faults'], 1)
+            self.assertEqual(result['miss_rows_with_switches'], 1)
+            self.assertEqual(result['totals']['minor_faults'], 2)
+            self.assertEqual(result['cpu_migrations'], 1)
+
+    def test_resource_negative_delta_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            with self.assertRaisesRegex(ValueError, 'negative resource'):
+                m.summarize_resources(self.resource_csv(root, lambda row: row.__setitem__(2, -1)), self.write(root), 1)
+
+    def test_resource_identity_or_length_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            with self.assertRaisesRegex(ValueError, 'identity mismatch'):
+                m.summarize_resources(self.resource_csv(root, lambda row: row.__setitem__(1, 99)), self.write(root), 1)
+            with self.assertRaisesRegex(ValueError, 'row count mismatch'):
+                m.summarize_resources(self.resource_csv(root, count=749), self.write(root), 1)
+
     def test_negative_time_rejected(self):
         with tempfile.TemporaryDirectory() as d:
             with self.assertRaisesRegex(ValueError, 'negative'):

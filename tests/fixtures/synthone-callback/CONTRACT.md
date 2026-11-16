@@ -27,3 +27,12 @@ record original/effective MXCSR, and are labeled diagnostic in the receipt.
 They may change output words. Their misses cannot replace baseline misses, and
 no runtime/native floating-mode change follows without original-platform and
 fidelity evidence. Retain both traces and compare diagnostic output hashes.
+
+Optional resource diagnostics compile `DNBOX_CALLBACK_RUSAGE` and write a
+separate CSV. Per-thread `getrusage` and `sched_getcpu` observations bracket the
+original wall/thread-CPU clock interval; those extra probes are outside that
+interval. Resource CPU time includes the surrounding clock probes and has the
+platform's accounting resolution. Faults, context switches and migrations are
+associations, not a proved cause or grounds to exclude a callback. Unknown CPU
+observations remain unknown. All timing misses remain counted, and instrumented
+runs are explicitly NOT_QUALIFIED even if no miss is observed.

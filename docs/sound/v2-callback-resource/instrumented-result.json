@@ -1,0 +1,47 @@
+{
+  "scope": "Fresh source-bound host callback deadlines; no device XRUN/app claim.",
+  "programs": 8,
+  "corpus_complete": false,
+  "diagnostic_ftz": false,
+  "benchmark_tracer_pid": 0,
+  "diagnostic_resources": {
+    "callbacks": 6000,
+    "totals": {
+      "minor_faults": 18,
+      "major_faults": 0,
+      "voluntary_switches": 0,
+      "involuntary_switches": 170,
+      "user_ns": 2329393000,
+      "system_ns": 35935000
+    },
+    "cpu_migrations": 2,
+    "unknown_cpu_observations": 0,
+    "miss_rows": 25,
+    "miss_rows_with_faults": 0,
+    "miss_rows_with_switches": 8,
+    "scope": "Resource bracket includes clock probes around timed region; association is not causation"
+  },
+  "qualification": "NOT_QUALIFIED: diagnostic instrumentation/mode",
+  "summary": {
+    "callbacks": 6000,
+    "frames": 768000,
+    "wall_misses": 25,
+    "cpu_misses": 23,
+    "max_wall_ns": 7794426,
+    "max_cpu_ns": 7793448
+  },
+  "nonfinite_words": 0,
+  "process_exit": 1,
+  "status": "DEADLINE_FAIL",
+  "executable_sha256": "a5d00e7066861cd56c92cd2e09b222b0f220eaa76a1a3738a51ff9661ebbb35a",
+  "stream_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "inputs_sha256": "6159dc37306fcb5ba644510dd1a639dda22a354f3f1663374cd4a178401a0905",
+  "files": {
+    "callback-trace.csv": "5f4d2869e68f45f776e45cfe8d7029a32b81dd23608bcce2ff547910648b1c21",
+    "callback-programs.jsonl": "b478d18ae1f887e969a7bfe3c77e0d9a8491d59f87992fcc46d086a8e7aa2395",
+    "CALLBACK-COMMANDS.json": "e0016855d687ea87c3bc82c6aae664521928521da19eb97934b2b81f344e2071",
+    "CALLBACK-ENVIRONMENT.json": "03be1b73c01cc714622e349dcd78df93df72cf35edb25dc95112e691efd45076",
+    "callback-run.log": "92281695f6a5e646d9439198782fa486134e45a370afbbe9eda58bb3fe12ac3b",
+    "callback-resources.csv": "76f6897b0da469e3023ff8e45a8fba92d8f492753f69c107d8269e972550e7ed"
+  }
+}
