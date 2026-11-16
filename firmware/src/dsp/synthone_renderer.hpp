@@ -23,8 +23,10 @@ public:
     // Source-resolved physical values, not generic normalized Drone knobs.
     bool parameter(unsigned id, float value) { return engine_.set_target(id, value); }
     bool restore(const float *values, size_t count) { return engine_.restore(values, count); }
-    bool note_on(int note, int velocity) { return engine_.on(note, velocity); }
-    bool note_off(int note) { return engine_.off(note); }
+    // Public key events must update original held-key/sequence state. The
+    // lower-level on/off calls are sequencer sinks and bypass that state.
+    bool note_on(int note, int velocity) { return engine_.start(note, velocity); }
+    bool note_off(int note) { return engine_.stop(note); }
     bool all_notes_off() { return engine_.stop_all(); }
     bool reset() { return engine_.reset(); }
     bool render(unsigned frames, float *left, float *right) {
@@ -34,6 +36,6 @@ public:
     int beat_count() const { return engine_.beat_count(); }
 
 private:
-    s1scheduler::SourceScheduler engine_{};
+    s1scheduler::SourceScheduler engine_;
 };
 } // namespace dnbox

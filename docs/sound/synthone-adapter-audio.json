@@ -1,0 +1,15 @@
+{
+  "scope": "new renderer adapter versus authenticated source-derived pre-FX FullOracle, not Apple app/fullFX/target",
+  "scenes": 12,
+  "frames": 576000,
+  "different_channel_words": 0,
+  "nonzero_left_frames": 529280,
+  "peak": 0.628623188,
+  "heap_calls_during_render": 0,
+  "float_audio_sha256": "4b32746b36590998cf7c215ec07d5890d394414e8b2702b7a1a5e847c8ed6b34",
+  "listen_wav_sha256": "ec3dd11ac7ba15e0c4b09a1626e04b05c44006bd70d238038d7b2dd4e64dc3e1",
+  "listen_wav_bytes": 192044,
+  "source_dependency_commit": "56079bbdcb753c37d65aedd17ce49ba71c261797",
+  "red_different_channel_words": 700576,
+  "fix": "public key events route through start/stop, not lower-level sequencer on/off sinks"
+}

@@ -1,0 +1,21 @@
+{
+  "inputs": {
+    "sj6_contract": {
+      "file": "sj6-control-contract.json",
+      "sha256": "99b361ea5c17bfb5be75eeca3f0da8eacab3a81231486c6175bc19d074b82ea2"
+    },
+    "sj6_audit": {
+      "file": "sj6-page-audit.json",
+      "sha256": "5a43bfa22b210ef676f37ff92fc02461b646fa9c5225e31bfee69441ef5f1834"
+    },
+    "synthone_native_header": {
+      "file": "portable_interface.hpp",
+      "sha256": "85f94a7f2f5c590ddcc83d7021c77be6d72f2647b8761d8f6de7cd32ee0e0963"
+    }
+  },
+  "sj6_descriptors": 64,
+  "sj6_native_count": 218,
+  "synthone_native_count": 150,
+  "derived_default_policy": "HOST_REFERENCE pow only; no claim of original Apple platform pow words. Literal defaults are exact retained binary32 words.",
+  "graph_binding": "NOT_ADMITTED; metadata/blob helpers do not alter or activate an engine"
+}

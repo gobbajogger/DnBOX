@@ -32,9 +32,9 @@ the decoder does not incorrectly reject that compatible endpoint.
 
 The new SynthOne adapter delegates real note, parameter, sequence/arp and render
 operations to the recovered pinned source scheduler. It is pre-FX WIP and has
-not yet been linked or audibly qualified in this checkpoint. It does not rename
+now passed a12-scene576,000-frame authenticated source-host pre-FX A/B with zero different channel words. This is not complete musical/device acceptance. It does not rename
 Drone or reinterpret saved legacy bank2/3 data. The complete original FX,
-150-parameter storage/admission, app wiring and fresh original-source A/B remain
+150-parameter storage/admission, app wiring and 56-preset/full-FX and target original-source A/B remain
 separate required work. Shared UI/runtime/storage files are untouched.
 
 Source base is the verified 8a0ef30c family, not a qualified current composition.

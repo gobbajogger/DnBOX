@@ -255,7 +255,6 @@
     "latest UI",
     "SynthOne renderer activation/full FX",
     "SuperJ6 renderer activation/64 controls",
-    "PADCAL1 variants not yet measured in this report",
     "runtime pool peak",
     "target CPU/device"
   ],
@@ -276,7 +275,51 @@
       "pool_free": 8364,
       "pool_floor": 8192,
       "pool_above_floor": 172,
-      "soft_double_scan": "PASS"
+      "soft_double_scan": "PASS",
+      "artifacts": {
+        "x0x.bin": {
+          "bytes": 537316,
+          "sha256": "27b5020a5fee64ffa92dd3af8b6b7b526560f7971f265b8d393da035895ebfe6"
+        },
+        "x0x.dis": {
+          "bytes": 8324639,
+          "sha256": "7c4cc6dcc6af92817f60471f88f64070ff55fb94974e5a854e3228cb886c1f5c"
+        },
+        "x0x.elf": {
+          "bytes": 621448,
+          "sha256": "865690a0bfd3a8e73c0caff020acd5cd624e000e0b317fac0fd630bc8d9f50c1"
+        }
+      }
+    },
+    {
+      "model": "elite",
+      "PADCAL": 1,
+      "build_exit": 0,
+      "app_code_capacity": 552672,
+      "flash_free": 13464,
+      "image_bytes": 539208,
+      "static_ram_used": 96128,
+      "static_ram_limit": 98304,
+      "pool_used": 335700,
+      "pool_limit": 344064,
+      "pool_free": 8364,
+      "pool_floor": 8192,
+      "pool_above_floor": 172,
+      "soft_double_scan": "PASS",
+      "artifacts": {
+        "x0x.bin": {
+          "bytes": 539208,
+          "sha256": "b4e843e210a661d9150c6cc499fa9e2dce840ea698d7de4e70a9876ea64ac426"
+        },
+        "x0x.dis": {
+          "bytes": 8356296,
+          "sha256": "c058c8a4f53a189ddc09dc6944a36043ba89c48c2e86d3791d7823ca3a4223d4"
+        },
+        "x0x.elf": {
+          "bytes": 624424,
+          "sha256": "a075e8a33096c2525e858d703325cdeb3c24c4c7c6159cb73bf5d4043d0d2d66"
+        }
+      }
     },
     {
       "model": "pro",
@@ -292,7 +335,51 @@
       "pool_free": 8364,
       "pool_floor": 8192,
       "pool_above_floor": 172,
-      "soft_double_scan": "PASS"
+      "soft_double_scan": "PASS",
+      "artifacts": {
+        "x0x.bin": {
+          "bytes": 537304,
+          "sha256": "1af9c30b8e2c845e45d0b467f8fbe798ea026f1a48709ae60bc510e0a205b662"
+        },
+        "x0x.dis": {
+          "bytes": 8324599,
+          "sha256": "5b94b7dea55fca30cbcf5843f699a5bd1898e69787260e46df9c9e05b045452b"
+        },
+        "x0x.elf": {
+          "bytes": 621444,
+          "sha256": "1315016a9ee4af9079a9d01b18a55efec9ac7392aeeb89da76dc74e9a392e495"
+        }
+      }
+    },
+    {
+      "model": "pro",
+      "PADCAL": 1,
+      "build_exit": 0,
+      "app_code_capacity": 552672,
+      "flash_free": 13472,
+      "image_bytes": 539200,
+      "static_ram_used": 96128,
+      "static_ram_limit": 98304,
+      "pool_used": 335700,
+      "pool_limit": 344064,
+      "pool_free": 8364,
+      "pool_floor": 8192,
+      "pool_above_floor": 172,
+      "soft_double_scan": "PASS",
+      "artifacts": {
+        "x0x.bin": {
+          "bytes": 539200,
+          "sha256": "e4a6ba2c2528c521b5f5ee8e54544b8f22c951f5ab5fb36847dd3dfbf227e9b1"
+        },
+        "x0x.dis": {
+          "bytes": 8356254,
+          "sha256": "70e5b0a2a8e5bda8042acc218a6643290f6b0b1f54d10ba223a6bd3f0c480677"
+        },
+        "x0x.elf": {
+          "bytes": 624416,
+          "sha256": "8782f4e3e34abda25a43ecd12217890c18e69f9884fbcf837db00dbb7c7583bb"
+        }
+      }
     }
   ],
   "new_compact_candidate": {
@@ -303,7 +390,8 @@
     "no_fit_claim": true,
     "new_flash_upper_bound_before_sharing": 30238,
     "elite_flash_floor_shortfall_if_naively_added": 23074,
-    "pool_floor_shortfall_if_six_sets_naively_added": 6368
+    "pool_floor_shortfall_if_six_sets_naively_added": 6368,
+    "worst_variant_flash_floor_shortfall_if_naively_added": 24966
   },
   "savings_candidates": [
     {

@@ -1,0 +1,30 @@
+In file included from <workspace>/sound-implementation/wip/tests/host/synthone_renderer_test.cpp:4:
+<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler/tests/source_scheduler_test.cpp:1:9: error: "main" redefined [-Werror]
+    1 | #define main accepted_compact_suite_main
+      |         ^~~~
+<workspace>/sound-implementation/wip/tests/host/synthone_renderer_test.cpp:3:9: note: this is the location of the previous definition
+    3 | #define main retained_source_scheduler_test_main
+      |         ^~~~
+In file included from <workspace>/sound-implementation/wip/tests/host/synthone_renderer_test.cpp:6:
+<workspace>/sound-implementation/wip/firmware/src/dsp/synthone_renderer.hpp:37:42: error: ‘s1scheduler::RuntimeState::RuntimeState()’ is protected within this context
+   37 |     s1scheduler::SourceScheduler engine_{};
+      |                                          ^
+In file included from <workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler/tests/compact_scheduler_test.cpp:2,
+                 from <workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler/tests/source_scheduler_test.cpp:2:
+<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler/scheduler.hpp:106:5: note: declared protected here
+  106 |     RuntimeState() = default;
+      |     ^~~~~~~~~~~~
+<workspace>/sound-implementation/wip/tests/host/synthone_renderer_test.cpp:7:5: error: redefinition of ‘int main(int, char**)’
+    7 | int main(int argc,char **argv) {
+      |     ^~~~
+<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler/tests/source_scheduler_test.cpp:68:5: note: ‘int main(int, char**)’ previously defined here
+   68 | int main(int argc,char**argv){
+      |     ^~~~
+cc1plus: all warnings being treated as errors
+Traceback (most recent call last):
+  File "<workspace>/synthone-implementation/adapter/build.py", line 6, in <module>
+    newroot.joinpath('commands.json').write_text(json.dumps([compile,link],indent=2));subprocess.run(compile,check=True);subprocess.run(link,check=True)
+                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['c++', '-std=c++17', '-DNO_LIBSNDFILE', '-fno-builtin', '-ffunction-sections', '-fdata-sections', '-ffp-contract=off', '-fno-fast-math', '-Wall', '-Wextra', '-Werror', '-Wno-unused-parameter', '-Wno-misleading-indentation', '-O2', '-Wno-reorder', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/scheduler', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/experiment/probe', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/experiment/shared-graph', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/controls', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension', '-I<workspace>/synthone-implementation/host/o2.zbpd0s0g/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav', '-c', '<workspace>/sound-implementation/wip/tests/host/synthone_renderer_test.cpp', '-o', '<workspace>/synthone-implementation/adapter/adapter_test.o', '-I<workspace>/sound-implementation/wip/firmware/src/dsp']' returned non-zero exit status 1.
