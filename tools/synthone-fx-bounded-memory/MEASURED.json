@@ -1,0 +1,87 @@
+{"record":"inventory"}
+{"stage":"bitcrush_hold","payload_bytes":16,"max_samples":0,"note":"four floats; hold length is sr/rate, not a buffer"}
+{"stage":"tremolo","payload_bytes":0,"max_samples":0,"note":"multiplies by the supplied LFO; no state"}
+{"stage":"autopan_sine_table","payload_bytes":16388,"max_samples":4097,"note":"sp_ftbl_create 4096 plus the guard sample"}
+{"stage":"autopan_osc_pan_host_objects","payload_bytes":40,"max_samples":0,"note":"host sizeof, pointers are 8"}
+{"stage":"phaser_faust","payload_bytes":192,"max_samples":0,"note":"copied faust struct; no sample delay line"}
+{"stage":"phaser_wrapper_host","payload_bytes":176,"max_samples":0,"note":"host sizeof of sp_phaser"}
+{"stage":"moog_delay_input_L","payload_bytes":64,"max_samples":6,"note":"delay[6] ladder state, both channels follow"}
+{"stage":"moog_delay_input_R","payload_bytes":64,"max_samples":6,"note":"same"}
+{"stage":"vdelay_L_allocated","payload_bytes":1920004,"max_samples":480001,"note":"init maxdel 10s"}
+{"stage":"vdelay_R_allocated","payload_bytes":1920004,"max_samples":480001,"note":"init maxdel 10s"}
+{"stage":"vdelay_RR_allocated","payload_bytes":1920004,"max_samples":480001,"note":"init maxdel 10s"}
+{"stage":"vdelay_fill_allocated","payload_bytes":1920004,"max_samples":480001,"note":"init maxdel 10s"}
+{"stage":"four_reachable_payloads","payload_bytes":2880016,"auxdata_host":16,"plus_four_aux":2880080,"manifest_bytes":2880080}
+{"stage":"delay_crossfade_pair_host","payload_bytes":8,"max_samples":0,"note":"pos only"}
+{"stage":"reverb_hipass_pair","payload_bytes":104,"max_samples":0,"note":"a[8] filter state, no delay line"}
+{"stage":"revsc_lines","payload_bytes":107440,"max_samples":0,"note":"eight delay lines, iPitchMod 1"}
+{"stage":"revsc_longest_line","samples":4567,"seconds":0.09514583}
+{"stage":"reverb_crossfade_pair_host","payload_bytes":8,"max_samples":0,"note":"pos only"}
+{"stage":"widen_delay","payload_bytes":9600,"max_samples":2400,"note":"fixed 0.05s, feedback forced 0"}
+{"stage":"proposed_control","bytes":1300,"aligned4":1300}
+{"stage":"phaser_faust_sizeof","bytes":192}
+{"stage":"compressor_faust_sizeof","bytes":56,"times6":336}
+{"stage":"moog_sizeof","bytes":64}
+{"stage":"buthp_sizeof","bytes":52}
+{"param":"bitCrushSampleRate","min":2048,"default":48000,"max":48000}
+{"param":"bitcrushLFO","min":0,"default":0,"max":3}
+{"param":"tremoloLFO","min":0,"default":0,"max":3}
+{"param":"autoPanAmount","min":0,"default":0,"max":1}
+{"param":"autoPanFrequency","min":0.00052083336,"default":0.25,"max":10}
+{"param":"phaserMix","min":0,"default":0,"max":1}
+{"param":"phaserRate","min":1,"default":12,"max":300}
+{"param":"phaserFeedback","min":0,"default":0,"max":0.800000012}
+{"param":"phaserNotchWidth","min":100,"default":800,"max":1000}
+{"param":"filterType","min":0,"default":0,"max":2}
+{"param":"cutoff","min":64,"default":20000,"max":22050}
+{"param":"delayInputCutoffTrackingRatio","min":0.5,"default":0.75,"max":1}
+{"param":"delayInputResonance","min":0,"default":0,"max":0.980000019}
+{"param":"delayOn","min":0,"default":0,"max":1}
+{"param":"delayFeedback","min":0,"default":0.100000001,"max":0.899999976}
+{"param":"delayTime","min":0.000362811785,"default":0.25,"max":2.5}
+{"param":"delayMix","min":0,"default":0.125,"max":1}
+{"param":"reverbOn","min":0,"default":1,"max":1}
+{"param":"reverbFeedback","min":0,"default":0.5,"max":1}
+{"param":"reverbHighPass","min":80,"default":700,"max":900}
+{"param":"reverbMix","min":0,"default":0,"max":1}
+{"param":"reverbMixLFO","min":0,"default":0,"max":3}
+{"param":"compressorReverbInputRatio","min":1,"default":13,"max":20}
+{"param":"compressorReverbInputThreshold","min":-60,"default":-8.5,"max":0}
+{"param":"compressorReverbInputAttack","min":0,"default":0.00100000005,"max":0.00999999978}
+{"param":"compressorReverbInputRelease","min":0,"default":0.224999994,"max":0.5}
+{"param":"compressorReverbInputMakeupGain","min":0.5,"default":1.88,"max":4}
+{"param":"compressorReverbWetRatio","min":1,"default":13,"max":20}
+{"param":"compressorReverbWetThreshold","min":-60,"default":-8,"max":0}
+{"param":"compressorReverbWetAttack","min":0,"default":0.00100000005,"max":0.00999999978}
+{"param":"compressorReverbWetRelease","min":0,"default":0.150000006,"max":0.5}
+{"param":"compressorReverbWetMakeupGain","min":0.5,"default":1.88,"max":4}
+{"param":"compressorMasterRatio","min":1,"default":20,"max":20}
+{"param":"compressorMasterThreshold","min":-60,"default":-9,"max":0}
+{"param":"compressorMasterAttack","min":0,"default":0.00100000005,"max":0.00999999978}
+{"param":"compressorMasterRelease","min":0,"default":0.150000006,"max":0.5}
+{"param":"compressorMasterMakeupGain","min":0.5,"default":2,"max":4}
+{"param":"masterVolume","min":0,"default":0.5,"max":2}
+{"param":"widen","min":0,"default":0,"max":1}
+{"pack":{"pool_i16":79200,"pool_bytes":158400,"carve_bytes":1300,"widen_i16":2400,"long_phys":25382,"short_phys":12693,"long_admitted":25378,"short_admitted":12689,"spare_i16":0,"delay_time_max_48":0.264354169,"delay_time_max_44":0.287732422,"default_delay_time":0.25}}
+{"record":"pan"}
+{"check":"pan_table_vs_fm_sinf","hz":0.25,"frames":48000,"max_abs":0.00251924992,"rms":0.0018069292}
+{"check":"pan_table_vs_fm_sinf","hz":10,"frames":48000,"max_abs":0.00337137422,"rms":0.00142405743}
+{"name":"identity_reference_48k","frames":48000,"bit_exact":true,"max_abs_l":0,"max_abs_r":0,"rms_l":0,"rms_r":0,"snr_db_l":1e+09,"snr_db_r":1e+09,"spec_mag_max_l":0,"spec_mag_max_r":0,"spec_mag_rms_l":0,"spec_mag_rms_r":0,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"identity_reference_44k","frames":44100,"bit_exact":true,"max_abs_l":0,"max_abs_r":0,"rms_l":0,"rms_r":0,"snr_db_l":1e+09,"snr_db_r":1e+09,"spec_mag_max_l":0,"spec_mag_max_r":0,"spec_mag_rms_l":0,"spec_mag_rms_r":0,"signal_rms":0.0927891458,"i16_saturations":0}
+{"name":"identity_lifecycle_48k","frames":60000,"bit_exact":true,"max_abs_l":0,"max_abs_r":0,"rms_l":0,"rms_r":0,"snr_db_l":1e+09,"snr_db_r":1e+09,"spec_mag_max_l":0,"spec_mag_max_r":0,"spec_mag_rms_l":0,"spec_mag_rms_r":0,"signal_rms":0.0175547162,"i16_saturations":0}
+{"name":"float_adapter_reference_48k","frames":48000,"bit_exact":true,"max_abs_l":0,"max_abs_r":0,"rms_l":0,"rms_r":0,"snr_db_l":1e+09,"snr_db_r":1e+09,"spec_mag_max_l":0,"spec_mag_max_r":0,"spec_mag_rms_l":0,"spec_mag_rms_r":0,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"i16_adapter_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.000622652471,"max_abs_r":0.00169350207,"rms_l":0.000188199617,"rms_r":0.000695750866,"snr_db_l":53.8569,"snr_db_r":42.5002,"spec_mag_max_l":0.220158164,"spec_mag_max_r":0.934715659,"spec_mag_rms_l":0.00714292011,"spec_mag_rms_r":0.0267606625,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"i16_adapter_reference_44k","frames":44100,"bit_exact":false,"max_abs_l":0.000587731251,"max_abs_r":0.00168290734,"rms_l":0.00018818457,"rms_r":0.000695998834,"snr_db_l":53.8583,"snr_db_r":42.4978,"spec_mag_max_l":0.19718663,"spec_mag_max_r":0.86693241,"spec_mag_rms_l":0.00709767849,"spec_mag_rms_r":0.0266593012,"signal_rms":0.0927891458,"i16_saturations":0}
+{"name":"i16_adapter_lifecycle_48k","frames":60000,"bit_exact":false,"max_abs_l":0.00134908501,"max_abs_r":0.0030703824,"rms_l":0.000252525796,"rms_r":0.00054149344,"snr_db_l":36.8418,"snr_db_r":30.216,"spec_mag_max_l":0.39234741,"spec_mag_max_r":0.599673092,"spec_mag_rms_l":0.0080533155,"spec_mag_rms_r":0.0168684599,"signal_rms":0.0175547162,"i16_saturations":0}
+{"name":"i16_plus_reverb_off_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.0466353744,"max_abs_r":0.0881034881,"rms_l":0.0228629057,"rms_r":0.0391468687,"snr_db_l":12.1667,"snr_db_r":7.49534,"spec_mag_max_l":42.8583572,"spec_mag_max_r":78.8808984,"spec_mag_rms_l":0.877792431,"spec_mag_rms_r":1.50556156,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"decim4_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.00766461156,"max_abs_r":0.0261711031,"rms_l":0.00361465092,"rms_r":0.0123609021,"snr_db_l":28.188,"snr_db_r":17.5083,"spec_mag_max_l":1.32942301,"spec_mag_max_r":3.62758261,"spec_mag_rms_l":0.0254472962,"spec_mag_rms_r":0.0606011956,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"decim10_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.018590441,"max_abs_r":0.0641145725,"rms_l":0.00904308742,"rms_r":0.0307372785,"snr_db_l":20.2229,"snr_db_r":9.59597,"spec_mag_max_l":3.77082729,"spec_mag_max_r":13.4949075,"spec_mag_rms_l":0.0787815039,"spec_mag_rms_r":0.221262271,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"single_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.0240677181,"max_abs_r":0.0865608454,"rms_l":0.0115051348,"rms_r":0.0405430976,"snr_db_l":18.1314,"snr_db_r":7.19094,"spec_mag_max_l":9.5069971,"spec_mag_max_r":83.8571619,"spec_mag_rms_l":0.102336142,"spec_mag_rms_r":1.58447454,"signal_rms":0.092782063,"i16_saturations":0}
+{"name":"i16_exposed_48k","frames":48000,"bit_exact":false,"max_abs_l":0.000976513373,"max_abs_r":0.00317810476,"rms_l":0.000398503417,"rms_r":0.000866074561,"snr_db_l":48.9314,"snr_db_r":42.1889,"spec_mag_max_l":0.565810335,"spec_mag_max_r":1.21886046,"spec_mag_rms_l":0.0140971966,"spec_mag_rms_r":0.0276333897,"signal_rms":0.111430112,"i16_saturations":0}
+{"name":"decim4_exposed_48k","frames":48000,"bit_exact":false,"max_abs_l":0.423586875,"max_abs_r":0.762501359,"rms_l":0.0122087299,"rms_r":0.0300771475,"snr_db_l":19.2066,"snr_db_r":11.3753,"spec_mag_max_l":0.913532905,"spec_mag_max_r":3.36321141,"spec_mag_rms_l":0.106490786,"spec_mag_rms_r":0.356317129,"signal_rms":0.111430112,"i16_saturations":0}
+{"name":"decim10_exposed_48k","frames":48000,"bit_exact":false,"max_abs_l":0.422600314,"max_abs_r":0.755241394,"rms_l":0.0211142546,"rms_r":0.0516179685,"snr_db_l":14.4485,"snr_db_r":6.68403,"spec_mag_max_l":2.15488459,"spec_mag_max_r":6.78483018,"spec_mag_rms_l":0.183728214,"spec_mag_rms_r":0.569020611,"signal_rms":0.111430112,"i16_saturations":0}
+{"name":"float_adapter_long_2s5","frames":288000,"bit_exact":false,"max_abs_l":0.0874870904,"max_abs_r":0.470912158,"rms_l":0.034684594,"rms_r":0.139569525,"snr_db_l":6.68609,"snr_db_r":-5.40699,"spec_mag_max_l":67.5060051,"spec_mag_max_r":199.258229,"spec_mag_rms_l":0.932054287,"spec_mag_rms_r":2.39478089,"signal_rms":0.0748930141,"i16_saturations":0}
+{"name":"decim10_long_2s5","frames":288000,"bit_exact":false,"max_abs_l":0.0177948871,"max_abs_r":0.0503819603,"rms_l":0.00358511208,"rms_r":0.013346611,"snr_db_l":26.3988,"snr_db_r":14.9814,"spec_mag_max_l":4.0110347,"spec_mag_max_r":9.95102648,"spec_mag_rms_l":0.0227559623,"spec_mag_rms_r":0.106800201,"signal_rms":0.0748930141,"i16_saturations":0}
+{"name":"single_long_2s5","frames":288000,"bit_exact":false,"max_abs_l":0.121573083,"max_abs_r":0.160447083,"rms_l":0.0444689283,"rms_r":0.0565761838,"snr_db_l":4.52769,"snr_db_r":2.43615,"spec_mag_max_l":88.3460154,"spec_mag_max_r":105.119256,"spec_mag_rms_l":0.680179715,"spec_mag_rms_r":0.992250624,"signal_rms":0.0748930141,"i16_saturations":0}
+{"name":"reverb_off_reference_48k","frames":48000,"bit_exact":false,"max_abs_l":0.0467173606,"max_abs_r":0.0886250585,"rms_l":0.0230309738,"rms_r":0.0397986862,"snr_db_l":12.103,"snr_db_r":7.35191,"spec_mag_max_l":43.1269513,"spec_mag_max_r":80.0083246,"spec_mag_rms_l":0.88444329,"spec_mag_rms_r":1.53175888,"signal_rms":0.092782063,"i16_saturations":0}
+{"record":"done","exit":0}
