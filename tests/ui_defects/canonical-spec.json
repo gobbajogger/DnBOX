@@ -1,0 +1,13 @@
+{
+  "schema": "dnbox-ui-canonical-spec/1",
+  "path": "docs/ui/UI-SOURCE-OF-TRUTH.md",
+  "sha256": "868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6",
+  "bytes": 2891,
+  "sourceDiscrepancies": "docs/ui/ENGINE-ADMISSION.md",
+  "referenceSystems": [
+    "909 R22",
+    "808 R22"
+  ],
+  "perPageCoverageStatus": "NOT_RUN",
+  "limits": "Hash pin alone is not page acceptance. All engine/runtime/layout requirements remain fail-closed pending actual per-page evidence."
+}

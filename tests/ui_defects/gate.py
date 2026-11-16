@@ -21,6 +21,7 @@ from PIL import Image
 STATUSES = {"PASS", "FAIL", "REVIEW_REQUIRED", "NOT_RUN"}
 WEB_IDS = set(range(10, 25))
 FIRMWARE_IDS = set(range(1, 10)) | set(range(19, 25))
+CANONICAL_SPEC_SHA256 = "868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6"
 
 
 def sha256(path: Path) -> str:
@@ -75,6 +76,8 @@ def artifact_integrity(item: object, expected_source: str, root: Path | None = N
 def inspect_report(report: dict, expected_source: str, required: set[int], scope: str,
                    artifact_root: Path | None = None) -> list[str]:
     problems = []
+    if report.get("canonicalSpecSHA256") != CANONICAL_SPEC_SHA256:
+        problems.append(f"{scope}: exact canonical owner-spec binding is missing or stale")
     if not valid_hash(expected_source) or report.get("sourceClosureSha256") != expected_source:
         problems.append(f"{scope}: source closure is missing or does not match")
     checks = report.get("checks", [])
@@ -199,6 +202,8 @@ def main() -> int:
         run.add_argument("--" + name, required=True)
     run.add_argument("command", nargs=argparse.REMAINDER)
     check = subs.add_parser("verify")
+    check.add_argument("--canonical-spec", type=Path,
+                       default=Path(__file__).with_name("canonical-spec.json"))
     for scope in ("firmware", "web"):
         check.add_argument("--" + scope + "-report", required=True, type=Path)
         check.add_argument("--" + scope + "-source", required=True)
@@ -209,6 +214,14 @@ def main() -> int:
             args.command.pop(0)
         return record_run(args)
     problems = []
+    from canonical_spec import authenticate, read_descriptor
+    try:
+        descriptor = read_descriptor(args.canonical_spec)
+        actual_spec = authenticate(Path(__file__).resolve().parents[2], descriptor)
+        if actual_spec != CANONICAL_SPEC_SHA256:
+            problems.append("canonical owner document differs from reviewed gate pin")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        problems.append(f"canonical owner document cannot be authenticated: {type(exc).__name__}")
     for scope, required in (("firmware", FIRMWARE_IDS), ("web", WEB_IDS)):
         report = json.loads(getattr(args, scope + "_report").read_text())
         receipt = json.loads(getattr(args, scope + "_pushed_receipt").read_text())
