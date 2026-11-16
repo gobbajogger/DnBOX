@@ -8124,6 +8124,16 @@ static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint
 }
 static UI_DRAW int dg_tail_px(float ms){if(ms<0)ms=0;if(ms>4000)ms=4000;return 2+(int)(23.0f*fm_sqrtf(ms/4000.0f)+.5f);}
 #define DG_BACK_MS 300u
+/* Shared by the compact and R22 renderers: one existing timestamp per voice. */
+static uint32_t dg_last[2][NDRUM+1];
+static UI_DRAW float dg_live_back(pref_t r,int live)
+{
+    uint32_t tnow=plat_ms();int ki=r.a==T_808,vi=r.b>NDRUM?NDRUM:r.b;
+    if(live)dg_last[ki][vi]=tnow|1u;
+    else if(dg_last[ki][vi] && tnow-dg_last[ki][vi]<DG_BACK_MS)
+        return (float)(tnow-dg_last[ki][vi])/(float)DG_BACK_MS;
+    return 1.0f;
+}
 static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
 {
     const x0x_param_t *d=pref_desc(r);
@@ -8133,13 +8143,9 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     int top=gy+1,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
     /* after the voice ends, the idle glyph comes back over DG_BACK_MS (ink fades in,
      * the wave regrows) instead of snapping from the last live frame */
-    static uint32_t dg_last[2][NDRUM+1];
-    uint32_t tnow=plat_ms(); float back=1.0f; int ki=r.a==T_808,vi=r.b>NDRUM?NDRUM:r.b;
-    if(live) dg_last[ki][vi]=tnow|1u;
-    else if(dg_last[ki][vi] && tnow-dg_last[ki][vi]<DG_BACK_MS){
-        back=(float)(tnow-dg_last[ki][vi])/(float)DG_BACK_MS;
-        if(role==DG_DECAY||role==DG_NTAIL||role==DG_BDSWEEP) col=blend(C_LINE,col,(int)(16.0f*back));   /* their live end is dim */
-    }
+    float back=dg_live_back(r,live);
+    if(!live && back<1.0f && (role==DG_DECAY||role==DG_NTAIL||role==DG_BDSWEEP))
+        col=blend(C_LINE,col,(int)(16.0f*back));
     if(q<0)q=0; if(q>1)q=1;
     switch(role){
     case DG_DECAY: {                             /* DECAY / TAIL: the tail, as long as the real time */
