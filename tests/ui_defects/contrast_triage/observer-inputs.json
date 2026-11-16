@@ -1,0 +1,22 @@
+{
+  "firmware/src/gfx.c": {
+    "beforeSHA256": "3efcbeafea44c2754cca3d43bf32aeec70ddc57f49e7344f2931cc165b909fab",
+    "afterSHA256": "082d8cc5c45f92b52c8dfc3a1d4e75743b54eceb3f23364befd110a09bb9301b"
+  },
+  "firmware/src/app/ui.c": {
+    "beforeSHA256": "01f0b4b4d2d099fef2c93fa6190d6bf2f25b4cd179495118dbbfd0a6c32cabbf",
+    "afterSHA256": "ff0840538fe1f6e821b1be644ba7a4343c203d60c2daf23cf09e3db9e58b8657"
+  },
+  "firmware/src/app/ui_drum_voice.inc": {
+    "beforeSHA256": "a669c3c03c19204bd26eda0bf59b2f33f43a52da8beb718df8da24ee10b45353",
+    "afterSHA256": "99a3688387fc9981bb808df70d86285e5e139307f27cb61c07ffffbefac70059"
+  },
+  "tests/host/ui_screen_inventory.c": {
+    "beforeSHA256": "a566070f3d5e9165e660bf195e0e2b11423ac2938af58717081d1ee6292bbb43",
+    "afterSHA256": "18297c5fdc15bed84cb8cda3d440ba142af6bc66d713aee807f5be0f3a1532b9"
+  },
+  "tests/host/ui_overlay_inventory.c": {
+    "beforeSHA256": "409780978eb5c4d47259350db31117540b23fb80138e7743de88b47eb788b38d",
+    "afterSHA256": "0f72e03f56fcd89473d9393a8cd8f2324284fc4693173cefe4ef6deb7ae4b181"
+  }
+}
