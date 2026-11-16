@@ -331,7 +331,8 @@ def build_app():
                   "-I" + str(FW / "src/dsp"),
                   "-DS1_NO_DOUBLE", "-ffp-contract=off", "-fno-fast-math"]
         s1_cxx = ["-std=c++11", "-fno-exceptions", "-fno-rtti", "-x", "c++"]
-        s1_c = ["nodouble/base.c", "nodouble/ftbl.c", "nodouble/adsr.c", "nodouble/crossfade.c",
+        s1_c = ["nodouble/d64.c", "nodouble/exact.c", "nodouble/pool_keep.c",
+                "nodouble/base.c", "nodouble/ftbl.c", "nodouble/adsr.c", "nodouble/crossfade.c",
                 "nodouble/osc.c", "nodouble/fosc.c", "nodouble/noise.c", "nodouble/moogladder.c",
                 "nodouble/butbp.c", "nodouble/buthp.c", "nodouble/port.c", "nodouble/phasor.c",
                 "nodouble/oscmorph2d.c", "float_math.c", "compact-reader/compact.c",

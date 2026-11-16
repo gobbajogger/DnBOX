@@ -13,7 +13,7 @@ import tempfile
 
 COMPILER_SHA256 = 'c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f'
 TOOLCHAIN_INPUTS_SHA256 = '56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e'
-LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','float_math.h','float_math.c','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp','nodouble/slot.h','nodouble/midi_cps.h','nodouble/base.c','nodouble/adsr.c','nodouble/butbp.c','nodouble/buthp.c','nodouble/crossfade.c','nodouble/fosc.c','nodouble/ftbl.c','nodouble/moogladder.c','nodouble/noise.c','nodouble/osc.c','nodouble/oscmorph2d.c','nodouble/phasor.c','nodouble/port.c']
+LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','float_math.h','float_math.c','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp','nodouble/slot.h','nodouble/d64.h','nodouble/d64.c','nodouble/exact.h','nodouble/exact.c','nodouble/pool_keep.c','nodouble/midi_cps.h','nodouble/base.c','nodouble/adsr.c','nodouble/butbp.c','nodouble/buthp.c','nodouble/crossfade.c','nodouble/fosc.c','nodouble/ftbl.c','nodouble/moogladder.c','nodouble/noise.c','nodouble/osc.c','nodouble/oscmorph2d.c','nodouble/phasor.c','nodouble/port.c']
 LAYOUT = '''#include "scheduler.hpp"
 struct LayoutAccess : s1scheduler::RuntimeState {
     static constexpr unsigned notes() { return sizeof(((LayoutAccess*)0)->objects_); }
@@ -101,7 +101,7 @@ def main():
     core=closure/'experiment/audiokit-4.9.2/AudioKit/Core'
     firmware_root=(root.parents[2]/'firmware').resolve()
     firmware_math=firmware_root/'src/dsp'
-    includes=[closure/'scheduler',closure/'experiment/probe',closure/'experiment/shared-graph',closure/'controls',core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav',firmware_math]
+    includes=[closure/'scheduler',closure/'scheduler'/'nodouble',closure/'experiment/probe',closure/'experiment/shared-graph',closure/'controls',core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav',firmware_math]
     resource=tc/'common/lib/clang/4.0.1/include';target_include=tc/'pi32v2/include'
     flags=['-target','pi32v2','-mcpu=r3','-mfprev1','-Os','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-fno-builtin','-DNO_LIBSNDFILE','-DS1_NO_DOUBLE','-nostdinc']
     inc=['-I'+str(x) for x in includes]+['-isystem',str(resource),'-isystem',str(target_include)]
@@ -114,6 +114,7 @@ def main():
     for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
         require((derived/name).read_bytes()==(closure/'scheduler/reader'/name).read_bytes(),'native reader derivation mismatch: '+name)
     units=[('checked_domain',closure/'scheduler/checked_domain.cpp','c++'),('compact_reader',closure/'scheduler/compact-reader/compact.c','c'),('compact_morph',closure/'scheduler/compact-reader/compact_morph.c','c'),('compact_note',closure/'scheduler/compact_note.cpp','c++'),('direct_reader',closure/'scheduler/reader/direct_reader.c','c'),('runtime_morph',closure/'scheduler/reader/morph_compute.c','c'),('runtime_note',closure/'scheduler/reader/runtime_note.cpp','c++'),('scheduler',closure/'scheduler/scheduler.cpp','c++'),('ports',closure/'controls/parameter_ports.cpp','c++'),('parameter_map',closure/'controls/generated/parameter_map.cpp','c++'),('voice',closure/'experiment/probe/portable_voice.cpp','c++')]
+    units += [('d64',closure/'scheduler/nodouble/d64.c','c'),('exact',closure/'scheduler/nodouble/exact.c','c'),('pool_keep',closure/'scheduler/nodouble/pool_keep.c','c')]
     units += [('base',closure/'scheduler/nodouble/base.c','c')]
     units += [(name,closure/'scheduler/nodouble'/(name+'.c'),'c') for name in ['ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']]
     units += [('morph',closure/'scheduler/nodouble/oscmorph2d.c','c'),('float_math',closure/'scheduler/float_math.c','c')]
@@ -152,20 +153,29 @@ def main():
     # Object scan, not a garbage-collected image. An earlier image count rooted
     # only live engine calls, so unreferenced base.c pow/soft-double stayed invisible.
     nm_bin=tc/'pi32v2/bin/nm'
-    object_scan=[]
+    # The firmware link is the objects plus libc.c. It provides memset, memcpy
+    # and memcmp, and no libm or compiler-rt. A symbol the closure does not
+    # define and the firmware does not provide fails the link on device.
+    firmware_symbols={'memset','memcpy','memcmp'}
+    defined=set()
+    pending=[]
     for obj in sorted(out.glob('*.o')):
-        listed=subprocess.run([str(nm_bin),'-u',str(obj)],capture_output=True,text=True)
+        listed=subprocess.run([str(nm_bin),str(obj)],capture_output=True,text=True)
         require(listed.returncode==0, 'nm failed on '+obj.name)
-        hits=[]
         for line in listed.stdout.splitlines():
             parts=line.split()
-            if not parts: continue
-            sym=parts[-1]
-            if sym.startswith('__') and 'df' in sym: hits.append(sym+'(double)')
-            elif sym in ('malloc','calloc','realloc','free'): hits.append(sym+'(alloc)')
-            elif sym in ('pow','exp','sin','cos','tan','log','log2','floor','fabs','fmod','tanh','sqrt'): hits.append(sym+'(libm)')
-        if hits: object_scan.append({'object':obj.name,'symbols':hits})
-    require(not object_scan, 'closure objects still reference double, alloc, or double libm: '+json.dumps(object_scan))
+            if len(parts)<2: continue
+            if parts[-2] in ('T','D','B','R','W','V','C'): defined.add(parts[-1])
+            elif parts[-2]=='U': pending.append((obj.name, parts[-1]))
+    object_scan=[]
+    for name, sym in pending:
+        if sym in defined or sym in firmware_symbols: continue
+        kind='undefined'
+        if sym.startswith('__') and 'df' in sym: kind='double'
+        elif sym in ('malloc','calloc','realloc','free'): kind='alloc'
+        elif sym in ('pow','exp','sin','cos','tan','log','log2','floor','fabs','fmod','tanh','sqrt','lrintf','__fpclassifyf'): kind='libm'
+        object_scan.append({'object':name,'symbol':sym,'kind':kind})
+    require(not object_scan, 'closure references a symbol the firmware does not provide: '+json.dumps(object_scan))
     _,sections=elf_sections(out/'layout.o');raw=sections['.s1layout']['data'];require(len(raw)==(20 if a.full_sequence else 18)*4,'native layout size mismatch')
     values=struct.unpack('<'+str(len(raw)//4)+'I',raw);require(values[:2]==(0x53314c31,4 if a.full_sequence else 3),'native layout signature mismatch')
     labels=['pointer','float','double','State','RuntimeState','Scheduler','Ports','S1NoteState','Held','note_objects_7','table_descriptors_53','Scheduler_alignment','direct_binding','direct_binding_alignment','compact_binding','compact_binding_alignment']

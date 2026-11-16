@@ -1,7 +1,6 @@
 #include "slot.h"
 
 #include <stdlib.h>
-#include <math.h>
 #include "float_math.h"
 #include "soundpipeextension.h"
 S1_POOLED(sp_oscmorph2d, sp_oscmorph2d_create, sp_oscmorph2d_destroy, morph)
@@ -99,7 +98,7 @@ int sp_oscmorph2d_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLOAT 
         ft2 = osc->tbl[index + 1]->tbl;
     }
     
-    osc->inc = (int32_t)lrintf(cps * sicvt);  
+    osc->inc = s1_lrintf(cps * sicvt);  
 
     fract = ((phs) & ftp1->lomask) * ftp1->lodiv;
 

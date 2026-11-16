@@ -2,7 +2,12 @@
 #include "reader/runtime_note.hpp"
 #include "compact_note.hpp"
 #include "wave_frequencies.h"
+#if !defined(S1_NO_DOUBLE)
 #include <assert.h>
+#else
+#define assert(cond) ((void)0)
+#endif
+#include "float_math.h"
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
@@ -29,13 +34,13 @@ bool overlap(const void *a,size_t an,const void *b,size_t bn) {
 }
 bool payload(const float *p,size_t n,float bound,InstanceSpan self) {
     if(!p || n!=4097 || overlap(p,n*sizeof(float),self.data,self.bytes)) return false;
-    for(size_t i=0;i<n;++i) if(!isfinite(p[i]) || p[i]<-bound || p[i]>bound) return false;
-    return p[4096]==0.f && !signbit(p[4096]);
+    for(size_t i=0;i<n;++i) if(!s1_finitef(p[i]) || p[i]<-bound || p[i]>bound) return false;
+    return p[4096]==0.f && !s1_signbitf(p[4096]);
 }
 bool values_valid(const float *p,size_t n,bool full_sequence=false) {
     if(!p || n!=150 || (!full_sequence && p[arpIsOn]!=0)) return false;
     for(unsigned i=0;i<150;++i)
-        if(!isfinite(p[i]) || p[i]<minimums[i] || p[i]>maximums[i]) return false;
+        if(!s1_finitef(p[i]) || p[i]<minimums[i] || p[i]>maximums[i]) return false;
     return true;
 }
 }
@@ -46,7 +51,7 @@ bool State::valid_init(const synthone_shared::Tables &tables,int rate,const floa
        !tuning || tuning_count!=128 || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
        overlap(&tables,sizeof tables,self.data,self.bytes)) return false;
     for(unsigned i=0;i<128;++i)
-        if(!isfinite(tuning[i]) || tuning[i]<=0 || tuning[i]>rate*.5f) return false;
+        if(!s1_finitef(tuning[i]) || tuning[i]<=0 || tuning[i]>rate*.5f) return false;
     for(unsigned i=0;i<52;++i) {
         const auto &r=tables.morph[i];
         if(r.band!=i/4 || static_cast<unsigned>(r.shape)!=i%4 ||
@@ -134,7 +139,7 @@ bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,co
        !values_valid(values,count,full_sequence) || !tuning || !tables.sine || tables.sine_count!=4097 ||
        reinterpret_cast<uintptr_t>(tables.sine)%alignof(float) ||
        overlap(packed,bytes,tables.sine,4097*sizeof(float)))return false;
-    for(unsigned i=0;i<128;++i)if(!isfinite(tuning[i])||tuning[i]<=0||tuning[i]>rate*.5f)return false;
+    for(unsigned i=0;i<128;++i)if(!s1_finitef(tuning[i])||tuning[i]<=0||tuning[i]>rate*.5f)return false;
     for(unsigned i=0;i<52;++i){const auto &r=tables.morph[i];
         if(r.samples||r.count!=4097||r.band!=i/4||static_cast<unsigned>(r.shape)!=i%4)return false;}
     for(unsigned i=0;i<13;++i){uint32_t actual,expected;memcpy(&actual,&tables.frequency_band[i],4);memcpy(&expected,&wave_frequencies[i],4);if(actual!=expected)return false;}
@@ -204,11 +209,11 @@ void State::initialize_note_objects() {
 }
 float State::tuningTableNoteToHz(int note) const { return tuningTable[clamp(note,0,127)]; }
 bool State::valid_parameter(unsigned p,float v) const {
-    return initialized_ && p<150 && isfinite(v) && (p!=arpIsOn || v==0.f);
+    return initialized_ && p<150 && s1_finitef(v) && (p!=arpIsOn || v==0.f);
 }
 bool State::valid_event(int pitch,int velocity,float frequency) const {
     return initialized_ && heldNoteNumbers.valid_count() && heldNoteNumbersAE.valid_count() && parameters[arpIsOn]==0 && sequencer.pending_empty && pitch>=0 && pitch<128 &&
-        velocity>=0 && velocity<=127 && isfinite(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
+        velocity>=0 && velocity<=127 && s1_finitef(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
 }
 bool State::valid_output_span(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self,bool full_sequence) const {
     if(!initialized_ || !l || !r || n>65536 || offset>65536-n || (!full_sequence && (parameters[arpIsOn]!=0 || !sequencer.pending_empty))) return false;

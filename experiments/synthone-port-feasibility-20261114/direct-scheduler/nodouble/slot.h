@@ -18,4 +18,5 @@
     int destroy_name(type **p) { \
         if (p && *p == &s1_pool_##tag) { s1_pool_used_##tag = 0; *p = 0; } \
         return SP_OK; \
-    }
+    } \
+    void *s1_pool_slot_##tag(void) { return &s1_pool_##tag; }

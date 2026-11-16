@@ -1,7 +1,7 @@
 #include "direct_reader.h"
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
+#include "float_math.h"
 #define S1_DIRECT_TAG UINT32_C(0x53315231)
 static int extent(const void *p,size_t n){return p!=NULL&&n!=0&&(uintptr_t)p<=UINTPTR_MAX-n;}
 static int overlap(const void *a,size_t an,const void *b,size_t bn){
@@ -25,7 +25,7 @@ int s1_morph_bind_direct(s1_morph_binding *out,const void *data,size_t bytes){
  const unsigned char *p=(const unsigned char*)data;
  for(size_t i=0;i<(size_t)S1_MORPH_UNIQUE_ROWS*S1_MORPH_WORDS_PER_ROW;++i){
   const uint32_t bits=word_le(p+4*i);float f;memcpy(&f,&bits,4);
-  if(!isfinite(f)||f< -2.f||f>2.f||(i%S1_MORPH_WORDS_PER_ROW==4096&&bits!=0))return 0;
+  if(!s1_finitef(f)||f< -2.f||f>2.f||(i%S1_MORPH_WORDS_PER_ROW==4096&&bits!=0))return 0;
  }
  const s1_morph_binding candidate={p,bytes,S1_DIRECT_TAG};*out=candidate;return 1;
 }

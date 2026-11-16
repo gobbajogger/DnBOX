@@ -1,5 +1,8 @@
 #include "parameter_ports.hpp"
 #include "float_math.h"
+#if defined(S1_NO_DOUBLE)
+#include "exact.h"
+#endif
 #include <math.h>
 #include <stdint.h>
 
@@ -10,7 +13,7 @@ constexpr float maximum_half_time = .99f;
 // Covers every current physical metadata range (largest maximum is 48000).
 constexpr float maximum_target_magnitude = 48000.f;
 bool valid_target(float value) {
-    return isfinite(value) && value >= -maximum_target_magnitude && value <= maximum_target_magnitude;
+    return s1_finitef(value) && value >= -maximum_target_magnitude && value <= maximum_target_magnitude;
 }
 bool valid_rate(int rate) { return rate == 44100 || rate == 48000 || rate == 96000; }
 float clamp_half_time(float value) {
@@ -51,7 +54,7 @@ void Ports::apply_restore(const float *values, int sample_rate) {
     // Source sp_port_init retains c1/c2, clears yt1 and makes coefficients dirty.
     common_.sr = sample_rate;
 #if defined(S1_NO_DOUBLE)
-    common_.onedsr = 1.f / (float)common_.sr;
+    common_.onedsr = s1_port_onedsr(common_.sr);
     common_.prvhtim = -100.f;
 #else
     common_.onedsr = 1.0 / common_.sr;
@@ -76,7 +79,7 @@ bool Ports::restore(const float *values, size_t value_count, int sample_rate) {
 }
 
 bool Ports::update_half_time(float half_time) {
-    if (!outputs_ || !isfinite(half_time) ||
+    if (!outputs_ || !s1_finitef(half_time) ||
         half_time < minimum_half_time || half_time > maximum_half_time) return false;
     common_.htime = half_time;
     return true;
@@ -84,7 +87,7 @@ bool Ports::update_half_time(float half_time) {
 
 bool Ports::set_resolved_target(unsigned parameter, float value) {
     if (!outputs_ || parameter >= parameter_count || !valid_target(value)) return false;
-    if (parameter == half_time_parameter && !isfinite(outputs_[parameter])) return false;
+    if (parameter == half_time_parameter && !s1_finitef(outputs_[parameter])) return false;
     const auto slot = selected_slots[parameter];
     if (slot == unsmoothed_slot) outputs_[parameter] = value;
     else selected_[slot].target = value;
@@ -97,8 +100,7 @@ bool Ports::tick() {
     if (!outputs_) return false;
     if (common_.prvhtim != common_.htime) {
 #if defined(S1_NO_DOUBLE)
-        common_.c2 = s1_powf(0.5f, common_.onedsr / common_.htime);
-        common_.c1 = 1.f - common_.c2;
+        s1_port_coeffs(common_.onedsr, common_.htime, &common_.c1, &common_.c2);
 #else
         common_.c2 = pow(0.5, common_.onedsr / common_.htime);
         common_.c1 = 1.0 - common_.c2;

@@ -13,7 +13,6 @@
 #include "slot.h"
 
 #include <stdlib.h>
-#include <math.h>
 #include "float_math.h"
 #include "soundpipe.h"
 S1_POOLED(sp_osc, sp_osc_create, sp_osc_destroy, osc)
@@ -51,7 +50,7 @@ int sp_osc_compute(sp_data *sp, sp_osc *osc, SPFLOAT *in, SPFLOAT *out)
     phs = osc->lphs;
     ft = osc->tbl->tbl;
     
-    osc->inc = (int32_t)lrintf(cps * sicvt);
+    osc->inc = s1_lrintf(cps * sicvt);
 
     fract = ((phs) & ftp->lomask) * ftp->lodiv;
     pos = phs>>lobits;

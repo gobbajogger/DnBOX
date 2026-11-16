@@ -28,11 +28,10 @@ and qualification, not ignoring this contract.
 ## Behavior and access
 
 The host reference keeps the original binary64 per-sample time and fmod.
-The firmware-target compile (`S1_NO_DOUBLE`) stores that clock as a 2^-64
-fixed-point ratio so the image links no soft-double helper. On the public
-sequence patterns the fixed sum stays within about 5e-11 of the binary64 sum.
-A step can move by one sample when the binary64 value is closer to a multiplier
-boundary than that residual.
+The firmware-target compile (`S1_NO_DOUBLE`) stores those same binary64 bits
+and updates them with integer add, divide and fmod. A step therefore crosses
+a multiplier boundary on the same sample as the original clock for every
+finite tempo, multiplier and sample rate, for as long as the sum stays finite.
 It preserves all supported source control ranges/casts, all three arp directions,
 1–4 octaves, interval scaling for notes-per-octave, 1–16 sequence steps, on/off,
 octave boost, pitch offset, held note order, chord velocities, and callback order.

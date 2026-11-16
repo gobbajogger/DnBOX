@@ -393,9 +393,10 @@ To get the calibration mode again, build with `X0X_DEV_PADCAL=1` (or with no val
 marks the complete calibration mode (CLP-79, orientation page, reopen fix, ok dot).
 
 Build option: `X0X_SYNTHONE` (default `0`). `1` compiles the no-double Synth One closure into the
-firmware image and calls `x0x_synthone_keep` from `engine_init` so `--gc-sections` keeps it. That call
-does not render audio and does not change the UI. `0` or an unset variable leaves the Elite and Pro
-binaries on the normal compile, with no Synth One objects. The closure is the experiment under
+firmware image and calls `x0x_synthone_keep` from `engine_init` so `--gc-sections` keeps it. The keep
+takes the address of the scheduler and of each static `.pool` slot, so the pool size in the link is
+the slot bytes. It does not render audio and does not change the UI. `0` or an unset variable leaves
+the Elite and Pro binaries on the normal compile, with no Synth One objects. The closure is the experiment under
 `experiments/synthone-port-feasibility-20261114/direct-scheduler`, built with `-DS1_NO_DOUBLE`. Measure
 flash, pool and RAM with:
 

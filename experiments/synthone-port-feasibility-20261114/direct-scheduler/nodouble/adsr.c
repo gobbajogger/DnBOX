@@ -1,7 +1,7 @@
 #include "slot.h"
 
 #include <stdlib.h>
-#include "float_math.h"
+#include "exact.h"
 #include "soundpipe.h"
 S1_POOLED(sp_adsr, sp_adsr_create, sp_adsr_destroy, adsr)
 
@@ -30,7 +30,7 @@ int sp_adsr_init(sp_data *sp, sp_adsr *p)
 
 static SPFLOAT tau2pole(sp_data *sp, sp_adsr *p, SPFLOAT tau)
 {
-    return s1_expf(-1.f / (tau * sp->sr));
+    return s1_adsr_pole(tau, sp->sr);
 }
 
 static SPFLOAT adsr_filter(sp_data *sp, sp_adsr *p)
@@ -48,7 +48,7 @@ int sp_adsr_compute(sp_data *sp, sp_adsr *p, SPFLOAT *in, SPFLOAT *out)
         /* quick fix: uncomment if broken */
         /* pole = tau2pole(sp, p, p->atk * 0.75); */
         /* p->atk_time = p->atk * sp->sr * 1.5; */
-        pole = tau2pole(sp, p, p->atk * 0.6f);
+        pole = tau2pole(sp, p, s1_round_mul(p->atk, 0x3fe3333333333333ull));
         p->atk_time = p->atk * sp->sr;
         p->a = pole;
         p->b = 1 - pole;
@@ -71,7 +71,7 @@ int sp_adsr_compute(sp_data *sp, sp_adsr *p, SPFLOAT *in, SPFLOAT *out)
             *out = adsr_filter(sp, p);
             /* quick fix: uncomment if broken */
             /* if(p->timer > p->atk_time) { */
-            if(*out > 0.99f) {
+            if(s1_f_gt_d(*out, 0x3fefae147ae147aeull)) {
                 p->mode = DECAY;
                 pole = tau2pole(sp, p, p->dec);
                 p->a = pole;

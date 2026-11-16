@@ -9,7 +9,6 @@
 #include <limits>
 using namespace s1source_sequence;
 static uint64_t allocations=0, samples=0, events=0,cases=0,rejects=0;
-static double max_clock_error=0;
 void *operator new(std::size_t n){++allocations;if(void*p=std::malloc(n?n:1))return p;throw std::bad_alloc();}
 void operator delete(void*p)noexcept{std::free(p);}
 void operator delete(void*p,std::size_t)noexcept{std::free(p);}
@@ -31,26 +30,13 @@ struct Pair{
   rate(48000);init();
  }
  void rate(double x){oracle.setSampleRate(x);runtime.set_sample_rate(x);}
-#if defined(S1_NO_DOUBLE)
- static S1Clock from_double(double x){
-  S1Clock c{0,0,1};
-  if(!(x>0)||!std::isfinite(x)) return c;
-  uint64_t u; std::memcpy(&u,&x,8);
-  int exp=(int)((u>>52)&2047); if(exp==0||exp==2047) return c;
-  uint64_t mant=(u&((1ull<<52)-1))|(1ull<<52);
-  int sh=(exp-1023-52)+64;
-  if(sh<0||sh>=128) return c;
-  if(sh>=64){ c.whole=mant<<(sh-64); return c; }
-  c.frac=mant<<sh; if(sh) c.whole=mant>>(64-sh); return c;
- }
-#endif
  void init(){oracle.init();runtime.init();}
  void reset(bool x){oracle.reset(x);runtime.reset(x);}
  void npo(int x){oracle.setNotesPerOctave(x);runtime.set_notes_per_octave(x);}
  void clock(double x){
   oracle.mBeatTime=x;
 #if defined(S1_NO_DOUBLE)
-  S1Clock c=from_double(x); runtime.set_clock(c.whole,c.frac);
+  uint64_t bits; std::memcpy(&bits,&x,8); runtime.set_clock(bits);
 #else
   runtime.beat_time=x;
 #endif
@@ -58,8 +44,7 @@ struct Pair{
  void compare(){
   if(a.count!=b.count||std::memcmp(a.events,b.events,a.count*sizeof(Event)))fail("callback stream");
 #if defined(S1_NO_DOUBLE)
-  double got=(double)runtime.beat_whole+(double)runtime.beat_frac*0x1p-64;
-  double err=std::fabs(got-oracle.mBeatTime); if(err>max_clock_error) max_clock_error=err;
+  if(std::memcmp(&oracle.mBeatTime,&runtime.beat_bits,sizeof(double)))fail("binary64 clock");
 #else
   if(std::memcmp(&oracle.mBeatTime,&runtime.beat_time,sizeof(double)))fail("binary64 clock");
 #endif
@@ -123,6 +108,6 @@ int main(){
  for(int id:ids)for(float bad:{std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::infinity(),-std::numeric_limits<float>::infinity()}){Pair t;t.p[id]=bad;t.bad();}
  {Pair t;t.count=129;t.bad();}{Pair t;t.held[0].noteNumber=-1;t.bad();}{Pair t;t.held[0].velocity=128;t.bad();}
  {Pair t;t.rate(0);t.bad();}{Pair t;t.rate(std::numeric_limits<double>::infinity());t.bad();}
- std::printf("{\"cases\":%llu,\"source_sample_calls\":%llu,\"callback_events\":%llu,\"transactional_rejects\":%llu,\"runtime_heap_allocations\":0,\"runtime_state_bytes\":%zu,\"max_clock_abs_error\":%.3g,\"failures\":0}\n",(unsigned long long)cases,(unsigned long long)samples,(unsigned long long)events,(unsigned long long)rejects,sizeof(SerializedSequence),max_clock_error);
+ std::printf("{\"cases\":%llu,\"source_sample_calls\":%llu,\"callback_events\":%llu,\"transactional_rejects\":%llu,\"runtime_heap_allocations\":0,\"runtime_state_bytes\":%zu,\"max_clock_abs_error\":0,\"failures\":0}\n",(unsigned long long)cases,(unsigned long long)samples,(unsigned long long)events,(unsigned long long)rejects,sizeof(SerializedSequence));
  return 0;
 }

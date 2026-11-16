@@ -15,7 +15,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "float_math.h"
+#include "exact.h"
 #include "soundpipe.h"
 S1_POOLED(sp_port, sp_port_create, sp_port_destroy, port)
 
@@ -30,15 +30,14 @@ int sp_port_init(sp_data *sp, sp_port *p, SPFLOAT htime)
     p->htime = htime;
 
     p->sr = sp->sr;
-    p->onedsr = 1.f/p->sr;
+    p->onedsr = s1_port_onedsr(p->sr);
     return SP_OK;
 }
 
 int sp_port_compute(sp_data *sp, sp_port *p, SPFLOAT *in, SPFLOAT *out)
 {
     if(p->prvhtim != p->htime){
-        p->c2 = s1_powf(0.5f, p->onedsr / p->htime);
-        p->c1 = 1.f - p->c2;
+        s1_port_coeffs(p->onedsr, p->htime, &p->c1, &p->c2);
         p->prvhtim = p->htime;
     }
 

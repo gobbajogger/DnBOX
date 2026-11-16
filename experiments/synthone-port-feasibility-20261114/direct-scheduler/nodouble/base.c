@@ -2,7 +2,7 @@
  * sp_midi2cps uses the 128-note table for integer notes and the firmware
  * exp2 polynomial for any other finite value. */
 #include <string.h>
-#include "float_math.h"
+#include "exact.h"
 #include "midi_cps.h"
 #include "slot.h"
 #include "soundpipe.h"
@@ -10,6 +10,9 @@
 static sp_data s1_sp_slot X0X_POOL;
 static float s1_sp_out X0X_POOL;
 static unsigned char s1_sp_used;
+
+void *s1_pool_slot_sp(void) { return &s1_sp_slot; }
+void *s1_pool_slot_spout(void) { return &s1_sp_out; }
 
 int sp_create(sp_data **spp)
 {
@@ -75,7 +78,7 @@ SPFLOAT sp_midi2cps(SPFLOAT nn)
         int note = (int)nn;
         if ((float)note == nn) return s1_midi_cps_at(note);
     }
-    return 440.f * s1_exp2f((nn - 69.f) / 12.f);
+    return s1_midi_cps_f64(nn);
 }
 
 int sp_set(sp_param *p, SPFLOAT val)

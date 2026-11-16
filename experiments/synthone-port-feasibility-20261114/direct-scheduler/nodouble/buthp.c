@@ -14,10 +14,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "float_math.h"
+#include "exact.h"
 #include "soundpipe.h"
 S1_POOLED(sp_buthp, sp_buthp_create, sp_buthp_destroy, buthp)
-#define ROOT2 1.41421356f
 
 /* Filter loop */
 
@@ -42,7 +41,7 @@ int sp_buthp_init(sp_data *sp, sp_buthp *p)
     p->istor = 0.f;
     p->sr = sp->sr;
     p->freq = 1000;
-    p->pidsr = S1_PI / sp->sr;
+    s1_butbp_consts(sp->sr, &p->pidsr, 0);
     if (p->istor==0.f) {
         p->a[6] = p->a[7] = 0.f;
         p->lkf = 0.f;
@@ -58,16 +57,8 @@ int sp_buthp_compute(sp_data *sp, sp_buthp *p, SPFLOAT *in, SPFLOAT *out)
     }
 
     if (p->freq != p->lkf)      {
-      SPFLOAT *a, c;
-      a = p->a;
       p->lkf = p->freq;
-      c = s1_tanf(p->pidsr * p->lkf);
-
-      a[1] = 1.f / ( 1.f + ROOT2 * c + c * c);
-      a[2] = -(a[1] + a[1]);
-      a[3] = a[1];
-      a[4] = 2.f * ( c*c - 1.f) * a[1];
-      a[5] = ( 1.f - ROOT2 * c + c * c) * a[1];
+      s1_buthp_coeffs(p->pidsr, p->lkf, p->a);
     }
     sp_butter_filter(in, out, p->a);
     return SP_OK;

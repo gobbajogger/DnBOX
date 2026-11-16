@@ -1,11 +1,10 @@
 // Generated morph-only direct-read derivative. See DERIVATION.json.
 #include "morph_compute.h"
 #include "float_math.h"
-#include <math.h>
 #include <string.h>
 int s1_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLOAT *out, const s1_morph_binding *binding)
 {
-    if(!sp||!osc||!out||!s1_morph_binding_valid(binding)||!osc->tbl||!osc->tbl[0]||!osc->fbl||osc->nft!=4||osc->nbl!=13||!isfinite(osc->freq)||osc->freq<0.f||!isfinite(osc->amp)||osc->lphs<0||(uint32_t)osc->lphs>SP_FT_PHMASK) return SP_NOT_OK;
+    if(!sp||!osc||!out||!s1_morph_binding_valid(binding)||!osc->tbl||!osc->tbl[0]||!osc->fbl||osc->nft!=4||osc->nbl!=13||!s1_finitef(osc->freq)||osc->freq<0.f||!s1_finitef(osc->amp)||osc->lphs<0||(uint32_t)osc->lphs>SP_FT_PHMASK) return SP_NOT_OK;
     sp_ftbl *ftp1;
     SPFLOAT amp, cps, fract, v1, v2;
     int row1, row2;
@@ -35,7 +34,7 @@ int s1_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLO
         bandlimitIndex = 0;
     }
 
-    if(bandlimitIndex<0||bandlimitIndex>=13||!isfinite(osc->wtpos)||osc->wtpos<0.f||osc->wtpos>=2147483648.f) return SP_NOT_OK;
+    if(bandlimitIndex<0||bandlimitIndex>=13||!s1_finitef(osc->wtpos)||osc->wtpos<0.f||osc->wtpos>=2147483648.f) return SP_NOT_OK;
     /* Use only the fractional part of the position or 1 */
     if (osc->wtpos > 1.f) {
         osc->wtpos -= (int)osc->wtpos;
@@ -59,7 +58,7 @@ int s1_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLO
         row2 = index + 1;
     }
     
-    osc->inc = (int32_t)lrintf(cps * sicvt);  
+    osc->inc = (int32_t)s1_lrintf(cps * sicvt);  
 
     fract = ((phs) & ftp1->lomask) * ftp1->lodiv;
 

@@ -30,6 +30,9 @@ else
     CC="$TC/pi32v2/bin/clang"
     NM="$TC/pi32v2/bin/nm"
     OBJDUMP="$TC/common/bin/objdump"
+    # The driver is common/bin/clang via a pi32v2 symlink, so it does not
+    # search pi32v2/include on its own. Firmware sources include stdlib.h.
+    set -- -idirafter "$TC/pi32v2/include" "$@"
 fi
 run "$CC" -target pi32v2 -mcpu=r3 -mfprev1 -O2 -fno-builtin -ffp-contract=off \
     -Wall -Wdouble-promotion -Ifirmware/src -Ibuild/gen "$@" -c "$SRCF" -o "$OBJ"
@@ -42,8 +45,7 @@ for s in $UNDEF; do
         malloc|calloc|realloc|free) BAD="$BAD $s(alloc)";;
         expf|exp|tanhf|tanh|powf|pow|sinf|sin|cosf|cos|tanf|tan|logf|log|log2f|log10f|sqrtf|sqrt|floorf|floor|fabsf|fabs|fmodf|fmod|exp2f|roundf|lrintf|atanf|atan2f|ceilf)
             BAD="$BAD $s(libm)";;
-        memset|memcpy|memmove|memcmp) ;;      # the firmware's libc.c provides these
-        __divsi3|__udivsi3|__modsi3|__umodsi3|__ashldi3|__lshrdi3|__ashrdi3|__muldi3|__udivdi3|__divdi3|__umoddi3|__moddi3) ;;
+        memset|memcpy|memcmp) ;;      # firmware/src/libc.c. Nothing else is linked.
         *) BAD="$BAD $s(undefined)";;
     esac
 done

@@ -4,7 +4,7 @@ from pathlib import Path
 import argparse,hashlib,json
 VOICE='probe/portable_voice.cpp'
 MORPH='audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c'
-PINS={VOICE:'c7be9b696b504d39a4d8d00216f507fb6cc7dfaec97b8f010e3fbdb969983cc7',MORPH:'455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c'}
+PINS={VOICE:'24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb',MORPH:'455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c'}
 def digest(b):return hashlib.sha256(b).hexdigest()
 def section(source,start):
  assert source.count(start)==1,start
@@ -58,7 +58,8 @@ def main():
  changes=[('*(ft1 + pos)','f11'),('*(ft2 + pos)','f21'),('*(ft1 + ((pos + 1) % ftp1->size))','f12'),('*(ft2 + ((pos + 1) % ftp1->size))','f22')]
  for old,new in changes:c=replace(c,old,new)
  c=c.replace('floor(','s1_ifloor(').replace('> 1.0','> 1.f')
- c='// Generated morph-only direct-read derivative. See DERIVATION.json.\n#include "morph_compute.h"\n#include "float_math.h"\n#include <math.h>\n#include <string.h>\n'+c+'\n'
+ c=c.replace('lrintf(','s1_lrintf(').replace('!isfinite(','!s1_finitef(')
+ c='// Generated morph-only direct-read derivative. See DERIVATION.json.\n#include "morph_compute.h"\n#include "float_math.h"\n#include <string.h>\n'+c+'\n'
  out=a.output_dir;out.mkdir(parents=True,exist_ok=True)
  outputs={'runtime_note.cpp':cpp,'morph_compute.c':c}
  manifest={'schema':1,'scope':'Runtime-only voice call adapter and four morph loads; original oracle/member/C morph unchanged','inputs':[{'path':p,'sha256':h}for p,h in PINS.items()],'original_member_function_sha256':digest(original_run.encode()),'original_member_body_sha256':digest(run.encode()),'original_morph_function_sha256':digest(original_morph.encode()),'private_helper_bodies_sha256':{'getParam':digest(get_param.encode()),'sampleRate':digest(sample_rate.encode()),'nnToHz':digest(nn.encode())},'voice_allowed_changes':['sixteen references to actual note fields','exact private helper bodies','two morph call-name redirects','explicit failed-read result propagation'],'morph_allowed_changes':['distinct symbol and binding parameter','admitted metadata/bounds rejection','row-index bookkeeping instead of raw payload pointers','four checked direct-word reads and bit copies','index floor is the binary32 image of libm floor inside the signed-32 domain; interpolation and phase arithmetic otherwise unchanged'],'outputs':[{'path':p,'bytes':len(v.encode()),'sha256':digest(v.encode())}for p,v in outputs.items()]}

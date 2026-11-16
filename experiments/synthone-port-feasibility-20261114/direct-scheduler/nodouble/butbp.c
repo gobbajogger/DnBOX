@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "float_math.h"
+#include "exact.h"
 #include "soundpipe.h"
 S1_POOLED(sp_butbp, sp_butbp_create, sp_butbp_destroy, butbp)
 
@@ -28,8 +28,7 @@ int sp_butbp_init(sp_data *sp, sp_butbp *p)
     p->sr = sp->sr;
     p->freq = 1000;
     p->bw = 10;
-    p->pidsr = S1_PI / sp->sr;
-    p->tpidsr = 2.f * S1_PI / sp->sr;
+    s1_butbp_consts(sp->sr, &p->pidsr, &p->tpidsr);
     p->a[6] = p->a[7] = 0.f;
     p->lkf = 0.f;
     p->lkb = 0.f;
@@ -51,16 +50,9 @@ int sp_butbp_compute(sp_data *sp, sp_butbp *p, SPFLOAT *in, SPFLOAT *out)
     fr = p->freq;
 
     if (bw != p->lkb || fr != p->lkf) {
-        SPFLOAT c, d;
         p->lkf = fr;
         p->lkb = bw;
-        c = 1.f / s1_tanf(p->pidsr * bw);
-        d = 2.f * s1_cosf(p->tpidsr * fr);
-        a[1] = 1.f / (1.f + c);
-        a[2] = 0.f;
-        a[3] = -a[1];
-        a[4] = - c * d * a[1];
-        a[5] = (c - 1.f) * a[1];
+        s1_butbp_coeffs(p->pidsr, p->tpidsr, bw, fr, a);
     }
     t = *in - a[4] * a[6] - a[5] * a[7];
     y = t * a[1] + a[2] * a[6] + a[3] * a[7];

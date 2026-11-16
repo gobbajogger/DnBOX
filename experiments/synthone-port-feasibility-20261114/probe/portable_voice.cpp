@@ -1,5 +1,8 @@
 #include "portable_interface.hpp"
 #include "float_math.h"
+#if defined(S1_NO_DOUBLE)
+#include "exact.h"
+#endif
 //
 //  S1NoteState.mm
 //  AudioKitSynthOne
@@ -428,7 +431,7 @@ void S1DSPKernel::processLfo(){
         sp_phasor_compute(sp, lfo1Phasor, nil, &lfo1); // sp_phasor_compute [0,1]
         if (parameters[lfo1Index] == 0) { // Sine
 #if defined(S1_NO_DOUBLE)
-            lfo1 = s1_sinf(lfo1 * S1_TWO_PI);
+            lfo1 = s1_lfo_sine(lfo1);
 #else
             lfo1 = sin(lfo1 * M_PI * 2.f);
 #endif
@@ -455,7 +458,7 @@ void S1DSPKernel::processLfo(){
         sp_phasor_compute(sp, lfo2Phasor, nil, &lfo2);  // sp_phasor_compute [0,1]
         if (parameters[lfo2Index] == 0) { // Sine
 #if defined(S1_NO_DOUBLE)
-            lfo2 = s1_sinf(lfo2 * S1_TWO_PI);
+            lfo2 = s1_lfo_sine(lfo2);
 #else
             lfo2 = sin(lfo2 * M_PI * 2.0);
 #endif

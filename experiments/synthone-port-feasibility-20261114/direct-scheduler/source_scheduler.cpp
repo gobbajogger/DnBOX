@@ -1,18 +1,19 @@
 #include "source_scheduler.hpp"
 #include "reader/runtime_note.hpp"
 #include "compact_note.hpp"
+#include "float_math.h"
 #include <math.h>
 #include <string.h>
 namespace s1scheduler {
 bool SourceScheduler::valid_source_event(int pitch,int velocity,float frequency)const{
- return initialized_ && heldNoteNumbers.valid_count() && heldNoteNumbersAE.valid_count() && pitch>=0 && pitch<128 && velocity>=0 && velocity<=127 && isfinite(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
+ return initialized_ && heldNoteNumbers.valid_count() && heldNoteNumbersAE.valid_count() && pitch>=0 && pitch<128 && velocity>=0 && velocity<=127 && s1_finitef(frequency) && frequency>=0 && frequency<=sp->sr*.5f;
 }
 bool SourceScheduler::set_notes_per_octave(int n){
     if(!initialized_ || !s1source_sequence::SerializedSequence::tuning_valid(parameters,150,n))return false;
     sequence.set_notes_per_octave(n);return true;
 }
 bool SourceScheduler::set_target(unsigned p,float v) {
-    if(!initialized_ || p>=150 || !isfinite(v))return false;
+    if(!initialized_ || p>=150 || !s1_finitef(v))return false;
     const float resolved=clampedValue(static_cast<S1Parameter>(p),v);
     float candidate[150];memcpy(candidate,parameters,sizeof candidate);candidate[p]=resolved;
     if(!s1source_sequence::SerializedSequence::tuning_valid(candidate,150,sequence.notes_per_octave()))return false;
