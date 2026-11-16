@@ -36,15 +36,18 @@ application link or S6 completion follows from these results.
 
 ## Existing-firmware baseline, not Sound admission
 
-Integ reports the latest independently measured combined existing-firmware
-source as `7e39818096e7fb728ef28cd6476b290b064e353e`: Elite/Pro XIP free
-3,156/3,164 bytes, static RAM headroom 1,096 bytes, and pool margin 836 bytes above the
-8,192-byte reserve. That is not qualification of its later published
-`731f5abd8357cfe8654222b3d5e3ed03b5749fb0`, whose native remeasurement is pending,
-and it does not include an admitted complete Synth One/SuperJ6 replacement.
-The small independent baseline receipt is retained at
-`docs/sound/v2-quad-distinct/integ-7e398-baseline-receipt.json`; its full Local
-gate is explicitly NOT_RUN. No large build was repeated for this citation.
+The latest independently measured combined existing-firmware source is
+`2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490`: default PADCAL=1 Elite/Pro XIP free
+2,548/2,556 bytes, static RAM headroom 1,096 bytes, and pool margin 836 bytes above
+the 8,192-byte reserve. The independent receipt verifies 5,507 source files stayed
+unchanged. Full Local remains NOT_RUN and affected host qualification was pending
+in that receipt. This is not Sound replacement admission.
+
+The small receipt is `docs/sound/v2-quad-distinct/integ-2d86-baseline-receipt.json`.
+Earlier `7e39818096e7fb728ef28cd6476b290b064e353e` measured 3,156/3,164 bytes XIP
+free and the same RAM/pool margins; its receipt remains preserved as history.
+The separately measured PADCAL=0 configuration is not an adopted saving and is
+not substituted for default PADCAL=1. No large build was repeated for this citation.
 
 ## Historical component checkpoints
 
