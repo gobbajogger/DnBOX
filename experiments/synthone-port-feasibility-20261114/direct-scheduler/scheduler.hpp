@@ -50,7 +50,7 @@ public:
     int polyphony = 6, playingNoteStatesIndex = 0;
     Held heldNoteNumbers{}, heldNoteNumbersAE{};
     /* Binary32 image of 440*2^(-9/12). The old double exp2 rounded to this. */
-    float monoFrequency = 0x1.05a026p+8f;
+    float monoFrequency = 261.625579833984375f;
     float previousProcessMonoPolyStatus = 0;
     sp_port *monoFrequencyPort = &mono_port_;
     const float *tuningTable = nullptr;

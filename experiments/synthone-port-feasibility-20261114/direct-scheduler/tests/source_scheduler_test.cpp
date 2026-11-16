@@ -5,7 +5,12 @@
 #include "full_oracle.hpp"
 static Snapshot full_capture(const SourceScheduler&s){
  Snapshot z=capture(static_cast<const RuntimeState&>(s));const auto&q=s.sequence;
- z.put(q.beat_time);z.put(q.previous_held);z.put(q.get_beat_count());z.put(q.notes_per_octave());
+#if defined(S1_NO_DOUBLE)
+ z.put(q.beat_bits);z.put(q.previous_held);
+#else
+ z.put(q.beat_time);z.put(q.previous_held);
+#endif
+z.put(q.get_beat_count());z.put(q.notes_per_octave());
  size_t n=q.last_count+q.initial_zero_count;z.put(n);
  for(unsigned i=0;i<q.last_count;i++)z.put(q.last_notes[i]);
  for(unsigned i=0;i<q.initial_zero_count;i++){int zero=0;z.put(zero);}
@@ -37,7 +42,13 @@ struct FullPair{
  void reset_seq(){{NoHeap guard;CHECK(s.reset_sequencer());}o.resetSequencer();events++;compare();}
  void restore(){{NoHeap guard;CHECK(s.restore(values,150));}CHECK(o.restore(values,150));events++;compare();}
  void npo(int n){s.set_notes_per_octave(n);o.sequencer.setNotesPerOctave(n);events++;compare();}
- void beat(unsigned k){double dt=(s.parameters[arpRate]/60.f)/s.sp->sr;double clock=k*s.parameters[arpSeqTempoMultiplier]-dt*.5;s.sequence.beat_time=o.sequencer.original.mBeatTime=clock;}
+ void beat(unsigned k){double dt=(s.parameters[arpRate]/60.f)/s.sp->sr;double clock=k*s.parameters[arpSeqTempoMultiplier]-dt*.5;o.sequencer.original.mBeatTime=clock;
+#if defined(S1_NO_DOUBLE)
+  {uint64_t bits;std::memcpy(&bits,&clock,8);s.sequence.set_clock(bits);}
+#else
+  s.sequence.beat_time=clock;
+#endif
+ }
  static void st(const RuntimeState&,unsigned phase,unsigned frame,void*c){auto&x=*static_cast<Context*>(c);auto z=full_capture(x.p->s);z.put(phase);z.put(frame);x.t->values.push_back(z);}
  static void ot(const OracleState&,unsigned phase,unsigned frame,void*c){auto&x=*static_cast<Context*>(c);auto z=full_capture(x.p->o);z.put(phase);z.put(frame);x.t->values.push_back(z);}
  void block(unsigned n,unsigned offset=0){

@@ -74,7 +74,7 @@ void State::init_graph(const synthone_shared::Tables &tables,int rate,const floa
     memcpy(ft_frequencyBand,tables.frequency_band,sizeof ft_frequencyBand);
     lfo1_0_1=lfo2_0_1=lfo3_0_1=0; lfo1_1_0=lfo2_1_0=lfo3_1_0=0;
     lfo1Smooth=lfo2Smooth=0; monoFrequencySmooth=261.6255653006f;
-    monoFrequency=0x1.05a026p+8f;
+    monoFrequency=261.625579833984375f;
     phasor1_={}; phasor2_={}; port1_={}; port2_={}; mono_port_={};
     lfo1Phasor=&phasor1_; lfo2Phasor=&phasor2_; lfo1Port=&port1_; lfo2Port=&port2_;
     monoFrequencyPort=&mono_port_;

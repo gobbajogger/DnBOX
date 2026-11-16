@@ -40,6 +40,8 @@ static uint64_t exp_d(uint64_t x)
 {
     int n;
     uint64_t r;
+    /* exp(-inf) is +0, as exp(-1.0/(tau*sr)) in adsr.c tau2pole (release 0). */
+    if (x == 0xfff0000000000000ull) return 0;
     if (!d64_isfinite(x)) return x;
     if (d64_lt(x, d64_from_i32(-745))) return 0;
     if (d64_lt(d64_from_i32(710), x)) return 0x7ff0000000000000ull;
@@ -52,6 +54,8 @@ static uint64_t exp2_d(uint64_t x)
 {
     int n;
     uint64_t f;
+    /* exp2(-inf) is +0, as pow(0.5, +inf) in port.c (half time 0). +inf and NaN pass through. */
+    if (x == 0xfff0000000000000ull) return 0;
     if (!d64_isfinite(x)) return x;
     if (d64_lt(x, d64_from_i32(-1100))) return 0;
     if (d64_lt(d64_from_i32(1024), x)) return 0x7ff0000000000000ull;

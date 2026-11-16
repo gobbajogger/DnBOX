@@ -28,10 +28,11 @@ void *__wrap_realloc(void*p,size_t n){if(deny_heap)fail("heap realloc",__LINE__)
 void __wrap_free(void*p){if(deny_heap)fail("heap free",__LINE__);__real_free(p);}
 }
 static const unsigned char *compact_data=nullptr;static size_t compact_size=0;
-static bool compact_oracle_window=false;static unsigned long long compact_word_reads=0,compact_rows[52]{};
+static bool compact_oracle_window=false;static bool compact_wrong_lsb=false; // test-only finite-wrong control
+static unsigned long long compact_word_reads=0,compact_rows[52]{};
 extern "C" int __real_s1c_read(const s1c_binding*,unsigned,unsigned,uint32_t*);
 extern "C" int __wrap_s1c_read(const s1c_binding*b,unsigned row,unsigned sample,uint32_t*out){
- CHECK(!compact_oracle_window);CHECK(row<52&&sample<4097);++compact_word_reads;++compact_rows[row];return __real_s1c_read(b,row,sample,out);
+ CHECK(!compact_oracle_window);CHECK(row<52&&sample<4097);++compact_word_reads;++compact_rows[row];int r=__real_s1c_read(b,row,sample,out);if(r&&compact_wrong_lsb)*out^=1u;return r;
 }
 static bool compact_init(Scheduler&s,const Tables&t,int rate,const float*v,size_t n,const float*tuning,size_t tn){
  Tables metadata=t;for(auto &row:metadata.morph)row.samples=nullptr;
