@@ -1,0 +1,212 @@
+{
+  "scope": "Unlinked generic model native objects only; not app fit or timing",
+  "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+  "units": [
+    {
+      "name": "sj6_math_model",
+      "command": [
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/bin/clang",
+        "-x",
+        "c",
+        "-std=c11",
+        "-target",
+        "pi32v2",
+        "-mcpu=r3",
+        "-mfprev1",
+        "-Os",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-fno-builtin",
+        "-DNO_LIBSNDFILE",
+        "-DS1_NO_DOUBLE",
+        "-nostdinc",
+        "-isystem",
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include",
+        "-isystem",
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include",
+        "-I/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native",
+        "-MD",
+        "-MF",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.d",
+        "-c",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.c",
+        "-o",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.o"
+      ],
+      "dependencies": [
+        {
+          "path": "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.c",
+          "sha256": "4aa61dd20907a52d428574554054cdf189937b4f3d105ff5f8e437aa6444087d"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.h",
+          "sha256": "15e57821bbbf59f52d7f127a60b18f47f76020ffc0897e5e220cce48589bf1b5"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include/stdint.h",
+          "sha256": "021dc659a6bfd1c0bcaa99549946e628b523847a680fd43e5804523c8f5a0103"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/stdint.h",
+          "sha256": "cc2d956f9c6dd0ac23a436f3d104dadf3f5074a872aa3107ddb350bb43f3f5d6"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/machine/_default_types.h",
+          "sha256": "76569c9dcd2ede45e1e2a132824af881785b17262cc805c8094149e4bab05f9b"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/features.h",
+          "sha256": "e6ba474c9232efa5fe7a750fd27d28c02fa68f1b28d35206783d6125c27a863f"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/_intsup.h",
+          "sha256": "d3304b4d9dc032a1a08542010915173395bf758a3e14636a7b28c4d215eb2d16"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/_stdint.h",
+          "sha256": "1b71da155b8f13896bf38962af86d397c770b224506977950780aab3080ae933"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/string.h",
+          "sha256": "85692d9cc7339e38306b5499103a26d9cc0fc0306543c5d372fdd4634598b82f"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/_ansi.h",
+          "sha256": "bec8ef0cad441473db09faa27cb18a1341eaa973e2f133ede6231acc0b54213e"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/newlib.h",
+          "sha256": "43e4fb8d79c1881795f4f45c6890ddfbcc2cb486ea1afc47b0f7d5ee7a0cf6a6"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/config.h",
+          "sha256": "9eade6f991457ea9725b2cc1566025fcbc650204220548d63ffdd0bd90626d48"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/machine/ieeefp.h",
+          "sha256": "2a76a491c26d12fdcd17363d38904dafcf96cf7aa8aed8b419eb336c254e4bdc"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/reent.h",
+          "sha256": "80385ff83bf3188052b21badc669d64ac27cd7bf64456886e9149b34478da8fe"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include/stddef.h",
+          "sha256": "4fe29f8d1e821017f3cfc5dd56ba39160d7629a49f049e39aef8ffeeec008a60"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include/__stddef_max_align_t.h",
+          "sha256": "5d26aeae66fc6f9cb969df50a2382536208f94dec476dd17239924e34550f33d"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/_types.h",
+          "sha256": "90980372c3ff717ef2fe1461db617c6ca307fe28c04fa7f2483591b2cfa88d8a"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/machine/_types.h",
+          "sha256": "44544ecbbc10c8aa58ca2da6d0617ffeee5af847af24515ab108c8218d6d92c8"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/lock.h",
+          "sha256": "43587d2d60a176cf6ad5117dd9515246e207398ffdf8fc52bbc0d9435f215152"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/cdefs.h",
+          "sha256": "ef96b3103d192fa94526aa71cccfe859b4dbd57a7d0584edc6aab2321390a017"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/string.h",
+          "sha256": "b7164ee36ccb0a08bc27c7e381ea417c97d8c3fd3157de62b75d2a6bf7a0a589"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_sine_table.inc",
+          "sha256": "ccc771cbb523e1f9a5b0971c1ec25fe379d70971b1e5785128ed1f9cc6676022"
+        }
+      ],
+      "sections": {
+        "executable": 3316,
+        "readonly": 8197,
+        "writable": 0,
+        "bss": 0
+      },
+      "sha256": "4d6b787893acbf8dd157169666bcc23432f1eadddead928719cbb2f544ec6774"
+    },
+    {
+      "name": "layout",
+      "command": [
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/bin/clang",
+        "-x",
+        "c",
+        "-std=c11",
+        "-target",
+        "pi32v2",
+        "-mcpu=r3",
+        "-mfprev1",
+        "-Os",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-fno-builtin",
+        "-DNO_LIBSNDFILE",
+        "-DS1_NO_DOUBLE",
+        "-nostdinc",
+        "-isystem",
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include",
+        "-isystem",
+        "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include",
+        "-I/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native",
+        "-MD",
+        "-MF",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/layout.d",
+        "-c",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/layout.c",
+        "-o",
+        "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/layout.o"
+      ],
+      "dependencies": [
+        {
+          "path": "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/layout.c",
+          "sha256": "fc032cb940a09e5b0cad76a3850d38c18a69be11f2c3af84b1f7a3bbf5b07a0e"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/sound-v2-evidence/sj6-build-span-native/sj6_math_model.h",
+          "sha256": "15e57821bbbf59f52d7f127a60b18f47f76020ffc0897e5e220cce48589bf1b5"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/common/lib/clang/4.0.1/include/stdint.h",
+          "sha256": "021dc659a6bfd1c0bcaa99549946e628b523847a680fd43e5804523c8f5a0103"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/stdint.h",
+          "sha256": "cc2d956f9c6dd0ac23a436f3d104dadf3f5074a872aa3107ddb350bb43f3f5d6"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/machine/_default_types.h",
+          "sha256": "76569c9dcd2ede45e1e2a132824af881785b17262cc805c8094149e4bab05f9b"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/features.h",
+          "sha256": "e6ba474c9232efa5fe7a750fd27d28c02fa68f1b28d35206783d6125c27a863f"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/_intsup.h",
+          "sha256": "d3304b4d9dc032a1a08542010915173395bf758a3e14636a7b28c4d215eb2d16"
+        },
+        {
+          "path": "/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/include/sys/_stdint.h",
+          "sha256": "1b71da155b8f13896bf38962af86d397c770b224506977950780aab3080ae933"
+        }
+      ],
+      "sections": {
+        "executable": 0,
+        "readonly": 0,
+        "writable": 0,
+        "bss": 0
+      },
+      "sha256": "7eb5b9481c9bfbd7ba398269bf135e9154f67bac1a6bef6f3b295c16bb6388bc"
+    }
+  ]
+}

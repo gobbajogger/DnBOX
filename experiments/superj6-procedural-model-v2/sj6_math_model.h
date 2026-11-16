@@ -28,6 +28,9 @@ typedef struct Sj6MathState { uint16_t segment; } Sj6MathState;
 int sj6_math_open(Sj6MathModel *m, const void *bytes, uint32_t n);
 /* Math-generated one-cycle RAM table. Never copies original PCM. Rejects
  * insufficient storage or out-of-int16 output, never clips or shortens.
+ * Requires an unchanged admitted model and aligned writable scratch disjoint
+ * from both its view and entire borrowed input. Only cycle_n samples are used.
+ * Rejected scratch spans cause no mutation. Numerical failure may be partial.
  * On failure caller must discard the partially written scratch buffer. */
 int sj6_math_build(const Sj6MathModel *m, int16_t *cycle, uint32_t capacity);
 void sj6_math_reset(Sj6MathState *s);

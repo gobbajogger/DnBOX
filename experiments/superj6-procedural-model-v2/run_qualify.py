@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fresh source-bound procedural-model tests. No whole-SuperJ6 or fit claim."""
 import argparse,hashlib,json,math,pathlib,shlex,struct,subprocess
-SOURCES=['sj6_math_model.c','sj6_math_model.h','sj6_sine_table.inc','model-unit-test.c','model-boundary-regression.c','model-span-test.c','model-render.c']
+SOURCES=['sj6_math_model.c','sj6_math_model.h','sj6_sine_table.inc','model-unit-test.c','model-boundary-regression.c','model-span-test.c','model-render.c','model-build-span-test.c']
 FROZEN_CONTENT='72b55c462402bedc464b90912c7705a9948371350d902be7ace4183618ff798f'
 def sha(b):return hashlib.sha256(b).hexdigest()
 def main():
@@ -21,7 +21,7 @@ def main():
     if pathlib.Path(n).resolve() not in allowed:raise ValueError('Unlisted dependency '+n)
    objs.append(obj)
   link=['cc',*[str(x) for x in objs],'-lm','-o',str(out/name)];subprocess.run(link,check=True);commands.append(link);verify();return out/name
- for name in ['model-unit-test','model-boundary-regression','model-span-test']:
+ for name in ['model-unit-test','model-boundary-regression','model-span-test','model-build-span-test']:
   exe=build(name);h=sha(exe.read_bytes());r=subprocess.run([str(exe)],capture_output=True,text=True);verify();assert sha(exe.read_bytes())==h;(out/(name+'.log')).write_text(r.stdout+r.stderr);results.append({'test':name,'exit':r.returncode,'executable_sha256':h,'stdout':r.stdout,'stderr':r.stderr});assert r.returncode==0
  rendered=[]
  if a.recovery_root:

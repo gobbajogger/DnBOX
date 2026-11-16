@@ -42,7 +42,12 @@ int sj6_math_open(Sj6MathModel *out,const void *bytes,uint32_t n){
 static float sine(uint32_t p){unsigned i=p>>21;float x=(float)(p&2097151u)*(1.f/2097152.f);return g_sine[i]+x*(g_sine[(i+1)&2047u]-g_sine[i]);}
 static int32_t nearest(float x){int32_t n=(int32_t)x;float r=x-(float)n;if(r>.5f||(r==.5f&&(n&1)))n++;else if(r<-.5f||(r==-.5f&&(n&1)))n--;return n;}
 int sj6_math_build(const Sj6MathModel *m,int16_t *cycle,uint32_t capacity){
- unsigned i,j;uint32_t step;if(!m||!cycle||capacity<m->cycle_n)return 1;step=0x80000000u/(m->cycle_n/2u);
+ unsigned i,j;uint32_t step,n;if(!m||!cycle||capacity<m->cycle_n)return 1;
+ n=(uint32_t)m->cycle_n*sizeof *cycle;
+ if(!span_valid(cycle,n)||(uintptr_t)cycle%_Alignof(int16_t)||
+    !span_valid(m->bytes,m->size)||
+    spans_overlap(cycle,n,m,sizeof *m)||spans_overlap(cycle,n,m->bytes,m->size))return 1;
+ step=0x80000000u/(m->cycle_n/2u);
  for(i=0;i<m->cycle_n;i++){float y=m->dc;for(j=0;j<m->harmonics;j++){const uint8_t *h=m->bytes+m->off_harm+6*j;uint32_t phase=(uint32_t)(i*step)*u16(h)+((uint32_t)u16(h+4)<<16);y+=(float)u16(h+2)*sine(phase+0x40000000u);}if(!finite32(y)||y<-32768.5f||y>=32767.5f)return 1;{int32_t n=nearest(y);if(n<-32768||n>32767)return 1;cycle[i]=(int16_t)n;}}
  return 0;
 }

@@ -128,3 +128,5 @@ Frozen a803 full694 replay passes66,624,000frames0different/0nonfinite; all1,388
 
 ## Generic SuperJ6 recovery and span guard
 Recovered isolated generic GPL model code without coefficients or banks; fixed open-admission alias/alignment/wrap bug using red/green tests. Independent synthetic review: 1,204 + 522 + 9 checks PASS. Fresh 24 frozen vectors preserve output; native object only 3,262 executable + 8,197 readonly, 64-byte view. No activation, fit, S3/S4 or completion credit. Next: finish vector receipt review and audit rendering contract boundaries. Existing publication/Swift denials remain stopped.
+
+Build scratch correction: alias regression RED exit1 with input mutation; aligned/nonwrapping scratch disjoint from model/input now required before writes. Fresh 4 suites (1,204+522+9+9) and 24 frozen vectors PASS, native executable3,316 (+54), readonly8,197 unchanged. Independent build guard source/nine-test review accepted. Default local ASan/LSan fails ptrace, not sanitizer PASS; managed rerun next after exact pin. No render math, owner or activation change.
