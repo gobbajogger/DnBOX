@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 00:24 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 00:35 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -9,7 +9,7 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 | C1 | FAIL | Local gate not run on this lane; independent test-and-merge owns it |
 | C2 | PASS | This commit descends directly from verified consolidated e742be7b; no deletions |
 | C3 | FAIL | Independent review not run; no UI changed |
-| C4 | FAIL | Full hard-limit scan not run; this change contains documentation only |
+| C4 | FAIL | Full hard-limit scan not run; current change adds a pre-FX adapter and host tests only |
 | C5 | FAIL | Outstanding S1–S7 below |
 | C6 | FAIL | Draft continuation; not merged |
 | S1 | FAIL | Reuse pinned 56079bbd source closure and public renderer from prior sound source; factory-wide finite/xrun proof remains missing |
@@ -22,12 +22,15 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 
 ## Now / next
 - Now: isolate exact consolidated source, recover existing 56079 renderer/source closure and sound components without rebuilding unchanged tests.
-- Next: source-linked inventory of factory-program admission and finite-render gaps, then scoped regression and implementation.
+- Next: carry original factory control bindings into the adapter test and qualify factory-wide finite output; then integrate the actual runtime with stock-memory accounting.
+- Fresh rebuild: 28 objects compiled from retained source, 12 scenes / 576000 frames, zero differing channel words versus source-derived oracle, zero heap calls during rendering. This is pre-FX component evidence only, not S1/S2 or hardware xrun PASS. See docs/sound/v2-pre-fx-evidence.md.
 
 ## Blockers and remedies
 - Prep files/gate not integrated yet: use attached RULES.md v2 as authorized input; keep sound edits isolated and merge prep target once accepted.
 - Existing sound PR #952 is on sound/engine-rebuild, not lane/*: preserve it unchanged as donor; this is its sole v2 continuation, not a second sound writer. Do not close it before rule 9–10 checks.
 - Local baseline Git history has absent older objects: exact HEAD tree is available and exported; remote connector is authoritative for ancestry and writes.
+
+- Evidence defect fixed: old adapter runner hashed source but reused old dependency objects. Regression reproduced this; new runner recompiles every object and rejects link inputs without a compile command. Source build still requires a trusted separately pinned closure.
 
 ## Top risks
 1. Original DSP graph and complete factory bank differ from the component adapter evidence.

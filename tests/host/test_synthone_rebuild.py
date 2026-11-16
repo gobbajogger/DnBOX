@@ -1,0 +1,32 @@
+"""Fresh-object regression: no preexisting dependency objects may be linked."""
+import pathlib
+import subprocess
+import tempfile
+import unittest
+import json
+import hashlib
+
+RUNNER = pathlib.Path(__file__).with_name('run_synthone_renderer.py')
+
+class RebuildTest(unittest.TestCase):
+    def test_recompiles_dependency_instead_of_trusting_stale_object(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = pathlib.Path(d)
+            source = base/'closure/scheduler'
+            (source/'tests').mkdir(parents=True)
+            dep = source/'dependency.c'
+            dep.write_text('int broken syntax;')
+            (base/'COMPILED-SOURCES.json').write_text(json.dumps([
+                {'path':'dependency.c','sha256':hashlib.sha256(dep.read_bytes()).hexdigest()}]))
+            # A stale object exists, but a fresh compilation must catch syntax.
+            (base/'dep.o').write_bytes(b'stale')
+            (base/'commands.json').write_text(json.dumps([
+                ['cc','-c',str(dep),'-o',str(base/'dep.o')],
+                ['c++','-c',str(source/'tests/source_scheduler_test.cpp'),'-o',str(base/'test.o')],
+                ['c++',str(base/'dep.o'),str(base/'test.o'),'-o',str(base/'test')]]))
+            result = subprocess.run(['python3',str(RUNNER),'--source-build',str(base),'--output',str(base/'out')],capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('dependency.c',result.stderr)
+            self.assertNotIn('synthone_renderer_test.cpp:',result.stderr)
+
+if __name__ == '__main__': unittest.main()
