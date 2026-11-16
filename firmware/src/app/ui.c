@@ -932,6 +932,7 @@ static int in_pattern(pref_t r)
 }
 
 /* a knob's label: mixer refs name their part */
+static int name_is(const x0x_param_t *d, const char *n);
 static const char *pref_name(pref_t r)
 {
     if(r.kind==R_SECTION)return GLOBAL_SECTIONS[r.a<6?r.a:0];
@@ -951,6 +952,8 @@ static const char *pref_name(pref_t r)
                                            {"A RATE", "B RATE"}, {"A DIR", "B DIR"}, {"A TRANSP", "B TRANSP"}};
     static const char *const CHN[MX_NPARAMS] = {"LEVEL", "REV", "DLY", "PAN", "CUT"};
     const x0x_param_t *d = pref_desc(r);
+    /* Presentation only: retain the native P.Dpth identity and pitch-sweep glyph. */
+    if(r.kind==R_ENG && r.a==T_909 && name_is(d,"P.Dpth"))return "Depth";
     static const char *const SEQN[6] = {"LENGTH", "RATE", "LENGTH", "RATE", "DIRECTION", "TRANSP"};
     if (r.kind == R_ENG && r.a == T_303)
         return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
