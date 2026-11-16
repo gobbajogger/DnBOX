@@ -9,7 +9,7 @@ const module=process.env.X0X_PLAYWRIGHT_MODULE;
 const {chromium}=await import(module ? pathToFileURL(module).href : 'playwright');
 const base=process.env.X0X_SITE_URL || 'http://127.0.0.1:8765/';
 const out=new URL('../build/web-site/',import.meta.url);mkdirSync(out,{recursive:true});
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true,chromiumSandbox:true});
 const results=[];
 function wav(){const b=Buffer.alloc(44+44100*2);b.write('RIFF');b.writeUInt32LE(b.length-8,4);b.write('WAVEfmt ',8);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);b.writeUInt16LE(1,22);b.writeUInt32LE(44100,24);b.writeUInt32LE(88200,28);b.writeUInt16LE(2,32);b.writeUInt16LE(16,34);b.write('data',36);b.writeUInt32LE(b.length-44,40);for(let i=0;i<44100;i++)b.writeInt16LE(Math.round(12000*Math.sin(i/12)),44+i*2);return b}
 try{

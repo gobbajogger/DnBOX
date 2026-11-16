@@ -601,3 +601,6 @@ Both retained under README test/dependency exception pending gate review.
 ## Independently measured stock-pool repair
 - At exact13e0b087839c9606bab98680cabf3a2d74f74757, both Elite/Pro native builds and budget PASS: pool335036/344064, margin836B above8192 floor; data+BSS96792/98304 leaves1512B; app free13464/13472B. ELF proves664B master moved to BSS with4-byte alignment. Startup/init and host master replay PASS. See integ-memory.md. This resolves the candidate budget subcheck, not baseline/full Local, C6 or combined Sound fit.
 - I5 authentic five zone assets now published only in nightly draft6a9607e886aab06ce0b1813321629b67239057b5; web owns real preview provider/allowlist. Firmware bank embedding remains blocked by stock flash fit. Both consolidated targets unchanged.
+
+Repeated mistake: browser launch policy checks missed a launcher invoked indirectly by the firmware host suite. Audit cross-repository and transitive test call graphs before running any suite, not just named browser scripts; never launch with default-off sandbox.
+- Full firmware source scan found five browser launchers: four Python offline sequencer entrypoints and Node workspace test. All now explicitly require normal Chromium sandbox. Runtime remains unrun where cloud sandbox cannot start; source-policy checks cannot substitute for runtime checks.

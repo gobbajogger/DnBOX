@@ -61,7 +61,10 @@ step clean-tree clean
 step setup setup
 step no-loss no_loss
 step limits limits
-if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
+browser_safe=1
+browser_policy() { python3 tests/browser-sandbox-policy.py || { browser_safe=0; return 1; }; }
+step browser-sandbox-policy browser_policy
+if [ $void = 0 ]; then if [ $browser_safe = 1 ]; then step host-tests host_tests; else echo "[FAIL] host-tests NOT_RUN: browser policy unsafe or unavailable"; fail=1; fi; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
 step drone drone
 R=PASS; [ $fail = 1 ] && R=FAIL; [ $void = 1 ] && R=VOID
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"
