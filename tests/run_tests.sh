@@ -541,6 +541,7 @@ run brk-outline-gate python3 -B tests/host/engine_brk_outline_gate_test.py   # e
 run chicago-fx-bridge sh tests/host/run_chicago_fx_bridge.sh   # Chicago SEND FX Type/Edit Mix/fxbus bridge (+ Crush/Ring/EQ/Cho/Ens/Phaser/SDly/BPM/Hall/GateRev insert flags)
 # chicago-fx-runtime is retired: it probed the bass303 chi_fx_process insert path that 18481a63 removed.
 run au-compare-align python3 tests/host/test_au_compare_align.py   # lag search law for Chicago/Miami AU compares
+run chicago-au-render-publish sh tests/host/chicago_au_render_publish_test.sh   # renderer link-then-rename: no EACCES window for a parallel reader
 run au-compare-battery python3 tests/host/test_au_compare_battery.py   # preset vs matrix modes + quick/full timing
 run install-gate-guard sh tests/host/test_install_gate_guard.sh   # tools/require_gate_pass.sh: the install needs the gate PASS of the exact tree
 run queue-guard sh tests/host/test_queue_guard.sh   # tools/require_gate_pass.sh check 6: each open QUEUE.md line is in the install commit
