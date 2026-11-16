@@ -227,3 +227,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Header17,148 checks PASS with explicit reference-only phase adapter; original d13 oracle bytes and full JSON provenance remain pinned. No silent oracle rewriting. Two runtime expressions only; integration must apply minimal patch over its hooks, never donor ui.c wholesale.
 - Repeated helper typo `and26` affected only a local exploratory pixel-count command, corrected before execution; no product/evidence source changed. Retain spaced Python and preflight syntax checks for reusable helpers.
 - Next: integration exact combined native/affected checks, remaining theme/transient inventory and source-derived complete screen coverage. All full checklist lines remain unqualified; reserved owner decisions unchanged.
+
+## Clip-key static layout guard corrected
+- Removed stale requirements for deleted PLAY KEYS/knob instructions, retaining held-key lighting, field selection, stage ON state and field/keybed nonoverlap. Duplicate extraction anchors now fail closed.
+- Seven current static checks and seven fixture cases (healthy plus six negatives) PASS; independently replayed against integration4e3b inputs. Not all-state raster geometry. Production unchanged from34ad.
+- Next: diagnose managed HOME GLOBE segmentation fault from actual preserved binary/trace; do not assume it is a stale expectation.
