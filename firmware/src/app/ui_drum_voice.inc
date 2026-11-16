@@ -311,22 +311,20 @@ static int dv_band_h(int band) { return band == 2 ? KNOB_H : BAND_H; }
 
 static void dv_header_battery(int x, int y)
 {
-    int lvl = plat_battery();
-    int bars, i;
-    uint16_t ink = SOUND_GRAY;
-    bars = lvl < 0 ? 0 : lvl > 3 ? 3 : lvl;
-    if (bars < 0) bars = 0;
-    /* r20 battery: 14 x 8 outline, three cells. */
-    rbox(x, y, 14, 8, 1, SOUND_FACE);
-    cv_rect(x, y, 14, 1, ink);
-    cv_rect(x, y+7, 14, 1, ink);
-    cv_rect(x, y, 1, 8, ink);
-    cv_rect(x+13, y, 1, 8, ink);
-    cv_rect(x+14, y+2, 2, 4, ink);
-    for (i = 0; i < 3; i++) {
-        uint16_t c = (i < bars) ? ink : SOUND_LINE;
-        cv_rect(x+2+i*4, y+2, 3, 4, c);
+    int lvl=plat_battery();uint16_t ink=lvl==0?SOUND_AMBER:SOUND_GRAY;
+    /* Reserve the same material on messages/pickup/modal/ordinary headers. */
+    rbox(x-2,y-3,22,14,R22_RADIUS,SOUND_FACE);
+    if(lvl==4){ /* USB host power does not report the battery's charge. */
+        cv_rect(x+4,y+2,7,5,ink);cv_rect(x+5,y,1,3,ink);cv_rect(x+9,y,1,3,ink);
+        cv_rect(x+7,y+7,1,2,ink);cv_rect(x+5,y+8,5,1,ink);return;
     }
+    cv_rect(x,y,14,1,ink);cv_rect(x,y+7,14,1,ink);
+    cv_rect(x,y,1,8,ink);cv_rect(x+13,y,1,8,ink);cv_rect(x+14,y+2,2,4,ink);
+    if(lvl<0){ /* Not sampled is distinct from measured empty. */
+        for(int i=0;i<3;i++)cv_rect(x+3+i*3,y+4,1,1,ink);return;
+    }
+    int bars=lvl>3?3:lvl;
+    for(int i=0;i<3;i++)cv_rect(x+2+i*4,y+2,3,4,i<bars?ink:SOUND_LINE);
 }
 
 static UI_DRAW void dv_body_pictogram(int t, int v, int x, int y, float scale, float env, uint16_t col)

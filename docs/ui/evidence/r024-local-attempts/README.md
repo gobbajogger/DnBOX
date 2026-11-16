@@ -1,0 +1,3 @@
+# Retained changed-input attempts
+
+These are actual local changed-source attempts, not the final exact-pushed-head gate. The firstR024RED proves USB was misrepresented asfull. Subsequent failures exposed message/pickup material differences; they remain intact. Expanded68checks pass after persistent truthful state rendering. Held-step strict raster failures exposed a REAL note-stem/label collision, not merely an observer issue; moving the glyph below the caption and normalizing negative pitchclasses fixes the exactAA comparison with erased-label tripwire. Older mistaken observer hypotheses/repair attempts remain in history; no accepted threshold was relaxed. Wholelane/native/device coverage remains open.

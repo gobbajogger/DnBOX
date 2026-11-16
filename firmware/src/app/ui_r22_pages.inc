@@ -78,13 +78,14 @@ static void r22_held_step_row(int off)
     surface_panel(3,y,234,76,ui.touched>=0,0,0,0);
     cv_text(11,y+3,&FONT_T,title,SOUND_GRAY);
     for(int k=0;k<4;k++){
-        int cx=34+k*57,gy=y+35;char value[16];uint16_t ink=ui.touched==k?part_col():SOUND_WHITE;
+        int cx=34+k*57,gy=y+47;char value[16];uint16_t ink=ui.touched==k?part_col():SOUND_WHITE;
         text_c(cx,y+17,&FONT_T,names[k],SOUND_INK);
         if(k==0){
             int note=held_note_of(bp,ui.held_step)+bp->transpose-24;
             put_note(value,note);
             for(int j=0;j<3;j++)cv_rect(cx-16,gy-5+j*5,33,1,SOUND_LINE);
-            int py=gy+6-(note%12)*12/11;
+            int pitch_class=(note%12+12)%12;
+            int py=gy+6-pitch_class*12/11;
             cv_stroke_aa(cx-3,py,cx+3,py,3.f,ink);cv_stroke_aa(cx+4,py,cx+4,py-10,2.f,ink);
         }else if(k==1){
             int gate=bstep_gate(st);put_s(value,gates[gate<3?gate:0]);

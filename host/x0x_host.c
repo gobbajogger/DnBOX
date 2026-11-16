@@ -98,7 +98,14 @@ int32_t plat_enc(int role)
     return v;
 }
 uint32_t plat_master(void) { return master; }
-int plat_battery(void) { return 3; }    /* the simulator: a full battery */
+/* Explicit host-only battery fixture. Default remains3/full; this is not
+ * device charge telemetry or a percentage estimate. */
+int plat_battery(void)
+{
+    const char *s=getenv("X0X_HOST_BATTERY_STATE");if(!s)return 3;
+    char *end;long state=strtol(s,&end,10);
+    return !*s||*end||state< -1||state>4?-1:(int)state;
+}
 void plat_leds(uint32_t b, uint32_t k)
 {
     lit_btn = b;
