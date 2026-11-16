@@ -33,7 +33,7 @@ class StateTests(unittest.TestCase):
  def test_duplicate_beat_preserves_existing_fractional_accumulator(self):
   s=BeatState(1,2.,.006)
   r=beat_catchup(s,2.,120.,True,5)
-  self.assertEqual(r.status,'OK_CLOCK');self.assertEqual(r.state.accumulator,F(.006))
+  self.assertEqual(r.status,'OK_CLOCK');self.assertEqual(r.state.accumulator,.006)
  def test_only_first_held_note_resets_delay(self):
   s=NoteState((0,2,3),delay_finished=(True,True,True),delay_passed=(.3,.4,.5))
   a=enter_note(s,0);b=enter_note(s,1)

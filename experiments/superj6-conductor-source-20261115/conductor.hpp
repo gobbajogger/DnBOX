@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include "f64_bits.hpp"
 
 namespace original_conductor_v1 {
 enum class Status { Unsupported, MainPassOnly, State, Clock, PendingAck, Invalid, Capacity, MissingCapability, MissingPow, MissingExp, MathFailure, AwaitingAck, StaleAck };
@@ -38,10 +39,13 @@ struct Cutoff { std::uint64_t generation; float current,target; bool active; std
 Status cutoff_step(const Cutoff&,float,Providers,Command*,std::size_t,std::size_t&,Cutoff&) noexcept;
 Status cutoff_ack(const Cutoff&,std::uint64_t,std::uint64_t,float,Cutoff&) noexcept;
 Status free_block_time(std::uint32_t,float,float&) noexcept;
-struct Beat { std::uint64_t generation; float last,accumulator;
- Beat(std::uint64_t g=0,float l=0,float a=0) noexcept:generation(g),last(l),accumulator(a){}
+// last and accumulator are IEEE binary64 bit patterns. The catch-up loop
+// uses integer arithmetic on those bits so the tick count matches binary64.
+struct Beat { std::uint64_t generation; std::uint64_t last,accumulator;
+ Beat(std::uint64_t g=0,std::uint64_t l=0,std::uint64_t a=0) noexcept:generation(g),last(l),accumulator(a){}
+ static Beat from_f32(std::uint64_t g,float l,float a) noexcept { return Beat(g,f64_from_f32(l),f64_from_f32(a)); }
 };
-Status beat_catchup(const Beat&,float,float,bool,Command*,std::size_t,std::size_t&,Beat&) noexcept;
+Status beat_catchup(const Beat&,std::uint64_t beat_bits,std::uint64_t tempo_bits,bool,Command*,std::size_t,std::size_t&,Beat&) noexcept;
 struct Note { std::uint8_t modes[3]; bool retriggers[3]; bool armed,retrigger4,new_note; bool delay_finished[3]; float delay_passed[3]; };
 Status enter_note(const Note&,std::size_t,Note&) noexcept;
 }

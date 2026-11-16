@@ -1,4 +1,5 @@
 #include "conductor.hpp"
+#include "f64_bits.hpp"
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -20,8 +21,8 @@ int main(){
  st=cutoff_step(s,.001f,p,out,256,n,next);CHECK(st==Status::PendingAck);
  if(st==Status::PendingAck){CHECK(n==2&&out[0].value!=.5f&&next.current==.5f);CHECK(next.awaiting&&next.active);CHECK(out[0].token==next.token);Cutoff ack{};CHECK(cutoff_ack(next,4,next.token,.5f,ack)==Status::State);CHECK(!ack.active&&!ack.awaiting);}
  float dt=-1.f;CHECK(free_block_time(64,48000.f,dt)==Status::Clock);CHECK(dt==64.f/48000.f);
- Beat b{2,0.f,0.f},bn{};n=999;st=beat_catchup(b,.05f,120.f,true,out,256,n,bn);CHECK(st==Status::Clock); if(st==Status::Clock)CHECK(n==2&&out[0].value==.0125f);
- Beat same{2,2.f,.006f};n=999;CHECK(beat_catchup(same,2.f,120.f,true,out,256,n,bn)==Status::Clock);CHECK(bn.accumulator==.006f);
+ Beat b=Beat::from_f32(2,0.f,0.f),bn{};n=999;st=beat_catchup(b,f64_from_f32(.05f),f64_from_f32(120.f),true,out,256,n,bn);CHECK(st==Status::Clock); if(st==Status::Clock)CHECK(n==2&&out[0].value==.0125f);
+ Beat same=Beat::from_f32(2,2.f,.006f);n=999;CHECK(beat_catchup(same,f64_from_f32(2.f),f64_from_f32(120.f),true,out,256,n,bn)==Status::Clock);CHECK(bn.accumulator==f64_from_f32(.006f));
  Note note{{0,2,3},{false,false,false},false,false,false,{true,true,true},{.3f,.4f,.5f}},nn{};
  CHECK(enter_note(note,0,nn)==Status::State);CHECK(nn.retriggers[1]&&nn.new_note&&nn.retrigger4&&nn.delay_passed[0]==0.f);
  CHECK(enter_note(note,1,nn)==Status::State);CHECK(nn.delay_passed[0]==.3f&&!nn.new_note);
@@ -43,7 +44,7 @@ int main(){
  CHECK(cutoff_ack(pending,4,3,.4f,next)==Status::State);CHECK(next.active&&!next.awaiting);
  Cutoff inplace{1,.2f,.8f,true};CHECK(cutoff_step(inplace,.01f,p,out,256,n,inplace)==Status::PendingAck);CHECK(inplace.awaiting);
  float unchanged_dt=9.f;CHECK(free_block_time(1,std::numeric_limits<float>::denorm_min(),unchanged_dt)==Status::Invalid);CHECK(unchanged_dt==9.f);
- Beat badbeat{1,0.f,.0125f};bn={99,9.f,.001f};n=777;CHECK(beat_catchup(badbeat,0.f,120.f,true,out,256,n,bn)==Status::Invalid);CHECK(bn.generation==99&&n==777);
+ Beat badbeat=Beat::from_f32(1,0.f,.0125f);bn=Beat::from_f32(99,9.f,.001f);n=777;CHECK(beat_catchup(badbeat,f64_from_f32(0.f),f64_from_f32(120.f),true,out,256,n,bn)==Status::Invalid);CHECK(bn.generation==99&&n==777);
  for(unsigned id=0;id<218;id++){float value=-1.f;CHECK(query_default(id,p,value)==Status::State);CHECK(std::isfinite(value));}
  const char unterminated[3]={'f','o','o'};Identifier bounded_name(unterminated);CHECK(bounded_name.size()==3);CHECK(bounded_name=="foo");
  std::printf("checks=%d failures=%d\n",checks,failures);return failures?1:0;

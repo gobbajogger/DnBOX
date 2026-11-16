@@ -1,6 +1,7 @@
 #include "preset_executor.hpp"
 #include "conductor.hpp"
 #include "control_data.hpp"
+#include "f64_bits.hpp"
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -84,15 +85,17 @@ Status free_block_time(std::uint32_t frames,float sample_rate,float& dt)noexcept
  if(frames>INT32_MAX||!std::isfinite(sample_rate)||sample_rate<=0)return Status::Invalid;
  float value=float(frames)/sample_rate;if(!std::isfinite(value))return Status::Invalid;dt=value;return Status::Clock;
 }
-Status beat_catchup(const Beat& s,float beat,float tempo,bool loaded,Command* out,std::size_t capacity,std::size_t& count,Beat& result)noexcept{
- if(!state_spans(&s,&result,sizeof(s),out,capacity,&count)||!std::isfinite(s.last)||!std::isfinite(s.accumulator)||s.accumulator<0||s.accumulator>=.0125f||!std::isfinite(beat)||!std::isfinite(tempo))return Status::Invalid;
+Status beat_catchup(const Beat& s,std::uint64_t beat,std::uint64_t tempo,bool loaded,Command* out,std::size_t capacity,std::size_t& count,Beat& result)noexcept{
+ constexpr std::uint64_t kZero=0,kOne=0x3ff0000000000000ULL,kSixty=0x404e000000000000ULL;
+ constexpr std::uint64_t kStep=0x3f8999999999999aULL,kStepNeg=0xbf8999999999999aULL,kGap=0x3fc999999999999aULL;
+ if(!state_spans(&s,&result,sizeof(s),out,capacity,&count)||!f64_finite(s.last)||!f64_finite(s.accumulator)||f64_lt(s.accumulator,kZero)||f64_ge(s.accumulator,kStep)||!f64_finite(beat)||!f64_finite(tempo))return Status::Invalid;
  Beat next=s;next.last=beat;Command tmp[17];std::size_t used=0;
- if(!loaded||beat<s.last)next.accumulator=0.f;
+ if(!loaded||f64_lt(beat,s.last))next.accumulator=kZero;
  else{
-  float elapsed=((beat-s.last)*60.f)/std::max(tempo,1.f);
-  if(std::isfinite(elapsed)&&elapsed>0){
-   if(elapsed>.2f)next.accumulator=0.f;
-   else{next.accumulator+=elapsed;while(next.accumulator>=.0125f){if(used==capacity)return Status::Capacity;if(used==17)return Status::Invalid;tmp[used]=command(Op::TickLfo,Receiver::Conductor,0,.0125f,s.generation,used);++used;next.accumulator=next.accumulator+(-.0125f);}}
+  const std::uint64_t elapsed=f64_div(f64_mul(f64_sub(beat,s.last),kSixty),f64_lt(tempo,kOne)?kOne:tempo);
+  if(f64_finite(elapsed)&&f64_gt(elapsed,kZero)){
+   if(f64_gt(elapsed,kGap))next.accumulator=kZero;
+   else{next.accumulator=f64_add(next.accumulator,elapsed);while(f64_ge(next.accumulator,kStep)){if(used==capacity)return Status::Capacity;if(used==17)return Status::Invalid;tmp[used]=command(Op::TickLfo,Receiver::Conductor,0,.0125f,s.generation,used);++used;next.accumulator=f64_add(next.accumulator,kStepNeg);}}
   }
  }
  if(used){std::copy(tmp,tmp+used,out);}

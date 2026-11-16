@@ -149,20 +149,21 @@ class BeatState:
     last: float
     accumulator: float=0.
 def beat_catchup(state,beat,tempo,loaded,capacity):
-    if type(state)is not BeatState or not _u64(state.generation) or not all(_finite(x)for x in (state.last,state.accumulator,beat,tempo)) or not 0<=state.accumulator<F(.0125) or type(loaded)is not bool or type(capacity)is not int or capacity<0:
+    # Binary64 catch-up. The C++ side performs the same operations on integer
+    # bit patterns, so the tick count matches this reference.
+    step=0.0125
+    if type(state)is not BeatState or not _u64(state.generation) or not all(_finite(x)for x in (state.last,state.accumulator,beat,tempo)) or not 0<=state.accumulator<step or type(loaded)is not bool or type(capacity)is not int or capacity<0:
         return Transition('INVALID',state)
-    last,acc,beat,tempo=F(state.last),F(state.accumulator),F(beat),F(tempo)
-    step=F(.0125)
+    last,acc,beat,tempo=state.last,state.accumulator,beat,tempo
     if not loaded or beat<last:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
-    elapsed=fdiv(fmul(fsub(beat,last),F(60.)),F(max(tempo,1.)))
+    elapsed=((beat-last)*60.)/max(tempo,1.)
     if not math.isfinite(elapsed) or elapsed<=0:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=acc))
-    if elapsed>F(.2):return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
-    acc=fadd(acc,elapsed);commands=[]
-    # Bound loop before allocating; admitted accumulator is a previous residual.
+    if elapsed>.2:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
+    acc=acc+elapsed;commands=[]
     while acc>=step:
         if len(commands)==capacity:return Transition('CAPACITY',state)
-        commands.append(Command('tick_lfo','elapsed_seconds','Conductor',0,step,state.generation,len(commands)))
-        acc=fadd(acc,-step)
+        commands.append(Command('tick_lfo','elapsed_seconds','Conductor',0,F(step),state.generation,len(commands)))
+        acc=acc+(-step)
     return Transition('OK_CLOCK',replace(state,last=beat,accumulator=acc),tuple(commands))
 @dataclass(frozen=True)
 class NoteState:

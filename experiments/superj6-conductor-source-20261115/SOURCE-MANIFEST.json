@@ -23,21 +23,21 @@
     },
     {
       "path": "conductor.cpp",
-      "bytes": 11205,
-      "sha256": "7b86f4473205367b709adb9874b670d9fb62a43b26e29706a036436be10bf506",
-      "git_blob": "9d98aa8257b1e3fad44908911a39849df1f078d7"
+      "bytes": 11571,
+      "sha256": "855cd8b692eb3ad1e0d3cb10d5a4eae574596e84d80722cfaf7c605b1b1c5b7e",
+      "git_blob": "8e40da3df15429e500245c190a9a494bcfc17deb"
     },
     {
       "path": "conductor.hpp",
-      "bytes": 4906,
-      "sha256": "6f514e0dc600e19a57ec70e41c96dc0dabb4ee8a46ea3f481f4a413ba80475df",
-      "git_blob": "d4ed8c784916191ff548d43554e4136af32608cb"
+      "bytes": 5258,
+      "sha256": "24519fb74397dec8e629482f3ba07feb3d1b0991878b85d052609da4e17c60a0",
+      "git_blob": "3aad179855dc6671ddf69994a710a1788a8f100e"
     },
     {
       "path": "conductor.py",
-      "bytes": 10212,
-      "sha256": "c8baa93ce4cfa3e39a2f7f04dbef12bc62d4630a6cfc2665963582bd907a9830",
-      "git_blob": "104077aa4d7eeb50db314f7ff0f17008903af081"
+      "bytes": 10223,
+      "sha256": "5ec5632628a43b6665957797e2598b1cc65c3e7c638cd0567e89daeb07c8d85d",
+      "git_blob": "3a30013be6dd5190da684bfbe0c2f41126c3b645"
     },
     {
       "path": "control_contract.json",
@@ -53,15 +53,15 @@
     },
     {
       "path": "cross_check.py",
-      "bytes": 1715,
-      "sha256": "56fe19b839447cbbbf47fb1ba12519be54e2be29fee2162d8ac43cb4e2008cb5",
-      "git_blob": "b8a5d85f1504496a6374760f7fb168a8782beb2d"
+      "bytes": 1758,
+      "sha256": "d703efe28f8a1028d6abf7a634528b274bfb7fa7a11eaa796517c26cc2fe896b",
+      "git_blob": "e4fde85ddc707c6a79b4ee39fd1799aad6614fa8"
     },
     {
       "path": "cross_probe.cpp",
-      "bytes": 1255,
-      "sha256": "25b6548458100af403e53017a387e80dcd657ebd383a677a4eac7f5cccc3539e",
-      "git_blob": "44fcc9e07e9d255207fb9b6a24b6c47a6d8fe2f4"
+      "bytes": 1419,
+      "sha256": "e2b7b6e59476802c32407215fe05391f23daffe7e976a2f436a183d7df9910cb",
+      "git_blob": "12e819e91952bb1b2d57882c635d0f25d37a9a9f"
     },
     {
       "path": "cutoff_executor.cpp",
@@ -197,9 +197,9 @@
     },
     {
       "path": "test_conductor.cpp",
-      "bytes": 4399,
-      "sha256": "814ee7ad865a2394b057a34e865d7b1f974c04f8fb4ec853fe7e4667c93aa88d",
-      "git_blob": "372fd96b2510aaa6ab87cbc022b9091e82017f45"
+      "bytes": 4580,
+      "sha256": "3a94d9f4ebdb5737ef2d07c20ddd338bba17b1445e32a3f9ea5af0b78fb8eb5d",
+      "git_blob": "ea12ec6e11dd7c7d8dcaab065f929b0d45726edc"
     },
     {
       "path": "test_conductor.py",
@@ -287,9 +287,9 @@
     },
     {
       "path": "test_state.py",
-      "bytes": 2794,
-      "sha256": "7c563c5f59ecf687b0310d1724b9ddf67d8a344a121000d7754f78a6b6dd19c5",
-      "git_blob": "f9a5f82fba72eadd9935830c7199d967cfa86885"
+      "bytes": 2791,
+      "sha256": "888ddc4cc88067ed2492784d62c206bdf24ce274681b01063f7d73da974144ba",
+      "git_blob": "7fe85a22c209cb9c34854481f81344a62cbc4b9e"
     },
     {
       "path": "test_tick_prefix.cpp",
@@ -347,9 +347,9 @@
     },
     {
       "path": "validate_host.py",
-      "bytes": 4490,
-      "sha256": "67bd12039e3882635777b688c746a2cd4244c8b2ab6b7ca40ab308f4041ba6c0",
-      "git_blob": "b624f6c6ca1d0694da6afd3f9fabc1a36a5d14aa"
+      "bytes": 4510,
+      "sha256": "ab6100bf92472bdc53c47dc7dd81c5d74bafdca3af0dce744686d5551dfba9f8",
+      "git_blob": "b4196632fe0c933c2ba5d1a4a7afbe358d1880df"
     },
     {
       "path": "vibrato4.cpp",
@@ -362,6 +362,18 @@
       "bytes": 1111,
       "sha256": "33fb24b31612c7a92ce06ffb168abaf2b1590b887ef065f422eedc58c680090d",
       "git_blob": "02719b473d1f123457c99f534c6681e614410957"
+    },
+    {
+      "path": "f64_bits.hpp",
+      "bytes": 22336,
+      "sha256": "f6313510b6f034750b35eb91fcfbfb4313928fa6178e5cfac62d6d7e9fcf460b",
+      "git_blob": "61df3cfbf70e14e8622976bcccaccbd34db8efea"
+    },
+    {
+      "path": "test_timing_exact.cpp",
+      "bytes": 2227,
+      "sha256": "4329e2860e32dbaa43c846a30327ec5b8f616140a9fed80fe4aa06daf1661513",
+      "git_blob": "c1385b2c4c5a5a668cdbe04561bad815bf1764b2"
     }
   ]
 }

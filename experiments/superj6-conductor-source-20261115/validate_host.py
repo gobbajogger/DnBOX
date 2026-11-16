@@ -28,7 +28,7 @@ base=[compiler,'-std=c++11','-pedantic-errors','-fno-exceptions','-Wall','-Wextr
 env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1')
 r=call('python',[sys.executable,'-m','unittest','discover','-v'],env);assert r.returncode==0
 for variant,flags in [('o2',['-O2']),('os',['-Os']),('sanitize',['-O1','-g','-fsanitize=address,undefined,float-cast-overflow','-fno-sanitize-recover=all'])]:
- for test in ['test_conductor','test_restore','test_deferred','test_lfo_laws','test_entropy','cross_probe','entropy_probe','test_tick_prefix','test_tick_time','test_lfo_apply','test_vibrato4','test_cutoff_executor','test_signed_zero','test_ordered_tick','test_lifecycle','prefix_equivalence_probe','test_preset_executor','test_defaults','test_pwm_postpass']:
+ for test in ['test_conductor','test_restore','test_deferred','test_lfo_laws','test_entropy','cross_probe','entropy_probe','test_tick_prefix','test_tick_time','test_lfo_apply','test_vibrato4','test_cutoff_executor','test_signed_zero','test_ordered_tick','test_lifecycle','prefix_equivalence_probe','test_preset_executor','test_defaults','test_pwm_postpass','test_timing_exact']:
   label=variant+'-'+test;exe=out/label
   r=call(label+'-build',base+flags+[str(root/'conductor.cpp'),str(root/'lfo_laws.cpp'),str(root/'entropy_table.cpp'),str(root/'tick_prefix.cpp'),str(root/'tick_time.cpp'),str(root/'lfo_apply.cpp'),str(root/'vibrato4.cpp'),str(root/'cutoff_executor.cpp'),str(root/'ordered_tick.cpp'),str(root/'lifecycle.cpp'),str(root/'preset_executor.cpp'),str(root/'prefix_reference_testonly.cpp'),str(root/(test+'.cpp')),'-o',str(exe)]);assert r.returncode==0,label
   before=hashlib.sha256(exe.read_bytes()).hexdigest();r=call(label,[str(exe)],env)

@@ -2,6 +2,7 @@ import sys,ctypes,struct
 from conductor import *
 from conductor import _default
 def fb(x):return struct.pack('>f',x).hex()
+def db(x):return struct.pack('>d',x).hex()
 _libm=ctypes.CDLL('libm.so.6')
 _powf=_libm.powf;_powf.argtypes=[ctypes.c_float,ctypes.c_float];_powf.restype=ctypes.c_float
 _expf=_libm.expf;_expf.argtypes=[ctypes.c_float];_expf.restype=ctypes.c_float
@@ -19,7 +20,7 @@ for i in range(1000):
 for i in range(1000):
  r=beat_catchup(BeatState(2,10.,float(i%12)/1000.),10.+float(i%103)/1000.,120.,True,256)
  assert r.status=='OK_CLOCK'
- expected.append(f'B {i} {len(r.commands)} {fb(r.state.accumulator)}')
+ expected.append(f'B {i} {len(r.commands)} {db(r.state.accumulator)}')
 actual=open(sys.argv[1]).read().splitlines()
 assert len(actual)==len(expected),(len(actual),len(expected))
 for i,(a,b)in enumerate(zip(actual,expected)):assert a==b,(i,a,b)
