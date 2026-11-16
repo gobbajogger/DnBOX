@@ -903,6 +903,8 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 }
 static void pref_set(pref_t r, int v) { pref_set_impl(r, v, 1); }
 
+#include "remote_scalar.inc" /* checked transaction only; no endpoint enabled */
+
 
 /* a name in capitals (the engines' own are mixed case): two at a time */
 static const char *caps_of(const char *n)

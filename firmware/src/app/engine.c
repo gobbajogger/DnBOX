@@ -705,6 +705,9 @@ static void apply_param(int t, int v, int i, int val)    /* ISR */
     }
 }
 
+unsigned engine_queue_available_locked(void)
+{ uint32_t n=cq_w-cq_r; return n<CQ?CQ-n:0; }
+
 void engine_set(int t, int v, int i, int val) { cq_put((uint32_t)t, (uint32_t)v, (uint32_t)i, (uint32_t)val); }
 void engine_set_base(int t, int v, int i) { cq_put(C_BASE, (uint32_t)t, (uint32_t)v, (uint32_t)i); }
 static void apply_base(int t, int v, int i)

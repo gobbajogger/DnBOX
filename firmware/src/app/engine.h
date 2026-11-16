@@ -315,3 +315,6 @@ extern uint32_t engine_diag_render_offset;
 #ifdef X0X_HOST
 int engine_brk_step_velocity(void); /* read-only motion/restore regression diagnostic */
 #endif
+
+/* Observation only unless caller holds plat_cq_lock through enqueue. */
+unsigned engine_queue_available_locked(void);
