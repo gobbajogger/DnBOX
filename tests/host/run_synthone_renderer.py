@@ -26,9 +26,23 @@ def main():
         path = base/'closure/scheduler'/entry['path']
         if hashlib.sha256(path.read_bytes()).hexdigest() != entry['sha256']:
             raise ValueError('Source hash mismatch: ' + entry['path'])
+    closure = (base/'closure').resolve()
+    closure_hashes = json.loads((base/'CLOSURE-SHA256.json').read_text())
+    verified = set()
+    for relative, digest in closure_hashes.items():
+        path = (closure/relative).resolve()
+        if not path.is_relative_to(closure) or not path.is_file():
+            raise ValueError('Invalid closure path: ' + relative)
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError('Closure hash mismatch: ' + relative)
+        verified.add(path)
+    actual = {path.resolve() for path in closure.rglob('*') if path.is_file()}
+    if actual != verified:
+        raise ValueError('Closure contains unverified or missing files')
     commands = json.loads((base/'commands.json').read_text())
     replacements = {}
     planned = []
+    adapter_count = 0
     for index, original in enumerate(commands[:-1]):
         command = list(original)
         if '-c' not in command or '-o' not in command:
@@ -38,10 +52,23 @@ def main():
         replacements[old_object] = new_object
         command[command.index('-o') + 1] = new_object
         source_index = command.index('-c') + 1
-        if command[source_index].endswith('/tests/source_scheduler_test.cpp'):
+        source = pathlib.Path(command[source_index]).resolve()
+        if source not in verified:
+            raise ValueError('Unverified compile source: ' + str(source))
+        for flag in command:
+            if flag.startswith('-I'):
+                include = pathlib.Path(flag[2:]).resolve()
+                if not include.is_relative_to(closure) or not include.is_dir():
+                    raise ValueError('Unverified include directory: ' + flag)
+            elif flag.startswith(('-include', '-imacros', '-isystem', '-iquote', '@')):
+                raise ValueError('Unsupported implicit input flag: ' + flag)
+        if source == closure/'scheduler/tests/source_scheduler_test.cpp':
+            adapter_count += 1
             command[source_index] = str(repo/'tests/host/synthone_renderer_test.cpp')
             command += ['-I' + str(repo/'firmware/src/dsp')]
         planned.append(command)
+    if adapter_count != 1:
+        raise ValueError('Expected exactly one adapter harness')
     link = [replacements.get(value, value) for value in commands[-1]]
     if any(value.endswith('.o') and value not in replacements.values() for value in link):
         raise ValueError('Link contains an object without a fresh compile command')

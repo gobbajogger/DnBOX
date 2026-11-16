@@ -11,7 +11,13 @@ rejects any link object not produced by that plan. It preserves source inputs.
 
 Regression: `python3 tests/host/test_synthone_rebuild.py` failed on the donor
 runner because the deliberately invalid dependency source was never compiled.
-It passes on the new runner.
+It passes on the new runner. Independent review additionally caught unbound
+compile paths and an optional adapter substitution. Two new negative regressions
+failed on that version and pass after binding every actual compiled source and
+include directory to a complete `CLOSURE-SHA256.json` snapshot, rejecting unlisted
+closure files, and requiring exactly one adapter substitution. All three
+regressions pass. The 89-file retained closure snapshot is an input-integrity
+record, not independent upstream-source provenance.
 
 Actual run: `python3 tests/host/run_synthone_renderer.py --source-build <trusted-source-build> --output <fresh-output>`
 compiled 28 objects from retained closure sources and ran successfully:
