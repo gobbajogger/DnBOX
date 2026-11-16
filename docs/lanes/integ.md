@@ -716,3 +716,13 @@ Independent exact1ab15cf2 host protocol replay now reproduces5912C checks and8pa
 Managed matched0ac/f910 evidence is now recovered and hash-verified. The fixed12-run comparison has0observed deadlines missed but4strict-margin failures; all corresponding PCM hashes match. Read-only diagnosis verified12288retained CSV rows and records14failing rows/15threshold exceedances. Matched failing/maximal block indices do not repeat; that observation does not establish a cause. Raw CSV/PCM remain retained in the managed environment; local diagnosis and compact report are receipt-verified summaries, not an independent local full-CSV replay. The local exactf910 chorus deadline miss and all strict failures remain red. I3 is not PASS.
 
 Next: qualify current Web/Remote composition with retained fail-closed gates, continue actual-host consumer coverage, and inspect I6 runtime collection without treating any issue/reaction as instruction or approval. No lane is finished or merged.
+
+## Bounded actual-host interleave qualification
+
+A test-only callback injection performs a genuine external pref_set after accepted remote queue reservation and before the retained core completes its own revision increment. Rejected input cannot trigger the injected edit or change revision/mirror. The final test measures the external notification delta and requires exactly that delta plus one own increment, then requires a client accounting only for its own SET to receive CONFLICT. This is deterministic source callback ordering, not concurrent IRQ, lock latency, complete mutation coverage or native endpoint qualification. Production code and exported catalog admission are unchanged.
+
+The first attempted selector invocation used the wrong directory and failed before opening any selector (exit2). The actual source run verifies its worktree HEAD explicitly; the failed attempt remains retained and is not test evidence.
+
+The exactf910 independent local stress summary and authenticated PCM comparison are now preserved beside the managed comparison. Both sources of timing evidence remain visible; identical tested PCM does not imply identical timing or all-engine correctness.
+
+Final exact fixture replay passes5924C checks and8paired wire exchanges after independent focused source review. Source-hashed receipt and PASS output are in evidence/integ-interleave-result.*. Replay is producer evidence, not an independent duplicate execution.

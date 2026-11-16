@@ -19,6 +19,10 @@ void dnbox_source_changed(void)
 typedef struct {uint16_t id;uint8_t target,voice,parameter;int8_t bank;uint16_t maximum;char label[64];} actual_control;
 static actual_control controls[512];static unsigned control_count;static uint32_t catalog_crc;
 static unsigned makeup_id;
+/* Test-only deterministic callback interleave, never a device IRQ simulation. */
+static int inject_external_after_set;
+static unsigned injected_external_edits;
+static uint32_t injected_revision_delta;
 static void collect_actual(unsigned target,unsigned voice,int bank)
 {
     for(unsigned parameter=0;parameter<(unsigned)engine_nparams(target,voice);parameter++) {
@@ -72,7 +76,15 @@ static int set_actual(void *ctx,uint16_t id,uint8_t kind,uint32_t value)
 {
     (void)ctx;const actual_control *c=lookup_actual(id);
     if(!c || kind!=DNR2_U32 || value>c->maximum)return 0;
-    return dnbox_remote_scalar_set(c->target,c->voice,c->parameter,c->bank,value);
+    int accepted=dnbox_remote_scalar_set(c->target,c->voice,c->parameter,c->bank,value);
+    if(accepted && inject_external_after_set) {
+        inject_external_after_set=0;
+        uint32_t before_external=protocol.revision;
+        pref_set(PR(R_ENG,T_MST,0,MST_MAKEUP),26);
+        injected_revision_delta=protocol.revision-before_external;
+        injected_external_edits++;
+    }
+    return accepted;
 }
 static int no_down(void *ctx,uint16_t id,uint32_t value,uint32_t *cookie)
 {(void)ctx;(void)id;(void)value;(void)cookie;return 0;}
@@ -174,6 +186,27 @@ int main(int argc,char **argv)
     run_ms(500);CHECK(engine_queue_available_locked()==1024);
     c.request++;r=transact(&c);CHECK(r.status==DNR2_QUEUED);
     CHECK(protocol.revision==external+1);CHECK(pref_get(PR(R_ENG,T_MST,0,MST_MAKEUP))==25);
+    /* Real source edit between accepted callback and core revision commit:
+     * no global origin suppression may hide this intervening mutation. */
+    run_ms(100);previous=protocol.revision;
+    inject_external_after_set=1;c.request++;c.revision=previous;c.value=0xffffffffu;
+    r=transact(&c);CHECK(r.status==DNR2_BAD);
+    CHECK(inject_external_after_set==1 && injected_external_edits==0);
+    CHECK(protocol.revision==previous);
+    CHECK(pref_get(PR(R_ENG,T_MST,0,MST_MAKEUP))==25);
+    c.request++;c.value=23;r=transact(&c);
+    CHECK(r.status==DNR2_QUEUED);
+    CHECK(inject_external_after_set==0 && injected_external_edits==1);
+    CHECK(injected_revision_delta>0);
+    CHECK(protocol.revision==previous+injected_revision_delta+1 && r.revision==protocol.revision);
+    CHECK(pref_get(PR(R_ENG,T_MST,0,MST_MAKEUP))==26);
+    external=protocol.revision;
+    /* A client accounting for only its own SET must refresh, not overwrite. */
+    c.request++;c.revision=previous+1;c.value=27;r=transact(&c);
+    CHECK(r.status==DNR2_CONFLICT && protocol.revision==external);
+    CHECK(pref_get(PR(R_ENG,T_MST,0,MST_MAKEUP))==26);
+    CHECK(injected_external_edits==1);
+    run_ms(100);
     unsigned actual_edits=0, inactive_reads=0;
     for(unsigned bank=ORIGINAL_SOUND_CHICAGO;bank<=ORIGINAL_SOUND_MIAMI;bank++) {
         for(unsigned v=0;v<NBASS;v++) {CHECK(engine_bass_select_preset(v,bank,0,&proj.sound)==0);run_ms(100);CHECK(!engine_bass_preset_pending(v));}
