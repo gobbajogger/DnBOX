@@ -28,8 +28,15 @@ X0X_COLD int dnbox_remote_scalar_set(unsigned target, unsigned voice,
      * from capacity check through mirror update and enqueue, so rejection
      * cannot leave a changed mirror or claim acceptance of a dropped command. */
     if(!engine_queue_available_locked())goto done;
-    pref_set_impl(ref,(int)value,0);
-    accepted=2;
+#if X0X_BASS_PRESET_PREVIEW
+    int bass_edit=target==T_303;
+    if(bass_edit)engine_bass_edit_hold(1);
+#endif
+    int applied=pref_apply_engine(ref,(int)value,0);
+#if X0X_BASS_PRESET_PREVIEW
+    if(bass_edit)engine_bass_edit_hold(0);
+#endif
+    if(applied) { ui.dirty=1; accepted=2; }
 done:
     plat_cq_unlock(flags);
     return accepted;

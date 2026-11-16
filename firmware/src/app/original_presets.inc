@@ -255,7 +255,12 @@ int engine_bass_requested_bank(int v)
 int engine_bass_requested_preset(int v)
 { bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)(r.token & 127) : engine_bass_preset_index(v); }
 void engine_bass_cancel_preset(int v)
-{ if ((unsigned)v < NBASS) bass_publish_request(v, 0x40000000u | ((++bass_request_serial & 0x3fffffu) << 8)); }
+{
+    if ((unsigned)v < NBASS) {
+        bass_publish_request(v, 0x40000000u | ((++bass_request_serial & 0x3fffffu) << 8));
+        dnbox_source_changed();
+    }
+}
 void engine_bass_edit_hold(int hold)
 {
     __asm__ volatile("" ::: "memory");
@@ -298,18 +303,27 @@ int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, in
         ((uint32_t)bank << 7) | (uint32_t)preset;
     bass_preview_dirty = 1;
     bass_publish_request(v, token);
+    dnbox_source_changed();
     return 0;
 }
 int engine_bass_select_preset(int v, int bank, int preset, sound_t *sound)
 { return engine_bass_select_preset_at(v, bank, preset, sound, -1); }
 int engine_bass_preset_gate(int v) { return (unsigned)v < NBASS && bass_gate_pat[v] < NPAT ? bass_gate_pat[v] : -1; }
+/* Notify once per actual adoption/cancellation, never on idle audio blocks. */
+static void bass_preset_applied(int v, uint32_t token)
+{
+    if (bass_applied[v] != token) {
+        bass_applied[v] = token;
+        dnbox_source_changed();
+    }
+}
 static void bass_preset_boundary_voice(int v)
 {
     {
         bass_request_t request;
         if (!bass_request_snapshot(v, &request)) return;
         uint32_t token = request.token;
-        if (!(token & 0x80000000u)) { bass_applied[v] = token; return; }
+        if (!(token & 0x80000000u)) { bass_preset_applied(v, token); return; }
         if (engine_bass_preset_pending(v) != 1) return;
         /* A pattern preset waits until its pattern plays (the bar switch). */
         if (bass_gate_pat[v] < NPAT && seq.ppat[TRK_BASS0 + v] != bass_gate_pat[v]) return;
@@ -318,7 +332,7 @@ static void bass_preset_boundary_voice(int v)
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
         live_key_context_retire(v, 1);
         if (original_runtime_retire(&original_parts[v].runtime) != ORIGINAL_RUNTIME_OK) {
-            bass_applied[v] = token;
+            bass_preset_applied(v, token);
             return;
         }
         int rc = original_runtime_init(&original_parts[v].runtime, next, seq_tempo(&seq),
@@ -326,7 +340,7 @@ static void bass_preset_boundary_voice(int v)
         if (rc != ORIGINAL_RUNTIME_OK) {
             /* A failed adoption remains visible and needs a fresh explicit
              * request; do not rerun expensive initialization every block. */
-            bass_applied[v] = token;
+            bass_preset_applied(v, token);
             return;
         }
         original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
@@ -341,7 +355,7 @@ static void bass_preset_boundary_voice(int v)
         original_seq_note[v] = -1;
         (void)original_runtime_prepare(&original_parts[v].runtime, seq_tempo(&seq));
         __asm__ volatile("" ::: "memory");
-        bass_applied[v] = token;
+        bass_preset_applied(v, token);
     }
 }
 static void bass_preset_boundary(void)

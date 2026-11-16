@@ -11,6 +11,7 @@
  * Keys: F3..G5; the 16 white keys are steps (HOME: patterns), the 11 black keys a drum
  * machine's tracks or the break's slice pads (HOME: part mutes). */
 #include "x0x.h"
+#include "remote_events.h"
 #include "../seq/held_chord.h"
 #include "panic_chord.h"
 #include "play_question.h"
@@ -254,7 +255,7 @@ static int division_pad_index(void);
 static const char *division_pad_label(void);
 
 /* something the project keeps changed: SAVE (or the autosave) has work to do */
-static void mark_dirty(void) { ui.dirty = 1; }
+static void mark_dirty(void) { dnbox_source_changed(); ui.dirty = 1; }
 
 static uint8_t save_wait;
 static void live_boundary(int entry);
@@ -710,6 +711,24 @@ static void ui_restore_base(int target, int voice, int parameter)
     engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
 }
 
+/* Shared scalar application. Validation and queue reservation belong to the
+ * checked caller; ordinary UI retains its existing overload behavior. Explicit
+ * origin avoids suppressing unrelated events through a global depth flag. */
+X0X_COLD static int pref_apply_engine(pref_t r,int v,int notify)
+{
+    if(r.a==T_303) {
+        if(!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v))return 0;
+        engine_bass_sound_refresh(&proj.sound,r.b);
+    } else proj.sound.v[r.a][r.b][r.c]=(uint8_t)v;
+    if(notify)engine_set(r.a,r.b,r.c,v);
+    else engine_set_from_remote(r.a,r.b,r.c,v);
+    if(r.a==T_MST && r.c==MST_COMP1)
+        master_comp1_pots(v,&proj.sound.v[T_MST][0][MST_THRESH],&proj.sound.v[T_MST][0][MST_RATIO],&proj.sound.v[T_MST][0][MST_MAKEUP]);
+    else if(r.a==T_MST && r.c==MST_DJF)
+        master_djf_pots(v,&proj.sound.v[T_MST][0][MST_MODE],&proj.sound.v[T_MST][0][MST_CUTOFF]);
+    return 1;
+}
+
 X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 {
 #if X0X_BASS_PRESET_PREVIEW
@@ -746,19 +765,7 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
     mark_dirty();
     switch (r.kind) {
     case R_ENG:
-        if (r.a == T_303) {
-            if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
-                say("INVALID SOUND",0); break;
-            }
-            engine_bass_sound_refresh(&proj.sound,r.b);
-        } else
-        proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
-        engine_set(r.a, r.b, r.c, v);
-        if (r.a == T_MST && r.c == MST_COMP1)          /* the macros: the details they set, for the list */
-            master_comp1_pots(v, &proj.sound.v[T_MST][0][MST_THRESH], &proj.sound.v[T_MST][0][MST_RATIO],
-                              &proj.sound.v[T_MST][0][MST_MAKEUP]);
-        else if (r.a == T_MST && r.c == MST_DJF)
-            master_djf_pots(v, &proj.sound.v[T_MST][0][MST_MODE], &proj.sound.v[T_MST][0][MST_CUTOFF]);
+        if(!pref_apply_engine(r,v,1))say("INVALID SOUND",0);
         break;
     case R_SWING: p->swing = (uint8_t)v; break;
     case R_DLEN: p->drum[r.a].len = (uint8_t)(v + 1); break;
@@ -8782,6 +8789,7 @@ X0X_COLD static int project_acquire(int reset)
         return UI_PROJECT_BUSY;
     }
     project_busy = 1;
+    dnbox_source_changed();
     undo_commit_stable();                       /* no uncommitted gesture is lost when staging borrows shadow */
     return 0;
 }
@@ -8824,6 +8832,7 @@ X0X_COLD void ui_project_end(int apply)
     project_input_sync();                            /* consume controls held or turned during the transaction */
     ui.act_t = plat_ms();
     project_busy = 0;
+    dnbox_source_changed();
     engine_project_release();
 }
 

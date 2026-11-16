@@ -318,3 +318,7 @@ int engine_brk_step_velocity(void); /* read-only motion/restore regression diagn
 
 /* Observation only unless caller holds plat_cq_lock through enqueue. */
 unsigned engine_queue_available_locked(void);
+
+/* Checked remote transaction only: caller owns source lock and queue slot;
+ * protocol core supplies its revision. Other producers use engine_set. */
+void engine_set_from_remote(int target,int voice,int parameter,int value);

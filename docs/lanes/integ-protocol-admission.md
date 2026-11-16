@@ -31,3 +31,9 @@ Required checks include full queue rejection with identical mirror/dirty state, 
 - Preserve existing old-editor routing; malformed claimed DNR traffic must not fall through to firmware maintenance.
 
 Current native resources remain the independently measured 0ac composition: Elite/Pro XIP free 2028/2040 B, pool reserve margin 836 B, RAM headroom 1080 B. New protocol storage/code cannot be presumed to fit. No PSRAM, device writes or unqualified endpoint advertisement is allowed.
+
+### Source-origin probe (not enabled transport)
+
+`X0X_DNR2_PROBE` exposes semantic event notifications only for an explicitly linked test receiver. Default firmware compiles them out. `pref_apply_engine` preserves the ordinary R_ENG storage/tag/master-macro behavior while choosing an explicit remote queue path that does not emit redundant external notifications. No global suppression state can hide another source's mutation.
+
+`remote-events` exercises actual UI and engine code: external A→B→A and direct engine changes, remote scalar acceptance with no redundant event, pending/adopted/cancelled preset changes, project availability, and idle boundary non-flooding. This does not prove complete mutation coverage. Endpoint reads/commands and revision increments must still be serialized; no write capability may be advertised merely because these hooks exist. Native resources and interrupt timing require measurement at the final composition.

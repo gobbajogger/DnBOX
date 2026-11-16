@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* X0X audio engine; see engine.h. */
 #include "engine.h"
+#include "remote_events.h"
 #include "../seq/held_chord.h"
 #include "plat.h"
 #include "../x0x_cold.h"
@@ -708,7 +709,8 @@ static void apply_param(int t, int v, int i, int val)    /* ISR */
 unsigned engine_queue_available_locked(void)
 { uint32_t n=cq_w-cq_r; return n<CQ?CQ-n:0; }
 
-void engine_set(int t, int v, int i, int val) { cq_put((uint32_t)t, (uint32_t)v, (uint32_t)i, (uint32_t)val); }
+void engine_set_from_remote(int t, int v, int i, int val) { cq_put((uint32_t)t, (uint32_t)v, (uint32_t)i, (uint32_t)val); }
+void engine_set(int t, int v, int i, int val) { dnbox_source_changed(); engine_set_from_remote(t,v,i,val); }
 void engine_set_base(int t, int v, int i) { cq_put(C_BASE, (uint32_t)t, (uint32_t)v, (uint32_t)i); }
 static void apply_base(int t, int v, int i)
 {
