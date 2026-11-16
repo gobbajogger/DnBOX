@@ -662,3 +662,9 @@ Repeated mistake: coordinator reported a requested stop or lane-file update as c
 - Independent source/receipt review accepted all6workloads: three distinct PCM outputs in each mode. Exact-software-FMA CPU/wall deadline misses1/2/1; existing-native-arithmetic mode1/0/0; stricter host margins FAIL for all. Prior mislabeled factory/FX timings are historical, not intended-workload qualification. UI is between audio halves; transports are host substitutes. I3 remains FAIL; no runtime regression or hardware dropout conclusion follows.
 - Retains all22 published Fwui6fa2e29486fd87fbff102e356575d62733d247aa paths after893, including unimplemented design research and preview evidence. Modal/header predicate independently reviewed,2941battery tests PASS on Fwui input. Combined exact native/resources/UI pending; no gesture/design activation.
 - Remote DNR2 current native binding remains absent. Preserved older adapter/core is source history only; real ownership/catalog/mutation hooks must be ported and resource-qualified before device compatibility or write capability is advertised.
+
+## Current design-reference authentication correction
+
+The retained canonical authenticator still named the historical docs/ui reference. It now pins the unchanged supplied v2 docs/design/UI-SOURCE-OF-TRUTH.md (3051 bytes, SHA256 c9e69f4885a85e51862ef1092af168760f50075a1daf4222f0be2486e0c649ad). The old path is explicitly rejected, even for identical bytes. This authenticates reference identity only; all missing UI checks remain FAIL/NOT_RUN and no past visual report is promoted. No design or RULES text was changed.
+
+Independent focused source review accepted the final correction after finding and fixing a symlink-alias bypass in canonical pathname resolution. Replayed canonical9, aggregator15 and wrapper10+2 reference contracts PASS. No page render was rerun or qualified by this reference-only correction.

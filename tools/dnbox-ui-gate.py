@@ -13,6 +13,14 @@ def unmet(report, profile_hash):
         if checks.get(str(i),{}).get('status')!='PASS':reasons.append('check'+str(i)+' not PASS')
     return reasons
 
+def authenticate_reference(snapshot):
+    base=snapshot/'tests/ui_defects'
+    spec=importlib.util.spec_from_file_location('dnbox_current_canonical',base/'canonical_spec.py')
+    canonical=importlib.util.module_from_spec(spec);spec.loader.exec_module(canonical)
+    descriptor=canonical.read_descriptor(base/'canonical-spec.json')
+    digest=canonical.authenticate(snapshot,descriptor)
+    return {'path':descriptor['path'],'sha256':digest,'bytes':descriptor['bytes']}
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--output-root',type=pathlib.Path,default=pathlib.Path('build/dnbox-gate'));a=ap.parse_args()
     root=pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
@@ -33,9 +41,10 @@ def main():
         raw=path.readlink().as_posix().encode() if mode=='120000' else path.read_bytes()
         actual=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
         if actual!=blob:raise ValueError('archived input differs: '+name.decode())
+    reference=authenticate_reference(snapshot)
     profile=snapshot/'SOURCE-PROFILE.json' 
     if profile.exists():raise ValueError('reserved generated source profile already tracked')
-    profile.write_text(json.dumps({'schema':'dnbox-exact-git-render-profile/1','sourceCommit':sha,'sourceTree':tree,'method':'git archive exact HEAD; no working-tree source substitution'},sort_keys=True,indent=2)+'\n')
+    profile.write_text(json.dumps({'schema':'dnbox-exact-git-render-profile/1','sourceCommit':sha,'sourceTree':tree,'canonicalReference':reference,'method':'git archive exact HEAD; no working-tree source substitution'},sort_keys=True,indent=2)+'\n')
     ph=hashlib.sha256(profile.read_bytes()).hexdigest()
     slice_dir=snapshot/'tests/ui_defects/first_slice';sys.path.insert(0,str(slice_dir))
     spec=importlib.util.spec_from_file_location('dnbox_first_slice_run',slice_dir/'run.py');runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
@@ -48,7 +57,7 @@ def main():
     report=json.loads(evaluation.read_text()) if evaluation.exists() else first
     reasons=unmet(report,ph)
     if not evaluated:reasons.append('evaluation failed or unavailable')
-    receipt={'sourceCommit':sha,'sourceTree':tree,'profileSha256':ph,'report':str(evaluation),'status':'FAIL' if reasons else 'PASS','unmet':reasons}
+    receipt={'sourceCommit':sha,'sourceTree':tree,'canonicalReference':reference,'profileSha256':ph,'report':str(evaluation),'status':'FAIL' if reasons else 'PASS','unmet':reasons}
     (out/'qualification.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n');print(json.dumps(receipt))
     return 1 if reasons else 0
 

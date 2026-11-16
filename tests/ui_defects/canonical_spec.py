@@ -3,9 +3,9 @@
 """Authenticate canonical owner text without pretending pages conform."""
 import argparse,hashlib,json,os,stat
 from pathlib import Path
-CANONICAL_PATH='docs/ui/UI-SOURCE-OF-TRUTH.md'
-CANONICAL_SHA256='868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6'
-CANONICAL_BYTES=2891
+CANONICAL_PATH='docs/design/UI-SOURCE-OF-TRUTH.md'
+CANONICAL_SHA256='c9e69f4885a85e51862ef1092af168760f50075a1daf4222f0be2486e0c649ad'
+CANONICAL_BYTES=3051
 MAX_DESCRIPTOR_BYTES=16384
 
 def read_regular(path,limit):
@@ -30,7 +30,8 @@ def authenticate(root,descriptor):
  root=Path(root).resolve()
  if descriptor.get('path')!=CANONICAL_PATH or descriptor.get('sha256')!=CANONICAL_SHA256 or descriptor.get('bytes')!=CANONICAL_BYTES:
   raise ValueError('descriptor must name the trusted exact canonical owner path/pin')
- path=(root/CANONICAL_PATH).resolve()
+ path=root/CANONICAL_PATH
+ if path.resolve()!=path:raise ValueError('canonical path must not use symlink aliases')
  if not path.is_relative_to(root):raise ValueError('canonical path escapes repository')
  data=read_regular(path,CANONICAL_BYTES)
  actual=hashlib.sha256(data).hexdigest()

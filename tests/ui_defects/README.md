@@ -62,14 +62,14 @@ full gates. Do not interpret test-runner success as a product PASS.
 
 ## Canonical design contract
 
-The owner-authored [UI source of truth](../../docs/ui/UI-SOURCE-OF-TRUTH.md)
+The owner-authored [UI source of truth](../../docs/design/UI-SOURCE-OF-TRUTH.md)
 is the single canonical design document. It is byte-pinned by
 `canonical-spec.json`; `gate.py verify` authenticates the actual repository file
 and rejects reports missing that exact document hash. A document hash match is
 identity only, not a per-page conformity PASS. Runtime/legacy-data discrepancies
-and unqualified replacement engines are recorded separately in
-[engine admission notes](../../docs/ui/ENGINE-ADMISSION.md), not edited out of
-the owner's words. The first slice is not the complete per-page token gate.
+and unqualified replacement engines have historical context in
+[engine admission notes](../../docs/ui/ENGINE-ADMISSION.md), which is not current
+design authority. Current status belongs in docs/lanes/*.md. The first slice is not the complete per-page token gate.
 
 ```sh
 python3 tests/ui_defects/test_canonical_spec.py
