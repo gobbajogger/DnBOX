@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "Bounded plain JS source/tests/docs for ordinary analysis-memory proof; no binary or runtime admission",
+  "parent": "346223e9ec6361f0d08ac72cee785a5d223d4caa",
+  "files": [
+    {
+      "path": "compact_analysis.js",
+      "mode": "100644",
+      "bytes": 22266,
+      "sha256": "a4671fbac90065ad1c6a193c21edf1c0088fae1eaa7c527ccefe739148086d54",
+      "git_blob_sha": "f12fa4f5138faa5dbb2a14dec9b82ebe2f8bdecd"
+    },
+    {
+      "path": "input_manifest.json",
+      "mode": "100644",
+      "bytes": 23380,
+      "sha256": "90b159074216ba0a369a41bd3fab3aab3db22daa7633629158bb4262db43c9e5",
+      "git_blob_sha": "81d14f92e6b9a51989f24b957cf673be1f26b035"
+    },
+    {
+      "path": "fold_config.json",
+      "mode": "100644",
+      "bytes": 5018,
+      "sha256": "668e154ad0afa100c0c3c48d5862dcc1270282819b1a8e196eac3346d3611132",
+      "git_blob_sha": "b4c872f28d5839ce4b3447467e3fd8af4c9bcf2a"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "bytes": 7225,
+      "sha256": "912c82090c449e14665e9d98ea55bfa36d6423c893d5ce9d5b26514d9fda8aac",
+      "git_blob_sha": "c56e547006a4b41e2aa5032a1f2bc57f215b2b7f"
+    },
+    {
+      "path": "notices/SynthOne-MIT.txt",
+      "mode": "100644",
+      "bytes": 1075,
+      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "git_blob_sha": "be8551b835e760f321887b531d2f09d8ffa05c5a"
+    }
+  ]
+}

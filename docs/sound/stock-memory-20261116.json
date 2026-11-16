@@ -1,0 +1,336 @@
+{
+  "scope": "Fresh genuine native BASELINE candidate1 link accounting, NOT latest UI or new-engine activation/fit/runtime/device qualification",
+  "base_commit": "8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b",
+  "base_tree": "0bff565aab165b1750535a6e1cf9cbd805e1f20d",
+  "base_blobs": 5353,
+  "overlays": [
+    {
+      "path": "experiments/original_synth/chicago_program.c",
+      "sha": "e58fd5c11a93fc263726eb416cd3c6f78e815bcc",
+      "sha256": "55d5bcd1c66e22b26a83a5ffda39d7fa7f272013f67297d09a24a2c72a204c45",
+      "bytes": 4373,
+      "mode": "100644"
+    },
+    {
+      "path": "experiments/original_synth/miami_program.c",
+      "sha": "f007bf01279c96756b020d62a33913c8571152b9",
+      "sha256": "9cd43dc57317688d73d6b194f06b0fd6b370a0fdac9ed236041186539f092a4f",
+      "bytes": 2573,
+      "mode": "100644"
+    },
+    {
+      "path": "experiments/original_synth/program_values_compact.h",
+      "sha": "2e8862e18076e6fd92211fc5a2b185701f46a53c",
+      "sha256": "395710a2a6d180d1bae9a597749743065417c9c6eeada4bb256b1411d404d25a",
+      "bytes": 7581,
+      "mode": "100644"
+    },
+    {
+      "path": "firmware/src/app/ui.c",
+      "sha": "ed5671c675df21d5363eceaa60af6aaec9fbfd2e",
+      "sha256": "e4d1c4a442add789a3657fdc6b0671038e67389fdb751b6faec3617b17c7cd96",
+      "bytes": 393840,
+      "mode": "100644"
+    },
+    {
+      "path": "firmware/src/gfx.c",
+      "sha": "8cbea609dc4b5b8b95fb802c3b55f38711cdaf65",
+      "sha256": "3efcbeafea44c2754cca3d43bf32aeec70ddc57f49e7344f2931cc165b909fab",
+      "bytes": 12317,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/exp_curve_exact_test.sh",
+      "sha": "ebb8aee598147aff044d46982cd06312fafbc302",
+      "sha256": "f15182769fb5e3c9e97a65ce5a32a42ef082d005ac6375c752f19d175ac51b35",
+      "bytes": 525,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/font_pack_test.py",
+      "sha": "b4740454074d39eec56ef703f2973689e88ba727",
+      "sha256": "6badcca25a08cbffc87c661cd3e28439b19cc4e281ced11de10790a778ca4d1d",
+      "bytes": 4022,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/host/exp_curve_exact_test.c",
+      "sha": "4a50e8aafc4b4da3c9771a2f804af60b6d066406",
+      "sha256": "9eec04796dcb146fd6b3cbec109c42502b625b7cefec0968eab25ad11a955461",
+      "bytes": 29863,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/host/font_pack_test.c",
+      "sha": "d0ce86cbbb7cdc0f343e3dde75604d5187f67fc4",
+      "sha256": "d27913b108c7285a5fa4e15271e52d3b8ec95eccb4c472055f812e1db0fac5c7",
+      "bytes": 4186,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/host/program_values_compact_test.c",
+      "sha": "fac379241427a2de5054b9252a0db97022abc391",
+      "sha256": "02a46683f7c825236cb8f04563c22dd1c660ba8b46124a976c70643258ce9c4b",
+      "bytes": 1197,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/program_values_compact_test.py",
+      "sha": "f481df268b86b51808c8bced7ec579f515f1633c",
+      "sha256": "dd742df451f39de35fbe8bb60dba24af1cb72fe5e5e9afc6bdeaf07f1e6a8e28",
+      "bytes": 1995,
+      "mode": "100644"
+    },
+    {
+      "path": "tools/gen_drum_samples.py",
+      "sha": "5dc7f7da33dbfdbccf46c584a367ed6d477c996f",
+      "sha256": "ff2a5d642d30b495fe6b1ddc7c6646ff9211333c082bbfd744cf2f6f6cc1dedc",
+      "bytes": 15603,
+      "mode": "100644"
+    },
+    {
+      "path": "tools/gen_font.py",
+      "sha": "640279a39dcadc06725ff72d85dcdcba9d1a426e",
+      "sha256": "bdc8cac472dfa2c0b2eb483780e004499316221cd73a4046b35ba95b09b6cc32",
+      "bytes": 15788,
+      "mode": "100755"
+    },
+    {
+      "path": "tools/gen_program_values_compact.py",
+      "sha": "7932afef273e80b1bf92531e418001cd1665e265",
+      "sha256": "821eb597ac7cb5da569687325463ede54b5890d578676612a77a1d0b87c6915f",
+      "bytes": 4023,
+      "mode": "100644"
+    },
+    {
+      "path": "docs/ui/ENGINE-ADMISSION.md",
+      "sha": "8025de6e982fb3c52bcceaac68ef9478ecc98c18",
+      "sha256": "814a5991bf911cb906ec428bfe94a4cb7d3f751b796c7ae13856dd8ccbefa66c",
+      "bytes": 3241,
+      "mode": "100644"
+    },
+    {
+      "path": "docs/ui/UI-SOURCE-OF-TRUTH.md",
+      "sha": "b9e02e51280af8978ba36f53a67db586d7a9acec",
+      "sha256": "868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6",
+      "bytes": 2891,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/README.md",
+      "sha": "39cbbf693f283108abaef5165bee7675067b16cc",
+      "sha256": "76cb1c1bb8d5acef43deb73deb22f950435e6eed232d578ae7cd37ee1b9de0df",
+      "bytes": 4565,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/canonical-spec.json",
+      "sha": "d0a395e3a33716da2aff33bff29ee3000225771f",
+      "sha256": "9d8def06cac69557680d95cdf41517c53ec2344b7bffbcd6221fa94c37a5397b",
+      "bytes": 482,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/canonical_spec.py",
+      "sha": "c7a4905b722303ee828921bb276cec09ee3afd62",
+      "sha256": "da6f38e67978660be151622cff2d6f62cfb2a6a3f15baea45d7a57a1702d791c",
+      "bytes": 2446,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/README.md",
+      "sha": "a81c578c609befd35165cbeebda26700be61496c",
+      "sha256": "4bf1f40a4563dc0b20b8531ccc734ee4f1c34954558081679d841f60814d28d4",
+      "bytes": 5507,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/capture.c",
+      "sha": "d95c323c63bbd1aef521a9c15ef09f3c237ecd2d",
+      "sha256": "0fb6b0bf15e6e2dce437aaedb509c63921f0cb5e40893e86696bb3b1d12e4e25",
+      "bytes": 2201,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/detectors.py",
+      "sha": "4f35cb763575a3273934ae2ae2f0647185551af5",
+      "sha256": "76369b5ea94dd8c0eac8e3a941a556a86ad76a3f133c52286c9d733de4937cad",
+      "bytes": 6599,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/evaluate.py",
+      "sha": "4f90402f9d65abbfc8704584f8c2b39ab11844d6",
+      "sha256": "8a522aed666f7b98377f040c6c888e577b25029ba69be59d124606be18b32959",
+      "bytes": 2852,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/expected-screens.json",
+      "sha": "60eaa8ade5abf67b636c8562d6c9a6532bffbed2",
+      "sha256": "2fdf3f80a3bc5f7b7845908b0e74d1bd2f36d87c6c47fcee77e4f1a4bc627244",
+      "bytes": 4704,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/historical_glyph.py",
+      "sha": "c166a5d970d6f97831fd1bd87542971439d754f0",
+      "sha256": "266d121c752eb9a0dfe3646823590e22ae04060c4d141c81c8c2a2704976326c",
+      "bytes": 3397,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/instrument.py",
+      "sha": "ba637aee60718d574d861b12e5a0b13e09843523",
+      "sha256": "d3538ae86477becf06c98c3040748b917d97efeb1635ba2efb002a6ad9fff757",
+      "bytes": 5515,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/regression.py",
+      "sha": "f0593c7338f65d504d80fa06a5f8bd0caa6be8a5",
+      "sha256": "43812343401264b85b79ea1f486637bb8822b639793122e3f83d15d361b7e5ee",
+      "bytes": 2051,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/run.py",
+      "sha": "fabc5329fc853099576fee63090b1ea3a5466020",
+      "sha256": "f15656c91fe6fee7b48597e3e5c7b026a79bd82682f457bb3fadeb7a2781ebc3",
+      "bytes": 10962,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/test_detectors.py",
+      "sha": "4fee7731d96311302e828c0f4d4c3ce4a1a73c05",
+      "sha256": "e98a5b716a096ef7820b3381c6a4f44d86299e45cf205685e7389d1c9c033ad8",
+      "bytes": 7765,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice/trace_gfx.inc",
+      "sha": "5cc7863bcb848b87d92a88f6d2e2c60648251127",
+      "sha256": "053bf0631f81d6203d39d5216829724deca4bef87dd07fc00b7ebb6fba947c52",
+      "bytes": 2617,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/first_slice_report.py",
+      "sha": "511844d2200bc74ab6e547a474ec7ff12b4e805c",
+      "sha256": "f9c769cf6a6e77e3e11bf9981af4c6214c39cb866fdba8b74964d7fa65756074",
+      "bytes": 3982,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/gate.py",
+      "sha": "8a6bfb6b2eda13934865fc3eae993514b6b4c5db",
+      "sha256": "d43a7fa07788212d9f305be08e0404668fb26377f10e17cdcc091473877dffb5",
+      "bytes": 12416,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/test_canonical_spec.py",
+      "sha": "42295f617cf148374a2232910f85bfa9ecf26239",
+      "sha256": "a319b9178edbb3f97e886a6473dc22a49a43b96c868dc97304fb816eee2afdbb",
+      "bytes": 4795,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/test_first_slice_report.py",
+      "sha": "18e7895e3d7ff7c9485aa25971784151fe2abf38",
+      "sha256": "61cf72159a2bc07256b08641002aee5fba0c574467ff87c7ae4fcbdd79825b67",
+      "bytes": 1459,
+      "mode": "100644"
+    },
+    {
+      "path": "tests/ui_defects/test_gate.py",
+      "sha": "7bf23f8c0ad2279428aa72445b30a175ac86f301",
+      "sha256": "fe8b65b4609bd12db5c2263c67174118427cf9d4c7a31eeaccbc242e858c80d2",
+      "bytes": 5724,
+      "mode": "100644"
+    }
+  ],
+  "composition_manifest_sha256": "dc745ce0a3e66f46497a58e6f0670a89b2bf0619771889bbbfc5cd5e81b6ec5f",
+  "missing": [
+    "latest UI",
+    "SynthOne renderer activation/full FX",
+    "SuperJ6 renderer activation/64 controls",
+    "PADCAL1 variants not yet measured in this report",
+    "runtime pool peak",
+    "target CPU/device"
+  ],
+  "SDK": "V1.2.14 pinned input subset, build pin checks passed; not a complete SDK checkout claim",
+  "toolchain_clang_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+  "measurements": [
+    {
+      "model": "elite",
+      "PADCAL": 0,
+      "build_exit": 0,
+      "app_code_capacity": 552672,
+      "flash_free": 15356,
+      "image_bytes": 537316,
+      "static_ram_used": 95696,
+      "static_ram_limit": 98304,
+      "pool_used": 335700,
+      "pool_limit": 344064,
+      "pool_free": 8364,
+      "pool_floor": 8192,
+      "pool_above_floor": 172,
+      "soft_double_scan": "PASS"
+    },
+    {
+      "model": "pro",
+      "PADCAL": 0,
+      "build_exit": 0,
+      "app_code_capacity": 552672,
+      "flash_free": 15368,
+      "image_bytes": 537304,
+      "static_ram_used": 95696,
+      "static_ram_limit": 98304,
+      "pool_used": 335700,
+      "pool_limit": 344064,
+      "pool_free": 8364,
+      "pool_floor": 8192,
+      "pool_above_floor": 172,
+      "soft_double_scan": "PASS"
+    }
+  ],
+  "new_compact_candidate": {
+    "coefficient_bytes": 16752,
+    "six_model_runtime_before_alignment": 6540,
+    "generic_native_text": 5294,
+    "generic_sine_rodata": 8192,
+    "no_fit_claim": true,
+    "new_flash_upper_bound_before_sharing": 30238,
+    "elite_flash_floor_shortfall_if_naively_added": 23074,
+    "pool_floor_shortfall_if_six_sets_naively_added": 6368
+  },
+  "savings_candidates": [
+    {
+      "name": "Compact512 rather than full2048",
+      "runtime_bytes": 18432,
+      "coefficient_bytes": 9396,
+      "basis": "Measured serialized payload totals and actual native cycle/view/cursor ABI",
+      "credited_against_current_baseline": 0,
+      "caution": "Different approximation error; neither engine is linked here."
+    },
+    {
+      "name": "Share immutable cycle+view for voices in same zone",
+      "runtime_upper_bound_before_cache_bookkeeping": 5440,
+      "worst_case_guaranteed_saving": 0,
+      "basis": "6*(1024+64+2) versus1024+64+6*2; C renderer takes const model/cycle and per-voice cursor",
+      "caution": "0..5440 depends on zone occupancy. Six different zones save0. Cache lifetime/bookkeeping/admission not qualified; even best1100B exceeds172Bmargin before graph/controls."
+    },
+    {
+      "name": "Deduplicate identical generic sine arrays",
+      "possible_duplicate_bytes": 8192,
+      "measured_current_baseline_occurrences": 0,
+      "credited_current_savings": 0,
+      "basis": "Exact8192-byte native rodata pattern searched in measured baseline image; zero matches",
+      "caution": "Future old-preview+new-renderer duplicate can share one identical table, but no existing baseline savings proven."
+    }
+  ],
+  "stock_hardware_only": true,
+  "PSRAM": "PROHIBITED",
+  "release_or_device_qualification": false
+}

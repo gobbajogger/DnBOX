@@ -1,0 +1,37 @@
+{
+  "commit": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "tree": "2a36703ec69a24e6669942f7492c315233741cb2",
+  "sources": [
+    {
+      "path": "AudioKitSynthOne/DSP/Sequencer/S1ArpModes.hpp",
+      "blob": "08646babac7f8f87fe99b53f9078da200d5b971f",
+      "sha256": "8d7afde0ffdd2ccde087323df6db58331412ac35711ee3bfeea03cbe5c648a9d"
+    },
+    {
+      "path": "AudioKitSynthOne/DSP/Sequencer/S1Arpeggiator.hpp",
+      "blob": "ded28a088f310ddcf704906cf29e53b469b0fef5",
+      "sha256": "84eea727e0d8e41c1a1ece0bf61de87a2b345a1a2659c5ae501c2418a534ecb1"
+    },
+    {
+      "path": "AudioKitSynthOne/DSP/Sequencer/S1SeqNoteNumber.hpp",
+      "blob": "4996ac923f8f7a87132e7f6af118d53d5349e9e3",
+      "sha256": "2df9dc1b522affb0f4edba9345264f87f838ac85d2c34a296a0b0fd05c86aa8b"
+    },
+    {
+      "path": "AudioKitSynthOne/DSP/Sequencer/S1Sequencer.hpp",
+      "blob": "51157feeaffba4bd017bf8dae395f6c9e1e7aff8",
+      "sha256": "304414bd897fc27cf2e8abc6051622f74a0e0a5716e1061ded5eff4b1d4c5b99"
+    },
+    {
+      "path": "AudioKitSynthOne/DSP/Sequencer/S1Sequencer.mm",
+      "blob": "4b13999e4234452da1766a34f59a2e3aba92d7d6",
+      "sha256": "873f9c8b52cab8043efae404f940a4cee6b62ab76c3d10fb96f47f64b58f9519"
+    }
+  ],
+  "parameter": {
+    "path": "AudioKitSynthOne/DSP/S1Parameter.h",
+    "blob": "3b0fcdfe82c58ac5b26bd31c7fddd78167045b18",
+    "sha256": "9598182b88dd9fdc7f31332857647a63913e232cb40d85169978b2ccdf271783"
+  },
+  "binding": "Only imports/framework types/AEArray enumeration/class namespace/visibility are replaced; original sequence timing/arithmetic/container algorithm remains"
+}

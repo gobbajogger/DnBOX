@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Build only this changed scheduler closure from explicit verified inputs."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument('--experiment-root',type=Path,required=True)
+    p.add_argument('--controls-root',type=Path,required=True)
+    p.add_argument('--master-root',type=Path,required=True)
+    p.add_argument('--tables',type=Path,required=True)
+    p.add_argument('--compact',type=Path,help='Optional metadata-only compact differential fixture; legacy raw CLI stays unchanged')
+    p.add_argument('--sequence-upstream-root',type=Path,help='Authenticated public six-file sequence/oracle source root for --full-sequence')
+    p.add_argument('--full-sequence',action='store_true',help='Full original sequence/arp source-composition experiment')
+    p.add_argument('--variant',choices=['o2','os','sanitize'],default='o2')
+    p.add_argument('--reader-composition',action='store_true',help='Compare runtime-only direct reader against unchanged oracle')
+    p.add_argument('--alias-composition',action='store_true',help='Compare exact packed aliases with the distinct-row oracle')
+    p.add_argument('--smoke',action='store_true',help='Run only the portable consumer binding smoke, preserving full prior fixture evidence separately')
+    p.add_argument('--build-root',type=Path,help='Optional isolated directory for this run and its staged closure')
+    a=p.parse_args()
+    root=Path(__file__).resolve().parent
+    bases={'experiment':a.experiment_root.resolve(),'controls':a.controls_root.resolve(),'master':a.master_root.resolve()}
+    manifest=json.loads((root/'DEPENDENCIES.json').read_text())
+    verified={}
+    for group,entries in manifest['groups'].items():
+        verified[group]={}
+        for entry in entries:
+            data=(bases[group]/entry['path']).read_bytes()
+            if len(data)!=entry['bytes'] or hashlib.sha256(data).hexdigest()!=entry['sha256']:
+                raise SystemExit('dependency identity mismatch: '+group+'/'+entry['path'])
+            verified[group][entry['path']]=data
+    if a.full_sequence:
+        if not a.sequence_upstream_root:raise SystemExit('--full-sequence requires exact --sequence-upstream-root')
+        bases['sequence-upstream']=a.sequence_upstream_root.resolve();verified['sequence-upstream']={}
+        sequence_manifest=json.loads((root/'source-sequence/SOURCE-INPUTS.json').read_text())
+        for entry in sequence_manifest['sources']+[sequence_manifest['parameter']]:
+            data=(bases['sequence-upstream']/entry['path']).read_bytes()
+            if hashlib.sha256(data).hexdigest()!=entry['sha256'] or hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()!=entry['blob']:raise SystemExit('exact original sequence input mismatch: '+entry['path'])
+            verified['sequence-upstream'][entry['path']]=data
+    tables=a.tables.resolve();data=tables.read_bytes();expected=manifest['table_payload']
+    if len(data)!=expected['bytes'] or hashlib.sha256(data).hexdigest()!=expected['sha256']:
+        raise SystemExit('table payload identity mismatch')
+    compact_data=None
+    if a.compact:
+        if a.alias_composition or a.reader_composition or a.smoke:raise SystemExit('compact fixture cannot be combined with another specialized fixture')
+        compact_data=a.compact.resolve().read_bytes()
+        if len(compact_data)!=165292 or hashlib.sha256(compact_data).hexdigest()!='a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5':raise SystemExit('compact input identity mismatch')
+    build_root=a.build_root.resolve() if a.build_root else root/'build'
+    build_root.mkdir(parents=True,exist_ok=True)
+    out=Path(tempfile.mkdtemp(prefix=a.variant+'.',dir=build_root))
+    # Compile only the exact verified bytes. Unlisted headers in caller trees
+    # cannot shadow these inputs through quoted-include directory precedence.
+    staged={group:out/'closure'/group for group in bases}
+    for group,entries in verified.items():
+        for name,data in entries.items():
+            destination=staged[group]/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
+    local=out/'closure/scheduler'
+    local_files=['fixed_array.hpp','float_math.h','scheduler.hpp','scheduler.cpp','tests/scheduler_test.cpp','tests/alias_composition_test.cpp','tests/reader_scheduler_test.cpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','oracle/state.hpp','oracle/oracle.hpp','oracle/oracle.cpp','oracle/MANIFEST.json','oracle/generate.py','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','tests/compact_scheduler_test.cpp','checked_domain.cpp','tests/checked_domain_test.cpp','source_scheduler.hpp','source_scheduler.cpp','full_oracle_state.hpp','full_oracle.hpp','full_oracle.cpp','source-sequence/original_sequence.hpp','tests/source_scheduler_test.cpp','source-sequence/source_sequence.hpp','source-sequence/sequence_types.hpp','source-sequence/verify_source.py','source-sequence/SOURCE-INPUTS.json','source-sequence/SynthOne-MIT.txt']
+    local_manifest=[]
+    for name in local_files:
+        data=(root/name).read_bytes();destination=local/name;destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(data)
+        local_manifest.append({'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+    (out/'COMPILED-SOURCES.json').write_text(json.dumps(local_manifest,indent=2)+'\n')
+    if a.full_sequence:
+        subprocess.run([__import__('sys').executable,str(local/'source-sequence/verify_source.py'),'--upstream-root',str(staged['sequence-upstream'])],check=True)
+        expected_oracle=(local/'oracle/oracle.cpp').read_text().replace('#include \"oracle.hpp\"','#include \"full_oracle.hpp\"').replace('Oracle::','FullOracle::')
+        if expected_oracle!=(local/'full_oracle.cpp').read_text():raise SystemExit('full original note/scheduler oracle bodies changed')
+    test_source=local/('tests/compact_scheduler_test.cpp' if a.compact else 'tests/scheduler_test.cpp')
+    if sum((a.alias_composition,a.reader_composition,a.smoke))>1: raise SystemExit('choose exactly one specialized fixture')
+    if a.full_sequence:
+        if not a.compact:raise SystemExit('full sequence requires authenticated compact fixture')
+        test_source=local/'tests/source_scheduler_test.cpp'
+    if a.reader_composition: test_source=local/'tests/reader_scheduler_test.cpp'
+    if a.alias_composition and a.smoke: raise SystemExit('choose alias composition or smoke, not both')
+    if a.alias_composition: test_source=local/'tests/alias_composition_test.cpp'
+    if a.smoke:
+        # Reuse the unchanged canonical snapshot/NoHeap/Pair helpers, without
+        # executing the current full-suite entry point or its 54 cases.
+        smoke='''#define main scheduler_full_fixture_main
+#include "tests/scheduler_test.cpp"
+#undef main
+int main(int argc,char**argv) {
+    CHECK(argc==2); Fixture f(argv[1]);
+    for(int rate:{44100,48000,96000}) {
+        case_name="portable control consumer binding"; ++cases;
+        Pair p(f,rate,true);
+        p.parameter(portamentoHalfTime,.17f); p.parameter(glide,.08f);
+        p.start(60,80,123); p.block(16);
+        p.start(67,110); p.block(16); p.stop(67); p.block(8);
+        p.stop(60); p.block(8);
+    }
+    std::printf("{\\"scope\\":\\"portable-controls-consumer-smoke\\",\\"cases\\":%u,\\"frames\\":%llu,\\"state_snapshots\\":%llu,\\"events\\":%llu,\\"heap_calls_during_actions\\":0,\\"failures\\":0}\\n",cases,frames,snapshots,events);
+    return 0;
+}
+'''
+        test_source=local/'tests/consumer_smoke.cpp';test_source.write_text(smoke)
+        local_manifest.append({'path':'tests/consumer_smoke.cpp','bytes':len(smoke.encode()),'sha256':hashlib.sha256(smoke.encode()).hexdigest()})
+        (out/'COMPILED-SOURCES.json').write_text(json.dumps(local_manifest,indent=2)+'\n')
+    staged_tables=out/'public-morphs.f32';staged_tables.write_bytes(tables.read_bytes())
+    if hashlib.sha256(staged_tables.read_bytes()).hexdigest()!=expected['sha256']:
+        raise SystemExit('table payload changed during staging')
+    staged_compact=out/'compact.bin'
+    if compact_data is not None:staged_compact.write_bytes(compact_data)
+    generated=out/'oracle-binding'
+    subprocess.run([__import__('sys').executable,str(local/'oracle/generate.py'),
+                    '--kernel-dir',str(staged['master']/'AudioKitSynthOne/DSP/Kernel'),
+                    '--output-dir',str(generated)],check=True,stdout=subprocess.DEVNULL)
+    for name in ['oracle.hpp','oracle.cpp','MANIFEST.json']:
+        if (generated/name).read_bytes()!=(local/'oracle'/name).read_bytes():
+            raise SystemExit('actual-source oracle binding mismatch: '+name)
+    reader_generated=out/'reader-binding'
+    subprocess.run([__import__('sys').executable,str(local/'reader/generate.py'),'--experiment-root',str(staged['experiment']),'--output-dir',str(reader_generated)],check=True,stdout=subprocess.DEVNULL)
+    for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
+        if (reader_generated/name).read_bytes()!=(local/'reader'/name).read_bytes(): raise SystemExit('reader source derivation mismatch: '+name)
+    core=staged['experiment']/'audiokit-4.9.2/AudioKit/Core'
+    includes=[local,staged['experiment']/'probe',staged['experiment']/'shared-graph',staged['controls'],core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav']
+    flags=['-fno-builtin','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-misleading-indentation']
+    flags+=['-O2'] if a.variant=='o2' else ['-Os'] if a.variant=='os' else ['-O1','-g','-fno-omit-frame-pointer','-fsanitize=address,undefined,float-cast-overflow','-fno-sanitize-recover=all']
+    inc=['-I'+str(x) for x in includes]
+    objects=[]
+    commands=[]
+    build_env=dict(os.environ)
+    # These ambient search paths could inject even nominal system headers ahead
+    # of the compiler's trusted system closure. No caller paths are required.
+    for name in ['CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','OBJC_INCLUDE_PATH']:
+        build_env.pop(name,None)
+    def command(args):
+        commands.append([str(x) for x in args])
+        with (out/'commands.json').open('w') as f:json.dump(commands,f,indent=2)
+        subprocess.run([str(x) for x in args],check=True,env=build_env)
+    for name in ['base','ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']:
+        dest=out/(name+'.o');objects.append(dest)
+        command([os.environ.get('CC','cc'),'-std=gnu99','-DNO_LIBSNDFILE']+flags+['-Wno-error']+inc+['-c',core/'Soundpipe/modules'/(name+'.c'),'-o',dest])
+    sources=[('checked_domain',local/'checked_domain.cpp','c++'),('compact_reader',local/'compact-reader/compact.c','c'),('compact_morph',local/'compact-reader/compact_morph.c','c'),('compact_note',local/'compact_note.cpp','c++'),('direct_reader',local/'reader/direct_reader.c','c'),('runtime_morph',local/'reader/morph_compute.c','c'),('runtime_note',local/'reader/runtime_note.cpp','c++'),('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c'),('voice',staged['experiment']/'probe/portable_voice.cpp','c++'),('parameter_map',staged['controls']/'generated/parameter_map.cpp','c++'),('ports',staged['controls']/'parameter_ports.cpp','c++'),('scheduler',local/'scheduler.cpp','c++'),('oracle',local/'oracle/oracle.cpp','c++'),('test',test_source,'c++')]
+    if a.full_sequence:
+        sources.insert(0,('source_scheduler',local/'source_scheduler.cpp','c++'));sources.insert(0,('full_oracle',local/'full_oracle.cpp','c++'))
+    for name,source,lang in sources:
+        dest=out/(name+'.o');objects.append(dest)
+        command([os.environ.get('CC' if lang=='c' else 'CXX','cc' if lang=='c' else 'c++'),'-std=gnu99' if lang=='c' else '-std=c++17' if a.full_sequence else '-std=c++11','-DNO_LIBSNDFILE']+flags+(['-Wno-error'] if name in ['morph','voice'] else ['-Wno-reorder'] if a.full_sequence and lang=='c++' else [])+inc+['-c',source,'-o',dest])
+    binary=out/'scheduler_test'
+    command([os.environ.get('CXX','c++')]+flags+objects+(['-Wl,--wrap=sp_oscmorph2d_compute'] if a.alias_composition else ['-Wl,--wrap=s1_runtime_morph_compute','-Wl,--wrap=s1_morph_read_word'] if a.reader_composition else [])+(['-Wl,--wrap=s1c_read'] if a.compact else [])+['-Wl,--gc-sections','-Wl,--wrap=malloc','-Wl,--wrap=calloc','-Wl,--wrap=realloc','-Wl,--wrap=free','-lm','-o',binary])
+    env=dict(build_env,ASAN_OPTIONS='detect_leaks=1')
+    result=subprocess.run([str(binary),str(staged_tables)]+([str(staged_compact)] if a.compact else []),text=True,capture_output=True,env=env)
+    (out/'stdout.txt').write_text(result.stdout);(out/'stderr.txt').write_text(result.stderr)
+    (out/'exit.txt').write_text(str(result.returncode)+'\n')
+    print(result.stdout,end='');print(result.stderr,end='',file=__import__('sys').stderr)
+    print('result directory: '+str(out))
+    if result.returncode:raise SystemExit(result.returncode)
+
+if __name__=='__main__':main()

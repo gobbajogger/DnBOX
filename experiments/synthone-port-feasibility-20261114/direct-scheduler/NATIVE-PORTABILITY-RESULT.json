@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "scope": "Freestanding source/host portability, native object compilation and compiler-evaluated target ABI layout only",
+  "baseline_commit": "b0013c8a8d7209a155494f5e9b4952dedde87ba2",
+  "source_manifest_sha256": "d138334eb8a6eb800b1022a8d58b828aafe149d2408d1e3977184bdd46c8d58c",
+  "native": {
+    "runtime_objects": 17,
+    "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+    "toolchain_manifest_sha256": "56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e",
+    "verified_toolchain_headers": 29,
+    "started_at": "2026-11-14T23:03:04.259737+00:00",
+    "completed_at": "2026-11-14T23:03:05.102836+00:00",
+    "layout": {
+      "pointer": 4,
+      "float": 4,
+      "double": 8,
+      "State": 9552,
+      "RuntimeState": 9956,
+      "Scheduler": 9956,
+      "Ports": 396,
+      "S1NoteState": 80,
+      "Held": 1540,
+      "note_objects_7": 3108,
+      "table_descriptors_53": 1484,
+      "Scheduler_alignment": 4
+    },
+    "link": "NOT_RUN",
+    "compiler_child_environment_policy": "Only fixed system PATH and C locale plus owned per-run TMPDIR; ambient compiler/loader/search variables not inherited."
+  },
+  "host": {
+    "o2": {
+      "cases": 54,
+      "checks": 55654337,
+      "frames": 18162,
+      "state_snapshots": 19302,
+      "events": 648,
+      "heap_calls_during_actions": 0,
+      "failures": 0
+    },
+    "os": {
+      "cases": 54,
+      "checks": 55654337,
+      "frames": 18162,
+      "state_snapshots": 19302,
+      "events": 648,
+      "heap_calls_during_actions": 0,
+      "failures": 0
+    },
+    "sanitize_default": {
+      "exit": 1,
+      "reason": "LeakSanitizer explicitly cannot operate under ptrace"
+    },
+    "sanitize_no_lsan": {
+      "exit": 0,
+      "ASAN_OPTIONS": "detect_leaks=0",
+      "result": {
+        "cases": 54,
+        "checks": 55654337,
+        "frames": 18162,
+        "state_snapshots": 19302,
+        "events": 648,
+        "heap_calls_during_actions": 0,
+        "failures": 0
+      },
+      "stderr_bytes": 0
+    }
+  },
+  "controls_o2": {
+    "cases": 12,
+    "ticks": 6436,
+    "all150_output_comparisons": 1073850,
+    "seven_field_selected_state_comparisons": 329314,
+    "checks": 6803934,
+    "compact_state_bytes_host": 400,
+    "caller_output_bytes": 600,
+    "dense_ports_and_targets_bytes_host": 4800,
+    "legacy_with_pointer_output_subtotal_bytes_host": 6600,
+    "immutable_map_bytes": 196,
+    "compact_pow_calls": 593,
+    "reference_pow_calls": 27278,
+    "static_action_heap_calls": 0,
+    "oracle_mallocs": 2400,
+    "oracle_frees": 2400,
+    "oracle_requested_bytes": 67200,
+    "pointer_bytes": 8
+  },
+  "control_input_negatives": {
+    "python_modes": 3,
+    "positive_source_checks": 6,
+    "negative_source_checks": 51,
+    "quoted_include_shadows_rejected": 5,
+    "ambient_compiler_paths_rejected": 7,
+    "self_consistent_manifest_substitutions_rejected": true,
+    "unverified_bytecode_loaders_bypassed": 2
+  },
+  "control_runtime_mutations": {
+    "runtime_mutations_detected": 11,
+    "compile_failures_counted": 0,
+    "baseline": "fresh_verified_full_test_passed"
+  },
+  "scheduler_runtime_mutations": {
+    "count": 10,
+    "all_compiled_linked_and_runtime_detected": true
+  },
+  "native_input_negatives": {
+    "count": 3,
+    "rejected_before_build": true
+  },
+  "not_claimed": [
+    "LeakSanitizer PASS",
+    "native DSP execution",
+    "native executable/firmware link",
+    "combined Juno/app resource or free-pool fit",
+    "table asset/read-path placement",
+    "CPU/workload/device/full-engine/global-FX acceptance",
+    "merge/release/publication"
+  ],
+  "reviewed_initial_source_manifest_sha256": "08879ca092f68825d088006df46cf36bd1544d6953157876aff783c986aa8a7f",
+  "native_profile_review_fix": {
+    "finding": "Inherited Clang driver environment could override strict argv",
+    "red_exit": 1,
+    "red_failure": "ambient CCC_OVERRIDE_OPTIONS changed native executable sections",
+    "green_exit": 0,
+    "driver_override_invariant": true,
+    "native_profile_builds": 2,
+    "runtime_executable_sections_compared": 17,
+    "scope": "Object-level reproducibility; not target execution or audible comparison"
+  }
+}
