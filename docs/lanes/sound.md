@@ -46,3 +46,5 @@ None.
 No rule changes. Prior rules/briefs are history only; existing code and evidence are reusable inputs under RULES.md v2.
 
 Native recovery checkpoint: exact56079 full-sequence recipe rebuilt29 runtime objects with authenticated original SDK C++ headers, object forbidden-symbol scan PASS/0. SourceScheduler10532 bytes independently reproduced. No firmware link/device/combined-memory PASS. See sound-memory.md and docs/sound/v2-native-component-result.json.
+
+Runtime source closure copied byte-identically into firmware/src/dsp/synthone with71-file hash manifest and MIT notices; all29 runtime units recompiled successfully from new repo paths. Not enabled in app/build. Next is replacement-safe C ABI/owner budget with integ, factory bindings and post-FX; simple union growth adds13624 bytes for two parts and is not admissible.

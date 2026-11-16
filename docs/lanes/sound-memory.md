@@ -59,3 +59,5 @@ SHA256: `7e369ab97e2b11f49ce21b655f7ce9785d5fd739a3c29772ee7ab15c3e8806fc`.
 
 Still NOT_RUN: native executable/firmware link, combined Juno/app resources, table
 storage/read workload, CPU and device qualification. S6 remains FAIL.
+
+Native baseline union probe at e742be7: original_runtime_backend3720 bytes, original_runtime_part5184, Chicago3492, Miami3720, Juno888. A simple10532-byte replacement union expands each backend by6812 bytes; two parts add13624 bytes before FX. This is not an accepted allocation plan.
