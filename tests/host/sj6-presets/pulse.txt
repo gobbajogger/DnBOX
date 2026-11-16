@@ -1,0 +1,8 @@
+# Public oscillator preset. Pulse width stays on the separate PWM postpass.
+neonpulseVolume 0.9
+neonsawVolume 0
+neonsubVolume 0.15
+neonnoiseVolume 0
+neonlayer1PWM 0.35
+neoncutoffLayer1 0.4
+neonresonanceLayer1 0.55
