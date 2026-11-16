@@ -271,13 +271,19 @@ int original_chicago_voice_control(original_chicago_voice *s,const original_chic
  return original_chicago_voice_control_admitted(s,c,t,bpm,kick,action);
 }
 static int note_valid(const original_chicago_voice_note *n){if(!n||n->raw_note<0||n->raw_note>187||n->velocity>127||n->unison_flag>2||!original_binary32_isfinite(n->tuned_pitch)||!original_binary32_isfinite(n->last_pitch)||!original_binary32_isfinite(n->unison_coordinate))return 0;for(unsigned i=0;i<2;i++)if(!original_binary32_isfinite(n->mg[i].phase)||n->mg[i].phase< -1||n->mg[i].phase>1||!original_binary32_isfinite(n->mg[i].hold))return 0;return 1;}
+/* Works on the caller's scratch copy of the voice; on failure that copy is
+ * partly written and the caller must discard it. Callers that already hold a
+ * scratch copy use this directly, so the voice is not copied twice on the stack. */
+static int full_note_inplace(original_chicago_voice *n,const original_chicago_voice_controls *c,const original_chicago_voice_tables *t,const original_chicago_voice_note *note,unsigned mask,float bpm){
+ memset(&n->coefficients,0,sizeof n->coefficients);for(unsigned i=0;i<4;i++)if(mask&(1u<<i)){n->pitch.target[i]=note->tuned_pitch;n->pitch.current[i]=note->last_pitch;n->activation[i]=-1;}
+ n->raw_note=note->raw_note;n->raw_velocity=note->velocity;n->velocity=(float)note->velocity/127.0f;n->keyboard_source=((float)note->raw_note-64.0f)*.015625f;n->unison_coordinate=note->unison_coordinate;n->unison_flag=(uint8_t)note->unison_flag;
+ for(unsigned i=0;i<2;i++){n->mg[i]=note->mg[i];if(!mg_output(&n->mg[i],c->mg_shape[i]))return 0;}
+ if(!original_chicago_mp4_init(&n->filter,t->a0,t->e0))return 0;
+ original_voice_gain_miami_full_note(&n->gain);n->vca=(original_vca){0,0};n->vcf=(original_vca){0,0};n->vcf_bipolar=n->vca_bipolar=0;n->key_down=1;n->damper_deferred=0;n->active=1;n->counter=44100;
+ unsigned action;if(!original_chicago_voice_control(n,c,t,bpm,1,&action))return 0;return 1;
+}
 static int full_note_mask(original_chicago_voice *s,const original_chicago_voice_controls *c,const original_chicago_voice_tables *t,const original_chicago_voice_note *note,unsigned mask,float bpm){
- original_chicago_voice n=*s;memset(&n.coefficients,0,sizeof n.coefficients);for(unsigned i=0;i<4;i++)if(mask&(1u<<i)){n.pitch.target[i]=note->tuned_pitch;n.pitch.current[i]=note->last_pitch;n.activation[i]=-1;}
- n.raw_note=note->raw_note;n.raw_velocity=note->velocity;n.velocity=(float)note->velocity/127.0f;n.keyboard_source=((float)note->raw_note-64.0f)*.015625f;n.unison_coordinate=note->unison_coordinate;n.unison_flag=(uint8_t)note->unison_flag;
- for(unsigned i=0;i<2;i++){n.mg[i]=note->mg[i];if(!mg_output(&n.mg[i],c->mg_shape[i]))return 0;}
- if(!original_chicago_mp4_init(&n.filter,t->a0,t->e0))return 0;
- original_voice_gain_miami_full_note(&n.gain);n.vca=(original_vca){0,0};n.vcf=(original_vca){0,0};n.vcf_bipolar=n.vca_bipolar=0;n.key_down=1;n.damper_deferred=0;n.active=1;n.counter=44100;
- unsigned action;if(!original_chicago_voice_control(&n,c,t,bpm,1,&action))return 0;*s=n;return 1;
+ original_chicago_voice n=*s;if(!full_note_inplace(&n,c,t,note,mask,bpm))return 0;*s=n;return 1;
 }
 int original_chicago_voice_full_note(original_chicago_voice *s,const original_chicago_voice_controls *c,const original_chicago_voice_tables *t,const original_chicago_voice_note *note,float bpm){
  if(!valid(s,c,t,bpm)||!note_valid(note)||s->active||s->vca.state!=6||s->awaiting_restart)return 0;
@@ -296,7 +302,7 @@ int original_chicago_voice_resume_restart(original_chicago_voice *s,const origin
 int original_chicago_voice_resume_part(original_chicago_voice *s,const original_chicago_voice_controls *c,const original_chicago_voice_tables *t,const original_chicago_voice_note *note,unsigned mask,unsigned final_part,float bpm){
  if(!valid(s,c,t,bpm)||!s->awaiting_restart||!note_valid(note)||final_part>1||!mask||mask>15||((mask&(mask-1))&&mask!=15)||(mask==15&&!final_part))return 0;
  original_chicago_voice n=*s;uint32_t D=n.pending_tail_duration;unsigned kick=n.pending_tail_kick;n.awaiting_restart=0;
- if(!full_note_mask(&n,c,t,note,mask,bpm))return 0;
+ if(!full_note_inplace(&n,c,t,note,mask,bpm))return 0;
  if(final_part){if(!tail(&n,c,t,D,kick))return 0;n.pending_tail_duration=0;n.pending_tail_kick=0;}
  else n.awaiting_restart=1;
  *s=n;return 1;
@@ -337,12 +343,14 @@ int original_chicago_voice_source_values(const original_chicago_voice_note *n,or
 }
 int original_chicago_voice_immediate_raw(original_chicago_voice *s,const original_chicago_voice_controls *c,const original_chicago_voice_tables *t,const original_chicago_voice_note *note,unsigned full,unsigned mask,float bpm,unsigned *action){
  if(!action||!valid(s,c,t,bpm)||s->awaiting_restart||full>1||!mask||mask>15||!source_note_valid(note)||!original_binary32_isfinite(note->tuned_pitch))return 0;
+ if(full&&(s->vca.state!=6||!note_valid(note)))return 0;
+ /* One scratch voice for both branches keeps a single copy in the frame. */
+ original_chicago_voice n=*s;
  if(full){
-  if(s->vca.state!=6||!note_valid(note))return 0;
-  original_chicago_voice n=*s;memset(&n.coefficients,0,sizeof n.coefficients);if(!full_note_mask(&n,c,t,note,mask,bpm))return 0;
+  if(!full_note_inplace(&n,c,t,note,mask,bpm))return 0;
   *s=n;*action=0;return 1;
  }
- original_chicago_voice n=*s;memset(&n.coefficients,0,sizeof n.coefficients);for(unsigned i=0;i<4;i++)if(mask&(1u<<i)){n.pitch.target[i]=note->tuned_pitch;n.activation[i]=-1;}
+ memset(&n.coefficients,0,sizeof n.coefficients);for(unsigned i=0;i<4;i++)if(mask&(1u<<i)){n.pitch.target[i]=note->tuned_pitch;n.activation[i]=-1;}
  original_chicago_voice_sources sources;if(!original_chicago_voice_source_values(note,&sources))return 0;
  n.raw_note=note->raw_note;n.raw_velocity=note->velocity;n.velocity=sources.velocity_unipolar;n.keyboard_source=sources.key_bipolar;n.unison_flag=(uint8_t)note->unison_flag;n.unison_coordinate=note->unison_coordinate;n.key_down=1;n.damper_deferred=0;n.active=1;
  for(unsigned i=0;i<2;i++)if(!mg_output(&n.mg[i],c->mg_shape[i]))return 0;
