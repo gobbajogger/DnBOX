@@ -1,10 +1,10 @@
 # DnBOX consolidated state
 
-Updated: 2026-11-16 09:36 UTC. Accountable owner: Integration & Release. This is the single living integration reference. Lane handoffs are immutable evidence, not alternative completion claims. **Inventory/candidate preparation only: no integrated composition, qualified release, merge, branch deletion, repository rename or deployment has occurred in this consolidation.**
+Updated: 2026-11-16 09:47 UTC. Accountable owner: Integration & Release. This is the single living integration reference. Lane handoffs are immutable evidence, not alternative completion claims. **Inventory/candidate preparation only: no integrated composition, qualified release, merge, branch deletion, repository rename or deployment has occurred in this consolidation.**
 
 ## Current decision and next checkpoint
 
-- Prepare one `integration/dnbox-consolidated` candidate branch per repository. Candidate files assembled locally; ref creation pending. First public-safe WIP push target: **09:55 UTC**, subject to exact source/readback and public-content review; report a concrete reason if missed. This is not a promise of passing whole-product qualification.
+- Owner19:43 requests `lead/consolidation-20261116` in both repositories. Initial firmware WIP already exists at `integration/dnbox-consolidated` commit `e30f9a3175a839f2bcacf0034328877383fc17fc`; preserve that ref and create the requested lead branch without force or overwriting any writer. First public-safe WIP push target: **09:55 UTC**, subject to exact source/readback and public-content review; report a concrete reason if missed. This is not a promise of passing whole-product qualification.
 - Firmware candidate source recommendation: retained testmerge `8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b`, tree `0bff565aab165b1750535a6e1cf9cbd805e1f20d`. The live development target remains #869 `94197fc839b00aff47b98ca02f3c6396e4a6eabf` until independently verified integration. This source recommendation is not permission to reset any target.
 - Website candidate base is verified #132 `3f22e000ad17456318cde997067c7fd45dd7e3b3`, #131 is1ancestor commit from main and #132 retains it with17further commits; no equal-tree claim.
 - All five lanes resumed separate implementation under owner19:27. Consume frozen snapshots below; never overwrite a live lane worktree. No active branch is eligible for cleanup merely because its work was copied.
@@ -12,7 +12,7 @@ Updated: 2026-11-16 09:36 UTC. Accountable owner: Integration & Release. This is
 
 ## Live repository inventory
 
-Authenticated GitHub API pagination, matching-refs crosscheck and open-PR terminal pages agree. Raw pages and per-ref/per-PR CSVs are in `repo-inventory/`. Counts below are BEFORE any consolidation operation, not after-cleanup counts.
+Authenticated GitHub API pagination, matching-refs crosscheck and open-PR terminal pages agree. Published per-ref/per-PR CSVs are in `docs/integration/20261116/`; complete raw pages remain in the paired preservation archive. Counts below are BEFORE any consolidation operation, not after-cleanup counts.
 
 | Repository | Branches | Open PRs | Live source/target heads |
 |---|---:|---:|---|
@@ -63,10 +63,14 @@ Authenticated GitHub API pagination, matching-refs crosscheck and open-PR termin
 
 ## Preservation and coverage boundaries
 
-Owner19:35–19:36 supersedes earlier asset exclusions: coefficients, captures and binaries are authorized for Git as well as Library; only secrets/tokens remain excluded. Owner identifies SDK libraries as MIT-licensed: retain exact license notices, provenance and byte identity. Use a supported large-file route for large artifacts; do not substitute an unresolved LFS pointer for retained bytes. Do not execute unrecognized software without applicable confirmation. Git blob creation supportsbase64 binary; no LFS transfer tool is exposed. Large artifact upload remains a specific capability check, not an exclusion. Each eligible public artifact requires paired exact GitSHA +same-byte Library archive named lane/date-time/SHA; excluded originals/binaries remain Library-only. Existing source/evidence checkpoints are durable but do not yet constitute the new paired consolidated artifact.
+Owner19:35–19:36 supersedes earlier asset exclusions: coefficients, captures and binaries are authorized for Git as well as Library; only secrets/tokens remain excluded. Owner identifies SDK libraries as MIT-licensed: retain exact license notices, provenance and byte identity. Use a supported large-file route for large artifacts; do not substitute an unresolved LFS pointer for retained bytes. Do not execute unrecognized software without applicable confirmation. Git blob creation supportsbase64 binary; no LFS transfer tool is exposed. Large artifact upload remains a specific capability check, not an exclusion. Each eligible public artifact requires paired exact GitSHA +same-byte Library archive named lane/date-time/SHA; all nonsecret originals and binaries remain subject to the owner’s latest Git+Library preservation instruction, using a supported size/transfer route. Existing source/evidence checkpoints are durable but do not yet constitute the new paired consolidated artifact.
 
 Repository branch/PR inventory is exhaustive at capture time. Local inventory covers submitted cloud lane roots; files and evidence counts overlap and must not be summed as unique work. The user Mac-mini is offline at fresh environment listing; inaccessible desktop files, separate historic chats, sample selection history and every old proposal are not exhaustively recovered. Sound/website/Remote/UI owners supplied actual snapshots, not full historical completion. No new attachments requested merely because an old name mentions private. All open/failed/missing proof remains open above.
 
 ## First candidate composition and checks
 
 Firmware candidate1 is a single-parent WIP composition on8a: all5,353base blobs individually Git-hash verified, exact14resource5070overlays and21byte-identical #95137cfiles. These copied changes are not landed merges or ancestry-retention claims. No GitHub workflow files exist. Latest liveUI/global/Sound changes are not included yet. Focused first-run41mechanics PASS; fontpack and exp-curve tests exit0; compact-program test performs796checks then exits1 because LeakSanitizer reports fatal traced-runtime incompatibility. Original log/exit retained, no sanitizer suppression or expectation change. Full host/native/UI/audio/timing qualification NOT_RUN for this composition. FirstWIP is intentionally unqualified.
+
+## First WIP corrective record
+
+Firmware first public candidate commit `e30f9a3175a839f2bcacf0034328877383fc17fc` was read back at09:45UTC on integration/dnbox-consolidated. Independent source review confirms all14resource overlays and21gate files match intended bytes and no new secret/internal-agent markers; exact-composition acceptance is pending. Four inventory CSVs were unintentionally newline-normalized CRLF→LF by text upload: rows were retained but the first remote tree did not match the local byte manifest. This corrective update restores original CSV bytes and corrects two documentation references; no product source, tests, thresholds or failure expectations are changed. The first commit and original failed logs are retained. Source code acceptance is not native/UI/audio acceptance.
