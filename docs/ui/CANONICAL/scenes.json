@@ -1,0 +1,3887 @@
+[
+  {
+    "id": "909-seq-00",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-01",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-02",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-03",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-04",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-05",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-06",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-07",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-08",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-09",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-voice-10",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\ntapkey b10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-00-held",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-list-00",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-seq-list-01",
+    "commands": "wait 300\nturn ALGO 0\ntap SEQ\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-00",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\nwait 40",
+    "target": "909-voice-00"
+  },
+  {
+    "id": "909-para-00-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-00-voice-01",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b1\nwait 40",
+    "target": "909-voice-01"
+  },
+  {
+    "id": "909-para-00-voice-02",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b2\nwait 40",
+    "target": "909-voice-02"
+  },
+  {
+    "id": "909-para-00-voice-03",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b3\nwait 40",
+    "target": "909-voice-03"
+  },
+  {
+    "id": "909-para-00-voice-04",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b4\nwait 40",
+    "target": "909-voice-04"
+  },
+  {
+    "id": "909-para-00-voice-05",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b5\nwait 40",
+    "target": "909-voice-05"
+  },
+  {
+    "id": "909-para-00-voice-06",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b6\nwait 40",
+    "target": "909-voice-06"
+  },
+  {
+    "id": "909-para-00-voice-07",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b7\nwait 40",
+    "target": "909-voice-07"
+  },
+  {
+    "id": "909-para-00-voice-08",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b8\nwait 40",
+    "target": "909-voice-08"
+  },
+  {
+    "id": "909-para-00-voice-09",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b9\nwait 40",
+    "target": "909-voice-09"
+  },
+  {
+    "id": "909-para-00-voice-10",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\n\ntapkey b10\nwait 40",
+    "target": "909-voice-10"
+  },
+  {
+    "id": "909-para-01",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": "909-voice-00"
+  },
+  {
+    "id": "909-para-01-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-01-voice-01",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b1\nwait 40",
+    "target": "909-voice-01"
+  },
+  {
+    "id": "909-para-01-voice-02",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b2\nwait 40",
+    "target": "909-voice-02"
+  },
+  {
+    "id": "909-para-01-voice-03",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b3\nwait 40",
+    "target": "909-voice-03"
+  },
+  {
+    "id": "909-para-01-voice-04",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b4\nwait 40",
+    "target": "909-voice-04"
+  },
+  {
+    "id": "909-para-01-voice-05",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b5\nwait 40",
+    "target": "909-voice-05"
+  },
+  {
+    "id": "909-para-01-voice-06",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b6\nwait 40",
+    "target": "909-voice-06"
+  },
+  {
+    "id": "909-para-01-voice-07",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b7\nwait 40",
+    "target": "909-voice-07"
+  },
+  {
+    "id": "909-para-01-voice-08",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b8\nwait 40",
+    "target": "909-voice-08"
+  },
+  {
+    "id": "909-para-01-voice-09",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b9\nwait 40",
+    "target": "909-voice-09"
+  },
+  {
+    "id": "909-para-01-voice-10",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\n\ntapkey b10\nwait 40",
+    "target": "909-voice-10"
+  },
+  {
+    "id": "909-para-02",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": "909-voice-00"
+  },
+  {
+    "id": "909-para-02-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-02-voice-01",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b1\nwait 40",
+    "target": "909-voice-01"
+  },
+  {
+    "id": "909-para-02-voice-02",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b2\nwait 40",
+    "target": "909-voice-02"
+  },
+  {
+    "id": "909-para-02-voice-03",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b3\nwait 40",
+    "target": "909-voice-03"
+  },
+  {
+    "id": "909-para-02-voice-04",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b4\nwait 40",
+    "target": "909-voice-04"
+  },
+  {
+    "id": "909-para-02-voice-05",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b5\nwait 40",
+    "target": "909-voice-05"
+  },
+  {
+    "id": "909-para-02-voice-06",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b6\nwait 40",
+    "target": "909-voice-06"
+  },
+  {
+    "id": "909-para-02-voice-07",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b7\nwait 40",
+    "target": "909-voice-07"
+  },
+  {
+    "id": "909-para-02-voice-08",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b8\nwait 40",
+    "target": "909-voice-08"
+  },
+  {
+    "id": "909-para-02-voice-09",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b9\nwait 40",
+    "target": "909-voice-09"
+  },
+  {
+    "id": "909-para-02-voice-10",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap EDIT\ntap EDIT\n\ntapkey b10\nwait 40",
+    "target": "909-voice-10"
+  },
+  {
+    "id": "909-para-list-00",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-01",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-02",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-03",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-04",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-05",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-06",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-07",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-08",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-09",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-para-list-10",
+    "commands": "wait 300\nturn ALGO 0\ntap EDIT\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-00",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-00-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-01",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-01-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-00",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-01",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-02",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-03",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-04",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-05",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-06",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-07",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-08",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-09",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-10",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-fx-list-11",
+    "commands": "wait 300\nturn ALGO 0\ntap FX\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-00",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-00-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-01",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-01-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-02",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-02-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-03",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-03-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-04",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-04-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-00",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-01",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-02",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-03",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-04",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-05",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-06",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-07",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-08",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-09",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-10",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-11",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-12",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-13",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-14",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-15",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-16",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-17",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-18",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-19",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-20",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-21",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-22",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-23",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 23\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-24",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 24\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-25",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 25\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-26",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 26\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-27",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 27\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-mix-list-28",
+    "commands": "wait 300\nturn ALGO 0\ntap LFO\ntap SEL\nturn SELECT 28\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-00",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-00-touch",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-list-00",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-list-01",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-list-02",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "909-home-list-03",
+    "commands": "wait 300\nturn ALGO 0\ntap HOME\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-01",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-02",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-03",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-04",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-05",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-06",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-07",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-08",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-09",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-voice-10",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\ntapkey b10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-00-held",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-list-00",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-seq-list-01",
+    "commands": "wait 300\nturn ALGO 1\ntap SEQ\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-00",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\nwait 40",
+    "target": "808-voice-00"
+  },
+  {
+    "id": "808-para-00-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-00-voice-01",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b1\nwait 40",
+    "target": "808-voice-01"
+  },
+  {
+    "id": "808-para-00-voice-02",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b2\nwait 40",
+    "target": "808-voice-02"
+  },
+  {
+    "id": "808-para-00-voice-03",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b3\nwait 40",
+    "target": "808-voice-03"
+  },
+  {
+    "id": "808-para-00-voice-04",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b4\nwait 40",
+    "target": "808-voice-04"
+  },
+  {
+    "id": "808-para-00-voice-05",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b5\nwait 40",
+    "target": "808-voice-05"
+  },
+  {
+    "id": "808-para-00-voice-06",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b6\nwait 40",
+    "target": "808-voice-06"
+  },
+  {
+    "id": "808-para-00-voice-07",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b7\nwait 40",
+    "target": "808-voice-07"
+  },
+  {
+    "id": "808-para-00-voice-08",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b8\nwait 40",
+    "target": "808-voice-08"
+  },
+  {
+    "id": "808-para-00-voice-09",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b9\nwait 40",
+    "target": "808-voice-09"
+  },
+  {
+    "id": "808-para-00-voice-10",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\n\ntapkey b10\nwait 40",
+    "target": "808-voice-10"
+  },
+  {
+    "id": "808-para-01",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": "808-voice-00"
+  },
+  {
+    "id": "808-para-01-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-01-voice-01",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b1\nwait 40",
+    "target": "808-voice-01"
+  },
+  {
+    "id": "808-para-01-voice-02",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b2\nwait 40",
+    "target": "808-voice-02"
+  },
+  {
+    "id": "808-para-01-voice-03",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b3\nwait 40",
+    "target": "808-voice-03"
+  },
+  {
+    "id": "808-para-01-voice-04",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b4\nwait 40",
+    "target": "808-voice-04"
+  },
+  {
+    "id": "808-para-01-voice-05",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b5\nwait 40",
+    "target": "808-voice-05"
+  },
+  {
+    "id": "808-para-01-voice-06",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b6\nwait 40",
+    "target": "808-voice-06"
+  },
+  {
+    "id": "808-para-01-voice-07",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b7\nwait 40",
+    "target": "808-voice-07"
+  },
+  {
+    "id": "808-para-01-voice-08",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b8\nwait 40",
+    "target": "808-voice-08"
+  },
+  {
+    "id": "808-para-01-voice-09",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b9\nwait 40",
+    "target": "808-voice-09"
+  },
+  {
+    "id": "808-para-01-voice-10",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap EDIT\n\ntapkey b10\nwait 40",
+    "target": "808-voice-10"
+  },
+  {
+    "id": "808-para-list-00",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-01",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-02",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-03",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-04",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-05",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-06",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-07",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-08",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-para-list-09",
+    "commands": "wait 300\nturn ALGO 1\ntap EDIT\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-00",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-00-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-01",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-01-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-00",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-01",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-02",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-03",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-04",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-05",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-06",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-07",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-08",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-09",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-10",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-fx-list-11",
+    "commands": "wait 300\nturn ALGO 1\ntap FX\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-00",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-00-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-01",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-01-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-02",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-02-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-03",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-03-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-04",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-04-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-00",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-01",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-02",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-03",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-04",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-05",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-06",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-07",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-08",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-09",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-10",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-11",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-12",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-13",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-14",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-15",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-16",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-17",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-18",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-19",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-20",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-21",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-22",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-23",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 23\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-24",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 24\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-25",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 25\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-26",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 26\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-27",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 27\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-mix-list-28",
+    "commands": "wait 300\nturn ALGO 1\ntap LFO\ntap SEL\nturn SELECT 28\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-00",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-00-touch",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-list-00",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-list-01",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-list-02",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "808-home-list-03",
+    "commands": "wait 300\nturn ALGO 1\ntap HOME\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-00",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-00-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-00-held",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-01",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-01-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-01-held",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-02",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-02-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-02-held",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-00",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-01",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-02",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-03",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-04",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-05",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-06",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-07",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-08",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-09",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-10",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-11",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-seq-list-12",
+    "commands": "wait 300\nturn ALGO 2\ntap SEQ\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-00",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-00-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-00",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-01",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-02",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-03",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-04",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-05",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-06",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-para-list-07",
+    "commands": "wait 300\nturn ALGO 2\ntap EDIT\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-00",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-00-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-01",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-01-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-00",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-01",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-02",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-03",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-04",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-05",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-06",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-07",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-08",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-09",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-10",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-fx-list-11",
+    "commands": "wait 300\nturn ALGO 2\ntap FX\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-00",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-00-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-01",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-01-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-02",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-02-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-03",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-03-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-04",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-04-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-00",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-01",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-02",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-03",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-04",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-05",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-06",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-07",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-08",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-09",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-10",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-11",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-12",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-13",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-14",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-15",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-16",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-17",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-18",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-19",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-20",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-21",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-22",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-23",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 23\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-24",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 24\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-25",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 25\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-26",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 26\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-27",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 27\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-mix-list-28",
+    "commands": "wait 300\nturn ALGO 2\ntap LFO\ntap SEL\nturn SELECT 28\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-00",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-00-touch",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-list-00",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-list-01",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-list-02",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "break-home-list-03",
+    "commands": "wait 300\nturn ALGO 2\ntap HOME\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-00",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-00-held",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-01",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-01-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-01-held",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-02",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-02-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-02-held",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-04",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-05",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-06",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-seq-list-07",
+    "commands": "wait 300\nturn ALGO 3\ntap SEQ\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-00",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-01",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-01-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-02",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-02-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-03",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-03-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-04",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-04-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-05",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-05-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-06",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-06-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-07",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-07-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-04",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-05",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-06",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-07",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-08",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-09",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-10",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-11",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-12",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-13",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-14",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-15",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-16",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-17",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-18",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-19",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-20",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-21",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-para-list-22",
+    "commands": "wait 300\nturn ALGO 3\ntap EDIT\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-00",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-01",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-01-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-04",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-05",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-06",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-07",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-08",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-09",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-10",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-fx-list-11",
+    "commands": "wait 300\nturn ALGO 3\ntap FX\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-00",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-01",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-01-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-02",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-02-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-03",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-03-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-04",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-04-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-04",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-05",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-06",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-07",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-08",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-09",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-10",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-11",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-12",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-13",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-14",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-15",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-16",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-17",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-18",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-19",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-20",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-21",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-22",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-23",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 23\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-24",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 24\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-25",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 25\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-26",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 26\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-27",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 27\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-mix-list-28",
+    "commands": "wait 300\nturn ALGO 3\ntap LFO\ntap SEL\nturn SELECT 28\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-00",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-home-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap HOME\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-00",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-00-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-01",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap ARP\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-01-touch",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap ARP\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-00",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-01",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-02",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-03",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-04",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-05",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-06",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "chicago-gen-list-07",
+    "commands": "wait 300\nturn ALGO 3\ntap ARP\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-00",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-00-held",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-01",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-01-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-01-held",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-02",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\ntap SEQ\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-02-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\ntap SEQ\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-02-held",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEQ\ntap SEQ\n\nkey w0 down\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-04",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-05",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-06",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-seq-list-07",
+    "commands": "wait 300\nturn ALGO 4\ntap SEQ\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-00",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-01",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-01-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-02",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-02-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-03",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-03-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-04",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-04-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-05",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-05-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\ntap EDIT\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-04",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-05",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-06",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-07",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-08",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-09",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-10",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-11",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-12",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-13",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-14",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-15",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-16",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-17",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-para-list-18",
+    "commands": "wait 300\nturn ALGO 4\ntap EDIT\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-00",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-01",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap FX\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-01-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap FX\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-04",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-05",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-06",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-07",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-08",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-09",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-10",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-fx-list-11",
+    "commands": "wait 300\nturn ALGO 4\ntap FX\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-00",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-01",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-01-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-02",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-02-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-03",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-03-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-04",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-04-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-04",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-05",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-06",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-07",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-08",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-09",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-10",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 10\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-11",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 11\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-12",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-13",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 13\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-14",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 14\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-15",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-16",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 16\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-17",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 17\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-18",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-19",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 19\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-20",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-21",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 21\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-22",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 22\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-23",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 23\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-24",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 24\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-25",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 25\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-26",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 26\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-27",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 27\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-mix-list-28",
+    "commands": "wait 300\nturn ALGO 4\ntap LFO\ntap SEL\nturn SELECT 28\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-00",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-home-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap HOME\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-00",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-00-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-01",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap ARP\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-01-touch",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap ARP\n\nspin K1 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-00",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-01",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-02",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-03",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-04",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-05",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-06",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "miami-gen-list-07",
+    "commands": "wait 300\nturn ALGO 4\ntap ARP\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-index",
+    "commands": "wait 300\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-00",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-01",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-02",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-03",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-04",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-05",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-06",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-0-row-07",
+    "commands": "wait 300\ntap GLO\nturn SELECT 0\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-00",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-01",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-02",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-03",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-04",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-05",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-06",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-07",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-08",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 8\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-1-row-09",
+    "commands": "wait 300\ntap GLO\nturn SELECT 1\ntap SEL\nturn SELECT 9\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-2-row-00",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-2-row-01",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-2-row-02",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-3-row-00",
+    "commands": "wait 300\ntap GLO\nturn SELECT 3\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-3-row-01",
+    "commands": "wait 300\ntap GLO\nturn SELECT 3\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-3-row-02",
+    "commands": "wait 300\ntap GLO\nturn SELECT 3\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-3-row-03",
+    "commands": "wait 300\ntap GLO\nturn SELECT 3\ntap SEL\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-3-row-04",
+    "commands": "wait 300\ntap GLO\nturn SELECT 3\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-4-row-00",
+    "commands": "wait 300\ntap GLO\nturn SELECT 4\ntap SEL\nturn SELECT 0\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-4-row-01",
+    "commands": "wait 300\ntap GLO\nturn SELECT 4\ntap SEL\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "global-4-row-02",
+    "commands": "wait 300\ntap GLO\nturn SELECT 4\ntap SEL\nturn SELECT 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p0-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 0\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p0-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 0\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p1-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p3-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 3\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p4-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p4-gen",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 4\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p2-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 2\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p0-fx",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 0\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p0-mix",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 0\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-p0-home",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\nturn ALGO 0\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-green-global",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO -1\ntap GLO\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p0-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 0\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p0-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 0\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p1-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p3-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 3\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p4-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p4-gen",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 4\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p2-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 2\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p0-fx",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 0\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p0-mix",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 0\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-p0-home",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\nturn ALGO 0\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-cyan-global",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 1\ntap GLO\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p0-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 0\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p0-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 0\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p1-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p3-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 3\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p4-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p4-gen",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 4\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p2-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 2\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p0-fx",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 0\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p0-mix",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 0\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-p0-home",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\nturn ALGO 0\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-red-global",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 2\ntap GLO\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p0-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 0\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p0-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 0\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p1-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p3-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 3\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p4-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p4-gen",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 4\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p2-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 2\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p0-fx",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 0\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p0-mix",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 0\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-p0-home",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\nturn ALGO 0\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-mono-global",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 3\ntap GLO\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p0-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 0\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p0-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 0\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p1-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p3-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 3\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p4-para",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p4-gen",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 4\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p2-seq",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 2\ntap SEQ\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p0-fx",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 0\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p0-mix",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 0\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-p0-home",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\nturn ALGO 0\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "theme-light-global",
+    "commands": "wait 300\ntap GLO\nturn SELECT 2\ntap SEL\nturn SELECT 2\nturn ALGO 4\ntap GLO\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "transport-playing",
+    "commands": "wait 300\ntapkey b0\ntapkey w0\ntapkey w4\ntap PLAY\nwait 777\nwait 40",
+    "target": null
+  },
+  {
+    "id": "transport-rec",
+    "commands": "wait 300\ntap REC\ntap PLAY\nwait 333\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-FX",
+    "commands": "wait 300\npress FX\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-SEL",
+    "commands": "wait 300\npress SEL\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-ENV",
+    "commands": "wait 300\npress ENV\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-LFO",
+    "commands": "wait 300\npress LFO\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-EDIT",
+    "commands": "wait 300\npress EDIT\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-GLO",
+    "commands": "wait 300\npress GLO\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-HOME",
+    "commands": "wait 300\npress HOME\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-SAVE",
+    "commands": "wait 300\npress SAVE\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-ARP",
+    "commands": "wait 300\npress ARP\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-SEQ",
+    "commands": "wait 300\npress SEQ\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-PLAY",
+    "commands": "wait 300\npress PLAY\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-REC",
+    "commands": "wait 300\npress REC\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-OCTdown",
+    "commands": "wait 300\npress OCT-\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "help-OCTup",
+    "commands": "wait 300\npress OCT+\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "song-0",
+    "commands": "wait 300\ntap HOME\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "song-1",
+    "commands": "wait 300\ntap HOME\ntap HOME\ntap HOME\ntap HOME\n\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t01_909",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t02_909_readout",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t03_808",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t04_303a",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t05_303a_held",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t06_tb3po",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t07_new_line_msg",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t08_break",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t09_break_loops",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t10_home",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t11_home_mute",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t12_fx",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t13_mix_comp",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t14_mix_pump",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t15_list",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t16_list_edit",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t17_global",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t18_global_reset",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\n# GLO > RESET PROJECT (+17 selectable rows from CLOCK SOURCE); inspect and cancel its confirmation.\n# GLOBAL > PROJECT (section 3) > RESET PROJECT (row 4)\nturn SELECT 3\ntap SEL\nturn SELECT 4\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t19_ask",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\n# GLO > RESET PROJECT (+17 selectable rows from CLOCK SOURCE); inspect and cancel its confirmation.\n# GLOBAL > PROJECT (section 3) > RESET PROJECT (row 4)\nturn SELECT 3\ntap SEL\nturn SELECT 4\ntap SEL\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t20_cancelled",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\n# GLO > RESET PROJECT (+17 selectable rows from CLOCK SOURCE); inspect and cancel its confirmation.\n# GLOBAL > PROJECT (section 3) > RESET PROJECT (row 4)\nturn SELECT 3\ntap SEL\nturn SELECT 4\ntap SEL\ntap HOME\nwait 300\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t21_ask_clear",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\n# GLO > RESET PROJECT (+17 selectable rows from CLOCK SOURCE); inspect and cancel its confirmation.\n# GLOBAL > PROJECT (section 3) > RESET PROJECT (row 4)\nturn SELECT 3\ntap SEL\nturn SELECT 4\ntap SEL\ntap HOME\nwait 300\ntap GLO\nturn SELECT 1\nturn ALGO -4\npress SAVE\ntap REC\nrelease SAVE\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-tour-t22_tempo",
+    "commands": "# A tour of every screen, for looking at (screenshots in build/scenarios/tour/).\nwait 300\n# a little content\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b1\ntapkey w4\ntapkey w12\npress ENV\ntapkey w0\nrelease ENV\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\nturn ALGO -1\ntapkey w0\ntapkey w2\ntapkey w4\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\nturn ALGO -2\ntap PLAY\nwait 600\nturn K1 6\nwait 1000\nturn ALGO 1\ntapkey b7\nturn ALGO 3\n# two ties by hand (TB-3PO writes none): on SEQ, hold a step, KNOB 2 to TIE; the manual's picture shows them\ntap SEQ\nkey w5 down\nturn K2 1\nkey w5 up\nkey w6 down\nturn K2 1\nkey w6 up\ntap EDIT\nwait 300\nkey w2 down\nwait 40\nkey w2 up\ntap ARP\ntap OCT+\nwait 1500\nturn ALGO -2\nwait 300\ntap EDIT\ntap EDIT\ntap EDIT\ntap HOME\nwait 200\ntapkey b1\ntapkey b1\ntap FX\nwait 1600\ntap LFO\nturn SELECT 9\nturn K2 4\nturn K3 40\nwait 1200\ntap SEL\nturn SELECT 3\nturn ALGO 2\ntap HOME\ntap GLO\n# GLO > RESET PROJECT (+17 selectable rows from CLOCK SOURCE); inspect and cancel its confirmation.\n# GLOBAL > PROJECT (section 3) > RESET PROJECT (row 4)\nturn SELECT 3\ntap SEL\nturn SELECT 4\ntap SEL\ntap HOME\nwait 300\ntap GLO\nturn SELECT 1\nturn ALGO -4\npress SAVE\ntap REC\nrelease SAVE\ntap HOME\npress HOME\nturn SELECT 5\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-song-s01_303a_on_p2",
+    "commands": "# Part patterns, the song, knob motion: each part its own pattern, bars arranged, moves recorded.\nwait 300\n# the 909 (on screen at boot): a kick on the quarters\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\npress HOME\nturn SELECT -5\nrelease HOME\n# PRESETS on 303 A's screen moves 303 A alone (stopped: at once)\nturn ALGO 4\nturn PRESET 1\nwait 1000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-song-s02_home_parts",
+    "commands": "# Part patterns, the song, knob motion: each part its own pattern, bars arranged, moves recorded.\nwait 300\n# the 909 (on screen at boot): a kick on the quarters\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\npress HOME\nturn SELECT -5\nrelease HOME\n# PRESETS on 303 A's screen moves 303 A alone (stopped: at once)\nturn ALGO 4\nturn PRESET 1\nwait 1000\ntap HOME\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-song-s03_song",
+    "commands": "# Part patterns, the song, knob motion: each part its own pattern, bars arranged, moves recorded.\nwait 300\n# the 909 (on screen at boot): a kick on the quarters\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\npress HOME\nturn SELECT -5\nrelease HOME\n# PRESETS on 303 A's screen moves 303 A alone (stopped: at once)\nturn ALGO 4\nturn PRESET 1\nwait 1000\ntap HOME\n# a HOME white key: all five parts\ntapkey w0\n# SONG (HOME again): white keys write bars 1, 2, 1\ntap HOME\ntapkey w0\ntapkey w1\ntapkey w0\n# bar 3 without the 808\nturn K1 -1\ntapkey b1\n# bar 2: 303 B three patterns on, P5 (page 2, knob 2)\nturn K1 -1\nturn SELECT 1\nturn K2 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-song-s04_song_playing",
+    "commands": "# Part patterns, the song, knob motion: each part its own pattern, bars arranged, moves recorded.\nwait 300\n# the 909 (on screen at boot): a kick on the quarters\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\npress HOME\nturn SELECT -5\nrelease HOME\n# PRESETS on 303 A's screen moves 303 A alone (stopped: at once)\nturn ALGO 4\nturn PRESET 1\nwait 1000\ntap HOME\n# a HOME white key: all five parts\ntapkey w0\n# SONG (HOME again): white keys write bars 1, 2, 1\ntap HOME\ntapkey w0\ntapkey w1\ntapkey w0\n# bar 3 without the 808\nturn K1 -1\ntapkey b1\n# bar 2: 303 B three patterns on, P5 (page 2, knob 2)\nturn K1 -1\nturn SELECT 1\nturn K2 3\n# PLAY on the SONG screen plays the song (there is no MODE); play from bar 1\nturn K1 -5\ntap PLAY\nwait 100\nwait 2000\nwait 2000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-song-s05_motion",
+    "commands": "# Part patterns, the song, knob motion: each part its own pattern, bars arranged, moves recorded.\nwait 300\n# the 909 (on screen at boot): a kick on the quarters\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\npress HOME\nturn SELECT -5\nrelease HOME\n# PRESETS on 303 A's screen moves 303 A alone (stopped: at once)\nturn ALGO 4\nturn PRESET 1\nwait 1000\ntap HOME\n# a HOME white key: all five parts\ntapkey w0\n# SONG (HOME again): white keys write bars 1, 2, 1\ntap HOME\ntapkey w0\ntapkey w1\ntapkey w0\n# bar 3 without the 808\nturn K1 -1\ntapkey b1\n# bar 2: 303 B three patterns on, P5 (page 2, knob 2)\nturn K1 -1\nturn SELECT 1\nturn K2 3\n# PLAY on the SONG screen plays the song (there is no MODE); play from bar 1\nturn K1 -5\ntap PLAY\nwait 100\nwait 2000\nwait 2000\nwait 2000\ntap PLAY\n# motion: 303 A's cutoff, swept while recording, one turn a step (16 steps of 125 ms)\ntap HOME\ntap EDIT\n# Miami FILTER: cutoff is current control 9, not the retired bass control 0.\ntap EDIT\ntap EDIT\nparam 2 0 9 48\n# a line to hear the sweep on (the manual's picture)\ntapkey w0\ntapkey w3\ntapkey w6\ntapkey w8\ntapkey w10\ntapkey w12\ntapkey w14\ntap REC\ntap PLAY\nwait 60\nspin K1 -40\nwait 124\nspin K1 10\nwait 124\nspin K1 10\nwait 124\nspin K1 10\nwait 124\nspin K1 10\nwait 124\nspin K1 10\nwait 124\nspin K1 10\nwait 124\ntap REC\n# the first turn lands on step 3 (PLAY's tap takes a moment), one step per turn after it\n# the next pass plays it back: step 4 (18 rising to 28), not the knob's 68\nwait 1310\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-help-h01_save",
+    "commands": "# Help cards: hold one button ~1 s and a card says what it does; letting go after the card does\n# nothing else; a key, a turn or another button puts the card away and the combination works.\nwait 300\n# SAVE held: the card (sooner than the others: SAVE is held to copy), and letting go does not save\npress SAVE\nwait 200\nwait 400\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-help-h02_home",
+    "commands": "# Help cards: hold one button ~1 s and a card says what it does; letting go after the card does\n# nothing else; a key, a turn or another button puts the card away and the combination works.\nwait 300\n# SAVE held: the card (sooner than the others: SAVE is held to copy), and letting go does not save\npress SAVE\nwait 200\nwait 400\nrelease SAVE\nwait 100\n# a short press of SAVE still saves\ntap SAVE\n# HOME held, then SELECT turned: the card goes, the tempo moves, HOME does not go home\npress HOME\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-help-h03_oct_kbd",
+    "commands": "# Help cards: hold one button ~1 s and a card says what it does; letting go after the card does\n# nothing else; a key, a turn or another button puts the card away and the combination works.\nwait 300\n# SAVE held: the card (sooner than the others: SAVE is held to copy), and letting go does not save\npress SAVE\nwait 200\nwait 400\nrelease SAVE\nwait 100\n# a short press of SAVE still saves\ntap SAVE\n# HOME held, then SELECT turned: the card goes, the tempo moves, HOME does not go home\npress HOME\nwait 1200\nturn SELECT 5\nrelease HOME\n# ENV held long, then a white key: the card goes and the key still works (an accent there)\ntapkey b0\ntapkey w0\npress ENV\nwait 1200\ntapkey w0\nrelease ENV\n# 303A on keyboard: OCT+ held\nturn ALGO 4\ntap SEQ\npress OCT+\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_sound",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_saw",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_mix",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_square",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nparam 2 0 0 127\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_adsr_idle",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nparam 2 0 0 127\nwait 30\nturn SELECT 3\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_adsr_active",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nparam 2 0 0 127\nwait 30\nturn SELECT 3\nspin K2 15\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_chicago-chicago_adsr_done",
+    "commands": "# Select Chicago through the later SOUND row, then return to its first bank.\nwait 300\nturn ALGO 4\ntap EDIT\nturn SELECT 5\nspin K1 -1\nwait 30\nturn SELECT -7\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nparam 2 0 0 127\nwait 30\nturn SELECT 3\nspin K2 15\nwait 30\nwait 1000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_sound",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_triangle",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_square",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_xmod_triangle",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_xmod_pulse",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_filter",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_triangle",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_square",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_idle",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_active",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_grace",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_sustain",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nspin K2 -20\nwait 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wobble_done",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nspin K2 -20\nwait 30\nwait 1000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_page2",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nspin K2 -20\nwait 30\nwait 1000\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_presets",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nspin K2 -20\nwait 30\nwait 1000\ntap EDIT\nturn SELECT 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_matrix_miami-miami_wrap",
+    "commands": "# Current Miami pages: CARRIER, XMOD, FILTER, WOBBLE, OUTPUT, SOUND.\nwait 300\nturn ALGO 4\ntap EDIT\nparam 2 0 0 0\nwait 30\nparam 2 0 0 64\nwait 30\ntap EDIT\nparam 2 0 6 0\nwait 30\nparam 2 0 6 127\nwait 30\ntap EDIT\ntap EDIT\nparam 2 0 11 0\nwait 30\nparam 2 0 11 42\nwait 30\nspin K1 10\nwait 30\nwait 500\nspin K2 -20\nwait 30\nwait 1000\ntap EDIT\nturn SELECT 1\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_page_split-split_909_sd_sound",
+    "commands": "# EDIT shows and auditions the chosen sound; SEQ owns visible step edits.\nwait 300\ntap EDIT\ntapkey w0\ntapkey b1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_page_split-split_909_sd_sound_after_seq",
+    "commands": "# EDIT shows and auditions the chosen sound; SEQ owns visible step edits.\nwait 300\ntap EDIT\ntapkey w0\ntapkey b1\ntap REC\ntap PLAY\ntapkey b1\ntapkey w4\ntap SEQ\ntap REC\ntap PLAY\ntapkey w4\nkey w8 down\ntap EDIT\nspin K1 2\ntap SEQ\nkey w8 up\ntap SEQ\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_page_split-split_303_roll",
+    "commands": "# EDIT shows and auditions the chosen sound; SEQ owns visible step edits.\nwait 300\ntap EDIT\ntapkey w0\ntapkey b1\ntap REC\ntap PLAY\ntapkey b1\ntapkey w4\ntap SEQ\ntap REC\ntap PLAY\ntapkey w4\nkey w8 down\ntap EDIT\nspin K1 2\ntap SEQ\nkey w8 up\ntap SEQ\ntap EDIT\n# A bass key on EDIT auditions without writing a hidden note, even with REC on.\nturn ALGO 4\ntap REC\ntap PLAY\ntapkey w0\ntap REC\ntap PLAY\npeakreset\nkey w0 down\nwait 200\ntap SEQ\nwait 200\nkey w0 up\nwait 100\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-sound_page_split-split_303_sound",
+    "commands": "# EDIT shows and auditions the chosen sound; SEQ owns visible step edits.\nwait 300\ntap EDIT\ntapkey w0\ntapkey b1\ntap REC\ntap PLAY\ntapkey b1\ntapkey w4\ntap SEQ\ntap REC\ntap PLAY\ntapkey w4\nkey w8 down\ntap EDIT\nspin K1 2\ntap SEQ\nkey w8 up\ntap SEQ\ntap EDIT\n# A bass key on EDIT auditions without writing a hidden note, even with REC on.\nturn ALGO 4\ntap REC\ntap PLAY\ntapkey w0\ntap REC\ntap PLAY\npeakreset\nkey w0 down\nwait 200\ntap SEQ\nwait 200\nkey w0 up\nwait 100\ntap EDIT\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-savefeedback-savefailed",
+    "commands": "# Save status remains distinct after the short message ends. A failed flash write stays visible\n# until a save succeeds. Autosave failures use the same state as explicit SAVE failures.\nwait 300\nstorefail 1\ntapkey b0\ntapkey w0\nwait 4600\ntap GLO\nwait 1500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-savefeedback-savequeued",
+    "commands": "# Save status remains distinct after the short message ends. A failed flash write stays visible\n# until a save succeeds. Autosave failures use the same state as explicit SAVE failures.\nwait 300\nstorefail 1\ntapkey b0\ntapkey w0\nwait 4600\ntap GLO\nwait 1500\nstorefail 0\ntap SAVE\ntap HOME\ntapkey w4\ntap PLAY\ntap SAVE\nwait 1500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-01_boot_909",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-02_909_grid",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-03_808_grid",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-04_tb3po_a",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-05_303b_sound",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-06_break",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\n# BREAK: all 16 steps on\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-07_playing_break",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\n# BREAK: all 16 steps on\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\n# tempo 128, play and record 4 bars\npress HOME\nturn SELECT 3\nrelease HOME\ntap PLAY\nwait 7500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-08_home",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\n# BREAK: all 16 steps on\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\n# tempo 128, play and record 4 bars\npress HOME\nturn SELECT 3\nrelease HOME\ntap PLAY\nwait 7500\ntap HOME\nwait 200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-09_fx",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\n# BREAK: all 16 steps on\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\n# tempo 128, play and record 4 bars\npress HOME\nturn SELECT 3\nrelease HOME\ntap PLAY\nwait 7500\ntap HOME\nwait 200\ntap FX\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-groove-10_mix",
+    "commands": "# Build a groove from the panel, as a player would, and record it.\nwait 500\n# 909: BD on the quarters (black key 1 = BD, white keys = steps)\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\n# SD on 5 and 13, CH on the off-beats, OH on the last 16th\ntapkey b1\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b8\ntapkey w15\n# accent row: hold ENV, white keys\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\nleds\n# 808 part: cowbell and clap\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w11\ntapkey b6\ntapkey w12\n# 303 A: TB-3PO page, generate a line\nturn ALGO 3\ntap ARP\ntap OCT+\n# 303 B: generate, then sound page: open the filter\nturn ALGO -1\ntap ARP\ntap OCT+\ntap EDIT\nturn K1 20\nturn K2 30\n# BREAK: all 16 steps on\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\n# tempo 128, play and record 4 bars\npress HOME\nturn SELECT 3\nrelease HOME\ntap PLAY\nwait 7500\ntap HOME\nwait 200\ntap FX\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-patterns-11_chain",
+    "commands": "# Patterns: cue on the bar, chain, copy, save, reboot, everything comes back.\nwait 300\ntapkey b0\ntapkey w0\ntapkey w8\n# copy pattern 1 to pattern 2 (SAVE held + white key), then make 2 different\npress SAVE\ntapkey w1\nrelease SAVE\n# pattern 2 is empty (the factory patterns are): the copy needs no question\ntap HOME\ntapkey w1\ntap EDIT\ntapkey b1\ntap SEQ\ntapkey w4\n# play pattern 2, cue 1: it changes on the bar, not before\npress HOME\nturn SELECT -5\nrelease HOME\ntap PLAY\nwait 1000\ntap HOME\ntapkey w0\nwait 1100\n# chain 1-2 (two white keys held on HOME)\nkey w0 down\nkey w1 down\nkey w1 up\nkey w0 up\n# the chain starts on its first pattern at the next bar, then alternates\nwait 2100\nwait 2000\nwait 2000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-clocksrc-01_glo_clock_source",
+    "commands": "# GLO > MIDI > CLOCK SOURCE (a74; a75 saves it in the bt byte): AUTO (the default), INTERNAL, EXTERNAL. The row is the first row of MIDI.\nwait 300\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-clocksrc-02_glo_external",
+    "commands": "# GLO > MIDI > CLOCK SOURCE (a74; a75 saves it in the bt byte): AUTO (the default), INTERNAL, EXTERNAL. The row is the first row of MIDI.\nwait 300\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nturn ALGO 2\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-clocksrc-03_waiting_for_clock",
+    "commands": "# GLO > MIDI > CLOCK SOURCE (a74; a75 saves it in the bt byte): AUTO (the default), INTERNAL, EXTERNAL. The row is the first row of MIDI.\nwait 300\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nturn ALGO 2\ntap GLO\nwait 100\n# EXTERNAL: PLAY with no clock waits; the play arrow and the PLAY light blink, the top line says so\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntap PLAY\nwait 700\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-clocksrc-04_following",
+    "commands": "# GLO > MIDI > CLOCK SOURCE (a74; a75 saves it in the bt byte): AUTO (the default), INTERNAL, EXTERNAL. The row is the first row of MIDI.\nwait 300\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nturn ALGO 2\ntap GLO\nwait 100\n# EXTERNAL: PLAY with no clock waits; the play arrow and the PLAY light blink, the top line says so\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntap PLAY\nwait 700\nleds\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-clocksrc-05_internal",
+    "commands": "# GLO > MIDI > CLOCK SOURCE (a74; a75 saves it in the bt byte): AUTO (the default), INTERNAL, EXTERNAL. The row is the first row of MIDI.\nwait 300\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nturn ALGO 2\ntap GLO\nwait 100\n# EXTERNAL: PLAY with no clock waits; the play arrow and the PLAY light blink, the top line says so\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntap PLAY\nwait 700\nleds\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\n# the clock stops: X0X pauses and waits; the tempo keeps the measured one (about 139 BPM)\nwait 700\ntap PLAY\nwait 100\n# INTERNAL: Start, Clock and Stop in are ignored; PLAY runs on the internal clock with clock out\ntap GLO\n# GLOBAL opens its sections; SEL enters MIDI + CLOCK (CLOCK SOURCE is row 0)\ntap SEL\nturn ALGO -1\ntap GLO\nmidi FA 00 00\nwait 100\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\ntap PLAY\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi F8 00 00\nwait 18\nmidi FC 00 00\nwait 1000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-perf-p01_live",
+    "commands": "# PERF: the performance screen, and PERF TEST (three patterns of its own on the factory sound), which\n# must put back everything it changed: the patterns, the sound, the tempo, the mutes, the song mode.\nwait 300\ntapkey b0\ntapkey w0\ntapkey w8\npress HOME\nturn SELECT -5\nrelease HOME\ntap HOME\ntapkey b4\n# GLO > PERFORMANCE (+18 selectable rows from CLOCK SOURCE).\ntap GLO\n# GLOBAL > SYSTEM (section 4) > PERFORMANCE (row 0)\nturn SELECT 4\ntap SEL\ntap SEL\ntap PLAY\nwait 2500\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-perf-p02_running",
+    "commands": "# PERF: the performance screen, and PERF TEST (three patterns of its own on the factory sound), which\n# must put back everything it changed: the patterns, the sound, the tempo, the mutes, the song mode.\nwait 300\ntapkey b0\ntapkey w0\ntapkey w8\npress HOME\nturn SELECT -5\nrelease HOME\ntap HOME\ntapkey b4\n# GLO > PERFORMANCE (+18 selectable rows from CLOCK SOURCE).\ntap GLO\n# GLOBAL > SYSTEM (section 4) > PERFORMANCE (row 0)\nturn SELECT 4\ntap SEL\ntap SEL\ntap PLAY\nwait 2500\ntap PLAY\n# SEL > RUN PERF TEST\ntap SEL\nturn SELECT 1\ntap SEL\nwait 300\nwait 7000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-perf-p03_results",
+    "commands": "# PERF: the performance screen, and PERF TEST (three patterns of its own on the factory sound), which\n# must put back everything it changed: the patterns, the sound, the tempo, the mutes, the song mode.\nwait 300\ntapkey b0\ntapkey w0\ntapkey w8\npress HOME\nturn SELECT -5\nrelease HOME\ntap HOME\ntapkey b4\n# GLO > PERFORMANCE (+18 selectable rows from CLOCK SOURCE).\ntap GLO\n# GLOBAL > SYSTEM (section 4) > PERFORMANCE (row 0)\nturn SELECT 4\ntap SEL\ntap SEL\ntap PLAY\nwait 2500\ntap PLAY\n# SEL > RUN PERF TEST\ntap SEL\nturn SELECT 1\ntap SEL\nwait 300\nwait 7000\nwait 9000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-guard-g01_guard",
+    "commands": "# The overload guard (engine.c): past the CPU it lightens the 303s and the 808's tails, shows GUARD,\n# and lets go after 3 s back under 65%. \"load N\" stands in for the FM-1's measured load.\nwait 300\n# 909 kick on the quarters, 808 too, 303 A on a TB-3PO line\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\nturn ALGO 1\ntapkey w0\ntapkey w8\nturn ALGO 3\ntap ARP\ntap OCT+\ntap PLAY\nwait 1500\n# a block over 92%: on at once, and the music plays on\nload 95\nwait 100\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-guard-g02_perftest",
+    "commands": "# The overload guard (engine.c): past the CPU it lightens the 303s and the 808's tails, shows GUARD,\n# and lets go after 3 s back under 65%. \"load N\" stands in for the FM-1's measured load.\nwait 300\n# 909 kick on the quarters, 808 too, 303 A on a TB-3PO line\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\nturn ALGO 1\ntapkey w0\ntapkey w8\nturn ALGO 3\ntap ARP\ntap OCT+\ntap PLAY\nwait 1500\n# a block over 92%: on at once, and the music plays on\nload 95\nwait 100\npeakreset\nwait 2000\n# 2 s under 65% is not enough; 3 s is\nload 40\nwait 2000\nwait 1500\n# 80% sustained is under both thresholds; 90% sustained crosses the average one\nload 80\nwait 2000\nload 90\nwait 2000\n# a load that comes back between 65 and 92 keeps it on\nload 70\nwait 5000\n# the PERF test measures the full cost: no guard while it runs, back after\nload 95\ntap PLAY\n# GLO > PERFORMANCE (+18 selectable rows from CLOCK SOURCE).\ntap GLO\n# GLOBAL > SYSTEM (section 4) > PERFORMANCE (row 0)\nturn SELECT 4\ntap SEL\ntap SEL\ntap SEL\nturn SELECT 1\ntap SEL\nwait 1000\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-guard-g03_perf_after",
+    "commands": "# The overload guard (engine.c): past the CPU it lightens the 303s and the 808's tails, shows GUARD,\n# and lets go after 3 s back under 65%. \"load N\" stands in for the FM-1's measured load.\nwait 300\n# 909 kick on the quarters, 808 too, 303 A on a TB-3PO line\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\nturn ALGO 1\ntapkey w0\ntapkey w8\nturn ALGO 3\ntap ARP\ntap OCT+\ntap PLAY\nwait 1500\n# a block over 92%: on at once, and the music plays on\nload 95\nwait 100\npeakreset\nwait 2000\n# 2 s under 65% is not enough; 3 s is\nload 40\nwait 2000\nwait 1500\n# 80% sustained is under both thresholds; 90% sustained crosses the average one\nload 80\nwait 2000\nload 90\nwait 2000\n# a load that comes back between 65 and 92 keeps it on\nload 70\nwait 5000\n# the PERF test measures the full cost: no guard while it runs, back after\nload 95\ntap PLAY\n# GLO > PERFORMANCE (+18 selectable rows from CLOCK SOURCE).\ntap GLO\n# GLOBAL > SYSTEM (section 4) > PERFORMANCE (row 0)\nturn SELECT 4\ntap SEL\ntap SEL\ntap SEL\nturn SELECT 1\ntap SEL\nwait 1000\ntap HOME\nwait 300\nwait 100\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-jam-20_break_amen",
+    "commands": "# Sends and the break bank: a breakbeat / acid jam built from the panel, 8 bars.\nwait 300\n# 909: kick on the quarters, closed hat on the off-beats, clap on 2 and 4\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b6\ntapkey w4\ntapkey w12\n# 303 A and B: TB-3PO lines\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\n# BREAK: every step on, loop A = AMEN (the bank's first), a little more roll\nturn ALGO -1\ntap EDIT\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K3 20\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-jam-21_sends_303",
+    "commands": "# Sends and the break bank: a breakbeat / acid jam built from the panel, 8 bars.\nwait 300\n# 909: kick on the quarters, closed hat on the off-beats, clap on 2 and 4\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b6\ntapkey w4\ntapkey w12\n# 303 A and B: TB-3PO lines\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\n# BREAK: every step on, loop A = AMEN (the bank's first), a little more roll\nturn ALGO -1\ntap EDIT\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K3 20\n# sends: MIX's PARTS, a part picked with its black key: knob 3 its reverb, knob 4 its delay\ntap LFO\ntapkey b0\nturn K3 25\ntapkey b4\nturn K4 10\ntapkey b3\nturn K4 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-jam-22_sends_break",
+    "commands": "# Sends and the break bank: a breakbeat / acid jam built from the panel, 8 bars.\nwait 300\n# 909: kick on the quarters, closed hat on the off-beats, clap on 2 and 4\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b6\ntapkey w4\ntapkey w12\n# 303 A and B: TB-3PO lines\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\n# BREAK: every step on, loop A = AMEN (the bank's first), a little more roll\nturn ALGO -1\ntap EDIT\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K3 20\n# sends: MIX's PARTS, a part picked with its black key: knob 3 its reverb, knob 4 its delay\ntap LFO\ntapkey b0\nturn K3 25\ntapkey b4\nturn K4 10\ntapkey b3\nturn K4 30\ntapkey b2\nturn K3 30\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-jam-22b_tape",
+    "commands": "# Sends and the break bank: a breakbeat / acid jam built from the panel, 8 bars.\nwait 300\n# 909: kick on the quarters, closed hat on the off-beats, clap on 2 and 4\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b6\ntapkey w4\ntapkey w12\n# 303 A and B: TB-3PO lines\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\n# BREAK: every step on, loop A = AMEN (the bank's first), a little more roll\nturn ALGO -1\ntap EDIT\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K3 20\n# sends: MIX's PARTS, a part picked with its black key: knob 3 its reverb, knob 4 its delay\ntap LFO\ntapkey b0\nturn K3 25\ntapkey b4\nturn K4 10\ntapkey b3\nturn K4 30\ntapkey b2\nturn K3 30\n# the delay's TAPE (FX, the DELAY page, knob 4): tape already (the factory's), a touch more worn\ntap FX\ntap FX\nturn K4 1\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-jam-23_home_jam",
+    "commands": "# Sends and the break bank: a breakbeat / acid jam built from the panel, 8 bars.\nwait 300\n# 909: kick on the quarters, closed hat on the off-beats, clap on 2 and 4\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey b6\ntapkey w4\ntapkey w12\n# 303 A and B: TB-3PO lines\nturn ALGO 4\ntap ARP\ntap OCT+\nturn ALGO -1\ntap ARP\ntap OCT+\n# BREAK: every step on, loop A = AMEN (the bank's first), a little more roll\nturn ALGO -1\ntap EDIT\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K3 20\n# sends: MIX's PARTS, a part picked with its black key: knob 3 its reverb, knob 4 its delay\ntap LFO\ntapkey b0\nturn K3 25\ntapkey b4\nturn K4 10\ntapkey b3\nturn K4 30\ntapkey b2\nturn K3 30\n# the delay's TAPE (FX, the DELAY page, knob 4): tape already (the factory's), a touch more worn\ntap FX\ntap FX\nturn K4 1\n# tempo 135, play 8 bars\npress HOME\nturn SELECT 10\nrelease HOME\ntap PLAY\nwait 14300\ntap HOME\nwait 200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s01_home",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s02_mix_comp",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s03_filter_sweep",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s04_breakdown",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s05_909",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\ntapkey b0\ntapkey b4\ntapkey b2\nwait 2000\nturn ALGO -2\nwait 800\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s06_303a",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\ntapkey b0\ntapkey b4\ntapkey b2\nwait 2000\nturn ALGO -2\nwait 800\nturn ALGO 4\nwait 800\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s07_break",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\ntapkey b0\ntapkey b4\ntapkey b2\nwait 2000\nturn ALGO -2\nwait 800\nturn ALGO 4\nwait 800\nturn ALGO -2\nwait 800\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s08_fx",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\ntapkey b0\ntapkey b4\ntapkey b2\nwait 2000\nturn ALGO -2\nwait 800\nturn ALGO 4\nwait 800\nturn ALGO -2\nwait 800\ntap FX\nwait 300\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-showcase-s09_mix",
+    "commands": "# Showcase: every part running on the factory sound (big beat: sends, tape delay, the master\n# compressor with PUMP), and a filter sweep, played from the panel at 128 BPM. Audio: build/scenarios/showcase/showcase.wav\nwait 300\n# ---- 909: four on the floor, clap on 2 and 4, closed hats on the off-beats, open hat, accents\ntapkey b0\ntapkey w0\ntapkey w4\ntapkey w8\ntapkey w12\ntapkey b6\ntapkey w4\ntapkey w12\ntapkey b7\ntapkey w2\ntapkey w6\ntapkey w10\ntapkey w14\ntapkey w15\ntapkey b8\ntapkey w7\npress ENV\ntapkey w0\ntapkey w8\nrelease ENV\n# ---- 808: cowbell, rim\nturn ALGO 1\ntapkey b7\ntapkey w3\ntapkey w10\ntapkey b5\ntapkey w6\ntapkey w13\n# ---- 303 A: a TB-3PO line; filter, envelope, drive, delay send\nturn ALGO 3\ntap ARP\ntap OCT+\n# ---- 303 B: a second, sparser line\nturn ALGO -1\ntap ARP\nturn K1 -20\ntap OCT+\ntap EDIT\n# ---- BREAK: on every step, a little more complexity and roll, some reverb\nturn ALGO -1\ntapkey w0\ntapkey w1\ntapkey w2\ntapkey w3\ntapkey w4\ntapkey w5\ntapkey w6\ntapkey w7\ntapkey w8\ntapkey w9\ntapkey w10\ntapkey w11\ntapkey w12\ntapkey w13\ntapkey w14\ntapkey w15\nturn K1 15\nturn K3 10\n# ---- the sound is the factory mix (big beat: the master squeezing and pumping, tape delay on the\n# ---- 303s, the clap in the room); only the master filter is switched on (LP) for the sweep\ntap LFO\ntap LFO\ntap LFO\ntap LFO\ntap LFO\nturn K1 1\n# ---- tempo 128\npress HOME\nturn SELECT 3\nrelease HOME\n# ---- play 16 bars: 4 as is, a filter sweep down and up, a breakdown, everything back\ntap PLAY\nwait 3000\ntap HOME\nwait 300\nwait 4200\n# MIX remembers its page (FILTER): one tap\ntap LFO\nturn K2 -55\nturn K2 55\ntap HOME\ntapkey b4\ntapkey b2\ntapkey b0\nwait 3700\ntapkey b0\ntapkey b4\ntapkey b2\nwait 2000\nturn ALGO -2\nwait 800\nturn ALGO 4\nwait 800\nturn ALGO -2\nwait 800\ntap FX\nwait 300\ntap LFO\nwait 400\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-stereo-s01_pans",
+    "commands": "# Stereo: MIX's PARTS page (a part picked with its black key, knob 2 its pan), and a drum track's pan\n# on MIX's 909 MIX page.\nwait 300\ntap LFO\nwait 100\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-stereo-s02_panned",
+    "commands": "# Stereo: MIX's PARTS page (a part picked with its black key, knob 2 its pan), and a drum track's pan\n# on MIX's 909 MIX page.\nwait 300\ntap LFO\nwait 100\ntapkey b0\nturn K2 -40\ntapkey b4\nturn K2 30\nwait 1200\nwait 40",
+    "target": null
+  },
+  {
+    "id": "journey-stereo-s03_bd_pan",
+    "commands": "# Stereo: MIX's PARTS page (a part picked with its black key, knob 2 its pan), and a drum track's pan\n# on MIX's 909 MIX page.\nwait 300\ntap LFO\nwait 100\ntapkey b0\nturn K2 -40\ntapkey b4\nturn K2 30\nwait 1200\n# a drum voice's PAN: the 909's kick, knob 2 of MIX's 909 MIX page (the black keys pick the track)\ntap LFO\n# MIX pages wrap (PARTS, 909 MIX, 808 MIX, MASTER, WAVE); the second LFO tap opens 909 MIX\ntapkey b0\nturn K2 -24\nwait 1200\nwait 40",
+    "target": null
+  }
+]

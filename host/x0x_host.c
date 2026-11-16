@@ -25,6 +25,8 @@
  *   peakreset                    restart the output peak (expect peak_db_min / peak_db_max)
  *   shot FILE.png                save the screen
  *   leds                         print the lit buttons and keys
+ *   uistate                      print view/part/page/pages/overlay/list/help/theme (ui_visual_gate coverage)
+ *                                (env X0X_HOST_FIXED_CLOCK=1: the CPU-load and cycle clocks step a fixed amount, no wall clock)
  *   expect WHAT VALUE            check state (playing, pattern, cue, view-part, ...): exit 1 on mismatch;
  *                                VALUE "<N" / ">N" is a bound
  *   reboot                       save nothing; re-run boot from the simulated flash (persistence test)
@@ -308,9 +310,17 @@ void plat_ble_set(int on) { ble_on = on; }
 uint32_t plat_cpu_pct(void) { return cpu_pct; }
 uint32_t plat_xruns(void) { return 0; }
 /* performance: no CPU counter here: the "cycles" are nanoseconds (plat_cycles_hz) */
+static int host_fixed_clock = -1;               /* X0X_HOST_FIXED_CLOCK=1 (tests/host/ui_visual_gate): no wall clock reaches the UI */
+static uint64_t host_fixed_ns;
+static int host_clock_fixed(void)
+{
+    if (host_fixed_clock < 0) { const char *e = getenv("X0X_HOST_FIXED_CLOCK"); host_fixed_clock = e && e[0] == '1'; }
+    return host_fixed_clock;
+}
 static uint64_t host_ns(void)
 {
     struct timespec t;
+    if (host_clock_fixed()) return host_fixed_ns += 1000u;   /* a fixed step per read: the same on every run */
     clock_gettime(CLOCK_MONOTONIC, &t);
     return (uint64_t)t.tv_sec * 1000000000u + (uint64_t)t.tv_nsec;
 }
@@ -530,6 +540,7 @@ static uint64_t instr_now(void)
 static double now_ns(void)
 {
     struct timespec t;
+    if (host_clock_fixed()) return (double)(host_fixed_ns += 1000u);
     clock_gettime(CLOCK_MONOTONIC, &t);
     return (double)t.tv_sec * 1e9 + (double)t.tv_nsec;
 }
@@ -1131,6 +1142,11 @@ int main(int argc, char **argv)
         else if (!strcmp(cmd, "shot")) {
             snprintf(out, sizeof out, "%s/%s", dir, a);
             png_write(out);
+        } else if (!strcmp(cmd, "uistate")) {    /* uistate: one line for tests/host/ui_visual_gate (coverage) */
+            printf("uistate view=%d part=%d page=%d pages=%d overlay=%d list_n=%d list_sel=%d help=%d glo_section=%d theme=%d\n",
+                   (int)ui.view, (int)ui.part, cur_page(), pg.n, (int)ui.overlay, (int)ui.list_n, (int)ui.list_sel,
+                   (int)ui.help, (int)ui.glo_section, (int)ui_theme_light);
+            fflush(stdout);
         } else if (!strcmp(cmd, "leds")) {
             int i;
             printf("  leds: buttons");
