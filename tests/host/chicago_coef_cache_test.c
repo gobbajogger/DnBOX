@@ -79,7 +79,7 @@ static void warm_tick(original_chicago_voice *a,original_chicago_voice *b,
 }
 static void check_warm_branches(const original_chicago_voice_controls *initial,
  const original_chicago_voice_tables *t,const original_chicago_voice_seed *seed){
- unsigned step=3000,warm=0,invalidations=0,controls=0;
+ unsigned step=3000,warm=0,invalidations=0,controls=0,round_trips=0;
  const unsigned stage[]={0,1,3};
  for(unsigned k=0;k<3;k++)for(unsigned mode=0;mode<2;mode++){
   original_chicago_voice_controls c=*initial;
@@ -127,6 +127,18 @@ static void check_warm_branches(const original_chicago_voice_controls *initial,
    warm_tick(&x,&y,&edited,t,bpm,d,++step);
    CHECK(!memcmp(&before,&x.coefficients,sizeof before));warm++;
   }
+  /* Sync round trip (automation toggling MG tempo on/off/on with every other
+   * key unchanged): both sub-caches stay valid, so only the mode key can force
+   * the tempo delta to be recomputed instead of reusing the free-run delta. */
+  for(unsigned i=0;i<2;i++){
+   original_chicago_voice x=a,y=b;original_chicago_voice_controls flip=c;
+   flip.mg_tempo[i]=(uint8_t)!mode;
+   warm_tick(&x,&y,&flip,t,120.0f,63,++step);
+   warm_tick(&x,&y,&c,t,120.0f,63,++step);
+   warm_tick(&x,&y,&flip,t,120.0f,63,++step);
+   CHECK(x.coefficients.mg[i].tempo_valid&&x.coefficients.mg[i].free_valid);
+   warm_tick(&x,&y,&c,t,120.0f,63,++step);round_trips++;
+  }
   /* Finite bad-cache witnesses prove that the warm branch consumes cached
    * values. The uncached reference starts from the same unmodified voice.
    * Deliberate divergence is the expected test-control result. */
@@ -167,8 +179,8 @@ static void check_warm_branches(const original_chicago_voice_controls *initial,
    CHECK(ac==bc&&bits(x.vcf.level)!=bits(y.vcf.level));controls++;
   }
  }
- CHECK(warm==75&&invalidations==51&&controls==38);
- printf("PASS chicago-warm-cache: warm=%u one-key=%u bad-cache-test-controls=%u; attack/decay/release, two MGs tempo/free, glide, D=63/64; bit-identical PCM/state\n",warm,invalidations,controls);
+ CHECK(warm==75&&invalidations==51&&controls==38&&round_trips==12);
+ printf("PASS chicago-warm-cache: warm=%u one-key=%u bad-cache-test-controls=%u sync-round-trips=%u; attack/decay/release, two MGs tempo/free, glide, D=63/64; bit-identical PCM/state\n",warm,invalidations,controls,round_trips);
 }
 
 int main(void){
