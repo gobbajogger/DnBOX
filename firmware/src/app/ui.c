@@ -5004,7 +5004,7 @@ static const capm_t *caps(const felucca_font_t *f)
     if (i == 6)
         i = 5;
     {
-        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = f->bw[gi], bpr = (w + 1u) / 2u, x, y;
+        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = font_bitmap_width(f, gi), bpr = (w + 1u) / 2u, x, y;
         const uint8_t *gd = f->data + f->off[gi];
         int top = -1, bot = 0;
         for (y = 0; y < f->h; y++)

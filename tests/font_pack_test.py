@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -77,6 +78,26 @@ def main():
                             "-o", str(executable)], check=True)
             subprocess.run([str(executable)], check=True)
             print(f"{fontset}: {size(original) - size(packed)} bytes saved; all rendered pixels retained")
+    # A valid face may have bitmap widths independent of its advances. The
+    # generator must keep those widths, rather than assume every face is Barlow.
+    gen_font.FONTSET = "barlow"
+    gen_font.SIZES = gen_font.FONTSETS["barlow"]
+    render = gen_font.render
+    def independent_advance(*args):
+        height, glyphs = render(*args)
+        glyphs = list(glyphs)
+        index = ord('8') - args[-2]
+        advance, width, pixels = glyphs[index]
+        glyphs[index] = (advance + 1, width, pixels)
+        return height, glyphs
+    with tempfile.TemporaryDirectory(prefix="x0x-font-fallback-") as directory:
+        path = Path(directory)
+        with patch.object(gen_font, "render", side_effect=independent_advance):
+            gen_font.main(path / "felucca_font.h")
+        header = (path / "felucca_font.h").read_text()
+        for name, *_ in gen_font.SIZES:
+            assert f"FONT_{name}_BW[" in header, name
+        print("PASS independent advance/bitmap widths retain explicit tables")
 
 
 if __name__ == "__main__":

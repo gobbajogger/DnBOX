@@ -299,10 +299,16 @@ def main(out, compressed=True, codec="crop-lz"):
         lines.append(f"static const uint16_t FONT_{name}_OFF[{len(offs)}] = {{" + ", ".join(map(str, offs)) + "};")
         lines.append(f"static const uint8_t FONT_{name}_ADV[{len(glyphs)}] = {{" +
                      ", ".join(str(a) for a, _, _ in glyphs) + "};")
-        lines.append(f"static const uint8_t FONT_{name}_BW[{len(glyphs)}] = {{" +
-                     ", ".join(str(b) for _, b, _ in glyphs) + "};")
+        # A packed font may omit a redundant width array, never its metrics.
+        # Some BDF/custom faces have independent advances: retain their table.
+        derived_bw = compressed and codec == "crop-lz" and all(
+            b == (a + 2 * PAD * scale if a else 0) for a, b, _ in glyphs)
+        if not derived_bw:
+            lines.append(f"static const uint8_t FONT_{name}_BW[{len(glyphs)}] = {{" +
+                         ", ".join(str(b) for _, b, _ in glyphs) + "};")
+        width_table = "0" if derived_bw else f"FONT_{name}_BW"
         lines.append(f"static const felucca_font_t FONT_{name} = {{ {h}, {PAD * scale}, {first}, {last}, "
-                     f"FONT_{name}_ADV, FONT_{name}_BW, FONT_{name}_OFF, FONT_{name}_DATA }};")
+                     f"FONT_{name}_ADV, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA }};")
         lines.append("")
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
     print(f"font set {FONTSET}: {sum(len(l) for l in lines if l.startswith('    0x')) // 6} B (approx)")

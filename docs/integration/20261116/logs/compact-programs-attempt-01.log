@@ -1,0 +1,13 @@
+Sanitized path-only projection of retained original stdout/stderr. RawSHA256 cf7caca5b6f860330788a08b78222b9cfc963d7688d455ba654e560a59628155
+COMMAND ["python3", "tests/program_values_compact_test.py"]
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+PASS compact program metadata: 796 exact binary32/name checks
+==29==LeakSanitizer has encountered a fatal error.
+==29==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==29==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+Traceback (most recent call last):
+  File "PROJECT_WORKSPACE/consolidation-20261116/firmware-candidate-1/tests/program_values_compact_test.py", line 30, in <module>
+    subprocess.run([str(exe)], check=True)
+  File "PYTHON_RUNTIME/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['TEMP_program-values/test']' returned non-zero exit status 1.

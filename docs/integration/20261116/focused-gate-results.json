@@ -1,0 +1,76 @@
+{
+  "exactCandidate": "firmware-candidate-1",
+  "scope": "focused mechanics/resource checks only; full host/native/UI/audio/timing NOT_RUN",
+  "results": [
+    {
+      "case": "gate-contracts",
+      "command": [
+        "python3",
+        "tests/ui_defects/test_gate.py"
+      ],
+      "exit": 0,
+      "seconds": 0.20090910499857273,
+      "log": "logs/gate-contracts-attempt-01.log"
+    },
+    {
+      "case": "canonical-contracts",
+      "command": [
+        "python3",
+        "tests/ui_defects/test_canonical_spec.py"
+      ],
+      "exit": 0,
+      "seconds": 0.8757909259984444,
+      "log": "logs/canonical-contracts-attempt-01.log"
+    },
+    {
+      "case": "producer-report-contracts",
+      "command": [
+        "python3",
+        "tests/ui_defects/test_first_slice_report.py"
+      ],
+      "exit": 0,
+      "seconds": 0.1520806629996514,
+      "log": "logs/producer-report-contracts-attempt-01.log"
+    },
+    {
+      "case": "detector-contracts",
+      "command": [
+        "python3",
+        "tests/ui_defects/first_slice/test_detectors.py"
+      ],
+      "exit": 0,
+      "seconds": 0.2246876669996709,
+      "log": "logs/detector-contracts-attempt-01.log"
+    },
+    {
+      "case": "compact-programs",
+      "command": [
+        "python3",
+        "tests/program_values_compact_test.py"
+      ],
+      "exit": 1,
+      "seconds": 0.6370768340020732,
+      "log": "logs/compact-programs-attempt-01.log"
+    },
+    {
+      "case": "font-pack",
+      "command": [
+        "python3",
+        "tests/font_pack_test.py"
+      ],
+      "exit": 0,
+      "seconds": 23.07598120700277,
+      "log": "logs/font-pack-attempt-01.log"
+    },
+    {
+      "case": "exp-curve-exact",
+      "command": [
+        "sh",
+        "tests/exp_curve_exact_test.sh"
+      ],
+      "exit": 0,
+      "seconds": 0.545403416002955,
+      "log": "logs/exp-curve-exact-attempt-01.log"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "firmware": {
+    "repository": "gobbajogger/X0X37-for-Loopy-Pro",
+    "default_branch": "main",
+    "before_branch_count": 357,
+    "before_open_pr_count": 73,
+    "unique_branch_names": 357,
+    "matching_refs_count": 357,
+    "matching_refs_exactly_agree": true,
+    "all_pr_head_refs_match_live": false,
+    "cached_pr_base_sha_disagrees_with_live_count": 18,
+    "protected": [
+      {
+        "branch": "gh-pages",
+        "sha": "cd345c949da096ee093dfd70bfadc6b185f6e2ed"
+      },
+      {
+        "branch": "main",
+        "sha": "035026fe70059af35e25c7c121b40f318b732fe3"
+      },
+      {
+        "branch": "nightly",
+        "sha": "2dd06b46ff037f858765ddf40275d8da02a9066c"
+      }
+    ],
+    "branch_pages": [
+      {
+        "file": "firmware-branches-page-1.json",
+        "count": 100
+      },
+      {
+        "file": "firmware-branches-page-2.json",
+        "count": 100
+      },
+      {
+        "file": "firmware-branches-page-3.json",
+        "count": 100
+      },
+      {
+        "file": "firmware-branches-page-4.json",
+        "count": 57
+      }
+    ],
+    "open_pr_terminal_page2_count": 0,
+    "recovery_prefix_count": 206,
+    "distinct_tip_count": 350,
+    "duplicate_tip_groups": 6,
+    "all_dispositions": "HOLD",
+    "metadata_permission_flags": {
+      "admin": true,
+      "maintain": true,
+      "push": true,
+      "triage": true,
+      "pull": true
+    },
+    "permissions_caveat": "User-facing repository flags do not grant connector administration; legacy protection GET denied 403.",
+    "qualified_source": "NOT_ESTABLISHED",
+    "deployed_website_source": "NOT_ESTABLISHED_FROM_GIT_HEADS"
+  },
+  "website": {
+    "repository": "gobbajogger/x0x37-for-Loopy-Pro_nightly",
+    "default_branch": "main",
+    "before_branch_count": 131,
+    "before_open_pr_count": 9,
+    "unique_branch_names": 131,
+    "matching_refs_count": 131,
+    "matching_refs_exactly_agree": true,
+    "all_pr_head_refs_match_live": true,
+    "cached_pr_base_sha_disagrees_with_live_count": 6,
+    "protected": [
+      {
+        "branch": "gh-pages",
+        "sha": "241196130538b5e6da7738f0c2ebbbdc57fce02e"
+      },
+      {
+        "branch": "main",
+        "sha": "8af48f83c21e76bc7ebac2ddbdb7c5e3ff0a81ea"
+      }
+    ],
+    "branch_pages": [
+      {
+        "file": "website-branches-page-1.json",
+        "count": 100
+      },
+      {
+        "file": "website-branches-page-2.json",
+        "count": 31
+      }
+    ],
+    "open_pr_terminal_page2_count": 0,
+    "recovery_prefix_count": 3,
+    "distinct_tip_count": 131,
+    "duplicate_tip_groups": 0,
+    "all_dispositions": "HOLD",
+    "metadata_permission_flags": {
+      "admin": true,
+      "maintain": true,
+      "push": true,
+      "triage": true,
+      "pull": true
+    },
+    "permissions_caveat": "User-facing repository flags do not grant connector administration; legacy protection GET denied 403.",
+    "qualified_source": "NOT_ESTABLISHED",
+    "deployed_website_source": "NOT_ESTABLISHED_FROM_GIT_HEADS"
+  }
+}

@@ -1,0 +1,5 @@
+Sanitized path-only projection of retained original stdout/stderr. RawSHA256 47fbb86e2149b1e431d970bc2249e7dd25b6b8cfe82a1f63bd1f62d5613ac447
+COMMAND ["sh", "tests/exp_curve_exact_test.sh"]
+gen_drum_samples: 110549 frames (55275 bytes of ADPCM, 221098 as int16) -> x0x_drum_samples.h; tanh 1026 packed 4104->3046 B + 19 pot curves lossless-predictor 9728->1387 B -> x0x_drum_tables.h
+CHECKED2432 FAILED0
+CHECKED2432 FAILED0

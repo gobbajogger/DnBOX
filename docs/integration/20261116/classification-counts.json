@@ -1,0 +1,47 @@
+{
+  "firmware": {
+    "total": 357,
+    "disposition": {
+      "HOLD": 357
+    },
+    "exclusive_primary": {
+      "RECOVERY_PROVENANCE_REF": 206,
+      "OPEN_PR_BASE_DEPENDENCY": 9,
+      "UNCLASSIFIED_CONTENT_WRITER_DEPENDENCY": 66,
+      "OPEN_PR_HEAD": 73,
+      "PROTECTED": 3
+    },
+    "overlapping_reasons": {
+      "RECOVERY_PROVENANCE_REF": 206,
+      "DISTINCT_TIP_CONTENT_UNVERIFIED": 344,
+      "WRITER_AND_AUTOMATION_DEPENDENCY_UNVERIFIED": 357,
+      "DUPLICATE_EXACT_TIP_NOT_CONTENT_PROOF": 13,
+      "OPEN_PR_BASE_DEPENDENCY": 35,
+      "OPEN_PR_HEAD": 73,
+      "PROTECTED": 3,
+      "DEFAULT_BRANCH": 1
+    }
+  },
+  "website": {
+    "total": 131,
+    "disposition": {
+      "HOLD": 131
+    },
+    "exclusive_primary": {
+      "RECOVERY_PROVENANCE_REF": 3,
+      "UNCLASSIFIED_CONTENT_WRITER_DEPENDENCY": 116,
+      "OPEN_PR_HEAD": 9,
+      "OPEN_PR_BASE_DEPENDENCY": 1,
+      "PROTECTED": 2
+    },
+    "overlapping_reasons": {
+      "RECOVERY_PROVENANCE_REF": 3,
+      "DISTINCT_TIP_CONTENT_UNVERIFIED": 131,
+      "WRITER_AND_AUTOMATION_DEPENDENCY_UNVERIFIED": 131,
+      "OPEN_PR_HEAD": 9,
+      "OPEN_PR_BASE_DEPENDENCY": 4,
+      "PROTECTED": 2,
+      "DEFAULT_BRANCH": 1
+    }
+  }
+}
