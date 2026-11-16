@@ -126,7 +126,12 @@ static void ota_case(float cut, float res)
         se += (double)d * d;
         if (bits(u) != bits(v)) diffs++;
     }
-    std::printf("ota cut %.0f diffs %d / 1024 rms %.3g\n", cut, diffs, std::sqrt(se / 1024.0));
+    std::printf("ota cut %.0f res %.2f diffs %d / 1024 rms %.3g\n", cut, res, diffs, std::sqrt(se / 1024.0));
+    {
+        char label[48];
+        std::snprintf(label, sizeof label, "ota %.0f/%.2f", cut, res);
+        expect(label, diffs, 1024);
+    }
 }
 
 static void syrup_case(float cut, float res)
@@ -163,8 +168,12 @@ int main()
     low_case(400.f, 0.3f);
     low_case(1800.f, 1.4f);
     low_case(6000.f, 4.f);
-    ota_case(500.f, 0.2f);
-    ota_case(3000.f, 0.7f);
+    {   /* cutoff x resonance sweep; the original's std::tan/std::tanh run on the host libm */
+        static const float cuts[] = {3.f, 20.f, 50.f, 120.f, 300.f, 500.f, 1000.f, 3000.f, 8000.f, 15000.f, 20000.f, 30000.f, 40000.f};
+        static const float ress[] = {0.f, 0.2f, 0.5f, 0.7f, 0.95f, 1.f};
+        for (float c : cuts)
+            for (float r : ress) ota_case(c, r);
+    }
     syrup_case(700.f, 0.4f);
     syrup_case(2500.f, 2.f);
 
@@ -172,6 +181,6 @@ int main()
         std::printf("FAIL blocks\n");
         return 1;
     }
-    std::printf("PASS envelopes, smooth, lowpass, syrup, with OTA residual printed above\n");
+    std::printf("PASS envelopes, smooth, lowpass, syrup, OTA sweep (78 cases)\n");
     return 0;
 }

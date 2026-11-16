@@ -48,6 +48,7 @@ void sj6_state_init(Sj6State *s, const Sj6Voice *v)
     s->drift = 0;
     s->noise = (v && v->noise_seed) ? v->noise_seed : 1u;
     s->nstate = 0;
+    s->frame = 0;
 }
 
 void sj6_render(const Sj6Voice *v, Sj6State *s, int32_t *out, int n, Sj6Cost *c)
@@ -67,10 +68,12 @@ void sj6_render(const Sj6Voice *v, Sj6State *s, int32_t *out, int n, Sj6Cost *c)
         for (p = 0; p < SJ6_PARTIALS; p++) {
             int32_t e, sines;
             const Sj6Partial *part = &v->partial[p];
+            uint32_t at = s->frame + (uint32_t)i;
+            int env_n = at > 0x7fffffffu ? 0x7fffffff : (int)at;
             if (!part->inc) continue;
             sines = sj6_sine_at(s->phase[p] + part->phase0);
             s->phase[p] += part->inc;
-            e = env_at(i, part->attack, part->decay, part->peak, part->sustain);
+            e = env_at(env_n, part->attack, part->decay, part->peak, part->sustain);
             e = (int32_t)(((int64_t)e * drift) >> 15);
             acc += (int32_t)(((int64_t)sines * e) >> 15);
             if (c) { c->adds += 5; c->muls += 3; c->shifts += 4; c->branches++; }
@@ -78,9 +81,13 @@ void sj6_render(const Sj6Voice *v, Sj6State *s, int32_t *out, int n, Sj6Cost *c)
         nz = s->noise;
         nz ^= nz << 13; nz ^= nz >> 17; nz ^= nz << 5;
         s->noise = nz ? nz : 1u;
-        nenv = env_at(i, v->partial[0].attack ? v->partial[0].attack : 1,
-                      v->partial[0].decay ? v->partial[0].decay : 1,
-                      v->noise_peak, v->noise_sustain);
+        {
+            uint32_t at = s->frame + (uint32_t)i;
+            int env_n = at > 0x7fffffffu ? 0x7fffffff : (int)at;
+            nenv = env_at(env_n, v->partial[0].attack ? v->partial[0].attack : 1,
+                          v->partial[0].decay ? v->partial[0].decay : 1,
+                          v->noise_peak, v->noise_sustain);
+        }
         {
             int32_t white = (int32_t)(nz >> 16) - 32768;
             if (v->noise_pole) {
@@ -97,6 +104,7 @@ void sj6_render(const Sj6Voice *v, Sj6State *s, int32_t *out, int n, Sj6Cost *c)
         out[i] = sample;
         if (c) c->branches += 2;
     }
+    s->frame += (uint32_t)n;
 }
 
 #ifdef SJ6_STANDIN_EMBED

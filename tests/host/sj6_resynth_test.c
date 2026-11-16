@@ -36,7 +36,8 @@ static double score_null(const int32_t *x, int n, const Sj6Voice *v, double *pea
     }
     free(y);
     if (ops) *ops = (double)(cost.muls + cost.adds + cost.shifts + cost.branches) / n;
-    if (cpu) *cpu = (ops ? *ops : 0) * 44100.0 / 320e6 * 100.0;
+    /* Measured FM-1 system clock is 360 MHz (docs/plans/2026-10-04-dual-core-and-clock.md). */
+    if (cpu) *cpu = (ops ? *ops : 0) * 44100.0 / 360e6 * 100.0;
     if (peak_db) *peak_db = db((double)peak / 32768.0);
     return db(sqrt(se / n) / 32768.0);
 }

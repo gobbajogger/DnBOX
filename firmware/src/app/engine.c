@@ -39,6 +39,64 @@
 
 #define POOL X0X_POOL
 
+#if X0X_SUPERJ6
+#include "../dsp/sj6_engine.h"
+static Sj6Engine sj6_eng POOL;
+/* UI/MIDI context -> audio ISR. One writer, one reader, power-of-two ring.
+ * Event word: kind<<16 | a<<8 | b. A preset is staged whole and taken at
+ * the next block, so the ISR never sees half a preset. */
+enum { SJ6_EVQ = 64u };
+static volatile uint32_t sj6_evq[SJ6_EVQ];
+static volatile uint32_t sj6_evw, sj6_evr;
+static uint16_t sj6_stage_id[SJ6_CTRLS] POOL;
+static float sj6_stage_val[SJ6_CTRLS] POOL;
+static volatile uint32_t sj6_stage_n, sj6_stage_ready;
+
+int engine_sj6_event(int kind, int a, int b)
+{
+    uint32_t w = sj6_evw;
+    if (w - sj6_evr >= SJ6_EVQ) return -1;               /* full: the caller retries */
+    sj6_evq[w & (SJ6_EVQ - 1u)] = ((uint32_t)kind & 255u) << 16 | ((uint32_t)a & 255u) << 8 | ((uint32_t)b & 255u);
+    sj6_evw = w + 1u;
+    return 0;
+}
+
+int engine_sj6_preset(const uint16_t *ids, const float *vals, unsigned n)
+{
+    unsigned i;
+    if (sj6_stage_ready || n > SJ6_CTRLS) return -1;     /* previous one not taken yet */
+    for (i = 0; i < n; i++) {
+        sj6_stage_id[i] = ids[i];
+        sj6_stage_val[i] = vals[i];
+    }
+    sj6_stage_n = n;
+    sj6_stage_ready = 1u;
+    return 0;
+}
+
+static void sj6_drain(void)
+{
+    uint32_t r = sj6_evr;
+    if (sj6_stage_ready) {
+        sj6_engine_load(&sj6_eng, sj6_stage_id, sj6_stage_val, sj6_stage_n);
+        sj6_stage_ready = 0u;
+    }
+    while (r != sj6_evw) {
+        uint32_t e = sj6_evq[r & (SJ6_EVQ - 1u)];
+        int a = (int)((e >> 8) & 255u), b = (int)(e & 255u);
+        switch (e >> 16) {
+        case SJ6_EV_SELECT: sj6_engine_select(&sj6_eng, a); break;
+        case SJ6_EV_NOTE_ON: sj6_engine_note_on(&sj6_eng, (uint8_t)a, (uint8_t)b); break;
+        case SJ6_EV_NOTE_OFF: sj6_engine_note_off(&sj6_eng, (uint8_t)a); break;
+        case SJ6_EV_RESYNTH: sj6_engine_resynth(&sj6_eng, b ? a : -1); break;
+        default: break;
+        }
+        r++;
+    }
+    sj6_evr = r;
+}
+#endif
+
 #if X0X_DEV_WOBBLE
 static wobble_t dev_wobble POOL;
 static synth_slot_t bass_slot[NBASS] POOL;
@@ -2219,6 +2277,18 @@ void engine_render(int32_t *out_lr, uint32_t n)
     if (mot_playing && !seq.playing)                     /* stopped: every knob back to its own value */
         motion_release(&mot);
     mot_playing = seq.playing;
+#if X0X_SUPERJ6
+    sj6_drain();
+    if (sj6_eng.selected) {
+#if X0X_SUPERJ6_BENCH
+        uint32_t sj6_c0 = plat_cycles();
+#endif
+        sj6_engine_render(&sj6_eng, out_l, out_r, n, seq_tempo(&seq));
+#if X0X_SUPERJ6_BENCH
+        sj6_bench_add(plat_cycles() - sj6_c0, n, sj6_engine_sounding(&sj6_eng));
+#endif
+    }
+#endif
     {
         PROF_T(pt);
         master_process_st(&mst, out_l, out_r, (int)n, vol);
@@ -2551,8 +2621,10 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
         eng_scope[p] = 0;
     eng_scope_w = 0;
 #ifdef X0X_SUPERJ6
-    /* Opt-in flash measurement. Not an audio or UI path. Default images omit it. */
+    /* Opt-in. The render path above plays it when sj6_eng.selected is set.
+     * Default images omit the call and the pool object. */
     extern void x0x_superj6_keep(void);
     x0x_superj6_keep();
+    sj6_engine_init(&sj6_eng);
 #endif
 }

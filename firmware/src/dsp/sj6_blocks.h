@@ -85,6 +85,18 @@ typedef struct Sj6Tick {
 int sj6_beat_catchup(const Sj6Beat *start, uint64_t beat, uint64_t tempo, int loaded,
                      Sj6Tick *out, int capacity, int *count, Sj6Beat *result);
 
+/* Not libm. sj6_tanf: exhaustively correctly rounded on [0, 1.078] (MPFR/tanl proof).
+ * sj6_tanhf: 26 positive inputs below 40 round one ulp off (binary64 double rounding);
+ * an exception table is still to do. */
+float sj6_tanf(float x);
+float sj6_tanhf(float x);
+float sj6_exp2(float x);
+/* Arguments actually passed to tan at this rate. The exhaustive check
+ * covers every binary32 between the minimum and the maximum. */
+float sj6_ota_hp_arg(float rate);
+float sj6_ota_g_arg(float rate, float cutoff);
+float sj6_syrup_tan_arg(float rate, float cutoff);
+
 void sj6_blocks_keep(void);
 
 #ifdef __cplusplus

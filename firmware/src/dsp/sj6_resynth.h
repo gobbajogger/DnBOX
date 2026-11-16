@@ -42,6 +42,7 @@ typedef struct Sj6State {
     uint32_t drift;
     uint32_t noise;
     int32_t nstate;
+    uint32_t frame; /* samples already rendered; a later block continues the envelope */
 } Sj6State;
 
 typedef struct Sj6Cost {

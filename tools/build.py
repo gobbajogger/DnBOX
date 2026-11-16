@@ -309,11 +309,18 @@ def build_app():
     superj6 = os.environ.get("X0X_SUPERJ6", "0")
     if superj6 not in ("0", "1"):
         raise SystemExit("X0X_SUPERJ6: 0 or 1")
+    superj6_bench = os.environ.get("X0X_SUPERJ6_BENCH", "0")
+    if superj6_bench not in ("0", "1"):
+        raise SystemExit("X0X_SUPERJ6_BENCH: 0 or 1")
+    if superj6_bench == "1" and superj6 != "1":
+        raise SystemExit("X0X_SUPERJ6_BENCH requires X0X_SUPERJ6=1")
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
         unit_flags = [f if f != "-O2" else "-Oz" for f in o2] if u == "dsp/bass303.c" else list(o2)
         if superj6 == "1" and u == "app/engine.c":
             unit_flags.append("-DX0X_SUPERJ6=1")
+            if superj6_bench == "1":
+                unit_flags.append("-DX0X_SUPERJ6_BENCH=1")
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
         objs.append(o)
     if superj6 == "1":
@@ -322,6 +329,9 @@ def build_app():
         # No libm, no heap, no C++ guards.
         cpp = ["-std=c++17", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", "-fno-use-cxa-atexit"]
         fma = SRC / "experiments/superj6-original-reference-20261115/sampler/DunneCore/Common/fma32.c"
+        eng = list(o2)
+        if superj6_bench == "1":
+            eng.append("-DX0X_SUPERJ6_BENCH=1")
         extra = [
             ("cc", *o2, "-DSJ6_STANDIN_EMBED", "-c", FW / "src/dsp/sj6_resynth.c", "-o", OUT / "o2/sj6_resynth.o"),
             ("cc", *o2, "-c", FW / "src/dsp/sj6_sinf.c", "-o", OUT / "o2/sj6_sinf.o"),
@@ -329,6 +339,7 @@ def build_app():
             ("cc", *o2, "-c", fma, "-o", OUT / "o2/sj6_fma32.o"),
             ("cc", *o2, *cpp, "-c", FW / "src/dsp/sj6_f64.cpp", "-o", OUT / "o2/sj6_f64.o"),
             ("cc", *o2, *cpp, "-c", FW / "src/dsp/sj6_blocks.cpp", "-o", OUT / "o2/sj6_blocks.o"),
+            ("cc", *eng, "-DSJ6_STANDIN_EMBED", "-c", FW / "src/dsp/sj6_engine.c", "-o", OUT / "o2/sj6_engine.o"),
             ("cc", *o2, "-c", FW / "src/dsp/superj6_link.c", "-o", OUT / "o2/sj6_link.o"),
         ]
         for unit in extra:

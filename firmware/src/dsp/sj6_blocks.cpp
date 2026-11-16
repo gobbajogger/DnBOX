@@ -50,12 +50,28 @@ static float pow_cr(float a, float b)
     using namespace sj6_math;
     return f64_to_f32(f64_pow(f64_from_f32(a), f64_from_f32(b)));
 }
-static float tanh_cr(float x)
+float sj6_tanhf(float x)
 {
     using namespace sj6_math;
-    uint64_t e = f64_exp(f64_mul(f64_from_f32(x), 0x4000000000000000ULL));
-    return f64_to_f32(f64_div(f64_sub(e, 0x3ff0000000000000ULL), f64_add(e, 0x3ff0000000000000ULL)));
+    uint32_t u, ax, bits;
+    float out;
+    memcpy(&u, &x, 4);
+    ax = u & 0x7fffffffu;
+    if (ax >= 0x7f800000u) {
+        bits = ax == 0x7f800000u ? (u & 0x80000000u) | 0x3f800000u : 0x7fc00000u;
+        memcpy(&out, &bits, 4);
+        return out;
+    }
+    /* |x| < 2^-13: the cubic term sits below half an ulp, so tanh(x) is x. */
+    if (ax < 0x39000000u) return x;
+    /* |x| >= 40: binary32 tanh is exactly +/-1, and the exp series would overflow. */
+    if (ax >= 0x42200000u) return (u >> 31) ? -1.f : 1.f;
+    {
+        uint64_t e = f64_exp(f64_mul(f64_from_f32(x), 0x4000000000000000ULL));
+        return f64_to_f32(f64_div(f64_sub(e, 0x3ff0000000000000ULL), f64_add(e, 0x3ff0000000000000ULL)));
+    }
 }
+static float tanh_cr(float x) { return sj6_tanhf(x); }
 static float sqrt_cr(float x)
 {
     using namespace sj6_math;
@@ -75,22 +91,52 @@ static float sqrt_cr(float x)
     g = f64_mul(f64_add(g, f64_div(X, g)), 0x3fe0000000000000ULL);
     return f64_to_f32(g);
 }
-static float tan_cr(float x) { return sj6_sinf(x) / sj6_cosf(x); }
-
-static float g_sine[2048];
-static int g_sine_ready;
-
-static void ensure_sine(void)
+float sj6_tanf(float x)
 {
     using namespace sj6_math;
-    int i;
-    if (g_sine_ready) return;
-    for (i = 0; i < 2048; i++) {
-        uint64_t turns = f64_mul(f64_mul(f64_div(f64_from_i64(i), f64_from_i64(2048)), 0x4000000000000000ULL), 0x400921fb54442d18ULL);
-        g_sine[i] = f64_to_f32(f64_sin(turns));
+    uint32_t u, ax, bits;
+    float out;
+    uint64_t X, s, c;
+    memcpy(&u, &x, 4);
+    ax = u & 0x7fffffffu;
+    if (ax >= 0x7f800000u) {
+        bits = 0x7fc00000u;
+        memcpy(&out, &bits, 4);
+        return out;
     }
-    g_sine_ready = 1;
+    /* |x| < 2^-13: tan(x) is x in binary32. The filter arguments are larger. */
+    if (ax < 0x39000000u) return x;
+    X = f64_from_f32(x);
+    s = f64_sin(X);
+    c = f64_sin(f64_sub(0x3ff921fb54442d18ULL, X));
+    return f64_to_f32(f64_div(s, c));
 }
+static float tan_cr(float x) { return sj6_tanf(x); }
+float sj6_exp2(float x) { return exp2_cr(x); }
+
+float sj6_ota_hp_arg(float rate)
+{
+    return 31.41592788696289f / (rate + rate);
+}
+
+float sj6_ota_g_arg(float rate, float cutoff)
+{
+    float max_cut = fmin2(rate * 0.9f, 30000.f);
+    float c = fmax2(fmin2(cutoff, max_cut), 3.f);
+    float lc = log2_cr(c);
+    return (exp2_cr(lc) * 3.1415927410125732f) / (rate + rate);
+}
+
+float sj6_syrup_tan_arg(float rate, float cut)
+{
+    float z;
+    cut = fmin2(fmax2(cut, 12.f), rate * 0.45351473923f);
+    z = (cut / rate) * 3.141592653589793f;
+    return z / (1.f + z);
+}
+
+/* Constant sinusoid. Was a 2048-float BSS fill of this same f64_sin. */
+#include "sj6_sine_table.inc"
 
 static float interp_cyclic(float phase)
 {
@@ -306,7 +352,6 @@ void sj6_smooth_init(Sj6Smooth *f, float sample_rate)
     f->first = 1;
     f->cutoff = 0x40d3880000000000ULL;
     f->resonance = 0x3fb999999999999aULL;
-    ensure_sine();
     sj6_smooth_set(f, f64_to_f32(f->cutoff), f64_to_f32(f->resonance));
     for (i = 0; i < 5; i++) f->c[i] = f->target[i];
     f->first = 1;
@@ -325,7 +370,6 @@ void sj6_smooth_set(Sj6Smooth *f, float frequency, float resonance)
     if (f64_gt(res, 0x4034000000000000ULL)) res = 0x4034000000000000ULL;
     f->cutoff = freq;
     f->resonance = res;
-    ensure_sine();
     normalized = f64_div(f64_add(freq, freq), f->rate);
     if (f64_gt(normalized, 0x3fefae147ae147aeULL)) normalized = 0x3fefae147ae147aeULL;
     phase = f64_to_f32(f64_mul(0x3fe0000000000000ULL, normalized));
@@ -368,7 +412,6 @@ void sj6_lowpass_init(Sj6Lowpass *f, float rate)
     memset(f, 0, sizeof *f);
     f->rate = rate;
     f->last_cut = f->last_res = -1.f;
-    ensure_sine();
 }
 
 void sj6_lowpass_set(Sj6Lowpass *f, float cutoff_hz, float resonance)
@@ -382,7 +425,6 @@ void sj6_lowpass_set(Sj6Lowpass *f, float cutoff_hz, float resonance)
     if (cutoff > 0.99f) cutoff = 0.99f;
     f->last_cut = cutoff_hz;
     f->last_res = resonance;
-    ensure_sine();
     k = pow_cr(resonance, 1.91f) * interp_cyclic(0.5f * cutoff);
     c1 = 0.5f * (1.f - k) / (1.f + k);
     c2 = (0.5f + c1) * interp_cyclic(0.5f * cutoff + 0.25f);
@@ -425,7 +467,7 @@ void sj6_ota_init(Sj6Ota *f, float rate)
 {
     memset(f, 0, sizeof *f);
     f->rate = rate;
-    f->hp_tan = tan_cr(31.41592788696289f / (rate + rate));
+    f->hp_tan = tan_cr(sj6_ota_hp_arg(rate));
     f->hp_g = f->hp_tan / (1.f + f->hp_tan);
     f->seed_ok = 1;
 }
@@ -457,12 +499,12 @@ void sj6_ota_set(Sj6Ota *f, float cutoff, float normalized_res, unsigned frames)
     if (f->first) {
         if (lc == f->cutoff_log) return;
         f->cutoff_log = lc;
-        f->g_target = tan_cr((exp2_cr(lc) * 3.1415927410125732f) / (f->rate + f->rate));
+        f->g_target = tan_cr(sj6_ota_g_arg(f->rate, c));
         f->g_left = (int)fmax2(1.f, (float)frames);
         f->g_step = (f->g_target - f->g) / (float)f->g_left;
     } else {
         f->cutoff_log = lc;
-        f->g = f->g_target = tan_cr((exp2_cr(lc) * 3.1415927410125732f) / (f->rate + f->rate));
+        f->g = f->g_target = tan_cr(sj6_ota_g_arg(f->rate, c));
         f->first = 1;
     }
 }
@@ -614,7 +656,7 @@ void sj6_syrup_set(Sj6Syrup *f, float cut, float res)
     f->last_cut = cut;
     f->last_res = res;
     z = (cut / f->rate) * 3.141592653589793f;
-    f->g = tan_cr(z / (1.f + z));
+    f->g = tan_cr(sj6_syrup_tan_arg(f->rate, cut));
     q = (-20.f * log10_cr(res)) / 19.f;
     q = fmin2(fmax2(q, 0.f), 1.f);
     kr = pow_cr(q, 0.45f) * 2.05f;
