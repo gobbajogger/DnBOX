@@ -1,6 +1,6 @@
 # Lane: integ
 
-Owner: repo prep integration agent. Branch: lane/integ-start-files. Updated: 2026-11-17 00:30 VLAT.
+Owner: integ lane integration agent. Branch: lane/integ-start-files. Updated: 2026-11-17 00:30 VLAT.
 Baseline: `e742be7bd0d01323c899de6e156f40b85ee451db`.
 
 ## Checklist
@@ -581,3 +581,19 @@ Both retained under README test/dependency exception pending gate review.
 
 ## Follow-up gate corrections
 - Native baseline Elite/Pro build PASS; observed pool free8364 minus8192 floor gives172B margin, FAIL340B below required512. Parse actual native stdout per exact model receipt. PSRAM detector now checks added assignment/define forms including gate itself, avoiding regex self-match without a blind spot. Focused regression12/12 PASS; full Local remains not passing.
+
+## Integration checklist (current open outcome)
+- I0 FAIL: baseline full gates still failing. Native pool margin172B is340B below512; sanitizer under ptrace and normal browser sandbox are environment blockers. Complete failure inventory belongs to independent exact-SHA run logs.
+- I1 FAIL: targets pinned above; no prep or lane PR merged yet.
+- I2 FAIL: combined lane source not integrated or qualified.
+- I3 FAIL: all-engine zero-dropout measurement not run on combined source.
+- I4 FAIL: LeakSanitizer cannot run under current tracer; Mac offline.
+- I5 FAIL: five BREAK sample integration/preview and Pages404 require exact source/runtime audit.
+- I6 FAIL: consolidated roadmap/voting runtime not yet reconciled.
+- I7 FAIL: cleanup waits all lanes and rule9; settings rename conflicts with user's explicit no-settings scope, no rename attempted.
+
+## Stock pool repair candidate
+- Baseline native master state `mst` is664B in pool; default data+BSS has2176B free. Relocate unchanged static master_t to ordinary BSS, retaining C alignment, lifetime and explicit master_init. Startup zeros both original pool and destination BSS. No DSP arithmetic, buffers, controls or thresholds changed. Projected margin836B and BSS headroom1512B are projections until candidate Elite/Pro links.
+- This does not fit Synth One: owner10532B versus existing union3720B adds13624B across two parts. Sound owns exact C ABI/owner plan; integration must reuse/reclaim without PSRAM, reduced original behavior or fake engine renaming.
+- Gate corrections independently18/18 focused fixtures passed; candidate724cec8 real clean/setup/no-loss/limits now PASS, not an overall Local PASS.
+- Independent review found Markdown excluded from secret scan. Scan now includes Markdown and prints filenames only, never matched values. Dummy Markdown token/key detection fixtures pass; total focused gate regression21/21 PASS. Host master algorithm regression PASS; no runtime/native relocation claim yet.

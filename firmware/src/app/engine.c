@@ -201,7 +201,9 @@ uint8_t engine_tape_active(void)
 }
 void engine_fx_mute(uint8_t mask) { fx.muted = mask & 7u; }
 uint8_t engine_fx_muted(void) { return fx.muted; }
-static master_t mst POOL; /* was BSS; pool after Chicago-insert union frees headroom */
+/* Same static lifetime/alignment and zero-init; ordinary RAM has verified headroom.
+ * Keep pool reserve for DSP owners without shrinking master state or delay lines. */
+static master_t mst;
 /* Mix delay ring: 1.80 s @ 44.1 kHz (was 2.00 s / 88200). Recovers pool for product WBL1 + ≥8192 free. */
 #define DLY_LEN 79200
 static int16_t dly_buf[DLY_LEN] POOL;

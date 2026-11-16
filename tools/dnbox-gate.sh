@@ -30,7 +30,7 @@ no_loss()    { if [ -n "${DNBOX_BASE_SHA:-}" ]; then
 limits()     { local bad=0
                git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' && { echo "workflow file changed"; bad=1; }
                git ls-files | grep -iE '\.ipa$|SuperJ6.*AU.*extension.*\.zip' && { echo "SuperJ6 installer in Git"; bad=1; }
-               git grep -nIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . ':!*.md' && { echo "possible Secret"; bad=1; }
+               git grep -lIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . && { echo "possible Secret (filename-only scan)"; bad=1; }
                git diff "$BASE" HEAD -- firmware tools build.sh | grep -iE '^\+.*((define[[:space:]]+[A-Za-z0-9_]*psram[A-Za-z0-9_]*[[:space:]]+(1|true|enable))|([A-Za-z0-9_]*psram[A-Za-z0-9_]*[[:space:]]*=[[:space:]]*(1|true|enable)))\b' && { echo "PSRAM enabled"; bad=1; }
                git ls-files -s | while read -r m o s p; do sz=$(git cat-file -s "$o") || exit 1; if [ "$sz" -ge 52428800 ]; then echo "≥50MB not in LFS: $p"; exit 1; fi; done || bad=1
                return $bad; }

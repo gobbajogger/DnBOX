@@ -40,3 +40,14 @@ with tempfile.TemporaryDirectory() as d:
   result=subprocess.run(['bash','-c','bad=0; '+line+'; exit "$bad"'],env=env,capture_output=True)
   assert result.returncode==want,(size,result.returncode)
 print('PASS 6: size boundaries and unreadable object rejection')
+# Markdown is not exempt; logs expose only filenames, never matched values.
+with tempfile.TemporaryDirectory() as d:
+ p=pathlib.Path(d)
+ subprocess.run(['git','init','-q'],cwd=p,check=True)
+ scan=next(l.strip() for l in s.splitlines() if 'git grep -lIE' in l).split('&&')[0].strip()
+ for value in ['ordinary safe notes', 'gh'+'p_'+'A'*24, '-----BEGIN '+'PRIVATE KEY-----']:
+  (p/'notes.md').write_text(value+'\n');subprocess.run(['git','add','notes.md'],cwd=p,check=True)
+  result=subprocess.run(['bash','-c',scan],cwd=p,capture_output=True,text=True)
+  assert (result.returncode==0)==(value!='ordinary safe notes')
+  assert value not in result.stdout+result.stderr
+print('PASS 3: Markdown token/key detection without value disclosure')
