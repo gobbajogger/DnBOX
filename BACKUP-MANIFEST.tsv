@@ -1,2 +1,4 @@
 kind	repo	ref	path	bytes	sha256	note
-file	gobbajogger/X0X37-for-Loopy-Pro	backup/dot-20261116-manifest	BACKUP-ROUTE-TEST.txt	82	aeb8920170cf72f073320ac68d43fb8755be6d441fb1ed105a0c72c55c3a6e20	Connector route test only; backup incomplete
+file	gobbajogger/X0X37-for-Loopy-Pro	backup/dot-20261116-manifest	BACKUP-ROUTE-TEST.txt	82	aeb8920170cf72f073320ac68d43fb8755be6d441fb1ed105a0c72c55c3a6e20	Connector route test; inventory incomplete
+library	-	-	dot-20261116-loose-renders.tar.gz	1163885	a4c403df3e028a7f8b4c71c5e9818b8c1a88bcf340b46bb0d922de4ba4878f30	14 loose render and score files; upload accepted; local archive checked
+library	-	-	dot-20261116-render-files.json	2395	6df81908622e6c3253c3419a3aa2779222c4c7aeeb6d995f06fe80bf7b235616	Index for supplemental render archive; upload accepted
