@@ -1,0 +1,171 @@
+{
+  "baseCommit": "e5f98835329bc9dc61d0c7981446dda4bb12af45",
+  "productionAndTestInputs": {
+    "firmware/src/app/ui.c": "0276d9c721a278f0fca75cbc16973f8904118505d11cf7294c628a4739306f8d",
+    "firmware/src/app/ui_drum_voice.inc": "e2687fae579e389d0415153361ecfaa5625b62feea9b8ae6a89ef8c7ec7a2eec",
+    "firmware/src/app/ui_glyph_renderer.h": "ebee44c751965bf29734fc98e8b984c7841c94b9b23ad73d77f1b28fd69a0b20",
+    "tests/ui_defects/first_slice/instrument.py": "c16f4008704b6301d0f641e873fecae6cf858a35f554400efa14496ffcdb8128",
+    "tests/ui_defects/first_slice/test_instrument_anchors.py": "b427a4b13422a8f5addbc7d6358b58336037bb84dc1274562c1bc22c2c0b58be",
+    "tests/host/ui_drum_coordinates_test.c": "80807786f61d867f6b53acbc5d53a81a66f369900384bc88011eec14293252f0"
+  },
+  "firstSlice": {
+    "actualScreens": 45,
+    "detectorExit": 0,
+    "checks": {
+      "1": {
+        "status": "PASS",
+        "failures": 0
+      },
+      "10": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "11": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "12": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "13": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "14": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "15": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "16": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "17": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "18": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "19": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "2": {
+        "status": "PASS",
+        "failures": 0
+      },
+      "20": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "21": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "22": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "23": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "24": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "3": {
+        "status": "PASS",
+        "failures": 0
+      },
+      "4": {
+        "status": "PASS",
+        "failures": 0
+      },
+      "5": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "6": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "7": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "8": {
+        "status": "NOT_RUN",
+        "failures": 0
+      },
+      "9": {
+        "status": "NOT_RUN",
+        "failures": 0
+      }
+    },
+    "overlaps": 0,
+    "sourceClosureSha256": "39bf844cf4518af7a887d095f6a4cce88e118a013648ee9c3d6e4fc512380f1b",
+    "rawReportSha256": "cd5770a5b8017942f650e845561e229ca43cdc3406f7a5333311ea21b84509f4",
+    "run": {
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "durationSeconds": 37.458223819732666,
+      "exit": 0,
+      "firstAttempt": true,
+      "instrumentedClosureSha256": "337f74ba1452aa86fc3b4257a1f018b3fc53f284f5a1d29aed450a32eef3f10e",
+      "logSha256": "cfdaad09e87494be0356761d149edaa1850eac17b2b66c4d8b9940e757ab7f0d",
+      "sourceClosureSha256": "39bf844cf4518af7a887d095f6a4cce88e118a013648ee9c3d6e4fc512380f1b"
+    }
+  },
+  "native": {
+    "elite": {
+      "appFree": 2220,
+      "image": 550452
+    },
+    "pro": {
+      "appFree": 2232,
+      "image": 550440
+    },
+    "ramDataBss": 96560,
+    "ramLimit": 98304,
+    "poolUsed": 335700,
+    "poolLimit": 344064,
+    "poolMarginBeyond8192": 172,
+    "fullLocal": "FAIL: pool margin below512; integ correction unmerged"
+  },
+  "coordinatePacking": {
+    "coordinates": 1650,
+    "authoredPrecision": "0.001",
+    "storageSavedBytes": 3300,
+    "bitIdentityChecks": 1651,
+    "rasterIdentity": {
+      "status": "PASS",
+      "identicalStates": 135,
+      "before": "r22-inventory",
+      "after": "r22-packed-inventory-serial",
+      "causeOfPrior5Differences": "Concurrent native generation replaced host built-in BREAK bank with empty bank during compilation. Serial rerun pins same built-in inputs. Never run native and host generators in same tree concurrently."
+    }
+  },
+  "coverageComplete": false,
+  "notRun": [
+    "all-domain geometry",
+    "alternate engine selections",
+    "complete Local gate",
+    "independent review",
+    "hardware",
+    "final combined SHA qualification"
+  ],
+  "knownFailures": [
+    "Initial uncompressed R22 native overflow1060B; corrected by coordinate packing, not omission.",
+    "Initial parallel host/native raster comparison5FAIL: shared generated BREAK bank race. Serial repeat135identical. Keep host/native generators isolated.",
+    "Initial stale detector anchor accepted radius4 only. Actual R22 radius9 now recognized with missing/duplicate anchors rejected;20unit tests PASS."
+  ]
+}

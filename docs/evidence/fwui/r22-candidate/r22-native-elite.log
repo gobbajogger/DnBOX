@@ -1,0 +1,21 @@
+check_locked_settings: 20 settings ok
+In file included from firmware/src/x0x.c:209:
+In file included from firmware/src/app/ui.c:8326:
+firmware/hal/../src/app/ui_drum_voice.inc:561:44: warning: unused variable 'dimc' [-Wunused-variable]
+    uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
+                                           ^
+1 warning generated.
+<workspace>/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: build/smk37-elite/x0x.elf section `.c1_text' will not fit in region `XIP'
+<workspace>/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 1060 bytes
+font T: BarlowSemiCondensed-SemiBold.ttf 10px h 12, digit adv 5, 1400 B
+font XS: BarlowSemiCondensed-SemiBold.ttf 12px h 15, digit adv 6, 1959 B
+font S: BarlowSemiCondensed-Medium.ttf 15px h 16, digit adv 7, 2592 B
+font B: BarlowSemiCondensed-Bold.ttf 15px h 16, digit adv 8, 2680 B
+font M: BarlowSemiCondensed-SemiBold.ttf 23px h 24, digit adv 12, 2854 B
+font L: BarlowSemiCondensed-Bold.ttf 31px h 32, digit adv 16, 2467 B
+font set barlow: 14243 B (approx)
+gen_drum_samples: 110549 frames (55275 bytes of ADPCM, 221098 as int16) -> x0x_drum_samples.h; tanh 1026 packed 4104->3046 B + 19 pot curves lossless-predictor 9728->1387 B -> x0x_drum_tables.h
+break bank: none (factory loops are an optional install)
+loader: image 8680 B at 0x1c0a800, bss end 0x1c0f810
+loader: ota.bin 7616 B
+build: pi32v2/bin/ld failed

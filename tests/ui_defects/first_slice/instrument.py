@@ -30,6 +30,14 @@ def wrap(text,signature,name,wrapper):
     return text[:start]+renamed+'\n'+wrapper+'\n'+text[end:]
 
 
+def active_bank_anchor(text):
+    """Recognize actual historical/current paint, never synthesize a panel."""
+    anchors=['rbox(6, ay, 228, ah, %d, RGB(36,48,54));'%radius for radius in (4,9)]
+    if sum(text.count(anchor) for anchor in anchors)!=1:
+        raise ValueError('expected exactly one supported active-bank paint anchor')
+    return next(anchor for anchor in anchors if anchor in text)
+
+
 def instrument(root):
     gfx=root/'firmware/src/gfx.c'; text=gfx.read_text()
     sig='static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)'
@@ -50,7 +58,8 @@ def instrument(root):
     text=once(text,'/* lower panel: body pictogram, voice name, P1/16, 16-step strip */','first_row=-1;first_control=-1;\n    /* lower panel: body pictogram, voice name, P1/16, 16-step strip */')
     # Actual panel rectangles, including otherwise-empty body; no padded fake nodes.
     text=once(text,'rbox(3, by, 234, body_h, 9, SOUND_FACE);','{first_panel("control-banks",3,by,234,body_h);rbox(3, by, 234, body_h, 9, SOUND_FACE);}')
-    text=once(text,'rbox(6, ay, 228, ah, 4, RGB(36,48,54));','{first_panel("active-bank",6,ay,228,ah);rbox(6, ay, 228, ah, 4, RGB(36,48,54));}')
+    anchor=active_bank_anchor(text)
+    text=once(text,anchor,'{first_panel("active-bank",6,ay,228,ah);'+anchor+'}')
     text=once(text,'rbox(3, py, 234, ph, 9, SOUND_FACE);','first_panel("voice-body",3,py,234,ph);rbox(3, py, 234, ph, 9, SOUND_FACE);')
     text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
     sig='static '+draw+'void dv_tune_fork(float ox, float oy, float sx, float sy, float tune01, uint16_t col)'

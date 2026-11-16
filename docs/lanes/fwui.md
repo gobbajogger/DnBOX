@@ -33,3 +33,10 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Source4bacd2e7: actual production host rendered135 ordinary page states at240x240. Harness, SHA256 manifest and all135 PNGs committed. Upload authorization rejection resolved by verifying exact files and citing owner rule13; no all-screen qualification claimed. Alternate engine selections, popups, transients and geometry remain NOT_RUN.
 - First inventory compile used nonexistent ui_force; corrected by invalidating existing blit_hash/cv_tile_valid caches. Corrected run exit0,135screens.
 - Independent pan regression rerun PASS8925. Native baseline e742 Elite/Pro XIP free13464/13472B; pool margin172B versus512B requirement. Integ owns measured pool correction. No full Local PASS at lane head.
+
+## Selective R22 candidate
+- Restored shared R22 header and22 drum voice layouts/glyphs from preserved freeze9 overlay, excluding historical GLOBE deletions and compressed-font accessor regression. Generic synth pages and other domains remain unfinished; no design acceptance claimed.
+- Actual45-screen drum detector: checks1-4 PASS, overlaps0. Other20 checks NOT_RUN; F2 not complete.20detector unit tests PASS, including current/historical radius anchors and fail-closed malformed cases.
+- Native initial overflow1060B fixed by packing1650 authored millipixel coordinates into16-bit storage.1651 float-bit checks PASS; serial135-state rendered pixels identical before/after. Elite2220B/Pro2232B XIP free; BSS96560, pool margin172 still below512 until independently verified integ correction composes. Full Local not passed.
+- Build/test generation must use isolated worktrees: concurrent host/native generators changed BREAK bank and produced5 false raster differences; failed result retained and serial135/135 replay verified. This was first occurrence, not a repeated error.
+- Evidence: docs/evidence/fwui/r22-candidate/summary.json and logs. Next: independent exact-head review, pool-fix composition, battery/pad regression tests, then remaining all-domain geometry and real SynthOne/SuperJ6 bindings.
