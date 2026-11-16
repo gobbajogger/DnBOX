@@ -1,0 +1,98 @@
+{
+  "scope": "Read-only bounded static original-loader evidence. Never executes original code.",
+  "binary_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "disassembler": {
+    "distribution_version": "5.0.9",
+    "binding_version": "5.0.7",
+    "native_api": [
+      5,
+      0,
+      1280
+    ],
+    "wheel_sha256": "273fd8d747d2e35c88f91450be51a603ecfaafb00d96d9f315dcb8689c86193e",
+    "source": "https://pypi.org/project/capstone/5.0.9/",
+    "package_pin_sha256": "774c7e117773aeb1334ec9647dbb607a01c6cc2197abef80f7425b63b1869664",
+    "package_files_checked": 58
+  },
+  "checks": [
+    "Original chained imports use format1/uncompressed symbols",
+    "0x1005d7cd4 -> GOT0x100732820 -> Swift String.append",
+    "0x1005d8724 -> GOT0x100732f08 -> Swift stringCompareWithSmolCheck",
+    "InstrumentPreset descriptor accessor0x1002c7398",
+    "InstrumentPreset27 fields, field-vector offset2 words",
+    "InstrumentPreset ordinal14 parameterValues static offset0x98",
+    "ParameterValuePair identifier/value static slots8/24",
+    "ID17 suffix branch0x10001f0ec constructs compressorAmount",
+    "ID17 default branch0x10001f2e0 RET after initial FMOV s0,wzr",
+    "InstrumentParameter static prefix/defaultOverride offsets0x40/0x50",
+    "Loop skipped IDs212,213,214 do not include17",
+    "0x1005d7cd4 adrp x16, #0x100732000",
+    "0x1005d7cd8 ldr x16, [x16, #0x820]",
+    "0x1005d7cdc br x16",
+    "0x1005d8724 adrp x16, #0x100732000",
+    "0x1005d8728 ldr x16, [x16, #0xf08]",
+    "0x1005d872c br x16",
+    "0x10001f2ac fmov s0, wzr",
+    "0x10001f2e0 ret ",
+    "0x10026984c bl #0x10001dbdc",
+    "0x100269874 bl #0x1005d7cd4",
+    "0x10026989c mov w4, #0",
+    "0x1002698a0 bl #0x1005d8724",
+    "0x1002698b8 tbnz w21, #0, #0x100269acc",
+    "0x1002698d8 b #0x100269b44",
+    "0x100269b48 bl #0x10001f2a8",
+    "0x100269bfc bl #0x10001f2a8",
+    "0x10026983c ldp x21, x27, [x8]",
+    "0x100269ad8 ldr s9, [x25, x8]",
+    "0x100269b14 ldr s9, [x24, x8]",
+    "0x1000c0a8c bl #0x1002c9360",
+    "0x1002ca0c0 stp x28, x22, [x8]",
+    "0x1002ca0d0 str s9, [x0, x8]",
+    "0x1002ca214 str x25, [x19, #0x330]",
+    "0x1000c0d20 add x1, x19, #0x430",
+    "0x1000c0d38 bl #0x10026796c",
+    "0x1002679a8 stp x21, x1, [x19, #0x140]",
+    "0x100267c40 ldr x24, [x19, #0x148]",
+    "0x100267c4c bl #0x10026926c"
+  ],
+  "synthetic_rejection_checks": [
+    "wrong_preset_offset",
+    "wrong_default_target",
+    "wrong_suffix_target",
+    "wrong_import"
+  ],
+  "imports": {
+    "append": "_$sSS6appendyySSF",
+    "compare_expecting_zero_equality": "_$ss27_stringCompareWithSmolCheck__9expectingSbs11_StringGutsV_ADs01_G16ComparisonResultOtF"
+  },
+  "static_layout": {
+    "InstrumentPreset_parameterValues": 152,
+    "ParameterValuePair_identifier": 8,
+    "ParameterValuePair_value": 24
+  },
+  "routine": "0x10026926c..0x10026a800",
+  "bounded_finding": "For a control with raw ID17 and current neon prefix, this routine searches current serialized neoncompressorAmount using exact Swift String equality, falls back to BaseParameter default0 if absent. It does not match the supplied legacy names on the inspected path. This is conditional on the records arriving here unmodified, not a whole-app migration result.",
+  "migration": "NOT_PROVEN",
+  "S5": "FAIL",
+  "missing_proof": [
+    "Full bank decode/library adaptation to this routine input, including alternate/indirect loaders and any preprocessing",
+    "Original-capable execution/source evidence connecting each legacy key and value through any migration to final control law"
+  ],
+  "output_sha256": {
+    "prefix_append.asm": "cef6e2b843bd82614ee8610a0450ab6004b6ee1e3722963889bcb19535d6e7e0",
+    "match_or_continue.asm": "081cb9438590fcf2d12c49b1f91f0d79970916c9e9f0b828ecaa668bdf5d2052",
+    "match_value_and_fallback.asm": "0b4b33436ac8c7c8c9b68c06fefafd96c0569b13e1d540350f3cb8a3d6c8b156",
+    "default_helper.asm": "a1161e52c9e99af3491438f7563cd4c3a05a5e211b338836faa61163da31beca",
+    "id17_suffix.asm": "317df7be47ef37bdc0f5a3b62092634bc0cfa6a45c1229544e1319306295a1f9",
+    "main_entry.asm": "47f7aff85db98c7bd0e91631fa6cba7afcbaba96dded18397fe4a0a1d59cb90a",
+    "caller1.asm": "15f469345ee5b1de8a636959b71bcd6d8d4d12713a05b7c575641e9a0e3c5046",
+    "caller2_call.asm": "36c2a63553f5e3adbac602d3e227d7b66d7e68eac02158bcff0b312bef0d151f",
+    "reset_before_load.asm": "8c53ee15695685f6868fdf097d2370aed9f57190214cefb2d85ecdc8f2108131",
+    "dictionary_parameter_pair.asm": "dce76be673723ae8e5b94f5ed39cdbda19d4171b1fcea2f363d6fc43f6435aca",
+    "dictionary_output.asm": "ae75c7eb4fe9ce36d2c9297bcbe5cebc8e94658261ddd7aa2ba28a23cbfc3401",
+    "appstate_dictionary_call.asm": "ea1280bb2b5c51c8028564bb4845b3ebd1097e03933adac82d99dab16810f164",
+    "appstate_to_loader.asm": "6f8220dd359c7030dda3f2d3fa3329097085f4e2d1a7a279d91df9ee0a85ed89",
+    "caller2_prefix.asm": "7e85dec651527c709ed2df4fee4472d719b33edb60b08eeeb54d34c022341cb3",
+    "loader-full.asm": "89c732af93ab3b6db69f7d2ea6169d3fc8d8006baf728e79f00e9688970b1620"
+  }
+}
