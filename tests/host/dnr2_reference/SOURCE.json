@@ -1,0 +1,37 @@
+{
+  "repository": "gobbajogger/x0x37-for-Loopy-Pro_nightly",
+  "commit": "05850decd20fa8e397e0ea9d39231cca7ab669cc",
+  "scope": "Retained protocol implementation for actual-app host qualification only; no firmware endpoint admission",
+  "files": [
+    {
+      "path": "tests/host/dnr2_reference/remote_core.c",
+      "source_path": "tests/product-remote/tests/c-reference/remote_core.c",
+      "git_blob": "dfaf85197ae7738bb000457306f13e713271bcc2",
+      "sha256": "4f7fae3087e3477d8bf8a65f77c3189dddddd3e1d34b8c264b3b1017578f97d4"
+    },
+    {
+      "path": "tests/host/dnr2_reference/remote_core.h",
+      "source_path": "tests/product-remote/tests/c-reference/remote_core.h",
+      "git_blob": "ed5613355ae1236b7d15b09db2682f5d30df1208",
+      "sha256": "ada39c8d12999c92debf50c787da66c0708122b8cfe486005b1ff1559d6ba7ae"
+    },
+    {
+      "path": "tests/host/dnr2_reference/remote_wire.c",
+      "source_path": "tests/product-remote/tests/c-reference/remote_wire.c",
+      "git_blob": "9ac2fecc0b44f7e451b6dffc1719b84e72d52dd0",
+      "sha256": "81b4a8729cab7af75bb8495f528d9979d0fc02abbedfba05aaac3f0dae659390"
+    },
+    {
+      "path": "tests/host/dnr2_reference/remote_wire.h",
+      "source_path": "tests/product-remote/tests/c-reference/remote_wire.h",
+      "git_blob": "346464516715261b61e37d7593bf6c89bf59af66",
+      "sha256": "ad878321249e107d532c8f69d48af1d702e397c990a43f47c4e0b5d1fe085cd5"
+    },
+    {
+      "path": "tests/host/dnr2_reference/browser_codec.mjs",
+      "source_path": "web/product-site/remote/device/vendor/codec.mjs",
+      "git_blob": "e5663eafcbe88a620f132ea12b028fbb2f266954",
+      "sha256": "2ba77fa371114c978dc00d25f2205ff69593a9ab4f24a3a406c262426bdf50d2"
+    }
+  ]
+}

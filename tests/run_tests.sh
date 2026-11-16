@@ -86,7 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|remote-scalar|remote-events) TEST_CLASS=G ;;
+    drum909-tanh-pair|remote-scalar|remote-events|remote-actual-core) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -495,6 +495,7 @@ run part-order sh tests/host/part_order_test.sh
 run smc-ui sh tests/host/smc_ui_test.sh
 run remote-scalar sh tests/host/remote_scalar_test.sh
 run remote-events sh tests/host/remote_events_test.sh
+run remote-actual-core sh tests/host/remote_actual_core_test.sh
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
 run smc-remainder sh tests/host/smc_remainder_test.sh
 run smc-popup-engine sh tests/host/smc_popup_engine_test.sh
