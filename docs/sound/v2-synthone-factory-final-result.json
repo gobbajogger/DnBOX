@@ -1,0 +1,23 @@
+{
+  "scope": "Fresh source-derived factory/frontend/FX comparison, not Apple-app/native/xrun qualification.\nPredeclared threshold: zero differing stereo float words and zero nonfinite words.\nCommon original FX is not an independent FX oracle; two-second scenes do not cover all tails.\n",
+  "presets": 694,
+  "frames": 66624000,
+  "differing_words": 0,
+  "nonfinite_words": 0,
+  "factory_inputs_sha256": "98acfee3617a51c2709a7883a13e025f27725f4febdd99a5bf881647f147dc4a",
+  "runtime_tested_sources_sha256": "d7083f6b7f332b9dfd02e4c157647ffb013d1548faa30a6fa38378ed86606a77",
+  "factory_commands_sha256": "fe92133d3f3cd5afafc2231735a9abf7a29ba1109d77493f7cde54fc4cdd0808",
+  "frontend_commands_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "runner_commit": "f50d5c14a4ca0091c58135d6daef363d0f64bea8",
+  "expected1388_pcm_hashes_all_match": true,
+  "pcm_manifest_sha256": "68c7f2d14fdcd1df74aa2888bb0b2d9e3bf77e500232a8cc4ecdff45bcb3b508",
+  "source_claim": "Source frontend/raw preFX oracle versus compact with common originalFX; not original Apple app audio",
+  "not_qualified": [
+    "callback xruns",
+    "independent FX oracle",
+    "all long tails",
+    "full tuning/hold/modwheel",
+    "native combined fit",
+    "complete S1/S2 sound checklist"
+  ]
+}
