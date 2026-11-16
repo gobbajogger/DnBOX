@@ -45,3 +45,9 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Production shared-header battery/cache regression:2892 assertions PASS across eight views and cacheable drum header, transitions0/1/2/3 and unknown/USB clipping. Simulator defaults stay full; test fixtures can vary host battery input. No firmware runtime code changed in this checkpoint.
 - Existing home_globe_part regression PASS on selective R22 candidate. This is a preserved-subset test, not the full F5 pad/LED matrix.
 - Pan production8925 assertions and battery2892 assertions support F4 content; final same-head independent replay/full lane gate remains pending, so no lane acceptance requested.
+
+## Parameter-page sequencer repair
+- Fixed F5 discrepancy:909/808 parameter-page white pads showed sequencer LEDs but only auditioned. Both parameter andSEQ pages now call the same drum_step path; black-key voice selection/audition and existing release ownership remain unchanged. BREAK already used its sequencer path.
+- Expanded production pads/settings cases across all22drum voices, emitted parameter pages,16pads, BREAK parameter pages and closed/list/help contexts. Before:2160 toggle failures. After:7096 assertions PASS.
+- Held-step-release regression PASS144 (both kits/voices and all four banks); existing HOME/GLOBE clear/copy regression PASS. Full host suite and all F5 playback/LED combinations remain pending; no fullF5 acceptance claimed.
+- Exact logs:docs/evidence/fwui/parameter-pads/. No device operation occurred.

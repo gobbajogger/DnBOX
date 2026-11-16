@@ -3882,10 +3882,8 @@ static void key_event(int k, int down)
     if (is_drum()) {
         if (bl >= 0)
             drum_key(bl, down, ui.view == V_SEQ);
-        else if (w >= 0 && ui.view == V_SEQ)
-            drum_step(ui.part, w, down);
-        else if (w >= 0 && down && ui.view == V_PART && key_sounds())
-            engine_drum(ui.part, ui.sel[ui.part], 0.75f); /* audition selected sound, never write a hidden step */
+        else if (w >= 0 && (ui.view == V_SEQ || ui.view == V_PART))
+            drum_step(ui.part, w, down); /* parameter pages show and edit the same step lane */
     } else if (is_303()) {
         if (kbd_on()) {                                /* REC: the keys play and write notes; FREE PLAY: play */
             if (down)
