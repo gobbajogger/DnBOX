@@ -188,6 +188,10 @@ def main():
                 branch="chat/scoped-test")
     reject_push("canonical-remote", remote="https://github.com/gobbajogger/X0X37-for-Loopy-Pro.git",
                 branch="chat/scoped-test")
+    reject_push("other-repo-new", remote="https://github.com/gobbajogger/DnBOX-nightly.git",   # R039
+                branch="chat/scoped-test")
+    reject_push("canonical-remote-new", remote="https://github.com/gobbajogger/DnBOX.git",        # R039
+                branch="chat/scoped-test")
     reject_push("protected", remote=str(bare), branch="nightly")
     os.environ["X0X_NIGHTLY_REMOTE"] = str(bare)
     try:

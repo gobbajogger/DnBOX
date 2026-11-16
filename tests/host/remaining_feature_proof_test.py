@@ -70,6 +70,17 @@ with tempfile.TemporaryDirectory() as tmp:
     assert invoke(sys.executable, str(TOOL), 'verify', '--repo', str(root), '--out', str(out), cwd=root).returncode
     helper.unlink()
     plan.write_text(json.dumps(ok))
+    # R039: a receipt names the repository by its old or its new name; any other name is refused.
+    must_run(sys.executable, str(TOOL), 'run', '--plan', str(plan), '--repo', str(root), '--out', str(out), cwd=root)
+    rec = json.loads((out / 'receipt.json').read_text())
+    assert rec['repo'] == 'gobbajogger/X0X37-for-Loopy-Pro'
+    for name, accepted in (('gobbajogger/X0X37-for-Loopy-Pro', True), ('gobbajogger/DnBOX', True),
+                           ('gobbajogger/x0x37-for-Loopy-Pro_nightly', False), ('gobbajogger/DnBOX-nightly', False),
+                           ('someone/DnBOX', False)):
+        (out / 'receipt.json').write_text(json.dumps({**rec, 'repo': name}, indent=2, sort_keys=True) + '\n')
+        rc = invoke(sys.executable, str(TOOL), 'verify', '--repo', str(root), '--out', str(out), cwd=root).returncode
+        assert (rc == 0) == accepted, (name, rc)
+    (out / 'receipt.json').write_text(json.dumps(rec, indent=2, sort_keys=True) + '\n')
     # A command that cannot be launched is recorded as FAIL (127) with no
     # reusable passing receipt from this or any earlier run in that folder.
     missing = {**ok, 'checks': [{'name': 'sample', 'argv': ['missing-x0x37-executable-that-does-not-exist']}]}

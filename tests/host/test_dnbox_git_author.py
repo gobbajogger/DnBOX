@@ -75,6 +75,8 @@ class DefaultAuthorTests(unittest.TestCase):
     def test_network_git_refused_before_git_execution(self):
         for remote in ('https://github.com/gobbajogger/X0X37-for-Loopy-Pro.git',
                        'git@github.com:gobbajogger/X0X37-for-Loopy-Pro.git',
+                       'https://github.com/gobbajogger/DnBOX.git',          # R039: the new name, same refusal
+                       'git@github.com:gobbajogger/DnBOX.git',
                        'file:///tmp/fixture.git', 'relative/fixture.git'):
             with self.subTest(remote=remote), patch.object(subprocess, 'run') as invoked:
                 with self.assertRaisesRegex(self.methods['NightlyPublishError'], 'Git network transport disabled'):
@@ -128,6 +130,8 @@ class DefaultAuthorTests(unittest.TestCase):
             ('default', str(self.remote), 'nightly-pages'),
             ('explicit-canonical', 'https://github.com/gobbajogger/X0X37-for-Loopy-Pro.git', 'chat/fixture'),
             ('explicit-other', 'https://github.com/gobbajogger/x0x37-for-Loopy-Pro_nightly.git', 'chat/fixture'),
+            ('explicit-canonical-new', 'https://github.com/gobbajogger/DnBOX.git', 'chat/fixture'),        # R039
+            ('explicit-other-new', 'https://github.com/gobbajogger/DnBOX-nightly.git', 'chat/fixture'),   # R039
             ('local', str(self.remote), 'chat/fixture'),
         ):
             with self.subTest(label=label), patch.object(subprocess, 'run') as invoked:
