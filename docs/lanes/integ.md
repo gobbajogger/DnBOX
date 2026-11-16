@@ -793,3 +793,9 @@ Producer exact-composed SONG host selector: 12 actual-graphics states and 86 che
 Independent exact-asset audit confirms five encoded source assets total109274B; unchanged646 app space after1024B reserve is2216/2228B. Existing default emits empty bank. Diagnostic lossless compression97,704B LZMA/99,309B zlib is not an admitted decoder or fit. Retained receipt docs/lanes/evidence/integ-break-embedding/ distinguishes this blocker from website playback. Working/Pending queues now reflect actual consolidated e742/9165, observed drafts and bounded collector status; no finished lane or publication is claimed.
 
 Exact fef9 independent default native Elite/Pro builds completed: XIP free3268/3276B, RAM1096B, pool836B above8192 reserve. Normalized public logs and original/public hashes are in evidence/integ-fef9-native. Setup wrong-SDK and read-only-cache failures were corrected without changing source or gates; no full Local/PADCAL/hardware acceptance follows.
+
+## Existing PADCAL configurations, no default change
+
+The source default is already X0X_DEV_PADCAL=1 (app/x0x.h), so explicit1 repeats the existing enabled configuration rather than newly qualifying it. Exact7f6 producer builds: enabled1 Elite/Pro XIP3268/3276B and RAM1096B; disabled0 XIP5140/5152B and RAM1528B. Both retain poolmargin836B. Public logs preserve raw/public hashes. Disabled0 removes calibration functionality; these bytes are NOT assumed available for a feature-preserving protocol addition and defaults remain unchanged. Full Local, device and native endpoint checks remain open.
+
+Repeated mistake: commit subjects omitted the RULES6 type/lane and next-deliverable format. Future subjects must use <type>(integ): <change> | next: <deliverable>; do not rewrite published history.

@@ -1,0 +1,52 @@
+{
+  "source": "7f6d8a44396e8d7da28f66e6fcc712c537494b1b",
+  "runtime_identical_to": "fef9b94d93fb2fc495d18e5da960197e786caf26",
+  "source_default_padcal": 1,
+  "scope": "producer builds of existing option; default unchanged; no full gate/hardware/protocol qualification",
+  "rows": [
+    {
+      "padcal": 1,
+      "model": "elite",
+      "exit": 0,
+      "xip_free": 3268,
+      "ram_free": 1096,
+      "pool_margin_above_8192": 836,
+      "raw_log_sha256": "f8db8f4e0e2c26b0c63028b42a1a953f21cc14cc75893fb2aad3859fe5be9008",
+      "public_log_sha256": "03f1ba2f602a2f760e85ae6b307700b3f73972d986bcdb546638124be55daff6",
+      "public_log": "padcal1-elite.log"
+    },
+    {
+      "padcal": 1,
+      "model": "pro",
+      "exit": 0,
+      "xip_free": 3276,
+      "ram_free": 1096,
+      "pool_margin_above_8192": 836,
+      "raw_log_sha256": "191042d67d41de22f206098d9bdda6d979332f56760f5a6d13d99f292b6d994a",
+      "public_log_sha256": "0030e8905a9b6b67e7ebbd38aed5418898373407c79995c00bca0bf5a9235b13",
+      "public_log": "padcal1-pro.log"
+    },
+    {
+      "padcal": 0,
+      "model": "elite",
+      "exit": 0,
+      "xip_free": 5140,
+      "ram_free": 1528,
+      "pool_margin_above_8192": 836,
+      "raw_log_sha256": "53d92efe1a052cd24e8c65696b10092207e3de3e183d24760c812b02d4583f1a",
+      "public_log_sha256": "0e1f1751d8a636937e702cd2f24455ce30846d518781508d7bd7c1180013625e",
+      "public_log": "padcal0-elite.log"
+    },
+    {
+      "padcal": 0,
+      "model": "pro",
+      "exit": 0,
+      "xip_free": 5152,
+      "ram_free": 1528,
+      "pool_margin_above_8192": 836,
+      "raw_log_sha256": "24e34669648e65c6651481fc63f047faf8d7f967cf80832a55217c0290b5eed4",
+      "public_log_sha256": "ee15cfe1a3bea59325ac1639966cffdfee33baf3b53d85b591d9a8093818fad3",
+      "public_log": "padcal0-pro.log"
+    }
+  ]
+}
