@@ -6143,7 +6143,7 @@ static UI_DRAW void draw_song(int band)
         if (seq.song_on && seq.playing && k == seq.song_pos)
             play_icon(26, y + 1, seq.song_rec ? RGB(255, 80, 70) : C_WHITE);
         if (k == sg->len) {                            /* one past the end: where the song grows */
-            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY: WHITE KEYS ADD BARS", C_DIM);
+            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY", C_DIM);
             continue;
         }
         for (int pos = 0; pos < NPARTS; pos++) {
