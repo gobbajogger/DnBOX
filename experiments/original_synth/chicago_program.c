@@ -3,8 +3,17 @@
 #include "binary32_classify.h"
 #ifndef ORIGINAL_CHICAGO_PROGRAM_METADATA
 #define ORIGINAL_CHICAGO_PROGRAM_METADATA "chicago_program_private.h"
+#define ORIGINAL_PROGRAM_VALUES_CHICAGO 1
+#define original_chicago_base original_chicago_base_raw
 #endif
 #include ORIGINAL_CHICAGO_PROGRAM_METADATA
+#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO
+#undef original_chicago_base
+#include "program_values_compact.h"
+#define ORIGINAL_CHICAGO_BASE_VALUE(i) compact_chicago_base_value(i)
+#else
+#define ORIGINAL_CHICAGO_BASE_VALUE(i) original_chicago_base[i]
+#endif
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
@@ -54,7 +63,7 @@ int original_chicago_program_init(original_chicago_program *p,unsigned factory){
 int original_chicago_program_native(const original_chicago_program *p,unsigned id,float *out){
  if(!p||!out||id>=117)return 0;
  for(unsigned i=0;i<29;i++)if(original_chicago_mappings[i].native_id==id){*out=p->target[i];return 1;}
- *out=original_chicago_base[id];return 1;
+ *out=ORIGINAL_CHICAGO_BASE_VALUE(id);return 1;
 }
 const char *original_chicago_program_name(unsigned factory){
  if(factory>=81)return NULL;

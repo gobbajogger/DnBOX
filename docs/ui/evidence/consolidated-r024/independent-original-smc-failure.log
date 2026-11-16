@@ -1,0 +1,167 @@
+In file included from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/x0x_host.c:345,
+                 from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/smc_ui_test.c:8,
+                 from /workspace/scratch/857bb2409f82/dnbox-test-merge/evidence/ui_r024_independent_test.c:3:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘pref_set_impl’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:823:57: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+  823 |     case R_MIDICH: seq.ch[r.a % NPARTS] = (uint8_t)(v ? v - 1 : SEQ_CH_OFF); break;
+      |                                                         ^~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘original_value_text’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:1060:40: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+ 1060 |         put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
+      |                                        ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘prob_turn’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:3071:43: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 3071 |         l->val[s] = (uint8_t)(nv != 100 ? nv : MOT_NONE);
+      |                                           ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_header’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:5342:31: warning: the address of ‘list_title’ will always evaluate as ‘true’ [-Waddress]
+ 5342 |             ui.overlay==O_LIST&&list_title?list_title:ui.view==V_PART?part_display(ui.part):
+      |                               ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_home’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:6038:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 6038 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                 ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:6038:30: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 6038 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                              ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_adsr_inline’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7485:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7485 |             if(level<0)level=0; if(level>1)level=1;
+      |             ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7485:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7485 |             if(level<0)level=0; if(level>1)level=1;
+      |                                 ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7506:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7506 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |             ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7506:27: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7506 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |                           ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_wave’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7855:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7855 |         if(v>1)v=1; if(v<-1)v=-1;
+      |         ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7855:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7855 |         if(v>1)v=1; if(v<-1)v=-1;
+      |                     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_gnaw’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7866:5: warning: this ‘while’ clause does not guard... [-Wmisleading-indentation]
+ 7866 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |     ^~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7866:38: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘while’
+ 7866 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |                                      ^~~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘orig_strip_glyph’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7893:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7893 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7893:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7893 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7896:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7896 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7896:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7896 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |                     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7915:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7915 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |         ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7915:23: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7915 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |                       ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7936:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7936 |         if(f<0)f=0; if(f>1)f=1;
+      |         ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7936:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7936 |         if(f<0)f=0; if(f>1)f=1;
+      |                     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7995:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7995 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |             ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:7995:29: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7995 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |                             ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘dg_tail’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8056:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8056 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8056:19: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8056 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |                   ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘drum_strip_glyph’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8100:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8100 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8100:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8100 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8155:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8155 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |             ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8155:25: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8155 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |                         ^~
+In file included from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8240:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui_drum_voice.inc: In function ‘dv_header_battery’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:324:9: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  324 |         for(int i=0;i<3;i++)cv_rect(x+3+i*3,y+4,1,1,ink);return;
+      |         ^~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:324:58: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  324 |         for(int i=0;i<3;i++)cv_rect(x+3+i*3,y+4,1,1,ink);return;
+      |                                                          ^~~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui_drum_voice.inc: In function ‘draw_drum_voice’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:559:44: warning: unused variable ‘dimc’ [-Wunused-variable]
+  559 |     uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
+      |                                            ^~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘ui_frame’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8916:26: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+ 8916 |     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+      |                          ^~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:8918:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+ 8918 |         if(!visible)peer_scroll.active=0; }
+      |         ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/x0x_host.c: In function ‘simulator_main’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/x0x_host.c:1111:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1111 |             seq.ch[part] = (uint8_t)(chn ? chn - 1 : SEQ_CH_OFF);
+      |                                            ^~~~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/smc_ui_test.c: At top level:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/smc_ui_test.c:11:9: warning: "CK_FN" redefined
+   11 | #define CK_FN __attribute__((unused))
+      |         ^~~~~
+In file included from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/smk_clip_arp_share.c:5,
+                 from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/x0x_host.c:342:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/smk_clip_keys.h:16:9: note: this is the location of the previous definition
+   16 | #define CK_FN __attribute__((X0X_MINSIZE noinline, unused))   /* small code: the app area is almost full */
+      |         ^~~~~
+In file included from /workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/smc_ui_test.c:56:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/firmware/src/app/smc_mixer.c: In function ‘smc_fx_bus’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/firmware/src/app/smc_mixer.c:1824:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1824 |     int strip = note < 32u ? (note & 7u) : -1;
+      |                                            ^~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/firmware/src/app/smc_mixer.c: At top level:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/firmware/src/app/smc_mixer.c:2288:5: warning: missing initializer for field ‘pending’ of ‘smc_panic_peer_t’ [-Wmissing-field-initializers]
+ 2288 |     {{0, 0}, 0, -1}
+      |     ^
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/firmware/src/app/smc_mixer.c:2285:13: note: ‘pending’ declared here
+ 2285 |     uint8_t pending;              /* single BANK action waits for its physical release */
+      |             ^~~~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: In function ‘unit_value’:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:1149:25: warning: this statement may fall through [-Wimplicit-fallthrough=]
+ 1149 |     case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
+      |                       ~~^~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:1150:5: note: here
+ 1150 |     case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
+      |     ^~~~
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c: At top level:
+/workspace/scratch/857bb2409f82/dnbox-test-merge/fwui-37c3-source/tests/host/../../host/../firmware/src/app/ui.c:3515:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]
+ 3515 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
+      |                                      ^~~~~~~~~~~~~~
+MESSAGE_WIDTH T=102 XS=123 B=159 text=NEWER DATA: NOT SAVED
+MESSAGE_WIDTH T=104 XS=128 B=159 text=MEMORY FULL: NOT SAVED
+MESSAGE_WIDTH T=124 XS=152 B=189 text=MOTION FULL: NOT ALL PASTED
+MESSAGE_WIDTH T=126 XS=153 B=199 text=PROJECT RESET: SAMPLES KEPT
+MESSAGE_WIDTH T=106 XS=128 B=167 text=BT SAVE FAILED: RETRYING
+MESSAGE_WIDTH T=78 XS=96 B=122 text=WAITING FOR CLOCK
+SMC_BATTERY_REGION_CHANGED=0
+FAIL /workspace/scratch/857bb2409f82/dnbox-test-merge/evidence/ui_r024_independent_test.c:15: changed

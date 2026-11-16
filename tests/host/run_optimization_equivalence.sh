@@ -29,11 +29,7 @@ check python3 tests/host/run_a3_dsp_equivalence.py drum808
 check python3 tests/host/run_a3_dsp_equivalence.py fxbus
 check sh tests/host/master_idle_identity_test.sh "$OUT/master-idle"
 check sh tests/host/fxbus_idle_identity_test.sh "$OUT/fxbus-idle"
-check sh tests/host/fxbus_coef_cache_test.sh
-check sh tests/host/chicago_peaking_coef_cache_test.sh
-check sh tests/host/vca_sustain_test.sh
-check python3 tests/host/run_chicago_ens_hoist.py
-check python3 tests/host/run_chicago_modulation_hoist.py
+# fxbus/peaking/vca/ens/modulation cache contracts: own entries in tests/run_tests.sh
 compile_run control-lut tests/host/original_control_lut_test.c
 compile_run gain-lut tests/host/original_gain_lut_test.c
 compile_run break-retrigger-lut tests/host/break_retrigger_lut_test.c

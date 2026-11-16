@@ -1951,7 +1951,12 @@ static int help_lines(int b, const char *l[HELP_LINES])
         break;
     case B_EDIT: L("THE PART'S SOUND"); L("AGAIN: THE NEXT PAGE"); L("HOLD A STEP + KNOB: P-LOCK");
         L("STEP + " UI_CAP_SELECT ": CHANCE"); break;
-    case B_GLO: L("SETTINGS, SAVE, LOAD,"); L("RESET, CLEAR, PERFORMANCE"); L("AGAIN: CLOSE"); break;
+    case B_GLO:
+        L("SETTINGS, SAVE, LOAD,"); L("RESET, CLEAR, PERFORMANCE"); L("AGAIN: CLOSE");
+        /* HOME only: the same card, no new screen. A pad tap clears the selected
+         * part of that pattern. Hold one pad and press another to copy that part. */
+        if (ui.view == V_HOME) { L("+ PAD: CLEAR THIS PART"); L("+ HOLD PAD, PRESS PAD: COPY"); }
+        break;
     case B_HOME:
 #if X0X_BASS_PRESET_PREVIEW
         if (ui.view==V_PART && is_303() && pg.r[cur_page()][0].kind==R_BENGINE &&
@@ -2605,12 +2610,27 @@ X0X_COLD static void run_action(int act, int arg)
     case ACT_RESET_SOUND: reset_sound(arg); break;
     case ACT_SAVE: save_project(); break;
     case ACT_LOAD: (void)ui_project_load(); break;
-    case ACT_CLEAR_PART:
-        clear_part(pat_of(arg), arg);
-        clear_lanes(seq.ppat[arg], arg);
+    case ACT_CLEAR_PART: {
+        /* Low byte: part. High byte, when set: pattern index + 1. High byte 0
+         * keeps SAVE+REC on the part's current pattern. */
+        int part = arg & 0xFF, spec = (arg >> 8) & 0xFF, pat;
+        char msg[48];
+        if ((unsigned)part >= NPARTS)
+            break;
+        pat = spec ? spec - 1 : seq.ppat[part];
+        if ((unsigned)pat >= NPAT)
+            break;
+        clear_part(&proj.pat[pat], part);
+        clear_lanes(pat, part);
         mark_dirty();
-        say("CLEARED ", part_name(arg));
+        if (!spec)
+            say("CLEARED ", part_name(part));
+        else {
+            put_i(put_s(put_s(put_s(msg, "CLEARED "), part_name(part)), " P"), pat + 1);
+            say(msg, 0);
+        }
         break;
+    }
     case ACT_CLEAR_PAT: {
         int i;
         for (i = 0; i < NPARTS; i++) {
@@ -2621,14 +2641,27 @@ X0X_COLD static void run_action(int act, int arg)
         say("PATTERN CLEARED", 0);
         break;
     }
-    case ACT_COPY: {                                  /* all five parts, from the source slots selected */
-        int dst = arg & 0xFF, i, rc = 0;              /* with the destination key */
+    case ACT_COPY: {                                  /* parts whose source slot is not the destination */
+        int dst = arg & 0xFF, i, rc = 0, n = 0, only = -1;
+        char one[48];
+        if ((unsigned)dst >= NPAT)
+            break;
         for (i = 0; i < NPARTS; i++)
-            if (ui.paste_src[i] != dst)
+            if (ui.paste_src[i] != dst) {
                 rc |= copy_part(dst, ui.paste_src[i], i);
+                only = n ? -1 : i;
+                n++;
+            }
         mark_dirty();
-        put_i(put_s(t, "PARTS PASTED TO P"), dst + 1);
-        say(rc ? "MOTION FULL: NOT ALL PASTED" : t, 0);
+        if (rc)
+            say("MOTION FULL: NOT ALL PASTED", 0);
+        else if (n == 1 && only >= 0) {
+            put_i(put_s(put_s(one, part_name(only)), " PASTED TO P"), dst + 1);
+            say(one, 0);
+        } else {
+            put_i(put_s(t, "PARTS PASTED TO P"), dst + 1);
+            say(t, 0);
+        }
         break;
     }
     case ACT_SONG_INS:
@@ -3634,6 +3667,36 @@ void ui_brk_page_keys(unsigned keys, int allowed)
     ui.act_t = plat_ms();
 }
 
+/* HOME + held GLOBE. A pattern-pad tap clears that pattern for the selected
+ * part. Hold the source pad and press the target pad to copy that part.
+ * Release GLOBE with no pad and it still opens settings. Pad calibration
+ * consumes GLOBE before this runs (main_fm1.c). */
+static int glo_key = -1, glo_pat = -1, glo_copied;
+static uint32_t glo_key_edges; /* keys that changed this scan; a source must already be held */
+static void globe_part_reset(void)
+{
+    glo_key = -1;
+    glo_pat = -1;
+    glo_copied = 0;
+}
+/* 1 = a copy was armed (including the question). 0 = same pattern, no copy. */
+static int globe_paste_part(int src, int dst)
+{
+    int p;
+    char q[28];
+    if ((unsigned)src >= NPAT || (unsigned)dst >= NPAT || (unsigned)ui.part >= NPARTS || src == dst)
+        return 0;
+    for (p = 0; p < NPARTS; p++)
+        ui.paste_src[p] = (uint8_t)dst;          /* ACT_COPY skips a part already on dst */
+    ui.paste_src[ui.part] = (uint8_t)src;
+    if (part_used(&proj.pat[dst], ui.part)) {
+        put_s(put_i(put_s(q, "PASTE OVER P"), dst + 1), "?");
+        ask(ACT_COPY, dst, q, "THIS PART HAS NOTES");
+    } else
+        run_action(ACT_COPY, dst);
+    return 1;
+}
+
 static int live_central_event(int key,int down);
 static void key_event(int k, int down)
 {
@@ -3719,6 +3782,27 @@ static void key_event(int k, int down)
             ask(ACT_COPY, wp, t, "IT HAS NOTES");
         } else
             run_action(ACT_COPY, wp);
+        return;
+    }
+    /* HOME, GLOBE held, SAVE not held: the pad is this part's pattern, not a cue.
+     * Tap releases clear. A second pad copies the selected part and does not clear. */
+    if (w >= 0 && ui.view == V_HOME && ui.overlay == O_NONE &&
+        (ui.btn & (1u << B_GLO)) && !(ui.btn & (1u << B_SAVE))) {
+        ui.btn_used |= 1u << B_GLO;                 /* release must not open settings */
+        ui.chain_first = -1;                        /* do not chain this pad */
+        if (down) {
+            int source_held = glo_key >= 0 && (ui.keys & ~glo_key_edges & (1u << glo_key));
+            if (!source_held || glo_key == k) {
+                glo_key = k;
+                glo_pat = wp;
+                glo_copied = 0;
+            } else if (globe_paste_part(glo_pat, wp))
+                glo_copied = 1;
+        } else if (k == glo_key) {
+            if (!glo_copied && glo_pat >= 0)
+                run_action(ACT_CLEAR_PART, ui.part | ((glo_pat + 1) << 8));
+            globe_part_reset();
+        }
         return;
     }
     if (ui.view == V_SONG && !(ui.btn & (1u << B_HOME))) {   /* SONG: white = the bar's pattern, black = its mutes */
@@ -4540,6 +4624,12 @@ X0X_COLD static void input_body(void)
     ui.btn = btn;
     ch = keys ^ ui.keys;
     ui.keys = keys;
+    /* Drop an armed pad when GLOBE is up or the page changed. A question keeps
+     * the arm: the source slots are already stored, and a release during the
+     * question must not clear. The next press checks that the source is held. */
+    if (!(btn & (1u << B_GLO)) || ui.view != V_HOME)
+        globe_part_reset();
+    glo_key_edges = ch;
     for (i = 0; i < NKEYS; i++)
         if (ch & (1u << i))
             key_event((int)i, (keys >> i) & 1u);
@@ -4923,7 +5013,7 @@ static const capm_t *caps(const felucca_font_t *f)
     if (i == 6)
         i = 5;
     {
-        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = f->bw[gi], bpr = (w + 1u) / 2u, x, y;
+        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = font_bitmap_width(f, gi), bpr = (w + 1u) / 2u, x, y;
         const uint8_t *gd = f->data + f->off[gi];
         int top = -1, bot = 0;
         for (y = 0; y < f->h; y++)
@@ -5297,6 +5387,33 @@ static part_header_snapshot_t part_header_snapshot;
 
 static void dv_full_title(char *t, int part, int v);
 static void dv_header_battery(int x, int y);
+/* Toasts share the left context region without dropping the last glyphs.
+ * A two-line tiny-font fallback preserves every character of existing messages. */
+static int ui_header_toast_split(const char *msg, char *first, char *second)
+{
+    int n=0, last_space=-1;
+    put_s(first,msg);second[0]=0;
+    if(tw(&FONT_T,msg)<=117)return 0;
+    while(first[n]) {
+        char saved=first[n+1];first[n+1]=0;
+        if(tw(&FONT_T,first)>117){first[n+1]=saved;break;}
+        first[n+1]=saved;if(first[n]==' ')last_space=n;n++;
+    }
+    if(last_space>0){first[last_space]=0;put_s(second,msg+last_space+1);}
+    else {first[n]=0;put_s(second,msg+n);}
+    return 1;
+}
+static void ui_header_toast(const char *msg)
+{
+    char first[sizeof ui.msg],second[sizeof ui.msg];
+    if(ui_header_toast_split(msg,first,second)) {
+        cv_text_clip(4,1,&FONT_T,first,SOUND_INK,4,125);
+        cv_text_clip(4,10,&FONT_T,second,SOUND_INK,4,125);
+    } else {
+        const felucca_font_t *f=tw(&FONT_B,msg)<=117?&FONT_B:tw(&FONT_XS,msg)<=117?&FONT_XS:&FONT_T;
+        cv_text_clip(4,vc(f,0,HDR_H-1),f,msg,SOUND_INK,4,125);
+    }
+}
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5373,8 +5490,7 @@ static UI_DRAW void draw_header(void)
                 }
                 cv_text_clip(x+17,2,&FONT_T,ui.msg+10,SOUND_INK,4,125);
             }else{
-                const felucca_font_t *f=tw(&FONT_B,ui.msg)<=117?&FONT_B:tw(&FONT_XS,ui.msg)<=117?&FONT_XS:&FONT_T;
-                cv_text_clip(4,vc(f,0,HDR_H-1),f,ui.msg,SOUND_INK,4,125);
+                ui_header_toast(ui.msg);
             }
         }else cv_text_clip(4,2,&FONT_B,name,part_view()?part_col():SOUND_WHITE,4,125);
         if (!toast && division_pad_owner()) {

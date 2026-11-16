@@ -1,0 +1,23 @@
+{
+  "source": "37c3f30354759c4027a01f38453a1461cade2f5e",
+  "scope": "first clean exact-head focused host run, not full UI/native/device gate",
+  "runs": [
+    {
+      "test": "ui_r24_battery_header_test.c",
+      "exit": 0,
+      "startUTC": "2026-11-16T10:34:39.224024+00:00",
+      "durationSeconds": 26.917856693267822,
+      "stdoutSHA256": "bada3527b7dd4a5cd4b7cee50970fe2122b6fd9070b4797b48f421a4a81abadb",
+      "stderrSHA256": "8593689fae4d69942af05b5a3bc2fcfe9394eeb8702e7d25ce818d1cb49973cc"
+    },
+    {
+      "test": "ui_r22_held_step_labels_test.c",
+      "exit": 0,
+      "startUTC": "2026-11-16T10:35:06.157013+00:00",
+      "durationSeconds": 27.05336046218872,
+      "stdoutSHA256": "a9fb3cd948bbc44ac0a299a949e1ce5900144e99d72ea13ec718229753d0904d",
+      "stderrSHA256": "347161822dea2924dc7140eb110f305238fc733089966d9b7f356de0a675c1a0"
+    }
+  ],
+  "postStatus": ""
+}

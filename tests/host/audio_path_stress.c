@@ -12,6 +12,18 @@ int plat_ble_smc_send_slot(unsigned slot, const uint8_t *msg, uint8_t len)
 { (void)slot; return plat_ble_smc_send(msg, len); }
 #include "../../firmware/src/app/smc_mixer.c"
 
+/* Thread CPU time: other processes on a shared host do not count as engine time. */
+static double stress_ns(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t);
+    return (double)t.tv_sec * 1e9 + (double)t.tv_nsec;
+}
+static int cmp_double(const void *a, const void *b)
+{
+    double x = *(const double *)a, y = *(const double *)b;
+    return x < y ? -1 : x > y;
+}
 static void packet(unsigned src, unsigned status, unsigned a, unsigned b)
 {
     assert(mi_w - mi_r < MQ);
@@ -59,9 +71,11 @@ int main(int argc, char **argv)
     double synth_sum[2] = {0}, synth_peak[2] = {0};
     unsigned late = 0, above_60 = 0, queued_peak = 0;
     uint32_t blits0 = blits;
+    double *halves = malloc((size_t)blocks * sizeof *halves);   /* host harness only */
+    if (!halves) return 2;
     for (int block = 0; block < blocks; ++block) {
         now_ms = (uint32_t)((uint64_t)block * 512u * 1000u / 44100u);
-        double fg0 = now_ns();
+        double fg0 = stress_ns();
         for (int i = 0; i < 8; ++i) {
             uint8_t fader[3] = {0xB0, (uint8_t)(40 + i), (uint8_t)(80 + (block + i) % 48)};
             uint8_t knob[3] = {0xB0, (uint8_t)(16 + i), (uint8_t)(64 + (block * 7 + i) % 64)};
@@ -72,11 +86,24 @@ int main(int argc, char **argv)
         ui.view = block & 1 ? V_HOME : V_MIX;
         ui_frame();
         smc_frame();
-        double foreground = now_ns() - fg0;
+        double foreground = stress_ns() - fg0;
         if (foreground > foreground_peak) foreground_peak = foreground;
         if (sweep && block % 8 == 0) {
             engine_set(T_MST, 0, MST_MODE, 1 + (block / 8) % 3);
             engine_set(T_MST, 0, MST_CUTOFF, (block * 13) % 128);
+        }
+        if (sweep == 2) {
+            /* Automation worst case: tempo moves every block and every continuous
+             * Chicago/Miami parameter of both bass parts moves every half below,
+             * so the coefficient caches miss on each new value; switch parameters
+             * move every 16 blocks. */
+            seq.bpm = 120.0f + (float)((block * 7) % 181);
+            if (block % 16 == 0)
+                for (int v = 0; v < 2; ++v)
+                    for (int i = 0; i < engine_nparams(T_303, v); ++i) {
+                        const x0x_param_t *p = engine_param(T_303, v, i);
+                        if (p && p->max < 127) engine_set(T_303, v, i, (block / 16 + i + v) % (p->max + 1));
+                    }
         }
         master = block & 64 ? 4096 : 1536;
         uint32_t prof0[2] = {eng_prof[PR_303A], eng_prof[PR_303B]};
@@ -91,14 +118,21 @@ int main(int argc, char **argv)
                         packet(src, 0x80u | (2u + b), old, 0);
                         packet(src, 0x90u | (2u + b), key, 70 + (block + note) % 58);
                     }
+            if (sweep == 2)
+                for (int v = 0; v < 2; ++v)
+                    for (int i = 0; i < engine_nparams(T_303, v); ++i) {
+                        const x0x_param_t *p = engine_param(T_303, v, i);
+                        if (p && p->max == 127) engine_set(T_303, v, i, (block * 2 + half) * (5 + i) % 128);
+                    }
             unsigned queued = mi_w - mi_r;
             if (queued > queued_peak) queued_peak = queued;
-            double t0 = now_ns();
+            double t0 = stress_ns();
             engine_render(lr + half * 512, 256);
             engine_volume(lr + half * 512, 256);
-            elapsed += now_ns() - t0;
+            elapsed += stress_ns() - t0;
         }
         total += elapsed;
+        halves[block] = elapsed;
         if (elapsed > peak) peak = elapsed;
         if (elapsed > 11600000.0) late++;
         if (elapsed > 6960000.0) above_60++;
@@ -120,6 +154,9 @@ int main(int argc, char **argv)
         assert(!plat_midi_pending());
     }
     assert(blits > blits0);
+    qsort(halves, (size_t)blocks, sizeof *halves, cmp_double);
+    double median = halves[blocks / 2], p99 = halves[(int)((blocks - 1) * 0.99)];
+    free(halves);
     if (fclose(audio) || fclose(trace)) return 2;
     printf("{\"chicago_preset\":%d,\"miami_preset\":%d,\"blocks\":%d,"
            "\"budget_ns\":11600000,\"peak_ns\":%.0f,\"average_ns\":%.0f,"
@@ -128,11 +165,12 @@ int main(int argc, char **argv)
            "\"chicago_peak_ns\":%.0f,\"chicago_average_ns\":%.0f,"
            "\"miami_peak_ns\":%.0f,\"miami_average_ns\":%.0f,"
            "\"foreground_peak_ns\":%.0f,\"midi_packets\":%u,\"midi_queue_peak\":%u,"
-           "\"smc_messages\":%u,\"blits\":%u}\n",
+           "\"smc_messages\":%u,\"blits\":%u,\"median_ns\":%.0f,\"p99_ns\":%.0f,"
+           "\"clock\":\"CLOCK_THREAD_CPUTIME_ID\"}\n",
            chicago, miami, blocks, peak, total / blocks, 11600000.0 - peak,
            peak / 116000.0, total / blocks / 116000.0, late, above_60,
            synth_peak[0], synth_sum[0] / blocks, synth_peak[1], synth_sum[1] / blocks,
            foreground_peak, (unsigned)blocks * 128u, queued_peak,
-           (unsigned)blocks * 16u, blits - blits0);
+           (unsigned)blocks * 16u, blits - blits0, median, p99);
     return 0;
 }

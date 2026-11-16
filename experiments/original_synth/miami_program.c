@@ -1,7 +1,15 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "miami_program.h"
 #include "binary32_classify.h"
+#define original_miami_factory_macro original_miami_factory_macro_raw
+#define original_miami_base original_miami_base_raw
+#define original_miami_factory_name original_miami_factory_name_raw
 #include "miami_program_private.h"
+#undef original_miami_factory_macro
+#undef original_miami_base
+#undef original_miami_factory_name
+#define ORIGINAL_PROGRAM_VALUES_MIAMI 1
+#include "program_values_compact.h"
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
@@ -43,15 +51,15 @@ int original_miami_program_set(original_miami_program *p,unsigned parameter,floa
 int original_miami_program_init(original_miami_program *p,unsigned factory) {
  if(!p||factory>=30)return 0;
  original_miami_program next;memset(&next,0,sizeof next);
- for(unsigned i=0;i<18;i++)(void)original_miami_program_set(&next,i,original_miami_factory_macro[factory][i]);
+ for(unsigned i=0;i<18;i++)(void)original_miami_program_set(&next,i,compact_miami_factory_value(factory,i));
  next.revision=0;*p=next;return 1;
 }
 int original_miami_program_native(const original_miami_program *p,unsigned id,float *out) {
  if(!p||!out)return 0;
  for(unsigned i=0;i<24;i++)if(original_miami_mappings[i].native_id==id){*out=p->target[i];return 1;}
  if(id>=109)return 0;
- *out=original_miami_base[id];return 1;
+ *out=compact_miami_base_value(id);return 1;
 }
 const char *original_miami_program_name(unsigned factory) {
- return factory<30?original_miami_factory_name[factory]:NULL;
+ return factory<30?compact_miami_factory_name(factory):NULL;
 }

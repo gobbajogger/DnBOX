@@ -16,8 +16,8 @@ Writes two headers (both flash-resident `static const` data):
                       constants for direct reads, plus the original packed
                       representation for compatibility and proof), and 9W9's EXP
                       pot curves (er99_pots.h: min * (max/min)^(pot/127)) packed
-                      the same way (x0x_pot_exp_value), so the device needs no
-                      powf and gets the same values 9W9 computes with libm.
+                      with an admitted fastmath predictor plus exact word corrections;
+                      x0x_pot_exp_value returns every original binary32 word.
 
   tools/gen_drum_samples.py [build/gen/x0x_drum_samples.h]
 The tables header is written next to the samples header.
@@ -119,6 +119,72 @@ def pot_exp(lo, hi, pot):
 
 def bits32(x):
     return struct.unpack("<I", struct.pack("<f", x))[0]
+
+
+
+# Exact binary32 predictor used only for lossless table reconstruction.
+# Every arithmetic result is rounded as the existing C fastmath path with
+# fp-contract=off; final stored correction restores the ORIGINAL IEEE word.
+_EXP_PREDICTOR_BITS = [[1087675000, 1026270341], [3214662153, 1021218314], [3195017126, 1022778941], [1088468797, 1009231692], [1090758974, 1022430347], [1085577848, 1004194795], [1086999868, 1025637171], [1086999868, 1000742914], [1086595862, 1025534948], [1087963366, 1000475325], [1086129471, 1025714374], [1088901756, 1006699012], [1091928636, 1007602945], [1088226623, 1019563913], [1082805564, 1027506756], [1081739903, 1024156676], [1087675000, 1025393091], [3221225472, 1023476228], [1084032319, 1025033926]]
+def _exp_predictor_word(row, pot):
+    a, b = [struct.unpack("<f", struct.pack("<I", w))[0] for w in _EXP_PREDICTOR_BITS[row]]
+    x = f32(a + f32(f32(pot) * b))
+    n = math.floor(f32(x + f32(0.5)))
+    z = f32(x - f32(n))
+    q = f32(1.534580891e-4)
+    for c in [1.339993158e-3, 9.618488972e-3, 5.550328776e-2, 2.402264689e-1, 6.931472057e-1, 1.0]:
+        q = f32(f32(q * z) + f32(c))
+    return (bits32(q) + ((n & 0xffffffff) << 23)) & 0xffffffff
+
+def _lossless_exp_block():
+    corrections, minima = [], []
+    for row, (_name, lo, hi) in enumerate(EXP_RANGES):
+        expected = [bits32(pot_exp(lo, hi, pot)) for pot in range(128)]
+        raw = [word - _exp_predictor_word(row, pot) for pot, word in enumerate(expected)]
+        minimum = min(raw)
+        assert -128 <= minimum <= 127 and max(raw) - minimum < 16, (row, min(raw), max(raw))
+        minima.append(minimum)
+        for pot in range(0, 128, 2):
+            corrections.append((raw[pot] - minimum) | ((raw[pot+1] - minimum) << 4))
+        for pot, word in enumerate(expected):
+            packed = corrections[row * 64 + pot // 2]
+            delta = minimum + ((packed >> ((pot & 1) * 4)) & 15)
+            assert (_exp_predictor_word(row, pot) + delta) & 0xffffffff == word
+    lines = ["#ifdef X0X_DRUM_TABLES_DEFINE",
+             "static const uint32_t x0x_exp_predictor_args[X0X_EXP_COUNT][2] = {"]
+    lines += [f"    {{0x{a:08x}u, 0x{b:08x}u}}," for a, b in _EXP_PREDICTOR_BITS]
+    lines += ["};", arr("int8_t", "x0x_exp_correction_min", minima),
+              arr("uint8_t", "x0x_exp_corrections", corrections),
+              "/* Same row/pot domain and original binary32 outputs; no pow/libm. */",
+              "__attribute__((noinline)) float x0x_pot_exp_value(unsigned row, unsigned pot)",
+              "{",
+              "    union { uint32_t u; float f; } a, b, result;",
+              "    unsigned packed = x0x_exp_corrections[row * 64u + (pot >> 1)];",
+              "    int32_t correction = (int32_t)x0x_exp_correction_min[row] + (int32_t)((packed >> ((pot & 1u) * 4u)) & 15u);",
+              "    a.u = x0x_exp_predictor_args[row][0];",
+              "    b.u = x0x_exp_predictor_args[row][1];",
+              "    /* All2432 admitted inputs are finite and inside the exp clamps;",
+              "     * retain the SAME arithmetic, dropping only unreachable checks. */",
+              "    float x = a.f + (float)pot * b.f;",
+              "    float rounded = x + 0.5f;",
+              "    int32_t ni = (int32_t)rounded;",
+              "    float n = (float)ni;",
+              "    if (n > rounded) n -= 1.0f;",
+              "    float z = x - n;",
+              "    float v = 1.534580891e-04f;",
+              "    v = v * z + 1.339993158e-03f;",
+              "    v = v * z + 9.618488972e-03f;",
+              "    v = v * z + 5.550328776e-02f;",
+              "    v = v * z + 2.402264689e-01f;",
+              "    v = v * z + 6.931472057e-01f;",
+              "    v = v * z + 1.0f;",
+              "    result.f = v;",
+              "    result.u += (uint32_t)(int32_t)n << 23;",
+              "    result.u += (uint32_t)correction;",
+              "    return result.f;",
+              "}", "#else",
+              "float x0x_pot_exp_value(unsigned row, unsigned pot);", "#endif", ""]
+    return lines, 19 * 8 + len(minima) + len(corrections)
 
 
 def pack_tanh_runs(tab):
@@ -236,46 +302,14 @@ def main():
     for i, (n, lo, hi) in enumerate(EXP_RANGES):
         t.append(f"#define X0X_EXP_{n} {i}   /* {lo:g} .. {hi:g} */")
     t.append(f"#define X0X_EXP_COUNT {len(EXP_RANGES)}")
-    # All variable bits are contiguous low bits. Encode their exact binary32
-    # representation, never recompute a curve in the runtime setter.
-    words, rows = [], []
-    for n, lo, hi in EXP_RANGES:
-        vals = [bits32(pot_exp(lo, hi, p)) for p in range(128)]
-        mask = 0
-        for v in vals:
-            mask |= v ^ vals[0]
-        width = mask.bit_length()
-        assert 0 < width < 32 and mask == (1 << width) - 1
-        base = vals[0] & ~mask
-        rows.append((base, len(words), width))
-        stream = sum((v & mask) << (p * width) for p, v in enumerate(vals))
-        words.extend((stream >> bit) & 0xffffffff
-                     for bit in range(0, 128 * width, 32))
-    words.append(0)  # final aligned high-word read; no out-of-bounds load
-    t += ["typedef struct { uint32_t base; uint16_t offset; uint8_t width; uint8_t reserved; } x0x_exp_row_t;",
-          "#ifdef X0X_DRUM_TABLES_DEFINE",
-          "static const x0x_exp_row_t x0x_exp_rows[X0X_EXP_COUNT] = {"]
-    t += [f"    {{0x{base:08x}u, {offset}, {width}, 0}},"
-          for base, offset, width in rows]
-    t += ["};", arr("uint32_t", "x0x_exp_words", words,
-                     lambda v: f"0x{v:08x}u", per=8),
-          "/* row < X0X_EXP_COUNT, pot < 128: callers retain their domain checks.",
-          " * At most two aligned XIP payload loads plus row metadata; no cache or FP arithmetic. */",
-          "__attribute__((noinline)) float x0x_pot_exp_value(unsigned row, unsigned pot)",
-          "{",
-          "    const x0x_exp_row_t *r = &x0x_exp_rows[row];",
-          "    unsigned bit = pot * r->width, shift = bit & 31u;",
-          "    const uint32_t *p = &x0x_exp_words[r->offset + (bit >> 5)];",
-          "    uint32_t v = p[0] >> shift;",
-          "    if (shift) v |= p[1] << (32u - shift);",
-          "    union { uint32_t u; float f; } result;",
-          "    result.u = r->base | (v & ((1u << r->width) - 1u));",
-          "    return result.f;",
-          "}", "#else",
-          "float x0x_pot_exp_value(unsigned row, unsigned pot);", "#endif", ""]
+    block, packed_exp_b = _lossless_exp_block()
+    t += block
     out_t.write_text("\n".join(t))
+    raw_exp_b = len(EXP_RANGES) * 128 * 4
     print(f"gen_drum_samples: {total} frames ({nbytes} bytes of ADPCM, {total * 2} as int16) -> {out_s.name}; "
-          f"tanh {TANH_N + 2} packed {tanh_raw_b}->{tanh_packed_b} B + {len(EXP_RANGES)} pot curves -> {out_t.name}")
+          f"tanh {TANH_N + 2} packed {tanh_raw_b}->{tanh_packed_b} B + {len(EXP_RANGES)} pot curves "
+          f"lossless-predictor {raw_exp_b}->{packed_exp_b} B -> {out_t.name}")
+
 
 
 if __name__ == "__main__":

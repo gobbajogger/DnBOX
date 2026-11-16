@@ -14,6 +14,14 @@ typedef struct {               /* proportional, see tools/gen_font.py */
 } felucca_font_t;
 #include "felucca_font.h"
 
+/* Null bw denotes a generation-verified advance+padding width. Zero-advance
+ * blank glyphs retain zero width. Other font families keep their exact table. */
+static inline uint32_t font_bitmap_width(const felucca_font_t *f, uint32_t gi)
+{
+    uint32_t advance = f->adv[gi];
+    return f->bw ? f->bw[gi] : advance ? advance + 2u * f->pad : 0u;
+}
+
 /* One strip, not a 240x240 frame. The panel is three strips that are never
  * drawn at the same time: header 20, main area 2*69 = 138, knob row 82
  * (20+138+82 = 240). The tallest is the main area. The strip used to be 144
@@ -184,7 +192,7 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        w = f->bw[gi];
+        w = font_bitmap_width(f, gi);
 #if !defined(FONT_PACKBITS) && !defined(FONT_LZ_CROP)
         bpr = (w + 1u) / 2u;
 #endif

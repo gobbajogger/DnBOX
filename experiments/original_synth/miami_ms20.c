@@ -106,21 +106,29 @@ static inline float k_gain_advance(original_ramp *r){
  * feeds that oscillator; osc 1 / 3 read the phase step osc 0 / 2 left in step[]): the
  * same samples and state. Fewer live values: far fewer stack spills a sample. */
 #define K_SPAN 64
-static inline __attribute__((always_inline)) float k_wave_c(unsigned shape,float p,float width,float correction,float triangle){
- if(shape==0){float t=2.0f*(.5f-original_binary32_abs(p));float t2=t*t,t3=t*t2;return t+triangle*t3;}
+static inline __attribute__((always_inline)) float k_wave_c(unsigned shape,float p,float width,float correction,float triangle,uint8_t zero_triangle){
+ if(shape==0){
+  float t=2.0f*(.5f-original_binary32_abs(p));
+  /* p is a finite phase in [-1,1], so t and t3=t*(t*t) are finite.
+   * The only zero t is +0 (exact 0.5f-0.5f). With either signed
+   * triangle zero, t+triangle*t3 is bitwise t+0.0f, including t=+0.
+   * Retain an addition: returning t would not generally preserve -0. */
+  if(zero_triangle)return t+0.0f;
+  float t2=t*t,t3=t*t2;return t+triangle*t3;
+ }
  float value=k_saw(p,correction);
  if(shape>=2){float q=p+(width+width);if(q>1)q=q-2;value=value-k_saw(q,correction);}
  return value;
 }
 /* even oscillator i: its wave (or 0), the phase step for osc i+1, the first mix term (i==0) or add (i==2) */
 static inline __attribute__((always_inline)) void k_osc_even(unsigned shape,unsigned first,uint32_t *phase_p,original_ramp *og_p,
- uint32_t inc,float width,float correction,float triangle,float xmod,float b,int32_t pstep,float *mix,int32_t *step,uint32_t n){
+ uint32_t inc,float width,float correction,float triangle,uint8_t zero_triangle,float xmod,float b,int32_t pstep,float *mix,int32_t *step,uint32_t n){
  uint32_t phase=*phase_p;original_ramp og=*og_p;
  for(uint32_t j=0;j<n;j++){
   float gain=og.current,w;int32_t step_i;
   phase-=inc;
   if(gain!=0.0f||xmod!=0.0f){
-   w=k_wave_c(shape,k_phase(phase),width,correction,triangle);
+   w=k_wave_c(shape,k_phase(phase),width,correction,triangle,zero_triangle);
    float a=w*xmod;float st=clamp(a+b,-1,1)*0x1p31f;step_i=st>=0x1p31f?INT32_MAX:(int32_t)st;
   }else{w=0.0f;step_i=pstep;}
   step[j]=step_i;
@@ -132,12 +140,12 @@ static inline __attribute__((always_inline)) void k_osc_even(unsigned shape,unsi
 }
 /* odd oscillator: steps by step[], adds its mix term */
 static inline __attribute__((always_inline)) void k_osc_odd(unsigned shape,uint32_t *phase_p,original_ramp *og_p,
- float width,float correction,float triangle,float *mix,const int32_t *step,uint32_t n){
+ float width,float correction,float triangle,uint8_t zero_triangle,float *mix,const int32_t *step,uint32_t n){
  uint32_t phase=*phase_p;original_ramp og=*og_p;
  for(uint32_t j=0;j<n;j++){
   float gain=og.current;
   phase-=(uint32_t)step[j];
-  if(gain!=0.0f){float w=k_wave_c(shape,k_phase(phase),width,correction,triangle);mix[j]=mix[j]+w*(gain*.5f);}
+  if(gain!=0.0f){float w=k_wave_c(shape,k_phase(phase),width,correction,triangle,zero_triangle);mix[j]=mix[j]+w*(gain*.5f);}
   (void)k_gain_advance(&og);
  }
  *phase_p=phase;*og_p=og;
@@ -147,6 +155,9 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  const original_prepared_oscillators *p,float vco_gain,float *L,float *R,uint32_t n){
  if(!f->prepared||!p->ready||!original_binary32_isfinite(vco_gain))return 0;
  const original_osc_controls *c=&p->controls;
+ uint8_t zero_triangle[4];
+ for(unsigned i=0;i<4;i++)
+  zero_triangle[i]=(uint8_t)(c->shape[i]==0&&(original_math_bits(p->triangle[i])&0x7fffffffu)==0);
  original_ramp og[4],st[2];memcpy(og,vg->oscillator,sizeof og);memcpy(st,vg->stereo,sizeof st);
  uint32_t phase[4];memcpy(phase,ph->phase,sizeof phase);
  const float xmod=c->xmod;
@@ -159,10 +170,10 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  float mix[K_SPAN];int32_t step[K_SPAN];
  while(n){   /* callers pass control spans of <= 64 frames (render_span): one pass */
  const uint32_t m=n<K_SPAN?n:K_SPAN;
- K_SHAPES(c->shape[0],k_osc_even(K_S,1,&phase[0],&og[0],c->increment[0],c->width[0],p->correction[0],p->triangle[0],xmod,b1,pstep1,mix,step,m));
- K_SHAPES(c->shape[1],k_osc_odd(K_S,&phase[1],&og[1],c->width[1],p->correction[1],p->triangle[1],mix,step,m));
- K_SHAPES(c->shape[2],k_osc_even(K_S,0,&phase[2],&og[2],c->increment[2],c->width[2],p->correction[2],p->triangle[2],xmod,b3,pstep3,mix,step,m));
- K_SHAPES(c->shape[3],k_osc_odd(K_S,&phase[3],&og[3],c->width[3],p->correction[3],p->triangle[3],mix,step,m));
+ K_SHAPES(c->shape[0],k_osc_even(K_S,1,&phase[0],&og[0],c->increment[0],c->width[0],p->correction[0],p->triangle[0],zero_triangle[0],xmod,b1,pstep1,mix,step,m));
+ K_SHAPES(c->shape[1],k_osc_odd(K_S,&phase[1],&og[1],c->width[1],p->correction[1],p->triangle[1],zero_triangle[1],mix,step,m));
+ K_SHAPES(c->shape[2],k_osc_even(K_S,0,&phase[2],&og[2],c->increment[2],c->width[2],p->correction[2],p->triangle[2],zero_triangle[2],xmod,b3,pstep3,mix,step,m));
+ K_SHAPES(c->shape[3],k_osc_odd(K_S,&phase[3],&og[3],c->width[3],p->correction[3],p->triangle[3],zero_triangle[3],mix,step,m));
  /* MS-20: mix[] -> the nonlinear output, in place */
  for(uint32_t j=0;j<m;j++){
   float g=advance(&ra),r=advance(&rr),ng=advance(&rn);ra.current=g;rr.current=r;rn.current=ng;

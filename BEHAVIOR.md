@@ -126,6 +126,8 @@ BAS-16. SEQ > PRESET > PAT SOUND (a page after the 303 SEQUENCE page) sets a bas
 BAS-17. GLO > AUDIO > NOTE LOCK (runtime, not saved, default OFF) makes a recorded bass note keep the sound it was played with: the edited sound is stored with that step in a motion lane (target 0xfd). On playback the locked sound is applied at that note-on and the base sound comes back on the next onset or on stop. NOTE LOCK only controls capture; stored locks always play. With no locks the audio is bit-exact. A motion lane on the same parameter is overridden at the locked onset. [USER 2026-11-12 02:43, 03:12] [CODE app/original_presets.inc seq/sequencer.c app/engine.c] [TEST tests/host/pattern_preset_notelock_test.sh]
 
 
+BAS-13. Chicago coefficient caching: no behaviour change (bit-identical). [CODE experiments/original_synth/chicago_voice.c] [TEST tests/host/chicago_coef_cache_test.c]
+
 ## 5. TB-3PO
 
 TB3-01. TB-3PO writes 303 lines. Select a 303 and press ARP. [MANUAL §7]
@@ -618,3 +620,5 @@ Resolved open questions (do not use these IDs again):
 - OQ-08: see MID-10.
 - OQ-09: see CLP-21.
 - OQ-10: see CLP-34.
+
+Miami coefficient caching: no behaviour change (bit-identical)

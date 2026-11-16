@@ -23,6 +23,9 @@ def main():
     ap.add_argument("--baseline-master", type=Path)
     ap.add_argument("--reference", type=Path)
     ap.add_argument("--all-presets", action="store_true")
+    ap.add_argument("--automate", action="store_true",
+                    help="instead of the two FX sweeps, move tempo and every Chicago/Miami "
+                         "parameter of both bass parts each block (cache-miss worst case)")
     ap.add_argument("--blocks", type=int, default=1024)
     ap.add_argument("--enforce-headroom", action="store_true",
                     help="Fail if the measured host peak exceeds 60 percent, or either synth exceeds 15 percent")
@@ -55,7 +58,7 @@ def main():
     results = []
     hashes = {}
     for case, (chicago, miami) in enumerate(pairs):
-        for sweep in (0, 1):
+        for sweep in ((2,) if args.automate else (0, 1)):
             label = f"{case:03d}-c{chicago}-m{miami}-s{sweep}"
             directory = out / label
             directory.mkdir(exist_ok=True)
@@ -82,6 +85,10 @@ def main():
         "deadline_misses": sum(r["deadline_misses"] for r in results),
         "blocks_above_60pct": sum(r["blocks_above_60pct"] for r in results),
         "foreground_peak_ns": max(r["foreground_peak_ns"] for r in results),
+        "worst_case_median_ns": max(r["median_ns"] for r in results),
+        "median_of_case_medians_ns": sorted(r["median_ns"] for r in results)[len(results) // 2],
+        "p99_max_ns": max(r["p99_ns"] for r in results),
+        "clock": "CLOCK_THREAD_CPUTIME_ID per 512-frame DMA half (two engine_render(256) calls)",
     }
     summary["margin_ns"] = 11600000 - summary["peak_ns"]
     summary["host_headroom_pass"] = (summary["peak_ns"] <= 6960000 and

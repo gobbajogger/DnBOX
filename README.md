@@ -1,3 +1,5 @@
+> Integration WIP, not a qualified build. See [CONSOLIDATED-STATE.md](CONSOLIDATED-STATE.md) for exact retained inputs, failed/unrun gates and active owners. Historical release text below does not qualify this candidate.
+
 # X0X for the M-VAVE FM-1
 
 For project work, read [AGENTS.md](AGENTS.md) and the

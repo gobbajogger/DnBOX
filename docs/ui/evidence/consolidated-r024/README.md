@@ -1,0 +1,5 @@
+# Retained R024/composition evidence
+
+The37c3 original first clean focused battery68/held tests passed, but independent overlay and real long-toast checks failed. Those are retained, not hidden by the narrower original suite. New source reserves battery in normal SMC/peek and wraps long toasts. Actual old37c3 product with external renderer fixtures fails both tests (exit1); current changed-source fixtures pass. Original strict-toast observer first assumed a flat background and failed at rounded-header bottom-edge AA; the unchanged exact glyph requirement now composites the actual rounded blank header. Both failed attempts and diagnostic coordinates remain.
+
+Gate mechanics23 and detector18 unit checks pass; these are code checks, not current all-screen/product acceptance. The normal three-way source merge retained e742 resource/R026 and UI37c3;21 original gate files were byte-equal before the explicit radius9hook/README change. No landed PR merge. PNG publication was explicitly rejected; actual captures remain Library-only, no bypass.

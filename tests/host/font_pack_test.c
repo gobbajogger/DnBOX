@@ -22,7 +22,7 @@ static int32_t raw_text(int32_t x, int32_t y, const felucca_font_t *f, const cha
 {
     uint32_t red = colour >> 11, green = (colour >> 5) & 63u, blue = colour & 31u;
     for (; *s; s++) {
-        uint32_t gi = glyph(f, (uint8_t)*s), w = f->bw[gi], stride = (w + 1) / 2, gy, gx;
+        uint32_t gi = glyph(f, (uint8_t)*s), w = font_bitmap_width(f, gi), stride = (w + 1) / 2, gy, gx;
         const uint8_t *p = f->data + f->off[gi];
         for (gy = 0; gy < f->h; gy++)
             for (gx = 0; gx < w; gx++) {
@@ -54,7 +54,8 @@ int main(void)
     for (role = 0; role < sizeof packed / sizeof *packed; role++) {
         const felucca_font_t *f = packed[role], *r = raw[role];
         assert(f->h == r->h && f->pad == r->pad && f->first == r->first && f->last == r->last);
-        assert(!memcmp(f->bw, r->bw, f->last - f->first + 1));
+        for (uint32_t g = 0; g <= (uint32_t)(f->last - f->first); ++g)
+            assert(font_bitmap_width(f,g) == font_bitmap_width(r,g));
         assert(!memcmp(f->adv, r->adv, f->last - f->first + 1));
         for (ch = 1; ch < 256; ch++) {
             char s[4] = {(char)ch, '8', (char)ch, 0};

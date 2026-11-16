@@ -287,7 +287,7 @@ static uint8_t bfx_hold[NPARTS], bfx_eff[NPARTS];
 static busfx_t bfx_st[NPARTS];
 /* Send throws and master filter use the same busfx_t + busfx_apply as the parts
  * (one outlined body). Extra channel slots stay unused for nch=1 / nch=2. */
-static busfx_t bfx_send_st[2] X0X_POOL;
+static busfx_t bfx_send_st[2]; /* RAM like bfx_st/bfx_flt_st: frees 136 B of pool headroom */
 static busfx_t bfx_flt_st;
 static busfx_stut_hub_t bfx_stut_hub X0X_POOL;
 

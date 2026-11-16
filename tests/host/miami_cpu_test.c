@@ -37,6 +37,10 @@ static void record(const void *p,size_t n){if(trace)CHECK(fwrite(p,1,n,trace)==n
 static void snapshot(unsigned n){
  record(left,n*sizeof *left);record(right,n*sizeof *right);
  RECORD(dry);RECORD(scratch);
+#ifdef MIAMI_TRACE_PCM_ONLY
+ /* Output-only proof for changes that add derived cache state. */
+ return;
+#endif
  RECORD(engine.program);RECORD(engine.controls);RECORD(engine.output);
  RECORD(engine.keys);RECORD(engine.held);RECORD(engine.records);
  record(&engine.allocator.held_active,sizeof engine.allocator-
