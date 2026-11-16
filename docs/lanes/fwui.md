@@ -122,3 +122,11 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Exhaustive pan identity regression
 - Expanded the production pan formatter test from one mixer voice to all five, and enumerated all 197 declared 909/808 voice/KIT descriptors rather than a guessed parameter limit. Exactly 22 drum voice pans and zero KIT pans; all 128 raw values retain L50/C/R50 endpoints and monotonic sides. Stored values remain unchanged.
 - Current b341 runtime PASS10,975 checks. This is formatter-domain coverage, not every rendered screen or complete F4 battery acceptance. Runtime source unchanged; evidence docs/evidence/fwui/pan-exhaustive/.
+
+## Repeated execution-path correction
+- Before file setup or tests, verify the execution working directory and use absolute paths for cross-directory writes; run with fail-fast shell setup so a failed edit cannot fall through to a stale test.
+- Two incorrect doubled worktree prefixes were caught before source writes. The first ran the unchanged old pan fixture; the second failed to compile the absent toast probe. Both attempts are retained distinctly; neither is new-product evidence. Both schedule prompts received this correction through the coordinator.
+
+## Transient toast battery failure retained
+- Genuine b341 runtime probe confirms missing R22 battery on SAVED, NEXT pattern cue, actual host ABOUT and a clearly labeled synthetic long diagnostic: all four FAIL, 36 of 36 expected battery fill pixels absent. Existing 57-character stress diagnostic has small-font width317px and clips on240px; no scrolling behavior implemented before owner design approval.
+- Production and stored message text unchanged. Negative fixture returns exit1, never a passing acceptance test. Before renders/logs and invalid setup attempt are retained at docs/evidence/fwui/toast-before/.
