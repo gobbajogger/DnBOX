@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "juno6.h"
+#include "x0x_param.h"
 #include <math.h>
 #include "fastmath.h"
 #include <string.h>
@@ -8,6 +9,40 @@
 static float clampf(float x,float a,float b){return x<a?a:x>b?b:x;}
 static float midi_hz(unsigned n){return 440.0f*fm_exp2f(((float)n-69.0f)*(1.0f/12.0f));}
 static float blep(float t,float dt){if(t<dt){t/=dt;return t+t-t*t-1.0f;}if(t>1.0f-dt){t=(t-1.0f)/dt;return t*t+t+t+1.0f;}return 0.0f;}
+/* Same pre-filter carrier used by audio and its waveform cue. Phase/subphase
+ * are cycles; dt is cycles/sample. The UI is a phase cue, not an oscilloscope. */
+float juno6_wave_value(float t,float dt,float width,float subphase,float morph,float sublevel)
+{
+ float saw=2*t-1-blep(t,dt);
+ float pulse=(t<width?1.0f:-1.0f)+blep(t,dt),q=t-width;
+ if(q<0)q+=1;
+ pulse-=blep(q,dt);
+ float sub=subphase<.5f?1.0f:-1.0f;
+ return (saw*(1-morph)+pulse*morph)*.7f+sub*sublevel;
+}
+/* Actual equations in set/render and the runtime chorus adapter. No invented
+ * envelope milliseconds or percentage aliases for frequency controls. */
+int juno6_param_si(unsigned id,int raw,float *value)
+{
+ if(!value || raw<0 || raw>127 || id>=16)return X0X_U_NONE;
+ float q=(float)raw/127.f;
+ switch(id) {
+ case 1:*value=q*50.f;return X0X_U_PCT;
+ case 2:*value=35.f+q*q*12000.f;return X0X_U_HZ;
+ case 4:*value=7000.f*q;return X0X_U_HZ;
+ case 5:*value=.002f+q*q*3.f;return X0X_U_S;
+ case 6:*value=.01f+q*q*3.f;return X0X_U_S;
+ case 8:*value=.01f+q*q*4.f;return X0X_U_S;
+ case 9:*value=15.f+2000.f*q*q;return X0X_U_HZ;
+ case 10:*value=.1f+8.f*q*q;return X0X_U_HZ;
+ case 11:*value=.2f*q*100.f;return X0X_U_PCT;
+ case 12:*value=(.1f+q*.8f)*100.f;return X0X_U_PCT;
+ case 13:*value=.1f+4.9f*q;return X0X_U_HZ;
+ case 14:*value=.5f*q*100.f;return X0X_U_PCT;
+ case 15:*value=q;return X0X_U_GAIN;
+ default:*value=q*100.f;return X0X_U_PCT;
+ }
+}
 void juno6_init(juno6_t*s,float sr){memset(s,0,sizeof *s);s->sample_rate=sr>8000?sr:44100;s->attack=.008f;s->decay=.28f;s->sustain=.72f;s->release=.24f;s->cutoff=.68f;s->resonance=.12f;s->pulse_width=.5f;s->sub_level=.22f;s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;s->macro[15]=1.0f;s->macro[16]=.5f;}
 int juno6_note_on(juno6_t*s,uint8_t note,uint8_t vel){unsigned i,chosen=0;uint32_t oldest;if(!vel){juno6_note_off(s,note);return 1;}for(i=0;i<6;i++)if(s->voice[i].gate&&s->voice[i].note==note){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate&&s->voice[i].envelope<.0001f){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate){chosen=i;goto assign;}oldest=s->voice[0].age;for(i=1;i<6;i++)if(s->voice[i].age<oldest){oldest=s->voice[i].age;chosen=i;}assign:{juno6_voice_t*v=&s->voice[chosen];v->note=note;v->gate=1;v->stage=1;v->age=++s->age;v->increment=midi_hz(note)/s->sample_rate*fm_exp2f(s->bend*(1.0f/12.0f));v->velocity=(float)vel/127.0f;if(v->envelope<.0001f)v->phase=0;}return 1;}
 void juno6_note_off(juno6_t*s,uint8_t note){unsigned i;for(i=0;i<6;i++)if(s->voice[i].gate&&s->voice[i].note==note){s->voice[i].gate=0;if(!s->damper)s->voice[i].stage=4;}}
@@ -33,12 +68,8 @@ void juno6_render(juno6_t *s, float *out, unsigned n)
    juno6_voice_t *v=&s->voice[i];
    if(!v->stage)continue;
    float dt=clampf(v->increment,.000001f,.45f),t=v->phase;
-   float saw=2*t-1-blep(t,dt),width=clampf(s->pulse_width+lfo*s->macro[11]*.2f,.05f,.95f);
-   float pulse=(t<width?1.0f:-1.0f)+blep(t,dt),q=t-width;
-   if(q<0)q+=1;
-   pulse-=blep(q,dt);
-   float sub=v->subphase<.5f?1.0f:-1.0f;
-   float x=(saw*(1-s->macro[0])+pulse*s->macro[0])*.7f+sub*s->sub_level;
+   float width=clampf(s->pulse_width+lfo*s->macro[11]*.2f,.05f,.95f);
+   float x=juno6_wave_value(t,dt,width,v->subphase,s->macro[0],s->sub_level);
    if(v->stage==1) {v->envelope+=attack;if(v->envelope>=1){v->envelope=1;v->stage=2;}}
    else if(v->stage==2){v->envelope-=decay;if(v->envelope<=s->sustain){v->envelope=s->sustain;v->stage=3;}}
    else if(v->stage==4){v->envelope-=fm_maxf(.000001f,v->envelope)*release;if(v->envelope<.00001f){v->envelope=0;v->stage=0;}}

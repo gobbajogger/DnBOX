@@ -37,3 +37,7 @@ void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
 /* Slot adapter: normalized patch macros; final two are performance-only. */
 int juno6_set(juno6_t*, unsigned, float);
 int juno6_active(const juno6_t*);
+
+/* Shared production oscillator equation and physical control readouts. */
+float juno6_wave_value(float phase,float dt,float width,float subphase,float morph,float sublevel);
+int juno6_param_si(unsigned id,int raw,float *value);

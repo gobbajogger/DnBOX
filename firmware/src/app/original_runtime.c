@@ -321,7 +321,13 @@ int original_runtime_motion_view(const original_runtime_part *p, float *phase, f
     float *current, float *target, int *active)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
-    if (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_DRONE) return 0;
+    if (p->kind == ORIGINAL_SOUND_JUNO) {
+        if(!phase || !bipolar || !current || !target || !active)return 0;
+        *phase=p->dsp.juno.synth.lfo_phase;
+        *bipolar=1.f-4.f*fm_fabsf(*phase-.5f);
+        *current=*target=0;*active=juno6_active(&p->dsp.juno.synth);return 1;
+    }
+    if (p->kind == ORIGINAL_SOUND_DRONE) return 0;
     if (p->kind == ORIGINAL_SOUND_MIAMI)
         return original_miami_backend_motion_view(&p->dsp.miami, phase, bipolar, current, target, active);
     *phase = *bipolar = 0.0f;
