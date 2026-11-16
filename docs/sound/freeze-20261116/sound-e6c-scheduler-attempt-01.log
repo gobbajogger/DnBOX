@@ -1,0 +1,36 @@
+{"authenticated_public_inputs": 6, "sequence_oracle_tokens": 1661, "parameter_enum_tokens": 603, "arithmetic_and_callback_body_equal": true, "allowed_binding_changes": ["imports/framework aliases", "AEArray pointer-view enumeration", "namespace/class name/visibility", "inline header linkage", "explicit local enum lookup"], "runtime_or_app_fidelity": false}
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c: In function ‘sp_out’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c:174:13: warning: comparison of integer expressions of different signedness: ‘uint32_t’ {aka ‘unsigned int’} and ‘int’ [-Wsign-compare]
+  174 |     if(chan > sp->nchan - 1) {
+      |             ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c: In function ‘sp_gen_vals’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:85:21: warning: comparison of integer expressions of different signedness: ‘size_t’ {aka ‘long unsigned int’} and ‘int’ [-Wsign-compare]
+   85 |         if(ft->size < j + 1){
+      |                     ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c: In function ‘sp_gen_sinesum’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:172:35: warning: comparison of integer expressions of different signedness: ‘int32_t’ {aka ‘int’} and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  172 |             for(phs = 0, n = 0; n < ft->size; n++){
+      |                                   ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c: In function ‘sp_gen_gauss’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:322:18: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  322 |     for(n = 0; n < ft->size; n++) {
+      |                  ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c: In function ‘sp_gen_composite’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:339:18: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  339 |     for(n = 0; n < args->size; n += 4) {
+      |                  ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:345:23: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  345 |         for (i = 0; i <ft->size ; i++) {
+      |                       ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c: In function ‘sp_gen_rand’:
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:362:18: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  362 |     for(n = 0; n < args->size; n += 2) {
+      |                  ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:365:20: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  365 |             if(pos < ft->size) {
+      |                    ^
+<workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c:371:12: warning: comparison of integer expressions of different signedness: ‘int’ and ‘size_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  371 |     if(pos <= ft->size) {
+      |            ^~
+{"scope":"full-source-sequence-arp-pre-FX-compact-composition","cases":38,"checks":354907688,"frames":114196,"state_snapshots":120289,"control_note_events":1081,"heap_calls_during_runtime_actions":0,"source_scheduler_host_bytes":12088,"failures":0}
+result directory: <workspace>/dnbox-test-merge/evidence/sound-e6c-fresh-build/o2.g2egv2kf

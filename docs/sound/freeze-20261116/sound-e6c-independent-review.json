@@ -1,0 +1,79 @@
+{
+  "scope": "Independent bounded WIP source/test review, not finished-piece candid UX review, Local gate or final engine admission",
+  "head": "e6c76e3b470d61b1c2f9e2a884efd6be18fa9373",
+  "tree": "b5add7846977d26f47e69d97aa99beb0bab9565e",
+  "pr": 952,
+  "immutableManifestFiles": 319,
+  "sourceHashMismatchesBeforeAndAfter": [],
+  "firstAttempts": [
+    {
+      "case": "scheduler",
+      "exit": 0,
+      "log": "sound-e6c-scheduler-attempt-01.log",
+      "sha256": "b3b95daadf1652c47c37bacfee13d39f7449984953607acdd0a5c9bc1c89b69d",
+      "bytes": 5418
+    },
+    {
+      "case": "renderer",
+      "exit": 0,
+      "log": "sound-e6c-renderer-attempt-01.log",
+      "sha256": "d370d38a6fc3d5d2290534189b76b8199104668cbb274d9df1506a845eab4f71",
+      "bytes": 181
+    },
+    {
+      "case": "controls",
+      "exit": 0,
+      "log": "sound-e6c-controls-attempt-01.log",
+      "sha256": "82094bca0402542af48fb45a32957e6888a03785d81968eff31eed2f833e5eff",
+      "bytes": 156
+    },
+    {
+      "case": "models",
+      "exit": 0,
+      "log": "sound-e6c-models-attempt-01.log",
+      "sha256": "f78fc90277df453bdfa18b0ac228ecaec349d96690a3fc0cf4e564d7aedb85ea",
+      "bytes": 290
+    },
+    {
+      "case": "schema",
+      "exit": 0,
+      "log": "sound-e6c-schema-attempt-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "findings": [],
+  "result": "PASS_COMPONENT_ONLY",
+  "notRun": [
+    "Full 56-preset SynthOne post-note FX chain",
+    "Actual 64-route SuperJ6 graph and640presets",
+    "New engine save/runtime activation and legacy ID preservation",
+    "Exact current combined native resources/stack/audio deadlines anddevice",
+    "Full UI browser/emulator and candid per-screen final review"
+  ],
+  "originalSourceScheduler": {
+    "cases": 38,
+    "checks": 354907688,
+    "frames": 114196,
+    "stateSnapshots": 120289,
+    "controlNoteEvents": 1081,
+    "differences": 0,
+    "heapCallsDuringRuntimeActions": 0
+  },
+  "publicAdapter": {
+    "scenes": 12,
+    "frames": 576000,
+    "differentChannelWords": 0,
+    "nonzeroLeftFrames": 529280,
+    "peak": 0.628623188,
+    "audioSha256": "4b32746b36590998cf7c215ec07d5890d394414e8b2702b7a1a5e847c8ed6b34"
+  },
+  "superJ6": {
+    "models": 24,
+    "frames": 7812906,
+    "protocolChecks": 1204,
+    "boundaryChecks": 522,
+    "graphBinding": "NOT_ADMITTED"
+  },
+  "observedUTC": "2026-11-16T10:33:16.977148+00:00"
+}

@@ -1,0 +1,84 @@
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/source_controls.hpp:10,
+                 from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/preset_audio.cpp:2:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AKSynthOneRate.h"
+      |  ^~~~~~
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/AKSynthOneRate.h:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AudioKit/AKInterop.h"
+      |  ^~~~~~
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/source_controls.hpp:10,
+                 from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/source_controls.cpp:2:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AKSynthOneRate.h"
+      |  ^~~~~~
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/AKSynthOneRate.h:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AudioKit/AKInterop.h"
+      |  ^~~~~~
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/oracle_controls.hpp:10,
+                 from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/oracle_controls.cpp:2:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AKSynthOneRate.h"
+      |  ^~~~~~
+In file included from <workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/S1Rate.hpp:12:
+<workspace>/synthone-implementation/original-comparison/verified/source-and-evidence/AKSynthOneRate.h:12:2: warning: #import is a deprecated GCC extension [-Wdeprecated]
+   12 | #import "AudioKit/AKInterop.h"
+      |  ^~~~~~
+{"preset_index":0,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.59386027,"energy":10014.522934688934}
+{"preset_index":1,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.585662067,"energy":4744.2264316017945}
+{"preset_index":2,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.676209331,"energy":789.76219591347706}
+{"preset_index":3,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.11643398,"energy":7745.9364650186499}
+{"preset_index":4,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.735827446,"energy":9503.4505340688829}
+{"preset_index":5,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.739789963,"energy":2493.634815557572}
+{"preset_index":6,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.898938775,"energy":3776.3457323836496}
+{"preset_index":7,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.796597123,"energy":5266.4187787589881}
+{"preset_index":8,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.82673955,"energy":7353.1817894084134}
+{"preset_index":9,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.09971166,"energy":19229.617273553584}
+{"preset_index":10,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.436225176,"energy":1947.683322877371}
+{"preset_index":11,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.507528663,"energy":1355.2696784841157}
+{"preset_index":12,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.155587301,"energy":118.64890809747172}
+{"preset_index":13,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.303766489,"energy":240.19773167721237}
+{"preset_index":14,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.20147312,"energy":30205.942323951265}
+{"preset_index":15,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.609296858,"energy":4297.3746121331314}
+{"preset_index":16,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.0507399812,"energy":10.410355386126632}
+{"preset_index":17,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.413869113,"energy":3025.7371386329746}
+{"preset_index":18,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.517380357,"energy":3578.0092740666169}
+{"preset_index":19,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.694802582,"energy":4305.1357150746262}
+{"preset_index":20,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.0534612797,"energy":99.973182677873424}
+{"preset_index":21,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.18102539,"energy":13098.250596133188}
+{"preset_index":22,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.27218175,"energy":3521.6322521801362}
+{"preset_index":23,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.292065799,"energy":427.58662683109162}
+{"preset_index":24,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.17782938,"energy":10754.109652258006}
+{"preset_index":25,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.11244726,"energy":20914.816874016709}
+{"preset_index":26,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.184983611,"energy":172.27814412360058}
+{"preset_index":27,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.38597155,"energy":5464.5463610285387}
+{"preset_index":28,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.328096628,"energy":367.75906628487547}
+{"preset_index":29,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.862469375,"energy":3591.0722951654911}
+{"preset_index":30,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.855758011,"energy":2812.8429580300954}
+{"preset_index":31,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.25972724,"energy":8077.094913602451}
+{"preset_index":32,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.1896342,"energy":5624.7344225856023}
+{"preset_index":33,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.431055635,"energy":1568.9545472616358}
+{"preset_index":34,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.50693417,"energy":10980.109500383025}
+{"preset_index":35,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.657247424,"energy":3497.9995877879433}
+{"preset_index":36,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.981200099,"energy":2579.3004252192877}
+{"preset_index":37,"commands":144,"frames":96000,"paired_bitexact":true,"peak":3.23241091,"energy":35598.133964883309}
+{"preset_index":38,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.580902874,"energy":3305.1453086355709}
+{"preset_index":39,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.178584114,"energy":248.10226099855598}
+{"preset_index":40,"commands":144,"frames":96000,"paired_bitexact":true,"peak":1.37672138,"energy":18985.908919381935}
+{"preset_index":41,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.151790649,"energy":422.26918451672992}
+{"preset_index":42,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.448759347,"energy":2847.9213061725177}
+{"preset_index":43,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.13005504,"energy":261.96975262349554}
+{"preset_index":44,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.134430856,"energy":250.56314151459128}
+{"preset_index":45,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.179583937,"energy":726.39011918165204}
+{"preset_index":46,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.370087475,"energy":2607.8013884186566}
+{"preset_index":47,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.366236687,"energy":2633.2017164092499}
+{"preset_index":48,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.242132485,"energy":570.15447466863327}
+{"preset_index":49,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.435794085,"energy":2307.8128738384144}
+{"preset_index":50,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.173001617,"energy":247.31842459748981}
+{"preset_index":51,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.021514684,"energy":5.1548850548285499}
+{"preset_index":52,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.116618492,"energy":711.73667346242939}
+{"preset_index":53,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.261218816,"energy":2053.7514497932598}
+{"preset_index":54,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.151011989,"energy":198.67484003482372}
+{"preset_index":55,"commands":144,"frames":96000,"paired_bitexact":true,"peak":0.110626057,"energy":60.008127314833864}
+{"actual_original_presets":56,"frames":5376000,"paired_bitexact":true,"scope":"Source helper laws + real original preset scalar/seq bindings/raw oracle vs compact/common originalFX; not Apple UI, complete tuning/hold/modwheel or target fidelity"}

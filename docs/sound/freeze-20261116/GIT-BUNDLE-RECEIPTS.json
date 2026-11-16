@@ -1,0 +1,24 @@
+[
+  {
+    "file": "<workspace>/sound-implementation/sound-20261116-1040-11a2f97b.bundle",
+    "bytes": 556824,
+    "sha256": "b0dc4c10c4000c2fdc811f82a65c27f64e84f30710669e54642ce09bf77df097",
+    "git_sha": "11a2f97bec7ad300d0acc02721175194e5a82f40",
+    "prerequisite": "8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b",
+    "logical_source_files_verified": 293,
+    "verify": "<workspace>/sound-implementation/sound-20261116-1040-11a2f97b.bundle is okay\nThe bundle contains this ref:\n11a2f97bec7ad300d0acc02721175194e5a82f40 refs/heads/sound/engine-rebuild\nThe bundle requires this ref:\n8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b \nThe bundle uses this hash algorithm: sha1",
+    "restore_verified": true,
+    "raw_commit_timezone": "-0500 (exact raw Git object SHA verified)"
+  },
+  {
+    "file": "<workspace>/sound-implementation/sound-20261116-1040-e6c76e3b.bundle",
+    "bytes": 680562,
+    "sha256": "4fbeb0089c0e9920f1b0b9887b7d9ec3f343f456a9fb0d6cd464986f5b842985",
+    "git_sha": "e6c76e3b470d61b1c2f9e2a884efd6be18fa9373",
+    "prerequisite": "8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b",
+    "logical_source_files_verified": 319,
+    "verify": "<workspace>/sound-implementation/sound-20261116-1040-e6c76e3b.bundle is okay\nThe bundle contains this ref:\ne6c76e3b470d61b1c2f9e2a884efd6be18fa9373 refs/heads/sound/engine-rebuild\nThe bundle requires this ref:\n8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b \nThe bundle uses this hash algorithm: sha1",
+    "restore_verified": true,
+    "raw_commit_timezone": "-0500 (exact raw Git object SHA verified)"
+  }
+]

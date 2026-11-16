@@ -1,0 +1,113 @@
+{
+  "base": "8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b",
+  "product_manifest_sha256": "dc745ce0a3e66f46497a58e6f0670a89b2bf0619771889bbbfc5cd5e81b6ec5f",
+  "verified_files": 5380,
+  "e742_commit": "e742be7bd0d01323c899de6e156f40b85ee451db",
+  "e742_tree": "2a8b9a18187655c874a715d2b3b7cc05f81fc8b7",
+  "e742_differences": [
+    {
+      "path": "CONSOLIDATED-STATE.md",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "README.md",
+      "reason": "changed_in_e742"
+    },
+    {
+      "path": "docs/integration/20261116/classification-counts.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/counts-and-coverage.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/firmware-branches.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/firmware-open-prs.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/focused-gate-results.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/intake-verification.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/canonical-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/compact-programs-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/detector-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/exp-curve-exact-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/font-pack-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/gate-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/producer-report-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/website-branches.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/website-open-prs.csv",
+      "reason": "not_in_initial_product_manifest"
+    }
+  ],
+  "expected_base_manifest_differences": [
+    "README.md"
+  ],
+  "compiled_product_mismatches": [],
+  "qualification_scope": "All5380native-source paths byte/mode-identical to e742;16e742-only documentation/evidencefiles absent. Not an all-file e742checkout claim.",
+  "readme_in_compiler_dependency_files": [],
+  "compiler_dependency_file_count": 0,
+  "comparison_to_expected_base_plus_35_map": {
+    "different_paths": [
+      "README.md"
+    ],
+    "note": "README matches e742, not8a. This was an obsolete expected-map assertion, not a product-source failure."
+  },
+  "comparison_to_e742": {
+    "listed_paths": 5380,
+    "different_paths": [],
+    "missing_paths": [
+      "CONSOLIDATED-STATE.md",
+      "docs/integration/20261116/classification-counts.json",
+      "docs/integration/20261116/counts-and-coverage.json",
+      "docs/integration/20261116/firmware-branches.csv",
+      "docs/integration/20261116/firmware-open-prs.csv",
+      "docs/integration/20261116/focused-gate-results.json",
+      "docs/integration/20261116/intake-verification.json",
+      "docs/integration/20261116/logs/canonical-contracts-attempt-01.log",
+      "docs/integration/20261116/logs/compact-programs-attempt-01.log",
+      "docs/integration/20261116/logs/detector-contracts-attempt-01.log",
+      "docs/integration/20261116/logs/exp-curve-exact-attempt-01.log",
+      "docs/integration/20261116/logs/font-pack-attempt-01.log",
+      "docs/integration/20261116/logs/gate-contracts-attempt-01.log",
+      "docs/integration/20261116/logs/producer-report-contracts-attempt-01.log",
+      "docs/integration/20261116/website-branches.csv",
+      "docs/integration/20261116/website-open-prs.csv"
+    ],
+    "note": "All5380listed native-source files/modes matchactuale742;16additional e742documentation/evidencefiles are absent, no code difference."
+  }
+}

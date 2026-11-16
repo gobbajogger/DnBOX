@@ -1,0 +1,283 @@
+{
+  "scope": "Independent native BASELINE input/artifact/resource check only; product inputs equivalent to e742 with documented source/evidence differences, not an all-file e742 checkout/current combined qualification",
+  "e742": "e742be7bd0d01323c899de6e156f40b85ee451db",
+  "sourceManifestFiles": 5380,
+  "sourceFileHashMismatches": [],
+  "matchingE742Paths": 5380,
+  "differingE742Paths": [],
+  "otherE742DocumentationDifferences": [
+    {
+      "path": "CONSOLIDATED-STATE.md",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "README.md",
+      "reason": "changed_in_e742"
+    },
+    {
+      "path": "docs/integration/20261116/classification-counts.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/counts-and-coverage.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/firmware-branches.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/firmware-open-prs.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/focused-gate-results.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/intake-verification.json",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/canonical-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/compact-programs-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/detector-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/exp-curve-exact-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/font-pack-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/gate-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/logs/producer-report-contracts-attempt-01.log",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/website-branches.csv",
+      "reason": "not_in_initial_product_manifest"
+    },
+    {
+      "path": "docs/integration/20261116/website-open-prs.csv",
+      "reason": "not_in_initial_product_manifest"
+    }
+  ],
+  "variants": [
+    {
+      "model": "elite",
+      "padcal": 0,
+      "artifacts": [
+        {
+          "file": "variants/elite-padcal0/firmware.fwsc",
+          "bytes": 651732,
+          "sha256": "8ebf2b07691c9faa4d6e57df3f28800506ec213b0e23eb3555c66628def24966",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal0/loader/ota.bin",
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal0/x0x.bin",
+          "bytes": 537316,
+          "sha256": "27b5020a5fee64ffa92dd3af8b6b7b526560f7971f265b8d393da035895ebfe6",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal0/x0x.dis",
+          "bytes": 8324639,
+          "sha256": "7c4cc6dcc6af92817f60471f88f64070ff55fb94974e5a854e3228cb886c1f5c",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal0/x0x.elf",
+          "bytes": 621448,
+          "sha256": "865690a0bfd3a8e73c0caff020acd5cd624e000e0b317fac0fd630bc8d9f50c1",
+          "match": true
+        }
+      ],
+      "ramSpanBytes": 95696,
+      "ramLimit": 98304,
+      "poolUsed": 335700,
+      "poolFree": 8364,
+      "flashFree": 15356,
+      "softDoubleSymbols": [],
+      "packageDamage": null,
+      "product": "SMK-37 Elite_900",
+      "exactRepackMatchesAppLoaderSDK": true,
+      "artifactCount": 5
+    },
+    {
+      "model": "elite",
+      "padcal": 1,
+      "artifacts": [
+        {
+          "file": "variants/elite-padcal1/firmware.fwsc",
+          "bytes": 651732,
+          "sha256": "bb89ba5ba830d45170783f250b53940b80ce7472c1abfd88603ada90895533f1",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal1/loader/ota.bin",
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal1/x0x.bin",
+          "bytes": 539208,
+          "sha256": "b4e843e210a661d9150c6cc499fa9e2dce840ea698d7de4e70a9876ea64ac426",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal1/x0x.dis",
+          "bytes": 8356296,
+          "sha256": "c058c8a4f53a189ddc09dc6944a36043ba89c48c2e86d3791d7823ca3a4223d4",
+          "match": true
+        },
+        {
+          "file": "variants/elite-padcal1/x0x.elf",
+          "bytes": 624424,
+          "sha256": "a075e8a33096c2525e858d703325cdeb3c24c4c7c6159cb73bf5d4043d0d2d66",
+          "match": true
+        }
+      ],
+      "ramSpanBytes": 96128,
+      "ramLimit": 98304,
+      "poolUsed": 335700,
+      "poolFree": 8364,
+      "flashFree": 13464,
+      "softDoubleSymbols": [],
+      "packageDamage": null,
+      "product": "SMK-37 Elite_900",
+      "exactRepackMatchesAppLoaderSDK": true,
+      "artifactCount": 5
+    },
+    {
+      "model": "pro",
+      "padcal": 0,
+      "artifacts": [
+        {
+          "file": "variants/pro-padcal0/firmware.fwsc",
+          "bytes": 651730,
+          "sha256": "b28d3e5b6418fb49c4dd9bde7a38c9cd61c155e4b739b2904cb6131f70b74231",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal0/loader/ota.bin",
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal0/x0x.bin",
+          "bytes": 537304,
+          "sha256": "1af9c30b8e2c845e45d0b467f8fbe798ea026f1a48709ae60bc510e0a205b662",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal0/x0x.dis",
+          "bytes": 8324599,
+          "sha256": "5b94b7dea55fca30cbcf5843f699a5bd1898e69787260e46df9c9e05b045452b",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal0/x0x.elf",
+          "bytes": 621444,
+          "sha256": "1315016a9ee4af9079a9d01b18a55efec9ac7392aeeb89da76dc74e9a392e495",
+          "match": true
+        }
+      ],
+      "ramSpanBytes": 95696,
+      "ramLimit": 98304,
+      "poolUsed": 335700,
+      "poolFree": 8364,
+      "flashFree": 15368,
+      "softDoubleSymbols": [],
+      "packageDamage": null,
+      "product": "SMK-37 Pro_900",
+      "exactRepackMatchesAppLoaderSDK": true,
+      "artifactCount": 5
+    },
+    {
+      "model": "pro",
+      "padcal": 1,
+      "artifacts": [
+        {
+          "file": "variants/pro-padcal1/firmware.fwsc",
+          "bytes": 651730,
+          "sha256": "862a60e5d622022eac4dc561d5436b97c9d4dc9755fef34fa00f4e66c80757d9",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal1/loader/ota.bin",
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal1/x0x.bin",
+          "bytes": 539200,
+          "sha256": "e4a6ba2c2528c521b5f5ee8e54544b8f22c951f5ab5fb36847dd3dfbf227e9b1",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal1/x0x.dis",
+          "bytes": 8356254,
+          "sha256": "70e5b0a2a8e5bda8042acc218a6643290f6b0b1f54d10ba223a6bd3f0c480677",
+          "match": true
+        },
+        {
+          "file": "variants/pro-padcal1/x0x.elf",
+          "bytes": 624416,
+          "sha256": "8782f4e3e34abda25a43ecd12217890c18e69f9884fbcf837db00dbb7c7583bb",
+          "match": true
+        }
+      ],
+      "ramSpanBytes": 96128,
+      "ramLimit": 98304,
+      "poolUsed": 335700,
+      "poolFree": 8364,
+      "flashFree": 13472,
+      "softDoubleSymbols": [],
+      "packageDamage": null,
+      "product": "SMK-37 Pro_900",
+      "exactRepackMatchesAppLoaderSDK": true,
+      "artifactCount": 5
+    }
+  ],
+  "result": "PASS_COMPONENT_ONLY",
+  "observedUTC": "2026-11-16T10:37:38.912167+00:00",
+  "notRun": [
+    "full host suite",
+    "new UI/new-engine composed link",
+    "real-time/stack/audio/device acceptance"
+  ],
+  "checkerAttempts": [
+    {
+      "attempt": 1,
+      "exit": 1,
+      "reason": "Checker assumed README must differ because producer metadata said so. Actual listed5380files allmatch e742; no product defect."
+    },
+    {
+      "attempt": 2,
+      "exit": 0,
+      "reason": "Corrected comparison requires allcompiledsource paths match and tolerates only documented noncompiledREADME difference, actual differing pathsnone."
+    }
+  ]
+}
