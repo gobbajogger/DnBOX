@@ -232,3 +232,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Removed stale requirements for deleted PLAY KEYS/knob instructions, retaining held-key lighting, field selection, stage ON state and field/keybed nonoverlap. Duplicate extraction anchors now fail closed.
 - Seven current static checks and seven fixture cases (healthy plus six negatives) PASS; independently replayed against integration4e3b inputs. Not all-state raster geometry. Production unchanged from34ad.
 - Next: diagnose managed HOME GLOBE segmentation fault from actual preserved binary/trace; do not assume it is a stale expectation.
+
+## Host empty-footer crash and stale scenarios repaired
+- Actual exact7f ASan/UBSan HOME trace identifiedNULL fa passed through help_fits to text_w after startup instruction removal. Host-only primary-fragment guard and safe diagnostic repair this without changing general renderer/help rules.
+- Executed isolated7f overlay: HOME ASan/UBSan ok, Sound-matrix15,728 ASan/UBSan checks PASS, scenario-help PASS. Matrix obsolete header dots/save samples corrected to four battery levels/save211, with row/page/state invariants retained. Sound-page drum toggles now match reviewed shared drum_step path; bass hidden-note/audio/motion/navigation checks remain and actual scenarioPASS.
+- Published helper bytes equal executed helper but full lane ancestry differs; no new-head full gate claim. Integ must apply the two-line host helper patch over its hooks. Next: independently review live Decay/NoiseTail regression repair while exact integration qualification continues.

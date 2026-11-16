@@ -5,17 +5,17 @@ Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly 
 
 ## Current finish lines and exact input scopes
 
-This source checkpoint composes reviewed FWUI e28eb89d08af84965a6f155d68b73db7467f7665 over firmware aa46bd352bdd47457dd54c9a7add64450780fbb9. New production changes are limited to the reviewed value-spacing and selected-text colors described below; exact combined native resources remain to be measured. Current nightly draft is9a883a716947df47180510d918dbe9ab6fdce3dc. Neither is consolidated or delivered; prior fef9 resource evidence is not automatically extended to changed runtime.
+Current inherited runtime is731f5abd8357cfe8654222b3d5e3ed03b5749fb0, composing reviewed FWUI16af/34ad LIGHT+metro work with all prior owner/probe/sanitizer corrections. Its exact native measurement is deliberately deferred until the next coherent reviewed live-glyph repair, not credited from prior7e. Latest nightly draft is7ca561b50833d2d6a38e10ada05b80047391f41a. This host-helper/evidence successor is neither consolidated nor delivered.
 
 - C1 FAIL: full before/after Local gates remain non-green; focused checks are not substitutes.
-- C2 prior scoped PASS: independent exact 54c41 and 1d068 no-loss against actual e742/9165 targets; this successor still needs its own exact check.
+- C2 prior scoped PASS: independent exact731f and7ca561 no-loss against actuale742/9165 targets; this successor needs its own exact check.
 - C3 FAIL: complete independent screen Review 10/10 is absent.
-- C4 FAIL overall: exact 54c41/1d068 bounded limits pass; comprehensive secret/opaque-content review and this successor's full gate remain open.
+- C4 FAIL overall: prior731f/7ca561 bounded limits pass; comprehensive secret/opaque-content review and this successor's full gate remain open.
 - C5 FAIL: unfinished I items remain.
 - C6 FAIL: PR955/136 remain drafts, not consolidated or delivered.
 - I0 FAIL: original consolidated firmware pool margin 172B is below 512B; baseline gates remain non-green.
 - I1 FAIL: targets and state record exist, but v2 lane work remains unmerged.
-- I2 FAIL overall: prior exact fef9 default production inputs build Elite/Pro with XIP 3268/3276B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
+- I2 FAIL overall: prior exact7e default production inputs build Elite/Pro with XIP3156/3164B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
 - I3 FAIL: local exact f910 has a chorus deadline miss and all strict margins fail. Fixed-count managed 0ac/f910 comparison has 0 deadline misses but 4 strict-margin failures across 12 runs (before initial plain; after warmed plain/chorus/peaking). Matching PCM is not timing or hardware equivalence. Old 0ac-only green runs below are historical.
 - I4 scoped evidence: managed 13e0 normal/ASan/UBSan comparisons with default LSan pass and the six-file compact-program closure remains byte-identical through current runtime; not whole-current-head/full-gate qualification.
 - I5 FAIL: five authentic encoded/derived preview assets retained; actual browser transport checks are bounded, stock firmware embedding and Pages delivery unfinished.
@@ -847,3 +847,23 @@ Repeated mistake: new host selectors were registered without their shared-genera
 Repeated mistake: transport replies may truncate or remain unfinished. Verify every chunk's completion, length and hash and the resulting exact tree before committing or accepting receipts; preserve originals on mismatch.
 
 The first attempted tree transport omitted an unfinished60000-byte read; exact local/remote tree mismatch caught it before any commit/ref change. The orphan tree is not a source checkpoint. Retry verified all12 completed chunk lengths and SHA256 values against the preserved682227-byte payload (SHA2568990ca899d1ade22362f6b69073a7e65dc0f65ad57e9dc82bc7e7c8c9125f166), then matched the exact staged tree before adding this record. No incorrect source reached the lane branch.
+
+## Empty-footer host diagnostic correction
+
+Composed the independently reviewed host-only helper patch from FWUI 1b8a498c96195dbf0d740d2ee1e8662172d9d36a over the current integration hooks. Only help_fits under X0X_HOST changes: a valid NULL primary footer fragment is measured and printed safely, matching the existing secondary guards. The native renderer is unchanged. Donor test/scenario corrections and original failure logs are retained with their exact executed-7f-overlay scope; those producer results are not a current-composition replay. Awaiting the separate live-envelope correction for one coherent native and affected managed-host qualification. Full Local remains open.
+
+## Reference upload hold (not delivered)
+
+The 9W9 archive publication was denied by automated review with: "The blob is a large, insufficiently screened archive containing audio/binary material and potentially excluded raw captures, exceeding the user’s stated per-write limit; its exact contents and authorization for this publication are not established." No 9W9 commit or reference update occurred. The original is preserved privately; no retry, alternate representation or alternate upload route is permitted pending the owner's approval. The integration owner remains accountable for recording the decision and completing only an authorized route.
+
+The preserved screening receipt records a 304497-byte ZIP, 405996 base64 characters and 406092-byte JSON write, below the 700000-byte cap; all 21 members match the independently verified public GPL upstream source inventory, including three original public reference WAVs. This evidence does not override the denial. At the time of that denial, the 8W8 blob upload had succeeded but was not committed and TB3PO upload had not been attempted. Later independent TB3PO work is recorded below. All three snapshots remain prepared prerequisites, not a delivered reference bundle or passing comparison. Other source/gate work continues independently.
+
+## Complete prior managed inventory
+
+The exact7f6 run's463 unique selectors reconcile to430PASS,14FAIL,19NOT_RUN. Four complete summary/failure/manifest/selector files were recovered and hash verified; screened copies and original/public hashes are in docs/lanes/evidence/integ-managed-7f-inventory. Raw logs remain preserved separately, not fully reconstructed here. This historical whole-inventory result is not current-source qualification. Corrected batch must cover fixed failures and affected previously passing dependencies, preserving all exclusions until their required inputs/routes are qualified.
+
+## Historical unregistered wheel fixture diagnosis
+
+The separate original_wheels_integration harness remains unqualified: after owner-field and current CC1 mapping diagnostics, an unchanged assertion at caller245 expects pitch-bend1 after a recorded motion lane applies0. The actual current mot_apply explicitly calls perf_apply for performance lanes; exact consolidated e742 has the same source branch. This is not evidence that the integration grouping introduced a runtime regression. Current registered perf-wheel-motion coverage is separate. No production behavior or assertion was relaxed; the historical runner also retains a documented partial input-binding gap, so its diagnostic runs are not gate/sanitizer qualification. Integ owns any eventual contract/fixture reconciliation and staged dependency repair.
+
+Two independent non-denied source prerequisites are now included in this draft:8W8 and code-only TB3PO, with39 total original licensed files verified by Git/SHA256/length and exact inventories. Existing8W8 blob and first TB3PO blob uploads succeeded (TB3PO JSON95943bytes below700000cap). No9W9 archive or alternate content representation is included; its denial remains in force. Publication and comparison qualification are separate; this does not resolve909 or full host completion.

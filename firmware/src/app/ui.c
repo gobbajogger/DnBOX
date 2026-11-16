@@ -6789,10 +6789,10 @@ static int help_fits(void)
                         ui.rec = (uint8_t)(b & 2);
                         any_button = (uint8_t)(b != 0);
                         footer_text(&fa, &fb, &fc);
-                        w = 4 + tw(&FONT_T, fa) + (fb ? FOOT_GAP + tw(&FONT_T, fb) : 0) + (fc ? FOOT_GAP + tw(&FONT_T, fc) : 0);
+                        w = 4 + (fa ? tw(&FONT_T, fa) : 0) + (fb ? FOOT_GAP + tw(&FONT_T, fb) : 0) + (fc ? FOOT_GAP + tw(&FONT_T, fc) : 0);
                         if (w > 236) {
                             if (ok)
-                                printf("footer too wide: \"%s / %s / %s\" (%d px)\n", fa, fb ? fb : "", fc ? fc : "", (int)w);
+                                printf("footer too wide: \"%s / %s / %s\" (%d px)\n", fa ? fa : "", fb ? fb : "", fc ? fc : "", (int)w);
                             ok = 0;
                         }
                     }

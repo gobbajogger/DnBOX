@@ -1,14 +1,14 @@
 # Working
 
-Verified consolidated source remains firmware `e742be7bd0d01323c899de6e156f40b85ee451db` and nightly `9165adb92fcdaab756c4e59e3d4a8ee22437ca5a`. No v2 lane is merged into those targets. Latest observed integration drafts are firmware `fef9b94d93fb2fc495d18e5da960197e786caf26` and nightly `4c9db78a617971588ae56b03faefd224c93bfbca`; these are not delivered sources.
+Verified consolidated sources remain firmware `e742be7bd0d01323c899de6e156f40b85ee451db` and nightly `9165adb92fcdaab756c4e59e3d4a8ee22437ca5a`. No v2 lane is merged into those targets. Latest live integration drafts verified through the GitHub connector are firmware `731f5abd8357cfe8654222b3d5e3ed03b5749fb0` and nightly `7ca561b50833d2d6a38e10ada05b80047391f41a`; this successor adds source prerequisites/evidence, not delivered runtime.
 
 | Owner | Current outcome and bounded evidence |
 |---|---|
-| sound | Source-faithful original engines, full factory/control/FX comparisons and stock-device fit remain unfinished. The 7972-byte Synth One pre-FX owner excludes tuning, sustain bookkeeping, full FX and stack. |
-| fwui | Reviewed SONG status-only correction95bb is composed in fef9; genuine screen/glyph/text fixtures have bounded acceptance, not complete screen Review10/10 or F1–F7 PASS. |
-| integ | Exact fef9 Elite/Pro default native builds pass: XIP free3268/3276B, RAM1096B, pool margin836B above8192 reserve. This is not extra PADCAL, hardware, or a full Local result. Original/derived protocol differential and default managed sanitizer pass in bounded scope; native endpoint still unadmitted. |
-| remote | Actual-source scalar stdin fixture exercises unchanged BrowserClient and typed Lua guards; no native endpoint/HELD admission or complete R1–R7 qualification. |
-| web | Current4c9 contains reviewed browser/TouchOSC sources,241 product paths and bounded actual browser observations. Complete Local, viewport review and Pages publication remain open. |
-| test-and-merge | Independently verified596 firmware and4c9 nightly containment/limits, and scoped source/host/native evidence. Current fef9 native resource check passes; no full Local or Review10/10. |
+| sound | Full original factory/control/FX comparisons and stock-device fit remain unfinished. The7972-byte Synth One pre-FX owner excludes tuning, sustain bookkeeping, fullFX and stack; component optimizations do not establish complete native fit. |
+| fwui | Reviewed LIGHT/metro and clip-fixture work is composed in731f. Remaining host-help crash/live-glyph/scenario fixes have active FWUI ownership. Bounded render/fixture results are not complete screen Review10/10 or F1–F7 PASS. |
+| integ | Independently measured7e398 Elite/Pro resources: XIP3156/3164B free, RAM1096B, poolmargin836B. Exact map-only ELFs match those binaries. Later731f runtime needs its own coherent native check; protocol endpoint still unadmitted. Two independent licensed prerequisites (8W8/TB3PO) are included in this pending checkpoint; comparisons remain unexecuted. Separate9W9 upload was denied and is held privately pending owner approval, with no retry/reroute. Full comparison prerequisites are not delivered or qualified. |
+| remote | Actual scalar stdin fixture and typed Lua guards have bounded evidence; no native endpoint/HELD admission or complete R1–R7 qualification. |
+| web | Nightly9a883 retains241 product paths and bounded actual browser evidence. Full Local, viewport review and Pages publication remain open. |
+| test-and-merge | Exact frozen7f6 managed inventory completed430PASS/14FAIL/19NOT_RUN across463 selectors; source5350 blobs unchanged. Four recovered result files reconciled independently. Corrected-source batch must include repaired failures and affected passing UI dependencies; old430PASS is not current-head qualification. Exact731f no-loss/limits and policy4/clip7+7 pass within scope, not full Local/C4/Review. |
 
-Integration owns shared runtime/build interfaces and these queues. Detailed source pins, evidence exclusions and failures remain in each lane file. Older queue pins are preserved in Git history, not current status or instruction. Each lane retains its existing draft PR.
+Integration owns shared runtime/build interfaces and queues. Every old failure, correction and remaining exclusion remains in lane evidence; no result is silently promoted across changed inputs. Existing lane draft PRs remain open and unmerged. Older queue pins are history, not instructions.

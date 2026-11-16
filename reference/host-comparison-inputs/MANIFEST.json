@@ -1,0 +1,308 @@
+{
+  "schema": "dnbox-licensed-host-reference-snapshots/1",
+  "scope": "Complete upstream src/ blobs plus LICENSE at the exact commits; repository metadata/docs outside src excluded. Reference tests only, not firmware activation.",
+  "inputs": [
+    {
+      "name": "schwung-8W8",
+      "repository": "charlesvestal/schwung-8W8",
+      "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+      "archive": "schwung-8W8.zip",
+      "bytes": 152437,
+      "sha256": "5fb86d732d7bc972e74219246fbbd02449bc20146b8c796d2ede9f557843a4df",
+      "files": [
+        {
+          "path": "LICENSE",
+          "mode": "100644",
+          "bytes": 35149,
+          "gitBlob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        },
+        {
+          "path": "src/dsp/sc808_bd_circuit.h",
+          "mode": "100644",
+          "bytes": 17221,
+          "gitBlob": "3505e09815d0c14d19af325ee3be6ecc52de0bfe",
+          "sha256": "ba4be526d507c734814754d04775bb248e7e0590f20a76825cb092c1d4e262aa"
+        },
+        {
+          "path": "src/dsp/sc808_circuit_common.h",
+          "mode": "100644",
+          "bytes": 6531,
+          "gitBlob": "585f964c19d3d90e92fe03cdd3c9e5cd75a1da7c",
+          "sha256": "a35d63dea29c4e7f5e8864d95b26dfab0ca6567d2fd6e0209bac742cb41c4814"
+        },
+        {
+          "path": "src/dsp/sc808_cp_circuit.h",
+          "mode": "100644",
+          "bytes": 9831,
+          "gitBlob": "44be9b6cf29843bb53dc0fb501193e8e7c9926a9",
+          "sha256": "14c68a032cd008d5cec7086f70355eac3c897679e521adb4d57928266174307d"
+        },
+        {
+          "path": "src/dsp/sc808_engine.cpp",
+          "mode": "100644",
+          "bytes": 42051,
+          "gitBlob": "cc58c68a1039b18bebc7fae78422945bba13ab25",
+          "sha256": "81a926b7fbde0b8eb777c53909613afb6396b4fd5eabd773cf30214e1e085f53"
+        },
+        {
+          "path": "src/dsp/sc808_engine.h",
+          "mode": "100644",
+          "bytes": 3284,
+          "gitBlob": "d569cd3850b7ceeaf996ef0f15f178615ecfa12b",
+          "sha256": "85d142a2ab0f1eb01beac74f25059cc44be3122e3b8a5a271161a061856bff06"
+        },
+        {
+          "path": "src/dsp/sc808_fx.h",
+          "mode": "100644",
+          "bytes": 9205,
+          "gitBlob": "59ce2d446e92dee35e015ff632c725f6421ad648",
+          "sha256": "b160446c1ca9c00caf6ca4ccc752ce24885dbe73ff09efd85bb35303cfe1ad6d"
+        },
+        {
+          "path": "src/dsp/sc808_mt_circuit.h",
+          "mode": "100644",
+          "bytes": 37529,
+          "gitBlob": "3aff9732ddf83c8896bc8948fc469e17e792e201",
+          "sha256": "3bdbf5f389100063cbc6287a5bb83160c4db0d1e6075c6398b9ec3ba67a1ba0a"
+        },
+        {
+          "path": "src/dsp/sc808_params.h",
+          "mode": "100644",
+          "bytes": 44779,
+          "gitBlob": "bac38873268b51748b70166ac6da78e0764b7b24",
+          "sha256": "693a2b775ac6d5f32d514a2d32ed5f4b2b5f74a37aa30f850c1bbd760b802965"
+        },
+        {
+          "path": "src/dsp/sc808_plugin.cpp",
+          "mode": "100644",
+          "bytes": 16883,
+          "gitBlob": "a8efdde74556e7c53a2cb7bd90d1a3af0b4b34f5",
+          "sha256": "eac0fcc6a0d48f0ef14673ddd5b22530e5ce046a264ce05bca3690ec6542697f"
+        },
+        {
+          "path": "src/dsp/sc808_rs_circuit.h",
+          "mode": "100644",
+          "bytes": 8537,
+          "gitBlob": "783a38c34c0ef142bcdb4b5b2bfc33f1a997ae2c",
+          "sha256": "40ea48128de7770bf082adb1a4724398d43868d5769350cf22691251df441a9d"
+        },
+        {
+          "path": "src/dsp/sc808_sd_circuit.h",
+          "mode": "100644",
+          "bytes": 11254,
+          "gitBlob": "58804b6b41a5b3ca3c93a08cff33870bf7cedbbf",
+          "sha256": "116c6dd803740026470a1a5848c82cd7609cb853dee41d526266010d8485cca5"
+        },
+        {
+          "path": "src/dsp/sc808_shape.h",
+          "mode": "100644",
+          "bytes": 7196,
+          "gitBlob": "6d98205202403a61e19562e26e02c435ebabd07a",
+          "sha256": "34a19fd7ea6d2071ef46df2d32224921a922440414dc8e9ed5cff14d2f0f2417"
+        },
+        {
+          "path": "src/dsp/sc808_tom_circuit.h",
+          "mode": "100644",
+          "bytes": 13296,
+          "gitBlob": "3ac958b540e02e31c3232468591c6a6ff2cc3748",
+          "sha256": "d35b90513893fad2498ff539b28138195d63e9802a0f09b095d305672b6845b1"
+        },
+        {
+          "path": "src/dsp/sc808_voices.h",
+          "mode": "100644",
+          "bytes": 31961,
+          "gitBlob": "e5215066eb9a214385c9da6b2554904520d11083",
+          "sha256": "58969682be9f3d0feb704a8552427ca9953dc4dd4f66d2ecbae0b135743805a2"
+        },
+        {
+          "path": "src/dsp/sc_ugens.h",
+          "mode": "100644",
+          "bytes": 27358,
+          "gitBlob": "f59dae20520b7212ab0fa7ae4491bde81760d14d",
+          "sha256": "af9d55df75d2d2a3587c1eda8a6b3679fffdd7e0ef99da1f6c70e7f05aa01bdd"
+        },
+        {
+          "path": "src/help.json",
+          "mode": "100644",
+          "bytes": 6758,
+          "gitBlob": "5921d2f9bfbd8adbc8604f68da302f18e7a0ed55",
+          "sha256": "c4bc4036c10a5aaf1d5d6890e686bdd1f45dec0c91ed6f66b2ef8b2ddd1942c9"
+        },
+        {
+          "path": "src/host/plugin_api_v1.h",
+          "mode": "100644",
+          "bytes": 8517,
+          "gitBlob": "318406a227a850373fcf6360327a93db7517c540",
+          "sha256": "2c410cbc65202239d35dc0e6cd0cfa451be11d7693bf620ec6337c635358c646"
+        },
+        {
+          "path": "src/module.json",
+          "mode": "100644",
+          "bytes": 769,
+          "gitBlob": "66f71f80a766b1fe11fea4a72de63c8575d5a123",
+          "sha256": "f06291f3cdd71a361beace6f045c92944eb33781aaa38243f038bb25ed30d523"
+        },
+        {
+          "path": "src/patches/8W8.json",
+          "mode": "100644",
+          "bytes": 162,
+          "gitBlob": "2bf4115a80b5f80f0139b4f3581d64306f45791c",
+          "sha256": "8c2b10fc6d0788f85516eae165e8d950e0cfbf8a7dd1979ffc035242acd69c6c"
+        },
+        {
+          "path": "src/tools/bench.cpp",
+          "mode": "100644",
+          "bytes": 4560,
+          "gitBlob": "7dd416089a05c0fd890ea36f0ac715eda77aab56",
+          "sha256": "213e50d9edb5af67d41a759ee5064c5cade2cb57f6839e5ff458bdd3489c55d5"
+        },
+        {
+          "path": "src/tools/demo_pattern.h",
+          "mode": "100644",
+          "bytes": 3180,
+          "gitBlob": "de84c233cc901ab5504e8cb2e3c22e31127c5dd1",
+          "sha256": "22cd7c82b2440dd69787914bded29e7b66aaa4b3dc23d681976e5ed5d5bb774c"
+        },
+        {
+          "path": "src/tools/loadtest.c",
+          "mode": "100644",
+          "bytes": 26653,
+          "gitBlob": "602c662c1d2a2e251caf87179f4b44bb778af1c5",
+          "sha256": "fa1be7456358d6e6462186c5f63af506c34b915a702b68f4395e0fc0720a381c"
+        },
+        {
+          "path": "src/tools/nullref.cpp",
+          "mode": "100644",
+          "bytes": 7557,
+          "gitBlob": "b9e21c7cb98dac24acb5105b6530ba697e93320c",
+          "sha256": "3809d1b9447cf766bba9eebe1b3c113924b420de63a7905cfb726ed068593cbd"
+        },
+        {
+          "path": "src/tools/probes.cpp",
+          "mode": "100644",
+          "bytes": 5799,
+          "gitBlob": "78d42e6738431a30bf8a61451afdde4fe084b85a",
+          "sha256": "0c1cb3a852226569e44ac2ec81e8391fad870b33021604ab5e87c67a5e97fe10"
+        },
+        {
+          "path": "src/tools/render.cpp",
+          "mode": "100644",
+          "bytes": 3333,
+          "gitBlob": "9f1b01efd8538db8e25e0f1845d101df7cc214b2",
+          "sha256": "df6d2ee1b6e4d410d77620916490bbfa2c030e1659d126920acf5c1849cb5da2"
+        },
+        {
+          "path": "src/ui_chain.js",
+          "mode": "100644",
+          "bytes": 24094,
+          "gitBlob": "e26e5e05d5a830c7d6c64a4adba751522815e989",
+          "sha256": "82bc68d7c7d1f33c48a6d5b06eea8ffa053bf47888ce534809f63e533b3be883"
+        },
+        {
+          "path": "src/vendor/sc808/sc808.scd",
+          "mode": "100644",
+          "bytes": 19944,
+          "gitBlob": "790f312e1a3e724c13cad480697988edfd32778f",
+          "sha256": "1d5d381bfeab976ac611c83922257de9a1cbcc437f0b30a5c5d739f26bab4aa4"
+        },
+        {
+          "path": "src/web_ui.html",
+          "mode": "100644",
+          "bytes": 28940,
+          "gitBlob": "2cc74d5d868327c63f7117eb16a835b25e9afc42",
+          "sha256": "8ab49dce7b2743ff6d98c2b08ae05e7c428bbae9ecd39723493beb18bb4a6200"
+        }
+      ],
+      "sourceTree": "a042961b65cb420bd1555de3cd93cbb7c807652f"
+    },
+    {
+      "name": "schwung-tb3po",
+      "repository": "charlesvestal/schwung-tb3po",
+      "commit": "f49d81d05d1e29ae37728a08e30f193892be3bc9",
+      "archive": "schwung-tb3po.zip",
+      "bytes": 71888,
+      "sha256": "913c42456d23907372f72ee803fd72b6ddcbdd3df51df18ceaca2e054df4c880",
+      "files": [
+        {
+          "path": "LICENSE",
+          "mode": "100644",
+          "bytes": 35149,
+          "gitBlob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        },
+        {
+          "path": "src/dsp/include/plugin_api_v1.h",
+          "mode": "100644",
+          "bytes": 6823,
+          "gitBlob": "d968786f84a60b035c2a763d112b1e26d7e77749",
+          "sha256": "ed1f56dc7773969a367d48b0b63bd06bfa433a43c57cc1827846779701aece5e"
+        },
+        {
+          "path": "src/dsp/tb3po.c",
+          "mode": "100644",
+          "bytes": 48503,
+          "gitBlob": "51edd01c52736d116936820341d89a4d053824a1",
+          "sha256": "f9345b97eb05692a161893ac1d3d2d100025eb68f4f90e8b7ae7605533d7c9e6"
+        },
+        {
+          "path": "src/help.json",
+          "mode": "100644",
+          "bytes": 8184,
+          "gitBlob": "892534a478688b20c4cc04757932160374bb2fd1",
+          "sha256": "6ab03c5c39918365bc50d4f776e0667f73a9863491e64d583da042c46c1e964c"
+        },
+        {
+          "path": "src/lane.mjs",
+          "mode": "100644",
+          "bytes": 5223,
+          "gitBlob": "7f05777ec0a71e3b76912ce6d437bf4f049f25f9",
+          "sha256": "2f35179a6cae6a6a66d457a70dd504a81c6d0254087026ad3e3ca61da3fbe610"
+        },
+        {
+          "path": "src/module.json",
+          "mode": "100644",
+          "bytes": 589,
+          "gitBlob": "e3064eeb10d5d83fdd7fbe72181fcf9a9cad1cf6",
+          "sha256": "e173e52108fb7a39f6b44083c0ab77c235fc8d65489cc66b92faa7a11b2026f5"
+        },
+        {
+          "path": "src/pad_map.mjs",
+          "mode": "100644",
+          "bytes": 3847,
+          "gitBlob": "19d8a45a64a1d9d1345070a60249fd5a14d5f3a9",
+          "sha256": "6a7e06e3d60d7ac002f671af143357249d02d3e515b1f021ff14b25848b7308a"
+        },
+        {
+          "path": "src/pages.mjs",
+          "mode": "100644",
+          "bytes": 10852,
+          "gitBlob": "c5448760642dc2556fd77712bc2d1ed3471f4779",
+          "sha256": "fe0e4d3e50295e1deb941066380caa27b57cc25c59f77e7631c5eab9b5998133"
+        },
+        {
+          "path": "src/params.mjs",
+          "mode": "100644",
+          "bytes": 14699,
+          "gitBlob": "2f72301b3fa8bf66fc6b6c54ea84e99adbe92d83",
+          "sha256": "e2509f62f049c6508016a219bd7a8d2a1211db2b6a4d9a137112bc4a2e8ea358"
+        },
+        {
+          "path": "src/ui.js",
+          "mode": "100644",
+          "bytes": 75434,
+          "gitBlob": "c9c4ef363083279af79332f6ccf0f638355407b7",
+          "sha256": "24bc2a78d9af8f4c403ef60deca4fdb0c0587c6d77d9dd804f7f11d4203328a9"
+        }
+      ],
+      "sourceTree": "2d87c9ef8a0fe1fca4b0af524e8939fbdf6fb904"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "schwung-9W9",
+      "status": "UPLOAD_DENIED_PRIVATE_HOLD",
+      "reason": "Separate original retained privately; no retry or alternate publication route pending owner approval."
+    }
+  ]
+}
