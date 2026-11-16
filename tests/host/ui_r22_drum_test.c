@@ -22,9 +22,11 @@ int main(void)
     setup(V_PART,PART_909);*page_of(V_PART)=1;build_pages();
     cv_begin(240,2*BAND_H,C_BLACK);cv_band(0,BAND_H);draw_drum_voice(0);
     uint16_t inactive_pixels[240*BAND_H];memcpy(inactive_pixels,cv_px,sizeof inactive_pixels);
-    cv_begin(240,BAND_H,SOUND_FACE);text_c(33,20,&FONT_T,"TUNE",SOUND_GRAY);
+    /* Shared four-track centre is34, not the retired hardcoded33.
+     * The original exact22 pixel failure remains in its immutable ledger. */
+    cv_begin(240,BAND_H,SOUND_FACE);text_c(34,20,&FONT_T,"TUNE",SOUND_GRAY);
     unsigned caption_ink=0;
-    for(int y=20;y<32;y++)for(int x=15;x<53;x++)if(cv_px[y*240+x]!=swap16(SOUND_FACE)) {
+    for(int y=20;y<32;y++)for(int x=16;x<54;x++)if(cv_px[y*240+x]!=swap16(SOUND_FACE)) {
         caption_ink++;CHECK(inactive_pixels[y*240+x]==cv_px[y*240+x]);
     }
     CHECK(caption_ink>0);

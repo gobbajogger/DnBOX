@@ -1,12 +1,12 @@
 # Firmware UI living status
 
-Updated 2026-11-16 09:34 UTC. Accountable UI owner: Dot firmware. Integration/Release owner: repository steward. Sound owner: sound_engine_qualification. This is the single working UI status record; roadmap ownership remains with the root. Gate source is authoritative in PR951 and is not duplicated by this UI-only WIP branch.
+Updated 2026-11-16 09:55 UTC. Accountable UI owner: Dot firmware. Integration/Release owner: repository steward. Sound owner: sound_engine_qualification. This is the single working UI status record; roadmap ownership remains with the root. Gate source is authoritative in PR951 and is not duplicated by this UI-only WIP branch.
 
 ## Latest instruction and next deadline
 
 Owner19:27/19:30 supersedes the broad pause. UI retains its live branch while Integration uses immutable checkpoints only. Finishing existing work, not rebuilding it. Push the preserved current authored UI WIP as-is to own non-main branch, no force/main or excluded content, before10:00UTC; first target09:50UTC. Then≤30minute WIP cadence. Reviewed merge/qualified release remains separately blocked. No branch deletion or landed merge before retained-content triple-check, exact-consolidated-SHA gates and independent before/after behavior/render review.
 
-Next deadline: verify first UI WIP remote SHA and paired private eligible-source artifact by09:50UTC. Target full all-available-screen WIP remains11:30UTC, explicitly excluding unimplemented genuine new-engine runtime states. The complete preserved private source/evidence checkpoint has been round-trip verified; Integration owns its consolidation and release scope. UI owns all screens, R023–R026 and geometry; Sound owns both real replacement engines. New code cannot bypass actual backend/schema/admission or memory gates.
+First UI WIP pushed/readback verified09:35UTC:22c589ef678f48fcdcb45b83386b626f3fa8b2a5, treecb7d64dfa0e5e9886310de09b26cef0f9376d955. Paired Library filename DnBOX-firmware-ui-WIP-20261116-0935-22c589ef678f48fcdcb45b83386b626f3fa8b2a5.zip,175299bytes,SHAf6672d81b28f5eccf0cbaa8e3da4661e34b4e01d2b5eccc48a22d1c14846d14b; all29Gitfilebytes verified through Library roundtrip. Next WIP push10:00UTC, then≤30min cadence. Target full all-available-screen WIP remains11:30UTC, explicitly excluding unimplemented genuine new-engine runtime states. The complete preserved private source/evidence checkpoint has been round-trip verified; Integration owns its consolidation and release scope. UI owns all screens, R023–R026 and geometry; Sound owns both real replacement engines. New code cannot bypass actual backend/schema/admission or memory gates.
 
 ## References consumed
 
@@ -52,4 +52,11 @@ Next deadline: verify first UI WIP remote SHA and paired private eligible-source
 
 ## Safety and ownership
 
-No new public product push, merge, release, Actions/workflows, network Git, device write, force push or branch deletion. The12 already-tracked approved original-derived headers remain byte-for-byte unchanged. New private coefficients/model/original artifacts stay outside public Git. All failed/changed-input attempts remain recoverable. New engines do not become real through string changes or made-up controls. FirmwareUI live writer resumed after explicit exclusive-scope reconciliation; Integration writes only immutable consolidation snapshots.
+Only authorized non-main WIP source preservation pushes; no merge/release, Actions/workflows, network Git, device write, force push or branch deletion. The12 already-tracked approved original-derived headers remain byte-for-byte unchanged. Latest owner19:35 permission supersedes older exclusions: ONLY secrets/tokens are excluded from Git; all other owned source/data/captures/coefficients/binaries are Git+Library as supported, without executing unrecognized software absent required approval. All failed/changed-input attempts remain recoverable. New engines do not become real through string changes or made-up controls. FirmwareUI live writer resumed after explicit exclusive-scope reconciliation; Integration writes only immutable consolidation snapshots.
+
+## Exact22 first-input and current follow-on
+- Clean exact22focusedhost first run:6PASS,2FAIL. Originalcaption/compactTUNEpixel tests retained retired48px/33px coordinates. One canonical34px-centre update passes1197checks; captionbaseline repair now passes at82px, with failed80pxrepair attempts preserved, not presented as originalPASS.
+- Actual870constructed captures on clean22 completed, not independently reviewed/all-engine accepted. Current review found PAN falsely normalized to50% by shared unit fallback; real native-font RED and follow-on exclusion are recorded.
+- Held-step early shared-row routing was a genuine codepath regression. Source follow-on restores actualNOTE/GATE/ACCENT/SLIDE unit definitions; exact font-mask calibration still failing and not accepted.
+- Native FX adaptation now shows one selected four-control effect bank plus allfive send rows, instead of overlapping8px send captions. Other effect controls remain on existing pages, not removed. Source follow-on not yet full-size reviewed.
+- Existing independent reviewer admission was explicitly blocked by threadlimit; no review was admitted or claimed.

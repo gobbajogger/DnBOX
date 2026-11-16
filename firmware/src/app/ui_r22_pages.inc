@@ -46,7 +46,7 @@ static void r22_control_unit(pref_t r,int x,int y,int w,int h,int active,uint16_
     pref_value_of(r,val,num,unit);
     /* An explicitly unitless engine amount may be displayed as its normalized
      * amount, never invented Hz/ms. Typed integer/enum scheduling stays intact. */
-    if(r.kind==R_ENG&&!d->names&&!unit[0]&&d->max==127){put_i(num,(val*100+63)/127);put_s(unit,"%");}
+    if(r.kind==R_ENG&&!is_pan(r)&&!d->names&&!unit[0]&&d->max==127){put_i(num,(val*100+63)/127);put_s(unit,"%");}
     put_s(put_s(value,num),unit);
     const felucca_font_t *font=&FONT_S;
     if(tw(font,value)>w-4)font=&FONT_T; /* Recorded as a typography limit, not silently accepted. */
@@ -68,8 +68,38 @@ static void r22_bank(int y,int h,const char *title,const pref_t refs[4],int acti
         r22_control_unit(refs[k],x,py+15,w,h-17,active,part_col());cell++;
     }
 }
+static void r22_held_step_row(int off)
+{
+    static const char *const names[]={"NOTE","GATE","ACCENT","SLIDE"};
+    static const char *const gates[]={"REST","NOTE","TIE"};
+    const bpart_t *bp=&cur_pat()->bass[bidx()];
+    const bstep_t *st=&bp->step[ui.held_step];
+    int y=142-off;char title[40];knob_tag(title);
+    surface_panel(3,y,234,76,ui.touched>=0,0,0,0);
+    cv_text(11,y+3,&FONT_T,title,SOUND_GRAY);
+    for(int k=0;k<4;k++){
+        int cx=34+k*57,gy=y+35;char value[16];uint16_t ink=ui.touched==k?part_col():SOUND_WHITE;
+        text_c(cx,y+17,&FONT_T,names[k],SOUND_INK);
+        if(k==0){
+            int note=held_note_of(bp,ui.held_step)+bp->transpose-24;
+            put_note(value,note);
+            for(int j=0;j<3;j++)cv_rect(cx-16,gy-5+j*5,33,1,SOUND_LINE);
+            int py=gy+6-(note%12)*12/11;
+            cv_stroke_aa(cx-3,py,cx+3,py,3.f,ink);cv_stroke_aa(cx+4,py,cx+4,py-10,2.f,ink);
+        }else if(k==1){
+            int gate=bstep_gate(st);put_s(value,gates[gate<3?gate:0]);
+            for(int j=0;j<3;j++)rbox(cx-17+j*13,gy-3,9,9,R22_RADIUS,j==gate?ink:SOUND_LINE);
+        }else{
+            int on=(st->flags&(k==2?BS_ACCENT:BS_SLIDE))!=0;put_s(value,on?"ON":"OFF");
+            if(k==2){for(int j=0;j<4;j++)cv_stroke_aa(cx-15+j*10,gy+6,cx-15+j*10,gy+6-(on?4+j*3:3),2.f,ink);}
+            else {cv_stroke_aa(cx-17,gy+5,cx-5,gy+5,2.f,ink);cv_stroke_aa(cx+5,gy-5,cx+17,gy-5,2.f,ink);if(on)cv_stroke_aa(cx-5,gy+5,cx+5,gy-5,2.f,ink);}
+        }
+        text_c(cx,y+56,&FONT_S,value,SOUND_WHITE);
+    }
+}
 static void r22_knob_row(int off)
 {
+    if(ui.view==V_SEQ&&is_303()&&ui.held_step>=0){r22_held_step_row(off);return;}
     int p=cur_page();char title[40];knob_tag(title);
     r22_bank(142,76,title,pg.r[p],ui.touched>=0,off);
 }
@@ -102,16 +132,22 @@ static void r22_fx(int band)
 {
     int off=band*BAND_H;
     cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
-    r22_bank(4,76,"REVERB",pg.r[0],cur_page()==0,off);
-    r22_bank(84,76,"DELAY",pg.r[1],cur_page()==1,off);
-    surface_panel(3,164-off,234,54,0,0,0,0);
-    cv_text(11,166-off,&FONT_T,"PART SENDS",SOUND_GRAY);
-    cv_text(111,166-off,&FONT_T,"REV",SOUND_GRAY);cv_text(183,166-off,&FONT_T,"DLY",SOUND_GRAY);
+    int p=cur_page();
+    r22_bank(4,82,pg.title[p],pg.r[p],1,off);
+    surface_panel(3,90-off,234,128,0,0,0,0);
+    cv_text(11,94-off,&FONT_T,"SEND",SOUND_GRAY);
+    text_c(112,94-off,&FONT_T,"REVERB",SOUND_GRAY);
+    text_c(192,94-off,&FONT_T,"DELAY",SOUND_GRAY);
+    /* Native240px: one four-control effect bank and allfive send rows.
+     * Desktop may display bothbanks; page navigation retains everyreal ref. */
     for(int pos=0;pos<NPARTS;pos++){
-        int p=part_at(pos),y=178+pos*8-off;
-        cv_text_clip(11,y-1,&FONT_T,part_display(p),PART_COL[p],11,91);
-        night_send(104,y,54,proj.sound.v[T_MIX][p][MX_REV],PART_COL[p]);
-        night_send(174,y,54,proj.sound.v[T_MIX][p][MX_DLY],PART_COL[p]);
+        int part=part_at(pos),y=110+pos*20-off;
+        cv_text_clip(11,y+2,&FONT_T,part_display(part),PART_COL[part],11,77);
+        for(int send=0;send<2;send++){
+            int x=80+send*80,raw=proj.sound.v[T_MIX][part][send?MX_DLY:MX_REV];
+            night_send(x,y+7,42,raw,PART_COL[part]);char n[12];put_s(put_i(n,(raw*100+63)/127),"%");
+            text_r(x+71,y+1,&FONT_S,n,SOUND_WHITE);
+        }
     }
 }
 static void r22_mix(int band)

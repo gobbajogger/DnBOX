@@ -1,0 +1,112 @@
+{
+  "commit": "22c589ef678f48fcdcb45b83386b626f3fa8b2a5",
+  "scope": "Focused currentexactWIP source, not full UI/native/device/engine qualification. Prior changed-source and setup failures remain retained. No claim equivalent inputs were never run before Gitpublication.",
+  "runs": [
+    {
+      "test": "ui_r22_material_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:40:05.636133+00:00",
+      "durationSeconds": 35.92381572723389,
+      "exit": 0,
+      "sourceFileSHA256": "b7fbce9afe537769dceb43b4d4bafc645a370374e52d8962d4464334a0832af9",
+      "stdoutSHA256": "965b5d6beb7669d53ae6876a5b7366035e2e082180962d7f168732b10ea37819",
+      "stderrSHA256": "af08614e894c0ed872abab07ebb99c0f9472cf67970e5c8387c2f48dc4b2a1cd"
+    },
+    {
+      "test": "ui_fx_duplicate_caption_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:40:41.563635+00:00",
+      "durationSeconds": 27.977850914001465,
+      "exit": 0,
+      "sourceFileSHA256": "62f5823ecc54a9a048a79ff3654f1c9d6ca6990e0023110c96246c6e70f8dfee",
+      "stdoutSHA256": "5b8f29e10ad49cbfbfa723bd93336fe5d9b89bea3020f58e8731f7a133ff1b81",
+      "stderrSHA256": "d3b6d26dfa32b394dde21dc78a82b0fa6998aca0b9e0b9ddf873587a497590be"
+    },
+    {
+      "test": "ui_r22_common_header_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:41:09.545321+00:00",
+      "durationSeconds": 26.966086864471436,
+      "exit": 0,
+      "sourceFileSHA256": "578b87f14703b303352aa6f90ca56bea69b2590bb382c24ee802bc4a4187765f",
+      "stdoutSHA256": "fd95a96784c4a147d10d39b820e189a649b992f341a081df617ecc953abde5b5",
+      "stderrSHA256": "ec80145f9c68249eed2431c569e1f62841fb148a13b3aca8d50b88c4a7488853"
+    },
+    {
+      "test": "ui_909_kit_semantics_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:41:36.514195+00:00",
+      "durationSeconds": 33.160444259643555,
+      "exit": 0,
+      "sourceFileSHA256": "b0edf467fb64fa7827a5234ebae72222c30cac7295506232feaaba62cfc2315f",
+      "stdoutSHA256": "d9c9944df0ffee0e0fafc33a5566bf8e335fd7987c23bf446f0acb1504a8fe21",
+      "stderrSHA256": "e8a8b9be8b57e3be0650f5f149e3dfd5db01f9273d4a3854d62dff693a010d84"
+    },
+    {
+      "test": "ui_drum_cell_alignment_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:42:09.676894+00:00",
+      "durationSeconds": 26.055185794830322,
+      "exit": 0,
+      "sourceFileSHA256": "80c5c9b8e1433836d538937989f126037529cc0d6ae1492cb427760e8a9ea134",
+      "stdoutSHA256": "ec181b171729e2051f0ad8933714d656d30f33f505ff57b6967155b7ef1f4a33",
+      "stderrSHA256": "9acc3e0092f0274e4ca961ecdb57e75e37ef40185ca44cd23c0a235947370bbc"
+    },
+    {
+      "test": "ui_909_kick_units_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:42:35.733857+00:00",
+      "durationSeconds": 27.050416946411133,
+      "exit": 0,
+      "sourceFileSHA256": "e98672d001adbd554a567306d3087abf7222605ab06383e4da11bd26ef90f038",
+      "stdoutSHA256": "6e66579cf362ca214df5488c0049e79aaf6594a1328bb511fb65d9a0dcf2220e",
+      "stderrSHA256": "cf6585d38e65d831df6e466f779a81bac173a0ea1bc884a671f03353b14163b6"
+    },
+    {
+      "test": "ui_drum_caption_band_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:43:02.785216+00:00",
+      "durationSeconds": 28.27375841140747,
+      "exit": 1,
+      "sourceFileSHA256": "94a6729d68672662c57719748c28a25fdb44e37ea11de29fe69d2fa0a13df09f",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "050fc1099c011ee0e73e4f89082879714e1fc7c68c6fcf3583b04f46aedf13b6"
+    },
+    {
+      "test": "ui_r22_drum_test.c",
+      "command": [
+        "sh",
+        "tests/host/smc_ui_test.sh"
+      ],
+      "startUTC": "2026-11-16T09:43:31.063219+00:00",
+      "durationSeconds": 27.80992817878723,
+      "exit": 1,
+      "sourceFileSHA256": "64d8ed9b24c9a739ea3f12e0bc6014537c415b8b4ecf06c98cc26109ddc30ede",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "47d063e81489eb0ff23429d89520ac4462eccbd6982f294b03148af066d9e053"
+    }
+  ],
+  "postHead": "22c589ef678f48fcdcb45b83386b626f3fa8b2a5",
+  "postStatus": ""
+}

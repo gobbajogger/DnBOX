@@ -1,0 +1,3 @@
+# Changed-input follow-on attempts
+
+These are actual retained localWIP attempts before the next source preservation commit, NOT exact22 first runs. Held-step unit rendering has an unresolved exactnative-font observer mismatch; failures remain visible and no acceptance is claimed. Pan actual rendered L50/C/R50 regression has real oldFAIL/newPASS after excluding pan from normalized amount fallback. Caption test repair's first wrong80px baseline failed and is retained;42pxcompact preceding row requires82px actualbaseline. TUNE34pxshared-centre repair passes1197focusedchecks; old33pxfailure remains in exact22 ledger. No complete all-page acceptance or release.
