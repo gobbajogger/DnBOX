@@ -1,0 +1,26 @@
+{
+  "sha": "2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490",
+  "explicitPadcal": 0,
+  "trackedFilesVerifiedAfter": 5507,
+  "models": [
+    {
+      "model": "elite",
+      "exit": 0,
+      "xipFree": 4500,
+      "ramHeadroom": 1528,
+      "poolAbove8192Reserve": 836,
+      "logSha256": "7c515a74910ee150417bc6317d0f6d52bed51eb7fb862f8fa4d3654a360867ea",
+      "elfSha256": "b29eef4e25c3b9659df604a0c3afd69e37f546dd7e40eb8e6d93a52c926ed303"
+    },
+    {
+      "model": "pro",
+      "exit": 0,
+      "xipFree": 4512,
+      "ramHeadroom": 1528,
+      "poolAbove8192Reserve": 836,
+      "logSha256": "8882293c64021c3de1785ef0a942003241fd0a07cec498f784d79ada4056c26c",
+      "elfSha256": "6411e494e338ce6727533a2389d502bcdac46be09e719fbeefea8c3f4513d0a6"
+    }
+  ],
+  "scope": "disabledPADCAL configuration only; not adopted savings or hardware/full Local"
+}

@@ -1,0 +1,22 @@
+{
+  "sha": "2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490",
+  "padcal": 1,
+  "sourceFilesVerifiedAfter": 5507,
+  "scope": "map-only relink matches independently built exact defaultPADCAL1 ELFs; no endpoint/fullLocal/device proof",
+  "models": [
+    {
+      "model": "elite",
+      "elfSha256": "d8950845114e735c20d8d523f9b9aae2f3ee5eeed62cef28e8ace52f5935139d",
+      "mapSha256": "3f1ab32b34cc9a787f05c04ce372c1bc9009458e856355a00f80626299fa2d4b",
+      "mapBytes": 207137,
+      "exit": 0
+    },
+    {
+      "model": "pro",
+      "elfSha256": "b20ed7c624fce050e187be953049e42441e406e70f18b9bb4d97bc1bdbcdff9f",
+      "mapSha256": "15b272f4c46813e120ec2573c26a07d10361f0d4529a82b36292f2dbdc083753",
+      "mapBytes": 204917,
+      "exit": 0
+    }
+  ]
+}

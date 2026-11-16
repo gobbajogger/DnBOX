@@ -5,17 +5,17 @@ Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly 
 
 ## Current finish lines and exact input scopes
 
-This checkpoint normally composes reviewed FWUI af56c8a4ba7b140402db71ba50a4dea6e14fddfe over ca0bbb444e8a1ed7534eb72add398c3aee0d3d28. The narrow patch restores live Decay/Noise Tail glyphs with the shared existing timestamp array, preserving integration hooks and the host NULL-footer fix. Exact new native/affected-host qualification remains required; prior7e resources are historical. Latest nightly draft is7ca561b50833d2d6a38e10ada05b80047391f41a. Neither draft is consolidated or delivered.
+Current production input is2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490, the reviewed af56 live-envelope repair over ca0bbb, with prior hooks/hostNULL preserved. This successor adds evidence only. Independent defaultPADCAL1 native Elite/Pro passed with2548/2556B XIPfree,1096B RAMheadroom and836B poolreserve margin. Exact matching maps and a separate disabledPADCAL0 configuration are retained below; affected managed host and full gates remain open. Latest nightly draft is7ca561b50833d2d6a38e10ada05b80047391f41a; neither is consolidated or delivered.
 
 - C1 FAIL: full before/after Local gates remain non-green; focused checks are not substitutes.
-- C2 prior scoped PASS: independent exact731f and7ca561 no-loss against actuale742/9165 targets; this successor needs its own exact check.
+- C2 prior scoped PASS: independent exact2d86 and7ca561 no-loss against actuale742/9165 targets; this successor needs its own exact check.
 - C3 FAIL: complete independent screen Review 10/10 is absent.
-- C4 FAIL overall: prior731f/7ca561 bounded limits pass; comprehensive secret/opaque-content review and this successor's full gate remain open.
+- C4 FAIL overall: exact2d86/7ca561 bounded limits pass; comprehensive secret/opaque-content review and this successor's full gate remain open.
 - C5 FAIL: unfinished I items remain.
 - C6 FAIL: PR955/136 remain drafts, not consolidated or delivered.
 - I0 FAIL: original consolidated firmware pool margin 172B is below 512B; baseline gates remain non-green.
 - I1 FAIL: targets and state record exist, but v2 lane work remains unmerged.
-- I2 FAIL overall: prior exact7e default production inputs build Elite/Pro with XIP3156/3164B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
+- I2 FAIL overall: exact2d86 default production inputs build Elite/Pro with XIP2548/2556B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
 - I3 FAIL: local exact f910 has a chorus deadline miss and all strict margins fail. Fixed-count managed 0ac/f910 comparison has 0 deadline misses but 4 strict-margin failures across 12 runs (before initial plain; after warmed plain/chorus/peaking). Matching PCM is not timing or hardware equivalence. Old 0ac-only green runs below are historical.
 - I4 scoped evidence: managed 13e0 normal/ASan/UBSan comparisons with default LSan pass and the six-file compact-program closure remains byte-identical through current runtime; not whole-current-head/full-gate qualification.
 - I5 FAIL: five authentic encoded/derived preview assets retained; actual browser transport checks are bounded, stock firmware embedding and Pages delivery unfinished.
@@ -873,3 +873,9 @@ Two independent non-denied source prerequisites are now included in this draft:8
 All20 published af56 donor blobs were authenticated before composition; applied only runtime-only.patch to ui.c/ui_drum_voice.inc, copied exact tests/evidence and donor lane state. Independent reviewer accepted source law/bounds, both1753-input manifests and direct equality of45,674,496 bytes across7434 cold-idle frames. Producer113424 host assertions are retained with their donor scope, not relabeled current-composition execution. No audio/input changes are claimed by this presentation patch. Current combined native and affected managed tests are next; no full Local or lane PASS.
 
 Independent exact ca0bbb predecessor no-loss/limits passed5491 tracked blobs. Its newly available reference selectors executed locally: TB3PO31920/31920 steps identical; drum808436 cases0fail, worst relative error6.135e-4 below1e-3. All39 licensed input files and clean source were verified. This closes those two missing-input results at ca0bbb only, not the denied909 input, full current host suite or new live-tail qualification; source-specific receipts remain with independent review.
+
+## Exact live-tail resource configuration and maps
+
+Independent defaultPADCAL1 and producer explicitPADCAL0 pairs both build at exact2d86; full5507 tracked-file after checks pass. Default1 XIP2548/2556,RAM1096,pool836reserve; disabled0 XIP4500/4512,RAM1528,pool836reserve. No feature was disabled in the adopted default configuration. Default1 map-only relinks reproduce independently built ELFs exactly. Screened logs/maps/receipts and original/public hashes are in docs/lanes/evidence/integ-live-tail-native. Corrected map-wrapper return guard has a reproducible synthetic negative/positive test; no old real build failure is inferred. Full Local/current host/all-engine or native protocol admission remains unqualified.
+
+The evidence bundle also preserves independently executed ca0bbb reference comparisons (808436cases,TB3PO31920steps) and exact2d86 no-loss/limits5507blob receipt/log. These are bounded source-specific checks, not whole-host/default-sanitizer or final-engine qualification.
