@@ -5404,6 +5404,20 @@ static part_header_snapshot_t part_header_snapshot;
 
 static void dv_full_title(char *t, int part, int v);
 static void dv_header_battery(int x, int y);
+/* The pickup hint must not erase the previous header's chain/page context. */
+static void header_pickup_detail(char *text,int pending)
+{
+    text[0]=0;
+    if(pending)return;
+    if(seq.chain_a!=seq.chain_b && !seq.song_on)put_s(text,"CHN");
+    else if(steps_view() && steps_len()>16)
+        put_i(put_s(put_i(text,ui.spage*16+1),"-"),ui.spage*16+16);
+}
+static const char *header_save_label(int state)
+{
+    return project_storage_unsupported()==2?"!":state==SAVE_QUEUED?queued_save_label():
+        state==SAVE_FAILED?"SAVE FAILED":"UNSAVED";
+}
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5495,6 +5509,19 @@ static UI_DRAW void draw_header(void)
         sound_slab(0,0,240,HDR_H,0);
         /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
         cv_text_clip(4,2,pickup?&FONT_S:&FONT_B,name,pickup?C_AMB:part_view()?part_col():SOUND_WHITE,4,125);
+        if((pickup || clip_mode) && ss!=SAVE_SAVED) {
+            const char *label=header_save_label(ss);
+            const felucca_font_t *font=pickup?&FONT_S:&FONT_B;
+            int left=4+tw(font,name)+6,width=tw(&FONT_XS,label)+10;
+            uint16_t ink=ss==SAVE_FAILED?RGB(255,70,70):C_AMB;
+            if(left+width<=130) {
+                box(left,3,width,13,ink);
+                text_c(left+width/2,vc(&FONT_XS,3,13),&FONT_XS,label,C_BLACK);
+            } else if(left+11<=130) {
+                box(left,3,11,13,ink);
+                text_c(left+5,vc(&FONT_XS,3,13),&FONT_XS,ss==SAVE_FAILED?"!":ss==SAVE_QUEUED?"Q":"*",C_BLACK);
+            }
+        }
         if (division_pad_owner() && !pickup && !clip_mode) {
             int dx = 4 + tw(&FONT_B, name) + 8;
             dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
@@ -5514,7 +5541,11 @@ static UI_DRAW void draw_header(void)
             char *end=put_i(put_s(pattern,seq.song_on?"S":"P"),
                 (seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[header_part])+1);
             if(pending)put_i(put_s(end,">"),cue+1);
-            cv_text(132,4,&FONT_T,pattern,pending?C_AMB:C_WHITE);
+            int context_end=cv_text(132,4,&FONT_T,pattern,pending?C_AMB:C_WHITE);
+            if(pickup) {
+                char detail[12];header_pickup_detail(detail,pending);
+                cv_text(context_end+3,4,&FONT_T,detail,SOUND_GRAY);
+            }
         }
         {   /* tempo, same readout as the shared header */
             char b[8];
@@ -5525,16 +5556,16 @@ static UI_DRAW void draw_header(void)
             if (!seq.ext || fm_fabsf(avg - (float)shown) > 0.6f)
                 shown = (int)(avg + 0.5f);
             put_i(b, shown);
-            text_r(200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);
+            text_r(pickup?215:200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);
         }
-        if(clip_mode) {
+        if(clip_mode || pickup) {
             uint8_t phase=seq.metro_view;
-            play_icon(168,4,!phase?C_DIM:phase<=4u?C_WHITE:C_HI);
+            play_icon(pickup?177:168,4,!phase?C_DIM:phase<=4u?C_WHITE:C_HI);
         } else if(seq.playing) play_icon(168,4,C_WHITE);
         else cv_rect(170,7,5,5,SOUND_GRAY);
-        if(ui.rec) dot(206,9,3,RGB(255,50,50));
+        if(ui.rec) dot(pickup?190:206,9,3,RGB(255,50,50));
         dv_header_battery(219, 5);
-        if(ss!=SAVE_SAVED) dot(211,3,1,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
+        if(ss!=SAVE_SAVED) dot(pickup?237:211,3,1,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
         cv_commit_header();
         if (cacheable) { part_header_snapshot = snapshot; part_header_snapshot_valid = 1; }
         return;
