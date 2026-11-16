@@ -1,0 +1,228 @@
+
+sound-v2-evidence/native-quad-activated/compact_morph.o:	file format ELF32-pi32v2
+
+Disassembly of section .text.s1c_runtime_morph_compute:
+s1c_runtime_morph_compute:
+       0:    7f 04             	[--sp] = {rets, r15-r4}
+       2:    e2 95             	sp += -44
+       4:    35 16             	r5 = r3
+       6:    14 16             	r4 = r1
+       8:    47 20             	r7 = 0
+       a:    20 44             	if (r0 == 0) goto 136 <s1c_runtime_morph_compute+0x94 : 94 >
+       c:    24 43             	if (r4 == 0) goto 134 <s1c_runtime_morph_compute+0x94 : 94 >
+       e:    25 42             	if (r5 == 0) goto 132 <s1c_runtime_morph_compute+0x94 : 94 >
+      10:    06 38             	r6 = [sp+96]
+      12:    60 16             	r0 = r6
+      14:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x18 : 18 >
+      18:    10 5d             	if (r0 == 0) goto 122 <s1c_runtime_morph_compute+0x94 : 94 >
+      1a:    42 64             	r2 = [r4+16] 
+      1c:    12 5b             	if (r2 == 0) goto 118 <s1c_runtime_morph_compute+0x94 : 94 >
+      1e:    23 60             	r3 = [r2+0] 
+      20:    13 59             	if (r3 == 0) goto 114 <s1c_runtime_morph_compute+0x94 : 94 >
+      22:    41 69             	r1 = [r4+36] 
+      24:    11 57             	if (r1 == 0) goto 110 <s1c_runtime_morph_compute+0x94 : 94 >
+      26:    40 67             	r0 = [r4+28] 
+      28:    80 f8 34 08       	if (r0 != 4) goto 104 <s1c_runtime_morph_compute+0x94 : 94 >
+      2c:    40 68             	r0 = [r4+32] 
+      2e:    80 f8 31 1a       	if (r0 != 13) goto 98 <s1c_runtime_morph_compute+0x94 : 94 >
+      32:    d0 ec 40 d0       	r13 = [r4+0]
+      36:    c2 14             	r10 = 0
+      38:    8a e9              <unknown instruction>
+      3a:    2c d8             	r12 += r2  #
+      3c:    60 e1 ff d4       		 r0 = r13 & 0x7F800000
+      40:    20 ff ff 04 27 00 	if (r0 == 2139095040) goto 78 <s1c_runtime_morph_compute+0x94 : 94 >
+      46:    d0 ec 44 80       	r8 = [r4+4]
+      4a:    60 e1 ff 84       	r0 = r8 & 0x7F800000
+      4e:    20 ff ff 04 20 00 	if (r0 == 2139095040) goto 64 <s1c_runtime_morph_compute+0x94 : 94 >
+      54:    d0 ec 4c 90       	r9 = [r4+12]
+      58:    c0 e1 98 09       	r0 = r9 >> 24
+      5c:    80 5b             	if (r0 != 0) goto 54 <s1c_runtime_morph_compute+0x94 : 94 >
+      5e:    40 6a             	r0 = [r4+40] 
+      60:    d0 ec 30 e1       	r14 = [r3+16]
+      64:    43 20             	r3 = 0
+      66:    80 fd 0f 02       	ifs (r0 < 1) goto 30 <s1c_runtime_morph_compute+0x88 : 88 >
+      6a:    43 6b             	r3 = [r4+44] 
+      6c:    73 fe 0a fe       	ifs (r3 > -1) goto 20 <s1c_runtime_morph_compute+0x84 : 84 >
+      70:    c1 24             	r1 += 4
+      72:    43 21             	r3 = 1
+      74:    10 05             	r0 = [r1++=4] 
+      76:    80 ec              <unknown instruction>
+      78:    05 d8             	r5 += r0  #
+      7a:    c3 21             		 r3 += 1
+      7c:    83 fd fa 1b       	ifs (r3 < 13) goto -12 <s1c_runtime_morph_compute+0x74 : 74 >
+      80:    43 20             	r3 = 0
+      82:    04 82             	goto 4 <s1c_runtime_morph_compute+0x88 : 88 >
+      84:    03 fc 06 18       	if (r3 > 12) goto 12 <s1c_runtime_morph_compute+0x94 : 94 >
+      88:    41 66             	r1 = [r4+24] 
+      8a:    60 e1 ff 14       	r0 = r1 & 0x7F800000
+      8e:    21 ff ff 04 03 00 	if (r0 != 2139095040) goto 6 <s1c_runtime_morph_compute+0x9A : 9a >
+      94:    70 16             	r0 = r7
+      96:    02 8b             	sp += 44
+      98:    5f 04             	{pc, r15-r4} = [sp++]
+      9a:    8a e9              <unknown instruction>
+      9c:    fb 19             	r3 = ~r7
+      9e:    eb e0 9e 74       	r11 = r7 + 0x4F000000
+      a2:    0b ed              <unknown instruction>
+      a4:    f7 19             	r7 &= r7
+      a6:    ea e0 7e 75       	r10 = r7 + 0x3F800000
+      aa:    11 ee              <unknown instruction>
+      ac:    80 ca              <unknown instruction>
+      ae:    3f e5              <unknown instruction>
+      b0:    1f 01             	tbh [r15]
+      b2:    3f e5              <unknown instruction>
+      b4:    8f 00              <unknown instruction>
+      b6:    3f e5              <unknown instruction>
+      b8:    11 10             	r1 = b[r1++=r8] (u)
+      ba:    c1 66             	[r4+24] = r1
+      bc:    e0 e0 40 a8       	r0 = r10 + 0xC00000
+      c0:    3f e5              <unknown instruction>
+      c2:    12 00              <unknown instruction>
+      c4:    c0 e1 32 f0       	r15 = r3 << 2
+      c8:    3f e5              <unknown instruction>
+      ca:    8f 1f             	r7 = r0 - r7
+      cc:    3f e5              <unknown instruction>
+      ce:    10 30             	r0 = -16
+      d0:    e0 e0 4f 74       	r0 = r7 + 0xCF000000
+      d4:    80 ed              <unknown instruction>
+      d6:    de 39             	r6 += 121
+      d8:    0b e9              <unknown instruction>
+      da:    dc 39             	r4 += 121
+      dc:    3f e5              <unknown instruction>
+      de:    1f 13             	b[r1++=r14] = r7
+      e0:    3f e5              <unknown instruction>
+      e2:    8f 01              <unknown instruction>
+      e4:    4b e0 01 00       	r11 = 1 <s1c_runtime_morph_compute : 0 >
+      e8:    90 ee              <unknown instruction>
+      ea:    80 03             	rep 18 r0 {
+      ec:    c3 14             		r11 = 0
+      ee:    b4 e0 12 1b       		r1 = r1 - r11
+      f2:    01 fc cf 67       		if (r1 > 51) goto -98 <s1c_runtime_morph_compute+0x94 : 94 >
+      f6:    d8 ec 2a b1       		r11 = [r2+r1<<2]
+      fa:    0b f8 cb 01       		if (r11 == 0) goto -106
+                               	} <s1c_runtime_morph_compute+0x94 : 94 >
+      fe:    d0 ec b0 00       	r0 = [r11+0]
+     102:    21 ff 80 0d c6 ff 	if (r0 != 4096) goto -116 <s1c_runtime_morph_compute+0x94 : 94 >
+     108:    d0 ec b4 c0       	r12 = [r11+4]
+     10c:    0c fc c2 3d       	if (r12 > 30) goto -124 <s1c_runtime_morph_compute+0x94 : 94 >
+     110:    3f e5              <unknown instruction>
+     112:    8f 01              <unknown instruction>
+     114:    3f e5              <unknown instruction>
+     116:    31 00              <unknown instruction>
+     118:    40 f1 03 f0       	r0 = r15 | 0x3  #
+     11c:    80 22             		 [sp+8] = r0
+     11e:    c7 14             	r15 = 0
+     120:    42 21             	r2 = 1
+     122:    11 ed 00 00       	ifs (r1 >= r0) {
+     126:    42 20             		r2 = 0
+                               	}
+     128:    3f e5              <unknown instruction>
+     12a:    e2 0d             	r2 = h[r6++=r11] (u)
+     12c:    87 b7             	r7 = r0 >> 23
+     12e:    77 17             	r7 = r7.b0 (u)
+     130:    12 18             	r2 += r1
+     132:    87 f9 3d fc       	if (r7 < 126) goto 122 <s1c_runtime_morph_compute+0x1B0 : 1b0 >
+     136:    17 f8 3b fe       	if (r7 == 255) goto 118 <s1c_runtime_morph_compute+0x1B0 : 1b0 >
+     13a:    c3 ff ff ff 7f 00 	r3 = 8388607 <s1c_runtime_morph_compute+0x7FFFFE : 7ffffe >
+     140:    90 e1 02 e3       	r14 = r0 & r3
+     144:    c0 e1 0f d9       	r13 = r0 >> 31
+     148:    87 f8 09 fc       	if (r7 != 126) goto 18 <s1c_runtime_morph_compute+0x15E : 15e >
+     14c:    0e f8 30 00       	if (r14 == 0) goto 96 <s1c_runtime_morph_compute+0x1B0 : 1b0 >
+     150:    4f e0 ff ff       	r15 = -1 <s1c_runtime_morph_compute+0xFFFFFFFFFFFFFFFE : fffffffffffffffe >
+     154:    3d e8 00 00       	if (r13 == 0) {
+     158:    4f e0 01 00       		r15 = 1
+                               	} <s1c_runtime_morph_compute : 0 >
+     15c:    14 89             	goto 82 <s1c_runtime_morph_compute+0x1B0 : 1b0 >
+     15e:    30 e1 81 7f       	r0 = r7 + -127
+     162:    43 e1 00 e8       	r3 = r14 | 0x800000
+     166:    80 f9 05 2e       	if (r0 < 23) goto 10 <s1c_runtime_morph_compute+0x174 : 174 >
+     16a:    30 e1 6a 7f       	r0 = r7 + -150
+     16e:    c8 e1 30 70       	r7 = r3 << r0
+     172:    04 99             	goto 50 <s1c_runtime_morph_compute+0x1A6 : 1a6 >
+     174:    a0 e0 95 70       	r0 = 0x95 - r7
+     178:    4f e0 01 00       	r15 = 1 <s1c_runtime_morph_compute : 0 >
+     17c:    c8 e1 f0 e0       	r14 = r15 << r0
+     180:    a0 e0 96 70       	r0 = 0x96 - r7
+     184:    c8 e1 f0 f0       	r15 = r15 << r0
+     188:    c7 ff ff ff ff 00 	r7 = 16777215 <s1c_runtime_morph_compute+0xFFFFFE : fffffe >
+     18e:    f7 18             	r7 += r15
+     190:    90 e1 72 f3       	r15 = r7 & r3
+     194:    c8 e1 32 70       	r7 = r3 >> r0
+     198:    0e ec 04 f0       	if (r15 > r14) goto 8 <s1c_runtime_morph_compute+0x1A4 : 1a4 >
+     19c:    57 e8 03 00       	if ((r7 & 1) == 0) goto 6 <s1c_runtime_morph_compute+0x1A6 : 1a6 >
+     1a0:    8e e8 01 f0       	if (r15 != r14) goto 2 <s1c_runtime_morph_compute+0x1A6 : 1a6 >
+     1a4:    c7 21             	r7 += 1
+     1a6:    af e0 00 70       	r15 = 0x0 - r7
+     1aa:    3d e8 00 00       	if (r13 == 0) {
+     1ae:    7f 16             		r15 = r7
+                               	}
+     1b0:    d0 ec 45 f1       	[r4+20] = r15
+     1b4:    d0 ec bc e0       	r14 = [r11+12]
+     1b8:    d0 ec b8 b0       	r11 = [r11+8]
+     1bc:    88 9c             	r0 = sp + 28
+     1be:    c8 f1 93 3c       	r3 = r9 >>> r12  #
+     1c2:    80 21             		 [sp+4] = r0
+     1c4:    38 81             	r0 = r3 + 1
+     1c6:    47 e0 ff 0f       	r7 = 4095 <s1c_runtime_morph_compute+0xFFE : ffe >
+     1ca:    f0 19             	r0 &= r7
+     1cc:    60 d6             	r0 = r6  #
+     1ce:    80 20             		 [sp] = r0
+     1d0:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x1D4 : 1d4 >
+     1d4:    10 5e             	if (r0 == 0) goto 124 <s1c_runtime_morph_compute+0x252 : 252 >
+     1d6:    88 98             	r0 = sp + 24
+     1d8:    8e 9c             	r6 = sp + 28
+     1da:    42 24             	r2 = 4
+     1dc:    61 16             	r1 = r6
+     1de:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x1E2 : 1e2 >
+     1e2:    69 84             	r1 = r6 + 4
+     1e4:    88 94             	r0 = sp + 20
+     1e6:    42 24             	r2 = 4
+     1e8:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x1EC : 1ec >
+     1ec:    69 88             	r1 = r6 + 8
+     1ee:    88 90             	r0 = sp + 16
+     1f0:    42 24             	r2 = 4
+     1f2:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x1F6 : 1f6 >
+     1f6:    69 8c             	r1 = r6 + 12
+     1f8:    88 8c             	r0 = sp + 12
+     1fa:    42 24             	r2 = 4
+     1fc:    80 ea 00 00       	call 0 <s1c_runtime_morph_compute+0x200 : 200 >
+     200:    d0 e9 14 00       	r1_r0 = d[sp+20]
+     204:    07 22             	r7 = [sp+8]
+     206:    3f f5              <unknown instruction>
+     208:    72 00              <unknown instruction>
+     20a:    03 23             	r3 = [sp+12]
+     20c:    3f f5              <unknown instruction>
+     20e:    a1 27             	[sp+156] = r1
+     210:    06 24             	r6 = [sp+16]
+     212:    3f e5              <unknown instruction>
+     214:    22 11             	r2 = b[r2++=r10] (u)
+     216:    3f e5              <unknown instruction>
+     218:    10 00              <unknown instruction>
+     21a:    3f e5              <unknown instruction>
+     21c:    72 13             	r2 = b[r7++=r14] (u)
+     21e:    3f e5              <unknown instruction>
+     220:    22 26             	r2 = [sp+152]
+     222:    3f e5              <unknown instruction>
+     224:    20 11             	r0 = b[r2++=r10] (u)
+     226:    3f e5              <unknown instruction>
+     228:    11 10             	r1 = b[r1++=r8] (u)
+     22a:    90 e1 b2 29       	r2 = r11 & r9
+     22e:    3f e5              <unknown instruction>
+     230:    9f 22              <unknown instruction>
+     232:    3f e5              <unknown instruction>
+     234:    e2 22             	r2 += -126
+     236:    3f e5              <unknown instruction>
+     238:    22 11             	r2 = b[r2++=r10] (u)
+     23a:    3f e5              <unknown instruction>
+     23c:    00 01             	tbb [r0]
+     23e:    3f e5              <unknown instruction>
+     240:    82 00             	rtx
+     242:    d0 60             	[r5+0] = r0
+     244:    40 65             	r0 = [r4+20] 
+     246:    90 18             	r0 += r9
+     248:    70 e1 7f 04       	r0 = r0 & 0xFFFFFF
+     24c:    c0 63             	[r4+12] = r0
+     24e:    47 21             	r7 = 1
+     250:    97 81             	goto -446 <s1c_runtime_morph_compute+0x94 : 94 >
+     252:    47 20             	r7 = 0
+     254:    87 9f             	goto -450 <s1c_runtime_morph_compute+0x94 : 94 >
+
