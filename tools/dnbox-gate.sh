@@ -31,7 +31,7 @@ limits()     { local bad=0
                git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' && { echo "workflow file changed"; bad=1; }
                git ls-files | grep -iE '\.ipa$|SuperJ6.*AU.*extension.*\.zip' && { echo "SuperJ6 installer in Git"; bad=1; }
                git grep -nIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . ':!*.md' && { echo "possible Secret"; bad=1; }
-               git diff "$BASE" HEAD -- firmware tools build.sh | grep -E '^\+.*(PSRAM|psram).*(=\s*1|ENABLE|enable|true)' && { echo "PSRAM enabled"; bad=1; }
+               git diff "$BASE" HEAD -- firmware tools build.sh | grep -iE '^\+.*((define[[:space:]]+[A-Za-z0-9_]*psram[A-Za-z0-9_]*[[:space:]]+(1|true|enable))|([A-Za-z0-9_]*psram[A-Za-z0-9_]*[[:space:]]*=[[:space:]]*(1|true|enable)))\b' && { echo "PSRAM enabled"; bad=1; }
                git ls-files -s | while read -r m o s p; do sz=$(git cat-file -s "$o"); [ "$sz" -ge 52428800 ] && { echo "≥50MB not in LFS: $p"; exit 1; }; done || bad=1
                return $bad; }
 host_tests() { sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
@@ -48,8 +48,8 @@ budget()     { local model xip pool
                [ -n "${BUILD_RUN:-}" ] && [ -d "$BUILD_RUN" ] || { echo "no fresh model build receipts"; return 1; }
                for model in elite pro; do
                  [ "$(cat "$BUILD_RUN/$model.source" 2>/dev/null)" = "$SHA $model" ] || { echo "missing exact-head $model receipt"; return 1; }
-                 xip=$(grep -hoiE 'xip[ _-]?free[^0-9-]*-?[0-9]+' "$BUILD_RUN/$model.log" | grep -oE '\-?[0-9]+$' | sort -n | head -1)
-                 pool=$(grep -hoiE 'pool[ _-]?margin[^0-9-]*-?[0-9]+' "$BUILD_RUN/$model.log" | grep -oE '\-?[0-9]+$' | sort -n | head -1)
+                 xip=$(sed -nE 's/.*app code area [0-9]+ B, (-?[0-9]+) B free.*/\1/p' "$BUILD_RUN/$model.log" | sort -n | head -1)
+                 pool=$(sed -nE 's/.*pool ([0-9]+) B of ([0-9]+).*/\1 \2/p' "$BUILD_RUN/$model.log" | awk '{print $2-$1-8192}' | sort -n | head -1)
                  [ -n "$xip" ] && [ -n "$pool" ] || { echo "$model budget numbers missing (NOT_RUN = FAIL)"; return 1; }
                  echo "$model XIP free=$xip B pool margin=$pool B sha=$SHA"
                  [ "$xip" -ge "$XIP_MIN" ] && [ "$pool" -ge "$POOL_MIN" ] || return 1

@@ -578,3 +578,6 @@ Both retained under README test/dependency exception pending gate review.
 - Independent regression: firmware fail-fast/exact-model budget fixtures PASS 6/6; connector-base validation, ancestry and documented deletion fixtures PASS 12/12 across both gates. These are focused tests, not a full Local PASS.
 - Firmware baseline host sanitizer tests fail because LeakSanitizer cannot operate under ptrace; current cloud and elevated tiny probe reproduce. Mac mini is offline; cloud is the only connected environment. Keep FAIL and rerun in a compatible environment, never disable sanitizer to claim PASS.
 - Firmware build gate now fails immediately for either model and budget reads only exact-SHA, per-model logs/receipts in a fresh run directory. Missing actual metrics remain FAIL.
+
+## Follow-up gate corrections
+- Native baseline Elite/Pro build PASS; observed pool free8364 minus8192 floor gives172B margin, FAIL340B below required512. Parse actual native stdout per exact model receipt. PSRAM detector now checks added assignment/define forms including gate itself, avoiding regex self-match without a blind spot. Focused regression12/12 PASS; full Local remains not passing.
