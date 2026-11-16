@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:34 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:55 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -113,3 +113,5 @@ Follow-up timing trace publication blocked: automated review twice rejected the 
 Complete694 callback characterization at521963 finished on two hosts: each520,500 callbacks/66,624,000 frames/0nonfinite and self-observed benchmark TracerPid0. Managed70 wall/62 CPU misses; local10,159 wall/9,771 CPU misses. Identical executable and bound-input SHA256 across hosts. Both FAIL; no erased pilots, native/device claim or S1 completion. Small exact receipts under docs/sound/v2-callback-full; full raw traces remain preserved pending publication review. Managed task independently recalculates all miss rows and event strata; next is evidence-led fidelity-preserving diagnosis, not a lower threshold or musical cut.
 
 Optional resource diagnostic implemented only in host bench: per-thread faults/switches/CPU-time and CPU IDs bracket the unchanged timed region, never exclude a miss and remain NOT_QUALIFIED. Twelve focused tests PASS. Eight-program instrumented25 wall/23 CPU misses,0nonfinite;0misses had recorded page faults,8 had switches. Default-mode control7/7 misses remains red. All8 diagnostic FNV digests agree with prior tracer-bound outputs, not full oracle proof. No runtime changed. Next inspect a block-scoped static-sequence validation reuse with fallback if a sequence control ever becomes smoothed, retaining dynamic checks and exact original behavior.
+
+Static sequence admission candidate: real instrumentation red129 calls/128frames -> normal1; synthetic future-smoothed sequence map red1/expected129 -> fallback129. Full public/boundary and dynamic per-sample checks retained, no owner fields/arithmetic changes. Original38-suite354,907,688 checks/114,196frames/120,289 snapshots PASS0fail/heap; frontend and12-scene576k exact replay unchanged audio4b32746b…. Native31units+layout compile7972/4, unlinked executable+132B, other sections unchanged. Native final raw scope string miscount preserved with explicit31+1 correction. Full694 frozen source/common-FX replay running; independent review and all timing/app/native gates remain open. See docs/sound/v2-sequence-static.

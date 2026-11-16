@@ -350,13 +350,19 @@
     },
     {
       "path": "scheduler/source-sequence/source_sequence.hpp",
-      "bytes": 9160,
-      "sha256": "9946fe860930d8c1e3053e2c3a0ce26f3d2c452fa8b1306691b744f153f2e7b3"
+      "bytes": 10146,
+      "sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+      "prior_v2_sha256": "9946fe860930d8c1e3053e2c3a0ce26f3d2c452fa8b1306691b744f153f2e7b3",
+      "prior_v2_bytes": 9160,
+      "changes": "Reuse only block-invariant sequence static validation after full boundary admission; private friend entry retains per-sample dynamic guards and actual smoothing-map fallback. No owner fields or arithmetic changes."
     },
     {
       "path": "scheduler/source_scheduler.cpp",
-      "bytes": 8597,
-      "sha256": "507d6fe699143c25b1c52669d9090c161b6966890b5a30a78e8faa915d2692d3"
+      "bytes": 9290,
+      "sha256": "5c6caf146aa163d381af0b4a1229b20359ea7ec96bca1854a857730130243583",
+      "prior_v2_sha256": "507d6fe699143c25b1c52669d9090c161b6966890b5a30a78e8faa915d2692d3",
+      "prior_v2_bytes": 8597,
+      "changes": "Reuse only block-invariant sequence static validation after full boundary admission; private friend entry retains per-sample dynamic guards and actual smoothing-map fallback. No owner fields or arithmetic changes."
     },
     {
       "path": "scheduler/source_scheduler.hpp",

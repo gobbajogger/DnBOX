@@ -116,6 +116,14 @@ bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
     struct View{const NoteNumber*values;size_t count;};
     const View held{heldNoteNumbersAE.values.begin(),static_cast<size_t>(heldNoteNumbersAE.count)};
     if(!sequence.can_process(parameters,150,held))return false;
+    // All owner/control/trace calls are serialized and non-reentrant; callbacks
+    // do not mutate controls. Ports.tick is the only in-block parameter writer.
+    // Reuse static validation only when its inputs cannot be smoothed by that
+    // actual port map. A future map change safely selects full sample checks.
+    bool reuse_static_admission=true;
+    for(unsigned slot=0;slot<synthone_ports::selected_count;++slot)
+        if(s1source_sequence::SerializedSequence::uses_parameter(synthone_ports::selected_indices[slot]))
+            reuse_static_admission=false;
     initializeNoteStates();
     if(parameters[isMono]>0) {
         if(mono.stage==S1NoteState::stageRelease && mono.amp<.01f) mono.clear();
@@ -133,7 +141,8 @@ bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         }
         processLfo();
         Sink sink{*this};
-        if(!sequence.process(parameters,150,held,sink))return false;
+        if(!(reuse_static_admission ? sequence.process_static_admitted(parameters,held,sink)
+                                   : sequence.process(parameters,150,held,sink)))return false;
         if(parameters[isMono]>0) {
             if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
                 if(compact_active_) { if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false; }

@@ -30,6 +30,7 @@ static inline int s1_beat_index(uint64_t next, float mult) {
 #endif
 // The original/target note ABI is signed32; reject another int ABI at compile time.
 static_assert(sizeof(int)==4,"original note ABI requires signed32 int");
+namespace s1scheduler { class SourceScheduler; }
 namespace s1source_sequence {
 struct SerializedSequence {
 #if defined(S1_NO_DOUBLE)
@@ -86,7 +87,25 @@ struct SerializedSequence {
   return true;
  }
  template<class View>bool can_process(const float*p,size_t n,const View&held)const{
-  if(!tuning_valid(p,n,notes_per_octave())||
+  return tuning_valid(p,n,notes_per_octave()) && can_process_dynamic(p,held);
+ }
+ template<class View,class Sink>bool process(const float*p,size_t n,const View&held,Sink&sink){
+  if(!tuning_valid(p,n,notes_per_octave()))return false;
+  return process_static_admitted(p,held,sink);
+ }
+private:
+ friend class s1scheduler::SourceScheduler;
+ static bool uses_parameter(unsigned id){
+  return id==arpIsOn||id==arpIsSequencer||id==arpRate||id==arpSeqTempoMultiplier||
+         id==arpDirection||id==arpOctave||id==arpInterval||id==arpTotalSteps||
+         (id>=sequencerPattern00&&id<sequencerPattern00+16)||
+         (id>=sequencerOctBoost00&&id<sequencerOctBoost00+16)||
+         (id>=sequencerNoteOn00&&id<sequencerNoteOn00+16);
+ }
+ // Only the serialized block owner may reuse admission. Dynamic clock, held
+ // view and pending-event capacity checks remain active on every sample.
+ template<class View>bool can_process_dynamic(const float*p,const View&held)const{
+  if(
 #if defined(S1_NO_DOUBLE)
      !d64_isfinite(sample_rate_bits)||!d64_lt(0,sample_rate_bits)||
 #else
@@ -112,10 +131,10 @@ struct SerializedSequence {
 #endif
   return true;
  }
- template<class View,class Sink>bool process(const float*p,size_t n,const View &held,Sink &sink){
+ template<class View,class Sink>bool process_static_admitted(const float*p,const View &held,Sink &sink){
   // All controls/held views and owner calls are serialized; callbacks do not
   // mutate inputs/owner, recurse, or exceed the sink's output/event capacity.
-  if(!can_process(p,n,held))return false;
+  if(!can_process_dynamic(p,held))return false;
   const bool on=p[arpIsOn]==1.f,first_any=previous_held==0&&held.count>0,first_none=held.count==0&&previous_held>0;
   const int octaves=static_cast<int>(p[arpOctave])+1;
   if(on&&(first_none||first_any)){
