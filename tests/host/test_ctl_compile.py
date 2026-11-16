@@ -13,6 +13,13 @@ import time
 import unittest
 
 TOP = Path(__file__).resolve().parents[2]
+
+
+def _default_tested_signals():
+    for s in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
+        signal.signal(s, signal.SIG_DFL)
+
+
 COMPILER = r'''
 import fcntl, json, os
 from pathlib import Path
@@ -235,7 +242,8 @@ class ControllerCompile(unittest.TestCase):
                 self.children.unlink(missing_ok=True)
                 self.env.update(X0X_JOBS='2', LINK_HANG=phase)
                 p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
-                                     env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                                     env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                     preexec_fn=_default_tested_signals)
                 try:
                     deadline = time.monotonic() + 5
                     while not self.child_pids():
@@ -303,11 +311,12 @@ class ControllerCompile(unittest.TestCase):
                 self.children.unlink(missing_ok=True)
                 self.env.update(X0X_JOBS=str(jobs), SPAWN_CHILD='src/a.c', HANG_SOURCE='src/b.c',
                                 AFTER_SUCCESS='src/b.c')
-                # An outer asynchronous shell can inherit ignored SIGINT. The
-                # tested child needs the normal disposition before its shell exec.
+                # An outer asynchronous shell, nohup or a detached runner can hand the
+                # suite ignored SIGHUP/SIGINT/SIGTERM. POSIX sh cannot trap a signal that
+                # was ignored on entry, so restore every tested signal before the exec.
                 p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
                                      env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                                     preexec_fn=lambda: signal.signal(signal.SIGINT, signal.SIG_DFL))
+                                     preexec_fn=_default_tested_signals)
                 try:
                     deadline = time.monotonic() + 5
                     while len(self.child_pids()) < 2:
@@ -329,7 +338,8 @@ class ControllerCompile(unittest.TestCase):
     def test_interruption_joins_compilers_and_descendants_before_cleanup(self):
         self.env.update(X0X_JOBS='2', HANG='1')
         p = subprocess.Popen(['sh', str(TOP / 'ble/ctl/build_in_container.sh')],
-                             env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                             env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                             preexec_fn=_default_tested_signals)
         self.addCleanup(lambda: p.poll() is None and p.kill())
         deadline = time.monotonic() + 5
         while time.monotonic() < deadline:
