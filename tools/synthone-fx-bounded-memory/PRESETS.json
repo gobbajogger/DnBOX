@@ -1,0 +1,167 @@
+{
+  "cap_seconds": 0.26435416666666667,
+  "tempo_assumption": "The extracted FX graph reads delayTime as seconds and does not rewrite it from tempo. In portable_interface.hpp the init default has tempoSyncToArpRate on and arpRate at 120 BPM. The kernel formula that would turn that switch into a delay time is not in this checkout, so no synced effective time was computed. A synced preset would use its own arpRate when that field is present, otherwise this 120 BPM default.",
+  "in_repo_init_default": {
+    "delayTime": 0.25,
+    "arpRate": 120.0,
+    "tempoSyncToArpRate": 1.0
+  },
+  "init_default_above_cap": false,
+  "readable_preset_files": 0,
+  "readable_presets_with_delayTime": 0,
+  "above_cap": 0,
+  "histogram_seconds": null,
+  "public_factory_files_pinned": 13,
+  "public_factory_files_missing": [
+    {
+      "path": "AudioKitSynthOne/Presets/Data/JEC.json",
+      "bytes": 377802,
+      "sha256": "9af56a4f52d050c98da8bfc6bc355ac872772cdd419def188bb644b0c9dff0c0"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Sound of Izrael.json",
+      "bytes": 382672,
+      "sha256": "1f100f20227401a47e17f91bac5be44efc6d5fef8d97f7ed2a64a2a7e1426462"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/DJ Puzzle.json",
+      "bytes": 83700,
+      "sha256": "6263b4c08143d5f62192ad48c881129ae0c2df80256abd010dee89ede10b6506"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/User.json",
+      "bytes": 2369,
+      "sha256": "7ff6a7cc65bae0a992108bc582ecae3538ebb3f3e33943fb4007fe7001a4b2a7"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Francis Preve.json",
+      "bytes": 75532,
+      "sha256": "7e45e985951bcff09de2745d7223a8523c559f7ae30c032cfeed81c6bf317187"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Sound of Izrael 2.json",
+      "bytes": 163872,
+      "sha256": "edf48f200ed2510b03d4b5e9e4c92c0306af0e38776c0916794d90e79572d861"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Spidericemidas.json",
+      "bytes": 195532,
+      "sha256": "1cb034e91677be3b7bc0cddca64d821ddbfc132d79f98e4211053867f76eec35"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/BankA.json",
+      "bytes": 152843,
+      "sha256": "1486c2b1fcb922d145541c96f436e7e15d755dba72ff9a8030052ef22d224bed"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Electronisounds.json",
+      "bytes": 130496,
+      "sha256": "94447bcafd93b8e534b99347ef1a2ab7f96006364c36e85c88825e2480a026e7"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Bonus.json",
+      "bytes": 392851,
+      "sha256": "e189a9782469bd851d97a2bd157cfdd43692621287de68eb2909e8aabbd4b996"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Red Sky Lullaby.json",
+      "bytes": 311963,
+      "sha256": "db813fe373ebd0c2434c8c0af376b245c331c35080b396bce83bc4d9f2fb0aac"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Brice Beasley.json",
+      "bytes": 141354,
+      "sha256": "a42a515cc66fc392f8831efa4865145dc9e2c8a8d9bc2554d1fd8a1aed242d45"
+    },
+    {
+      "path": "AudioKitSynthOne/Presets/Data/Starter Bank.json",
+      "bytes": 58280,
+      "sha256": "f4da92584505084e3b0277cf1e1f1911050837014a5fa7371cc6879421cbe908"
+    }
+  ],
+  "owner_archive_sha256": "68ad8b5fa0adca8b5da2b03f9303e9321c6a20907f5945e3fe879bc6494009a4",
+  "owner_banks_recorded": [
+    {
+      "path": "Synth one/Sound of Izrael.json",
+      "presets": 101,
+      "bytes": 290041
+    },
+    {
+      "path": "Synth one/Red Sky Lullaby.json",
+      "presets": 100,
+      "bytes": 318043
+    },
+    {
+      "path": "Synth one/Francis Preve.json",
+      "presets": 26,
+      "bytes": 76095
+    },
+    {
+      "path": "Synth one/Starter Bank.json",
+      "presets": 15,
+      "bytes": 42090
+    },
+    {
+      "path": "Synth one/BankA.json",
+      "presets": 135,
+      "bytes": 424102
+    },
+    {
+      "path": "Synth one/Sound of Izrael 2.json",
+      "presets": 51,
+      "bytes": 161446
+    },
+    {
+      "path": "Synth one/Spidericemidas.json",
+      "presets": 61,
+      "bytes": 194429
+    },
+    {
+      "path": "Synth one/Brice Beasley.json",
+      "presets": 46,
+      "bytes": 144736
+    },
+    {
+      "path": "Synth one/Synth Tutorials.json",
+      "presets": 42,
+      "bytes": 128738
+    },
+    {
+      "path": "Synth one/JEC.json",
+      "presets": 88,
+      "bytes": 282405
+    },
+    {
+      "path": "Synth one/DJ Puzzle.json",
+      "presets": 28,
+      "bytes": 85827
+    },
+    {
+      "path": "Synth one/Wabi Sabi Waves.json",
+      "presets": 170,
+      "bytes": 550535
+    },
+    {
+      "path": "Synth one/Electronisounds.json",
+      "presets": 43,
+      "bytes": 133683
+    }
+  ],
+  "owner_banks_missing_bodies": [
+    "Synth one/Sound of Izrael.json",
+    "Synth one/Red Sky Lullaby.json",
+    "Synth one/Francis Preve.json",
+    "Synth one/Starter Bank.json",
+    "Synth one/BankA.json",
+    "Synth one/Sound of Izrael 2.json",
+    "Synth one/Spidericemidas.json",
+    "Synth one/Brice Beasley.json",
+    "Synth one/Synth Tutorials.json",
+    "Synth one/JEC.json",
+    "Synth one/DJ Puzzle.json",
+    "Synth one/Wabi Sabi Waves.json",
+    "Synth one/Electronisounds.json"
+  ],
+  "owner_probe_record_count": 906,
+  "owner_probe_scope": "static control-value per-note and LFO probe; no global FX, smoothing, sequencer or AU"
+}

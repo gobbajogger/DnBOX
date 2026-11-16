@@ -23,3 +23,13 @@ g++ -std=c++17 $FLAGS -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -
   -o "$BUILD/measure" "$TOOL/measure.cpp" "$BUILD"/*.o -Wl,--gc-sections -lm
 "$BUILD/measure" "$TOOL/MEASURED.json"
 echo "wrote $TOOL/MEASURED.json"
+g++ -std=c++17 $FLAGS -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-attributes \
+  -o "$BUILD/ownership" "$TOOL/ownership.cpp" "$BUILD"/*.o -Wl,--gc-sections -lm
+"$BUILD/ownership" "$TOOL/OWNERSHIP.json"
+echo "wrote $TOOL/OWNERSHIP.json"
+g++ -std=c++17 $FLAGS -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-attributes \
+  -o "$BUILD/hybrid" "$TOOL/hybrid.cpp" "$BUILD"/*.o -Wl,--gc-sections -lm
+"$BUILD/hybrid" "$TOOL/HYBRID.json"
+echo "wrote $TOOL/HYBRID.json"
+python3 "$TOOL/count_presets.py" > "$TOOL/PRESETS.json"
+echo "wrote $TOOL/PRESETS.json"
