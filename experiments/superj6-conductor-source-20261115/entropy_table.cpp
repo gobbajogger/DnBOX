@@ -1,5 +1,6 @@
 #include "entropy_table.hpp"
 #include <algorithm>
+#include <cstring>
 namespace original_conductor_v1 {
 namespace {
 struct Reader {EntropyProvider provider;std::uint64_t budget,requests;EntropyStatus status;
@@ -45,11 +46,30 @@ EntropyResult build_entropy_table12(EntropyProvider provider,std::uint64_t budge
  }
  std::copy(temporary,temporary+256,output);return {EntropyStatus::Complete,r.requests};
 }
-EntropyResult draw_held_sample(EntropyProvider provider,std::uint64_t budget,double& output) noexcept{
+EntropyResult draw_held_sample(EntropyProvider provider,std::uint64_t budget,float& output) noexcept{
  if(!provider.next_word)return {EntropyStatus::MissingProvider,0};
  Reader r{provider,budget,0,EntropyStatus::Complete};std::uint64_t x;
  if(!bounded64(r,9007199254740993ULL,x))return {r.status,r.requests};
- double value=x==9007199254740992ULL?1.:(double(x)/9007199254740992.)*2.-1.;
+ // Binary32 rounding of the original (x/2^53)*2-1. Center on 2^52 so the
+ // subtraction does not collapse a sub-ulp fraction into zero.
+ float value;
+ if(x==9007199254740992ULL) value=1.f;
+ else if(x==4503599627370496ULL) value=0.f;
+ else {
+  const bool neg=x<4503599627370496ULL;
+  std::uint64_t mag=neg?4503599627370496ULL-x:x-4503599627370496ULL;
+  const int msb=63-__builtin_clzll(mag);
+  int exp=msb-52;
+  const int shift=msb-23;
+  std::uint64_t base;std::uint32_t sig;
+  if(shift>=0){base=mag>>shift;const std::uint64_t rest=shift?mag&((1ULL<<shift)-1):0;const std::uint64_t half=shift?1ULL<<(shift-1):0;if(shift&&(rest>half||(rest==half&&(base&1))))++base;if(base==0x1000000ULL){base>>=1;++exp;}sig=std::uint32_t(base)&0x7fffffu;}
+  else sig=std::uint32_t(mag<<(-shift))&0x7fffffu;
+  const int biased=exp+127;
+  std::uint32_t bits=neg?0x80000000u:0;
+  if(biased>=255) bits|=0x7f800000u;
+  else if(biased>0) bits|=std::uint32_t(biased)<<23|sig;
+  std::memcpy(&value,&bits,4);
+ }
  output=value;return {EntropyStatus::Complete,r.requests};
 }
 

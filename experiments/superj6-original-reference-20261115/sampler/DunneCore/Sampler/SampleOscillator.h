@@ -12,11 +12,11 @@ namespace DunneCore
     struct SampleOscillator
     {
         bool isLooping;     // true until note released
-        double indexPoint;  // use double so we don't lose precision when indexPoint becomes much larger than increment
-        double increment;   // 1.0 = play at original speed
-        double multiplier;  // multiplier applied to increment for pitch bend, vibrato
+        float indexPoint;  // use float so we don't lose precision when indexPoint becomes much larger than increment
+        float increment;   // 1.0f = play at original speed
+        float multiplier;  // multiplier applied to increment for pitch bend, vibrato
         
-        void setPitchOffsetSemitones(double semitones) { multiplier = pow(2.0, semitones/12.0); }
+        void setPitchOffsetSemitones(float semitones) { multiplier = std::pow(2.0f, semitones/12.0f); }
         
         // return true if we run out of samples
         inline bool getSample(SampleBuffer *sampleBuffer, int sampleCount, float *output, float gain)

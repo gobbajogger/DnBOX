@@ -6,7 +6,7 @@
 using namespace original_conductor_v1;
 struct Context{std::vector<Command> commands;PwmPostpassSnapshot* external;unsigned fail;};
 static bool effect(void*p,const Command&c)noexcept{auto&x=*static_cast<Context*>(p);x.commands.push_back(c);if(x.external)for(auto&r:x.external->route)r=0;return x.commands.size()!=x.fail;}
-static double power(double a,double b)noexcept{return std::pow(a,b);}
+static float power(float a,float b)noexcept{return std::pow(a,b);}
 static unsigned long long bits(double x){unsigned long long b;std::memcpy(&b,&x,8);return b;}
 int main(){unsigned checks=0,bad=0;
 #define C(x) do{++checks;if(!(x)){++bad;std::fprintf(stderr,"FAIL %d\n",__LINE__);}}while(0)

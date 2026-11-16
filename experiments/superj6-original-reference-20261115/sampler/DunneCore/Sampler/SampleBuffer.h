@@ -43,21 +43,21 @@ namespace DunneCore
         
         void setData(unsigned index, float data);
         
-        // Use double for the real-valued index, because oscillators will need the extra precision.
-        inline float interp(double fIndex, float gain)
+        // Use float for the real-valued index, because oscillators will need the extra precision.
+        inline float interp(float fIndex, float gain)
         {
             if ((samples == 0 && pcm16Data == 0) || sampleCount == 0) return 0.0f;
             
             int ri = int(fIndex);
-            double f = fIndex - ri;
+            float f = fIndex - ri;
             int rj = ri + 1;
             
             float si = ri < sampleCount ? readValue(unsigned(ri)) : 0.0f;
             float sj = rj < sampleCount ? readValue(unsigned(rj)) : 0.0f;
-            return (float)(gain * ((1.0 - f) * si + f * sj));
+            return (float)(gain * ((1.0f - f) * si + f * sj));
         }
         
-        inline void interp(double fIndex, float *leftOutput, float *rightOutput, float gain)
+        inline void interp(float fIndex, float *leftOutput, float *rightOutput, float gain)
         {
             if ((samples == 0 && pcm16Data == 0) || sampleCount == 0)
             {
@@ -71,12 +71,12 @@ namespace DunneCore
             }
             
             int ri = int(fIndex);
-            double f = fIndex - ri;
+            float f = fIndex - ri;
             int rj = ri + 1;
             
             float si = ri < sampleCount ? readValue(unsigned(ri)) : 0.0f;
             float sj = rj < sampleCount ? readValue(unsigned(rj)) : 0.0f;
-            *leftOutput = (float)(gain * ((1.0 - f) * si + f * sj));
+            *leftOutput = (float)(gain * ((1.0f - f) * si + f * sj));
             si = ri < sampleCount ? readValue(unsigned(sampleCount + ri)) : 0.0f;
             sj = rj < sampleCount ? readValue(unsigned(sampleCount + rj)) : 0.0f;
             *rightOutput = (float)(gain * ((1.0f - f) * si + f * sj));

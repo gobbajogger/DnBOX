@@ -5,6 +5,7 @@
   #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
+#include <cmath>
 
 namespace DunneCore
 {
@@ -44,7 +45,7 @@ namespace DunneCore
 
         auto nTableSize = waveTable.size();
         for (int i=0; i < nTableSize; i++)
-            waveTable[i] = (float)(2.0 * amplitude * double(i)/nTableSize - amplitude);
+            waveTable[i] = (float)(2.0f * amplitude * float(i)/nTableSize - amplitude);
     }
     
     void FunctionTable::sinusoid(float amplitude)
@@ -54,7 +55,7 @@ namespace DunneCore
 
         auto nTableSize = waveTable.size();
         for (int i=0; i < nTableSize; i++)
-            waveTable[i] = (float)(amplitude * sin(double(i)/nTableSize * 2.0 * M_PI));
+            waveTable[i] = amplitude * std::sin(float(i)/nTableSize * 2.0f * 3.1415927410125732f);
     }
 
     // A variation of sinusoid() which adds a tiny bit of 2nd harmonic, producing a tone closer to
@@ -67,7 +68,7 @@ namespace DunneCore
         auto nTableSize = waveTable.size();
         for (int i = 0; i < nTableSize; i++)
             waveTable[i] = (float)(amplitude *
-                (sin(double(i) / nTableSize * 2.0 * M_PI) + 0.015f * sin(double(i) / nTableSize * 4.0 * M_PI))
+                (std::sin(float(i) / nTableSize * 2.0f * 3.1415927410125732f) + 0.015f * std::sin(float(i) / nTableSize * 4.0f * 3.1415927410125732f))
                 );
     }
 
@@ -98,8 +99,8 @@ namespace DunneCore
     
     // Initialize a FunctionTable to an exponential shape, scaled to fit in the unit square.
     // The function itself is y = -exp(-x), where x ranges from 'left' to 'right'.
-    // The more negative 'left' is, the more vertical the start of the rise; -5.0 yields near-vertical.
-    // The more positive 'right' is, the more horizontal then end of the rise; +5.0 yields near-horizontal.
+    // The more negative 'left' is, the more vertical the start of the rise; -5.0f yields near-vertical.
+    // The more positive 'right' is, the more horizontal then end of the rise; +5.0f yields near-horizontal.
     void FunctionTable::exponentialCurve(float left, float right)
     {
         // in case user forgot, init table to default size
@@ -119,7 +120,7 @@ namespace DunneCore
 
     // Initialize a FunctionTable to a power-curve shape, defined in the unit square.
     // The given exponent may be positive for a concave-up shape or negative for concave-down.
-    // Typical range of the exponent is plus or minus 4 or 5.
+    // Typical range of the exponent is plus or minus 4 or 5.f
     void FunctionTable::powerCurve(float exponent)
     {
         // in case user forgot, init table to default size
@@ -133,7 +134,7 @@ namespace DunneCore
             waveTable[i] = powf(x, exponent);
     }
 
-    void FunctionTableOscillator::init(double sampleRate, float frequency, int tableLength)
+    void FunctionTableOscillator::init(float sampleRate, float frequency, int tableLength)
     {
         waveTable.init(tableLength);
         sampleRateHz = sampleRate;

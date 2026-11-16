@@ -69,7 +69,7 @@ namespace DunneCore
         /// amount of semitone change via voice lfo
         float voiceLFOSemitones;
 
-        /// fraction 0.0 - 1.0, based on MIDI velocity
+        /// fraction 0.0f - 1.0f, based on MIDI velocity
         float noteVolume;
 
         // temporary holding variables
@@ -91,7 +91,7 @@ namespace DunneCore
         
         SamplerVoice() : noteNumber(-1) {}
 
-        void init(double sampleRate);
+        void init(float sampleRate);
 
         void updateAmpAdsrParameters() { ampEnvelope.updateParams(); }
         void updateFilterAdsrParameters() { filterEnvelope.updateParams();otaFilterEnvelope.updateParams(); }

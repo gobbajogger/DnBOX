@@ -5,8 +5,8 @@
 using namespace original_conductor_v1;
 struct Fake{OrderedState* s;LiveLfo l[3];LiveVibrato v;std::string trace;float later_value;unsigned entropy;bool fail;bool expect_cycle,observed_cycle;};
 static float sine(float x)noexcept{return std::sin(x);}
-static double pow_(double x,double y)noexcept{return std::pow(x,y);}
-static double exp_(double x)noexcept{return std::exp(x);}
+static float pow_(float x,float y)noexcept{return std::pow(x,y);}
+static float exp_(float x)noexcept{return std::exp(x);}
 static bool random_(void*p,std::uint64_t&v)noexcept{++static_cast<Fake*>(p)->entropy;v=UINT64_MAX;return true;}
 static bool live(void*p,unsigned i,LiveLfo&l)noexcept{Fake&f=*static_cast<Fake*>(p);l=f.l[i];l.delay_finished=f.s->times.delay_finished[i];return true;}
 static ResolveStatus resolve(void*,std::uint16_t id,ResolvedControl&r)noexcept{r={1,id,id};return ResolveStatus::Found;}
@@ -14,8 +14,8 @@ static bool set(void*p,ResolvedControl r,float v)noexcept{Fake&f=*static_cast<Fa
 static bool cutoff(void*p,ResolvedControl,float v)noexcept{Fake&f=*static_cast<Fake*>(p);f.s->cutoff.target=v;f.s->cutoff.active=true;return true;}
 static bool notify(void*,std::uint16_t,float)noexcept{return true;}
 static bool vlive(void*p,LiveVibrato&v)noexcept{v=static_cast<Fake*>(p)->v;return true;}
-static bool freq(void*p,float,double)noexcept{Fake&f=*static_cast<Fake*>(p);f.trace+='F';if(f.expect_cycle)f.observed_cycle=f.s->vibrato.cycle_complete;return true;}
-static bool depth(void*p,float,double)noexcept{static_cast<Fake*>(p)->trace+='D';return true;}
+static bool freq(void*p,float,float)noexcept{Fake&f=*static_cast<Fake*>(p);f.trace+='F';if(f.expect_cycle)f.observed_cycle=f.s->vibrato.cycle_complete;return true;}
+static bool depth(void*p,float,float)noexcept{static_cast<Fake*>(p)->trace+='D';return true;}
 static bool ca(void*p,float)noexcept{static_cast<Fake*>(p)->trace+='C';return true;}
 static bool cn(void*p,unsigned,float)noexcept{static_cast<Fake*>(p)->trace+='N';return true;}
 static bool cr(void*p,float&v)noexcept{v=static_cast<Fake*>(p)->s->cutoff.current;return true;}

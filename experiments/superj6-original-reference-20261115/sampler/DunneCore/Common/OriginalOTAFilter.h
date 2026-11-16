@@ -19,14 +19,14 @@ struct OriginalOTAFilter {
   if(q<.9f){q=(q+(-.75f))/.15000000596046448f;return ota_f32_math::fma(q,ota_f32_math::fma(q,ota_f32_math::fma(q,-.8449998497962952f,1.0199997425079346f),.675000011920929f),3.1500000953674316f);}
   return ota_f32_math::fma(q+(-.9f),1.2000000476837158f,4.f);
  }
- void setParameters(double cutoff,double normalizedRes,unsigned frames){
+ void setParameters(float cutoff,float normalizedRes,unsigned frames){
   outGain=1.f;
   if(first){if(modeTarget!=1.f){modeLeft=maximum(1,int(std::ceil(rate*.005f)));modeTarget=1.f;modeStep=(modeTarget-mode)/float(modeLeft);}}
   else{mode=modeTarget=1.f;modeLeft=0;}
   const float maxCut=minimum(rate*.9f,30000.f);
-  const float c=maximum(minimum(ota_f32_math::ingress(cutoff),maxCut),3.f);
+  const float c=maximum(minimum(cutoff,maxCut),3.f);
   const float lc=std::log2(c);
-  float q=curve(maximum(minimum(ota_f32_math::ingress(normalizedRes),1.f),0.f));
+  float q=curve(maximum(minimum(normalizedRes,1.f),0.f));
   const float t=minimum(maximum((c/rate+(-.45f))/.05f,0.f),1.f);
   const float w=maximum(q+(-3.9f),0.f)*t;
   const float s=ota_f32_math::fma(t,-2.f,3.f);

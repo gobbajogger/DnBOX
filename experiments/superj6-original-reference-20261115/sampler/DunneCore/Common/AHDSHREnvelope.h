@@ -17,7 +17,7 @@ namespace DunneCore
     {
         float sampleRateHz;
         float attackSamples, holdSamples, decaySamples, releaseHoldSamples, releaseSamples;
-        float sustainFraction;    // [0.0, 1.0]
+        float sustainFraction;    // [0.0f, 1.0f]
 
         AHDSHREnvelopeParameters();
         void init(float newSampleRateHz, float attackSeconds, float holdSeconds, float decaySeconds, float susFraction,

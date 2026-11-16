@@ -9,33 +9,33 @@
 #include <optional>
 #include <vector>
 namespace j6_saga {
-constexpr std::array<double,18> divisions{{.0625,.09375,.125,.1875,.25,.375,.5,.75,1,1.5,2,3,4,8,12,16,24,32}};
+constexpr std::array<float,18> divisions{{.0625f,.09375f,.125f,.1875f,.25f,.375f,.5f,.75f,1,1.5f,2,3,4,8,12,16,24,32}};
 constexpr std::array<unsigned,10> pad_x{{144,26,7,88,96,100,15,72,104,61}};
 constexpr std::array<unsigned,10> pad_y{{66,27,8,89,97,101,13,73,103,60}};
 enum class Status { ok, invalid_input, unresolved_random };
-inline std::optional<double> duration(double stored) {
+inline std::optional<float> duration(float stored) {
  if(!std::isfinite(stored))return {};
- const double index=std::round((1.-stored)*17.);
- if(!(index>=0.&&index<18.))return {};
+ const float index=std::round((1.f-stored)*17.f);
+ if(!(index>=0.f&&index<18.f))return {};
  return divisions[static_cast<unsigned>(index)];
 }
-inline std::optional<double> rate_knob(float k) {
+inline std::optional<float> rate_knob(float k) {
  if(!std::isfinite(k)||k<0.f||k>1.f)return {};
- const double shifted=double(k)*.7+.3;
- const double stored=std::round(shifted/(1./17.))*(1./17.);
+ const float shifted=float(k)*.7f+.3f;
+ const float stored=std::round(shifted/(1.f/17.f))*(1.f/17.f);
  if(!duration(stored))return {};
  return stored;
 }
-inline std::optional<double> snap(double beat,double d,double offset) {
- if(!std::isfinite(beat)||!std::isfinite(d)||!std::isfinite(offset)||d<=0.)return {};
- const double q=(beat-offset)/d-1e-9;
- const double value=offset+d*std::ceil(q);
+inline std::optional<float> snap(float beat,float d,float offset) {
+ if(!std::isfinite(beat)||!std::isfinite(d)||!std::isfinite(offset)||d<=0.f)return {};
+ const float q=(beat-offset)/d-1e-9f;
+ const float value=offset+d*std::ceil(q);
  if(!std::isfinite(q)||!std::isfinite(value))return {};
  return value;
 }
 struct Pool { Status status{Status::ok};std::vector<int> notes; };
-inline Pool arp_pool(const std::vector<std::uint8_t>& held,double octave,double interval,double raw) {
- if(!std::isfinite(octave)||!std::isfinite(interval)||!std::isfinite(raw)||octave<0.||octave>3.||interval<0.||interval>12.||raw<0.||raw>=7.)return {Status::invalid_input,{}};
+inline Pool arp_pool(const std::vector<std::uint8_t>& held,float octave,float interval,float raw) {
+ if(!std::isfinite(octave)||!std::isfinite(interval)||!std::isfinite(raw)||octave<0.f||octave>3.f||interval<0.f||interval>12.f||raw<0.f||raw>=7.f)return {Status::invalid_input,{}};
  const int mode=int(raw),tiers=int(octave),semitones=int(interval);
  if(mode>=4)return {Status::unresolved_random,{}};
  Pool out;
@@ -65,10 +65,10 @@ inline std::optional<std::uint8_t> transform_note(int n,Scale scale={}) {
  }
  return {};
 }
-inline std::optional<std::vector<std::uint8_t>> sequence_notes(const std::vector<std::uint8_t>& held,double offset,double toggle,Scale scale={}) {
- if(!std::isfinite(offset)||!std::isfinite(toggle)||offset< -24.||offset>24.||(scale.enabled&&!(scale.absolute_pitch_classes&0xfff)))return {};
+inline std::optional<std::vector<std::uint8_t>> sequence_notes(const std::vector<std::uint8_t>& held,float offset,float toggle,Scale scale={}) {
+ if(!std::isfinite(offset)||!std::isfinite(toggle)||offset< -24.f||offset>24.f||(scale.enabled&&!(scale.absolute_pitch_classes&0xfff)))return {};
  std::vector<std::uint8_t> result;
- if(toggle>=1.)for(auto n:held){auto out=transform_note(int(n)+int(offset),scale);if(!out)return {};result.push_back(*out);}
+ if(toggle>=1.f)for(auto n:held){auto out=transform_note(int(n)+int(offset),scale);if(!out)return {};result.push_back(*out);}
  return result;
 }
 inline std::optional<std::array<unsigned,2>> pad_targets(int raw) {
@@ -81,38 +81,38 @@ inline std::optional<int> next_pad(int current,int other,int direction) {
  if(n==other)n=(n+direction+10)%10;
  return n;
 }
-inline std::optional<unsigned> destination_mask(double raw) {
- if(!std::isfinite(raw)||raw<0.||raw>=3.)return {};
+inline std::optional<unsigned> destination_mask(float raw) {
+ if(!std::isfinite(raw)||raw<0.f||raw>=3.f)return {};
  constexpr unsigned masks[]={15,13,10};return masks[int(raw)];
 }
 struct Settings {
  bool arp_on{true},seq_on{false};
- double arp_type{0},extra_octaves{1},interval{12},tempo{120},running{0};
- double steps{16},gate{.99},division{.5},destination{0};
+ float arp_type{0},extra_octaves{1},interval{12},tempo{120},running{0};
+ float steps{16},gate{.99f},division{.5f},destination{0};
  std::uint8_t velocity{87};
- std::array<double,16> enabled{},offset{};
- Settings(){enabled.fill(1.);offset.fill(0.);}
+ std::array<float,16> enabled{},offset{};
+ Settings(){enabled.fill(1.f);offset.fill(0.f);}
 };
 struct State {
  Settings settings;
  int step{0};
- double next_step{0},next_gate_end{0},previous_step{0},previous_beat{0};
+ float next_step{0},next_gate_end{0},previous_step{0},previous_beat{0};
  std::vector<std::uint8_t> held,generated;
  bool reset_if_no_held{true};
  std::size_t arp_index{0};int arp_direction{1};
  bool transport_change{true};std::uint8_t old_note{0},new_note{60};
 };
 struct Event { std::uint8_t note,velocity,channel{0}; };
-struct Frame { std::uint32_t frames;double sample_rate,beat;bool synced;double grid_offset{0};Scale scale{}; };
+struct Frame { std::uint32_t frames;float sample_rate,beat;bool synced;float grid_offset{0};Scale scale{}; };
 struct Result { Status status;State next;std::vector<Event> events;bool admitted_step{false}; };
 inline Result process(const State& input,Frame f) {
  auto fail=[&](Status error){return Result{error,input,{},false};};
  const auto& c=input.settings;auto d=duration(c.division);
- if(!d||!std::isfinite(f.sample_rate)||f.sample_rate<=0.||!std::isfinite(f.beat)||!std::isfinite(f.grid_offset)||!std::isfinite(c.tempo)||c.tempo<=0.||!std::isfinite(c.running)||!std::isfinite(c.steps)||c.steps<1.||c.steps>16.||!std::isfinite(c.gate)||c.gate<0.||c.gate>1.||input.step<0||input.step>=16||!std::isfinite(input.next_step)||!std::isfinite(input.next_gate_end)||!std::isfinite(input.previous_step)||!std::isfinite(input.previous_beat)||(f.scale.enabled&&!(f.scale.absolute_pitch_classes&0xfff)))return fail(Status::invalid_input);
- double comparison=f.beat;
+ if(!d||!std::isfinite(f.sample_rate)||f.sample_rate<=0.f||!std::isfinite(f.beat)||!std::isfinite(f.grid_offset)||!std::isfinite(c.tempo)||c.tempo<=0.f||!std::isfinite(c.running)||!std::isfinite(c.steps)||c.steps<1.f||c.steps>16.f||!std::isfinite(c.gate)||c.gate<0.f||c.gate>1.f||input.step<0||input.step>=16||!std::isfinite(input.next_step)||!std::isfinite(input.next_gate_end)||!std::isfinite(input.previous_step)||!std::isfinite(input.previous_beat)||(f.scale.enabled&&!(f.scale.absolute_pitch_classes&0xfff)))return fail(Status::invalid_input);
+ float comparison=f.beat;
  if(!f.synced) {
-  const double seconds=double(f.frames)/f.sample_rate;
-  const double beats_per_second=c.tempo/60.;
+  const float seconds=float(f.frames)/f.sample_rate;
+  const float beats_per_second=c.tempo/60.f;
   comparison+=seconds*beats_per_second;
  }
  if(!std::isfinite(comparison))return fail(Status::invalid_input);
@@ -120,7 +120,7 @@ inline Result process(const State& input,Frame f) {
  auto flush=[&](){for(auto n:q.generated)result.events.push_back({n,0,0});q.generated.clear();};
  if(q.next_gate_end<=comparison)flush();
  auto reset=[&](bool quantized)->bool {
-  auto next=quantized?snap(f.beat,*d,f.grid_offset):std::optional<double>{f.beat};
+  auto next=quantized?snap(f.beat,*d,f.grid_offset):std::optional<float>{f.beat};
   if(!next)return false;
   q.step=0;q.arp_index=0;q.next_step=*next;q.previous_step=f.beat;q.previous_beat=f.beat;q.next_gate_end=f.beat;flush();return true;
  };
@@ -131,7 +131,7 @@ inline Result process(const State& input,Frame f) {
   if(!reset(false))return fail(Status::invalid_input);
   q.transport_change=false;
  } else if(f.beat<q.previous_beat) { if(!reset(false))return fail(Status::invalid_input); }
- if(c.running<=0.)return result;
+ if(c.running<=0.f)return result;
  if(q.next_step>comparison){q.previous_beat=f.beat;return result;}
  if(c.arp_on) {
   if(!q.held.empty()) {
@@ -149,11 +149,11 @@ inline Result process(const State& input,Frame f) {
   auto notes=sequence_notes(q.held,c.offset[q.step],c.enabled[q.step],f.scale);if(!notes)return fail(Status::invalid_input);
   for(auto n:*notes){q.new_note=n;q.generated.push_back(n);result.events.push_back({n,c.velocity,0});}
  }
- const double old=q.next_step;
+ const float old=q.next_step;
  q.next_step=old+*d;q.next_gate_end=old+*d*c.gate;
  if(!std::isfinite(q.next_step)||!std::isfinite(q.next_gate_end))return fail(Status::invalid_input);
  q.previous_step=old;q.old_note=q.new_note;
- ++q.step;if(q.step>int(c.steps-1.))q.step=0;
+ ++q.step;if(q.step>int(c.steps-1.f))q.step=0;
  q.previous_beat=f.beat;result.admitted_step=true;return result;
 }
 }

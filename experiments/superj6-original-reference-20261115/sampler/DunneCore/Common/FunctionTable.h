@@ -10,7 +10,7 @@ namespace DunneCore
     #define DEFAULT_WAVETABLE_SIZE 256
 
     /// FunctionTable represents a simple one-dimensional table of float values,
-    /// addressable by a normalized fractional index, [0.0, 1.0), with or without wraparound.
+    /// addressable by a normalized fractional index, [0.0f, 1.0f), with or without wraparound.
     /// Linear interpolation is used to interpolate values between available samples.
     ///
     /// Cyclic (wraparound) addressing is useful for creating simple oscillators. In such
@@ -39,8 +39,8 @@ namespace DunneCore
         
         inline float interp_cyclic(float phase)
         {
-            while (phase < 0) phase += 1.0;
-            while (phase >= 1.0) phase -= 1.0f;
+            while (phase < 0) phase += 1.0f;
+            while (phase >= 1.0f) phase -= 1.0f;
 
             auto nTableSize = waveTable.size();
             
@@ -51,7 +51,7 @@ namespace DunneCore
             
             float si = waveTable[ri];
             float sj = waveTable[rj];
-            return (float)std::fma(1.0 - double(f), double(si), double(f * sj));
+            return (float)std::fma(1.0f - float(f), float(si), float(f * sj));
         }
         
         // functions for use by class WaveShaper (see comments in .cpp file)
@@ -62,7 +62,7 @@ namespace DunneCore
         inline float interp_bounded(float phase)
         {
             if (phase < 0) return waveTable.front();
-            if (phase >= 1.0) return waveTable.back();
+            if (phase >= 1.0f) return waveTable.back();
 
             auto nTableSize = waveTable.size();
             
@@ -73,7 +73,7 @@ namespace DunneCore
             
             float si = waveTable[ri];
             float sj = waveTable[rj];
-            return (float)((1.0 - f) * si + f * sj);
+            return (float)((1.0f - f) * si + f * sj);
         }
     };
     
@@ -84,13 +84,13 @@ namespace DunneCore
     /// zero out high-frequency coefficients, then inverse FFT.
     struct FunctionTableOscillator
     {
-        double sampleRateHz;
+        float sampleRateHz;
         float phase;
         float phaseDelta;   // normalized frequency: cycles per sample
         FunctionTable waveTable;
         
         ~FunctionTableOscillator() { deinit(); }
-        void init(double sampleRate, float frequency, int tableLength=DEFAULT_WAVETABLE_SIZE);
+        void init(float sampleRate, float frequency, int tableLength=DEFAULT_WAVETABLE_SIZE);
         void deinit();
         
         void setFrequency(float frequency);

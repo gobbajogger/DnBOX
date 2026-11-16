@@ -4,7 +4,7 @@
 #include <string>
 using namespace original_conductor_v1;
 struct Fake{RuntimeCutoff* state;float core;std::string trace;float posted;bool mutate_current,mutate_target,fail;};
-static double ex(double x)noexcept{return std::exp(x);}
+static float ex(float x)noexcept{return std::exp(x);}
 static bool apply(void* p,float v)noexcept{Fake& f=*static_cast<Fake*>(p);f.trace+='A';f.core=v;return !f.fail;}
 static bool post(void* p,unsigned,float v)noexcept{Fake& f=*static_cast<Fake*>(p);f.trace+='N';f.posted=v;if(f.mutate_current)f.state->current=.2f;if(f.mutate_target)f.state->target=.9f;return true;}
 static bool read(void* p,float& v)noexcept{Fake& f=*static_cast<Fake*>(p);f.trace+='R';v=f.core;return true;}

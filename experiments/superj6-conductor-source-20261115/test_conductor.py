@@ -23,6 +23,6 @@ class MainPass(unittest.TestCase):
   b=plan_main_pass((),b'x',9,False,512,CAPS,math.pow)
   self.assertEqual(a.status,'OK_MAIN_PASS_ONLY');self.assertEqual(b.status,'OK_MAIN_PASS_ONLY')
   self.assertEqual(a.commands[0].op,'apply_control');self.assertEqual(b.commands[0].op,'defer_volume')
-  self.assertEqual(b.commands[0].delay_seconds,.15)
+  self.assertEqual(b.commands[0].delay_seconds,F(.15))
   self.assertTrue(all(c.generation==9 and c.order==i for i,c in enumerate(b.commands)))
 if __name__=='__main__':unittest.main()

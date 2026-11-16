@@ -5,8 +5,8 @@
 #include "vibrato4.hpp"
 #include "cutoff_executor.hpp"
 namespace original_conductor_v1 {
-struct OrderedState {double phases[3],held[4],held_elapsed[3];TickTimes times;ApplyState apply;Vibrato4State vibrato;RuntimeCutoff cutoff;};
-struct OrderedInput {TickPrefixInput prefix;double delay1,delay3;bool fully_loaded,preset_loaded;};
+struct OrderedState {float phases[3],held[4],held_elapsed[3];TickTimes times;ApplyState apply;Vibrato4State vibrato;RuntimeCutoff cutoff;};
+struct OrderedInput {TickPrefixInput prefix;float delay1,delay3;bool fully_loaded,preset_loaded;};
 struct OrderedBackend {Sine sine;EntropyProvider entropy;std::uint64_t entropy_budget;RestartVibrato restart;Providers math;ApplyBackend lfo;CutoffBackend cutoff;VibratoBackend vibrato;};
 enum class OrderedStatus {NotLoaded,CompletedEffectsOnly,PrefixFailure,PartialFailure};
 enum class OrderedStage {None,Prefix,Time,Lfo1,Lfo2,Lfo3,Cutoff,Vibrato4};

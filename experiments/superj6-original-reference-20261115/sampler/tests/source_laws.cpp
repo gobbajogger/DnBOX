@@ -26,9 +26,9 @@ int main(){
   v.useSyrupFilter=syrup;v.useJunoFilter=!syrup;v.vintageFilterADSR=true;v.userCutoff=base;
   const float phase=.3125f;v.synthOsc.phase=phase;v.synthOsc.increment=.125f;for(float &h:v.synthOsc.down)h=.2f;v.start(60,48000,hz,.7f,&b,true);CK(v.synthOsc.phase==0&&v.synthOsc.increment==0);for(float h:v.synthOsc.down)CK(h==0);
   auto envelope=v.filterEnvelope;const float e=envelope.getSample(),vel=std::fma(.4f,.7f,1.f-.4f);
-  double expected;
-  if(syrup){double lo=std::max(double(base),1.),hi=std::max(lo,22050.),ec=std::min(std::max(double(e),0.),1.),amount=std::min(std::max(double(.3f*vel),0.),1.),t=1.-ec;expected=std::exp2(std::fma(amount*(1.-t*t),std::log2(hi)-std::log2(lo),std::log2(lo)));if(key!=0.f&&hz>1.f&&expected>1.)expected*=std::pow(double(hz)/double(261.626f),double(key));expected=std::min(std::max(expected,1.),22050.);expected=std::min(std::max(expected,12.),48000.*.45351473923);}
-  else{const float span=22050.f-base;expected=double(base)+double(span*((.3f*vel)*e));if(hz>130.80999755859375f){float ratio=hz/130.80999755859375f;float power=std::max(1.f/(12.f-std::log2(ratio)),.0416666679084301f);expected+=double((((std::pow(ratio,power)-1.f)*key)*span)/3.3299999237060547f);}expected=std::max(12.,std::min(expected,22050.));}
+  float expected;
+  if(syrup){float lo=std::max(base,1.f),hi=std::max(lo,22050.f),ec=std::min(std::max(e,0.f),1.f),amount=std::min(std::max(.3f*vel,0.f),1.f),t=1.f-ec;expected=std::exp2(std::fma(amount*(1.f-t*t),std::log2(hi)-std::log2(lo),std::log2(lo)));if(key!=0.f&&hz>1.f&&expected>1.f)expected*=std::pow(hz/261.626f,key);expected=std::min(std::max(expected,1.f),22050.f);expected=std::min(std::max(expected,12.f),48000.f*.45351473923f);}
+  else{const float span=22050.f-base;expected=base+span*((.3f*vel)*e);if(hz>130.80999755859375f){float ratio=hz/130.80999755859375f;float power=std::max(1.f/(12.f-std::log2(ratio)),.0416666679084301f);expected+=(((std::pow(ratio,power)-1.f)*key)*span)/3.3299999237060547f;}expected=std::max(12.f,std::min(expected,22050.f));}
   CK(!v.prepToGetSamples(16,1,0,bypass?-1.f:3.f,key,.3f,.4f,.7f,0,0,5));
   CK(v.isFilterEnabled==!bypass);
   CK((syrup?v.leftSyrupFilter.lastCutoff:v.leftSmoothFilter.cutoff)==expected);

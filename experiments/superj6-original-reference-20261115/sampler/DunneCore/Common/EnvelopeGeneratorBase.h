@@ -19,7 +19,7 @@ namespace DunneCore
     class ExponentialSegmentGenerator
     {
     public:
-        void reset(double initialValue, double targetValue, double tco, int segmentLengthSamples);
+        void reset(float initialValue, float targetValue, float tco, int segmentLengthSamples);
 
         inline float getValue()
         {
@@ -48,7 +48,7 @@ namespace DunneCore
         }
 
     protected:
-        double output, target, offset, coefficient;
+        float output, target, offset, coefficient;
         bool isRising;
         bool isHorizontal;
         int tcount, segLength;
@@ -60,9 +60,9 @@ namespace DunneCore
     public:
         struct SegmentDescriptor
         {
-            double initialValue;
-            double finalValue;
-            double tco;
+            float initialValue;
+            float finalValue;
+            float tco;
             int lengthSamples;
         };
         typedef std::vector<SegmentDescriptor> Descriptor;
@@ -95,7 +95,7 @@ namespace DunneCore
         int curSegIndex;
 
         void setupCurSeg();
-        void setupCurSeg(double initValue);
+        void setupCurSeg(float initValue);
         bool skipEmptySegments();
     };
 

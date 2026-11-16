@@ -7,7 +7,7 @@
 
 namespace DunneCore
 {
-    void SamplerVoice::init(double sampleRate)
+    void SamplerVoice::init(float sampleRate)
     {
         synthOsc.reset();whiteNoiseOsc.reset();whiteNoise=pendingWhiteNoise=false;
         samplingRate = float(sampleRate);
@@ -36,7 +36,7 @@ namespace DunneCore
         sampleBuffer = buffer;
         oscillator.indexPoint = buffer->startPoint;
         oscillator.increment = (buffer->sampleRate / sampleRate) * (frequency / buffer->noteFrequency);
-        oscillator.multiplier = 1.0;
+        oscillator.multiplier = 1.0f;
         oscillator.isLooping = buffer->isLooping;
         
         noteVolume = volume;
@@ -44,11 +44,11 @@ namespace DunneCore
         volumeRamper.init(0.0f);
         
         samplingRate = sampleRate;
-        leftFilter.updateSampleRate(double(samplingRate));
-        rightFilter.updateSampleRate(double(samplingRate));
-        leftSmoothFilter.updateSampleRate(double(samplingRate));
-        rightSmoothFilter.updateSampleRate(double(samplingRate));
-        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftFilter.updateSampleRate(float(samplingRate));
+        rightFilter.updateSampleRate(float(samplingRate));
+        leftSmoothFilter.updateSampleRate(float(samplingRate));
+        rightSmoothFilter.updateSampleRate(float(samplingRate));
+        leftSyrupFilter.updateSampleRate(float(samplingRate));rightSyrupFilter.updateSampleRate(float(samplingRate));
         leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
         filterEnvelope.start();otaFilterEnvelope.start();
 
@@ -59,7 +59,7 @@ namespace DunneCore
         voiceLFOSemitones = 0.0f;
 
         glideSemitones = 0.0f;
-        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0 && noteFrequency != frequency)
+        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0f && noteFrequency != frequency)
         {
             // prepare to glide
             glideSemitones = -12.0f * log2f(frequency / noteFrequency);
@@ -75,16 +75,16 @@ namespace DunneCore
     {
         pendingWhiteNoise=noise;
         samplingRate = sampleRate;
-        leftFilter.updateSampleRate(double(samplingRate));
-        rightFilter.updateSampleRate(double(samplingRate));
-        leftSmoothFilter.updateSampleRate(double(samplingRate));
-        rightSmoothFilter.updateSampleRate(double(samplingRate));
-        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftFilter.updateSampleRate(float(samplingRate));
+        rightFilter.updateSampleRate(float(samplingRate));
+        leftSmoothFilter.updateSampleRate(float(samplingRate));
+        rightSmoothFilter.updateSampleRate(float(samplingRate));
+        leftSyrupFilter.updateSampleRate(float(samplingRate));rightSyrupFilter.updateSampleRate(float(samplingRate));
         leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
         oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
         glideSemitones = 0.0f;
-        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0 && noteFrequency != frequency)
+        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0f && noteFrequency != frequency)
         {
             // prepare to glide
             glideSemitones = -12.0f * log2f(frequency / noteFrequency);
@@ -109,17 +109,17 @@ namespace DunneCore
     void SamplerVoice::restartNewNoteLegato(unsigned note, float sampleRate, float frequency)
     {
         samplingRate = sampleRate;
-        leftFilter.updateSampleRate(double(samplingRate));
-        rightFilter.updateSampleRate(double(samplingRate));
-        leftSmoothFilter.updateSampleRate(double(samplingRate));
-        rightSmoothFilter.updateSampleRate(double(samplingRate));
-        leftSyrupFilter.updateSampleRate(double(samplingRate));rightSyrupFilter.updateSampleRate(double(samplingRate));
+        leftFilter.updateSampleRate(float(samplingRate));
+        rightFilter.updateSampleRate(float(samplingRate));
+        leftSmoothFilter.updateSampleRate(float(samplingRate));
+        rightSmoothFilter.updateSampleRate(float(samplingRate));
+        leftSyrupFilter.updateSampleRate(float(samplingRate));rightSyrupFilter.updateSampleRate(float(samplingRate));
         leftOTAFilter.updateSampleRate(samplingRate);rightOTAFilter.updateSampleRate(samplingRate);
 
         oscillator.increment = (sampleBuffer->sampleRate / sampleRate) * (frequency / sampleBuffer->noteFrequency);
         float previousGlideSemitones = glideSemitones;
         glideSemitones = 0.0f;
-        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0)
+        if (*glideSecPerOctave != 0.0f && noteFrequency != 0.0f)
         {
             // prepare to glide
             glideSemitones = std::fma(-12.0f, log2f(frequency / noteFrequency), previousGlideSemitones);
@@ -171,7 +171,7 @@ namespace DunneCore
             tempGain = masterVolume * tempNoteVolume;
             volumeRamper.reinit(ampEnvelope.getSample(), sampleCount);
             // This can execute as part of the voice-stealing mechanism, and will be executed rarely.
-            // To test, set MAX_POLYPHONY in CoreSampler.cpp to something small like 2 or 3.
+            // To test, set MAX_POLYPHONY in CoreSampler.cpp to something small like 2 or 3.f
             if (!ampEnvelope.isPreStarting())
             {
                 tempGain = masterVolume * noteVolume;
@@ -206,7 +206,7 @@ namespace DunneCore
 
         float pitchCurveAmount = 1.0f; // >1 = faster curve, 0 < curve < 1 = slower curve - make this a parameter
         if (pitchCurveAmount < 0) { pitchCurveAmount = 0; }
-        pitchEnvelopeSemitones = pow(pitchEnvelope.getSample(), pitchCurveAmount) * pitchADSRSemitones;
+        pitchEnvelopeSemitones = std::pow(pitchEnvelope.getSample(), pitchCurveAmount) * pitchADSRSemitones;
 
         vibratoLFO.setFrequency(voiceLFOFrequencyHz);
         voiceLFOSemitones = vibratoLFO.getSample() * voiceLFODepthSemitones;
@@ -232,38 +232,38 @@ namespace DunneCore
                 const float key=keyTracking*std::log2(std::max(noteHz,1.f)/MIDDLE_C_HZ);
                 const float cutoff=std::min(std::max(std::max(userCutoff,3.f)*std::exp2(amount+key),3.f),30000.f);
                 const float q=(-20.f*std::log10(std::max(resLinear,.00009999999747378752f)))/18.989999771118164f;
-                leftOTAFilter.setParameters(double(cutoff),double(q),sampleCount);rightOTAFilter.setParameters(double(cutoff),double(q),sampleCount);
+                leftOTAFilter.setParameters(float(cutoff),float(q),sampleCount);rightOTAFilter.setParameters(float(cutoff),float(q),sampleCount);
             } else if(useSyrupFilter){
                 // Legacy32=false path is note-relative, independent of isOSC.
                 const float baseFrequency=std::fma(keyTracking,noteHz-MIDDLE_C_HZ,MIDDLE_C_HZ);
                 const float envStrength=std::fma(cutoffEnvelopeVelocityScaling,noteVolume,1.f-cutoffEnvelopeVelocityScaling);
-                double cutoff=baseFrequency*std::fma(cutoffEnvelopeStrength*envStrength,env,1.f+cutoffMultiple);
+                float cutoff=baseFrequency*std::fma(cutoffEnvelopeStrength*envStrength,env,1.f+cutoffMultiple);
                 if(vintageFilterADSR){
-                    const double lo=std::max(double(userCutoff),1.0),hi=std::max(lo,22050.0);
-                    const double e=std::min(std::max(double(env),0.0),1.0);
-                    const double amount=std::min(std::max(double(cutoffEnvelopeStrength*envStrength),0.0),1.0);
-                    const double t=1.0-e,shape=1.0-t*t;
+                    const float lo=std::max(float(userCutoff),1.0f),hi=std::max(lo,22050.0f);
+                    const float e=std::min(std::max(float(env),0.0f),1.0f);
+                    const float amount=std::min(std::max(float(cutoffEnvelopeStrength*envStrength),0.0f),1.0f);
+                    const float t=1.0f-e,shape=1.0f-t*t;
                     cutoff=std::exp2(std::fma(amount*shape,std::log2(hi)-std::log2(lo),std::log2(lo)));
-                    if(keyTracking!=0.f&&noteHz>1.f&&cutoff>1.0)cutoff*=std::pow(double(noteHz)/double(MIDDLE_C_HZ),double(keyTracking));
-                    cutoff=std::min(std::max(cutoff,1.0),22050.0);
+                    if(keyTracking!=0.f&&noteHz>1.f&&cutoff>1.0f)cutoff*=std::pow(float(noteHz)/float(MIDDLE_C_HZ),float(keyTracking));
+                    cutoff=std::min(std::max(cutoff,1.0f),22050.0f);
                 }
                 leftSyrupFilter.fourPole=rightSyrupFilter.fourPole=syrup24;
                 leftSyrupFilter.setParameters(cutoff,resLinear);rightSyrupFilter.setParameters(cutoff,resLinear);
             } else {
                 float baseFrequency = std::fma(keyTracking, noteHz - MIDDLE_C_HZ, MIDDLE_C_HZ);
                 float envStrength = std::fma(cutoffEnvelopeVelocityScaling, noteVolume, 1.0f - cutoffEnvelopeVelocityScaling);
-                double cutoffFrequency = baseFrequency * std::fma(cutoffEnvelopeStrength * envStrength, env, 1.0f + cutoffMultiple);
+                float cutoffFrequency = baseFrequency * std::fma(cutoffEnvelopeStrength * envStrength, env, 1.0f + cutoffMultiple);
                 if(vintageFilterADSR){
                     const float span=22050.f-userCutoff;
                     const float add=span*((cutoffEnvelopeStrength*envStrength)*env);
-                    cutoffFrequency=double(userCutoff)+double(add);
+                    cutoffFrequency=float(userCutoff)+float(add);
                     if(noteHz>130.80999755859375f){
                         const float ratio=noteHz/130.80999755859375f;
                         const float exponent=std::max(1.f/(12.f-std::log2(ratio)),.0416666679084301f);
                         const float bend=(((std::pow(ratio,exponent)-1.f)*keyTracking)*span)/3.3299999237060547f;
-                        cutoffFrequency+=double(bend);
+                        cutoffFrequency+=float(bend);
                     }
-                    cutoffFrequency=std::min(cutoffFrequency,22050.0);
+                    cutoffFrequency=std::min(cutoffFrequency,22050.0f);
                 }
                 if(useJunoFilter) {
                     leftSmoothFilter.setParameters(cutoffFrequency,resLinear);rightSmoothFilter.setParameters(cutoffFrequency,resLinear);

@@ -11,5 +11,5 @@ struct EntropyResult {EntropyStatus status;std::uint64_t requests;};
 // A finite request budget is an explicit fail-closed adapter limit, not an original
 // bound. The actual source rejection loops have no finite worst-case request count.
 EntropyResult build_entropy_table12(EntropyProvider,std::uint64_t request_budget,float (&output)[256]) noexcept;
-EntropyResult draw_held_sample(EntropyProvider,std::uint64_t request_budget,double& output) noexcept;
+EntropyResult draw_held_sample(EntropyProvider,std::uint64_t request_budget,float& output) noexcept;
 }

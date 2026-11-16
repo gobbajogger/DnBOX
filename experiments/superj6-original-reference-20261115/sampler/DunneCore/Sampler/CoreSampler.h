@@ -30,7 +30,7 @@ public:
     ~CoreSampler();
     
     /// returns system error code, nonzero only if a problem occurs
-    int init(double sampleRate);
+    int init(float sampleRate);
     
     /// call this to un-load all samples and clear the keymap
     void deinit();
@@ -142,19 +142,19 @@ public:
     
     // per-voice filter parameters
     
-    // multiple of note frequency - 1.0 means cutoff at fundamental
+    // multiple of note frequency - 1.0f means cutoff at fundamental
     float cutoffMultiple;
 
-    // key tracking factor: 1.0 means perfect key tracking, 0.0 means none; may be e.g. -2.0 to +2.0
+    // key tracking factor: 1.0f means perfect key tracking, 0.0f means none; may be e.g. -2.0f to +2.0f
     float keyTracking;
     
     // how much filter EG adds on top of cutoffMultiple
     float cutoffEnvelopeStrength;
     
-    /// fraction 0.0 - 1.0, scaling note volume's effect on cutoffEnvelopeStrength
+    /// fraction 0.0f - 1.0f, scaling note volume's effect on cutoffEnvelopeStrength
     float filterEnvelopeVelocityScaling;
 
-    // resonance [-20 dB, +20 dB] becomes linear [10.0, 0.1]
+    // resonance [-20 dB, +20 dB] becomes linear [10.0f, 0.1f]
     float linearResonance;
 
     // how much pitch ADSR adds on top of pitch

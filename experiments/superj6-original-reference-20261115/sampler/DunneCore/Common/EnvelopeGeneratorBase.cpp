@@ -7,12 +7,12 @@
 namespace DunneCore
 {
 
-    void ExponentialSegmentGenerator::reset(double initialValue, double targetValue, double tco, int segmentLengthSamples)
+    void ExponentialSegmentGenerator::reset(float initialValue, float targetValue, float tco, int segmentLengthSamples)
     {
         output = segmentLengthSamples > 0 ? initialValue : targetValue;
         target = targetValue;
         isHorizontal = targetValue == initialValue;
-        isLinear = tco <= 0.0;
+        isLinear = tco <= 0.0f;
         isRising = targetValue > initialValue;
 
         if (isHorizontal)
@@ -31,19 +31,19 @@ namespace DunneCore
         {
             if (segmentLengthSamples == 0)
             {
-                coefficient = 0.0;
+                coefficient = 0.0f;
                 offset = target;
             }
             else
             {
-                // Correction to Pirkle (who uses delta = 1.0 always)
-                // According to Redmon (who only discusses the delta = 1.0 case), delta should be defined thus
-                double delta = std::abs(targetValue - initialValue);
-                coefficient = exp(-log((delta + tco) / tco) / segmentLengthSamples);
+                // Correction to Pirkle (who uses delta = 1.0f always)
+                // According to Redmon (who only discusses the delta = 1.0f case), delta should be defined thus
+                float delta = std::abs(targetValue - initialValue);
+                coefficient = std::exp(-std::log((delta + tco) / tco) / segmentLengthSamples);
                 if (isRising)
-                    offset = (target + tco) * (1.0 - coefficient);
+                    offset = (target + tco) * (1.0f - coefficient);
                 else
-                    offset = (target - tco) * (1.0 - coefficient);
+                    offset = (target - tco) * (1.0f - coefficient);
             }
         }
     }
@@ -54,10 +54,10 @@ namespace DunneCore
         ExponentialSegmentGenerator::reset(seg.initialValue, seg.finalValue, seg.tco, seg.lengthSamples);
     }
 
-    void MultiSegmentEnvelopeGenerator::setupCurSeg(double initValue)
+    void MultiSegmentEnvelopeGenerator::setupCurSeg(float initValue)
     {
         SegmentDescriptor seg = (*segments)[curSegIndex];
-        double targetValue = seg.finalValue;
+        float targetValue = seg.finalValue;
         bool isHorizontal = seg.initialValue == seg.finalValue;
         if (isHorizontal) { // if flat (hold) then use same value, prevents fades from currentVal to hold val
             targetValue = initValue;

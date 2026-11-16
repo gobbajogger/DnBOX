@@ -2,8 +2,8 @@
 #include <cstddef>
 #include <cstdint>
 namespace original_conductor_v1 {
-struct LiveLfo {bool enabled,snapback,delay_finished;unsigned mode,waveform;float rate;double amount;float bases[2];std::uint16_t destinations[2];};
-struct ApplyState {bool armed,cycle_complete[3];double current_time[3];std::size_t held_notes;};
+struct LiveLfo {bool enabled,snapback,delay_finished;unsigned mode,waveform;float rate;float amount;float bases[2];std::uint16_t destinations[2];};
+struct ApplyState {bool armed,cycle_complete[3];float current_time[3];std::size_t held_notes;};
 struct ResolvedControl {std::uintptr_t token;std::uint16_t parameter,global;};
 enum class ResolveStatus {Found,Missing,Failure};
 struct ApplyBackend {
@@ -21,5 +21,5 @@ struct ApplyResult {ApplyStatus status;unsigned effects;bool cycle_changed;};
 // set + global dispatch finish; missing controls are not fabricated. Backend must
 // implement real effects and report failure honestly; success is not audio identity.
 // Earlier callbacks may change later LFO inputs or the second destination's base.
-ApplyResult apply_tick_lfo(unsigned,const double (&wave_row)[6],ApplyState&,ApplyBackend) noexcept;
+ApplyResult apply_tick_lfo(unsigned,const float (&wave_row)[6],ApplyState&,ApplyBackend) noexcept;
 }

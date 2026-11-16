@@ -23,7 +23,7 @@ PresetResult execute_main(const Record*,std::size_t,std::uint64_t,bool,Providers
 namespace original_conductor_v1 {
 // Snapshot AFTER the main pass, in original LFO2dest1/LFO2dest2/LFO3dest1/LFO3dest2
 // order. Original captures all four route bytes and base-control identities before
-// applying any slot. Caller pins the actual base-control objects184/186/188/190.
+// applying any slot. Caller pins the actual base-control objects184/186/188/190.f
 // This API copies route bytes; callbacks cannot alter this captured selection.
 struct PwmPostpassSnapshot {std::uint8_t route[4];};
 // Only routes78/79 reapply their BASE-control record/default, not the routed

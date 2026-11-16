@@ -1,8 +1,8 @@
 #pragma once
 #include "ordered_tick.hpp"
 namespace original_conductor_v1 {
-struct Lifecycle {OrderedState tick;bool new_note,retrigger[4];double last_beat,beat_accumulator;};
-struct BeatUpdate {bool supplied;double finite_nonnegative;};
+struct Lifecycle {OrderedState tick;bool new_note,retrigger[4];float last_beat,beat_accumulator;};
+struct BeatUpdate {bool supplied;float finite_nonnegative;};
 enum class LifecycleStatus {Unsupported,Noop,CompletedEffectsOnly,Invalid,MissingCapability,PartialFailure};
 struct LifecycleResult {LifecycleStatus status;OrderedResult tick;};
 // Source-closed finite/nonnegative optional beat subset only. General original

@@ -21,7 +21,7 @@ namespace DunneCore
     
     ResonantLowPassFilter::ResonantLowPassFilter()
     {
-        init(44100.0);  // sensible guess, will be overridden by init() call anyway
+        init(44100.0f);  // sensible guess, will be overridden by init() call anyway
 
         if (sineTable.waveTable.empty())  // build sine table only once
         {
@@ -30,14 +30,14 @@ namespace DunneCore
         }
     }
     
-    void ResonantLowPassFilter::init(double sampleRateHz)
+    void ResonantLowPassFilter::init(float sampleRateHz)
     {
         this->sampleRateHz = sampleRateHz;
-        x1 = x2 = y1 = y2 = 0.0;
-        mLastCutoffHz = mLastResLinear = -1.0;  // force recalc of coefficients
+        x1 = x2 = y1 = y2 = 0.0f;
+        mLastCutoffHz = mLastResLinear = -1.0f;  // force recalc of coefficients
     }
     
-    void ResonantLowPassFilter::setParameters(double newCutoffHz, double newResLinear)
+    void ResonantLowPassFilter::setParameters(float newCutoffHz, float newResLinear)
     {
         // only calculate the filter coefficients if the parameters have changed from last time
         if (newCutoffHz == mLastCutoffHz && newResLinear == mLastResLinear) return;
@@ -47,22 +47,22 @@ namespace DunneCore
         if (newResLinear > kMaxResLinear ) newResLinear = kMaxResLinear;
         
         // convert cutoff from Hz to 0->1 normalized frequency
-        double cutoff = 2.0 * newCutoffHz / sampleRateHz;
-        if (cutoff > 0.99) cutoff = 0.99;   // clip
+        float cutoff = 2.0f * newCutoffHz / sampleRateHz;
+        if (cutoff > 0.99f) cutoff = 0.99f;   // clip
         
         mLastCutoffHz = newCutoffHz;
         mLastResLinear = newResLinear;
 
-        double k = std::pow(newResLinear, 1.91) * Sine(float(0.5 * cutoff));
-        double c1 = 0.5 * (1.0 - k) / (1.0 + k);
-        double c2 = (0.5 + c1) * Cosine(float(0.5 * cutoff));
-        double c3 = (0.5 + c1 - c2) * 0.25;
+        float k = std::pow(newResLinear, 1.91f) * Sine(float(0.5f * cutoff));
+        float c1 = 0.5f * (1.0f - k) / (1.0f + k);
+        float c2 = (0.5f + c1) * Cosine(float(0.5f * cutoff));
+        float c3 = (0.5f + c1 - c2) * 0.25f;
         
-        a0 = 2.0 * c3;
-        a1 = 2.0 * 2.0 * c3;
-        a2 = 2.0 * c3;
-        b1 = 2.0 * -c2;
-        b2 = 2.0 * c1;
+        a0 = 2.0f * c3;
+        a1 = 2.0f * 2.0f * c3;
+        a2 = 2.0f * c3;
+        b1 = 2.0f * -c2;
+        b2 = 2.0f * c1;
     }
     
     void ResonantLowPassFilter::process(const float *sourceP, float *destP, int inFramesToProcess)
@@ -70,7 +70,7 @@ namespace DunneCore
         while (inFramesToProcess--)
         {
             float inputSample = *sourceP++;
-            float outputSample = float(std::fma(-b2, y2, std::fma(-b1, y1, std::fma(a2, x2, std::fma(a0, double(inputSample), a1*x1)))));
+            float outputSample = float(std::fma(-b2, y2, std::fma(-b1, y1, std::fma(a2, x2, std::fma(a0, float(inputSample), a1*x1)))));
 
             x2 = x1;
             x1 = inputSample;

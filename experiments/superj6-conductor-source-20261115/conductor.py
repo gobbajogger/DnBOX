@@ -5,7 +5,12 @@ name their bounded scope. This is not a full original preset loader.
 from dataclasses import dataclass,replace
 from pathlib import Path
 import json,math,struct
+import numpy as np
 F=lambda x:struct.unpack('<f',struct.pack('<f',x))[0]
+def fadd(a,b):return float(np.float32(a)+np.float32(b))
+def fsub(a,b):return float(np.float32(a)-np.float32(b))
+def fmul(a,b):return float(np.float32(a)*np.float32(b))
+def fdiv(a,b):return float(np.float32(a)/np.float32(b))
 def _finite(x):
     try:return type(x)in (int,float) and math.isfinite(x)
     except OverflowError:return False
@@ -42,14 +47,15 @@ def _default(i,pow_fn):
     if d['kind']=='literal_binary32':
         return struct.unpack('<f',struct.pack('<I',int(d['bits'],16)))[0]
     if pow_fn is None:raise LookupError('MISSING_POW')
-    value=pow_fn((d['input_double']-d['minimum'])/(d['maximum']-d['minimum']),1./d['taper'])
+    ratio=fdiv(fsub(F(d['input_double']),F(d['minimum'])),fsub(F(d['maximum']),F(d['minimum'])))
+    value=pow_fn(ratio,fdiv(1.,F(d['taper'])))
     if not _finite(value) or not 0.<=value<=1.:raise ValueError('invalid provider result')
     return F(value)
 
 def plan_main_pass(records,raw,generation,caller_immediate,capacity,capabilities,pow_fn=None):
     """Plan ONLY26926c's main control pass, not post-LFO/tuning/whole transaction.
     Executor capabilities declare command support, not sound fidelity. pow_fn must
-    be a pure finite deterministic double provider; its platform identity is external.
+    be a pure finite deterministic binary32 provider; its platform identity is external.
     Capacity/validation failure returns no commands. No caller state is mutated.
     Unknown records remain intact and are not automatically DSP-supported.
     """
@@ -69,7 +75,7 @@ def plan_main_pass(records,raw,generation,caller_immediate,capacity,capabilities
             value=F(r.value) if r is not None else _default(i,pow_fn)
             if not math.isfinite(value):return Result('INVALID')
             if i==24 and value>0:selected.append(('delay_enable_prepare',i,value,0.))
-            selected.append(('defer_volume' if i==0 and not caller_immediate else 'apply_control',i,value,.15 if i==0 and not caller_immediate else 0.))
+            selected.append(('defer_volume' if i==0 and not caller_immediate else 'apply_control',i,value,F(.15) if i==0 and not caller_immediate else 0.))
     except LookupError:return Result('MISSING_POW')
     except (ValueError,OverflowError,TypeError):return Result('MATH_FAILURE')
     if len(selected)>capacity:return Result('CAPACITY')
@@ -108,10 +114,10 @@ def cutoff_step(state,dt,capacity,capabilities,exp_fn=None):
     try:
         if dt>0:
             if exp_fn is None:return Transition('MISSING_EXP',state)
-            exponent=exp_fn(dt/-.015)
+            exponent=F(exp_fn(fdiv(F(dt),F(-.015))))
             if not _finite(exponent) or not 0.<=exponent<=1.:return Transition('MATH_FAILURE',state)
-            alpha=F(1.-exponent)
-            current=F(F(state.current)+F(F(target-F(state.current))*alpha))
+            alpha=fsub(1.,exponent)
+            current=fadd(F(state.current),fmul(fsub(target,F(state.current)),alpha))
         else:current=target
         emitted=F(0. if current<0. else 1. if current>1. else current)
     except (ValueError,OverflowError,TypeError):return Transition('MATH_FAILURE',state)
@@ -133,8 +139,8 @@ def cutoff_ack(state,generation,token,actual_cutoff):
     return Transition('OK_STATE',replace(state,active=not close,awaiting=False))
 def free_block_time(frames,sample_rate):
     """Top-level render frames only. Never call separately per internal voice chunk."""
-    if type(frames)is not int or not 0<=frames<1<<31 or not _finite(sample_rate) or sample_rate<=0:raise ValueError('invalid render block')
-    value=frames/sample_rate
+    if type(frames)is not int or not 0<=frames<1<<31 or not _finite(sample_rate) or F(sample_rate)<=0:raise ValueError('invalid render block')
+    value=fdiv(frames,F(sample_rate))
     if not math.isfinite(value):raise ValueError('invalid block duration')
     return value
 @dataclass(frozen=True)
@@ -143,19 +149,20 @@ class BeatState:
     last: float
     accumulator: float=0.
 def beat_catchup(state,beat,tempo,loaded,capacity):
-    if type(state)is not BeatState or not _u64(state.generation) or not all(_finite(x)for x in (state.last,state.accumulator,beat,tempo)) or not 0<=state.accumulator<.0125 or type(loaded)is not bool or type(capacity)is not int or capacity<0:
+    if type(state)is not BeatState or not _u64(state.generation) or not all(_finite(x)for x in (state.last,state.accumulator,beat,tempo)) or not 0<=state.accumulator<F(.0125) or type(loaded)is not bool or type(capacity)is not int or capacity<0:
         return Transition('INVALID',state)
-    if not loaded or beat<state.last:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
-    elapsed=((beat-state.last)*60.)/max(tempo,1.)
-    if not math.isfinite(elapsed) or elapsed<=0:return Transition('OK_CLOCK',replace(state,last=beat))
-    if elapsed>.2:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
-    acc=state.accumulator+elapsed;commands=[]
+    last,acc,beat,tempo=F(state.last),F(state.accumulator),F(beat),F(tempo)
+    step=F(.0125)
+    if not loaded or beat<last:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
+    elapsed=fdiv(fmul(fsub(beat,last),F(60.)),F(max(tempo,1.)))
+    if not math.isfinite(elapsed) or elapsed<=0:return Transition('OK_CLOCK',replace(state,last=beat,accumulator=acc))
+    if elapsed>F(.2):return Transition('OK_CLOCK',replace(state,last=beat,accumulator=0.))
+    acc=fadd(acc,elapsed);commands=[]
     # Bound loop before allocating; admitted accumulator is a previous residual.
-    if state.accumulator>=.0125:return Transition('INVALID',state)
-    while acc>=.0125:
+    while acc>=step:
         if len(commands)==capacity:return Transition('CAPACITY',state)
-        commands.append(Command('tick_lfo','elapsed_seconds','Conductor',0,.0125,state.generation,len(commands)))
-        acc=acc+(-.0125)
+        commands.append(Command('tick_lfo','elapsed_seconds','Conductor',0,step,state.generation,len(commands)))
+        acc=fadd(acc,-step)
     return Transition('OK_CLOCK',replace(state,last=beat,accumulator=acc),tuple(commands))
 @dataclass(frozen=True)
 class NoteState:

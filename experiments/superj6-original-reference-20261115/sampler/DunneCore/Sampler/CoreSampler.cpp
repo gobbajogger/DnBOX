@@ -17,7 +17,7 @@
 #define MIDI_NOTENUMBERS 128
 
 // Convert MIDI note to Hz, for 12-tone equal temperament
-#define NOTE_HZ(midiNoteNumber) ( 440.0f * pow(2.0f, ((midiNoteNumber) - 69.0f)/12.0f) )
+#define NOTE_HZ(midiNoteNumber) ( 440.0f * std::pow(2.0f, ((midiNoteNumber) - 69.0f)/12.0f) )
 
 struct CoreSampler::InternalData {
     // list of (pointers to) all loaded samples
@@ -90,7 +90,7 @@ CoreSampler::~CoreSampler()
     unloadAllSamples();
 }
 
-int CoreSampler::init(double sampleRate)
+int CoreSampler::init(float sampleRate)
 {
     currentSampleRate = (float)sampleRate;
     data->ampEnvelopeParameters.updateSampleRate((float)(sampleRate/CORESAMPLER_CHUNKSIZE));
@@ -151,7 +151,7 @@ void CoreSampler::loadSampleData(SampleDataDescriptor& sdd)
     pBuf->isLooping = sdd.sampleDescriptor.isLooping;
     if (pBuf->isLooping)
     {
-        // loopStartPoint, loopEndPoint are usually sample indices, but values 0.0-1.0
+        // loopStartPoint, loopEndPoint are usually sample indices, but values 0.0f-1.0f
         // are interpreted as fractions of the total sample length.
         if (sdd.sampleDescriptor.loopStartPoint > 1.0f) pBuf->loopStartPoint = sdd.sampleDescriptor.loopStartPoint;
         else pBuf->loopStartPoint = pBuf->endPoint * sdd.sampleDescriptor.loopStartPoint;

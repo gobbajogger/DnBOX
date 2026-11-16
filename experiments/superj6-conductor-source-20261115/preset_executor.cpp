@@ -12,7 +12,7 @@ bool present(const Record* r,std::size_t n,MainBinding binding,float& value)noex
  for(std::size_t i=0;i<n;i++){if(r[i].identifier==binding.name.data()){value=static_cast<float>(r[i].value);return true;}}
  return false;
 }
-Command action(Op op,std::uint16_t id,float value,std::uint64_t gen,std::size_t order)noexcept{return {op,Domain::NormalizedControl,Receiver::InstrumentControl,id,double(value),gen,order,op==Op::DeferVolume?.15:0.,0};}
+Command action(Op op,std::uint16_t id,float value,std::uint64_t gen,std::size_t order)noexcept{return {op,Domain::NormalizedControl,Receiver::InstrumentControl,id,float(value),gen,order,op==Op::DeferVolume?.15f:0.f,0};}
 }
 PresetResult execute_main(const Record* records,std::size_t nr,std::uint64_t generation,bool immediate,Providers p,PresetBackend backend)noexcept{
  if(nr>4096||!readable_span(records,nr,sizeof(Record))||(nr&&(reinterpret_cast<std::uintptr_t>(records)%alignof(Record))))return {PresetStatus::Invalid,0,0,218};

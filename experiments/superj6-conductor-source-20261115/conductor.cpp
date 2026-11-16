@@ -7,7 +7,7 @@
 #include <algorithm>
 namespace original_conductor_v1 {
 bool Identifier::operator==(const char* s)const noexcept{return length==std::strlen(s)&&(length==0||std::memcmp(pointer,s,length)==0);}
-static_assert(sizeof(float)==4 && std::numeric_limits<float>::digits==24 && sizeof(double)==8 && std::numeric_limits<double>::digits==53,"IEEE source widths required");
+static_assert(sizeof(float)==4 && std::numeric_limits<float>::digits==24,"IEEE binary32 required");
 namespace {
 struct Span {std::uintptr_t first,last;bool valid;};
 Span span(const void* p,std::size_t count,std::size_t width) noexcept {
@@ -16,22 +16,22 @@ Span span(const void* p,std::size_t count,std::size_t width) noexcept {
  auto n=count*width;if(n>max-a)return {0,0,false};return {a,a+n,true};
 }
 bool overlaps(Span a,Span b) noexcept{return a.first<a.last&&b.first<b.last&&a.first<b.last&&b.first<a.last;}
-bool f32(double x) noexcept{return std::isfinite(x)&&std::fabs(x)<=std::numeric_limits<float>::max();}
+bool f32(float x) noexcept{return std::isfinite(x)&&std::fabs(x)<=std::numeric_limits<float>::max();}
 float bits(std::uint32_t x)noexcept{float y;std::memcpy(&y,&x,4);return y;}
 float fsub(float a,float b)noexcept{volatile float x=a-b;return x;}
 float fmul(float a,float b)noexcept{volatile float x=a*b;return x;}
 float fadd(float a,float b)noexcept{volatile float x=a+b;return x;}
 float clamp(float v)noexcept{if(v<0.f)return 0.f;if(v>1.f)return 1.f;return v;}
 float epsilon()noexcept{return bits(0x3a03126f);}
-double dbits(std::uint64_t u)noexcept{double v;std::memcpy(&v,&u,8);return v;}
 Status default_value(unsigned id,Providers p,float& out)noexcept{
  const auto index=default_expression_index[id];if(!index){out=bits(default_literal_bits[id]);return Status::State;}
  const auto& d=default_expressions[index-1];
  if(!p.pow)return Status::MissingPow;
- double x=p.pow((dbits(d.input_bits)-dbits(d.lo_bits))/(dbits(d.hi_bits)-dbits(d.lo_bits)),1./dbits(d.taper_bits));if(!f32(x)||x<0.||x>1.)return Status::MathFailure;
- out=static_cast<float>(x);return Status::State;
+ const float input=bits(d.input_bits),lo=bits(d.lo_bits),hi=bits(d.hi_bits),taper=bits(d.taper_bits);
+ float x=p.pow((input-lo)/(hi-lo),1.f/taper);if(!f32(x)||x<0.f||x>1.f)return Status::MathFailure;
+ out=x;return Status::State;
 }
-Command command(Op op,Receiver r,std::uint16_t id,double value,std::uint64_t gen,std::size_t order,double delay=0.,std::uint64_t token=0)noexcept{
+Command command(Op op,Receiver r,std::uint16_t id,float value,std::uint64_t gen,std::size_t order,float delay=0.f,std::uint64_t token=0)noexcept{
  return {op,op==Op::TickLfo?Domain::ElapsedSeconds:Domain::NormalizedControl,r,id,value,gen,order,delay,token};
 }
 bool state_spans(const void* input,void* result,std::size_t width,Command* out,std::size_t cap,std::size_t* count)noexcept{
@@ -56,22 +56,22 @@ Status plan_main(const Record* records,std::size_t nr,std::uint64_t gen,bool imm
   if(!found){auto st=default_value(binding.id,providers,value);if(st!=Status::State)return st;}
   if(binding.id==24&&value>0){required|=DelayPrepare;tmp[used]=command(Op::DelayEnablePrepare,Receiver::InstrumentControl,binding.id,value,gen,used);++used;}
   const bool defer=binding.id==0&&!immediate;if(defer)required|=DeferredVolume;
-  tmp[used]=command(defer?Op::DeferVolume:Op::ApplyControl,Receiver::InstrumentControl,binding.id,value,gen,used,defer?.15:0.);++used;
+  tmp[used]=command(defer?Op::DeferVolume:Op::ApplyControl,Receiver::InstrumentControl,binding.id,value,gen,used,defer?.15f:0.f);++used;
  }
  if(used>capacity)return Status::Capacity;
  if((providers.capabilities&required)!=required)return Status::MissingCapability;
  std::copy(tmp,tmp+used,out);count=used;return Status::MainPassOnly;
 }
-Status cutoff_step(const Cutoff& s,double dt,Providers p,Command* out,std::size_t capacity,std::size_t& count,Cutoff& result)noexcept{
+Status cutoff_step(const Cutoff& s,float dt,Providers p,Command* out,std::size_t capacity,std::size_t& count,Cutoff& result)noexcept{
  if(!state_spans(&s,&result,sizeof(s),out,capacity,&count)||!std::isfinite(dt)||!std::isfinite(s.current)||!std::isfinite(s.target)||s.token==UINT64_MAX)return Status::Invalid;
  if(s.awaiting)return Status::AwaitingAck;
  if(!s.active){result=s;count=0;return Status::State;}
  if(capacity<2)return Status::Capacity;
  if((p.capabilities&(CutoffApply|GlobalDispatch))!=(CutoffApply|GlobalDispatch))return Status::MissingCapability;
  float target=clamp(s.target),current=target;
- if(dt>0){if(!p.exp)return Status::MissingExp;double e=p.exp(dt/-.015);if(!std::isfinite(e)||e<0.||e>1.||!f32(1.-e))return Status::MathFailure;float alpha=static_cast<float>(1.-e);current=fadd(s.current,fmul(fsub(target,s.current),alpha));if(!std::isfinite(current))return Status::MathFailure;}
+ if(dt>0){if(!p.exp)return Status::MissingExp;float e=p.exp(dt/-.015f);if(!std::isfinite(e)||e<0.f||e>1.f||!f32(1.f-e))return Status::MathFailure;float alpha=static_cast<float>(1.f-e);current=fadd(s.current,fmul(fsub(target,s.current),alpha));if(!std::isfinite(current))return Status::MathFailure;}
  float emitted=clamp(current);Cutoff next=s;next.current=std::fabs(fsub(emitted,target))<=epsilon()?target:emitted;next.target=target;next.token++;next.awaiting=true;
- Command tmp[2]={command(Op::CutoffApply,Receiver::CoreCutoff,7,emitted,s.generation,0,0.,next.token),command(Op::GlobalDispatch,Receiver::ConductorGlobal,7,emitted,s.generation,1,0.,next.token)};
+ Command tmp[2]={command(Op::CutoffApply,Receiver::CoreCutoff,7,emitted,s.generation,0,0.f,next.token),command(Op::GlobalDispatch,Receiver::ConductorGlobal,7,emitted,s.generation,1,0.f,next.token)};
  std::copy(tmp,tmp+2,out);result=next;count=2;return Status::PendingAck;
 }
 Status cutoff_ack(const Cutoff& s,std::uint64_t gen,std::uint64_t token,float actual,Cutoff& result)noexcept{
@@ -80,19 +80,19 @@ Status cutoff_ack(const Cutoff& s,std::uint64_t gen,std::uint64_t token,float ac
  if(!s.awaiting||gen!=s.generation||token!=s.token)return Status::StaleAck;
  Cutoff next=s;next.active=!(std::fabs(fsub(s.current,s.target))<=epsilon()&&std::fabs(fsub(actual,s.target))<=epsilon());next.awaiting=false;result=next;return Status::State;
 }
-Status free_block_time(std::uint32_t frames,double sample_rate,double& dt)noexcept{
+Status free_block_time(std::uint32_t frames,float sample_rate,float& dt)noexcept{
  if(frames>INT32_MAX||!std::isfinite(sample_rate)||sample_rate<=0)return Status::Invalid;
- double value=double(frames)/sample_rate;if(!std::isfinite(value))return Status::Invalid;dt=value;return Status::Clock;
+ float value=float(frames)/sample_rate;if(!std::isfinite(value))return Status::Invalid;dt=value;return Status::Clock;
 }
-Status beat_catchup(const Beat& s,double beat,double tempo,bool loaded,Command* out,std::size_t capacity,std::size_t& count,Beat& result)noexcept{
- if(!state_spans(&s,&result,sizeof(s),out,capacity,&count)||!std::isfinite(s.last)||!std::isfinite(s.accumulator)||s.accumulator<0||s.accumulator>=.0125||!std::isfinite(beat)||!std::isfinite(tempo))return Status::Invalid;
+Status beat_catchup(const Beat& s,float beat,float tempo,bool loaded,Command* out,std::size_t capacity,std::size_t& count,Beat& result)noexcept{
+ if(!state_spans(&s,&result,sizeof(s),out,capacity,&count)||!std::isfinite(s.last)||!std::isfinite(s.accumulator)||s.accumulator<0||s.accumulator>=.0125f||!std::isfinite(beat)||!std::isfinite(tempo))return Status::Invalid;
  Beat next=s;next.last=beat;Command tmp[17];std::size_t used=0;
- if(!loaded||beat<s.last)next.accumulator=0.;
+ if(!loaded||beat<s.last)next.accumulator=0.f;
  else{
-  double elapsed=((beat-s.last)*60.)/std::max(tempo,1.);
+  float elapsed=((beat-s.last)*60.f)/std::max(tempo,1.f);
   if(std::isfinite(elapsed)&&elapsed>0){
-   if(elapsed>.2)next.accumulator=0.;
-   else{next.accumulator+=elapsed;while(next.accumulator>=.0125){if(used==capacity)return Status::Capacity;if(used==17)return Status::Invalid;tmp[used]=command(Op::TickLfo,Receiver::Conductor,0,.0125,s.generation,used);++used;next.accumulator=next.accumulator+(-.0125);}}
+   if(elapsed>.2f)next.accumulator=0.f;
+   else{next.accumulator+=elapsed;while(next.accumulator>=.0125f){if(used==capacity)return Status::Capacity;if(used==17)return Status::Invalid;tmp[used]=command(Op::TickLfo,Receiver::Conductor,0,.0125f,s.generation,used);++used;next.accumulator=next.accumulator+(-.0125f);}}
   }
  }
  if(used){std::copy(tmp,tmp+used,out);}
@@ -102,7 +102,7 @@ Status enter_note(const Note& s,std::size_t held,Note& result)noexcept{
  auto a=span(&s,1,sizeof(s)),b=span(&result,1,sizeof(result));if(!a.valid||!b.valid||(overlaps(a,b)&&&s!=&result))return Status::Invalid;
  for(unsigned i=0;i<3;++i)if(s.modes[i]>3||!std::isfinite(s.delay_passed[i])||s.delay_passed[i]<0)return Status::Invalid;
  Note next=s;next.armed=true;next.retrigger4=true;
- for(unsigned i=0;i<3;++i){if(s.modes[i]==2)next.retriggers[i]=true;if(!held){next.delay_finished[i]=false;next.delay_passed[i]=0.;}}
+ for(unsigned i=0;i<3;++i){if(s.modes[i]==2)next.retriggers[i]=true;if(!held){next.delay_finished[i]=false;next.delay_passed[i]=0.f;}}
  if(!held){next.new_note=true;}
  result=next;return Status::State;
 }

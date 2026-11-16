@@ -5,29 +5,29 @@ namespace DunneCore {
 struct OriginalSyrupFilter {
  template<class T> static T minimum(T a,T b){return b<a?b:a;}
  template<class T> static T maximum(T a,T b){return a<b?b:a;}
- double rate=44100.,lastCutoff=12.,lastRes=.1;
+ float rate=44100.f,lastCutoff=12.f,lastRes=.1f;
  float g=0,k=0,inGain=1,outGain=1,a=-1,b=1,invA=1,invB=1;
  float p1=0,h1=0,p2=0,h2=0,p3=0,h3=0,p4=0,h4=0;
  bool fourPole=false;
  void clear(){p1=h1=p2=h2=p3=h3=p4=h4=0;}
- void init(double sr){rate=sr;clear();}
- void updateSampleRate(double sr){rate=sr;}
- void setParameters(double cut,double res) {
+ void init(float sr){rate=sr;clear();}
+ void updateSampleRate(float sr){rate=sr;}
+ void setParameters(float cut,float res) {
   if(!std::isfinite(cut))cut=lastCutoff;
   if(!std::isfinite(res))res=lastRes;
-  cut=minimum(maximum(cut,12.),rate*.45351473923);
-  res=minimum(maximum(res,.1),10.);
+  cut=minimum(maximum(cut,12.f),rate*.45351473923f);
+  res=minimum(maximum(res,.1f),10.f);
   lastCutoff=cut;lastRes=res;
-  const double z=(cut/rate)*3.141592653589793;
-  g=float(std::tan(z/(1.+z)));
-  double q=(-20.*std::log10(res))/19.; q=minimum(maximum(q,0.),1.);
-  const double kr=std::pow(q,.45)*2.05;
-  const double drive=std::fma(q,2.,1.);
-  inGain=float(1./drive);
-  outGain=float((std::pow(drive,.75)*1.35)/std::sqrt(drive*double(inGain)));
+  const float z=(cut/rate)*3.141592653589793f;
+  g=float(std::tan(z/(1.f+z)));
+  float q=(-20.f*std::log10(res))/19.f; q=minimum(maximum(q,0.f),1.f);
+  const float kr=std::pow(q,.45f)*2.05f;
+  const float drive=std::fma(q,2.f,1.f);
+  inGain=float(1.f/drive);
+  outGain=float((std::pow(drive,.75f)*1.35f)/std::sqrt(drive*float(inGain)));
   const float twiceG=g+g;
   const float limit=maximum(1.f,std::fma(twiceG,.09f,.97f));
-  k=float(kr/double(limit));
+  k=float(kr/float(limit));
   const float gg=g*g;
   a=(twiceG-gg)+(-1.f); b=1.f-g;
   const float c=(gg-g)+1.f;

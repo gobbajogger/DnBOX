@@ -4,7 +4,7 @@
 // adjustable cutoff frequency and resonance.
 //
 // Filter resonance is usually expressed in dB, but to avoid having to call expensive
-// math functions like pow(), we use a linear value between 10.0 (-20 dB) and 0.1 (+20 dB)
+// math functions like pow(), we use a linear value between 10.0f (-20 dB) and 0.1f (+20 dB)
 
 #pragma once
 #include <cmath>
@@ -15,28 +15,28 @@ namespace DunneCore
     struct ResonantLowPassFilter
     {
         // coefficients
-        double a0, a1, a2, b1, b2;
+        float a0, a1, a2, b1, b2;
         
         // state
-        double x1, x2, y1, y2;
+        float x1, x2, y1, y2;
         
         // misc
-        double sampleRateHz, mLastCutoffHz, mLastResLinear;
+        float sampleRateHz, mLastCutoffHz, mLastResLinear;
         
         ResonantLowPassFilter();
         
-        void init(double sampleRateHz);
-        void updateSampleRate(double sampleRate) { sampleRateHz = sampleRate; }
+        void init(float sampleRateHz);
+        void updateSampleRate(float sampleRate) { sampleRateHz = sampleRate; }
         
-        void setParameters(double newCutoffHz, double newResLinear);
-        void setCutoff(double newCutoffHz) { setParameters(newCutoffHz, mLastResLinear); }
-        void setResonance(double newResLinear) { setParameters(mLastCutoffHz, newResLinear); }
+        void setParameters(float newCutoffHz, float newResLinear);
+        void setCutoff(float newCutoffHz) { setParameters(newCutoffHz, mLastResLinear); }
+        void setResonance(float newResLinear) { setParameters(mLastCutoffHz, newResLinear); }
         
         void process(const float *inSourceP, float *inDestP, int inFramesToProcess);
 
         inline float process(float inputSample)
         {
-            float outputSample = (float)(std::fma(-b2, y2, std::fma(-b1, y1, std::fma(a2, x2, std::fma(a0, double(inputSample), a1*x1)))));
+            float outputSample = (float)(std::fma(-b2, y2, std::fma(-b1, y1, std::fma(a2, x2, std::fma(a0, float(inputSample), a1*x1)))));
 
             x2 = x1;
             x1 = inputSample;

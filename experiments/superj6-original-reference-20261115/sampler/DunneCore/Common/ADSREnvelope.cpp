@@ -40,43 +40,43 @@ namespace DunneCore
     void ADSREnvelope::init(CurvatureType curvatureType)
     {
         currentCurvature=curvatureType;
-        int silenceSamples = int(0.01 * pParameters->sampleRateHz);     // always 10 mSec
+        int silenceSamples = int(0.01f * pParameters->sampleRateHz);     // always 10 mSec
         int attackSamples = int(pParameters->attackSamples);
         int decaySamples = int(pParameters->decaySamples);
-        double sustainFraction = double(pParameters->sustainFraction);
+        float sustainFraction = float(pParameters->sustainFraction);
         int releaseSamples = int(pParameters->releaseSamples);
 
         envDesc.clear();
-        envDesc.push_back({ 0.0, 0.0, 0.0, -1 });               // kIdle: 0 forever
-        envDesc.push_back({ 1.0, 0.0, 0.0, silenceSamples });   // kSilence in 10 mSec
+        envDesc.push_back({ 0.0f, 0.0f, 0.0f, -1 });               // kIdle: 0 forever
+        envDesc.push_back({ 1.0f, 0.0f, 0.0f, silenceSamples });   // kSilence in 10 mSec
 
         if(curvatureType==kOriginalOTA) {
-            const double reciprocal=1./std::expm1(1.5);
-            envDesc.push_back({0.,1.,1./std::expm1(1.),attackSamples});
-            envDesc.push_back({1.,sustainFraction,(1.-sustainFraction)*reciprocal,decaySamples});
-            envDesc.push_back({sustainFraction,sustainFraction,0.,-1});
-            envDesc.push_back({sustainFraction,0.,sustainFraction*reciprocal,releaseSamples});
+            const float reciprocal=1.f/std::expm1(1.5f);
+            envDesc.push_back({0.f,1.f,1.f/std::expm1(1.f),attackSamples});
+            envDesc.push_back({1.f,sustainFraction,(1.f-sustainFraction)*reciprocal,decaySamples});
+            envDesc.push_back({sustainFraction,sustainFraction,0.f,-1});
+            envDesc.push_back({sustainFraction,0.f,sustainFraction*reciprocal,releaseSamples});
         }
         else if (curvatureType == kAnalogLike)
         {
-            envDesc.push_back({ 0.0, 1.0, exp(-1.5), attackSamples });                  // kAttack
-            envDesc.push_back({ 1.0, sustainFraction, exp(-4.95), decaySamples });      // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0, -1 });           // kSustain
-            envDesc.push_back({ sustainFraction, 0.0, exp(-4.95), releaseSamples });    // kRelease
+            envDesc.push_back({ 0.0f, 1.0f, std::exp(-1.5f), attackSamples });                  // kAttack
+            envDesc.push_back({ 1.0f, sustainFraction, std::exp(-4.95f), decaySamples });      // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });           // kSustain
+            envDesc.push_back({ sustainFraction, 0.0f, std::exp(-4.95f), releaseSamples });    // kRelease
         }
         else if (curvatureType == kLinearInDb)
         {
-            envDesc.push_back({ 0.0, 1.0, 0.99999, attackSamples });                    // kAttack
-            envDesc.push_back({ 1.0, sustainFraction, exp(-11.05), decaySamples });     // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0, -1 });           // kSustain
-            envDesc.push_back({ sustainFraction, 0.0, exp(-11.05), releaseSamples });   // kRelease
+            envDesc.push_back({ 0.0f, 1.0f, 0.99999f, attackSamples });                    // kAttack
+            envDesc.push_back({ 1.0f, sustainFraction, std::exp(-11.05f), decaySamples });     // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });           // kSustain
+            envDesc.push_back({ sustainFraction, 0.0f, std::exp(-11.05f), releaseSamples });   // kRelease
         }
         else
         {
-            envDesc.push_back({ 0.0, 1.0, 0.0, attackSamples });                        // kAttack
-            envDesc.push_back({ 1.0, sustainFraction, 0.0, decaySamples });             // kDecay
-            envDesc.push_back({ sustainFraction, sustainFraction, 0.0, -1 });           // kSustain
-            envDesc.push_back({ sustainFraction, 0.0, 0.0, releaseSamples });           // kRelease
+            envDesc.push_back({ 0.0f, 1.0f, 0.0f, attackSamples });                        // kAttack
+            envDesc.push_back({ 1.0f, sustainFraction, 0.0f, decaySamples });             // kDecay
+            envDesc.push_back({ sustainFraction, sustainFraction, 0.0f, -1 });           // kSustain
+            envDesc.push_back({ sustainFraction, 0.0f, 0.0f, releaseSamples });           // kRelease
         }
 
         env.reset(&envDesc);
@@ -85,7 +85,7 @@ namespace DunneCore
     void ADSREnvelope::updateParams()
     {
         if (envDesc.size() < 6) return;
-        double sustainFraction = double(pParameters->sustainFraction);
+        float sustainFraction = float(pParameters->sustainFraction);
 
         envDesc[kAttack].lengthSamples = int(pParameters->attackSamples);
         envDesc[kDecay].finalValue = sustainFraction;
@@ -94,8 +94,8 @@ namespace DunneCore
         envDesc[kRelease].initialValue = sustainFraction;
         envDesc[kRelease].lengthSamples = int(pParameters->releaseSamples);
         if(currentCurvature==kOriginalOTA){
-            const double reciprocal=1./std::expm1(1.5);
-            envDesc[kDecay].tco=(1.-sustainFraction)*reciprocal;
+            const float reciprocal=1.f/std::expm1(1.5f);
+            envDesc[kDecay].tco=(1.f-sustainFraction)*reciprocal;
             envDesc[kRelease].tco=sustainFraction*reciprocal;
         }
     }
