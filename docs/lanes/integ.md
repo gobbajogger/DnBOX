@@ -3,7 +3,32 @@
 Owner: accountable integration lane. Branch: lane/integ-start-files. RULES.md v2 only.
 Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly remains9165adb92fcdaab756c4e59e3d4a8ee22437ca5a. No lane draft merged or deployed.
 
-## Current finish lines (current composed runtime 0ac93f57)
+## Current finish lines and exact input scopes
+
+This source/test update descends from firmware draft 54c41e13ee2b6c20f5012bbd44437b18e4115311, whose production firmware is byte-identical to independently built 646ac66293d5cc2a04de37ce6dc172f07e572306. Current nightly composed draft is 1d0680a62a24fa9ec76ba455219c9dd00d3041ef. Neither is the consolidated target. New test/collector files are not present in older recorded source SHAs unless explicitly stated as added pinned inputs.
+
+- C1 FAIL: full before/after Local gates remain non-green; focused checks are not substitutes.
+- C2 prior scoped PASS: independent exact 54c41 and 1d068 no-loss against actual e742/9165 targets; this successor still needs its own exact check.
+- C3 FAIL: complete independent screen Review 10/10 is absent.
+- C4 FAIL overall: exact 54c41/1d068 bounded limits pass; comprehensive secret/opaque-content review and this successor's full gate remain open.
+- C5 FAIL: unfinished I items remain.
+- C6 FAIL: PR955/136 remain drafts, not consolidated or delivered.
+- I0 FAIL: original consolidated firmware pool margin 172B is below 512B; baseline gates remain non-green.
+- I1 FAIL: targets and state record exist, but v2 lane work remains unmerged.
+- I2 FAIL overall: identical 646 production inputs build Elite/Pro with XIP 3240/3252B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
+- I3 FAIL: local exact f910 has a chorus deadline miss and all strict margins fail. Fixed-count managed 0ac/f910 comparison has 0 deadline misses but 4 strict-margin failures across 12 runs (before initial plain; after warmed plain/chorus/peaking). Matching PCM is not timing or hardware equivalence. Old 0ac-only green runs below are historical.
+- I4 scoped evidence: managed 13e0 normal/ASan/UBSan comparisons with default LSan pass and the six-file compact-program closure remains byte-identical through current runtime; not whole-current-head/full-gate qualification.
+- I5 FAIL: five authentic encoded/derived preview assets retained; actual browser transport checks are bounded, stock firmware embedding and Pages delivery unfinished.
+- I6 FAIL overall: advisory normalizer 22 and bounded read-only collector 8 tests pass; local gh route is BLOCKED; authenticated managed collection on 2026-11-16 at 19:54:15 UTC observed six historical issues and zero reactions with authorization NONE/actions empty. The recovered report and receipt hashes match; full stdout remains preserved in the managed runtime, not independently reconstructed here. No issue/reaction grants authority, and no new schedule was created.
+- I7 FAIL: cleanup waits finished lanes/rule 9; no settings, rename or deletion performed.
+
+## Current next work
+
+Keep native scalar binding unadmitted while measuring source-complete flash/RAM/stack, mutation revisions and original held ownership. Protocol annotations/table-free decoding are measured experiments only. Continue exact Web/Remote composition qualification with current fail-closed gates. Fwui's earlier 0ed pickup regression was corrected and independently reviewed in cde and retained in 646; it is not a current unresolved source finding. Full original Sound FX/flash and fullUI requirements remain unresolved, without reductions or false PASS.
+
+The following 0ac checkpoint is retained only as historical evidence. Its then-current pins, open findings and next steps are superseded by the status above.
+
+## Historical checkpoint: 0ac93f57 finish lines (superseded)
 - C1 FAIL: full before/after Local gates are not passing. Focused native, host, UI and containment results below do not substitute.
 - C2 PASS at badcc/0cad: independently verified exact consolidated containment and deletion reasons. This update deletes no files and retains those parents.
 - C3 FAIL: complete independent screen Review 10/10 is absent.
@@ -19,7 +44,7 @@ Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly 
 - I6 FAIL overall: 22-fixture reviewed advisory-only normalizer has run on fresh complete connector data. It grants no authority and does not establish a finished automatic collector or consolidated roadmap.
 - I7 FAIL: cleanup waits lane completion and rule 9. No settings/rename, deletion or unsupported archive action performed.
 
-## Current verified subchecks and next work
+## Historical 0ac93f57 subchecks and then-open work
 - Exact 0ac native Elite/Pro: XIP free 2028/2040 B; pool reserve margin 836 B; RAM headroom 1080 B. Independent actual battery test: 2941 checks PASS.
 - Exact 0ac managed host stress: six runs, zero CPU/wall deadline misses, whole render <=6.96 ms and each synth <=1.74 ms. Maximum observed wall block 5.029299 ms. All four plain PCM hashes match, and the three program/FX workloads are distinct. The fixed admission fixture proves both engine wrappers and exact macro values. No target-device or all-final-engine claim.
 - Current-host census: 326 actual descriptor tuples, 978 valid zero/mid/max edits, 1897 checks PASS. It assigns no protocol IDs and enables no endpoint. Next: checked scalar transaction admission, queue saturation/atomicity, exact mutation revisions and remote held-owner lifetime before current DNR2 binding.
@@ -736,3 +761,19 @@ Standalone unchanged retained protocol native objects measure3024B code/readonly
 A test-only table-free sequential-ID decoder matches all326 generated current scalar tuples twice across bank state, rejects invalid IDs without changing output, and leaves whole stored sound/live banks unchanged. Final producer7242C checks plus8wire exchanges pass after independent bounded source review. This avoids a persistent diagnostic row/label table conceptually, but native decoder size/latency and endpoint fit remain unmeasured; IDs are not stable/public/admitted. Production code remains unchanged.
 
 Retains all36 API-hash-verified Fwui448d49d2bab765a6aa3630bbb14ea6fbe3e7d3cf test/evidence paths sinceef70, no runtime changes. Independent input reviews cover clip-key/strip/chord/bounds fixtures only; all unimplemented fullUI requirements stay FAIL/NOT_RUN.
+
+Repeated mistake: tests hashed inputs then compiled reread mutable paths. Capture the exact input bytes once, hash-check and stage them, then compile only staged inputs and verify them around execution.
+
+## Protocol annotation feasibility and staged-input recovery
+
+A source-derived experiment outlines only core base/save and wire u7/p7 helpers. Original retained C/H remain untouched; the test runner pins all four original hashes, captures original/fixture bytes once and compiles staged originals/headers/fixture/derived copies only. Checks bracket each compile-and-run mode, not every compiler call or the entire system toolchain. Independent provenance review and4 compiler-stub mutation regressions pass, including rejection of reintroduced live C/header/fixture inputs.
+
+The final frozen runner and fixture pass100000 deterministic protocol/wire comparisons per mode,13056 single-byte decode mutations, active held/cached semantic fields, invalid lengths/null guards, and directed capacity/exhaustion/expiry cases in normal, UBSan and default ASan/UBSan/LSan modes on the managed host. Full log and receipt hashes were recovered/verified. Local old-runner LSan ptrace failure and managed trailing-argument exit2 NOT_RUN are retained separately; the final command has no directory argument. No retry-to-green or leak disable occurred. These are bounded host checks, not exhaustive protocol state proof or native admission.
+
+Native unlinked measurements retain every tested variant: core1820→1276B, wire1204→924B, table-free decoder222B, with core state692B unchanged. Original handle prologue reserves700B plus52B saved registers; derived handle84+44, with outlined base40+20 and save16 before deeper callees. These are measured prologues only, not a full stack bound. Nominal candidate2422B code/decoder still leaves only818/830B of current XIPfree before binding/catalog/transport, below1024B reserve absent measured link savings. No fit claim or production annotation activation.
+
+## Read-only I6 collector route
+
+A bounded GitHub CLI API collector uses only GET on the fixed repository/hostname, gathers all issue/reaction pages through a terminal empty page, and feeds the existing advisory normalizer. Failures, incomplete pages, elapsed/request limits or stale data block with no accepted items/actions. Bodies and account logins are not retained. It creates no schedule, message, reaction or authorization. Eight collector regressions pass; the local unauthenticated gh route returns BLOCKED honestly. Alternate authenticated read-only runtime verification remains next; historical issue observations do not revive prior instructions.
+
+Managed annotation execution used base54c41 plus the separately supplied pinned runner/C fixture, not an assertion those test files were already in that base tree. Receipts and normalized failed-attempt history are at evidence/integ-native-annotations.

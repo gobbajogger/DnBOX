@@ -1,0 +1,16 @@
+PASS active held/cached semantic fields, decode lengths0..60 and null guards
+PASS directed67-owner capacity/full, revision+lease exhaustion, expiry cleanup,13056 single-byte decode mutations
+PASS 100000 deterministic transactions + command/reply wire and mutated decode comparisons; callbacks SET=4449 DOWN=8683 UP=8683
+statuses 72698 4890 5106 10757 314 650 5585 0 0
+PASS annotation differential mode=normal
+PASS active held/cached semantic fields, decode lengths0..60 and null guards
+PASS directed67-owner capacity/full, revision+lease exhaustion, expiry cleanup,13056 single-byte decode mutations
+PASS 100000 deterministic transactions + command/reply wire and mutated decode comparisons; callbacks SET=4449 DOWN=8683 UP=8683
+statuses 72698 4890 5106 10757 314 650 5585 0 0
+PASS annotation differential mode=ubsan
+PASS active held/cached semantic fields, decode lengths0..60 and null guards
+PASS directed67-owner capacity/full, revision+lease exhaustion, expiry cleanup,13056 single-byte decode mutations
+PASS 100000 deterministic transactions + command/reply wire and mutated decode comparisons; callbacks SET=4449 DOWN=8683 UP=8683
+statuses 72698 4890 5106 10757 314 650 5585 0 0
+PASS annotation differential mode=asan
+No native application, stack, latency, linked fit or endpoint admission is implied.

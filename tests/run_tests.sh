@@ -496,6 +496,9 @@ run smc-ui sh tests/host/smc_ui_test.sh
 run remote-scalar sh tests/host/remote_scalar_test.sh
 run remote-events sh tests/host/remote_events_test.sh
 run remote-actual-core sh tests/host/remote_actual_core_test.sh
+run dnbox-inbox-collect python3 tests/dnbox_inbox_collect_test.py
+run remote-native-input-binding python3 tests/remote_native_annotations_binding_test.py
+run remote-native-annotations python3 tests/remote_native_annotations_test.py
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
 run smc-remainder sh tests/host/smc_remainder_test.sh
 run smc-popup-engine sh tests/host/smc_popup_engine_test.sh

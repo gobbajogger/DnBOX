@@ -1,0 +1,83 @@
+{
+  "scope": "native unlinked annotation feasibility; no exact application link/fit or latency qualification",
+  "source_base": "54c41e13ee2b6c20f5012bbd44437b18e4115311",
+  "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+  "selected_annotation_only_changes": [
+    "core: base/save noinline",
+    "wire: u7/p7 noinline"
+  ],
+  "variants": {
+    "remote_core": {
+      "text_rodata": 1820,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "9bdc01ab351869e5b4f87d4c9a9087658e004a5cad334aa3abc07c5ff062d4f2"
+    },
+    "core-save": {
+      "text_rodata": 1420,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "1b01fef729c43f44365945464472680af5d495eded5aab9360a8de61a2b61d29"
+    },
+    "core-base": {
+      "text_rodata": 1624,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "dadd1b03b47174163d7af176f9e1843e9bdfd4cf301079bbbc8e6d7498d860de"
+    },
+    "core-base-save": {
+      "text_rodata": 1276,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "2535b4c35b2d329c0da553f1ec870bcc93fe32bffaed5192e16d92af65f55ce0"
+    },
+    "core-all": {
+      "text_rodata": 1292,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "4d7abc0e8e1fa2debf9c3fe9b9ca4c2fd51f43a48e6970215e48434c79a2de09"
+    },
+    "remote_wire": {
+      "text_rodata": 1204,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "707978368c45738a6888ecd9f8676687c64eb4ebd7d2938064f9e0ed991e915f"
+    },
+    "wire-p7": {
+      "text_rodata": 994,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "f7723e0a50a5265b718b502841c9626dc236c5bf716c650c8c88ebb8eec21e4f"
+    },
+    "wire-u7": {
+      "text_rodata": 1134,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "b197a14e0432eeb35fd0bf544440e7e7fac68dc85ff5e06ff86e7f03f233ae27"
+    },
+    "wire-both": {
+      "text_rodata": 924,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "6ac282740be7d6b55b948b0412f398698f457f5f951e85e29fc288f0f4d96476"
+    },
+    "decoder": {
+      "text_rodata": 222,
+      "data": 0,
+      "bss": 0,
+      "object_sha256": "245384490d96723931caa25613686fdc927e53e06243c663dd56e0ddc4806f14"
+    }
+  },
+  "derived_sources_sha256": {
+    "core-base-save.c": "d8ccf2e114fb5214199c40a61c52a42167ee1f24990fcf5525de65fd4628e162",
+    "wire-both.c": "e4d1214825e8421c2294ffacb3559ffd8a097f9d60d90263822b6d099f9baedb",
+    "decoder.c": "442a5a9077ea419fdb09cc63ffffcc3199adfdc7d8a68ada8fcc505a35eb7571"
+  },
+  "native_core_bytes": 692,
+  "nominal_code_plus_decoder_bytes": 2422,
+  "unmeasured": [
+    "linker GC/dedup effects",
+    "native binding/catalog/transport code and state placement",
+    "full target call-stack depth and IRQ/command latency"
+  ]
+}
