@@ -40,3 +40,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Native initial overflow1060B fixed by packing1650 authored millipixel coordinates into16-bit storage.1651 float-bit checks PASS; serial135-state rendered pixels identical before/after. Elite2220B/Pro2232B XIP free; BSS96560, pool margin172 still below512 until independently verified integ correction composes. Full Local not passed.
 - Build/test generation must use isolated worktrees: concurrent host/native generators changed BREAK bank and produced5 false raster differences; failed result retained and serial135/135 replay verified. This was first occurrence, not a repeated error.
 - Evidence: docs/evidence/fwui/r22-candidate/summary.json and logs. Next: independent exact-head review, pool-fix composition, battery/pad regression tests, then remaining all-domain geometry and real SynthOne/SuperJ6 bindings.
+
+## Battery and preserved GLOBE coverage
+- Production shared-header battery/cache regression:2892 assertions PASS across eight views and cacheable drum header, transitions0/1/2/3 and unknown/USB clipping. Simulator defaults stay full; test fixtures can vary host battery input. No firmware runtime code changed in this checkpoint.
+- Existing home_globe_part regression PASS on selective R22 candidate. This is a preserved-subset test, not the full F5 pad/LED matrix.
+- Pan production8925 assertions and battery2892 assertions support F4 content; final same-head independent replay/full lane gate remains pending, so no lane acceptance requested.
