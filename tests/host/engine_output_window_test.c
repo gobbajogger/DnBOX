@@ -22,6 +22,17 @@ int engine_note_lock_capture_on(void) { return 0; }
 void engine_note_lock_refresh(void) {}
 #pragma weak engine_bass_note_validate
 int engine_bass_note_validate(const lane_t *lane) { (void)lane; return 0; }
+/* Newer shared UI references absent from the retained engine. This audio-only
+ * differential must never exercise Remote writes or note-lock capture. Strong
+ * current-engine definitions override these; any baseline use fails closed. */
+#pragma weak engine_queue_available_locked
+unsigned engine_queue_available_locked(void) { abort(); }
+#pragma weak engine_set_from_remote
+void engine_set_from_remote(int t, int v, int p, int value)
+{ (void)t; (void)v; (void)p; (void)value; abort(); }
+#pragma weak engine_bass_note_capture
+int engine_bass_note_capture(lane_t *lanes, int pat, int voice, int step, const sound_t *sound)
+{ (void)lanes; (void)pat; (void)voice; (void)step; (void)sound; abort(); }
 /* CPU2 modes run: 0 none, 1 deferred, 2 failed with no progress, 3 failed after a partial
  * job. The script compares 0..2 with BASE_REF, and 3 with this engine's own clean mode 1. */
 #ifndef OW_LO

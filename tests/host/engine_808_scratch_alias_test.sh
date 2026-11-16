@@ -5,7 +5,11 @@
 # Needs the private original-synth inputs and sh host/build_host.sh --generate-only.
 set -e
 cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-origin/build/0.0.22}
-git show $BASE:firmware/src/app/engine.c > $D/engine-base.c
+# Resolve once, then stage the historical textual include alongside its engine.
+# Otherwise quoted include lookup falls through to the current owner/event layout.
+BASE=$(git rev-parse --verify "$BASE^{commit}")
+git show "$BASE:firmware/src/app/engine.c" > "$D/engine-base.c"
+git show "$BASE:firmware/src/app/original_presets.inc" > "$D/original_presets.inc"
 U=$(python3 - <<'PY'
 import importlib.util
 spec=importlib.util.spec_from_file_location('b','tools/build.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)

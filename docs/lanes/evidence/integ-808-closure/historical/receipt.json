@@ -1,0 +1,10 @@
+{
+  "repository": "gobbajogger/X0X37-for-Loopy-Pro",
+  "commit": "2456968ba39b521610364f3ea17a118b456269c0",
+  "path": "firmware/src/app/original_presets.inc",
+  "gitBlob": "49a84544b8fd32c4c5fec7ef41ed76052eb320f5",
+  "sha256": "73ef645d27aa009205833d11ea6d93277be497301cf43725b30e8895875b1bb3",
+  "bytes": 9673,
+  "source": "GitHub connector contents at exact commit; local original tree entry and Git blob hash verified",
+  "restore": "git hash-object -w --stdin < original_presets.inc; resulting SHA must equal gitBlob; never alter the historical engine or include."
+}
