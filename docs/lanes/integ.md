@@ -597,3 +597,7 @@ Both retained under README test/dependency exception pending gate review.
 - This does not fit Synth One: owner10532B versus existing union3720B adds13624B across two parts. Sound owns exact C ABI/owner plan; integration must reuse/reclaim without PSRAM, reduced original behavior or fake engine renaming.
 - Gate corrections independently18/18 focused fixtures passed; candidate724cec8 real clean/setup/no-loss/limits now PASS, not an overall Local PASS.
 - Independent review found Markdown excluded from secret scan. Scan now includes Markdown and prints filenames only, never matched values. Dummy Markdown token/key detection fixtures pass; total focused gate regression21/21 PASS. Host master algorithm regression PASS; no runtime/native relocation claim yet.
+
+## Independently measured stock-pool repair
+- At exact13e0b087839c9606bab98680cabf3a2d74f74757, both Elite/Pro native builds and budget PASS: pool335036/344064, margin836B above8192 floor; data+BSS96792/98304 leaves1512B; app free13464/13472B. ELF proves664B master moved to BSS with4-byte alignment. Startup/init and host master replay PASS. See integ-memory.md. This resolves the candidate budget subcheck, not baseline/full Local, C6 or combined Sound fit.
+- I5 authentic five zone assets now published only in nightly draft6a9607e886aab06ce0b1813321629b67239057b5; web owns real preview provider/allowlist. Firmware bank embedding remains blocked by stock flash fit. Both consolidated targets unchanged.
