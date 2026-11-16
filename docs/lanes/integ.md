@@ -5,7 +5,7 @@ Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly 
 
 ## Current finish lines and exact input scopes
 
-This source/test update descends from firmware draft 54c41e13ee2b6c20f5012bbd44437b18e4115311, whose production firmware is byte-identical to independently built 646ac66293d5cc2a04de37ce6dc172f07e572306. Current nightly composed draft is 1d0680a62a24fa9ec76ba455219c9dd00d3041ef. Neither is the consolidated target. New test/collector files are not present in older recorded source SHAs unless explicitly stated as added pinned inputs.
+This evidence update descends from firmware draft fef9b94d93fb2fc495d18e5da960197e786caf26, whose only production change from independently built646 is the reviewed SONG instruction literal removal. Exact fef9 native resources are recorded below. Current nightly draft is4c9db78a617971588ae56b03faefd224c93bfbca. Neither is consolidated or delivered. Earlier54c41/6fc/596 test and resource checkpoints remain historical exact-input evidence, not current all-gate qualification.
 
 - C1 FAIL: full before/after Local gates remain non-green; focused checks are not substitutes.
 - C2 prior scoped PASS: independent exact 54c41 and 1d068 no-loss against actual e742/9165 targets; this successor still needs its own exact check.
@@ -15,7 +15,7 @@ This source/test update descends from firmware draft 54c41e13ee2b6c20f5012bbd444
 - C6 FAIL: PR955/136 remain drafts, not consolidated or delivered.
 - I0 FAIL: original consolidated firmware pool margin 172B is below 512B; baseline gates remain non-green.
 - I1 FAIL: targets and state record exist, but v2 lane work remains unmerged.
-- I2 FAIL overall: identical 646 production inputs build Elite/Pro with XIP 3240/3252B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
+- I2 FAIL overall: exact fef9 default production inputs build Elite/Pro with XIP 3268/3276B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
 - I3 FAIL: local exact f910 has a chorus deadline miss and all strict margins fail. Fixed-count managed 0ac/f910 comparison has 0 deadline misses but 4 strict-margin failures across 12 runs (before initial plain; after warmed plain/chorus/peaking). Matching PCM is not timing or hardware equivalence. Old 0ac-only green runs below are historical.
 - I4 scoped evidence: managed 13e0 normal/ASan/UBSan comparisons with default LSan pass and the six-file compact-program closure remains byte-identical through current runtime; not whole-current-head/full-gate qualification.
 - I5 FAIL: five authentic encoded/derived preview assets retained; actual browser transport checks are bounded, stock firmware embedding and Pages delivery unfinished.
@@ -787,3 +787,9 @@ The firmware gate previously scanned only changed workflow/PSRAM paths, allowing
 Normal composition of FWUI 95bb856fa3aa38fb02c4b9e74a9b4becdaf0430a retains reviewed Attack/text/geometry fixtures and changes production only by replacing SONG's EMPTY: WHITE KEYS ADD BARS literal with EMPTY. END/status/input semantics and current scalar/event hooks remain unchanged. The intentional help-card decision remains separate. Frozen source review accepted the literal removal; exact combined affected host/native qualification is still required before resource or full-gate claims.
 
 Producer exact-composed SONG host selector: 12 actual-graphics states and 86 checks PASS; selector registered in full host suite. Authenticated historical Attack fixture retains its original trailing blank line despite diff whitespace notice. Source review/complete native gate remain separately scoped.
+
+## I5 stock embedding audit and queue reconciliation
+
+Independent exact-asset audit confirms five encoded source assets total109274B; unchanged646 app space after1024B reserve is2216/2228B. Existing default emits empty bank. Diagnostic lossless compression97,704B LZMA/99,309B zlib is not an admitted decoder or fit. Retained receipt docs/lanes/evidence/integ-break-embedding/ distinguishes this blocker from website playback. Working/Pending queues now reflect actual consolidated e742/9165, observed drafts and bounded collector status; no finished lane or publication is claimed.
+
+Exact fef9 independent default native Elite/Pro builds completed: XIP free3268/3276B, RAM1096B, pool836B above8192 reserve. Normalized public logs and original/public hashes are in evidence/integ-fef9-native. Setup wrong-SDK and read-only-cache failures were corrected without changing source or gates; no full Local/PADCAL/hardware acceptance follows.

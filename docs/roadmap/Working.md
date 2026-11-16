@@ -1,18 +1,14 @@
 # Working
 
-Consolidated source remains firmware `e742be7bd0d01323c899de6e156f40b85ee451db`
-and nightly `9165adb92fcdaab756c4e59e3d4a8ee22437ca5a`. No v2 lane is merged
-into those targets yet. The following are observed draft source/evidence pins,
-not promises that later heads inherit every result.
+Verified consolidated source remains firmware `e742be7bd0d01323c899de6e156f40b85ee451db` and nightly `9165adb92fcdaab756c4e59e3d4a8ee22437ca5a`. No v2 lane is merged into those targets. Latest observed integration drafts are firmware `fef9b94d93fb2fc495d18e5da960197e786caf26` and nightly `4c9db78a617971588ae56b03faefd224c93bfbca`; these are not delivered sources.
 
-| Owner | Work and observed evidence |
+| Owner | Current outcome and bounded evidence |
 |---|---|
-| sound | Native pre-FX owner7972B/alignment4 at866cec771c17dfbfddb88a7833755824bb4fb480; full native link, XIP fit, postFX and activation remain unqualified. |
-| fwui | R22 geometry/screens and source-faithful labels; source review/render tests ongoing, no finished screen inventory claim. |
-| integ | Native stock pool repair13e0b087839c9606bab98680cabf3a2d74f74757 independently measured margin836B on Elite/Pro. Stable per-part owner grouping under test, not Synth activation. |
-| remote | Gesture/slider/protocol/visual work; normal-sandbox runtime and full R1–R7 qualification still open. |
-| web | Real five-asset provider/build admission68f4b7b718a45291c86d4548b996c5095e8353a4. Combined nightly draftc93f1225b9eaf7735397e1a4540b8b646e868af6 awaiting exact-head gate/review. |
-| test-and-merge | Independent source/host/native review and before/after Local evidence. No Review10/10 or full Local PASS asserted. |
+| sound | Source-faithful original engines, full factory/control/FX comparisons and stock-device fit remain unfinished. The 7972-byte Synth One pre-FX owner excludes tuning, sustain bookkeeping, full FX and stack. |
+| fwui | Reviewed SONG status-only correction95bb is composed in fef9; genuine screen/glyph/text fixtures have bounded acceptance, not complete screen Review10/10 or F1–F7 PASS. |
+| integ | Exact fef9 Elite/Pro default native builds pass: XIP free3268/3276B, RAM1096B, pool margin836B above8192 reserve. This is not extra PADCAL, hardware, or a full Local result. Original/derived protocol differential and default managed sanitizer pass in bounded scope; native endpoint still unadmitted. |
+| remote | Actual-source scalar stdin fixture exercises unchanged BrowserClient and typed Lua guards; no native endpoint/HELD admission or complete R1–R7 qualification. |
+| web | Current4c9 contains reviewed browser/TouchOSC sources,241 product paths and bounded actual browser observations. Complete Local, viewport review and Pages publication remain open. |
+| test-and-merge | Independently verified596 firmware and4c9 nightly containment/limits, and scoped source/host/native evidence. Current fef9 native resource check passes; no full Local or Review10/10. |
 
-Each owner retains one lane PR into the consolidated target. Integration owns
-shared runtime/build interfaces and these queues. No main/settings/device writes.
+Integration owns shared runtime/build interfaces and these queues. Detailed source pins, evidence exclusions and failures remain in each lane file. Older queue pins are preserved in Git history, not current status or instruction. Each lane retains its existing draft PR.
