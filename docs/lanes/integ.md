@@ -604,3 +604,9 @@ Both retained under README test/dependency exception pending gate review.
 
 Repeated mistake: browser launch policy checks missed a launcher invoked indirectly by the firmware host suite. Audit cross-repository and transitive test call graphs before running any suite, not just named browser scripts; never launch with default-off sandbox.
 - Full firmware source scan found five browser launchers: four Python offline sequencer entrypoints and Node workspace test. All now explicitly require normal Chromium sandbox. Runtime remains unrun where cloud sandbox cannot start; source-policy checks cannot substitute for runtime checks.
+
+## Stable per-part owner grouping
+- Legacy runtime and its exclusively borrowed Chicago FX now occupy one stable per-part struct, with a compile-time no-size-growth assertion. All101 engine/preset accesses are mechanically redirected; original runtime retirement and init APIs are unchanged. No Synth One object is activated or copied over live state.
+- Host app build PASS; host layout fixture proves9656B=5360+4296, alignment8, two disjoint parts. Native9436B layout and behavior equivalence remain to be independently measured at this candidate.
+- Fresh Complete/Working/Pending queues and roadmap index now point at actual consolidated e742/9165. No lane Complete. #120 is the suggestion/voting requirement (historical partial helper PR184), not unrelated GitHub PR120.
+- Selected `original-owner-layout` runner entry PASS; unrelated SMK package checks skipped because no package in this candidate. This is not full-suite PASS. Independent normalized before/after source review found no behavior change beyond storage access/declaration substitution; native links still required.

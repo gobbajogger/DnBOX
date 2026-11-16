@@ -155,9 +155,9 @@ void engine_note_lock_refresh(void)
 }
 static void note_lock_restore(int v)
 {
-    unsigned n=original_sound_count(original_bass[v].kind);
+    unsigned n=original_sound_count(original_parts[v].runtime.kind);
     note_lock_applied[v]=0;
-    for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_bass[v].kind,i))apply_base(T_303,v,(int)i);
+    for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_parts[v].runtime.kind,i))apply_base(T_303,v,(int)i);
     for(int i=0;i<MX_NPARAMS;i++)apply_base(T_MIX,PART_303A+v,i);
 }
 /* ISR, a bass onset (s_bon), before the key: the onset's locked sound, or the
@@ -167,14 +167,14 @@ static void note_lock_onset(int v)
     const lane_t *l=0;
     if(note_lock_any && mot.lane) {
         int k=bass_note_find(mot.lane,seq.ppat[TRK_BASS0+v],v,eng_step[TRK_BASS0+v]);
-        if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
+        if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_parts[v].runtime.kind)l=&mot.lane[k];
     }
     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
-    unsigned n=original_sound_count(original_bass[v].kind);
+    unsigned n=original_sound_count(original_parts[v].runtime.kind);
     for(unsigned i=0;i<n;i++) {
         float value;
-        if(original_sound_is_performance(original_bass[v].kind,i))continue;
-        if(original_sound_value(l->val,i,&value))(void)original_runtime_param(&original_bass[v],i,value);
+        if(original_sound_is_performance(original_parts[v].runtime.kind,i))continue;
+        if(original_sound_value(l->val,i,&value))(void)original_runtime_param(&original_parts[v].runtime,i,value);
     }
     for(int i=0;i<MX_NPARAMS;i++)apply_param(T_MIX,PART_303A+v,i,l->val[BASS_NOTE_MIX+i]);
     note_lock_applied[v]=1;
@@ -202,8 +202,8 @@ void engine_bass_sound_refresh(sound_t *sound, int v)
 static int bass_restore_part(const sound_t *sound, int v)
 {
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
-    if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
-    int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
+    if (original_runtime_retire(&original_parts[v].runtime) != ORIGINAL_RUNTIME_OK) return 0;
+    int rc = original_runtime_init(&original_parts[v].runtime, sound->v[T_303][v], seq_tempo(&seq),
         &original_tuning, &original_fx_owner[v]);
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
     bass_named_preset[v] = sound->v[T_303][v][30];
@@ -220,7 +220,7 @@ static void bass_restore_sound(const sound_t *sound)
         (void)bass_restore_part(sound, v);
     }
 }
-int engine_bass_bank(int v) { return (unsigned)v < NBASS ? original_bass[v].kind : -1; }
+int engine_bass_bank(int v) { return (unsigned)v < NBASS ? original_parts[v].runtime.kind : -1; }
 int engine_bass_bank_available(int v, int bank)
 {
     return (unsigned)v < NBASS && (bank == ORIGINAL_SOUND_JUNO || bank == ORIGINAL_SOUND_DRONE || bank == FACTORY_BANK_MIAMI ||
@@ -247,7 +247,7 @@ int engine_bass_preset_pending(int v)
     if (!plat_midi_passed(request.midi) || (int32_t)(cq_r - request.cq) < 0) return 5;
     if (bass_has_locks(v)) return 4;
     if (bass_wheel_mask & (1u << v)) return 3;
-    if (original_runtime_owned(&original_bass[v]) || original_quiet_samples[v] < 512u) return 2;
+    if (original_runtime_owned(&original_parts[v].runtime) || original_quiet_samples[v] < 512u) return 2;
     return 1;
 }
 int engine_bass_requested_bank(int v)
@@ -272,7 +272,7 @@ int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
         if (bass_has_locks(v)) return -4;
         /* Typed history restore retains its existing admission contract. Only
          * factory requests own the measured fade/quiescence transition. */
-        if ((bass_wheel_mask & (1u << v)) || original_runtime_active(&original_bass[v])) return 2;
+        if ((bass_wheel_mask & (1u << v)) || original_runtime_active(&original_parts[v].runtime)) return 2;
     }
     return cq_r != cq_w || live_key_r != live_key_w || live_key_cancel ||
         !plat_midi_passed(plat_midi_mark()) ? 2 : 0;
@@ -317,11 +317,11 @@ static void bass_preset_boundary_voice(int v)
         uint8_t next[32];
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
         live_key_context_retire(v, 1);
-        if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) {
+        if (original_runtime_retire(&original_parts[v].runtime) != ORIGINAL_RUNTIME_OK) {
             bass_applied[v] = token;
             return;
         }
-        int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
+        int rc = original_runtime_init(&original_parts[v].runtime, next, seq_tempo(&seq),
             &original_tuning, &original_fx_owner[v]);
         if (rc != ORIGINAL_RUNTIME_OK) {
             /* A failed adoption remains visible and needs a fresh explicit
@@ -339,7 +339,7 @@ static void bass_preset_boundary_voice(int v)
         PARAM_TRACE(PARAM_PRESET, T_303, v, -1, bank);
         PARAM_TRACE(PARAM_PRESET, T_303, v, -2, preset);
         original_seq_note[v] = -1;
-        (void)original_runtime_prepare(&original_bass[v], seq_tempo(&seq));
+        (void)original_runtime_prepare(&original_parts[v].runtime, seq_tempo(&seq));
         __asm__ volatile("" ::: "memory");
         bass_applied[v] = token;
     }
