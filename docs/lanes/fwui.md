@@ -63,3 +63,6 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Final b6 native runtime rerun in isolated tree:Elite2444B/Pro2456B XIP free; BSS96560; pool margin172 before integ fix. These native inputs unchanged through62e71.
 - Isolated F6 read-only adapter/renderer preview:1295 assertions PASS,20native240x240 captures. Uses existing step/motion values, preserves four knob controls by replacing only footer strip. NOT connected to production input/render path; no F6 delivery claim. BREAK velocity explicitly unavailable, not mislabeled Level.
 - Owner decision pending for SEL+SELECT lane switch; no mapping added before answer. Integ owns authentic BREAK velocity support. Preview code and captures under docs/evidence/fwui/step-lane-preview/.
+
+## Mixer formatter handoff
+- Exported exact target5 LEVEL/REV/DLY/PAN raw0..127 values for Remote from pref_value_of, avoiding JavaScript approximations of fm_log2f rounding. Existing CUT descriptor is also retained as source data, not a newly invented UI control. All five part voices share this formatter. docs/evidence/fwui/formatter/mixer.json pins production65a240 and source SHA256; no runtime admission claim.
