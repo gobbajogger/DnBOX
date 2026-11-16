@@ -1,4 +1,5 @@
 #include "parameter_ports.hpp"
+#include "float_math.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -49,8 +50,13 @@ bool Ports::init(float *outputs, size_t output_count, const float *values,
 void Ports::apply_restore(const float *values, int sample_rate) {
     // Source sp_port_init retains c1/c2, clears yt1 and makes coefficients dirty.
     common_.sr = sample_rate;
+#if defined(S1_NO_DOUBLE)
+    common_.onedsr = 1.f / (float)common_.sr;
+    common_.prvhtim = -100.f;
+#else
     common_.onedsr = 1.0 / common_.sr;
     common_.prvhtim = -100.0;
+#endif
     common_.htime = clamp_half_time(values[half_time_parameter]);
     for (unsigned i = 0; i < parameter_count; ++i) {
         const auto slot = selected_slots[i];
@@ -90,8 +96,13 @@ bool Ports::set_resolved_target(unsigned parameter, float value) {
 bool Ports::tick() {
     if (!outputs_) return false;
     if (common_.prvhtim != common_.htime) {
+#if defined(S1_NO_DOUBLE)
+        common_.c2 = s1_powf(0.5f, common_.onedsr / common_.htime);
+        common_.c1 = 1.f - common_.c2;
+#else
         common_.c2 = pow(0.5, common_.onedsr / common_.htime);
         common_.c1 = 1.0 - common_.c2;
+#endif
         common_.prvhtim = common_.htime;
     }
     for (unsigned slot = 0; slot < selected_count; ++slot) {

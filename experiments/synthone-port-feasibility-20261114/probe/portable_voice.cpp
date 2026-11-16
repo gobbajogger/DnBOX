@@ -1,4 +1,5 @@
 #include "portable_interface.hpp"
+#include "float_math.h"
 //
 //  S1NoteState.mm
 //  AudioKitSynthOne
@@ -10,7 +11,11 @@
 
 // Relative note number to frequency
 static inline float nnToHz(float noteNumber) {
+#if defined(S1_NO_DOUBLE)
+    return s1_exp2f(noteNumber/12.f);
+#else
     return exp2(noteNumber/12.f);
+#endif
 }
 
 // MARK: Member Functions
@@ -281,7 +286,13 @@ void S1NoteState::run(int frameIndex, float *outL, float *outR) {
     } else if (getParam(filterType) == 1) {
         // bandpass bandwidth is a different unit than lopass resonance.
         // take advantage of the range of resonance [0,1].
-        const float bandwidth = 0.0625f * sampleRate() * (-1.f + exp2( clamp(1.f - filterResonance, 0.f, 1.f) ) );
+        const float bandwidth = 0.0625f * sampleRate() * (-1.f +
+#if defined(S1_NO_DOUBLE)
+            s1_exp2f
+#else
+            exp2
+#endif
+            ( clamp(1.f - filterResonance, 0.f, 1.f) ) );
         bandPass->bw = bandwidth;
     }
     
@@ -366,7 +377,11 @@ void S1NoteState::run(int frameIndex, float *outL, float *outR) {
         noise_out *= lfo3_1_0;
 
     // adsr pitch tracking
+#if defined(S1_NO_DOUBLE)
+    const float pitch = s1_log2f(newFrequencyOsc1 > 0 ? newFrequencyOsc1 : 261.f);
+#else
     const float pitch = log2(newFrequencyOsc1 > 0 ? newFrequencyOsc1 : 261.f);
+#endif
     const float ymin = 6.f;
     const float ymax = 11.f;
     const float kt0 = (pitch - ymin)/(ymax-ymin);
@@ -412,7 +427,11 @@ void S1DSPKernel::processLfo(){
         lfo1Phasor->freq = parameters[lfo1Rate];
         sp_phasor_compute(sp, lfo1Phasor, nil, &lfo1); // sp_phasor_compute [0,1]
         if (parameters[lfo1Index] == 0) { // Sine
+#if defined(S1_NO_DOUBLE)
+            lfo1 = s1_sinf(lfo1 * S1_TWO_PI);
+#else
             lfo1 = sin(lfo1 * M_PI * 2.f);
+#endif
         } else if (parameters[lfo1Index] == 1) { // Square
             if (lfo1 > 0.5f) {
                 lfo1 = 1.f;
@@ -435,7 +454,11 @@ void S1DSPKernel::processLfo(){
         lfo2Phasor->freq = parameters[lfo2Rate];
         sp_phasor_compute(sp, lfo2Phasor, nil, &lfo2);  // sp_phasor_compute [0,1]
         if (parameters[lfo2Index] == 0) { // Sine
+#if defined(S1_NO_DOUBLE)
+            lfo2 = s1_sinf(lfo2 * S1_TWO_PI);
+#else
             lfo2 = sin(lfo2 * M_PI * 2.0);
+#endif
         } else if (parameters[lfo2Index] == 1) { // Square
             if (lfo2 > 0.5f) {
                 lfo2 = 1.f;

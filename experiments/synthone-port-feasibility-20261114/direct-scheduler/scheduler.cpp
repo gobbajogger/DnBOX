@@ -69,7 +69,7 @@ void State::init_graph(const synthone_shared::Tables &tables,int rate,const floa
     memcpy(ft_frequencyBand,tables.frequency_band,sizeof ft_frequencyBand);
     lfo1_0_1=lfo2_0_1=lfo3_0_1=0; lfo1_1_0=lfo2_1_0=lfo3_1_0=0;
     lfo1Smooth=lfo2Smooth=0; monoFrequencySmooth=261.6255653006f;
-    monoFrequency=440.f*exp2((60.f-69.f)/12.f);
+    monoFrequency=0x1.05a026p+8f;
     phasor1_={}; phasor2_={}; port1_={}; port2_={}; mono_port_={};
     lfo1Phasor=&phasor1_; lfo2Phasor=&phasor2_; lfo1Port=&port1_; lfo2Port=&port2_;
     monoFrequencyPort=&mono_port_;
@@ -202,7 +202,7 @@ void State::initialize_note_objects() {
         v.stage=S1NoteState::stageOff; v.internalGate=0; v.rootNoteNumber=-1; v.transpose=0;
     }
 }
-double State::tuningTableNoteToHz(int note) const { return tuningTable[clamp(note,0,127)]; }
+float State::tuningTableNoteToHz(int note) const { return tuningTable[clamp(note,0,127)]; }
 bool State::valid_parameter(unsigned p,float v) const {
     return initialized_ && p<150 && isfinite(v) && (p!=arpIsOn || v==0.f);
 }
@@ -319,7 +319,7 @@ bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         if(mono.stage==S1NoteState::stageRelease && mono.amp<.01f) mono.clear();
     } else for(auto &note:poly) if(note.stage==S1NoteState::stageRelease && note.amp<.01f) note.clear();
     processSampleCounter+=n;
-    if(processSampleCounter>2048.) {playingNotesDidChange();processSampleCounter=0;}
+    if(processSampleCounter>2048.f) {playingNotesDidChange();processSampleCounter=0;}
     trace(0,0);
     for(unsigned i=0;i<n;++i) {
         l[offset+i]=r[offset+i]=0;

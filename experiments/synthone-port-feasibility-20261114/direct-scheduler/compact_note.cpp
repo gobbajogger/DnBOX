@@ -1,11 +1,16 @@
 // Generated from pinned original source. See DERIVATION.json and notices.
 #include "compact_note.hpp"
+#include "float_math.h"
 extern "C" {
 #include "compact-reader/compact_morph.h"
 }
 namespace {
 static inline float nnToHz(float noteNumber) {
+#if defined(S1_NO_DOUBLE)
+    return s1_exp2f(noteNumber/12.f);
+#else
     return exp2(noteNumber/12.f);
+#endif
 }
 }
 namespace s1scheduler_compact {
@@ -191,7 +196,13 @@ bool run_note(S1NoteState &note,int frameIndex,float *outL,float *outR,const s1c
     } else if (getParam(filterType) == 1) {
         // bandpass bandwidth is a different unit than lopass resonance.
         // take advantage of the range of resonance [0,1].
-        const float bandwidth = 0.0625f * sampleRate() * (-1.f + exp2( clamp(1.f - filterResonance, 0.f, 1.f) ) );
+        const float bandwidth = 0.0625f * sampleRate() * (-1.f +
+#if defined(S1_NO_DOUBLE)
+            s1_exp2f
+#else
+            exp2
+#endif
+            ( clamp(1.f - filterResonance, 0.f, 1.f) ) );
         bandPass->bw = bandwidth;
     }
     
@@ -276,7 +287,11 @@ bool run_note(S1NoteState &note,int frameIndex,float *outL,float *outR,const s1c
         noise_out *= lfo3_1_0;
 
     // adsr pitch tracking
+#if defined(S1_NO_DOUBLE)
+    const float pitch = s1_log2f(newFrequencyOsc1 > 0 ? newFrequencyOsc1 : 261.f);
+#else
     const float pitch = log2(newFrequencyOsc1 > 0 ? newFrequencyOsc1 : 261.f);
+#endif
     const float ymin = 6.f;
     const float ymax = 11.f;
     const float kt0 = (pitch - ymin)/(ymax-ymin);

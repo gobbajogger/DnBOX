@@ -120,7 +120,7 @@ bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         if(mono.stage==S1NoteState::stageRelease && mono.amp<.01f) mono.clear();
     } else for(auto &note:poly) if(note.stage==S1NoteState::stageRelease && note.amp<.01f) note.clear();
     processSampleCounter+=n;
-    if(processSampleCounter>2048.) {playingNotesDidChange();processSampleCounter=0;}
+    if(processSampleCounter>2048.f) {playingNotesDidChange();processSampleCounter=0;}
     trace(0,0);
     for(unsigned i=0;i<n;++i) {
         l[offset+i]=r[offset+i]=0;

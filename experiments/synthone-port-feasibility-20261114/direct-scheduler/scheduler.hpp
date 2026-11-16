@@ -38,7 +38,7 @@ public:
     State(const State &) = delete;
     State &operator=(const State &) = delete;
     void initializeNoteStates();
-    double tuningTableNoteToHz(int note) const;
+    float tuningTableNoteToHz(int note) const;
     void heldNotesDidChange() {}
     void playingNotesDidChange() {}
     void beatCounterDidChange() {}
@@ -49,12 +49,13 @@ public:
     S1NoteState *monoNote = &mono;
     int polyphony = 6, playingNoteStatesIndex = 0;
     Held heldNoteNumbers{}, heldNoteNumbersAE{};
-    float monoFrequency = 440.f * exp2((60.f - 69.f)/12.f);
+    /* Binary32 image of 440*2^(-9/12). The old double exp2 rounded to this. */
+    float monoFrequency = 0x1.05a026p+8f;
     float previousProcessMonoPolyStatus = 0;
     sp_port *monoFrequencyPort = &mono_port_;
     const float *tuningTable = nullptr;
     bool resetted = false, initializedNoteStates = false;
-    double processSampleCounter = 0;
+    float processSampleCounter = 0;
     EmptySequencer sequencer{};
     bool initialized() const { return initialized_; }
     bool valid_parameter(unsigned, float) const;

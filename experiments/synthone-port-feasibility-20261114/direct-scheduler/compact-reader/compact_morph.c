@@ -1,5 +1,6 @@
 // Generated morph-only direct-read derivative. See DERIVATION.json.
 #include "compact_morph.h"
+#include "float_math.h"
 #include <math.h>
 #include <string.h>
 int s1c_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLOAT *out, const s1c_binding *binding)
@@ -25,7 +26,7 @@ int s1c_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFL
             }
         } else {
             /* the override is the index */
-            bandlimitIndex = floor(bandlimitIndexOverride);
+            bandlimitIndex = bandlimitIndexOverride;
             if (bandlimitIndex < 0)
                 bandlimitIndex = 0;
         }
@@ -36,12 +37,12 @@ int s1c_runtime_morph_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFL
 
     if(bandlimitIndex<0||bandlimitIndex>=13||!isfinite(osc->wtpos)||osc->wtpos<0.f||osc->wtpos>=2147483648.f) return SP_NOT_OK;
     /* Use only the fractional part of the position or 1 */
-    if (osc->wtpos > 1.0) {
+    if (osc->wtpos > 1.f) {
         osc->wtpos -= (int)osc->wtpos;
     }
     
     const SPFLOAT findex = (bandlimitIndex * osc->nft) + osc->wtpos * (osc->nft - 1);
-    const int index = floor(findex);
+    const int index = s1_ifloor(findex);
     const SPFLOAT wtfrac = findex - index;
     if(index<0||index>=52||!osc->tbl[index]||osc->tbl[index]->size!=4096||osc->tbl[index]->lobits>=31) return SP_NOT_OK;
 

@@ -19,8 +19,8 @@
     {
       "path": "DEPENDENCIES.json",
       "bytes": 8793,
-      "sha256": "60e4909375d099a1783605210945769e556dac33c690cbc11042da6e31c206c9",
-      "git_blob_sha": "5714a90bb313de24dcf610d1a689ffe77cb88495"
+      "sha256": "9526a65ce36b48bedda416922808f0da1aade47fa415b97529c87d4ac9546f7f",
+      "git_blob_sha": "cc49d5bcdf8685c240d6dd9aff55d6e9768c1dec"
     },
     {
       "path": "NATIVE-SDK-CXX.json",
@@ -42,9 +42,9 @@
     },
     {
       "path": "SOURCE-SEQUENCE-CONTRACT.md",
-      "bytes": 4682,
-      "sha256": "0c8bc4b2ba375256d96a0923bb984674b1e8020b61ae20b4acca0fafa2fd6e97",
-      "git_blob_sha": "c28f02396b4b11a4575c797f0172b4579b4e129f"
+      "bytes": 5083,
+      "sha256": "9b24ec12650c41ff63465723f58884756d719a9e09427468f4c17221d2fe28be",
+      "git_blob_sha": "785f6ac440e4b4a58db5ca94e973f0e9680124ff"
     },
     {
       "path": "checked_domain.cpp",
@@ -72,9 +72,9 @@
     },
     {
       "path": "compact-reader/compact_morph.c",
-      "bytes": 3143,
-      "sha256": "95a47bfa0c717d4747055dc72524ae0cb5287757bbaeccb614a3eed0cf1d3573",
-      "git_blob_sha": "8830facdaae4caf207866d81f74f55c25aca9b9f"
+      "bytes": 3164,
+      "sha256": "1066307d0fe55aa181773f0a18c913e0f61c79f9c069d9ac251f14007f12a137",
+      "git_blob_sha": "bfd8ae9026af6b8eb1273d9856a0e21239a9f5db"
     },
     {
       "path": "compact-reader/compact_morph.h",
@@ -108,9 +108,9 @@
     },
     {
       "path": "compact_note.cpp",
-      "bytes": 11838,
-      "sha256": "197e7a51aa9a8807fec7ed032c53182b2f28f891e89c7fd9e7ec293c0db332a6",
-      "git_blob_sha": "299f6cbe884bbb1531ff54c4e137aab683721d74"
+      "bytes": 12146,
+      "sha256": "b35574acdaf808759fb6ab3f5c305a3a3d305061dff672c6f64d9885cce957d3",
+      "git_blob_sha": "6db09fe34250825764666f7f3e1d61823c50ab46"
     },
     {
       "path": "compact_note.hpp",
@@ -123,6 +123,18 @@
       "bytes": 591,
       "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
       "git_blob_sha": "8039d3dc33a01beda447768e8f392e0229857f40"
+    },
+    {
+      "path": "float_math.c",
+      "bytes": 702,
+      "sha256": "dec12a754e158a34e7075d6fc8e16713e55d8668876958a5796ebce1d3d2525c",
+      "git_blob_sha": "6ecb0466c40f219eb9a7d489e0d116da495d50c6"
+    },
+    {
+      "path": "float_math.h",
+      "bytes": 1007,
+      "sha256": "e39958467ee706210da6c7a14786acf3260ccc3adfd423915038f55851f7e678",
+      "git_blob_sha": "1842ba0f93b7d7e47e083edefb6acd2d0278f9f8"
     },
     {
       "path": "full_oracle.cpp",
@@ -147,6 +159,78 @@
       "bytes": 6108,
       "sha256": "da32764a6b1d0fbc0f079e4655753fa993c3e93a62b953275d31916fd7f8a543",
       "git_blob_sha": "4c10e56fa82f24cfdd55b36d2acdb23973685d6c"
+    },
+    {
+      "path": "nodouble/adsr.c",
+      "bytes": 2082,
+      "sha256": "624e36ef9f1a721ade03c86319ad3441cbf03952cca110a54563988b8cb7d929",
+      "git_blob_sha": "a8073eb8f59468468bbddd2f6d32e32d9977a283"
+    },
+    {
+      "path": "nodouble/butbp.c",
+      "bytes": 1522,
+      "sha256": "908431f962b4da7055caf2257c3e483054a73c180377b87b3da79784b40cd4c0",
+      "git_blob_sha": "12ff5daf90f1aa3a6939151fa409c28ea2fa4970"
+    },
+    {
+      "path": "nodouble/buthp.c",
+      "bytes": 1577,
+      "sha256": "74e72d3421a7211db77efe9cee7590873df06796950b7a861d6fa95c5a0d519e",
+      "git_blob_sha": "b1b17222ceac0d23f820062fa227e8fbf676470e"
+    },
+    {
+      "path": "nodouble/crossfade.c",
+      "bytes": 554,
+      "sha256": "b104828155742e29d67258018cac1776b1f952defc10a1e0f5b2dea65ce2a9ab",
+      "git_blob_sha": "79b497b1024d58bc1eb2bfbbf7870edfbbdef480"
+    },
+    {
+      "path": "nodouble/fosc.c",
+      "bytes": 2019,
+      "sha256": "c9ae15f69f1ce116e1aec58d90ed48e7f333a4e6272a583ca2fb79ee6b07c9f8",
+      "git_blob_sha": "a70cabce4a5124f436b6bdf6c2f863e44b6b8910"
+    },
+    {
+      "path": "nodouble/ftbl.c",
+      "bytes": 671,
+      "sha256": "c28a7ebc5d7855c16d9e395d6c79797cdecc51c6cdf627eee7e42f27fa560661",
+      "git_blob_sha": "d7f8db36a09a4879c97631d76b0eeb47e1c972db"
+    },
+    {
+      "path": "nodouble/moogladder.c",
+      "bytes": 3142,
+      "sha256": "4e19b14ed1ddcb84acf0f589227d7536e529a764734c5bc61af91c5501908b95",
+      "git_blob_sha": "0c41369a658a9ab5f0172f974507ad99a93afa30"
+    },
+    {
+      "path": "nodouble/noise.c",
+      "bytes": 506,
+      "sha256": "ad8d78d6048d99681fc9ee38c0b89fd4110fbd23cd190c5095efe914cb3a1d55",
+      "git_blob_sha": "1518173a4c2f552e29ceef2c4bf7ec672a364320"
+    },
+    {
+      "path": "nodouble/osc.c",
+      "bytes": 1480,
+      "sha256": "ea92044f3ae633e5e00a8760dc22d777e688ab36ad5293310bbfb16080e72ac4",
+      "git_blob_sha": "65b13966954797f234a6b5342e9d3069e6513728"
+    },
+    {
+      "path": "nodouble/oscmorph2d.c",
+      "bytes": 3456,
+      "sha256": "04d273c9658f97adeb0f928e5c8f423a5b553c0369ab6cf705f00ae12bca3d27",
+      "git_blob_sha": "59228f4271e45ace9efc81740f1ea7c9c1bf67ad"
+    },
+    {
+      "path": "nodouble/phasor.c",
+      "bytes": 993,
+      "sha256": "7f8e83994f8ae43e6259ca7a8999486e49a4d0a04e0b247281f30e1c0d778056",
+      "git_blob_sha": "f6ee96b828917a4310dc440962ed34a0867dbdc5"
+    },
+    {
+      "path": "nodouble/port.c",
+      "bytes": 1077,
+      "sha256": "4e8a692278926d4bb7f162b33aa61d30f1eac53b36f334e90b337e9c5d5fc73a",
+      "git_blob_sha": "6c83c44f99c891569d11141901917b8c638e6108"
     },
     {
       "path": "notices/AudioKit-4.9.2-MIT.txt",
@@ -192,9 +276,9 @@
     },
     {
       "path": "reader/DERIVATION.json",
-      "bytes": 1879,
-      "sha256": "2820f8abfdb46b2b6d88e05d974c7161270a21971522a85252d3a7f4554db084",
-      "git_blob_sha": "1a38e75ff771b7e96a4cc93fd8ca9c0586ce530b"
+      "bytes": 1961,
+      "sha256": "e9bf7639ce057b5d646546fc774f08991fad48a9abb07e7329b826872cdc35b0",
+      "git_blob_sha": "7c3cdf744c4cdfbf3e7873a2fd08f60f2fcf369a"
     },
     {
       "path": "reader/direct_reader.c",
@@ -210,15 +294,15 @@
     },
     {
       "path": "reader/generate.py",
-      "bytes": 6411,
-      "sha256": "ce54d06e5edee400799325f0d98e9e8812b92b89d80570aee5daaf37968d8e6d",
-      "git_blob_sha": "32fdbdec08ba2b3718e8db3b0db45aefcf38fe30"
+      "bytes": 6604,
+      "sha256": "7c1ca1852c63fbe45959cf93da7b37711f3ebb3aa205a98f607033a39f19d2b6",
+      "git_blob_sha": "66d309e7038b0fcc8d094c826991f99631c5affb"
     },
     {
       "path": "reader/morph_compute.c",
-      "bytes": 3192,
-      "sha256": "882bf2072ee1faa653c7a627f04edc046772a056e76a0b85c7e96d4c4e53eec3",
-      "git_blob_sha": "51cb9f0dec08dd6d854ed23dd0517291dc15b815"
+      "bytes": 3224,
+      "sha256": "0e6c6a6b81cbd04a23c93e536b07d775911d10c298488b12b7ea40ffac027751",
+      "git_blob_sha": "fa04fb71d12e87d886c3f502ad49c61facae71fb"
     },
     {
       "path": "reader/morph_compute.h",
@@ -228,9 +312,9 @@
     },
     {
       "path": "reader/runtime_note.cpp",
-      "bytes": 11811,
-      "sha256": "b331d9bf140632564e6abd18b0ee5da6cf7576df6692b49b1bd110896bd2bcbc",
-      "git_blob_sha": "0fe20eedb03d1220a3314a201823cb21dca06489"
+      "bytes": 12119,
+      "sha256": "573111ce4bb0c1042b4fe3a876c52c03571f42e8b9fe0c00d393176d6f38ac8c",
+      "git_blob_sha": "63617af9d80e2e3390ab23b40e71f009224c0ef3"
     },
     {
       "path": "reader/runtime_note.hpp",
@@ -246,9 +330,9 @@
     },
     {
       "path": "run_native.py",
-      "bytes": 13176,
-      "sha256": "42f62c305c214fd1baa73f70c3835ffdfc26e03b367a319f7475742abfe2e062",
-      "git_blob_sha": "a59823c7d8be1a9f67ae59613478c544cfd41d3f"
+      "bytes": 13786,
+      "sha256": "7abec777237e06269853bf3047789bdeef690d2c6682c122e9df7b032de4bceb",
+      "git_blob_sha": "dd6a33feeecc6f410e87e135992af249f4fe4ea6"
     },
     {
       "path": "run_tests.py",
@@ -258,15 +342,15 @@
     },
     {
       "path": "scheduler.cpp",
-      "bytes": 20674,
-      "sha256": "eb4013053339164cb9a0ac736c1cdd5af5eaa22d3ab8b3bb36e603f27912bd59",
-      "git_blob_sha": "ef5184d83a6c982f060c96bce8511daf532e2322"
+      "bytes": 20660,
+      "sha256": "d9427c53212a7f20fc59ebb4c89be0a69251cab1d6e0ab50d452cc4ab3c3eace",
+      "git_blob_sha": "da0bb9f6ced71473433e4e3cbcf3d8014cdc65f3"
     },
     {
       "path": "scheduler.hpp",
-      "bytes": 8431,
-      "sha256": "62c42d10aca53f77e75afb46cc5f79e4eaf93a8d89caa8d8f8c08fad959646f8",
-      "git_blob_sha": "755838985b7116ac3ae52afb173d30fe81f0c6dc"
+      "bytes": 8491,
+      "sha256": "3aa71824ef18dce224ab7b0d2da8b71327f31e16265e19eb99f7a1cfc1b597a9",
+      "git_blob_sha": "0f253c2c007a6e56e150e15747da36f674365c7f"
     },
     {
       "path": "source-sequence/SOURCE-INPUTS.json",
@@ -294,15 +378,15 @@
     },
     {
       "path": "source-sequence/source_sequence.hpp",
-      "bytes": 7011,
-      "sha256": "2bdcd31c701dca784eb61bd52eba811bbb0c8af1bf5add1f25f9cbc0fb7fde7b",
-      "git_blob_sha": "5af785a47a9e7a9445eda868c04f041fbe591ffd"
+      "bytes": 11132,
+      "sha256": "a5bd9790d62839b345c605a2b67f009c91d60cd6f26af45c4e54da0386fd3c70",
+      "git_blob_sha": "09a2e5a8f517818be225de22caa9301882dd7ab4"
     },
     {
       "path": "source-sequence/test_sequence.cpp",
-      "bytes": 6847,
-      "sha256": "323ce1845ba885b5e4b664023dad0d790df9441fb9b3e1ee30f9a66346ca0a9c",
-      "git_blob_sha": "1a43e7396e2cf8b228df563a278f4532a23c0f51"
+      "bytes": 7704,
+      "sha256": "13a06b938119e81c0fdf309c0e22eb9d73c8702e8ccbdc1946bc804af677225c",
+      "git_blob_sha": "aa13a4a2b8102f136ef12648ecf2206024ebb32a"
     },
     {
       "path": "source-sequence/verify_source.py",
@@ -312,9 +396,9 @@
     },
     {
       "path": "source_scheduler.cpp",
-      "bytes": 8188,
-      "sha256": "b09c3d65f6e8263b7632d7535ee406f148b5d4ef2e5294305c7d3fefde85a2d5",
-      "git_blob_sha": "52cef512a2e1928dbe5d83a3c91793fb4c24e684"
+      "bytes": 8189,
+      "sha256": "60f489d40c79a7ae56de310634164a735e5b6915b827e18db64a5eb27d6743b0",
+      "git_blob_sha": "67ab2abae55747ca3855763a8ea142ef19cd0078"
     },
     {
       "path": "source_scheduler.hpp",
@@ -395,5 +479,6 @@
       "compact-reader/test_words.c"
     ],
     "limits": "No flagged V6/control65 intake; corpus/compact binaries/SDK content excluded. Inherited NATIVE-SDK-CXX.json is unchanged public metadata only"
-  }
+  },
+  "no_double_note": "2026-11-16 successor updates the changed DSP/sequence records and adds float_math plus nodouble. It does not restate the earlier 62-file freeze as a full directory inventory."
 }

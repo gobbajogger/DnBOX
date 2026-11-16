@@ -27,7 +27,12 @@ and qualification, not ignoring this contract.
 
 ## Behavior and access
 
-The target keeps original binary64 per-sample time and fmod; no floatification.
+The host reference keeps the original binary64 per-sample time and fmod.
+The firmware-target compile (`S1_NO_DOUBLE`) stores that clock as a 2^-64
+fixed-point ratio so the image links no soft-double helper. On the public
+sequence patterns the fixed sum stays within about 5e-11 of the binary64 sum.
+A step can move by one sample when the binary64 value is closer to a multiplier
+boundary than that residual.
 It preserves all supported source control ranges/casts, all three arp directions,
 1–4 octaves, interval scaling for notes-per-octave, 1–16 sequence steps, on/off,
 octave boost, pitch offset, held note order, chord velocities, and callback order.
@@ -69,6 +74,7 @@ The original oracle never calls the compact reader. Host sample/state equality,
 native objects and a retained API ELF do not establish target execution, correct
 platform placement, full product resources, CPU, acoustic app fidelity, device
 behavior or the whole hardest-configuration zero-discontinuity gate.
-The genuine original binary64/no-linked-softdouble conflict remains visible.
+The host reference still uses binary64. The firmware-target closure is compiled
+without soft-double helpers. That does not by itself admit the image.
 Default LeakSanitizer failure under ptrace is retained; detect_leaks=0 passes
 are explicitly not leak-detection passes.

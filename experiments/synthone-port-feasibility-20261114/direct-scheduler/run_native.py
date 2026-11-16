@@ -13,7 +13,7 @@ import tempfile
 
 COMPILER_SHA256 = 'c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f'
 TOOLCHAIN_INPUTS_SHA256 = '56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e'
-LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp']
+LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','float_math.h','float_math.c','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp','nodouble/adsr.c','nodouble/butbp.c','nodouble/buthp.c','nodouble/crossfade.c','nodouble/fosc.c','nodouble/ftbl.c','nodouble/moogladder.c','nodouble/noise.c','nodouble/osc.c','nodouble/oscmorph2d.c','nodouble/phasor.c','nodouble/port.c']
 LAYOUT = '''#include "scheduler.hpp"
 struct LayoutAccess : s1scheduler::RuntimeState {
     static constexpr unsigned notes() { return sizeof(((LayoutAccess*)0)->objects_); }
@@ -99,9 +99,10 @@ def main():
             expected[dest.resolve()]=digest(data)
             source_records.append({'path':group+'/'+name,'bytes':len(data),'sha256':digest(data)})
     core=closure/'experiment/audiokit-4.9.2/AudioKit/Core'
-    includes=[closure/'scheduler',closure/'experiment/probe',closure/'experiment/shared-graph',closure/'controls',core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav']
+    firmware_math=(root.parents[2]/'firmware/src/dsp').resolve()
+    includes=[closure/'scheduler',closure/'experiment/probe',closure/'experiment/shared-graph',closure/'controls',core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav',firmware_math]
     resource=tc/'common/lib/clang/4.0.1/include';target_include=tc/'pi32v2/include'
-    flags=['-target','pi32v2','-mcpu=r3','-mfprev1','-Os','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-fno-builtin','-DNO_LIBSNDFILE','-nostdinc']
+    flags=['-target','pi32v2','-mcpu=r3','-mfprev1','-Os','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-fno-builtin','-DNO_LIBSNDFILE','-DS1_NO_DOUBLE','-nostdinc']
     inc=['-I'+str(x) for x in includes]+['-isystem',str(resource),'-isystem',str(target_include)]
     # Compiler-driver controls such as CCC_OVERRIDE_OPTIONS can override argv.
     # Inherit nothing: no user config, loader injection or numeric-mode controls.
@@ -112,8 +113,9 @@ def main():
     for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
         require((derived/name).read_bytes()==(closure/'scheduler/reader'/name).read_bytes(),'native reader derivation mismatch: '+name)
     units=[('checked_domain',closure/'scheduler/checked_domain.cpp','c++'),('compact_reader',closure/'scheduler/compact-reader/compact.c','c'),('compact_morph',closure/'scheduler/compact-reader/compact_morph.c','c'),('compact_note',closure/'scheduler/compact_note.cpp','c++'),('direct_reader',closure/'scheduler/reader/direct_reader.c','c'),('runtime_morph',closure/'scheduler/reader/morph_compute.c','c'),('runtime_note',closure/'scheduler/reader/runtime_note.cpp','c++'),('scheduler',closure/'scheduler/scheduler.cpp','c++'),('ports',closure/'controls/parameter_ports.cpp','c++'),('parameter_map',closure/'controls/generated/parameter_map.cpp','c++'),('voice',closure/'experiment/probe/portable_voice.cpp','c++')]
-    units += [(name,core/'Soundpipe/modules'/(name+'.c'),'c') for name in ['base','ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']]
-    units += [('morph',core/'SoundpipeExtension/modules/oscmorph2d.c','c')]
+    units += [('base',core/'Soundpipe/modules/base.c','c')]
+    units += [(name,closure/'scheduler/nodouble'/(name+'.c'),'c') for name in ['ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']]
+    units += [('morph',closure/'scheduler/nodouble/oscmorph2d.c','c'),('float_math',closure/'scheduler/float_math.c','c')]
     if a.full_sequence:units.insert(0,('source_scheduler',closure/'scheduler/source_scheduler.cpp','c++'))
     layout_source=LAYOUT
     if a.full_sequence:layout_source=layout_source.replace('#include "scheduler.hpp"','#include "source_scheduler.hpp"').replace('0x53314c31,3,','0x53314c31,4,').replace('sizeof(s1c_binding),alignof(s1c_binding)','sizeof(s1c_binding),alignof(s1c_binding),sizeof(s1scheduler::SourceScheduler),alignof(s1scheduler::SourceScheduler)')
@@ -133,6 +135,8 @@ def main():
                 kind='staged'
             elif path in sdk_headers:
                 require(sha==sdk_headers[path],'SDK header changed during compilation');kind='sdk-cxx-header';system_headers['sdk-cxx/'+str(path.relative_to(sdk))]=sha
+            elif path==firmware_math/'fastmath.h':
+                kind='firmware-fastmath'; system_headers['firmware/src/dsp/fastmath.h']=sha
             else:
                 require(path in pinned_headers and sha==pinned_headers[path] and (resource in path.parents or target_include in path.parents), 'unlisted or changed native dependency: '+str(path))
                 kind='toolchain-header';system_headers[str(path.relative_to(tc))]=sha
