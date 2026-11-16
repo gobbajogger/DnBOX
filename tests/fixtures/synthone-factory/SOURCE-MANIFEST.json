@@ -49,8 +49,8 @@
     },
     {
       "path": "fullfx/full_fixture.hpp",
-      "sha256": "c9f6579e468974ec0bf6937f2d1a284aa819d5b63e95ce2318d87a85fc0d4166",
-      "bytes": 4124
+      "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+      "bytes": 4162
     },
     {
       "path": "fullfx/fx_compressor.hpp",
@@ -111,6 +111,11 @@
       "path": "frontend/fx_resource_probe.cpp",
       "sha256": "30964af557097a5ed7f6548931dcd4a4f936b854c7b9624a82f43be05c0f6276",
       "bytes": 1329
+    },
+    {
+      "path": "frontend/quad_guard.hpp",
+      "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+      "bytes": 872
     }
   ]
 }

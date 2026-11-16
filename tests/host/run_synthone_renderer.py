@@ -25,6 +25,7 @@ def stage_runtime(closure, runtime):
 
 
 ADAPTER_FILES = ('tests/host/synthone_renderer_test.cpp',
+                 'tests/fixtures/synthone-factory/frontend/quad_guard.hpp',
                  'firmware/src/dsp/synthone_renderer.hpp',
                  'firmware/src/dsp/synthone_c.cpp', 'firmware/src/dsp/synthone_c.h',
                  'tests/fixtures/synthone-factory/frontend/oracle_controls.cpp',
@@ -160,6 +161,7 @@ def main():
     link = [replacements.get(value, value) for value in commands[-1]]
     if any(value.endswith('.o') and value not in replacements.values() for value in link):
         raise ValueError('Link contains an object without a fresh compile command')
+    link.insert(1, '-Wl,--wrap=s1c_read_quad')
     link.insert(1, str(out/'c-wrapper.o'))
     link.insert(1, str(out/'source-frontend.o'))
     link.insert(1, str(out/'oracle-frontend.o'))

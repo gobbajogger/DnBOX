@@ -1,0 +1,18 @@
+{
+  "scope": "Real quad-specific wrong-word/oracle-window failures, no mocked reader",
+  "results": [
+    {
+      "mode": "quad-wrong-word",
+      "exit": 1,
+      "expected_failure": "different==0",
+      "log_sha256": "b47febb9487a91f7e81fc6db2314d97fd58d9a99b93ac22de6265b53ff6ae1bb"
+    },
+    {
+      "mode": "quad-oracle-window",
+      "exit": 1,
+      "expected_failure": "!compact_oracle_window",
+      "log_sha256": "8a383bfa6b87ba11f695330e13907e7a6677a8e6dd1fdbf3e070d6914bbe13b8"
+    }
+  ],
+  "executable_sha256": "c1e4ba3237eacd9478db5e812889cca3c37514c91fb895ab31cca34440f31024"
+}

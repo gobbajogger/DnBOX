@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 05:20 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 05:29 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -121,3 +121,5 @@ Frozen6a7 full factory replay completed:694 programs/66,624,000 frames/0 differe
 Independent final6a7 corpus audit verifies all1,388 PCM hashes and complete factory/runtime input bindings. Timing remains FAIL: candidate pilot35wall/33CPU; preserved-binary same-host ABBA has A17/16,B28/27,B42/40,A20/19 wall/CPU misses, all tracer0 and0nonfinite. Complete input keys agree except the two intended scheduler files; all inputs/executables rechecked before/after. Shared-host ABBA does not establish causal speedup/regression, and no misses are discarded. Only2 exact CPU-miss callback identities recur across runs; neither recurrence nor resource association proves cause. Small diagnostic receipts preserved; raw traces stay local under the existing stopped-publication boundary. Next: isolate callback workload cost versus host variability without changing audio math, then rerun affected qualification, not repeated unqualified full corpora.
 
 Isolated compact four-word reader implemented but NOT activated in morph runtime. Staged original-scalar comparison44,313,152 words plus identical positions/invalid/alias/late failure checks PASS; metadata4->2 red/green verified. Native owner7972/4 unchanged, unlinked code+346B. Default ASan/LSan run fails with ptrace fatal; separate detect_leaks=0 address/UB diagnostic PASS is not leak qualification. Integ released managed thread for exact default sanitizer rerun after source pin. Twelve-scene current scalar route remains0diff/heap. Independent review pending. See docs/sound/v2-compact-quad; do not infer timing gain or combined fit.
+
+Quad activation candidate: reviewed6caf reader wired to morph with identical four-word/float order. Actual quad-use red/green and quad-only wrong-word/oracle-window negatives PASS. Original38 cases and12-scene audio retain exact4b32746b output; check-count difference is combined wrapper bounds assertions, not removed original scenarios. Native owner7972/4, unlinked code+286B versus6a7. Exact standalone default sanitizer PASS recovered from managed route, local ptrace failure retained. New694 replay and activated deadlines remain NOT_RUN; independent activation review requested. See docs/sound/v2-quad-activation.

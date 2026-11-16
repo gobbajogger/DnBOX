@@ -153,7 +153,7 @@ def main():
         verify_files(allowed)
         objects.append(str(obj))
     objects += runtime_objects(cmds[-1], harness_obj)
-    cmd = ['c++', *objects, '-Wl,--gc-sections', '-Wl,--wrap=s1c_read', '-Wl,--wrap=malloc', '-Wl,--wrap=calloc',
+    cmd = ['c++', *objects, '-Wl,--gc-sections', '-Wl,--wrap=s1c_read', '-Wl,--wrap=s1c_read_quad', '-Wl,--wrap=malloc', '-Wl,--wrap=calloc',
            '-Wl,--wrap=realloc', '-Wl,--wrap=free', '-lm', '-o', str(out / 'factory-test')]
     commands.append(cmd)
     (out / 'factory-build-commands.json').write_text(json.dumps(commands, indent=2) + '\n')

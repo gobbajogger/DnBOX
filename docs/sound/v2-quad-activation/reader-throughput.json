@@ -1,0 +1,92 @@
+{
+  "scope": "Diagnostic batched word throughput only, not synth callback/native qualification; all four ABBA runs retained",
+  "inputs": {
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/original/compact.c": "a5e63c119d98b6708d6809c7bec093104a9299aac6b95fd3ac51fb90c880e7b5",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/original/compact.h": "6899920139862016acbdec4a88949e376972b3529fd29617af1a5cf6aae521b4",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/candidate/compact.c": "10c7052a5caa40d7442c914385c5e07cb07783007ad290997980e5c20d4e743c",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/candidate/compact.h": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/test.c": "9d15b281dad60c85f49962b4fe32396262411490ccc794b1d5767829e9236161",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/runner.py": "b1739f7d1d69ab6170cf4dda8f5894fb3646aa535caee94ced8bbdbb14c672ac",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/bench.c": "38191913d6684f5c23f79e2a207558ea9cc545ebabfc8114263d671c76402e9c",
+    "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/replay.py": "3b751558c377f2efedfcef670d1f723e4fbe8e8a8d30848bee39fd4f1d2bb4a7"
+  },
+  "commands": [
+    [
+      "cc",
+      "-O2",
+      "-std=c11",
+      "-Ds1c_read=s1c_original_read",
+      "-Ds1c_bind=s1c_original_bind",
+      "-Ds1c_binding_valid=s1c_original_binding_valid",
+      "-MMD",
+      "-MF",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/original-fresh.d",
+      "-c",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/original/compact.c",
+      "-o",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/original-fresh.o"
+    ],
+    [
+      "cc",
+      "-O2",
+      "-std=c11",
+      "-MMD",
+      "-MF",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/quad-fresh.d",
+      "-c",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/candidate/compact.c",
+      "-o",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/quad-fresh.o"
+    ],
+    [
+      "cc",
+      "-O2",
+      "-std=c11",
+      "-I/workspace/scratch/857bb2409f82/sound-v2-evidence/compact-quad-final/candidate",
+      "-MMD",
+      "-MF",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/bench-fresh.d",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/bench.c",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/original-fresh.o",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/quad-fresh.o",
+      "-o",
+      "/workspace/scratch/857bb2409f82/sound-v2-evidence/quad-throughput/bench-fresh"
+    ]
+  ],
+  "executable_sha256": "06fa6f4c95a17301a16d477fe07f9e48850b6f49920fc83f73e9ce1ebba8f024",
+  "runs": [
+    {
+      "run": 0,
+      "batch": 0,
+      "quads": 1704352,
+      "sum": 13125095516073216,
+      "cpu_ns": 361344977,
+      "wall_ns": 367798483
+    },
+    {
+      "run": 1,
+      "batch": 1,
+      "quads": 1704352,
+      "sum": 13125095516073216,
+      "cpu_ns": 217415938,
+      "wall_ns": 217431513
+    },
+    {
+      "run": 2,
+      "batch": 1,
+      "quads": 1704352,
+      "sum": 13125095516073216,
+      "cpu_ns": 226383549,
+      "wall_ns": 227625963
+    },
+    {
+      "run": 3,
+      "batch": 0,
+      "quads": 1704352,
+      "sum": 13125095516073216,
+      "cpu_ns": 296172826,
+      "wall_ns": 296172160
+    }
+  ]
+}

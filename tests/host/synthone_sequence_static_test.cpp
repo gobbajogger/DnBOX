@@ -3,6 +3,7 @@
 #define main retained_compact_suite_main
 #include "tests/compact_scheduler_test.cpp"
 #undef main
+#include "quad_guard.hpp"
 #include "source_scheduler.hpp"
 static bool count_validation = false;
 static unsigned validation_calls = 0;

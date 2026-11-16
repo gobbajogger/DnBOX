@@ -160,8 +160,10 @@
     },
     {
       "path": "scheduler/compact-reader/compact_morph.c",
-      "bytes": 3146,
-      "sha256": "be5b2727bd5cc262f76bbff5edb6ab56f3f5337c1f2ea95fdfa3ca53bc63d46f"
+      "bytes": 3003,
+      "sha256": "85c30ba0b6022c48a6f63e6503279b122226ea83096d657f8030112a72741921",
+      "prior_v2_sha256": "be5b2727bd5cc262f76bbff5edb6ab56f3f5337c1f2ea95fdfa3ca53bc63d46f",
+      "change": "Use transactional quad reader; same word order and all original float arithmetic."
     },
     {
       "path": "scheduler/compact-reader/compact_morph.h",

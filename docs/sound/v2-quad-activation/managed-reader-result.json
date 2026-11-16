@@ -1,0 +1,54 @@
+{
+  "scope": "Stage exact original scalar and current batch reader; no runtime activation.",
+  "exit": 0,
+  "sanitizers": true,
+  "asan_options": "",
+  "lsan_options": "",
+  "original_source": "56079bbd compact reader preserved at6a7",
+  "inputs": {
+    "original/compact.c": "a5e63c119d98b6708d6809c7bec093104a9299aac6b95fd3ac51fb90c880e7b5",
+    "original/compact.h": "6899920139862016acbdec4a88949e376972b3529fd29617af1a5cf6aae521b4",
+    "candidate/compact.c": "10c7052a5caa40d7442c914385c5e07cb07783007ad290997980e5c20d4e743c",
+    "candidate/compact.h": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+    "test.c": "9d15b281dad60c85f49962b4fe32396262411490ccc794b1d5767829e9236161",
+    "compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5",
+    "runner.py": "b1739f7d1d69ab6170cf4dda8f5894fb3646aa535caee94ced8bbdbb14c672ac"
+  },
+  "commands": [
+    [
+      "cc",
+      "-O2",
+      "-std=c11",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-Ds1c_read=s1c_original_read",
+      "-Ds1c_bind=s1c_original_bind",
+      "-Ds1c_binding_valid=s1c_original_binding_valid",
+      "-MMD",
+      "-MF",
+      "/workspace/synthone-quad-6caf/output/original.d",
+      "-c",
+      "/workspace/synthone-quad-6caf/output/original/compact.c",
+      "-o",
+      "/workspace/synthone-quad-6caf/output/original.o"
+    ],
+    [
+      "cc",
+      "-O2",
+      "-std=c11",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-finstrument-functions",
+      "-I/workspace/synthone-quad-6caf/output/candidate",
+      "-MMD",
+      "-MF",
+      "/workspace/synthone-quad-6caf/output/test.d",
+      "/workspace/synthone-quad-6caf/output/test.c",
+      "/workspace/synthone-quad-6caf/output/original.o",
+      "-o",
+      "/workspace/synthone-quad-6caf/output/test"
+    ]
+  ],
+  "executable_sha256": "82f07c4fac5e8f268a01cc6ec2e3ce7f19146d2666ab07dd81279a13f3cff425",
+  "log_sha256": "f9a9204172b9d79e80b553c167c69d45d5fc774ebfcebb27082eb1c5578bdfce"
+}

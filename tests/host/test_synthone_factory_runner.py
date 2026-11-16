@@ -54,6 +54,17 @@ class RunnerGuards(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'fixture hash'):
             self.collect()
 
+    def test_quad_guard_is_bound_and_mutation_rejected(self):
+        data = self.collect()
+        name = Path('tests/fixtures/synthone-factory/frontend/quad_guard.hpp')
+        self.assertIn(name, data)
+        allowed = m.stage_inputs(data, self.stage)
+        guard = self.stage / name
+        self.assertIn(guard.resolve(), allowed)
+        guard.write_text(guard.read_text() + '\n')
+        with self.assertRaisesRegex(ValueError, 'bound input changed'):
+            m.verify_files(allowed)
+
     def test_corrupt_original_bank_rejected_before_build(self):
         f = self.repo / 'assets/factory_banks/synthone/BankA.json'
         f.write_text(f.read_text() + '\n')

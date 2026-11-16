@@ -1,6 +1,7 @@
 #define main accepted_compact_suite_main
 #include "tests/compact_scheduler_test.cpp"
 #undef main
+#include "../frontend/quad_guard.hpp"
 #include "source_scheduler.hpp"
 #include "full_oracle.hpp"
 static Snapshot full_capture(const SourceScheduler&s){

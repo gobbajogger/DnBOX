@@ -3,6 +3,7 @@
 #define main retained_source_scheduler_test_main
 #include "tests/compact_scheduler_test.cpp"
 #undef main
+#include "quad_guard.hpp"
 #include "source_scheduler.hpp"
 #include "full_oracle.hpp"
 #include "synthone_renderer.hpp"
@@ -63,8 +64,13 @@ int main(int argc,char **argv) {
  CHECK(!held.insert_checked(s1scheduler::NoteNumber(-256,0,100),0));
  CHECK(!std::memcmp(saved,&held,sizeof held));held.insert(s1scheduler::NoteNumber(60,65536,100),0);
  CHECK(!std::memcmp(saved,&held,sizeof held));
- CHECK(argc==4); Fixture f(argv[1]); FILE *packfile=std::fopen(argv[2],"rb"); CHECK(packfile);
+ CHECK(argc==4||argc==5); Fixture f(argv[1]); FILE *packfile=std::fopen(argv[2],"rb"); CHECK(packfile);
  std::vector<unsigned char> pack(165292);CHECK(std::fread(pack.data(),1,pack.size(),packfile)==pack.size());CHECK(!std::fclose(packfile));
+ if(argc==5){
+  if(!std::strcmp(argv[4],"quad-wrong-word"))compact_quad_wrong_lsb=true;
+  else if(!std::strcmp(argv[4],"quad-oracle-window")){s1c_binding b;CHECK(s1c_bind(&b,pack.data(),pack.size()));uint32_t words[4];compact_oracle_window=true;return s1c_read_quad(&b,0,1,0,1,words)?0:2;}
+  else CHECK(false);
+ }
  test_source_frontend(f,pack);
  unsigned long long count=0, different=0, nonzero=0; float peak=0;
  FILE *audio=std::fopen(argv[3],"wb");CHECK(audio);
@@ -103,6 +109,7 @@ int main(int argc,char **argv) {
   }
   CHECK(dnbox_s1_all_off(handle));CHECK(dnbox_s1_reset(handle));dnbox_s1_retire(handle);
  }
+ CHECK(compact_quad_calls>0);
  CHECK(!std::fclose(audio));std::printf("{\"scope\":\"new-adapter-vs-actual-source-pre-FX\",\"scenes\":12,\"frames\":%llu,\"different_channel_words\":%llu,\"nonzero_left_frames\":%llu,\"peak\":%.9g,\"heap_calls_during_render\":0}\n",count,different,nonzero,peak);
  return different||!nonzero;
 }
