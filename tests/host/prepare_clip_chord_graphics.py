@@ -18,7 +18,7 @@ start = unique(s, 'static char chord_draw')
 end = unique(s, 'static void text_c')
 main = unique(s, 'static void fresh(void)')
 assert start < end < main
-hook = s[start:end]
+hook = '#include <assert.h>\n' + s[start:end]
 assert hook.count('static int32_t cv_text(') == 1
 assert hook.count('return x+tw(f,s);') == 1
 hook = hook.replace('static int32_t cv_text(', 'static int32_t observed_cv_text(')
@@ -40,9 +40,11 @@ host = out / 'actual-clip-key-host.inc'
 text = host.read_text()
 anchor = '#include "actual-clip-key-renderers.inc"'
 unique(text, anchor)
-host.write_text(text.replace(anchor, hook + '\n' + anchor))
+helper_anchor = 'static void text_c('
+unique(text, helper_anchor)
+host.write_text(text.replace(helper_anchor, hook + '\n' + helper_anchor))
 (out / 'chord-real.c').write_text('#include <assert.h>\n#include "actual-clip-key-host.inc"\n' + s[main:])
-inputs = [source, Path(__file__), Path('tests/host/ui_clip_chord_graphics_test.sh')]
+inputs = [source, Path(__file__), Path('tests/host/ui_clip_chord_graphics_test.sh'), Path('tests/host/ui_clip_strip_domains_test.c')]
 receipt = {'schema': 'dnbox-actual-chord-graphics/1', 'inputs': {}, 'generated': {}}
 for p in inputs:
     receipt['inputs'][str(p).replace(str(Path.cwd())+'/', '')] = hashlib.sha256(p.read_bytes()).hexdigest()
@@ -50,5 +52,6 @@ for p in sorted(out.glob('*.inc')) + [out/'felucca_font.h', out/'chord-real.c']:
     receipt['generated'][p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 receipt['setupProvenanceSha256'] = hashlib.sha256((out/'provenance.json').read_bytes()).hexdigest()
 receipt['compileCommand'] = [os.environ.get('CC', 'cc'), '-DSMK_MODEL="SMK-37 Pro"', '-std=gnu99', '-O1', '-Ifirmware/src', '-Ifirmware/src/app', '-Ifirmware/hal', '-I$OUT', '$OUT/chord-real.c', 'firmware/src/app/smk_clip_arp_share.c', '-lm', '-o', '$OUT/chord-real']
+receipt['stripCompileCommand'] = [os.environ.get('CC', 'cc'), '-DSMK_MODEL="SMK-37 Pro"', '-std=gnu99', '-O1', '-Ifirmware/src', '-Ifirmware/src/app', '-Ifirmware/hal', '-I$OUT', 'tests/host/ui_clip_strip_domains_test.c', 'firmware/src/app/smk_clip_arp_share.c', '-lm', '-o', '$OUT/strip-domains']
 receipt['scope'] = 'Original lifecycle/test assertions preserved; production drawing replaces no-op graphics. Host MIDI/USB mocks remain. Not device or visual review.'
 (out/'chord-graphics-provenance.json').write_text(json.dumps(receipt,indent=2)+'\n')
