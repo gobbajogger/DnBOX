@@ -54,3 +54,6 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 
 ## Remote formatter handoff
 - Exported exact current Chicago/Miami pref_value_of readouts at every descriptor raw value, pinned to production b6be480c and source-file SHA256. Per-engine JSON under700KB at docs/evidence/fwui/formatter/. Capture describes boot factory preset state only, explicitly NOT_ADMITTED as runtime qualification. SuperJ6/SynthOne generic-percent fallback is not exported.
+
+## Gate fixture repair
+- Independent baseline found clip-chord display fixture omitted font_bitmap_width while extracted production caps() now requires it. Fixture now extracts the unchanged production helper rather than reverting compressed-font behavior. Corrected actual run:7049 checks/7050 captured chord draws PASS. Evidence:r22-candidate/clip-chord-fixed.log. Production code unchanged by this repair.
