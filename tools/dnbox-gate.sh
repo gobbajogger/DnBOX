@@ -28,6 +28,7 @@ no_loss()    { if [ -n "${DNBOX_BASE_SHA:-}" ]; then
                while read -r f; do grep -qF -- "$f" "$lf" 2>/dev/null || { echo "deleted without reason in $lf: $f"; miss=1; }; done <<< "$del"
                return $miss; }
 limits()     { local bad=0
+               python3 tools/dnbox-hard-limits.py || bad=1
                git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' && { echo "workflow file changed"; bad=1; }
                git ls-files | grep -iE '\.ipa$|SuperJ6.*AU.*extension.*\.zip' && { echo "SuperJ6 installer in Git"; bad=1; }
                git grep -lIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . && { echo "possible Secret (filename-only scan)"; bad=1; }
