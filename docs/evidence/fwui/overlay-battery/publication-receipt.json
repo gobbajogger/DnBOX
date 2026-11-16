@@ -1,0 +1,7 @@
+{
+  "executedFixtureSHA256": "484a36010662dabcac223b15b11e1f6d8b4259defad39aa34b0d2326b4ecb352",
+  "publishedFixtureSHA256": "58748a7ffd0a206c7354e52e3f9827b6df8ff1c3db45be8168ff5b1bf770fc35",
+  "difference": "Comment clarifies 50ms clock advancement; summary calls injected states updates rather than distinct transitions. Test logic unchanged. Historical run inputs/logs preserved unchanged.",
+  "independentReview": "test-and-merge accepted bounded traversal/assertions, receipts and wrapper; requested these wording corrections.",
+  "scope": "Not full F4, cache-key mutation proof or device evidence."
+}
