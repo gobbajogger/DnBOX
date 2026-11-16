@@ -44,3 +44,5 @@ None.
 
 ## Conflicts
 No rule changes. Prior rules/briefs are history only; existing code and evidence are reusable inputs under RULES.md v2.
+
+Native recovery checkpoint: exact56079 full-sequence recipe rebuilt29 runtime objects with authenticated original SDK C++ headers, object forbidden-symbol scan PASS/0. SourceScheduler10532 bytes independently reproduced. No firmware link/device/combined-memory PASS. See sound-memory.md and docs/sound/v2-native-component-result.json.

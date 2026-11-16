@@ -41,3 +41,21 @@ fresh exact-source Elite/Pro link and shared engine memory planning.
 Next: compile complete runtime with the pinned target toolchain, account for
 post-FX and immutable table residency, and integrate only once combined memory
 can retain ≥8704 free pool bytes. No final fit PASS is claimed.
+
+## Fresh authenticated native runtime compile
+
+Recovered and executed the pinned source's `direct-scheduler/run_native.py` with
+`--full-sequence`, authenticated experiment/control dependencies, matching pinned
+compiler, and original SDK C++ overload headers. Its native recipe uses C++11,
+`S1_NO_DOUBLE`, exact integer binary64 clock helpers, and pi32v2/r3 FPU flags.
+This supersedes the generic host-command native diagnostic, which did not select
+that native closure.
+
+Result: all29 runtime objects compiled; forbidden-symbol scan PASS,0 forbidden
+symbols; native SourceScheduler10532 bytes, RuntimeState9984 bytes. Full details,
+source/object hashes and dependency records: `docs/sound/v2-native-component-result.json`.
+Absolute local paths there are normalized to named input roots. Original result
+SHA256: `7e369ab97e2b11f49ce21b655f7ce9785d5fd739a3c29772ee7ab15c3e8806fc`.
+
+Still NOT_RUN: native executable/firmware link, combined Juno/app resources, table
+storage/read workload, CPU and device qualification. S6 remains FAIL.
