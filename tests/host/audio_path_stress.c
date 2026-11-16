@@ -92,6 +92,19 @@ int main(int argc, char **argv)
             engine_set(T_MST, 0, MST_MODE, 1 + (block / 8) % 3);
             engine_set(T_MST, 0, MST_CUTOFF, (block * 13) % 128);
         }
+        if (sweep == 2) {
+            /* Automation worst case: tempo moves every block and every continuous
+             * Chicago/Miami parameter of both bass parts moves every half below,
+             * so the coefficient caches miss on each new value; switch parameters
+             * move every 16 blocks. */
+            seq.bpm = 120.0f + (float)((block * 7) % 181);
+            if (block % 16 == 0)
+                for (int v = 0; v < 2; ++v)
+                    for (int i = 0; i < engine_nparams(T_303, v); ++i) {
+                        const x0x_param_t *p = engine_param(T_303, v, i);
+                        if (p && p->max < 127) engine_set(T_303, v, i, (block / 16 + i + v) % (p->max + 1));
+                    }
+        }
         master = block & 64 ? 4096 : 1536;
         uint32_t prof0[2] = {eng_prof[PR_303A], eng_prof[PR_303B]};
         double elapsed = 0;
@@ -104,6 +117,12 @@ int main(int argc, char **argv)
                         unsigned key = 36 + block % 12 + note;
                         packet(src, 0x80u | (2u + b), old, 0);
                         packet(src, 0x90u | (2u + b), key, 70 + (block + note) % 58);
+                    }
+            if (sweep == 2)
+                for (int v = 0; v < 2; ++v)
+                    for (int i = 0; i < engine_nparams(T_303, v); ++i) {
+                        const x0x_param_t *p = engine_param(T_303, v, i);
+                        if (p && p->max == 127) engine_set(T_303, v, i, (block * 2 + half) * (5 + i) % 128);
                     }
             unsigned queued = mi_w - mi_r;
             if (queued > queued_peak) queued_peak = queued;

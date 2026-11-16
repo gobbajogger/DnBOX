@@ -23,6 +23,9 @@ def main():
     ap.add_argument("--baseline-master", type=Path)
     ap.add_argument("--reference", type=Path)
     ap.add_argument("--all-presets", action="store_true")
+    ap.add_argument("--automate", action="store_true",
+                    help="instead of the two FX sweeps, move tempo and every Chicago/Miami "
+                         "parameter of both bass parts each block (cache-miss worst case)")
     ap.add_argument("--blocks", type=int, default=1024)
     ap.add_argument("--enforce-headroom", action="store_true",
                     help="Fail if the measured host peak exceeds 60 percent, or either synth exceeds 15 percent")
@@ -55,7 +58,7 @@ def main():
     results = []
     hashes = {}
     for case, (chicago, miami) in enumerate(pairs):
-        for sweep in (0, 1):
+        for sweep in ((2,) if args.automate else (0, 1)):
             label = f"{case:03d}-c{chicago}-m{miami}-s{sweep}"
             directory = out / label
             directory.mkdir(exist_ok=True)
