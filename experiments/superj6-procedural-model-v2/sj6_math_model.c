@@ -63,6 +63,14 @@ static float decay(float x){float q,f,p,scale;int n;uint32_t u;if(x>=87.f)return
 float sj6_math_at(const Sj6MathModel *m,Sj6MathState *s,const int16_t *cycle,uint32_t frame,uint32_t fraction){
  const uint8_t *d,*t;unsigned seg=0,i,j,shift=0;uint32_t phase,index,mask;uint64_t linear;float u,drift,y,at[3]={0,0,0},on[3]={0,0,0},time;
  if(!m||!cycle||frame>=m->frames)return 0.f;
+ /* The admitted view/input and built cycle are read-only during rendering. */
+ {uint32_t n=(uint32_t)m->cycle_n*sizeof *cycle;
+  if(!span_valid(cycle,n)||(uintptr_t)cycle%_Alignof(int16_t))return 0.f;
+  if(s&&(!span_valid(s,sizeof *s)||(uintptr_t)s%_Alignof(Sj6MathState)||
+     spans_overlap(s,sizeof *s,m,sizeof *m)||
+     spans_overlap(s,sizeof *s,m->bytes,m->size)||
+     spans_overlap(s,sizeof *s,cycle,n)))return 0.f;
+ }
  if(s&&s->segment<m->segments)seg=s->segment;
  d=m->bytes+m->off_drift+24u*seg;if(frame<u32(d))seg=0;
  while(seg+1u<m->segments&&frame>=u32(m->bytes+m->off_drift+24u*seg+4))seg++;

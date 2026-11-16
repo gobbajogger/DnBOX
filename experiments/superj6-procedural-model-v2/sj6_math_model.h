@@ -37,6 +37,11 @@ void sj6_math_reset(Sj6MathState *s);
 /* Returns raw PCM-unit math, not normalized audio. Caller supplies original
  * source position and owns loop/note/envelope/pitch semantics. Integer frame
  * plus unsigned Q32 fraction supports block-independent arbitrary positions.
+ * Requires an unchanged admitted view and a complete built cycle in live,
+ * aligned readable storage. Optional state is aligned, writable and disjoint
+ * from the view, borrowed input and the cycle. Invalid/wrapping cycle or state
+ * spans return +0 without mutation; stateless rendering uses a null state.
+ * Span checks do not validate mapping or forged/mutated views. No racing writes.
  * This API alone is not original sampler/loop/voice/FX integration. */
 float sj6_math_at(const Sj6MathModel *m, Sj6MathState *s, const int16_t *cycle,
                  uint32_t frame, uint32_t fraction);
