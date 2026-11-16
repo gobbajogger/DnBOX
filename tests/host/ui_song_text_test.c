@@ -2,11 +2,29 @@
 #define SMC_UI_MAIN retained_fixture_main
 #include "smc_ui_test.c"
 static unsigned empty_text,end_text,explanatory_text;
+static uint16_t empty_color,end_color;
+static uint16_t status_background[240*69];
+static double status_min;
+static unsigned status_samples;
+static double status_luminance(uint16_t color)
+{
+ double v[3]={(double)((color>>11)&31)/31.,(double)((color>>5)&63)/63.,(double)(color&31)/31.};
+ for(int i=0;i<3;i++)v[i]=v[i]<=.04045?v[i]/12.92:pow((v[i]+.055)/1.055,2.4);
+ return .2126*v[0]+.7152*v[1]+.0722*v[2];
+}
 static int32_t observed_song_text(int32_t x,int32_t y,const felucca_font_t *f,const char *s,uint16_t c)
 {
     empty_text+=!strcmp(s,"EMPTY");end_text+=!strcmp(s,"END");
+    if(!strcmp(s,"EMPTY"))empty_color=c;if(!strcmp(s,"END"))end_color=c;
     explanatory_text+=strstr(s,"WHITE KEYS ADD BARS")!=0;
-    return cv_text(x,y,f,s,c);
+    int status=!strcmp(s,"EMPTY")||!strcmp(s,"END");
+    if(status){CHECK(cv_w*cv_h<=240*69);memcpy(status_background,cv_px,cv_w*cv_h*2);}
+    int32_t result=cv_text(x,y,f,s,c);
+    if(status)for(unsigned i=0;i<cv_w*cv_h;i++)if(cv_px[i]!=status_background[i] && cv_px[i]==swap16(c)){
+        double a=status_luminance(c),b=status_luminance(swap16(status_background[i]));
+        double ratio=(fmax(a,b)+.05)/(fmin(a,b)+.05);if(ratio<status_min)status_min=ratio;status_samples++;
+    }
+    return result;
 }
 #define cv_text observed_song_text
 #include "song_text_current.inc"
@@ -24,10 +42,12 @@ int main(void)
     for(int length=0;length<=2;length++)for(int selected=0;selected<=length;selected++)for(int band=0;band<2;band++) {
         setup(V_SONG,PART_909);song()->len=(uint8_t)length;ui.song_sel=(uint8_t)selected;
         song_t before=*song();screen_state_t screen=screen_state();int playing=seq.playing;
-        empty_text=end_text=explanatory_text=0;
+        empty_text=end_text=explanatory_text=0;status_min=100;status_samples=0;
         render_song(draw_song,band,actual);render_song(observed_draw_song,band,observed);
         CHECK(!memcmp(actual,observed,sizeof actual));CHECK(!explanatory_text);
         if(!band){CHECK(length?end_text==1:empty_text==1);}
+        if(!band)CHECK((length?end_color:empty_color)==(selected==length?C_WHITE:C_DIM));
+        if(!band){CHECK(status_samples>0);if(selected==length)CHECK(status_min>=4.5);printf("STATUS_CONTRAST len=%d selected=%d ratio=%.6f pixels=%u\n",length,selected,status_min,status_samples);}
         else CHECK(!empty_text && !end_text);
         render_song(before_draw_song,band,prior);
         if(length||band)CHECK(!memcmp(actual,prior,sizeof actual));
@@ -35,6 +55,6 @@ int main(void)
         CHECK(!memcmp(&before,song(),sizeof before));unchanged(screen);CHECK(seq.playing==playing);
     }
     CHECK(changed==1);
-    printf("PASS SONG EMPTY/END actual graphics, 12 states, %u checks; no input/hardware or full-screen acceptance\n",checks);
+    printf("PASS SONG EMPTY/END selected color and actual graphics, 12 states, %u checks; no input/hardware or full-screen acceptance\n",checks);
     return 0;
 }
