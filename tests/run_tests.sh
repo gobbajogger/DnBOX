@@ -305,7 +305,7 @@ run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
 run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c SMC_UI_OUT=build/host/composed-smc-panic sh tests/host/smc_ui_test.sh
 run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
-run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
+run composed-ui-identity sh tests/host/composed_ui_identity_test.sh
 run drone-slot env SMC_UI_TEST_FILE=tests/host/drone_slot_test.c SMC_UI_OUT=build/host/drone-slot sh tests/host/smc_ui_test.sh
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
