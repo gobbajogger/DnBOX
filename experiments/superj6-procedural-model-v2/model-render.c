@@ -1,0 +1,6 @@
+/* Private model/PCM consumer. Does not contain any coefficients or recordings. */
+#include "sj6_math_model.h"
+#include <stdio.h>
+#include <stdlib.h>
+static unsigned char *read_all(const char *name,unsigned *n){FILE*f=fopen(name,"rb");long z;unsigned char*p;if(!f)return 0;fseek(f,0,SEEK_END);z=ftell(f);rewind(f);if(z<0||z>1048576){fclose(f);return 0;}*n=(unsigned)z;p=(unsigned char*)malloc(*n);if(!p||fread(p,1,*n,f)!=*n){free(p);fclose(f);return 0;}fclose(f);return p;}
+int main(int argc,char**argv){unsigned n,i;unsigned char *p;Sj6MathModel m;Sj6MathState s;int16_t*table;FILE*out;if(argc!=3)return 2;p=read_all(argv[1],&n);if(!p||sj6_math_open(&m,p,n)){fprintf(stderr,"invalid model\n");free(p);return 3;}table=(int16_t*)malloc(m.cycle_n*sizeof*table);if(!table||sj6_math_build(&m,table,m.cycle_n)){fprintf(stderr,"cycle build failed\n");free(table);free(p);return 4;}out=fopen(argv[2],"wb");if(!out){free(table);free(p);return 5;}sj6_math_reset(&s);for(i=0;i<m.frames;i++){float f=sj6_math_at(&m,&s,table,i,0);if(fwrite(&f,sizeof f,1,out)!=1)return 6;}fclose(out);printf("%u frames; payload %u bytes; cycle %u bytes; view %u state %u bytes\n",m.frames,n,m.cycle_n*2u,(unsigned)sizeof m,(unsigned)sizeof s);free(table);free(p);return 0;}
