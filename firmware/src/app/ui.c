@@ -6809,7 +6809,6 @@ static uint16_t footer_text(const char **a, const char **b, const char **c)
 {
     *a = *b = *c = 0;
     if (!any_button) {
-        *a = "HOLD ANY BUTTON: WHAT IT DOES";
         return C_GRAY;
     }
     if (ui.overlay == O_ASK) {
