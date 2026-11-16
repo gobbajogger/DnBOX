@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:04 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:25 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -84,3 +84,18 @@ Managed second-environment exact replay PASS:694 programs and all1388 PCM hashes
 Source-helper C ABI checkpoint: transient original helper laws (physical and six dependent normalized parameters) plus resolved-target accessor, no owner growth.6,385 changes/957,750 exact target comparisons against retained original helper,4,096 extra rendered frames0diff/controlheap0; prior12scenes576,000frames0diff/renderheap0 unchanged audio SHA4b32746b…. Native wrapper+frontend compile7972B/align4,248B scratch plus20B saved registers before callees; complete stack and combined app fit NOT_RUN. Six renderer closure negatives and eight factory closure/selection tests PASS; fresh factory build-only PASS, new694audio NOT_RUN. Scope and source receipts in docs/sound/v2-source-frontend-result.json. Independent review pending; no full S1–S7 PASS.
 
 App-frontend input audit: authenticated694 corpus has12 non-12ET master sets,5 non440 A4 values,5 nonzero stored hold flags and37 nondefault modwheel routes. Five audit regressions PASS; these are stored-field counts, not audible qualification. Exact original MIT Swift/AudioKit tuning sources retained separately from frozen factory fixture, with Gitblob/SHA256 pins. Swift absent locally; original Swift/iOS execution NOT_RUN. Next: verify complete original tuning/NPO/A4 routing and obtain an independent original-capable test route before extending audio claims. No runtime changed in this audit.
+
+Corrective action: Sound ended its turn at an interim handoff while independent
+original-tuning reference preparation remained available. That was premature,
+not lane completion. Continue as sole owner across interim reports: prepare the
+source-exact reference harness and closure tests while reviews/capability checks
+run; stop only the specifically denied LFS action. Root owns final lane decisions.
+
+Prepared source-exact Swift tuning reference with6 closure tests PASS and captured694 bank inputs; actual local compiler probe NOT_RUN because swiftc is absent. Managed read-only capability probe dispatched after tester released the idle thread. No mathematical port, app callback or audio PASS is asserted. See docs/sound/v2-tuning-reference-preparation.md.
+
+Swift route correction: managed read-only probe confirmed no compiler. A later
+local1.1GB official toolchain download was denied by automated review because it
+exceeded the read-only/no-installation scope. Stopped without retry or indirect
+route; root handles explicit owner approval for expanded compiler preparation.
+Swift execution remains NOT_RUN. Continue source/closure work and independent
+existing-C++ checks; do not substitute a translation for original Swift evidence.

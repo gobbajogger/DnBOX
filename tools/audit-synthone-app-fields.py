@@ -15,9 +15,12 @@ def finite(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
-def audit(bank_root):
+def audit(bank_root, capture=None):
     manifest_bytes = (bank_root / 'MANIFEST.json').read_bytes()
     manifest = json.loads(manifest_bytes)
+    if capture is not None:
+        capture.clear()
+        capture['MANIFEST.json'] = manifest_bytes
     seen = set()
     rows = []
     counts = {'presets': 0, 'non440_A4': 0, 'non12ET_master_sets': 0,
@@ -31,6 +34,8 @@ def audit(bank_root):
         blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
         if len(data) != entry['size'] or hashlib.sha256(data).hexdigest() != entry['sha256'] or blob != entry['sha']:
             raise ValueError('bank hash/size mismatch: ' + name)
+        if capture is not None:
+            capture[name] = data
         programs = json.loads(data)
         if not isinstance(programs, list) or len(programs) != entry['count']:
             raise ValueError('bank count mismatch: ' + name)

@@ -10,7 +10,8 @@ SDK/toolchain binary or executable artifact is included.
 These are unmodified research inputs, not a compiled replacement or an
 independent app-audio oracle. Swift is not installed in the present host;
 no Swift/original-iOS execution is claimed. The available Mac is offline; an
-existing managed task is checking Swift availability after its current review. Do not add these files to the C++
+managed read-only probe also found no compiler. Expanded compiler preparation
+is blocked pending explicit approval, rather than rerouted after denial. Do not add these files to the C++
 factory runner's qualified closure silently or reinterpret frozen694 results.
 
 Confirmed source flow:
