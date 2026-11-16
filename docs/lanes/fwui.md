@@ -118,3 +118,7 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Fresh b341 native Elite/Pro builds: XIP free3544/3552B, BSS96544; pool margin172 remains below512 until integ fix composition. All312 tracked firmware/tools/assets/build.sh files match exact remote tree. External compiler/linker/plugin/SDK boot hashes recorded.
 - Actual linker maps committed with receipts proving same ELF bytes as normal builds after adding only -Map to effective SMK link. First wrapper attempt missed build.sh board default; its wrong-target maps/receipts were detected, preserved INVALID, never admitted. Corrected wrapper forces board/model and rejects unexpected output before link; new negative regression fails old wrapper and PASS3 corrected checks.
 - Current same-runtime pan8925, held-step144, pads7096 and HOME/GLOBE regressions pass. Evidence docs/evidence/fwui/native-b341/. F3 candidate evidence awaits independent review; no full Local, combined source, device or lane acceptance.
+
+## Exhaustive pan identity regression
+- Expanded the production pan formatter test from one mixer voice to all five, and enumerated all 197 declared 909/808 voice/KIT descriptors rather than a guessed parameter limit. Exactly 22 drum voice pans and zero KIT pans; all 128 raw values retain L50/C/R50 endpoints and monotonic sides. Stored values remain unchanged.
+- Current b341 runtime PASS10,975 checks. This is formatter-domain coverage, not every rendered screen or complete F4 battery acceptance. Runtime source unchanged; evidence docs/evidence/fwui/pan-exhaustive/.
