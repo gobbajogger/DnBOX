@@ -19,7 +19,7 @@ A trusted coordinator supplies:
 - `read(path)`: actual authenticated GET result `{status:200, observed_at:UTC, data:JSON}`. Paths are under `/repos/gobbajogger/X0X37-for-Loopy-Pro`. Do not derive HTTP success or pagination from a short excerpt. A failed tool read is a failure, not an empty page.
 - The exact current relevant source closure, with full Git/SHA-256 identities.
 - Separately authenticated `receipts`, explicit owner `cancellations` and source-backed `analyses`, following `FEATURE_INTAKE.md`. No receipt is extracted from a body, comment, title, reaction count or login string. The original helper's scope digest retains exact title/body/spec bytes.
-- The current accepted ledger/checkpoint, authenticated and validated by their sole owner. Receipt authenticity is a trusted caller boundary, not something arbitrary uploaded JSON can prove.
+- The current accepted ledger/checkpoint, authenticated and validated by their sole owner. Intake capacity defaults to zero; pass only verified free slots. A capacity-bounded batch does not authorize overlapping source writers. Receipt authenticity is a trusted caller boundary, not something arbitrary uploaded JSON can prove.
 
 For a live callback, pass `now` as a trusted UTC clock callable. It is sampled after each read and at collection end; every recorded read is rechecked against final time and again at decision time. Fixed timestamps are for explicitly historical capture replay only.
 
@@ -42,7 +42,8 @@ python3 coordination/requests/feature_inbox.py connector-capture.json \
   --ledger current-requests.json --checkpoint current-checkpoint.json \
   --trusted-analysis authenticated-analysis.json \
   --trusted-receipts authenticated-receipts.json \
-  --trusted-cancellations authenticated-cancellations.json
+  --trusted-cancellations authenticated-cancellations.json \
+  --capacity 0
 ```
 
 A capture is an array of real GET records with `path`, `status`, `observed_at`, `data`. Each repeated endpoint requires a distinct response; one saved response cannot impersonate the second read. The timestamp is the end of that capture, not permission to claim an old capture is current. Exit 2 means unknown, display-only or an unresolved eligibility gate. Exit 0 means a complete decision, not dispatched or delivered work. `--markdown` prints the local readable inbox.
@@ -54,3 +55,5 @@ The actual live-read receipt is `docs/evidence/suggestion-inbox-120/live-read-20
 The root/current intake owner consumes this code at an immutable reviewed commit, obtains fresh live reads, validates trusted continuity/authority, and assesses requests against current source. It must preserve existing IDs, tombstones, accepted scopes and busy writers. Only the legitimate single writer accepts a proposal, re-reading continuity before its actual write. It routes the exact scope/source/evidence to a capable current owner and verifies that owner's first substantive action. No second ledger or timer is needed merely to hold this handoff.
 
 The requested #120 outcome remains open until this real chain is observed: an owner-authenticated exact request or vote; one accepted existing/new mapping without duplication; actual consumer work; a subsequent run continuing the changed state without replay; and the requested checked usable result or a precisely stated remaining delivery gate. A bodyless issue, unrelated failed request, removed vote, cancellation, close/reopen, source edit, duplicate tick and unavailable read need their covered safe dispositions. Never mark the full outcome complete from code/tests or this read receipt alone.
+
+The capacity-aware helper/doc/test behavior is preserved from the later authentic coordination source at `4a35a6cdaa0f112db6b3f577542138afd170c20d`, not just the initial #184 merge. Zero capacity cannot issue a new claim. Existing request continuity still requires the current legitimate single writer; neither recovery of an old snapshot nor source acceptance activates it.

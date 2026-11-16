@@ -153,9 +153,9 @@ def freshness(reads, now, max_age_seconds=900):
             raise ValueError('stale/future observation at decision: ' + record['path'])
 
 
-def run(snapshot, ledger, checkpoint, *, now):
+def run(snapshot, ledger, checkpoint, *, now, capacity=0):
     """Expose inbox state even when continuity is unavailable; never reset it."""
-    result = {'schema': 1, 'state': 'UNKNOWN', 'claim': None, 'inbox': None,
+    result = {'schema': 1, 'state': 'UNKNOWN', 'claim': None, 'claims': [], 'inbox': None,
               'continuity_verified': False, 'observation_sha256': intake.digest(snapshot)}
     if snapshot.get('read_status') != 'success':
         result['reason'] = snapshot.get('reason', 'required reads unavailable')
@@ -179,9 +179,9 @@ def run(snapshot, ledger, checkpoint, *, now):
         result['state'] = 'DISPLAY_ONLY'
         result['reason'] = 'Live ledger/checkpoint unavailable; existing continuity must be recovered by its sole owner'
         return result
-    decision = intake.evaluate(snapshot, ledger, checkpoint)
+    decision = intake.evaluate(snapshot, ledger, checkpoint, capacity=capacity)
     result.update(state=decision['state'], reason=decision['reason'], decision=decision,
-                  claim=decision.get('claim'), continuity_verified='proposed_checkpoint' in decision)
+                  claim=decision.get('claim'), claims=decision.get('claims', []), continuity_verified='proposed_checkpoint' in decision)
     return result
 
 
@@ -229,6 +229,7 @@ def main():
     parser.add_argument('--now', required=True, help='UTC read time; old captures remain historical')
     parser.add_argument('--ledger', type=Path)
     parser.add_argument('--checkpoint', type=Path)
+    parser.add_argument('--capacity', type=int, default=0, help='verified free intake slots; default none')
     parser.add_argument('--trusted-analysis', type=Path)
     parser.add_argument('--trusted-receipts', type=Path)
     parser.add_argument('--trusted-cancellations', type=Path)
@@ -240,7 +241,7 @@ def main():
         snapshot = collect(RecordedReader(load(args.capture)), load(args.source), now=args.now,
                            analyses=load(args.trusted_analysis), receipts=load(args.trusted_receipts) or [],
                            cancellations=load(args.trusted_cancellations) or [])
-        result = run(snapshot, load(args.ledger), load(args.checkpoint), now=args.now)
+        result = run(snapshot, load(args.ledger), load(args.checkpoint), now=args.now, capacity=args.capacity)
         output = render(snapshot, result) if args.markdown else json.dumps(
             {'observation': snapshot, 'result': result}, sort_keys=True, ensure_ascii=False, indent=2)
         print(output)

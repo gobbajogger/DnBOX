@@ -112,7 +112,7 @@ class InboxTests(unittest.TestCase):
         s = self.collect()
         self.assertEqual(s['approval_receipts'], [])
         self.assertFalse(any('/secrets' in p for p in self.r.calls))
-        self.assertIsNone(intake.evaluate(s, {'records': []}, {'schema': 1})['claim'])
+        self.assertIsNone(intake.evaluate(s, {'records': []}, {'schema': 1}, capacity=1)['claim'])
 
     def test_owner_vote_plus_assessment_routes_exact_eligible_scope(self):
         spec = {'behavior': 'Show active lane, preserve controls.'}
@@ -127,7 +127,7 @@ class InboxTests(unittest.TestCase):
         prefix = intake.endpoint(101, '/reactions') + '?per_page=100&page=2'
         self.r.responses[prefix] = []
         s = self.collect(analyses={'9001': {'spec': spec, 'assessment': a}}, receipts=[receipt])
-        plan = intake.evaluate(s, {'records': []}, {'schema': 1})
+        plan = intake.evaluate(s, {'records': []}, {'schema': 1}, capacity=1)
         self.assertEqual(plan['claim']['issue_number'], 101)
         self.assertEqual(plan['claim']['scope_hash'], h)
         self.assertEqual(s['approval_receipts'], [receipt])
@@ -138,7 +138,7 @@ class InboxTests(unittest.TestCase):
         self.r.responses[intake.endpoint(101, '/reactions') + '?per_page=100&page=2'] = []
         s = self.collect()
         self.assertEqual(s['approval_receipts'], [])
-        plan = intake.evaluate(s, {'records': []}, {'schema': 1})
+        plan = intake.evaluate(s, {'records': []}, {'schema': 1}, capacity=1)
         self.assertIsNone(plan['claim'])
 
     def test_inbox_view_escapes_external_text_and_distinguishes_votes(self):
@@ -200,7 +200,7 @@ class InboxTests(unittest.TestCase):
         cancel = {'repository_id': intake.REPOSITORY_ID, 'issue_id': 9001,
                   'actor': OWNER, 'scope_hash': h, 'evidence_ref': 'authenticated-owner:cancel'}
         s = self.collect(cancellations=[cancel])
-        result = intake.evaluate(s, {'records': []}, {'schema': 1})
+        result = intake.evaluate(s, {'records': []}, {'schema': 1}, capacity=1)
         self.assertEqual(result['items'][0]['state'], 'CANCELLED')
         self.assertIsNone(result['claim'])
         cancel['actor'] = {'id': 8, 'type': 'User', 'login': 'gobbajogger'}
@@ -217,6 +217,17 @@ class InboxTests(unittest.TestCase):
         result = inbox.run(s, {'records': []}, {'schema': 1}, now='2026-11-15T18:15:01Z')
         self.assertEqual(result['state'], 'UNKNOWN')
         self.assertIsNone(result['claim'])
+
+    def test_run_requires_verified_free_capacity_before_claiming(self):
+        import inspect
+        self.assertIn('capacity', inspect.signature(inbox.run).parameters)
+        s = self.collect()
+        result = inbox.run(s, {'records': []}, {'schema': 1}, now=NOW)
+        self.assertEqual(result['claims'], [])
+        self.assertIsNone(result['claim'])
+        result = inbox.run(s, {'records': []}, {'schema': 1}, now=NOW, capacity=-1)
+        self.assertEqual(result['state'], 'BLOCKED')
+        self.assertEqual(result['claims'], [])
 
 
 if __name__ == '__main__':
