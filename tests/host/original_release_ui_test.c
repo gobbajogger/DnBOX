@@ -338,6 +338,19 @@ static uint32_t picture_pixels(const uint16_t *p,int x,int y,int w,int h)
     for(int row=y;row<y+h;row++)for(int col=x;col<x+w;col++)sum=(sum^p[row*240+col])*16777619u;
     return sum;
 }
+/* Current R22 NAME/P#/transport/BPM/battery contract. Compare the whole
+ * dedicated pattern region, not retired 8be mini-glyph coordinates. This is
+ * source-semantic pixel evidence with shared fonts, not an independent golden. */
+static int header_pattern_matches(const char *label,uint16_t ink)
+{
+    uint16_t actual[36*HDR_H];
+    for(int y=0;y<HDR_H;y++)for(int x=0;x<36;x++)actual[y*36+x]=fb[y*240+132+x];
+    cv_begin(240,HDR_H,C_BLACK);sound_slab(0,0,240,HDR_H,0);
+    CHECK(tw(&FONT_T,label)<=36);cv_text(132,4,&FONT_T,label,ink);
+    for(int y=0;y<HDR_H;y++)for(int x=0;x<36;x++)
+        if(actual[y*36+x]!=cv_px[y*240+132+x])return 0;
+    return 1;
+}
 static void picture_rule_cases(void)
 {
     screen(V_HOME,PART_909,0); seq.playing=seq.song_on=seq.chain_a=seq.chain_b=0;
@@ -351,8 +364,8 @@ static void picture_rule_cases(void)
     seq_t before=seq;
     for(int theme=0;theme<=5;theme+=5){
         palette_set(theme); ui.msg_until=0;
-        /* Preserve 8be's complete position badge. Actual HOME plates show the
-         * saved content; the actual PART header shows the queued content. */
+        /* HOME plates retain their content glyphs. The approved R22 header
+         * names current and queued patterns explicitly. */
         ui.view=V_HOME; ui.pbank=(NPAT-1)/16; build_pages(); draw_main();
         int pos=0; while(pos<NPARTS && part_at(pos)!=PART_909)pos++;
         CHECK(pos<NPARTS);
@@ -362,32 +375,40 @@ static void picture_rule_cases(void)
             CHECK(fb[(MAIN_Y+4+pos*4+row)*240+9+slot*14+4+i]==swap16(ink));
         }
         ui.view=V_PART; build_pages(); draw_header();
-        for(int i=0;i<8;i++)for(int y=8;y<=10;y++){
-            uint16_t queued=(0x02u&(1u<<i))?dim(PART_COL[PART_909],9):SOUND_FACE;
-            CHECK(fb[y*240+141+i]==swap16(queued));
-        }
+        char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);
+        snprintf(pending,sizeof pending,"P%d>%d",NPAT,NPAT-1);
+        CHECK(header_pattern_matches(pending,C_AMB));
+        CHECK(!header_pattern_matches(current,C_AMB));
+        CHECK(!header_pattern_matches(pending,C_WHITE));
         uint32_t idle=picture_pixels(fb,132,0,40,HDR_H);
         now_ms+=1000; ui.frame+=32; draw_header();
         CHECK(picture_pixels(fb,132,0,40,HDR_H)==idle);
-        seq.pcue[PART_909]=0xff; draw_header(); uint32_t no_cue=picture_pixels(fb,132,0,40,HDR_H);
+        seq.pcue[PART_909]=0xff; draw_header(); CHECK(header_pattern_matches(current,C_WHITE)); uint32_t no_cue=picture_pixels(fb,132,0,40,HDR_H);
         seq.pcue[PART_909]=NPAT-1; draw_header();
         CHECK(picture_pixels(fb,132,0,40,HDR_H)==no_cue);
         seq.pcue[PART_909]=NPAT-2;
-        seq.playing=1; eng_step[TRK_DRUM]=0; draw_header(); uint32_t step=picture_pixels(fb,132,6,6,7);
-        eng_step[TRK_DRUM]=1; draw_header();
-        CHECK(picture_pixels(fb,132,6,6,7)!=step);
+        uint8_t prior_phase=seq.metro_view;
+        seq.playing=1;seq.metro_view=0;eng_step[TRK_DRUM]=0;draw_header();
+        CHECK(fb[9*240+169]==swap16(C_DIM));
+        uint32_t step=picture_pixels(fb,168,4,9,11);
+        eng_step[TRK_DRUM]=1;now_ms+=1000;draw_header();
+        CHECK(picture_pixels(fb,168,4,9,11)==step); /* audio phase, not track step/wall time */
+        seq.metro_view=1;draw_header();CHECK(fb[9*240+169]==swap16(C_WHITE));
+        seq.metro_view=5;draw_header();CHECK(fb[9*240+169]==swap16(C_HI));
+        seq.metro_view=prior_phase;
         seq.playing=0;
     }
     CHECK(!memcmp(saved,&proj,sizeof proj)); CHECK(!memcmp(&before,&seq,sizeof seq)); free(saved);
     palette_set(proj.set.palette);
-    /* The current header uses the same bounded triangle, lit by the actual
-     * clock phase rather than replacing it with an old stop-square helper. */
+    /* The current header uses this bounded triangle while playing; its
+     * stopped square remains static regardless of audio clock phase. */
     cv_begin(240,HDR_H,C_BLACK); play_icon(10,4,C_DIM);
     for(int y=0;y<HDR_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK))CHECK(x>=10&&x<19&&y>=4&&y<15);
     screen(V_HOME,PART_909,0); ui.msg_until=0; seq.metro_view=0; draw_header();
-    uint32_t stopped=picture_pixels(fb,217,4,9,11);
+    for(int y=7;y<12;y++)for(int x=170;x<175;x++)CHECK(fb[y*240+x]==swap16(SOUND_GRAY));
+    uint32_t stopped=picture_pixels(fb,168,4,9,11);
     seq.metro_view=1; draw_header();
-    CHECK(picture_pixels(fb,217,4,9,11)!=stopped); seq.metro_view=0;
+    CHECK(picture_pixels(fb,168,4,9,11)==stopped); seq.metro_view=0;
     for(int p=PART_303A;p<=PART_303B;p++){
         screen(V_PART,p,0); uint8_t page=cur_page(),view=ui.view,part=ui.part;
         cv_begin(240,KNOB_H,C_BLACK); int end=matrix_row_hint(7,50,C_HI);
@@ -404,9 +425,11 @@ static void picture_rule_cases(void)
         for(int x=row_x;x<row_x+10;x++)CHECK(fb[(KNOB_Y+74)*240+x]==swap16(C_AMB));
         ui.held_step=-1;
         seq.ppat[p]=NPAT-1;seq.pcue[p]=NPAT-2;draw_header();
-        CHECK(fb[9*240+137]==swap16(C_AMB));
-        seq.pcue[p]=0xff;draw_header();CHECK(fb[9*240+137]==swap16(SOUND_FACE));
-        seq.pcue[p]=NPAT-1;draw_header();CHECK(fb[9*240+137]==swap16(SOUND_FACE));
+        char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);
+        snprintf(pending,sizeof pending,"P%d>%d",NPAT,NPAT-1);
+        CHECK(header_pattern_matches(pending,C_AMB));
+        seq.pcue[p]=0xff;draw_header();CHECK(header_pattern_matches(current,C_WHITE));
+        seq.pcue[p]=NPAT-1;draw_header();CHECK(header_pattern_matches(current,C_WHITE));
     }
     /* Preserve the exact direction text for lists/Help; the strip's existing
      * pictures distinguish the same four states without duplicate readouts. */
