@@ -245,3 +245,9 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Integ must apply minimal two-file runtime patch over its hooks and measure exact combined native resources. All full checklist lines remain unqualified. Next: independent combined qualification, remaining screen/theme/live coverage; reserved owner decisions remain unimplemented.
 - Independent final reviewer verified both 1,753-input manifests, all receipts, equivalent live images and direct cold-idle byte equality; 113,424-check run remains producer evidence, not duplicate independent execution.
 - Publication stalled in interrupted multi-batch tree upload, before any commit/ref action. Recovery read live ref and last confirmed immutable tree, resumed missing tree entries and uses one expected-head CAS update; bounded calls and persisted object IDs prevent uncertain duplicate pushes.
+
+## Dispatch observer closure hardened
+- Existing dispatch evidence now verifies all original inputs plus exact instrumented UI/harness hashes after execution, not only before compile. Eight source/negative tests PASS; final actual replay preserves19route IDs with honest substituted clip/PADCAL NOT_RUN and coverageComplete=false.
+- Final wrapper keeps the existing path-list schema and adds hashes separately. Initial reduced-input staging lacked unused build.sh; isolated complete staging repaired it, not a production failure. Executed UI equals af56, full fixture closure pinned separately; no whole-checkout or F1 qualification inferred.
+- Production remains af56 and combined2d86 is under independent qualification. Next: remaining source-derived screen/state inventory and gate findings; owner-reserved designs remain pending.
+- Battery theme coverage: 120 actual R_PALETTE/part/level states added; original suite retained, total9,897checksPASS. Source roles/outline/cells tested, not whole contrast or toast/calibration completion. No production edits.

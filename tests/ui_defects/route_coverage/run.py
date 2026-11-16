@@ -15,6 +15,13 @@ BRANCHES={
  'project-transfer-header':'if (project_busy) {'}
 ROUTES=FUNCTIONS+list(BRANCHES)
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def verify_closure(root, original, instrumented):
+    """Bind every original input and exact generated observer through execution."""
+    for name, digest in {**original, **instrumented}.items():
+        path=root/name
+        if not path.is_file() or sha(path)!=digest:
+            raise ValueError('Source closure changed: '+name)
+
 def instrument(ui,drum):
     if ui.count('#include "x0x.h"')!=1:raise ValueError("Expected one UI include anchor")
     ui=ui.replace('#include "x0x.h"','#include "x0x.h"\nstatic unsigned fwui_route_hits[%d];'%len(ROUTES),1)
@@ -75,9 +82,12 @@ def main():
     expected={'firmware/src/app/ui.c','firmware/src/app/ui_drum_voice.inc'}
     changed={path for path,digest in inputs.items() if sha(frozen/path)!=digest}
     if changed!=expected:raise ValueError('Unexpected instrumentation mutations: '+str(changed))
+    instrumented={name:sha(frozen/name) for name in expected|{'tests/host/ui_route_coverage_test.c'}}
+    verify_closure(frozen,inputs,instrumented)
     env=__import__('os').environ.copy();env.update(SMC_UI_TEST_FILE='tests/host/ui_route_coverage_test.c',SMC_UI_OUT=str(out/'host'))
     with (out/'first-run.log').open('w') as log:
         result=subprocess.run(['sh','tests/host/smc_ui_test.sh'],cwd=frozen,env=env,stdout=log,stderr=subprocess.STDOUT)
+    verify_closure(frozen,inputs,instrumented)
     records={int(i):int(n) for i,n in re.findall(r'^ROUTE (\d+) (\d+)$',(out/'first-run.log').read_text(),re.M)}
     if result.returncode or set(records)!=set(range(len(ROUTES))):raise ValueError('Renderer/coverage producer failed; retain first-run.log')
     rows=[{'id':name,'calls':records[i],'status':'OBSERVED' if records[i] else 'NOT_RUN'} for i,name in enumerate(ROUTES)]
@@ -86,6 +96,6 @@ def main():
             row['status']='NOT_RUN';row['reason']='Device renderer is substituted in this host fixture; route entry is not renderer evidence.'
     report={'schema':'dnbox-render-dispatch-coverage/1','coverageComplete':False,'routes':rows,
         'sourceInputManifestSHA256':sha(out/'source-inputs.json'),'sourceUI_SHA256':inputs['firmware/src/app/ui.c'],
-        'instrumentedFiles':sorted(expected),'limits':'Function/branch entry counts only. No pixel, style, complete state inventory, hardware or lane qualification. No PNGs saved.'}
+        'instrumentedFiles':sorted(expected),'instrumentedSHA256':instrumented,'sourceClosureVerifiedAfterRun':True,'limits':'Function/branch entry counts only. No pixel, style, complete state inventory, hardware or lane qualification. No PNGs saved.'}
     (out/'report.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 if __name__=='__main__':main()

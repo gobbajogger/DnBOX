@@ -2,8 +2,31 @@
 /* Actual production header, including cache invalidation on battery changes. */
 #define SMC_UI_MAIN retained_fixture_main
 #include "smc_ui_test.c"
+static void battery_theme_transitions(void)
+{
+    const int parts[]={PART_909,PART_808,PART_303A,PART_303B,PART_BRK};
+    unsigned states=0;
+    for(unsigned part=0;part<sizeof parts/sizeof parts[0];part++) {
+        setup(V_PART,parts[part]);
+        for(int theme=0;theme<6;theme++) {
+            pref_set(PR(R_PALETTE,0,0,0),theme);
+            CHECK(proj.set.palette==theme);
+            for(int level=0;level<4;level++) {
+                host_battery_level=level;now_ms+=50;ui_frame();
+                CHECK(ui.view==V_PART && ui.part==parts[part]);
+                CHECK(fb[5*240+220]==swap16(SOUND_GRAY));
+                for(int cell=0;cell<3;cell++)for(int y=7;y<11;y++)for(int x=221+cell*4;x<224+cell*4;x++)
+                    CHECK(fb[y*240+x]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+                states++;
+            }
+        }
+    }
+    CHECK(states==120);
+    printf("PASS battery real theme transitions: %u part/theme/level states\n",states);
+}
 int main(void)
 {
+    battery_theme_transitions();
     const int levels[]={3,0,1,2,3,2,1,0,-1,4};
     for(int view=0;view<NVIEWS;view++) {
         if(view==V_GLO) continue; /* global is a list overlay, covered separately */
