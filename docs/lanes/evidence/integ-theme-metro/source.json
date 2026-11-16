@@ -1,0 +1,48 @@
+{
+  "base": "4e3b2647057e16c86ed49ef4a33a7a4c625b05a4",
+  "donor": "16af848e23eec924d5549f5049ad5055405a2ee5",
+  "runtimeDonor": "34ad78a76f963276de31de50c85f08a20af01f8a",
+  "scope": "producer combined affected host checks; exact new native and complete gates NOT_RUN",
+  "files": {
+    "firmware/src/app/ui.c": "1ce241f8bd872dc7efc63342f320b098ed088bfa66589ed8fcd5dd942accbd95",
+    "firmware/src/app/ui_drum_voice.inc": "55038d61d8c7e68e7421866b69e8245011c883fc9ca2d3dd806123c5f97091e5",
+    "tests/run_tests.sh": "191ce98250df752756d93f5e4d2bf557d9bad8f515390823c75a8308eb4cf2cf",
+    "tests/host/fwui_light_theme_sweep.c": "d2b0189212a897d0f291d44ae282dcf7b7cb5d2492f300e76c30ef8203dcd8c8",
+    "tests/host/smc_remainder_test.c": "5e449ebdce301e6ee04517c76ace577339e695795c983189433a0d357f11d680",
+    "tests/host/composed_ui_identity_test.c": "f1bec5bfe576a5c9dfbf24e1c636e5c7b70bdf3284e6f6fb9ecbd8e1cbd97bd8",
+    "tests/integ_ui_selector_policy_test.py": "217724adfb21cc426ad25b36323ee58c850797442882e7bc33902050c2506744"
+  },
+  "logs": [
+    {
+      "file": "remainder.log",
+      "rawSHA256": "db030a0778f26901568f289d1229f9541394f67944e26a8b83abcf60b64c3f9a",
+      "publicSHA256": "23e8a36263c81299d9643a899de6aafddf54f85f23b97b7051325f2790769fdc",
+      "exit": 0
+    },
+    {
+      "file": "light.log",
+      "rawSHA256": "3d6eb7bf63b8ca26b1d563713350984563e447da8167d68d3d3a37534706d772",
+      "publicSHA256": "71b4e4c2c61ade5ec79ce61e442fbd52cdf96e284d81e278d393a5da44883f24",
+      "exit": 0
+    },
+    {
+      "file": "header.log",
+      "rawSHA256": "1dbdd0954d2eaba462505b2b754185767358372c01ef14575afcbd4982717091",
+      "publicSHA256": "d4c58b0b7ebbf7aa3837a2525b5eb3d234ff744da374c9fcf0f5b296b8cc6cd4",
+      "exit": 0
+    },
+    {
+      "file": "clip.log",
+      "rawSHA256": "d93ce126fc0dc7aae24202d2a0aa937fb4bcd509f639217ee2a3bcbfcec741b1",
+      "publicSHA256": "d93ce126fc0dc7aae24202d2a0aa937fb4bcd509f639217ee2a3bcbfcec741b1",
+      "exit": 0
+    },
+    {
+      "file": "selectors.log",
+      "rawSHA256": "a7dbb9bfb061f5c10c932c1bf88e2f49f42869d366966c8ddce7ce8e3f46ab90",
+      "publicSHA256": "a7dbb9bfb061f5c10c932c1bf88e2f49f42869d366966c8ddce7ce8e3f46ab90",
+      "exit": 0
+    }
+  ],
+  "registrationScope": "Final runner registration independently exercised by four focused policy tests after unchanged production replay; no duplicate full host or runtime claim."
+}

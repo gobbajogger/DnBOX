@@ -5573,7 +5573,7 @@ static UI_DRAW void draw_header(void)
         if(clip_mode || pickup) {
             uint8_t phase=seq.metro_view;
             play_icon(pickup?177:168,4,!phase?C_DIM:phase<=4u?C_WHITE:C_HI);
-        } else if(seq.playing) play_icon(168,4,C_WHITE);
+        } else if(seq.playing) play_icon(168,4,!seq.metro_view?C_DIM:seq.metro_view<=4u?C_WHITE:C_HI);
         else cv_rect(170,7,5,5,SOUND_GRAY);
         if(ui.rec) dot(pickup?190:206,9,3,RGB(255,50,50));
         dv_header_battery(219, 5);

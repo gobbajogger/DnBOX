@@ -597,7 +597,7 @@ static UI_DRAW void draw_drum_voice(int band)
             if (active) {
                 int ay = y - off;
                 if (ay + ah > 0 && ay < bh)
-                    rbox(6, ay, 228, ah, 9, RGB(36,48,54));
+                    rbox(6, ay, 228, ah, 9, ui_theme_light?SOUND_SELECT:RGB(36,48,54));
             }
             /* labels */
             {

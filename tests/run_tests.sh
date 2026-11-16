@@ -86,6 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
+    fwui-light-theme|ui-song-text|ui-list-unit) TEST_CLASS=G ;;
     drum909-tanh-pair|remote-scalar|remote-events|remote-actual-core) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
@@ -306,6 +307,7 @@ run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c
 run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
 run composed-ui-identity sh tests/host/composed_ui_identity_test.sh
+run fwui-light-theme env SMC_UI_TEST_FILE=tests/host/fwui_light_theme_sweep.c SMC_UI_OUT=build/host/fwui-light-theme sh tests/host/smc_ui_test.sh
 run drone-slot env SMC_UI_TEST_FILE=tests/host/drone_slot_test.c SMC_UI_OUT=build/host/drone-slot sh tests/host/smc_ui_test.sh
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
@@ -605,7 +607,9 @@ run smk-clip-ble-clear sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/
 run smk-clip-keys sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_clip_keys_test tests/smk_clip_keys_test.c firmware/src/app/smk_clip_arp_share.c && $OUT/smk_clip_keys_test"
 run smk-chord-recognize sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_chord_recognize_test tests/smk_chord_recognize_test.c && $OUT/smk_chord_recognize_test"
 if [ "$PIL_SKIP" = 1 ]; then not_run smk-clip-chord-display Pillow; else run smk-clip-chord-display sh tests/host/smk_clip_chord_display_test.sh; fi
-run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # CLP-75: no top bar on the stage page, help line at the bottom
+run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # field/keybed geometry; removed explainers stay absent
+run smk-ck-page-layout-negative python3 tests/smk_ck_page_layout_negative_test.py
+run integ-ui-selector-policy python3 tests/integ_ui_selector_policy_test.py
 run smk-arrows sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_arrows_test tests/smk_arrows_test.c && $OUT/smk_arrows_test"   # < > route and hold repeat
 run smk-arrows-owner python3 tests/smk_arrows_owner_test.py   # one owner for each < > press in clip mode (CLP-27)
 run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h --gamma-h $OUT/apc40_pad_gamma_gen.h && \
