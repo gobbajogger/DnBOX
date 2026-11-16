@@ -317,12 +317,23 @@ def build_app():
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
         objs.append(o)
     if superj6 == "1":
-        # Off by default, so a normal image stays byte-identical. These objects are
-        # the sample-free resynthesis only: no libm, no heap, no C++ guards.
-        units.append(("cc", *o2, "-DSJ6_STANDIN_EMBED", "-c", FW / "src/dsp/sj6_resynth.c", "-o", OUT / "o2/sj6_resynth.o"))
-        objs.append(OUT / "o2/sj6_resynth.o")
-        units.append(("cc", *o2, "-c", FW / "src/dsp/superj6_link.c", "-o", OUT / "o2/sj6_link.o"))
-        objs.append(OUT / "o2/sj6_link.o")
+        # Off by default, so a normal image stays byte-identical. The link is the
+        # analytic voice, the integer filters/envelopes/timing and the resynthesis.
+        # No libm, no heap, no C++ guards.
+        cpp = ["-std=c++17", "-fno-exceptions", "-fno-rtti", "-fno-threadsafe-statics", "-fno-use-cxa-atexit"]
+        fma = SRC / "experiments/superj6-original-reference-20261115/sampler/DunneCore/Common/fma32.c"
+        extra = [
+            ("cc", *o2, "-DSJ6_STANDIN_EMBED", "-c", FW / "src/dsp/sj6_resynth.c", "-o", OUT / "o2/sj6_resynth.o"),
+            ("cc", *o2, "-c", FW / "src/dsp/sj6_sinf.c", "-o", OUT / "o2/sj6_sinf.o"),
+            ("cc", *o2, "-c", FW / "src/dsp/sj6_analytic.c", "-o", OUT / "o2/sj6_analytic.o"),
+            ("cc", *o2, "-c", fma, "-o", OUT / "o2/sj6_fma32.o"),
+            ("cc", *o2, *cpp, "-c", FW / "src/dsp/sj6_f64.cpp", "-o", OUT / "o2/sj6_f64.o"),
+            ("cc", *o2, *cpp, "-c", FW / "src/dsp/sj6_blocks.cpp", "-o", OUT / "o2/sj6_blocks.o"),
+            ("cc", *o2, "-c", FW / "src/dsp/superj6_link.c", "-o", OUT / "o2/sj6_link.o"),
+        ]
+        for unit in extra:
+            units.append(unit)
+            objs.append(unit[-1])
     tc_all(*units)
     elf = OUT / "x0x.elf"
     # unreferenced functions (each in its own section: -ffunction-sections) are dropped: the DSP keeps
