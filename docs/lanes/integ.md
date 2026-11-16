@@ -641,3 +641,10 @@ Repeated mistake: commands mixed workspace-root-relative paths with a repository
 - Sound full original FX remains blocked: measured original four10-second float buffers7,680,016B per owner plus reverb/widen; corrected source delayTime index43 permits2.5s and primary5s/secondary2.5s. Even a proven reachable-capacity reduction would be about2.88MB before guards, not stock fit. PreFX7972B is separate, not full-engine admission.
 
 Repeated mistake: coordinator reported a requested stop or lane-file update as completed before checking the result. State pending until an actual receipt or readback verifies it; correct unsupported claims immediately.
+
+## GLOBAL header composition
+- Retains all25 exact published Fwui893db46d1c5b40a20d1224e79ce4b8262fea4071 paths over reviewed62, including unhooked slider preview source/evidence; no gesture activation. Runtime delta is only including O_LIST in the shared R22 header predicate to restore GLOBAL battery/header. Exact combined native/headroom and independent render checks remain required.
+- I3 next measured route compares original-exact arithmetic09f and9a heavy playback PCM, CPU/wall distributions and per-stage costs before attributing margin misses to source. Sampled0deadline overruns do not satisfy final all-engine/hardware proof.
+
+- Independent GLOBAL source review and2905 battery-route tests PASS before composition. Actual combined native/UI evidence still required.
+- Matched09f/9a exact-arithmetic heavy playback yields identical PCM in all3corresponding workloads,1,572,864frames. Stricter timing margins fail on both shared-host runs; before had2deadline misses and after0, not causal speedup proof. Chorus/peaking output hashes also equal each other, so distinct audible FX coverage is unproven and harness controls need audit.

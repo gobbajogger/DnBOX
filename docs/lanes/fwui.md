@@ -57,3 +57,20 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 
 ## Gate fixture repair
 - Independent baseline found clip-chord display fixture omitted font_bitmap_width while extracted production caps() now requires it. Fixture now extracts the unchanged production helper rather than reverting compressed-font behavior. Corrected actual run:7049 checks/7050 captured chord draws PASS. Evidence:r22-candidate/clip-chord-fixed.log. Production code unchanged by this repair.
+
+## Independent review and thin-lane preview
+- Independent reviewer replayed battery2892, coordinate1651, parameter pads7096 and clip-chord7049 checks successfully. Independent saved-trace evaluation confirms45drum states/checks1-4/zero overlaps, not a fresh whole-UI run or Review10/10.
+- Final b6 native runtime rerun in isolated tree:Elite2444B/Pro2456B XIP free; BSS96560; pool margin172 before integ fix. These native inputs unchanged through62e71.
+- Isolated F6 read-only adapter/renderer preview:1295 assertions PASS,20native240x240 captures. Uses existing step/motion values, preserves four knob controls by replacing only footer strip. NOT connected to production input/render path; no F6 delivery claim. BREAK velocity explicitly unavailable, not mislabeled Level.
+- Owner decision pending for SEL+SELECT lane switch; no mapping added before answer. Integ owns authentic BREAK velocity support. Preview code and captures under docs/evidence/fwui/step-lane-preview/.
+
+## Mixer formatter handoff
+- Exported exact target5 LEVEL/REV/DLY/PAN raw0..127 values for Remote from pref_value_of, avoiding JavaScript approximations of fm_log2f rounding. Existing CUT descriptor is also retained as source data, not a newly invented UI control. All five part voices share this formatter. docs/evidence/fwui/formatter/mixer.json pins production65a240 and source SHA256; no runtime admission claim.
+
+## Reachable inventory correction
+- Corrected inventory harness:bare V_GLO is not a reachable global screen; replaced5 invalid bare setups with42 real GLOBAL index/section row states via production entry/list routing. Captured172 ordinary/global native states. Historical135 capture is retained, not relabeled.
+- New source-derived inventory schema/pinned test blob at docs/evidence/fwui/inventory-routes/manifest.json. Four render archives retain all172 PNGs. coverageComplete=false:alternate engine pages, other overlays/transients and hardware clip/PADCAL remain NOT_RUN. No F1/F2 acceptance claimed.
+
+## Global header correction
+- Actual global inventory exposed old header path on O_LIST:missing common R22 battery/style. Expanded production battery test first failed on GLOBAL. R22 header now also handles list overlays; corrected2905 assertions PASS. Other modal/help and full all-screen visual checks remain open.
+- Fresh172-state replay confirms only42 GLOBAL images changed;130 ordinary states pixel-identical. Both native builds pass XIP reserve:Elite2412/Pro2424B free; BSS96560; pool remains172-margin until integ fix composition. No full Local/Review acceptance.

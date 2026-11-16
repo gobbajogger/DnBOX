@@ -9,13 +9,14 @@ static void json_string(const char *s)
 int main(void)
 {
     setup(V_PART,PART_303A);
-    for(int voice=0;voice<2;voice++) {
-        int bank=engine_bass_bank(voice);
-        CHECK(bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_MIAMI);
-        printf("FORMATTER:{\"schema\":\"dnbox-production-formatter/1\",\"bank\":%d,\"engine\":\"%s\",\"voice\":%d,\"target\":%d,\"preset\":%d,\"runtimeAdmission\":\"NOT_ADMITTED\",\"state\":\"boot factory preset\",\"controls\":[",bank,bank==ORIGINAL_SOUND_CHICAGO?"Chicago":"Miami",voice,T_303,engine_bass_preset_index(voice));
+    for(int n=0;n<3;n++) {
+        int mix=n==2,voice=mix?0:n,target=mix?T_MIX:T_303;
+        int bank=mix?-1:engine_bass_bank(voice);
+        CHECK(mix || bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_MIAMI);
+        printf("FORMATTER:{\"schema\":\"dnbox-production-formatter/1\",\"bank\":%d,\"engine\":\"%s\",\"voice\":%d,\"target\":%d,\"preset\":%d,\"runtimeAdmission\":\"NOT_ADMITTED\",\"state\":\"boot factory preset\",\"controls\":[",bank,mix?"Mixer":bank==ORIGINAL_SOUND_CHICAGO?"Chicago":"Miami",voice,target,mix?-1:engine_bass_preset_index(voice));
         int first=1;
         for(int parameter=0;parameter<128;parameter++) {
-            pref_t r=PR(R_ENG,T_303,voice,parameter); const x0x_param_t *d=pref_desc(r);
+            pref_t r=PR(R_ENG,target,voice,parameter); const x0x_param_t *d=pref_desc(r);
             if(!d)continue;
             if(!first)putchar(',');first=0;
             printf("{\"slot\":%d,\"name\":",parameter);json_string(d->name);

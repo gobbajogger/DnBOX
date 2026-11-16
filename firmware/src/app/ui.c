@@ -5469,7 +5469,7 @@ static UI_DRAW void draw_header(void)
     }
     if (!pickup || (int32_t)(ui.msg_until - plat_ms()) <= 0)
         ui.msg_until = pickup = 0;
-    if (!pickup && ui.overlay==O_NONE && !ui.help
+    if (!pickup && (ui.overlay==O_NONE || ui.overlay==O_LIST) && !ui.help
 #if BOARD_SMK37
         && !smk_clip_mode_on()
 #endif

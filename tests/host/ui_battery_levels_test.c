@@ -21,6 +21,12 @@ int main(void)
         host_battery_level=level;now_ms+=50;ui_frame();
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    setup(V_HOME,PART_303A);button_tap(B_GLO);
+    CHECK(ui.view==V_GLO && ui.overlay==O_LIST);
+    for(int level=0;level<4;level++) {
+        host_battery_level=level;now_ms+=50;ui_frame();
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+    }
     host_battery_level=3;
     printf("PASS four battery levels and header invalidation: %u checks\n",checks);
     return 0;

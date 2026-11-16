@@ -1,0 +1,70 @@
+{
+  "before": "09f251eedca1b45279b1da5853de84f2be471ae4",
+  "after": "9a38fc9395ab15ad072b1929df945e5a54400f3b",
+  "scope": "same compiler/flags/workloads, separate elapsed runs on shared host; not controlled target timing or causal speedup proof",
+  "workloads": {
+    "plain": {
+      "before": {
+        "pcm_sha256": "762537f19a9fbd74a7dc45635def93fb9a51881738aa80db65cf3384c5687b8d",
+        "cpu_median_ns": 908132.0,
+        "cpu_p99_ns": 3615215.0,
+        "cpu_peak_ns": 8706027.0,
+        "cpu_deadline_misses": 0,
+        "wall_deadline_misses": 0,
+        "stricter_margins_pass": false
+      },
+      "after": {
+        "pcm_sha256": "762537f19a9fbd74a7dc45635def93fb9a51881738aa80db65cf3384c5687b8d",
+        "cpu_median_ns": 1099336.5,
+        "cpu_p99_ns": 2833940.0,
+        "cpu_peak_ns": 6311871.0,
+        "cpu_deadline_misses": 0,
+        "wall_deadline_misses": 0,
+        "stricter_margins_pass": false
+      },
+      "pcm_bit_exact": true
+    },
+    "chorus": {
+      "before": {
+        "pcm_sha256": "e68998ae0c4f49446403d9a1a0e261f5dc0326956070b759b7e0276a09856ea1",
+        "cpu_median_ns": 935226.0,
+        "cpu_p99_ns": 4677806.0,
+        "cpu_peak_ns": 12082877.0,
+        "cpu_deadline_misses": 1,
+        "wall_deadline_misses": 1,
+        "stricter_margins_pass": false
+      },
+      "after": {
+        "pcm_sha256": "e68998ae0c4f49446403d9a1a0e261f5dc0326956070b759b7e0276a09856ea1",
+        "cpu_median_ns": 1005725.5,
+        "cpu_p99_ns": 3408700.0,
+        "cpu_peak_ns": 5350731.0,
+        "cpu_deadline_misses": 0,
+        "wall_deadline_misses": 0,
+        "stricter_margins_pass": false
+      },
+      "pcm_bit_exact": true
+    },
+    "peaking": {
+      "before": {
+        "pcm_sha256": "e68998ae0c4f49446403d9a1a0e261f5dc0326956070b759b7e0276a09856ea1",
+        "cpu_median_ns": 928889.0,
+        "cpu_p99_ns": 4888072.0,
+        "cpu_peak_ns": 12146284.0,
+        "cpu_deadline_misses": 1,
+        "wall_deadline_misses": 1,
+        "stricter_margins_pass": false
+      },
+      "after": {
+        "pcm_sha256": "e68998ae0c4f49446403d9a1a0e261f5dc0326956070b759b7e0276a09856ea1",
+        "cpu_median_ns": 981405.0,
+        "cpu_p99_ns": 3204483.0,
+        "cpu_peak_ns": 7418955.0,
+        "cpu_deadline_misses": 0,
+        "wall_deadline_misses": 0,
+        "stricter_margins_pass": false
+      },
+      "pcm_bit_exact": true
+    }
+  }
+}
