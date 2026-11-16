@@ -648,3 +648,8 @@ Repeated mistake: coordinator reported a requested stop or lane-file update as c
 
 - Independent GLOBAL source review and2905 battery-route tests PASS before composition. Actual combined native/UI evidence still required.
 - Matched09f/9a exact-arithmetic heavy playback yields identical PCM in all3corresponding workloads,1,572,864frames. Stricter timing margins fail on both shared-host runs; before had2deadline misses and after0, not causal speedup proof. Chorus/peaking output hashes also equal each other, so distinct audible FX coverage is unproven and harness controls need audit.
+
+## Verified containment transport correction
+- Complete-graph git merge-base remains first. If unrelated historical donor objects are absent, fallback hashes every raw commit on a first-parent path and succeeds only upon reaching the exact freshly pinned consolidated base. Missing/invalid/corrupt first-parent objects fail. No invented ancestry/shallow boundary or no-loss waiver.
+- Both fetched symbolic refs and connector exact refs resolve to commit pins; deletion diff failures now fail closed rather than appearing as empty deletion lists. Independent10fixture cases PASS; no full Local qualification implied.
+- Independent exact92bdd native Elite2044/Pro2056B XIP free, pool836B reserve and BSS1080B free; actual battery2905checks PASS. This gate-only successor preserves runtime inputs, not all-final-engine qualification.
