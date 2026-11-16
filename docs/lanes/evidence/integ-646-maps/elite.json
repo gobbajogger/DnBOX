@@ -1,0 +1,12 @@
+{
+  "model": "elite",
+  "wrapperOnlyAddsLinkMap": true,
+  "elfBeforeSHA256": "10c24d0784c3acd8eb41d3caa0be74d55f5c40b3888be6a7dc2b1b32175676fc",
+  "elfAfterSHA256": "10c24d0784c3acd8eb41d3caa0be74d55f5c40b3888be6a7dc2b1b32175676fc",
+  "elfByteIdentical": true,
+  "mapSHA256": "ce04d9a0abf6eafdfc3f9d2bec34630d70096465fbbe61a5297216768169c9cd",
+  "source": "646ac66293d5cc2a04de37ce6dc172f07e572306",
+  "normalizedMapSHA256": "ce04d9a0abf6eafdfc3f9d2bec34630d70096465fbbe61a5297216768169c9cd",
+  "normalization": "Absolute source/toolchain/SDK/generation paths replaced by named placeholders; addresses, lengths and symbols unchanged",
+  "independentReview": "raw map and before/after ELF hashes match independently built exact646 outputs; no new runtime qualification"
+}

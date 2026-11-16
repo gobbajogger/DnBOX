@@ -726,3 +726,13 @@ The first attempted selector invocation used the wrong directory and failed befo
 The exactf910 independent local stress summary and authenticated PCM comparison are now preserved beside the managed comparison. Both sources of timing evidence remain visible; identical tested PCM does not imply identical timing or all-engine correctness.
 
 Final exact fixture replay passes5924C checks and8paired wire exchanges after independent focused source review. Source-hashed receipt and PASS output are in evidence/integ-interleave-result.*. Replay is producer evidence, not an independent duplicate execution.
+
+## Exact linked maps and compact diagnostic catalog
+
+Map-only builds of exact646 completed for both models. The wrapper changes only ld -Map and checks SMK37/model/output; both resulting ELF hashes exactly match the original independently qualified binaries. Independent review checked raw maps and both ELF identities. Normalized public maps retain raw and normalized SHA256 receipts at evidence/integ-646-maps; only absolute path prefixes changed. No firmware/SDK binary is published by this evidence commit.
+
+Standalone unchanged retained protocol native objects measure3024B code/readonly and692B core state (28B host embedded). Against646 XIPfree3240/3252, nominal216/228B remaining already misses1024B reserve before missing glue/catalog/transport. BSS or pool allocation is not established; no linker-GC/dedup credit or native fit is claimed. Exact compiler/source/object hashes are preserved in evidence/integ-protocol-unlinked-size.json.
+
+A test-only table-free sequential-ID decoder matches all326 generated current scalar tuples twice across bank state, rejects invalid IDs without changing output, and leaves whole stored sound/live banks unchanged. Final producer7242C checks plus8wire exchanges pass after independent bounded source review. This avoids a persistent diagnostic row/label table conceptually, but native decoder size/latency and endpoint fit remain unmeasured; IDs are not stable/public/admitted. Production code remains unchanged.
+
+Retains all36 API-hash-verified Fwui448d49d2bab765a6aa3630bbb14ea6fbe3e7d3cf test/evidence paths sinceef70, no runtime changes. Independent input reviews cover clip-key/strip/chord/bounds fixtures only; all unimplemented fullUI requirements stay FAIL/NOT_RUN.

@@ -61,6 +61,40 @@ static void make_actual_catalog(void)
 }
 static const actual_control *lookup_actual(uint16_t id)
 {return id && id<=control_count?&controls[id-1]:0;}
+/* Compact decoder experiment: no persistent row/label table, bank selection,
+ * reads, writes or public-ID admission. Uses current source parameter domains. */
+typedef struct { unsigned target,voice,parameter; int bank; } decoded_actual;
+static int decode_actual(uint16_t id, decoded_actual *out)
+{
+    if(!id || !out)return 0;
+    unsigned ordinal=0;
+    for(unsigned t=0;t<NTARGETS;t++)if(t!=T_303)
+        for(unsigned v=0;v<(unsigned)engine_nvoices(t);v++)
+            for(unsigned p=0;p<(unsigned)engine_nparams(t,v);p++)
+                if(++ordinal==id) {*out=(decoded_actual){t,v,p,-1};return 1;}
+    for(unsigned bank=ORIGINAL_SOUND_CHICAGO;bank<=ORIGINAL_SOUND_MIAMI;bank++)
+        for(unsigned v=0;v<NBASS;v++)
+            for(unsigned p=0;p<original_sound_count(bank);p++) {
+                if(original_sound_is_performance(bank,p))continue;
+                if(++ordinal==id) {*out=(decoded_actual){T_303,v,p,(int)bank};return 1;}
+            }
+    return 0;
+}
+static void test_compact_decode(void)
+{
+    sound_t saved=proj.sound;int banks[NBASS];
+    for(unsigned v=0;v<NBASS;v++)banks[v]=engine_bass_bank(v);
+    for(unsigned i=0;i<control_count;i++) {
+        decoded_actual d;const actual_control *c=&controls[i];CHECK(decode_actual(c->id,&d));
+        CHECK(d.target==c->target && d.voice==c->voice && d.parameter==c->parameter && d.bank==c->bank);
+    }
+    decoded_actual sentinel={999,999,999,999}, d=sentinel;
+    CHECK(!decode_actual(0,&d) && !memcmp(&d,&sentinel,sizeof d));
+    CHECK(!decode_actual((uint16_t)(control_count+1),&d) && !memcmp(&d,&sentinel,sizeof d));
+    CHECK(!decode_actual(65535,&d) && !memcmp(&d,&sentinel,sizeof d));
+    CHECK(!decode_actual(1,0));CHECK(!memcmp(&saved,&proj.sound,sizeof saved));
+    for(unsigned v=0;v<NBASS;v++)CHECK(banks[v]==engine_bass_bank(v));
+}
 static int read_actual(void *ctx,uint16_t id,uint8_t *kind,uint32_t *value)
 {
     (void)ctx;const actual_control *c=lookup_actual(id);
@@ -162,6 +196,7 @@ int main(int argc,char **argv)
     if(argc==2 && !strcmp(argv[1],"--serve"))return serve_actual();
     if(argc==2 && !strcmp(argv[1],"--catalog"))return dump_actual_catalog();
     CHECK(argc==1);
+    test_compact_decode();
     dnr2_command c={0};memcpy(c.unit_high,high,sizeof high);c.unit=1;c.client=7;c.request=1;c.version=2;c.op=DNR2_OPEN;
     dnr2_reply r=transact(&c);CHECK(r.status==DNR2_OK);c.epoch=r.epoch;
     c.request++;c.op=DNR2_SET;c.revision=r.revision;c.control=(uint16_t)makeup_id;c.value=23;
@@ -227,6 +262,7 @@ int main(int argc,char **argv)
         }
     }
     CHECK(actual_edits==978 && inactive_reads==72);
+    test_compact_decode();
     printf("PASS actual scalar catalog: %u controls, %u protocol edits, %u inactive bank reads rejected\n",control_count,actual_edits,inactive_reads);
     printf("PASS actual app/core transaction: %u checks; actual generated scalar table; no endpoint admission\n",checks);
     return 0;

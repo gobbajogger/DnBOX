@@ -1,0 +1,706 @@
+In file included from tests/host/../../host/x0x_host.c:339,
+                 from tests/host/smc_ui_test.c:8,
+                 from tests/host/ui_overlay_inventory.c:4:
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘pref_set_impl’:
+tests/host/../../host/../firmware/src/app/ui.c:820:57: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+  820 |     case R_MIDICH: seq.ch[r.a % NPARTS] = (uint8_t)(v ? v - 1 : SEQ_CH_OFF); break;
+      |                                                         ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘original_value_text’:
+tests/host/../../host/../firmware/src/app/ui.c:1060:40: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+ 1060 |         put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
+      |                                        ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘prob_turn’:
+tests/host/../../host/../firmware/src/app/ui.c:3100:43: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 3100 |         l->val[s] = (uint8_t)(nv != 100 ? nv : MOT_NONE);
+      |                                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_home’:
+tests/host/../../host/../firmware/src/app/ui.c:6097:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 6097 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:6097:30: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 6097 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                              ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_adsr_inline’:
+tests/host/../../host/../firmware/src/app/ui.c:7524:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7524 |             if(level<0)level=0; if(level>1)level=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:7524:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7524 |             if(level<0)level=0; if(level>1)level=1;
+      |                                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:7545:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7545 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:7545:27: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7545 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_wave’:
+tests/host/../../host/../firmware/src/app/ui.c:7893:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7893 |         if(v>1)v=1; if(v<-1)v=-1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7893:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7893 |         if(v>1)v=1; if(v<-1)v=-1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_gnaw’:
+tests/host/../../host/../firmware/src/app/ui.c:7904:5: warning: this ‘while’ clause does not guard... [-Wmisleading-indentation]
+ 7904 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |     ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c:7904:38: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘while’
+ 7904 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |                                      ^~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘orig_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:7927:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7927 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7927:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7927 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:7930:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7930 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7930:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7930 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7949:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7949 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7949:23: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7949 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |                       ^~
+tests/host/../../host/../firmware/src/app/ui.c:7970:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7970 |         if(f<0)f=0; if(f>1)f=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7970:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7970 |         if(f<0)f=0; if(f>1)f=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8029:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8029 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8029:29: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8029 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |                             ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘dg_tail’:
+tests/host/../../host/../firmware/src/app/ui.c:8090:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8090 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8090:19: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8090 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |                   ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘drum_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:8134:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8134 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8134:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8134 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:8189:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8189 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8189:25: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8189 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |                         ^~
+In file included from tests/host/../../host/../firmware/src/app/ui.c:8274:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc: In function ‘draw_drum_voice’:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:562:44: warning: unused variable ‘dimc’ [-Wunused-variable]
+  562 |     uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
+      |                                            ^~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘ui_frame’:
+tests/host/../../host/../firmware/src/app/ui.c:8943:26: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+ 8943 |     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+      |                          ^~~
+tests/host/../../host/../firmware/src/app/ui.c:8945:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+ 8945 |         if(!visible)peer_scroll.active=0; }
+      |         ^~
+tests/host/../../host/x0x_host.c: In function ‘simulator_main’:
+tests/host/../../host/x0x_host.c:1105:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1105 |             seq.ch[part] = (uint8_t)(chn ? chn - 1 : SEQ_CH_OFF);
+      |                                            ^~~~~~~
+tests/host/smc_ui_test.c: At top level:
+tests/host/smc_ui_test.c:11:9: warning: "CK_FN" redefined
+   11 | #define CK_FN __attribute__((unused))
+      |         ^~~~~
+In file included from tests/host/../../host/../firmware/src/app/smk_clip_arp_share.c:5,
+                 from tests/host/../../host/x0x_host.c:336:
+tests/host/../../host/../firmware/src/app/smk_clip_keys.h:16:9: note: this is the location of the previous definition
+   16 | #define CK_FN __attribute__((X0X_MINSIZE noinline, unused))   /* small code: the app area is almost full */
+      |         ^~~~~
+In file included from tests/host/smc_ui_test.c:57:
+firmware/src/app/smc_mixer.c: In function ‘smc_fx_bus’:
+firmware/src/app/smc_mixer.c:1826:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1826 |     int strip = note < 32u ? (note & 7u) : -1;
+      |                                            ^~
+firmware/src/app/smc_mixer.c: At top level:
+firmware/src/app/smc_mixer.c:2290:5: warning: missing initializer for field ‘pending’ of ‘smc_panic_peer_t’ [-Wmissing-field-initializers]
+ 2290 |     {{0, 0}, 0, -1}
+      |     ^
+firmware/src/app/smc_mixer.c:2287:13: note: ‘pending’ declared here
+ 2287 |     uint8_t pending;              /* single BANK action waits for its physical release */
+      |             ^~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘unit_value’:
+tests/host/../../host/../firmware/src/app/ui.c:1143:25: warning: this statement may fall through [-Wimplicit-fallthrough=]
+ 1143 |     case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
+      |                       ~~^~~~~~~~~~~~~~~~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c:1144:5: note: here
+ 1144 |     case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
+      |     ^~~~
+tests/host/../../host/../firmware/src/app/ui.c: At top level:
+tests/host/../../host/../firmware/src/app/ui.c:3544:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]
+ 3544 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
+      |                                      ^~~~~~~~~~~~~~
+SCREEN {"id":"list-view-00-part-00-voice-00-row-00","view":0,"part":0,"voice":0,"row":0,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-00-voice-00-row-01","view":0,"part":0,"voice":0,"row":1,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-00-voice-00-row-02","view":0,"part":0,"voice":0,"row":2,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-00-voice-00-row-03","view":0,"part":0,"voice":0,"row":3,"rows":4,"width":240,"height":240}
+LIST_COVERAGE view=0 part=0 voice=0 first=0 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-00-part-01-voice-00-row-00","view":0,"part":1,"voice":0,"row":0,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-01-voice-00-row-01","view":0,"part":1,"voice":0,"row":1,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-01-voice-00-row-02","view":0,"part":1,"voice":0,"row":2,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-01-voice-00-row-03","view":0,"part":1,"voice":0,"row":3,"rows":4,"width":240,"height":240}
+LIST_COVERAGE view=0 part=1 voice=0 first=0 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-00-part-02-voice-00-row-00","view":0,"part":2,"voice":0,"row":0,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-02-voice-00-row-01","view":0,"part":2,"voice":0,"row":1,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-02-voice-00-row-02","view":0,"part":2,"voice":0,"row":2,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-02-voice-00-row-03","view":0,"part":2,"voice":0,"row":3,"rows":4,"width":240,"height":240}
+LIST_COVERAGE view=0 part=2 voice=0 first=0 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-00-part-03-voice-00-row-00","view":0,"part":3,"voice":0,"row":0,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-03-voice-00-row-01","view":0,"part":3,"voice":0,"row":1,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-03-voice-00-row-02","view":0,"part":3,"voice":0,"row":2,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-03-voice-00-row-03","view":0,"part":3,"voice":0,"row":3,"rows":4,"width":240,"height":240}
+LIST_COVERAGE view=0 part=3 voice=0 first=0 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-00-part-04-voice-00-row-00","view":0,"part":4,"voice":0,"row":0,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-04-voice-00-row-01","view":0,"part":4,"voice":0,"row":1,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-04-voice-00-row-02","view":0,"part":4,"voice":0,"row":2,"rows":4,"width":240,"height":240}
+SCREEN {"id":"list-view-00-part-04-voice-00-row-03","view":0,"part":4,"voice":0,"row":3,"rows":4,"width":240,"height":240}
+LIST_COVERAGE view=0 part=4 voice=0 first=0 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-01-part-00-voice-00-row-01","view":1,"part":0,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-02","view":1,"part":0,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-03","view":1,"part":0,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-04","view":1,"part":0,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-05","view":1,"part":0,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-07","view":1,"part":0,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-09","view":1,"part":0,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-00-row-10","view":1,"part":0,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=0 first=1 selectable=8 captured=8 unique=8
+SCREEN {"id":"list-view-01-part-00-voice-01-row-01","view":1,"part":0,"voice":1,"row":1,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-02","view":1,"part":0,"voice":1,"row":2,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-03","view":1,"part":0,"voice":1,"row":3,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-04","view":1,"part":0,"voice":1,"row":4,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-06","view":1,"part":0,"voice":1,"row":6,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-08","view":1,"part":0,"voice":1,"row":8,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-01-row-09","view":1,"part":0,"voice":1,"row":9,"rows":10,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=1 first=1 selectable=7 captured=7 unique=7
+SCREEN {"id":"list-view-01-part-00-voice-02-row-01","view":1,"part":0,"voice":2,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-02-row-02","view":1,"part":0,"voice":2,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-02-row-03","view":1,"part":0,"voice":2,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-02-row-05","view":1,"part":0,"voice":2,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-02-row-07","view":1,"part":0,"voice":2,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-02-row-08","view":1,"part":0,"voice":2,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=2 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-00-voice-03-row-01","view":1,"part":0,"voice":3,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-03-row-02","view":1,"part":0,"voice":3,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-03-row-03","view":1,"part":0,"voice":3,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-03-row-05","view":1,"part":0,"voice":3,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-03-row-07","view":1,"part":0,"voice":3,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-03-row-08","view":1,"part":0,"voice":3,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=3 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-00-voice-04-row-01","view":1,"part":0,"voice":4,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-04-row-02","view":1,"part":0,"voice":4,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-04-row-03","view":1,"part":0,"voice":4,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-04-row-05","view":1,"part":0,"voice":4,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-04-row-07","view":1,"part":0,"voice":4,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-04-row-08","view":1,"part":0,"voice":4,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=4 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-00-voice-05-row-01","view":1,"part":0,"voice":5,"row":1,"rows":7,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-05-row-03","view":1,"part":0,"voice":5,"row":3,"rows":7,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-05-row-05","view":1,"part":0,"voice":5,"row":5,"rows":7,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-05-row-06","view":1,"part":0,"voice":5,"row":6,"rows":7,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=5 first=1 selectable=4 captured=4 unique=4
+SCREEN {"id":"list-view-01-part-00-voice-06-row-01","view":1,"part":0,"voice":6,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-06-row-02","view":1,"part":0,"voice":6,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-06-row-04","view":1,"part":0,"voice":6,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-06-row-06","view":1,"part":0,"voice":6,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-06-row-07","view":1,"part":0,"voice":6,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=6 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-00-voice-07-row-01","view":1,"part":0,"voice":7,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-07-row-02","view":1,"part":0,"voice":7,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-07-row-04","view":1,"part":0,"voice":7,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-07-row-06","view":1,"part":0,"voice":7,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-07-row-07","view":1,"part":0,"voice":7,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=7 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-00-voice-08-row-01","view":1,"part":0,"voice":8,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-08-row-02","view":1,"part":0,"voice":8,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-08-row-04","view":1,"part":0,"voice":8,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-08-row-06","view":1,"part":0,"voice":8,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-08-row-07","view":1,"part":0,"voice":8,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=8 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-00-voice-09-row-01","view":1,"part":0,"voice":9,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-09-row-02","view":1,"part":0,"voice":9,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-09-row-04","view":1,"part":0,"voice":9,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-09-row-06","view":1,"part":0,"voice":9,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-09-row-07","view":1,"part":0,"voice":9,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=9 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-00-voice-10-row-01","view":1,"part":0,"voice":10,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-10-row-02","view":1,"part":0,"voice":10,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-10-row-04","view":1,"part":0,"voice":10,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-10-row-06","view":1,"part":0,"voice":10,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-00-voice-10-row-07","view":1,"part":0,"voice":10,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=0 voice=10 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-01-voice-00-row-01","view":1,"part":1,"voice":0,"row":1,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-02","view":1,"part":1,"voice":0,"row":2,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-03","view":1,"part":1,"voice":0,"row":3,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-04","view":1,"part":1,"voice":0,"row":4,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-06","view":1,"part":1,"voice":0,"row":6,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-08","view":1,"part":1,"voice":0,"row":8,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-00-row-09","view":1,"part":1,"voice":0,"row":9,"rows":10,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=0 first=1 selectable=7 captured=7 unique=7
+SCREEN {"id":"list-view-01-part-01-voice-01-row-01","view":1,"part":1,"voice":1,"row":1,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-02","view":1,"part":1,"voice":1,"row":2,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-03","view":1,"part":1,"voice":1,"row":3,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-04","view":1,"part":1,"voice":1,"row":4,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-06","view":1,"part":1,"voice":1,"row":6,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-08","view":1,"part":1,"voice":1,"row":8,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-01-row-09","view":1,"part":1,"voice":1,"row":9,"rows":10,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=1 first=1 selectable=7 captured=7 unique=7
+SCREEN {"id":"list-view-01-part-01-voice-02-row-01","view":1,"part":1,"voice":2,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-02-row-02","view":1,"part":1,"voice":2,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-02-row-03","view":1,"part":1,"voice":2,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-02-row-05","view":1,"part":1,"voice":2,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-02-row-07","view":1,"part":1,"voice":2,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-02-row-08","view":1,"part":1,"voice":2,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=2 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-01-voice-03-row-01","view":1,"part":1,"voice":3,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-03-row-02","view":1,"part":1,"voice":3,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-03-row-03","view":1,"part":1,"voice":3,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-03-row-05","view":1,"part":1,"voice":3,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-03-row-07","view":1,"part":1,"voice":3,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-03-row-08","view":1,"part":1,"voice":3,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=3 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-01-voice-04-row-01","view":1,"part":1,"voice":4,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-04-row-02","view":1,"part":1,"voice":4,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-04-row-03","view":1,"part":1,"voice":4,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-04-row-05","view":1,"part":1,"voice":4,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-04-row-07","view":1,"part":1,"voice":4,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-04-row-08","view":1,"part":1,"voice":4,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=4 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-01-voice-05-row-01","view":1,"part":1,"voice":5,"row":1,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-05-row-02","view":1,"part":1,"voice":5,"row":2,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-05-row-03","view":1,"part":1,"voice":5,"row":3,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-05-row-05","view":1,"part":1,"voice":5,"row":5,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-05-row-07","view":1,"part":1,"voice":5,"row":7,"rows":9,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-05-row-08","view":1,"part":1,"voice":5,"row":8,"rows":9,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=5 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-01-part-01-voice-06-row-01","view":1,"part":1,"voice":6,"row":1,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-02","view":1,"part":1,"voice":6,"row":2,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-03","view":1,"part":1,"voice":6,"row":3,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-04","view":1,"part":1,"voice":6,"row":4,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-06","view":1,"part":1,"voice":6,"row":6,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-08","view":1,"part":1,"voice":6,"row":8,"rows":10,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-06-row-09","view":1,"part":1,"voice":6,"row":9,"rows":10,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=6 first=1 selectable=7 captured=7 unique=7
+SCREEN {"id":"list-view-01-part-01-voice-07-row-01","view":1,"part":1,"voice":7,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-07-row-02","view":1,"part":1,"voice":7,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-07-row-04","view":1,"part":1,"voice":7,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-07-row-06","view":1,"part":1,"voice":7,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-07-row-07","view":1,"part":1,"voice":7,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=7 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-01-voice-08-row-01","view":1,"part":1,"voice":8,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-08-row-02","view":1,"part":1,"voice":8,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-08-row-04","view":1,"part":1,"voice":8,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-08-row-06","view":1,"part":1,"voice":8,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-08-row-07","view":1,"part":1,"voice":8,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=8 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-01-voice-09-row-01","view":1,"part":1,"voice":9,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-09-row-02","view":1,"part":1,"voice":9,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-09-row-04","view":1,"part":1,"voice":9,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-09-row-06","view":1,"part":1,"voice":9,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-09-row-07","view":1,"part":1,"voice":9,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=9 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-01-voice-10-row-01","view":1,"part":1,"voice":10,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-10-row-02","view":1,"part":1,"voice":10,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-10-row-04","view":1,"part":1,"voice":10,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-10-row-06","view":1,"part":1,"voice":10,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-01-voice-10-row-07","view":1,"part":1,"voice":10,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=1 voice=10 first=1 selectable=5 captured=5 unique=5
+SCREEN {"id":"list-view-01-part-02-voice-00-row-00","view":1,"part":2,"voice":0,"row":0,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-01","view":1,"part":2,"voice":0,"row":1,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-02","view":1,"part":2,"voice":0,"row":2,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-03","view":1,"part":2,"voice":0,"row":3,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-04","view":1,"part":2,"voice":0,"row":4,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-05","view":1,"part":2,"voice":0,"row":5,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-06","view":1,"part":2,"voice":0,"row":6,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-07","view":1,"part":2,"voice":0,"row":7,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-08","view":1,"part":2,"voice":0,"row":8,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-09","view":1,"part":2,"voice":0,"row":9,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-10","view":1,"part":2,"voice":0,"row":10,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-11","view":1,"part":2,"voice":0,"row":11,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-12","view":1,"part":2,"voice":0,"row":12,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-13","view":1,"part":2,"voice":0,"row":13,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-14","view":1,"part":2,"voice":0,"row":14,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-15","view":1,"part":2,"voice":0,"row":15,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-16","view":1,"part":2,"voice":0,"row":16,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-17","view":1,"part":2,"voice":0,"row":17,"rows":19,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-02-voice-00-row-18","view":1,"part":2,"voice":0,"row":18,"rows":19,"width":240,"height":240}
+LIST_COVERAGE view=1 part=2 voice=0 first=0 selectable=19 captured=19 unique=19
+SCREEN {"id":"list-view-01-part-03-voice-00-row-00","view":1,"part":3,"voice":0,"row":0,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-01","view":1,"part":3,"voice":0,"row":1,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-02","view":1,"part":3,"voice":0,"row":2,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-03","view":1,"part":3,"voice":0,"row":3,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-04","view":1,"part":3,"voice":0,"row":4,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-05","view":1,"part":3,"voice":0,"row":5,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-06","view":1,"part":3,"voice":0,"row":6,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-07","view":1,"part":3,"voice":0,"row":7,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-08","view":1,"part":3,"voice":0,"row":8,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-09","view":1,"part":3,"voice":0,"row":9,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-10","view":1,"part":3,"voice":0,"row":10,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-11","view":1,"part":3,"voice":0,"row":11,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-12","view":1,"part":3,"voice":0,"row":12,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-13","view":1,"part":3,"voice":0,"row":13,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-14","view":1,"part":3,"voice":0,"row":14,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-15","view":1,"part":3,"voice":0,"row":15,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-16","view":1,"part":3,"voice":0,"row":16,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-17","view":1,"part":3,"voice":0,"row":17,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-18","view":1,"part":3,"voice":0,"row":18,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-19","view":1,"part":3,"voice":0,"row":19,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-20","view":1,"part":3,"voice":0,"row":20,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-21","view":1,"part":3,"voice":0,"row":21,"rows":23,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-03-voice-00-row-22","view":1,"part":3,"voice":0,"row":22,"rows":23,"width":240,"height":240}
+LIST_COVERAGE view=1 part=3 voice=0 first=0 selectable=23 captured=23 unique=23
+SCREEN {"id":"list-view-01-part-04-voice-00-row-00","view":1,"part":4,"voice":0,"row":0,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-01","view":1,"part":4,"voice":0,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-02","view":1,"part":4,"voice":0,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-03","view":1,"part":4,"voice":0,"row":3,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-05","view":1,"part":4,"voice":0,"row":5,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-06","view":1,"part":4,"voice":0,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-01-part-04-voice-00-row-07","view":1,"part":4,"voice":0,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=1 part=4 voice=0 first=0 selectable=7 captured=7 unique=7
+SCREEN {"id":"list-view-02-part-02-voice-00-row-00","view":2,"part":2,"voice":0,"row":0,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-01","view":2,"part":2,"voice":0,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-02","view":2,"part":2,"voice":0,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-03","view":2,"part":2,"voice":0,"row":3,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-04","view":2,"part":2,"voice":0,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-05","view":2,"part":2,"voice":0,"row":5,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-06","view":2,"part":2,"voice":0,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-02-voice-00-row-07","view":2,"part":2,"voice":0,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=2 part=2 voice=0 first=0 selectable=8 captured=8 unique=8
+SCREEN {"id":"list-view-02-part-03-voice-00-row-00","view":2,"part":3,"voice":0,"row":0,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-01","view":2,"part":3,"voice":0,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-02","view":2,"part":3,"voice":0,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-03","view":2,"part":3,"voice":0,"row":3,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-04","view":2,"part":3,"voice":0,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-05","view":2,"part":3,"voice":0,"row":5,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-06","view":2,"part":3,"voice":0,"row":6,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-02-part-03-voice-00-row-07","view":2,"part":3,"voice":0,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=2 part=3 voice=0 first=0 selectable=8 captured=8 unique=8
+SCREEN {"id":"list-view-03-part-00-voice-00-row-00","view":3,"part":0,"voice":0,"row":0,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-01","view":3,"part":0,"voice":0,"row":1,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-02","view":3,"part":0,"voice":0,"row":2,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-03","view":3,"part":0,"voice":0,"row":3,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-04","view":3,"part":0,"voice":0,"row":4,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-05","view":3,"part":0,"voice":0,"row":5,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-07","view":3,"part":0,"voice":0,"row":7,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-08","view":3,"part":0,"voice":0,"row":8,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-09","view":3,"part":0,"voice":0,"row":9,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-10","view":3,"part":0,"voice":0,"row":10,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-00-voice-00-row-11","view":3,"part":0,"voice":0,"row":11,"rows":12,"width":240,"height":240}
+LIST_COVERAGE view=3 part=0 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-03-part-01-voice-00-row-00","view":3,"part":1,"voice":0,"row":0,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-01","view":3,"part":1,"voice":0,"row":1,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-02","view":3,"part":1,"voice":0,"row":2,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-03","view":3,"part":1,"voice":0,"row":3,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-04","view":3,"part":1,"voice":0,"row":4,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-05","view":3,"part":1,"voice":0,"row":5,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-07","view":3,"part":1,"voice":0,"row":7,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-08","view":3,"part":1,"voice":0,"row":8,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-09","view":3,"part":1,"voice":0,"row":9,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-10","view":3,"part":1,"voice":0,"row":10,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-01-voice-00-row-11","view":3,"part":1,"voice":0,"row":11,"rows":12,"width":240,"height":240}
+LIST_COVERAGE view=3 part=1 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-03-part-02-voice-00-row-00","view":3,"part":2,"voice":0,"row":0,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-01","view":3,"part":2,"voice":0,"row":1,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-02","view":3,"part":2,"voice":0,"row":2,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-03","view":3,"part":2,"voice":0,"row":3,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-04","view":3,"part":2,"voice":0,"row":4,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-05","view":3,"part":2,"voice":0,"row":5,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-07","view":3,"part":2,"voice":0,"row":7,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-08","view":3,"part":2,"voice":0,"row":8,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-09","view":3,"part":2,"voice":0,"row":9,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-10","view":3,"part":2,"voice":0,"row":10,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-02-voice-00-row-11","view":3,"part":2,"voice":0,"row":11,"rows":12,"width":240,"height":240}
+LIST_COVERAGE view=3 part=2 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-03-part-03-voice-00-row-00","view":3,"part":3,"voice":0,"row":0,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-01","view":3,"part":3,"voice":0,"row":1,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-02","view":3,"part":3,"voice":0,"row":2,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-03","view":3,"part":3,"voice":0,"row":3,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-04","view":3,"part":3,"voice":0,"row":4,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-05","view":3,"part":3,"voice":0,"row":5,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-07","view":3,"part":3,"voice":0,"row":7,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-08","view":3,"part":3,"voice":0,"row":8,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-09","view":3,"part":3,"voice":0,"row":9,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-10","view":3,"part":3,"voice":0,"row":10,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-03-voice-00-row-11","view":3,"part":3,"voice":0,"row":11,"rows":12,"width":240,"height":240}
+LIST_COVERAGE view=3 part=3 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-03-part-04-voice-00-row-00","view":3,"part":4,"voice":0,"row":0,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-01","view":3,"part":4,"voice":0,"row":1,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-02","view":3,"part":4,"voice":0,"row":2,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-03","view":3,"part":4,"voice":0,"row":3,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-04","view":3,"part":4,"voice":0,"row":4,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-05","view":3,"part":4,"voice":0,"row":5,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-07","view":3,"part":4,"voice":0,"row":7,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-08","view":3,"part":4,"voice":0,"row":8,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-09","view":3,"part":4,"voice":0,"row":9,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-10","view":3,"part":4,"voice":0,"row":10,"rows":12,"width":240,"height":240}
+SCREEN {"id":"list-view-03-part-04-voice-00-row-11","view":3,"part":4,"voice":0,"row":11,"rows":12,"width":240,"height":240}
+LIST_COVERAGE view=3 part=4 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-04-part-00-voice-00-row-00","view":4,"part":0,"voice":0,"row":0,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-01","view":4,"part":0,"voice":0,"row":1,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-02","view":4,"part":0,"voice":0,"row":2,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-03","view":4,"part":0,"voice":0,"row":3,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-04","view":4,"part":0,"voice":0,"row":4,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-05","view":4,"part":0,"voice":0,"row":5,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-06","view":4,"part":0,"voice":0,"row":6,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-07","view":4,"part":0,"voice":0,"row":7,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-08","view":4,"part":0,"voice":0,"row":8,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-09","view":4,"part":0,"voice":0,"row":9,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-10","view":4,"part":0,"voice":0,"row":10,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-11","view":4,"part":0,"voice":0,"row":11,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-12","view":4,"part":0,"voice":0,"row":12,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-13","view":4,"part":0,"voice":0,"row":13,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-14","view":4,"part":0,"voice":0,"row":14,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-15","view":4,"part":0,"voice":0,"row":15,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-17","view":4,"part":0,"voice":0,"row":17,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-18","view":4,"part":0,"voice":0,"row":18,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-19","view":4,"part":0,"voice":0,"row":19,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-20","view":4,"part":0,"voice":0,"row":20,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-21","view":4,"part":0,"voice":0,"row":21,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-22","view":4,"part":0,"voice":0,"row":22,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-23","view":4,"part":0,"voice":0,"row":23,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-24","view":4,"part":0,"voice":0,"row":24,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-25","view":4,"part":0,"voice":0,"row":25,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-26","view":4,"part":0,"voice":0,"row":26,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-27","view":4,"part":0,"voice":0,"row":27,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-00-voice-00-row-28","view":4,"part":0,"voice":0,"row":28,"rows":29,"width":240,"height":240}
+LIST_COVERAGE view=4 part=0 voice=0 first=0 selectable=28 captured=28 unique=28
+SCREEN {"id":"list-view-04-part-01-voice-00-row-00","view":4,"part":1,"voice":0,"row":0,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-01","view":4,"part":1,"voice":0,"row":1,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-02","view":4,"part":1,"voice":0,"row":2,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-03","view":4,"part":1,"voice":0,"row":3,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-04","view":4,"part":1,"voice":0,"row":4,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-05","view":4,"part":1,"voice":0,"row":5,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-06","view":4,"part":1,"voice":0,"row":6,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-07","view":4,"part":1,"voice":0,"row":7,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-08","view":4,"part":1,"voice":0,"row":8,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-09","view":4,"part":1,"voice":0,"row":9,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-10","view":4,"part":1,"voice":0,"row":10,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-11","view":4,"part":1,"voice":0,"row":11,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-12","view":4,"part":1,"voice":0,"row":12,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-13","view":4,"part":1,"voice":0,"row":13,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-14","view":4,"part":1,"voice":0,"row":14,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-15","view":4,"part":1,"voice":0,"row":15,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-17","view":4,"part":1,"voice":0,"row":17,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-18","view":4,"part":1,"voice":0,"row":18,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-19","view":4,"part":1,"voice":0,"row":19,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-20","view":4,"part":1,"voice":0,"row":20,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-21","view":4,"part":1,"voice":0,"row":21,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-22","view":4,"part":1,"voice":0,"row":22,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-23","view":4,"part":1,"voice":0,"row":23,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-24","view":4,"part":1,"voice":0,"row":24,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-25","view":4,"part":1,"voice":0,"row":25,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-26","view":4,"part":1,"voice":0,"row":26,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-27","view":4,"part":1,"voice":0,"row":27,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-01-voice-00-row-28","view":4,"part":1,"voice":0,"row":28,"rows":29,"width":240,"height":240}
+LIST_COVERAGE view=4 part=1 voice=0 first=0 selectable=28 captured=28 unique=28
+SCREEN {"id":"list-view-04-part-02-voice-00-row-00","view":4,"part":2,"voice":0,"row":0,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-01","view":4,"part":2,"voice":0,"row":1,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-02","view":4,"part":2,"voice":0,"row":2,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-03","view":4,"part":2,"voice":0,"row":3,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-04","view":4,"part":2,"voice":0,"row":4,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-05","view":4,"part":2,"voice":0,"row":5,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-06","view":4,"part":2,"voice":0,"row":6,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-07","view":4,"part":2,"voice":0,"row":7,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-08","view":4,"part":2,"voice":0,"row":8,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-09","view":4,"part":2,"voice":0,"row":9,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-10","view":4,"part":2,"voice":0,"row":10,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-11","view":4,"part":2,"voice":0,"row":11,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-12","view":4,"part":2,"voice":0,"row":12,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-13","view":4,"part":2,"voice":0,"row":13,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-14","view":4,"part":2,"voice":0,"row":14,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-15","view":4,"part":2,"voice":0,"row":15,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-17","view":4,"part":2,"voice":0,"row":17,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-18","view":4,"part":2,"voice":0,"row":18,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-19","view":4,"part":2,"voice":0,"row":19,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-20","view":4,"part":2,"voice":0,"row":20,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-21","view":4,"part":2,"voice":0,"row":21,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-22","view":4,"part":2,"voice":0,"row":22,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-23","view":4,"part":2,"voice":0,"row":23,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-24","view":4,"part":2,"voice":0,"row":24,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-25","view":4,"part":2,"voice":0,"row":25,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-26","view":4,"part":2,"voice":0,"row":26,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-27","view":4,"part":2,"voice":0,"row":27,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-02-voice-00-row-28","view":4,"part":2,"voice":0,"row":28,"rows":29,"width":240,"height":240}
+LIST_COVERAGE view=4 part=2 voice=0 first=0 selectable=28 captured=28 unique=28
+SCREEN {"id":"list-view-04-part-03-voice-00-row-00","view":4,"part":3,"voice":0,"row":0,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-01","view":4,"part":3,"voice":0,"row":1,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-02","view":4,"part":3,"voice":0,"row":2,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-03","view":4,"part":3,"voice":0,"row":3,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-04","view":4,"part":3,"voice":0,"row":4,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-05","view":4,"part":3,"voice":0,"row":5,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-06","view":4,"part":3,"voice":0,"row":6,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-07","view":4,"part":3,"voice":0,"row":7,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-08","view":4,"part":3,"voice":0,"row":8,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-09","view":4,"part":3,"voice":0,"row":9,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-10","view":4,"part":3,"voice":0,"row":10,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-11","view":4,"part":3,"voice":0,"row":11,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-12","view":4,"part":3,"voice":0,"row":12,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-13","view":4,"part":3,"voice":0,"row":13,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-14","view":4,"part":3,"voice":0,"row":14,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-15","view":4,"part":3,"voice":0,"row":15,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-17","view":4,"part":3,"voice":0,"row":17,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-18","view":4,"part":3,"voice":0,"row":18,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-19","view":4,"part":3,"voice":0,"row":19,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-20","view":4,"part":3,"voice":0,"row":20,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-21","view":4,"part":3,"voice":0,"row":21,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-22","view":4,"part":3,"voice":0,"row":22,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-23","view":4,"part":3,"voice":0,"row":23,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-24","view":4,"part":3,"voice":0,"row":24,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-25","view":4,"part":3,"voice":0,"row":25,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-26","view":4,"part":3,"voice":0,"row":26,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-27","view":4,"part":3,"voice":0,"row":27,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-03-voice-00-row-28","view":4,"part":3,"voice":0,"row":28,"rows":29,"width":240,"height":240}
+LIST_COVERAGE view=4 part=3 voice=0 first=0 selectable=28 captured=28 unique=28
+SCREEN {"id":"list-view-04-part-04-voice-00-row-00","view":4,"part":4,"voice":0,"row":0,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-01","view":4,"part":4,"voice":0,"row":1,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-02","view":4,"part":4,"voice":0,"row":2,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-03","view":4,"part":4,"voice":0,"row":3,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-04","view":4,"part":4,"voice":0,"row":4,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-05","view":4,"part":4,"voice":0,"row":5,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-06","view":4,"part":4,"voice":0,"row":6,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-07","view":4,"part":4,"voice":0,"row":7,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-08","view":4,"part":4,"voice":0,"row":8,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-09","view":4,"part":4,"voice":0,"row":9,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-10","view":4,"part":4,"voice":0,"row":10,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-11","view":4,"part":4,"voice":0,"row":11,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-12","view":4,"part":4,"voice":0,"row":12,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-13","view":4,"part":4,"voice":0,"row":13,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-14","view":4,"part":4,"voice":0,"row":14,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-15","view":4,"part":4,"voice":0,"row":15,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-17","view":4,"part":4,"voice":0,"row":17,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-18","view":4,"part":4,"voice":0,"row":18,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-19","view":4,"part":4,"voice":0,"row":19,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-20","view":4,"part":4,"voice":0,"row":20,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-21","view":4,"part":4,"voice":0,"row":21,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-22","view":4,"part":4,"voice":0,"row":22,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-23","view":4,"part":4,"voice":0,"row":23,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-24","view":4,"part":4,"voice":0,"row":24,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-25","view":4,"part":4,"voice":0,"row":25,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-26","view":4,"part":4,"voice":0,"row":26,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-27","view":4,"part":4,"voice":0,"row":27,"rows":29,"width":240,"height":240}
+SCREEN {"id":"list-view-04-part-04-voice-00-row-28","view":4,"part":4,"voice":0,"row":28,"rows":29,"width":240,"height":240}
+LIST_COVERAGE view=4 part=4 voice=0 first=0 selectable=28 captured=28 unique=28
+SCREEN {"id":"list-view-06-part-00-voice-00-row-00","view":6,"part":0,"voice":0,"row":0,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-01","view":6,"part":0,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-02","view":6,"part":0,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-03","view":6,"part":0,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-04","view":6,"part":0,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-05","view":6,"part":0,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-06","view":6,"part":0,"voice":0,"row":6,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-07","view":6,"part":0,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-08","view":6,"part":0,"voice":0,"row":8,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-09","view":6,"part":0,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-00-voice-00-row-10","view":6,"part":0,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=6 part=0 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-06-part-01-voice-00-row-00","view":6,"part":1,"voice":0,"row":0,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-01","view":6,"part":1,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-02","view":6,"part":1,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-03","view":6,"part":1,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-04","view":6,"part":1,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-05","view":6,"part":1,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-06","view":6,"part":1,"voice":0,"row":6,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-07","view":6,"part":1,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-08","view":6,"part":1,"voice":0,"row":8,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-09","view":6,"part":1,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-01-voice-00-row-10","view":6,"part":1,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=6 part=1 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-06-part-02-voice-00-row-00","view":6,"part":2,"voice":0,"row":0,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-01","view":6,"part":2,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-02","view":6,"part":2,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-03","view":6,"part":2,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-04","view":6,"part":2,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-05","view":6,"part":2,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-06","view":6,"part":2,"voice":0,"row":6,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-07","view":6,"part":2,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-08","view":6,"part":2,"voice":0,"row":8,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-09","view":6,"part":2,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-02-voice-00-row-10","view":6,"part":2,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=6 part=2 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-06-part-03-voice-00-row-00","view":6,"part":3,"voice":0,"row":0,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-01","view":6,"part":3,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-02","view":6,"part":3,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-03","view":6,"part":3,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-04","view":6,"part":3,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-05","view":6,"part":3,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-06","view":6,"part":3,"voice":0,"row":6,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-07","view":6,"part":3,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-08","view":6,"part":3,"voice":0,"row":8,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-09","view":6,"part":3,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-03-voice-00-row-10","view":6,"part":3,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=6 part=3 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-06-part-04-voice-00-row-00","view":6,"part":4,"voice":0,"row":0,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-01","view":6,"part":4,"voice":0,"row":1,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-02","view":6,"part":4,"voice":0,"row":2,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-03","view":6,"part":4,"voice":0,"row":3,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-04","view":6,"part":4,"voice":0,"row":4,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-05","view":6,"part":4,"voice":0,"row":5,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-06","view":6,"part":4,"voice":0,"row":6,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-07","view":6,"part":4,"voice":0,"row":7,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-08","view":6,"part":4,"voice":0,"row":8,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-09","view":6,"part":4,"voice":0,"row":9,"rows":11,"width":240,"height":240}
+SCREEN {"id":"list-view-06-part-04-voice-00-row-10","view":6,"part":4,"voice":0,"row":10,"rows":11,"width":240,"height":240}
+LIST_COVERAGE view=6 part=4 voice=0 first=0 selectable=11 captured=11 unique=11
+SCREEN {"id":"list-view-07-part-00-voice-00-row-00","view":7,"part":0,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-07-part-00-voice-00-row-01","view":7,"part":0,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=7 part=0 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-07-part-01-voice-00-row-00","view":7,"part":1,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-07-part-01-voice-00-row-01","view":7,"part":1,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=7 part=1 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-07-part-02-voice-00-row-00","view":7,"part":2,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-07-part-02-voice-00-row-01","view":7,"part":2,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=7 part=2 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-07-part-03-voice-00-row-00","view":7,"part":3,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-07-part-03-voice-00-row-01","view":7,"part":3,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=7 part=3 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-07-part-04-voice-00-row-00","view":7,"part":4,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-07-part-04-voice-00-row-01","view":7,"part":4,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=7 part=4 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-08-part-00-voice-00-row-00","view":8,"part":0,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-00-voice-00-row-01","view":8,"part":0,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=8 part=0 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-08-part-01-voice-00-row-00","view":8,"part":1,"voice":0,"row":0,"rows":2,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-01-voice-00-row-01","view":8,"part":1,"voice":0,"row":1,"rows":2,"width":240,"height":240}
+LIST_COVERAGE view=8 part=1 voice=0 first=0 selectable=2 captured=2 unique=2
+SCREEN {"id":"list-view-08-part-02-voice-00-row-01","view":8,"part":2,"voice":0,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-02-voice-00-row-02","view":8,"part":2,"voice":0,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-02-voice-00-row-03","view":8,"part":2,"voice":0,"row":3,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-02-voice-00-row-04","view":8,"part":2,"voice":0,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-02-voice-00-row-05","view":8,"part":2,"voice":0,"row":5,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-02-voice-00-row-07","view":8,"part":2,"voice":0,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=8 part=2 voice=0 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-08-part-03-voice-00-row-01","view":8,"part":3,"voice":0,"row":1,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-03-voice-00-row-02","view":8,"part":3,"voice":0,"row":2,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-03-voice-00-row-03","view":8,"part":3,"voice":0,"row":3,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-03-voice-00-row-04","view":8,"part":3,"voice":0,"row":4,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-03-voice-00-row-05","view":8,"part":3,"voice":0,"row":5,"rows":8,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-03-voice-00-row-07","view":8,"part":3,"voice":0,"row":7,"rows":8,"width":240,"height":240}
+LIST_COVERAGE view=8 part=3 voice=0 first=1 selectable=6 captured=6 unique=6
+SCREEN {"id":"list-view-08-part-04-voice-00-row-00","view":8,"part":4,"voice":0,"row":0,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-01","view":8,"part":4,"voice":0,"row":1,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-02","view":8,"part":4,"voice":0,"row":2,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-03","view":8,"part":4,"voice":0,"row":3,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-04","view":8,"part":4,"voice":0,"row":4,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-05","view":8,"part":4,"voice":0,"row":5,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-06","view":8,"part":4,"voice":0,"row":6,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-07","view":8,"part":4,"voice":0,"row":7,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-08","view":8,"part":4,"voice":0,"row":8,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-10","view":8,"part":4,"voice":0,"row":10,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-11","view":8,"part":4,"voice":0,"row":11,"rows":13,"width":240,"height":240}
+SCREEN {"id":"list-view-08-part-04-voice-00-row-12","view":8,"part":4,"voice":0,"row":12,"rows":13,"width":240,"height":240}
+LIST_COVERAGE view=8 part=4 voice=0 first=0 selectable=12 captured=12 unique=12
+OVERLAY_INVENTORY 500 states in 57 lists; help/confirmation/transients/alternate engine coverage NOT_RUN

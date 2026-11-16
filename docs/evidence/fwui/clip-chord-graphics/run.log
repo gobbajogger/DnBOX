@@ -1,0 +1,6 @@
+In file included from actual-clip-key-host.inc:101,
+                 from chord-real.c:2:
+ck_a.inc:38:1: warning: ‘minsize’ attribute directive ignored [-Wattributes]
+   38 | {
+      | ^
+clip chord display: 7049 checks, 7050 captured chord draws passed
