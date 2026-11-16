@@ -128,7 +128,7 @@ page. SEQ, EDIT and ARP show the part you choose with ALGORITHM.
 | ENV | Hold while pressing keys: an accent. |
 | LFO | The mixer and the master. Hold while pressing keys: a slide. |
 | EDIT | The selected part's sound. The keys still write its steps. |
-| GLO | The settings. Press again to close. |
+| GLO | The settings. Press again to close. On HOME, hold it and tap a pattern pad to clear that pattern for the selected part only. Hold it, hold the source pad, then press the target pad to copy that part. |
 | HOME | The pattern: all five parts, which pattern they play, mutes. Again: the song, and again back. In a list, back; in a question, no. |
 | SAVE | Save everything (while playing: when you stop). Hold it to copy the pattern; then a white key pastes it. |
 | ARP | TB-3PO, the 303 line generator (on a 303). |
@@ -471,8 +471,17 @@ held from when you pressed the destination key, and their contents are copied wh
 SAVE does not make a clipboard snapshot. While holding SAVE, OCT- and OCT+ switch between patterns
 1–16 and 17–32.
 
-**Clearing.** Hold SAVE and press REC to clear the selected part in its pattern. GLO > CLEAR
-PATTERN clears all five.
+**One part, from HOME.** Hold GLOBE (GLO). Tap a pattern pad to clear that pattern for the part
+selected with ALGORITHM; the other parts in that pattern stay, and no other pattern changes.
+The screen says CLEARED, the part, and the pattern number. Hold a source pad, then press the
+target pad, to copy that same part into the target pattern (909 PASTED TO P2, or whichever part
+is selected). Other parts in the target stay. If that part already has notes there, X0X asks
+first (PASTE OVER P2? / THIS PART HAS NOTES). Releasing the source after a copy does not clear it.
+Let go of GLOBE before the pad and the tap does nothing. These gestures work on HOME only.
+GLOBE on its own still opens and closes the settings. SAVE still copies all five parts.
+
+**Clearing.** Hold SAVE and press REC to clear the selected part in its current pattern. GLO > CLEAR
+PATTERN clears all five parts of the patterns they are playing.
 
 **Muting.** On HOME, black keys 1–5 mute and unmute the parts. Mutes aren't saved, except inside
 a song.
@@ -674,7 +683,7 @@ The SMK-37 has a sixth, BLUETOOTH MIDI (see [Bluetooth MIDI](#bluetooth-midi-smk
 | SAVE PROJECT | Saves everything. |
 | LOAD SAVED | Loads the last saved project. Stop playback and recording first. Asks before discarding unsaved edits. Keeps the sample slots and clears undo history. |
 | AUTOSAVE | ON (the default): while the pattern is stopped, changes are saved by themselves once nothing has been touched for four seconds. OFF: only SAVE saves. |
-| CLEAR PATTERN | Clears all five parts of the current pattern. |
+| CLEAR PATTERN | Clears all five parts of the patterns they are playing. It does not become a one-part clear. On HOME, hold GLOBE and tap a pad to clear only the selected part of that pad. |
 | RESET PROJECT | Asks before resetting the live project to factory sounds, empty patterns and default settings, with no song or knob motion. Keeps the sample slots and clears undo history. AUTOSAVE returns to ON, so the reset state can replace your saved project automatically. |
 | PERFORMANCE | Opens the performance page (below). |
 | ABOUT X0X | Shows the version, how full the memory for patterns is (MEM), and the audio load. |
