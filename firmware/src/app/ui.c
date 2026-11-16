@@ -1172,11 +1172,12 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         }
         return;
     }
-    if (is_pan(r)) {                                     /* L64 .. C .. R63 */
+    if (is_pan(r)) {                                     /* L50 .. C .. R50; engine stays 0..127 */
         if (v == 64)
             put_s(num, "C");
         else
-            put_i(put_s(num, v < 64 ? "L" : "R"), v < 64 ? 64 - v : v - 64);
+            put_i(put_s(num, v < 64 ? "L" : "R"),
+                  v < 64 ? ((64 - v) * 50 + 32) / 64 : ((v - 64) * 50 + 31) / 63);
         return;
     }
     switch (r.kind) {
@@ -3881,10 +3882,8 @@ static void key_event(int k, int down)
     if (is_drum()) {
         if (bl >= 0)
             drum_key(bl, down, ui.view == V_SEQ);
-        else if (w >= 0 && ui.view == V_SEQ)
-            drum_step(ui.part, w, down);
-        else if (w >= 0 && down && ui.view == V_PART && key_sounds())
-            engine_drum(ui.part, ui.sel[ui.part], 0.75f); /* audition selected sound, never write a hidden step */
+        else if (w >= 0 && (ui.view == V_SEQ || ui.view == V_PART))
+            drum_step(ui.part, w, down); /* parameter pages show and edit the same step lane */
     } else if (is_303()) {
         if (kbd_on()) {                                /* REC: the keys play and write notes; FREE PLAY: play */
             if (down)
@@ -5075,6 +5074,8 @@ static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
                            (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
 }
 
+#include "ui_glyph_renderer.h"
+
 /* corner coverage of a radius-r quarter circle, pixel (x, y) of the r x r corner square,
  * 4 x 4 supersampled; and of its 1-px ring (for outlines). Constant data in flash, packed: the
  * r x r square of radius r starts at CORNER_OFF[r]. The values are those that the old start-up
@@ -5394,10 +5395,15 @@ static UI_DRAW void header_pattern_cue(int x,int part)
 typedef struct {
     const char *name;
     uint16_t colours[5], col;
-    uint8_t light, part, page, pages, phase, rec, save, night;
+    uint8_t light, part, page, pages, phase, rec, save, night, sel;
+    uint8_t playing,song_on,battery;
+    uint16_t pattern;
+    float tempo;
 } part_header_snapshot_t;
 static part_header_snapshot_t part_header_snapshot;
 
+static void dv_full_title(char *t, int part, int v);
+static void dv_header_battery(int x, int y);
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5409,7 +5415,7 @@ static UI_DRAW void draw_header(void)
     int pickup = ui.msg[0] == 'P' && ui.msg[1] == 'I' && ui.msg[2] == 'C' &&
                  ui.msg[3] == 'K' && ui.msg[4] == ' ';
     part_header_snapshot_t snapshot = {0};
-    int cacheable = !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
+    int cacheable = !seq.ext && !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
         ui.overlay == O_NONE && !ui.help && !division_pad_owner() &&
         seq_cue_of(&seq, ui.part) < 0
 #if BOARD_SMK37
@@ -5423,8 +5429,11 @@ static UI_DRAW void draw_header(void)
             (bidx() ? "MIAMI B" : "MIAMI A") : (bidx() ? "CHICAGO B" : "CHICAGO A");
         memcpy(snapshot.colours, pal, sizeof pal);
         snapshot.col = matrix_col(); snapshot.light = ui_theme_light;
-        snapshot.part = ui.part; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
+        snapshot.part = ui.part; snapshot.sel = is_drum()?(uint8_t)ui.sel[ui.part]:0; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
         snapshot.phase = seq.metro_view; snapshot.rec = ui.rec; snapshot.save = (uint8_t)ss;
+        snapshot.playing=seq.playing;snapshot.song_on=seq.song_on;
+        snapshot.pattern=(uint16_t)(seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[ui.part]);
+        snapshot.tempo=seq_tempo(&seq);snapshot.battery=(uint8_t)plat_battery();
         snapshot.night = (uint8_t)(matrix_three_rows() || X0X_ORIGINAL_SYNTH);
         if (part_header_snapshot_valid && blit_hash[0] && cv_tile_valid[0] &&
             !memcmp(&snapshot, &part_header_snapshot, sizeof snapshot)) return;
@@ -5460,39 +5469,61 @@ static UI_DRAW void draw_header(void)
     }
     if (!pickup || (int32_t)(ui.msg_until - plat_ms()) <= 0)
         ui.msg_until = pickup = 0;
-    if (!pickup && ui.view==V_PART && (is_drum() || is_303()) && ui.overlay==O_NONE && !ui.help
+    if (!pickup && ui.overlay==O_NONE && !ui.help
 #if BOARD_SMK37
         && !smk_clip_mode_on()
 #endif
         ) {
-        const char *name=part_display(ui.part);
-        if(is_303()) {
+        const char *name=ui.view==V_PART?part_display(ui.part):
+            ui.view==V_GLO?list_title:VIEW_N[ui.view];
+        char drum_title[24],context_title[32];
+        if(ui.view==V_PART && is_303()) {
             name=engine_bass_bank(bidx())==ORIGINAL_SOUND_JUNO?(bidx()?"JUNO B":"JUNO A"):engine_bass_bank(bidx())==ORIGINAL_SOUND_DRONE?(bidx()?"DRONE B":"DRONE A"):
                 engine_bass_bank(bidx())==ORIGINAL_SOUND_MIAMI?(bidx()?"MIAMI B":"MIAMI A"):
                 (bidx()?"CHICAGO B":"CHICAGO A");
         }
-        int night=matrix_three_rows() || X0X_ORIGINAL_SYNTH;
-        if(night) sound_slab(0,0,240,20,0);
-        cv_text(7,2,&FONT_B,name,night?SOUND_GREEN:matrix_col());
+        if(ui.view==V_PART && is_drum()) {
+            dv_full_title(drum_title, ui.part, ui.sel[ui.part]);
+            name = drum_title;
+        }
+        if(ui.view==V_SEQ || ui.view==V_GEN) {
+            put_s(put_s(put_s(context_title,part_display(ui.part))," "),VIEW_N[ui.view]);
+            name=context_title;
+        }
+        sound_slab(0,0,240,HDR_H,0);
+        /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
+        cv_text_clip(4,2,&FONT_B,name,part_view()?part_col():SOUND_WHITE,4,125);
         if (division_pad_owner()) {
-            int dx = 7 + tw(&FONT_B, name) + 8;
+            int dx = 4 + tw(&FONT_B, name) + 8;
             dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
             cv_text(dx, 6, &FONT_T, division_pad_label() + 11, C_AMB);
         }
-        {   /* Screen banks, not musical divisions or the selected control row. */
-            int banks = (pg.n + 3) / 4;
-            for (int i = 0; i < banks; i++) {
-                int dx = 232 - (banks - 1 - i) * 10;
-                dot(dx, 9, 2, night?SOUND_AMBER:C_HI);
-                if (i != cur_page() / 4) dot(dx, 9, 1, night?SOUND_FACE:C_BLACK);
-            }
+        if(!division_pad_owner()) {
+            char pattern[16];
+            int header_part=part_view()?ui.part:PART_909;
+            int cue=seq_cue_of(&seq,header_part);
+            int pending=cue>=0 && cue!=seq.ppat[header_part] && !seq.song_on;
+            char *end=put_i(put_s(pattern,seq.song_on?"S":"P"),
+                (seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[header_part])+1);
+            if(pending)put_i(put_s(end,">"),cue+1);
+            cv_text(132,4,&FONT_T,pattern,pending?C_AMB:C_WHITE);
         }
-        if(!division_pad_owner()) header_pattern_cue(132,ui.part);   /* #807 cue picture */
-        { uint8_t phase = seq.metro_view; /* #688/#788: audio-owned beat phase */
-          play_icon(175, 4, !phase ? C_DIM : phase <= 4u ? C_WHITE : C_HI);
+        {   /* tempo, same readout as the shared header */
+            char b[8];
+            static float avg; static int shown;
+            float tmp = seq_tempo(&seq);
+            if (!seq.ext || avg < 1.0f) avg = tmp;
+            avg += (tmp - avg) * 0.03f;
+            if (!seq.ext || fm_fabsf(avg - (float)shown) > 0.6f)
+                shown = (int)(avg + 0.5f);
+            put_i(b, shown);
+            text_r(200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);
         }
-        if(ui.rec) dot(190,9,3,RGB(255,50,50));
-        if(ss!=SAVE_SAVED) dot(237,3,2,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
+        if(seq.playing) play_icon(168,4,C_WHITE);
+        else cv_rect(170,7,5,5,SOUND_GRAY);
+        if(ui.rec) dot(206,9,3,RGB(255,50,50));
+        dv_header_battery(219, 5);
+        if(ss!=SAVE_SAVED) dot(211,3,1,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
         cv_commit_header();
         if (cacheable) { part_header_snapshot = snapshot; part_header_snapshot_valid = 1; }
         return;
@@ -5827,6 +5858,7 @@ static UI_DRAW void matrix_knob_caption(char *text, int page)
     }
 }
 
+static UI_DRAW void draw_drum_voice(int band);
 static UI_DRAW void draw_part_sound(int band)
 {
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
@@ -6971,7 +7003,9 @@ static UI_DRAW void draw_main(void)
             draw_song(band);
         else if (ui.view == V_PERF)
             draw_perf(band);
-        else if (ui.view == V_PART && (is_drum() || is_303()))
+        else if (ui.view == V_PART && is_drum())
+            draw_drum_voice(band);
+        else if (ui.view == V_PART && is_303())
             draw_part_sound(band);
         else if (is_drum())
             draw_drum(band);
@@ -8287,6 +8321,8 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     }
 }
 
+#include "ui_drum_voice.inc"
+
 static uint32_t knobs_sig(void)
 {
     uint32_t h = 2166136261u, i;
@@ -8306,6 +8342,7 @@ static uint32_t knobs_sig(void)
         MIXIN(engine_bass_preset_pending(bidx()));
         MIXIN(engine_bass_requested_bank(bidx())); MIXIN(engine_bass_requested_preset(bidx()));
     }
+    MIXIN(ui_ease_sig());
     MIXIN(ui.view);
     MIXIN(ui.part);
     MIXIN(division_pad_owner());
@@ -8427,7 +8464,10 @@ static UI_DRAW void draw_knobs(void)
     if (ui.view == V_PART && (is_drum() || is_303())) {
         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
         cv_begin(240, KNOB_H, C_BLACK);
-        if (ui.overlay==O_NONE && !ui.help) draw_part_sound(2);
+        if (ui.overlay==O_NONE && !ui.help) {
+            if (is_drum()) draw_drum_voice(2);
+            else draw_part_sound(2);
+        }
         cv_commit_knobs(3);
         last_sig = 0;
         return;
@@ -8674,6 +8714,7 @@ static void leds(void)
 /* ===================================================================== frame === */
 X0X_COLD void ui_init(void)
 {
+    ui_ease_reset();
     part_header_snapshot_valid = 0;
 #if BOARD_SMK37
     smc_ui_cancel();
@@ -8956,6 +8997,7 @@ void ui_frame(void)
     pattern_sound_tick();
     engine_note_lock_refresh();
     device_bt_save();
+    ui_ease_tick();
     autosave();
     if (!project_busy)
         perf_test_tick();

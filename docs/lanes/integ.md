@@ -610,3 +610,10 @@ Repeated mistake: browser launch policy checks missed a launcher invoked indirec
 - Host app build PASS; host layout fixture proves9656B=5360+4296, alignment8, two disjoint parts. Native9436B layout and behavior equivalence remain to be independently measured at this candidate.
 - Fresh Complete/Working/Pending queues and roadmap index now point at actual consolidated e742/9165. No lane Complete. #120 is the suggestion/voting requirement (historical partial helper PR184), not unrelated GitHub PR120.
 - Selected `original-owner-layout` runner entry PASS; unrelated SMK package checks skipped because no package in this candidate. This is not full-suite PASS. Independent normalized before/after source review found no behavior change beyond storage access/declaration substitution; native links still required.
+
+Repeated mistake: commands mixed workspace-root-relative paths with a repository workdir. Resolve input/output paths against the explicit working directory before running; fail closed on missing inputs.
+
+## Combined firmware candidate
+- Normal two-parent composition of integ adae9f72f4ed04fce786b0f0690414242407d34a with published fwui62e71c2eed04881b2eb9c86d73e5e9fd1d61069b. All170 exact published changed paths retained, no unpublished slider-lane file; no conflicts with obsolete-brief removals. No consolidated/main merge.
+- Owner grouping native evidence atadae: Elite/Pro app free13240/13248B, RAM1512B free, pool836B reserve margin. original_parts18872B=2*9436,4-byte aligned. Costs224B XIP versus13e0; not a combined UI measurement.
+- Combined R22/native headroom must be measured; arithmetic estimates are not qualification. Known UI gate invocation defect (missing evaluator paths) is under correction; unimplemented checks stay FAIL/NOT_RUN.
