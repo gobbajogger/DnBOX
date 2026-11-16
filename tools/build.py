@@ -306,11 +306,23 @@ def build_app():
         o = OUT / "o2" / "wobble.o"
         units.append(("cc", *[f if f != "-O2" else "-Oz" for f in o2], "-c", Path("experiments/wobble/wobble.c"), "-o", o))
         objs.append(o)
+    superj6 = os.environ.get("X0X_SUPERJ6", "0")
+    if superj6 not in ("0", "1"):
+        raise SystemExit("X0X_SUPERJ6: 0 or 1")
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
-        unit_flags = [f if f != "-O2" else "-Oz" for f in o2] if u == "dsp/bass303.c" else o2
+        unit_flags = [f if f != "-O2" else "-Oz" for f in o2] if u == "dsp/bass303.c" else list(o2)
+        if superj6 == "1" and u == "app/engine.c":
+            unit_flags.append("-DX0X_SUPERJ6=1")
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
         objs.append(o)
+    if superj6 == "1":
+        # Off by default, so a normal image stays byte-identical. These objects are
+        # the sample-free resynthesis only: no libm, no heap, no C++ guards.
+        units.append(("cc", *o2, "-DSJ6_STANDIN_EMBED", "-c", FW / "src/dsp/sj6_resynth.c", "-o", OUT / "o2/sj6_resynth.o"))
+        objs.append(OUT / "o2/sj6_resynth.o")
+        units.append(("cc", *o2, "-c", FW / "src/dsp/superj6_link.c", "-o", OUT / "o2/sj6_link.o"))
+        objs.append(OUT / "o2/sj6_link.o")
     tc_all(*units)
     elf = OUT / "x0x.elf"
     # unreferenced functions (each in its own section: -ffunction-sections) are dropped: the DSP keeps

@@ -2550,4 +2550,9 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
     for (p = 0; p < (int)SCOPE_N; p++)
         eng_scope[p] = 0;
     eng_scope_w = 0;
+#ifdef X0X_SUPERJ6
+    /* Opt-in flash measurement. Not an audio or UI path. Default images omit it. */
+    extern void x0x_superj6_keep(void);
+    x0x_superj6_keep();
+#endif
 }

@@ -5,28 +5,48 @@
 # undefined symbol outside an allow list. Also prints the instruction count of each
 # function (a rough cost signal; tests/target_budget.py does the loop-weighted one).
 #   tools/target_obj_check.sh firmware/src/dsp/bass303.c [extra cflags...]
-# Needs JIELI_TOOLCHAIN (tools/get_toolchain.sh) and docker or podman.
+# Needs JIELI_TOOLCHAIN (tools/get_toolchain.sh). Uses docker or podman when one
+# is installed. Otherwise it runs the toolchain binaries on this machine and
+# adds the toolchain's own C headers with -idirafter.
 set -e
 cd "$(dirname "$0")/.."
 SRCF="$1"; shift
 : "${JIELI_TOOLCHAIN:?set JIELI_TOOLCHAIN}"
 TC="$(cd "$JIELI_TOOLCHAIN" && pwd -P)"
-DOCKER="$(command -v docker || command -v podman)"
+DOCKER=""
+if command -v docker >/dev/null 2>&1; then DOCKER=docker
+elif command -v podman >/dev/null 2>&1; then DOCKER=podman
+fi
 OBJ="build/objcheck/$(basename "$SRCF" .c).o"
 mkdir -p build/objcheck
-run() { "$DOCKER" run --rm --platform linux/amd64 -v "$PWD:/work" -v "$TC:/opt/jieli:ro" -w /work \
-        debian:bookworm-slim "$@"; }
-run /opt/jieli/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -mfprev1 -O2 -fno-builtin -ffp-contract=off \
-    -Wall -Wdouble-promotion -Ifirmware/src -Ibuild/gen "$@" -c "$SRCF" -o "$OBJ"
-run sh -c "/opt/jieli/pi32v2/bin/nm -u $OBJ; echo ---; /opt/jieli/common/bin/objdump -d $OBJ" > "$OBJ.txt"
+if [ -n "$DOCKER" ]; then
+    run() { "$DOCKER" run --rm --platform linux/amd64 -v "$PWD:/work" -v "$TC:/opt/jieli:ro" -w /work \
+            debian:bookworm-slim "$@"; }
+    CC=/opt/jieli/pi32v2/bin/clang
+    NM=/opt/jieli/pi32v2/bin/nm
+    OBJDUMP=/opt/jieli/common/bin/objdump
+    INC=/opt/jieli/pi32v2/include
+else
+    echo "target_obj_check: no container; using $TC directly" >&2
+    run() { "$@"; }
+    CC="$TC/pi32v2/bin/clang"
+    NM="$TC/pi32v2/bin/nm"
+    OBJDUMP="$TC/common/bin/objdump"
+    INC="$TC/pi32v2/include"
+fi
+run "$CC" -target pi32v2 -mcpu=r3 -mfprev1 -O2 -fno-builtin -ffp-contract=off \
+    -Wall -Wdouble-promotion -idirafter "$INC" -Ifirmware/src -Ibuild/gen "$@" -c "$SRCF" -o "$OBJ"
+run sh -c "$NM -u $OBJ; echo ---; $OBJDUMP -d $OBJ" > "$OBJ.txt"
 UNDEF="$(awk '/^---$/{exit} {print $NF}' "$OBJ.txt")"
 BAD=""
 for s in $UNDEF; do
     case "$s" in
         __*df*|__*sf2df*|__extendsfdf2|__truncdfsf2) BAD="$BAD $s(double)";;
         malloc|calloc|realloc|free) BAD="$BAD $s(alloc)";;
-        expf|exp|tanhf|tanh|powf|pow|sinf|sin|cosf|cos|tanf|tan|logf|log|log2f|log10f|sqrtf|sqrt|floorf|floor|fabsf|fabs|fmodf|fmod|exp2f|roundf|lrintf|atanf|atan2f|ceilf)
+        expf|exp|tanhf|tanh|powf|pow|sinf|sin|cosf|cos|tanf|tan|logf|log|log2f|log10f|sqrtf|sqrt|floorf|floor|fabsf|fabs|fmodf|fmod|exp2f|roundf|lrintf|atanf|atan2f|ceilf|__fpclassifyf|__isinf|__isnan)
             BAD="$BAD $s(libm)";;
+        __cxa_guard_acquire|__cxa_guard_release|__cxa_guard_abort|_Znwj|_Znaj|_ZdlPv|_ZdaPv)
+            BAD="$BAD $s(c++)";;
         memset|memcpy|memmove|memcmp) ;;      # the firmware's libc.c provides these
         __divsi3|__udivsi3|__modsi3|__umodsi3|__ashldi3|__lshrdi3|__ashrdi3|__muldi3|__udivdi3|__divdi3|__umoddi3|__moddi3) ;;
         *) BAD="$BAD $s(undefined)";;
