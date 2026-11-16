@@ -29,3 +29,14 @@ with tempfile.TemporaryDirectory() as d:
   result=subprocess.run(['bash','-c',f'BASE={base}; '+scanner],cwd=p,capture_output=True)
   assert (result.returncode==0)==blocked,(f,result.returncode)
 print('PASS 5: detector self-line accepted, firmware/tools/build activation detected')
+
+# Preserve 50 MiB threshold and reject unreadable objects, not ordinary small files.
+with tempfile.TemporaryDirectory() as d:
+ p=pathlib.Path(d);g=p/'git'
+ g.write_text('#!/bin/sh\nif [ "$1" = ls-files ]; then echo "100644 abc 0 fixture"; elif [ "$BYTES" = unknown ]; then exit 1; else echo "$BYTES"; fi\n');g.chmod(0o755)
+ line=next(l.strip() for l in s.splitlines() if 'git ls-files -s |' in l)
+ for size,want in [('0',0),('1',0),('52428799',0),('52428800',1),('52428801',1),('unknown',1)]:
+  env=dict(os.environ,PATH=str(p)+':'+os.environ['PATH'],BYTES=size)
+  result=subprocess.run(['bash','-c','bad=0; '+line+'; exit "$bad"'],env=env,capture_output=True)
+  assert result.returncode==want,(size,result.returncode)
+print('PASS 6: size boundaries and unreadable object rejection')
