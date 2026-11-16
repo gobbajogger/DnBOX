@@ -1,0 +1,22 @@
+{
+  "source": "646ac66293d5cc2a04de37ce6dc172f07e572306",
+  "scope": "exact combined native Elite/Pro and affected host only; fullLocal/Review not qualified",
+  "native": {
+    "elite_xip_free": 3240,
+    "pro_xip_free": 3252,
+    "ram_free": 1096,
+    "pool_margin_above_8192": 836
+  },
+  "host": {
+    "no_explainers": 1,
+    "startup_footer": "PASS",
+    "battery_header_checks": 5306
+  },
+  "logs": {
+    "646-elite.log": "1f76197fef1e445c5d83a336cf49a32d61b7749332a39492914a18c388fe8662",
+    "646-pro.log": "ad4033f5cb1d5fee53ee3ab1f18dcf91144e14c3a2c83d51e4141774f607b970",
+    "646-explainers.log": "d10ffbd9f0faa72cd6837063279524e199b59fbc3d035051302a1e8dbc4b36ad",
+    "646-footer.log": "cdd83727e2fbe6c5b7242febbeff6e6be5247181cf0cb5c2a5f7b71f577a5a83",
+    "646-battery.log": "39c078b63031cf741986683e3bb398d1c3f725a291fdac28c039c5db2fca18df"
+  }
+}
