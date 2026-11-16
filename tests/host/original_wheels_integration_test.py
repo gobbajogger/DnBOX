@@ -60,7 +60,7 @@ for mode, flags in [('normal', ['-O2']), ('sanitized', ['-O1', '-g', '-fno-omit-
         raise SystemExit(result.returncode)
     row['runs'] = []
     env = os.environ.copy()
-    env.update(ASAN_OPTIONS='detect_leaks=0', UBSAN_OPTIONS='halt_on_error=1')
+    env.update(ASAN_OPTIONS='detect_leaks=1', UBSAN_OPTIONS='halt_on_error=1')
     for part in (0, 1):
         for kind in (0, 1):
             log = out/f'{mode}-part{part}-kind{kind}.log'

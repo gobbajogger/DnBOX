@@ -13,5 +13,5 @@ for mode in normal sanitized; do
     fi
     cc -std=c99 $flags -Wall -Wextra -Werror -fno-fast-math -ffp-contract=off \
       -Iexperiments/original_synth tests/host/miami_idle_helper_smoke_test.c -o "$out/$mode"
-    ASAN_OPTIONS=detect_leaks=0 "$out/$mode"
+    ASAN_OPTIONS=detect_leaks=1 "$out/$mode"
 done

@@ -92,7 +92,7 @@ for mode in ['normal','sanitized']:
    subprocess.run([cc,*flags,*extra,'tests/host/chicago_idle_then_note_test.c',*map(str,objs),'-lm','-o',str(exe)],check=True,stdout=log,stderr=log)
    with (d/(side+'.log')).open('w') as output:
     subprocess.run([str(exe),str(d/(side+'.bin'))],check=True,stdout=output,
-     env={**os.environ,'ASAN_OPTIONS':'detect_leaks=0'})
+     env={**os.environ,'ASAN_OPTIONS':'detect_leaks=1'})
  receipt['modes'][mode]=compare_files(d/'candidate.bin',d/'reference.bin')
  print(mode+': byte-exact PCM and DSP state PASS')
  print('candidate '+(d/'candidate.log').read_text(),end='')

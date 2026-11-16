@@ -100,6 +100,6 @@ with tempfile.TemporaryDirectory(prefix='bf029-real-') as d:
     args=[cc,'-std=c11',*flags,'-I'+str(root/'firmware/src/seq'),str(src)] + [str(root/'firmware/src/seq'/s) for s in ['sequencer.c','pattern.c','tb3po.c','motion.c']] + ['-lm','-o',str(out)]
     p=subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
     if p.returncode:print('COMPILE exit',p.returncode,p.stdout);sys.exit(p.returncode)
-    p=subprocess.run([str(out)],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=0:halt_on_error=1'})
+    p=subprocess.run([str(out)],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=1:halt_on_error=1'})
     print(p.stdout,end='')
     sys.exit(p.returncode)

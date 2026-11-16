@@ -29,7 +29,7 @@ def main():
     run(['cc',*flags,'-DFIXTURE_MAIN',*src,'-o',a.output/'session'])
     run([a.output/'session'])
     run(['cc',*flags,'-DFIXTURE_MAIN','-fsanitize=address,undefined','-fno-omit-frame-pointer','-no-pie',*src,'-o',a.output/'session-sanitized'])
-    run([a.output/'session-sanitized'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=0',UBSAN_OPTIONS='halt_on_error=1'))
+    run([a.output/'session-sanitized'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1',UBSAN_OPTIONS='halt_on_error=1'))
     run([sys.executable,'-B',Path(__file__).with_name('test_session.py')])
     editor=(ROOT/'firmware/src/app/editor.c').read_text()
     # Exact decoder/encoder and production case, not an independently rewritten responder.

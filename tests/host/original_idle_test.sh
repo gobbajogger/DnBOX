@@ -93,7 +93,7 @@ try:
             if code:raise SystemExit(code)
         stage=mode+' execution'
         with (out/(mode+'.log')).open('w') as log,(out/(mode+'.diagnostics.log')).open('w') as err:
-            p=subprocess.run([str(exe)],stdout=log,stderr=err,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=0'})
+            p=subprocess.run([str(exe)],stdout=log,stderr=err,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=1'})
         code=p.returncode
         if code:raise SystemExit(code)
     stage='normal/sanitized exact log comparison'

@@ -21,14 +21,14 @@ for mode in normal san; do
   src=$D/engine-base.c; [ $v = new ] && src=firmware/src/app/engine.c
   cc $F -Dseq_until_event=output_window_until_event -Dplat_cpu2_run=output_window_cpu2_run -Dplat_cpu2_wait=output_window_cpu2_wait -c $src -o $D/eng-$v.o
   cc $F -DOW_LO=0 -DOW_HI=3 tests/host/engine_output_window_test.c $U $D/eng-$v.o -lm -o $D/h-$v
-  ASAN_OPTIONS=detect_leaks=0 $D/h-$v $D/$mode-$dw-$v.pcm | tail -1
+  if ASAN_OPTIONS=detect_leaks=1 $D/h-$v $D/$mode-$dw-$v.pcm > $D/$mode-$dw-$v.log 2>&1; then tail -1 $D/$mode-$dw-$v.log; else cat $D/$mode-$dw-$v.log; exit 1; fi
  done
  cmp $D/$mode-$dw-base.pcm $D/$mode-$dw-new.pcm && echo "BITEXACT $mode DEV_WOBBLE=$dw $(stat -c%s $D/$mode-$dw-new.pcm) B $(sha256sum < $D/$mode-$dw-new.pcm | cut -c1-16)"
  # a core-1 job that failed half done: the output equals this engine's clean deferred run
  # (the old engine rendered the 808 and BREAK twice there: not a reference)
  for r in 3 1; do
   cc $F -DOW_LO=$r -DOW_HI=$((r+1)) tests/host/engine_output_window_test.c $U $D/eng-new.o -lm -o $D/h-m$r
-  ASAN_OPTIONS=detect_leaks=0 $D/h-m$r $D/$mode-$dw-m$r.pcm | tail -1
+  if ASAN_OPTIONS=detect_leaks=1 $D/h-m$r $D/$mode-$dw-m$r.pcm > $D/$mode-$dw-m$r.log 2>&1; then tail -1 $D/$mode-$dw-m$r.log; else cat $D/$mode-$dw-m$r.log; exit 1; fi
  done
  cmp $D/$mode-$dw-m3.pcm $D/$mode-$dw-m1.pcm && echo "PARTIAL=CLEAN $mode DEV_WOBBLE=$dw"
  done

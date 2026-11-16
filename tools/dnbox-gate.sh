@@ -65,7 +65,10 @@ step limits limits
 browser_safe=1
 browser_policy() { python3 tests/browser-sandbox-policy.py || { browser_safe=0; return 1; }; }
 step browser-sandbox-policy browser_policy
-if [ $void = 0 ]; then if [ $browser_safe = 1 ]; then step host-tests host_tests; else echo "[FAIL] host-tests NOT_RUN: browser policy unsafe or unavailable"; fail=1; fi; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
+sanitizer_safe=1
+sanitizer_policy() { python3 tools/dnbox-sanitizer-policy.py || { sanitizer_safe=0; return 1; }; }
+step sanitizer-policy sanitizer_policy
+if [ $void = 0 ]; then if [ $browser_safe = 1 ] && [ $sanitizer_safe = 1 ]; then step host-tests host_tests; else echo "[FAIL] host-tests NOT_RUN: browser or sanitizer policy unsafe or unavailable"; fail=1; fi; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
 step drone drone
 R=PASS; [ $fail = 1 ] && R=FAIL; [ $void = 1 ] && R=VOID
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"

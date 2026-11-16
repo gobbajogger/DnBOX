@@ -100,9 +100,9 @@ def main():
         subprocess.run(command, check=True)
         native_env = dict(os.environ)
         if args.sanitize:
-            # This executor uses ptrace; LSan cannot attach. ASan/UBSan remain on.
-            # This is not a leak-check PASS and is explicitly recorded below.
-            native_env["ASAN_OPTIONS"] = "detect_leaks=0:halt_on_error=1"
+            # Keep leak detection enabled. A tracer failure is a failed run,
+            # not permission to suppress the leak checker.
+            native_env["ASAN_OPTIONS"] = "detect_leaks=1:halt_on_error=1"
             native_env["UBSAN_OPTIONS"] = "halt_on_error=1:print_stacktrace=1"
         def native(*items):
             subprocess.run([str(binary), *map(str, items)], check=True, env=native_env)
@@ -214,7 +214,7 @@ def main():
     receipt = {"status": "OFFLINE_COMPATIBILITY_ONLY", "firmware_git_tree": TREE,
                "upstream_commit": manifest["commit"], "package_sha256": {k:v[1] for k,v in PACKAGES.items()},
                "sanitize": args.sanitize,
-               "leak_sanitizer": "NOT_RUN: ptrace executor incompatibility; detect_leaks=0" if args.sanitize else "NOT_RUN",
+               "leak_sanitizer": "ENABLED: sanitized native execution completed with detect_leaks=1" if args.sanitize else "NOT_RUN",
                "checks": CHECKS, "source_sha256": source_hashes,
                "limits": ["No firmware or bootloader installed or executed on a target.",
                           "No platform/GPIO/SPI/USB backend compiled or opened.",

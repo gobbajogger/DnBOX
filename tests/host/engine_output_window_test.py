@@ -12,7 +12,7 @@ assert '    static float out_l[256], out_r[256];' in baseline
 (E/'engine-raw-alias.c').write_text(baseline.replace('    static float out_l[256], out_r[256];', '#if X0X_DEV_WOBBLE\n    float *out_l=t0,*out_r=tr;\n#else\n    static float out_l[256], out_r[256];\n#endif'))
 assert (S/'build/gen/x0x_drum_samples.h').exists(), 'Prepare unchanged assets with sh host/build_host.sh --generate-only'
 def run(a,log,check=True):
- p=subprocess.run(list(map(str,a)),cwd=S,capture_output=True,text=True,env=os.environ|{"ASAN_OPTIONS":"detect_leaks=0"});(D/log).write_text(p.stdout+p.stderr);cmds.append({'argv':list(map(str,a)),'cwd':str(S),'exit':p.returncode,'log':log});(D/'COMMANDS.json').write_text(json.dumps(cmds,indent=2));assert not check or p.returncode==0,(log,p.stdout[-700:]+p.stderr[-700:]);return p.returncode
+ p=subprocess.run(list(map(str,a)),cwd=S,capture_output=True,text=True,env=os.environ|{"ASAN_OPTIONS":"detect_leaks=1"});(D/log).write_text(p.stdout+p.stderr);cmds.append({'argv':list(map(str,a)),'cwd':str(S),'exit':p.returncode,'log':log});(D/'COMMANDS.json').write_text(json.dumps(cmds,indent=2));assert not check or p.returncode==0,(log,p.stdout[-700:]+p.stderr[-700:]);return p.returncode
 units=['dsp/drum909','dsp/drum808','dsp/x0x_param','dsp/bass303','dsp/breaks','dsp/fxbus','dsp/master','seq/sequencer','seq/tb3po','seq/pattern','seq/motion','app/factory_banks']
 for wobble in [1,0]:
  for mode in ['normal','sanitized']:

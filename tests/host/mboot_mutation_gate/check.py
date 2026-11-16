@@ -30,7 +30,7 @@ def main():
     run(['cc',*flags,test,'-o',a.output/'gate'])
     pure=run([a.output/'gate'])
     run(['cc',*flags,'-fsanitize=address,undefined','-fno-omit-frame-pointer','-no-pie',test,'-o',a.output/'gate-sanitized'])
-    run([a.output/'gate-sanitized'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=0',UBSAN_OPTIONS='halt_on_error=1'))
+    run([a.output/'gate-sanitized'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1',UBSAN_OPTIONS='halt_on_error=1'))
     flash=(ROOT/'firmware/hal/fm1_flash.h').read_text()
     erase=function(flash,'static int fl_erase4k(')
     write=function(flash,'static int fl_write(')
@@ -68,7 +68,7 @@ puts("PASS: exact common wrappers block raw calls; reset hook revokes; zero-leng
     with tempfile.TemporaryDirectory(prefix='mboot-wrapper-proof-') as tmp:
         p=Path(tmp)/'wrappers.c';p.write_text(harness)
         run(['cc',*flags,'-fsanitize=address,undefined','-no-pie',p,'-o',a.output/'wrappers'])
-        wrappers=run([a.output/'wrappers'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=0',UBSAN_OPTIONS='halt_on_error=1'))
+        wrappers=run([a.output/'wrappers'],env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1',UBSAN_OPTIONS='halt_on_error=1'))
     system=(ROOT/'firmware/hal/fm1_sys.h').read_text()
     for sig in ['static void fm1_reboot(', 'static void fm1_enter_uboot(',
                 'FM1_INLINE void fm1_core_reset(', 'FM1_INLINE void fm1_enter_update(']:

@@ -28,7 +28,7 @@ for mode in normal sanitized; do
         -DORIGINAL_USE_SOFT_FMA -DMIAMI_FX_NO_HOST_FENV -fno-fast-math -ffp-contract=off \
         -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -Iexperiments/original_synth -Iexperiments/wobble \
         ${ORIGINAL_UI_TEST_FILE:-tests/host/original_release_ui_test.c} $U -lm -o "$OUT/$mode" > "$OUT/$mode.compile.log" 2>&1
-    ASAN_OPTIONS=detect_leaks=0 "$OUT/$mode" "$OUT/$mode-images" > "$OUT/$mode.log" 2>&1
+    ASAN_OPTIONS=detect_leaks=1 "$OUT/$mode" "$OUT/$mode-images" > "$OUT/$mode.log" 2>&1
 done
 cmp "$OUT/normal.log" "$OUT/sanitized.log"
 for f in "$OUT/normal-images/"*.png; do cmp "$f" "$OUT/sanitized-images/$(basename "$f")"; done

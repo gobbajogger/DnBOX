@@ -104,7 +104,7 @@ with tempfile.TemporaryDirectory(prefix='motion-external-wait-') as tmp:
         sys.stderr.write(build.stdout + build.stderr)
         raise SystemExit(f'{cc} compilation failed with exit {build.returncode}')
     run = subprocess.run([str(exe)], text=True, capture_output=True,
-                         env={**os.environ, 'ASAN_OPTIONS': 'detect_leaks=0:halt_on_error=1'})
+                         env={**os.environ, 'ASAN_OPTIONS': 'detect_leaks=1:halt_on_error=1'})
     sys.stdout.write(run.stdout)
     sys.stderr.write(run.stderr)
     sys.exit(run.returncode)
