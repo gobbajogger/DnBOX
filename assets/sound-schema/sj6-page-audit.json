@@ -1,0 +1,3375 @@
+{
+  "scope": "Public-safe parameter identities, proposed UI grouping and implementation limits; no coefficient/audio/preset-value payloads",
+  "proposal_not_implementation": true,
+  "namespaces": {
+    "default_parameter_ids": 218,
+    "ordered_main_preset_entries": 170,
+    "main_skips": [
+      212,
+      213,
+      214
+    ],
+    "preview_read_ids": [
+      0,
+      1,
+      3,
+      7,
+      8,
+      36,
+      37,
+      38,
+      39,
+      78,
+      82,
+      86,
+      87,
+      88,
+      89,
+      94,
+      129,
+      130,
+      132,
+      133,
+      134,
+      135,
+      136,
+      201,
+      202,
+      209
+    ]
+  },
+  "source_files": [
+    "experiments/superj6-conductor-source-20261115/control_contract.json",
+    "experiments/superj6-conductor-source-20261115/control_data.hpp",
+    "experiments/superj6-conductor-source-20261115/preset_executor.cpp",
+    "experiments/superj6-conductor-source-20261115/lfo_laws.cpp",
+    "firmware/src/dsp/sj6_engine.c",
+    "firmware/src/dsp/sj6_engine.h",
+    "docs/superj6/UI-GLYPH-MAP.md"
+  ],
+  "current_selected_preset_binding": "NOT_IMPLEMENTED: init loads default table; preset API accepts caller ID/value arrays; no original-bank/name/program binding or MIDI/UI caller exists in owned candidate. neon is an identifier prefix, not a selected preset name. Existing genericJuno6 runtime/programs are separate.",
+  "legacy_unmapped_names": [
+    "neonlimiterAmount",
+    "neontubeRageAmount"
+  ],
+  "legacy_known_but_outside_main_order": [
+    18,
+    19,
+    20,
+    21,
+    146
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "name": "Mix / Oscillator",
+      "ids": [
+        0,
+        1,
+        3,
+        201,
+        202,
+        86,
+        82,
+        83
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Wave detail",
+      "ids": [
+        78,
+        210,
+        79,
+        211,
+        72,
+        73,
+        74,
+        75
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Amplitude envelopes",
+      "ids": [
+        36,
+        37,
+        38,
+        39,
+        119,
+        120,
+        121,
+        122
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Filter",
+      "ids": [
+        128,
+        209,
+        129,
+        130,
+        131,
+        136,
+        137,
+        127
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Filter envelope / layer1",
+      "ids": [
+        132,
+        133,
+        134,
+        135,
+        116,
+        117,
+        7,
+        8
+      ]
+    },
+    {
+      "number": 6,
+      "name": "LFO1",
+      "ids": [
+        87,
+        88,
+        195,
+        94,
+        89,
+        90,
+        91,
+        192
+      ]
+    },
+    {
+      "number": 7,
+      "name": "LFO2",
+      "ids": [
+        95,
+        96,
+        196,
+        98,
+        97,
+        92,
+        193,
+        199
+      ]
+    },
+    {
+      "number": 8,
+      "name": "LFO3",
+      "ids": [
+        99,
+        100,
+        197,
+        102,
+        101,
+        93,
+        194,
+        200
+      ]
+    },
+    {
+      "number": 9,
+      "name": "LFO1/2 routes",
+      "ids": [
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187
+      ]
+    },
+    {
+      "number": 10,
+      "name": "LFO3 / modulation routes",
+      "ids": [
+        188,
+        189,
+        190,
+        191,
+        198,
+        179,
+        203,
+        204
+      ]
+    },
+    {
+      "number": 11,
+      "name": "Delay / reverb",
+      "ids": [
+        24,
+        25,
+        26,
+        27,
+        11,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "number": 12,
+      "name": "Chorus",
+      "ids": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        208
+      ]
+    },
+    {
+      "number": 13,
+      "name": "Chorus v2 / space",
+      "ids": [
+        215,
+        216,
+        217,
+        12,
+        16,
+        17,
+        22,
+        23
+      ]
+    },
+    {
+      "number": 14,
+      "name": "Voice / unison",
+      "ids": [
+        32,
+        33,
+        34,
+        35,
+        59,
+        60,
+        61,
+        62
+      ]
+    },
+    {
+      "number": 15,
+      "name": "Arpeggiator / sequencer",
+      "ids": [
+        63,
+        64,
+        65,
+        66,
+        142,
+        143,
+        144,
+        145
+      ]
+    },
+    {
+      "number": 16,
+      "name": "Sequence offsets1..8",
+      "ids": [
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154
+      ]
+    },
+    {
+      "number": 17,
+      "name": "Sequence offsets9..16",
+      "ids": [
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162
+      ]
+    },
+    {
+      "number": 18,
+      "name": "Sequence toggles1..8",
+      "ids": [
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170
+      ]
+    },
+    {
+      "number": 19,
+      "name": "Sequence toggles9..16",
+      "ids": [
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178
+      ]
+    },
+    {
+      "number": 20,
+      "name": "Layers / key limits",
+      "ids": [
+        5,
+        6,
+        45,
+        46,
+        47,
+        48,
+        76,
+        77
+      ]
+    },
+    {
+      "number": 21,
+      "name": "Pitch / tuning",
+      "ids": [
+        138,
+        139,
+        140,
+        141,
+        124,
+        125,
+        126,
+        206
+      ]
+    },
+    {
+      "number": 22,
+      "name": "Highpass / phaser / flanger",
+      "ids": [
+        28,
+        29,
+        68,
+        69,
+        70,
+        71,
+        49,
+        50
+      ]
+    },
+    {
+      "number": 23,
+      "name": "Flanger / ring / FM",
+      "ids": [
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ]
+    },
+    {
+      "number": 24,
+      "name": "Remaining original main-pass fields",
+      "ids": [
+        118,
+        115,
+        212,
+        213,
+        214,
+        104,
+        103,
+        105
+      ]
+    },
+    {
+      "number": 25,
+      "name": "Remaining original main-pass fields",
+      "ids": [
+        106,
+        107,
+        108,
+        109,
+        123,
+        205
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "id": 0,
+      "identifier": "neonvolumeControl",
+      "field": "volumeControl",
+      "type": "continuous Float control",
+      "units": "normalized level, not proof of linear physical gain",
+      "main_apply_position": 0,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        113,
+        272
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 1,
+      "identifier": "neonpulseVolume",
+      "field": "pulseVolume",
+      "type": "continuous Float control",
+      "units": "normalized level, not proof of linear physical gain",
+      "main_apply_position": 21,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        108,
+        109
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 2,
+      "identifier": "neonlayer1OscMode",
+      "field": "layer1OscMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 3,
+      "identifier": "neonsawVolume",
+      "field": "sawVolume",
+      "type": "continuous Float control",
+      "units": "normalized level, not proof of linear physical gain",
+      "main_apply_position": 22,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        107,
+        109
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 4,
+      "identifier": "neonlayer2OscMode",
+      "field": "layer2OscMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 5,
+      "identifier": "neonlayer1Sound",
+      "field": "layer1Sound",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 85,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Source/library selection, not current generic program index; original bank/layer loader mapping unqualified."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 6,
+      "identifier": "neonlayer2Sound",
+      "field": "layer2Sound",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 86,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Source/library selection, not current generic program index; original bank/layer loader mapping unqualified."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 7,
+      "identifier": "neoncutoffLayer1",
+      "field": "cutoffLayer1",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 1,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        116
+      ],
+      "notes": [
+        "Preview guessed20Hz..20kHz law is not an original-qualified display law."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 8,
+      "identifier": "neonresonanceLayer1",
+      "field": "resonanceLayer1",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 2,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        121,
+        121
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 9,
+      "identifier": "neoncutoffLayer2",
+      "field": "cutoffLayer2",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 10,
+      "identifier": "neonresonanceLayer2",
+      "field": "resonanceLayer2",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 11,
+      "identifier": "neonverbEnable",
+      "field": "verbEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 3,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 12,
+      "identifier": "neonverbTypeII",
+      "field": "verbTypeII",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 12,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 13,
+      "identifier": "neonverbSize",
+      "field": "verbSize",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 4,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 14,
+      "identifier": "neonverbLoCut",
+      "field": "verbLoCut",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 5,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 15,
+      "identifier": "neonverbMix",
+      "field": "verbMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 6,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 16,
+      "identifier": "neonstereoWiden",
+      "field": "stereoWiden",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 17,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 17,
+      "identifier": "neoncompressorAmount",
+      "field": "compressorAmount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 16,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 18,
+      "identifier": "neoncompThreshold",
+      "field": "compThreshold",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Known218-namespace field, absent from170 main-apply order; preserve legacy input rather than invent migration."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 19,
+      "identifier": "neoncompHeadroom",
+      "field": "compHeadroom",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Known218-namespace field, absent from170 main-apply order; preserve legacy input rather than invent migration."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 20,
+      "identifier": "neoncompAttack",
+      "field": "compAttack",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Known218-namespace field, absent from170 main-apply order; preserve legacy input rather than invent migration."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 21,
+      "identifier": "neoncompPostGain",
+      "field": "compPostGain",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Known218-namespace field, absent from170 main-apply order; preserve legacy input rather than invent migration."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 22,
+      "identifier": "neonautopanRate",
+      "field": "autopanRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 14,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 23,
+      "identifier": "neonautopanDepth",
+      "field": "autopanDepth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 15,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 24,
+      "identifier": "neondelayEnable",
+      "field": "delayEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 7,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 25,
+      "identifier": "neondelayTime",
+      "field": "delayTime",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 8,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 26,
+      "identifier": "neondelayFeedback",
+      "field": "delayFeedback",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 9,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 27,
+      "identifier": "neondelayMix",
+      "field": "delayMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 10,
+      "proposed_page": 11,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 28,
+      "identifier": "neonhighPassCutoff",
+      "field": "highPassCutoff",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 25,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 29,
+      "identifier": "neonhighPassRez",
+      "field": "highPassRez",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 30,
+      "identifier": "neonbandPassWidth",
+      "field": "bandPassWidth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 31,
+      "identifier": "neonfreeFormHertz",
+      "field": "freeFormHertz",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 32,
+      "identifier": "neonmonoEnable",
+      "field": "monoEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 18,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 33,
+      "identifier": "neonlegatoEnable",
+      "field": "legatoEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 19,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 34,
+      "identifier": "neonglideEnable",
+      "field": "glideEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 35,
+      "identifier": "neonglideTime",
+      "field": "glideTime",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 20,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 36,
+      "identifier": "neonattack",
+      "field": "attack",
+      "type": "continuous normalized time control",
+      "units": "seconds after0.002+(16-0.002)*u^3.33; raw stored value is normalized",
+      "main_apply_position": 34,
+      "proposed_page": 3,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        137
+      ],
+      "notes": [
+        "Original setter inspected; preview incorrectly uses raw control as seconds."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 37,
+      "identifier": "neondecay",
+      "field": "decay",
+      "type": "continuous normalized time control",
+      "units": "seconds after0.002+(24-0.002)*u^3.35; raw stored value is normalized",
+      "main_apply_position": 35,
+      "proposed_page": 3,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        138
+      ],
+      "notes": [
+        "Original decay/release setters and binary64 constants inspected; not the attack exponent3.33. Preview raw-second law is wrong."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 38,
+      "identifier": "neonsustain",
+      "field": "sustain",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 36,
+      "proposed_page": 3,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        139
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 39,
+      "identifier": "neonrelease",
+      "field": "release",
+      "type": "continuous normalized time control",
+      "units": "seconds after0.002+(24-0.002)*u^3.35; raw stored value is normalized",
+      "main_apply_position": 37,
+      "proposed_page": 3,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        140
+      ],
+      "notes": [
+        "Original decay/release setters and binary64 constants inspected; not the attack exponent3.33. Preview raw-second law is wrong."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 40,
+      "identifier": "neonchorusIEnable",
+      "field": "chorusIEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 44,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 41,
+      "identifier": "neonchorusIIEnable",
+      "field": "chorusIIEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 45,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 42,
+      "identifier": "neonchorusRate",
+      "field": "chorusRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 46,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 43,
+      "identifier": "neonchorusDepth",
+      "field": "chorusDepth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 47,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 44,
+      "identifier": "neonchorusMix",
+      "field": "chorusMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 48,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 45,
+      "identifier": "neonlayer1LowNote",
+      "field": "layer1LowNote",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 46,
+      "identifier": "neonlayer1HighNote",
+      "field": "layer1HighNote",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 47,
+      "identifier": "neonlayer2LowNote",
+      "field": "layer2LowNote",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 48,
+      "identifier": "neonlayer2HighNote",
+      "field": "layer2HighNote",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 49,
+      "identifier": "neonflangerEnable",
+      "field": "flangerEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 50,
+      "identifier": "neonflangerRate",
+      "field": "flangerRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 51,
+      "identifier": "neonflangerDepth",
+      "field": "flangerDepth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 52,
+      "identifier": "neonringMod",
+      "field": "ringMod",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 53,
+      "identifier": "neonringModDepth",
+      "field": "ringModDepth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 54,
+      "identifier": "neonringModMix",
+      "field": "ringModMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 55,
+      "identifier": "neonfmDrumMode",
+      "field": "fmDrumMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 56,
+      "identifier": "neonfmModTime",
+      "field": "fmModTime",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 57,
+      "identifier": "neonfmModCents",
+      "field": "fmModCents",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 54,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 58,
+      "identifier": "neonfmDestination",
+      "field": "fmDestination",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 23,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 59,
+      "identifier": "neonunison",
+      "field": "unison",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 50,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 60,
+      "identifier": "neonunisonDetune",
+      "field": "unisonDetune",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 51,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 61,
+      "identifier": "neonunisonStereo",
+      "field": "unisonStereo",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 52,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 62,
+      "identifier": "neonunisonType",
+      "field": "unisonType",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 53,
+      "proposed_page": 14,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 63,
+      "identifier": "neonarpEnable",
+      "field": "arpEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 26,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 64,
+      "identifier": "neonarpType",
+      "field": "arpType",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 27,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 65,
+      "identifier": "neonarpOctave",
+      "field": "arpOctave",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 28,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 66,
+      "identifier": "neonarpInterval",
+      "field": "arpInterval",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 29,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 67,
+      "identifier": "neonoscSync",
+      "field": "oscSync",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 68,
+      "identifier": "neonphaserEnable",
+      "field": "phaserEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 69,
+      "identifier": "neonphaserSpeed",
+      "field": "phaserSpeed",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 70,
+      "identifier": "neonphaserFeedback",
+      "field": "phaserFeedback",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 71,
+      "identifier": "neonphaserNotch",
+      "field": "phaserNotch",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 22,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 72,
+      "identifier": "neonlayer1Semi",
+      "field": "layer1Semi",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 68,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 73,
+      "identifier": "neonlayer2Semi",
+      "field": "layer2Semi",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 69,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 74,
+      "identifier": "neonlayer1Detune",
+      "field": "layer1Detune",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 70,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 75,
+      "identifier": "neonlayer2Detune",
+      "field": "layer2Detune",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 71,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 76,
+      "identifier": "neonlayer1Pan",
+      "field": "layer1Pan",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 77,
+      "identifier": "neonlayer2Pan",
+      "field": "layer2Pan",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 20,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 78,
+      "identifier": "neonlayer1PWM",
+      "field": "layer1PWM",
+      "type": "continuous Float control",
+      "units": "duty percentage50-47*u, when corresponding PWM enable active",
+      "main_apply_position": 163,
+      "proposed_page": 2,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        114,
+        114
+      ],
+      "notes": [
+        "Original width setter inspected; raw knob direction narrows the pulse."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 79,
+      "identifier": "neonlayer2PWM",
+      "field": "layer2PWM",
+      "type": "continuous Float control",
+      "units": "duty percentage50-47*u, when corresponding PWM enable active",
+      "main_apply_position": 164,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Original width setter inspected; raw knob direction narrows the pulse."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 80,
+      "identifier": "neonlayer1RetroMode",
+      "field": "layer1RetroMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 81,
+      "identifier": "neonlayer2RetroMode",
+      "field": "layer2RetroMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 82,
+      "identifier": "neonlayer1Waveform",
+      "field": "layer1Waveform",
+      "type": "selector stored as Float",
+      "units": "normalized stops0,1/3,2/3,1 => Sine,Triangle,Saw,Square",
+      "main_apply_position": 76,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        101
+      ],
+      "notes": [
+        "Separate PWM enable selects PWM form for Square; preview waveform meanings are wrong."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 83,
+      "identifier": "neonlayer2Waveform",
+      "field": "layer2Waveform",
+      "type": "selector stored as Float",
+      "units": "normalized stops0,1/3,2/3,1 => Sine,Triangle,Saw,Square",
+      "main_apply_position": 77,
+      "proposed_page": 1,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Separate PWM enable selects PWM form for Square; preview waveform meanings are wrong."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 84,
+      "identifier": "neonlayer1FilterType",
+      "field": "layer1FilterType",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 85,
+      "identifier": "neonlayer2FilterType",
+      "field": "layer2FilterType",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 86,
+      "identifier": "neonoscRange",
+      "field": "oscRange",
+      "type": "selector stored as Float",
+      "units": "normalized stops0,.5,1 =>16-foot,8-foot,4-foot",
+      "main_apply_position": 11,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        123
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 87,
+      "identifier": "neonlfo1Enable",
+      "field": "lfo1Enable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 158,
+      "proposed_page": 6,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        115,
+        245
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 88,
+      "identifier": "neonlfo1Rate",
+      "field": "lfo1Rate",
+      "type": "continuous Float control",
+      "units": "Hz or tempo division according to HzEnable 195",
+      "main_apply_position": 126,
+      "proposed_page": 6,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        244
+      ],
+      "notes": [
+        "Public source reference uses16*u^3.33 in Hz mode,18 tempo factors otherwise. Native original provider/numerical staging still requires qualification."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 89,
+      "identifier": "neonlfo1Amount",
+      "field": "lfo1Amount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 127,
+      "proposed_page": 6,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        115
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 90,
+      "identifier": "neonlfo1Amount2",
+      "field": "lfo1Amount2",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": 6,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 91,
+      "identifier": "neonlfo1DelayTime",
+      "field": "lfo1DelayTime",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 128,
+      "proposed_page": 6,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 92,
+      "identifier": "neonlfo2DelayTime",
+      "field": "lfo2DelayTime",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": null,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 93,
+      "identifier": "neonlfo3DelayTime",
+      "field": "lfo3DelayTime",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 129,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 94,
+      "identifier": "neonlfo1Waveform",
+      "field": "lfo1Waveform",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 130,
+      "proposed_page": 6,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        250
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 95,
+      "identifier": "neonlfo2Enable",
+      "field": "lfo2Enable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 159,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 96,
+      "identifier": "neonlfo2Rate",
+      "field": "lfo2Rate",
+      "type": "continuous Float control",
+      "units": "Hz or tempo division according to HzEnable 196",
+      "main_apply_position": 135,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Public source reference uses16*u^3.33 in Hz mode,18 tempo factors otherwise. Native original provider/numerical staging still requires qualification."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 97,
+      "identifier": "neonlfo2Amount",
+      "field": "lfo2Amount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 136,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 98,
+      "identifier": "neonlfo2Waveform",
+      "field": "lfo2Waveform",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 137,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 99,
+      "identifier": "neonlfo3Enable",
+      "field": "lfo3Enable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 160,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 100,
+      "identifier": "neonlfo3Rate",
+      "field": "lfo3Rate",
+      "type": "continuous Float control",
+      "units": "Hz or tempo division according to HzEnable 197",
+      "main_apply_position": 142,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Public source reference uses16*u^3.33 in Hz mode,18 tempo factors otherwise. Native original provider/numerical staging still requires qualification."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 101,
+      "identifier": "neonlfo3Amount",
+      "field": "lfo3Amount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 143,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 102,
+      "identifier": "neonlfo3Waveform",
+      "field": "lfo3Waveform",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 144,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 103,
+      "identifier": "neontremoloDepth",
+      "field": "tremoloDepth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 79,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 104,
+      "identifier": "neontremoloRate",
+      "field": "tremoloRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 78,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 105,
+      "identifier": "neonvibratoSemitones",
+      "field": "vibratoSemitones",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 80,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 106,
+      "identifier": "neonvibratoRate",
+      "field": "vibratoRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 81,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 107,
+      "identifier": "neoncrushEnable",
+      "field": "crushEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 82,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 108,
+      "identifier": "neoncrushAmount",
+      "field": "crushAmount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 83,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 109,
+      "identifier": "neoncrushBitRate",
+      "field": "crushBitRate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 84,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 110,
+      "identifier": "neoncrushMix",
+      "field": "crushMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 111,
+      "identifier": "neondistortionEnable",
+      "field": "distortionEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 112,
+      "identifier": "neondistortionAmount",
+      "field": "distortionAmount",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 113,
+      "identifier": "neondistortionMix",
+      "field": "distortionMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 114,
+      "identifier": "neonlayerMix",
+      "field": "layerMix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 115,
+      "identifier": "neonadsrLinkEnable",
+      "field": "adsrLinkEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 38,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 116,
+      "identifier": "neonadsrFilterLinkEnable",
+      "field": "adsrFilterLinkEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 39,
+      "proposed_page": 5,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 117,
+      "identifier": "neonfilterLinkEnable",
+      "field": "filterLinkEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 5,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 118,
+      "identifier": "neonisTempoSyncd",
+      "field": "isTempoSyncd",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 13,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 119,
+      "identifier": "neonattack2",
+      "field": "attack2",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 40,
+      "proposed_page": 3,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 120,
+      "identifier": "neondecay2",
+      "field": "decay2",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 41,
+      "proposed_page": 3,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 121,
+      "identifier": "neonsustain2",
+      "field": "sustain2",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 42,
+      "proposed_page": 3,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 122,
+      "identifier": "neonrelease2",
+      "field": "release2",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 43,
+      "proposed_page": 3,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 123,
+      "identifier": "neonvintageMode",
+      "field": "vintageMode",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 148,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 124,
+      "identifier": "neonglobalBend",
+      "field": "globalBend",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 149,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 125,
+      "identifier": "neonlayer1Bend",
+      "field": "layer1Bend",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 150,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 126,
+      "identifier": "neonlayer2Bend",
+      "field": "layer2Bend",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 151,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 127,
+      "identifier": "neonfilterRezBoostEnable",
+      "field": "filterRezBoostEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 4,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 128,
+      "identifier": "neonfilterEnable",
+      "field": "filterEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": null,
+      "proposed_page": 4,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 129,
+      "identifier": "neonfilterCutoff",
+      "field": "filterCutoff",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 55,
+      "proposed_page": 4,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        116,
+        116
+      ],
+      "notes": [
+        "Preview guessed20Hz..20kHz law is not an original-qualified display law."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 130,
+      "identifier": "neonfilterRez",
+      "field": "filterRez",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 56,
+      "proposed_page": 4,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        120
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 131,
+      "identifier": "neonfilterTracking",
+      "field": "filterTracking",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 57,
+      "proposed_page": 4,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 132,
+      "identifier": "neonfilterAttack",
+      "field": "filterAttack",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 58,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        143
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 133,
+      "identifier": "neonfilterDecay",
+      "field": "filterDecay",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 59,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        144
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 134,
+      "identifier": "neonfilterSustain",
+      "field": "filterSustain",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 60,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        145
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 135,
+      "identifier": "neonfilterRelease",
+      "field": "filterRelease",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 61,
+      "proposed_page": 5,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        146
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 136,
+      "identifier": "neonfilterStrength",
+      "field": "filterStrength",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 62,
+      "proposed_page": 4,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        228
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 137,
+      "identifier": "neonfilterVelocity",
+      "field": "filterVelocity",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 63,
+      "proposed_page": 4,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 138,
+      "identifier": "neonpitchAttack",
+      "field": "pitchAttack",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 64,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 139,
+      "identifier": "neonpitchDecay",
+      "field": "pitchDecay",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 65,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 140,
+      "identifier": "neonpitchSustain",
+      "field": "pitchSustain",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 66,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 141,
+      "identifier": "neonpitchRelease",
+      "field": "pitchRelease",
+      "type": "continuous normalized time control",
+      "units": "normalized knob; display physical time only with original conversion",
+      "main_apply_position": 67,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 142,
+      "identifier": "neonseqEnable",
+      "field": "seqEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 30,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 143,
+      "identifier": "neonseqDivision",
+      "field": "seqDivision",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 32,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 144,
+      "identifier": "neonseqGate",
+      "field": "seqGate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 31,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 145,
+      "identifier": "neonseqTotalSteps",
+      "field": "seqTotalSteps",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 33,
+      "proposed_page": 15,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 146,
+      "identifier": "neonseqDestination",
+      "field": "seqDestination",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Known218-namespace field, absent from170 main-apply order; preserve legacy input rather than invent migration."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 147,
+      "identifier": "neonseqStep1Offset",
+      "field": "seqStep1Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 89,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 148,
+      "identifier": "neonseqStep2Offset",
+      "field": "seqStep2Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 90,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 149,
+      "identifier": "neonseqStep3Offset",
+      "field": "seqStep3Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 91,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 150,
+      "identifier": "neonseqStep4Offset",
+      "field": "seqStep4Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 92,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 151,
+      "identifier": "neonseqStep5Offset",
+      "field": "seqStep5Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 93,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 152,
+      "identifier": "neonseqStep6Offset",
+      "field": "seqStep6Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 94,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 153,
+      "identifier": "neonseqStep7Offset",
+      "field": "seqStep7Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 95,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 154,
+      "identifier": "neonseqStep8Offset",
+      "field": "seqStep8Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 96,
+      "proposed_page": 16,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 155,
+      "identifier": "neonseqStep9Offset",
+      "field": "seqStep9Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 97,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 156,
+      "identifier": "neonseqStep10Offset",
+      "field": "seqStep10Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 98,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 157,
+      "identifier": "neonseqStep11Offset",
+      "field": "seqStep11Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 99,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 158,
+      "identifier": "neonseqStep12Offset",
+      "field": "seqStep12Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 100,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 159,
+      "identifier": "neonseqStep13Offset",
+      "field": "seqStep13Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 101,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 160,
+      "identifier": "neonseqStep14Offset",
+      "field": "seqStep14Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 102,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 161,
+      "identifier": "neonseqStep15Offset",
+      "field": "seqStep15Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 103,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 162,
+      "identifier": "neonseqStep16Offset",
+      "field": "seqStep16Offset",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 104,
+      "proposed_page": 17,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 163,
+      "identifier": "neonseqStep1Toggle",
+      "field": "seqStep1Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 105,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 164,
+      "identifier": "neonseqStep2Toggle",
+      "field": "seqStep2Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 106,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 165,
+      "identifier": "neonseqStep3Toggle",
+      "field": "seqStep3Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 107,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 166,
+      "identifier": "neonseqStep4Toggle",
+      "field": "seqStep4Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 108,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 167,
+      "identifier": "neonseqStep5Toggle",
+      "field": "seqStep5Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 109,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 168,
+      "identifier": "neonseqStep6Toggle",
+      "field": "seqStep6Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 110,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 169,
+      "identifier": "neonseqStep7Toggle",
+      "field": "seqStep7Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 111,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 170,
+      "identifier": "neonseqStep8Toggle",
+      "field": "seqStep8Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 112,
+      "proposed_page": 18,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 171,
+      "identifier": "neonseqStep9Toggle",
+      "field": "seqStep9Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 113,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 172,
+      "identifier": "neonseqStep10Toggle",
+      "field": "seqStep10Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 114,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 173,
+      "identifier": "neonseqStep11Toggle",
+      "field": "seqStep11Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 115,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 174,
+      "identifier": "neonseqStep12Toggle",
+      "field": "seqStep12Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 116,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 175,
+      "identifier": "neonseqStep13Toggle",
+      "field": "seqStep13Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 117,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 176,
+      "identifier": "neonseqStep14Toggle",
+      "field": "seqStep14Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 118,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 177,
+      "identifier": "neonseqStep15Toggle",
+      "field": "seqStep15Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 119,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 178,
+      "identifier": "neonseqStep16Toggle",
+      "field": "seqStep16Toggle",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 120,
+      "proposed_page": 19,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 179,
+      "identifier": "neonmodwheelDestination",
+      "field": "modwheelDestination",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 121,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 180,
+      "identifier": "neonlfo1Dest1BaseValue",
+      "field": "lfo1Dest1BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 123,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 181,
+      "identifier": "neonlfo1Dest1Param",
+      "field": "lfo1Dest1Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 122,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 182,
+      "identifier": "neonlfo1Dest2BaseValue",
+      "field": "lfo1Dest2BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 125,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 183,
+      "identifier": "neonlfo1Dest2Param",
+      "field": "lfo1Dest2Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 124,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 184,
+      "identifier": "neonlfo2Dest1BaseValue",
+      "field": "lfo2Dest1BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 132,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 185,
+      "identifier": "neonlfo2Dest1Param",
+      "field": "lfo2Dest1Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 131,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 186,
+      "identifier": "neonlfo2Dest2BaseValue",
+      "field": "lfo2Dest2BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 134,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 187,
+      "identifier": "neonlfo2Dest2Param",
+      "field": "lfo2Dest2Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 133,
+      "proposed_page": 9,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 188,
+      "identifier": "neonlfo3Dest1BaseValue",
+      "field": "lfo3Dest1BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 139,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 189,
+      "identifier": "neonlfo3Dest1Param",
+      "field": "lfo3Dest1Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 138,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 190,
+      "identifier": "neonlfo3Dest2BaseValue",
+      "field": "lfo3Dest2BaseValue",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 141,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 191,
+      "identifier": "neonlfo3Dest2Param",
+      "field": "lfo3Dest2Param",
+      "type": "parameter identity stored as Float",
+      "units": "integer destination identity, NOT normalized0..1",
+      "main_apply_position": 140,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Do not clamp to normalized range or infer generic-Juno destination aliases."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 192,
+      "identifier": "neonlfo1Mode",
+      "field": "lfo1Mode",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 145,
+      "proposed_page": 6,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Original LFOMode names: Loop,Retrigger,ArpShot,Oneshot. Original callback/mode-index staging must be preserved."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 193,
+      "identifier": "neonlfo2Mode",
+      "field": "lfo2Mode",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 146,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Original LFOMode names: Loop,Retrigger,ArpShot,Oneshot. Original callback/mode-index staging must be preserved."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 194,
+      "identifier": "neonlfo3Mode",
+      "field": "lfo3Mode",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 147,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Original LFOMode names: Loop,Retrigger,ArpShot,Oneshot. Original callback/mode-index staging must be preserved."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 195,
+      "identifier": "neonlfo1HzEnable",
+      "field": "lfo1HzEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 155,
+      "proposed_page": 6,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 196,
+      "identifier": "neonlfo2HzEnable",
+      "field": "lfo2HzEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 156,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 197,
+      "identifier": "neonlfo3HzEnable",
+      "field": "lfo3HzEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 157,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 198,
+      "identifier": "neonlfoSnapbackEnable",
+      "field": "lfoSnapbackEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 152,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 199,
+      "identifier": "neonlfo2SnapbackEnable",
+      "field": "lfo2SnapbackEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 153,
+      "proposed_page": 7,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 200,
+      "identifier": "neonlfo3SnapbackEnable",
+      "field": "lfo3SnapbackEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 154,
+      "proposed_page": 8,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 201,
+      "identifier": "neonnoiseVolume",
+      "field": "noiseVolume",
+      "type": "continuous Float control",
+      "units": "normalized level, not proof of linear physical gain",
+      "main_apply_position": 23,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        112
+      ],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 202,
+      "identifier": "neonsubVolume",
+      "field": "subVolume",
+      "type": "continuous Float control",
+      "units": "normalized level, not proof of linear physical gain",
+      "main_apply_position": 24,
+      "proposed_page": 1,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        111
+      ],
+      "notes": [
+        "Original setter targets sampler1 master volume, not a generic sub-wave/octave selector. Actual12-zone loader binding is not yet fully qualified."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 203,
+      "identifier": "neonpad1Destination",
+      "field": "pad1Destination",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 87,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 204,
+      "identifier": "neonpad2Destination",
+      "field": "pad2Destination",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 88,
+      "proposed_page": 10,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 205,
+      "identifier": "neonfixedVelocityEnable",
+      "field": "fixedVelocityEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 161,
+      "proposed_page": 25,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 206,
+      "identifier": "neonaTuning",
+      "field": "aTuning",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 72,
+      "proposed_page": 21,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 207,
+      "identifier": "neonempty",
+      "field": "empty",
+      "type": "placeholder",
+      "units": "not an editable musical control",
+      "main_apply_position": null,
+      "proposed_page": null,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 208,
+      "identifier": "neonchorusVersion",
+      "field": "chorusVersion",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 49,
+      "proposed_page": 12,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 209,
+      "identifier": "neonfilterType",
+      "field": "filterType",
+      "type": "two-state selector stored as Float",
+      "units": "OTA off/on for normalized0..1; original rounds half-away then compares to1",
+      "main_apply_position": 162,
+      "proposed_page": 4,
+      "current_preview_status": "PREVIEW_READ_BUT_ORIGINAL_ROUTE_NOT_QUALIFIED",
+      "read_lines": [
+        102
+      ],
+      "notes": [
+        "Original dispatcher and named ivar prove isJunoOTAFilter selection, not three LP/OTA/Syrup stops. Exact alternate receiver/label is not yet qualified. Distinct from layer filter waveform84/85."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 210,
+      "identifier": "neonlayer1PWMEnable",
+      "field": "layer1PWMEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 165,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Separate layer PWM enable, not a fifth direct waveform-stop replacement."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 211,
+      "identifier": "neonlayer2PWMEnable",
+      "field": "layer2PWMEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 166,
+      "proposed_page": 2,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Separate layer PWM enable, not a fifth direct waveform-stop replacement."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 212,
+      "identifier": "neonkeyLockEnable",
+      "field": "keyLockEnable",
+      "type": "switch stored as Float",
+      "units": "off/on; exact callback threshold must match original",
+      "main_apply_position": 73,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Explicitly skipped by original main preset executor; global ownership must not be overwritten by an engine preset."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 213,
+      "identifier": "neonkeyLockRoot",
+      "field": "keyLockRoot",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 74,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Explicitly skipped by original main preset executor; global ownership must not be overwritten by an engine preset."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 214,
+      "identifier": "neonkeyLockScale",
+      "field": "keyLockScale",
+      "type": "selector stored as Float",
+      "units": "enumeration; do not invent labels/index mapping",
+      "main_apply_position": 75,
+      "proposed_page": 24,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [
+        "Explicitly skipped by original main preset executor; global ownership must not be overwritten by an engine preset."
+      ],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 215,
+      "identifier": "neonj60v2Rate",
+      "field": "j60v2Rate",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 167,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 216,
+      "identifier": "neonj60v2Depth",
+      "field": "j60v2Depth",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 168,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    },
+    {
+      "id": 217,
+      "identifier": "neonj60v2Mix",
+      "field": "j60v2Mix",
+      "type": "continuous Float control",
+      "units": "raw stored control value; physical range/law not established",
+      "main_apply_position": 169,
+      "proposed_page": 13,
+      "current_preview_status": "NOT_READ_BY_CURRENT_PREVIEW_DSP",
+      "read_lines": [],
+      "notes": [],
+      "public_identity_source": "experiments/superj6-conductor-source-20261115/control_contract.json"
+    }
+  ]
+}
