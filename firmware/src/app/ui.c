@@ -710,6 +710,7 @@ static void ui_restore_base(int target, int voice, int parameter)
     engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
 }
 
+static int is_pan(pref_t r);
 X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 {
 #if X0X_BASS_PRESET_PREVIEW
@@ -727,6 +728,8 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
         return;
     }
     v = v < 0 ? 0 : v > d->max ? d->max : v;
+    if (is_pan(r))
+        v = x0x_pan_clamp(v);                         /* the clip: L50 .. C .. R50, every writer */
     if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
         if (v == pref_get(r)) return;
         int bank = r.kind == R_BENGINE ? v : engine_bass_requested_bank(r.b);
@@ -1172,11 +1175,12 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         }
         return;
     }
-    if (is_pan(r)) {                                     /* L64 .. C .. R63 */
-        if (v == 64)
+    if (is_pan(r)) {                                     /* L50 .. C .. R50 (x0x_pan_clamp) */
+        int a = x0x_pan_amount(v);
+        if (!a)
             put_s(num, "C");
         else
-            put_i(put_s(num, v < 64 ? "L" : "R"), v < 64 ? 64 - v : v - 64);
+            put_i(put_s(num, a < 0 ? "L" : "R"), a < 0 ? -a : a);
         return;
     }
     switch (r.kind) {
@@ -2978,6 +2982,8 @@ static void lock_turn(pref_t r, int e, int role)
     nv = cur + e;
     nv = nv < 0 ? 0 : nv > d->max ? d->max : nv;
     }
+    if (is_pan(r))
+        nv = x0x_pan_clamp(nv);                       /* a pan p-lock clips at L50 / R50 too */
     l->val[s] = (uint8_t)nv;
     if (!seq.playing)                                 /* stopped: heard at once, until the step is let go */
         engine_set(r.a, r.b, r.c, nv);
@@ -6158,7 +6164,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
             }
         }
         rbox(x + 3, 123 - o, 13, 3, 1, C_LINE);          /* the pan, a mark from the middle */
-        rbox(x + 3 + (pa * 10) / 127, 121 - o, 3, 7, 1, sel ? C_WHITE : C_GRAY);
+        rbox(x + 3 + x0x_pan_pos(pa, 10), 121 - o, 3, 7, 1, sel ? C_WHITE : C_GRAY);
     }
 }
 
@@ -7666,7 +7672,7 @@ static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
     if(is_pan(r) || r.kind==R_BTRANS ||
        (r.kind==R_ENG && ((r.a==T_BRK && r.c==1) ||
                           (r.a==T_MST && r.c==MST_DJF)))) {
-        int at=left+q*36/127;
+        int at=is_pan(r)?left+x0x_pan_pos(val,36):left+q*36/127;   /* pan: L50 at the left stop */
         cv_rect(left,38,37,1,C_LINE);cv_rect(cx,32,1,13,C_GRAY);
         cv_rect(left,35,1,7,C_GRAY);cv_rect(right,35,1,7,C_GRAY);
         cv_rect(at-1,34,3,9,col);
