@@ -64,14 +64,20 @@ def main():
                 raise ValueError('Unsupported implicit input flag: ' + flag)
         if source == closure/'scheduler/tests/source_scheduler_test.cpp':
             adapter_count += 1
+            wrapper_compile = list(command)
             command[source_index] = str(repo/'tests/host/synthone_renderer_test.cpp')
             command += ['-I' + str(repo/'firmware/src/dsp')]
         planned.append(command)
     if adapter_count != 1:
         raise ValueError('Expected exactly one adapter harness')
+    wrapper_compile[wrapper_compile.index('-c') + 1] = str(repo/'firmware/src/dsp/synthone_c.cpp')
+    wrapper_compile[wrapper_compile.index('-o') + 1] = str(out/'c-wrapper.o')
+    wrapper_compile += ['-I' + str(repo/'firmware/src/dsp')]
+    planned.append(wrapper_compile)
     link = [replacements.get(value, value) for value in commands[-1]]
     if any(value.endswith('.o') and value not in replacements.values() for value in link):
         raise ValueError('Link contains an object without a fresh compile command')
+    link.insert(1, str(out/'c-wrapper.o'))
     link[link.index('-o') + 1] = str(out/'adapter-test')
     planned.append(link)
     (out/'commands.json').write_text(json.dumps(planned, indent=2) + '\n')

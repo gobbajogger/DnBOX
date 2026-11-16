@@ -47,3 +47,25 @@ SHA-256 checksums (local trusted retained closure; no raw assets published):
 - `source-build/compact.bin`: `a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5`
 
 Independent test-and-merge review at e3e156c1323840d9db516e5aad6940b2cff71cb5: source-path binding and harness guards inspected; all three regressions independently rerun PASS. Bounded component-integrity approval only, not rule 9 Local approval.
+
+## Caller-owned C ABI checkpoint
+
+`firmware/src/dsp/synthone_c.h/.cpp` adds an explicit storage/span/alignment API
+for cold init/retire, resolved physical parameters, public note events, reset, and
+stereo render. It is pre-FX only; no existing app bank is enabled or reinterpreted.
+Config, compact pack, sine, bands, parameters and tuning cannot alias owner storage.
+Stale/forged handles are outside the documented lifetime contract.
+
+Expanded actual-render test first failed to link the absent API, then passed with
+the implementation:12 scenes/576000 frames; C ABI and C++ adapter bit-identical to
+source oracle. Boundary cases include null/short/misaligned owner, config and
+parameter overlap, invalid parameter index/NaN, invalid note/velocity, reset and
+retire. Three build-integrity regressions still pass. Native wrapper compilation
+with exact pinned C++11/S1_NO_DOUBLE recipe passes; undefined-symbol scan finds no
+allocation or software-double helper. Independent source-only review found no
+blocking issue; independent test replay pending.
+
+Final fresh command manifest SHA256: `c653fcd2bd45410691ae49a27150125cb6a1614002d7ce01a36d027e0a51693d`.
+Host summary unchanged:576000 frames,0 differing channel words,529280 nonzero left
+frames,peak0.628623188,0 heap calls during render. This adds a caller seam, not a
+firmware link, timing, factory or all-engine memory PASS.
