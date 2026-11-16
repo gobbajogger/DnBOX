@@ -1,0 +1,37 @@
+{
+  "source": "953c4680940f2417631e954fbd313326d55aa44d",
+  "nativeSource": "2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490",
+  "scope": "Private test inputs only; identical firmware/host/tools closure, no MKE package or device/publication",
+  "files": [
+    {
+      "path": "smk37/x0x.bin",
+      "bytes": 550116,
+      "sha256": "8e66a2ac2fdcd99a62cce0fa4fd8b572c106b7b4cb208643d27968e1e68bfdc5"
+    },
+    {
+      "path": "smk37/loader/ota.bin",
+      "bytes": 7614,
+      "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+    },
+    {
+      "path": "smk37-elite/x0x.bin",
+      "bytes": 550124,
+      "sha256": "fd7009916803e6859d4911b57ea2c2dde0250502647dc6ec207dec5afdcc3f24"
+    },
+    {
+      "path": "smk37-elite/loader/ota.bin",
+      "bytes": 7616,
+      "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+    },
+    {
+      "path": "x0x-smk37.fwsc",
+      "bytes": 651730,
+      "sha256": "79078f7b03c557f68c145b9c8d1098c098eeeef29ac7925b347e3f607603b46e"
+    },
+    {
+      "path": "x0x-smk37-elite.fwsc",
+      "bytes": 651732,
+      "sha256": "2079a4d4643f3c75ee9b063d22a48ade62d5dbb527948b151d43d96ad96a5175"
+    }
+  ]
+}

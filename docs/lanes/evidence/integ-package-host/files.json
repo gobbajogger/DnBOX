@@ -1,0 +1,72 @@
+{
+  "package-host-inputs.json": {
+    "rawSHA256": "b5c796884886a001e7ff4cede98f9053646f5b91009fa5e32494d0ab77f8c835",
+    "publicSHA256": "b5c796884886a001e7ff4cede98f9053646f5b91009fa5e32494d0ab77f8c835",
+    "publicBytes": 1184
+  },
+  "package-host-results.json": {
+    "rawSHA256": "acfe2ca8d7bb2b2e37a5fa8b9ea88ed31483e52ca1811b38f1dfd106c0e9cf00",
+    "publicSHA256": "acfe2ca8d7bb2b2e37a5fa8b9ea88ed31483e52ca1811b38f1dfd106c0e9cf00",
+    "publicBytes": 1983
+  },
+  "package-host-run.log": {
+    "rawSHA256": "8dc635910f4f7d99d6e1a8bd59e53bc33eae7101c7e261c9c9d0102603685679",
+    "publicSHA256": "8dc635910f4f7d99d6e1a8bd59e53bc33eae7101c7e261c9c9d0102603685679",
+    "publicBytes": 213
+  },
+  "package-mke-build.log": {
+    "rawSHA256": "68c8c2e2519fa3b29d9f48e00bebd0fc2a68139ef03f7e8c49b24a00f604b048",
+    "publicSHA256": "1fc0985fc0bf2dae8d57a934847c5c4867ef04ccc1faed907f7b8b307775b7d7",
+    "publicBytes": 1438
+  },
+  "smk-ota-entry-model1.log": {
+    "rawSHA256": "9e86cfe397d00498bdf9d2b2db73b51eeac63a08d679ebe38edf600d2433b354",
+    "publicSHA256": "9e86cfe397d00498bdf9d2b2db73b51eeac63a08d679ebe38edf600d2433b354",
+    "publicBytes": 814
+  },
+  "smk-ota-entry.log": {
+    "rawSHA256": "f4fadd0e69a20b803a5eb1c6ff684d33c52f74da31bbdf54b5a1ffd58622b67f",
+    "publicSHA256": "f4fadd0e69a20b803a5eb1c6ff684d33c52f74da31bbdf54b5a1ffd58622b67f",
+    "publicBytes": 814
+  },
+  "ble-package.log": {
+    "rawSHA256": "f4f4a4502181893d710d210cd5a40b3b9d1ea31c077f2f5650c9d12d7cd8016f",
+    "publicSHA256": "f4f4a4502181893d710d210cd5a40b3b9d1ea31c077f2f5650c9d12d7cd8016f",
+    "publicBytes": 17
+  },
+  "smk-ota-entry-model2.log": {
+    "rawSHA256": "220d43db689d146c54062f674411ba357338f50ac9f00a605e0a6d45e78ec4a3",
+    "publicSHA256": "220d43db689d146c54062f674411ba357338f50ac9f00a605e0a6d45e78ec4a3",
+    "publicBytes": 814
+  },
+  "smk-build-package-elite.log": {
+    "rawSHA256": "8e7ffb6b973257e15e2c05331715507d2ce866dfe9d87f414d506f235856653b",
+    "publicSHA256": "8e7ffb6b973257e15e2c05331715507d2ce866dfe9d87f414d506f235856653b",
+    "publicBytes": 439
+  },
+  "smk-package.log": {
+    "rawSHA256": "a704dd6928ea926bd6a7681aa11831a2acc4959c8a5345a4a02809f98dc96418",
+    "publicSHA256": "a704dd6928ea926bd6a7681aa11831a2acc4959c8a5345a4a02809f98dc96418",
+    "publicBytes": 439
+  },
+  "smk-update-loader.log": {
+    "rawSHA256": "2b353543476496b6efd7b5727b6d9d51c262e5c51620658ae96a18e8b222c314",
+    "publicSHA256": "2b353543476496b6efd7b5727b6d9d51c262e5c51620658ae96a18e8b222c314",
+    "publicBytes": 604
+  },
+  "smk-build-package.log": {
+    "rawSHA256": "a704dd6928ea926bd6a7681aa11831a2acc4959c8a5345a4a02809f98dc96418",
+    "publicSHA256": "a704dd6928ea926bd6a7681aa11831a2acc4959c8a5345a4a02809f98dc96418",
+    "publicBytes": 439
+  },
+  "package-lua51-result.json": {
+    "rawSHA256": "a8c9a910718d424ea8b8d715fa29c7b51a5cb1cc5c9c66f2a0d8530cbddc8b43",
+    "publicSHA256": "a8c9a910718d424ea8b8d715fa29c7b51a5cb1cc5c9c66f2a0d8530cbddc8b43",
+    "publicBytes": 946
+  },
+  "package-lua51-run.log": {
+    "rawSHA256": "c37c7a9387818aaf384c3d08e0bd698898c7e6139f75892db912072100341e3a",
+    "publicSHA256": "c37c7a9387818aaf384c3d08e0bd698898c7e6139f75892db912072100341e3a",
+    "publicBytes": 151
+  }
+}
