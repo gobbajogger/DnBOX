@@ -8,6 +8,7 @@
 #include "synthone_renderer.hpp"
 #include "synthone_c.h"
 int main(int argc,char **argv) {
+ CHECK(dnbox_s1_owner_bytes()<=11000); // intermediate host owner budget; not target fit
  CHECK(argc==4); Fixture f(argv[1]); FILE *packfile=std::fopen(argv[2],"rb"); CHECK(packfile);
  std::vector<unsigned char> pack(165292);CHECK(std::fread(pack.data(),1,pack.size(),packfile)==pack.size());CHECK(!std::fclose(packfile));
  unsigned long long count=0, different=0, nonzero=0; float peak=0;

@@ -61,3 +61,29 @@ Still NOT_RUN: native executable/firmware link, combined Juno/app resources, tab
 storage/read workload, CPU and device qualification. S6 remains FAIL.
 
 Native baseline union probe at e742be7: original_runtime_backend3720 bytes, original_runtime_part5184, Chicago3492, Miami3720, Juno888. A simple10532-byte replacement union expands each backend by6812 bytes; two parts add13624 bytes before FX. This is not an accepted allocation plan.
+
+## Serialized held-note snapshot reuse
+
+The port's public events and render already require one serialized owner. Every
+mutation synchronously assigned heldNoteNumbers to heldNoteNumbersAE before the
+next use; the AE name now references that same Held object. This removes one
+1536-byte backing array while retaining source spellings and event ordering.
+No asynchronous publication, polyphony, note range, timing or DSP law is changed.
+
+Native target size10532→8996 bytes, measured compiler symbol size0x2324; host
+12088→10560. The intermediate host owner budget test failed before reuse and
+passes after. Full original source-composition suite:38 cases,354907688 checks,
+114196 frames,120289 snapshots,1081 control/note events,0 runtime heap calls,
+0 failures. C/C++/oracle12-scene576000-frame comparison still has0 differences.
+All29 runtime units were rebuilt from modified repository paths.
+
+The test runner now overlays current repository runtime sources into a copied
+verified fixture/oracle closure, records TESTED-SOURCES.json and compiles all
+objects against that same staged view; it cannot accidentally test the old
+retained runtime instead. Original provenance hash remains alongside changed
+source hash in SOURCE-MANIFEST.json.
+
+Integ is separately auditing reuse of the per-part Chicago4252-byte FX owner
+with the3720-byte backend union (7972 total). Even if that passes its retirement
+and tail tests, this8996-byte owner still exceeds it by1024 bytes per part,
+before post-FX. No speculative reuse is credited toward S6.

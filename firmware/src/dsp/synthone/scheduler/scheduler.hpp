@@ -48,7 +48,12 @@ public:
     S1NoteState mono{};
     S1NoteState *monoNote = &mono;
     int polyphony = 6, playingNoteStatesIndex = 0;
-    Held heldNoteNumbers{}, heldNoteNumbersAE{};
+    Held heldNoteNumbers{};
+    // This port serializes every control/event/render call. The original AE
+    // snapshot was copied synchronously after each mutation; keep its source
+    // spelling as a reference to the same owner, not a second1536-byte array.
+    // No concurrent UI-to-audio publication is implied by this representation.
+    Held &heldNoteNumbersAE = heldNoteNumbers;
     /* Binary32 image of 440*2^(-9/12). The old double exp2 rounded to this. */
     float monoFrequency = 261.625579833984375f;
     float previousProcessMonoPolyStatus = 0;

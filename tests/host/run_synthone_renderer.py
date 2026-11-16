@@ -10,6 +10,7 @@ import hashlib
 import json
 import pathlib
 import subprocess
+import shutil
 
 
 def main():
@@ -39,7 +40,23 @@ def main():
     actual = {path.resolve() for path in closure.rglob('*') if path.is_file()}
     if actual != verified:
         raise ValueError('Closure contains unverified or missing files')
+    # The verified retained closure supplies oracle/fixture inputs. Always
+    # compile the current repository's runtime, not historical runtime bytes.
+    original_closure = closure
+    closure = out/'closure'
+    if closure.exists():
+        raise ValueError('Use a fresh output directory for runtime staging')
+    shutil.copytree(original_closure, closure)
+    runtime = repo/'firmware/src/dsp/synthone'
+    for group in ('scheduler', 'experiment', 'controls'):
+        shutil.copytree(runtime/group, closure/group, dirs_exist_ok=True)
+    verified = {path.resolve() for path in closure.rglob('*') if path.is_file()}
+    tested = {str(path.relative_to(closure)): hashlib.sha256(path.read_bytes()).hexdigest()
+              for path in sorted(verified)}
+    (out/'TESTED-SOURCES.json').write_text(json.dumps(tested, indent=2) + '\n')
     commands = json.loads((base/'commands.json').read_text())
+    commands = [[value.replace(str(original_closure), str(closure)) for value in command]
+                for command in commands]
     replacements = {}
     planned = []
     adapter_count = 0
