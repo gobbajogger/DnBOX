@@ -1,0 +1,87 @@
+{
+  "schema": "dnbox-stopped-wip-source-preservation/1",
+  "status": "UNREVIEWED WIP PRESERVATION ONLY",
+  "sourceBase": "ffd31a735acc5721d1f90a30fc1ceb283aad6fc5",
+  "scope": "Optional read-only receipt-aid R3 source and synthetic regressions. Not adopted, mandatory, a scheduler, permission check, delivery proof or live service integration.",
+  "exclusions": [
+    "Actual automation IDs, definitions, prompts, run receipts and private live fixtures excluded.",
+    "No schedule/runtime hook change; subsequent real use and affected independent recheck remain unproved."
+  ],
+  "notClaimed": [
+    "integration",
+    "full-suite pass",
+    "native fit",
+    "target timing",
+    "browser/device qualification",
+    "release"
+  ],
+  "format": "Ordinary UTF-8 source files. No archive/base64 source payload committed.",
+  "files": [
+    {
+      "path": "R2-TO-R3.patch",
+      "bytes": 7599,
+      "sha256": "68ba5d424f13b610b19bdcd184ed5f9b4d1b0d049e66a4c3628987a8651bd46e",
+      "gitBlob": "adf97cf3bd7ce41b39aa655c27f931c541d917a0",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "README-R3.md",
+      "bytes": 1735,
+      "sha256": "8ca2c988eeadabbdb299b811a277b33453b5a8b09c150b5387e9c9ddb2f6ba58",
+      "gitBlob": "970d746230966a50f163db0fff00ade6e729f545",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2778,
+      "sha256": "2116e20ca1f44fd53368284d2c683667d8b1c823ab7c7ceae2e4b00ef2fffc65",
+      "gitBlob": "b1c6e043ebc0e2f9f4de3c8322428c99a4b8feae",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "receipt_guard.py",
+      "bytes": 10033,
+      "sha256": "b18cacb993930f1b4bfa79cb7943f2136e9a3bd0c134ca990cba2733e992a579",
+      "gitBlob": "e8d4bcfc36fd62fca72c84da5290544a697a9563",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "test_independent_regressions.py",
+      "bytes": 4294,
+      "sha256": "9c32289f1ec352286e392a1f1f5c9d5414ea1f6a4dde5fc2c9f19fd755e43ead",
+      "gitBlob": "37e4e5051d418d833a305822af1b4453218dacf1",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "test_r3_consequences.py",
+      "bytes": 3319,
+      "sha256": "60e470adcaebb00c1d3c5ce30239300881df5cf057eefc6b14116cc8a5a00c10",
+      "gitBlob": "1a1656203ee898084a6962a2b83050e15052375f",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    },
+    {
+      "path": "test_receipt_guard.py",
+      "bytes": 5801,
+      "sha256": "b8ba984dd7ccbb9249e4fd17cb0b2ed01c3a60fc8eb8be1b6bc0185d70278fe0",
+      "gitBlob": "a7f08c2065cce0b67b1fcb60aefaef0c72a4237b",
+      "mode": "100644",
+      "exclusionReview": "PASS: individually hash-checked, UTF8/text source class, credential/private-ID/proprietary-marker scan; no raw capture/audio/SDK/binary file class",
+      "classification": "owned project source/test/patch or accompanying source documentation"
+    }
+  ],
+  "payloadCount": 7,
+  "payloadBytes": 35559,
+  "additionalLocalOmissions": []
+}
