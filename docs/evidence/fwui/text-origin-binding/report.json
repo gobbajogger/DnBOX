@@ -1,0 +1,39 @@
+{
+  "schema": "dnbox-logical-text-bounds/1",
+  "coverageComplete": false,
+  "sourceInputManifestSHA256": "88d2dff0aa89ea058d4c0f6cd73500838fde26feed5b6a2cb9ca53ccf0ff3fc5",
+  "stripMapping": {
+    "HDR_H": 20,
+    "MAIN_Y": 20,
+    "BAND_H": 69,
+    "KNOB_Y": 158,
+    "KNOB_H": 82
+  },
+  "domains": [
+    {
+      "domain": "ordinary",
+      "calls": 10467,
+      "decodedInkSamples": 1427082,
+      "logicalOutsideSamples": 0,
+      "explicitClipCallsExcluded": 235,
+      "actualOriginChecks": 690,
+      "screenRecords": 172
+    },
+    {
+      "domain": "lists",
+      "calls": 17564,
+      "decodedInkSamples": 2486373,
+      "logicalOutsideSamples": 0,
+      "explicitClipCallsExcluded": 557,
+      "actualOriginChecks": 1671,
+      "screenRecords": 500
+    }
+  ],
+  "instrumented": {
+    "firmware/src/app/ui.c": "ec549a5db220e83dccf0da60901764d089feea256278d649a5a914ae44a5743f",
+    "firmware/src/gfx.c": "766fea4b3564b2c098a17b3003541fb1b42d801862d2a8dc50d193c78245895d",
+    "tests/host/ui_overlay_inventory.c": "0f72e03f56fcd89473d9393a8cd8f2324284fc4693173cefe4ef6deb7ae4b181",
+    "tests/host/ui_screen_inventory.c": "cbdad1f23cd1496cfc0ad16dbf867faf0871013f10a103d4057f76a1ad75621f"
+  },
+  "limits": "Logical 240x240 ink bounds only; repeated band ink samples are not unique pixels. Explicit clips excluded. Does not prove band visibility, all text, overlap, content bounds, full inventory or visual acceptance."
+}
