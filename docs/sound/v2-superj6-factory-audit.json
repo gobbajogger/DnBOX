@@ -1,0 +1,91 @@
+{
+  "scope": "Input integrity and identity coverage only; not DSP mapping",
+  "dsp_mapping_status": "NOT_ADMITTED",
+  "banks": [
+    {
+      "file": "Brice Beasley.superj6.bank.json.gz",
+      "presets": 12,
+      "original_sha256": "84058c8030cc1b5848627b9ce98386ff7a437b06d57033c58b89848f332c803b",
+      "parameter_entries": 1788
+    },
+    {
+      "file": "DMT CYMATICS.superj6.bank.json.gz",
+      "presets": 123,
+      "original_sha256": "b5ca5dbbae9f52b10686a42f65d1dc5f5a7e4796b14d875625c3b8fe8381648b",
+      "parameter_entries": 18109
+    },
+    {
+      "file": "Electronisounds.superj6.bank.json.gz",
+      "presets": 21,
+      "original_sha256": "82378445cf57b3cd48f873bf0e63aa9c92dcddd9166be34d88e213b72ac8b7fb",
+      "parameter_entries": 2746
+    },
+    {
+      "file": "Intro Bank.superj6.bank.json.gz",
+      "presets": 104,
+      "original_sha256": "b7130d817c26809aed3b10acbda07a2a6d39ed5487355d07a0debd8c666c1c78",
+      "parameter_entries": 15944
+    },
+    {
+      "file": "Moby Pixel.superj6.bank.json.gz",
+      "presets": 29,
+      "original_sha256": "d4607891e4a3132547a69afc5c470252a2d23197b02a816bef92bc6946edf17e",
+      "parameter_entries": 3930
+    },
+    {
+      "file": "Red Sky Lullaby.superj6.bank.json.gz",
+      "presets": 101,
+      "original_sha256": "ec937f1e86c2bbed62b75c75509536b485c624dc7b77ddd191be8f39d9601309",
+      "parameter_entries": 15067
+    },
+    {
+      "file": "SOi.superj6.bank.json.gz",
+      "presets": 51,
+      "original_sha256": "d14e8abbb2e42460d854d92c274166ce21ddcdd6413891ee601772aae9fbb577",
+      "parameter_entries": 6932
+    },
+    {
+      "file": "Sander R Wolff.superj6.bank.json.gz",
+      "presets": 15,
+      "original_sha256": "0f97fd070aa266fb019df026d5f07c5052ee81b0b0ed9c1d0d3034d7b6bad4b9",
+      "parameter_entries": 1791
+    },
+    {
+      "file": "Sound Test Room.superj6.bank.json.gz",
+      "presets": 64,
+      "original_sha256": "31f842a32f1a4f64cda30b92cccfbcce35913ac379e443d640b3bcb7c9ae19aa",
+      "parameter_entries": 7356
+    },
+    {
+      "file": "Stellar Anomalies.superj6.bank.json.gz",
+      "presets": 33,
+      "original_sha256": "48f0ae778df63ff77cbe17dc0d89ab3f6ce76971d5df369cf1828dc5be5cad43",
+      "parameter_entries": 4186
+    },
+    {
+      "file": "The GarageBand Guide.superj6.bank.json.gz",
+      "presets": 26,
+      "original_sha256": "cf0951578f171da7755815ac630f03835fbe85490320c3cd90cf2fd032275eeb",
+      "parameter_entries": 3795
+    },
+    {
+      "file": "Wabi Sabi Waves.superj6.bank.json.gz",
+      "presets": 61,
+      "original_sha256": "d146d5fbdb2d78d3bbb5220e5d75d39110fb9c907ecba6dc40f52a5a0b266671",
+      "parameter_entries": 8905
+    }
+  ],
+  "unknown_identifiers": {
+    "neonlimiterAmount": 240,
+    "neontubeRageAmount": 34
+  },
+  "total_banks": 12,
+  "total_presets": 640,
+  "parameter_entries": 90549,
+  "distinct_identifiers": 174,
+  "recognized_identifiers": 172,
+  "input_integrity": "PASS",
+  "complete_identity_coverage": "FAIL",
+  "manifest_sha256": "9dc773abf3000d82044e15376d465d6da4f695b551ddb30599b995eb0dab8d4d",
+  "schema_sha256": "5a43bfa22b210ef676f37ff92fc02461b646fa9c5225e31bfee69441ef5f1834"
+}
