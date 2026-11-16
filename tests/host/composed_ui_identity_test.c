@@ -7,7 +7,17 @@ static void reference_header_commit(void) { memcpy(reference_pixels,cv_px,240*HD
 #define cv_commit_header reference_header_commit
 #include "reference/ui_perf_8be_reference.inc"
 #undef cv_commit_header
+/* Explicit reviewed metro correction overlay; retained d13 oracle bytes stay authentic.
+ * Only the playing triangle at the shared R22 position regains audio-owned phase. */
+static void r22_phase_reference_icon(int32_t x,int32_t y,uint16_t colour)
+{
+    if(x==168 && y==4 && seq.playing)
+        colour=!seq.metro_view?C_DIM:seq.metro_view<=4u?C_WHITE:C_HI;
+    play_icon(x,y,colour);
+}
+#define play_icon r22_phase_reference_icon
 #include "reference/ui_r22_d13_header_reference.inc"
+#undef play_icon
 static void same_header(void)
 {
     ui_t prior=ui;

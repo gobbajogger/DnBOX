@@ -1,0 +1,34 @@
+{
+  "scope": "Two runtime expressions only; donor source excludes integration hooks. Apply runtime-only.patch, not wholesale ui.c.",
+  "phaseFocusedChecks": 202,
+  "fullRemainderChecks": 206037,
+  "headerChecks": 17148,
+  "paletteStates": 270,
+  "paletteChecks": 810,
+  "darkFrames": 225,
+  "darkHashMismatches": 0,
+  "lightChangedPixels": 15952,
+  "lightChangedPixelsOutsideActiveBank": 0,
+  "negative": "Old playing-static-white fails actual phase0 at169,9; old LIGHT fill fails actual bank sample7,46.",
+  "rawLogInterleaving": "One before FRAME hash is split by exactly named mismatch/FAIL stderr lines; remove only those lines to join its two hash halves. Original log remains intact.",
+  "publishedLogHashes": {
+    "light-before.log": "ee7c5c094f7359f752385d10d945247fd24a3205b59014262bdc75f56790dc5e",
+    "phase-focused-after.log": "01a46d6c5110ee9aac25ac2965a3e233ea78239e5de24d60c3cefae10dba5c74",
+    "remainder-after.log": "4e6407ca19547d2afbdc26f56855782b35b5724ecd9aad672cf23bae6e1bc084",
+    "palette-after.log": "b5d6eab4cbe22fc138685e4cf47abdc8d45d2e41f497f316c1e7a0ed6ddce534",
+    "remainder-stale-fx-coordinate.log": "0fbe7e2202b14861a87bb257c6afd735b6162561a59f7f9fec2739aa5d8b49da",
+    "phase-before.log": "4e063721d84ab39a1d22533f236b9b4311e53009790d392b60571ac1067a16bf",
+    "header-after.log": "062e378a9dc7840c1be9a7c29c43d8821c38456cf345e0797f743375fb17cc0c",
+    "light-isolated-after.log": "f47e38ef99062cfd80559ad47552fbb3b8e76ef9d1fa4b2f57001e76a11b36c3"
+  },
+  "sourceHashes": {
+    "firmware/src/app/ui.c": "fcda221227e641b94fdaac03ab2af171d56ddc9176acd3f65189f7801cecbb1c",
+    "firmware/src/app/ui_drum_voice.inc": "55038d61d8c7e68e7421866b69e8245011c883fc9ca2d3dd806123c5f97091e5",
+    "tests/host/smc_remainder_test.c": "5e449ebdce301e6ee04517c76ace577339e695795c983189433a0d357f11d680",
+    "tests/host/fwui_metro_phase_test.c": "1c5457152e2471074651a905e636180c66a5f5a466521bf29d78676e34515372",
+    "tests/host/fwui_light_theme_sweep.c": "d2b0189212a897d0f291d44ae282dcf7b7cb5d2492f300e76c30ef8203dcd8c8",
+    "tests/host/composed_ui_identity_test.c": "f1bec5bfe576a5c9dfbf24e1c636e5c7b70bdf3284e6f6fb9ecbd8e1cbd97bd8",
+    "tests/host/composed_ui_identity_test.sh": "d709e28e54cf91b3586ce635e16bc0fd79ea5393ac0a61453e20b4a686577e90"
+  },
+  "frameHashAlgorithm": "32-bit FNV-1a, supporting check only; not a byte-for-byte equality proof"
+}

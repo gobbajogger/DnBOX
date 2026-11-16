@@ -220,3 +220,10 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## SMC pickup expectation repair
 - Actual obsolete fixture mismatch219,10 came from current R22 battery and shifted status center108; expectation still used120/no battery. Full lower-header comparison retained, explicit outline/cell checks added; all acquisition/write/feedback/ramp logic unchanged.
 - Actual856,048 assertions PASS,278popup/76peek hints; independently source-reviewed. No production/full visual qualification. Next: preserve audio-owned metro phase in normal R22 header; this is a separate real behavior regression, not a reason to weaken phase tests.
+
+## Preserved metro phase and LIGHT active-bank material
+- Restored actual audio-owned playing-phase colors at existing R22 triangle position, retaining stopped square. Static-white before source fails phase0 at169,9. Full remainder206,037 checks PASS after narrow stale coordinate repairs; no phase contract weakened.
+- LIGHT dark-on-dark active bank now uses existing SOUND_SELECT material; DARK unchanged. Exact combined270states/810checks PASS;225DARK FNV-1a32 hashes match (supporting check, not byte-equality proof). Equivalent LIGHT factory BD changes only active bank. Not all-domain/animation/wholecontrast acceptance.
+- Header17,148 checks PASS with explicit reference-only phase adapter; original d13 oracle bytes and full JSON provenance remain pinned. No silent oracle rewriting. Two runtime expressions only; integration must apply minimal patch over its hooks, never donor ui.c wholesale.
+- Repeated helper typo `and26` affected only a local exploratory pixel-count command, corrected before execution; no product/evidence source changed. Retain spaced Python and preflight syntax checks for reusable helpers.
+- Next: integration exact combined native/affected checks, remaining theme/transient inventory and source-derived complete screen coverage. All full checklist lines remain unqualified; reserved owner decisions unchanged.
