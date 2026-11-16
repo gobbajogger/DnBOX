@@ -1,0 +1,347 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+  0.00      0.00     0.00 31409614     0.00     0.00  getrow
+  0.00      0.00     0.00 12039600     0.00     0.00  __wrap_s1c_read
+  0.00      0.00     0.00 12039600     0.00     0.00  physical_word
+  0.00      0.00     0.00 12039600     0.00     0.00  s1c_read
+  0.00      0.00     0.00  6081900     0.00     0.00  sp_crossfade_compute
+  0.00      0.00     0.00  4608000     0.00     0.00  sp_compressor_compute
+  0.00      0.00     0.00  3072000     0.00     0.00  sp_vdelay_compute
+  0.00      0.00     0.00  3040950     0.00     0.00  sp_buthp_compute
+  0.00      0.00     0.00  3040950     0.00     0.00  sp_moogladder_compute
+  0.00      0.00     0.00  3011698     0.00     0.00  sp_adsr_compute
+  0.00      0.00     0.00  3009900     0.00     0.00  s1c_binding_valid
+  0.00      0.00     0.00  3009900     0.00     0.00  s1c_runtime_morph_compute
+  0.00      0.00     0.00  2304000     0.00     0.00  sp_port_compute
+  0.00      0.00     0.00  2272950     0.00     0.00  sp_osc_compute
+  0.00      0.00     0.00  1536000     0.00     0.00  sp_phasor_compute
+  0.00      0.00     0.00  1504950     0.00     0.00  s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&)
+  0.00      0.00     0.00  1504950     0.00     0.00  sp_butbp_compute
+  0.00      0.00     0.00  1504950     0.00     0.00  sp_fosc_compute
+  0.00      0.00     0.00  1504950     0.00     0.00  sp_noise_compute
+  0.00      0.00     0.00  1504950     0.00     0.00  sp_rand
+  0.00      0.00     0.00   774000     0.00     0.00  callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*)
+  0.00      0.00     0.00   770096     0.00     0.00  s1scheduler::SourceScheduler::stop(int)
+  0.00      0.00     0.00   768288     0.00     0.00  sp_delay_compute
+  0.00      0.00     0.00   768000     0.00     0.00  S1DSPKernel::processLfo()
+  0.00      0.00     0.00   768000     0.00     0.00  synthone_ports::Ports::tick()
+  0.00      0.00     0.00   768000     0.00     0.00  SourceFx::frame(float, float*, float*, float, float, float, float)
+  0.00      0.00     0.00   768000     0.00     0.00  sp_pan2_compute
+  0.00      0.00     0.00   768000     0.00     0.00  sp_revsc_compute
+  0.00      0.00     0.00   288000     0.00     0.00  computephaser
+  0.00      0.00     0.00   288000     0.00     0.00  sp_phaser_compute
+  0.00      0.00     0.00     8642     0.00     0.00  s1scheduler::RuntimeState::initializeNoteStates()
+  0.00      0.00     0.00     8642     0.00     0.00  void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>()
+  0.00      0.00     0.00     6000     0.00     0.00  s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*)
+  0.00      0.00     0.00     6000     0.00     0.00  s1source_sequence::SerializedSequence::tuning_valid(float const*, unsigned long, int)
+  0.00      0.00     0.00     6000     0.00     0.00  s1scheduler::RuntimeState::valid_runtime_output(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const
+  0.00      0.00     0.00     6000     0.00     0.00  s1scheduler::State::valid_output_span(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const
+  0.00      0.00     0.00     1673     0.00     0.00  s1scheduler::SourceScheduler::off_valid(int)
+  0.00      0.00     0.00      969     0.00     0.00  S1NoteState::startNoteHelper(int, int, float)
+  0.00      0.00     0.00      969     0.00     0.00  s1scheduler::SourceScheduler::on_valid(int, int, float)
+  0.00      0.00     0.00      969     0.00     0.00  s1scheduler::State::tuningTableNoteToHz(int) const
+  0.00      0.00     0.00      896     0.00     0.00  s1scheduler::SourceScheduler::start(int, int, float)
+  0.00      0.00     0.00      896     0.00     0.00  s1scheduler::Held::insert_checked(s1scheduler::NoteNumber, unsigned long)
+  0.00      0.00     0.00      896     0.00     0.00  s1scheduler::SourceScheduler::valid_source_event(int, int, float) const
+  0.00      0.00     0.00      112     0.00     0.00  s1scheduler::init_morph_checked(sp_data*, sp_oscmorph2d*, sp_ftbl**, int, int, float*, float)
+  0.00      0.00     0.00      112     0.00     0.00  sp_adsr_init
+  0.00      0.00     0.00      112     0.00     0.00  sp_crossfade_init
+  0.00      0.00     0.00       64     0.00     0.00  s1scheduler::SourceScheduler::stop_all()
+  0.00      0.00     0.00       56     0.00     0.00  sp_butbp_init
+  0.00      0.00     0.00       56     0.00     0.00  sp_buthp_init
+  0.00      0.00     0.00       56     0.00     0.00  sp_fosc_init
+  0.00      0.00     0.00       56     0.00     0.00  sp_moogladder_init
+  0.00      0.00     0.00       56     0.00     0.00  sp_noise_init
+  0.00      0.00     0.00       56     0.00     0.00  sp_osc_init
+  0.00      0.00     0.00       43     0.00     0.00  S1NoteState::clear()
+  0.00      0.00     0.00       24     0.00     0.00  sp_vdelay_reset
+
+			Call graph
+
+
+granularity: each sample hit covers 2 byte(s) no time propagated
+
+index % time    self  children    called     name
+                0.00    0.00 3009900/31409614     s1c_binding_valid [10]
+                0.00    0.00 12039600/31409614     s1c_read [3]
+                0.00    0.00 16360114/31409614     physical_word [2]
+[1]      0.0    0.00    0.00 31409614         getrow [1]
+-----------------------------------------------
+                0.00    0.00 12039600/12039600     s1c_read [3]
+[2]      0.0    0.00    0.00 12039600         physical_word [2]
+                0.00    0.00 16360114/31409614     getrow [1]
+-----------------------------------------------
+                0.00    0.00 12039600/12039600     s1c_runtime_morph_compute [11]
+[3]      0.0    0.00    0.00 12039600         s1c_read [3]
+                0.00    0.00 12039600/31409614     getrow [1]
+                0.00    0.00 12039600/12039600     physical_word [2]
+-----------------------------------------------
+                0.00    0.00 3009900/6081900     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+                0.00    0.00 3072000/6081900     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[4]      0.0    0.00    0.00 6081900         sp_crossfade_compute [4]
+-----------------------------------------------
+                0.00    0.00 4608000/4608000     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[5]      0.0    0.00    0.00 4608000         sp_compressor_compute [5]
+-----------------------------------------------
+                0.00    0.00 3072000/3072000     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[6]      0.0    0.00    0.00 3072000         sp_vdelay_compute [6]
+-----------------------------------------------
+                0.00    0.00 1504950/3040950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+                0.00    0.00 1536000/3040950     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[7]      0.0    0.00    0.00 3040950         sp_buthp_compute [7]
+-----------------------------------------------
+                0.00    0.00 1504950/3040950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+                0.00    0.00 1536000/3040950     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[8]      0.0    0.00    0.00 3040950         sp_moogladder_compute [8]
+-----------------------------------------------
+                0.00    0.00      51/3011698     s1scheduler::SourceScheduler::off_valid(int) [98]
+                0.00    0.00      51/3011698     s1scheduler::SourceScheduler::stop(int) [88]
+                0.00    0.00    1696/3011698     s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00 3009900/3011698     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[9]      0.0    0.00    0.00 3011698         sp_adsr_compute [9]
+-----------------------------------------------
+                0.00    0.00 3009900/3009900     s1c_runtime_morph_compute [11]
+[10]     0.0    0.00    0.00 3009900         s1c_binding_valid [10]
+                0.00    0.00 3009900/31409614     getrow [1]
+-----------------------------------------------
+                0.00    0.00 3009900/3009900     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[11]     0.0    0.00    0.00 3009900         s1c_runtime_morph_compute [11]
+                0.00    0.00 12039600/12039600     s1c_read [3]
+                0.00    0.00 12039600/12039600     __wrap_s1c_read [85]
+                0.00    0.00 3009900/3009900     s1c_binding_valid [10]
+-----------------------------------------------
+                0.00    0.00  768000/2304000     s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+                0.00    0.00 1536000/2304000     S1DSPKernel::processLfo() [89]
+[12]     0.0    0.00    0.00 2304000         sp_port_compute [12]
+-----------------------------------------------
+                0.00    0.00  768000/2272950     SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+                0.00    0.00 1504950/2272950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[13]     0.0    0.00    0.00 2272950         sp_osc_compute [13]
+-----------------------------------------------
+                0.00    0.00 1536000/1536000     S1DSPKernel::processLfo() [89]
+[14]     0.0    0.00    0.00 1536000         sp_phasor_compute [14]
+-----------------------------------------------
+                0.00    0.00 1504950/1504950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[15]     0.0    0.00    0.00 1504950         sp_butbp_compute [15]
+-----------------------------------------------
+                0.00    0.00 1504950/1504950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[16]     0.0    0.00    0.00 1504950         sp_fosc_compute [16]
+-----------------------------------------------
+                0.00    0.00 1504950/1504950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+[17]     0.0    0.00    0.00 1504950         sp_noise_compute [17]
+                0.00    0.00 1504950/1504950     sp_rand [18]
+-----------------------------------------------
+                0.00    0.00 1504950/1504950     sp_noise_compute [17]
+[18]     0.0    0.00    0.00 1504950         sp_rand [18]
+-----------------------------------------------
+                0.00    0.00     288/768288      sp_revsc_compute [21]
+                0.00    0.00  768000/768288      SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[19]     0.0    0.00    0.00  768288         sp_delay_compute [19]
+-----------------------------------------------
+                0.00    0.00  768000/768000      SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[20]     0.0    0.00    0.00  768000         sp_pan2_compute [20]
+-----------------------------------------------
+                0.00    0.00  768000/768000      SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[21]     0.0    0.00    0.00  768000         sp_revsc_compute [21]
+                0.00    0.00     288/768288      sp_delay_compute [19]
+-----------------------------------------------
+                0.00    0.00  288000/288000      sp_phaser_compute [23]
+[22]     0.0    0.00    0.00  288000         computephaser [22]
+-----------------------------------------------
+                0.00    0.00  288000/288000      SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+[23]     0.0    0.00    0.00  288000         sp_phaser_compute [23]
+                0.00    0.00  288000/288000      computephaser [22]
+-----------------------------------------------
+                0.00    0.00     112/112         void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[24]     0.0    0.00    0.00     112         sp_adsr_init [24]
+-----------------------------------------------
+                0.00    0.00     112/112         void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[25]     0.0    0.00    0.00     112         sp_crossfade_init [25]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[26]     0.0    0.00    0.00      56         sp_butbp_init [26]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[27]     0.0    0.00    0.00      56         sp_buthp_init [27]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[28]     0.0    0.00    0.00      56         sp_fosc_init [28]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[29]     0.0    0.00    0.00      56         sp_moogladder_init [29]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[30]     0.0    0.00    0.00      56         sp_noise_init [30]
+-----------------------------------------------
+                0.00    0.00      56/56          void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[31]     0.0    0.00    0.00      56         sp_osc_init [31]
+-----------------------------------------------
+                0.00    0.00      24/24          callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*) [87]
+[32]     0.0    0.00    0.00      24         sp_vdelay_reset [32]
+-----------------------------------------------
+                0.00    0.00 12039600/12039600     s1c_runtime_morph_compute [11]
+[85]     0.0    0.00    0.00 12039600         __wrap_s1c_read [85]
+-----------------------------------------------
+                0.00    0.00 1504950/1504950     s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[86]     0.0    0.00    0.00 1504950         s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+                0.00    0.00 3009900/3011698     sp_adsr_compute [9]
+                0.00    0.00 3009900/3009900     s1c_runtime_morph_compute [11]
+                0.00    0.00 3009900/6081900     sp_crossfade_compute [4]
+                0.00    0.00 1504950/2272950     sp_osc_compute [13]
+                0.00    0.00 1504950/1504950     sp_fosc_compute [16]
+                0.00    0.00 1504950/1504950     sp_noise_compute [17]
+                0.00    0.00 1504950/3040950     sp_moogladder_compute [8]
+                0.00    0.00 1504950/1504950     sp_butbp_compute [15]
+                0.00    0.00 1504950/3040950     sp_buthp_compute [7]
+-----------------------------------------------
+                0.00    0.00  774000/774000      s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[87]     0.0    0.00    0.00  774000         callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*) [87]
+                0.00    0.00      24/24          sp_vdelay_reset [32]
+-----------------------------------------------
+                0.00    0.00      48/770096      main [42]
+                0.00    0.00    2048/770096      s1scheduler::SourceScheduler::stop_all() [106]
+                0.00    0.00  768000/770096      s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[88]     0.0    0.00    0.00  770096         s1scheduler::SourceScheduler::stop(int) [88]
+                0.00    0.00    1673/1673        s1scheduler::SourceScheduler::off_valid(int) [98]
+                0.00    0.00     633/969         s1scheduler::State::tuningTableNoteToHz(int) const [101]
+                0.00    0.00     633/969         S1NoteState::startNoteHelper(int, int, float) [99]
+                0.00    0.00     633/969         s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00      51/3011698     sp_adsr_compute [9]
+-----------------------------------------------
+                0.00    0.00  768000/768000      s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[89]     0.0    0.00    0.00  768000         S1DSPKernel::processLfo() [89]
+                0.00    0.00 1536000/1536000     sp_phasor_compute [14]
+                0.00    0.00 1536000/2304000     sp_port_compute [12]
+-----------------------------------------------
+                0.00    0.00  768000/768000      s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[90]     0.0    0.00    0.00  768000         synthone_ports::Ports::tick() [90]
+-----------------------------------------------
+                0.00    0.00  768000/768000      s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[91]     0.0    0.00    0.00  768000         SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+                0.00    0.00 4608000/4608000     sp_compressor_compute [5]
+                0.00    0.00 3072000/3072000     sp_vdelay_compute [6]
+                0.00    0.00 3072000/6081900     sp_crossfade_compute [4]
+                0.00    0.00 1536000/3040950     sp_buthp_compute [7]
+                0.00    0.00 1536000/3040950     sp_moogladder_compute [8]
+                0.00    0.00  768000/2272950     sp_osc_compute [13]
+                0.00    0.00  768000/768000      sp_pan2_compute [20]
+                0.00    0.00  768000/768000      sp_revsc_compute [21]
+                0.00    0.00  768000/768288      sp_delay_compute [19]
+                0.00    0.00  288000/288000      sp_phaser_compute [23]
+-----------------------------------------------
+                0.00    0.00     969/8642        s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00    1673/8642        s1scheduler::SourceScheduler::off_valid(int) [98]
+                0.00    0.00    6000/8642        s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[92]     0.0    0.00    0.00    8642         s1scheduler::RuntimeState::initializeNoteStates() [92]
+-----------------------------------------------
+                0.00    0.00     969/8642        s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00    1673/8642        s1scheduler::SourceScheduler::off_valid(int) [98]
+                0.00    0.00    6000/8642        s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[93]     0.0    0.00    0.00    8642         void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+                0.00    0.00     112/112         sp_adsr_init [24]
+                0.00    0.00     112/112         s1scheduler::init_morph_checked(sp_data*, sp_oscmorph2d*, sp_ftbl**, int, int, float*, float) [105]
+                0.00    0.00     112/112         sp_crossfade_init [25]
+                0.00    0.00      56/56          sp_osc_init [31]
+                0.00    0.00      56/56          sp_fosc_init [28]
+                0.00    0.00      56/56          sp_noise_init [30]
+                0.00    0.00      56/56          sp_moogladder_init [29]
+                0.00    0.00      56/56          sp_butbp_init [26]
+                0.00    0.00      56/56          sp_buthp_init [27]
+-----------------------------------------------
+                0.00    0.00    6000/6000        main [42]
+[94]     0.0    0.00    0.00    6000         s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+                0.00    0.00 1504950/1504950     s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [86]
+                0.00    0.00  774000/774000      callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*) [87]
+                0.00    0.00  768000/768000      synthone_ports::Ports::tick() [90]
+                0.00    0.00  768000/2304000     sp_port_compute [12]
+                0.00    0.00  768000/768000      S1DSPKernel::processLfo() [89]
+                0.00    0.00  768000/770096      s1scheduler::SourceScheduler::stop(int) [88]
+                0.00    0.00  768000/768000      SourceFx::frame(float, float*, float*, float, float, float, float) [91]
+                0.00    0.00    6000/6000        s1scheduler::State::valid_output_span(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [97]
+                0.00    0.00    6000/6000        s1scheduler::RuntimeState::valid_runtime_output(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [96]
+                0.00    0.00    6000/6000        s1source_sequence::SerializedSequence::tuning_valid(float const*, unsigned long, int) [95]
+                0.00    0.00    6000/8642        void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+                0.00    0.00    6000/8642        s1scheduler::RuntimeState::initializeNoteStates() [92]
+                0.00    0.00      43/43          S1NoteState::clear() [107]
+-----------------------------------------------
+                0.00    0.00    6000/6000        s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[95]     0.0    0.00    0.00    6000         s1source_sequence::SerializedSequence::tuning_valid(float const*, unsigned long, int) [95]
+-----------------------------------------------
+                0.00    0.00    6000/6000        s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[96]     0.0    0.00    0.00    6000         s1scheduler::RuntimeState::valid_runtime_output(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [96]
+-----------------------------------------------
+                0.00    0.00    6000/6000        s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[97]     0.0    0.00    0.00    6000         s1scheduler::State::valid_output_span(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [97]
+-----------------------------------------------
+                0.00    0.00    1673/1673        s1scheduler::SourceScheduler::stop(int) [88]
+[98]     0.0    0.00    0.00    1673         s1scheduler::SourceScheduler::off_valid(int) [98]
+                0.00    0.00    1673/8642        void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+                0.00    0.00    1673/8642        s1scheduler::RuntimeState::initializeNoteStates() [92]
+                0.00    0.00      51/3011698     sp_adsr_compute [9]
+-----------------------------------------------
+                0.00    0.00     336/969         s1scheduler::SourceScheduler::start(int, int, float) [102]
+                0.00    0.00     633/969         s1scheduler::SourceScheduler::stop(int) [88]
+[99]     0.0    0.00    0.00     969         S1NoteState::startNoteHelper(int, int, float) [99]
+-----------------------------------------------
+                0.00    0.00     336/969         s1scheduler::SourceScheduler::start(int, int, float) [102]
+                0.00    0.00     633/969         s1scheduler::SourceScheduler::stop(int) [88]
+[100]    0.0    0.00    0.00     969         s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00    1696/3011698     sp_adsr_compute [9]
+                0.00    0.00     969/8642        void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+                0.00    0.00     969/8642        s1scheduler::RuntimeState::initializeNoteStates() [92]
+-----------------------------------------------
+                0.00    0.00     336/969         s1scheduler::SourceScheduler::start(int, int, float) [102]
+                0.00    0.00     633/969         s1scheduler::SourceScheduler::stop(int) [88]
+[101]    0.0    0.00    0.00     969         s1scheduler::State::tuningTableNoteToHz(int) const [101]
+-----------------------------------------------
+                0.00    0.00     896/896         main [42]
+[102]    0.0    0.00    0.00     896         s1scheduler::SourceScheduler::start(int, int, float) [102]
+                0.00    0.00     896/896         s1scheduler::SourceScheduler::valid_source_event(int, int, float) const [104]
+                0.00    0.00     896/896         s1scheduler::Held::insert_checked(s1scheduler::NoteNumber, unsigned long) [103]
+                0.00    0.00     336/969         S1NoteState::startNoteHelper(int, int, float) [99]
+                0.00    0.00     336/969         s1scheduler::SourceScheduler::on_valid(int, int, float) [100]
+                0.00    0.00     336/969         s1scheduler::State::tuningTableNoteToHz(int) const [101]
+-----------------------------------------------
+                0.00    0.00     896/896         s1scheduler::SourceScheduler::start(int, int, float) [102]
+[103]    0.0    0.00    0.00     896         s1scheduler::Held::insert_checked(s1scheduler::NoteNumber, unsigned long) [103]
+-----------------------------------------------
+                0.00    0.00     896/896         s1scheduler::SourceScheduler::start(int, int, float) [102]
+[104]    0.0    0.00    0.00     896         s1scheduler::SourceScheduler::valid_source_event(int, int, float) const [104]
+-----------------------------------------------
+                0.00    0.00     112/112         void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [93]
+[105]    0.0    0.00    0.00     112         s1scheduler::init_morph_checked(sp_data*, sp_oscmorph2d*, sp_ftbl**, int, int, float*, float) [105]
+-----------------------------------------------
+                0.00    0.00      64/64          main [42]
+[106]    0.0    0.00    0.00      64         s1scheduler::SourceScheduler::stop_all() [106]
+                0.00    0.00    2048/770096      s1scheduler::SourceScheduler::stop(int) [88]
+-----------------------------------------------
+                0.00    0.00      43/43          s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [94]
+[107]    0.0    0.00    0.00      43         S1NoteState::clear() [107]
+-----------------------------------------------
+
+Index by function name
+
+  [87] callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*) [104] s1scheduler::SourceScheduler::valid_source_event(int, int, float) const [19] sp_delay_compute
+  [89] S1DSPKernel::processLfo() [97] s1scheduler::State::valid_output_span(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [16] sp_fosc_compute
+  [99] S1NoteState::startNoteHelper(int, int, float) [101] s1scheduler::State::tuningTableNoteToHz(int) const [28] sp_fosc_init
+ [107] S1NoteState::clear()   [85] __wrap_s1c_read         [8] sp_moogladder_compute
+  [92] s1scheduler::RuntimeState::initializeNoteStates() [22] computephaser [29] sp_moogladder_init
+  [88] s1scheduler::SourceScheduler::stop(int) [1] getrow [17] sp_noise_compute
+ [102] s1scheduler::SourceScheduler::start(int, int, float) [2] physical_word [30] sp_noise_init
+  [94] s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*) [10] s1c_binding_valid [13] sp_osc_compute
+ [100] s1scheduler::SourceScheduler::on_valid(int, int, float) [3] s1c_read [31] sp_osc_init
+ [106] s1scheduler::SourceScheduler::stop_all() [11] s1c_runtime_morph_compute [20] sp_pan2_compute
+  [98] s1scheduler::SourceScheduler::off_valid(int) [9] sp_adsr_compute [23] sp_phaser_compute
+ [105] s1scheduler::init_morph_checked(sp_data*, sp_oscmorph2d*, sp_ftbl**, int, int, float*, float) [24] sp_adsr_init [14] sp_phasor_compute
+ [103] s1scheduler::Held::insert_checked(s1scheduler::NoteNumber, unsigned long) [15] sp_butbp_compute [12] sp_port_compute
+  [93] void s1scheduler::State::initialize_note_objects<&s1scheduler::init_morph_checked>() [26] sp_butbp_init [18] sp_rand
+  [90] synthone_ports::Ports::tick() [7] sp_buthp_compute [21] sp_revsc_compute
+  [95] s1source_sequence::SerializedSequence::tuning_valid(float const*, unsigned long, int) [27] sp_buthp_init [6] sp_vdelay_compute
+  [86] s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&) [5] sp_compressor_compute [32] sp_vdelay_reset
+  [91] SourceFx::frame(float, float*, float*, float, float, float, float) [4] sp_crossfade_compute
+  [96] s1scheduler::RuntimeState::valid_runtime_output(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const [25] sp_crossfade_init

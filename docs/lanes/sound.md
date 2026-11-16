@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 05:12 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 05:20 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -119,3 +119,5 @@ Static sequence admission candidate: real instrumentation red129 calls/128frames
 Frozen6a7 full factory replay completed:694 programs/66,624,000 frames/0 different words/0 nonfinite. All1,388 actual PCM lengths/SHA256 match prior frozen manifest68c7f2d1, preserving tested output beyond shared-new-wrapper comparison. Independent normal static admission/source review PASS; hardened synthetic future-map fallback129 validations PASS producer replay. Evidence under docs/sound/v2-sequence-static; common-FX/source-only limits remain, S1/S2 not complete. Candidate8-program callback pilot now measures separately; no operation-count-to-timing inference. All denied LFS/Swift/trace actions remain stopped; outputs preserved.
 
 Independent final6a7 corpus audit verifies all1,388 PCM hashes and complete factory/runtime input bindings. Timing remains FAIL: candidate pilot35wall/33CPU; preserved-binary same-host ABBA has A17/16,B28/27,B42/40,A20/19 wall/CPU misses, all tracer0 and0nonfinite. Complete input keys agree except the two intended scheduler files; all inputs/executables rechecked before/after. Shared-host ABBA does not establish causal speedup/regression, and no misses are discarded. Only2 exact CPU-miss callback identities recur across runs; neither recurrence nor resource association proves cause. Small diagnostic receipts preserved; raw traces stay local under the existing stopped-publication boundary. Next: isolate callback workload cost versus host variability without changing audio math, then rerun affected qualification, not repeated unqualified full corpora.
+
+Isolated compact four-word reader implemented but NOT activated in morph runtime. Staged original-scalar comparison44,313,152 words plus identical positions/invalid/alias/late failure checks PASS; metadata4->2 red/green verified. Native owner7972/4 unchanged, unlinked code+346B. Default ASan/LSan run fails with ptrace fatal; separate detect_leaks=0 address/UB diagnostic PASS is not leak qualification. Integ released managed thread for exact default sanitizer rerun after source pin. Twelve-scene current scalar route remains0diff/heap. Independent review pending. See docs/sound/v2-compact-quad; do not infer timing gain or combined fit.

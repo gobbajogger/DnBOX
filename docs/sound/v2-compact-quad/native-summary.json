@@ -1,0 +1,23 @@
+{
+  "before": {
+    "executable": 39106,
+    "readonly": 4522,
+    "writable": 616,
+    "bss": 56
+  },
+  "after": {
+    "executable": 39452,
+    "readonly": 4522,
+    "writable": 616,
+    "bss": 56
+  },
+  "delta": {
+    "executable": 346,
+    "readonly": 0,
+    "writable": 0,
+    "bss": 0
+  },
+  "owner_bytes": 7972,
+  "owner_alignment": 4,
+  "scope": "Unlinked 31-unit component sections, not live linked footprint. New batch API not activated; no app/native timing qualification."
+}

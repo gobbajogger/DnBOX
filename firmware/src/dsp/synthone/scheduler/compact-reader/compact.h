@@ -26,6 +26,11 @@ int s1c_binding_valid(const s1c_binding *);
  * binary32 bits, including signed zero. Output may not alias borrowed bytes.
  * Out-of-range unsigned coordinates are rejected, not wrapped. */
 int s1c_read(const s1c_binding *,unsigned,unsigned,uint32_t *);
+/* Transactional two-row/two-position read: [row0,pos0], [row1,pos0],
+ * [row0,pos1], [row1,pos1]. Same coordinate domains as scalar read. out points
+ * to four aligned writable uint32_t, disjoint from whole binding and payload.
+ * Any failure preserves all four outputs; no persistent cache/owner storage. */
+int s1c_read_quad(const s1c_binding *,unsigned,unsigned,unsigned,unsigned,uint32_t *);
 #ifdef __cplusplus
 }
 #endif

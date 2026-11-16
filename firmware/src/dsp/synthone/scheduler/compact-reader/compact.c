@@ -48,25 +48,25 @@ static int block(const view*v,const rowinfo*q,unsigned j,size_t*p,unsigned*mode,
  if(end-start!=size||!range(start,size,v->n))return 0;
  *p=start;*mode=m;*width=w;*anchors=a;return 1;
 }
-static int physical_word(const view*v,unsigned row,unsigned sample,uint32_t*out){
- rowinfo q;if(sample>=4097||!getrow(v,row,&q))return 0;
+static int physical_word_row(const view*v,const rowinfo*q,unsigned sample,uint32_t*out){
+ if(sample>=4097)return 0;
  if(sample==4096){*out=0;return 1;}
- if(q.mode==3){
- unsigned lo=0,hi=q.off;
- while(lo<hi){const unsigned mid=(lo+hi)/2;if(sample<u16(v->b+q.first+6*mid))hi=mid;else lo=mid+1;}
- if(lo>=q.off)return 0;*out=u32(v->b+q.first+6*lo+2);return 1;
+ if(q->mode==3){
+ unsigned lo=0,hi=q->off;
+ while(lo<hi){const unsigned mid=(lo+hi)/2;if(sample<u16(v->b+q->first+6*mid))hi=mid;else lo=mid+1;}
+ if(lo>=q->off)return 0;*out=u32(v->b+q->first+6*lo+2);return 1;
  }
- unsigned lo=0,hi=q.count;
- while(lo<hi){const unsigned mid=(lo+hi)/2;if(u16(v->b+q.off+6*mid)<sample)lo=mid+1;else hi=mid;}
- if(lo<q.count&&u16(v->b+q.off+6*lo)==sample){*out=u32(v->b+q.off+6*lo+2);return 1;}
- const unsigned j=(sample+4096-(q.flags&4095))&4095,a=(q.flags>>12)&1,b=(q.flags>>13)&1;
+ unsigned lo=0,hi=q->count;
+ while(lo<hi){const unsigned mid=(lo+hi)/2;if(u16(v->b+q->off+6*mid)<sample)lo=mid+1;else hi=mid;}
+ if(lo<q->count&&u16(v->b+q->off+6*lo)==sample){*out=u32(v->b+q->off+6*lo+2);return 1;}
+ const unsigned j=(sample+4096-(q->flags&4095))&4095,a=(q->flags>>12)&1,b=(q->flags>>13)&1;
  unsigned rep=j,sign=0;
- if(q.mode){
+ if(q->mode){
  const unsigned r=(0U-j)&4095;if(r<rep){rep=r;sign=a;}
- if(q.mode==2){const unsigned t=(j+2048)&4095,s=(2048U-j)&4095;if(t<rep){rep=t;sign=b;}if(s<rep){rep=s;sign=a^b;}}
+ if(q->mode==2){const unsigned t=(j+2048)&4095,s=(2048U-j)&4095;if(t<rep){rep=t;sign=b;}if(s<rep){rep=s;sign=a^b;}}
  }
- if(rep>=q.n)return 0;
- size_t p;unsigned mode,width,anchors;if(!block(v,&q,rep/64,&p,&mode,&width,&anchors))return 0;
+ if(rep>=q->n)return 0;
+ size_t p;unsigned mode,width,anchors;if(!block(v,q,rep/64,&p,&mode,&width,&anchors))return 0;
  const unsigned i=rep%64;uint32_t value;
  if(mode==0)value=u32(v->b+p+2+4*i);
  else{
@@ -90,6 +90,9 @@ static int physical_word(const view*v,unsigned row,unsigned sample,uint32_t*out)
  }
  }
  *out=value^(sign?UINT32_C(0x80000000):0);return 1;
+}
+static int physical_word(const view*v,unsigned row,unsigned sample,uint32_t*out){
+ rowinfo q;if(!getrow(v,row,&q))return 0;return physical_word_row(v,&q,sample,out);
 }
 static int validate(const view*v){
  for(unsigned r=0;r<52;r++){const unsigned expected=r<48?r:r==48?44:r==49?45:r-2;if(v->b[1264+r]!=expected)return 0;}
@@ -132,4 +135,20 @@ int s1c_read(const s1c_binding*b,unsigned row,unsigned sample,uint32_t*out){
     overlap(out,sizeof *out,b,sizeof *b)||overlap(out,sizeof *out,b->bytes,b->byte_count))return 0;
  const unsigned physical=row<48?row:row==48?44:row==49?45:row-2;uint32_t w;
  if(!physical_word(&v,physical,sample,&w)||!word_valid(w))return 0;*out=w;return 1;
+}
+
+int s1c_read_quad(const s1c_binding*b,unsigned row0,unsigned row1,unsigned sample0,unsigned sample1,uint32_t*out){
+ if(row0>=52||row1>=52||sample0>=4097||sample1>=4097||!extent(b,sizeof *b)||
+    ((uintptr_t)b%__alignof__(s1c_binding))||b->format_tag!=S1C_TAG)return 0;
+ view v;if(!header(b->bytes,b->byte_count,&v))return 0;
+ if(!extent(out,4*sizeof *out)||((uintptr_t)out%__alignof__(uint32_t))||
+    overlap(out,4*sizeof *out,b,sizeof *b)||overlap(out,4*sizeof *out,b->bytes,b->byte_count))return 0;
+ const unsigned physical0=row0<48?row0:row0==48?44:row0==49?45:row0-2;
+ const unsigned physical1=row1<48?row1:row1==48?44:row1==49?45:row1-2;
+ rowinfo q0,q1;if(!getrow(&v,physical0,&q0)||!getrow(&v,physical1,&q1))return 0;
+ uint32_t w[4];
+ if(!physical_word_row(&v,&q0,sample0,w)||!physical_word_row(&v,&q1,sample0,w+1)||
+    !physical_word_row(&v,&q0,sample1,w+2)||!physical_word_row(&v,&q1,sample1,w+3))return 0;
+ for(unsigned i=0;i<4;i++)if(!word_valid(w[i]))return 0;
+ for(unsigned i=0;i<4;i++)out[i]=w[i];return 1;
 }
