@@ -522,6 +522,7 @@ run drum-pan sh -c "mkdir -p build/gen && ([ -f build/gen/x0x_drum_tables.h ] ||
 run stereo sh -c "mkdir -p build/gen && ([ -f build/gen/x0x_drum_tables.h ] || python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null) && $CC -O2 -ffp-contract=off -w -Ifirmware/src/dsp -Ifirmware/src -Ibuild/gen -o $OUT/stereo_test tests/host/stereo_test.c firmware/src/dsp/master.c firmware/src/dsp/fxbus.c -lm && $OUT/stereo_test"
 run master sh -c "$CC $W -Wno-double-promotion -o $OUT/master_test tests/host/master_test.c firmware/src/dsp/master.c -lm && $OUT/master_test"
 run original-owner-layout sh -c "$CC -std=c11 -O2 -Iexperiments/original_synth -Iexperiments/wobble -o $OUT/original_owner_layout_test tests/host/original_owner_layout_test.c && $OUT/original_owner_layout_test"
+run break-step-velocity sh -c "$CC -O2 -ffp-contract=off -Wall -Wextra -Werror tests/host/break_velocity_test.c -lm -o $OUT/break_velocity_test && $OUT/break_velocity_test"
 run drum-kit-identity sh tests/host/drum_kit_identity_test.sh   # independent 909 and 808 voices
 run drum909-adpcm sh tests/host/run_drum909_adpcm.sh   # the 909 cymbals as IMA ADPCM (A/B study reference)
 for t in drum909 drum808 breaks; do

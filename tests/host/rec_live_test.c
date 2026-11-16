@@ -689,6 +689,20 @@ static void test_filter_controls(void)
     png_write("build/host/filter-adsr.png");
 }
 
+static void test_break_velocity_motion_restore(void)
+{
+    seq_stop(&seq);tick(20);
+    int lane=motion_alloc(proj.arr.lane,seq.ppat[TRK_BRK],PART_BRK,T_VEL,PART_BRK<<4,0);
+    CHECK(lane>=0,"BREAK velocity sparse lane allocated");
+    if(lane<0)return;
+    memset(proj.arr.lane[lane].val,64,NSTEPS);
+    engine_motion_reset();seq_start(&seq);tick(160);
+    CHECK(engine_brk_step_velocity()==64,"BREAK velocity applied independently of Level");
+    engine_motion_clear(lane);tick(20);
+    CHECK(engine_brk_step_velocity()==0,"BREAK velocity clear restores legacy/full");
+    seq_stop(&seq);tick(20);
+}
+
 int main(void)
 {
     boot();
@@ -701,6 +715,7 @@ int main(void)
     test_start_ext_running();
     test_drum_record_velocity();
     test_drum_vel_clear_resets_runtime();
+    test_break_velocity_motion_restore();
     test_drum_nearest();
 #if BOARD_SMK37
     seq_stop(&seq);

@@ -700,8 +700,9 @@ static int project_validate_for(const project_t *p)
                 return -1;
             max = PROB_COND + PROB_NCOND - 1;
         } else if (l->t == T_VEL) {
-            /* Drum black-key strike velocity only; 303 steps keep bstep.velocity. */
-            if (l->part >= NKIT || (l->v >> 4) != l->part || (l->v & 15) >= NDRUM || l->i)
+            /* Drum/BREAK strike velocity; 303 steps keep bstep.velocity. */
+            if ((l->part >= NKIT && l->part != PART_BRK) || (l->v >> 4) != l->part ||
+                (l->v & 15) >= (l->part == PART_BRK ? 1 : NDRUM) || l->i)
                 return -1;
             max = 127;
         } else {

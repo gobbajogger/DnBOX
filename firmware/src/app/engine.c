@@ -189,6 +189,7 @@ void engine_brk_bend(int value)
 }
 #ifdef X0X_HOST
 int engine_brk_bend_value(void) { return brk.bend; }
+int engine_brk_step_velocity(void) { return brk.step_velocity; }
 #endif
 static fxbus_t fx POOL;
 static volatile uint8_t tape_signal_seen;
@@ -1301,6 +1302,8 @@ static void mot_apply(void *x, int t, int v, int i, int val)
         int kit = v >> 4, voice = v & 15;
         if ((unsigned)kit < NKIT && (unsigned)voice < NDRUM)
             seq.drum_vel[kit][voice] = (uint8_t)(val < 0 ? 0 : val > 127 ? 127 : val);
+        else if (kit == PART_BRK && voice == 0)
+            breaks_velocity(&brk, val);
     } else if (t < NTARGETS)
         apply_param(t, v, i, val);
 }
