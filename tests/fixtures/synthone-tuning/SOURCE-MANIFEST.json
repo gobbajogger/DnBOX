@@ -1,0 +1,121 @@
+{
+  "scope": "Exact original MIT app-frontend research inputs; uncompiled Swift, not runtime admission",
+  "files": [
+    {
+      "path": "SynthOne/AudioKitSynthOne/DSP/AKSynthOne.swift",
+      "sha": "9431ae5e5b2e80e61a4ae7df210a262b76d28082",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 12360,
+      "sha256": "6559a67d77d3563403bd343ef33103b8daa941b1abeba5c581fd1c3ad22c346b"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/DSP/S1TuningTable.swift",
+      "sha": "21a4865c7bf08b15930a91fe1af620c0b888b37b",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 341,
+      "sha256": "017c2d4fd788bf556a6e02e64bdfc33429612d74cefecd4f4a2d1f49b101888e"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Tunings/Model/Tunings.swift",
+      "sha": "dc8a246d6a77ac7f973dcaf1f2bfd7c0df96ccfb",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 13772,
+      "sha256": "efe18ca4987f513d50bc34d212fe907afdf721a64a972d96ce4b6e97a8ff6328"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Tunings/TuningsPanelController/TuningsPanelController.swift",
+      "sha": "0a33fd6c28d47f9e903141aaff2ea08888db9fd0",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 13530,
+      "sha256": "30d0489cd26d53c741c9bbe387efffab69ee9bee3d644c7c30b7023acc7c05e3"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/DSP/Conductor.swift",
+      "sha": "ad33788b1fcae8faecc7e9b27e569835c5c26305",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 11328,
+      "sha256": "c6fa1af6ed05e6d1cfb1d38238912f32a1986448de76f9efe1ba4e4773a3eda1"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Settings/AppSettings.swift",
+      "sha": "ed09fae72d2553b1acd24930d4e83ef6afcc2409",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "bytes": 11525,
+      "sha256": "08fc6806329fdc937ee221f6cd93d699073da0350e260e88ad60479cb181baf1"
+    },
+    {
+      "path": "AudioKit/AudioKit/Common/Internals/Microtonality/AKTuningTable.swift",
+      "sha": "2933d17112996f89a4ffab48ce6fd6ca75cebefe",
+      "repository": "AudioKit/AudioKit",
+      "bytes": 9386,
+      "sha256": "281204a75d49b11d09b112b76c15ed701fcf9566f59afab9ae640f53015e371f",
+      "pin": "03fecf80a66be88f6ac0356cd532c72dbe09922d",
+      "tag_object": "2539f865457f708479e36cba802b38728bae2f3b"
+    },
+    {
+      "path": "AudioKit/AudioKit/Common/Internals/Microtonality/AKTuningTableBase.swift",
+      "sha": "a5d1d228561cc06b798830a6cda7ac4c1f0b753d",
+      "repository": "AudioKit/AudioKit",
+      "bytes": 2383,
+      "sha256": "2c7ca9a3f8cd84bac7bf86fe4ea8d166f5ef2542d3b620f149ee7eabfba27da2",
+      "pin": "03fecf80a66be88f6ac0356cd532c72dbe09922d",
+      "tag_object": "2539f865457f708479e36cba802b38728bae2f3b"
+    },
+    {
+      "path": "AudioKit/AudioKit/Common/Internals/Microtonality/AKTuningTable+EqualTemperament.swift",
+      "sha": "bebb1d704457dca5326eb5711497e1b2995788e0",
+      "repository": "AudioKit/AudioKit",
+      "bytes": 1158,
+      "sha256": "8df0de698424dd46b48e2bd17509b1e23aaab51effc032cc1a426d0a5da49d59",
+      "pin": "03fecf80a66be88f6ac0356cd532c72dbe09922d",
+      "tag_object": "2539f865457f708479e36cba802b38728bae2f3b"
+    },
+    {
+      "path": "AudioKit/LICENSE",
+      "sha": "e99249a865bfbacdeeda22e965268a42ff638913",
+      "repository": "AudioKit/AudioKit",
+      "bytes": 1085,
+      "sha256": "b9aad96b49e7afcadb3f351b733de24577924b3ba48c82a3e07393d8b9f96c5e",
+      "pin": "03fecf80a66be88f6ac0356cd532c72dbe09922d",
+      "tag_object": "2539f865457f708479e36cba802b38728bae2f3b"
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/DSP/SDSustainer.swift",
+      "sha": "34f0e5ce4d3a9ed62deaa0b638205885a2978ed5",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "sha256": "ed6bf4f8a937f26cc307d81d3f20f6701fb2c0bcfe0efd9754597364505c9fcc",
+      "bytes": 1860
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Keyboard/Manager+ModWheelDelegate.swift",
+      "sha": "236869e2e34b07bd10498830878ea70cbe338112",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "sha256": "1e3986cfe49d828a2a5d0fa0c061011a7cffc69050f9195e26063960e62bfd31",
+      "bytes": 1022
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Keyboard/Manager+Keyboard.swift",
+      "sha": "64053e2148988c0572f13587ebafff4645a0e3e3",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "sha256": "2586f4393135b03d99ba09827f6952337e83068ad6bc98e3eb708a0341a07553",
+      "bytes": 1623
+    },
+    {
+      "path": "SynthOne/AudioKitSynthOne/Manager/Manager+callbacks.swift",
+      "sha": "3ccf79e005f295cf579bc4e591263eb3c59f09a8",
+      "repository": "AudioKit/AudioKitSynthOne",
+      "pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+      "sha256": "9a3fdc337980b1bac7b58dc4ff43e31d443de793701097a6d3a7f5dfd08ec764",
+      "bytes": 7257
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 02:46 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:04 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -82,3 +82,5 @@ Final frozen f50d5c14 factory replay completed from the portable restored bundle
 Managed second-environment exact replay PASS:694 programs and all1388 PCM hashes plus canonical533934080B archive match. LFS object-only upload then denied exit2 because repository LFS budget is exceeded. Stopped; no alternate route, remote readback NOT_RUN, no dangling pointer committed. All originals/recreation/local LFS bytes retained. Root owns legitimate budget restoration; sound will verify remote fresh-cache readback before pointer publication. See docs/sound/v2-artifact-recovery-status.md. Unaffected control-law/native-interface work continues; no full sound checklist PASS.
 
 Source-helper C ABI checkpoint: transient original helper laws (physical and six dependent normalized parameters) plus resolved-target accessor, no owner growth.6,385 changes/957,750 exact target comparisons against retained original helper,4,096 extra rendered frames0diff/controlheap0; prior12scenes576,000frames0diff/renderheap0 unchanged audio SHA4b32746b…. Native wrapper+frontend compile7972B/align4,248B scratch plus20B saved registers before callees; complete stack and combined app fit NOT_RUN. Six renderer closure negatives and eight factory closure/selection tests PASS; fresh factory build-only PASS, new694audio NOT_RUN. Scope and source receipts in docs/sound/v2-source-frontend-result.json. Independent review pending; no full S1–S7 PASS.
+
+App-frontend input audit: authenticated694 corpus has12 non-12ET master sets,5 non440 A4 values,5 nonzero stored hold flags and37 nondefault modwheel routes. Five audit regressions PASS; these are stored-field counts, not audible qualification. Exact original MIT Swift/AudioKit tuning sources retained separately from frozen factory fixture, with Gitblob/SHA256 pins. Swift absent locally; original Swift/iOS execution NOT_RUN. Next: verify complete original tuning/NPO/A4 routing and obtain an independent original-capable test route before extending audio claims. No runtime changed in this audit.

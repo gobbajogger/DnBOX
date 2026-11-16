@@ -1,0 +1,898 @@
+{
+  "scope": "Audit source factory fields outside the qualified scalar/pre-FX bench.\n\nCounts stored inputs, not audible behavior or complete app qualification.\nExpected repository/counts must come from a separately trusted manifest.\n",
+  "manifest_sha256": "806d92dae2ef75b073168e5b85ee2dc6055f2c3b10ceca3a0e40933514c37622",
+  "source_repo": "AudioKit/AudioKitSynthOne",
+  "source_pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "bank_count": 12,
+  "counts": {
+    "presets": 694,
+    "non440_A4": 5,
+    "non12ET_master_sets": 12,
+    "missing_master_sets": 216,
+    "nonzero_stored_hold": 5,
+    "nondefault_modwheel_routing": 37
+  },
+  "affected_entries": [
+    {
+      "bank": "BankA.json",
+      "index": 9,
+      "name": "JEC Digiharp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 5 Harmonic Series: Pentad",
+      "tuning_master_count": 5,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "BankA.json",
+      "index": 16,
+      "name": "BB Crush On The Choir",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "BankA.json",
+      "index": 24,
+      "name": "Frost Plucks",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 3 Harmonic+Subharmonic Series: Triad",
+      "tuning_master_count": 5,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 2,
+      "name": "Let\u2019s Play",
+      "frequencyA4": 439,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": true,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 12,
+      "name": "The Pulse (LFO Rate)",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 15,
+      "name": "BB 80s Cop Drama",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 23,
+      "name": "Harmonic Harp Pluck",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 7 Wilson North Indian:Bhairavi",
+      "tuning_master_count": 7,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 30,
+      "name": "97 Tears Keys",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 45,
+      "name": "ElectroTrash Bass",
+      "frequencyA4": 440,
+      "isHoldMode": 1,
+      "modWheelRouting": 0,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": true,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 51,
+      "name": "Carpenter Arpenter",
+      "frequencyA4": 440,
+      "isHoldMode": 1,
+      "modWheelRouting": 0,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": true,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 56,
+      "name": "C Strange Things",
+      "frequencyA4": 440,
+      "isHoldMode": 1,
+      "modWheelRouting": 0,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": true,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 62,
+      "name": "Simply Square Lead",
+      "frequencyA4": 440,
+      "isHoldMode": 1,
+      "modWheelRouting": 0,
+      "tuningName": null,
+      "tuning_master_count": null,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": true,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Bonus.json",
+      "index": 86,
+      "name": "Sega Outrun",
+      "frequencyA4": 440,
+      "isHoldMode": 1,
+      "modWheelRouting": 0,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": true,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 6,
+      "name": "BB New Worlds Seq",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 12,
+      "name": "BB Dream With Me Arp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 6 Wilson Hexany(3, 5, 15, 27)",
+      "tuning_master_count": 6,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 14,
+      "name": "BB Danger Inc. Drone",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 16,
+      "name": "BB Kubrick Hall Drone",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 19,
+      "name": "BB Stunned By Splendor Drone",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 23,
+      "name": "BB Phaedra Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 27,
+      "name": "BB Castaspella Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 28,
+      "name": "BB Hobbs Vox Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "12 Hobbs Recurrence Relation",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 29,
+      "name": "BB Up To You Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 31,
+      "name": "BB Vibe Organ 1979 Poly",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 32,
+      "name": "BB Hughes Poly",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 33,
+      "name": "BB 80s Cop Poly",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 34,
+      "name": "BB Makeshift Organ Poly",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 35,
+      "name": "BB Slow Keys Poly",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 38,
+      "name": "BB R\u00f6y\u2019s Phaser Bass",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 42,
+      "name": "BB The Silver Screen Lead",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 43,
+      "name": "BB Eazy-East Lead",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": " 7 Wilson Highland Bagpipes",
+      "tuning_master_count": 7,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 44,
+      "name": "BB Extremity FX",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Brice Beasley.json",
+      "index": 45,
+      "name": "BB Synth Won Sign-off",
+      "frequencyA4": 410,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": true,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "DJ Puzzle.json",
+      "index": 0,
+      "name": "Lost Sentinel",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "DJ Puzzle.json",
+      "index": 4,
+      "name": "Cinematic Waves",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 6,
+      "name": "JEC Rainbow Dome Synthi",
+      "frequencyA4": 434,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": true,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 28,
+      "name": "JEC Come Back Calypso 2",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 29,
+      "name": "JEC Crushed Velvet Sequins 2",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 58,
+      "name": "JEC Un Dallap\u00e9 per Alessandro 2",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 67,
+      "name": "JEC Soft iVCS3",
+      "frequencyA4": 432,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": true,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 78,
+      "name": "JEC Voxy Bass",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "JEC.json",
+      "index": 86,
+      "name": "JEC Slow Lesley",
+      "frequencyA4": 434,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": true,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 0,
+      "name": "Deeper Space Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 18,
+      "name": "Shimmershine Pad",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 34,
+      "name": "Groover Bass",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 41,
+      "name": "Odd Mod Arp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 46,
+      "name": "Hexadekany Arp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 6 Wilson Hexany(1, 3, 5, 7)",
+      "tuning_master_count": 6,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 48,
+      "name": "Analog Bubblearp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 7 Wilson MOS G:0.2641",
+      "tuning_master_count": 7,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 56,
+      "name": "Modal Trance Arp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 1,
+      "tuningName": " 7 Wilson North Indian:Madhubanti",
+      "tuning_master_count": 7,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 60,
+      "name": "Hick Up Arp",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": " 5 Grady: S Pentatonic 11-limit Scale 2",
+      "tuning_master_count": 5,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 63,
+      "name": "Oddscale Riser",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "19 Grady: A-Narushima 19-tone 7-limit",
+      "tuning_master_count": 19,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 74,
+      "name": "Carpsicord",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 75,
+      "name": "97 Tears Keys",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 78,
+      "name": "Church Organs in Space",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Red Sky Lullaby.json",
+      "index": 84,
+      "name": "Syncopated Keys",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 2,
+      "tuningName": "12 ET",
+      "tuning_master_count": 12,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": false,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": true
+      }
+    },
+    {
+      "bank": "Sound of Izrael 2.json",
+      "index": 21,
+      "name": "Soi ARP 22",
+      "frequencyA4": 440,
+      "isHoldMode": 0,
+      "modWheelRouting": 0,
+      "tuningName": "Harmonic+Subharmonic Series: Dyad",
+      "tuning_master_count": 3,
+      "flags": {
+        "non440_A4": false,
+        "non12ET_master_sets": true,
+        "nonzero_stored_hold": false,
+        "nondefault_modwheel_routing": false
+      }
+    }
+  ],
+  "qualification": "NOT_RUN: complete tuning, hold and modwheel routing"
+}
