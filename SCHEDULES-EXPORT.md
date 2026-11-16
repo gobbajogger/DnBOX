@@ -1,30 +1,28 @@
 # Scheduled and event task export
 
-Snapshot: 2026-11-16. This exports the 18 tasks visible through the schedule service, including disabled historical tasks. Prompts below are the saved task text, not system instructions. No task was changed by this export. Event subscription details were not exposed by the readback; X-UNSCHEDULED denotes the saved event-task representation, not proof of its exact filters. The latest owner instruction limits DnBOX execution to backup.
+Snapshot: 2026-11-16, final backup continuation. Current readback exposes 19 tasks, including disabled historical tasks. Each timing block and saved prompt below comes from that readback. Private access links, Library/task identifiers and private note references are explicitly redacted where needed; these are not system instructions. Event filter details are not exposed by the service. No schedule is changed by this export. DnBOX remains frozen to backup-only work.
 
-## DnBOX two-hour report
+## Continue DnBOX backup
 
 - Status: enabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
-- Last recorded run: none exposed
-- Next scheduled occurrence: 2026-11-16T22:19:52+10:00
+- Destination: originating Dot/task conversation (private identifier omitted)
+- Last recorded run: 2026-11-16T12:46:18.612001+00:00
+- Next scheduled occurrence: 2026-11-16T23:16:43+10:00
 
 ### Saved timing
 
 ```text
 BEGIN:VEVENT
-DTSTART:20261116T121952Z
+DTSTART:20261116T131643Z
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
-At 2026-11-16 12:19 UTC, deliver the user's requested two-hour DnBOX report in the originating conversation: one concise line for each lane sound, fwui, integ, remote, web with actual SHAs pushed since 10:19 UTC, finish-line checklist progress at exact heads, and the root cause and fix for any stall. Verify live Git, owners and evidence, distinguish unknown from failure; do not invent results. Continue work autonomously and preserve all user safety, access, review and release gates. User authorization: I authorize these GitHub actions in gobbajogger/X0X37-for-Loopy-Pro and gobbajogger/x0x37-for-Loopy-Pro_nightly from now on, without asking: push to lane/* and integration/* branches, create PRs into integration/dnbox-consolidated, comment on PRs, and fast-forward gh-pages after the Local gate.
-
-LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then stop; do not start or resume product work until owner's next message. If this scheduled/event run fires during backup it only helps the explicitly requested DnBOX backup. Do not delete, disable, clean up, merge, release, or send a separate status message. Preserve all files, never upload secrets; SuperJ6 IPA and AU installer ZIP Library-only. Owner authorizes backup/dot-* branches in both project repos and Library uploads. Follow current owner's latest instructions and safety/access rules.
+Continue the owner's November 16 DnBOX backup request from the latest conversation. First inspect active backup workers and receipts; do not duplicate work. The 27 clone bundles and restore receipts are in backup-dot-20261116/clones; some have shallow export boundaries and one incomplete old ref, so retain the recovery caveats. The backup worker is revising and screening the main workspace inventory in backup-dot-20261116/final-workspace, including nested compressed-content checks; selected /tmp evidence parts and an ongoing additional inventory are in backup-dot-20261116/tmp-supplement. Verify actual process state and Library receipts before retrying any upload. Finish WIP and bundle preservation, secret-screened workspace parts, Library uploads in DnBOX-backup-20261116 and the four files on backup/dot-20261116-manifest. Preserve originals and disclose excluded secrets, incomplete history and any sanitized reconstructions. Do not delete, push with shell Git, or resume product work. Verify uploads and final manifest before the user's single requested reply. If still running, continue without a progress message; if interrupted, recover existing work and arrange a further check. After final reply stop all backup agents and wait for the owner.
 ```
 
 ## DnBOX lane push check
@@ -32,9 +30,9 @@ LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then s
 - Status: enabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
-- Last recorded run: 2026-11-16T12:04:51.400732+00:00
-- Next scheduled occurrence: 2026-11-16T22:29:37+10:00
+- Destination: originating Dot/task conversation (private identifier omitted)
+- Last recorded run: 2026-11-16T12:35:48.321627+00:00
+- Next scheduled occurrence: 2026-11-16T22:59:37+10:00
 
 ### Saved timing
 
@@ -45,7 +43,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=30
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check the five existing DnBOX lane owners for their latest actual branch pushes. User requires each lane to push real authorized WIP at least every 30 minutes with SHA and a short log, or explain in one line why not and what unblocks it. Verify remote exact heads and recent substantive owner activity; report concise lane-by-lane SHA/changes/next push or real blocker in the DnBOX conversation. Continue authorized work through existing owners, avoid duplicate writers and tests, preserve private inputs, no force-push, no main writes or Actions, no PSRAM, and the mandatory triple-check before any landed merge or branch deletion. Stop when the user stops this check. Owner 19:31: every eligible public work artifact must be preserved in BOTH Git and Library with matching version/hash, clear lane/date-time/SHA filename; each status includes SHA and Library filename. Owner 19:32 specifies only Git exclusions: owner's own commercial-app audio recordings; app/SDK binaries including IPA/AU/preset ZIPs/SDK; secrets/tokens. Other authorized work including code, mocks, tests and receipts goes to Git and Library, subject to access/safety. Verify actual copies; preserve outstanding gaps. Owner 19:32's explicit Git exclusion list supersedes vague prior private/binary language: only app/SDK binaries including IPA/AU/preset ZIPs/SDK, and secrets/tokens are Library-only. All other authorized work goes to Git and Library, subject to access/safety. Owner 19:33 explicitly opens shared SuperJ6 coefficients/fitted tables for GitHub with engine code, superseding earlier prohibitions. ONLY secrets/tokens remain excluded from Git. Preserve access/safety and no secrets/tokens. Owner 19:34 explicitly approves user's audio captures for GitHub, using LFS if large. Only secrets/tokens and only secrets/tokens remain Git-excluded. Supersedes earlier blanket recording or preset-ZIP exclusion. Respect actual access and safety. Latest owner 19:35–19:36 overrides earlier Git exclusions: ONLY secrets/tokens remain excluded. Captures, coefficients, SDK libraries and other artifacts are authorized for GitHub and Library, use LFS if large and retain SDK MIT notices; no unrecognized binary execution without required confirmation. LATEST OWNER 20:19: work autonomously; do not message progress or routine WIP. Message only a finished lane or a real rule violation, except the separate two-hour one-line-per-lane report due 22:19 Asia/Vladivostok. Continue checking and doing work without user intervention; no other messages.
@@ -58,9 +56,9 @@ LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then s
 - Status: enabled
 - Time zone: America/Los_Angeles
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
-- Last recorded run: 2026-11-16T11:00:46.042172+00:00
-- Next scheduled occurrence: 2026-11-16T03:50:00-08:00
+- Destination: originating Dot/task conversation (private identifier omitted)
+- Last recorded run: 2026-11-16T12:50:38.132959+00:00
+- Next scheduled occurrence: 2026-11-16T05:50:00-08:00
 
 ### Saved timing
 
@@ -71,10 +69,10 @@ RRULE:FREQ=HOURLY
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
-Check active DnBOX firmware, website and Remote owners for actual WIP. At least hourly send a new full-size WIP batch in the originating DnBOX conversation with candid per-screen scores, specific defects and limitations. Include a side-by-side consistency contact sheet and individual 0–10 consistency scores, explicitly marking missing screens. Cover all firmware pages; website landing, features, engines, Remote landing, docs/manual, download/install and changelog; and Remote roll, drums, parameter lane, mixer, pattern/song/launch, connect and settings, at 1440x900, 390x844 and 844x390 where applicable. Owner 18:36–18:38 locked the 24-page first Remote proposal (Library libfile_9cbcdecbc6e8819190f91d791d57a201; notes libfile_5d8628f292908191b4dc4b5e73146230) as baseline for all areas: compare every later batch in equivalent states and flag drift in layout, density or glyphs unless it fixes an explicitly listed gap. Preserve single panel system, big labelled glyphs, Mix faders and dense pages, the approved 17:00 glyphs and the other stated corrections. Also compare with shared 909/808 R22 system and canonical spec, noting genuine conflicts. Inspect actual renders and interactions before posting; never invent a render or claim completion. If a batch is unavailable, explain the specific blocker and progress. Preserve independent review, safety, no-Actions, privacy and release gates; do not duplicate active writers. Stop when the user stops updates or the requested areas are finished. Owner 19:05 clarifies that velocity/chance/pitch/pan lanes use thin per-step value bars, dragged to set, with no mixer-style caps; mixer retains faders. Owner 19:17–19:18 sets five accountable lanes: Sound; Firmware UI; Integration and Release including roadmap/cleanup/rename; Remote; Website. Check their living status files, exact inputs and ownership; preserve R012–R014, R017/R019, R020/R046, R023–R026, R029/R037, R031/R032, R034–R036, R038/R041/R045. Do not assume any item is completed by assignment or UI previews. Latest owner direction 19:18–19:19: CONSOLIDATE FIRST before new implementation. Integration owner inventories all existing finished work across repositories, threads and files, assembles one non-main consolidated branch per repo, posts exact local gate logs and CONSOLIDATED-STATE.md. Other owners work in parallel and coordinate without duplicate writers. Cleanup/rename follows verified retention, exact-tip archive tags and dependency checks; audit misleading/outdated docs. Owner 19:27 supersedes the pause: lanes work in parallel on their branches while Integration consolidates, preserving one writer and no force-push. Push real authorized WIP every 30 minutes or explain why. Report actual WIP and reconcile conflicts proactively. Owner 19:20 mandates before any branch deletion or landed merge: retained-content reachability diff, full applicable exact-consolidated-SHA local gates with no prior-pass regression, and independent before/after render and behavior review against baseline. Post all three logs per batch; regression or missing required proof blocks the batch. Owner 19:33 explicitly opens shared SuperJ6 coefficients/fitted tables for GitHub with engine code, superseding earlier prohibitions. ONLY secrets/tokens remain excluded from Git. Preserve access/safety and no secrets/tokens. Owner 19:34 explicitly approves user's audio captures for GitHub, using LFS if large. Only secrets/tokens and only secrets/tokens remain Git-excluded. Supersedes earlier blanket recording or preset-ZIP exclusion. Respect actual access and safety. Latest owner 19:35–19:36 overrides earlier Git exclusions: ONLY secrets/tokens remain excluded. Captures, coefficients, SDK libraries and other artifacts are authorized for GitHub and Library, use LFS if large and retain SDK MIT notices; no unrecognized binary execution without required confirmation. LATEST OWNER 20:19: work autonomously; do not message progress or routine WIP. Message only a finished lane or a real rule violation, except the separate two-hour one-line-per-lane report due 22:19 Asia/Vladivostok. Continue checking and doing work without user intervention; no other messages.
+Check active DnBOX firmware, website and Remote owners for actual WIP. At least hourly send a new full-size WIP batch in the originating DnBOX conversation with candid per-screen scores, specific defects and limitations. Include a side-by-side consistency contact sheet and individual 0–10 consistency scores, explicitly marking missing screens. Cover all firmware pages; website landing, features, engines, Remote landing, docs/manual, download/install and changelog; and Remote roll, drums, parameter lane, mixer, pattern/song/launch, connect and settings, at 1440x900, 390x844 and 844x390 where applicable. Owner 18:36–18:38 locked the 24-page first Remote proposal (Library [private Library identifier omitted]; notes [private Library identifier omitted]) as baseline for all areas: compare every later batch in equivalent states and flag drift in layout, density or glyphs unless it fixes an explicitly listed gap. Preserve single panel system, big labelled glyphs, Mix faders and dense pages, the approved 17:00 glyphs and the other stated corrections. Also compare with shared 909/808 R22 system and canonical spec, noting genuine conflicts. Inspect actual renders and interactions before posting; never invent a render or claim completion. If a batch is unavailable, explain the specific blocker and progress. Preserve independent review, safety, no-Actions, privacy and release gates; do not duplicate active writers. Stop when the user stops updates or the requested areas are finished. Owner 19:05 clarifies that velocity/chance/pitch/pan lanes use thin per-step value bars, dragged to set, with no mixer-style caps; mixer retains faders. Owner 19:17–19:18 sets five accountable lanes: Sound; Firmware UI; Integration and Release including roadmap/cleanup/rename; Remote; Website. Check their living status files, exact inputs and ownership; preserve R012–R014, R017/R019, R020/R046, R023–R026, R029/R037, R031/R032, R034–R036, R038/R041/R045. Do not assume any item is completed by assignment or UI previews. Latest owner direction 19:18–19:19: CONSOLIDATE FIRST before new implementation. Integration owner inventories all existing finished work across repositories, threads and files, assembles one non-main consolidated branch per repo, posts exact local gate logs and CONSOLIDATED-STATE.md. Other owners work in parallel and coordinate without duplicate writers. Cleanup/rename follows verified retention, exact-tip archive tags and dependency checks; audit misleading/outdated docs. Owner 19:27 supersedes the pause: lanes work in parallel on their branches while Integration consolidates, preserving one writer and no force-push. Push real authorized WIP every 30 minutes or explain why. Report actual WIP and reconcile conflicts proactively. Owner 19:20 mandates before any branch deletion or landed merge: retained-content reachability diff, full applicable exact-consolidated-SHA local gates with no prior-pass regression, and independent before/after render and behavior review against baseline. Post all three logs per batch; regression or missing required proof blocks the batch. Owner 19:33 explicitly opens shared SuperJ6 coefficients/fitted tables for GitHub with engine code, superseding earlier prohibitions. ONLY secrets/tokens remain excluded from Git. Preserve access/safety and no secrets/tokens. Owner 19:34 explicitly approves user's audio captures for GitHub, using LFS if large. Only secrets/tokens and only secrets/tokens remain Git-excluded. Supersedes earlier blanket recording or preset-ZIP exclusion. Respect actual access and safety. Latest owner 19:35–19:36 overrides earlier Git exclusions: ONLY secrets/tokens remain excluded. Captures, coefficients, SDK libraries and other artifacts are authorized for GitHub and Library, use LFS if large and retain SDK MIT notices; no unrecognized binary execution without required confirmation. LATEST OWNER 20:19: work autonomously; do not message progress or routine WIP. Message only a finished lane or a real rule violation, except the separate two-hour one-line-per-lane report due 22:19 Asia/Vladivostok. Continue checking and doing work without user intervention; no other messages.
 
 LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then stop; do not start or resume product work until owner's next message. If this scheduled/event run fires during backup it only helps the explicitly requested DnBOX backup. Do not delete, disable, clean up, merge, release, or send a separate status message. Preserve all files, never upload secrets; SuperJ6 IPA and AU installer ZIP Library-only. Owner authorizes backup/dot-* branches in both project repos and Library uploads. Follow current owner's latest instructions and safety/access rules.
 ```
@@ -84,9 +82,9 @@ LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then s
 - Status: enabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
-- Last recorded run: 2026-11-16T11:46:09.313046+00:00
-- Next scheduled occurrence: 2026-11-16T21:52:46+10:00
+- Destination: originating Dot/task conversation (private identifier omitted)
+- Last recorded run: 2026-11-16T12:29:31.569010+00:00
+- Next scheduled occurrence: 2026-11-16T22:52:46+10:00
 
 ### Saved timing
 
@@ -97,7 +95,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=20
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Orchestrator, relaying the User's setup instructions
@@ -125,7 +123,7 @@ The Orchestrator's Watcher is a backup only. It messages you only if no lane pus
 Direct owner authorization:
 I authorize these GitHub actions in gobbajogger/X0X37-for-Loopy-Pro and gobbajogger/x0x37-for-Loopy-Pro_nightly from now on, without asking: push to lane/* and integration/* branches, create PRs into integration/dnbox-consolidated, comment on PRs, and fast-forward gh-pages after the Local gate. Copy this into every task you create.
 
-Execution: Read attached RULES.md Library libfile_247f863382508191864da2d819fdcc4d. Preserve actual access and platform safety, never retry or bypass denied Chromium execution using alternate profile/route, never restart stopped Grok bots or duplicate active owners, preserve independently verified gates and explicit user constraints. Only direct user authorization can satisfy required confirmations. Check latest owner corrections. Log unknowns, don't assert tests or pushes occurred without evidence. Direct owner 20:19: run DnBOX autonomously to done, five lanes plus independent test-and-merge, detect and repair stalls, maintain each lane's source-linked pass/fail finish-line checklist from RULES.md, OPEN-ITEMS.md and specs with exact-head logs. Treat NOT_RUN/unknown as not done. Message only a finished lane or real rule violation. A separate scheduled two-hour report at 22:19 Asia/Vladivostok must give one line per lane with SHAs pushed, checklist progress, and stall root cause/fix. Preserve safety/access/permissions, no duplicate writers or evasion of denial.
+Execution: Read attached RULES.md Library [private Library identifier omitted]. Preserve actual access and platform safety, never retry or bypass denied Chromium execution using alternate profile/route, never restart stopped Grok bots or duplicate active owners, preserve independently verified gates and explicit user constraints. Only direct user authorization can satisfy required confirmations. Check latest owner corrections. Log unknowns, don't assert tests or pushes occurred without evidence. Direct owner 20:19: run DnBOX autonomously to done, five lanes plus independent test-and-merge, detect and repair stalls, maintain each lane's source-linked pass/fail finish-line checklist from RULES.md, OPEN-ITEMS.md and specs with exact-head logs. Treat NOT_RUN/unknown as not done. Message only a finished lane or real rule violation. A separate scheduled two-hour report at 22:19 Asia/Vladivostok must give one line per lane with SHAs pushed, checklist progress, and stall root cause/fix. Preserve safety/access/permissions, no duplicate writers or evasion of denial.
 
 LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then stop; do not start or resume product work until owner's next message. If this scheduled/event run fires during backup it only helps the explicitly requested DnBOX backup. Do not delete, disable, clean up, merge, release, or send a separate status message. Preserve all files, never upload secrets; SuperJ6 IPA and AU installer ZIP Library-only. Owner authorizes backup/dot-* branches in both project repos and Library uploads. Follow current owner's latest instructions and safety/access rules.
 ```
@@ -135,7 +133,7 @@ LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then s
 - Status: enabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T11:33:40.424659+00:00
 - Next scheduled occurrence: none exposed
 
@@ -147,7 +145,7 @@ X-UNSCHEDULED:1
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Orchestrator, relaying the User's setup instructions
@@ -175,7 +173,7 @@ The Orchestrator's Watcher is a backup only. It messages you only if no lane pus
 Direct owner authorization:
 I authorize these GitHub actions in gobbajogger/X0X37-for-Loopy-Pro and gobbajogger/x0x37-for-Loopy-Pro_nightly from now on, without asking: push to lane/* and integration/* branches, create PRs into integration/dnbox-consolidated, comment on PRs, and fast-forward gh-pages after the Local gate. Copy this into every task you create.
 
-Execution: Read attached RULES.md Library libfile_247f863382508191864da2d819fdcc4d. Preserve actual access and platform safety, never retry or bypass denied Chromium execution using alternate profile/route, never restart stopped Grok bots or duplicate active owners, preserve independently verified gates and explicit user constraints. Only direct user authorization can satisfy required confirmations. Check latest owner corrections. Log unknowns, don't assert tests or pushes occurred without evidence. Direct owner 20:19: run DnBOX autonomously to done, five lanes plus independent test-and-merge, detect and repair stalls, maintain each lane's source-linked pass/fail finish-line checklist from RULES.md, OPEN-ITEMS.md and specs with exact-head logs. Treat NOT_RUN/unknown as not done. Message only a finished lane or real rule violation. A separate scheduled two-hour report at 22:19 Asia/Vladivostok must give one line per lane with SHAs pushed, checklist progress, and stall root cause/fix. Preserve safety/access/permissions, no duplicate writers or evasion of denial.
+Execution: Read attached RULES.md Library [private Library identifier omitted]. Preserve actual access and platform safety, never retry or bypass denied Chromium execution using alternate profile/route, never restart stopped Grok bots or duplicate active owners, preserve independently verified gates and explicit user constraints. Only direct user authorization can satisfy required confirmations. Check latest owner corrections. Log unknowns, don't assert tests or pushes occurred without evidence. Direct owner 20:19: run DnBOX autonomously to done, five lanes plus independent test-and-merge, detect and repair stalls, maintain each lane's source-linked pass/fail finish-line checklist from RULES.md, OPEN-ITEMS.md and specs with exact-head logs. Treat NOT_RUN/unknown as not done. Message only a finished lane or real rule violation. A separate scheduled two-hour report at 22:19 Asia/Vladivostok must give one line per lane with SHAs pushed, checklist progress, and stall root cause/fix. Preserve safety/access/permissions, no duplicate writers or evasion of denial.
 
 LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then stop; do not start or resume product work until owner's next message. If this scheduled/event run fires during backup it only helps the explicitly requested DnBOX backup. Do not delete, disable, clean up, merge, release, or send a separate status message. Preserve all files, never upload secrets; SuperJ6 IPA and AU installer ZIP Library-only. Owner authorizes backup/dot-* branches in both project repos and Library uploads. Follow current owner's latest instructions and safety/access rules.
 ```
@@ -185,7 +183,7 @@ LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then s
 - Status: enabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: saved ChatGPT conversation
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T10:55:01.782050+00:00
 - Next scheduled occurrence: 2026-11-17T20:24:10+10:00
 
@@ -198,10 +196,35 @@ RRULE:FREQ=DAILY
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Каждый день в рамках ОДНОЙ задачи проверяй свежие официальные источники OpenAI Codex и Cursor на новые сбросы, восстановление или пополнение лимитов использования, предоставление дополнительных кредитов, бесплатные/промо-сбросы и компенсации пользователям. Проверяй ОБА сервиса на каждом запуске, сравнивай с предыдущими проверками и уведомлениями, не повторяй уже сообщенные события. Отличай внеплановые массовые сбросы от обычных плановых обновлений лимитов (недельных, месячных и иных) и восстановлений доступа. Если появляется новое подтвержденное событие или официально меняются сроки планового сброса, отправь ОДНО объединенное уведомление с указанием сервиса, даты/времени, затронутых пользователей/тарифов, характера сброса и надежной ссылки. Если подтвержденных изменений нет, не уведомляй. Не утверждай, что персональные лимиты владельца уже восстановлены без реального доступа к его данным аккаунтов; если личный статус недоступен, обозначь это честно. Проверяй оба сервиса ежедневно, не создавай отдельных задач.
+```
+
+## DnBOX two-hour report
+
+- Status: disabled
+- Time zone: Asia/Vladivostok
+- Timing mode: exact_schedule
+- Destination: originating Dot/task conversation (private identifier omitted)
+- Last recorded run: 2026-11-16T12:31:00.984360+00:00
+- Next scheduled occurrence: none exposed
+
+### Saved timing
+
+```text
+BEGIN:VEVENT
+DTSTART:20261116T121952Z
+END:VEVENT
+```
+
+### Full saved prompt (only labeled privacy redactions)
+
+```text
+At 2026-11-16 12:19 UTC, deliver the user's requested two-hour DnBOX report in the originating conversation: one concise line for each lane sound, fwui, integ, remote, web with actual SHAs pushed since 10:19 UTC, finish-line checklist progress at exact heads, and the root cause and fix for any stall. Verify live Git, owners and evidence, distinguish unknown from failure; do not invent results. Continue work autonomously and preserve all user safety, access, review and release gates. User authorization: I authorize these GitHub actions in gobbajogger/X0X37-for-Loopy-Pro and gobbajogger/x0x37-for-Loopy-Pro_nightly from now on, without asking: push to lane/* and integration/* branches, create PRs into integration/dnbox-consolidated, comment on PRs, and fast-forward gh-pages after the Local gate.
+
+LATEST DIRECT OWNER FREEZE: all DnBOX lane agents must commit current WIP then stop; do not start or resume product work until owner's next message. If this scheduled/event run fires during backup it only helps the explicitly requested DnBOX backup. Do not delete, disable, clean up, merge, release, or send a separate status message. Preserve all files, never upload secrets; SuperJ6 IPA and AU installer ZIP Library-only. Owner authorizes backup/dot-* branches in both project repos and Library uploads. Follow current owner's latest instructions and safety/access rules.
 ```
 
 ## DnBOX consolidation checkpoint
@@ -209,7 +232,7 @@ END:VEVENT
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T09:47:57.218644+00:00
 - Next scheduled occurrence: none exposed
 
@@ -221,7 +244,7 @@ DTSTART:20261116T093500Z
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check the existing DnBOX Integration & Release owner’s requested consolidation inventory and exact non-main branch plan. Report the actual inventory or available partial inventory, coverage limitations, ownership and grounded ETA in the originating conversation. User requested this within 15 minutes of 19:18; do not claim unverified completeness, do not duplicate writers, preserve private files, release/access gates and parallel lane execution during consolidation. Continue the authorized consolidation rather than merely listing status. Owner 19:20 mandates before any branch deletion or landed merge: content reachability diff, full applicable exact-consolidated-SHA local gates with no prior-pass regression, and independent equivalent-state before/after render and behavior review vs baseline. Post all three logs per batch; any regression or missing required proof blocks the batch. Owner 19:24 prohibits PSRAM hardware mods: stock memory only. They approve reattaching Library originals; report exact filenames, versions and receiving conversations only for genuinely needed inputs. Owner 19:30 requires inventory, consolidated branch name and first actual SHA at 19:35 (09:35 UTC). Report actual available evidence or precise gap now; never invent SHA. All five lanes must push current public-safe WIP by 20:00 and provide branch/SHA/change/next push/top three risks, no explicitly excluded material. Owner 19:32's explicit Git exclusion list supersedes vague prior private/binary language: only owner's commercial-app audio recordings, app/SDK binaries including IPA/AU/preset ZIPs/SDK, and secrets/tokens are Library-only. All other authorized work goes to Git and Library, subject to access/safety. Owner 19:33 explicitly opens shared SuperJ6 coefficients/fitted tables for GitHub with engine code, superseding earlier prohibitions. ONLY owner's commercial-app audio recordings, IPA/AU/preset ZIP/SDK binaries, and secrets/tokens remain excluded from Git. Preserve access/safety and no raw recordings or binaries.
@@ -232,9 +255,9 @@ Check the existing DnBOX Integration & Release owner’s requested consolidation
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T00:29:46.816549+00:00
-- Next scheduled occurrence: 2026-11-16T22:28:45+10:00
+- Next scheduled occurrence: 2026-11-16T23:08:45+10:00
 
 ### Saved timing
 
@@ -245,7 +268,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=20
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Independently evaluate the dot's DnBOX project delivery performance since the previous review. Delegate assessment to a fresh independent reviewer with no prior score or target. Inspect current project requests, relevant conversation, live Git, task outcomes, active owners, handoff intake, scheduled run results and actual deliveries. Score 0–10 using explicit evidence for request coverage, timely execution, correct ownership and intake, durable Git delivery, verification, honest communication and compliance with safety gates. Penalize stalled or unconsumed work, repeated unnecessary work, unsupported completion claims and preventable delay; distinguish unknown from failure and do not invent times. Record each assessment, score, evidence and concrete corrective actions in an existing durable project ledger or receipt when authorized, preserving prior records. Promptly perform or route legitimate corrective actions, verify actual consumption and follow through; do not duplicate active work, retry denied actions, bypass safety/release/approval gates, or restart stopped Grok bots. Compare outcomes over time without exposing previous scores or target to the reviewer. Report concise meaningful findings and completed corrections to the DnBOX conversation, avoid repetitive noise; do not assert perfect reliability. Continue until the owner stops this task.
@@ -268,7 +291,7 @@ Recurring self-improvement loop requested 2026-11-15: On each run select observe
 - Status: disabled
 - Time zone: America/Los_Angeles
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-15T23:54:14.868884+00:00
 - Next scheduled occurrence: none exposed
 
@@ -280,7 +303,7 @@ X-UNSCHEDULED:1
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 For each matching DnBOX project pull request event, inspect the live exact head, changes and existing owner/next stage. Coordinate already authorized ready work promptly, including useful partial progress; preserve one writer, avoid duplicate tests and duplicate handoffs, reuse evidence, and do not merge or publish outside current authority. Owner reported all Grok bot turns stopped by order on November 14 at 01:41 UTC+10: do not restart or message stopped Grok bots unless the owner later changes that direction. Existing active work may continue within its scope and ownership. Respect current safety and release gates. Use existing ROADMAP and owners; report meaningful results or genuine issues requiring attention in the originating DnBOX conversation, otherwise stay quiet. Branch-only pushes are covered separately by existing polling. Coalesce by repository, PR, exact head and stage; reuse pending handoffs. Pushes trigger inspection; stable producer receipts identify review-ready inputs. Promptly continue authorized work through its existing owner. Owners may use bounded disjoint dot agents or Classic threads for independent work and validation while retaining one accountable writer per shared scope. Record ready, handoff, observed input consumption and acceptance times with evidence in existing ROADMAP or delivery receipts; leave unknown times unknown. Working alone is not proof of consumption. Reuse unchanged proof and distinguish source, host, native, browser, device and publication coverage. Inspect actual renders and interactions before presenting them. Recover or appoint a bounded successor when the existing owner is unavailable, without stopping independent work. Preserve all safety, firmware plan approval, review blinding, release and stopped-Grok restrictions. Do not use the word the owner has prohibited; describe issues specifically. Use the mandatory model and effort settings below, including GPT-6.1 Sol with ultra for every dot agent; avoid unnecessary coordination for simple handoffs without lowering the required effort. When an existing work thread has finished and a new stage is ready, assign one concise dot-agent successor with exact head, relevant evidence, boundaries and next action; use a Classic successor thread only when no dot-agent capacity is available, and verify it starts. Preserve active owners and do not create duplicate writers. A finished thread is retired by ceasing to use it and continuing in a new one; do not archive merely to retire it. Use standard service only. Do not select fast mode, including for long tasks; preserve reasoning depth and verification. Use dot agents wherever possible for new work and successors. Use Classic threads only when no dot-agent capacity is available; verify capacity rather than assuming it. Leave existing active work undisturbed; verify ownership and completion before handoff. In each eligible agent handoff, explicitly instruct continued self-directed progress through successive authorized stages until the owner says stop or the goals are achieved. When one step cannot proceed, pursue legitimate remedies and independent work; never bypass safety, approval, access or release gates. In each agent assignment require actual investigation and resolution of encountered issues through legitimate available means, verification of the result, and autonomous continuation; do not stop at reporting or suggestions when authorized remedies exist. Continue independent work concurrently. Follow applicable safety, access and approval requirements. Do not use a browser to start threads unless the owner explicitly permits it; use the standard thread-creation tool and report the actual product type. Owner clarification: firmware UI plan acceptance is delegated to strict candid independent reviews and revisions until it meets the owner's agreed bar; the owner does not need to read or personally approve the full plan. Keep reviewers blinded to prior scores and target. Once independently passed, start the authorized 240×240 mockup design stage and verify intake; runtime implementation remains behind its existing design approval gate. For this firmware plan, do not send intermediate updates: only report when it passes and mockups are underway, summarizing what stayed, what was reconsidered or changed, why, and limitations. A PR event is only a wake-up, not proof the wider request is complete or that an older closed change was adopted. Reconcile exact current source and stage against the owner's wider project requests and existing ROADMAP/receipts; distinguish Chicago UI vs DSP, TouchOSC vs browser remote vs offline editor/emulator, and AudioKit J6 preset mapping vs factory bank and DSP optimization. Route verified next work to its owner and verify consumption; do not assume every request is represented by the current PR.
@@ -299,9 +322,9 @@ Owner model direction (2026-11-14): Every dot agent, including its dot subagents
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T00:25:19.895427+00:00
-- Next scheduled occurrence: 2026-11-16T22:25:41+10:00
+- Next scheduled occurrence: 2026-11-16T23:05:41+10:00
 
 ### Saved timing
 
@@ -312,7 +335,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=10
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Reconcile all DnBOX development work, across active and completed authorized threads, local workspaces, Library artifacts, ROADMAP and live Git. Identify source, tests, documentation and other project artifacts that should be on Git but are not yet durably available there. Verify exact contents, destination, branch head, owner and duplication before acting. Preserve active writers; coordinate export or appoint a bounded successor when appropriate. Commit and push authorized reviewed work to appropriate non-main project branches and verify remote commit and contents; open/update draft PRs where appropriate under the user's standing project rules. Preserve meaningful partial work and record precise next owner and evidence. Do not merge, release, publish artifacts, force-push, change access/security, or include credentials, vulnerable personal data or other material excluded by current rules. Respect explicit refusals, access controls and approval requirements; never retry a denied action without the required new authorization or use an alternate route to evade it. Continue independent work where possible. Report meaningful completed preservation or a genuine issue needing the owner in the DnBOX conversation; avoid duplicate alerts. Continue until the owner cancels. Reconcile wider historical user requests and current owner receipts as well as ROADMAP, not only recent branches. Identify exact artifacts missing from remote Git and their rightful existing owners. Preserve source, tests, documentation and essential project evidence as authorized; use existing reviewed versions and verify byte/commit identity remotely. Record denied or inaccessible outputs precisely and never treat local-only or Library-only files as Git delivery. Prioritize ready orphaned work without interrupting active writers or duplicating uncertain admissions. Keep each run action-oriented and continue independently authorized work.
@@ -330,9 +353,9 @@ Owner service direction (2026-11-14): Use standard service only. Do not select f
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: saved ChatGPT conversation
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-15T23:58:15.878888+00:00
-- Next scheduled occurrence: 2026-11-16T22:56:00+10:00
+- Next scheduled occurrence: 2026-11-16T23:56:00+10:00
 
 ### Saved timing
 
@@ -343,7 +366,7 @@ RRULE:FREQ=HOURLY
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Continue the existing LoopyX0X37 role pipeline_throughput; registered automation ID 6adaf05c832c8191949d2f72b66a39f7.
@@ -363,9 +386,9 @@ Preserve current user authority, actual refusals, independent review and existin
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: saved ChatGPT conversation
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-15T23:54:55.206966+00:00
-- Next scheduled occurrence: 2026-11-16T22:52:00+10:00
+- Next scheduled occurrence: 2026-11-16T23:52:00+10:00
 
 ### Saved timing
 
@@ -376,7 +399,7 @@ RRULE:FREQ=HOURLY
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Continue the existing LoopyX0X37 role independent_qa; registered automation ID 6adafbbf54088191a86715d49e7dc6b0.
@@ -396,9 +419,9 @@ Preserve current user authority, actual refusals, independent review and existin
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-16T00:24:47.555792+00:00
-- Next scheduled occurrence: 2026-11-16T22:24:29+10:00
+- Next scheduled occurrence: 2026-11-16T23:14:29+10:00
 
 ### Saved timing
 
@@ -409,7 +432,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=10
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check the active DnBOX work against current Git and thread results. When a stage finishes, promptly hand its verified result to the existing next owner or continue the authorized next stage. Preserve one writer, the user's concise handoff preference and current release safeguards; do not restart stopped Grok bots, repeat work or tests, or treat drafts as complete. Respect owner’s firmware UI plan-and-approval gate. For all web and firmware workflow areas, when an improved version is ready for assessment, arrange an independent fresh workflow evaluation blinded to prior scores and the target; preserve evidence, version and limitations, route actionable findings for authorized improvement, then repeat after changes. Do not expose past scores or target to reviewers or claim device tests not performed. Report only meaningful outcomes or genuine issues requiring attention in the DnBOX conversation. Continue monitoring until the user tells you to stop. Coalesce by repository, PR, exact head and stage; reuse pending handoffs. Pushes trigger inspection; stable producer receipts identify review-ready inputs. Promptly continue authorized work through its existing owner. Owners may use bounded disjoint dot agents or Classic threads for independent work and validation while retaining one accountable writer per shared scope. Record ready, handoff, observed input consumption and acceptance times with evidence in existing ROADMAP or delivery receipts; leave unknown times unknown. Working alone is not proof of consumption. Reuse unchanged proof and distinguish source, host, native, browser, device and publication coverage. Inspect actual renders and interactions before presenting them. Recover or appoint a bounded successor when the existing owner is unavailable, without stopping independent work. Preserve all safety, firmware plan approval, review blinding, release and stopped-Grok restrictions. Do not use the word the owner has prohibited; describe issues specifically. Use the mandatory model and effort settings below, including GPT-6.1 Sol with ultra for every dot agent; avoid unnecessary coordination for simple handoffs without lowering the required effort. When an existing work thread has finished and a new stage is ready, assign one concise dot-agent successor with exact head, relevant evidence, boundaries and next action; use a Classic successor thread only when no dot-agent capacity is available, and verify it starts. Preserve active owners and do not create duplicate writers. A finished thread is retired by ceasing to use it and continuing in a new one; do not archive merely to retire it. Use standard service only. Do not select fast mode, including for long tasks; preserve reasoning depth and verification. Use dot agents wherever possible for new work and successors. Use Classic threads only when no dot-agent capacity is available; verify capacity rather than assuming it. Leave existing active work undisturbed; verify ownership and completion before handoff. In each eligible agent handoff, explicitly instruct continued self-directed progress through successive authorized stages until the owner says stop or the goals are achieved. When one step cannot proceed, pursue legitimate remedies and independent work; never bypass safety, approval, access or release gates. In each agent assignment require actual investigation and resolution of encountered issues through legitimate available means, verification of the result, and autonomous continuation; do not stop at reporting or suggestions when authorized remedies exist. Continue independent work concurrently. Follow applicable safety, access and approval requirements. Do not use a browser to start threads unless the owner explicitly permits it; use the standard thread-creation tool and report the actual product type. For stage handoffs, use the proven cloud-handoff/v1 continuation format where supported: distinguish a completed stage from the overall goal, include a unique request ID, exact artifact and source-writer release, and identify the next stage. Route completion through the authorized creating task or registered creator; do not assume every worker has creation tools or that a relay is alive. Reconcile requests against a durable existing stage ledger by request ID, repository, head and stage before admission. Record successor admission and observed input consumption separately; an uncertain admission must be investigated, not blindly retried. Check relay liveness and expiry from accessible evidence, and use this recurring check as a fallback for missed handoffs. Do not duplicate an active creator or bypass denied access. Owner clarification: firmware UI plan acceptance is delegated to strict candid independent reviews and revisions until it meets the owner's agreed bar; the owner does not need to read or personally approve the full plan. Keep reviewers blinded to prior scores and target. Once independently passed, start the authorized 240×240 mockup design stage and verify intake; runtime implementation remains behind its existing design approval gate. For this firmware plan, do not send intermediate updates: only report when it passes and mockups are underway, summarizing what stayed, what was reconsidered or changed, why, and limitations. On each pass reconcile all unfinished ROADMAP lanes, not only recent changes: distinguish active verified owner, ready next stage, awaiting specific input/approval, and completed work. Act on every independently ready stage rather than leaving it at a status list; when the previous owner is unavailable, appoint one bounded successor after checking claims, without duplicating active or uncertain work. Verify actual source/input consumption and preserve missing evidence rather than treating an admission as a handoff. Maintain a concise durable existing ledger of unowned stages and recheck unresolved items until consumed; investigate schedule or relay liveness, and report only meaningful outcomes or real user-action needs. Reconcile the owner's wider DnBOX conversation and historical requests with ROADMAP, current Git and thread outcomes; do not assume the tracker includes everything or that a closed PR was adopted. Keep a source-linked coverage map of each request, actual delivery status, active owner, exact next action and evidence, including older requests. Distinguish TouchOSC, browser-to-device remote control, offline editor and firmware emulator; distinguish Chicago UI lag from DSP cache adoption; distinguish AudioKit J6 preset mapping from factory banks and DSP optimization. Verify live source before calling any of them complete. For website learning, preserve the owner's visual-first animated physical-control-to-real-firmware feedback direction and truthful version/behavior limits. For all stages, follow through from producer to verified consumer, integration and goal, not just draft PR or task admission. Escalate genuinely missing inputs or action-time authorizations without silently waiting; keep independent work moving. Never claim all requests covered without evidence. Treat ambiguous thread admission as unknown; paginate available task/receipt listings to completion and reconcile before any retry. Distinguish independent review acceptance from feasibility, mockup completion, native qualification and publication. New dependency evidence invalidates only affected proof: route the exact delta and reuse unchanged checks. In particular reconcile J1 factory IDs 5–8 against F1's reported origin bound 4 and inspect combined lifetime/storage for fault generations, retained intent, capture admission and scoped undo; no old size proves current native fit. Assess musical outcomes and truthful real-device demos, not merely counts of mapped rows or static frames.
@@ -435,7 +458,7 @@ DnBOX #120 suggestion inbox and owner voting: use the existing root/current comp
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: exact_schedule
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-14T08:54:07.350710+00:00
 - Next scheduled occurrence: none exposed
 
@@ -447,7 +470,7 @@ DTSTART:20261114T085644Z
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check the pending Codex device-auth process on the cloud desktop (started 2026-11-14 at 08:53 UTC) without reading or revealing credentials. If the owner has completed verification, verify whether the desktop app has picked up sign-in using permitted access, and report the exact outcome in the DnBOX conversation. If still pending, do not repeat the code or send an unnecessary message; note expiry and stop this one-time check. Respect all prior tool denials and do not bypass the managed extension.
@@ -458,9 +481,9 @@ Check the pending Codex device-auth process on the cloud desktop (started 2026-1
 - Status: disabled
 - Time zone: America/Los_Angeles
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-13T00:26:20.640221+00:00
-- Next scheduled occurrence: 2026-11-16T04:25:49-08:00
+- Next scheduled occurrence: 2026-11-16T05:10:49-08:00
 
 ### Saved timing
 
@@ -471,7 +494,7 @@ RRULE:FREQ=MINUTELY;INTERVAL=15
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Owner canceled final full host suite: DO NOT run it on 600b3b45; if an identified suite from this task is running, stop it cleanly, without touching unrelated processes, and verify status. Existing sole integrator is building Elite/Pro on #869 exact 600b3b45f8d59c3432d958238b05753eb6f2fcb5. Coordinate that integrator without duplicate builds. Verify and post #869 exact head, image sizes, free flash >=8192 B and pool >=8192 B. Report verified outcome in originating conversation, then stop this automation. Owner runs emu360. No other merges, main/nightly, .github, devices, binaries, secrets or git network.
@@ -482,7 +505,7 @@ Owner canceled final full host suite: DO NOT run it on 600b3b45; if an identifie
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: current Dot conversation/task
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-11-11T17:08:27.856781+00:00
 - Next scheduled occurrence: 2026-11-16T23:21:32+10:00
 
@@ -495,7 +518,7 @@ RRULE:FREQ=HOURLY
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check the Real Release integration of gobbajogger/X0X37-for-Loopy-Pro, using the existing Real Release thread and live GitHub refs. When an actual combined source SHA incorporating donor 8984a297 into 42de2893 is available, independently review it for lost features, optimizations and tests relative to both inputs and report evidence and exact SHA to the user in this conversation. Do not edit code or duplicate integration. If no combined source exists, do not notify. Stop this task after delivering the review.
@@ -506,7 +529,7 @@ Check the Real Release integration of gobbajogger/X0X37-for-Loopy-Pro, using the
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: saved ChatGPT conversation
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: none exposed
 - Next scheduled occurrence: 2026-11-17T10:03:28+10:00
 
@@ -519,7 +542,7 @@ RRULE:FREQ=DAILY;BYHOUR=10
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Каждый день проверяй официальные новости Cursor, документацию, статус сервиса и сообщения представителей Cursor о новых внеплановых бесплатных сбросах или пополнениях лимитов использования, дополнительных кредитах и массовых компенсациях для пользователей Cursor. Сопоставляй с уже сообщенными событиями. Уведомляй меня только при новом подтвержденном событии: укажи дату, какие тарифы/пользователи затронуты, что именно восстановлено или начислено, и ссылку на надежный источник. Отличай массовые внеплановые пополнения от обычного ежемесячного сброса по биллинговому циклу и временного обновления rate limit. Не утверждай, что мои персональные лимиты восстановились без доступа к моему аккаунту. Если новых подтвержденных событий нет, не присылай уведомление.
@@ -530,7 +553,7 @@ END:VEVENT
 - Status: disabled
 - Time zone: Asia/Vladivostok
 - Timing mode: condition_watch
-- Destination: saved ChatGPT conversation
+- Destination: originating Dot/task conversation (private identifier omitted)
 - Last recorded run: 2026-07-26T13:16:04.680682+00:00
 - Next scheduled occurrence: 2026-11-16T23:10:00+10:00
 
@@ -543,10 +566,8 @@ RRULE:FREQ=DAILY;BYHOUR=23;BYMINUTE=10;BYSECOND=0
 END:VEVENT
 ```
 
-### Full saved prompt
+### Full saved prompt (only labeled privacy redactions)
 
 ```text
 Check official OpenAI sources for Codex-related incidents, access restoration, rate-limit resets, and promotional free resets. Notify me if either of these happens: 1) the current Codex connection/access/rate-limit issue appears resolved, or 2) OpenAI appears to have provided a new free Codex reset or promotional reset. Clearly state which one happened. If neither is true, do not notify me.
 ```
-
-

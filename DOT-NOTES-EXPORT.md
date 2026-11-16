@@ -100,3 +100,15 @@ The same saved list marked temporary broken-26 selection removal, withdrawn-pack
 
 This export draws on the saved profile, current-state and ownership/data-boundary notes, the main LoopyX0X37 history and coordination continuations through November 13, the saved commitment ledger, and the current conversation's November 16 backup corrections. Older duplicate legacy notes were not separately reinterpreted as current instructions. It deliberately omits unrelated personal/account details, private system instructions, credentials and internal memory locations. It summarizes remembered facts and cautions rather than claiming a fresh audit of every repository or recovered artifact.
 
+
+## Verified backup continuation outcome
+
+The continuation completed and verified 27 Git bundles plus six Git recovery files, followed by 40 additional workspace, evidence and recovery items in the private DnBOX-backup-20261116 Library folder. All 73 payload items have successful upload receipts and matching folder readback names and byte counts; the payload total is 3,672,954,701 bytes. These counts exclude these final control documents.
+
+The main workspace archive has 15 parts totaling 2,604,423,226 bytes and preserves 151,907 entries, 7,147,696,313 logical bytes, and 3,491,558,262 unique regular-file bytes. A complete streamed read verified every payload SHA256, hardlink relationship and symlink target against the inventory, with no missing or mismatched entry. Additional temporary evidence preserves 1,355 selected paths and 55,551 further paths, plus the separately reviewed UI packet ZIP.
+
+All 27 bundles were restored independently with matching WIP trees and successful fsck results. Fourteen required explicit shallow export boundaries because original history was incomplete. The old remote ref build/0.0.22 at 2456968ba39b521610364f3ea17a118b456269c0 had an incomplete tree and was omitted from two export bundles; available original objects and metadata are retained in raw Git stores. This is not proof of full historical recovery.
+
+The SDK ZIP is a reconstruction retaining all member names, with only 13 embedded PEM key payloads redacted in eight sample/test files. Three parser/writer files containing delimiter constants remain exact. The original ZIP is unchanged locally. The reconstruction is 309,787,813 bytes, SHA256 cf53391acd7c9bafbf690c93fae1d9ba59f2053343f4d57ee3a1b4737fcaa0c0; member-level provenance is in the archive inventory. The flagged keys were samples/fixtures, not established live account credentials.
+
+Excluded from the payload are the requested SuperJ6 IPA/AU installer, rebuildable caches/build directories, internal authentication/runtime configuration and redundant backup outputs. No original was deleted. Screening covered nested compressed content and recognizable secrets/private-runtime markers; bounded pattern checks are not a guarantee against all conceivable secrets. No product work, device operation or shell Git push was performed.
