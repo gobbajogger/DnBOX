@@ -103,3 +103,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Readable kick depth label
 - Remote source audit identified still-cryptic P.Dpth/P.DEPTH presentation, prohibited by RULE18. Presentation now reads Depth/DEPTH consistently in generic lists/knobs and all three R22 caption cases. Native target0/voice0/slot4 descriptor P.Dpth, stored value and DG_BDSWEEP pitch-sweep glyph remain unchanged.
 - Production fixture failed before alias and PASS11 checks after; captures all three909kick pages and selected deep-list row. Four240x240 renders plus exact mapping/source hashes at docs/evidence/fwui/readable-depth/. Independent review and native changed composition pending; no fullF1/lane PASS.
+
+## Strengthened authentic caption gate
+- Added explicit P.DEPTH rejection alongside P.DPTH; old detector failed the new negative case, corrected detector passes all20 unit tests and accepts readable DEPTH. This strengthens, never relaxes, RULE18 coverage.
+- Re-evaluated unchanged genuine historical45screen traces with the stricter detector: checks1–3 PASS, check4 FAIL in3screens, overlaps0. Prior old-detector PASS evidence retained as historical, not silently relabeled.
+- Fresh first-attempt b341 production runtime capture:45screens, checks1–4 PASS, overlaps0; checks5–24 remain NOT_RUN. Full trace/report/render log/source closure and45nativePNG retained in four small archives at docs/evidence/fwui/strict-caption/. No fullF1/F2/Review acceptance.

@@ -1,0 +1,64 @@
+{
+  "productionSourceCommit": "b341436ff8087c20b8ef51765f986736473611b0",
+  "sourceClosureSha256": "028c82370346c67359bd54ebea9014bc056c268f2941728b68021d7a9d146882",
+  "coverageComplete": false,
+  "scope": "45 real drum states only; check1-4, overlap detector",
+  "checks": {
+    "1": "PASS",
+    "10": "NOT_RUN",
+    "11": "NOT_RUN",
+    "12": "NOT_RUN",
+    "13": "NOT_RUN",
+    "14": "NOT_RUN",
+    "15": "NOT_RUN",
+    "16": "NOT_RUN",
+    "17": "NOT_RUN",
+    "18": "NOT_RUN",
+    "19": "NOT_RUN",
+    "2": "PASS",
+    "20": "NOT_RUN",
+    "21": "NOT_RUN",
+    "22": "NOT_RUN",
+    "23": "NOT_RUN",
+    "24": "NOT_RUN",
+    "3": "PASS",
+    "4": "PASS",
+    "5": "NOT_RUN",
+    "6": "NOT_RUN",
+    "7": "NOT_RUN",
+    "8": "NOT_RUN",
+    "9": "NOT_RUN"
+  },
+  "overlaps": 0,
+  "historical": {
+    "sourceClosureSha256": "39bf844cf4518af7a887d095f6a4cce88e118a013648ee9c3d6e4fc512380f1b",
+    "sameStricterDetector": true,
+    "check4": "FAIL",
+    "failures": 3,
+    "reason": "P.DEPTH had incorrectly escaped P.DPTH-only ban"
+  },
+  "unitTests": 20,
+  "archives": [
+    {
+      "path": "trace-and-report.zip",
+      "bytes": 312982,
+      "sha256": "78676ca2593c5cb48b8ed330d325d094c05ba55e465a78c38cd5435e9c3add5c"
+    },
+    {
+      "path": "before-after-logs.zip",
+      "bytes": 284637,
+      "sha256": "bf58cc2931565a4d5d8b15e70fcceec663b1ff131ef89408ed29c8a864d44126"
+    },
+    {
+      "path": "source-closure.zip",
+      "bytes": 282231,
+      "sha256": "f817394c1b21c1d7afbbdd447fa3e0f0b4c01fb9ed15c2de969592a339052e11"
+    },
+    {
+      "path": "renders.zip",
+      "bytes": 300960,
+      "sha256": "ca4128cd9a33d917b5b08993ad5336118af4a6273723f5fe0aab56baa464d58f"
+    }
+  ],
+  "limits": "NOT whole UI, NOT full24, NOT human10/10, NOT native/device qualification"
+}
