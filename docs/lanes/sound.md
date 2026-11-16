@@ -15,7 +15,7 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 | S1 | FAIL | Reuse pinned 56079bbd source closure and public renderer from prior sound source; factory-wide finite/xrun proof remains missing |
 | S2 | FAIL | Frozen f50/e454694-program raw-vs-compact common-FX replay independently verified; not full app/independent FX/long-tail/xrun qualification |
 | S3 | FAIL | Existing 64-control schema/model component checks do not prove full routed engine |
-| S4 | FAIL | Original 14/56 comparison input available; complete intended-engine A/B pending |
+| S4 | FAIL | Referenced SuperJ6 14/56 ZIP not identified; found Synth One 56-preset/14-over-unity archive, not a substitute. Complete intended-engine A/B pending |
 | S5 | FAIL | Complete 640/12-bank mapping not verified |
 | S6 | FAIL | Native pre-FX owner7972B measured; combined integ09f budget freeXIP2220/2232B,BSS1080B,pool836B cannot admit full originalFX/wave assets. No combined fit. See sound-memory.md |
 | S7 | FAIL | Consolidated still contains Drone; coordinated removal required |
@@ -130,3 +130,5 @@ Frozen a803 full694 replay passes66,624,000frames0different/0nonfinite; all1,388
 Recovered isolated generic GPL model code without coefficients or banks; fixed open-admission alias/alignment/wrap bug using red/green tests. Independent synthetic review: 1,204 + 522 + 9 checks PASS. Fresh 24 frozen vectors preserve output; native object only 3,262 executable + 8,197 readonly, 64-byte view. No activation, fit, S3/S4 or completion credit. Next: finish vector receipt review and audit rendering contract boundaries. Existing publication/Swift denials remain stopped.
 
 Build scratch correction: alias regression RED exit1 with input mutation; aligned/nonwrapping scratch disjoint from model/input now required before writes. Fresh 4 suites (1,204+522+9+9) and 24 frozen vectors PASS, native executable3,316 (+54), readonly8,197 unchanged. Independent build guard source/nine-test review accepted. Default local ASan/LSan fails ptrace, not sanitizer PASS; managed rerun next after exact pin. No render math, owner or activation change.
+
+Exact335d managed default ASan/UBSan/LSan nine-case run exit0 with options unset; full2,902-byte receipt recovered and independently hash/source audited. Local ptrace failure retained. Corrected unsupported S4 input-availability assertion: identified14/56 evidence is Synth One common-FX, not SuperJ6; exact SuperJ6 reference unresolved, no automatic rule change.
