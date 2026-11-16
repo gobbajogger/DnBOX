@@ -661,8 +661,8 @@ static UI_DRAW void draw_drum_voice(int band)
                     float glyph_sy=1.50f+(float)(ah-72)*.025f;
                     if (gy-off < bh && (float)(gy-off)+18.f*glyph_sy+2.f > 0)
                         dv_glyph(r, ev, (float)gx, (float)(gy-off),1.375f,glyph_sy,ink);
-                    if (y + ah - 20 - off < bh && y + ah - 20 - off + 16 > 0)
-                        dv_value_text(r, ev_i, vx, y + ah - 20 - off, SOUND_WHITE, 1);
+                    if (y + ah - 16 - off < bh && y + ah - 16 - off + 16 > 0)
+                        dv_value_text(r, ev_i, vx, y + ah - 16 - off, SOUND_WHITE, 1);
                 } else if (active) {
                     /* single-control active bank (e.g. rimshot Tune): centered large glyph */
                     gx = 92; gy = y + 25;

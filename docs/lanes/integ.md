@@ -5,7 +5,7 @@ Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly 
 
 ## Current finish lines and exact input scopes
 
-This evidence update descends from firmware draft fef9b94d93fb2fc495d18e5da960197e786caf26, whose only production change from independently built646 is the reviewed SONG instruction literal removal. Exact fef9 native resources are recorded below. Current nightly draft is4c9db78a617971588ae56b03faefd224c93bfbca. Neither is consolidated or delivered. Earlier54c41/6fc/596 test and resource checkpoints remain historical exact-input evidence, not current all-gate qualification.
+This source checkpoint composes reviewed FWUI e28eb89d08af84965a6f155d68b73db7467f7665 over firmware aa46bd352bdd47457dd54c9a7add64450780fbb9. New production changes are limited to the reviewed value-spacing and selected-text colors described below; exact combined native resources remain to be measured. Current nightly draft is9a883a716947df47180510d918dbe9ab6fdce3dc. Neither is consolidated or delivered; prior fef9 resource evidence is not automatically extended to changed runtime.
 
 - C1 FAIL: full before/after Local gates remain non-green; focused checks are not substitutes.
 - C2 prior scoped PASS: independent exact 54c41 and 1d068 no-loss against actual e742/9165 targets; this successor still needs its own exact check.
@@ -15,7 +15,7 @@ This evidence update descends from firmware draft fef9b94d93fb2fc495d18e5da96019
 - C6 FAIL: PR955/136 remain drafts, not consolidated or delivered.
 - I0 FAIL: original consolidated firmware pool margin 172B is below 512B; baseline gates remain non-green.
 - I1 FAIL: targets and state record exist, but v2 lane work remains unmerged.
-- I2 FAIL overall: exact fef9 default production inputs build Elite/Pro with XIP 3268/3276B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
+- I2 FAIL overall: prior exact fef9 default production inputs build Elite/Pro with XIP 3268/3276B free, RAM 1096B, pool 836B above 8192 reserve. Independently verified map-only ELF identities and focused host tests are retained; all final engines/full host suite are not qualified.
 - I3 FAIL: local exact f910 has a chorus deadline miss and all strict margins fail. Fixed-count managed 0ac/f910 comparison has 0 deadline misses but 4 strict-margin failures across 12 runs (before initial plain; after warmed plain/chorus/peaking). Matching PCM is not timing or hardware equivalence. Old 0ac-only green runs below are historical.
 - I4 scoped evidence: managed 13e0 normal/ASan/UBSan comparisons with default LSan pass and the six-file compact-program closure remains byte-identical through current runtime; not whole-current-head/full-gate qualification.
 - I5 FAIL: five authentic encoded/derived preview assets retained; actual browser transport checks are bounded, stock firmware embedding and Pages delivery unfinished.
@@ -809,3 +809,9 @@ On exact7f6 with default PADCAL1, baseline map-only ELF identity passed both mod
 Exact7f6 intake found four registered selectors using explicit leak disabling (original-release-ui, ui-theme, engine-808-scratch-alias, ui-303-entry). A wider source inventory found17 maintained runner files with explicit detect_leaks=0; the additional files are not automatically inferred reachable by the current gate. Current source switches those overrides to1, retains original historical reference/evidence bytes, and updates future receipt wording only where successful sanitized execution is mandatory.
 
 The engine808 shell pipeline previously hid a failing executable behind successful tail; a negative reproduces exit0 after exit7. Both invocation sites now capture logs and exit nonzero on execution failure. Fifteen control-flow/static regression cases pass, including missing policy/required inventory, source/environment suppressions, and both shell paths. Existing21 gate regression checks pass. A bounded source/environment preflight now blocks host execution if these controls are absent/unsafe; it is not comprehensive call-graph analysis or actual leak qualification. Corrected actual sanitizer executions are still NOT_RUN until independent managed requalification. Frozen managed7f6 and all historical red evidence remain unchanged.
+
+## Reviewed R22 readability composition
+
+Normal composition of FWUI e28eb89d08af84965a6f155d68b73db7467f7665 includes reviewed2bfa/d13 runtime: three active multi-control value offsets move from-20 to-16; selected list units and selected SONG EMPTY/END status use existing C_WHITE, unselected color unchanged. No font, input, native descriptor, scalar/event hook or default option changes. Source review and producer geometry/contrast fixtures are bounded; exact combined affected host/native checks remain separate. Obsolete composed-ui-identity 8be whole-header comparison repair remains with FWUI, not a reason to revert approved R22.
+
+Actual composed selected-unit12states70checks and SONG12states112checks passed. Initial compile/run logs survived an environment restart without a final shell session receipt; the exact resulting binaries were rerun after recovery and both exit0 receipts retained. This is bounded producer host evidence, not native/fullUI qualification.

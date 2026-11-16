@@ -1,0 +1,15 @@
+{
+  "scope": "Selected SONG status role only,12 uniform-background row/band states,112 producer checks. Matched foreground changed pixels, not a general contrast detector.",
+  "sourceSHA256": {
+    "firmware/src/app/ui.c": "01f0b4b4d2d099fef2c93fa6190d6bf2f25b4cd179495118dbbfd0a6c32cabbf",
+    "tests/host/ui_song_text_test.c": "737e2f864f4c62fa0170bdfadd36fc97e388d2703a470a4eba48d045f3e1fcd5"
+  },
+  "selectedContrast": 9.553437,
+  "unselectedContrast": 5.55469,
+  "priorSelectedContrast": 3.747307,
+  "priorEvidence": "Actual prior C_DIM EMPTY status at RGB565 background10695 and foreground33938; recorded in status-overlay-contrast/lists.log. The retained before_draw_song helper changes the instruction literal, not the color, and is not a color-before proof.",
+  "priorRawLogSHA256": "9540d2efcdca795ac4b77c5a7f78562c34175ba5f2bbcf179a676feb251b9ee2",
+  "publishedLogSHA256": "b8b576e614436c63e38f2433359848e9bd55eb1a4d423e636d60c69b12ccde77",
+  "native": "NOT_RUN for new combined runtime; integration owner measuring",
+  "review": "Independent source acceptance of exact one-line role correction and scoped fixture, not duplicate full render."
+}

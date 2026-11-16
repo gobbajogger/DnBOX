@@ -500,6 +500,7 @@ run dnbox-inbox-collect python3 tests/dnbox_inbox_collect_test.py
 run dnbox-hard-limits python3 tests/hard-limits-regression.py
 run dnbox-sanitizer-policy python3 tests/sanitizer-policy-regression.py
 run ui-song-text sh tests/host/ui_song_text_test.sh
+run ui-list-unit sh tests/host/ui_list_unit_test.sh
 run remote-native-input-binding python3 tests/remote_native_annotations_binding_test.py
 run remote-native-annotations python3 tests/remote_native_annotations_test.py
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh

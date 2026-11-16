@@ -1,0 +1,19 @@
+{
+  "base": "aa46bd352bdd47457dd54c9a7add64450780fbb9",
+  "donor": "e28eb89d08af84965a6f155d68b73db7467f7665",
+  "scope": "producer exact staged source host replay; source-only acceptance not full gates",
+  "source_sha256": {
+    "firmware/src/app/ui.c": "6a86d7e635f8500c100fca369d7f190384424ae6d3a3bcad365c86ced91ec475",
+    "firmware/src/app/ui_drum_voice.inc": "a669c3c03c19204bd26eda0bf59b2f33f43a52da8beb718df8da24ee10b45353",
+    "tests/host/ui_list_unit_test.c": "a9c42011784f41265959bf0bda135057141c089cfef2c9c46af319dcca341199",
+    "tests/host/ui_song_text_test.c": "737e2f864f4c62fa0170bdfadd36fc97e388d2703a470a4eba48d045f3e1fcd5"
+  },
+  "binary_sha256": {
+    "list-unit": "0341442371b3c919483447beb0464b92de09326b62865f4dc72fb25ec0b0b62e",
+    "song-text": "ec457a4c83f604c41b730946a3e3cf58be38d40102e9fe440d2a09f0edf30e54"
+  },
+  "replay_exit": {
+    "list": 0,
+    "song": 0
+  }
+}

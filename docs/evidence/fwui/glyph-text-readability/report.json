@@ -1,0 +1,39 @@
+{
+  "schema": "dnbox-glyph-text-ownership/1",
+  "coverageComplete": false,
+  "results": [
+    {
+      "case": "current",
+      "states": 7434,
+      "statesWithIntersection": 0,
+      "checks": 37300,
+      "logicalOutside": 0,
+      "inputManifestSHA256": "5f40a5167c55c824180039f68c03dd783bed0dc493855d30dd49c8a6c66b47a4",
+      "instrumented": {
+        "firmware/src/gfx.c": "aed13d1ef16d075a8eff2a4e9237e13382ba6343c48ac796bb1cbfcae5d7713a",
+        "firmware/src/app/ui.c": "e304dc788aa33b2c20e0400eb53a809a2b5e9bbc96cde79587af4ac3ef9dbc2d",
+        "firmware/src/app/ui_drum_voice.inc": "99a3688387fc9981bb808df70d86285e5e139307f27cb61c07ffffbefac70059"
+      },
+      "logSHA256": "4fb4f72dfae767575657a08b944ca1a07b4740855b14e754607c07ff33a879c1",
+      "originalLocalLogSHA256": "58173b1855893881483a84dfa535fce90ee521a09f9d5c61cef3ce7249746968",
+      "publishedLog": "current.log"
+    },
+    {
+      "case": "prior-placement",
+      "states": 7434,
+      "statesWithIntersection": 6845,
+      "checks": 37300,
+      "logicalOutside": 0,
+      "inputManifestSHA256": "5f40a5167c55c824180039f68c03dd783bed0dc493855d30dd49c8a6c66b47a4",
+      "instrumented": {
+        "firmware/src/gfx.c": "aed13d1ef16d075a8eff2a4e9237e13382ba6343c48ac796bb1cbfcae5d7713a",
+        "firmware/src/app/ui.c": "e304dc788aa33b2c20e0400eb53a809a2b5e9bbc96cde79587af4ac3ef9dbc2d",
+        "firmware/src/app/ui_drum_voice.inc": "1baad3569eb9b86ca3dc0b06f2008091873d9239450643ff3ed4f0f15ac64dbc"
+      },
+      "logSHA256": "0dcbac545f81e7fb57c3c046422e8da62cc228ccfdf0a3917dd3bf709226b3b6",
+      "originalLocalLogSHA256": "6dc6778adc2cce1bb38b8266a22be7afd004f2deb850938f0c78b2597c577a18",
+      "publishedLog": "prior-placement.log"
+    }
+  ],
+  "scope": "Factory other dependencies, all legal integer values of 63 current visible drum identities, idle settled selected SOUND pages. Pixel ownership uses actual glyph before/after RGB565 and requires unchanged produced color immediately before text paint. No all combinations, animation, complete inventory or F2 claim."
+}
