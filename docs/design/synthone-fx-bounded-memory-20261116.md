@@ -4,9 +4,9 @@
 
 **Source:** the full-FX extraction on `820edc7bae28a53e642fe53761a2fb90d5975804` (`experiments/synthone-port-feasibility-20261114/full-reference/source_fx.hpp`). The graph is the original Synth One stereo chain: bitcrush, tremolo, auto-pan, phaser, optional ladder into the delay, four variable delays, reverb hipass, three compressors, Costello reverb, master, and a fixed 50 ms widen on the right.
 
-**Recommendation:** keep the four-line delay, store it as 12-bit samples in the 158,400 bytes the send delay already owns (`dly_buf`, 79,200 × int16), and do not allocate the Costello tank. At 48 kHz the longest delay time that fits is **0.264 s** (12,689 samples). The factory delay time is 0.25 s, so that preset still reaches its full length. A preset that asks for the 2.5 s maximum is shortened. Inside the cap, the same indexing as the original 10 s ring is bit-exact in float; the 12-bit store is the sample error. New pool bytes: **0**. The 148 bytes between the measured pool free and the 8,192-byte floor are not used.
+**Recommendation:** Design I. Float lines at the full sample rate, sized to the loaded preset, so the delay matches the original while the time fits. A 12-bit or decimated line is not this recommendation. The map in `firmware/app.ld` has no SDRAM or PSRAM. The FX pool is 344,064 bytes at `0x01C20000`, inside the 512 KB window that starts at `0x01C00000`.
 
-The person playing the device would keep a short echo at the factory setting, would lose echoes longer than about a quarter of a second, and would not get a private Costello reverb from this budget. The drum and bass send delay cannot keep a separate history in the same array.
+Of 694 public factory presets, 40 have an armed identical history that fits in the 158,400-byte send buffer. 274 fit only if the pool is emptied down to the 8,192-byte floor. A 0.25 s delay alone is 288,064 bytes at 48 kHz, and with the reverb tank it is larger than the pool. A longer tweak than the loaded line is refused. It is not decimated.
 
 ## Where the bytes can live
 
@@ -138,9 +138,72 @@ Reading the table: on the existing fixtures, 12-bit storage stays near 30–54 d
 
 Design A rows quantise the 50 ms widen as well as the four lines. Design B and Design C rows leave that widen at float32, so their right-channel error does not include the widen step.
 
-## 4. Recommendation
+## 4. Presets and Design I
 
-Use **Design A**.
+Public factory banks are `AudioKit/AudioKitSynthOne` at `6466a371`, paths under `Presets/Data`. `public-source-manifest.json` stores each file's SHA-256. The JSON bodies are not committed here. They were read once, and every file matched that manifest. `User.json` is one user slot and is not in the 694. The private owner archive (`Synth one.zip`, 906 presets, SHA-256 `68ad8b5f…`) is not in the checkout and is not counted.
+
+Tempo follows the fresh-kernel load order in `S1DSPKernel+getSetSynthParameters.mm`. `delayTime` is snapped with `S1Rate::nearestTime` while sync is still the default on and the tempo is still 120 BPM. Setting `arpRate` snaps that result again at the preset's tempo. Setting `tempoSyncToArpRate` off does not put the original seconds back. The delay divisions run from two bars down to a 1/64 triplet. Eight, six, four, and three bars are excluded. A division outside 0.0003628117914 s to 2.5 s is skipped. The FX graph then uses the snapped seconds as `delayTime`.
+
+Bit-exact line size is `ceil(seconds × rate) + 4` floats, the window that matched `sp_vdelay` on the host. The left and right lines are `2 × delayTime`. The other two are `delayTime`. The reverb tank is the eight Costello lines: 107,440 bytes at 48 kHz and 98,760 bytes at 44.1 kHz. Widen is `round(0.05 × rate)` floats.
+
+Armed history is those delay lines, the reverb tank, the widen line, the pan table when auto-pan is on, the phaser and ladder state when they are in the path, and the compressors and hipass filters the frame always runs. Heard history drops a stage the stored patch bypasses (delay toggle or mix at 0, reverb toggle or mix at 0, widen at 0, auto-pan amount at 0).
+
+### Effective delay time, 694 factory presets
+
+325 presets have an effective `delayTime` above 0.264 s. 369 are at or under that cap. This is the synced time, not the raw stored number.
+
+| Effective delay (s) | Presets |
+| --- | --- |
+| 0.00–0.25 | 300 |
+| 0.25–0.50 | 189 |
+| 0.50–0.75 | 169 |
+| 0.75–1.00 | 5 |
+| 1.00–1.25 | 19 |
+| 1.25–1.50 | 6 |
+| 1.50–1.75 | 2 |
+| 1.75–2.00 | 2 |
+| 2.00–2.25 | 0 |
+| 2.25–2.50 | 1 |
+| 2.50 | 1 |
+
+Banks: Sound of Izrael 101, Red Sky Lullaby 100, Bonus 94, JEC 88, Spidericemidas 61, Sound of Izrael 2 51, Brice Beasley 46, Electronisounds 43, BankA 41, DJ Puzzle 28, Francis Preve 26, Starter Bank 15.
+
+### (a) Per-preset bytes
+
+`tools/synthone-fx-bounded-memory/IDENTICAL.json` has one row per preset at 48 kHz and at 44.1 kHz: bank, name, stored time, snapped time, division, delay bytes, reverb bytes, heard bytes, and armed bytes. The largest armed preset at 48 kHz is Red Sky Lullaby "Outer Limits" (arp 1 BPM, snapped to the 2.5 s cap): 2,880,064 delay bytes and 3,014,268 armed bytes.
+
+A 0.25 s snap, which is an eighth note at 120 BPM, is 288,064 delay bytes at 48 kHz. With the tank, widen, and the small state, the armed total is about 406 KB, which is larger than the pool.
+
+### (b) How many fit
+
+| Budget | Bytes | What is reclaimed | Armed fit, 48 kHz | Heard fit, 48 kHz | Armed fit, 44.1 kHz |
+| --- | --- | --- | --- | --- | --- |
+| `dly_buf` | 158,400 | Send delay only. Owner: drum and bass send, `engine.c`. | 40 / 694 | 213 / 694 | 56 / 694 |
+| Send plus small pool objects | 162,976 | Above, plus undo 4,096 (UI undo), scope 256 (engine meter), BLE MIDI out 224 (`ble.c`). | 45 / 694 | 222 / 694 | 58 / 694 |
+| That set, and the screen strip | 229,216 | Above, plus `cv_px` 66,240 (240×138 RGB565, `gfx.c`). The screen strip is gone. | 110 / 694 | 274 / 694 | 125 / 694 |
+| Pool ceiling | 335,872 | Entire `.pool` except the 8,192-byte floor. This also removes the 909, the 808, both 303s, breaks, the send reverb inside `fxbus_t`, the Chicago inserts, and the project stage. Those struct sizes were not measured here (`x0x_drum_tables.h` is generated). The ceiling is the linker length minus the floor. | 274 / 694 | 393 / 694 | 286 / 694 |
+
+Delay payloads alone, ignoring the tank, fit in `dly_buf` for 184 of 694 presets at 48 kHz. The longest effective time in that group is 0.136 s. The next preset is 0.139 s and does not fit. 525 presets have the delay switched on. 131 of those have delay payloads that fit in `dly_buf`.
+
+### (c) Past the budget
+
+The line length is chosen when the preset loads, from that preset's snapped `delayTime`. A shorter tweak stays inside the line and stays bit-exact. A longer tweak is not accepted: the sounding time stays at the allocated length, and the extra movement is not decimated, companded, or read from an old tail. Loading a preset whose armed history is above the reclaimed budget does not install a shorter stand-in. The delay stays on the previous exact preset, or it stays bypassed. Opening the reverb on a preset that was loaded without the tank is the same refusal unless the tank's 107,440 bytes (48 kHz) are already reserved.
+
+### `dly_buf` rule
+
+Exclusive use. A fixed split cannot hold a float four-line history of even 0.14 s and also a musical send delay. While Synth One's delay is the loaded exact preset, the drum and bass delay sends write nothing and add nothing. Their reverb combs stay in `fxbus_t`, which is not `dly_buf`. Dry drums and bass are unchanged. Turning the synth delay off, or leaving that preset, fades the wet output to dry over 256 samples, clears the buffer, then lets the send write again and fades its wet in over 256 samples. The old send echo does not come back. The host test is `ownership.cpp`: 48,000 SourceFx frames while the send is suppressed (0 send writes, 0 buffer mutations), fade step 0.00879 against an abrupt step of 0.251, stale peak 0 after the clear and 0.307 if the clear is skipped.
+
+## 5. Recommendation
+
+Use **Design I** for every preset whose armed byte count is within the budget that is actually reclaimed. The table in (b) is the fit list. Lossy Design A (12-bit, 0.264 s cap) and Design H (full rate up to that cap, then /2, /4, or /10) do not meet an identical-sound requirement. They remain measured in `MEASURED.json` and `HYBRID.json` so the cost of ignoring this section is on paper.
+
+On the delay section alone, Design H at full rate matches the short fixture to about 52 / 49 dB SNR (12-bit, not float). At 2.5 s it is /10 and the raw SNR is about 2 dB; after a 27-sample alignment it is about 34 / 24 dB. A 256-sample fade across the 0.20 s to 0.40 s boundary has max step 0.00098. An abrupt clear has max step 0.294. Mu-law stays full rate at 0.40 s (SNR about 34 dB) and is still /10 at 2.5 s. A mono pool uses /4 for a 2.5 s program and is a different stereo image (right-channel SNR about 6 dB on the short fixture). None of those are bit-exact.
+
+Per line, the four-line 12-bit budget reaches these `delayTime` maxima at 48 kHz: /1 = 0.264 s, /2 = 0.529 s, /4 = 1.057 s, /10 = 2.644 s. That covers the 2.5 s parameter maximum and does not cover the 10 s init. Mu-law doubles the stored samples, so the same steps are 0.529 s, 1.057 s, 2.115 s, and 5.287 s. The stock graph always runs all four lines at `2×` and `1×` the same `delayTime`, so it never frees three lines for one long line.
+
+## 6. Earlier lossy recommendation
+
+The 12-bit plan below was the recommendation before the identical-sound requirement. It is not the recommendation now.
 
 | Budget | Bytes | Notes |
 | --- | --- | --- |
@@ -179,3 +242,5 @@ Not claimed here:
 | Private captures | The FX harness fixtures above are synthetic. Those two tests do not reference a private recording. |
 | Send-reverb versus Costello | `fxbus.c` was not linked into this probe. The reverb-off rows are silence in that slot, not the Schroeder tank. |
 | Firmware link, pool free, flash free, device playback | Design only. The 8,340 and 24/36 figures are earlier records, not a new image. |
+| Owner preset archive, 906 presets | `Synth one.zip` is not in the checkout. The 694 count is the public factory banks only. |
+| Per-engine `.pool` struct sizes | `x0x_drum_tables.h` is generated, so this host did not take `sizeof` of the 909, 808, 303, or break engines. The pool ceiling is the linker length minus the floor. |
