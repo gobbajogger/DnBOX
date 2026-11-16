@@ -306,11 +306,54 @@ def build_app():
         o = OUT / "o2" / "wobble.o"
         units.append(("cc", *[f if f != "-O2" else "-Oz" for f in o2], "-c", Path("experiments/wobble/wobble.c"), "-o", o))
         objs.append(o)
+    synthone = os.environ.get("X0X_SYNTHONE", "0")
+    if synthone not in ("0", "1"):
+        raise SystemExit("X0X_SYNTHONE: 0 or 1")
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
-        unit_flags = [f if f != "-O2" else "-Oz" for f in o2] if u == "dsp/bass303.c" else o2
+        unit_flags = [f if f != "-O2" else "-Oz" for f in o2] if u == "dsp/bass303.c" else list(o2)
+        if synthone == "1" and u == "app/engine.c":
+            unit_flags.append("-DX0X_SYNTHONE=1")
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
         objs.append(o)
+    if synthone == "1":
+        # Off by default. These objects are how Lead measures the no-double closure.
+        # They are not called from the audio or UI path except x0x_synthone_keep.
+        s1 = SRC / "experiments/synthone-port-feasibility-20261114"
+        s1_inc = ["-I" + str(s1 / "direct-scheduler"),
+                  "-I" + str(s1 / "direct-scheduler/nodouble"),
+                  "-I" + str(s1 / "probe"),
+                  "-I" + str(s1 / "shared-graph"),
+                  "-I" + str(s1 / "parameter-ports"),
+                  "-I" + str(s1 / "audiokit-4.9.2/AudioKit/Core/Soundpipe"),
+                  "-I" + str(s1 / "audiokit-4.9.2/AudioKit/Core/SoundpipeExtension"),
+                  "-I" + str(s1 / "audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav"),
+                  "-I" + str(FW / "src/dsp"),
+                  "-DS1_NO_DOUBLE", "-ffp-contract=off", "-fno-fast-math"]
+        s1_cxx = ["-std=c++11", "-fno-exceptions", "-fno-rtti", "-x", "c++"]
+        s1_c = ["nodouble/base.c", "nodouble/ftbl.c", "nodouble/adsr.c", "nodouble/crossfade.c",
+                "nodouble/osc.c", "nodouble/fosc.c", "nodouble/noise.c", "nodouble/moogladder.c",
+                "nodouble/butbp.c", "nodouble/buthp.c", "nodouble/port.c", "nodouble/phasor.c",
+                "nodouble/oscmorph2d.c", "float_math.c", "compact-reader/compact.c",
+                "compact-reader/compact_morph.c", "reader/direct_reader.c", "reader/morph_compute.c"]
+        s1_cpp = ["checked_domain.cpp", "compact_note.cpp", "scheduler.cpp", "source_scheduler.cpp",
+                  "reader/runtime_note.cpp"]
+        for rel in s1_c:
+            o = OUT / "o2" / ("s1_" + Path(rel).name + ".o")
+            units.append(("cc", *o2, *s1_inc, "-c", s1 / "direct-scheduler" / rel, "-o", o))
+            objs.append(o)
+        units.append(("cc", *o2, *s1_inc, *s1_cxx, "-c", s1 / "probe/portable_voice.cpp", "-o", OUT / "o2/s1_voice.o"))
+        objs.append(OUT / "o2/s1_voice.o")
+        units.append(("cc", *o2, *s1_inc, *s1_cxx, "-c", s1 / "parameter-ports/parameter_ports.cpp", "-o", OUT / "o2/s1_ports.o"))
+        objs.append(OUT / "o2/s1_ports.o")
+        units.append(("cc", *o2, *s1_inc, *s1_cxx, "-c", s1 / "parameter-ports/generated/parameter_map.cpp", "-o", OUT / "o2/s1_parameter_map.o"))
+        objs.append(OUT / "o2/s1_parameter_map.o")
+        for rel in s1_cpp:
+            o = OUT / "o2" / ("s1_" + Path(rel).name + ".o")
+            units.append(("cc", *o2, *s1_inc, *s1_cxx, "-c", s1 / "direct-scheduler" / rel, "-o", o))
+            objs.append(o)
+        units.append(("cc", *o2, "-DS1_NO_DOUBLE", "-c", FW / "src/dsp/synthone_link.c", "-o", OUT / "o2/s1_link.o"))
+        objs.append(OUT / "o2/s1_link.o")
     tc_all(*units)
     elf = OUT / "x0x.elf"
     # unreferenced functions (each in its own section: -ffunction-sections) are dropped: the DSP keeps

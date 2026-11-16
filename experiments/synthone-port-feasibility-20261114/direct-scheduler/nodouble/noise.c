@@ -1,11 +1,10 @@
+#include "slot.h"
+
 #include <stdlib.h>
 #include "soundpipe.h"
+S1_POOLED(sp_noise, sp_noise_create, sp_noise_destroy, noise)
 
-int sp_noise_create(sp_noise **ns)
-{
-    *ns = malloc(sizeof(sp_noise));
-    return SP_OK;
-}
+
 
 int sp_noise_init(sp_data *sp, sp_noise *ns)
 {
@@ -21,8 +20,4 @@ int sp_noise_compute(sp_data *sp, sp_noise *ns, SPFLOAT *in, SPFLOAT *out)
     return SP_OK;
 }
 
-int sp_noise_destroy(sp_noise **ns)
-{
-    free(*ns);
-    return SP_OK;
-}
+

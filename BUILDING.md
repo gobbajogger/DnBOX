@@ -392,6 +392,18 @@ X0X_DEV_PADCAL=0 MODEL=elite ./build.sh --board smk37
 To get the calibration mode again, build with `X0X_DEV_PADCAL=1` (or with no value). The tag `padcal-v1`
 marks the complete calibration mode (CLP-79, orientation page, reopen fix, ok dot).
 
+Build option: `X0X_SYNTHONE` (default `0`). `1` compiles the no-double Synth One closure into the
+firmware image and calls `x0x_synthone_keep` from `engine_init` so `--gc-sections` keeps it. That call
+does not render audio and does not change the UI. `0` or an unset variable leaves the Elite and Pro
+binaries on the normal compile, with no Synth One objects. The closure is the experiment under
+`experiments/synthone-port-feasibility-20261114/direct-scheduler`, built with `-DS1_NO_DOUBLE`. Measure
+flash, pool and RAM with:
+
+```
+X0X_SYNTHONE=1 X0X_DEV_PADCAL=0 MODEL=elite ./build.sh --board smk37
+X0X_SYNTHONE=1 X0X_DEV_PADCAL=0 MODEL=pro ./build.sh --board smk37
+```
+
 The build also generates `build/gen/`. It contains the font and the 909's cymbal samples (IMA ADPCM,
 44.1 kHz) and tables (`tools/gen_drum_samples.py`). The default image does not contain the two factory
 break loops. Those loops are 2 bars each, IMA ADPCM at 44.1 kHz, 220,500 B together, and they stay in

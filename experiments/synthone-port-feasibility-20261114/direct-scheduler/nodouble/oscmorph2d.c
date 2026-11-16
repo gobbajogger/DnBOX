@@ -1,19 +1,14 @@
+#include "slot.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include "float_math.h"
 #include "soundpipeextension.h"
+S1_POOLED(sp_oscmorph2d, sp_oscmorph2d_create, sp_oscmorph2d_destroy, morph)
 
-int sp_oscmorph2d_create(sp_oscmorph2d **p)
-{
-    *p = malloc(sizeof(sp_oscmorph2d));
-    return SP_OK;
-}
 
-int sp_oscmorph2d_destroy(sp_oscmorph2d **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_oscmorph2d_init(sp_data *sp, sp_oscmorph2d *osc, sp_ftbl **ft, int nft, int nbl, float *fbls, SPFLOAT iphs)
 {

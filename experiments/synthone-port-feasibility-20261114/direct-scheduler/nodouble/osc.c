@@ -10,22 +10,17 @@
  *
  */
 
+#include "slot.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include "float_math.h"
 #include "soundpipe.h"
+S1_POOLED(sp_osc, sp_osc_create, sp_osc_destroy, osc)
 
-int sp_osc_create(sp_osc **osc)
-{
-    *osc = malloc(sizeof(sp_osc));
-    return SP_OK;
-}
 
-int sp_osc_destroy(sp_osc **osc)
-{
-    free(*osc);
-    return SP_NOT_OK;
-}
+
+
 
 int sp_osc_init(sp_data *sp, sp_osc *osc, sp_ftbl *ft, SPFLOAT iphs)
 {

@@ -1,20 +1,15 @@
+#include "slot.h"
+
 #include <stdlib.h>
 #include "float_math.h"
 #include "soundpipe.h"
+S1_POOLED(sp_adsr, sp_adsr_create, sp_adsr_destroy, adsr)
 
 enum { CLEAR, ATTACK, DECAY, SUSTAIN, RELEASE };
 
-int sp_adsr_create(sp_adsr **p)
-{
-    *p = malloc(sizeof(sp_adsr));
-    return SP_OK;
-}
 
-int sp_adsr_destroy(sp_adsr **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_adsr_init(sp_data *sp, sp_adsr *p)
 {

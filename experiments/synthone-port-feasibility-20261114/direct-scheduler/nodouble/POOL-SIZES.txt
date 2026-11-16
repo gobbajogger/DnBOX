@@ -1,0 +1,19 @@
+Host sizeof, one .pool slot per constructor. The engine embeds its DSP objects
+and does not call these constructors. sp_auxdata_alloc keeps no buffer and
+returns failure. sp_createn accepts one channel and uses the sp_data slot.
+
+sp_data 240
+sp_data output float 4
+sp_adsr 48
+sp_butbp 64
+sp_buthp 52
+sp_crossfade 4
+sp_fosc 40
+sp_moogladder 64
+sp_noise 4
+sp_osc 32
+sp_oscmorph2d 56
+sp_phasor 16
+sp_port 28
+used flags 13
+total if every slot is retained 665

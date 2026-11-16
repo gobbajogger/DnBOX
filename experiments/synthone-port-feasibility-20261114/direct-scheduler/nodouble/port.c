@@ -11,22 +11,17 @@
  */
 
 
+#include "slot.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include "float_math.h"
 #include "soundpipe.h"
+S1_POOLED(sp_port, sp_port_create, sp_port_destroy, port)
 
-int sp_port_create(sp_port **p)
-{
-    *p = malloc(sizeof(sp_port));
-    return SP_OK;
-}
 
-int sp_port_destroy(sp_port **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_port_init(sp_data *sp, sp_port *p, SPFLOAT htime)
 {

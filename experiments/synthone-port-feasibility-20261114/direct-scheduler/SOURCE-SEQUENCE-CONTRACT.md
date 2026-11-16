@@ -75,6 +75,7 @@ native objects and a retained API ELF do not establish target execution, correct
 platform placement, full product resources, CPU, acoustic app fidelity, device
 behavior or the whole hardest-configuration zero-discontinuity gate.
 The host reference still uses binary64. The firmware-target closure is compiled
-without soft-double helpers. That does not by itself admit the image.
+without soft-double helpers. `X0X_SYNTHONE=1` is the opt-in firmware measurement
+build in BUILDING.md. It does not by itself admit the image.
 Default LeakSanitizer failure under ptrace is retained; detect_leaks=0 passes
 are explicitly not leak-detection passes.

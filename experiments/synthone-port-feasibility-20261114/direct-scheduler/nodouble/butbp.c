@@ -10,22 +10,17 @@
  *
  */
 
+#include "slot.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include "float_math.h"
 #include "soundpipe.h"
+S1_POOLED(sp_butbp, sp_butbp_create, sp_butbp_destroy, butbp)
 
-int sp_butbp_create(sp_butbp **p)
-{
-    *p = malloc(sizeof(sp_butbp));
-    return SP_OK;
-}
 
-int sp_butbp_destroy(sp_butbp **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_butbp_init(sp_data *sp, sp_butbp *p)
 {

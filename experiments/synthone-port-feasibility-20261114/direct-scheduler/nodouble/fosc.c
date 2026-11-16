@@ -10,20 +10,15 @@
  *
  */
 
+#include "slot.h"
+
 #include <stdlib.h>
 #include "soundpipe.h"
+S1_POOLED(sp_fosc, sp_fosc_create, sp_fosc_destroy, fosc)
 
-int sp_fosc_create(sp_fosc **p)
-{
-    *p = malloc(sizeof(sp_fosc));
-    return SP_OK;
-}
 
-int sp_fosc_destroy(sp_fosc **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_fosc_init(sp_data *sp, sp_fosc *p, sp_ftbl *ft)
 {

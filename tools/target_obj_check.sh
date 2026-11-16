@@ -5,20 +5,35 @@
 # undefined symbol outside an allow list. Also prints the instruction count of each
 # function (a rough cost signal; tests/target_budget.py does the loop-weighted one).
 #   tools/target_obj_check.sh firmware/src/dsp/bass303.c [extra cflags...]
-# Needs JIELI_TOOLCHAIN (tools/get_toolchain.sh) and docker or podman.
+# Needs JIELI_TOOLCHAIN (tools/get_toolchain.sh). Uses docker or podman when one
+# is installed. Otherwise it runs the toolchain binaries on this machine.
 set -e
 cd "$(dirname "$0")/.."
 SRCF="$1"; shift
 : "${JIELI_TOOLCHAIN:?set JIELI_TOOLCHAIN}"
 TC="$(cd "$JIELI_TOOLCHAIN" && pwd -P)"
-DOCKER="$(command -v docker || command -v podman)"
+DOCKER=""
+if command -v docker >/dev/null 2>&1; then DOCKER=docker
+elif command -v podman >/dev/null 2>&1; then DOCKER=podman
+fi
 OBJ="build/objcheck/$(basename "$SRCF" .c).o"
 mkdir -p build/objcheck
-run() { "$DOCKER" run --rm --platform linux/amd64 -v "$PWD:/work" -v "$TC:/opt/jieli:ro" -w /work \
-        debian:bookworm-slim "$@"; }
-run /opt/jieli/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -mfprev1 -O2 -fno-builtin -ffp-contract=off \
+if [ -n "$DOCKER" ]; then
+    run() { "$DOCKER" run --rm --platform linux/amd64 -v "$PWD:/work" -v "$TC:/opt/jieli:ro" -w /work \
+            debian:bookworm-slim "$@"; }
+    CC=/opt/jieli/pi32v2/bin/clang
+    NM=/opt/jieli/pi32v2/bin/nm
+    OBJDUMP=/opt/jieli/common/bin/objdump
+else
+    echo "target_obj_check: no container; using $TC directly" >&2
+    run() { "$@"; }
+    CC="$TC/pi32v2/bin/clang"
+    NM="$TC/pi32v2/bin/nm"
+    OBJDUMP="$TC/common/bin/objdump"
+fi
+run "$CC" -target pi32v2 -mcpu=r3 -mfprev1 -O2 -fno-builtin -ffp-contract=off \
     -Wall -Wdouble-promotion -Ifirmware/src -Ibuild/gen "$@" -c "$SRCF" -o "$OBJ"
-run sh -c "/opt/jieli/pi32v2/bin/nm -u $OBJ; echo ---; /opt/jieli/common/bin/objdump -d $OBJ" > "$OBJ.txt"
+run sh -c "$NM -u $OBJ; echo ---; $OBJDUMP -d $OBJ" > "$OBJ.txt"
 UNDEF="$(awk '/^---$/{exit} {print $NF}' "$OBJ.txt")"
 BAD=""
 for s in $UNDEF; do

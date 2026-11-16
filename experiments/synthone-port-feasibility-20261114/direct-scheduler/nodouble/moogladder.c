@@ -9,10 +9,13 @@
  * Location: Opcodes/newfils.c
  */
 
+#include "slot.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include "float_math.h"
 #include "soundpipe.h"
+S1_POOLED(sp_moogladder, sp_moogladder_create, sp_moogladder_destroy, moog)
 
 #define SPFLOAT2LONG(x) lrintf(x)
 
@@ -33,15 +36,9 @@ static float my_tanh(float x)
     return sign * s1_tanhf(x);
 }
 
-int sp_moogladder_create(sp_moogladder **t){
-    *t = malloc(sizeof(sp_moogladder));
-    return SP_OK;
-}
 
-int sp_moogladder_destroy(sp_moogladder **t){
-    free(*t);
-    return SP_OK;
-}
+
+
 
 int sp_moogladder_init(sp_data *sp, sp_moogladder *p){
     p->istor = 0.f;

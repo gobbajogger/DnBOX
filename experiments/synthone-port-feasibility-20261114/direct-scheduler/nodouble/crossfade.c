@@ -1,18 +1,13 @@
+#include "slot.h"
+
 #include <stdlib.h>
 #include "soundpipe.h"
+S1_POOLED(sp_crossfade, sp_crossfade_create, sp_crossfade_destroy, crossfade)
 /* 0.5 is exact in binary32, same bits as the double literal. */
 
-int sp_crossfade_create(sp_crossfade **p)
-{
-    *p = malloc(sizeof(sp_crossfade));
-    return SP_OK;
-}
 
-int sp_crossfade_destroy(sp_crossfade **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_crossfade_init(sp_data *sp, sp_crossfade *p)
 {

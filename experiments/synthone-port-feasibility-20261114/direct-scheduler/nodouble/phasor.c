@@ -10,20 +10,15 @@
  *
  */
 
+#include "slot.h"
+
 #include <stdlib.h>
 #include "soundpipe.h"
+S1_POOLED(sp_phasor, sp_phasor_create, sp_phasor_destroy, phasor)
 
-int sp_phasor_create(sp_phasor **p)
-{
-    *p = malloc(sizeof(sp_phasor));
-    return SP_OK;
-}
 
-int sp_phasor_destroy(sp_phasor **p)
-{
-    free(*p);
-    return SP_OK;
-}
+
+
 
 int sp_phasor_init(sp_data *sp, sp_phasor *p, SPFLOAT iphs)
 {

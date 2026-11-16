@@ -13,7 +13,7 @@ import tempfile
 
 COMPILER_SHA256 = 'c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f'
 TOOLCHAIN_INPUTS_SHA256 = '56cfa3d45003c12b33bad6d4e8aff1f4dab0f33d1774faa5419f18ab98a6174e'
-LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','float_math.h','float_math.c','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp','nodouble/adsr.c','nodouble/butbp.c','nodouble/buthp.c','nodouble/crossfade.c','nodouble/fosc.c','nodouble/ftbl.c','nodouble/moogladder.c','nodouble/noise.c','nodouble/osc.c','nodouble/oscmorph2d.c','nodouble/phasor.c','nodouble/port.c']
+LOCAL = ['scheduler.hpp', 'scheduler.cpp', 'fixed_array.hpp','float_math.h','float_math.c','reader/direct_reader.h','reader/direct_reader.c','reader/morph_compute.h','reader/morph_compute.c','reader/runtime_note.hpp','reader/runtime_note.cpp','reader/generate.py','reader/DERIVATION.json','compact-reader/compact.h','compact-reader/compact.c','compact-reader/compact_morph.h','compact-reader/compact_morph.c','compact_note.hpp','compact_note.cpp','checked_domain.cpp','nodouble/slot.h','nodouble/midi_cps.h','nodouble/base.c','nodouble/adsr.c','nodouble/butbp.c','nodouble/buthp.c','nodouble/crossfade.c','nodouble/fosc.c','nodouble/ftbl.c','nodouble/moogladder.c','nodouble/noise.c','nodouble/osc.c','nodouble/oscmorph2d.c','nodouble/phasor.c','nodouble/port.c']
 LAYOUT = '''#include "scheduler.hpp"
 struct LayoutAccess : s1scheduler::RuntimeState {
     static constexpr unsigned notes() { return sizeof(((LayoutAccess*)0)->objects_); }
@@ -99,7 +99,8 @@ def main():
             expected[dest.resolve()]=digest(data)
             source_records.append({'path':group+'/'+name,'bytes':len(data),'sha256':digest(data)})
     core=closure/'experiment/audiokit-4.9.2/AudioKit/Core'
-    firmware_math=(root.parents[2]/'firmware/src/dsp').resolve()
+    firmware_root=(root.parents[2]/'firmware').resolve()
+    firmware_math=firmware_root/'src/dsp'
     includes=[closure/'scheduler',closure/'experiment/probe',closure/'experiment/shared-graph',closure/'controls',core/'Soundpipe',core/'SoundpipeExtension',core/'Soundpipe/lib/dr_wav',firmware_math]
     resource=tc/'common/lib/clang/4.0.1/include';target_include=tc/'pi32v2/include'
     flags=['-target','pi32v2','-mcpu=r3','-mfprev1','-Os','-ffunction-sections','-fdata-sections','-ffp-contract=off','-fno-fast-math','-fno-builtin','-DNO_LIBSNDFILE','-DS1_NO_DOUBLE','-nostdinc']
@@ -113,7 +114,7 @@ def main():
     for name in ['runtime_note.cpp','morph_compute.c','DERIVATION.json']:
         require((derived/name).read_bytes()==(closure/'scheduler/reader'/name).read_bytes(),'native reader derivation mismatch: '+name)
     units=[('checked_domain',closure/'scheduler/checked_domain.cpp','c++'),('compact_reader',closure/'scheduler/compact-reader/compact.c','c'),('compact_morph',closure/'scheduler/compact-reader/compact_morph.c','c'),('compact_note',closure/'scheduler/compact_note.cpp','c++'),('direct_reader',closure/'scheduler/reader/direct_reader.c','c'),('runtime_morph',closure/'scheduler/reader/morph_compute.c','c'),('runtime_note',closure/'scheduler/reader/runtime_note.cpp','c++'),('scheduler',closure/'scheduler/scheduler.cpp','c++'),('ports',closure/'controls/parameter_ports.cpp','c++'),('parameter_map',closure/'controls/generated/parameter_map.cpp','c++'),('voice',closure/'experiment/probe/portable_voice.cpp','c++')]
-    units += [('base',core/'Soundpipe/modules/base.c','c')]
+    units += [('base',closure/'scheduler/nodouble/base.c','c')]
     units += [(name,closure/'scheduler/nodouble'/(name+'.c'),'c') for name in ['ftbl','adsr','crossfade','osc','fosc','noise','moogladder','butbp','buthp','port','phasor']]
     units += [('morph',closure/'scheduler/nodouble/oscmorph2d.c','c'),('float_math',closure/'scheduler/float_math.c','c')]
     if a.full_sequence:units.insert(0,('source_scheduler',closure/'scheduler/source_scheduler.cpp','c++'))
@@ -135,21 +136,42 @@ def main():
                 kind='staged'
             elif path in sdk_headers:
                 require(sha==sdk_headers[path],'SDK header changed during compilation');kind='sdk-cxx-header';system_headers['sdk-cxx/'+str(path.relative_to(sdk))]=sha
-            elif path==firmware_math/'fastmath.h':
-                kind='firmware-fastmath'; system_headers['firmware/src/dsp/fastmath.h']=sha
+            elif firmware_root==path or firmware_root in path.parents:
+                kind='firmware-header'; system_headers[str(path.relative_to(firmware_root.parent))]=sha
             else:
                 require(path in pinned_headers and sha==pinned_headers[path] and (resource in path.parents or target_include in path.parents), 'unlisted or changed native dependency: '+str(path))
                 kind='toolchain-header';system_headers[str(path.relative_to(tc))]=sha
-            dependencies.append({'path':str(path.relative_to(out)) if kind=='staged' else str(path.relative_to(sdk)) if kind=='sdk-cxx-header' else str(path.relative_to(tc)), 'kind':kind,'sha256':sha})
+            if kind=='staged': recorded=str(path.relative_to(out))
+            elif kind=='sdk-cxx-header': recorded=str(path.relative_to(sdk))
+            elif kind=='firmware-header': recorded=str(path.relative_to(firmware_root.parent))
+            else: recorded=str(path.relative_to(tc))
+            dependencies.append({'path':recorded,'kind':kind,'sha256':sha})
         machine,sections=elf_sections(obj)
         sizes={key:sum(s['bytes'] for s in sections.values() if s['flags']&2 and pred(s)) for key,pred in [('executable',lambda s:s['flags']&4),('readonly',lambda s:not s['flags']&5),('writable',lambda s:s['flags']&1 and s['type']!=8),('bss',lambda s:s['flags']&1 and s['type']==8)]}
         results.append({'name':name,'command':command,'exit':q.returncode,'source_sha256':digest(source.read_bytes()),'object_sha256':digest(obj.read_bytes()),'elf_machine':machine,'allocated_section_bytes':sizes,'dependencies':dependencies})
+    # Object scan, not a garbage-collected image. An earlier image count rooted
+    # only live engine calls, so unreferenced base.c pow/soft-double stayed invisible.
+    nm_bin=tc/'pi32v2/bin/nm'
+    object_scan=[]
+    for obj in sorted(out.glob('*.o')):
+        listed=subprocess.run([str(nm_bin),'-u',str(obj)],capture_output=True,text=True)
+        require(listed.returncode==0, 'nm failed on '+obj.name)
+        hits=[]
+        for line in listed.stdout.splitlines():
+            parts=line.split()
+            if not parts: continue
+            sym=parts[-1]
+            if sym.startswith('__') and 'df' in sym: hits.append(sym+'(double)')
+            elif sym in ('malloc','calloc','realloc','free'): hits.append(sym+'(alloc)')
+            elif sym in ('pow','exp','sin','cos','tan','log','log2','floor','fabs','fmod','tanh','sqrt'): hits.append(sym+'(libm)')
+        if hits: object_scan.append({'object':obj.name,'symbols':hits})
+    require(not object_scan, 'closure objects still reference double, alloc, or double libm: '+json.dumps(object_scan))
     _,sections=elf_sections(out/'layout.o');raw=sections['.s1layout']['data'];require(len(raw)==(20 if a.full_sequence else 18)*4,'native layout size mismatch')
     values=struct.unpack('<'+str(len(raw)//4)+'I',raw);require(values[:2]==(0x53314c31,4 if a.full_sequence else 3),'native layout signature mismatch')
     labels=['pointer','float','double','State','RuntimeState','Scheduler','Ports','S1NoteState','Held','note_objects_7','table_descriptors_53','Scheduler_alignment','direct_binding','direct_binding_alignment','compact_binding','compact_binding_alignment']
     if a.full_sequence:labels+=['SourceScheduler','SourceScheduler_alignment']
     result={'cxx_math_dispatch':'authentic SDK C++ overloads' if a.sdk_cxx_headers else 'legacy C-only math header; original C++ dispatch NOT established','sdk_cxx_manifest_sha256':digest((root/'NATIVE-SDK-CXX.json').read_bytes()) if a.sdk_cxx_headers else None,'started_at':started_at,'completed_at':datetime.now(timezone.utc).isoformat(),'scope':'Freestanding runtime native objects and compiler-evaluated layout only; no executable/firmware link, table placement, resource-floor, CPU or device acceptance','compiler_sha256':COMPILER_SHA256,'compiler_child_environment':env,'source_manifest_sha256':digest((root/'SOURCE-MANIFEST.json').read_bytes()),'compiled_sources':source_records,'toolchain_headers':system_headers,'units':results,'runtime_objects':len(units),'layout':dict(zip(labels,values[2:])),'not_run':['native executable/firmware link','combined Juno/app resources','table storage/read workload','CPU/device qualification']}
     (out/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n')
-    print(json.dumps({'runtime_objects':len(units),'layout':result['layout'],'result_directory':str(out),'link':'NOT_RUN'}))
+    print(json.dumps({'runtime_objects':len(units),'layout':result['layout'],'object_scan':'PASS','forbidden_symbols':0,'result_directory':str(out),'link':'NOT_RUN'}))
 
 if __name__=='__main__':main()

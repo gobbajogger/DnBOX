@@ -149,4 +149,13 @@ bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
     }
     return true;
 }
+#if defined(S1_NO_DOUBLE)
+extern "C" void s1_scheduler_keep(void) {
+    /* Address only. The firmware calls this when X0X_SYNTHONE=1 so
+     * --gc-sections keeps this scheduler and the DSP it calls. */
+    static bool (SourceScheduler::*method)(unsigned, unsigned, float *, float *);
+    method = &SourceScheduler::process;
+    __asm__ __volatile__("" : : "m"(method));
+}
+#endif
 }
