@@ -108,3 +108,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Added explicit P.DEPTH rejection alongside P.DPTH; old detector failed the new negative case, corrected detector passes all20 unit tests and accepts readable DEPTH. This strengthens, never relaxes, RULE18 coverage.
 - Re-evaluated unchanged genuine historical45screen traces with the stricter detector: checks1–3 PASS, check4 FAIL in3screens, overlaps0. Prior old-detector PASS evidence retained as historical, not silently relabeled.
 - Fresh first-attempt b341 production runtime capture:45screens, checks1–4 PASS, overlaps0; checks5–24 remain NOT_RUN. Full trace/report/render log/source closure and45nativePNG retained in four small archives at docs/evidence/fwui/strict-caption/. No fullF1/F2/Review acceptance.
+
+## Exact per-voice drum formatter export
+- Added source-backed909/808 exports:24 voice/KIT tables,197 typed controls,21924 complete raw-domain readouts. Each file is under700KB and pins productionb341/source hashes plus boot state vector. Native and display names remain separate, including P.Dpth→Depth.
+- Producer PASS421 nonmutation/descriptor assertions; parser verifies complete contiguous domains and unique typed IDs. Existing Chicago/Miami/Mixer control tables are unchanged. Empty source units stay empty/raw, never fabricated percentages. Current drum formatter code is identity/raw-based; alternate-mode audio behavior and physical-device equivalence are not qualified.
+- Data/index/logs at docs/evidence/fwui/drum-formatters/ for Remote typed adapter. No runtime production change in this checkpoint; no full lane acceptance.
