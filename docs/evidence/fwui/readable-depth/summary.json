@@ -1,0 +1,59 @@
+{
+  "baseCommit": "cde93e9f3eaa5f7176547f369b367d20f1550374",
+  "status": "PRESENTATION_ONLY_NOT_FULL_F1_PASS",
+  "mapping": {
+    "nativeName": "P.Dpth",
+    "presentationName": "Depth",
+    "renderedCaption": "DEPTH",
+    "target": 0,
+    "voice": 0,
+    "slot": 4,
+    "glyph": "DG_BDSWEEP",
+    "storedIdentityChanged": false
+  },
+  "checks": {
+    "before": "FAIL pref_name(depth)==Depth",
+    "after": 11,
+    "nativeAfterChange": "NOT_RUN; exact combined qualification pending"
+  },
+  "sourceHashes": {
+    "firmware/src/app/ui.c": {
+      "sha256": "892773492da1ecd7d2084a0e6ea0ac1d0e9dfbe2d0c4482f9130d0fccb762101",
+      "gitBlob": "d0c08b4165e471bbb7eb3fa7f76f59eadfad2957"
+    },
+    "firmware/src/app/ui_drum_voice.inc": {
+      "sha256": "7386bab5b37ca6583ab8e956e7a0e867c166c7a0c64d0c8d43bcefc0fe00fdb3",
+      "gitBlob": "deb1234c06ce88d87a91e307cc2fed2e3fbe6cee"
+    },
+    "tests/host/ui_readable_labels_test.c": {
+      "sha256": "19dcf73467b413418fb99249c9e91b10a730a9f79bd20acc673b2970987b9120",
+      "gitBlob": "8334a2e85cadcc6543b1362f2e9168f72c960537"
+    }
+  },
+  "screens": [
+    {
+      "path": "depth-deep-list.png",
+      "sha256": "3e80454fb139c086961fe8bb0b1ee4cf78414c4602c44851e756d45f65135863",
+      "width": 240,
+      "height": 240
+    },
+    {
+      "path": "view-01-part-00-voice-00-page-00.png",
+      "sha256": "230642d425c8bc2b6fc7cdc6e56cad5e3c912757ceee42d4eb7d7d87655ba7ab",
+      "width": 240,
+      "height": 240
+    },
+    {
+      "path": "view-01-part-00-voice-00-page-01.png",
+      "sha256": "bc4e08e3e8ebb96a71848ce154705fcfc3b40d8bf8c1691c989d9c3c8fdf78ff",
+      "width": 240,
+      "height": 240
+    },
+    {
+      "path": "view-01-part-00-voice-00-page-02.png",
+      "sha256": "5a8e5035903069dd0a5b8ab4cb85e4ab3e5513656971cdebab84137f43e9801a",
+      "width": 240,
+      "height": 240
+    }
+  ]
+}

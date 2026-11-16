@@ -7,7 +7,7 @@ measurements, not aesthetic acceptance. Thin glyphs and sparse layouts can fail.
 from collections import defaultdict
 
 LABEL_WHITELIST = {'Q': 'standard filter resonance notation'}
-CRYPTIC_LABELS = {'P.DPTH'}
+CRYPTIC_LABELS = {'P.DPTH', 'P.DEPTH'}
 
 
 def largest_empty_rectangle(mask):

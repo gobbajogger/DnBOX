@@ -35,6 +35,7 @@ int main(void)
         CHECK(ui.help==B_SEL+1);
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    shot("header-help");
     held_btn=0;input();CHECK(!ui.help);
     setup(V_HOME,PART_303A);ask(ACT_CLEAR_PART,PART_303A,"CLEAR PART?","TEST ONLY");
     CHECK(ui.overlay==O_ASK);
@@ -42,7 +43,59 @@ int main(void)
         host_battery_level=level;now_ms+=50;ui_frame();CHECK(ui.overlay==O_ASK);
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    shot("header-confirmation");
     button_tap(B_HOME);CHECK(ui.overlay==O_NONE);
+    /* Hardware pickup producer sends this exact status through say(). */
+    setup(V_HOME,PART_303A);say("PICK F1 UP",0);
+    for(int level=0;level<4;level++) {
+        host_battery_level=level;now_ms+=50;ui_frame();
+        CHECK(!strcmp(ui.msg,"PICK F1 UP") && ui.msg_until>now_ms);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+    }
+    shot("header-pickup");
+    /* Real header source, fixture clip body/clock; not a physical-device test. */
+    setup(V_SEQ,PART_303A);clip_grid_mode=1;
+    for(int clock=0;clock<2;clock++)for(int level=0;level<4;level++) {
+        fixture_clip_external_clock=(uint8_t)clock;host_battery_level=level;now_ms+=50;ui_frame();
+        CHECK(clip_grid_mode && seq.clk_src==SEQ_CLK_AUTO);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+        if(level==3) {
+            shot(clock?"header-clip-external":"header-clip-internal");
+            if(!clock)memcpy(before_fb,fb,sizeof fb);
+            else {
+                CHECK(changed_rows(0,20,before_fb,fb)>0);
+                for(int y=0;y<18;y++)for(int x=0;x<126;x++)CHECK(before_fb[y*240+x]==fb[y*240+x]);
+            }
+        }
+    }
+    fixture_clip_external_clock=0;clip_grid_mode=0;
+    for(int peek=0;peek<2;peek++) {
+        setup(V_HOME,PART_909);fader(0,0);CHECK(smc_ui_active() && smc_peek->on);
+        if(!peek)smc_peek_cancel();
+        for(int level=0;level<4;level++) {
+            host_battery_level=level;now_ms+=50;ui_frame();CHECK(smc_ui_active());
+            for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+        }
+        shot(peek?"header-smc-peek":"header-smc-physical");
+    }
+    /* Regressions found by independent review of the retired fallback. */
+    setup(V_SEQ,PART_909);char detail[12];
+    seq.chain_a=0;seq.chain_b=1;header_pickup_detail(detail,0);CHECK(!strcmp(detail,"CHN"));
+    header_pickup_detail(detail,1);CHECK(!detail[0]);
+    seq.chain_b=seq.chain_a;seq.ppat[0]=15;cur_pat()->drum[0].len=64;
+    for(int page=0;page<4;page++) {
+        ui.spage=(uint8_t)page;header_pickup_detail(detail,0);
+        char expected[12];snprintf(expected,sizeof expected,"%d-%d",page*16+1,page*16+16);
+        CHECK(!strcmp(detail,expected));CHECK(tw(&FONT_T,"P16")+3+tw(&FONT_T,detail)<=45);
+    }
+    CHECK(!strcmp(header_save_label(SAVE_FAILED),"SAVE FAILED"));
+    CHECK(215-tw(&FONT_T,"275")>193);
+    say("PICK F1 UP",0);now_ms+=50;ui_frame();shot("header-pickup-page-range");
+    seq.chain_b=1;now_ms+=50;ui_frame();shot("header-pickup-chain");
+    ui.save_failed=1;CHECK(save_state()==SAVE_FAILED);now_ms+=50;ui_frame();shot("header-pickup-save-failed");
+    clip_grid_mode=1;ui.msg_until=0;now_ms+=50;ui_frame();shot("header-clip-save-failed");
+    CHECK(save_state()==SAVE_FAILED);
+    ui.save_failed=0;clip_grid_mode=0;
     host_battery_level=3;
     printf("PASS four battery levels and header invalidation: %u checks\n",checks);
     return 0;

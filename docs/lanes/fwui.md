@@ -88,3 +88,49 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Help and confirmation battery repair
 - Actual held-SEL help route failed battery pixel checks on7ea37 unchanged893 runtime. Minimal common-header predicate now also permits help and confirmation while retaining pickup and hardware clip exclusions. Cached PART header rules and modal input behavior unchanged.
 - Expanded production battery suite PASS2941 checks: all prior views and GLOBAL, genuine held help/release, ask/cancel, four battery levels. Logs/hashes at docs/evidence/fwui/modal-header/. Exact combined native and independent replay pending; no fullF4 or lane PASS. Pickup/clip/message coverage remains open.
+
+## Pickup and clip status header repair
+- Independent6fa2 replay PASS2941. Subsequent actual pickup status failed the same battery check; unified status renderer now retains PICK text, LP identity, clip INT/EXT from smk_ck_ext and metro phase, with common four-level R22 battery. Removed unreachable old header fallback, not its controls. Clip body/clock are test fixtures, never device claims.
+- Expanded battery suite PASS5258, including all four battery levels, internal/external clock distinction and stable LP title pixels. Existing SMC restore/clip/wait/overlay suite PASS8238. Native own-source Elite/Pro XIP free4288/4300 B, BSS96544, unchanged pre-integ pool margin172. Exact combined native and independent source review pending.
+- Five240x240 production-header captures plus logs/source hashes retained at docs/evidence/fwui/status-header/. SMC-specific popup/peek and transient notification bars still need battery coverage; no fullF4 acceptance. No F6/F7 design change.
+
+## Pickup status regression correction and SMC battery
+- Independent review found unmerged0ed44 removed pickup CHN/long-step-range and save text. Corrected those semantics: production helper supplies CHN or each16-step range; original save label/compact !/Q/* fallback restored for pickup/clip. Worst P16+49-64 width initially failed unchanged header spacing; pickup-only indicator positions now reserve45px for complete context without reducing font or clipping. LP/INT/EXT and record/metro status retained.
+- SMC physical overlay and peek also failed battery checks. Both now reuse the same R22 battery renderer; context text is bounded and existing physical-control glyph/number moves left20px, with both peek status lines retained. Remote confirmed no firmware writer conflict.
+- Producer battery/status suite PASS5306, including real fader-created peek/overlay, CHN/ranges, worst-font-width bound, save failure and four-level transitions. Existing full SMC restore/clip suite PASS8238. Actual native Elite/Pro free3676/3684B, BSS96544, pool172 before integ fix. Independent review/exact combined qualification pending; no F4/lane PASS.
+- Historical deep-list manifest now explicitly records harnessCommit7ea37 separately from runtime893; it does not satisfy final one-SHA capture qualification. Denied archive09 remains unmodified/unretried; archive10 remains unattempted.
+
+## Readable kick depth label
+- Remote source audit identified still-cryptic P.Dpth/P.DEPTH presentation, prohibited by RULE18. Presentation now reads Depth/DEPTH consistently in generic lists/knobs and all three R22 caption cases. Native target0/voice0/slot4 descriptor P.Dpth, stored value and DG_BDSWEEP pitch-sweep glyph remain unchanged.
+- Production fixture failed before alias and PASS11 checks after; captures all three909kick pages and selected deep-list row. Four240x240 renders plus exact mapping/source hashes at docs/evidence/fwui/readable-depth/. Independent review and native changed composition pending; no fullF1/lane PASS.
+
+## Strengthened authentic caption gate
+- Added explicit P.DEPTH rejection alongside P.DPTH; old detector failed the new negative case, corrected detector passes all20 unit tests and accepts readable DEPTH. This strengthens, never relaxes, RULE18 coverage.
+- Re-evaluated unchanged genuine historical45screen traces with the stricter detector: checks1–3 PASS, check4 FAIL in3screens, overlaps0. Prior old-detector PASS evidence retained as historical, not silently relabeled.
+- Fresh first-attempt b341 production runtime capture:45screens, checks1–4 PASS, overlaps0; checks5–24 remain NOT_RUN. Full trace/report/render log/source closure and45nativePNG retained in four small archives at docs/evidence/fwui/strict-caption/. No fullF1/F2/Review acceptance.
+
+## Exact per-voice drum formatter export
+- Added source-backed909/808 exports:24 voice/KIT tables,197 typed controls,21924 complete raw-domain readouts. Each file is under700KB and pins productionb341/source hashes plus boot state vector. Native and display names remain separate, including P.Dpth→Depth.
+- Producer PASS421 nonmutation/descriptor assertions; parser verifies complete contiguous domains and unique typed IDs. Existing Chicago/Miami/Mixer control tables are unchanged. Empty source units stay empty/raw, never fabricated percentages. Current drum formatter code is identity/raw-based; alternate-mode audio behavior and physical-device equivalence are not qualified.
+- Data/index/logs at docs/evidence/fwui/drum-formatters/ for Remote typed adapter. No runtime production change in this checkpoint; no full lane acceptance.
+
+## Exact native maps and preserved input regressions
+- Fresh b341 native Elite/Pro builds: XIP free3544/3552B, BSS96544; pool margin172 remains below512 until integ fix composition. All312 tracked firmware/tools/assets/build.sh files match exact remote tree. External compiler/linker/plugin/SDK boot hashes recorded.
+- Actual linker maps committed with receipts proving same ELF bytes as normal builds after adding only -Map to effective SMK link. First wrapper attempt missed build.sh board default; its wrong-target maps/receipts were detected, preserved INVALID, never admitted. Corrected wrapper forces board/model and rejects unexpected output before link; new negative regression fails old wrapper and PASS3 corrected checks.
+- Current same-runtime pan8925, held-step144, pads7096 and HOME/GLOBE regressions pass. Evidence docs/evidence/fwui/native-b341/. F3 candidate evidence awaits independent review; no full Local, combined source, device or lane acceptance.
+
+## Exhaustive pan identity regression
+- Expanded the production pan formatter test from one mixer voice to all five, and enumerated all 197 declared 909/808 voice/KIT descriptors rather than a guessed parameter limit. Exactly 22 drum voice pans and zero KIT pans; all 128 raw values retain L50/C/R50 endpoints and monotonic sides. Stored values remain unchanged.
+- Current b341 runtime PASS10,975 checks. This is formatter-domain coverage, not every rendered screen or complete F4 battery acceptance. Runtime source unchanged; evidence docs/evidence/fwui/pan-exhaustive/.
+
+## Repeated execution-path correction
+- Before file setup or tests, verify the execution working directory and use absolute paths for cross-directory writes; run with fail-fast shell setup so a failed edit cannot fall through to a stale test.
+- Two incorrect doubled worktree prefixes were caught before source writes. The first ran the unchanged old pan fixture; the second failed to compile the absent toast probe. Both attempts are retained distinctly; neither is new-product evidence. Both schedule prompts received this correction through the coordinator.
+
+## Transient toast battery failure retained
+- Genuine b341 runtime probe confirms missing R22 battery on SAVED, NEXT pattern cue, actual host ABOUT and a clearly labeled synthetic long diagnostic: all four FAIL, 36 of 36 expected battery fill pixels absent. Existing 57-character stress diagnostic has small-font width317px and clips on240px; no scrolling behavior implemented before owner design approval.
+- Production and stored message text unchanged. Negative fixture returns exit1, never a passing acceptance test. Before renders/logs and invalid setup attempt are retained at docs/evidence/fwui/toast-before/.
+
+## Source-derived renderer dispatch coverage
+- Isolated copied b341 production source now has an observation-only probe for14 main-body render functions and5 exceptional dispatch branches. Existing ordinary/global construction plus actual help/ask/SMC/readout/wait/transfer paths observed17 of19 categories. Clip-grid and PADCAL actual renderer coverage remains NOT_RUN because this host fixture substitutes them. Counts are function entries, not unique screens or visual acceptance; coverageComplete=false.
+- Six instrumentation tests PASS: only counters added, missing/duplicate function or branch/include anchors rejected, unrelated branches untouched. First attempt omitted original-engine experiments and failed before compilation; preserved failure and corrected full input manifests/logs are retained in docs/evidence/fwui/dispatch-coverage/attempts.zip. No production changes, screenshots, native-fit delta or complete F1/F2 claim.

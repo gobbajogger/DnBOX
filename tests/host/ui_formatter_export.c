@@ -6,6 +6,30 @@ static void json_string(const char *s)
 {
     putchar('"');for(;*s;s++){unsigned char c=(unsigned char)*s;if(c=='"'||c=='\\'){putchar('\\');putchar(c);}else if(c<32)printf("\\u%04x",c);else putchar(c);}putchar('"');
 }
+static void export_drum_voice(int target,int voice)
+{
+    int part=target==T_909?PART_909:PART_808;
+    setup(V_PART,part);if(voice<NDRUM)ui.sel[part]=(uint8_t)voice;build_pages();
+    int count=engine_nparams(target,voice),state[128];CHECK(count>0 && count<=128);
+    for(int slot=0;slot<count;slot++)state[slot]=pref_get(PR(R_ENG,target,voice,slot));
+    printf("DRUM_FORMATTER:{\"schema\":\"dnbox-production-formatter/1\",\"engine\":\"%s\",\"target\":%d,\"voice\":%d,\"voiceName\":",target==T_909?"909":"808",target,voice);
+    json_string(voice<NDRUM?engine_voice_name(target,voice):"KIT");
+    printf(",\"qualification\":\"FORMATTER_ONLY_NOT_DEVICE_OR_FULL_LANE\",\"stateScope\":\"boot factory state; other controls fixed while formatting each raw domain\",\"stateVector\":[");
+    for(int slot=0;slot<count;slot++){if(slot)putchar(',');printf("{\"slot\":%d,\"raw\":%d}",slot,state[slot]);}
+    printf("],\"controls\":[");
+    for(int slot=0;slot<count;slot++) {
+        pref_t r=PR(R_ENG,target,voice,slot);const x0x_param_t *d=pref_desc(r);CHECK(d!=0);
+        if(slot)putchar(',');printf("{\"kind\":%d,\"target\":%d,\"voice\":%d,\"slot\":%d,\"nativeName\":",r.kind,target,voice,slot);json_string(d->name);
+        printf(",\"displayName\":");json_string(pref_name(r));printf(",\"minimumRaw\":0,\"maximumRaw\":%d,\"values\":[",d->max);
+        for(int raw=0;raw<=d->max;raw++) {
+            char number[64],unit[64];pref_value_of(r,raw,number,unit);
+            if(raw)putchar(',');printf("{\"raw\":%d,\"number\":",raw);json_string(number);printf(",\"unit\":");json_string(unit);putchar('}');
+        }
+        printf("]}");
+    }
+    printf("]}\n");
+    for(int slot=0;slot<count;slot++)CHECK(pref_get(PR(R_ENG,target,voice,slot))==state[slot]);
+}
 int main(void)
 {
     setup(V_PART,PART_303A);
@@ -29,5 +53,7 @@ int main(void)
         }
         printf("]}\n");
     }
+    for(int target=T_909;target<=T_808;target++)for(int voice=0;voice<=NDRUM;voice++)export_drum_voice(target,voice);
+    printf("PASS formatter export without control mutation: %u checks\n",checks);
     return 0;
 }

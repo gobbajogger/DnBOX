@@ -8090,5 +8090,7 @@
     "identicalRendersBeforeAfterCoverageFix": 500
   },
   "publicationComplete": false,
-  "publicationBlocker": "Archive09 upload denied twice as allegedly over700KB despite verified full JSON447932bytes; no retry or route workaround. Archive10 retained and not attempted. First400 renders are in published archives; all500 capture hashes retained."
+  "publicationBlocker": "Archive09 upload denied twice as allegedly over700KB despite verified full JSON447932bytes; no retry or route workaround. Archive10 retained and not attempted. First400 renders are in published archives; all500 capture hashes retained.",
+  "sourceInventoryCommit": "7ea37ab8cef8b911f47b08e251877eee69a39068",
+  "provenanceQualification": "Historical split pins: runtime893, harness7ea37. Does not satisfy final one-SHA runtime+harness inventory qualification."
 }

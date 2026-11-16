@@ -615,7 +615,7 @@ static UI_DRAW void draw_drum_voice(int band)
                     if (cells==1 && pd0 && pd0->name) {
                         const char *nm = pd0->name;
                         if (name_is(pd0, "Pitch"))put_s(b,"PITCH");
-                        else if(name_is(pd0,"P.Dpth"))put_s(b,"P.DEPTH");
+                        else if(name_is(pd0,"P.Dpth"))put_s(b,"DEPTH");
                         else {
                             int i; char *d = b;
                             for (i = 0; nm[i] && i < 12; i++) {
@@ -655,7 +655,7 @@ static UI_DRAW void draw_drum_voice(int band)
                         char caption[16];const x0x_param_t *d=pref_desc(r);int j=0;
                         if(d&&d->name)for(;d->name[j]&&j<14;j++)caption[j]=d->name[j]>='a'&&d->name[j]<='z'?d->name[j]-32:d->name[j];
                         caption[j]=0;
-                        if(d&&name_is(d,"P.Dpth"))put_s(caption,"P.DEPTH");
+                        if(d&&name_is(d,"P.Dpth"))put_s(caption,"DEPTH");
                         text_c(vx,y+14-off,&FONT_T,caption,gray);
                     }
                     float glyph_sy=1.50f+(float)(ah-72)*.025f;
@@ -676,7 +676,7 @@ static UI_DRAW void draw_drum_voice(int band)
                     const x0x_param_t *d=pref_desc(r);char caption[16];int j=0;
                     if(d&&d->name)for(;d->name[j]&&j<14;j++)caption[j]=d->name[j]>='a'&&d->name[j]<='z'?d->name[j]-32:d->name[j];
                     caption[j]=0;
-                    if(d&&name_is(d,"P.Dpth"))put_s(caption,"P.DEPTH");
+                    if(d&&name_is(d,"P.Dpth"))put_s(caption,"DEPTH");
                     text_c(gx+22,y+14-off,&FONT_T,caption,gray);
                     if(gy-off<bh&&gy+17-off>0)dv_glyph(r,ev,(float)gx,(float)(gy-off),.62f,.76f,gray);
                     dv_value_text(r,ev_i,gx+40,y+29-off,SOUND_WHITE,0);
