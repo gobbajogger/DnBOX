@@ -6,6 +6,10 @@
 extern "C" {
 #endif
 typedef struct dnbox_s1 dnbox_s1;
+/* Pinned pi32v2 pre-FX allocation contract; compilation verifies both values.
+ * Other architectures must query owner_bytes/alignment instead. No FX included. */
+#define DNBOX_S1_PI32V2_OWNER_BYTES 7972u
+#define DNBOX_S1_PI32V2_OWNER_ALIGNMENT 4u
 typedef struct {
     const void *compact; size_t compact_bytes;
     const float *sine; size_t sine_count;

@@ -8,7 +8,22 @@
 #include <stddef.h>
 
 namespace s1scheduler {
-struct NoteNumber { int noteNumber, transpose, velocity; };
+// Source events admit MIDI notes/velocities0..127 and transpose-24..24.
+// Preserve every admitted value without a12-byte host-oriented representation.
+struct NoteNumber {
+    uint8_t noteNumber=0, velocity=0;
+    int16_t transpose=0;
+    NoteNumber()=default;
+    NoteNumber(int note,int trans,int vel) {
+        if(note<0||note>127||vel<0||vel>127||trans<-24||trans>24) {
+            noteNumber=255;return; // explicit invalid marker, never wrap to a valid MIDI event
+        }
+        noteNumber=static_cast<uint8_t>(note);velocity=static_cast<uint8_t>(vel);
+        transpose=static_cast<int16_t>(trans);
+    }
+    bool valid() const {return noteNumber<=127&&velocity<=127&&transpose>=-24&&transpose<=24;}
+};
+static_assert(sizeof(NoteNumber)==4,"bounded held-note record must occupy4 bytes");
 struct Held {
     FixedArray<NoteNumber,128> values{};
     int count = 0;

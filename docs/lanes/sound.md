@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 00:35 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 01:09 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -56,3 +56,7 @@ C ABI checkpoint: cold caller-owned init/retire plus physical parameters/note/re
 Memory reuse checkpoint: serialized held-note snapshot now aliases owner, native10532→8996 bytes (1536saved/part). Full original suite38cases354907688checks/114196frames0failures; C/C++/oracle576000frames0differences; all29 native units compile. Independent review pending, still no combined fit. Source manifest retains prechange hash. Next: coordinate FX lifetime reuse and further representation savings, no musical feature cuts.
 
 Independent reviewer reran e955 and compared output bytes to prior5e541: exact match. Overlay oracle/test protection regression added,4 runner tests PASS. Native29-object unlinked code33406+readonly3230+compact165292 exceeds current13.4KB XIP headroom; flash remains a separate blocker, no protected-map/user-slot workaround claimed.
+
+Packed held-note checkpoint: source-domain record now4 bytes (note/velocity0..127,transpose-24..24); invalid constructor args use255 sentinel and both insertion routes reject rather than wrap. All802816 valid triples retain exact fields. Native owner7972 bytes, all29 units compile. Final original suite38cases354907688checks0failures and576000frame C/C++/oracle compare0differences; audio bytes match prior5e541. Independent review pending; preFX-only, app/FX lifetime+flash still blockers. Descriptor2 experiment rejected/reverted after shared raw oracle initialization failed, so no descriptor or test-oracle changes shipped.
+
+Explicit pi32v2 C allocation contract now7972bytes/alignment4, checked by static_assert in actual native compile; receipt docs/sound/v2-native-owner-layout.json. Invalid packed insertions preserve whole Held object; typed record is internal runtime only, not a persisted/upstream schema change.

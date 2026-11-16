@@ -1,0 +1,21 @@
+{
+  "scope": "Pinned pi32v2 pre-FX C owner layout, not full-FX or combined firmware fit",
+  "owner_bytes": 7972,
+  "owner_alignment": 4,
+  "host_owner_bytes": 9536,
+  "target": "pi32v2 r3 mfprev1",
+  "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+  "native_compile": "PASS",
+  "compile_time_size_and_alignment_guards": "PASS under __PI32V2__",
+  "source_manifest_sha256": "8e4edecce96c8696cf96f154f322e182b00d393b5086903dfce6159841608cdb",
+  "c_header_sha256": "eb6114801b84df647379e6104a5eae5939d173c16adbeb7f9bc705428b8c81c8",
+  "c_implementation_sha256": "7c1d6d5e486d380a434ccc3ad58b07f2b9c902a210421a65b46f1e7f01eca543",
+  "native_wrapper_object_sha256": "0d9490791120b9d3e2dad830238e24cf2b1f71e4eee32fbcc15c42a2fbae1c8b",
+  "not_qualified": [
+    "app/FX owner lifetime overlay",
+    "factory150-parameter application",
+    "post-note FX",
+    "combined flash/RAM",
+    "CPU and device"
+  ]
+}

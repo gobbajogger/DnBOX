@@ -96,3 +96,24 @@ postFX and factory routing. Add165292B compact waveform pack. See exact per-obje
 hashes and allocation sums in docs/sound/v2-native-unlinked-budget.json.
 Integ reports exact current app XIP free13464B Elite/13472B Pro; no fit credit
 from protected map changes or external/user sample slots is assumed.
+
+## Current pre-FX owner:7972 bytes
+
+Held-note fields are admitted MIDI note/velocity0..127 and transpose-24..24,
+so an aligned4-byte record (two uint8 fields,one int16) retains every valid
+value. Invalid constructor inputs are marked invalid before casting, and both
+insertion paths reject the marker. No wrapping values become valid events.
+All128*128*49=802816 admitted triples are exhaustively checked.
+
+Native owner8996→7972 bytes (symbol size0x1f24), host10560→9536. All29
+runtime units compile again. Final full original suite:38cases354907688checks,
+114196frames120289snapshots1081events,0failures0runtimeheap.576000-frame
+C/C++/oracle test passes, and output bytes match the pre-alias5e541 run.
+
+This equals the candidate per-part backend3720+Chicago FX4252 footprint, but
+that is not combined fit: integ must prove retirement/admission and tails,
+SynthOne postFX remains unadmitted, and flash is far over headroom.
+
+Rejected alternative: compact-only two-descriptor build also changed the
+shared raw oracle initializer and produced a failing comparison; it was fully
+reverted, not hidden with an oracle edit. No descriptor-mode change is shipped.

@@ -20,7 +20,7 @@ bool Held::remove_checked(size_t i) {
     --count;return true;
 }
 bool Held::insert_checked(NoteNumber value,size_t i) {
-    if(!valid_count() || count>=128 || i>static_cast<size_t>(count))return false;
+    if(!value.valid() || !valid_count() || count>=128 || i>static_cast<size_t>(count))return false;
     for(size_t n=static_cast<size_t>(count);n>i;--n)values[n]=values[n-1];
     values[i]=value;++count;return true;
 }

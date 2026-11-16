@@ -19,6 +19,7 @@ void Held::remove(size_t i) {
     --count;
 }
 void Held::insert(NoteNumber value,size_t i) {
+    if(!value.valid()) return;
     assert(count<128 && i<=static_cast<size_t>(count));
     for(size_t n=count;n>i;--n) values[n]=values[n-1];
     values[i]=value; ++count;

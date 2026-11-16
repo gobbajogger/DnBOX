@@ -139,8 +139,10 @@
     },
     {
       "path": "scheduler/checked_domain.cpp",
-      "bytes": 1580,
-      "sha256": "973892916374d5eea6ac1e0b062ed4209cbf8518b76b610394ba072be9f57f49"
+      "bytes": 1598,
+      "sha256": "353696102b6cf9cdb1432e79e3d89dbaff033bca8c6894c51b630ab268abffb2",
+      "original_sha256": "973892916374d5eea6ac1e0b062ed4209cbf8518b76b610394ba072be9f57f49",
+      "change": "Serialized held owner snapshot alias and admitted MIDI record packing; invalid values never wrap"
     },
     {
       "path": "scheduler/compact-reader/compact.c",
@@ -329,15 +331,17 @@
     },
     {
       "path": "scheduler/scheduler.cpp",
-      "bytes": 20777,
-      "sha256": "21131deff1ab7f0714663bc94bd85a2380c03114293ed5a1b304027117982dac"
+      "bytes": 20808,
+      "sha256": "aebcbaf53423ca916b8c746dbb9811279e1bd8dfccaf9a6af1150b56c1542fb5",
+      "original_sha256": "21131deff1ab7f0714663bc94bd85a2380c03114293ed5a1b304027117982dac",
+      "change": "Serialized held owner snapshot alias and admitted MIDI record packing; invalid values never wrap"
     },
     {
       "path": "scheduler/scheduler.hpp",
-      "bytes": 8837,
-      "sha256": "54c7504cedde533b52a07d2d8690f83f52eefc020e2227abbc7a2dbce43e7a66",
+      "bytes": 9575,
+      "sha256": "764a81e077ef194fd05ad5af978b1176a0f0feb242ebbb9dbe86ff4e26fc93c9",
       "original_sha256": "9b4cff6d61dba19a998b78b394c8152b3fe0a6b1d5f331002c110ff84e6e7ab3",
-      "change": "Serialized held-note AE snapshot aliases owner; no concurrent publication contract"
+      "change": "Serialized held owner snapshot alias and admitted MIDI record packing; invalid values never wrap"
     },
     {
       "path": "scheduler/source-sequence/sequence_types.hpp",

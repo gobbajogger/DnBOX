@@ -28,3 +28,8 @@ Derived changes preserve the prior input SHA in each changed SOURCE-MANIFEST ent
 The serialized held-note AE snapshot now aliases its owner; native owner8996 bytes
 (previous10532). Both full original event/state and audio comparison tests pass;
 no concurrent UI/audio use is permitted. This is still not combined fit.
+
+Current native owner7972 bytes after bounded4-byte held-note records; input-domain
+checks prevent narrowing wrap. SOURCE-MANIFEST records original and derived
+hashes. Full original source/event and before/after audio comparisons pass;
+postFX and combined-memory/flash qualification remain open.

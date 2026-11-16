@@ -4,6 +4,10 @@
 #include <new>
 #include <stdint.h>
 struct dnbox_s1 { s1scheduler::SourceScheduler engine; };
+#if defined(__PI32V2__)
+static_assert(sizeof(dnbox_s1)==DNBOX_S1_PI32V2_OWNER_BYTES,"review owner allocation after layout change");
+static_assert(alignof(dnbox_s1)==DNBOX_S1_PI32V2_OWNER_ALIGNMENT,"review owner alignment after layout change");
+#endif
 static bool span(const void *p,size_t n) {
     return p && n <= UINTPTR_MAX-reinterpret_cast<uintptr_t>(p);
 }
