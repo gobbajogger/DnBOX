@@ -454,7 +454,34 @@ static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, f
             }
             xy[2*n] = ox + px * sx; xy[2*n+1] = oy + py * sy; n++;
         }
-        cv_poly_aa(xy, n, col);
+        float back=dg_live_back(r,live);
+        uint16_t idle_col=!live && back<1.f?blend(C_LINE,col,(int)(16.f*back)):col;
+        cv_poly_aa(xy, n, live?C_LINE:idle_col);
+        if(live) {
+            /* Same -60dB envelope/remaining-tail law as dg_tail, in the R22
+             * viewbox. The approved idle curve stays as a dim ghost. */
+            float level=fm_clampf(e,.001f,1.f);
+            int noisy=role==DG_NTAIL;
+            int xe=(noisy || uu==X0X_U_MS || uu==X0X_U_S)?dg_tail_px(ms):2+(int)(q*23.f+.5f);
+            float shift=(float)xe*fm_log2f(level)/-9.966f;
+            uint32_t seed=noisy?age/40u:0;
+            n=0;
+            /* Preserve dg_tail's integer envelope/noise law and age-seeded
+             * fill strokes, affinely scaled into this R22 viewbox. */
+            for(i=0;(float)i<=(float)xe-shift;i++) {
+                float amplitude=fm_exp2f(-9.966f*((float)i+shift)/(float)xe);
+                int height=(int)(amplitude*(OG_H-2)+.5f);
+                if(noisy)height=height*(40+dg_rnd((i+(int)shift)*7+(int)seed))/140;
+                if(height>0) {
+                    float px=ox+(1.f+(reach-1.f)*(float)i/(float)xe)*sx;
+                    float py=oy+12.f*(1.f-(float)height/(OG_H-2))*sy;
+                    xy[2*n]=px;xy[2*n+1]=py;n++;
+                    if(i==0 || (noisy && i%5==0))
+                        cv_line_aa(px,py,px,oy+12.f*sy,i?col:C_WHITE);
+                }
+            }
+            if(n>1)cv_poly_aa(xy,n,col);
+        }
         return;
     }
     if (role == DG_BDSWEEP) { /* P.DPTH / PITCH: kick pitch drop, 0..100 ms */
