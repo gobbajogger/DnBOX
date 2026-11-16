@@ -9,3 +9,7 @@ Read-only Library recovery also preserved four separately named SuperJ6 referenc
 S5 remains incomplete: 172 of 174 stored identifiers have verified mappings. Static original AU metadata names ordinal 17 `limiterAmount`, while verified serialized ID17 is `neoncompressorAmount`. That mismatch does not establish a legacy alias for `neonlimiterAmount`. Literal absence of the full prefixed name is also not proof of absent behavior, since identifiers can be composed. `neontubeRageAmount` remains unmapped. Preserve both unknown identifiers and fail closed, rather than dropping them or inventing aliases.
 
 No original binary, factory bank, model coefficient or PCM payload is included in this audit. No design/rule change or completed checklist item is claimed.
+
+## Version-cohort diagnostic
+
+The exact 640-preset corpus has exactly one of the three stored amount keys in every preset: limiterAmount 240, compressorAmount 366, tubeRageAmount 34. All tubeRage records report version1.5; compressor records span versions1,1.5,1.6,1.7,1.8; limiter records include older versions and two1.5 records. This is evidence to investigate migration, not proof that any keys can be aliased or that their value laws match. The audit retains unknown identity failure and has ten synthetic tests, including missing/coexisting keys and metadata mutation after capture. Both metadata buffers are now parsed and hashed from the same captured bytes. Independent review accepted this bounded diagnostic.

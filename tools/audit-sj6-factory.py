@@ -23,6 +23,9 @@ def audit(root, manifest, schema):
               'dsp_mapping_status': 'NOT_ADMITTED', 'banks': [], 'unknown_identifiers': {},
               'total_banks': 0, 'total_presets': 0, 'parameter_entries': 0}
     unknown = collections.Counter()
+    legacy_keys = {'neonlimiterAmount', 'neoncompressorAmount', 'neontubeRageAmount'}
+    key_counts = collections.Counter()
+    versions = collections.defaultdict(collections.Counter)
     identifiers = set()
     seen_files = set()
     for item in manifest['banks']:
@@ -53,6 +56,12 @@ def audit(root, manifest, schema):
                 count += 1
                 if ident not in known:
                     unknown[ident] += 1
+            present = seen & legacy_keys
+            key_counts[str(len(present))] += 1
+            version = preset.get('version')
+            version = version if isinstance(version, str) else '<missing-or-non-string>'
+            for ident in present:
+                versions[ident][version] += 1
         result['banks'].append({'file': name, 'presets': item['presets'],
                                 'original_sha256': digest(raw), 'parameter_entries': count})
         result['total_presets'] += item['presets']
@@ -60,6 +69,11 @@ def audit(root, manifest, schema):
     result['total_banks'] = len(result['banks'])
     if result['total_banks'] != manifest['total_banks'] or result['total_presets'] != manifest['total_presets']:
         raise ValueError('corpus totals mismatch')
+    result['legacy_amount_cohort'] = {
+        'scope': 'Stored-key/version co-occurrence only; no migration or alias law inferred',
+        'mapping_status': 'NOT_PROVEN',
+        'key_count_histogram': dict(sorted(key_counts.items())),
+        'versions_by_identifier': {k: dict(sorted(v.items())) for k, v in sorted(versions.items())}}
     result['unknown_identifiers'] = dict(sorted(unknown.items()))
     result['distinct_identifiers'] = len(identifiers)
     result['recognized_identifiers'] = len(identifiers & known)
@@ -75,9 +89,11 @@ def main():
     p.add_argument('--schema', type=Path, required=True)
     p.add_argument('--out', type=Path, required=True)
     args = p.parse_args()
-    result = audit(args.banks, json.loads(args.manifest.read_text()), json.loads(args.schema.read_text()))
-    result['manifest_sha256'] = digest(args.manifest.read_bytes())
-    result['schema_sha256'] = digest(args.schema.read_bytes())
+    manifest_bytes = args.manifest.read_bytes()
+    schema_bytes = args.schema.read_bytes()
+    result = audit(args.banks, json.loads(manifest_bytes), json.loads(schema_bytes))
+    result['manifest_sha256'] = digest(manifest_bytes)
+    result['schema_sha256'] = digest(schema_bytes)
     args.out.write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps({k: v for k, v in result.items() if k != 'banks'}, sort_keys=True))
     return 1 if result['complete_identity_coverage'] == 'FAIL' else 0

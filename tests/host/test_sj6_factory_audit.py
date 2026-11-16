@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
+import sys
 
 path = Path(__file__).resolve().parents[2] / 'tools/audit-sj6-factory.py'
 spec = importlib.util.spec_from_file_location('audit_sj6', path)
@@ -46,6 +48,47 @@ class AuditTests(unittest.TestCase):
         self.assertEqual(result['unknown_identifiers'], {'legacy': 1})
         self.assertEqual(result['complete_identity_coverage'], 'FAIL')
         self.assertEqual(result['parameter_entries'], 2)
+
+    def test_legacy_cohort_never_implies_alias(self):
+        preset = self.bank['presets'][0]
+        preset['version'] = '1.5'
+        preset['parameterValues'] += [
+            {'identifier': 'neonlimiterAmount', 'value': 0.2},
+            {'identifier': 'neoncompressorAmount', 'value': 0.8}]
+        self.write()
+        result = self.run_audit()
+        cohort = result['legacy_amount_cohort']
+        self.assertEqual(cohort['key_count_histogram'], {'2': 1})
+        self.assertEqual(cohort['versions_by_identifier']['neonlimiterAmount'], {'1.5': 1})
+        self.assertEqual(cohort['mapping_status'], 'NOT_PROVEN')
+        self.assertEqual(result['complete_identity_coverage'], 'FAIL')
+
+    def test_missing_cohort_does_not_become_default(self):
+        self.write()
+        cohort = self.run_audit()['legacy_amount_cohort']
+        self.assertEqual(cohort['key_count_histogram'], {'0': 1})
+        self.assertEqual(cohort['versions_by_identifier'], {})
+
+    def test_report_hashes_use_the_audited_metadata_bytes(self):
+        self.write()
+        manifest = self.root / 'manifest.json'
+        schema = self.root / 'schema.json'
+        output = self.root / 'result.json'
+        manifest.write_text(json.dumps(self.manifest))
+        schema.write_text(json.dumps(self.schema))
+        expected = [module.digest(p.read_bytes()) for p in [manifest, schema]]
+        original = module.audit
+        def mutate_after_audit(*args):
+            result = original(*args)
+            manifest.write_text('{}')
+            schema.write_text('{}')
+            return result
+        argv = ['audit', '--banks', str(self.root), '--manifest', str(manifest),
+                '--schema', str(schema), '--out', str(output)]
+        with mock.patch.object(sys, 'argv', argv), mock.patch.object(module, 'audit', mutate_after_audit):
+            self.assertEqual(module.main(), 0)
+        result = json.loads(output.read_text())
+        self.assertEqual([result['manifest_sha256'], result['schema_sha256']], expected)
 
     def test_duplicate_rejected(self):
         self.bank['presets'][0]['parameterValues'] *= 2
