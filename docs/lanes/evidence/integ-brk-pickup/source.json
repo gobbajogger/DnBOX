@@ -1,0 +1,37 @@
+{
+  "base": "36b8c293a8f36fcad4979e98671486d9b51a8ecd",
+  "pickupDonor": "8591dbeb216287d3e22a60800133714ef19492e6",
+  "scope": "producer affected host replay; no production change, no full Local or sanitizer claim",
+  "sourceSHA256": {
+    "tests/host/engine_brk_mute_test.c": "e62c6e9ec696f9da522544fca334ec8a8e795606f467158b286ee4f539bd9aa2",
+    "tests/host/engine_brk_mute_test.py": "26f4acda35c831c0534c0d7a2c6bcaad0da927a968eb25385e5e7e825e9610c9",
+    "tests/host/smc_pickup_acceptance_test.c": "b3cfbea776901cbc87e0ef7f2cdc665e5e58f43777ce7349089beca3b2e3e71e",
+    "tests/host/smc_pickup_acceptance_test.sh": "dc50935570eb5017ecd6f114821a2d582589271921af2750d9304dd565e8ac59",
+    "firmware/src/app/engine.c": "a52b3727119c680e03bcdc2d95242558967c2f24358322c78e2d14e99d08e826",
+    "firmware/src/app/ui.c": "6a86d7e635f8500c100fca369d7f190384424ae6d3a3bcad365c86ced91ec475"
+  },
+  "logs": [
+    {
+      "file": "break-before.log",
+      "rawSHA256": "c05fb8d62a59cb10ca8e3b3e4f61b5e95055890a697a2e3bd56a98a7f94d643a",
+      "publicSHA256": "d681868ce23f06a23d015edae9313a9dae5f50c94e5b0e5c6362b9213d369774"
+    },
+    {
+      "file": "break-after.log",
+      "rawSHA256": "51ebd448aab370c65b396bc9842af167dc8dbb00bd4116281a705c284d3d5abc",
+      "publicSHA256": "51ebd448aab370c65b396bc9842af167dc8dbb00bd4116281a705c284d3d5abc"
+    },
+    {
+      "file": "pickup-after.log",
+      "rawSHA256": "680b020110b11bb9e2d2132d02b9c0ad7d91ff1bda29b63bf90e2691c0ec5b8e",
+      "publicSHA256": "57f21d5577f885c19ed33d500cc53a0ba812fdc104b636a5a5ceea38b424d471"
+    }
+  ],
+  "breakBeforeExit": 1,
+  "breakAfterExit": 0,
+  "abruptCutExpectedExit": 3,
+  "pickupExit": 0,
+  "pickupAssertions": 856048,
+  "popupChecks": 278,
+  "peekChecks": 76
+}

@@ -1,0 +1,20 @@
+In file included from <source>/tests/host/engine_brk_mute_test.c:123:
+<temporary-fixture>/production_engine_brk_control.inc: In function ‘drain’:
+<temporary-fixture>/production_engine_brk_control.inc:245:49: error: ‘original_parts’ undeclared (first use in this function); did you mean ‘original_bass’?
+  245 |             if(poly)(void)original_runtime_key(&original_parts[a].runtime,ORIGINAL_INPUT_KEYS,b,(v>>2)&127u);
+      |                                                 ^~~~~~~~~~~~~~
+      |                                                 original_bass
+<temporary-fixture>/production_engine_brk_control.inc:245:49: note: each undeclared identifier is reported only once for each function it appears in
+<source>/tests/host/engine_brk_mute_test.c: At top level:
+<source>/tests/host/engine_brk_mute_test.c:31:12: error: ‘original_bass’ defined but not used [-Werror=unused-variable]
+   31 | static int original_bass[NBASS], brk_bend_owner, project_midi_drop;
+      |            ^~~~~~~~~~~~~
+cc1: all warnings being treated as errors
+Traceback (most recent call last):
+  File "<source>/tests/host/engine_brk_mute_test.py", line 103, in <module>
+    main()
+  File "<source>/tests/host/engine_brk_mute_test.py", line 92, in main
+    subprocess.run(cc + flags + extra + [str(harness), "-lm", "-o", str(executable)],
+  File "<python>/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['cc', '-std=c99', '-O2', '-ffp-contract=off', '-DX0X_HOST', '-Wall', '-Wextra', '-Werror', '-Wno-unused-parameter', '-Wno-unused-function', '-Wno-error=attributes', '-I<temporary-fixture>', '<source>/tests/host/engine_brk_mute_test.c', '-lm', '-o', '<temporary-fixture>/mute-test']' returned non-zero exit status 1.
