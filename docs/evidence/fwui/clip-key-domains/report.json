@@ -1,0 +1,63 @@
+{
+  "schema": "dnbox-clip-key-domain-audit/1",
+  "productionCommit": "ef70c8a9564f595505f852c5fd7a34e939b7abd9",
+  "states": 153,
+  "draws": 1914,
+  "clippedOpaquePixels": 0,
+  "labelValueBoundingOverlap": 0,
+  "cellOverruns": 0,
+  "positiveControls": [
+    "clipped pixels",
+    "label/value overlap",
+    "cell overrun"
+  ],
+  "observerIdenticalRasters": 18,
+  "context": "Each legal raw value starts from zero-initialized idle CK plus ck_ch=2, ck_gate=4, ck_rate=8. Selected page is set before actual ck_set; all other fields retain this fixed context.",
+  "inputs": {
+    "tests/host/ui_clip_keys_domain_test.c": {
+      "sha256": "e75937f1b44c0e3908d5be41de943991e99c026006d4d47f8654864cc0502a47",
+      "gitBlob": "7293c74369c379dff47c989c18b8f3f3c9864c33"
+    },
+    "tests/host/ui_clip_keys_domain_test.sh": {
+      "sha256": "5dd0ef9864db39a8aec83e7954bd6abc98244b43a06ae6ff29fd48c6f3ee03e9",
+      "gitBlob": "7abf9bc0c5b5b3d051e3736a41d159f49147aa8a"
+    },
+    "tests/host/ui_clip_keys_text_observer.inc": {
+      "sha256": "f537bba5f03c1e894247b55a76492cfbba7b2b9c36691643ecf7b9e11ffbc016",
+      "gitBlob": "5782be29893f45c037561b11953eba2a58e1391d"
+    },
+    "tests/host/ui_clip_keys_render_test.c": {
+      "sha256": "81aee2dfa2d2ccdf28224cd718139b3a4eda5e41ea82284f9e48a972ec2cf6ea",
+      "gitBlob": "1c2319990ff2c72e63e744c0e571ba398e5eb0c9"
+    },
+    "tests/host/ui_clip_keys_render_test.sh": {
+      "sha256": "7a42d3f02b67880c416284d508a5d9030b7eec2e4c1f39e1f0ed3eaa2fda9ca8",
+      "gitBlob": "d6a615381003f71cd5c705196b0a441ac4197941"
+    },
+    "tests/host/prepare_clip_keys_render.py": {
+      "sha256": "91d3e881720eecc0840f61c0549a6cc711329bf979e0af01925fea8012d9dc4e",
+      "gitBlob": "9d0d2389fb99918a7468b4bb206ca5f1fc2a1fe6"
+    },
+    "firmware/src/app/ui.c": {
+      "sha256": "f5f15678d7e5bb63570398cc3873ec45b2acd27498a62b90d46fb77ca6ccb5b1",
+      "gitBlob": "ea4efc7016c072ad3912124f6de62e8b9b11316c"
+    },
+    "firmware/src/app/main_fm1.c": {
+      "sha256": "0b32aabfe105baa457a8c8402189e6840c3dbfd7137cc875c9c0b9d43ff98e07",
+      "gitBlob": "8c090941d149854a576557997e62ef97fc0fef3d"
+    },
+    "firmware/src/gfx.c": {
+      "sha256": "3efcbeafea44c2754cca3d43bf32aeec70ddc57f49e7344f2931cc165b909fab",
+      "gitBlob": "8cbea609dc4b5b8b95fb802c3b55f38711cdaf65"
+    }
+  },
+  "notRun": [
+    "Cartesian field combinations",
+    "held/live MIDI note states",
+    "full 240x240 screen composition",
+    "device operation",
+    "independent visual review10/10",
+    "full Local gate"
+  ],
+  "sanitizers": "ASan+UBSan exit 0 on same domain C/observer/runtime; receipt-only wrapper update did not alter executable inputs."
+}

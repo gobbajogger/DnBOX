@@ -157,3 +157,7 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 
 ## Startup instructional footer removed
 - Independent review accepted the one-line removal of startup-only HOLD ANY BUTTON explanatory text under RULE21. Null initialization/return color and all context/help/input branches remain unchanged. Actual footer regression FAIL before/PASS after; existing battery/header/help5306 checks PASS. No generic full-render or full Local claim. This joins reviewed695 clip-key text cleanup for one next combined qualification, avoiding repeated native micro-builds.
+
+## Clip-key raw-domain text geometry
+- Test-only fixed-context sweep uses actual setters/readback/rendering for all153 legal values across17 page-fields.1914 text calls show zero canvas-clipped opaque pixels, conservative label/value bounding overlap or120-pixel column overruns; injected negative geometry triggers all3 detector counters. Every raw starts from the same explicit idle CK/settings state. Drawing nonmutation holds; observer leaves18 baseline rasters byte-identical. ASan+UBSan also passed. Not Cartesian combinations, live-note states, full-screen visual acceptance or any checklist PASS.
+- Review requested final instrumented-input provenance rather than original setup-only receipt. Added separate final domain receipt for observer/C/sh/generated includes/fonts and compile command; corrected rerun passed. Runtime remains ef70, frozen for integ combined qualification.
