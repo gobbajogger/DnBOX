@@ -3,33 +3,36 @@
 Owner: accountable integration lane. Branch: lane/integ-start-files. RULES.md v2 only.
 Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly remains9165adb92fcdaab756c4e59e3d4a8ee22437ca5a. No lane draft merged or deployed.
 
-## Current finish lines
-- C1 FAIL: full Local before/after not passing. Exact9a native and selected host results are subchecks only.
-- C2 PASS at9a: descendant of consolidated; preserved deletion reasons below. Latest changes delete nothing.
-- C3 FAIL: complete independent screen Review10/10 not obtained.
-- C4 FAIL: required full-head limits evidence not yet complete; no secrets or prohibited assets intentionally added.
-- C5 FAIL: outstanding I items below; no lane complete.
-- C6 FAIL: draft955 unmerged, rule9 checks unmet.
-- I0 FAIL: consolidated baseline pool margin172B below512; browser/sanitizer environment and other full-suite evidence remain scoped.
-- I1 FAIL: consolidated targets exist but lane work remains draft; no fictitious merged-state entry.
-- I2 FAIL: exact9a Elite/Pro and focused host tests PASS, all-final-lane combined/full-host qualification absent.
-- I3 FAIL: current9a heavy host playback measured0deadline misses across3x1024blocks, but stricter host margin thresholds FAIL and final Synth One/SuperJ6 composition absent. Not hardware dropout evidence.
-- I4 scoped evidence recovered: managed13e0 compact-programs normal796 + ASan/UBSan796 + corruption negative PASS with default LeakSanitizer; independent six-file closure byte-identical to9a. Not a full9a checkout or final all-lane composition gate.
-- I5 FAIL: authentic five encoded/derived preview assets retained in nightly; current firmware has2076/2088B XIP free, insufficient109274B sample bank. Live Pages404 and stock embedding not delivered.
-- I6 FAIL: fresh roadmap exists; v2 read-only advisory inbox normalizer is under review, no old approval replay or completed automatic collector claim.
-- I7 FAIL: cleanup waits all lanes and rule9; archive/delete routes unavailable under current shell auth. Rename conflicts with explicit no-settings scope, no settings action.
+## Current finish lines (current composed runtime 0ac93f57)
+- C1 FAIL: full before/after Local gates are not passing. Focused native, host, UI and containment results below do not substitute.
+- C2 PASS at badcc/0cad: independently verified exact consolidated containment and deletion reasons. This update deletes no files and retains those parents.
+- C3 FAIL: complete independent screen Review 10/10 is absent.
+- C4 FAIL: full-head limits have not yet qualified this evidence/test update.
+- C5 FAIL: unfinished I items remain; raw managed measurements are preserved but not all durably published.
+- C6 FAIL: PR955 and PR136 remain drafts, not merged or delivered.
+- I0 FAIL: consolidated firmware baseline pool reserve margin is 172 B, below 512 B; full baseline gates remain non-green.
+- I1 FAIL: both consolidated targets exist, but lane draft work is not merged.
+- I2 FAIL: exact 0ac Elite/Pro native and focused host tests pass; all final lanes and full host suite are not qualified.
+- I3 FAIL overall: managed exact 0ac heavy playback and three repeated plain runs pass bounded host deadlines and stricter margins, with actual observed TracerPid=0. Synth One/SuperJ6 and target hardware remain absent; earlier local timing failures are preserved, not erased or causally explained.
+- I4 scoped evidence: managed 13e0 normal 796 + ASan/UBSan 796 + corruption negative PASS with default LSan, six-file dependency closure identical to 9a. Not whole-current-head qualification.
+- I5 FAIL: authentic five encoded/derived preview assets retained in nightly, but stock firmware embedding and Pages delivery remain unfinished.
+- I6 FAIL overall: 22-fixture reviewed advisory-only normalizer has run on fresh complete connector data. It grants no authority and does not establish a finished automatic collector or consolidated roadmap.
+- I7 FAIL: cleanup waits lane completion and rule 9. No settings/rename, deletion or unsupported archive action performed.
 
-## Next independent work
-Retain latest reviewed Web/Remote correction in nightly draft ea9f2ebd7dc05661e92d00da6315240bbfc7572e, finish actual combined gates, compare measured audio margins and preserve all evidence. Coordinate faithful Sound memory/flash alternatives without activating an unfit engine. Continue advisory-only inbox runtime while these checks run.
+## Current verified subchecks and next work
+- Exact 0ac native Elite/Pro: XIP free 2028/2040 B; pool reserve margin 836 B; RAM headroom 1080 B. Independent actual battery test: 2941 checks PASS.
+- Exact 0ac managed host stress: six runs, zero CPU/wall deadline misses, whole render <=6.96 ms and each synth <=1.74 ms. Maximum observed wall block 5.029299 ms. All four plain PCM hashes match, and the three program/FX workloads are distinct. The fixed admission fixture proves both engine wrappers and exact macro values. No target-device or all-final-engine claim.
+- Current-host census: 326 actual descriptor tuples, 978 valid zero/mid/max edits, 1897 checks PASS. It assigns no protocol IDs and enables no endpoint. Next: checked scalar transaction admission, queue saturation/atomicity, exact mutation revisions and remote held-owner lifetime before current DNR2 binding.
+- Historical DNR2 glue is source input only and is not in current firmware. Current remote input plane and ownership hooks are absent. Remote is testing queued-DOWN acknowledgement and stale replay cancellation independently; no synthetic callback result qualifies actual firmware.
+- Sound's 7972 B pre-FX owner does not fit full original FX. Actual original delay rings allocate 7680016 B per owner before other FX; source delayTime max 2.5 s feeds primary 5 s/secondary 2.5 s. No silent capacity reduction, PSRAM or external user-slot substitution.
+- Continue reviewed Web/Remote compositions while preserving latest fail-closed gate policy. Fwui 0ed44 is held pending correction of independently found pickup indicators; current 0ac remains unchanged.
+- The first census wrapper attempt was invalid after its running shell file was edited. Its log is retained and excluded; the complete final unchanged wrapper rerun exited 0. Never modify a running test driver or its inputs.
 
-## Current blockers and routes
-- GitHub API performs authorized writes below700KB; shell gh unauthenticated and network push dry-run failed username.
-- Full UI detector only implements checks1–4; fresh exact6f45screens0overlaps cannot qualify20NOT_RUN checks. Wrapper correctly fails closed.
-- Exact9a independent native: Elite/Pro XIP2076/2088B free, pool335036/344064 reserve836B, data+BSS97224/98304 headroom1080B; BREAK6760B unchanged. Independent project-stage26865, BREAK2450410 and rec-live actual motion/clear PASS.
-- Sound preFX7972B owner is not full-engine fit. Correct source delayTime index43 max2.5s feeds primary5s/secondary2.5s; original allocated delay rings7680016B perowner. Any faithful capacity trim still needs proof, and roughly2.88MB float storage exceeds stock. No silent sound/delay reduction, PSRAM or external-user-slot substitution.
-- Heavy playback reports distinguish0observed host deadlines from stricter margin failures; no timing regression claim without matched baseline comparison.
-
+Repeated mistake: commands mixed workspace-root-relative paths with a repository workdir. Resolve input/output paths against the explicit working directory before running; fail closed on missing inputs.
+Repeated mistake: browser-sandbox fixes missed launchers in the full gate call graph. Inspect every invoked launcher, require explicit chromium_sandbox=True throughout, and never count a two-file policy check as full runtime coverage.
+Repeated mistake: browser launch policy checks missed a launcher invoked indirectly by the firmware host suite. Audit cross-repository and transitive test call graphs before running any suite, not just named browser scripts; never launch with default-off sandbox.
 Repeated mistake: the integration owner ended after an intermediate handoff while independent I items remained. Keep one accountable owner active through those items and all applicable gates; verify actual progress before transferring ownership.
+Repeated mistake: coordinator reported a requested stop or lane-file update as completed before checking the result. State pending until an actual receipt or readback verifies it; correct unsupported claims immediately.
 
 ## Preserved prep history
 The following deletion reasons and dated observations are history/evidence, not replacements for current finish-line status above.
