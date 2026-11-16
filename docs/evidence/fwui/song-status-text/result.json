@@ -1,0 +1,13 @@
+{
+  "firmware/src/app/ui.c": "1ceb7b8d0a087494aaa57be1d3e6b0da70b8076327db56265227a2c2afea6ac9",
+  "tests/host/ui_song_text_test.c": "f1ad2f5741c7aab453443a3ffcac2ec67e331eb4cce70cae3a9f0684551e3bd1",
+  "tests/host/ui_song_text_test.sh": "15c9e02e46d4520bea4a8900ddca7992e15ef2e82ddb4f88fdc0eae1c5d18ba9",
+  "scope": "Literal-only removal of normal SONG explanation. Actual production draw_song and delegated real cv_text; empty status, END, song/UI/transport preserved. No help-card/design/color or input changes.",
+  "producer": "12 states / 86 checks PASS",
+  "before": "Source assertion fails on prior explanatory literal; not an actual baseline runtime test failure.",
+  "native": "NOT_RUN for changed literal. Prior exact combined ef70 native evidence does not qualify changed head.",
+  "logs": {
+    "song-text-before.log": "6fcbe2bfed0416f4eca4a11d11de9125240eae0daebba30ff8583efcac3237ea",
+    "song-text-after.log": "33ed3ddf4eb131f86d76021619361b4ed8336a9c76217e3b86680d696ffb2593"
+  }
+}

@@ -10,8 +10,10 @@ GFX=(ROOT/'firmware/src/gfx.c').read_text()
 UI=(ROOT/'firmware/src/app/ui.c').read_text()
 class InstrumentTests(unittest.TestCase):
     def test_exact_input(self):
-        output,dims=m.instrument(GFX,UI)
+        output,instrumented_ui,dims=m.instrument(GFX,UI)
         self.assertEqual(dims['KNOB_Y'],158)
+        self.assertEqual(instrumented_ui.count('fwui_text_commit_origin(x,y);'),3)
+        self.assertIn('TEXT_CANVAS_NOT_COMMITTED',output)
         self.assertIn('fwui_text_logical_outside(px,py,cv_h)',output)
         self.assertEqual(output.count('if (!a || px < clip_left'),1)
     def test_unique_graphics_anchors(self):
@@ -19,6 +21,11 @@ class InstrumentTests(unittest.TestCase):
             with self.subTest(anchor=anchor):
                 with self.assertRaises(ValueError):m.instrument(GFX+'\n'+anchor,UI)
                 with self.assertRaises(ValueError):m.instrument(GFX.replace(anchor,''),UI)
+    def test_commit_route_anchors(self):
+        for name in ('cv_commit','cv_commit_rows','cv_commit_full_with_tiles'):
+            with self.subTest(name=name):
+                with self.assertRaises(ValueError):m.instrument(GFX,UI.replace('static void '+name+'(', 'static void missing_'+name+'('))
+                with self.assertRaises(ValueError):m.instrument(GFX,UI+'\nstatic void '+name+'(void) {}\n')
     def test_unknown_layout(self):
         with self.assertRaises(ValueError):m.instrument(GFX,UI.replace('#define KNOB_Y 158','#define KNOB_Y 159'))
         with self.assertRaises(ValueError):m.instrument(GFX,UI+'\n#define KNOB_Y 158\n')

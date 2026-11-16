@@ -781,3 +781,9 @@ Managed annotation execution used base54c41 plus the separately supplied pinned 
 ## Firmware tracked-object hard-limit parity
 
 The firmware gate previously scanned only changed workflow/PSRAM paths, allowing retained workflow files and common active configuration forms to escape those checks. It now additionally invokes the exact previously reviewed nightly tracked-object helper, without removing existing guards or changing thresholds. Thirteen disposable-repository fixtures exercise retained workflows, parenthesized defines, typed/JSON/Kconfig PSRAM activation, detector literals, 50 MiB blobs, LFS pointers, missing objects and renamed SuperJ6 AU archives. All pass. Actual base6fc tracked inventory (5321 blobs) also passes the new helper; staged successor and exact published gate qualification remain separate. This bounded scan is not comprehensive secret/opaque archive content assurance or full C4/Local qualification.
+
+## Reviewed SONG status-only composition
+
+Normal composition of FWUI 95bb856fa3aa38fb02c4b9e74a9b4becdaf0430a retains reviewed Attack/text/geometry fixtures and changes production only by replacing SONG's EMPTY: WHITE KEYS ADD BARS literal with EMPTY. END/status/input semantics and current scalar/event hooks remain unchanged. The intentional help-card decision remains separate. Frozen source review accepted the literal removal; exact combined affected host/native qualification is still required before resource or full-gate claims.
+
+Producer exact-composed SONG host selector: 12 actual-graphics states and 86 checks PASS; selector registered in full host suite. Authenticated historical Attack fixture retains its original trailing blank line despite diff whitespace notice. Source review/complete native gate remain separately scoped.
