@@ -1,0 +1,2062 @@
+In file included from tests/host/../../host/x0x_host.c:339,
+                 from tests/host/smc_ui_test.c:8,
+                 from tests/host/ui_screen_inventory.c:6:
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘pref_set_impl’:
+tests/host/../../host/../firmware/src/app/ui.c:820:57: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+  820 |     case R_MIDICH: seq.ch[r.a % NPARTS] = (uint8_t)(v ? v - 1 : SEQ_CH_OFF); break;
+      |                                                         ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘original_value_text’:
+tests/host/../../host/../firmware/src/app/ui.c:1060:40: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+ 1060 |         put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
+      |                                        ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘prob_turn’:
+tests/host/../../host/../firmware/src/app/ui.c:3100:43: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 3100 |         l->val[s] = (uint8_t)(nv != 100 ? nv : MOT_NONE);
+      |                                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_home’:
+tests/host/../../host/../firmware/src/app/ui.c:6097:17: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 6097 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:6097:30: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 6097 |                 if(tx<4)tx=4;if(tx+w>236)tx=236-w;
+      |                              ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘draw_adsr_inline’:
+tests/host/../../host/../firmware/src/app/ui.c:7524:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7524 |             if(level<0)level=0; if(level>1)level=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:7524:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7524 |             if(level<0)level=0; if(level>1)level=1;
+      |                                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:7545:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7545 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:7545:27: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7545 |             if(lv<0)lv=0; if(lv>1)lv=1;
+      |                           ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_wave’:
+tests/host/../../host/../firmware/src/app/ui.c:7893:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7893 |         if(v>1)v=1; if(v<-1)v=-1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7893:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7893 |         if(v>1)v=1; if(v<-1)v=-1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘og_gnaw’:
+tests/host/../../host/../firmware/src/app/ui.c:7904:5: warning: this ‘while’ clause does not guard... [-Wmisleading-indentation]
+ 7904 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |     ^~~~~
+tests/host/../../host/../firmware/src/app/ui.c:7904:38: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘while’
+ 7904 |     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+      |                                      ^~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘orig_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:7927:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7927 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7927:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7927 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:7930:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7930 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7930:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7930 |     if(amp<0)amp=0; if(amp>1)amp=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:7949:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7949 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7949:23: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7949 |         if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
+      |                       ^~
+tests/host/../../host/../firmware/src/app/ui.c:7970:9: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 7970 |         if(f<0)f=0; if(f>1)f=1;
+      |         ^~
+tests/host/../../host/../firmware/src/app/ui.c:7970:21: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 7970 |         if(f<0)f=0; if(f>1)f=1;
+      |                     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8029:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8029 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8029:29: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8029 |             if(mod<0)mod=0; if(mod>1)mod=1;
+      |                             ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘dg_tail’:
+tests/host/../../host/../firmware/src/app/ui.c:8090:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8090 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8090:19: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8090 |     if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
+      |                   ^~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘drum_strip_glyph’:
+tests/host/../../host/../firmware/src/app/ui.c:8134:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8134 |     if(q<0)q=0; if(q>1)q=1;
+      |     ^~
+tests/host/../../host/../firmware/src/app/ui.c:8134:17: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8134 |     if(q<0)q=0; if(q>1)q=1;
+      |                 ^~
+tests/host/../../host/../firmware/src/app/ui.c:8189:13: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 8189 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |             ^~
+tests/host/../../host/../firmware/src/app/ui.c:8189:25: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 8189 |             if(i<1)i=1; if(i>OG_W-2)i=OG_W-2; /* 3px marker stays in the cell */
+      |                         ^~
+In file included from tests/host/../../host/../firmware/src/app/ui.c:8274:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc: In function ‘draw_drum_voice’:
+tests/host/../../host/../firmware/src/app/ui_drum_voice.inc:562:44: warning: unused variable ‘dimc’ [-Wunused-variable]
+  562 |     uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
+      |                                            ^~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘ui_frame’:
+tests/host/../../host/../firmware/src/app/ui.c:8943:26: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+ 8943 |     else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
+      |                          ^~~
+tests/host/../../host/../firmware/src/app/ui.c:8945:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+ 8945 |         if(!visible)peer_scroll.active=0; }
+      |         ^~
+tests/host/../../host/x0x_host.c: In function ‘simulator_main’:
+tests/host/../../host/x0x_host.c:1105:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1105 |             seq.ch[part] = (uint8_t)(chn ? chn - 1 : SEQ_CH_OFF);
+      |                                            ^~~~~~~
+tests/host/smc_ui_test.c: At top level:
+tests/host/smc_ui_test.c:11:9: warning: "CK_FN" redefined
+   11 | #define CK_FN __attribute__((unused))
+      |         ^~~~~
+In file included from tests/host/../../host/../firmware/src/app/smk_clip_arp_share.c:5,
+                 from tests/host/../../host/x0x_host.c:336:
+tests/host/../../host/../firmware/src/app/smk_clip_keys.h:16:9: note: this is the location of the previous definition
+   16 | #define CK_FN __attribute__((X0X_MINSIZE noinline, unused))   /* small code: the app area is almost full */
+      |         ^~~~~
+In file included from tests/host/smc_ui_test.c:57:
+firmware/src/app/smc_mixer.c: In function ‘smc_fx_bus’:
+firmware/src/app/smc_mixer.c:1826:44: warning: operand of ‘?:’ changes signedness from ‘int’ to ‘unsigned int’ due to unsignedness of other operand [-Wsign-compare]
+ 1826 |     int strip = note < 32u ? (note & 7u) : -1;
+      |                                            ^~
+firmware/src/app/smc_mixer.c: At top level:
+firmware/src/app/smc_mixer.c:2290:5: warning: missing initializer for field ‘pending’ of ‘smc_panic_peer_t’ [-Wmissing-field-initializers]
+ 2290 |     {{0, 0}, 0, -1}
+      |     ^
+firmware/src/app/smc_mixer.c:2287:13: note: ‘pending’ declared here
+ 2287 |     uint8_t pending;              /* single BANK action waits for its physical release */
+      |             ^~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c: In function ‘unit_value’:
+tests/host/../../host/../firmware/src/app/ui.c:1143:25: warning: this statement may fall through [-Wimplicit-fallthrough=]
+ 1143 |     case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
+      |                       ~~^~~~~~~~~~~~~~~~~~~~~
+tests/host/../../host/../firmware/src/app/ui.c:1144:5: note: here
+ 1144 |     case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
+      |     ^~~~
+tests/host/../../host/../firmware/src/app/ui.c: At top level:
+tests/host/../../host/../firmware/src/app/ui.c:3544:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]
+ 3544 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
+      |                                      ^~~~~~~~~~~~~~
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=47 y=-103 w=240 h=82 ink=60 text=34
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=100 y=-103 w=240 h=82 ink=96 text=10%
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=158 y=-103 w=240 h=82 ink=93 text=1.0s
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=217 y=-103 w=240 h=82 ink=76 text=0%
+TEXT_CANVAS_CLIP x=207 y=-55 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-19 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=47 y=-103 w=240 h=82 ink=60 text=34
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=100 y=-103 w=240 h=82 ink=96 text=10%
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=158 y=-103 w=240 h=82 ink=93 text=1.0s
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=217 y=-103 w=240 h=82 ink=76 text=0%
+TEXT_CANVAS_CLIP x=207 y=-75 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-23 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=158 text=909 / 2
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=189 y=-118 w=240 h=82 ink=198 text=SNAPPY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=178 text=SNARE
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=158 text=909 / 2
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=39 y=-103 w=240 h=82 ink=164 text=205Hz
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=95 y=-103 w=240 h=82 ink=154 text=1.2kHz
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=153 y=-103 w=240 h=82 ink=171 text=340ms
+TEXT_CANVAS_CLIP x=189 y=-118 w=240 h=82 ink=198 text=SNAPPY
+TEXT_CANVAS_CLIP x=214 y=-103 w=240 h=82 ink=111 text=50%
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=178 text=SNARE
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=160 text=909 / 3
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=202 text=LOW TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=160 text=909 / 3
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=52 y=-103 w=240 h=82 ink=136 text=68Hz
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=129 y=-103 w=240 h=82 ink=98 text=18%
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=189 text=996ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=202 text=LOW TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=154 text=909 / 4
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=190 text=MID TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=154 text=909 / 4
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=49 y=-103 w=240 h=82 ink=149 text=102Hz
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=129 y=-103 w=240 h=82 ink=98 text=18%
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=169 text=763ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=190 text=MID TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=162 text=909 / 5
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=215 text=HIGH TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=162 text=909 / 5
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=49 y=-103 w=240 h=82 ink=148 text=132Hz
+TEXT_CANVAS_CLIP x=104 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=129 y=-103 w=240 h=82 ink=98 text=18%
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=165 text=720ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=215 text=HIGH TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=909 / 6
+TEXT_CANVAS_CLIP x=127 y=79 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=79 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=79 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=79 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=102 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=102 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=102 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=102 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=125 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=125 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=125 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=125 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=197 y=-97 w=240 h=82 ink=243 text=210Hz
+TEXT_CANVAS_CLIP x=204 y=-61 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-35 w=240 h=82 ink=218 text=RIMSHOT
+TEXT_CANVAS_CLIP x=198 y=-35 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-13 w=240 h=82 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=-13 w=240 h=82 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=-13 w=240 h=82 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=-13 w=240 h=82 ink=27 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=909 / 6
+TEXT_CANVAS_CLIP x=127 y=79 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=79 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=79 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=79 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=102 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=102 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=102 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=102 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=125 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=125 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=125 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=125 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=197 y=-117 w=240 h=82 ink=243 text=210Hz
+TEXT_CANVAS_CLIP x=204 y=-65 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-35 w=240 h=82 ink=218 text=RIMSHOT
+TEXT_CANVAS_CLIP x=198 y=-35 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-13 w=240 h=82 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=-13 w=240 h=82 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=-13 w=240 h=82 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=-13 w=240 h=82 ink=27 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=150 text=909 / 7
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=168 y=-118 w=240 h=82 ink=92 text=TAIL
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=260 text=HANDCLAP
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=150 text=909 / 7
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=157 text=951Hz
+TEXT_CANVAS_CLIP x=168 y=-118 w=240 h=82 ink=92 text=TAIL
+TEXT_CANVAS_CLIP x=182 y=-103 w=240 h=82 ink=164 text=344ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=260 text=HANDCLAP
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=909 / 8
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=278 text=CLOSED HAT
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=909 / 8
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=142 text=+0.2st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=182 y=-103 w=240 h=82 ink=169 text=109ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=278 text=CLOSED HAT
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=165 text=909 / 9
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=228 text=OPEN HAT
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=165 text=909 / 9
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=142 text=+0.2st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=182 y=-103 w=240 h=82 ink=175 text=456ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=228 text=OPEN HAT
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=181 text=909 / 10
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=167 text=CRASH
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=181 text=909 / 10
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=142 text=+0.2st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=187 y=-103 w=240 h=82 ink=95 text=1.8s
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=167 text=CRASH
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DEPTH
+TEXT_CANVAS_CLIP x=207 y=-45 w=240 h=82 ink=103 text=45
+TEXT_CANVAS_CLIP x=204 y=-13 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=167 text=909 / 11
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=119 text=RIDE
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=167 text=909 / 11
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=142 text=+0.2st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=187 y=-103 w=240 h=82 ink=95 text=1.8s
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=119 text=RIDE
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=39 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=100 y=-103 w=240 h=82 ink=108 text=33%
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=157 y=-103 w=240 h=82 ink=100 text=19%
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=218 y=-103 w=240 h=82 ink=59 text=87
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=154 text=808 / 2
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=189 y=-118 w=240 h=82 ink=198 text=SNAPPY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=178 text=SNARE
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=154 text=808 / 2
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=39 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=100 y=-103 w=240 h=82 ink=111 text=50%
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=159 y=-103 w=240 h=82 ink=90 text=108
+TEXT_CANVAS_CLIP x=189 y=-118 w=240 h=82 ink=198 text=SNAPPY
+TEXT_CANVAS_CLIP x=214 y=-103 w=240 h=82 ink=99 text=70%
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=178 text=SNARE
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=156 text=808 / 3
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=202 text=LOW TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=156 text=808 / 3
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=51 y=-103 w=240 h=82 ink=129 text=0.0st
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=130 y=-103 w=240 h=82 ink=97 text=TOM
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=179 text=392ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=202 text=LOW TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+SCREEN {"id":"view-00-part-00-voice-00-page-00","view":0,"part":0,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-00-part-01-voice-00-page-00","view":0,"part":1,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-00-part-02-voice-00-page-00","view":0,"part":2,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-00-part-03-voice-00-page-00","view":0,"part":3,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-00-part-04-voice-00-page-00","view":0,"part":4,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-00-page-00","view":1,"part":0,"voice":0,"page":0,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-00-page-01","view":1,"part":0,"voice":0,"page":1,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-00-page-02","view":1,"part":0,"voice":0,"page":2,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-01-page-00","view":1,"part":0,"voice":1,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-01-page-01","view":1,"part":0,"voice":1,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-02-page-00","view":1,"part":0,"voice":2,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-02-page-01","view":1,"part":0,"voice":2,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-03-page-00","view":1,"part":0,"voice":3,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-03-page-01","view":1,"part":0,"voice":3,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-04-page-00","view":1,"part":0,"voice":4,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-04-page-01","view":1,"part":0,"voice":4,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-05-page-00","view":1,"part":0,"voice":5,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-05-page-01","view":1,"part":0,"voice":5,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-06-page-00","view":1,"part":0,"voice":6,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-06-page-01","view":1,"part":0,"voice":6,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-07-page-00","view":1,"part":0,"voice":7,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-07-page-01","view":1,"part":0,"voice":7,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-08-page-00","view":1,"part":0,"voice":8,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-08-page-01","view":1,"part":0,"voice":8,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-09-page-00","view":1,"part":0,"voice":9,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-09-page-01","view":1,"part":0,"voice":9,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-10-page-00","view":1,"part":0,"voice":10,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-00-voice-10-page-01","view":1,"part":0,"voice":10,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-00-page-00","view":1,"part":1,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-00-page-01","view":1,"part":1,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-01-page-00","view":1,"part":1,"voice":1,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-01-page-01","view":1,"part":1,"voice":1,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-02-page-00","view":1,"part":1,"voice":2,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-02-page-01","view":1,"part":1,"voice":2,"page":1,"pages":2,"widthTEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=150 text=808 / 4
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=190 text=MID TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=150 text=808 / 4
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=51 y=-103 w=240 h=82 ink=129 text=0.0st
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=130 y=-103 w=240 h=82 ink=97 text=TOM
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=175 text=282ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=190 text=MID TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=158 text=808 / 5
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=215 text=HIGH TOM
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=158 text=808 / 5
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=51 y=-103 w=240 h=82 ink=129 text=0.0st
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=130 y=-103 w=240 h=82 ink=97 text=TOM
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=201 y=-103 w=240 h=82 ink=181 text=259ms
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=215 text=HIGH TOM
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=159 text=808 / 6
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=218 text=RIMSHOT
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=159 text=808 / 6
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=33 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=49 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=107 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=132 y=-103 w=240 h=82 ink=92 text=RIM
+TEXT_CANVAS_CLIP x=183 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=209 y=-103 w=240 h=82 ink=61 text=40
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=218 text=RIMSHOT
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=146 text=808 / 7
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=260 text=HANDCLAP
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=146 text=808 / 7
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=39 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=75 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=104 y=-103 w=240 h=82 ink=64 text=32
+TEXT_CANVAS_CLIP x=135 y=-118 w=240 h=82 ink=182 text=SOUND
+TEXT_CANVAS_CLIP x=156 y=-103 w=240 h=82 ink=115 text=CLAP
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=218 y=-103 w=240 h=82 ink=63 text=64
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=260 text=HANDCLAP
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=159 text=808 / 8
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=227 text=COWBELL
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=159 text=808 / 8
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=190 y=-103 w=240 h=82 ink=67 text=62
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=227 text=COWBELL
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=161 text=808 / 9
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=188 text=CYMBAL
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=161 text=808 / 9
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=190 y=-103 w=240 h=82 ink=57 text=70
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=188 text=CYMBAL
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=177 text=808 / 10
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=228 text=OPEN HAT
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=177 text=808 / 10
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=190 y=-103 w=240 h=82 ink=50 text=74
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=228 text=OPEN HAT
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=143 text=808 / 1
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=23 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=81 y=-118 w=240 h=82 ink=131 text=TONE
+TEXT_CANVAS_CLIP x=132 y=-118 w=240 h=82 ink=174 text=ATTACK
+TEXT_CANVAS_CLIP x=192 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=118 text=KICK
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=808 / 11
+TEXT_CANVAS_CLIP x=127 y=72 w=240 h=138 ink=20 text=1
+TEXT_CANVAS_CLIP x=153 y=72 w=240 h=138 ink=31 text=2
+TEXT_CANVAS_CLIP x=179 y=72 w=240 h=138 ink=33 text=3
+TEXT_CANVAS_CLIP x=205 y=72 w=240 h=138 ink=27 text=4
+TEXT_CANVAS_CLIP x=127 y=91 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=91 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=91 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=91 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=110 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=110 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=110 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=110 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=129 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=129 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=129 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=129 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=204 y=-45 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-19 w=240 h=82 ink=278 text=CLOSED HAT
+TEXT_CANVAS_CLIP x=198 y=-19 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=11 y=134 w=240 h=138 ink=163 text=808 / 11
+TEXT_CANVAS_CLIP x=127 y=66 w=240 h=138 ink=16 text=1
+TEXT_CANVAS_CLIP x=153 y=66 w=240 h=138 ink=27 text=2
+TEXT_CANVAS_CLIP x=179 y=66 w=240 h=138 ink=28 text=3
+TEXT_CANVAS_CLIP x=205 y=66 w=240 h=138 ink=25 text=4
+TEXT_CANVAS_CLIP x=127 y=86 w=240 h=138 ink=35 text=5
+TEXT_CANVAS_CLIP x=153 y=86 w=240 h=138 ink=36 text=6
+TEXT_CANVAS_CLIP x=179 y=86 w=240 h=138 ink=23 text=7
+TEXT_CANVAS_CLIP x=205 y=86 w=240 h=138 ink=36 text=8
+TEXT_CANVAS_CLIP x=127 y=106 w=240 h=138 ink=38 text=9
+TEXT_CANVAS_CLIP x=150 y=106 w=240 h=138 ink=54 text=10
+TEXT_CANVAS_CLIP x=176 y=106 w=240 h=138 ink=40 text=11
+TEXT_CANVAS_CLIP x=202 y=106 w=240 h=138 ink=51 text=12
+TEXT_CANVAS_CLIP x=124 y=126 w=240 h=138 ink=53 text=13
+TEXT_CANVAS_CLIP x=150 y=126 w=240 h=138 ink=47 text=14
+TEXT_CANVAS_CLIP x=176 y=126 w=240 h=138 ink=55 text=15
+TEXT_CANVAS_CLIP x=202 y=126 w=240 h=138 ink=56 text=16
+TEXT_CANVAS_CLIP x=52 y=-118 w=240 h=82 ink=130 text=TUNE
+TEXT_CANVAS_CLIP x=68 y=-103 w=240 h=82 ink=131 text=+0.1st
+TEXT_CANVAS_CLIP x=164 y=-118 w=240 h=82 ink=155 text=DECAY
+TEXT_CANVAS_CLIP x=190 y=-103 w=240 h=82 ink=50 text=47
+TEXT_CANVAS_CLIP x=204 y=-55 w=240 h=82 ink=129 text=127
+TEXT_CANVAS_CLIP x=11 y=-25 w=240 h=82 ink=278 text=CLOSED HAT
+TEXT_CANVAS_CLIP x=198 y=-25 w=240 h=82 ink=124 text=P1 / 16
+TEXT_CANVAS_CLIP x=127 y=-3 w=240 h=82 ink=4 text=1
+TEXT_CANVAS_CLIP x=153 y=-3 w=240 h=82 ink=4 text=2
+TEXT_CANVAS_CLIP x=179 y=-3 w=240 h=82 ink=5 text=3
+TEXT_CANVAS_CLIP x=205 y=-3 w=240 h=82 ink=2 text=4
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=56 text=60%
+TEXT_CANVAS_CLIP x=99 y=63 w=240 h=138 ink=38 text=17%
+TEXT_CANVAS_CLIP x=158 y=63 w=240 h=138 ink=57 text=65%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=186 text=3  FILTER
+TEXT_CANVAS_CLIP x=18 y=-22 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-24 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-23 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=56 text=60%
+TEXT_CANVAS_CLIP x=79 y=-22 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-24 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-23 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=99 y=-6 w=240 h=82 ink=47 text=17%
+TEXT_CANVAS_CLIP x=135 y=-22 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-24 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-23 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=158 y=-6 w=240 h=82 ink=56 text=65%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=56 text=60%
+TEXT_CANVAS_CLIP x=99 y=63 w=240 h=138 ink=38 text=17%
+TEXT_CANVAS_CLIP x=158 y=63 w=240 h=138 ink=57 text=65%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=186 text=3  FILTER
+TEXT_CANVAS_CLIP x=18 y=-22 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-24 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-23 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=56 text=60%
+TEXT_CANVAS_CLIP x=79 y=-22 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-24 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-23 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=99 y=-6 w=240 h=82 ink=47 text=17%
+TEXT_CANVAS_CLIP x=135 y=-22 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-24 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-23 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=158 y=-6 w=240 h=82 ink=56 text=65%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=56 text=60%
+TEXT_CANVAS_CLIP x=99 y=63 w=240 h=138 ink=38 text=17%
+TEXT_CANVAS_CLIP x=158 y=63 w=240 h=138 ink=57 text=65%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=186 text=3  FILTER
+TEXT_CANVAS_CLIP x=18 y=-22 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-24 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-23 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=56 text=60%
+TEXT_CANVAS_CLIP x=79 y=-22 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-24 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-23 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=99 y=-6 w=240 h=82 ink=47 text=17%
+TEXT_CANVAS_CLIP x=135 y=-22 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-24 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-23 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=158 y=-6 w=240 h=82 ink=56 text=65%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=56 text=60%
+TEXT_CANVAS_CLIP x=99 y=63 w=240 h=138 ink=38 text=17%
+TEXT_CANVAS_CLIP x=158 y=63 w=240 h=138 ink=57 text=65%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=186 text=3  FILTER
+TEXT_CANVAS_CLIP x=190 y=-34 w=240 h=82 ink=253 text=KNOBS 5-7
+TEXT_CANVAS_CLIP x=18 y=-22 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-24 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-23 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=56 text=60%
+TEXT_CANVAS_CLIP x=79 y=-22 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-24 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-23 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=99 y=-6 w=240 h=82 ink=47 text=17%
+TEXT_CANVAS_CLIP x=135 y=-22 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-24 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-23 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=158 y=-6 w=240 h=82 ink=56 text=65%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=56 text=60%
+TEXT_CANVAS_CLIP x=99 y=63 w=240 h=138 ink=38 text=17%
+TEXT_CANVAS_CLIP x=158 y=63 w=240 h=138 ink=57 text=65%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=186 text=3  FILTER
+TEXT_CANVAS_CLIP x=18 y=-22 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-24 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=18 y=-23 w=240 h=82 ink=171 text=CUTOFF
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=56 text=60%
+TEXT_CANVAS_CLIP x=79 y=-22 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-24 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=79 y=-23 w=240 h=82 ink=168 text=CRUSH
+TEXT_CANVAS_CLIP x=99 y=-6 w=240 h=82 ink=47 text=17%
+TEXT_CANVAS_CLIP x=135 y=-22 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-24 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=135 y=-23 w=240 h=82 ink=213 text=WOBBLE
+TEXT_CANVAS_CLIP x=158 y=-6 w=240 h=82 ink=56 text=65%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=79 text=5-6
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=79 text=5-6
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=197 y=208 w=240 h=138 ink=149 text=PATCH
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=197 y=139 w=240 h=138 ink=149 text=PATCH
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=54 text=83%
+TEXT_CANVAS_CLIP x=102 y=63 w=240 h=138 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=217 text=3  FILTER 2
+TEXT_CANVAS_CLIP x=25 y=-22 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-24 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-23 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=57 text=83%
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=102 y=-6 w=240 h=82 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=54 text=83%
+TEXT_CANVAS_CLIP x=102 y=63 w=240 h=138 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=217 text=3  FILTER 2
+TEXT_CANVAS_CLIP x=25 y=-22 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-24 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-23 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=57 text=83%
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=102 y=-6 w=240 h=82 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=54 text=83%
+TEXT_CANVAS_CLIP x=102 y=63 w=240 h=138 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=217 text=3  FILTER 2
+TEXT_CANVAS_CLIP x=25 y=-22 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-24 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-23 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=57 text=83%
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=102 y=-6 w=240 h=82 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=54 text=83%
+TEXT_CANVAS_CLIP x=102 y=63 w=240 h=138 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=217 text=3  FILTER 2
+TEXT_CANVAS_CLIP x=190 y=-34 w=240 h=82 ink=266 text=KNOBS 5-6
+TEXT_CANVAS_CLIP x=25 y=-22 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-24 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-23 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=57 text=83%
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=102 y=-6 w=240 h=82 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=40 y=63 w=240 h=138 ink=54 text=83%
+TEXT_CANVAS_CLIP x=102 y=63 w=240 h=138 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=55 text=1-4
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=217 text=3  FILTER 2
+TEXT_CANVAS_CLIP x=25 y=-22 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-24 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=25 y=-23 w=240 h=82 ink=108 text=BITE
+TEXT_CANVAS_CLIP x=40 y=-6 w=240 h=82 ink=57 text=83%
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=158 text=GNAW
+TEXT_CANVAS_CLIP x=102 y=-6 w=240 h=82 ink=38 text=0%
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=42 y=63 w=240 h=138 ink=37 text=OFF
+TEXT_CANVAS_CLIP x=77 y=61 w=240 h=138 ink=89 text=43 %
+TEXT_CANVAS_CLIP x=140 y=61 w=240 h=138 ink=69 text=0 %
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=201 text=3  EFFECT
+TEXT_CANVAS_CLIP x=23 y=-22 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-24 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-23 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=42 y=-6 w=240 h=82 ink=49 text=OFF
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=77 y=-8 w=240 h=82 ink=96 text=43 %
+TEXT_CANVAS_CLIP x=139 y=-22 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-24 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-23 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=140 y=-8 w=240 h=82 ink=77 text=0 %
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=42 y=63 w=240 h=138 ink=37 text=OFF
+TEXT_CANVAS_CLIP x=77 y=61 w=240 h=138 ink=89 text=43 %
+TEXT_CANVAS_CLIP x=140 y=61 w=240 h=138 ink=69 text=0 %
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=201 text=3  EFFECT
+TEXT_CANVAS_CLIP x=23 y=-22 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-24 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-23 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=42 y=-6 w=240 h=82 ink=49 text=OFF
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=77 y=-8 w=240 h=82 ink=96 text=43 %
+TEXT_CANVAS_CLIP x=139 y=-22 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-24 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-23 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=140 y=-8 w=240 h=82 ink=77 text=0 %
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=208 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=42 y=63 w=240 h=138 ink=37 text=OFF
+TEXT_CANVAS_CLIP x=77 y=61 w=240 h=138 ink=89 text=43 %
+TEXT_CANVAS_CLIP x=140 y=61 w=240 h=138 ink=69 text=0 %
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=220 y=139 w=240 h=138 ink=79 text=5-8
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=201 text=3  EFFECT
+TEXT_CANVAS_CLIP x=190 y=-34 w=240 h=82 ink=253 text=KNOBS 5-7
+TEXT_CANVAS_CLIP x=23 y=-22 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-24 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-23 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=42 y=-6 w=240 h=82 ink=49 text=OFF
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=77 y=-8 w=240 h=82 ink=96 text=43 %
+TEXT_CANVAS_CLIP x=139 y=-22 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-24 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-23 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=140 y=-8 w=240 h=82 ink=77 text=0 %
+TEXT_CANVAS_CLIP x=7 y=208 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=208 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=197 y=208 w=240 h=138 ink=149 text=PATCH
+TEXT_CANVAS_CLIP x=42 y=63 w=240 h=138 ink=37 text=OFF
+TEXT_CANVAS_CLIP x=77 y=61 w=240 h=138 ink=89 text=43 %
+TEXT_CANVAS_CLIP x=140 y=61 w=240 h=138 ink=69 text=0 %
+TEXT_CANVAS_CLIP x=7 y=139 w=240 h=138 ink=34 text=< >
+TEXT_CANVAS_CLIP x=55 y=139 w=240 h=138 ink=130 text=PARA
+TEXT_CANVAS_CLIP x=197 y=139 w=240 h=138 ink=149 text=PATCH
+TEXT_CANVAS_CLIP x=8 y=-34 w=240 h=82 ink=201 text=3  EFFECT
+TEXT_CANVAS_CLIP x=23 y=-22 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-24 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=23 y=-23 w=240 h=82 ink=110 text=TYPE
+TEXT_CANVAS_CLIP x=42 y=-6 w=240 h=82 ink=49 text=OFF
+TEXT_CANVAS_CLIP x=80 y=-22 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-24 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=80 y=-23 w=240 h=82 ink=126 text=EDIT 1
+TEXT_CANVAS_CLIP x=77 y=-8 w=240 h=82 ink=96 text=43 %
+TEXT_CANVAS_CLIP x=139 y=-22 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-24 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=139 y=-23 w=240 h=82 ink=137 text=EDIT 2
+TEXT_CANVAS_CLIP x=140 y=-8 w=240 h=82 ink=77 text=0 %
+":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-03-page-00","view":1,"part":1,"voice":3,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-03-page-01","view":1,"part":1,"voice":3,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-04-page-00","view":1,"part":1,"voice":4,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-04-page-01","view":1,"part":1,"voice":4,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-05-page-00","view":1,"part":1,"voice":5,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-05-page-01","view":1,"part":1,"voice":5,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-06-page-00","view":1,"part":1,"voice":6,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-06-page-01","view":1,"part":1,"voice":6,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-07-page-00","view":1,"part":1,"voice":7,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-07-page-01","view":1,"part":1,"voice":7,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-08-page-00","view":1,"part":1,"voice":8,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-08-page-01","view":1,"part":1,"voice":8,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-09-page-00","view":1,"part":1,"voice":9,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-09-page-01","view":1,"part":1,"voice":9,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-10-page-00","view":1,"part":1,"voice":10,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-01-voice-10-page-01","view":1,"part":1,"voice":10,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-00","view":1,"part":2,"voice":0,"page":0,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-01","view":1,"part":2,"voice":0,"page":1,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-02","view":1,"part":2,"voice":0,"page":2,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-03","view":1,"part":2,"voice":0,"page":3,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-04","view":1,"part":2,"voice":0,"page":4,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-02-voice-00-page-05","view":1,"part":2,"voice":0,"page":5,"pages":6,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-00","view":1,"part":3,"voice":0,"page":0,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-01","view":1,"part":3,"voice":0,"page":1,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-02","view":1,"part":3,"voice":0,"page":2,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-03","view":1,"part":3,"voice":0,"page":3,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-04","view":1,"part":3,"voice":0,"page":4,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-05","view":1,"part":3,"voice":0,"page":5,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-06","view":1,"part":3,"voice":0,"page":6,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-03-voice-00-page-07","view":1,"part":3,"voice":0,"page":7,"pages":8,"width":240,"height":240}
+SCREEN {"id":"view-01-part-04-voice-00-page-00","view":1,"part":4,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-02-part-02-voice-00-page-00","view":2,"part":2,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-02-part-02-voice-00-page-01","view":2,"part":2,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-02-part-03-voice-00-page-00","view":2,"part":3,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-02-part-03-voice-00-page-01","view":2,"part":3,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-00-voice-00-page-00","view":3,"part":0,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-00-voice-00-page-01","view":3,"part":0,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-01-voice-00-page-00","view":3,"part":1,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-01-voice-00-page-01","view":3,"part":1,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-02-voice-00-page-00","view":3,"part":2,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-02-voice-00-page-01","view":3,"part":2,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-03-voice-00-page-00","view":3,"part":3,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-03-voice-00-page-01","view":3,"part":3,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-04-voice-00-page-00","view":3,"part":4,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-03-part-04-voice-00-page-01","view":3,"part":4,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-04-part-00-voice-00-page-00","view":4,"part":0,"voice":0,"page":0,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-00-voice-00-page-01","view":4,"part":0,"voice":0,"page":1,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-00-voice-00-page-02","view":4,"part":0,"voice":0,"page":2,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-00-voice-00-page-03","view":4,"part":0,"voice":0,"page":3,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-00-voice-00-page-04","view":4,"part":0,"voice":0,"page":4,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-01-voice-00-page-00","view":4,"part":1,"voice":0,"page":0,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-01-voice-00-page-01","view":4,"part":1,"voice":0,"page":1,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-01-voice-00-page-02","view":4,"part":1,"voice":0,"page":2,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-01-voice-00-page-03","view":4,"part":1,"voice":0,"page":3,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-01-voice-00-page-04","view":4,"part":1,"voice":0,"page":4,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-02-voice-00-page-00","view":4,"part":2,"voice":0,"page":0,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-02-voice-00-page-01","view":4,"part":2,"voice":0,"page":1,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-02-voice-00-page-02","view":4,"part":2,"voice":0,"page":2,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-02-voice-00-page-03","view":4,"part":2,"voice":0,"page":3,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-02-voice-00-page-04","view":4,"part":2,"voice":0,"page":4,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-03-voice-00-page-00","view":4,"part":3,"voice":0,"page":0,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-03-voice-00-page-01","view":4,"part":3,"voice":0,"page":1,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-03-voice-00-page-02","view":4,"part":3,"voice":0,"page":2,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-03-voice-00-page-03","view":4,"part":3,"voice":0,"page":3,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-03-voice-00-page-04","view":4,"part":3,"voice":0,"page":4,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-04-voice-00-page-00","view":4,"part":4,"voice":0,"page":0,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-04-voice-00-page-01","view":4,"part":4,"voice":0,"page":1,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-04-voice-00-page-02","view":4,"part":4,"voice":0,"page":2,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-04-voice-00-page-03","view":4,"part":4,"voice":0,"page":3,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-04-part-04-voice-00-page-04","view":4,"part":4,"voice":0,"page":4,"pages":5,"width":240,"height":240}
+SCREEN {"id":"view-06-part-00-voice-00-page-00","view":6,"part":0,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-00-voice-00-page-01","view":6,"part":0,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-01-voice-00-page-00","view":6,"part":1,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-01-voice-00-page-01","view":6,"part":1,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-02-voice-00-page-00","view":6,"part":2,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-02-voice-00-page-01","view":6,"part":2,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-03-voice-00-page-00","view":6,"part":3,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-03-voice-00-page-01","view":6,"part":3,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-04-voice-00-page-00","view":6,"part":4,"voice":0,"page":0,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-06-part-04-voice-00-page-01","view":6,"part":4,"voice":0,"page":1,"pages":2,"width":240,"height":240}
+SCREEN {"id":"view-07-part-00-voice-00-page-00","view":7,"part":0,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-07-part-01-voice-00-page-00","view":7,"part":1,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-07-part-02-voice-00-page-00","view":7,"part":2,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-07-part-03-voice-00-page-00","view":7,"part":3,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-07-part-04-voice-00-page-00","view":7,"part":4,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-08-part-00-voice-00-page-00","view":8,"part":0,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-08-part-01-voice-00-page-00","view":8,"part":1,"voice":0,"page":0,"pages":1,"width":240,"height":240}
+SCREEN {"id":"view-08-part-02-voice-00-page-00","view":8,"part":2,"voice":0,"page":0,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-02-voice-00-page-01","view":8,"part":2,"voice":0,"page":1,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-02-voice-00-page-02","view":8,"part":2,"voice":0,"page":2,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-03-voice-00-page-00","view":8,"part":3,"voice":0,"page":0,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-03-voice-00-page-01","view":8,"part":3,"voice":0,"page":1,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-03-voice-00-page-02","view":8,"part":3,"voice":0,"page":2,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-04-voice-00-page-00","view":8,"part":4,"voice":0,"page":0,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-04-voice-00-page-01","view":8,"part":4,"voice":0,"page":1,"pages":3,"width":240,"height":240}
+SCREEN {"id":"view-08-part-04-voice-00-page-02","view":8,"part":4,"voice":0,"page":2,"pages":3,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-00","view":5,"section":-1,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-01","view":5,"section":-1,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-02","view":5,"section":-1,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-03","view":5,"section":-1,"row":3,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-04","view":5,"section":-1,"row":4,"width":240,"height":240}
+SCREEN {"id":"global-section--1-row-05","view":5,"section":-1,"row":5,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-00","view":5,"section":0,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-01","view":5,"section":0,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-02","view":5,"section":0,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-03","view":5,"section":0,"row":3,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-04","view":5,"section":0,"row":4,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-05","view":5,"section":0,"row":5,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-06","view":5,"section":0,"row":6,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-07","view":5,"section":0,"row":7,"width":240,"height":240}
+SCREEN {"id":"global-section-0-row-08","view":5,"section":0,"row":8,"width":240,"height":240}
+SCREEN {"id":"global-section-1-row-00","view":5,"section":1,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-1-row-01","view":5,"section":1,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-1-row-02","view":5,"section":1,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-1-row-03","view":5,"section":1,"row":3,"width":240,"height":240}
+SCREEN {"id":"global-section-1-row-04","view":5,"section":1,"row":4,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-00","view":5,"section":2,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-01","view":5,"section":2,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-02","view":5,"section":2,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-03","view":5,"section":2,"row":3,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-04","view":5,"section":2,"row":4,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-05","view":5,"section":2,"row":5,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-06","view":5,"section":2,"row":6,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-07","view":5,"section":2,"row":7,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-08","view":5,"section":2,"row":8,"width":240,"height":240}
+SCREEN {"id":"global-section-2-row-09","view":5,"section":2,"row":9,"width":240,"height":240}
+SCREEN {"id":"global-section-3-row-00","view":5,"section":3,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-3-row-01","view":5,"section":3,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-3-row-02","view":5,"section":3,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-4-row-00","view":5,"section":4,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-4-row-01","view":5,"section":4,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-4-row-02","view":5,"section":4,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-4-row-03","view":5,"section":4,"row":3,"width":240,"height":240}
+SCREEN {"id":"global-section-4-row-04","view":5,"section":4,"row":4,"width":240,"height":240}
+SCREEN {"id":"global-section-5-row-00","view":5,"section":5,"row":0,"width":240,"height":240}
+SCREEN {"id":"global-section-5-row-01","view":5,"section":5,"row":1,"width":240,"height":240}
+SCREEN {"id":"global-section-5-row-02","view":5,"section":5,"row":2,"width":240,"height":240}
+SCREEN {"id":"global-section-5-row-03","view":5,"section":5,"row":3,"width":240,"height":240}
+INVENTORY 172 ordinary/global states; other overlays/alternate engine coverage NOT_RUN
