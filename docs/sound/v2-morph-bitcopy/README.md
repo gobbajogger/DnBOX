@@ -29,3 +29,10 @@ qualification for this candidate yet. Earlier callback failures remain failures.
 Independent source/runner review accepted the narrow compiler route and freshly replayed the 24,576-frame test with zero differences/copy calls, verifying all staged hashes. No S1–S7 completion claim.
 
 Original complete 38-case sequence replay also passes: 114,196 frames, 120,289 state snapshots, 1,081 events, zero failures/runtime heap calls. This still does not qualify the complete app or deadline performance.
+
+Native observed prologue scratch for morph drops 44 to 28 bytes, saved 13 registers unchanged. With unchanged quad/physical-row frames, the observed three-frame prefix is 316 rather than 332 bytes. This excludes deeper callees, callers, interrupts and runtime/library frames and is not a full stack bound.
+
+## Frozen d9ae corpus and deadline characterization
+All 694 programs / 66,624,000 frames have zero differing or nonfinite words. Every one of 1,388 PCM lengths/hashes equals retained manifest68c7f2d. This is source/common-FX evidence, not independent app/FX/tail qualification.
+
+Same-host ABBA on eight programs remains FAIL in every run: A10/10, B3/3, B2/2, A1/1 wall/CPU misses. Each records6,000callbacks,768,000frames,benchmark tracer0 and0nonfinite. A is retained a803, B is d9ae; all bound inputs match except morph source. No samples, warmup or outliers were discarded. This does not establish a causal speedup or zero-xrun qualification. Raw traces remain preserved locally under the stopped trace-publication boundary.
