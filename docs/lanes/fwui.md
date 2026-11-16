@@ -28,3 +28,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 - Pan formatter changed from L64/C/R63 to L50/C/R50; engine values and audio panning unchanged. Production host regression checks all 128 values across MIX and 22 drum voices, 8925 assertions. Before: endpoint assertion fails; after: PASS. Battery icon and remaining F4 checks remain unqualified.
 - Exact e742 drum first-slice attempt failed before rendering: checked-in instrument.py requires absent firmware/src/app/ui_drum_voice.inc, while current renderer is inline draw_drum in ui.c. No107-defect count transferred from historical source. Next route: extend matching current production host fixtures; do not reconstruct candidate source merely to satisfy stale instrumentation.
 - Native resource baseline underway under independent test-and-merge ownership. Full gate, hardware, independent review and all-screen geometry NOT_RUN at this head.
+
+## Ordinary-page baseline inventory
+- Source4bacd2e7: actual production host rendered135 ordinary page states at240x240. Harness, SHA256 manifest and all135 PNGs committed. Upload authorization rejection resolved by verifying exact files and citing owner rule13; no all-screen qualification claimed. Alternate engine selections, popups, transients and geometry remain NOT_RUN.
+- First inventory compile used nonexistent ui_force; corrected by invalidating existing blit_hash/cv_tile_valid caches. Corrected run exit0,135screens.
+- Independent pan regression rerun PASS8925. Native baseline e742 Elite/Pro XIP free13464/13472B; pool margin172B versus512B requirement. Integ owns measured pool correction. No full Local PASS at lane head.
