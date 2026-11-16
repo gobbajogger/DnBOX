@@ -1,0 +1,17 @@
+{
+  "baseCommit": "95bb856fa3aa38fb02c4b9e74a9b4becdaf0430a",
+  "inputs": {
+    "firmware/src/app/ui.c": "aba4437b5f1cd17521ae57c234f2f6a18e2299092e2f43b72e6287d4ca963414",
+    "firmware/src/app/ui_drum_voice.inc": "a669c3c03c19204bd26eda0bf59b2f33f43a52da8beb718df8da24ee10b45353",
+    "tests/ui_defects/glyph_text/run.py": "998feda6a064b60990dbe6ae5a1a5c3cd837154ff05973a00fdbeaa6317300d3",
+    "tests/ui_defects/glyph_text/test_instrument.py": "95e3adf2134e96309fcb422a0f42b7cb3b937843332220cfbe752f7216cb3922",
+    "tests/host/fwui_glyph_cases.inc": "d37f260e94a5f875412dd07e5e6ad6f98ee8ae9d3c485057306bd94a1587aab5",
+    "tests/host/fwui_glyph_layout_test.c": "0204f6b2cc90e88336efb1741bb7838472b0b22f20109e2b17248c295be91c2b",
+    "tests/host/ui_list_unit_test.c": "a9c42011784f41265959bf0bda135057141c089cfef2c9c46af319dcca341199",
+    "tests/host/ui_list_unit_test.sh": "c3402f69788c60c0383919400a1d6337f7b294b875b99f6df8c6e9005d6161df"
+  },
+  "selectedUnitStates": 12,
+  "selectedUnitChecks": 70,
+  "selectedUnitPublishedLogSHA256": "a25b3c40f63b7fece9a8e13387969fa5cbfbff6debf1ce9307023d0e5792494b",
+  "logNormalization": "Execution workspace prefixes replaced with <workspace>; report retains original local log hashes separately."
+}

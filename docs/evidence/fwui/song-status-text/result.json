@@ -6,8 +6,13 @@
   "producer": "12 states / 86 checks PASS",
   "before": "Source assertion fails on prior explanatory literal; not an actual baseline runtime test failure.",
   "native": "NOT_RUN for changed literal. Prior exact combined ef70 native evidence does not qualify changed head.",
-  "logs": {
+  "originalLocalLogHashes": {
     "song-text-before.log": "6fcbe2bfed0416f4eca4a11d11de9125240eae0daebba30ff8583efcac3237ea",
     "song-text-after.log": "33ed3ddf4eb131f86d76021619361b4ed8336a9c76217e3b86680d696ffb2593"
-  }
+  },
+  "publishedLogHashes": {
+    "before.log": "6fcbe2bfed0416f4eca4a11d11de9125240eae0daebba30ff8583efcac3237ea",
+    "after.log": "6d734638b7d824e24e27243d14bdbd484dfb201617a58aac568dca0e7b8c9623"
+  },
+  "logNormalization": "Published after.log replaces the execution workspace prefix with <workspace>; original local byte hashes remain separately recorded. Test output and result are otherwise identical."
 }
