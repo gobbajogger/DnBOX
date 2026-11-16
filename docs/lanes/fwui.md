@@ -74,3 +74,17 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Global header correction
 - Actual global inventory exposed old header path on O_LIST:missing common R22 battery/style. Expanded production battery test first failed on GLOBAL. R22 header now also handles list overlays; corrected2905 assertions PASS. Other modal/help and full all-screen visual checks remain open.
 - Fresh172-state replay confirms only42 GLOBAL images changed;130 ordinary states pixel-identical. Both native builds pass XIP reserve:Elite2412/Pro2424B free; BSS96560; pool remains172-margin until integ fix composition. No full Local/Review acceptance.
+
+## Source-derived F7 navigation research
+- Global-header893 independently reviewed/replayed: all25 delta blobs verified, one-line runtime predicate change preserves pickup/help/clip exclusions, actual GLOBAL battery2905 checks PASS. Integ92bdd7e20fde6ad3fa161d85dcd6deb641e251c9 retains893 via normal second parent; combined native qualification pending, no consolidated merge.
+- Source-backed category proposal retained at docs/evidence/fwui/f7-proposal/. Machine check covers every SynthOne ID0..149 once in25 functional categories; max4 four-control pages/category. All48 sequencer fields explicitly retained (relative offsets, octave-boost and note-enable). SuperJ6 eight audited eight-control groups split into two pages each. Existing SOUND engine/preset and deep-list value editing must remain reachable. No page/input design implemented; owner yes/no pending.
+- Sound independently corrected global detuning and envelope keyboard-tracking grouping. Unit audit preserves upstream mistakes rather than propagating them: position136 repeats master makeup identifier but denotes wet makeup; delay cutoff tracking is a ratio despite native Hertz tag. These findings are metadata/provenance, not qualified formatter outputs. Remaining unit laws, live DSP binding, complete renders and full lane checks remain open.
+
+## Deep-list inventory extension
+- Actual SEL entry and list_move traversal capture500 selectable states across57 lists. Independent review requested upward rewind and complete row accounting; corrected harness asserts first selectable row, unique rows and expected count. Rerun PASS; all500 render bytes identical before/after coverage correction. Adds scoped source inventory, not complete F1/F2 qualification.
+- Eight archives publish400 native240x240 renders. Archive09 was denied twice as allegedly exceeding700KB despite measured fullJSON447932bytes; no further retry or workaround. Archive10 not attempted. Both retained locally; manifest explicitly marks publication incomplete and distinguishes all image statuses. No secrets or personal screenshots.
+- Help/confirmation/transients/alternate engines/hardware modes remain NOT_RUN. Audit also confirms old fallback topbar paths without four-level battery; targeted modal tests next, no F4 acceptance.
+
+## Help and confirmation battery repair
+- Actual held-SEL help route failed battery pixel checks on7ea37 unchanged893 runtime. Minimal common-header predicate now also permits help and confirmation while retaining pickup and hardware clip exclusions. Cached PART header rules and modal input behavior unchanged.
+- Expanded production battery suite PASS2941 checks: all prior views and GLOBAL, genuine held help/release, ask/cancel, four battery levels. Logs/hashes at docs/evidence/fwui/modal-header/. Exact combined native and independent replay pending; no fullF4 or lane PASS. Pickup/clip/message coverage remains open.

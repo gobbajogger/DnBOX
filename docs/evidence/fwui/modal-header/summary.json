@@ -1,0 +1,18 @@
+{
+  "baseCommit": "7ea37ab8cef8b911f47b08e251877eee69a39068",
+  "scope": "Shared R22 status header in real held-SEL help and confirmation. Pickup/hardware clip exclusions preserved.",
+  "before": "FAIL four-level battery pixels on actual held-SEL help route",
+  "after": "PASS 2941 checks, including help/confirmation four levels, help release, confirmation cancel",
+  "nativeCombined": "NOT_RUN",
+  "fullF4": "NOT_PASS: pickup/clip/message/all-screen coverage pending",
+  "files": {
+    "firmware/src/app/ui.c": {
+      "sha256": "0ac6ea1ba72581fe1b516b3a2b6a82af21d26f8bac9a980a09f821e567c60baf",
+      "gitBlob": "00b03e3dcf27e80b1f43da6ff6a396acc0fdea5e"
+    },
+    "tests/host/ui_battery_levels_test.c": {
+      "sha256": "4d8c8eb71e9e16eefeffa9c59e273ed07019187539abf1f87d2e210ad34bc045",
+      "gitBlob": "b978176135c30c821191bdc4940a18c79a39b35d"
+    }
+  }
+}

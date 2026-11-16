@@ -27,6 +27,22 @@ int main(void)
         host_battery_level=level;now_ms+=50;ui_frame();
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    /* Real held SEL help route; modal body must not remove status battery. */
+    setup(V_HOME,PART_303A);held_btn=1u<<B_SEL;input();
+    now_ms+=HELP_HOLD+1;input();CHECK(ui.help==B_SEL+1);
+    for(int level=0;level<4;level++) {
+        host_battery_level=level;now_ms+=50;ui_frame();
+        CHECK(ui.help==B_SEL+1);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+    }
+    held_btn=0;input();CHECK(!ui.help);
+    setup(V_HOME,PART_303A);ask(ACT_CLEAR_PART,PART_303A,"CLEAR PART?","TEST ONLY");
+    CHECK(ui.overlay==O_ASK);
+    for(int level=0;level<4;level++) {
+        host_battery_level=level;now_ms+=50;ui_frame();CHECK(ui.overlay==O_ASK);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+    }
+    button_tap(B_HOME);CHECK(ui.overlay==O_NONE);
     host_battery_level=3;
     printf("PASS four battery levels and header invalidation: %u checks\n",checks);
     return 0;

@@ -1,0 +1,16 @@
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.274s
+
+OK
+PASS missing-note negative control
+PASS stale identity tag negative control
+coverage: redraws=1024/1024 audible=31 drum_masks=2047/2047 max_voices=1/2
+PASS stress coverage: blocks=1024 frames=524288 Chicago=1 Miami=2 redraws=1024 nonzero=1048441 factory=0 FX=0; host transport substitutes, no DMA/xrun proof
+Host audio half peak 12.556395 ms; margin -0.946418 ms; host timing limits FAIL; target NOT_RUN
+coverage: redraws=1024/1024 audible=31 drum_masks=2047/2047 max_voices=1/2
+PASS stress coverage: blocks=1024 frames=524288 Chicago=1 Miami=2 redraws=1024 nonzero=1048439 factory=29 FX=1; host transport substitutes, no DMA/xrun proof
+Host audio half peak 27.808022 ms; margin -16.198045 ms; host timing limits FAIL; target NOT_RUN
+coverage: redraws=1024/1024 audible=31 drum_masks=2047/2047 max_voices=1/2
+PASS stress coverage: blocks=1024 frames=524288 Chicago=1 Miami=2 redraws=1024 nonzero=1048440 factory=18 FX=6; host transport substitutes, no DMA/xrun proof
+Host audio half peak 15.147213 ms; margin -3.537236 ms; host timing limits FAIL; target NOT_RUN

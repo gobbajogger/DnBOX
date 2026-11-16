@@ -1,0 +1,72 @@
+{
+  "source_base": "badcc0cdcff7744d27c7f2e7f1ffeca84a5c2ab2",
+  "changed_fixture_sha256": {
+    "tests/host/audio_stress_test.c": "f1c28e22951e7b2238e8454eaffa897282d363ff616dcf04740570f8e0d5e9cd",
+    "tests/host/audio_stress_test.sh": "d5073678fb1b3033687e311f7bf43c508b0a990eb2ffccfa85cdd52b6597907a"
+  },
+  "scope": "Producer admission-verified host-only stress; not exact native/device, final engines or full gate",
+  "negative_controls": [
+    "missing external note rejected",
+    "stale identity tag rejected"
+  ],
+  "actual_macro_admission": "Both rendered kinds observed (mask3), exact Chicago/Miami macro memcmp + runtime preset indices before timing",
+  "modes": {
+    "exact-software-FMA": {
+      "workloads": {
+        "plain": {
+          "pcm_sha256": "20f96da9187a217865331082f4e62e17b4ee0901477d82bd22e66314266fb905",
+          "render_cpu_peak_ns": 12556395.0,
+          "cpu_deadline_misses": 1,
+          "wall_deadline_misses": 1,
+          "stricter_host_margins": false
+        },
+        "chorus": {
+          "pcm_sha256": "f61ec7444a6d13a17442e46fc426fe409d93cbc5aaa801e05901a6730fa5de10",
+          "render_cpu_peak_ns": 27808022.0,
+          "cpu_deadline_misses": 2,
+          "wall_deadline_misses": 2,
+          "stricter_host_margins": false
+        },
+        "peaking": {
+          "pcm_sha256": "c644be95778af946291a58c732a7e00209b26a1bec04287ab38304476594f1d0",
+          "render_cpu_peak_ns": 15147213.0,
+          "cpu_deadline_misses": 1,
+          "wall_deadline_misses": 1,
+          "stricter_host_margins": false
+        }
+      },
+      "all_three_distinct_PCM": true
+    },
+    "existing-native-arithmetic": {
+      "workloads": {
+        "plain": {
+          "pcm_sha256": "4b2a1c4702cdf20ef4e5ff86c1832acc14a87fb46f0c45c6b889f04093bb28ff",
+          "render_cpu_peak_ns": 13437634.0,
+          "cpu_deadline_misses": 1,
+          "wall_deadline_misses": 1,
+          "stricter_host_margins": false
+        },
+        "chorus": {
+          "pcm_sha256": "4fbbc12e139aecd8cbe8e72d2ae27dc9b9dd677fc544304fdd5f8dbbc9a9d876",
+          "render_cpu_peak_ns": 9013526.0,
+          "cpu_deadline_misses": 0,
+          "wall_deadline_misses": 0,
+          "stricter_host_margins": false
+        },
+        "peaking": {
+          "pcm_sha256": "2d4ded05ae6f6090cab97a8973db4f77cb3bd37c26c49aeba1f27ccf50edfad9",
+          "render_cpu_peak_ns": 7329666.0,
+          "cpu_deadline_misses": 0,
+          "wall_deadline_misses": 0,
+          "stricter_host_margins": false
+        }
+      },
+      "all_three_distinct_PCM": true
+    }
+  },
+  "post_run_normalization": "Removed trailing whitespace after one shell echo only; C fixture and all executed commands unchanged.",
+  "published_fixture_sha256": {
+    "tests/host/audio_stress_test.c": "f1c28e22951e7b2238e8454eaffa897282d363ff616dcf04740570f8e0d5e9cd",
+    "tests/host/audio_stress_test.sh": "7b42bb9ca3f31dba6a8b46d8631656b6da6e073991ccf5f19cc9dc0c885bc09e"
+  }
+}

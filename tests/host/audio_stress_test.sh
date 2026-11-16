@@ -33,6 +33,11 @@ status=0
 X0X_STRESS_DROP_ONE=1 "$OUT/stress" "$OUT/negative.csv" "$OUT/negative.s32" 64 0 0 >"$OUT/negative.log" 2>&1 || status=$?
 if [ "$status" != 3 ]; then cat "$OUT/negative.log"; echo 'FAIL: missing-note negative control'; exit 1; fi
 echo 'PASS missing-note negative control'
+status=0
+X0X_STRESS_SKIP_TAG_REFRESH=1 "$OUT/stress" "$OUT/identity-negative.csv" "$OUT/identity-negative.s32" 64 29 1 >"$OUT/identity-negative.log" 2>&1 || status=$?
+if [ "$status" != 1 ]; then cat "$OUT/identity-negative.log"; echo 'FAIL: stale identity tag negative control'; exit 1; fi
+grep -q 'engine_bass_sound_validate' "$OUT/identity-negative.log"
+echo 'PASS stale identity tag negative control'
 for workload in plain chorus peaking; do
     case "$workload" in plain) factory=0; choice=0 ;; chorus) factory=29; choice=1 ;; peaking) factory=18; choice=6 ;; esac
     mkdir -p "$OUT/$workload"
