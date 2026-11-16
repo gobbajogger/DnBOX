@@ -13,6 +13,16 @@ import subprocess
 import shutil
 
 
+def stage_runtime(closure, runtime):
+    # Validate the complete overlay before replacing any retained fixture file.
+    for path in runtime.rglob('*'):
+        relative = path.relative_to(runtime)
+        if any(part in ('tests', 'oracle', 'sequence-upstream') for part in relative.parts) or path.name.startswith('full_oracle'):
+            raise ValueError('Protected oracle/test path: ' + str(relative))
+    for group in ('scheduler', 'experiment', 'controls'):
+        shutil.copytree(runtime/group, closure/group, dirs_exist_ok=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-build', type=pathlib.Path, required=True)
@@ -48,8 +58,7 @@ def main():
         raise ValueError('Use a fresh output directory for runtime staging')
     shutil.copytree(original_closure, closure)
     runtime = repo/'firmware/src/dsp/synthone'
-    for group in ('scheduler', 'experiment', 'controls'):
-        shutil.copytree(runtime/group, closure/group, dirs_exist_ok=True)
+    stage_runtime(closure, runtime)
     verified = {path.resolve() for path in closure.rglob('*') if path.is_file()}
     tested = {str(path.relative_to(closure)): hashlib.sha256(path.read_bytes()).hexdigest()
               for path in sorted(verified)}

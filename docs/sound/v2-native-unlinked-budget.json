@@ -1,0 +1,254 @@
+{
+  "scope": "Object allocation sums only; no dead-strip/combined firmware link or exact flash increment",
+  "runtime_source": "e955baa04b0343384cd9ff101d6a41f6f7771fd8",
+  "native_owner_bytes": 8996,
+  "runtime_objects": [
+    {
+      "name": "source_scheduler",
+      "object_sha256": "2f5753a48a8648d3bb06c25e30f78ce623dfefd098ecc510d67d8d39d2c9e7fb",
+      "executable": 3748,
+      "readonly": 1200,
+      "writable": 0,
+      "bss": 8
+    },
+    {
+      "name": "checked_domain",
+      "object_sha256": "4a895965d12be3b47eecbcfa61e00e2bbe4f136efa24eb1f4e3db5ab3b5f7653",
+      "executable": 368,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "compact_reader",
+      "object_sha256": "ef3ef1900e1f9d8baa7c02b080220f753d6aa7173a76177b8ee598bf5e8fe7bf",
+      "executable": 2796,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "compact_morph",
+      "object_sha256": "8965053702463c284db412588f34a8853ad63f20ecd478b281920a4180ca6db3",
+      "executable": 658,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "compact_note",
+      "object_sha256": "a0c078ee32dbc0e0616331bd034c55ea2fec8482950bdfba9a572aa986849024",
+      "executable": 1878,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "direct_reader",
+      "object_sha256": "92c47d4b060b42225cb9d86c349af68593e7ca4317bb89db3e094eceee9f5ff5",
+      "executable": 496,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "runtime_morph",
+      "object_sha256": "78551274599e685dc453b0559eaa16a6a7e585a54789dae888e3f350d610307c",
+      "executable": 706,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "runtime_note",
+      "object_sha256": "153f6d9a6319158c83e84e2327a00bea9cc7b2b0a98b12f7160c38feeb25016d",
+      "executable": 1878,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "scheduler",
+      "object_sha256": "f9a018f0fba6fa7b56b8997202c74288127e1e3bec504a3bae33cde00867d642",
+      "executable": 7120,
+      "readonly": 1313,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "ports",
+      "object_sha256": "1f06b4a6459588cc6c88ea2a37d08a8e1e7514a2182fa06da2b9254f185d789f",
+      "executable": 906,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "parameter_map",
+      "object_sha256": "7e05b789fa3d3cf88c8333e9a35597c94e5d9698488b8f8369c82d39869e3b99",
+      "executable": 0,
+      "readonly": 196,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "voice",
+      "object_sha256": "b7d42ca3d2c4243ac8816c485a39ac175f965e4410b09d74bf7492f7777ec32f",
+      "executable": 2716,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "d64",
+      "object_sha256": "9fd170ebd3b0a03c20adee200acb98e645053ac3e46edcb8782c06e497f3adcd",
+      "executable": 3772,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "exact",
+      "object_sha256": "7b9b2aeb35740d4c8838a873bf96c37ad253e18ad5c0461f140f3c812ad01d53",
+      "executable": 2728,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "pool_keep",
+      "object_sha256": "f5bd6178f370d388f3e0db784ff71d658cdb598484926926573aa6001fe610e4",
+      "executable": 92,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "base",
+      "object_sha256": "6ec6545f6eaa080a7a19402a9441c768d7f3dd8fae80bd6ab223fcdfc6fc5952",
+      "executable": 306,
+      "readonly": 521,
+      "writable": 228,
+      "bss": 4
+    },
+    {
+      "name": "ftbl",
+      "object_sha256": "528617d8683f8f4f5823e03b4e8719f7b97225cfb929a28452ab59a447188d0c",
+      "executable": 84,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    },
+    {
+      "name": "adsr",
+      "object_sha256": "a93c8b318d1005fcb3bb55099e45c549071aaf5be75eac02e544656da91dc719",
+      "executable": 378,
+      "readonly": 0,
+      "writable": 48,
+      "bss": 4
+    },
+    {
+      "name": "crossfade",
+      "object_sha256": "fa175455dbf281a960f94940b74568edc8d05df72866417502ef7d3b5e108877",
+      "executable": 110,
+      "readonly": 0,
+      "writable": 4,
+      "bss": 4
+    },
+    {
+      "name": "osc",
+      "object_sha256": "efc55edf1a9803156770cc4aba298d92d62f5f76c668c32d600c0918c0f1e314",
+      "executable": 356,
+      "readonly": 0,
+      "writable": 24,
+      "bss": 4
+    },
+    {
+      "name": "fosc",
+      "object_sha256": "9bb0cd3b53c183360ded351ecb92e29fd3f4d832c4e667f4c06b48eefcb6ca8e",
+      "executable": 306,
+      "readonly": 0,
+      "writable": 36,
+      "bss": 4
+    },
+    {
+      "name": "noise",
+      "object_sha256": "b2e673bb9b8a6d4c1ca0a26904ea8dd8a2c4a9ef39c7df07c42e34ffcf06de08",
+      "executable": 128,
+      "readonly": 0,
+      "writable": 4,
+      "bss": 4
+    },
+    {
+      "name": "moogladder",
+      "object_sha256": "1253c713435dbd1d155caee810c7bbe82b8ee3d5a1cb1c49c5a6c3a0bf8a1baf",
+      "executable": 382,
+      "readonly": 0,
+      "writable": 64,
+      "bss": 4
+    },
+    {
+      "name": "butbp",
+      "object_sha256": "0354520f335964b7be156da17b7b60584557a746a016361e2f8f10711da94f13",
+      "executable": 248,
+      "readonly": 0,
+      "writable": 64,
+      "bss": 4
+    },
+    {
+      "name": "buthp",
+      "object_sha256": "d213e111bdf358b2fe4d1c58bd141b577d598ba5750d0d9c590c4c2e7799d219",
+      "executable": 218,
+      "readonly": 0,
+      "writable": 52,
+      "bss": 4
+    },
+    {
+      "name": "port",
+      "object_sha256": "150ea2a1faf9f28f95c4e140206278a466bdccd7eab1c76ad3bae13b77f2a806",
+      "executable": 188,
+      "readonly": 0,
+      "writable": 28,
+      "bss": 4
+    },
+    {
+      "name": "phasor",
+      "object_sha256": "a3450d0f73e5d2fba242db6825ce7cce4aa13933f29f79c7d7948e556aa4cb7d",
+      "executable": 150,
+      "readonly": 0,
+      "writable": 16,
+      "bss": 4
+    },
+    {
+      "name": "morph",
+      "object_sha256": "e99cd07ee89cbb89e19c52d9fd576c259cc103a1acd1dfc96ee9a61ec299960d",
+      "executable": 658,
+      "readonly": 0,
+      "writable": 48,
+      "bss": 4
+    },
+    {
+      "name": "float_math",
+      "object_sha256": "81d95908b3672289b2c3fd75aed98de07226c6a9ce6254fb06973672a80a1835",
+      "executable": 32,
+      "readonly": 0,
+      "writable": 0,
+      "bss": 0
+    }
+  ],
+  "unlinked_total": {
+    "executable": 33406,
+    "readonly": 3230,
+    "writable": 616,
+    "bss": 56
+  },
+  "compact_pack_bytes": 165292,
+  "not_included": [
+    "C ABI wrapper",
+    "sine/frequency metadata",
+    "post-note FX",
+    "factory bindings",
+    "relocations/alignment and firmware composition"
+  ],
+  "combined_fit": "NOT_RUN"
+}

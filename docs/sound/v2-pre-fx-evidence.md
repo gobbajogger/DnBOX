@@ -69,3 +69,13 @@ Final fresh command manifest SHA256: `c653fcd2bd45410691ae49a27150125cb6a1614002
 Host summary unchanged:576000 frames,0 differing channel words,529280 nonzero left
 frames,peak0.628623188,0 heap calls during render. This adds a caller seam, not a
 firmware link, timing, factory or all-engine memory PASS.
+
+Independent e955 replay:12scenes576000frames0diff/0renderheap. Exact output bytes
+compared with the reviewer's independent5e541 pre-alias render also match (cmp
+exit0), independently checking before/after audio rather than only two wrappers
+sharing the new runtime. No full application/FX/device qualification implied.
+
+Review hardening: staging rejects runtime paths containing tests, oracle or
+sequence-upstream and full_oracle-prefixed filenames before copying anything.
+A regression attempting3 such replacements failed before the guard and now
+passes with retained fixture bytes unchanged; all4 runner tests pass.

@@ -87,3 +87,12 @@ Integ is separately auditing reuse of the per-part Chicago4252-byte FX owner
 with the3720-byte backend union (7972 total). Even if that passes its retirement
 and tail tests, this8996-byte owner still exceeds it by1024 bytes per part,
 before post-FX. No speculative reuse is credited toward S6.
+
+## Flash remains a separate blocker
+
+Current29 native objects before executable linking/dead-strip total33406B code,
+3230B readonly,616B writable,56B BSS, excluding C ABI, sine/frequency metadata,
+postFX and factory routing. Add165292B compact waveform pack. See exact per-object
+hashes and allocation sums in docs/sound/v2-native-unlinked-budget.json.
+Integ reports exact current app XIP free13464B Elite/13472B Pro; no fit credit
+from protected map changes or external/user sample slots is assumed.

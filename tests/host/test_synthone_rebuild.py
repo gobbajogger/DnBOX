@@ -73,4 +73,28 @@ class RebuildTest(unittest.TestCase):
             self.assertNotEqual(result.returncode,0)
             self.assertIn('Expected exactly one adapter harness',result.stderr)
 
+    def test_runtime_overlay_cannot_replace_independent_oracle(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('renderer_runner', RUNNER)
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            runtime, closure = root/'runtime', root/'closure'
+            for group in ('scheduler', 'experiment', 'controls'):
+                (runtime/group).mkdir(parents=True)
+                (closure/group).mkdir(parents=True)
+            for name in ('oracle/state.hpp', 'tests/source_scheduler_test.cpp', 'full_oracle.cpp'):
+                with self.subTest(path=name):
+                    bad = runtime/'scheduler'/name
+                    good = closure/'scheduler'/name
+                    bad.parent.mkdir(parents=True, exist_ok=True)
+                    good.parent.mkdir(parents=True, exist_ok=True)
+                    bad.write_text('self agreeing replacement')
+                    good.write_text('independent retained input')
+                    with self.assertRaisesRegex(ValueError, 'Protected oracle/test path'):
+                        runner.stage_runtime(closure, runtime)
+                    self.assertEqual(good.read_text(), 'independent retained input')
+                    bad.unlink()
+
 if __name__ == '__main__': unittest.main()

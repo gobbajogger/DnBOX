@@ -54,3 +54,5 @@ Schema checkpoint: recovered source-derived SuperJ664 slots/218 native IDs and S
 C ABI checkpoint: cold caller-owned init/retire plus physical parameters/note/reset/render, with span/alignment/alias guards. Expanded actual audio test covers C/C++/source equality across12 scenes576000 frames and invalid bounds; native wrapper compile PASS. Integ notified; no pool allocation or app activation.
 
 Memory reuse checkpoint: serialized held-note snapshot now aliases owner, native10532→8996 bytes (1536saved/part). Full original suite38cases354907688checks/114196frames0failures; C/C++/oracle576000frames0differences; all29 native units compile. Independent review pending, still no combined fit. Source manifest retains prechange hash. Next: coordinate FX lifetime reuse and further representation savings, no musical feature cuts.
+
+Independent reviewer reran e955 and compared output bytes to prior5e541: exact match. Overlay oracle/test protection regression added,4 runner tests PASS. Native29-object unlinked code33406+readonly3230+compact165292 exceeds current13.4KB XIP headroom; flash remains a separate blocker, no protected-map/user-slot workaround claimed.
