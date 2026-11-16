@@ -1,0 +1,11 @@
+test_duplicate_definition_rejected (test_instrument.InstrumentTests.test_duplicate_definition_rejected) ... ok
+test_exact_observation_only (test_instrument.InstrumentTests.test_exact_observation_only) ... ok
+test_missing_branch_rejected (test_instrument.InstrumentTests.test_missing_branch_rejected) ... ok
+test_missing_function_rejected (test_instrument.InstrumentTests.test_missing_function_rejected) ... ok
+test_missing_include_rejected (test_instrument.InstrumentTests.test_missing_include_rejected) ... ok
+test_similar_outside_branch_not_counted (test_instrument.InstrumentTests.test_similar_outside_branch_not_counted) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 10.415s
+
+OK
