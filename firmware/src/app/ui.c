@@ -5304,10 +5304,12 @@ static UI_DRAW void header_pattern_cue(int x,int part)
 typedef struct {
     const char *name;
     uint16_t colours[5], col;
-    uint8_t light, part, page, pages, phase, rec, save, night;
+    uint8_t light, part, page, pages, phase, rec, save, night, sel;
 } part_header_snapshot_t;
 static part_header_snapshot_t part_header_snapshot;
 
+static void dv_full_title(char *t, int part, int v);
+static void dv_header_battery(int x, int y);
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5333,7 +5335,7 @@ static UI_DRAW void draw_header(void)
             (bidx() ? "MIAMI B" : "MIAMI A") : (bidx() ? "CHICAGO B" : "CHICAGO A");
         memcpy(snapshot.colours, pal, sizeof pal);
         snapshot.col = matrix_col(); snapshot.light = ui_theme_light;
-        snapshot.part = ui.part; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
+        snapshot.part = ui.part; snapshot.sel = is_drum()?(uint8_t)ui.sel[ui.part]:0; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
         snapshot.phase = seq.metro_view; snapshot.rec = ui.rec; snapshot.save = (uint8_t)ss;
         snapshot.night = (uint8_t)(matrix_three_rows() || X0X_ORIGINAL_SYNTH);
         if (part_header_snapshot_valid && blit_hash[0] && cv_tile_valid[0] &&
@@ -5376,32 +5378,50 @@ static UI_DRAW void draw_header(void)
 #endif
         ) {
         const char *name=part_display(ui.part);
+        char drum_title[24];
         if(is_303()) {
             name=engine_bass_bank(bidx())==ORIGINAL_SOUND_JUNO?(bidx()?"JUNO B":"JUNO A"):engine_bass_bank(bidx())==ORIGINAL_SOUND_DRONE?(bidx()?"DRONE B":"DRONE A"):
                 engine_bass_bank(bidx())==ORIGINAL_SOUND_MIAMI?(bidx()?"MIAMI B":"MIAMI A"):
                 (bidx()?"CHICAGO B":"CHICAGO A");
         }
+        if(is_drum()) {
+            dv_full_title(drum_title, ui.part, ui.sel[ui.part]);
+            name = drum_title;
+        }
         int night=matrix_three_rows() || X0X_ORIGINAL_SYNTH;
         if(night) sound_slab(0,0,240,20,0);
-        cv_text(7,2,&FONT_B,name,night?SOUND_GREEN:matrix_col());
+        /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
+        cv_text(4,2,&FONT_B,name,is_drum()?part_col():(night?SOUND_GREEN:matrix_col()));
         if (division_pad_owner()) {
-            int dx = 7 + tw(&FONT_B, name) + 8;
+            int dx = 4 + tw(&FONT_B, name) + 8;
             dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
             cv_text(dx, 6, &FONT_T, division_pad_label() + 11, C_AMB);
         }
-        {   /* Screen banks, not musical divisions or the selected control row. */
-            int banks = (pg.n + 3) / 4;
-            for (int i = 0; i < banks; i++) {
-                int dx = 232 - (banks - 1 - i) * 10;
-                dot(dx, 9, 2, night?SOUND_AMBER:C_HI);
-                if (i != cur_page() / 4) dot(dx, 9, 1, night?SOUND_FACE:C_BLACK);
-            }
+        if(!division_pad_owner()) {
+            int part = ui.part, cue = seq_cue_of(&seq, part);
+            int pending=cue>=0 && cue!=seq.ppat[part] && !seq.song_on;
+            ui_position_badge(seq.song_on?UI_G_SONG:UI_G_PATTERN,
+                (seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[part])+1,
+                pending?cue+1:0,seq.song_on?(seq.song_rec?RGB(255,90,80):C_AMB):C_WHITE,
+                (ui.frame & 16u)?C_WHITE:C_GRAY);
+            header_pattern_cue(132,ui.part);
         }
-        if(!division_pad_owner()) header_pattern_cue(132,ui.part);   /* #807 cue picture */
-        { uint8_t phase = seq.metro_view; /* #688/#788: audio-owned beat phase */
-          play_icon(175, 4, !phase ? C_DIM : phase <= 4u ? C_WHITE : C_HI);
+        {   /* tempo, same readout as the shared header */
+            char b[8];
+            static float avg; static int shown;
+            float tmp = seq_tempo(&seq);
+            if (!seq.ext || avg < 1.0f) avg = tmp;
+            avg += (tmp - avg) * 0.03f;
+            if (!seq.ext || fm_fabsf(avg - (float)shown) > 0.6f)
+                shown = (int)(avg + 0.5f);
+            put_i(b, shown);
+            text_r(200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);
         }
-        if(ui.rec) dot(190,9,3,RGB(255,50,50));
+        { uint8_t phase = seq.metro_view;
+          play_icon(168, 4, !phase ? C_DIM : phase <= 4u ? C_WHITE : C_HI);
+        }
+        if(ui.rec) dot(206,9,3,RGB(255,50,50));
+        dv_header_battery(219, 5);
         if(ss!=SAVE_SAVED) dot(237,3,2,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
         cv_commit_header();
         if (cacheable) { part_header_snapshot = snapshot; part_header_snapshot_valid = 1; }
@@ -5737,6 +5757,7 @@ static UI_DRAW void matrix_knob_caption(char *text, int page)
     }
 }
 
+static UI_DRAW void draw_drum_voice(int band);
 static UI_DRAW void draw_part_sound(int band)
 {
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
@@ -6881,7 +6902,9 @@ static UI_DRAW void draw_main(void)
             draw_song(band);
         else if (ui.view == V_PERF)
             draw_perf(band);
-        else if (ui.view == V_PART && (is_drum() || is_303()))
+        else if (ui.view == V_PART && is_drum())
+            draw_drum_voice(band);
+        else if (ui.view == V_PART && is_303())
             draw_part_sound(band);
         else if (is_drum())
             draw_drum(band);
@@ -8197,6 +8220,8 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     }
 }
 
+#include "ui_drum_voice.inc"
+
 static uint32_t knobs_sig(void)
 {
     uint32_t h = 2166136261u, i;
@@ -8337,7 +8362,10 @@ static UI_DRAW void draw_knobs(void)
     if (ui.view == V_PART && (is_drum() || is_303())) {
         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
         cv_begin(240, KNOB_H, C_BLACK);
-        if (ui.overlay==O_NONE && !ui.help) draw_part_sound(2);
+        if (ui.overlay==O_NONE && !ui.help) {
+            if (is_drum()) draw_drum_voice(2);
+            else draw_part_sound(2);
+        }
         cv_commit_knobs(3);
         last_sig = 0;
         return;
