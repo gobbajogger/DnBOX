@@ -1,0 +1,6 @@
+Path-only sanitized rawstdout/stderr; originalSHA256 36ec21513c72ab5882db1402178f5b83e40e47a27d46de3c37137b09c463e403
+COMMAND ["sh", "tests/host/fxbus_coef_cache_test.sh"]
++ cc -O2 -std=c99 -fno-fast-math -ffp-contract=off -Wall -Wextra -Werror -Ifirmware/src -Ifirmware/src/dsp -IPROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache -Dfxbus_init=old_fxbus_init -Dfxbus_set=old_fxbus_set -Dfxbus_set_bpm=old_fxbus_set_bpm -Dfxbus_get=old_fxbus_get -Dfxbus_param=old_fxbus_param -Dfxbus_nparams=old_fxbus_nparams -Dfxbus_param_si=old_fxbus_param_si -Dfxbus_process=old_fxbus_process -Dfxbus_process_st=old_fxbus_process_st -c PROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache/wrapper.c -o PROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache/reference.o
++ cc -O2 -std=c99 -fno-fast-math -ffp-contract=off -Wall -Wextra -Werror -Ifirmware/src -Ifirmware/src/dsp -IPROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache tests/host/fxbus_coef_cache_test.c firmware/src/dsp/fxbus.c PROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache/reference.o -lm -o PROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache/test
++ PROJECT_WORKSPACE/consolidation-20261116/scratch/fxbus-cache/test
+PASS fxbus coefficient cache: 12288 blocks, 2124567 samples, 24608 states, sizeof=18320 (unchanged)

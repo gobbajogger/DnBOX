@@ -1,0 +1,69 @@
+{
+  "exactCommit": "e742be7bd0d01323c899de6e156f40b85ee451db",
+  "exactTree": "2a8b9a18187655c874a715d2b3b7cc05f81fc8b7",
+  "firstAttempt": true,
+  "fixtures": "historic-a06-restoration-receipt.json",
+  "fullGate": false,
+  "results": [
+    {
+      "case": "chicago-cache",
+      "command": [
+        "sh",
+        "tests/host/chicago_coef_cache_test.sh"
+      ],
+      "exit": 0,
+      "seconds": 3.7368901259978884,
+      "log": "logs/chicago-cache-attempt-01.log"
+    },
+    {
+      "case": "miami-cache",
+      "command": [
+        "sh",
+        "tests/host/run_miami_coef_cache.sh"
+      ],
+      "exit": 0,
+      "seconds": 6.918978012003208,
+      "log": "logs/miami-cache-attempt-01.log"
+    },
+    {
+      "case": "fxbus-cache",
+      "command": [
+        "sh",
+        "tests/host/fxbus_coef_cache_test.sh"
+      ],
+      "exit": 0,
+      "seconds": 1.8852053420014272,
+      "log": "logs/fxbus-cache-attempt-01.log"
+    },
+    {
+      "case": "chicago-peaking-cache",
+      "command": [
+        "sh",
+        "tests/host/chicago_peaking_coef_cache_test.sh"
+      ],
+      "exit": 0,
+      "seconds": 0.9746683769990341,
+      "log": "logs/chicago-peaking-cache-attempt-01.log"
+    },
+    {
+      "case": "chicago-ensemble-hoist",
+      "command": [
+        "python3",
+        "tests/host/run_chicago_ens_hoist.py"
+      ],
+      "exit": 0,
+      "seconds": 5.456650152002112,
+      "log": "logs/chicago-ensemble-hoist-attempt-01.log"
+    },
+    {
+      "case": "chicago-modulation-hoist",
+      "command": [
+        "python3",
+        "tests/host/run_chicago_modulation_hoist.py"
+      ],
+      "exit": 0,
+      "seconds": 3.7311423550017935,
+      "log": "logs/chicago-modulation-hoist-attempt-01.log"
+    }
+  ]
+}

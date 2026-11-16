@@ -1,6 +1,6 @@
 # DnBOX consolidated state
 
-Updated: 2026-11-16 09:47 UTC. Accountable owner: Integration & Release. This is the single living integration reference. Lane handoffs are immutable evidence, not alternative completion claims. **Inventory/candidate preparation only: no integrated composition, qualified release, merge, branch deletion, repository rename or deployment has occurred in this consolidation.**
+Updated: 2026-11-16 10:27 UTC. Accountable owner: Integration & Release. This is the single living integration reference. Lane handoffs are immutable evidence, not alternative completion claims. **Inventory/candidate preparation only: no integrated composition, qualified release, merge, branch deletion, repository rename or deployment has occurred in this consolidation.**
 
 ## Current decision and next checkpoint
 
@@ -74,3 +74,23 @@ Firmware candidate1 is a single-parent WIP composition on8a: all5,353base blobs 
 ## First WIP corrective record
 
 Firmware first public candidate commit `e30f9a3175a839f2bcacf0034328877383fc17fc` was read back at09:45UTC on integration/dnbox-consolidated. Independent source review confirms all14resource overlays and21gate files match intended bytes and no new secret/internal-agent markers; exact-composition acceptance is pending. Four inventory CSVs were unintentionally newline-normalized CRLF→LF by text upload: rows were retained but the first remote tree did not match the local byte manifest. This corrective update restores original CSV bytes and corrects two documentation references; no product source, tests, thresholds or failure expectations are changed. The first commit and original failed logs are retained. Source code acceptance is not native/UI/audio acceptance.
+
+## Current Integration candidate, 10:27UTC
+
+Canonical targets are integration/dnbox-consolidated: firmwaree742be7bd0d01323c899de6e156f40b85ee451db, website9165adb92fcdaab756c4e59e3d4a8ee22437ca5a. Leadrefs are retained inventory snapshots, not alternative active mergewriters. This source WIP is on lane/integ-composition, a single-parent candidate offe742; it is NOT landed into either canonical target.
+
+| Active lane | Exact pushed source at capture | In this candidate / merge status |
+|---|---|---|
+| Sound | sound/engine-rebuild11a2f97bec7ad300d0acc02721175194e5a82f40 |293new/imported files copied byte-exact for preservation; no sharedapp/DSPgraph activation. Not a merged/qualified engine. |
+| FirmwareUI | fix/r22-drum-glyphs9da1c410d883f486071004590774d67a290fdd54 |Not composed yet; R014/R026/resource UI3way must preserve both. #951 writer explicitlyFirmwareUI, previous37c21file gate retained here. |
+| Website | feature/website-r22 93b6f0991147be97c89b82e5039267c546608469, draft#133 |Not in firmware/source preview; retains separateowned work andrequiresRemote/sharedmanifest composition. |
+| Remote | cursor/remote-parameter-lane-bdb9, lastverified3f22e000ad17456318cde997067c7fd45dd7e3b3 |New FunkyBeats/sharedtokens WIP awaiting exactpush receipt. Existing structuralbrowser denialNOT_RUN remains. |
+| Integration | canonicale742/9165; thisunqualifiedlaneWIP |No PRmerge/deletion/rename/deployment; independenttest-and-merge owner consumes frozen candidates, no competingrefwriter. |
+
+Actual first-run e742cache evidence now retained: Chicago/Miami/fxbus/peaking/ensemble/modulation all6exit0 after authentic historicfixture recovery. These are component bit/state differential checks, not final whole-product audio/timing. Exact e45eb482 test blob3610e9dc5cc0967541c08a3abdf4e4fab0256b21 is copied here, andactual memory-full/settings/hash-collision preflight exited0. Its retired b348race parent was NOT merged/copied. R014ef14325f wasalreadyancestor ofe742, so no duplicated merge occurred.
+
+LSan remainsFAIL: the unchanged compact-program test passed796checks thenfatal; an independent no-allocation ASan+UBSan control alsoexit1 with thread-attachEPERM. No suppression, ptrace/security bypass or rewritten expectation. A genuinely qualified untraced executor must run unchanged leakchecks. Source test code anddiagnostic logs are retained. Originalsanitizerfailureisnotcalledresolved.
+
+FINISH-LINE.json/.md is the source-linked checklist:17requiredoutcome rows, finishLineSatisfied=false. ExactOPEN-ITEMS source remainsnotrecoveredafterLibrarytitle+localtargeted checks; archive/repo/content recoverycontinues. Thisexplicitcoveragegap preventsall-projectcomplete claims. Fullsuite/browser/emulator/audio/timing/finalnewengine/nativeallpage qualification stillunfulfilled. Stockmemory only; noPSRAM.
+
+R020fiveoriginalselectedzones/previews are recovered exactly andsource-staged with4assetselftestPASS+wrongzoneFAIL; actualold/private-audio routes returned404inrealHTTPRED. PublicproviderGREEN andactualbrowser/audio are notdone. R045latercapacity-zerohelper correction isrecoverable; no currentledger/runtime vote/receiver execution isasserted. Both areopen, notplaceholderComplete.

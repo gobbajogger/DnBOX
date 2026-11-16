@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "scope": "Reviewed isolated full-reference source only; NOT complete ports or firmware integration",
+  "review": {
+    "synthone_candidate_sha256": "9cbaece955a15091e3efe9684731b7c1f18146040292d20135357f8d97f88a6d",
+    "affected_review_sha256": "611cb084a9380da0d115f99eb3ef4e3dd1039c5d624f586e3aba5511bdcbec43",
+    "sampler_candidate_sha256": "8d6e518aa956a17bfa3acead0ef1e9e720c65c7ea92cfd93befead254253f57b",
+    "initial_review_sha256": "a6936ad43fb45d4f44568625367ac380287ebba2a671613f86ed4d4a47b5b8d0"
+  },
+  "upstream": {
+    "synthone": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+    "audiokit": "AudioKit/AudioKit@03fecf80a66be88f6ac0356cd532c72dbe09922d",
+    "sampler": "AudioKit/DunneAudioKit@be581d08158ea4556a54298f75814d23ff7db886"
+  },
+  "proof_scope": [
+    "COMMON authentic source FX after distinct raw-original-note/fullsequence and compact-reader pipelines; lifecycle comparisons are not independent target-FX fidelity.",
+    "Guarded original virtual-index history:7530222 host samples per O2/Os/sanitizer variant,zero differences; pre-mutation alias rejection.",
+    "Original selected sampler vs public-source component:one explicit zero-offset configuration,8192 bit-identical float words; no original asset/capture included.",
+    "Default LSan fails under ptrace;same binaries with leak detection disabled pass,no leak-pass claim."
+  ],
+  "remaining_gates": [
+    "Complete original engines/controls/modulation/presets/own sequencers/arps/pads and full graph remain unfinished.",
+    "No runtime integration,full native link/resource/CPU/device/hard-load acceptance.",
+    "Full-engine18double-helper numerical-policy failure open;four48k reachable-delay payloads2880080B are not fit.",
+    "Generated Csound-derived history body and upstream modules excluded;generation requires authenticated separate source and applicable notices.",
+    "IPA/AU/private assets/presets/waveforms/PCM/emulator/SDK/toolchain/binaries/private reports/unreviewed frontend excluded.",
+    "Source preservation retains experimental local input directory contracts;not a turnkey product build."
+  ],
+  "files": [
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/generate_source_fx.py",
+      "bytes": 5960,
+      "sha256": "c7a90d219b01d50f7fcb3f89266385f5664beff2c3e73062524f65c30388f01a",
+      "git_blob": "46635d862db846f45544f466bdf3d3a5855d8d31"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/source_fx.hpp",
+      "bytes": 19388,
+      "sha256": "aee3fe78b450b35bfe6d40741d12dcedf02e24388bdf07850bde7b13d8d8d33e",
+      "git_blob": "848568106f7580e95fc4b6ddb16b43abd20ec002"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/fx_compressor.hpp",
+      "bytes": 2244,
+      "sha256": "f7d7c7cb5cd6092550a7e457304f86af4fab225ee1b25745f9a98bfca7ecbe38",
+      "git_blob": "c7bb750840eefd7a245a6a07bbc8bde6a96a40ed"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/fx_reference_test.cpp",
+      "bytes": 806,
+      "sha256": "f1679bcd8841d32f568fff338d7a7f55e0612216d0616028de4a4a89835f1f88",
+      "git_blob": "c0c44f292873049674da02ab0d8bbb4a397a4853"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/fx_lifecycle_test.cpp",
+      "bytes": 2437,
+      "sha256": "fe4ba01682c6de18b186999f7129fbd0487f3c056bcb078dcbe11fba0a1d522e",
+      "git_blob": "379de69d523758bffd8797fe92a411a21575e8c4"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/full_chain_compare.cpp",
+      "bytes": 3983,
+      "sha256": "1ecc7a0585007fbe3a030e477832ccd7d44656ab8c7a7335a8e1d2d6535e0745",
+      "git_blob": "ba06aa1cfb79e385594f491121b71883f6d9a2e5"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/full_chain_lifecycle.cpp",
+      "bytes": 4983,
+      "sha256": "e2bb3e25252a3738aaa055e1edaeac50e6eb0ceb0ae41035c5290ab9710232e4",
+      "git_blob": "1ba9fd72f26e8ea5a038afb9dae38f3a689bef52"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/full_fixture.hpp",
+      "bytes": 4124,
+      "sha256": "c9f6579e468974ec0bf6937f2d1a284aa819d5b63e95ce2318d87a85fc0d4166",
+      "git_blob": "71dbec5e0306a97cd45c8b54b0e915713a605866"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/compact-delay/history_delay.h",
+      "bytes": 1420,
+      "sha256": "7c7c08f61f986e3cdac1588baf34a23092d3fa9d85c436cec0da850e019914ea",
+      "git_blob": "f585e4a3fb393eeb2c09e80632e816a23520f919"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/compact-delay/generate_history.py",
+      "bytes": 4782,
+      "sha256": "5c0f315e2675d55ed7f2c288140010bae030c87af890c63ac45ca6eb86bb0231",
+      "git_blob": "429071f879831dd093baa01c2d5d6ace89d0f78c"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/compact-delay/test_history.c",
+      "bytes": 4792,
+      "sha256": "3639cfc888bd0783a192323df59bcd8121084f40a3aa9769711678422b1e8efe",
+      "git_blob": "ca6de6eb816675382fb8f2d1a6e9389dce0530ac"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/notices/SynthOne-MIT.txt",
+      "bytes": 1075,
+      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "git_blob": "be8551b835e760f321887b531d2f09d8ffa05c5a"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/notices/AudioKit-4.9.2-MIT.txt",
+      "bytes": 1085,
+      "sha256": "b9aad96b49e7afcadb3f351b733de24577924b3ba48c82a3e07393d8b9f96c5e",
+      "git_blob": "e99249a865bfbacdeeda22e965268a42ff638913"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/compat/AudioKit/AKInterop.h",
+      "bytes": 39,
+      "sha256": "6c03e2d632669b5ba1b6736e3d4901e5a9a0c80f008b22a670481a7fcaef2541",
+      "git_blob": "f1fc04ec067a2bdbbe17267d0f9f0d5180945fc1"
+    },
+    {
+      "path": "experiments/synthone-port-feasibility-20261114/full-reference/compat/AudioKit/AKSoundpipeKernel.hpp",
+      "bytes": 86,
+      "sha256": "1a00ed8f540105fcd3863fc588b2dfcc686016f2dbca5a6e1f110367efa0c51c",
+      "git_blob": "568a418b013f454aaf3d2eec9373cb855c19a966"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/LICENSE",
+      "bytes": 1065,
+      "sha256": "ea20aff5120bba16d7584a2e12b60fdd775d4bb8195440caf67fccba476c8972",
+      "git_blob": "1d3a7a21d6a5ea9c4ed86507c48f6b0ec9478d22"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/ADSREnvelope.cpp",
+      "bytes": 4236,
+      "sha256": "4e856e5ea890a8d2b737552f72a434703c8240e789ccd28234b015a320df2997",
+      "git_blob": "0fb42f1f12087d4450a63f314c3505341d904cf9"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/ADSREnvelope.h",
+      "bytes": 2628,
+      "sha256": "7ff86d3fa0d4b008b083e127a034177ddb66cd642c5535c515fc969826a7fac8",
+      "git_blob": "b92d8dc45d2c1bbdfc84c32ad6b94fc9d7a60411"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/AHDSHREnvelope.cpp",
+      "bytes": 6103,
+      "sha256": "bf336853c9e2c733e88db65c956135a2477d95de656ab7f5e5056c0a9f9ccf9e",
+      "git_blob": "5869151c582d9ef68d6468de15e69197956f4745"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/AHDSHREnvelope.h",
+      "bytes": 3659,
+      "sha256": "0ba1f89aa690bdf584d6d7d226e6c07c4119e2a8590f61df5461806c09d59186",
+      "git_blob": "096216da7f4f73020c854efbaa6a3533037ea8d0"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/EnvelopeGeneratorBase.cpp",
+      "bytes": 3859,
+      "sha256": "fc5728156db88e06219dfd8b84c379f71a874d8bf9d56e7f063e5281eac9ac62",
+      "git_blob": "4d9003cf434f69ae91b2670f1363c0673a500520"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/EnvelopeGeneratorBase.h",
+      "bytes": 3017,
+      "sha256": "dfa8f067f098af3bac248cd0a5cb03a22e162a6bad3cc1372ee2602a4bdc5289",
+      "git_blob": "5f47a22b29bdf693199d29eebe72bcf277c43cb9"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/FunctionTable.cpp",
+      "bytes": 5523,
+      "sha256": "55d586055b9fbcbf4b5926e7d6fb40e5714a7a48fe7993b45544dac43f454922",
+      "git_blob": "07cd16937bd9a532a2e21d17a1d6a6bfb2bc9be5"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/FunctionTable.h",
+      "bytes": 5402,
+      "sha256": "648f3586bd829631576b1a2d06ebbd5909818d2c8decf5fc6cd462b369381959",
+      "git_blob": "1a875c9b139f2747e837164d322b3ff222623901"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/LinearRamper.h",
+      "bytes": 1980,
+      "sha256": "94112d4202ef7ad96ccfd2f2525a6fd0e1cfffc4ba361545179af8b0bfb4f785",
+      "git_blob": "1628f05ac2608e5e1d1a153198fd4f0d70a1d13c"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/ResonantLowPassFilter.cpp",
+      "bytes": 2893,
+      "sha256": "b3f424c1e2f5918297818002fd90bf07554a4ee464f9e4793b7c300109f3bf4e",
+      "git_blob": "22cf3c25d2937b55def98778e88eca143e94be31"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/ResonantLowPassFilter.h",
+      "bytes": 1472,
+      "sha256": "eabfdc3225ac6b4c82c73d4abbdddfb683b0e23fde9e22fb5ed2d14338475314",
+      "git_blob": "22d78dc5e54236ccbeabdf7461b48ec5fadd511c"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/SustainPedalLogic.cpp",
+      "bytes": 1571,
+      "sha256": "d5732d517eb7e3b591bb9ac911e3d54c514f0cdc1dc725085c5a618bc28cbc7b",
+      "git_blob": "b4c4a51d229d8dec9089aacfb2d33e629ce72f48"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Common/SustainPedalLogic.h",
+      "bytes": 663,
+      "sha256": "6ae32643cc244859b232659c8d05f5b194e1165b85b511debb3d8b25d96214ef",
+      "git_blob": "3332bd06846a22fc9b385bfdaad66eaa63cdcd37"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/CoreSampler.cpp",
+      "bytes": 20247,
+      "sha256": "dc0e6aa9821761d6a199ff0f8a3f21b6f7bc343f05e75a8ef1b858c9bc9521b4",
+      "git_blob": "b7a07ea5867742da7db3bf6ae18272f6bb663999"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/CoreSampler.h",
+      "bytes": 5171,
+      "sha256": "71ea8378e437e70e1a0121f9320b46e5706b324bb96970be18e8dc417b59d8da",
+      "git_blob": "dc93840176646a2e6534c02cae993c06ad31ce84"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/SampleBuffer.cpp",
+      "bytes": 1109,
+      "sha256": "54fc6e068e02ea32ab039ca9e5a728cbcd8f99740f2de80656a8a4723f854d8c",
+      "git_blob": "a12642397f1bbce7c63d78e88c830115728c7142"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/SampleBuffer.h",
+      "bytes": 2765,
+      "sha256": "bac1884f159786d2f609460bd07c4dc7c634fe30ac052f870d9c617dc6875d23",
+      "git_blob": "7dd6d78d9a678ceed6b15122af653c0b02386858"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/SampleOscillator.h",
+      "bytes": 1986,
+      "sha256": "82e378f138e3d86a0ad67c94689d132a96b5b97f5b32019c059955bf5e26b5b3",
+      "git_blob": "42e2306337787929f29a196e883d1838bb33c712"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/SamplerVoice.cpp",
+      "bytes": 8933,
+      "sha256": "98f0350946dfebdcf699d4e528c1254be157ad3b3e4f3a9bbbac12e7d7a20ed3",
+      "git_blob": "87141202f10c356ea57082d6873af6ebe83a3602"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/DunneCore/Sampler/SamplerVoice.h",
+      "bytes": 3791,
+      "sha256": "4a0a49ddf0fe612be9d9d4458eaa3ce9afe0854564c01290935ca644926f4454",
+      "git_blob": "31c2bd07a0fa5b4e3c49ea106dfa547fb687944d"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/upstream/Sources/CDunneAudioKit/include/Sampler_Typedefs.h",
+      "bytes": 712,
+      "sha256": "39bc28d096c360760c9e7f4b508910d565b625bc2c6b73ace8f094c49dc01196",
+      "git_blob": "49faac0274d98c8bf4dd692333da70320da1f32a"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/gcc-adapted/AHDSHREnvelope.cpp",
+      "bytes": 6064,
+      "sha256": "604aa39d835ce241c69345ae98429514ad9ac1ad79a7b701e00de57d9429516b",
+      "git_blob": "16d5f8f21f15a028935dfd2cdba9b23157a72aca"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/gcc-adapted/CoreSampler.cpp",
+      "bytes": 20208,
+      "sha256": "41e026f82926d62104bcf976ad045816bb464fa290945b1081b43518205fc437",
+      "git_blob": "81c4cadb94f615f1032ed8de48d36644c78eff5c"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/gcc-adapted/EnvelopeGeneratorBase.cpp",
+      "bytes": 3864,
+      "sha256": "841b017e837bb830074eff3a124d1ebbee6a30246f67cd76b9af3db04103d065",
+      "git_blob": "4429f3b5427da954fc09874bf396ed056fa11111"
+    },
+    {
+      "path": "experiments/superj6-public-sampler-reference-20261115/gcc-adapted/SamplerVoice.cpp",
+      "bytes": 9023,
+      "sha256": "86605fc556e60fbc7cabba09774d03cb443dfd3bb053126019b6ff0a219df5b8",
+      "git_blob": "dbc83de9618283614540ecdf6e988e6053ca6e68"
+    }
+  ]
+}

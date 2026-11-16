@@ -1,0 +1,4 @@
+Path-only sanitized rawstdout/stderr; originalSHA256 68b1d627dbd3c9f24f97dba348f3f9169cbd2a14275bad7ef07c3981871b863b
+COMMAND ["sh", "tests/host/chicago_coef_cache_test.sh"]
+PASS chicago-warm-cache: warm=75 one-key=51 bad-cache-test-controls=38 sync-round-trips=12; attack/decay/release, two MGs tempo/free, glide, D=63/64; bit-identical PCM/state
+PASS chicago-coef-cache: 2200 ticks; attack=93 decay=1936 release=171; tempo=2187 free=2213; bit-identical PCM/state

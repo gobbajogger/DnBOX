@@ -1,0 +1,8 @@
+{
+  "exit": 1,
+  "phase": "fixture tree authentication before anyproducttest",
+  "observed": "first restoration checked response alias a06e commit as root tree, assertion rejected it",
+  "remedy": "use actual tree identity from authenticated Git commit; no changed product/source/tests/expectations",
+  "requestedTreeAlias": "a06e20189141ff5fb8766e2c6152be460f4356c3",
+  "actualCommitRootTree": "33690b177cc7c9c8a697eb45b9f7309510d986ec"
+}

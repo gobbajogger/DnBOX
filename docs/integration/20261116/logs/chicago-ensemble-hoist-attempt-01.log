@@ -1,0 +1,6 @@
+Path-only sanitized rawstdout/stderr; originalSHA256 f0c16b612288c4483029d0e111e3b0f32562c3d6e4a2e1782f1e5ceb994c0b04
+COMMAND ["python3", "tests/host/run_chicago_ens_hoist.py"]
+COMMAND: cc -std=c99 -O2 -Wall -Wextra -Werror -DX0X_HOST -fno-fast-math -ffp-contract=off -ITEMP_chicago-ens-hoist -Ifirmware/src/app -Ifirmware/src/dsp tests/host/chicago_ens_hoist_test.c -lm -o TEMP_chicago-ens-hoist/test
+PASS Ensemble: 20070162 samples, 135176 calls; output and full state bit-exact
+COMMAND: cc -std=c99 -Os -Wall -Wextra -Werror -DX0X_HOST -fno-fast-math -ffp-contract=off -ITEMP_chicago-ens-hoist -Ifirmware/src/app -Ifirmware/src/dsp tests/host/chicago_ens_hoist_test.c -lm -o TEMP_chicago-ens-hoist/test
+PASS Ensemble: 20070162 samples, 135176 calls; output and full state bit-exact

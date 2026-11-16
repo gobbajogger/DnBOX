@@ -1,0 +1,30 @@
+{
+  "R014": {
+    "requestedHead": "ef14325f977744cb73b0c22b7335bf54049ed7b3",
+    "alreadyDirectParentOf": "8a0ef30ca3e60e9c2c2721f1c3b7b303e12b229b",
+    "retainedBy": "e742be7bd0d01323c899de6e156f40b85ee451db",
+    "sourceCommits": [
+      "a3281c40991718383fe41c93fede88cb383d51b5",
+      "a980247baa7d532022a9510a3433d8463d20d204",
+      "36937d4ea015e0b136175cdc07741472013fb352",
+      "3e1c08bba9f163323cbd0cca5178d48085ce1974",
+      "73f7e5d47e443098cf3f6d72ca29966ed0e40578",
+      "14dbf36a0de2c81f360beb4e38b8c0dc6e3dc245",
+      "87f0ef3bfde24b143b99e9d9b5f6c3fdd831f54d",
+      "bcadfe887521b9c3ddb0188de6d00f4fa03c41a5",
+      "817a0343a85341cf7627cdc44a3cb377da25d2f9",
+      "93b37ff730f4475a1eb3e9a46ed5478a67e12e82",
+      "7dc30aec3b10445e59ae92a5972db28dc8cc756f",
+      "459aec1970238b7b4eb492ac748c40bf70b95869",
+      "ef14325f977744cb73b0c22b7335bf54049ed7b3"
+    ],
+    "duplicateMergeNeeded": false
+  },
+  "preflight": {
+    "requestedHead": "e45eb48201a45646fea130930f6c89694ae04e3f",
+    "actualChangedFile": "tests/host/project_save_preflight_test.c",
+    "exactBlob": "3610e9dc5cc0967541c08a3abdf4e4fab0256b21",
+    "retiredParent": "b34857d40de538c3a95b9ba45ce3865c8c631eed",
+    "nextAction": "copy verified valid test blob only into next isolated source candidate and run actual preflight; no wholesale parent merge"
+  }
+}

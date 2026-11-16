@@ -1,0 +1,7 @@
+Path-only sanitized rawstdout/stderr; originalSHA256 b47e5cefc0e5ce907717d230b5e300e23c00807c16e976ecfd4c2380d3f6dc5e
+COMMAND ["sh", "tests/host/run_miami_coef_cache.sh"]
+PASS Miami runtime-part sizeof 5360 <= 5368
+miami coefficient cache: bitwise differential tests PASS
+miami coefficient cache: bitwise differential tests PASS
+miami coefficient cache: bitwise differential tests PASS
+miami coefficient cache: bitwise differential tests PASS

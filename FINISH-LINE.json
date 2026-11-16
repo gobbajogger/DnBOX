@@ -1,0 +1,235 @@
+{
+  "schema": "dnbox-source-linked-finish-line/1",
+  "updatedUTC": "2026-11-16T10:24:30.951821+00:00",
+  "owner": "Integration & Release",
+  "sourceReferences": [
+    {
+      "name": "RULES(1).md",
+      "version": 0,
+      "bytes": 12978,
+      "sha256": "de3e94f256704103c5db8cc8ad911ffe6c031dac811ca9f6c07a59ea9147fc04",
+      "authority": "Operational requirements context; action authorization is direct owner chat; safety andtriplechecks preserved"
+    },
+    {
+      "name": "docs/ui/UI-SOURCE-OF-TRUTH.md",
+      "bytes": 2891,
+      "sha256": "868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6"
+    },
+    {
+      "name": "OPEN-ITEMS.md",
+      "state": "exactsourceidentity pending"
+    }
+  ],
+  "heads": {
+    "firmwareIntegration": "e742be7bd0d01323c899de6e156f40b85ee451db",
+    "websiteIntegration": "9165adb92fcdaab756c4e59e3d4a8ee22437ca5a",
+    "fwui": "9da1c410d883f486071004590774d67a290fdd54",
+    "sound": "11a2f97bec7ad300d0acc02721175194e5a82f40",
+    "website": "93b6f0991147be97c89b82e5039267c546608469",
+    "remoteLastVerified": "3f22e000ad17456318cde997067c7fd45dd7e3b3"
+  },
+  "requirements": [
+    {
+      "id": "R012",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Exact final combined source builds Elite/Pro \u00d7 PADCAL0/1 with recorded SDK/toolchain and all flash/static/pool floors; stock hardware only",
+      "status": "PARTIAL",
+      "evidence": [
+        "e742 resource-only product-input matrix four configs reported PASS; only172B pool margin above8192floor"
+      ],
+      "nextAction": "Import four exact receipts; rerun affected native gates at final combined head. Latest UI/newengines not qualified.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R013",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Zero late halves/xruns/dropouts in complete audible BREAK+Chicago+held synth+909 scene; both models; target whole-half timing floor satisfied",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "nextAction": "Recover exact previous timing scene/pins and run unchanged applicable full-scene timing/audio qualification; no hardware inference.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R014",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Preserve Chicago/Miami coefficient caches/options and source laws with exact baseline differential gates",
+      "status": "PASS_COMPONENT",
+      "evidence": [
+        "ef14325f is ancestor of8a/e742; six first-run e742 cache/hoist gates exit0"
+      ],
+      "nextAction": "Carry preserved source through full composition; final combined/native timing still required.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R015-R019",
+      "lane": "sound",
+      "required": true,
+      "passCriterion": "Real SynthOne from56079 and SuperJ6 full graph/64bindings/preset apply/FX/sequencer/arp/MIDI; original-A-B and stock-memory admission; no silent legacy-save ID remap",
+      "status": "PARTIAL",
+      "evidence": [
+        "sound/engine-rebuild11a2f97 new-source/models unactivated; accepted narrow component tests, P2 original-loop clock/gain remains open"
+      ],
+      "nextAction": "Independent source/test review, true renderer/graph admission and exact full-composition fit/audio/RT evidence.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R020/R046",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Exactly BR1 zones1\u20133 thenBR2zones1\u20132 defaultAll, listen beforechoose, All/subset/None preserving base/no erasure; authenticated public preview bytes and actual provider interaction",
+      "status": "PARTIAL",
+      "evidence": [
+        "original archive239bd1d1\u2026; allfive ADPCM/PCM/WAV pins reproduce;4asset selftestsPASS; wrong-zone mutantFAIL"
+      ],
+      "nextAction": "Complete public URL provider source and source-authentic RED/GREEN tests; actual browser/audio and firmware package path remain distinct.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R021-R026/R030",
+      "lane": "fwui",
+      "required": true,
+      "passCriterion": "All applicable firmware pages/states share909+808R22 components, approvedglyphart; label+animatedglyph+value/unit, correctpan/battery/holds/pads; no collision/duplicate score>5",
+      "status": "PARTIAL",
+      "evidence": [
+        "9da1c410 WIP; frozen9 only45drumstates/135panels pass1\u20134, otherdomainsNOT_RUN"
+      ],
+      "nextAction": "Full inventory source-pinned 240\u00d7240 equivalent-state renders, geometry/defect fixtures, behavior and independent10/10 review; calibration/device gaps explicit.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R027/R034/R035",
+      "lane": "remote",
+      "required": true,
+      "passCriterion": "Real source-linked Remote pages/TouchOSC/gesture-only editing andthin shared sliders; exact locked baseline layouts across desktop/portrait/landscape",
+      "status": "PARTIAL",
+      "evidence": [
+        "PR132 currently3f22 last verified; newer FunkyBeats source WIP in-flight; denied ChromiumNOT_RUN"
+      ],
+      "nextAction": "Consume exact pushed Remote/sharedsource, complete behavior/browser and locked-baseline independent checks without denied-route bypass.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R031-R033/R036",
+      "lane": "web",
+      "required": true,
+      "passCriterion": "All19website routes+installer/emulator/import/export/nightly preserve functionality; no broken shared imports/manifest drift; exact full-page rendered states andplayable provider where requested",
+      "status": "PARTIAL",
+      "evidence": [
+        "Website93b6f099 draftPR133; shareddeps missing and firstbuild drift retained; exactfullsuite fixture failures being reconciled"
+      ],
+      "nextAction": "Compose with Remote/shared dependencies, refresh exact manifest/package, run full applicable gates and independent before/after review before merge/deploy.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R029/R037",
+      "lane": "all",
+      "required": true,
+      "passCriterion": "Independent reviewer did not build candidate; actual emulator/behavior andequivalent-state before/after renders at required dimensions; everyrequired screen10/10 andeverynewdefect automated",
+      "status": "NOT_RUN",
+      "evidence": [
+        "Narrow independent code/geometry receipts exist; not whole-lane acceptance"
+      ],
+      "nextAction": "Review only frozen final composition and explicit complete inventory; actual runtime/emulator limits remain visible.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R038/#887",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Complete/Working/Pending+ROADMAP match exact composed source/evidence, no falseComplete or lost historical requests",
+      "status": "PARTIAL",
+      "evidence": [
+        "#887 source fivepathdelta inventoried; existing canonical docs retained"
+      ],
+      "nextAction": "Reconcile exact final integration/source state with sole roadmap writer; review stale claims before retirement.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R041",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "All crucial originals/source/assets recoverable and named; reconstructions distinguish originals; no invented missing attachment request",
+      "status": "PARTIAL",
+      "evidence": [
+        "UI/Remote/Website/Sound checkpoints recovered; original fivezone archive recovered; missing laterS1 takeover has no knownLibraryidentity;112SVGsourcepack unestablished"
+      ],
+      "nextAction": "Preserve exact known artifacts and recover genuinely missing named originals; never substitute PDF reconstruction as original sourcepack.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R045/#120",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Authenticated owner request/openingvote, conflict-checked assessment, single current ledger writer/capacity guard, true consumer action andno replay; no fake issue/vote/observer activation",
+      "status": "PARTIAL",
+      "evidence": [
+        "Unique later capacity-zero helper61fcf6f\u2026 recovered; old #950 DISPLAY_ONLY/exit2 andzeroowneropeningvotes; runtime/ledger identity notcurrent"
+      ],
+      "nextAction": "Retain corrected helper/tests; reconcile current writer/ledger/design-specific owner record andreal end-to-end execution before activation/completion.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "R040/R039",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Before anyeligible deletion/merge: everyfile/commit retained+dependencies/writers cleared, full exactcombinedlocalgates/no regression, independent baseline render/behavior; exact-tip archive tag+durable recovery; then supported rename andverified redirects/Pages/links/counts",
+      "status": "NOT_RUN",
+      "evidence": [
+        "Initial357/131branches and73/9openPRs; all488HOLD; no supported tag/delete/rename mutation exposed"
+      ],
+      "nextAction": "Finish candidate qualification anddependency audit; use only supported authorized operations. No archive-only integration or protected/main/force/security changes.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "FULL_LOCAL_GATE",
+      "lane": "all",
+      "required": true,
+      "passCriterion": "Everyapplicable required test at exact final commit has real first-run exit/log; failures/NOT_RUN notpasses; no filters/mocks/native-only results substitute whole gate",
+      "status": "FAIL",
+      "evidence": [
+        "e742 compact-program firstexit1; no-allocation sanitizercontrol also1 thread-attachEPERM; firstwebsite composition builddriftFAIL; browserdenialNOT_RUN"
+      ],
+      "nextAction": "Use a genuinely authorized qualified executor for unchanged LSan test; repair actual composition manifest, satisfy browser/allpage gates without suppressions/denialbypass.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "TRIPLE_CHECK",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "Full retained-content log +full applicable exact-source gate log +independent equivalent-state render/behavior log allPASS before landedmerge/deletion",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "nextAction": "Collect three full logs per batch; hold all merges/deletions/cleanup on any missing required proof orregression.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "DELIVERY",
+      "lane": "all",
+      "required": true,
+      "passCriterion": "Finishedpiece PR into verifiedintegration, exact qualifiedsource delivered through authorized path with byte/readback/pairedLibrary; notsourceWIP or draftonly",
+      "status": "NOT_RUN",
+      "evidence": [
+        "Canonical integration e742/9165 andLibrarypairs verified; lane WIPs/DraftPRs notdelivered product"
+      ],
+      "nextAction": "Complete affected gates; independently review, then authorized integration/publication readback. Production/device writes excluded.",
+      "source": "RULES(1).md rules2,12,13,17,22; direct owner20:19"
+    },
+    {
+      "id": "OPEN_ITEMS_SOURCE",
+      "lane": "integ",
+      "required": true,
+      "passCriterion": "All entries of owner OPEN-ITEMS.md andremaining request IDs mapped to precise source-linked acceptance rows",
+      "status": "NOT_RECONCILED",
+      "evidence": [
+        "Exact/simple Librarytitle searches0; targetedcloudfindnone, parentasked exactLibraryidentity"
+      ],
+      "nextAction": "Read exact provided OPEN-ITEMS source andextend checklist without dropping any item. Current checklist coverage is partial, notall-project completeness.",
+      "source": "Owner20:19 explicit OPEN-ITEMS source requirement"
+    }
+  ],
+  "finishLineSatisfied": false,
+  "coverageLimit": "Exact OPEN-ITEMS source not yet supplied/recovered; historic request namespace gaps remain. No all-project-complete claim."
+}
