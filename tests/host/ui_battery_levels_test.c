@@ -35,6 +35,7 @@ int main(void)
         CHECK(ui.help==B_SEL+1);
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    shot("header-help");
     held_btn=0;input();CHECK(!ui.help);
     setup(V_HOME,PART_303A);ask(ACT_CLEAR_PART,PART_303A,"CLEAR PART?","TEST ONLY");
     CHECK(ui.overlay==O_ASK);
@@ -42,7 +43,32 @@ int main(void)
         host_battery_level=level;now_ms+=50;ui_frame();CHECK(ui.overlay==O_ASK);
         for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
     }
+    shot("header-confirmation");
     button_tap(B_HOME);CHECK(ui.overlay==O_NONE);
+    /* Hardware pickup producer sends this exact status through say(). */
+    setup(V_HOME,PART_303A);say("PICK F1 UP",0);
+    for(int level=0;level<4;level++) {
+        host_battery_level=level;now_ms+=50;ui_frame();
+        CHECK(!strcmp(ui.msg,"PICK F1 UP") && ui.msg_until>now_ms);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+    }
+    shot("header-pickup");
+    /* Real header source, fixture clip body/clock; not a physical-device test. */
+    setup(V_SEQ,PART_303A);clip_grid_mode=1;
+    for(int clock=0;clock<2;clock++)for(int level=0;level<4;level++) {
+        fixture_clip_external_clock=(uint8_t)clock;host_battery_level=level;now_ms+=50;ui_frame();
+        CHECK(clip_grid_mode && seq.clk_src==SEQ_CLK_AUTO);
+        for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+        if(level==3) {
+            shot(clock?"header-clip-external":"header-clip-internal");
+            if(!clock)memcpy(before_fb,fb,sizeof fb);
+            else {
+                CHECK(changed_rows(0,20,before_fb,fb)>0);
+                for(int y=0;y<18;y++)for(int x=0;x<126;x++)CHECK(before_fb[y*240+x]==fb[y*240+x]);
+            }
+        }
+    }
+    fixture_clip_external_clock=0;clip_grid_mode=0;
     host_battery_level=3;
     printf("PASS four battery levels and header invalidation: %u checks\n",checks);
     return 0;

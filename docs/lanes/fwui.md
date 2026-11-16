@@ -88,3 +88,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Help and confirmation battery repair
 - Actual held-SEL help route failed battery pixel checks on7ea37 unchanged893 runtime. Minimal common-header predicate now also permits help and confirmation while retaining pickup and hardware clip exclusions. Cached PART header rules and modal input behavior unchanged.
 - Expanded production battery suite PASS2941 checks: all prior views and GLOBAL, genuine held help/release, ask/cancel, four battery levels. Logs/hashes at docs/evidence/fwui/modal-header/. Exact combined native and independent replay pending; no fullF4 or lane PASS. Pickup/clip/message coverage remains open.
+
+## Pickup and clip status header repair
+- Independent6fa2 replay PASS2941. Subsequent actual pickup status failed the same battery check; unified status renderer now retains PICK text, LP identity, clip INT/EXT from smk_ck_ext and metro phase, with common four-level R22 battery. Removed unreachable old header fallback, not its controls. Clip body/clock are test fixtures, never device claims.
+- Expanded battery suite PASS5258, including all four battery levels, internal/external clock distinction and stable LP title pixels. Existing SMC restore/clip/wait/overlay suite PASS8238. Native own-source Elite/Pro XIP free4288/4300 B, BSS96544, unchanged pre-integ pool margin172. Exact combined native and independent source review pending.
+- Five240x240 production-header captures plus logs/source hashes retained at docs/evidence/fwui/status-header/. SMC-specific popup/peek and transient notification bars still need battery coverage; no fullF4 acceptance. No F6/F7 design change.
