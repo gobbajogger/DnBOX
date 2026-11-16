@@ -138,10 +138,29 @@ static int test_settings_guards(void)
     return 0;
 }
 
+/* measure_project() stops at the first byte over STREAM_CAP, so project_save()
+ * returning -7 says nothing about how far over the fixture is. Count the whole
+ * packed stream, so a fixture that is only marginally too big fails here. */
+static int count_put(void *ctx, const uint8_t *p, uint32_t n)
+{
+    (void)p;
+    *(uint32_t *)ctx += n;
+    return 0;
+}
+
+static uint32_t full_packed_len(void)
+{
+    uint32_t total = 0;
+    lz_sink_t sink = {count_put, &total};
+    if (lz_compress((const uint8_t *)&proj + RAW_OFF, RAW_LEN, &sink))
+        return 0;
+    return total;
+}
+
 int main(void)
 {
     uint8_t *raw = (uint8_t *)&proj + RAW_OFF;
-    uint32_t rng = 1;
+    uint32_t rng = 1, full_len;
     int i;
 
     project_defaults();
@@ -177,6 +196,12 @@ int main(void)
     proj.set.palette = 2;
     proj.sound.v[T_303][0][0] = 99;
     seq.bpm = 140.0f;
+    full_len = full_packed_len();
+    if (full_len < STREAM_CAP + PLAT_STORE_MAX) {
+        printf("memory-full fixture packs to %u B, under STREAM_CAP %u + one object %u\n",
+               (unsigned)full_len, (unsigned)STREAM_CAP, (unsigned)PLAT_STORE_MAX);
+        return 1;
+    }
     writes = 0;
     if (project_save() != -7 || writes) {
         printf("memory-full save changed %u objects\n", (unsigned)writes);
