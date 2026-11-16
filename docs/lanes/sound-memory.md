@@ -1,6 +1,55 @@
 # Sound memory: component measurements, NOT all-engine fit
 
-S6 remains FAIL. No final Elite/Pro combined link or runtime qualification exists.
+S6 remains FAIL. No final combined Elite/Pro link with the required complete
+Synth One/SuperJ6 replacements has been qualified.
+
+## Latest Sound component checkpoint: 3e41
+
+Source: `3e41e4b37c91a8f30542f3cd0724c6a518d588fd` (runtime unchanged in the
+later documentation-only checkpoint `103286c8fa38f908c23e409b81ab37b6ee084f8d`).
+The 31 unlinked native runtime/adapter units total:
+
+| Section | Bytes |
+|---|---:|
+| Executable | 39,392 |
+| Readonly | 4,522 |
+| Writable | 616 |
+| BSS | 56 |
+| Separate compact waveform pack | 165,292 |
+
+The dummy layout object is excluded from those sums. Its assertions establish a
+7,972-byte pre-FX owner aligned to 4 bytes, not an additional allocated owner in
+an application. Borrowed tuning storage and all application lifetimes still
+need explicit combined accounting. The observed morph/quad/physical-row stack
+prefix is 316 bytes; deeper callees, callers and interrupt/library frames are
+not included, so it is not a complete stack bound.
+
+The original full-FX delay allocation remains 7,680,016 bytes. The separately
+audited reachable-delay estimate is about 2.88 MB; neither figure is admitted
+stock-memory usage. No delay/control range, engine, protected flash region or
+musical output was removed to obtain these component measurements.
+
+Evidence: `docs/sound/v2-morph-bitcopy/native-sections.json`, its stack-prefix
+receipt, and `docs/sound/v2-quad-distinct/native-summary.json`. Full command/dependency receipts remain privately preserved; their public upload
+is blocked and is not claimed here. No all-engine
+application link or S6 completion follows from these results.
+
+## Existing-firmware baseline, not Sound admission
+
+Integ reports the latest independently measured combined existing-firmware
+source as `7e39818096e7fb728ef28cd6476b290b064e353e`: Elite/Pro XIP free
+3,156/3,164 bytes, static RAM headroom 1,096 bytes, and pool margin 836 bytes above the
+8,192-byte reserve. That is not qualification of its later published
+`731f5abd8357cfe8654222b3d5e3ed03b5749fb0`, whose native remeasurement is pending,
+and it does not include an admitted complete Synth One/SuperJ6 replacement.
+The small independent baseline receipt is retained at
+`docs/sound/v2-quad-distinct/integ-7e398-baseline-receipt.json`; its full Local
+gate is explicitly NOT_RUN. No large build was repeated for this citation.
+
+## Historical component checkpoints
+
+The measurements below retain the development history. Their references to
+"current" describe those earlier checkpoints, not the latest combined source.
 
 ## SynthOne pinned pre-FX owner
 
