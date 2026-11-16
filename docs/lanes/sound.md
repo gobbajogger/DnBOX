@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:08 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:22 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -109,3 +109,5 @@ Callback review correction: the earlier Python tracer field observes the runner,
 Commit-message correction: the previous callback checkpoint subject omitted rule6's `| next:` suffix. No content or ref was rewritten; subsequent subjects retain the required next deliverable.
 
 Follow-up timing trace publication blocked: automated review twice rejected the exact60,761B gzip /81,107B JSON request as above700KB, despite explicit measured request size. Stopped that blob, no indirect retry or encoding/destination change. Root handles owner clarification/review resolution. New source/tests/text-only status can proceed independently; all trace bytes remain preserved. Hardened8-program pilot observed benchmark TracerPid0,19 wall/17 CPU misses,0nonfinite. Full694 timing still pending source review.
+
+Complete694 callback characterization at521963 finished on two hosts: each520,500 callbacks/66,624,000 frames/0nonfinite and self-observed benchmark TracerPid0. Managed70 wall/62 CPU misses; local10,159 wall/9,771 CPU misses. Identical executable and bound-input SHA256 across hosts. Both FAIL; no erased pilots, native/device claim or S1 completion. Small exact receipts under docs/sound/v2-callback-full; full raw traces remain preserved pending publication review. Managed task independently recalculates all miss rows and event strata; next is evidence-led fidelity-preserving diagnosis, not a lower threshold or musical cut.
