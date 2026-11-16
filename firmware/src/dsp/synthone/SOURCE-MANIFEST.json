@@ -146,8 +146,8 @@
     },
     {
       "path": "scheduler/compact-reader/compact.c",
-      "bytes": 8647,
-      "sha256": "10c7052a5caa40d7442c914385c5e07cb07783007ad290997980e5c20d4e743c",
+      "bytes": 8820,
+      "sha256": "f46f1c92a5fd5e2ad3869c58c123de3b4bd17f7a31c88fa5519919c71b463499",
       "prior_v2_sha256": "a5e63c119d98b6708d6809c7bec093104a9299aac6b95fd3ac51fb90c880e7b5",
       "change": "Transactional four-word batch read, scalar retained, not yet used by morph runtime."
     },

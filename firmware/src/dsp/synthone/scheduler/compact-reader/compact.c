@@ -147,8 +147,15 @@ int s1c_read_quad(const s1c_binding*b,unsigned row0,unsigned row1,unsigned sampl
  const unsigned physical1=row1<48?row1:row1==48?44:row1==49?45:row1-2;
  rowinfo q0,q1;if(!getrow(&v,physical0,&q0)||!getrow(&v,physical1,&q1))return 0;
  uint32_t w[4];
- if(!physical_word_row(&v,&q0,sample0,w)||!physical_word_row(&v,&q1,sample0,w+1)||
-    !physical_word_row(&v,&q0,sample1,w+2)||!physical_word_row(&v,&q1,sample1,w+3))return 0;
+ if(!physical_word_row(&v,&q0,sample0,w))return 0;
+ if(physical1==physical0)w[1]=w[0];
+ else if(!physical_word_row(&v,&q1,sample0,w+1))return 0;
+ if(sample1==sample0){w[2]=w[0];w[3]=w[1];}
+ else{
+  if(!physical_word_row(&v,&q0,sample1,w+2))return 0;
+  if(physical1==physical0)w[3]=w[2];
+  else if(!physical_word_row(&v,&q1,sample1,w+3))return 0;
+ }
  for(unsigned i=0;i<4;i++)if(!word_valid(w[i]))return 0;
  for(unsigned i=0;i<4;i++)out[i]=w[i];return 1;
 }
