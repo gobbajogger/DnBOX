@@ -1,0 +1,22 @@
+{
+  "reviewer": "test-and-merge (independent agent)",
+  "scope": "source/input integrity, restore and packaging only; no complete sound/native/independent fullFX approval",
+  "findings_resolved": [
+    "live-path compile/read closure and unlisted include shadow",
+    "unpaired-original archive names could be omitted"
+  ],
+  "independently_replayed_tests": {
+    "factory_closure": 7,
+    "restore": 3,
+    "packaging": 3
+  },
+  "files": {
+    "tests/host/run_synthone_factory.py": "8ade06f1585f7cbd3b59f8262fbe7b1a4e2ad5f91f91f15de8ccc796c2010c6a",
+    "tests/host/test_synthone_factory_runner.py": "57b304f25a334824d3b9e86080a43e0bae4d720a9f7e64a6ce9b48a1351faad3",
+    "tools/restore-synthone-test-inputs.py": "eb1e05f5d524f68bf4a6e0a94c4f021320d49cd980f3081684abb4104d6b1613",
+    "tests/host/test_synthone_input_restore.py": "ddd74e622c01edea774f50f00a58e4b69a424c24528290018ea04401d945f6d0",
+    "tools/package-synthone-factory-pcm.py": "c018a5edb7a52448380ad5eb520f92a39809163c6bc6133a3892d3a65f18df1c",
+    "tests/host/test_synthone_pcm_packaging.py": "63bdc88efee548cf23a85ba7d682ef826a9781c0e71c8383f705586ad9686349"
+  },
+  "audio_status": "Final frozen694 source replay in progress; prior runs exploratory only"
+}
