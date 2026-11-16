@@ -1,0 +1,43 @@
+{
+  "scope": "Producer diagnostic tests and original-bundle legacy-record comparison only; no loader execution/migration/engine qualification",
+  "source_sha256": {
+    "tools/audit-sj6-bundled-legacy.py": "34fd21214c2f76699d451aabbfad872d7835e54306e569791db55234b1492a4c",
+    "tests/test_sj6_bundled_legacy.py": "d3a8bb5a8931c7db3cc69fe8a2d690c8b78695b09681c9fa2b16c7f5d6700508"
+  },
+  "commands": [
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "<workspace>/sound-v2/tests/test_sj6_bundled_legacy.py"
+      ],
+      "exit_code": 0,
+      "log_bytes": 112,
+      "log_sha256": "26e4fc70ea6b6384bf46375bf00ad2ce38024aabcad5482770bd95e72ba6bbc6"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "<workspace>/sound-v2/tools/audit-sj6-bundled-legacy.py",
+        "--root",
+        "<workspace>/sound-v2/assets/factory_banks/superj6",
+        "--manifest",
+        "<workspace>/sound-v2/assets/factory_banks/superj6/MANIFEST.json",
+        "--archive",
+        "<workspace>/superj6-qualification/private/original-graph/com.audiokitpro.superj6-0.999.8-Decrypted.ipa",
+        "--archive-sha256",
+        "dde4992f24f52d4390391069025b27092a2f327e3a53115bdd53a6ede0dffa8e",
+        "--output",
+        "<workspace>/sound-v2-evidence/sj6-legacy-static/bundled-legacy-receipt-result.json"
+      ],
+      "exit_code": 0,
+      "log_bytes": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "result_sha256": "a8daa39e30340cd78b465b9119174e16c378bae55ed644016d0d7b829b0e6d20",
+  "synthetic_tests": 13,
+  "matched_factory_records": 640,
+  "independent_review": "test-and-merge verified exact two source hashes and independently replayed 13 tests PASS; accepted record-comparison scope only",
+  "memory_fit": "No firmware changes; prior combined fit FAIL remains",
+  "reference_execution": "NOT_RUN"
+}

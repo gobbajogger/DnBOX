@@ -13,3 +13,9 @@ No original binary, factory bank, model coefficient or PCM payload is included i
 ## Version-cohort diagnostic
 
 The exact 640-preset corpus has exactly one of the three stored amount keys in every preset: limiterAmount 240, compressorAmount 366, tubeRageAmount 34. All tubeRage records report version1.5; compressor records span versions1,1.5,1.6,1.7,1.8; limiter records include older versions and two1.5 records. This is evidence to investigate migration, not proof that any keys can be aliased or that their value laws match. The audit retains unknown identity failure and has ten synthetic tests, including missing/coexisting keys and metadata mutation after capture. Both metadata buffers are now parsed and hashed from the same captured bytes. Independent review accepted this bounded diagnostic.
+
+## Original bundled-key cross-check
+
+The preserved original IPA SHA256 `dde4992f24f52d4390391069025b27092a2f327e3a53115bdd53a6ede0dffa8e` contains the same 640 factory preset identities. A captured-input comparison matches bank identity, preset version, the exact stored legacy key and its numeric value in all 640 records. This includes the 240 limiter and 34 tubeRage keys. It rules out a different supplied key set as the explanation for the unresolved identities; it does not establish how the original loader treats those keys. No alias, migration law, original playback or S5 PASS follows. Original app and bank payloads remain private pending the existing rights boundary.
+
+The diagnostic tool validates the archive hash before parsing, captured manifest/raw-bank hashes and lengths, duplicate identities, exactly one amount key per preset, equal preset identity sets and manifest totals. Thirteen synthetic tests cover identity/key/value changes, missing/coexisting keys, nonfinite values and input tampering. Method-name and literal-string scans were inconclusive; static absence is not proof of omitted loader behavior.
