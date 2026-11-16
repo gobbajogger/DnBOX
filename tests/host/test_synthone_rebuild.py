@@ -97,4 +97,33 @@ class RebuildTest(unittest.TestCase):
                     self.assertEqual(good.read_text(), 'independent retained input')
                     bad.unlink()
 
+    def test_adapter_snapshot_isolated_from_live_source(self):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('renderer_adapter_guard',RUNNER)
+        runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as d:
+            root=pathlib.Path(d);repo=root/'repo';stage=root/'stage'
+            for name in runner.ADAPTER_FILES:
+                p=repo/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('// original')
+            hashes=runner.stage_adapters(repo,stage)
+            allowed={(stage/name).resolve():digest for name,digest in hashes.items()}
+            (repo/'firmware/src/dsp/synthone_c.cpp').write_text('// changed live')
+            runner.verify_bound(allowed)
+            (stage/'firmware/src/dsp/synthone_c.cpp').write_text('// changed staged')
+            with self.assertRaisesRegex(ValueError,'Compiled input changed'):
+                runner.verify_bound(allowed)
+
+    def test_compiler_actual_unlisted_header_is_rejected(self):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('renderer_dep_guard',RUNNER)
+        runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as d:
+            root=pathlib.Path(d);source=root/'source.c';header=root/'shadow.h';dep=root/'actual.d'
+            source.write_text('#include "shadow.h"\nint value(void){return SHADOW;}\n')
+            header.write_text('#define SHADOW 2\n')
+            subprocess.run(['cc','-MMD','-MF',str(dep),'-c',str(source),'-o',str(root/'out.o')],check=True)
+            allowed={source.resolve():hashlib.sha256(source.read_bytes()).hexdigest()}
+            with self.assertRaisesRegex(ValueError,'Unverified actual compile dependency'):
+                runner.verify_depfile(dep,allowed)
+
 if __name__ == '__main__': unittest.main()

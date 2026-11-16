@@ -1,28 +1,28 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 01:09 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 02:46 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
 | ID | Status | Current evidence / next check |
 |---|---|---|
 | C1 | FAIL | Local gate not run on this lane; independent test-and-merge owns it |
-| C2 | PASS | This commit descends directly from verified consolidated e742be7b; no deletions |
+| C2 | FAIL | Live consolidated still e742be7b; branch descends from it and this change deletes no files, but required no-loss gate is not run at this head |
 | C3 | FAIL | Independent review not run; no UI changed |
 | C4 | FAIL | Full hard-limit scan not run; current change adds a pre-FX adapter and host tests only |
 | C5 | FAIL | Outstanding S1–S7 below |
 | C6 | FAIL | Draft continuation; not merged |
 | S1 | FAIL | Reuse pinned 56079bbd source closure and public renderer from prior sound source; factory-wide finite/xrun proof remains missing |
-| S2 | FAIL | Existing original-versus-compact 56-preset full-FX replay is scoped evidence, not every factory program |
+| S2 | FAIL | Frozen f50/e454694-program raw-vs-compact common-FX replay independently verified; not full app/independent FX/long-tail/xrun qualification |
 | S3 | FAIL | Existing 64-control schema/model component checks do not prove full routed engine |
 | S4 | FAIL | Original 14/56 comparison input available; complete intended-engine A/B pending |
 | S5 | FAIL | Complete 640/12-bank mapping not verified |
-| S6 | FAIL | Native pi32v2 pre-FX owner10532 bytes measured; historical baseline margin172 is340 below rule minimum; no combined fit. See sound-memory.md |
+| S6 | FAIL | Native pre-FX owner7972B measured; combined integ09f budget freeXIP2220/2232B,BSS1080B,pool836B cannot admit full originalFX/wave assets. No combined fit. See sound-memory.md |
 | S7 | FAIL | Consolidated still contains Drone; coordinated removal required |
 
 ## Now / next
-- Now: isolate exact consolidated source, recover existing 56079 renderer/source closure and sound components without rebuilding unchanged tests.
-- Next: carry original factory control bindings into the adapter test and qualify factory-wide finite output; then integrate the actual runtime with stock-memory accounting.
+- Now: review source-helper C ABI and exact staged closure; preserve the verified694-program outputs while legitimate LFS budget restoration is handled by root.
+- Next: source-faithful control/tuning/FX and measured stock-memory plan with integ; no activation or musical cuts without required evidence/design decision.
 - Fresh rebuild: 28 objects compiled from retained source, 12 scenes / 576000 frames, zero differing channel words versus source-derived oracle, zero heap calls during rendering. This is pre-FX component evidence only, not S1/S2 or hardware xrun PASS. See docs/sound/v2-pre-fx-evidence.md.
 
 ## Blockers and remedies
@@ -80,3 +80,5 @@ Archive utility review found a missing-pair case:1388 filenames alone could hide
 Final frozen f50d5c14 factory replay completed from the portable restored bundle:694 programs/66,624,000frames,0differing stereo words,0NaN/Inf. All1388 output SHA256 values match the preserved expected manifest. Factory input receipt98acfee3, runtime TESTED-SOURCESd7083f6b, command stream460d0869; exact logs/receipts committed under docs/sound/v2-synthone-factory-final*. This is source-frontend/raw-preFX-vs-compact with common FX, not Apple app, independentFX, all long tails, full tuning/hold/modwheel, callback xruns or native fit. S1/S2 remain FAIL at full checklist scope. Next independent final receipt acceptance and managed read-only recreation; source64-control/full native resource blockers stay open.
 
 Managed second-environment exact replay PASS:694 programs and all1388 PCM hashes plus canonical533934080B archive match. LFS object-only upload then denied exit2 because repository LFS budget is exceeded. Stopped; no alternate route, remote readback NOT_RUN, no dangling pointer committed. All originals/recreation/local LFS bytes retained. Root owns legitimate budget restoration; sound will verify remote fresh-cache readback before pointer publication. See docs/sound/v2-artifact-recovery-status.md. Unaffected control-law/native-interface work continues; no full sound checklist PASS.
+
+Source-helper C ABI checkpoint: transient original helper laws (physical and six dependent normalized parameters) plus resolved-target accessor, no owner growth.6,385 changes/957,750 exact target comparisons against retained original helper,4,096 extra rendered frames0diff/controlheap0; prior12scenes576,000frames0diff/renderheap0 unchanged audio SHA4b32746b…. Native wrapper+frontend compile7972B/align4,248B scratch plus20B saved registers before callees; complete stack and combined app fit NOT_RUN. Six renderer closure negatives and eight factory closure/selection tests PASS; fresh factory build-only PASS, new694audio NOT_RUN. Scope and source receipts in docs/sound/v2-source-frontend-result.json. Independent review pending; no full S1–S7 PASS.

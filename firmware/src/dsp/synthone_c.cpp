@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "synthone_c.h"
 #include "source_scheduler.hpp"
+#include "frontend/source_controls.hpp"
 #include <new>
 #include <stdint.h>
 struct dnbox_s1 { s1scheduler::SourceScheduler engine; };
@@ -47,6 +48,22 @@ dnbox_s1 *dnbox_s1_init(void *storage,size_t bytes,const dnbox_s1_config *config
 }
 void dnbox_s1_retire(dnbox_s1 *p) { if(p) p->~dnbox_s1(); }
 int dnbox_s1_parameter(dnbox_s1 *p,unsigned id,float value) { return p && p->engine.set_target(id,value); }
+int dnbox_s1_source_parameter(dnbox_s1 *p,unsigned id,float value) {
+    if(!p) return 0;
+    dnbox_s1frontend::SourceControls controls(p->engine);
+    return controls.set_parameter(id,value);
+}
+int dnbox_s1_source_normalized(dnbox_s1 *p,unsigned id,float value) {
+    if(!p) return 0;
+    dnbox_s1frontend::SourceControls controls(p->engine);
+    return controls.set_normalized(id,value,0);
+}
+int dnbox_s1_target(const dnbox_s1 *p,unsigned id,float *out) {
+    if(!p || id>=150 || reinterpret_cast<uintptr_t>(out)%alignof(float) ||
+       !disjoint(p,sizeof(*p),out,sizeof(float))) return 0;
+    *out=p->engine.compactPorts.target(id).value;
+    return 1;
+}
 int dnbox_s1_note_on(dnbox_s1 *p,int note,int velocity) { return p && p->engine.start(note,velocity); }
 int dnbox_s1_note_off(dnbox_s1 *p,int note) { return p && p->engine.stop(note); }
 int dnbox_s1_all_off(dnbox_s1 *p) { return p && p->engine.stop_all(); }

@@ -1,0 +1,53 @@
+{
+  "scope": "Original scalar source-helper laws through pre-FX C ABI; not complete app frontend or native activation",
+  "source_reference_commit": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "prior_public_head": "679ff978f59b593c305069022804c342115d7e5a",
+  "helper_changes": 6385,
+  "target_word_comparisons": 957750,
+  "frontend_render_frames": 4096,
+  "frontend_different_words": 0,
+  "control_heap_calls": 0,
+  "pre_fx_scenes": 12,
+  "pre_fx_frames": 576000,
+  "pre_fx_different_words": 0,
+  "render_heap_calls": 0,
+  "audio_sha256": "4b32746b36590998cf7c215ec07d5890d394414e8b2702b7a1a5e847c8ed6b34",
+  "runtime_tested_sources_sha256": "06586c3567c814dd878674c20532c68e2efb4ca8f2c37361a707f434515c2a70",
+  "adapter_tested_sources_sha256": "ffb550fde078616f071183264c2ce4046d9fb8fcc87b72552b25d2e614611285",
+  "commands_sha256": "58066fd1378567bdd3e9352c346d6a2da28c6c88edb5651d6ff1fe7bf70a2ac4",
+  "renderer_guard_tests": 6,
+  "factory_guard_tests": 8,
+  "factory_build_only": "PASS; new694audio NOT_RUN",
+  "native": {
+    "target": "pi32v2 r3",
+    "compiler": "jieli-linux-toolchains-20260730.1",
+    "owner_bytes": 7972,
+    "owner_alignment": 4,
+    "wrapper_frontend_compile": "PASS",
+    "transient_scratch_bytes": 248,
+    "wrapper_saved_register_bytes": 20,
+    "complete_call_stack": "NOT_MEASURED",
+    "frontend_unlinked_symbol_bytes": {
+      "T": 3414,
+      "W": 104,
+      "r": 1292
+    },
+    "application_link_and_combined_fit": "NOT_RUN"
+  },
+  "source_hashes": {
+    "firmware/src/dsp/synthone_c.cpp": "4a594bd91f73d19f546f55bcf4c211b1da0e1ac3bb935b2cac52488986069062",
+    "firmware/src/dsp/synthone_c.h": "4fc1f3917db30ca51cdd88db90ee57c232ee3ed2c6164151bb528ea66114da82",
+    "tests/host/synthone_renderer_test.cpp": "0f556fc93baa9364b3a90baf4b3a0cca75c16dd5b7f2b8764a551a8eb8262f2f",
+    "tests/host/run_synthone_renderer.py": "113bd964683151a4faa7c8cf8e060ec32db51ea06e8c6dc81c4c50d0fefb35af",
+    "tests/host/test_synthone_rebuild.py": "d30f3f970a2439c125163c9fea21e37b101705621bd4fce639f60112cc6696ff",
+    "tests/host/run_synthone_factory.py": "bf3796959c49e8c273e4525853fb0a31ae0fde728d5057a8e3cbc5cbd4b492fa",
+    "tests/host/test_synthone_factory_runner.py": "527d866f11688d4488fc2972804617db9925476382ecdbcfb6f6f27c72e23815",
+    "firmware/src/dsp/synthone/SOURCE-MANIFEST.json": "2600a28b624356021e10696f5d283891b9ecc3bcf8f2bf4e0b2f722f6c7fa886",
+    "firmware/src/dsp/synthone/controls/frontend/AKSynthOneRate.h": "5adeb902cd667fda78366084951e013b815ee39008c6cd50dde74f8411ca54c8",
+    "firmware/src/dsp/synthone/controls/frontend/AudioKit/AKInterop.h": "6c03e2d632669b5ba1b6736e3d4901e5a9a0c80f008b22a670481a7fcaef2541",
+    "firmware/src/dsp/synthone/controls/frontend/S1Rate.hpp": "b4d76cd149f0e99f8f25b1ae31e19845e7156538abdfae583bf80fd919874228",
+    "firmware/src/dsp/synthone/controls/frontend/notices/SynthOne-MIT.txt": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+    "firmware/src/dsp/synthone/controls/frontend/source_controls.cpp": "a094d93857f1de64cf857196ad9f16e87c511d87de843727b0e4f32a54d9896c",
+    "firmware/src/dsp/synthone/controls/frontend/source_controls.hpp": "436341d1fe18b15309ff132c51f88dd468a01c2d6735b1ed19d9f0cd44c04a77"
+  }
+}

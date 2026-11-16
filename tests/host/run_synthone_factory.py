@@ -79,6 +79,12 @@ def verify_dependencies(depfile, allowed):
             raise ValueError('bound dependency changed: ' + str(path))
 
 
+def runtime_objects(link, harness_obj):
+    # Factory compiles its own frontend/oracle. Never link renderer-only helpers.
+    excluded = {'c-wrapper.o', 'source-frontend.o', 'oracle-frontend.o'}
+    return [x for x in link if x.endswith('.o') and x != harness_obj and Path(x).name not in excluded]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--source-build', type=Path, required=True)
@@ -96,6 +102,9 @@ def main():
     runtime_manifest = (out / 'TESTED-SOURCES.json').read_bytes()
     for name, digest in json.loads(runtime_manifest).items():
         allowed[(out / 'closure' / relative(name)).resolve()] = digest
+    adapter_manifest = (out / 'ADAPTER-SOURCES.json').read_bytes()
+    for name, digest in json.loads(adapter_manifest).items():
+        allowed[(out / 'adapter-inputs' / relative(name)).resolve()] = digest
     assets = {'public-morphs.f32': (852176, '0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5'),
               'compact.bin': (165292, 'a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5')}
     for name, (size, digest) in assets.items():
@@ -126,7 +135,7 @@ def main():
         path = Path(arg[2:]).resolve()
         if path == (repo / 'firmware/src/dsp').resolve():
             continue  # C ABI include root is unused by this source-only fixture.
-        if not path.is_relative_to(out / 'closure'):
+        if not path.is_relative_to(out / 'closure') and not path.is_relative_to(out / 'adapter-inputs'):
             raise ValueError('unbound include root: ' + str(path))
         includes.append(arg)
     flags = ['-O2', '-fno-builtin', '-ffunction-sections', '-fdata-sections', '-ffp-contract=off', '-fno-fast-math', '-DNO_LIBSNDFILE']
@@ -143,7 +152,7 @@ def main():
         verify_dependencies(dep, allowed)
         verify_files(allowed)
         objects.append(str(obj))
-    objects += [x for x in cmds[-1] if x.endswith('.o') and x != harness_obj and not x.endswith('/c-wrapper.o')]
+    objects += runtime_objects(cmds[-1], harness_obj)
     cmd = ['c++', *objects, '-Wl,--gc-sections', '-Wl,--wrap=s1c_read', '-Wl,--wrap=malloc', '-Wl,--wrap=calloc',
            '-Wl,--wrap=realloc', '-Wl,--wrap=free', '-lm', '-o', str(out / 'factory-test')]
     commands.append(cmd)
@@ -163,6 +172,7 @@ def main():
         'scope': __doc__, 'presets': 694, 'frames': progress['frames'], 'differing_words': 0, 'nonfinite_words': 0,
         'factory_inputs_sha256': sha((out / 'FACTORY-INPUTS.json').read_bytes()),
         'runtime_tested_sources_sha256': sha(runtime_manifest),
+        'adapter_tested_sources_sha256': sha(adapter_manifest),
         'factory_commands_sha256': sha((out / 'factory-build-commands.json').read_bytes()),
         'frontend_commands_sha256': allowed[command_stream.resolve()]
     }, indent=2) + '\n')

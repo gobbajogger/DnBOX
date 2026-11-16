@@ -117,3 +117,13 @@ SynthOne postFX remains unadmitted, and flash is far over headroom.
 Rejected alternative: compact-only two-descriptor build also changed the
 shared raw oracle initializer and produced a failing comparison; it was fully
 reverted, not hidden with an oracle edit. No descriptor-mode change is shipped.
+
+## Transient source-helper API checkpoint
+
+New scalar source-law setters do not add owner fields: native7972B/alignment4
+static assertions still compile. Their local helper occupies248B; each emitted
+wrapper saves20B registers before its callees. Complete worst-case call-stack
+usage remains unmeasured. The frontend translation unit's unlinked symbols add
+3414B T+104B W and1292B r. These are component symbol sums, not link-map size or
+combined admission. Existing original fullFX/wave-table resource blockers remain.
+See `docs/sound/v2-source-frontend-result.json` for exact source/result hashes.

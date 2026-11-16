@@ -362,6 +362,54 @@
       "path": "scheduler/source_scheduler.hpp",
       "bytes": 2192,
       "sha256": "d6046152bd8f9725a859850196bc50ab9fb222ffd3db4b17f1ed360f166261ed"
+    },
+    {
+      "path": "controls/frontend/AKSynthOneRate.h",
+      "bytes": 805,
+      "sha256": "5adeb902cd667fda78366084951e013b815ee39008c6cd50dde74f8411ca54c8",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "4643ef26cdc9d322b552817870bb239ac4fbfda5e3bef752653600a9b1ff5f7a",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
+    },
+    {
+      "path": "controls/frontend/AudioKit/AKInterop.h",
+      "bytes": 39,
+      "sha256": "6c03e2d632669b5ba1b6736e3d4901e5a9a0c80f008b22a670481a7fcaef2541",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "6c03e2d632669b5ba1b6736e3d4901e5a9a0c80f008b22a670481a7fcaef2541",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
+    },
+    {
+      "path": "controls/frontend/S1Rate.hpp",
+      "bytes": 9376,
+      "sha256": "b4d76cd149f0e99f8f25b1ae31e19845e7156538abdfae583bf80fd919874228",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "aaa6c2a89c608349a42a7a2bdb5e8eee8cd8415127fdafd10d9a248eaaf1ae78",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
+    },
+    {
+      "path": "controls/frontend/notices/SynthOne-MIT.txt",
+      "bytes": 1075,
+      "sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "71ac2b8af8849096ba2d0f3510972b8384204f17517e773bfa52fc755fb0fc49",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
+    },
+    {
+      "path": "controls/frontend/source_controls.cpp",
+      "bytes": 9712,
+      "sha256": "a094d93857f1de64cf857196ad9f16e87c511d87de843727b0e4f32a54d9896c",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "9a2519b13a0c5ab4b087883162a3283a75ececa770d034f8b5369a88c5cfc0f1",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
+    },
+    {
+      "path": "controls/frontend/source_controls.hpp",
+      "bytes": 3297,
+      "sha256": "436341d1fe18b15309ff132c51f88dd468a01c2d6735b1ed19d9f0cd44c04a77",
+      "derived_from_reviewed_fixture_commit": "b02139cdb50d0a0b88fc132780ff7eb4f46e6971",
+      "fixture_original_sha256": "1e3afde92cb925fd9dc13bdafb634cd69d91b0043e97433e767be40cad9e41e9",
+      "changes": "Isolated namespace/include guards; portable #include; friendlyName uses immutable literal instead of std::string; unreachable invalid-parameter printf removed behind public validation. DSP parameter laws unchanged."
     }
   ]
 }

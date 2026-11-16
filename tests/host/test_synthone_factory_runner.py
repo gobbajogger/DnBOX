@@ -13,6 +13,11 @@ spec.loader.exec_module(m)
 
 
 class RunnerGuards(unittest.TestCase):
+    def test_renderer_frontends_are_not_linked_twice(self):
+        link = ['c++', '/out/harness.o', '/out/c-wrapper.o', '/out/source-frontend.o',
+                '/out/oracle-frontend.o', '/out/dependency-003.o', '-o', '/out/test']
+        self.assertEqual(m.runtime_objects(link, '/out/harness.o'), ['/out/dependency-003.o'])
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
