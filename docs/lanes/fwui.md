@@ -177,3 +177,8 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 
 ## Actual canvas origin binding
 - Extended isolated bounds observer to validate actual cv_commit/cv_commit_rows/full-with-tiles coordinates and reject replacement of a text-bearing canvas before commit.172/500 affected producers reran with690/1671 origin checks and unchanged0 logical out-of-screen samples. Four unit tests include missing/duplicate actual commit-route mutations. Independent review verified frozen bf9deb55 source/report hashes and reran instrumentation tests. No production change or band-union/overlap/fullF2 acceptance.
+
+## Native drum Attack contract6 regression
+- Actual six visible909/808 typed Attack controls ×four current scale contexts ×settled min/max:48 cases,0 failures,357 checks. Native polyline rising-span/32-unit viewbox meets min≤10% and max≥40%; unchanged AA renderer generates actual pixels. Idle/state nonmutation and real page identity asserted.
+- Authenticated f254 Git blob7b573423 supplies only unchanged historical Attack block into same current host;48 cases/24 minimum-span failures. Original input manifests must match; expected-only mutations and exact hook hashes verified again after execution. Reviewer requested these runner guards, then affected two-case rerun retained96 byte-identical rasters. Independent source/hash/threshold review, four extraction tests and two equivalent PNG-pair visual inspections accepted bounded evidence.
+- Distinct generated64x48 regression PNGs and manifests published under docs/evidence/fwui/attack-shape/. No denied deep-list/Remote artifact retried. Not whole historical firmware, full-screen/all-engine/live/check5 or fullF2 acceptance.
