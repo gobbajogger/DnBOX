@@ -1,13 +1,30 @@
-## Summary
+## Purpose and request coverage
 
-<!-- What changed, and why. -->
+<!-- Link the request/design and name preserved behavior, changed behavior and known gaps. -->
 
-## How it was tested
+## Exact source and ownership
 
-<!-- Host tests, builds, or a short reason this is docs-only. -->
+- Source branch and head SHA:
+- Target branch and checked head SHA:
+- Owner, dependencies and integration order:
+- Related or replacement PRs (do not close unique/active work without proof):
 
-## Checklist
+## Local verification and independent review
 
-- [ ] I did not commit firmware images (`.fwsc`, `.bin`, `.elf`, `.img`), logs, dumps, or zip archives.
-- [ ] I did not change files under `.github/workflows/` unless a maintainer asked for that.
-- [ ] Licence and credits in `LICENSE`, `LICENSING.md` and `CREDITS.md` still apply to any third-party code I touched.
+<!-- Record commands, exit codes, exact inputs and evidence links. Use PASS, FAIL and NOT_RUN separately. No GitHub Actions. -->
+
+- Affected local tests and negative/regression cases:
+- Applicable Elite/Pro model, SDK/config, flash/pool/audio/timing checks:
+- Independent reviewer and exact reviewed version:
+- Visual changes: approved reference, internal review and actual candidate validation:
+- Remaining gaps, accountable owner and next action:
+
+## Delivery boundary
+
+<!-- Distinguish source, review, integration, qualification, publication and device acceptance. A draft or source commit is not usable delivery. -->
+
+- [ ] No secrets, unrelated private captures/backups, proprietary SDK/toolchain or firmware/product binaries are included.
+- [ ] Licences, attribution, existing controls, manuals, history and installer safety are preserved.
+- [ ] No GitHub Actions/workflows, force push, access/protection/settings changes or unapproved destructive action.
+- [ ] Production promotion, publication and device results are not claimed without exact evidence and applicable authorization.
+

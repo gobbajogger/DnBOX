@@ -1,5 +1,7 @@
 # DnBOX
 
+[Repository maintenance](docs/repository-maintenance/README.md): rename preparation, complete branch/PR snapshot, retention and feature-request status. Current repository and installer URLs remain unchanged.
+
 DnBOX (formerly X0X37) is firmware that turns an **M-VAVE SMK-37 Elite** or **SMK-37 Pro** into a groovebox you can play with [Loopy Pro](https://loopypro.com/) and as a stand-alone instrument. FM-1 builds exist in source; current public packages are SMK-37 only.
 
 It gives you a **909**, an **808**, two **303s** with an acid line generator, and a **breakbeat player**, all running at once. Each part can use its own pattern length and rate. You can chain patterns, record knob moves, and play everything in stereo through a shared reverb, tape delay and master compressor. Over USB the keyboard is a MIDI device and an audio interface, with no driver needed.

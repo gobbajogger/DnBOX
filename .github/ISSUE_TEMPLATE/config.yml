@@ -1,8 +1,9 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Web installer
-    url: https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/
-    about: Install or restore DnBOX firmware (Chrome or Edge, USB).
   - name: Manual
     url: https://gobbajogger.github.io/X0X37-for-Loopy-Pro/manual/
-    about: How to use DnBOX, including troubleshooting and restore steps.
+    about: Existing DnBOX manual. Repository rename and Pages cutover have not occurred.
+  - name: Current installer
+    url: https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/
+    about: Back up first and preserve all model, release and device-write safeguards.
+
