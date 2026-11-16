@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:25 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:45 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -99,3 +99,5 @@ exceeded the read-only/no-installation scope. Stopped without retry or indirect
 route; root handles explicit owner approval for expanded compiler preparation.
 Swift execution remains NOT_RUN. Continue source/closure work and independent
 existing-C++ checks; do not substitute a translation for original Swift evidence.
+
+Callback measurement checkpoint: a new source-bound host bench preserves all callback samples and original program mono/poly/arp/FX settings. Eight-program pilot failed with64 wall/58 CPU deadline misses; an explicitly diagnostic FTZ run and same-binary normal repeat also failed. Six trace integrity tests PASS; fresh build and independent source review underway before full694 measurement. No device XRUN, resolved stall cause, production floating-mode change or S1 PASS claimed. Red trace/source snapshots preserved under docs/sound/callback-pilot; next diagnose and repeat on an independent available host without touching denied LFS or Swift routes.

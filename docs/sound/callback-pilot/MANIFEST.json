@@ -1,0 +1,50 @@
+{
+  "scope": "Preserved red8-program pilots; not all694 or device qualification",
+  "files": {
+    "initial-normal/callback-trace.csv.gz": {
+      "raw_bytes": 203989,
+      "raw_sha256": "d1744463f66db6a035904ab8fbd1b474c2b8e4e2644fd14b07d1119f918e0d64",
+      "gzip_sha256": "7a1ea79129eca257c3e1946c45e032bf004c812b8568e94c804c6a2675d709b7"
+    },
+    "initial-normal/callback-programs.jsonl.gz": {
+      "raw_bytes": 1788,
+      "raw_sha256": "a9d67bd085396baf66d71a4579f3655619ec7479bf8211b021c04a9496f1e56e",
+      "gzip_sha256": "82f6efd19602d217388cd0718d23d519ad06a7351da3ea3518d800184149e650"
+    },
+    "initial-normal/callback-run.log.gz": {
+      "raw_bytes": 222,
+      "raw_sha256": "ee974d6181d02a443cbc351ce09199df431db30e0f8d327e29ad3b0e15c67d81",
+      "gzip_sha256": "8fb2795950cfc5fba580bff535a7f48bfaedfb2686f3ccce4bde14bc716a7f86"
+    },
+    "ftz-diagnostic/callback-trace.csv.gz": {
+      "raw_bytes": 203693,
+      "raw_sha256": "6bae47f34dc8d2816ab5ff926c45cd11932b90e0d5c8f8860f8bf23aa6a9e52d",
+      "gzip_sha256": "1aa0e47a1f39cb4692f6a3a659bcda8423c07bf982189a7ee989d53345d3687f"
+    },
+    "ftz-diagnostic/callback-programs.jsonl.gz": {
+      "raw_bytes": 1785,
+      "raw_sha256": "3472dc6bf353bc229ca574759410b3500876250b50ff1b9b215aa7c6a9a32a8c",
+      "gzip_sha256": "78dfa05c14df44c060e72538135772011e4f8d01768302a3295e62ec2d6a4a07"
+    },
+    "ftz-diagnostic/callback-run.log.gz": {
+      "raw_bytes": 282,
+      "raw_sha256": "d9c3d68daba2dcbd739ecd66f7e9e2249796731a72baada29b5756171cbb0238",
+      "gzip_sha256": "4097c4f8759f68ab0d9ae1644636a741b1e819096140f658d724144e1e68334a"
+    },
+    "normal-repeat/callback-trace.csv.gz": {
+      "raw_bytes": 205389,
+      "raw_sha256": "ac63a84cb2ee40576d85663449991e349f8b51b656d98f09d918a205fdd35550",
+      "gzip_sha256": "031d81d9c696576f9164c847651fffe6091b0227c0ca37f6eb4625aa726587a9"
+    },
+    "normal-repeat/callback-programs.jsonl.gz": {
+      "raw_bytes": 1799,
+      "raw_sha256": "8271e5c5e748cdfd2726da5b8f71f69860902525804b4690a12d9ad91b5dcce8",
+      "gzip_sha256": "ddc3fcf048e1e2511f1221f98ad95b8302f4b15275bf67fb685fe011016bb6a1"
+    },
+    "normal-repeat/callback-run.log.gz": {
+      "raw_bytes": 284,
+      "raw_sha256": "dbbb7541b6eb4e161bdbdaa639c10c5a19df8da4a0453d7625b42d7c8e117fca",
+      "gzip_sha256": "ebb5ae3f0bb81b53fc57a8ef910ac8bd29534b88097b3a2c032229c9ba544b02"
+    }
+  }
+}
