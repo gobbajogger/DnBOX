@@ -4985,6 +4985,46 @@ static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
                            (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
 }
 
+/* Shared glyph renderer (anim/renderer-aa-ease.patch, R22 lock): Xiaolin Wu lines with
+ * coverage 0..16 into px_blend, so a glyph is one thin anti-aliased stroke at R22 weight
+ * instead of a 1-bit staircase. Same law as anim/renderer-aa-ease.js for the Remote. */
+static int aa_ipart(float x) { return (int)fm_floorf(x); }
+static float aa_fpart(float x) { return x - fm_floorf(x); }
+static float aa_rfpart(float x) { return 1.0f - aa_fpart(x); }
+static void aa_plot(int steep, int x, int y, uint16_t col, float a)
+{
+    uint32_t c = (uint32_t)(a * 16.0f + 0.5f);
+    if (steep) px_blend(y, x, col, c); else px_blend(x, y, col, c);
+}
+static void cv_line_aa(float x0, float y0, float x1, float y1, uint16_t col)
+{
+    int steep = fm_fabsf(y1 - y0) > fm_fabsf(x1 - x0);
+    float dx, grad, xend, yend, xgap, intery;
+    int xpxl1, xpxl2, x;
+    if (steep) { float t = x0; x0 = y0; y0 = t; t = x1; x1 = y1; y1 = t; }
+    if (x0 > x1) { float t = x0; x0 = x1; x1 = t; t = y0; y0 = y1; y1 = t; }
+    dx = x1 - x0;
+    grad = dx == 0.0f ? 1.0f : (y1 - y0) / dx;
+    xend = fm_floorf(x0 + 0.5f); yend = y0 + grad * (xend - x0); xgap = aa_rfpart(x0 + 0.5f);
+    xpxl1 = (int)xend;
+    aa_plot(steep, xpxl1, aa_ipart(yend), col, aa_rfpart(yend) * xgap);
+    aa_plot(steep, xpxl1, aa_ipart(yend) + 1, col, aa_fpart(yend) * xgap);
+    intery = yend + grad;
+    xend = fm_floorf(x1 + 0.5f); yend = y1 + grad * (xend - x1); xgap = aa_fpart(x1 + 0.5f);
+    xpxl2 = (int)xend;
+    aa_plot(steep, xpxl2, aa_ipart(yend), col, aa_rfpart(yend) * xgap);
+    aa_plot(steep, xpxl2, aa_ipart(yend) + 1, col, aa_fpart(yend) * xgap);
+    for (x = xpxl1 + 1; x < xpxl2; x++, intery += grad) {
+        aa_plot(steep, x, aa_ipart(intery), col, aa_rfpart(intery));
+        aa_plot(steep, x, aa_ipart(intery) + 1, col, aa_fpart(intery));
+    }
+}
+static void cv_poly_aa(const float *xy, int n, uint16_t col)
+{
+    for (int i = 1; i < n; i++)
+        cv_line_aa(xy[2 * i - 2], xy[2 * i - 1], xy[2 * i], xy[2 * i + 1], col);
+}
+
 /* corner coverage of a radius-r quarter circle, pixel (x, y) of the r x r corner square,
  * 4 x 4 supersampled; and of its 1-px ring (for outlines). Constant data in flash, packed: the
  * r x r square of radius r starts at CORNER_OFF[r]. The values are those that the old start-up
@@ -6945,7 +6985,7 @@ static UI_DRAW void draw_original_wave(int cx,int y,const ui_original_wave_cache
 {
     cv_rect(cx-14,y+v->zero[slot],UI_ORIGINAL_WAVE_W,1,blend(face,ink,3));
     for(int i=1;i<UI_ORIGINAL_WAVE_W;i++)
-        cv_line(cx-15+i,y+v->wave[slot][i-1],cx-14+i,y+v->wave[slot][i],ink);
+        cv_line_aa((float)(cx-15+i),(float)(y+v->wave[slot][i-1]),(float)(cx-14+i),(float)(y+v->wave[slot][i]),ink);
 }
 
 enum { MIAMI_WAVE_HEIGHT=19, MIAMI_WAVE_ZERO=9, MIAMI_WAVE_GAIN=8 };
@@ -6993,7 +7033,7 @@ static UI_DRAW void draw_wave_glyph(int cx, int y, int shape, int mix, uint16_t 
         int a=shape==4?-saw:shape==1?(saw*(127-mix)+square*mix)/127:
               shape==3?(tri*(127-mix)+pulse*mix)/127:(tri*(127-mix)+square*mix)/127;
         int py=y+(a+15)*8/30;
-        if(i) cv_line(cx-14+i-1,prev,cx-14+i,py,col);
+        if(i) cv_line_aa((float)(cx-14+i-1),(float)prev,(float)(cx-14+i),(float)py,col);
         prev=py;
     }
 }
@@ -7197,6 +7237,54 @@ static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, u
     int e = cv_text(l, f == &FONT_T ? y : base_y(&FONT_T, y, &FONT_XS), f, num, ink);
     if (wu) cv_text(e + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
 }
+/* Shared value ease (anim/renderer-aa-ease.patch): the painted pot follows the committed
+ * value critically damped, one step per 16 ms ui_frame. Settles to <=0.5 % of the step and
+ * <0.5 px painted error within 180 ms, no overshoot: omega = 5/0.12 = 41.667 (0.47 % at 180 ms).
+ * Audio keeps the committed integer pot; only the continuous glyph + readout use this.
+ * Slots are reused least-recently-painted first, and knobs_sig() mixes the painted values
+ * in so the strip keeps repainting until the ease has settled. */
+#define UI_EASE_OMEGA (5.0f / 0.12f)
+#define UI_EASE_DT    (16.0f / 1000.0f)
+#define UI_EASE_SLOTS 8
+typedef struct { float y, vel; int tgt; pref_t r; uint32_t seen; uint8_t on; } ui_ease_t;
+static ui_ease_t ui_ease[UI_EASE_SLOTS];
+static void ui_ease_tick(void)
+{
+    float ex = fm_expf(-UI_EASE_OMEGA * UI_EASE_DT);
+    for (int i = 0; i < UI_EASE_SLOTS; i++) {
+        ui_ease_t *e = &ui_ease[i];
+        float A, B;
+        if (!e->on) continue;
+        A = e->y - (float)e->tgt;
+        B = e->vel + UI_EASE_OMEGA * A;
+        e->y = (A + B * UI_EASE_DT) * ex + (float)e->tgt;
+        e->vel = (B - UI_EASE_OMEGA * (A + B * UI_EASE_DT)) * ex;
+        if (fm_fabsf(e->y - (float)e->tgt) < 0.02f && fm_fabsf(e->vel) < 0.5f) { e->y = (float)e->tgt; e->vel = 0.0f; }
+    }
+}
+static int ui_ease_value(pref_t r, int committed)
+{
+    int i, pick = 0;
+    for (i = 0; i < UI_EASE_SLOTS; i++) {
+        ui_ease_t *e = &ui_ease[i];
+        if (e->on && e->r.kind == r.kind && e->r.a == r.a && e->r.b == r.b && e->r.c == r.c) {
+            e->tgt = committed; e->seen = ui.frame;
+            return (int)(e->y + 0.5f);
+        }
+        if (!e->on) { if (ui_ease[pick].on) pick = i; }
+        else if (ui_ease[pick].on && (int32_t)(e->seen - ui_ease[pick].seen) < 0) pick = i;
+    }
+    ui_ease[pick].on = 1; ui_ease[pick].r = r; ui_ease[pick].seen = ui.frame;
+    ui_ease[pick].y = (float)committed; ui_ease[pick].vel = 0.0f; ui_ease[pick].tgt = committed;
+    return committed;
+}
+static uint32_t ui_ease_sig(void)
+{
+    uint32_t h = 0;
+    for (int i = 0; i < UI_EASE_SLOTS; i++) if (ui_ease[i].on) h = h * 31u + (uint32_t)(int)(ui_ease[i].y + 0.5f);
+    return h;
+}
+
 static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
 {
     const x0x_param_t *d=pref_desc(r);
@@ -7207,6 +7295,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     int value_y=height>49?35:26, bar_y=height-4;
     if(!d) return;
     val=matrix_value(r);
+    if(d->max==127) val=ui_ease_value(r,val);   /* continuous pots: glyph + readout follow the eased value */
     if(r.kind==R_ENG && r.a==T_303 &&
        engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO) {
         /* Original Chicago slots: 13 ON, 14 MODE, 16 SPEED; readout text stays original. */
@@ -8017,6 +8106,11 @@ static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint
     float sh=0;
     if(live){ if(e<0.001f)e=0.001f; sh=(float)xe*fm_log2f(e)/-9.966f; }
     cv_rect(gx,bot,OG_W,1,C_LINE);
+    if(!live && !noisy) {        /* idle outline: the -60 dB exponential as one AA stroke, not a staircase */
+        float xy[33*2]; int n=xe<8?16:32;
+        for(int i=0;i<=n;i++){ float t=(float)i/(float)n; xy[2*i]=(float)gx+t*(float)xe; xy[2*i+1]=(float)bot-fm_exp2f(-9.966f*t)*(float)H; }
+        cv_poly_aa(xy,n+1,col);
+    } else {
     int h0=-1;
     for(int x=0;x<=xe;x++){
         float a=fm_exp2f(-9.966f*(float)x/(float)xe);
@@ -8027,6 +8121,7 @@ static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint
         if(noisy && !live) cv_rect(gx+x,bot-h,1,h,c);
         else { cv_rect(gx+x,bot-h,1,1,c); if(h0>h+1) cv_rect(gx+x-1,bot-h0,1,h0-h,c); }
         h0=h;
+    }
     }
     if(!live) return;
     for(int x=0;(float)x<=(float)xe-sh;x++){
@@ -8216,6 +8311,7 @@ static uint32_t knobs_sig(void)
         MIXIN(engine_bass_preset_pending(bidx()));
         MIXIN(engine_bass_requested_bank(bidx())); MIXIN(engine_bass_requested_preset(bidx()));
     }
+    MIXIN(ui_ease_sig());                       /* keep repainting while an eased value moves */
     MIXIN(ui.view);
     MIXIN(ui.part);
     MIXIN(division_pad_owner());
@@ -8869,6 +8965,7 @@ void ui_frame(void)
     autosave();
     if (!project_busy)
         perf_test_tick();
+    ui_ease_tick();                                 /* 16 ms step; continuous glyphs paint the eased pot */
     if (ui.view == V_PERF && !perf_testing())
         perf_window(0);
     for (i = 0; i < NPARTS; i++)
