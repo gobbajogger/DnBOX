@@ -70,3 +70,7 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 ## Reachable inventory correction
 - Corrected inventory harness:bare V_GLO is not a reachable global screen; replaced5 invalid bare setups with42 real GLOBAL index/section row states via production entry/list routing. Captured172 ordinary/global native states. Historical135 capture is retained, not relabeled.
 - New source-derived inventory schema/pinned test blob at docs/evidence/fwui/inventory-routes/manifest.json. Four render archives retain all172 PNGs. coverageComplete=false:alternate engine pages, other overlays/transients and hardware clip/PADCAL remain NOT_RUN. No F1/F2 acceptance claimed.
+
+## Global header correction
+- Actual global inventory exposed old header path on O_LIST:missing common R22 battery/style. Expanded production battery test first failed on GLOBAL. R22 header now also handles list overlays; corrected2905 assertions PASS. Other modal/help and full all-screen visual checks remain open.
+- Fresh172-state replay confirms only42 GLOBAL images changed;130 ordinary states pixel-identical. Both native builds pass XIP reserve:Elite2412/Pro2424B free; BSS96560; pool remains172-margin until integ fix composition. No full Local/Review acceptance.
