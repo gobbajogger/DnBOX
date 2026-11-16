@@ -1,6 +1,6 @@
 # Lane: sound
 Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 03:45 VLAT.
+Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-17 04:08 VLAT.
 
 ## Checklist
 All final checklist items remain FAIL until exact combined-source proof exists.
@@ -101,3 +101,11 @@ Swift execution remains NOT_RUN. Continue source/closure work and independent
 existing-C++ checks; do not substitute a translation for original Swift evidence.
 
 Callback measurement checkpoint: a new source-bound host bench preserves all callback samples and original program mono/poly/arp/FX settings. Eight-program pilot failed with64 wall/58 CPU deadline misses; an explicitly diagnostic FTZ run and same-binary normal repeat also failed. Six trace integrity tests PASS; fresh build and independent source review underway before full694 measurement. No device XRUN, resolved stall cause, production floating-mode change or S1 PASS claimed. Red trace/source snapshots preserved under docs/sound/callback-pilot; next diagnose and repeat on an independent available host without touching denied LFS or Swift routes.
+
+Independent source-helper review completed: tester reran 6,385 helper changes /957,750 target-word comparisons /4,096 frontend frames with0 differences/control heap, plus12 scenes/576,000 frames with0 differences/render heap. All14 receipt input hashes retained;6 renderer and8 factory guard regressions PASS. This accepts only the documented source-helper component, not complete app/native/timing.
+
+Callback review correction: the earlier Python tracer field observes the runner, not the benchmark. Relabeled it and added the benchmark's own process observation before timed regions, with missing/duplicate/parent-vs-child regressions. Captured and before/after verified reused orchestration tools; imported captured factory bytes and included tool hashes. Nine focused tests PASS. Earlier pilots remain red and their parent observation does not establish an untraced benchmark. A staged fresh eight-program run verifies the hardened path before complete corpus testing. Profile and trace stratification show misses beyond initial callbacks; no single root cause or production optimization is established.
+
+Commit-message correction: the previous callback checkpoint subject omitted rule6's `| next:` suffix. No content or ref was rewritten; subsequent subjects retain the required next deliverable.
+
+Follow-up timing trace publication blocked: automated review twice rejected the exact60,761B gzip /81,107B JSON request as above700KB, despite explicit measured request size. Stopped that blob, no indirect retry or encoding/destination change. Root handles owner clarification/review resolution. New source/tests/text-only status can proceed independently; all trace bytes remain preserved. Hardened8-program pilot observed benchmark TracerPid0,19 wall/17 CPU misses,0nonfinite. Full694 timing still pending source review.

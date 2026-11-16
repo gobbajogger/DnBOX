@@ -51,6 +51,25 @@ class DeadlineTrace(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'count mismatch'):
                 m.summarize(self.write(Path(d), lambda row: row.__setitem__(4, 3000000)), 1)
 
+    def test_changed_orchestration_tool_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'factory.py'
+            path.write_bytes(b'original')
+            snapshot = {path: path.read_bytes()}
+            m.verify_tool_snapshot(snapshot)
+            path.write_bytes(b'changed')
+            with self.assertRaisesRegex(ValueError, 'orchestration tool changed'):
+                m.verify_tool_snapshot(snapshot)
+
+    def test_benchmark_not_parent_tracer(self):
+        self.assertEqual(m.parse_benchmark_tracer('runner_tracer_pid=0\nbenchmark_tracer_pid=123 (observed)\n'), 123)
+        self.assertEqual(m.parse_benchmark_tracer('benchmark_tracer_pid=-1 (unavailable)\n'), -1)
+
+    def test_missing_duplicate_benchmark_tracer_rejected(self):
+        for text in ('runner_tracer_pid=0\n', 'benchmark_tracer_pid=0\nbenchmark_tracer_pid=0\n'):
+            with self.assertRaisesRegex(ValueError, 'benchmark tracer'):
+                m.parse_benchmark_tracer(text)
+
     def test_negative_time_rejected(self):
         with tempfile.TemporaryDirectory() as d:
             with self.assertRaisesRegex(ValueError, 'negative'):

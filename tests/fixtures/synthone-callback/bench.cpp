@@ -36,6 +36,16 @@ static bool missed(uint64_t elapsed, unsigned frames, unsigned rate) {
 }
 int main(int argc, char **argv) {
     CHECK(argc == 8); // original table, pack, commands, CSV, JSONL, count, diagnostic FTZ
+    // Observe this benchmark process, not its Python parent's tracer state.
+    int benchmark_tracer_pid = -1;
+    if (FILE *status = std::fopen("/proc/self/status", "r")) {
+        char line[256];
+        while (std::fgets(line, sizeof line, status))
+            if (std::strncmp(line, "TracerPid:", 10) == 0)
+                benchmark_tracer_pid = int(std::strtol(line + 10, nullptr, 10));
+        CHECK(!std::fclose(status));
+    }
+    std::fprintf(stderr, "benchmark_tracer_pid=%d (-1 means unavailable)\n", benchmark_tracer_pid);
     const bool diagnostic_ftz = std::strtoul(argv[7], nullptr, 10) != 0;
 #if defined(__SSE__)
     const unsigned original_mxcsr = _mm_getcsr();

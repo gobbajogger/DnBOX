@@ -3,7 +3,6 @@
 import argparse
 import csv
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -14,6 +13,21 @@ import sys
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def verify_tool_snapshot(snapshot):
+    for path, data in snapshot.items():
+        if path.read_bytes() != data:
+            raise ValueError('orchestration tool changed: ' + str(path))
+
+
+def parse_benchmark_tracer(stderr):
+    lines = [line for line in stderr.splitlines() if line.startswith('benchmark_tracer_pid=')]
+    if len(lines) != 1:
+        raise ValueError('missing or duplicate benchmark tracer observation')
+    value = int(lines[0].split('=', 1)[1].split()[0])
+    if value < -1: raise ValueError('invalid benchmark tracer observation')
+    return value
 
 
 def summarize(csv_path, programs):
@@ -53,16 +67,26 @@ def main():
     runner_bytes = Path(__file__).read_bytes()
     benchmark = (repo / 'tests/fixtures/synthone-callback/bench.cpp').read_bytes()
     contract = (repo / 'tests/fixtures/synthone-callback/CONTRACT.md').read_bytes()
+    tool_snapshot = {repo / 'tests/host' / name: (repo / 'tests/host' / name).read_bytes()
+                     for name in ('run_synthone_factory.py', 'run_synthone_renderer.py')}
+    verify_tool_snapshot(tool_snapshot)
     subprocess.run([sys.executable, repo / 'tests/host/run_synthone_factory.py', '--source-build',
                     args.source_build.resolve(), '--output', out, '--build-only'], check=True)
-    spec = importlib.util.spec_from_file_location('factory', repo / 'tests/host/run_synthone_factory.py')
-    factory = importlib.util.module_from_spec(spec); spec.loader.exec_module(factory)
+    verify_tool_snapshot(tool_snapshot)
+    import types
+    factory = types.ModuleType('factory')
+    factory.__file__ = str(repo / 'tests/host/run_synthone_factory.py')
+    exec(compile(tool_snapshot[Path(factory.__file__)], factory.__file__, 'exec'), factory.__dict__)
     allowed = {}
     for manifest, root in [('TESTED-SOURCES.json', 'closure'), ('ADAPTER-SOURCES.json', 'adapter-inputs')]:
         for name, digest in json.loads((out / manifest).read_bytes()).items():
             allowed[(out / root / factory.relative(name)).resolve()] = digest
     for name, digest in json.loads((out / 'FACTORY-INPUTS.json').read_bytes()).items():
         allowed[(out / factory.relative(name)).resolve()] = digest
+    for path, data in tool_snapshot.items():
+        staged_tool = out / ('orchestration-' + path.name)
+        staged_tool.write_bytes(data)
+        allowed[staged_tool] = sha(data)
     source, contract_path = out / 'callback-bench.cpp', out / 'CALLBACK-CONTRACT.md'
     source.write_bytes(benchmark); contract_path.write_bytes(contract)
     (out / 'callback-runner.py').write_bytes(runner_bytes)
@@ -90,21 +114,24 @@ def main():
     executable_hash = sha((out / 'callback-bench').read_bytes())
     inputs = {str(path.relative_to(out)): digest for path, digest in sorted(allowed.items())}
     (out / 'CALLBACK-INPUTS.json').write_text(json.dumps(inputs, indent=2) + '\n')
+    verify_tool_snapshot(tool_snapshot)
     if args.build_only:
         (out / 'CALLBACK-RESULT.json').write_text(json.dumps({'status': 'NOT_RUN', 'reason': 'build only'}) + '\n')
         return
     status = Path('/proc/self/status').read_text() if Path('/proc/self/status').exists() else 'unavailable'
     env = {'platform': platform.platform(), 'cpu_count': os.cpu_count(),
            'affinity': sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None,
-           'tracer_pid': next((line.split(':', 1)[1].strip() for line in status.splitlines() if line.startswith('TracerPid:')), 'unknown')}
+           'runner_tracer_pid': next((line.split(':', 1)[1].strip() for line in status.splitlines() if line.startswith('TracerPid:')), 'unknown')}
     (out / 'CALLBACK-ENVIRONMENT.json').write_text(json.dumps(env, indent=2) + '\n')
     run = subprocess.run([str(out / 'callback-bench'), str(out / 'factory-inputs/public-morphs.f32'),
         str(out / 'factory-inputs/compact.bin'), str(stream), str(out / 'callback-trace.csv'),
         str(out / 'callback-programs.jsonl'), str(args.programs), '1' if args.diagnostic_ftz else '0'], text=True, capture_output=True)
     (out / 'callback-run.log').write_text(run.stdout + run.stderr)
     factory.verify_files(allowed)
+    verify_tool_snapshot(tool_snapshot)
     if sha((out / 'callback-bench').read_bytes()) != executable_hash:
         raise ValueError('benchmark executable changed')
+    benchmark_tracer_pid = parse_benchmark_tracer(run.stderr)
     summary = summarize(out / 'callback-trace.csv', args.programs)
     programs = [json.loads(line) for line in (out / 'callback-programs.jsonl').read_text().splitlines()]
     if len(programs) != args.programs or [x['preset'] for x in programs] != list(range(args.programs)):
@@ -118,6 +145,7 @@ def main():
     expected_exit = int(bool(summary['wall_misses'] or summary['cpu_misses'] or nonfinite))
     if run.returncode != expected_exit: raise ValueError('unexpected benchmark exit')
     receipt = {'scope': __doc__, 'programs': args.programs, 'corpus_complete': args.programs == 694, 'diagnostic_ftz': args.diagnostic_ftz,
+        'benchmark_tracer_pid': benchmark_tracer_pid,
         'qualification': 'NOT_QUALIFIED: diagnostic floating mode' if args.diagnostic_ftz else 'host measurement only',
         'summary': summary, 'nonfinite_words': nonfinite, 'process_exit': run.returncode,
         'status': 'DEADLINE_FAIL' if expected_exit else 'ZERO_MISSES_IN_THIS_RUN',
