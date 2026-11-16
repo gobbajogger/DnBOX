@@ -73,7 +73,7 @@ typedef struct {
  * A zero glide duration means invalid; D is nonzero in every valid tick. */
 typedef struct {
  uint32_t base_bits[2],times_bits[2],bpm_bits,duration,mg_valid_mask;
- float denominator[2],delta[2];
+ float delta[2]; /* the MG denominator is recomputed on every miss; only delta is reused */
  original_glide_cache glide;
 } original_miami_coefficient_cache;
 typedef struct {

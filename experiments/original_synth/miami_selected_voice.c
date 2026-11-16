@@ -115,7 +115,7 @@ static void mg_advance(original_miami_voice_mg *m,original_miami_coefficient_cac
   if(cache){
    if(cache->bpm_bits!=bp||cache->duration!=D)cache->mg_valid_mask=0;
    cache->base_bits[i]=bb;cache->times_bits[i]=tb;cache->bpm_bits=bp;cache->duration=D;
-   cache->denominator[i]=denominator;cache->delta[i]=delta;cache->mg_valid_mask|=1u<<i;
+   cache->delta[i]=delta;cache->mg_valid_mask|=1u<<i;
   }
  }
  m->phase=m->phase+delta;if(m->phase>=1){m->phase=m->phase-2.0f;m->wrapped=1;}

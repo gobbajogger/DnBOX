@@ -45,7 +45,6 @@ static void check_selected_mg(void){
   CHECK((cache.mg_valid_mask&(1u<<i))&&cache.base_bits[i]==bits_of(b));
   CHECK(cache.times_bits[i]==bits_of(times)&&cache.bpm_bits==bits_of(bpm));
   CHECK(cache.duration==D);
-  equal(cache.denominator[i],(44100.0f*b)*times,"MG denominator",k);
  }
  CHECK(cache.mg_valid_mask);
 }
