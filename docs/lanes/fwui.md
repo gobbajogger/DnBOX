@@ -57,3 +57,9 @@ Historical briefs are evidence only. RULES.md v2 from owner-provided dnbox-repo-
 
 ## Gate fixture repair
 - Independent baseline found clip-chord display fixture omitted font_bitmap_width while extracted production caps() now requires it. Fixture now extracts the unchanged production helper rather than reverting compressed-font behavior. Corrected actual run:7049 checks/7050 captured chord draws PASS. Evidence:r22-candidate/clip-chord-fixed.log. Production code unchanged by this repair.
+
+## Independent review and thin-lane preview
+- Independent reviewer replayed battery2892, coordinate1651, parameter pads7096 and clip-chord7049 checks successfully. Independent saved-trace evaluation confirms45drum states/checks1-4/zero overlaps, not a fresh whole-UI run or Review10/10.
+- Final b6 native runtime rerun in isolated tree:Elite2444B/Pro2456B XIP free; BSS96560; pool margin172 before integ fix. These native inputs unchanged through62e71.
+- Isolated F6 read-only adapter/renderer preview:1295 assertions PASS,20native240x240 captures. Uses existing step/motion values, preserves four knob controls by replacing only footer strip. NOT connected to production input/render path; no F6 delivery claim. BREAK velocity explicitly unavailable, not mislabeled Level.
+- Owner decision pending for SEL+SELECT lane switch; no mapping added before answer. Integ owns authentic BREAK velocity support. Preview code and captures under docs/evidence/fwui/step-lane-preview/.
