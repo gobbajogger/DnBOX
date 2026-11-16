@@ -82,6 +82,10 @@ def main():
         "deadline_misses": sum(r["deadline_misses"] for r in results),
         "blocks_above_60pct": sum(r["blocks_above_60pct"] for r in results),
         "foreground_peak_ns": max(r["foreground_peak_ns"] for r in results),
+        "worst_case_median_ns": max(r["median_ns"] for r in results),
+        "median_of_case_medians_ns": sorted(r["median_ns"] for r in results)[len(results) // 2],
+        "p99_max_ns": max(r["p99_ns"] for r in results),
+        "clock": "CLOCK_THREAD_CPUTIME_ID per 512-frame DMA half (two engine_render(256) calls)",
     }
     summary["margin_ns"] = 11600000 - summary["peak_ns"]
     summary["host_headroom_pass"] = (summary["peak_ns"] <= 6960000 and
