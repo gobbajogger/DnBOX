@@ -54,7 +54,7 @@ budget()     { local model xip pool
                  echo "$model XIP free=$xip B pool margin=$pool B sha=$SHA"
                  [ "$xip" -ge "$XIP_MIN" ] && [ "$pool" -ge "$POOL_MIN" ] || return 1
                done; }
-ui_defects() { python3 tests/ui_defects/test_gate.py && { [ ! -f tests/ui_defects/first_slice/evaluate.py ] || python3 tests/ui_defects/first_slice/evaluate.py; }; }
+ui_defects() { python3 tests/ui_defects/test_gate.py && python3 tools/dnbox-ui-gate.py --output-root "$OUT"; }
 drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
 step clean-tree clean
