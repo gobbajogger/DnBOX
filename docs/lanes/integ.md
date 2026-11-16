@@ -1,27 +1,38 @@
 # Lane: integ
 
-Owner: integ lane integration agent. Branch: lane/integ-start-files. Updated: 2026-11-17 00:30 VLAT.
-Baseline: `e742be7bd0d01323c899de6e156f40b85ee451db`.
+Owner: accountable integration lane. Branch: lane/integ-start-files. RULES.md v2 only.
+Consolidated firmware remains e742be7bd0d01323c899de6e156f40b85ee451db; nightly remains9165adb92fcdaab756c4e59e3d4a8ee22437ca5a. No lane draft merged or deployed.
 
-## Checklist
-- C1 FAIL: exact baseline/head Local gates in progress; not claimed passing.
-- C2 PASS: branch descends from pinned consolidated input; deletions below preserve recoverability in Git history.
-- C3 FAIL: independent test-and-merge review in progress.
-- C4 FAIL: full gate pending.
-- C5 FAIL: broader integration outcome not complete.
-- C6 FAIL: prep PR remains unmerged until required evidence.
+## Current finish lines
+- C1 FAIL: full Local before/after not passing. Exact9a native and selected host results are subchecks only.
+- C2 PASS at9a: descendant of consolidated; preserved deletion reasons below. Latest changes delete nothing.
+- C3 FAIL: complete independent screen Review10/10 not obtained.
+- C4 FAIL: required full-head limits evidence not yet complete; no secrets or prohibited assets intentionally added.
+- C5 FAIL: outstanding I items below; no lane complete.
+- C6 FAIL: draft955 unmerged, rule9 checks unmet.
+- I0 FAIL: consolidated baseline pool margin172B below512; browser/sanitizer environment and other full-suite evidence remain scoped.
+- I1 FAIL: consolidated targets exist but lane work remains draft; no fictitious merged-state entry.
+- I2 FAIL: exact9a Elite/Pro and focused host tests PASS, all-final-lane combined/full-host qualification absent.
+- I3 FAIL: current9a heavy host playback measured0deadline misses across3x1024blocks, but stricter host margin thresholds FAIL and final Synth One/SuperJ6 composition absent. Not hardware dropout evidence.
+- I4 scoped evidence recovered: managed13e0 compact-programs normal796 + ASan/UBSan796 + corruption negative PASS with default LeakSanitizer; independent six-file closure byte-identical to9a. Not a full9a checkout or final all-lane composition gate.
+- I5 FAIL: authentic five encoded/derived preview assets retained in nightly; current firmware has2076/2088B XIP free, insufficient109274B sample bank. Live Pages404 and stock embedding not delivered.
+- I6 FAIL: fresh roadmap exists; v2 read-only advisory inbox normalizer is under review, no old approval replay or completed automatic collector claim.
+- I7 FAIL: cleanup waits all lanes and rule9; archive/delete routes unavailable under current shell auth. Rename conflicts with explicit no-settings scope, no settings action.
 
-## Now / next
-Apply supplied v2 prep, remove obsolete briefs with reasons, correct proven gate false-PASS defect, then qualify exact before/after inputs.
+## Next independent work
+Retain latest reviewed Web/Remote correction in nightly draft ea9f2ebd7dc05661e92d00da6315240bbfc7572e, finish actual combined gates, compare measured audio margins and preserve all evidence. Coordinate faithful Sound memory/flash alternatives without activating an unfit engine. Continue advisory-only inbox runtime while these checks run.
 
-## Blockers and routes
-- Shell gh is not logged in; explicit push dry-run cannot read GitHub username. Use connected GitHub API writes below 700 KB.
-- Baseline has no new gate script; execute the supplied script externally on the exact baseline and record this bootstrap fact.
-- Independent reviewer reproduced Elite-failure/Pro-success false PASS; firmware gate corrected to fail immediately and require Elite copy. Budget attribution remains unresolved, never PASS from stale logs.
+## Current blockers and routes
+- GitHub API performs authorized writes below700KB; shell gh unauthenticated and network push dry-run failed username.
+- Full UI detector only implements checks1–4; fresh exact6f45screens0overlaps cannot qualify20NOT_RUN checks. Wrapper correctly fails closed.
+- Exact9a independent native: Elite/Pro XIP2076/2088B free, pool335036/344064 reserve836B, data+BSS97224/98304 headroom1080B; BREAK6760B unchanged. Independent project-stage26865, BREAK2450410 and rec-live actual motion/clear PASS.
+- Sound preFX7972B owner is not full-engine fit. Correct source delayTime index43 max2.5s feeds primary5s/secondary2.5s; original allocated delay rings7680016B perowner. Any faithful capacity trim still needs proof, and roughly2.88MB float storage exceeds stock. No silent sound/delay reduction, PSRAM or external-user-slot substitution.
+- Heavy playback reports distinguish0observed host deadlines from stricter margin failures; no timing regression claim without matched baseline comparison.
 
-## Conflicts noted
-- CHECKLISTS I0 describes no-new-regressions while RULES 9 requires passing before and after. No merge is authorized by a failed/VOID gate alone; independent review required.
-- User kickoff forbids repo settings changes; no rename/settings action performed.
+Repeated mistake: the integration owner ended after an intermediate handoff while independent I items remained. Keep one accountable owner active through those items and all applicable gates; verify actual progress before transferring ownership.
+
+## Preserved prep history
+The following deletion reasons and dated observations are history/evidence, not replacements for current finish-line status above.
 
 ## Deletes
 - `.agents/skills/x0x37-check` — obsolete brief/rule/handoff listed in supplied removal manifest; recoverable from parent Git commit.
@@ -628,3 +639,5 @@ Repeated mistake: commands mixed workspace-root-relative paths with a repository
 - Producer DSP regression2,450,410 checks, existing BREAK rates/click control, actual engine motion64-to-clear0 and storage26,865 checks PASS. Host layout unchanged; exact combined native memory/XIP and independent review still required. No F6 visual/gesture acceptance implied.
 - Independent actual6f392 UI wrapper:45screens, supported checks1–4 PASS,0overlaps; fullUI FAIL because checks5–24 NOT_RUN. Wrapper repair does not qualify incomplete coverage.
 - Sound full original FX remains blocked: measured original four10-second float buffers7,680,016B per owner plus reverb/widen; corrected source delayTime index43 permits2.5s and primary5s/secondary2.5s. Even a proven reachable-capacity reduction would be about2.88MB before guards, not stock fit. PreFX7972B is separate, not full-engine admission.
+
+Repeated mistake: coordinator reported a requested stop or lane-file update as completed before checking the result. State pending until an actual receipt or readback verifies it; correct unsupported claims immediately.
