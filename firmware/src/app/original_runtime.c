@@ -31,8 +31,16 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         rc = ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_MIAMI)
         rc = original_miami_backend_init(&p->dsp.miami, factory, bpm) ? 1 : -2;
-    else
+    else {
+        original_chicago_fx2_cold_owner owned;
+        if (!fx) {
+            if (!original_chicago_fx2_compact_init(&p->dsp.chicago_owned.fx))
+                return ORIGINAL_RUNTIME_NEEDS_FX;
+            owned = original_chicago_fx2_compact_owner(&p->dsp.chicago_owned.fx);
+            fx = &owned; /* descriptor is copied; borrowed context stays in p */
+        }
         rc = original_chicago_backend_init_compact(&p->dsp.chicago, factory, bpm, 0, tuning, fx);
+    }
     p->status = (int8_t)rc;
     if (rc != ORIGINAL_RUNTIME_OK) return rc;
     if (kind == ORIGINAL_SOUND_JUNO) {

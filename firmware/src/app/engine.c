@@ -58,9 +58,6 @@ static original_runtime_workspace original_workspace POOL;
 _Static_assert(sizeof(original_runtime_workspace) >= 4 * 256 * sizeof(float),
                "808 metal raw fits in the Chicago workspace");
 static original_chicago_tuning original_tuning POOL;
-static original_chicago_fx2_compact original_fx[NBASS] POOL;
-static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
-static uint8_t original_fx_ready;
 static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
 static uint8_t original_midi_channel[NBASS];
 static int16_t original_seq_note[NBASS];
@@ -3257,13 +3254,6 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
     mot.restore = mot_restore;
     mot_base_snd = base;
     if (!original_tuning.ready) (void)original_chicago_tuning_bind(&original_tuning, 0, 0, NULL, 0x6d70);
-    if (!original_fx_ready) {
-        for (p = 0; p < NBASS; ++p) {
-            (void)original_chicago_fx2_compact_init(&original_fx[p]);
-            original_fx_owner[p] = original_chicago_fx2_compact_owner(&original_fx[p]);
-        }
-        original_fx_ready = 1;
-    }
     bass_restore_sound(base);
     for (p = 0; p < NPARTS; p++) {
         mix_level[p] = 1.0f;

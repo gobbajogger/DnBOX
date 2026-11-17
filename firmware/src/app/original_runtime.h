@@ -4,6 +4,7 @@
 #include "../dsp/original_chicago_backend.h"
 #include "../dsp/original_miami_backend.h"
 #include "../dsp/juno6.h"
+#include "chicago_fx2_compact.h"
 
 enum { ORIGINAL_INPUT_USB, ORIGINAL_INPUT_BLE, ORIGINAL_INPUT_TRS,
        ORIGINAL_INPUT_KEYS, ORIGINAL_INPUT_SEQUENCE, ORIGINAL_INPUT_COUNT };
@@ -11,6 +12,8 @@ enum { ORIGINAL_RUNTIME_OK = 1, ORIGINAL_RUNTIME_INVALID = 0,
        ORIGINAL_RUNTIME_NEEDS_FX = -1, ORIGINAL_RUNTIME_FAULT = -2 };
 typedef union {
     original_chicago_backend chicago;
+    /* Selected-lifetime Chicago core and insert share the other-engine arena. */
+    struct { original_chicago_backend backend; original_chicago_fx2_compact fx; } chicago_owned;
     original_miami_backend miami;
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     /* Placeholder until the Synth One renderer is admitted into this slot. */
@@ -32,8 +35,10 @@ typedef union {
 } original_runtime_workspace;
 
 /* Cold/adoption operations use the explicit seven-type Chicago selection
- * policy. Its owner remains caller-owned at a stable address. Missing resources
- * remain a visible refusal. No old engine or bank is involved. */
+ * policy. A non-NULL FX descriptor borrows the caller's stable-address owner;
+ * NULL selects the part's inline FX arena. The initialized part must itself stay
+ * at a stable address until retired because its backend borrows that arena.
+ * Missing resources remain a visible refusal. No old engine/bank is involved. */
 int original_runtime_init(original_runtime_part *, const uint8_t cell[32], float bpm,
     original_chicago_tuning *, const original_chicago_fx2_cold_owner *);
 /* Call on an initialized or zero-initialized part before cold replacement;

@@ -1,0 +1,29 @@
+  ok   legacy-slot2-map
+  ok   synthone-slot
+  ok   poly-chord-integration
+  FAIL original-sound-cell (see build/host/original-sound-cell.log)
+       ==419==LeakSanitizer has encountered a fatal error.
+       ==419==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+       ==419==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+  FAIL pattern-preset-notelock (see build/host/pattern-preset-notelock.log)
+       ==592==LeakSanitizer has encountered a fatal error.
+       ==592==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+       ==592==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+  skip SMK-37 Pro package tests (needs build/smk37 app/loader and AC79_SDK; run ./build.sh --board smk37)
+  FAIL preset-navigation-noop (see build/host/preset-navigation-noop.log)
+       tests/host/preset_navigation_noop_test.c:91:44: warning: comparison of integer expressions of different signedness: ‘int’ and ‘unsigned int’ [-Wsign-compare]
+          91 |     for(int v=0;v<2;v++)for(int bank=0;bank<=ORIGINAL_SOUND_JUNO;bank++) {
+             |                                            ^~
+       tests/host/../../host/../firmware/src/app/ui.c: In function ‘unit_value’:
+       tests/host/../../host/../firmware/src/app/ui.c:1140:25: warning: this statement may fall through [-Wimplicit-fallthrough=]
+        1140 |     case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
+             |                       ~~^~~~~~~~~~~~~~~~~~~~~
+       tests/host/../../host/../firmware/src/app/ui.c:1141:5: note: here
+        1141 |     case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
+             |     ^~~~
+       tests/host/../../host/../firmware/src/app/ui.c: At top level:
+       tests/host/../../host/../firmware/src/app/ui.c:3540:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]
+        3540 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
+             |                                      ^~~~~~~~~~~~~~
+       FAIL 18: engine_bass_preset_edited(v)
+TESTS FAILED
