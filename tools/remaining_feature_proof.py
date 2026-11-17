@@ -151,7 +151,7 @@ def run_checks(root, plan, output):
             failure = True
     except (ValueError, subprocess.CalledProcessError):
         failure = True
-    receipt = {'schema': 1, 'repo': 'gobbajogger/X0X37-for-Loopy-Pro',
+    receipt = {'schema': 1, 'repo': 'gobbajogger/DnBOX',
                'head': head, 'tree': tree, 'inputs': inputs, 'toolchain': toolchain,
                'checks': results, 'status': 'FAIL' if failure else 'HOST_CHECKED',
                'limits': 'Scoped host commands only; not independent QA, firmware build, model, device or release PASS'}
@@ -163,7 +163,7 @@ def verify(root, output):
     receipt = json.loads((output / 'receipt.json').read_text())
     if set(receipt) != {'schema', 'repo', 'head', 'tree', 'inputs', 'checks', 'status', 'limits', 'toolchain'} or receipt['schema'] != 1:
         raise ValueError('Bad receipt schema')
-    if receipt['repo'] != 'gobbajogger/X0X37-for-Loopy-Pro':
+    if receipt['repo'] != 'gobbajogger/DnBOX':
         raise ValueError('Unexpected repository')
     check_commit(root, receipt)
     if toolchain_snapshot(receipt['checks'], root) != receipt['toolchain']:

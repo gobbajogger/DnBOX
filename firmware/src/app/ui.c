@@ -509,6 +509,8 @@ static const x0x_param_t SONG_P[] = {
 static int pref_read_only(pref_t r)
 {
     if (r.kind == R_BSTATUS) return 1;
+    /* A bank with a single preset (Synth One INIT) has nothing to choose. */
+    if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
     if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
         (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
     return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;

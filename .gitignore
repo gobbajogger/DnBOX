@@ -4,3 +4,19 @@ __pycache__/
 *.o
 releases/openbeta/*.lock
 releases/openbeta/*.json.tmp
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+*.swp
+*~
+.idea/
+
+# Build and firmware artefacts
+*.elf
+*.map
+*.fwsc
+*.img
+*.log
+firmware/build/

@@ -97,7 +97,7 @@ def main():
                         summary.append({'direction':direction,'n':n,'compiler':cc,'rch':rch,'trials':len(times),'median_ms':round(med/1e6,3),'delta_vs512_percent':round(100*(med/base-1),2),'host_struct_bytes':row[0]['sizeof_breaks'],'pcm_hash':row[0]['hash']})
     doc={'evidence_revision':'performance-pr93-rch-buffer-host-tradeoff-20261024-r7',
       'scope':'HOST-ONLY Git-blob exact breaks.c/h; experimental macro changes in ephemeral copies; not target RAM/MCU/ISR or independent QA',
-      'source':{'repository':'gobbajogger/X0X37-for-Loopy-Pro','full_commit':'1074d667c106472bb3f05db571abb4b9fea13ceb','root_tree':'4f6c4734f20a33d79e248860622ef77689008fa7','firmware_tree':'a87a83e15116422eed84528d95f52ddef5029927','breaks_c_blob':EXPECT_C,'breaks_h_blob':EXPECT_H},
+      'source':{'repository':'gobbajogger/DnBOX','full_commit':'1074d667c106472bb3f05db571abb4b9fea13ceb','root_tree':'4f6c4734f20a33d79e248860622ef77689008fa7','firmware_tree':'a87a83e15116422eed84528d95f52ddef5029927','breaks_c_blob':EXPECT_C,'breaks_h_blob':EXPECT_H},
       'compiler_flags':'-std=c11 -O2 -Wall -Wextra -Werror -pedantic -ffp-contract=off','adversarial_executed':not args.skip_adversarial,'checks':checks,'cases':cases,'summary':summary,
       'decision':'REJECT cache reductions at unchanged decoder strategy: materially slower worst long loops, despite host size reduction; do not edit firmware/source or compromise 8192-byte target reserve',
       'unrun':['new Elite and Pro builds of experimental configurations','actual target static RAM/pool/flash','MCU audio ISR/XRUN and owner device','independent QA for PR93']}

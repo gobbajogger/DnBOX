@@ -56,6 +56,8 @@ def make_xml(directory):
 
     def control(parent, name, kind, frame, text="", script=None):
         node = element(parent, "node")
+        # Stable identity namespace, not a navigable repository link.
+        # Preserve the original seed across repository renames.
         node.setAttribute("ID", str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/gobbajogger/X0X37-for-Loopy-Pro/touchosc/" + name)))
         node.setAttribute("type", kind)
         props = {

@@ -10,7 +10,7 @@ Content-Transfer-Encoding: 8bit
 Keep one outlined body for the per-voice render slice under -O2 so the
 compiler does not inflate d8_render. Behavior unchanged.
 
-Co-authored-by: rdh5yk9n42 <rdh5yk9n42@privaterelay.appleid.com>
+Co-authored-by: rdh5yk9n42 <<redacted-apple-privaterelay>>
 ---
  firmware/src/dsp/drum808.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

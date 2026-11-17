@@ -7,7 +7,7 @@ forbids committing or pushing .fwsc/.img binaries and requires connected
 GitHub API with its default author for text-only source delivery in the
 canonical repository. The legacy `--push` option is kept for compatibility
 with callers but always fails closed; it does not deploy any website or
-write to `gobbajogger/x0x37-for-Loopy-Pro_nightly` (read-only provenance).
+write to `gobbajogger/DnBOX-nightly` (read-only provenance).
 Historical stage-handoff examples are not executable publication authority.
 """
 import argparse
@@ -33,8 +33,8 @@ BANNER = (
     "Only an Elite and Pro development build that passed validation is listed. "
     "A failed or invalid build is not published."
 )
-NIGHTLY_PAGES = "https://gobbajogger.github.io/x0x37-for-Loopy-Pro_nightly/"
-LIVE_REPOSITORY = "gobbajogger/x0x37-for-Loopy-Pro_nightly"
+NIGHTLY_PAGES = "https://gobbajogger.github.io/DnBOX-nightly/"
+LIVE_REPOSITORY = "gobbajogger/DnBOX-nightly"
 LIVE_REF = "gh-pages"
 BRANCH = "nightly-pages"
 # gh-pages is production. main/master and the firmware nightly branch are source.
@@ -526,7 +526,7 @@ def _handoff_record():
         "pages_repository": LIVE_REPOSITORY,
         "pages_ref": LIVE_REF,
         "note": (
-            "Not a deploy of gobbajogger/x0x37-for-Loopy-Pro_nightly gh-pages. "
+            "Not a deploy of gobbajogger/DnBOX-nightly gh-pages. "
             "This does not run that repository's publisher."
         ),
     }

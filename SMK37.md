@@ -4,7 +4,7 @@ X0X also builds for the M-Vave SMK-37, a 37-key controller with the same chip as
 unchanged; everything for the SMK-37 is behind `BOARD_SMK37`.
 
 **Install / upgrade / downgrade / switch:** open the project web installer in Chrome or Edge —
-https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/
+https://gobbajogger.github.io/DnBOX/install/
 
 1. Connect the keyboard by USB and press Connect (if it is already in update mode, Install resumes).
 2. Pick a published version and your model (Pro / Elite / MKE-P37), **or** drop any `.fwsc`
@@ -13,7 +13,7 @@ https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/
    when the new map still has room. Calibration and pairing are never touched.
 4. If a write stops halfway, replug and Install the same package again to finish from update mode.
 
-The [sample importer](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/breaks/) loads your own
+The [sample importer](https://gobbajogger.github.io/DnBOX/breaks/) loads your own
 break loops the same way. Unofficial multi-firmware builds also appear on
 https://genkigenki.github.io/smk37/.
 

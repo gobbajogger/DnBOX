@@ -1,166 +1,26 @@
-# Lane: sound
-Owner: sound agent. Branch: lane/sound-v2. Target: integration/dnbox-consolidated.
-Base: e742be7bd0d01323c899de6e156f40b85ee451db. Updated: 2026-11-16 23:33 UTC.
+# Lane: sound   (copy to docs/lanes/sound.md; update in every push)
+Owner agent: <name>   Branch: lane/sound-<topic>   Draft PR: #<n>   Head: <sha8>   Updated: <YYYY-MM-DD HH:MM VLAT>
 
-## Checklist
-All final checklist items remain FAIL until exact combined-source proof exists.
-| ID | Status | Current evidence / next check |
-|---|---|---|
-| C1 | FAIL | Local gate not run on this lane; independent test-and-merge owns it |
-| C2 | FAIL | Live consolidated still e742be7b; branch descends from it and this change deletes no files, but required no-loss gate is not run at this head |
-| C3 | FAIL | Bounded independent component reviews are recorded below; required complete rule-9 screen/10-of-10 Review is not run |
-| C4 | FAIL | Full exact-head hard-limit scan not run; current isolated source/tool changes are not full-lane qualification |
-| C5 | FAIL | Outstanding S1–S7 below |
-| C6 | FAIL | Draft continuation; not merged |
-| S1 | FAIL | Pinned 56079bbd source/common-FX corpus: 694 programs finite with exact retained output; measured callback deadlines still FAIL. Complete app/FX/xrun qualification missing |
-| S2 | FAIL | Latest 3e41 694-program source/common-FX corpus independently audited against retained 68c7 PCM hashes; not full app/independent FX/long-tail qualification |
-| S3 | FAIL | Existing 64-control schema/model component checks do not prove full routed engine |
-| S4 | FAIL | Referenced SuperJ6 14/56 ZIP not identified; found Synth One 56-preset/14-over-unity archive, not a substitute. Complete intended-engine A/B pending |
-| S5 | FAIL | 640/12 corpus identity and bounded original bundled decode verified; 2 legacy-key mappings and complete materialized selection/control routing remain unproven |
-| S6 | FAIL | Pre-FX owner 7,972 B; latest measured existing-firmware 2d86 default PADCAL=1 has XIP free 2,548/2,556 B, RAM headroom 1,096 B and pool reserve margin 836 B. Full FX/wave assets not admitted. See sound-memory.md |
-| S7 | FAIL | Slot-2 string-machine engine still present until this removal lands; Synth One occupies the slot |
+## Checklist (from CHECKLISTS.md)
+| ID | Check | Status (PASS/FAIL) | Evidence (SHA + log path or PR comment link) |
+|---|---|---|---|
+| C1 | Local gate at head | FAIL | |
+| <S1…> | | FAIL | |
 
 ## Now / next
-- Now: close original committed-library/selected-preset provenance and finish coordinated default sanitizer replay of the independently reviewed isolated procedural-model state-span fix; preserve all verified corpus outputs and stopped upload/installation holds.
-- Next: source-faithful control/tuning/FX and measured stock-memory plan with integ; no activation or musical cuts without required evidence/design decision.
-- Historical initial rebuild: 28 objects compiled from retained source, 12 scenes / 576000 frames, zero differing channel words versus source-derived oracle, zero heap calls during rendering. This is pre-FX component evidence only, not S1/S2 or hardware xrun PASS. See docs/sound/v2-pre-fx-evidence.md.
+- Now: <item, riskiest first>
+- Next: <item>
 
-## Blockers and remedies
-- Prep files/gate not integrated yet: use attached RULES.md v2 as authorized input; keep sound edits isolated and merge prep target once accepted.
-- Existing sound PR #952 is on sound/engine-rebuild, not lane/*: preserve it unchanged as donor; this is its sole v2 continuation, not a second sound writer. Do not close it before rule 9–10 checks.
-- Local baseline Git history has absent older objects: exact HEAD tree is available and exported; remote connector is authoritative for ancestry and writes.
+## Blockers (each with its fix and the route being tried; never "waiting")
+- <blocker> → <fix> (since HH:MM)
 
-- Evidence defect fixed: old adapter runner hashed source but reused old dependency objects. Regression reproduced this; new runner recompiles every object and rejects link inputs without a compile command. Independent review caught unbound compile paths and missing harness detection; both regressions now pass with full 89-file closure verification and exactly one adapter substitution. Source build still requires a trusted separately pinned closure.
+## Top 3 risks for the next hour
+1.
+2.
+3.
 
-- Historical native ABI probe: compiler required C++14; its earlier 10,532-byte owner was later reduced to the current 7,972-byte pre-FX owner. Neither component figure is application fit.
+## Deletes (files this lane removes on purpose, with reason; the gate's no-loss step reads this)
+- <path> — <reason>
 
-## Top risks
-1. Original DSP graph and complete factory bank differ from the component adapter evidence.
-2. Combined engine stock memory not qualified by historical baseline maps.
-3. UI/build shared paths require coordination with fwui and integ; no edits there in this checkpoint.
-
-## Deletes
-None.
-
-## Conflicts
-No rule changes. Prior rules/briefs are history only; existing code and evidence are reusable inputs under RULES.md v2.
-
-## Chronological evidence history
-
-Earlier pending/next/current statements below describe their checkpoint, not a new assignment or the present checklist. Later entries record their resolution or continuing limits; use the top checklist and Now/next for current work.
-
-Native recovery checkpoint: exact56079 full-sequence recipe rebuilt29 runtime objects with authenticated original SDK C++ headers, object forbidden-symbol scan PASS/0. SourceScheduler10532 bytes independently reproduced. No firmware link/device/combined-memory PASS. See sound-memory.md and docs/sound/v2-native-component-result.json.
-
-Runtime source closure copied byte-identically into firmware/src/dsp/synthone with71-file hash manifest and MIT notices; all29 runtime units recompiled successfully from new repo paths. Not enabled in app/build. Next is replacement-safe C ABI/owner budget with integ, factory bindings and post-FX; simple union growth adds13624 bytes for two parts and is not admissible.
-
-Schema checkpoint: recovered source-derived SuperJ664 slots/218 native IDs and SynthOne150 physical descriptors, contract/audit and reproducible generator. Strict cc -Wall -Wextra -Werror rejected donor misleading indentation; formatting-only fix passes. Existing descriptor/blob test verifies64 unique slots,218-word roundtrip,888 corrupt-byte rejections,finite/alias/transaction checks. Regenerated both descriptor tables byte-identically. DSP bindings remain NOT_ADMITTED; S3 not PASS.
-
-C ABI checkpoint: cold caller-owned init/retire plus physical parameters/note/reset/render, with span/alignment/alias guards. Expanded actual audio test covers C/C++/source equality across12 scenes576000 frames and invalid bounds; native wrapper compile PASS. Integ notified; no pool allocation or app activation.
-
-Memory reuse checkpoint: serialized held-note snapshot now aliases owner, native10532→8996 bytes (1536saved/part). Full original suite38cases354907688checks/114196frames0failures; C/C++/oracle576000frames0differences; all29 native units compile. Independent review pending, still no combined fit. Source manifest retains prechange hash. Next: coordinate FX lifetime reuse and further representation savings, no musical feature cuts.
-
-Independent reviewer reran e955 and compared output bytes to prior5e541: exact match. Overlay oracle/test protection regression added,4 runner tests PASS. Native29-object unlinked code33406+readonly3230+compact165292 exceeds current13.4KB XIP headroom; flash remains a separate blocker, no protected-map/user-slot workaround claimed.
-
-Packed held-note checkpoint: source-domain record now4 bytes (note/velocity0..127,transpose-24..24); invalid constructor args use255 sentinel and both insertion routes reject rather than wrap. All802816 valid triples retain exact fields. Native owner7972 bytes, all29 units compile. Final original suite38cases354907688checks0failures and576000frame C/C++/oracle compare0differences; audio bytes match prior5e541. Independent review pending; preFX-only, app/FX lifetime+flash still blockers. Descriptor2 experiment rejected/reverted after shared raw oracle initialization failed, so no descriptor or test-oracle changes shipped.
-
-Explicit pi32v2 C allocation contract now7972bytes/alignment4, checked by static_assert in actual native compile; receipt docs/sound/v2-native-owner-layout.json. Invalid packed insertions preserve whole Held object; typed record is internal runtime only, not a persisted/upstream schema change.
-
-Independent final packed866 review: fresh 12-scene/576000-frame replay0 differences/0 render heap; exact audio comparison against pre-alias/pre-pack5e541 also PASS, SHA2564b32746b36590998cf7c215ec07d5890d394414e8b2702b7a1a5e847c8ed6b34. Four runner negatives PASS. Component evidence only; no app/full gate approval.
-
-Factory audit checkpoint: all640 SuperJ6 presets/12banks parse and90549 parameter entries are finite/unique per preset; 174identities,172known plus neonlimiterAmount240/neontubeRageAmount34 unknown occurrences. Coverage intentionally FAIL, no dropping/aliasing. Seven synthetic validator regressions PASS. S5 still FAIL. Original bank publication blocked by automated disclosure review; checked exact owner rule13, no secrets, archive/official-page provenance, redistribution rights remain unresolved (not prohibited). No retry/route-around; parent handles exact owner clarification. Original bytes preserved locally. Continuing factory frontend and exact unknown-field research without public bank payload. See docs/sound/v2-factory-input-status.md.
-
-Original SynthOne factory recovery: officialMIT source6466a371 (license blobbe8551b8) supplies694 entries across12 non-User banks; all original Gitblob hashes verified. This is separate from the blockedSuperJ6 corpus. Source-derived144-command frontend plus common original FX exploratory replay passes all694/66,624,000frames,0different/0nonfinite; prior56-program output before/after also byte-identical. Not an Apple app/tuning/hold/modwheel, xruns, long-tail or nativeFX qualification. Copied-fixture fresh runner replay in progress. Generator initially globbed newMANIFEST.json as a bank; fixed to explicit authenticated manifest entries and added synthetic regression. No runtime edits.
-
-Measured originalFX48k arrays: delay7,680,016B,reverb107,440B,widen9,600B before objects. Correct actual delayTime index43/domain≤2.5s reaches5s primary delay and2.5s secondary; earlier index36 inference withdrawn. Even naive reachable-range rings~2.88MB are unadmitted and far exceed combined native free memory. Next: preserve full source evidence, independently review exact resource bounds and resolve faithful runtime design with integ/root. No musical cuts/PSRAM.
-
-Repeated mistake: a factory runner verified manifest-listed files but compiled live paths or allowed unlisted include shadows. Stage and verify the complete compiled/read source closure and negative tests; a manifest alone does not qualify actual tested bytes.
-
-Factory runner integrity repair: only verified factory/Swift/frontend/FX bytes plus generator/descriptors are staged. Compiler depfiles reject unlisted/changed actual inputs, includes restricted to staged/verified closures; actual raw/compact original asset hashes are pinned. Runtime TESTED-SOURCES hash enters receipt. Seven closure regressions and generator enumeration regression PASS; staged9-unit build-only passes (audio NOT_RUN). Prior second694 replay completed but remains exploratory because it preceded this integrity repair. Awaiting independent closure review before final694 rerun; no final S1/S2 acceptance.
-
-Portable recovery checkpoint: original89-file source closure plus byte-pinned raw/compact data, portable recipe and notices form97-entry914465B archive (885f793f…), split480000/434465B for plugin requests. No SDK, objects or executable binaries. Restore verifies every member before writing and only relocates documented path placeholder;3 restore regressions PASS. Final staged694 replay now uses this restored bundle. Per-output1388-file hash manifest preserved; deterministic uncompressed USTAR hardlinks identical original/compact pairs. Final LFS upload NOT_RUN; root coordinates managed environment without a competing lane writer.
-
-Archive utility review found a missing-pair case:1388 filenames alone could hide693pairs plus2orphan originals. Fixed admission to exact694 matching pairs before output;3 targeted regressions PASS. Existing source archive already had all1388 hash-verified names; readback confirms every original/compact byte. Managed replay handoff is read-only/no competing writer, LFS upload still NOT_RUN.
-
-Final frozen f50d5c14 factory replay completed from the portable restored bundle:694 programs/66,624,000frames,0differing stereo words,0NaN/Inf. All1388 output SHA256 values match the preserved expected manifest. Factory input receipt98acfee3, runtime TESTED-SOURCESd7083f6b, command stream460d0869; exact logs/receipts committed under docs/sound/v2-synthone-factory-final*. This is source-frontend/raw-preFX-vs-compact with common FX, not Apple app, independentFX, all long tails, full tuning/hold/modwheel, callback xruns or native fit. S1/S2 remain FAIL at full checklist scope. Next independent final receipt acceptance and managed read-only recreation; source64-control/full native resource blockers stay open.
-
-Managed second-environment exact replay PASS:694 programs and all1388 PCM hashes plus canonical533934080B archive match. LFS object-only upload then denied exit2 because repository LFS budget is exceeded. Stopped; no alternate route, remote readback NOT_RUN, no dangling pointer committed. All originals/recreation/local LFS bytes retained. Root owns legitimate budget restoration; sound will verify remote fresh-cache readback before pointer publication. See docs/sound/v2-artifact-recovery-status.md. Unaffected control-law/native-interface work continues; no full sound checklist PASS.
-
-Source-helper C ABI checkpoint: transient original helper laws (physical and six dependent normalized parameters) plus resolved-target accessor, no owner growth.6,385 changes/957,750 exact target comparisons against retained original helper,4,096 extra rendered frames0diff/controlheap0; prior12scenes576,000frames0diff/renderheap0 unchanged audio SHA4b32746b…. Native wrapper+frontend compile7972B/align4,248B scratch plus20B saved registers before callees; complete stack and combined app fit NOT_RUN. Six renderer closure negatives and eight factory closure/selection tests PASS; fresh factory build-only PASS, new694audio NOT_RUN. Scope and source receipts in docs/sound/v2-source-frontend-result.json. Independent review pending; no full S1–S7 PASS.
-
-App-frontend input audit: authenticated694 corpus has12 non-12ET master sets,5 non440 A4 values,5 nonzero stored hold flags and37 nondefault modwheel routes. Five audit regressions PASS; these are stored-field counts, not audible qualification. Exact original MIT Swift/AudioKit tuning sources retained separately from frozen factory fixture, with Gitblob/SHA256 pins. Swift absent locally; original Swift/iOS execution NOT_RUN. Next: verify complete original tuning/NPO/A4 routing and obtain an independent original-capable test route before extending audio claims. No runtime changed in this audit.
-
-Corrective action: Sound ended its turn at an interim handoff while independent
-original-tuning reference preparation remained available. That was premature,
-not lane completion. Continue as sole owner across interim reports: prepare the
-source-exact reference harness and closure tests while reviews/capability checks
-run; stop only the specifically denied LFS action. Root owns final lane decisions.
-
-Prepared source-exact Swift tuning reference with6 closure tests PASS and captured694 bank inputs; actual local compiler probe NOT_RUN because swiftc is absent. Managed read-only capability probe dispatched after tester released the idle thread. No mathematical port, app callback or audio PASS is asserted. See docs/sound/v2-tuning-reference-preparation.md.
-
-Swift route correction: managed read-only probe confirmed no compiler. A later
-local1.1GB official toolchain download was denied by automated review because it
-exceeded the read-only/no-installation scope. Stopped without retry or indirect
-route; root handles explicit owner approval for expanded compiler preparation.
-Swift execution remains NOT_RUN. Continue source/closure work and independent
-existing-C++ checks; do not substitute a translation for original Swift evidence.
-
-Callback measurement checkpoint: a new source-bound host bench preserves all callback samples and original program mono/poly/arp/FX settings. Eight-program pilot failed with64 wall/58 CPU deadline misses; an explicitly diagnostic FTZ run and same-binary normal repeat also failed. Six trace integrity tests PASS; fresh build and independent source review underway before full694 measurement. No device XRUN, resolved stall cause, production floating-mode change or S1 PASS claimed. Red trace/source snapshots preserved under docs/sound/callback-pilot; next diagnose and repeat on an independent available host without touching denied LFS or Swift routes.
-
-Independent source-helper review completed: tester reran 6,385 helper changes /957,750 target-word comparisons /4,096 frontend frames with0 differences/control heap, plus12 scenes/576,000 frames with0 differences/render heap. All14 receipt input hashes retained;6 renderer and8 factory guard regressions PASS. This accepts only the documented source-helper component, not complete app/native/timing.
-
-Callback review correction: the earlier Python tracer field observes the runner, not the benchmark. Relabeled it and added the benchmark's own process observation before timed regions, with missing/duplicate/parent-vs-child regressions. Captured and before/after verified reused orchestration tools; imported captured factory bytes and included tool hashes. Nine focused tests PASS. Earlier pilots remain red and their parent observation does not establish an untraced benchmark. A staged fresh eight-program run verifies the hardened path before complete corpus testing. Profile and trace stratification show misses beyond initial callbacks; no single root cause or production optimization is established.
-
-Commit-message correction: the previous callback checkpoint subject omitted rule6's `| next:` suffix. No content or ref was rewritten; subsequent subjects retain the required next deliverable.
-
-Follow-up timing trace publication blocked: automated review twice rejected the exact60,761B gzip /81,107B JSON request as above700KB, despite explicit measured request size. Stopped that blob, no indirect retry or encoding/destination change. Root handles owner clarification/review resolution. New source/tests/text-only status can proceed independently; all trace bytes remain preserved. Hardened8-program pilot observed benchmark TracerPid0,19 wall/17 CPU misses,0nonfinite. Full694 timing still pending source review.
-
-Complete694 callback characterization at521963 finished on two hosts: each520,500 callbacks/66,624,000 frames/0nonfinite and self-observed benchmark TracerPid0. Managed70 wall/62 CPU misses; local10,159 wall/9,771 CPU misses. Identical executable and bound-input SHA256 across hosts. Both FAIL; no erased pilots, native/device claim or S1 completion. Small exact receipts under docs/sound/v2-callback-full; full raw traces remain preserved pending publication review. Managed task independently recalculates all miss rows and event strata; next is evidence-led fidelity-preserving diagnosis, not a lower threshold or musical cut.
-
-Optional resource diagnostic implemented only in host bench: per-thread faults/switches/CPU-time and CPU IDs bracket the unchanged timed region, never exclude a miss and remain NOT_QUALIFIED. Twelve focused tests PASS. Eight-program instrumented25 wall/23 CPU misses,0nonfinite;0misses had recorded page faults,8 had switches. Default-mode control7/7 misses remains red. All8 diagnostic FNV digests agree with prior tracer-bound outputs, not full oracle proof. No runtime changed. Next inspect a block-scoped static-sequence validation reuse with fallback if a sequence control ever becomes smoothed, retaining dynamic checks and exact original behavior.
-
-Static sequence admission candidate: real instrumentation red129 calls/128frames -> normal1; synthetic future-smoothed sequence map red1/expected129 -> fallback129. Full public/boundary and dynamic per-sample checks retained, no owner fields/arithmetic changes. Original38-suite354,907,688 checks/114,196frames/120,289 snapshots PASS0fail/heap; frontend and12-scene576k exact replay unchanged audio4b32746b…. Native31units+layout compile7972/4, unlinked executable+132B, other sections unchanged. Native final raw scope string miscount preserved with explicit31+1 correction. Full694 frozen source/common-FX replay running; independent review and all timing/app/native gates remain open. See docs/sound/v2-sequence-static.
-
-Frozen6a7 full factory replay completed:694 programs/66,624,000 frames/0 different words/0 nonfinite. All1,388 actual PCM lengths/SHA256 match prior frozen manifest68c7f2d1, preserving tested output beyond shared-new-wrapper comparison. Independent normal static admission/source review PASS; hardened synthetic future-map fallback129 validations PASS producer replay. Evidence under docs/sound/v2-sequence-static; common-FX/source-only limits remain, S1/S2 not complete. Candidate8-program callback pilot now measures separately; no operation-count-to-timing inference. All denied LFS/Swift/trace actions remain stopped; outputs preserved.
-
-Independent final6a7 corpus audit verifies all1,388 PCM hashes and complete factory/runtime input bindings. Timing remains FAIL: candidate pilot35wall/33CPU; preserved-binary same-host ABBA has A17/16,B28/27,B42/40,A20/19 wall/CPU misses, all tracer0 and0nonfinite. Complete input keys agree except the two intended scheduler files; all inputs/executables rechecked before/after. Shared-host ABBA does not establish causal speedup/regression, and no misses are discarded. Only2 exact CPU-miss callback identities recur across runs; neither recurrence nor resource association proves cause. Small diagnostic receipts preserved; raw traces stay local under the existing stopped-publication boundary. Next: isolate callback workload cost versus host variability without changing audio math, then rerun affected qualification, not repeated unqualified full corpora.
-
-Isolated compact four-word reader implemented but NOT activated in morph runtime. Staged original-scalar comparison44,313,152 words plus identical positions/invalid/alias/late failure checks PASS; metadata4->2 red/green verified. Native owner7972/4 unchanged, unlinked code+346B. Default ASan/LSan run fails with ptrace fatal; separate detect_leaks=0 address/UB diagnostic PASS is not leak qualification. Integ released managed thread for exact default sanitizer rerun after source pin. Twelve-scene current scalar route remains0diff/heap. Independent review pending. See docs/sound/v2-compact-quad; do not infer timing gain or combined fit.
-
-Quad activation candidate: reviewed6caf reader wired to morph with identical four-word/float order. Actual quad-use red/green and quad-only wrong-word/oracle-window negatives PASS. Original38 cases and12-scene audio retain exact4b32746b output; check-count difference is combined wrapper bounds assertions, not removed original scenarios. Native owner7972/4, unlinked code+286B versus6a7. Exact standalone default sanitizer PASS recovered from managed route, local ptrace failure retained. New694 replay and activated deadlines remain NOT_RUN; independent activation review requested. See docs/sound/v2-quad-activation.
-
-Frozen a803 full694 replay passes66,624,000frames0different/0nonfinite; all1,388 PCM lengths/hashes equal prior68c7f2d manifest. Independent narrow renderer and both quad negatives accepted; final corpus receipt audit requested. Callback pilot remains FAIL15wall/14CPU, tracer0. Native three-frame stack prefix rises288->332B (+44), not a full stack bound; unchanged owner is not unchanged total RAM. Source-only tuning call audit identifies0..<127 update, unverified A4/NPO app callback routes, and stored-vs-applied hold distinction; no invented retuning/hold semantics or Swift denial retry.
-
-### Generic SuperJ6 recovery and span guard
-Recovered isolated generic GPL model code without coefficients or banks; fixed open-admission alias/alignment/wrap bug using red/green tests. Independent synthetic review: 1,204 + 522 + 9 checks PASS. Fresh 24 frozen vectors preserve output; native object only 3,262 executable + 8,197 readonly, 64-byte view. No activation, fit, S3/S4 or completion credit. Next: finish vector receipt review and audit rendering contract boundaries. Existing publication/Swift denials remain stopped.
-
-Build scratch correction: alias regression RED exit1 with input mutation; aligned/nonwrapping scratch disjoint from model/input now required before writes. Fresh 4 suites (1,204+522+9+9) and 24 frozen vectors PASS, native executable3,316 (+54), readonly8,197 unchanged. Independent build guard source/nine-test review accepted. Default local ASan/LSan fails ptrace, not sanitizer PASS; managed rerun next after exact pin. No render math, owner or activation change.
-
-Exact335d managed default ASan/UBSan/LSan nine-case run exit0 with options unset; full2,902-byte receipt recovered and independently hash/source audited. Local ptrace failure retained. Corrected unsupported S4 input-availability assertion: identified14/56 evidence is Synth One common-FX, not SuperJ6; exact SuperJ6 reference unresolved, no automatic rule change.
-
-Remaining exact335d synthetic suites default ASan/UBSan/LSan:1,204 protocol+522 boundary+9 open-span exit0, options unset, six source dependencies before/after bound. Recovered2,999-byte receipt SHA93118159b40072b4ae9580cfce2ed3b439fa022e3ca65245d31ff51b4d08edcd. This and prior9 build checks cover synthetic memory safety only. S4 reference mismatch and S5 legacy identity evidence are recorded in v2-reference-scope-audit.md; no alias or checklist requirement changed.
-
-S5 legacy-key census: after exact corpus binding, every one of640 presets contains exactly one of limiterAmount240, compressorAmount366, tubeRageAmount34. Version cohorts suggest migration but do not prove an alias or unchanged value law. Original218 enum ordinal17 is named limiterAmount but current serialized ID17 is neoncompressorAmount; no alias was introduced. Coverage remains FAIL172/174. Repeated provenance mistake corrected: capture metadata bytes once and use the same buffers for parsing and receipt hashes; changed-file-after-audit regression now passes. Independent review caught this variant; no observed historical mutation is claimed.
-
-S5 original-bundle cross-check: captured original IPA and supplied bank inputs have all 640 matching preset/bank/version/stored legacy-key/numeric-value records. Thus the unresolved 240 limiter and 34 tubeRage keys also occur in original bundled inputs; no different-bank substitution explains the gap. Thirteen synthetic diagnostic tests PASS and independently replayed; exact source review accepted only this comparison scope. This is not original-loader execution, migration proof or S5 completion. Static method/literal tracing remains inconclusive; retain unknowns and fail coverage rather than invent aliases. No native inputs or memory layout changed; prior combined-fit and gate failures remain.
-
-Conditional original-loader finding reviewed: one exact-match routine uses the current identifier and directly falls back to enum 17's zero default when absent. A bounded app-state decoder stores identifiers unchanged along the inspected route, but original factory preprocessing and other entries remain unclosed. No alias or whole-app ignore law is inferred; S5 remains FAIL. Independent replay passed 39 fixed static checks, six dependency tests and four clearly labelled assertion-plumbing negatives. Official Capstone package bytes and actual stub/default instructions are bound. An exploratory whole-text scan stopped at embedded data; its empty output was inconclusive and that helper was removed from reusable tooling. Next trace the ordinary captured-preset callback producer at 0x100265894, preserving the conditional finding. No firmware/memory inputs changed; original execution and combined fit remain unqualified.
-
-Explicit bit-copy candidate: retained -fno-builtin morph emitted98,304 external four-byte copies in24,576 tested frames; four alias-safe explicit builtins now give0calls/0state-or-output differences. Flags, heap wrappers and arithmetic unchanged. Fresh original12scenes576,000frames plus frontend replay preserve exact4b32746b audio; actual quad wrong-word/oracle-window negatives still fail. Native compact_morph text598->556B (-42), all other allocated sections and7972/4owner unchanged; this is unlinked component evidence, not fit/timing. Runner binds retained header manifest, staged actual dependencies and compiler; independent reviewer freshly replayed24,576frames0diff/0copies and accepted this narrow scope. Full694 and deadlines NOT_RUN for this candidate; earlier misses retained. Next qualify frozen source and measure same-input timing, while original factory preprocessing/S4 reference/Swift/rights remain unresolved and denied routes stay stopped.
-
-Frozen d9ae694 source/common-FX replay completed66,624,000frames0diff/0nonfinite; all1,388PCM hashes equal retained68c7f2d. Independent final corpus audit verified exact1,388file set/hashes and all bound manifests. Same-host eight-program ABBA stillFAIL: A10/10,B3/3,B2/2,A1/1wall/CPU misses, each tracer0/0nonfinite; no causal speedup or discarded samples. Native observed three-frame stackprefix316vs332B, not fullstack. Next diagnose remaining hot-path work with exact state/output tests; no full S1/S2/S6 or lanePASS, no denied retry.
-
-Distinct-coordinate reader candidate reuses only already-computed local words for equal physical row/sample. Both row admissions, all final validity checks and transactional commit retained. RealRED4vs2evaluations ->GREEN4/2/2/1;44,313,152scalar comparisons and added shared-row late-failure no-mutationPASS. Independent source review accepted; default sanitizer pending on coordinated idle managed thread. Fresh12scene/frontend exact replayPASS; native reader text+42B, other sections/7972owner unchanged, not combinedfit. Next default sanitizer then frozen corpus/deadline characterization; no full gate or lanePASS.
-
-Frozen3e41 default managedASan/UBSan/LSan44,313,152comparisons exit0, exactreceipt/full-log independentlyverified. Full38cases and12scene/frontend replayPASS;694corpus66,624,000frames0diff/0nonfinite, independent1388PCM audit equals68c7f2d. Deadlines remainFAIL: d9ae/3e41ABBA A11/8,B28/28,B11/9,A2/2; fixed-affinityCPU8 diagnostic A28/26,B155/145,B246/245,A83/83. No samplediscard or causal performance claim; affinity does not solve misses. Native+42B reader text/unchangedowner is not fit. Next continue original factory-entry/source investigation and fidelity-preserving resource diagnosis; no further uninformative timing retries. Managed thread released after recovered/verifiable result; all denied routes remain stopped.
-
-Repeated documentation mistake: new scoped results were published without refreshing summary README/memory figures. Before each push, update affected summaries from exact receipts and distinguish historical measurements, current source and qualified composition. Corrected the procedural model README against the existing four-suite/build-native receipts, and refreshed sound-memory.md from the 3e41 component result plus the independent 7e398 existing-firmware baseline receipt. The later integ 731f head remains native-unmeasured; neither baseline is Sound admission.
-
-The revised summary figures were independently checked against exact native and host receipts before this documentation push. The new bundled-entry static tool remains unpublished while its dataflow review is pending. A fresh computer inventory still shows Mac-mini.local offline; no original-app execution or stopped installation/upload was retried. Latest existing-firmware baseline and current Sound component figures remain explicitly separate from final all-engine qualification.
-
-Full native command/dependency receipt publication is blocked by a disclosure review; original receipts remain preserved privately. No retry or alternate upload route is authorized. The separately reviewed numeric summaries below remain component-only evidence, not full Local or Sound qualification.
-
-Bounded bundled-bank entry now independently reviewed: 99 fixed static/input checks replayed on the pinned original without executing it. The inspected default asset-bundle path reaches the bank/preset JSON decoder. Original resources contain the requested 12 banks / 640 presets plus one separate User Bank init preset; previous corpus comparison explicitly excluded User Bank. Cache/override provenance, materialized snapshot/selection routing and legacy migration remain NOT_PROVEN, S5 FAIL. Next trace snapshot producers and transformations; no alias or runtime binding added. No DSP/native inputs changed, so accepted component memory figures remain unchanged and combined fit remains unqualified.
-
-The existing-firmware resource baseline advanced to independently measured 2d86: default PADCAL=1 XIP free 2,548/2,556 bytes, static RAM headroom 1,096 bytes, pool margin 836 above reserve; 5,507 source files unchanged. sound-memory.md now cites that exact receipt and retains 7e as history. Full Local NOT_RUN and affected host pending in that receipt are not Sound qualification. Separately, private original tracing identifies committed-library callback and snapshot selection boundaries, but their intervening persistent-state/materialization transformations remain unresolved. No new mapping, alias, original execution or checklist PASS is claimed.
-
-Render-state boundary checkpoint: preceding approximate procedural model mutated aliased borrowed input/view/cycle through optional state (nine-case RED: five failures). Aligned/nonwrapping/disjoint state admission now precedes state access; valid numerical math is unchanged. Independent captured-runner replay passes five synthetic suites (1204 + 522 + 9 + 9 + 1642). Producer 24-vector output hashes remain unchanged; isolated native executable 3426 B (+110), view 64 B/alignment 4, not combined fit. Local default LSan fails under ptrace; no suppression or sanitizer PASS. Managed exact-source replay is NOT_RUN while firmware owns the shared environment. Generic GPL code only, no original model/preset payload. All lane items stay FAIL.
+## Conflicts noted (RULES 23)
+- <conflict> → reading used: <…>

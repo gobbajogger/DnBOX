@@ -1,6 +1,6 @@
 # Open-beta metadata contract
 
-This note is for the owner of `gobbajogger/x0x37-for-Loopy-Pro_nightly` pull request 13. It does not change that site.
+This note is for the owner of `gobbajogger/DnBOX-nightly` pull request 13. It does not change that site.
 
 The machine version and the readable label are different fields.
 

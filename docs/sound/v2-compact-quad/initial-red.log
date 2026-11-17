@@ -1,7 +1,0 @@
-sound-v2/tests/host/synthone_compact_quad_test.c: In function ‘rejected’:
-sound-v2/tests/host/synthone_compact_quad_test.c:11:152: error: implicit declaration of function ‘s1c_read_quad’; did you mean ‘s1c_read’? [-Wimplicit-function-declaration]
-   11 | static void rejected(const s1c_binding*b,unsigned r0,unsigned r1,unsigned p0,unsigned p1){uint32_t o[4]={1,2,3,4},old[4];memcpy(old,o,sizeof o);CHECK(!s1c_read_quad(b,r0,r1,p0,p1,o));CHECK(!memcmp(o,old,sizeof o));}
-      |                                                                                                                                                        ^~~~~~~~~~~~~
-sound-v2/tests/host/synthone_compact_quad_test.c:7:28: note: in definition of macro ‘CHECK’
-    7 | #define CHECK(x) do { if(!(x)){fprintf(stderr,"FAIL line %d: %s\n",__LINE__,#x);exit(1);} } while(0)
-      |                            ^

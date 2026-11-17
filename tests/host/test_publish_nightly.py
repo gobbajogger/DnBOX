@@ -184,9 +184,9 @@ def main():
 
     reject_push("default-branch", remote=str(bare))
     reject_push("local-branch", remote=str(bare), branch="chat/scoped-test")
-    reject_push("other-repo", remote="https://github.com/gobbajogger/x0x37-for-Loopy-Pro_nightly.git",
+    reject_push("other-repo", remote="https://github.com/gobbajogger/DnBOX-nightly.git",
                 branch="chat/scoped-test")
-    reject_push("canonical-remote", remote="https://github.com/gobbajogger/X0X37-for-Loopy-Pro.git",
+    reject_push("canonical-remote", remote="https://github.com/gobbajogger/DnBOX.git",
                 branch="chat/scoped-test")
     reject_push("protected", remote=str(bare), branch="nightly")
     os.environ["X0X_NIGHTLY_REMOTE"] = str(bare)

@@ -4,7 +4,7 @@ This is the follow-up to [FULL-SOURCE-FETCH.md](FULL-SOURCE-FETCH.md). It descri
 
 ## Verified immutable inventory
 
-- Repository: `gobbajogger/X0X37-for-Loopy-Pro`.
+- Repository: `gobbajogger/DnBOX`.
 - Integration commit at the inventory checkpoint: `b982c1eebc2ef731e0379103506aecb3df0b85e5` on `wip/one-build`.
 - Git **root tree** (not the commit SHA): `44c17cf99617adce274c0a57156cf7a9c4176c7b`.
 - Exact manifest: [`docs/manifests/one-build-b982c1ee.tsv`](manifests/one-build-b982c1ee.tsv), with 4,239 paths and 23,407,781 declared blob bytes, including 9 symlinks and 145 executable files. Tree listing was `truncated:false`.
@@ -41,7 +41,7 @@ Never claim the prior checkout was complete just because a manifest or old sourc
 Run the following complete JavaScript in the connected Code Mode GitHub tool environment. The example compares the pinned `b982c1ee` manifest with the **currently verified** `docs/full-source-fetch` PR branch head (not with a guessed SHA). Each invocation retrieves the manifest, reads the immutable head commit/root tree and downloads at most eight missing blobs. The output is one JSONL receipt. Copy its complete JSON line to the execution machine and rerun with `START_INDEX` and `START_OFFSET` set to the prior returned `next`. Do not remove line wrapping from the enclosing JSON or truncate `b64`. Use a transferred target TSV created from that same immutable head tree, with exactly the same path order. The new head **cannot contain its own manifest of itself** because that would change its Git tree. Save a head manifest separately, referring to its pre-manifest commit SHA.
 
 ```javascript
-const REPO = "gobbajogger/X0X37-for-Loopy-Pro";
+const REPO = "gobbajogger/DnBOX";
 const BASE_MANIFEST = "docs/manifests/one-build-b982c1ee.tsv";
 const START_INDEX = 0;
 const START_OFFSET = 0;
