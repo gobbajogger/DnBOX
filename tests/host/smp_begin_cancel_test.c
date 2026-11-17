@@ -68,6 +68,8 @@ static uint32_t st_crc32(const uint8_t *p, uint32_t n)
     }
     return ~c;
 }
+static unsigned preview_retire_cancels;
+void engine_brk_preview_end(void) { assert(usr_nz[0] != 0); preview_retire_cancels++; }
 void engine_brk_loops(void) {}
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes) { (void)base; (void)nbytes; }
 void ui_say(const char *a, const char *b) { (void)a; (void)b; }
@@ -308,5 +310,6 @@ int main(void)
         assert(usr_nz[0] == 0);
         puts("smp begin-cancel: higher-sector mid-WRITE abandon fail-closed ok");
     }
+    assert(preview_retire_cancels > 0); /* every tested retirement cancels before slot identity is removed */
     return 0;
 }

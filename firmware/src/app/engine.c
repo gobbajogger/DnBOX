@@ -3255,6 +3255,9 @@ int engine_brk_count(int bank) { return breaks_count(&brk, bank); }
 
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes)
 {
+    /* Main-loop retirement boundary: a pending chooser must not confirm a
+     * renumbered/replaced sample after its audition source disappears. */
+    engine_brk_preview_end();
     breaks_drop_range(&brk, base, nbytes);
 }
 

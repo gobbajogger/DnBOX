@@ -26,5 +26,13 @@ int main(void){
  CHECK(brk_choice_turn(PR(R_BRKSLOT,0,0,0),-1));audio_tick();
  unsigned next=(seq.ppat[PART_BRK]+1)%NPAT;seq.pat[next].brk=*bp;seq.pat[next].brk.slot_a=nb;seq.ppat[PART_BRK]=next;
  engine_brk_loops();audio_tick();CHECK(!engine_brk_preview_active());CHECK(engine_brk_count(0)>1);CHECK(!brk_choice_confirm());
+ /* Retirement may renumber slots. Never confirm the replacement at the old
+  * candidate index, even when the rescan happened before range invalidation. */
+ for(int i=0;i<16;i++)audio_tick();bp=&seq.pat[seq.ppat[PART_BRK]].brk;
+ bp->slot_a=nb;engine_brk_loops();for(int i=0;i<16;i++)audio_tick();
+ CHECK(brk_choice_turn(PR(R_BRKSLOT,0,0,0),1));audio_tick();
+ slot_nz[1]=0;engine_brk_loops();engine_brk_drop_range(preview_data[1],sizeof preview_data[1]);audio_tick();
+ CHECK(!engine_brk_preview_active());CHECK(!brk_choice_confirm());CHECK(bp->slot_a==nb);
+ engine_brk_flush();CHECK(!engine_brk_held());CHECK(engine_brk_count(0)>1);
  puts("BREAK full host queued preview/cancel/confirm PASS");return 0;
 }
