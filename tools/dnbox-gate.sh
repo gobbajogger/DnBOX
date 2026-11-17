@@ -5,6 +5,8 @@
 # A step that cannot run is FAIL (NOT_RUN counts as FAIL). Do not weaken thresholds; fix the step instead.
 # VOID must not hide an earlier FAIL: the overall result is FAIL if any stage failed.
 # VOID only when the environment is genuinely missing; the setup step lists what is missing.
+# Offline is the default: no git fetch, clone or ls-remote. Set DNBOX_GATE_ONLINE=1 to allow
+# network Git. A skipped network step prints [SKIP] and the rest runs against local refs.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
 LANE="${1:-unknown}"; SHA=$(git rev-parse HEAD); BASE=origin/integration/dnbox-consolidated
@@ -12,7 +14,22 @@ TS=$(TZ=Asia/Vladivostok date +%Y%m%d-%H%M); OUT=build/dnbox-gate; mkdir -p "$OU
 LOG="$OUT/${SHA:0:8}-$TS.log"; exec > >(tee "$LOG") 2>&1
 XIP_MIN=${XIP_MIN:-1024}; POOL_MIN=${POOL_MIN:-512}
 fail=0; void=0
-step() { local name=$1; shift; echo "== $name"; if "$@"; then echo "[PASS] $name"; else rc=$?; [ $rc = 2 ] && { echo "[VOID] $name"; void=1; } || { echo "[FAIL] $name"; fail=1; }; fi; }
+step() {
+  local name=$1; shift
+  echo "== $name"
+  if "$@"; then
+    echo "[PASS] $name"
+  else
+    rc=$?
+    if [ "$rc" -eq 3 ]; then
+      echo "[SKIP] $name"
+    elif [ "$rc" -eq 2 ]; then
+      echo "[VOID] $name"; void=1
+    else
+      echo "[FAIL] $name"; fail=1
+    fi
+  fi
+}
 
 # Forward toolchain, drum-reference and Chromium paths so child builds and tests see them.
 pass_env() {
@@ -41,14 +58,30 @@ setup()      { pass_env
                  miss=1
                fi
                [ "$miss" -eq 0 ] || return 2; }
-no_loss()    { git fetch -q origin integration/dnbox-consolidated || return 1
+fetch_base() { if [ "${DNBOX_GATE_ONLINE:-0}" = "1" ]; then
+                 git fetch -q origin integration/dnbox-consolidated || return 1
+                 return 0
+               fi
+               echo "SKIP fetch of origin/integration/dnbox-consolidated: offline default (set DNBOX_GATE_ONLINE=1 to fetch)"
+               return 3; }
+resolve_base() { if git rev-parse -q --verify 'refs/remotes/origin/integration/dnbox-consolidated^{commit}' >/dev/null; then
+                   BASE=origin/integration/dnbox-consolidated
+                 elif git rev-parse -q --verify 'refs/heads/integration/dnbox-consolidated^{commit}' >/dev/null; then
+                   BASE=integration/dnbox-consolidated
+                 else
+                   echo "no local integration/dnbox-consolidated ref; merge it in or run with DNBOX_GATE_ONLINE=1"
+                   return 1
+                 fi
+                 echo "using BASE=$BASE"; }
+no_loss()    { resolve_base || return 1
                git merge-base --is-ancestor "$BASE" HEAD || { echo "branch does not contain $BASE: merge it in (no rebase)"; return 1; }
                local del; del=$(git diff --name-only --diff-filter=D "$BASE" HEAD)
                [ -z "$del" ] && return 0
                local lf="docs/lanes/$LANE.md" miss=0
                while read -r f; do grep -qF -- "$f" "$lf" 2>/dev/null || { echo "deleted without reason in $lf: $f"; miss=1; }; done <<< "$del"
                return $miss; }
-limits()     { local bad=0
+limits()     { resolve_base || return 1
+               local bad=0
                git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' && { echo "workflow file changed"; bad=1; }
                git ls-files | grep -iE '\.ipa$|SuperJ6.*AU.*extension.*\.zip' && { echo "SuperJ6 installer in Git"; bad=1; }
                git grep -nIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . ':!*.md' && { echo "possible Secret"; bad=1; }
@@ -60,8 +93,16 @@ limits()     { local bad=0
                return $bad; }
 host_tests() { pass_env
                if ! git rev-parse -q --verify 'refs/remotes/origin/build/0.0.22^{commit}' >/dev/null; then
-                 echo "fetching origin build/0.0.22 (missing from this clone)"
-                 git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22 || return 1
+                 if [ "${DNBOX_GATE_ONLINE:-0}" = "1" ]; then
+                   echo "fetching origin build/0.0.22 (missing from this clone)"
+                   git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22 || return 1
+                 else
+                   echo "SKIP fetch of origin/build/0.0.22: offline default, and the ref is not in this checkout"
+                   echo "host tests need refs/remotes/origin/build/0.0.22 locally, or DNBOX_GATE_ONLINE=1"
+                   return 1
+                 fi
+               else
+                 echo "using local origin/build/0.0.22 (no fetch)"
                fi
                sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
                grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && return 1; return $r; }
@@ -125,6 +166,7 @@ drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANG
 
 step clean-tree clean
 step setup setup
+step fetch-base fetch_base
 step no-loss no_loss
 step limits limits
 if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
