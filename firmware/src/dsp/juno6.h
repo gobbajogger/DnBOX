@@ -4,6 +4,7 @@
  * design; no Plaits source is copied. */
 #pragma once
 #include <stdint.h>
+#include "envelope_snapshot.h"
 #define JUNO6_VOICES 6u
 #define JUNO6_CHORUS_BYTES 512u
 #define JUNO6_CHORUS_SAMPLES 256u
@@ -42,9 +43,5 @@ int juno6_active(const juno6_t*);
  * not a concurrent audio/UI publication primitive. Physical seconds and
  * sustain fraction, no normalized control reinterpretation. One shared
  * amp/filter envelope. No elapsed progress or release-start level is stored. */
-typedef struct {
- float adsr[4], level;
- int selected_voice;
- unsigned stage, gate, active, shared_amp_filter;
-} juno6_envelope_snapshot;
+
 int juno6_read_envelope(const juno6_t *, juno6_envelope_snapshot *);

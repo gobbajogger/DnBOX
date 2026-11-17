@@ -371,6 +371,7 @@ run load-guard-diagnostic python3 tests/host/test_load_guard_diagnostic.py
 run state-trace-diagnostic python3 tests/host/test_state_trace_diagnostic.py
 run play-question sh tests/host/play_question_test.sh
 run play-question-ui sh tests/host/play_question_ui_test.sh
+run engine-public-header sh tests/host/engine_header_test.sh
 run sound-reset sh tests/host/sound_reset_test.sh
 run held-step-release sh tests/host/held_step_release_test.sh
 run lz-max-match sh -c "$CC $W -o $OUT/lz_max_match_test tests/host/lz_max_match_test.c && $OUT/lz_max_match_test"

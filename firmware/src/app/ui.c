@@ -19,6 +19,7 @@
 #include "../x0x_cold.h"                       /* X0X_COLD: input and menu code of the main loop, built for size */
 #include "../dsp/fastmath.h"
 #include "../dsp/master.h"
+#include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
 #include "ui_original_controls.h"
 #include "bass_pattern_preset.h"
 #include "ui_original_wave.h"
