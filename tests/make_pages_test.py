@@ -96,7 +96,7 @@ with tempfile.TemporaryDirectory() as td:
     assert cat3["latest"] == "1.0"
     assert "fm1" in cat3["versions"][0]["models"]
     assert (out3 / "firmware" / "x0x-1.0.fwsc").is_file()
-    assert "X0X37-for-Loopy-Pro" in (out2 / "index.html").read_text(encoding="utf-8")
+    assert "DnBOX" in (out2 / "index.html").read_text(encoding="utf-8")
 
     out_shell = td / "shell"
     make_pages_main(["--shell", "--out", str(out_shell)])

@@ -8,6 +8,6 @@
 
 ## Checklist
 
-- [ ] I did not commit firmware images (`.fwsc`, `.bin`, `.elf`, `.img`), unrelated logs, dumps, or zip archives. The single required nonsecret gate log is included or linked for this exact head.
-- [ ] I did not change files under `.github/workflows/` unless a maintainer asked for that.
+- [ ] I included or linked the required single nonsecret gate log for the exact head. I did not commit firmware images (`.fwsc`, `.bin`, `.elf`, `.img`), unrelated logs, private/raw captures, dumps, credentials, SDK/toolchain binaries, or zip archives.
+- [ ] I did not use GitHub Actions or add or change files under `.github/workflows/`.
 - [ ] Licence and credits in `LICENSE`, `LICENSING.md` and `CREDITS.md` still apply to any third-party code I touched.

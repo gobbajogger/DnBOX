@@ -5,7 +5,7 @@ Status: DEV / HARDWARE TEST - DEVICE NOT TESTED
 Plan only. Nothing here was run on a device. Do not flash a device until the owner
 authorizes this exact candidate. Stop at the first failure and record what you saw.
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/717
+Source: https://github.com/gobbajogger/DnBOX/pull/717
 (`wip/smc-mixer-integration`). This checklist follows SMC-11. While UNLOCKED, the
 mixer follows the keyboard page. While LOCKED, the mixer keeps its own page and
 captured fader/knob targets. Keyboard page changes cannot move the locked mixer,

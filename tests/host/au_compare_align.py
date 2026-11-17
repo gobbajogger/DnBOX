@@ -28,7 +28,7 @@ Metric classes:
     - sequencer-step-bound acid lines (gate timing vs transport)
 
 **Not AU compare** (related): SMC rhythm FX gates must follow **sequencer transport phase**
-([#372](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/372)); that is product law,
+([#372](https://github.com/gobbajogger/DnBOX/pull/372)); that is product law,
 not the offline AU PCM harness — but wobble/mod scenarios still use render-start + cyclic rules above.
 
 See Project store ``docs/chicago-miami-sound-execution.md`` (alignment section).

@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/709 (wip/smc-first-boot-and-roles, main_fm1.c, project.c). The BLE controller is prepared at every boot. The saved OFF setting is applied after start and can be turned ON later without restart. With no saved device settings, the SMK-37 starts as SMC host with Bluetooth ON. Saved OFF and DEVICE roles are kept, also when other project data is missing.
+Source: https://github.com/gobbajogger/DnBOX/pull/709 (wip/smc-first-boot-and-roles, main_fm1.c, project.c). The BLE controller is prepared at every boot. The saved OFF setting is applied after start and can be turned ON later without restart. With no saved device settings, the SMK-37 starts as SMC host with Bluetooth ON. Saved OFF and DEVICE roles are kept, also when other project data is missing.
 
 ## 1. What you need
 

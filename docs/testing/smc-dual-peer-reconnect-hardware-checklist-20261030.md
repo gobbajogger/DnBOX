@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/687 (wip/smc-port). Per-peer link epochs and lost-release boundaries keep a new session's Solo and Pause safe from old releases. Disabled or disconnected BLE cannot clear hosted Solo. MMC STOP overflow stays in order. Two-peer ownership and connected names are kept. The PR also carries the Chicago/Miami composition from its base.
+Source: https://github.com/gobbajogger/DnBOX/pull/687 (wip/smc-port). Per-peer link epochs and lost-release boundaries keep a new session's Solo and Pause safe from old releases. Disabled or disconnected BLE cannot clear hosted Solo. MMC STOP overflow stays in order. Two-peer ownership and connected names are kept. The PR also carries the Chicago/Miami composition from its base.
 
 ## 1. What you need
 

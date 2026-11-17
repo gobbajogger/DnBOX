@@ -8,11 +8,11 @@ Status: **PARTIAL / NOT A COMPLETE CHECKOUT** (2026-10-30). This records actual 
 
 ## Frozen source and exact inventory
 
-- Repository: gobbajogger/X0X37-for-Loopy-Pro
+- Repository: gobbajogger/DnBOX
 - Source branch at preflight: wip/one-build
 - Source commit: cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21
 - Git commit root tree: 3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8
-- Recursive tree endpoint: https://api.github.com/repos/gobbajogger/X0X37-for-Loopy-Pro/git/trees/3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8?recursive=1
+- Recursive tree endpoint: https://api.github.com/repos/gobbajogger/DnBOX/git/trees/3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8?recursive=1
 - GET result: sha equals root tree; truncated=false; 4,582 entries = 4,223 blobs + 359 directories; declared blob data 23,199,539 bytes.
 - Blob modes: 4,069 regular 100644, 145 executable 100755, and 9 symlink 120000. There are no Git submodules in this tree.
 - The API also accepted /git/trees/cb5423c4?recursive=1, but its result's sha was the commit SHA, not the root-tree SHA. Use the exact root tree URL above for independent identity checks.
@@ -36,10 +36,10 @@ The branch and commit were checked through the connected GitHub tool. Do not sub
 
 Use the authenticated Code Mode tool interface, not a shell request, git clone/fetch/pull, or direct GitHub DNS.
 
-1. Read the branch: tools.mcp__GitHub__fetch({url:"https://api.github.com/repos/gobbajogger/X0X37-for-Loopy-Pro/branches/wip/one-build"}). Confirm its commit is cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21.
-2. Read the recursive tree: tools.mcp__GitHub__fetch({url:"https://api.github.com/repos/gobbajogger/X0X37-for-Loopy-Pro/git/trees/3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8?recursive=1"}). Parse result.content as JSON; require the recorded SHA, truncated=false, the exact entry counts and modes.
-3. For an ordinary 100644 or 100755 blob (including binary and empty files), call tools.mcp__GitHub__fetch_file({repository_full_name:"gobbajogger/X0X37-for-Loopy-Pro",path:entry.path,ref:"cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21",encoding:"base64"}). Its result.content contains line-wrapped base64; remove whitespace. Compare result.sha with entry.sha and base64-decoded length with entry.size.
-4. For a 120000 symlink, call tools.mcp__GitHub__fetch_blob({repository_full_name:"gobbajogger/X0X37-for-Loopy-Pro",blob_sha:entry.sha}). This returns the UTF-8 link-target text. Base64-encode those bytes for the same transfer format. The receiver independently checks the Git blob SHA.
+1. Read the branch: tools.mcp__GitHub__fetch({url:"https://api.github.com/repos/gobbajogger/DnBOX/branches/wip/one-build"}). Confirm its commit is cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21.
+2. Read the recursive tree: tools.mcp__GitHub__fetch({url:"https://api.github.com/repos/gobbajogger/DnBOX/git/trees/3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8?recursive=1"}). Parse result.content as JSON; require the recorded SHA, truncated=false, the exact entry counts and modes.
+3. For an ordinary 100644 or 100755 blob (including binary and empty files), call tools.mcp__GitHub__fetch_file({repository_full_name:"gobbajogger/DnBOX",path:entry.path,ref:"cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21",encoding:"base64"}). Its result.content contains line-wrapped base64; remove whitespace. Compare result.sha with entry.sha and base64-decoded length with entry.size.
+4. For a 120000 symlink, call tools.mcp__GitHub__fetch_blob({repository_full_name:"gobbajogger/DnBOX",blob_sha:entry.sha}). This returns the UTF-8 link-target text. Base64-encode those bytes for the same transfer format. The receiver independently checks the Git blob SHA.
 5. Fetch in bounded batches, persist every returned byte chunk in order, and make the receiver reject missing/duplicate chunks. Do not silently skip API errors or save a partially reconstructed tree as the target revision.
 
 Binary and empty files are included; neither Git SHA identity nor file count can be inferred from a pathname search. Keep executable and symlink modes.
@@ -51,7 +51,7 @@ This is the tested bounded connector pattern. Run the whole JavaScript body in f
 Each invocation reads the pinned tree again, makes at most 12 blob calls, and emits at most 6,000 base64 characters plus JSON metadata. This avoids the observed tool-call ceiling and response truncation. The connected tool has no direct file-write bridge to the shell: **copying the batches is a required transfer step**, not something this document claims has already been automated.
 
 ~~~javascript
-const REPO = "gobbajogger/X0X37-for-Loopy-Pro";
+const REPO = "gobbajogger/DnBOX";
 const COMMIT = "cb5423c4aad7d9fc0c3e0a532c2aac080f3cfd21";
 const TREE = "3e2a673f97a0ae4fc4e3fd5457952fb6e3f7d6e8";
 const START_INDEX = 0;
@@ -219,7 +219,7 @@ Use fetch_file with encoding:"base64" for binary, including WAV, PNG, BIN and ot
 3. Trying fetch_file by a symlink path:
 
 ~~~text
-UNKNOWN: Error code: UNKNOWN; Error: InvalidInputException: GitHub path did not return readable file content: gobbajogger/X0X37-for-Loopy-Pro/.agents/skills/x0x37-check
+UNKNOWN: Error code: UNKNOWN; Error: InvalidInputException: GitHub path did not return readable file content: gobbajogger/DnBOX/.agents/skills/x0x37-check
 ~~~
 
 Use fetch_blob at the symlink's recorded SHA and preserve mode 120000.

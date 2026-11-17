@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/705 (fix/midi-queue-order, usb.c, ble.c, plat_fm1.c). When an output queue is full, one discardable controller message is removed and the protected note or transport message is added at the end. Order is kept. TIMER5 is masked during queue changes. The BLE ring is now 64 slots so a cursor wrap keeps the index.
+Source: https://github.com/gobbajogger/DnBOX/pull/705 (fix/midi-queue-order, usb.c, ble.c, plat_fm1.c). When an output queue is full, one discardable controller message is removed and the protected note or transport message is added at the end. Order is kept. TIMER5 is masked during queue changes. The BLE ring is now 64 slots so a cursor wrap keeps the index.
 
 ## 1. What you need
 

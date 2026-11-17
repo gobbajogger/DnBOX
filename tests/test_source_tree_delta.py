@@ -24,7 +24,7 @@ def entry(path,mode,data):
 def manifest(path, entries):
     content = [
       '# GitHub blob manifest; exact pinned source, not a checkout',
-      '# repository gobbajogger/X0X37-for-Loopy-Pro',
+      '# repository gobbajogger/DnBOX',
       '# commit ' + 'a'*40,
       '# tree ' + root_tree_sha(entries),
       '# blobs ' + str(len(entries)),

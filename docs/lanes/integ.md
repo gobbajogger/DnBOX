@@ -584,5 +584,7 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 
 M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
 
-## Hygiene review corrections
-Isolated review-fix branch from the hygiene PR; original PR head is unchanged. Corrected contribution routing and gate-log wording, and replaced missing document links with the existing delivery plan and consolidated state. Full gate and independent final review remain NOT_RUN; consume through the existing integration owner before merge.
+
+### Hygiene review corrections after #957/#958
+
+Owner: integ hygiene-review worker. Consolidated input: `ec4f4e56abc37d677475244d73588fc42effa415`. Correct docs PR target, required gate-log exception, workflow prohibition, missing documentation links and rename wording. Reuses `lane/integ-hygiene-review-fixes`; no firmware or workflow changes. Documentation assertions PASS; full gate and independent final-head review NOT_RUN. Next: independent review and applicable integration gates; no delivery claim.
