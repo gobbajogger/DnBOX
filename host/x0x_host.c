@@ -336,7 +336,10 @@ void plat_stalls_enable(int on) { (void)on; }
 #include "../firmware/src/app/smk_clip_arp_share.c"   /* one ck_arp_pick + CK_RATE_T for engine + clip MIDI */
 #include "../firmware/src/app/smc_fx_map_tables.c"    /* one SMC FX map table for engine + smc_mixer */
 #include "../firmware/src/app/project.c"
-#include "../firmware/src/app/ui.c"
+#ifndef X0X_HOST_UI_SOURCE
+#define X0X_HOST_UI_SOURCE "../firmware/src/app/ui.c"
+#endif
+#include X0X_HOST_UI_SOURCE
 
 #if X0X_PARAM_TRACE
 void x0x_param_trace(int source, int target, int voice, int parameter, int value)

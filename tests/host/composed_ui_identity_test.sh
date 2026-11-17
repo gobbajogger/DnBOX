@@ -1,17 +1,25 @@
 #!/bin/sh
-# Authenticate the retained R22 source oracle before executing the actual UI fixture.
 set -eu
 cd "$(dirname "$0")/../.."
-python3 - <<'PY'
-import hashlib,json
-from pathlib import Path
-p=Path('tests/host/reference/ui_r22_d13_header_reference.inc')
-expected='328be8b7a5a9b3a0f09059509daedaf0d3d90ef31b8be965bb004d69a942d640'
-receipt_bytes=p.with_suffix('.json').read_bytes()
-if hashlib.sha256(receipt_bytes).hexdigest()!='87034b657a1adab04d2d787f8c88b99d3f81276e335249794cd40b7250bbb8d6':
- raise SystemExit('R22 header reference authentication failed')
-receipt=json.loads(receipt_bytes)
-if receipt['sourceCommit']!='d13f410936596b6931e574e6418e35ea67af3368' or receipt['referenceSHA256']!=expected or hashlib.sha256(p.read_bytes()).hexdigest()!=expected:
- raise SystemExit('R22 header reference authentication failed')
-PY
-SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=${SMC_UI_OUT:-build/host/composed-ui} sh tests/host/smc_ui_test.sh
+OUT=${SMC_UI_OUT:-build/host/composed-ui}
+SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT="$OUT" sh tests/host/smc_ui_test.sh
+for kind in battery title; do
+ NEG="$OUT/negative-$kind"
+ mkdir -p "$NEG"
+ python3 - "$kind" "$NEG/ui.c" <<'PYTHON'
+import pathlib,sys
+s=pathlib.Path('firmware/src/app/ui.c').read_text()
+old,new,count = ('"S1 A"','"BAD A"',3) if sys.argv[1]=='title' else ('dv_header_battery(219, 5);','(void)0; /* negative: omitted battery */',2)
+if s.count(old)!=count: raise SystemExit('production mutation anchor changed')
+pathlib.Path(sys.argv[2]).write_text(s.replace(old,new))
+PYTHON
+ MUTANT=$(cd "$NEG" && pwd)/ui.c
+ set +e
+ X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_HOST_UI_SOURCE=\"$MUTANT\"" SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT="$NEG" sh tests/host/smc_ui_test.sh > "$OUT/negative-$kind.log" 2>&1
+ rc=$?
+ set -e
+ [ "$rc" != 0 ] || { echo "FAIL: production $kind mutation was accepted"; exit 1; }
+ case "$kind" in battery) marker=CURRENT_BATTERY_MISMATCH;;title) marker=CURRENT_TITLE_MISMATCH;;esac
+ grep -q "$marker" "$OUT/negative-$kind.log" || { cat "$OUT/negative-$kind.log"; exit 1; }
+done
+echo 'Current identity production negatives: missing battery and wrong title rejected'

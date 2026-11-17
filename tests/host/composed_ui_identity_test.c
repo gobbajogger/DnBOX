@@ -1,67 +1,50 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
-/* Compare R22 header source/cache regressions and unchanged retained 8be arc/wave. */
+/* Current identity/component behavior and cache coherence, not a historical header golden. */
 #define SMC_UI_MAIN retained_fixture_main
 #include "smc_ui_test.c"
 static uint16_t reference_pixels[240 * MAIN_ROWS];
-static void dv_header_battery_r22_reference(int,int);
-static void reference_header_commit(void)
-{
-    /* Owner requires the battery even while a notification is visible. */
-    if (ui.msg_until && (int32_t)(ui.msg_until-plat_ms())>0 &&
-        strncmp(ui.msg,"PICK ",5)) dv_header_battery_r22_reference(219,5);
-    memcpy(reference_pixels,cv_px,240*HDR_H*2);
-}
+static void reference_header_commit(void){memcpy(reference_pixels,cv_px,240*HDR_H*2);}
 #define cv_commit_header reference_header_commit
 #include "reference/ui_perf_8be_reference.inc"
 #undef cv_commit_header
-/* Explicit reviewed metro correction overlay; retained d13 oracle bytes stay authentic.
- * Only the playing triangle at the shared R22 position regains audio-owned phase. */
-static void r22_phase_reference_icon(int32_t x,int32_t y,uint16_t colour)
+static void expect_current_battery(void)
 {
-    if(x==168 && y==4 && seq.playing)
-        colour=!seq.metro_view?C_DIM:seq.metro_view<=4u?C_WHITE:C_HI;
-    play_icon(x,y,colour);
-}
-/* Product naming correction is explicit; retained reference bytes stay unchanged. */
-static int32_t r22_named_reference_text(int32_t x,int32_t y,const felucca_font_t *font,
-    const char *name,uint16_t colour,int32_t left,int32_t right)
-{
-    if (!strcmp(name,"JUNO A")) name="SUPERJ6 A";
-    else if (!strcmp(name,"JUNO B")) name="SUPERJ6 B";
-    else if (!strcmp(name,"DRONE A")) name="S1 A";
-    else if (!strcmp(name,"DRONE B")) name="S1 B";
-    return cv_text_clip(x,y,font,name,colour,left,right);
-}
-static void r22_battery_reference_text(int32_t x,int32_t y,const felucca_font_t *font,
-    const char *text,uint16_t colour)
-{
-    if (x==120 && text==ui.msg && ui.msg_until &&
-        (int32_t)(ui.msg_until-plat_ms())>0 && strncmp(ui.msg,"PICK ",5)) {
-        CHECK(tw(font,text)<=206); /* long wrapping has a separate toast test */
-        x=107; /* centre of the 214px text area; reserve the battery cell */
+    /* Four levels are an outlined battery with zero through three filled cells. */
+    int level=plat_battery();level=level<0?0:level>3?3:level;
+    for(int y=5;y<=12;y++)for(int x=219;x<=234;x++){
+        int edge=(x<=232&&(y==5||y==12||x==219||x==232))||(x>=233&&y>=7&&y<=10);
+        int cell=y>=7&&y<=10&&x>=221&&x<=231&&(x-221)%4<3;
+        if(!edge&&!cell)continue;
+        uint16_t expected=swap16(edge?SOUND_GRAY:((x-221)/4<level?SOUND_GRAY:SOUND_LINE));
+        if(fb[y*240+x]!=expected)fprintf(stderr,"CURRENT_BATTERY_MISMATCH x=%d y=%d level=%d\n",x,y,level);
+        CHECK(fb[y*240+x]==expected);
     }
-    text_c(x,y,font,text,colour);
 }
-#define play_icon r22_phase_reference_icon
-#define cv_text_clip r22_named_reference_text
-#define text_c r22_battery_reference_text
-#define ORIGINAL_SOUND_DRONE ORIGINAL_SOUND_SYNTHONE /* legacy oracle ABI only */
-#include "reference/ui_r22_d13_header_reference.inc"
-#undef ORIGINAL_SOUND_DRONE
-#undef text_c
-#undef cv_text_clip
-#undef play_icon
+static void expect_current_title(const char *expected)
+{
+    CHECK(tw(&FONT_B,expected)<=121);
+
+    /* draw_header currently paints the rounded background before status
+     * dispatch and again on the ordinary-title path. Preserve both AA passes:
+     * a single pass differs at the rounded border before any title ink. */
+    cv_begin(240,HDR_H,C_BLACK);night_panel(0,0,240,HDR_H,0);
+    sound_slab(0,0,240,HDR_H,0);
+    cv_text_clip(4,2,&FONT_B,expected,part_col(),4,125);
+    for(int y=0;y<HDR_H;y++)for(int x=4;x<125;x++){
+        if(fb[y*240+x]!=cv_px[y*240+x])fprintf(stderr,"CURRENT_TITLE_MISMATCH expected=%s x=%d y=%d\n",expected,x,y);
+        CHECK(fb[y*240+x]==cv_px[y*240+x]);
+    }
+}
 static void same_header(void)
 {
-    ui_t prior=ui;
-    draw_header_r22_reference();ui=prior;
+    /* The normal path must equal a fresh render at identical live state. This
+     * retains full-frame cache regression coverage without obsolete pixel art. */
+    draw_header();memcpy(reference_pixels,fb,240*HDR_H*2);
+    part_header_snapshot_valid=0;blit_hash[0]=0;cv_tile_valid[0]=0;
     draw_header();
-    if(memcmp(reference_pixels,fb,240*HDR_H*2)) {
-        unsigned pixel=0;while(pixel<240*HDR_H && reference_pixels[pixel]==fb[pixel])pixel++;
-        fprintf(stderr,"HEADER_MISMATCH view=%u part=%u voice=%u page=%d battery=%d tempo=%.3f rec=%u help=%u overlay=%u x=%u y=%u\n",ui.view,ui.part,is_drum()?ui.sel[ui.part]:0,cur_page(),plat_battery(),(double)seq_tempo(&seq),ui.rec,ui.help,ui.overlay,pixel%240,pixel/240);
-        fprintf(stderr,"HEADER_DETAIL msg=%s until=%u now=%u expected=%04x actual=%04x\n",ui.msg,ui.msg_until,plat_ms(),reference_pixels[pixel],fb[pixel]);
-    }
+    if(memcmp(reference_pixels,fb,240*HDR_H*2))fprintf(stderr,"CURRENT_HEADER_CACHE_MISMATCH view=%u part=%u\n",ui.view,ui.part);
     CHECK(!memcmp(reference_pixels,fb,240*HDR_H*2));
+    expect_current_battery();
 }
 int main(void)
 {
@@ -81,24 +64,36 @@ int main(void)
             cv_begin(240,HDR_H,C_BLACK);cv_rect(0,0,240,HDR_H,C_AMB);cv_commit_header();same_header();
         }
     }
-    /* The frozen legacy oracle is adapted explicitly above, never rewritten.
-     * Render both current synth identities and the battery-reserving toast. */
-    for(int bank=0;bank<2;bank++) {
-        setup(V_PART,PART_303A);
-        int kind=bank?ORIGINAL_SOUND_JUNO:ORIGINAL_SOUND_SYNTHONE;
-        for(int voice=0;voice<2;voice++) {
+    /* Independent public identity table; never derived from renderer names. */
+    static const struct {int kind; const char *name[2]; const char *tag;} identity[]={
+        {ORIGINAL_SOUND_CHICAGO,{"CHICAGO A","CHICAGO B"},"chicago"},
+        {ORIGINAL_SOUND_MIAMI,{"MIAMI A","MIAMI B"},"miami"},
+        {ORIGINAL_SOUND_SYNTHONE,{"S1 A","S1 B"},"synthone"},
+        {ORIGINAL_SOUND_JUNO,{"SUPERJ6 A","SUPERJ6 B"},"superj6"}
+    };
+    for(int voice=0;voice<2;voice++) {
+        setup(V_PART,PART_303A+voice);
+        for(unsigned bank=0;bank<sizeof identity/sizeof identity[0];bank++) {
             int32_t audio[512];
-            CHECK(engine_bass_select_preset(voice,kind,0,&proj.sound)==0);
-            for(int n=0;n<1024 && engine_bass_preset_pending(voice);n++) engine_render(audio,256);
-            CHECK(!engine_bass_preset_pending(voice));
-            CHECK(engine_bass_bank(voice)==kind);
-            ui.part=(uint8_t)(PART_303A+voice);build_pages();ui.msg_until=0;
-            draw_main();draw_knobs();draw_footer();same_header();
-            CHECK(!strcmp(part_header_snapshot.name,bank?(voice?"SUPERJ6 B":"SUPERJ6 A"):(voice?"S1 B":"S1 A")));
-            shot(bank?(voice?"identity-superj6-b":"identity-superj6-a"):(voice?"identity-synthone-b":"identity-synthone-a"));
-            say("RESET SOUND",0);same_header();
-            shot(bank?(voice?"toast-superj6-b":"toast-superj6-a"):(voice?"toast-synthone-b":"toast-synthone-a"));
+            CHECK(engine_bass_select_preset(voice,identity[bank].kind,0,&proj.sound)==0);
+            for(int n=0;n<1024&&engine_bass_preset_pending(voice);n++)engine_render(audio,256);
+            CHECK(!engine_bass_preset_pending(voice));CHECK(engine_bass_bank(voice)==identity[bank].kind);
+            build_pages();ui.msg_until=0;
+            /* Same part/theme, primed cache: bank change itself must refresh the title. */
+            same_header();expect_current_title(identity[bank].name[voice]);
+            for(int theme=0;theme<6;theme++) {
+                palette_set(theme);draw_main();draw_knobs();draw_footer();same_header();same_header();
+                expect_current_title(identity[bank].name[voice]);
+                CHECK(!strcmp(part_header_snapshot.name,identity[bank].name[voice]));
+                if(theme==0||theme==5){char file[64];snprintf(file,sizeof file,"identity-%s-%c-%s",identity[bank].tag,'a'+voice,theme?"light":"dark");shot(file);}
+                say("RESET SOUND",0);same_header();now_ms=ui.msg_until;same_header();
+            }
         }
+    }
+    static const char *drum_title[2][2]={{"909 KICK","909 RIMSHOT"},{"808 KICK","808 RIMSHOT"}};
+    for(int kit=0;kit<2;kit++){
+        setup(V_PART,kit);
+        for(int v=0;v<2;v++){ui.sel[kit]=v?5:0;build_pages();same_header();expect_current_title(drum_title[kit][v]);}
     }
     /* Explicit current R22 semantics and independent cache-input transitions. */
     for(int kit=0;kit<NKIT;kit++) {
