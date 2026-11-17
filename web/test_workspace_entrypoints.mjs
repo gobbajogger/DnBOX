@@ -49,7 +49,7 @@ function fixture(pathname, hash) {
 }
 
 test('generated index.html selects generated sibling workspace, not developer source HTML',()=>{
-  const f=fixture('/X0X37-for-Loopy-Pro/index.html','#samples');
+  const f=fixture('/DnBOX/index.html','#samples');
   try {
     assert.equal(f.$('samplesview').hidden,false);
     assert.equal(f.$('samplesframe').src,'breaks/', 'generated root /index.html should select the real breaks workspace');
@@ -61,12 +61,12 @@ test('direct dev source x0x_installer.html still selects local source HTML',()=>
   finally {f.restore()}
 });
 test('generated install/index.html deep link selects its ../projects/ frame',()=>{
-  const f=fixture('/X0X37-for-Loopy-Pro/install/index.html','#projects');
+  const f=fixture('/DnBOX/install/index.html','#projects');
   try {assert.equal(f.$('projectsframe').src,'../projects/', 'dataset src retains generated path')}
   finally {f.restore()}
 });
 test('wrong-origin messages cannot modify workspace iframe height',()=>{
-  const f=fixture('/X0X37-for-Loopy-Pro/index.html','#samples');
+  const f=fixture('/DnBOX/index.html','#samples');
   try {
     f.events.get('message')({origin:'https://attacker.test',source:f.$('samplesframe').contentWindow,data:{type:'dnbox-height',height:10000}});
     assert.equal(f.$('samplesframe').style.height,undefined);

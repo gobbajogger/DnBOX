@@ -12,15 +12,15 @@ The factory sound is set up for big beat, so it should make noise the moment you
 
 Use Chrome or Edge on a computer, with the keyboard on USB:
 
-**[Open the installer](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/)**
+**[Open the installer](https://gobbajogger.github.io/DnBOX/install/)**
 
-You can also download the current Elite and Pro packages from **[GitHub Releases (latest)](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/releases/latest)** (v0.0.25.1).
+You can also download the current Elite and Pro packages from **[GitHub Releases (latest)](https://github.com/gobbajogger/DnBOX/releases/latest)** (v0.0.25.1).
 
 - Pick the package that matches your model (**Elite** or **Pro**). Starrykey 37 Play uses the SMK-37 Pro package.
 - **Back up your sample slots before you install.** The installer can do this for you.
 - Do not unplug the USB cable while firmware is being written.
 
-See the [manual](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/manual/) (written for the FM-1; [SMK37.md](SMK37.md) has the keyboard map). To load your own break loops, use the [sample importer](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/breaks/).
+See the [manual](https://gobbajogger.github.io/DnBOX/manual/) (written for the FM-1; [SMK37.md](SMK37.md) has the keyboard map). To load your own break loops, use the [sample importer](https://gobbajogger.github.io/DnBOX/breaks/).
 
 ### Hardware test status
 
@@ -31,15 +31,15 @@ See the [manual](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/manual/) (wri
 If an install fails, the keyboard becomes unresponsive, or you want the factory software back:
 
 1. Keep the USB cable plugged in until any write that is already in progress has finished. Do not unplug mid-write.
-2. Use the [web installer](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/) to restore **M-VAVE stock firmware**, or use [M-VAVE M-UPGRADE](https://www.m-vave.com/download).
-3. On an FM-1 that keeps crashing, the device starts in a safe mode. The [manual's Troubleshooting](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/manual/) section covers the rest.
+2. Use the [web installer](https://gobbajogger.github.io/DnBOX/install/) to restore **M-VAVE stock firmware**, or use [M-VAVE M-UPGRADE](https://www.m-vave.com/download).
+3. On an FM-1 that keeps crashing, the device starts in a safe mode. The [manual's Troubleshooting](https://gobbajogger.github.io/DnBOX/manual/) section covers the rest.
 4. If you still have a sample-slot backup, restore it after the keyboard is running again (the installer or `tools/x0x_slots.py restore`).
 
-A **0.0.26** package was briefly offered on the [nightly installer](https://gobbajogger.github.io/x0x37-for-Loopy-Pro_nightly/install/) and was **withdrawn** after a black-screen boot. Do not install 0.0.26. Use the restore steps above if that package is already on a device.
+A **0.0.26** package was briefly offered on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/) and was **withdrawn** after a black-screen boot. Do not install 0.0.26. Use the restore steps above if that package is already on a device.
 
 ## FAQ
 
-**Which package should I use?** SMK-37 Elite uses the Elite package. SMK-37 Pro and Starrykey 37 Play use the Pro package. Pick the matching file in the installer or on the [latest release](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/releases/latest).
+**Which package should I use?** SMK-37 Elite uses the Elite package. SMK-37 Pro and Starrykey 37 Play use the Pro package. Pick the matching file in the installer or on the [latest release](https://github.com/gobbajogger/DnBOX/releases/latest).
 
 **Do I have to back up first?** Yes, if you have anything in the sample slots you want to keep. The installer can back them up. An install that would otherwise lose loops saves them first and writes them back after, but a backup of your own is still the safe option.
 
@@ -70,7 +70,7 @@ DnBOX comes from [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita
 
 DnBOX doesn't ship with any recorded breaks, only two loops played by its own 909. You can load your own into the sample slots at 44.1 kHz. The SMK-37 has three slots of 80, 120 and 32 KiB (about 3.7, 5.5 and 1.5 seconds, 10.7 seconds in all); the FM-1 has two of 80 KiB (about 3.7 seconds each). Ask for 22.05 kHz to fit twice as much at lower quality.
 
-The [sample importer](https://gobbajogger.github.io/X0X37-for-Loopy-Pro/breaks/) does this from Chrome or Edge. From the command line:
+The [sample importer](https://gobbajogger.github.io/DnBOX/breaks/) does this from Chrome or Edge. From the command line:
 
 ```
 tools/upload_breaks.py --bars amen.wav think.wav ...   # take one bar of each and upload them

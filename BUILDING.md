@@ -507,7 +507,7 @@ action-specific permission, validated exact artifacts and the designated install
 under [the active workflow](docs/rules/workflow.md) before any hardware command.
 
 X0X's web installer for this repo is
-<https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/> (version + model picker, sample
+<https://gobbajogger.github.io/DnBOX/install/> (version + model picker, sample
 importer at `/breaks/`). Felucca's own installer is on hugelton.github.io. To install your own
 build, use the command line, or a local copy of the site (below).
 
@@ -550,7 +550,7 @@ A CI workflow is not local validation or proof of live publication.
 2. `tools/publish_pages.sh X.Y`: builds the site (landing, installer with every kept version,
    sample importer, manual, firmware) via `tools/make_pages.py`, merges older packages already on
    `gh-pages`, and pushes the branch. The site is
-   <https://gobbajogger.github.io/X0X37-for-Loopy-Pro/>. The current `.github/workflows/pages.yml` only displays manual workflow
+   <https://gobbajogger.github.io/DnBOX/>. The current `.github/workflows/pages.yml` only displays manual workflow
    instructions; it neither deploys on source pushes nor publishes Release assets.
    A source push or Release upload is not evidence of updated served Pages bytes.
 3. `gh release create vX.Y build/x0x-smk37-X.Y.fwsc build/x0x-smk37-elite-X.Y.fwsc build/x0x-smk37-mke-X.Y.fwsc --prerelease`

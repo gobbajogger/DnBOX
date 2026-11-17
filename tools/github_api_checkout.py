@@ -283,7 +283,7 @@ def reconstruct(api: API, repo: str, commit_sha: str, expected_tree: str | None,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--repo', default='gobbajogger/X0X37-for-Loopy-Pro')
+    parser.add_argument('--repo', default='gobbajogger/DnBOX')
     parser.add_argument('--commit', required=True)
     parser.add_argument('--expected-tree')
     parser.add_argument('--verify-ref', help='ref whose current head must match --commit')

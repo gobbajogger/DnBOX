@@ -55,7 +55,7 @@ reference check alone does not attest the actual device.
 ## Existing ownership and exact compatibility
 
 At reconciliation, firmware `nightly` still points to the accepted commit above.
-Existing Data Safety [PR #114](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/114)
+Existing Data Safety [PR #114](https://github.com/gobbajogger/DnBOX/pull/114)
 owns native OTA safety; current head
 `757c6e5b168c8c737e758346eb26e23134a5bcbd`, root
 `9aa0d0d32a657c3b7a8a6e4150f290954fa19cf6`. Its newer physical-ID/atomic-output
@@ -72,11 +72,11 @@ any combined updater before adoption. The preserved known-head condition and
 original-build adapter are separately identifiable changes; an adapter's updater
 hash must never be casually repinned to a newly combined implementation.
 
-[PR #113](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/113) has older
+[PR #113](https://github.com/gobbajogger/DnBOX/pull/113) has older
 family/model reconnect work;
-[PR #121](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/121) owns fixture
+[PR #121](https://github.com/gobbajogger/DnBOX/pull/121) owns fixture
 reconciliation against #114;
-[PR #125](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/125) preserves
+[PR #125](https://github.com/gobbajogger/DnBOX/pull/125) preserves
 future identity/native-discovery work. No branch belonging to those owners is
 overwritten here. Browser WebMIDI and its admission rules remain separate: native
 CLI results neither prove nor disprove browser behavior. Production promotion,

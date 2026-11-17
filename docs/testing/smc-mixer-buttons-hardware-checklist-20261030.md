@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/714 (wip/mixer-ux-one-build, smc_mixer.c, smc_fx_caption.h). Pattern arrows use a pending cue and repeat presses add up. A press back to the playing pattern cancels the cue. Held buttons are owned per peer. A repeated NoteOn is not another REC/MUTE toggle. Held feedback stays until NoteOff. Lost releases and reconnects clear stale holds. FX SELECT captions show the real effect. FX audio is unchanged.
+Source: https://github.com/gobbajogger/DnBOX/pull/714 (wip/mixer-ux-one-build, smc_mixer.c, smc_fx_caption.h). Pattern arrows use a pending cue and repeat presses add up. A press back to the playing pattern cancels the cue. Held buttons are owned per peer. A repeated NoteOn is not another REC/MUTE toggle. Held feedback stays until NoteOff. Lost releases and reconnects clear stale holds. FX SELECT captions show the real effect. FX audio is unchanged.
 
 ## 1. What you need
 

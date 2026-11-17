@@ -6,7 +6,7 @@ Use an ordinary native Linux environment able to reach `https://api.github.com`,
 
 ```bash
 python3 tools/github_api_checkout.py \
-  --repo gobbajogger/X0X37-for-Loopy-Pro \
+  --repo gobbajogger/DnBOX \
   --commit c9718ae833eb64a5191c350922593df8a36017c9 \
   --expected-tree 715fbd98d427c8ddd6b64d1b923e9d1fb8ae64ea \
   --verify-ref nightly \
