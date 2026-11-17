@@ -23,7 +23,10 @@ class InjectedFailure(RuntimeError):
 
 class BrowserSafety(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='browser-contract-', dir=os.environ['TMPDIR'])
+        # The parallel host runner intentionally isolates TMPDIR inside its checkout.
+        # Browser fixtures must use the same dedicated external root as the runner.
+        root = os.environ.get('DNBOX_BROWSER_TMPDIR') or os.environ['TMPDIR']
+        self.temp = tempfile.TemporaryDirectory(prefix='browser-contract-', dir=root)
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
         self.events = []

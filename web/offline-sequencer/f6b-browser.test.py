@@ -32,7 +32,7 @@ def project_fixture(pitch, opaque):
 
 @contextmanager
 def browser_temp_directory():
-    # Keep the browser inside the caller's workspace, not global /tmp or this checkout.
+    # Caller supplies a workspace temp root; reject global /tmp and this checkout.
     # A short dedicated DNBOX_BROWSER_TMPDIR is useful for Unix socket path limits.
     for key in ('DNBOX_CHROMIUM_EXECUTABLE', 'CHROMIUM_EXECUTABLE', 'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH'):
         if os.environ.get(key):
