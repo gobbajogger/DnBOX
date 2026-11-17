@@ -8,6 +8,13 @@ The factory sound is set up for big beat, so it should make noise the moment you
 
 [![X0X running on the FM-1 (watch on YouTube)](https://img.youtube.com/vi/cZLYrZaLDUk/maxresdefault.jpg)](https://www.youtube.com/watch?v=cZLYrZaLDUk)
 
+
+## Current work
+
+Active development is on `integration/dnbox-consolidated`. The clean starting point is the prerelease tag `dnbox-start-2026-11-17` (also `start-fw-2026-11-17` for the M0 start merge). See [docs/START-POINT.md](docs/START-POINT.md) for the locked DONE list and the LEFT list, and [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) for the seven moves to the final build.
+
+GitHub Actions are off. Run checks locally with `scripts/gate.sh <lane>` and paste the `DNBOX-GATE: PASS <sha>` or `DNBOX-GATE: FAIL <sha> <failed checks>` line on the pull request. Pull requests go into `integration/dnbox-consolidated`, not `main`.
+
 ## Install
 
 Use Chrome or Edge on a computer, with the keyboard on USB:
@@ -35,7 +42,7 @@ If an install fails, the keyboard becomes unresponsive, or you want the factory 
 3. On an FM-1 that keeps crashing, the device starts in a safe mode. The [manual's Troubleshooting](https://gobbajogger.github.io/DnBOX/manual/) section covers the rest.
 4. If you still have a sample-slot backup, restore it after the keyboard is running again (the installer or `tools/x0x_slots.py restore`).
 
-A **0.0.26** package was briefly offered on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/) and was **withdrawn** after a black-screen boot. Do not install 0.0.26. Use the restore steps above if that package is already on a device.
+An earlier **0.0.26** candidate (`600b3b45`) was withdrawn from the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/) after startup problems. A later 0.0.26 development test build (`94197fc8`) replaced it. The project owner reported testing 0.0.25.1 and 0.0.26 on an SMK-37 Elite. The Pro has not been tested on a device yet. This is not a full hardware qualification of either model. Prefer the published [v0.0.25.1](https://gobbajogger.github.io/DnBOX/install/) package unless you are deliberately testing the nightly candidate.
 
 ## FAQ
 
@@ -123,7 +130,7 @@ DnBOX does not take donations. It builds on other people's work. If you want to 
 ## Changelog, contributing and security
 
 - [CHANGELOG.md](CHANGELOG.md) — recent firmware changes
-- [docs/RELEASING.md](docs/RELEASING.md) — how a public release is made
+- [docs/RELEASES.md](docs/RELEASES.md) — integration-branch tags for finished moves; public packages stay on `v*` tags
 - [CONTRIBUTING.md](CONTRIBUTING.md) — how to report issues and propose changes
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
 - [SECURITY.md](SECURITY.md) — how to report a vulnerability
@@ -133,7 +140,7 @@ People working in this repository should also read [BUILDING.md](BUILDING.md).
 
 ## Integration branch notes
 
-This branch is `integration/dnbox-consolidated`. It is integration WIP, not a qualified build. See [CONSOLIDATED-STATE.md](CONSOLIDATED-STATE.md) for exact retained inputs, failed or unrun gates, and active owners. Historical or public-release text above does not qualify this candidate.
+This branch is `integration/dnbox-consolidated`. It is integration WIP, not a qualified public build. See [docs/START-POINT.md](docs/START-POINT.md) for the start SHAs and the DONE/LEFT lists, and [CONSOLIDATED-STATE.md](CONSOLIDATED-STATE.md) for exact retained inputs and gate status. Historical or public-release text above does not qualify this candidate.
 
 For project work, read [AGENTS.md](AGENTS.md). Build, publication and device commands require their current action authority and applicable evidence; older examples do not assign an integration or publisher role.
 
