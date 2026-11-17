@@ -7,7 +7,7 @@
 # VOID only when the environment is genuinely missing; the setup step lists what is missing.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
-LANE="${1:-unknown}"; SHA=$(git rev-parse HEAD); BASE=origin/integration/dnbox-consolidated
+LANE="${1:-unknown}"; SHA=$(git rev-parse HEAD); BASE=${DNBOX_GATE_BASE_SHA:-}
 TS=$(TZ=Asia/Vladivostok date +%Y%m%d-%H%M); OUT=build/dnbox-gate; mkdir -p "$OUT"
 LOG="$OUT/${SHA:0:8}-$TS.log"; exec > >(tee "$LOG") 2>&1
 XIP_MIN=${XIP_MIN:-1024}; POOL_MIN=${POOL_MIN:-512}
@@ -41,7 +41,10 @@ setup()      { pass_env
                  miss=1
                fi
                [ "$miss" -eq 0 ] || return 2; }
-no_loss()    { git fetch -q origin integration/dnbox-consolidated || return 1
+no_loss()    { # Caller supplies the live consolidated SHA verified through the GitHub API.
+               # Only local Git is used here; absent inputs fail closed, never fetch.
+               [[ "$BASE" =~ ^[0-9a-f]{40}$ ]] || { echo "missing verified DNBOX_GATE_BASE_SHA"; return 1; }
+               git cat-file -e "$BASE^{commit}" || { echo "missing local consolidated commit $BASE"; return 1; }
                git merge-base --is-ancestor "$BASE" HEAD || { echo "branch does not contain $BASE: merge it in (no rebase)"; return 1; }
                local del; del=$(git diff --name-only --diff-filter=D "$BASE" HEAD)
                [ -z "$del" ] && return 0
@@ -54,14 +57,14 @@ limits()     { local bad=0
                git grep -nIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . ':!*.md' && { echo "possible Secret"; bad=1; }
                # PSRAM grep check removed: the Elite/Pro fit test is the only memory gate.
                while read -r m o s p; do
-                 sz=$(git cat-file -s "$o")
+                 sz=$(git cat-file -s "$o") || { echo "cannot inspect tracked blob $o"; bad=1; continue; }
                  if [ "$sz" -ge 52428800 ]; then echo "≥50MB not in LFS: $p"; bad=1; fi
                done < <(git ls-files -s)
                return $bad; }
 host_tests() { pass_env
                if ! git rev-parse -q --verify 'refs/remotes/origin/build/0.0.22^{commit}' >/dev/null; then
-                 echo "fetching origin build/0.0.22 (missing from this clone)"
-                 git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22 || return 1
+                 echo "missing local origin/build/0.0.22; restore verified reference through the GitHub API"
+                 return 1
                fi
                sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
                grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && return 1; return $r; }
@@ -123,6 +126,7 @@ ui_defects() { python3 tests/ui_defects/test_gate.py || return 1
              }
 drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
+step gate-regression python3 tests/test_dnbox_gate_budget.py
 step clean-tree clean
 step setup setup
 step no-loss no_loss
@@ -132,3 +136,4 @@ step drone drone
 R=PASS; [ $void = 1 ] && R=VOID; [ $fail = 1 ] && R=FAIL
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"
 [ $R = PASS ] && exit 0; [ $R = VOID ] && exit 2; exit 1
+

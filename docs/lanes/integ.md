@@ -1,7 +1,7 @@
-Move: M0 (clean start and green gate)   PR: #955   Head: this commit
+Move: M0 (clean start and green gate)   PR: pending   Head: this commit
 LEFT items PASS: 0/2; failing: L15 L16
-Gate at head: M0 start checks pending; corrected limits self-match and size-loop false failures; full green gate remains follow-up
-ETA merge: start files after M0 checks; green gates 2026-11-17 22:00 VLAT
+Gate at head: NOT_RUN; gate regression tests PASS; pool reserve correction pending integration
+ETA merge: after exact full gate and independent review
 
 # Lane: integ   (copy to docs/lanes/integ.md; update in every push)
 Owner agent: <name>   Branch: lane/integ-<topic>   Draft PR: #<n>   Head: <sha8>   Updated: <YYYY-MM-DD HH:MM VLAT>
@@ -583,3 +583,6 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 - `skills/x0x37-workflow/references/stages.md` — supplied removal list; historical instructions, retained in Git history.
 
 M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
+
+## Gate reserve correction
+Owner: gate-review; branch fix/integ-pool-reserve. Raw pool free must retain 8192 B reserve; reported 8364 B means margin 172 B, below the 512 B floor. Gate uses local Git only: caller supplies live API-verified DNBOX_GATE_BASE_SHA and preloads origin/build/0.0.22 through authorized inputs. Missing local inputs fail closed. Five regression tests pass, including both model thresholds and absent-reference rejection; registered in gate. Full Local gate and native rebuild NOT_RUN for this script-only correction. Next: independent review and exact combined gate.
