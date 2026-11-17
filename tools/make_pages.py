@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
 """Make the X0X site for GitHub Pages
-(https://gobbajogger.github.io/X0X37-for-Loopy-Pro/):
+(https://gobbajogger.github.io/DnBOX/):
 
   index.html                  landing: install, breaks, projects, manual, source
   install/index.html          web installer with version + model pickers (Web MIDI)
@@ -40,8 +40,8 @@ SRC = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SRC / "web"))
 from make_site import product_of, strip_module  # noqa: E402
 
-REPO = "https://github.com/gobbajogger/X0X37-for-Loopy-Pro"
-PAGES = "https://gobbajogger.github.io/X0X37-for-Loopy-Pro"
+REPO = "https://github.com/gobbajogger/DnBOX"
+PAGES = "https://gobbajogger.github.io/DnBOX"
 MODEL_FILE = {
     "pro": "x0x37-{ver}.fwsc",
     "elite": "x0x37-{ver}-elite.fwsc",

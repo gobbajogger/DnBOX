@@ -56,7 +56,7 @@ def make_xml(directory):
 
     def control(parent, name, kind, frame, text="", script=None):
         node = element(parent, "node")
-        node.setAttribute("ID", str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/gobbajogger/X0X37-for-Loopy-Pro/touchosc/" + name)))
+        node.setAttribute("ID", str(uuid.uuid5(uuid.NAMESPACE_URL, "https://github.com/gobbajogger/DnBOX/touchosc/" + name)))
         node.setAttribute("type", kind)
         props = {
             "background": ("b", 0 if kind == "LABEL" else 1),

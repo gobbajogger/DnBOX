@@ -4,7 +4,7 @@ This candidate starts from `0e77d923dfee44a9b64a98c121fac55200b91f20`
 (tree `2b4c32cf531dd3402cc33895e9dbc66ad1aebace`). This is the source of
 `nightly-0e77d923-dev`, the latest installable firmware entry in the NIGHTLY
 catalog inspected on 2026-10-29. The catalog repository is
-`gobbajogger/x0x37-for-Loopy-Pro_nightly`, pinned at
+`gobbajogger/DnBOX-nightly`, pinned at
 `821aa12e6625dd6e7b3c5202d7d0838a420d0bdc`. The installer embeds the same row.
 The source commit, every Git blob and executable mode were verified locally.
 

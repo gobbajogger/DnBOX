@@ -36,7 +36,7 @@ CONFLATED_KEYS = (
     "installer_fingerprint",
 )
 DEFAULT_INSTALL_URL = (
-    "https://gobbajogger.github.io/x0x37-for-Loopy-Pro_nightly/install/"
+    "https://gobbajogger.github.io/DnBOX-nightly/install/"
 )
 
 

@@ -322,7 +322,7 @@ async function page(pkg, product, firmware, from, fill, opts = {}) {
   const pkgUrl = "https://nightly.example.test/sha256/test.fwsc";
   const entry = { product, pkg: pkgUrl, size: pkg.raw.length, sha256: pkgSha, controller_sha256: ctlSha };
   const catalog = JSON.stringify({
-    repo: "https://github.com/gobbajogger/X0X37-for-Loopy-Pro",
+    repo: "https://github.com/gobbajogger/DnBOX",
     latest: "test",
     versions: [{ version: "test", status: "dev-checked", source_commit: rootSha,
       firmware_tree_sha: treeSha, qa_pass: true, source_licenses_approved: true,

@@ -7,10 +7,10 @@
 
 You are the orchestrator. You do not implement, test, merge, or publish the firmware yourself. You start one owner-visible Cloud Agent per stage, record its URL, and start the next stage only after that agent pushes its handoff. The owner must be able to open every stage thread.
 
-Repository: https://github.com/gobbajogger/X0X37-for-Loopy-Pro
+Repository: https://github.com/gobbajogger/DnBOX
 Procedure already in the repo: `AGENTS.md` and `docs/rules/workflow.md` on `cursor/full-cycle-stage-workflow-d6ff`.
-Nightly installer, not production: https://gobbajogger.github.io/x0x37-for-Loopy-Pro_nightly/install/
-Nightly browser repo: `gobbajogger/x0x37-for-Loopy-Pro_nightly`
+Nightly installer, not production: https://gobbajogger.github.io/DnBOX-nightly/install/
+Nightly browser repo: `gobbajogger/DnBOX-nightly`
 
 ## Where the loop is now
 
@@ -63,7 +63,7 @@ An unchanged SHA with no new defect still starts the next audit. That is the loo
 
 Use `POST https://api.cursor.com/v1/agents` with the owner's user or service-account API key (`CURSOR_API_KEY`). Send:
 
-- repository `https://github.com/gobbajogger/X0X37-for-Loopy-Pro`
+- repository `https://github.com/gobbajogger/DnBOX`
 - `startingRef` set to the pushed stage branch
 - `prompt.text` set to that stage's successor file, plus the return instruction above
 

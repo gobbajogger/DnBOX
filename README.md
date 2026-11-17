@@ -17,10 +17,10 @@ The factory sound is set up for big beat, so it should make noise the moment you
 
 [![X0X running on the FM-1 (watch on YouTube)](https://img.youtube.com/vi/cZLYrZaLDUk/maxresdefault.jpg)](https://www.youtube.com/watch?v=cZLYrZaLDUk)
 
-- **Install it** (Chrome or Edge, USB): <https://gobbajogger.github.io/X0X37-for-Loopy-Pro/install/> — upgrade, downgrade, or switch: pick a published version/model, or drop any `.fwsc` (stock / other custom / local build)
-- **Sample importer** (your own break loops): <https://gobbajogger.github.io/X0X37-for-Loopy-Pro/breaks/>
-- **Read the manual**: <https://gobbajogger.github.io/X0X37-for-Loopy-Pro/manual/>
-- **Download firmware**: [releases](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/releases)
+- **Install it** (Chrome or Edge, USB): <https://gobbajogger.github.io/DnBOX/install/> — upgrade, downgrade, or switch: pick a published version/model, or drop any `.fwsc` (stock / other custom / local build)
+- **Sample importer** (your own break loops): <https://gobbajogger.github.io/DnBOX/breaks/>
+- **Read the manual**: <https://gobbajogger.github.io/DnBOX/manual/>
+- **Download firmware**: [releases](https://github.com/gobbajogger/DnBOX/releases)
 - **M-Vave SMK-37 / Loopy Pro:** see [SMK-37 instructions](SMK37.md).
 
 The site is served from the `gh-pages` branch. A missing page is a publication
