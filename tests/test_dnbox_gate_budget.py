@@ -28,6 +28,23 @@ class GateTests(unittest.TestCase):
                 self.assertNotEqual(run(command).returncode,0)
                 (p/f'{model}-pool.txt').write_text('512')
             (p/'pro-pool.txt').unlink();self.assertNotEqual(run(command).returncode,0)
+    def test_malformed_budget_numbers_fail_closed(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)
+            for model in ['elite','pro']:
+                (p/f'{model}-xip.txt').write_text('1024')
+                (p/f'{model}-pool.txt').write_text('512')
+            command=f'OUT={d};XIP_MIN=1024;POOL_MIN=512;'+func('budget','ui_defects()')+'\nbudget'
+            for model in ['elite','pro']:
+                for metric,valid in [('xip','1024'),('pool','512')]:
+                    path=p/f'{model}-{metric}.txt'
+                    for invalid in ['', 'garbage', '512 B', '512\n512', '-1', '1.5',
+                                    '0x200', '0512', ' 512', '9999999999999999999999999']:
+                        with self.subTest(model=model,metric=metric,invalid=invalid):
+                            path.write_text(invalid)
+                            result=run(command)
+                            self.assertNotEqual(result.returncode,0)
+                    path.write_text(valid)
     def test_missing_base_fails_without_network(self):
         command='BASE=;git(){ echo forbidden >&2;return 88;};'+func('no_loss','limits()')+'\nno_loss'
         r=run(command);self.assertNotEqual(r.returncode,0);self.assertNotIn('forbidden',r.stderr)

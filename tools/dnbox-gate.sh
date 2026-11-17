@@ -105,8 +105,14 @@ budget()     { local model xip pool bad=0
                    echo "$model budget numbers not found (NOT_RUN = FAIL): Elite and Pro must both print 'XIP free' and 'pool margin'"
                    return 1
                  fi
-                 xip=$(cat "$OUT/${model}-xip.txt")
-                 pool=$(cat "$OUT/${model}-pool.txt")
+                 xip=$(cat "$OUT/${model}-xip.txt") || return 1
+                 pool=$(cat "$OUT/${model}-pool.txt") || return 1
+                 # Canonical nonnegative decimal bytes, bounded below shell overflow.
+                 # Firmware memory fits in nine digits; malformed evidence is never PASS.
+                 if [[ ! "$xip" =~ ^(0|[1-9][0-9]{0,8})$ ]] || [[ ! "$pool" =~ ^(0|[1-9][0-9]{0,8})$ ]]; then
+                   echo "$model budget numbers malformed (FAIL)"
+                   return 1
+                 fi
                  echo "$model: XIP free: $xip B (min $XIP_MIN); pool margin: $pool B (min $POOL_MIN)"
                  if [ "$xip" -lt "$XIP_MIN" ] || [ "$pool" -lt "$POOL_MIN" ]; then
                    echo "$model fit test failed: XIP free $xip B (min $XIP_MIN), pool margin $pool B (min $POOL_MIN)"
