@@ -5954,6 +5954,8 @@ static UI_DRAW void draw_break(int band)
     uint32_t lmarks = lock_marks(-1, -1, 0);           /* (the break: its 16 steps) */
     engine_brk_state(&slice, &bank, &div, &running);
     int audition = engine_brk_held() != 0, active = running || audition;
+    int choosing = ui.brk_choice_on && engine_brk_preview_active() &&
+                   ui.brk_choice_pat == seq.ppat[PART_BRK];
     if (!ui.outline_ok || ui.outline_slot != bp->slot_a) {
         ui.outline_ok = (uint8_t)engine_brk_outline(0, ui.outline, 232);
         ui.outline_slot = bp->slot_a;
@@ -6006,10 +6008,23 @@ static UI_DRAW void draw_break(int band)
             }
             /* Assignments and steps are one coherent group. Actual sounding
              * bank keeps a distinct label and underline, not a separate tile. */
-            text_c(60,28,&FONT_XS,ta,bank==0 && active?C_WHITE:C_HI);
-            text_c(180,28,&FONT_XS,tb,bank==1 && active?C_WHITE:C_HI);
-            if(active) cv_rect(bank?132:12,40,96,1,col);
+            text_c(60,28,&FONT_XS,ta,bank==0 && active && !choosing?C_WHITE:C_HI);
+            text_c(180,28,&FONT_XS,tb,bank==1 && active && !choosing?C_WHITE:C_HI);
+            if(active && !choosing) cv_rect(bank?132:12,40,96,1,col);
             (void)q;
+        }
+        /* A candidate is not an assignment. Keep its identity and the physical
+         * choose/cancel actions visible for the whole audition, not just toast.
+         * The waveform still follows the engine's actual audition-owned A path. */
+        if (choosing && ui.brk_choice_slot < ns) {
+            q = put_s(t, ui.brk_choice_bank ? "PREVIEW B " : "PREVIEW A ");
+            const char *name = sn[ui.brk_choice_slot];
+            while (*name && q < t + sizeof(t) - 1) *q++ = *name++;
+            *q = 0;
+            cv_text(8,44,&FONT_T,t,C_WHITE);
+            cv_text(8,55,&FONT_T,"SEL CHOOSE",C_WHITE);
+            cv_text(132,55,&FONT_T,"HOME CANCEL",C_WHITE);
+            return;
         }
         int count = engine_brk_count(0), page = ui.brk_page * 8 < count ? ui.brk_page : (count - 1) / 8;
         q = put_i(put_s(t, "SLICES "), page * 8 + 1);
@@ -6924,6 +6939,7 @@ static UI_DRAW void draw_main(void)
         else
             draw_break(band);
         if (band == 1 && readout && !envelope &&
+            !(ui.brk_choice_on && engine_brk_preview_active()) &&
             !(ui.view == V_PART && (is_drum() || is_303())))
             draw_readout();
     }
