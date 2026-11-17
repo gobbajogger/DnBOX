@@ -204,7 +204,7 @@ static int bass_restore_part(const sound_t *sound, int v)
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
-        &original_tuning, &original_fx_owner[v]);
+        &original_tuning, NULL);
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
     bass_named_preset[v] = sound->v[T_303][v][30];
     original_seq_note[v] = -1;
@@ -224,7 +224,7 @@ int engine_bass_bank(int v) { return (unsigned)v < NBASS ? original_bass[v].kind
 int engine_bass_bank_available(int v, int bank)
 {
     return (unsigned)v < NBASS && (bank == ORIGINAL_SOUND_JUNO || bank == ORIGINAL_SOUND_DRONE || bank == FACTORY_BANK_MIAMI ||
-        (bank == FACTORY_BANK_CHICAGO && original_fx_ready));
+        bank == FACTORY_BANK_CHICAGO);
 }
 const x0x_param_t *engine_bass_bank_param(int bank, int parameter)
 { return original_sound_param((unsigned)bank, (unsigned)parameter); }
@@ -322,7 +322,7 @@ static void bass_preset_boundary_voice(int v)
             return;
         }
         int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
-            &original_tuning, &original_fx_owner[v]);
+            &original_tuning, NULL);
         if (rc != ORIGINAL_RUNTIME_OK) {
             /* A failed adoption remains visible and needs a fresh explicit
              * request; do not rerun expensive initialization every block. */

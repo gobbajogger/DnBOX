@@ -1,26 +1,10 @@
-# Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner agent: <name>   Branch: lane/fwui-<topic>   Draft PR: #<n>   Head: <sha8>   Updated: <YYYY-MM-DD HH:MM VLAT>
+# Lane: fwui
+Owner: M2 recovery. Branch: lane/fwui-mixer-checkpoint. Base: consolidated ec4f4e56.
+Status: R22 mixer checkpoint and no-cut Chicago FX arena sharing independently reviewed; exact Elite/Pro fit PASS. Not merged; full M2 remains open.
 
-## Checklist (from CHECKLISTS.md)
-| ID | Check | Status (PASS/FAIL) | Evidence (SHA + log path or PR comment link) |
-|---|---|---|---|
-| C1 | Local gate at head | FAIL | |
-| <S1…> | | FAIL | |
-
-## Now / next
-- Now: <item, riskiest first>
-- Next: <item>
-
-## Blockers (each with its fix and the route being tried; never "waiting")
-- <blocker> → <fix> (since HH:MM)
-
-## Top 3 risks for the next hour
-1.
-2.
-3.
-
-## Deletes (files this lane removes on purpose, with reason; the gate's no-loss step reads this)
-- <path> — <reason>
-
-## Conflicts noted (RULES 23)
-- <conflict> → reading used: <…>
+- Mixer: five channel names, live meters, level/unit, selected instrument identity; EN_K1 level mapping, PAN/REV/DLY and effective motion preserved.
+- Chicago FX arena shares mutually exclusive backend lifetime without musical cuts; retirement/reuse and 81-factory bit-exact checks pass.
+- Host mixer: 8008 checks. Production integration normal/ASan/UBSan: 337747 checks. Independent overlay: 81 factories, 1944 blocks bit-exact.
+- Rebuilt exact unchanged source: Elite XIP free13080 B; Pro13088 B. Pool335244/344064 B, margin628 B after8192 B reserve on both. Floors1024/512 PASS.
+- LSan blocked by tracer; full Local gate/browser and whole-M2 qualification NOT_RUN. No device test claimed.
+- Original broad M2 work remains preserved. Next: integrate reviewed checkpoint through applicable gates, then remaining R22 screens.

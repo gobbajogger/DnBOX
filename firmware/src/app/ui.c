@@ -6341,14 +6341,26 @@ static UI_DRAW void draw_mix(int band)
     if (band == 0 && !master && !wave) {               /* channel strips */
         for (int pos = 0; pos < NPARTS; pos++) {
             p = part_at(pos);
-            int x = 6 + pos * 38, lvl = proj.sound.v[T_MIX][p][0], pk = eng_peak[p] * 64 / 32768;
+            pref_t level_ref=PR(R_ENG,T_MIX,p,MX_LEVEL);
+            int x = 3 + pos * 40, lvl = pref_get(level_ref);
+            /* Match the selected knob card's effective motion/lock value. */
+            if(p==ui.mixsel) {
+                int effective=lock_step()>=0?lock_of(level_ref,lock_step()):motion_now(level_ref);
+                if(effective>=0)lvl=effective;
+            }
+            int pk = eng_peak[p] * 24 / 32768;
             int selected=cur_page()==0 && p==ui.mixsel;
-            surface_panel(x-2,0,30,BAND_H,selected,selected?dim(PART_COL[p],3):SOUND_FACE,
-                          selected?PART_COL[p]:SOUND_EDGE,SOUND_SIDE);
-            rbox(x + 10, 4, 6, 64, 3, C_LINE);
-            if (pk > 1)
-                rbox(x + 10, 68 - pk, 6, pk, 3, part_muted(p) ? C_DIM : PART_COL[p]);
-            rbox(x + 4, 67 - lvl * 64 / 127, 18, 3, 1, C_WHITE);
+            char number[16], unit[8];
+            uint16_t ink=part_muted(p)?SOUND_GRAY:SOUND_WHITE;
+            night_panel(x,0,38,BAND_H,selected);
+            text_c(x+19,4,&FONT_T,part_s(p),ink);
+            if(selected)cv_text(x+29,16,&FONT_T,"1",SOUND_GRAY);
+            rbox(x+16,17,6,26,3,C_LINE);
+            if(pk>0)rbox(x+16,42-pk,6,pk,2,part_muted(p)?C_DIM:PART_COL[p]);
+            rbox(x+10,41-lvl*24/127,18,3,1,ink);
+            pref_value_of(level_ref,lvl,number,unit);
+            text_c(x+19,47,&FONT_S,number,ink);
+            text_c(x+19,60,&FONT_T,unit,SOUND_GRAY);
         }
     }
     if (band == 0) {                                   /* the master's gain reduction (MASTER and WAVE) */
@@ -6377,10 +6389,6 @@ static UI_DRAW void draw_mix(int band)
             cv_text(9,49,&FONT_XS,t,plat_cpu_pct()>85u?C_AMB:C_GRAY);
             if(engine_guard_active())text_r(229,49,&FONT_XS,"GUARD",C_AMB);
             return;
-        }
-        for (int pos = 0; pos < NPARTS && !master && !wave; pos++) { /* strip names */
-            p = part_at(pos);
-            text_c(6 + pos * 38 + 13, 0, &FONT_XS, part_s(p), part_muted(p) ? C_LINE : PART_COL[p]);
         }
         night_panel(0,14,118,31,0);night_panel(120,14,120,31,0);
         night_panel(0,46,240,22,0);
@@ -8484,13 +8492,14 @@ static UI_DRAW void draw_knobs(void)
         const x0x_param_t *d = pref_desc(r);
         char num[16], unit[8];
         int cx = i * 60 + 30, val, touched = ui.touched == i;
+        int mixer_identity=ui.view==V_MIX && pgi==0 && r.kind==R_ENG && r.a==T_MIX && r.c==MX_LEVEL;
         uint16_t col = drum_mix_page() >= 0 ? PART_COL[drum_mix_page()] : part_col();   /* MIX: 909 in the 909's */
         if (i)
             cv_rect(i * 60, 14, 1, 50, C_LINE);
         if (!d)
             continue;
         /* Selected control keeps the shared raised face; value/lock semantics below are unchanged. */
-        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
+        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, mixer_identity?part_s(r.b):caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
         val = pref_get(r);
         if (lock_step() >= 0) {                        /* a held step: its own value (amber mark: locked) */
             int lv = lock_of(r, lock_step());
@@ -8503,6 +8512,13 @@ static UI_DRAW void draw_knobs(void)
             dot(i * 60 + 52, 17, 2, mv >= 0 ? C_WHITE : C_DIM);
             if (mv >= 0)
                 val = mv;
+        }
+        if(mixer_identity) {
+            /* Level's single readout is in the selected upper strip. Keep
+             * encoder zero and its lock/motion marks, not a duplicate control. */
+            glyph_identity(NPARTS,r.b,cx-18,col);
+            text_c(cx,55,&FONT_T,"1",C_GRAY);
+            continue;
         }
         if(drum_strip_role(r)==DG_LEVEL) {
             drum_strip_glyph(r,val,cx-13,28,col);
