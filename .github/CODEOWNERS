@@ -1,0 +1,23 @@
+# Every path is owned by @gobbajogger.
+# Comments name the lane that normally works that path (see AGENTS.md).
+# test-and-merge reviews gates and PRs and has no path prefix.
+# remote and web work live in gobbajogger/x0x37-for-Loopy-Pro_nightly.
+
+# integ — default: docs, gates, licensing, repo hygiene, integration
+* @gobbajogger
+
+# sound — Synth One, SuperJ6, Chicago, Miami, presets, A/B benches, memory fit
+/firmware/src/dsp/ @gobbajogger
+/firmware/src/seq/ @gobbajogger
+/assets/ @gobbajogger
+/experiments/ @gobbajogger
+/tools/synth684_harness/ @gobbajogger
+
+# fwui — firmware screens, battery, pan, pads/LEDs, hold-GLOBE, slider lane, code-space fit
+/firmware/src/gfx.c @gobbajogger
+/firmware/src/lcd.c @gobbajogger
+/firmware/src/ui_theme.h @gobbajogger
+/tests/ui_defects/ @gobbajogger
+/docs/design/ @gobbajogger
+/docs/feature41-ui/ @gobbajogger
+/docs/mockups/ @gobbajogger
