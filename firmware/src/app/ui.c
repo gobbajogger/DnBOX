@@ -1116,7 +1116,10 @@ static int original_value_text(pref_t r, int value, char *num, char *unit)
             int amount = v->xmod_tune; char *q = num;
             if (amount < 0) { q = put_s(q,"-"); amount = -amount; }
             else if (amount > 0) q = put_s(q,"+");
-            q = put_i(q,amount/100); *q++ = '.'; *q++ = (char)('0'+(amount/10)%10); *q++ = (char)('0'+amount%10); *q = 0;
+            /* Native80 is bipolar VCA-to-slave pitch amount, not fixed tuning.
+             * xmod_tune stores thousandths; show that amount as percent. */
+            q = put_i(q,amount/10); *q++ = '.'; *q++ = (char)('0'+amount%10); *q = 0;
+            put_s(unit,"%");
             return 1;
         }
     }
@@ -6166,7 +6169,8 @@ static UI_DRAW void draw_fx(int band)
     cv_text(9,121-off,&FONT_T,"FEEDBACK",C_GRAY);cv_text(129,121-off,&FONT_T,"RV DECAY",C_GRAY);
     put_s(put_i(t,proj.sound.v[T_FX][0][FX_DL_FDBK]*100/127),"%");
     text_r(111,121-off,&FONT_T,t,C_WHITE);
-    put_i(t,proj.sound.v[T_FX][0][FX_RV_DECAY]*100/127);text_r(231,121-off,&FONT_T,t,C_WHITE);
+    pref_value(PR(R_ENG,T_FX,0,FX_RV_DECAY),a,u);
+    put_s(put_s(t,a),u);text_r(231,121-off,&FONT_T,t,C_WHITE);
 }
 
 /* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
