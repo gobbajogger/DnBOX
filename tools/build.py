@@ -577,6 +577,8 @@ def check(img, syms, dis, rt):
     bss = sym("_bss_end") - 0x01C08000
     pool = sym("_pool_end") - sym("_pool_start")
     notes.append(f"image {len(img)} B; RAM .data+.bss {bss} B of 98304; pool {pool} B of {0x54000}")
+    notes.append(f"{MODEL} XIP free: {APP_CODE_MAX - len(img)} bytes")
+    notes.append(f"{MODEL} pool margin: {0x54000 - pool - 8192} bytes (above 8192-byte reserve)")
     if bss > 96 * 1024:
         errors.append("RAM region overflow")
     if 0x54000 - pool < 8192:                     # keep >= 8 KiB of the pool spare
