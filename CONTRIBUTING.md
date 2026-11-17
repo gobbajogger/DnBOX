@@ -23,6 +23,12 @@ Do not attach private backups, credentials, or raw captures that you do not want
 4. Build and test guidance is in [BUILDING.md](BUILDING.md).
 5. Do not use GitHub Actions or add or change GitHub workflow files under `.github/workflows/`.
 
+
+## Branches
+
+Max 15 branches per repo; every branch needs an open PR; delete the branch right after merge/close, after the archive/<branch> tag.
+
+Protected branches (`main`, `gh-pages`, `nightly` where it exists, and `integration/dnbox-consolidated`) count toward the cap. Keep at most two `backup/*` branches. Work that is closed or merged is preserved by the `archive/<branch>` tag, then the branch is deleted.
 ## Releases
 
 Follow [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) and current owner instructions for qualification, integration and delivery. A source PR does not authorize a release, publication, a device write or a merge to `main`.
