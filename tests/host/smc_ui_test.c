@@ -408,6 +408,39 @@ static int track_slot_of(int t, int v, const char *name)
     }
     return -1;
 }
+/* Independent retained control IDs from the verified R21/R22 drum inventory,
+ * adapted only for the required singleton main-AMP envelope row. Do not derive
+ * these expectations from production sorting or drum_amp_ref(). */
+static int expected_amp_id(int t, int v)
+{ return t == T_909 && v == 0 ? 2 : t == T_909 && v == 1 ? 3 : -1; }
+#define TRACK_CHECK(expr) do { if (!(expr)) fprintf(stderr, "DRUM_PAGE_CONTRACT_MISMATCH\n"); CHECK(expr); } while (0)
+static void check_track_page_contract(int t, int v)
+{
+    static const int ids[2][11][4] = {
+        {{0,1,4,5},{0,1,2,-1},{0,3,1,-1},{0,3,1,-1},{0,3,1,-1},
+         {1,-1,-1,-1},{1,2,-1,-1},{2,0,-1,-1},{2,0,-1,-1},
+         {0,2,-1,-1},{0,2,-1,-1}},
+        {{3,1,4,2},{3,1,4,2},{1,3,2,-1},{1,3,2,-1},{1,3,2,-1},
+         {1,3,2,-1},{1,3,4,2},{1,2,-1,-1},{2,1,-1,-1},
+         {2,1,-1,-1},{1,2,-1,-1}}
+    };
+    int kit = t == T_808, rows = 0, amp = expected_amp_id(t,v);
+    TRACK_CHECK(v >= 0 && v < 11);
+    for (int page = 0; page < pg.n; page++) {
+        if (pg.group[page] != GR_TRACK) continue;
+        TRACK_CHECK(rows < (amp >= 0 ? 2 : 1));
+        for (int k = 0; k < 4; k++) {
+            int id = rows == 0 ? ids[kit][v][k] : k == 0 ? amp : -1;
+            TRACK_CHECK(id < 0 ? pg.r[page][k].kind == R_NONE
+                  : smc_same(pg.r[page][k], PR(R_ENG,t,v,id)));
+        }
+        /* Page keys store11chars; the visible graph title is drawn as AMP. */
+        if (rows == 1) TRACK_CHECK(!strcmp_s(pg.title[page], "AMP ENVELOP"));
+        rows++;
+    }
+    TRACK_CHECK(rows == (amp >= 0 ? 2 : 1));
+}
+#undef TRACK_CHECK
 static void test_track_knob_align(void)
 {
     static const char *const names[] = {
@@ -421,6 +454,7 @@ static void test_track_knob_align(void)
             setup(V_PART, kit ? PART_808 : PART_909);
             ui.sel[kit] = (uint8_t)v;
             build_pages();
+            check_track_page_contract(t, v);
             for (page = 0; page < pg.n; page++) {
                 int hole = 0;
                 if (pg.group[page] != GR_TRACK) continue;
@@ -429,6 +463,10 @@ static void test_track_knob_align(void)
                     int rank = 100, n;
                     if (r.kind == R_NONE) { hole = 1; continue; }
                     CHECK(!hole);                     /* no empty knob between filled ones */
+                    /* A full-row envelope is a separate semantic group, not a
+                     * continuation of the ordinary knob ranking. Its exact
+                     * identity, position and singleton shape are checked above. */
+                    if (r.c == expected_amp_id(t, v)) continue;
                     for (n = 0; n < (int)(sizeof names / sizeof *names); n++)
                         if (name_is(engine_param(r.a, r.b, r.c), names[n])) {
                             rank = n;
@@ -440,10 +478,10 @@ static void test_track_knob_align(void)
             }
             for (i = 0; i < (int)(sizeof names / sizeof *names); i++) {
                 int a = track_slot_of(t, v, names[i]);
-                if (a < 0) continue;
+                if (a < 0 || (expected_amp_id(t,v) >= 0 && !strcmp_s(names[i], "Decay"))) continue;
                 for (j = i + 1; j < (int)(sizeof names / sizeof *names); j++) {
                     int b = track_slot_of(t, v, names[j]);
-                    if (b >= 0) CHECK(a < b);
+                    if (b >= 0 && !(expected_amp_id(t,v) >= 0 && !strcmp_s(names[j], "Decay"))) CHECK(a < b);
                 }
             }
         }

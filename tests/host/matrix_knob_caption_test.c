@@ -12,7 +12,15 @@ static void check_caption(const char *caption,const char *name)
     /* The native Chicago envelope graph replaces the active row widgets and
      * caption; its saved bindings are still checked independently below. */
     if(engine_bass_bank(bidx())==ORIGINAL_SOUND_CHICAGO && page==3)caption="";
-    char title[80];put_s(put_s(put_i(title,r+1),"  "),matrix_group(page));
+    /* Independent displayed titles; never derive expected text from renderer. */
+    static const char *const chi_titles[]={"OSCILLATOR","FILTER 1","FILTER 2","ENVELOPE","AMPLIFIER","ARPEGGIATOR","EFFECT","SOUND"};
+    static const char *const mia_titles[]={"CARRIER","XMOD","FILTER","WOBBLE","OUTPUT","SOUND"};
+    int bank=engine_bass_bank(bidx());
+    CHECK(bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_MIAMI);
+    CHECK(page>=0 && page<(bank==ORIGINAL_SOUND_CHICAGO?8:6));
+    const char *expected_title=bank==ORIGINAL_SOUND_CHICAGO?chi_titles[page]:mia_titles[page];
+    CHECK(!strcmp_s(matrix_group(page),expected_title));
+    char title[80];put_s(put_s(put_i(title,r+1),"  "),expected_title);
     
     CHECK(8+tw(&FONT_T,title)+8<=232-tw(&FONT_T,caption));
     sound_t before=proj.sound;int dirty=ui.dirty,sw=save_wait;
@@ -21,11 +29,11 @@ static void check_caption(const char *caption,const char *name)
     CHECK(!memcmp(&before,&proj.sound,sizeof before));CHECK(!memcmp(refs,pg.r[page],sizeof refs));
     CHECK(cur_page()==page && ui.dirty==dirty && save_wait==sw);
     uint16_t label=SOUND_INK;
-    cv_begin(240,12,SOUND_SELECT);
-    /* Raised panel's native edge and four-row geometry. */
-    cv_rect(7,0,226,1,SOUND_SELECT_EDGE);
-    for(int y=1;y<5;y++)cv_rect(8,y,224,1,blend(SOUND_SELECT,C_WHITE,5-y));
-    cv_rect(9,1,58,1,SOUND_SELECT_EDGE);
+    /* Independent exact flat surface geometry, not the production wrapper.
+     * The obsolete raised bevel/glare is no longer an accepted oracle. */
+    cv_begin(240,49,SOUND_BASE);
+    rbox(3,0,234,49,8,SOUND_SELECT_EDGE);
+    rbox(4,1,232,47,7,SOUND_SELECT);
     cv_text(8,0,&FONT_T,title,label);text_r(232,0,&FONT_T,caption,label);
     /* Chicago ENVELOPE row: the ADSR graph draws its K5-K8 A/D/S/R values at
      * rest (#746); ui-glyph-polish checks those pixels. */
