@@ -30,7 +30,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, List, Optional, Sequence, Set
 
 
-DEFAULT_REPO = "gobbajogger/X0X37-for-Loopy-Pro"
+DEFAULT_REPO = "gobbajogger/DnBOX"
 TRUNK = "main"
 FORBIDDEN_BASES = frozenset({"nightly", "gh-pages"})
 FIRMWARE_PREFIXES = ("firmware/",)

@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/712 (wip/engines-ui-one-build). It carries the optimized Chicago and Miami DSP (clock span, chorus span, Miami idle clock and zero stores) into the one-build UI. The sound must stay the same. The one-build UI, rate pads, SMC, BREAK and stored revision 13 are not changed.
+Source: https://github.com/gobbajogger/DnBOX/pull/712 (wip/engines-ui-one-build). It carries the optimized Chicago and Miami DSP (clock span, chorus span, Miami idle clock and zero stores) into the one-build UI. The sound must stay the same. The one-build UI, rate pads, SMC, BREAK and stored revision 13 are not changed.
 
 ## 1. What you need
 

@@ -10,8 +10,8 @@ const projects = readFileSync(join(dir, 'x0x_projects.html'), 'utf8');
 const protocol = readFileSync(join(dir, 'x0x_projects.js'), 'utf8');
 const links = [...installer.matchAll(/<a\s+href="([^\"]+)"\s+data-t="projects">/g)];
 assert.equal(links.length, 1, 'installer must have one translated project/song route');
-assert.equal(new URL(links[0][1], 'https://example.org/X0X37-for-Loopy-Pro/install/').href,
-             'https://example.org/X0X37-for-Loopy-Pro/projects/');
+assert.equal(new URL(links[0][1], 'https://example.org/DnBOX/install/').href,
+             'https://example.org/DnBOX/projects/');
 assert.match(installer, /data-t="projectshint"/);
 assert.equal([...installer.matchAll(/\bprojects: "/g)].length, 2, 'ja/en names required');
 assert.equal([...installer.matchAll(/\bprojectshint: "/g)].length, 2, 'ja/en explanations required');

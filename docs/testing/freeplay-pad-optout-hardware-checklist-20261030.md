@@ -6,7 +6,7 @@ PR #715 changes only the host regression. It does not change production firmware
 and is not, by itself, a device-test candidate. Do not install or hardware-test
 PR #715 as though the test-only commit were firmware.
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/715
+Source: https://github.com/gobbajogger/DnBOX/pull/715
 (`fix/freeplay-pad-optout-regression`). The regression checks both compile-time UI
 flag states for Miami Free Play pad handling: rate selection disabled
 (`X0X_DEV_WOBBLE=0`) and rate selection enabled (the normal enabled variant).
