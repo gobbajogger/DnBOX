@@ -24,3 +24,7 @@ Owner agent: <name>   Branch: lane/fwui-<topic>   Draft PR: #<n>   Head: <sha8> 
 
 ## Conflicts noted (RULES 23)
 - <conflict> → reading used: <…>
+
+## Clip-chord host repair
+Owner: M2 recovery. Source checkpoint only; whole M2 remains open.
+Extract font_bitmap_width before glyph/text_w in chord_metrics.inc. Red implicit-declaration failure reproduced; corrected test passes 7049 checks and 7050 captured draws. No firmware code changed. Next: current-source first-slice render receipts and R22 screen qualification.
