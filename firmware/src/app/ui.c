@@ -191,6 +191,7 @@ typedef struct {
     uint8_t held_step_part, held_step_pat; /* owner at key-down; a pattern can change before key-up */
     uint8_t step_edited;
     uint8_t paste_src[NPARTS];        /* source slots chosen with a paste target; stable through confirmation */
+    uint8_t brk_choice_on, brk_choice_bank, brk_choice_slot, brk_choice_pat;
     uint8_t step_preview;              /* the held step is sounding (only while stopped) */
     uint8_t step_created;              /* the press turned the held step on (its release keeps it) */
     int8_t brk_held;                   /* BREAK: the white key (16th) held, -1 none */
@@ -627,6 +628,8 @@ static pattern_t *pref_pattern(pref_t r)
 
 static int pref_get(pref_t r)
 {
+    if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
+        seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
     pattern_t *p = pref_pattern(r);
     switch (r.kind) {
     case R_BENGINE: return engine_bass_requested_bank(r.b);
@@ -905,6 +908,46 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 #endif
 }
 static void pref_set(pref_t r, int v) { pref_set_impl(r, v, 1); }
+
+/* Browsing never changes a pattern. The existing BREAK voice auditions the
+ * candidate; SEL commits and any exit restores the selected loops. */
+static void brk_choice_cancel(void)
+{
+    if (!ui.brk_choice_on) return;
+    ui.brk_choice_on = 0;
+    engine_brk_preview_end();
+    ui.outline_ok = 0;
+}
+static int brk_choice_turn(pref_t r, int e)
+{
+    int n = engine_brk_nslots(), value;
+    if (!n || !e) return 0;
+    if (ui.brk_choice_on && (ui.brk_choice_bank != r.a ||
+        ui.brk_choice_pat != seq.ppat[PART_BRK])) brk_choice_cancel();
+    value = ui.brk_choice_on ? ui.brk_choice_slot : pref_get(r);
+    value += e > 0 ? 1 : -1;
+    value = value < 0 ? 0 : value >= n ? n - 1 : value;
+    if (!engine_brk_preview(value)) return 0;
+    ui.brk_choice_on = 1;
+    ui.brk_choice_bank = (uint8_t)r.a;
+    ui.brk_choice_slot = (uint8_t)value;
+    ui.brk_choice_pat = seq.ppat[PART_BRK];
+    ui.outline_ok = 0;
+    say("PREVIEW", 0);
+    return 1;
+}
+static int brk_choice_confirm(void)
+{
+    if (!ui.brk_choice_on) return 0;
+    if (!engine_brk_preview_active() || ui.brk_choice_pat != seq.ppat[PART_BRK]) { brk_choice_cancel(); return 0; }
+    int bank = ui.brk_choice_bank, slot = ui.brk_choice_slot;
+    brk_choice_cancel();
+    pref_set_impl(PR(R_BRKSLOT, bank, 0, 0), slot, 1);
+    mark_dirty();
+    say("CHOSEN", 0);
+    return 1;
+}
+
 
 
 /* a name in capitals (the engines' own are mixed case): two at a time */
@@ -2811,6 +2854,7 @@ static int32_t accel(int role, int32_t s, int range)
 
 static void set_view(int v)
 {
+    brk_choice_cancel();
     bass_layout_accept();
     /* A step held on SEQ may carry its p-lock gesture to EDIT's sound knobs.
      * Return to SEQ after key-up so lock_release still uses those knob refs. */
@@ -3157,6 +3201,8 @@ static uint32_t lock_marks(int t, int v, int base)
 
 static void turn_ref(pref_t r, int e, int knob)
 {
+    if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
+    brk_choice_cancel();
 #if X0X_BASS_PRESET_PREVIEW
     /* The detent's descriptor, current value, write and motion ownership all
      * belong to one committed engine, even across an audio boundary. */
@@ -4093,6 +4139,11 @@ static int play_answer_question(int home_held)
 
 X0X_COLD static void button_tap(int b)
 {
+    if (ui.brk_choice_on) {
+        if (b == B_SEL) { (void)brk_choice_confirm(); return; }
+        brk_choice_cancel();
+        if (b == B_HOME) return;
+    }
     if (perf_testing()) {                             /* the test owns the transport: HOME or PLAY stop it */
         if ((b == B_HOME || b == B_PLAY) && perf.phase != 3)
             perf_test_abort();
@@ -5334,31 +5385,17 @@ static UI_DRAW int ui_position_badge(int glyph,int position,int queued,uint16_t 
     }
     return x;
 }
-/* Shallow bevel stays entirely inside the existing rectangle. Four-pixel
- * chamfers, inset dark lower edge, restrained local highlight: no tall teeth,
- * extra buffer, animation, layout change or mutable render state. */
+/* Shared flat surface: consistent rounded outline, no per-edge bevel or glare.
+ * Callers retain their selected face/edge colors and exact control geometry. */
 static UI_DRAW void surface_panel(int x,int y,int w,int h,int active,uint16_t face,uint16_t edge,uint16_t side)
 {
-    int r=h>=18?4:h>=9?2:1, row;
-    if(w<2*r+3 || h<2*r+3) r=1;
-    for(row=0;row<h;row++) {
-        int inset=row<r?r-row:row>=h-r?row-(h-r)+1:0;
-        uint16_t shade=face;
-        if(active && h>=18 && row>0 && row<5)shade=blend(face,C_WHITE,5-row);
-        if(active && h>=18 && row>=h-4)shade=blend(face,C_BLACK,(row-(h-4)+1)*2);
-        cv_rect(x+inset,y+row,w-2*inset,1,shade);
-    }
-    cv_rect(x+r,y,w-2*r,1,edge);
-    cv_line(x,y+r,x+r,y,edge);
-    cv_rect(x,y+r,1,h-2*r,active?edge:UI_N_LEFT);
-    cv_line(x+w-r-1,y,x+w-1,y+r,edge);
-    cv_rect(x+w-1,y+r,1,h-2*r,side);
-    cv_line(x+w-1,y+h-r-1,x+w-r-1,y+h-1,side);
-    cv_rect(x+r,y+h-1,w-2*r,1,UI_N_SHADOW);
-    cv_line(x,y+h-r-1,x+r,y+h-1,side);
-    /* A short light catch, not a washed-out full-width glare band. */
-    if(w>24 && h>=18) cv_rect(x+r+2,y+1,w/4,1,active?edge:UI_N_LEFT);
-    if(active && h>=18) cv_rect(x+r+1,y+h-2,w-2*r-2,1,side);
+    int r=8;
+    (void)active; (void)side;
+    if(w<=0 || h<=0) return;
+    if(r>(w-1)/2) r=(w-1)/2;
+    if(r>(h-1)/2) r=(h-1)/2;
+    rbox(x,y,w,h,r,edge);
+    if(w>2 && h>2) rbox(x+1,y+1,w-2,h-2,r>0?r-1:0,face);
 }
 static UI_DRAW void night_panel(int x,int y,int w,int h,int active)
 {
@@ -5456,10 +5493,11 @@ static UI_DRAW void draw_header(void)
     char b[24];
     int32_t x;
     int ss = save_state();
+    int edit_step = lock_step();
     int pickup = ui.msg[0] == 'P' && ui.msg[1] == 'I' && ui.msg[2] == 'C' &&
                  ui.msg[3] == 'K' && ui.msg[4] == ' ';
     part_header_snapshot_t snapshot = {0};
-    int cacheable = !seq.ext && !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
+    int cacheable = edit_step < 0 && !seq.ext && !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
         ui.overlay == O_NONE && !ui.help && !division_pad_owner() &&
         seq_cue_of(&seq, ui.part) < 0
 #if BOARD_SMK37
@@ -5585,7 +5623,11 @@ static UI_DRAW void draw_header(void)
             char *end=put_i(put_s(pattern,seq.song_on?"S":"P"),
                 (seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[header_part])+1);
             if(pending)put_i(put_s(end,">"),cue+1);
-            int context_end=cv_text(132,4,&FONT_T,pattern,pending?C_AMB:C_WHITE);
+            /* During held-step editing the actual target takes priority over
+             * ordinary pattern context. Release restores the normal header;
+             * engine identity, tempo, transport and battery remain visible. */
+            if(edit_step>=0 && !pickup) put_i(put_s(pattern,"STEP "),edit_step+1);
+            int context_end=cv_text(132,4,&FONT_T,pattern,edit_step>=0?C_AMB:pending?C_AMB:C_WHITE);
             if(pickup) {
                 char detail[12];header_pickup_detail(detail,pending);
                 cv_text(context_end+3,4,&FONT_T,detail,SOUND_GRAY);
@@ -5940,7 +5982,7 @@ static UI_DRAW void draw_break(int band)
         const char *const *sn = engine_brk_slot_names();
         int ns = engine_brk_nslots();
         char t[40], *q = t;
-        night_panel(3,1,234,20,0);
+        night_panel(3,1,234,65,0);
         for (c=0;c<16;c++) {
             int x=8+c*14,on=(bp->steps>>c)&1u;
             cv_rect(x,5,12,12,on?(c==ph?C_WHITE:col):(c==ph?C_DIM:UI_N_SIDE));
@@ -5962,9 +6004,11 @@ static UI_DRAW void draw_break(int band)
                 put_s(put_s(ta, "A  "), sn[bp->slot_a % ns]);
                 put_s(put_s(tb, "B  "), sn[bp->slot_b % ns]);
             }
-            night_panel(3,25,114,16,bank==0 && active);
-            night_panel(123,25,114,16,bank==1 && active);
-            text_c(60,28,&FONT_XS,ta,C_HI);text_c(180,28,&FONT_XS,tb,C_HI);
+            /* Assignments and steps are one coherent group. Actual sounding
+             * bank keeps a distinct label and underline, not a separate tile. */
+            text_c(60,28,&FONT_XS,ta,bank==0 && active?C_WHITE:C_HI);
+            text_c(180,28,&FONT_XS,tb,bank==1 && active?C_WHITE:C_HI);
+            if(active) cv_rect(bank?132:12,40,96,1,col);
             (void)q;
         }
         int count = engine_brk_count(0), page = ui.brk_page * 8 < count ? ui.brk_page : (count - 1) / 8;
@@ -8430,9 +8474,9 @@ static UI_DRAW void draw_knobs(void)
         return;
     last_sig = sig;
     cv_begin(240, KNOB_H, C_BLACK);
-    night_panel(3,0,234,11,0);
-    for(i=0;i<4;i++) night_panel(i*60+3,13,54,55,ui.touched==i);
-    night_panel(0,70,240,12,0);
+    /* One shared bounded parameter panel, including its context caption.
+     * Touch/lock/motion remain content states, never separate raised tiles. */
+    night_panel(3,0,234,68,0);
     {   /* the rule; at its right end, where you are: the tag, then the page dots */
         char t[36];                    /* room for "303A P-LOCK STEP 16 · WBL1 (1/2)" */
         int dots = pg.n > 1 && ui.view != V_GLO;
@@ -8456,8 +8500,6 @@ static UI_DRAW void draw_knobs(void)
         for (i = 0; i < 4; i++) {
             char v[12];
             int cx = i * 60 + 30;
-            if (i)
-                cv_rect(i * 60, 14, 1, 50, C_LINE);
             if (i == 0)
                 put_note(v, held_note_of(bp, ui.held_step) + bp->transpose - 24);
             else if (i == 1)
@@ -8476,12 +8518,10 @@ static UI_DRAW void draw_knobs(void)
         char num[16], unit[8];
         int cx = i * 60 + 30, val, touched = ui.touched == i;
         uint16_t col = drum_mix_page() >= 0 ? PART_COL[drum_mix_page()] : part_col();   /* MIX: 909 in the 909's */
-        if (i)
-            cv_rect(i * 60, 14, 1, 50, C_LINE);
         if (!d)
             continue;
-        /* Selected control keeps the shared raised face; value/lock semantics below are unchanged. */
-        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
+        /* Selection is the label/value color; no independent tile or relief. */
+        text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
         val = pref_get(r);
         if (lock_step() >= 0) {                        /* a held step: its own value (amber mark: locked) */
             int lv = lock_of(r, lock_step());
@@ -8903,6 +8943,8 @@ static void autosave(void)
 void ui_frame(void)
 {
     uint32_t i;
+    if (ui.brk_choice_on && (!engine_brk_preview_active() || project_busy || seq.ppat[PART_BRK] != ui.brk_choice_pat ||
+        plat_keys() || (plat_buttons() & ~((1u << B_SEL) | (1u << B_HOME))))) brk_choice_cancel();
     input();
     division_pad_input();
     ext_rec_drain();

@@ -370,6 +370,8 @@ static void ed_smp_retire(uint32_t k)
 {
     if (!usr_nz[k])
         return;
+    /* Invalidate chooser identity before removing a slot can renumber it. */
+    engine_brk_preview_end();
     usr_nz[k] = 0;
     engine_brk_loops();                               /* the next trigger reads the replacement, not this slot */
     engine_brk_drop_range(smp_user_xip(k), SMP_USER_SIZE(k));

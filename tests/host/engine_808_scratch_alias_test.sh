@@ -6,6 +6,14 @@
 set -e
 cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-refs/tags/archive/build/0.0.22}
 git show $BASE:firmware/src/app/engine.c > $D/engine-base.c
+# The archived engine predates the current UI's optional BREAK audition API.
+# Its comparison exercises render/CQ scratch only, never sample browsing. Refuse
+# audition in that baseline rather than changing the archived audio implementation.
+cat >> "$D/engine-base.c" <<'BASE_PREVIEW_COMPAT'
+int engine_brk_preview(int slot) { (void)slot; return 0; }
+void engine_brk_preview_end(void) { }
+int engine_brk_preview_active(void) { return 0; }
+BASE_PREVIEW_COMPAT
 U=$(python3 - <<'PY'
 import importlib.util
 spec=importlib.util.spec_from_file_location('b','tools/build.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)

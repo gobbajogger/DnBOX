@@ -72,6 +72,7 @@ static uint32_t st_crc32(const uint8_t *p, uint32_t n)
     }
     return ~c;
 }
+void engine_brk_preview_end(void) {}
 void engine_brk_loops(void) {}
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes) { (void)base; (void)nbytes; }
 void ui_say(const char *a, const char *b) { (void)a; (void)b; }

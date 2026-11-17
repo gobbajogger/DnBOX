@@ -86,7 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -501,6 +501,8 @@ run ui-drum-single-lane sh tests/host/ui_drum_single_lane_test.sh
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
 run ui-overlay-battery sh tests/host/ui_overlay_battery_test.sh
 run ui-toast-battery sh tests/host/ui_toast_battery_test.sh
+run ui-shared-parameter-panel sh tests/host/ui_shared_parameter_panel_test.sh
+run ui-held-target-visibility sh tests/host/ui_held_target_visibility_test.sh
 run ui-overlay-battery-registration python3 tests/host/test_ui_overlay_battery_registration.py
 run smc-remainder sh tests/host/smc_remainder_test.sh
 run smc-popup-engine sh tests/host/smc_popup_engine_test.sh
@@ -543,6 +545,10 @@ run adaptive-break-controls sh tests/host/run_adaptive_break_controls.sh
 run adaptive-break-storage sh tests/host/run_adaptive_break_storage.sh
 run adaptive-break-midi-pair python3 tests/host/run_adaptive_break_midi_pair.py
 run break-performance sh tests/host/run_break_performance.sh
+run break-preview-snapshot sh -c "$CC -std=c99 -O1 -DX0X_HOST -Wall -Wextra -Werror -Ifirmware/src tests/host/break_preview_snapshot_test.c -lm -o $OUT/break-preview-snapshot && $OUT/break-preview-snapshot"
+run break-preview-ui python3 -B tests/host/ui_break_preview_test.py
+run break-preview-decoder python3 -B tests/host/engine_break_preview_test.py
+run break-preview-integration env SMC_UI_TEST_FILE=tests/host/break_preview_midi_test.c SMC_UI_OUT=build/host/break-preview-integration sh tests/host/smc_ui_test.sh
 run engine-brk-mute python3 -B tests/host/engine_brk_mute_test.py   # real BREAK gate, immediate mute and abrupt-cut control
 run brk-loops-seamless python3 -B tests/host/engine_brk_loops_seamless_gate_test.py   # no brk_hold mute; engine_brk_loops flushes deferred bank publish (#354)
 run brk-outline sh -c "$CC -std=c11 -O1 -Wall -Wextra -Werror -o $OUT/brk_outline_test tests/host/brk_outline_test.c && $OUT/brk_outline_test"   # abs(-32768) outline peaks must not wrap to blank
