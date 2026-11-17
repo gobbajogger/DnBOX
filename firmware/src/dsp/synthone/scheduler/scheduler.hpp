@@ -103,7 +103,12 @@ protected:
     sp_port port1_{}, port2_{}, mono_port_{};
     sp_data context_{};
     float context_output_ = 0;
+#if defined(S1_HARMONIC_ONLY)
+    sp_ftbl *descriptors_=nullptr;
+    unsigned descriptor_count_=0;
+#else
     sp_ftbl descriptors_[53]{};
+#endif
     bool initialized_ = false;
 };
 
@@ -123,7 +128,12 @@ public:
     const s1c_binding &compact_binding() const { return compact_; }
     const s1_morph_binding &reader_binding() const { return reader_; }
 protected:
+#if defined(S1_HARMONIC_ONLY)
+    sp_ftbl runtime_descriptors_[2]{};
+    RuntimeState(){descriptors_=runtime_descriptors_;descriptor_count_=2;}
+#else
     RuntimeState() = default;
+#endif
     bool init_runtime(const synthone_shared::Tables &, int, const float *, size_t,
                       const float *, size_t, InstanceSpan);
     bool restore_runtime(const float *, size_t, InstanceSpan, bool full_sequence=false);
@@ -132,6 +142,9 @@ protected:
     bool valid_runtime_output(float *,float *,unsigned,unsigned,InstanceSpan,bool full_sequence=false) const;
     bool init_compact_runtime(const synthone_shared::Tables &,const void *,size_t,int,const float *,size_t,const float *,size_t,InstanceSpan,bool full_sequence=false);
     s1c_binding compact_{};
+#if defined(S1_HARMONIC_ONLY)
+    bool init_harmonic_runtime(const synthone_shared::Tables &,int,const float *,size_t,const float *,size_t,InstanceSpan,bool full_sequence=false,bool canonical_sine=false);
+#endif
     bool compact_active_ = false;
     s1_morph_binding reader_{};
     bool reader_active_ = false;

@@ -112,6 +112,10 @@ bool SourceScheduler::reset_dsp() {
 }
 bool SourceScheduler::reset_sequencer() { if(!initialized_) return false; sequence.reset(false); beatCounterDidChange(); return true; }
 bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
+#if defined(S1_HARMONIC_ONLY)
+    if(!compact_active_ || compact_.bytes || compact_.byte_count || compact_.format_tag!=0x48334d31u)return false;
+#endif
+
     if(!valid_output(l,r,n,offset) || !heldNoteNumbersAE.valid_count()) return false;
     struct View{const NoteNumber*values;size_t count;};
     const View held{heldNoteNumbersAE.values.begin(),static_cast<size_t>(heldNoteNumbersAE.count)};
@@ -145,15 +149,23 @@ bool SourceScheduler::process(unsigned n,unsigned offset,float *l,float *r) {
                                    : sequence.process(parameters,150,held,sink)))return false;
         if(parameters[isMono]>0) {
             if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
+#if defined(S1_HARMONIC_ONLY)
+                if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false;
+#else
                 if(compact_active_) { if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false; }
                 else if(reader_active_) { if(!s1scheduler_reader::run_note(mono,offset+i,l,r,reader_))return false; }
                 else mono.run(offset+i,l,r);
+#endif
             }
         } else for(auto &note:poly)
             if(note.rootNoteNumber!=-1 && note.stage!=S1NoteState::stageOff) {
+#if defined(S1_HARMONIC_ONLY)
+                if(!s1scheduler_compact::run_note(note,offset+i,l,r,compact_))return false;
+#else
                 if(compact_active_) { if(!s1scheduler_compact::run_note(note,offset+i,l,r,compact_))return false; }
                 else if(reader_active_) { if(!s1scheduler_reader::run_note(note,offset+i,l,r,reader_))return false; }
                 else note.run(offset+i,l,r);
+#endif
             }
         trace(1,i);
     }

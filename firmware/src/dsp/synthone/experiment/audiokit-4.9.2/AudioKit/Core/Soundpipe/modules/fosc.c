@@ -12,6 +12,9 @@
 
 #include <stdlib.h>
 #include "soundpipe.h"
+#if defined(S1_CANONICAL_SINE)
+#include "canonical_sine.h"
+#endif
 
 int sp_fosc_create(sp_fosc **p)
 {
@@ -43,6 +46,10 @@ int sp_fosc_init(sp_data *sp, sp_fosc *p, sp_ftbl *ft)
 
 int sp_fosc_compute(sp_data *sp, sp_fosc *p, SPFLOAT *in, SPFLOAT *out)
 {
+#if defined(S1_CANONICAL_SINE)
+    if(!p->ft->tbl && p->ft->size!=4096)return SP_NOT_OK;
+#endif
+
 
     sp_ftbl *ftp;
 
@@ -68,6 +75,10 @@ int sp_fosc_compute(sp_data *sp, sp_fosc *p, SPFLOAT *in, SPFLOAT *out)
     minc = (int32_t)(mod * sicvt);
     mphs &= SP_FT_PHMASK;
     fract = ((mphs) & ftp->lomask) * ftp->lodiv;
+#if defined(S1_CANONICAL_SINE)
+    if(!ft){unsigned pos=(unsigned)(mphs >> lobits);v1=s1_canonical_sample(ft,pos);v2=v1==s1_canonical_sample(ft,p->ft->size-1)?s1_canonical_sample(ft,0):s1_canonical_sample(ft,pos+1);}
+    else {
+#endif
     ftab = ft + (mphs >> lobits);
     v1 = ftab[0];
 
@@ -76,6 +87,9 @@ int sp_fosc_compute(sp_data *sp, sp_fosc *p, SPFLOAT *in, SPFLOAT *out)
     } else {
         v2 = ftab[1];
     }
+#if defined(S1_CANONICAL_SINE)
+    }
+#endif
 
     fmod = (v1 + (v2 - v1) * fract) * ndx;
     mphs += minc;
@@ -83,6 +97,10 @@ int sp_fosc_compute(sp_data *sp, sp_fosc *p, SPFLOAT *in, SPFLOAT *out)
     cinc = (int32_t)(cfreq * sicvt);
     cphs &= SP_FT_PHMASK;
     fract = ((cphs) & ftp->lomask) * ftp->lodiv;
+#if defined(S1_CANONICAL_SINE)
+    if(!ft){unsigned pos=(unsigned)(cphs >>lobits);v1=s1_canonical_sample(ft,pos);v2=v1==s1_canonical_sample(ft,p->ft->size-1)?s1_canonical_sample(ft,0):s1_canonical_sample(ft,pos+1);}
+    else {
+#endif
     ftab = ft + (cphs >>lobits);
     v1 = ftab[0];
 
@@ -91,6 +109,9 @@ int sp_fosc_compute(sp_data *sp, sp_fosc *p, SPFLOAT *in, SPFLOAT *out)
     } else {
         v2 = ftab[1];
     }
+#if defined(S1_CANONICAL_SINE)
+    }
+#endif
 
     *out = (v1 + (v2 - v1) * fract) * amp;
     cphs += cinc;

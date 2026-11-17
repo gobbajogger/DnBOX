@@ -47,6 +47,10 @@ bool values_valid(const float *p,size_t n,bool full_sequence=false) {
 }
 bool State::valid_init(const synthone_shared::Tables &tables,int rate,const float *values,
                        size_t count,const float *tuning,size_t tuning_count,InstanceSpan self,bool full_sequence) const {
+#if defined(S1_HARMONIC_ONLY)
+    if(!descriptors_ || descriptor_count_!=53)return false;
+#endif
+
     if((rate!=44100 && rate!=48000 && rate!=96000) ||
        overlap(values,150*sizeof(float),self.data,self.bytes) || !values_valid(values,count,full_sequence) ||
        !tuning || tuning_count!=128 || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
@@ -67,11 +71,22 @@ void State::init_graph(const synthone_shared::Tables &tables,int rate,const floa
     context_.sr=rate; context_.nchan=1; context_.len=5ul*static_cast<unsigned>(rate);
     memcpy(context_.filename,"test.wav",sizeof "test.wav"); sp=&context_;
     tuningTable=tuning;
+#if defined(S1_HARMONIC_ONLY)
+    if(descriptor_count_==2) {
+      for(unsigned i=0;i<2;++i){auto &d=descriptors_[i];d={};sp_ftbl_init(sp,&d,4096);d.tbl=i?const_cast<float*>(tables.sine):nullptr;d.del=0;}
+      for(unsigned i=0;i<52;++i)ft_array[i]=&descriptors_[0];
+      sine=&descriptors_[1];
+    } else {
+#endif
     for(unsigned i=0;i<53;++i) {
         auto &d=descriptors_[i]; d={}; sp_ftbl_init(sp,&d,4096);
         d.tbl=const_cast<float *>(i<52?tables.morph[i].samples:tables.sine); d.del=0;
         if(i<52) ft_array[i]=&d; else sine=&d;
     }
+#if defined(S1_HARMONIC_ONLY)
+    }
+#endif
+
     memcpy(ft_frequencyBand,tables.frequency_band,sizeof ft_frequencyBand);
     lfo1_0_1=lfo2_0_1=lfo3_0_1=0; lfo1_1_0=lfo2_1_0=lfo3_1_0=0;
     lfo1Smooth=lfo2Smooth=0; monoFrequencySmooth=261.6255653006f;
@@ -94,6 +109,10 @@ bool State::valid_restore(const float *values,size_t count,InstanceSpan self,boo
 }
 bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,const float *values,
                                 size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
+#if defined(S1_HARMONIC_ONLY)
+    return false;
+#else
+
     if(!valid_init(tables,rate,values,count,tuning,tuning_count,self)) return false;
     reader_={};reader_active_=false;compact_={};compact_active_=false;
     compactPorts.teardown();
@@ -102,9 +121,15 @@ bool RuntimeState::init_runtime(const synthone_shared::Tables &tables,int rate,c
     if(!compactPorts.init(parameters,150,values,150,rate)) return false;
     restore_graph();
     return true;
+
+#endif
 }
 bool RuntimeState::init_reader_runtime(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
         int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self) {
+#if defined(S1_HARMONIC_ONLY)
+    return false;
+#else
+
     if(overlap(&tables,sizeof tables,self.data,self.bytes) || !packed ||
        bytes!=S1_MORPH_DIRECT_BYTES || count!=150 || tuning_count!=128 ||
        overlap(packed,bytes,self.data,self.bytes) || overlap(packed,bytes,&tables,sizeof tables) || tables.sine_count!=4097 ||
@@ -127,9 +152,14 @@ bool RuntimeState::init_reader_runtime(const synthone_shared::Tables &tables,con
     // All replacement inputs are admitted before any live state is retired.
     if(!init_runtime(tables,rate,values,count,tuning,tuning_count,self))return false;
     reader_=candidate;reader_active_=true;return true;
+#endif
 }
 bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,const void *packed,size_t bytes,
         int rate,const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self,bool full_sequence) {
+#if defined(S1_HARMONIC_ONLY)
+    return false;
+#else
+
     // Authenticate the WHOLE final owner before dereferencing candidate metadata.
     if(overlap(&tables,sizeof tables,self.data,self.bytes) || !packed || count!=150 || tuning_count!=128 ||
        (rate!=44100&&rate!=48000&&rate!=96000) ||
@@ -155,7 +185,35 @@ bool RuntimeState::init_compact_runtime(const synthone_shared::Tables &tables,co
     compactPorts.teardown();init_graph(tables,rate,tuning);
     if(!compactPorts.init(parameters,150,values,150,rate))return false;
     restore_graph();reader_={};reader_active_=false;compact_=candidate;compact_active_=true;return true;
+
+#endif
 }
+#if defined(S1_HARMONIC_ONLY)
+bool RuntimeState::init_harmonic_runtime(const synthone_shared::Tables &tables,int rate,
+        const float *values,size_t count,const float *tuning,size_t tuning_count,InstanceSpan self,bool full_sequence,bool canonical_sine) {
+    if(descriptors_!=runtime_descriptors_ || descriptor_count_!=2)return false;
+
+#if !defined(S1_CANONICAL_SINE)
+    if(canonical_sine)return false;
+#endif
+    if(overlap(&tables,sizeof tables,self.data,self.bytes) || count!=150 || tuning_count!=128 ||
+       (rate!=44100&&rate!=48000&&rate!=96000) ||
+       overlap(values,150*sizeof(float),self.data,self.bytes) || overlap(tuning,128*sizeof(float),self.data,self.bytes) ||
+       reinterpret_cast<uintptr_t>(values)%alignof(float) || reinterpret_cast<uintptr_t>(tuning)%alignof(float) ||
+       !values_valid(values,count,full_sequence) || !tuning ||
+       (canonical_sine ? tables.sine!=nullptr : tables.sine==nullptr) || tables.sine_count!=4097 ||
+       reinterpret_cast<uintptr_t>(tables.sine)%alignof(float))return false;
+    for(unsigned i=0;i<128;++i)if(!s1_finitef(tuning[i])||tuning[i]<=0||tuning[i]>rate*.5f)return false;
+    for(unsigned i=0;i<52;++i){const auto &r=tables.morph[i];
+        if(r.samples||r.count!=4097||r.band!=i/4||static_cast<unsigned>(r.shape)!=i%4)return false;}
+    for(unsigned i=0;i<13;++i){uint32_t actual,expected;memcpy(&actual,&tables.frequency_band[i],4);memcpy(&expected,&wave_frequencies[i],4);if(actual!=expected)return false;}
+    if(!canonical_sine&&!payload(tables.sine,tables.sine_count,1.f,self))return false;
+    compactPorts.teardown();init_graph(tables,rate,tuning);
+    if(!compactPorts.init(parameters,150,values,150,rate))return false;
+    restore_graph();reader_={};reader_active_=false;
+    compact_={nullptr,0,0x48334d31u};compact_active_=true;return true;
+}
+#endif
 bool RuntimeState::valid_runtime_output(float *l,float *r,unsigned n,unsigned offset,InstanceSpan self,bool full_sequence) const {
     if(n>65536||offset>65536-n)return false;
     const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
@@ -221,7 +279,11 @@ bool State::valid_output_span(float *l,float *r,unsigned n,unsigned offset,Insta
     const size_t bytes=(static_cast<size_t>(n)+offset)*sizeof(float);
     if(overlap(l,bytes,r,bytes) || overlap(l,bytes,self.data,self.bytes) || overlap(r,bytes,self.data,self.bytes) ||
        overlap(l,bytes,tuningTable,128*sizeof(float)) || overlap(r,bytes,tuningTable,128*sizeof(float))) return false;
+#if defined(S1_HARMONIC_ONLY)
+    for(unsigned i=0;i<descriptor_count_;++i){const auto &d=descriptors_[i];if(overlap(l,bytes,d.tbl,4097*sizeof(float))||overlap(r,bytes,d.tbl,4097*sizeof(float)))return false;}
+#else
     for(const auto &d:descriptors_) if(overlap(l,bytes,d.tbl,4097*sizeof(float)) || overlap(r,bytes,d.tbl,4097*sizeof(float))) return false;
+#endif
     return true;
 }
 bool Scheduler::set_target(unsigned p,float v) {
@@ -319,6 +381,10 @@ bool Scheduler::reset_dsp() {
 }
 bool Scheduler::reset_sequencer() { if(!initialized_) return false; sequencer.reset(false); beatCounterDidChange(); return true; }
 bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
+#if defined(S1_HARMONIC_ONLY)
+    if(!compact_active_ || compact_.bytes || compact_.byte_count || compact_.format_tag!=0x48334d31u)return false;
+#endif
+
     if(!valid_output(l,r,n,offset)) return false;
     initializeNoteStates();
     if(parameters[isMono]>0) {
@@ -338,15 +404,23 @@ bool Scheduler::process(unsigned n,unsigned offset,float *l,float *r) {
         processLfo(); if(!sequencer.process_checked(parameters,heldNoteNumbersAE))return false;
         if(parameters[isMono]>0) {
             if(mono.rootNoteNumber!=-1 && mono.stage!=S1NoteState::stageOff) {
+#if defined(S1_HARMONIC_ONLY)
+                if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false;
+#else
                 if(compact_active_) { if(!s1scheduler_compact::run_note(mono,offset+i,l,r,compact_))return false; }
                 else if(reader_active_) { if(!s1scheduler_reader::run_note(mono,offset+i,l,r,reader_))return false; }
                 else mono.run(offset+i,l,r);
+#endif
             }
         } else for(auto &note:poly)
             if(note.rootNoteNumber!=-1 && note.stage!=S1NoteState::stageOff) {
+#if defined(S1_HARMONIC_ONLY)
+                if(!s1scheduler_compact::run_note(note,offset+i,l,r,compact_))return false;
+#else
                 if(compact_active_) { if(!s1scheduler_compact::run_note(note,offset+i,l,r,compact_))return false; }
                 else if(reader_active_) { if(!s1scheduler_reader::run_note(note,offset+i,l,r,reader_))return false; }
                 else note.run(offset+i,l,r);
+#endif
             }
         trace(1,i);
     }

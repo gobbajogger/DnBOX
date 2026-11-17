@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #include "float_math.h"
 #include "soundpipe.h"
+#if defined(S1_CANONICAL_SINE)
+#include "canonical_sine.h"
+#endif
 S1_POOLED(sp_osc, sp_osc_create, sp_osc_destroy, osc)
 
 
@@ -37,6 +40,10 @@ int sp_osc_init(sp_data *sp, sp_osc *osc, sp_ftbl *ft, SPFLOAT iphs)
 
 int sp_osc_compute(sp_data *sp, sp_osc *osc, SPFLOAT *in, SPFLOAT *out)
 {
+#if defined(S1_CANONICAL_SINE)
+    if(!osc->tbl->tbl && osc->tbl->size!=4096)return SP_NOT_OK;
+#endif
+
     sp_ftbl *ftp;
     SPFLOAT amp, cps, fract, v1, v2, *ft;
     int32_t phs, lobits;
@@ -54,8 +61,13 @@ int sp_osc_compute(sp_data *sp, sp_osc *osc, SPFLOAT *in, SPFLOAT *out)
 
     fract = ((phs) & ftp->lomask) * ftp->lodiv;
     pos = phs>>lobits;
+#if defined(S1_CANONICAL_SINE)
+    v1=s1_canonical_sample(ft,(unsigned)pos);
+    v2=s1_canonical_sample(ft,(unsigned)((pos+1)%ftp->size));
+#else
     v1 = *(ft + pos);
     v2 = *(ft + ((pos + 1) % ftp->size));
+#endif
     *out = (v1 + (v2 - v1) * fract) * amp;
     phs += osc->inc;
     phs &= SP_FT_PHMASK;

@@ -6,7 +6,17 @@
 // Original Apple/Clang floating overload, not GCC integer abs.
 using std::abs;
 static_assert(std::is_same<decltype(abs(1.f)),float>::value,"floating abs overload required");
+#if defined(S1_NO_DOUBLE)
+#include "float_math.h"
+#endif
 namespace dnbox_s1frontend {
+static inline bool source_finite(float x) {
+#if defined(S1_NO_DOUBLE)
+ return s1_finitef(x)!=0;
+#else
+ return std::isfinite(x);
+#endif
+}
 #include "S1Rate.hpp"
 typedef struct DependentParameter {
     S1Parameter parameter;
@@ -38,9 +48,9 @@ class SourceControls {
  // Notifications are captured by value, not transmitted to UI/thread queues.
  // A getter is unavailable until the corresponding actual source setter emitted
  // a dependent update; no invented cold uninitialized notification values.
- bool set_parameter(unsigned p,float x){if(!s_->initialized()||p>=150||!std::isfinite(x))return false;event_count=0;failed_=false;setSynthParameter(static_cast<S1Parameter>(p),x);return !failed_;}
- bool set_normalized(unsigned p,float x,int payload){if(!s_->initialized()||!slot(p)||!std::isfinite(x)||x<0||x>1)return false;event_count=0;failed_=false;setDependentParameter(static_cast<S1Parameter>(p),x,payload);return !failed_;}
- bool normalized(unsigned p,float&out){if(!slot(p)||!(ready_&slot(p)))return false;float v=getDependentParameter(static_cast<S1Parameter>(p));if(!std::isfinite(v))return false;out=v;return true;}
+ bool set_parameter(unsigned p,float x){if(!s_->initialized()||p>=150||!source_finite(x))return false;event_count=0;failed_=false;setSynthParameter(static_cast<S1Parameter>(p),x);return !failed_;}
+ bool set_normalized(unsigned p,float x,int payload){if(!s_->initialized()||!slot(p)||!source_finite(x)||x<0||x>1)return false;event_count=0;failed_=false;setDependentParameter(static_cast<S1Parameter>(p),x,payload);return !failed_;}
+ bool normalized(unsigned p,float&out){if(!slot(p)||!(ready_&slot(p)))return false;float v=getDependentParameter(static_cast<S1Parameter>(p));if(!source_finite(v))return false;out=v;return true;}
  float target(unsigned p)const{return p<150?s_->compactPorts.target(p).value:0.f;}
 };
 }

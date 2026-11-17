@@ -8,7 +8,11 @@ extern "C" {
 typedef struct dnbox_s1 dnbox_s1;
 /* Pinned pi32v2 pre-FX allocation contract; compilation verifies both values.
  * Other architectures must query owner_bytes/alignment instead. No FX included. */
+#if defined(S1_HARMONIC_ONLY)
+#define DNBOX_S1_PI32V2_OWNER_BYTES 6552u /* expected7972-51*28+8; native assertion must verify */
+#else
 #define DNBOX_S1_PI32V2_OWNER_BYTES 7972u
+#endif
 #define DNBOX_S1_PI32V2_OWNER_ALIGNMENT 4u
 typedef struct {
     const void *compact; size_t compact_bytes;
@@ -25,6 +29,16 @@ typedef struct {
 size_t dnbox_s1_owner_bytes(void);
 size_t dnbox_s1_owner_alignment(void);
 dnbox_s1 *dnbox_s1_init(void *storage,size_t bytes,const dnbox_s1_config *);
+#if defined(S1_HARMONIC_ONLY)
+/* Experimental harmonic backend; compact MUST be NULL and compact_bytes=0.
+ * Same borrowed sine/tuning and serialized ownership contract; not native admission. */
+dnbox_s1 *dnbox_s1_init_harmonic(void *storage,size_t bytes,const dnbox_s1_config *);
+#endif
+#if defined(S1_HARMONIC_ONLY) && defined(S1_CANONICAL_SINE)
+/* Explicit canonical original sine. sine MUST be NULL and sine_count=4097;
+ * compact MUST remain NULL/0. Generic nonnull-sine API retains its semantics. */
+dnbox_s1 *dnbox_s1_init_harmonic_canonical_sine(void *storage,size_t bytes,const dnbox_s1_config *);
+#endif
 /* All handle operations require a live handle returned by init, or NULL.
  * Retire ends its lifetime. Never render or retire a stale/forged handle. */
 void dnbox_s1_retire(dnbox_s1 *);

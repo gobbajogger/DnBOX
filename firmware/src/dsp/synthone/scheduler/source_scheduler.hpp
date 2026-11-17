@@ -14,6 +14,18 @@ public:
   if(!init_compact_runtime(t,p,bytes,rate,v,n,tuning,tn,{this,sizeof *this},true))return false;
   sequence={};sequence.set_sample_rate(rate);sequence.init();return true;
  }
+#if defined(S1_HARMONIC_ONLY)
+ bool init_harmonic_metadata(const synthone_shared::Tables&t,int rate,const float*v,size_t n,const float*tuning,size_t tn){
+  if(!init_harmonic_runtime(t,rate,v,n,tuning,tn,{this,sizeof *this},true))return false;
+  sequence={};sequence.set_sample_rate(rate);sequence.init();return true;
+ }
+#endif
+#if defined(S1_HARMONIC_ONLY) && defined(S1_CANONICAL_SINE)
+ bool init_harmonic_canonical_metadata(const synthone_shared::Tables&t,int rate,const float*v,size_t n,const float*tuning,size_t tn){
+  if(!init_harmonic_runtime(t,rate,v,n,tuning,tn,{this,sizeof *this},true,true))return false;
+  sequence={};sequence.set_sample_rate(rate);sequence.init();return true;
+ }
+#endif
  bool restore(const float*v,size_t n){
   if(!initialized_ || (reinterpret_cast<uintptr_t>(v)%alignof(float)) ||
      !valid_restore(v,n,{this,sizeof *this},true) ||

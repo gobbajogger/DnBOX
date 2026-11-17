@@ -20,6 +20,48 @@ static bool disjoint(const void *a,size_t n,const void *b,size_t m) {
 extern "C" {
 size_t dnbox_s1_owner_bytes(void) { return sizeof(dnbox_s1); }
 size_t dnbox_s1_owner_alignment(void) { return alignof(dnbox_s1); }
+#if defined(S1_HARMONIC_ONLY)
+dnbox_s1 *dnbox_s1_init(void *,size_t,const dnbox_s1_config *) { return nullptr; }
+static dnbox_s1 *harmonic_init_impl(void *storage,size_t bytes,const dnbox_s1_config *config,bool canonical) {
+#if !defined(S1_CANONICAL_SINE)
+    if(canonical)return nullptr;
+#endif
+    if(bytes<sizeof(dnbox_s1) || !span(storage,bytes) ||
+       reinterpret_cast<uintptr_t>(storage)%alignof(dnbox_s1) ||
+       reinterpret_cast<uintptr_t>(config)%alignof(dnbox_s1_config) ||
+       !disjoint(storage,sizeof(dnbox_s1),config,sizeof(*config))) return nullptr;
+    const dnbox_s1_config c=*config;
+    if(c.sine_count>SIZE_MAX/sizeof(float) ||
+       (c.compact || c.compact_bytes) ||
+       (canonical ? (c.sine!=nullptr || c.sine_count!=4097) : !disjoint(storage,sizeof(dnbox_s1),c.sine,c.sine_count*sizeof(float))) ||
+       !disjoint(storage,sizeof(dnbox_s1),c.frequency_bands,13*sizeof(float)) ||
+       !disjoint(storage,sizeof(dnbox_s1),c.parameters,150*sizeof(float)) ||
+       !disjoint(storage,sizeof(dnbox_s1),c.tuning,128*sizeof(float)) ||
+       reinterpret_cast<uintptr_t>(c.frequency_bands)%alignof(float)) return nullptr;
+    synthone_shared::Tables tables{};
+    for(unsigned b=0;b<13;b++) {
+        tables.frequency_band[b]=c.frequency_bands[b];
+        for(unsigned s=0;s<4;s++) tables.morph[b*4+s]={nullptr,4097,b,static_cast<synthone_shared::Shape>(s)};
+    }
+    tables.sine=c.sine;tables.sine_count=c.sine_count;
+    dnbox_s1 *owner=new(storage) dnbox_s1;
+    bool ok;
+#if defined(S1_CANONICAL_SINE)
+    if(canonical) ok=owner->engine.init_harmonic_canonical_metadata(tables,c.sample_rate,c.parameters,150,c.tuning,128);
+    else
+#endif
+    ok=owner->engine.init_harmonic_metadata(tables,c.sample_rate,c.parameters,150,c.tuning,128);
+    if(!ok) {
+        owner->~dnbox_s1();return nullptr;
+    }
+    return owner;
+}
+dnbox_s1 *dnbox_s1_init_harmonic(void*s,size_t n,const dnbox_s1_config*c){return harmonic_init_impl(s,n,c,false);}
+#if defined(S1_CANONICAL_SINE)
+dnbox_s1 *dnbox_s1_init_harmonic_canonical_sine(void*s,size_t n,const dnbox_s1_config*c){return harmonic_init_impl(s,n,c,true);}
+#endif
+
+#else
 dnbox_s1 *dnbox_s1_init(void *storage,size_t bytes,const dnbox_s1_config *config) {
     if(bytes<sizeof(dnbox_s1) || !span(storage,bytes) ||
        reinterpret_cast<uintptr_t>(storage)%alignof(dnbox_s1) ||
@@ -46,6 +88,7 @@ dnbox_s1 *dnbox_s1_init(void *storage,size_t bytes,const dnbox_s1_config *config
     }
     return owner;
 }
+#endif
 void dnbox_s1_retire(dnbox_s1 *p) { if(p) p->~dnbox_s1(); }
 int dnbox_s1_parameter(dnbox_s1 *p,unsigned id,float value) { return p && p->engine.set_target(id,value); }
 int dnbox_s1_source_parameter(dnbox_s1 *p,unsigned id,float value) {
