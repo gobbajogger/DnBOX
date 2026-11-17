@@ -234,7 +234,8 @@ typedef struct {
     uint8_t outline_ok, outline_slot;
     uint8_t song_sel;                  /* the SONG screen's bar */
 } ui_t;
-static ui_t ui X0X_POOL;
+/* UI state fits normal zeroed RAM; preserve the pool reserve for audio. */
+static ui_t ui;
 /* A remote engine edit refreshes the parameter layout without changing the
  * keyboard's remembered page. Keep a SOUND-page selection effective across the
  * asynchronous bank change; only physical keyboard input accepts the new page. */
@@ -5491,7 +5492,8 @@ static UI_DRAW void draw_header(void)
                 text_c(107, vc(font, 0, HDR_H - 1), font, ui.msg, C_BLACK);
             else {
                 char line[sizeof ui.msg];
-                unsigned n = (unsigned)strlen(ui.msg), cut;
+                unsigned n = 0, cut;
+                while (n + 1 < sizeof ui.msg && ui.msg[n]) ++n;
                 memcpy(line, ui.msg, sizeof line);
                 while (n && tw(&FONT_T, line) > 206) line[--n] = 0;
                 cut = n;
