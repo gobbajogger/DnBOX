@@ -5,6 +5,15 @@ HERE=Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location('screen_walk',HERE/'screen_walk.py');walk=importlib.util.module_from_spec(spec);spec.loader.exec_module(walk)
 
 class ScreenWalk(unittest.TestCase):
+    def test_owner_review_routes_required(self):
+        expected=walk.expected_inventory()
+        self.assertIn("home-playing",expected)
+        self.assertIn("modal-clear-pattern",expected)
+        for kind in range(4):
+            for part in (2,3):
+                for page in range(3):
+                    self.assertIn(f"engine-seq-{kind}-part-{part}-page-{page}",expected)
+
     def fixture(self,root):
         root.mkdir(exist_ok=True)
         import io

@@ -4,6 +4,18 @@
 #define SMC_UI_MAIN retained_fixture_main
 #include "../host/smc_ui_test.c"
 
+/* Same frozen identity contract as the presence-only walker. */
+static void walkshot(const char *name) {
+ const char *family="ordinary";
+ if(!strncmp(name,"global-",7))family="global";
+ if(!strncmp(name,"list-",5))family="list";
+ if(!strncmp(name,"engine-",7))family="engine";
+ if(!strncmp(name,"help-",5))family="help";
+ if(!strncmp(name,"modal-",6))family="modal";
+ shot(name);
+ printf("WALK {\"kind\":\"screen\",\"id\":\"%s\",\"family\":\"%s\"}\n",name,family);
+}
+
 static unsigned presence_checks,presence_missing;
 static int seen_text(const char *text) {for(unsigned i=0;i<geo_nframe;i++)if(!strcmp(text,geo_frame[i].text))return 1;return 0;}
 static void required_drum_content(const char *screen) {
@@ -101,7 +113,11 @@ static void required_drum_pixels(const char *screen) {
   if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height);}
  }
 }
+static unsigned audit_frames;
 static void geo_audit(const char *screen) {
+ static unsigned calls;
+ if(calls++==0 && getenv("AUDIT_MUTATE_SKIP"))return;
+ unsigned audited=0,before=geo_findings;
  required_drum_pixels(screen);
  required_strip_content(screen);
  required_other_content(screen);
@@ -115,8 +131,12 @@ static void geo_audit(const char *screen) {
    if(getenv("GEOMETRY_MUTATE") && sx>=0&&sx<240&&sy>=0&&sy<240)fb[sy*240+sx]^=65535;
    if(sx<0||sx>=240||sy<0||sy>=240||fb[sy*240+sx]!=swap16(e.col))missing++;
   }
+  if(expected)audited++;
   if(missing){geo_findings++;printf("GEOMETRY screen=%s text=[%s] at=%d,%d missing=%u/%u\n",screen,e.text,e.x,e.y,missing,expected);}
  }
+ if(audit_frames==0 && getenv("AUDIT_MUTATE_ZERO"))audited=0;
+ printf("AUDIT {\"kind\":\"screen\",\"id\":\"%s\",\"texts\":%u,\"findings\":%u}\n",screen,audited,geo_findings-before);
+ audit_frames++;
 }
 
 int main(void)
@@ -135,14 +155,14 @@ int main(void)
                 *page_of(view)=(uint8_t)page; build_pages();
                 geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash); memset(cv_tile_valid,0,sizeof cv_tile_valid); ui_frame();
                 char name[80];snprintf(name,sizeof name,"view-%02d-part-%02d-voice-%02d-page-%02d",view,part,voice,page);
-                shot(name);geo_audit(name);
+                walkshot(name);geo_audit(name);
                 printf("SCREEN {\"id\":\"%s\",\"view\":%d,\"part\":%d,\"voice\":%d,\"page\":%d,\"pages\":%d,\"width\":240,\"height\":240}\n",name,view,part,voice,page,pages);
                 total++;
                 for(int edge=0;edge<2;edge++) {
                     int old[4];pref_t refs[4];
                     for(int k=0;k<4;k++){refs[k]=pg.r[page][k];old[k]=pref_get(refs[k]);const x0x_param_t *d=pref_desc(refs[k]);if(refs[k].kind==R_ENG && d)pref_set(refs[k],edge?d->max:0);}
                     geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-                    snprintf(name,sizeof name,"edge-%d-view-%02d-part-%02d-voice-%02d-page-%02d",edge,view,part,voice,page);shot(name);geo_audit(name);total++;
+                    snprintf(name,sizeof name,"edge-%d-view-%02d-part-%02d-voice-%02d-page-%02d",edge,view,part,voice,page);walkshot(name);geo_audit(name);total++;
                     for(int k=0;k<4;k++)if(refs[k].kind==R_ENG)pref_set(refs[k],old[k]);
                 }
             }
@@ -159,7 +179,7 @@ int main(void)
         for(int row=0;row<rows;row++) {
             ui.list_sel=(uint8_t)row;ui.list_top=(uint8_t)(row>5?row-5:0);
             geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-            char name[80];snprintf(name,sizeof name,"global-section-%d-row-%02d",section,row);shot(name);geo_audit(name);
+            char name[80];snprintf(name,sizeof name,"global-section-%d-row-%02d",section,row);walkshot(name);geo_audit(name);
             printf("SCREEN {\"id\":\"%s\",\"view\":%d,\"section\":%d,\"row\":%d,\"width\":240,\"height\":240}\n",name,V_GLO,section,row);
             total++;
         }
@@ -181,7 +201,7 @@ int main(void)
     int row=ui.list_sel;CHECK(row<ui.list_n && !list_skip(row));
     CHECK(!(seen&(UINT64_C(1)<<row)));seen|=UINT64_C(1)<<row;captured++;
     geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-    char name[96];snprintf(name,sizeof name,"list-view-%02d-part-%02d-voice-%02d-row-%02d",view,part,voice,row);shot(name);geo_audit(name);
+    char name[96];snprintf(name,sizeof name,"list-view-%02d-part-%02d-voice-%02d-row-%02d",view,part,voice,row);walkshot(name);geo_audit(name);
     printf("SCREEN {\"id\":\"%s\",\"view\":%d,\"part\":%d,\"voice\":%d,\"row\":%d,\"rows\":%d,\"width\":240,\"height\":240}\n",name,view,part,voice,row,ui.list_n);
     total++;list_move(1);if(ui.list_sel==row)break;
    }
@@ -199,15 +219,44 @@ int main(void)
       for(int page=0;page<pages;page++) {
        *page_of(V_PART)=(uint8_t)page;build_pages();geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
        memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-       char name[80];snprintf(name,sizeof name,"engine-%u-part-%d-page-%d",kind,part,page);shot(name);geo_audit(name);total++;
+       char name[80];snprintf(name,sizeof name,"engine-%u-part-%d-page-%d",kind,part,page);walkshot(name);geo_audit(name);total++;
       }
+    }
+
+    /* Owner-review routes omitted by the ordinary default-bank traversal. */
+    for(unsigned kind=0;kind<4;kind++)for(int part=PART_303A;part<=PART_303B;part++) {
+      setup(V_SEQ,part);
+      CHECK(engine_bass_select_preset(part-PART_303A,kind,0,&proj.sound)==0);
+      for(int block=0;block<12;block++){int32_t audio[512];engine_render(audio,256);}
+      CHECK(!engine_bass_preset_pending(part-PART_303A));build_pages();int pages=pg.n;
+      CHECK(pages==3);
+      for(int page=0;page<pages;page++) {
+       *page_of(V_SEQ)=(uint8_t)page;build_pages();geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
+       memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+       char name[80];snprintf(name,sizeof name,"engine-seq-%u-part-%d-page-%d",kind,part,page);walkshot(name);geo_audit(name);total++;
+      }
+    }
+    setup(V_HOME,PART_909);button_tap(B_PLAY);{int32_t audio[512];engine_render(audio,256);}CHECK(seq.playing);
+    {geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
+     memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+     const char *name="home-playing";walkshot(name);geo_audit(name);total++;
+    }
+    button_tap(B_PLAY);{int32_t audio[512];engine_render(audio,256);}CHECK(!seq.playing);
+    setup(V_HOME,PART_909);button_tap(B_GLO);CHECK(ui.overlay==O_LIST);
+    ui.list_sel=4;button_tap(B_SEL);CHECK(ui.glo_section==4);
+    int clear_row=-1;
+    for(int row=0;row<ui.list_n;row++)if(list_rows[row].kind==R_ACT && list_rows[row].a==ACT_CLEAR_PAT)clear_row=row;
+    CHECK(clear_row>=0);ui.list_sel=(uint8_t)clear_row;button_tap(B_SEL);CHECK(ui.overlay==O_ASK);
+    {geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
+     memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+     const char *name="modal-clear-pattern";walkshot(name);geo_audit(name);total++;
     }
 
     for(int view=0;view<NVIEWS;view++)for(int part=0;part<NPARTS;part++)for(int button=0;button<NB;button++) {
       if(view==V_GLO || (view==V_GEN && (part<PART_303A||part>PART_303B)))continue;
       setup(view,part);held_btn=ui.btn=1u<<button;ui.help=button+1;
       geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-      CHECK(ui.help==button+1);char name[80];snprintf(name,sizeof name,"help-view-%d-part-%d-button-%d",view,part,button);shot(name);geo_audit(name);total++;
+      CHECK(ui.help==button+1);char name[80];snprintf(name,sizeof name,"help-view-%d-part-%d-button-%d",view,part,button);walkshot(name);geo_audit(name);total++;
     }
     for(int modal=0;modal<4;modal++) {
       setup(V_HOME,PART_909);
@@ -216,11 +265,13 @@ int main(void)
       if(modal==2)say("NEXT: PAT 16",0);
       if(modal==3)run_action(ACT_ABOUT,0);
       geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
-      char name[80];snprintf(name,sizeof name,"modal-%d",modal);shot(name);geo_audit(name);total++;
+      char name[80];snprintf(name,sizeof name,"modal-%d",modal);walkshot(name);geo_audit(name);total++;
     }
     printf("INVENTORY %u ordinary/global/list/engine/help/modal states\n",total);
 
 
+    printf("WALK {\"kind\":\"complete\",\"screens\":%u}\n",total);
+    printf("AUDIT {\"kind\":\"complete\",\"screens\":%u}\n",audit_frames);
     printf("GEOMETRY findings=%u screens=%u\n",geo_findings,total);
     printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);return geo_findings||presence_missing||pixel_missing||pixel_damaged?1:0;
 }

@@ -7634,7 +7634,7 @@ static UI_DRAW int all_glyph_semantics(pref_t r,int val,int cx,uint16_t col){
   else glyph_identity(d->max+1,val,l,col);
  }else if(r.kind==R_TAPE){
   if(val<16){cv_line(l,43,l+8,43,col);cv_line(l+8,43,l+8,33,col);cv_line(l+8,33,l+18,33,col);cv_line(l+18,33,l+18,43,col);cv_line(l+18,43,l+28,43,col);cv_line(l+28,43,l+28,33,col);cv_line(l+28,33,l+36,33,col);}
-  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;rbox(x-7,30,15,15,5,C_LINE);rbox(x-5,32,11,11,4,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
+  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
  }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DRIVE){
   drive_amount_glyph(val,cx,col);
  }else return 0;return 1;
@@ -7676,7 +7676,7 @@ static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
     } else if(r.kind==R_TAPE) {
         for(int side=-1;side<=1;side+=2) {
             int x=cx+side*10;
-            rbox(x-7,30,15,15,5,C_LINE);rbox(x-5,32,11,11,4,SOUND_FACE);
+            disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);
             cv_line(x,37,x+q*4/127,33,col);cv_rect(x-1,36,3,3,col);
         }
         cv_rect(cx-10,46,21,1,col);

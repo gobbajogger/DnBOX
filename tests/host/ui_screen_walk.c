@@ -96,6 +96,35 @@ int main(void)
       }
     }
 
+    /* Owner-review routes omitted by the ordinary default-bank traversal. */
+    for(unsigned kind=0;kind<4;kind++)for(int part=PART_303A;part<=PART_303B;part++) {
+      setup(V_SEQ,part);
+      CHECK(engine_bass_select_preset(part-PART_303A,kind,0,&proj.sound)==0);
+      for(int block=0;block<12;block++){int32_t audio[512];engine_render(audio,256);}
+      CHECK(!engine_bass_preset_pending(part-PART_303A));build_pages();int pages=pg.n;
+      CHECK(pages==3);
+      for(int page=0;page<pages;page++) {
+       *page_of(V_SEQ)=(uint8_t)page;build_pages();
+       memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+       char name[80];snprintf(name,sizeof name,"engine-seq-%u-part-%d-page-%d",kind,part,page);walkshot(name);total++;
+      }
+    }
+    setup(V_HOME,PART_909);button_tap(B_PLAY);{int32_t audio[512];engine_render(audio,256);}CHECK(seq.playing);
+    {
+     memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+     const char *name="home-playing";walkshot(name);total++;
+    }
+    button_tap(B_PLAY);{int32_t audio[512];engine_render(audio,256);}CHECK(!seq.playing);
+    setup(V_HOME,PART_909);button_tap(B_GLO);CHECK(ui.overlay==O_LIST);
+    ui.list_sel=4;button_tap(B_SEL);CHECK(ui.glo_section==4);
+    int clear_row=-1;
+    for(int row=0;row<ui.list_n;row++)if(list_rows[row].kind==R_ACT && list_rows[row].a==ACT_CLEAR_PAT)clear_row=row;
+    CHECK(clear_row>=0);ui.list_sel=(uint8_t)clear_row;button_tap(B_SEL);CHECK(ui.overlay==O_ASK);
+    {
+     memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
+     const char *name="modal-clear-pattern";walkshot(name);total++;
+    }
+
     for(int view=0;view<NVIEWS;view++)for(int part=0;part<NPARTS;part++)for(int button=0;button<NB;button++) {
       if(view==V_GLO || (view==V_GEN && (part<PART_303A||part>PART_303B)))continue;
       setup(view,part);held_btn=ui.btn=1u<<button;ui.help=button+1;

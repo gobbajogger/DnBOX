@@ -3,8 +3,8 @@
 """Gate entry: render the checked-out firmware screens on the host and judge them.
 
 Exports the committed HEAD tree into a fresh temporary directory, applies the
-test-only instrumentation, runs the real host renderer once, and runs the
-checks 1-4 detectors plus the glyph/value collision check on every screen.
+full-inventory geometry instrumentation and negative controls, then runs the
+checks 1-4 detectors plus glyph/value collisions on the45drum-page slice.
 Exit 0 only when every screen renders and no check fails or is NOT_RUN.
 No receipts are read; nothing outside the output directory is written.
 """
@@ -13,7 +13,8 @@ from pathlib import Path
 from instrument import instrument, HERE
 from detectors import inspect_screen
 from run import parse_trace, write
-from screen_walk import run as walk_screens, require_drum_source
+from screen_walk import require_drum_source
+from full_geometry import run as full_geometry
 
 def main():
     p = argparse.ArgumentParser()
@@ -27,7 +28,7 @@ def main():
         archive = subprocess.run(['git', 'archive', a.rev], cwd=repo, check=True, stdout=subprocess.PIPE).stdout
         subprocess.run(['tar', '-x', '-C', str(work)], input=archive, check=True)
         try:
-            walk_screens(work, out / 'screens')
+            full_geometry(work, out / 'geometry')
             require_drum_source(work)
         except (OSError, ValueError, subprocess.SubprocessError) as error:
             write(out / 'judgement.json', {'status': 'FAIL', 'error': str(error)})
