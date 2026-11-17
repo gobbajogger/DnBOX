@@ -5990,103 +5990,10 @@ static UI_DRAW void draw_part_sound(int band)
 
 }
 
+#include "ui_break_layout_main.h"
 static UI_DRAW void draw_break(int band)
 {
-    const brkpart_t *bp = &cur_pat()->brk;
-    int c, ph = seq.playing ? eng_step[TRK_BRK] : -1, slice, bank, div, running;
-    uint16_t col = part_col();
-    uint32_t lmarks = lock_marks(-1, -1, 0);           /* (the break: its 16 steps) */
-    engine_brk_state(&slice, &bank, &div, &running);
-    int audition = engine_brk_held() != 0, active = running || audition;
-    int choosing = ui.brk_choice_on && engine_brk_preview_active() &&
-                   ui.brk_choice_pat == seq.ppat[PART_BRK];
-    if (!ui.outline_ok || ui.outline_slot != bp->slot_a) {
-        ui.outline_ok = (uint8_t)engine_brk_outline(0, ui.outline, 232);
-        ui.outline_slot = bp->slot_a;
-    }
-    if (band == 0) {                                   /* loop A: eight visible slice slots */
-        int x, count = engine_brk_count(0);
-        int page = ui.brk_page * 8 < count ? ui.brk_page : (count - 1) / 8;
-        night_panel(3,1,234,65,0);
-        for (c = 0; c < 8; c++) {
-            int x0 = 8 + c * 28, local = page * 8 + c;
-            char t[4];
-            if (local < count) put_i(t, local + 1); else put_s(t, "-");
-            if (active && local == slice && bank == 0)
-                cv_rect(x0,5,28,44,dim(col,5));
-            text_c(x0 + 14,53,&FONT_XS,t,active && local==slice && bank==0?C_WHITE:C_GRAY);
-        }
-        cv_rect(8,27,224,1,C_LINE);
-        for (x=0;x<224 && ui.outline_ok;x++) {
-            int sl = page * 8 + x / 28;
-            int source_x = (page * 8 * 232 + x * 8 * 232 / 224) / count;
-            int h = sl < count && source_x < 232 ? ui.outline[source_x] * 21 / 255 : 0;
-            if(h) cv_rect(8+x,27-h,1,2*h+1,active && sl==slice && bank==0?C_WHITE:col);
-        }
-        for(c=1;c<8;c++) cv_rect(8+c*28,5,1,44,C_LINE);
-    } else {
-        const char *const *sn = engine_brk_slot_names();
-        int ns = engine_brk_nslots();
-        char t[40], *q = t;
-        night_panel(3,1,234,65,0);
-        for (c=0;c<16;c++) {
-            int x=8+c*14,on=(bp->steps>>c)&1u;
-            cv_rect(x,5,12,12,on?(c==ph?C_WHITE:col):(c==ph?C_DIM:UI_N_SIDE));
-            cv_rect(x,5,12,1,on?col:UI_N_EDGE);
-            if (on && ((lmarks >> c) & 1u))            /* the step's own values (p-locks): a notch */
-                cv_rect(x+8,6,3,3,C_BLACK);
-            if (bp->slice[c]) {                        /* the step's own slice */
-                char d[4]; put_i(d, (bp->slice[c] - 1) % engine_brk_count(0) + 1);
-                text_c(x+6,vc(&FONT_XS,5,12),&FONT_XS,d,on?C_BLACK:C_GRAY);
-            }
-        }
-
-        {
-            char ta[16], tb[16];
-            if (!ns) {
-                put_s(ta, "A  none");
-                put_s(tb, "B  none");
-            } else {
-                put_s(put_s(ta, "A  "), sn[bp->slot_a % ns]);
-                put_s(put_s(tb, "B  "), sn[bp->slot_b % ns]);
-            }
-            /* Assignments and steps are one coherent group. Actual sounding
-             * bank keeps a distinct label and underline, not a separate tile. */
-            text_c(60,28,&FONT_XS,ta,bank==0 && active && !choosing?C_WHITE:C_HI);
-            text_c(180,28,&FONT_XS,tb,bank==1 && active && !choosing?C_WHITE:C_HI);
-            if(active && !choosing) cv_rect(bank?132:12,40,96,1,col);
-            (void)q;
-        }
-        /* A candidate is not an assignment. Keep its identity and the physical
-         * choose/cancel actions visible for the whole audition, not just toast.
-         * The waveform still follows the engine's actual audition-owned A path. */
-        if (choosing && ui.brk_choice_slot < ns) {
-            q = put_s(t, ui.brk_choice_bank ? "PREVIEW B " : "PREVIEW A ");
-            const char *name = sn[ui.brk_choice_slot];
-            while (*name && q < t + sizeof(t) - 1) *q++ = *name++;
-            *q = 0;
-            cv_text(8,44,&FONT_T,t,C_WHITE);
-            cv_text(8,55,&FONT_T,"SEL CHOOSE",C_WHITE);
-            cv_text(132,55,&FONT_T,"HOME CANCEL",C_WHITE);
-            return;
-        }
-        int count = engine_brk_count(0), page = ui.brk_page * 8 < count ? ui.brk_page : (count - 1) / 8;
-        q = put_i(put_s(t, "SLICES "), page * 8 + 1);
-        q = put_i(put_s(q, "-"), count < 8 ? count : page * 8 + 8);
-        q = put_i(put_s(q, "/"), count);
-        if (count != (int)brk_slice_count(bp, 0)) put_s(q, " PENDING");
-        cv_text(8, 44, &FONT_XS, t, C_GRAY);
-        q = put_s(t, ui.brk_count_target ? "EDIT B " : "EDIT A ");
-        put_i(q, (int)brk_slice_count(bp, ui.brk_count_target));
-        cv_text(144, 44, &FONT_XS, t, C_GRAY);
-        q = put_s(t, "");
-        if (active) {
-            q = put_s(q, audition ? "LIVE A" : bank ? "PLAY B" : "PLAY A");
-            put_i(put_s(q, ":"), slice + 1);
-
-        }
-        cv_text(8, 58, &FONT_T, t, C_DIM);
-    }
+    break_layout_main(band);
 }
 
 /* Stored forward note-origin semantics, shared with the piano roll. Resolve
@@ -6983,6 +6890,7 @@ static UI_DRAW void draw_main(void)
         else
             draw_break(band);
         if (band == 1 && readout && !envelope &&
+            !(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ)) &&
             !(ui.brk_choice_on && engine_brk_preview_active()) &&
             !(ui.view == V_PART && (is_drum() || is_303())))
             draw_readout();
@@ -8412,6 +8320,14 @@ static uint32_t knobs_sig(void)
     MIXIN(proj.set.palette);
     MIXIN(ui.sel[0] | ui.sel[1] << 8);
     MIXIN(seq.ppat[ui.part]);
+    if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ)) {
+        const brkpart_t *bp=&cur_pat()->brk;
+        MIXIN(bp->steps); for(int k=0;k<16;k++)MIXIN(bp->slice[k]);
+        MIXIN(lock_marks(-1,-1,0)); MIXIN(seq.playing); MIXIN(eng_step[TRK_BRK]);
+        MIXIN(brk_slice_count(bp,0)); MIXIN(brk_slice_count(bp,1));
+        MIXIN(engine_brk_count(0)); /* Sounding snapshot adoption changes footer modulo. */
+        MIXIN(ui.brk_count_target);
+    }
     MIXIN(ui.song_sel);
     {
         const char *fa, *fb, *fc;
@@ -8498,6 +8414,7 @@ static void knob_tag(char *t)
     }
 }
 
+#include "ui_break_layout_controls.h"
 static UI_DRAW void draw_knobs(void)
 {
     static uint32_t last_sig;
@@ -8534,6 +8451,9 @@ static UI_DRAW void draw_knobs(void)
         return;
     last_sig = sig;
     cv_begin(240, KNOB_H, C_BLACK);
+    if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE && !ui.help) {
+        break_layout_controls(); cv_commit_knobs(3); return;
+    }
     /* One shared bounded parameter panel, including its context caption.
      * Touch/lock/motion remain content states, never separate raised tiles. */
     night_panel(3,0,234,68,0);

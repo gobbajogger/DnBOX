@@ -6,8 +6,18 @@ static void shared_plane(void){
  int page=cur_page();pref_t refs[4];int values[4];
  for(int k=0;k<4;k++){refs[k]=pg.r[page][k];values[k]=pref_get(refs[k]);}
  draw_header();draw_main();draw_knobs();
+ /* Legitimate sparse-page read-only text may cross a former card seam.
+  * Expected ink is explicit; a retained vertical divider must still fail. */
+ cv_begin(240,KNOB_H,SOUND_FACE);
+ if(ui.part==PART_BRK&&ui.view==V_SEQ&&cur_page()==0){
+  char t[20];
+  put_i(put_s(t,"A SLICES "),(int)brk_slice_count(&cur_pat()->brk,0));
+  cv_text(105,vc(&FONT_T,17,10),&FONT_T,t,C_GRAY);
+  put_i(put_s(t,"B SLICES "),(int)brk_slice_count(&cur_pat()->brk,1));
+  cv_text(105,vc(&FONT_T,31,10),&FONT_T,t,C_GRAY);
+ }
  for(int seam=1;seam<4;seam++)for(int y=24;y<=50;y++)
-  CHECK(fb[(KNOB_Y+y)*240+seam*60]==swap16(SOUND_FACE));
+  CHECK(fb[(KNOB_Y+y)*240+seam*60]==cv_px[y*240+seam*60]);
  for(int k=0;k<4;k++)CHECK(pref_get(refs[k])==values[k]);
  memcpy(saved_strip,fb+KNOB_Y*240,sizeof saved_strip);
  draw_knobs();CHECK(!memcmp(saved_strip,fb+KNOB_Y*240,sizeof saved_strip));
@@ -54,10 +64,10 @@ static void break_actual_bank_feedback(void){
    if(running&&bank==wanted&&slice>=0){observed=1;break;}
   }
   CHECK(observed);draw_header();draw_main();draw_knobs();
-  int y=MAIN_Y+BAND_H+40;
-  for(int x=0;x<96;x++){
-   CHECK(fb[y*240+(wanted?132:12)+x]==swap16(part_col()));
-   CHECK(fb[y*240+(wanted?12:132)+x]==swap16(SOUND_FACE));
+  int y=111;
+  for(int x=0;x<106;x++){
+   CHECK(fb[y*240+(wanted?124:10)+x]==swap16(part_col()));
+   CHECK(fb[y*240+(wanted?10:124)+x]==swap16(SOUND_FACE));
   }
   shot(wanted?"break-playing-B":"break-playing-A");seq.req_stop=1;audio_block();
  }
@@ -69,10 +79,10 @@ static void break_actual_bank_feedback(void){
  CHECK(engine_brk_held()!=0);
  int slice,bank,div,running;engine_brk_state(&slice,&bank,&div,&running);
  CHECK(bank==0&&slice==0&&!running);draw_main();
- for(int x=12;x<108;x++)CHECK(fb[(MAIN_Y+BAND_H+40)*240+x]==swap16(part_col()));
+ for(int x=10;x<116;x++)CHECK(fb[111*240+x]==swap16(part_col()));
  shot("break-stopped-audition-A");engine_brk_live(32,0);audio_block();CHECK(!engine_brk_held());
  draw_main();
- for(int x=12;x<108;x++)CHECK(fb[(MAIN_Y+BAND_H+40)*240+x]==swap16(SOUND_FACE));
+ for(int x=10;x<116;x++)CHECK(fb[111*240+x]==swap16(SOUND_FACE));
 }
 int main(void){
  flat_surface_contract();bounded_selected_surfaces();break_actual_bank_feedback();
