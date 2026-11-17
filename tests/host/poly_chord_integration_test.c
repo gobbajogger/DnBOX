@@ -7,7 +7,7 @@ unsigned poly_chord_sequence_keys(int voice);
 unsigned poly_chord_sequence_key(int voice,int key);
 #define sequence_keys poly_chord_sequence_keys
 int main(void){
- for(int kind=ORIGINAL_SOUND_DRONE;kind<=ORIGINAL_SOUND_JUNO;kind++)for(int v=0;v<NBASS;v++){
+ for(int kind=ORIGINAL_SOUND_SYNTHONE;kind<=ORIGINAL_SOUND_JUNO;kind++)for(int v=0;v<NBASS;v++){
   setup(V_PART,PART_303A+v);
   proj.set.bt |= PROJ_BT_CLK_IN; /* SMC fixture overrides this required settings bit. */
   CHECK(engine_bass_select_preset(v,kind,0,&proj.sound)==0);
@@ -19,7 +19,7 @@ int main(void){
   proj.pat[0].bass[v].step[0]=(bstep_t){60,G_NOTE,100};
   proj.pat[0].bass[v].step[1]=(bstep_t){60,G_TIE|0xf0,100};
   CHECK(held_chord_set(proj.arr.lane,0,v,0,notes,3));
-  if(kind==ORIGINAL_SOUND_DRONE&&v==0){
+  if(kind==ORIGINAL_SOUND_SYNTHONE&&v==0){
    project_capture_stage();CHECK(project_validate_stage()==0);
    uint8_t header[PROJECT_FILE_HDR];project_file_header(header);
    CHECK(header[20]==15);CHECK(project_file_validate(header)==0);

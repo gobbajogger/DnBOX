@@ -3,7 +3,6 @@
 #include "original_sound.h"
 #include "../dsp/original_chicago_backend.h"
 #include "../dsp/original_miami_backend.h"
-#include "../dsp/drone_string.h"
 #include "../dsp/juno6.h"
 
 enum { ORIGINAL_INPUT_USB, ORIGINAL_INPUT_BLE, ORIGINAL_INPUT_TRS,
@@ -14,7 +13,8 @@ typedef union {
     original_chicago_backend chicago;
     original_miami_backend miami;
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
-    drone_string_t drone; /* third synth kind, never an extra part */
+    /* Placeholder until the Synth One renderer is admitted into this slot. */
+    struct { uint8_t down[128]; } synthone;
 } original_runtime_backend;
 typedef struct {
     original_runtime_backend dsp;

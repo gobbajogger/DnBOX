@@ -106,7 +106,7 @@ static void storage(void)
     project_capture_stage(); project_stage.pat[5].rsv[1] = (uint8_t)(ORIGINAL_SOUND_MIAMI << 7 | 31);
     CHECK(project_validate_stage() != 0);
     project_stage.pat[5].rsv[1] = (uint8_t)(ORIGINAL_SOUND_MIAMI << 7); CHECK(project_validate_stage() != 0);
-    /* Drone uses four formerly-unused byte values, not a new stream layout. */
+    /* Historical slot-2 codes 0xC1..0xC4 stay valid, not a new stream layout. */
     project_stage.pat[5].rsv[1] = 0xC1u; CHECK(project_validate_stage() == 0);
     project_stage.pat[5].rsv[1] = 0xC4u; CHECK(project_validate_stage() == 0);
     project_stage.pat[5].rsv[1] = 0xC0u; CHECK(project_validate_stage() != 0);
@@ -157,14 +157,14 @@ static void preset_recall(void)
     CHECK(engine_bass_preset_index(0) == 8 && seq.ppat[TRK_BASS0] == 2);
     proj.pat[2].rsv[0] = proj.pat[3].rsv[0] = 0;
     /* Third engine follows the same part, MIDI channel and pattern gate. */
-    proj.pat[4].rsv[0] = (uint8_t)bass_pattern_preset_encode(ORIGINAL_SOUND_DRONE, 2);
+    proj.pat[4].rsv[0] = (uint8_t)bass_pattern_preset_encode(ORIGINAL_SOUND_SYNTHONE, 1);
     seq.pcue[TRK_BASS0] = 4; pattern_sound_tick();
-    CHECK(engine_bass_requested_bank(0) == ORIGINAL_SOUND_DRONE);
-    CHECK(engine_bass_requested_preset(0) == 1);
+    CHECK(engine_bass_requested_bank(0) == ORIGINAL_SOUND_SYNTHONE);
+    CHECK(engine_bass_requested_preset(0) == 0);
     wait_applied(0);
-    CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_DRONE);
-    CHECK(engine_bass_preset_index(0) == 1);
-    CHECK(engine_bass_sound_bank(&proj.sound, 0) == ORIGINAL_SOUND_DRONE);
+    CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_SYNTHONE);
+    CHECK(engine_bass_preset_index(0) == 0);
+    CHECK(engine_bass_sound_bank(&proj.sound, 0) == ORIGINAL_SOUND_SYNTHONE);
     proj.pat[4].rsv[0] = 0;
     select_chicago(0, 0); /* restore for note-lock tests */
     printf("preset recall: gated to the pattern, applied when it plays, cancelled with its cue\\n");

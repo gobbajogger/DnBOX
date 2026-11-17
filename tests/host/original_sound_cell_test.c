@@ -171,16 +171,19 @@ static void verify_pattern_preset_codec(void)
     unsigned bank=99u, one=99u;
     assert(bass_pattern_preset_encode(ORIGINAL_SOUND_CHICAGO,0)==0u);
     assert(bass_pattern_preset_decode(0,&bank,&one) && bank==0 && one==0);
-    for (unsigned k=0;k<=ORIGINAL_SOUND_DRONE;++k) {
+    for (unsigned k=0;k<=ORIGINAL_SOUND_SYNTHONE;++k) {
         unsigned n=original_sound_factories(k);
         for(unsigned p=1;p<=n;++p) {
             unsigned code=bass_pattern_preset_encode(k,p);
-            unsigned expect = k == ORIGINAL_SOUND_DRONE ? 0xC0u | p : (k << 7) | p;
+            unsigned expect = k == ORIGINAL_SOUND_SYNTHONE ? 0xC1u : (k << 7) | p;
             assert(code==expect && code<=255u);
             assert(bass_pattern_preset_decode(code,&bank,&one) && bank==k && one==p);
         }
         assert(!bass_pattern_preset_encode(k,n+1));
     }
+    /* Historical 0xC2..0xC4 still decode, always to Synth One init. */
+    assert(bass_pattern_preset_decode(0xC4u,&bank,&one) && bank==ORIGINAL_SOUND_SYNTHONE && one==1u);
+    assert(bass_pattern_preset_decode(0xC2u,&bank,&one) && bank==ORIGINAL_SOUND_SYNTHONE && one==1u);
     static const uint8_t invalid[]={82,127,128,159,191,192,197,255};
     for(unsigned i=0;i<sizeof invalid;++i)
         assert(!bass_pattern_preset_decode(invalid[i],&bank,&one));
@@ -190,45 +193,29 @@ static void verify_pattern_preset_codec(void)
     assert(!bass_pattern_preset_encode(4,1));
 }
 
-static void verify_drone(void)
+static void verify_synthone(void)
 {
-    static const uint8_t preset[4][6] = {
-        {57,66,51,23,83,95}, {35,39,38,58,108,105},
-        {94,97,70,17,72,83}, {73,75,12,5,55,94}
-    };
-    assert(original_sound_count(ORIGINAL_SOUND_DRONE) == 8);
-    assert(original_sound_factories(ORIGINAL_SOUND_DRONE) == 4);
-    assert(original_sound_engine_id(ORIGINAL_SOUND_DRONE) == ORIGINAL_SOUND_DRONE_ID);
-    for (unsigned factory = 0; factory < ORIGINAL_DRONE_FACTORIES; ++factory) {
-        uint8_t cell[32], copy[32];
-        assert(original_sound_init(cell, ORIGINAL_SOUND_DRONE, factory));
-        assert(original_sound_valid(cell) && cell[28] == ORIGINAL_SOUND_SCHEMA);
-        assert(cell[29] == ORIGINAL_SOUND_DRONE && cell[30] == factory);
-        assert(!original_sound_edit_mask(cell));
-        assert(!memcmp(cell, preset[factory], 6));
-        assert(original_sound_name(ORIGINAL_SOUND_DRONE, factory));
-        for (unsigned i = 0; i < 6; ++i) {
-            float value = -1.0f;
-            assert(original_sound_value(cell, i, &value));
-            assert(value >= 0.0f && value <= 1.0f);
-        }
-        float bend = -1.0f, damper = -1.0f;
-        assert(original_sound_value(cell, 6, &bend) && bend == .5f);
-        assert(original_sound_value(cell, 7, &damper) && damper == 0.0f);
-        assert(original_sound_is_performance(ORIGINAL_SOUND_DRONE, 6));
-        assert(original_sound_is_performance(ORIGINAL_SOUND_DRONE, 7));
-        memcpy(copy, cell, sizeof cell);
-        assert(!original_sound_set(cell, 6, 100) && !memcmp(cell, copy, 32));
-        assert(!original_sound_set(cell, 7, 100) && !memcmp(cell, copy, 32));
-        assert(original_sound_set(cell, 1, 119));
-        assert(original_sound_valid(cell) && original_sound_edit_mask(cell) == (1u << 1));
-        float x = -1;
-        assert(original_sound_value(cell, 1, &x) && x > .93f && x < .95f);
-        cell[8] = 1;
-        assert(!original_sound_valid(cell)); /* unused patch bytes stay zero */
-    }
+    uint8_t cell[32], copy[32];
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 2);
+    assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
+    assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
+    assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
+    assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+    assert(original_sound_valid(cell) && cell[28] == ORIGINAL_SOUND_SCHEMA);
+    assert(cell[29] == ORIGINAL_SOUND_SYNTHONE && cell[30] == 0);
+    assert(!original_sound_edit_mask(cell));
+    assert(cell[0] == 64);
+    assert(!strcmp(original_sound_name(ORIGINAL_SOUND_SYNTHONE, 0), "INIT"));
+    float bend = -1.0f, damper = -1.0f;
+    assert(original_sound_value(cell, 0, &bend) && bend == .5f);
+    assert(original_sound_value(cell, 1, &damper) && damper == 0.0f);
+    assert(original_sound_is_performance(ORIGINAL_SOUND_SYNTHONE, 0));
+    assert(original_sound_is_performance(ORIGINAL_SOUND_SYNTHONE, 1));
+    memcpy(copy, cell, sizeof cell);
+    assert(!original_sound_set(cell, 0, 100) && !memcmp(cell, copy, 32));
+    assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
     uint8_t bad[32] = {0};
-    assert(!original_sound_init(bad, ORIGINAL_SOUND_DRONE, 4));
+    assert(!original_sound_init(bad, ORIGINAL_SOUND_SYNTHONE, 1));
     assert(!original_sound_valid(bad));
 }
 
@@ -286,7 +273,7 @@ int main(void)
     }
     for(unsigned kind=0;kind<2;++kind)
         for(unsigned factory=0;factory<original_sound_factories(kind);++factory) compare(kind,factory);
-    verify_drone();
+    verify_synthone();
     verify_pattern_preset_codec();
     printf("PASS compact32-byte patch cell: %u exact factory programs, %u single-control edits, %u malformed transactions; %u performance edits refused and %u stale performance restores neutral; twelve FX and all 81 factory programs (55 compact + 26 restored inserts); schema1 rejected; no factory float round-trip\n",factories,edits,failures,performance_refusals,stale_restores);
     return 0;

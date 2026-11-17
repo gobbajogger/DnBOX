@@ -56,7 +56,7 @@ int main(void)
             CHECK(!engine_bass_preset_pending(v) && engine_bass_preset_index(v)==target);
             CHECK(!engine_bass_preset_edited(v));
         }
-        /* ENGINE clamps only at actual endpoints; Miami/Drone are interior. */
+        /* ENGINE clamps only at actual endpoints; Miami/Synth One are interior. */
         if(bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_JUNO) {
             int outward=bank==ORIGINAL_SOUND_CHICAGO?-1:1;
             int neighbor=bank-outward;
