@@ -21,7 +21,7 @@ static live_key_owner_t live_key_owner[NBASS];
 static volatile uint8_t live_key_w, live_key_r, live_key_cancel;
 static uint8_t original_key_pitch[NBASS][64];
 static uint8_t bass_held[NBASS], bass_held_count[NBASS], bass_held_src[NBASS], bass_slide[NBASS];
-static struct { struct bass_dummy runtime; } original_parts[NBASS];
+static struct bass_dummy original_bass[NBASS];
 static int applied, retired;
 static uint32_t plat_cq_lock(void) { return 0; }
 static void plat_cq_unlock(uint32_t s) { (void)s; }

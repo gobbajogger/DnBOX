@@ -139,21 +139,11 @@ static void render_clock_header(int part_header, unsigned frame)
     ui.msg[0]=0; ui.msg_until=0; ui.frame=frame;
     ui_frame();
 }
-static void check_r22_clock_pixel(uint16_t expected)
-{
-    uint16_t actual=fb[9*240+169], wanted=(uint16_t)((expected<<8)|(expected>>8));
-    if(seq.playing){
-        if(actual!=wanted)fprintf(stderr,"R22_PHASE_MISMATCH phase=%u x169 y9 actual=%04x expected=%04x\n",seq.metro_view,actual,wanted);
-        CHECK(actual==wanted);
-    }else{
-        for(int y=7;y<12;y++)for(int x=170;x<175;x++)CHECK(fb[y*240+x]==swap16(SOUND_GRAY));
-    }
-}
 static void check_clock_headers(uint16_t expected, unsigned frame)
 {
     for(int p=0;p<2;p++) {
         render_clock_header(p,frame);
-        check_r22_clock_pixel(expected);
+        CHECK(fb[9*240+(p?176:218)]==(uint16_t)((expected<<8)|(expected>>8)));
     }
 }
 
@@ -166,7 +156,7 @@ static void clock_icons(void)
         for(unsigned i=0;i<sizeof phases;i++) {
             seq.metro_view=phases[i]; ui_frame();
             uint16_t c=!phases[i]?C_DIM:phases[i]<=4?C_WHITE:C_HI;
-            check_r22_clock_pixel(c);
+            CHECK(fb[9*240+(part_header?176:218)]==(uint16_t)((c<<8)|(c>>8)));
             if(phases[i]) CHECK(smc_led(0x5d)==(phases[i]<=16));
         }
         seq.metro_view=1; eng_step[TRK_DRUM]=0; draw_header();
@@ -359,12 +349,12 @@ static void held_fx_header(void)
 {
     setup(V_FX,PART_303B); message(0x90,0,127); smc_ui_draw_peer();
     memcpy(before_fb,fb,sizeof fb);
-    cv_begin(240,HDR_H,C_BLACK); ui_pictogram(162,1,UI_G_FX_REVERB,2,C_HI); cv_commit(0,0,0);
-    for(int y=1;y<19;y++) CHECK(!memcmp(before_fb+y*240+162,fb+y*240+162,18*sizeof *fb));
+    cv_begin(240,HDR_H,C_BLACK); ui_pictogram(182,1,UI_G_FX_REVERB,2,C_HI); cv_commit(0,0,0);
+    for(int y=1;y<19;y++) CHECK(!memcmp(before_fb+y*240+182,fb+y*240+182,18*sizeof *fb));
     tap(0x63); smc_ui_draw_peer();
     CHECK(changed_rows(0,HDR_H,before_fb,fb)>0); memcpy(before_fb,fb,sizeof fb);
-    cv_begin(240,HDR_H,C_BLACK); ui_pictogram(162,1,UI_G_FX_DELAY,2,C_HI); cv_commit(0,0,0);
-    for(int y=1;y<19;y++) CHECK(!memcmp(before_fb+y*240+162,fb+y*240+162,18*sizeof *fb));
+    cv_begin(240,HDR_H,C_BLACK); ui_pictogram(182,1,UI_G_FX_DELAY,2,C_HI); cv_commit(0,0,0);
+    for(int y=1;y<19;y++) CHECK(!memcmp(before_fb+y*240+182,fb+y*240+182,18*sizeof *fb));
     message(0x80,0,0); smc_ui_draw_peer();
     CHECK(changed_rows(0,HDR_H,before_fb,fb)>0);
     message(0x90,0,127); message(0x90,1,127); message(0x80,1,0);

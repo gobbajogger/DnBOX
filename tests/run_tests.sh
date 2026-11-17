@@ -86,8 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    fwui-light-theme|ui-song-text|ui-list-unit) TEST_CLASS=G ;;
-    drum909-tanh-pair|remote-scalar|remote-events|remote-actual-core) TEST_CLASS=G ;;
+    drum909-tanh-pair) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -306,8 +305,7 @@ run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
 run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c SMC_UI_OUT=build/host/composed-smc-panic sh tests/host/smc_ui_test.sh
 run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
-run composed-ui-identity sh tests/host/composed_ui_identity_test.sh
-run fwui-light-theme env SMC_UI_TEST_FILE=tests/host/fwui_light_theme_sweep.c SMC_UI_OUT=build/host/fwui-light-theme sh tests/host/smc_ui_test.sh
+run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
 run drone-slot env SMC_UI_TEST_FILE=tests/host/drone_slot_test.c SMC_UI_OUT=build/host/drone-slot sh tests/host/smc_ui_test.sh
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
@@ -432,7 +430,6 @@ run engine-cq-boff-overflow python3 tests/host/engine_cq_boff_overflow_test.py  
 run engine-cq-brk-overflow python3 tests/host/engine_cq_brk_overflow_test.py   # full CQ must keep C_BRK press+release (displace param)
 run engine-cq-bon-overflow python3 tests/host/engine_cq_bon_overflow_test.py   # full CQ must keep C_BON (displace param)
 run engine-cq-drum-overflow python3 tests/host/engine_cq_drum_overflow_test.py   # full CQ must keep C_DRUM (displace param)
-run engine-808-baseline-closure python3 tests/host/test_engine_808_baseline_closure.py
 run engine-808-scratch-alias sh tests/host/engine_808_scratch_alias_test.sh   # 808 scratch in the out window: bit-identical to separate t0/tr
 run midi-mq-noteoff-overflow python3 tests/host/midi_mq_noteoff_overflow_test.py   # full MIDI-in MQ must keep Note Off (displace CC)
 run midi-mq-rt-overflow python3 tests/host/midi_mq_rt_overflow_test.py   # full MIDI-in MQ must keep Start/Continue/Stop (displace CC)
@@ -496,16 +493,6 @@ run smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py
 run part-order sh tests/host/part_order_test.sh
 run smc-ui sh tests/host/smc_ui_test.sh
-run remote-scalar sh tests/host/remote_scalar_test.sh
-run remote-events sh tests/host/remote_events_test.sh
-run remote-actual-core sh tests/host/remote_actual_core_test.sh
-run dnbox-inbox-collect python3 tests/dnbox_inbox_collect_test.py
-run dnbox-hard-limits python3 tests/hard-limits-regression.py
-run dnbox-sanitizer-policy python3 tests/sanitizer-policy-regression.py
-run ui-song-text sh tests/host/ui_song_text_test.sh
-run ui-list-unit sh tests/host/ui_list_unit_test.sh
-run remote-native-input-binding python3 tests/remote_native_annotations_binding_test.py
-run remote-native-annotations python3 tests/remote_native_annotations_test.py
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
 run smc-remainder sh tests/host/smc_remainder_test.sh
 run smc-popup-engine sh tests/host/smc_popup_engine_test.sh
@@ -534,9 +521,6 @@ run smc-clip-visibility sh tests/host/smc_clip_visibility_test.sh
 run drum-pan sh -c "mkdir -p build/gen && ([ -f build/gen/x0x_drum_tables.h ] || python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null) && $CC -O2 -ffp-contract=off -w -Ifirmware/src/dsp -Ifirmware/src -Ibuild/gen -o $OUT/drum_pan_test tests/host/drum_pan_test.c firmware/src/dsp/drum909.c firmware/src/dsp/drum808.c firmware/src/dsp/x0x_param.c -lm && $OUT/drum_pan_test"
 run stereo sh -c "mkdir -p build/gen && ([ -f build/gen/x0x_drum_tables.h ] || python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null) && $CC -O2 -ffp-contract=off -w -Ifirmware/src/dsp -Ifirmware/src -Ibuild/gen -o $OUT/stereo_test tests/host/stereo_test.c firmware/src/dsp/master.c firmware/src/dsp/fxbus.c -lm && $OUT/stereo_test"
 run master sh -c "$CC $W -Wno-double-promotion -o $OUT/master_test tests/host/master_test.c firmware/src/dsp/master.c -lm && $OUT/master_test"
-run original-owner-layout sh -c "$CC -std=c11 -O2 -Iexperiments/original_synth -Iexperiments/wobble -o $OUT/original_owner_layout_test tests/host/original_owner_layout_test.c && $OUT/original_owner_layout_test"
-run dnbox-inbox python3 tests/dnbox_inbox_test.py
-run break-step-velocity sh -c "$CC -O2 -ffp-contract=off -Wall -Wextra -Werror tests/host/break_velocity_test.c -lm -o $OUT/break_velocity_test && $OUT/break_velocity_test"
 run drum-kit-identity sh tests/host/drum_kit_identity_test.sh   # independent 909 and 808 voices
 run drum909-adpcm sh tests/host/run_drum909_adpcm.sh   # the 909 cymbals as IMA ADPCM (A/B study reference)
 for t in drum909 drum808 breaks; do
@@ -608,9 +592,7 @@ run smk-clip-ble-clear sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/
 run smk-clip-keys sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_clip_keys_test tests/smk_clip_keys_test.c firmware/src/app/smk_clip_arp_share.c && $OUT/smk_clip_keys_test"
 run smk-chord-recognize sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_chord_recognize_test tests/smk_chord_recognize_test.c && $OUT/smk_chord_recognize_test"
 if [ "$PIL_SKIP" = 1 ]; then not_run smk-clip-chord-display Pillow; else run smk-clip-chord-display sh tests/host/smk_clip_chord_display_test.sh; fi
-run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # field/keybed geometry; removed explainers stay absent
-run smk-ck-page-layout-negative python3 tests/smk_ck_page_layout_negative_test.py
-run integ-ui-selector-policy python3 tests/integ_ui_selector_policy_test.py
+run smk-ck-page-layout python3 tests/smk_ck_page_layout_test.py   # CLP-75: no top bar on the stage page, help line at the bottom
 run smk-arrows sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/smk_arrows_test tests/smk_arrows_test.c && $OUT/smk_arrows_test"   # < > route and hold repeat
 run smk-arrows-owner python3 tests/smk_arrows_owner_test.py   # one owner for each < > press in clip mode (CLP-27)
 run apc40-tables sh -c "python3 tools/apc_pad_colors.py --pad-h $OUT/apc40_pad_default_gen.h --lcd-h $OUT/apc40_lcd565_gen.h --gamma-h $OUT/apc40_pad_gamma_gen.h && \

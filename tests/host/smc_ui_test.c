@@ -23,8 +23,7 @@ uint8_t smk_clip_transport_button(uint8_t b, uint8_t p) { (void)b; (void)p; retu
 uint8_t smk_clip_history_button(uint8_t b, uint8_t p, uint8_t h) { (void)b; (void)p; (void)h; return 0; }
 void smk_play_note_button(uint8_t p, uint8_t h) { (void)p; (void)h; }
 uint8_t smk_ck_flash_busy(void) { return 0; }
-static uint8_t fixture_clip_external_clock;
-uint8_t smk_ck_ext(void) { return fixture_clip_external_clock; }
+uint8_t smk_ck_ext(void) { return 0; }
 uint8_t smk_ck_knobs_owned(void) { return 0; }
 uint8_t smk_ck_panel(uint32_t *p, uint32_t f) { (void)p; (void)f; return 0; }
 uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)

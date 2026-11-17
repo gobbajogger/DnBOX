@@ -1,9 +1,0 @@
-# Original-release UI header expectation repair
-
-Executed production source: exact integration 2d86f59491d3ec33c1ab586a62ae0f4e9ff0a490, with only this test overlay. Canonical UI-SOURCE-OF-TRUTH line 6 specifies NAME / P# / transport / BPM / battery. The old fixture demanded retired 8be queued-content pixels at x141 and sampled x217 for transport, now battery territory. Actual red: theme0 x141,y9 actual2311 versus old c310, current31/cue30 zero-based.
-
-Test-only repair compares the whole dedicated current/queued pattern region, explicitly distinguishes P32>31 from P32 and wrong color, retains HOME content glyph tests and project/sequencer nonmutation. Transport tests use the current triangle location and actual audio-owned phase, reject track-step/wall-clock animation, and assert the stable stopped-square pixels. All existing engine/control/selector/footer/direction assertions remain.
-
-Normal default mode: 35,966 checks and 97 captures PASS. Default sanitizer mode is BLOCKED/FAIL here: LeakSanitizer fatal error under ptrace. The full wrapper did not pass and image-equality phase was not reached. An already-started run with leak scan disabled produced a separate diagnostic only; it is explicitly NOT qualification and no such run will be repeated. Independent QA will run the published corrected fixture with default sanitizer controls on its managed route after the active immutable batch completes. Environment inventory found only this cloud, an offline Mac and offline DnBOX RDC device.
-
-A candidate expected string incorrectly used P32>P31; its failed comparison and diagnostic are preserved separately. The final expected text is the actual canonical P32>31, not a production rewrite. Shared fonts/render primitives mean source-semantic regression evidence, not independent visual golden or full F1/F2/Local qualification. Production bytes are unchanged. No test threshold or sanitizer control in the published wrapper is changed.

@@ -503,7 +503,7 @@ static inline uint32_t rev_next(const brk_voice_t *v, uint32_t q) { return q > v
  * The claim of k happens before the fade, and a bank that goes invalid under us is refused,
  * so a loop rebuild cannot silence the voice that is already playing. */
 static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint32_t p, int rev,
-                           int have_state, int32_t pred, int32_t idx, unsigned velocity)
+                           int have_state, int32_t pred, int32_t idx)
 {
     brk_voice_t *o = &b->v[b->cur], *v;
     const brk_bank_t *prev;
@@ -522,7 +522,6 @@ static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint
     b->cur ^= 1u;
     v = &b->v[b->cur];
     v->on = 1;
-    v->velocity = (uint8_t)velocity;
     v->bank = (uint8_t)bk;
     v->gen = k->gen;
     v->snap = k;
@@ -562,7 +561,7 @@ static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint
 
 /* (re)start slice sl of bank bk from its beginning: forward from its first sample, reverse
  * from its first sample then wrapping to its end (BB Gen's reverse) */
-__attribute__((noinline)) static int slice_start(breaks_t *b, int bk, int sl, unsigned velocity)
+__attribute__((noinline)) static int slice_start(breaks_t *b, int bk, int sl)
 {
     const brk_bank_t *k = breaks_bank(b, bk);
     if (!k || !k->valid)
@@ -570,7 +569,7 @@ __attribute__((noinline)) static int slice_start(breaks_t *b, int bk, int sl, un
     sl %= k->slices;
     unsigned boundary = (unsigned)sl * (32u / k->slices);
     return voice_start_on(b, k, bk, sl, k->start[boundary], b->perf.reverse, 1,
-                   k->at_start[boundary].pred, k->at_start[boundary].idx, velocity);
+                   k->at_start[boundary].pred, k->at_start[boundary].idx);
 }
 
 /* ---- the generator ---------------------------------------------------------------------- */
@@ -630,7 +629,7 @@ static void fire_trigger(breaks_t *b, int bp, int forced)
     b->sub_count = 0;
     b->sub_elapsed = 0;
     b->sub_len = b->sub_div ? b->spt / (float)b->sub_div : 0.0f;
-    int accepted = slice_start(b, rb, slice, held >= 0 ? 0u : b->step_velocity);
+    int accepted = slice_start(b, rb, slice);
     if (accepted && held < 0 && b->running && b->step_on && !b->quiet &&
         b->v[b->cur].on && b->v[b->cur].snap == breaks_bank(b, rb) && b->accepted)
         b->accepted(b->accepted_ctx, slice, rb, b->v[b->cur].gen);
@@ -653,7 +652,7 @@ static void pin_trigger(breaks_t *b, int slice)
     b->sub_count = 0;
     b->sub_elapsed = 0;
     b->sub_len = 0.0f;
-    int accepted = slice_start(b, 0, slice, b->step_velocity);
+    int accepted = slice_start(b, 0, slice);
     if (accepted && b->running && b->step_on && !b->quiet && breaks_bank(b, 0)->valid && b->accepted)
         b->accepted(b->accepted_ctx, slice, 0, breaks_bank(b, 0)->gen);
     b->st_trigs++;
@@ -662,9 +661,6 @@ static void pin_trigger(breaks_t *b, int slice)
     b->st_div = 0;
     b->st_forced = 0;
 }
-
-void breaks_velocity(breaks_t *b, int value)
-{ b->step_velocity = (uint8_t)(value < 0 ? 0 : value > 127 ? 127 : value); }
 
 void breaks_pin(breaks_t *b, int slice) { b->pin = (int8_t)(slice >= 0 && slice < 32 ? slice : -1); }
 
@@ -718,7 +714,7 @@ static void perf_sync(breaks_t *b)
                         b->current_slice = key;
                         b->render_bank = 0;
                         b->sub_div = 0;
-                        slice_start(b, 0, key, 0);
+                        slice_start(b, 0, key);
                     }
                     edged = key;
                 } else
@@ -737,7 +733,7 @@ static void perf_sync(breaks_t *b)
             b->current_slice = sl;
             b->render_bank = 0;
             b->sub_div = 0;
-            slice_start(b, 0, sl, 0);
+            slice_start(b, 0, sl);
             gate_update(b);
         }
     }
@@ -901,7 +897,7 @@ void breaks_render(breaks_t *b, float *out, int n)
             uint32_t p = v->rev ? v->pos : (v->pos ? v->pos - 1u : 0u);
             while (sl + 1 < k->slices && k->start[(sl + 1) * (32 / k->slices)] <= v->lo)
                 sl++;
-            voice_start_on(b, k, bk, sl, p, b->perf.reverse, 0, 0, 0, v->velocity);
+            voice_start_on(b, k, bk, sl, p, b->perf.reverse, 0, 0, 0);
             inc[b->cur] = brk_inc(b, b->v[b->cur].snap ? b->v[b->cur].snap : k);
         }
     }
@@ -917,7 +913,7 @@ void breaks_render(breaks_t *b, float *out, int n)
         if (b->sub_count + 1 < b->sub_div) {                /* retrigger: replay the slice head */
             if ((float)b->sub_elapsed >= (float)(b->sub_count + 1) * b->sub_len) {
                 b->sub_count++;
-                slice_start(b, b->render_bank, b->current_slice, b->v[b->cur].velocity);
+                slice_start(b, b->render_bank, b->current_slice);
                 inc[b->cur] = b->v[b->cur].snap ? brk_inc(b, b->v[b->cur].snap) : 0.0f;
             }
             b->sub_elapsed++;
@@ -937,7 +933,7 @@ void breaks_render(breaks_t *b, float *out, int n)
                 uint32_t pos = v->lo + (v->rev ? (off + span - advance) % span : (off + advance) % span);
                 int sl = 0;
                 while (sl + 1 < k->slices && k->start[(sl + 1) * (32 / k->slices)] <= v->lo) sl++;
-                if (voice_start_on(b, k, v->bank, sl, pos, v->rev, 0, 0, 0, v->velocity))
+                if (voice_start_on(b, k, v->bank, sl, pos, v->rev, 0, 0, 0))
                     inc[b->cur] = brk_inc(b, k);
             }
             if (b->grain_left) b->grain_left--;
@@ -951,10 +947,7 @@ void breaks_render(breaks_t *b, float *out, int n)
             k = v->snap;
             if (!k)
                 continue;
-            float gain = v->g;
-            if (v->velocity && v->velocity != 127u)
-                gain *= (float)v->velocity * (1.0f / 127.0f);
-            y += (v->s0 + (v->s1 - v->s0) * v->frac) * gain;
+            y += (v->s0 + (v->s1 - v->s0) * v->frac) * v->g;
             v->g += v->dg;
             if (v->g >= 1.0f) {
                 v->g = 1.0f;

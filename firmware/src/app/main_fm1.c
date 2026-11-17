@@ -1906,6 +1906,7 @@ static void ck_page_draw(void)
     uint16_t col[CK_NKEY];
     uint32_t pg = (cp->pg & 3u) - 1u, k, n, count = pg == 2u ? 9u : 4u;
     uint16_t c = CK_MODE_C[pg];
+    text_c(120, vc(&FONT_T, 124, 12), &FONT_T, "KNOB2 FIELD  KNOB3 / < > VALUE  KEYS PLAY", C_GRAY);
     for (n = 0; n < count; n++) {
         uint32_t f = CK_PAGE_FIELDS[pg][n];
         int32_t fx = 4 + (int32_t)(n / 5u) * 120, fy = 2 + (int32_t)(n % 5u) * 12;
@@ -1915,6 +1916,7 @@ static void ck_page_draw(void)
         cv_text(fx, vc(&FONT_T, fy, 12), &FONT_T, nm, C_GRAY);
         cv_text(fx + 44, vc(&FONT_XS, fy, 12), &FONT_XS, ck_val_txt(f, ck_get(f), t), C_WHITE);
     }
+    text_c(120, vc(&FONT_T, 64, 10), &FONT_T, "PLAY KEYS", c);
     for (k = 0; k < CK_NKEY; k++)
         col[k] = CK_BIT(cp->keys, k) ? c : CK_BLK(k) ? RGB(25, 25, 25) : RGB(60, 60, 60);
     ck_kbd(10, 76, 10, 46, CK_NKEY, col);

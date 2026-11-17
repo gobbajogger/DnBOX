@@ -5,11 +5,7 @@
 # Needs the private original-synth inputs and sh host/build_host.sh --generate-only.
 set -e
 cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-origin/build/0.0.22}
-# Resolve once, then stage the historical textual include alongside its engine.
-# Otherwise quoted include lookup falls through to the current owner/event layout.
-BASE=$(git rev-parse --verify "$BASE^{commit}")
-git show "$BASE:firmware/src/app/engine.c" > "$D/engine-base.c"
-git show "$BASE:firmware/src/app/original_presets.inc" > "$D/original_presets.inc"
+git show $BASE:firmware/src/app/engine.c > $D/engine-base.c
 U=$(python3 - <<'PY'
 import importlib.util
 spec=importlib.util.spec_from_file_location('b','tools/build.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)
@@ -25,14 +21,14 @@ for mode in normal san; do
   src=$D/engine-base.c; [ $v = new ] && src=firmware/src/app/engine.c
   cc $F -Dseq_until_event=output_window_until_event -Dplat_cpu2_run=output_window_cpu2_run -Dplat_cpu2_wait=output_window_cpu2_wait -c $src -o $D/eng-$v.o
   cc $F -DOW_LO=0 -DOW_HI=3 tests/host/engine_output_window_test.c $U $D/eng-$v.o -lm -o $D/h-$v
-  if ASAN_OPTIONS=detect_leaks=1 $D/h-$v $D/$mode-$dw-$v.pcm > $D/$mode-$dw-$v.log 2>&1; then tail -1 $D/$mode-$dw-$v.log; else cat $D/$mode-$dw-$v.log; exit 1; fi
+  ASAN_OPTIONS=detect_leaks=0 $D/h-$v $D/$mode-$dw-$v.pcm | tail -1
  done
  cmp $D/$mode-$dw-base.pcm $D/$mode-$dw-new.pcm && echo "BITEXACT $mode DEV_WOBBLE=$dw $(stat -c%s $D/$mode-$dw-new.pcm) B $(sha256sum < $D/$mode-$dw-new.pcm | cut -c1-16)"
  # a core-1 job that failed half done: the output equals this engine's clean deferred run
  # (the old engine rendered the 808 and BREAK twice there: not a reference)
  for r in 3 1; do
   cc $F -DOW_LO=$r -DOW_HI=$((r+1)) tests/host/engine_output_window_test.c $U $D/eng-new.o -lm -o $D/h-m$r
-  if ASAN_OPTIONS=detect_leaks=1 $D/h-m$r $D/$mode-$dw-m$r.pcm > $D/$mode-$dw-m$r.log 2>&1; then tail -1 $D/$mode-$dw-m$r.log; else cat $D/$mode-$dw-m$r.log; exit 1; fi
+  ASAN_OPTIONS=detect_leaks=0 $D/h-m$r $D/$mode-$dw-m$r.pcm | tail -1
  done
  cmp $D/$mode-$dw-m3.pcm $D/$mode-$dw-m1.pcm && echo "PARTIAL=CLEAN $mode DEV_WOBBLE=$dw"
  done

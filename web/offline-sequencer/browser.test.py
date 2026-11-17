@@ -6,7 +6,7 @@ ROOT=Path(__file__).parent.resolve();OUT=Path(os.environ.get('DNBOX_EDITOR_TEST_
 def midi(pitch=60):
  tr=bytes([0,144,pitch,96,131,96,128,pitch,0,0,255,47,0]);return b'MThd'+(6).to_bytes(4,'big')+bytes([0,0,0,1,1,224])+b'MTrk'+len(tr).to_bytes(4,'big')+tr
 with sync_playwright() as p:
- browser=p.chromium.launch(executable_path=os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') or None,headless=True,chromium_sandbox=True)
+ browser=p.chromium.launch(executable_path=os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') or None,headless=True,args=['--no-sandbox'])
  for width,height in [(1440,1000),(1024,900),(390,844),(320,568)]:
   print('VIEWPORT',width,height,flush=True)
   ctx=browser.new_context(viewport={'width':width,'height':height},is_mobile=width<500,has_touch=width<1100,accept_downloads=True);errors=[];net=[]

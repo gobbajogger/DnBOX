@@ -1,9 +1,0 @@
-# Linked eight-entry protocol code diagnostic
-
-Exact source7f6d8a44396e8d7da28f66e6fcc712c537494b1b is firmware-runtime-identical to independently measuredfef9. Map-only builds first reproduced the exact baseline ELF on both models. Then the reviewed wrapper added only two pinned derived objects, all eight public reference entry roots and a new map. The application source was unchanged; no entry point was called or device written.
-
-Both links complete: baseline free3268/3276B, probe free1076/1084B, increment2192B. All eight symbols survive. Only52/60B beyond the1024B XIP reserve remain. RAM and pool are unchanged because no692B core instance, catalog/decoder, callbacks/glue or transport storage was allocated. No stack/IRQ latency, active endpoint, all-engine fit or full gate claim follows. This is the complete eight-entry API code cost, not a mathematical lower bound for a smaller device-specific endpoint.
-
-Objects are reproducible from the original pinned C/headers under tests/host/dnr2_reference: apply only base/save noinline to core and u7/p7 noinline to wire, as exercised by tests/remote_native_annotations_test.py. Compile with the pinned pi32v2 compiler recorded in receipts, -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -Os -ffunction-sections -fdata-sections -fno-builtin and its authentic standard includes. inputs.json pins the resulting objects; supply them beside link_probe.py before diagnostic use. Baseline maps/ELFs and compiled objects remain retained in the local diagnostic evidence; no SDK or linked binary is published here.
-
-Four control-flow tests use disposable Git/compiler/readelf stubs, not native execution: successful receipt, nonzero build return, preservation of original setup error, and missing-root rejection. Native actual logs are separate. Public logs/maps normalize paths only; public-files.json retains original/public SHA256.

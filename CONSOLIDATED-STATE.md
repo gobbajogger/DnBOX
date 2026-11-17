@@ -1,8 +1,6 @@
-# CONSOLIDATED-STATE (integration/dnbox-consolidated)
+# Consolidated source ledger
 
-| Repository | Verified baseline SHA | Prep branch | Gate | Review |
-|---|---|---|---|---|
-| Firmware | e742be7bd0d01323c899de6e156f40b85ee451db | lane/integ-start-files | NOT_RUN at new head | Independent review assigned |
-| Nightly | 9165adb92fcdaab756c4e59e3d4a8ee22437ca5a | lane/integ-start-files | NOT_RUN at new head | Independent review assigned |
+Inherited consolidated baseline: `e742be7bd0d01323c899de6e156f40b85ee451db`.
+This tree contains the supplied RULES.md v2 start-file/removal payload for PR #955. The eventual normal merge SHA is recorded by GitHub on that PR; no complete lane, full Local gate, product release or Pages publication is asserted here.
 
-No prep merge is claimed. Existing baseline ancestry is preserved.
+Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, exact tip `246ea3718c6c72ba80bbd1aafcd5356f871c78c8`. Gate/environment corrections move to an independent follow-up; other product work remains in the backup and its original lane branches. No unique history is deleted.

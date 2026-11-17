@@ -28,8 +28,7 @@ static uint32_t seen_param[4096];
 static uint8_t bass_held[NBASS], bass_held_count[NBASS], bass_held_src[NBASS];
 static uint8_t original_key_pitch[NBASS][38], bass_attacked[NBASS];
 static uint16_t src_held[3];
-static struct { int runtime; } original_parts[NBASS];
-static int brk_bend_owner, project_midi_drop;
+static int original_bass[NBASS], brk_bend_owner, project_midi_drop;
 /* 0.0.25 Chicago accent/slide flags (bass_adapt_flags): BREAK paths only clear them here. */
 static uint8_t bass_accent[NBASS], bass_slide[NBASS];
 static void bass_adapt_flags(int p, int acc, int sl)

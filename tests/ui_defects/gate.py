@@ -21,7 +21,7 @@ from PIL import Image
 STATUSES = {"PASS", "FAIL", "REVIEW_REQUIRED", "NOT_RUN"}
 WEB_IDS = set(range(10, 25))
 FIRMWARE_IDS = set(range(1, 10)) | set(range(19, 25))
-CANONICAL_SPEC_SHA256 = "c9e69f4885a85e51862ef1092af168760f50075a1daf4222f0be2486e0c649ad"
+CANONICAL_SPEC_SHA256 = "868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6"
 
 
 def sha256(path: Path) -> str:

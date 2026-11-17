@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/workspace/scratch/857bb2409f82/fwui-evidence/test_link_map_wrapper.py", line 10, in <module>
-    else:raise AssertionError('wrong target was not rejected')
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: wrong target was not rejected

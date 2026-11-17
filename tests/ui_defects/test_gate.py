@@ -23,7 +23,7 @@ ARTIFACT = {"path":str(PNG),"sha256":hashlib.sha256(PNG.read_bytes()).hexdigest(
 
 def model():
     return {"sourceClosureSha256": H, "checks": [{"id": i, "status": "PASS", "evidence": [copy.deepcopy(ARTIFACT)]} for i in range(1, 25)],
-            "canonicalSpecSHA256":"c9e69f4885a85e51862ef1092af168760f50075a1daf4222f0be2486e0c649ad",
+            "canonicalSpecSHA256":"868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6",
             "screens": [{**ARTIFACT,"id": "test", "width":1,"height":1,"score": 10, "defects": []}],
             "coverageInventory":[{"id":"test"}],
             "coverageComplete": True, "run": {"exit": 0, "firstAttempt": True, "sourceClosureSha256": H}}

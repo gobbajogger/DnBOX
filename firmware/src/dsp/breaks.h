@@ -67,7 +67,7 @@ typedef struct {
     float g, dg;                      /* crossfade gain and its per-sample slope */
     uint32_t lo, hi;                  /* reverse: wraps within [lo, hi) (the slice) */
     uint32_t rbase;                   /* reverse: rbuf holds samples rbase .. rbase + BRK_RCH - 1 */
-    uint8_t rvalid, velocity, rsv[2]; /* 0 legacy/full; 1..127 latched per voice */
+    uint8_t rvalid, rsv[3];
     int16_t rbuf[BRK_RCH];
     brk_ima_t seek_state;             /* before previous adjacent reverse-cache block */
     uint32_t seek_pos;               /* UINT32_MAX when no saved boundary is valid */
@@ -103,7 +103,6 @@ typedef struct breaks {
     float spt;                        /* output samples per trigger */
     int32_t trig_left;                /* samples to a pending mid-16th trigger (1/4 bar length) */
     uint8_t step_on;                  /* this step's enable bit */
-    uint8_t step_velocity;            /* sparse motion lane; 0 legacy/full */
 
     /* retrigger (BB Gen's sub-slice) */
     uint8_t sub_div, sub_count;
@@ -143,7 +142,6 @@ void breaks_flush(breaks_t *b);                /* publish a loop change that wai
 void breaks_drop_range(breaks_t *b, const uint8_t *base, uint32_t nbytes); /* samples at base are going away */
 const brk_bank_t *breaks_bank(const breaks_t *b, int which); /* the published loop, for the screen */
 void breaks_step(breaks_t *b, int step16, int bar, float samples_per_16th, int enabled);
-void breaks_velocity(breaks_t *b, int value);     /* 0 legacy/full; 1..127 next sequenced voice, never live keys */
 void breaks_pin(breaks_t *b, int slice);           /* next step: stored A slice0..31 resolved modulo count; -1 generator */
 void breaks_stop(breaks_t *b);
 void breaks_live(breaks_t *b, int key, int down);  /* 0-7 hold slice of A, 8 reverse, 9 jungle stretch, 10 stutter */

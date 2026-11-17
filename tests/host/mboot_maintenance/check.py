@@ -38,7 +38,7 @@ def main():
     run(['cc',*flags,source,'-o',a.output/'storage-ota'])
     run([a.output/'storage-ota'])
     run(['cc',*flags,'-fsanitize=address,undefined','-no-pie',source,'-o',a.output/'storage-ota-sanitized'])
-    env=dict(os.environ,ASAN_OPTIONS='detect_leaks=1',UBSAN_OPTIONS='halt_on_error=1')
+    env=dict(os.environ,ASAN_OPTIONS='detect_leaks=0',UBSAN_OPTIONS='halt_on_error=1')
     run([a.output/'storage-ota-sanitized'],env=env)
     with tempfile.TemporaryDirectory(prefix='mboot-admission-proof-') as tmp:
         tmp=Path(tmp)

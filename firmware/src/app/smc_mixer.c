@@ -1266,7 +1266,7 @@ static void smc_ui_draw_peer(void)
             end = put_i(put_s(end, "P"), page + 1);
             put_s(put_s(end, " "), page_name);
         }
-        int max_width = fx_note >= 0 ? (smc.locked ? 127 : 140) : (smc.locked ? 147 : 160);
+        int max_width = fx_note >= 0 ? (smc.locked ? 147 : 160) : (smc.locked ? 167 : 180);
         while (tw(&FONT_XS, tag) > max_width) {
             /* Keep complete words beside the physical-control indicator. */
             char *space = tag;
@@ -1285,18 +1285,17 @@ static void smc_ui_draw_peer(void)
     cv_text(smc.locked?31:18, vc(&FONT_XS, 0, HDR_H), &FONT_XS, caps_of(tag), C_GRAY);
     if (fx_note >= 0) {
         int bus = smc.fx_strip.key_bus[fx_note];
-        ui_pictogram(162,1,smc_fx_symbol(smc.fx_strip.held_fx[bus][fx_note >> 3]),2,C_HI);
+        ui_pictogram(182,1,smc_fx_symbol(smc.fx_strip.held_fx[bus][fx_note >> 3]),2,C_HI);
     }
     int control=smc_ui.kind==3?UI_G_KEY:smc_ui.kind==1 || smc_ui.kind==2?UI_G_KNOB:UI_G_FADER;
     if (smc_ui.kind==3 && smc_ui.action>=0x5D) {
         control=smc_ui.action==0x5F?UI_G_RECORD:smc_ui.action==0x5E?UI_G_PLAY:UI_G_STOP;
-        ui_pictogram(201,5,control,1,C_HI);
+        ui_pictogram(221,5,control,1,C_HI);
     } else {
-        ui_pictogram(189,5,control,1,C_HI);
+        ui_pictogram(209,5,control,1,C_HI);
         put_i(tag, smc_ui.strip+1);
-        text_r(215,vc(&FONT_S,0,HDR_H),&FONT_S,tag,C_HI);
+        text_r(235,vc(&FONT_S,0,HDR_H),&FONT_S,tag,C_HI);
     }
-    dv_header_battery(219,5);
     cv_commit_header();
     cv_begin(240, 2 * BAND_H, C_BLACK);
     cv_band(0, 2 * BAND_H);
@@ -1422,7 +1421,7 @@ void smc_ui_draw(void)
             pref_value_of(r, pref_get(r), value, unit);
             q = put_s(put_s(q, " "), value);
         }
-        while (q > banner && tw(&FONT_XS, banner) > 208) *--q = 0;
+        while (q > banner && tw(&FONT_XS, banner) > 232) *--q = 0;
         /* Second header line: the same pickup / ACTIVE status as the #737
          * approved peek, so a fader that has not caught its target says so. */
         {
@@ -1436,9 +1435,8 @@ void smc_ui_draw(void)
             }
             cv_begin(240, HDR_H, C_BLACK);
             cv_rect(0, 0, 240, HDR_H, C_BLACK);
-            text_c(108, vc(&FONT_XS, 0, 10), &FONT_XS, caps_of(banner), C_HI);
-            text_c(108, vc(&FONT_T, 10, 10), &FONT_T, status, sc);
-            dv_header_battery(219,5);
+            text_c(120, vc(&FONT_XS, 0, 10), &FONT_XS, caps_of(banner), C_HI);
+            text_c(120, vc(&FONT_T, 10, 10), &FONT_T, status, sc);
             cv_commit(0, 0, 0);
         }
     } else smc_ui_draw_peer();

@@ -98,8 +98,7 @@ int32_t plat_enc(int role)
     return v;
 }
 uint32_t plat_master(void) { return master; }
-static int host_battery_level = 3;     /* simulator default; host fixtures may exercise levels */
-int plat_battery(void) { return host_battery_level; }
+int plat_battery(void) { return 3; }    /* the simulator: a full battery */
 void plat_leds(uint32_t b, uint32_t k)
 {
     lit_btn = b;

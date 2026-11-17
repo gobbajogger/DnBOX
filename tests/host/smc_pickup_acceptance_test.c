@@ -34,18 +34,11 @@ static void status_is(const char *status)
         /* Approved #737 peek: the status is the second header line, drawn
          * over the real page. Compare that line only. */
         cv_begin(240, HDR_H, C_BLACK);
-        text_c(108, vc(&FONT_T, 10, 10), &FONT_T, status,
+        text_c(120, vc(&FONT_T, 10, 10), &FONT_T, status,
                status[0] == 'P' ? C_HI : C_GRAY);
-        dv_header_battery(219,5);
         cv_commit(0, 0, 0);
-        if(memcmp(active_fb+10*240,fb+10*240,240*(HDR_H-10)*sizeof *fb)){
-          int i=10*240;while(i<240*HDR_H&&active_fb[i]==fb[i])i++;
-          fprintf(stderr,"PICKUP_HEADER_MISMATCH x=%d y=%d actual=%04x expected=%04x\n",i%240,i/240,active_fb[i],fb[i]);
-        }
         CHECK(!memcmp(active_fb + 10 * 240, fb + 10 * 240,
                       240 * (HDR_H - 10) * sizeof *fb));
-        CHECK(active_fb[10*240+219]==swap16(SOUND_GRAY));
-        for(int cell=0;cell<3;cell++)CHECK(active_fb[8*240+222+cell*4]==swap16(cell<plat_battery()?SOUND_GRAY:SOUND_LINE));
         if (status[0] == 'P') peek_pickup_hints++;
         return;
     }

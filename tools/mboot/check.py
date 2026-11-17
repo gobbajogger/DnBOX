@@ -78,7 +78,7 @@ def main():
             executable = temp / ('test-sanitize' if sanitize else 'test')
             extra = ['-O1', '-fsanitize=address,undefined', '-fno-omit-frame-pointer'] if sanitize else ['-O2']
             run(['cc', *flags, *extra, source, up / 'src/core.c', test, '-o', executable], ROOT)
-            env = dict(os.environ, ASAN_OPTIONS='detect_leaks=1:halt_on_error=1',
+            env = dict(os.environ, ASAN_OPTIONS='detect_leaks=0:halt_on_error=1',
                        UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
             run([executable, boot], ROOT, env)
         # Compile the adoption API for the actual target too; this is a source
@@ -100,7 +100,7 @@ def main():
         'limits': ['No device access, installation, firmware package, or controller build.',
                    'Default application updater and installer paths are unchanged.',
                    'Private upstream hardware-image tests are SKIP; synthetic tests ran.',
-                   'LeakSanitizer enabled for completed host-only runs; no hardware qualification.',
+                   'LeakSanitizer NOT_RUN: ptrace environment; detect_leaks=0.',
                    'Alternative compiler qualification is structural/build-only, not hardware proof.']}
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.write_text(json.dumps(receipt, indent=2) + '\n')

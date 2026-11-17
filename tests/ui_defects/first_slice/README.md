@@ -14,7 +14,7 @@ all-24, native firmware, device, flash-fit, timing or delivery acceptance.
   empty integer-pixel rectangle <=12% of the full240x240 screen. Panel fills,
   borders, padding and touch areas are not content. Ink includes actual text,
   glyphs, body pictograms and step marks. No semantic exemptions or added padding.
-- Check4: actual painted captions, >=2 characters, reject P.DPTH and P.DEPTH. The sole
+- Check4: actual painted captions, >=2 characters, reject P.DPTH. The sole
   single-character whitelist is conventional filter Q. Numeric values and
   parameter names inferred without painted text are not captions.
 - Supplemental D01: actual glyph/value raster-bounds collisions. Not a claim

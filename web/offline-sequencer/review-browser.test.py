@@ -9,7 +9,7 @@ fixture=json.loads(subprocess.check_output(['node','--input-type=module','-e',"i
 tr=bytes([0,144,60,96,131,96,128,60,0,0,255,47,0]);midi=b'MThd'+(6).to_bytes(4,'big')+bytes([0,0,0,1,1,224])+b'MTrk'+len(tr).to_bytes(4,'big')+tr
 rows=[]
 with sync_playwright() as p:
- browser=p.chromium.launch(executable_path=os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') or None,headless=True,chromium_sandbox=True)
+ browser=p.chromium.launch(executable_path=os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') or None,headless=True,args=['--no-sandbox'])
  for w,h in ([(1440,1000)] if red else [(1440,1000),(1024,900),(390,844),(320,568)]):
   ctx=browser.new_context(viewport={'width':w,'height':h},is_mobile=w<500,has_touch=w<1100);page=ctx.new_page();errors=[];network=[]
   def route(r):

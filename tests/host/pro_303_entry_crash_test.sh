@@ -18,7 +18,7 @@ for mode in normal sanitized; do
       -DX0X_HOST $DEFS -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
       tests/host/pro_303_entry_crash_test.c $ORIGINAL_FLAGS $U -lm -o "$OUT/$mode"
     for scenario in check-defaults invalid-retained; do
-        ASAN_OPTIONS=detect_leaks=1 "$OUT/$mode" "$scenario" >> "$OUT/$mode.log"
+        ASAN_OPTIONS=detect_leaks=0 "$OUT/$mode" "$scenario" >> "$OUT/$mode.log"
     done
 done
 cmp "$OUT/normal.log" "$OUT/sanitized.log"

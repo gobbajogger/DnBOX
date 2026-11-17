@@ -78,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix='bf027-') as temp:
     if built.returncode:
         print(built.stdout+built.stderr, file=sys.stderr)
         raise SystemExit(f'{compiler} compile exit {built.returncode}')
-    run=subprocess.run([str(exe)],text=True,capture_output=True,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=1'})
+    run=subprocess.run([str(exe)],text=True,capture_output=True,env={**os.environ,'ASAN_OPTIONS':'detect_leaks=0'})
     sys.stdout.write(run.stdout)
     sys.stderr.write(run.stderr)
     sys.exit(run.returncode)

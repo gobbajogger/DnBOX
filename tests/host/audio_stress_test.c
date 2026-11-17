@@ -6,10 +6,6 @@
 #include "dsp/busfx.h"
 
 static uint64_t synth_cpu[2];
-static int verify_admission;
-static unsigned admission_mask;
-static original_chicago_program expected_chicago;
-static original_miami_program expected_miami;
 static unsigned max_active[2], note_events[2][2][2], measured, runtime_faults, drop_one;
 static uint64_t cpu_ns(void)
 {
@@ -55,14 +51,6 @@ int stress_real_original_runtime_render(original_runtime_part *,original_runtime
 int original_runtime_render(original_runtime_part *p,original_runtime_workspace *w,float *l,float *r,uint32_t n)
 {
     uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_render(p,w,l,r,n); charge(p,t,rc);
-    if (verify_admission) {
-        CHECK(p->kind==ORIGINAL_SOUND_CHICAGO || p->kind==ORIGINAL_SOUND_MIAMI);
-        admission_mask |= 1u << p->kind;
-        if (p->kind==ORIGINAL_SOUND_CHICAGO)
-            CHECK(!memcmp(p->dsp.chicago.program.macro,expected_chicago.macro,sizeof expected_chicago.macro));
-        else if (p->kind==ORIGINAL_SOUND_MIAMI)
-            CHECK(!memcmp(p->dsp.miami.program.macro,expected_miami.macro,sizeof expected_miami.macro));
-    }
     unsigned active=0;
     if(p->kind==ORIGINAL_SOUND_CHICAGO) active=p->dsp.chicago.voice.active!=0;
     else for(unsigned i=0;i<ORIGINAL_MIAMI_BACKEND_VOICES;i++) active+=p->dsp.miami.voices[i].active!=0;
@@ -117,16 +105,7 @@ int main(int argc,char **argv)
     CHECK(original_sound_init(proj.sound.v[T_303][0],ORIGINAL_SOUND_CHICAGO,0));
     CHECK(original_sound_init(proj.sound.v[T_303][1],ORIGINAL_SOUND_MIAMI,factory));
     CHECK(original_sound_set(proj.sound.v[T_303][0],ORIGINAL_CHICAGO_FX_TYPE,choice));
-    /* Raw sound cells need matching identity tags before project adoption. The
-     * old fixture left stale preset/edit tags and silently retained old DSP. */
-    if (!getenv("X0X_STRESS_SKIP_TAG_REFRESH"))
-        for (int v=0;v<NBASS;v++) engine_bass_sound_refresh(&proj.sound,v);
-    CHECK(engine_bass_sound_validate(&proj.sound)==0);
-    CHECK(original_sound_restore_chicago(&expected_chicago,proj.sound.v[T_303][0]));
-    CHECK(original_sound_restore_miami(&expected_miami,proj.sound.v[T_303][1]));
-    admission_mask=0;verify_admission=1;engine_apply_sound(&proj.sound);audio();
-    CHECK(admission_mask==3u);verify_admission=0;
-    CHECK(engine_bass_preset_index(0)==0 && engine_bass_preset_index(1)==(int)factory);
+    engine_apply_sound(&proj.sound);audio();
     CHECK(engine_bass_bank(0)==0&&engine_bass_bank(1)==1);
     pattern_t *p=&proj.pat[0];
     for(unsigned kit=0;kit<2;kit++) {

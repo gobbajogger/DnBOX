@@ -116,7 +116,7 @@ static void geometry(void)
         fixture(0,bank);sound_t before=proj.sound;
         for(int page=0;page<pg.n;page++) {
             *page_of(V_PART)=page;render();
-            /* The current slab geometry retains the original palette. */
+            /* The current slab geometry and page dots use the original palette. */
             for(int r=0;r<4 && page/4*4+r<pg.n;r++) {
                 int y=24+r*50+24;
                 CHECK(fb[y*240+7]==swap16(r==page%4?SOUND_SELECT:SOUND_FACE));
@@ -124,22 +124,18 @@ static void geometry(void)
             for(int state=SAVE_SAVED;state<=SAVE_FAILED;state++) {
                 ui.dirty=state==SAVE_UNSAVED;save_wait=state==SAVE_QUEUED;ui.save_failed=state==SAVE_FAILED;
                 ui.msg_until=0;draw_header();
-                /* R22 replaces old header bank dots with its level battery.
-                 * Active row geometry/page identity remains checked above. */
-                for(int level=0;level<4;level++) {
-                    host_battery_level=level;draw_header();
-                    CHECK(fb[10*240+219]==swap16(SOUND_GRAY));
-                    for(int cell=0;cell<3;cell++)
-                        CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));
+                for(int i=0;i<2;i++) {
+                    int x=222+i*10;CHECK(x-3>194 && x+3<236);
+                    CHECK(fb[9*240+x]==swap16(i==page/4?SOUND_AMBER:SOUND_FACE));
+                    CHECK(fb[9*240+x+2]!=swap16(SOUND_FACE)); /* antialiased outline */
                 }
-                host_battery_level=3;draw_header();
-                if(state!=SAVE_SAVED)CHECK(fb[3*240+211]==swap16(state==SAVE_FAILED?RGB(255,70,70):C_AMB));
+                if(state!=SAVE_SAVED)CHECK(fb[3*240+237]==swap16(state==SAVE_FAILED?RGB(255,70,70):C_AMB));
                 CHECK(cur_page()==page);CHECK(!memcmp(&before,&proj.sound,sizeof before));
             }
             ui.dirty=save_wait=ui.save_failed=0;
         }
     }
-    puts("PASS original matrix row geometry, R22 battery levels, save states and render side effects");
+    puts("PASS original matrix row geometry, screen-bank dots, save states and render side effects");
 }
 static void envelopes(void)
 {

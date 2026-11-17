@@ -440,14 +440,6 @@ static void test_semantic_rejection(void)
     project_stage.arr.lane[0].part = PART_303A;
     project_stage.arr.lane[0].v = (uint8_t)(PART_303A << 4);
     CHECK(project_validate_stage() == -1);
-    project_stage.arr.lane[0].part = PART_BRK;
-    project_stage.arr.lane[0].v = (uint8_t)(PART_BRK << 4);
-    CHECK(project_validate_stage() == 0);
-    project_stage.arr.lane[0].v |= 1;
-    CHECK(project_validate_stage() == -1);
-    project_stage.arr.lane[0].v = (uint8_t)(PART_BRK << 4);
-    project_stage.arr.lane[0].i = 1;
-    CHECK(project_validate_stage() == -1);
     check_live_unchanged();
 }
 

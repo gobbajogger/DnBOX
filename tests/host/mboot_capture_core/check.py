@@ -45,7 +45,7 @@ def main():
     normal = run([out / 'test-core'])
     run(['cc', *flags, '-g', '-fsanitize=address,undefined', '-fno-omit-frame-pointer',
          '-no-pie', src, test, '-o', out / 'test-core-sanitized'])
-    sanitizer = run([out / 'test-core-sanitized'], env=dict(os.environ, ASAN_OPTIONS='detect_leaks=1'))
+    sanitizer = run([out / 'test-core-sanitized'], env=dict(os.environ, ASAN_OPTIONS='detect_leaks=0'))
     run(['cc', *flags, '-shared', '-fPIC', src, '-o', out / 'core.so'])
     lib = ctypes.CDLL(str(out / 'core.so'))
     lib.mb_capture_sha256.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p]

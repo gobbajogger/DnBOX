@@ -101,38 +101,11 @@ static void brk_seq(int cx)
         close_all();
     }
 }
-/* F5: parameter pages advertise and must edit the same selected step lane. */
-static void parameter_pages(int cx)
-{
-    for(int part=PART_909;part<=PART_BRK;part++) {
-        if(part!=PART_909 && part!=PART_808 && part!=PART_BRK)continue;
-        ui.part=(uint8_t)part;set_view(V_PART);close_all();
-        int voices=part<NKIT?NDRUM:1;
-        for(int voice=0;voice<voices;voice++) {
-            if(part<NKIT)ui.sel[part]=(uint8_t)voice;
-            build_pages();int pages=pg.n;
-            for(int page=0;page<pages;page++) {
-                *page_of(V_PART)=(uint8_t)page;build_pages();close_all();
-                same_picture(cx,"parameter page");
-                for(int w=0;w<16;w++) {
-                    int st=step_of(w);
-                    int before=part<NKIT?sm_get(cur_pat()->drum[part].hit[voice],st):!!(cur_pat()->brk.steps&(1u<<w));
-                    open_cx(cx);tap_pad(w);leave_cx(cx);
-                    int after=part<NKIT?sm_get(cur_pat()->drum[part].hit[voice],st):!!(cur_pat()->brk.steps&(1u<<w));
-                    T(before!=after,"part%d voice%d page%d pad%d toggles step with %s",part,voice,page,w,CXN[cx]);
-                    T(!!(lit_keys&(1u<<WHITE_KEY[w]))==after,"part%d page%d pad%d LED follows step",part,page,w);
-                    close_all();
-                }
-            }
-        }
-    }
-}
 int main(void)
 {
     boot(); tick(300);
     seq_stop(&seq); tick(50);
     for (int cx = CX_NONE; cx < CX_N; cx++) {
-        parameter_pages(cx);
         drum_seq(cx);
         drum_mix(cx);
         brk_seq(cx);
