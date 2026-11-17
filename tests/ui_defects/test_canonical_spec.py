@@ -6,13 +6,31 @@ from PIL import Image
 MODULE=Path(__file__).with_name('canonical_spec.py').resolve()
 s=importlib.util.spec_from_file_location('canonical',MODULE)
 c=importlib.util.module_from_spec(s);s.loader.exec_module(c)
-REL='docs/ui/UI-SOURCE-OF-TRUTH.md'
+REL='docs/design/UI-SOURCE-OF-TRUTH.md'
 OWNER=(Path(__file__).resolve().parents[2]/REL).read_bytes()
-PIN='868957f911acd3d2de67f61db41f2f49a552d0f023d69be67df96a637149add6'
+PIN='c9e69f4885a85e51862ef1092af168760f50075a1daf4222f0be2486e0c649ad'
 class CanonicalTests(unittest.TestCase):
  def fixture(self,p):
   q=p/REL;q.parent.mkdir(parents=True);q.write_bytes(OWNER)
-  return {'path':REL,'sha256':PIN,'bytes':2891}
+  return {'path':REL,'sha256':PIN,'bytes':3051}
+ def test_legacy_owner_path_is_not_current_authority(self):
+  with tempfile.TemporaryDirectory() as t:
+   root=Path(t);d=self.fixture(root)
+   legacy=root/'docs/ui/UI-SOURCE-OF-TRUTH.md';legacy.parent.mkdir(parents=True);legacy.write_bytes(OWNER)
+   d['path']='docs/ui/UI-SOURCE-OF-TRUTH.md'
+   with self.assertRaises(ValueError):c.authenticate(root,d)
+ def test_canonical_file_symlink_to_legacy_path_rejected(self):
+  with tempfile.TemporaryDirectory() as t:
+   root=Path(t);d=self.fixture(root)
+   legacy=root/'docs/ui/UI-SOURCE-OF-TRUTH.md';legacy.parent.mkdir(parents=True);legacy.write_bytes(OWNER)
+   (root/REL).unlink();(root/REL).symlink_to('../ui/UI-SOURCE-OF-TRUTH.md')
+   with self.assertRaises(ValueError):c.authenticate(root,d)
+ def test_canonical_parent_symlink_rejected(self):
+  with tempfile.TemporaryDirectory() as t:
+   root=Path(t);d=self.fixture(root)
+   (root/'docs/design').rename(root/'docs/elsewhere')
+   (root/'docs/design').symlink_to('elsewhere',target_is_directory=True)
+   with self.assertRaises(ValueError):c.authenticate(root,d)
  def test_document_drift_rejected(self):
   with tempfile.TemporaryDirectory() as t:
    p=Path(t);d=self.fixture(p);self.assertEqual(c.authenticate(p,d),PIN)

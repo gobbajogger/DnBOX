@@ -34,7 +34,7 @@ def run():
     receipts = []
     with sync_playwright() as p:
         opts = {'executable_path': os.environ['DNBOX_CHROMIUM_EXECUTABLE']} if os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') else {}
-        browser = p.chromium.launch(headless=True, **opts)
+        browser = p.chromium.launch(headless=True, chromium_sandbox=True, **opts)
         for width, height in [(1280, 900), (390, 844), (844, 390)]:
             ctx = browser.new_context(viewport={'width': width, 'height': height})
             ctx.add_init_script('window.midiCalls=0;navigator.requestMIDIAccess=()=>{window.midiCalls++;throw Error("No device calls expected")};')
