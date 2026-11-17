@@ -583,3 +583,6 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 - `skills/x0x37-workflow/references/stages.md` — supplied removal list; historical instructions, retained in Git history.
 
 M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
+
+## CI
+GitHub Actions runs the Local gate on every PR into `integration/dnbox-consolidated` and every push to that branch. See `docs/lanes/CI.md`.

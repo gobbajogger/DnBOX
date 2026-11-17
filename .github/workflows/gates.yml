@@ -1,0 +1,124 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Local gate on GitHub-hosted runners. No secrets, no deploy, never touches main or gh-pages.
+name: gates
+
+on:
+  pull_request:
+    branches: [integration/dnbox-consolidated]
+  push:
+    branches: [integration/dnbox-consolidated]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Local gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential lua5.1 pkg-config
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Cache JieLi toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dnbox-deps/jieli
+          key: jieli-linux-toolchain-get_toolchain
+
+      - name: Cache AC79 SDK files
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dnbox-deps/ac79
+          key: ac79-sdk-V1.2.14-2026-10-13-3files
+
+      - name: Cache schwung reference trees
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dnbox-deps/schwung
+          key: schwung-9W9-a9e030d9-8W8-1dbef27e-303-1c8e2038-tb3po-c5d6e1df
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-fw
+
+      - name: Prepare public dependencies
+        run: bash .github/ci/prepare-deps.sh
+        env:
+          DNBOX_DEPS: ${{ runner.temp }}/dnbox-deps
+
+      - name: Fetch origin/build/0.0.22
+        run: git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22
+
+      - name: Run Local gate
+        env:
+          JIELI_TOOLCHAIN: ${{ runner.temp }}/dnbox-deps/jieli/toolchain
+          AC79_SDK: ${{ runner.temp }}/dnbox-deps/ac79
+          NINEW9_DIR: ${{ runner.temp }}/dnbox-deps/schwung/schwung-9W9
+          EIGHTW8_DIR: ${{ runner.temp }}/dnbox-deps/schwung/schwung-8W8
+          SCHWUNG303: ${{ runner.temp }}/dnbox-deps/schwung/schwung-303
+          TB3PO_REF: ${{ runner.temp }}/dnbox-deps/schwung/schwung-tb3po/src/dsp/tb3po.c
+          X0X_TEST_JOBS: '4'
+          TMPDIR: ${{ runner.temp }}/dnbox-tmp
+        run: |
+          set -o pipefail
+          mkdir -p "$TMPDIR"
+          set +e
+          tools/dnbox-gate.sh integ
+          rc=$?
+          set -e
+          result=$(grep -E '^DNBOX-GATE RESULT ' build/dnbox-gate/*.log | tail -1 || true)
+          echo "$result"
+          {
+            echo "## DnBOX Local gate"
+            echo
+            echo '```'
+            echo "$result"
+            echo '```'
+            if [ -s "${{ runner.temp }}/dnbox-deps/MISSING.txt" ]; then
+              echo
+              echo "### Missing runner inputs"
+              echo
+              echo '```'
+              cat "${{ runner.temp }}/dnbox-deps/MISSING.txt"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+
+      - name: Upload gate logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnbox-gate-logs
+          path: |
+            build/dnbox-gate/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14

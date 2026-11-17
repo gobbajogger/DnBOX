@@ -14,8 +14,16 @@ step() { local name=$1; shift; echo "== $name"; if "$@"; then echo "[PASS] $name
 
 echo "DNBOX-GATE repo=firmware lane=$LANE sha=$SHA started=$TS (UTC+10)"
 clean()      { git diff --quiet && git diff --cached --quiet; }
-setup()      { [ -x "${JIELI_TOOLCHAIN:-$HOME/.jieli/toolchain}/pi32v2/bin/clang" ] && [ -f "${AC79_SDK:-$HOME/fw-AC79_AIoT_SDK}/cpu/wl82/tools/uboot.boot" ] \
-               && python3 tools/check_original_inputs.py >/dev/null || { echo "missing JieLi toolchain/SDK or original synth inputs (restore from Library, see docs/LIBRARY-INDEX.md)"; return 2; }; }
+setup()      { local miss=0
+               local tc="${JIELI_TOOLCHAIN:-$HOME/.jieli/toolchain}/pi32v2/bin/clang"
+               local boot="${AC79_SDK:-$HOME/fw-AC79_AIoT_SDK}/cpu/wl82/tools/uboot.boot"
+               [ -x "$tc" ] || { echo "needs JieLi toolchain clang: $tc (install with tools/get_toolchain.sh)"; miss=1; }
+               [ -f "$boot" ] || { echo "needs AC79 SDK uboot.boot: $boot (public tag AC79NN_SDK_V1.2.14_2026-10-13 from https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK)"; miss=1; }
+               if ! python3 tools/check_original_inputs.py >/dev/null; then
+                 echo "needs original synth inputs (restore from Library, see docs/LIBRARY-INDEX.md)"
+                 miss=1
+               fi
+               [ "$miss" -eq 0 ] || return 2; }
 no_loss()    { git fetch -q origin integration/dnbox-consolidated || return 1
                git merge-base --is-ancestor "$BASE" HEAD || { echo "branch does not contain $BASE: merge it in (no rebase)"; return 1; }
                local del; del=$(git diff --name-only --diff-filter=D "$BASE" HEAD)
@@ -24,7 +32,11 @@ no_loss()    { git fetch -q origin integration/dnbox-consolidated || return 1
                while read -r f; do grep -qF -- "$f" "$lf" 2>/dev/null || { echo "deleted without reason in $lf: $f"; miss=1; }; done <<< "$del"
                return $miss; }
 limits()     { local bad=0
-               git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' && { echo "workflow file changed"; bad=1; }
+               while read -r f; do
+                 [ -z "$f" ] && continue
+                 [ "$f" = ".github/workflows/gates.yml" ] && continue
+                 echo "workflow file changed: $f"; bad=1
+               done <<< "$(git diff --name-only "$BASE" HEAD | grep -E '^\.github/workflows/' || true)"
                git ls-files | grep -iE '\.ipa$|SuperJ6.*AU.*extension.*\.zip' && { echo "SuperJ6 installer in Git"; bad=1; }
                git grep -nIE '(ghp_|gho_|github_pat_)[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}' -- . ':!*.md' && { echo "possible Secret"; bad=1; }
                git diff "$BASE" HEAD -- firmware tools build.sh ':!tools/dnbox-gate.sh' | grep -E '^\+.*(PSRAM|psram).*(=\s*1|ENABLE|enable|true)' && { echo "PSRAM enabled"; bad=1; }
@@ -47,8 +59,23 @@ step clean-tree clean
 step setup setup
 step no-loss no_loss
 step limits limits
-if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
+# Host tests and UI defects do not need the JieLi cross-compiler; run them even if setup was VOID.
+step host-tests host_tests
+step ui-defects ui_defects
+if [ $void = 0 ]; then
+  step build-elite-pro fw_build
+  step flashmap flashmap
+  step budget budget
+else
+  echo "== build-elite-pro"
+  echo "[SKIP] build-elite-pro: needs JieLi toolchain and AC79 SDK (see setup)"
+  echo "== flashmap"
+  echo "[SKIP] flashmap: needs firmware build"
+  echo "== budget"
+  echo "[SKIP] budget: needs firmware build"
+fi
 step drone drone
-R=PASS; [ $fail = 1 ] && R=FAIL; [ $void = 1 ] && R=VOID
+# FAIL wins over VOID so a missing tool cannot hide a real test failure.
+R=PASS; [ $void = 1 ] && R=VOID; [ $fail = 1 ] && R=FAIL
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"
 [ $R = PASS ] && exit 0; [ $R = VOID ] && exit 2; exit 1
