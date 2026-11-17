@@ -932,6 +932,7 @@ static int in_pattern(pref_t r)
 }
 
 /* a knob's label: mixer refs name their part */
+static int name_is(const x0x_param_t *d, const char *n);
 static const char *pref_name(pref_t r)
 {
     if(r.kind==R_SECTION)return GLOBAL_SECTIONS[r.a<6?r.a:0];
@@ -951,6 +952,8 @@ static const char *pref_name(pref_t r)
                                            {"A RATE", "B RATE"}, {"A DIR", "B DIR"}, {"A TRANSP", "B TRANSP"}};
     static const char *const CHN[MX_NPARAMS] = {"LEVEL", "REV", "DLY", "PAN", "CUT"};
     const x0x_param_t *d = pref_desc(r);
+    /* Presentation only: retain the native P.Dpth identity and pitch-sweep glyph. */
+    if(r.kind==R_ENG && r.a==T_909 && name_is(d,"P.Dpth"))return "Depth";
     static const char *const SEQN[6] = {"LENGTH", "RATE", "LENGTH", "RATE", "DIRECTION", "TRANSP"};
     if (r.kind == R_ENG && r.a == T_303)
         return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -5075,6 +5078,8 @@ static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
                            (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
 }
 
+#include "ui_glyph_renderer.h"
+
 /* corner coverage of a radius-r quarter circle, pixel (x, y) of the r x r corner square,
  * 4 x 4 supersampled; and of its 1-px ring (for outlines). Constant data in flash, packed: the
  * r x r square of radius r starts at CORNER_OFF[r]. The values are those that the old start-up
@@ -5827,6 +5832,7 @@ static UI_DRAW void matrix_knob_caption(char *text, int page)
     }
 }
 
+static UI_DRAW void draw_drum_voice(int band);
 static UI_DRAW void draw_part_sound(int band)
 {
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
@@ -6341,14 +6347,26 @@ static UI_DRAW void draw_mix(int band)
     if (band == 0 && !master && !wave) {               /* channel strips */
         for (int pos = 0; pos < NPARTS; pos++) {
             p = part_at(pos);
-            int x = 6 + pos * 38, lvl = proj.sound.v[T_MIX][p][0], pk = eng_peak[p] * 64 / 32768;
+            pref_t level_ref=PR(R_ENG,T_MIX,p,MX_LEVEL);
+            int x = 3 + pos * 40, lvl = pref_get(level_ref);
+            /* Match the selected knob card's effective motion/lock value. */
+            if(p==ui.mixsel) {
+                int effective=lock_step()>=0?lock_of(level_ref,lock_step()):motion_now(level_ref);
+                if(effective>=0)lvl=effective;
+            }
+            int pk = eng_peak[p] * 24 / 32768;
             int selected=cur_page()==0 && p==ui.mixsel;
-            surface_panel(x-2,0,30,BAND_H,selected,selected?dim(PART_COL[p],3):SOUND_FACE,
-                          selected?PART_COL[p]:SOUND_EDGE,SOUND_SIDE);
-            rbox(x + 10, 4, 6, 64, 3, C_LINE);
-            if (pk > 1)
-                rbox(x + 10, 68 - pk, 6, pk, 3, part_muted(p) ? C_DIM : PART_COL[p]);
-            rbox(x + 4, 67 - lvl * 64 / 127, 18, 3, 1, C_WHITE);
+            char number[16], unit[8];
+            uint16_t ink=part_muted(p)?SOUND_GRAY:SOUND_WHITE;
+            night_panel(x,0,38,BAND_H,selected);
+            text_c(x+19,4,&FONT_T,part_s(p),ink);
+            if(selected)cv_text(x+29,16,&FONT_T,"1",SOUND_GRAY);
+            rbox(x+16,17,6,26,3,C_LINE);
+            if(pk>0)rbox(x+16,42-pk,6,pk,2,part_muted(p)?C_DIM:PART_COL[p]);
+            rbox(x+10,41-lvl*24/127,18,3,1,ink);
+            pref_value_of(level_ref,lvl,number,unit);
+            text_c(x+19,47,&FONT_S,number,ink);
+            text_c(x+19,60,&FONT_T,unit,SOUND_GRAY);
         }
     }
     if (band == 0) {                                   /* the master's gain reduction (MASTER and WAVE) */
@@ -6377,10 +6395,6 @@ static UI_DRAW void draw_mix(int band)
             cv_text(9,49,&FONT_XS,t,plat_cpu_pct()>85u?C_AMB:C_GRAY);
             if(engine_guard_active())text_r(229,49,&FONT_XS,"GUARD",C_AMB);
             return;
-        }
-        for (int pos = 0; pos < NPARTS && !master && !wave; pos++) { /* strip names */
-            p = part_at(pos);
-            text_c(6 + pos * 38 + 13, 0, &FONT_XS, part_s(p), part_muted(p) ? C_LINE : PART_COL[p]);
         }
         night_panel(0,14,118,31,0);night_panel(120,14,120,31,0);
         night_panel(0,46,240,22,0);
@@ -6971,7 +6985,9 @@ static UI_DRAW void draw_main(void)
             draw_song(band);
         else if (ui.view == V_PERF)
             draw_perf(band);
-        else if (ui.view == V_PART && (is_drum() || is_303()))
+        else if (ui.view == V_PART && is_drum())
+            draw_drum_voice(band);
+        else if (ui.view == V_PART && is_303())
             draw_part_sound(band);
         else if (is_drum())
             draw_drum(band);
@@ -8131,6 +8147,16 @@ static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint
 }
 static UI_DRAW int dg_tail_px(float ms){if(ms<0)ms=0;if(ms>4000)ms=4000;return 2+(int)(23.0f*fm_sqrtf(ms/4000.0f)+.5f);}
 #define DG_BACK_MS 300u
+/* Shared by the compact and R22 renderers: one existing timestamp per voice. */
+static uint32_t dg_last[2][NDRUM+1];
+static UI_DRAW float dg_live_back(pref_t r,int live)
+{
+    uint32_t tnow=plat_ms();int ki=r.a==T_808,vi=r.b>NDRUM?NDRUM:r.b;
+    if(live)dg_last[ki][vi]=tnow|1u;
+    else if(dg_last[ki][vi] && tnow-dg_last[ki][vi]<DG_BACK_MS)
+        return (float)(tnow-dg_last[ki][vi])/(float)DG_BACK_MS;
+    return 1.0f;
+}
 static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
 {
     const x0x_param_t *d=pref_desc(r);
@@ -8140,13 +8166,9 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     int top=gy+1,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
     /* after the voice ends, the idle glyph comes back over DG_BACK_MS (ink fades in,
      * the wave regrows) instead of snapping from the last live frame */
-    static uint32_t dg_last[2][NDRUM+1];
-    uint32_t tnow=plat_ms(); float back=1.0f; int ki=r.a==T_808,vi=r.b>NDRUM?NDRUM:r.b;
-    if(live) dg_last[ki][vi]=tnow|1u;
-    else if(dg_last[ki][vi] && tnow-dg_last[ki][vi]<DG_BACK_MS){
-        back=(float)(tnow-dg_last[ki][vi])/(float)DG_BACK_MS;
-        if(role==DG_DECAY||role==DG_NTAIL||role==DG_BDSWEEP) col=blend(C_LINE,col,(int)(16.0f*back));   /* their live end is dim */
-    }
+    float back=dg_live_back(r,live);
+    if(!live && back<1.0f && (role==DG_DECAY||role==DG_NTAIL||role==DG_BDSWEEP))
+        col=blend(C_LINE,col,(int)(16.0f*back));
     if(q<0)q=0; if(q>1)q=1;
     switch(role){
     case DG_DECAY: {                             /* DECAY / TAIL: the tail, as long as the real time */
@@ -8287,6 +8309,8 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     }
 }
 
+#include "ui_drum_voice.inc"
+
 static uint32_t knobs_sig(void)
 {
     uint32_t h = 2166136261u, i;
@@ -8306,6 +8330,7 @@ static uint32_t knobs_sig(void)
         MIXIN(engine_bass_preset_pending(bidx()));
         MIXIN(engine_bass_requested_bank(bidx())); MIXIN(engine_bass_requested_preset(bidx()));
     }
+    MIXIN(ui_ease_sig());
     MIXIN(ui.view);
     MIXIN(ui.part);
     MIXIN(division_pad_owner());
@@ -8427,7 +8452,10 @@ static UI_DRAW void draw_knobs(void)
     if (ui.view == V_PART && (is_drum() || is_303())) {
         /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
         cv_begin(240, KNOB_H, C_BLACK);
-        if (ui.overlay==O_NONE && !ui.help) draw_part_sound(2);
+        if (ui.overlay==O_NONE && !ui.help) {
+            if (is_drum()) draw_drum_voice(2);
+            else draw_part_sound(2);
+        }
         cv_commit_knobs(3);
         last_sig = 0;
         return;
@@ -8484,13 +8512,14 @@ static UI_DRAW void draw_knobs(void)
         const x0x_param_t *d = pref_desc(r);
         char num[16], unit[8];
         int cx = i * 60 + 30, val, touched = ui.touched == i;
+        int mixer_identity=ui.view==V_MIX && pgi==0 && r.kind==R_ENG && r.a==T_MIX && r.c==MX_LEVEL;
         uint16_t col = drum_mix_page() >= 0 ? PART_COL[drum_mix_page()] : part_col();   /* MIX: 909 in the 909's */
         if (i)
             cv_rect(i * 60, 14, 1, 50, C_LINE);
         if (!d)
             continue;
         /* Selected control keeps the shared raised face; value/lock semantics below are unchanged. */
-        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
+        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, mixer_identity?part_s(r.b):caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
         val = pref_get(r);
         if (lock_step() >= 0) {                        /* a held step: its own value (amber mark: locked) */
             int lv = lock_of(r, lock_step());
@@ -8503,6 +8532,13 @@ static UI_DRAW void draw_knobs(void)
             dot(i * 60 + 52, 17, 2, mv >= 0 ? C_WHITE : C_DIM);
             if (mv >= 0)
                 val = mv;
+        }
+        if(mixer_identity) {
+            /* Level's single readout is in the selected upper strip. Keep
+             * encoder zero and its lock/motion marks, not a duplicate control. */
+            glyph_identity(NPARTS,r.b,cx-18,col);
+            text_c(cx,55,&FONT_T,"1",C_GRAY);
+            continue;
         }
         if(drum_strip_role(r)==DG_LEVEL) {
             drum_strip_glyph(r,val,cx-13,28,col);
@@ -8674,6 +8710,7 @@ static void leds(void)
 /* ===================================================================== frame === */
 X0X_COLD void ui_init(void)
 {
+    ui_ease_reset();
     part_header_snapshot_valid = 0;
 #if BOARD_SMK37
     smc_ui_cancel();
@@ -8956,6 +8993,7 @@ void ui_frame(void)
     pattern_sound_tick();
     engine_note_lock_refresh();
     device_bt_save();
+    ui_ease_tick();
     autosave();
     if (!project_busy)
         perf_test_tick();

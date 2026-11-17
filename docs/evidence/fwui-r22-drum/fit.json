@@ -1,0 +1,26 @@
+{
+  "elite": {
+    "app_bin_bytes": 551232,
+    "app_code_capacity": 552672,
+    "xip_free_bytes": 1440,
+    "pool_used_bytes": 335244,
+    "pool_capacity": 344064,
+    "pool_reserve": 8192,
+    "pool_margin_bytes": 628,
+    "elf_sha256": "c9e41edba27d7735895ebc7c64fec318490c65ddfa77ec414f7d2c226ca843c4",
+    "bin_sha256": "95d03ff9e194d112b436712b1d07d096d7ab9115216dc6a32d5cb034fe19747d",
+    "fit": "PASS"
+  },
+  "pro": {
+    "app_bin_bytes": 551220,
+    "app_code_capacity": 552672,
+    "xip_free_bytes": 1452,
+    "pool_used_bytes": 335244,
+    "pool_capacity": 344064,
+    "pool_reserve": 8192,
+    "pool_margin_bytes": 628,
+    "elf_sha256": "15b8428a49aa4f3050d57eeb0b2067471d07e66bb76be80e47fbfdfeed1da41b",
+    "bin_sha256": "e4be765cbbc132c9058e524b380affda04bf6fb0bf1cd793a71a13a57b804dc0",
+    "fit": "PASS"
+  }
+}
