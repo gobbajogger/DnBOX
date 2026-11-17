@@ -13,6 +13,7 @@ from pathlib import Path
 from instrument import instrument, HERE
 from detectors import inspect_screen
 from run import parse_trace, write
+from screen_walk import run as walk_screens, require_drum_source
 
 def main():
     p = argparse.ArgumentParser()
@@ -21,17 +22,17 @@ def main():
     a = p.parse_args()
     out = a.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     repo = Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], cwd=HERE, text=True).strip())
-    with tempfile.TemporaryDirectory(prefix='dnbox-ui-judge-') as tmp:
+    with tempfile.TemporaryDirectory(prefix='dnbox-ui-judge-', dir=out) as tmp:
         work = Path(tmp) / 'src'; work.mkdir()
         archive = subprocess.run(['git', 'archive', a.rev], cwd=repo, check=True, stdout=subprocess.PIPE).stdout
         subprocess.run(['tar', '-x', '-C', str(work)], input=archive, check=True)
-        if not (work / 'firmware/src/app/ui_drum_voice.inc').exists():
-            # The first-slice detectors target the R22 drum-voice screen. Until the
-            # fwui lane lands it, there is no such screen in this tree to judge.
-            print('ui-defects: no R22 drum-voice screen (firmware/src/app/ui_drum_voice.inc) in this tree; '
-                  'first-slice render not applicable')
-            write(out / 'judgement.json', {'applicable': False})
-            return 0
+        try:
+            walk_screens(work, out / 'screens')
+            require_drum_source(work)
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            write(out / 'judgement.json', {'status': 'FAIL', 'error': str(error)})
+            print(f'ui-defects: FAIL: {error}')
+            return 1
         instrument(work)
         env = os.environ.copy()
         env.update({'SMC_UI_OUT': str(out / 'host'), 'SMC_UI_TEST_FILE': 'tests/host/first_slice_capture.c'})
