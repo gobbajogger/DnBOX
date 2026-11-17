@@ -48,6 +48,24 @@ def instrument(root):
     a='        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
     s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
 
+    # Full-row drum envelopes are audited as real curve pixels, never exempted
+    # from the glyph contract. Snapshot only the curve: baseline/text cannot
+    # satisfy a missing-curve negative.
+    p=root/'firmware/src/app/ui.c';s=p.read_text()
+    a='    for(int x=1;x<=214;x++) {'
+    s=once(s,a,'''    uint16_t curve_before[CV_MAX];pixel_snapshot(curve_before);
+    if(getenv("PIXEL_MUTATE_SHIFT")){x0+=80;prevx+=80;}
+    if(!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE"))
+'''+a)
+    a='    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
+    s=once(s,a,'''    if(getenv("PIXEL_MUTATE_SHIFT"))x0-=80;
+    uint32_t curve_owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
+    if(geo_enabled&&(getenv("PIXEL_MUTATE_BLANK")||getenv("ENVELOPE_MUTATE_BLANK")))memcpy(cv_px,curve_before,cv_w*cv_h*sizeof *curve_before);
+    pixel_finish(curve_before,curve_owner);
+    if(geo_enabled&&getenv("PIXEL_MUTATE_OVERPAINT"))memcpy(cv_px,curve_before,cv_w*cv_h*sizeof *curve_before);
+    if(geo_enabled&&!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE")){if(presence_nglyph>=256)exit(2);unsigned *q=presence_glyph[presence_nglyph++];q[0]=r.kind;q[1]=r.a;q[2]=r.b;q[3]=r.c;}
+'''+a);p.write_text(s)
+
     helper=root/'tests/ui_defects/first_slice/instrument.py'
     spec=importlib.util.spec_from_file_location('first_slice_wrappers',helper);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()

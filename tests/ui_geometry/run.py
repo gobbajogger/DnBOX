@@ -22,7 +22,7 @@ def run(source,output):
     env=dict(os.environ,SMC_UI_OUT=str(output/'host'),SMC_UI_TEST_FILE='tests/ui_geometry/capture.c')
     env.pop('GEOMETRY_MUTATE',None)
     env.pop('AUDIT_MUTATE_SKIP',None);env.pop('AUDIT_MUTATE_ZERO',None)
-    for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT'):env.pop(key,None)
+    for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT','ENVELOPE_MUTATE_CURVE','ENVELOPE_MUTATE_BLANK'):env.pop(key,None)
     for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP'):env.pop(key,None)
     with (output/'render.log').open('w') as log:
         result=subprocess.run(['sh','tests/host/smc_ui_test.sh'],cwd=work,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
@@ -62,7 +62,7 @@ def run(source,output):
     report['glyphPixels']=pix
     if len(pix)!=1 or int(pix[0][0])==0 or int(pix[0][1])+int(pix[0][2])!=0:report['status']='FAIL'
     else:
-        for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT'):
+        for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT','ENVELOPE_MUTATE_CURVE','ENVELOPE_MUTATE_BLANK'):
             me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
             lp=output/(key.lower()+'.log')
             with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
@@ -70,6 +70,13 @@ def run(source,output):
             pm=re.findall(r'^GLYPH_PIXELS checks=(\d+) missing=(\d+) damaged=(\d+)$',lp.read_text(),re.M)
             report[key]={'exit':mrun.returncode,'glyphPixels':pm}
             if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])+int(pm[0][2])==0:report['status']='FAIL'
+            if key.startswith('ENVELOPE_'):
+                expected={prefix+f'view-01-part-00-voice-{voice:02d}-page-01' for voice in (0,1) for prefix in ('','edge-0-','edge-1-')}
+                actual=set(re.findall(r'^GLYPH_PIXEL_MISSING screen=(\S+)',lp.read_text(),re.M))
+                report[key]['expectedGraphFailures']=sorted(expected)
+                report[key]['actualGraphFailures']=sorted(actual)
+                if actual!=expected:report['status']='FAIL'
+
     for key in ('AUDIT_MUTATE_SKIP','AUDIT_MUTATE_ZERO'):
         me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None);lp=output/(key.lower()+'.log')
         with lp.open('w') as log:

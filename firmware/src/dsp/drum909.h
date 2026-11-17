@@ -133,3 +133,14 @@ int drum909_get(const drum909_t *d, int voice, int i);
 int drum909_active(const drum909_t *d);
 
 void drum909_all_off(drum909_t *d);
+
+/* Read-only BD/SD main amplitude observation, at the serialized audio-owner
+ * boundary. Caller-owned output must be disjoint from d. No held-note ADSR,
+ * elapsed-hit timer, pitch/click/noise role or final SD VCA gain is implied. */
+typedef struct {
+ float raw_level, target_decay_ms, target_hold_ms;
+ float ramp_start, ramp_end, ramp_samples, ramp_ratio;
+ int32_t hold_left, ramp_left, ramp_ticks;
+ unsigned active, hold_active, ramp_valid;
+} drum909_amp_snapshot;
+int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out);

@@ -1411,14 +1411,21 @@ static int track_param_rank(const x0x_param_t *d)
 
 /* a drum track: its sound, four knobs a page (its DRIVE and DIST: SEL's list; its level, pan and sends:
  * MIX's 909 MIX / 808 MIX page) */
+/* Exact admitted main-amp controls, not Attack labels (BD Attack is click gain). */
+static int drum_amp_ref(pref_t r)
+{ return r.kind==R_ENG && r.a==T_909 &&
+    ((r.b==DR_BD && r.c==2) || (r.b==DR_SD && r.c==3)); }
 X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
 {
     const char *nm = engine_voice_name(t, v);
     pref_t snd[NPARAMS_MAX];
     int rank[NPARAMS_MAX];
     int n = 0, i, j;
+    pref_t amp=NONE;
     for (i = 0; i < engine_nparams(t, v) && n < NPARAMS_MAX; i++) {
         const x0x_param_t *d = engine_param(t, v, i);
+        pref_t r=PR(R_ENG,t,v,i);
+        if(drum_amp_ref(r)){amp=r;continue;}
         if (name_is(d, "Drive") || name_is(d, "Dist"))
             more(emit, PR(R_ENG, t, v, i));
         else if (!name_is(d, "Level") && !name_is(d, "Pan") && !name_is(d, "Rev") && !name_is(d, "Dly")) {
@@ -1439,6 +1446,7 @@ X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
     emit->group = GR_TRACK;
     for (i = 0; i < n; i += 4)
         add_page(emit, nm, snd[i], i + 1 < n ? snd[i + 1] : NONE, i + 2 < n ? snd[i + 2] : NONE, i + 3 < n ? snd[i + 3] : NONE);
+    if(amp.kind!=R_NONE)add_page(emit,"AMP ENVELOPE",amp,NONE,NONE,NONE);
 }
 
 /* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
@@ -7286,8 +7294,30 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
  * Chicago D/R are RC time constants: sample five tau, never quadratic easing.
  * Miami release uses a full-scale slope; its duration from sustain is s*R.
  * The hold interval is illustrative. No persistent renderer state is needed. */
+/* Recognize actual envelope controls, not a label substring. Mixed rows must
+ * first be partitioned by the page builder so non-envelope controls are kept. */
+static unsigned adsr_stage_slots(int p,int slot[4])
+{
+    if(slot)for(int i=0;i<4;i++)slot[i]=-1;
+    if(ui.view!=V_PART || !is_303() || p<0 || p>=pg.n)return 0;
+    int bank=engine_bass_sound_bank(&proj.sound,bidx());
+    int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1;
+    if(first<0)return 0;
+    unsigned present=0;
+    for(int k=0;k<4;k++) {
+        pref_t r=pg.r[p][k];if(r.kind==R_NONE)continue;
+        if(r.kind!=R_ENG || r.a!=T_303 || r.b!=bidx() || r.c<first || r.c>first+3)return 0;
+        unsigned stage=(unsigned)(r.c-first);
+        if(present&(1u<<stage))return 0;
+        present|=1u<<stage;if(slot)slot[stage]=k;
+    }
+    return present;
+}
 typedef struct {
     float attack,decay,sustain,release;
+    float live_level;
+    unsigned live_stage,live_gate,live_active,present;
+    int slot[4];
     int curved,release_curve,gate,enabled;
 } ui_adsr_t;
 
@@ -7295,8 +7325,18 @@ static void adsr_values(ui_adsr_t *e,int p)
 {
     int i;
     float *time[3]={&e->attack,&e->decay,&e->release};
-    e->sustain=(float)matrix_value(pg.r[p][2])/127.0f;
+    *e=(ui_adsr_t){0};e->present=adsr_stage_slots(p,e->slot);
+    if(!e->present)return;
+    e->sustain=e->slot[2]>=0?(float)matrix_value(pg.r[p][e->slot[2]])/127.0f:0;
     e->curved=e->release_curve=e->gate=0;e->enabled=1;
+    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_JUNO) {
+        juno6_envelope_snapshot v;
+        if(!engine_juno_envelope_view(bidx(),&v)){e->enabled=0;return;}
+        e->attack=v.adsr[0];e->decay=v.adsr[1];e->sustain=v.adsr[2];e->release=v.adsr[3];
+        e->live_level=v.level;e->live_stage=v.stage;e->live_gate=v.gate;e->live_active=v.active;
+        e->curved=e->release_curve=e->enabled=3; /* compact Juno linear A/D, geometric R */
+        return;
+    }
     if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_CHICAGO) {
         /* Original Chicago ENVELOPE slots 7..10 (A, D, S, R): stage-normalised
          * compiled native controls include each macro's scaling; D/R are RC. */
@@ -7306,7 +7346,8 @@ static void adsr_values(ui_adsr_t *e,int p)
          * scaling included); q127 if the runtime view is unavailable. */
         float native[4]={0,0,0,0};unsigned gate=0;
         int nv=engine_bass_adsr_view(bidx(),native,&gate);
-        if(nv){e->sustain=native[2];e->gate=(int)gate;}
+        if(!nv){e->enabled=0;return;}
+        e->sustain=native[2];e->gate=(int)gate;
         for(i=0;i<3;i++) {
             float x=nv?native[i==2?3:i]:(float)matrix_value(pg.r[p][i==2?3:i])/127.0f; x*=x; x*=x;
             *time[i]=i==0?13.0f*x+.001f:i==1?25.0f*x+.001f:25.0f*x+.002f;
@@ -7343,22 +7384,24 @@ static float adsr_release(const ui_adsr_t *e,float u)
     return adsr_fall(e->release_curve,e->sustain,0.0f,u);
 }
 
-/* The envelope graph lives on the PART page itself, above the envelope row,
- * and follows the live control values. Original Chicago ENVELOPE only. */
-/* Any row whose four controls are the original A/D/S/R set gets the graph,
- * active or not. Chicago: ENVELOPE (slots 7..10, one macro set that drives
- * both VCF and VCA EGs). The original Miami profile has no A/D/S/R row. */
+/* Every admitted A/D/S/R tuple gets the full-row graph, active or not.
+ * Chicago7..10 is the original macro set. Compact Juno5..8 controls one
+ * shared amplitude/filter envelope; it is not two independent envelopes.
+ * Miami has no A/D/S/R row; Synth One/full SuperJ6 roles remain unadmitted. */
 static UI_DRAW int adsr_row(int p)
-{
-    return ui.view==V_PART && is_303() && p>=0 && p<pg.n &&
-           engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_CHICAGO &&
-           pg.r[p][0].kind==R_ENG && pg.r[p][0].c==7 && pg.r[p][1].c==8 &&
-           pg.r[p][2].c==9 && pg.r[p][3].c==10;
-}
+{ return adsr_stage_slots(p,0)!=0 || (p>=0 && p<pg.n && drum_amp_ref(pg.r[p][0]) &&
+    pg.r[p][1].kind==R_NONE && pg.r[p][2].kind==R_NONE && pg.r[p][3].kind==R_NONE); }
 /* Level of one original stage at time t (s): attack toward 1.3 clipped at 1,
  * decay toward sustain, release toward zero (original_vca_tick). */
 static float adsr_original_level(const ui_adsr_t *e,int stage,float t)
 {
+    if(e->enabled==3) {
+        if(stage==0)return fm_minf(1.0f,t/e->attack);
+        if(stage==1)return fm_maxf(e->sustain,1.0f-(1.0f-e->sustain)*t/e->decay);
+        float step=1.0f-1.0f/fm_maxf(1.0f,e->release*BASS303_SR);
+        float level=e->sustain*fm_powf(step,t*BASS303_SR);
+        return level<.00001f?0:level;
+    }
     if(stage==0) return fm_minf(1.0f,1.3f-1.3f*fm_expf(-t/e->attack));
     if(stage==1) return e->sustain+(1.0f-e->sustain)*fm_expf(-t/e->decay);
     return e->sustain*fm_expf(-t/e->release);
@@ -7373,6 +7416,22 @@ static void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],float dur[
     dur[0]=e->attack*1.466337f;                            /* ln(1.3/0.3) */
     dur[1]=e->decay*4.6051702f;                            /* ln(100) */
     dur[2]=e->sustain>0.04f?e->release*fm_logf(e->sustain/0.04f):0.0f;
+    if(e->enabled==3) {
+        dur[0]=e->attack;dur[1]=e->decay;
+        float step=1.0f-1.0f/fm_maxf(1.0f,e->release*BASS303_SR);
+        dur[2]=e->sustain>.00001f && step>0 ? fm_logf(.00001f/e->sustain)/fm_logf(step)/BASS303_SR : 0;
+    }
+    if(e->present!=15u) {
+        int w[4]={0,0,0,0},count=0,last=-1,used=0;
+        for(k=0;k<3;k++){int stage=k==2?3:k;if(e->present&(1u<<stage)){sum+=dur[k];count++;last=stage;}}
+        w[2]=(e->present&4u)?(count?42:width):0;
+        int space=width-w[2],free=space-count*3;
+        for(k=0;k<3;k++){int stage=k==2?3:k;if(e->present&(1u<<stage)){
+            w[stage]=3+(sum>0?(int)(free*dur[k]/sum):free/count);used+=w[stage];}}
+        if(last>=0)w[last]+=space-used;
+        xs[0]=x0;for(k=0;k<4;k++)xs[k+1]=xs[k]+w[k];
+        return;
+    }
     for(k=0;k<3;k++) sum+=dur[k];
     /* Each timed stage keeps 3 px so a short stage never vanishes. */
     int w[3],free=span-9,used=0;
@@ -7381,28 +7440,77 @@ static void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],float dur[
     if(w[1]<3) { w[2]-=3-w[1]; w[1]=3; }
     xs[0]=x0; xs[1]=x0+w[0]; xs[2]=xs[1]+w[1]; xs[3]=xs[2]+hold; xs[4]=x0+width;
 }
+/* Same full-row visual component for a real finite exponential drum decay.
+ * Fixed time domain (the parameter maximum) makes decay edits visible in the
+ * curve, not merely its label. The live cursor uses actual hold/ramp counters,
+ * not the editable target duration; the separate meter shows raw EG level.
+ * BD's real fixed hold is a plateau, never labelled sustain or attack. */
+static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
+{
+    pref_t r=pg.r[p][0];drum909_amp_snapshot v;
+    if(!engine_drum909_amp_view(r.b,&v))return;
+    int x0=13,y0=y+h-5,top=y+22,edited=active && ui.touched==0 &&
+        (int32_t)(ui.touch_until-plat_ms())>0;
+    uint16_t col=active?matrix_col():SOUND_WHITE,ink=edited?SOUND_INK:col;
+    float max_ms=0;
+    if(!drum909_param_si(r.b,r.c,127,&max_ms) || max_ms<=0)return;
+    float horizon=max_ms+v.target_hold_ms,hold=v.target_hold_ms,decay=v.target_decay_ms;
+    int prevx=x0,prevy=top;
+    cv_rect(x0,y0-off,215,1,SOUND_SELECT_SIDE);
+    for(int x=1;x<=214;x++) {
+        float ms=horizon*x/214.0f;
+        float level=ms<=hold?1.0f:ms>=hold+decay?0.0f:fm_expf(fm_logf(.00001f)*(ms-hold)/decay);
+        int yy=y0-(int)(level*(y0-top)+.5f);
+        cv_line(prevx,prevy-off,x0+x,yy-off,ink);prevx=x0+x;prevy=yy;
+    }
+    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);
+    put_s(put_i(put_s(label,"D "),(matrix_value(r)*100+63)/127),"%");
+    text_c(75,y+8-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
+    put_s(put_s(label,num),unit);
+    int vx=232-tw(&FONT_T,label);
+    cv_text(vx,y-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
+    text_r(vx-5,y-off,&FONT_T,"DECAY",edited?SOUND_INK:SOUND_GRAY);
+    if(edited)cv_rect(x0,y0+2-off,215,2,SOUND_INK);
+    if(v.active && (v.hold_active || v.ramp_valid)) {
+        float level=fm_maxf(0,fm_minf(1,v.raw_level));
+        /* Current BD trigger fixes the hold at 40ms; SD has none. Ramp
+         * left counts the next sample, so subtract one for last-returned cur.
+         * Target edits never retime the sounding note. */
+        float live_hold=r.b==DR_BD?40.0f:0.0f;
+        float elapsed=v.hold_active?live_hold-v.hold_left/44.1f:
+            live_hold+fm_maxf(0,(float)(v.ramp_ticks-v.ramp_left-1))/44.1f;
+        int px=x0+(int)(214*fm_minf(1,fm_maxf(0,elapsed/horizon))+.5f);
+        int py=y0-(int)(level*(y0-top)+.5f);
+        cv_rect(px,top-off,1,y0-top,SOUND_DIM);cv_rect(px-1,py-1-off,3,3,SOUND_INK);
+        cv_rect(9,top-off,1,y0-top+1,SOUND_DIM);cv_rect(7,py-off,5,1,SOUND_INK);
+    }
+}
 static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
 {
+    if(drum_amp_ref(pg.r[p][0])){draw_drum_amp_inline(p,active,y,h,off);return;}
     static const char *const names[4]={"ATTACK","DECAY","SUSTAIN","RELEASE"};
     ui_adsr_t e;
-    int k,edited=active && ui.touched>=0 && ui.touched<4 &&
-        (int32_t)(ui.touch_until-plat_ms())>0?ui.touched:-1;
+    int k,touched=active && ui.touched>=0 && ui.touched<4 &&
+        (int32_t)(ui.touch_until-plat_ms())>0?ui.touched:-1,edited=-1;
     int x0=13,y0=y+h-5,top=y+22,xs[5];
     uint16_t col=active?matrix_col():SOUND_WHITE,hi=SOUND_INK;   /* inactive: the inactive-row ink */
     float dur[3];
     adsr_values(&e,p);
+    if(!e.enabled)return;
+    for(k=0;k<4;k++)if(e.slot[k]>=0 && e.slot[k]==touched)edited=k;
     adsr_layout(&e,x0,214,xs,dur);
     int ys=y0-(int)(e.sustain*(y0-top)+0.5f);
     if(edited>=0) { /* the selected or turned stage and its live value */
         char num[16],unit[8],t[32];
-        pref_value_of(pg.r[p][edited],matrix_value(pg.r[p][edited]),num,unit);
+        pref_value_of(pg.r[p][e.slot[edited]],matrix_value(pg.r[p][e.slot[edited]]),num,unit);
         put_s(put_s(put_s(put_s(t,names[edited])," "),num),unit);
         text_r(232,y-off,&FONT_T,t,hi);
     }
     cv_rect(x0,y0-off,215,1,SOUND_SELECT_SIDE);
-    cv_line(xs[3],top-off,xs[3],ys-2-off,SOUND_DIM);       /* note-off */
+    if(e.present&8u)cv_line(xs[3],top-off,xs[3],ys-2-off,SOUND_DIM); /* note-off only for release */
     for(k=0;k<3;k++) {
         int stage=k==2?3:k, xa=xs[k==2?3:k], xb=xs[k==2?4:k+1], i, px=xa, py;
+        if(!(e.present&(1u<<stage)))continue;
         float d=dur[k];
         float l0=stage==0?0.0f:stage==1?1.0f:e.sustain;
         py=y0-(int)(l0*(y0-top)+0.5f);
@@ -7414,28 +7522,37 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
             cv_line(px,py-off,xa+i,ny-off,edited==stage?hi:col);px=xa+i;py=ny;
         }
     }
-    cv_line(xs[2],ys-off,xs[3],ys-off,edited==2?hi:col);
+    if(e.present&4u)cv_line(xs[2],ys-off,xs[3],ys-off,edited==2?hi:col);
     for(k=0;k<4;k++) {
         /* Keep A/D/S/R percentage visible at rest as well as during K5-K8
          * turns. Same quantisation as the native Chicago value readout. */
+        if(!(e.present&(1u<<k)))continue;
         char label[20];
         char *end=put_s(label,k==0?"A ":k==1?"D ":k==2?"S ":"R ");
-        end=put_i(end,(matrix_value(pg.r[p][k])*100+63)/127);
+        end=put_i(end,(matrix_value(pg.r[p][e.slot[k]])*100+63)/127);
         put_s(end,"%");
-        text_c(31+k*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
+        text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
     }
     {   /* Native state1 contains both decay and sustain. Classify within 1% of S.
          * Cursor level is always the live EG; the horizontal axis names stages. */
         float level=0,mod=0; unsigned state=6,held=0;
-        if(engine_bass_voice_view(bidx(),&level,&mod,&state,&held) && state!=6) {
+        int observed;
+        if(e.enabled==3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+        else observed=engine_bass_voice_view(bidx(),&level,&mod,&state,&held);
+        if(observed && state!=6) {
             if(level<0)level=0; if(level>1)level=1;
-            int stage=state==0?0:state==3?3:((e.gate && held) ||
+            int stage=e.enabled==3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
+                state==0?0:state==3?3:((e.gate && held) ||
                 (level-e.sustain<=.01f && e.sustain-level<=.01f))?2:1;
             /* A stage/level gauge, separate from the preview's time curve:
              * Gate mode or release during attack can differ from the schematic.
              * Dotted vertical rail names the stage; the crossbar is actual level. */
-            int x=(xs[stage]+xs[stage+1])/2;
-            for(int yy=top;yy<=y0;yy+=3) cv_rect(x,yy-off,1,1,SOUND_DIM);
+            int shown=!!(e.present&(1u<<stage));
+            /* An absent stage has no curve playhead. Its actual level remains
+             * visible on a separate left meter, never at a false endpoint. */
+            int x=shown?(xs[stage]+xs[stage+1])/2:9;
+            if(shown)for(int yy=top;yy<=y0;yy+=3) cv_rect(x,yy-off,1,1,SOUND_DIM);
+            else cv_rect(x,top-off,1,y0-top+1,SOUND_DIM);
             int yy=y0-(int)(level*(y0-top)+.5f)-off;
             cv_rect(x-2,yy,5,1,hi);
             cv_rect(x,yy-1,1,3,hi);
@@ -7448,9 +7565,23 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
     }
     {   /* playhead: where the live VCA EG is now, on this graph's own time axis */
         float adsr[4],lv=0; int st=6,px=-1;
-        if(engine_bass_env_view(bidx(),adsr,&lv,&st) && st!=6) {
+        int observed;
+        if(e.enabled==3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+        else observed=engine_bass_env_view(bidx(),adsr,&lv,&st);
+        if(observed && st!=6) {
             if(lv<0)lv=0; if(lv>1)lv=1;
-            if(st==0) { float t=-e.attack*fm_logf(fm_maxf(1e-6f,(1.3f-lv)/1.3f));
+            if(e.enabled==3) {
+                /* Position on the canonical curve at the actual sampled level,
+                 * not invented DSP elapsed time (release can begin before S). */
+                float u=0;int stage=st==0?0:st==3?3:e.live_stage==3?2:1;
+                if(stage==0)u=lv;
+                else if(stage==1)u=(1.0f-lv)/fm_maxf(1e-6f,1.0f-e.sustain);
+                else if(stage==2)u=.5f;
+                else if(e.sustain>.00001f && lv>.00001f)
+                    u=fm_logf(lv/e.sustain)/fm_logf(.00001f/e.sustain);
+                else u=1;
+                u=fm_maxf(0,fm_minf(1,u));px=(e.present&(1u<<stage))?xs[stage]+(int)((xs[stage+1]-xs[stage])*u+.5f):-1;
+            } else if(st==0) { float t=-e.attack*fm_logf(fm_maxf(1e-6f,(1.3f-lv)/1.3f));
                 px=xs[0]+(int)((xs[1]-xs[0])*fm_minf(1.0f,t/fm_maxf(dur[0],1e-6f))+.5f); }
             else if(st==1) {
                 float u=lv-e.sustain,full=1.0f-e.sustain;
@@ -7461,9 +7592,11 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
                 float t=e.sustain>1e-6f&&lv>1e-6f?-e.release*fm_logf(lv/e.sustain):dur[2];
                 px=xs[3]+(int)((xs[4]-xs[3])*fm_minf(1.0f,fm_maxf(0.0f,t)/fm_maxf(dur[2],1e-6f))+.5f);
             } else px=xs[4];
-            int py=y0-(int)(lv*(y0-top)+.5f);
+            if(e.enabled!=3){int stage=st==0?0:st==3?3:lv-e.sustain>.01f*(1-e.sustain)?1:2;
+                if(!(e.present&(1u<<stage)))px=-1;}
+            if(px>=0){int py=y0-(int)(lv*(y0-top)+.5f);
             cv_rect(px,top-off,1,y0-top,SOUND_DIM);
-            cv_rect(px-1,py-1-off,3,3,hi);
+            cv_rect(px-1,py-1-off,3,3,hi);}
         }
     }
 }

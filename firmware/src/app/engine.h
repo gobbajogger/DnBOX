@@ -18,6 +18,8 @@
 #pragma once
 #include <stdint.h>
 #include "../dsp/x0x_param.h"
+#include "../dsp/juno6.h"
+#include "../dsp/drum909.h"
 #include "../seq/sequencer.h"
 #include "../seq/motion.h"
 #include "param_trace.h"
@@ -83,6 +85,9 @@ int engine_bass_status(int voice);
 int engine_bass_filter_view(int voice, float *eg, float *depth);
 /* Chicago native compiled envelope controls (including macro scaling). */
 int engine_bass_adsr_view(int voice, float values[4], unsigned *gate);
+/* Compact Juno shared amp/filter envelope, physical controls and real stage.
+ * Coherent main-loop snapshot under the existing audio-source mask. */
+int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
 /* UI-only snapshot of the real amplitude EG and first modulator. */
 int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
 /* drums, UI: ms since the track's last hit, its live amp envelope 0..1; 0 when silent */
@@ -311,3 +316,6 @@ void engine_diag_half(uint32_t half, uint32_t late);
 #if X0X_DIAG_STATE_TRACE
 extern uint32_t engine_diag_render_offset;
 #endif
+
+/* Main-loop coherent BD/SD amplitude snapshot; not a final audio peak. */
+int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out);

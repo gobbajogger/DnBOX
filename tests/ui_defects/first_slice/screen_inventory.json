@@ -6090,6 +6090,29 @@
     {
       "id": "modal-clear-pattern",
       "family": "modal"
+    },
+    {
+      "id": "view-01-part-00-voice-01-page-02",
+      "family": "ordinary"
+    },
+    {
+      "id": "edge-0-view-01-part-00-voice-01-page-02",
+      "family": "ordinary"
+    },
+    {
+      "id": "edge-1-view-01-part-00-voice-01-page-02",
+      "family": "ordinary"
+    }
+  ],
+  "reachabilityChanges": [
+    {
+      "revision": "51f4c8711320cb992458ef99822d52324531a2ee",
+      "reason": "SD mixed controls partitioned into ordinary controls and main AMP graph; unchanged kit controls now reachable on page 2. Added three states, removed none.",
+      "added": [
+        "view-01-part-00-voice-01-page-02",
+        "edge-0-view-01-part-00-voice-01-page-02",
+        "edge-1-view-01-part-00-voice-01-page-02"
+      ]
     }
   ]
 }

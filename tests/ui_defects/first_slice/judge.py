@@ -4,7 +4,7 @@
 
 Exports the committed HEAD tree into a fresh temporary directory, applies the
 full-inventory geometry instrumentation and negative controls, then runs the
-checks 1-4 detectors plus glyph/value collisions on the45drum-page slice.
+checks 1-4 detectors plus glyph/value collisions on the explicitly enumerated drum-page slice.
 Exit 0 only when every screen renders and no check fails or is NOT_RUN.
 No receipts are read; nothing outside the output directory is written.
 """

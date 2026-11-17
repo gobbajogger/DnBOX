@@ -30,7 +30,7 @@ def validate_screens(screens, complete):
     expected=json.loads((HERE/'expected-screens.json').read_text())['screens']
     wanted={s['id']:s for s in expected}
     if not complete or complete.get('rendererExit')!=0 or complete.get('screens')!=len(wanted):
-        raise ValueError('incomplete renderer: expected explicit45-screen inventory')
+        raise ValueError(f'incomplete renderer: expected explicit {len(wanted)}-screen inventory')
     ids=[s.get('id') for s in screens]
     if len(ids)!=len(wanted) or len(set(ids))!=len(ids) or set(ids)!=set(wanted):
         raise ValueError('missing, extra or duplicate constructed screen')

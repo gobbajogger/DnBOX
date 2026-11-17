@@ -103,6 +103,23 @@ int engine_bass_voice_view(int v, float *level, float *modulation, unsigned *sta
 { return (unsigned)v < NBASS && original_runtime_voice_view(&original_bass[v],level,modulation,state,key_down); }
 int engine_bass_adsr_view(int v, float values[4], unsigned *gate)
 { return (unsigned)v < NBASS && original_runtime_adsr_view(&original_bass[v],values,gate); }
+int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out)
+{
+    if((voice!=DR_BD && voice!=DR_SD) || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=drum909_read_amp(&d909,voice,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
+int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
+{
+    if((unsigned)v>=NBASS || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=original_bass[v].status==ORIGINAL_RUNTIME_OK && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+        juno6_read_envelope(&original_bass[v].dsp.juno.synth,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
 int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
 { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
 int engine_bass_env_view(int v, float adsr[4], float *level, int *state)

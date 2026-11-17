@@ -41,10 +41,19 @@ def instrument(root):
     return result;
 }'''
     text=wrap(text,sig,'cv_text',wrapper);gfx.write_text(text)
+    ui=root/'firmware/src/app/ui.c';body=ui.read_text()
+    a='    for(int x=1;x<=214;x++) {'
+    body=once(body,a,'''    uint16_t envelope_before[CV_MAX];first_snapshot(envelope_before);
+    first_glyph_type="envelope-curve";first_ref[0]=r.kind;first_ref[1]=r.a;first_ref[2]=r.b;first_ref[3]=r.c;
+    first_name=pref_desc(r)?pref_desc(r)->name:"";
+'''+a)
+    a='    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);'
+    body=once(body,a,'    first_finish(envelope_before,"glyph",x0,top-off,0);\n'+a);ui.write_text(body)
     dv=root/'firmware/src/app/ui_drum_voice.inc';text=dv.read_text()
     draw='UI_DRAW ' if 'static UI_DRAW void dv_glyph(' in text else ''
     text=once(text,'int off = band * BAND_H, bh = dv_band_h(band);','int off = band * BAND_H, bh = dv_band_h(band);\n    first_offset=band==2?158:20;first_control=-1;first_row=-1;')
     text=once(text,'/* labels */','/* labels */\n            first_row=p;first_control=-1;')
+    text=once(text,'if(adsr_row(p)) {','if(adsr_row(p)) {\n                pref_t graph_ref=pg.r[p][0];first_row=p;first_control=0;\n                first_ref[0]=graph_ref.kind;first_ref[1]=graph_ref.a;first_ref[2]=graph_ref.b;first_ref[3]=graph_ref.c;\n                first_name=pref_desc(graph_ref)?pref_desc(graph_ref)->name:"";')
     text=once(text,'if (r.kind == R_NONE) continue;','if (r.kind == R_NONE) continue;\n                first_control=k;first_ref[0]=r.kind;first_ref[1]=r.a;first_ref[2]=r.b;first_ref[3]=r.c;first_name=pref_desc(r)?pref_desc(r)->name:"";')
     text=once(text,'y += ah;','first_control=-1;\n            y += ah;')
     text=once(text,'/* lower panel: body pictogram, voice name, P1/16, 16-step strip */','first_row=-1;first_control=-1;\n    /* lower panel: body pictogram, voice name, P1/16, 16-step strip */')

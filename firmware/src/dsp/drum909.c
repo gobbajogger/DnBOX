@@ -1137,3 +1137,19 @@ void drum909_all_off(drum909_t *d)
         d->smp[i].playing = 0;
     }
 }
+
+int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
+{
+ if(!d||!out||(voice!=DR_BD&&voice!=DR_SD))return 0;
+ const d9_bt_t *n=&d->bt[voice];
+ drum909_amp_snapshot v={0};
+ v.raw_level=n->amp.cur;v.target_decay_ms=n->decay;v.target_hold_ms=n->amp_hold;
+ v.active=n->mute>0;v.hold_left=n->amp_hold_left;
+ v.hold_active=v.active && voice==DR_BD && n->amp_hold_left>0;
+ v.ramp_valid=v.active && n->amp.left>0;
+ if(v.ramp_valid){
+  v.ramp_start=n->amp.v0;v.ramp_end=n->amp.v1;v.ramp_samples=n->amp.t1;
+  v.ramp_ratio=n->amp.r;v.ramp_left=n->amp.left;v.ramp_ticks=n->amp.k;
+ }
+ *out=v;return 1;
+}

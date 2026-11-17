@@ -626,6 +626,10 @@ static UI_DRAW void draw_drum_voice(int band)
                 if (ay + ah > 0 && ay < bh)
                     rbox(6, ay, 228, ah, 9, ui_theme_light?SOUND_SELECT:RGB(36,48,54));
             }
+            if(adsr_row(p)) {
+                cv_text(11,y-off,&FONT_T,"AMP",gray);
+                draw_adsr_inline(p,active,y,ah,off);y+=ah;continue;
+            }
             /* labels */
             {
                                 int ly = y + 2 - off;
@@ -733,35 +737,41 @@ static UI_DRAW void draw_drum_voice(int band)
             rbox(3, py, 234, ph, 9, SOUND_FACE);
             /* Real voice identity and actual16 steps share the remaining
              * context surface. Rows reflow; no activity or data is invented. */
-            int cols=ph>=88?4:8, rows=16/cols;
-            int left=cols==4?124:118, pitch=(228-left)/cols;
-            int step_top=body_y+19, step_h=(ph-24)/rows;
-            float body_scale=ph<64?.65f:1.f;
-            int body_height=(int)(47.f*body_scale);
-            dv_body_pictogram(t,v,10,body_y+(ph-body_height)/2-off,body_scale,env,col);
-            cv_text(11,body_y+3-off,&FONT_T,dv_voice_name(t,v),col);
+            /* One continuous16-step window, matching the white-key input.
+             * Keep the voice identity above it, never over the step lane. */
+            int left=9, pitch=14, step_top=body_y+ph-25;
+            unsigned first=(unsigned)ui.spage*16u;
+            if(first>=NSTEPS)first=0;
+            /* Authored body paths plus the live 6% pulse fit in 44px per
+             * scale unit. Leave the identity and step lane unobstructed. */
+            float body_scale=(float)(ph-44)/44.f;
+            if(body_scale>3.f)body_scale=3.f;
+            if(body_scale>0.f)
+                dv_body_pictogram(t,v,87,body_y+(ph-11)/2-16-off,body_scale,env,col);
+            char identity[32];
+            put_i(put_s(put_s(identity,dv_voice_name(t,v)),t==T_808?" 808/":" 909/"),v+1);
+            cv_text(11,body_y+3-off,&FONT_T,identity,col);
             pat_i = seq.ppat[ui.part];
             slen = cur_pat()->drum[ui.part].len;
             if (slen < 1) slen = 16;
             {
                 char rhs[16];
-                put_s(put_i(put_s(put_i(put_s(rhs, "P"), pat_i + 1), " / "), slen > 16 ? 16 : slen), "");
+                put_s(put_i(put_s(put_i(put_s(rhs, "P"), pat_i + 1), " / "), slen), "");
                 text_r(226,body_y+3-off,&FONT_T,rhs,gray);
-                char id[16];put_i(put_s(id,t==T_808?"808 / ":"909 / "),v+1);
-                cv_text(11,body_y+ph-14-off,&FONT_T,id,gray);
             }
             dp = &cur_pat()->drum[ui.part];
             len = dp->len;
             for (s = 0; s < 16; s++) {
-                int sx = left+(s%cols)*pitch;
-                int sy=step_top+(s/cols)*step_h-off;
-                int hit = s < NSTEPS && s < len && sm_get(dp->hit[v], s);
-                int curstep = seq.playing && (eng_step[TRK_DRUM + ui.part] % (len ? len : 16)) == s;
+                int sx = left+s*pitch;
+                int sy=step_top-off;
+                int absolute=(int)first+s;
+                int hit = absolute < NSTEPS && absolute < len && sm_get(dp->hit[v], absolute);
+                int curstep = seq.playing && (eng_step[TRK_DRUM + ui.part] % (len ? len : 16)) == absolute;
                 uint16_t sc = hit ? col : SOUND_LINE;
                 if (curstep) sc = C_WHITE;
                 cv_rect(sx, sy, 11, 4, sc);
                 {
-                    char nn[4];put_i(nn, s + 1);
+                    char nn[4];put_i(nn, absolute + 1);
                     text_c(sx+5,sy+6,&FONT_T,nn,gray);
                 }
             }
