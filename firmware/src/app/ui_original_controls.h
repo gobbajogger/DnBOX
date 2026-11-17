@@ -7,7 +7,7 @@
 
 /* Control metadata only. The released UI still owns all drawing and cadence. */
 enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
-       UI_ORIGINAL_DRONE_PAGES = 2, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = 1, UI_ORIGINAL_JUNO_PAGES = 4 };
 static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
     {11,12,-1,-1}, {13,15,14,16}, {17,18,19,-1}
@@ -19,11 +19,11 @@ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
 };
 static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
-static const int8_t ui_original_drone_rows[UI_ORIGINAL_DRONE_PAGES][4] = {
-    {0,1,2,-1}, {3,4,5,-1}
+static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
+    {-1,-1,-1,-1}
 };
-static const char *const ui_original_drone_titles[] = {
-    "STRING", "ENVELOPE"
+static const char *const ui_original_synthone_titles[] = {
+    "SYNTH ONE"
 };
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
@@ -42,13 +42,10 @@ static const char *ui_original_name(unsigned kind, unsigned id)
         "WAVE","LEVEL","SUB","PITCH","GLIDE","LEVEL","WAVE","TUNE",
         "DEPTH","CUTOFF","CRUSH","SHAPE","WOBBLE","RATE","OUTPUT","STEREO"
     };
-    static const char *const drone[] = {
-        "REGISTER","BRIGHTNESS","FLUTTER","ATTACK","RELEASE","LEVEL"
-    };
     static const char *const juno[] = {"WAVE","SUB","CUTOFF","RES","ENV","ATTACK","DECAY","SUSTAIN","RELEASE","HPF","LFO RATE","LFO DEPTH","WIDTH","CHO RATE","CHORUS","LEVEL"};
     if(kind==ORIGINAL_SOUND_JUNO)return id<16?juno[id]:"";
     if (kind == ORIGINAL_SOUND_CHICAGO && id < 20) return chicago[id];
-    if (kind == ORIGINAL_SOUND_DRONE) return id < 6 ? drone[id] : "";
+    if (kind == ORIGINAL_SOUND_SYNTHONE) return "";
     return kind == ORIGINAL_SOUND_MIAMI && id < 16 ? miami[id] : "";
 }
 
@@ -103,7 +100,7 @@ static int ui_original_controls_project(ui_original_control_view *out,
     union { original_chicago_program chicago; original_miami_program miami; } program;
     memset(out, 0, sizeof *out);
     out->kind = (uint8_t)kind;
-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_DRONE) return 1; /* no Chicago/Miami fields */
+    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 1; /* no Chicago/Miami fields */
     if (kind == ORIGINAL_SOUND_CHICAGO) {
         original_chicago_program *p = &program.chicago;
         if (!original_sound_restore_chicago(p, cell)) return 0;

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Product-sound identity codec. Callers own storage transactions. The original
- * profile accepts OCH1/OMI1/ODR1 schema 2 and their 22/18/8-control cells; legacy
+ * profile accepts OCH1/OMI1/OS11/OJU1 schema 2 cells; historical 0x4F445231
+ * tags with count 8 are adopted as OS11 Synth One init. Legacy
  * profiles retain their own product identity rules. The integration owner
  * supplies the registry from actual production descriptors. */
 #pragma once
@@ -41,11 +42,10 @@ static inline int bass_identity_check(const bass_identity_t *tag,
     if (!tag || (!registry && n)) return BASS_IDENTITY_INVALID;
     if (tag->state == BASS_IDENTITY_UNKNOWN) return BASS_IDENTITY_UNSUPPORTED;
     if (tag->engine != ORIGINAL_SOUND_CHICAGO_ID && tag->engine != ORIGINAL_SOUND_MIAMI_ID &&
-        tag->engine != ORIGINAL_SOUND_DRONE_ID && tag->engine != ORIGINAL_SOUND_JUNO_ID)
+        tag->engine != ORIGINAL_SOUND_SYNTHONE_ID && tag->engine != ORIGINAL_SOUND_JUNO_ID)
         return BASS_IDENTITY_UNSUPPORTED;
     if (tag->schema != ORIGINAL_SOUND_SCHEMA) return BASS_IDENTITY_UNSUPPORTED;
-    unsigned kind = tag->engine == ORIGINAL_SOUND_MIAMI_ID ? ORIGINAL_SOUND_MIAMI :
-        tag->engine == ORIGINAL_SOUND_JUNO_ID ? ORIGINAL_SOUND_JUNO : tag->engine == ORIGINAL_SOUND_DRONE_ID ? ORIGINAL_SOUND_DRONE : ORIGINAL_SOUND_CHICAGO;
+    unsigned kind = original_sound_kind_from_id(tag->engine);
     if (tag->count != original_sound_count(kind))
         return BASS_IDENTITY_INVALID;
     if (tag->state == BASS_IDENTITY_UNKNOWN)
@@ -67,6 +67,18 @@ static inline int bass_identity_check(const bass_identity_t *tag,
     return match->available ? BASS_IDENTITY_READY : BASS_IDENTITY_UNAVAILABLE;
 }
 
+
+/* Historical 0x4F445231 / count-8 tags become OS11 init. Never written back. */
+static inline int bass_identity_adopt(bass_identity_t *tag)
+{
+    if (!tag || !original_sound_is_legacy_slot2_id(tag->engine)) return 0;
+    if (tag->schema != ORIGINAL_SOUND_SCHEMA || tag->count != 8u ||
+        tag->state != BASS_IDENTITY_KNOWN) return 0;
+    tag->engine = ORIGINAL_SOUND_SYNTHONE_ID;
+    tag->count = (uint8_t)original_sound_count(ORIGINAL_SOUND_SYNTHONE);
+    return 1;
+}
+
 static inline int bass_identity_decode(bass_identity_t *out, const uint8_t *wire, size_t bytes,
                                       const bass_identity_entry_t *registry, size_t n)
 {
@@ -77,6 +89,7 @@ static inline int bass_identity_decode(bass_identity_t *out, const uint8_t *wire
                  (uint32_t)wire[2] << 16 | (uint32_t)wire[3] << 24;
     tag.schema = (uint16_t)((uint16_t)wire[4] | (uint16_t)wire[5] << 8);
     tag.count = wire[6]; tag.state = wire[7];
+    (void)bass_identity_adopt(&tag);
     status = bass_identity_check(&tag, registry, n);
     if (status != BASS_IDENTITY_INVALID) *out = tag;
     return status;
@@ -124,14 +137,20 @@ static inline int bass_sound_tag_decode(bass_sound_info_t *out,const bass_sound_
     bass_sound_info_t info;
     int rc;
     if(!out || !wire)return BASS_IDENTITY_INVALID;
+    uint32_t wire_engine=(uint32_t)wire->bytes[0]|(uint32_t)wire->bytes[1]<<8|
+        (uint32_t)wire->bytes[2]<<16|(uint32_t)wire->bytes[3]<<24;
+    int legacy=original_sound_is_legacy_slot2_id(wire_engine);
     rc=bass_identity_decode(&info.identity,wire->bytes,BASS_IDENTITY_BYTES,registry,n);
     if(rc==BASS_IDENTITY_INVALID || rc==BASS_IDENTITY_UNSUPPORTED)return rc;
     info.preset=(uint16_t)(wire->bytes[8]|((uint16_t)wire->bytes[9]<<8));
     info.flags=wire->bytes[10];
     if(wire->bytes[11] || (info.flags&~BASS_SOUND_EDITED))return BASS_IDENTITY_INVALID;
-    unsigned kind = info.identity.engine == ORIGINAL_SOUND_MIAMI_ID ? ORIGINAL_SOUND_MIAMI :
-        info.identity.engine == ORIGINAL_SOUND_JUNO_ID ? ORIGINAL_SOUND_JUNO : info.identity.engine == ORIGINAL_SOUND_DRONE_ID ? ORIGINAL_SOUND_DRONE : ORIGINAL_SOUND_CHICAGO;
-    if (info.preset >= original_sound_factories(kind))
+    unsigned kind = original_sound_kind_from_id(info.identity.engine);
+    if (legacy) {
+        if (info.preset != BASS_SOUND_NO_PRESET && info.preset >= 4u)
+            return BASS_IDENTITY_INVALID;
+        if (info.preset != BASS_SOUND_NO_PRESET) info.preset = 0;
+    } else if (info.preset >= original_sound_factories(kind))
         return BASS_IDENTITY_INVALID;
     if(rc==BASS_IDENTITY_CHOICE_REQUIRED) {
         if(info.preset || info.flags)return BASS_IDENTITY_INVALID;

@@ -91,7 +91,7 @@ test_class() {
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
     smk-clip-ble-clear|smk-clip-ble-notify|installer-ctl|ctl-read-framing|installer-backup-snapshot) TEST_CLASS=S ;;
-    composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|roadmap-evidence-check|composed-ui-identity|drone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
+    composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|composed-ui-identity|synthone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
@@ -99,7 +99,7 @@ test_class() {
     adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
-    synth-param-jump|param-write-sources) TEST_CLASS=G ;;
+    synth-param-jump|param-write-sources|ui-drum-glyph) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
     chicago-adsr-graph|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
@@ -298,7 +298,7 @@ W="-O2 -ffp-contract=off -Wall -Wextra -Wdouble-promotion -Werror"
 run composed-features sh tests/host/composed_features_test.sh
 run juno6-runtime sh tests/host/juno6_runtime_test.sh "$OUT/juno6-runtime"
 run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
-run drone-string sh -c "$CC -std=c99 -O2 tests/host/drone_string_test.c -lm -o $OUT/drone_string && $OUT/drone_string"
+run legacy-slot2-map sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Iexperiments/original_synth tests/host/legacy_slot2_map_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/legacy_slot2_map && $OUT/legacy_slot2_map"
 run juno6-dsp sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src/dsp -o $OUT/juno6_test tests/host/juno6_test.c firmware/src/dsp/juno6.c -lm && $OUT/juno6_test"
 run usb-retry sh tests/host/run_usb_retry.sh
 run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
@@ -306,7 +306,7 @@ run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c
 run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
 run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
-run drone-slot env SMC_UI_TEST_FILE=tests/host/drone_slot_test.c SMC_UI_OUT=build/host/drone-slot sh tests/host/smc_ui_test.sh
+run synthone-slot env SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/synthone-slot sh tests/host/smc_ui_test.sh
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
 run project-rates-companion sh tests/host/project_rates_companion_test.sh
@@ -384,7 +384,8 @@ run panic-mutants sh tests/host/panic_mutants.sh
 run panic-mutants-runner python3 tests/host/panic_mutants_test.py
 run live-key-epoch python3 tests/host/live_key_epoch_test.py
 run midi-epoch-step python3 tests/host/midi_epoch_step_test.py
-run roadmap-evidence-check sh tests/host/roadmap_evidence_check_test.sh
+run roadmap-generation python3 tests/host/roadmap_generation_test.py
+run roadmap-current sh -c 'python3 tools/generate_roadmap.py --check --integration-sha "${DNBOX_GATE_BASE_SHA:-$(git rev-parse HEAD)}"'   # merged items must be ancestors of the tested tree (local Git only)
 run optimization-equivalence sh tests/host/run_optimization_equivalence.sh
 run sdk-pin python3 tests/sdk_pin_test.py   # SDK V1.2.14 pins; a wrong SDK stops the build
 run native-nightly-probe python3 tests/host/test_native_nightly_build_probe.py
@@ -660,6 +661,7 @@ command -v node >/dev/null 2>&1 && run project-adoption-identities node --test w
 run offline-sequencer node --test web/offline-sequencer/*.test.mjs
 run offline-sequencer-browser python3 web/offline-sequencer/f6b-browser.test.py
 run offline-touchosc-pack python3 web/offline-sequencer/touchosc/pack.test.py
+run offline-touchosc-identity python3 tests/host/test_touchosc_identity.py
 run offline-touchosc-lua lua5.1 web/offline-sequencer/touchosc/controller.test.lua
 command -v node >/dev/null 2>&1 && run projects-web node web/test_projects.mjs   # exact project and sample bundles, transfer and recovery
 command -v node >/dev/null 2>&1 && run installer-project-handoff node web/test_installer_project_handoff.mjs

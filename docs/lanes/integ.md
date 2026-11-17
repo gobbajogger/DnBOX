@@ -583,3 +583,24 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 - `skills/x0x37-workflow/references/stages.md` — supplied removal list; historical instructions, retained in Git history.
 
 M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
+
+## M5 roadmap source candidate (2026-11-17)
+
+Owner: integ. Target: integration/dnbox-consolidated. Exact base: 7b17a64e11731de50f4fe46ef7ebe3948a730a10.
+Roadmap generation and regression tests implemented; positive local ancestry required for every Complete entry against explicit DNBOX_GATE_BASE_SHA. No move declared Complete. Preserved historical ROADMAP content.
+Local checks: generator tests 7 PASS; current views PASS; existing roadmap-evidence self-test 42 PASS. These checks do not qualify the complete M5 composition. Actions not used.
+M5 remains WORKING: compact-program LSan outside tracer, deployed five BREAK previews/selection, and genuine feature-list item120 voting runtime acceptance remain open. No device operation or publication claimed.
+
+
+### Hygiene review corrections after #957/#958
+
+Owner: integ hygiene-review worker. Consolidated input: `ec4f4e56abc37d677475244d73588fc42effa415`. Correct docs PR target, required gate-log exception, workflow prohibition, missing documentation links and rename wording. Reuses `lane/integ-hygiene-review-fixes`; no firmware or workflow changes. Documentation assertions PASS; full gate and independent final-head review NOT_RUN. Next: independent review and applicable integration gates; no delivery claim.
+- tests/host/roadmap_evidence_check.sh: evidence-only check, stale per DOT-BRIEF.
+- tests/host/roadmap_evidence_check_test.sh: self-test of the removed evidence check.
+- tests/host/run_host_with_evidence.py: evidence-only host-run wrapper, stale per DOT-BRIEF.
+- tests/host/mboot_nightly_contract/check_source_closure.py: source-closure receipt check, stale per DOT-BRIEF.
+- tests/host/mboot_readonly_contract/check_source_closure.py: source-closure receipt check, stale per DOT-BRIEF.
+- tests/ui_defects/first_slice/evaluate.py: judged saved render receipts; replaced by judge.py, which renders and judges the checkout itself.
+- firmware/src/dsp/drone_string.h: Drone engine removed (sound item 2); slot 2 is Synth One and old Drone projects load as Synth One init.
+- tests/host/drone_slot_test.c: stale Drone test; replaced by tests/host/synthone_slot_test.c.
+- tests/host/drone_string_test.c: stale Drone test; replaced by tests/host/legacy_slot2_map_test.c (old Drone projects load as Synth One init).

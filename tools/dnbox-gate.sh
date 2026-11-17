@@ -92,17 +92,17 @@ limits()     { resolve_base || return 1
                done < <(git ls-files -s)
                return $bad; }
 host_tests() { pass_env
-               if ! git rev-parse -q --verify 'refs/remotes/origin/build/0.0.22^{commit}' >/dev/null; then
+               if ! git rev-parse -q --verify 'refs/tags/archive/build/0.0.22^{commit}' >/dev/null; then
                  if [ "${DNBOX_GATE_ONLINE:-0}" = "1" ]; then
-                   echo "fetching origin build/0.0.22 (missing from this clone)"
-                   git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22 || return 1
+                   echo "fetching tag archive/build/0.0.22 (missing from this clone)"
+                   git fetch origin refs/tags/archive/build/0.0.22:refs/tags/archive/build/0.0.22 || return 1
                  else
-                   echo "SKIP fetch of origin/build/0.0.22: offline default, and the ref is not in this checkout"
-                   echo "host tests need refs/remotes/origin/build/0.0.22 locally, or DNBOX_GATE_ONLINE=1"
+                   echo "SKIP fetch of archive/build/0.0.22: offline default, and the tag is not in this checkout"
+                   echo "host tests need refs/tags/archive/build/0.0.22 locally, or DNBOX_GATE_ONLINE=1"
                    return 1
                  fi
                else
-                 echo "using local origin/build/0.0.22 (no fetch)"
+                 echo "using local archive/build/0.0.22 (no fetch)"
                fi
                sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
                grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && return 1; return $r; }
@@ -153,14 +153,10 @@ budget()     { local model xip pool bad=0
                done
                return $bad; }
 ui_defects() { python3 tests/ui_defects/test_gate.py || return 1
-               [ -f tests/ui_defects/first_slice/evaluate.py ] || return 0
-               local render="${DNBOX_UI_RENDER_DIR:-$OUT/ui-render}"
-               if [ ! -f "$render/source-closure.json" ]; then
-                 echo "evaluate.py render receipts missing at $render/source-closure.json (NOT_RUN = FAIL)"
-                 return 1
-               fi
-               # Force a real failure (not VOID): evaluate.py may exit 2 on a Python error.
-               python3 tests/ui_defects/first_slice/evaluate.py --render-dir "$render" --output "$OUT/ui-eval.json" || return 1
+               python3 -m unittest discover -s tests/ui_defects/first_slice -p 'test_*.py' || return 1
+               # Render the screens from this checkout on the host and judge them (no saved receipts).
+               rm -rf "$OUT/ui-judge"
+               python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
              }
 drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
