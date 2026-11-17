@@ -232,6 +232,7 @@ typedef struct {
     uint32_t down_t[NB];               /* when each button went down */
     uint32_t turn_t;                   /* the last encoder turn */
     uint8_t outline[232];              /* the break loop's outline */
+    uint32_t outline_revision;
     uint8_t outline_ok, outline_slot;
     uint8_t song_sel;                  /* the SONG screen's bar */
 } ui_t;
@@ -8414,6 +8415,7 @@ static void knob_tag(char *t)
     }
 }
 
+#include "ui_chance_probe.h"
 #include "ui_break_layout_controls.h"
 static UI_DRAW void draw_knobs(void)
 {

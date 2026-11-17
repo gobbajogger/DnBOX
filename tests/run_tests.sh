@@ -86,7 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -550,6 +550,8 @@ run break-preview-ui python3 -B tests/host/ui_break_preview_test.py
 run break-preview-visibility sh tests/host/ui_break_preview_visibility_test.sh
 run break-held-edit-journey sh tests/host/break_held_edit_journey_test.sh
 run break-family-layout sh tests/host/break_family_layout_probe_test.sh
+run break-outline-snapshot sh tests/host/break_outline_snapshot_test.sh
+run ui-chance-framebuffer sh tests/host/ui_chance_framebuffer_test.sh
 run break-preview-decoder python3 -B tests/host/engine_break_preview_test.py
 run break-preview-integration env SMC_UI_TEST_FILE=tests/host/break_preview_midi_test.c SMC_UI_OUT=build/host/break-preview-integration sh tests/host/smc_ui_test.sh
 run engine-brk-mute python3 -B tests/host/engine_brk_mute_test.py   # real BREAK gate, immediate mute and abrupt-cut control

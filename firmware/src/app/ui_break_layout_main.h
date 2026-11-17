@@ -34,8 +34,9 @@ static void break_layout_main(int band)
     int choosing=ui.brk_choice_on&&engine_brk_preview_active()&&ui.brk_choice_pat==seq.ppat[PART_BRK];
     if(count<1)count=1;
     int page=ui.brk_page*8<count?ui.brk_page:(count-1)/8;
-    if(!ui.outline_ok||ui.outline_slot!=bp->slot_a){
-        ui.outline_ok=(uint8_t)engine_brk_outline(0,ui.outline,232);
+    if(!ui.outline_ok||ui.outline_slot!=bp->slot_a||
+       ui.outline_revision!=engine_brk_outline_revision(0)){
+        ui.outline_ok=(uint8_t)engine_brk_outline_snapshot(0,ui.outline,232,&ui.outline_revision);
         ui.outline_slot=bp->slot_a;
     }
     night_panel(3,24-off,234,118,0);

@@ -8,6 +8,9 @@ static void break_layout_controls(void)
     int pgi=cur_page();
     night_panel(3,146-KNOB_Y,234,64,0);
     for(int i=0;i<4;i++){
+#if X0X_GFINAL_CHANCE_PROBE
+        chance_knob_status[i]=CHANCE_NOT_TARGET;
+#endif
         pref_t r=pg.r[pgi][i];const x0x_param_t *d=pref_desc(r);
         if(!d)continue;
         int cx=centers[i],val=pref_get(r),touched=ui.touched==i;
@@ -23,6 +26,12 @@ static void break_layout_controls(void)
         /* Canonical body occupies173..191; preserve existing glyph value law
          * while moving its established y28 body to the new y15 local cell. */
         int old_oy=cv_oy;cv_oy-=13;
+#if X0X_GFINAL_CHANCE_PROBE
+        chance_knob_status[i]=(uint8_t)chance_native_knob(r,d,val,cx);
+        if(chance_knob_status[i]==CHANCE_DRAWN) {
+            /* Canonical body at local y15 via the existing cv_oy=-13. */
+        } else
+#endif
         if(!(perform_glyph(r,val,cx,part_col())||control_glyph(r,val,cx,part_col()))&&d->names&&d->max<12){
             int n=d->max+1,pw=n>6?3:6,w=n*(pw+2)-2;
             for(int k=0;k<n;k++)box(cx-w/2+k*(pw+2),33,pw,9,k==val?part_col():C_LINE);

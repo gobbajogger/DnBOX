@@ -285,6 +285,8 @@ void engine_brk_flush(void);                                /* publish a loop ch
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes);
 int engine_brk_slice(void);                                 /* slice sounding now, -1 none (UI) */
 void engine_brk_state(int *slice, int *bank, int *div, int *running);
+uint32_t engine_brk_outline_revision(int which);
+int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revision);
 int engine_brk_outline(int which, uint8_t *peaks, int n);   /* the loop's peaks for the screen (main loop) */
 /* motion (seq/motion.h): lanes play into the engine, never into the sound_t mirror */
 int engine_motion_part(int target, int voice);              /* the part a parameter's lane follows */
