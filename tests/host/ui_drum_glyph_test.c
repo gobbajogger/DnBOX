@@ -35,10 +35,12 @@ static void test_dispatch(void)
 {
     setup(V_PART, PART_909); ui.sel[PART_909] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 0, "Tune") == DG_BDSWEEP); CHECK(role_of(0, 1, "Attack") == DG_ATTACK);
-    CHECK(role_of(0, 2, "Decay") == DG_DECAY);
+    CHECK(smc_same(pg.r[1][0], PR(R_ENG,T_909,0,2))); CHECK(adsr_row(1));
+    CHECK(role_of(1, 0, "Decay") == DG_DECAY);
     ui.sel[PART_909] = 1; build_pages();
     CHECK(role_of(0, 0, "Tune") == DG_TUNE); CHECK(role_of(0, 1, "Tone") == DG_NTAIL);
-    CHECK(role_of(0, 3, "Snappy") == DG_SNAPPY);
+    CHECK(role_of(0, 2, "Snappy") == DG_SNAPPY);
+    CHECK(smc_same(pg.r[1][0], PR(R_ENG,T_909,1,3))); CHECK(adsr_row(1));
     setup(V_PART, PART_808); ui.sel[PART_808] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 1, "Tone") == DG_LPF);
     ui.sel[PART_808] = 1; build_pages(); CHECK(role_of(0, 1, "Tone") == DG_SHELLS);
@@ -57,6 +59,44 @@ static void test_dispatch(void)
     setup(V_FX, PART_909); build_pages();
     for (int p = 0; p < pg.n; p++) for (int k = 0; k < 4; k++) CHECK(!role_of(p, k, NULL));
     puts("PASS dispatch: 909/808 roles by control, BRK and other views untouched");
+}
+/* Actual compositor full-row graph, excluding every caption/readout. The
+ * ordinary first row is42px, then the active singleton AMP row is56px. */
+static void amp_curve_copy(uint16_t *out)
+{
+    for(int y=90;y<120;y++) memcpy(out+(y-90)*222,fb+y*240+7,222*sizeof *out);
+}
+static void test_amp_motion(int voice)
+{
+    uint16_t idle[222*30], first[222*30], later[222*30];
+    drum909_amp_snapshot a,b;
+    setup(V_PART,PART_909);ui.sel[PART_909]=(uint8_t)voice;build_pages();
+    CHECK(smc_same(pg.r[1][0],PR(R_ENG,T_909,voice,voice==0?2:3)));
+    CHECK(adsr_row(1));*page_of(V_PART)=1;
+    pref_set(pg.r[1][0],64);drain_ms(6000);ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&a));CHECK(!a.active);amp_curve_copy(idle);
+    engine_drum(PART_909,voice,1.0f);drain_ms(20);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&a));CHECK(a.active);
+    CHECK(a.hold_active||a.ramp_valid);CHECK(a.raw_level>0);
+    amp_curve_copy(first);CHECK(memcmp(idle,first,sizeof idle));
+    drain_ms(150);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&b));CHECK(b.active&&b.ramp_valid);
+    CHECK(b.raw_level<a.raw_level);CHECK(b.ramp_left<b.ramp_ticks);
+    amp_curve_copy(later);CHECK(memcmp(first,later,sizeof first));
+    /* Real counter + raw-level position must produce the canonical marker,
+     * not merely some other changing pixels elsewhere on the page. */
+    float maximum=0;CHECK(drum909_param_si(voice,voice==0?2:3,127,&maximum)==X0X_U_MS);
+    float elapsed=(voice==0?40.0f:0.0f)+(b.ramp_ticks-b.ramp_left-1)/44.1f;
+    CHECK(b.raw_level>=0 && b.raw_level<=1);
+    CHECK(elapsed>=0 && elapsed<=maximum+b.target_hold_ms);
+    int px=13+(int)(214*elapsed/(maximum+b.target_hold_ms)+.5f);
+    int py=119-(int)(b.raw_level*29+.5f);
+    CHECK(px>=13 && px<=227 && py>=90 && py<=119);
+    CHECK(fb[(py-1)*240+px-1]==swap16(SOUND_INK));
+    drain_ms(6000);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&b));CHECK(!b.active);
+    amp_curve_copy(later);CHECK(!memcmp(idle,later,sizeof idle));
+    printf("PASS 909 voice%d full AMP: hit, actual counter/level motion, idle restoration\n",voice);
 }
 static void test_motion(int part)
 {
@@ -164,4 +204,4 @@ static void test_shared_return_fade(void)
     now_ms=saved_now;dg_last[0][1]=saved_last;
     puts("PASS shared300ms return-fade clock contract");
 }
-int main(void) { test_dispatch(); test_motion(PART_909); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds();test_noise_tail_motion();test_shared_return_fade(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }
+int main(void) { test_dispatch(); test_amp_motion(0); test_amp_motion(1); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds();test_noise_tail_motion();test_shared_return_fade(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }

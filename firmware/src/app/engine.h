@@ -18,8 +18,7 @@
 #pragma once
 #include <stdint.h>
 #include "../dsp/x0x_param.h"
-#include "../dsp/juno6.h"
-#include "../dsp/drum909.h"
+#include "../dsp/envelope_snapshot.h"
 #include "../seq/sequencer.h"
 #include "../seq/motion.h"
 #include "param_trace.h"

@@ -19,6 +19,7 @@
 #include "../x0x_cold.h"                       /* X0X_COLD: input and menu code of the main loop, built for size */
 #include "../dsp/fastmath.h"
 #include "../dsp/master.h"
+#include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
 #include "ui_original_controls.h"
 #include "bass_pattern_preset.h"
 #include "ui_original_wave.h"
@@ -236,7 +237,7 @@ typedef struct {
     uint8_t outline_ok, outline_slot;
     uint8_t song_sel;                  /* the SONG screen's bar */
 } ui_t;
-/* Keep bounded UI state in ordinary zeroed BSS; preserve audio pool reserve. */
+/* UI state fits normal zeroed RAM; preserve the pool reserve for audio. */
 static ui_t ui;
 /* A remote engine edit refreshes the parameter layout without changing the
  * keyboard's remembered page. Keep a SOUND-page selection effective across the
