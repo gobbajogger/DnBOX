@@ -1,6 +1,6 @@
 Move: M0 (clean start and green gate)   PR: #955   Head: this commit
 LEFT items PASS: 0/2; failing: L15 L16
-Gate at head: NOT_RUN (M0 start checks next; full green gate remains follow-up)
+Gate at head: M0 start checks pending; corrected limits self-match and size-loop false failures; full green gate remains follow-up
 ETA merge: start files after M0 checks; green gates 2026-11-17 22:00 VLAT
 
 # Lane: integ   (copy to docs/lanes/integ.md; update in every push)
@@ -581,3 +581,5 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 - `skills/x0x37-workflow/SKILL.md` — supplied removal list; historical instructions, retained in Git history.
 - `skills/x0x37-workflow/references/handoff.md` — supplied removal list; historical instructions, retained in Git history.
 - `skills/x0x37-workflow/references/stages.md` — supplied removal list; historical instructions, retained in Git history.
+
+M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
