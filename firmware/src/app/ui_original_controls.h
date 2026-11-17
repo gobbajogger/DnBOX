@@ -77,6 +77,7 @@ typedef struct {
     uint8_t shape[3], wobble_rate;
     int8_t carrier_pitch, env_percent;
     int16_t xmod_tune;
+    uint8_t wave_on; /* Chicago oscillator gain mask; fits previous alignment padding. */
     float vca[4];                 /* Chicago native 32..35: VCA EG A, D, S, R as original_vca_tick takes them */
 } ui_original_control_view;
 typedef struct {
@@ -87,7 +88,7 @@ typedef struct {
 
 /* Exactly the macro dependencies of native fields read below. A lock/motion
  * preview is explicit even if its byte equals a rounded factory display byte. */
-#define UI_ORIGINAL_CHICAGO_TEXT_MASK ((1u<<4)|(1u<<7)|(1u<<8)|(1u<<9)|(1u<<10)|(1u<<11)|(1u<<13)|(1u<<14)|(1u<<15)|(1u<<16))
+#define UI_ORIGINAL_CHICAGO_TEXT_MASK ((1u<<0)|(1u<<4)|(1u<<7)|(1u<<8)|(1u<<9)|(1u<<10)|(1u<<11)|(1u<<13)|(1u<<14)|(1u<<15)|(1u<<16))
 #define UI_ORIGINAL_MIAMI_TEXT_MASK ((1u<<0)|(1u<<3)|(1u<<6)|(1u<<7)|(1u<<11)|(1u<<13))
 static int ui_original_controls_project(ui_original_control_view *out,
     const uint8_t cell[ORIGINAL_SOUND_BYTES], const uint8_t preview[22], uint32_t mask)
@@ -111,6 +112,14 @@ static int ui_original_controls_project(ui_original_control_view *out,
         }
         float x;
 #define CN(field, id, count) do { if (!original_chicago_program_native(p,id,&x)) return 0; out->field=(uint8_t)ui_original_quant(x,count); } while (0)
+        float ga,gb;
+        if(!original_chicago_program_native(p,1,&x))return 0;
+        out->shape[0]=(uint8_t)ui_original_quant(x,5);
+        if(!original_chicago_program_native(p,9,&x))return 0;
+        out->shape[1]=(uint8_t)ui_original_quant(x,5);
+        if(out->shape[0]>3 || out->shape[1]>3)return 0;
+        if(!original_chicago_program_native(p,3,&ga)||!original_chicago_program_native(p,11,&gb))return 0;
+        out->wave_on=(ga>0?1:0)|(gb>0?2:0);
         CN(arp_on,62,2); CN(arp_mode,61,4); CN(arp_range,60,6);
         out->arp_range++;
         CN(amp_gate,107,2);

@@ -733,6 +733,12 @@ run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-readout sh tests/host/chicago_readout_test.sh; fi
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
+run ui-owner-copy python3 tests/host/ui_owner_copy_test.py
+run ui-home-r22 sh tests/host/ui_home_r22_test.sh
+run ui-owner-units sh tests/host/ui_owner_units_test.sh
+run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
+run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
+run ui-pan-units sh tests/host/ui_pan_units_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-chicago-env-motion sh tests/host/ui_chicago_env_motion_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run matrix-knob-caption Pillow; else run matrix-knob-caption sh tests/host/matrix_knob_caption_test.sh; fi

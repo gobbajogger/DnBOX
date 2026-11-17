@@ -372,7 +372,7 @@ static void picture_rule_cases(void)
         for(int slot=14;slot<16;slot++)for(int i=0;i<8;i++)for(int row=0;row<3;row++){
             unsigned mask=slot==15?0x11u:0x02u;
             uint16_t ink=(mask&(1u<<i))?dim(PART_COL[PART_909],slot==15?16:9):UI_N_SIDE;
-            CHECK(fb[(MAIN_Y+4+pos*4+row)*240+9+slot*14+4+i]==swap16(ink));
+            CHECK(fb[(MAIN_Y+42+pos*18+row)*240+39+slot*12+i]==swap16(ink));
         }
         ui.view=V_PART; build_pages(); draw_header();
         char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);
@@ -415,14 +415,11 @@ static void picture_rule_cases(void)
         CHECK(end+8+tw(&FONT_T,UI_CAP_EDIT)+4+18<190);
         for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK))CHECK(x>=7&&x<end&&y>=50&&y<62);
         CHECK(page==cur_page()&&view==ui.view&&part==ui.part);
-        /* Exercise the composed footer, including the physical panel caption
-         * when built with X0X_SMK_CAPTIONS=1, not just its row helper. */
-        draw_knobs(); int next_x=end+8+tw(&FONT_T,UI_CAP_EDIT)+4;
-        for(int x=next_x;x<next_x+8;x++)CHECK(fb[(KNOB_Y+70)*240+x]==swap16(SOUND_GRAY));
+        /* Owner removed physical-navigation hints in both idle and held states. */
+        draw_knobs();
+        for(int y=70;y<80;y++)for(int x=7;x<234;x++)CHECK(fb[(KNOB_Y+y)*240+x]==swap16(SOUND_BASE));
         ui.held_step=0;ui.held_step_part=(uint8_t)p;ui.held_step_pat=seq.ppat[p];draw_knobs();
-        char held[48];snprintf(held,sizeof held,"STEP 1 %s: CHANCE %s",UI_CAP_ARROWS,UI_CAP_EDIT);
-        int row_x=7+tw(&FONT_T,held)+4;
-        for(int x=row_x;x<row_x+10;x++)CHECK(fb[(KNOB_Y+74)*240+x]==swap16(C_AMB));
+        for(int y=70;y<80;y++)for(int x=7;x<234;x++)CHECK(fb[(KNOB_Y+y)*240+x]==swap16(SOUND_BASE));
         ui.held_step=-1;
         seq.ppat[p]=NPAT-1;seq.pcue[p]=NPAT-2;draw_header();
         char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);

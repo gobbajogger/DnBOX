@@ -95,7 +95,7 @@ static void test_adsr_motion(void){
  * Header pixels are included so the touch readout cannot hide a stage value. */
 static void adsr_expected_header_and_labels(int highlighted)
 {
- const char *const labels[4]={"K5 A 63%","K6 D 31%","K7 S 63%","K8 R 31%"};
+ const char *const labels[4]={"A 63%","D 31%","S 63%","R 31%"};
  const char *const touched[4]={"ATTACK 63%","DECAY 31%","SUSTAIN 63%","RELEASE 31%"};
  uint16_t actual[240*22];
  memcpy(actual,cv_px,sizeof actual);

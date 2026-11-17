@@ -145,27 +145,26 @@ static void visual_order(void)
         else if(p==PART_BRK)pat->brk.steps=1;
         else {pat->bass[p-NKIT].step[0].flags=G_NOTE;pat->bass[p-NKIT].step[0].note=48;}
     }
-    cv_begin(240,BAND_H,C_BLACK);draw_home(0);
+    /* R22 numbered pattern grid keeps the stable display order in both bands.
+     * Compare each part's actual content pixels, not assignment outlines. */
     for(int pos=0;pos<NPARTS;pos++) {
-        int p=expected[pos],x=7+(p+1)*14;
-        CHECK(cv_px[(4+pos*4)*240+x]==swap16(PART_COL[p]));
+        int p=expected[pos],x=39+(p+1)*12,y=42+pos*18;
+        int band=y/BAND_H,by=y%BAND_H;
+        cv_begin(240,BAND_H,C_BLACK);draw_home(band);
+        uint16_t pixels[240*BAND_H];memcpy(pixels,cv_px,sizeof pixels);
+        uint8_t strength[8];
+        home_pattern_strength8(&proj.pat[p+1],proj.arr.lane,p+1,p,
+                               proj.set.accent_q7,T_VEL,strength);
+        cv_begin(240,BAND_H,C_BLACK);
+        pat_glyph_row(x,by,strength,PART_COL[p],1);
+        int ink=0;
+        for(int yy=by;yy<by+3;yy++)for(int xx=x;xx<x+8;xx++) {
+            uint16_t want=cv_px[yy*240+xx];
+            if(want!=swap16(C_BLACK)){CHECK(pixels[yy*240+xx]==want);ink++;}
+        }
+        CHECK(ink>0);
     }
     for(int p=0;p<NPARTS;p++)seq.ppat[p]=0;
-    cv_begin(240,BAND_H,C_BLACK);draw_home(1);
-    uint16_t pixels[240*BAND_H];memcpy(pixels,cv_px,sizeof pixels);
-    cv_begin(240,BAND_H,C_BLACK);
-    /* The Night rows are20px high; compare all lower-band visible rows in fixed order. */
-    for(int pos=1;pos<5;pos++) {
-        int p=expected[pos],y=35+pos*20-BAND_H;
-        if(p<NKIT) {
-            uint32_t bits=0;const dpart_t *d=&pat_of(p)->drum[p];
-            for(int v=0;v<NDRUM;v++)bits|=d->hit[v][0];
-            lane(y,p,bits&65535u,eng_step[TRK_DRUM+p],d->len,0);
-        } else if(p==PART_BRK)lane(y,p,pat_of(p)->brk.steps,eng_step[TRK_BRK],16,0);
-        else {const bpart_t *bp=&pat_of(p)->bass[p-NKIT];
-            lane(y,p,bass_content_bits16(bp,0),eng_step[TRK_BASS0+p-NKIT],bp->len,0);}
-    }
-    CHECK(!memcmp(pixels,cv_px,sizeof pixels));
     set_view(V_MIX);*page_of(V_MIX)=0;build_pages();ui.mixsel=PART_BRK;ui_frame();shot("mix-drums-then-synths");
     set_view(V_SONG);song_fill(0);ui_frame();shot("song-drums-then-synths");
     set_view(V_FX);ui_frame();shot("fx-drums-then-synths");
