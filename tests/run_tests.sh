@@ -385,6 +385,8 @@ run panic-mutants-runner python3 tests/host/panic_mutants_test.py
 run live-key-epoch python3 tests/host/live_key_epoch_test.py
 run midi-epoch-step python3 tests/host/midi_epoch_step_test.py
 run roadmap-evidence-check sh tests/host/roadmap_evidence_check_test.sh
+run roadmap-generation python3 tests/host/roadmap_generation_test.py
+run roadmap-current python3 tools/generate_roadmap.py --check
 run optimization-equivalence sh tests/host/run_optimization_equivalence.sh
 run sdk-pin python3 tests/sdk_pin_test.py   # SDK V1.2.14 pins; a wrong SDK stops the build
 run native-nightly-probe python3 tests/host/test_native_nightly_build_probe.py
