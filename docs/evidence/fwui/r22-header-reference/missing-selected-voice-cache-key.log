@@ -1,2 +1,0 @@
-HEADER_MISMATCH view=1 part=0 voice=2 page=0 battery=3 tempo=180.000 rec=0 help=0 overlay=0 x=31 y=4
-FAIL tests/host/composed_ui_identity_test.c:20: !memcmp(reference_pixels,fb,240*HDR_H*2)

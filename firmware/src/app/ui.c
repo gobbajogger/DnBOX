@@ -5469,7 +5469,7 @@ static UI_DRAW void draw_header(void)
             while (n<(int)sizeof ui.msg-1 && ui.msg[n]>='0' && ui.msg[n]<='9' && pattern<=NPAT)
                 pattern=pattern*10+ui.msg[n++]-'0';
             put_s(put_s(b, "> "), ui.msg+10);
-            x=(240-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,b))/2;
+            x=(214-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,b))/2;
             x=cv_text(x,vc(&FONT_B,0,HDR_H-1),&FONT_B,"NEXT",C_BLACK)+6;
             frame(x,1,12,17,C_BLACK);
             if (!ui.msg[n] && pattern>0 && pattern<=NPAT) {
@@ -5482,9 +5482,26 @@ static UI_DRAW void draw_header(void)
             }
             cv_text(x+18,vc(&FONT_B,0,HDR_H-1),&FONT_B,b,C_BLACK);
         } else {   /* #800 NEXT pattern glyph; other messages keep #806's long-text font fallback */
-            const felucca_font_t *font = tw(&FONT_B, ui.msg) <= 232 ? &FONT_B : &FONT_XS;
-            text_c(120, vc(font, 0, HDR_H - 1), font, ui.msg, C_BLACK);
+            /* Reserve the same battery cell as ordinary R22 headers. Long
+             * About identities use two tiny-font rows, not clipped text. */
+            const felucca_font_t *font = tw(&FONT_B, ui.msg) <= 206 ? &FONT_B : &FONT_XS;
+            if (tw(font, ui.msg) <= 206)
+                text_c(107, vc(font, 0, HDR_H - 1), font, ui.msg, C_BLACK);
+            else {
+                char line[sizeof ui.msg];
+                unsigned n = (unsigned)strlen(ui.msg), cut;
+                memcpy(line, ui.msg, sizeof line);
+                while (n && tw(&FONT_T, line) > 206) line[--n] = 0;
+                cut = n;
+                while (cut && ui.msg[cut] != ' ') --cut;
+                if (!cut) cut = n;
+                line[cut] = 0;
+                text_c(107, -1, &FONT_T, line, C_BLACK);
+                text_c(107, 9, &FONT_T,
+                       ui.msg + cut + (ui.msg[cut] == ' '), C_BLACK);
+            }
         }
+        dv_header_battery(219, 5);
         cv_commit_header();
         return;
     }

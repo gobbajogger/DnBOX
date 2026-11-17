@@ -1,6 +1,6 @@
 # Glyph polish: real framebuffer comparisons
 
-BEFORE is PR [#743](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/743), commit `e5a75c7c8e7f1b21baa1476b5fbf635b29017480`. The reference mockups are PR [#744](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/744), commit `51b2180e3eecd57b7e3a40900aca6ad7519c2223`.
+BEFORE is PR [#743](https://github.com/gobbajogger/DnBOX/pull/743), commit `e5a75c7c8e7f1b21baa1476b5fbf635b29017480`. The reference mockups are PR [#744](https://github.com/gobbajogger/DnBOX/pull/744), commit `51b2180e3eecd57b7e3a40900aca6ad7519c2223`.
 
 AFTER comes from the changed production UI and engines. The exact consumed source-file SHA-256 values are recorded in [render-inputs.json](render-inputs.json). The render harness is identical for both phases. All 1,987 sampled frames per phase are represented by the sheets below: 47 series, 24 animated control families and 23 individual original-engine controls. Raw PNG frames and executables remain in scratch and are excluded from the PR.
 

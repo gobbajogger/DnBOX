@@ -1,7 +1,0 @@
-# Actual clip chord graphics replay
-
-Production runtime remains ef70c8a9564f595505f852c5fd7a34e939b7abd9, inherited by85052c1. Run `OUT=/absolute/scratch/path sh tests/host/ui_clip_chord_graphics_test.sh`.
-
-The earlier chord display fixture intentionally used no-op rectangles and captured text without production rasterization. This supplementary fixture retains that test's lifecycle, expectation strings, independent chord-summary oracle and7049 checks, but uses the actual gfx/font/rounded helpers and unchanged CK renderer from the clip-key host extraction. Its text observer checks the original width/character expectations, checks opaque font pixels stay within the82-pixel strip canvas, then calls actual cv_text. Stage-chip text drawn through pre-existing text_c helpers still renders but is not part of the added observer assertions. All7050 observed chord draws pass, including4096 pitch-class masks and generated chord/inversion/arp cases. Existing mocked USB/Bluetooth sinks remain; no device I/O.
-
-ASan+UBSan replay also passes without diagnostics. Four duplicate-anchor negative cases fail before modifying the host include. Final generated source/font hashes and compile command are separate from original setup provenance; normalized public setup paths have their own receipt hash. No runtime changes, PNG/raw captures, all-screen visual review or complete F1/F2 qualification are claimed.

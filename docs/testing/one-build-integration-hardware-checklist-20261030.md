@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/698 (wip/one-build at cb5423c). Changes covered: Miami rate pads on by default in Free Play (1eb56ce), unused pads stay playable (9ca647b), BREAK transient bend (c32f927), wobble DSP isolated from Miami (f62fa65), SMC command-credit startup fix (33df71b), two-peer BLE controller heap (dcfb9e5), reused audio output windows (f0444ae).
+Source: https://github.com/gobbajogger/DnBOX/pull/698 (wip/one-build at cb5423c). Changes covered: Miami rate pads on by default in Free Play (1eb56ce), unused pads stay playable (9ca647b), BREAK transient bend (c32f927), wobble DSP isolated from Miami (f62fa65), SMC command-credit startup fix (33df71b), two-peer BLE controller heap (dcfb9e5), reused audio output windows (f0444ae).
 
 ## 1. What you need
 

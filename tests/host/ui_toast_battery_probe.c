@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
-/* Development negative fixture. Nonzero exit means the actual missing-battery
- * defect, not passing acceptance. Production source remains unchanged. */
+/* Focused diagnostic probe. Nonzero exit means a missing-battery defect.
+ * ui_toast_battery_test.c also checks levels, text layout and state retention. */
 #define SMC_UI_MAIN retained_fixture_main
 #include "smc_ui_test.c"
 static unsigned missing;

@@ -1,9 +1,0 @@
-{
-  "productionSourceCommit": "b341436ff8087c20b8ef51765f986736473611b0",
-  "checks": 10975,
-  "mixerVoices": 5,
-  "drumPans": 22,
-  "declaredDrumDescriptors": 197,
-  "limits": "Formatter domain and nonmutation only; not complete F4 or all-screen acceptance.",
-  "executionNote": "Initial edit command used the wrong working-directory prefix and did not change source; the original test replay passed 8925. Corrected edit and new test run are preserved separately."
-}

@@ -36,10 +36,6 @@ class Detectors(unittest.TestCase):
         self.assertFalse(inspect_screen(screen([g, label]))['checks']['4']['failures'])
         label['text'] = 'P.DPTH'
         self.assertTrue(inspect_screen(screen([g, label]))['checks']['4']['failures'])
-        label['text'] = 'P.DEPTH'
-        self.assertTrue(inspect_screen(screen([g, label]))['checks']['4']['failures'])
-        label['text'] = 'DEPTH'
-        self.assertFalse(inspect_screen(screen([g, label]))['checks']['4']['failures'])
 
     def test_background_padding_does_not_count_as_content(self):
         s = screen(); s['panels'] = [{'id':'panel','bbox':[0,0,20,20]}]

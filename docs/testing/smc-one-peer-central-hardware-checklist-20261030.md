@@ -6,7 +6,7 @@ Plan only. Nothing here was run on a device. Do not flash a device until the own
 authorizes this exact candidate. Elite recovery and flash stay withdrawn until the owner
 says otherwise. Stop at the first failure. Write down what you saw. Roll back (section 4).
 
-Source: https://github.com/gobbajogger/X0X37-for-Loopy-Pro/pull/700 (smc-a-port-20261029, base dnbox-base-smc-20261029). It replaces dual-peer central scheduling with the working one-peer HCI/ATT discovery and credit handling. Controller: 1 central link, 5 ACL TX credits, multilink off. SMC output is slot 0 only. The controller starts at power-on. Saved OFF stays idle and can turn ON without restart. Missing settings default to SMC host and ON.
+Source: https://github.com/gobbajogger/DnBOX/pull/700 (smc-a-port-20261029, base dnbox-base-smc-20261029). It replaces dual-peer central scheduling with the working one-peer HCI/ATT discovery and credit handling. Controller: 1 central link, 5 ACL TX credits, multilink off. SMC output is slot 0 only. The controller starts at power-on. Saved OFF stays idle and can turn ON without restart. Missing settings default to SMC host and ON.
 
 ## 1. What you need
 

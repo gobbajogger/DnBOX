@@ -126,7 +126,7 @@ offline gate does not authorize or claim bootloader replacement.
 
 - [Upstream boot/format code](https://github.com/jvitkauskas/m-bootloader/tree/64b74d009e6d21fe85ca60754b7c01d438214804).
 - [Upstream v1.2 metadata](https://github.com/jvitkauskas/m-bootloader/releases/tag/v1.2).
-- [Current firmware source](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/tree/3eb42089e4cd2e8cb1a720246fb4526776433ed5).
+- [Current firmware source](https://github.com/gobbajogger/DnBOX/tree/3eb42089e4cd2e8cb1a720246fb4526776433ed5).
 
 Flash occupancy by itself does not impose playback work. The relevant runtime
 costs are active XIP reads/cache behavior and erase/program stalls; RAM headroom is

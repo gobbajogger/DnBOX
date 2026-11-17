@@ -86,7 +86,7 @@ git push -q -f "$REMOTE" gh-pages
 rm -rf .git
 REPO="$(printf %s "$REMOTE" | sed -E 's#(git@github.com:|https://[^@]+@github.com/|https://github.com/)##; s#\.git$##')"
 gh api -X POST "repos/$REPO/pages/builds" >/dev/null 2>&1 || echo "(enable Settings → Pages → Deploy from branch → gh-pages if the site is not live yet)"
-echo "pushed to gh-pages → https://gobbajogger.github.io/X0X37-for-Loopy-Pro/"
+echo "pushed to gh-pages → https://gobbajogger.github.io/DnBOX/"
 echo "  install:  …/install/   (version picker + drop any .fwsc for upgrade/downgrade/stock/custom)"
 echo "  samples:  …/breaks/"
 echo "  projects: …/projects/"
