@@ -15,7 +15,10 @@ static void selected(int v,int bank,int preset)
     CHECK(!engine_bass_preset_pending(v));CHECK(engine_bass_preset_index(v)==preset);
     int param=bank?1:ORIGINAL_CHICAGO_CUTOFF;
     pref_t ref=PR(R_ENG,T_303,v,param);int value=pref_get(ref);
-    pref_set(ref,value==127?126:value+1);CHECK(engine_bass_preset_edited(v));
+    pref_set(ref,value==127?126:value+1);
+    /* The removal-only Synth One init exposes performance controls only;
+     * these must not become persistent preset edits. Other banks still must. */
+    CHECK(engine_bass_preset_edited(v)==(bank!=ORIGINAL_SOUND_SYNTHONE));
     audio(); /* Drain the accepted edit before isolating wheel-deferred requests. */
     ui.dirty=save_wait=0;
 }
@@ -23,6 +26,7 @@ static void unchanged_detent(int v,int role,int direction,int pending)
 {
     sound_t before=proj.sound;unsigned calls=engine_bass_choice_serial();uint32_t rev=song_structure_revision;
     int preset=engine_bass_requested_preset(v),bank=engine_bass_requested_bank(v),page=cur_page();
+    int edited=engine_bass_preset_edited(v);
     detent(role,direction);
     CHECK(engine_bass_choice_serial()==calls);CHECK(engine_bass_preset_pending(v)==pending);
     CHECK(engine_bass_requested_preset(v)==preset && engine_bass_requested_bank(v)==bank);
@@ -30,7 +34,7 @@ static void unchanged_detent(int v,int role,int direction,int pending)
     CHECK(song_structure_revision==rev && cur_page()==page);
     for(int i=0;i<3;i++)audio();
     CHECK(engine_bass_preset_pending(v)==pending);CHECK(!memcmp(&before,&proj.sound,sizeof before));
-    CHECK(engine_bass_preset_edited(v));
+    CHECK(engine_bass_preset_edited(v)==edited);
 }
 int main(void)
 {
@@ -43,6 +47,19 @@ int main(void)
             for(int i=0;i<3;i++)audio();
             CHECK(!memcmp(&before,&proj.sound,sizeof before));
             unchanged_detent(v,encoder,d,0);
+            if(original_sound_factories(bank)==1) {
+                /* Single init has no adjacent preset in either direction.
+                 * A deferred explicit reload must also remain unpublished. */
+                unchanged_detent(v,encoder,-d,0);
+                engine_bass_wheel_owners(1u<<v);
+                CHECK(!engine_bass_select_preset(v,bank,target,&proj.sound));
+                CHECK(engine_bass_preset_pending(v)==3);
+                unchanged_detent(v,encoder,d,3);
+                unchanged_detent(v,encoder,-d,3);
+                engine_bass_wheel_owners(0);await_ready(v);
+                CHECK(engine_bass_preset_index(v)==target);
+                continue;
+            }
             /* A subsequent real adjacent target must still request and apply. */
             unsigned calls=engine_bass_choice_serial();detent(encoder,-d);CHECK(engine_bass_choice_serial()==calls+1);
             CHECK(engine_bass_requested_preset(v)==target-d);await_ready(v);
@@ -56,7 +73,7 @@ int main(void)
             CHECK(!engine_bass_preset_pending(v) && engine_bass_preset_index(v)==target);
             CHECK(!engine_bass_preset_edited(v));
         }
-        /* ENGINE clamps only at actual endpoints; Miami/Drone are interior. */
+        /* ENGINE clamps only at actual endpoints; Miami/Synth One are interior. */
         if(bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_JUNO) {
             int outward=bank==ORIGINAL_SOUND_CHICAGO?-1:1;
             int neighbor=bank-outward;

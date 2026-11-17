@@ -692,7 +692,7 @@ static UI_DRAW void draw_drum_voice(int band)
                         dv_value_text(r, ev_i, vx, y + ah - 16 - off, SOUND_WHITE, 1);
                 } else if (active) {
                     /* single-control active bank (e.g. rimshot Tune): centered large glyph */
-                    gx = 92; gy = y + 25;
+                    gx = 92; gy = y + 23; /* Keep the scaled fork inside the56px active bank. */
                     if (gy - off < bh)
                         dv_glyph(r, ev, (float)gx, (float)(gy - off), 1.8f, 1.8f, ink);
                     dv_value_text(r, ev_i, 214, y + 35 - off, SOUND_WHITE, 1);

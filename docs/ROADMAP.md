@@ -1,3 +1,17 @@
+# Roadmap
+
+Generated status views from [CONSOLIDATED-STATE.md](../CONSOLIDATED-STATE.md):
+
+- [Working](roadmap/Working.md)
+- [Pending](roadmap/Pending.md)
+- [Complete](roadmap/Complete.md)
+
+Run `python3 tools/generate_roadmap.py --integration-sha <verified-consolidated-sha>` after state changes. Use `--check` in qualification; missing local commit objects fail closed, never fetch.
+
+## Preserved historical roadmap
+
+The entries below are retained history, not qualification of the current integration.
+
 # X0X37 roadmap
 
 This file tells what we build, what we finished, where we are and what we must still do. Update this file when a step ends or a plan changes. USER_PREFERENCES.md gives the preferences and rules. x0x37/BEHAVIOR.md gives the intended behavior. x0x37-progress-log.md gives the detailed history.

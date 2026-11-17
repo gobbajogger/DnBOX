@@ -50,7 +50,15 @@ def instrument(root):
     text=once(text,'/* lower panel: body pictogram, voice name, P1/16, 16-step strip */','first_row=-1;first_control=-1;\n    /* lower panel: body pictogram, voice name, P1/16, 16-step strip */')
     # Actual panel rectangles, including otherwise-empty body; no padded fake nodes.
     text=once(text,'rbox(3, by, 234, body_h, 9, SOUND_FACE);','{first_panel("control-banks",3,by,234,body_h);rbox(3, by, 234, body_h, 9, SOUND_FACE);}')
-    text=once(text,'rbox(6, ay, 228, ah, 4, RGB(36,48,54));','{first_panel("active-bank",6,ay,228,ah);rbox(6, ay, 228, ah, 4, RGB(36,48,54));}')
+    active_panels = (
+        'rbox(6, ay, 228, ah, 4, RGB(36,48,54));',
+        'rbox(6, ay, 228, ah, 9, ui_theme_light?SOUND_SELECT:RGB(36,48,54));',
+    )
+    matches = [anchor for anchor in active_panels if anchor in text]
+    if len(matches) != 1:
+        raise ValueError('Expected exactly one supported active-bank panel anchor')
+    anchor = matches[0]
+    text=once(text,anchor,'{first_panel("active-bank",6,ay,228,ah);'+anchor+'}')
     text=once(text,'rbox(3, py, 234, ph, 9, SOUND_FACE);','first_panel("voice-body",3,py,234,ph);rbox(3, py, 234, ph, 9, SOUND_FACE);')
     text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
     sig='static '+draw+'void dv_tune_fork(float ox, float oy, float sx, float sy, float tune01, uint16_t col)'

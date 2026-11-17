@@ -92,7 +92,7 @@ structure or missing final native-font audit reject parsing and saved-trace
 evaluation. An empty structure is NOT_RUN, never PASS. Supplemental actual-font
 text bounding-box intersections now include the WIP TUTUNE section/control
 caption duplication. These are measured text bounds; full ink-level typography
-and unrelated FX/Home/Drone/Remote defects still require their own fixtures.
+and unrelated FX/Home/Remote defects still require their own fixtures.
 
 Regression receipts use exclusive file creation and cannot overwrite an earlier
 failure. They make no global first-attempt claim. The accountable owner's
