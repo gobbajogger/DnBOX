@@ -663,6 +663,7 @@ command -v node >/dev/null 2>&1 && run breaks-web node web/test_breaks.mjs   # t
 command -v node >/dev/null 2>&1 && run breaks-page node web/test_breaks_page.mjs   # the page against a mocked device
 command -v node >/dev/null 2>&1 && run project-adoption-identities node --test web/test_project_adoption_identities.mjs
 run offline-sequencer node --test web/offline-sequencer/*.test.mjs
+run offline-browser-safety python3 tests/test_offline_browser_safety.py
 run offline-sequencer-browser python3 web/offline-sequencer/f6b-browser.test.py
 run offline-touchosc-pack python3 web/offline-sequencer/touchosc/pack.test.py
 run offline-touchosc-identity python3 tests/host/test_touchosc_identity.py
