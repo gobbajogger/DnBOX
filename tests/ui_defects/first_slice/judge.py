@@ -26,12 +26,10 @@ def main():
         archive = subprocess.run(['git', 'archive', a.rev], cwd=repo, check=True, stdout=subprocess.PIPE).stdout
         subprocess.run(['tar', '-x', '-C', str(work)], input=archive, check=True)
         if not (work / 'firmware/src/app/ui_drum_voice.inc').exists():
-            # The first-slice detectors target the R22 drum-voice screen. Until the
-            # fwui lane lands it, there is no such screen in this tree to judge.
-            print('ui-defects: no R22 drum-voice screen (firmware/src/app/ui_drum_voice.inc) in this tree; '
-                  'first-slice render not applicable')
-            write(out / 'judgement.json', {'applicable': False})
-            return 0
+            reason = 'required R22 renderer source missing: firmware/src/app/ui_drum_voice.inc'
+            print('ui-defects: FAIL: ' + reason)
+            write(out / 'judgement.json', {'status': 'FAIL', 'screens': 0, 'reason': reason})
+            return 1
         instrument(work)
         env = os.environ.copy()
         env.update({'SMC_UI_OUT': str(out / 'host'), 'SMC_UI_TEST_FILE': 'tests/host/first_slice_capture.c'})
