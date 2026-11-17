@@ -1,5 +1,9 @@
 # DnBOX
 
+[![Latest release](https://img.shields.io/github/v/release/gobbajogger/DnBOX?label=release)](https://github.com/gobbajogger/DnBOX/releases/latest)
+[![Installer](https://img.shields.io/badge/installer-Pages-0e7a3d)](https://gobbajogger.github.io/DnBOX/install/)
+[![Tracking](https://img.shields.io/badge/tracking-%23967-informational)](https://github.com/gobbajogger/DnBOX/issues/967)
+
 DnBOX (formerly X0X37) is firmware that turns an **M-VAVE SMK-37 Elite** or **SMK-37 Pro** into a groovebox you can play with [Loopy Pro](https://loopypro.com/) and as a stand-alone instrument. FM-1 builds exist in source; current public packages are SMK-37 only.
 
 It gives you a **909**, an **808**, two **303s** with an acid line generator, and a **breakbeat player**, all running at once. Each part can use its own pattern length and rate. You can chain patterns, record knob moves, and play everything in stereo through a shared reverb, tape delay and master compressor. Over USB the keyboard is a MIDI device and an audio interface, with no driver needed.
@@ -11,9 +15,9 @@ The factory sound is set up for big beat, so it should make noise the moment you
 
 ## Current work
 
-Active development is on `integration/dnbox-consolidated`. The clean starting point is the prerelease tag `dnbox-start-2026-11-17` (also `start-fw-2026-11-17` for the M0 start merge). See [docs/START-POINT.md](docs/START-POINT.md) for the locked DONE list and the LEFT list, and [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) for the seven moves to the final build.
+Active development is on `integration/dnbox-consolidated`. The clean starting point is the prerelease tag `dnbox-start-2026-11-17` (also `start-fw-2026-11-17` for the M0 start merge). See [docs/START-POINT.md](docs/START-POINT.md) for the locked DONE list and the LEFT list, [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) for the seven moves to the final build, the [changelog](CHANGELOG.md) for releases so far, and [tracking issue #967](https://github.com/gobbajogger/DnBOX/issues/967).
 
-GitHub Actions are off. Run checks locally with `scripts/gate.sh <lane>` and paste the `DNBOX-GATE: PASS <sha>` or `DNBOX-GATE: FAIL <sha> <failed checks>` line on the pull request. Pull requests go into `integration/dnbox-consolidated`, not `main`.
+GitHub Actions are off. Run checks locally with `scripts/gate.sh <lane>` (offline by default; `--post` publishes a `dnbox-gate` commit status) and paste the `DNBOX-GATE: PASS <sha>`, `FAIL`, or `INCOMPLETE` line on the pull request. Pull requests go into `integration/dnbox-consolidated`, not `main`.
 
 ## Install
 
@@ -54,7 +58,7 @@ An earlier **0.0.26** candidate (`600b3b45`) was withdrawn from the [nightly ins
 
 **How do I go back to stock firmware?** Use the installer restore option, or M-VAVE M-UPGRADE. See [Restore and rescue](#restore-and-rescue).
 
-**Where is the source and the issue tracker?** This repository. Repository and Pages URLs still use the previous name because the GitHub repository has not been renamed.
+**Where is the source and the issue tracker?** This repository, [gobbajogger/DnBOX](https://github.com/gobbajogger/DnBOX). The published installer is on [GitHub Pages](https://gobbajogger.github.io/DnBOX/install/). Work in progress is tracked in [issue #967](https://github.com/gobbajogger/DnBOX/issues/967).
 
 **How do I report a bug or a vulnerability?** Use the bug-report issue form for ordinary problems. See [SECURITY.md](SECURITY.md) for vulnerabilities. Do not attach private backups or credentials.
 
