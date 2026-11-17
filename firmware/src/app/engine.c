@@ -115,7 +115,7 @@ static void original_prepare_all(void)
 unsigned engine_original_keys(int v, int latched)
 {
     if ((unsigned)v >= NBASS || original_bass[v].status != ORIGINAL_RUNTIME_OK) return 0;
-    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO || original_bass[v].kind == ORIGINAL_SOUND_DRONE) return 0; /* no arp */
+    if (original_bass[v].kind == ORIGINAL_SOUND_JUNO || original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) return 0; /* no arp */
     const chicago_arp_control *keys = original_bass[v].kind == ORIGINAL_SOUND_MIAMI ?
         &original_bass[v].dsp.miami.keys : &original_bass[v].dsp.chicago.keys;
     return latched ? keys->latched_count : keys->physical_count;
@@ -124,8 +124,9 @@ uint32_t engine_original_value_bits(int v, unsigned parameter)
 {
     if ((unsigned)v >= NBASS || parameter >= original_sound_count(original_bass[v].kind) ||
         original_bass[v].status != ORIGINAL_RUNTIME_OK) return UINT32_MAX;
-    float value = original_bass[v].kind == ORIGINAL_SOUND_JUNO ? original_bass[v].dsp.juno.synth.macro[parameter] : original_bass[v].kind == ORIGINAL_SOUND_DRONE ?
-        original_bass[v].dsp.drone.macro[parameter] : original_bass[v].kind == ORIGINAL_SOUND_MIAMI ?
+    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE) return 0;
+    float value = original_bass[v].kind == ORIGINAL_SOUND_JUNO ? original_bass[v].dsp.juno.synth.macro[parameter] :
+        original_bass[v].kind == ORIGINAL_SOUND_MIAMI ?
         original_bass[v].dsp.miami.program.macro[parameter] : original_bass[v].dsp.chicago.program.macro[parameter];
     uint32_t bits; __builtin_memcpy(&bits, &value, sizeof bits); return bits;
 }
@@ -586,7 +587,7 @@ static uint8_t perf_seen[NBASS][3] = {{64, 0, 0}, {64, 0, 0}};
 static int16_t mod_ctl[NBASS] = {-1, -1};
 static volatile uint8_t ext_touch[NBASS];           /* ISR -> UI: bit0 bend, bit1 mod moved by ext MIDI */
 static int mod_param(int v)
-{ return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_DRONE ? 1 :
+{ return original_bass[v].kind == ORIGINAL_SOUND_JUNO ? 2 : original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE ? -1 :
     original_bass[v].kind == ORIGINAL_SOUND_MIAMI ? ORIGINAL_MIAMI_WOBBLE_DEPTH : ORIGINAL_CHICAGO_CUTOFF; }
 static const float mix_level_values[128] = {
     0x0p+0f,     0x1.a36e2ep-14f,     0x1.a36e2ep-12f,     0x1.d7dbf4p-11f,
@@ -1236,6 +1237,7 @@ static void apply_param(int t, int v, int i, int val);
 static void mod_apply(int v, int val)              /* ISR */
 {
     if ((unsigned)v >= NBASS) return;
+    if (mod_param(v) < 0) return;
     val = val < 0 ? 0 : val > 127 ? 127 : val;
     apply_param(T_303, v, mod_param(v), val);      /* the knob's own path */
     mod_ctl[v] = (int16_t)val;                     /* after: apply_param from a knob clears it */

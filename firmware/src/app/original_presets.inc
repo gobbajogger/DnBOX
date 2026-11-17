@@ -13,7 +13,7 @@ static void bass_preset_boundary_voice(int v);
 static const bass_identity_entry_t BASS_SOUND_REGISTRY[4] = {
     {ORIGINAL_SOUND_CHICAGO_ID, ORIGINAL_SOUND_SCHEMA, 22, 1},
     {ORIGINAL_SOUND_MIAMI_ID, ORIGINAL_SOUND_SCHEMA, 18, 1},
-    {ORIGINAL_SOUND_DRONE_ID, ORIGINAL_SOUND_SCHEMA, ORIGINAL_DRONE_NPARAMS, 1},
+    {ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA, ORIGINAL_SYNTHONE_NPARAMS, 1},
     {ORIGINAL_SOUND_JUNO_ID, ORIGINAL_SOUND_SCHEMA, ORIGINAL_JUNO_NPARAMS, 1}
 };
 
@@ -48,11 +48,20 @@ static void bass_tag_set(sound_t *sound, int voice, int bank, int preset, int ed
         (uint16_t)preset, (uint8_t)(edited ? BASS_SOUND_EDITED : 0)};
     (void)bass_sound_tag_encode(&sound->bass[voice], &info, BASS_SOUND_REGISTRY, 4);
 }
-static int bass_tagged_cell_validate(const uint8_t *cell, const bass_sound_tag_t *tag, int *bank)
+static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *bank)
 {
     bass_sound_info_t info;
+    int adopted = original_sound_adopt_legacy_cell(cell);
     if (!original_sound_valid(cell)) return -9;
-    if (bass_sound_tag_decode(&info, tag, BASS_SOUND_REGISTRY, 4) != BASS_IDENTITY_READY) return -9;
+    if (adopted) {
+        bass_sound_info_t next = {{ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA,
+            (uint8_t)original_sound_count(ORIGINAL_SOUND_SYNTHONE), BASS_IDENTITY_KNOWN}, 0, 0};
+        if (bass_sound_tag_encode(tag, &next, BASS_SOUND_REGISTRY, 4) != BASS_IDENTITY_READY)
+            return -9;
+        info = next;
+    } else if (bass_sound_tag_decode(&info, tag, BASS_SOUND_REGISTRY, 4) != BASS_IDENTITY_READY) {
+        return -9;
+    }
     *bank = cell[29];
     if (info.identity.engine != original_sound_engine_id((unsigned)*bank) ||
         info.preset != cell[30] || info.flags != (original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)) return -9;
@@ -61,8 +70,9 @@ static int bass_tagged_cell_validate(const uint8_t *cell, const bass_sound_tag_t
 int engine_bass_sound_bank(const sound_t *sound, int voice)
 {
     int bank;
-    return sound && (unsigned)voice < NBASS &&
-        !bass_tagged_cell_validate(sound->v[T_303][voice], &sound->bass[voice], &bank) ? bank : -1;
+    sound_t *mut = (sound_t *)sound;
+    return mut && (unsigned)voice < NBASS &&
+        !bass_tagged_cell_validate(mut->v[T_303][voice], &mut->bass[voice], &bank) ? bank : -1;
 }
 int engine_bass_sound_validate(const sound_t *sound)
 {
@@ -83,11 +93,12 @@ int engine_note_lock_capture_on(void) { return note_lock_capture; }
 int engine_bass_note_validate(const lane_t *l)
 {
     int bank;
+    lane_t *mut=(lane_t *)l;
     if(l->used!=1 || l->t!=BASS_NOTE_TARGET || l->pat>=NPAT ||
        l->part<PART_303A || l->part>PART_303B || l->v>=NSTEPS ||
        l->i!=BASS_NOTE_VERSION || l->rsv)return -1;
     for(int i=BASS_NOTE_USED;i<NSTEPS;i++)if(l->val[i])return -1;
-    int rc=bass_tagged_cell_validate(l->val,(const bass_sound_tag_t *)(l->val+BASS_NOTE_TAG),&bank);
+    int rc=bass_tagged_cell_validate(mut->val,(bass_sound_tag_t *)(mut->val+BASS_NOTE_TAG),&bank);
     if(rc)return rc;
     for(int i=0;i<MX_NPARAMS;i++)if(l->val[BASS_NOTE_MIX+i]>engine_param(T_MIX,l->part,i)->max)return -1;
     return 0;
@@ -223,7 +234,7 @@ static void bass_restore_sound(const sound_t *sound)
 int engine_bass_bank(int v) { return (unsigned)v < NBASS ? original_bass[v].kind : -1; }
 int engine_bass_bank_available(int v, int bank)
 {
-    return (unsigned)v < NBASS && (bank == ORIGINAL_SOUND_JUNO || bank == ORIGINAL_SOUND_DRONE || bank == FACTORY_BANK_MIAMI ||
+    return (unsigned)v < NBASS && (bank == ORIGINAL_SOUND_JUNO || bank == ORIGINAL_SOUND_SYNTHONE || bank == FACTORY_BANK_MIAMI ||
         (bank == FACTORY_BANK_CHICAGO && original_fx_ready));
 }
 const x0x_param_t *engine_bass_bank_param(int bank, int parameter)
@@ -267,7 +278,10 @@ int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
 {
     for (int v = 0; v < NBASS; ++v) if (mask & (1u << v)) {
         int bank;
-        if (bass_tagged_cell_validate(target->cell[v], &target->tag[v], &bank)) return -5;
+        uint8_t cell[ORIGINAL_SOUND_BYTES];
+        bass_sound_tag_t tag = target->tag[v];
+        memcpy(cell, target->cell[v], sizeof cell);
+        if (bass_tagged_cell_validate(cell, &tag, &bank)) return -5;
         if (!engine_bass_bank_available(v, bank)) return -2;
         if (bass_has_locks(v)) return -4;
         /* Typed history restore retains its existing admission contract. Only

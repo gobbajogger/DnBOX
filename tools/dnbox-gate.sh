@@ -153,14 +153,10 @@ budget()     { local model xip pool bad=0
                done
                return $bad; }
 ui_defects() { python3 tests/ui_defects/test_gate.py || return 1
-               [ -f tests/ui_defects/first_slice/evaluate.py ] || return 0
-               local render="${DNBOX_UI_RENDER_DIR:-$OUT/ui-render}"
-               if [ ! -f "$render/source-closure.json" ]; then
-                 echo "evaluate.py render receipts missing at $render/source-closure.json (NOT_RUN = FAIL)"
-                 return 1
-               fi
-               # Force a real failure (not VOID): evaluate.py may exit 2 on a Python error.
-               python3 tests/ui_defects/first_slice/evaluate.py --render-dir "$render" --output "$OUT/ui-eval.json" || return 1
+               python3 -m unittest discover -s tests/ui_defects/first_slice -p 'test_*.py' || return 1
+               # Render the screens from this checkout on the host and judge them (no saved receipts).
+               rm -rf "$OUT/ui-judge"
+               python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
              }
 drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 

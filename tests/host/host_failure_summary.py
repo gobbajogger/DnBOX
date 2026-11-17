@@ -3,7 +3,7 @@
 """Inspect genuine host-suite results without hiding failures or inventing clears.
 
 A later git checkout is not evidence of the revision that ran an old transcript.
-Use --run-record from run_host_with_evidence.py for source-bound comparisons.
+Use --run-record with a record captured at the tested HEAD for source-bound comparisons.
 """
 import argparse
 from collections import Counter
@@ -197,7 +197,7 @@ def main():
     ap.add_argument('--logdir', type=Path, default=Path('build/host'))
     ap.add_argument('--transcript', type=Path)
     ap.add_argument('--run-record', type=Path,
-                    help='record captured with run_host_with_evidence.py at the actual tested HEAD')
+                    help='record captured at the actual tested HEAD')
     ap.add_argument('--baseline-report', type=Path)
     ap.add_argument('--output', type=Path, default=Path('build/host/failure-summary.json'))
     args = ap.parse_args()

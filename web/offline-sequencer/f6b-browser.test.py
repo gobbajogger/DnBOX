@@ -34,7 +34,12 @@ def run():
     receipts = []
     with sync_playwright() as p:
         opts = {'executable_path': os.environ['DNBOX_CHROMIUM_EXECUTABLE']} if os.environ.get('DNBOX_CHROMIUM_EXECUTABLE') else {}
-        browser = p.chromium.launch(headless=True, **opts)
+        # Chromium puts its singleton Unix socket below TMPDIR. The host suite's
+        # isolated TMPDIR can exceed Unix's 108-byte socket-path limit, so the
+        # browser alone gets a short private tmp directory; test output stays isolated.
+        browser_tmp = tempfile.TemporaryDirectory(prefix='dnbox-pw-', dir='/tmp')
+        browser = p.chromium.launch(headless=True, env={**os.environ, 'TMPDIR': browser_tmp.name}, **opts)
+
         for width, height in [(1280, 900), (390, 844), (844, 390)]:
             ctx = browser.new_context(viewport={'width': width, 'height': height})
             ctx.add_init_script('window.midiCalls=0;navigator.requestMIDIAccess=()=>{window.midiCalls++;throw Error("No device calls expected")};')
@@ -173,6 +178,7 @@ def run():
             receipts.append({'viewport': [width, height], 'result': 'PASS', 'device_calls': 0})
             ctx.close()
         browser.close()
+        browser_tmp.cleanup()
     (OUT / 'f6b-browser-receipt.json').write_text(json.dumps(receipts, indent=2) + '\n')
 
 if __name__ == '__main__':
