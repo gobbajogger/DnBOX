@@ -122,8 +122,8 @@ DnBOX does not take donations. It builds on other people's work. If you want to 
 
 ## Changelog, contributing and security
 
-- [CHANGELOG.md](CHANGELOG.md) — recent firmware changes
-- [docs/RELEASING.md](docs/RELEASING.md) — how a public release is made
+- [CONSOLIDATED-STATE.md](CONSOLIDATED-STATE.md) — integration state and current qualification
+- [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) — delivery sequence and required checks
 - [CONTRIBUTING.md](CONTRIBUTING.md) — how to report issues and propose changes
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
 - [SECURITY.md](SECURITY.md) — how to report a vulnerability

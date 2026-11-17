@@ -17,15 +17,15 @@ Do not attach private backups, credentials, or raw captures that you do not want
 
 ## Code and documentation changes
 
-1. Fork the repository or push a branch, then open a pull request against `main` for docs or against the branch the maintainers are using for the current firmware work. Follow the pull request template.
-2. Keep changes focused. Do not commit firmware images (`.fwsc`, `.bin`, `.elf`, `.img`), logs, dumps, or zip archives.
+1. Fork the repository or push a branch, then open code and documentation pull requests against `integration/dnbox-consolidated`. Do not push or merge to `main`; final sign-off belongs to the owner. Follow the pull request template.
+2. Keep changes focused. Do not commit firmware images (`.fwsc`, `.bin`, `.elf`, `.img`), unrelated logs, dumps, or zip archives. Include the single nonsecret gate log required by [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md).
 3. Follow the licence in [LICENSE](LICENSE) and the third-party notices in [LICENSING.md](LICENSING.md) and [CREDITS.md](CREDITS.md).
 4. Build and test guidance is in [BUILDING.md](BUILDING.md).
 5. Do not change GitHub workflow files under `.github/workflows/` unless a maintainer asks you to.
 
 ## Releases
 
-Every public DnBOX release on main and on nightly follows [docs/RELEASING.md](docs/RELEASING.md). Do not invent a different tag, asset name, or notes layout.
+Follow [docs/DELIVERY-PLAN.md](docs/DELIVERY-PLAN.md) and the current owner instructions for qualification and delivery. A source PR does not authorize a release or a merge to `main`.
 
 ## Security
 

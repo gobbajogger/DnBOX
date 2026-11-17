@@ -583,3 +583,6 @@ Each path below is an obsolete brief/rule/handoff explicitly listed in the suppl
 - `skills/x0x37-workflow/references/stages.md` — supplied removal list; historical instructions, retained in Git history.
 
 M0 limits correction: exclude the gate scanner itself from its PSRAM-setting diff and explicitly succeed for small tracked blobs; object-read failures still fail closed. Original supplied limits falsely rejected its own regex and the final small file. Environment and full-gate repairs remain separate.
+
+## Hygiene review corrections
+Isolated review-fix branch from the hygiene PR; original PR head is unchanged. Corrected contribution routing and gate-log wording, and replaced missing document links with the existing delivery plan and consolidated state. Full gate and independent final review remain NOT_RUN; consume through the existing integration owner before merge.
