@@ -148,8 +148,8 @@ static void read_only_rows_do_not_edit(void)
 /* HOME pattern glyphs: two used patterns with different 909 hits must not paint the same fill. */
 static void home_pattern_glyph_content(void)
 {
-    /* 16 stored steps map in pairs to eight columns. The current plate starts
-     * at x=7, with its 8x3 content inset by two pixels, at canvas y=4. */
+    /* R22 HOME is a pattern-column/part-row matrix. The 909 row's first
+     * 10x12 plate starts at(38,38), with8x3 content at(39,42). */
     static const unsigned expected_mask[2] = {0x11u, 0x03u};
     unsigned observed_mask[2] = {0, 0};
     int pattern, row, column;
@@ -175,7 +175,7 @@ static void home_pattern_glyph_content(void)
         uint16_t ink = swap16(dim(PART_COL[PART_909], pattern == 0 ? 12 : 7));
         for (row = 0; row < 3; row++)
             for (column = 0; column < 8; column++) {
-                uint16_t pixel = fb[(MAIN_Y + 4 + row) * 240 + 9 + pattern * 14 + column];
+                uint16_t pixel = fb[(MAIN_Y + 42 + row) * 240 + 39 + pattern * 12 + column];
                 uint16_t expected = (expected_mask[pattern] & (1u << column)) ?
                                     ink : swap16(UI_N_SIDE);
                 assert(pixel == expected);

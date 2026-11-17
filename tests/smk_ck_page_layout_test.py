@@ -27,18 +27,17 @@ check("rbox(fx - 2, fy" in pd and "f == (uint32_t)cp->pg >> 4" in pd,
       "page marks the selected field")
 check("ck_zones" not in pd and "CK_ZONE" not in header and "k - lo == v" not in pd,
       "page does not show editable key zones or value keys")
-check('"PLAY KEYS"' in pd and "CK_BIT(cp->keys, k) ? c" in pd and
+check("CK_BIT(cp->keys, k) ? c" in pd and
       "ck_kbd(10, 76, 10, 46, CK_NKEY, col)" in pd,
-      "page labels its keyboard as playable and lights held keys")
+      "page draws its playable keyboard and lights held keys")
 check("ck_nm(CK_MODE_N, i)" in panel and "cp->on >> i & 1u" in panel,
       "KEYS strip retains stage names and ON state")
-check("KNOB2 FIELD  KNOB3 / < > VALUE  KEYS PLAY" in pd,
-      "help line names the knob and arrow controls")
+check('"PLAY KEYS"' not in pd and '"KNOB2 FIELD' not in pd,
+      "page has no explanatory keyboard or knob instructions")
 field = re.search(r"fy = (\d+) \+ \(int32_t\)\(n % 5u\) \* (\d+)", pd)
-label = re.search(r"vc\(&FONT_T, (\d+), 10\), &FONT_T, \"PLAY KEYS\"", pd)
-help_y = re.search(r"vc\(&FONT_T, (\d+), 12\), &FONT_T, \"KNOB2", pd)
-check(bool(field and label and help_y) and int(field.group(1)) + 4 * int(field.group(2)) + 12 <= int(label.group(1))
-      and int(label.group(1)) + 10 <= 76 and 76 + 46 <= int(help_y.group(1)) and int(help_y.group(1)) + 12 <= 138,
-      "fields, keyboard label, keyboard and help line do not overlap")
+keyboard = re.search(r"ck_kbd\(10, (\d+), 10, (\d+), CK_NKEY, col\)", pd)
+check(bool(field and keyboard) and int(field.group(1)) + 4 * int(field.group(2)) + 12 <= int(keyboard.group(1))
+      and int(keyboard.group(1)) + int(keyboard.group(2)) <= 138,
+      "fields and keyboard do not overlap and fit the stage page")
 print(f"smk_ck_page_layout_test: {fails} fail(s)")
 sys.exit(1 if fails else 0)

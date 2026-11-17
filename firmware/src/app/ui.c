@@ -114,7 +114,7 @@ static int part_neighbor(int part, int direction)
 #if X0X_BASS_PRESET_PREVIEW
 static const char *bass_display_name(int bank,int other,int voice)
 {
-    if (bank == ORIGINAL_SOUND_JUNO) return bank == other ? (voice?"JUNO B":"JUNO A"):"JUNO";
+    if (bank == ORIGINAL_SOUND_JUNO) return bank == other ? (voice?"SUPERJ6 B":"SUPERJ6 A"):"SUPERJ6";
     if (bank == ORIGINAL_SOUND_SYNTHONE) return bank == other ?
         (voice ? "S1 B" : "S1 A") : "SYNTH ONE";
     if(bank==other) return bank?(voice?"MIAMI B":"MIAMI A"):(voice?"CHICAGO B":"CHICAGO A");
@@ -156,7 +156,7 @@ static const char *part_s(int i)
 #if X0X_BASS_TAGGED_SOUND
         if(engine_bass_sound_bank(&proj.sound,v)<0)return "?";
 #endif
-        if (b == ORIGINAL_SOUND_JUNO) return b == engine_bass_bank(1-v)?(v?"JU-B":"JU-A"):"JUN";
+        if (b == ORIGINAL_SOUND_JUNO) return b == engine_bass_bank(1-v)?(v?"SJ6B":"SJ6A"):"SJ6";
         if (b == ORIGINAL_SOUND_SYNTHONE) return b == engine_bass_bank(1-v) ?
             (v ? "S1B" : "S1A") : "S1";
         if(b==engine_bass_bank(1-v)) return b?(v?"MI-B":"MI-A"):(v?"CH-B":"CH-A");
@@ -424,7 +424,7 @@ static uint8_t original_page_bank, original_list_bank;
 static int original_display_value(pref_t r);
 static const ui_original_control_view *original_text_view(pref_t r, int value);
 static void build_pages(void);
-static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "JUNO"};
+static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "SUPERJ6"};
 static const x0x_param_t BENGINE_P = {"ENGINE",3,0,BENGINE_N};
 static x0x_param_t BPRESET_P = {"PRESET",54,0,0};
 static const x0x_param_t BSTATUS_P = {"STATUS",0,0,0};
@@ -5460,7 +5460,7 @@ static UI_DRAW void draw_header(void)
         ;
     if (cacheable) {
         snapshot.name = part_display(ui.part);
-        if (is_303()) snapshot.name = engine_bass_bank(bidx()) == ORIGINAL_SOUND_JUNO ? (bidx()?"JUNO B":"JUNO A") : engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE ?
+        if (is_303()) snapshot.name = engine_bass_bank(bidx()) == ORIGINAL_SOUND_JUNO ? (bidx()?"SUPERJ6 B":"SUPERJ6 A") : engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE ?
             (bidx() ? "S1 B" : "S1 A") : engine_bass_bank(bidx()) == ORIGINAL_SOUND_MIAMI ?
             (bidx() ? "MIAMI B" : "MIAMI A") : (bidx() ? "CHICAGO B" : "CHICAGO A");
         memcpy(snapshot.colours, pal, sizeof pal);
@@ -5528,7 +5528,7 @@ static UI_DRAW void draw_header(void)
             ui.view==V_GLO?list_title:VIEW_N[ui.view];
         char drum_title[24],context_title[32];
         if(ui.view==V_PART && is_303()) {
-            name=engine_bass_bank(bidx())==ORIGINAL_SOUND_JUNO?(bidx()?"JUNO B":"JUNO A"):engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE?(bidx()?"S1 B":"S1 A"):
+            name=engine_bass_bank(bidx())==ORIGINAL_SOUND_JUNO?(bidx()?"SUPERJ6 B":"SUPERJ6 A"):engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE?(bidx()?"S1 B":"S1 A"):
                 engine_bass_bank(bidx())==ORIGINAL_SOUND_MIAMI?(bidx()?"MIAMI B":"MIAMI A"):
                 (bidx()?"CHICAGO B":"CHICAGO A");
         }
@@ -6423,10 +6423,6 @@ static UI_DRAW void draw_perf(int band)
                 put_s(q, PT_N[perf.test < 3 ? perf.test : 2]);
             }
             cv_text(4, 24, &FONT_S, t, done ? C_HI : C_AMB);
-            if (!done)
-                cv_text(4, 46, &FONT_XS, UI_CAP_HOME " / " UI_CAP_PLAY ": STOP", C_DIM);
-            else
-                cv_text(4, 46, &FONT_XS, "SHARE OF THE CPU (PEAK)  CYCLES / SAMPLE", C_DIM);
             return;
         }
         q = put_s(t, "LOAD ");
@@ -6444,7 +6440,7 @@ static UI_DRAW void draw_perf(int band)
             q = put_s(q, "%  WRITE ");
             put_s(put_i(q, perf.stall[2]), "%");
         } else
-            put_s(t, "STALLS OFF (KNOB 1)");
+            put_s(t, "STALLS OFF");
         cv_text(4, 46, &FONT_XS, t, perf.stalls_on ? C_GRAY : C_DIM);
         if (!perf.stalls_on && plat_irq_stack_size()) {   /* the interrupts' 8 KiB: the deepest so far */
             q = put_s(t, "IRQ STACK ");

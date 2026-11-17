@@ -3,7 +3,14 @@
 #define SMC_UI_MAIN retained_fixture_main
 #include "smc_ui_test.c"
 static uint16_t reference_pixels[240 * MAIN_ROWS];
-static void reference_header_commit(void) { memcpy(reference_pixels,cv_px,240*HDR_H*2); }
+static void dv_header_battery_r22_reference(int,int);
+static void reference_header_commit(void)
+{
+    /* Owner requires the battery even while a notification is visible. */
+    if (ui.msg_until && (int32_t)(ui.msg_until-plat_ms())>0 &&
+        strncmp(ui.msg,"PICK ",5)) dv_header_battery_r22_reference(219,5);
+    memcpy(reference_pixels,cv_px,240*HDR_H*2);
+}
 #define cv_commit_header reference_header_commit
 #include "reference/ui_perf_8be_reference.inc"
 #undef cv_commit_header
@@ -15,8 +22,34 @@ static void r22_phase_reference_icon(int32_t x,int32_t y,uint16_t colour)
         colour=!seq.metro_view?C_DIM:seq.metro_view<=4u?C_WHITE:C_HI;
     play_icon(x,y,colour);
 }
+/* Product naming correction is explicit; retained reference bytes stay unchanged. */
+static int32_t r22_named_reference_text(int32_t x,int32_t y,const felucca_font_t *font,
+    const char *name,uint16_t colour,int32_t left,int32_t right)
+{
+    if (!strcmp(name,"JUNO A")) name="SUPERJ6 A";
+    else if (!strcmp(name,"JUNO B")) name="SUPERJ6 B";
+    else if (!strcmp(name,"DRONE A")) name="S1 A";
+    else if (!strcmp(name,"DRONE B")) name="S1 B";
+    return cv_text_clip(x,y,font,name,colour,left,right);
+}
+static void r22_battery_reference_text(int32_t x,int32_t y,const felucca_font_t *font,
+    const char *text,uint16_t colour)
+{
+    if (x==120 && text==ui.msg && ui.msg_until &&
+        (int32_t)(ui.msg_until-plat_ms())>0 && strncmp(ui.msg,"PICK ",5)) {
+        CHECK(tw(font,text)<=206); /* long wrapping has a separate toast test */
+        x=107; /* centre of the 214px text area; reserve the battery cell */
+    }
+    text_c(x,y,font,text,colour);
+}
 #define play_icon r22_phase_reference_icon
+#define cv_text_clip r22_named_reference_text
+#define text_c r22_battery_reference_text
+#define ORIGINAL_SOUND_DRONE ORIGINAL_SOUND_SYNTHONE /* legacy oracle ABI only */
 #include "reference/ui_r22_d13_header_reference.inc"
+#undef ORIGINAL_SOUND_DRONE
+#undef text_c
+#undef cv_text_clip
 #undef play_icon
 static void same_header(void)
 {
@@ -26,6 +59,7 @@ static void same_header(void)
     if(memcmp(reference_pixels,fb,240*HDR_H*2)) {
         unsigned pixel=0;while(pixel<240*HDR_H && reference_pixels[pixel]==fb[pixel])pixel++;
         fprintf(stderr,"HEADER_MISMATCH view=%u part=%u voice=%u page=%d battery=%d tempo=%.3f rec=%u help=%u overlay=%u x=%u y=%u\n",ui.view,ui.part,is_drum()?ui.sel[ui.part]:0,cur_page(),plat_battery(),(double)seq_tempo(&seq),ui.rec,ui.help,ui.overlay,pixel%240,pixel/240);
+        fprintf(stderr,"HEADER_DETAIL msg=%s until=%u now=%u expected=%04x actual=%04x\n",ui.msg,ui.msg_until,plat_ms(),reference_pixels[pixel],fb[pixel]);
     }
     CHECK(!memcmp(reference_pixels,fb,240*HDR_H*2));
 }
@@ -45,6 +79,25 @@ int main(void)
             ui.help=0;ui.overlay=O_ASK;same_header();ui.overlay=O_NONE;
             say("RESET SOUND",0);same_header();now_ms=ui.msg_until;same_header();
             cv_begin(240,HDR_H,C_BLACK);cv_rect(0,0,240,HDR_H,C_AMB);cv_commit_header();same_header();
+        }
+    }
+    /* The frozen legacy oracle is adapted explicitly above, never rewritten.
+     * Render both current synth identities and the battery-reserving toast. */
+    for(int bank=0;bank<2;bank++) {
+        setup(V_PART,PART_303A);
+        int kind=bank?ORIGINAL_SOUND_JUNO:ORIGINAL_SOUND_SYNTHONE;
+        for(int voice=0;voice<2;voice++) {
+            int32_t audio[512];
+            CHECK(engine_bass_select_preset(voice,kind,0,&proj.sound)==0);
+            for(int n=0;n<1024 && engine_bass_preset_pending(voice);n++) engine_render(audio,256);
+            CHECK(!engine_bass_preset_pending(voice));
+            CHECK(engine_bass_bank(voice)==kind);
+            ui.part=(uint8_t)(PART_303A+voice);build_pages();ui.msg_until=0;
+            draw_main();draw_knobs();draw_footer();same_header();
+            CHECK(!strcmp(part_header_snapshot.name,bank?(voice?"SUPERJ6 B":"SUPERJ6 A"):(voice?"S1 B":"S1 A")));
+            shot(bank?(voice?"identity-superj6-b":"identity-superj6-a"):(voice?"identity-synthone-b":"identity-synthone-a"));
+            say("RESET SOUND",0);same_header();
+            shot(bank?(voice?"toast-superj6-b":"toast-superj6-a"):(voice?"toast-synthone-b":"toast-synthone-a"));
         }
     }
     /* Explicit current R22 semantics and independent cache-input transitions. */

@@ -167,7 +167,15 @@ static void selector_cases(void)
         choose(0,kind,0); screen(V_PART,PART_303A,1); pref_t r=PR(R_ENG,T_303,0,kind?7:4);
         for (unsigned q=63;q<=65;q++) {
             pref_set(r,(int)q); block(); char text[24]; text_of(r,text);
-            CHECK(!strcmp(text,kind?(q==63?"-0.08":q==64?"0.00":"+0.08"):(q==63?"-2%":q==64?"0%":"+2%")));
+            if (kind) {
+                /* Native80 is a bipolar modulation amount, displayed as percent,
+                 * not a unitless fixed pitch. Compare with independent DSP compile. */
+                original_miami_program program; original_miami_voice_controls control;
+                CHECK(original_sound_restore_miami(&program,proj.sound.v[T_303][0]));
+                CHECK(original_miami_voice_compile(&control,&program));
+                CHECK(strlen(text)>0 && text[strlen(text)-1]=='%');
+                CHECK(fabsf(strtof(text,0)-100.f*control.patch_slave)<=.051f);
+            } else CHECK(!strcmp(text,q==63?"-2%":q==64?"0%":"+2%"));
         }
         pref_set(r,64); block(); float exact; CHECK(original_sound_value(proj.sound.v[T_303][0],r.c,&exact) && exact==.5f);
     }
