@@ -191,6 +191,7 @@ typedef struct {
     uint8_t held_step_part, held_step_pat; /* owner at key-down; a pattern can change before key-up */
     uint8_t step_edited;
     uint8_t paste_src[NPARTS];        /* source slots chosen with a paste target; stable through confirmation */
+    uint8_t brk_choice_on, brk_choice_bank, brk_choice_slot, brk_choice_pat;
     uint8_t step_preview;              /* the held step is sounding (only while stopped) */
     uint8_t step_created;              /* the press turned the held step on (its release keeps it) */
     int8_t brk_held;                   /* BREAK: the white key (16th) held, -1 none */
@@ -234,7 +235,8 @@ typedef struct {
     uint8_t outline_ok, outline_slot;
     uint8_t song_sel;                  /* the SONG screen's bar */
 } ui_t;
-static ui_t ui X0X_POOL;
+/* Keep bounded UI state in ordinary zeroed BSS; preserve audio pool reserve. */
+static ui_t ui;
 /* A remote engine edit refreshes the parameter layout without changing the
  * keyboard's remembered page. Keep a SOUND-page selection effective across the
  * asynchronous bank change; only physical keyboard input accepts the new page. */
@@ -626,6 +628,8 @@ static pattern_t *pref_pattern(pref_t r)
 
 static int pref_get(pref_t r)
 {
+    if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
+        seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
     pattern_t *p = pref_pattern(r);
     switch (r.kind) {
     case R_BENGINE: return engine_bass_requested_bank(r.b);
@@ -904,6 +908,46 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 #endif
 }
 static void pref_set(pref_t r, int v) { pref_set_impl(r, v, 1); }
+
+/* Browsing never changes a pattern. The existing BREAK voice auditions the
+ * candidate; SEL commits and any exit restores the selected loops. */
+static void brk_choice_cancel(void)
+{
+    if (!ui.brk_choice_on) return;
+    ui.brk_choice_on = 0;
+    engine_brk_preview_end();
+    ui.outline_ok = 0;
+}
+static int brk_choice_turn(pref_t r, int e)
+{
+    int n = engine_brk_nslots(), value;
+    if (!n || !e) return 0;
+    if (ui.brk_choice_on && (ui.brk_choice_bank != r.a ||
+        ui.brk_choice_pat != seq.ppat[PART_BRK])) brk_choice_cancel();
+    value = ui.brk_choice_on ? ui.brk_choice_slot : pref_get(r);
+    value += e > 0 ? 1 : -1;
+    value = value < 0 ? 0 : value >= n ? n - 1 : value;
+    if (!engine_brk_preview(value)) return 0;
+    ui.brk_choice_on = 1;
+    ui.brk_choice_bank = (uint8_t)r.a;
+    ui.brk_choice_slot = (uint8_t)value;
+    ui.brk_choice_pat = seq.ppat[PART_BRK];
+    ui.outline_ok = 0;
+    say("PREVIEW", 0);
+    return 1;
+}
+static int brk_choice_confirm(void)
+{
+    if (!ui.brk_choice_on) return 0;
+    if (!engine_brk_preview_active() || ui.brk_choice_pat != seq.ppat[PART_BRK]) { brk_choice_cancel(); return 0; }
+    int bank = ui.brk_choice_bank, slot = ui.brk_choice_slot;
+    brk_choice_cancel();
+    pref_set_impl(PR(R_BRKSLOT, bank, 0, 0), slot, 1);
+    mark_dirty();
+    say("CHOSEN", 0);
+    return 1;
+}
+
 
 
 /* a name in capitals (the engines' own are mixed case): two at a time */
@@ -2786,6 +2830,7 @@ static int32_t accel(int role, int32_t s, int range)
 
 static void set_view(int v)
 {
+    brk_choice_cancel();
     bass_layout_accept();
     /* A step held on SEQ may carry its p-lock gesture to EDIT's sound knobs.
      * Return to SEQ after key-up so lock_release still uses those knob refs. */
@@ -3132,6 +3177,8 @@ static uint32_t lock_marks(int t, int v, int base)
 
 static void turn_ref(pref_t r, int e, int knob)
 {
+    if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
+    brk_choice_cancel();
 #if X0X_BASS_PRESET_PREVIEW
     /* The detent's descriptor, current value, write and motion ownership all
      * belong to one committed engine, even across an audio boundary. */
@@ -4070,6 +4117,11 @@ static int play_answer_question(int home_held)
 
 X0X_COLD static void button_tap(int b)
 {
+    if (ui.brk_choice_on) {
+        if (b == B_SEL) { (void)brk_choice_confirm(); return; }
+        brk_choice_cancel();
+        if (b == B_HOME) return;
+    }
     if (perf_testing()) {                             /* the test owns the transport: HOME or PLAY stop it */
         if ((b == B_HOME || b == B_PLAY) && perf.phase != 3)
             perf_test_abort();
@@ -8913,6 +8965,8 @@ static void autosave(void)
 void ui_frame(void)
 {
     uint32_t i;
+    if (ui.brk_choice_on && (!engine_brk_preview_active() || project_busy || seq.ppat[PART_BRK] != ui.brk_choice_pat ||
+        plat_keys() || (plat_buttons() & ~((1u << B_SEL) | (1u << B_HOME))))) brk_choice_cancel();
     input();
     division_pad_input();
     ext_rec_drain();

@@ -272,6 +272,9 @@ uint32_t engine_brk_held(void); /* aggregate slice ownership, macros excluded */
 #define REC_EV_STEP(e) ((int)(((e) >> 17) & 255u))
 int engine_rec_ev_get(uint32_t *ev);   /* 1 = a current-generation event was taken; stale entries are dropped */
 int engine_brk_count(int bank); /* currently applied snapshot count; requested changes may wait for release */
+int engine_brk_preview_active(void);
+int engine_brk_preview(int slot); /* pending, runtime-only whole-loop audition */
+void engine_brk_preview_end(void); /* cancel/finish and restore selected loops */
 void engine_brk_loops(void);                                /* (re)read the A / B loops of the current pattern */
 void engine_brk_flush(void);                                /* publish a loop change that waited for the sounding voice */
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes);
