@@ -8,9 +8,9 @@ Reference version: owner document dated 2026-11-16 17:22; SHA256
 ## Current firmware, not renamed fiction
 
 At development source `94197fc839b00aff47b98ca02f3c6396e4a6eabf`, and the local
-R22 overlay under review, the selectable banks remain Chicago, Miami, Drone
-and generic Juno6. `firmware/src/app/original_sound.h` assigns Drone bank 2
-and persistent identifier `0x4f445231`, and generic Juno bank 3 and persistent
+R22 overlay under review, the selectable banks remain Chicago, Miami, Synth One
+and generic Juno6. `firmware/src/app/original_sound.h` assigns the third slot as bank 2
+and persistent identifier `0x4f533131` (OS11); historical `0x4f445231` loads as Synth One init, and generic Juno bank 3 and persistent
 identifier `0x4f4a5531`. `original_sound.c` uses the kind in packed cell byte 29.
 The UI selector and header names are in `ui.c`; runtime dispatch and compiled
 union members are in `original_runtime.c` and `original_runtime.h`.

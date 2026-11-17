@@ -23,7 +23,7 @@ arrays={}
 for name in ['minimums','defaults','maximums']:
  raw=re.search(r'\b'+name+r'\[150\]\s*=\s*\{([^}]*)\}',s).group(1);arrays[name]=[bits(float(x.strip().rstrip('f'))) for x in raw.split(',')];assert len(arrays[name])==150
 units={15:'Hz',47:'Hz',16:'Hz',22:'seconds',23:'seconds',25:'seconds',26:'seconds',27:'seconds',29:'seconds',36:'Hz',39:'Hz',43:'seconds',64:'BPM',143:'Hz',144:'seconds'}
-lines=['/* Native source physical values, not generic Drone normalized knobs. */','static const dnbox_s1_control s1_descriptors[150]={']
+lines=['/* Native source physical values, not generic normalized knobs. */','static const dnbox_s1_control s1_descriptors[150]={']
 for i in range(150):
  flags=(1 if i in [15,47,36,43,140,147] else 0)|(2 if i in range(33,45) else 0)
  lines.append('{%d,%d,0x%08xu,0x%08xu,0x%08xu,%s,%s},'%(i,flags,arrays['minimums'][i],arrays['defaults'][i],arrays['maximums'][i],string(names[i]),string(units.get(i,'native physical value; consult original setter'))))

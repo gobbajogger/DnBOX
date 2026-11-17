@@ -18,7 +18,7 @@ All final checklist items remain FAIL until exact combined-source proof exists.
 | S4 | FAIL | Referenced SuperJ6 14/56 ZIP not identified; found Synth One 56-preset/14-over-unity archive, not a substitute. Complete intended-engine A/B pending |
 | S5 | FAIL | 640/12 corpus identity and bounded original bundled decode verified; 2 legacy-key mappings and complete materialized selection/control routing remain unproven |
 | S6 | FAIL | Pre-FX owner 7,972 B; latest measured existing-firmware 2d86 default PADCAL=1 has XIP free 2,548/2,556 B, RAM headroom 1,096 B and pool reserve margin 836 B. Full FX/wave assets not admitted. See sound-memory.md |
-| S7 | FAIL | Consolidated still contains Drone; coordinated removal required |
+| S7 | FAIL | Slot-2 string-machine engine still present until this removal lands; Synth One occupies the slot |
 
 ## Now / next
 - Now: close original committed-library/selected-preset provenance and finish coordinated default sanitizer replay of the independently reviewed isolated procedural-model state-span fix; preserve all verified corpus outputs and stopped upload/installation holds.

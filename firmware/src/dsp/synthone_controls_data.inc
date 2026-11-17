@@ -1,4 +1,4 @@
-/* Native source physical values, not generic Drone normalized knobs. */
+/* Native source physical values, not generic normalized knobs. */
 static const dnbox_s1_control s1_descriptors[150]={
 {0,0,0x00000000u,0x3f800000u,0x3f800000u,"index1","native physical value; consult original setter"},
 {1,0,0x00000000u,0x3f800000u,0x3f800000u,"index2","native physical value; consult original setter"},

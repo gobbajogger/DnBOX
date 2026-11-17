@@ -8,18 +8,20 @@
 #define ORIGINAL_SOUND_BYTES 32u
 #define ORIGINAL_SOUND_CHICAGO 0u
 #define ORIGINAL_SOUND_MIAMI 1u
-#define ORIGINAL_SOUND_DRONE 2u
+#define ORIGINAL_SOUND_SYNTHONE 2u
 #define ORIGINAL_SOUND_JUNO 3u
 #define ORIGINAL_SOUND_JUNO_ID UINT32_C(0x4f4a5531)
 #define ORIGINAL_JUNO_NPARAMS 18u
 #define ORIGINAL_JUNO_FACTORIES 4u
 #define ORIGINAL_SOUND_CHICAGO_ID UINT32_C(0x4f434831)
 #define ORIGINAL_SOUND_MIAMI_ID UINT32_C(0x4f4d4931)
-#define ORIGINAL_SOUND_DRONE_ID UINT32_C(0x4f445231)
+#define ORIGINAL_SOUND_SYNTHONE_ID UINT32_C(0x4f533131)
+#define ORIGINAL_SOUND_LEGACY_ODR1_ID UINT32_C(0x4f445231)
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
-#define ORIGINAL_DRONE_FACTORIES 4u
-#define ORIGINAL_DRONE_NPARAMS 8u
+#define ORIGINAL_SYNTHONE_FACTORIES 1u
+#define ORIGINAL_SYNTHONE_NPARAMS 2u
+#define ORIGINAL_SYNTHONE_INIT_FACTORY 0u
 #define ORIGINAL_CHICAGO_FX_CHOICES 12u
 
 /* Public control positions used by the physical performance wheels. */
@@ -35,7 +37,7 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
            (kind == ORIGINAL_SOUND_MIAMI &&
             (parameter == ORIGINAL_MIAMI_PITCH_BEND || parameter == ORIGINAL_MIAMI_PITCH_BEND + 1u)) ||
            (kind == ORIGINAL_SOUND_JUNO && (parameter == 16u || parameter == 17u)) ||
-           (kind == ORIGINAL_SOUND_DRONE && (parameter == 6u || parameter == 7u));
+           (kind == ORIGINAL_SOUND_SYNTHONE && (parameter == 0u || parameter == 1u));
 }
 
 /* New firmware patch representation, not a legacy bank decoder:
@@ -43,8 +45,11 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
  * [29] engine kind; [30] selected factory index; [31] reserved zero.
  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
  * restored-insert ones) and FxType stores a twelve-choice index.
- * Drone adds kind 2 to this exact schema-2 32-byte cell, with six editable
- * registrations/contours and two performance inputs. No song migration.
+ * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
+ * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
+ * init cell (factory 0); they are never written back. No song-layout change.
+ * The 32-byte cell currently stores only the two performance inputs until
+ * the 150-parameter Synth One patch format is admitted.
  * The original engines still map to their original selectors; schema1 is refused.
  * Untouched controls come from the immutable binary32 factory data, never
  * their rounded display bytes. Edits represent the firmware's 7-bit controls.
@@ -54,6 +59,22 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
  * This stores a patch, not arbitrary AU floats or live voice/history state.
  * Every cell argument points to 32 accessible bytes. Source/output may alias;
  * failed validation or preparation leaves the destination unchanged. */
+static inline unsigned original_sound_kind_from_id(uint32_t engine)
+{
+    if (engine == ORIGINAL_SOUND_MIAMI_ID) return ORIGINAL_SOUND_MIAMI;
+    if (engine == ORIGINAL_SOUND_JUNO_ID) return ORIGINAL_SOUND_JUNO;
+    if (engine == ORIGINAL_SOUND_SYNTHONE_ID || engine == ORIGINAL_SOUND_LEGACY_ODR1_ID)
+        return ORIGINAL_SOUND_SYNTHONE;
+    return ORIGINAL_SOUND_CHICAGO;
+}
+static inline int original_sound_is_legacy_slot2_id(uint32_t engine)
+{
+    return engine == ORIGINAL_SOUND_LEGACY_ODR1_ID;
+}
+int original_sound_is_legacy_slot2_cell(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+/* Rewrites a historical kind-2 8-parameter cell to Synth One init. Returns 1 if
+ * rewritten, 0 if the cell is already a current Synth One or other kind. */
+int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES]);
 unsigned original_sound_count(unsigned kind);
 unsigned original_sound_factories(unsigned kind);
 /* Returns the immutable original program index, or -1 on invalid input. */
