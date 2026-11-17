@@ -34,5 +34,17 @@ int main(void){
  slot_nz[1]=0;engine_brk_loops();engine_brk_drop_range(preview_data[1],sizeof preview_data[1]);audio_tick();
  CHECK(!engine_brk_preview_active());CHECK(!brk_choice_confirm());CHECK(bp->slot_a==nb);
  engine_brk_flush();CHECK(!engine_brk_held());CHECK(engine_brk_count(0)>1);
+ /* Adding an earlier empty storage slot renumbers a candidate: reject its
+  * stale confirmation, even though there was no retirement/drop callback. */
+ slot_nz[0]=0;slot_nz[1]=1;bp->slot_a=nb;engine_brk_loops();for(int i=0;i<16;i++)audio_tick();
+ CHECK(engine_brk_nslots()==nb+1);CHECK(brk_choice_turn(PR(R_BRKSLOT,0,0,0),1));audio_tick();
+ slot_nz[0]=1;engine_brk_loops();audio_tick();CHECK(engine_brk_nslots()==nb+2);
+ CHECK(!engine_brk_preview_active());CHECK(!brk_choice_confirm());CHECK(bp->slot_a==nb);
+ engine_brk_flush();CHECK(!engine_brk_held());CHECK(engine_brk_count(0)>1);
+ /* An addition after the candidate leaves its physical identity unchanged. */
+ slot_nz[1]=0;engine_brk_loops();for(int i=0;i<16;i++)audio_tick();
+ CHECK(brk_choice_turn(PR(R_BRKSLOT,0,0,0),1));audio_tick();
+ slot_nz[1]=1;engine_brk_loops();audio_tick();CHECK(engine_brk_preview_active());
+ CHECK(brk_choice_confirm());audio_tick();engine_brk_flush();CHECK(bp->slot_a==nb);CHECK(!engine_brk_held());
  puts("BREAK full host queued preview/cancel/confirm PASS");return 0;
 }

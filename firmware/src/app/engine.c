@@ -3169,8 +3169,23 @@ X0X_COLD void engine_brk_loops(void)
     }
     const brkpart_t *bp = &seq.pat[seq.ppat[TRK_BRK]].brk;
     brk_loop_t L[2];
-    int w;
+    int w, audition = brk_preview_slot, nb_before = builtin_count();
+    int audition_slot = -1, audition_zone = -1;
+    if (audition >= nb_before && audition < nloops) {
+        audition_slot = loop_slot[audition];
+        audition_zone = loop_zone[audition];
+    }
     scan_loops();                                       /* an upload may have changed the user loops */
+    /* An addition/restoration can renumber an audition without retiring its
+     * storage. Validate its physical identity before publishing any new loop.
+     * The table is main-loop-owned; audio may only cancel the captured intent. */
+    if (audition >= nb_before && brk_preview_slot == audition &&
+        (audition_slot < 0 || audition >= nloops || loop_slot[audition] != audition_slot ||
+         loop_zone[audition] != audition_zone)) {
+        cq_put(C_BRK, 32, 0, 1);
+        brk_preview_slot = -1;
+        breaks_preview_restore(&brk);
+    }
     /* No mute. The voice that is already sounding keeps its snapshot, and the
      * new loop is published for the next trigger. Skipping the break here used
      * to drop a whole buffer. */
