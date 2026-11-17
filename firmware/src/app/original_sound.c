@@ -40,7 +40,7 @@ static const uint8_t original_sound_juno_factories[4][16] = {
  {15,50,58,36,80,0,35,30,20,5,20,0,64,25,18,110},
  {70,10,105,12,20,0,20,110,15,12,25,5,80,60,50,96}
 };
-static const char *const original_sound_juno_names[4] = {"JUNO POLY", "JUNO PAD", "JUNO PLUCK", "JUNO BRASS"};
+static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
 static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
     {"PBend",127,64,0},{"Damper",127,0,0}
 };

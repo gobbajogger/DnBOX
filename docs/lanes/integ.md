@@ -1,10 +1,3 @@
-# Current integ item1 — 2026-11-17 19:00 VLAT
-Owner agent: dot/integ   Branch: lane/integ   PR: #972   Head: this commit
-Gate at final head: NOT_RUN; no merge or deployment completion claimed.
-Now: Runtime BREAK preview-before-choose with bounded snapshot restore. Both native models fit (pool margin788B); independent review and final full gate pending. Host qualification blocked by LeakSanitizer tracer failure; no sanitizer waiver.
-Next: qualify final inputs, post the actual PASS line, merge only when allowed, then verify deployed aliases.
-
-## Preserved lane history
 Move: M0 (clean start and green gate)   PR: #955   Head: this commit
 LEFT items PASS: 0/2; failing: L15 L16
 Gate at head: M0 start checks pending; corrected limits self-match and size-loop false failures; full green gate remains follow-up

@@ -85,6 +85,7 @@ typedef struct breaks {
 #if defined(X0X_HOST)
     brk_bank_t side[2];               /* host tests may use several breaks_t at once */
 #endif
+    uint32_t outline_revision[2];    /* publication/restore/retirement, under config lock */
     volatile uint8_t pub[2];          /* published snapshot: 0..1 bank[], 2..3 side[] */
     volatile uint8_t preview_pin, preview_epoch;
     uint8_t preview_saved[2];

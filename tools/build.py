@@ -396,6 +396,11 @@ def app_compile_commands(flags, original_synth, wobble):
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         flags = [*flags, "-flto"]
+    chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "0")
+    if chance_probe not in ("0", "1"):
+        raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+    if chance_probe == "1":
+        flags = [*flags, "-DX0X_GFINAL_CHANCE_PROBE=1"]
     o2 = [f if f != "-Os" else "-O2" for f in flags]
     units = [("cc", "-c", FW / "crt0.S", "-o", OUT / "crt0.o"),
              ("cc", "-c", FW / "hal" / "fm1_vec.S", "-o", OUT / "fm1_vec.o"),
@@ -424,6 +429,13 @@ def app_compile_commands(flags, original_synth, wobble):
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
             units.append(("cc", *uf, "-c", Path(u), "-o", o))
             objs.append(o)
+    if chance_probe == "1":
+        # Separate integer-only object; existing no-soft-double check unchanged.
+        uf = [f for f in flags if f not in ("-flto", "-ffast-math")]
+        uf += ["-ffp-contract=off", "-fno-fast-math"]
+        obj = OUT / "gfinal" / "chance_native.o"
+        units.append(("cc", *uf, "-c", FW / "src" / "app" / "gfinal" / "ui_chance_exact.c", "-o", obj))
+        objs.append(obj)
     return units, objs
 
 

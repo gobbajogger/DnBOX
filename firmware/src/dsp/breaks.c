@@ -346,6 +346,7 @@ void breaks_preview_restore(breaks_t *b)
     if (b->preview_pin) {
         b->pub[0] = b->preview_saved[0];
         b->pub[1] = b->preview_saved[1];
+        b->outline_revision[0]++; b->outline_revision[1]++;
         b->pend_on[0] = b->pend_on[1] = 0;
         b->preview_pin = 0;
         b->preview_epoch++;
@@ -378,6 +379,7 @@ X0X_COLD void breaks_set_loop_request(breaks_t *b, int which, const brk_loop_t *
         for (j = 0; j < 2; j++)
             if (b->v[j].bank == (uint8_t)which) b->v[j].on = 0;
         k->valid = 0; k->gen++;
+        b->outline_revision[which]++;
         if (loop) k->slices = (uint8_t)loop_count(loop);
         b->pend_on[which] = 0;
         brk_config_unlock(irq); return;
@@ -413,6 +415,7 @@ X0X_COLD void breaks_set_loop_request(breaks_t *b, int which, const brk_loop_t *
     }
     brk_barrier();
     b->pub[which] = (uint8_t)idx;
+    b->outline_revision[which]++;
     b->pend_on[which] = 0;
     brk_config_unlock(irq);
 }
@@ -452,6 +455,8 @@ X0X_COLD void breaks_drop_range(breaks_t *b, const uint8_t *base, uint32_t nbyte
         if (b->v[j].on && k && k->adpcm >= base && k->adpcm < end)
             b->v[j].on = 0;
     }
+    /* Even address-reused storage must invalidate a previously decoded outline. */
+    b->outline_revision[0]++; b->outline_revision[1]++;
     /* Retire every snapshot, including a hidden pinned performance bank. */
     for (w = 0; w < 4; w++) {
         brk_bank_t *k = bank_slot(b, (unsigned)w);

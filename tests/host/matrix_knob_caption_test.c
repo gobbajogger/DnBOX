@@ -3,8 +3,9 @@
 #define CHICAGO_PRESENTATION_NO_MAIN
 #include "chicago_presentation_test.c"
 static const char *out;
-static const char *const physical[]={"","KNOB 5","KNOB 6","KNOBS 5-6","KNOB 7","KNOBS 5,7","KNOBS 6-7","KNOBS 5-7","KNOB 8","KNOBS 5,8","KNOBS 6,8","KNOBS 5-6,8","KNOBS 7-8","KNOBS 5,7-8","KNOBS 6-8","KNOBS 5-8"};
-static const char *const logical[]={"","KNOB 1","KNOB 2","KNOBS 1-2","KNOB 3","KNOBS 1,3","KNOBS 2-3","KNOBS 1-3","KNOB 4","KNOBS 1,4","KNOBS 2,4","KNOBS 1-2,4","KNOBS 3-4","KNOBS 1,3-4","KNOBS 2-4","KNOBS 1-4"};
+/* Owner removed all physical-button hint captions; bindings stay tested below. */
+static const char *const physical[16]={"","","","","","","","","","","","","","","",""};
+static const char *const logical[16]={"","","","","","","","","","","","","","","",""};
 static void check_caption(const char *caption,const char *name)
 {
     int page=cur_page(),r=page%4,top=24+r*50;
@@ -12,7 +13,7 @@ static void check_caption(const char *caption,const char *name)
      * caption; its saved bindings are still checked independently below. */
     if(engine_bass_bank(bidx())==ORIGINAL_SOUND_CHICAGO && page==3)caption="";
     char title[80];put_s(put_s(put_i(title,r+1),"  "),matrix_group(page));
-    int sound=pg.r[page][0].kind==R_BENGINE,pending=engine_bass_preset_pending(bidx());
+    
     CHECK(8+tw(&FONT_T,title)+8<=232-tw(&FONT_T,caption));
     sound_t before=proj.sound;int dirty=ui.dirty,sw=save_wait;
     pref_t refs[4];memcpy(refs,pg.r[page],sizeof refs);
@@ -32,19 +33,8 @@ static void check_caption(const char *caption,const char *name)
     for(int y=0;y<11;y++)for(int x=8;x<232;x++)if(fb[(top+y)*240+x]!=cv_px[y*240+x]) {
         fprintf(stderr,"caption %s mismatch page%d top%d x%d y%d got%04x want%04x\n",name,page,top,x,y,fb[(top+y)*240+x],cv_px[y*240+x]);CHECK(0);
     }
-    int nav=tw(&FONT_T,UI_CAP_ARROWS)+28;   /* F5 row picture */
-    char range[12];put_i(put_s(put_i(range,page/4*4+1),"-"),page/4*4+4<pg.n?page/4*4+4:pg.n);
-    cv_begin(240,12,SOUND_FACE);
-    uint16_t gray=SOUND_GRAY,hint=SOUND_AMBER;
-    if(sound && pending) {
-        CHECK(7+tw(&FONT_T,UI_CAP_HOME ": CANCEL")+8+nav<=234);
-        cv_text(7,0,&FONT_T,UI_CAP_HOME ": CANCEL",gray);expected_row_hint(234-nav,0,hint);
-    } else {
-        const char *right=sound?UI_CAP_HOME ": BACK":range;
-        int x=expected_row_hint(7,0,gray),next_end=matrix_next_hint(x+8,0,gray);   /* #798 F1 next hint */
-        CHECK(next_end+8+tw(&FONT_T,right)<=234);
-        if(sound) expected_home_back(0,hint); else text_r(234,0,&FONT_T,right,hint);   /* #807 F5 */
-    }
+    /* The obsolete navigation footer is intentionally empty, in R22 body colour. */
+    cv_begin(240,12,SOUND_BASE);
     for(int y=0;y<11;y++)for(int x=7;x<234;x++)CHECK(fb[(228+y)*240+x]==cv_px[y*240+x]);
 }
 /* Owner-declared native page order; changing a binding must fail before a

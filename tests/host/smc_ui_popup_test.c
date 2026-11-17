@@ -147,7 +147,7 @@ static void pattern_notice(const char *value)
     night_panel(0,0,240,HDR_H,0);
     box(0,0,240,HDR_H-1,part_col());
     char arrow[16];put_s(put_s(arrow,"> "),value);
-    int x=(240-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,arrow))/2;
+    int x=(214-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,arrow))/2;
     x=cv_text(x,vc(&FONT_B,0,HDR_H-1),&FONT_B,"NEXT",C_BLACK)+6;
     frame(x,1,12,17,C_BLACK);
     /* Hand-derived from the stored fixtures below, independently of HOME's
@@ -162,6 +162,13 @@ static void pattern_notice(const char *value)
         cv_rect(x+4,8,1,3,C_BLACK); /* BREAK: step 4 */
     }
     cv_text(x+18,vc(&FONT_B,0,HDR_H-1),&FONT_B,arrow,C_BLACK);
+    /* Independent full-battery pixels; the notice must reserve its cell. */
+    CHECK(host_battery_level==3);
+    rbox(219,5,14,8,1,SOUND_FACE);
+    cv_rect(219,5,14,1,SOUND_GRAY);cv_rect(219,12,14,1,SOUND_GRAY);
+    cv_rect(219,5,1,8,SOUND_GRAY);cv_rect(232,5,1,8,SOUND_GRAY);
+    cv_rect(233,7,2,4,SOUND_GRAY);
+    for(int cell=0;cell<3;cell++)cv_rect(221+cell*4,7,3,4,SOUND_GRAY);
     cv_commit(0,0,0);
     CHECK(!memcmp(active_fb,fb,HDR_H*240*sizeof *fb));
     CHECK(ui.msg_until==now_ms+1000);

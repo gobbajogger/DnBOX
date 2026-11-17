@@ -86,7 +86,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|break-preview-integration) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -95,12 +95,12 @@ test_class() {
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
-    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
+    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
-    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
+    dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
     synth-param-jump|param-write-sources|ui-drum-glyph) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
-    chicago-adsr-graph|ui-settings-sections) TEST_CLASS=G ;;
+    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
     *) TEST_CLASS=P ;;
@@ -493,8 +493,17 @@ run legacy-303-project sh tests/host/legacy_303_project_test.sh   # old bass303 
 run smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py
 run part-order sh tests/host/part_order_test.sh
+run synthone-short-label python3 tests/host/test_synthone_short_label.py
 run smc-ui sh tests/host/smc_ui_test.sh
+run ui-adsr-engine-graph sh tests/host/ui_adsr_engine_graph_test.sh
+run ui-drum-amp-graph sh tests/host/ui_drum_amp_graph_test.sh
+run ui-drum-single-lane sh tests/host/ui_drum_single_lane_test.sh
 run smc-ui-popup sh tests/host/smc_ui_popup_test.sh
+run ui-overlay-battery sh tests/host/ui_overlay_battery_test.sh
+run ui-toast-battery sh tests/host/ui_toast_battery_test.sh
+run ui-shared-parameter-panel sh tests/host/ui_shared_parameter_panel_test.sh
+run ui-held-target-visibility sh tests/host/ui_held_target_visibility_test.sh
+run ui-overlay-battery-registration python3 tests/host/test_ui_overlay_battery_registration.py
 run smc-remainder sh tests/host/smc_remainder_test.sh
 run smc-popup-engine sh tests/host/smc_popup_engine_test.sh
 run smc-audit-core sh tests/host/smc_audit_core_test.sh
@@ -538,6 +547,12 @@ run adaptive-break-midi-pair python3 tests/host/run_adaptive_break_midi_pair.py
 run break-performance sh tests/host/run_break_performance.sh
 run break-preview-snapshot sh -c "$CC -std=c99 -O1 -DX0X_HOST -Wall -Wextra -Werror -Ifirmware/src tests/host/break_preview_snapshot_test.c -lm -o $OUT/break-preview-snapshot && $OUT/break-preview-snapshot"
 run break-preview-ui python3 -B tests/host/ui_break_preview_test.py
+run break-preview-visibility sh tests/host/ui_break_preview_visibility_test.sh
+run break-held-edit-journey sh tests/host/break_held_edit_journey_test.sh
+run break-family-layout sh tests/host/break_family_layout_probe_test.sh
+run break-context-label sh tests/host/break_context_label_test.sh
+run break-outline-snapshot sh tests/host/break_outline_snapshot_test.sh
+run ui-chance-framebuffer sh tests/host/ui_chance_framebuffer_test.sh
 run break-preview-decoder python3 -B tests/host/engine_break_preview_test.py
 run break-preview-integration env SMC_UI_TEST_FILE=tests/host/break_preview_midi_test.c SMC_UI_OUT=build/host/break-preview-integration sh tests/host/smc_ui_test.sh
 run engine-brk-mute python3 -B tests/host/engine_brk_mute_test.py   # real BREAK gate, immediate mute and abrupt-cut control
@@ -736,7 +751,15 @@ run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-readout sh tests/host/chicago_readout_test.sh; fi
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
+run ui-owner-copy python3 tests/host/ui_owner_copy_test.py
+run ui-home-r22 sh tests/host/ui_home_r22_test.sh
+run ui-owner-units sh tests/host/ui_owner_units_test.sh
+run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
+run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
+run ui-pan-units sh tests/host/ui_pan_units_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
+run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
+run ui-perf-labels sh tests/host/ui_perf_labels_test.sh
 run ui-chicago-env-motion sh tests/host/ui_chicago_env_motion_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run matrix-knob-caption Pillow; else run matrix-knob-caption sh tests/host/matrix_knob_caption_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run preset-navigation-noop Pillow; else run preset-navigation-noop sh tests/host/preset_navigation_noop_test.sh; fi

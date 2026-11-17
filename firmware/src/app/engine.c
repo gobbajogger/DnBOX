@@ -106,6 +106,23 @@ int engine_bass_voice_view(int v, float *level, float *modulation, unsigned *sta
 { return (unsigned)v < NBASS && original_runtime_voice_view(&original_bass[v],level,modulation,state,key_down); }
 int engine_bass_adsr_view(int v, float values[4], unsigned *gate)
 { return (unsigned)v < NBASS && original_runtime_adsr_view(&original_bass[v],values,gate); }
+int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out)
+{
+    if((voice!=DR_BD && voice!=DR_SD) || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=drum909_read_amp(&d909,voice,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
+int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
+{
+    if((unsigned)v>=NBASS || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=original_bass[v].status==ORIGINAL_RUNTIME_OK && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+        juno6_read_envelope(&original_bass[v].dsp.juno.synth,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
 int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
 { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
 int engine_bass_env_view(int v, float adsr[4], float *level, int *state)
@@ -3129,17 +3146,35 @@ static uint8_t brk_outline_peak_u8(int32_t pk)
 
 /* the loop's outline for the screen: n columns of peak level 0..255 (main loop: decodes the
  * whole loop once, ~20k IMA steps; called when the loop changes, never per frame) */
-X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
+uint32_t engine_brk_outline_revision(int which)
 {
-    const brk_bank_t *bk = &brk.bank[which & 1];
-    uint32_t i, ns = bk->n;
+    if (which < 0 || which > 1) return 0;
+    uint32_t irq = plat_cq_lock(), revision = brk.outline_revision[which];
+    plat_cq_unlock(irq);
+    return revision;
+}
+/* Main-loop only: capture one immutable payload and its revision together.
+ * Audio may restore publication during decode, but cannot rewrite this payload.
+ * No concurrent main-loop storage writer is permitted during this call. */
+X0X_COLD int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revision)
+{
+    const brk_bank_t *bk;
+    const uint8_t *adpcm;
+    uint32_t i, ns, irq;
+    if (which < 0 || which > 1 || !peaks || n <= 0) return 0;
+    irq = plat_cq_lock();
+    bk = breaks_bank(&brk, which);
+    adpcm = bk && bk->valid ? bk->adpcm : 0;
+    ns = bk && bk->valid ? bk->n : 0;
+    if (revision) *revision = brk.outline_revision[which];
+    plat_cq_unlock(irq);
     int32_t pred = 0, idx = 0, col = 0, pk = 0;
     uint32_t per;
-    if (!bk->adpcm || !ns || n <= 0)
+    if (!adpcm || !ns)
         return 0;
     per = (ns + (uint32_t)n - 1u) / (uint32_t)n;       /* samples per column (32-bit: no __udivdi3) */
     for (i = 0; i < ns; i++) {
-        int32_t s = ima_decode(bk->adpcm, i, &pred, &idx), c;
+        int32_t s = ima_decode(adpcm, i, &pred, &idx), c;
         c = (int32_t)(i / per);
         if (c != col) {
             peaks[col] = brk_outline_peak_u8(pk);
@@ -3154,6 +3189,8 @@ X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
         peaks[col] = 0;
     return 1;
 }
+X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
+{ return engine_brk_outline_snapshot(which, peaks, n, 0); }
 float engine_gr_db(void) { return mst.gr_view; }
 int engine_master_get(int i) { return master_get(&mst, i); }
 void engine_master_format(int i, char *buf) { master_format(&mst, i, buf); }

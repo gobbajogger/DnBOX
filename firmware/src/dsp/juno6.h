@@ -37,3 +37,14 @@ void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
 /* Slot adapter: normalized patch macros; final two are performance-only. */
 int juno6_set(juno6_t*, unsigned, float);
 int juno6_active(const juno6_t*);
+
+/* Caller-owned output must be disjoint from synth. Serialized observation;
+ * not a concurrent audio/UI publication primitive. Physical seconds and
+ * sustain fraction, no normalized control reinterpretation. One shared
+ * amp/filter envelope. No elapsed progress or release-start level is stored. */
+typedef struct {
+ float adsr[4], level;
+ int selected_voice;
+ unsigned stage, gate, active, shared_amp_filter;
+} juno6_envelope_snapshot;
+int juno6_read_envelope(const juno6_t *, juno6_envelope_snapshot *);
