@@ -4,7 +4,7 @@
 # finished CPU2 job must give the clean deferred output.
 # Needs the private original-synth inputs and sh host/build_host.sh --generate-only.
 set -e
-cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-origin/build/0.0.22}
+cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-refs/tags/archive/build/0.0.22}
 git show $BASE:firmware/src/app/engine.c > $D/engine-base.c
 U=$(python3 - <<'PY'
 import importlib.util

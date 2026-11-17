@@ -92,17 +92,17 @@ limits()     { resolve_base || return 1
                done < <(git ls-files -s)
                return $bad; }
 host_tests() { pass_env
-               if ! git rev-parse -q --verify 'refs/remotes/origin/build/0.0.22^{commit}' >/dev/null; then
+               if ! git rev-parse -q --verify 'refs/tags/archive/build/0.0.22^{commit}' >/dev/null; then
                  if [ "${DNBOX_GATE_ONLINE:-0}" = "1" ]; then
-                   echo "fetching origin build/0.0.22 (missing from this clone)"
-                   git fetch --no-tags origin build/0.0.22:refs/remotes/origin/build/0.0.22 || return 1
+                   echo "fetching tag archive/build/0.0.22 (missing from this clone)"
+                   git fetch origin refs/tags/archive/build/0.0.22:refs/tags/archive/build/0.0.22 || return 1
                  else
-                   echo "SKIP fetch of origin/build/0.0.22: offline default, and the ref is not in this checkout"
-                   echo "host tests need refs/remotes/origin/build/0.0.22 locally, or DNBOX_GATE_ONLINE=1"
+                   echo "SKIP fetch of archive/build/0.0.22: offline default, and the tag is not in this checkout"
+                   echo "host tests need refs/tags/archive/build/0.0.22 locally, or DNBOX_GATE_ONLINE=1"
                    return 1
                  fi
                else
-                 echo "using local origin/build/0.0.22 (no fetch)"
+                 echo "using local archive/build/0.0.22 (no fetch)"
                fi
                sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
                grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && return 1; return $r; }
