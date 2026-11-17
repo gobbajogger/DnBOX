@@ -361,6 +361,7 @@ static int chi_arp_on_part(int b)
 static int held_note_of(const bpart_t *bp, int s);
 static void bass_step_cancel(void);
 static void drum_step_cancel(void);
+static void break_step_cancel(void);
 
 /* ============================================================ text helpers === */
 static char *put_s(char *b, const char *s)
@@ -2858,7 +2859,7 @@ static void set_view(int v)
     bass_layout_accept();
     /* A step held on SEQ may carry its p-lock gesture to EDIT's sound knobs.
      * Return to SEQ after key-up so lock_release still uses those knob refs. */
-    if (ui.view == V_PART && v == V_SEQ && (ui.held_step >= 0 || ui.hold_step >= 0)) {
+    if (ui.view == V_PART && v == V_SEQ && (ui.held_step >= 0 || ui.hold_step >= 0 || ui.brk_held >= 0)) {
         say("RELEASE STEP FIRST", 0);
         return;
     }
@@ -2868,6 +2869,7 @@ static void set_view(int v)
     if (!(ui.view == V_SEQ && v == V_PART)) {
         bass_step_cancel();
         drum_step_cancel();
+        break_step_cancel();
     }
     if (v != ui.view)
         ui.prev_view = ui.view;
@@ -2877,7 +2879,6 @@ static void set_view(int v)
     seq.rec_mask = ui.rec && is_303() && v == V_SEQ ? (uint8_t)(1u << bidx()) : 0;
     seq.rec_ext_mask = ui.rec ? (uint8_t)((1u << NBASS) - 1u) : 0;
     seq.rec_hold_mask = ui.rec && is_303() && v == V_PART ? (uint8_t)(1u << bidx()) : 0;
-    ui.brk_held = -1;
     ui.overlay = O_NONE;
     build_pages();
 }
@@ -2945,13 +2946,18 @@ static int held_drum_step(void)
            ui.hold_pat == seq.ppat[ui.part] ? ui.hold_step : -1;
 }
 
+static int held_break_step(void)
+{
+    return ui.part == PART_BRK && ui.hold_pat == seq.ppat[PART_BRK] ? ui.brk_held : -1;
+}
+
 static int lock_step(void)
 {
     if (ui.view != V_PART || ui.overlay != O_NONE)
         return -1;
     if (is_303())
         return ui.rec ? -1 : ui.held_step;
-    return is_drum() ? held_drum_step() : ui.brk_held;
+    return is_drum() ? held_drum_step() : held_break_step();
 }
 static int lockable(pref_t r) { return r.kind == R_ENG && !pref_read_only(r) && engine_motion_part(r.a, r.b) == ui.part; }
 static int lock_of(pref_t r, int s)                  /* step s's own value of r, -1 none */
@@ -3030,7 +3036,10 @@ static const ui_original_wave_cache *original_wave_view(pref_t r, int value)
 
 static void lock_turn(pref_t r, int e, int role)
 {
-    int s = lock_step(), part = ui.part, k, cur, nv;
+    int break_locked = ui.part == PART_BRK;
+    uint32_t break_state = break_locked ? plat_cq_lock() : 0;
+    int s = lock_step(), part = ui.part, k, cur, nv, message_name = 0;
+    const char *message = 0;
 #if X0X_BASS_PRESET_PREVIEW
     /* The active preset can change the descriptor at an audio boundary. Keep
      * descriptor, first lane allocation, lock value and audible preview in
@@ -3040,11 +3049,11 @@ static void lock_turn(pref_t r, int e, int role)
 #endif
     const x0x_param_t *d = pref_desc(r);
     lane_t *l;
-    if (!original_ref_current(r)) goto done;
+    if (s < 0 || !original_ref_current(r)) goto done;
     if (!d)
         goto done;
     if (!lockable(r)) {
-        say("NO P-LOCK: ", caps_of(pref_name(r)));
+        message = "NO P-LOCK: "; message_name = 1;
         goto done;
     }
     if (is_303())
@@ -3066,11 +3075,11 @@ static void lock_turn(pref_t r, int e, int role)
         if (!seq.playing)
             ui_restore_base(r.a, r.b, r.c);
         mark_dirty();
-        say("P-LOCK CLEARED: ", caps_of(pref_name(r)));
+        message = "P-LOCK CLEARED: "; message_name = 1;
         goto done;
     }
     if (k < 0 && (k = motion_alloc(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c)) < 0) {
-        say("MOTION FULL", 0);
+        message = "MOTION FULL";
         goto done;
     }
     l = &proj.arr.lane[k];
@@ -3094,6 +3103,9 @@ done:
 #if X0X_BASS_PRESET_PREVIEW
     if (bass_edit) engine_bass_edit_hold(0);
 #endif
+    if (break_locked) plat_cq_unlock(break_state);
+    /* Formatting and toast work stays outside the audio-owner transaction. */
+    if (message) say(message, message_name ? caps_of(pref_name(r)) : 0);
     return;
 }
 static void lock_release(void)                        /* the held step let go: stopped, the knobs' own back */
@@ -3131,6 +3143,13 @@ static void drum_step_cancel(void)
     ui.hold_step = -1;
 }
 
+static void break_step_cancel(void)
+{
+    if (ui.part == PART_BRK && ui.brk_held >= 0 && ui.hold_used)
+        lock_release();
+    ui.brk_held = -1;
+}
+
 /* probability: SEQ or EDIT, a step held, SELECT sets its chance (5..100 %, a T_PROB lane: motion.h's
  * MOT_NONE = always). Drums: the selected track's step; the 303s and the break: the step */
 static int held_any_step(void)
@@ -3139,13 +3158,19 @@ static int held_any_step(void)
         return -1;
     if (is_303())
         return ui.rec ? -1 : ui.held_step;
-    return is_drum() ? held_drum_step() : ui.brk_held;
+    return is_drum() ? held_drum_step() : held_break_step();
 }
 static void prob_turn(int e)
 {
+    int break_locked = ui.part == PART_BRK;
+    uint32_t break_state = break_locked ? plat_cq_lock() : 0;
     int s = held_any_step(), part = ui.part, v = part << 4 | (is_drum() ? ui.sel[part] : 0), k, nv, j, any = 0;
     char t[24], *q;
     lane_t *l;
+    if (s < 0) {
+        if (break_locked) plat_cq_unlock(break_state);
+        return;
+    }
     if (is_303())
         ui.step_edited = 1;
     else
@@ -3159,6 +3184,7 @@ static void prob_turn(int e)
         nv = pos < 20 ? 100 - 5 * pos : PROB_COND + pos - 20;
     }
     if (nv != 100 && k < 0 && (k = motion_alloc(proj.arr.lane, seq.ppat[part], part, T_PROB, v, 0)) < 0) {
+        if (break_locked) plat_cq_unlock(break_state);
         say("MOTION FULL", 0);
         return;
     }
@@ -3171,6 +3197,7 @@ static void prob_turn(int e)
             engine_motion_clear(k);
     }
     mark_dirty();
+    if (break_locked) plat_cq_unlock(break_state);
     q = put_s(put_i(put_s(t, "STEP "), s + 1), ": ");
     if (nv > 100) {
         int a, b;
@@ -3687,7 +3714,7 @@ void smk_clip_enter_cleanup(void)
     bass_step_cancel();
     ui.chain_first = -1;
     ui.hold_step = -1;
-    ui.brk_held = -1;
+    break_step_cancel();
     for (int b = 0; b < NBASS; b++)                   /* a 303 key note that still sounds: let it go */
         if (kbd_held_note[b] || kbd_arp_n[b]) {
             engine_bass_off(b);
@@ -3971,12 +3998,17 @@ static void key_event(int k, int down)
         int slot = ui.brk_page * 8 + bl;
         if (bl >= 0 && bl < 8 && down && slot >= count) { say("UNUSED SLICE KEY", 0); return; }
         if (bl >= 0 && bl < 8 && down && ui.brk_held >= 0) {     /* a step held + black 1-8: its own slice */
-            int st = ui.brk_held;
+            uint32_t state = plat_cq_lock();
+            int st = held_break_step();
+            if (st < 0) { plat_cq_unlock(state); break_step_cancel(); return; }
+            bp = &proj.pat[ui.hold_pat].brk;
             brk_slice_write(bp, st, bp->slice[st] && (bp->slice[st] - 1) % count == slot ? 0 : slot + 1);
+            int assigned = bp->slice[st];
+            plat_cq_unlock(state);
             ui.hold_used = 1;                          /* its release keeps the step */
             ui.brk_pinkeys |= (uint16_t)(1u << bl);
             engine_brk_edit_hold(1);
-            if (bp->slice[st]) {
+            if (assigned) {
                 char t[24];
                 put_i(put_s(put_i(put_s(t, "STEP "), st + 1), ": SLICE "), slot + 1);
                 say(t, 0);
@@ -3989,7 +4021,10 @@ static void key_event(int k, int down)
             engine_brk_edit_hold((ui.brk_localkeys & 255u) || ui.brk_pinkeys);
             engine_brk_live(bl < 8 ? 32 + slot : bl, down);
         } else if (w >= 0 && down) {                     /* as the drums: empty on at once, a tap takes it off */
+            uint32_t state = plat_cq_lock();
+            bp = &cur_pat()->brk;
             ui.brk_held = (int8_t)w;
+            ui.hold_pat = seq.ppat[PART_BRK];
             ui.hold_used = 0;
             ui.hold_t0 = plat_ms();
             ui.hold_created = !((bp->steps >> w) & 1u);
@@ -3997,11 +4032,17 @@ static void key_event(int k, int down)
                 bp->steps |= 1u << w;
                 mark_dirty();
             }
+            plat_cq_unlock(state);
         } else if (w >= 0 && ui.brk_held == w) {
-            if (!ui.hold_created && !ui.hold_used && plat_ms() - ui.hold_t0 < STEP_TAP_MS) {
-                bp->steps &= ~(1u << w);
+            uint32_t state = plat_cq_lock();
+            /* Validate and mutate the press-time pattern atomically with the
+             * audio task's cue adoption, never a newly selected pattern. */
+            if (held_break_step() == w && !ui.hold_created && !ui.hold_used &&
+                plat_ms() - ui.hold_t0 < STEP_TAP_MS) {
+                proj.pat[ui.hold_pat].brk.steps &= ~(1u << w);
                 mark_dirty();
             }
+            plat_cq_unlock(state);
             if (ui.hold_used)
                 lock_release();
             ui.brk_held = -1;
@@ -4621,6 +4662,8 @@ X0X_COLD static void input_body(void)
             bass_rec_step[i] = 0;
     if (ui.held_step >= 0 && (ui.part != ui.held_step_part || seq.ppat[ui.part] != ui.held_step_pat))
         bass_step_cancel();                            /* playback or a cue changed the pattern under the key */
+    if (ui.brk_held >= 0 && (ui.part != PART_BRK || ui.hold_pat != seq.ppat[PART_BRK]))
+        break_step_cancel();                           /* a stale key must not edit the newly adopted pattern */
 #if BOARD_SMK37
     smc_poll();
     if (revision != project_revision)
@@ -4755,6 +4798,7 @@ X0X_COLD static void input_body(void)
             if (p != ui.part) {
                 bass_step_cancel();
                 drum_step_cancel();
+                break_step_cancel();
             }
             ui.part = (uint8_t)p;
             if (ui.view == V_GEN && !is_303())         /* TB-3PO is a 303's */
