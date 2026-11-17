@@ -80,8 +80,9 @@ static void break_layout_main(int band)
     }
     /* Same physical panel crosses the strip boundary; no buffer repartition. */
     night_panel(3,146-off,234,64,0);
-    cv_text(10,vc(&FONT_T,148-off,10),&FONT_T,pg.title[cur_page()],col);
-    if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,148-off,10),&FONT_T,t,C_GRAY);}
+    /* Keep Q descenders above the main/knob strip boundary at y158. */
+    cv_text(10,vc(&FONT_T,147-off,10),&FONT_T,pg.title[cur_page()],col);
+    if(pg.n>1){q=put_i(t,cur_page()+1);put_i(put_s(q," / "),pg.n);text_r(230,vc(&FONT_T,147-off,10),&FONT_T,t,C_GRAY);}
 }
 static void break_layout_footer(void)
 {
