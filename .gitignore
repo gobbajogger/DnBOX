@@ -12,3 +12,11 @@ releases/openbeta/*.json.tmp
 *.swp
 *~
 .idea/
+
+# Build and firmware artefacts
+*.elf
+*.map
+*.fwsc
+*.img
+*.log
+firmware/build/

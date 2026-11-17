@@ -590,3 +590,8 @@ Owner: integ. Target: integration/dnbox-consolidated. Exact base: 7b17a64e11731d
 Roadmap generation and regression tests implemented; positive local ancestry required for every Complete entry against explicit DNBOX_GATE_BASE_SHA. No move declared Complete. Preserved historical ROADMAP content.
 Local checks: generator tests 7 PASS; current views PASS; existing roadmap-evidence self-test 42 PASS. These checks do not qualify the complete M5 composition. Actions not used.
 M5 remains WORKING: compact-program LSan outside tracer, deployed five BREAK previews/selection, and genuine feature-list item120 voting runtime acceptance remain open. No device operation or publication claimed.
+
+
+### Hygiene review corrections after #957/#958
+
+Owner: integ hygiene-review worker. Consolidated input: `ec4f4e56abc37d677475244d73588fc42effa415`. Correct docs PR target, required gate-log exception, workflow prohibition, missing documentation links and rename wording. Reuses `lane/integ-hygiene-review-fixes`; no firmware or workflow changes. Documentation assertions PASS; full gate and independent final-head review NOT_RUN. Next: independent review and applicable integration gates; no delivery claim.
