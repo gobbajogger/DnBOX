@@ -43,6 +43,21 @@ class Detectors(unittest.TestCase):
         self.assertEqual(r['measurements']['panels'][0]['contentBboxRatio'], 0)
         self.assertTrue(r['checks']['3']['failures'])
 
+    def test_axes_cannot_substitute_for_missing_envelope_curve(self):
+        body = {'kind':'envelope-body','origin':[13,30], 'pixels':800,
+                'bbox':[13,30,228,90]}
+        s=screen([body]);s['panels']=[{'id':'graph','bbox':[0,0,20,20]}]
+        s['mask']=['1'*20 for _ in range(20)]
+        failures=inspect_screen(s)['checks']['3']['failures']
+        self.assertTrue(any(f['reason']=='missing-native-envelope-curve' for f in failures))
+        s['events'].append({'kind':'envelope-curve','origin':[13,30],
+                            'pixels':0,'bbox':None})
+        failures=inspect_screen(s)['checks']['3']['failures']
+        self.assertTrue(any(f['reason']=='missing-native-envelope-curve' for f in failures))
+        s['events'][-1].update(pixels=200,bbox=[13,30,228,90])
+        failures=inspect_screen(s)['checks']['3']['failures']
+        self.assertFalse(any(f['reason']=='missing-native-envelope-curve' for f in failures))
+
     def test_largest_empty_rectangle_exact(self):
         self.assertEqual(largest_empty_rectangle([[False]*4 for _ in range(3)])['area'], 12)
         self.assertEqual(largest_empty_rectangle([[True]*4 for _ in range(3)])['area'], 0)

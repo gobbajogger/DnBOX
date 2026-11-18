@@ -28,6 +28,28 @@ class CurrentSourceHooks(unittest.TestCase):
                 self.assertEqual(source.count('first_panel("'+role+'"'), 1)
             self.assertEqual(source.count('UI_PANEL_RADIUS'), 3)
 
+    def test_native_curve_writes_observed_once(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.prepare(root)
+            instrument(root)
+            source = (root / FILES[2]).read_text()
+            self.assertEqual(source.count('first_original_dv_curve_row(v,kick,top,bottom,col);'), 1)
+            self.assertEqual(source.count('first_finish(before,"envelope-body",13,top,0);'), 1)
+
+    def test_missing_or_duplicate_curve_renderer_rejected(self):
+        anchor = 'static UI_DRAW void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uint16_t col)'
+        for replacement in ('', anchor + anchor):
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                self.prepare(root)
+                path = root / FILES[2]
+                source = path.read_text()
+                self.assertEqual(source.count(anchor), 1)
+                path.write_text(source.replace(anchor, replacement))
+                with self.assertRaises(ValueError):
+                    instrument(root)
+
     def test_missing_or_duplicate_panel_rejected(self):
         anchor = 'rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);'
         for replacement in ('', anchor + anchor):

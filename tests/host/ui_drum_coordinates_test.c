@@ -156,11 +156,11 @@ int main(void)
     CHECK(sizeof original_lengths == sizeof DV_POLY / sizeof DV_POLY[0]);
     unsigned coordinate = 0;
     for (unsigned p = 0; p < sizeof original_lengths; p++) {
-        dv_poly_t poly = DV_POLY[p];
-        CHECK(poly.n == original_lengths[p]);
-        CHECK(2u * (poly.off + poly.n) <= sizeof DV_XY / sizeof DV_XY[0]);
-        for (unsigned i = 0; i < 2u * poly.n; i++) {
-            float actual = (float)DV_XY[2u * poly.off + i] / 1000.0f;
+        unsigned offset=DV_POLY[p]&511u, count=DV_POLY[p]>>9;
+        CHECK(count == original_lengths[p]);
+        CHECK(2u * (offset + count) <= 882u);
+        for (unsigned i = 0; i < 2u * count; i++) {
+            float actual = (float)dv_coordinate(2u * offset + i) / 1000.0f;
             CHECK(coordinate < sizeof reference_xy / sizeof reference_xy[0]);
             CHECK(!memcmp(&actual, &reference_xy[coordinate], sizeof actual));
             coordinate++;

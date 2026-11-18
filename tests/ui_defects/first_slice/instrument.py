@@ -90,6 +90,23 @@ def instrument(root):
     first_finish(before,"value",cx,y,0);
 }'''
     text=wrap(text,sig,'dv_value_text',wrapper)
+    # Full-width native envelope curves replaced many body pictograms. Observe
+    # their actual raster writes as body content, never panel fills or fake ink.
+    sig='static '+draw+'void dv_curve_row(drum_curve_t *v,int kick,int top,int bottom,uint16_t col)'
+    if text.count(sig) != 1:
+        raise ValueError('Expected exactly one native drum curve renderer')
+    wrapper=sig+"""
+{
+    uint16_t before[CV_MAX];first_snapshot(before);
+    first_original_dv_curve_row(v,kick,top,bottom,col);
+    first_finish(before,"envelope-body",13,top,0);
+}
+"""
+    text=wrap(text,sig,'dv_curve_row',wrapper)
+    text=once(text,'    cv_poly_aa(points,used/2,col);',
+        '    uint16_t curve_before[CV_MAX];first_snapshot(curve_before);\n'
+        '    cv_poly_aa(points,used/2,col);\n'
+        '    first_finish(curve_before,"envelope-curve",13,top,0);')
     # Real body paths are included in ink measurements, but panel fills are not.
     sig='static '+draw+'void dv_body_pictogram('
     start=text.index(sig); brace=text.index('{',start);signature=text[start:brace].strip()

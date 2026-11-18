@@ -99,7 +99,7 @@ test_class() {
     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
-    synth-param-jump|param-write-sources|ui-drum-glyph) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
+    synth-param-jump|param-write-sources|ui-drum-glyph|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
     chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
@@ -257,7 +257,7 @@ run() {
         return
     fi
     gw=0; gen_wait "$name" && gw=1
-    [ "$cls" = W ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
+    [ "$cls" = W ] || [ "$cls" = G ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
     (                                       # xtrace goes to the file on the next line so sh -x lines do not tear
         export HOME="$PWD/$OUT/iso/$name/home" TMPDIR="$PWD/$OUT/iso/$name/tmp"
         export PYTHONUSERBASE="$X0X_PYTHONUSERBASE"   # pip --user Pillow must survive the private HOME
@@ -270,9 +270,9 @@ run() {
                 echo "0 s $name" > "$RES/$key.time"
                 exit 0            # no job-slot read: the pool must not deadlock on a failed generation
             fi
-            [ "$cls" = W ] || read -r _ <&3
+            [ "$cls" = W ] || [ "$cls" = G ] || read -r _ <&3
         fi
-        [ "$cls" = G ] && gen_lock
+        if [ "$cls" = G ]; then gen_lock; read -r _ <&3; fi
         run_one "$key" "$name" "$@"
         [ "$cls" = G ] && gen_unlock
         [ "$name" = host-build ] && : > "$OUT/iso/.gen-done"   # also after a FAIL: the waiting tests then start and report
@@ -588,6 +588,7 @@ run stage-handoff python3 tests/host/test_stage_handoff.py   # tools/stage_hando
 run dev-validate python3 tests/host/test_dev_validate.py DevelopmentValidation
 run dev-validate-composed python3 tests/host/test_dev_validate_composed.py ComposedValidation
 run nightly-publish python3 tests/host/test_publish_nightly.py
+run scheduler-capacity python3 tests/test_scheduler_capacity.py
 run gen-cache python3 tests/host/test_gen_cache.py
 run smk-update-contract python3 tests/host/test_smk_update_contract.py
 if [ "$PIL_SKIP" = 1 ]; then not_run gen-order Pillow; else run gen-order sh tests/host/test_gen_order.sh; fi   # this file: drum-pan and stereo start after host-build (build/gen), with 8 jobs and 1 job
@@ -753,6 +754,10 @@ run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-readout sh tests/host/chicago_readout_test.sh; fi
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
+run ui-drum-curve-axes python3 tests/host/ui_drum_curve_axes_test.py
+run ui-no-loss-return python3 tests/host/ui_no_loss_return_test.py
+run ui-glyph-storage python3 -m unittest discover -s tests -p "test_*packing.py"
+run ui-fx-feedback-context python3 tests/host/ui_fx_feedback_context_test.py
 run ui-owner-copy python3 tests/host/ui_owner_copy_test.py
 run ui-home-r22 sh tests/host/ui_home_r22_test.sh
 run ui-owner-units sh tests/host/ui_owner_units_test.sh

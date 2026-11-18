@@ -23,6 +23,15 @@
 #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
 #include "ui_original_controls.h"
 #include "bass_pattern_preset.h"
+
+/* Keep screen renderers out of their callers on SMK to reduce code size.
+ * Drawing operations, fonts and audio code stay unchanged. */
+#if BOARD_SMK37 && defined(__clang__)
+#define UI_DRAW __attribute__((minsize, noinline))
+#else
+#define UI_DRAW
+#endif
+
 #include "ui_original_wave.h"
 #include "../dsp/bass_param_ids.h"                    /* BASS303_* (the 303's pages) */
 #include "chicago_arp.h"                       /* CHI_ARP_* (Chicago live arp page) */
@@ -175,11 +184,12 @@ enum { ACT_NONE, ACT_SAVE, ACT_LOAD, ACT_CLEAR_PART, ACT_CLEAR_PAT, ACT_COPY, AC
 #if BOARD_SMK37 && X0X_DEV_PADCAL
        ACT_PADCAL,
 #endif
-       ACT_RESET_SOUND,
+       ACT_RESET_SOUND, ACT_HOME_LIVE, ACT_HOME_PATTERNS,
 };
 
 typedef struct {
     uint8_t view, part, prev_view;
+    uint8_t home_live; /* runtime view only; never changes stored pattern assignment */
     uint8_t sel[NKIT];
     uint8_t page[NVIEWS][NPARTS];
     uint8_t spage;                     /* the 16 steps the white keys show: 0 = 1-16 .. 3 = 49-64 */
@@ -469,6 +479,8 @@ static const x0x_param_t ACT_P[] = {
 #if BOARD_SMK37 && X0X_DEV_PADCAL
     {"PAD COLOURS", 0, 0, 0},
 #endif
+    [ACT_HOME_LIVE] = {"LIVE OVERVIEW", 0, 0, 0},
+    [ACT_HOME_PATTERNS] = {"PATTERNS", 0, 0, 0},
 };
 static const x0x_param_t STALLS_P = {"STALLS", 1, 0, ONOFF_N};
 static const x0x_param_t MIDICH_P[NPARTS] = {   /* 0 = OFF (no notes in or out), 1-16 */
@@ -630,7 +642,7 @@ static pattern_t *pref_pattern(pref_t r)
     return pat_of(r.kind == R_SWING ? PART_909 : r.kind == R_DLEN || r.kind == R_DRATE ? r.a : NKIT + r.a);
 }
 
-static int pref_get(pref_t r)
+static UI_DRAW int pref_get(pref_t r)
 {
     if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
         seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
@@ -1074,21 +1086,6 @@ static int is_pan(pref_t r)
 static int matrix_value(pref_t r);
 
 /* Chicago Gate routes amp ADSR to the filter and therefore uses filter time laws. */
-static int display_env_param(pref_t r)
-{
-    if (r.c >= BASS303_AATTACK && r.c <= BASS303_ARELEASE &&
-        matrix_value(PR(R_ENG,T_303,r.b,BASS303_AMPMODE)) == BASS303_AMP_GATE) {
-        static const uint8_t filter[4] = {BASS303_FATTACK,BASS303_DECAY,BASS303_FSUSTAIN,BASS303_FRELEASE};
-        return filter[r.c-BASS303_AATTACK];
-    }
-    return r.c;
-}
-
-static float display_env_ms(pref_t r, int v)
-{
-    (void)r; (void)v; return 0.0f; /* bass303.c is not linked in the original-synth build */
-}
-
 static void display_ms(float ms,char *num,char *unit)
 {
     if(ms>0.0f && ms<10.0f) {
@@ -1104,7 +1101,7 @@ static const char *original_status_name(int voice)
     if (status != 1) return status == -1 ? "FX WAIT" : "DSP ERR";
     return wait > 0 && wait < 7 ? pending[wait] : "READY";
 }
-static int original_value_text(pref_t r, int value, char *num, char *unit)
+static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *unit)
 {
     if (r.kind == R_BENGINE) {
         put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
@@ -1788,6 +1785,8 @@ static void open_list_of_pages(void)
         list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
     for (k = 0; k < pg.nmore; k++)
         list_add(pg.more[k]);
+    if (ui.view == V_HOME)
+        list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
     if (ui.view == V_PERF)
         list_add(PR(R_ACT, ACT_PERF_TEST, 0, 0));
     if (ui.view == V_SONG) {
@@ -2673,6 +2672,9 @@ X0X_COLD static void run_action(int act, int arg)
     char t[28];
     if (act == ACT_CLEAR_PART || act == ACT_CLEAR_PAT || act == ACT_COPY) record_finish();
     switch (act) {
+    case ACT_HOME_LIVE:
+    case ACT_HOME_PATTERNS:
+        ui.home_live = act == ACT_HOME_LIVE; ui.overlay = O_NONE; break;
     case ACT_RESET_SOUND: reset_sound(arg); break;
     case ACT_SAVE: save_project(); break;
     case ACT_LOAD: (void)ui_project_load(); break;
@@ -5388,19 +5390,12 @@ static int steps_len(void)
 }
 
 /* -------------------------------------------------------------- header --- */
-/* Keep screen renderers out of their callers on SMK to reduce code size.
- * Drawing operations, fonts and audio code stay unchanged. */
-#if BOARD_SMK37 && defined(__clang__)
-#define UI_DRAW __attribute__((minsize, noinline))
-#else
-#define UI_DRAW
-#endif
 /* Horizontal runs keep the small-cell atlas cheap to paint at either scale. */
 static UI_DRAW void ui_pictogram(int x,int y,int glyph,int scale,uint16_t ink)
 {
     if ((unsigned)glyph>=UI_G_COUNT || scale<1 || scale>3) return;
     for (int row=0;row<9;row++) {
-        uint16_t bits=UI_PICTOGRAM[glyph][row];
+        uint16_t bits=ui_pictogram_row((unsigned)glyph,(unsigned)row);
         for (int col=0;col<9;) {
             if (!(bits & (1u<<(8-col)))) { col++; continue; }
             int start=col;
@@ -5848,7 +5843,8 @@ static UI_DRAW void draw_303(int band, int gen)
         q = put_s(q, " ");
         put_s(q, TB3PO_SCALE_NAMES[bp->gen.scale % TB3PO_NSCALES]);
         put_hex(put_s(t2, "SEED "), bp->gen.seed & 0xFFFFu, 4);
-        segs(4, vc(&FONT_S, 122, 16) - o, &FONT_S, C_GRAY, 18, t, t2, 0, 0);
+        segs(4, vc(&FONT_S, 122, 16) - o, &FONT_S, C_GRAY, 10, t, t2,
+             gen && ui.gen_stale[b] ? "CHANGED" : 0, 0);
     }
 }
 
@@ -6062,8 +6058,50 @@ static void lane(int y, int p, uint32_t bits, int ph, int len, int base)
 
 /* R22 HOME: pattern numbers name columns, parts name rows. Assignment and
  * stored note/velocity content remain separate; drawing never edits a pattern. */
+static UI_DRAW void draw_home_live(int band)
+{
+    int off=band*BAND_H;
+    cv_text(8,3-off,&FONT_T,"LIVE STEPS",SOUND_GRAY);
+    for(int pos=0;pos<NPARTS;pos++) {
+        int p=part_at(pos),track=p<NKIT?TRK_DRUM+p:p==PART_BRK?TRK_BRK:TRK_BASS0+p-PART_303A;
+        const pattern_t *pt=pat_of(p);
+        int len=p<NKIT?pt->drum[p].len:p==PART_BRK?16:pt->bass[p-PART_303A].len;
+        int ph=seq.playing?eng_step[track]:-1;
+        int base=ph>=0?(ph/16)*16:0;
+        if(base>=len)base=0;
+        uint32_t bits=0;
+        if(p<NKIT)for(int c=0;c<16&&base+c<len;c++)for(int v=0;v<NDRUM;v++)
+            if(sm_get(pt->drum[p].hit[v],base+c))bits|=1u<<c;
+        if(p==PART_BRK)bits=pt->brk.steps;
+        if(part_is_303(p))bits=bass_content_bits16(&pt->bass[p-PART_303A],base);
+        int y=18+pos*24-off,muted=part_muted(p);
+        uint16_t col=muted?SOUND_DIM:PART_COL[p];
+        char range[20],*q=put_i(range,base+1);
+        q=put_i(put_s(q,"-"),base+16<len?base+16:len);put_i(put_s(q," / "),len);
+        night_panel(3,y,234,22,0);
+        char identity[24];
+        const char *name=part_display(p);
+        if(part_is_303(p)) {
+            int voice=p-PART_303A,bank=engine_bass_bank(voice);
+            const char *engine=bank==ORIGINAL_SOUND_JUNO?"SUPERJ6":
+                bank==ORIGINAL_SOUND_SYNTHONE?"SYNTH ONE":bank==ORIGINAL_SOUND_MIAMI?"MIAMI":
+                bank==ORIGINAL_SOUND_CHICAGO?"CHICAGO":"CHOOSE ENGINE";
+            put_s(put_s(identity,engine),voice?" B":" A");name=identity;
+        }
+        cv_text(8,y+1,&FONT_T,name,col);
+        cv_text(8,y+11,&FONT_T,range,SOUND_GRAY);
+        for(int c=0;c<16;c++) {
+            int x=85+c*9,on=(bits>>c)&1u;
+            cv_rect(x,y+5,7,10,base+c<len?SOUND_EDGE:SOUND_SIDE);
+            if(base+c<len&&on)cv_rect(x+1,y+6,5,8,col);
+            if(ph==base+c)cv_rect(x,y+17,7,2,SOUND_WHITE);
+        }
+    }
+}
+
 static UI_DRAW void draw_home(int band)
 {
+    if(ui.home_live){draw_home_live(band);return;}
     int off=band*BAND_H,c0=ui.pbank*16;
     char title[24];
     put_i(put_s(put_i(put_s(title,"PATTERNS "),c0+1),"-"),c0+16);
@@ -6171,7 +6209,8 @@ static UI_DRAW void draw_fx(int band)
     put_s(put_s(q,"  "),a);cv_text(9,96-off,&FONT_S,t,C_HI);
     night_panel(3,116-off,114,20,0);night_panel(123,116-off,114,20,0);
     cv_text(9,121-off,&FONT_T,"FEEDBACK",C_GRAY);cv_text(129,121-off,&FONT_T,"RV DECAY",C_GRAY);
-    put_s(put_i(t,proj.sound.v[T_FX][0][FX_DL_FDBK]*100/127),"%");
+    pref_value(PR(R_ENG,T_FX,0,FX_DL_FDBK),a,u);
+    put_s(put_s(t,a),u);
     text_r(111,121-off,&FONT_T,t,C_WHITE);
     pref_value(PR(R_ENG,T_FX,0,FX_RV_DECAY),a,u);
     put_s(put_s(t,a),u);text_r(231,121-off,&FONT_T,t,C_WHITE);
@@ -6711,9 +6750,9 @@ static UI_DRAW void draw_ask(int band)
         cv_rect(233, 0, 1, 44, red);
         cv_rect(7, 44, 226, 1, red);
         box(22, 10, 92, 24, red);
-        text_c(68, vc(&FONT_B, 10, 24), &FONT_B, "YES", C_BLACK);
+        text_c(68, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_SEL " YES", C_BLACK);
         frame(126, 10, 92, 24, C_GRAY);
-        text_c(172, vc(&FONT_B, 10, 24), &FONT_B, "NO", C_GRAY);
+        text_c(172, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_HOME " NO", C_GRAY);
     }
 }
 
@@ -7311,23 +7350,22 @@ typedef struct {
     float live_level;
     unsigned live_stage,live_gate,live_active,present;
     int slot[4];
-    int curved,release_curve,gate,enabled;
+    int gate,enabled;
 } ui_adsr_t;
 
-static void adsr_values(ui_adsr_t *e,int p)
+static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
 {
     int i;
     float *time[3]={&e->attack,&e->decay,&e->release};
     *e=(ui_adsr_t){0};e->present=adsr_stage_slots(p,e->slot);
     if(!e->present)return;
-    e->sustain=e->slot[2]>=0?(float)matrix_value(pg.r[p][e->slot[2]])/127.0f:0;
-    e->curved=e->release_curve=e->gate=0;e->enabled=1;
+    /* Only the two admitted original owners below can enable a graph. */
     if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_JUNO) {
         juno6_envelope_snapshot v;
         if(!engine_juno_envelope_view(bidx(),&v)){e->enabled=0;return;}
         e->attack=v.adsr[0];e->decay=v.adsr[1];e->sustain=v.adsr[2];e->release=v.adsr[3];
         e->live_level=v.level;e->live_stage=v.stage;e->live_gate=v.gate;e->live_active=v.active;
-        e->curved=e->release_curve=e->enabled=3; /* compact Juno linear A/D, geometric R */
+        e->enabled=3; /* compact Juno linear A/D, geometric R */
         return;
     }
     if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_CHICAGO) {
@@ -7342,39 +7380,15 @@ static void adsr_values(ui_adsr_t *e,int p)
         if(!nv){e->enabled=0;return;}
         e->sustain=native[2];e->gate=(int)gate;
         for(i=0;i<3;i++) {
-            float x=nv?native[i==2?3:i]:(float)matrix_value(pg.r[p][i==2?3:i])/127.0f; x*=x; x*=x;
+            float x=native[i==2?3:i]; x*=x; x*=x;
             *time[i]=i==0?13.0f*x+.001f:i==1?25.0f*x+.001f:25.0f*x+.002f;
         }
-        e->curved=1; e->release_curve=1; e->enabled=2; /* 2: original exponential laws */
+        e->enabled=2; /* 2: original exponential laws */
         return;
     }
-    for(i=0;i<3;i++) {
-        pref_t r=pg.r[p][i==2?3:i];
-        *time[i]=display_env_ms(r,matrix_value(r));
-    }
-    e->gate=matrix_value(PR(R_ENG,T_303,bidx(),BASS303_AMPMODE))==BASS303_AMP_GATE;
-    if(pg.r[p][0].c==BASS303_AATTACK) {
-        e->curved=!e->gate; e->release_curve=e->gate?2:1;
-    }
-    else e->enabled=!e->gate && matrix_value(PR(R_ENG,T_303,bidx(),BASS303_FENV));
-}
-
-static float adsr_fall(int curved,float start,float end,float u)
-{
-    return curved?end+(start-end)*fm_expf(-5.0f*u):start+(end-start)*u;
-}
-
-/* Gate mode refreshes the filter release step from its current level on each
- * BASS303_CTRL block. Unlike standalone FENV it is geometric, not linear.
- * Show the normal active-render recurrence over five nominal release times;
- * idle/block-size changes and the post-envelope RC filter are not audio-traced. */
-static float adsr_release(const ui_adsr_t *e,float u)
-{
-    if(e->release_curve==2 && e->release>0.0f) {
-        float n=e->release*(BASS303_SR/(1000.0f*BASS303_CTRL));
-        return e->sustain*fm_powf(fm_maxf(0.0f,1.0f-1.0f/n),5.0f*n*u);
-    }
-    return adsr_fall(e->release_curve,e->sustain,0.0f,u);
+    /* An owner change after stage recognition cannot enable the retired
+     * positional bass303 fallback. No unavailable/foreign graph is invented. */
+    e->enabled=0;
 }
 
 /* Every admitted A/D/S/R tuple gets the full-row graph, active or not.
@@ -7386,7 +7400,7 @@ static UI_DRAW int adsr_row(int p)
     pg.r[p][1].kind==R_NONE && pg.r[p][2].kind==R_NONE && pg.r[p][3].kind==R_NONE); }
 /* Level of one original stage at time t (s): attack toward 1.3 clipped at 1,
  * decay toward sustain, release toward zero (original_vca_tick). */
-static float adsr_original_level(const ui_adsr_t *e,int stage,float t)
+static UI_DRAW float adsr_original_level(const ui_adsr_t *e,int stage,float t)
 {
     if(e->enabled==3) {
         if(stage==0)return fm_minf(1.0f,t/e->attack);
@@ -7402,7 +7416,7 @@ static float adsr_original_level(const ui_adsr_t *e,int stage,float t)
 /* Segment widths follow the real stage durations: attack to full scale,
  * decay to within 1% of sustain, release to the 0.04 cutoff. The sustain
  * plateau has a fixed illustrative width; it is not a time. */
-static void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],float dur[3])
+static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],float dur[3])
 {
     float sum=0.0f;
     int k,hold=42,span=width-hold;
@@ -7521,7 +7535,8 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
          * turns. Same quantisation as the native Chicago value readout. */
         if(!(e.present&(1u<<k)))continue;
         char label[20];
-        char *end=put_s(label,k==0?"A ":k==1?"D ":k==2?"S ":"R ");
+        char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+e.slot[k]);
+        end=put_s(put_s(end," "),k==0?"A ":k==1?"D ":k==2?"S ":"R ");
         end=put_i(end,(matrix_value(pg.r[p][e.slot[k]])*100+63)/127);
         put_s(end,"%");
         text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
@@ -8267,7 +8282,7 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
 
 #include "ui_drum_voice.inc"
 
-static uint32_t knobs_sig(void)
+static UI_DRAW uint32_t knobs_sig(void)
 {
     uint32_t h = 2166136261u, i;
     int pgi = cur_page();
