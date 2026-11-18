@@ -613,7 +613,7 @@ static UI_DRAW void dv_cp_stage_page(int band)
     int decay_owner=engine_drum808_param_curve_preview(D8_CP,2,choice,matrix_value(pg.r[0][3]),&decay);
     int selected=decay_owner==D8S_MA+1;
     rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);
-    cv_text(11,28-off,&FONT_T,"SOUND",ink);
+    cv_text(11,28-off,&FONT_T,page==0?"SOUND":"KIT",ink);
     if(!key_sounds())cv_text(91,28-off,&FONT_T,"KEY SOUND OFF",SOUND_GRAY);
     char label[32];put_i(put_s(put_i(label,page+1),"/"),pg.n);
     text_r(232,28-off,&FONT_T,label,SOUND_GRAY);

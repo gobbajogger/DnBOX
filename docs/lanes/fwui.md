@@ -1,5 +1,5 @@
 # Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Gate baseline: `90fa6d5f0cefa9913e76a6acc8a4ba9cb57c8613`. Updated: 2026-11-18 11:00 EST.
+Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published gate head: `e43726340aaa298a9fcb0831d9d1f6398245eea8`. Updated: 2026-11-18 12:40 EST.
 
 ## Checklist (from CHECKLISTS.md)
 
@@ -7,15 +7,15 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 | ID | Check | Status | Evidence / remaining qualification |
 |---|---|---|---|
-| C1 | Exact-head Local gate | FAIL | Original90fa terminal FAIL: 499 PASS, 4 FAIL, 0 NOT_RUN; both exits1, GATE_RETURNED, authentic dnbox-gate failure59267455179. All four failures have reviewed scoped repairs; successor full gate belongs solely to Integ. |
+| C1 | Exact-head Local gate | FAIL | Original90fa terminal FAIL: 499 PASS, 4 FAIL, 0 NOT_RUN; both exits1, GATE_RETURNED, authentic dnbox-gate failure59267455179. All four original failures have reviewed scoped repairs. Integ alone owns the active e437 full gate; its last consumed observation has359 PASS and gate-trap FAIL without terminal. |
 | C2 | Consolidated ancestry and no loss | PASS | 76040daa remains an ancestor; repairs add no deletion or branch rewrite. |
-| C3 | Independent complete screen acceptance | FAIL | All three correction commits received independent review with zero unresolved findings; scoped native before/after renders and runtime negatives pass. Complete lane visual acceptance remains open. |
+| C3 | Independent complete screen acceptance | FAIL | Original correction reviews and the bounded KIT review complete with zero unresolved findings. KIT48 states,24 matched frame pairs and runtime wrong-association negative pass; complete lane visual acceptance remains open. |
 | C4 | Full hard-limit gate | FAIL | Exact repaired-head gate not yet run. No new forbidden files or runtime paths in these fixes. |
 | C5 | All finish-line items closed | FAIL | F1/F4–F7 and final gate/acceptance remain open. |
 | C6 | Ready and merged by Integ | FAIL | PR975 remains draft; reviewed corrections are delivered through the existing lane branch. Integ alone qualifies the successor and controls Ready/merge after required checks. |
 | F1 | All R22 screens and shared glyphs | FAIL | Recovered revision comparison and complete native acceptance remain open; separate reference owner retained. |
 | F2 | All-domain geometry | FAIL | Repaired-source caption geometry: 1,530 reached states, 40,967 texts, zero findings; full component/all-domain gate and final acceptance remain open. |
-| F3 | Native code-space fit | PASS | Footer repair source ince7a26a1f / unchanged ui21397ecf: independent Elite1044 B, Pro1052 B XIP free; poolmargin780 B. Same stock thresholds. |
+| F3 | Native code-space fit | PASS | KIT source inc1894cb94 / unchanged ui21397ecf: independent Elite1028 B, Pro1036 B XIP free; poolmargin780 B. Stock XIPfloor1024/poolfloor512/reserve8192 unchanged. |
 | F4 | Pan and battery on all readouts | FAIL | No fresh complete repaired-head gate result. |
 | F5 | Pads/LEDs and hold-GLOBE | FAIL | No fresh complete repaired-head host-suite result. |
 | F6 | Firmware per-step slider lane | FAIL | Complete scenario/render acceptance remains open. |
@@ -23,8 +23,8 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 ## Now / next
 
-- Now: deliver the three independently reviewed corrections for all four terminal original90fa failures through existing lane/fwui and PR975. Production changes are limited to three header baselines26→28 and the CP/MA step row214→212.
-- Next: Integ qualifies the published successor SHA/tree with one unfiltered full gate and the required independent integration checks. No duplicate gate, Ready operation or merge is performed by this writer.
+- Now: retain published e437 through Integ's actual terminal. Prepare the independently reviewed, single-line KIT section title correction and its focused regression on the same lane; no competing publication or gate.
+- Next: coordinate the exact reviewed KIT successor with Integ after terminal and fresh head/base checks. Integ alone qualifies its publication through one full gate and required integration checks; this writer does not mark Ready or merge.
 - Then: reconcile the separately prepared selector/glyph work onto fresh accepted consolidated after current repair integration. Its scoped native behavior, geometry and stock resource checks pass; it remains unpublished and is excluded from this correction delivery.
 
 ## Blockers and recovery
@@ -35,7 +35,7 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 ## Top risks
 
-1. The accepted header repair retains only20/28 B beyond the required XIP reserve; later code must be measured.
+1. The minimal KIT correction retains only4/12 B beyond the required XIP reserve; every subsequent candidate needs exact stock measurement.
 2. A green geometry walker is not full page/revision/owner acceptance.
 3. Old-owner audio tails, held locks and motion must remain distinct from next-hit selector identity.
 
@@ -45,7 +45,7 @@ None.
 
 ## Conflicts noted
 
-The user's current instructions retain the existing branch/PR, assign the active90fa gate exclusively to Integ, prohibit Codex/Actions/devices/main/force-push/PSRAM, and store artifacts/checkpoints in Space/Library. Those instructions supersede older generic workflow text.
+The user's current instructions retain the existing branch/PR, assign the active e437 gate exclusively to Integ, prohibit Codex/Actions/devices/main/force-push/PSRAM, and store artifacts/checkpoints in Space/Library. Those instructions supersede older generic workflow text.
 
 ### 2026-11-18 original mock recovery and renderer repair
 
@@ -90,3 +90,16 @@ The original exact90fa gate completed at15:37 UTC with499 PASS,4 FAIL,0 NOT_RUN 
 The reviewed repairs correspond exactly to terminal failures: current-source FREE PLAY negative compatibility; CP/MA header y28 with preserved cue/redraw oracles and alternate-MA coverage; CP/MA footer y212 with both older independent oracles unchanged. The newer stage-row oracle is aligned to that established contract. All controls, flat panels/radii, graph width and native owner semantics remain unchanged by these corrections. No files are deleted.
 
 Local review anchors are76a57af,3f78164 and325368b. Authenticated API publication may produce different commit IDs because its commit metadata is server-generated; every published tree must match its reviewed local tree. Exact local/published mapping, live head/tree/base readback, full review artifacts, native measurements and original terminal evidence are maintained on the existing FWUI implementation Page. A matching tree is source fidelity, not a successor full-gate PASS.
+
+
+### 2026-11-18 Edition 2 adoption and truthful KIT section
+
+Consumed completed reference handoff v1 (SHA256 d9aa533cf8fa0fc56afe5988e868b8370c13adbb66cef3346424c48ce4ce984d) and exact ZIP v2 (SHA256 222b4cf357e0b1ca5153ba3d7785e84f58aca909c9966fb9cfb9370cc93d1372). All9622 current checksum payloads verify; the older PACKAGE-MANIFEST has300 stale entries and is retained as a metadata discrepancy. Independent source/no-loss maps retain all51 normal compositions,393 control occurrences,45 list schemas/408 rows/91 frames,32 target families/84 banks and8 boards/4 overlays/110 state contracts. Full maps and explicit missing originals/observers remain on the existing implementation Page; inventory coverage is not runtime acceptance. The separate reference owner remains authoritative.
+
+[Integ's refined KIT finding](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6985959901) retains the current flat geometry and restrained selected ink; only SOUND2/2 on an active KIT page is wrong. [FWUI coordination](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6986154892) confirms this bounded correction and the immutable active gate head. Change only the CP/MA title to page==0?SOUND:KIT. Preserve all parameter owners, physical controls and values, full-row envelopes, key cue y28, identity and16 steps y212. No old panel, fill, color or radius is restored.
+
+The independent real-framebuffer regression first compiles unchanged e437 and fails24 KIT associations of48 states at its C assertion. The candidate passes10628 checks, both palettes/choices/pages, actual encoder navigation and held/released input. A freshly compiled current-source wrong-association mutant fails all24 intended markers at runtime. The complete wrapper passes twice over the same persistent output. All24 before/after PNG pairs are identical outside x11..50/y28..39; SOUND frames are fully identical. Eight primary frames were independently and root-inspected. Existing footer, curve and key oracles remain unchanged. The new wrapper is registered once and serialized as classG because it regenerates shared host inputs.
+
+Independent stock native Elite/Pro builds exit0 at1028/1036 B XIP free,780 B pool margin and8192 B pool reserve. KIT costs16 B versus e437; affected local frame allocations are unchanged. These are direct measurements, not whole-stack, timing or device proof. Three simplification passes found no worthwhile change. Completed independent ce-code-review run kit-e437-20261118-independent reports no actionable findings; no aggregate gate acceptance follows.
+
+The e437 full gate remains owned solely by Integ; at12:32:59 EST it had359 PASS and one gate-trap failure caused by executor placement beneath /tmp. The original failure and this active run are preserved. Do not publish this successor until terminal is recorded and exact head/base are rechecked in coordination. Keep selector WIP and separate whole-page list/caption work outside this narrow delivery. No files are deleted. Exact source, test, native, review and recovery receipts are maintained on [the FWUI implementation Page](https://chatgpt.com/space/page_800ecfd4f2a08191884949bf6bbee920).
