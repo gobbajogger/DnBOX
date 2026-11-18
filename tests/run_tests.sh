@@ -24,8 +24,7 @@
 #     succeeds. A generation failure fails the suite and does not publish .gen-done: a waiter stops on
 #     build/host/iso/.gen-fail, records FAIL, takes no job slot, and does not use a stale header.
 #     When host-build itself ran, it still publishes .gen-done after the test (also on FAIL) so waiters report.
-#     gen-nonfont-tables mutates shared build/gen: class G so it cannot race stereo/drum-pan/project-* /
-#     wave-motion-migrate / project-save-preflight / smp-begin-cancel compiles.
+#     gen-nonfont-tables exercises missing headers in a private build directory.
 #   A missing optional input prints "  not-run <name> (<reason>)". It does not write a .fail file and does not set FAIL.
 #     Pillow: python3 cannot import PIL. ASan runtime: ${CC:-cc} -fsanitize=address,undefined does not link.
 #     Parallel tests use a private HOME. Python's user site follows HOME, so the Pillow check and those tests
@@ -97,7 +96,7 @@ test_class() {
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage|audio-stress) TEST_CLASS=G ;;
-    perf-wheel-noise) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
+    perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
     synth-param-jump|param-write-sources|ui-drum-glyph) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
