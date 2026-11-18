@@ -3,11 +3,28 @@
 from pathlib import Path
 import re,unittest
 S=(Path(__file__).resolve().parents[2]/'firmware/src/app/ui.c').read_text()
+def unapproved_knob_prefix(source):
+ # Only the shared physical envelope constructor and its two mapped owners
+ # may emit K-slot labels. This does not permit generic knob instructions.
+ line='char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+slot);'
+ signature='static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)\n{'
+ start=source.find(signature);end=source.find('\nstatic ',start+1) if start>=0 else -1
+ adsr='physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));'
+ amp="physical_stage_label(label,0,'D',matrix_value(r));"
+ if start<0 or end<0 or source[start:end].count(line)!=1 or source.count(line)!=1:return True
+ if source.count(adsr)!=1 or source.count(amp)!=1 or source.count('physical_stage_label(')!=3:return True
+ return 'put_s(label,"K")' in source.replace(line,'',1)
 class Copy(unittest.TestCase):
  def test_instruction_literals_absent(self):
   for text in ('C/D COUNT C#/D# PAGE','A KEYS ','? (NO CYCLE COUNTER)','NO IMAGE',': RUN PERF TEST',': RUN IT AGAIN','KNOBS ',': YES',': NO'):
    with self.subTest(text=text):self.assertFalse('"'+text+'"' in S,text)
  def test_button_prefixes_absent(self):
-  for text in ('UI_CAP_SEL "  YES"','UI_CAP_HOME "  NO"','put_s(label,"K")'):
+  for text in ('UI_CAP_SEL "  YES"','UI_CAP_HOME "  NO"'):
    with self.subTest(text=text):self.assertFalse(text in S,text)
+ def test_required_stage_identity_is_narrowly_allowed(self):
+  self.assertFalse(unapproved_knob_prefix(S))
+ def test_unmapped_or_duplicate_prefix_rejected(self):
+  self.assertTrue(unapproved_knob_prefix(S+'\nput_s(label,"K");'))
+  self.assertTrue(unapproved_knob_prefix(S.replace('physical_stage_label(label,e.slot[k]', 'physical_stage_label(label,k')))
+  self.assertTrue(unapproved_knob_prefix(S.replace('put_s(label,"K")','put_s(label,"")')))
 if __name__=='__main__':unittest.main()

@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "../../firmware/src/app/original_sound.h"
+#include "../../firmware/src/app/unit_control.h"
 #include "../../firmware/src/app/bass_pattern_preset.h"
 #include <assert.h>
 #include <stdio.h>
@@ -221,6 +222,12 @@ static void verify_synthone(void)
 
 int main(void)
 {
+    for(unsigned raw=0;raw<128;raw++) {
+        float gain=mix_level_control(raw),unit=unit_control(raw);
+        float expected_gain=(float)(raw*raw)/10000.0f,expected_unit=(float)raw/127.0f;
+        assert(memcmp(&gain,&expected_gain,sizeof gain)==0);
+        assert(memcmp(&unit,&expected_unit,sizeof unit)==0);
+    }
     uint8_t legacy[32]={0};
     assert(!original_sound_valid(legacy));
     memset(legacy,127,sizeof legacy);assert(!original_sound_valid(legacy));

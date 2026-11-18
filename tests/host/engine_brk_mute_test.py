@@ -42,6 +42,12 @@ def main():
     if "static void cq_mark_fresh(" in source:
         cq_end = source.index("static int cq_replace(", cq_start)
     declarations = source[cq_start:cq_end]
+    # engine_render advances the actual 808 observer clock even in this
+    # BREAK-only fixture. Retain its production scalar declaration, not a
+    # stubbed render body or a copied observer implementation.
+    clock = re.search(r"^static uint32_t d8_frame(?=[,;])", source, re.M)
+    if clock:
+        declarations += "\n" + clock.group(0) + ";\n"
     if "static volatile uint8_t notes_off_req;" in source:
         start = source.index("static volatile uint8_t notes_off_req;")
         declarations += "\n" + source[start:source.index("void engine_request_notes_off(", start)]

@@ -43,6 +43,12 @@ int engine_brk_preview_active(void) { return 0; }
 uint32_t engine_brk_outline_revision(int which) { (void)which; return 0; }
 int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revision)
 { (void)which; (void)peaks; (void)n; (void)revision; return 0; }
+int engine_drum808_curve(int voice, drum_curve_t *out)
+{ (void)voice; (void)out; return 0; }
+int engine_bd909_pitch_view(float *ms, float *hz)
+{ (void)ms; (void)hz; return 0; }
+int engine_drum909_decay_view(int voice, engine_decay_view_t *out)
+{ (void)voice; (void)out; return 0; }
 int engine_drum909_amp_view(int voice, drum909_amp_snapshot *out)
 { (void)voice; (void)out; return 0; }
 int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out)

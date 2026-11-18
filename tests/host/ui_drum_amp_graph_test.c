@@ -15,6 +15,23 @@ static uint32_t screen_curve(int ep){
  for(int y=92;y<119;y++)for(int x=13;x<=227;x++){h=(h^fb[y*240+x])*16777619u;ink+=fb[y*240+x]==swap16(matrix_col());}
  CHECK(ink>0);return h;
 }
+static void physical_amp_caption(int ep)
+{
+ static const int raw[3]={0,64,127};
+ static const char *const expected[3]={"K5 D 0%","K5 D 50%","K5 D 100%"};
+ uint16_t saved[120*12];CHECK(UI_FIRST_KNOB==5);
+ for(int theme=0;theme<2;theme++)for(int i=0;i<3;i++){
+  proj.set.palette=theme?5:0;palette_set(proj.set.palette);CHECK(ui_theme_light==(unsigned)theme);ui.touched=-1;pref_set(pg.r[ep][0],raw[i]);
+  cv_begin(240,82,C_BLACK);draw_adsr_inline(ep,1,4,69,0);
+  for(int y=0;y<12;y++)memcpy(saved+y*120,cv_px+(y+12)*240,120*sizeof(uint16_t));
+  cv_begin(240,82,C_BLACK);text_c(75,12,&FONT_T,expected[i],SOUND_GRAY);
+  for(int y=0;y<12;y++){
+   if(memcmp(saved+y*120,cv_px+(y+12)*240,120*sizeof(uint16_t)))fprintf(stderr,"AMP_PHYSICAL_SLOT_CAPTION_MISSING\n");
+   CHECK(!memcmp(saved+y*120,cv_px+(y+12)*240,120*sizeof(uint16_t)));
+  }
+ }
+ proj.set.palette=0;palette_set(0);
+}
 int main(void){
  drum909_amp_snapshot v;CHECK(!engine_drum909_amp_view(-1,&v));CHECK(!engine_drum909_amp_view(DR_LT,&v));CHECK(!engine_drum909_amp_view(DR_BD,0));
  for(int voice=DR_BD;voice<=DR_SD;voice++){
@@ -26,7 +43,7 @@ int main(void){
    if(drum_amp_ref(r)){CHECK(ep<0);ep=p;CHECK(adsr_row(p));for(int j=1;j<4;j++)CHECK(pg.r[p][j].kind==R_NONE);}
    else CHECK(!adsr_row(p));
   }
-  CHECK(ep>=0);
+  CHECK(ep>=0);physical_amp_caption(ep);
   for(int i=0;i<engine_nparams(T_909,voice);i++){
    const x0x_param_t *d=engine_param(T_909,voice,i);
    if(name_is(d,"Drive")||name_is(d,"Dist")||name_is(d,"Level")||name_is(d,"Pan")||name_is(d,"Rev")||name_is(d,"Dly"))continue;

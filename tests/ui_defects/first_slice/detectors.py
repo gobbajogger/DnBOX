@@ -74,6 +74,12 @@ def inspect_screen(screen):
         label_observations.append({'ref':g['ref'],'row':g.get('row'),'control':g.get('control'),'paintedCaptions':actual})
         if not valid:
             checks['4']['failures'].append({'reason':'missing-short-or-cryptic-painted-caption','ref':g['ref'],'actual':actual})
+    # Axis ink can never stand in for the observed native envelope itself.
+    # The body hook marks a requested graph; only the actual polyline hook
+    # supplies envelope-curve pixels, separately from guides and labels.
+    if any(e['kind']=='envelope-body' for e in events) and not any(
+            e['kind']=='envelope-curve' and e.get('pixels',0)>0 for e in events):
+        checks['3']['failures'].append({'reason':'missing-native-envelope-curve'})
     width=screen.get('width',240); height=screen.get('height',240)
     mask=[[c=='1' if isinstance(c,str) else bool(c) for c in row] for row in screen['mask']]
     panels=[]

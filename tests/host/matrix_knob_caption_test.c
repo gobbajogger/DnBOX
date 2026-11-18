@@ -2,6 +2,7 @@
 /* Actual renderer pixels; no replacement caption formatter. */
 #define CHICAGO_PRESENTATION_NO_MAIN
 #include "chicago_presentation_test.c"
+#include "ui_sound_footer_oracle.h"
 static const char *out;
 /* Owner removed all physical-button hint captions; bindings stay tested below. */
 static const char *const physical[16]={"","","","","","","","","","","","","","","",""};
@@ -41,9 +42,7 @@ static void check_caption(const char *caption,const char *name)
     for(int y=0;y<11;y++)for(int x=8;x<232;x++)if(fb[(top+y)*240+x]!=cv_px[y*240+x]) {
         fprintf(stderr,"caption %s mismatch page%d top%d x%d y%d got%04x want%04x\n",name,page,top,x,y,fb[(top+y)*240+x],cv_px[y*240+x]);CHECK(0);
     }
-    /* The obsolete navigation footer is intentionally empty, in R22 body colour. */
-    cv_begin(240,12,SOUND_BASE);
-    for(int y=0;y<11;y++)for(int x=7;x<234;x++)CHECK(fb[(228+y)*240+x]==cv_px[y*240+x]);
+    expect_sound_step_footer();
 }
 /* Owner-declared native page order; changing a binding must fail before a
  * caption derived from that binding can accidentally agree with itself. */

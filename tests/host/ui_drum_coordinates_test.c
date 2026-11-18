@@ -144,11 +144,29 @@ static const float reference_xy[] = {
 };
 int main(void)
 {
-    CHECK(sizeof reference_xy/sizeof reference_xy[0]==sizeof DV_XY/sizeof DV_XY[0]);
-    for(unsigned i=0;i<sizeof DV_XY/sizeof DV_XY[0];i++) {
-        float actual=(float)DV_XY[i]/1000.0f;
-        CHECK(!memcmp(&actual,&reference_xy[i],sizeof actual));
+    /* Keep every original path boundary independent of the storage atlas. */
+    static const unsigned char original_lengths[] = {
+        25, 2, 2, 2, 2, 25, 11, 9, 2, 2, 2, 2, 2, 25, 11, 2, 2, 2, 2, 25,
+        11, 2, 2, 2, 25, 11, 2, 2, 2, 25, 11, 2, 2, 10, 5, 2, 2, 18, 9, 2,
+        2, 2, 2, 18, 18, 2, 2, 2, 2, 2, 20, 2, 2, 2, 34, 2, 2, 25, 2, 2,
+        2, 2, 25, 11, 9, 2, 2, 2, 2, 2, 25, 11, 2, 2, 2, 2, 25, 11, 2, 2,
+        2, 25, 11, 2, 2, 2, 25, 11, 2, 2, 10, 5, 2, 2, 12, 2, 9, 20, 2, 2,
+        2, 18, 18, 2, 2, 2, 2, 2, 18, 9, 2, 2, 2, 2,
+    };
+    CHECK(sizeof original_lengths == 114);
+    unsigned coordinate = 0;
+    for (unsigned p = 0; p < sizeof original_lengths; p++) {
+        unsigned path=dv_path(p),offset=path&2047u,count=path>>11;
+        CHECK(count == original_lengths[p]);
+        CHECK(offset < sizeof DV_XY_PACKED);
+        for (unsigned i = 0; i < 2u * count; i++) {
+            float actual = (float)dv_coordinate_next(&offset) / 1000.0f;
+            CHECK(coordinate < sizeof reference_xy / sizeof reference_xy[0]);
+            CHECK(!memcmp(&actual, &reference_xy[coordinate], sizeof actual));
+            coordinate++;
+        }
     }
+    CHECK(coordinate == sizeof reference_xy / sizeof reference_xy[0]);
     printf("PASS bit-identical R22 coordinates: %u checks\n",checks);
     return 0;
 }

@@ -9,6 +9,7 @@
 static unsigned checks, captures;
 static const char *image_dir;
 #define CHECK(x) do { checks++; if (!(x)) { fprintf(stderr,"FAIL line %d: %s\n",__LINE__,#x); exit(1); } } while (0)
+#include "ui_sound_footer_oracle.h"
 static void block(void) { int32_t audio[512]; engine_render(audio,256); }
 static void settle(void) { for (int i=0;i<12;i++) block(); }
 static void choose(unsigned voice,unsigned kind,unsigned factory)
@@ -423,11 +424,12 @@ static void picture_rule_cases(void)
         CHECK(end+8+tw(&FONT_T,UI_CAP_EDIT)+4+18<190);
         for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK))CHECK(x>=7&&x<end&&y>=50&&y<62);
         CHECK(page==cur_page()&&view==ui.view&&part==ui.part);
-        /* Owner removed physical-navigation hints in both idle and held states. */
+        /* Navigation prose stays absent; the actual step lane remains in idle/held states. */
         draw_knobs();
-        for(int y=70;y<80;y++)for(int x=7;x<234;x++)CHECK(fb[(KNOB_Y+y)*240+x]==swap16(SOUND_BASE));
+        expect_sound_step_footer();
         ui.held_step=0;ui.held_step_part=(uint8_t)p;ui.held_step_pat=seq.ppat[p];draw_knobs();
-        for(int y=70;y<80;y++)for(int x=7;x<234;x++)CHECK(fb[(KNOB_Y+y)*240+x]==swap16(SOUND_BASE));
+        expect_sound_step_footer();
+        shot(p==PART_303A?"footer-held-a":"footer-held-b");
         ui.held_step=-1;
         seq.ppat[p]=NPAT-1;seq.pcue[p]=NPAT-2;draw_header();
         char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);

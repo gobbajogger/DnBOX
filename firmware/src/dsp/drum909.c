@@ -266,7 +266,8 @@ X0X_COLD int drum909_param_si(int voice, int i, int pot, float *val)
     case F_PITCH: return X0X_U_RATIO;
     case F_REV: case F_DLY: case F_ATTACK: case F_PDEPTH: case F_SNAPPY: *val = v * 100.0f; return X0X_U_PCT;
     case F_DECAY: case F_TAIL: return X0X_U_MS;
-    case F_TONE: return s->curve == CV_EXP ? X0X_U_HZ : X0X_U_NONE;
+    case F_TONE: /* SD noise decay: fixed 24 ms hold is separate. */
+        *val = v * 0.7f; return X0X_U_MS; /* admitted pot table is 300..4000 */
     case F_TUNE:
         if (voice==DR_BD && s->curve==CV_LIN)return X0X_U_MS;
         if (s->curve != CV_EXP) return X0X_U_NONE;

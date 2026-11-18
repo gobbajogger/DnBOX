@@ -17,3 +17,11 @@ typedef struct {
  int32_t hold_left, ramp_left, ramp_ticks;
  unsigned active, hold_active, ramp_valid;
 } drum909_amp_snapshot;
+
+/* Full-velocity preview of one named control voltage. Times are milliseconds.
+ * The live level is read independently from the sounding circuit. */
+typedef struct {
+ float delay, rise_tau, rise_end, hold, fall, peak, window;
+ float elapsed, level;
+ unsigned linear;
+} drum_curve_t;

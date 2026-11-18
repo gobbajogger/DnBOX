@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+import os,subprocess,tempfile
+from pathlib import Path
+root=Path(__file__).resolve().parents[2];out=root/'build/host/freeplay-state';out.mkdir(parents=True,exist_ok=True)
+def run(name,source=None):
+ env=dict(os.environ,SMC_UI_TEST_FILE='tests/host/ui_freeplay_state_test.c',SMC_UI_OUT=str(out/name))
+ if source:env['X0X_HOST_DEFS']=env.get('X0X_HOST_DEFS','')+' -DX0X_HOST_UI_SOURCE="'+str(source)+'"'
+ p=subprocess.run(['sh','tests/host/smc_ui_test.sh'],cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=100);(out/(name+'.log')).write_text(p.stdout);return p
+p=run('positive')
+if p.returncode or 'PASS FREE PLAY' not in p.stdout:raise SystemExit(p.stdout[-3000:])
+s=(root/'firmware/src/app/ui.c').read_text()
+old=subprocess.check_output(['git','show','6c418a43ff6fc5f4e1fad3bbf71e63cfd64a1987:firmware/src/app/ui.c'],cwd=root,text=True)
+anchor='&& ui.freeplay[bidx()] && !ui.rec'
+if s.count(anchor)!=1:raise SystemExit('missing/duplicate mode anchor')
+for name,text,marker in [('old-missing-cue',old,'FREE_PLAY_MODE_CUE_MISSING'),('always-free',s.replace(anchor,'&& !ui.rec'),'FREE_PLAY_MODE_CUE_UNEXPECTED')]:
+ with tempfile.TemporaryDirectory(prefix='freeplay-mode-negative-') as d:
+  f=Path(d)/'ui.c';f.write_text(text);p=run(name,f)
+  if not p.returncode or marker not in p.stdout or 'FAIL ' not in p.stdout:raise SystemExit(name+' not rejected as intended '+p.stdout[-3000:])
+print('PASS actual FREE PLAY visibility/no-loss and old-source/wrong-state negatives')

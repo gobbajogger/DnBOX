@@ -11,12 +11,19 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'tests/host/engine_808_scratch_alias_test.sh'
 DECLARATIONS = '''#include <stdint.h>
+typedef struct { uint32_t sentinel; } drum_curve_t;
+typedef struct { uint32_t sentinel; } engine_decay_view_t;
 typedef struct { uint32_t sentinel; } drum909_amp_snapshot;
 typedef struct { uint32_t sentinel; } juno6_envelope_snapshot;
 '''
 CALLS = '''int main(void) {
  uint8_t peaks[2]={17,29}; uint32_t revision=73;
  drum909_amp_snapshot drum={91}; juno6_envelope_snapshot juno={97};
+ drum_curve_t curve={17};
+ if(engine_drum808_curve(0,&curve)!=0 || curve.sentinel!=17)return 9;
+ float ms=11,hz=31; engine_decay_view_t decay={41};
+ if(engine_bd909_pitch_view(&ms,&hz)!=0 || ms!=11 || hz!=31)return 7;
+ if(engine_drum909_decay_view(0,&decay)!=0 || decay.sentinel!=41)return 8;
  if(engine_brk_preview(0)!=0 || engine_brk_preview_active()!=0)return 1;
  engine_brk_preview_end();
  if(engine_brk_outline_revision(0)!=0)return 2;

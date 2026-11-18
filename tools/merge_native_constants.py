@@ -16,10 +16,8 @@ import struct
 TABLES = {
     'IMA_ROUND_CORR': (64, '1d9b12c62c87407a8f43f24dd8e8dd69436df5b9c35a24f0f8dfb4130594af2d'),
     'fx_beats': (52, 'd28c773f2033dcf08b986c902d51330fa2e1850c180a9b970344edf64ff8554d'),
-    'mix_send_values': (512, '2e7800667d4ae3e49ac70e26b3c2631385158fa9aa31755904a651566fb1dc7d'),
     'original_pitch44100': (512, '77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926'),
     'mod_linear': (256, 'a7d0f57804777b16ea8d658964f84e29a9846084af4e9c145116ba9ba4daa903'),
-    'original_sound_unit_value': (512, '2e7800667d4ae3e49ac70e26b3c2631385158fa9aa31755904a651566fb1dc7d'),
     'original_drive_table': (256, 'a7d0f57804777b16ea8d658964f84e29a9846084af4e9c145116ba9ba4daa903'),
     'miami_decimator_wet': (256, 'a7d0f57804777b16ea8d658964f84e29a9846084af4e9c145116ba9ba4daa903'),
     'original_miami_voice_compile.base': (40, '0192a1c6d0a48f1cef5d37d48feca0cb97c3336d00d11414bc339cc9e6f36e9b'),

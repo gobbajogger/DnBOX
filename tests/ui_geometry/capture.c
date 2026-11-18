@@ -60,7 +60,16 @@ static void required_other_content(const char *screen) {
   int page=cur_page(),row=page%4,three=matrix_three_rows(),height=three?66:49,step=three?67:50,y=HDR_H+4+row*step;
   for(int k=0;k<4;k++) {
    pref_t r=pg.r[page][k];if(!pref_desc(r))continue;char label[64],num[32],unit[8],joined[48];
-   if(adsr_row(page)){snprintf(label,sizeof label,"%c %d%%","ADSR"[k],(matrix_value(r)*100+63)/127);expect_region(screen,"synth-envelope",label,k*59,y,240,y+height);synth_presence_checks++;continue;}
+   if(adsr_row(page)){
+    /* Independent owner/control IDs, not the renderer's partial-stage slots.
+     * Captions must retain physical knob identity as well as actual stage. */
+    int bank=engine_bass_sound_bank(&proj.sound,bidx());
+    int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1;
+    int stage=(int)r.c-first;
+    if(first<0 || stage<0 || stage>3){presence_missing++;printf("MISSING_CONTENT screen=%s kind=synth-envelope invalid-owner-or-stage\n",screen);continue;}
+    snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
+    expect_region(screen,"synth-envelope",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;continue;
+   }
    snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;
    if(r.kind==R_BPRESET)continue; /* wrapped preset names have their own tested formatter */
    pref_value_of(r,matrix_value(r),num,unit);snprintf(joined,sizeof joined,"%s%s",num,unit);

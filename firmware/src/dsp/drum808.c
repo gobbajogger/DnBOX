@@ -1915,6 +1915,69 @@ __attribute__((noinline)) static int track_sound(const drum808_t *d, int t)
     return k_snd[t][d->sw[t] & 1];
 }
 
+/* Match the editable circuit branches, independent of their audio filters.
+ * The resonator decay pots alter feedback/Q, not a discrete envelope. */
+X0X_COLD int drum808_curve(const drum808_t *d,int track,drum_curve_t *v)
+{
+    if((unsigned)track>=D8_NUM)return 0;
+    int s=track_sound(d,track);
+    const float *pv=d->potv[s];
+    float t=pv[D8P_DECAY]*1000.f;
+    float full_v=4.f+10.f*(SC808_FULL_VELOCITY_GAIN-1.f)/3.f;
+    unsigned active;
+    *v=(drum_curve_t){.peak=1.f};
+    switch(s) {
+    case D8S_SD: {
+        float dq=.35f+1.15f*d->pot[s][D8P_DECAY]/127.f;
+        v->peak=d->pot[s][D8P_X1]/127.f;
+        v->fall=75.f*dq/(.35f+1.15f*SD_DECAY_DEF);
+        v->level=d->sd.noise_env/(.25f*full_v);
+        v->window=450;active=d->sd.active;break;
+    }
+    case D8S_RS: {
+        const d8_env_t *e=&d->rs.env;
+        /* EnvGen.kr advances once every 64 frames. Interpolate its most
+         * recently returned sample exactly as env_next does. */
+        v->delay=0;v->hold=64.f/44.1f;
+        v->fall=t*9.12f/42.f;
+        v->level=e->prev+(e->cur-e->prev)*(e->phase?e->phase-1:0)/64.f;
+        v->window=250;active=d->rs.active && !e->done;break;
+    }
+    case D8S_MA: {
+        float a=(d->pot[s][D8P_X1]/127.f)/MA_ATK_DEF;
+        v->rise_tau=fm_maxf(.2f,1.2f*a*a);
+        v->rise_end=v->rise_tau*4.60517f;
+        v->fall=t*.85f/4.60517f;
+        v->level=d->ma.level*8.f/full_v;
+        v->window=350;active=d->ma.active;break;
+    }
+    case D8S_CP:
+        v->delay=1234.f/44.1f;
+        v->rise_tau=-1.f/(44.1f*fm_logf(1.f-D8_CP_MAIN_ATK));
+        v->rise_end=v->rise_tau*3.912023f;
+        v->fall=.0385f*t;v->level=d->cp.main_level;
+        v->window=650;active=d->cp.active;break;
+    case D8S_CB:
+        v->fall=t*(.140f/.43f);v->level=d->cb.body*(8.f/.23f)/full_v;
+        v->window=3000;active=d->cb.active;break;
+    case D8S_CY:
+        v->rise_tau=-1.f/(44.1f*fm_logf(1.f-D8_CY_ATK_C));v->rise_end=v->rise_tau*4.60517f;
+        v->linear=1;v->fall=t;v->level=.25f*d->cy.e1;
+        v->window=6100;active=d->cy.active;break;
+    case D8S_OH:
+        v->rise_tau=-1.f/(44.1f*fm_logf(1.f-D8_OH_ATK_C));v->rise_end=v->rise_tau*4.60517f;
+        v->hold=.30f*t;v->linear=1;v->fall=.70f*t;v->level=.25f*d->oh.lin_level;
+        v->window=1600;active=d->oh.active;break;
+    case D8S_CH:
+        v->rise_tau=-1.f/(44.1f*fm_logf(D8_MENV_UP));v->rise_end=v->rise_tau*5.298317f;
+        v->fall=t*.5f;v->level=.25f*d->ch.env.v;
+        v->window=1200;active=d->ch.active;break;
+    default:return 0;
+    }
+    v->elapsed=active?0.f:-1.f;
+    return 1;
+}
+
 int drum808_nparams(int track) { return track >= 0 && track <= D8_KIT ? d8_nspec[track] : 0; }
 
 /* UI readout: a pot's engine value and unit (X0X_U_*). Tune is semitones
