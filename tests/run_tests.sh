@@ -257,7 +257,7 @@ run() {
         return
     fi
     gw=0; gen_wait "$name" && gw=1
-    [ "$cls" = W ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
+    [ "$cls" = W ] || [ "$cls" = G ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
     (                                       # xtrace goes to the file on the next line so sh -x lines do not tear
         export HOME="$PWD/$OUT/iso/$name/home" TMPDIR="$PWD/$OUT/iso/$name/tmp"
         export PYTHONUSERBASE="$X0X_PYTHONUSERBASE"   # pip --user Pillow must survive the private HOME
@@ -270,9 +270,9 @@ run() {
                 echo "0 s $name" > "$RES/$key.time"
                 exit 0            # no job-slot read: the pool must not deadlock on a failed generation
             fi
-            [ "$cls" = W ] || read -r _ <&3
+            [ "$cls" = W ] || [ "$cls" = G ] || read -r _ <&3
         fi
-        [ "$cls" = G ] && gen_lock
+        if [ "$cls" = G ]; then gen_lock; read -r _ <&3; fi
         run_one "$key" "$name" "$@"
         [ "$cls" = G ] && gen_unlock
         [ "$name" = host-build ] && : > "$OUT/iso/.gen-done"   # also after a FAIL: the waiting tests then start and report
@@ -588,6 +588,7 @@ run stage-handoff python3 tests/host/test_stage_handoff.py   # tools/stage_hando
 run dev-validate python3 tests/host/test_dev_validate.py DevelopmentValidation
 run dev-validate-composed python3 tests/host/test_dev_validate_composed.py ComposedValidation
 run nightly-publish python3 tests/host/test_publish_nightly.py
+run scheduler-capacity python3 tests/test_scheduler_capacity.py
 run gen-cache python3 tests/host/test_gen_cache.py
 run smk-update-contract python3 tests/host/test_smk_update_contract.py
 if [ "$PIL_SKIP" = 1 ]; then not_run gen-order Pillow; else run gen-order sh tests/host/test_gen_order.sh; fi   # this file: drum-pan and stereo start after host-build (build/gen), with 8 jobs and 1 job
