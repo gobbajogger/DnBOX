@@ -1,6 +1,63 @@
 # Sound lane
 
-## Current owner checkpoint — 2026-11-18
+## Active successor implementation — 2026-11-18
+
+The user transferred sole Sound ownership from the length-limited thread
+`6afe1680-84a4-83e9-99bc-62619d34b5d0`. Exact recovery finished before source
+writes: all 690 staged paths and 342 reviewed files matched tree
+`74fdcc425ba2e8bbf8d287ebaf3577d462ce048c`, with no deletions. The verified
+preservation commit is `9be11840b11d256f22a9af19d290cfe96f31a429`, ordered parents
+`b90faafd2de71063448beea67aa5d22938a5c64b` and consolidated
+`76040daa5b52d686a8b7b544296ba5d79610a95d`. Existing `lane/sound` and draft
+[PR #973](https://github.com/gobbajogger/DnBOX/pull/973) are retained.
+
+The allocated separate local executor completed `compact-reference-elite-02`
+and then `compact-shared-elite-03`, with every one of 74 compilation units
+rebuilt for each member. The reference reproduced the 1,772-byte XIP reserve
+shortfall. The shared-math physical link succeeded at **546,924 bytes**, saving
+**6,496 bytes** and leaving **4,724 bytes above the unchanged 1,024-byte XIP
+reserve**. Both retain pool raw free 8,972 bytes, only 780 above its 8,192-byte
+reserve / 268 above the extra 512-byte gate margin. Ordinary RAM free is 1,100
+bytes and XPOOL free is zero. [Actual results and evidence](../../experiments/sound-hardware-v1/shared_math/README.md)
+are a partial-core resource measurement, not complete sound qualification.
+Pro was not rerun; its prior 1,764-byte deficit remains open.
+
+Implementation now includes an independently authored S1 envelope component
+with 12-byte state, separate from SJ6's AHDSHR. Stage coefficients latch on
+entry, sustain remains live, edits precede the sample, and retrigger retains
+the current level. No allocation, transcendental calculation or shared mutable
+state occurs in its sample routine. The component is not connected to the
+production renderer. Its ten immutable scalar recordings total **379,288
+binary32 outputs, all exact**, with five API/behavior tests, two input-integrity tests and four rejected
+C mutants. A boundary-edit regression was added after independent review found
+that an early decay latch survived the first four tests. All failed evidence
+is retained. [Component contract and verification](../../experiments/sound-hardware-v1/component_followup/README.md)
+explain the qualified scope.
+
+Prepared-coefficient alternatives remain research-only. Existing fastmath is
+exact on the recordings but differs for some legal physical controls against
+the inferred mathematical formula. An independent integer proposal matched
+5,360,032 tested coefficients, including subnormal boundaries, but still needs
+native cost and broader original-behavior qualification. A recovered physical
+range dictionary preserves complete state/audio in the host comparison; its
+79-byte prior object saving is not an additional measured image saving.
+
+Focused dispatcher tests `synthone-envelope-dnbx`, `fastmath`, and
+`fastmath-ubsan` pass on the current source. The full firmware suite and
+`scripts/gate.sh sound --post` have **not** run: exact production Elite/Pro
+links, target regression/timing and the next local allocation remain open.
+PR comment6994424328 requests the next bounded allocation. The two-link slice
+is consumed, Web owns its next shared RDC window, and no RDC fallback is taken.
+
+**Production Synth One is still silent and unresolved.** A complete independent
+S1 profile still needs the common oscillator/VCA/four-pole filter path, all 150
+controls, 694 presets, FX and two-part ownership; SJ6's 218 controls/640 presets
+and full sound/FX qualification remain separate. Existing S1–S6/common FAILs
+are not converted to PASS by these component results. No production activation
+or consolidated merge is admitted. No PSRAM, main/force/device writes,
+Actions/Codex work or #156 mutation is performed.
+
+## Recovered predecessor checkpoint — 2026-11-18
 
 This thread is the sole Sound production owner after consuming Dot Sound's frozen handoff. Preserve `lane/sound` and draft PR #973. The handoff archive SHA-256 is `4cc1b62ece0685eaa29b2c7ff86e7b58a4760a50b829bf27a18c38f6ef1bd773`; its live head was rechecked as `b90faafd2de71063448beea67aa5d22938a5c64b`. Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` was merged in locally without conflicts; the existing lane history and files are preserved.
 

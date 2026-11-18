@@ -16,3 +16,10 @@ The user's latest direction explicitly keeps the Sound checkpoint and recovery i
 | [AC79 SDK V1.2.14 recovery archive](https://chatgpt.com/library?file_id=libfile_fde3_f-bec3af011f588191aa5fe724ba82f4bd_2021479872048191acbfdca1f870a539&account_id=personal) | 309,800,121 | `929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6` | Extract separately; pass the SDK root to the same native replay helper with `--sdk`. The actual source tree is `fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13`. |
 
 Current source, tests, numeric behavior packets and measured candidate results are in [the existing Sound research package](../experiments/sound-hardware-v1/README.md). The [existing Sound Space](https://chatgpt.com/space/page_1d69bfdd65788191a98d1fe6e9c370b3) carries the current delivery report and gate state. Native diagnostic images and duplicate SDK/toolchain trees are rebuildable inputs and are not firmware payloads in this package.
+
+## Sound exact recovery and executed Elite pair — 2026-11-18
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| [DnBOX-Sound-recovered-74fdcc42-20261118.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-034be894b64881919da2c5dc7122a285_2021479872048191acbfdca1f870a539&account_id=personal) | 81,171,985 | `a33c1054a6ff8f9d10e3218388dfa00c90e1f5f9eeeae520d9927c2fac8a517b` | Exact reviewed staged tree, publication plan and recovery index. Published without deletion as commit `9be11840b11d256f22a9af19d290cfe96f31a429`. |
+| [DnBOX-Sound-local-Elite-fit-20261118.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-4abf329e18488191bda4aef75d18e025_2021479872048191acbfdca1f870a539&account_id=personal) | 5,292,068 | `5ee9b04d5d875d2d5f0e743f33491a0700f051ef247938298cc31930ed564b61` | Both allocated serial native links: exact inputs, maps, logs, terminals, physical-link failure and successful shared image, independent audit. No Pro or production admission inferred. |

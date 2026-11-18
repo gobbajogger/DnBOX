@@ -1,0 +1,60 @@
+{
+  "status": "RED_EXISTING_CORE_RETAINED_OUTPUTS",
+  "purpose": "Fresh comparison of retained output bytes; no old binary re-execution is claimed",
+  "candidate_sha256": "e08b39b829ad71e68e5e8b61901e1f33c3315eabcbfe3beac1b3672648712ed4",
+  "reference_sha256": "2cafbc8eb4b7aba8e22e0820ce8116d9dc7a57e6f8c41ed162c44ed98c474cfe",
+  "cases": [
+    {
+      "case": 0,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.4222848564386368,
+      "rms_error": 0.1719837965979678,
+      "finite": true,
+      "candidate_sha256": "3814b1a37c9e73459f2756453ef145bfa97ea54e5b0e50568c033ecfcbb5573d"
+    },
+    {
+      "case": 1,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.4222848564386368,
+      "rms_error": 0.1719837965979678,
+      "finite": true,
+      "candidate_sha256": "3814b1a37c9e73459f2756453ef145bfa97ea54e5b0e50568c033ecfcbb5573d"
+    },
+    {
+      "case": 2,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.4222848564386368,
+      "rms_error": 0.1719837965979678,
+      "finite": true,
+      "candidate_sha256": "3814b1a37c9e73459f2756453ef145bfa97ea54e5b0e50568c033ecfcbb5573d"
+    },
+    {
+      "case": 3,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.5972916334867477,
+      "rms_error": 0.10663083686008268,
+      "finite": true,
+      "candidate_sha256": "937ade8d7535668d32d2dbc710a7de7401d257a8fa8d7772daadce3b06b33885"
+    },
+    {
+      "case": 4,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.4222848564386368,
+      "rms_error": 0.1719837965979678,
+      "finite": true,
+      "candidate_sha256": "3814b1a37c9e73459f2756453ef145bfa97ea54e5b0e50568c033ecfcbb5573d"
+    }
+  ],
+  "wall_seconds": 0.030752767008380033,
+  "maximum_rss_kib": 11520
+}
