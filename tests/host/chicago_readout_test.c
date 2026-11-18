@@ -2,6 +2,7 @@
 /* Current Chicago/Miami renderer and engine: read-only STATUS is a real cell. */
 #define CHICAGO_PRESENTATION_NO_MAIN
 #include "chicago_presentation_test.c"
+#include "ui_sound_footer_oracle.h"
 static const char *output_dir;
 static void check_readout(const char *status,int selected,const char *name)
 {
@@ -31,11 +32,7 @@ static void check_readout(const char *status,int selected,const char *name)
     CHECK(tw(font,status)<=54);cv_text(151-tw(font,status)/2,26,font,status,ink);
     for(int y=10;y<44;y++)for(int xx=125;xx<177;xx++)
         CHECK(fb[(top+y)*240+xx]==cv_px[y*240+xx]);
-    if(selected) {
-        cv_begin(240,12,SOUND_BASE); /* no key-hint footer */
-        for(int y=0;y<11;y++)for(int xx=7;xx<234;xx++)
-            CHECK(fb[(228+y)*240+xx]==cv_px[y*240+xx]);
-    }
+    expect_sound_step_footer();
 }
 static void inert_status_knobs(int v)
 {
