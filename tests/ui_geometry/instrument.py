@@ -26,10 +26,7 @@ def instrument(root):
     p=root/'firmware/src/app/ui.c';s=p.read_text()
     s=once(s,'static void cv_lcd_full(uint32_t x, uint32_t y)\n{','static void cv_lcd_full(uint32_t x, uint32_t y)\n{\n    geo_blit(x,y);')
     s=once(s,'    cv_lcd_pos_t pos = {x, y};','    geo_blit(x,y);\n    cv_lcd_pos_t pos = {x, y};')
-    # Only the semantic face must survive. The two decorative shadow layers are
-    # intentionally overpainted by that face; their ink is not missing text.
-    s=once(s,'    cv_text(x,y+1,f,s,UI_N_LEFT); /* shallow incised lower light */','    unsigned geo_saved=geo_ntile;\n    cv_text(x,y+1,f,s,UI_N_LEFT); /* shallow incised lower light */')
-    s=once(s,'    cv_text(x,y,f,s,ink);       /* retain the native face, metrics and ink */','    geo_ntile=geo_saved;\n    cv_text(x,y,f,s,ink);       /* retain the native face, metrics and ink */')
+    # Current parameter names are rendered once in their semantic face ink.
     p.write_text(s)
 
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()

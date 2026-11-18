@@ -10,6 +10,7 @@
  *
  * Keys: F3..G5; the 16 white keys are steps (HOME: patterns), the 11 black keys a drum
  * machine's tracks or the break's slice pads (HOME: part mutes). */
+#include "../dsp/drum808.h"
 #include "x0x.h"
 #include "../seq/held_chord.h"
 #include "panic_chord.h"
@@ -5433,9 +5434,10 @@ static UI_DRAW int ui_position_badge(int glyph,int position,int queued,uint16_t 
 }
 /* Shared flat surface: consistent rounded outline, no per-edge bevel or glare.
  * Callers retain their selected face/edge colors and exact control geometry. */
+enum { UI_PANEL_RADIUS = 8 };
 static UI_DRAW void surface_panel(int x,int y,int w,int h,int active,uint16_t face,uint16_t edge,uint16_t side)
 {
-    int r=8;
+    int r=UI_PANEL_RADIUS;
     (void)active; (void)side;
     if(w<=0 || h<=0) return;
     if(r>(w-1)/2) r=(w-1)/2;
@@ -5447,24 +5449,6 @@ static UI_DRAW void night_panel(int x,int y,int w,int h,int active)
 {
     surface_panel(x,y,w,h,active,active?SOUND_SELECT:SOUND_FACE,
                   active?SOUND_SELECT_EDGE:SOUND_EDGE,active?SOUND_SELECT_SIDE:SOUND_SIDE);
-}
-/* Compact steps/notes use the same shallow material inside their old bounds.
- * Keep the centre ink (hit/mute/play semantics) and all overlay notches intact. */
-static UI_DRAW void night_mark(int x,int y,int w,int h,uint16_t ink,int raised)
-{
-    box(x,y,w,h,ink);
-    if(w>=4 && h>=5) {
-        cv_rect(x+1,y+1,w-2,1,raised?blend(ink,C_WHITE,3):UI_N_SHADOW);
-        cv_rect(x+1,y+h-2,w-2,1,raised?dim(ink,7):UI_N_LEFT);
-    }
-}
-
-static void night_label_c(int cx,int y,const felucca_font_t *f,const char *s,uint16_t ink)
-{
-    int x=cx-tw(f,s)/2;
-    cv_text(x,y+1,f,s,UI_N_LEFT); /* shallow incised lower light */
-    cv_text(x,y-1,f,s,UI_N_SHADOW);
-    cv_text(x,y,f,s,ink);       /* retain the native face, metrics and ink */
 }
 #define sound_slab night_panel
 
@@ -5736,12 +5720,12 @@ static UI_DRAW void draw_drum(int band)
             }
             if (v == NDRUM) {                          /* the accent row: white marks */
                 if (hit)
-                    night_mark(x + 2, y + 1, 8, 6, C_WHITE,1);
+                    box(x + 2, y + 1, 8, 6, C_WHITE);
                 else
                     rbox(x + 2, y + 3, 8, 2, 1, C_LINE);
                 continue;
             }
-            night_mark(x, y, 12, DROW - 2, hit ? (muted ? C_DIM : sel ? col : on_dim) : (s == ph ? C_DIM : C_LINE),hit);
+            box(x, y, 12, DROW - 2, hit ? (muted ? C_DIM : sel ? col : on_dim) : (s == ph ? C_DIM : C_LINE));
             if (hit && s == ph)
                 box(x + 2, y + 2, 8, DROW - 6, C_WHITE);
             if (hit && sel && ((lmarks >> c) & 1u))      /* the step's own values (p-locks): a notch */
@@ -5817,7 +5801,7 @@ static UI_DRAW void draw_303(int band, int gen)
             uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
             int end = st->flags >> BS_END_SHIFT;
             int width = end ? (end * 12 + 14) / 15 : 12;
-            night_mark(x, y, width, 5, fc,1); /* captured 1..15 release fraction of this step */
+            box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
             if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
                 cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
             if (g == G_TIE) {
@@ -5838,8 +5822,8 @@ static UI_DRAW void draw_303(int band, int gen)
                 cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
             }
         }
-        night_mark(x + 1, 101 - o, 10, 4, g && (st->flags & BS_ACCENT) ? C_WHITE : C_LINE,g && (st->flags & BS_ACCENT));   /* its accent, its slide */
-        night_mark(x + 1, 113 - o, 10, 4, g && (st->flags & BS_SLIDE) ? col : C_LINE,g && (st->flags & BS_SLIDE));
+        box(x + 1, 101 - o, 10, 4, g && (st->flags & BS_ACCENT) ? C_WHITE : C_LINE);   /* its accent, its slide */
+        box(x + 1, 113 - o, 10, 4, g && (st->flags & BS_SLIDE) ? col : C_LINE);
     }
     cv_text(3, vc(&FONT_XS, 99, 8) - o, &FONT_XS, "AC", C_GRAY);
     cv_text(3, vc(&FONT_XS, 111, 8) - o, &FONT_XS, "SL", C_GRAY);
@@ -6088,7 +6072,7 @@ static UI_DRAW void draw_home(int band)
     int sw=tw(&FONT_T,status)+10;
     rbox(237-sw,3-off,sw,14,7,SOUND_FACE);
     text_r(232,6-off,&FONT_T,status,SOUND_GRAY);
-    rbox(3,20-off,234,112,9,SOUND_FACE);
+    rbox(3,20-off,234,112,UI_PANEL_RADIUS,SOUND_FACE);
     for(int c=0;c<16;c++) {
         char n[4];put_i(n,c0+c+1);
         text_c(43+c*12,24-off,&FONT_T,n,SOUND_GRAY);
@@ -7243,14 +7227,9 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     }
     {
         int yy=y+(height>49?14:11);
-        if(night) night_label_c(cx,yy,&FONT_T,matrix_name(r),unused?SOUND_DIM:active?SOUND_INK:SOUND_GRAY);
-        else {
-            int xx=cx-tw(&FONT_T,matrix_name(r))/2;
-            uint16_t face=active?col:SOUND_FACE;
-            cv_text(xx,yy+1,&FONT_T,matrix_name(r),blend(face,C_WHITE,2));
-            cv_text(xx,yy-1,&FONT_T,matrix_name(r),blend(face,C_BLACK,6));
-            text_c(cx,yy,&FONT_T,matrix_name(r),unused?SOUND_DIM:active?C_BLACK:C_GRAY);
-        }
+        uint16_t label = unused ? SOUND_DIM : active ? (night ? SOUND_INK : C_BLACK)
+                                                    : (night ? SOUND_GRAY : C_GRAY);
+        text_c(cx, yy, &FONT_T, matrix_name(r), label);
     }
 #if X0X_BASS_PRESET_PREVIEW
     if(r.kind==R_BPRESET) {

@@ -12,6 +12,9 @@ expect part 4
 tap EDIT
 tap EDIT
 turn K1 2
+expect loop_a 0
+# Browsing auditions without changing the pattern; SEL explicitly chooses it.
+tap SEL
 expect loop_a 2
 shot 30_loops_uploaded.png
 tapkey w0

@@ -196,6 +196,142 @@ static void test_noise_tail_motion(void)
     drain_ms(6000);now_ms++;ui_frame();CHECK(!engine_drum_view(0,1,&age,&late));cell_copy(1,final);CHECK(!memcmp(idle,final,sizeof idle));
     puts("PASS actual Noise Tail, clock-only age-seed change, and byte-identical settled return");
 }
+static uint32_t pitch_curve_hash(void)
+{
+    uint32_t hash=2166136261u;
+    for(int y=185;y<=208;y++)for(int x=13;x<=227;x++)
+        hash=(hash^fb[y*240+x])*16777619u;
+    return hash;
+}
+
+static void test_kick_pitch_row(void)
+{
+    setup(V_PART,PART_909);ui.sel[PART_909]=DR_BD;*page_of(V_PART)=0;build_pages();
+    pref_t depth=PR(R_ENG,T_909,DR_BD,4);
+    pref_set(depth,0);drain_ms(6100);ui_frame();
+    uint32_t shallow=pitch_curve_hash();
+    pref_set(depth,127);drain_ms(30);ui_frame();CHECK(shallow!=pitch_curve_hash());
+    float ms,hz;
+    CHECK(!engine_bd909_pitch_view(&ms,&hz));
+    engine_drum(PART_909,DR_BD,1);drain_ms(10);ui_frame();
+    CHECK(engine_bd909_pitch_view(&ms,&hz));CHECK(ms>0 && ms<40 && hz>49);
+    int x=13+(int)(214.f*ms/160.f+.5f);
+    int y=dv_kick_pitch_y(hz,185,208);
+    CHECK(fb[y*240+x]==swap16(SOUND_INK));
+    uint32_t early=pitch_curve_hash();
+    float old_ms=ms,old_hz=hz;
+    pref_set(depth,0); /* Preview changes; running voice retains its trigger. */
+    CHECK(engine_bd909_pitch_view(&ms,&hz));CHECK(ms==old_ms && hz==old_hz);
+    drain_ms(50);ui_frame();CHECK(engine_bd909_pitch_view(&ms,&hz));
+    CHECK(ms>40 && ms<160 && hz<old_hz);CHECK(early!=pitch_curve_hash());
+    x=13+(int)(214.f*ms/160.f+.5f);y=dv_kick_pitch_y(hz,185,208);
+    CHECK(fb[y*240+x]==swap16(SOUND_INK));
+    shot("kick-pitch-live");
+    drain_ms(6100);ui_frame();CHECK(!engine_bd909_pitch_view(&ms,&hz));
+    CHECK(shallow==pitch_curve_hash());shot("kick-pitch-idle");
+    puts("PASS full-width 909 kick pitch sweep, live oscillator, independent next-hit edit");
+}
+static void test_secondary_decay_rows(void)
+{
+    engine_decay_view_t v;
+    CHECK(!engine_drum909_decay_view(DR_RS,&v));
+    for(int voice=DR_LT;voice<=DR_RD;voice++) {
+        if(voice==DR_RS)continue;
+        setup(V_PART,PART_909);ui.sel[PART_909]=voice;*page_of(V_PART)=0;build_pages();
+        int pot=voice<=DR_HT?1:(voice==DR_CH || voice==DR_OH)?0:2;
+        pref_t r=PR(R_ENG,T_909,voice,pot);
+        CHECK(!strcmp_s(pref_name(r),voice==DR_CP?"Tail":"Decay"));
+        pref_set(r,127);drain_ms(6100);ui_frame();
+        CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms<0);
+        uint32_t long_curve=2166136261u;
+        for(int y=153;y<=208;y++)for(int x=13;x<=227;x++)
+            long_curve=(long_curve^fb[y*240+x])*16777619u;
+        float max_ms=v.decay_ms;
+        engine_drum(PART_909,voice,1);drain_ms(12);ui_frame();
+        CHECK(engine_drum909_decay_view(voice,&v));
+        if(voice==DR_CP)CHECK(v.elapsed_ms<0); /* fourth pulse starts the editable tail */
+        else CHECK(v.elapsed_ms>=0);
+        drain_ms(40);ui_frame();
+        CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms>0 && v.level>0);
+        float t=v.elapsed_ms,level=v.level;
+        float expected=v.peak*fm_powf(.00001f/v.peak,t/max_ms);
+        CHECK(fabsf(v.level-expected)<.002f);
+        int x=13+(int)(214.f*t/max_ms+.5f);
+        int top=153,bottom=208;
+        int y=bottom-(int)((bottom-top)*fm_clampf(level,0,1)+.5f);
+        CHECK(fb[y*240+x]==swap16(SOUND_INK));
+        pref_set(r,0);drain_ms(5);ui_frame();
+        CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms>t && v.level<=level);
+        CHECK(v.decay_ms<max_ms);
+        if(voice==DR_OH) {
+            engine_drum(PART_909,DR_CH,1);drain_ms(12);
+            CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms<0);
+        }
+        drain_ms(6100);ui_frame();CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms<0);
+        uint32_t short_curve=2166136261u;
+        for(int y=153;y<=208;y++)for(int x=13;x<=227;x++)
+            short_curve=(short_curve^fb[y*240+x])*16777619u;
+        CHECK(long_curve!=short_curve);
+    }
+    puts("PASS eight editable 909 decay graphs using production ramp samples");
+}
+static void test_snare_noise_row(void)
+{
+    engine_decay_view_t v;
+    setup(V_PART,PART_909);ui.sel[PART_909]=DR_SD;*page_of(V_PART)=0;build_pages();
+    pref_t tone=PR(R_ENG,T_909,DR_SD,1);
+    pref_set(tone,127);drain_ms(6100);ui_frame();
+    CHECK(engine_drum909_decay_view(DR_SD,&v));CHECK(v.elapsed_ms<0);
+    float max_ms=v.decay_ms+24.f;
+    engine_drum(PART_909,DR_SD,1);drain_ms(4);ui_frame();
+    CHECK(engine_drum909_decay_view(DR_SD,&v));CHECK(v.elapsed_ms>0 && v.elapsed_ms<24 && v.level==1);
+    int x=13+(int)(214.f*v.elapsed_ms/max_ms+.5f);
+    CHECK(fb[185*240+x]==swap16(SOUND_INK));
+    drain_ms(50);ui_frame();CHECK(engine_drum909_decay_view(DR_SD,&v));
+    CHECK(v.elapsed_ms>24 && v.level<1 && v.level>0);
+    CHECK(fabsf(v.level-fm_powf(.00001f,(v.elapsed_ms-24.f)/v.decay_ms))<.001f);
+    int y=208-(int)(23.f*v.level+.5f);
+    x=13+(int)(214.f*v.elapsed_ms/max_ms+.5f);CHECK(fb[y*240+x]==swap16(SOUND_INK));
+    pref_set(tone,0);drain_ms(5);ui_frame();CHECK(engine_drum909_decay_view(DR_SD,&v));
+    CHECK(v.elapsed_ms>60 && v.decay_ms+24.f<max_ms);
+    drain_ms(6100);ui_frame();CHECK(engine_drum909_decay_view(DR_SD,&v));CHECK(v.elapsed_ms<0);
+    puts("PASS 909 snare noise hold and actual tone decay");
+}
+static void test_808_circuit_curves(void)
+{
+    const int tracks[]={D8_SD,D8_RS,D8_CP,D8_CP,D8_CB,D8_CY,D8_OH,D8_CH};
+    drum_curve_t view;
+    setup(V_PART,PART_808);
+    CHECK(!engine_drum808_curve(D8_BD,&view));CHECK(!engine_drum808_curve(D8_MT,&view));
+    for(unsigned i=0;i<sizeof tracks/sizeof *tracks;i++){
+        int voice=tracks[i];
+        setup(V_PART,PART_808);ui.sel[PART_808]=voice;*page_of(V_PART)=0;build_pages();
+        if(voice==D8_CP || voice==D8_RS)pref_set(find_ref(T_808,voice,"Sound"),i==3);
+        pref_t decay=find_ref(T_808,voice,"Decay");
+        pref_set(decay,127);drain_ms(6200);ui_frame();
+        CHECK(engine_drum808_curve(voice,&view));CHECK(view.elapsed<0);
+        float long_fall=view.fall;
+        engine_drum(PART_808,voice,1);
+        drain_ms(4);ui_frame();
+        CHECK(engine_drum808_curve(voice,&view));CHECK(view.elapsed>0);
+        CHECK(fabsf(view.level-dv_curve_level(&view,view.elapsed))<.04f);
+        drain_ms(26);ui_frame();
+        CHECK(engine_drum808_curve(voice,&view));CHECK(view.elapsed>0);
+        float expected=dv_curve_level(&view,view.elapsed);
+        CHECK(fabsf(view.level-expected)<.04f);
+        int x=13+(int)(214.f*view.elapsed/view.window+.5f);
+        int y=208-(int)(55.f*fm_clampf(view.level,0.f,1.f)+.5f);
+        CHECK(fb[y*240+x]==swap16(SOUND_INK));
+        float age=view.elapsed;
+        pref_set(decay,0);drain_ms(4);ui_frame();CHECK(engine_drum808_curve(voice,&view));
+        CHECK(view.fall<long_fall);CHECK(view.elapsed>age);
+        if(voice==D8_RS){
+            pref_set(find_ref(T_808,voice,"Sound"),1);drain_ms(5);
+            CHECK(!engine_drum808_curve(voice,&view));
+        }
+    }
+    puts("PASS eight editable 808 circuit envelopes, switch isolation and real audio-frame cursor");
+}
 static void test_shared_return_fade(void)
 {
     pref_t r=PR(R_ENG,T_909,1,1);uint32_t saved_now=now_ms,saved_last=dg_last[0][1];
@@ -204,4 +340,4 @@ static void test_shared_return_fade(void)
     now_ms=saved_now;dg_last[0][1]=saved_last;
     puts("PASS shared300ms return-fade clock contract");
 }
-int main(void) { test_dispatch(); test_amp_motion(0); test_amp_motion(1); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds();test_noise_tail_motion();test_shared_return_fade(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }
+int main(void) { test_dispatch(); test_808_circuit_curves(); test_secondary_decay_rows(); test_snare_noise_row(); test_kick_pitch_row(); test_amp_motion(0); test_amp_motion(1); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds();test_noise_tail_motion();test_shared_return_fade(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }

@@ -92,6 +92,7 @@ int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned 
 /* drums, UI: ms since the track's last hit, its live amp envelope 0..1; 0 when silent */
 int engine_drum_view(int kit, int voice, uint32_t *age_ms, float *env);
 /* UI: the 909 kick's pitch t ms after a hit for these engine values (drum909_bd_hz) */
+int engine_bd909_pitch_view(float *ms,float *hz); /* sounding kick position, sampled atomically */
 float engine_bd909_hz(float tau, float depth, float pitch, float t_ms);
 /* UI: live MG1 phase/output (Miami) and osc pitch glide (both); 0 when not available */
 int engine_bass_motion_view(int voice, float *phase, float *bipolar, float *current, float *target, int *active);
@@ -322,4 +323,9 @@ extern uint32_t engine_diag_render_offset;
 #endif
 
 /* Main-loop coherent BD/SD amplitude snapshot; not a final audio peak. */
+/* Editable 909 snare noise, tom body, clap tail and sample VCA. The preview uses a
+ * full-velocity trigger. Cursor time and level come from the running ramp. */
+typedef struct { float peak, decay_ms, elapsed_ms, level; } engine_decay_view_t;
+int engine_drum808_curve(int voice,drum_curve_t *view);
+int engine_drum909_decay_view(int voice,engine_decay_view_t *out);
 int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out);
