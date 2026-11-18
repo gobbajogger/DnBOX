@@ -20,14 +20,12 @@ static void check_readout(const char *status,int selected,const char *name)
     CHECK(pref_read_only(refs[2]));
     char num[16],unit[8];pref_value_of(refs[2],pref_get(refs[2]),num,unit);
     CHECK(!strcmp(num,status) && !unit[0]);
-    /* Independent cell-interior oracle: raised label and native text. The
+    /* Independent cell-interior oracle: one flat label and native text. The
      * STATUS cell has no legacy shared-half icon, reason line or K8 divider. */
     uint16_t bg=selected?SOUND_SELECT:SOUND_FACE;
     uint16_t ink=selected?SOUND_INK:SOUND_WHITE,label=selected?SOUND_INK:SOUND_GRAY;
     cv_begin(240,49,bg);
     int x=151-tw(&FONT_T,"STATUS")/2;
-    cv_text(x,12,&FONT_T,"STATUS",UI_N_LEFT);
-    cv_text(x,10,&FONT_T,"STATUS",UI_N_SHADOW);
     cv_text(x,11,&FONT_T,"STATUS",label);
     const felucca_font_t *font=!strcmp(status,"FX WAIT")?&FONT_XS:&FONT_B;
     CHECK(tw(font,status)<=54);cv_text(151-tw(font,status)/2,26,font,status,ink);

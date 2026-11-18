@@ -26,9 +26,15 @@ class FullGeometryTests(unittest.TestCase):
   import judge,sys
   with tempfile.TemporaryDirectory() as d:
    out=Path(d)/'out'
+   def exported_source(argv,**kwargs):
+    if argv[:2]==['tar','-x']:
+     source=Path(argv[3])/'firmware/src/app/ui_drum_voice.inc'
+     source.parent.mkdir(parents=True,exist_ok=True)
+     source.write_text('/* presence-only fixture; geometry is mocked to fail */\n')
+    return subprocess.CompletedProcess(argv,0,stdout=b'')
    with patch.object(sys,'argv',['judge.py','--output',str(out)]), \
         patch('judge.subprocess.check_output',return_value=d+'\n'), \
-        patch('judge.subprocess.run',return_value=subprocess.CompletedProcess([],0,stdout=b'')), \
+        patch('judge.subprocess.run',side_effect=exported_source), \
         patch('judge.full_geometry',side_effect=ValueError('geometry negative')) as required:
     self.assertEqual(judge.main(),1)
     required.assert_called_once()

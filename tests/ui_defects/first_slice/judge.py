@@ -27,6 +27,11 @@ def main():
         work = Path(tmp) / 'src'; work.mkdir()
         archive = subprocess.run(['git', 'archive', a.rev], cwd=repo, check=True, stdout=subprocess.PIPE).stdout
         subprocess.run(['tar', '-x', '-C', str(work)], input=archive, check=True)
+        if not (work / 'firmware/src/app/ui_drum_voice.inc').exists():
+            reason = 'required R22 renderer source missing: firmware/src/app/ui_drum_voice.inc'
+            print('ui-defects: FAIL: ' + reason)
+            write(out / 'judgement.json', {'status': 'FAIL', 'screens': 0, 'reason': reason})
+            return 1
         try:
             full_geometry(work, out / 'geometry')
             require_drum_source(work)
