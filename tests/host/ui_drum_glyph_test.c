@@ -244,7 +244,7 @@ static void test_secondary_decay_rows(void)
         pref_set(r,127);drain_ms(6100);ui_frame();
         CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms<0);
         uint32_t long_curve=2166136261u;
-        for(int y=153;y<=208;y++)for(int x=13;x<=227;x++)
+        for(int y=153;y<=194;y++)for(int x=33;x<=227;x++)
             long_curve=(long_curve^fb[y*240+x])*16777619u;
         float max_ms=v.decay_ms;
         engine_drum(PART_909,voice,1);drain_ms(12);ui_frame();
@@ -256,9 +256,12 @@ static void test_secondary_decay_rows(void)
         float t=v.elapsed_ms,level=v.level;
         float expected=v.peak*fm_powf(.00001f/v.peak,t/max_ms);
         CHECK(fabsf(v.level-expected)<.002f);
-        int x=13+(int)(214.f*t/max_ms+.5f);
-        int top=153,bottom=208;
-        int y=bottom-(int)((bottom-top)*fm_clampf(level,0,1)+.5f);
+        CHECK(max_ms>0 && t>=0 && t<=max_ms && level>=0 && level<=1);
+        int x=33+(int)(194.f*t/max_ms+.5f);
+        int top=153,bottom=194;
+        int y=bottom-(int)((bottom-top)*level+.5f);
+        CHECK(x>=33 && x<=227 && y>=top && y<=bottom);
+        if(fb[y*240+x]!=swap16(SOUND_INK))fprintf(stderr,"909_LIVE_MARKER_MISSING voice=%d x=%d y=%d\n",voice,x,y);
         CHECK(fb[y*240+x]==swap16(SOUND_INK));
         pref_set(r,0);drain_ms(5);ui_frame();
         CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms>t && v.level<=level);
@@ -269,7 +272,7 @@ static void test_secondary_decay_rows(void)
         }
         drain_ms(6100);ui_frame();CHECK(engine_drum909_decay_view(voice,&v));CHECK(v.elapsed_ms<0);
         uint32_t short_curve=2166136261u;
-        for(int y=153;y<=208;y++)for(int x=13;x<=227;x++)
+        for(int y=153;y<=194;y++)for(int x=33;x<=227;x++)
             short_curve=(short_curve^fb[y*240+x])*16777619u;
         CHECK(long_curve!=short_curve);
     }
@@ -319,9 +322,17 @@ static void test_808_circuit_curves(void)
         CHECK(engine_drum808_curve(voice,&view));CHECK(view.elapsed>0);
         float expected=dv_curve_level(&view,view.elapsed);
         CHECK(fabsf(view.level-expected)<.04f);
-        int x=13+(int)(214.f*view.elapsed/view.window+.5f);
-        int y=208-(int)(55.f*fm_clampf(view.level,0.f,1.f)+.5f);
+        /* This fixed two-bank fixture has plot y153..194 after reserving
+         * the native FONT_T time band. The percentage scale owns x13..29;
+         * real time runs x33..227, not the retired x13..227 unlabelled plot. */
+        CHECK(view.window>0 && view.elapsed>=0 && view.elapsed<=view.window);
+        CHECK(view.level>=0 && view.level<=1);
+        int x=33+(int)(194.f*view.elapsed/view.window+.5f);
+        int y=194-(int)(41.f*view.level+.5f);
+        CHECK(x>=33 && x<=227 && y>=153 && y<=194);
+        if(fb[y*240+x]!=swap16(SOUND_INK))fprintf(stderr,"808_LIVE_MARKER_MISSING voice=%d x=%d y=%d elapsed=%f level=%f\n",voice,x,y,view.elapsed,view.level);
         CHECK(fb[y*240+x]==swap16(SOUND_INK));
+        char shot_name[48];snprintf(shot_name,sizeof shot_name,"808-circuit-live-%u-voice%d",i,voice);shot(shot_name);
         float age=view.elapsed;
         pref_set(decay,0);drain_ms(4);ui_frame();CHECK(engine_drum808_curve(voice,&view));
         CHECK(view.fall<long_fall);CHECK(view.elapsed>age);

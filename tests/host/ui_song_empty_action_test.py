@@ -15,11 +15,14 @@ def run(name, source=None):
 p=run('positive')
 if p.returncode or 'PASS empty SONG' not in p.stdout:raise SystemExit(p.stdout[-4000:])
 s=(ROOT/'firmware/src/app/ui.c').read_text()
-anchor='k ? "END" : "EMPTY: WHITE KEYS ADD BARS"'
-if s.count(anchor)!=1:raise SystemExit('missing/duplicate SONG mutation anchor')
-with tempfile.TemporaryDirectory(prefix='song-cue-negative-') as d:
-    f=Path(d)/'ui.c';f.write_text(s.replace(anchor,'k ? "END" : "EMPTY"'))
-    p=run('missing-cue',f)
-    if p.returncode==0 or 'EMPTY_SONG_ACTION_CUE_MISSING' not in p.stdout or 'FAIL ' not in p.stdout:
-        raise SystemExit('missing cue not rejected at runtime: '+p.stdout[-4000:])
-print('PASS empty SONG real action and missing-cue production negative')
+mutants=[
+ ('missing-cue','k ? "END" : "EMPTY: WHITE KEYS ADD BARS"','k ? "END" : "EMPTY"','EMPTY_SONG_ACTION_CUE_MISSING'),
+ ('unreadable-selection','k==ui.song_sel?SOUND_SELECT:SOUND_FACE','k==ui.song_sel?C_WHITE:SOUND_FACE','SONG_SELECTED_CONTRAST_MISSING')]
+for name,anchor,replacement,marker in mutants:
+    if s.count(anchor)!=1:raise SystemExit('missing/duplicate SONG mutation anchor: '+name)
+    with tempfile.TemporaryDirectory(prefix='song-action-negative-') as d:
+        f=Path(d)/'ui.c';f.write_text(s.replace(anchor,replacement))
+        p=run(name,f)
+        if p.returncode==0 or marker not in p.stdout or 'FAIL ' not in p.stdout:
+            raise SystemExit('SONG mutation not rejected at runtime: '+p.stdout[-4000:])
+print('PASS real palette SONG action, missing-cue and unreadable-selection production negatives')

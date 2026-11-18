@@ -29,8 +29,8 @@ static void cue(void)
 int main(void)
 {
  for(int theme=0;theme<2;theme++){
-  setup(V_SONG,PART_909);ui_theme_light=theme;ui.song_sel=0;song()->len=0;
-  draw_main();cue();shot(theme?"song-empty-light":"song-empty-dark");
+  setup(V_SONG,PART_909);pref_set(PR(R_PALETTE,0,0,0),theme?NPALETTES-1:0);ui.song_sel=0;song()->len=0;
+  draw_header();draw_main();draw_knobs();cue();shot(theme?"song-empty-light":"song-empty-dark");
   int key=-1;for(int k=0;k<27;k++)if(KEY_WHITE[k]==3){key=k;break;}
   CHECK(key>=0);held_keys=1u<<key;input();held_keys=0;input();
   CHECK(song()->len==1);CHECK(ui.song_sel==1);
