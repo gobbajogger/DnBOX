@@ -1329,7 +1329,7 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         if (!ps) { put_s(num, "OFF"); return; }
         unsigned kind, preset;
         if (!bass_pattern_preset_decode(ps, &kind, &preset)) { put_s(num, "INVALID"); return; }
-        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_SYNTHONE ? 'D' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
+        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_SYNTHONE ? 'S' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
         put_i(num + 1, (int)preset);
         return;
     }
@@ -3795,7 +3795,7 @@ static int globe_paste_part(int src, int dst)
 }
 
 static int live_central_event(int key,int down);
-static void key_event(int k, int down)
+static UI_DRAW void key_event(int k, int down)
 {
     /* End the press-time BREAK owner before modal/view/clip dispatch can hide it.
      * Paging is blocked while held, so its slice identity remains stable. */
@@ -5611,15 +5611,17 @@ static UI_DRAW void draw_header(void)
             dv_full_title(drum_title, ui.part, ui.sel[ui.part]);
             name = drum_title;
         }
+        int free_mode=ui.view==V_SEQ && is_303() && ui.freeplay[bidx()] && !ui.rec;
         if(ui.view==V_SEQ || ui.view==V_GEN) {
-            put_s(put_s(put_s(context_title,part_display(ui.part))," "),VIEW_N[ui.view]);
+            put_s(put_s(put_s(context_title,free_mode?bass_header_name():part_display(ui.part))," "),
+                  free_mode?"FREE PLAY":VIEW_N[ui.view]);
             name=context_title;
         }
         if(clip_mode)name="LP";
         if(pickup)name=ui.msg;
         sound_slab(0,0,240,HDR_H,0);
         /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
-        cv_text_clip(4,2,pickup?&FONT_S:&FONT_B,name,pickup?C_AMB:part_view()?part_col():SOUND_WHITE,4,125);
+        cv_text_clip(4,free_mode&&!pickup&&!clip_mode?4:2,pickup?&FONT_S:free_mode&&!clip_mode?&FONT_T:&FONT_B,name,pickup?C_AMB:part_view()?part_col():SOUND_WHITE,4,125);
         if((pickup || clip_mode) && ss!=SAVE_SAVED) {
             const char *label=header_save_label(ss);
             const felucca_font_t *font=pickup?&FONT_S:&FONT_B;
@@ -5910,6 +5912,24 @@ static UI_DRAW void matrix_knob_caption(char *text, int page)
 }
 
 static UI_DRAW void draw_drum_voice(int band);
+/* Same sixteen physical white-key positions as the selected part, not a
+ * second sequencer or an invented animation. All four sound banks stay above. */
+static UI_DRAW void sound_step_footer(void)
+{
+    const bpart_t *bp=&cur_pat()->bass[bidx()];
+    int ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
+    for(int c=0;c<16;c++) {
+        int step=step_of(c),x=8+c*14,enabled=step<bp->len;
+        int gate=enabled?bstep_gate(&bp->step[step]):G_REST;
+        char number[8];put_i(number,step+1);
+        text_c(x+6,224-KNOB_Y,&FONT_T,number,enabled?SOUND_GRAY:SOUND_DIM);
+        cv_rect(x,237-KNOB_Y,12,2,enabled?SOUND_LINE:SOUND_SIDE);
+        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,part_col());
+        if(enabled && step==ui.held_step)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
+        if(enabled && step==ph)cv_rect(x,239-KNOB_Y,12,1,SOUND_INK);
+    }
+}
+
 static UI_DRAW void draw_part_sound(int band)
 {
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
@@ -5972,7 +5992,7 @@ static UI_DRAW void draw_part_sound(int band)
         }
 #endif
     }
-    /* Sound controls need no instructional footer. */
+    if(band==2)sound_step_footer();
 
 }
 
@@ -7456,6 +7476,13 @@ static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],fl
  * curve, not merely its label. The live cursor uses actual hold/ramp counters,
  * not the editable target duration; the separate meter shows raw EG level.
  * BD's real fixed hold is a plateau, never labelled sustain or attack. */
+/* One physical slot/stage/percentage format for every full-row envelope. */
+static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)
+{
+    char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+slot);
+    *end++=' ';*end++=stage;*end++=' ';
+    put_s(put_i(end,(raw*100+63)/127),"%");
+}
 static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
 {
     pref_t r=pg.r[p][0];drum909_amp_snapshot v;
@@ -7475,7 +7502,7 @@ static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
         cv_line(prevx,prevy-off,x0+x,yy-off,ink);prevx=x0+x;prevy=yy;
     }
     char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);
-    put_s(put_i(put_s(label,"D "),(matrix_value(r)*100+63)/127),"%");
+    physical_stage_label(label,0,'D',matrix_value(r));
     text_c(75,y+8-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
     put_s(put_s(label,num),unit);
     int vx=232-tw(&FONT_T,label);
@@ -7539,10 +7566,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
          * turns. Same quantisation as the native Chicago value readout. */
         if(!(e.present&(1u<<k)))continue;
         char label[20];
-        char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+e.slot[k]);
-        end=put_s(put_s(end," "),k==0?"A ":k==1?"D ":k==2?"S ":"R ");
-        end=put_i(end,(matrix_value(pg.r[p][e.slot[k]])*100+63)/127);
-        put_s(end,"%");
+        physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));
         text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
     }
     {   /* Native state1 contains both decay and sustain. Classify within 1% of S.
@@ -8205,9 +8229,9 @@ static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
         else xe=2+(int)(q*23+.5f);               /* 808 decays: no confirmed time (pot/127 to the circuit) */
         dg_tail(gx,gy,xe,live,e,0,0,col);
     } break;
-    case DG_NTAIL: {                             /* 909 SD TONE: the snare noise's decay (noise_decay ms: 24 ms hold + 0.7 x) */
+    case DG_NTAIL: {                             /* 909 SD TONE: the snare noise decay in physical ms plus 24 ms hold */
         float x=dg_si(r,r.c,val);
-        dg_tail(gx,gy,dg_tail_px(24.0f+0.7f*x),live,e,1,live?age/40u:0,col);
+        dg_tail(gx,gy,dg_tail_px(24.0f+x),live,e,1,live?age/40u:0,col);
     } break;
     case DG_TUNE: {                              /* TUNE: a wave whose cycles follow the real pitch; rings on a hit */
         /* 808 TUNE and the 909 cymbal TUNE are bipolar semitones (pot 64 = 0 st):
@@ -8556,7 +8580,7 @@ static uint32_t drum_step_lights(int kit)
     return lit;
 }
 
-static void leds(void)
+static UI_DRAW void leds(void)
 {
     uint32_t b = 0, k = 0, d = 0, i;
     int blink = (ui.frame & 8u) != 0;
@@ -8921,7 +8945,7 @@ static void autosave(void)
     }
 }
 
-void ui_frame(void)
+UI_DRAW void ui_frame(void)
 {
     uint32_t i;
     if (ui.brk_choice_on && (!engine_brk_preview_active() || project_busy || seq.ppat[PART_BRK] != ui.brk_choice_pat ||

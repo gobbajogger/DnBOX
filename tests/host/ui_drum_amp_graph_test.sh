@@ -9,3 +9,4 @@ for mode in DRUM_GRAPH_MISSING DRUM_GRAPH_STATIC; do
  grep -q 'graph_hash(ep)!=lo' "$SMC_UI_OUT/$mode.log"
 done
 echo 'BD/SD missing/static negative controls rejected PASS'
+python3 tests/host/ui_drum_amp_caption_mutants.py

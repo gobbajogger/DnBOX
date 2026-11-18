@@ -153,14 +153,14 @@ int main(void)
         2, 25, 11, 2, 2, 2, 25, 11, 2, 2, 10, 5, 2, 2, 12, 2, 9, 20, 2, 2,
         2, 18, 18, 2, 2, 2, 2, 2, 18, 9, 2, 2, 2, 2,
     };
-    CHECK(sizeof original_lengths == sizeof DV_POLY / sizeof DV_POLY[0]);
+    CHECK(sizeof original_lengths == 114);
     unsigned coordinate = 0;
     for (unsigned p = 0; p < sizeof original_lengths; p++) {
-        unsigned offset=DV_POLY[p]&511u, count=DV_POLY[p]>>9;
+        unsigned path=dv_path(p),offset=path&2047u,count=path>>11;
         CHECK(count == original_lengths[p]);
-        CHECK(2u * (offset + count) <= 882u);
+        CHECK(offset < sizeof DV_XY_PACKED);
         for (unsigned i = 0; i < 2u * count; i++) {
-            float actual = (float)dv_coordinate(2u * offset + i) / 1000.0f;
+            float actual = (float)dv_coordinate_next(&offset) / 1000.0f;
             CHECK(coordinate < sizeof reference_xy / sizeof reference_xy[0]);
             CHECK(!memcmp(&actual, &reference_xy[coordinate], sizeof actual));
             coordinate++;
