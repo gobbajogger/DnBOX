@@ -1,5 +1,5 @@
 # Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published head: `90fa6d5f0cefa9913e76a6acc8a4ba9cb57c8613`. Updated: 2026-11-18 10:32 EST.
+Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Gate baseline: `90fa6d5f0cefa9913e76a6acc8a4ba9cb57c8613`. Updated: 2026-11-18 11:00 EST.
 
 ## Checklist (from CHECKLISTS.md)
 
@@ -7,12 +7,12 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 | ID | Check | Status | Evidence / remaining qualification |
 |---|---|---|---|
-| C1 | Exact-head Local gate | FAIL | Integ retains the original 90fa run; all four completed failures (FREE PLAY, key-sound, single-lane, curve-axes) are preserved. No successor full gate yet. |
+| C1 | Exact-head Local gate | FAIL | Original90fa terminal FAIL: 499 PASS, 4 FAIL, 0 NOT_RUN; both exits1, GATE_RETURNED, authentic dnbox-gate failure59267455179. All four failures have reviewed scoped repairs; successor full gate belongs solely to Integ. |
 | C2 | Consolidated ancestry and no loss | PASS | 76040daa remains an ancestor; repairs add no deletion or branch rewrite. |
-| C3 | Independent complete screen acceptance | FAIL | FREE PLAY and header repairs received independent review; footer has scoped native image/runtime qualification. Complete lane visual acceptance remains open. |
+| C3 | Independent complete screen acceptance | FAIL | All three correction commits received independent review with zero unresolved findings; scoped native before/after renders and runtime negatives pass. Complete lane visual acceptance remains open. |
 | C4 | Full hard-limit gate | FAIL | Exact repaired-head gate not yet run. No new forbidden files or runtime paths in these fixes. |
 | C5 | All finish-line items closed | FAIL | F1/F4–F7 and final gate/acceptance remain open. |
-| C6 | Ready and merged by Integ | FAIL | PR975 remains draft at published90fa; no Ready or merge operation. |
+| C6 | Ready and merged by Integ | FAIL | PR975 remains draft; reviewed corrections are delivered through the existing lane branch. Integ alone qualifies the successor and controls Ready/merge after required checks. |
 | F1 | All R22 screens and shared glyphs | FAIL | Recovered revision comparison and complete native acceptance remain open; separate reference owner retained. |
 | F2 | All-domain geometry | FAIL | Repaired-source caption geometry: 1,530 reached states, 40,967 texts, zero findings; full component/all-domain gate and final acceptance remain open. |
 | F3 | Native code-space fit | PASS | Footer repair source ince7a26a1f / unchanged ui21397ecf: independent Elite1044 B, Pro1052 B XIP free; poolmargin780 B. Same stock thresholds. |
@@ -23,14 +23,14 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 ## Now / next
 
-- Now: complete independent review of the CP/MA footer correction after the already reviewed FREE PLAY and header repairs. All four observed failure paths now pass their scoped native checks.
-- Next: consume Integ's terminal record, reconcile the published head/base, deliver only the reviewed repair commits through the existing lane/PR, and obtain the successor exact-head gate.
-- Then: continue the shared selector/glyph and broader page work from the accepted base. The separate selector candidate is unpublished and fails stock XIP reserve; its passing framebuffer checks do not authorize delivery.
+- Now: deliver the three independently reviewed corrections for all four terminal original90fa failures through existing lane/fwui and PR975. Production changes are limited to three header baselines26→28 and the CP/MA step row214→212.
+- Next: Integ qualifies the published successor SHA/tree with one unfiltered full gate and the required independent integration checks. No duplicate gate, Ready operation or merge is performed by this writer.
+- Then: reconcile the separately prepared selector/glyph work onto fresh accepted consolidated after current repair integration. Its scoped native behavior, geometry and stock resource checks pass; it remains unpublished and is excluded from this correction delivery.
 
 ## Blockers and recovery
 
-- Original90fa gate is still owned by Integ through terminal. Consume complete exit/state/log/status evidence from that owner; do not duplicate or interrupt it.
-- Unpublished Sound selector costs64 B versus90fa and fails the1024 B XIP floor (980/988 B free). Preserve it as an unqualified candidate and continue bounded UI code-space work after the current gate repairs.
+- Original90fa gate has terminated. Its complete v0 archive, manifest, exits, logs and authentic status were consumed and verified; successor exact-head qualification is the remaining delivery gate, owned solely by Integ.
+- The prepared selector initially failed stock XIP at980/988 B. A measured private read-only classifier pointer interface recovers64 B, yielding1044/1052 B and780 B pool margin; this separate source unit still requires reconciliation and exact-head acceptance after current repair integration.
 - Full Synth One/SuperJ6 UI admission depends on genuine Sound-owner controls and resource-qualified runtime; no substitute engine or control surface is accepted.
 
 ## Top risks
@@ -57,11 +57,11 @@ At 10aaceca the geometry probe stopped before rendering because it still targete
 
 ### 2026-11-18 FREE PLAY negative compatibility repair
 
-Integ alone retains the existing exact-90fa gate through terminal. Its [14:50 UTC observation](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6982060401) reports the positive FREE PLAY fixture passed, but the historical negative ui.c lacked `physical_stage_label` now required by the drum include. That compiler failure is not an accepted negative. The historical source hash was also unavailable in the successor checkout and GitHub contents API.
+Integ owned the exact-90fa gate through terminal. Its [14:50 UTC observation](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6982060401) reports the positive FREE PLAY fixture passed, but the historical negative ui.c lacked `physical_stage_label` now required by the drum include. That compiler failure is not an accepted negative. The historical source hash was also unavailable in the successor checkout and GitHub contents API.
 
 Replace only that historical input with a current-source missing-cue mutant. Retain the independent rendered-pixel oracle and wrong-state mutant, including required `FREE_PLAY_MODE_CUE_MISSING` / `FREE_PLAY_MODE_CUE_UNEXPECTED` markers and runtime `FAIL` assertion. No firmware source, control, threshold, image fixture or C oracle changes belong to this repair. The source no longer requires an unreachable historical Git object merely to run the current test.
 
-The separate SOUND selector correction remains an unpublished implementation unit; its candidate resource failures are not accepted or part of this gate repair. The original Integ gate is neither duplicated nor interrupted. Exact repaired-head full gate and independent integration qualification remain required before delivery. No lane completion, native resource change, merge or main write is claimed.
+The separate SOUND selector correction remains an unpublished implementation unit and is excluded from this gate repair. Historical candidate resource failures remain recorded. Exact repaired-head full gate and independent integration qualification remain required before merge. No lane completion, merge or main write is claimed.
 
 ### 2026-11-18 CP/MA key-sound header repair
 
@@ -82,3 +82,11 @@ Change only `dv_voice_steps(T_808,D8_CP,200-off,214-off,1)` to use `212-off`. Ke
 Actual native GREEN: the existing single-lane harness passes270,616 checks, and curve-axes passes34,294 positive checks plus its preserved missing-curve negative. The stage wrapper passes the fixed attack/curve-law, audio-owner epoch and stage-row checks with all four existing mutants. Independent binary replays confirm all five negative controls exit1 at their intended runtime assertions after successful compilation. Four fresh CLAP/MARACAS dark/light framebuffer images were independently inspected; the continuous footer, identity, controls and owner graphs remain readable.
 
 Independent stock Elite/Pro builds for this exact footer source exit0 with XIP1044/1052 B free and poolmargin780 B, unchanged from the header-only baseline. Native disassembly changes one immediate without increasing instruction size or the affected frames. This is scoped source/runtime/visual/resource qualification; full exact-head gate, complete R22 acceptance, whole-stack and hardware proof remain open. Evidence and recovery artifacts are on the existing FWUI implementation Page linked above.
+
+### 2026-11-18 terminal90fa evidence consumed and correction delivery
+
+The original exact90fa gate completed at15:37 UTC with499 PASS,4 FAIL,0 NOT_RUN across503 host records. Both gate/run exits are1 and run.state is GATE_RETURNED. The authentic dnbox-gate failure is status59267455179; head90fa6d5f, tree918ac4d9 and base76040daa were unchanged. The full terminal archive v0 (`terminal-90fa-fail.zip`,44853 bytes, SHA256 `075d0d0140b9d28af65d98114e10463f74f20c150333c882d228db3298c9db90`) and all31 manifest payloads were verified. [Original terminal report](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6983377341) and [Integ ownership confirmation](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6983426330) retain Classic FWUI as sole correction writer and Classic Integ as sole successor gate owner.
+
+The reviewed repairs correspond exactly to terminal failures: current-source FREE PLAY negative compatibility; CP/MA header y28 with preserved cue/redraw oracles and alternate-MA coverage; CP/MA footer y212 with both older independent oracles unchanged. The newer stage-row oracle is aligned to that established contract. All controls, flat panels/radii, graph width and native owner semantics remain unchanged by these corrections. No files are deleted.
+
+Local review anchors are76a57af,3f78164 and325368b. Authenticated API publication may produce different commit IDs because its commit metadata is server-generated; every published tree must match its reviewed local tree. Exact local/published mapping, live head/tree/base readback, full review artifacts, native measurements and original terminal evidence are maintained on the existing FWUI implementation Page. A matching tree is source fidelity, not a successor full-gate PASS.
