@@ -99,7 +99,7 @@ test_class() {
     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
-    synth-param-jump|param-write-sources|ui-drum-glyph|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
+    synth-param-jump|param-write-sources|ui-drum-glyph|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action) TEST_CLASS=G ;;   # ui-drum-glyph regenerates build/gen via smc_ui_test.sh
     chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
@@ -756,6 +756,7 @@ if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-re
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
 run ui-drum-curve-axes python3 tests/host/ui_drum_curve_axes_test.py
 run ui-no-loss-return python3 tests/host/ui_no_loss_return_test.py
+run ui-song-empty-action python3 tests/host/ui_song_empty_action_test.py
 run ui-glyph-storage python3 -m unittest discover -s tests -p "test_*packing.py"
 run ui-fx-feedback-context python3 tests/host/ui_fx_feedback_context_test.py
 run ui-owner-copy python3 tests/host/ui_owner_copy_test.py

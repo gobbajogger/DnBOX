@@ -23,7 +23,7 @@ def run(source,output):
     env.pop('GEOMETRY_MUTATE',None)
     env.pop('AUDIT_MUTATE_SKIP',None);env.pop('AUDIT_MUTATE_ZERO',None)
     for key in ('PIXEL_MUTATE_BLANK','PIXEL_MUTATE_SHIFT','PIXEL_MUTATE_OVERPAINT','ENVELOPE_MUTATE_CURVE','ENVELOPE_MUTATE_BLANK'):env.pop(key,None)
-    for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP'):env.pop(key,None)
+    for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP','PRESENCE_MUTATE_ENV_KNOB','PRESENCE_MUTATE_ENV_STAGE','PRESENCE_MUTATE_ENV_PERCENT','PRESENCE_MUTATE_ENV_MISSING'):env.pop(key,None)
     with (output/'render.log').open('w') as log:
         result=subprocess.run(['sh','tests/host/smc_ui_test.sh'],cwd=work,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600)
     # Validate actual output before any PASS or mutants: catches truncated walks,
@@ -48,7 +48,7 @@ def run(source,output):
     if len(presence)!=1 or int(presence[0][0])==0 or int(presence[0][1])!=0:report['status']='FAIL'
     else:
         report['presenceChecks']=int(presence[0][0])
-        for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP'):
+        for key in ('PRESENCE_MUTATE_VALUE','PRESENCE_MUTATE_GLYPH','PRESENCE_MUTATE_LIST','PRESENCE_MUTATE_SYNTH','PRESENCE_MUTATE_STRIP','PRESENCE_MUTATE_ENV_KNOB','PRESENCE_MUTATE_ENV_STAGE','PRESENCE_MUTATE_ENV_PERCENT','PRESENCE_MUTATE_ENV_MISSING'):
             me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
             logpath=output/(key.lower()+'.log')
             with logpath.open('w') as log:

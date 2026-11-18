@@ -5506,6 +5506,14 @@ static const char *header_save_label(int state)
     return project_storage_unsupported()==2?"!":state==SAVE_QUEUED?queued_save_label():
         state==SAVE_FAILED?"SAVE FAILED":"UNSAVED";
 }
+/* One identity owner for both cached and freshly painted part headers. */
+static UI_DRAW const char *bass_header_name(void)
+{
+    return engine_bass_bank(bidx()) == ORIGINAL_SOUND_JUNO ? (bidx()?"SUPERJ6 B":"SUPERJ6 A") :
+        engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE ? (bidx()?"S1 B":"S1 A") :
+        engine_bass_bank(bidx()) == ORIGINAL_SOUND_MIAMI ? (bidx()?"MIAMI B":"MIAMI A") :
+        (bidx()?"CHICAGO B":"CHICAGO A");
+}
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5531,9 +5539,7 @@ static UI_DRAW void draw_header(void)
         ;
     if (cacheable) {
         snapshot.name = part_display(ui.part);
-        if (is_303()) snapshot.name = engine_bass_bank(bidx()) == ORIGINAL_SOUND_JUNO ? (bidx()?"SUPERJ6 B":"SUPERJ6 A") : engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE ?
-            (bidx() ? "S1 B" : "S1 A") : engine_bass_bank(bidx()) == ORIGINAL_SOUND_MIAMI ?
-            (bidx() ? "MIAMI B" : "MIAMI A") : (bidx() ? "CHICAGO B" : "CHICAGO A");
+        if (is_303()) snapshot.name = bass_header_name();
         memcpy(snapshot.colours, pal, sizeof pal);
         snapshot.col = matrix_col(); snapshot.light = ui_theme_light;
         snapshot.part = ui.part; snapshot.sel = is_drum()?(uint8_t)ui.sel[ui.part]:0; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
@@ -5599,9 +5605,7 @@ static UI_DRAW void draw_header(void)
             ui.view==V_GLO?list_title:VIEW_N[ui.view];
         char drum_title[24],context_title[32];
         if(ui.view==V_PART && is_303()) {
-            name=engine_bass_bank(bidx())==ORIGINAL_SOUND_JUNO?(bidx()?"SUPERJ6 B":"SUPERJ6 A"):engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE?(bidx()?"S1 B":"S1 A"):
-                engine_bass_bank(bidx())==ORIGINAL_SOUND_MIAMI?(bidx()?"MIAMI B":"MIAMI A"):
-                (bidx()?"CHICAGO B":"CHICAGO A");
+            name=bass_header_name();
         }
         if(ui.view==V_PART && is_drum()) {
             dv_full_title(drum_title, ui.part, ui.sel[ui.part]);
@@ -6154,14 +6158,14 @@ static UI_DRAW void draw_song(int band)
         }
         if (k > sg->len || k >= NSONG)
             break;
-        surface_panel(0,y,236,11,k==ui.song_sel,k==ui.song_sel?C_LINE:SOUND_FACE,
+        surface_panel(0,y,236,11,k==ui.song_sel,k==ui.song_sel?SOUND_SELECT:SOUND_FACE,
                       k==ui.song_sel?SOUND_SELECT_EDGE:SOUND_EDGE,SOUND_SIDE);
         put_i(t, k + 1);
         cv_text(4, vc(&FONT_XS, y, 11), &FONT_XS, t, k == ui.song_sel ? C_WHITE : C_GRAY);
         if (seq.song_on && seq.playing && k == seq.song_pos)
             play_icon(26, y + 1, seq.song_rec ? RGB(255, 80, 70) : C_WHITE);
         if (k == sg->len) {                            /* one past the end: where the song grows */
-            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY", k == ui.song_sel ? C_WHITE : C_DIM);
+            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY: WHITE KEYS ADD BARS", k == ui.song_sel ? C_WHITE : C_DIM);
             continue;
         }
         for (int pos = 0; pos < NPARTS; pos++) {

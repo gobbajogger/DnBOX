@@ -40,6 +40,13 @@ def instrument(root):
     s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_LIST"))'+a.strip())
     a='static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)\n{'
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_SYNTH"))return;');p.write_text(s)
+    a='        text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);'
+    s=once(s,a,'''        if(getenv("PRESENCE_MUTATE_ENV_KNOB"))label[1]='0';
+        if(getenv("PRESENCE_MUTATE_ENV_STAGE"))label[3]='X';
+        if(getenv("PRESENCE_MUTATE_ENV_PERCENT"))label[5]='X';
+        if(!getenv("PRESENCE_MUTATE_ENV_MISSING"))
+'''+a);p.write_text(s)
+
 
     p=root/'firmware/src/app/ui.c';s=p.read_text()
     a='        text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'

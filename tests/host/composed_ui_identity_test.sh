@@ -9,7 +9,7 @@ for kind in battery title; do
  python3 - "$kind" "$NEG/ui.c" <<'PYTHON'
 import pathlib,sys
 s=pathlib.Path('firmware/src/app/ui.c').read_text()
-old,new,count = ('"S1 A"','"BAD A"',3) if sys.argv[1]=='title' else ('dv_header_battery(219, 5);','(void)0; /* negative: omitted battery */',2)
+old,new,count = ('"S1 A"','"BAD A"',2) if sys.argv[1]=='title' else ('dv_header_battery(219, 5);','(void)0; /* negative: omitted battery */',2)
 if s.count(old)!=count: raise SystemExit('production mutation anchor changed')
 pathlib.Path(sys.argv[2]).write_text(s.replace(old,new))
 PYTHON
