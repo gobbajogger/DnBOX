@@ -107,7 +107,7 @@ class FailClosed(unittest.TestCase):
                   'mask':[bits[i:i+240] for i in range(0,len(bits),240)]}
             screens.append(item)
             for e in [{**identity,'kind':'screen'},g,f,panel,{'kind':'mask','bits':bits}]:lines.append('FIRST:'+json.dumps(e))
-        complete={'kind':'complete','screens':45,'rendererExit':0};lines.append('FIRST:'+json.dumps(complete))
+        complete={'kind':'complete','screens':len(expected),'rendererExit':0};lines.append('FIRST:'+json.dumps(complete))
         raw={'screens':screens,'complete':complete};log='\n'.join(lines)
         validate_trace_against_log(log,raw)
         tampered=copy.deepcopy(raw);tampered['screens'][0]['events'][1]['text']='PITCH'

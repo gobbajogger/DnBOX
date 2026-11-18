@@ -160,8 +160,9 @@ int main(void)
     CHECK(engine_brk_count(0)==16);CHECK(!engine_brk_held());
     composed_geometry();
     reset();
-    any_button=1;const char *a,*b,*c;footer_text(&a,&b,&c);CHECK(strstr(b,"JUNGLE")!=0);
-    CHECK(8+tw(&FONT_T,b)<236);ui_frame();png_write("build/host/break-jungle-hint.png");
+    /* R22 removed explanatory footers; absence is intentional, not a string. */
+    any_button=1;const char *a,*b,*c;footer_text(&a,&b,&c);CHECK(!a&&!b&&!c);
+    ui_frame();png_write("build/host/break-live-controls.png");
     uint8_t saved_pitch=proj.sound.v[T_BRK][0][1];
     fm1_in.frames=400;fm1_in.wheel[0]=550;fm1_in.wheel[1]=615;smk_wheels();audio();
     fm1_in.wheel[0]=630;smk_wheels();audio();CHECK(engine_brk_bend_value()==8191);

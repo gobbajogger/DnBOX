@@ -43,6 +43,9 @@ volatile uint32_t eng_scope_w;
 static drum909_t d909 POOL;
 static drum808_t d808 POOL;
 static volatile uint8_t project_hold;
+static volatile int brk_preview_slot = -1;
+static uint8_t brk_preview_audio_on, brk_preview_pattern;
+static void brk_preview_interrupt(void);
 static original_runtime_part original_bass[NBASS] POOL;
 static uint16_t original_quiet_samples[NBASS], original_switch_gain[NBASS];
 #ifdef X0X_HOST
@@ -103,6 +106,23 @@ int engine_bass_voice_view(int v, float *level, float *modulation, unsigned *sta
 { return (unsigned)v < NBASS && original_runtime_voice_view(&original_bass[v],level,modulation,state,key_down); }
 int engine_bass_adsr_view(int v, float values[4], unsigned *gate)
 { return (unsigned)v < NBASS && original_runtime_adsr_view(&original_bass[v],values,gate); }
+int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out)
+{
+    if((voice!=DR_BD && voice!=DR_SD) || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=drum909_read_amp(&d909,voice,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
+int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
+{
+    if((unsigned)v>=NBASS || !out)return 0;
+    uint32_t flags=plat_cq_lock();
+    int ok=original_bass[v].status==ORIGINAL_RUNTIME_OK && original_bass[v].kind==ORIGINAL_SOUND_JUNO &&
+        juno6_read_envelope(&original_bass[v].dsp.juno.synth,out);
+    plat_cq_unlock(flags);
+    return ok;
+}
 int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
 { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
 int engine_bass_env_view(int v, float adsr[4], float *level, int *state)
@@ -1533,8 +1553,9 @@ static int brk_any_slice(int slice)
 }
 static void brk_midi_wrap(int src, int on, int note)
 {
-    int slice = brk_note_slice(note);
     if ((unsigned)src >= MIDI_NSRC) return;
+    if (on) brk_preview_interrupt();
+    int slice = brk_note_slice(note);
     if (!on) {
         if (!brk_note_down(src, note)) return;
         brk_note_set(src, note, 0);
@@ -1959,8 +1980,20 @@ static void drain(void)
                 __builtin_memset(original_key_pitch[a], 0, sizeof original_key_pitch[a]);
             }
             if(seq_bass_poly(&seq,(int)a))seq_rec_bass(&seq,(int)a,(int)b,0,0,3,0);
-        } else if (type == C_BRK)
-            brk_local_event((int)a, (int)b);
+        } else if (type == C_BRK) {
+            if (v) { /* audition-owned events never release a performance owner */
+                if (b && brk_preview_slot >= 0) {
+                    brk_preview_audio_on = 1;
+                    brk_local_event(32, 1);
+                } else if (!b && brk_preview_audio_on) {
+                    brk_preview_audio_on = 0;
+                    brk_local_event(32, 0);
+                }
+            } else {
+                if (b) brk_preview_interrupt();
+                brk_local_event((int)a, (int)b);
+            }
+        }
     }
     cq_r = r;
     int16_t wheel = brk_wheel;
@@ -3113,17 +3146,35 @@ static uint8_t brk_outline_peak_u8(int32_t pk)
 
 /* the loop's outline for the screen: n columns of peak level 0..255 (main loop: decodes the
  * whole loop once, ~20k IMA steps; called when the loop changes, never per frame) */
-X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
+uint32_t engine_brk_outline_revision(int which)
 {
-    const brk_bank_t *bk = &brk.bank[which & 1];
-    uint32_t i, ns = bk->n;
+    if (which < 0 || which > 1) return 0;
+    uint32_t irq = plat_cq_lock(), revision = brk.outline_revision[which];
+    plat_cq_unlock(irq);
+    return revision;
+}
+/* Main-loop only: capture one immutable payload and its revision together.
+ * Audio may restore publication during decode, but cannot rewrite this payload.
+ * No concurrent main-loop storage writer is permitted during this call. */
+X0X_COLD int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revision)
+{
+    const brk_bank_t *bk;
+    const uint8_t *adpcm;
+    uint32_t i, ns, irq;
+    if (which < 0 || which > 1 || !peaks || n <= 0) return 0;
+    irq = plat_cq_lock();
+    bk = breaks_bank(&brk, which);
+    adpcm = bk && bk->valid ? bk->adpcm : 0;
+    ns = bk && bk->valid ? bk->n : 0;
+    if (revision) *revision = brk.outline_revision[which];
+    plat_cq_unlock(irq);
     int32_t pred = 0, idx = 0, col = 0, pk = 0;
     uint32_t per;
-    if (!bk->adpcm || !ns || n <= 0)
+    if (!adpcm || !ns)
         return 0;
     per = (ns + (uint32_t)n - 1u) / (uint32_t)n;       /* samples per column (32-bit: no __udivdi3) */
     for (i = 0; i < ns; i++) {
-        int32_t s = ima_decode(bk->adpcm, i, &pred, &idx), c;
+        int32_t s = ima_decode(adpcm, i, &pred, &idx), c;
         c = (int32_t)(i / per);
         if (c != col) {
             peaks[col] = brk_outline_peak_u8(pk);
@@ -3138,22 +3189,50 @@ X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
         peaks[col] = 0;
     return 1;
 }
+X0X_COLD int engine_brk_outline(int which, uint8_t *peaks, int n)
+{ return engine_brk_outline_snapshot(which, peaks, n, 0); }
 float engine_gr_db(void) { return mst.gr_view; }
 int engine_master_get(int i) { return master_get(&mst, i); }
 void engine_master_format(int i, char *buf) { master_format(&mst, i, buf); }
 
+
+
 X0X_COLD void engine_brk_loops(void)
 {
+    if (brk_preview_slot >= 0 && brk_preview_pattern != seq.ppat[TRK_BRK]) {
+        cq_put(C_BRK, 32, 0, 1);
+        brk_preview_slot = -1;
+        breaks_preview_restore(&brk);
+    }
     const brkpart_t *bp = &seq.pat[seq.ppat[TRK_BRK]].brk;
     brk_loop_t L[2];
-    int w;
+    int w, audition = brk_preview_slot, nb_before = builtin_count();
+    int audition_slot = -1, audition_zone = -1;
+    if (audition >= nb_before && audition < nloops) {
+        audition_slot = loop_slot[audition];
+        audition_zone = loop_zone[audition];
+    }
     scan_loops();                                       /* an upload may have changed the user loops */
+    /* An addition/restoration can renumber an audition without retiring its
+     * storage. Validate its physical identity before publishing any new loop.
+     * The table is main-loop-owned; audio may only cancel the captured intent. */
+    if (audition >= nb_before && brk_preview_slot == audition &&
+        (audition_slot < 0 || audition >= nloops || loop_slot[audition] != audition_slot ||
+         loop_zone[audition] != audition_zone)) {
+        cq_put(C_BRK, 32, 0, 1);
+        brk_preview_slot = -1;
+        breaks_preview_restore(&brk);
+    }
     /* No mute. The voice that is already sounding keeps its snapshot, and the
      * new loop is published for the next trigger. Skipping the break here used
      * to drop a whole buffer. */
     breaks_flush(&brk);                                /* a change that waited for a free snapshot */
     for (w = 0; w < 2; w++) {
-        int slot = w ? bp->slot_b : bp->slot_a;
+        uint32_t irq = plat_cq_lock();
+        int preview = brk_preview_slot;
+        int epoch = preview >= 0 ? brk.preview_epoch : -1;
+        int slot = (!w && preview >= 0) ? preview : w ? bp->slot_b : bp->slot_a;
+        plat_cq_unlock(irq);
         uint32_t ns = 0, rate = 0;
         char name[9];
         int nb = builtin_count();
@@ -3169,10 +3248,57 @@ X0X_COLD void engine_brk_loops(void)
             if (builtin) L[w] = *builtin;
             else __builtin_memset(&L[w], 0, sizeof L[w]);
         }
-        L[w].slices = (uint8_t)brk_slice_count(bp, (unsigned)w);
-        breaks_set_loop(&brk, w, &L[w]);
+        L[w].slices = (!w && preview >= 0) ? 1 : (uint8_t)brk_slice_count(bp, (unsigned)w);
+        breaks_set_loop_request(&brk, w, &L[w], epoch);
     }
 }
+
+/* Runtime-only audition using the existing snapshot/voice path. Never changes
+ * sample storage or pattern slot selections and never allocates another voice. */
+int engine_brk_preview(int slot)
+{
+    if (project_hold || SEQ_PART_OFF(&seq, TRK_BRK) || slot < 0 || slot >= engine_brk_nslots() ||
+        (brk_preview_slot < 0 && (engine_brk_held() || cq_w != cq_r))) return 0;
+    if (!breaks_preview_begin(&brk)) return 0;
+    uint32_t irq = plat_cq_lock();
+    if (!brk.preview_pin || (brk_preview_slot < 0 && (engine_brk_held() || cq_w != cq_r))) {
+        plat_cq_unlock(irq);
+        breaks_preview_restore(&brk); return 0;
+    }
+    brk_preview_pattern = seq.ppat[TRK_BRK];
+    brk_preview_slot = slot;
+    plat_cq_unlock(irq);
+    cq_put(C_BRK, 32, 0, 1);
+    engine_brk_loops();
+    if (brk_preview_slot != slot || !brk.preview_pin) return 0;
+    if (brk.pend_on[0] || breaks_count(&brk, 0) != 1) {
+        engine_brk_preview_end(); return 0;
+    }
+    cq_put(C_BRK, 32, 1, 1);
+    return 1;
+}
+void engine_brk_preview_end(void)
+{
+    if (brk_preview_slot < 0) return;
+    cq_put(C_BRK, 32, 0, 1);
+    brk_preview_slot = -1;
+    breaks_preview_restore(&brk);
+    engine_brk_loops(); /* main-loop cancellation also adopts a newly selected pattern */
+}
+
+/* Audio-owner path: restore the performance mapping before its new note. */
+static void brk_preview_interrupt(void)
+{
+    if (brk_preview_slot < 0 && !brk_preview_audio_on) return;
+    if (brk_preview_audio_on) {
+        brk_preview_audio_on = 0;
+        brk_local_event(32, 0);
+        breaks_sync_input(&brk);
+    }
+    brk_preview_slot = -1;
+    breaks_preview_restore(&brk);
+}
+int engine_brk_preview_active(void) { return brk_preview_slot >= 0; }
 
 uint32_t engine_brk_held(void) { return brk.slices; }
 void engine_brk_flush(void) { breaks_flush(&brk); }
@@ -3181,6 +3307,9 @@ int engine_brk_count(int bank) { return breaks_count(&brk, bank); }
 
 void engine_brk_drop_range(const uint8_t *base, uint32_t nbytes)
 {
+    /* Main-loop retirement boundary: a pending chooser must not confirm a
+     * renumbered/replaced sample after its audition source disappears. */
+    engine_brk_preview_end();
     breaks_drop_range(&brk, base, nbytes);
 }
 
@@ -3200,6 +3329,8 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
     notes_off_requested_cutoff = notes_off_cutoff = notes_off_midi_epoch = 0;
     __builtin_memset(cq_panic_fresh, 0, sizeof cq_panic_fresh);
     rec_w = rec_r = 0;
+    brk_preview_slot = -1;
+    brk_preview_audio_on = 0;
     brk_local = 0;
     brk_midi_count = 0;
     brk_input_channel = 255;

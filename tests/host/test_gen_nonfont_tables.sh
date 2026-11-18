@@ -4,29 +4,23 @@
 # Samples can exist without x0x_drum_tables.h; a custom X0X_BREAK_BANK skips
 # gen_builtin_break.sh, so gen_nonfont must regenerate drums when tables vanish
 # (same gate as host/build_host.sh). Otherwise stereo / drum-pan fail to compile.
-#
-# Nested run_tests shares parent build/host/iso. Clearing .gen-done for the
-# probe must not strand parallel needs_gen waiters in the parent suite — always
-# republish .gen-done (tables present) or .gen-fail before exit.
 set -eu
 cd "$(dirname "$0")/../.."
+root=$(pwd -P)
 T=$(mktemp -d "${TMPDIR:-/tmp}/x0x-gen-nonfont.XXXXXX")
 T=$(cd "$T" && pwd -P)
-publish_parent_gen() {
-    mkdir -p build/host/iso
-    if [ -f build/gen/x0x_drum_tables.h ]; then
-        : > build/host/iso/.gen-done
-        rm -f build/host/iso/.gen-fail
-    else
-        : > build/host/iso/.gen-fail
-    fi
-}
-trap 'publish_parent_gen; rm -rf "$T"' EXIT HUP INT TERM
-mkdir -p "$T/nopil" "$T/bank" build/gen build/host
+trap 'rm -rf "$T"' EXIT HUP INT TERM
+# Exercise the real runner with a private build tree. Other host compiles may
+# read the generated tables and the scheduler markers for the entire suite.
+mkdir -p "$T/tree/tests" "$T/tree/build/gen" "$T/nopil" "$T/bank"
+cp tests/run_tests.sh "$T/tree/tests/run_tests.sh"
+for dir in tools firmware assets host tests/host; do
+    ln -s "$root/$dir" "$T/tree/$dir"
+done
+cd "$T/tree"
 : > "$T/bank/bank.txt"
 printf '%s\n' 'raise ImportError("Pillow intentionally hidden for host regression")' > "$T/nopil/PIL.py"
 printf 'stub\n' > build/gen/x0x_drum_samples.h
-rm -f build/gen/x0x_drum_tables.h build/gen/x0x_break_bank.h build/host/iso/.gen-done build/host/iso/.gen-fail
 
 # Mask system and user-site Pillow so the nested probe exercises the missing-Pillow path.
 # The outer qualification preflight must not reject this deliberate missing dependency.
@@ -55,11 +49,6 @@ printf '%s\n' "$out" | grep -q 'ok   stereo' || {
 }
 [ -f build/gen/x0x_drum_tables.h ] || {
     echo "FAIL: gen_nonfont left x0x_drum_tables.h missing" >&2
-    exit 1
-}
-publish_parent_gen
-[ -e build/host/iso/.gen-done ] || {
-    echo "FAIL: parent needs_gen marker .gen-done missing after probe" >&2
     exit 1
 }
 echo "gen-nonfont-tables: ok"

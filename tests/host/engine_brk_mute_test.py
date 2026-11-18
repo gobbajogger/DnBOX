@@ -59,11 +59,16 @@ def main():
         start = source.index("#define ENG_TAIL_CS ")
         end = source.index("\n", start)
         declarations += "\n" + source[start:end + 1]
+    # Preview ownership is part of the real drain path, not a stubbed model.
+    start = source.index("static volatile int brk_preview_slot")
+    end = source.index("static original_runtime_part", start)
+    declarations += "\n" + source[start:end].replace(", brk_preview_pattern", "")
     signatures = [
         "static int cq_replace(",
         "__attribute__((noinline)) static void cq_put(",
         "static void s_brk(",
         "static void brk_local_event(",
+        "static void brk_preview_interrupt(void)\n{",
         "static void drain(",
         "void engine_render(",
     ]

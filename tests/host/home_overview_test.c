@@ -10,9 +10,9 @@ static const int display_position[5] = {0,1,4,3,2};
 static const char *outdir;
 static unsigned row_mask(int pattern, int part, int row)
 {
-    int i, x = 9 + pattern * 14 + (pattern >= 8 ? 4 : 0);
+    int i, x = 39 + pattern * 12;
     unsigned mask = 0;
-    int y = MAIN_Y + 4 + display_position[part] * 4 + row;
+    int y = MAIN_Y + 42 + display_position[part] * 18 + row;
     for (i = 0; i < 8; ++i)
         if (fb[y * 240 + x + i] != swap16(UI_N_SIDE)) mask |= 1u << i;
     return mask;
@@ -56,8 +56,8 @@ static void check(const char *name, int pattern, int part, unsigned expected_pb,
          * brightness levels are 12/7 and 16/9 for current/noncurrent. */
         int brightness = part < NKIT ? (current ? 12 : 7) : (current ? 16 : 9);
         uint16_t ink = swap16(dim(PART_COL[part], brightness));
-        int x = 9 + pattern * 14 + (pattern >= 8 ? 4 : 0);
-        int y = MAIN_Y + 4 + display_position[part] * 4;
+        int x = 39 + pattern * 12;
+        int y = MAIN_Y + 42 + display_position[part] * 18;
         for (int row = 0; row < 3; ++row)
             for (int col = 0; col < 8; ++col) {
                 uint16_t want = expected_mask & (1u << col) ? ink : swap16(UI_N_SIDE);
@@ -69,27 +69,23 @@ static void check(const char *name, int pattern, int part, unsigned expected_pb,
             }
     }
     if (!seq.playing && seq.ppat[part] == pattern && part >= PART_303A && part < PART_BRK) {
-        unsigned lane_bits = 0;
-        /* Lane top edges carry the exact on/off content colour. */
-        int y = MAIN_Y + 35 + display_position[part] * 20 + 5;
-        for (int step = 0; step < 16; ++step)
-            if (fb[y * 240 + 58 + step * 11 + (step >> 2)] == swap16(PART_COL[part])) lane_bits |= 1u << step;
+        /* R22 grid replaces live step lanes. Preserve the independent
+         * NOTE/TIE semantic check; raster content is checked above for every cell. */
+        unsigned lane_bits=bass_content_bits16(&proj.pat[pattern].bass[part-NKIT],0);
         if (lane_bits != expected_pb) {
             fprintf(stderr, "HOME bass lane mismatch: %s bits=%04x expected=%04x\n", name, lane_bits, expected_pb);
             ++failures;
         }
     }
     {
-        int x = 7 + pattern * 14 + (pattern >= 8 ? 4 : 0);
-        int y = MAIN_Y + 4 + display_position[part] * 4;
-        uint16_t tick = fb[y * 240 + x];
-        int active = seq.ppat[part] == pattern && part_used(&proj.pat[pattern], part);
-        /* An empty assigned lane has no content tick. A used assigned lane
-         * has three part-colour pixels, independent of the cue frame. */
-        uint16_t expected = swap16(PART_COL[part]);
-        if ((tick == expected) != active || (fb[(y + 1) * 240 + x] == expected) != active ||
-            (fb[(y + 2) * 240 + x] == expected) != active) {
-            fprintf(stderr, "assignment tick mismatch: %s part %d\n", name, part); ++failures;
+        int x=43+pattern*12,y=MAIN_Y+38+display_position[part]*18;
+        /* R22 assignment outline is visible even for an empty pattern. It is
+         * not content; row_mask above still requires zero content for empties. */
+        int active=seq.ppat[part]==pattern;
+        int cue=seq_cue_of(&seq,part);
+        int queued=cue==pattern&&cue!=seq.ppat[part]&&(ui.frame&16u);
+        if(fb[y*240+x]!=swap16(queued?C_WHITE:active?PART_COL[part]:UI_N_SIDE)) {
+            fprintf(stderr,"assignment outline mismatch: %s part %d\n",name,part);++failures;
         }
     }
 }
@@ -193,12 +189,12 @@ static void tie_matrix(void)
  * brightness helper as the oracle. The final 64-step bin is column seven. */
 static void check_velocity_glyph(int pattern, int brightness)
 {
-    int x = 9 + pattern * 14;
+    int x = 39 + pattern * 12;
     assert(row_mask(pattern, PART_909, 0) == 0x80u);
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 8; ++col) {
             uint16_t expected = swap16(col == 7 ? dim(PART_COL[PART_909], brightness) : UI_N_SIDE);
-            assert(fb[(MAIN_Y + 4 + row) * 240 + x + col] == expected);
+            assert(fb[(MAIN_Y + 42 + row) * 240 + x + col] == expected);
         }
 }
 static void velocity_brightness(void)

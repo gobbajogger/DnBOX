@@ -15,20 +15,32 @@ static int role_of(int p, int k, const char *want)
         CHECK(!want[i] && !n[i]); }
     return drum_strip_role(r);
 }
+enum { R22_GLYPH_W=46,R22_GLYPH_H=28 };
+static void cell_copy(int k,uint16_t *out)
+{   /* Current active R22 page0 path origin, excluding caption/value rows. */
+    int cells=0;for(int i=0;i<4;i++)if(pg.r[0][i].kind!=R_NONE)cells++;
+    CHECK(cells>=2 && k<cells);
+    int gx=6+(228*(2*k+1))/(2*cells)-22;
+    for(int y=0;y<R22_GLYPH_H;y++)
+        memcpy(out+y*R22_GLYPH_W,fb+(54+y)*240+gx,R22_GLYPH_W*sizeof *out);
+}
 static uint32_t cell_hash(int k)
-{   /* page row 0, control k: the 26x19 glyph box */
-    uint32_t h = 2166136261u;
-    for (int y = 40; y < 64; y++) for (int x = k * 60 + 2; x < k * 60 + 30; x++) h = (h ^ fb[240 * y + x]) * 16777619u;
+{
+    uint16_t pixels[R22_GLYPH_W*R22_GLYPH_H];cell_copy(k,pixels);uint32_t h=2166136261u;
+    for(unsigned i=0;i<sizeof pixels/sizeof pixels[0];i++)h=(h^pixels[i])*16777619u;
     return h;
 }
+
 static void test_dispatch(void)
 {
     setup(V_PART, PART_909); ui.sel[PART_909] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 0, "Tune") == DG_BDSWEEP); CHECK(role_of(0, 1, "Attack") == DG_ATTACK);
-    CHECK(role_of(0, 2, "Decay") == DG_DECAY);
+    CHECK(smc_same(pg.r[1][0], PR(R_ENG,T_909,0,2))); CHECK(adsr_row(1));
+    CHECK(role_of(1, 0, "Decay") == DG_DECAY);
     ui.sel[PART_909] = 1; build_pages();
     CHECK(role_of(0, 0, "Tune") == DG_TUNE); CHECK(role_of(0, 1, "Tone") == DG_NTAIL);
-    CHECK(role_of(0, 3, "Snappy") == DG_SNAPPY);
+    CHECK(role_of(0, 2, "Snappy") == DG_SNAPPY);
+    CHECK(smc_same(pg.r[1][0], PR(R_ENG,T_909,1,3))); CHECK(adsr_row(1));
     setup(V_PART, PART_808); ui.sel[PART_808] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 1, "Tone") == DG_LPF);
     ui.sel[PART_808] = 1; build_pages(); CHECK(role_of(0, 1, "Tone") == DG_SHELLS);
@@ -48,10 +60,50 @@ static void test_dispatch(void)
     for (int p = 0; p < pg.n; p++) for (int k = 0; k < 4; k++) CHECK(!role_of(p, k, NULL));
     puts("PASS dispatch: 909/808 roles by control, BRK and other views untouched");
 }
+/* Actual compositor full-row graph, excluding every caption/readout. The
+ * ordinary first row is42px, then the active singleton AMP row is56px. */
+static void amp_curve_copy(uint16_t *out)
+{
+    for(int y=90;y<120;y++) memcpy(out+(y-90)*222,fb+y*240+7,222*sizeof *out);
+}
+static void test_amp_motion(int voice)
+{
+    uint16_t idle[222*30], first[222*30], later[222*30];
+    drum909_amp_snapshot a,b;
+    setup(V_PART,PART_909);ui.sel[PART_909]=(uint8_t)voice;build_pages();
+    CHECK(smc_same(pg.r[1][0],PR(R_ENG,T_909,voice,voice==0?2:3)));
+    CHECK(adsr_row(1));*page_of(V_PART)=1;
+    pref_set(pg.r[1][0],64);drain_ms(6000);ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&a));CHECK(!a.active);amp_curve_copy(idle);
+    engine_drum(PART_909,voice,1.0f);drain_ms(20);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&a));CHECK(a.active);
+    CHECK(a.hold_active||a.ramp_valid);CHECK(a.raw_level>0);
+    amp_curve_copy(first);CHECK(memcmp(idle,first,sizeof idle));
+    drain_ms(150);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&b));CHECK(b.active&&b.ramp_valid);
+    CHECK(b.raw_level<a.raw_level);CHECK(b.ramp_left<b.ramp_ticks);
+    amp_curve_copy(later);CHECK(memcmp(first,later,sizeof first));
+    /* Real counter + raw-level position must produce the canonical marker,
+     * not merely some other changing pixels elsewhere on the page. */
+    float maximum=0;CHECK(drum909_param_si(voice,voice==0?2:3,127,&maximum)==X0X_U_MS);
+    float elapsed=(voice==0?40.0f:0.0f)+(b.ramp_ticks-b.ramp_left-1)/44.1f;
+    CHECK(b.raw_level>=0 && b.raw_level<=1);
+    CHECK(elapsed>=0 && elapsed<=maximum+b.target_hold_ms);
+    int px=13+(int)(214*elapsed/(maximum+b.target_hold_ms)+.5f);
+    int py=119-(int)(b.raw_level*29+.5f);
+    CHECK(px>=13 && px<=227 && py>=90 && py<=119);
+    CHECK(fb[(py-1)*240+px-1]==swap16(SOUND_INK));
+    drain_ms(6000);now_ms++;ui_frame();
+    CHECK(engine_drum909_amp_view(voice,&b));CHECK(!b.active);
+    amp_curve_copy(later);CHECK(!memcmp(idle,later,sizeof idle));
+    printf("PASS 909 voice%d full AMP: hit, actual counter/level motion, idle restoration\n",voice);
+}
 static void test_motion(int part)
 {
     setup(V_PART, part); ui.sel[part] = 0; *page_of(V_PART) = 0; build_pages();
-    drain_ms(300); ui_frame(); uint32_t idle = cell_hash(3), d0 = cell_hash(part == PART_909 ? 2 : 3);
+    drain_ms(300); ui_frame(); int decay_cell=part==PART_909?2:3;
+    uint16_t idle_pixels[R22_GLYPH_W*R22_GLYPH_H],final_pixels[R22_GLYPH_W*R22_GLYPH_H];cell_copy(decay_cell,idle_pixels);
+    uint32_t d0=cell_hash(decay_cell);
     uint32_t a; float e; CHECK(!engine_drum_view(part, 0, &a, &e));
     engine_drum(part, 0, 1.0f); drain_ms(20); now_ms++; ui_frame();
     CHECK(engine_drum_view(part, 0, &a, &e)); float e1 = e; CHECK(e1 > 0.2f);
@@ -60,7 +112,7 @@ static void test_motion(int part)
     CHECK(engine_drum_view(part, 0, &a, &e)); CHECK(e < e1);                 /* the tail shrinks */
     CHECK(cell_hash(part == PART_909 ? 2 : 3) != h1);                         /* the playhead moves */
     drain_ms(6000); now_ms++; ui_frame();
-    CHECK(!engine_drum_view(part, 0, &a, &e)); CHECK(cell_hash(3) == idle);   /* idle again */
+    CHECK(!engine_drum_view(part, 0, &a, &e)); cell_copy(decay_cell,final_pixels);CHECK(!memcmp(idle_pixels,final_pixels,sizeof idle_pixels));   /* idle again */
     printf("PASS motion %s: hit animates the decay cell, then it rests\n", part == PART_909 ? "909" : "808");
 }
 static uint32_t direct_drum(pref_t r,int value)
@@ -127,4 +179,29 @@ static void test_value_motion_bounds(void)
  }
  puts("PASS drum continuous values, native bounds, real live roles and MIX level cache");
 }
-int main(void) { test_dispatch(); test_motion(PART_909); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }
+static void test_noise_tail_motion(void)
+{
+    setup(V_PART,PART_909);ui.sel[PART_909]=1;*page_of(V_PART)=0;build_pages();
+    CHECK(drum_strip_role(pg.r[0][1])==DG_NTAIL);
+    pref_set(pg.r[0][1],127);pref_set(find_ref(T_909,1,"Decay"),127);drain_ms(300);ui_frame();
+    uint16_t idle[R22_GLYPH_W*R22_GLYPH_H],final[R22_GLYPH_W*R22_GLYPH_H];cell_copy(1,idle);
+    uint32_t old=cell_hash(1),age;float first,late;
+    engine_drum(PART_909,1,1.f);drain_ms(20);now_ms++;ui_frame();
+    CHECK(engine_drum_view(0,1,&age,&first));CHECK(first>.2f);uint32_t early=cell_hash(1);CHECK(early!=old);
+    /* Explicit clock-only diagnostic: no audio rendered, actual909 envelope
+     * unchanged, proving that source age/40 drives the noise pattern. */
+    now_ms+=40;audio_due_ms=now_ms;ui_frame();
+    CHECK(engine_drum_view(0,1,&age,&late));CHECK(late==first);CHECK(cell_hash(1)!=early);
+    drain_ms(150);now_ms++;ui_frame();CHECK(engine_drum_view(0,1,&age,&late));CHECK(late<first);
+    drain_ms(6000);now_ms++;ui_frame();CHECK(!engine_drum_view(0,1,&age,&late));cell_copy(1,final);CHECK(!memcmp(idle,final,sizeof idle));
+    puts("PASS actual Noise Tail, clock-only age-seed change, and byte-identical settled return");
+}
+static void test_shared_return_fade(void)
+{
+    pref_t r=PR(R_ENG,T_909,1,1);uint32_t saved_now=now_ms,saved_last=dg_last[0][1];
+    now_ms=100000;CHECK(dg_live_back(r,1)==1.f);now_ms+=100;float a=dg_live_back(r,0);CHECK(a>0.32f&&a<0.34f);
+    now_ms+=100;float b=dg_live_back(r,0);CHECK(b>a&&b<1.f);now_ms+=101;CHECK(dg_live_back(r,0)==1.f);
+    now_ms=saved_now;dg_last[0][1]=saved_last;
+    puts("PASS shared300ms return-fade clock contract");
+}
+int main(void) { test_dispatch(); test_amp_motion(0); test_amp_motion(1); test_motion(PART_808); test_tune_band_separation(); test_value_motion_bounds();test_noise_tail_motion();test_shared_return_fade(); printf("PASS ui-drum-glyph (%u checks)\n", checks); return 0; }

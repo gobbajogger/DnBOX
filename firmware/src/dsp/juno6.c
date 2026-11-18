@@ -83,3 +83,18 @@ int juno6_set(juno6_t *s,unsigned id,float x) {
  }
  return 1;
 }
+
+int juno6_read_envelope(const juno6_t *s,juno6_envelope_snapshot *out)
+{
+ if(!s||!out)return 0;
+ juno6_envelope_snapshot v={0};
+ v.adsr[0]=s->attack;v.adsr[1]=s->decay;v.adsr[2]=s->sustain;v.adsr[3]=s->release;
+ v.selected_voice=-1;v.shared_amp_filter=1;
+ for(unsigned i=0;i<JUNO6_VOICES;i++){
+  const juno6_voice_t *n=&s->voice[i];
+  if(n->stage && (v.selected_voice<0 || n->envelope>v.level)){
+   v.selected_voice=(int)i;v.level=n->envelope;v.stage=n->stage;v.gate=n->gate;v.active=1;
+  }
+ }
+ *out=v;return 1;
+}

@@ -255,16 +255,20 @@ X0X_COLD int drum909_param_si(int voice, int i, int pot, float *val)
     if (voice < 0 || voice > DR_KIT || i < 0 || i >= d9_nspec[voice])
         return X0X_U_NONE;
     const d9_pspec_t *s = d9_spec(voice, i);
-    if (s->curve == CV_SW || voice == DR_KIT)
+    if (s->curve == CV_SW)
         return X0X_U_NONE;
     float v = d9_pot_value(s, pot);
     *val = v;
     switch (s->field) {
-    case F_LEVEL: return X0X_U_GAIN;
+    case F_LEVEL: case F_ACCENT: return X0X_U_GAIN;
+    case F_VEL: *val=v*100;return X0X_U_PCT;
+    case F_DRIVE: *val=(float)pot*100/127;return X0X_U_PCT;
+    case F_PITCH: return X0X_U_RATIO;
     case F_REV: case F_DLY: case F_ATTACK: case F_PDEPTH: case F_SNAPPY: *val = v * 100.0f; return X0X_U_PCT;
     case F_DECAY: case F_TAIL: return X0X_U_MS;
     case F_TONE: return s->curve == CV_EXP ? X0X_U_HZ : X0X_U_NONE;
     case F_TUNE:
+        if (voice==DR_BD && s->curve==CV_LIN)return X0X_U_MS;
         if (s->curve != CV_EXP) return X0X_U_NONE;
         return s->exp == X0X_EXP_SMP_PITCH ? X0X_U_RATIO : X0X_U_HZ;
     default: return X0X_U_NONE;
@@ -1132,4 +1136,20 @@ void drum909_all_off(drum909_t *d)
         d->smp[i].mute = 0;
         d->smp[i].playing = 0;
     }
+}
+
+int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out)
+{
+ if(!d||!out||(voice!=DR_BD&&voice!=DR_SD))return 0;
+ const d9_bt_t *n=&d->bt[voice];
+ drum909_amp_snapshot v={0};
+ v.raw_level=n->amp.cur;v.target_decay_ms=n->decay;v.target_hold_ms=n->amp_hold;
+ v.active=n->mute>0;v.hold_left=n->amp_hold_left;
+ v.hold_active=v.active && voice==DR_BD && n->amp_hold_left>0;
+ v.ramp_valid=v.active && n->amp.left>0;
+ if(v.ramp_valid){
+  v.ramp_start=n->amp.v0;v.ramp_end=n->amp.v1;v.ramp_samples=n->amp.t1;
+  v.ramp_ratio=n->amp.r;v.ramp_left=n->amp.left;v.ramp_ticks=n->amp.k;
+ }
+ *out=v;return 1;
 }

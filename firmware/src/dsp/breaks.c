@@ -245,7 +245,7 @@ X0X_COLD static int bank_referenced(const breaks_t *b, const brk_bank_t *k)
 static unsigned loop_count(const brk_loop_t *loop)
 {
     unsigned n = loop->slices;
-    return n == 4 || n == 16 || n == 32 ? n : 8;
+    return n == 1 || n == 4 || n == 16 || n == 32 ? n : 8;
 }
 int breaks_count(const breaks_t *b, int bank)
 {
@@ -268,7 +268,8 @@ X0X_COLD static int pick_slot(const breaks_t *b, int which)
 {
     unsigned i, pub = b->pub[which], other = b->pub[which ^ 1];
     for (i = 0; i < 4u; i++) {
-        if (i == pub || i == other)
+        if (i == pub || i == other || (b->preview_pin &&
+            (i == b->preview_saved[0] || i == b->preview_saved[1])))
             continue;
         if (bank_referenced(b, bank_slot_c(b, i)))
             continue;
@@ -325,91 +326,119 @@ static void bank_seek(const brk_bank_t *k, uint32_t p, int32_t *pred, int32_t *i
         ima_decode(k->adpcm, i++, pred, idx);
 }
 
+/* Pin already-prepared banks. Preparation keeps them immutable until restore. */
+int breaks_preview_begin(breaks_t *b)
+{
+    uint32_t irq = brk_config_lock();
+    if (!b->preview_pin) {
+        if (b->slices || b->perf.count || b->local_guard) {
+            brk_config_unlock(irq); return 0;
+        }
+        b->preview_saved[0] = b->pub[0];
+        b->preview_saved[1] = b->pub[1];
+        b->preview_pin = 1;
+    }
+    brk_config_unlock(irq); return 1;
+}
+void breaks_preview_restore(breaks_t *b)
+{
+    uint32_t irq = brk_config_lock();
+    if (b->preview_pin) {
+        b->pub[0] = b->preview_saved[0];
+        b->pub[1] = b->preview_saved[1];
+        b->outline_revision[0]++; b->outline_revision[1]++;
+        b->pend_on[0] = b->pend_on[1] = 0;
+        b->preview_pin = 0;
+        b->preview_epoch++;
+        brk_barrier();
+    }
+    brk_config_unlock(irq);
+}
+
 /* Main-loop loop assign — not breaks_render (X0X_COLD) */
-X0X_COLD void breaks_set_loop(breaks_t *b, int which, const brk_loop_t *loop)
+X0X_COLD void breaks_set_loop_request(breaks_t *b, int which, const brk_loop_t *loop, int preview_epoch)
 {
     brk_bank_t *k;
     int idx, j;
-    if (which < 0 || which > 1)
-        return;
+    uint32_t irq;
+    if (which < 0 || which > 1) return;
+    /* Validate the caller's intent and choose a spare atomically. The audio
+     * owner can restore the pinned banks at any point outside this lock. */
+    irq = brk_config_lock();
+    if (preview_epoch >= 0 && (!b->preview_pin || b->preview_epoch != preview_epoch)) {
+        brk_config_unlock(irq); return;
+    }
     k = bank_slot(b, b->pub[which]);
     if (loop && which == 0 && (b->slices || b->perf.count || b->local_guard) &&
         breaks_count(b, 0) != (int)loop_count(loop)) {
         pend_store(b, which, loop);
-        return;
+        brk_config_unlock(irq); return;
     }
     if (!loop || !loop->adpcm || loop->nsamples < 64 || !loop->bars) {
-        uint32_t irq = brk_config_lock();
-        if (loop && which == 0 && breaks_count(b, 0) != (int)loop_count(loop) &&
-            (b->slices || b->perf.count || b->local_guard)) {
-            brk_config_unlock(irq);
-            pend_store(b, which, loop);
-            return;
-        }
-        /* the samples may be erased: do not keep a voice on them */
+        if (preview_epoch >= 0) { brk_config_unlock(irq); return; }
         for (j = 0; j < 2; j++)
-            if (b->v[j].bank == (uint8_t)which)
-                b->v[j].on = 0;
-        k->valid = 0;
-        k->gen++;
+            if (b->v[j].bank == (uint8_t)which) b->v[j].on = 0;
+        k->valid = 0; k->gen++;
+        b->outline_revision[which]++;
         if (loop) k->slices = (uint8_t)loop_count(loop);
-        brk_config_unlock(irq);
         b->pend_on[which] = 0;
-        return;
+        brk_config_unlock(irq); return;
     }
     if (loop_same(k, loop)) {
         b->pend_on[which] = 0;
-        return;                                         /* already sounding this loop: leave the voice */
-    }
-    /* A held source note keeps its original mapping until release. */
-    if (which == 0 && (b->slices || b->perf.count || b->local_guard) && k->slices != loop_count(loop)) {
-        pend_store(b, which, loop);
-        return;
+        brk_config_unlock(irq); return;
     }
     idx = pick_slot(b, which);
-    if (idx >= 0) {
-        brk_bank_t *next = bank_slot(b, (unsigned)idx);
-        if (k->valid && k->adpcm == loop->adpcm && k->n == loop->nsamples &&
-            k->sp16 == (float)loop->nsamples / ((float)loop->bars * 16.0f)) {
-            /* Count-only publication reuses immutable, exact max-32 decoder states. */
-            *next = *k;
-            next->slices = (uint8_t)loop_count(loop);
-            next->gen++;
-        } else
-            bank_fill(next, loop);
-        uint32_t irq = brk_config_lock();
-        if (which == 0 && k->slices != loop_count(loop) &&
-            (b->slices || b->perf.count || b->local_guard)) {
-            brk_config_unlock(irq);
-            pend_store(b, which, loop);
-            return;
-        }
-        brk_barrier();
-        b->pub[which] = (uint8_t)idx;
-        brk_config_unlock(irq);                   /* triggers keep reading valid audio */
-        b->pend_on[which] = 0;
-        return;
+    if (idx < 0) {
+        /* Never rewrite a published bank in place. Retry from main when a
+         * spare is free; this also keeps restore safe during preparation. */
+        pend_store(b, which, loop);
+        brk_config_unlock(irq); return;
     }
-    if (k->slices == loop_count(loop) && !bank_referenced(b, k)) {
-        k->valid = 0;                                   /* voice_start will not take a half-built bank */
-        brk_barrier();
-        if (!bank_referenced(b, k)) {
-            bank_fill(k, loop);
-            b->pend_on[which] = 0;
-            return;
-        }
-        k->valid = 1;                                   /* a voice claimed it; do not rewrite its samples */
+    brk_config_unlock(irq);
+    brk_bank_t *next = bank_slot(b, (unsigned)idx);
+    if (k->valid && k->adpcm == loop->adpcm && k->n == loop->nsamples &&
+        k->sp16 == (float)loop->nsamples / ((float)loop->bars * 16.0f)) {
+        *next = *k;
+        next->slices = (uint8_t)loop_count(loop);
+        next->gen++;
+    } else
+        bank_fill(next, loop); /* unbounded decode is main-loop only */
+    irq = brk_config_lock();
+    if (preview_epoch >= 0 && (!b->preview_pin || b->preview_epoch != preview_epoch)) {
+        brk_config_unlock(irq); return;
     }
-    pend_store(b, which, loop);                         /* every spare snapshot is still sounding */
+    if (which == 0 && k->slices != loop_count(loop) &&
+        (b->slices || b->perf.count || b->local_guard)) {
+        pend_store(b, which, loop);
+        brk_config_unlock(irq); return;
+    }
+    brk_barrier();
+    b->pub[which] = (uint8_t)idx;
+    b->outline_revision[which]++;
+    b->pend_on[which] = 0;
+    brk_config_unlock(irq);
+}
+X0X_COLD void breaks_set_loop(breaks_t *b, int which, const brk_loop_t *loop)
+{
+    uint32_t irq = brk_config_lock();
+    int epoch = b->preview_pin ? b->preview_epoch : -1;
+    brk_config_unlock(irq);
+    breaks_set_loop_request(b, which, loop, epoch);
 }
 
 /* Main-loop pending publish — not breaks_render (X0X_COLD) */
 X0X_COLD void breaks_flush(breaks_t *b)
 {
     int w;
-    for (w = 0; w < 2; w++)
-        if (b->pend_on[w])
-            breaks_set_loop(b, w, &b->pend[w]);
+    for (w = 0; w < 2; w++) {
+        uint32_t irq = brk_config_lock();
+        int pending = b->pend_on[w];
+        int epoch = b->preview_pin ? b->preview_epoch : -1;
+        brk_loop_t loop = b->pend[w];
+        brk_config_unlock(irq);
+        if (pending) breaks_set_loop_request(b, w, &loop, epoch);
+    }
 }
 
 /* Sample unload path — not breaks_render (X0X_COLD) */
@@ -420,18 +449,25 @@ X0X_COLD void breaks_drop_range(breaks_t *b, const uint8_t *base, uint32_t nbyte
     if (!base || !nbytes)
         return;
     end = base + nbytes;
+    uint32_t irq = brk_config_lock();
     for (j = 0; j < 2; j++) {
         const brk_bank_t *k = b->v[j].snap;
         if (b->v[j].on && k && k->adpcm >= base && k->adpcm < end)
             b->v[j].on = 0;
     }
-    for (w = 0; w < 2; w++) {
-        brk_bank_t *k = bank_slot(b, b->pub[w]);
+    /* Even address-reused storage must invalidate a previously decoded outline. */
+    b->outline_revision[0]++; b->outline_revision[1]++;
+    /* Retire every snapshot, including a hidden pinned performance bank. */
+    for (w = 0; w < 4; w++) {
+        brk_bank_t *k = bank_slot(b, (unsigned)w);
         if (k->adpcm >= base && k->adpcm < end)
             k->valid = 0;
+    }
+    for (w = 0; w < 2; w++) {
         if (b->pend_on[w] && b->pend[w].adpcm >= base && b->pend[w].adpcm < end)
             b->pend_on[w] = 0;
     }
+    brk_config_unlock(irq);
 }
 
 /* ---- voices ----------------------------------------------------------------------------- */
@@ -746,6 +782,9 @@ void breaks_slice_on(breaks_t *b, int slice)
     breaks_slice_hold(b, slice, 1);
     b->restart = (uint8_t)(slice + 1);
 }
+
+/* Audio owner: apply released audition input before publishing performance mapping. */
+void breaks_sync_input(breaks_t *b) { perf_sync(b); }
 
 void breaks_slice_hold(breaks_t *b, int slice, int down)
 {

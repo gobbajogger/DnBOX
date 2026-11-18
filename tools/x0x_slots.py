@@ -431,7 +431,10 @@ def write_slot(link, k, img, progress=None):
             raise SlotError(f"slot {k + 1}: write at {adr:#x} failed ({rc})")
         if progress:
             progress(min(off + WRITE_LEN, len(data)), len(data))
-    r = req(link, CMD_END, [k] + pack7(img[:HDR_LEN]), 5.0)
+    # The short header leaves the flash gap erased. Preserve programmed gap
+    # bytes from a prepared archive with the firmware's full-header END form.
+    header_end = DATA_OFF if any(b != 0xff for b in img[HDR_LEN:DATA_OFF]) else HDR_LEN
+    r = req(link, CMD_END, [k] + pack7(img[:header_end]), 5.0)
     rc = _slot_ack(r, k, "end")
     if rc:
         raise SlotError(f"slot {k + 1}: the device refused the header ({rc}, {RC.get(rc, '?')})")
