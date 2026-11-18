@@ -45,7 +45,7 @@ def instrument(root):
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_SYNTH"))return;');p.write_text(s)
 
     p=root/'firmware/src/app/ui.c';s=p.read_text()
-    a='        night_label_c(cx-1, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
+    a='        text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
     s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
 
     # Full-row drum envelopes are audited as real curve pixels, never exempted
