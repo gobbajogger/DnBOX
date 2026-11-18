@@ -2,6 +2,7 @@
 /* Current Chicago/Miami renderer and engine: read-only STATUS is a real cell. */
 #define CHICAGO_PRESENTATION_NO_MAIN
 #include "chicago_presentation_test.c"
+#include "ui_sound_footer_oracle.h"
 static const char *output_dir;
 static void check_readout(const char *status,int selected,const char *name)
 {
@@ -20,33 +21,18 @@ static void check_readout(const char *status,int selected,const char *name)
     CHECK(pref_read_only(refs[2]));
     char num[16],unit[8];pref_value_of(refs[2],pref_get(refs[2]),num,unit);
     CHECK(!strcmp(num,status) && !unit[0]);
-    /* Independent cell-interior oracle: raised label and native text. The
+    /* Independent cell-interior oracle: one flat label and native text. The
      * STATUS cell has no legacy shared-half icon, reason line or K8 divider. */
     uint16_t bg=selected?SOUND_SELECT:SOUND_FACE;
     uint16_t ink=selected?SOUND_INK:SOUND_WHITE,label=selected?SOUND_INK:SOUND_GRAY;
     cv_begin(240,49,bg);
     int x=151-tw(&FONT_T,"STATUS")/2;
-    cv_text(x,12,&FONT_T,"STATUS",UI_N_LEFT);
-    cv_text(x,10,&FONT_T,"STATUS",UI_N_SHADOW);
     cv_text(x,11,&FONT_T,"STATUS",label);
     const felucca_font_t *font=!strcmp(status,"FX WAIT")?&FONT_XS:&FONT_B;
     CHECK(tw(font,status)<=54);cv_text(151-tw(font,status)/2,26,font,status,ink);
     for(int y=10;y<44;y++)for(int xx=125;xx<177;xx++)
         CHECK(fb[(top+y)*240+xx]==cv_px[y*240+xx]);
-    if(selected) {
-        int pending=engine_bass_preset_pending(v),nav=tw(&FONT_T,UI_CAP_ARROWS)+28;   /* F5 row picture */
-        cv_begin(240,12,SOUND_FACE);
-        if(pending) {
-            cv_text(7,0,&FONT_T,UI_CAP_HOME ": CANCEL",SOUND_GRAY);
-            expected_row_hint(234-nav,0,SOUND_AMBER);
-        } else {
-            int end=expected_row_hint(7,0,SOUND_GRAY);
-            matrix_next_hint(end+8,0,SOUND_GRAY);   /* #798 F1 next hint */
-            expected_home_back(0,SOUND_AMBER);       /* #807 F5: HOME + back arrow */
-        }
-        for(int y=0;y<11;y++)for(int xx=7;xx<234;xx++)
-            CHECK(fb[(228+y)*240+xx]==cv_px[y*240+xx]);
-    }
+    expect_sound_step_footer();
 }
 static void inert_status_knobs(int v)
 {

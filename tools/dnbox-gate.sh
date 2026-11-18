@@ -145,6 +145,13 @@ budget()     { local model xip pool bad=0
                  fi
                  xip=$(cat "$OUT/${model}-xip.txt")
                  pool=$(cat "$OUT/${model}-pool.txt")
+                 # Reject malformed/overflowing shell integers rather than letting
+                 # test(1) diagnostics turn an invalid fit into a passing result.
+                 if ! [[ "$xip" =~ ^(0|[1-9][0-9]{0,6})$ && "$pool" =~ ^(0|[1-9][0-9]{0,6})$ ]]; then
+                   echo "$model invalid budget numbers (NOT_RUN = FAIL)"
+                   bad=1
+                   continue
+                 fi
                  echo "$model: XIP free: $xip B (min $XIP_MIN); pool margin: $pool B (min $POOL_MIN)"
                  if [ "$xip" -lt "$XIP_MIN" ] || [ "$pool" -lt "$POOL_MIN" ]; then
                    echo "$model fit test failed: XIP free $xip B (min $XIP_MIN), pool margin $pool B (min $POOL_MIN)"
@@ -160,6 +167,7 @@ ui_defects() { python3 tests/ui_defects/test_gate.py || return 1
              }
 drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
+step pool-accounting python3 tests/test_pool_budget.py
 step clean-tree clean
 step setup setup
 step fetch-base fetch_base

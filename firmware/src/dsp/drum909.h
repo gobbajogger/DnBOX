@@ -15,6 +15,7 @@
  * more than a few dozen operations. */
 #pragma once
 #include <stdint.h>
+#include "envelope_snapshot.h"
 #include "x0x_param.h"
 #include "drum909_dsp.h"
 
@@ -133,3 +134,9 @@ int drum909_get(const drum909_t *d, int voice, int i);
 int drum909_active(const drum909_t *d);
 
 void drum909_all_off(drum909_t *d);
+
+/* Read-only BD/SD main amplitude observation, at the serialized audio-owner
+ * boundary. Caller-owned output must be disjoint from d. No held-note ADSR,
+ * elapsed-hit timer, pitch/click/noise role or final SD VCA gain is implied. */
+
+int drum909_read_amp(const drum909_t *d,int voice,drum909_amp_snapshot *out);

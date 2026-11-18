@@ -1,0 +1,3627 @@
+{
+  "provenance": {
+    "captured_utc": "2026-11-18T14:53:27.315116+00:00",
+    "combined_sha256": "7161c21e6d9d773cb7f1311be33ec4dc4d59cac74fb76a14b5115fee2364341f",
+    "files": [
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.c",
+        "snapshot_path": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.c",
+        "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+        "bytes": 19483
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.h",
+        "snapshot_path": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.h",
+        "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c",
+        "bytes": 7001
+      }
+    ],
+    "scope": "Final frozen rank-corrected candidate native resource review only; no candidate or production mutation",
+    "fastmath": {
+      "path": "/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/firmware/src/dsp/fastmath.h",
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    }
+  },
+  "native_layout": {
+    "pointer": 4,
+    "float": 4,
+    "double": 8,
+    "envelope_params": 24,
+    "layer_params": 96,
+    "envelope_state": 36,
+    "layer_voice": 92,
+    "voice": 192,
+    "layer": 100,
+    "part": 2264,
+    "work": 112,
+    "voice_snapshot": 32,
+    "part_layer_offset": 8,
+    "part_voice_offset": 208,
+    "part_raw_offset": 1360,
+    "part_raw_present_offset": 2232,
+    "backend_stock": 3720,
+    "runtime_part_stock": 5184,
+    "selected_fx_stock": 4252,
+    "chorus_stock": 536,
+    "candidate_plus_chorus": 2800,
+    "slot_backend_with_candidate": 3720,
+    "two_slot_backend_bytes": 7440
+  },
+  "method": "ELF32-pi32v2 linked disassembly fixed frames and direct calls, four bytes per saved register; no target execution",
+  "limitations": [
+    "Caller and interrupt frames excluded",
+    "No hardware stack watermark",
+    "No native timing or cycle conversion",
+    "Resource composition has no candidate runtime instances or engine routing"
+  ],
+  "builds": [
+    {
+      "model": "elite",
+      "optimization": "Os",
+      "public_api_count": 24,
+      "object_text_bytes": 5960,
+      "object_rodata_bytes": 20,
+      "object_mutable_static_bytes": 0,
+      "object_undefined": [
+        "00000000         *UND*\t\t 00000000 memcpy",
+        "00000000         *UND*\t\t 00000000 memset"
+      ],
+      "linked_undefined": [],
+      "soft_double_symbols": [],
+      "integer_64bit_helper_symbols": [],
+      "baseline_image_bytes": 551492,
+      "composition_image_bytes": 557332,
+      "incremental_image_bytes": 5840,
+      "physical_free_bytes_including_end_marker": -4660,
+      "shortfall_from_1024_free_gate": 5684,
+      "physical_link_returncode": 1,
+      "xip_gate": "FAIL",
+      "unchanged_ram_sections": {
+        ".data": 600,
+        ".bss": 96596,
+        ".pool": 335092,
+        ".xpool": 9216,
+        ".c1stack": 4608,
+        ".noinit": 308
+      },
+      "stack_analysis": {
+        "frames": {
+          "dnbx_abi_version": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_part_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_layer_params_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_work_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_default_layer_params": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_default_layer_params+0x76"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "dnbx_init": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_default_layer_params",
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_init+0x42",
+              "dnbx_init+0x50",
+              "dnbx_init+0x52"
+            ],
+            "edges": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 40,
+            "callees": [
+              "envelope_valid",
+              "increment",
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x19A",
+              "dnbx_set_layer+0x1E4"
+            ],
+            "edges": [
+              "envelope_valid",
+              "increment",
+              "memcpy"
+            ]
+          },
+          "envelope_valid": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_abi_version+0x2",
+              "dnbx_part_size+0x2",
+              "envelope_valid+0x96",
+              "increment+0x22",
+              "increment+0x4A",
+              "increment+0x4E",
+              "increment+0x62"
+            ],
+            "edges": []
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x4",
+              "increment+0xB4"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "dnbx_get_layer": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_get_layer+0x30"
+            ],
+            "edges": [
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_on+0x11C",
+              "dnbx_note_on+0x124",
+              "dnbx_note_on+0x12E",
+              "dnbx_note_on+0x136",
+              "dnbx_note_on+0x178",
+              "dnbx_note_on+0x1BC",
+              "dnbx_note_on+0x1C6",
+              "dnbx_note_on+0x32",
+              "dnbx_note_on+0x3C",
+              "dnbx_note_on+0x4C",
+              "dnbx_note_on+0x64",
+              "dnbx_note_on+0x7C",
+              "dnbx_note_on+0x9A",
+              "dnbx_note_on+0xC2",
+              "dnbx_note_on+0xD2",
+              "dnbx_note_on+0xF8"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x2E",
+              "dnbx_note_off+0x56",
+              "dnbx_note_off+0x5E"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x2A"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1298_0_0_+0x12E",
+              ".GJTIE1298_0_0_+0x134",
+              ".GJTIE1298_0_0_+0x14",
+              ".GJTIE1298_0_0_+0x1D6",
+              ".GJTIE1298_0_0_+0x1E4",
+              ".GJTIE1298_0_0_+0x1F2",
+              ".GJTIE1298_0_0_+0x214",
+              ".GJTIE1298_0_0_+0x226",
+              ".GJTIE1298_0_0_+0x244",
+              ".GJTIE1298_0_0_+0x50",
+              ".GJTIE1298_0_0_+0x6",
+              ".GJTIE1298_0_0_+0x62",
+              ".GJTIE1298_0_0_+0x64",
+              ".GJTIE1298_0_0_+0x70",
+              ".GJTIE1298_0_0_+0x7C",
+              ".GJTIE1298_0_0_+0x7E",
+              ".GJTIE1298_0_0_+0x8A",
+              ".GJTIE1298_0_0_+0xE6"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x18",
+              "settle+0x3E",
+              "settle+0x70",
+              "settle+0x76",
+              "settle+0x86"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x58",
+              "prepare_tick+0x20",
+              "prepare_tick+0x48",
+              "prepare_tick+0x4E",
+              "prepare_tick+0x7E",
+              "prepare_tick+0x90",
+              "voice_active.1135+0x6"
+            ],
+            "edges": []
+          },
+          "voice_active.1135": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1135+0x1E"
+            ],
+            "edges": []
+          },
+          "dnbx_set_sustain": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_sustain+0x2E",
+              "dnbx_set_sustain+0x44",
+              "dnbx_set_sustain+0x4A",
+              "dnbx_set_sustain+0x50"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_set_velocity_mode+0x24"
+            ],
+            "edges": []
+          },
+          "dnbx_all_off": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_all_off+0x30",
+              "dnbx_all_off+0x3A"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_active_voices+0x18",
+              "dnbx_active_voices+0x24",
+              "dnbx_active_voices+0x30"
+            ],
+            "edges": [
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_read_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "memset",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_read_voice+0x36",
+              "dnbx_read_voice+0x82",
+              "dnbx_read_voice+0x86"
+            ],
+            "edges": [
+              "memset",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_render": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 84,
+            "fixed_frame_bytes": 136,
+            "callees": [
+              "envelope_sample",
+              "oscillator",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x11A",
+              "dnbx_render+0x128",
+              "dnbx_render+0x14C",
+              "dnbx_render+0x168",
+              "dnbx_render+0x18",
+              "dnbx_render+0x18A",
+              "dnbx_render+0x18C",
+              "dnbx_render+0x1A4",
+              "dnbx_render+0x1C4",
+              "dnbx_render+0x1C6",
+              "dnbx_render+0x20C",
+              "dnbx_render+0x246",
+              "dnbx_render+0x270",
+              "dnbx_render+0x296",
+              "dnbx_render+0x2AA",
+              "dnbx_render+0x2CE",
+              "dnbx_render+0x2E4",
+              "dnbx_render+0x2FA",
+              "dnbx_render+0x300",
+              "dnbx_render+0x312",
+              "dnbx_render+0x318",
+              "dnbx_render+0x31E",
+              "dnbx_render+0x354",
+              "dnbx_render+0x3B2",
+              "dnbx_render+0x3B4",
+              "dnbx_render+0x76",
+              "dnbx_render+0x7C",
+              "dnbx_render+0xA2",
+              "dnbx_render+0xAE",
+              "oscillator+0x40",
+              "oscillator+0x44",
+              "oscillator+0x60"
+            ],
+            "edges": [
+              "envelope_sample",
+              "oscillator",
+              "voice_active.1135"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x1A",
+              "envelope_sample+0x22",
+              "envelope_sample+0x4E",
+              "envelope_sample+0x62"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "oscillator": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 48,
+            "callees": [
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x56",
+              "oscillator+0x60"
+            ],
+            "edges": [
+              "shape"
+            ]
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep.1137",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x26",
+              "shape+0x46",
+              "shape+0x5C",
+              "shape+0x7A",
+              "shape+0x9A",
+              "shape+0xA0",
+              "shape+0xCE"
+            ],
+            "edges": [
+              "blep.1137",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep.1137": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "blep.1137+0x14"
+            ],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_store_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_store_raw+0x54"
+            ],
+            "edges": []
+          },
+          "dnbx_read_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_read_raw+0x44"
+            ],
+            "edges": []
+          },
+          "dnbx_attack_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_attack_from_unit+0x154",
+              "dnbx_attack_from_unit+0x15A",
+              "dnbx_attack_from_unit+0x15C"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0x146",
+              "dnbx_lfo_from_unit+0x14C",
+              "dnbx_lfo_from_unit+0x14E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_pwm_from_unit+0x36",
+              "dnbx_pwm_from_unit+0x38"
+            ],
+            "edges": []
+          },
+          "dnbx_range_from_stop": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_range_from_stop+0x26",
+              "dnbx_range_from_stop+0xE"
+            ],
+            "edges": []
+          },
+          "dnbx_wave_probe": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_wave_probe_mode"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "dnbx_wave_probe_mode"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "oscillator"
+            ],
+            "potential_tail_callees": [
+              "dnbx_wave_probe_mode+0xB4",
+              "dnbx_wave_probe_mode+0xB8"
+            ],
+            "edges": [
+              "oscillator"
+            ]
+          }
+        },
+        "api_paths": {
+          "dnbx_abi_version": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_abi_version"
+            ]
+          },
+          "dnbx_part_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_part_size"
+            ]
+          },
+          "dnbx_layer_params_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_layer_params_size"
+            ]
+          },
+          "dnbx_work_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_work_size"
+            ]
+          },
+          "dnbx_default_layer_params": {
+            "complete": true,
+            "bytes": 28,
+            "path": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_init": {
+            "complete": true,
+            "bytes": 44,
+            "path": [
+              "dnbx_init",
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "complete": true,
+            "bytes": 64,
+            "path": [
+              "dnbx_set_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_get_layer": {
+            "complete": true,
+            "bytes": 36,
+            "path": [
+              "dnbx_get_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "dnbx_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_note_off": {
+            "complete": true,
+            "bytes": 168,
+            "path": [
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "complete": true,
+            "bytes": 160,
+            "path": [
+              "dnbx_set_sustain",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_set_velocity_mode"
+            ]
+          },
+          "dnbx_all_off": {
+            "complete": true,
+            "bytes": 32,
+            "path": [
+              "dnbx_all_off",
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_active_voices",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_read_voice": {
+            "complete": true,
+            "bytes": 40,
+            "path": [
+              "dnbx_read_voice",
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "complete": true,
+            "bytes": 260,
+            "path": [
+              "dnbx_render",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_store_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_store_raw"
+            ]
+          },
+          "dnbx_read_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_read_raw"
+            ]
+          },
+          "dnbx_attack_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_attack_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_lfo_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_pwm_from_unit"
+            ]
+          },
+          "dnbx_range_from_stop": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_range_from_stop"
+            ]
+          },
+          "dnbx_wave_probe": {
+            "complete": true,
+            "bytes": 152,
+            "path": [
+              "dnbx_wave_probe",
+              "dnbx_wave_probe_mode",
+              "oscillator",
+              "shape",
+              "blep.1137"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "complete": true,
+            "bytes": 136,
+            "path": [
+              "dnbx_wave_probe_mode",
+              "oscillator",
+              "shape",
+              "blep.1137"
+            ]
+          }
+        },
+        "missing_functions": []
+      }
+    },
+    {
+      "model": "pro",
+      "optimization": "Os",
+      "public_api_count": 24,
+      "object_text_bytes": 5960,
+      "object_rodata_bytes": 20,
+      "object_mutable_static_bytes": 0,
+      "object_undefined": [
+        "00000000         *UND*\t\t 00000000 memcpy",
+        "00000000         *UND*\t\t 00000000 memset"
+      ],
+      "linked_undefined": [],
+      "soft_double_symbols": [],
+      "integer_64bit_helper_symbols": [],
+      "baseline_image_bytes": 551484,
+      "composition_image_bytes": 557324,
+      "incremental_image_bytes": 5840,
+      "physical_free_bytes_including_end_marker": -4652,
+      "shortfall_from_1024_free_gate": 5676,
+      "physical_link_returncode": 1,
+      "xip_gate": "FAIL",
+      "unchanged_ram_sections": {
+        ".data": 600,
+        ".bss": 96596,
+        ".pool": 335092,
+        ".xpool": 9216,
+        ".c1stack": 4608,
+        ".noinit": 308
+      },
+      "stack_analysis": {
+        "frames": {
+          "dnbx_abi_version": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_part_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_layer_params_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_work_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_default_layer_params": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_default_layer_params+0x76"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "dnbx_init": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_default_layer_params",
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_init+0x42",
+              "dnbx_init+0x50",
+              "dnbx_init+0x52"
+            ],
+            "edges": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 40,
+            "callees": [
+              "envelope_valid",
+              "increment",
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x19A",
+              "dnbx_set_layer+0x1E4"
+            ],
+            "edges": [
+              "envelope_valid",
+              "increment",
+              "memcpy"
+            ]
+          },
+          "envelope_valid": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_abi_version+0x2",
+              "dnbx_part_size+0x2",
+              "envelope_valid+0x96",
+              "increment+0x22",
+              "increment+0x4A",
+              "increment+0x4E",
+              "increment+0x62"
+            ],
+            "edges": []
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x4",
+              "increment+0xB4"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "dnbx_get_layer": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_get_layer+0x30"
+            ],
+            "edges": [
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_on+0x11C",
+              "dnbx_note_on+0x124",
+              "dnbx_note_on+0x12E",
+              "dnbx_note_on+0x136",
+              "dnbx_note_on+0x178",
+              "dnbx_note_on+0x1BC",
+              "dnbx_note_on+0x1C6",
+              "dnbx_note_on+0x32",
+              "dnbx_note_on+0x3C",
+              "dnbx_note_on+0x4C",
+              "dnbx_note_on+0x64",
+              "dnbx_note_on+0x7C",
+              "dnbx_note_on+0x9A",
+              "dnbx_note_on+0xC2",
+              "dnbx_note_on+0xD2",
+              "dnbx_note_on+0xF8"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x2E",
+              "dnbx_note_off+0x56",
+              "dnbx_note_off+0x5E"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x2A"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1298_0_0_+0x12E",
+              ".GJTIE1298_0_0_+0x134",
+              ".GJTIE1298_0_0_+0x14",
+              ".GJTIE1298_0_0_+0x1D6",
+              ".GJTIE1298_0_0_+0x1E4",
+              ".GJTIE1298_0_0_+0x1F2",
+              ".GJTIE1298_0_0_+0x214",
+              ".GJTIE1298_0_0_+0x226",
+              ".GJTIE1298_0_0_+0x244",
+              ".GJTIE1298_0_0_+0x50",
+              ".GJTIE1298_0_0_+0x6",
+              ".GJTIE1298_0_0_+0x62",
+              ".GJTIE1298_0_0_+0x64",
+              ".GJTIE1298_0_0_+0x70",
+              ".GJTIE1298_0_0_+0x7C",
+              ".GJTIE1298_0_0_+0x7E",
+              ".GJTIE1298_0_0_+0x8A",
+              ".GJTIE1298_0_0_+0xE6"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x18",
+              "settle+0x3E",
+              "settle+0x70",
+              "settle+0x76",
+              "settle+0x86"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x58",
+              "prepare_tick+0x20",
+              "prepare_tick+0x48",
+              "prepare_tick+0x4E",
+              "prepare_tick+0x7E",
+              "prepare_tick+0x90",
+              "voice_active.1135+0x6"
+            ],
+            "edges": []
+          },
+          "voice_active.1135": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1135+0x1E"
+            ],
+            "edges": []
+          },
+          "dnbx_set_sustain": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_sustain+0x2E",
+              "dnbx_set_sustain+0x44",
+              "dnbx_set_sustain+0x4A",
+              "dnbx_set_sustain+0x50"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_set_velocity_mode+0x24"
+            ],
+            "edges": []
+          },
+          "dnbx_all_off": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_all_off+0x30",
+              "dnbx_all_off+0x3A"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_active_voices+0x18",
+              "dnbx_active_voices+0x24",
+              "dnbx_active_voices+0x30"
+            ],
+            "edges": [
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_read_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "memset",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_read_voice+0x36",
+              "dnbx_read_voice+0x82",
+              "dnbx_read_voice+0x86"
+            ],
+            "edges": [
+              "memset",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_render": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 84,
+            "fixed_frame_bytes": 136,
+            "callees": [
+              "envelope_sample",
+              "oscillator",
+              "voice_active.1135"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x11A",
+              "dnbx_render+0x128",
+              "dnbx_render+0x14C",
+              "dnbx_render+0x168",
+              "dnbx_render+0x18",
+              "dnbx_render+0x18A",
+              "dnbx_render+0x18C",
+              "dnbx_render+0x1A4",
+              "dnbx_render+0x1C4",
+              "dnbx_render+0x1C6",
+              "dnbx_render+0x20C",
+              "dnbx_render+0x246",
+              "dnbx_render+0x270",
+              "dnbx_render+0x296",
+              "dnbx_render+0x2AA",
+              "dnbx_render+0x2CE",
+              "dnbx_render+0x2E4",
+              "dnbx_render+0x2FA",
+              "dnbx_render+0x300",
+              "dnbx_render+0x312",
+              "dnbx_render+0x318",
+              "dnbx_render+0x31E",
+              "dnbx_render+0x354",
+              "dnbx_render+0x3B2",
+              "dnbx_render+0x3B4",
+              "dnbx_render+0x76",
+              "dnbx_render+0x7C",
+              "dnbx_render+0xA2",
+              "dnbx_render+0xAE",
+              "oscillator+0x40",
+              "oscillator+0x44",
+              "oscillator+0x60"
+            ],
+            "edges": [
+              "envelope_sample",
+              "oscillator",
+              "voice_active.1135"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x1A",
+              "envelope_sample+0x22",
+              "envelope_sample+0x4E",
+              "envelope_sample+0x62"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "oscillator": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 48,
+            "callees": [
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x56",
+              "oscillator+0x60"
+            ],
+            "edges": [
+              "shape"
+            ]
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep.1137",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x26",
+              "shape+0x46",
+              "shape+0x5C",
+              "shape+0x7A",
+              "shape+0x9A",
+              "shape+0xA0",
+              "shape+0xCE"
+            ],
+            "edges": [
+              "blep.1137",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep.1137": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "blep.1137+0x14"
+            ],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_store_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_store_raw+0x54"
+            ],
+            "edges": []
+          },
+          "dnbx_read_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_read_raw+0x44"
+            ],
+            "edges": []
+          },
+          "dnbx_attack_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_attack_from_unit+0x154",
+              "dnbx_attack_from_unit+0x15A",
+              "dnbx_attack_from_unit+0x15C"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0x146",
+              "dnbx_lfo_from_unit+0x14C",
+              "dnbx_lfo_from_unit+0x14E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_pwm_from_unit+0x36",
+              "dnbx_pwm_from_unit+0x38"
+            ],
+            "edges": []
+          },
+          "dnbx_range_from_stop": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_range_from_stop+0x26",
+              "dnbx_range_from_stop+0xE"
+            ],
+            "edges": []
+          },
+          "dnbx_wave_probe": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_wave_probe_mode"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "dnbx_wave_probe_mode"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "oscillator"
+            ],
+            "potential_tail_callees": [
+              "dnbx_wave_probe_mode+0xB4",
+              "dnbx_wave_probe_mode+0xB8"
+            ],
+            "edges": [
+              "oscillator"
+            ]
+          }
+        },
+        "api_paths": {
+          "dnbx_abi_version": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_abi_version"
+            ]
+          },
+          "dnbx_part_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_part_size"
+            ]
+          },
+          "dnbx_layer_params_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_layer_params_size"
+            ]
+          },
+          "dnbx_work_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_work_size"
+            ]
+          },
+          "dnbx_default_layer_params": {
+            "complete": true,
+            "bytes": 28,
+            "path": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_init": {
+            "complete": true,
+            "bytes": 44,
+            "path": [
+              "dnbx_init",
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "complete": true,
+            "bytes": 64,
+            "path": [
+              "dnbx_set_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_get_layer": {
+            "complete": true,
+            "bytes": 36,
+            "path": [
+              "dnbx_get_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "dnbx_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_note_off": {
+            "complete": true,
+            "bytes": 168,
+            "path": [
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "complete": true,
+            "bytes": 160,
+            "path": [
+              "dnbx_set_sustain",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_set_velocity_mode"
+            ]
+          },
+          "dnbx_all_off": {
+            "complete": true,
+            "bytes": 32,
+            "path": [
+              "dnbx_all_off",
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_active_voices",
+              "voice_active.1135"
+            ]
+          },
+          "dnbx_read_voice": {
+            "complete": true,
+            "bytes": 40,
+            "path": [
+              "dnbx_read_voice",
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "complete": true,
+            "bytes": 260,
+            "path": [
+              "dnbx_render",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_store_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_store_raw"
+            ]
+          },
+          "dnbx_read_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_read_raw"
+            ]
+          },
+          "dnbx_attack_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_attack_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_lfo_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_pwm_from_unit"
+            ]
+          },
+          "dnbx_range_from_stop": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_range_from_stop"
+            ]
+          },
+          "dnbx_wave_probe": {
+            "complete": true,
+            "bytes": 152,
+            "path": [
+              "dnbx_wave_probe",
+              "dnbx_wave_probe_mode",
+              "oscillator",
+              "shape",
+              "blep.1137"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "complete": true,
+            "bytes": 136,
+            "path": [
+              "dnbx_wave_probe_mode",
+              "oscillator",
+              "shape",
+              "blep.1137"
+            ]
+          }
+        },
+        "missing_functions": []
+      }
+    },
+    {
+      "model": "elite",
+      "optimization": "O2",
+      "public_api_count": 24,
+      "object_text_bytes": 8490,
+      "object_rodata_bytes": 20,
+      "object_mutable_static_bytes": 0,
+      "object_undefined": [
+        "00000000         *UND*\t\t 00000000 memcpy",
+        "00000000         *UND*\t\t 00000000 memset"
+      ],
+      "linked_undefined": [],
+      "soft_double_symbols": [],
+      "integer_64bit_helper_symbols": [],
+      "baseline_image_bytes": 551492,
+      "composition_image_bytes": 559860,
+      "incremental_image_bytes": 8368,
+      "physical_free_bytes_including_end_marker": -7188,
+      "shortfall_from_1024_free_gate": 8212,
+      "physical_link_returncode": 1,
+      "xip_gate": "FAIL",
+      "unchanged_ram_sections": {
+        ".data": 600,
+        ".bss": 96596,
+        ".pool": 335092,
+        ".xpool": 9216,
+        ".c1stack": 4608,
+        ".noinit": 308
+      },
+      "stack_analysis": {
+        "frames": {
+          "dnbx_abi_version": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_part_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_layer_params_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_work_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_default_layer_params": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_default_layer_params+0x76"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "dnbx_init": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_init+0x10E",
+              "dnbx_init+0x110"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "envelope_valid",
+              "fm_floorf",
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x1B4",
+              "dnbx_set_layer+0x270",
+              "dnbx_set_layer+0x2CC"
+            ],
+            "edges": [
+              "envelope_valid",
+              "fm_floorf",
+              "memcpy"
+            ]
+          },
+          "envelope_valid": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_init+0x34",
+              "dnbx_init+0x3A",
+              "dnbx_set_layer+0x22",
+              "dnbx_set_layer+0x4A",
+              "dnbx_set_layer+0x4E",
+              "dnbx_set_layer+0x62",
+              "envelope_valid+0x96"
+            ],
+            "edges": []
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "dnbx_get_layer": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_get_layer+0x30"
+            ],
+            "edges": [
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 56,
+            "fixed_frame_bytes": 108,
+            "callees": [
+              "dnbx_note_off",
+              "enter_stage",
+              "fm_floorf",
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_on+0x108",
+              "dnbx_note_on+0x12E",
+              "dnbx_note_on+0x156",
+              "dnbx_note_on+0x17E",
+              "dnbx_note_on+0x1A6",
+              "dnbx_note_on+0x1BC",
+              "dnbx_note_on+0x1C6",
+              "dnbx_note_on+0x1CC",
+              "dnbx_note_on+0x1DC",
+              "dnbx_note_on+0x1E2",
+              "dnbx_note_on+0x1EA",
+              "dnbx_note_on+0x1FA",
+              "dnbx_note_on+0x26C",
+              "dnbx_note_on+0x29A",
+              "dnbx_note_on+0x2C4",
+              "dnbx_note_on+0x2E8",
+              "dnbx_note_on+0x2FA",
+              "dnbx_note_on+0x320",
+              "dnbx_note_on+0x334",
+              "dnbx_note_on+0x33E",
+              "dnbx_note_on+0x34C",
+              "dnbx_note_on+0x38E",
+              "dnbx_note_on+0x3CE",
+              "dnbx_note_on+0x488",
+              "dnbx_note_on+0x4AA",
+              "dnbx_note_on+0x4D4",
+              "dnbx_note_on+0x504",
+              "dnbx_note_on+0x54C",
+              "dnbx_note_on+0x556",
+              "dnbx_note_on+0x57A",
+              "dnbx_note_on+0x5A6",
+              "dnbx_note_on+0x5AA",
+              "dnbx_note_on+0x5D2",
+              "dnbx_note_on+0x5E",
+              "dnbx_note_on+0x5F2",
+              "dnbx_note_on+0x618",
+              "dnbx_note_on+0x624",
+              "dnbx_note_on+0x640",
+              "dnbx_note_on+0x650",
+              "dnbx_note_on+0x658",
+              "dnbx_note_on+0x676",
+              "dnbx_note_on+0x6A0",
+              "dnbx_note_on+0x6C4",
+              "dnbx_note_on+0x6D2",
+              "dnbx_note_on+0x6DE",
+              "dnbx_note_on+0x6E4",
+              "dnbx_note_on+0x6E8",
+              "dnbx_note_on+0x6EE",
+              "dnbx_note_on+0x6F4",
+              "dnbx_note_on+0x6FA",
+              "dnbx_note_on+0x70",
+              "dnbx_note_on+0x700",
+              "dnbx_note_on+0x82",
+              "dnbx_note_on+0x94",
+              "dnbx_note_on+0xA8",
+              "dnbx_note_on+0xBC",
+              "dnbx_note_on+0xE2",
+              "dnbx_set_sustain+0x1A"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "enter_stage",
+              "fm_floorf",
+              "memset"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x104",
+              "dnbx_note_off+0x42",
+              "dnbx_note_off+0x64",
+              "dnbx_note_off+0x90",
+              "dnbx_note_off+0xBC",
+              "dnbx_note_off+0xE0"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0x134",
+              "release_voice+0x13A",
+              "release_voice+0x40",
+              "release_voice+0x64",
+              "release_voice+0x9E",
+              "release_voice+0xA6",
+              "release_voice+0xAA",
+              "release_voice+0xC",
+              "release_voice+0xD0",
+              "release_voice+0xF8"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1297_0_0_+0x12E",
+              ".GJTIE1297_0_0_+0x134",
+              ".GJTIE1297_0_0_+0x14",
+              ".GJTIE1297_0_0_+0x1D6",
+              ".GJTIE1297_0_0_+0x1E4",
+              ".GJTIE1297_0_0_+0x1F2",
+              ".GJTIE1297_0_0_+0x214",
+              ".GJTIE1297_0_0_+0x226",
+              ".GJTIE1297_0_0_+0x244",
+              ".GJTIE1297_0_0_+0x50",
+              ".GJTIE1297_0_0_+0x6",
+              ".GJTIE1297_0_0_+0x62",
+              ".GJTIE1297_0_0_+0x64",
+              ".GJTIE1297_0_0_+0x70",
+              ".GJTIE1297_0_0_+0x7C",
+              ".GJTIE1297_0_0_+0x7E",
+              ".GJTIE1297_0_0_+0x8A",
+              ".GJTIE1297_0_0_+0xE6"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_sustain+0x3E",
+              "dnbx_set_sustain+0x52",
+              "dnbx_set_sustain+0x6C",
+              "dnbx_set_sustain+0x82",
+              "dnbx_set_sustain+0x98",
+              "dnbx_set_sustain+0xAC",
+              "dnbx_set_sustain+0xB2"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_set_velocity_mode+0x24"
+            ],
+            "edges": []
+          },
+          "dnbx_all_off": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_all_off+0x34"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_active_voices+0x10E",
+              "dnbx_active_voices+0x13C",
+              "dnbx_active_voices+0x13E",
+              "dnbx_active_voices+0x48",
+              "dnbx_active_voices+0x74",
+              "dnbx_active_voices+0xAA",
+              "dnbx_active_voices+0xD8"
+            ],
+            "edges": []
+          },
+          "dnbx_read_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_read_voice+0x8C",
+              "dnbx_read_voice+0x8E"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 116,
+            "fixed_frame_bytes": 168,
+            "callees": [
+              "envelope_sample",
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x11E",
+              "dnbx_render+0x180",
+              "dnbx_render+0x18A",
+              "dnbx_render+0x19E",
+              "dnbx_render+0x1D2",
+              "dnbx_render+0x1E6",
+              "dnbx_render+0x204",
+              "dnbx_render+0x22A",
+              "dnbx_render+0x234",
+              "dnbx_render+0x236",
+              "dnbx_render+0x274",
+              "dnbx_render+0x276",
+              "dnbx_render+0x286",
+              "dnbx_render+0x2A4",
+              "dnbx_render+0x2AC",
+              "dnbx_render+0x31C",
+              "dnbx_render+0x3CA",
+              "dnbx_render+0x3D6",
+              "dnbx_render+0x41C",
+              "dnbx_render+0x4A2",
+              "dnbx_render+0x4A4",
+              "dnbx_render+0x76",
+              "dnbx_render+0xB0"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x116",
+              "envelope_sample+0x1E",
+              "envelope_sample+0x26",
+              "envelope_sample+0x50",
+              "envelope_sample+0x5C",
+              "envelope_sample+0x7E",
+              "envelope_sample+0xB0",
+              "envelope_sample+0xB6",
+              "envelope_sample+0xC6",
+              "envelope_sample+0xD0",
+              "envelope_sample+0xD4",
+              "envelope_sample+0xEE",
+              "envelope_sample+0xF2"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0xD6",
+              "fm_sin_pi",
+              "shape+0x11C",
+              "shape+0x14E",
+              "shape+0x162",
+              "shape+0x16C",
+              "shape+0x1AA",
+              "shape+0x1AE",
+              "shape+0x1B2",
+              "shape+0x24",
+              "shape+0x3E",
+              "shape+0x42",
+              "shape+0x44",
+              "shape+0x52",
+              "shape+0x6C",
+              "shape+0x86",
+              "shape+0xA4",
+              "shape+0xAE",
+              "shape+0xD8"
+            ],
+            "edges": [
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_store_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_store_raw+0x54"
+            ],
+            "edges": []
+          },
+          "dnbx_read_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_read_raw+0x44"
+            ],
+            "edges": []
+          },
+          "dnbx_attack_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_attack_from_unit+0x154",
+              "dnbx_attack_from_unit+0x15A",
+              "dnbx_attack_from_unit+0x15C"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0x146",
+              "dnbx_lfo_from_unit+0x14C",
+              "dnbx_lfo_from_unit+0x14E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_pwm_from_unit+0x36",
+              "dnbx_pwm_from_unit+0x38"
+            ],
+            "edges": []
+          },
+          "dnbx_range_from_stop": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_range_from_stop+0x26",
+              "dnbx_range_from_stop+0xE"
+            ],
+            "edges": []
+          },
+          "dnbx_wave_probe": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_wave_probe_mode"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "dnbx_wave_probe_mode"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "recognized": true,
+            "saved_register_bytes": 48,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 56,
+            "callees": [
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0xD0",
+              "dnbx_wave_probe_mode+0xF6",
+              "dnbx_wave_probe_mode+0xFC",
+              "dnbx_wave_probe_mode+0xFE"
+            ],
+            "edges": [
+              "shape"
+            ]
+          }
+        },
+        "api_paths": {
+          "dnbx_abi_version": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_abi_version"
+            ]
+          },
+          "dnbx_part_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_part_size"
+            ]
+          },
+          "dnbx_layer_params_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_layer_params_size"
+            ]
+          },
+          "dnbx_work_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_work_size"
+            ]
+          },
+          "dnbx_default_layer_params": {
+            "complete": true,
+            "bytes": 28,
+            "path": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_init": {
+            "complete": true,
+            "bytes": 72,
+            "path": [
+              "dnbx_init",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "complete": true,
+            "bytes": 76,
+            "path": [
+              "dnbx_set_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_get_layer": {
+            "complete": true,
+            "bytes": 36,
+            "path": [
+              "dnbx_get_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "complete": true,
+            "bytes": 252,
+            "path": [
+              "dnbx_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_note_off": {
+            "complete": true,
+            "bytes": 144,
+            "path": [
+              "dnbx_note_off",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "complete": true,
+            "bytes": 140,
+            "path": [
+              "dnbx_set_sustain",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_set_velocity_mode"
+            ]
+          },
+          "dnbx_all_off": {
+            "complete": true,
+            "bytes": 32,
+            "path": [
+              "dnbx_all_off",
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_active_voices"
+            ]
+          },
+          "dnbx_read_voice": {
+            "complete": true,
+            "bytes": 40,
+            "path": [
+              "dnbx_read_voice",
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "complete": true,
+            "bytes": 264,
+            "path": [
+              "dnbx_render",
+              "envelope_sample",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_store_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_store_raw"
+            ]
+          },
+          "dnbx_read_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_read_raw"
+            ]
+          },
+          "dnbx_attack_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_attack_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_lfo_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_pwm_from_unit"
+            ]
+          },
+          "dnbx_range_from_stop": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_range_from_stop"
+            ]
+          },
+          "dnbx_wave_probe": {
+            "complete": true,
+            "bytes": 108,
+            "path": [
+              "dnbx_wave_probe",
+              "dnbx_wave_probe_mode",
+              "shape",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "complete": true,
+            "bytes": 92,
+            "path": [
+              "dnbx_wave_probe_mode",
+              "shape",
+              "fm_floorf"
+            ]
+          }
+        },
+        "missing_functions": []
+      }
+    },
+    {
+      "model": "pro",
+      "optimization": "O2",
+      "public_api_count": 24,
+      "object_text_bytes": 8490,
+      "object_rodata_bytes": 20,
+      "object_mutable_static_bytes": 0,
+      "object_undefined": [
+        "00000000         *UND*\t\t 00000000 memcpy",
+        "00000000         *UND*\t\t 00000000 memset"
+      ],
+      "linked_undefined": [],
+      "soft_double_symbols": [],
+      "integer_64bit_helper_symbols": [],
+      "baseline_image_bytes": 551484,
+      "composition_image_bytes": 559852,
+      "incremental_image_bytes": 8368,
+      "physical_free_bytes_including_end_marker": -7180,
+      "shortfall_from_1024_free_gate": 8204,
+      "physical_link_returncode": 1,
+      "xip_gate": "FAIL",
+      "unchanged_ram_sections": {
+        ".data": 600,
+        ".bss": 96596,
+        ".pool": 335092,
+        ".xpool": 9216,
+        ".c1stack": 4608,
+        ".noinit": 308
+      },
+      "stack_analysis": {
+        "frames": {
+          "dnbx_abi_version": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_part_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_layer_params_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_work_size": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_default_layer_params": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_default_layer_params+0x76"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "dnbx_init": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_init+0x10E",
+              "dnbx_init+0x110"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "envelope_valid",
+              "fm_floorf",
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_layer+0x1B4",
+              "dnbx_set_layer+0x270",
+              "dnbx_set_layer+0x2CC"
+            ],
+            "edges": [
+              "envelope_valid",
+              "fm_floorf",
+              "memcpy"
+            ]
+          },
+          "envelope_valid": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_init+0x34",
+              "dnbx_init+0x3A",
+              "dnbx_set_layer+0x22",
+              "dnbx_set_layer+0x4A",
+              "dnbx_set_layer+0x4E",
+              "dnbx_set_layer+0x62",
+              "envelope_valid+0x96"
+            ],
+            "edges": []
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "dnbx_get_layer": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memcpy"
+            ],
+            "potential_tail_callees": [
+              "dnbx_get_layer+0x30"
+            ],
+            "edges": [
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 56,
+            "fixed_frame_bytes": 108,
+            "callees": [
+              "dnbx_note_off",
+              "enter_stage",
+              "fm_floorf",
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_on+0x108",
+              "dnbx_note_on+0x12E",
+              "dnbx_note_on+0x156",
+              "dnbx_note_on+0x17E",
+              "dnbx_note_on+0x1A6",
+              "dnbx_note_on+0x1BC",
+              "dnbx_note_on+0x1C6",
+              "dnbx_note_on+0x1CC",
+              "dnbx_note_on+0x1DC",
+              "dnbx_note_on+0x1E2",
+              "dnbx_note_on+0x1EA",
+              "dnbx_note_on+0x1FA",
+              "dnbx_note_on+0x26C",
+              "dnbx_note_on+0x29A",
+              "dnbx_note_on+0x2C4",
+              "dnbx_note_on+0x2E8",
+              "dnbx_note_on+0x2FA",
+              "dnbx_note_on+0x320",
+              "dnbx_note_on+0x334",
+              "dnbx_note_on+0x33E",
+              "dnbx_note_on+0x34C",
+              "dnbx_note_on+0x38E",
+              "dnbx_note_on+0x3CE",
+              "dnbx_note_on+0x488",
+              "dnbx_note_on+0x4AA",
+              "dnbx_note_on+0x4D4",
+              "dnbx_note_on+0x504",
+              "dnbx_note_on+0x54C",
+              "dnbx_note_on+0x556",
+              "dnbx_note_on+0x57A",
+              "dnbx_note_on+0x5A6",
+              "dnbx_note_on+0x5AA",
+              "dnbx_note_on+0x5D2",
+              "dnbx_note_on+0x5E",
+              "dnbx_note_on+0x5F2",
+              "dnbx_note_on+0x618",
+              "dnbx_note_on+0x624",
+              "dnbx_note_on+0x640",
+              "dnbx_note_on+0x650",
+              "dnbx_note_on+0x658",
+              "dnbx_note_on+0x676",
+              "dnbx_note_on+0x6A0",
+              "dnbx_note_on+0x6C4",
+              "dnbx_note_on+0x6D2",
+              "dnbx_note_on+0x6DE",
+              "dnbx_note_on+0x6E4",
+              "dnbx_note_on+0x6E8",
+              "dnbx_note_on+0x6EE",
+              "dnbx_note_on+0x6F4",
+              "dnbx_note_on+0x6FA",
+              "dnbx_note_on+0x70",
+              "dnbx_note_on+0x700",
+              "dnbx_note_on+0x82",
+              "dnbx_note_on+0x94",
+              "dnbx_note_on+0xA8",
+              "dnbx_note_on+0xBC",
+              "dnbx_note_on+0xE2",
+              "dnbx_set_sustain+0x1A"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "enter_stage",
+              "fm_floorf",
+              "memset"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x104",
+              "dnbx_note_off+0x42",
+              "dnbx_note_off+0x64",
+              "dnbx_note_off+0x90",
+              "dnbx_note_off+0xBC",
+              "dnbx_note_off+0xE0"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0x134",
+              "release_voice+0x13A",
+              "release_voice+0x40",
+              "release_voice+0x64",
+              "release_voice+0x9E",
+              "release_voice+0xA6",
+              "release_voice+0xAA",
+              "release_voice+0xC",
+              "release_voice+0xD0",
+              "release_voice+0xF8"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 52,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1297_0_0_+0x12E",
+              ".GJTIE1297_0_0_+0x134",
+              ".GJTIE1297_0_0_+0x14",
+              ".GJTIE1297_0_0_+0x1D6",
+              ".GJTIE1297_0_0_+0x1E4",
+              ".GJTIE1297_0_0_+0x1F2",
+              ".GJTIE1297_0_0_+0x214",
+              ".GJTIE1297_0_0_+0x226",
+              ".GJTIE1297_0_0_+0x244",
+              ".GJTIE1297_0_0_+0x50",
+              ".GJTIE1297_0_0_+0x6",
+              ".GJTIE1297_0_0_+0x62",
+              ".GJTIE1297_0_0_+0x64",
+              ".GJTIE1297_0_0_+0x70",
+              ".GJTIE1297_0_0_+0x7C",
+              ".GJTIE1297_0_0_+0x7E",
+              ".GJTIE1297_0_0_+0x8A",
+              ".GJTIE1297_0_0_+0xE6"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "recognized": true,
+            "saved_register_bytes": 28,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 28,
+            "callees": [
+              "release_voice"
+            ],
+            "potential_tail_callees": [
+              "dnbx_set_sustain+0x3E",
+              "dnbx_set_sustain+0x52",
+              "dnbx_set_sustain+0x6C",
+              "dnbx_set_sustain+0x82",
+              "dnbx_set_sustain+0x98",
+              "dnbx_set_sustain+0xAC",
+              "dnbx_set_sustain+0xB2"
+            ],
+            "edges": [
+              "release_voice"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_set_velocity_mode+0x24"
+            ],
+            "edges": []
+          },
+          "dnbx_all_off": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_all_off+0x34"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_active_voices+0x10E",
+              "dnbx_active_voices+0x13C",
+              "dnbx_active_voices+0x13E",
+              "dnbx_active_voices+0x48",
+              "dnbx_active_voices+0x74",
+              "dnbx_active_voices+0xAA",
+              "dnbx_active_voices+0xD8"
+            ],
+            "edges": []
+          },
+          "dnbx_read_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "memset"
+            ],
+            "potential_tail_callees": [
+              "dnbx_read_voice+0x8C",
+              "dnbx_read_voice+0x8E"
+            ],
+            "edges": [
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 116,
+            "fixed_frame_bytes": 168,
+            "callees": [
+              "envelope_sample",
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_render+0x11E",
+              "dnbx_render+0x180",
+              "dnbx_render+0x18A",
+              "dnbx_render+0x19E",
+              "dnbx_render+0x1D2",
+              "dnbx_render+0x1E6",
+              "dnbx_render+0x204",
+              "dnbx_render+0x22A",
+              "dnbx_render+0x234",
+              "dnbx_render+0x236",
+              "dnbx_render+0x274",
+              "dnbx_render+0x276",
+              "dnbx_render+0x286",
+              "dnbx_render+0x2A4",
+              "dnbx_render+0x2AC",
+              "dnbx_render+0x31C",
+              "dnbx_render+0x3CA",
+              "dnbx_render+0x3D6",
+              "dnbx_render+0x41C",
+              "dnbx_render+0x4A2",
+              "dnbx_render+0x4A4",
+              "dnbx_render+0x76",
+              "dnbx_render+0xB0"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 40,
+            "local_and_outgoing_bytes": 4,
+            "fixed_frame_bytes": 44,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x116",
+              "envelope_sample+0x1E",
+              "envelope_sample+0x26",
+              "envelope_sample+0x50",
+              "envelope_sample+0x5C",
+              "envelope_sample+0x7E",
+              "envelope_sample+0xB0",
+              "envelope_sample+0xB6",
+              "envelope_sample+0xC6",
+              "envelope_sample+0xD0",
+              "envelope_sample+0xD4",
+              "envelope_sample+0xEE",
+              "envelope_sample+0xF2"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0xD6",
+              "fm_sin_pi",
+              "shape+0x11C",
+              "shape+0x14E",
+              "shape+0x162",
+              "shape+0x16C",
+              "shape+0x1AA",
+              "shape+0x1AE",
+              "shape+0x1B2",
+              "shape+0x24",
+              "shape+0x3E",
+              "shape+0x42",
+              "shape+0x44",
+              "shape+0x52",
+              "shape+0x6C",
+              "shape+0x86",
+              "shape+0xA4",
+              "shape+0xAE",
+              "shape+0xD8"
+            ],
+            "edges": [
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "dnbx_store_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_store_raw+0x54"
+            ],
+            "edges": []
+          },
+          "dnbx_read_raw": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_read_raw+0x44"
+            ],
+            "edges": []
+          },
+          "dnbx_attack_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_attack_from_unit+0x154",
+              "dnbx_attack_from_unit+0x15A",
+              "dnbx_attack_from_unit+0x15C"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0x146",
+              "dnbx_lfo_from_unit+0x14C",
+              "dnbx_lfo_from_unit+0x14E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_pwm_from_unit+0x36",
+              "dnbx_pwm_from_unit+0x38"
+            ],
+            "edges": []
+          },
+          "dnbx_range_from_stop": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_range_from_stop+0x26",
+              "dnbx_range_from_stop+0xE"
+            ],
+            "edges": []
+          },
+          "dnbx_wave_probe": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "dnbx_wave_probe_mode"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "dnbx_wave_probe_mode"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "recognized": true,
+            "saved_register_bytes": 48,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 56,
+            "callees": [
+              "shape"
+            ],
+            "potential_tail_callees": [
+              "dnbx_lfo_from_unit+0xD0",
+              "dnbx_wave_probe_mode+0xF6",
+              "dnbx_wave_probe_mode+0xFC",
+              "dnbx_wave_probe_mode+0xFE"
+            ],
+            "edges": [
+              "shape"
+            ]
+          }
+        },
+        "api_paths": {
+          "dnbx_abi_version": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_abi_version"
+            ]
+          },
+          "dnbx_part_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_part_size"
+            ]
+          },
+          "dnbx_layer_params_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_layer_params_size"
+            ]
+          },
+          "dnbx_work_size": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_work_size"
+            ]
+          },
+          "dnbx_default_layer_params": {
+            "complete": true,
+            "bytes": 28,
+            "path": [
+              "dnbx_default_layer_params",
+              "memset"
+            ]
+          },
+          "dnbx_init": {
+            "complete": true,
+            "bytes": 72,
+            "path": [
+              "dnbx_init",
+              "memset"
+            ]
+          },
+          "dnbx_set_layer": {
+            "complete": true,
+            "bytes": 76,
+            "path": [
+              "dnbx_set_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_get_layer": {
+            "complete": true,
+            "bytes": 36,
+            "path": [
+              "dnbx_get_layer",
+              "memcpy"
+            ]
+          },
+          "dnbx_note_on": {
+            "complete": true,
+            "bytes": 252,
+            "path": [
+              "dnbx_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_note_off": {
+            "complete": true,
+            "bytes": 144,
+            "path": [
+              "dnbx_note_off",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_sustain": {
+            "complete": true,
+            "bytes": 140,
+            "path": [
+              "dnbx_set_sustain",
+              "release_voice",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_set_velocity_mode": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_set_velocity_mode"
+            ]
+          },
+          "dnbx_all_off": {
+            "complete": true,
+            "bytes": 32,
+            "path": [
+              "dnbx_all_off",
+              "memset"
+            ]
+          },
+          "dnbx_active_voices": {
+            "complete": true,
+            "bytes": 8,
+            "path": [
+              "dnbx_active_voices"
+            ]
+          },
+          "dnbx_read_voice": {
+            "complete": true,
+            "bytes": 40,
+            "path": [
+              "dnbx_read_voice",
+              "memset"
+            ]
+          },
+          "dnbx_render": {
+            "complete": true,
+            "bytes": 264,
+            "path": [
+              "dnbx_render",
+              "envelope_sample",
+              "enter_stage",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_store_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_store_raw"
+            ]
+          },
+          "dnbx_read_raw": {
+            "complete": true,
+            "bytes": 12,
+            "path": [
+              "dnbx_read_raw"
+            ]
+          },
+          "dnbx_attack_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_attack_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_lfo_from_unit": {
+            "complete": true,
+            "bytes": 20,
+            "path": [
+              "dnbx_lfo_from_unit",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_pwm_from_unit": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_pwm_from_unit"
+            ]
+          },
+          "dnbx_range_from_stop": {
+            "complete": true,
+            "bytes": 0,
+            "path": [
+              "dnbx_range_from_stop"
+            ]
+          },
+          "dnbx_wave_probe": {
+            "complete": true,
+            "bytes": 108,
+            "path": [
+              "dnbx_wave_probe",
+              "dnbx_wave_probe_mode",
+              "shape",
+              "fm_floorf"
+            ]
+          },
+          "dnbx_wave_probe_mode": {
+            "complete": true,
+            "bytes": 92,
+            "path": [
+              "dnbx_wave_probe_mode",
+              "shape",
+              "fm_floorf"
+            ]
+          }
+        },
+        "missing_functions": []
+      }
+    }
+  ],
+  "source_recheck": {
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.c": {
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+      "matches_snapshot": true
+    },
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.h": {
+      "sha256": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c",
+      "matches_snapshot": false
+    }
+  }
+}

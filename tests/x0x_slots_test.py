@@ -156,6 +156,14 @@ def main():
     check(xs.CMD_ERASE in dev2.log and xs.CMD_BEGIN in dev2.log and xs.CMD_END in dev2.log,
           "restore uses SMP_ERASE / SMP_BEGIN, SMP_WRITE, SMP_END")
 
+    # Prepared archives can preserve programmed bytes between the header and payload.
+    padded = bytearray(back[0])
+    padded[xs.HDR_LEN:xs.DATA_OFF] = bytes(range(xs.DATA_OFF - xs.HDR_LEN))
+    padded_meta, padded_images = xs.read_archive(xs.make_archive(lay, [bytes(padded), None]))
+    padded_dev = MockDevice(2, 0x14000)
+    xs.restore(padded_dev, padded_meta, padded_images)
+    check(xs.backup(padded_dev)[1] == padded_images, "restore preserves all 512 header-area bytes")
+
     # 4. --slots: restore only slot 2 (erase), slot 1 untouched
     dev3 = MockDevice(2, 0x14000)
     dev3.load(0, h2, d2)

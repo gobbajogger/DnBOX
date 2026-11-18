@@ -4,8 +4,56 @@
 # finished CPU2 job must give the clean deferred output.
 # Needs the private original-synth inputs and sh host/build_host.sh --generate-only.
 set -e
-cd "$(dirname "$0")/../.."; D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-refs/tags/archive/build/0.0.22}
+cd "$(dirname "$0")/../.."
+python3 tests/test_archive_engine_ui_compat.py
+python3 tests/test_archive_engine_runner.py
+# Preserve the executable exit status before displaying its final output line.
+run_audio_checked() {
+ log=$1; pcm=$2; blocks=$3; bytes=$4; shift 4
+ if ASAN_OPTIONS=detect_leaks=0 "$@" "$pcm" > "$log"; then
+  if ! grep -Fq "PASS engine output windows: $blocks blocks;" "$log"; then
+   echo "missing complete audio marker" >&2; return 1
+  fi
+  if [ ! -f "$pcm" ] || ! actual=$(wc -c < "$pcm"); then
+   echo "missing readable audio bytes" >&2; return 1
+  fi
+  if [ "$actual" -ne "$bytes" ]; then
+   echo "incomplete audio bytes" >&2; return 1
+  fi
+  tail -1 "$log"
+ else
+  rc=$?
+  cat "$log"
+  return "$rc"
+ fi
+}
+D=${OUT:-build/host}/engine-808-alias; rm -rf $D; mkdir -p $D; BASE=${BASE_REF:-refs/tags/archive/build/0.0.22}
 git show $BASE:firmware/src/app/engine.c > $D/engine-base.c
+# The archived engine predates the current UI's optional BREAK audition API.
+# Its comparison exercises render/CQ scratch only, never sample browsing. Refuse
+# audition in that baseline rather than changing the archived audio implementation.
+cat >> "$D/engine-base.c" <<'BASE_PREVIEW_COMPAT'
+int engine_brk_preview(int slot) { (void)slot; return 0; }
+void engine_brk_preview_end(void) { }
+int engine_brk_preview_active(void) { return 0; }
+/* Current UI-only snapshot accessors are not exercised by the archived audio
+ * comparison. Report unavailable, never synthesize envelope or waveform state.
+ * These definitions are appended only to engine-base.c; current engine APIs
+ * and the render/CQ comparison path remain unchanged. */
+uint32_t engine_brk_outline_revision(int which) { (void)which; return 0; }
+int engine_brk_outline_snapshot(int which, uint8_t *peaks, int n, uint32_t *revision)
+{ (void)which; (void)peaks; (void)n; (void)revision; return 0; }
+int engine_drum808_curve(int voice, drum_curve_t *out)
+{ (void)voice; (void)out; return 0; }
+int engine_bd909_pitch_view(float *ms, float *hz)
+{ (void)ms; (void)hz; return 0; }
+int engine_drum909_decay_view(int voice, engine_decay_view_t *out)
+{ (void)voice; (void)out; return 0; }
+int engine_drum909_amp_view(int voice, drum909_amp_snapshot *out)
+{ (void)voice; (void)out; return 0; }
+int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out)
+{ (void)voice; (void)out; return 0; }
+BASE_PREVIEW_COMPAT
 U=$(python3 - <<'PY'
 import importlib.util
 spec=importlib.util.spec_from_file_location('b','tools/build.py');b=importlib.util.module_from_spec(spec);spec.loader.exec_module(b)
@@ -21,15 +69,17 @@ for mode in normal san; do
   src=$D/engine-base.c; [ $v = new ] && src=firmware/src/app/engine.c
   cc $F -Dseq_until_event=output_window_until_event -Dplat_cpu2_run=output_window_cpu2_run -Dplat_cpu2_wait=output_window_cpu2_wait -c $src -o $D/eng-$v.o
   cc $F -DOW_LO=0 -DOW_HI=3 tests/host/engine_output_window_test.c $U $D/eng-$v.o -lm -o $D/h-$v
-  ASAN_OPTIONS=detect_leaks=0 $D/h-$v $D/$mode-$dw-$v.pcm | tail -1
+  run_audio_checked "$D/$mode-$dw-$v.log" "$D/$mode-$dw-$v.pcm" 600 591360 "$D/h-$v"
  done
- cmp $D/$mode-$dw-base.pcm $D/$mode-$dw-new.pcm && echo "BITEXACT $mode DEV_WOBBLE=$dw $(stat -c%s $D/$mode-$dw-new.pcm) B $(sha256sum < $D/$mode-$dw-new.pcm | cut -c1-16)"
+ cmp $D/$mode-$dw-base.pcm $D/$mode-$dw-new.pcm
+ echo "BITEXACT $mode DEV_WOBBLE=$dw $(stat -c%s $D/$mode-$dw-new.pcm) B $(sha256sum < $D/$mode-$dw-new.pcm | cut -c1-16)"
  # a core-1 job that failed half done: the output equals this engine's clean deferred run
  # (the old engine rendered the 808 and BREAK twice there: not a reference)
  for r in 3 1; do
   cc $F -DOW_LO=$r -DOW_HI=$((r+1)) tests/host/engine_output_window_test.c $U $D/eng-new.o -lm -o $D/h-m$r
-  ASAN_OPTIONS=detect_leaks=0 $D/h-m$r $D/$mode-$dw-m$r.pcm | tail -1
+  run_audio_checked "$D/$mode-$dw-m$r.log" "$D/$mode-$dw-m$r.pcm" 200 197120 "$D/h-m$r"
  done
- cmp $D/$mode-$dw-m3.pcm $D/$mode-$dw-m1.pcm && echo "PARTIAL=CLEAN $mode DEV_WOBBLE=$dw"
+ cmp $D/$mode-$dw-m3.pcm $D/$mode-$dw-m1.pcm
+ echo "PARTIAL=CLEAN $mode DEV_WOBBLE=$dw"
  done
 done

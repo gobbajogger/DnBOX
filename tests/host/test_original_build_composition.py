@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Check replacement/legacy source and flag selection without invoking a compiler."""
 import importlib.util
+import inspect
 import re
 import os
 from pathlib import Path
@@ -42,13 +43,64 @@ class OriginalBuildCompositionTests(unittest.TestCase):
             for path, command in sources.items():
                 with self.subTest(board=board, model=model, source=path):
                     self.assertNotIn("-fno-unroll-loops", command)
-                    native_only = Path(path).suffix == ".S" or Path(path).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"} or path in {"firmware/src/dsp/drum909.c", "firmware/src/dsp/master.c", "firmware/src/dsp/fxbus.c"}
+                    native_only = Path(path).suffix == ".S" or Path(path).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"} or path in {"firmware/src/dsp/drum909.c", "firmware/src/dsp/master.c", "firmware/src/dsp/fxbus.c", "firmware/src/app/gfinal/ui_chance_exact.c"}
                     self.assertEqual("-flto" in command, compact and not native_only)
                     expected = compact and Path(path).stem == "chicago_packed"
                     self.assertEqual("-DX0X_CHICAGO_COMPACT_HEADERS=1" in command, expected)
                     if "-O2" in command:
                         self.assertIn("-ffp-contract=off", command)
                         self.assertNotIn("-ffast-math", command)
+
+    def assert_chance_plan(self, model, setting=None):
+        env = dict(os.environ)
+        env.pop("X0X_GFINAL_CHANCE_PROBE", None)
+        if setting is not None:
+            env["X0X_GFINAL_CHANCE_PROBE"] = setting
+        with mock.patch.dict(os.environ, env, clear=True), mock.patch.object(build, "BOARD", "smk37"), mock.patch.object(build, "MODEL", model):
+            commands, objects, sources = compile_plan({"X0X_ORIGINAL_SYNTH": "1"})
+        path = "firmware/src/app/gfinal/ui_chance_exact.c"
+        enabled = setting != "0"
+        self.assertEqual(path in sources, enabled, "CHANCE_PROVIDER_PRESENCE")
+        self.assertEqual(len(commands), len(sources), "CHANCE_DUPLICATE_UNIT")
+        self.assertEqual(len(objects), len(set(objects)), "CHANCE_DUPLICATE_OBJECT")
+        for source, command in sources.items():
+            if not source.endswith(".S"):
+                self.assertIn("-DX0X_GFINAL_CHANCE_PROBE=" + ("1" if enabled else "0"), command, "CHANCE_EXPLICIT_DEFINE")
+        if enabled:
+            command = sources[path]
+            self.assertNotIn("-flto", command, "CHANCE_NO_LTO")
+            self.assertNotIn("-ffast-math", command, "CHANCE_STRICT_MATH")
+            self.assertIn("-ffp-contract=off", command, "CHANCE_NO_CONTRACTION")
+            self.assertIn("-fno-fast-math", command, "CHANCE_STRICT_MATH")
+            self.assertEqual(objects.count(build.OUT / "gfinal/chance_native.o"), 1, "CHANCE_PROVIDER_OBJECT")
+        else:
+            self.assertNotIn(build.OUT / "gfinal/chance_native.o", objects, "CHANCE_DISABLED_OBJECT")
+
+    def test_chance_default_and_explicit_native_config(self):
+        for model in ("elite", "pro"):
+            for setting in (None, "1", "0"):
+                with self.subTest(model=model, setting=setting):
+                    self.assert_chance_plan(model, setting)
+        with mock.patch.dict(os.environ, {"X0X_GFINAL_CHANCE_PROBE": "invalid"}):
+            with self.assertRaisesRegex(SystemExit, "X0X_GFINAL_CHANCE_PROBE: 0 or 1"):
+                compile_plan({})
+
+    def test_chance_contract_rejects_actual_build_plan_mutations(self):
+        source = inspect.getsource(build.app_compile_commands)
+        mutations = [
+            ('f not in ("-flto", "-ffast-math")', 'f not in ("-ffast-math",)', "CHANCE_NO_LTO", None),
+            ('uf += ["-ffp-contract=off", "-fno-fast-math"]', 'uf += ["-ffp-contract=off", "-fno-fast-math", "-ffast-math"]', "CHANCE_STRICT_MATH", None),
+            ('if chance_probe == "1":', 'if False:', "CHANCE_PROVIDER_PRESENCE", None),
+            ('objs.append(obj)', 'objs.append(obj); units.append(units[-1])', "CHANCE_DUPLICATE_UNIT", None),
+            ('"-DX0X_GFINAL_CHANCE_PROBE=" + chance_probe', '"-DX0X_GFINAL_CHANCE_PROBE=1"', "CHANCE_EXPLICIT_DEFINE", "0"),
+        ]
+        for old, new, marker, setting in mutations:
+            self.assertEqual(source.count(old), 1, "mutation anchor changed")
+            namespace = dict(build.__dict__, BOARD="smk37", MODEL="elite")
+            exec(compile(source.replace(old, new), str(ROOT / "tools/build.py"), "exec"), namespace)
+            with self.subTest(marker=marker), mock.patch.object(build, "app_compile_commands", namespace["app_compile_commands"]):
+                with self.assertRaisesRegex(AssertionError, marker):
+                    self.assert_chance_plan("elite", setting)
 
     def test_removed_engines_have_no_build_hook(self):
         # Even a currently unreachable build branch can accidentally compile a

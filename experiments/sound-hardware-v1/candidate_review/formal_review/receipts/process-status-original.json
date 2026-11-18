@@ -1,0 +1,38 @@
+{
+  "source_sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594",
+  "source_path": "/workspace/scratch/67e685478953/superj6_research/candidate_review/verify_candidate.py",
+  "purpose": "Synthetic harness process-status negative/positive controls only; no DSP/compiler execution.",
+  "cases": [
+    {
+      "name": "forced_false",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative/synthetic_gate_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative",
+        "false"
+      ],
+      "exit_code": 0,
+      "scoped_acceptance_pass": false,
+      "receipt_written": true,
+      "expected_exit_code": 1,
+      "pass": false
+    },
+    {
+      "name": "forced_true",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative/synthetic_gate_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative",
+        "true"
+      ],
+      "exit_code": 0,
+      "scoped_acceptance_pass": true,
+      "receipt_written": true,
+      "expected_exit_code": 0,
+      "pass": true
+    }
+  ],
+  "all_pass": false
+}

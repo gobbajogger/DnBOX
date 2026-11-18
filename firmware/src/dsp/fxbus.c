@@ -57,8 +57,8 @@ const x0x_param_t *fxbus_param(int i)
     return i >= 0 && i < FX_NPARAMS ? &fx_p[i].ui : 0;
 }
 
-/* UI readout: a pot's engine value and unit (X0X_U_*). RvDec is a feedback
- * coefficient and Drive a gain curve: no confirmed unit. */
+/* UI readout: actual reverb feedback as percent, not invented seconds.
+ * Drive is normalized control amount: shaping modes do not share a dB law. */
 X0X_COLD int fxbus_param_si(int i, int pot, float *val)
 {
     if (i < 0 || i >= FX_NPARAMS)
@@ -69,6 +69,8 @@ X0X_COLD int fxbus_param_si(int i, int pot, float *val)
     float v = s->curve == CV_EXP ? x0x_pot_exp_value(s->exp, pot) : s->lo + (s->hi - s->lo) * (float)pot / 127.0f;
     *val = v;
     switch (i) {
+    case FX_DRIVE: *val = (float)pot * (100.0f/127.0f); return X0X_U_PCT;
+    case FX_RV_DECAY: *val = v * 100.0f; return X0X_U_PCT;
     case FX_VOLUME: case FX_RV_LEVEL: case FX_DL_LEVEL: return X0X_U_GAIN;
     case FX_COMP: case FX_RV_TONE: case FX_DL_TONE: case FX_DL_WEAR: case FX_DL_FDBK: *val = v * 100.0f; return X0X_U_PCT;
     case FX_RV_HPF: case FX_DL_HPF: return X0X_U_HZ;

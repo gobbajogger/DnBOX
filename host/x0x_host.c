@@ -98,7 +98,8 @@ int32_t plat_enc(int role)
     return v;
 }
 uint32_t plat_master(void) { return master; }
-int plat_battery(void) { return 3; }    /* the simulator: a full battery */
+static int host_battery_level = 3;     /* simulator default; host fixtures may exercise levels */
+int plat_battery(void) { return host_battery_level; }
 void plat_leds(uint32_t b, uint32_t k)
 {
     lit_btn = b;
@@ -335,7 +336,10 @@ void plat_stalls_enable(int on) { (void)on; }
 #include "../firmware/src/app/smk_clip_arp_share.c"   /* one ck_arp_pick + CK_RATE_T for engine + clip MIDI */
 #include "../firmware/src/app/smc_fx_map_tables.c"    /* one SMC FX map table for engine + smc_mixer */
 #include "../firmware/src/app/project.c"
-#include "../firmware/src/app/ui.c"
+#ifndef X0X_HOST_UI_SOURCE
+#define X0X_HOST_UI_SOURCE "../firmware/src/app/ui.c"
+#endif
+#include X0X_HOST_UI_SOURCE
 
 #if X0X_PARAM_TRACE
 void x0x_param_trace(int source, int target, int voice, int parameter, int value)

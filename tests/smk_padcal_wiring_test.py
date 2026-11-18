@@ -3,13 +3,15 @@
 """Pad calibration wiring (BEHAVIOR.md CLP-79): the firmware text gives the mode its menu row, its keys,
 knobs, pads and LCD page, and keeps the UI away meanwhile. The logic is in tests/smk_padcal_test.c."""
 import re
+import os
+from ui_source_extract import function
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "firmware/src/app"
 main = (APP / "main_fm1.c").read_text()
-ui = (APP / "ui.c").read_text()
+ui = Path(os.environ.get("SMK_PADCAL_UI_SOURCE", str(APP / "ui.c"))).read_text()
 plat = (APP / "plat_fm1.c").read_text()
 fails = 0
 
@@ -21,9 +23,7 @@ def check(ok, what):
 
 
 def body(text, head):
-    i = text.index(head)
-    j = text.index("\n}\n", i)
-    return text[i:j]
+    return function(text, head)
 
 
 # The menu row: GLOBAL > SYSTEM > PAD COLOURS, SMK only, not in clip mode.
@@ -44,7 +44,7 @@ check("smk_clip_mode_on() || smk_padcal_on()" in body(ui, "static void key_event
 dm = body(ui, "static UI_DRAW void draw_main(void)")
 check(dm.index("smk_padcal_draw(240u, 2u * BAND_H)") < dm.index("smk_clip_lcd_draw(240u"), "LCD: the page draws before the clip grid")
 # The frame: the mode takes the frame; the keys and knobs.
-fr = body(main, "static void smk_frame(void)")
+fr = body(main, "CK_FN static void smk_frame(void)")
 held = re.search(r"if \(ui_project_busy\(\)\) \{[^{}]*\}", fr)
 check(held and held.start() < fr.index("if (padcal.on) {") and "return;" in held.group()
       and "smk_padcal_frame();" not in held.group(),

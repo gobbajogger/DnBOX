@@ -271,6 +271,21 @@
       "kit": 1,
       "voice": 10,
       "page": 1
+    },
+    {
+      "id": "kit0-voice01-page02",
+      "kit": 0,
+      "voice": 1,
+      "page": 2
+    }
+  ],
+  "reachabilityChanges": [
+    {
+      "revision": "51f4c8711320cb992458ef99822d52324531a2ee",
+      "reason": "Separating real SD AMP Decay from mixed controls moves retained kit row to page2; explicitly added one identity, removed none.",
+      "added": [
+        "kit0-voice01-page02"
+      ]
     }
   ]
 }

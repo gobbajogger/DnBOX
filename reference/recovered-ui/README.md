@@ -1,8 +1,8 @@
-# Text-only recovered UI and SMC reference
+# Recovered UI and SMC reference
 
 This subset preserves exact historical source, tests, text mock generators, documentation and licenses for selective reuse by the existing source owner. It is not active firmware, a complete standalone build, installed functionality or current-candidate acceptance.
 
-The [full independently reviewed archival reference](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/tree/64575f86375e7daa9a939de25e6eb2f5047e0665/reference/recovered-ui) remains at immutable PR703 commit `64575f86375e7daa9a939de25e6eb2f5047e0665`. Its 76-file local integrity proof is reused. This new package includes only 55 original text files, excluding all19 PNG files and replacing the original README/manifest with subset-specific documentation. Four additional historical SMC source/test/license files are enumerated in this manifest. No binaries are added.
+The [full independently reviewed archival reference](https://github.com/gobbajogger/X0X37-for-Loopy-Pro/tree/64575f86375e7daa9a939de25e6eb2f5047e0665/reference/recovered-ui) remains at immutable PR703 commit `64575f86375e7daa9a939de25e6eb2f5047e0665`. The text subset contains 55 original text files and four additional historical SMC files. All 19 original mock PNGs have been restored from that commit. `MOCK-ORIGINALS.json` records their archived paths, byte counts and SHA256 digests.
 
 ## Provenance and reuse
 

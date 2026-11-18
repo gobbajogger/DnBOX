@@ -1,0 +1,22 @@
+{
+  "run_id": "formal_ce_review_20261118",
+  "branch": "lane/sound",
+  "head_sha": "b90faafd2de71063448beea67aa5d22938a5c64b",
+  "verdict": "Ready to merge",
+  "verdict_scope": "Reviewed isolated research package only; no full Sound, existing-PR, hardware or production admission.",
+  "completed_at": "2026-11-18T15:46:10.463813+00:00",
+  "skill": "compound-engineering:ce-code-review",
+  "mode": "markdown report-only",
+  "scope_manifest_sha256": "ef28caa0f91078fe466524f0cc5b52d5608b344a33ed813d3f50729bed0aeadd",
+  "reviewers": [
+    "correctness",
+    "testing",
+    "maintainability",
+    "performance",
+    "project-standards",
+    "adversarial"
+  ],
+  "validator_batch_count": 1,
+  "owner_verified_resolution_count": 4,
+  "open_actionable_findings": 0
+}

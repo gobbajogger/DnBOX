@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_public_boundary_path.py",
+    "--package",
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+    "--output",
+    "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/public_boundary_path"
+  ],
+  "exit_code": 0,
+  "script_sha256": "0142f4f9f5c3b3a54a26f0a982c7cfe39e34f4d54d00336f635e40906b317fd8",
+  "result_sha256": "38e0bd4bd97472109a9123c1a9c6759d155310841143d04ac1215824b2f090aa",
+  "native_code_loaded": false
+}

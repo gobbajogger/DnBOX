@@ -1,0 +1,83 @@
+[
+  {
+    "bank": "Bonus.json",
+    "preset_index": 74,
+    "id": 12,
+    "name": "noiseVolume",
+    "command_value": 0.5,
+    "min": 0.0,
+    "max": 0.25
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 123,
+    "name": "compressorReverbInputRatio",
+    "command_value": 0.0,
+    "min": 1.0,
+    "max": 20.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 124,
+    "name": "compressorReverbWetRatio",
+    "command_value": 0.0,
+    "min": 1.0,
+    "max": 20.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 135,
+    "name": "compressorReverbInputMakeupGain",
+    "command_value": 0.0,
+    "min": 0.5,
+    "max": 4.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 136,
+    "name": "compressorReverbWetMakeupGain",
+    "command_value": 0.0,
+    "min": 0.5,
+    "max": 4.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 15,
+    "name": "lfo1Rate",
+    "command_value": 0.0,
+    "min": 0.0005208333604969084,
+    "max": 80.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 47,
+    "name": "lfo2Rate",
+    "command_value": 0.0,
+    "min": 0.0005208333604969084,
+    "max": 80.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 122,
+    "name": "compressorMasterRatio",
+    "command_value": 0.0,
+    "min": 1.0,
+    "max": 20.0
+  },
+  {
+    "bank": "Starter Bank.json",
+    "preset_index": 0,
+    "id": 134,
+    "name": "compressorMasterMakeupGain",
+    "command_value": 0.0,
+    "min": 0.5,
+    "max": 4.0
+  }
+]

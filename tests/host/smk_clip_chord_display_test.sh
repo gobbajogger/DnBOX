@@ -21,7 +21,8 @@ def fn(s,name):
  while level:
   level += (s[e]=='{')-(s[e]=='}');e+=1
  return s[a:e]+'\n'
-(out/'chord_metrics.inc').write_text(fn(g,'static inline uint32_t font_bitmap_width(')+fn(g,'static uint32_t glyph(')+fn(g,'static int32_t text_w(')+
+(out/'chord_metrics.inc').write_text(fn(g,'static inline uint32_t font_bitmap_width(')+
+ fn(g,'static uint32_t glyph(')+fn(g,'static int32_t text_w(')+
  'typedef struct { const felucca_font_t *f; int8_t top, bot; } capm_t;\nstatic capm_t capm[6];\n'+
  fn(u,'static const capm_t *caps(')+fn(u,'static int32_t vc('))
 PY

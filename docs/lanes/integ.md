@@ -604,3 +604,19 @@ Owner: integ hygiene-review worker. Consolidated input: `ec4f4e56abc37d677475244
 - firmware/src/dsp/drone_string.h: Drone engine removed (sound item 2); slot 2 is Synth One and old Drone projects load as Synth One init.
 - tests/host/drone_slot_test.c: stale Drone test; replaced by tests/host/synthone_slot_test.c.
 - tests/host/drone_string_test.c: stale Drone test; replaced by tests/host/legacy_slot2_map_test.c (old Drone projects load as Synth One init).
+### BREAK and compact-program checks, 2026-11-18
+
+- On the public [Starting breaks page](https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/), Chromium played each of the five previews after choosing None. All five responses returned HTTP 200 and matched the corresponding repository WAV bytes. Playback kept all five boxes clear. The page made zero requests to the private audio route.
+- Choosing All and downloading produced `DnBOX-starting-breaks.x0xslots`, 110844 bytes, SHA256 `2d5dca29b235104ffbf1efe372ba14c35f3d50c92c4630c0d3f9c1d4cfca2117`. The checks exercised the public browser and download paths. Device restoration and audible hardware playback remain unverified.
+- At firmware commit `aa5b0691b686c8f543b90b94445975f9aa267aca`, `python3 tests/program_values_compact_test.py` passed both sets of 796 exact metadata checks. LeakSanitizer rejected the genuine 123-byte leak and the test rejected the corrupt metadata control. All ten active original synth inputs matched the pinned manifest.
+- The combined firmware gate, stock-device fit, and independent review remain open. The public BREAK result applies to the site observed on 2026-11-18. GitHub reported deployed Pages build `241196130538b5e6da7738f0c2ebbbdc57fce02e` and branch tip `2de2355715f979ca1da7aeca1632c4bfe254ad24`.
+
+### Prepared BREAK archive restore
+
+The public five-sample archive at SHA256 `2d5dca29b235104ffbf1efe372ba14c35f3d50c92c4630c0d3f9c1d4cfca2117` passed parsing and preview but failed verified restore on the first slot. It carries 32 zero bytes between its 480-byte header and the sample payload at offset 512. Sending only the short header left those bytes erased. The CLI and browser installer's restore paths now use the full header area when it contains programmed bytes. They keep the short header for archives with erased padding.
+
+On the SMK host fixture for `523d486e`, the firmware's editor and slot scanner read both original sample images back exactly with a full header (60,237 and 50,061 bytes). With short headers, both images differed in 32 bytes. The CLI and browser installer regression suites pass with nonuniform padding. All 31 possible nonempty selections from the corrected website exporter passed CLI restore and backup against the simulated SMK flash layout.
+
+In the firmware host UI, the full archive exposed three BR1 zones and two BR2 zones. Browsing each played a distinct preview while the pattern selection stayed at zero until SEL. The five measured 350 ms peaks were −9.5, −10.8, −15.7, −12.7 and −13.3 dBFS. The idle control measured −180 dBFS. The measurements cover user-slot imports. The default firmware package and physical keyboard were outside this check.
+
+The full gate at `523d486e` passed the firmware builds, flash map, budget and UI checks. Its sole failed host test was `ext-midi-rec-smk`: a concurrent missing-header probe removed the shared drum tables during compilation. The negative probe now runs the real test runner in a private build directory, and the external MIDI test uses the generated-header lock. Both cases pass together with eight runner jobs. Re-running the negative probe preserved the hashes of all three parent drum and BREAK headers.

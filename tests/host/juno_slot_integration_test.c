@@ -33,7 +33,7 @@ int main(void)
             CHECK(engine_bass_voice_view(voice,&level,&mod,&state,&down));
             CHECK(!down);
             ui.help=0;ui.msg_until=0;draw_main();draw_knobs();draw_footer();draw_header();
-            CHECK(!strcmp(part_header_snapshot.name,voice?"JUNO B":"JUNO A"));
+            CHECK(!strcmp(part_header_snapshot.name,voice?"SUPERJ6 B":"SUPERJ6 A"));
             shot(voice?"juno-b":"juno-a");
             ui.help=1;draw_header();shot(voice?"juno-b-help":"juno-a-help");ui.help=0;
         }

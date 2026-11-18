@@ -1,0 +1,46 @@
+{
+  "c_sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+  "measured_h_sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c",
+  "current_h_sha256": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c",
+  "preprocessed_source_equal": false,
+  "preprocessed_sha256": [
+    "5532dac6eec3c8161951b686dce71baebf53b2f553593a63e002d49c203aca4b",
+    "9943f70526a2608262184f3b680f79768fc7cbe495af9d471e5a058b3f36d2b1"
+  ],
+  "commands": [
+    [
+      "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/bin/clang",
+      "-target",
+      "pi32v2",
+      "-mcpu=r3",
+      "-mfprev1",
+      "-ffp-contract=off",
+      "-E",
+      "-P",
+      "-I/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/firmware/src/dsp",
+      "-idirafter",
+      "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/include",
+      "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.c"
+    ],
+    [
+      "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/bin/clang",
+      "-target",
+      "pi32v2",
+      "-mcpu=r3",
+      "-mfprev1",
+      "-ffp-contract=off",
+      "-E",
+      "-P",
+      "-I/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/firmware/src/dsp",
+      "-idirafter",
+      "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/include",
+      "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.c"
+    ]
+  ],
+  "preprocessed_nonblank_lines_equal": true,
+  "preprocessed_nonblank_sha256": [
+    "e1a4c53e2e77f808252793de2dd00d59164e93d97b87bfcf0b7e7b46214bc028",
+    "e1a4c53e2e77f808252793de2dd00d59164e93d97b87bfcf0b7e7b46214bc028"
+  ],
+  "conclusion": "Only preprocessed blank lines differ; compiled declarations and implementation text are unchanged."
+}

@@ -1,0 +1,30 @@
+{
+  "baseline_unchanged_files": 375,
+  "changed_files": [
+    {
+      "path": "tools/build.py",
+      "baseline_sha256": "8adce422a93b0349689d09473d53a78e495e38719ec5f2c2ddcdf5813cb4e030",
+      "fixture_sha256": "2af940eca4ecdf2ec56b8c9ed1c70efa110e539451314e90f8da0d9bd2634c5e"
+    },
+    {
+      "path": "firmware/src/app/original_runtime.c",
+      "baseline_sha256": "ff014466acfce7f41d960d808b466190ab2d41c4c2427e3f8b0d1abdd9c45284",
+      "fixture_sha256": "4b2c1f36350c43d293fdf58c1364eb599da3b0e7f955802c5719612011c27852"
+    },
+    {
+      "path": "firmware/src/dsp/juno6.h",
+      "baseline_sha256": "625ac8ce03b978d996ed995fda11ccd6a838f8c816ba29def8583217c17193d4",
+      "fixture_sha256": "c2169d8e74d2b8e5623499e83799c464f4f3b54ae66c520025c9a3f5a9f64300"
+    },
+    {
+      "path": "firmware/src/dsp/juno6.c",
+      "baseline_sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502",
+      "fixture_sha256": "41056d2f8634bae4555d723c79cb9610a73afdd1282328e326568b5169320185"
+    }
+  ],
+  "added_files": [
+    "firmware/src/dsp/dnbx_core.c",
+    "firmware/src/dsp/dnbx_core.h"
+  ],
+  "note": "Build outputs excluded; exact source pins are in replacement-PROVENANCE.json"
+}

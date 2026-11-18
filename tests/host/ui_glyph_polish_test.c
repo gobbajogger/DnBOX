@@ -96,6 +96,7 @@ static void test_adsr_motion(void){
 static void adsr_expected_header_and_labels(int highlighted)
 {
  const char *const labels[4]={"K5 A 63%","K6 D 31%","K7 S 63%","K8 R 31%"};
+ CHECK(UI_FIRST_KNOB==5); /* Actual board profile, independently pinned. */
  const char *const touched[4]={"ATTACK 63%","DECAY 31%","SUSTAIN 63%","RELEASE 31%"};
  uint16_t actual[240*22];
  memcpy(actual,cv_px,sizeof actual);
@@ -103,6 +104,7 @@ static void adsr_expected_header_and_labels(int highlighted)
  if(highlighted>=0)text_r(232,0,&FONT_T,touched[highlighted],SOUND_INK);
  for(int k=0;k<4;k++)text_c(31+k*59,8,&FONT_T,labels[k],
                                k==highlighted?SOUND_INK:SOUND_GRAY);
+ if(memcmp(actual,cv_px,sizeof actual))fprintf(stderr,"PHYSICAL_ADSR_CAPTION_MISMATCH\n");
  CHECK(!memcmp(actual,cv_px,sizeof actual));
 }
 static void test_adsr_idle_values_and_touch(void)

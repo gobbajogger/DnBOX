@@ -178,7 +178,7 @@ class MockDevice:
         if cmd == xs.CMD_END:
             h = xs.unpack7(a[1:])
             p = xs.parse_header(h)
-            if len(h) != xs.HDR_LEN:
+            if len(h) not in (xs.HDR_LEN, xs.DATA_OFF):
                 self._try_restore_sec0(k)
                 return [k, 1]
             if not p or p["data_len"] > size - xs.DATA_OFF:

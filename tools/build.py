@@ -396,6 +396,10 @@ def app_compile_commands(flags, original_synth, wobble):
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         flags = [*flags, "-flto"]
+    chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+    if chance_probe not in ("0", "1"):
+        raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
+    flags = [*flags, "-DX0X_GFINAL_CHANCE_PROBE=" + chance_probe]
     o2 = [f if f != "-Os" else "-O2" for f in flags]
     units = [("cc", "-c", FW / "crt0.S", "-o", OUT / "crt0.o"),
              ("cc", "-c", FW / "hal" / "fm1_vec.S", "-o", OUT / "fm1_vec.o"),
@@ -424,6 +428,13 @@ def app_compile_commands(flags, original_synth, wobble):
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
             units.append(("cc", *uf, "-c", Path(u), "-o", o))
             objs.append(o)
+    if chance_probe == "1":
+        # Separate integer-only object; existing no-soft-double check unchanged.
+        uf = [f for f in flags if f not in ("-flto", "-ffast-math")]
+        uf += ["-ffp-contract=off", "-fno-fast-math"]
+        obj = OUT / "gfinal" / "chance_native.o"
+        units.append(("cc", *uf, "-c", FW / "src" / "app" / "gfinal" / "ui_chance_exact.c", "-o", obj))
+        objs.append(obj)
     return units, objs
 
 
@@ -575,10 +586,25 @@ def check(img, syms, dis, rt):
         mm = re.search(r"^([0-9a-f]+) .*\s" + name + r"$", syms, re.M)
         return int(mm.group(1), 16) if mm else 0
     bss = sym("_bss_end") - 0x01C08000
-    pool = sym("_pool_end") - sym("_pool_start")
+    # Pool margin means free bytes AFTER the existing 8 KiB safety reserve.
+    # Missing/duplicate/reversed/out-of-region linker symbols cannot prove fit.
+    pool_symbols = []
+    for name in ("_pool_start", "_pool_end"):
+        matches = re.findall(r"^([0-9a-f]+) .*\s" + name + r"$", syms, re.M)
+        if len(matches) != 1:
+            errors.append(f"invalid pool symbol {name}: expected exactly one, got {len(matches)}")
+            return errors, notes
+        pool_symbols.append(int(matches[0], 16))
+    pool_start, pool_end = pool_symbols
+    if pool_start != 0x01C20000 or not pool_start <= pool_end <= 0x01C74000:
+        errors.append(f"invalid pool bounds: {pool_start:#x}..{pool_end:#x}")
+        return errors, notes
+    pool = pool_end - pool_start
     notes.append(f"image {len(img)} B; RAM .data+.bss {bss} B of 98304; pool {pool} B of {0x54000}")
     print(f"XIP free: {APP_CODE_MAX - len(img)} B")
-    print(f"pool margin: {0x54000 - pool} B")
+    print(f"pool raw free: {0x54000 - pool} B")
+    print("pool reserve: 8192 B")
+    print(f"pool margin: {0x54000 - pool - 8192} B")
     if bss > 96 * 1024:
         errors.append("RAM region overflow")
     if 0x54000 - pool < 8192:                     # keep >= 8 KiB of the pool spare

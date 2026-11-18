@@ -34,7 +34,7 @@ typedef struct {
     uint32_t nsamples;      /* decoded samples */
     uint32_t rate;          /* 22050 (or 44100) */
     uint8_t bars;           /* musical length of the loop in bars (the user states it; 1..8) */
-    uint8_t slices;         /* 0 = compatibility default 8; otherwise 4,8,16,32 */
+    uint8_t slices;         /* 0 = default 8; 1 = transient whole-loop preview; otherwise 4,8,16,32 */
 } brk_loop_t;
 
 /* indices of breaks_param() past the per-pattern settings */
@@ -85,7 +85,10 @@ typedef struct breaks {
 #if defined(X0X_HOST)
     brk_bank_t side[2];               /* host tests may use several breaks_t at once */
 #endif
+    uint32_t outline_revision[2];    /* publication/restore/retirement, under config lock */
     volatile uint8_t pub[2];          /* published snapshot: 0..1 bank[], 2..3 side[] */
+    volatile uint8_t preview_pin, preview_epoch;
+    uint8_t preview_saved[2];
     uint8_t pend_on[2];               /* a change waiting for a free snapshot */
     brk_loop_t pend[2];
     brk_voice_t v[2];                 /* the sounding voice and the one fading out */
@@ -137,6 +140,9 @@ typedef struct breaks {
 } breaks_t;
 
 void breaks_init(breaks_t *b);
+int breaks_preview_begin(breaks_t *b); /* main: pin current immutable performance banks */
+void breaks_preview_restore(breaks_t *b); /* bounded pointer restore, no decode */
+void breaks_set_loop_request(breaks_t *b, int which, const brk_loop_t *loop, int preview_epoch);
 void breaks_set_loop(breaks_t *b, int which /*0 = A, 1 = B*/, const brk_loop_t *loop);   /* NULL = empty (silent) */
 void breaks_flush(breaks_t *b);                /* publish a loop change that waited for a free snapshot */
 void breaks_drop_range(breaks_t *b, const uint8_t *base, uint32_t nbytes); /* samples at base are going away */
@@ -154,6 +160,7 @@ const x0x_param_t *breaks_param(int i);
 void breaks_set(breaks_t *b, int i, int value);
 int breaks_get(const breaks_t *b, int i);
 
+void breaks_sync_input(breaks_t *b); /* audio owner only, synchronize held input edges */
 void breaks_slice_hold(breaks_t *b, int slice, int down);
 int breaks_count(const breaks_t *b, int bank);
 

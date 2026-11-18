@@ -1,0 +1,47 @@
+{
+  "scenarios": [
+    {
+      "events": "two_zero_stage_held_retriggers",
+      "public_stage_transitions": 0,
+      "actual_stage_transitions": 32,
+      "public_exp2": 0,
+      "actual_direct_exp2": 4,
+      "active_voices_after": 2
+    },
+    {
+      "events": "two_zero_stage_note_offs",
+      "public_stage_transitions": 0,
+      "actual_stage_transitions": 24,
+      "public_exp2": 0,
+      "actual_direct_exp2": 0,
+      "active_voices_after": 0
+    }
+  ],
+  "probe_sha256": "c4e336076a31b2e79fcfe33e1a68ff1b935e9f7608e75a0d0645a3a246c87293",
+  "commands": [
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-ffp-contract=off",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_02/snapshot",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/zero_stage_probe.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/dnbx_core_trace.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/zero_stage_probe"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/zero_stage_probe"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

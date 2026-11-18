@@ -3,13 +3,28 @@
 #include "smc_ui_test.c"
 static void snap(const char *name){project_t *b=malloc(sizeof proj);CHECK(b);memcpy(b,&proj,sizeof proj);ui_frame();CHECK(!memcmp(b,&proj,sizeof proj));free(b);shot(name);}
 int main(void){
+ /* Compare every pixel of the actual first two sequencer cells to their flat
+  * roundrects, including the antialiased corners and hit/empty semantics. */
+ setup(V_SEQ,PART_909);
+ ui.sel[0]=0;
+ dpart_t *drum=&cur_pat()->drum[0];
+ drum->len=16;
+ memset(drum->hit[0],0,sizeof drum->hit[0]);
+ sm_set(drum->hit[0],0);
+ seq.playing=0;
  const uint16_t bg=RGB(3,7,11);
- for(int w=1;w<=14;w++)for(int h=4;h<=10;h++)for(int raised=0;raised<2;raised++) {
-  cv_begin(240,BAND_H,bg);night_mark(12,10,w,h,C_HI,raised);
-  for(int y=0;y<BAND_H;y++)for(int x=0;x<240;x++)
-   if(x<12||x>=12+w||y<10||y>=10+h)CHECK(cv_px[y*240+x]==swap16(bg));
-  if(w>=4 && h>=5)CHECK(cv_px[(10+h/2)*240+12+w/2]==swap16(C_HI));
+ uint16_t expected[2][DROW-2][12];
+ cv_begin(240,BAND_H,bg);
+ for(int c=0;c<2;c++) {
+  box(col_x(c),1,12,DROW-2,c==0?part_col():C_LINE);
+  for(int y=0;y<DROW-2;y++)
+   memcpy(expected[c][y],&cv_px[(1+y)*240+col_x(c)],sizeof expected[c][y]);
  }
+ cv_begin(240,BAND_H,bg);
+ draw_drum(0);
+ for(int c=0;c<2;c++)
+  for(int y=0;y<DROW-2;y++)
+   CHECK(!memcmp(expected[c][y],&cv_px[(1+y)*240+col_x(c)],sizeof expected[c][y]));
  setup(V_HOME,PART_909);open_global();snap("main-global-selected");
  ui.list_sel=ui.list_n-1;ui.list_top=ui.list_sel>5?ui.list_sel-5:0;snap("main-global-last-row");
  ask(ACT_RESET,0,"RESET PROJECT?","SAMPLES ARE KEPT");snap("main-reset-confirmation-no-action");
