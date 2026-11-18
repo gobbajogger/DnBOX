@@ -613,10 +613,10 @@ static UI_DRAW void dv_cp_stage_page(int band)
     int decay_owner=engine_drum808_param_curve_preview(D8_CP,2,choice,matrix_value(pg.r[0][3]),&decay);
     int selected=decay_owner==D8S_MA+1;
     rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);
-    cv_text(11,26-off,&FONT_T,"SOUND",ink);
-    if(!key_sounds())cv_text(91,26-off,&FONT_T,"KEY SOUND OFF",SOUND_GRAY);
+    cv_text(11,28-off,&FONT_T,"SOUND",ink);
+    if(!key_sounds())cv_text(91,28-off,&FONT_T,"KEY SOUND OFF",SOUND_GRAY);
     char label[32];put_i(put_s(put_i(label,page+1),"/"),pg.n);
-    text_r(232,26-off,&FONT_T,label,SOUND_GRAY);
+    text_r(232,28-off,&FONT_T,label,SOUND_GRAY);
     const int slots[2]={0,2};
     for(int i=0;i<2;i++) {
         pref_t r=pg.r[0][slots[i]];int center=i?177:63,value=matrix_value(r);
