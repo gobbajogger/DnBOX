@@ -72,6 +72,10 @@ def run(source,output):
             if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])+int(pm[0][2])==0:report['status']='FAIL'
             if key.startswith('ENVELOPE_'):
                 expected={prefix+f'view-01-part-00-voice-{voice:02d}-page-01' for voice in (0,1) for prefix in ('','edge-0-','edge-1-')}
+                # Both bound CP/MA stages belong to the SOUND bank. The KIT
+                # bank still shows the graphs but its active control is Accent.
+                expected.update(prefix+'view-01-part-01-voice-06-page-00'
+                                for prefix in ('','edge-0-','edge-1-'))
                 actual=set(re.findall(r'^GLYPH_PIXEL_MISSING screen=(\S+)',lp.read_text(),re.M))
                 report[key]['expectedGraphFailures']=sorted(expected)
                 report[key]['actualGraphFailures']=sorted(actual)

@@ -329,7 +329,15 @@ static void test_808_circuit_curves(void)
         CHECK(view.level>=0 && view.level<=1);
         int x=33+(int)(194.f*view.elapsed/view.window+.5f);
         int y=194-(int)(41.f*view.level+.5f);
-        CHECK(x>=33 && x<=227 && y>=153 && y<=194);
+        if(voice==D8_CP) {
+            /* Stage-only CP and combined MA target rows keep actual level
+             * separate from an edited-target horizontal time coordinate. */
+            drum_curve_t bound;
+            CHECK(engine_drum808_param_curve(D8_CP,2,&bound)==(i==3?D8S_MA:D8S_CP)+1);
+            CHECK(bound.elapsed>=0 && bound.level==view.level);
+            x=230;y=164-(int)((i==3?48.f:20.f)*bound.level+.5f);
+            CHECK(y>=(i==3?116:144) && y<=164);
+        } else CHECK(x>=33 && x<=227 && y>=153 && y<=194);
         if(fb[y*240+x]!=swap16(SOUND_INK))fprintf(stderr,"808_LIVE_MARKER_MISSING voice=%d x=%d y=%d elapsed=%f level=%f\n",voice,x,y,view.elapsed,view.level);
         CHECK(fb[y*240+x]==swap16(SOUND_INK));
         char shot_name[48];snprintf(shot_name,sizeof shot_name,"808-circuit-live-%u-voice%d",i,voice);shot(shot_name);

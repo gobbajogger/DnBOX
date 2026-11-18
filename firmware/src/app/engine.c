@@ -141,6 +141,20 @@ int engine_drum808_curve(int voice,drum_curve_t *view)
     plat_cq_unlock(lock);
     return ok;
 }
+int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
+{
+    if(!view)return 0;
+    uint32_t lock=plat_cq_lock();
+    int owner=drum808_param_curve_preview(&d808,voice,param,selection,raw,view);
+    if(owner && view->elapsed>=0) {
+        int slot=owner==D8S_MA+1?NDRUM+1:voice;
+        view->elapsed=(d8_frame-d8_trigger_frame[slot])/44.1f;
+    }
+    plat_cq_unlock(lock);
+    return owner;
+}
+int engine_drum808_param_curve(int voice,int param,drum_curve_t *view)
+{ return engine_drum808_param_curve_preview(voice,param,-1,-1,view); }
 int engine_drum909_decay_view(int voice,engine_decay_view_t *out)
 {
     if(!out || voice<DR_SD || voice>DR_RD || voice==DR_RS)return 0;

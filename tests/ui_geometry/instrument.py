@@ -70,6 +70,33 @@ def instrument(root):
     if(geo_enabled&&!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE")){if(presence_nglyph>=256)exit(2);unsigned *q=presence_glyph[presence_nglyph++];q[0]=r.kind;q[1]=r.a;q[2]=r.b;q[3]=r.c;}
 '''+a);p.write_text(s)
 
+    # Actual bound-stage polylines have parameter ownership, not fake small
+    # cells. Combined MA assigns each real phase's pixels to its bound control.
+    p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
+    if 'dv_bound_stage(' in s:
+        a='    cv_poly_aa(points,used,col);'
+        s=once(s,a,r'''
+    uint16_t stage_before[CV_MAX];pixel_snapshot(stage_before);
+    if(getenv("PIXEL_MUTATE_SHIFT"))for(int z=0;z<used;z++)points[2*z]+=80;
+    if(!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE"))cv_poly_aa(points,used,col);
+    if(geo_enabled&&(getenv("PIXEL_MUTATE_BLANK")||getenv("ENVELOPE_MUTATE_BLANK")))memcpy(cv_px,stage_before,cv_w*cv_h*sizeof *stage_before);
+    if(geo_enabled&&!getenv("PRESENCE_MUTATE_GLYPH")&&!getenv("ENVELOPE_MUTATE_CURVE")){
+      pref_t a=PR(R_ENG,T_808,D8_CP,3),d=PR(R_ENG,T_808,D8_CP,2);
+      uint32_t ao=1u+((uint32_t)a.kind<<24)+((uint32_t)a.a<<16)+((uint32_t)a.b<<8)+a.c;
+      uint32_t dd=1u+((uint32_t)d.kind<<24)+((uint32_t)d.a<<16)+((uint32_t)d.b<<8)+d.c;
+      int split=14+(int)(214.f*v->rise_end/window);
+      for(int yy=cv_y0;yy<cv_y1;yy++)for(unsigned xx=0;xx<cv_w;xx++)if(stage_before[yy*cv_w+xx]!=cv_px[yy*cv_w+xx]){
+        pixel_tile_owner[yy*cv_w+xx]=stage==1||(stage==0&&(int)xx<=split)?ao:dd;
+        pixel_tile_color[yy*cv_w+xx]=cv_px[yy*cv_w+xx];
+      }
+      for(int k=0;k<2;k++)if(stage==0 || stage==k+1){
+        pref_t r=k?d:a;if(presence_nglyph>=256)exit(2);unsigned *q=presence_glyph[presence_nglyph++];q[0]=r.kind;q[1]=r.a;q[2]=r.b;q[3]=r.c;
+      }
+    }
+    if(geo_enabled&&getenv("PIXEL_MUTATE_OVERPAINT"))memcpy(cv_px,stage_before,cv_w*cv_h*sizeof *stage_before);
+''')
+        p.write_text(s)
+
     helper=root/'tests/ui_defects/first_slice/instrument.py'
     spec=importlib.util.spec_from_file_location('first_slice_wrappers',helper);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()

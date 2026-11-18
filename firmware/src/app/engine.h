@@ -327,5 +327,8 @@ extern uint32_t engine_diag_render_offset;
  * full-velocity trigger. Cursor time and level come from the running ramp. */
 typedef struct { float peak, decay_ms, elapsed_ms, level; } engine_decay_view_t;
 int engine_drum808_curve(int voice,drum_curve_t *view);
+/* Returns native sound owner + 1; curve and hit epoch captured together. */
+int engine_drum808_param_curve(int voice,int param,drum_curve_t *view);
+int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view);
 int engine_drum909_decay_view(int voice,engine_decay_view_t *out);
 int engine_drum909_amp_view(int voice,drum909_amp_snapshot *out);

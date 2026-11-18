@@ -99,8 +99,7 @@ test_class() {
     perf-wheel-noise|ext-midi-rec-smk) TEST_CLASS=G ;;   # generates and reads shared build/gen headers
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
-    synth-param-jump|param-write-sources|ui-drum-glyph|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
-    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-settings-sections) TEST_CLASS=G ;;
+    synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
     *) TEST_CLASS=P ;;
@@ -312,6 +311,7 @@ run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
 run project-rates-companion sh tests/host/project_rates_companion_test.sh
 run composed-midi-epoch python3 tests/host/m1_midi_epoch_test.py build/host/composed-midi-epoch --baseline-usb tests/host/reference/usb_before_midi_epoch.c
 run break-retrigger-lut sh -c "$CC -O1 -std=c99 -ffp-contract=off tests/host/break_retrigger_lut_test.c -lm -o $OUT/break_retrigger_lut && $OUT/break_retrigger_lut"
+run break-retrigger-law python3 tests/host/test_break_retrigger_law.py
 run dsp-host-linkage sh tests/host/run_dsp_host_linkage.sh
 run fastmath sh -c "$CC -DX0X_HOST -O2 -ffp-contract=off -Wall -Wextra -Werror -o $OUT/fastmath_test tests/host/fastmath_test.c -lm && $OUT/fastmath_test"   # its reference is double on purpose
 run fastmath-ubsan sh tests/host/run_fastmath_ubsan.sh  # negative exponent shifts must be defined
@@ -755,6 +755,7 @@ run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-readout sh tests/host/chicago_readout_test.sh; fi
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
+run ui-808-stage-rows sh tests/host/ui_808_stage_rows_test.sh
 run ui-drum-curve-axes python3 tests/host/ui_drum_curve_axes_test.py
 run ui-no-loss-return python3 tests/host/ui_no_loss_return_test.py
 run ui-song-empty-action python3 tests/host/ui_song_empty_action_test.py

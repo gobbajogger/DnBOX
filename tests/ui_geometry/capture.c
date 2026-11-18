@@ -30,6 +30,25 @@ static void required_drum_content(const char *screen) {
   pref_value_of(r,matrix_value(r),num,unit);snprintf(value,sizeof value,"%s%s",num,unit);
   unsigned glyph=0;for(unsigned z=0;z<presence_nglyph;z++)if(presence_glyph[z][0]==r.kind&&presence_glyph[z][1]==r.a&&presence_glyph[z][2]==r.b&&presence_glyph[z][3]==r.c)glyph++;
   presence_checks++;if(!glyph){presence_missing++;printf("MISSING_CONTENT screen=%s kind=glyph expected=[%s]\n",screen,caption);}
+  if(ui.part==PART_808 && ui.sel[PART_808]==D8_CP){
+   if(page==0 && (k==1||k==3)){
+    char physical[32];snprintf(physical,sizeof physical,"K%d %c %d%%",UI_FIRST_KNOB+k,k==1?'A':'D',(matrix_value(r)*100+63)/127);
+    const char *title=matrix_value(PR(R_ENG,T_808,D8_CP,4))?"MARACAS AD":k==1?"MARACAS ATTACK":"CLAP DECAY";
+    const char *required[2]={title,physical};for(int n=0;n<2;n++){presence_checks++;if(!seen_text(required[n])){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-stage expected=[%s]\n",screen,required[n]);}}
+    if(k==1){float ms;engine_param_si(T_808,D8_CP,3,matrix_value(r),&ms);int tenth=(int)(ms*10+.5f);char time[32];if(tenth<100)snprintf(time,sizeof time,"99%% %d.%dms",tenth/10,tenth%10);else snprintf(time,sizeof time,"99%% %dms",(tenth+5)/10);presence_checks++;if(!seen_text(time)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-rise-time expected=[%s]\n",screen,time);}}
+    if(k==3&&!matrix_value(PR(R_ENG,T_808,D8_CP,4))){
+     /* Independent admitted CP pot law and nominal 99% fall, not view window. */
+     double ms=350.*pow(8.,matrix_value(r)/127.)*.0385*log(100.);
+     int tenth=(int)(ms*10+.5);char time[32];
+     if(tenth<100)snprintf(time,sizeof time,"99%% %d.%dms",tenth/10,tenth%10);
+     else snprintf(time,sizeof time,"99%% %dms",(tenth+5)/10);
+     presence_checks++;if(!seen_text(time)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-fall-time expected=[%s]\n",screen,time);}
+    }
+    continue;
+   }
+   if(page==0)snprintf(caption,sizeof caption,"K%d %s",UI_FIRST_KNOB+k,k==0?"TUNE":"SOUND");
+   else strcpy(caption,"KIT ACCENT");
+  }
   const char *expected[2]={caption,value};
   for(int n=0;n<2;n++){presence_checks++;if(!seen_text(expected[n])){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s]\n",screen,n?"value+unit":"label",expected[n]);}}
  }
@@ -113,6 +132,11 @@ static void required_drum_pixels(const char *screen) {
   uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
   unsigned pixels=0,missing=0,outside=0;
   int x0=cells==1?6:6+228*k/cells,x1=cells==1?234:6+228*(k+1)/cells;
+  if(ui.part==PART_808&&ui.sel[PART_808]==D8_CP){
+   if(page==1){x0=103;x1=140;y=177;height=20;}
+   else if(k==0||k==2){x0=k?150:40;x1=k?205:88;y=50;height=26;}
+   else {x0=11;x1=230;if(matrix_value(PR(R_ENG,T_808,D8_CP,4))){y=114;height=52;}else{y=k==1?98:142;height=24;}}
+  }
   for(int sy=0;sy<240;sy++)for(int sx=0;sx<240;sx++)if(pixel_frame_owner[sy*240+sx]==owner){
    pixels++;if(fb[sy*240+sx]!=pixel_frame_color[sy*240+sx])missing++;
    if(sx<x0||sx>=x1||sy<y||sy>=y+height)outside++;
