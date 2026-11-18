@@ -1,5 +1,5 @@
 # Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published head: `90fa6d5f0cefa9913e76a6acc8a4ba9cb57c8613`. Updated: 2026-11-18 10:03 EST.
+Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published head: `90fa6d5f0cefa9913e76a6acc8a4ba9cb57c8613`. Updated: 2026-11-18 10:32 EST.
 
 ## Checklist (from CHECKLISTS.md)
 
@@ -7,15 +7,15 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 | ID | Check | Status | Evidence / remaining qualification |
 |---|---|---|---|
-| C1 | Exact-head Local gate | FAIL | Integ retains the original 90fa run; completed FREE PLAY and key-sound failures are preserved. No successor full gate yet. |
+| C1 | Exact-head Local gate | FAIL | Integ retains the original 90fa run; all four completed failures (FREE PLAY, key-sound, single-lane, curve-axes) are preserved. No successor full gate yet. |
 | C2 | Consolidated ancestry and no loss | PASS | 76040daa remains an ancestor; repairs add no deletion or branch rewrite. |
-| C3 | Independent complete screen acceptance | FAIL | FREE PLAY repair received four independent review passes; scoped native images do not establish full lane visual acceptance. |
+| C3 | Independent complete screen acceptance | FAIL | FREE PLAY and header repairs received independent review; footer has scoped native image/runtime qualification. Complete lane visual acceptance remains open. |
 | C4 | Full hard-limit gate | FAIL | Exact repaired-head gate not yet run. No new forbidden files or runtime paths in these fixes. |
 | C5 | All finish-line items closed | FAIL | F1/F4–F7 and final gate/acceptance remain open. |
 | C6 | Ready and merged by Integ | FAIL | PR975 remains draft at published90fa; no Ready or merge operation. |
 | F1 | All R22 screens and shared glyphs | FAIL | Recovered revision comparison and complete native acceptance remain open; separate reference owner retained. |
 | F2 | All-domain geometry | FAIL | Repaired-source caption geometry: 1,530 reached states, 40,967 texts, zero findings; full component/all-domain gate and final acceptance remain open. |
-| F3 | Native code-space fit | PASS | Header repair source inc13f85bd6 / unchanged ui21397ecf: independent Elite1044 B, Pro1052 B XIP free; poolmargin780 B. Same stock thresholds. |
+| F3 | Native code-space fit | PASS | Footer repair source ince7a26a1f / unchanged ui21397ecf: independent Elite1044 B, Pro1052 B XIP free; poolmargin780 B. Same stock thresholds. |
 | F4 | Pan and battery on all readouts | FAIL | No fresh complete repaired-head gate result. |
 | F5 | Pads/LEDs and hold-GLOBE | FAIL | No fresh complete repaired-head host-suite result. |
 | F6 | Firmware per-step slider lane | FAIL | Complete scenario/render acceptance remains open. |
@@ -23,7 +23,7 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 ## Now / next
 
-- Now: qualify the FREE PLAY negative-input repair and CP/MA key-sound header correction against the actual gate failures.
+- Now: complete independent review of the CP/MA footer correction after the already reviewed FREE PLAY and header repairs. All four observed failure paths now pass their scoped native checks.
 - Next: consume Integ's terminal record, reconcile the published head/base, deliver only the reviewed repair commits through the existing lane/PR, and obtain the successor exact-head gate.
 - Then: continue the shared selector/glyph and broader page work from the accepted base. The separate selector candidate is unpublished and fails stock XIP reserve; its passing framebuffer checks do not authorize delivery.
 
@@ -72,3 +72,13 @@ Move only the SOUND title, conditional KEY SOUND OFF cue and page indicator base
 Independent native builds preserve Elite1044 B / Pro1052 B XIP free and780 B pool margin. Focused framebuffer positives and both cue-removal negatives pass, including a repeated run over existing output directories. The complete repaired-head gate remains open. Detailed artifacts and checkpoint are maintained on [DnBOX FWUI implementation and qualification](https://chatgpt.com/space/page_800ecfd4f2a08191884949bf6bbee920).
 
 Fresh repaired-source geometry also passes: 1,530 actual rendered states; 40,967 opaque-text audits with zero findings; 17,741 presence assertions with zero missing; 249 glyph-pixel checks with zero missing/damaged. Runtime geometry, presence, pixel and envelope negatives reject their intended damage, and missing/empty audit controls are rejected by the validator. This is the reached-state semantic-caption/presence subtest, not complete R22 design or aggregate gate acceptance.
+
+### 2026-11-18 CP/MA footer compatibility repair
+
+Integ's 15:13:17 UTC observation reported 349 completed PASS and four FAIL without terminal exit files. Two newly identified positive failures, `ui-drum-single-lane` and `ui-drum-curve-axes`, share the CP/MA step row's y214 position. Both established independent oracles require y212. An isolated snapshot of the reviewed header repair reproduced the first mismatch at x9/y212 and the axes composed-step runtime assertion before any production edit.
+
+Change only `dv_voice_steps(T_808,D8_CP,200-off,214-off,1)` to use `212-off`. Keep identity y200, strict length bounds, all sixteen absolute step labels, KIT, physical controls, graphs and actual-owner live state. Correct the newer stage-row test's mistaken y214..<218 range to y212..<216; leave both older independent C oracles and the mutation scripts unchanged.
+
+Actual native GREEN: the existing single-lane harness passes270,616 checks, and curve-axes passes34,294 positive checks plus its preserved missing-curve negative. The stage wrapper passes the fixed attack/curve-law, audio-owner epoch and stage-row checks with all four existing mutants. Independent binary replays confirm all five negative controls exit1 at their intended runtime assertions after successful compilation. Four fresh CLAP/MARACAS dark/light framebuffer images were independently inspected; the continuous footer, identity, controls and owner graphs remain readable.
+
+Independent stock Elite/Pro builds for this exact footer source exit0 with XIP1044/1052 B free and poolmargin780 B, unchanged from the header-only baseline. Native disassembly changes one immediate without increasing instruction size or the affected frames. This is scoped source/runtime/visual/resource qualification; full exact-head gate, complete R22 acceptance, whole-stack and hardware proof remain open. Evidence and recovery artifacts are on the existing FWUI implementation Page linked above.

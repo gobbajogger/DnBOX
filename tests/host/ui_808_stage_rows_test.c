@@ -42,7 +42,7 @@ static void test_held_attack_preview(void){
 static void test_stage_steps(void){
  dpart_t *dp=&cur_pat()->drum[PART_808];dp->len=17;ui.spage=1;memset(dp->hit[D8_CP],0,sizeof dp->hit[D8_CP]);sm_set(dp->hit[D8_CP],16);
  for(int playing=0;playing<2;playing++){seq.playing=playing;eng_step[TRK_DRUM+PART_808]=16;draw_stage_screen();
-  for(int c=0;c<16;c++){uint16_t expected=c?SOUND_LINE:playing?C_WHITE:part_col();for(int y=214;y<218;y++)for(int x=9+c*14;x<20+c*14;x++){if(fb[y*240+x]!=swap16(expected))fprintf(stderr,"BOUND_STAGE_STEP_LANE_MISMATCH\n");CHECK(fb[y*240+x]==swap16(expected));}}
+  for(int c=0;c<16;c++){uint16_t expected=c?SOUND_LINE:playing?C_WHITE:part_col();for(int y=212;y<216;y++)for(int x=9+c*14;x<20+c*14;x++){if(fb[y*240+x]!=swap16(expected))fprintf(stderr,"BOUND_STAGE_STEP_LANE_MISMATCH\n");CHECK(fb[y*240+x]==swap16(expected));}}
  }
  seq.playing=0;ui.spage=0;dp->len=16;
 }

@@ -651,7 +651,7 @@ static UI_DRAW void dv_cp_stage_page(int band)
     cv_text(11,180-off,&FONT_T,"KIT ACCENT",page==1?SOUND_INK:SOUND_GRAY);
     dv_glyph(kit,ui_ease_float(kit,kv),105,179-off,.7f,.7f,col);
     dv_value_text(kit,kv,214,180-off,SOUND_WHITE,0);
-    dv_voice_steps(T_808,D8_CP,200-off,214-off,1);
+    dv_voice_steps(T_808,D8_CP,200-off,212-off,1);
 }
 
 static UI_DRAW void dv_control_caption(pref_t r,int cx,int y)
