@@ -197,7 +197,7 @@ class FakeX0X {
     }
     if (cmd === 13) {
       const h = unpack78(a.slice(1)), p = parseHeader(h);
-      if (h.length !== HDR_LEN) return [k, 1];
+      if (h.length !== HDR_LEN && h.length !== DATA_OFF) return [k, 1];
       if (!p || p.dataLen > size - DATA_OFF) return [k, 2];
       if (crc32(this.flash.mem.subarray(base + DATA_OFF, base + DATA_OFF + p.dataLen)) !== p.crc) return [k, 3];
       this.flash.program(base, h);
@@ -266,9 +266,12 @@ ok(packageSlotMap(packageOf(NEW_PKG, { map: NEW.map }).image).map((m) => [m.off,
 // ---- 4. a later map moves slot 2: saved, installed, written back at its new offset ----
 {
   const fw = { [NOW]: NEW, [NEW_PKG]: MOVED };
-  const r = await flow(packageOf(NEW_PKG, { map: MOVED.map }), NEW_PKG, NOW, NEW_PKG, fw, [[0, IMG[0]], [1, IMG[1]]]);
+  const padded = IMG[1].slice();
+  padded.fill(0, HDR_LEN, DATA_OFF);
+  padded[DATA_OFF - 1] = 0x73;
+  const r = await flow(packageOf(NEW_PKG, { map: MOVED.map }), NEW_PKG, NOW, NEW_PKG, fw, [[0, IMG[0]], [1, padded]]);
   const now = slotImages(r.flash, MOVED);
-  ok(!r.err && r.saved.length === 1 && same(now[0], IMG[0]) && same(now[1], IMG[1]) && r.res.move.skipped.length === 0,
+  ok(!r.err && r.saved.length === 1 && same(now[0], IMG[0]) && same(now[1], padded) && r.res.move.skipped.length === 0,
     "moved slot: saved, installed, slot 2 written back at 0xD7000 and verified");
 }
 
