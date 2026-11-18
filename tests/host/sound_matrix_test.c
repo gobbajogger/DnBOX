@@ -154,12 +154,15 @@ static void envelopes(void)
         double qa=nv[0],qd=nv[1],qr=nv[3];
         near(e.attack,(float)(13*qa*qa*qa*qa+.001));
         near(e.decay,(float)(25*qd*qd*qd*qd+.001));near(e.sustain,nv[2]);
-        near(e.release,(float)(25*qr*qr*qr*qr+.002));CHECK(e.curved && e.release_curve==1 && e.enabled==2);
+        near(e.release,(float)(25*qr*qr*qr*qr+.002));CHECK(e.enabled==2 && e.present==15u);
+        for(int k=0;k<4;k++)CHECK(e.slot[k]==k);
         for(int i=0;i<=10;i++) {
             float t=i*.1f;
             near(adsr_original_level(&e,0,t*e.attack),fminf(1.f,1.3f-1.3f*expf(-t)));
             near(adsr_original_level(&e,1,t*e.decay),e.sustain+(1-e.sustain)*expf(-t));
-            near(adsr_original_level(&e,3,t*e.release),e.sustain*expf(-t));
+            float got=adsr_original_level(&e,3,t*e.release),want=e.sustain*expf(-t);
+            if(fabsf(got-want)>=.0001f)fprintf(stderr,"CHICAGO_RELEASE_LAW_MISMATCH\n");
+            near(got,want);
         }
         int x[5];float durations[3];adsr_layout(&e,13,214,x,durations);
         CHECK(x[0]==13 && x[4]==227 && x[3]-x[2]==42);

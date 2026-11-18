@@ -9,7 +9,11 @@ sh host/build_host.sh --generate-only >"$OUT/assets.log" 2>&1
 . tests/host/original_build.sh
 U=$ORIGINAL_SOURCES
 # shellcheck disable=SC2086
-${CC:-cc} -O0 -g -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter ${SAN_FLAGS:-} \
+${CC:-cc} -O0 -g -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter ${SAN_FLAGS:-} ${X0X_HOST_DEFS:-} \
  -DX0X_HOST -DX0X_SMK_CAPTIONS=1   -DX0X_BASS_PRESET_PREVIEW=1 -DX0X_BASS_TAGGED_SOUND=1 \
- -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen tests/host/sound_matrix_test.c $ORIGINAL_FLAGS $U -lm -o "$OUT/test"
+ -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen tests/host/sound_matrix_test.c $ORIGINAL_FLAGS $U -lm -o "$OUT/test"
 "$OUT/test" "$OUT"
+
+if [ "${SOUND_MATRIX_SINGLE:-0}" != 1 ]; then
+    python3 tests/host/sound_matrix_release_mutants.py "$OUT"
+fi
