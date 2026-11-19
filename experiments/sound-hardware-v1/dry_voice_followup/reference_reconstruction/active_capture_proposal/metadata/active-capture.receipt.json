@@ -1,0 +1,61 @@
+{
+  "classification": "NEW_ORIGINAL_REFERENCE_CAPTURE_NOT_HISTORICAL_RECOVERY",
+  "case_id": "filter-modulation/1.2_2000_0.9",
+  "argv": [
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "filter-modulation/1.2_2000_0.9"
+  ],
+  "working_directory": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation",
+  "timeout_seconds": 15,
+  "attempt": 1,
+  "start_utc": "2026-11-19T00:32:55.394646+00:00",
+  "compiler_or_linker_invocations": 0,
+  "native_target": false,
+  "exit_code": 0,
+  "timed_out": false,
+  "finish_utc": "2026-11-19T00:32:55.609552+00:00",
+  "process_terminal": true,
+  "stdout": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stdout.log",
+    "bytes": 501,
+    "sha256": "eb6ae1a7b0775ae30a2aaf872adf6a9f6742608970828d920c01b8ba1febc9e1"
+  },
+  "stderr": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "output": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "bytes": 1058304,
+    "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74"
+  },
+  "wrapper_receipt": {
+    "classification": "NEW_RECONSTRUCTED_ORIGINAL_DRY_CAPTURE",
+    "case_id": "filter-modulation/1.2_2000_0.9",
+    "sample_rate_hz": 44100,
+    "mono_channel": "original_left",
+    "notes": [
+      36,
+      60,
+      84
+    ],
+    "velocity": 100,
+    "notes_completed": 3,
+    "fresh_original_per_note": true,
+    "controls_from_pinned_physical_vector": true,
+    "warmup_frames": 529344,
+    "retained_frames": 264576,
+    "total_reference_frames": 793920,
+    "process_calls": 12405,
+    "block_size": 64,
+    "note_off_frame_per_note": 66112,
+    "warmup_nonfinite_count": 0,
+    "output_nonfinite_count": 0,
+    "status": 0
+  }
+}

@@ -1,54 +1,96 @@
 # Sound lane
 
-## Independent dry voice and stock fit results — 2026-11-19
+## Measured stock fit and independent dry voice — 2026-11-19
 
-The independent source work continues after published envelope/shared-math
-commit `e0ef1994a91abef619c755f9428e44c8c9f064c4`. The new
-[dry-voice package](../../experiments/sound-hardware-v1/dry_voice_followup/README.md)
-contains two frozen implementations, the exact recovered original PCM contract,
-all numerical reports, independent audit and a portable comparison/recovery
-entry. Original engines remain comparison-only. A passes79/180 static notes;
-B passes109/180, including all45 zero-resonance notes. Both full gates are
-**FAIL**, with zero nonfinite samples. B's worst resonant error is45.163240 dB
-and includes sustained post-note-off feedback oscillation. No tolerance, gain,
-alignment or tail rule was changed to disguise it.
+Sole Sound ownership and existing `lane/sound` / draft PR973 are preserved.
+The exact predecessor/partial-upload recovery completed before source writes,
+as recorded below. Original engines are comparison references only. New sound
+behavior uses existing DnBOX components and independently written adapters.
+**Production Synth One remains silent and unresolved.**
 
-The new152-byte isolated voice combines stock raw saw, squared velocity,
-explicit component gain, the independently written S1 amplitude/filter
-envelopes, VCA before filter and an existing DnBOX four-pole primitive. It is
-not production activation or full control/preset coverage. A bounded analytic
-diagnosis identifies the delayed-feedback instability and proposes one
-centered implicit correction; its separate implementation/comparison follows.
+### Actual native results
 
-Independent audit found the recorded A/B bytes and all120 report/log sets
-consistent, then found four historical harness weaknesses: absolute scratch
-paths, removed assertions under optimized Python, incomplete resume validation
-and metadata overwrites. Those originals remain immutable. The new entry
-stages verified source/metric snapshots, uses explicit checks, requires exact
-note coverage and fresh output, and does not resume. Four integrity regression
-tests pass normally and under optimized Python. An optimized-Python selected
-B replay reproduces candidate/paired PCM and metric JSON byte-for-byte.
+The separate local executor completed the original compact Elite pair, then
+the four stock jobs allocated by Integ comment 6995594729. Stock results and
+all four physical maps/command-log archives are published in
+[`f291e916a9b61ae862899f0d26e21d42d76a7846`](https://github.com/gobbajogger/DnBOX/commit/f291e916a9b61ae862899f0d26e21d42d76a7846).
+All 292 serial stock compilations, four links and 12 inspections exit0. Every
+plan received fresh exact-input/toolchain/header/environment/capacity checks;
+all owned local process groups were released and the allocation is consumed.
 
-The original archive has60 static physical files/180 notes. Further reference
-recovery is separate from candidate implementation; no active-modulation or
-full-preset qualification follows from those recordings.
+| Stock image | Load including marker | Above unchanged 1,024-byte XIP reserve |
+| --- | ---: | ---: |
+| Elite reference | 551,492 B | 156 B |
+| Elite shared | 544,708 B | 6,940 B |
+| Pro reference | 551,484 B | 164 B |
+| Pro shared | 544,700 B | 6,948 B |
 
-The [stock native comparison](../../experiments/sound-hardware-v1/shared_math/production_fit/README.md)
-completed under Integ allocation6995594729: all292 serial compiles, four physical
-links and12 inspections exit0. Elite reference/shared load551492/544708 bytes;
-Pro551484/544700 bytes. Shared saves6784 bytes per model and leaves6940/6948
-bytes above the unchanged XIP reserve. Pool remains8972 raw free, only268 beyond
-its required margins; ordinary RAM1100 free, XPOOL0. All owned local process
-groups are released and this four-link allocation is consumed. These are stock
-profiles with silent S1, not independent-instrument acceptance. Web retains its
-shared RDC window; no fallback occurs. The old-image diagnostic still does
-not qualify the current target reference/shared audio pair.
+Sharing saves 6,784 bytes per stock model. The earlier compact Elite saving is
+6,496 bytes; these different closures are not additive. Stock Pro does not
+resolve unmeasured compact/full independent Pro fit. All four stock maps keep
+pool raw free 8,972 bytes, 780 above 8,192 and 268 beyond the extra 512-byte gate
+margin; ordinary RAM 1,100 free; XPOOL 0. Default development model 900 and the
+empty BREAK bank stay explicit. Stock profiles still include silent S1.
+[Detailed scope and exact evidence](../../experiments/sound-hardware-v1/shared_math/production_fit/README.md).
 
-`scripts/gate.sh sound --post` remains unqualified and unrun. The actual prior
-Elite partial-core improvement is retained below; stock resource results are
-measured, while target regression/deadlines and complete instrument fit remain open.
-**Production Synth One remains silent.** PR973 stays draft and S1–S6/common
-FAILs remain open. No PSRAM, main/force/device/Actions/Codex/#156 operation occurs.
+### Implemented dry-voice behavior and genuine failures
+
+The [independent dry-voice package](../../experiments/sound-hardware-v1/dry_voice_followup/README.md)
+now preserves four frozen variants. A passes 79/180 static notes; B 109/180;
+C 109/180; D 138/180, 45/60 complete files. All full gates remain **FAIL**, with
+zero nonfinite samples. D adds 29 passing notes relative to C and loses none;
+all 45 zero-resonance notes remain byte-identical. D's worst RMS error is
+4.832778 dB and worst spectral error 8.991580 dB, against unchanged 1/3 dB limits.
+The selected 2 kHz/resonance 0.9 file now passes all three notes.
+
+C corrects the delayed-feedback instability with centered feedback and adds
+two history floats. Matched isolated filter observations show C compressing
+signals where the original remains proportional at the three tested levels.
+D replaces only that nonzero-resonance feedback with the existing primitive's
+unfitted slope-five linear law and a direct implicit solve. It retains C's
+complete r=0 branch, forward poles, coefficient preparation, histories, gain,
+controls, two substeps and tail policy. No original algorithm was copied.
+
+C/D use 160 host bytes per mono voice. Fresh two-owner tests each verify 8,192
+sample words, 310 complete state checkpoints and 310 untouched-owner checks
+under irregular blocks/live edits; 16,384 outputs are finite. Source reviews
+and exact comparisons establish their bounded scope, not full instruments,
+arbitrary modulation, target cost or production activation.
+
+The remaining 42 static failures are at 64 Hz/resonance 0.9 for notes 36/84, and
+8,000/22,050 Hz at resonance 0.5/0.9 for all three notes, across all three
+velocities. Their exact reports remain failures. No tolerance, gain, alignment
+or retirement rule was changed to hide them.
+
+### Reference recovery and remaining qualification
+
+All 60 static original files/180 notes were recovered exactly. Six zero-depth
+dynamic pairs are authenticated aliases to static originals, providing 18
+labels without new observations. Historical nonzero-depth paired PCM for 18
+files/54 notes remains missing. A separately rebuilt original-only closure
+reproduced the selected three-note baseline byte-for-byte, then produced one
+new exact-contract active-filter original capture. Original engine source
+stays isolated in comparison recovery evidence.
+
+On this one new depth-1.2, cutoff-2,000 Hz, resonance-0.9 recording,
+unchanged D passed all three notes after its static replay was byte-identical.
+RMS/spectral errors in dB were 0.232227/0.682166 (36), 0.239112/0.767147
+(60), and 0.196105/2.106154 (84), gain 1, zero nonfinite. This is three new
+active observations, separate from the 138/180 static count. It does not
+recover the historical paired files or qualify the 72-case modulation matrix.
+
+The published comparison entry snapshots verified source/metric bytes, rejects
+existing/symlink outputs, enforces exact note coverage and gain 1, and retains
+mandatory checks under optimized Python. Original runners/failures remain
+immutable evidence. All earlier exact envelope/component results are retained.
+
+`scripts/gate.sh sound --post` remains unqualified and unrun. Target identity
+still needs exact successful image/package pairs and a reviewed 909/808/BREAK/
+FX/master driver. The available old 94197fc8 diagnostic is not that proof.
+Full native callback timing, simultaneous complete S1/SJ6/FX memory, all 150
+S1 controls/694 presets and 218 SJ6 controls/640 presets remain open. Web keeps
+its shared RDC window; there is no fallback. No PSRAM, main/force/device,
+Actions/Codex or #156 operation is introduced. PR973 remains draft.
 
 ## Active successor implementation — 2026-11-18
 

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/scratch/e803955aec60/s1_dry_voice_d/build/s1_dry_host",
+    "--describe"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_dry_voice_d",
+  "started_utc": "2026-11-19T00:21:57.417142+00:00",
+  "binary_sha256_before_execution": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751",
+  "exit_status": 0,
+  "stdout": "{\"voice_bytes\":160,\"prepared_bytes\":92,\"history_bytes\":68,\"sample_rate_hz\":44100,\"coefficient_hex\":[\"3f7fce7c\",\"3f7ed775\",\"3f7fe249\",\"3f7fce7c\",\"3f7fe249\",\"3f7ffd07\"]}\n",
+  "stderr": "",
+  "finished_utc": "2026-11-19T00:21:57.417824+00:00"
+}

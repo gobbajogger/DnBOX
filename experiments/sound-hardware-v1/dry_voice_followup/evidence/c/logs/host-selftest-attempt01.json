@@ -1,0 +1,10 @@
+{
+  "command": [
+    "build/s1_dry_host",
+    "--selftest"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_dry_voice_c",
+  "exit_status": 0,
+  "stdout": "{\"status\":\"PASS\",\"checks\":[\"finite physical input validation\",\"invalid changes leave state untouched\",\"full cutoff/depth endpoints\",\"squared velocity\",\"independent owners\",\"zero initialized extra histories\",\"160 byte object\",\"explicit unsupported retrigger\"],\"note_audio_rendered\":false}\n",
+  "stderr": ""
+}

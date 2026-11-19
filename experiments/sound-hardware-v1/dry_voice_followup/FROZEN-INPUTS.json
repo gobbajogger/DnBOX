@@ -37,6 +37,58 @@
       "historical_executable_sha256": "af8ac90658258d7d3ca48b46656c6132e6f4afb66e8076ec8a814b6082d4de27",
       "expected_host_bytes": 152,
       "historical_reports_sha256": "da37ad1cd46e00ff20b40134a9f8965a14fc6f56fa08e88925cf529eafb5e99f"
+    },
+    "c": {
+      "id": "c_ch4_centered_feedback",
+      "source_root": "variants/c",
+      "expected_host_bytes": 160,
+      "files": {
+        "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+        "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+        "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+        "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+        "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+        "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+        "build.sh": "0908bab25841da1c8f379400c369feefcaf56a16cb03b0a94f43638ccd4834ed",
+        "DECLARATION.json": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+        "PRETEST-DECLARATION.json": "27dfdcbb8c6344408aad82c71eff5a8330ec4283c6c841339f4b21392fdf80ca",
+        "COMPARATOR-SOURCE.json": "05de37374c94364363845176289e807aa56b501bfe67e0c0d45fc23342b124b1",
+        "READY.md": "887980da596cd7bd3219ba04f06b068627fd65cc51c1cd655b3d80cf0f5e338a",
+        "tests/scalar_test.c": "41085e1cb0564971f699251c8c45d5cb609d558a3e563fb4520301ee161b7c5f",
+        "tests/scalar_cases.h": "f11c74353772662071372c3ae0f33fb0bd21e6c7ae0424f5acb5c55b62a07e2d",
+        "tests/make_scalar_fixtures.py": "fc861ce13592ce07a64ec060f9eb5cda56c2ecd637fa3561f39ab4f8d7f8edde"
+      },
+      "original_pre_audio_declaration_sha256": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+      "historical_executable_sha256": "838c151b0d59f4be8c959a6430499d529a686f5d5f3afaaaaf26749cf26b1e38"
+    },
+    "d": {
+      "id": "d_ch4_centered_linear_feedback",
+      "source_root": "variants/d",
+      "expected_host_bytes": 160,
+      "files": {
+        "BUILD-DECLARATION.json": "d78429f5cecf577c1e5e79a1f6a77e0a4864799d0a6af01f4b663dac1a156aef",
+        "COMPARATOR-SOURCE.json": "2ff199e0a1b93586063b3b3e196c25de1cf6a1ec0697d01fde1beb8a9de13590",
+        "DECLARATION.json": "9e6c7241b36ae4ca4fc0fae2cc764536a8612517c98cec3e2d149236c33cc28a",
+        "EVIDENCE-MANIFEST.json": "d507036231e75db63ef6c2ea2941f9da381016fc8b6313fd1bea8b645f28bc2e",
+        "NEXT-COMMAND.txt": "91a86f34848872d91df02390a0d9150c37061bb7a545aad01d90396db89e6a73",
+        "PREPARATION-RESULT.json": "507b192bf1b2682336252c2f7c65661bc60c418029f3b8cb4df287f6516b6f4f",
+        "PRETEST-DECLARATION.json": "959ee2a38f8fd06d88dfdefb336411c9a7cd8f408e7d6ebe41d0ebb09cabaed3",
+        "READY.md": "62b5dcfaabd29074fd861423508352823d82331cfa9e80d5cc0bc86f8213ae57",
+        "inputs/C-filter-observations.json": "85c088668cb1106cc5c32e6438c0e6535c82ea328d21435c91bb45863c3b372a",
+        "inputs/NONLINEAR-HYPOTHESIS.md": "ea2e830a98392567a9055b71296feb4764fbb32ecbbf613641823de8f16ace11",
+        "inputs/reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931",
+        "prepare.py": "f3a36ba98617c0a81ed3f8e5a87766634421d777b2dec15c72a17dc1286be34c",
+        "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+        "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+        "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+        "tests/ownership_test.c": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+        "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+        "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+        "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+        "reports/C-to-D.patch.gz": "cfe9f25e47bce068d36f495fc74970c8977f7481d41e85ee79e0a80849034d1b"
+      },
+      "original_pre_audio_declaration_sha256": "9e6c7241b36ae4ca4fc0fae2cc764536a8612517c98cec3e2d149236c33cc28a",
+      "historical_executable_sha256": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751"
     }
   },
   "packet": {

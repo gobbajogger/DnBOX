@@ -1,0 +1,621 @@
+{
+  "schema": "comparison-only original dry/filter replay closure v1",
+  "status": "PREPARATION_ONLY; NO COMPILE LINK OR AUDIO EXECUTION",
+  "created_utc_date": "2026-11-19",
+  "reference_code_location_policy": "Original/reference files remain at their already recovered private paths; this deliverable contains hashes and manifests only. Nothing copied into canonical Git.",
+  "smallest_filter_object_route": {
+    "historical_exact_object": {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-007.o",
+      "bytes": 5352,
+      "sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6"
+    },
+    "historical_expected_sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6",
+    "headers": [
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+        "bytes": 51563,
+        "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+        "bytes": 129191,
+        "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2"
+      }
+    ],
+    "source_rebuild_optional": {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/moogladder.c",
+      "bytes": 3201,
+      "sha256": "d784563da2cd3243ab28f9020aa696db0d2ea208d92924c97ae36a1aba4a01ba"
+    },
+    "read_only_symbol_inspection": {
+      "unresolved_symbols": [
+        "exp",
+        "free",
+        "malloc",
+        "tanh"
+      ],
+      "additional_original_objects_required": 0,
+      "runtime_dependencies": [
+        "host C runtime",
+        "host libm"
+      ],
+      "note": "Header ABI is historically hash-matched. A new C wrapper can use a zero-initialized public sp_data context with sr=44100 and the original component public create/init/compute/destroy API. No whole-engine state, tables, or candidate component needed."
+    },
+    "missing_inputs": [
+      "New comparison-only capture_filter.c wrapper, to be authored and hashed before approval for host execution.",
+      "Hash-pinned excitation PCM to be created only after root authorizes bounded host work."
+    ],
+    "known_unknowns": [
+      "Historical libc/libm identity was not recorded; record current compiler, linker, executable and runtime-library identities for the future capture.",
+      "No filter-only historical PCM/hash exists in inspected evidence; resulting output will be a new original-component observation."
+    ]
+  },
+  "self_consistent_dry_source_route": {
+    "source_root": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full",
+    "proposed_translation_unit_count": 17,
+    "units": [
+      {
+        "unit_id": "dependency-000",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c",
+          "bytes": 4448,
+          "sha256": "65eea7830ffdc039e8e18a6234c676f0b2e31b9cc02d5ee51020d94070bd7296"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-000.d",
+          "bytes": 548,
+          "sha256": "e859c8bed71a62a97b7ba857e637832f5e0bdfd5717cdfb60ef93ceaddcb34f5"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-000.o",
+          "bytes": 7832,
+          "sha256": "d4084fa409fb69d3c66c9ee7f8daf177a312cbcb59bb52b4ae408f54cc9023b2"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-001",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c",
+          "bytes": 9100,
+          "sha256": "1f5a6aa4fded5dcceae3859717b0722d8efeb1b9ffa129f6bd7a6425be29e9c0"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-001.d",
+          "bytes": 548,
+          "sha256": "122472c3b00f80f4d05fe0fc9caab99881da1706fd76afeaef50e3f8292ee54d"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-001.o",
+          "bytes": 11768,
+          "sha256": "4c81a1713523f302d6123e7b2e1a3ed9629e908ee11cf1baa15617398ead33ae"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-002",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/adsr.c",
+          "bytes": 2066,
+          "sha256": "816310221f5ce2e04751d7f284a61cc9057cbabf44deef7366a085c57ca310dc"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-002.d",
+          "bytes": 548,
+          "sha256": "9f48e564cf551d133df2c212887b6dca8fbd8e95f170840c51615a28e7fdab17"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-002.o",
+          "bytes": 3632,
+          "sha256": "8fefb6bc9eb43621e9ee8554402fb79e3ded814fb7570445ab64f6517e862a6e"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-003",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/crossfade.c",
+          "bytes": 488,
+          "sha256": "2a472e538671aea47e8db36c671ee6804f176cc6a951c267de27c6344152b906"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-003.d",
+          "bytes": 553,
+          "sha256": "b0cd62acff9a1ce82a5494b7f84639f1b8f13803007dfc16dec861a3a0e396b1"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-003.o",
+          "bytes": 2352,
+          "sha256": "748e6b320708c83286b6b4141ec7b911b949bf8dbcd4e739330d0cd838afc03f"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-004",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/osc.c",
+          "bytes": 1451,
+          "sha256": "630f55b96f50e56d1d9735fd67654b980523023dbca634ae5479f5d0d6aa6b9d"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-004.d",
+          "bytes": 547,
+          "sha256": "2de0f8b989c16bc5e6073b1ba5d2d83801d2f8ed43bd6f1c4945936c5d7fdd15"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-004.o",
+          "bytes": 2888,
+          "sha256": "fe3ceac6e0937c27faddfa769844e20f537c4bc19e8fb2ca31a732b0c303da50"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-005",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/fosc.c",
+          "bytes": 2018,
+          "sha256": "bffb48406abd1705f8d9b3ddde5dad449dafabb1fe6ed091b6decac3f76557b6"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-005.d",
+          "bytes": 548,
+          "sha256": "c2e72632d87d370dcbf992ff506946a7e19b04d6ebe3fcb88437c7212317f32d"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-005.o",
+          "bytes": 2608,
+          "sha256": "ca496ce9ca8ec306bfd3e0f19decfb63bd344cf2a1e090f1beb23d31da6c1d33"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-006",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/noise.c",
+          "bytes": 524,
+          "sha256": "cf33ac6e9f99b85f386643b96e8de32db717101a4be3a158e9aa75a422a0dbae"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-006.d",
+          "bytes": 549,
+          "sha256": "3d4000322094eb01720cc8f84082a42ad406cd2a3d27057dc580156cc34b9b3c"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-006.o",
+          "bytes": 2568,
+          "sha256": "5a6cb4f87b0756c92fbf1f27f6a0010c258e3841ebecf10158115c8e9ae6ecb5"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-007",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/moogladder.c",
+          "bytes": 3201,
+          "sha256": "d784563da2cd3243ab28f9020aa696db0d2ea208d92924c97ae36a1aba4a01ba"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-007.d",
+          "bytes": 554,
+          "sha256": "45d01ef8516c3a9f562d69a24938eb8271437f2122a8a74dc2fccd0f7868d320"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-007.o",
+          "bytes": 5352,
+          "sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-008",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/butbp.c",
+          "bytes": 1644,
+          "sha256": "35228571e2904402ec60b733713090c768ca84f5dab96521b9fd6b7f74dac867"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-008.d",
+          "bytes": 549,
+          "sha256": "9f25468187e3e568e0fca6b9957e8100132b5454b5746547be87b2aa7ac375cd"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-008.o",
+          "bytes": 3184,
+          "sha256": "a239002f319705a55ae830d6cc675df1c75c7329da79b3787626d235b4c5214a"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-009",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/buthp.c",
+          "bytes": 1663,
+          "sha256": "00d71f10b1cd4ae80cbdd8c221dd6f92781231bb0ac43426fe3fc512ab31cadf"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-009.d",
+          "bytes": 549,
+          "sha256": "29cd2186f0e41ae0e5bab27254e8c8a5e1a2380e9eb6c939f02b115a30235a7b"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-009.o",
+          "bytes": 3080,
+          "sha256": "fa0acb718a97f80cc3f0e5dafc9eba7e851b0775cde4b0bd20f6b5a409266448"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-010",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/port.c",
+          "bytes": 1163,
+          "sha256": "2a0451a80fd74ab52805114609bb937df662492858f5768c120da8af7af1a490"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-010.d",
+          "bytes": 548,
+          "sha256": "89b387df87491ebae8d2c31d6db833769b830fc66edf35aeebe0bdaea5c504bf"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-010.o",
+          "bytes": 3040,
+          "sha256": "1397991cd953c69e0bce3023736b135ebeef3fb242e78e82b71a5e35849ad2cf"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-011",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/phasor.c",
+          "bytes": 993,
+          "sha256": "264477d11086f19f4702c598604748ada3b445b58a80ab4e8108cff0d37e3103"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-011.d",
+          "bytes": 550,
+          "sha256": "ef318637be733b856944f276e2270e8217c7c9d5df230b4efbdabcfdcdd6480a"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-011.o",
+          "bytes": 2616,
+          "sha256": "70776c8023169d015795f41b4dfcc188f33361efe4f674f90d4e9786811a47b3"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-012",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.cpp",
+          "bytes": 15066,
+          "sha256": "b277765fe76447b81c55da91e4b70ed1d28f5151971a4f956cd2c187bc516fe2"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-012.d",
+          "bytes": 2292,
+          "sha256": "f3260ff12bfce990b4af5337ec4104f0a56734d40a0bdef43120ecd79f573c3a"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-012.o",
+          "bytes": 22752,
+          "sha256": "8991c3bd3b4ed824396d632c31a67af8f4a5f5008f92df02907d6fb01a7ce9cc"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-014",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/checked_domain.cpp",
+          "bytes": 1598,
+          "sha256": "353696102b6cf9cdb1432e79e3d89dbaff033bca8c6894c51b630ab268abffb2"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-014.d",
+          "bytes": 1756,
+          "sha256": "336850a85ce9feada846a76d0c9107b5e6d7062d180586b59ca0a372de1a607e"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-014.o",
+          "bytes": 2928,
+          "sha256": "cdbe8c7797555c875c7514d6cd4356b417c696fc13a1ba2471e2e106d3d58a68"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-021",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c",
+          "bytes": 3601,
+          "sha256": "455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-021.d",
+          "bytes": 729,
+          "sha256": "19983d1b43f408e7d14c9210609a289062c8668b9c24a2cf4f448ea04a5e0431"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-021.o",
+          "bytes": 4408,
+          "sha256": "238b8860add9c6f6e62d0cf8cc729e73d7d165c91b5d705b93b5aa1960f303da"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-022",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/portable_voice.cpp",
+          "bytes": 16843,
+          "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-022.d",
+          "bytes": 920,
+          "sha256": "e78ab34cac725d1041fff7c2fdea1a2e15414b09cb7559e5b4fc71c034b6930c"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-022.o",
+          "bytes": 13840,
+          "sha256": "05f764b4f95862b8574917245ea28d2bc3f235f589cdbf9521353d1582a4055f"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      },
+      {
+        "unit_id": "dependency-025",
+        "source": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/scheduler.cpp",
+          "bytes": 20808,
+          "sha256": "aebcbaf53423ca916b8c746dbb9811279e1bd8dfccaf9a6af1150b56c1542fb5"
+        },
+        "dependency_receipt": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/compile-025.d",
+          "bytes": 2225,
+          "sha256": "ea3806a051672508a06a81e96252599957eb2ad8f78a46ea8ba151f2b87b8d79"
+        },
+        "recovered_object": {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-025.o",
+          "bytes": 35112,
+          "sha256": "11ac608ef78b02dee3128f9accd36c283df0892435d3d519e4986920d2652314"
+        },
+        "recovered_object_usage": "Provenance only. Rebuild every selected translation unit together; do not mix these prebuilt objects with different headers."
+      }
+    ],
+    "transitive_non_system_input_count": 39,
+    "transitive_non_system_inputs": [
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/public-morphs.f32",
+        "bytes": 852176,
+        "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/generated/parameter_map.hpp",
+        "bytes": 447,
+        "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/parameter_ports.hpp",
+        "bytes": 1836,
+        "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+        "bytes": 129191,
+        "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/adsr.c",
+        "bytes": 2066,
+        "sha256": "816310221f5ce2e04751d7f284a61cc9057cbabf44deef7366a085c57ca310dc"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c",
+        "bytes": 4448,
+        "sha256": "65eea7830ffdc039e8e18a6234c676f0b2e31b9cc02d5ee51020d94070bd7296"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/butbp.c",
+        "bytes": 1644,
+        "sha256": "35228571e2904402ec60b733713090c768ca84f5dab96521b9fd6b7f74dac867"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/buthp.c",
+        "bytes": 1663,
+        "sha256": "00d71f10b1cd4ae80cbdd8c221dd6f92781231bb0ac43426fe3fc512ab31cadf"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/crossfade.c",
+        "bytes": 488,
+        "sha256": "2a472e538671aea47e8db36c671ee6804f176cc6a951c267de27c6344152b906"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/fosc.c",
+        "bytes": 2018,
+        "sha256": "bffb48406abd1705f8d9b3ddde5dad449dafabb1fe6ed091b6decac3f76557b6"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c",
+        "bytes": 9100,
+        "sha256": "1f5a6aa4fded5dcceae3859717b0722d8efeb1b9ffa129f6bd7a6425be29e9c0"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/moogladder.c",
+        "bytes": 3201,
+        "sha256": "d784563da2cd3243ab28f9020aa696db0d2ea208d92924c97ae36a1aba4a01ba"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/noise.c",
+        "bytes": 524,
+        "sha256": "cf33ac6e9f99b85f386643b96e8de32db717101a4be3a158e9aa75a422a0dbae"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/osc.c",
+        "bytes": 1451,
+        "sha256": "630f55b96f50e56d1d9735fd67654b980523023dbca634ae5479f5d0d6aa6b9d"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/phasor.c",
+        "bytes": 993,
+        "sha256": "264477d11086f19f4702c598604748ada3b445b58a80ab4e8108cff0d37e3103"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/port.c",
+        "bytes": 1163,
+        "sha256": "2a0451a80fd74ab52805114609bb937df662492858f5768c120da8af7af1a490"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+        "bytes": 51563,
+        "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c",
+        "bytes": 3601,
+        "sha256": "455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+        "bytes": 847,
+        "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/portable_interface.hpp",
+        "bytes": 9271,
+        "sha256": "85f94a7f2f5c590ddcc83d7021c77be6d72f2647b8761d8f6de7cd32ee0e0963"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/portable_voice.cpp",
+        "bytes": 16843,
+        "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/wave_frequencies.h",
+        "bytes": 189,
+        "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/shared-graph/shared_graph.hpp",
+        "bytes": 2583,
+        "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/checked_domain.cpp",
+        "bytes": 1598,
+        "sha256": "353696102b6cf9cdb1432e79e3d89dbaff033bca8c6894c51b630ab268abffb2"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/compact-reader/compact.h",
+        "bytes": 2085,
+        "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/compact_note.hpp",
+        "bytes": 187,
+        "sha256": "a60abde6f97fda1f63cb182b6521420ff3cf0d22711239956a7cca080cec28a2"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/fixed_array.hpp",
+        "bytes": 591,
+        "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/float_math.h",
+        "bytes": 2314,
+        "sha256": "96c9feca77a87aa581b41e160a76c214d54645b27abfe447e8c726390a394d19"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.cpp",
+        "bytes": 15066,
+        "sha256": "b277765fe76447b81c55da91e4b70ed1d28f5151971a4f956cd2c187bc516fe2"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.hpp",
+        "bytes": 2696,
+        "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle_state.hpp",
+        "bytes": 2045,
+        "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/state.hpp",
+        "bytes": 2563,
+        "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/direct_reader.h",
+        "bytes": 1157,
+        "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/runtime_note.hpp",
+        "bytes": 182,
+        "sha256": "2943c6d7ab1d283e8518fb52d9f93ffd9a74249f6c5f677f224a068673ee0d80"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/scheduler.cpp",
+        "bytes": 20808,
+        "sha256": "aebcbaf53423ca916b8c746dbb9811279e1bd8dfccaf9a6af1150b56c1542fb5"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/scheduler.hpp",
+        "bytes": 9575,
+        "sha256": "764a81e077ef194fd05ad5af978b1176a0f0feb242ebbb9dbe86ff4e26fc93c9"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/original_sequence.hpp",
+        "bytes": 20259,
+        "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0"
+      },
+      {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/sequence_types.hpp",
+        "bytes": 4646,
+        "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c"
+      },
+      {
+        "path": "/workspace/scratch/e803955aec60/dry_reference_packet/case_plan.json",
+        "bytes": 177344,
+        "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
+      }
+    ],
+    "proof_limit": "Smallest proposed closure from retained dependency receipts and symbol inspection; no compiler or linker has validated it. All units are rebuilt consistently to avoid historical-header ABI substitutions.",
+    "wrapper_includes": "full_oracle.hpp directly; does not include full_fixture.hpp or compact_scheduler_test.cpp.",
+    "excluded_historical_paths": [
+      "hardware-core-spike/physical-gain/hc.c",
+      "hardware-core-spike/physical-gain/hc.o",
+      "hardware-core-spike/physical-gain/dry-reference.cpp",
+      "source_scheduler.cpp",
+      "source_scheduler.hpp",
+      "source_controls.cpp",
+      "preset_audio.cpp",
+      "factory-* effects/control objects",
+      "compact-reader and reader implementation translation units",
+      "oracle/oracle.cpp (FullOracle has its own generated implementation)"
+    ],
+    "shared_support_note": "The recovered scheduler.cpp source holds common State support and unrelated RuntimeState/Scheduler sections. Function/data sections and linker garbage collection must leave only FullOracle/common reference support. A future map/symbol audit must confirm no candidate runtime/compact reader/HC engine enters the executable; stop if those sections are needed.",
+    "missing_inputs": [
+      "New comparison-only capture_full_oracle.cpp wrapper, to be authored and hashed before host execution."
+    ],
+    "historical_identity_blockers_retained": [
+      {
+        "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/scheduler.hpp",
+        "historical_sha256": "902982a924af09358d9bd76070ce7cdce1846b50aa029524ea86dde285e0d692",
+        "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+      },
+      {
+        "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/shared-graph/../probe/portable_interface.hpp",
+        "historical_sha256": "50a7229f0b7d2b3bd1b74966a2f89a321e6ead9b79e21e25de42c1aca80bac30",
+        "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+      },
+      {
+        "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source_scheduler.hpp",
+        "historical_sha256": "5cbd6800919d813b4f755783c9aa374f8103d7fb065912eed86b52781a189b19",
+        "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+      },
+      {
+        "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-025.o",
+        "historical_sha256": "1e98f858dcaef753823d3f22ccaff356cf7aa1409010579530de4a9d9683612c",
+        "status": "ONLY_DIFFERENT_HASH_PRESENT"
+      }
+    ],
+    "historical_objects_policy": "The missing historical scheduler object is not silently replaced. This is explicitly a new reconstructed original-reference build; it must reproduce the saved static original mono hash before dynamic output is admitted."
+  }
+}

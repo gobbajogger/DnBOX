@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor",
+    "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src/s1_dry_voice.c",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor/dnbx_s1_envelope.c",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness/src/active_host.c",
+    "-o",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one",
+  "started_utc": "2026-11-19T00:47:10.556364+00:00",
+  "exit_status": 0,
+  "stdout": "",
+  "stderr": "",
+  "finished_utc": "2026-11-19T00:47:10.781208+00:00"
+}

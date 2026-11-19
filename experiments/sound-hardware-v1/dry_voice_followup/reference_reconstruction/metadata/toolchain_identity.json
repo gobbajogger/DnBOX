@@ -1,0 +1,198 @@
+{
+  "schema": "pinned full-original dry host tool identities v1",
+  "tools": {
+    "cc": {
+      "path": "/usr/bin/cc",
+      "resolved_path": "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "bytes": 1162264,
+      "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f"
+    },
+    "c++": {
+      "path": "/usr/bin/c++",
+      "resolved_path": "/usr/bin/x86_64-linux-gnu-g++-14",
+      "bytes": 1166360,
+      "sha256": "6b3696e4dcb85e1c949c732a02befa50e3983ecf94ce7e8e58d9d503b954b79d"
+    },
+    "ld": {
+      "path": "/usr/bin/ld",
+      "resolved_path": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+      "bytes": 1861256,
+      "sha256": "d2766988b6a1b1d1518cdc09242e726d1f24e151e16410ada3092b11ffd9081b"
+    },
+    "nm": {
+      "path": "/usr/bin/nm",
+      "resolved_path": "/usr/bin/x86_64-linux-gnu-nm",
+      "bytes": 45160,
+      "sha256": "ddb55c0685721bf494aa2d090056b8b32a40614ad4464b305896f527d882c3c1"
+    },
+    "readelf": {
+      "path": "/usr/bin/readelf",
+      "resolved_path": "/usr/bin/x86_64-linux-gnu-readelf",
+      "bytes": 777864,
+      "sha256": "4a387d80a70e6e97ef940a666fab59d5c38e7cf19ff907192fa983cb8505a7de"
+    },
+    "python3": {
+      "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "resolved_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+      "bytes": 30894944,
+      "sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7"
+    }
+  },
+  "metadata_queries": [
+    {
+      "name": "c-version",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-14",
+        "--version"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "first_line": "x86_64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0"
+    },
+    {
+      "name": "cxx-version",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "--version"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "first_line": "x86_64-linux-gnu-g++-14 (Debian 14.2.0-19) 14.2.0"
+    },
+    {
+      "name": "ld-version",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-ld.bfd",
+        "--version"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "first_line": "GNU ld (GNU Binutils for Debian) 2.44"
+    },
+    {
+      "name": "cc1",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-gcc-14",
+        "-print-prog-name=cc1"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/libexec/gcc/x86_64-linux-gnu/14/cc1",
+        "resolved_path": "/usr/libexec/gcc/x86_64-linux-gnu/14/cc1",
+        "bytes": 34148896,
+        "sha256": "02675980109a4a5496cddf67d5286de57942759edc830deaa525e36f9a2a0291"
+      }
+    },
+    {
+      "name": "cc1plus",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "-print-prog-name=cc1plus"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/libexec/gcc/x86_64-linux-gnu/14/cc1plus",
+        "resolved_path": "/usr/libexec/gcc/x86_64-linux-gnu/14/cc1plus",
+        "bytes": 36389344,
+        "sha256": "3064a74d411cc6a72fa3d8d2ce47d72925a42807d89d60618d8467b0eb10c948"
+      }
+    },
+    {
+      "name": "collect2",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "-print-prog-name=collect2"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/libexec/gcc/x86_64-linux-gnu/14/collect2",
+        "resolved_path": "/usr/libexec/gcc/x86_64-linux-gnu/14/collect2",
+        "bytes": 422136,
+        "sha256": "ea31a4cebd9df1b6428c463428d461ccecfe66c897936409d5b2cde0b3af9e27"
+      }
+    },
+    {
+      "name": "driver-ld",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "-print-prog-name=ld"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/bin/ld",
+        "resolved_path": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+        "bytes": 1861256,
+        "sha256": "d2766988b6a1b1d1518cdc09242e726d1f24e151e16410ada3092b11ffd9081b"
+      }
+    },
+    {
+      "name": "libstdcxx",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "-print-file-name=libstdc++.so.6"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libstdc++.so.6",
+        "resolved_path": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+        "bytes": 2497768,
+        "sha256": "972bb2a18b71140dab0240f8a1f68ab3fb1d56bcd4c4f824a91b70888faf5a00"
+      }
+    },
+    {
+      "name": "libgcc_s",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-14",
+        "-print-file-name=libgcc_s.so.1"
+      ],
+      "exit_code": 0,
+      "classification": "tool identity metadata lookup; not compilation or linking",
+      "identity": {
+        "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libgcc_s.so.1",
+        "resolved_path": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+        "bytes": 182856,
+        "sha256": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+      }
+    }
+  ],
+  "runtime_files": [
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "bytes": 977112,
+      "sha256": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "bytes": 1995216,
+      "sha256": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "bytes": 225672,
+      "sha256": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libstdc++.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+      "bytes": 2497768,
+      "sha256": "972bb2a18b71140dab0240f8a1f68ab3fb1d56bcd4c4f824a91b70888faf5a00"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libgcc_s.so.1",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "bytes": 182856,
+      "sha256": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+    }
+  ],
+  "build_compile_invocations": 0,
+  "host_link_invocations": 0,
+  "reference_process_invocations": 0
+}

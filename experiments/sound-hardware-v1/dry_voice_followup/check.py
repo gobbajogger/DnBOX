@@ -20,7 +20,7 @@ import sys
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-MANIFEST_SHA = "a272b1120f1dd416ce521ab0d65391266b201efe5493681d859b771b40449785"
+MANIFEST_SHA = "2f16ef62c422d2bbd8100271790d6aa0a253d33e77bb126c2ceb79b2f9a8b3c1"
 PLAN_SHA = "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
 METRIC_SHA = "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
 NOTES = [36, 60, 84]
@@ -190,6 +190,8 @@ def main():
     executable = None
     historical = None
     if args.saved_candidates:
+        require("historical_reports_sha256" in meta,
+                "No historical saved-candidate bundle is supplied for this variant")
         historical_path = HERE / "evidence" / args.variant / "all_reports.json.gz"
         historical_data = historical_path.read_bytes()
         require(digest(historical_data) == meta["historical_reports_sha256"],

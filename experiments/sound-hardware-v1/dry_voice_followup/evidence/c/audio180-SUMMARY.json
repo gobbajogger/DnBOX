@@ -1,0 +1,1821 @@
+{
+  "scope": "Static dry voice only; zero intact preset coverage",
+  "variant": "c_ch4_centered_feedback",
+  "case_files": 60,
+  "note_cases": 180,
+  "accepted_files": 30,
+  "accepted_notes": 109,
+  "maximum_rms_db": 7.691473258364919,
+  "maximum_spectral_db": 8.959004990571875,
+  "rows": [
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.12508024159021813,
+      "spectral_db": 2.3146929874499613,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.8471320480588092,
+      "spectral_db": 2.9669104750614355,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 2.0292299139830248,
+      "spectral_db": 3.104424613329723,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_2000_.25",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 1.1219515761775254,
+      "spectral_db": 0.8839061837440242,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_2000_.25",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.9774173737495379,
+      "spectral_db": 1.5371424049203568,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.25",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.4014424400969219,
+      "spectral_db": 1.4543586638410062,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.5",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.1617040984280578,
+      "spectral_db": 1.3326955263559106,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_2000_.5",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 1.0538678727309865,
+      "spectral_db": 2.102895633953392,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_2000_.5",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.9699427009666107,
+      "spectral_db": 2.2464756825442365,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.009452865045069479,
+      "spectral_db": 0.6614515809448952,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.0411144826955511,
+      "spectral_db": 0.8972153706192271,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.23970808686406564,
+      "spectral_db": 1.2436492305695397,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_.25",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.5747910149320997,
+      "spectral_db": 1.7340498836231604,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_.25",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.6019125407430527,
+      "spectral_db": 1.896254727696507,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_.25",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.6969090635287993,
+      "spectral_db": 2.0750923690365957,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_.5",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.4163208292784337,
+      "spectral_db": 3.6185348287232606,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_.5",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.49074662161278376,
+      "spectral_db": 3.744399179011809,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_.5",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.7314158123444641,
+      "spectral_db": 3.8783987609141786,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_.9",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.03717708379308772,
+      "spectral_db": 8.112362002790919,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_.9",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.2353032788330178,
+      "spectral_db": 8.208484418864149,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_.9",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.43835584135312067,
+      "spectral_db": 8.387221423030374,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 8.070550029411577e-05,
+      "spectral_db": 0.22854720564595685,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.002916136793422456,
+      "spectral_db": 0.4443482131179109,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.015482780292222368,
+      "spectral_db": 0.8399629579259393,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.25",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.7548548323539259,
+      "spectral_db": 1.2502956231381475,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.25",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.21397616131317856,
+      "spectral_db": 2.03991663588608,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.25",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.22465496985586644,
+      "spectral_db": 0.9263922310668771,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.5",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.7564486613010222,
+      "spectral_db": 2.044358879783725,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.5",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.6445335966283985,
+      "spectral_db": 3.9901300654702863,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_500_.5",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.22692960039866644,
+      "spectral_db": 0.9320187613919456,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.3922270142165588,
+      "spectral_db": 2.913158742238718,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 2.0023712855849434,
+      "spectral_db": 4.500828029889537,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_500_.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.2693156871004372,
+      "spectral_db": 0.9296267071365442,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.011645908159441718,
+      "spectral_db": 0.2159007624241629,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.06759454884860039,
+      "spectral_db": 0.36611474068773514,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.19885789752807426,
+      "spectral_db": 0.9272736196612952,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.25",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.16195787693273406,
+      "spectral_db": 0.2665433646414269,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.25",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.24214090500379631,
+      "spectral_db": 0.31746897272360863,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.25",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.507428054469239,
+      "spectral_db": 0.8630440287357443,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.5",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.728304984705867,
+      "spectral_db": 0.6251230699768391,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.5",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.2574549115757756,
+      "spectral_db": 0.32058973992631956,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.5",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.8055090010932802,
+      "spectral_db": 0.8425004596762193,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.9",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 6.314121557581571,
+      "spectral_db": 4.964920388620424,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_64_.9",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.06183657669601242,
+      "spectral_db": 0.8292104092105897,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_.9",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.3422879333432438,
+      "spectral_db": 0.9276235565475145,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.03831282317683407,
+      "spectral_db": 0.1084168263664763,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.25383451977822413,
+      "spectral_db": 0.2979775357478652,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.3134369366985802,
+      "spectral_db": 0.7991983191303026,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_8000_.25",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 1.6838815298123835,
+      "spectral_db": 1.9847042845275555,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.25",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 1.6579723123824288,
+      "spectral_db": 2.112677643621676,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.25",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 1.5435360742567816,
+      "spectral_db": 2.4215402449693615,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.5",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.8780679734840613,
+      "spectral_db": 2.3034327634092127,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.5",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 1.8776106581416796,
+      "spectral_db": 2.4542490432581427,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.5",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 1.8372790152454008,
+      "spectral_db": 2.7622143846892993,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 1.6162946673486895,
+      "spectral_db": 3.597706867858686,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 1.08527527137493,
+      "spectral_db": 3.73420300397735,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.8384154979708134,
+      "spectral_db": 3.8970125675593077,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.007946682638982093,
+      "spectral_db": 1.8880970766802252,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.031471053741162165,
+      "spectral_db": 2.0703378612007555,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.13749090227334668,
+      "spectral_db": 2.2837313830095822,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_2000_.25",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 1.6425516326019625,
+      "spectral_db": 1.0751716667803393,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.25",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 1.3856148565065567,
+      "spectral_db": 1.7976992091487107,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.25",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.4493865618415255,
+      "spectral_db": 1.5513841613056307,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_2000_.5",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.6905216079102503,
+      "spectral_db": 1.7653304759327846,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.5",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 1.5123679185983923,
+      "spectral_db": 2.537213340015102,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.5",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 1.3109074412930777,
+      "spectral_db": 2.6139250982535582,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.9",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.4016975526069205,
+      "spectral_db": 3.0685150902559206,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.9",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.7649433350363508,
+      "spectral_db": 3.667021332692872,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_.9",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 2.441217210428704,
+      "spectral_db": 3.838778220903722,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.00945203374885368,
+      "spectral_db": 0.6614590284662987,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.0411143197247513,
+      "spectral_db": 0.8972141569934519,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.23970804979876092,
+      "spectral_db": 1.2436507695105112,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_22050_.25",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 1.1290371217224187,
+      "spectral_db": 1.9156951491412035,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.25",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 1.138570519618083,
+      "spectral_db": 2.094281768844445,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.25",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 1.1686383632729946,
+      "spectral_db": 2.2747374499818798,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.5",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.9548475341653904,
+      "spectral_db": 3.663401617673328,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.5",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 1.0108835494662778,
+      "spectral_db": 3.8200690896201306,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.5",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 1.1838940786709136,
+      "spectral_db": 3.9727040525955317,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.9",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.3918909107339927,
+      "spectral_db": 7.7441312891277505,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.9",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.023117075307347627,
+      "spectral_db": 7.8652199233889535,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_.9",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.6866364967837263,
+      "spectral_db": 8.06244631028034,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 8.069290929284781e-05,
+      "spectral_db": 0.2285475313528238,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.0029161340058030992,
+      "spectral_db": 0.4443481057770167,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.01548274714149254,
+      "spectral_db": 0.8399625491318127,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_.25",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 1.1635787483751725,
+      "spectral_db": 1.6526500432839815,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_500_.25",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.2631566687721449,
+      "spectral_db": 2.1918830672070246,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_.25",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.22756499827639196,
+      "spectral_db": 0.9264383408217404,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_.5",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.2162016629521188,
+      "spectral_db": 2.613638335235809,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_500_.5",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.9844508250077724,
+      "spectral_db": 4.57193052051439,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_500_.5",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.22707256076382126,
+      "spectral_db": 0.933444611706064,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_.9",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.34649713147388195,
+      "spectral_db": 3.6320001986959056,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_500_.9",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 2.4462914345599054,
+      "spectral_db": 5.517961116863918,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_500_.9",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.27868458391083695,
+      "spectral_db": 0.9380634649385492,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.011643698262370867,
+      "spectral_db": 0.21587581385825172,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.06759509077875775,
+      "spectral_db": 0.36600313043148436,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.1988578331336121,
+      "spectral_db": 0.9272641174850251,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.25",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.2775046502664204,
+      "spectral_db": 0.46359848333900433,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.25",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.24249951651186935,
+      "spectral_db": 0.31754964311961137,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.25",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.5082388914021763,
+      "spectral_db": 0.8628823948598225,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.5",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.101808001949447,
+      "spectral_db": 1.0775629762429817,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_64_.5",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.25751659083213374,
+      "spectral_db": 0.3203487379422518,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.5",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.8052402516430257,
+      "spectral_db": 0.8420483041755132,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.9",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 7.691473258364919,
+      "spectral_db": 5.093117340706213,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_64_.9",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.02763332151740651,
+      "spectral_db": 0.8291346141502008,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_.9",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.3442251370204625,
+      "spectral_db": 0.9277170971780785,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.03831247199757934,
+      "spectral_db": 0.10852257058258796,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.2538749199381536,
+      "spectral_db": 0.2980222430769149,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.3138965744961875,
+      "spectral_db": 0.7991914326210594,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_8000_.25",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 2.2333781737160816,
+      "spectral_db": 2.028732184676949,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.25",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 2.175952148791625,
+      "spectral_db": 2.1666818212823338,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.25",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 1.9440388391684007,
+      "spectral_db": 2.4883331626205663,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.5",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 2.41800879605878,
+      "spectral_db": 2.5862909281212274,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.5",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 2.4012309753385845,
+      "spectral_db": 2.7418191752516456,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.5",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 2.278898246298086,
+      "spectral_db": 3.039985958533162,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.9",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 1.9794245837415314,
+      "spectral_db": 4.2596814280733275,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.9",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 1.3214045759422934,
+      "spectral_db": 4.38774726572623,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_.9",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.5018390685736573,
+      "spectral_db": 4.509558544462202,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.007946548360554516,
+      "spectral_db": 1.8880964954430248,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.031470955587744084,
+      "spectral_db": 2.0703391251641543,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.13749078589015568,
+      "spectral_db": 2.2837257389470103,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.25",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.3361034558637669,
+      "spectral_db": 0.7290718393088493,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.25",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.3219660103298924,
+      "spectral_db": 0.9531011444219031,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.25",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.2571741871237659,
+      "spectral_db": 1.2407325791060657,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.5",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.4328364810674237,
+      "spectral_db": 0.7448509257156655,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.5",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.4197176877181575,
+      "spectral_db": 1.0068089489171819,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.5",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.443723119827156,
+      "spectral_db": 1.2691312380822617,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.9",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.3445204001280686,
+      "spectral_db": 0.8429999059992367,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.9",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.6527220054340808,
+      "spectral_db": 1.0887644486809063,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_.9",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.1693146214863531,
+      "spectral_db": 1.298249066545492,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.00945285320518152,
+      "spectral_db": 0.6614646715960464,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.041114569485572565,
+      "spectral_db": 0.8972081354674908,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.23970785929783564,
+      "spectral_db": 1.243640386956058,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_.25",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.2439569695667819,
+      "spectral_db": 1.7244187896179966,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_.25",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.19505326209731524,
+      "spectral_db": 1.8306488778968135,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_.25",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.017584263781615758,
+      "spectral_db": 1.9714629606645266,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_.5",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.32205656738629196,
+      "spectral_db": 3.831018138880523,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_.5",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.2066056914327394,
+      "spectral_db": 3.899481429036917,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_.5",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.16934962751085383,
+      "spectral_db": 3.9761837278699046,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_.9",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.20973985385400085,
+      "spectral_db": 8.872325192781766,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_.9",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.22288723864440252,
+      "spectral_db": 8.907429084789264,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_.9",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.2446814175225038,
+      "spectral_db": 8.959004990571875,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 8.072305819985961e-05,
+      "spectral_db": 0.22854728273121488,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.002916202965308288,
+      "spectral_db": 0.4443478414504431,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.015482691237859194,
+      "spectral_db": 0.8399623289750743,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.25",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.09840798943396245,
+      "spectral_db": 0.22655492183877463,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.25",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.06764507266595192,
+      "spectral_db": 0.4072474280693739,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.25",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.2201083438429018,
+      "spectral_db": 0.9266941216760285,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.5",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.11952555427917261,
+      "spectral_db": 0.24721637799732013,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.5",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.12245612815021775,
+      "spectral_db": 0.7159773293587443,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.5",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.22695899521360832,
+      "spectral_db": 0.9279200065703432,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.9",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.15362834923495583,
+      "spectral_db": 0.282947407596695,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.9",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.025292474008517307,
+      "spectral_db": 0.5228015289911093,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_.9",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 0.25483926931805784,
+      "spectral_db": 0.9303690788067925,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.011645513466349915,
+      "spectral_db": 0.21585723436056015,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.06759374590742269,
+      "spectral_db": 0.3661636843777165,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.19885745378596137,
+      "spectral_db": 0.9272690401819955,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.25",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.04257860420599544,
+      "spectral_db": 0.1352608920083225,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.25",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.24169861702125747,
+      "spectral_db": 0.3175336113664247,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.25",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.5060438451861331,
+      "spectral_db": 0.863160919077202,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.5",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 0.03909476301687069,
+      "spectral_db": 0.1569057308105844,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.5",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 0.25722023651635484,
+      "spectral_db": 0.3208453560088565,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.5",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 0.8051797267419283,
+      "spectral_db": 0.8428541373406211,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.9",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.5046873347045401,
+      "spectral_db": 4.631906114688184,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_64_.9",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.1190761481352425,
+      "spectral_db": 0.8297054210308358,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_.9",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.3389031763381034,
+      "spectral_db": 0.9273733559650972,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_64_0",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.03830970140518258,
+      "spectral_db": 0.10860371257823369,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_0",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.2539368338702557,
+      "spectral_db": 0.29805757107579806,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_64_0",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.3134347936235278,
+      "spectral_db": 0.7992932023986452,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_.25",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 36,
+      "rms_db": 0.8686459310242036,
+      "spectral_db": 1.955555117019317,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_.25",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 60,
+      "rms_db": 0.8758862509067509,
+      "spectral_db": 2.0858571557604755,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_.25",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "note": 84,
+      "rms_db": 0.9001684027820261,
+      "spectral_db": 2.3606940819998394,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_.5",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 36,
+      "rms_db": 1.1341135532100979,
+      "spectral_db": 1.9528777382381957,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_.5",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 60,
+      "rms_db": 1.1614084004145577,
+      "spectral_db": 2.069387773182408,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_.5",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "note": 84,
+      "rms_db": 1.2436305995836512,
+      "spectral_db": 2.3660769740594443,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_.9",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 1.3564109522099401,
+      "spectral_db": 2.4865012191022746,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_.9",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 1.4848322411272292,
+      "spectral_db": 2.594811137329379,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_.9",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 4.64981826668567,
+      "spectral_db": 2.8515575515602056,
+      "accepted": false
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 36,
+      "rms_db": 0.007946564967759643,
+      "spectral_db": 1.8880967326492961,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 60,
+      "rms_db": 0.03147102587747859,
+      "spectral_db": 2.0703363515555893,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "note": 84,
+      "rms_db": 0.13749106882813414,
+      "spectral_db": 2.2837302165182645,
+      "accepted": true
+    }
+  ],
+  "accepted": false,
+  "unqualified": [
+    "72 dynamic cases",
+    "694 intact presets",
+    "150 controls",
+    "native fit",
+    "callback deadline",
+    "production activation"
+  ]
+}

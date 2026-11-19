@@ -1,0 +1,8 @@
+SOURCE PREPARATION ONLY. ROOT REVIEW AND EXECUTION RELEASE STILL REQUIRED.
+No compiler, renderer or metric has been invoked for this harness.
+
+python /workspace/scratch/e803955aec60/s1_d_active_followup/check_active.py --d-root /workspace/scratch/e803955aec60/s1_dry_voice_d --new-original /workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le --new-original-sha256 3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74 --output /workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one
+
+Exactly one host build, one static replay with exact D identity required,
+then one active candidate capture and one unchanged gain-1 metric execution.
+Any failure is terminal; outputs are not overwritten or automatically retried.
