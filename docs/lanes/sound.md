@@ -1,6 +1,6 @@
 # Sound lane
 
-## Independent dry voice and next stock fit preparation — 2026-11-19
+## Independent dry voice and stock fit results — 2026-11-19
 
 The independent source work continues after published envelope/shared-math
 commit `e0ef1994a91abef619c755f9428e44c8c9f064c4`. The new
@@ -33,17 +33,20 @@ The original archive has60 static physical files/180 notes. Further reference
 recovery is separate from candidate implementation; no active-modulation or
 full-preset qualification follows from those recordings.
 
-The [next stock native plans](../../experiments/sound-hardware-v1/shared_math/production_fit/README.md)
-are prepared for Elite reference/shared and Pro reference/shared,73 official
-compile units and357 pinned inputs each. They are **NOT_RUN / ALLOCATION_REQUIRED**.
-PR973 comment6994965759 is the concrete four-link request; no response granting
-it was present at the latest read. The old two-link allocation is consumed.
-Web retains the next shared RDC window; there is no fallback. The available
-old-image diagnostic runner does not qualify current target audio identity.
+The [stock native comparison](../../experiments/sound-hardware-v1/shared_math/production_fit/README.md)
+completed under Integ allocation6995594729: all292 serial compiles, four physical
+links and12 inspections exit0. Elite reference/shared load551492/544708 bytes;
+Pro551484/544700 bytes. Shared saves6784 bytes per model and leaves6940/6948
+bytes above the unchanged XIP reserve. Pool remains8972 raw free, only268 beyond
+its required margins; ordinary RAM1100 free, XPOOL0. All owned local process
+groups are released and this four-link allocation is consumed. These are stock
+profiles with silent S1, not independent-instrument acceptance. Web retains its
+shared RDC window; no fallback occurs. The old-image diagnostic still does
+not qualify the current target reference/shared audio pair.
 
 `scripts/gate.sh sound --post` remains unqualified and unrun. The actual prior
-Elite partial-core improvement is retained below; stock/current-production
-Elite/Pro, target regression/deadlines and complete instrument fit are open.
+Elite partial-core improvement is retained below; stock resource results are
+measured, while target regression/deadlines and complete instrument fit remain open.
 **Production Synth One remains silent.** PR973 stays draft and S1–S6/common
 FAILs remain open. No PSRAM, main/force/device/Actions/Codex/#156 operation occurs.
 

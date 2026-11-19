@@ -1,0 +1,84 @@
+{
+  "status": "LINK_MEASURED",
+  "plan_sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9",
+  "composition": "stock",
+  "profile": "reference",
+  "model": "elite",
+  "physical_xip_capacity": 552672,
+  "required_free_bytes": 1024,
+  "native_execution": "NOT_RUN",
+  "emulator_execution": "NOT_RUN",
+  "physical_link_returncode": 0,
+  "sections_from_physical_map": {
+    ".text": {
+      "vma": 33554720,
+      "bytes": 547572,
+      "lma": 33554720
+    },
+    ".ram_sink": {
+      "vma": 29360128,
+      "bytes": 1024,
+      "lma": 29360128
+    },
+    ".ram_text": {
+      "vma": 29361152,
+      "bytes": 2708,
+      "lma": 34102292
+    },
+    ".c1_text": {
+      "vma": 29363860,
+      "bytes": 608,
+      "lma": 34105000
+    },
+    ".data": {
+      "vma": 29392896,
+      "bytes": 600,
+      "lma": 34105608
+    },
+    ".c1stack": {
+      "vma": 29835264,
+      "bytes": 4608,
+      "lma": 29835264
+    },
+    ".bss": {
+      "vma": 29393504,
+      "bytes": 96596,
+      "lma": 29393504
+    },
+    ".pool": {
+      "vma": 29491200,
+      "bytes": 335092,
+      "lma": 29491200
+    },
+    ".xpool": {
+      "vma": 29839872,
+      "bytes": 9216,
+      "lma": 29839872
+    },
+    ".noinit": {
+      "vma": 29868032,
+      "bytes": 308,
+      "lma": 29868032
+    },
+    ".ble_ram": {
+      "vma": 29869056,
+      "bytes": 3888,
+      "lma": 29869056
+    }
+  },
+  "pool_raw_free_bytes": 8972,
+  "pool_margin_above_8192_reserve": 780,
+  "pool_gate": "PASS",
+  "ordinary_ram_extent_bytes": 97204,
+  "ordinary_ram_free_bytes": 1100,
+  "xpool_free_bytes": 0,
+  "load_image_bytes": 551492,
+  "physical_free_bytes": 1180,
+  "reserve_margin_bytes": 156,
+  "image_size_source": "physical link map, aligned load sections plus four-byte marker",
+  "elf_sha256": "262aecf1718137d0210f18d6a601e2df977ec8897c35dffa2cf201311f3aba6b",
+  "undefined": [],
+  "soft_double_symbols": [],
+  "xip_gate": "PASS",
+  "qualification": "Resource experiment only. Header sharing and actual target behavior/timing require independent target-code evidence."
+}
