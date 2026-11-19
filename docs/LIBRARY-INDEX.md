@@ -23,3 +23,9 @@ Current source, tests, numeric behavior packets and measured candidate results a
 | --- | ---: | --- | --- |
 | [DnBOX-Sound-recovered-74fdcc42-20261118.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-034be894b64881919da2c5dc7122a285_2021479872048191acbfdca1f870a539&account_id=personal) | 81,171,985 | `a33c1054a6ff8f9d10e3218388dfa00c90e1f5f9eeeae520d9927c2fac8a517b` | Exact reviewed staged tree, publication plan and recovery index. Published without deletion as commit `9be11840b11d256f22a9af19d290cfe96f31a429`. |
 | [DnBOX-Sound-local-Elite-fit-20261118.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-4abf329e18488191bda4aef75d18e025_2021479872048191acbfdca1f870a539&account_id=personal) | 5,292,068 | `5ee9b04d5d875d2d5f0e743f33491a0700f051ef247938298cc31930ed564b61` | Both allocated serial native links: exact inputs, maps, logs, terminals, physical-link failure and successful shared image, independent audit. No Pro or production admission inferred. |
+
+## Recovered original dry PCM — 2026-11-19
+
+| Library name | Size (bytes) | SHA256 | Recovery |
+| --- | ---: | --- | --- |
+| [sound-pcm-preservation.tar](https://chatgpt.com/library?file_id=libfile_fde3_f-63d0512781708191a4f53e3346480783_2021479872048191acbfdca1f870a539&account_id=personal) | 211,988,480 | `d5d11628a390f19d99783b1fb805979d371f5971efa01737c00bbc1e359b5403` | Download exactly, then run `experiments/sound-hardware-v1/dry_voice_followup/recover_references.py --archive PATH --output NEW_DIRECTORY`. It verifies all nested hashes and exports only the original mono column of60 physical recordings/180 notes. No original engine is executed or incorporated into the independent implementation. |

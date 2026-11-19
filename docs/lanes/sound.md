@@ -1,5 +1,52 @@
 # Sound lane
 
+## Independent dry voice and next stock fit preparation — 2026-11-19
+
+The independent source work continues after published envelope/shared-math
+commit `e0ef1994a91abef619c755f9428e44c8c9f064c4`. The new
+[dry-voice package](../../experiments/sound-hardware-v1/dry_voice_followup/README.md)
+contains two frozen implementations, the exact recovered original PCM contract,
+all numerical reports, independent audit and a portable comparison/recovery
+entry. Original engines remain comparison-only. A passes79/180 static notes;
+B passes109/180, including all45 zero-resonance notes. Both full gates are
+**FAIL**, with zero nonfinite samples. B's worst resonant error is45.163240 dB
+and includes sustained post-note-off feedback oscillation. No tolerance, gain,
+alignment or tail rule was changed to disguise it.
+
+The new152-byte isolated voice combines stock raw saw, squared velocity,
+explicit component gain, the independently written S1 amplitude/filter
+envelopes, VCA before filter and an existing DnBOX four-pole primitive. It is
+not production activation or full control/preset coverage. A bounded analytic
+diagnosis identifies the delayed-feedback instability and proposes one
+centered implicit correction; its separate implementation/comparison follows.
+
+Independent audit found the recorded A/B bytes and all120 report/log sets
+consistent, then found four historical harness weaknesses: absolute scratch
+paths, removed assertions under optimized Python, incomplete resume validation
+and metadata overwrites. Those originals remain immutable. The new entry
+stages verified source/metric snapshots, uses explicit checks, requires exact
+note coverage and fresh output, and does not resume. Four integrity regression
+tests pass normally and under optimized Python. An optimized-Python selected
+B replay reproduces candidate/paired PCM and metric JSON byte-for-byte.
+
+The original archive has60 static physical files/180 notes. Further reference
+recovery is separate from candidate implementation; no active-modulation or
+full-preset qualification follows from those recordings.
+
+The [next stock native plans](../../experiments/sound-hardware-v1/shared_math/production_fit/README.md)
+are prepared for Elite reference/shared and Pro reference/shared,73 official
+compile units and357 pinned inputs each. They are **NOT_RUN / ALLOCATION_REQUIRED**.
+PR973 comment6994965759 is the concrete four-link request; no response granting
+it was present at the latest read. The old two-link allocation is consumed.
+Web retains the next shared RDC window; there is no fallback. The available
+old-image diagnostic runner does not qualify current target audio identity.
+
+`scripts/gate.sh sound --post` remains unqualified and unrun. The actual prior
+Elite partial-core improvement is retained below; stock/current-production
+Elite/Pro, target regression/deadlines and complete instrument fit are open.
+**Production Synth One remains silent.** PR973 stays draft and S1–S6/common
+FAILs remain open. No PSRAM, main/force/device/Actions/Codex/#156 operation occurs.
+
 ## Active successor implementation — 2026-11-18
 
 The user transferred sole Sound ownership from the length-limited thread

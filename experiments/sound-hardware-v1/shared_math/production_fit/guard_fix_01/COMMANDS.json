@@ -1,0 +1,177 @@
+[
+  {
+    "label": "negative-modified-input",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/native-plans/fixture/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 1,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative-modified-input.log",
+    "log_sha256": "0bcda7786fb29cc209de64abb30253d70a001d481d0f02c8f68a579fa7184f86",
+    "status": "REJECTED_AS_EXPECTED",
+    "expected_guard": "Prepared inputs changed or gained files"
+  },
+  {
+    "label": "negative-forbidden-cpath",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json"
+    ],
+    "environment_overrides": {
+      "CPATH": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/forbidden-include-path"
+    },
+    "returncode": 1,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative-forbidden-cpath.log",
+    "log_sha256": "4d2fc7dc22d6b3c9c729e2071faeff888ea0e73b195ec6271c66074d4e9bb0ad",
+    "status": "REJECTED_AS_EXPECTED",
+    "expected_guard": "Unpinned native include/library environment: CPATH"
+  },
+  {
+    "label": "negative-optimized-execute",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-O",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py",
+      "--execute",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/native-plans/fixture/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 1,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative-optimized-execute.log",
+    "log_sha256": "51a71bbaf26645fc33e16ee9ceb6d3e968a2e2bd2885cd08ec105f8f5428ae25",
+    "status": "REJECTED_AS_EXPECTED",
+    "expected_guard": "Optimized Python is forbidden for verification and native execution"
+  },
+  {
+    "label": "negative-optimized-preparation",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-O",
+      "/workspace/scratch/e803955aec60/fit_next_plan/prepare_production.py",
+      "--source",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/nonexistent-canonical-source"
+    ],
+    "environment_overrides": {},
+    "returncode": 1,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative-optimized-preparation.log",
+    "log_sha256": "8fb5e42e7ed0d4efe5b5ab7e49be0277b95135202d7b05160505db667b9b76ae",
+    "status": "REJECTED_AS_EXPECTED",
+    "expected_guard": "Optimized Python is forbidden for preparation and native execution"
+  },
+  {
+    "label": "negative-env-optimized-execute",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py",
+      "--execute",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/native-plans/fixture/PLAN.json"
+    ],
+    "environment_overrides": {
+      "PYTHONOPTIMIZE": "1"
+    },
+    "returncode": 1,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative-env-optimized-execute.log",
+    "log_sha256": "51a71bbaf26645fc33e16ee9ceb6d3e968a2e2bd2885cd08ec105f8f5428ae25",
+    "status": "REJECTED_AS_EXPECTED",
+    "expected_guard": "Optimized Python is forbidden for verification and native execution"
+  },
+  {
+    "label": "normal-input-verification-1",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 0,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/normal-input-verification-1.log",
+    "log_sha256": "958317a0a36a3b66ced134af0ae7f8e18f2a58aaa822ece908532c01b9d2188e",
+    "status": "PASS",
+    "verification": {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json",
+      "sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED",
+      "python_optimization": 0
+    }
+  },
+  {
+    "label": "normal-input-verification-2",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 0,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/normal-input-verification-2.log",
+    "log_sha256": "790b845071b1c152944571eacc0857c950e7d76b414aba9545c4b8c8c0ed5e7b",
+    "status": "PASS",
+    "verification": {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/PLAN.json",
+      "sha256": "a8ba4504d514db2160af53fd76db0e2441d63420a92723104d64f70ef0e7c22d",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED",
+      "python_optimization": 0
+    }
+  },
+  {
+    "label": "normal-input-verification-3",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 0,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/normal-input-verification-3.log",
+    "log_sha256": "02676f0b2833a86c24772e416d3c0f9c10b85d38ab031992c08e75ae78a8c7d4",
+    "status": "PASS",
+    "verification": {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json",
+      "sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED",
+      "python_optimization": 0
+    }
+  },
+  {
+    "label": "normal-input-verification-4",
+    "argv": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py",
+      "--plan",
+      "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/PLAN.json"
+    ],
+    "environment_overrides": {},
+    "returncode": 0,
+    "log": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/normal-input-verification-4.log",
+    "log_sha256": "6c312802de0b73da55504f2663ec7ce7d3ccf3a9aac70114c5cd0897edf63535",
+    "status": "PASS",
+    "verification": {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/PLAN.json",
+      "sha256": "253510c1009f19be438504be7e8d0a4554f006d321f87a40c3c03d888a4b83e4",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED",
+      "python_optimization": 0
+    }
+  }
+]
