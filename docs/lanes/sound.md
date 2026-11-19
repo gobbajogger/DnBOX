@@ -1,5 +1,23 @@
 # Sound lane
 
+## Independent SuperJ6 layer 1 attack field — 2026-11-19
+
+The [SuperJ6 field adapter](../../experiments/sound-hardware-v1/sj6-id36-field-adapter/CURRENT.md)
+now applies already-decoded app ID 36 (`neonattack`, main application position
+34) to the first layer of the independent DnBOX candidate. It uses the existing
+normalized attack conversion and physical setter. The caller must explicitly
+establish independent, unlinked envelopes. Unknown or conflicting link state
+rejects the complete attack batch without mutation. ID 119 remains raw-only.
+The adapter adds no per-sample dispatch or persistent state.
+
+The raw-only baseline reproduced the bug: at knob zero it stored the value but
+left attack at 0.008 s instead of 0.002 s. Five normalized settings then matched
+the direct physical path across all 10,240 stereo frames, including complete
+part state; layer 2 remained audible and unchanged. Wrong-layer and linear-law
+mutants failed. This establishes pre-note field application for one qualified
+control. It does not establish linked-mode callbacks, the full preset importer,
+original complete-preset audio, native size/cost or production activation.
+
 ## Measured stock fit and independent dry voice — 2026-11-19
 
 Sole Sound ownership and existing `lane/sound` / draft PR973 are preserved.

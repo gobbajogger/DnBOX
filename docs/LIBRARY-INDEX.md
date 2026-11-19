@@ -29,3 +29,17 @@ Current source, tests, numeric behavior packets and measured candidate results a
 | Library name | Size (bytes) | SHA256 | Recovery |
 | --- | ---: | --- | --- |
 | [sound-pcm-preservation.tar](https://chatgpt.com/library?file_id=libfile_fde3_f-63d0512781708191a4f53e3346480783_2021479872048191acbfdca1f870a539&account_id=personal) | 211,988,480 | `d5d11628a390f19d99783b1fb805979d371f5971efa01737c00bbc1e359b5403` | Download exactly, then run `experiments/sound-hardware-v1/dry_voice_followup/recover_references.py --archive PATH --output NEW_DIRECTORY`. It verifies all nested hashes and exports only the original mono column of60 physical recordings/180 notes. No original engine is executed or incorporated into the independent implementation. |
+
+## Complete Sound recovery and SuperJ6 field addendum — 2026-11-19
+
+The two parts contain exact canonical source at `358085d49a6b575dd6bfa79dd6c01c688741ea50` (tree `9520a215d07b7e054188fb4adf91acb78938638c`) and the frozen inputs, actual native maps/ELFs/objects/logs, numerical references, candidate/paired PCM and review records. All 10,666 archive entries were verified by size and SHA-256. Concatenate part01 then part02; the complete gzip tar is **737,000,061 bytes**, SHA-256 `e969679925e16bbd89ebf3192082578af597ae496815fe3dfd14a91df855c69e`. Extract into a new private directory and run its `VERIFY.py`. Original algorithms remain comparison-only. Consumed native plans are evidence, not a new execution allocation.
+
+The separate small SuperJ6 addendum adds the independently qualified pre-note layer 1 attack binding and retains the source boundary. It does not replace the larger archive or change the historical fit/audio findings.
+
+| Library item | Bytes | SHA-256 | Use |
+| --- | ---: | --- | --- |
+| [DnBOX-Sound-final-recovery-358085d49a6b.tar.gz.part01](https://chatgpt.com/library?file_id=libfile_fde3_f-0529d1417b7c819190a3af4a97867fad_2021479872048191acbfdca1f870a539&account_id=personal) | 402,653,184 | `11712b6da50b5f1d2e2858e2cd33590853b2ec6896bba89cf609a75f9184d926` | First consecutive byte range of the complete S1/stock-fit recovery archive. |
+| [DnBOX-Sound-final-recovery-358085d49a6b.tar.gz.part02](https://chatgpt.com/library?file_id=libfile_fde3_f-988366e82f808191a7cd8621ccdd2bae_2021479872048191acbfdca1f870a539&account_id=personal) | 334,346,877 | `09d37cff2269d5c89081ae0460436413f4574959cb187864cff90bdbfb7e886f` | Second and final consecutive byte range of the same archive. |
+| [SPLIT-MANIFEST.json](https://chatgpt.com/library?file_id=libfile_fde3_f-71bff0b76e1c8191a595b2bd70119511_2021479872048191acbfdca1f870a539&account_id=personal) | 2,179 | `5eac9577021debd27e9fcf6d3be76032929a9cadf0ad3de33e0da6a53e825763` | Ordered byte lengths and hashes for both parts and the reconstructed archive. |
+| [DnBOX-Sound-SuperJ6-ID36-addendum.tar.gz](https://chatgpt.com/library?file_id=libfile_fde3_f-ffbba022a2e88191976d92efd3966bd4_2021479872048191acbfdca1f870a539&account_id=personal) | 14,888 | `76ea897b4788a7e7f2d510dfa4fe70b93879c4cbe6e0f150048fa33852437041` | Exact SuperJ6 ID 36 field-adapter source, focused tests, original failures, guarded replay, review and source manifest. Applies after the main archive. |
+| [SPLIT-README.md](https://chatgpt.com/library?file_id=libfile_fde3_f-5a0c03f708048191b8e6bee00c115d6f_2021479872048191acbfdca1f870a539&account_id=personal) | 4,633 | `efbd9490645cfb463a0f3a82aecfcd2579935f90d154a925e7223d062ccbb3bb` | Restore, verification and content-boundary instructions for the main archive. |
