@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <cstdio>
 #include <vector>
 #define X0X_IMA_TABLES_DEFINE
@@ -14,6 +15,7 @@ struct State {
     int predictor, index;
     std::int64_t error, estimate;
     unsigned parent, code;
+    int filtered_error;
 };
 struct Trace { std::uint8_t parent, code; };
 
@@ -22,7 +24,7 @@ static std::int64_t squared(int difference)
     return std::int64_t(difference) * difference;
 }
 
-static std::vector<std::uint8_t> encode(const std::vector<int> &pcm)
+static std::vector<std::uint8_t> encode(const std::vector<int> &pcm, bool shape_ride)
 {
     int delta[89][16], next_index[89][16];
     for (int i=0; i<89; ++i) {
@@ -45,12 +47,16 @@ static std::vector<std::uint8_t> encode(const std::vector<int> &pcm)
             for (unsigned code=0; code<16; ++code) {
                 int pred=std::clamp(base.predictor+delta[base.index][code],-32768,32767);
                 int idx=next_index[base.index][code];
-                auto error=base.error+squared(pred-pcm[frame]);
+                int residual = pred - pcm[frame];
+                // The ride rolls off sharply near Nyquist. Penalize quantization noise there:
+                // it shifts into the audible midrange when the ride is tuned down.
+                int filtered = shape_ride ? residual - 7 * base.filtered_error / 8 : 0;
+                auto error = base.error + 8 * squared(residual) + 2 * squared(filtered);
                 // Lower bound on the next error if the target lies beyond the largest code.
                 int overshoot=0;
                 if (frame+1<pcm.size())
                     overshoot=std::max(0,std::abs(pcm[frame+1]-pred)-delta[idx][7]);
-                choices[count++]={pred,idx,error,error+squared(overshoot),parent,code};
+                choices[count++]={pred,idx,error,error+8*squared(overshoot),parent,code,filtered};
             }
         }
         const auto better=[](const State &a,const State &b) {
@@ -85,8 +91,10 @@ static std::vector<std::uint8_t> encode(const std::vector<int> &pcm)
     return output;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    bool shape_ride = argc == 2 && std::strcmp(argv[1], "--ride") == 0;
+    if (argc != 1 && !shape_ride) return 2;
     std::vector<int> samples;
     for (;;) {
         int low=std::getc(stdin);
@@ -97,6 +105,6 @@ int main()
         samples.push_back(word>=32768 ? word-65536 : word);
     }
     if (std::ferror(stdin) || samples.empty()) return 2;
-    auto encoded=encode(samples);
+    auto encoded=encode(samples, shape_ride);
     return std::fwrite(encoded.data(),1,encoded.size(),stdout)==encoded.size() ? 0 : 1;
 }

@@ -47,11 +47,11 @@ def compile_renderer(out):
 
 
 def render(exe, engine, program, controls=(), frames=44100,
-           events=((0, 144, 48, 80), (22050, 128, 48, 0)), boundaries=()):
+           events=((0, 144, 48, 80), (22050, 128, 48, 0)), boundaries=(), *, probe_anchor_frames=-1):
     if any(status not in (128, 144) for _, status, _, _ in events):
         raise ValueError("Unexpected MIDI status")
     notes = [(tick, key, 0 if status == 128 else velocity) for tick, status, key, velocity in events]
-    payload = [frames, len(notes), len(boundaries), *(v for event in notes for v in event), *boundaries]
+    payload = [frames, len(notes), len(boundaries), probe_anchor_frames, *(v for event in notes for v in event), *boundaries]
     raw = subprocess.check_output([str(exe), engine, str(program), *map(str, controls)],
                                   input=" ".join(map(str, payload)).encode("ascii"))
     if len(raw) != frames * 2 * 4:
@@ -98,18 +98,21 @@ def compare_miami(exe):
     return rows
 
 
-def compare_chicago(exe):
+def compare_chicago(exe, *, probe_anchor_frames=-1):
     packet = json.loads((ROOT / "tests/fixtures/chicago-au-3.1.6.json").read_text())
     if (packet["sample_rate"] != 44100 or packet["au_version"] != "3.1.6"
             or len({r["name"] for r in packet["rows"]}) != 29 or len(packet["rows"]) != 29):
         raise ValueError("Incomplete Chicago reference packet")
     rows = []
     for row in packet["rows"]:
+        if probe_anchor_frames >= 0 and row["name"] != "overlap_glide_mid":
+            continue
         if len(row["controls"]) != 22 or len(row["harmonics_rel_db"]) != 12:
             raise ValueError(f"Incomplete controls or measurements for {row['name']}")
         # AudioUnit host splits all trials at these edges, even without a note.
         cuts = [i for i in (11025, 16538, 22050, 33075, 44100, 66150) if i < row["frames"]]
-        pcm = render(exe, "chicago", 0, row["controls"], row["frames"], row["events"], cuts)
+        pcm = render(exe, "chicago", 0, row["controls"], row["frames"], row["events"], cuts,
+                     probe_anchor_frames=probe_anchor_frames)
         mono = pcm.astype(np.float64).mean(axis=1)
         start, end = row["fit_window_frames"]
         steady = mono[start:end]
@@ -157,10 +160,20 @@ def compare_chicago(exe):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--probe-chicago-anchor", action="store_true",
+                        help="measure the overlap glide across diagnostic timer values and exit")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     exe = compile_renderer(out)
+    if args.probe_chicago_anchor:
+        rows = []
+        for duration in (0, 64, 95, 96, 256, 441, 2205, 11025, 11026):
+            row, = compare_chicago(exe, probe_anchor_frames=duration)
+            rows.append({"diagnostic_anchor_frames": duration, **row})
+        (out / "anchor-probe.json").write_text(json.dumps(rows, indent=2, allow_nan=False) + "\n")
+        print(f"Measured {len(rows)} diagnostic durations. Current firmware uses 0.")
+        return 0
     factory = {}
     for engine, total in (("chicago", 81), ("miami", 30)):
         peaks = [np.max(abs(render(exe, engine, i)), axis=0).tolist() for i in range(total)]

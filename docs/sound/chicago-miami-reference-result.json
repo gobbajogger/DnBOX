@@ -590,5 +590,86 @@
         "stereo_frames_changed_from_973": 0
       }
     ]
+  },
+  "chicago_glide_diagnostic": {
+    "status": "Unqualified; production leaves the counter at zero.",
+    "reproduce": "OPENBLAS_NUM_THREADS=1 python3 tests/host/bass_reference_qualification.py --out build/chicago-anchor --probe-chicago-anchor",
+    "stimulus": "Original AU 3.1.6 overlap_glide_mid, native 44100 Hz. Note 48 starts at frame 0 and overlaps note 55 at frame 11025. The reference pitch search hit its boundary.",
+    "mechanism": "Cold firmware Chicago leaves allocator.gate_duration zero. The recovered after-events countdown then never copies the current note to the previous-note anchor. Deferred restart reads that anchor upon completion.",
+    "identifiability": "The capture distinguishes zero and the 95/96 and 11025/11026 boundaries. All sampled interior durations produce identical full candidate PCM for this stimulus. The original duration and true moving pitch trajectory remain unknown. A shorter-gap licensed AU capture or the native cold-constructor duration is needed before changing the timer.",
+    "measurements": [
+      {
+        "diagnostic_anchor_frames": 0,
+        "candidate_sha256": "811d18f82b60ede70da82a5a1113f8b34eefd02153ac4768875d347e373df094",
+        "pitch_valid": false,
+        "steady_rms_db": -0.04451544706119781,
+        "max_steady_envelope_db": 0.7554235121334787,
+        "max_relative_harmonic_db": 2.211604783048167
+      },
+      {
+        "diagnostic_anchor_frames": 64,
+        "candidate_sha256": "4b9d1d7492fa8a2d1e8de837e2005171a03c845dc4c32299a9c9ff78b50b5b72",
+        "pitch_valid": false,
+        "steady_rms_db": -0.022480527465823765,
+        "max_steady_envelope_db": 0.36654332113844057,
+        "max_relative_harmonic_db": 3.4054019772320743
+      },
+      {
+        "diagnostic_anchor_frames": 95,
+        "candidate_sha256": "4b9d1d7492fa8a2d1e8de837e2005171a03c845dc4c32299a9c9ff78b50b5b72",
+        "pitch_valid": false,
+        "steady_rms_db": -0.022480527465823765,
+        "max_steady_envelope_db": 0.36654332113844057,
+        "max_relative_harmonic_db": 3.4054019772320743
+      },
+      {
+        "diagnostic_anchor_frames": 96,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 256,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 441,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 2205,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 11025,
+        "candidate_sha256": "a16ddce9c4bec5c35b34b58feb505a8744e21008e85b4db5ffaccd3380f3a8d9",
+        "pitch_valid": false,
+        "steady_rms_db": 4.273794414544965e-06,
+        "max_steady_envelope_db": 1.6723723531721758e-05,
+        "max_relative_harmonic_db": 0.000408931269362256
+      },
+      {
+        "diagnostic_anchor_frames": 11026,
+        "candidate_sha256": "4b9d1d7492fa8a2d1e8de837e2005171a03c845dc4c32299a9c9ff78b50b5b72",
+        "pitch_valid": false,
+        "steady_rms_db": -0.022480527465823765,
+        "max_steady_envelope_db": 0.36654332113844057,
+        "max_relative_harmonic_db": 3.4054019772320743
+      }
+    ]
   }
 }

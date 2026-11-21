@@ -43,8 +43,16 @@ int main(int argc, char **argv)
      * boundaries; this keeps all sound generation inside the production path. */
     unsigned frames = 0, events = 0, cuts = 0;
     unsigned ticks[16], keys[16], velocities[16], boundaries[16];
-    if (scanf("%u%u%u", &frames, &events, &cuts) != 3 || !frames || frames > 2 * RATE ||
-        events > 16 || cuts > 16) return 2;
+    int probe_anchor_frames;
+    if (scanf("%u%u%u%d", &frames, &events, &cuts, &probe_anchor_frames) != 4 ||
+        !frames || frames > 2 * RATE || events > 16 || cuts > 16 ||
+        probe_anchor_frames < -1 || probe_anchor_frames > RATE) return 2;
+    /* -1 preserves cold production state for every qualification row. The
+     * optional diagnostic isolates the missing native timer initialization. */
+    if (probe_anchor_frames >= 0) {
+        if (kind != ORIGINAL_SOUND_CHICAGO) return 2;
+        part.dsp.chicago.allocator.gate_duration = probe_anchor_frames;
+    }
     for (unsigned i = 0; i < events; ++i) {
         if (scanf("%u%u%u", &ticks[i], &keys[i], &velocities[i]) != 3 ||
             (i && ticks[i] < ticks[i-1]) || ticks[i] >= frames ||

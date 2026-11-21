@@ -27,7 +27,8 @@ def main():
         for _, filename in SAMPLES:
             wav = ASSETS / filename
             pcm, _ = read_wav(wav)
-            data = subprocess.run([str(exe)], input=struct.pack(f"<{len(pcm)}h", *pcm),
+            command = [str(exe), "--ride"] if wav.stem == "ride" else [str(exe)]
+            data = subprocess.run(command, input=struct.pack(f"<{len(pcm)}h", *pcm),
                                   stdout=subprocess.PIPE, check=True).stdout
             if len(data) != (len(pcm) + 1) // 2:
                 raise ValueError(f"{filename}: wrong encoded length")
