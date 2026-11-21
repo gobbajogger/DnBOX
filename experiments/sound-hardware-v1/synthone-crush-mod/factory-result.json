@@ -1,0 +1,53 @@
+{
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "input": "three-note overlap/release on the production six-voice renderer; shared dry input; original Soundpipe clocks/smoothers and original LFO/hold/tremolo expressions; all other effects off",
+  "rate": 44100,
+  "frames_per_program": 44100,
+  "same_panel": {
+    "pass": 694,
+    "max_abs_level_db": 0.0023697438198094284,
+    "max_spectral_db": 0.06404720281079401,
+    "by_route": {
+      "0": {
+        "programs": 580,
+        "pass": 580
+      },
+      "1": {
+        "programs": 44,
+        "pass": 44
+      },
+      "2": {
+        "programs": 26,
+        "pass": 26
+      },
+      "3": {
+        "programs": 44,
+        "pass": 44
+      }
+    }
+  },
+  "original_controls": {
+    "pass": 558,
+    "max_abs_level_db": 0.6692175118643128,
+    "max_spectral_db": 17.841480709812515,
+    "by_route": {
+      "0": {
+        "programs": 580,
+        "pass": 451
+      },
+      "1": {
+        "programs": 44,
+        "pass": 43
+      },
+      "2": {
+        "programs": 26,
+        "pass": 26
+      },
+      "3": {
+        "programs": 44,
+        "pass": 38
+      }
+    }
+  },
+  "uncompressed_rows_sha256": "4b518dfb7da3af6e42283466fe88934080b0f9662bb705d0b86c897e292c1f79"
+}
