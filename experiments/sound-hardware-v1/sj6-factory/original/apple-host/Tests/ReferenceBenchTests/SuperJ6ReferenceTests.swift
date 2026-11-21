@@ -65,7 +65,7 @@ final class SuperJ6ReferenceTests: XCTestCase {
                 let active = try dictionary(restored["appStatePreset"])
                 let application = try auditApplied(unit, source: preset, active: active,
                                                    initialTree: initialTree, route: route)
-                let pcm = try render(unit.outputBusses[0].format, block, schedule, spec)
+                let (pcm, events, firstRender) = try render(unit.outputBusses[0].format, block, schedule, spec)
                 let savedState = try JSONSerialization.data(withJSONObject: active, options: [.sortedKeys])
                 var receipt: Record = [
                     "arm": "original", "bank_uuid": row.bank_uuid, "bundled_bank_uuid": checked.bundled_bank_uuid,
@@ -73,7 +73,10 @@ final class SuperJ6ReferenceTests: XCTestCase {
                     "s4_inputs_sha256": audit.spec_sha256, "factory_route": route,
                     "component_version": audit.component_version, "sample_rate": spec.sample_rate,
                     "authored_tempo": preset["seqTempo"]!, "applied_tempo": active["seqTempo"]!,
-                    "first_event_frame": spec.events[0].frame, "first_render_frame": 0,
+                    "first_event_frame": events[0]["frame"]!, "first_render_frame": firstRender,
+                    "scheduled_events": events, "block_frames": unit.maximumFramesToRender,
+                    "gain": 1.0, "reset": spec.reset, "transport": spec.transport,
+                    "input_file_sha256": sha(input),
                     "event_count": spec.events.count,
                     "frames": spec.capture_frames, "channels": spec.channels, "format": "stereo-f32le",
                     "pcm_sha256": sha(pcm), "applied_state_sha256": sha(savedState),

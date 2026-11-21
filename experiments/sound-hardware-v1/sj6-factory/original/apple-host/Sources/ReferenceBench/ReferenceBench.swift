@@ -47,6 +47,8 @@ struct Matrix: Decodable {
     let capture_frames: Int
     let block_frames: Int
     let gain: Double
+    let reset: String
+    let transport: String
     let programs: [Program]
     let events: [Event]
 }
@@ -144,13 +146,15 @@ func loadProgram(_ unit: AUAudioUnit, row: Program, source: Record) async throws
 }
 
 func render(_ format: AVAudioFormat, _ block: AURenderBlock, _ schedule: AUScheduleMIDIEventBlock,
-            _ spec: Matrix) throws -> Data {
+            _ spec: Matrix) throws -> (Data, [Record], Int) {
     guard let buffer = AVAudioPCMBuffer(pcmFormat: format,
                                         frameCapacity: AVAudioFrameCount(spec.block_frames)),
           let channels = buffer.floatChannelData else { throw BenchFailure("Missing MIDI or float stereo output") }
     var result = Data(capacity: spec.capture_frames * 8)
     var cursor = 0
-    var anySound = false
+    var scheduled: [Record] = []
+    var firstRender: Int?
+    var sounding = [false, false]
     for begin in stride(from: 0, to: spec.capture_frames, by: spec.block_frames) {
         let count = min(spec.block_frames, spec.capture_frames - begin)
         while cursor < spec.events.count && spec.events[cursor].frame < begin + count {
@@ -161,6 +165,7 @@ func render(_ format: AVAudioFormat, _ block: AURenderBlock, _ schedule: AUSched
             [status, event.note, event.velocity].withUnsafeBufferPointer { bytes in
                 schedule(AUEventSampleTime(event.frame), 0, bytes.count, bytes.baseAddress!)
             }
+            scheduled.append(["frame": event.frame, "action": event.action, "note": event.note, "velocity": event.velocity])
             cursor += 1
         }
         buffer.frameLength = AVAudioFrameCount(count)
@@ -171,6 +176,7 @@ func render(_ format: AVAudioFormat, _ block: AURenderBlock, _ schedule: AUSched
         stamp.mSampleTime = Double(begin)
         let status = block(&flags, &stamp, AUAudioFrameCount(count), 0, buffer.mutableAudioBufferList, nil)
         try require(status == noErr, "AU render failed at frame \(begin) with OSStatus \(status)")
+        if firstRender == nil { firstRender = Int(stamp.mSampleTime) }
         let output = UnsafeMutableAudioBufferListPointer(buffer.mutableAudioBufferList)
         try require(output.count == 2 && output.allSatisfy { $0.mData != nil && $0.mDataByteSize >= UInt32(count * 4) },
                     "AU returned an incomplete stereo buffer")
@@ -179,14 +185,14 @@ func render(_ format: AVAudioFormat, _ block: AURenderBlock, _ schedule: AUSched
             for channel in 0..<2 {
                 let sample = returned[channel][i]
                 try require(sample.isFinite, "Non-finite original PCM at frame \(begin + i)")
-                anySound = anySound || sample != 0
+                sounding[channel] = sounding[channel] || sample != 0
                 var word = sample.bitPattern.littleEndian
                 withUnsafeBytes(of: &word) { result.append(contentsOf: $0) }
             }
         }
     }
-    try require(cursor == spec.events.count && anySound, "Incomplete event schedule or silent original")
-    return result
+    try require(cursor == spec.events.count && sounding.contains(true) && firstRender != nil, "Incomplete event schedule or silent original")
+    return (result, scheduled, firstRender!)
 }
 
 
@@ -213,6 +219,7 @@ func auditApplied(_ unit: AUAudioUnit, source: Record, active: Record,
     var changed: [Record] = []
     var activeChanged: [Record] = []
     var unexposedLegacy: [String] = []
+    var liveWords: [String: UInt32] = [:]
     var liveMatches = 0
     for entry in snapshot {
         guard let key = entry["identifier"] as? String, let value = entry["value"] as? NSNumber,
@@ -241,9 +248,11 @@ func auditApplied(_ unit: AUAudioUnit, source: Record, active: Record,
             else { missingTree.append(key) }
             continue
         }
-        if parameter.value.bitPattern == bits { liveMatches += 1 }
+        let actualBits = parameter.value.bitPattern
+        liveWords[key] = actualBits
+        if actualBits == bits { liveMatches += 1 }
         else {
-            changed.append(["identifier": key, "expected_bits": bits, "applied_bits": parameter.value.bitPattern,
+            changed.append(["identifier": key, "expected_bits": bits, "applied_bits": actualBits,
                             "min": parameter.minValue, "max": parameter.maxValue])
         }
     }
@@ -256,7 +265,7 @@ func auditApplied(_ unit: AUAudioUnit, source: Record, active: Record,
         && changed.isEmpty && liveMatches > 0 && legacyOK
     let details: Record = ["authored": expected.count, "snapshot": snapshot.count,
         "tree_before_selection": initialTree.count, "tree_after_selection": live.count,
-        "live_matches": liveMatches, "missing_active": missingActive, "active_differences": activeChanged,
+        "live_matches": liveMatches, "live_words": liveWords, "missing_active": missingActive, "active_differences": activeChanged,
         "missing_live": missingTree, "live_differences": changed, "unexposed_legacy": unexposedLegacy,
         "qualified": complete]
     return ApplicationAudit(complete: complete, details: details)

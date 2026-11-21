@@ -2,6 +2,8 @@
 
 **S4 FAIL. Zero of 14 complete preset pairs were available for comparison.** The predeclared N03 limits per program are an absolute RMS-level difference of at most 1.0 dB and log-spectral distance of at most 3.0 dB over 20 Hz–16 kHz. N01 allows 14 original-app factory preset renders when the 14/56 comparison ZIP cannot be recovered. This report records the input check before a full-preset render. [Delivery plan, N01 and N03](../DELIVERY-PLAN.md)
 
+The November 21 rerun on the recovered Linux bench reproduced seven original component captures byte for byte. Complete instrument initialization stopped at the first Swift Foundation UUID metadata request. The engine-only AU host, 14 fixed input records, authenticated release audit, and stereo scoring command are in the [factory bench](../../experiments/sound-hardware-v1/sj6-factory/README.md). The two arms still need complete-preset renders before any score can be reported.
+
 ## Verified originals
 
 | Input | Bytes | SHA-256 |

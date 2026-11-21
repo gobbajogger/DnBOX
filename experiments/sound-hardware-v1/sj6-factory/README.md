@@ -22,11 +22,13 @@ For the application replay use the compact waveform and typed AMP2 tree specifie
 
 The fixed matrix contains the first program in each original export bank plus *Medieval Sky* and *PWM String Pad*. Each graph starts fresh at 44.1 kHz with the authored internal tempo. A single note, then a chord and a release tail exercise three seconds of stereo output. Both arms use the exact sample positions and unity gain specified in [the matrix](s4-inputs.json). See [the original bench](original/README.md) for the restricted Linux component replay, the released/bundled bank identity audit and the headless Audio Unit host.
 
-Each capture consists of `<program UID>.f32le` and its JSON receipt. The receipt pins the arm (`original` or `dnbox`), bank and program IDs, complete record hash, matrix hash, rate, frame count, channel count, `stereo-f32le` format, PCM digest, and full-preset qualification. Original output requires the matching AU executable digest. DnBOX output requires the source commit. The two arms must have trustworthy producer evidence for those declarations.
+Each producer exports the stereo PCM, the receipt, and the applied program state as `<UID>.f32le`, `<UID>.json`, and `<UID>.applied.json`. The scorer checks the selected input against the release audit and complete record hash. It verifies the applied UID, tuning, tempo, input settings, every authored control in the applied snapshot, and the live control words emitted by the producer. The receipt includes the actual event schedule, render start, internal clock mode, fresh-instance reset, unity gain, block size, and digests of the applied state and PCM. Each channel must be finite and contain sound. The original needs the audited AU identity, installed executable digest and qualified load route. The DnBOX capture needs a trusted source revision and the SHA-256 of the independently identified production image used for that capture. Receipt checks establish consistency with these inputs. Producer provenance still depends on running the trusted bench and firmware and collecting their outputs directly.
 
 ```sh
 python3 -m unittest test_comparison
-python3 compare.py /path/to/original-captures /path/to/dnbox-captures
+python3 compare.py /path/to/original-captures /path/to/dnbox-captures \
+    --inputs /tmp/sj6-selected --candidate-image /path/to/x0x.bin \
+    --candidate-commit "$FULL_SOURCE_COMMIT"
 ```
 
 Each channel must pass the existing 1 dB absolute RMS-level and 3 dB log-spectral limits in 20 Hz–16 kHz. The spectral calculation uses 2,048-frame Hann windows, 512-frame hops and a reference-relative −80 dB floor. Unusable captures yield exit 2. A fully scored matrix outside tolerance yields exit 1. The recovered material supplies zero qualifying pairs. The seven Linux component replays have their own input and output hashes.

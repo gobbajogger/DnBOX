@@ -8,6 +8,21 @@ The released instrument and the separate export contain the same 640 program UID
 
 The opt-in production build setting `X0X_SYNTHONE_PATCH=1` exposes 13 applied INIT controls to FWUI. The foreground can enumerate descriptors, read a coherent per-part snapshot, and stage an edit for the next audio block. The app rejects stale revisions, preserves the peer part, reports temporary note-lock ownership and persists edits through the existing project cell. Both owners, all 1,664 control positions, held notes, preset replacement and a save/reload passed. The ordinary Elite and Pro ELF, app and package bytes match the previous stock outputs. With the option enabled, the +1 ms physical scene differs from stock by 11 project bytes on Elite and four on Pro, with the first DAC difference at stereo frame 120,896 on both. An edited opt-in cell requires the enabled build. [Native links and stock comparisons](../../experiments/sound-hardware-v1/synthone-patch/verification.tar.gz) The complete 694-program factory backend and S6 are open. [API](../../firmware/src/app/s1_patch.h) · [Application test](../../tests/host/synthone_patch_test.c)
 
+## Startup, live input timing and Synth One widening, 2026-11-21
+
+The direct-DMA candidate places the original first audio block in bank 1 for edge 4 and leaves edge 5 silent. Both targets reproduced all 30,208 startup stereo frames with the saved Clip project. Across the 12 complete physical scenes (0 through +5 ms on each board), all runs completed 648 halves with zero raw late transfers. Peak shifted times were 10,471 µs on Elite and 10,485 µs on Pro. Both retained the stock image lengths and 8,972 free pool bytes.
+
+| Changed bytes in the 36,420-byte saved project | 0 ms | +1 ms | +2 ms | +3 ms | +4 ms | +5 ms |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Elite | 3 | 0 | 13 | 5 | 10 | 0 |
+| Pro | 4 | 10 | 12 | 3 | 4 | 0 |
+
+No live DAC capture matched stock throughout. In the byte-identical Elite +1 project, stock accepted drum hit 4 in DMA half 190 and the candidate in half 191. The output first differed at frame 97,856. A native DSP regression also increased the cost of peaking EQ and chorus in this exact-size variant. The source patches, absolute frame and project offsets for each run, saved project and reproduction commands are in the [timing packet](../../experiments/sound-hardware-v1/strict-timing/direct-dma-startup.tar.gz).
+
+The [fresh pack-free oscillator A/B](../sound/synthone-ab.md) produced 1,388 stereo captures whose hashes matched the recovered comparison. All 694 programs passed separately on both channels and 492 were byte-identical. The largest spectral error was 0.064061 dB. [CPU sampling of the eight slowest original callback programs](../../experiments/sound-hardware-v1/synthone-profile/README.md) found the original ladder filter at 19.2% and compact waveform word lookup at 11.1% of 7,416 samples. All 64 repeated output checksums matched the original records.
+
+A 6,615-byte per-part history now reproduces the final Synth One widening stage within tolerance on all 694 factory stimuli at 44.1 kHz. The worst spectral RMS difference is 0.003267 dB. The original two-byte implementation failed two programs. A native application diagnostic also links both selected histories for 368 additional flash bytes, with no incremental pool allocation. The stock memory is shared with other possible factory FX work and the multi-second feedback delay still lacks a qualified implementation. [Factory measurements and selected-part firmware replay](../../experiments/sound-hardware-v1/synthone-widen/README.md)
+
 ## Timing decision
 
 The note-cost planner with audio-owned startup reached **10,409 µs on Elite** and **10,377 µs on Pro** across +1 through +5 ms. All ten shifted runs completed 648 audio halves in 8 seconds with zero raw or scene late. That leaves 1,200 and 1,232 µs of headroom against 11,609 µs. Both models retained stock application and package sizes, byte-identical loaders and 8,972 B of free pool. **Behavior qualification fails.** Each same-offset physical project differed from stock. Pro +1 differed in one byte, bass B length 32 versus 35. The production firmware remains at its previously qualified source. S6 is still FAIL. [Timing, flash, project and DAC records](../../experiments/sound-hardware-v1/strict-timing/note-cost-and-owned-boot.tar.gz)
