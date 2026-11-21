@@ -51,7 +51,7 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
  * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
  * init cell (factory 0); they are never written back. No song-layout change.
  * With X0X_SYNTHONE_PATCH enabled, bytes/bits 8..20 hold native INIT
- * edits in descriptor order. Stock refuses these edited cells. Untouched
+ * edits in descriptor order. Builds with X0X_SYNTHONE_PATCH disabled refuse these edited cells. Untouched
  * cells retain their historical 32 bytes and exact INIT values.
  * The original engines still map to their original selectors; schema1 is refused.
  * Untouched controls come from the immutable binary32 factory data, never

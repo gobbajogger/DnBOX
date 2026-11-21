@@ -7404,6 +7404,7 @@ static UI_DRAW void draw_preset_name(int voice,int cx,int y,int height,uint16_t 
 #endif
 
 static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col);
+static UI_DRAW void s1_rate_glyph(pref_t r,int val,int x,int y,int width,uint16_t ink);
 #if X0X_SYNTHONE_PATCH
 static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,uint16_t col);
 #endif
@@ -7447,6 +7448,8 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     uint16_t ink=night?(active?SOUND_INK:SOUND_WHITE):(active?C_BLACK:C_WHITE);
     int value_y=height>49?35:26, bar_y=height-4;
     if(!d) return;
+    int rate_row = width == 232 && r.kind == R_ENG && r.a == T_303 &&
+        r.c == ORIGINAL_SYNTHONE_CRUSH && engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE;
     val=matrix_value(r);
     if(r.kind==R_ENG && r.a==T_303 &&
        engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO) {
@@ -7482,7 +7485,8 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         int yy=y+(height>49?14:11);
         uint16_t label = unused ? SOUND_DIM : active ? (night ? SOUND_INK : C_BLACK)
                                                     : (night ? SOUND_GRAY : C_GRAY);
-        text_c(cx, yy, &FONT_T, matrix_name(r), label);
+        if (rate_row) cv_text(x+8, yy, &FONT_T, matrix_name(r), label);
+        else text_c(cx, yy, &FONT_T, matrix_name(r), label);
     }
 #if X0X_BASS_PRESET_PREVIEW
     if(r.kind==R_BPRESET) {
@@ -7529,12 +7533,16 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
     if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
         /* Drum parts draw their own rows in draw_drum_voice. */
-        int single = width == 232;
-        orig_strip_glyph(r,val,single ? cx-46 : x+3,y+22,ink);
         pref_value_of(r,val,num,unit);
-        if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
-            strip_value_fit(x, y+28, num, unit, ink);
-        else strip_value(single ? cx+23 : x+width-14,y+28,num,unit,ink);
+        if (rate_row) {
+            s1_rate_glyph(r,val,x+34,y+23,108,ink);
+            strip_value(x+width-29,y+34,num,unit,ink);
+        } else {
+            orig_strip_glyph(r,val,x+3,y+22,ink);
+            if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
+                strip_value_fit(x, y+28, num, unit, ink);
+            else strip_value(x+width-14,y+28,num,unit,ink);
+        }
     } else
     if(shape) {
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -8234,26 +8242,32 @@ static UI_DRAW void orig_fx_glyph(int type,int gx,int gy,uint16_t col)
     default: break;
     }
 }
-static UI_DRAW void og_wave(int gx,int gy,float (*f)(float,float),float q,uint16_t col)
+static UI_DRAW void og_wave_width(int gx,int gy,int width,float (*f)(float,float),float q,uint16_t col)
 {   /* f returns -1..1 (up positive) over t 0..1 */
     int py=0;
-    cv_rect(gx,gy+OG_H,OG_W,1,C_LINE);
-    for(int i=0;i<OG_W;i++) {
-        float v=f((float)i/(OG_W-1),q);
+    cv_rect(gx,gy+OG_H,width,1,C_LINE);
+    for(int i=0;i<width;i++) {
+        float v=f((float)i/(width-1),q);
         if(v>1)v=1; if(v<-1)v=-1;
         int yy=gy+OG_H/2-(int)(v*6.0f+(v<0?-.5f:.5f));
         if(i) cv_line(gx+i-1,py,gx+i,yy,col);
         py=yy;
     }
 }
+static inline void og_wave(int gx,int gy,float (*f)(float,float),float q,uint16_t col)
+{ og_wave_width(gx,gy,OG_W,f,q,col); }
 static float og_sin(float t,float k){return fm_sinf(6.2831853f*t*k);}
 static float og_bite(float t,float q){float g=.3f+6.0f*q;return fm_tanhf(g*og_sin(t,1.5f))/fm_tanhf(g);}
 static float og_gnaw(float t,float q){float v=og_sin(t,1.5f)*(1.0f+3.0f*q);
     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
-/* Sample-and-hold retains the input amplitude between clock ticks. */
-static float og_rate_hold(float t,float q){
-    int steps = 2 + (int)((1.f-q)*24.f + .5f);
-    return og_sin((float)(int)(t*steps)/(float)steps,1.5f);
+/* The reference sine retains its amplitude between ticks of the applied rate. */
+static float og_rate_hold(float t,float ticks)
+{ return og_sin((float)(int)(t*ticks)/ticks,1.5f); }
+static UI_DRAW void s1_rate_glyph(pref_t r,int val,int x,int y,int width,uint16_t ink)
+{
+    float hz;
+    if (engine_param_si(T_303,r.b,r.c,val,&hz) == X0X_U_HZ)
+        og_wave_width(x,y,width,og_rate_hold,hz*.002f,ink); /* two milliseconds */
 }
 static float og_crush(float t,float q){int n=12-(int)(q*10+.5f);float v=og_sin((float)((int)(t*(26-q*20))) /(26-q*20),1.5f);
     return (float)(int)(v*n+(v<0?-.5f:.5f))/(float)n;}       /* sample-rate + bit reduction */
@@ -8381,7 +8395,7 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     float q=d && d->max?(float)val/(float)d->max:0;
     int bank=engine_bass_sound_bank(&proj.sound,r.b), c=r.c;
     if (bank == ORIGINAL_SOUND_SYNTHONE && c == ORIGINAL_SYNTHONE_CRUSH) {
-        og_wave(gx,gy,og_rate_hold,q,col);
+        s1_rate_glyph(r,val,gx,gy,OG_W,col);
         return;
     }
     if (bank == ORIGINAL_SOUND_JUNO) { juno_strip_glyph(r, q, gx, gy, col); return; }

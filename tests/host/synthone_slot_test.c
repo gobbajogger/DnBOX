@@ -128,9 +128,11 @@ static void short_list(int voice)
             CHECK(!strcmp(number, "48000") && !strcmp(unit, "Hz"));
         }
         ui_frame();
-        char name[64];
-        snprintf(name, sizeof name, "stock-init-list-%s-%c", names[row], 'a' + voice);
-        shot(name);
+        if (row) { /* Preserve the three archived selector captures. */
+            char name[64];
+            snprintf(name, sizeof name, "stock-init-list-%s-%c", names[row], 'a' + voice);
+            shot(name);
+        }
     }
     button_tap(B_HOME);
     CHECK(ui.overlay == O_NONE && ui.view == V_PART && bidx() == voice && cur_page() == 1);
