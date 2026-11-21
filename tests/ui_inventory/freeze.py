@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
-"""Export/authenticate one local Git tree; no network, writes, checkout or merge."""
+"""Export/authenticate one local Git tree; no network or Git mutation."""
 import argparse,hashlib,json,os,re,subprocess,tarfile,tempfile
 from pathlib import Path
 

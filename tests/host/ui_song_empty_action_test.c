@@ -4,7 +4,7 @@
 static uint16_t actual[240*240];
 static void cue(void)
 {
- const char *s="EMPTY: WHITE KEYS ADD BARS";
+ const char *s="EMPTY   WHITE KEY: ADD BAR";
  const felucca_font_t *f=&FONT_XS;
  int x=50,y=HDR_H+vc(f,11,11),w=tw(f,s),ink=0;
  CHECK(x+w<=240);

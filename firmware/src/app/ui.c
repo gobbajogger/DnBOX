@@ -1757,10 +1757,10 @@ static void hdr_name(int g, char *t)
 {
     const char *who = is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part]) : part_name(ui.part);
     switch (g) {
-    case GR_TRACK: put_s(put_s(t, who), ": THIS TRACK"); break;
+    case GR_TRACK: put_s(put_s(t, who), ": TRACK"); break;
     case GR_TMIX: put_s(put_s(t, who), ": TRACK MIX"); break;
     case GR_KIT: put_s(put_s(t, part_name(ui.part)), ": ALL TRACKS"); break;
-    case GR_PAT: put_s(put_i(put_s(t, "P"), seq.ppat[ui.part] + 1), ": THE PATTERN"); break;
+    case GR_PAT: put_s(put_i(put_s(t, "P"), seq.ppat[ui.part] + 1), ": PATTERN"); break;
     case GR_MORE: put_s(t, "MORE"); break;
     case GR_MIDI: put_s(t, "MIDI"); break;
     case GR_AUDIO: put_s(t, "AUDIO"); break;
@@ -1768,7 +1768,7 @@ static void hdr_name(int g, char *t)
     case GR_PROJECT: put_s(t, "PROJECT"); break;
     case GR_SYSTEM: put_s(t, "SYSTEM"); break;
     case GR_BT: put_s(t, "BLUETOOTH MIDI"); break;
-    default: put_s(put_s(t, part_name(ui.part)), ": THE SOUND"); break;
+    default: put_s(put_s(t, part_name(ui.part)), ": SOUND"); break;
     }
 }
 
@@ -2011,25 +2011,25 @@ static int help_lines(int b, const char *l[HELP_LINES])
     int n = 0, gen = ui.view == V_GEN, kbd = is_303() && ui.rec;
 #define L(s) (l[n++] = (s))
     switch (b) {
-    case B_FX: L("THE EFFECTS: REVERB, DELAY,"); L("TAPE AND KIT DRIVE"); L("AGAIN: THE NEXT PAGE"); break;
-    case B_SEL: L("THIS SCREEN AS A LIST"); L("IN A LIST: RUN THE ACTION"); L("IN A QUESTION: YES"); break;
+    case B_FX: L("REVERB / DELAY"); L("TAPE / KIT DRIVE"); L("TAP: NEXT PAGE"); break;
+    case B_SEL: L("TAP: LIST"); L("LIST: ACTIVATE"); L("CONFIRM: YES"); break;
     case B_ENV:
-        if (is_303()) { L("HOLD + KEY: AN ACCENT"); if (kbd) L("WRITING: + " UI_CAP_OCT ": REST"); }
+        if (is_303()) { L("HOLD + KEY: ACCENT"); if (kbd) L("REC + " UI_CAP_OCT ": REST"); }
         else if (is_drum()) { L("HOLD + WHITE KEY: ACCENT"); L("HOLD + BLACK KEY: LOUD HIT"); }
-        else L("HOLD + KEY: AN ACCENT");
+        else L("HOLD + KEY: ACCENT");
         break;
     case B_LFO:
-        L("THE MIXER AND THE MASTER"); L("AGAIN: THE NEXT PAGE");
+        L("MIXER / MASTER"); L("TAP: NEXT PAGE");
         if (ui.view == V_MIX) L(UI_CAP_HOME " + BLACK KEY: MUTE");
-        if (is_303()) { L("HOLD + KEY: A SLIDE"); if (kbd) L("HOLD + " UI_CAP_OCT ": TIE"); }
+        if (is_303()) { L("HOLD + KEY: SLIDE"); if (kbd) L("HOLD + " UI_CAP_OCT ": TIE"); }
         break;
-    case B_EDIT: L("THE PART'S SOUND"); L("AGAIN: THE NEXT PAGE"); L("HOLD A STEP + KNOB: P-LOCK");
+    case B_EDIT: L("PART SOUND"); L("TAP: NEXT PAGE"); L("STEP + KNOB: PARAMETER LOCK");
         L("STEP + " UI_CAP_SELECT ": CHANCE"); break;
     case B_GLO:
-        L("SETTINGS, SAVE, LOAD,"); L("RESET, CLEAR, PERFORMANCE"); L("AGAIN: CLOSE");
+        L("SETTINGS / SAVE / LOAD"); L("RESET / CLEAR / PERFORMANCE"); L("TAP: CLOSE");
         /* HOME only: the same card, no new screen. A pad tap clears the selected
          * part of that pattern. Hold one pad and press another to copy that part. */
-        if (ui.view == V_HOME) { L("+ PAD: CLEAR THIS PART"); L("+ HOLD PAD, PRESS PAD: COPY"); }
+        if (ui.view == V_HOME) { L("+ PAD: CLEAR PART"); L("+ HOLD PAD + PAD: COPY PART"); }
         break;
     case B_HOME:
 #if X0X_BASS_PRESET_PREVIEW
@@ -2037,47 +2037,48 @@ static int help_lines(int b, const char *l[HELP_LINES])
             engine_bass_preset_pending(bidx())) L("TAP: CANCEL SOUND REQUEST");
         else
 #endif
-            L("THE PATTERN: ALL FIVE PARTS");
-        L("AGAIN: SONG  + " UI_CAP_SELECT ": TEMPO"); L("+ WHITE KEY: PATTERN");
-        if (is_drum() && part_view()) L("+ BLACK KEY: MUTE THE TRACK");
-        L("+ " UI_CAP_REC ": UNDO  + " UI_CAP_PLAY ": REDO"); L("LIST: BACK   QUESTION: NO");
+            L("PATTERN / 5 PARTS");
+        L("TAP: SONG  + " UI_CAP_SELECT ": TEMPO"); L("+ WHITE KEY: PATTERN");
+        if (is_drum() && part_view()) L("+ BLACK KEY: TRACK MUTE");
+        L("+ " UI_CAP_REC ": UNDO  + " UI_CAP_PLAY ": REDO"); L("LIST: BACK   CONFIRM: NO");
         break;
     case B_SAVE: {                                   /* the pattern a copy takes */
         static char cp[40], cl[32], st[40];
         put_s(cp, "+ WHITE KEY: COPY LIVE PARTS");
         put_s(put_s(cl, "+ " UI_CAP_REC ": CLEAR "), part_name(ui.part));
         if (ui.rec && !proj.set.autosave_off && save_state() == SAVE_UNSAVED)
-            put_s(st, UI_CAP_REC " OFF FOR AUTOSAVE");
+            put_s(st, UI_CAP_REC " ON / AUTOSAVE PAUSED");
         else
             put_s(put_s(st, proj.set.autosave_off ? "AUTO OFF / " : "AUTO ON / "),
                   save_state() == SAVE_QUEUED ? queued_save_label() : save_state() == SAVE_FAILED ? "SAVE FAILED" :
                   save_state() == SAVE_UNSAVED ? "UNSAVED" : "SAVED");
-        L("TAP: SAVE EVERYTHING"); L(cp); L(ui.pbank ? "TO P17-32 (+ " UI_CAP_OCT "-: P1-16)" : "TO P1-16 (+ " UI_CAP_OCT "+: P17-32)"); L(cl);
-        L("+ KNOB: FORGET ITS MOTION"); L(st);
+        L("TAP: SAVE PROJECT"); L(cp); L(ui.pbank ? "TO P17-32 (+ " UI_CAP_OCT "-: P1-16)" : "TO P1-16 (+ " UI_CAP_OCT "+: P17-32)"); L(cl);
+        L("+ KNOB: CLEAR MOTION"); L(st);
         break;
     }
     case B_ARP:
-        L("TB-3PO: THE 303 LINE"); L("GENERATOR (CHICAGO, MIAMI)");
-        if (gen) { L(UI_CAP_OCT "+: A NEW LINE"); L(UI_CAP_OCT "-: MUTATE IT"); }
-        L("AGAIN: THE NEXT PAGE");
+        L("TB-3PO / 303 GENERATOR"); L("CHICAGO / MIAMI");
+        if (gen) { L(UI_CAP_OCT "+: NEW LINE"); L(UI_CAP_OCT "-: MUTATE LINE"); }
+        L("TAP: NEXT PAGE");
         break;
     case B_SEQ:
-        L("THE PART'S STEPS: LENGTH, RATE"); L("AGAIN: THE NEXT PAGE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
+        L("STEP LENGTH / RATE"); L("TAP: NEXT PAGE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
+        if (ui.view == V_SEQ) L("SEQ + " UI_CAP_SEL ": SLIDER LANE");
         if (is_303()) L("STEP + " UI_CAP_ALGO ": VELOCITY");
         break;
     case B_PLAY: L("START / STOP"); L(UI_CAP_HOME " + " UI_CAP_PLAY ": REDO"); break;
     case B_REC:
-        L("RECORD ON / OFF:"); L(is_303() ? "THE KEYS PLAY AND WRITE NOTES" : "BLACK KEYS, KNOB MOVES");
+        L("RECORD ON / OFF"); L(is_303() ? "KEYS: NOTE RECORD" : "BLACK KEYS / KNOB MOTION");
         L(UI_CAP_HOME " + " UI_CAP_REC ": UNDO"); L(UI_CAP_SAVE " + " UI_CAP_REC ": CLEAR PART");
         break;
     case B_OCTDN:
     case B_OCTUP:
-        if (gen) L(b == B_OCTUP ? "A NEW 303 LINE" : "MUTATE THE LINE");
-        else if (kbd) { L("THE KEYBOARD'S OCTAVE"); L(UI_CAP_LFO "+" UI_CAP_OCT ": TIE"); L(UI_CAP_ENV "+" UI_CAP_OCT ": REST"); }
+        if (gen) L(b == B_OCTUP ? "NEW 303 LINE" : "MUTATE LINE");
+        else if (kbd) { L("KEYBOARD OCTAVE"); L(UI_CAP_LFO "+" UI_CAP_OCT ": TIE"); L(UI_CAP_ENV "+" UI_CAP_OCT ": REST"); }
         else if (ui.view == V_HOME || ui.view == V_SONG) L(b == B_OCTUP ? "PATTERNS 17-32" : "PATTERNS 1-16");
         else {
-            L(b == B_OCTUP ? "THE NEXT 16 STEPS" : "THE 16 STEPS BEFORE"); L("PAGES: 1-16 17-32 33-48 49-64");
-            if (is_303()) L("HOLDING A STEP: ITS OCTAVE");
+            L(b == B_OCTUP ? "NEXT 16 STEPS" : "PREVIOUS 16 STEPS"); L("PAGES: 1-16 17-32 33-48 49-64");
+            if (is_303()) L("HOLD STEP: NOTE OCTAVE");
         }
         break;
     default: break;
@@ -2099,7 +2100,7 @@ static void copy_tick(uint32_t btn, uint32_t keys)
     }
     if (!said && btn == m && !keys && !(ui.btn_used & m) && ui.overlay != O_ASK &&
         plat_ms() - ui.down_t[B_SAVE] >= COPY_HOLD && (int32_t)(ui.turn_t - ui.down_t[B_SAVE]) <= 0) {
-        say("CHOOSE PASTE TARGET", 0);
+        say("PASTE TARGET", 0);
         said = 1;
     }
 }
@@ -4194,6 +4195,7 @@ static int play_answer_question(int home_held)
 
 enum { UI_LANE_VELOCITY, UI_LANE_CHANCE, UI_LANE_PITCH, UI_LANE_PAN, UI_LANE_COUNT };
 static uint8_t ui_step_lane;
+static int step_lane_turn(int e);
 
 X0X_COLD static void button_tap(int b)
 {
@@ -4269,8 +4271,8 @@ X0X_COLD static void button_tap(int b)
             set_view(ui.view == V_HOME ? V_SONG : V_HOME);
         break;
     case B_SEL:
-        /* Physical equivalent of activating the visible lane label. Plain
-         * SELECT and SEQ retain their list/page roles. */
+        /* Activate the visible lane label with SEQ + SCALE (FM-1 SEL).
+         * Plain SCALE/SEL and SEQ retain their list/page roles; K2 is separate. */
         if (ui.view==V_SEQ && ui.overlay==O_NONE && !ui.help && (ui.btn & (1u<<B_SEQ)) &&
             plat_ms()-ui.down_t[B_SEQ]<HELP_HOLD) {
             ui_step_lane=(uint8_t)((ui_step_lane+1)%UI_LANE_COUNT);
@@ -4805,7 +4807,12 @@ X0X_COLD static void input_body(void)
         }
     }
     if ((e = enc(EN_ALGO)) != 0) {               /* ALGORITHM: part, or held 303 step's velocity */
-        if (ui.overlay == O_LIST) {
+        if (ui.view==V_SEQ && ui.overlay==O_NONE && !ui.help &&
+            (ui.btn & (1u<<B_SEQ)) && held_any_step()>=0 &&
+            plat_ms()-ui.down_t[B_SEQ]<HELP_HOLD) {
+            ui.btn_used|=1u<<B_SEQ;
+            (void)step_lane_turn(e);
+        } else if (ui.overlay == O_LIST) {
             turn_ref(list_rows[ui.list_sel], e, EN_ALGO);
         } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
             bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
@@ -5135,38 +5142,11 @@ static uint16_t dim(uint16_t c, int t) { return blend(C_BLACK, c, t); }
 
 static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f, s); }
 
-/* a font's capital line: the first and last rows of 'H' (rounded half coverage), measured
- * once from the glyph bitmap, so text is centred on what the eye sees rather than on the
- * font's cell (which differs per face and size) */
-typedef struct { const felucca_font_t *f; int8_t top, bot; } capm_t;
-static capm_t capm[6];
+/* gen_font measures these rows before encoding the bitmap, identically for
+ * all codecs. Reading packed bytes as raw alpha would move the baseline. */
 static const capm_t *caps(const felucca_font_t *f)
 {
-    int i;
-    for (i = 0; i < 6 && capm[i].f; i++)
-        if (capm[i].f == f)
-            return &capm[i];
-    if (i == 6)
-        i = 5;
-    {
-        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = font_bitmap_width(f, gi), bpr = (w + 1u) / 2u, x, y;
-        const uint8_t *gd = f->data + f->off[gi];
-        int top = -1, bot = 0;
-        for (y = 0; y < f->h; y++)
-            for (x = 0; x < w; x++) {
-                uint32_t a = gd[y * bpr + x / 2u];
-                a = (x & 1u) ? (a & 15u) : (a >> 4);
-                if (a >= 8u) {
-                    if (top < 0)
-                        top = (int)y;
-                    bot = (int)y;
-                }
-            }
-        capm[i].f = f;
-        capm[i].top = (int8_t)(top < 0 ? 0 : top);
-        capm[i].bot = (int8_t)bot;
-    }
-    return &capm[i];
+    return &f->cap;
 }
 /* parts of a line ("A 909 GR", "B 909 FL") with a real gap between them: a proportional face's
  * space is too narrow to separate them. A NULL ends the list. */
@@ -6205,7 +6185,7 @@ static UI_DRAW void draw_song(int band)
         if (seq.song_on && seq.playing && k == seq.song_pos)
             play_icon(26, y + 1, seq.song_rec ? RGB(255, 80, 70) : C_WHITE);
         if (k == sg->len) {                            /* one past the end: where the song grows */
-            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY: WHITE KEYS ADD BARS", k == ui.song_sel ? C_WHITE : C_DIM);
+            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY   WHITE KEY: ADD BAR", k == ui.song_sel ? C_WHITE : C_DIM);
             continue;
         }
         for (int pos = 0; pos < NPARTS; pos++) {

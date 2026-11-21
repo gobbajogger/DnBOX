@@ -1,7 +1,7 @@
 # Firmware renderer inventory
 
 This source audit complements the existing screen walker. It discovers painting
-functions and their callers in `firmware/src`, assigns stable
+functions and their callers across firmware application/graphics sources, assigns stable
 `repository-path::C-symbol` IDs, and leaves every unobserved production function
 explicitly uncovered. Inactive preprocessor branches remain inventoried. IDs do
 not depend on line numbers, discovery order, screenshot count, or a candidate's
@@ -9,8 +9,13 @@ self-reported completion count.
 
 ```sh
 python3 -m unittest discover -s tests/ui_inventory -p 'test_*.py' -v
+python3 tests/ui_inventory/freeze.py --repo /local/repo --tree <exact-tree-or-commit-sha> --output /new/source-freeze
 python3 tests/ui_inventory/source_inventory.py --source . --output /new/source-inventory.json
-python3 tests/ui_inventory/run.py --source . --output /new/output-outside-source
+python3 tests/ui_inventory/run.py --source /new/source-freeze --output /new/output-outside-source
+python3 tests/ui_inventory/verify.py --evidence /new/output-outside-source --source-freeze /new/source-freeze --output /new/output-outside-source/verification.json
+python3 tests/ui_inventory/extend_edits.py --evidence /new/output-outside-source
+python3 tests/ui_inventory/pack_tar.py --source /new/output-outside-source --report-name combined-report.json --output /new/transfer-with-edits
+python3 tests/ui_inventory/pack_tar.py --source /new/output-outside-source --output /new/transfer
 ```
 
 `run.py` instruments a disposable source copy, reuses the actual geometry walker
@@ -34,6 +39,9 @@ Macro-generated painters, indirect function pointers, graphics primitives in
 another subsystem, and semantically distinct branches need further audit.
 Calls with the same symbol in different application files conservatively keep
 all matching definitions. Unused functions therefore remain visible as gaps.
+Every direct painting API invocation outside recognized function grammar is an
+explicit source-audit gap rather than silently omitted. Source registration
+follows quoted includes from the actual production `firmware/src/x0x.c` root.
 
 The existing host substitutes the physical clip-grid and pad-calibration
 painters. This runner separately extracts their exact production bodies and
@@ -45,7 +53,8 @@ hardware behavior remain outside that evidence. The original substitutes never
 receive production renderer IDs. An inactive slider-lane source file stays
 uncovered until registered by the production translation unit. A successful
 host process cannot turn uncovered routes into acceptance.
-The report always retains `F1: FAIL`, `visualApproval: false`, and unimplemented
+The report measures source coverage separately, retains `F1: UNREVIEWED`,
+`R22VisualReview: UNREVIEWED`, `visualApproval: false`, and unimplemented
 pixel conformance checks as `NOT_RUN` and exhaustive branch coverage as partial. Independent visual review, complete
 R22/shared-glyph conformance, native firmware memory fit and the Local gate must
 qualify the final exact revision separately.
@@ -62,3 +71,20 @@ to expose shared backgrounds to the outer xz compressor, and passes a decoded
 RGB identity check. Identical frame bytes within one archive use ordinary tar
 hardlinks. `index.json` hashes every part; `frame-map.json` in the metadata part
 retains the exact original/rendered/compressed/pixel hashes and renderer mapping.
+
+Each frame carries an explicit evidence kind: complete actual UI frame,
+complete one-shot boot/OTA display function, native painter composition with
+fixture RAM, direct preview composition, or literal source display prefix/
+statements with native input and hardware tails unrun. Literal display slices
+do not mark their whole production wrapper as observed. The producer returns
+nonzero for a renderer, input authentication, parsing or evidence-integrity
+failure. A valid measurement can report PASS while source coverage is PARTIAL;
+the explicit unobserved-ID list is retained for external lane qualification.
+A renderer exit of zero and a scoped `verify.py` PASS cannot certify F1/R22
+product acceptance.
+
+`extend_edits.py` runs the existing physical lane-edit/persistence fixture in
+its own isolated copy of the prepared source, preserving the primary attempt.
+It adds all declared part/lane edit states to `combined-report.json` and retains
+the separate invocation, exact fixture hash, instrumented inputs and native PNGs.
+Host project writer/reader persistence is tested; no device persistence is used.

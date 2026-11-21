@@ -3,7 +3,7 @@
   "rendererExit": 0,
   "audits": {
     "screens": 1530,
-    "texts": 41879,
+    "texts": 41884,
     "findings": 0
   },
   "scope": "semantic-caption clipping/occlusion in reached final frames; component/glyph geometry is separate",
@@ -202,5 +202,10 @@
   "AUDIT_MUTATE_ZERO": {
     "exit": 0,
     "auditRejected": true
+  },
+  "screenText": {
+    "audited_screens": 1530,
+    "distinct_strings": 749,
+    "known_instructional_copy": {}
   }
 }

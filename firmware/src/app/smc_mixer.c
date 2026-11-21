@@ -1124,6 +1124,7 @@ static UI_DRAW void smc_ui_grid(void)
             if (k.kind == R_BDIR) label = "DIR";
             if (k.kind == R_BTRANS) label = "TRNS";
             if (k.kind == R_FREEPLAY) label = "FREE";
+            if (k.kind == R_BPATSND) label = "SOUND";
             smc_ui_text(name, label);
             if (tw(label_font, caps_of(name)) > 27) label_font = &FONT_XS;
         }
@@ -1170,7 +1171,7 @@ static UI_DRAW void smc_ui_grid(void)
                 const felucca_font_t *font = tw(&FONT_T, caption) <= 20 ? &FONT_T : &FONT_XS;
                 const capm_t *cap = caps(font);
                 int text_y = y + 1 + (9 - (cap->bot - cap->top + 1)) / 2 - cap->top;
-                text_c(x + 19, text_y, font, caption, c);
+                text_c(x + 18, text_y, font, caption, c);
             }
         }
         smc_ui_strip_value(f, x + 15, 122, fc);

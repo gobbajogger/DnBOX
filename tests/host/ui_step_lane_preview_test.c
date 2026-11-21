@@ -37,7 +37,7 @@ static void live_lane_scenarios(void)
             char name[64];snprintf(name,sizeof name,"window-part%d-page%d",part,window);shot(name);
         }
         free(saved);
-        button_tap(B_SEL);CHECK(ui.overlay==O_LIST); /* ordinary SELECT still opens list */
+        button_tap(B_SEL);CHECK(ui.overlay==O_LIST); /* ordinary SCALE/SEL still opens list */
     }
 }
 int main(void)
@@ -84,6 +84,6 @@ int main(void)
         blit_hash[3]=0;draw_knobs();draw_step_lane();cv_commit_knobs(3);
         char name[64];snprintf(name,sizeof name,"preview-part%d-lane%d",part,kind);shot(name);
     }
-    printf("PASS physical SEQ+SELECT lane cycle, stored adapter and production/preview renders: %u checks; literal touchscreen NOT_RUN\n",checks);
+    printf("PASS physical SEQ+SCALE(FM-1 SEL) lane cycle, stored adapter and production/preview renders: %u checks; literal touchscreen NOT_RUN\n",checks);
     return 0;
 }

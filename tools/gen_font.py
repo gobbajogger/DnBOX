@@ -343,10 +343,30 @@ def main(out, compressed=True, codec=None):
     models = None
     if compressed and codec == "crop-alpha":
         models = alpha_models((name, h, glyphs) for name, _, _, _, _, _, h, glyphs in configs)
-        lines.append("static const uint8_t FONT_ALPHA_MODEL[16][15] = {")
-        for _, model in models:
-            lines.append("    {" + ", ".join(map(str, model)) + "},")
-        lines.append("};")
+        prefixes, subtables = [], []
+        for mapping, _ in models:
+            direct = [0] * 128
+            for value, (code, length) in mapping.items():
+                for suffix in range(1 << (7-length)):
+                    direct[(code << (7-length)) | suffix] = (length << 4) | value
+            prefix = []
+            for i in range(16):
+                sub = direct[i*8:(i+1)*8]
+                if sub[0] >> 4 <= 4:
+                    assert len(set(sub)) == 1
+                    prefix.append(sub[0])
+                else:
+                    if sub not in subtables:
+                        subtables.append(sub)
+                    prefix.append(128 | subtables.index(sub))
+            prefixes.append(prefix)
+        assert len(subtables) < 128
+        for cname, table, width in [("FONT_ALPHA_PREFIX", prefixes, 16),
+                                     ("FONT_ALPHA_SUB", subtables, 8)]:
+            lines.append(f"static const uint8_t {cname}[{len(table)}][{width}] = {{")
+            for row in table:
+                lines.append("    {" + ", ".join(map(str, row)) + "},")
+            lines.append("};")
     for name, ttf, px, scale, first, last, h, glyphs in configs:
         data, offs, seen = [], [], {}
         for adv, bw, g in glyphs:
@@ -364,6 +384,8 @@ def main(out, compressed=True, codec=None):
             data.extend(pack_cropped_alpha(g, bw, h, models) if models is not None
                         else pack_cropped_glyph(g, bw, h) if compressed and codec == "crop-lz"
                         else pack_glyph(raw) if compressed else raw)
+        if models is not None:
+            data.append(0)  # bounded seven-bit lookahead at the final glyph
         assert len(data) < 65536
         lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
         for i in range(0, len(data), 24):
@@ -380,8 +402,15 @@ def main(out, compressed=True, codec=None):
             lines.append(f"static const uint8_t FONT_{name}_BW[{len(glyphs)}] = {{" +
                          ", ".join(str(b) for _, b, _ in glyphs) + "};")
         width_table = "0" if derived_bw else f"FONT_{name}_BW"
+        # Match the UI's half-coverage cap-line rule on the source raster.
+        # Numeric faces use zero, since they have no capital H.
+        metric_char = 'H' if first <= ord('H') <= last else '0'
+        _, metric_width, metric_pixels = glyphs[ord(metric_char) - first]
+        ink_rows = [y for y in range(h)
+                    if any(a >= 8 for a in metric_pixels[y * metric_width:(y + 1) * metric_width])]
+        cap_top, cap_bottom = (ink_rows[0], ink_rows[-1]) if ink_rows else (0, 0)
         lines.append(f"static const felucca_font_t FONT_{name} = {{ {h}, {PAD * scale}, {first}, {last}, "
-                     f"FONT_{name}_ADV, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA }};")
+                     f"FONT_{name}_ADV, {width_table}, FONT_{name}_OFF, FONT_{name}_DATA, {{ {cap_top}, {cap_bottom} }} }};")
         lines.append("")
         print(f"font {name}: {ttf} {px}px h {h}, digit adv {glyphs[ord('0') - first][0]}, {len(data)} B")
     print(f"font set {FONTSET}: {sum(len(l) for l in lines if l.startswith('    0x')) // 6} B (approx)")

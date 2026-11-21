@@ -2,28 +2,38 @@
 
 Branch `lane/fwui`, draft PR #975, targeting `integration/dnbox-consolidated`. The independent test-and-merge owner handles the aggregate gate and visual review.
 
-## Current stock and screen evidence
+## Current FWUI qualification
 
-The code and generated resources in this revision were built from Git tree `3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493`. The two final firmware images use stock SMK-37 memory. Both genuine linker-map relinks reproduced the original ELF byte for byte. The prior baseline measured 1,028 / 1,036 B XIP free. [Current link maps, inputs and logs](fwui/current/) · [Baseline](fwui/stock-04b5/).
+The stock firmware input tree is `956a004d8abc991093318b1d067bfe32e6b914c7`. Both models use AC79 SDK 1.2.14 and JieLi 20260730.1. Every extra linker-map build reproduced the original stock ELF byte for byte. [Stock measurements and production input hashes](fwui/current/stock-fit.json) · [Earlier 04b5 baseline](fwui/stock-04b5/).
 
-| Stock model | XIP free | XIP floor | Pool free | Margin above 8,192 B reserve | Normal RAM used |
-|---|---:|---:|---:|---:|---:|
-| Elite | 2,276 B | 1,024 B | 8,972 B | 780 B | 97,204 / 98,304 B |
-| Pro | 2,288 B | 1,024 B | 8,972 B | 780 B | 97,204 / 98,304 B |
+| Stock model | Application image | XIP free | Minimum XIP | Raw pool free | Margin over 8,192 B reserve | Normal RAM |
+|---|---:|---:|---:|---:|---:|---:|
+| Elite | 550,840 B | 1,832 B | 1,024 B | 8,972 B | 780 B | 97,156 / 98,304 B |
+| Pro | 550,828 B | 1,844 B | 1,024 B | 8,972 B | 780 B | 97,156 / 98,304 B |
 
-The control fixes preserve pattern/kit ownership while displaying 808 Accent firing and 909 BD Tune, actual sequencer clock rates, BREAK groove, Miami wobble, and the effective master compression curve. FX RETURN uses the established K7/K8 send controls. HOME faders and encoders now show SMC pickup in the SMC grid. Explicit PAGE/PAUSE remains the route to a peer peek. The lossless font encoding preserved the tested pixels and advances. The host draw benchmark recorded higher CPU cost, with the slowest full page at 2.26 ms. [Timing by page](fwui/current/host-font-timing.json).
+### Screen inventory
 
-| Check | Result at this checkpoint |
-|---|---|
-| F1 | FAIL. The firmware-derived inventory contains 118 stable renderer IDs and 1,689 distinct 240×240 frame captures. The run reached 98 renderer functions and all four targeted pickup/playhead branches. Twenty functions remain unobserved, including hardware entry points and unused helpers. The metadata distinguishes complete UI frames, RAM-backed board painters and display-only boot slices. Independent R22 review remains open. [Stable renderer IDs](fwui/screens/stable-renderer-ids.tsv) · [Frame archive index](fwui/screens/index.json) · [Verification](fwui/screens/verification.json). |
-| F2 | FAIL across all domains. The ordinary walker passed all 1,530 states, 18,571 content checks and 249 drum glyph checks, including its negative controls. It caught and led to fixing 144 overwritten BREAK captions. Additional board-only domains still need geometry audits. [Geometry](fwui/current/geometry.json). |
-| F3 | PASS. Both stock models meet the two memory floors. [Builds and linker verification](fwui/current/stock-fit.json). |
-| F4 | Pan and battery host checks passed, including the 10,975-check pan test, 9,898 battery checks and the overlay battery suite. All-header coverage still needs the board screen inventory. [Control tests](fwui/current/control-tests.json). |
-| F5 | The real pad/LED scenario passed 7,229 checks on 909, 808 and BREAK. Hold-GLOBE and copy semantics passed. Full host suite at the final PR head remains open. |
-| F6 | The four real-data step lanes run in V_SEQ. Hold SEQ and tap SCALE on SMK-37 (SEL on FM-1) to cycle. The host scenario passed 1,427 checks and covers keyboard ownership and four pattern windows. BREAK has no admitted step velocity. Literal label touch has no input path on these boards. |
-| F7 | FAIL. The production Synth One renderer produces zero nonzero stereo frames on the held-note test. Neither editor has an editable Synth One engine control. The compact SuperJ6 slot has only 16 controls on each part. Sound owns the genuine bindings in #973. The visible-text scan also found explanatory copy on the help cards and empty song row. [Rendered text](fwui/current/text-scan.txt). |
+The source scanner assigns IDs by firmware path and C symbol. The native runner captured 1,709 different states and exercises the battery, running playhead, SMC pickup direction and physical pickup header. It reached 98 of 118 inventoried renderer functions. The register lists all 20 unobserved functions, including full startup and recovery wrappers, unused helpers and alternate painter paths. [Renderer IDs](fwui/screens/stable-renderer-ids.tsv) · [Unobserved paths and recovery conditions](fwui/current/native-gaps.json).
 
-C2 passes. Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor and the branch deletes no files relative to it. C1, C3, C4, C5 and C6 remain open. The final Local gate, independent four-size screen review, lane readiness and integration merge remain with their respective owners. To open a frame, look up its stable ID in the archive index or metadata. Extract the indicated tar.xz part with tar. The PNG members are the native 240×240 framebuffer pixels. The current firmware, generator and model build inputs match the preceding qualified revision. The next deliverable is the extended board geometry replay and the remaining input and caption repairs.
+Every captured state has a 240×240 PNG in the [screen archive](fwui/screens/index.json). Extract the indicated tar.xz part with tar. The metadata part contains the state-to-file map, per-frame RGB hashes and evidence type. It distinguishes complete UI frames, native board painters with test RAM, direct previews and exact display operations taken from boot handlers. [Reproduction](../../tests/ui_inventory/README.md).
+
+![Six native 240×240 frames showing battery, transport, SMC pickup, envelope and two edited step lanes](fwui/screens/review-preview.png)
+
+### Checklist
+
+| Item | Status | Evidence and remaining work |
+|---|---|---|
+| F1 | FAIL | The source and pixel inventory is available. Independent R22 component and glyph acceptance for the reached screens and the outstanding source paths is open. |
+| F2 | FAIL across all firmware domains | The ordinary walker passed 1,530 states, 41,884 visible text masks, 18,571 content checks and 249 drum-glyph checks with zero findings. An additional 159 frames and 20 persisted-edit frames had zero visible unexpected overlaps. All six raw underlay findings are recorded. The tempo popup owns the covered pixels and the background restores byte-for-byte on expiry. The board grid bounds have their own pixel tests. Native entry paths still missing from F1 have no complete-frame geometry result. [Walker](fwui/current/geometry.json) · [Extended geometry](fwui/current/extended-geometry.json). |
+| F3 | PASS | Both real stock builds and their linker maps pass the 1,024 B XIP and 512 B pool floors. [Elite map](fwui/current/final-elite-link.map.gz) · [Pro map](fwui/current/final-pro-link.map.gz). |
+| F4 | PASS in software | All 27 admitted numeric pan controls use L50 / C / R50. The board CLIP, KEYS and pad-calibration painters share the regular header. Both independent SMC headers use the same four-level battery painter. Unknown and USB states are covered. The board exposes discrete levels, with no calibrated percentage. [Control tests](fwui/current/control-tests.json). |
+| F5 | FAIL for full-suite acceptance | All 7,229 tests in the actual SMK pad/LED scenario passed, as did the hold-GLOBE, copy and held-step checks. The final independent full host suite remains outstanding. |
+| F6 | PARTIAL | Hold SEQ and briefly press SCALE on SMK-37 (SEL on FM-1) to cycle velocity, chance, pitch and pan. Hold SEQ and a step, then turn K3 (ALGO on FM-1) to edit the displayed value. Nineteen supported part/quantity combinations changed, redrew and survived save/load. BREAK velocity has no sequencer-to-voice gain contract and is displayed as unavailable. The boards have no literal touchscreen input path. [Edit scenarios](../../tests/host/ui_step_lane_edit_test.c). |
+| F7 | FAIL | The ordinary text scan finds zero known instructional captions. Additional board and SMC copy remains under review. The FWUI head exposes zero Synth One engine controls in each editor and 16 compact SuperJ6 controls per part. An isolated replay with the newer Sound runtime makes Synth One INIT audible (8,192/8,192 frames) and still exposes zero editable Synth One engine controls. The genuine factory parameter and 64-control interfaces remain with Sound. [Runtime and editor comparison](fwui/current/sound-runtime-comparison.json) · [Sound checkpoint](https://github.com/gobbajogger/DnBOX/blob/ca0c00a4e5863132de4a66f5d1c477c14d699be5/docs/lanes/sound.md). |
+
+The changes include the projected 808 Accent attack, actual 909 BD Tune trajectory, six sequencer rates, BREAK groove, active Miami wobble, effective master COMP curve, physical FX RETURN and HOME SMC pickup. The font stores cap rows from its source raster before compression. Cap-height regressions cover raw and packed forms, all six roles, both font families, sanitizer runs and twelve wrong-metric mutations. The corrected metrics changed pixels in 1,450 of the 1,709 frames, which are available for independent comparison. [Font check](fwui/current/font-cap.json) · [Changed frame IDs](fwui/current/cap-frame-comparison.json.gz).
+
+C2 passes. The branch contains consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` and deletes no files relative to it. C1, C3, C5 and C6 remain open. C4 needs its exact-head limits result. The most recent scoped no-loss and limits runs passed on `a03f7267`. The designated test-and-merge reviewer owns C1 and C3. Integ owns readiness and merge under Rule 9. The current blocker and recovery work for F7 are the genuine admitted Sound interfaces and the expanded visible-text audit.
 
 ## Archived qualification history
 

@@ -1,0 +1,30 @@
+{
+  "actual-runtime-damage": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"unexpected/current-layer overlap\"}"
+  },
+  "current-layer-overpaint": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"unexpected/current-layer overlap\"}"
+  },
+  "uncovered-visible-pixel": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"visible text pixel loss\"}"
+  },
+  "wrong-popup-rect": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"visible text pixel loss\"}"
+  },
+  "unexpected-label": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"unexpected hidden base text\"}"
+  },
+  "missing-last-audit": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"actual frame without matching final audit\"}"
+  },
+  "wrong-production-source": {
+    "exit": 1,
+    "result": "{\"status\": \"FAIL\", \"reason\": \"restoration proof source mismatch\"}"
+  }
+}

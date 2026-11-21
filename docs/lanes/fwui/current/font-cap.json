@@ -1,0 +1,181 @@
+{
+  "status": "PASS",
+  "sourceHashes": {
+    "tools/gen_font.py": "e647bfdce48a020d8e19d4d5485a57334f67dcc2f8560de5a447a0344ac58e30",
+    "firmware/src/gfx.c": "19b596fc537f4c333df928d8d30fa8c50a55f0f81659b199028524bc0569b6e4"
+  },
+  "cases": [
+    {
+      "family": "barlow",
+      "storage": "raw",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-raw/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "barlow",
+      "storage": "raw",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-raw/sanitized.log"
+    },
+    {
+      "family": "barlow",
+      "storage": "packed",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-packed/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "barlow",
+      "storage": "packed",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-packed/sanitized.log"
+    },
+    {
+      "family": "barlow",
+      "storage": "packbits",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-packbits/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "barlow",
+      "storage": "packbits",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "49817d48d51a19b6",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/barlow-packbits/sanitized.log"
+    },
+    {
+      "family": "terminus",
+      "storage": "raw",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-raw/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "terminus",
+      "storage": "raw",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-raw/sanitized.log"
+    },
+    {
+      "family": "terminus",
+      "storage": "packed",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-packed/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "terminus",
+      "storage": "packed",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-packed/sanitized.log"
+    },
+    {
+      "family": "terminus",
+      "storage": "packbits",
+      "sanitized": false,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-packbits/normal.log",
+      "negativeControls": {
+        "top": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        },
+        "bottom": {
+          "exit": 1,
+          "marker": "CAP_METRIC_MISMATCH"
+        }
+      }
+    },
+    {
+      "family": "terminus",
+      "storage": "packbits",
+      "sanitized": true,
+      "exit": 0,
+      "rasterHash": "c69dab5a8eafc368",
+      "faces": 6,
+      "log": "/workspace/scratch/eab11d5aefab/font-cap-results/terminus-packbits/sanitized.log"
+    }
+  ],
+  "normalMetricMutants": 12,
+  "sanitizers": "AddressSanitizer and UndefinedBehaviorSanitizer; leak checking disabled for ptrace environment",
+  "scope": "Final white-on-black RGB565 pixels from production painter, half-intensity threshold (equivalent alpha8); all6 roles in2 font families, raw/native packed/PackBits; declared glyph ranges include retained width-zero glyphs and clipped coordinates. No device or layout acceptance.",
+  "sourceTree": "956a004d8abc991093318b1d067bfe32e6b914c7"
+}

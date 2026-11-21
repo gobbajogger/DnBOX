@@ -3,6 +3,8 @@
 /* Small-canvas renderer (no full framebuffer). Draw text/lines into
  * an off-screen strip, then blit it in one DMA transfer. Pixels are stored
  * byte-swapped (the panel takes RGB565 big-endian). */
+typedef struct { int8_t top, bot; } capm_t;
+
 typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t h;
     uint8_t pad;               /* bitmap starts this many pixels left of the pen */
@@ -11,6 +13,7 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
     const uint16_t *off;       /* byte offset of each glyph */
     const uint8_t *data;
+    capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
 #include "felucca_font.h"
 
@@ -232,17 +235,15 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
 #if defined(FONT_ALPHA_CROP)
                 /* Per-glyph bitstream; exact alpha uses the already decoded previous
                  * row only. Generated codebooks cover all values in at most 7 bits. */
-                const uint8_t *model=FONT_ALPHA_MODEL[above[gx]];
-                uint32_t n=0, first=0, sym=0;
-                for (unsigned k=0;k<7;k++) {
-                    if(!code_left) { code_bits=*gd++; code_left=8; }
-                    n=(n<<1)|((code_bits>>(--code_left))&1u);
-                    uint32_t count=model[k];
-                    if(n<count) { sym=first+n; break; }
-                    n-=count;
-                    first+=count;
+                if (code_left < 7u) {
+                    code_bits=(code_bits<<8)|*gd++;
+                    code_left+=8u;
                 }
-                a=(model[7+(sym>>1)]>>((sym&1u)?0:4))&15u;
+                uint32_t peek=(code_bits>>(code_left-7u))&127u;
+                uint32_t entry=FONT_ALPHA_PREFIX[above[gx]][peek>>3];
+                if (entry&128u) entry=FONT_ALPHA_SUB[entry&127u][peek&7u];
+                code_left-=entry>>4;
+                a=entry&15u;
                 above[gx]=(uint8_t)a;
 #elif defined(FONT_LZ_CROP)
                 /* Generated streams never reference before their own glyph;

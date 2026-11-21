@@ -9,6 +9,13 @@ from pathlib import Path
 # Confirmed instructional sentences from the existing renderers. Keep a complete
 # register of observed strings, including new words requiring editorial review.
 INSTRUCTIONAL = {
+    "THE KEYS PLAY AND WRITE NOTES",
+    "HOLDING A STEP: ITS OCTAVE",
+    "THE EFFECTS: REVERB, DELAY,",
+    "AGAIN: THE NEXT PAGE",
+    "THE PATTERN: ALL FIVE PARTS",
+    "THE MIXER AND THE MASTER",
+    "CHOOSE PASTE TARGET",
     "THIS SCREEN AS A LIST",
     "THE PART'S SOUND",
     "IN A LIST: RUN THE ACTION",
@@ -18,12 +25,14 @@ INSTRUCTIONAL = {
 
 def scan(log):
     screens = defaultdict(set)
+    traced = defaultdict(int)
     audited = {}
     complete = None
     for line in log:
         if line.startswith("UI_TEXT\t"):
             _, screen, _x, _y, caption = line.rstrip("\n").split("\t", 4)
             screens[screen].add(caption)
+            traced[screen] += 1
         elif line.startswith("AUDIT "):
             row = json.loads(line[6:])
             if row["kind"] == "complete":
@@ -32,10 +41,15 @@ def scan(log):
                 raise ValueError(f"Incomplete or duplicate raster audit for {row['id']}")
             else:
                 audited[row["id"]] = row["texts"]
-    if not screens or set(screens) != set(audited) or len(audited) != complete:
+    if not screens or set(screens) != set(audited) or len(audited) != complete or dict(traced) != audited:
         raise ValueError("Missing final-frame text trace or incomplete geometry walk")
     findings = {caption: sorted(screen for screen in screens if caption in screens[screen])
                 for caption in sorted(INSTRUCTIONAL)}
+    for suffix in (": THIS TRACK", ": THE PATTERN", ": THE SOUND"):
+        for screen, captions in screens.items():
+            for caption in captions:
+                if caption.endswith(suffix):
+                    findings.setdefault(caption, []).append(screen)
     return {"audited_screens": len(audited), "distinct_strings": len(set.union(*screens.values())),
             "known_instructional_copy": {s: ids for s, ids in findings.items() if ids},
             "screen_text": {s: sorted(captions) for s, captions in sorted(screens.items())}}

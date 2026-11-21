@@ -3,6 +3,7 @@
 typedef struct {
     const pattern_t *pat;
     const lane_t *motion;
+    pref_t ref;
     int part,voice,kind,maximum,fallback,available;
 } step_lane_context_t;
 static void step_lane_prepare(step_lane_context_t *c,int part,int voice,int kind)
@@ -33,7 +34,7 @@ static void step_lane_prepare(step_lane_context_t *c,int part,int voice,int kind
         } else ref=find_ref(T_BRK,0,"Pitch");
         desc=pref_desc(ref);
         if(ref.kind!=R_ENG || !desc || desc->max<=0)c->available=0;
-        else {target=ref.a;motion_voice=ref.b;parameter=ref.c;c->maximum=desc->max;c->fallback=pref_get(ref);}
+        else {target=ref.a;motion_voice=ref.b;parameter=ref.c;c->maximum=desc->max;c->fallback=pref_get(ref);c->ref=ref;}
     }
     if(target>=0) {
         int k=motion_find(proj.arr.lane,seq.ppat[part],part,target,motion_voice,parameter);
@@ -51,6 +52,34 @@ static int step_lane_read(const step_lane_context_t *c,int step,int *conditional
         return bstep_velocity(&c->pat->bass[c->part-PART_303A].step[step]);
     } else if(c->kind==UI_LANE_PITCH && part_is_303(c->part))return c->pat->bass[c->part-PART_303A].step[step].note;
     return value;
+}
+/* SEQ + a held step + K3 (FM-1 ALGO) edits the visible stored lane.
+ * Plain K3, K2/chance and the four page knobs retain their established roles.
+ * Generic parameter edits belong to the next trigger, without a live preview. */
+X0X_COLD static int step_lane_turn(int e)
+{
+    int step=held_any_step(),part=ui.part,conditional,value,k;
+    step_lane_context_t c;
+    if(step<0 || !e)return 0;
+    step_lane_prepare(&c,part,part<NKIT?ui.sel[part]:0,ui_step_lane);
+    value=step_lane_read(&c,step,&conditional);
+    if(is_303())ui.step_edited=1;else ui.hold_used=1;
+    if(value<0)return 1; /* unavailable native quantity; never substitute LEVEL */
+    if(c.kind==UI_LANE_CHANCE) {prob_turn(e);return 1;}
+    value+=e;value=value<1&&c.kind==UI_LANE_VELOCITY?1:value<0?0:value>c.maximum?c.maximum:value;
+    if(c.kind==UI_LANE_VELOCITY) {
+        if(part<NKIT)drum_vel_set_step(part,ui.sel[part],step,(uint8_t)value);
+        else cur_pat()->bass[bidx()].step[step].velocity=(uint8_t)value;
+    } else if(c.kind==UI_LANE_PITCH && is_303())held_note_by(e);
+    else {
+        uint32_t state=part==PART_BRK?plat_cq_lock():0;
+        k=motion_find(proj.arr.lane,seq.ppat[part],part,c.ref.a,c.ref.b,c.ref.c);
+        if(k<0)k=motion_alloc(proj.arr.lane,seq.ppat[part],part,c.ref.a,c.ref.b,c.ref.c);
+        if(k>=0)proj.arr.lane[k].val[step]=(uint8_t)value;
+        if(part==PART_BRK)plat_cq_unlock(state);
+        if(k<0) {say("MOTION FULL",0);return 1;}
+    }
+    mark_dirty();return 1;
 }
 static int step_lane_value(int part,int voice,int step,int kind,int *maximum,int *conditional)
 {

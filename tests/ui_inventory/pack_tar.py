@@ -18,9 +18,10 @@ def compressed(rows):
                 if pixels:seen[pixels]=name
     return lzma.compress(target.getvalue(),preset=6)
 
-def pack(source,out):
+def pack(source,out,report_name='report.json'):
     out.mkdir(parents=True,exist_ok=False)
-    report=json.loads((source/'report.json').read_text());groups={};mapping=[];receipts=[]
+    if Path(report_name).name!=report_name:raise ValueError('report must be beneath evidence root')
+    report=json.loads((source/report_name).read_text());groups={};mapping=[];receipts=[]
     methods={}
     if (source/'frame-methods.json').is_file():methods={r['path']:r['evidenceKind'] for r in json.loads((source/'frame-methods.json').read_text())}
     for name,frames in sorted(report['frames'].items()):
@@ -52,17 +53,17 @@ def pack(source,out):
         receipts.append(dict(path=name,bytes=len(data),sha256=hashlib.sha256(data).hexdigest(),entries=[r[0] for r in rows]))
     for family,rows in sorted(groups.items()):save(family,rows)
     metadata=[('frame-map.json',(json.dumps(mapping,indent=2)+'\n').encode(),None)]
-    for name in ('report.json','source-inventory.json','source-closure.json','render.log','production-tree.json','production-tree-receipt.json','runner-inputs.json','native-display-slices.json','stable-renderer-ids.tsv','verification.json','frame-methods.json','delivery-verifier.py'):
+    for name in ('report.json','combined-report.json','source-inventory.json','source-closure.json','render.log','production-tree.json','production-tree-receipt.json','runner-inputs.json','native-display-slices.json','stable-renderer-ids.tsv','combined-stable-renderer-ids.tsv','verification.json','frame-methods.json','delivery-verifier.py','extensions/edited-lanes/report.json','extensions/edited-lanes/render.log','extensions/edited-lanes/instrumented-inputs.json','extensions/edited-lanes/extension-runner.py'):
         p=source/name
         if p.is_file():metadata.append((name,p.read_bytes(),None))
     for path in sorted((source/'runner-inputs').glob('*')):
         if path.is_file():metadata.append(('runner-inputs/'+path.name,path.read_bytes(),None))
     metadata.append(('delivery-packer.py',Path(__file__).read_bytes(),None))
     save('metadata',metadata)
-    index=dict(schema=1,status=report['status'],F1=report['F1'],sourceClosure=report['sourceClosure'],
+    index=dict(schema=1,status=report['status'],F1=report['F1'],R22VisualReview=report.get('R22VisualReview','UNREVIEWED'),sourceCoverage=report.get('sourceCoverage'),sourceClosure=report['sourceClosure'],reportFile=report_name,reportSHA256=hashlib.sha256((source/report_name).read_bytes()).hexdigest(),
                frames=len(mapping),stableStateIDs=len(report['frames']),totalBytes=sum(r['bytes'] for r in receipts),
                maxPartBytes=max(r['bytes'] for r in receipts),archives=receipts,packerSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                note='Direct tar.xz extraction yields stable state/instance PNG paths. PNG compression=0 exposes shared pixels to xz; exact decoded RGB verified. Byte-identical PNGs use archive-local hardlinks. No visual approval.')
     (out/'index.json').write_text(json.dumps(index,indent=2)+'\n');print(json.dumps({k:v for k,v in index.items() if k!='archives'}))
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();pack(a.source,a.output)
+    p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--report-name',default='report.json');a=p.parse_args();pack(a.source,a.output,a.report_name)

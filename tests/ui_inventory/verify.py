@@ -44,7 +44,7 @@ def verify(evidence,source,output):
         kinds={frame['state']['lane'] for frame in rows}
         if kinds!=set(range(len(report['stepLaneLabels']))):raise ValueError('missing physical lane family state')
         lanes[str(part)]=[report['stepLaneLabels'][k] for k in sorted(kinds)]
-    result=dict(status='PASS',scope='Saved-source/tree, complete legacy walk/audits, PNG/RGB/actual-state integrity and physical lane family coverage only; F1 acceptance remains FAIL and extended final-text geometry requires separate producer.',
+    result=dict(status='PASS',scope='Saved-source/tree, complete legacy walk/audits, PNG/RGB/actual-state integrity and physical lane family coverage only; F1/R22 acceptance is external and extended final-text geometry requires separate producer.',
                 reportSHA256=hashlib.sha256((evidence/'report.json').read_bytes()).hexdigest(),verifierSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 productionTree=tree,legacyWalkerFrames=legacy['screens'],legacyGeometry=audits,
                 actualSnapshots=count,stableStateIDs=len(states),physicalLaneFamilies=lanes,F1=report['F1'],visualApproval=False)

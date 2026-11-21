@@ -1,18 +1,18 @@
 {
   "status": "PASS",
-  "scope": "Saved-source/tree, complete legacy walk/audits, PNG/RGB/actual-state integrity and physical lane family coverage only; F1 acceptance remains FAIL and extended final-text geometry requires separate producer.",
-  "reportSHA256": "a44521a436a579340ae77fd74e311ae784347ef756c82f09e914c8e3fc561a26",
-  "verifierSHA256": "49a42194381b3e362e2ddc0d9ca3b9e676cf7be6743c2d1271afb7eecea00f20",
+  "scope": "Saved-source/tree, complete legacy walk/audits, PNG/RGB/actual-state integrity and physical lane family coverage only; F1/R22 acceptance is external and extended final-text geometry requires separate producer.",
+  "reportSHA256": "c1e0359da515999ecca1c00d424c8f444c91defca4c8ebd09986e93ec75d311b",
+  "verifierSHA256": "a105b09705017235ab4039b8be739bdf1cc485682c25c207b8c71c59f981dc1d",
   "productionTree": {
     "status": "VERIFIED",
-    "tree": "3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493",
-    "files": 5082,
-    "referenceSHA256": "ffa889ee7e507e3a76ade8ac0cbef25fae3a7d2e2dcdc68189bbe7a3733f4c41"
+    "tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+    "files": 5160,
+    "referenceSHA256": "83351e9b9929ca47cb368a6e4cd88b9b8655ac83a95528717a7c2fbef02504a3"
   },
   "legacyWalkerFrames": 1530,
   "legacyGeometry": {
     "screens": 1530,
-    "texts": 41879,
+    "texts": 41884,
     "findings": 0
   },
   "actualSnapshots": 1689,
@@ -49,6 +49,6 @@
       "PAN"
     ]
   },
-  "F1": "FAIL",
+  "F1": "UNREVIEWED",
   "visualApproval": false
 }

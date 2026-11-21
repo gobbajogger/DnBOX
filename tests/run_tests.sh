@@ -85,7 +85,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-808-accent|ui-step-lane|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -412,6 +412,7 @@ run pattern-preset-notelock sh tests/host/pattern_preset_notelock_test.sh build/
 if [ "$PIL_SKIP" = 1 ]; then not_run project-runtime Pillow; else run project-runtime sh tests/host/project_runtime_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run save-note-quiet Pillow; else run save-note-quiet sh tests/host/save_note_quiet_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run font-pack Pillow; else run font-pack python3 tests/font_pack_test.py; fi
+if [ "$PIL_SKIP" = 1 ]; then not_run font-cap-metrics Pillow; else run font-cap-metrics python3 tests/font_cap_metrics_test.py; fi
 run smc-protocol sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -o $OUT/smc_protocol_test tests/host/smc_protocol_test.c && $OUT/smc_protocol_test"
 run smc-fader python3 tests/host/smc_fader_test.py
 run smc-buttons python3 tests/host/smc_buttons_test.py
@@ -769,6 +770,9 @@ run ui-sound-footer-oracle python3 tests/host/ui_sound_footer_oracle_test.py
 run ui-release-footer-mutants python3 tests/host/ui_release_footer_mutants.py
 run ui-freeplay-state python3 tests/host/ui_freeplay_state_test.py
 run ui-pattern-sound-identity sh tests/host/ui_pattern_sound_identity_test.sh
+run ui-clock-comp env SMC_UI_TEST_FILE=tests/host/ui_clock_comp_test.c sh tests/host/smc_ui_test.sh
+run smc-caption-geometry sh tests/host/smc_caption_geometry_test.sh
+run ui-layer-restoration sh tests/host/ui_layer_restoration_test.sh
 run ui-808-accent env SMC_UI_TEST_FILE=tests/host/ui_808_accent_test.c sh tests/host/smc_ui_test.sh
 run ui-drum-tune-role python3 tests/host/ui_drum_tune_role_test.py
 run ui-snare-tone-law python3 tests/host/ui_snare_tone_law_test.py
@@ -782,6 +786,7 @@ run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
 run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
 run ui-pan-units sh tests/host/ui_pan_units_test.sh
 run ui-step-lane sh tests/host/ui_step_lane_test.sh
+run ui-step-lane-edit sh tests/host/ui_step_lane_edit_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
 run ui-perf-labels sh tests/host/ui_perf_labels_test.sh

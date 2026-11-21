@@ -1,15 +1,20 @@
 {
-  "build_input_tree": "3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493",
-  "verified_inputs": {
-    "tree": "3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493",
-    "tracked_file_count": 5082,
-    "mismatches": [],
-    "FONT_ALPHA_CROP": true,
-    "FONT_ALPHA_MODEL": true
+  "build_input_tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "source_verification": {
+    "status": "VERIFIED",
+    "tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+    "files": 5160,
+    "referenceSHA256": "83351e9b9929ca47cb368a6e4cd88b9b8655ac83a95528717a7c2fbef02504a3"
+  },
+  "build_input_objects": {
+    "firmware": "7a36babbb1437f6049da21b7fc3d19d2f39bf8c6",
+    "experiments/original_synth": "0cdd656980643a45d2061dc87be292e0426d11ef",
+    "tools/build.py": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
+    "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
   },
   "stock_builds": [
     {
-      "candidate": "final",
+      "candidate": "metrics",
       "model": "elite",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -104,22 +109,22 @@
         "build/smk37-elite/original/original_sound.o",
         "build/smk37-elite/gfinal/chance_native.o",
         "-Map",
-        "<native>/evidence/final-elite-link.map",
+        "<native>/evidence/metrics-elite-link.map",
         "-o",
-        "<native>/evidence/final-elite-mapped.elf"
+        "<native>/evidence/metrics-elite-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546476,
-          "sha256": "53e33aeb7647b5c61dd080011438f1f7a1f0d175d293c37bbe3950215c5fa3c8"
+          "size": 546920,
+          "sha256": "5d429235fed81250c269009a424caf259efbad98df49ed0fcd9389c8dd69b5d9"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "20b60b6b0a1ffb6583dce723894f40ce4f3bcbb951231c8a9d223c7c3a6d2670"
+          "sha256": "13c0d9e2a33f119c60a922a4772c4b6c51df5ac7a9a55dc6ebd315e04316f5e2"
         },
         ".ram_text": {
           "equal": true,
@@ -129,25 +134,27 @@
         ".c1_text": {
           "equal": true,
           "size": 608,
-          "sha256": "703e09c104aac2b963d6286122544286282f4c79bce34687fe383b77a8a7a0d4"
+          "sha256": "22340cdd347f4aca6481fce1fe351c823f29e8ba3683f6fdf1dfb9c444852ba6"
         }
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "6181aacc495d954676ebc34629fcb134de4dc598cec41808a8988a8e43713cc8",
-      "mapped_elf_sha256": "6181aacc495d954676ebc34629fcb134de4dc598cec41808a8988a8e43713cc8",
+      "original_elf_sha256": "1a5c42a69a7149b22b22d2f30e9dd97ef1e802a34501bef73f73f19206a48fa7",
+      "mapped_elf_sha256": "1a5c42a69a7149b22b22d2f30e9dd97ef1e802a34501bef73f73f19206a48fa7",
       "link_map": {
-        "filename": "final-elite-link.map",
-        "sha256": "8e150cc60f04906d5c7c30d7b3e6b04a6e31056eae54e28f66c65353bf2d4d1b",
-        "bytes": 211060,
-        "gzip_bytes": 28269
+        "filename": "metrics-elite-link.map",
+        "sha256": "129be864ba6c03c02a501f1875b783b73ec688461c5133e6a4d5acedd9e42744",
+        "bytes": 211198,
+        "gzip_bytes": 28318
       },
-      "xip_free_bytes": 2276,
+      "committed_map": "final-elite-link.map.gz",
+      "xip_free_bytes": 1832,
       "pool_margin_bytes": 780,
+      "pool_raw_free_bytes": 8972,
       "command_line_build_exit": 0
     },
     {
-      "candidate": "final",
+      "candidate": "metrics",
       "model": "pro",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -242,22 +249,22 @@
         "build/smk37/original/original_sound.o",
         "build/smk37/gfinal/chance_native.o",
         "-Map",
-        "<native>/evidence/final-pro-link.map",
+        "<native>/evidence/metrics-pro-link.map",
         "-o",
-        "<native>/evidence/final-pro-mapped.elf"
+        "<native>/evidence/metrics-pro-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546464,
-          "sha256": "2023f78e07e63869bea16bde7b07ad26ca1cc7f578d8b772d811a2d024866a15"
+          "size": 546908,
+          "sha256": "4cc808896c0ddcf1d91ab12dc4f36a04351e62f66d8de26d46ec46edf10fa988"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "8a3f8555cb225304f447475cc42c5acfa2c31ee9dd597d8acd418eeecf38a6cc"
+          "sha256": "9c8ced45710b61c41631183746cc31d012f2581d43983b4055a71550a51bc8f0"
         },
         ".ram_text": {
           "equal": true,
@@ -267,21 +274,23 @@
         ".c1_text": {
           "equal": true,
           "size": 608,
-          "sha256": "703e09c104aac2b963d6286122544286282f4c79bce34687fe383b77a8a7a0d4"
+          "sha256": "22340cdd347f4aca6481fce1fe351c823f29e8ba3683f6fdf1dfb9c444852ba6"
         }
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "4631242abe13423b4a6a89e7f66bc228675c58fee634e10ad5da23723abe0b5d",
-      "mapped_elf_sha256": "4631242abe13423b4a6a89e7f66bc228675c58fee634e10ad5da23723abe0b5d",
+      "original_elf_sha256": "f8d6af08959b2de0ace3726c42d86b3622ca40c30eb85ee35774aadcc6d78eee",
+      "mapped_elf_sha256": "f8d6af08959b2de0ace3726c42d86b3622ca40c30eb85ee35774aadcc6d78eee",
       "link_map": {
-        "filename": "final-pro-link.map",
-        "sha256": "0e2968daac2dd7eca06b0f46689750eff04f196e4ee1d897ba4f7a5dc1f28001",
-        "bytes": 208779,
-        "gzip_bytes": 28213
+        "filename": "metrics-pro-link.map",
+        "sha256": "7c95caecac80a0aec24e350c1e7e957cadea12757a8f8a370fe693bb8f7bfeb8",
+        "bytes": 208964,
+        "gzip_bytes": 28286
       },
-      "xip_free_bytes": 2288,
+      "committed_map": "final-pro-link.map.gz",
+      "xip_free_bytes": 1844,
       "pool_margin_bytes": 780,
+      "pool_raw_free_bytes": 8972,
       "command_line_build_exit": 0
     }
   ]

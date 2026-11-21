@@ -1,0 +1,66 @@
+{
+  "productionTree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "scope": "Explicit native route limitations; source-only display slices and measured runtime coverage do not qualify external F1/R22 acceptance.",
+  "routes": [
+    {
+      "ids": [
+        "firmware/src/app/main_fm1.c::fm1_main",
+        "firmware/src/app/main_fm1.c::fm1_cstart"
+      ],
+      "notConstructed": "Actual native startup, linker/RAM setup, flash admission, interrupts and audio startup; post-reset crash-notice branch (both core variants) is not dynamically entered by the host walker.",
+      "displayEvidence": "The complete default/custom boot display renderer is captured separately through the host LCD framebuffer oracle."
+    },
+    {
+      "ids": [
+        "firmware/src/app/main_fm1.c::fm1_fault"
+      ],
+      "notConstructed": "Actual hardware exception dispatch, timed fault loop and native reboot.",
+      "displayEvidence": "Exact fault-display prefix is captured with fixture crash registers; the prefix does not mark the complete wrapper observed."
+    },
+    {
+      "ids": [
+        "firmware/src/app/main_fm1.c::safe_main"
+      ],
+      "notConstructed": "Actual watchdog/USB safe-mode loop, native PLAY retry and its STARTING DnBOX... transition.",
+      "displayEvidence": "Exact static safe-mode display prefixes, including both crash core diagnostics, are captured."
+    },
+    {
+      "ids": [
+        "firmware/src/app/main_fm1.c::enter_uboot"
+      ],
+      "notConstructed": "Native USB detach, bootguard update and bootloader transition.",
+      "displayEvidence": "Both source-backed UBOOT display strings are captured as exact prefixes only."
+    },
+    {
+      "ids": [
+        "firmware/src/app/panel.c::panel_setup"
+      ],
+      "notConstructed": "Real hardware matrix teaching, encoder acquisition, timeout progression and persistent calibration writes.",
+      "displayEvidence": "All declared button and encoder prompt labels are captured from exact source display statements; no device writes occur."
+    },
+    {
+      "ids": [
+        "firmware/src/lcd.c::lcd_init"
+      ],
+      "notConstructed": "Native LCD power/reset and hardware bus initialization.",
+      "displayEvidence": "Production higher-level painters use the explicit existing host lcd_blit/lcd_fill framebuffer oracle."
+    },
+    {
+      "ids": [
+        "firmware/src/app/ui.c::strip_value_fit",
+        "firmware/src/app/ui.c::dg_tail"
+      ],
+      "notConstructed": "Legacy drum matrix/tail fallback branches are not selected by the declared production page dispatch in this walk.",
+      "displayEvidence": "The admitted drum part route uses draw_drum_voice; ordinary strip drum dispatch selects DG_LEVEL. These helpers remain unobserved, not synthetically invoked to inflate coverage."
+    },
+    {
+      "ids": [
+        "firmware/src/app/ui.c::draw_wave_glyph",
+        "firmware/src/app/ui.c::original_cell_value"
+      ],
+      "notConstructed": "The normal admitted engine/page cases do not enter these source-present original/fallback drawing paths.",
+      "displayEvidence": "They remain explicit source/runtime coverage gaps requiring entry-condition review."
+    }
+  ],
+  "otherHelpers": "The report and stable-ID table retain every additional unobserved function classified NO_DIRECT_CALL_PATH_REVIEW_REQUIRED; that classification does not prove absence of callbacks or macro reachability."
+}
