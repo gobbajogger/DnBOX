@@ -9,11 +9,16 @@ def run(name,source=None):
 p=run('positive')
 if p.returncode or 'PASS FREE PLAY' not in p.stdout:raise SystemExit(p.stdout[-3000:])
 s=(root/'firmware/src/app/ui.c').read_text()
-old=subprocess.check_output(['git','show','6c418a43ff6fc5f4e1fad3bbf71e63cfd64a1987:firmware/src/app/ui.c'],cwd=root,text=True)
 anchor='&& ui.freeplay[bidx()] && !ui.rec'
 if s.count(anchor)!=1:raise SystemExit('missing/duplicate mode anchor')
-for name,text,marker in [('old-missing-cue',old,'FREE_PLAY_MODE_CUE_MISSING'),('always-free',s.replace(anchor,'&& !ui.rec'),'FREE_PLAY_MODE_CUE_UNEXPECTED')]:
+# Before fd29ace4 the sequencer header always used the part/view title and normal
+# header font. Making free_mode false selects those same paths on this checkout.
+controls = [
+    ('missing-cue', s.replace(anchor, '&& 0'), 'FREE_PLAY_MODE_CUE_MISSING'),
+    ('always-free', s.replace(anchor, '&& !ui.rec'), 'FREE_PLAY_MODE_CUE_UNEXPECTED'),
+]
+for name, text, marker in controls:
  with tempfile.TemporaryDirectory(prefix='freeplay-mode-negative-') as d:
   f=Path(d)/'ui.c';f.write_text(text);p=run(name,f)
   if not p.returncode or marker not in p.stdout or 'FAIL ' not in p.stdout:raise SystemExit(name+' not rejected as intended '+p.stdout[-3000:])
-print('PASS actual FREE PLAY visibility/no-loss and old-source/wrong-state negatives')
+print('PASS actual FREE PLAY visibility/no-loss and missing-cue/wrong-state negatives')

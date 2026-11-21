@@ -1,18 +1,41 @@
 # Integration baseline
 
-Target `integration/dnbox-consolidated` at `76040daa5b52d686a8b7b544296ba5d79610a95d`. Work continues on `lane/integ`. GitHub rejected creation of `lane/integ-baseline` (HTTP 422). The active branch-name ruleset reserves `lane/integ` for this lane. No other open integration PR existed when the work started.
+Firmware draft [#976](https://github.com/gobbajogger/DnBOX/pull/976) targets `integration/dnbox-consolidated` at `76040daa5b52d686a8b7b544296ba5d79610a95d`. The branch ruleset rejected `lane/integ-baseline` (422) and allows `lane/integ`.
 
-| Item | Evidence at this checkpoint |
+| Item | State and evidence |
 |---|---|
-| I0 | The FWUI PR head passed 501 host tests. The consolidated squash has the same tree. Its independent exact-commit baseline remains to be verified. [#970 gate record](https://github.com/gobbajogger/DnBOX/pull/970#issuecomment-6980748381). |
-| I1 | `CONSOLIDATED-STATE.md` records 10 merged PRs and their source and merge SHAs. GitHub compare confirms ancestry for each. |
-| I2–I3 | Final combined firmware and all-engine dropout qualification depend on the open Sound and FWUI PRs. |
-| I4–I5 | See the compact-program sanitizer and five-BREAK restore records below. Final composition qualification is open. |
-| I6 | Reconcile the owner-request rows, generated status views and the feature-list voting implementation. |
-| I7 | Both canonical installer URLs return 200. The two old Pages paths return 404. Cleanup is deferred until the lanes merge. |
-| C1–C6 | Candidate gate and independent review remain outstanding. The draft is ineligible for merge. |
+| I0 | **Open.** The first consolidated Local run stopped during the host stage. Results and retests are below. The earlier 501-pass [PR #970 run](https://github.com/gobbajogger/DnBOX/pull/970#issuecomment-6980748381) used the same tree at a different commit. |
+| I1 | **Pass at base.** The [source ledger](../../CONSOLIDATED-STATE.md) names all ten merged PRs, their source and merge SHAs. GitHub compare confirmed each merge is in this base. |
+| I2 | Stock Pro and Elite built with SDK 1.2.14. XIP headroom was 1,188 B and 1,180 B respectively, with a 780 B pool margin above the 8,192 B reserve on both. Final combined builds depend on [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) and [FWUI #975](https://github.com/gobbajogger/DnBOX/pull/975). |
+| I3 | **Open.** The current heavy fixture covers Chicago and Miami. Qualify every engine under heavy playback after the sound and UI changes integrate, and measure the worst margin against 11,609 µs. |
+| I4 | **Pass at consolidated `76040daa`.** A stock Debian Linux guest ran the unchanged compact-program test as uid 1000 with TracerPid 0. The clean control exited zero, the expected 123-byte leak was detected, both sets of 796 exact checks passed, and the corruption control rejected its mutant. [Log and source identities](../../evidence/integ-baseline-76040daa/compact-programs-linux.log). |
+| I5 | **Partial.** Five live previews, both URL forms per sample, archive generation and byte-exact simulated restore work. The exact 109,394 B native five-zone pack cannot fit either stock application at the available aligned headroom. See the measurements below. |
+| I6 | Owner requests 26.8, 26.9 and 26.11 appear in the roadmap. Complete/Working/Pending are checked against the pinned consolidated SHA. [Nightly #170](https://github.com/gobbajogger/DnBOX-nightly/pull/170) contains the feature inbox and vote reader. This branch applies the existing enhancement label to new requests submitted through the issue form. Authenticated end-to-end vote verification is open. |
+| I7 | Both canonical installers returned 200 and the old Pages paths returned 404. Safe static redirect files and browser tests are in [nightly #170](https://github.com/gobbajogger/DnBOX-nightly/pull/170). Serving the historical paths requires control of the owner Pages root. Archive and cleanup follow integration of every lane. |
+| C1 | Candidate gate open. |
+| C2 | Straight descendant of the consolidated SHA. This work removes no tracked file. |
+| C3 | Independent final review at every required size is open. |
+| C4 | Baseline hard-limit scan passed. Rerun at the candidate SHA. |
+| C5, C6 | Checklist still has open work. Draft remains open. |
 
-This checkpoint changes documentation only. Stock firmware source, build configuration and memory layout have no delta from the base. Exact-candidate gate and memory measurements are outstanding.
+### First consolidated Local run
+
+The gate registered 500 host checks. Before interruption 247 passed and 26 failed. The other 227 produced no terminal result. The Elite package prerequisite was absent when registration started. Both stock packages will be available for the candidate run. [Baseline log and retest discussion](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7055474361).
+
+| Failure in the interrupted run | Separate exact-source retest or cause |
+|---|---|
+| `gate-trap`, `dev-validate`, `dev-validate-composed`, `offline-browser-safety`, `offline-sequencer-browser`, `offline-touchosc-lua` | Passed after correcting checkout/temp placement, reference inputs, the browser environment and the Lua 5.1 runtime. |
+| `fxbus-coef-cache`, `chicago-peaking-coef-cache`, `chicago-ens-hoist`, `chicago-modulation-hoist` | Passed once the runner had the pinned historical Git objects. |
+| `compact-programs` | Passed on stock Linux with LeakSanitizer active, recorded under I4. |
+| `composed-midi-epoch`, `chicago-fx2-inserts`, `original-sound-cell`, `sound-reset`, `panic-notes`, `drum-fill`, `cq-reclaim`, `optimization-equivalence`, `ble-midi-receive`, `ble-capture-replay`, `ble-device-setting-flow`, `ble-toggle-persistence-gate`, `ble-role-switch`, `chicago-span-hold`, `fma-exact-identity` | The sandbox runtime could not attach the sanitizer helper. Repeat on a Linux runner that passes both the clean and deliberate-leak controls. |
+
+A separate FREE PLAY framebuffer test passed the positive render and then exited 128 fetching an unpublished Git object. The repaired test exercises missing and unexpected cue mutations through the native renderer. Its missing-cue result matched the reachable historical predecessor in 32 of 32 comparisons, across 154,880 RGB565 bytes (SHA-256 `6e617d6c451e7b62e3bbd37fc4528f7f8279cec4abf9dbee2d3643872e115a07`). The complete repaired wrapper subsequently exited zero.
+
+The first no-loss step failed because the checkout lacked a parent object. The missing history was restored. The generator scheduler also repeatedly tried to create a lock directory while another job held it. A focused test observed 32 rejected attempts across eight waiters. The runner now uses one blocking FIFO token. All eight waiters completed, and independent capacity, registration and admission tests passed. Host compilers, sanitizer settings, timing limits and firmware code are unchanged.
+
+### Five BREAK samples
+
+The five canonical ADPCM payloads occupy 109,274 bytes, plus 120 bytes in native bank structures. The resulting pack SHA-256 is `8df1316157fc8ce8dcb87cfd267fea83790702ccd1963ae91c0de60ca255b582`. Native placement rejected both stock images. The aligned space available is 1,184 B on Pro and 1,168 B on Elite. Retaining 1 KiB free requires another 109,234 B on Pro and 109,250 B on Elite. The tested offline export is 110,844 bytes and uses three zones in slot 1 and two in slot 2. The live exporter produced SHA-256 `3a7f19858d23309dac7375b88d0537cae7854ad65680edd1f95d4dbc0beed4c6`. User-selected restore is available. A default delivery needs either additional measured space or a separately approved slot-initialization scheme which preserves existing user recordings.
 
 ## Earlier evidence
 

@@ -22,7 +22,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
       "merge_sha": "",
       "owner": "integ",
       "dependencies": [],
-      "next_action": "Complete exact-head checks and integrate; no move completion asserted"
+      "next_action": "Complete the interrupted firmware gate at 76040daa and review the 104 nightly references from 914d68e8."
     },
     {
       "id": "M1",
@@ -82,7 +82,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
       "dependencies": [
         "M0"
       ],
-      "next_action": "Complete exact-head checks and integrate; no move completion asserted"
+      "next_action": "Compact-program LeakSanitizer passed at 76040daa. Resolve stock flash space for five BREAK samples and verify an authenticated feature vote."
     },
     {
       "id": "M6",

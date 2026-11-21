@@ -11,7 +11,7 @@ Install from the [web installer](https://gobbajogger.github.io/DnBOX/install/) o
 Please use the issue forms:
 
 - Bug report: keyboard model (Elite / Pro), firmware version, steps to reproduce, and whether you backed up sample slots
-- Feature request
+- [Feature request](https://github.com/gobbajogger/DnBOX/issues/new?template=feature_request.yml) — describe the change, the keyboard model and what it would let you do. To vote on a proposal, add 👍 to its opening post. GitHub keeps the votes with the issue.
 
 Do not attach private backups, credentials, or raw captures that you do not want public.
 
