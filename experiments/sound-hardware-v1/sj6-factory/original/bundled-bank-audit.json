@@ -1,0 +1,146 @@
+{
+  "ipa_sha256": "dde4992f24f52d4390391069025b27092a2f327e3a53115bdd53a6ede0dffa8e",
+  "au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "component_version": 67072,
+  "spec_sha256": "d4ac2cea455728a20a1146264117a79f31809f9dd2d1f83de6733f58cf04a3f3",
+  "programs": [
+    {
+      "uid": "10F71106-934F-43B8-A6B5-136AC923F1E0",
+      "file_sha256": "e521be36478bd8dbd8202bed45dddf55f6118e35076fc78d9c244d7ae41af074",
+      "bundled_bank_uuid": "E71B742D-0E6F-481F-93C9-3DF966104EE6",
+      "supplied_bank_uuid": "C9BA0082-A879-46CC-A84F-7F57EC54DC9F",
+      "parameter_count": 149,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "1E5E5DDF-B5C6-4503-BDBC-CAE9CD1D0A94",
+      "file_sha256": "ed6317e31d2d5deacd03dfad0339f319c8adb3b020085f7dd44960f66134766f",
+      "bundled_bank_uuid": "E5694AB9-BE2B-4256-BC65-EDC580C16C84",
+      "supplied_bank_uuid": "60C850AA-C450-4DC5-9157-28333AF612EE",
+      "parameter_count": 148,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "5F43075B-1052-433F-AFCB-7FBF5E11823D",
+      "file_sha256": "d88b085e32941b6d97bb3d72b6ac9c0cb2691e46b711fee680f83dca3101e489",
+      "bundled_bank_uuid": "C8A9FBEB-F417-464F-A8EC-E4A8AE8E7812",
+      "supplied_bank_uuid": "E7AC5CC1-260C-4830-AC0E-4206D674C239",
+      "parameter_count": 148,
+      "decimal_differences": [
+        "neonvolumeControl"
+      ],
+      "metadata_differences": []
+    },
+    {
+      "uid": "B699455E-6E85-42FD-AA6C-D8F992FDB303",
+      "file_sha256": "6a3697fe27fd80149a565862ab8574929f6a548293b627414fbf9ca287f8d0a6",
+      "bundled_bank_uuid": "DFFCE1CB-EA1B-4059-8E69-16CED0AEA8F1",
+      "supplied_bank_uuid": "84B1A8EB-BA34-4B8B-B3BE-6FE8CADB40DA",
+      "parameter_count": 149,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "4DBA5169-1A26-45B7-9A8C-BE968BB2EA36",
+      "file_sha256": "c970745b2bf234fd16388013914f1349083792e9ca6a7c563959e176b0513aca",
+      "bundled_bank_uuid": "DFFCE1CB-EA1B-4059-8E69-16CED0AEA8F1",
+      "supplied_bank_uuid": "84B1A8EB-BA34-4B8B-B3BE-6FE8CADB40DA",
+      "parameter_count": 167,
+      "decimal_differences": [],
+      "metadata_differences": [
+        "originalUid"
+      ]
+    },
+    {
+      "uid": "885376B8-806E-4532-8FFF-A3B61D462338",
+      "file_sha256": "01572c68c7d5a11f1ecc495981cc41d40b89c46bf8c227fc1be5b5838ea6eab6",
+      "bundled_bank_uuid": "2D38FBB8-DC2B-4C0F-92F7-13EA6ED78C11",
+      "supplied_bank_uuid": "9D317FAA-7EE4-4682-BA50-294CEDB3DAC2",
+      "parameter_count": 148,
+      "decimal_differences": [
+        "neonvolumeControl"
+      ],
+      "metadata_differences": []
+    },
+    {
+      "uid": "178217AC-78A0-4238-A0D3-23F188042B69",
+      "file_sha256": "eb051e3c596214bec5cb01af4b28e4a40cf350bba354e5ee6491e6b4f31cffce",
+      "bundled_bank_uuid": "4676513A-1DC7-448C-9517-0599A1034BD7",
+      "supplied_bank_uuid": "D9C2AC79-DAFE-456F-AA76-52E4565B77D1",
+      "parameter_count": 150,
+      "decimal_differences": [
+        "neonvolumeControl"
+      ],
+      "metadata_differences": []
+    },
+    {
+      "uid": "A0404688-ECAE-480A-8097-4FA82058ACFD",
+      "file_sha256": "29aa7f74368df6648d87c7d4d349606334d9d05aef68579dd0e54c442599cb03",
+      "bundled_bank_uuid": "6B88194B-0E71-40E1-9846-43B4B9302BC3",
+      "supplied_bank_uuid": "0D43FA89-B60B-403E-BBB6-BE36EDA5E5D9",
+      "parameter_count": 147,
+      "decimal_differences": [
+        "neonvolumeControl"
+      ],
+      "metadata_differences": []
+    },
+    {
+      "uid": "07E33041-92A3-42E2-AD4A-6289169B0BDA",
+      "file_sha256": "c8597cc6e9576a2bff896aa6fef3df99c55d6d90f539b19ee44dcbad46068d60",
+      "bundled_bank_uuid": "BC2747B4-FBF6-4C17-B12B-015240A7012B",
+      "supplied_bank_uuid": "BC152AB4-9391-40F3-BCDC-83207645FCC3",
+      "parameter_count": 115,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "82E5394D-06A8-42D9-890D-878F70A9EFD9",
+      "file_sha256": "605e9cfae06f56bc8a104799d8f8fc6fa56c9ee62461b89d9398377fa83e8469",
+      "bundled_bank_uuid": "3BEFC062-9432-499D-92A4-B6C76C892910",
+      "supplied_bank_uuid": "22F572EB-EDCA-4321-B3C5-ED2B14FDE68B",
+      "parameter_count": 114,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+      "file_sha256": "50f285a40829fc31b40aedc25f975c06cfe2a82fac5820a87eaca24364d7a425",
+      "bundled_bank_uuid": "3BEFC062-9432-499D-92A4-B6C76C892910",
+      "supplied_bank_uuid": "22F572EB-EDCA-4321-B3C5-ED2B14FDE68B",
+      "parameter_count": 114,
+      "decimal_differences": [],
+      "metadata_differences": [
+        "position"
+      ]
+    },
+    {
+      "uid": "BA9B7984-F195-4BF1-AD98-C9AB4488A142",
+      "file_sha256": "3b65445abf3db898cfb91376c6a24a62624c9799e7417ea26865fe2247d26a9b",
+      "bundled_bank_uuid": "B7DFB860-6D8B-4DC1-AA25-645A6A783F49",
+      "supplied_bank_uuid": "682CBBA8-415A-49C6-AD03-EA3DFF17E402",
+      "parameter_count": 115,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "5BC3209E-2CAC-41A2-9BD1-12A71E27EEB6",
+      "file_sha256": "84a3a8d6a6cb7280cbae22465229ddb287e95158d88ced72a3823a32b46b7aae",
+      "bundled_bank_uuid": "24307E5F-89D6-40CC-A08E-CF2441D1CBE6",
+      "supplied_bank_uuid": "822F3C3E-AD43-4CFB-8068-2D3ECB09741A",
+      "parameter_count": 115,
+      "decimal_differences": [],
+      "metadata_differences": []
+    },
+    {
+      "uid": "5E170FFC-81DE-4501-A51B-75094B063EAB",
+      "file_sha256": "4b2713250527061b5a6a2374889d7de74ca751b0c9766e6253301024f5dcaaff",
+      "bundled_bank_uuid": "8F2CE3D9-0E9D-4B76-96BD-9736793A4668",
+      "supplied_bank_uuid": "A9A7DAC2-6163-4535-9B88-B0D243401280",
+      "parameter_count": 147,
+      "decimal_differences": [],
+      "metadata_differences": []
+    }
+  ]
+}

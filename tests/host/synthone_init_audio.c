@@ -88,8 +88,64 @@ static void allocation_trace(const uint8_t cell[32])
     }
 }
 
+#if X0X_SYNTHONE_PATCH
+/* Play identical notes on live production voices. Apply one native control to
+ * A, retaining phase and both envelope histories. B remains the independent
+ * control. Filter envelope parameters need nonzero depth to be audible. */
+static void patch_audio(void)
+{
+    const unsigned changed[] = {127,0,0,0,0,127,127,0,0,127,127,0,0};
+    uint8_t cell[32];
+    for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
+        assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+        assert(original_sound_s1_set(cell, 4, 90)); /* filterADSRMix */
+        assert(original_sound_s1_set(cell, 7, 30)); /* filterSustainLevel */
+        assert(original_sound_s1_set(cell, 1, 90)); /* morph1Volume */
+        assert(original_runtime_init(&part_a, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_init(&part_b, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        key(&part_a, 60, 105); key(&part_b, 60, 105);
+        float al[64], ar[64], bl[64], br[64];
+        assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
+        assert(!memcmp(al, bl, sizeof al));
+        s1_dry_voice before = part_a.dsp.synthone.voice[0];
+        assert(original_sound_s1_set(cell, slot, changed[slot]));
+        assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
+        s1_part_apply_cell(&part_a.dsp.synthone, cell);
+        const s1_dry_voice *after = &part_a.dsp.synthone.voice[0];
+        assert(after->phase == before.phase && !memcmp(&after->amp, &before.amp, sizeof before.amp));
+        assert(!memcmp(&after->filter, &before.filter, sizeof before.filter));
+        unsigned different = 0;
+        for (unsigned block = 0; block < 320; ++block) {
+            /* Like the source envelope, a new attack coefficient takes effect
+             * at the next attack. Exercise both held and newly started voices. */
+            if (block == 32) { key(&part_a, 67, 105); key(&part_b, 67, 105); }
+            if (block == 180) {
+                key(&part_a, 60, 0); key(&part_b, 60, 0);
+                key(&part_a, 67, 0); key(&part_b, 67, 0);
+            }
+            assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
+            assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
+            for (unsigned f = 0; f < 64; ++f) {
+                assert(isfinite(al[f]) && isfinite(bl[f]));
+                if (al[f] != bl[f]) ++different;
+            }
+        }
+        printf("factory ID %u changed %u of 20480 frames\n", s1_patch_at(slot)->factory_id, different);
+        fflush(stdout);
+        assert(different > 64);
+        assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
+        assert(s1_part_patch_value(&part_a.dsp.synthone,slot) ==
+            s1_patch_physical(s1_patch_at(slot),changed[slot]));
+    }
+}
+#endif
+
 int main(void)
 {
+#if X0X_SYNTHONE_PATCH
+    patch_audio();
+#endif
     uint8_t cell[32], legacy[32];
     assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY));
     memcpy(legacy, cell, sizeof cell);

@@ -22,6 +22,18 @@
 #include "../seq/sequencer.h"
 #include "../seq/motion.h"
 #include "param_trace.h"
+#if X0X_SYNTHONE_PATCH
+#include "s1_patch.h"
+/* Foreground API. Read returns the applied target and patch identity. Write
+ * queues one edit on that same identity for the next audio boundary. A
+ * subsequent preset/reload supersedes it, including reloading identical INIT.
+ * BUSY means a note lock or an earlier edit still owns the part. */
+enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
+int engine_s1_patch_pending(void);
+int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
+int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
+int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
+#endif
 
 enum { T_909, T_808, T_303, T_BRK, T_FX, T_MIX, T_MST, NTARGETS };
 #define T_PROB NTARGETS                /* a lane's pseudo-target: a step's chance, 5..100 % (not in sound_t);

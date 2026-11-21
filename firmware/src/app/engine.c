@@ -2923,6 +2923,9 @@ void engine_render(int32_t *out_lr, uint32_t n)
         return;
     }
     eng_prof_frames += n;
+#if X0X_SYNTHONE_PATCH
+    s1_patch_boundary();
+#endif
     original_prepare_all(); /* precedes every serial frame-zero edit and key */
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;

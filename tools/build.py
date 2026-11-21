@@ -468,8 +468,9 @@ def build_app():
             flags.append(f"-D{flag}={v}")
     # Sound-selector previews use tagged storage but deliberately leave the
     # separate per-note snapshot lifecycle disabled until it is qualified.
-    bass_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND")
-    for flag in bass_flags:
+    sound_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND",
+                   "X0X_SYNTHONE_PATCH")
+    for flag in sound_flags:
         v = os.environ.get(flag)
         if v is not None:
             if v not in ("0", "1"):

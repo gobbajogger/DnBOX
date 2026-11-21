@@ -28,6 +28,9 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         rc=ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_init(&p->dsp.synthone);
+#if X0X_SYNTHONE_PATCH
+        if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
+#endif
         rc = ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_MIAMI)
         rc = original_miami_backend_init(&p->dsp.miami, factory, bpm) ? 1 : -2;
@@ -235,7 +238,11 @@ int original_runtime_all_off(original_runtime_part *p)
         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
         p->dsp.juno.chorus.write=0;ok=1;
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+#if X0X_SYNTHONE_PATCH
+        s1_part_all_off(&p->dsp.synthone);
+#else
         s1_part_init(&p->dsp.synthone);
+#endif
         ok = 1;
     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
         ok = original_miami_backend_all_off(&p->dsp.miami);
