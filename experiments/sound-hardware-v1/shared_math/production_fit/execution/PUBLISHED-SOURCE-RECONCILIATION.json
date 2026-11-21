@@ -1,0 +1,21 @@
+{
+  "utc": "2026-11-19T00:26:03.573290+00:00",
+  "plan_source_commit": "e0ef1994a91abef619c755f9428e44c8c9f064c4",
+  "plan_source_git_tree": "9d90b64c610126c5602a12e2409bc60305f4a02d",
+  "published_commit": "f7f27cde98f7ac7594eb4ad23526652f0fb10130",
+  "published_tree": "80e26acb2042e9685bdd47e8d6da2527c8d229d6",
+  "consolidated_commit": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "tracked_selected_paths": 351,
+  "tracked_source_differences": [],
+  "not_in_published_tree": [],
+  "generated_header_inputs": {
+    "chicago_compact_private.h": "22beb20b008a93a22000752e62b25018b793bae5f69b1aca5d06c8152916e189",
+    "felucca_font.h": "5d895596344a94798b95b86137805bdb685b2e0263f20d2824dea37dbf99e352",
+    "x0x_break_bank.h": "b114be3c1c1f2019f6b920a732a17d4ce47ba203ac3505a93c65c67da1e2a3f0",
+    "x0x_drum_samples.h": "50e7aa406f7767d7b10bb2165aa9d19e59b27b451dea59b881cab06a0c5818e9",
+    "x0x_drum_tables.h": "9235c69643359a1d9e4f692e754d25e8b9a4014b9e41886eed995d8aaf100eb5"
+  },
+  "scope": "Read-only blob comparison to published commit; no working-tree substitution. Reference fastmath six-declaration reversal remains intentional. Default frozen empty BREAK bank.",
+  "working_head": "f7f27cde98f7ac7594eb4ad23526652f0fb10130",
+  "working_status": " M experiments/sound-hardware-v1/dry_voice_followup/FROZEN-INPUTS.json\n M experiments/sound-hardware-v1/dry_voice_followup/check.py\n?? experiments/sound-hardware-v1/dry_voice_followup/diagnosis/NONLINEAR-HYPOTHESIS.md\n?? experiments/sound-hardware-v1/dry_voice_followup/evidence/c/\n?? experiments/sound-hardware-v1/dry_voice_followup/evidence/d/\n?? experiments/sound-hardware-v1/dry_voice_followup/filter_probe_c/\n?? experiments/sound-hardware-v1/dry_voice_followup/ownership_followup/\n?? experiments/sound-hardware-v1/dry_voice_followup/reference_filter_observations/\n?? experiments/sound-hardware-v1/dry_voice_followup/reference_followup/\n?? experiments/sound-hardware-v1/dry_voice_followup/variants/c/\n?? experiments/sound-hardware-v1/dry_voice_followup/variants/d/\n"
+}

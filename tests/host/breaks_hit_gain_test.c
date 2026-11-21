@@ -96,20 +96,29 @@ static void internal_restarts(void)
     render_scaled(BRK_GRAIN_HOP + 200, v);
     assert(subject.cur != before);
 
-    start_pair(v, 0);
-    breaks_set(&reference, BRK_ALEN, 3);
-    breaks_set(&subject, BRK_ALEN, 3);
-    breaks_live(&reference, 10, 1);
-    breaks_live(&subject, 10, 1);
-    breaks_step(&reference, 4, 0, 256, 1);
-    breaks_step_velocity(&subject, 4, 0, 256, 1, (uint8_t)v);
-    render_scaled(128, v);
-    assert(subject.sub_div == 4);
-    /* The next 16th has a different velocity but no fresh generator hit. */
-    breaks_step(&reference, 5, 0, 256, 1);
-    breaks_step_velocity(&subject, 5, 0, 256, 1, 0);
-    render_scaled(800, v);
-    assert(subject.sub_count == 3);
+    /* Programmed repeats and live stutter use different crossfades. Both
+     * keep the velocity of their trigger when the next step is muted. */
+    for (int live = 0; live <= 1; ++live) {
+        start_pair(v, 0);
+        breaks_set(&reference, BRK_ALEN, 3);
+        breaks_set(&subject, BRK_ALEN, 3);
+        if (live) {
+            breaks_live(&reference, 10, 1);
+            breaks_live(&subject, 10, 1);
+        } else {
+            breaks_set(&reference, BRK_R4, 100);
+            breaks_set(&subject, BRK_R4, 100);
+        }
+        breaks_step(&reference, 4, 0, 256, 1);
+        breaks_step_velocity(&subject, 4, 0, 256, 1, (uint8_t)v);
+        render_scaled(128, v);
+        assert(subject.sub_div == 4);
+        /* The next 16th has a different velocity but no fresh generator hit. */
+        breaks_step(&reference, 5, 0, 256, 1);
+        breaks_step_velocity(&subject, 5, 0, 256, 1, 0);
+        render_scaled(800, v);
+        assert(subject.sub_count == 3);
+    }
 
     start_pair(v, 0);
     breaks_set(&reference, BRK_ALEN, 0);

@@ -1,0 +1,25 @@
+{
+  "scope": "bounded analysis and uncompiled proposal; no audio render",
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 12570,
+      "sha256": "faed37f5454f20ec844bb4ab058db4d91b54feb12e6597f9c2f5d46b02fbd1cc"
+    },
+    {
+      "file": "centered_feedback_proposal.c",
+      "bytes": 3691,
+      "sha256": "7dae0fb90e85669ce9901e07955fe334e228d328da86cf12b88c9ba8330a4b5e"
+    },
+    {
+      "file": "scalar_checks.py",
+      "bytes": 6060,
+      "sha256": "e3df442f546e407e427afc2bd8d110c3db26fb675d952e7607d5f8b6f82601c8"
+    },
+    {
+      "file": "scalar_results.json",
+      "bytes": 21593,
+      "sha256": "9664a074b4c457b5a6d5dc8ea273c43b712455c876b600405ed04799267d7b94"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "source": "dea023ce632538621b59bb307ebcaf440805b032",
+  "header_sha256": "db5243700029444f2e1ef1f37f9a365cc7e571a9369b8a218c67af61c4756af0",
+  "pairs_sha256": "f1d7229af02c75fff10559db3797a80fc44c49d15a7f3276a5029b89a4d2c4eb",
+  "bounds": {
+    "q": [
+      0,
+      15099490
+    ],
+    "q2": [
+      0,
+      227994598260100
+    ],
+    "twice_q_max": 30198980,
+    "predicted": [
+      0,
+      16609443
+    ],
+    "biased_residual": [
+      0,
+      3
+    ],
+    "before_minus_2": [
+      2,
+      16609445
+    ],
+    "restored": [
+      0,
+      16609443
+    ]
+  },
+  "reference_words": 1542,
+  "packed_lut_bytes": 1200,
+  "old_lut_bytes": 2400,
+  "want_sha256": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+  "host": {
+    "-O0": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+    "-O2": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+    "-Os": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+    "-O3": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7"
+  },
+  "generator": {
+    "-O0": "f1d7229af02c75fff10559db3797a80fc44c49d15a7f3276a5029b89a4d2c4eb",
+    "-O2": "f1d7229af02c75fff10559db3797a80fc44c49d15a7f3276a5029b89a4d2c4eb",
+    "-Os": "f1d7229af02c75fff10559db3797a80fc44c49d15a7f3276a5029b89a4d2c4eb",
+    "-O3": "f1d7229af02c75fff10559db3797a80fc44c49d15a7f3276a5029b89a4d2c4eb"
+  },
+  "pi32v2_emu": {
+    "words": 1542,
+    "captured_sha256": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+    "binary_sha256": "f5b6f310c6464d4e0927388f748da1d09c32dc069912363344d571f15a8d95a0",
+    "emulator_commit": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+    "compile_flags": "-target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -Oz -std=c99 -ffreestanding -fno-builtin"
+  }
+}

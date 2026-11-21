@@ -38,7 +38,6 @@ static void fl_plain_window_init(void) { abort(); }
 static void st_owner_check(void) { abort(); }
 static void smp_user_scan(uint32_t slot) { (void)slot; abort(); }
 static void ed_smp_recover(void) { abort(); }
-static void ota_boot_cleanup(void) { abort(); }
 static const uint8_t *boot_shown(void) { return NULL; }
 static void stop_before_audio_startup(void)
 {

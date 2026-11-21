@@ -1,0 +1,59 @@
+
+/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/native/core-O2.o:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .strtab       000003c5 0000000000000000 
+  2 .text         00000000 0000000000000000 TEXT DATA 
+  3 .text.dnbx_abi_version 00000006 0000000000000000 TEXT DATA 
+  4 .text.dnbx_part_size 00000006 0000000000000000 TEXT DATA 
+  5 .text.dnbx_layer_params_size 00000004 0000000000000000 TEXT DATA 
+  6 .text.dnbx_work_size 00000004 0000000000000000 TEXT DATA 
+  7 .text.dnbx_default_layer_params 00000078 0000000000000000 TEXT DATA 
+  8 .rela.text.dnbx_default_layer_params 0000000c 0000000000000000 
+  9 .text.dnbx_init 0000011a 0000000000000000 TEXT DATA 
+ 10 .rela.text.dnbx_init 00000024 0000000000000000 
+ 11 .text.envelope_valid 00000098 0000000000000000 TEXT DATA 
+ 12 .text.fm_floorf 0000001c 0000000000000000 TEXT DATA 
+ 13 .text.dnbx_set_layer 000002d6 0000000000000000 TEXT DATA 
+ 14 .rela.text.dnbx_set_layer 00000030 0000000000000000 
+ 15 .text.dnbx_get_layer 00000032 0000000000000000 TEXT DATA 
+ 16 .rela.text.dnbx_get_layer 0000000c 0000000000000000 
+ 17 .text.enter_stage 0000028e 0000000000000000 TEXT DATA 
+ 18 .rela.text.enter_stage 0000000c 0000000000000000 
+ 19 .text.release_voice 00000146 0000000000000000 TEXT DATA 
+ 20 .rela.text.release_voice 00000048 0000000000000000 
+ 21 .text.dnbx_note_off 00000108 0000000000000000 TEXT DATA 
+ 22 .rela.text.dnbx_note_off 00000048 0000000000000000 
+ 23 .text.dnbx_note_on 00000710 0000000000000000 TEXT DATA 
+ 24 .rela.text.dnbx_note_on 0000006c 0000000000000000 
+ 25 .text.dnbx_set_sustain 000000b4 0000000000000000 TEXT DATA 
+ 26 .rela.text.dnbx_set_sustain 00000048 0000000000000000 
+ 27 .text.dnbx_set_velocity_mode 00000026 0000000000000000 TEXT DATA 
+ 28 .text.dnbx_all_off 00000038 0000000000000000 TEXT DATA 
+ 29 .rela.text.dnbx_all_off 0000000c 0000000000000000 
+ 30 .text.dnbx_active_voices 00000142 0000000000000000 TEXT DATA 
+ 31 .text.dnbx_read_voice 00000092 0000000000000000 TEXT DATA 
+ 32 .rela.text.dnbx_read_voice 0000000c 0000000000000000 
+ 33 .text.envelope_sample 00000158 0000000000000000 TEXT DATA 
+ 34 .rela.text.envelope_sample 00000018 0000000000000000 
+ 35 .text.fm_sin_pi 00000062 0000000000000000 TEXT DATA 
+ 36 .text.shape   000001bc 0000000000000000 TEXT DATA 
+ 37 .rela.text.shape 00000018 0000000000000000 
+ 38 .text.dnbx_render 000004a8 0000000000000000 TEXT DATA 
+ 39 .rela.text.dnbx_render 00000030 0000000000000000 
+ 40 .text.dnbx_store_raw 00000056 0000000000000000 TEXT DATA 
+ 41 .text.dnbx_read_raw 00000046 0000000000000000 TEXT DATA 
+ 42 .text.dnbx_attack_from_unit 00000166 0000000000000000 TEXT DATA 
+ 43 .rela.text.dnbx_attack_from_unit 0000000c 0000000000000000 
+ 44 .text.dnbx_lfo_from_unit 00000154 0000000000000000 TEXT DATA 
+ 45 .rela.text.dnbx_lfo_from_unit 0000000c 0000000000000000 
+ 46 .text.dnbx_pwm_from_unit 0000003a 0000000000000000 TEXT DATA 
+ 47 .text.dnbx_range_from_stop 00000030 0000000000000000 TEXT DATA 
+ 48 .text.dnbx_wave_probe_mode 00000104 0000000000000000 TEXT DATA 
+ 49 .rela.text.dnbx_wave_probe_mode 00000018 0000000000000000 
+ 50 .text.dnbx_wave_probe 00000014 0000000000000000 TEXT DATA 
+ 51 .rela.text.dnbx_wave_probe 0000000c 0000000000000000 
+ 52 .rodata..Lswitch.table 00000014 0000000000000000 DATA 
+ 53 .symtab       00000260 0000000000000000 

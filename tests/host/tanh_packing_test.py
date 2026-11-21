@@ -79,13 +79,18 @@ def main():
             shadow = out / "shadow" / "dsp"
             gen.mkdir(parents=True)
             shadow.mkdir(parents=True)
+            (shadow.parent / "x0x_cold.h").write_bytes((dsp_dir.parent / "x0x_cold.h").read_bytes())
             # Full DSP header shadow so quoted includes and dsp/*.h harness paths
             # both see the kind-specific drum909_dsp.h / generated tables.
-            for hdr in dsp_dir.glob("*.h"):
-                (shadow / hdr.name).write_bytes(hdr.read_bytes())
-            dsp_path = "firmware/src/dsp/drum909_dsp.h"
-            (shadow / "drum909_dsp.h").write_bytes(
-                old(dsp_path) if kind == "baseline" else (ROOT / dsp_path).read_bytes())
+            if kind == "baseline":
+                headers = subprocess.check_output(["git", "ls-tree", "--name-only",
+                                                   BASE + ":firmware/src/dsp"], cwd=ROOT).decode().splitlines()
+                for name in headers:
+                    if name.endswith(".h"):
+                        (shadow / name).write_bytes(old("firmware/src/dsp/" + name))
+            else:
+                for hdr in dsp_dir.glob("*.h"):
+                    (shadow / hdr.name).write_bytes(hdr.read_bytes())
 
             script = ROOT / "tools/gen_drum_samples.py"
             code = old("tools/gen_drum_samples.py") if kind == "baseline" else script.read_bytes()
@@ -97,13 +102,16 @@ def main():
             sys.argv = argv
             # Tables live next to DSP headers for #include "x0x_drum_tables.h".
             (shadow / "x0x_drum_tables.h").write_bytes((gen / "x0x_drum_tables.h").read_bytes())
-            (shadow / "x0x_drum_samples.h").write_bytes((gen / "x0x_drum_samples.h").read_bytes())
+            # Keep the historical cymbal audio fixed across the table-packing comparison.
+            (shadow / "x0x_drum_samples.h").write_bytes(
+                (tmp / "baseline" / "gen" / "x0x_drum_samples.h").read_bytes())
 
             objects = []
-            for name in ("drum909", "fxbus"):
+            units = ["drum909", "fxbus"] if kind == "baseline" else ["drum909", "fxbus", "x0x_param"]
+            for name in units:
                 path = "firmware/src/dsp/" + name + ".c"
                 src = out / (name + ".c")
-                src.write_bytes((ROOT / path).read_bytes())
+                src.write_bytes(old(path) if kind == "baseline" else (ROOT / path).read_bytes())
                 obj = out / (name + ".o")
                 run([cc, "-O2", "-ffp-contract=off", "-std=c99",
                      "-Wall", "-Wextra", "-Werror", "-Wdouble-promotion",

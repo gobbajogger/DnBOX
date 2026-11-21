@@ -1,0 +1,16 @@
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index de3898e6..35bb7c61 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -9019,7 +9019,11 @@ UI_DRAW void ui_frame(void)
+ #endif
+     {
+         draw_header();
++        if (!seq.playing && plat_keys() != ui.keys)
++            cv_lcd_maybe_input();
+         draw_main();
++        if (!seq.playing && plat_keys() != ui.keys)
++            cv_lcd_maybe_input();
+         draw_knobs();
+     }
+     leds();

@@ -1,0 +1,11 @@
+{
+  "au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "instrument": "KoFMInstrument",
+  "initializer": "0x100059aec",
+  "call_site": "0x100059b14",
+  "import_stub": "0x1005d762c",
+  "reached_import": "_$s10Foundation4UUIDVMa",
+  "exception": "Unimplemented/error-path import trapped: _$s10Foundation4UUIDVMa",
+  "guest_basic_blocks_entered": 3,
+  "full_graph_instances": 0
+}

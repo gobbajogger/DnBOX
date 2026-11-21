@@ -1,0 +1,39 @@
+{
+  "utc": "2026-11-18T23:07:28.994722+00:00",
+  "scope": "Two authorized serialized local Elite full-closure links; no target execution, full instrument acceptance or gate",
+  "runs": [
+    {
+      "label": "compact-reference-elite-02",
+      "status": "PHYSICAL_LINK_FAILED",
+      "compiled_units": 74,
+      "load_image_bytes": 553420,
+      "physical_free_bytes": -748,
+      "reserve_margin_bytes": -1772,
+      "pool_raw_free_bytes": 8972,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_free_bytes": 0,
+      "physical_link_returncode": 1,
+      "plan_sha256": "49971208c215f59d4ad0ccc1c7b0f7ce7a1c31b764c9cde6e49eda141258b313",
+      "result_sha256": "0b37f98942d4861a060bbc30913b97affbdc80f25c8484ff77fea8ea4e3f6d3e",
+      "map_sha256": "63aab078aebb7c012b1749e00988cf0f410613c880450231f0316b5037b2a668",
+      "commands_sha256": "0c2e280e281a22df159501cf97a499b1167d4b86d7f259c3e8bbeb1be0ead221"
+    },
+    {
+      "label": "compact-shared-elite-03",
+      "status": "LINK_MEASURED",
+      "compiled_units": 74,
+      "load_image_bytes": 546924,
+      "physical_free_bytes": 5748,
+      "reserve_margin_bytes": 4724,
+      "pool_raw_free_bytes": 8972,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_free_bytes": 0,
+      "physical_link_returncode": 0,
+      "plan_sha256": "c1db664a35fd1c99e70b88c3d6586b30c0a1442b068338fa7f6f72fd163ba010",
+      "result_sha256": "988b26a886702af7b0c7d35a1f23590a2fc4c49fe283b8d5bafc0a0195847300",
+      "map_sha256": "1908159f91f0e35493b9a3b5cfabc5b1d7aae75bbe151ebe87fbaf1a1cd733ed",
+      "commands_sha256": "927671ae0d82fd8ebc893be31ebee318844ed8cade253b54408645035852812f"
+    }
+  ],
+  "text_and_image_saved_bytes": 6496
+}

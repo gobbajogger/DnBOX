@@ -1,0 +1,188 @@
+{
+  "scope": "Static source-derived ordered command corpus; not Apple execution or candidate audio acceptance",
+  "program_count": 694,
+  "bank_count": 12,
+  "banks": [
+    {
+      "name": "BankA.json",
+      "count": 41,
+      "sha256": "1486c2b1fcb922d145541c96f436e7e15d755dba72ff9a8030052ef22d224bed"
+    },
+    {
+      "name": "Bonus.json",
+      "count": 94,
+      "sha256": "e189a9782469bd851d97a2bd157cfdd43692621287de68eb2909e8aabbd4b996"
+    },
+    {
+      "name": "Brice Beasley.json",
+      "count": 46,
+      "sha256": "a42a515cc66fc392f8831efa4865145dc9e2c8a8d9bc2554d1fd8a1aed242d45"
+    },
+    {
+      "name": "DJ Puzzle.json",
+      "count": 28,
+      "sha256": "6263b4c08143d5f62192ad48c881129ae0c2df80256abd010dee89ede10b6506"
+    },
+    {
+      "name": "Electronisounds.json",
+      "count": 43,
+      "sha256": "94447bcafd93b8e534b99347ef1a2ab7f96006364c36e85c88825e2480a026e7"
+    },
+    {
+      "name": "Francis Preve.json",
+      "count": 26,
+      "sha256": "7e45e985951bcff09de2745d7223a8523c559f7ae30c032cfeed81c6bf317187"
+    },
+    {
+      "name": "JEC.json",
+      "count": 88,
+      "sha256": "9af56a4f52d050c98da8bfc6bc355ac872772cdd419def188bb644b0c9dff0c0"
+    },
+    {
+      "name": "Red Sky Lullaby.json",
+      "count": 100,
+      "sha256": "db813fe373ebd0c2434c8c0af376b245c331c35080b396bce83bc4d9f2fb0aac"
+    },
+    {
+      "name": "Sound of Izrael 2.json",
+      "count": 51,
+      "sha256": "edf48f200ed2510b03d4b5e9e4c92c0306af0e38776c0916794d90e79572d861"
+    },
+    {
+      "name": "Sound of Izrael.json",
+      "count": 101,
+      "sha256": "1f100f20227401a47e17f91bac5be44efc6d5fef8d97f7ed2a64a2a7e1426462"
+    },
+    {
+      "name": "Spidericemidas.json",
+      "count": 61,
+      "sha256": "1cb034e91677be3b7bc0cddca64d821ddbfc132d79f98e4211053867f76eec35"
+    },
+    {
+      "name": "Starter Bank.json",
+      "count": 15,
+      "sha256": "f4da92584505084e3b0277cf1e1f1911050837014a5fa7371cc6879421cbe908"
+    }
+  ],
+  "direct_bindings": 96,
+  "sequence_writes": 48,
+  "writes_per_program": 144,
+  "parameter_count": 150,
+  "smoothed_count": 46,
+  "unwritten_ids": [
+    18,
+    31,
+    33,
+    140,
+    144,
+    145
+  ],
+  "exact_historical_patch_subset_factory_matches": 0,
+  "subset_filter_funnel": [
+    {
+      "condition": "bandlimit_disabled",
+      "individual_count": 480,
+      "cumulative_count": 480
+    },
+    {
+      "condition": "lowpass_selected",
+      "individual_count": 598,
+      "cumulative_count": 431
+    },
+    {
+      "condition": "oscillator1_saw_endpoint",
+      "individual_count": 110,
+      "cumulative_count": 58
+    },
+    {
+      "condition": "oscillator2_volume_zero",
+      "individual_count": 65,
+      "cumulative_count": 3
+    },
+    {
+      "condition": "sub_volume_zero",
+      "individual_count": 105,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "fm_volume_zero",
+      "individual_count": 120,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "noise_volume_zero",
+      "individual_count": 250,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "all_twelve_lfo_routes_off",
+      "individual_count": 80,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "arp_off",
+      "individual_count": 356,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "poly_mode",
+      "individual_count": 368,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "glide_zero",
+      "individual_count": 363,
+      "cumulative_count": 0
+    },
+    {
+      "condition": "dry_stereo_fx_controls",
+      "individual_count": 50,
+      "cumulative_count": 0
+    }
+  ],
+  "pre_setter_out_of_metadata_range_count": 9,
+  "pre_setter_out_of_metadata_range_by_id": {
+    "12": 1,
+    "123": 1,
+    "124": 1,
+    "135": 1,
+    "136": 1,
+    "15": 1,
+    "47": 1,
+    "122": 1,
+    "134": 1
+  },
+  "filter_types": {
+    "0.0": 598,
+    "1.0": 60,
+    "2.0": 36
+  },
+  "bandlimit": {
+    "0.0": 480,
+    "1.0": 214
+  },
+  "unknown_or_nonDSP_field_counts": {
+    "author": 694,
+    "bank": 694,
+    "category": 694,
+    "isFavorite": 694,
+    "isHoldMode": 694,
+    "isUser": 694,
+    "midiBendRange": 694,
+    "modWheelRouting": 694,
+    "name": 694,
+    "octavePosition": 694,
+    "position": 694,
+    "uid": 694,
+    "userText": 694,
+    "tuningMasterSet": 478,
+    "tuningName": 478,
+    "oscBandlimitIndexOverride": 274
+  },
+  "raw_command_limits": [
+    "Values are before dependent setter and smoothing side effects.",
+    "No generic 0..1 normalization. Six dependent IDs require their own contract.",
+    "Preset data plus commands do not represent original Swift type-conversion execution.",
+    "Zero intact factory matches does not imply that all subsets of their signal paths fail."
+  ]
+}

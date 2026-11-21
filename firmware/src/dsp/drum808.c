@@ -2220,7 +2220,6 @@ void drum808_trigger(drum808_t *d, int track, float vel)
     d->lane[lane].hit = vgain;
     d->lane[lane].pk = 0.0f;
     d->lane[lane].now = 0.0f;
-    d->lane[lane].qn = 0;
     d->lane[lane].cg = 1.0f;
     d->lane[lane].cstep = 0.0f;
     d->lane[lane].snd = (uint8_t)s;
@@ -2301,64 +2300,25 @@ static int voice_active(const drum808_t *d, int l)
     }
 }
 
-/* X0X: a voice's tail ends once it has stayed 60 dB under the hit's own peak for 20 ms. 8W8 runs
- * each voice until its output is under -90 dBFS-ish (3.2e-5, or the metal voices' envelopes), so a
- * voice spends 12..87 % of its life (cymbal .. rim shot; cowbell 51 %) under -60 dB of its peak,
- * at full cost: the 808 was the biggest share of the renders that ran over. D8_TAIL_DB=0 keeps
- * 8W8's endings (the reference test). */
-#ifndef D8_TAIL_DB
-#define D8_TAIL_DB 1
-#endif
-#define D8_TAIL_K 1.0e-3f              /* -60 dB */
-#define D8_TAIL_N 882                  /* 20 ms: the gaps between a clap's bursts are shorter */
-#define D8_TAIL_FLOOR 1.0e-2f          /* the hit has sounded (voices peak at 0.2 .. 7) */
-#if D8_TAIL_DB
-__attribute__((noinline)) static void voice_stop(drum808_t *d, int l)
+/* The panel reads the envelope. Each 8W8 voice owns its release and
+ * choke, including the oscillator and noise state used on retrigger. */
+static void lane_meter(d8_lane_t *lane, const float *buf, int n)
 {
-    switch (l) {
-    case L_BD: d->bd.active = 0; break;
-    case L_SD: d->sd.active = 0; break;
-    case L_T0: case L_T1: case L_T2: d->tom[l - L_T0].active = 0; break;
-    case L_RS: d->rs.active = 0; break;
-    case L_CL: d->cl.active = 0; break;
-    case L_MA: d->ma.active = 0; break;
-    case L_CP: d->cp.active = 0; break;
-    case L_CB: d->cb.active = 0; break;
-    case L_CH: d->ch.active = 0; break;
-    case L_OH: d->oh.active = 0; break;
-    default: d->cy.active = 0; break;
+    float peak = 0.0f;
+    for (int i = 0; i < n; i++) {
+        float level = fm_fabsf(buf[i]);
+        if (level > peak)
+            peak = level;
     }
+    lane->now = peak;
+    if (peak > lane->pk)
+        lane->pk = peak;
 }
-__attribute__((noinline)) static void lane_tail(drum808_t *d, int l, const float *buf, int m)
-{
-    d8_lane_t *ln = &d->lane[l];
-    float pk = ln->pk, threshold = pk * D8_TAIL_K;
-    int32_t qn = ln->qn;
-    float now = 0.0f;
-    int i;
-    for (i = 0; i < m; i++) {
-        float a = fm_fabsf(buf[i]);               /* (+0 for -0: compares the same, never stored) */
-        if (a > now)
-            now = a;
-        if (D8_UNLIKELY(a > pk)) { pk = a; threshold = pk * D8_TAIL_K; }
-        if (__builtin_expect(a > threshold, 1))
-            qn = 0;
-        else
-            qn++;
-    }
-    ln->pk = pk;
-    ln->qn = qn;
-    ln->now = now;
-    if (qn > D8_TAIL_N && pk > D8_TAIL_FLOOR)       /* (a metal voice opens late: it has to have sounded) */
-        voice_stop(d, l);
-}
-#endif
 
 static inline __attribute__((always_inline)) int lane_on(const drum808_t *d, int l) { return d->lane[l].cg > 0.0f && voice_active(d, l); }
 
 X0X_COLD float drum808_env(const drum808_t *d, int track)
 {
-#if D8_TAIL_DB
     int l;
     if (track < 0 || track >= D8_NUM) return 0.0f;
     switch (track) {
@@ -2373,9 +2333,6 @@ X0X_COLD float drum808_env(const drum808_t *d, int track)
     }
     if (!voice_active(d, l) || !(d->lane[l].pk > 0.0f)) return 0.0f;
     return d->lane[l].now / d->lane[l].pk;
-#else
-    (void)d; (void)track; return -1.0f;
-#endif
 }
 
 int drum808_active(const drum808_t *d)
@@ -2537,9 +2494,7 @@ static void d8_render(drum808_t *d, float *dry, float *rev, float *dly, int n, u
                 lane_mix(d, ln, buf, got, dry + off, rev + off, dly + off, audible_tracks);
                 d8_dry_r = dr;
             }
-#if D8_TAIL_DB
-            lane_tail(d, l, buf, got);
-#endif
+            lane_meter(ln, buf, got);
         }
     }
 }
@@ -2626,9 +2581,7 @@ void drum808_metal_prepare(drum808_t *d, float raw[4][256], int n, uint16_t audi
             for (i = 0; i < got; i++)
                 raw[k][off + i] = buf[i];
             d8_msnap.got[ch][k] = got;
-#if D8_TAIL_DB
-            lane_tail(d, l, buf, got);
-#endif
+            lane_meter(ln, buf, got);
             /* the same choke lane_mix will apply: keep voice state in step, restore at mix */
             for (i = 0; i < got; i++) {
                 if (ln->cstep < 0.0f) {

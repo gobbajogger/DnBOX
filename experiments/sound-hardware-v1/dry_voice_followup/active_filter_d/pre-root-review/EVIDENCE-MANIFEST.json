@@ -1,0 +1,18 @@
+{
+  "schema": "Active-filter source-only freeze evidence v1",
+  "excludes_self": true,
+  "files_sha256": {
+    "DECLARATION.json": "207f589cac583ee2823b6ae577e0ab7f10764459f26de4703b5291a7de140a67",
+    "NEXT-COMMAND.txt": "e4f294369c75fd157938399c5c448720b09d6e889cd2f4a2deb1ff03118cd7d3",
+    "README.md": "689e63a6fc86a715ca9995455b36248fb3da81bbcf5925fcaf7e774c94ba5423",
+    "SOURCE-REVIEW.json": "d57be05b99bb7bd4548dfb7c4160ea1b5b65da7be9f34e9d3bde1630b2bc451f",
+    "check_active.py": "7f447922c64097e1d25d489caa73c89f828d442cb4957efd5d4ce3364a2457d4",
+    "inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89"
+  },
+  "compiled_files": [],
+  "candidate_pcm_files": []
+}

@@ -1,0 +1,135 @@
+--- a/crates/fm1-soc/src/lib.rs
++++ b/crates/fm1-soc/src/lib.rs
+@@ -1075,4 +1075,9 @@
+             let baud = self.sfr_get(0x11d04);
+             self.periph.spi1_start(bytes, baud, irq);
++            if self.foreground_read_window() {
++                if let Some(observer) = &mut self.dnbox_observer {
++                    observer.foreground_spi_start(self.periph.cycles, self.periph.spi1_done_at, bytes);
++                }
++            }
+         }
+     }
+@@ -1098,4 +1103,44 @@
+     let on = |k: &str| std::env::var_os(k).is_some();
+     (on("FM1_STRICT") || on("FM1_LCD_TIMED")) && !on("FM1_LCD_INSTANT")
++}
++
++impl Soc {
++    #[inline]
++    fn foreground_read_window(&self) -> bool {
++        matches!(self.periph.audio_halves, 448..=459 | 561..=578) &&
++            !self.core1_charging && !self.periph.in_isr && self.dnbox_observer.is_some()
++    }
++
++    #[inline]
++    fn observe_foreground_read(&mut self, addr: u32, width: u32, value: u32) {
++        if self.foreground_read_window() {
++            if let Some(observer) = &mut self.dnbox_observer {
++                observer.foreground_read(self.periph.cycles, addr, width, value, self.periph.spi1_done_at);
++            }
++        }
++    }
++
++    #[inline(always)]
++    fn read32_unobserved(&mut self, addr: u32) -> u32 {
++        let o = addr.wrapping_sub(RAM_BASE) as usize;
++        if o + 4 <= self.ram.len() {
++            if addr & 3 != 0 && self.strict_align {
++                self.misaligned(addr, 4);
++            }
++            return self.ram.read32(o as u32);
++        }
++        let x = addr.wrapping_sub(XIP_BASE) as usize;
++        if x + 4 <= self.xip.len() {
++            if let Some(c) = self.xip_cache.as_mut() {
++                if c.access(addr) {
++                    self.xip_charge(XipCache::MISS_TICKS);
++                    self.miss_note(addr);
++                }
++            }
++            return u32::from_le_bytes([self.xip[x], self.xip[x + 1], self.xip[x + 2], self.xip[x + 3]]);
++        }
++        self.read32_slow(addr)
++    }
++
+ }
+
+@@ -1188,8 +1233,11 @@
+     fn read8(&mut self, addr: u32) -> u8 {
+         let o = addr.wrapping_sub(RAM_BASE);
+-        if (o as usize) < self.ram.len() {
+-            return self.ram.read8(o);
+-        }
+-        self.read32(addr & !3).to_le_bytes()[(addr & 3) as usize]
++        let value = if (o as usize) < self.ram.len() {
++            self.ram.read8(o)
++        } else {
++            self.read32_unobserved(addr & !3).to_le_bytes()[(addr & 3) as usize]
++        };
++        self.observe_foreground_read(addr, 1, value as u32);
++        value
+     }
+
+@@ -1199,30 +1247,15 @@
+             self.misaligned(addr, 2);
+         }
+-        // halfwords sit at offsets 0 and 2 of the word (the old `>> 8` for
+-        // offset 2 returned bytes 1-2 and sheared every 16-bit pixel canvas)
+-        let v = self.read32(addr & !3);
+-        (v >> ((addr & 2) * 8)) as u16
++        let v = self.read32_unobserved(addr & !3);
++        let value = (v >> ((addr & 2) * 8)) as u16;
++        self.observe_foreground_read(addr, 2, value as u32);
++        value
+     }
+
+     #[inline(always)]
+     fn read32(&mut self, addr: u32) -> u32 {
+-        let o = addr.wrapping_sub(RAM_BASE) as usize;
+-        if o + 4 <= self.ram.len() {
+-            if addr & 3 != 0 && self.strict_align {
+-                self.misaligned(addr, 4);
+-            }
+-            return self.ram.read32(o as u32);
+-        }
+-        let x = addr.wrapping_sub(XIP_BASE) as usize;
+-        if x + 4 <= self.xip.len() {
+-            if let Some(c) = self.xip_cache.as_mut() {
+-                if c.access(addr) {
+-                    self.xip_charge(XipCache::MISS_TICKS);
+-                    self.miss_note(addr);
+-                }
+-            }
+-            return u32::from_le_bytes([self.xip[x], self.xip[x + 1], self.xip[x + 2], self.xip[x + 3]]);
+-        }
+-        self.read32_slow(addr)
++        let value = self.read32_unobserved(addr);
++        self.observe_foreground_read(addr, 4, value);
++        value
+     }
+
+--- a/crates/fm1-soc/src/dnbox_observer.rs
++++ b/crates/fm1-soc/src/dnbox_observer.rs
+@@ -146,4 +146,21 @@
+             edge.seq, edge.scheduled_cycle, edge.observed_cycle, edge.deadline_cycle, edge.half, edge.address, edge.words));
+     }
++    pub fn foreground_read(&mut self, cycle: u64, address: u32, width: u32, value: u32, spi1_done_at: u64) {
++        let (name, offset) = match address {
++            0x10804 => ("timer4", 0),
++            0x13104 => ("adc", 0),
++            0x11d00 => ("spi1_status", 0),
++            _ => {
++                let Some(w) = self.watches.iter().find(|w| w.name.starts_with("scene_read_") && w.contains(address,width)) else { return };
++                (w.name.as_str(), address - w.address)
++            }
++        };
++        self.emit(format!("{{\"event\":\"foreground_read\",\"seq\":{},\"cycle\":{cycle},\"name\":\"{name}\",\"offset\":{offset},\"width\":{width},\"value\":{value},\"spi1_done_at\":{spi1_done_at}}}", self.dma_seq));
++    }
++
++    pub fn foreground_spi_start(&mut self, cycle: u64, spi1_done_at: u64, bytes: u32) {
++        self.emit(format!("{{\"event\":\"foreground_spi_start\",\"seq\":{},\"cycle\":{cycle},\"bytes\":{bytes},\"spi1_done_at\":{spi1_done_at}}}", self.dma_seq));
++    }
++
+     pub fn foreground_context(&mut self, cycle: u64, interrupted_pc: u32, spi1_done_at: u64) {
+         self.emit(format!("{{\"event\":\"foreground_context\",\"seq\":{},\"cycle\":{cycle},\"interrupted_pc\":{interrupted_pc},\"spi1_done_at\":{spi1_done_at}}}", self.dma_seq));

@@ -1,0 +1,120 @@
+{
+  "label": "production-reference-pro-06",
+  "plan_sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+  "argv": [
+    "python3",
+    "verify_inputs.py",
+    "--execute",
+    "--plan",
+    "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/fit_next_plan",
+  "start_utc": "2026-11-19T00:28:06.244848+00:00",
+  "end_utc": "2026-11-19T00:28:19.273120+00:00",
+  "elapsed_seconds": 13.028348810999887,
+  "returncode": 0,
+  "waited_pid": 5,
+  "process_group": 5,
+  "maxrss_kib": 82924,
+  "rss_scope": "wait4 maximum resident set reported for the verifier process and its waited descendants; not a sum of concurrent RSS",
+  "user_seconds": 12.02695,
+  "system_seconds": 0.95877,
+  "minor_faults": 251926,
+  "major_faults": 0,
+  "block_input": 272,
+  "block_output": 30536,
+  "outer_log": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-pro-06-outer.log",
+  "outer_log_sha256": "b2e4808adf552248cdf2206c32506216a5201b0b9ff4e9c88d19a58ba4c2b324",
+  "admission_sha256": "0baf2e0deb8be518977bb2a5bb592d4c890ea5f22280f55d435dcdbb4cecb1fa",
+  "remaining_local_process_group_members": [],
+  "local_process_group_released": true,
+  "process_visibility": "Local PID namespace only; no global process absence inferred",
+  "other_observed_active_local_jobs_after": [],
+  "result": {
+    "status": "LINK_MEASURED",
+    "plan_sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+    "composition": "stock",
+    "profile": "reference",
+    "model": "pro",
+    "physical_xip_capacity": 552672,
+    "required_free_bytes": 1024,
+    "native_execution": "NOT_RUN",
+    "emulator_execution": "NOT_RUN",
+    "physical_link_returncode": 0,
+    "sections_from_physical_map": {
+      ".text": {
+        "vma": 33554720,
+        "bytes": 547564,
+        "lma": 33554720
+      },
+      ".ram_sink": {
+        "vma": 29360128,
+        "bytes": 1024,
+        "lma": 29360128
+      },
+      ".ram_text": {
+        "vma": 29361152,
+        "bytes": 2708,
+        "lma": 34102284
+      },
+      ".c1_text": {
+        "vma": 29363860,
+        "bytes": 608,
+        "lma": 34104992
+      },
+      ".data": {
+        "vma": 29392896,
+        "bytes": 600,
+        "lma": 34105600
+      },
+      ".c1stack": {
+        "vma": 29835264,
+        "bytes": 4608,
+        "lma": 29835264
+      },
+      ".bss": {
+        "vma": 29393504,
+        "bytes": 96596,
+        "lma": 29393504
+      },
+      ".pool": {
+        "vma": 29491200,
+        "bytes": 335092,
+        "lma": 29491200
+      },
+      ".xpool": {
+        "vma": 29839872,
+        "bytes": 9216,
+        "lma": 29839872
+      },
+      ".noinit": {
+        "vma": 29868032,
+        "bytes": 308,
+        "lma": 29868032
+      },
+      ".ble_ram": {
+        "vma": 29869056,
+        "bytes": 3884,
+        "lma": 29869056
+      }
+    },
+    "pool_raw_free_bytes": 8972,
+    "pool_margin_above_8192_reserve": 780,
+    "pool_gate": "PASS",
+    "ordinary_ram_extent_bytes": 97204,
+    "ordinary_ram_free_bytes": 1100,
+    "xpool_free_bytes": 0,
+    "load_image_bytes": 551484,
+    "physical_free_bytes": 1188,
+    "reserve_margin_bytes": 164,
+    "image_size_source": "physical link map, aligned load sections plus four-byte marker",
+    "elf_sha256": "1a1e8a569e5a3525fbfbf1ef776b29db764d4b8bc3f203d1831d1bc3ca38063c",
+    "undefined": [],
+    "soft_double_symbols": [],
+    "xip_gate": "PASS",
+    "qualification": "Resource experiment only. Header sharing and actual target behavior/timing require independent target-code evidence."
+  },
+  "result_sha256": "6e2e2b55fe007f65acbc9a6fda31e291eb7313ac5ae4e767046cc9e344b10c23",
+  "emulator_execution": "NOT_RUN",
+  "status": "TERMINAL"
+}

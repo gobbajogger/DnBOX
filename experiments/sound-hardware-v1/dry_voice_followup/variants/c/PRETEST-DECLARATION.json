@@ -1,0 +1,39 @@
+{
+  "status": "C_COMPILED_BEFORE_SELFTESTS_NO_NOTE_AUDIO_RENDERED",
+  "written_utc": "2026-11-18T23:59:56.433287+00:00",
+  "variant": "c_ch4_centered_feedback",
+  "fixed_iterations": 6,
+  "only_proposed_variant": "centered feedback D(z)=((1+z^-1)/2)^4; same B poles/excitation/rate/gain",
+  "source_files_sha256": {
+    "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "tests/scalar_test.c": "41085e1cb0564971f699251c8c45d5cb609d558a3e563fb4520301ee161b7c5f",
+    "tests/scalar_cases.h": "f11c74353772662071372c3ae0f33fb0bd21e6c7ae0424f5acb5c55b62a07e2d",
+    "tests/make_scalar_fixtures.py": "fc861ce13592ce07a64ec060f9eb5cda56c2ecd637fa3561f39ab4f8d7f8edde",
+    "build.sh": "0908bab25841da1c8f379400c369feefcaf56a16cb03b0a94f43638ccd4834ed",
+    "inputs/centered_feedback_proposal.c": "7dae0fb90e85669ce9901e07955fe334e228d328da86cf12b88c9ba8330a4b5e",
+    "inputs/README.md": "faed37f5454f20ec844bb4ab058db4d91b54feb12e6597f9c2f5d46b02fbd1cc",
+    "inputs/scalar_checks.py": "e3df442f546e407e427afc2bd8d110c3db26fb675d952e7607d5f8b6f82601c8",
+    "inputs/scalar_results.json": "9664a074b4c457b5a6d5dc8ea273c43b712455c876b600405ed04799267d7b94"
+  },
+  "compiled_files_sha256": {
+    "build/s1_dry_voice.o": "1f8fffc1620a41a27ae9003cf73081f755177a385703cec37ec6d74d91f21a60",
+    "build/s1_dry_host": "838c151b0d59f4be8c959a6430499d529a686f5d5f3afaaaaf26749cf26b1e38",
+    "build/scalar_test": "2b6bae03915612247f4b604bdfde4d9372143451ab1756896dcde029c71b95a9"
+  },
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "blocked_environment_keys_present": [],
+  "gate_unchanged": {
+    "gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0
+  },
+  "root_review_and_explicit_authorization_required_before_audio": true,
+  "A_B_frozen_files_still_unchanged": true
+}

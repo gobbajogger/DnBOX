@@ -1,0 +1,30 @@
+{
+  "banks": {
+    "BankA.json": 41,
+    "Bonus.json": 94,
+    "Brice Beasley.json": 46,
+    "DJ Puzzle.json": 28,
+    "Electronisounds.json": 43,
+    "Francis Preve.json": 26,
+    "JEC.json": 88,
+    "Red Sky Lullaby.json": 100,
+    "Sound of Izrael 2.json": 51,
+    "Sound of Izrael.json": 101,
+    "Spidericemidas.json": 61,
+    "Starter Bank.json": 15
+  },
+  "records": 694,
+  "verified_pre_setter_words": 99936,
+  "scalar_writes_per_program": 96,
+  "sequence_writes_per_program": 48,
+  "source_default_uses": {
+    "adsrPitchTracking": 582,
+    "arpSeqTempoMultiplier": 582,
+    "oscBandlimitEnable": 359,
+    "transpose": 582
+  },
+  "distinct_uids": 670,
+  "distinct_bank_uid_pairs": 691,
+  "distinct_bank_position_pairs": 694,
+  "commands_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af"
+}

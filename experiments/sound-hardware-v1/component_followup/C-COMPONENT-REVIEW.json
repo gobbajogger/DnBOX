@@ -1,0 +1,130 @@
+{
+  "status": "complete",
+  "verdict": "Ready to merge",
+  "verdict_scope": "Bounded inactive envelope component checkpoint only. This is not admission to merge the whole sound lane or activate production S1.",
+  "scope": {
+    "base": "9be11840b11d256f22a9af19d290cfe96f31a429",
+    "branch": "lane/sound",
+    "head_sha": "9be11840b11d256f22a9af19d290cfe96f31a429",
+    "pr_url": null,
+    "files_changed": 8,
+    "mode": "explicit caller-scoped untracked component snapshot"
+  },
+  "intent": "Review the independently written prepared-coefficient S1 scalar envelope against its numeric-only contract and immutable observations. Preserve SJ6 and leave production S1 inactive; qualify no target coefficient routine, allocator, native fit or whole instrument.",
+  "intent_confidence": "explicit",
+  "reviewers": [
+    "inline-correctness",
+    "inline-api-and-memory",
+    "inline-testing",
+    "inline-project-standards",
+    "inline-adversarial"
+  ],
+  "independent_reviewers": [],
+  "findings": [],
+  "actionable_findings": [],
+  "triage_groups": [],
+  "pre_existing_findings": [],
+  "learnings": [],
+  "agent_native_gaps": [],
+  "requirements_completeness": {
+    "source": "/workspace/scratch/e803955aec60/fidelity_review/IMPLEMENTER-CONTRACT.md",
+    "source_kind": "explicit numeric component contract",
+    "result": "Component recurrence, event order, live sustain, stage latches, retrigger retention, initial/reset state and state ownership are satisfied. Target coefficient preparation and production integration remain explicitly excluded."
+  },
+  "resolved_observations": [
+    {
+      "title": "Add decay edit at attack threshold to reject early latching",
+      "initial_evidence": "threshold_after_recurrence.log: original 4-test suite exited 0 for the mutant",
+      "resolution": "Root added and retained test_decay_edit_at_attack_boundary_is_latched_on_the_next_sample, now at tests/host/test_synthone_dnbx_envelope.py:188.",
+      "verification": "Final copied suite: 5 tests exit 0. Final threshold_after_recurrence.log: 5 tests exit 1; mutant .623046875 versus expected .869140625.",
+      "classification": "Declared component boundary invariant; no extra original-app observation claimed."
+    }
+  ],
+  "deployment_notes": [
+    "Production S1 remains inactive. Do not treat this bounded review as a Local gate, sound-lane admission, RAM/flash qualification or permission to merge consolidated."
+  ],
+  "residual_risks": [
+    "Host binary32 arithmetic is verified with -fno-fast-math and -ffp-contract=off; native compiler, coefficient routine and denormal behavior require later qualification.",
+    "Full S1 topology, physical control law, presets, FX, note ownership, simultaneous stock memory fit and real callbacks remain outside this component. Existing FAILs remain FAIL."
+  ],
+  "testing_gaps": [],
+  "coverage": {
+    "source_hashes": {
+      "firmware/src/dsp/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+      "firmware/src/dsp/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+      "tests/host/test_synthone_dnbx_envelope.py": "0f25a47aa44fabed04327489ffc37bd4f582725d343c1b0ae7a4a88a4d62e7a0"
+    },
+    "exact_fixture_samples": 379288,
+    "exact_fixture_different_words": 0,
+    "suite_after_boundary_test": {
+      "tests": 5,
+      "exit_code": 0,
+      "log": "/workspace/scratch/e803955aec60/s1_component_review/final/baseline.log"
+    },
+    "mutant_terminal_outcomes": [
+      {
+        "name": "baseline",
+        "exit_code": 0,
+        "expected_failure": false,
+        "log": "/workspace/scratch/e803955aec60/s1_component_review/final/baseline.log"
+      },
+      {
+        "name": "running_time_relatch",
+        "exit_code": 1,
+        "expected_failure": true,
+        "log": "/workspace/scratch/e803955aec60/s1_component_review/final/running_time_relatch.log"
+      },
+      {
+        "name": "sustain_snap",
+        "exit_code": 1,
+        "expected_failure": true,
+        "log": "/workspace/scratch/e803955aec60/s1_component_review/final/sustain_snap.log"
+      },
+      {
+        "name": "retrigger_level_reset",
+        "exit_code": 1,
+        "expected_failure": true,
+        "log": "/workspace/scratch/e803955aec60/s1_component_review/final/retrigger_level_reset.log"
+      },
+      {
+        "name": "threshold_after_recurrence",
+        "exit_code": 1,
+        "expected_failure": true,
+        "log": "/workspace/scratch/e803955aec60/s1_component_review/final/threshold_after_recurrence.log"
+      }
+    ],
+    "memory_review": "No allocation, mutable global state, external heap calls or pointer arithmetic in the component. Guard checks exercised valid disjoint state and parameter objects; this is not an instrument leak or sanitizer result.",
+    "api_preconditions": "Null configure rejected and invalid finite/nonfinite controls preserve params; reset/sample require valid pointers and sample gate 0 or 1 as documented.",
+    "external_peer": "Explicitly prohibited by caller; none started.",
+    "execution": "Single reviewer with inline lenses under caller authorization; no subagent or claim of cross-model corroboration.",
+    "scope_exceptions": "Caller explicitly included these untracked component files and required every artifact under the isolated review directory. No canonical source, index, GitHub, original source, native build, full suite, device, external Codex, RDC or Actions operations were performed.",
+    "review_process_adaptation": "CE mode:agent serialization and bounded inline lenses; no separate persona/validator dispatch or skill mechanics helper was run. No current findings required validation.",
+    "preserved_logs": [
+      "/workspace/scratch/e803955aec60/s1_component_review/final/baseline.log",
+      "/workspace/scratch/e803955aec60/s1_component_review/final/running_time_relatch.log",
+      "/workspace/scratch/e803955aec60/s1_component_review/final/sustain_snap.log",
+      "/workspace/scratch/e803955aec60/s1_component_review/final/retrigger_level_reset.log",
+      "/workspace/scratch/e803955aec60/s1_component_review/final/threshold_after_recurrence.log"
+    ],
+    "prior_extra_invariants": {
+      "receipt": "/workspace/scratch/e803955aec60/s1_component_review/review.json",
+      "description": "Earlier 6-test extended suite, irregular owner bursts, endpoint and canary checks remain retained; not rerun in this final simplification pass. C implementation is byte-identical."
+    },
+    "final_diff_inspection": [
+      "C implementation unchanged: SHA-256 4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9.",
+      "Header now correctly requires reset before first use and avoids asserting that only reset may yield zero.",
+      "new_state helper calls the public reset API; removed unused samples state parameter.",
+      "Stable IDs live-3/live-5 select the same sustain-edit and decay-retrigger owner cases.",
+      "Retained-red selection live-0..4 preserves case-major order and does not alter existing baseline outputs.",
+      "F32.size and F32.iter_unpack retain binary32 little-endian sizes and comparison behavior.",
+      "Immediate addClassCleanup covers setup failures and normal teardown.",
+      "Mismatch diagnostics remain exact, now calculated only on mismatch.",
+      "Seven-sample attack-boundary edit assertion remains .869140625 and kills the early-latch mutant."
+    ],
+    "canonical_sources_match_reviewed_snapshot": true
+  },
+  "artifact_path": "/workspace/scratch/e803955aec60/s1_component_review/final",
+  "run_id": "s1-component-independent-final-review-20261118",
+  "completed_at": "2026-11-18T23:22:36.391228+00:00",
+  "reviewed_prior_receipt": "/workspace/scratch/e803955aec60/s1_component_review/review.json"
+}

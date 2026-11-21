@@ -1,0 +1,79 @@
+physical-gain/100_2000_.9: PASS
+physical-gain/100_2000_.25: PASS
+physical-gain/100_2000_.5: PASS
+physical-gain/100_2000_0: PASS
+physical-gain/100_22050_.25: PASS
+physical-gain/100_22050_.5: FAIL
+physical-gain/100_22050_.9: FAIL
+physical-gain/100_22050_0: PASS
+physical-gain/100_500_.25: PASS
+physical-gain/100_500_.5: PASS
+physical-gain/100_500_.9: PASS
+physical-gain/100_500_0: PASS
+physical-gain/100_64_.25: PASS
+physical-gain/100_64_.5: PASS
+physical-gain/100_64_.9: FAIL
+physical-gain/100_64_0: PASS
+physical-gain/100_8000_.25: PASS
+physical-gain/100_8000_.5: FAIL
+physical-gain/100_8000_.9: FAIL
+physical-gain/100_8000_0: PASS
+physical-gain/127_2000_.25: PASS
+physical-gain/127_2000_.5: PASS
+physical-gain/127_2000_.9: PASS
+physical-gain/127_2000_0: PASS
+physical-gain/127_22050_.25: PASS
+physical-gain/127_22050_.5: FAIL
+physical-gain/127_22050_.9: FAIL
+physical-gain/127_22050_0: PASS
+physical-gain/127_500_.25: PASS
+physical-gain/127_500_.5: PASS
+physical-gain/127_500_.9: PASS
+physical-gain/127_500_0: PASS
+physical-gain/127_64_.25: PASS
+physical-gain/127_64_.5: PASS
+physical-gain/127_64_.9: FAIL
+physical-gain/127_64_0: PASS
+physical-gain/127_8000_.25: PASS
+physical-gain/127_8000_.5: FAIL
+physical-gain/127_8000_.9: FAIL
+physical-gain/127_8000_0: PASS
+physical-gain/20_2000_.25: PASS
+physical-gain/20_2000_.5: PASS
+physical-gain/20_2000_.9: PASS
+physical-gain/20_2000_0: PASS
+physical-gain/20_22050_.25: PASS
+physical-gain/20_22050_.5: FAIL
+physical-gain/20_22050_.9: FAIL
+physical-gain/20_22050_0: PASS
+physical-gain/20_500_.25: PASS
+physical-gain/20_500_.5: PASS
+physical-gain/20_500_.9: PASS
+physical-gain/20_500_0: PASS
+physical-gain/20_64_.25: PASS
+physical-gain/20_64_.5: PASS
+physical-gain/20_64_.9: FAIL
+physical-gain/20_64_0: PASS
+physical-gain/20_8000_.25: PASS
+physical-gain/20_8000_.5: FAIL
+physical-gain/20_8000_.9: FAIL
+physical-gain/20_8000_0: PASS
+{
+  "scope": "Static dry voice only; zero intact preset coverage",
+  "variant": "d_ch4_centered_linear_feedback",
+  "case_files": 60,
+  "note_cases": 180,
+  "accepted_files": 45,
+  "accepted_notes": 138,
+  "maximum_rms_db": 4.832778298315766,
+  "maximum_spectral_db": 8.991579577623538,
+  "accepted": false,
+  "unqualified": [
+    "72 dynamic cases",
+    "694 intact presets",
+    "150 controls",
+    "native fit",
+    "callback deadline",
+    "production activation"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schema": "public original-reference baseline and next-proposal handoff v1",
+  "status": "EXACT_BASELINE_TERMINAL; ACTIVE_PREPARATION_ONLY",
+  "original_engine_source_or_executable_included": false,
+  "public_wrapper_and_numeric_metadata_only": true,
+  "files": [
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/REPORT.md",
+      "bytes": 7277,
+      "sha256": "4fab67be68a39d7560f05b01625f7e7a437bc34b8f8660800a4f69567d3c07c0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/capture_original_dry.cpp",
+      "bytes": 9727,
+      "sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/PROPOSAL.json",
+      "bytes": 54695,
+      "sha256": "36d914226f921180f3c7d79643105e900650f65d9d3a1c5016e496891cb57aed"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/PROPOSAL.sha256",
+      "bytes": 80,
+      "sha256": "968190da5241b71ed1b97991ae496b0cb393c9aa07baf22455cbf39fb08e663b"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/execute_frozen_baseline.py",
+      "bytes": 15922,
+      "sha256": "772b2522f5ebfc9e08bfa5d59c83ed965dc3a95171df2754cd493726a468c013"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/authorized_attempt_summary.json",
+      "bytes": 1782,
+      "sha256": "8d43d40aef503943f5649671e883b24678c8a5196210c214ec4275775e9ec298"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/baseline_identity_result.json",
+      "bytes": 1249,
+      "sha256": "287675dcf9e9428d05e908fed75aefcb2616a9eae4dbf812d429cbfcfe4a2150"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/baseline_executable_identity.json",
+      "bytes": 218,
+      "sha256": "ab6b37ef07b1fdbde539d68799b980f5da5091dd44a74abcc699e1553932834c"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/authorized_link_audit.json",
+      "bytes": 3377,
+      "sha256": "fca2abdb8474d021383e0734f562801cf0c530a53edfb39966d844bf8c499cf2"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/explicit_execution_guards.json",
+      "bytes": 927,
+      "sha256": "2fcd3baa432ffc07196215ea3aa0a240f830ea27c391dd7a4642472cb3958c65"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/staged_inputs.json",
+      "bytes": 28301,
+      "sha256": "dc389b97faf513ee2e018845a16392e34c1b9333817c94d304544290141ceac5"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/numeric_fixture_manifest.json",
+      "bytes": 10698,
+      "sha256": "90d689b66cd0daab920bc051ae8fb358da8c33cb72bc3f409535b799a7a723ec"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/toolchain_identity.json",
+      "bytes": 6998,
+      "sha256": "5643abcba964cf580b7e4a7f31b963515a6b7e5d355974a54d42cc5a3f9bb88e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/map_exclusion_plan.json",
+      "bytes": 5758,
+      "sha256": "5812881c13a3c147dabf7204bc30ade8fc93e6f237115a5b4ab8e77e8fff92b8"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/public_handoff_preservation.json",
+      "bytes": 2967,
+      "sha256": "7da98ce033dedd2873680815c88a8710210e06561e351efe6510727f547901f4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/PROPOSAL.json",
+      "bytes": 14314,
+      "sha256": "088ce262d3bcc3a336b63cf4ad4a3d3914b3ca5235e32b177a3405395a81ec35"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/PROPOSAL.sha256",
+      "bytes": 80,
+      "sha256": "e9626b5c5ca178f8f79da7ba7e208260717b635f92cf243bc8944734f021c302"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/README.md",
+      "bytes": 2780,
+      "sha256": "a13b8a4ec5cb1c51ae4bab9046975ea300970052557773708a9ddbd50983388c"
+    }
+  ]
+}

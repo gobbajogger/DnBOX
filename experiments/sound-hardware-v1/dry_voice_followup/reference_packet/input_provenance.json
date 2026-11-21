@@ -1,0 +1,85 @@
+{
+  "note": "Hashes are file identity only. Original DSP algorithms and prior candidate implementation were not opened or copied. Fixture glue was inspected for stimulus/tuning and executable interface only.",
+  "inputs": [
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/BEHAVIOR-BRIEF.md",
+      "bytes": 12443,
+      "sha256": "0f15c39d7e884987036873a589c71b2f3bf26d228e39e9718520ddcce29077ac"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/behavior_fixtures.json",
+      "bytes": 15262,
+      "sha256": "f497b22941b9634db4fcca518b1ef4b8f28b4ef6318cbd1f5eddbf86cb18b0d1"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/s1_control_catalog.json",
+      "bytes": 94442,
+      "sha256": "3e2871f6756e78557693d77bd5cce732edf0cd09997d05a0cd518e4528d1a951"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/metrics.py",
+      "bytes": 997,
+      "sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/SUMMARY.json",
+      "bytes": 32912,
+      "sha256": "0aca21ecbbc4a405d48516170f5c3be4497e9bf232515da7285ce1b95f199886"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/run.py",
+      "bytes": 1583,
+      "sha256": "9e00b3a6be00034318b1d8edc66adfba6087ef487a4e853d7a38ae0d0a442b7b"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/COMMANDS.json",
+      "bytes": 7177,
+      "sha256": "9bf94f51720be75d6fa20ab82aa571425c5d8449110eb3da8cbb6b7403f8882b"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/PCM-TMP-PRESERVATION.json",
+      "bytes": 38662,
+      "sha256": "f10b8351acd4f0d31d63d050963e9d3eb5e710bc71937e7238d40982cb88d6ec"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/DRY-INPUTS.json",
+      "bytes": 11307,
+      "sha256": "46096e74b955b6cb9e966e5a10f693c7afe8c76c47f8dc2055cc915020823b56"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/SUMMARY.json",
+      "bytes": 12921,
+      "sha256": "dece44e10f6b301296bd8a634ce411c471c26aebab5e3298440d4537e5d402ca"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/run.py",
+      "bytes": 1580,
+      "sha256": "7b040d47083a538d84324c44c951cc8aff8bed8b46ffc84b91ea003563373ef6"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/legacy-adapter-range-failure/SUMMARY.json",
+      "bytes": 12783,
+      "sha256": "aa9406ada07443f3f7d8f0f17041cb276a4aa22a4d06c1123b6ba78b525f9c56"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/tests/compact_scheduler_test.cpp",
+      "bytes": 28711,
+      "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/fullfx/full_fixture.hpp",
+      "bytes": 4162,
+      "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/preset_audio.cpp",
+      "bytes": 4119,
+      "sha256": "f4d55d04153b057bc9b28e4e30dbaf5b9debe30e8dd33ccfae7e2d644118d53b"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/public-morphs.f32",
+      "bytes": 852176,
+      "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+    }
+  ]
+}

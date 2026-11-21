@@ -1,0 +1,32 @@
+[
+  {
+    "name": "baseline",
+    "exit_code": 0,
+    "expected_failure": false,
+    "log": "/workspace/scratch/e803955aec60/s1_component_review/final/baseline.log"
+  },
+  {
+    "name": "running_time_relatch",
+    "exit_code": 1,
+    "expected_failure": true,
+    "log": "/workspace/scratch/e803955aec60/s1_component_review/final/running_time_relatch.log"
+  },
+  {
+    "name": "sustain_snap",
+    "exit_code": 1,
+    "expected_failure": true,
+    "log": "/workspace/scratch/e803955aec60/s1_component_review/final/sustain_snap.log"
+  },
+  {
+    "name": "retrigger_level_reset",
+    "exit_code": 1,
+    "expected_failure": true,
+    "log": "/workspace/scratch/e803955aec60/s1_component_review/final/retrigger_level_reset.log"
+  },
+  {
+    "name": "threshold_after_recurrence",
+    "exit_code": 1,
+    "expected_failure": true,
+    "log": "/workspace/scratch/e803955aec60/s1_component_review/final/threshold_after_recurrence.log"
+  }
+]

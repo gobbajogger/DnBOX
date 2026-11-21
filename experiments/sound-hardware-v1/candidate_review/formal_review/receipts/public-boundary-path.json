@@ -1,0 +1,29 @@
+{
+  "purpose": "Observe the old/new library path selection without loading any native code.",
+  "native_code_loaded": false,
+  "cases": [
+    {
+      "case": "historical",
+      "source": "candidate_review/history/check_compact_public_boundaries.py",
+      "source_sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18",
+      "requested_fresh_directory": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/public_boundary_path/historical/fresh",
+      "first_selected_library": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/public_boundary_path/historical/compact_profile_review/accepted.so"
+      ],
+      "selected_fresh": false,
+      "pass": true
+    },
+    {
+      "case": "current",
+      "source": "candidate_review/check_compact_public_boundaries.py",
+      "source_sha256": "49c1ed054174d96fb2c415f975be49a4e307ae808715923a369a175be90e2ae4",
+      "requested_fresh_directory": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/public_boundary_path/current/fresh",
+      "first_selected_library": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/public_boundary_path/current/fresh/accepted.so"
+      ],
+      "selected_fresh": true,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

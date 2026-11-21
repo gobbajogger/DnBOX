@@ -71,7 +71,13 @@ static inline int bass_identity_check(const bass_identity_t *tag,
 /* Historical 0x4F445231 / count-8 tags become OS11 init. Never written back. */
 static inline int bass_identity_adopt(bass_identity_t *tag)
 {
-    if (!tag || !original_sound_is_legacy_slot2_id(tag->engine)) return 0;
+    if (!tag) return 0;
+    if (tag->engine == ORIGINAL_SOUND_SYNTHONE_ID && tag->schema == ORIGINAL_SOUND_SCHEMA &&
+        tag->count == 2 && tag->state == BASS_IDENTITY_KNOWN) {
+        tag->count = ORIGINAL_SYNTHONE_NPARAMS;
+        return 1;
+    }
+    if (!original_sound_is_legacy_slot2_id(tag->engine)) return 0;
     if (tag->schema != ORIGINAL_SOUND_SCHEMA || tag->count != 8u ||
         tag->state != BASS_IDENTITY_KNOWN) return 0;
     tag->engine = ORIGINAL_SOUND_SYNTHONE_ID;

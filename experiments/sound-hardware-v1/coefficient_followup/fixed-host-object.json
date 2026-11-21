@@ -1,0 +1,24 @@
+{
+  "undefined_symbols": {
+    "command": [
+      "nm",
+      "-u",
+      "/workspace/scratch/e803955aec60/coefficient_review/fixed_only.o"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "host_object_size": {
+    "command": [
+      "size",
+      "/workspace/scratch/e803955aec60/coefficient_review/fixed_only.o"
+    ],
+    "exit": 0,
+    "stdout": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n    792\t      0\t      0\t    792\t    318\t/workspace/scratch/e803955aec60/coefficient_review/fixed_only.o\n",
+    "stderr": ""
+  },
+  "source_bytes": 4190,
+  "source_lines": 121,
+  "host_only_caveat": "Host x86-64 object, not native target flash/link evidence; target may require uint64 division/multiply helpers."
+}

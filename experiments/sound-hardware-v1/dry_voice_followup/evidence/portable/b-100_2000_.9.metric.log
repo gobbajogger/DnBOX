@@ -1,0 +1,24 @@
+{"command": ["/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python", "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/dry_voice_followup/reference_packet/metrics.py", "/workspace/scratch/e803955aec60/dry_portable_validation/b_replay/100_2000_.9.paired.f32", "1"], "cwd": "/workspace/scratch/e803955aec60/dry_portable_validation/b_replay", "started_utc": "2026-11-18T23:57:09.878912+00:00", "exit_status": 0}
+{
+  "scope": "dry controlled three-pitch screen, not full engine gate",
+  "gain": 1.0,
+  "rows": [
+    {
+      "note": 36,
+      "rms_db": 0.1392130357248819,
+      "spectral_db": 2.2915799192067547
+    },
+    {
+      "note": 60,
+      "rms_db": 0.8810500689817609,
+      "spectral_db": 2.9502664724974883
+    },
+    {
+      "note": 84,
+      "rms_db": 1.9348981746235328,
+      "spectral_db": 3.099491563393029
+    }
+  ],
+  "nonfinite": 0,
+  "pcm_sha256": "40002ee7d0c10a5bdd4d37e6d7ccaf37048a614e3affa28d792489205c575000"
+}

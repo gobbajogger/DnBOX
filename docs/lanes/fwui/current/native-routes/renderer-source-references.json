@@ -1,0 +1,45 @@
+{
+  "cv_blit_from": [
+    "firmware/src/gfx.c:117: static void cv_blit_from(uint32_t x, uint32_t y, uint32_t r0)"
+  ],
+  "dg_tail": [
+    "firmware/src/app/ui.c:8555: static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint32_t seed,uint16_t col)",
+    "firmware/src/app/ui.c:8650: dg_tail(gx,gy,xe,live,e,0,0,col);",
+    "firmware/src/app/ui.c:8654: dg_tail(gx,gy,dg_tail_px(24.0f+x),live,e,1,live?age/40u:0,col);"
+  ],
+  "header_pattern_badge": [
+    "firmware/src/app/ui.c:5574: static UI_DRAW void header_pattern_badge(int x,int part,int pattern,int current,uint16_t ink)",
+    "firmware/src/app/ui.c:5590: nav_arrow(x,6,1,ink);header_pattern_badge(x+8,part,cue,0,C_GRAY);"
+  ],
+  "header_pattern_cue": [
+    "firmware/src/app/ui.c:5584: static UI_DRAW void header_pattern_cue(int x,int part)"
+  ],
+  "lane": [
+    "firmware/src/app/ui.c:6241: static void lane(int y, int p, uint32_t bits, int ph, int len, int base)"
+  ],
+  "matrix_next_hint": [
+    "firmware/src/app/ui.c:5987: static UI_DRAW int matrix_next_hint(int x,int y,uint16_t c)"
+  ],
+  "matrix_row_hint": [
+    "firmware/src/app/ui.c:5977: static UI_DRAW int matrix_row_hint(int x,int y,uint16_t c)"
+  ],
+  "nav_arrow": [
+    "firmware/src/app/ui.c:5564: static UI_DRAW void nav_arrow(int x,int y,int direction,uint16_t ink)",
+    "firmware/src/app/ui.c:5590: nav_arrow(x,6,1,ink);header_pattern_badge(x+8,part,cue,0,C_GRAY);"
+  ],
+  "original_cell_value": [
+    "firmware/src/app/ui.c:7935: static void original_cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)",
+    "firmware/src/app/ui.c:8986: original_cell_value(cx,vc(&FONT_B,53,13),num,unit,touched ? C_WHITE : C_HI);"
+  ],
+  "row_picture": [
+    "firmware/src/app/ui.c:5570: static UI_DRAW void row_picture(int x,int y,uint16_t ink)",
+    "firmware/src/app/ui.c:5982: row_picture(x+14,y,c);"
+  ],
+  "strip_value_fit": [
+    "firmware/src/app/ui.c:7422: static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, uint16_t ink)",
+    "firmware/src/app/ui.c:7536: strip_value_fit(x, y+28, num, unit, ink);"
+  ],
+  "ui_position_badge": [
+    "firmware/src/app/ui.c:5525: static UI_DRAW int ui_position_badge(int glyph,int position,int queued,uint16_t ink,uint16_t cue_ink)"
+  ]
+}

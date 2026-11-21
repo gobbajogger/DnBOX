@@ -1,0 +1,425 @@
+{
+  "schema": "one additive original-only active-filter capture proposal v1",
+  "created_utc": "2026-11-19T00:30:19.740114+00:00",
+  "status": "PREPARATION_ONLY; NOT_AUTHORIZED_OR_EXECUTED",
+  "classification": "NEW_ORIGINAL_REFERENCE_CAPTURE_FROM_EXACT_BASELINE_VALIDATED_RECONSTRUCTION; NOT_MISSING_HISTORICAL_PCM_RECOVERY",
+  "native_sequence_gate": "Do not run until root sends terminal release of its native sequence and explicitly authorizes this one frozen command.",
+  "successful_baseline": {
+    "case_id": "physical-gain/100_2000_.9",
+    "mono_bytes": 1058304,
+    "mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "result_receipt": {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/baseline_identity_result.json",
+      "bytes": 1249,
+      "sha256": "287675dcf9e9428d05e908fed75aefcb2616a9eae4dbf812d429cbfcfe4a2150"
+    },
+    "attempt_summary": {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/authorized_attempt_summary.json",
+      "bytes": 1782,
+      "sha256": "8d43d40aef503943f5649671e883b24678c8a5196210c214ec4275775e9ec298"
+    },
+    "link_audit": {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/metadata/authorized_link_audit.json",
+      "bytes": 3377,
+      "sha256": "fca2abdb8474d021383e0734f562801cf0c530a53edfb39966d844bf8c499cf2"
+    }
+  },
+  "public_wrapper": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/capture_original_dry.cpp",
+    "bytes": 9727,
+    "sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4"
+  },
+  "successful_executable": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry",
+    "bytes": 63936,
+    "sha256": "edf9f733ff449ecf345f9843952dea5d7cdab00825de88e4d7c3c61e6135f91d"
+  },
+  "runtime_files": [
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "bytes": 977112,
+      "sha256": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "bytes": 1995216,
+      "sha256": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "bytes": 225672,
+      "sha256": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libstdc++.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+      "bytes": 2497768,
+      "sha256": "972bb2a18b71140dab0240f8a1f68ab3fb1d56bcd4c4f824a91b70888faf5a00"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libgcc_s.so.1",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "bytes": 182856,
+      "sha256": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+    }
+  ],
+  "case_plan": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/case_plan.json",
+    "bytes": 177344,
+    "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
+  },
+  "inputs": [
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+      "bytes": 852176,
+      "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+      "bytes": 600,
+      "sha256": "6f7e9834054579c2d61e7e33072c2651107e3e987a75aa59c1b222d3f5164ff4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+      "bytes": 512,
+      "sha256": "c53587ea03c65ee8bd3a7849cca890bdfcc2c5209847ded0c1e1de2a7db4a218"
+    }
+  ],
+  "exact_active_vector": {
+    "sha256": "6f7e9834054579c2d61e7e33072c2651107e3e987a75aa59c1b222d3f5164ff4",
+    "bytes": 600,
+    "controls": 150,
+    "parameter_overrides": {
+      "16": 2000.0,
+      "17": 0.8999999761581421,
+      "19": 1.2000000476837158,
+      "22": 0.20000000298023224,
+      "23": 0.30000001192092896,
+      "24": 0.4000000059604645,
+      "25": 0.5
+    },
+    "bits_hex": [
+      "3f800000",
+      "3f800000",
+      "3f000000",
+      "00000000",
+      "00000000",
+      "3f800000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "3e800000",
+      "44fa0000",
+      "3f666666",
+      "3f800000",
+      "3f99999a",
+      "00000000",
+      "00000000",
+      "3e4ccccd",
+      "3e99999a",
+      "3ecccccd",
+      "3f000000",
+      "3d4ccccd",
+      "3ba3d70a",
+      "3f4ccccd",
+      "3d4ccccd",
+      "00000000",
+      "3f800000",
+      "3f000000",
+      "41c00000",
+      "473b8000",
+      "00000000",
+      "3e800000",
+      "3f800000",
+      "3f000000",
+      "442f0000",
+      "00000000",
+      "00000000",
+      "3dcccccd",
+      "3e800000",
+      "3e000000",
+      "00000000",
+      "00000000",
+      "3e800000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "3f800000",
+      "41400000",
+      "00000000",
+      "3f800000",
+      "42f00000",
+      "00000000",
+      "40800000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "00000000",
+      "41400000",
+      "00000000",
+      "44480000",
+      "00000000",
+      "00000000",
+      "41a00000",
+      "41500000",
+      "41500000",
+      "c1100000",
+      "c1080000",
+      "c1000000",
+      "3a83126f",
+      "3a83126f",
+      "3a83126f",
+      "3e19999a",
+      "3e666666",
+      "3e19999a",
+      "40000000",
+      "3ff0a3d7",
+      "3ff0a3d7",
+      "3f400000",
+      "00000000",
+      "3f800000",
+      "46000000",
+      "c1400000",
+      "41400000",
+      "43dc0000",
+      "358637bd",
+      "bf800000",
+      "00000000",
+      "3e800000",
+      "00000000",
+      "00000000"
+    ]
+  },
+  "control_distinction": {
+    "baseline_filter_ADSR": [
+      0.05,
+      0.05,
+      1.0,
+      0.5
+    ],
+    "active_filter_ADSR": [
+      0.2,
+      0.3,
+      0.4,
+      0.5
+    ],
+    "bitwise_differences_from_baseline": [
+      {
+        "parameter_id": 19,
+        "parameter_name": "filterADSRMix",
+        "baseline_bits": "00000000",
+        "active_bits": "3f99999a",
+        "baseline_value": 0.0,
+        "active_value": 1.2000000476837158
+      },
+      {
+        "parameter_id": 22,
+        "parameter_name": "filterAttackDuration",
+        "baseline_bits": "3d4ccccd",
+        "active_bits": "3e4ccccd",
+        "baseline_value": 0.05000000074505806,
+        "active_value": 0.20000000298023224
+      },
+      {
+        "parameter_id": 23,
+        "parameter_name": "filterDecayDuration",
+        "baseline_bits": "3d4ccccd",
+        "active_bits": "3e99999a",
+        "baseline_value": 0.05000000074505806,
+        "active_value": 0.30000001192092896
+      },
+      {
+        "parameter_id": 24,
+        "parameter_name": "filterSustainLevel",
+        "baseline_bits": "3f800000",
+        "active_bits": "3ecccccd",
+        "baseline_value": 1.0,
+        "active_value": 0.4000000059604645
+      }
+    ],
+    "unchanged_control_count": 146,
+    "unchanged_common_controls": "Oscillator/source, amplitude envelope, velocity, tuning, LFO/glide/arp-off and all other controls outside the four listed filter fields remain byte-identical. Release stays 0.5 in both cases.",
+    "reason": "Use the exact predeclared historical modulation case; do not substitute the physical baseline filter ADSR."
+  },
+  "command": {
+    "argv": [
+      "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry",
+      "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+      "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+      "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+      "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+      "filter-modulation/1.2_2000_0.9"
+    ],
+    "working_directory": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation",
+    "environment": {
+      "PATH": "/usr/bin:/bin",
+      "LC_ALL": "C",
+      "LANG": "C",
+      "TZ": "UTC",
+      "TMPDIR": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/tmp"
+    },
+    "timeout_seconds": 15,
+    "max_invocations": 1,
+    "max_retries": 0,
+    "stdout_log": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stdout.log",
+    "stderr_log": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stderr.log"
+  },
+  "output_contract": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "format": "Original left mono, IEEE754 binary32 little endian",
+    "new_output_only": true,
+    "sample_rate_hz": 44100,
+    "velocity": 100,
+    "notes": [
+      {
+        "midi_note": 36,
+        "frequency_hz": 65.4063949584961,
+        "frequency_f32_hex": "4282d013",
+        "note_record_index": 0,
+        "paired_byte_offset": 0,
+        "mono_byte_offset": 0
+      },
+      {
+        "midi_note": 60,
+        "frequency_hz": 261.6255798339844,
+        "frequency_f32_hex": "4382d013",
+        "note_record_index": 1,
+        "paired_byte_offset": 705536,
+        "mono_byte_offset": 352768
+      },
+      {
+        "midi_note": 84,
+        "frequency_hz": 1046.5023193359375,
+        "frequency_f32_hex": "4482d013",
+        "note_record_index": 2,
+        "paired_byte_offset": 1411072,
+        "mono_byte_offset": 705536
+      }
+    ],
+    "fresh_original_instance_per_note": true,
+    "block_frames": 64,
+    "warmup_blocks_per_note": 2757,
+    "warmup_frames_per_note": 176448,
+    "retained_blocks_per_note": 1378,
+    "retained_frames_per_note": 88192,
+    "note_on_frame_per_note": 0,
+    "note_off_before_block_per_note": 1033,
+    "note_off_frame_per_note": 66112,
+    "expected_total_warmup_frames": 529344,
+    "expected_total_retained_frames": 264576,
+    "expected_total_reference_frames": 793920,
+    "expected_process_calls": 12405,
+    "expected_mono_bytes": 1058304,
+    "expected_original_mono_sha256": null,
+    "required_nonfinite_samples": 0,
+    "required_output_receipt": "Record actual input/executable/runtime identities, complete wrapper receipt, output size and new mono SHA-256. Preserve any partial or failed output and all logs."
+  },
+  "historical_pair_identity_for_provenance_only": {
+    "documented_filename": "/tmp/sound-filter-modulation/1.2_2000_0.9.f32.gz",
+    "decompressed_bytes": 2116608,
+    "decompressed_sha256": "f0f95c5ec0e496beaec004602b347bea41be069388e69c42f9f28b69c110e98a",
+    "not_an_expected_mono_hash": "The historical pair contains original and old candidate columns. Its SHA-256 cannot authenticate a newly rendered mono file. No historical missing bytes are claimed recovered."
+  },
+  "pre_execution_gates": [
+    "Root explicitly releases the native sequence and authorizes this frozen proposal.",
+    "Rehash the successful executable, public wrapper, three exact runtime inputs, case_plan, baseline result receipt and runtime-library files.",
+    "Use explicit conditional guards, not assertions; reject unpinned include/library/LD_PRELOAD injection environment.",
+    "Check current local processes and serialize away from an observed compiler/renderer; this proposal reserves no capacity.",
+    "Confirm target output and attempt log/receipt paths are absent; do not overwrite old evidence."
+  ],
+  "stop_conditions": [
+    "Changed identity or environment guard failure: no renderer invocation.",
+    "Nonzero exit, timeout, wrong frame/byte count or nonfinite output: preserve every byte/log and stop without retry, parameter changes or source repair."
+  ],
+  "no_adjustments": [
+    "gain fitting",
+    "normalization",
+    "phase alignment",
+    "resampling",
+    "silence or tail trimming",
+    "changed physical parameters",
+    "changed thresholds"
+  ],
+  "scope_limits": {
+    "compiler_driver_commands": 0,
+    "host_links": 0,
+    "renderer_invocations": 1,
+    "active_case_files": 1,
+    "active_note_cases": 3,
+    "full_modulation_matrix_run": false,
+    "native_target_commands": 0,
+    "emulator_commands": 0,
+    "fullsuite_or_timing_benchmark": false
+  },
+  "candidate_comparison_gate_unchanged": {
+    "gain": 1,
+    "RMS_error_db_max": 1,
+    "spectral_error_db_max": 3,
+    "nonfinite_max": 0,
+    "candidate_comparison_executed_here": false
+  }
+}

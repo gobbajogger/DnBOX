@@ -1,0 +1,75 @@
+[
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/accepted.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/diagnostic.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "-DDNBX_DIAGNOSTIC_COUNTERS=0",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/compact.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-DDNBX_DIAGNOSTIC_COUNTERS=2",
+      "-c",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/relocation_01/invalid_profile.o"
+    ],
+    "exit_code": 1
+  }
+]

@@ -1,0 +1,145 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -26,6 +26,7 @@
+     uint32_t crash_seen;                            /* the crash count already reported at a boot */
+ } x0x_dbg __attribute__((section(".noinit")));
+ static uint8_t safe_mode;
++static volatile uint8_t boot_silent_half; /* one plus bank number, cleared on the first release after G1 */
+ #if X0X_DEBUG
+ /* development: the slowest block since boot, taken apart (read over USB: tools/fm1_debug.py) */
+ extern volatile uint32_t eng_dbg_wait, eng_dbg_nsub;
+@@ -94,15 +95,44 @@
+     x0x_dbg.in_audio = 0;
+ }
+ 
++/* With zero or one release before USB settles, preserve the original
++ * pending IRQ. An observed bank change establishes the original G1 bank. */
++static void smk_usb_boot_settle(void)
++{
++    uint32_t start = fm1_ticks(), first = 2u;
++    while (fm1_ticks() - start < 25000u * FM1_TICKS_PER_US) {
++        if (safe_mode || boot_silent_half || !(fm1_audio_pending() & FM1_AUDIO_HALF))
++            continue;
++        uint32_t half = fm1_audio_free_half();
++        if (first == 2u)
++            first = half;
++        else if (half != first) {
++            fm1_alnk0_irq();
++            boot_silent_half = 1u + first;
++        }
++    }
++}
++
+ void fm1_alnk0_irq(void)                            /* via isr_alnk0 (hal/fm1_isr.S) */
+ {
+     uint8_t p = fm1_audio_pending();
+     fm1_audio_ack_aux(p);
+     if (p & FM1_AUDIO_HALF) {
+         uint32_t half = fm1_audio_free_half();
++        if (boot_silent_half) {
++            uint32_t silent = boot_silent_half - 1u;
++            boot_silent_half = 0;
++            if (half == silent) {
++                /* The cold spacer is already valid in the opposite bank. */
++                fm1_audio_ack_half();
++                return;
++            }
++        }
++        /* Clear this completion before beginning work. A new release
++         * remains pending even if two bank changes return to the same index. */
++        fm1_audio_ack_half();
+         render_block(&abuf[half * HALF_WORDS]);
+-        fm1_audio_ack_half();
+-        if (fm1_audio_free_half() != half) {
++        if ((fm1_audio_pending() & FM1_AUDIO_HALF) || fm1_audio_free_half() != half) {
+ #if X0X_DEBUG
+             x0x_worst.late_in++;
+ #endif
+@@ -2438,6 +2468,14 @@
+     fm1_timer5_start(isr_timer5, 4);
+     fm1_guard_lock_top();
+     fm1_irq_enable_all();
++    /* A pre-rendered first block has one silent transfer before ordinary
++     * rendering resumes. Anchor panel settling to that physical release.
++     * A stopped audio clock must still allow the panel to boot. */
++    if (boot_silent_half) {
++        uint32_t start = fm1_ticks();
++        while (boot_silent_half &&
++               fm1_ticks() - start < (HALF_FRAMES * 1000000u / FS + 1u) * FM1_TICKS_PER_US) {}
++    }
+     fm1_delay_ms(30);
+ #if BOARD_SMK37
+     if ((fm1_in.buttons & FM1_OCT_BOTH) == FM1_OCT_BOTH)
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2298,6 +2298,12 @@
+     if (n < 64u)
+         return;                                         /* a short stretch is mostly set-up */
+     c = ticks * 256u / n;
++    /* Idle Chicago spans do not predict a new sequenced note's active cost.
++     * Keep the measured peak across a rest. Other owners retain their decay. */
++    if (c < e && seq.playing && (j == JB_A || j == JB_B) &&
++        original_seq_note[j - JB_A] < 0 &&
++        original_bass[j - JB_A].kind == ORIGINAL_SOUND_CHICAGO)
++        return;
+     eng_job_cost[j] = c > e ? c : e - ((e - c) >> 4);   /* rise at once, fall over ~16 stretches */
+ }
+ 
+--- a/firmware/src/x0x.c
++++ b/firmware/src/x0x.c
+@@ -57,6 +57,9 @@
+ #define FELUCCA_ID "FM-1_900"     /* package identity (tools/build.py) */
+ #endif
+ #endif
++static void smk_usb_boot_settle(void);
++void fm1_alnk0_irq(void);
++#define USB_RESET_WAIT() smk_usb_boot_settle()
+ #include "usb.c"
+ #ifndef X0X_TRS
+ #if BOARD_SMK37
+--- a/firmware/src/usb.c
++++ b/firmware/src/usb.c
+@@ -1617,7 +1617,11 @@
+ {
+     usb.timeouts = 0;
+     fm1_usb_reset();
++#ifdef USB_RESET_WAIT
++    USB_RESET_WAIT();
++#else
+     fm1_delay_ms(25);
++#endif
+     usb_attach_ready();
+ }
+ 
+--- a/experiments/wobble/miami_decimator_adapter.c
++++ b/experiments/wobble/miami_decimator_adapter.c
+@@ -11,7 +11,7 @@
+     (void)miami_decimator_seed(&next.kernel,0,0,0,0);
+     next.frequency_integer = 64;
+     next.wet_integer = 127;
+-    next.wet_gain = miami_decimator_wet[127];
++    next.wet_gain = INT16_MAX;
+     (void)miami_decimator_stage_step(&next.kernel,miami_decimator_frequency[63]);
+     *s = next;
+     return 1;
+@@ -29,7 +29,8 @@
+     uint8_t p = (uint8_t)((uint32_t)value & UINT32_C(127));
+     if (parameter == 2) {
+         s->wet_integer = p;
+-        s->wet_gain = miami_decimator_wet[p];
++        /* The original 128-point gain ramp is 258 per detent with a full-scale final step. */
++        s->wet_gain = (int16_t)(258u * p + (p == 127u));
+     } else {
+         if (parameter == 1) s->frequency_integer = p;
+         else s->bit_integer = p;
+--- a/experiments/original_synth/chicago_drive.c
++++ b/experiments/original_synth/chicago_drive.c
+@@ -16,7 +16,7 @@
+ void original_chicago_drive_reset(original_chicago_drive *s){if(!s)return;s->drive=shl(s->target_drive,15);s->gain=shl(s->target_gain,15);s->threshold=0;memset(s->previous_driven,0,sizeof s->previous_driven);memset(s->previous_nonlinear,0,sizeof s->previous_nonlinear);}
+ int original_chicago_drive_set(original_chicago_drive *s,unsigned parameter,unsigned value){
+  if(!s||value>127||(parameter!=2&&parameter!=3))return 0;
+- if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=original_drive_table[value];}
++ if(parameter==2){s->edit1=(uint8_t)value;s->target_drive=(int32_t)(258u*value+(value==127u));}
+  else{s->edit2=(uint8_t)value;s->target_gain=1279+asr(mul(original_drive_gain_table[value],31489),15);}
+  return 1;
+ }

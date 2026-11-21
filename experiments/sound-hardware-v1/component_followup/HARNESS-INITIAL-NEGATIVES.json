@@ -1,0 +1,45 @@
+{
+  "scope": "Pure Python review negatives only. Compilers/CDLL were mocked for bounds; metadata replay used the unchanged Python proposal. This is not a DSP, native, or whole-lane test.",
+  "source_sha256": {
+    "verify_bounds.before.py": "d2fb26a739f3794971f92697327ed0372d05535f2f5da59d3961002989ea29bd",
+    "coefficient_check.before.py": "d964cbc105f534b2a49dee0a6f43cb814651ebe5cbcd400d88aebfe7869b425d"
+  },
+  "bounds_optimized_python": {
+    "0": {
+      "outcome": "AssertionError",
+      "actual_init_calls": 6,
+      "actual_render_calls": 0,
+      "recorded_failed_boundary_cases": null,
+      "reported_all_boundary_checks_pass": null,
+      "reported_audio_state_equal": null,
+      "reported_render_calls": null,
+      "reported_render_frames": null
+    },
+    "1": {
+      "outcome": "returned_success",
+      "actual_init_calls": 0,
+      "actual_render_calls": 0,
+      "recorded_failed_boundary_cases": 564,
+      "reported_all_boundary_checks_pass": true,
+      "reported_audio_state_equal": true,
+      "reported_render_calls": 576,
+      "reported_render_frames": 31488
+    }
+  },
+  "coefficient_metadata_coverage": {
+    "comparison_engine": "unchanged source-free Python mathematical oracle; no host C invoked",
+    "samples": 379288,
+    "different_words": 0,
+    "finite": true,
+    "negative_control_rejected": true,
+    "unique_live_reference_offsets_compared": [
+      0
+    ],
+    "live_reference_words_never_compared": 98304,
+    "input_hashes": {
+      "static": "9b164e9b7ebf3fe95665ceaa64afb39d51442e4167305c5d7bc55e115995ade4",
+      "live": "2cafbc8eb4b7aba8e22e0820ce8116d9dc7a57e6f8c41ed162c44ed98c474cfe"
+    },
+    "satisfies_old_per_method_scoped_gate": true
+  }
+}

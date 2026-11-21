@@ -1,0 +1,20 @@
+{
+  "written_utc": "2026-11-19T00:47:10.827154+00:00",
+  "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness/metrics.py",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.paired.f32le",
+    "1"
+  ],
+  "paired_sha256": "338458922ef3861ec77898dfe386328a2ad6fa19897d265a010d106d96269bce",
+  "paired_columns": [
+    "original",
+    "candidate"
+  ],
+  "original_sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74",
+  "candidate_sha256": "7ac88e50c0d0566c1a707dbeda8c81bed5b0848cfe44634011228999ea1f02b1",
+  "gain": 1,
+  "normalization": "none",
+  "time_alignment": "none"
+}
