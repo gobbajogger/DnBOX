@@ -1,0 +1,25 @@
+{
+  "parent": "6c91d26ecb621b023334900c09e3705d2a91d86e",
+  "scope": "Native INIT rate reducer at 44.1 kHz, ordinary build flags in a Linux host process. Static rate controls, a mid-note edit, original LFO assignment off. Both arms receive the same shipping six-voice INIT dry signal. This compares one effect stage; no complete factory- or board-level result.",
+  "source_kernel_sha256": "3fa142e20a4e51869b796743a61e58e04c34e73f81ca6736f5c456a81cadce53",
+  "firmware_source_sha256": {
+    "s1_dry_part.c": "020103599a6c337906c2cb51be6081a34af6161dbc605dcb4eadf52b69fa56c7",
+    "s1_dry_part.h": "af3220b056a265264c27b96b5ac8097a821bfd3a78048c8df693c75100eda25f"
+  },
+  "test_sha256": {
+    "bitcrush_compare.c": "1c235fb51a87067ba468d78ed5e9ec28ad4c65240d87760a9d4738e80440a01b",
+    "bitcrush_reference.py": "611eadfbeae0500329f0390c3e88cbf32a7892acb7380a7f8e2c8e3a9e4ac496"
+  },
+  "compiler": "Debian GCC 14.2.0-19, -O2 -ffp-contract=off",
+  "control_positions": 128,
+  "frames_per_position": 14976,
+  "channels": 2,
+  "compared_stereo_frames": 1916928,
+  "differing_sample_words": 0,
+  "negative_control": {
+    "implementation": "Directly divide sample rate by edited rate, omitting the original log2/exp2 intermediate rounding",
+    "failed_sweeps": 103
+  },
+  "stdout": "128 control sweeps, 14976 frames per sweep, 0 failures\n",
+  "stdout_sha256": "85d78b4e2a6ff348de38a28d6e322f9fed2fc73fa976efb7666db8e553631743"
+}
