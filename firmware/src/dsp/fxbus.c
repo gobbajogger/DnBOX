@@ -567,7 +567,8 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
  * across the split. A nonzero first sample resets its quiet count. */
 int fxbus_can_stream_idle_delay(const fxbus_t *f,const float *rev,const float *dly,unsigned n)
 {
-    if (!n || n > 256 || f->dl_quiet < f->dlen)
+    int frames = f->dlen < 0 ? -f->dlen : f->dlen;
+    if (!n || n > 256 || f->dl_quiet < frames)
         return 0;
     for (unsigned i = 0; i < n; ++i)
         if (dly[i] != 0.0f) return 0;
