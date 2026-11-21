@@ -1,4 +1,4 @@
-"""Compare straight 44.1 kHz BREAK playback with the original BB Gen plugin."""
+"""Compare straight and retriggered 44.1 kHz BREAK playback with the original BB Gen plugin."""
 import argparse
 import hashlib
 import json
@@ -29,7 +29,7 @@ def build(bb, output):
     subprocess.run(['cc', '-std=gnu11', '-O2', '-fno-fast-math', '-ffp-contract=off',
                     '-DX0X_HOST', '-DX0X_IMA_TABLES_DEFINE', '-I' + str(upstream), '-I' + str(dsp),
                     HERE / 'straight.c', upstream / 'breakbeat.c', upstream / 'slice_select.c',
-                    dsp / 'breaks.c', '-Wl,--wrap=mkdir,--wrap=symlink,--wrap=unlink',
+                    dsp / 'breaks.c', '-Wl,--wrap=mkdir,--wrap=symlink,--wrap=unlink,--wrap=time',
                     '-lm', '-o', output / 'compare'], check=True)
 
 
@@ -52,6 +52,7 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     build(args.bb_gen_tree.resolve(), out)
     rows = []
+    retriggers = []
     bank = REPO / 'assets/factory-breaks'
     for name, samples, digest in fixtures(bank):
         adpcm = bank / (name + '.adpcm')
@@ -89,15 +90,39 @@ def main():
                                  max_error_pcm16=int(np.max(np.abs(diff))),
                                  level_db=level, spectral_rms_db=spectral,
                                  pcm_sha256=hashlib.sha256(pcm.read_bytes()).hexdigest()))
+            frames = samples // 8 - 128
+            control = out / f'{name}-{kind}-clocked-dry.pcm'
+            subprocess.run([out / 'compare', str(samples), str(frames), adpcm, wav_path,
+                            control, out, '1', 'off'], check=True)
+            dry = np.fromfile(control, dtype='<i2').reshape(-1, 2)
+            for index, divisions in enumerate((2, 3, 4, 8)):
+                path = out / f'{name}-{kind}-{divisions}x.pcm'
+                subprocess.run([out / 'compare', str(samples), str(frames), adpcm, wav_path,
+                                path, out, '1', str(index)], check=True)
+                wet = np.fromfile(path, dtype='<i2').reshape(-1, 2)
+                if wet.shape != dry.shape or any(np.array_equal(wet[:, ch], dry[:, ch]) for ch in (0, 1)):
+                    raise ValueError(f'Incomplete retrigger render for {path.name}')
+                # Score the entire wet slice, including its onset and every
+                # crossfade at an internal retrigger. No fitted gain or offset.
+                ref, firmware = wet.astype(np.float64).T
+                level, spectrum = channel_score(ref, firmware, 44100, [20, 16000])
+                retriggers.append(dict(name=name, source=kind, slice=1, divisions=divisions,
+                                       frames=frames, level_db=level, spectral_rms_db=spectrum,
+                                       pcm_sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
+    (out / 'retriggers.json').write_text(json.dumps(retriggers, indent=2, allow_nan=False) + '\n')
     (out / 'results.json').write_text(json.dumps(rows, indent=2, allow_nan=False) + '\n')
     for kind in ('decoded', 'original_wav'):
         cases = [r for r in rows if r['source'] == kind]
         print(kind, len(cases), 'cases,', sum(r['post_fade_frames'] for r in cases),
               'frames,', sum(r['post_fade_different_words'] for r in cases), 'differing words')
+    print('retriggers', len(retriggers), 'cases,',
+          sum(abs(r['level_db']) <= 1 and r['spectral_rms_db'] <= 3 for r in retriggers),
+          'within 1 dB level and 3 dB spectral limits')
     # The shared-source playback check is exact. Original WAV scores quantify
     # the lossy encoding separately and use the sound lane's 1 dB/3 dB limits.
     return int(any(r['post_fade_different_words'] for r in rows if r['source'] == 'decoded') or
-               any(abs(r['level_db']) > 1 or r['spectral_rms_db'] > 3 for r in rows if r['source'] == 'original_wav'))
+               any(abs(r['level_db']) > 1 or r['spectral_rms_db'] > 3 for r in rows if r['source'] == 'original_wav') or
+               any(abs(r['level_db']) > 1 or r['spectral_rms_db'] > 3 for r in retriggers))
 
 
 if __name__ == '__main__':
