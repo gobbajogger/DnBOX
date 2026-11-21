@@ -189,6 +189,66 @@ static __attribute__((noinline)) void k_pulse_fixed(unsigned first,uint32_t *pha
  *phase_p=phase;
 }
 #define K_SHAPES(sh,CALL) do{ if((sh)==0){enum{K_S=0};CALL;} else if((sh)==1){enum{K_S=1};CALL;} else {enum{K_S=2};CALL;} }while(0)
+static inline __attribute__((always_inline)) void k_odd_fallback(const original_prepared_oscillators *p,
+ unsigned odd,uint32_t *phase,original_ramp *og,const uint8_t *zero_triangle,
+ float *mix,const int32_t *step,uint32_t n){
+ const original_osc_controls *c=&p->controls;
+  K_SHAPES(c->shape[odd],k_osc_odd(K_S,&phase[odd],&og[odd],c->width[odd],p->correction[odd],p->triangle[odd],zero_triangle[odd],mix,step,n));
+}
+static __attribute__((noinline)) void k_odd_pass(const original_prepared_oscillators *p,
+ unsigned odd,uint32_t *phase,original_ramp *og,const uint8_t *zero_triangle,
+ float *mix,int32_t *step,uint32_t n,int32_t pstep,int constant){
+ const original_osc_controls *c=&p->controls;
+ const int held=k_fixed_gain(og[odd]);
+ if(held && og[odd].current==0.0f){
+  uint32_t delta=0;
+  if(constant)delta=(uint32_t)pstep*n;
+  else for(uint32_t j=0;j<n;j++)delta+=(uint32_t)step[j];
+  phase[odd]-=delta;
+ }else if(held && c->shape[odd]==1){
+  uint32_t at=phase[odd];float scale=og[odd].current*.5f,correction=p->correction[odd];
+  if(constant)for(uint32_t j=0;j<n;j++){at-=(uint32_t)pstep;mix[j]+=k_saw(k_phase(at),correction)*scale;}
+  else for(uint32_t j=0;j<n;j++){at-=(uint32_t)step[j];mix[j]+=k_saw(k_phase(at),correction)*scale;}
+  phase[odd]=at;
+ }else{
+  if(constant)for(uint32_t j=0;j<n;j++)step[j]=pstep;
+  k_odd_fallback(p,odd,phase,og,zero_triangle,mix,step,n);
+ }
+}
+static __attribute__((noinline)) void k_even_fallback(unsigned first,const original_prepared_oscillators *p,
+ unsigned even,uint32_t *phase,original_ramp *og,const uint8_t *zero_triangle,float base,int32_t pstep,
+ float *mix,int32_t *step,uint32_t n){
+ const original_osc_controls *c=&p->controls;
+ uint32_t inc=c->increment[even];
+ K_SHAPES(c->shape[even],k_osc_even(K_S,first,&phase[even],&og[even],inc,c->width[even],p->correction[even],p->triangle[even],zero_triangle[even],c->xmod,base,pstep,mix,step,n));
+}
+/* A monotonically decreasing phase cannot cross a pulse edge when its
+ * first and final samples are both inside this negative half and the
+ * unsigned distance fits between them. In that interval wave is +1. */
+static inline int k_unity_pulse_span(uint32_t phase,uint32_t inc,uint32_t n){
+ uint32_t first=phase-inc;
+ return first>=0x82000000u && first<=0xfe000000u &&
+        inc<=0x7c000000u/64u && inc*(n-1u)<=first-0x82000000u;
+}
+static inline __attribute__((always_inline)) void k_pulse_pair(unsigned first,
+ uint32_t *phase,original_ramp *og,const original_prepared_oscillators *p,
+ unsigned even,float base,int32_t pstep,float *mix,int32_t *step,uint32_t n,
+ const uint8_t *zero_triangle){
+ const original_osc_controls *c=&p->controls;
+ unsigned odd=even+1;uint32_t inc=c->increment[even];int constant=0;
+ const int fixed_pulse=c->shape[even]>=2 && c->width[even]==.5f &&
+                       p->correction[even]==1.0f && k_fixed_gain(og[even]);
+ if(fixed_pulse && k_unity_pulse_span(phase[even],inc,n)){
+  constant=1;pstep=k_mod_delta(1.0f,c->xmod,base);
+  phase[even]-=inc*n;
+  float gain=og[even].current;
+  if(first){float term=gain!=0.0f?gain*.5f:0.0f;for(uint32_t j=0;j<n;j++)mix[j]=term;}
+  else if(gain!=0.0f){float term=gain*.5f;for(uint32_t j=0;j<n;j++)mix[j]+=term;}
+ }else if(fixed_pulse)
+  k_pulse_fixed(first,&phase[even],og[even].current,inc,c->xmod,base,mix,step,n);
+ else k_even_fallback(first,p,even,phase,og,zero_triangle,base,pstep,mix,step,n);
+ k_odd_pass(p,odd,phase,og,zero_triangle,mix,step,n,pstep,constant);
+}
 int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *vg,original_oscillators *ph,
  const original_prepared_oscillators *p,float vco_gain,float *L,float *R,uint32_t n){
  if(!f->prepared||!p->ready||!original_binary32_isfinite(vco_gain))return 0;
@@ -196,9 +256,8 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  uint8_t zero_triangle[4];
  for(unsigned i=0;i<4;i++)
   zero_triangle[i]=(uint8_t)(c->shape[i]==0&&(original_math_bits(p->triangle[i])&0x7fffffffu)==0);
- original_ramp og[4],st[2];memcpy(og,vg->oscillator,sizeof og);memcpy(st,vg->stereo,sizeof st);
- uint32_t phase[4];memcpy(phase,ph->phase,sizeof phase);
- const float xmod=c->xmod;
+ original_voice_gain gains=*vg;original_ramp *og=gains.oscillator,*st=gains.stereo;
+ original_oscillators osc=*ph;uint32_t *phase=osc.phase;
  const float b1=(float)c->increment[1]*0x1p-31f,b3=(float)c->increment[3]*0x1p-31f;
  const float st1=clamp(b1,-1,1)*0x1p31f,st3=clamp(b3,-1,1)*0x1p31f;
  const int32_t pstep1=st1>=0x1p31f?INT32_MAX:(int32_t)st1,pstep3=st3>=0x1p31f?INT32_MAX:(int32_t)st3;
@@ -208,18 +267,8 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  float mix[K_SPAN];int32_t step[K_SPAN];
  while(n){   /* callers pass control spans of <= 64 frames (render_span): one pass */
  const uint32_t m=n<K_SPAN?n:K_SPAN;
- if(c->shape[0]>=2 && c->width[0]==.5f && p->correction[0]==1.0f && k_fixed_gain(og[0]))
-  k_pulse_fixed(1,&phase[0],og[0].current,c->increment[0],xmod,b1,mix,step,m);
- else K_SHAPES(c->shape[0],k_osc_even(K_S,1,&phase[0],&og[0],c->increment[0],c->width[0],p->correction[0],p->triangle[0],zero_triangle[0],xmod,b1,pstep1,mix,step,m));
- if(og[1].current==0.0f && k_fixed_gain(og[1])){
-  uint32_t delta=0;for(uint32_t j=0;j<m;j++)delta+=(uint32_t)step[j];phase[1]-=delta;
- }else K_SHAPES(c->shape[1],k_osc_odd(K_S,&phase[1],&og[1],c->width[1],p->correction[1],p->triangle[1],zero_triangle[1],mix,step,m));
- if(c->shape[2]>=2 && c->width[2]==.5f && p->correction[2]==1.0f && k_fixed_gain(og[2]))
-  k_pulse_fixed(0,&phase[2],og[2].current,c->increment[2],xmod,b3,mix,step,m);
- else K_SHAPES(c->shape[2],k_osc_even(K_S,0,&phase[2],&og[2],c->increment[2],c->width[2],p->correction[2],p->triangle[2],zero_triangle[2],xmod,b3,pstep3,mix,step,m));
- if(og[3].current==0.0f && k_fixed_gain(og[3])){
-  uint32_t delta=0;for(uint32_t j=0;j<m;j++)delta+=(uint32_t)step[j];phase[3]-=delta;
- }else K_SHAPES(c->shape[3],k_osc_odd(K_S,&phase[3],&og[3],c->width[3],p->correction[3],p->triangle[3],zero_triangle[3],mix,step,m));
+ k_pulse_pair(1,phase,og,p,0,b1,pstep1,mix,step,m,zero_triangle);
+ k_pulse_pair(0,phase,og,p,2,b3,pstep3,mix,step,m,zero_triangle);
  int filter_held=original_math_bits(advance(&ra))==original_math_bits(ra.current)&&
   original_math_bits(advance(&rr))==original_math_bits(rr.current)&&original_math_bits(advance(&rn))==original_math_bits(rn.current);
  /* MS-20: mix[] -> the nonlinear output, in place */
@@ -249,7 +298,7 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  }
  if(!original_binary32_isfinite(h0)||!original_binary32_isfinite(h1)||!original_binary32_isfinite(h2)||
     !original_binary32_isfinite(h3)||!original_binary32_isfinite(h4))return 0;
- memcpy(vg->oscillator,og,sizeof og);memcpy(vg->stereo,st,sizeof st);memcpy(ph->phase,phase,sizeof phase);
+ *vg=gains;*ph=osc;
  f->a=ra;f->resonance=rr;f->noise_gain=rn;f->noise=noise;
  f->history[0]=h0;f->history[1]=h1;f->history[2]=h2;f->history[3]=h3;f->history[4]=h4;
  return 1;

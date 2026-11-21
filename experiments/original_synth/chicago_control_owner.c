@@ -9,7 +9,7 @@ int original_chicago_control_owner_edit(original_chicago_control_owner *s,unsign
  if(!s||!s->status)return 0;
  original_chicago_program next=*s->program;original_chicago_voice_controls compiled=*s->voice;
  if(!original_chicago_program_set(&next,macro,normalized))return 0;
- if(macro!=20&&macro!=2&&!memcmp(s->program->target,next.target,sizeof next.target)){
+ if(macro!=20&&macro!=2&&macro!=0&&!memcmp(s->program->target,next.target,sizeof next.target)){
   if(!original_chicago_voice_recompile_unchanged(&compiled,&next))return 0;
  }else if(!original_chicago_voice_recompile(&compiled,&next,macro))return 0;
  const original_chicago_routing *r=&compiled.routing;

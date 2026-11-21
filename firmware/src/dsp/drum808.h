@@ -210,6 +210,9 @@ void drum808_render(drum808_t *d, float *dry, float *rev, float *dly, int n);
 /* X0X stereo: each track placed by its PAN into dry_l / dry_r (sends mono); all centred, both are
  * drum808_render's dry exactly */
 void drum808_render_st(drum808_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n);
+/* Cleared, distinct dry buffers yield the same signal as masked stereo. */
+void drum808_render_st_cleared(drum808_t *d, float *left, float *right, float *rev, float *dly,
+                              int n, uint16_t audible_tracks);
 /* Only selected tracks reach dry/send buses; every voice still advances normally. */
 void drum808_render_st_masked(drum808_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                              int n, uint16_t audible_tracks);

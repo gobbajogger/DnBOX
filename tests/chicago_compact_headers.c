@@ -5,6 +5,7 @@
 #include "../experiments/original_synth/chicago_packed.c"
 extern int chicago_raw_bits(uint32_t index,uint32_t *a,uint32_t *e);
 int main(void){
+ original_chicago_packed_cache cache={UINT32_MAX,0.f,0.f};
  for(uint32_t i=0;i<16385;i++){
   uint32_t ra,re,ca,ce; float a,e;
   assert(chicago_raw_bits(i,&ra,&re));
@@ -13,7 +14,8 @@ int main(void){
   assert(ra==ca && re==ce);
   assert(original_chicago_packed_lookup(0,i,&a,&e));
   assert(memcmp(&a,&ra,4)==0 && memcmp(&e,&re,4)==0);
-  assert(original_chicago_packed_lookup(0,i,&a,&e)); /* cached */
+  assert(original_chicago_packed_cached(&cache,i,&a,&e));
+  assert(memcmp(&a,&ra,4)==0 && memcmp(&e,&re,4)==0);
  }
  uint32_t v; float a,e;
  assert(!original_chicago_packed_lookup(0,16385,&a,&e));
@@ -31,11 +33,11 @@ int main(void){
  t.count=0;BAD();t=original_chicago_packed_a;
  t.blocks--;BAD();t=original_chicago_packed_a;
  t.bytes=65536;BAD();t=original_chicago_packed_a;
- uint16_t offsets[513];memcpy(offsets,t.offset,sizeof offsets);t.offset=offsets;
+ uint16_t offsets[sizeof original_chicago_packed_a_offset / sizeof(uint16_t)];memcpy(offsets,t.offset,sizeof offsets);t.offset=offsets;
  offsets[0]=1;BAD();offsets[0]=0;
- offsets[1]=6;BAD();offsets[1]=65535;BAD();
+ offsets[1]=4;BAD();offsets[1]=65535;BAD();
  uint8_t block[8]={0};
- assert(!chicago_compact_decode(block,6,1,0,0,&v));
+ assert(!chicago_compact_decode(block,4,1,0,0,&v));
  assert(!chicago_compact_decode(block,8,1,0,0,&v));
  return 0;
 }

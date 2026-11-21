@@ -71,6 +71,15 @@ int original_chicago_program_native(const original_chicago_program *p,unsigned i
  *out=ORIGINAL_CHICAGO_BASE_VALUE(id);return 1;
 #endif
 }
+/* The shipping Wave macro changes the levels of oscillators 1 and 3.
+ * Check the metadata in this translation unit so alternate profiles can
+ * fall back to the full compiler. The shipping check folds at build time. */
+int original_chicago_program_osc_mix(const original_chicago_program *p,float *level1,float *level3){
+ unsigned first=original_chicago_macro_start[0];
+ if(!p||!level1||!level3||original_chicago_macro_start[1]!=first+2||
+    original_chicago_mappings[first].native_id!=3||original_chicago_mappings[first+1].native_id!=11)return 0;
+ *level1=p->target[first];*level3=p->target[first+1];return 1;
+}
 const char *original_chicago_program_name(unsigned factory){
  if(factory>=81)return NULL;
 #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY

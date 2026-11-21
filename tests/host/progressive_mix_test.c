@@ -12,14 +12,27 @@ static pthread_t thread;
 static _Thread_local int in_worker;
 static void (*pending)(uint32_t);
 static uint32_t argument;
-static unsigned jobs, drops;
+static unsigned jobs, drops, previews, prefix_drops;
+static int joined, exercise_preview;
+extern int mix_test_preview_worker(void (*fn)(uint32_t));
+extern void mix_test_prepare_preview(unsigned frames, unsigned final_edit);
+extern int mix_test_write_preview(FILE *);
+
+/* A rejected preview never publishes the partially mastered prefix. */
+void mix_test_master_checkpoint(void)
+{
+    if (in_worker && mode == INTERRUPTED) {
+        ++prefix_drops;
+        pthread_exit(NULL);
+    }
+}
 extern int mix_test_kits_complete(void);
 
 void plat_cpu2_sync(void)
 {
     __atomic_thread_fence(__ATOMIC_SEQ_CST);
     /* Both kits have published, while later worker jobs remain. */
-    if (in_worker && mode == INTERRUPTED && mix_test_kits_complete()) {
+    if (in_worker && mode == INTERRUPTED && !mix_test_preview_worker(pending) && mix_test_kits_complete()) {
         ++drops;
         pthread_exit(NULL);
     }
@@ -38,10 +51,17 @@ int mix_test_submit(void (*fn)(uint32_t), uint32_t arg)
     assert(!pending);
     if (mode == SERIAL) return 0;
     ++jobs;
+    int preview = mix_test_preview_worker(fn);
+    previews += preview;
     pending = fn;
     argument = arg;
     if (mode == CONCURRENT || mode == INTERRUPTED)
         assert(!pthread_create(&thread, NULL, worker, NULL));
+    if (mode == INTERRUPTED && preview && exercise_preview) {
+        /* Main has published only the prefix; enforce failure before the next FX span. */
+        assert(!pthread_join(thread, NULL));
+        joined = 1;
+    }
     return 1;
 }
 
@@ -50,8 +70,9 @@ int mix_test_join(void)
     assert(pending);
     if (mode == DEFERRED)
         pending(argument);
-    else if (mode == CONCURRENT || mode == INTERRUPTED)
+    else if ((mode == CONCURRENT || mode == INTERRUPTED) && !joined)
         assert(!pthread_join(thread, NULL));
+    joined = 0;
     pending = NULL;
     return mode == FAILED || mode == INTERRUPTED ? -1 : 0;
 }
@@ -85,6 +106,27 @@ int main(int argc, char **argv)
     boot();
     engine_guard_enable(0);
     seq.playing = 0;
+    if (play_break == 2) {
+        exercise_preview = 1;
+        unsigned commits = 0, edited_commits = 0;
+        for (unsigned i = 0; i < 24; ++i) {
+            unsigned edit = (i / 2) % 4;
+            mix_test_prepare_preview(i % 2 ? 28 : 16, edit);
+            engine_drum(0, 2, .8f);
+            render(stream, 256);
+            int committed = mix_test_write_preview(stream);
+            commits += committed;
+            if (edit) edited_commits += committed;
+        }
+        printf("preview requests %u, commits %u, post-edit commits %u, prefix dropouts %u\n",
+               previews, commits, edited_commits, prefix_drops);
+        assert(mode == SERIAL || previews == 24);
+        assert(!edited_commits);
+        assert(commits == (mode == CONCURRENT || mode == DEFERRED ? 6u : 0u));
+        assert(prefix_drops == (mode == INTERRUPTED ? 24u : 0u));
+        assert(!fclose(stream));
+        return 0;
+    }
     select_bank(stream, 0, ORIGINAL_SOUND_SYNTHONE);
     select_bank(stream, 1, ORIGINAL_SOUND_JUNO);
 

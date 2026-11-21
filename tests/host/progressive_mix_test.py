@@ -19,15 +19,7 @@ def main():
 
     with tempfile.TemporaryDirectory() as directory:
         tmp = Path(directory)
-        engine = tmp / "engine.c"
-        engine.write_text(
-            '#include "firmware/src/app/engine.c"\n'
-            'int mix_test_kits_complete(void) {\n'
-            '    unsigned kits = (1u << JB_909) | (1u << JB_808);\n'
-            '    return eng_c1_next == JB_A && (eng_c1_mask & kits) == kits &&\n'
-            '           (eng_c1_mask & ~kits) != 0;\n'
-            '}\n'
-        )
+        engine = root / "tests/host/progressive_mix_engine.c"
         cc = shlex.split(os.environ.get("CC", "cc"))
         flags = [
             "-O1", "-std=c11", "-pthread", "-ffp-contract=off", "-fno-fast-math",
@@ -39,7 +31,7 @@ def main():
         ]
         obj = tmp / "engine.o"
         subprocess.run(cc + flags + [
-            "-DX0X_CORE_PLAN=31", "-Dplat_cpu2_run=mix_test_submit",
+            "-DX0X_HOST_ASYNC_PREVIEW", "-DX0X_CORE_PLAN=31", "-Dplat_cpu2_run=mix_test_submit",
             "-Dplat_cpu2_wait=mix_test_join", "-c", engine, "-o", obj,
         ], cwd=root, check=True)
         units = [f"firmware/src/{p}" for p in build.O2_UNITS if p != "app/engine.c"]
@@ -50,9 +42,9 @@ def main():
         subprocess.run(cc + flags + link + ["tests/host/progressive_mix_test.c",
                        *units, obj, "-lm", "-o", executable], cwd=root, check=True)
 
-        def capture(mode, play_break=True):
+        def capture(mode, scenario=1):
             pcm = tmp / "output.pcm"
-            subprocess.run([executable, str(mode), str(int(play_break)), pcm], check=True)
+            subprocess.run([executable, str(mode), str(int(scenario)), pcm], check=True)
             return pcm.read_bytes()
 
         serial = capture(0)
@@ -63,6 +55,11 @@ def main():
                 raise AssertionError(f"worker mode {mode} changed the serial mix")
         if capture(3, False) == serial:
             raise AssertionError("disabling BREAK hits left the mix unchanged")
+        reference = capture(0, 2)
+        for mode in range(1, 5):
+            if capture(mode, 2) != reference:
+                raise AssertionError(f"worker mode {mode} changed short-prefix PCM or state")
+        print("PASS short-prefix master preview, final PUMP/motion edits and partial handoff")
         print("PASS progressive mix, takeover, wet sends and adopted synth owners")
 
 

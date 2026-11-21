@@ -47,7 +47,7 @@ typedef struct {
  * Outer ARP/FX/master endpoints remain explicit in routing; they are not
  * silently applied per voice. No getters/conversions in the audio sample path. */
 int original_chicago_voice_compile(original_chicago_voice_controls *out,const original_chicago_program *program);
-/* Incremental bend/cutoff edit of an initialized corresponding snapshot.
+/* Incremental oscillator mix, bend or cutoff edit of an initialized corresponding snapshot.
  * Program must differ only by the named program_set edit. Other edits, an
  * unready snapshot or a revision gap use full compilation. Failure is atomic. */
 int original_chicago_voice_recompile(original_chicago_voice_controls *out,

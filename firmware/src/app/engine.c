@@ -899,13 +899,11 @@ static void apply_base(int t, int v, int i)
     apply_param(t, v, i, mot_base_snd->v[t][v][i]);
 }
 
-/* the output's scale: Felucca's -6 dBFS ceiling of the 24-bit codec (2^22), or its full scale (LOUD); the
- * clamp keeps an over from wrapping (normal: the codec's own full scale, as before) */
-static volatile float out_scale = 4194303.0f, out_lim = 2.0f;
+/* The output scale selects Felucca's -6 dBFS level or full-scale 24-bit PCM (LOUD). */
+static volatile float out_scale = 4194303.0f;
 void engine_out_loud(int on)
 {
     out_scale = on ? 8388607.0f : 4194303.0f;
-    out_lim = on ? 1.0f : 2.0f;
 }
 
 /* USB AUDIO FULL (#12): the render at full level, for the USB tap, and the MASTER knob after it, for
@@ -2242,11 +2240,19 @@ __attribute__((noinline)) static void glide_set(glide_t *g, float t)
     if (g->cur < 0.0f)
         g->cur = t;
 }
+/* A one-pole can stop a few ULPs from its target: its next float addition
+ * rounds back to cur. Outside the end-of-span snap this gain is permanent
+ * until the target changes, including over another call boundary. */
+static int glide_constant(const glide_t *g)
+{
+    const float c = g->cur, d = g->tgt - c;
+    return c == g->tgt || (fm_fabsf(d) >= 1e-5f && c + d * GLIDE_A == c);
+}
 __attribute__((noinline)) static void add_glide(float *dst, const float *src, glide_t *g, uint32_t n)
 {
     uint32_t i;
     float c = g->cur, t = g->tgt;
-    if (c == t) {
+    if (glide_constant(g)) {
         if (c != 0.0f)
             for (i = 0; i < n; i++)
                 dst[i] += src[i] * c;
@@ -2303,8 +2309,8 @@ __attribute__((noinline)) static void scale_glide(float *buf, glide_t *g, uint32
 {
     uint32_t i;
     float c = g->cur, t = g->tgt;
-    if (c == t) {
-        if (c == 1.0f) return;
+    if (glide_constant(g)) {
+        if (c == 1.0f && c == t) return;
         for (i = 0; i < n; i++)
             buf[i] *= c;
         return;
@@ -2398,10 +2404,26 @@ __attribute__((noinline)) static void kit_sends(int b, const float *m, uint32_t 
  * The partition may change only between stretches, after the previous join. */
 enum { JB_909, JB_808, JB_A, JB_B, JB_BRK, JB_N };
 static int brk_silent_now = 1;
-static uint8_t d808_was_active;
+static uint8_t d808_was_active, d808_mix_mode;
+static float d808_mix_peak;
 /* each bass's L/R, and bass B's own workspace (A keeps original_workspace): XPOOL, which
  * either core may write (core 0's stacks are closed to core 1's writes, fm1_guard.h) */
-static original_runtime_workspace original_workspace_b X0X_XPOOL;
+/* The last stretch releases both bass workspaces before post-FX. No further
+ * bass render can reuse the second workspace until the preview has joined. */
+typedef struct {
+    master_t before, trial;
+    float channels[2][256];
+    const float *source_l, *source_r;
+    unsigned frames;
+    volatile unsigned ready, complete;
+} master_preview_t;
+_Static_assert(sizeof(master_preview_t) <= sizeof(original_runtime_workspace), "use only released bass storage");
+static union {
+    original_runtime_workspace bass;
+    master_preview_t preview;
+} workspace_b X0X_XPOOL;
+#define original_workspace_b workspace_b.bass
+static uint8_t preview_tail, preview_running;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
 static volatile uint8_t eng_c1_next;                   /* core 1: the next of its jobs to start */
@@ -2448,15 +2470,16 @@ static void job_cost(int j, uint32_t ticks, uint32_t n)
  * sends are silent. Each bus still receives its original product or sum. */
 static int kit_mix_settled(const glide_t *g)
 {
-    return g[GL_L].cur == g[GL_L].tgt && g[GL_R].cur == g[GL_R].tgt &&
-           g[GL_VREV].cur == g[GL_VREV].tgt && g[GL_VDLY].cur == g[GL_VDLY].tgt &&
+    return glide_constant(&g[GL_L]) && glide_constant(&g[GL_R]) &&
+           glide_constant(&g[GL_VREV]) && glide_constant(&g[GL_VDLY]) &&
            g[GL_L].cur > 0 && g[GL_R].cur > 0 && g[GL_VREV].cur > 0 && g[GL_VDLY].cur > 0 &&
            g[GL_REV].cur == 0 && g[GL_REV].tgt == 0 && g[GL_DLY].cur == 0 && g[GL_DLY].tgt == 0;
 }
 
-static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
+static void prepare_808_mix(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
 {
     uint32_t i;
+    d808_mix_mode = 0;
     if (!d808_was_active) {
         /* CRUSH and the glue detector advance across gaps between hits. */
         if ((!d808.master_on || d808.kpot[D8_KIT_DIST] != D8_MASTER_CRUSH) &&
@@ -2481,22 +2504,40 @@ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_pa
         const float gl = g[GL_L].cur, gr = g[GL_R].cur, vr = g[GL_VREV].cur, vd = g[GL_VDLY].cur;
         for (i = 0; i < n; ++i) {
             const float l = left808[i], r = right808[i];
-            dry_l[i] += l * gl;
-            dry_r[i] += r * gr;
-            rev[i] += t1[i] * vr;
-            dly[i] += t2[i] * vd;
+            left808[i] = l * gl;
+            right808[i] = r * gr;
+            t1[i] *= vr;
+            t2[i] *= vd;
             float a = fm_fabsf((l + r) * .5f);
             if (a > peak) peak = a;
         }
-        peak *= mix_level[PART_808];
-        if (peak > part_peak[PART_808]) part_peak[PART_808] = peak;
+        d808_mix_peak = peak * mix_level[PART_808];
+        d808_mix_mode = 2;
+    } else {
+        d808_mix_mode = 1;
+    }
+}
+
+static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
+{
+    if (d808_mix_mode == 3)
+        prepare_808_mix(left808, right808, n, solo_parts);
+    if (!d808_mix_mode) return;
+    if (d808_mix_mode == 2) {
+        if (d808_mix_peak > part_peak[PART_808]) part_peak[PART_808] = d808_mix_peak;
+        for (uint32_t i = 0; i < n; ++i) {
+            dry_l[i] += left808[i];
+            dry_r[i] += right808[i];
+            rev[i] += t1[i];
+            dly[i] += t2[i];
+        }
         return;
     }
     add_glide(dry_l, left808, &mix_glide[PART_808][GL_L], n);
     add_glide(dry_r, right808, &mix_glide[PART_808][GL_R], n);
     add_glide(rev, t1, &mix_glide[PART_808][GL_VREV], n);
     add_glide(dly, t2, &mix_glide[PART_808][GL_VDLY], n);
-    for (i = 0; i < n; i++)
+    for (uint32_t i = 0; i < n; i++)
         left808[i] = (left808[i] + right808[i]) * 0.5f;
     kit_sends(PART_808, left808, n);
 }
@@ -2508,6 +2549,16 @@ static int glide_silent(const glide_t *g)
 
 /* A rendered bass owns its original-synth workspace until the next stretch.
  * Build a mono copy only while a send is audible or gliding. */
+/* quiet_samples counts the trailing run only. Once a loud frame is found,
+ * every earlier sample in this stretch is immaterial to the final count. */
+static uint32_t bass_quiet_tail(const float *l, const float *r, uint32_t n, uint32_t before)
+{
+    for (uint32_t i = n; i; --i)
+        if (fm_fabsf(l[i - 1]) > 1.0f/65536.0f || fm_fabsf(r[i - 1]) > 1.0f/65536.0f)
+            return n - i;
+    return n + before < 512u ? n + before : 512u;
+}
+
 static void prepare_bass_mix(int bv, float *left, float *right, unsigned n, uint8_t solo_parts)
 {
     int p = PART_303A + bv;
@@ -2586,12 +2637,19 @@ static void run_job(int j, int core)
         if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
             for (i = 0; i < n; i++)
                 left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
-            drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
+            drum808_render_st_cleared(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
             bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
         } else {
             active = 0;
             drum808_pan_settle(&d808);
         }
+        /* A held worker may be retried. Commit the stateful kit insert once
+         * after the worker publishes its render. */
+        if (core && (d808.master_on || d808.kpot[D8_KIT_GLUE] ||
+                     d808.kpot[D8_KIT_RV_BUS] || fxbus_reverb_active(&d8_verb)))
+            d808_mix_mode = 3;
+        else
+            prepare_808_mix(left808, right808, n, solo_parts);
         if (!core)
             PROF_ADD(PR_808, p8);
     } else if (j == JB_A || j == JB_B) {
@@ -2619,14 +2677,8 @@ static void run_job(int j, int core)
             if (!fade && original_switch_gain[bv] == 512u) {
                 /* Settled gain 1.0: x * 1.0f == x for every float, so only the
                  * quiet count runs (the same per-sample result). */
-                uint32_t q = original_quiet_samples[bv];
                 float g = bass_accent_mk[bv], t = bass_accent_mk_to[bv];
-                if (g == 1.0f && t == 1.0f) {
-                    for (i = 0; i < n; ++i) {
-                        if (fm_fabsf(bb[bv][i]) > 1.0f/65536.0f || fm_fabsf(bb[1-bv][i]) > 1.0f/65536.0f) q = 0;
-                        else if (q < 512u) ++q;
-                    }
-                } else {
+                if (g != 1.0f || t != 1.0f) {
                     /* Accent make-up (bass_303_accent_makeup), fused into this
                      * scan: one pass over the part, the same samples. */
                     for (i = 0; i < n; ++i) {
@@ -2637,25 +2689,18 @@ static void run_job(int j, int core)
                         }
                         float l = bb[bv][i] * g, r = bb[1-bv][i] * g;
                         bb[bv][i] = l; bb[1-bv][i] = r;
-                        if (fm_fabsf(l) > 1.0f/65536.0f || fm_fabsf(r) > 1.0f/65536.0f) q = 0;
-                        else if (q < 512u) ++q;
                     }
                     bass_accent_mk[bv] = g;
                 }
-                bass_quiet_next[bv] = q;
             } else {
-                uint32_t q = original_quiet_samples[bv];
                 for (i = 0; i < n; ++i) {
                     if (fade) { if (original_switch_gain[bv]) --original_switch_gain[bv]; }
                     else if (original_switch_gain[bv] < 512u) ++original_switch_gain[bv];
                     float gain = (float)original_switch_gain[bv] * (1.0f/512.0f);
                     bb[bv][i] *= gain; bb[1-bv][i] *= gain;
-                    if (fm_fabsf(bb[bv][i]) > 1.0f/65536.0f || fm_fabsf(bb[1-bv][i]) > 1.0f/65536.0f)
-                        q = 0;
-                    else if (q < 512u) ++q;
                 }
-                bass_quiet_next[bv] = q;
             }
+            bass_quiet_next[bv] = bass_quiet_tail(bl, br, n, original_quiet_samples[bv]);
             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
             prepare_bass_mix(bv, bl, br, n, solo_parts);
         }
@@ -2672,6 +2717,37 @@ static void run_job(int j, int core)
     }
     if (active)
         job_cost(j, plat_ticks24() - tk, n);
+}
+
+/* The centered mono BREAK contribution uses one product for both dry lanes.
+ * With a fixed reverb send, all of its audible buses and the meter can be
+ * advanced in one ordered pass. Wet/gliding delay retains its normal lanes. */
+static void mix_break(unsigned n, uint8_t solo)
+{
+    const float level = mix_level[PART_BRK];
+    glide_t *g = mix_glide[PART_BRK];
+    mix_targets(PART_BRK, level, solo);
+    if (g[GL_L].cur > 0.0f && g[GL_L].cur == g[GL_R].cur &&
+        glide_constant(&g[GL_L]) && glide_constant(&g[GL_R]) &&
+        glide_constant(&g[GL_REV]) && glide_silent(&g[GL_DLY])) {
+        const float pan = g[GL_L].cur, send = g[GL_REV].cur;
+        float peak = 0.0f;
+        for (unsigned i = 0; i < n; ++i) {
+            float sample = kbuf[i], dry = sample * pan, a = fm_fabsf(sample);
+            dry_l[i] += dry;
+            dry_r[i] += dry;
+            if (send != 0.0f) rev[i] += sample * send;
+            if (a > peak) peak = a;
+        }
+        peak *= level;
+        if (peak > part_peak[PART_BRK]) part_peak[PART_BRK] = peak;
+        return;
+    }
+    add_glide(dry_l, kbuf, &g[GL_L], n);
+    add_glide(dry_r, kbuf, &g[GL_R], n);
+    add_glide(rev, kbuf, &g[GL_REV], n);
+    add_glide(dly, kbuf, &g[GL_DLY], n);
+    meter(PART_BRK, kbuf, level, n);
 }
 
 static void mix_bass(int bv, unsigned n)
@@ -2845,6 +2921,71 @@ static void core2_fx(uint32_t arg)
         eng_sync();
     }
 }
+/* Only the private copy advances on core 1. The wet output stays available
+ * for a serial retry if a final sequencer event changes the master. */
+static void preview_master(uint32_t unused)
+{
+    master_preview_t *p = &workspace_b.preview;
+    unsigned done = 0;
+    float peak = 0.0f;
+    (void)unused;
+    while (done < p->frames) {
+        eng_sync();
+        unsigned ready = p->ready;
+        if (ready == done) continue;
+        eng_sync();
+        unsigned count = ready - done;
+        float *l = p->channels[0] + done, *r = p->channels[1] + done;
+        memcpy(l, p->source_l + done, count * sizeof *l);
+        memcpy(r, p->source_r + done, count * sizeof *r);
+        /* A zero starting meter makes this call expose its segment peak. */
+        p->trial.gr_view = 0.0f;
+        master_process_st(&p->trial, l, r, (int)count, eng_vol);
+        if (p->trial.gr_view > peak) peak = p->trial.gr_view;
+        done = ready;
+    }
+    p->trial.gr_view = peak > p->before.gr_view ? peak : p->before.gr_view * 0.93f;
+    eng_sync();
+    p->complete = 1;
+    eng_sync();
+}
+
+static int preview_final_tail(float *l,float *r,unsigned n)
+{
+    /* An active bus filter can depend on the original stretch phase and
+     * settling boundary. Leave its single original call intact. */
+    if (bfx_flt_hold || busfx_settling(&bfx_flt_st) ||
+        !fxbus_can_stream_idle_delay(&fx, rev, dly, n))
+        return 0;
+    master_preview_t *p = &workspace_b.preview;
+    p->before = p->trial = mst;
+    p->source_l = l - preview_tail;
+    p->source_r = r - preview_tail;
+    p->frames = preview_tail + n;
+    p->ready = preview_tail;
+    p->complete = 0;
+    eng_sync();
+#if !defined(X0X_HOST) || defined(X0X_HOST_ASYNC_PREVIEW)
+    if (!plat_cpu2_run(preview_master, 0)) return 0;
+    preview_running = 1;
+#endif
+    for (unsigned off = 0; off < n;) {
+        unsigned len = n - off;
+        if (len > ENG_TAIL_CS) len = ENG_TAIL_CS;
+        fxbus_process_st(&fx, dry_l + off, dry_r + off, rev + off, dly + off,
+                         l + off, r + off, (int)len);
+        off += len;
+        eng_sync();
+        p->ready = preview_tail + off;
+    }
+    eng_sync();
+#if defined(X0X_HOST) && !defined(X0X_HOST_ASYNC_PREVIEW)
+    /* The normal host executes submissions inline. Publish before submitting. */
+    preview_running = plat_cpu2_run(preview_master, 0) != 0;
+#endif
+    return 1;
+}
+
 static void tape_after_fx(void)
 {
     if (fx.dl_type != 1 || fx.dl_level <= 0.0f || (fx.muted & 2u))
@@ -2902,15 +3043,8 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     brk_midi_drain();
     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
         if (bass_render_ok[j]) original_rec_recover_off(j);
-    if (!brk_silent_now) {
-        float g = mix_level[PART_BRK];
-        mix_targets(PART_BRK, g, solo_parts);
-        add_glide(dry_l, kbuf, &mix_glide[PART_BRK][GL_L], n);
-        add_glide(dry_r, kbuf, &mix_glide[PART_BRK][GL_R], n);
-        add_glide(rev, kbuf, &mix_glide[PART_BRK][GL_REV], n);
-        add_glide(dly, kbuf, &mix_glide[PART_BRK][GL_DLY], n);
-        meter(PART_BRK, kbuf, g, n);
-    }
+    if (!brk_silent_now)
+        mix_break(n, solo_parts);
     bfx_send_shape(0, rev, (int)n);
     bfx_send_shape(1, dly, (int)n);
     if (eng_do_master && n >= ENG_TAIL_CS) {
@@ -2988,6 +3122,8 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
 #endif
         tape_after_fx();
         eng_master_done = 1;
+    } else if (preview_tail && preview_final_tail(out_l,out_r,n)) {
+        tape_after_fx();
     } else {
         PROF_T(pf);
         fxbus_process_st(&fx, dry_l, dry_r, rev, dly, out_l, out_r, (int)n);
@@ -3013,7 +3149,8 @@ __attribute__((noinline, minsize)) void engine_diag_half(uint32_t half, uint32_t
 
 void engine_render(int32_t *out_lr, uint32_t n)
 {
-    static float out_l[256], out_r[256];
+    static float wet_l[256], wet_r[256];
+    float *out_l = wet_l, *out_r = wet_r;
     uint32_t done = 0, i;
     float vol = usb_full ? 1.0f : (float)plat_master() / 4096.0f;   /* (FULL: engine_volume) */
     int p;
@@ -3023,6 +3160,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
     eng_vol = vol;
     eng_master_done = 0;
     eng_mastered = 0;
+    preview_running = 0;
     if (project_hold) {
         tape_signal_seen = 0;
         for (i = 0; i < n * 2u; i++)
@@ -3067,6 +3205,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
         /* any stretch of ENG_TAIL_CS or more: pipeline. Mastered frames
          * must be a prefix (the master's state is in sample order). */
         eng_do_master = (k >= ENG_TAIL_CS && done == eng_mastered);
+        preview_tail = (eng_mastered == 0 && done && k >= ENG_TAIL_CS && done + k == n) ? (uint8_t)done : 0;
         render_sub(out_l + done, out_r + done, k, 0);
         d8_frame+=k;
         if (eng_do_master && eng_master_done)
@@ -3087,26 +3226,39 @@ void engine_render(int32_t *out_lr, uint32_t n)
 #endif
     }
     mot_playing = seq.playing;
+    if (preview_running) {
+        int status = plat_cpu2_wait();
+        master_preview_t *p = &workspace_b.preview;
+        eng_sync();
+        if (!status && p->complete && !memcmp(&mst, &p->before, sizeof mst)) {
+            mst = p->trial;
+            out_l = p->channels[0];
+            out_r = p->channels[1];
+            eng_mastered = n;
+        }
+    }
     if (eng_mastered < n) {
         PROF_T(pt);
         master_process_st(&mst, out_l + eng_mastered, out_r + eng_mastered,
                           (int)(n - eng_mastered), vol);
         PROF_ADD(6, pt);
     }
-    {   /* globals in registers: the stores below cannot reload them per sample */
-        const float lim = out_lim, scale = out_scale;
-        for (i = 0; i < n; i++) {
-            float l = out_l[i], r = out_r[i];        /* (out_scale: NORMAL 2^22, Felucca's; LOUD 2^23) */
-            l = l > lim ? lim : l < -lim ? -lim : l;
-            r = r > lim ? lim : r < -lim ? -lim : r;
-            out_lr[2u * i] = (int32_t)(l * scale);
-            out_lr[2u * i + 1u] = (int32_t)(r * scale);
-        }
-    }
     {
+        /* The master bounds both channels to [-1, 1] in every mode. */
+        const float scale = out_scale;
         uint32_t w = eng_scope_w;
-        for (i = 1; i < n; i += 2u)
-            eng_scope[w++ & (SCOPE_N - 1u)] = (int16_t)((out_l[i] + out_r[i]) * 16383.5f);
+        for (i = 0; i + 1u < n; i += 2u) {
+            float l = out_l[i + 1u], r = out_r[i + 1u];
+            out_lr[2u * i] = (int32_t)(out_l[i] * scale);
+            out_lr[2u * i + 1u] = (int32_t)(out_r[i] * scale);
+            out_lr[2u * i + 2u] = (int32_t)(l * scale);
+            out_lr[2u * i + 3u] = (int32_t)(r * scale);
+            eng_scope[w++ & (SCOPE_N - 1u)] = (int16_t)((l + r) * 16383.5f);
+        }
+        if (i < n) {
+            out_lr[2u * i] = (int32_t)(out_l[i] * scale);
+            out_lr[2u * i + 1u] = (int32_t)(out_r[i] * scale);
+        }
         eng_scope_w = w;
     }
     for (p = 0; p < NPARTS; p++) {                      /* meters: peak hold, ~300 ms decay at the UI */

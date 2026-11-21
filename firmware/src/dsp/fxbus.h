@@ -80,6 +80,8 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
  * are fxbus_process's out exactly */
 void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const float *rev, const float *dly,
                       float *out_l, float *out_r, int n);
+/* The idle-delay and reverb gates permit equivalent consecutive subcalls. */
+int fxbus_can_stream_idle_delay(const fxbus_t *,const float *rev,const float *dly,unsigned n);
 int fxbus_nparams(void);
 const x0x_param_t *fxbus_param(int i);
 int fxbus_param_si(int i, int pot, float *val);

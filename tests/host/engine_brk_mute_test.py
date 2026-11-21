@@ -61,6 +61,10 @@ def main():
         start = source.index("static float eng_vol;")
         end = source.index("static volatile uint32_t eng_fx_done;", start)
         declarations += "\n" + source[start:end]
+    if "} master_preview_t;" in source:
+        end = source.index("} master_preview_t;") + len("} master_preview_t;")
+        start = source.rindex("typedef struct {", 0, end)
+        declarations += "\n" + source[start:end] + "\nstatic struct { master_preview_t preview; } workspace_b;\n"
     if "#define ENG_TAIL_CS " in source:
         start = source.index("#define ENG_TAIL_CS ")
         end = source.index("\n", start)

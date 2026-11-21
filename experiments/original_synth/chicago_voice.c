@@ -81,10 +81,13 @@ int original_chicago_voice_compile(original_chicago_voice_controls *out,const or
  * Any other macro or uncertain cache takes the complete compiler above. */
 int original_chicago_voice_recompile(original_chicago_voice_controls *out,const original_chicago_program *p,unsigned macro){
  if(!out||!p)return 0;
- if((macro!=20&&macro!=2)||out->ready!=CONTROL_READY||p->revision!=out->revision+UINT32_C(1))
+ if((macro!=20&&macro!=2&&macro!=0)||out->ready!=CONTROL_READY||p->revision!=out->revision+UINT32_C(1))
   return original_chicago_voice_compile(out,p);
  if(!program_valid(p))return 0;
- if(macro==20)out->routing.bend_bipolar=bipolar(native(p,105));
+ if(macro==0){
+  if(!original_chicago_program_osc_mix(p,&out->gain.level[0],&out->gain.level[2]))
+   return original_chicago_voice_compile(out,p);
+ }else if(macro==20)out->routing.bend_bipolar=bipolar(native(p,105));
  else out->cutoff=native(p,24);
  out->revision=p->revision;return 1;
 }

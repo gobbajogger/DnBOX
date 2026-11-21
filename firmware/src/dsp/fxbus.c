@@ -562,6 +562,23 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
         out[i] *= vol;
 }
 
+/* Splitting an idle delay reproduces its time slew and integer phase advance.
+ * A reverb that stays active or stays gated retains the same ring positions
+ * across the split. A nonzero first sample resets its quiet count. */
+int fxbus_can_stream_idle_delay(const fxbus_t *f,const float *rev,const float *dly,unsigned n)
+{
+    if (!n || n > 256 || f->dl_quiet < f->dlen)
+        return 0;
+    for (unsigned i = 0; i < n; ++i)
+        if (dly[i] != 0.0f) return 0;
+    if (f->rv_quiet <= FX_RV_QUIET - (int)n || rev[0] != 0.0f)
+        return 1;
+    if (f->rv_quiet < FX_RV_QUIET) return 0;
+    for (unsigned i = 0; i < n; ++i)
+        if (rev[i] != 0.0f) return 0;
+    return 1;
+}
+
 /* X0X stereo: 9W9's chain on L and R. The distortion runs on each side; the glue compressor reads
  * the louder side and moves both together, so the image holds */
 void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const float *rev, const float *dly,

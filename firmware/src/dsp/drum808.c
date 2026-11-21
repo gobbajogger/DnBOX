@@ -822,75 +822,59 @@ D8_TICK float cp_tick(d8_cp_t *v)
     return y;
 }
 
-/* One stretch of the clap: the same ops as cp_tick, state in scalars. */
+/* Advance each branch across a short span so its delay state stays in registers.
+ * A span ends no later than the sample which can retire a quiet clap. */
 __attribute__((noinline)) static int cp_run(d8_cp_t *restrict v, float *restrict buf, int m)
 {
-    const float bp_b0 = v->bp.b0, bp_e1 = v->bp.e1, bp_e2 = v->bp.e2;
-    const float hp_n0 = v->hp.n0, hp_n1 = v->hp.n1, hp_n2 = v->hp.n2;
-    const float hp_e1 = v->hp.e1, hp_e2 = v->hp.e2;
-    const float tooth_d = v->tooth_d, main_d = v->main_d, floor_d = v->floor_d;
-    const float main_atk = v->main_atk;
-    const int32_t spread = v->spread, main_open = v->main_open;
-    float bp_z1 = v->bp.z1, bp_z2 = v->bp.z2;
-    float hp_z1 = v->hp.z1, hp_z2 = v->hp.z2;
-    float tooth = v->tooth, main_level = v->main_level, main_target = v->main_target;
-    float floor_level = v->floor_level;
-    uint32_t rs1 = v->rng.s1, rs2 = v->rng.s2, rs3 = v->rng.s3;
-    int32_t fired = v->fired, age = v->age, quiet = v->quiet;
-    uint8_t active = v->active;
-    int i;
-
-    for (i = 0; i < m && active; i++) {
-        float ctrl, n, y, bx, hy;
-        fm_bits_t u;
-        if (fired < 3 && age >= fired * spread) {
-            tooth = 0.80f;
-            fired++;
+    int off = 0;
+    while (off < m && v->active) {
+        int count = m - off;
+        if (v->quiet > 400 - count)
+            count = v->quiet >= 400 ? 1 : 401 - v->quiet;
+        int end = off + count;
+        if (v->fired >= 3 && v->age > v->main_open && v->main_target == 0.0f) {
+            for (int i = off; i < end; ++i) {
+                buf[i] = v->tooth + v->main_level + v->floor_level;
+                v->tooth *= v->tooth_d;
+                v->main_level *= v->main_d;
+                v->floor_level *= v->floor_d;
+            }
+            v->age += count;
+        } else {
+            for (int i = off; i < end; ++i) {
+                if (v->fired < 3 && v->age >= v->fired * v->spread) {
+                    v->tooth = 0.80f;
+                    v->fired++;
+                }
+                if (v->age == v->main_open) {
+                    v->main_target = 1.0f;
+                    v->floor_level = 0.030f;
+                }
+                v->age++;
+                buf[i] = v->tooth + v->main_level + v->floor_level;
+                v->tooth *= v->tooth_d;
+                if (v->main_target > 0.0f) {
+                    v->main_level += (v->main_target - v->main_level) * v->main_atk;
+                    if (v->main_level > 0.98f)
+                        v->main_target = 0.0f;
+                } else
+                    v->main_level *= v->main_d;
+                v->floor_level *= v->floor_d;
+            }
         }
-        if (age == main_open) {
-            main_target = 1.0f;
-            floor_level = 0.030f;
+        for (int i = off; i < end; ++i) {
+            float noise = rng_frand2(&v->rng);
+            buf[i] = (noise > 0.0f ? noise : 0.0f) * buf[i];
+            buf[i] = bp_run(&v->bp, buf[i]) * 0.62f;
         }
-        age++;
-        ctrl = tooth + main_level + floor_level;
-        tooth *= tooth_d;
-        if (main_target > 0.0f) {
-            main_level += (main_target - main_level) * main_atk;
-            if (main_level > 0.98f)
-                main_target = 0.0f;
-        } else
-            main_level *= main_d;
-        floor_level *= floor_d;
-        /* rng_frand2, address never taken */
-        rs1 = ((rs1 & 0xFFFFFFFEu) << 12) ^ (((rs1 << 13) ^ rs1) >> 19);
-        rs2 = ((rs2 & 0xFFFFFFF8u) << 4) ^ (((rs2 << 2) ^ rs2) >> 25);
-        rs3 = ((rs3 & 0xFFFFFFF0u) << 17) ^ (((rs3 << 3) ^ rs3) >> 11);
-        u.u = 0x40000000u | ((rs1 ^ rs2 ^ rs3) >> 9);
-        n = u.f - 3.0f;
-        /* bp_run(&v->bp, (n > 0 ? n : 0) * ctrl) * 0.62f */
-        bx = bp_b0 * ((n > 0.0f ? n : 0.0f) * ctrl);
-        y = bx + bp_z1;
-        bp_z1 = (y + y + bp_z2) - bp_e1 * y;
-        bp_z2 = (-bx - y) - bp_e2 * y;
-        y = y * 0.62f;
-        /* bq_run(&v->hp, y) */
-        hy = hp_n0 * y + hp_z1;
-        hp_z1 = (hp_n1 * y + (hy + hy + hp_z2)) - hp_e1 * hy;
-        hp_z2 = (hp_n2 * y - hy) - hp_e2 * hy;
-        y = hy;
-        if (__builtin_expect(y > drum808_quiet || y < -drum808_quiet, 1)) quiet = 0;
-        else if (++quiet > 400) active = 0;
-        buf[i] = y;
+        for (int i = off; i < end; ++i) {
+            float y = bq_run(&v->hp, buf[i]);
+            QUIET(v, y, 400);
+            buf[i] = y;
+        }
+        off = end;
     }
-
-    v->bp.z1 = bp_z1; v->bp.z2 = bp_z2;
-    v->hp.z1 = hp_z1; v->hp.z2 = hp_z2;
-    v->tooth = tooth; v->main_level = main_level; v->main_target = main_target;
-    v->floor_level = floor_level;
-    v->rng.s1 = rs1; v->rng.s2 = rs2; v->rng.s3 = rs3;
-    v->fired = fired; v->age = age; v->quiet = quiet;
-    v->active = active;
-    return i;
+    return off;
 }
 
 /* ---- the metal bank: sc808_mt_circuit.h SchmittBank ---- */
@@ -2334,6 +2318,27 @@ static const uint8_t k_lane_track[L_NUM] = {D8_BD, D8_SD, D8_LT, D8_MT, D8_HT, D
                                             D8_CB, D8_CH, D8_OH, D8_CY};
 static float *d8_dry_r;         /* the render in progress: its right side (0: mono) */
 
+/* A clean mono lane can update its raw peak while adding dry audio.
+ * Positive send gains, drive and choke still use the ordinary lane mixer. */
+static inline int lane_center_mix(drum808_t *d, d8_lane_t *l, const float *buf, int m, float *dry, uint16_t mask)
+{
+    int s = l->snd;
+    if (d8_dry_r || l->cstep != 0.0f || !(d->shp[s].drive < 1.0e-3f) ||
+        d->potv[s][D8P_REV] != 0.f || d->potv[s][D8P_DLY] != 0.f)
+        return 0;
+    float g = d->potv[s][D8P_LEVEL] * l->hit * d->vol;
+    if (!(mask & (1u << k_lane_track[l - d->lane]))) g = 0.0f;
+    float k = k_trim[s] * g * l->cg, peak = 0.0f;
+    for (int i = 0; i < m; ++i) {
+        float x = buf[i], mag = fm_fabsf(x);
+        dry[i] += x * k;
+        if (mag > peak) peak = mag;
+    }
+    l->now = peak;
+    if (peak > l->pk) l->pk = peak;
+    return 1;
+}
+
 __attribute__((noinline)) static void lane_mix(drum808_t *d, d8_lane_t *l, const float *buf, int m, float *dry, float *rev, float *dly,
                      uint16_t audible_tracks)
 {
@@ -2447,6 +2452,8 @@ static void d8_render(drum808_t *d, float *dry, float *rev, float *dly, int n, u
                 }
             }
             got = voice_run(d, l, buf, mm, bus, pair);
+            if (lane_center_mix(d, ln, buf, got, dry + off, audible_tracks))
+                continue;
             {
                 float *dr = d8_dry_r;                     /* the chunk's slice of the right side */
                 d8_dry_r = dr ? dr + off : 0;
@@ -2479,6 +2486,26 @@ void drum808_render_st_masked(drum808_t *d, float *dry_l, float *dry_r, float *r
     d8_dry_r = dry_r;
     d8_render(d, dry_l, rev, dly, n, audible_tracks, D8_LANES_ALL);
     d8_dry_r = 0;
+}
+
+/* The engine owns cleared dry buffers. At a settled centre pan the two
+ * channels receive identical additions, including through choke and drive. */
+void drum808_render_st_cleared(drum808_t *d, float *left, float *right, float *rev, float *dly,
+                              int n, uint16_t audible_tracks)
+{
+    for (int tr = 0; tr < D8_NUM; ++tr) {
+        if (d->pan_lc[tr] != 1.0f || d->pan_rc[tr] != 1.0f ||
+            d->pan_l[tr] != 1.0f || d->pan_r[tr] != 1.0f) {
+            drum808_render_st_masked(d, left, right, rev, dly, n, audible_tracks);
+            return;
+        }
+    }
+    if (n <= 0) return;
+    for (int tr = 0; tr < D8_NUM; ++tr)
+        d->pan_dl[tr] = d->pan_dr[tr] = 0.0f;
+    d8_dry_r = 0;
+    d8_render(d, left, rev, dly, n, audible_tracks, D8_LANES_ALL);
+    __builtin_memcpy(right, left, (unsigned)n * sizeof *left);
 }
 
 void drum808_render_st_lanes(drum808_t *d, float *dry_l, float *dry_r, float *rev, float *dly,

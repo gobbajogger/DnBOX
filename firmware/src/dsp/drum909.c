@@ -9,6 +9,7 @@
 #include "drum909.h"
 #include "x0x_drum_samples.h"
 #include "ima_adpcm.h"
+#include <stddef.h>
 #include "../x0x_cold.h"          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
 
 #define D9_VCA_VT 0.0002f
@@ -745,9 +746,14 @@ __attribute__((noinline)) static void d9_emit_block(const d9_bus_t *b, int m)
  * sample the filter should have seen; the DR_NZ_HIST before it are readable. */
 __attribute__((noinline)) static void d9_warm(d9_biquad_t *f, const float *end)
 {
-    d9_biquad_reset(f);
+    d9_biquad_t state = *f;
+    d9_biquad_reset(&state);
+#ifdef __clang__
+#pragma clang loop unroll_count(4)
+#endif
     for (int i = -DR_NZ_HIST; i < 0; ++i)
-        d9_biquad_tick(f, end[i]);
+        d9_biquad_tick(&state, end[i]);
+    *f = state;
 }
 
 /* Kick (er99_bt_render with the stock sweep, one shell) */
@@ -855,10 +861,36 @@ __attribute__((noinline)) static void d9_env_values(d9_env_t *e, float *out, int
     e->v = v;
 }
 
+/* A warmed filter starts with all four histories reset. Filters with
+ * identical coefficient bits warmed against the same noise history are
+ * identical even when the voices had different states before the reset. */
+static int d9_same_coefficients(const d9_biquad_t *a, const d9_biquad_t *b)
+{
+    return __builtin_memcmp(a, b, offsetof(d9_biquad_t, x1)) == 0;
+}
+
+static void d9_warm_toms(d9_tom_t *first, d9_tom_t *end, const float *nz)
+{
+    d9_warm(&first->noise_bp, nz);
+    first->stick_warm = 0;
+    for (d9_tom_t *next = first + 1; next < end; ++next) {
+        if (next->mute > 0 && next->stick_warm &&
+            d9_same_coefficients(&first->noise_bp, &next->noise_bp)) {
+            next->noise_bp = first->noise_bp;
+            next->stick_warm = 0;
+        }
+    }
+}
+
 /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
  * once their envelopes have run out (-100 dB) they are skipped. */
-static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n)
+typedef struct {
+    const float *end;
+    const d9_biquad_t *filter;
+} d9_warmed_end_t;
+
+static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const d9_bus_t *bus, int n, d9_warmed_end_t *warmed)
 {
     const int m = n < t->mute ? n : t->mute;
     t->mute -= m;
@@ -868,10 +900,6 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const 
     d9_env_anchor(&t->env[2]);
     d9_env_anchor(&t->noise_env);
     const float stick_g = t->noise_level * 1.5f;
-    if (t->stick_warm) {
-        d9_warm(&t->noise_bp, nz);
-        t->stick_warm = 0;
-    }
     static const float ratio[3] = {1.0f, 1.5f, 2.75f};
     enum { span = 32 };
     float pitch[span], amp[span];
@@ -904,7 +932,12 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const 
     if (!t->noise_env.left)
         t->stick_stale = 1;
     if (t->stick_stale && t->mute == 0) {
-        d9_warm(&t->noise_bp, nz + m);
+        if (warmed->end == nz + m && d9_same_coefficients(warmed->filter, &t->noise_bp))
+            t->noise_bp = *warmed->filter;
+        else
+            d9_warm(&t->noise_bp, nz + m);
+        warmed->end = nz + m;
+        warmed->filter = &t->noise_bp;
         t->stick_stale = 0;
     }
 }
@@ -1119,10 +1152,13 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
         d9_bus(&bus, d, DR_SD, dry, rev, dly, audible_tracks);
         d9_render_sd(&d->bt[DR_SD], nz, &bus, n);
     }
+    d9_warmed_end_t warmed = {0};
     for (int t = 0; t < 3; ++t)
         if (d->tom[t].mute > 0) {
+            if (d->tom[t].stick_warm)
+                d9_warm_toms(&d->tom[t], d->tom + 3, nz);
             d9_bus(&bus, d, DR_LT + t, dry, rev, dly, audible_tracks);
-            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n);
+            d9_render_tom(&d->tom[t], &d->bt[DR_LT + t], nz, &bus, n, &warmed);
         }
     if (d->rim.mute > 0) {
         d9_bus(&bus, d, DR_RS, dry, rev, dly, audible_tracks);

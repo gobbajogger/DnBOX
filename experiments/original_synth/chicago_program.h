@@ -23,6 +23,8 @@ int original_chicago_program_set(original_chicago_program *p,unsigned parameter,
 /* Core0..108 and FX1/FX2 109..116 only. The original five mapped IDs above120
  * are no-ops in this CMP4 route and deliberately have no invented state. */
 int original_chicago_program_native(const original_chicago_program *p,unsigned native_id,float *normalized);
+/* Two live oscillator levels when the original Wave mapping is present. */
+int original_chicago_program_osc_mix(const original_chicago_program *,float *level1,float *level3);
 const char *original_chicago_program_name(unsigned factory);
 /* Compile once per control snapshot, before rendering. This produces exact
  * original outer values, not an ARP scheduler or a complete voice/FX graph.

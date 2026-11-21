@@ -39,8 +39,14 @@ static uint8_t mot_was_on, mot_on, mot_release_req, mot_playing;
 static unsigned eng_prof_frames, eng_scope_w;
 static int16_t eng_scope[512];
 static uint16_t eng_peak[5];
-static float part_peak[5], out_lim = 1.0f, out_scale = 4194304.0f;
+static float part_peak[5], out_scale = 4194304.0f;
 static int mot, mst, fx;
+/* This fixture renders BREAK synchronously. The integrated mixer suite covers
+ * the real compressor preview, including a worker interrupted in mid-block. */
+typedef int master_t;
+static uint8_t preview_tail, preview_running;
+int plat_cpu2_wait(void) { assert(!preview_running); return 0; }
+#define eng_sync() ((void)0)
 #define SCOPE_N 512u
 #define ORIGINAL_INPUT_KEYS 1
 #define PROF_T(name) unsigned name = 0

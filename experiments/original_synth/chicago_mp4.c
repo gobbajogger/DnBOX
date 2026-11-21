@@ -104,40 +104,20 @@ static __attribute__((noinline)) float oscillator_mix(const original_prepared_os
  float mix=gain[0]!=0.0f?w[0]*(gain[0]*.5f):0.0f;for(unsigned i=1;i<4;i++)if(gain[i]!=0.0f)mix=mix+w[i]*(gain[i]*.5f);
  return mix;
 }
-static inline __attribute__((always_inline)) int ck_step(const original_prepared_oscillators *p,const ck_slaves *slaves,unsigned single,int parked,float vco_gain,
+static inline __attribute__((always_inline)) int ck_step(const original_prepared_oscillators *p,const ck_slaves *slaves,int parked,int filter_held,float vco_gain,
  uint32_t phase[4],original_ramp og[4],original_ramp st[2],original_ramp *ngr,uint32_t *nsp,
  float H[5],original_ramp *ra,original_ramp *re,original_ramp *rr,uint32_t *lo,uint32_t *ro){
- const original_osc_controls *c=&p->controls;
- float mix;
- if (single < 4) {
-  /* The other gain ramps are parked at positive zero. All oscillator
-   * phases and hard-sync resets still advance at every sample. */
-  for (unsigned master=0; master<4; master+=2) {
-   uint32_t previous=phase[master];
-   phase[master]-=c->increment[master];
-   phase[master+1]-=slaves->plain[master/2];
-   if ((int32_t)phase[master] > (int32_t)previous)
-    phase[master+1]=0x7fffffffu;
-  }
-  float gain=og[single].current;
-  mix=0.0f;
-  if (gain!=0.0f) {
-   float wave=ck_wave(c->shape[single],ck_phase(phase[single]),c->width[single],p->correction[single],p->triangle[single]);
-   float sample=wave*(gain*.5f);
-   mix=single==0 ? sample : 0.0f+sample;
-  }
-  if (!parked) (void)ck_xadvance(&og[single]);
- } else {
-  float gain[4];
-  for(unsigned i=0;i<4;i++)gain[i]=og[i].current;
-  mix=oscillator_mix(p,slaves,phase,gain);
+ float gain[4];
+ for(unsigned i=0;i<4;i++)gain[i]=og[i].current;
+ float mix=oscillator_mix(p,slaves,phase,gain);
  if (!parked) for(unsigned i=0;i<4;i++)(void)ck_xadvance(&og[i]);
- }
  float ng=parked?ngr->current:ck_xadvance(ngr);uint32_t ns=*nsp;unsigned choose=(ns&0x40000000u)==0;*nsp=(ns+ns)^(choose?8393u:0);
  float input=ng*(choose?.5f:-.5f)+mix;input=vco_gain*input;
  if(!original_binary32_isfinite(input))return 0;
  original_ramp a2=*ra,e2=*re,r2=*rr;
- float A=advance(&a2),E=advance(&e2),R=advance(&r2);
+ float A=filter_held?ra->target:advance(&a2);
+ float E=filter_held?re->target:advance(&e2);
+ float R=filter_held?rr->target:advance(&r2);
  float tmp=H[3]+E*H[4],d=H[4]-E*tmp;
  if(!original_binary32_isfinite(d))return 0;
  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
@@ -147,25 +127,6 @@ static inline __attribute__((always_inline)) int ck_step(const original_prepared
  *ra=a2;*re=e2;*rr=r2;H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
  float l=parked?st[0].current:ck_xadvance(&st[0]),r=parked?st[1].current:ck_xadvance(&st[1]);
  *lo=original_math_bits(z4*l);*ro=original_math_bits(z4*r);return 1;
-}
-/* Same operations as ck_step when every ramp is already at its target with
- * a zero delta: advance()/ck_xadvance return the held value and write it
- * back unchanged. Constants stay in registers; the ramps are not touched. */
-static inline __attribute__((always_inline)) int ck_step_hold(const original_prepared_oscillators *p,const ck_slaves *slaves,float vco_gain,
- uint32_t phase[4],const float gain[4],float ng,float A,float E,float R,float sl,float sr,
- uint32_t *nsp,float H[5],uint32_t *lo,uint32_t *ro){
- float mix=oscillator_mix(p,slaves,phase,gain);
- unsigned choose=(*nsp&0x40000000u)==0;*nsp=(*nsp+*nsp)^(choose?8393u:0);
- float input=ng*(choose?.5f:-.5f)+mix;input=vco_gain*input;
- if(!original_binary32_isfinite(input))return 0;
- float tmp=H[3]+E*H[4],d=H[4]-E*tmp;
- if(!original_binary32_isfinite(d))return 0;
- float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);float u2=u*u,u4=u2*u2,u5=u*u4;float v5=1-u5;float nonlinear=d>=0?v5:-v5;
- float v=input-R*nonlinear,z1=v+A*(H[0]-v),z2=z1+A*(H[1]-z1),z3=z2+A*(H[2]-z2),z4=z3+A*(H[3]-z3);
- /* Each nonfinite cascade stage propagates to z4. The finite d check also covers tmp. */
- if(!original_binary32_isfinite(z4))return 0;
- H[0]=z1;H[1]=z2;H[2]=z3;H[3]=z4;H[4]=tmp;
- *lo=original_math_bits(z4*sl);*ro=original_math_bits(z4*sr);return 1;
 }
 static inline int ramp_held(const original_ramp *r){return r->delta==0.0f&&r->current==r->target;}
 
@@ -193,6 +154,80 @@ static unsigned single_moving_oscillator(const original_ramp gain[4],const origi
  return selected;
 }
 
+/* With a single audible master and zero modulation the slave phase has
+ * no effect on the rendered samples. Reconstruct both hard-sync pairs for
+ * the number of attempted samples, including a failing sample. */
+static void ck_commit_pairs(uint32_t phase[4],const original_osc_controls *c,const ck_slaves *slaves,uint32_t count){
+ for(unsigned even=0;even<4;even+=2){
+  uint32_t master=phase[even],slave=phase[even+1],inc=c->increment[even],delta=slaves->plain[even/2];
+  if(inc<=0x7fffffffu){
+   uint32_t rank=master^0x80000000u;
+   uint32_t end=master-inc*count;
+   if(inc && (uint64_t)inc*count>rank){
+    uint32_t after=(UINT32_MAX-(end^0x80000000u))/inc;
+    slave=0x7fffffffu-delta*after;
+   }else slave-=delta*count;
+   phase[even]=end; phase[even+1]=slave;
+   continue;
+  }
+  for(uint32_t j=0;j<count;j++){
+   uint32_t prev=master;master-=inc;slave-=delta;
+   if((int32_t)master>(int32_t)prev)slave=0x7fffffffu;
+  }
+  phase[even]=master;phase[even+1]=slave;
+ }
+}
+static float ck_fixed_pulse(uint32_t phase,float correction){
+ uint32_t half=phase&0x7fffffffu;
+ if(half-0x08000000u<=0x70000000u){
+  if((int32_t)phase<0)return 1.0f;
+  float q=ck_phase(phase);
+  return (q-1.0f)-(((q+1.0f)-2.0f)+1.0f);
+ }
+ return ck_wave(2,ck_phase(phase),.5f,correction,0.0f);
+}
+static __attribute__((noinline)) int ck_pulse_span(const original_prepared_oscillators *p,
+ const ck_slaves *slaves,unsigned even,float gain,float ng,float sl,float sr,
+ float vco_gain,uint32_t phase[4],uint32_t *nsp,float H[5],
+ original_ramp *ra,original_ramp *re,original_ramp *rr,uint32_t *lo,uint32_t *ro,uint32_t n){
+ uint32_t attempted=0,at=phase[even],inc=p->controls.increment[even],noise=*nsp;
+ float h0=H[0],h1=H[1],h2=H[2],h3=H[3],h4=H[4],scale=gain*.5f;
+ original_ramp aa=*ra,ee=*re,rval=*rr;
+ int ok=1;
+ while(ok && attempted<n){
+  original_ramp an=aa,en=ee,rn=rval;
+  int held=(original_math_bits(advance(&an))==original_math_bits(aa.current) &&
+            original_math_bits(advance(&en))==original_math_bits(ee.current) &&
+            original_math_bits(advance(&rn))==original_math_bits(rval.current));
+  uint32_t stop=n;
+  if(!held && n-attempted>12)stop=attempted+12;
+  while(attempted<stop){
+  unsigned j=attempted++;
+  at-=inc;float term=ck_fixed_pulse(at,p->correction[even])*scale;
+  float mix=even==0?term:0.0f+term;
+  unsigned choose=(noise&0x40000000u)==0;noise=(noise+noise)^(choose?8393u:0);
+  float input=ng*(choose?.5f:-.5f)+mix;input=vco_gain*input;
+  if(!original_binary32_isfinite(input)){ok=0;break;}
+  original_ramp next_a=aa,next_e=ee,next_r=rval;
+  float A=held?aa.current:advance(&next_a);
+  float E=held?ee.current:advance(&next_e);
+  float R=held?rval.current:advance(&next_r);
+  float tmp=h3+E*h4,d=h4-E*tmp;
+  if(!original_binary32_isfinite(d)){ok=0;break;}
+  float u=original_binary32_abs(d)>=1?0:1-original_binary32_abs(d);
+  float u2=u*u,u4=u2*u2,u5=u*u4,nonlinear=d>=0?1-u5:-(1-u5);
+  float v=input-R*nonlinear,z1=v+A*(h0-v),z2=z1+A*(h1-z1),z3=z2+A*(h2-z2),z4=z3+A*(h3-z3);
+  if(!original_binary32_isfinite(z4)){ok=0;break;}
+  aa.current=A;ee.current=E;rval.current=R;
+  h0=z1;h1=z2;h2=z3;h3=z4;h4=tmp;
+  lo[j]=original_math_bits(z4*sl);ro[j]=original_math_bits(z4*sr);
+  }
+ }
+ ra->current=aa.current;re->current=ee.current;rr->current=rval.current;
+ H[0]=h0;H[1]=h1;H[2]=h2;H[3]=h3;H[4]=h4;*nsp=noise;
+ ck_commit_pairs(phase,&p->controls,slaves,attempted);
+ return ok;
+}
 /* n samples (n>=1) into bit-pattern outputs. Returns 0 at the first
  * nonfinite filter value, with state committed as the per-sample path. */
 int original_chicago_voice_span(original_voice_gain *vg,original_oscillators *ph,const original_prepared_oscillators *p,
@@ -208,16 +243,18 @@ int original_chicago_voice_span(original_voice_gain *vg,original_oscillators *ph
   slaves.base[i]=b;slaves.plain[i]=ck_phase_delta(ck_clamp(b,-1,1)*0x1p31f);
  }
  int ok=1;
- if(ramp_held(&ra)&&ramp_held(&re)&&ramp_held(&rr)&&
+ int filter_held=ramp_held(&ra)&&ramp_held(&re)&&ramp_held(&rr)&&
     ramp_held(&og[0])&&ramp_held(&og[1])&&ramp_held(&og[2])&&ramp_held(&og[3])&&
-    ramp_held(&st[0])&&ramp_held(&st[1])&&ramp_held(&ngr)){
-  float gain[4]={og[0].current,og[1].current,og[2].current,og[3].current};
-  float A=ra.target,E=re.target,R=rr.target,sl=st[0].current,sr=st[1].current,ng=ngr.current;
-  for(uint32_t k=0;k<n;k++)if(!ck_step_hold(p,&slaves,vco_gain,phase,gain,ng,A,E,R,sl,sr,&ns,H,left+k,right+k)){ok=0;break;}
- }else{
-  unsigned single=single_moving_oscillator(og,p);
-  int parked=ck_fixed(og[0])&&ck_fixed(og[1])&&ck_fixed(og[2])&&ck_fixed(og[3])&&ck_fixed(st[0])&&ck_fixed(st[1])&&ck_fixed(ngr);
-  for(uint32_t k=0;k<n;k++)if(!ck_step(p,&slaves,single,parked,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
+    ramp_held(&st[0])&&ramp_held(&st[1])&&ramp_held(&ngr);
+ {
+  unsigned single=filter_held?4:single_moving_oscillator(og,p);
+  int parked=filter_held || (ck_fixed(og[0])&&ck_fixed(og[1])&&ck_fixed(og[2])&&ck_fixed(og[3])&&ck_fixed(st[0])&&ck_fixed(st[1])&&ck_fixed(ngr));
+  if(parked && (single==0 || single==2) && og[single].current!=0.0f &&
+     p->controls.shape[single]>=2 && p->controls.width[single]==.5f && p->correction[single]>=.25f)
+   ok=ck_pulse_span(p,&slaves,single,og[single].current,ngr.current,st[0].current,st[1].current,
+                    vco_gain,phase,&ns,H,&ra,&re,&rr,left,right,n);
+  else
+  for(uint32_t k=0;k<n;k++)if(!ck_step(p,&slaves,parked,filter_held,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
  }
  for(unsigned i=0;i<4;i++){ph->phase[i]=phase[i];vg->oscillator[i]=og[i];}
  vg->stereo[0]=st[0];vg->stereo[1]=st[1];*noise_gain=ngr;*noise_state=ns;
