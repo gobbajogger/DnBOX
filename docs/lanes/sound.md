@@ -8,14 +8,35 @@ The owner requested a worst block of 10,909 µs or less against the 11,609 µs l
 | --- | ---: | ---: | ---: |
 | +0 ms | 11,402 | 11,289 | 11,406 |
 | +1 ms | 11,323 | 11,318 | 11,440 |
-| +2 ms | 11,319 | 11,087 | — |
-| +3 ms | 11,282 | — | — |
-| +4 ms | — | — | — |
-| +5 ms | — | — | — |
+| +2 ms | 11,319 | 11,087 | 10,921 |
+| +3 ms | 11,282 | 11,241 | 11,438 |
+| +4 ms | 11,297 | 11,303 | 11,438 |
+| +5 ms | 11,272 | 11,272 | 10,922 |
 
-A dash means the run has no recorded result at this checkpoint. Each reported shot completed 648 halves with **0 late during the scene and 1 raw late**. The first IRQ reaches the second DMA half with less than 1 ms left before the next boundary. The separate same-image 2-second warmed boot also records one late. The historical d4088e60 Elite replay reproduced the owner’s 11,440 µs at +1 ms and the previously published 11,406 µs unshifted.
+The worst current shifted run was **11,323 µs Elite** (+1 ms, 414 µs over target) and **11,318 µs Pro** (+1 ms, 409 µs over). Each stock or historical shot completed 648 halves with **0 late during the scene and 1 raw late**. The first IRQ reaches the second DMA half with less than 1 ms left before the next boundary. The separate same-image 2-second warmed boot also records one late. The historical d4088e60 Elite replay reproduced the owner’s 11,440 µs at +1 ms and the previously published 11,406 µs unshifted.
 
 The current Elite unshifted maximum occurred in half 603, at 7.466 s. The 909 and Chicago bass consumed 78,993 and 75,964 guest timer ticks in that half. A diagnostic mixer/planner variant reached 11,291 µs unshifted. It changed the app footprint by −48 B and the first DAC difference occurred at stereo frame 160,324. Its timing does not qualify it for production. The production Elite and Pro images remain 546,516 and 546,508 B. Each retains 8,972 B of pool, or 780 B above reserve. The scene requests BREAK events and the stock image has no optional factory loop bank installed. [Reproduction and measurements](../../experiments/sound-hardware-v1/strict-timing/README.md)
+
+### Native changes under test
+
+| Elite experiment | Unshifted peak (µs) | Occupied application delta | Raw late | Scene late |
+| --- | ---: | ---: | ---: | ---: |
+| Stock | 11,402 | 0 B | 1 | 0 |
+| Planner and settled mixer gain | 11,291 | −48 B | 1 | 0 |
+| Mixer and quiet-tail accounting | 11,125 | −240 B | 1 | 0 |
+| Planner hysteresis | 11,382 | 0 B | 1 | 0 |
+| Chicago finite-check simplification | 11,272 | −96 B | 1 | 0 |
+| 909 stereo accumulation, IMA and tom changes | 11,108 | −80 B | 1 | 0 |
+| USB initialized before audio DMA | 11,363 | 0 B | 0 | 0 |
+| Combined Chicago, 909, mixer and USB ordering | 11,238 | −400 B | 0 | 0 |
+
+The −400 B combination also measured 11,238 µs unshifted on Pro. Initializing USB before DMA lets the first DMA interrupt run on time. Its 8-second captures complete 647 halves because DMA starts later. The stock image completes 648. The scene and stop time stay fixed. A full-size variant specializes the DJ filter, limiter knee and kick path. Fresh native links confirm exactly **546,516 B Elite / 546,508 B Pro** with 8,972 B free pool on both. Each variant has its own ELF, package and factory flash. [Native sizes and differential](../../experiments/sound-hardware-v1/strict-timing/occupied-parity-proof.tar.gz)
+
+The −400 B combination matched all 50 deterministic audio and state outputs across 17 host scenarios. In the unshifted Elite live run, however, five of 36,420 project bytes differed from stock. Two 909 step masks, the 808 pattern length and two sound settings changed. Of the post-PLAY event rows, 296 matched at the same rendered frame, three were present only on stock and one only on the candidate. The phase-sensitive physical setup also yields different project bytes across shifts on unmodified stock. None of these candidates has been enabled. [Control, project, onset and timing receipts](../../experiments/sound-hardware-v1/strict-timing/current-sweep-proof.tar.gz)
+
+### S6 feedback and storage
+
+A two-cursor experiment with four checkpoints needs 2,712 B per owner and returned 176,400 original wet words exactly with an ideal random-access dry source. The first wet callback still needs 49,662 source frames per owner. An optimistic 360 MHz kernel needed 19.769 ms and 23.582 ms for its two cursors, or 43.351 ms serially for one owner. Even with a core per cursor, the larger cursor exceeds 11.609 ms. The stock app and both 1 MiB flash images contained zero exact nonzero 128-sample source blocks in the tested formats. The live feedback, independent part histories and actual dry-source generation still need a fitting implementation. [Source, model receipts and replay](../../experiments/sound-hardware-v1/synthone-delay/checkpoint-provider-feedback.tar.gz)
 
 ## Production Synth One INIT and original comparisons, 2026-11-21 UTC
 

@@ -13,4 +13,11 @@ Each board first creates its own factory flash image. A second 2,000 ms shot mea
 
 The unshifted Elite observer reproduced the uninstrumented max, RAM snapshot and core-load CSV. Its worst half spanned 28, 228 and 256 engine frames. The separate PC sampler changed that result from 11,402 to 11,391 µs and is used only for source attribution. The sample window identified the 909 drum render and Chicago voice span as the largest compute regions. The stock scene produced zero nonzero BREAK halves with the optional bank absent.
 
-The isolated [mixer/planner patch](mixer-planner.patch.gz) retains ascending scheduler tie order and eliminates settled-unity multiplication. Its measured Elite application was 546,468 B, with 6,204 B free and the same 8,972 B raw pool. The unshifted run saved 111 µs but missed the target by 382 µs. Its recorded stereo output differs at 122,151 channel words, beginning at frame 160,324. The branch carries only its evidence.
+The isolated [mixer/planner patch](mixer-planner.patch.gz) retains ascending scheduler tie order and eliminates settled-unity multiplication. Its measured Elite application was 546,468 B, with 6,204 B free and the same 8,972 B raw pool. The unshifted run saved 111 µs but missed the target by 382 µs. Its recorded stereo output differs at 122,151 channel words, beginning at frame 160,324. Its engine outputs matched all 50 deterministic files across 17 scenarios. In the native scene, the same K22 press triggered the same closed-hat voice one DMA period later. The branch carries only its evidence.
+
+
+## Full sweep and DSP experiments
+
+- [Trace and sweep archive](current-sweep-proof.tar.gz) contains reproducible control comparisons, exact input identities and all 12 stock results. [Historical reproduction](historical-shift-proof.tar.gz) includes all six Elite shots of d4088e60.
+- [909 source and differential](909-render-proof.tar.gz) includes complete 7,648-byte state and four-bus comparisons, the sampler replay, the triangle-diode test and the real physical image sizes.
+- [Equal-occupancy source and cold links](occupied-parity-proof.tar.gz) includes the complete experimental patch against ca0c00a4 and the linker and host audio receipts. The raw firmware payloads are reconstructed using the normal stock build.
