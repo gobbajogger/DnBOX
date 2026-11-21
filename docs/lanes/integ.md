@@ -5,7 +5,7 @@ Firmware draft [#976](https://github.com/gobbajogger/DnBOX/pull/976) incorporate
 | Item | State and evidence |
 |---|---|
 | I0 | **Open.** The completed firmware baseline at `76040daa` recorded 478 PASS, 23 FAIL and 0 NOT_RUN. The explicitly requested 501-case host gate at `2643d690` has no terminal result. The prior stock-Linux checkpoint ends after `composed-features`. A fresh Debian 6.12.117 guest passed all 16 preflight checks, the clean and deliberate-leak sanitizer controls, and the sandboxed Chromium DOM check. Separate exact-source Elite and Pro rebuilds reproduced all six original package, application and loader hashes. [Full baseline](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058434593) · [501-case inventory](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058435097) · [Original checkpoint](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7059118916) · [Fresh control and package evidence](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7061534954) |
-| I1 | **Pass for firmware at `8e4c1a10`.** The [source ledger](../../CONSOLIDATED-STATE.md) lists twelve merged PRs with their source and merge SHAs. The latest pair are [#977](https://github.com/gobbajogger/DnBOX/pull/977) and [#978](https://github.com/gobbajogger/DnBOX/pull/978). |
+| I1 | **Pass for the consolidated ledger through `1c82772b`.** Each of the 14 recorded merges is reachable from this consolidated snapshot. The two latest are #980 and #981. [Source ledger](../../CONSOLIDATED-STATE.md) · [Reachability check](../../evidence/integ-cloud-2643d690/consolidated-reachability.txt) |
 | I2 | **Both pre-merge models built at `0fbe180f`.** Elite application 546,496 B, Pro 546,488 B. XIP free 6,176 B and 6,184 B respectively. Both retain 780 B above the 8,192 B pool reserve. Final builds on consolidated follow integration of the outstanding source lanes and require a complete passing host suite. [Packages, checksums and link maps](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7061499375) |
 | I3 | **Open.** The two stock zero-loop runs at `0fbe180f` each recorded six thread-CPU misses in 32,768 blocks against 11,609 µs. PCM and meter output matched for all 32 bank/workload combinations. An independent fixed-instruction CPU control also crossed the limit eight times. Validate the full workloads on a timing-qualified runner and retain the measured failures. [Raw audio and control evidence](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7061556315) |
 | I4 | **Pass at consolidated `76040daa` and lane `f394ac03`.** Stock Linux ran the original test untraced as uid 1000. It detected the deliberate 123-byte leak, passed both sets of 796 checks and rejected corrupted data. [Consolidated log](../../evidence/integ-baseline-76040daa/compact-programs-linux.log) · [Lane log](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7056736948) |
@@ -20,7 +20,22 @@ Firmware draft [#976](https://github.com/gobbajogger/DnBOX/pull/976) incorporate
 
 The [recovery index](../LIBRARY-INDEX.md#consolidated-firmware-baseline-evidence) identifies the two baseline archives and verification manifests. The owner reported disabling `gates.yml` in both repositories. At 02:32 UTC on 21 November 2026 GitHub still reported both workflows active and the permissions endpoint required administrative access. This preserves the observation made under the earlier Rule 2.
 
-## Current three-lane candidate
+## Cloud qualification on 21 November 2026
+
+The consolidated ledger now includes the two owner-approved rules PRs #980 and #981 through `1c82772b`. The check at integration PR head `8911d62c` found zero deleted files and five consolidated commits outside its ancestry. The six changed paths since the initial tested PR head `2643d690` are Markdown files. The [cloud evidence](../../evidence/integ-cloud-2643d690/) names each input and records separate replay results.
+
+| Item | Measured result |
+|---|---|
+| I0 and I4 | The full 501-case suite started on the pre-merge head `2643d690` after all 16 preflight checks passed. A separate stock Debian 6.12 guest running as uid 1000 rejected the 123-byte LeakSanitizer control, passed both sets of 796 program checks and rejected the corrupted data. |
+| I2 | The stock three-lane source tree `12266ef6` includes Sound `e5426681`, FWUI `b7b91c8b` and integration `8911d62c`. The Elite and Pro package checks passed. XIP free was 6,192 / 6,200 bytes and pool margin was 780 bytes on both models. |
+| I3 | Two heavy playback sweeps on this tree reported 3 and 8 thread-CPU misses in 16,384 blocks each. All 64 PCM and meter digests matched the prior candidate. Twelve strict 360 MHz emulator scenes peaked at 11,481 µs Elite and 11,434 µs Pro. Each recorded one late half at boot and zero additional late halves during playback. |
+| I5 | The native stock packer accepted a maximum 5,168-byte payload budget per model. The unchanged 109,394-byte bank is 104,226 bytes over budget on both. The live site returned the expected SHA-256 for all five previews at both URL forms. The unknown-zone control returned HTTP 404. |
+| I6 | The generated roadmap, proposal form and installer receipt form passed their focused checks. The production GitHub inbox reader received HTTP 200 and an empty proposal list. A signed-in submission, opening-post vote and refreshed count are still unverified. |
+| Nightly | Two fresh full local gate attempts on `b3868da0` exited 1. The homepage wait was fixed on #170 at `b62b3c1b`. The four approved viewport images matched. Nightly `061e9521` fixes the downloaded installer’s Release status link and scopes the product name check to exclude the owner’s policy text. |
+
+The post-merge target and the I7 cleanup depend on the remaining lane merges.
+
+## Earlier three-lane candidate at 0fbe180f
 
 [Combined diagnostic `0fbe180f`](https://github.com/gobbajogger/DnBOX/commit/0fbe180f279ac638c85934ec0b3739120085cf4e) joins integration `09d9ffab`, Sound `ad499684` and FWUI `a0d49bb8`. The tree is `b82bb101e2f4006166fcbaec9ce205ead23a977e`. The later Sound changes through `4c1f7589` affect governance, documentation and experimental sources. The new combined SuperJ6 production code was present in both native builds and all three host matrices. The two final post-merge models remain outstanding while [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) and [FWUI #975](https://github.com/gobbajogger/DnBOX/pull/975) are drafts.
 

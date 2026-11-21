@@ -104,7 +104,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
 }
 ```
 
-## Merged pull requests through `8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374`
+## Merged pull requests through `1c82772bac9a33f030bf954ec6151987aef2cbb8`
 
 GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merge commit is reachable from this snapshot. The PR head is included for squash merges and deleted branches. Lane acceptance is tracked in `docs/lanes/integ.md`.
 
@@ -122,3 +122,5 @@ GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merg
 | [#974](https://github.com/gobbajogger/DnBOX/pull/974) | `lane/integ` | `66acd3f06193d6ee37e5a50eaa45ab71e1cb93da` | `f753443cf31bf912356b27df022f951b8c82fcd8` |
 | [#977](https://github.com/gobbajogger/DnBOX/pull/977) | `backup/rules-fix-20261121` | `370d4c5cdc1a3601947beb8f35f0a7b0e72a3843` | `d729626b659080e59584227c03352dab07bb5b53` |
 | [#978](https://github.com/gobbajogger/DnBOX/pull/978) | `backup/rules-cleanup-20261121` | `30c834c151193e956ccfd8373dabf3b55052be72` | `8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374` |
+| [#980](https://github.com/gobbajogger/DnBOX/pull/980) | `backup/rules-binary-20261121` | `4592ac7f9d0c45bef0d7769aeb40bfb1b30180fe` | `19c0de8b78b3116e89677332694836b3315756d1` |
+| [#981](https://github.com/gobbajogger/DnBOX/pull/981) | `backup/rules-site-gate-20261121` | `69a650da0e7885bc516293bd573313280152d15c` | `1c82772bac9a33f030bf954ec6151987aef2cbb8` |
