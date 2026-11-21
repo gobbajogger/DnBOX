@@ -28,6 +28,18 @@ PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) starts at sound PR [#97
 
 ## Populated-scene qualification
 
+The ordinary Elite and Pro images at `42ae56e1d83127fd9855fb8e86f8907af216b63a` passed the calibrated default and both populated scenes. Each run used the same 922 unshifted events for eight seconds in `fm1-live` at 360 MHz with `FM1_STRICT=1`. The table includes startup. The deadline is strictly below 11,609 µs with zero late transfers and zero xruns.
+
+| Scene | Elite peak µs | Elite late / xruns | Pro peak µs | Pro late / xruns |
+| --- | ---: | ---: | ---: | ---: |
+| Calibrated default | 7,930 | 0 / 0 | 7,978 | 0 / 0 |
+| Chicago and Miami | 11,492 | 0 / 0 | 11,325 | 0 / 0 |
+| Juno and Synth One | 10,099 | 0 / 0 | 10,687 | 0 / 0 |
+
+All four populated runs triggered all 11 rows in each kit, produced signal on both selected bass parts and BREAK, and finished with audible stereo output. Pro reversed the two synth owners. After multiple simultaneous drum attacks, the scheduler assigns one kit and one sounding bass to each core for the first long render stretch. The regression exercises both owner orders, short stretches, repeated single-lane triggers and worker recovery, and checks the resulting PCM against serial rendering.
+
+The ordinary images retain 4,604 bytes of XIP on Elite and 4,616 on Pro. Both retain 2,064 pool bytes above the 8 KiB reserve. The check matched 1,923 tracked paths for each board to the measured source. [Six strict replays, native counters, PCM and package digests](../../experiments/sound-hardware-v1/selected-native/populated-42ae56e1.json)
+
 At `87a2fbde9c58aa79d51dad7b29d9537348ee5ed8`, Elite passes both requested populated scenes. Pro passes Juno and Synth One. Its Chicago and Miami scene exceeds the deadline by 435 µs and records two late transfers. All 636 verified build inputs match this source. Elite uses 552,484 application bytes with 188 free. Pro uses 552,472 with 200 free. Each uses 96,260 bytes of normal RAM and 333,880 pool bytes, leaving 10,184 pool bytes free and 1,992 above reserve.
 
 | Populated scene | Elite peak µs | Elite late / xruns | Pro peak µs | Pro late / xruns |
