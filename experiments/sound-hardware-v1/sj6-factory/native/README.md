@@ -14,6 +14,8 @@ Both compact targets use the standard board model and linker layout, size optimi
 
 **Correction.** The first twelve replay shots restored the complete stock flash over the supplied compact package. They ran stock code. The previous compact physical parity and timing claims are withdrawn. The 17 fixed-input host scenarios independently matched all 50 stock audio/state files. Native image and pool measurements above came from the compact link.
 
+The repeated six offsets per board used authenticated compact firmware with stock-equivalent user state. All twelve DAC recordings and final projects differed from their same-offset stock references. The first differing stereo frame ranged from 102,402 to 288,833. Final projects differed in one to eleven bytes. The worst peaks were 11,396 µs Elite and 11,288 µs Pro. Each run completed 648 halves with one startup late transfer and zero additional scene late transfers. [Package checks and all twelve measurements](physical.json)
+
 ## Reproduce the native experiment
 
 From the Sound checkout, choose a new work directory and export the project's AC79 SDK and JieLi toolchain paths. The firmware base is `dea023ce632538621b59bb307ebcaf440805b032`. Applying the patch with the index produces tree `bfd39793b1bf792a0b43b6d635ce3318058717e1` on that exact parent. Build the two models sequentially in each tree because the generator directory is shared.
@@ -35,11 +37,12 @@ done
 python3 "$bench/replay_pwm_defaults.py" "$work/compact"
 ```
 
-The oscillator runner accepts this prepared compact tree directly. Use its controls, range, holdout and PWM String Pad suites as documented in the [oscillator comparison](../oscillator/README.md). Both native loaders matched the stock loader for their model. [Build identities, symbols and strict captures](results.json)
+The oscillator runner accepts this prepared compact tree directly. Use its controls, range, holdout and PWM String Pad suites as documented in the [oscillator comparison](../oscillator/README.md). Both native loaders matched the stock loader for their model. [Build identities, symbols and host checks](results.json)
 
-The physical replay uses the repository's strict driver and matched board binaries. The calibrated source of `fm1-live` is `ba83317aa55cbcdb2830c5da97d5f64b763499e2`, built here with Rust 1.85.1. The stock +1 control on each board reproduced the archived image, seed, project and DAC digests and all timing and late counts. The command below repeats the six shifts on each candidate and compares each capture against the two archived stock measurement packets. Use a fresh output directory for each replay. All writes are to the emulator's disposable flash file.
+The physical replay uses the repository's strict driver and matched board binaries. The calibrated source of `fm1-live` is `ba83317aa55cbcdb2830c5da97d5f64b763499e2`, built here with Rust 1.85.1. The stock +1 control on each board reproduced the archived image, seed, project and DAC digests and all timing and late counts. The command below repeats the six shifts on each candidate and compares each capture against the two archived stock measurement packets. The replay writes `sweep.json` only for a completed run. It returns a failing status when any completed shot misses its timing target. The example records all board/shift failures before returning that status. Use a fresh output directory for each replay. The optional raw-reference flags below authenticate the stock ELF, DAC and project before reporting the first zero-based differing stereo frame and the number of changed frames and project bytes. All writes are to the emulator's disposable flash file.
 
 ```sh
+failed=0
 for model in elite pro
 do
     board=smk37
@@ -50,12 +53,16 @@ do
         out="$work/$tree-$model-sweep"
         python3 "$bench/../strict-timing/replay.py" --emulator "$FM1_LIVE" \
             --elf "$build/$board/x0x.elf" --fwsc "$build/x0x-$board.fwsc" \
-            --output "$out" || exit 1
+            --output "$out" || failed=1
+        test -s "$out/sweep.json" || exit 2
         for shift in 0 1 2 3 4 5
         do
             python3 "$bench/native/score_scene.py" "$model" "$build/$board/x0x.elf" \
-                "$out/shift$shift" "$shift" --stock-seed "$work/stock-$model-sweep/seed/flash.bin" || exit 1
+                "$out/shift$shift" "$shift" --stock-seed "$work/stock-$model-sweep/seed/flash.bin" \
+                --stock-folder "$work/stock-$model-sweep/shift$shift" \
+                --stock-elf "$work/stock/build/$board/x0x.elf" || failed=1
         done
     done
 done
+exit "$failed"
 ```

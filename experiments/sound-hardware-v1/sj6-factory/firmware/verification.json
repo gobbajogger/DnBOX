@@ -268,5 +268,34 @@
         }
       }
     }
+  },
+  "integrated_juno_audio": {
+    "shipping_presets": [
+      {
+        "preset": 0,
+        "matched_float32_words": 65536,
+        "sha256": "b64c9f9d6a11125a2b2a068a5332a35ae78966f9682e6cb729e8f6d208095cfa"
+      },
+      {
+        "preset": 1,
+        "matched_float32_words": 65536,
+        "sha256": "8e6730842e6f9ca9077d747dab92b3748584b4701615132bcd879462f5b8c348"
+      },
+      {
+        "preset": 2,
+        "matched_float32_words": 65536,
+        "sha256": "948c66d602d1f6e23ff13e5c77d0eacb0913f8aa4657992ae413850f235fe9a6"
+      },
+      {
+        "preset": 3,
+        "matched_float32_words": 65536,
+        "sha256": "ceb8956dc1df6d724c28e8c31f07bd3bc7d69de1a38f934077f1b8e0ee12260b"
+      }
+    ],
+    "unit": "interleaved stereo binary32 channel words",
+    "typed_selections": 48,
+    "typed_reference": "independently measured compact factory stereo, two-note progression",
+    "typed_matching_words": 147456,
+    "typed_sha256": "cd5815d27df86142b0c8e167f3971e6498d293d727870d9c32924394ce1df6d1"
   }
 }

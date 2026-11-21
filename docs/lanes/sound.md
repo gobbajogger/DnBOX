@@ -12,9 +12,13 @@ The opt-in firmware accepts a decoded factory row through `engine_superj6_factor
 
 All six native packages built. Both ordinary ELFs, applications, loaders and packages match their archived stock digests. The combined profile size-optimizes the original-synth units normally built with `-Os`, preserves the `-O2` real-time units, and retains the bulk factory loader for the on-device integration point. The four shipping Juno presets enter the shipping renderer on ordinary selection. The physical replay now checks the installed package bytes against the seed before starting any shot. [Native identities, footprint, BREAK word checks and host measurements](../../experiments/sound-hardware-v1/sj6-factory/firmware/verification.json)
 
+## Integrated SuperJ6 physical-input qualification, 2026-11-21
+
+All 12 strict emulator runs on the integrated SuperJ6-only package differed from stock in both the live DAC stream and the final project. Each ran 922 events over eight seconds and completed 648 halves. The worst peaks were 11,404 µs Elite and 11,261 µs Pro, leaving 205 and 348 µs against the 11,609 µs deadline. Every run had one startup xrun and zero additional scene late transfers. Both boards reproduced the stock warm boot and the complete 30,208-frame saved Clip startup. The combined SuperJ6 and Synth One editor profile also differed from stock on both +1 ms scenes. The 700 µs margin and stock physical-input behavior remain open. [Per-offset timings, first differing frames and both profile results](../../experiments/sound-hardware-v1/sj6-factory/firmware/README.md)
+
 ## Compact SuperJ6 on both models, 2026-11-21
 
-The corrected waveform and PWM entry points now link on the current firmware base. The compact image occupies 550,436 bytes on Elite and 550,424 bytes on Pro, leaving 2,236 and 2,248 bytes of XIP and 8,972 free pool bytes on each. The original twelve shots restored the complete stock flash over these candidate packages. Those compact physical-parity and timing claims are withdrawn. A fresh replay must initialize flash from each candidate and verify its protected firmware bytes before scoring. All 50 files from the independent 17-scenario host comparison matched stock. [Exact source, native builds and per-shift comparison](../../experiments/sound-hardware-v1/sj6-factory/native/README.md)
+The corrected waveform and PWM entry points now link on the current firmware base. The compact image occupies 550,436 bytes on Elite and 550,424 bytes on Pro, leaving 2,236 and 2,248 bytes of XIP and 8,972 free pool bytes on each. The original twelve shots restored the complete stock flash over these candidate packages. Those measurements ran stock code. Repeating all twelve scenes with the protected firmware verified for each candidate found twelve different DAC streams and twelve different final projects. The worst peaks were 11,396 µs Elite and 11,288 µs Pro. All 50 files from the independent 17-scenario host comparison matched stock. [Exact source, native builds and per-shift comparison](../../experiments/sound-hardware-v1/sj6-factory/native/README.md)
 
 The four ordinary shipping Juno presets were also compared directly. PAD, PLUCK and BRASS exceeded one or more stock-audio tolerances in the compact replacement. The fitted image retains the typed APIs without a full production factory-bank caller. [Per-preset audio and runtime lifecycle checks](../../experiments/sound-hardware-v1/sj6-factory/native-host/README.md)
 
@@ -29,6 +33,8 @@ At PR source `dea023ce632538621b59bb307ebcaf440805b032` both fresh ordinary mode
 ## Elite cutoff timing and equal-size replay, 2026-11-21
 
 The published phase-restored build reproduced its 199,282-frame prefix on Elite +1 ms. The first cutoff error came from the foreground acceleration clock. Its tenth knob edit occurred three milliseconds later than stock, moving the following edit across the 12 ms gain threshold. Measuring detents at scanner acceptance corrected that cutoff at 4,946 ms but changed bass B pattern length. Sharing the identical IMA rounding table in the phase-restored source recovers its 64 extra flash bytes. This build matches the stock application length on Elite and Pro. The Elite +1 run retained the first 290,880 of 333,312 stereo frames, reached 10,455 µs with zero late transfers or xruns and changed ten final project bytes. [Native results, source and observer evidence](../../experiments/sound-hardware-v1/strict-timing/scan-time/README.md)
+
+A read-only stock Elite +1 replay tested whether existing LCD waits could absorb a shorter callback without moving foreground input. Its three over-target halves interrupted pixel drawing with zero SPI time remaining. Of 112 other IRQs that interrupted the SPI wait routine, none returned before that transfer had already finished. [Interrupted native PCs, SPI deadlines and calibrated physical replay](../../experiments/sound-hardware-v1/strict-timing/foreground-wait/README.md)
 
 ## First-block interrupt handoff and input timing, 2026-11-21
 
@@ -520,7 +526,9 @@ The current draft is PR #973 on `lane/sound`. This update restores the original 
 - The pre-FX adapter rendered 576,000 frames across 12 scenes. There were zero differing channel words and zero render heap calls. The scalar control comparison checked 957,750 targets and found zero differing words.
 - The generic factory comparison rendered 694 presets over 66,624,000 frames. There were zero differing or nonfinite words. Both outputs used the same FX implementation. All 1,388 output filenames, byte counts and SHA-256 hashes matched the historical PCM manifest. The commands in the portable input guide reproduce the test. [Factory results](../sound/restored-factory-replay.json) · [PCM manifest](../sound/v2-synthone-factory-pcm-manifest.json) · [Input guide](../../assets/test-inputs/synthone/README.md)
 
-## Checklist
+## Historical checklist at the restored-source checkpoint
+
+The table records the earlier checkpoint. The November 21 results above supersede its Synth One program-comparison status and describe the current SuperJ6 and timing results.
 
 | Item | Status | Evidence or remaining work |
 | --- | --- | --- |

@@ -13,6 +13,10 @@ All four published shipping Juno programs match the shipping head on 262,144 ste
 
 The firmware uses the stereo renderer. In this measured experiment a direct call to the original low-level mono helper on an active typed owner returns silent stock voices. The public runtime and hardware stereo comparisons above exercise the stereo path. This fixture does not select the 640 factory programs from the panel or measure complete original AU parity.
 
+## Physical input with package-owned flash
+
+Each board's replay initialized fresh flash from its own package. All 643,072 protected bytes matched that package, and all 405,504 persistent bytes matched initialized stock before input. Cold and warm startup reproduced stock audio and project bytes on both boards. The +1 ms scene first differed at stereo frame 120,896 on Elite and 199,811 on Pro. Elite changed one project byte and had an 11,301 µs peak. Pro changed 11 project bytes and peaked at 11,337 µs. Each completed 648 halves, with one raw startup late transfer and zero additional scene late transfers. [Native and stock identities, same-offset differences and exact frames](physical.json)
+
 ## Reproduction
 
 Set the standard JieLi toolchain and AC79 SDK environment variables first. The second patch applies to the measured compact tree. Run builds sequentially because both models use its generated-header directory.

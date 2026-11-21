@@ -12,7 +12,7 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
-from compare import channel_score
+from compare import AUDIT, channel_score, json_object
 from factory import load_factory, select, canonical_bytes
 import remote_fields
 
@@ -37,7 +37,8 @@ LEGACY_HASHES = (
     "10f4073e2f0aedaddb1db3621689e647131e58f004a043e0579eb05140ad79ba",
 )
 FRAMES = 8192
-SPEC = json.loads((HERE.parent / 's4-inputs.json').read_bytes())
+SPEC_FILE = HERE.parent / "s4-inputs.json"
+SPEC = json.loads(SPEC_FILE.read_bytes())
 
 
 def digest(data):
@@ -86,21 +87,53 @@ def build(compact, repo, out):
     return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in inputs}
 
 
-def cases(archive, suite):
-    if archive is None:
+def selected_record(directory, row, audited):
+    uid = row["program_uid"]
+    if audited["uid"] != uid or audited["supplied_bank_uuid"] != row["bank_uuid"]:
+        raise ValueError(f"release audit disagrees with S4 identity for {uid}")
+    path = directory / f"{uid}.json"
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError as error:
+        raise ValueError(f"missing selected S4 record {path}") from error
+    item = json_object(raw)
+    if "uid" not in item and "preset" in item:
+        bank = item.get("bank")
+        if not isinstance(bank, dict) or bank.get("uuid") != row["bank_uuid"]:
+            raise ValueError(f"selected bank UUID differs for {uid}")
+        if digest(raw) != audited["file_sha256"]:
+            raise ValueError(f"selected matrix file checksum differs for {uid}")
+        return item["preset"]
+    return item
+
+
+def cases(archive, suite, selected=None):
+    if archive is None and selected is None:
         for layer in range(2):
             for stop in range(3):
                 yield "control-" + str(stop), layer, np.float32(stop / 3), 0., 0., {}
             for amount in AMOUNTS[suite]:
                 yield "control-pwm-" + str(amount), layer, 1., np.float32(amount), float(amount > 0), {}
         return
-    if digest(archive.read_bytes()) != SPEC["archive_sha256"]:
-        raise ValueError("expected the authenticated J6presets.zip")
-    banks = load_factory(archive)
+    if selected is not None:
+        audit = json_object(AUDIT.read_bytes())
+        if audit["spec_sha256"] != digest(SPEC_FILE.read_bytes()):
+            raise ValueError("release audit and S4 manifest disagree")
+        audited = {entry["uid"]: entry for entry in audit["programs"]}
+    else:
+        if digest(archive.read_bytes()) != SPEC["archive_sha256"]:
+            raise ValueError("expected the authenticated J6presets.zip")
+        banks = load_factory(archive)
     catalog = json.loads((HERE.parent.parent / "mapping/results/implementer_brief/public_control_catalog.json").read_bytes())
     keys = {entry["id"]: entry["identifier"] for entry in catalog["controls"]}
     for row in SPEC["programs"]:
-        record = select(banks, row["bank_uuid"], row["program_uid"])["preset"]
+        uid = row["program_uid"]
+        if selected is not None:
+            record = selected_record(selected, row, audited[uid])
+        else:
+            record = select(banks, row["bank_uuid"], uid)["preset"]
+        if not isinstance(record, dict) or record.get("uid") != uid:
+            raise ValueError(f"expected complete preset object with UID {uid}")
         if digest(canonical_bytes(record)) != row["record_sha256"]:
             raise ValueError(f"record checksum differs for {row['program_uid']}")
         yield from authored_layers(record, keys)
@@ -128,17 +161,21 @@ def main():
     parser.add_argument("--repo", type=Path, required=True)
     inputs = parser.add_mutually_exclusive_group()
     inputs.add_argument("--banks", type=Path)
+    inputs.add_argument("--selected-records", type=Path, metavar="DIR",
+                        help="14 <UID>.json files from factory.py matrix or their complete extracted presets")
     inputs.add_argument("--suite", choices=NOTES)
     inputs.add_argument("--remote-repo", type=Path, help="Nightly Git checkout for the checked PWM String Pad fields")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    suite = args.suite or "controls"
+    # Verify every selected record before compiling, writing outputs or scoring.
+    settings = list(cases(args.banks, suite, args.selected_records)) if not args.remote_repo else []
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out)
-    suite = args.suite or "controls"
     rows = []
-    settings = cases(args.banks, suite)
-    scope = "factory-main-pass base oscillator only" if args.banks else f"isolated oscillator {suite}"
+    factory_input = args.banks is not None or args.selected_records is not None
+    scope = "factory-main-pass base oscillator only" if factory_input else f"isolated oscillator {suite}"
     if args.remote_repo:
         settings = ((*row, {}) for row in remote_fields.load(args.remote_repo, out, SPEC))
         scope = "six Remote-verified PWM String Pad control words, pre-filter oscillator only"
@@ -177,7 +214,10 @@ def main():
     if args.remote_repo:
         result["remote_commit"] = remote_fields.REMOTE_REV
         result["remote_input_sha256"] = remote_fields.FILES
-    if args.banks:
+    if factory_input:
+        result["factory_input"] = "selected records" if args.selected_records is not None else "full archive"
+        result["s4_inputs_sha256"] = digest(SPEC_FILE.read_bytes())
+        result["record_sha256_by_uid"] = {row["program_uid"]: row["record_sha256"] for row in SPEC["programs"]}
         result["pwm_amount_stage"] = "main preset pass, before the captured-route postpass and live modulation"
     (out / "result.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(f"{result['passes']}/{len(rows)} isolated oscillator comparisons within limits")
