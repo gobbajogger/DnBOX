@@ -12,13 +12,9 @@ esac
 CC="${CC:-cc}"
 mkdir -p build/gen build/host
 [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
-# Regen when samples or tables are missing, or when the packing generator is newer
-# (EXP pot helper lives here). Tables alone can vanish while samples stay; both
-# come from the same script, so either miss must re-run it before break-bank compile.
-if [ ! -f build/gen/x0x_drum_samples.h ] || [ ! -f build/gen/x0x_drum_tables.h ] \
-    || [ tools/gen_drum_samples.py -nt build/gen/x0x_drum_samples.h ]; then
-    python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null
-fi
+# Validate the source WAVs and encoded payloads on every entry, including restored
+# files with preserved mtimes. Unchanged generated headers keep their mtimes.
+python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null
 if [ -n "${X0X_BREAK_BANK:-}" ]; then python3 tools/gen_break_bank.py "$X0X_BREAK_BANK" build/gen/x0x_break_bank.h >/dev/null
 else sh tools/gen_builtin_break.sh build/gen >/dev/null; fi
 [ "${1:-}" != --generate-only ] || exit 0

@@ -27,10 +27,8 @@ import json
 import math
 import struct
 import sys
+import tempfile
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import sampleio as sio  # noqa: E402
 
 SRC = Path(__file__).resolve().parents[1]
 ASSETS = SRC / "assets" / "909"
@@ -228,6 +226,16 @@ def pack_tanh_runs(tab):
     return runs, payload, raw_b, packed_b
 
 
+def write_header(path, content):
+    data = content.encode()
+    if path.is_file() and path.read_bytes() == data:
+        return
+    # Parallel host tests can compile this header as another process generates it.
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as target:
+        target.write(data)
+    Path(target.name).replace(path)
+
+
 def main():
     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
     out_t = out_s.parent / "x0x_drum_tables.h"
@@ -256,7 +264,7 @@ def main():
         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
         hdr.append(arr("uint8_t", name, list(data), per=24))
         hdr.append("")
-    out_s.write_text("\n".join(hdr))
+    write_header(out_s, "\n".join(hdr))
 
     tab = [f32(math.tanh(TANH_MAX * i / TANH_N)) for i in range(TANH_N + 2)]
     tanh_runs, tanh_words, tanh_raw_b, tanh_packed_b = pack_tanh_runs(tab)
@@ -314,7 +322,7 @@ def main():
     t.append(f"#define X0X_EXP_COUNT {len(EXP_RANGES)}")
     block, packed_exp_b = _lossless_exp_block()
     t += block
-    out_t.write_text("\n".join(t))
+    write_header(out_t, "\n".join(t))
     raw_exp_b = len(EXP_RANGES) * 128 * 4
     print(f"gen_drum_samples: {total} frames ({nbytes} bytes of ADPCM, {total * 2} as int16) -> {out_s.name}; "
           f"tanh {TANH_N + 2} packed {tanh_raw_b}->{tanh_packed_b} B + {len(EXP_RANGES)} pot curves "
