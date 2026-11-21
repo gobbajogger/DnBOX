@@ -20,3 +20,5 @@ python3 replay.py "$FACTORY_BUILD" /tmp/s1-wide-16 --history-bits 16
 ```
 
 The two-byte run exits 1 for the two out-of-tolerance programs. [Application ownership and native builds](selected-ownership/README.md) exercise a separate integration in the real part renderer. Both selected parts retain distinct histories across switching and project reloads. Each borrows 4,095 bytes from its retired Chicago insert and 2,520 from its backend union. Both links add 368 flash bytes and retain 8,972 bytes of free pool. The multi-second feedback delay also needs owner storage. The combined graph has yet to qualify on either board.
+
+The [editable FWUI widening prototype](fwui-reconstruction.md) adds a smoothed per-part target and preserves existing 13-slot snapshots and project cells. Its recovered source still needs native qualification.

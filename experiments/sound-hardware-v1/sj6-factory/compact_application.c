@@ -16,7 +16,7 @@ void __wrap_juno6_init(juno6_t *part, float rate)
 }
 
 typedef struct {
-    float adsr[4], wave[2];
+    float master, adsr[4], wave[2];
     engine_superj6_pwm pwm[2];
     unsigned present;
 } app_fields;
@@ -44,7 +44,9 @@ static int select_fields(unsigned bank, unsigned position, app_fields *patch)
     while (sj6_next_field(&reader, &id, &bits)) {
         float x;
         memcpy(&x, &bits, sizeof x);
-        if (id >= 119 && id <= 122) {
+        if (id == ENGINE_SJ6_MASTER_VOLUME) {
+            patch->master = x; patch->present |= 1u << 10;
+        } else if (id >= 119 && id <= 122) {
             patch->adsr[id-119] = x; patch->present |= 1u << (id-119);
         } else if (id == 82 || id == 83) {
             patch->wave[id-82] = x; patch->present |= 1u << (4+id-82);
@@ -54,7 +56,7 @@ static int select_fields(unsigned bank, unsigned position, app_fields *patch)
             patch->pwm[id-210].enable = x; patch->present |= 1u << (8+id-210);
         }
     }
-    if ((patch->present & 63u) != 63u) return 0;
+    if ((patch->present & 1087u) != 1087u) return 0; /* master, AMP2 and waves */
     for (unsigned l = 0; l < 2; ++l) {
         int has_amount = (patch->present >> (6+l)) & 1u;
         int has_enable = (patch->present >> (8+l)) & 1u;
@@ -70,7 +72,10 @@ static void check_raw(unsigned v, unsigned id, float expected)
     CHECK(memcmp(&applied, &expected, sizeof applied) == 0);
 }
 
-int main(void)
+#ifndef SJ6_APPLICATION_MAIN
+#define SJ6_APPLICATION_MAIN main
+#endif
+int SJ6_APPLICATION_MAIN(void)
 {
     unsigned applied = 0, refused = 0, checked = 0;
     open_parts();
@@ -83,6 +88,7 @@ int main(void)
             float old_raw[218];
             memcpy(old_presence, owner[v^1]->core.raw_present, sizeof old_presence);
             memcpy(old_raw, owner[v^1]->core.raw, sizeof old_raw);
+            CHECK(engine_superj6_edit(v, ENGINE_SJ6_MASTER_VOLUME, loaded.master));
             for (unsigned k = 0; k < 4; ++k)
                 CHECK(engine_superj6_edit(v, (enum engine_superj6_field)(119+k), loaded.adsr[k]));
             for (unsigned l = 0; l < 2; ++l)
@@ -90,6 +96,7 @@ int main(void)
                     loaded.present & (1u << (8+l)) ? &loaded.pwm[l] : NULL));
             int32_t stereo[2];
             engine_render(stereo, 1);
+            check_raw(v, ENGINE_SJ6_MASTER_VOLUME, loaded.master); ++checked;
             for (unsigned k = 0; k < 4; ++k) { check_raw(v,119+k,loaded.adsr[k]); ++checked; }
             for (unsigned l = 0; l < 2; ++l) {
                 check_raw(v,82+l,loaded.wave[l]); ++checked;

@@ -4,7 +4,7 @@ The authenticated bank export contains 640 programs. The C reader selects each b
 
 The PI32v2 object compiled with the stock compiler at `-Oz` has 374 bytes of code and 122,359 bytes of read-only data, including the identities. The production image has 6,156 bytes free on Elite and 6,164 on Pro before the required 1,024-byte XIP reserve. This bank representation exceeds that space. It is an audition and integration input.
 
-The compact DnBOX application received both waveform selections, available PWM controls and the four second-layer amplitude controls for 474 records. The other 166 required missing PWM state for a square wave. Across the accepted selections, 2,944 authored words matched DSP readback after a real audio boundary, and the other part retained its exact raw parameter state. Complete FX, additional musical controls and physical firmware bank selection remain open.
+The compact DnBOX application received master volume, both waveform selections, available PWM controls and the four second-layer amplitude controls for 474 records. The other 166 required missing PWM state for a square wave. Across the accepted selections, 3,418 authored words matched DSP readback after a real audio boundary, and the other part retained its exact raw parameter state. The independent [master-volume check](master/README.md) covered all 640 records. Complete FX, additional musical controls and physical firmware bank selection remain open.
 
 ## Run the factory checks
 
@@ -16,7 +16,7 @@ python3 factory.py /path/to/J6presets.zip list
 python3 factory.py /path/to/J6presets.zip matrix /tmp/sj6-selected
 ```
 
-For the application replay use the compact waveform and typed AMP2 tree specified in the adjacent `sj6-amp2/oscillator-prenote.tar.gz`. Run its normal host build with this directory's `compact_application.c` as `SMC_UI_TEST_FILE`, a fresh `SMC_UI_OUT`, and `X0X_HOST_DEFS="-Itests/host -I/tmp/sj6-reader -Wl,--wrap=juno6_init"`.
+For the application replay use the compact waveform and typed AMP2 tree specified in the adjacent `sj6-amp2/oscillator-prenote.tar.gz`, then apply [the compact master-volume patch](master/compact-master.patch). Run its normal host build with this directory's `compact_application.c` as `SMC_UI_TEST_FILE`, a fresh `SMC_UI_OUT`, and `X0X_HOST_DEFS="-Itests/host -I/tmp/sj6-reader -Wl,--wrap=juno6_init"`.
 
 ## S4 input and scoring
 
