@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "status": "CHECKPOINT_SOURCE_HEADS_AND_USABLE_INPUTS_VERIFIED; BUNDLE_NOT_YET_PUBLISHED",
+  "source_branch": "integration/dnbox-consolidated",
+  "source_repositories": [
+    {
+      "repository": "gobbajogger/DnBOX",
+      "commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+      "tree": "a4876790880cae769298f6701e8ab5db1d970b30",
+      "source_git_url": "https://github.com/gobbajogger/DnBOX.git",
+      "included_in_bundle": false
+    },
+    {
+      "repository": "gobbajogger/DnBOX-nightly",
+      "commit": "583f622961fc9975fac746592ce6c483073c4170",
+      "tree": "7c10299ae8ccccb72771cd75b490b67bf2238eac",
+      "source_git_url": "https://github.com/gobbajogger/DnBOX-nightly.git",
+      "included_in_bundle": false
+    }
+  ],
+  "bundle": {
+    "name": "LoopyX0X37-shared-inputs-integration-dnbox-consolidated-f1786ebe-583f6229.zip",
+    "expected_destination": "LoopyX0X37 Project Sources",
+    "published": false,
+    "verified_usable_by_fresh_worker": false,
+    "source_retrieval": "git fetch exact immutable commits on network-connected executor; do not substitute branch tip"
+  },
+  "inputs": [
+    {
+      "filename": "jieli-linux-toolchains-20260730.1.zip",
+      "version": "20260730.1; pi32v2 clang 4.0.1",
+      "bytes": 49449905,
+      "sha256": "ed379c483468c44f10cf3be7db32356b9623e16320a021cf2a4e06ec96ab5f19",
+      "present_in_task_runtime": true,
+      "archive_integrity": "verified",
+      "usable_for": "gobbajogger/DnBOX firmware builds on Linux x86_64",
+      "verified_command": "pi32v2/bin/clang --version",
+      "packaged_in_bundle": false
+    },
+    {
+      "filename": "LoopyX0X37-Project-Sources-Bootstrap-20261023(1)(1).zip",
+      "bytes": 6323764,
+      "sha256": "ea173ec3afd6adea9219622652ed0dcafe48f8a6cba43395c4dab62895928319",
+      "present_in_task_runtime": true,
+      "archive_integrity": "verified",
+      "contains_source_for": "gobbajogger/X0X37-for-Loopy-Pro at historical 7537a46ab49419920428299db8f3321d01e6fd16 only; not DnBOX source",
+      "usable_for": "historical fetch/integrity-script patterns; do not substitute for either source repo",
+      "packaged_in_bundle": false
+    },
+    {
+      "filename": "AC79NN_SDK_V1.2.14_2026-10-13",
+      "source": "gobbajogger/DnBOX tools/build.py",
+      "available_locally": false,
+      "packaged_in_bundle": false,
+      "required_files_sha256": {
+        "uboot.boot": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+        "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+        "cfg/eq_cfg_hw.bin": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8"
+      },
+      "note": "Older V1.2.1 SDK in bootstrap does not satisfy current firmware pin; actual V1.2.14 archive must be retrieved and checked."
+    }
+  ],
+  "required_host_platform": "Linux x86_64",
+  "environment": {
+    "JIELI_TOOLCHAIN": "<unpacked>/jieli-linux-toolchains-20260730.1",
+    "AC79_SDK": "<unpacked SDK V1.2.14 root>"
+  },
+  "instructions": [
+    "Do not treat the older X0X37 bootstrap snapshot as DnBOX source.",
+    "On a network-connected runner fetch each git commit directly using the source_git_url and check git rev-parse HEAD against source_repositories[*].commit and HEAD^{tree} against tree.",
+    "Unpack the toolchain ZIP and verify SHA-256; set JIELI_TOOLCHAIN to the directory with pi32v2 and common.",
+    "Fetch the pinned SDK V1.2.14 and verify the three hashes from tools/build.py before firmware builds.",
+    "Do not flash devices or publish firmware."
+  ],
+  "verification": {
+    "github_heads_read_via_connector": true,
+    "github_commit_trees_read_via_connector": true,
+    "toolchain_archive_sha_verified": true,
+    "toolchain_clang_version_executed": true,
+    "source_archives_local": false,
+    "full_recovery_test_passed": false
+  },
+  "recorded_utc_date": "2026-11-21"
+}
