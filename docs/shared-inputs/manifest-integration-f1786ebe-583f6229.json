@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CHECKPOINT_SOURCE_HEADS_AND_USABLE_INPUTS_VERIFIED; BUNDLE_NOT_YET_PUBLISHED",
+  "status": "LIBRARY_BUNDLE_PUBLISHED_AND_READBACK_VERIFIED; PROJECT_FILES_ATTACHMENT_NOT_VERIFIED; PINNED_SOURCE_FETCH_BLOCKED",
   "source_branch": "integration/dnbox-consolidated",
   "source_repositories": [
     {
@@ -20,10 +20,33 @@
   ],
   "bundle": {
     "name": "LoopyX0X37-shared-inputs-integration-dnbox-consolidated-f1786ebe-583f6229.zip",
-    "expected_destination": "LoopyX0X37 Project Sources",
-    "published": false,
-    "verified_usable_by_fresh_worker": false,
-    "source_retrieval": "git fetch exact immutable commits on network-connected executor; do not substitute branch tip"
+    "size_bytes": 49455924,
+    "sha256": "378050a7148466014dcfbae1e916ee94160f78629016d47a6b62cc1b3117b8c6",
+    "actual_destination": "personal ChatGPT Library: /LoopyX0X37/Project Sources",
+    "library_file_id": "libfile_fde3_f-3873fcb84bd48191b77f0c3c8455fc5b_2021479872048191acbfdca1f870a539",
+    "library_file_url": "https://chatgpt.com/library?file_id=libfile_fde3_f-3873fcb84bd48191b77f0c3c8455fc5b_2021479872048191acbfdca1f870a539&account_id=personal",
+    "matching_manifest_library_file_id": "libfile_fde3_f-ebe5260065d081918b6a6e9ad51be043_2021479872048191acbfdca1f870a539",
+    "matching_manifest_sha256": "b1cc488c9729383fb70c8bc6530eeda9c226a2d1205d5d1f78697dc9e377de22",
+    "published_to_library": true,
+    "attached_to_chatgpt_project_files": false,
+    "source_delivery_mode": "PINNED_GIT_FETCH_ON_RESTORE",
+    "source_trees_embedded": false,
+    "included_paths": [
+      "manifest.json",
+      "README.md",
+      "SHA256SUMS",
+      "scripts/restore.sh",
+      "scripts/verify.py",
+      "toolchain/jieli-linux-toolchains-20260730.1.zip"
+    ],
+    "restore_commands": [
+      "unzip -q LoopyX0X37-shared-inputs-integration-dnbox-consolidated-f1786ebe-583f6229.zip -d shared",
+      "bash shared/scripts/restore.sh ./restored --inputs-only",
+      "bash shared/scripts/restore.sh ./restored --fetch"
+    ],
+    "restore_requires_network_for_sources": true,
+    "verified_library_readback": true,
+    "verified_usable_by_fresh_worker": false
   },
   "inputs": [
     {
@@ -78,7 +101,15 @@
     "toolchain_archive_sha_verified": true,
     "toolchain_clang_version_executed": true,
     "source_archives_local": false,
-    "full_recovery_test_passed": false
+    "full_recovery_test_passed": false,
+    "library_file_upload_passed": true,
+    "library_byte_for_byte_readback_passed": true,
+    "bundle_zip_integrity_passed": true,
+    "bundle_inputs_only_restore_passed": true,
+    "bundle_scripts_syntax_passed": true,
+    "source_fetch_attempt_exit_code": 128,
+    "source_fetch_blocker": "Current execution container cannot resolve github.com",
+    "sdk_files_not_present": true
   },
   "recorded_utc_date": "2026-11-21"
 }
