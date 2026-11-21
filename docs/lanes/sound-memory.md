@@ -23,6 +23,10 @@ Pruning unused feedback dependencies made the active cursor pair 660 B. Four exi
 
 A bounded dry-source provider using eight bins per recorded note period occupied 224 B for saved data or 300 B including the active encoder. All four wet paths failed the 24 dB signal-to-noise contract on both original programs. The edited owner's long cursor alone took 14,752 µs on PI32v2. [Provider memory, accuracy and target timing](../../experiments/sound-hardware-v1/synthone-delay/bounded-periodic-source-proof.tar.gz)
 
+The packed provider with its 224 B of stored records, count/end metadata, both historical reader states and both FX cursors measures 2,732 B, leaving 32 B in the current per-owner budget. Concurrently encoding new input while retaining both readers takes 2,800 B, or 36 B over. [Composed target layouts](../../experiments/sound-hardware-v1/synthone-delay/combined-storage-abi.tar.gz)
+
+A separate finite low-pass stage passed 75 original control trajectories and all 252 existing dry-note comparisons. Its full applications occupy 546,676 B Elite and 546,668 B Pro, with 5,996 and 6,004 B of XIP free. The pool stays at 8,972 B, and ordinary RAM use stays at 97,204 B. This diagnostic adds 160 B to each stock application. [Physical results](../../experiments/sound-hardware-v1/stock-dry/live-cutoff-proof.tar.gz)
+
 ## Earlier candidate images
 
 These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
