@@ -41,6 +41,46 @@ static void show(unsigned part)
     draw_header(); draw_main(); draw_knobs();
 }
 
+/* A turn from the fourth row to SOUND must paint four numbered rows, keep
+ * the selected part's knob assignments, and refresh the step footer. */
+static void selector_window(unsigned owner)
+{
+    static const char *const titles[] = {
+        "2  FILTER", "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  SOUND"
+    };
+    show(owner);
+    *page_of(V_PART) = 3;
+    draw_main(); draw_knobs();
+    for (int direction = 1; direction >= -1; direction -= 2) {
+        enc_acc[EN_SELECT] = direction;
+        now_ms += 100;
+        ui_frame();
+        CHECK(cur_page() == (direction == 1 ? 4 : 3));
+        memcpy(baseline[owner], fb, sizeof fb);
+        memset(blit_hash, 0, sizeof blit_hash);
+        memset(cv_tile_valid, 0, sizeof cv_tile_valid);
+        draw_header(); draw_main(); draw_knobs();
+        CHECK(!memcmp(baseline[owner], fb, sizeof fb));
+        if (direction < 0) continue;
+        CHECK(pg.r[4][0].kind == R_BENGINE && pg.r[4][0].b == owner);
+        CHECK(pg.r[4][1].kind == R_BPRESET && pref_read_only(pg.r[4][1]));
+        CHECK(pg.r[4][2].kind == R_BSTATUS && pref_read_only(pg.r[4][2]));
+        CHECK(pg.r[4][3].kind == R_NONE);
+        for (int row = 0; row < 4; ++row) {
+            uint16_t ink = swap16(row == 3 ? SOUND_INK : SOUND_GRAY);
+            cv_begin(240, 14, C_BLACK);
+            cv_text(8, 0, &FONT_T, titles[row], C_WHITE);
+            int marked = 0;
+            for (int i = 0; i < 240*14; ++i) {
+                if (cv_px[i] != swap16(C_WHITE)) continue;
+                CHECK(fb[(24 + row*50)*240 + i] == ink);
+                ++marked;
+            }
+            CHECK(marked > 5);
+        }
+    }
+}
+
 static void filter_labels(void)
 {
     s1_patch_snapshot snapshot;
@@ -84,7 +124,8 @@ static void value_bounds(void)
         const s1_patch_descriptor *d = s1_patch_at(slot);
         unsigned column = slot < 2 ? slot : slot < 5 ? slot-2 : (slot-5)%4;
         int envelope = slot >= 5;
-        int center = (envelope ? 31 : 33) + CELL_W*(int)column;
+        int width = slot < 2 ? 118 : slot < 5 ? 78 : CELL_W;
+        int center = (envelope ? 31 : 4 + width/2) + width*(int)column;
         int xmin=240,xmax=-1,ymin=CELL_H,ymax=-1;
         for (unsigned q = 0; q <= S1_PATCH_STEPS; ++q) {
             char number[24]={0}, unit[12]={0}, label[40];
@@ -103,7 +144,7 @@ static void value_bounds(void)
                     if (y>ymax) ymax=y;
                 }
         }
-        CHECK(xmin >= 4 + CELL_W*(int)column && xmax < 4 + CELL_W*((int)column+1));
+        CHECK(xmin >= 4 + width*(int)column && xmax < 4 + width*((int)column+1));
         CHECK(envelope ? (ymin>9 && ymax<24) : (ymin>35 && ymax<CELL_H));
     }
     puts("All 1664 formatted values fit their physical controls");
@@ -146,6 +187,7 @@ int main(void)
 {
     setup(V_PART,PART_303A);
     choose_patch(0); choose_patch(1);
+    selector_window(0); selector_window(1);
     show(0);
     filter_labels(); value_bounds(); busy_frame();
     for (unsigned v=0; v<2; ++v) {

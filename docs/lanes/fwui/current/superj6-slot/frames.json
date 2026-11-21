@@ -1,0 +1,268 @@
+{
+  "provider": "Stock compact juno6 slot",
+  "platform": "SMK-37 host",
+  "archive": "frames.tar.gz",
+  "archive_sha256": "cccbfe667c9ef1fe4bed2ea8578cc16d41017aa4486bc9d9d329386be8f9e634",
+  "frames": [
+    {
+      "file": "slot-a-matrix-oscillator.png",
+      "owner": "A",
+      "route": "matrix",
+      "state": "oscillator",
+      "width": 240,
+      "height": 240,
+      "sha256": "dc2595352fff4b30bb2831f7fe26a8339358585d61bfc7ad06d33b34d2ab7c43",
+      "rgb_sha256": "567f19186ceb418a5208215a0a23212457832e29503aff02e8f7ed6a6ae0e987"
+    },
+    {
+      "file": "slot-a-matrix-filter.png",
+      "owner": "A",
+      "route": "matrix",
+      "state": "filter",
+      "width": 240,
+      "height": 240,
+      "sha256": "a76229f3178a1b6780a5b026d781f7e017ccf4b50afe41dfde1f39d8aed618f9",
+      "rgb_sha256": "7097fc5dc65a5ba7f56787eb952b7e03a176fd52a90ab1fc58dcc3383eca8260"
+    },
+    {
+      "file": "slot-a-matrix-envelope.png",
+      "owner": "A",
+      "route": "matrix",
+      "state": "envelope",
+      "width": 240,
+      "height": 240,
+      "sha256": "e86330094277e1d00afe77a36f21d6e5befcbb9327460b64f834f6eb61bbd03a",
+      "rgb_sha256": "aeae7f0f8603bcea6e30f86ac41c80a41c573721aded6406f50c1f398154f01e"
+    },
+    {
+      "file": "slot-a-matrix-lfo-chorus.png",
+      "owner": "A",
+      "route": "matrix",
+      "state": "lfo-chorus",
+      "width": 240,
+      "height": 240,
+      "sha256": "446e2caba7b03328c6f94058e334dd4226186bc1e507362c9af6769b47ee0c9f",
+      "rgb_sha256": "c3e485fca99e2b9598bb452132596d45715868dcdd55b525cd5489f9efb0928c"
+    },
+    {
+      "file": "slot-a-list-oscillator.png",
+      "owner": "A",
+      "route": "list",
+      "state": "oscillator",
+      "width": 240,
+      "height": 240,
+      "sha256": "c654cd776fe5e5072543ca5d66501604c3731f075e2676571dcd5b853531fe3d",
+      "rgb_sha256": "7e0b62cee85accc92a68a0094821b9b9f5943b6d3fe53596fcba6e29487eb0c4"
+    },
+    {
+      "file": "slot-a-list-filter.png",
+      "owner": "A",
+      "route": "list",
+      "state": "filter",
+      "width": 240,
+      "height": 240,
+      "sha256": "f362e2a548d28cbc4d8797e8f476d2bc718e911bb907e42214e41299fcf1ed21",
+      "rgb_sha256": "4298d96add7faf417f029f9c260e781bb2b04aa1c9031d99fc28111ba35838ea"
+    },
+    {
+      "file": "slot-a-list-envelope.png",
+      "owner": "A",
+      "route": "list",
+      "state": "envelope",
+      "width": 240,
+      "height": 240,
+      "sha256": "919038de984429fb6b36111cc0eca903bfcb7daf5b8f1cb7f374b65e54ef76be",
+      "rgb_sha256": "a609ea8fdd53e8dab7b1b6f0702b1c154ac6d3bb6b1cf4c7ad715dbc34170487"
+    },
+    {
+      "file": "slot-a-list-lfo-chorus.png",
+      "owner": "A",
+      "route": "list",
+      "state": "lfo-chorus",
+      "width": 240,
+      "height": 240,
+      "sha256": "3355212332a1614b11e2034f27d5a99794d76795a9b4afd981d6c4a1aca516a3",
+      "rgb_sha256": "6baff0e6bf0afca6c51c846b44e3aa29de7e514255e442b5655f8e9313145e92"
+    },
+    {
+      "file": "slot-a-list-sound.png",
+      "owner": "A",
+      "route": "list",
+      "state": "sound",
+      "width": 240,
+      "height": 240,
+      "sha256": "e12efabc600b340ab92e434a9b18708b0f071010ab9c23e93053f90e91278529",
+      "rgb_sha256": "67f380ace169c185fceeafbe83365a7510eba1ab06b1c99e325ba74f67db6915"
+    },
+    {
+      "file": "slot-a-sound-poly.png",
+      "owner": "A",
+      "route": "sound",
+      "state": "poly",
+      "width": 240,
+      "height": 240,
+      "sha256": "1502fa5c5a5eceae08f1a5deefddc5d35d6e1f850e4a6df667d55ad515eb6488",
+      "rgb_sha256": "081d0527a8d33d98e1a5168a30956196192a1525673181a36683c96afcc48229"
+    },
+    {
+      "file": "slot-a-sound-pad.png",
+      "owner": "A",
+      "route": "sound",
+      "state": "pad",
+      "width": 240,
+      "height": 240,
+      "sha256": "fbdeb2633d7e1e158a42c35f94faa9d5fe1aac9a83dca97a231671238ea13897",
+      "rgb_sha256": "21c628f2b9ca93c3887f6dbe7aee5cdf4ffdb4945483e3b47e3a28f07393ba66"
+    },
+    {
+      "file": "slot-a-sound-pluck.png",
+      "owner": "A",
+      "route": "sound",
+      "state": "pluck",
+      "width": 240,
+      "height": 240,
+      "sha256": "671569965c1e6bb48dfa77e200b7fdd2404c40501e0972875ab44aa869cf3f94",
+      "rgb_sha256": "423ff73784b16431c01d5fac63f98f4e6bc073e87fad9c9ac41f0e1ec124cbcc"
+    },
+    {
+      "file": "slot-a-sound-brass.png",
+      "owner": "A",
+      "route": "sound",
+      "state": "brass",
+      "width": 240,
+      "height": 240,
+      "sha256": "d3ce4321ad0cc07dda3786c44cbefab32a740a450e4b0f952bb2de478ed65517",
+      "rgb_sha256": "32a5f02df8f360bb9e8aa6a70bc3da62f6310701e5a7ef50bb128fbf83702cc0"
+    },
+    {
+      "file": "slot-b-matrix-oscillator.png",
+      "owner": "B",
+      "route": "matrix",
+      "state": "oscillator",
+      "width": 240,
+      "height": 240,
+      "sha256": "17a5c9ef1965ed9490f183d85b721cb4095883f2ba0e5409d7adcd06e21e6ab4",
+      "rgb_sha256": "fac9b8878bbce73cefe40e4af7970dbcd5848e23bc9a56e0fdbf81561a0c2021"
+    },
+    {
+      "file": "slot-b-matrix-filter.png",
+      "owner": "B",
+      "route": "matrix",
+      "state": "filter",
+      "width": 240,
+      "height": 240,
+      "sha256": "4e5e3e04142a5913cb69116a5755914ab7f1bfadbf28c91c631ce7800db495fd",
+      "rgb_sha256": "ee481c5984209173c0af4f0f6958e979ca849cff378e9a8f3913488efad988f6"
+    },
+    {
+      "file": "slot-b-matrix-envelope.png",
+      "owner": "B",
+      "route": "matrix",
+      "state": "envelope",
+      "width": 240,
+      "height": 240,
+      "sha256": "fbd53852f21d468b8891e1859008365425f23d3d4871aa86f00079a5484c888d",
+      "rgb_sha256": "fa1ee473dc37e67710831eaa6ac0a57c4d62d45aa239b9dc5a002287739fbdd3"
+    },
+    {
+      "file": "slot-b-matrix-lfo-chorus.png",
+      "owner": "B",
+      "route": "matrix",
+      "state": "lfo-chorus",
+      "width": 240,
+      "height": 240,
+      "sha256": "0abdc58dbaaeff7af7591f75eb621ace1a1758a769cdf95f540d8758825c7d18",
+      "rgb_sha256": "9b0c258677abe6d7d39572f385f14c931b2d25b7638e63859c470928ed0511cf"
+    },
+    {
+      "file": "slot-b-list-oscillator.png",
+      "owner": "B",
+      "route": "list",
+      "state": "oscillator",
+      "width": 240,
+      "height": 240,
+      "sha256": "ebf8fcfa9c10bcc144188484d12310914f01a3e5f528054c67cbabbd16152682",
+      "rgb_sha256": "12de28fd65f22902c31abc1e9da01d60b4fe184bcc97320e262ac5591000f7ef"
+    },
+    {
+      "file": "slot-b-list-filter.png",
+      "owner": "B",
+      "route": "list",
+      "state": "filter",
+      "width": 240,
+      "height": 240,
+      "sha256": "050643efbda6b964623c9cda324d5e4ea8e28b085ca2090c3175f469a9a5e18c",
+      "rgb_sha256": "9b9171d54283d6ad55d83c02dd7f67d9fdab11d35500532777d071324fac870e"
+    },
+    {
+      "file": "slot-b-list-envelope.png",
+      "owner": "B",
+      "route": "list",
+      "state": "envelope",
+      "width": 240,
+      "height": 240,
+      "sha256": "82b89fbf1e67ebfc374819fa250b4ca393ddc3bb73cee90caf852b949bb89bf5",
+      "rgb_sha256": "4be5c4a3f3a2ffb1a883c0eebc2fa3b08133fec91c0a76acd3732de9f31f4440"
+    },
+    {
+      "file": "slot-b-list-lfo-chorus.png",
+      "owner": "B",
+      "route": "list",
+      "state": "lfo-chorus",
+      "width": 240,
+      "height": 240,
+      "sha256": "d913dda402cc6cc79292e741491eb19057cdbc4082eeb4580948a491ca5ea66b",
+      "rgb_sha256": "b63898e30e21b4a5b4fc09ece0e569aa4495d72f10e1062b9ae89bade7d43a36"
+    },
+    {
+      "file": "slot-b-list-sound.png",
+      "owner": "B",
+      "route": "list",
+      "state": "sound",
+      "width": 240,
+      "height": 240,
+      "sha256": "7902a91896b020f736f4c861622bcc65493c8b5e46fd5d0338fe9d2d1d41f8cc",
+      "rgb_sha256": "fccce85d63410b8f0899acb65709c17e484a3e4937509ce490d2b91a3d650c26"
+    },
+    {
+      "file": "slot-b-sound-poly.png",
+      "owner": "B",
+      "route": "sound",
+      "state": "poly",
+      "width": 240,
+      "height": 240,
+      "sha256": "5396f683f4ebd7fed2b1edc98a9bbfa50af69446a9e291cfe7d8591fa88a3c87",
+      "rgb_sha256": "b3586ec03a202cb86b3473882cc145124dbcb60b5ae7746d5c9adfbea5bca1b9"
+    },
+    {
+      "file": "slot-b-sound-pad.png",
+      "owner": "B",
+      "route": "sound",
+      "state": "pad",
+      "width": 240,
+      "height": 240,
+      "sha256": "070c14d0be2a6a69f1f552627b5c06212d756c65e58f246b91cd3fe21734936f",
+      "rgb_sha256": "dffef79838075595392ffacc947a6ef74377227d3d655c4e37b94a8a7dcade7b"
+    },
+    {
+      "file": "slot-b-sound-pluck.png",
+      "owner": "B",
+      "route": "sound",
+      "state": "pluck",
+      "width": 240,
+      "height": 240,
+      "sha256": "cf6fef0518034845d5522c089d52f0769561f7d8bf70fe3a44d723588edcf0b3",
+      "rgb_sha256": "ef3a11f9ffea5fa43f531839004edf0fb54568555a085e230ead4fb726e647ac"
+    },
+    {
+      "file": "slot-b-sound-brass.png",
+      "owner": "B",
+      "route": "sound",
+      "state": "brass",
+      "width": 240,
+      "height": 240,
+      "sha256": "98caf9cd5beadd8b1525e4e6b885ef35449af6da00126c51fbc040994d7caaa7",
+      "rgb_sha256": "516b52e33a9305085cae47911faef18e55bebfa5e9b8cc8d28a75012c25b0121"
+    }
+  ]
+}

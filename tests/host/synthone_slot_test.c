@@ -1,12 +1,156 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Exercise Synth One in the production slot selector and header labels. */
 #define SMC_UI_MAIN retained_fixture_main
+#define plat_midi_mark host_midi_mark
 #include "smc_ui_test.c"
+#undef plat_midi_mark
+
+/* The production engine reads the host MIDI watermark between the odd and
+ * even publication counters. Observe one real in-progress request there. */
+static void (*during_publication)(void);
+uint32_t plat_midi_mark(void)
+{
+    if (during_publication) {
+        void (*observe)(void) = during_publication;
+        during_publication = 0;
+        observe();
+    }
+    return host_midi_mark();
+}
 static void render_blocks(unsigned count)
 {
     int32_t audio[512];
     while (count--) engine_render(audio,256);
 }
+#if !X0X_SYNTHONE_PATCH
+/* Compare ink in the completed framebuffer with independently composed labels,
+ * readouts and pictograms. A missing or misplaced item fails its own row. */
+static void selector_row(int row, const char *label, const char *value, int glyph)
+{
+    int y = 24 + row * 67;
+    uint16_t ink = row ? SOUND_WHITE : SOUND_INK;
+    uint16_t face = row ? SOUND_FACE : SOUND_SELECT;
+    cv_begin(220, 56, face);
+    cv_text(0, 0, &FONT_XS, label, ink);
+    const felucca_font_t *font = tw(&FONT_M, value) <= 187 ? &FONT_M : &FONT_B;
+    CHECK(tw(font, value) <= 187);
+    cv_text(28, 21, font, value, ink);
+    ui_pictogram(0, 25, glyph, 2, ink);
+    for (int dy = 0; dy < 50; ++dy)
+        CHECK(!memcmp(fb + (y + 6 + dy) * 240 + 12, cv_px + dy * 220, 220 * sizeof(*fb)));
+}
+
+static void selector_frame(const char *bank, const char *preset, const char *status, int locked)
+{
+    ui_frame();
+    selector_row(0, BOARD_SMK37 ? "K5  ENGINE" : "K1  ENGINE", bank, UI_G_SOUND);
+    selector_row(1, BOARD_SMK37 ? "K6  PRESET" : "K2  PRESET", preset, locked ? UI_G_LOCK : UI_G_LIST);
+    selector_row(2, "STATUS", status, !strcmp(status,"READY") ? UI_G_CHECK : UI_G_HOLD);
+    /* Number positions follow the sixteen physical white-key steps in bank 1. */
+    uint16_t background = fb[230 * 240 + 239];
+    for (int k = 0; k < 16; ++k) {
+        char number[4];
+        snprintf(number, sizeof number, "%d", k+1);
+        cv_begin(14, 13, swap16(background));
+        text_c(7, 0, &FONT_T, number, SOUND_GRAY);
+        int pixels = 0, mismatch = 0;
+        for (int y = 0; y < 13; ++y)
+            for (int x = 0; x < 14; ++x) {
+                uint16_t expected = cv_px[y * 14 + x];
+                if (expected == background) continue;
+                ++pixels;
+                mismatch += fb[(224+y) * 240 + 7 + k*14 + x] != expected;
+            }
+        CHECK(pixels && !mismatch);
+    }
+}
+
+static void publishing_frame(void)
+{
+    CHECK(engine_bass_preset_pending(bidx()) == 6);
+    selector_frame("SYNTH ONE", "UPDATING", "WAIT", 1);
+    shot(bidx() ? "stock-init-updating-b" : "stock-init-updating-a");
+}
+
+static void widest_factory(int voice)
+{
+    int longest = 0, which_bank = -1, which_preset = -1;
+    for (unsigned bank = ORIGINAL_SOUND_CHICAGO; bank <= ORIGINAL_SOUND_MIAMI; ++bank)
+        for (unsigned i = 0; i < original_sound_factories(bank); ++i) {
+            const char *name = original_sound_name(bank,i);
+            int width = tw(&FONT_M,name);
+            if (width > longest) { longest = width; which_bank = bank; which_preset = i; }
+        }
+    CHECK(longest > 187 && which_preset >= 0);
+    const char *name = original_sound_name(which_bank,which_preset);
+    char caption[FACTORY_NAME_MAX];
+    size_t count = strlen(name);
+    CHECK(count < sizeof caption);
+    for (size_t i = 0; i <= count; ++i) {
+        char c = name[i];
+        caption[i] = c >= 'a' && c <= 'z' ? (char)(c-'a'+'A') : c;
+    }
+    CHECK(!engine_bass_select_preset(voice,which_bank,which_preset,&proj.sound));
+    CHECK(engine_bass_preset_pending(voice) == 2);
+    selector_frame(which_bank == ORIGINAL_SOUND_CHICAGO ? "CHICAGO" : "MIAMI", caption, "HELD", 0);
+    printf("Longest admitted stock name: %s (%d px at medium size)\n",name,longest);
+    shot(voice ? "stock-init-long-name-b" : "stock-init-long-name-a");
+}
+
+static void physical_detent(int column, int delta)
+{
+    now_ms += 128;
+    enc_acc[EN_K1 + column] = delta;
+    ui_input_only();
+}
+
+static void stock_selector(int voice)
+{
+    CHECK(pg.n == 1 && cur_page() == 0 && !strcmp(pg.title[0],"SOUND"));
+    for (int col = 0; col < 3; ++col) CHECK(pg.r[0][col].b == voice);
+    CHECK(pg.r[0][0].kind == R_BENGINE && pg.r[0][1].kind == R_BPRESET);
+    CHECK(pg.r[0][2].kind == R_BSTATUS && pg.r[0][3].kind == R_NONE);
+    CHECK(!pref_read_only(pg.r[0][0]) && pref_read_only(pg.r[0][1]) && pref_read_only(pg.r[0][2]));
+    uint32_t serial = engine_bass_choice_serial();
+    for (int col = 1; col < 4; ++col) physical_detent(col, 1);
+    CHECK(engine_bass_choice_serial() == serial && !engine_bass_preset_pending(voice));
+    selector_frame("SYNTH ONE", "INIT", "READY", 1);
+    shot(voice ? "stock-init-ready-b" : "stock-init-ready-a");
+
+    /* K5 changes the requested bank while a held Synth One note retains its
+     * applied owner. K6 now selects the pending bank's real factory preset. */
+    engine_bass_on_velocity(voice,60,0,0,100);
+    render_blocks(4);
+    widest_factory(voice);
+    engine_bass_cancel_preset(voice);
+    during_publication = publishing_frame;
+    physical_detent(0, 1);
+    CHECK(!during_publication);
+    CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
+    CHECK(engine_bass_requested_bank(voice) == ORIGINAL_SOUND_JUNO);
+    CHECK(engine_bass_preset_pending(voice) == 2);
+    selector_frame("SUPERJ6", "SUPERJ6 POLY", "HELD", 0);
+    physical_detent(1, 1);
+    CHECK(engine_bass_requested_preset(voice) == 1);
+    selector_frame("SUPERJ6", "SUPERJ6 PAD", "HELD", 0);
+    shot(voice ? "stock-init-pending-b" : "stock-init-pending-a");
+    engine_bass_off(voice);
+    for (int n = 0; n < 1024 && engine_bass_preset_pending(voice); ++n) render_blocks(1);
+    ui_input_only();
+    CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_JUNO && engine_bass_preset_index(voice) == 1);
+    CHECK(pg.n > 1 && cur_page() == pg.n-1 && pg.r[cur_page()][0].kind == R_BENGINE);
+
+    /* Returning from the longer bank must keep the actual SOUND control
+     * selected and clamp the former last page to the stock INIT page. */
+    physical_detent(0,-1);
+    for (int n = 0; n < 1024 && engine_bass_preset_pending(voice); ++n) render_blocks(1);
+    ui_input_only();
+    CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
+    CHECK(pg.n == 1 && *page_of(V_PART) == 0 && cur_page() == 0);
+    selector_frame("SYNTH ONE", "INIT", "READY", 1);
+}
+#endif
+
 int main(void)
 {
     setup(V_PART,PART_303A);
@@ -22,6 +166,10 @@ int main(void)
         CHECK(engine_bass_sound_bank(&proj.sound,voice)==ORIGINAL_SOUND_SYNTHONE);
         ui.part=(uint8_t)(PART_303A+voice);build_pages();
         CHECK(pg.n==UI_ORIGINAL_SYNTHONE_PAGES+1);
+#if !X0X_SYNTHONE_PATCH
+        stock_selector(voice);
+        CHECK(engine_bass_bank(1-voice)==other);
+#endif
         engine_bass_on_velocity(voice,60,0,0,100);
         render_blocks(32);
         float level,mod;unsigned state,down;

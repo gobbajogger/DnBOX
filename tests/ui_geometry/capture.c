@@ -76,7 +76,25 @@ static void required_other_content(const char *screen) {
   }
  }
  if(ui.overlay==O_NONE&&ui.view==V_PART&&is_303()) {
-  int page=cur_page(),row=page%4,three=matrix_three_rows(),height=three?66:49,step=three?67:50,y=HDR_H+4+row*step;
+  int page=cur_page(), three=matrix_three_rows(), rows=three?3:4, row=page%4;
+  int height=three?66:49,step=three?67:50;
+  if(pg.n >= rows && pg.n-page+row < rows) row=rows-(pg.n-page);
+  int y=HDR_H+4+row*step;
+#if !X0X_SYNTHONE_PATCH
+  if(engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE) {
+   CHECK(pg.n==1 && page==0);
+   const char *labels[]={BOARD_SMK37?"K5  ENGINE":"K1  ENGINE",
+                         BOARD_SMK37?"K6  PRESET":"K2  PRESET","STATUS"};
+   const char *values[]={"SYNTH ONE","INIT","READY"};
+   for(int k=0;k<3;k++){
+    int top=HDR_H+4+k*67;
+    expect_region(screen,"stock-init-label",labels[k],6,top,100,top+26);
+    expect_region(screen,"stock-init-value",values[k],32,top+22,224,top+63);
+    synth_presence_checks+=2;
+   }
+   return;
+  }
+#endif
   for(int k=0;k<4;k++) {
    pref_t r=pg.r[page][k];if(!pref_desc(r))continue;char label[64],num[32],unit[8],joined[48];
    if(adsr_row(page)){
@@ -86,7 +104,15 @@ static void required_other_content(const char *screen) {
     int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1;
     int stage=(int)r.c-first;
     if(first<0 || stage<0 || stage>3){presence_missing++;printf("MISSING_CONTENT screen=%s kind=synth-envelope invalid-owner-or-stage\n",screen);continue;}
-    snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
+    if(bank==ORIGINAL_SOUND_JUNO) {
+     pref_value_of(r,matrix_value(r),num,unit);
+     snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
+              !strcmp(unit,"%") ? "%" : "");
+     if(strcmp(unit,"%")) {
+      expect_region(screen,"synth-envelope-unit",unit,k*59,y,(k+1)*59+4,y+height);
+      synth_presence_checks++;
+     }
+    } else snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
     expect_region(screen,"synth-envelope",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;continue;
    }
    snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;

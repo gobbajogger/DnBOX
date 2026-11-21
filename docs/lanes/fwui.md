@@ -2,7 +2,15 @@
 
 The existing [draft PR #975](https://github.com/gobbajogger/DnBOX/pull/975) targets `integration/dnbox-consolidated`. The [previous native qualification comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7057196568) records the focused results and stock sizes at `4c05722d`. The [previous qualification](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7056161789) covers the baseline at `5f80e1d6`.
 
-## Current firmware and stock limits
+## Startup and bass-panel routes
+
+Startup and normal playback use the same display. Follow the splash to the first sequencer frame, or follow the pending-sample, updater, calibration, and guard paths in the [startup route inventory](fwui/current/native-routes/README.md). For either bass part, press **PARA**, use **K2** to select **SOUND**, and use **K5** to select the engine. The final page keeps its preceding controls visible. On stock Synth One, SOUND displays the engine, preset and application status. On a Sound build with the editor enabled, K5–K8 edit the selected row and **SCALE** opens the parameter list.
+
+SuperJ6 exposes four selectable presets and sixteen physical controls per bass part. The regression drives the panel through both owners, changes every macro, checks live filter and level pixels, and reloads the project. The audio replay reproduced all 6,291,456 stereo frames across four presets, sixteen controls and 128 positions. [SuperJ6 routes, units and captures](fwui/current/superj6-slot/README.md) · [Synth One parameter reference](fwui/current/synthone-editor/README.md)
+
+The branch incorporates the current consolidated policy at `d729626b`. Lane acceptance requires focused tests at the PR head, both stock builds, no loss and independent review. The combined branch owns the full release gate. The stock figures below are the starting measurements at `3e67b59c`. Qualification of the updated selectors and the combined catalog is in progress.
+
+## Previous firmware and stock limits
 
 The [published firmware](https://github.com/gobbajogger/DnBOX/commit/61827a714ca7b240c01a55ed347b5fd7b847c7c2) contains the BREAK startup fix and the Synth One editor. The stock FWUI branch builds on its own. The editor runs when built with [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) and `X0X_SYNTHONE_PATCH=1`. The [control reference](fwui/current/synthone-editor/README.md) lists every factory ID, physical range, edit step, unit and display format for both bass parts.
 

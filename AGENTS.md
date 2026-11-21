@@ -1,6 +1,6 @@
 # DnBOX — start here (every agent, every run)
 This file replaces every earlier AGENTS.md, skill, brief and handoff. Read these four files, in this order, and nothing older:
-1. `RULES.md` — the only rules (v2, 25 rules). If any other text in this repo disagrees, RULES.md wins.
+1. `RULES.md` — the only rules (v2, rules 0–25). If any other text in this repo disagrees, RULES.md wins.
 2. `CHECKLISTS.md` — the pass/fail finish line for each lane. Work until your lane's lines are all PASS.
 3. `docs/lanes/<your-lane>.md` — your lane's current state, blockers, next item. Update it in every push.
 4. `CONSOLIDATED-STATE.md` — what is merged into `integration/dnbox-consolidated`, with SHAs.
@@ -29,6 +29,7 @@ DnBOX is firmware for the SMK-37 keyboard (Elite and Pro builds; this repo, `gob
 tools/dnbox-gate.sh <lane>          # firmware repo, at the commit you want to gate
 ```
 Needs: JieLi toolchain (`~/.jieli/toolchain`) and AC79 SDK (`~/fw-AC79_AIoT_SDK`) and the original synth inputs (`python3 tools/check_original_inputs.py`); if missing, get them from Git or the Library using `docs/LIBRARY-INDEX.md`. Steps: clean-tree, setup, no-loss, limits, host-tests (`host/build_host.sh` + `tests/run_tests.sh`), build-elite-pro (`MODEL=elite|pro ./build.sh`), flashmap, budget (XIP free ≥ 1024 B, pool margin ≥ 512 B), ui-defects, drone. Last line: `DNBOX-GATE RESULT PASS|FAIL|VOID sha=<sha>`; log in `build/dnbox-gate/`. Post the log as a PR comment naming the SHA. NOT_RUN = FAIL.
+When the full gate is required (RULES 9): once on the combined branch after the final lane merge, before any `gh-pages` fast-forward, and before anything goes to `main`. A lane PR into `integration/dnbox-consolidated` needs only its focused tests (plus Elite/Pro builds for firmware), no-loss and the independent Review; a missing `dnbox-gate` status flag does not block it.
 
 ## Where everything lives
 | What | Where |

@@ -2,6 +2,7 @@
 """Build and exercise the FWUI candidate on its real Sound provider, in a fresh directory."""
 import argparse
 import hashlib
+import io
 import json
 import os
 import re
@@ -123,6 +124,27 @@ def build_boards(source, dest, reference):
         raise SystemExit("Native fit or binary replay failed. See native.json and model logs.")
 
 
+def archive_routes(dest):
+    ids = (2, 5, 16, 17, 19, 22, 23, 24, 25, 26, 27, 28, 29)
+    expected = {f"list-{owner}-factory-id-{control:02d}.png" for owner in "AB" for control in ids}
+    lists = sorted((dest / "panel").glob("list-*.png"))
+    if {path.name for path in lists} != expected:
+        raise ValueError("Incomplete Synth One part-list capture")
+    live = ("bass-a-attack", "bass-b-idle-control", "bass-a-held", "bass-b-held-control",
+            "bass-a-released", "simultaneous-editor-busy")
+    matrix = sorted((dest / "panel").glob("bass-*.png"))
+    captures = lists + matrix + [dest / "frame-review" / (name + ".png") for name in live]
+    manifest = {}
+    with tarfile.open(dest / "routes.tar.xz", "w:xz", preset=3) as archive:
+        for path in captures:
+            data = path.read_bytes()
+            member = tarfile.TarInfo(path.name)
+            member.size = len(data)
+            archive.addfile(member, io.BytesIO(data))
+            manifest[path.name] = hashlib.sha256(data).hexdigest()
+    (dest / "routes.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("out", type=Path, help="new directory for composed source and receipts")
@@ -179,11 +201,12 @@ def main():
                 with Image.open(other) as applied:
                     match = re.fullmatch(r"bass-[AB]-page-(\d+)-k(\d+)-before", path.stem)
                     page, knob = map(int, match.groups())
-                    row_y, cell_x = 24 + 50 * (page - 1), 4 + 59 * (knob - 5)
+                    width = {1: 118, 2: 78}.get(page, 59)
+                    row_y, cell_x = 24 + 50 * (page - 1), 4 + width * (knob - 5)
                     # In an envelope row the selected knob's physical value is
                     # above the graph. Other controls put it below the glyph.
                     top, bottom = ((10, 23) if page >= 3 else (34, 48))
-                    box = (cell_x, row_y + top, cell_x + 58, row_y + bottom)
+                    box = (cell_x, row_y + top, cell_x + width - 1, row_y + bottom)
                     assert ImageChops.difference(img.crop(box).convert("RGB"),
                                                  applied.crop(box).convert("RGB")).getbbox(), path
     # Exact R22 49px rows, 50px pitch, with the native font's cap bounds.
@@ -191,14 +214,15 @@ def main():
     for owner in "AB":
         with Image.open(dest / "panel" / f"bass-{owner}-page-2-k0-overview.png") as img:
             for k in range(3):
-                x = 4 + 59 * k
+                x = 4 + 78 * k
                 for y in (74 + 21, 74 + 36):
-                    assert len(img.crop((x+5, y, x+53, y+1)).getcolors()) == 1, (owner, k, y)
+                    assert len(img.crop((x+5, y, x+73, y+1)).getcolors()) == 1, (owner, k, y)
             for y in (124 + 10, 174 + 10):
                 assert len(img.crop((12, y, 228, y+1)).getcolors()) == 1, (owner, y)
     manifest = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in pngs}
     (dest / "frames.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"{len(manifest)} captured 240x240 frames in {dest / 'panel'}")
+    archive_routes(dest)
+    print(f"{len(manifest)} matrix captures plus list, live voice and contention captures in {dest}")
     if args.boards or args.native_receipt:
         reference = json.loads(args.native_receipt.read_text()) if args.native_receipt else None
         build_boards(source, dest, reference)

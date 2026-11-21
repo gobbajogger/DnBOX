@@ -21,12 +21,19 @@ int main(void){
   for(int i=0;i<16;i++)bp->slice[i]=(uint8_t)(i%2?0:i%8+1);
   for(int i=0;i<16;i++)audio_block();break_probe_frame();
   CHECK(pg.n==(page?3:1));
-  for(int i=0;i<16;i++)for(int y=234;y<238;y++)for(int x=9+i*14;x<20+i*14;x++)
-   CHECK(fb[y*240+x]==swap16((bp->steps>>i)&1u?part_col():C_LINE));
+  /* Loops shows the slice footer. SEQ shows the velocity lane at unity. */
+  for(int i=0;i<16;i++){
+   int x0=page?68+i*10:9+i*14, y0=page?230:234;
+   int width=page?3:11, height=page?8:4;
+   uint16_t off=page?SOUND_LINE:C_LINE;
+   uint16_t expected=swap16((bp->steps>>i)&1u?part_col():off);
+   for(int y=y0;y<y0+height;y++)for(int x=x0;x<x0+width;x++)
+    CHECK(fb[y*240+x]==expected);
+  }
   static uint16_t before[26*240];memcpy(before,fb+214*240,sizeof before);
   bp->steps^=1u<<15;draw_knobs();unsigned changed=0;
   for(int i=0;i<26*240;i++)changed+=before[i]!=fb[214*240+i];
-  CHECK(changed==44);bp->steps^=1u<<15;break_probe_frame();
+  CHECK(changed==(page?24:44));bp->steps^=1u<<15;break_probe_frame();
   char name[80];snprintf(name,sizeof name,"break-family-%s-%s",names[page],theme?"light":"dark");shot(name);
   if(!page)for(int bank=0;bank<2;bank++){
    brkpart_t original=*bp;CHECK(brk_choice_turn(PR(R_BRKSLOT,bank,0,0),1));audio_block();now_ms+=1500;break_probe_frame();
@@ -46,7 +53,7 @@ int main(void){
   }
  }
  /* Stopped held-slice release and DSP count adoption must invalidate footer without a project edit. */
- setup(V_SEQ,PART_BRK);for(int n=0;n<16;n++)audio_block();
+ setup(V_PART,PART_BRK);for(int n=0;n<16;n++)audio_block();
  pref_set(PR(R_BRKSLICE,0,0,0),1);audio_block();CHECK(engine_brk_count(0)==8);
  cur_pat()->brk.steps=0xffff;cur_pat()->brk.slice[0]=8;
  engine_brk_live(32,1);audio_block();CHECK(engine_brk_held());
@@ -79,7 +86,7 @@ int main(void){
   shot(wanted?"break-family-playing-B":"break-family-playing-A");seq.req_stop=1;audio_block();
  }
  /* The footer keeps actual lock notches distinct from slice and hit rows. */
- setup(V_SEQ,PART_BRK);cur_pat()->brk.steps=0xffff;
+ setup(V_PART,PART_BRK);cur_pat()->brk.steps=0xffff;
  int lane=motion_alloc(proj.arr.lane,0,PART_BRK,T_BRK,0,1);CHECK(lane>=0);
  proj.arr.lane[lane].val[15]=13;break_probe_frame();CHECK(lock_marks(-1,-1,0)&(1u<<15));
  for(int y=238;y<240;y++)for(int x=223;x<226;x++)CHECK(fb[y*240+x]==swap16(C_AMB));

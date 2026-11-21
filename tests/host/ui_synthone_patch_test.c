@@ -101,14 +101,29 @@ static void check_part(unsigned owner)
     button_tap(B_SEL);
     CHECK(ui.overlay == O_LIST);
     int seen = 0;
-    for (int i = 0; i < ui.list_n; ++i) {
-        pref_t r = list_rows[i];
+    /* Follow the selector through the real list, including group headings and
+     * scrolling. Capture each selected control after the complete panel frame. */
+    for (;;) {
+        unsigned row = ui.list_sel;
+        pref_t r = list_rows[row];
         if (r.kind == R_S1PATCH) {
             CHECK(r.b == owner && r.c == seen++);
+            CHECK(row >= ui.list_top && row < (unsigned)ui.list_top + 6);
             s1_patch_value v;
             CHECK(s1_read(r, &v));
-            check_readout(r, s1_patch_at(r.c), v.physical);
+            const s1_patch_descriptor *d = s1_patch_at(r.c);
+            check_readout(r, d, v.physical);
+            char name[64];
+            snprintf(name, sizeof name, "list-%c-factory-id-%02u", 'A' + owner, d->factory_id);
+            ui_frame();
+            shot(name);
         }
+        now_ms += 100;
+        enc_acc[EN_SELECT] = 1;
+        ui_input_only();
+        CHECK(ui.overlay == O_LIST);
+        if (ui.list_sel == row) break;
+        CHECK(ui.list_sel > row);
     }
     CHECK(seen == S1_PATCH_COUNT);
     button_tap(B_HOME);

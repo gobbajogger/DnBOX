@@ -19,6 +19,7 @@
 #include "ui_pictograms.h"
 #include "../x0x_cold.h"                       /* X0X_COLD: input and menu code of the main loop, built for size */
 #include "../dsp/fastmath.h"
+#include "../dsp/juno6_controls.h"
 #include "../dsp/master.h"
 #include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
 #include "ui_original_controls.h"
@@ -1152,6 +1153,28 @@ static const char *original_status_name(int voice)
     if (status != 1) return status == -1 ? "FX WAIT" : "DSP ERR";
     return wait > 0 && wait < 7 ? pending[wait] : "READY";
 }
+static char *put_d1(char *q, float x, int sign);
+static void unit_value(int u, float x, char *num, char *unit);
+
+/* Physical readouts for the compact juno6_set/render and chorus controls.
+ * BASE CUT and ENV DEPTH describe the requested lowpass coefficient, before
+ * the renderer limits its sum. Release is an exponential time constant. */
+static UI_DRAW void juno_value_text(unsigned id, int value, char *num, char *unit)
+{
+    float x;
+    if (!original_sound_control_value(ORIGINAL_SOUND_JUNO, id, (unsigned)value, &x)) {
+        put_s(num, "INVALID");
+        return;
+    }
+    float physical = juno6_control_physical(id, x);
+    if (id == 9 && !value) put_s(num, "OFF");
+    else if (id == 5 || id == 6 || id == 8) unit_value(X0X_U_S, physical, num, unit);
+    else if (id == 2 || id == 4 || id == 9) unit_value(X0X_U_HZ, physical, num, unit);
+    else if (id == 10 || id == 13) {
+        put_d1(num, physical, 0);
+        put_s(unit, "Hz");
+    } else unit_value(X0X_U_PCT, 100.f * physical, num, unit);
+}
 static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *unit)
 {
     if (r.kind == R_BENGINE) {
@@ -1173,7 +1196,8 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
     const ui_original_control_view *v = 0;
     /* a corrupt patch has no bank: never index a name table through a null view */
     if (bank != ORIGINAL_SOUND_CHICAGO && bank != ORIGINAL_SOUND_MIAMI && bank != ORIGINAL_SOUND_SYNTHONE && bank != ORIGINAL_SOUND_JUNO) { put_s(num,"INVALID"); return 1; }
-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
+    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
+    if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
         v = original_text_view(r,value);
@@ -6005,6 +6029,39 @@ static UI_DRAW void sound_step_footer(void)
 #if X0X_SYNTHONE_PATCH
 static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink);
 #endif
+#if !X0X_SYNTHONE_PATCH
+static const char *matrix_preset_name(int voice);
+/* Stock INIT exposes engine selection and readback, with no editable patch. */
+static UI_DRAW void draw_init_selector(int band)
+{
+    int off = band * BAND_H;
+    for (int k = 0; k < 3; ++k) {
+        int y = 4 + 67*k - off;
+        if (y + 66 <= 0 || y >= (band == 2 ? KNOB_H : BAND_H)) continue;
+        pref_t r = pg.r[0][k];
+        char label[24], num[36], unit[8];
+        char *end = label;
+        if (k < 2) end = put_s(put_i(put_s(end, "K"), UI_FIRST_KNOB + k), "  ");
+        put_s(end, caps_of(pref_name(r)));
+        pref_value(r, num, unit);
+        const char *value = num;
+        int glyph = UI_G_SOUND;
+        if (k == 1) {
+            value = caps_of(matrix_preset_name(r.b));
+            glyph = pref_read_only(r) ? UI_G_LOCK : UI_G_LIST;
+        } else if (k == 2) {
+            glyph = !strcmp_s(num, "READY") ? UI_G_CHECK : UI_G_HOLD;
+        }
+        sound_slab(3, y, 234, 66, !k);
+        uint16_t ink = !k ? SOUND_INK : SOUND_WHITE;
+        cv_text(12, y+6, &FONT_XS, label, ink);
+        ui_pictogram(12, y+31, glyph, 2, ink);
+        const felucca_font_t *font = tw(&FONT_M, value) <= 187 ? &FONT_M : &FONT_B;
+        cv_text(40, y+27, font, value, ink);
+    }
+    if (band == 2) sound_step_footer();
+}
+#endif
 static UI_DRAW void draw_part_sound(int band)
 {
 #if X0X_SYNTHONE_PATCH
@@ -6012,10 +6069,20 @@ static UI_DRAW void draw_part_sound(int band)
     if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE &&
         engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
 #endif
+#if !X0X_SYNTHONE_PATCH
+    if (pg.n == 1 && pg.r[0][0].kind == R_BENGINE) {
+        draw_init_selector(band);
+        return;
+    }
+#endif
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
     int three=matrix_three_rows(), night=three || X0X_ORIGINAL_SYNTH;
     int rows=three?3:4, height=three?66:49, step=three?67:50;
-    uint16_t col=matrix_col(), gray=night?SOUND_GRAY:C_GRAY, hint=night?SOUND_AMBER:C_HI;
+    /* A partial final bank shares preceding rows with the previous view.
+     * Keep the selected page and its physical encoder bindings unchanged. */
+    int tail = pg.n >= rows && first + rows > pg.n;
+    if (tail) first = pg.n - rows;
+    uint16_t col=matrix_col();
     if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
     for (row=0;row<rows;row++) {
         int p=first+row, y=4+row*step-off, active=p==page;
@@ -6025,7 +6092,7 @@ static UI_DRAW void draw_part_sound(int band)
         if (night) sound_slab(3,y,234,height,active);
         else surface_panel(3,y,234,height,active,active?col:SOUND_FACE,
                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
-        put_s(put_s(put_i(t,row+1),"  "),matrix_group(p));
+        put_s(put_s(put_i(t,(tail ? p : row)+1),"  "),matrix_group(p));
         cv_text(8,y,&FONT_T,t,label);
 #if X0X_SYNTHONE_PATCH
         if (s1_draw_patch && pg.r[p][0].kind == R_S1PATCH &&
@@ -6039,14 +6106,21 @@ static UI_DRAW void draw_part_sound(int band)
             char knobs[20];matrix_knob_caption(knobs,p);
             text_r(232,y,&FONT_T,knobs,label);
         }
-        for (k=0;k<4;k++) {
-            int x=4+k*59;
+        int columns = 4, cell_width = 59;
+#if X0X_SYNTHONE_PATCH
+        if (s1_draw_patch && pg.r[p][0].kind == R_S1PATCH) {
+            columns = pg.r[p][0].c == 0 ? 2 : 3;
+            cell_width = 236 / columns;
+        }
+#endif
+        for (k=0;k<columns;k++) {
+            int x=4+k*cell_width;
             if (k && (pg.r[p][k].kind!=R_NONE
 #if X0X_BASS_PRESET_PREVIEW
                 || (k==2 && pg.r[p][0].kind==R_BENGINE)
 #endif
                 )) cv_rect(x,y+14,1,night?height-18:32,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-            draw_param_widget(pg.r[p][k],x,y,59,active,col,height,night);
+            draw_param_widget(pg.r[p][k],x,y,cell_width,active,col,height,night);
         }
 #if X0X_BASS_PRESET_PREVIEW
         if (!X0X_ORIGINAL_SYNTH && pg.r[p][0].kind==R_BENGINE) {
@@ -7402,10 +7476,11 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         int active_voice = engine_bass_voice_view(r.b, &amp, &filter, &stage, &held) && stage != 6;
         int lit = active_voice ? (int)(amp*gain*6.f+.5f) : 0;
         int ceiling = (int)(gain*6.f+.5f);
+        int pitch = (width - 24) / 6;
         for (int i=0; i<6; i++) {
             uint16_t color = i<lit ? (active ? SOUND_BASE : SOUND_INK) :
                              i<ceiling ? ink : SOUND_DIM;
-            cv_rect(cx-12+4*i,y+31-2*i,3,2,color);
+            cv_rect(cx-3*pitch+pitch*i,y+31-2*i,pitch-2,2,color);
         }
         pref_value_of(r, val, num, unit);
         strip_value(cx, y+35, num, unit, ink);
@@ -7430,7 +7505,9 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         /* Drum parts draw their own rows in draw_drum_voice. */
         orig_strip_glyph(r,val,x+3,y+22,ink);
         pref_value_of(r,val,num,unit);
-        strip_value(x+45,y+28,num,unit,ink);
+        if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
+            strip_value_fit(x, y+28, num, unit, ink);
+        else strip_value(x+45,y+28,num,unit,ink);
     } else
     if(shape) {
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -7741,6 +7818,15 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
          * turns. Same quantisation as the native Chicago value readout. */
         if(!(e.present&(1u<<k)))continue;
         char label[20];
+        if (e.enabled == 3) {
+            char num[16], unit[8];
+            pref_t r = pg.r[p][e.slot[k]];
+            pref_value_of(r, matrix_value(r), num, unit);
+            char *end = put_i(put_s(label, "K"), UI_FIRST_KNOB + e.slot[k]);
+            *end++ = ' '; *end++ = "ADSR"[k]; *end++ = ' '; put_s(end, num);
+            strip_value(31+e.slot[k]*59,y+8-off,label,unit,edited==k?hi:SOUND_GRAY);
+            continue;
+        }
         physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));
         text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
     }
@@ -8045,6 +8131,7 @@ static UI_DRAW int orig_strip_slot(pref_t r)
 {
     if(r.kind!=R_ENG || r.a!=T_303) return 0;
     int b=engine_bass_sound_bank(&proj.sound,r.b);
+    if(b==ORIGINAL_SOUND_JUNO) return r.c < 16 && (r.c < 5 || r.c > 8);
     if(b==ORIGINAL_SOUND_CHICAGO) return r.c>=1 && (r.c<=6 || r.c==11 || r.c==12 || r.c==15 || r.c==17);
     if(b==ORIGINAL_SOUND_MIAMI) return r.c>=1 && r.c<=15 && r.c!=6 && r.c!=11;
     return 0;
@@ -8150,11 +8237,118 @@ static UI_DRAW int og_states(pref_t r,int val,int *idx)
 static int env_knee_x(int gx,float z)
 { z=(z+.5f)*.5f; /* bipolar: cutoff+EG*ENV spans -0.5..1.5, CUTOFF 50% sits mid-cell */
   z=z<0?0:z>1?1:z; return gx+2+(int)(z*(OG_W-3-ENV_FALL)+.5f); }
+static UI_DRAW void og_lowpass(int gx, int gy, float cq, float pq, uint16_t col)
+{
+    int top=gy+3, bot=gy+OG_H, right=gx+OG_W-1;
+    int pivot=gx+4+(int)(cq*14+.5f),peak=top+2-(int)(pq*5+.5f);
+    cv_rect(gx,bot,OG_W,1,C_LINE);
+    cv_line(gx,top+2,pivot-3,top+2,col);cv_line(pivot-3,top+2,pivot,peak,col);
+    cv_line(pivot,peak,pivot+6>right?right:pivot+6,bot,col);
+    if(pivot+6<right) cv_line(pivot+6,bot,right,bot,col);
+}
+
+static UI_DRAW void og_sub(int gx, int gy, int amplitude, uint16_t col)
+{
+    int top=gy+3, bot=gy+OG_H, right=gx+OG_W-1;
+    for (int i=0; i<4; ++i) {
+        int x = gx + i*6;
+        cv_line(x,top,x+3,top,C_LINE);
+        cv_line(x+3,top,x+3,top+4,C_LINE);
+        cv_line(x+3,top+4,x+6,top+4,C_LINE);
+        cv_line(x+6,top+4,x+6,top,C_LINE);
+    }
+    for (int i=0; i<2; ++i) {
+        int x = gx + i*12, high = bot - amplitude;
+        cv_line(x,high,x+6,high,col);
+        cv_line(x+6,high,x+6,bot,col);
+        cv_line(x+6,bot,x+12,bot,col);
+        if (x+12<right) cv_line(x+12,bot,x+12,high,col);
+    }
+}
+
+static UI_DRAW void og_level(int gx, int gy, float q, int sounding, float amp, uint16_t col)
+{
+    int bot=gy+OG_H;
+    int ceiling=(int)(q*6.0f+.5f),lit=sounding?(int)(q*amp*6.0f+.5f):0;
+    cv_rect(gx,bot,OG_W,1,C_LINE);
+    for(int i=0;i<6;i++) {
+        uint16_t ink=i<lit?C_WHITE:i<ceiling?(sounding?blend(C_LINE,col,6):col):C_LINE;
+        cv_rect(gx+i*4,bot-3-i*2,3,2,ink);
+    }
+}
+
+/* One second of the compact PWM oscillator, a triangle at the configured Hz. */
+static float og_triangle(float t, float hz)
+{
+    float phase = t * hz;
+    return 1.f - 4.f * fm_fabsf(phase - fm_floorf(phase) - .5f);
+}
+
+static UI_DRAW void juno_strip_glyph(pref_t r, float q, int gx, int gy, uint16_t col)
+{
+    int bot = gy + OG_H, right = gx + OG_W - 1, mid = gy + OG_H / 2;
+    float amp, mod; unsigned state, held;
+    int sounding = engine_bass_voice_view(r.b, &amp, &mod, &state, &held) && state != 6;
+    if (!sounding) amp = 0.f;
+    if (r.c == 0 || r.c == 12) {
+        /* A single unfiltered DCO cycle at its configured base duty. */
+        float mix = r.c == 0 ? q : 1.f;
+        int stored = matrix_value(PR(R_ENG,T_303,r.b,12));
+        float duty = juno6_control_physical(12, r.c == 12 ? q : stored / 127.f);
+        int previous = mid;
+        for (int i = 0; i < OG_W; ++i) {
+            float t = (float)i / OG_W;
+            float signal = (2.f*t - 1.f)*(1.f-mix) + (t < duty ? mix : -mix);
+            int y = mid - (int)(signal * 7.f);
+            if (i) cv_line(gx+i-1,previous,gx+i,y,col);
+            previous = y;
+        }
+    } else if (r.c == 1) og_sub(gx, gy, (int)(q*7.f+.5f), col);
+    else if (r.c == 15) og_level(gx, gy, q, sounding, amp, col);
+    else if (r.c == 2 || r.c == 3 || r.c == 4) {
+        float cut = matrix_value(PR(R_ENG,T_303,r.b,2)) / 127.f;
+        float res = matrix_value(PR(R_ENG,T_303,r.b,3)) / 127.f;
+        float depth = matrix_value(PR(R_ENG,T_303,r.b,4)) / 127.f;
+        if (r.c == 2) cut = q;
+        if (r.c == 3) res = q;
+        if (r.c == 4) depth = q;
+        /* Divide by the largest pre-limit coefficient. The tick is the
+         * fully open envelope; the curve follows the sounding envelope. */
+        float base = cut*cut * (12.f/19.f), travel = depth * (7.f/19.f);
+        og_lowpass(gx, gy, base + amp*travel, res, col);
+        if (r.c == 4) cv_rect(gx+4+(int)((base+travel)*14.f+.5f),bot-5,1,5,col);
+    } else if (r.c == 9) {
+        if (q == 0.f) cv_line(gx,mid,right,mid,col);
+        else {
+            int knee = gx + 5 + (int)(q*q*15.f);
+            cv_line(gx,bot,knee-4,bot,col);
+            cv_line(knee-4,bot,knee,gy+4,col);
+            cv_line(knee,gy+4,right,gy+4,col);
+        }
+    } else if (r.c == 10) og_wave(gx, gy, og_triangle, juno6_control_physical(10, q), col);
+    else if (r.c == 13) og_wave(gx, gy, og_sin, juno6_control_physical(13, q), col);
+    else if (r.c == 11) {
+        /* Reachable PWM duties on either side of the slider's base setting. */
+        float duty = juno6_control_physical(12, matrix_value(PR(R_ENG,T_303,r.b,12))/127.f);
+        float depth = juno6_control_physical(11, q);
+        int low = gx + (int)(fm_maxf(.05f, duty-depth) * (OG_W-1));
+        int high = gx + (int)(fm_minf(.95f, duty+depth) * (OG_W-1));
+        cv_line(gx,gy+4,low,gy+4,col); cv_line(low,gy+4,low,bot,col);
+        cv_line(low,bot,right,bot,col);
+        cv_line(low,gy+4,high,gy+4,col); cv_line(high,gy+4,high,bot,col);
+    } else { /* Chorus wet and dry coefficients, complementary in each channel. */
+        int wet = (int)(q*.5f*OG_W+.5f);
+        cv_rect(gx,gy+4,OG_W-wet,3,col);
+        if (wet) cv_rect(gx,bot-4,wet,3,col);
+    }
+}
 static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
 {
     const x0x_param_t *d=pref_desc(r);
     float q=d && d->max?(float)val/(float)d->max:0;
-    int chi=engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO,c=r.c;
+    int bank=engine_bass_sound_bank(&proj.sound,r.b), c=r.c;
+    if (bank == ORIGINAL_SOUND_JUNO) { juno_strip_glyph(r, q, gx, gy, col); return; }
+    int chi=bank==ORIGINAL_SOUND_CHICAGO;
     int level_role=c==(chi?12:14) || (!chi && (c==1 || c==5));
     int top=gy+3,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
     if(q<0)q=0; if(q>1)q=1;
@@ -8165,11 +8359,7 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
         float cq=q,pq=0;
         if(chi && c==3){pref_t cr=PR(R_ENG,T_303,r.b,2);const x0x_param_t *dc=pref_desc(cr);
             cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0;pq=q;}
-        int pivot=gx+4+(int)(cq*14+.5f),peak=top+2-(int)(pq*5+.5f);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        cv_line(gx,top+2,pivot-3,top+2,col);cv_line(pivot-3,top+2,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6>right?right:pivot+6,bot,col);
-        if(pivot+6<right) cv_line(pivot+6,bot,right,bot,col);
+        og_lowpass(gx, gy, cq, pq, col);
     } else if(chi && c==4) {                     /* ENV: the lowpass knee the filter EG sweeps */
         /* chicago_voice.c mp4_prepare: z = cutoff + vcf.level * env_depth. The knee
          * and its resonance bump move LEFT/RIGHT only: x = live CUTOFF + EG x ENV.
@@ -8217,21 +8407,14 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
         if(idx){cv_line(gx+2,bot,gx+2,top,col);cv_line(gx+2,top,gx+22,top,col);cv_line(gx+22,top,gx+22,bot,col);}
         else{cv_line(gx+1,bot,gx+5,top,col);cv_line(gx+5,top,gx+10,mid,col);cv_line(gx+10,mid,gx+18,mid,col);cv_line(gx+18,mid,gx+24,bot,col);}
     } else if(level_role) {                     /* LEVEL / OUTPUT: live segmented meter */
-        int ceiling=(int)(q*6.0f+.5f),lit=sounding?(int)(q*amp*6.0f+.5f):0;
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        for(int i=0;i<6;i++) {
-            uint16_t ink=i<lit?C_WHITE:i<ceiling?(sounding?blend(C_LINE,col,6):col):C_LINE;
-            cv_rect(gx+i*4,bot-3-i*2,3,2,ink);
-        }
+        og_level(gx, gy, q, sounding, amp, col);
     } else if(chi && c==15) {                    /* RANGE: octave stairs */
         int idx,n=og_states(r,val,&idx),sw=OG_W/(n?n:1);
         for(int k=0;k<n;k++){int h=3+k*(OG_H-3)/(n>1?n-1:1);cv_rect(gx+k*sw,bot-h+1,sw-2,h,k<=idx?col:C_LINE);}
     } else if(chi && c==17) {                    /* FX TYPE: recognizable effect picture */
         orig_fx_glyph(val,gx,gy,col);
     } else if(!chi && c==2) {                    /* SUB: osc square + sub-octave square */
-        int a=1+(int)(q*6+.5f);
-        for(int i=0;i<4;i++){int xx=gx+i*6;cv_line(xx,top,xx+3,top,C_LINE);cv_line(xx+3,top,xx+3,top+4,C_LINE);cv_line(xx+3,top+4,xx+6,top+4,C_LINE);cv_line(xx+6,top+4,xx+6,top,C_LINE);}
-        for(int i=0;i<2;i++){int xx=gx+i*12;cv_line(xx,bot-a,xx+6,bot-a,col);cv_line(xx+6,bot-a,xx+6,bot,col);cv_line(xx+6,bot,xx+12,bot,col);if(xx+12<right)cv_line(xx+12,bot,xx+12,bot-a,col);}
+        og_sub(gx, gy, 1+(int)(q*6.f+.5f), col);
     } else if(!chi && (c==3 || c==7)) {          /* PITCH / TUNE: centre needle */
         float ang=(q*2-1)*1.05f; int px=gx+12,py=bot;
         cv_rect(px,top-2,1,2,C_LINE);cv_rect(gx+1,bot,OG_W-2,1,C_LINE);
