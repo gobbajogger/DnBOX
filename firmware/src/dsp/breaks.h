@@ -67,7 +67,9 @@ typedef struct {
     float g, dg;                      /* crossfade gain and its per-sample slope */
     uint32_t lo, hi;                  /* reverse: wraps within [lo, hi) (the slice) */
     uint32_t rbase;                   /* reverse: rbuf holds samples rbase .. rbase + BRK_RCH - 1 */
-    uint8_t rvalid, rsv[3];
+    uint8_t rvalid;
+    int8_t interpolate_mask;          /* 0 for original programmed rolls, -1 otherwise */
+    uint8_t rsv[2];
     int16_t rbuf[BRK_RCH];
     brk_ima_t seek_state;             /* before previous adjacent reverse-cache block */
     uint32_t seek_pos;               /* UINT32_MAX when no saved boundary is valid */

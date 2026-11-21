@@ -562,6 +562,8 @@ static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint
     v->gen = k->gen;
     v->snap = k;
     v->rev = (uint8_t)rev;
+    const int programmed_roll = have_state && b->sub_div > 1 && !b->perf.stutter && !b->perf.jungle && !rev;
+    v->interpolate_mask = programmed_roll ? 0 : -1;
     v->seek_pos = UINT32_MAX;       /* never reuse state from a prior voice */
     v->lo = k->start[sl * (32 / k->slices)];
     v->hi = k->start[(sl + 1) * (32 / k->slices)];
@@ -993,7 +995,11 @@ void breaks_render(breaks_t *b, float *out, int n)
             k = v->snap;
             if (!k)
                 continue;
-            y += (v->s0 + (v->s1 - v->s0) * v->frac) * v->g;
+            /* BB Gen reads the sample at the integral part of its playhead. */
+            fm_bits_t fraction = {.f = v->frac};
+            fraction.u &= (uint32_t)(int32_t)v->interpolate_mask;
+            float sample = v->s0 + (v->s1 - v->s0) * fraction.f;
+            y += sample * v->g;
             v->g += v->dg;
             if (v->g >= 1.0f) {
                 v->g = 1.0f;
