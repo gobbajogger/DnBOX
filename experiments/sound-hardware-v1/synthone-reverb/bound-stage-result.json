@@ -1,0 +1,315 @@
+{
+  "base": "bf48ce83bea6f8d332dddff11e5407c4fd744fc6",
+  "original_source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "command_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "ordinary_controls": {
+    "IDs": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "labels": [
+      "on",
+      "mix",
+      "feedback",
+      "input high-pass",
+      "mix source",
+      "input dynamics tuple",
+      "wet dynamics tuple"
+    ],
+    "input_dynamics_tuples": 9,
+    "return_dynamics_tuples": 10
+  },
+  "upstream_graph": {
+    "programs": 694,
+    "bank_count": 12,
+    "sample_rate": 44100,
+    "stereo_frames_per_program": 132300,
+    "stereo_frames_per_arm": 91816200,
+    "results": {
+      "ordinary": {
+        "wet": {
+          "passing_programs": 692,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.003301142282324643,
+          "max_spectrum_rms_db": 5.415385256268984,
+          "failures": [
+            {
+              "flat": 301,
+              "name": "JEC High Pass Poly 2",
+              "channel_scores": [
+                {
+                  "signed_rms_db": 0.0003373822651936013,
+                  "spectral_rms_db": 1.8413400678325578,
+                  "peak_error": 0.0005499664694070816,
+                  "pass": true
+                },
+                {
+                  "signed_rms_db": 0.00076123208835612,
+                  "spectral_rms_db": 3.3369715782791105,
+                  "peak_error": 0.0011616908013820648,
+                  "pass": false
+                }
+              ]
+            },
+            {
+              "flat": 339,
+              "name": "JEC Alarming!",
+              "channel_scores": [
+                {
+                  "signed_rms_db": 0.00011150338075504858,
+                  "spectral_rms_db": 5.415385256268984,
+                  "peak_error": 0.00014487234875559807,
+                  "pass": false
+                },
+                {
+                  "signed_rms_db": 7.955160786243585e-05,
+                  "spectral_rms_db": 4.589011461321926,
+                  "peak_error": 0.0001949835568666458,
+                  "pass": false
+                }
+              ]
+            }
+          ]
+        },
+        "final": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.0004455261869582124,
+          "max_spectrum_rms_db": 1.8008977379149709,
+          "failures": []
+        }
+      },
+      "ordinary-nine": {
+        "wet": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.001407051879592096,
+          "max_spectrum_rms_db": 2.192337380752686,
+          "failures": []
+        },
+        "final": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.0003049798032659563,
+          "max_spectrum_rms_db": 0.5174941170688608,
+          "failures": []
+        }
+      },
+      "panel-eight": {
+        "wet": {
+          "passing_programs": 692,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.4377165303275011,
+          "max_spectrum_rms_db": 5.401788810422704,
+          "failures": [
+            {
+              "flat": 301,
+              "name": "JEC High Pass Poly 2",
+              "channel_scores": [
+                {
+                  "signed_rms_db": 0.0390356609112842,
+                  "spectral_rms_db": 1.908147779731281,
+                  "peak_error": 0.000762108713388443,
+                  "pass": true
+                },
+                {
+                  "signed_rms_db": 0.0309811527074594,
+                  "spectral_rms_db": 3.311659539117135,
+                  "peak_error": 0.0012257024645805359,
+                  "pass": false
+                }
+              ]
+            },
+            {
+              "flat": 339,
+              "name": "JEC Alarming!",
+              "channel_scores": [
+                {
+                  "signed_rms_db": 0.0579890800373565,
+                  "spectral_rms_db": 5.401788810422704,
+                  "peak_error": 0.0008125267922878265,
+                  "pass": false
+                },
+                {
+                  "signed_rms_db": 0.043146012471141464,
+                  "spectral_rms_db": 4.679265241321537,
+                  "peak_error": 0.0007181614637374878,
+                  "pass": false
+                }
+              ]
+            }
+          ]
+        },
+        "final": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.35993238938906813,
+          "max_spectrum_rms_db": 1.7927197356829139,
+          "failures": []
+        }
+      },
+      "panel-nine": {
+        "wet": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.4375137629958395,
+          "max_spectrum_rms_db": 2.1694359345710073,
+          "failures": []
+        },
+        "final": {
+          "passing_programs": 694,
+          "full_wet_passing": 34,
+          "full_wet": 34,
+          "max_absolute_rms_db": 0.35993383448887417,
+          "max_spectrum_rms_db": 0.5127557879011347,
+          "failures": []
+        }
+      }
+    }
+  },
+  "target_stage_native": {
+    "ordinary": {
+      "blocks": 40,
+      "stereo_frames_per_block": 256,
+      "guest_timer_hz": 24000000,
+      "guest_cpu_hz": 360000000,
+      "initial_selected_owner_bytes": 3716,
+      "external_history_bytes": 25296,
+      "checksum": 4274800428,
+      "ticks": [
+        64247,
+        62888,
+        62864,
+        62912,
+        62898,
+        62922,
+        62918,
+        62914,
+        62923,
+        63061,
+        63067,
+        63039,
+        63033,
+        63095,
+        63021,
+        63021,
+        63025,
+        63059,
+        63073,
+        63052,
+        63062,
+        63077,
+        63098,
+        63074,
+        63086,
+        63147,
+        63112,
+        63117,
+        63134,
+        63076,
+        63156,
+        63096,
+        63110,
+        63014,
+        63076,
+        63107,
+        63088,
+        63100,
+        63101,
+        63133
+      ],
+      "min_us": 2619.3333333333335,
+      "max_us": 2676.9583333333335,
+      "elf_sha256": "c7022b5161a8edb0292b509ba393cb38b1e155923b69371daaa79310b03997e5",
+      "bin_sha256": "899536722caa3346133e16b968995d0e52f2570825dbd9fb67e934882649ee61"
+    },
+    "ordinary-nine": {
+      "blocks": 40,
+      "stereo_frames_per_block": 256,
+      "guest_timer_hz": 24000000,
+      "guest_cpu_hz": 360000000,
+      "initial_selected_owner_bytes": 3704,
+      "external_history_bytes": 28405,
+      "checksum": 3078578460,
+      "ticks": [
+        69064,
+        67563,
+        67532,
+        67600,
+        67571,
+        67586,
+        67590,
+        67565,
+        67520,
+        67615,
+        67578,
+        67503,
+        67480,
+        67511,
+        67376,
+        67345,
+        67286,
+        67318,
+        67335,
+        67318,
+        67313,
+        67338,
+        67367,
+        67331,
+        67359,
+        67423,
+        67372,
+        67381,
+        67410,
+        67334,
+        67423,
+        67367,
+        67379,
+        67266,
+        67340,
+        67371,
+        67352,
+        67363,
+        67359,
+        67404
+      ],
+      "min_us": 2802.75,
+      "max_us": 2877.6666666666665,
+      "elf_sha256": "da9c12c8486816f89e9b2f51bfbc8e9b4c81ab8d35595e7af5c5a831431b89e4",
+      "bin_sha256": "44336a59376e568a73e480db8a6c4a6222bc39fba24bb907a739cfb6d2ebd37e"
+    }
+  },
+  "selected_owner_ABI": {
+    "outer_backend_bytes": 3720,
+    "runtime_part_bytes": 5184,
+    "8bit": {
+      "selected_bytes": 3720,
+      "external_bytes": 25296,
+      "external_block_bytes": 17,
+      "external_blocks": 1488
+    },
+    "9bit": {
+      "selected_bytes": 3708,
+      "external_bytes": 28405,
+      "external_block_bytes": 19,
+      "external_blocks": 1495
+    }
+  },
+  "owner_lifecycle": "PASS 90 checks. Ordinary two-owner pages and selector detents, independent histories, project save/load, undo/redo, recorder, historical spare rows, switches, absent/short allocations and canaries.",
+  "factory_names_in_ordinary_patch": 0,
+  "native_stage_scope": "Isolated 40 \u00d7 256 true stereo blocks including original input high-pass, independent input and wet dynamics, RevSC and wet mix. Whole-image flash, placement, CI and actual callback deadline are separately measured.",
+  "base_patch_sha256": "a22ea10131169dcf963c5877bf9d1f3e32c69ffd5ae3584782ffdc1f192c7315",
+  "proof_sha256": "5da2a5a5683298cc991eb9f5626b2654cc1118ce50feba3d1ced62e0900ff581"
+}
