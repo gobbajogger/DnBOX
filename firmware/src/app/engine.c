@@ -1164,6 +1164,8 @@ __attribute__((noinline)) static int prob_skip(int part, int v)                 
     prob_rng ^= prob_rng << 5;
     return prob_rng % 100u >= p;
 }
+/* A burst can replace both kits' previous measured workload between stretches. */
+static uint16_t recent_kit_hits[NKIT];
 static void s_drum(void *x, int kit, int v, float vel);
 static int s_drum_seq(void *x, int kit, int v, float vel)
 {
@@ -1180,6 +1182,7 @@ __attribute__((noinline)) static void s_drum(void *x, int kit, int v, float vel)
         master_key(&mst, kit, vel);
     if ((unsigned)kit < NKIT && (unsigned)v < NDRUM)   /* MIX's drum pages: the track's meter jumps */
     {
+        recent_kit_hits[kit] |= (uint16_t)(1u << v);
         eng_hit[kit][v] = (uint8_t)(vel >= 1.0f ? 255 : (int)(vel * 255.0f));
         if(kit==1)d8_trigger_frame[drum808_clock_slot(v)]=d8_frame;
         eng_hit_ms[kit][v] = plat_ms() | 1u;          /* 0 = never hit */
@@ -2910,17 +2913,31 @@ static uint32_t plan_pick(uint32_t n)
     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
     best &= act & ok;
-    bc = plan_cost(best, c);
-    cost = bc;
+    const uint32_t kits = (1u << JB_909) | (1u << JB_808);
+    const uint32_t bass = (1u << JB_A) | (1u << JB_B);
+    const int both_polyphonic = (recent_kit_hits[0] & (recent_kit_hits[0] - 1u)) &&
+                                (recent_kit_hits[1] & (recent_kit_hits[1] - 1u));
+    /* After simultaneous polyphonic attacks the old kit timings describe
+     * their tails. Start the first long stretch with one newly attacked kit
+     * and one sounding bass on each core, then use its actual measurements. */
+    const int paired = both_polyphonic && n >= 64u && (act & kits) == kits &&
+                       eng_bass_voiced[0] && eng_bass_voiced[1] && (ok & bass);
+    if (n >= 64u) recent_kit_hits[0] = recent_kit_hits[1] = 0;
+    const int old_allowed = !paired || ((best & kits) && (best & kits) != kits &&
+                                       (best & bass) && (best & bass) != bass);
+    cost = plan_cost(best, c);
+    bc = old_allowed ? cost : UINT32_MAX;
     const uint32_t allowed = act & ok;
     m = 0;
     do {
-        uint32_t k = plan_cost(m, c);
-        if (k < bc) { bc = k; best = m; }
+        if (!paired || ((m & kits) && (m & kits) != kits && (m & bass) && (m & bass) != bass)) {
+            uint32_t k = plan_cost(m, c);
+            if (k < bc) { bc = k; best = m; }
+        }
         m = (m - allowed) & allowed;
     } while (m);
 
-    if (bc * 16u < cost * 15u || (eng_plan & ~(act & ok)))   /* switch for a measured 1/16 gain or an ineligible job */
+    if (!old_allowed || bc * 16u < cost * 15u || (eng_plan & ~(act & ok)))   /* switch for a measured 1/16 gain or an ineligible job */
         eng_plan = (uint8_t)best;
     return eng_plan & act & ok;
 }

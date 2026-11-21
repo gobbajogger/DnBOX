@@ -106,6 +106,33 @@ int main(int argc, char **argv)
     boot();
     engine_guard_enable(0);
     seq.playing = 0;
+    if (play_break == 3) {
+        extern unsigned mix_test_attack_plan(unsigned);
+        extern unsigned mix_test_current_plan(void);
+        /* Source fixture for the dynamic planner; serial, deferred, failed
+         * and pthread renders must emit identical ordered PCM across owners. */
+        const unsigned owners[][NBASS] = {
+            { ORIGINAL_SOUND_CHICAGO, ORIGINAL_SOUND_MIAMI },
+            { ORIGINAL_SOUND_MIAMI, ORIGINAL_SOUND_CHICAGO },
+            { ORIGINAL_SOUND_CHICAGO, ORIGINAL_SOUND_CHICAGO },
+            { ORIGINAL_SOUND_CHICAGO, ORIGINAL_SOUND_MIAMI },
+        };
+        for (unsigned scenario = 0; scenario < sizeof owners / sizeof owners[0]; scenario++) {
+            engine_request_notes_off();
+            render(stream, 256);
+            for (unsigned part = 0; part < NBASS; part++)
+                select_bank(stream, part, owners[scenario][part]);
+            engine_bass_on_velocity(0, 45, 1, 0, 112);
+            if (scenario != 3) engine_bass_on_velocity(1, 60, 0, 0, 108);
+            render(stream, 256);
+            unsigned expected = mix_test_attack_plan(scenario);
+            render(stream, 256);
+            assert(mix_test_current_plan() == expected);
+        }
+        assert(mode == SERIAL || jobs);
+        assert(!fclose(stream));
+        return 0;
+    }
     if (play_break == 2) {
         exercise_preview = 1;
         unsigned commits = 0, edited_commits = 0;

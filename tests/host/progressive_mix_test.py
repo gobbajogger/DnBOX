@@ -30,17 +30,26 @@ def main():
             "-Iexperiments/original_synth", "-Iexperiments/wobble", "-Ibuild/gen",
         ]
         obj = tmp / "engine.o"
-        subprocess.run(cc + flags + [
-            "-DX0X_HOST_ASYNC_PREVIEW", "-DX0X_CORE_PLAN=31", "-Dplat_cpu2_run=mix_test_submit",
-            "-Dplat_cpu2_wait=mix_test_join", "-c", engine, "-o", obj,
-        ], cwd=root, check=True)
         units = [f"firmware/src/{p}" for p in build.O2_UNITS if p != "app/engine.c"]
         units += ["firmware/src/app/factory_banks.c", *build.ORIGINAL_SYNTH_UNITS,
-                  *build.ORIGINAL_SYNTH_BACKENDS]
+                  *build.ORIGINAL_SYNTH_BACKENDS, "tests/host/progressive_mix_test.c"]
         executable = tmp / "mix"
         link = ["-no-pie"] if sys.platform.startswith("linux") else []
-        subprocess.run(cc + flags + link + ["tests/host/progressive_mix_test.c",
-                       *units, obj, "-lm", "-o", executable], cwd=root, check=True)
+        objects = []
+        for index, unit in enumerate(units):
+            target = tmp / f"unit-{index}.o"
+            subprocess.run(cc + flags + ["-c", unit, "-o", target], cwd=root, check=True)
+            objects.append(target)
+
+        def build_engine(plan_flags):
+            subprocess.run(cc + flags + plan_flags + [
+                "-DX0X_HOST_ASYNC_PREVIEW", "-Dplat_cpu2_run=mix_test_submit",
+                "-Dplat_cpu2_wait=mix_test_join", "-c", engine, "-o", obj,
+            ], cwd=root, check=True)
+            subprocess.run(cc + flags + link + [*objects, obj, "-lm", "-o", executable],
+                           cwd=root, check=True)
+
+        build_engine(["-DX0X_CORE_PLAN=31"])
 
         def capture(mode, scenario=1):
             pcm = tmp / "output.pcm"
@@ -61,6 +70,13 @@ def main():
                 raise AssertionError(f"worker mode {mode} changed short-prefix PCM or state")
         print("PASS short-prefix master preview, final PUMP/motion edits and partial handoff")
         print("PASS progressive mix, takeover, wet sends and adopted synth owners")
+
+        build_engine([])
+        serial = capture(0, 3)
+        for mode in (1, 2, 3):
+            if capture(mode, 3) != serial:
+                raise AssertionError(f"worker mode {mode} changed the attack-aware mix")
+        print("PASS attack-aware planner, repeated hits, owner eligibility and ordered PCM")
 
 
 if __name__ == "__main__":

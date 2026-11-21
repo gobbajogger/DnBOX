@@ -83,3 +83,42 @@ int mix_test_write_preview(FILE *f)
     assert(fwrite(&at, sizeof at, 1, f) == 1);
     return eng_mastered == 256;
 }
+
+/* Equal measured costs make the previous two-kit mask optimal without the
+ * attack rule. This distinguishes an actual constraint from an incidental split. */
+unsigned mix_test_attack_plan(unsigned scenario)
+{
+    const uint32_t kits = (1u << JB_909) | (1u << JB_808);
+    const uint32_t bass = (1u << JB_A) | (1u << JB_B);
+    assert(original_runtime_owned(&original_bass[0]));
+    assert(!!original_runtime_owned(&original_bass[1]) == (scenario != 3));
+    memset(eng_bass_cost, 0, sizeof eng_bass_cost);
+    for (unsigned j = 0; j < JB_N; j++) eng_job_cost[j] = 5000;
+    eng_plan = kits;
+    recent_kit_hits[0] = recent_kit_hits[1] = 0;
+
+    for (unsigned kit = 0; kit < NKIT; kit++) {
+        s_drum(NULL, kit, 0, .8f);
+        s_drum(NULL, kit, 0, .8f);
+    }
+    assert(plan_pick(64) == kits); /* Retriggering one lane counts once. */
+    for (unsigned kit = 0; kit < NKIT; kit++) s_drum(NULL, kit, 0, .8f);
+    assert(plan_pick(16) == kits);
+    for (unsigned kit = 0; kit < NKIT; kit++) s_drum(NULL, kit, 1, .8f);
+
+    uint32_t result = plan_pick(64);
+    if (scenario < 2) { /* Miami is the only eligible bass in either order. */
+        assert((result & kits) && (result & kits) != kits);
+        assert((result & bass) == (1u << (scenario ? JB_A : JB_B)));
+    } else assert(result == kits); /* Two Chicago owners or a silent bass. */
+    assert(!recent_kit_hits[0] && !recent_kit_hits[1]);
+    eng_plan = kits;
+    assert(plan_pick(256) == kits); /* The first long stretch consumed the hits. */
+    for (unsigned kit = 0; kit < NKIT; kit++) {
+        s_drum(NULL, kit, 0, .75f);
+        s_drum(NULL, kit, 1, .9f);
+    }
+    return result;
+}
+
+unsigned mix_test_current_plan(void) { return eng_plan; }
