@@ -506,6 +506,16 @@ static int demo(const char *path)
             }
         }
     }
+    const char *pair_path = getenv("D9_DEMO_PAIR");
+    if (pair_path) {
+        FILE *pair = fopen(pair_path, "wb");
+        if (!pair)
+            return 1;
+        int ok = fwrite(rmono, sizeof *rmono, (size_t)total, pair) == (size_t)total &&
+                 fwrite(mono, sizeof *mono, (size_t)total, pair) == (size_t)total;
+        if (fclose(pair) || !ok)
+            return 1;
+    }
     FILE *f = fopen(path, "wb");
     if (!f) { printf("cannot write %s\n", path); return 1; }
     const uint32_t bytes = (uint32_t)total * 4;

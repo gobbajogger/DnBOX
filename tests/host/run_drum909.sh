@@ -10,7 +10,7 @@ cd "$(dirname "$0")/../.."
 : "${NINEW9_DIR:=../schwung-9W9}"          # fm1-parent/schwung-9W9 -> github.com/athousanddetails/schwung-9W9
 [ -f "$NINEW9_DIR/src/dsp/er99_engine.c" ] || { echo "9W9 sources not found in $NINEW9_DIR (set NINEW9_DIR)"; exit 2; }
 CC="${CC:-cc}"
-OUT=build/drum909_test
+OUT=${D9_TEST_OUT:-build/drum909_test}
 mkdir -p "$OUT"
 
 python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h
@@ -43,4 +43,4 @@ done
 "$CC" -O2 -ffp-contract=off $WARN -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -c tests/host/drum909_test.c -o "$OUT/drum909_test.o"
 "$CC" -o "$OUT/drum909_test" "$OUT/drum909_test.o" "$OUT/drum909.o" "$OUT/fxbus.o" "$OUT/x0x_param.o" "$OUT/er99_engine.o" "$OUT/drum909_ref.o" "$OUT/drum909_refd.o" -lm
 
-"$OUT/drum909_test" "$OUT/ref_src" build/drum909_demo.wav
+"$OUT/drum909_test" "$OUT/ref_src" "${D9_DEMO_WAV:-build/drum909_demo.wav}"
