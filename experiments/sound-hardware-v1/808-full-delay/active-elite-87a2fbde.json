@@ -1,0 +1,91 @@
+{
+  "elf_sha256": "735f9a553879bb4d2979500e28629fe72a893f5fc2e04c345ec1191cbdde2311",
+  "fwsc_sha256": "e7bc6760ddf023ee7d0e470efa75cacb5ffb4c37df1e5a6ea424a40894f58bcc",
+  "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+  "seed_sha256": "e8cb85202586fdd681bef5e8813db449c6a65a68672c42740247e7654796d43b",
+  "boot": {
+    "duration_ms": 2000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 119,
+    "max_us": 4021,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "8e1049613f530c573546c52a3af5a7140024142eae120fd12c63ac4cbe169a11",
+    "pcm_bytes": 243712,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "initial_flash_sha256": "e8cb85202586fdd681bef5e8813db449c6a65a68672c42740247e7654796d43b",
+    "final_flash_sha256": "e8cb85202586fdd681bef5e8813db449c6a65a68672c42740247e7654796d43b"
+  },
+  "shot": {
+    "duration_ms": 8000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 539,
+    "max_us": 16145,
+    "raw_late": 96,
+    "audio_xruns": 96,
+    "pcm_sha256": "158ef0e62408b6f7828e811af68ea9ed0f838f4d7e8b9d0acc8a387ed5f31eb3",
+    "pcm_bytes": 1302528,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "initial_flash_sha256": "e8cb85202586fdd681bef5e8813db449c6a65a68672c42740247e7654796d43b",
+    "final_flash_sha256": "e8cb85202586fdd681bef5e8813db449c6a65a68672c42740247e7654796d43b"
+  },
+  "guest": {
+    "bass_kinds": [
+      0,
+      1
+    ],
+    "runtime_status": [
+      1,
+      1
+    ],
+    "peak_meter_909_808_A_B_BREAK": [
+      32767,
+      20523,
+      11658,
+      7276,
+      32767
+    ],
+    "triggered_rows_909_808": [
+      11,
+      11
+    ],
+    "last_playhead_steps": [
+      0,
+      16,
+      0,
+      31,
+      0
+    ],
+    "user_zones": [
+      0,
+      1,
+      0
+    ],
+    "loop_count": 1,
+    "first_catalog_slot_zone": [
+      1,
+      0
+    ],
+    "sample_rate": 44100,
+    "stereo_frames": 325632,
+    "first_half_second_nonzero_words": 0,
+    "last_half_second_nonzero_words": 44056,
+    "peak_pcm16": 13239,
+    "pcm_sha256": "158ef0e62408b6f7828e811af68ea9ed0f838f4d7e8b9d0acc8a387ed5f31eb3",
+    "observed_halves": 539,
+    "peak_callback_us": 16145,
+    "raw_late": 96,
+    "audio_xruns": 96
+  },
+  "scene_late": 96,
+  "owners_ok": true,
+  "all_active": true,
+  "timing_ok": false,
+  "passed": false
+}
