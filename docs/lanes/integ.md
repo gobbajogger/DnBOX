@@ -1,6 +1,28 @@
 # Integration baseline
 
-## Current combined qualification
+## Stock firmware and five-zone BREAK qualification
+
+The five original 22,050 Hz BREAK zones now have a native build and package-composer entry point, `--starting-breaks`. Fixtures for Elite and Pro recovered all 109,394 bytes of the bank through the firmware reader and rejected a one-byte application overrun. The bank retains its original ADPCM and reserves 1,024 erased bytes below Bluetooth. Both current stock applications reject it for lack of space. [Implementation](https://github.com/gobbajogger/DnBOX/commit/c5ca95ec4b040ec1d638f1db0d9be42c609bb386)
+
+| Combined stock model | Application | Free XIP | Pool above reserve | Available for bank | Bank shortfall |
+|---|---:|---:|---:|---:|---:|
+| Elite | 546,468 B | 6,204 B | 832 B | 5,168 B | 104,226 B |
+| Pro | 546,460 B | 6,212 B | 832 B | 5,184 B | 104,210 B |
+
+The native builds used integration `cfbdb7ae` and Sound `f013ecc6`, including FWUI #975. The resulting tree was `b469f59b5bbeb963e6d4ec899d03399fabb6fc71`. Both stock packages passed the model, CRC and partition checks. All eight application, ELF, loader and package fingerprints matched the previous build. All 16 recorded firmware merge SHAs were reachable from consolidated `46874497`. [Build and timing receipt](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7064436580)
+
+| Heavy playback run | Blocks | Render-thread misses | Wall misses | Render-thread peak | Wall peak |
+|---|---:|---:|---:|---:|---:|
+| Ordinary load | 32,768 | 18 | 701 | 75,169.046 µs | 111,621.122 µs |
+| After local builds and tests paused | 32,768 | 43 | 4,203 | 136,213.218 µs | 1,991,462.852 µs |
+
+All 32 PCM and 32 meter/scope digests matched the reference in both runs. Both kits and all five parts played. Muting Bass B failed the coverage check as expected. CPU 6 recorded 18.31% steal time in the second run, and a fixed-work control missed 109 deadlines. The 909 optimization trial reproduced the audio but increased the median end-to-end time by 0.96% across 16 paired cases. It was excluded from firmware. Neither stock sweep passed I3.
+
+The six scheduler-capacity, four pool-budget and seven roadmap cases passed. The generated roadmap matched consolidated. The local LeakSanitizer control returned a tracing error before it could report the deliberate leak. The earlier stock Debian run detected the leak and rejected corrupted metadata. [Stock sanitizer evidence](../../evidence/integ-45b09b2d/compact-stock-linux.tar.xz)
+
+Sound #973 and nightly Remote #169 remain open. Signed-in vote verification, final consolidated builds, the parallel host and strict emulator gates, and post-merge cleanup remain pending.
+
+## Earlier combined qualification
 
 The [tested combination](https://github.com/gobbajogger/DnBOX/commit/c51d9d8647fb72ae0628af6fef7fb8cfbcbd40e9) includes FWUI #975 and the engine and 909 sample changes that Sound #973 incorporated from #985. The [subsequent two-parent comparison](https://github.com/gobbajogger/DnBOX/commit/3571c7dc29722356e486701fbe566da13cd36f04) retains all 6,918 paths from integration `711df7b3` and Sound `2fe5930c`. The 78 stock translation units, 71 playback translation units and 166 compiler dependencies matched the build, and five regenerated stock headers matched byte-for-byte. Consolidated is `46874497`. [Source comparison and input proof](../../evidence/integ-c51d9d86/source-equivalence.tar.xz)
 
