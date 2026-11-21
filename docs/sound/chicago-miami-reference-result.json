@@ -475,5 +475,120 @@
     "commit": "63278e3322aefa89b25f129ca2fccc35ef3b3b3d",
     "rows_passing": 0,
     "tested_change": "Chicago inverted-quadratic oscillator-level curve 2 has unity maximum. Miami retains its original quadratic normalization. No final mixer or per-preset calibration."
+  },
+  "historical_synth684": {
+    "baseline_firmware": "f9ffd12e",
+    "baseline_exact_rows": 15,
+    "baseline_total_rows": 15,
+    "before_fix_exact_rows": 12,
+    "corrected_exact_rows": 2,
+    "notes": "Pinned historical .f32 files are version-specific regression captures. Gain correction changes all 11 Chicago outputs. All four Miami outputs match the PR #973 parent byte for byte. Before this change the fast-FMA compressor conversion changed 22 Chicago p00/fx4 frames, Miami p09 selected voice changed 12 frames, and Miami p18 MS20 changed 57 frames. The historical commit reproduces all 15 checked-in files.",
+    "comparisons": [
+      {
+        "file": "chicago-p00-fx0.f32",
+        "historical_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "before_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "after_sha256": "ceb34cac1d1a8d7905c91429543481df81784b3d5f1102f58c993120aa2392e3",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx1.f32",
+        "historical_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "before_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "after_sha256": "ceb34cac1d1a8d7905c91429543481df81784b3d5f1102f58c993120aa2392e3",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx2.f32",
+        "historical_sha256": "a55b511e231b05fe9a62e9fc0582422ea1301d48485e466a7032eea1fd152400",
+        "before_sha256": "a55b511e231b05fe9a62e9fc0582422ea1301d48485e466a7032eea1fd152400",
+        "after_sha256": "b87c65b7ffc176487df841242e34e46f89c91a32858652e8b3df67a7b332e2e7",
+        "stereo_frames_changed_from_973": 35906
+      },
+      {
+        "file": "chicago-p00-fx3.f32",
+        "historical_sha256": "b3e170587022dcc79d3ab41d8d62409ca5172157878cbff34d1f0e2dfa31ba89",
+        "before_sha256": "b3e170587022dcc79d3ab41d8d62409ca5172157878cbff34d1f0e2dfa31ba89",
+        "after_sha256": "488d75b04b8d6b0e1164abe0f14a4722a113fdc468a9f023a28daccc53ffe0a9",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx4.f32",
+        "historical_sha256": "a35fa06898e03fec2ae73d8e0cbafdf1c9e5cd6ff982470faccb143f59629717",
+        "before_sha256": "b72a4b7e5242c047d842ca2b503ab6d448cf4a7163d42e1b2d46214a4a8a0a8c",
+        "after_sha256": "11d90300bd28a8dc4ce6c41bf10f44b08e5b35b1fa8fc7c6e10f810bc5b2ab4a",
+        "stereo_frames_changed_from_973": 31656
+      },
+      {
+        "file": "chicago-p00-fx5.f32",
+        "historical_sha256": "2258b8b69fac77f540e576767ac1317a18db19bbac57d3d8a42a1903181210a0",
+        "before_sha256": "2258b8b69fac77f540e576767ac1317a18db19bbac57d3d8a42a1903181210a0",
+        "after_sha256": "f4c0df6cab4fb46ebd6a60acdd9032dbfaab682c089cb3b2a7bdc81009dabd3d",
+        "stereo_frames_changed_from_973": 30389
+      },
+      {
+        "file": "chicago-p00-fx6.f32",
+        "historical_sha256": "b11513afce749884257bb8e33531584f45071c1e70de6b05bf3c522683dffadc",
+        "before_sha256": "b11513afce749884257bb8e33531584f45071c1e70de6b05bf3c522683dffadc",
+        "after_sha256": "c24e8ceef4d967a8b90178b90be17c7d71f1957f9b0c8c22a0aa9e36d3f1a086",
+        "stereo_frames_changed_from_973": 30900
+      },
+      {
+        "file": "chicago-p07-fx0.f32",
+        "historical_sha256": "31f6a59c551bf954bc6f0e4e5a23431df5ce7a28002e1ff6e3ff12675ad91cef",
+        "before_sha256": "31f6a59c551bf954bc6f0e4e5a23431df5ce7a28002e1ff6e3ff12675ad91cef",
+        "after_sha256": "c4c8b16c43893020f145019509b95b769a8a84e50380ab94f7aa9d9e698aa78f",
+        "stereo_frames_changed_from_973": 43929
+      },
+      {
+        "file": "chicago-p19-fx0.f32",
+        "historical_sha256": "c6da1cd5a139be45847a9c403213f50a83d7176c001c5b94bedfd32cf3f979c4",
+        "before_sha256": "c6da1cd5a139be45847a9c403213f50a83d7176c001c5b94bedfd32cf3f979c4",
+        "after_sha256": "f1db4a5a62c24670e2c723a99d587d62af870c7c1df69bfed7ea7e184f4261af",
+        "stereo_frames_changed_from_973": 30183
+      },
+      {
+        "file": "chicago-p33-fx0.f32",
+        "historical_sha256": "e0079955a78c63e8db24b0f5babf0e73a6e11bb50411e75039ece99e6687df6f",
+        "before_sha256": "e0079955a78c63e8db24b0f5babf0e73a6e11bb50411e75039ece99e6687df6f",
+        "after_sha256": "e4132315272ae5bb413e6ae0b74cf8e698218483e18d79263ddc760fddec7e54",
+        "stereo_frames_changed_from_973": 31385
+      },
+      {
+        "file": "chicago-p54-fx0.f32",
+        "historical_sha256": "5ef9d1eaa0aad518ab245daa48e1fd16b25ab1f6628cbb60959ed9e42eaaa65f",
+        "before_sha256": "5ef9d1eaa0aad518ab245daa48e1fd16b25ab1f6628cbb60959ed9e42eaaa65f",
+        "after_sha256": "f2fb349c44df8b5a93e67bf15b6c521a81ac2bfb77b47c2aae54ec2cec41a708",
+        "stereo_frames_changed_from_973": 34310
+      },
+      {
+        "file": "miami-p00-fx0.f32",
+        "historical_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "before_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "after_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p09-fx0.f32",
+        "historical_sha256": "e8a7dd2c09e7353d1f46ef7468fe0c111d8202108b5d72aebe57b94dfa8e6622",
+        "before_sha256": "1a737fa1a4b0ba075806afebfc16f89100c46db330c910a5abe2fada3abe40bb",
+        "after_sha256": "1a737fa1a4b0ba075806afebfc16f89100c46db330c910a5abe2fada3abe40bb",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p18-fx0.f32",
+        "historical_sha256": "002bec7fc326717809e205e116998491ee9ecdf8d5e13135f5b676f0cb02efe3",
+        "before_sha256": "59387e83b54da9d08fd9f9de77f585dc4122ce17d8abfd455bbb620ddbe721a5",
+        "after_sha256": "59387e83b54da9d08fd9f9de77f585dc4122ce17d8abfd455bbb620ddbe721a5",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p29-fx0.f32",
+        "historical_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "before_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "after_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "stereo_frames_changed_from_973": 0
+      }
+    ]
   }
 }
