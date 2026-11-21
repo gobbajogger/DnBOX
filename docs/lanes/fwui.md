@@ -11,7 +11,11 @@
 | F7 Synth One | Ordinary SMK-37 Elite and Pro builds enable the 13 controls supported by the Synth One INIT provider on each bass part. The EFFECT page adds the native CRUSH RATE in Hz, independently of the 13 patch controls. The focused panel test edits every list control through the keyboard and checks reload and peer-part isolation. The optional factory graph remains a separate Sound configuration. |
 | F3 stock fit | Both packages, flash bounds, the 1,024-byte XIP floor and the 512-byte pool margin above the 8,192-byte reserve require measurements on this composition. |
 
-The focused regressions, independent screen review and ordinary Elite and Pro links are in progress. Integration owns the combined host suite.
+The native recovery fixture passed 42 frames, including both failed-update return states. Removing the redraw or shifting the retry by one pixel each failed its control. The compact SuperJ6 keyboard replay passed 8,918 assertions, matched all 28 earlier native frames and reached the five helpers previously listed as caller-free. [Recovery replays](fwui/current/native-routes/report.json) · [SuperJ6 function entries](fwui/current/native-routes/j6-function-replay.json)
+
+The sequenced BREAK replay measured Q15 peaks of 0, 4,644, 9,288 and 18,430 for saved hits at 0, 32, 64 and 127. The Synth One INIT renderer passed the 13-control sweeps. Its separate rate reducer matched the independent reference over 1,916,928 frames. The first EFFECT row used 50.844% of the available panel. Commit `199f0444` widens the waveform and separates its label and Hz readout. Final geometry and stock package measurements for this revision are pending. Integration owns the combined host suite.
+
+## Qualification of the merged #975
 
 Integ merged [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) into `integration/dnbox-consolidated` on 21 November 2026. The merge and qualified PR head have identical trees. All 37 focused host registrations and both stock builds passed on `9dd6f2df`. The complete host suite started on merge `3e307cfa`. [Merge](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) · [Qualification record](fwui/current/integration-qualification.json)
 

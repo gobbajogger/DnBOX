@@ -11,7 +11,7 @@ RAM linker regions and reset endpoints. It makes no device connection.
 | `fm1_main` | Its unchanged startup prefix sees an unrecognized flash ID, takes the RAM-only path, initializes the LCD, draws the factory splash and both post-crash notices, and enters the real safe-mode function on the guarded route. | This first fixture stops before `x0x_dbg.boots++`. A second fixture below traverses the complete ordinary loop with a recognized flash ID. |
 | `lcd_init` | Runs the SMK initialization sequence and transfers the complete black clear before DISPON. The test checks every write window and the full pixel count. | Electrical reset, DMA completion, panel timing and color on glass. |
 | `fm1_fault` | Draws six diagnostic rows, polls the production four-second deadline against a test clock and calls reset. | Hardware exception entry, physical delay and reboot. |
-| `safe_main`, `enter_uboot` | Checks PLAY before and after the 500-ms guard, both core readouts, the retry overlay with and without a crash record, USB request, detach, delays, bootguard and bootloader/reset endpoints. | Physical key, USB, watchdog and reset. The OTA service is idle. |
+| `safe_main`, `enter_uboot` | Checks PLAY before and after the 500-ms guard, both core readouts, the retry overlay with and without a crash record, USB request, detach, delays, bootguard and bootloader/reset endpoints. | Physical key, USB, watchdog and reset. A separate test also exercises a stalled updater and the return to recovery. |
 | `panel_setup` | Tests all 14 buttons and seven encoders, alternating encoder direction, timeout at initial release, second button and second encoder, and success. All three timeouts restore the old map. Success saves the checked new map once into RAM. | Physical scanning, actual timing and persistent calibration. |
 
 The replay compares every decoded pixel in 31 frames against their published
@@ -24,6 +24,23 @@ vertical displacement of the retry message fails the frame comparison.
 The [supplemental screen index](screen-index.tsv) maps the 40 recovery, calibration and waveform case IDs to their PNGs and decoded RGB digests.
 
 The primary inventory retains its original 98/118 count. Seven additional complete function bodies execute across the two host startup fixtures, including `fm1_main`. Physical startup remains unmeasured.
+
+## Returning from a failed update
+
+A host that stops sending data during a safe-mode install can recover without
+power cycling. After three unanswered 5-second package reads, the firmware
+shows the failed result for 1.5 seconds, then repaints the recovery controls
+and saved crash registers. PLAY shows the retry caption and requests a reset.
+The scanner, USB and bootguard timer keep their state.
+
+The compiled host replay compares all 57,600 pixels at each of the package,
+failure, restored safe-mode and retry checkpoints. Before the change,
+the first restored frame still showed FAILED. Pressing PLAY painted a retry
+caption over that screen. Removing the redraw reproduced both bad frames.
+[Restored controls](safe-after-failed-update.png) ·
+[Retry before](safe-retry-after-failed-update-before.png) ·
+[Retry after](safe-retry-after-failed-update.png) ·
+[Pixel differences](recovery-delta.json) · [Native receipt](report.json)
 
 ## Recognized flash and the ordinary application loop
 
