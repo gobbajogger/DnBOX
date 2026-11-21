@@ -1,0 +1,112 @@
+{
+  "schema_version": 3,
+  "status": "PARTIAL_WORKING_NOT_OFFLINE_COMPLETE",
+  "source_branch": "integration/dnbox-consolidated",
+  "checkpoint_branch": "lane/prep-shared-inputs-restore",
+  "bundle_file": "LoopyX0X37-shared-inputs-restore-integration-dnbox-consolidated-f1786ebe-583f6229.zip",
+  "bundle_sha256": "387bea14003ab5637ea794a87a7b77d542775880bc3e0d66d831e0a08a05ef05",
+  "bundle_size_bytes": 49459065,
+  "source_repositories": [
+    {
+      "repository": "gobbajogger/DnBOX",
+      "url": "https://github.com/gobbajogger/DnBOX.git",
+      "commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+      "tree": "a4876790880cae769298f6701e8ab5db1d970b30",
+      "destination": "sources/DnBOX",
+      "embedded": false
+    },
+    {
+      "repository": "gobbajogger/DnBOX-nightly",
+      "url": "https://github.com/gobbajogger/DnBOX-nightly.git",
+      "commit": "583f622961fc9975fac746592ce6c483073c4170",
+      "tree": "7c10299ae8ccccb72771cd75b490b67bf2238eac",
+      "destination": "sources/DnBOX-nightly",
+      "embedded": false
+    }
+  ],
+  "source_metadata_validation": {
+    "github_api_commit_and_tree_id": "PASS",
+    "github_api_recursive_tree_inventory": "PASS_NOT_TRUNCATED",
+    "gobbajogger/DnBOX": {
+      "objects": 7548,
+      "blobs": 6865,
+      "blob_size_bytes": 145411116,
+      "tree_sha": "a4876790880cae769298f6701e8ab5db1d970b30"
+    },
+    "gobbajogger/DnBOX-nightly": {
+      "objects": 1255,
+      "blobs": 1117,
+      "blob_size_bytes": 37805424,
+      "tree_sha": "7c10299ae8ccccb72771cd75b490b67bf2238eac"
+    },
+    "materialized_tree_sha256_verified": false,
+    "local_git_checkout_attempt": "FAIL_128_GITHUB_DNS_UNAVAILABLE"
+  },
+  "sdk_archive": {
+    "tag": "AC79NN_SDK_V1.2.14_2026-10-13",
+    "source_url": "https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK",
+    "library_folder": "/LoopyX0X37/Project Sources",
+    "library_filename": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13.zip",
+    "library_file_id": "libfile_fde3_f-884bd07411348191a96937009c5e02a3_2021479872048191acbfdca1f870a539",
+    "library_file_url": "https://chatgpt.com/library?file_id=libfile_fde3_f-884bd07411348191a96937009c5e02a3_2021479872048191acbfdca1f870a539&account_id=personal",
+    "size_bytes_from_library_metadata": 309800121,
+    "archive_sha256_reported_unverified": "929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6",
+    "present_as_library_file": true,
+    "raw_byte_materialization": "BLOCKED_UNAUTHORIZED_RAW_PATH",
+    "verified_by_byte_digest": false,
+    "stored_inside_this_bundle": false,
+    "file_pins_from_build_py": {
+      "cpu/wl82/tools/uboot.boot": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+      "cpu/wl82/tools/cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+      "cpu/wl82/tools/cfg/eq_cfg_hw.bin": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8"
+    },
+    "check_command": "python3 scripts/verify_sdk.py --sdk-zip /path/to/fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13.zip --extract ./restored/SDK"
+  },
+  "compiler_input": {
+    "archive_path": "toolchain/jieli-linux-toolchains-20260730.1.zip",
+    "source_name": "jieli-linux-toolchains-20260730.1.zip",
+    "size_bytes": 49449905,
+    "sha256": "ed379c483468c44f10cf3be7db32356b9623e16320a021cf2a4e06ec96ab5f19",
+    "version": "20260730.1; pi32v2 Clang 4.0.1",
+    "unpack_target": "toolchain/",
+    "exec_path": "toolchain/jieli-linux-toolchains-20260730.1/pi32v2/bin/clang",
+    "platform": "Linux x86_64",
+    "compatibility": "DnBOX firmware build: pi32v2/compiler confirmed"
+  },
+  "bundle_contains_sources": false,
+  "bundle_contains_sdk_bytes": false,
+  "destination": "personal ChatGPT Library /LoopyX0X37/Project Sources (Project Files attachment not verified)",
+  "tested": {
+    "baseline_zip_readback": "PASS",
+    "compiler_zip_sha256": "PASS",
+    "compiler_executable_version": "PASS_4.0.1",
+    "inputs_only_restore": "PASS",
+    "source_fetch": "FAIL_128_DNS",
+    "sdk_extractor_synthetic_positive": "PASS",
+    "sdk_extractor_synthetic_wrong_hash_rejected": "PASS",
+    "sdk_production_sha256": "NOT_RUN",
+    "fresh_worker_full_restore": "NOT_RUN"
+  },
+  "restore_commands": [
+    "unzip -q LoopyX0X37-shared-inputs-restore-integration-dnbox-consolidated-f1786ebe-583f6229.zip -d dnbox-shared",
+    "cd dnbox-shared && bash scripts/restore.sh ./restored --inputs-only",
+    "cd dnbox-shared && bash scripts/restore.sh ./restored --fetch # requires github.com network",
+    "cd dnbox-shared && python3 scripts/verify_sdk.py --sdk-zip /path/to/sdk.zip --extract ./restored/SDK",
+    "export JIELI_TOOLCHAIN=\"$PWD/restored/toolchain/jieli-linux-toolchains-20260730.1\"",
+    "export AC79_SDK=\"$PWD/restored/SDK\""
+  ],
+  "note": "The testable source-fetched plus SDK path remains blocked in this runtime. Do not interpret bundle publication as all-input restore success.",
+  "published_library": {
+    "folder": "/LoopyX0X37/Project Sources",
+    "bundle_file_id": "libfile_fde3_f-10d0d482801c819181a139adde0637ed_2021479872048191acbfdca1f870a539",
+    "bundle_url": "https://chatgpt.com/library?file_id=libfile_fde3_f-10d0d482801c819181a139adde0637ed_2021479872048191acbfdca1f870a539&account_id=personal",
+    "standalone_manifest_file_id": "libfile_fde3_f-58c73d3cb4408191a7434c5eb62b3982_2021479872048191acbfdca1f870a539",
+    "standalone_manifest_url": "https://chatgpt.com/library?file_id=libfile_fde3_f-58c73d3cb4408191a7434c5eb62b3982_2021479872048191acbfdca1f870a539&account_id=personal",
+    "standalone_manifest_sha256": "62e6f02dc72b51a1032af775d78d8006206bc6f6518a8ae38aa3ba66ccdf2bd7",
+    "bundle_upload": "PASS",
+    "manifest_upload": "PASS",
+    "byte_for_byte_library_readback": "PASS",
+    "zip_integrity_after_readback": "PASS",
+    "project_files_attachment": "NOT_VERIFIED"
+  }
+}
