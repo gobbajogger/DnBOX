@@ -1169,8 +1169,8 @@ static UI_DRAW void smc_ui_grid(void)
                 }
             } else {
                 const felucca_font_t *font = tw(&FONT_T, caption) <= 20 ? &FONT_T : &FONT_XS;
-                const capm_t *cap = caps(font);
-                int text_y = y + 1 + (9 - (cap->bot - cap->top + 1)) / 2 - cap->top;
+                int top = cap_top(font);
+                int text_y = y + 1 + (9 - (cap_bottom(font) - top + 1)) / 2 - top;
                 text_c(x + 19, text_y, font, caption, c);
             }
         }

@@ -5171,6 +5171,11 @@ static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f, s);
 /* a font's capital line: the first and last rows of 'H' (rounded half coverage), measured
  * once from the glyph bitmap, so text is centred on what the eye sees rather than on the
  * font's cell (which differs per face and size) */
+#ifdef FONT_ENTROPY
+/* The glyph generator retained the panel's existing vertical alignment. */
+static int cap_top(const felucca_font_t *f) { return f->data[0]; }
+static int cap_bottom(const felucca_font_t *f) { return f->data[1]; }
+#else
 typedef struct { const felucca_font_t *f; int8_t top, bot; } capm_t;
 static capm_t capm[6];
 static const capm_t *caps(const felucca_font_t *f)
@@ -5201,6 +5206,9 @@ static const capm_t *caps(const felucca_font_t *f)
     }
     return &capm[i];
 }
+static int cap_top(const felucca_font_t *f) { return caps(f)->top; }
+static int cap_bottom(const felucca_font_t *f) { return caps(f)->bot; }
+#endif
 /* parts of a line ("A 909 GR", "B 909 FL") with a real gap between them: a proportional face's
  * space is too narrow to separate them. A NULL ends the list. */
 static int32_t segs(int32_t x, int32_t y, const felucca_font_t *f, uint16_t c, int32_t gap, const char *a,
@@ -5216,14 +5224,14 @@ static int32_t segs(int32_t x, int32_t y, const felucca_font_t *f, uint16_t c, i
 /* the y to draw f at so its capitals sit centred in [y0, y0 + h) */
 static int32_t vc(const felucca_font_t *f, int32_t y0, int32_t h)
 {
-    const capm_t *m = caps(f);
-    int32_t ch = m->bot - m->top + 1;
-    return y0 + (h - ch + 1) / 2 - m->top;
+    int32_t top = cap_top(f);
+    int32_t ch = cap_bottom(f) - top + 1;
+    return y0 + (h - ch + 1) / 2 - top;
 }
 /* the y to draw g at so its baseline matches f drawn at y */
 static int32_t base_y(const felucca_font_t *f, int32_t y, const felucca_font_t *g)
 {
-    return y + caps(f)->bot - caps(g)->bot;
+    return y + cap_bottom(f) - cap_bottom(g);
 }
 static void text_c(int32_t cx, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)
 {

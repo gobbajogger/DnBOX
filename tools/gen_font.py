@@ -12,6 +12,7 @@ alpha 0..15. Each glyph's packed bytes use lossless PackBits: a control byte
 0..127 introduces that many + 1 literal bytes; 128..255 repeats the following
 byte (control & 127) + 1 times. Glyph metrics and all coverage values are unchanged.
 """
+from collections import Counter
 import sys
 from pathlib import Path
 
@@ -259,6 +260,57 @@ def pack_cropped_glyph(pixels, width, height):
             *pack_glyph_lz(raw)]
 
 
+def entropy_codes(payloads):
+    """Encode byte ranks in eight prefix groups using four to ten bits each."""
+    counts = Counter(byte for data in payloads for byte in data)
+    symbols = sorted(range(256), key=lambda b: (-counts[b], b))
+    codes = {}
+    for rank, byte in enumerate(symbols):
+        group = max(0, rank.bit_length() - 1)
+        width = max(1, group)
+        base = 1 << group if group else 0
+        codes[byte] = (group | ((rank - base) << 3), 3 + width)
+    return symbols, codes
+
+
+def encode_glyphs(data, offsets, codes):
+    """Keep glyphs byte-addressable and bound the decoder's two-byte lookahead."""
+    starts = sorted(set(offsets))
+    ends = starts[1:] + [len(data)]
+    encoded, new_offsets = [], {}
+    for start, end in zip(starts, ends):
+        new_offsets[start] = len(encoded)
+        reservoir = bits = 0
+        for byte in data[start:end]:
+            word, width = codes[byte]
+            reservoir |= word << bits
+            bits += width
+            while bits >= 8:
+                encoded.append(reservoir & 255)
+                reservoir >>= 8
+                bits -= 8
+        if bits:
+            encoded.append(reservoir)
+    return encoded + [0, 0], [new_offsets[start] for start in offsets]
+
+
+def cap_alignment(data, offset, width, height):
+    """Preserve the preceding packed font's observed cap-line alignment.
+
+    The panel measured H (or 0 in the numeric face) from the stored bytes.
+    Record that existing layout before recoding the glyph payload.
+    """
+    stride = (width + 1) // 2
+    rows = []
+    for y in range(height):
+        for x in range(width):
+            index = offset + y * stride + x // 2
+            if index < len(data) and (data[index] >> (0 if x & 1 else 4)) & 15 >= 8:
+                rows.append(y)
+                break
+    return [rows[0], rows[-1]] if rows else [0, 0]
+
+
 def main(out, compressed=True, codec="crop-lz"):
     assert codec in ("crop-lz", "packbits")
     if not PILFeatures.check("raqm"):
@@ -267,6 +319,7 @@ def main(out, compressed=True, codec="crop-lz"):
              "#pragma once", "#include <stdint.h>", f"#define FONT_PAD {PAD}  /* x scale for L, see below */", ""]
     if compressed:
         lines.append("#define FONT_LZ_CROP 1" if codec == "crop-lz" else "#define FONT_PACKBITS 1")
+    roles = []
     for name, ttf, px, scale, pixel, first, last in SIZES:
         h, glyphs = render(ttf, px, scale, pixel, first, last)
         if name in KEEP:
@@ -291,6 +344,19 @@ def main(out, compressed=True, codec="crop-lz"):
                     raw.append((row[x] << 4) | row[x + 1])
             data.extend((pack_cropped_glyph(g, bw, h) if codec == "crop-lz" else pack_glyph(raw))
                         if compressed else raw)
+        roles.append((name, ttf, px, h, scale, first, last, glyphs, data, offs))
+    entropy = compressed and codec == "crop-lz"
+    if entropy:
+        symbols, codes = entropy_codes(role[-2] for role in roles)
+        lines.append("#define FONT_ENTROPY 1")
+        lines.append("static const uint8_t font_symbols[256] = {" + ",".join(map(str, symbols)) + "};")
+    for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
+        if entropy:
+            cap = ord("H" if last >= ord("H") else "0") - first
+            alignment = cap_alignment(data, offs[cap], glyphs[cap][1], h)
+            data, offs = encode_glyphs(data, offs, codes)
+            data = alignment + data
+            offs = [offset + len(alignment) for offset in offs]
         assert len(data) < 65536
         lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
         for i in range(0, len(data), 24):

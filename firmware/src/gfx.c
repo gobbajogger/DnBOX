@@ -176,6 +176,30 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
 
 /* text in colour c, each pixel's coverage blended over what is already on the canvas (an
  * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
+#ifdef FONT_ENTROPY
+typedef struct {
+    const uint8_t *next;
+    uint32_t word, bits;
+} font_stream_t;
+
+/* Each three-bit group identifies a power-of-two range of byte ranks. The
+ * generator appends two guard bytes for the last glyph's lookahead. */
+static inline uint32_t font_byte(font_stream_t *s)
+{
+    while (s->bits < 10u) {
+        s->word |= (uint32_t)*s->next++ << s->bits;
+        s->bits += 8u;
+    }
+    uint32_t group = s->word & 7u;
+    uint32_t width = group ? group : 1u;
+    uint32_t base = group ? 1u << group : 0u;
+    uint32_t rank = base + ((s->word >> 3) & ((1u << width) - 1u));
+    s->word >>= 3u + width;
+    s->bits -= 3u + width;
+    return font_symbols[rank];
+}
+#endif
+
 static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c, int32_t clip_left, int32_t clip_right)
 {
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
@@ -198,8 +222,15 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
 #endif
         gd = f->data + f->off[gi];
 #ifdef FONT_LZ_CROP
-        uint32_t rectangle = gd[0] | ((uint32_t)gd[1] << 8) | ((uint32_t)gd[2] << 16);
-        gd += 3;
+#ifdef FONT_ENTROPY
+        font_stream_t stream = {gd, 0, 0};
+#define FONT_BYTE() font_byte(&stream)
+#else
+#define FONT_BYTE() (*gd++)
+#endif
+        uint32_t rectangle = FONT_BYTE();
+        rectangle |= FONT_BYTE() << 8;
+        rectangle |= FONT_BYTE() << 16;
         crop_x = rectangle & 63u;
         crop_y = (rectangle >> 6) & 63u;
         w = (rectangle >> 12) & 63u;
@@ -213,15 +244,16 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                  * the ring is bounded and needs no clear or shared state. */
                 if (!(gx & 1u)) {
                     if (!left) {
-                        uint32_t token = *gd++;
-                        distance = token & 128u ? *gd++ : 0;
+                        uint32_t token = FONT_BYTE();
+                        distance = token & 128u ? FONT_BYTE() : 0;
                         left = (token & 127u) + (distance ? 3u : 1u);
                     }
-                    byte = distance ? history[(written - distance) & 255u] : *gd++;
+                    byte = distance ? history[(written - distance) & 255u] : FONT_BYTE();
                     history[written++ & 255u] = (uint8_t)byte;
                     left--;
                 }
                 a = byte;
+#undef FONT_BYTE
 #elif defined(FONT_PACKBITS)
                 /* Decode one byte per pixel pair; odd-width rows discard their
                  * padding nibble exactly as the original bitmap reader did. */
