@@ -14,6 +14,27 @@ PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) starts at sound PR [#97
 | Synth One | Pinned original Synth One dry scheduler and captures | The ordinary six-voice INIT renderer passes all 180 static notes, 72 modulation notes and eight note/chord scenes. Previously a release and reattack at the same render boundary produced no new attack. It now reproduces the original retrigger at MIDI 36, 60 and 84. Original factory-bank comparisons use a separate host graph. The 694-program graph and its effects are outside the shipping INIT path. [Original PCM digests and retrigger measurements](../../experiments/sound-hardware-v1/stock-dry/README.md) |
 | Juno / SuperJ6 | Pinned original-derived CoreSampler and analytic oscillator, authenticated PWM String Pad controls | All four shipping patches render finite stereo. Repeated pitches during release or sustain now reuse the ringing voice on all four. The optional factory path also clears inherited PWM and passes 298 oscillator probes plus eight authentic layer comparisons. The complete stereo comparison has 0 of 14 original preset pairs available. [Shipping and component measurements](../../experiments/sound-hardware-v1/sj6-factory/retrigger/README.md) |
 
+## Timing and on-device signal in the emulator
+
+Both ordinary JieLi builds fit. The measured applications occupied 546,468 bytes on Elite and 546,460 bytes on Pro. Both retained 9,024 free pool bytes, 832 bytes above the reserve. The USB reset now completes before audio DMA starts. The guest late-transfer and xrun counters include startup.
+
+These measurements identify the combined source `29a2694ea9c64c7726ad686a218866dfb66654fa`. Both images include the 808, Chicago, Synth One and Juno corrections and the first 909 re-encode. The later ride correction changes package bytes. Each heavy shot uses the same calibrated 922 physical input events over 8,000 ms with `FM1_STRICT=1` and `fm1-live --mhz 360`. The unshifted ordinary scene completed 647 audio halves on each model. The lane's additional 700 µs target is tighter than the requested 11,609 µs deadline.
+
+| Initial project and synth owners | Elite peak µs | Elite raw late / xruns | Pro peak µs | Pro raw late / xruns |
+| --- | ---: | ---: | ---: | ---: |
+| Ordinary calibrated scene | 10,963 | 0 / 0 | 11,213 | 0 / 0 |
+| Populated, Chicago and Miami | 13,587 | 72 / 72 | 15,460 | 100 / 100 |
+| Populated, Juno and Synth One | 12,097 | 6 / 6 | 13,408 | 78 / 78 |
+
+The populated projects retain the same scene and run real patterns on both kits, both bass parts and a loaded 909FL loop. On Elite the synth owners were Chicago/Miami and Juno/Synth One. Pro reversed each pair. All five guest part meters registered and all 22 kit tracks fired in each populated shot. In separate short shots, each isolated kit triggered all 11 of its tracks with the other four meters at zero. The [native per-part receipts](../../experiments/sound-hardware-v1/selected-native/results.json) also identify the tested sample, project, firmware, ELF and captured DAC stream.
+
+| SHA-256 | Elite | Pro |
+| --- | --- | --- |
+| FWSC | `0893e0bbc0cc83cdb276e4ae3baa3d459dc9f9ebec99cdfefb8a05c9e1c91fab` | `6a4e38a656c2a1114ca296fd892201bde57865896d194734fd769ff4ade3589a` |
+| ELF | `cd862677d32feb755e7f74adc2397fbb703684cd58ae1a69570d0f5df47ceba9` | `93ce01e75c458d67cb781a71c49e9ba2f3fc88fcb258e31ff20e761ea7c506f4` |
+
+The emulator was built from `ba83317aa55cbcdb2830c5da97d5f64b763499e2`, executable SHA-256 `f52a3f6fb18ebe22a4c59281d441aa16b3ce5c93b008c53b538bd2383b296c57`. The [ordinary scene driver](../../experiments/sound-hardware-v1/strict-timing/replay.py) verifies the protected bytes in its warmed seed and collects the guest's actual counters. For the populated test, use the [project staging instructions](../../experiments/sound-hardware-v1/selected-native/README.md) and its sibling `heavy.py` with the two staged owner IDs.
+
 ## Reproducing the comparisons
 
 Run the 808 and 909 host benches against the pinned checkouts above. Use a separate working directory per native build because both models generate headers. The native smoke tests and the heavy scene use disposable emulator flash. No physical keyboard was tested.
