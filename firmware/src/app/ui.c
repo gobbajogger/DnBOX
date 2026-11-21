@@ -8345,14 +8345,11 @@ static UI_DRAW uint32_t knobs_sig(void)
     MIXIN(ui_ease_sig());
     MIXIN(ui.view);
     if(ui.view==V_SEQ) {
-        step_lane_context_t context;
-        step_lane_prepare(&context,ui.part,ui.part<NKIT?ui.sel[ui.part]:0,ui_step_lane);
+        step_lane_snapshot_t lane;
+        step_lane_snapshot(&lane,ui_step_lane);
         MIXIN(ui_step_lane);
-        for(int c=0;c<16;c++) {
-            int conditional,step=ui.part==PART_BRK?c:step_of(c);
-            MIXIN(step_lane_read(&context,step,&conditional));
-            MIXIN(step_lane_has_note(ui.part,ui.part<NKIT?ui.sel[ui.part]:0,step));
-        }
+        MIXIN(lane.notes);
+        for(int c=0;c<16;c++)MIXIN(lane.value[c]);
     }
     MIXIN(ui.part);
     MIXIN(division_pad_owner());

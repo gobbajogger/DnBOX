@@ -26,8 +26,9 @@
 enum { T_909, T_808, T_303, T_BRK, T_FX, T_MIX, T_MST, NTARGETS };
 #define T_PROB NTARGETS                /* a lane's pseudo-target: a step's chance, 5..100 % (not in sound_t);
                                         * voice = part << 4 | drum track (0 on the 303s and the break) */
-#define T_VEL (T_PROB + 1)             /* drum step velocity 1..127 (not in sound_t); same voice packing as T_PROB.
-                                        * MOT_NONE / base 0 = legacy accent / accent_q7 law. 303s keep bstep.velocity. */
+#define T_VEL (T_PROB + 1)             /* drum or BREAK step velocity, same voice packing as T_PROB.
+                                        * Drums use 0 / MOT_NONE for the accent law. BREAK uses MOT_NONE for
+                                        * unity, 0 for silent and 127 for unity. 303s keep bstep.velocity. */
 enum { PART_909, PART_808, PART_303A, PART_303B, PART_BRK, NPARTS };
 /* T_MIX, per part: level, reverb send, delay send, pan (64 = centre),
  * channel cutoff (127 = open, before the master filter). */

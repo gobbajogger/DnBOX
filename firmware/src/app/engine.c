@@ -1226,7 +1226,7 @@ static void s_brk(void *x, int s16, int bar, float spb, int en)
             breaks_set(&brk, i, bp->set[i]);
         }
     breaks_pin(&brk, (int)bp->slice[s16 & 15] - 1);   /* the step's own slice, if it has one */
-    breaks_step(&brk, s16, bar, spb, en);
+    breaks_step_velocity(&brk, s16, bar, spb, en, seq.brk_velocity);
 }
 static void brk_midi_discard(void);
 static void s_brkstop(void *x) { (void)x; breaks_stop(&brk); brk_midi_discard(); }
@@ -1326,7 +1326,7 @@ static int mot_base(void *x, int t, int v, int i)
     if (t == T_PROB)
         return 100;                                   /* always */
     if (t == T_VEL)
-        return 0;                                     /* legacy accent / accent_q7 */
+        return v == (PART_BRK << 4) ? 127 : 0;         /* BREAK unity; drums use the accent law */
     if (t >= NTARGETS)
         return 100;
     if (t == T_303 && (unsigned)v < NBASS && i == mod_param(v) && mod_ctl[v] >= 0)
@@ -1345,8 +1345,11 @@ static void mot_apply(void *x, int t, int v, int i, int val)
             prob[v >> 4][v & 15] = (uint8_t)val;
     } else if (t == T_VEL) {
         int kit = v >> 4, voice = v & 15;
-        if ((unsigned)kit < NKIT && (unsigned)voice < NDRUM)
-            seq.drum_vel[kit][voice] = (uint8_t)(val < 0 ? 0 : val > 127 ? 127 : val);
+        uint8_t velocity = (uint8_t)(val < 0 ? 0 : val > 127 ? 127 : val);
+        if (v == (PART_BRK << 4))
+            seq.brk_velocity = velocity;
+        else if ((unsigned)kit < NKIT && (unsigned)voice < NDRUM)
+            seq.drum_vel[kit][voice] = velocity;
     } else if (t < NTARGETS)
         apply_param(t, v, i, val);
 }
@@ -2941,6 +2944,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;
         motion_release(&mot);
+        seq.brk_velocity = 127; /* undo/load may already have removed the lane that supplied it */
     }
     mot_was_on = mot_on;
     guard_apply();

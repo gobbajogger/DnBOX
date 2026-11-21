@@ -142,6 +142,7 @@ typedef struct {
     volatile uint8_t playing;         /* 1 = running */
     volatile uint8_t ppat[NTRACKS];   /* the pattern each part plays */
     volatile uint8_t pcue[NTRACKS];   /* each part's cued pattern (0xFF = none) */
+    uint8_t brk_velocity;             /* audio-side T_VEL value for the next sequenced BREAK hit */
     union {
         volatile uint16_t chain;      /* publish a | b << 8 with one aligned store */
         struct {                     /* little-endian read aliases for the main-loop UI */

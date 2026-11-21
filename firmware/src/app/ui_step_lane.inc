@@ -21,7 +21,10 @@ static void step_lane_prepare(step_lane_context_t *c,int part,int voice,int kind
         c->maximum=c->fallback=100;
     } else if(kind==UI_LANE_VELOCITY) {
         if(part<NKIT) {target=T_VEL;motion_voice=(part<<4)|voice;}
-        else if(!part_is_303(part))c->available=0; /* BREAK velocity is not admitted. */
+        else if(part==PART_BRK) {
+            target=T_VEL;motion_voice=PART_BRK<<4;c->fallback=127;
+            c->ref=PR(R_ENG,T_VEL,motion_voice,0);
+        }
     } else if(kind==UI_LANE_PITCH && part_is_303(part)) {
         /* Native stored note below, without an invented parameter lock. */
     } else {
@@ -49,6 +52,7 @@ static int step_lane_read(const step_lane_context_t *c,int step,int *conditional
     if(c->kind==UI_LANE_CHANCE)*conditional=value>100;
     else if(c->kind==UI_LANE_VELOCITY) {
         if(c->part<NKIT)return value?value:sm_get(c->pat->drum[c->part].accent,step)?127:seq.accent_q7;
+        if(c->part==PART_BRK)return value;
         return bstep_velocity(&c->pat->bass[c->part-PART_303A].step[step]);
     } else if(c->kind==UI_LANE_PITCH && part_is_303(c->part))return c->pat->bass[c->part-PART_303A].step[step].note;
     return value;
@@ -76,9 +80,9 @@ X0X_COLD static int step_lane_turn(int e)
         goto done;
     }
     next=value+e;
-    next=next<1&&c.kind==UI_LANE_VELOCITY?1:next<0?0:next>c.maximum?c.maximum:next;
+    next=next<1&&c.kind==UI_LANE_VELOCITY&&part!=PART_BRK?1:next<0?0:next>c.maximum?c.maximum:next;
     if(next==value)goto done;
-    if(c.kind==UI_LANE_VELOCITY) {
+    if(c.kind==UI_LANE_VELOCITY && part!=PART_BRK) {
         if(part<NKIT) {
             drum_vel_set_step(part,ui.sel[part],step,(uint8_t)next);
             k=motion_find(proj.arr.lane,seq.ppat[part],part,T_VEL,(part<<4)|ui.sel[part],0);
@@ -92,6 +96,14 @@ X0X_COLD static int step_lane_turn(int e)
         if(k<0)k=motion_alloc(proj.arr.lane,seq.ppat[part],part,c.ref.a,c.ref.b,c.ref.c);
         if(k<0) {full=1;goto done;}
         proj.arr.lane[k].val[step]=(uint8_t)next;
+        /* Returning to unity releases sparse storage once no other step needs it. */
+        if(part==PART_BRK && c.kind==UI_LANE_VELOCITY && next==127) {
+            lane_t *lane=&proj.arr.lane[k];
+            lane->val[step]=MOT_NONE;
+            int j=0;
+            while(j<NSTEPS && lane->val[j]==MOT_NONE)j++;
+            if(j==NSTEPS)engine_motion_clear(k);
+        }
         changed=1;
     }
 done:
@@ -102,8 +114,11 @@ done:
 }
 static int step_lane_value(int part,int voice,int step,int kind,int *maximum,int *conditional)
 {
+    uint32_t guard=part==PART_BRK?plat_cq_lock():0;
     step_lane_context_t c;step_lane_prepare(&c,part,voice,kind);*maximum=c.maximum;
-    return step_lane_read(&c,step,conditional);
+    int value=step_lane_read(&c,step,conditional);
+    if(part==PART_BRK)plat_cq_unlock(guard);
+    return value;
 }
 static int step_lane_has_note(int part,int voice,int step)
 {
@@ -112,22 +127,44 @@ static int step_lane_has_note(int part,int voice,int step)
     if(part_is_303(part))return bstep_gate(&pat->bass[part-PART_303A].step[step])!=G_REST;
     return step<16 && !!(pat->brk.steps&(1u<<step));
 }
+typedef struct {
+    int16_t value[16];
+    uint16_t notes;
+    int maximum;
+} step_lane_snapshot_t;
+
+/* Take the same coherent view for the strip and its redraw signature. Release
+ * the audio guard before any painting or display I/O. */
+static void step_lane_snapshot(step_lane_snapshot_t *snapshot,int kind)
+{
+    int part=ui.part,voice=part<NKIT?ui.sel[part]:0;
+    uint32_t guard=part==PART_BRK?plat_cq_lock():0;
+    step_lane_context_t context;
+    step_lane_prepare(&context,part,voice,kind);
+    snapshot->maximum=context.maximum;
+    snapshot->notes=0;
+    for(int c=0;c<16;c++) {
+        int conditional,step=part==PART_BRK?c:step_of(c);
+        snapshot->value[c]=(int16_t)step_lane_read(&context,step,&conditional);
+        if(step_lane_has_note(part,voice,step))snapshot->notes|=(uint16_t)(1u<<c);
+    }
+    if(part==PART_BRK)plat_cq_unlock(guard);
+}
+
 static UI_DRAW void draw_step_lane(void)
 {
     static const char *const labels[UI_LANE_COUNT]={"VELOCITY","CHANCE","PITCH","PAN"};
     int kind=ui_step_lane<UI_LANE_COUNT?ui_step_lane:UI_LANE_VELOCITY;
-    int part=ui.part,voice=part<NKIT?ui.sel[part]:0;
-    step_lane_context_t context;step_lane_prepare(&context,part,voice,kind);
+    step_lane_snapshot_t snapshot;step_lane_snapshot(&snapshot,kind);
     cv_rect(0,69,240,13,SOUND_FACE); /* replace only the old footer, preserve four knobs */
     cv_text(4,69,&FONT_T,labels[kind],SOUND_GRAY);
     for(int c=0;c<16;c++) {
-        int step=part==PART_BRK?c:step_of(c),maximum=context.maximum,conditional;
-        int value=step_lane_read(&context,step,&conditional);
+        int maximum=snapshot.maximum,value=snapshot.value[c];
         int x=69+c*10;
-        uint16_t ink=step_lane_has_note(part,voice,step)?part_col():SOUND_LINE;
+        uint16_t ink=(snapshot.notes & (1u<<c))?part_col():SOUND_LINE;
         cv_rect(x,72,1,8,SOUND_LINE);
         if(value<0) {cv_rect(x-1,78,3,1,SOUND_GRAY);continue;}
-        if(conditional) {box(x-2,72,5,7,ink);continue;}
+        if(kind==UI_LANE_CHANCE && value>100) {box(x-2,72,5,7,ink);continue;}
         if(value>maximum)value=maximum;
         int h=(value*7+maximum/2)/maximum;
         cv_rect(x-1,79-h,3,h+1,ink);

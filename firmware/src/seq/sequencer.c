@@ -45,6 +45,7 @@ X0X_COLD void seq_init(seq_t *s, pattern_t *patterns)
     s->bpm = 125.0f;
     s->ext_bpm = 125.0f;
     s->accent_q7 = 88;                /* a 909 non-accented hit sits ~3 dB under an accent */
+    s->brk_velocity = 127;            /* an unedited BREAK hit plays at its original gain */
     s->send_clock = 1;
     for (i = 0; i < NTRACKS; i++)
         s->ch[i] = SEQ_CH_DEFAULT[i];
