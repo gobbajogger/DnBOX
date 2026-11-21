@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 4);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 6);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -222,6 +222,9 @@ static void verify_synthone(void)
     assert(original_sound_set(wet, ORIGINAL_SYNTHONE_CRUSH, 74));
     assert(wet[ORIGINAL_SYNTHONE_WIDTH] == 91 && wet[ORIGINAL_SYNTHONE_CRUSH] == 74);
     assert(original_sound_edit_mask(wet) == 12u && original_sound_valid(wet));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_PAN_RATE, 0));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_PAN, 1));
+    assert(original_sound_edit_mask(wet) == 60u && original_sound_valid(wet));
     wet[31] = 0;
     assert(!original_sound_valid(wet));
     uint8_t bad[32] = {0};

@@ -745,6 +745,10 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
             *val = s1_part_crush_hz(unit_control((unsigned)pot));
             return X0X_U_HZ;
         }
+        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && i == (int)ORIGINAL_SYNTHONE_PAN_RATE && (unsigned)pot < 128u) {
+            *val = s1_pan_hz((unsigned)pot);
+            return X0X_U_HZ;
+        }
         return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */

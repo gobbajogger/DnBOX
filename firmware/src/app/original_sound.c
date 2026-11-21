@@ -46,7 +46,8 @@ static const uint8_t original_sound_juno_factories[4][16] = {
 };
 static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
 static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
-    {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0},{"Width",127,0,0}
+    {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0},{"Width",127,0,0},
+    {"Pan",127,0,0},{"Pan Hz",127,ORIGINAL_SYNTHONE_PAN_RATE_INIT,0}
 };
 static const char *const original_sound_synthone_names[ORIGINAL_SYNTHONE_FACTORIES] = {
     "INIT"
@@ -181,17 +182,17 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
     uint32_t mask = original_sound_edit_mask(cell);
-    uint32_t effects = (1u << ORIGINAL_SYNTHONE_CRUSH) | (1u << ORIGINAL_SYNTHONE_WIDTH);
+    uint32_t effects = ((1u << ORIGINAL_SYNTHONE_NPARAMS) - 1u) & ~3u;
     if (cell[31] != (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & effects))) return 0;
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
-        for (unsigned i = ORIGINAL_SYNTHONE_CRUSH; i <= ORIGINAL_SYNTHONE_WIDTH; ++i)
+        for (unsigned i = ORIGINAL_SYNTHONE_CRUSH; i < ORIGINAL_SYNTHONE_NPARAMS; ++i)
             if (!(mask & (1u << i)) && cell[i]) return 0;
     }
     unsigned count = original_sound_count(cell[29]);
     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
 #if X0X_SYNTHONE_PATCH
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
-        if (mask & ~(S1_PATCH_MASK | 15u)) return 0;
+        if (mask & ~(S1_PATCH_MASK | effects | 3u)) return 0;
         for (unsigned i = 0; i < 22; ++i) {
             if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
         }
@@ -297,7 +298,7 @@ int original_sound_value(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned para
         if (!original_sound_control_value(cell[29], parameter, cell[parameter], &result)) return 0;
     }
     else if (cell[29] == ORIGINAL_SOUND_SYNTHONE)
-        result = 0.f;
+        result = parameter == ORIGINAL_SYNTHONE_PAN_RATE ? unit_control(ORIGINAL_SYNTHONE_PAN_RATE_INIT) : 0.f;
     else if (cell[29] == ORIGINAL_SOUND_JUNO)
         result = unit_control(original_sound_juno_factories[cell[30]][parameter]);
     else if (cell[29] == ORIGINAL_SOUND_CHICAGO) {

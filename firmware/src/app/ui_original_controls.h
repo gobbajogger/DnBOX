@@ -20,7 +20,7 @@ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
 };
 static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
 static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
-    {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,-1,-1}
+    {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE}
 };
 static const char *const ui_original_synthone_titles[] = {
     "SYNTH ONE"
@@ -48,6 +48,8 @@ static const char *ui_original_name(unsigned kind, unsigned id)
     if (kind == ORIGINAL_SOUND_SYNTHONE) {
         if (id == ORIGINAL_SYNTHONE_CRUSH) return "CRUSH RATE";
         if (id == ORIGINAL_SYNTHONE_WIDTH) return "STEREO WIDTH";
+        if (id == ORIGINAL_SYNTHONE_PAN) return "PAN DEPTH";
+        if (id == ORIGINAL_SYNTHONE_PAN_RATE) return "PAN RATE";
         return "";
     }
     return kind == ORIGINAL_SOUND_MIAMI && id < 16 ? miami[id] : "";

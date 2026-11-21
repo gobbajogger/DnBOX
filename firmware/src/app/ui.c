@@ -1,9041 +1,3663 @@
-/* SPDX-License-Identifier: GPL-3.0-only */
-/* X0X user interface v2 (docs/plans/2026-10-03-ui.md): panel input, screens, the knob strip,
- * lists, questions, the readout, and the key lights.
- *
- * Grammar: ALGORITHM = part, PRESETS = pattern, SELECT = move (page / list row), KNOB 1-4 =
- * the four values in the knob strip (on every screen), SEL = open / run / yes, HOME = back.
- *
- * The screen is four bands (header, main top, main bottom, knob strip), each drawn into
- * Felucca's canvas and blitted only when its pixels changed: SPI time is the scarce thing.
- *
- * Keys: F3..G5; the 16 white keys are steps (HOME: patterns), the 11 black keys a drum
- * machine's tracks or the break's slice pads (HOME: part mutes). */
-#include "../dsp/drum808.h"
-#include "x0x.h"
-#include "../seq/held_chord.h"
-#include "panic_chord.h"
-#include "play_question.h"
-#include "home_pattern_glyph.h" /* HOME complete patterns, per-hit velocity */
-#include "ui_pictograms.h"
-#include "../x0x_cold.h"                       /* X0X_COLD: input and menu code of the main loop, built for size */
-#include "../dsp/fastmath.h"
-#include "../dsp/master.h"
-#include "../dsp/drum909.h"              /* this renderer directly uses DR_* and drum909_param_si */
-#include "ui_original_controls.h"
-#include "bass_pattern_preset.h"
-
-/* Keep screen renderers out of their callers on SMK to reduce code size.
- * Drawing operations, fonts and audio code stay unchanged. */
-#if BOARD_SMK37 && defined(__clang__)
-#define UI_DRAW __attribute__((minsize, noinline))
-#else
-#define UI_DRAW
-#endif
-
-#include "ui_original_wave.h"
-#include "../dsp/bass_param_ids.h"                    /* BASS303_* (the 303's pages) */
-#include "chicago_arp.h"                       /* CHI_ARP_* (Chicago live arp page) */
-#include "chicago_fx.h"                        /* CHI_FX_* SEND FX + Crush/Ring/EQ/Cho/Ens/Phaser/SDly/BPM/Hall/GateRev insert */
-#include "chicago_aux.h"                       /* CHI_PBEND / CHI_DAMPER */
-#include "../dsp/fxbus.h"                      /* FX_* indices for SEND FX commit */
-#include "note_names.h"                        /* X0X_NOTE_N: one Câ€¦B table with clip/chord */
-#include "undo.c"
-#include "sound_reset.c"
-
-/* Printed SMK-37 Pro/Elite legends: panel.c + smk_input.h (unit-confirmed).
- * Simulator commands and logical button/encoder roles do not change. */
-#ifndef X0X_SMK_CAPTIONS
-#define X0X_SMK_CAPTIONS BOARD_SMK37
-#endif
-#if X0X_SMK_CAPTIONS
-#define UI_CAP_HOME "PATCH"
-#define UI_CAP_EDIT "PARA"
-#define UI_CAP_SEL "SCALE"
-#define UI_CAP_LFO "NOTE REPEAT"
-#define UI_CAP_GLO "GLOBE"
-#define UI_CAP_ENV "CHORD"
-#define UI_CAP_SAVE "BT"
-#define UI_CAP_REC "SEQ REC"
-#define UI_CAP_PLAY "SEQ PLAY"
-#define UI_CAP_SELECT "K2"
-#define UI_CAP_ALGO "K3"
-#define UI_CAP_PRESET "K4"
-#define UI_CAP_OCT "OCTAVE"
-#define UI_FIRST_KNOB 5
-#define UI_CAP_ARROWS "< >"
-#else
-#define UI_CAP_HOME "HOME"
-#define UI_CAP_EDIT "EDIT"
-#define UI_CAP_SEL "SEL"
-#define UI_CAP_LFO "LFO"
-#define UI_CAP_GLO "GLO"
-#define UI_CAP_ENV "ENV"
-#define UI_CAP_SAVE "SAVE"
-#define UI_CAP_REC "REC"
-#define UI_CAP_PLAY "PLAY"
-#define UI_CAP_SELECT "SELECT"
-#define UI_CAP_ALGO "ALGO"
-#define UI_CAP_PRESET "PRESET"
-#define UI_CAP_OCT "OCT"
-#define UI_FIRST_KNOB 1
-#define UI_CAP_ARROWS "SELECT"
-#endif
-
-
-/* ================================================================ model === */
-static const int8_t KEY_WHITE[NKEYS] = {0, -1, 1, -1, 2, -1, 3, 4, -1, 5, -1, 6, 7, -1, 8, -1, 9, -1, 10, 11, -1, 12, -1, 13, 14, -1, 15};
-static const int8_t KEY_BLACK[NKEYS] = {-1, 0, -1, 1, -1, 2, -1, -1, 3, -1, 4, -1, -1, 5, -1, 6, -1, 7, -1, -1, 8, -1, 9, -1, -1, 10, -1};
-/* Inverse of KEY_WHITE / KEY_BLACK (was rebuilt into BSS at ui_init).
- * On SMK, x0x.c included smk_input.h first: the pad map is these same 16 indices. */
-#if defined(SMK_NPAD)
-_Static_assert(SMK_NPAD == 16u, "SMK white-key map is the 16 panel white keys");
-#define WHITE_KEY SMK_WHITE_NOTE
-#else
-static const uint8_t WHITE_KEY[16] = {0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24, 26};
-#endif
-static const uint8_t BLACK_KEY[11] = {1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25};
-
-enum { V_HOME, V_PART, V_GEN, V_FX, V_MIX, V_GLO, V_SONG, V_PERF, V_SEQ, NVIEWS };
-static const char *const VIEW_N[NVIEWS] = {"HOME", "", "TB-3PO", "FX", "MIX", "GLOBAL", "SONG", "PERF", "SEQ"};
-static const uint16_t PART_COLOURS[2][NPARTS] = {
-    {RGB(255,150,40),RGB(255,72,64),RGB(130,240,90),RGB(70,205,255),RGB(214,120,255)},
-    {RGB(139,69,0),RGB(172,35,29),RGB(40,104,30),RGB(0,96,132),RGB(117,49,148)}
-};
-#define PART_COL PART_COLOURS[ui_theme_light]
-/* Bass slots are not named 303: Chicago is the 303 engine, Miami is not. Shown names follow the engine (part_name). */
-static const char *const PART_N[NPARTS] = {"909", "808", "BASS A", "BASS B", "BREAK"};
-/* Presentation only: drums together, then the default Chicago B / Miami A.
- * Project lanes, MIDI channels, engine buses and all saved arrays keep their IDs.
- * Engine changes never move a physical strip or a held gesture's destination. */
-static const uint8_t PART_ORDER[NPARTS] = {PART_909, PART_808, PART_BRK, PART_303B, PART_303A};
-static int part_is_drum(int part) { return part == PART_909 || part == PART_808; }
-static int part_is_303(int part) { return part == PART_303A || part == PART_303B; }
-static int part_at(int position) { return PART_ORDER[position]; }
-static int part_position(int part)
-{
-    for (int i = 0; i < NPARTS; i++) if (part_at(i) == part) return i;
-    return 0;
-}
-static int part_neighbor(int part, int direction)
-{
-    int position = part_position(part) + direction;
-    return part_at(position < 0 ? 0 : position >= NPARTS ? NPARTS - 1 : position);
-}
-/* Lane labels: PART_N except BREAK â†’ BRK (4 chars). Beats a second 5-pointer table. */
-#if X0X_BASS_PRESET_PREVIEW
-static const char *bass_display_name(int bank,int other,int voice)
-{
-    if (bank == ORIGINAL_SOUND_JUNO) return bank == other ? (voice?"SUPERJ6 B":"SUPERJ6 A"):"SUPERJ6";
-    if (bank == ORIGINAL_SOUND_SYNTHONE) return bank == other ?
-        (voice ? "S1 B" : "S1 A") : "SYNTH ONE";
-    if(bank==other) return bank?(voice?"MIAMI B":"MIAMI A"):(voice?"CHICAGO B":"CHICAGO A");
-    return bank?"MIAMI":"CHICAGO";
-}
-#endif
-static const char *part_display(int part)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    if (part_is_303(part)) {
-        int voice=part-PART_303A;
-#if X0X_BASS_TAGGED_SOUND
-        if(engine_bass_sound_bank(&proj.sound,voice)<0)return "CHOOSE ENGINE";
-#endif
-        return bass_display_name(engine_bass_bank(voice),engine_bass_bank(1-voice),voice);
-    }
-#endif
-    return PART_N[part];
-}
-/* A part's shown name uses the synth slot's actual engine kind. */
-static const char *part_name(int part)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    if (part_is_303(part)) {
-        int voice=part-PART_303A;
-#if X0X_BASS_TAGGED_SOUND
-        if(engine_bass_sound_bank(&proj.sound,voice)<0)return PART_N[part];
-#endif
-        return bass_display_name(engine_bass_bank(voice),engine_bass_bank(1-voice),voice);
-    }
-#endif
-    return PART_N[part];
-}
-static const char *part_s(int i)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    if (part_is_303(i)) {
-        int v=i-PART_303A,b=engine_bass_bank(v);
-#if X0X_BASS_TAGGED_SOUND
-        if(engine_bass_sound_bank(&proj.sound,v)<0)return "?";
-#endif
-        if (b == ORIGINAL_SOUND_JUNO) return b == engine_bass_bank(1-v)?(v?"SJ6B":"SJ6A"):"SJ6";
-        if (b == ORIGINAL_SOUND_SYNTHONE) return b == engine_bass_bank(1-v) ?
-            (v ? "S1B" : "S1A") : "S1";
-        if(b==engine_bass_bank(1-v)) return b?(v?"MI-B":"MI-A"):(v?"CH-B":"CH-A");
-        return b?"MIA":"CHI";
-    }
-#endif
-    return i==PART_BRK?"BRK":PART_N[i];
-}
-
-/* overlays drawn over the main area */
-enum { O_NONE, O_LIST, O_ASK };
-enum { ACT_NONE, ACT_SAVE, ACT_LOAD, ACT_CLEAR_PART, ACT_CLEAR_PAT, ACT_COPY, ACT_RESET, ACT_ABOUT, ACT_SONG_INS,
-       ACT_SONG_DEL, ACT_SONG_CLR, ACT_PERF, ACT_PERF_TEST,
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-       ACT_PADCAL,
-#endif
-       ACT_RESET_SOUND, ACT_HOME_LIVE, ACT_HOME_PATTERNS,
-};
-
-typedef struct {
-    uint8_t view, part, prev_view;
-    uint8_t home_live; /* runtime view only; never changes stored pattern assignment */
-    uint8_t sel[NKIT];
-    uint8_t page[NVIEWS][NPARTS];
-    uint8_t spage;                     /* the 16 steps the white keys show: 0 = 1-16 .. 3 = 49-64 */
-    uint8_t pbank;                     /* the 16 patterns HOME's white keys choose: 0 = 1-16, 1 = 17-32 */
-    uint8_t mixsel;                    /* MIX's PARTS: the part the knobs set (black keys 1-5) */
-    int8_t oct;
-    uint8_t rec;
-    uint8_t freeplay[NBASS];           /* SEQ > FREE PLAY: the keys play the 303, nothing written (not saved) */
-    uint8_t wpos[NBASS];
-    int8_t held_step;
-    uint8_t held_step_part, held_step_pat; /* owner at key-down; a pattern can change before key-up */
-    uint8_t step_edited;
-    uint8_t paste_src[NPARTS];        /* source slots chosen with a paste target; stable through confirmation */
-    uint8_t brk_choice_on, brk_choice_bank, brk_choice_slot, brk_choice_pat;
-    uint8_t step_preview;              /* the held step is sounding (only while stopped) */
-    uint8_t step_created;              /* the press turned the held step on (its release keeps it) */
-    int8_t brk_held;                   /* BREAK: the white key (16th) held, -1 none */
-    int8_t hold_step;                  /* a drum machine: the step (white key) held, -1 none */
-    uint8_t hold_drum, hold_pat;       /* kit/track and pattern at key-down; navigation cannot retarget its release */
-    uint8_t hold_created, hold_used;   /* drums / BREAK: the press turned the step on; a knob or a slice used it */
-    int8_t chain_first;
-    int8_t touched;                    /* knob cell being turned (4 = tempo), -1 none */
-    uint8_t touch_view, touch_part, touch_page;
-    uint8_t touch_kind, touch_a, touch_b, touch_c; /* exact edited ref for overlays */
-    uint32_t step_t0;                  /* when the held 303 step went down: a tap toggles, a hold does not */
-    uint32_t hold_t0;                  /* when it went down (a tap takes an old step off) */
-    uint8_t brk_page, brk_count_target;
-    uint16_t brk_localkeys;
-    uint16_t brk_pinkeys;              /* BREAK: black keys used to give a held step its slice (their release is not live) */
-    uint8_t gen_stale[NBASS];          /* TB-3PO's knobs changed since the line was written */
-    uint32_t btn, keys, btn_used;
-    uint32_t enc_t[NE];
-    uint8_t enc_run[NE];               /* quick detents in a row (acceleration waits for a spin) */
-    char msg[64];                      /* ABOUT long line includes the diagnostic source SHA */
-    uint32_t msg_until;
-    uint32_t touch_until;
-    uint8_t overlay;
-    uint8_t list_sel, list_top, list_n;
-    int8_t glo_section; /* -1: section index; local navigation, never project state */
-    uint8_t glo_index, glo_sel[6], glo_top[6];
-    uint8_t ask_act;
-    uint8_t ask_overlay;
-    uint16_t ask_arg;
-    char ask_q[2][28];
-    uint32_t frame;
-    uint32_t dirty;
-    uint32_t act_t;                    /* the last time anything was touched (autosave waits for quiet) */
-    uint32_t saved_t;                  /* the last autosave */
-    uint8_t last_autosave;             /* AUTOSAVE was just switched off: one more, which keeps that */
-    uint8_t save_failed;               /* a failed write stays visible until a save succeeds */
-    uint8_t help;                      /* the help card on screen: its button + 1, 0 none */
-    uint32_t down_t[NB];               /* when each button went down */
-    uint32_t turn_t;                   /* the last encoder turn */
-    uint8_t outline[232];              /* the break loop's outline */
-    uint32_t outline_revision;
-    uint8_t outline_ok, outline_slot;
-    uint8_t song_sel;                  /* the SONG screen's bar */
-} ui_t;
-/* UI state fits normal zeroed RAM; preserve the pool reserve for audio. */
-static ui_t ui;
-/* A remote engine edit refreshes the parameter layout without changing the
- * keyboard's remembered page. Keep a SOUND-page selection effective across the
- * asynchronous bank change; only physical keyboard input accepts the new page. */
-static uint8_t bass_layout_pending_mask, bass_layout_on_sound_page;
-static void bass_layout_note_remote_edit(int voice);
-static void bass_layout_accept(void);
-/* SMC is a presentation layer; its implementation follows this file in the unity build. */
-void smc_ui_cancel(void);
-int smc_ui_active(void);
-void smc_ui_draw(void);
-void smc_ui_clip_show(int n, const char *name, const char *value);
-static uint8_t any_button;             /* a button has been pressed since power-on (the footer's first line) */
-#define FOOT_GAP 7                     /* between the footer's parts */
-static uint16_t footer_text(const char **a, const char **b, const char **c);
-static int division_pad_owner(void);
-static int division_pad_index(void);
-static const char *division_pad_label(void);
-
-/* something the project keeps changed: SAVE (or the autosave) has work to do */
-static void mark_dirty(void) { ui.dirty = 1; }
-
-static uint8_t save_wait;
-static void live_boundary(int entry);
-static void keyboard_panic_reset(uint32_t btn);
-static uint8_t project_busy, project_revision;
-static uint32_t song_structure_revision; /* runtime identity epoch for frozen song-bar controls */
-int ui_project_busy(void) { return project_busy != 0; }
-X0X_COLD static void project_input_sync(void)
-{
-    int i;
-    ui.btn = ui.btn_used = plat_buttons();
-    keyboard_panic_reset(ui.btn);
-    ui.keys = plat_keys();
-    for (i = 0; i < NE; i++) {
-        (void)plat_enc(i);
-        ui.enc_run[i] = 0;
-    }
-    /* Project end still owns project_busy here: revoke the old physical epoch
-     * and suppress keys held across the transfer before input is enabled. */
-    live_boundary(0);
-}
-enum { SAVE_SAVED, SAVE_UNSAVED, SAVE_QUEUED, SAVE_FAILED };
-static int save_state(void)
-{
-    if (project_storage_unsupported() == 2)
-        return SAVE_FAILED;
-    if (save_wait)
-        return SAVE_QUEUED;
-    if (ui.save_failed)
-        return SAVE_FAILED;
-    return ui.dirty ? SAVE_UNSAVED : SAVE_SAVED;
-}
-static const char *queued_save_label(void)
-{
-    if (!seq.playing && !seq.req_start && !seq.req_cont && !seq.req_stop)
-        return ui.rec ? "REC OFF TO SAVE" : "SAVE WHEN QUIET";
-    return "SAVE AT STOP";
-}
-static const char *queued_save_message(void)
-{
-    if (!seq.playing && !seq.req_start && !seq.req_cont && !seq.req_stop)
-        return ui.rec ? "REC OFF TO SAVE" : "SAVES WHEN QUIET";
-    return "SAVES WHEN STOPPED";
-}
-
-/* the encoders, read for the UI: a turn counts as being touched (the autosave waits for quiet) */
-static int32_t enc(int role)
-{
-    int32_t v = plat_enc(role);
-    if (v) {
-        bass_layout_accept();
-#if BOARD_SMK37
-        smc_ui_cancel();
-#endif
-        ui.act_t = ui.turn_t = plat_ms();
-    }
-    return v;
-}
-
-/* PERF (the performance screen and its test; see "performance" below) */
-enum { PT_IDLE = -1, PT_DONE = 3 };
-static struct {
-    uint32_t t_ms, ticks, cyc, frames, prof[ENG_PROF_N], st[3];
-    uint16_t mhz10;                    /* the CPU clock x 10; 0 = not known (no cycle counter) */
-    uint8_t load, peak, stalls_on, have;
-    uint16_t stage[ENG_PROF_N];        /* each stage's share of the CPU, x 10 (%) */
-    uint16_t cps;                      /* the render's cycles per sample (cycle counter only) */
-    uint8_t stall[3];                  /* fetch / read / write stall cycles, % */
-    int8_t test, phase;                /* test: PT_IDLE, a scenario 0..2, PT_DONE (when phase is 4);
-                                        * phase: 0 stop, 1 settle, 2 measure, 3 put back, 4 done */
-    uint32_t test_t0;
-    uint16_t res_load[3], res_cps[3];  /* per scenario: the render's share x 10, cycles per sample */
-    uint8_t res_peak[3];
-    pattern_t *pat;                    /* what the test changes, to put back */
-    uint8_t ppat[NPARTS], song_on, ca, cb;
-    uint32_t mute;
-    float bpm;
-} perf = {.test = PT_IDLE};
-
-static pattern_t *pat_of(int part) { return &proj.pat[seq.ppat[part]]; }
-static pattern_t *cur_pat(void) { return pat_of(ui.part); }    /* the pattern the part on screen plays */
-static int part_view(void) { return ui.view == V_PART || ui.view == V_SEQ || ui.view == V_GEN; }
-static int steps_view(void) { return ui.view == V_PART || ui.view == V_SEQ; }
-static song_t *song(void) { return &proj.arr.song; }
-static int is_303(void) { return part_is_303(ui.part); }
-static int is_drum(void) { return part_is_drum(ui.part); }
-static int bidx(void) { return ui.part == PART_303B ? 1 : 0; }
-static int kbd_on(void) { return is_303() && (ui.view == V_PART || ui.rec || ui.freeplay[bidx()]); }
-static uint8_t kbd_held_note[NBASS];
-static uint8_t bass_rec_step[NBASS];                 /* recorded source step + 1; zero means none */
-static uint8_t bass_rec_pat[NBASS], bass_rec_playing[NBASS];
-static uint8_t kbd_held_key[NBASS];                  /* physical key + 1; survives octave and part changes */
-/* Original owners receive each physical key, independently of native voice allocation. */
-#define UI_BASS_HELD_MAX 37u
-static uint8_t kbd_arp_key[NBASS][UI_BASS_HELD_MAX] X0X_POOL;     /* physical key + 1 */
-static uint8_t kbd_arp_note[NBASS][UI_BASS_HELD_MAX] X0X_POOL;
-static uint8_t kbd_arp_n[NBASS] X0X_POOL;
-static int chi_arp_on_part(int b)
-{
-    (void)b; return 0; /* native owner receives every key; no external ARP */
-}
-static int held_note_of(const bpart_t *bp, int s);
-static void bass_step_cancel(void);
-static void drum_step_cancel(void);
-static void break_step_cancel(void);
-
-/* ============================================================ text helpers === */
-static char *put_s(char *b, const char *s)
-{
-    while (*s)
-        *b++ = *s++;
-    *b = 0;
-    return b;
-}
-static char *put_i(char *b, int v)
-{
-    char t[12];
-    int n = 0, neg = v < 0;
-    uint32_t u = (uint32_t)(neg ? -v : v);
-    do {
-        t[n++] = (char)('0' + u % 10u);
-        u /= 10u;
-    } while (u);
-    if (neg)
-        *b++ = '-';
-    while (n)
-        *b++ = t[--n];
-    *b = 0;
-    return b;
-}
-#define NOTE_N X0X_NOTE_N                      /* same twelve names as clip ROOT / chord spell */
-static char *put_note(char *b, int n)
-{
-    b = put_s(b, NOTE_N[(n % 12 + 12) % 12]);
-    return put_i(b, n / 12 - 1);
-}
-static char *put_hex(char *b, uint32_t v, int digits)
-{
-    int i;
-    for (i = digits - 1; i >= 0; i--)
-        *b++ = "0123456789ABCDEF"[(v >> (4 * i)) & 15u];
-    *b = 0;
-    return b;
-}
-
-static void say(const char *a, const char *b)
-{
-    char *q = put_s(ui.msg, a);
-    if (b)
-        put_s(q, b);
-    ui.msg_until = plat_ms() + 1300u;
-}
-
-/* =============================================================== param refs === */
-enum { R_NONE, R_ENG, R_SWING, R_DLEN, R_DRATE, R_BLEN, R_BRATE, R_BDIR, R_BTRANS, R_GEN, R_BRKSET,
-       R_BRKSLICE, R_BRKSLOT, R_TEMPO, R_ACCENT, R_CLKOUT, R_NOTEOUT, R_PALETTE, R_KEYLED, R_KEYSOUND, R_AUTOSAVE, R_ACT, R_SBAR, R_SPAT,
-       R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
-       R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
-typedef struct { uint8_t kind, a, b, c; } pref_t;
-#define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
-#define NONE PR(R_NONE, 0, 0, 0)
-
-static const char *const GLOBAL_SECTIONS[6] = {"MIDI + CLOCK", "BLUETOOTH", "AUDIO", "KEYS + SCREEN", "PROJECT", "SYSTEM"};
-static ui_original_control_cache original_controls X0X_POOL;
-static ui_original_wave_cache original_wave X0X_POOL;   /* engine waveform cue (ca8299b6 / 9e237cce) */
-static uint8_t original_page_bank, original_list_bank;
-static int original_display_value(pref_t r);
-static const ui_original_control_view *original_text_view(pref_t r, int value);
-static void build_pages(void);
-static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "SUPERJ6"};
-static const x0x_param_t BENGINE_P = {"ENGINE",3,0,BENGINE_N};
-static x0x_param_t BPRESET_P = {"PRESET",54,0,0};
-static const x0x_param_t BSTATUS_P = {"STATUS",0,0,0};
-/* per-pattern preset recall (owner 2026-11-12 02:42): 0 OFF, else the preset number in the
- * part's current engine. Codes 1..81=Chicago, 129..158=Miami and
- * 193..196=historical slot-2 (all load as Synth One init). Reuse the original pattern byte without migration. */
-static x0x_param_t PATSND_P = {"PAT SOUND",54,0,0};
-
-static const char *const RATE_N[] = {"1/16", "1/16T", "1/32", "1/8T", "1/8", "1/4"};   /* M13: index = pattern.h RATE_* */
-static const char *const BRK_RATE_N[] = {"1/16", "1/8", "1/4"};   /* M13: BREAK groups 16ths; stored as RATE_16/8/4 */
-static const char *const DIR_N[] = {"FWD", "REV", "PING", "RND"};
-static const char *const ONOFF_N[] = {"OFF", "ON"};
-#define ROOT_N NOTE_N                       /* same twelve names as put_note */
-static const char *const THEME_N[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO", "LIGHT"};
-enum { G_DENS, G_ACC, G_SLIDE, G_OCTS, G_ROOT, G_SCALE, G_BASE, G_MUT, NGEN };
-static const x0x_param_t GEN_P[NGEN] = {
-    {"DENS", 100, 70, 0}, {"ACCENT", 100, 40, 0}, {"SLIDE", 100, 25, 0}, {"OCTS", 2, 1, 0},
-    {"ROOT", 11, 9, ROOT_N}, {"SCALE", TB3PO_NSCALES - 1, 0, TB3PO_SCALE_NAMES}, {"OCTAVE", 4, 1, 0},
-    {"MUTATE", 16, 0, 0},
-};
-enum { SQ_SWING, SQ_DLEN, SQ_DRATE, SQ_BLEN, SQ_BRATE, SQ_BDIR, SQ_BTRANS, SQ_TEMPO, SQ_ACCENT, SQ_CLK, SQ_NOTES,
-       SQ_THEME, SQ_KEYLED, SQ_KEYSOUND, SQ_AUTOSAVE, NSQ };
-static const char *const KEYSOUND_N[] = {"STOPPED", "ALWAYS"};
-static const char *const LIGHTS_N[] = {"OFF", "ON", "KEYS"};   /* ON: the keys, and the unlit buttons glow */
-static const x0x_param_t SEQ_P[NSQ] = {
-    {"SWING", 100, 0, 0}, {"LENGTH", NSTEPS - 1, 15, 0}, {"RATE", NRATES - 1, 0, RATE_N}, {"LENGTH", NSTEPS - 1, 15, 0},
-    {"RATE", NRATES - 1, 0, RATE_N}, {"DIR", 3, 0, DIR_N}, {"TRANSP", 48, 24, 0}, {"TEMPO", 255, 105, 0},
-    {"ACCENT", 127, 88, 0}, {"CLOCK OUT", 1, 1, ONOFF_N}, {"NOTES OUT", 1, 0, ONOFF_N}, {"THEME", 5, 1, THEME_N},
-    {"LIGHTS", 2, 1, LIGHTS_N}, {"KEY SOUND", 1, 0, KEYSOUND_N},
-    {"AUTOSAVE", 1, 1, ONOFF_N},
-};
-static const x0x_param_t ACT_P[] = {
-    {"", 0, 0, 0}, {"SAVE PROJECT", 0, 0, 0}, {"LOAD SAVED", 0, 0, 0},
-    {"CLEAR THIS PART", 0, 0, 0}, {"CLEAR PATTERN", 0, 0, 0},
-    {"COPY PATTERN", 0, 0, 0}, {"RESET PROJECT", 0, 0, 0}, {"ABOUT DnBOX", 0, 0, 0}, {"INSERT BAR", 0, 0, 0},
-    {"DELETE BAR", 0, 0, 0}, {"CLEAR SONG", 0, 0, 0}, {"PERFORMANCE", 0, 0, 0}, {"RUN PERF TEST", 0, 0, 0},
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-    {"PAD COLOURS", 0, 0, 0},
-#endif
-    [ACT_HOME_LIVE] = {"LIVE OVERVIEW", 0, 0, 0},
-    [ACT_HOME_PATTERNS] = {"PATTERNS", 0, 0, 0},
-};
-static const x0x_param_t STALLS_P = {"STALLS", 1, 0, ONOFF_N};
-static const x0x_param_t MIDICH_P[NPARTS] = {   /* 0 = OFF (no notes in or out), 1-16 */
-    {"909 MIDI CH", 16, 10, 0}, {"808 MIDI CH", 16, 11, 0}, {"BASS A MIDI CH", 16, 2, 0}, {"BASS B MIDI CH", 16, 3, 0},
-    {"BREAK MIDI CH", 16, 4, 0}};
-/* M7: per-part ON/OFF (seq.part_off). OFF stops new notes, independent of mute and level. */
-static const x0x_param_t NOTELOCK_P = {"NOTE LOCK", 1, 0, ONOFF_N};   /* runtime; capture only */
-static const x0x_param_t PARTON_P[NPARTS] = {
-    {"909", 1, 1, ONOFF_N}, {"808", 1, 1, ONOFF_N}, {"BASS A", 1, 1, ONOFF_N}, {"BASS B", 1, 1, ONOFF_N},
-    {"BREAK", 1, 1, ONOFF_N}};
-static const x0x_param_t QUEUEMUTE_P = {"QUEUE MUTES", 1, 0, ONOFF_N};
-static const x0x_param_t BRKRATE_P = {"RATE", 2, 0, BRK_RATE_N};
-static const char *const OUT_N[] = {"NORMAL", "LOUD"};
-static const x0x_param_t OUT_P = {"OUTPUT", 1, 0, OUT_N};
-static const char *const USBA_N[] = {"FOLLOWS KNOB", "FULL"};
-static const x0x_param_t USBA_P = {"USB AUDIO", 1, 0, USBA_N};
-static const x0x_param_t TUNE_P = {"TUNE", 127, 64, 0};  /* global, both bass engines; stored as signed 0-center */
-static const x0x_param_t FREEPLAY_P = {"FREE PLAY", 1, 0, ONOFF_N};
-static const char *const BRKSLICE_N[] = {"4", "8", "16", "32"};
-static const x0x_param_t BRKSLICE_P[2] = {
-    {"A SLICES", 3, 1, BRKSLICE_N}, {"B SLICES", 3, 1, BRKSLICE_N}
-};
-static const x0x_param_t SREP_P = {"REPEAT", 7, 0, 0};    /* the bar plays 1-8 times */
-static const char *const BATT_N[] = {"EMPTY", "1/3", "2/3", "FULL", "USB POWER", "..."};
-static const x0x_param_t BATT_P = {"BATTERY", 5, 0, BATT_N};   /* read only (plat_battery) */
-#define BT_N ONOFF_N                                           /* same OFF/ON labels */
-static const x0x_param_t BT_P = {"BLUETOOTH", 1, 0, BT_N};      /* Bluetooth MIDI (SMK-37) */
-static const char *const SMC_ROLE_N[] = {"DEVICE", "SMC HOST"};
-static const char *const SMC_MAP_N[] = {"DAW", "USER"};
-static const x0x_param_t SMC_ROLE_P = {"BT ROLE", 1, 0, SMC_ROLE_N};
-static const x0x_param_t SMC_MAP_P = {"SMC PRESET", 1, 0, SMC_MAP_N};
-static const x0x_param_t CKCH_P = {"CLIP KEYS CH", 13, 0, 0};  /* clip mode keybed channel 2-15 (0 = 2) */
-static const char *const CLKSRC_N[] = {"AUTO", "INTERNAL", "EXTERNAL"};   /* SEQ_CLK_* order */
-static const x0x_param_t CLKSRC_P = {"CLOCK SOURCE", 2, 0, CLKSRC_N};
-static const char *const BTSTAT_N[] = {"UNAVAILABLE", "OFF", "RESTART", "STARTING", "READY", "CONNECTED",
-                                       "FAILED", "BAD IMAGE"};   /* PLAT_BLE_* order */
-static const x0x_param_t BTSTAT_P = {"STATUS", 7, 0, BTSTAT_N};   /* read only (plat_ble_state) */
-static const x0x_param_t SONG_P[] = {
-    {"909", NPAT - 1, 0, 0}, {"808", NPAT - 1, 0, 0}, {"BASS A", NPAT - 1, 0, 0}, {"BASS B", NPAT - 1, 0, 0},
-    {"BREAK", NPAT - 1, 0, 0},
-    {"LENGTH", NSONG, 0, 0},
-};
-
-static int pref_read_only(pref_t r)
-{
-    if (r.kind == R_BSTATUS) return 1;
-    /* A bank with a single preset (Synth One INIT) has nothing to choose. */
-    if (r.kind == R_BPRESET && original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) <= 1u) return 1;
-    if (r.kind == R_ENG && r.a == T_303 && original_sound_is_performance(
-        (unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c)) return 1;
-    return r.kind == R_BATT || r.kind == R_BTSTAT || r.kind == R_BTNAME;
-}
-
-/* the song's bar k exists from here on: a new bar repeats the one before (the first: what plays) */
-static void song_fill(int k)
-{
-    song_t *sg = song();
-    if (sg->len <= k && sg->len < NSONG) song_structure_revision++;
-    while (sg->len <= k && sg->len < NSONG) {
-        song_bar_t *b = &sg->bar[sg->len];
-        int p;
-        if (sg->len)
-            *b = sg->bar[sg->len - 1];
-        else {
-            for (p = 0; p < NPARTS; p++)
-                b->pat[p] = seq.ppat[p];
-            b->mute = 0;
-        }
-        sg->len++;
-    }
-}
-
-static const x0x_param_t *pref_desc(pref_t r)
-{
-    switch (r.kind) {
-    case R_BENGINE: return &BENGINE_P;
-    case R_BPRESET:
-        BPRESET_P.max = (uint8_t)(original_sound_factories((unsigned)engine_bass_requested_bank(r.b))-1);
-        return &BPRESET_P;
-    case R_BSTATUS: return &BSTATUS_P;
-    case R_BPATSND:
-        PATSND_P.max = (uint8_t)original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
-        return &PATSND_P;
-    case R_NOTELOCK: return &NOTELOCK_P;
-    case R_ENG: return engine_param(r.a, r.b, r.c);
-    case R_GEN: return &GEN_P[r.c % NGEN];
-    case R_BRKSET: return breaks_param(r.c);
-    case R_SWING: return &SEQ_P[SQ_SWING];
-    case R_DLEN: return &SEQ_P[SQ_DLEN];
-    case R_DRATE: return &SEQ_P[SQ_DRATE];
-    case R_BLEN: return &SEQ_P[SQ_BLEN];
-    case R_BRATE: return &SEQ_P[SQ_BRATE];
-    case R_BDIR: return &SEQ_P[SQ_BDIR];
-    case R_BTRANS: return &SEQ_P[SQ_BTRANS];
-    case R_BRKSLICE: return &BRKSLICE_P[r.a != 0];
-    case R_BRKSLOT: {
-        static x0x_param_t d = {"LOOP", 0, 0, 0};
-        static const char *none[] = {"none"};
-        int n = engine_brk_nslots();
-        d.max = n ? (uint8_t)(n - 1) : 0;
-        d.names = n ? engine_brk_slot_names() : none;
-        return &d;
-    }
-    case R_TEMPO: return &SEQ_P[SQ_TEMPO];
-    case R_ACCENT: return &SEQ_P[SQ_ACCENT];
-    case R_CLKOUT: return &SEQ_P[SQ_CLK];
-    case R_NOTEOUT: return &SEQ_P[SQ_NOTES];
-    case R_PALETTE: return &SEQ_P[SQ_THEME];
-    case R_KEYLED: return &SEQ_P[SQ_KEYLED];
-    case R_KEYSOUND: return &SEQ_P[SQ_KEYSOUND];
-    case R_AUTOSAVE: return &SEQ_P[SQ_AUTOSAVE];
-    case R_ACT: return &ACT_P[r.a];
-    case R_SBAR: {
-        static x0x_param_t d = {"BAR", 0, 0, 0};
-        d.max = (uint8_t)(song()->len < NSONG ? song()->len : NSONG - 1);
-        return &d;
-    }
-    case R_SPAT: return &SONG_P[r.a % NPARTS];
-    case R_MIDICH: return &MIDICH_P[r.a % NPARTS];
-    case R_PARTON: return &PARTON_P[r.a % NPARTS];
-    case R_QUEUEMUTE: return &QUEUEMUTE_P;
-    case R_BRKRATE: return &BRKRATE_P;
-    case R_OUTLOUD: return &OUT_P;
-    case R_USBFULL: return &USBA_P;
-    case R_FINETUNE: return &TUNE_P;
-    case R_FREEPLAY: return &FREEPLAY_P;
-    case R_SREP: return &SREP_P;
-    case R_BATT: return &BATT_P;
-    case R_BT: return &BT_P;
-    case R_SMC_ROLE: return &SMC_ROLE_P;
-    case R_SMC_MAP: return &SMC_MAP_P;
-    case R_CKCH: return &CKCH_P;
-    case R_CLKSRC: return &CLKSRC_P;
-    case R_BTSTAT: return &BTSTAT_P;
-    case R_BTNAME: {                                   /* read only: the name it advertises */
-        static const char *nm[1];
-        static const x0x_param_t d = {"NAME", 0, 0, nm};
-        nm[0] = plat_ble_name()[0] ? plat_ble_name() : "-";
-        return &d;
-    }
-    case R_SLEN: return &SONG_P[5];
-    case R_STALLS: return &STALLS_P;
-    case R_TAPE: {
-        static const x0x_param_t d = {"TAPE", 127, 72, 0};
-        return &d;
-    }
-    default: return 0;
-    }
-}
-
-/* SMC snapshots use the otherwise-unused b byte on pattern refs to bind an
- * exact pattern (index + 1). Ordinary panel refs keep b=0 and follow playback. */
-static pattern_t *pref_pattern(pref_t r)
-{
-    if (r.kind == R_BRKRATE) return r.b ? &proj.pat[r.b - 1u] : cur_pat();
-    if (r.kind < R_SWING || r.kind > R_BRKSLOT) return cur_pat();
-    if (r.b) return &proj.pat[r.b - 1u];
-    if (r.kind >= R_GEN) return cur_pat();
-    return pat_of(r.kind == R_SWING ? PART_909 : r.kind == R_DLEN || r.kind == R_DRATE ? r.a : NKIT + r.a);
-}
-
-static UI_DRAW int pref_get(pref_t r)
-{
-    if (r.kind == R_BRKSLOT && ui.brk_choice_on && r.a == ui.brk_choice_bank &&
-        seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
-    pattern_t *p = pref_pattern(r);
-    switch (r.kind) {
-    case R_BENGINE: return engine_bass_requested_bank(r.b);
-    case R_BPRESET: return engine_bass_requested_preset(r.b);
-    case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
-    case R_ENG: return proj.sound.v[r.a][r.b][r.c];
-    case R_SWING: return p->swing;
-    case R_DLEN: return p->drum[r.a].len - 1;
-    case R_DRATE: return p->drum[r.a].rate;
-    case R_BLEN: return p->bass[r.a].len - 1;
-    case R_BRATE: return p->bass[r.a].rate;
-    case R_BRKRATE: return p->brk.rate == RATE_8 ? 1 : p->brk.rate == RATE_4 ? 2 : 0;
-    case R_BDIR: return p->bass[r.a].dir;
-    case R_BTRANS: return p->bass[r.a].transpose;
-    case R_GEN: {
-        const tb3po_cfg_t *g = &p->bass[r.a].gen;
-        switch (r.c) {
-        case G_DENS: return g->density;
-        case G_ACC: return g->accent;
-        case G_SLIDE: return g->slide;
-        case G_OCTS: return g->oct_range - 1;
-        case G_ROOT: return g->root;
-        case G_SCALE: return g->scale;
-        case G_BASE: return g->base_oct;
-        default: return g->mutate_bars;
-        }
-    }
-    case R_BRKSET: return p->brk.set[r.c];
-    case R_BRKSLOT: return r.a ? p->brk.slot_b : p->brk.slot_a;
-    case R_BRKSLICE: { int code = (p->brk.slice_mode >> (r.a * 2)) & 3; return code < 2 ? code ^ 1 : code; }
-    case R_TEMPO: return (int)(seq.bpm + 0.5f) - 20;
-    case R_ACCENT: return seq.accent_q7;
-    case R_CLKOUT: return seq.send_clock;
-    case R_NOTEOUT: return seq.send_notes;
-    case R_PALETTE: return proj.set.palette;
-    case R_KEYLED: return proj.set.keyled;
-    case R_KEYSOUND: return proj.set.keysound;
-    case R_AUTOSAVE: return !proj.set.autosave_off;
-    case R_SBAR: return ui.song_sel;
-    case R_SPAT: {
-        const song_t *sg = song();
-        int bar = r.b ? r.b - 1u : ui.song_sel;
-        int k = bar < sg->len ? bar : r.b ? -1 : sg->len - 1;
-        return k >= 0 ? sg->bar[k].pat[r.a] : seq.ppat[r.a];
-    }
-    case R_MIDICH: return seq.ch[r.a % NPARTS] == SEQ_CH_OFF ? 0 : seq.ch[r.a % NPARTS] + 1;
-    case R_PARTON: return !SEQ_PART_OFF(&seq, r.a % NPARTS);
-    case R_QUEUEMUTE: return seq.queued_mutes;
-    case R_BPATSND: {
-        uint8_t ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
-        unsigned bank, value;
-        return bass_pattern_preset_decode(ps, &bank, &value) ? (int)value : 0;
-    }
-    case R_NOTELOCK: return engine_note_lock_capture_on();
-    case R_OUTLOUD: return proj.set.out_loud;
-    case R_USBFULL: return proj.set.usb_full;
-    case R_FINETUNE: return PROJ_TUNE_OF(&proj.set) + 64;
-    case R_FREEPLAY: return ui.freeplay[r.a];
-    case R_SREP: {
-        unsigned bar = r.b ? r.b - 1u : ui.song_sel;
-        return bar < song()->len ? song()->bar[bar].mute >> 5 : 0;
-    }
-    case R_BATT: return plat_battery() < 0 ? 5 : plat_battery();
-    case R_BT: return proj.set.bt & 1u;
-    case R_SMC_ROLE: return !!(proj.set.bt & PROJ_BT_SMC_CENTRAL);
-    case R_SMC_MAP: return !!(proj.set.bt & PROJ_BT_SMC_USER);
-    case R_CKCH: return proj.set.ck_ch - 2;
-    case R_CLKSRC: return PROJ_CLK_SRC(proj.set.bt);
-    case R_BTSTAT: return plat_ble_state();
-    case R_SLEN: return song()->len;
-    case R_STALLS: return perf.stalls_on;
-    case R_TAPE: return proj.sound.v[T_FX][1][0];       /* (kept in an engine slot nothing reads) */
-    default: return 0;
-    }
-}
-
-static void ui_restore_base(int target, int voice, int parameter)
-{
-    if (target == T_303) {
-        if ((unsigned)voice < NBASS && original_sound_is_performance(
-            (unsigned)engine_bass_bank(voice),(unsigned)parameter)) return;
-        engine_set_base(target,voice,parameter); return;
-    }
-    engine_set(target,voice,parameter,proj.sound.v[target][voice][parameter]);
-}
-
-X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    /* Freeze the active bank before reading its descriptor. The audio boundary
-     * may otherwise replace Chicago with Miami between clamp and store. */
-    int bass_edit = r.kind == R_ENG && r.a == T_303;
-    if (bass_edit) engine_bass_edit_hold(1);
-#endif
-    pattern_t *p = pref_pattern(r);
-    const x0x_param_t *d = pref_desc(r);
-    if (!d || r.kind == R_ACT || pref_read_only(r)) {
-#if X0X_BASS_PRESET_PREVIEW
-        if (bass_edit) engine_bass_edit_hold(0);
-#endif
-        return;
-    }
-    v = v < 0 ? 0 : v > d->max ? d->max : v;
-    if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
-        if (v == pref_get(r)) return;
-        int bank = r.kind == R_BENGINE ? v : engine_bass_requested_bank(r.b);
-        int preset = r.kind == R_BENGINE ? 0 : v;
-        int rc = engine_bass_select_preset(r.b,bank,preset,&proj.sound);
-        if (rc) {
-            say(rc == -2 ? "ENGINE UNAVAILABLE" : rc == -4 ? "SOUND LOCKS OWN LANE" :
-                rc == -5 ? "UNSUPPORTED SOUND" : "INVALID PRESET",0);
-            return;
-        }
-        if (!from_keyboard) bass_layout_note_remote_edit(r.b);
-        else bass_layout_accept();
-        mark_dirty();
-        if (from_keyboard) build_pages();
-        return;
-    }
-    mark_dirty();
-    switch (r.kind) {
-    case R_ENG:
-        if (r.a == T_303) {
-            if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
-                say("INVALID SOUND",0); break;
-            }
-            engine_bass_sound_refresh(&proj.sound,r.b);
-        } else
-        proj.sound.v[r.a][r.b][r.c] = (uint8_t)v;
-        engine_set(r.a, r.b, r.c, v);
-        if (r.a == T_MST && r.c == MST_COMP1)          /* the macros: the details they set, for the list */
-            master_comp1_pots(v, &proj.sound.v[T_MST][0][MST_THRESH], &proj.sound.v[T_MST][0][MST_RATIO],
-                              &proj.sound.v[T_MST][0][MST_MAKEUP]);
-        else if (r.a == T_MST && r.c == MST_DJF)
-            master_djf_pots(v, &proj.sound.v[T_MST][0][MST_MODE], &proj.sound.v[T_MST][0][MST_CUTOFF]);
-        break;
-    case R_SWING: p->swing = (uint8_t)v; break;
-    case R_DLEN: p->drum[r.a].len = (uint8_t)(v + 1); break;
-    case R_DRATE: p->drum[r.a].rate = (uint8_t)v; break;
-    case R_BLEN: p->bass[r.a].len = (uint8_t)(v + 1); break;
-    case R_BRATE: p->bass[r.a].rate = (uint8_t)v; break;
-    case R_BRKRATE: p->brk.rate = (uint8_t)(v == 1 ? RATE_8 : v == 2 ? RATE_4 : RATE_16); break;
-    case R_BDIR: p->bass[r.a].dir = (uint8_t)v; break;
-    case R_BTRANS: p->bass[r.a].transpose = (uint8_t)v; break;
-    case R_GEN: {
-        tb3po_cfg_t *g = &p->bass[r.a].gen;
-        switch (r.c) {
-        case G_DENS: g->density = (uint8_t)v; break;
-        case G_ACC: g->accent = (uint8_t)v; break;
-        case G_SLIDE: g->slide = (uint8_t)v; break;
-        case G_OCTS: g->oct_range = (uint8_t)(v + 1); break;
-        case G_ROOT: g->root = (uint8_t)v; break;
-        case G_SCALE: g->scale = (uint8_t)v; break;
-        case G_BASE: g->base_oct = (uint8_t)v; break;
-        default: g->mutate_bars = (uint8_t)v; break;
-        }
-        if (r.c != G_MUT)                            /* the line stays: the settings are the next NEW / MUTATE's */
-            ui.gen_stale[r.a] = 1;
-        break;
-    }
-    case R_BRKSET: p->brk.set[r.c] = (uint8_t)v; break;
-    case R_BRKSLICE: {
-        ui.brk_count_target = (uint8_t)(r.a != 0);
-        unsigned shift = r.a * 2u, code = v < 2 ? (unsigned)v ^ 1u : (unsigned)v;
-        p->brk.slice_mode = (uint8_t)((p->brk.slice_mode & ~(3u << shift)) | (code << shift));
-        if (!r.b || p == pat_of(PART_BRK)) engine_brk_loops();
-        break;
-    }
-    case R_BRKSLOT:
-        ui.brk_count_target = (uint8_t)(r.a != 0);
-        if (r.a)
-            p->brk.slot_b = (uint8_t)v;
-        else
-            p->brk.slot_a = (uint8_t)v;
-        if (!r.b || p == pat_of(PART_BRK)) engine_brk_loops();
-        ui.outline_ok = 0;
-        break;
-    case R_TEMPO: seq.bpm = (float)(v + 20); break;
-    case R_ACCENT: seq.accent_q7 = (uint8_t)v; break;
-    case R_CLKOUT: seq.send_clock = (uint8_t)v; break;
-    case R_NOTEOUT: seq.send_notes = (uint8_t)v; break;
-    case R_PALETTE: proj.set.palette = (uint8_t)v; palette_set((uint32_t)v); break;
-    case R_KEYLED: proj.set.keyled = (uint8_t)v; break;
-    case R_KEYSOUND: proj.set.keysound = (uint8_t)v; break;
-    case R_AUTOSAVE: proj.set.autosave_off = (uint8_t)!v; ui.last_autosave = (uint8_t)!v; break;
-    case R_SBAR: ui.song_sel = (uint8_t)v; break;
-    case R_SPAT: {
-        unsigned bar = r.b ? r.b - 1u : ui.song_sel;
-        if (r.b && bar >= song()->len) break; /* a deleted locked bar stays deleted */
-        song_fill((int)bar);
-        song()->bar[bar].pat[r.a] = (uint8_t)v;
-        break;
-    }
-    case R_MIDICH: seq.ch[r.a % NPARTS] = (uint8_t)(v ? v - 1 : SEQ_CH_OFF); break;
-    case R_PARTON: seq.part_off = (uint8_t)(v ? seq.part_off & ~(1u << (r.a % NPARTS)) : seq.part_off | 1u << (r.a % NPARTS)); break;
-    case R_QUEUEMUTE:
-        PROJ_SET_QMUTE(&proj.set, v);
-        seq.queued_mutes = (uint8_t)PROJ_QMUTE_OF(&proj.set);
-        break;
-    case R_BPATSND: {
-        unsigned bank = (unsigned)engine_bass_requested_bank(r.b);
-        pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1] =
-            (uint8_t)bass_pattern_preset_encode(bank, (unsigned)v);
-        break;
-    }
-    case R_NOTELOCK: engine_note_lock_capture(v); break;
-    case R_OUTLOUD: proj.set.out_loud = (uint8_t)v; engine_out_loud(v); break;
-    case R_USBFULL: proj.set.usb_full = (uint8_t)v; engine_usb_full(v); break;
-    case R_FINETUNE: PROJ_SET_TUNE(&proj.set, v - 64); engine_bass_tune(v - 64); break;
-    case R_CKCH: proj.set.ck_ch = (uint8_t)(v + 2); break;   /* sounding notes end on their own channel */
-    case R_CLKSRC:                                            /* (ui_frame gives it to the sequencer) */
-        proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_BT_CLK_MASK) | (uint8_t)v << 1 | PROJ_BT_CLK_IN);
-        break;
-    case R_BT:
-        project_device_bt_set(v > 0);
-        plat_ble_set(v > 0);
-        if (plat_ble_state() == PLAT_BLE_RESTART)
-            say("RESTART TO TURN ON", 0);             /* the controller starts only at power-on */
-        else if (project_device_bt_pending()) say("BT SAVE PENDING", 0);
-        break;
-    case R_SMC_ROLE:
-        proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_BT_SMC_CENTRAL) | (v ? PROJ_BT_SMC_CENTRAL : 0u));
-        say(v ? "BLUETOOTH HOST" : "BLUETOOTH DEVICE", 0);
-        break;
-    case R_SMC_MAP:
-        proj.set.bt = (uint8_t)((proj.set.bt & ~PROJ_BT_SMC_USER) | (v ? PROJ_BT_SMC_USER : 0u));
-        say(v ? "USER: CH16 + MMC" : "DAW: MACKIE MODE", 0);
-        break;
-    case R_FREEPLAY:
-        if (v && ui.part == PART_303A + r.a)
-            bass_step_cancel();                       /* the held step must not become a held keyboard note */
-        ui.freeplay[r.a] = (uint8_t)v;
-        if (!v && (kbd_held_note[r.a] || kbd_arp_n[r.a])) { /* a key still down: let it go */
-            engine_bass_off(r.a);
-            kbd_held_note[r.a] = 0;
-            kbd_held_key[r.a] = 0;
-            kbd_arp_n[r.a] = 0;
-        }
-        break;
-    case R_SREP: {
-        unsigned bar = r.b ? r.b - 1u : ui.song_sel;
-        if (bar < NSONG && (!r.b || bar < song()->len)) {
-            song_fill((int)bar);
-            song_bar_t *b = &song()->bar[bar];
-            b->mute = (uint8_t)((b->mute & 0x1Fu) | v << 5);
-        }
-        break;
-    }
-    case R_TAPE: {                                    /* 0..15 the clean digital delay; above, tape, wearing */
-        uint8_t ty = (uint8_t)(v >= 16), we = (uint8_t)(ty ? (v - 16) * 127 / 111 : proj.sound.v[T_FX][0][FX_DL_WEAR]);
-        proj.sound.v[T_FX][1][0] = (uint8_t)v;
-        proj.sound.v[T_FX][0][FX_DL_TYPE] = ty;
-        proj.sound.v[T_FX][0][FX_DL_WEAR] = we;
-        engine_set(T_FX, 0, FX_DL_TYPE, ty);
-        engine_set(T_FX, 0, FX_DL_WEAR, we);
-        break;
-    }
-    case R_STALLS:
-        perf.stalls_on = (uint8_t)v;
-        plat_stalls_enable(v);
-        perf.have = 0;                                /* the next window starts the counts again */
-        break;
-    case R_SLEN:
-        if (v != song()->len) song_structure_revision++;
-        if (v > song()->len)
-            song_fill(v - 1);
-        else
-            song()->len = (uint16_t)v;
-        if (ui.song_sel > song()->len)
-            ui.song_sel = (uint8_t)(song()->len < NSONG ? song()->len : NSONG - 1);
-        break;
-    default: break;
-    }
-#if X0X_BASS_PRESET_PREVIEW
-    if (bass_edit) engine_bass_edit_hold(0);
-#endif
-}
-static void pref_set(pref_t r, int v) { pref_set_impl(r, v, 1); }
-
-/* Browsing never changes a pattern. The existing BREAK voice auditions the
- * candidate; SEL commits and any exit restores the selected loops. */
-static void brk_choice_cancel(void)
-{
-    if (!ui.brk_choice_on) return;
-    ui.brk_choice_on = 0;
-    engine_brk_preview_end();
-    ui.outline_ok = 0;
-}
-static int brk_choice_turn(pref_t r, int e)
-{
-    int n = engine_brk_nslots(), value;
-    if (!n || !e) return 0;
-    if (ui.brk_choice_on && (ui.brk_choice_bank != r.a ||
-        ui.brk_choice_pat != seq.ppat[PART_BRK])) brk_choice_cancel();
-    value = ui.brk_choice_on ? ui.brk_choice_slot : pref_get(r);
-    value += e > 0 ? 1 : -1;
-    value = value < 0 ? 0 : value >= n ? n - 1 : value;
-    if (!engine_brk_preview(value)) return 0;
-    ui.brk_choice_on = 1;
-    ui.brk_choice_bank = (uint8_t)r.a;
-    ui.brk_choice_slot = (uint8_t)value;
-    ui.brk_choice_pat = seq.ppat[PART_BRK];
-    ui.outline_ok = 0;
-    say("PREVIEW", 0);
-    return 1;
-}
-static int brk_choice_confirm(void)
-{
-    if (!ui.brk_choice_on) return 0;
-    if (!engine_brk_preview_active() || ui.brk_choice_pat != seq.ppat[PART_BRK]) { brk_choice_cancel(); return 0; }
-    int bank = ui.brk_choice_bank, slot = ui.brk_choice_slot;
-    brk_choice_cancel();
-    pref_set_impl(PR(R_BRKSLOT, bank, 0, 0), slot, 1);
-    mark_dirty();
-    say("CHOSEN", 0);
-    return 1;
-}
-
-
-
-/* a name in capitals (the engines' own are mixed case): two at a time */
-static const char *caps_of(const char *n)
-{
-    static char t[2][24];
-    static int w;
-    char *q = t[w ^= 1];
-    int i;
-    for (i = 0; n[i] && i < 23; i++) {
-        int brand_n = i > 0 && n[i-1]=='D' && n[i]=='n' && n[i+1]=='B' && n[i+2]=='O' && n[i+3]=='X';
-        q[i] = !brand_n && n[i] >= 'a' && n[i] <= 'z' ? (char)(n[i] - 32) : n[i];
-    }
-    q[i] = 0;
-    return q;
-}
-
-/* the value belongs to the pattern (it changes when the pattern does), not to the sound */
-static int in_pattern(pref_t r)
-{
-    switch (r.kind) {
-    case R_SWING: case R_DLEN: case R_DRATE: case R_BLEN: case R_BRATE: case R_BDIR: case R_BTRANS: case R_GEN:
-    case R_BRKSET: case R_BRKSLOT: case R_BRKSLICE: case R_BRKRATE: case R_BPATSND:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-/* a knob's label: mixer refs name their part */
-static int name_is(const x0x_param_t *d, const char *n);
-static const char *pref_name(pref_t r)
-{
-    if(r.kind==R_SECTION)return GLOBAL_SECTIONS[r.a<6?r.a:0];
-    if ((r.kind == R_PARTON || r.kind == R_SPAT) && part_is_303(r.a % NPARTS))
-        return part_name(r.a % NPARTS);                /* the engine, never "303" for Miami */
-    if (r.kind == R_MIDICH && part_is_303(r.a % NPARTS)) {
-        static char t[24];
-        put_s(put_s(t, part_name(r.a % NPARTS)), " MIDI CH");
-        return t;
-    }
-    static const char *const MIXN[NPARTS][MX_NPARAMS] = {{"909", "909 RV", "909 DL", "909 PAN", "909 CUT"},
-                                                         {"808", "808 RV", "808 DL", "808 PAN", "808 CUT"},
-                                                         {"BASS A", "A REV", "A DLY", "A PAN", "A CUT"},
-                                                         {"BASS B", "B REV", "B DLY", "B PAN", "B CUT"},
-                                                         {"BREAK", "BRK RV", "BRK DL", "BRK PAN", "BRK CUT"}};
-    static const char *const PATN[6][2] = {{"909 LEN", "808 LEN"}, {"909 RATE", "808 RATE"}, {"A LEN", "B LEN"},
-                                           {"A RATE", "B RATE"}, {"A DIR", "B DIR"}, {"A TRANSP", "B TRANSP"}};
-    static const char *const CHN[MX_NPARAMS] = {"LEVEL", "REV", "DLY", "PAN", "CUT"};
-    const x0x_param_t *d = pref_desc(r);
-    /* Presentation only: retain the native P.Dpth identity and pitch-sweep glyph. */
-    if(r.kind==R_ENG && r.a==T_909 && name_is(d,"P.Dpth"))return "Depth";
-    static const char *const SEQN[6] = {"LENGTH", "RATE", "LENGTH", "RATE", "DIRECTION", "TRANSP"};
-    if (r.kind == R_ENG && r.a == T_303)
-        return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
-    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)       /* SEQ: the part's own; a list elsewhere: whose */
-        return ui.view == V_SEQ ? SEQN[r.kind - R_DLEN] : PATN[r.kind - R_DLEN][r.a & 1];
-    if (r.kind == R_ENG && r.a == T_MIX && ui.view == V_MIX && r.c < MX_NPARAMS)
-        return CHN[r.c];                               /* MIX's PARTS: the picked part's */
-    if (r.kind == R_ENG && (r.a == T_909 || r.a == T_808) && r.b == NDRUM && r.c == 1)
-        return "ACCENT";                               /* the kits' depth of accents */
-    if (r.kind == R_ENG && r.a == T_MIX && r.b < NPARTS && r.c == 0 && part_is_303(r.b))
-        return part_name(r.b);
-    if (r.kind == R_ENG && r.a == T_MIX && r.b < NPARTS && r.c < MX_NPARAMS)
-        return MIXN[r.b][r.c];
-    if (r.kind == R_ENG && r.a == T_FX) {               /* the page says which effect: the knob, what */
-        switch (r.c) {
-        case FX_RV_DECAY: return "DECAY";
-        case FX_RV_TONE: case FX_DL_TONE: return "TONE";
-        case FX_DL_TIME: return "TIME";
-        case FX_DL_FDBK: return "FEEDBACK";
-        case FX_RV_HPF: return "REV LOW CUT";
-        case FX_DL_HPF: return "DLY LOW CUT";
-        case FX_RV_LEVEL: return "REV RETURN";
-        case FX_DL_LEVEL: return "DLY RETURN";
-        case FX_DL_PING: return "PING-PONG";
-        case FX_COMP: return "GLUE";
-        default: break;
-        }
-    }
-    if (r.kind == R_BRKSET && r.c == BRK_BCHANCE)
-        return "B CHANCE";
-    if (r.kind == R_ENG && (r.a == T_909 || r.a == T_808) && r.b < NDRUM && ui.view == V_MIX && ui.overlay == O_LIST) {
-        static char t[24];                             /* MIX's list: whose track ("909 BD LEVEL") */
-        put_s(put_s(put_s(put_s(t, r.a == T_909 ? "909 " : "808 "), engine_voice_name(r.a, r.b)), " "), d ? d->name : "");
-        return t;
-    }
-    if (r.kind == R_ENG && r.a == T_303) {
-        {
-            switch (r.c) {
-            case BASS303_AATTACK: return "ATTACK";
-            case BASS303_ADECAY: return "DECAY";
-            case BASS303_ASUSTAIN: return "SUSTAIN";
-            case BASS303_ARELEASE: return "RELEASE";
-            case BASS303_FATTACK: return "F ATTACK";
-            case BASS303_FSUSTAIN: return "F SUSTAIN";
-            case BASS303_FRELEASE: return "F RELEASE";
-            default: break;
-            }
-        }
-    }
-    if (r.kind == R_BRKSLOT)
-        return r.a ? "LOOP B" : "LOOP A";
-    return d ? d->name : "";
-}
-
-/* a pan: a part's (MIX) or a drum voice's ("Pan", its last pot): drawn L / C / R, its arc from the middle */
-static int is_pan(pref_t r)
-{
-    const x0x_param_t *d;
-    if (r.kind != R_ENG)
-        return 0;
-    if (r.a == T_MIX)
-        return r.c == MX_PAN;
-    d = pref_desc(r);
-    return (r.a == T_909 || r.a == T_808) && d && d->name[0] == 'P' && d->name[1] == 'a' && d->name[2] == 'n' &&
-           !d->name[3];
-}
-
-static int matrix_value(pref_t r);
-
-/* Chicago Gate routes amp ADSR to the filter and therefore uses filter time laws. */
-static void display_ms(float ms,char *num,char *unit)
-{
-    if(ms>0.0f && ms<10.0f) {
-        int t=(int)(ms*10.0f+0.5f);
-        put_i(put_s(put_i(num,t/10),"."),t%10);
-    } else put_i(num,(int)(ms+0.5f));
-    put_s(unit,"ms");
-}
-static const char *original_status_name(int voice)
-{
-    static const char *const pending[] = {"READY","WAIT","HELD","WHEEL","LOCKS","INPUT","WAIT"};
-    int status = engine_bass_status(voice), wait = engine_bass_preset_pending(voice);
-    if (status != 1) return status == -1 ? "FX WAIT" : "DSP ERR";
-    return wait > 0 && wait < 7 ? pending[wait] : "READY";
-}
-static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *unit)
-{
-    if (r.kind == R_BENGINE) {
-        put_s(num, value >= 0 && value <= ORIGINAL_SOUND_JUNO ? BENGINE_N[value] : "INVALID");
-        return 1;
-    }
-    if (r.kind == R_BPRESET) {
-        if (value < 0) put_s(num,"USER");
-        else {
-            char *end = put_i(num,value+1);
-            if (!engine_bass_preset_pending(r.b) && engine_bass_preset_edited(r.b)) put_s(end,"*");
-        }
-        return 1;
-    }
-    if (r.kind == R_BSTATUS) { put_s(num,original_status_name(r.b)); return 1; }
-    if (r.kind != R_ENG || r.a != T_303) return 0;
-    int bank = engine_bass_sound_bank(&proj.sound,r.b);
-    unsigned kind = (unsigned)bank, id = r.c;
-    const ui_original_control_view *v = 0;
-    /* a corrupt patch has no bank: never index a name table through a null view */
-    if (bank != ORIGINAL_SOUND_CHICAGO && bank != ORIGINAL_SOUND_MIAMI && bank != ORIGINAL_SOUND_SYNTHONE && bank != ORIGINAL_SOUND_JUNO) { put_s(num,"INVALID"); return 1; }
-    if (kind == ORIGINAL_SOUND_SYNTHONE && id == ORIGINAL_SYNTHONE_CRUSH) {
-        float hz;
-        if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) {
-            put_i(num, (int)(hz + .5f));
-            put_s(unit, "Hz");
-            return 1;
-        }
-    }
-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
-    if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
-        (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
-        v = original_text_view(r,value);
-        if (!v) { put_s(num,"INVALID"); return 1; }
-    }
-    if (kind == ORIGINAL_SOUND_CHICAGO) {
-        static const char *const speed[] = {"1/2","1/4D","1/2T","1/4","1/8D","1/4T","1/8","1/8T","1/16","1/32"};
-        if (id == 0) {
-            static const char *const wave[]={"TRI","SAW","SQR","PUL"};
-            if(!v->wave_on)put_s(num,"OFF");
-            else if(v->wave_on==1 || v->shape[0]==v->shape[1])put_s(num,wave[v->shape[0]]);
-            else if(v->wave_on==2)put_s(num,wave[v->shape[1]]);
-            else put_s(put_s(put_s(num,wave[v->shape[0]]),"/"),wave[v->shape[1]]);
-            return 1;
-        }
-        if (id == 4) { put_i(v->env_percent>0?put_s(num,"+"):num,v->env_percent); put_s(unit,"%"); return 1; }
-        if (id == 11) { put_s(num,v->amp_gate ? "GATE" : "ENV"); return 1; }
-        if (id == 13) { put_s(num,v->arp_on ? "ON" : "OFF"); return 1; }
-        if (id == 14) { put_s(num,v->arp_mode == 1 ? "DOWN" : v->arp_mode == 2 ? "UP" : "UP/DN"); return 1; }
-        if (id == 15) { put_s(num,v->arp_range == 1 ? "1 OCT" : v->arp_range == 2 ? "2 OCT" : "FULL"); return 1; }
-        if (id == 16) { put_s(num,speed[v->arp_speed]); return 1; }
-        if (id == 17) {
-            const char *name = original_sound_fx_name((unsigned)value);
-            put_s(num,name ? name : "INVALID"); return 1;
-        }
-    } else {
-        static const char *const shape[] = {"TRI","SAW","SQR","PUL"};
-        static const char *const wobble[] = {"TRI","DOWN","UP","SQR"};
-        static const char *const rate[] = {"1/2","1/4","1/8","1/16","1/3","1/6","1/12","1/24"};
-        if (id == 0 || id == 6) { put_s(num,shape[v->shape[id == 0 ? 0 : 1]]); return 1; }
-        if (id == 11) { put_s(num,wobble[v->shape[2]]); return 1; }
-        if (id == 13) { put_s(num,rate[v->wobble_rate]); return 1; }
-        if (id == 3) { put_i(v->carrier_pitch > 0 ? put_s(num,"+") : num,v->carrier_pitch); put_s(unit,"st"); return 1; }
-        if (id == 7) {
-            int amount = v->xmod_tune; char *q = num;
-            if (amount < 0) { q = put_s(q,"-"); amount = -amount; }
-            else if (amount > 0) q = put_s(q,"+");
-            /* Native80 is bipolar VCA-to-slave pitch amount, not fixed tuning.
-             * xmod_tune stores thousandths; show that amount as percent. */
-            q = put_i(q,amount/10); *q++ = '.'; *q++ = (char)('0'+amount%10); *q = 0;
-            put_s(unit,"%");
-            return 1;
-        }
-    }
-    put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1;
-}
-
-/* signed number with one decimal below 10 (|x|), else whole */
-static char *put_d1(char *q, float x, int sign)
-{
-    int t = (int)(x * 10.0f + (x < 0 ? -0.5f : 0.5f));
-    if (t < 0) { *q++ = '-'; t = -t; } else if (sign && t > 0) *q++ = '+';
-    if (t < 100) { q = put_i(q, t / 10); *q++ = '.'; *q++ = (char)('0' + t % 10); *q = 0; return q; }
-    return put_i(q, (t + 5) / 10);
-}
-/* an engine value in its unit (X0X_U_*), short enough for a 60 px cell */
-static void unit_value(int u, float x, char *num, char *unit)
-{
-    switch (u) {
-    case X0X_U_PCT: put_i(num, (int)(x + 0.5f)); put_s(unit, "%"); return;
-    case X0X_U_GAIN:
-        if (x <= 0.0f) { put_s(num, "OFF"); return; }
-        put_d1(num, 6.0206f * fm_log2f(x), 1); put_s(unit, "dB"); return;
-    case X0X_U_HZ:
-        if (x < 999.5f) { put_i(num, (int)(x + 0.5f)); put_s(unit, "Hz"); }
-        else { put_d1(num, x / 1000.0f, 0); put_s(unit, "kHz"); }
-        return;
-    case X0X_U_MS:
-        if (x < 999.5f) { put_i(num, (int)(x + 0.5f)); put_s(unit, "ms"); }
-        else { put_d1(num, x / 1000.0f, 0); put_s(unit, "s"); }
-        return;
-    case X0X_U_S:
-        if (x < 0.9995f) { put_i(num, (int)(x * 1000.0f + 0.5f)); put_s(unit, "ms"); }
-        else { put_d1(num, x, 0); put_s(unit, "s"); }
-        return;
-    case X0X_U_RATIO: x = 12.0f * fm_log2f(x); /* fall through: semitones */
-    case X0X_U_ST: put_d1(num, x, 1); put_s(unit, "st"); return;
-    default: return;
-    }
-}
-
-/* the value, as a number and a unit ("-6" "dB"); a switch gives its name and no unit */
-X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
-{
-    const x0x_param_t *d = pref_desc(r);
-    *num = *unit = 0;
-    if (!d || r.kind == R_ACT)
-        return;
-    if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS) {
-        engine_bass_edit_hold(1);
-        (void)original_value_text(r,v,num,unit);
-        engine_bass_edit_hold(0);
-        return;
-    }
-    if (d->names) {
-        /* Retained or incompatible sound data must not become a pointer lookup. */
-        put_s(num, v >= 0 && v <= d->max ? d->names[v] : "INVALID");
-        if (r.kind == R_ENG && r.a == T_BRK && r.c == 1 && v >= 0 && v <= d->max)
-            put_s(unit, "st");                           /* breaks.c: semi = Pitch - 12 */
-        return;
-    }
-    if (r.kind == R_TAPE) {
-        if (v < 16)
-            put_s(num, "DIGI");
-        else {
-            put_i(num, (v - 16) * 100 / 111);
-            put_s(unit, "%");
-        }
-        return;
-    }
-    if (is_pan(r)) {                                     /* L50 .. C .. R50; engine stays 0..127 */
-        if (v == 64)
-            put_s(num, "C");
-        else
-            put_i(put_s(num, v < 64 ? "L" : "R"),
-                  v < 64 ? ((64 - v) * 50 + 32) / 64 : ((v - 64) * 50 + 31) / 63);
-        return;
-    }
-    switch (r.kind) {
-    case R_ENG:
-        if (r.a == T_MST) {                              /* the master formats itself: "-12dB" */
-            char t[16], *q = t;
-            engine_master_format(r.c, t);
-            while (*q && (*q == '-' || *q == '.' || (*q >= '0' && *q <= '9')))
-                q++;
-            put_s(unit, q);
-            *q = 0;
-            put_s(num, t);
-            return;
-        }
-        if (r.a == T_MIX) {
-            if (r.c == 0) {                              /* level: 100 = 0 dB, square law */
-                if (!v)
-                    put_s(num, "OFF");
-                else {
-                    float db = 12.0412f * fm_log2f((float)v / 100.0f);
-                    int t10 = (int)(db * 10.0f + (db < 0 ? -0.5f : 0.5f));
-                    char *q = num;
-                    if (t10 > 0)
-                        *q++ = '+';
-                    else if (t10 < 0)
-                        *q++ = '-';
-                    t10 = t10 < 0 ? -t10 : t10;
-                    q = put_i(q, t10 / 10);
-                    if (t10 < 100 && t10 % 10) {
-                        *q++ = '.';
-                        put_i(q, t10 % 10);
-                    }
-                    put_s(unit, "dB");
-                }
-                return;
-            }
-            put_i(num, v * 100 / 127);
-            put_s(unit, "%");
-            return;
-        }
-        { float x = 0.0f; int u = engine_param_si(r.a, r.b, r.c, v, &x);
-          if (u != X0X_U_NONE) { unit_value(u, x, num, unit); return; } }
-        put_i(num, v);
-        return;
-    case R_DLEN:
-    case R_BLEN: put_i(num, v + 1); put_s(unit, "steps"); return;
-    case R_ACCENT: put_i(num,(v*100+63)/127);put_s(unit,"%");return;
-    case R_BTRANS: {
-        char *q = num;
-        if (v > 24)
-            *q++ = '+';
-        put_i(q, v - 24);
-        put_s(unit, "st");
-        return;
-    }
-    case R_SWING: put_i(num, 50 + v / 4); put_s(unit, "%"); return;
-    case R_GEN:
-        if (r.c == G_OCTS || r.c == G_BASE)
-            put_i(num, v + 1);
-        else if (r.c == G_MUT) {
-            if (!v)
-                put_s(num, "OFF");
-            else {
-                put_i(num, v);
-                put_s(unit, "bar");
-            }
-        } else {
-            put_i(num, v);
-            put_s(unit, "%");
-        }
-        return;
-    case R_BRKSET: put_i(num, v); put_s(unit, "%"); return;
-    case R_TEMPO: put_i(num, v + 20); put_s(unit, "bpm"); return;
-    case R_FINETUNE: {
-        int tsteps = v - 64, milli = tsteps * 625;
-        char *e = num;
-        if (milli > 0) *e++ = '+';
-        if (milli < 0) { *e++ = '-'; milli = -milli; }
-        e = put_i(e, milli / 1000);
-        *e++ = '.';
-        *e++ = (char)('0' + (milli / 100) % 10);
-        *e = 0;
-        put_s(unit, "Hz");
-        return;
-    }
-    case R_BPATSND: {
-        unsigned ps = pat_of(PART_303A + (r.b & 1))->rsv[r.b & 1];
-        if (!ps) { put_s(num, "OFF"); return; }
-        unsigned kind, preset;
-        if (!bass_pattern_preset_decode(ps, &kind, &preset)) { put_s(num, "INVALID"); return; }
-        num[0] = kind == ORIGINAL_SOUND_JUNO ? 'J' : kind == ORIGINAL_SOUND_SYNTHONE ? 'S' : kind == ORIGINAL_SOUND_MIAMI ? 'M' : 'C';
-        put_i(num + 1, (int)preset);
-        return;
-    }
-    case R_SBAR: put_i(num, v + 1); return;
-    case R_SPAT: num[0] = 'P'; put_i(num + 1, v + 1); return;
-    case R_MIDICH: if (v) put_i(num, v); else put_s(num, "OFF"); return;
-    case R_CKCH: put_i(num, v + 2); return;
-    case R_SREP: num[0] = 'x'; put_i(num + 1, v + 1); return;
-    case R_SLEN: put_i(num, v); put_s(unit, "bar"); return;
-    default: put_i(num, v); return;
-    }
-}
-static void pref_value(pref_t r, char *num, char *unit)
-{
-    if (r.kind == R_ENG && r.a == T_303) { pref_value_of(r,original_display_value(r),num,unit); return; }
-    pref_value_of(r,pref_get(r),num,unit);
-}
-
-/* ===================================================================== pages === */
-#define MAXPAGES 14
-/* page groups: whose values a page holds (the SEL list's headers, the header's colour) */
-enum { GR_NONE, GR_TRACK, GR_TMIX, GR_KIT, GR_PAT, GR_SOUND, GR_MORE,
-       GR_MIDI, GR_AUDIO, GR_KEYS, GR_PROJECT, GR_SYSTEM, GR_BT };   /* (the last six: GLO's sections) */
-#define MAXMORE 14
-typedef struct {
-    pref_t r[MAXPAGES][4];
-    char title[MAXPAGES][12];
-    uint8_t group[MAXPAGES];
-    int n;
-    pref_t more[MAXMORE];              /* the screen's other knobs: only in SEL's list, under MORE */
-    int nmore;
-} pages_t;
-static pages_t pg X0X_POOL;
-typedef struct { pref_t r[4]; char title[12]; int page, n; } page_query_t;
-/* The descriptor emitter has one explicit output contract. Query mode records
- * one requested page plus the count, without a second persistent page table. */
-typedef struct {
-    pages_t *pages;
-    page_query_t *query;
-    uint8_t group;
-} page_emitter_t;
-
-static void more(page_emitter_t *emit, pref_t r)
-{
-    pages_t *pages = emit->pages;
-    if (pages && r.kind != R_NONE && pages->nmore < MAXMORE)
-        pages->more[pages->nmore++] = r;
-}
-
-static void title(pages_t *pages, int i, const char *s)
-{
-    int k = 0;
-    while (s[k] && k < 11) {
-        pages->title[i][k] = s[k];
-        k++;
-    }
-    pages->title[i][k] = 0;
-}
-
-static void add_page(page_emitter_t *emit, const char *t,
-                     pref_t a, pref_t b, pref_t c, pref_t d)
-{
-    page_query_t *query = emit->query;
-    pages_t *pages = emit->pages;
-    if (query) {
-        if (query->n == query->page) {
-            query->r[0] = a;
-            query->r[1] = b;
-            query->r[2] = c;
-            query->r[3] = d;
-            unsigned i = 0;
-            for (; t[i] && i < 11; i++)
-                query->title[i] = t[i];
-            query->title[i] = 0;
-        }
-        query->n++;
-        return;
-    }
-    if (pages->n >= MAXPAGES)
-        return;
-    pages->r[pages->n][0] = a;
-    pages->r[pages->n][1] = b;
-    pages->r[pages->n][2] = c;
-    pages->r[pages->n][3] = d;
-    title(pages, pages->n, t);
-    pages->group[pages->n] = emit->group;
-    pages->n++;
-}
-
-static int name_is(const x0x_param_t *d, const char *n)
-{
-    const char *a = d ? d->name : "";
-    while (*a && *a == *n) {
-        a++;
-        n++;
-    }
-    return !*a && !*n;
-}
-static pref_t find_ref(int t, int v, const char *n)
-{
-    int i;
-    for (i = 0; i < engine_nparams(t, v); i++)
-        if (name_is(engine_param(t, v, i), n))
-            return PR(R_ENG, t, v, i);
-    return NONE;
-}
-
-/* Drum sound knobs: named ranks so matching controls keep the same physical
- * knobs across 909/808 tracks (DSP tables differ per voice). Level/Pan/Rev/Dly
- * stay on MIX; Drive/Dist stay in SEL's list. Unknown names keep their relative
- * table order after the named ranks. Restored after Chicago-aux land dropped it. */
-static int track_param_rank(const x0x_param_t *d)
-{
-    static const char *const order[] = {
-        "Tune", "Tone", "Attack", "Sound", "Decay", "Snappy", "Tail", "P.Dpth", "Pitch",
-    };
-    int i;
-    for (i = 0; i < (int)(sizeof order / sizeof *order); i++)
-        if (name_is(d, order[i]))
-            return i;
-    return (int)(sizeof order / sizeof *order);
-}
-
-/* a drum track: its sound, four knobs a page (its DRIVE and DIST: SEL's list; its level, pan and sends:
- * MIX's 909 MIX / 808 MIX page) */
-/* Exact admitted main-amp controls, not Attack labels (BD Attack is click gain). */
-static int drum_amp_ref(pref_t r)
-{ return r.kind==R_ENG && r.a==T_909 &&
-    ((r.b==DR_BD && r.c==2) || (r.b==DR_SD && r.c==3)); }
-X0X_COLD static void add_track_pages(page_emitter_t *emit, int t, int v)
-{
-    const char *nm = engine_voice_name(t, v);
-    pref_t snd[NPARAMS_MAX];
-    int rank[NPARAMS_MAX];
-    int n = 0, i, j;
-    pref_t amp=NONE;
-    for (i = 0; i < engine_nparams(t, v) && n < NPARAMS_MAX; i++) {
-        const x0x_param_t *d = engine_param(t, v, i);
-        pref_t r=PR(R_ENG,t,v,i);
-        if(drum_amp_ref(r)){amp=r;continue;}
-        if (name_is(d, "Drive") || name_is(d, "Dist"))
-            more(emit, PR(R_ENG, t, v, i));
-        else if (!name_is(d, "Level") && !name_is(d, "Pan") && !name_is(d, "Rev") && !name_is(d, "Dly")) {
-            rank[n] = track_param_rank(d);
-            snd[n++] = PR(R_ENG, t, v, i);
-        }
-    }
-    for (i = 1; i < n; i++) {              /* stable insertion by rank */
-        pref_t x = snd[i];
-        int rx = rank[i];
-        for (j = i; j > 0 && rank[j - 1] > rx; j--) {
-            snd[j] = snd[j - 1];
-            rank[j] = rank[j - 1];
-        }
-        snd[j] = x;
-        rank[j] = rx;
-    }
-    emit->group = GR_TRACK;
-    for (i = 0; i < n; i += 4)
-        add_page(emit, nm, snd[i], i + 1 < n ? snd[i + 1] : NONE, i + 2 < n ? snd[i + 2] : NONE, i + 3 < n ? snd[i + 3] : NONE);
-    if(amp.kind!=R_NONE)add_page(emit,"AMP ENVELOPE",amp,NONE,NONE,NONE);
-}
-
-/* where a screen's page is kept: per part on the part's screens (and TB-3PO), else one per screen */
-static uint8_t *page_of(int view)
-{
-    return &ui.page[view][view == V_PART || view == V_SEQ || view == V_GEN ? ui.part : 0];
-}
-
-/* Immutable page descriptions avoid rebuilding four constant preference records at
- * every call site. The only patched byte is the current part/voice/channel;
- * NONE retains its all-zero record. This runs only during UI page construction. */
-X0X_COLD __attribute__((noinline)) static void add_page_refs(page_emitter_t *emit, const char *t, const pref_t *refs, int axis, uint8_t value)
-{
-    pref_t row[4];
-    for (int i = 0; i < 4; i++) {
-        row[i] = refs[i];
-        if (row[i].kind != R_NONE) {
-            if (axis == 1) row[i].a = value;
-            if (axis == 2) row[i].b = value;
-        }
-    }
-    add_page(emit, t, row[0], row[1], row[2], row[3]);
-}
-
-X0X_COLD __attribute__((noinline)) static void more_refs(page_emitter_t *emit, const pref_t *refs, unsigned n, int axis, uint8_t value)
-{
-    unsigned i;
-    for (i = 0; i < n; i++) {
-        pref_t r = refs[i];
-        if (axis == 1) r.a = value;
-        if (axis == 2) r.b = value;
-        more(emit, r);
-    }
-}
-
-/* Pure navigation inputs: emit existing descriptors without keyboard clamping. */
-static void describe_pages(pages_t *out, page_query_t *query, int view, int p, int mixsel, const uint8_t *selection)
-{
-    page_emitter_t output = {out, query, GR_NONE};
-    page_emitter_t *emit = &output;
-    if (query)
-        query->n = 0;
-    else
-        out->n = out->nmore = 0;
-    switch (view) {
-    case V_HOME:                                       /* the pattern: how the parts run through it */
-    case V_GLO:
-        do { static const pref_t refs[4] = {PR(R_TEMPO, 0, 0, 0), PR(R_SWING, 0, 0, 0), PR(R_ENG, T_MST, 0, MST_DJF), PR(R_ENG, T_MST, 0, MST_PUMP)};
-            add_page_refs(emit, "PERFORM", refs, 0, 0); } while (0);
-        break;
-    case V_SEQ:                                        /* the part's steps: how its pattern runs */
-        emit->group = GR_PAT;
-        if (part_is_drum(p))
-            do { static const pref_t refs[4] = {PR(R_DLEN, 0, 0, 0), PR(R_DRATE, 0, 0, 0), NONE, NONE};
-            add_page_refs(emit, "SEQUENCE", refs, 1, p); } while (0);   /* (the swing: HOME's, all parts') */
-        else if (part_is_303(p)) {
-            int b = p - PART_303A;
-            do { static const pref_t refs[4] = {PR(R_BLEN, 0, 0, 0), PR(R_BRATE, 0, 0, 0), PR(R_BDIR, 0, 0, 0), PR(R_BTRANS, 0, 0, 0)};
-            add_page_refs(emit, "SEQUENCE", refs, 1, b); } while (0);
-            add_page(emit, "PRESET", PR(R_BPATSND, 0, b, 0), NONE, NONE, NONE);   /* 0.0.25: this pattern's bass preset */
-            emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
-            do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
-            add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
-        }
-        else {
-            do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
-            add_page_refs(emit, "SEQUENCE", refs, 0, 0); } while (0);
-            do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_COMPLEX), PR(R_BRKSET, 0, 0, BRK_ANCHOR), PR(R_BRKSET, 0, 0, BRK_ROLL), PR(R_BRKSET, 0, 0, BRK_FILL)};
-            add_page_refs(emit, "GROOVE", refs, 0, 0); } while (0);
-            do { static const pref_t refs[4] = {PR(R_BRKSET, 0, 0, BRK_R2), PR(R_BRKSET, 0, 0, BRK_R3), PR(R_BRKSET, 0, 0, BRK_R4), PR(R_BRKSET, 0, 0, BRK_R8)};
-            add_page_refs(emit, "RETRIG", refs, 0, 0); } while (0);
-            do { static const pref_t refs[] = {PR(R_BRKSET, 0, 0, BRK_PHRASE), PR(R_BRKSET, 0, 0, BRK_ALEN), PR(R_BRKSET, 0, 0, BRK_BLEN)};
-                more_refs(emit, refs, 3, 0, 0); } while (0);
-        }
-        break;
-    case V_PART:                                       /* the part's sound */
-        if (part_is_drum(p)) {
-            int t = p == PART_909 ? T_909 : T_808;
-            add_track_pages(emit, t, selection[p]);
-            emit->group = GR_KIT;
-            if (p == PART_909)                         /* (the kit's gain: the mixer's level does it) */
-                do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
-            else
-                do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), PR(R_ENG, T_808, NDRUM, D8_KIT_DIST), PR(R_ENG, T_808, NDRUM, D8_KIT_DRIVE), PR(R_ENG, T_808, NDRUM, D8_KIT_GLUE)};
-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
-        } else if (part_is_303(p)) {
-            int b = p - PART_303A;
-            emit->group = GR_SOUND;
-            int kind = engine_bass_bank(b), chicago = kind == ORIGINAL_SOUND_CHICAGO;
-            const int8_t (*rows)[4] = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_rows : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_rows :
-                chicago ? ui_original_chicago_rows : ui_original_miami_rows;
-            const char *const *titles = kind == ORIGINAL_SOUND_JUNO ? ui_original_juno_titles : kind == ORIGINAL_SOUND_SYNTHONE ? ui_original_synthone_titles :
-                chicago ? ui_original_chicago_titles : ui_original_miami_titles;
-            int count = kind == ORIGINAL_SOUND_JUNO ? UI_ORIGINAL_JUNO_PAGES : kind == ORIGINAL_SOUND_SYNTHONE ? UI_ORIGINAL_SYNTHONE_PAGES :
-                chicago ? UI_ORIGINAL_CHICAGO_PAGES : UI_ORIGINAL_MIAMI_PAGES;
-            for (int row = 0; row < count; row++) {
-                pref_t refs[4];
-                for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
-                add_page_refs(emit, titles[row],refs,0,0);
-            }
-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
-        } else {
-            emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
-            do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
-            add_page_refs(emit, "LOOPS", refs, 0, 0); } while (0);
-            more(emit, PR(R_ENG, T_BRK, 0, 0));
-            more(emit, PR(R_BRKSLICE, 0, 0, 0));
-            more(emit, PR(R_BRKSLICE, 1, 0, 0));
-        }
-        break;
-    case V_GEN: {
-        int b = p - PART_303A;
-        emit->group = GR_PAT;
-        do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_DENS), PR(R_GEN, 0, 0, G_ACC), PR(R_GEN, 0, 0, G_SLIDE), PR(R_GEN, 0, 0, G_OCTS)};
-            add_page_refs(emit, "GENERATE", refs, 1, b); } while (0);
-        do { static const pref_t refs[4] = {PR(R_GEN, 0, 0, G_ROOT), PR(R_GEN, 0, 0, G_SCALE), PR(R_GEN, 0, 0, G_BASE), PR(R_GEN, 0, 0, G_MUT)};
-            add_page_refs(emit, "SCALE", refs, 1, b); } while (0);
-        break;
-    }
-    case V_FX:                                         /* (each part's sends: MIX's PARTS) */
-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), NONE, NONE};
-            add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
-            add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
-            do { static const pref_t refs[] = {PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_HPF), PR(R_ENG, T_FX, 0, FX_DL_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_PING)};
-                more_refs(emit, refs, 5, 0, 0); } while (0);
-        break;
-    case V_MIX:                                        /* a channel picked with a black key, its four knobs */
-        do { static const pref_t refs[4] = {PR(R_ENG, T_MIX, 0, MX_LEVEL), PR(R_ENG, T_MIX, 0, MX_PAN), PR(R_ENG, T_MIX, 0, MX_REV), PR(R_ENG, T_MIX, 0, MX_DLY)};
-            add_page_refs(emit, "PARTS", refs, 2, mixsel); } while (0);
-        for (p = 0; p < NKIT; p++) {                    /* each drum machine's tracks: LEVEL, PAN, REV, DLY */
-            int t = p ? T_808 : T_909, v = selection[p];
-            add_page(emit, p ? "808 MIX" : "909 MIX", find_ref(t, v, "Level"), find_ref(t, v, "Pan"), find_ref(t, v, "Rev"),
-                     find_ref(t, v, "Dly"));
-        }
-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
-            add_page_refs(emit, "MASTER", refs, 0, 0); } while (0);
-            do { static const pref_t refs[] = {PR(R_ENG, T_MST, 0, MST_THRESH), PR(R_ENG, T_MST, 0, MST_RATIO), PR(R_ENG, T_MST, 0, MST_ATTACK), PR(R_ENG, T_MST, 0, MST_RELEASE), PR(R_ENG, T_MST, 0, MST_MAKEUP), PR(R_ENG, T_MST, 0, MST_MIX), PR(R_ENG, T_MST, 0, MST_PUMPSRC), PR(R_ENG, T_MST, 0, MST_RESO), PR(R_ENG, T_MST, 0, MST_LIMIT), PR(R_ENG, T_FX, 0, FX_DIST), PR(R_ENG, T_FX, 0, FX_COMP), PR(R_ENG, T_FX, 0, FX_VOLUME)};
-                more_refs(emit, refs, 12, 0, 0); } while (0);
-        /* sibling of MASTER: same knobs, post-master eng_scope wave (Baud Girl â‰¤10 Hz redraw) */
-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
-            add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
-        break;
-    case V_PERF:
-        do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
-            add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
-        break;
-    case V_SONG:
-        do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
-        do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_303B, 0, 0), PR(R_SPAT, PART_303A, 0, 0), PR(R_SREP, 0, 0, 0)};
-            add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
-        break;
-    default: break;
-    }
-    if ((query ? query->n : out->n) == 0)
-        do { static const pref_t refs[4] = {NONE, NONE, NONE, NONE};
-            add_page_refs(emit, "", refs, 0, 0); } while (0);
-}
-
-static void build_pages(void)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    int b=bidx(), oldpage=*page_of(ui.view);
-    int preserve=ui.view==V_PART && is_303() && (bass_layout_pending_mask & (1u<<b));
-    int keep_sound=ui.view==V_PART && is_303() && oldpage<pg.n &&
-        pg.r[oldpage][0].kind==R_BENGINE && pg.r[oldpage][0].b==b;
-#endif
-    describe_pages(&pg, 0, ui.view, ui.part, ui.mixsel, ui.sel);
-    if (ui.view == V_PART && is_303()) original_page_bank = (uint8_t)engine_bass_bank(bidx());
-#if X0X_BASS_PRESET_PREVIEW
-    if(!preserve && keep_sound) *page_of(ui.view)=(uint8_t)(pg.n-1);
-#endif
-    if (
-#if X0X_BASS_PRESET_PREVIEW
-        !preserve &&
-#endif
-        *page_of(ui.view) >= pg.n) *page_of(ui.view) = 0;
-}
-
-static int cur_page(void)
-{
-    int page = *page_of(ui.view);
-    if (ui.view == V_PART && is_303() &&
-        (bass_layout_on_sound_page & (1u << bidx())))
-        return pg.n - 1;
-    return page < pg.n ? page : pg.n - 1;
-}
-
-static void bass_layout_note_remote_edit(int voice)
-{
-    unsigned bit = 1u << (unsigned)voice;
-    if (ui.view != V_PART || !is_303() || bidx() != voice)
-        return;
-    if (!(bass_layout_pending_mask & bit) && pg.r[cur_page()][0].kind == R_BENGINE)
-        bass_layout_on_sound_page |= (uint8_t)bit;
-    bass_layout_pending_mask |= (uint8_t)bit;
-}
-
-static void bass_layout_accept(void)
-{
-    if (ui.view == V_PART && is_303() && (bass_layout_pending_mask & (1u << bidx())))
-        *page_of(ui.view) = (uint8_t)cur_page();
-    bass_layout_pending_mask = bass_layout_on_sound_page = 0;
-}
-
-/* MIX's page of a drum machine's tracks: which machine (0 / 1), -1 = not one */
-static int drum_mix_page(void)
-{
-    const char *t = pg.title[cur_page()];
-    return ui.view == V_MIX && t[4] == 'M' && t[5] == 'I' && t[6] == 'X' ? (t[0] == '8') : -1;
-}
-
-/* MIX MASTER (peak hist + COMP knobs); not the WAVE sibling */
-static int master_mix_page(void)
-{
-    const char *t = pg.title[cur_page()];
-    return ui.view == V_MIX && t[0] == 'M' && t[1] == 'A' && t[2] == 'S' && t[3] == 'T';
-}
-
-/* MIX WAVE: live post-master mono scope from eng_scope[] */
-static int wave_mix_page(void)
-{
-    const char *t = pg.title[cur_page()];
-    return ui.view == V_MIX && t[0] == 'W' && t[1] == 'A' && t[2] == 'V' && t[3] == 'E';
-}
-
-/* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */
-static int track_page(void)
-{
-    int g = pg.group[cur_page()];
-    return ui.view == V_PART && is_drum() && (g == GR_TRACK || g == GR_TMIX);
-}
-
-/* ===================================================================== lists === */
-/* A list is rows of refs. SEL on a page opens the list of every page's knobs (the deep view);
- * GLOBAL is a list of its own. SELECT moves, ALGORITHM changes, SEL runs an action. */
-#define LIST_MAX 64
-static pref_t list_rows[LIST_MAX] X0X_POOL;
-static char list_title[16];
-
-static void list_add(pref_t r)
-{
-    int i;
-    if (r.kind == R_NONE || ui.list_n >= LIST_MAX)
-        return;
-    for (i = 0; i < ui.list_n; i++)                   /* a ref on two pages (LEVEL) lists once */
-        if (list_rows[i].kind == r.kind && list_rows[i].a == r.a && list_rows[i].b == r.b && list_rows[i].c == r.c)
-            return;
-    list_rows[ui.list_n++] = r;
-}
-
-/* a list section's name: whose values follow */
-static void hdr_name(int g, char *t)
-{
-    const char *who = is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part]) : part_name(ui.part);
-    switch (g) {
-    case GR_TRACK: put_s(put_s(t, who), ": THIS TRACK"); break;
-    case GR_TMIX: put_s(put_s(t, who), ": TRACK MIX"); break;
-    case GR_KIT: put_s(put_s(t, part_name(ui.part)), ": ALL TRACKS"); break;
-    case GR_PAT: put_s(put_i(put_s(t, "P"), seq.ppat[ui.part] + 1), ": THE PATTERN"); break;
-    case GR_MORE: put_s(t, "MORE"); break;
-    case GR_MIDI: put_s(t, "MIDI"); break;
-    case GR_AUDIO: put_s(t, "AUDIO"); break;
-    case GR_KEYS: put_s(t, "KEYS AND SCREEN"); break;
-    case GR_PROJECT: put_s(t, "PROJECT"); break;
-    case GR_SYSTEM: put_s(t, "SYSTEM"); break;
-    case GR_BT: put_s(t, "BLUETOOTH MIDI"); break;
-    default: put_s(put_s(t, part_name(ui.part)), ": THE SOUND"); break;
-    }
-}
-
-static int list_skip(int i) { return i < ui.list_n && list_rows[i].kind == R_HDR; }
-
-static void open_list_of_pages(void)
-{
-    if (ui.view == V_PART && is_303()) original_list_bank = original_page_bank;
-    int p, k, last = -1, groups = 0;
-    ui.list_n = 0;
-    for (p = 0; p < pg.n; p++)
-        if (pg.group[p] != (p ? pg.group[p - 1] : GR_NONE))
-            groups++;
-    for (p = 0; p < pg.n; p++) {
-        if (groups > 1 && pg.group[p] != last && ui.list_n < LIST_MAX)
-            list_rows[ui.list_n++] = PR(R_HDR, pg.group[p], 0, 0);
-        last = pg.group[p];
-        for (k = 0; k < 4; k++)
-            list_add(pg.r[p][k]);
-    }
-    if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
-        list_rows[ui.list_n++] = PR(R_HDR, GR_MORE, 0, 0);
-    for (k = 0; k < pg.nmore; k++)
-        list_add(pg.more[k]);
-    if (ui.view == V_HOME)
-        list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
-    if (ui.view == V_PERF)
-        list_add(PR(R_ACT, ACT_PERF_TEST, 0, 0));
-    if (ui.view == V_SONG) {
-        list_add(PR(R_SLEN, 0, 0, 0));
-        list_add(PR(R_ACT, ACT_SONG_INS, 0, 0));
-        list_add(PR(R_ACT, ACT_SONG_DEL, 0, 0));
-        list_add(PR(R_ACT, ACT_SONG_CLR, 0, 0));
-    }
-    if (ui.view == V_SEQ)
-        put_s(put_s(list_title, part_name(ui.part)), " SEQ");
-    else
-        put_s(list_title, ui.view == V_PART ? part_display(ui.part) : VIEW_N[ui.view]);
-    ui.list_sel = ui.list_top = 0;
-    while (list_skip(ui.list_sel))
-        ui.list_sel++;
-    ui.overlay = ui.list_n ? O_LIST : O_NONE;
-}
-
-static void global_index(void)
-{
-    ui.glo_section=-1;ui.list_n=0;
-    for(int g=0;g<6;g++) {
-#if !BOARD_SMK37
-        if(g==1)continue;
-#endif
-        list_add(PR(R_SECTION,g,0,0));
-    }
-    put_s(list_title,"GLOBAL");ui.list_sel=ui.glo_index<ui.list_n?ui.glo_index:0;ui.list_top=0;ui.overlay=O_LIST;
-}
-static void global_section(int g)
-{
-    if(g<0||g>=6)return;
-    ui.glo_index=ui.list_sel;ui.glo_section=(int8_t)g;ui.list_n=0;
-    switch(g) {
-    case 0:
-        list_add(PR(R_CLKSRC,0,0,0));list_add(PR(R_CLKOUT,0,0,0));list_add(PR(R_NOTEOUT,0,0,0));
-        for(int p=0;p<NPARTS;p++)list_add(PR(R_MIDICH,part_at(p),0,0));
-#if BOARD_SMK37
-        list_add(PR(R_CKCH,0,0,0));
-#endif
-        break;
-    case 1:
-#if BOARD_SMK37
-        list_add(PR(R_BT,0,0,0));list_add(PR(R_SMC_ROLE,0,0,0));list_add(PR(R_SMC_MAP,0,0,0));
-        list_add(PR(R_BTSTAT,0,0,0));list_add(PR(R_BTNAME,0,0,0));
-#endif
-        break;
-    case 2:list_add(PR(R_OUTLOUD,0,0,0));list_add(PR(R_USBFULL,0,0,0));list_add(PR(R_FINETUNE,0,0,0));
-        for(int p=0;p<NPARTS;p++)list_add(PR(R_PARTON,part_at(p),0,0));
-        list_add(PR(R_QUEUEMUTE,0,0,0));list_add(PR(R_NOTELOCK,0,0,0));break;
-    case 3:list_add(PR(R_KEYLED,0,0,0));list_add(PR(R_KEYSOUND,0,0,0));list_add(PR(R_PALETTE,0,0,0));break;
-    case 4:
-        list_add(PR(R_ACT,ACT_SAVE,0,0));list_add(PR(R_ACT,ACT_LOAD,0,0));list_add(PR(R_AUTOSAVE,0,0,0));
-        list_add(PR(R_ACT,ACT_CLEAR_PAT,0,0));list_add(PR(R_ACT,ACT_RESET,0,0));break;
-    case 5:
-        list_add(PR(R_ACT,ACT_PERF,0,0));list_add(PR(R_ACT,ACT_ABOUT,0,0));list_add(PR(R_BATT,0,0,0));
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-        {extern uint8_t smk_clip_mode_on(void);if(!smk_clip_mode_on())list_add(PR(R_ACT,ACT_PADCAL,0,0));}
-#endif
-        break;
-    }
-    put_s(list_title,GLOBAL_SECTIONS[g]);ui.list_sel=ui.glo_sel[g]<ui.list_n?ui.glo_sel[g]:0;
-    ui.list_top=ui.glo_top[g]<=ui.list_sel?ui.glo_top[g]:0;ui.overlay=O_LIST;
-}
-static void global_back(void)
-{
-    int g=ui.glo_section;
-    if(g>=0&&g<6){ui.glo_sel[g]=ui.list_sel;ui.glo_top[g]=ui.list_top;}
-    global_index();
-}
-static void open_global(void)
-{
-    memset(ui.glo_sel,0,sizeof ui.glo_sel);memset(ui.glo_top,0,sizeof ui.glo_top);ui.glo_index=0;global_index();
-}
-
-/* ================================================================ questions === */
-static void ask(int act, int arg, const char *q1, const char *q2)
-{
-    ui.ask_act = (uint8_t)act;
-    ui.ask_overlay = ui.overlay;
-    ui.ask_arg = (uint16_t)arg;
-    put_s(ui.ask_q[0], q1);
-    put_s(ui.ask_q[1], q2 ? q2 : "");
-    ui.overlay = O_ASK;
-}
-
-/* part `part` of a pattern has something to play */
-static int part_used(const pattern_t *pt, int part)
-{
-    int v, s;
-    if (part < NKIT) {
-        for (v = 0; v < NDRUM; v++)
-            if (sm_any(pt->drum[part].hit[v]))
-                return 1;
-        return 0;
-    }
-    if (part == PART_BRK)
-        return pt->brk.steps != 0;
-    for (s = 0; s < NSTEPS; s++)
-        if (bstep_gate(&pt->bass[part - NKIT].step[s]) == G_NOTE)
-            return 1;
-    return 0;
-}
-
-static int pattern_used(const pattern_t *pt)
-{
-    int v, s, used = pt->brk.steps != 0;
-    for (v = 0; v < NDRUM; v++)
-        used |= sm_any(pt->drum[0].hit[v]) | sm_any(pt->drum[1].hit[v]);
-    for (s = 0; s < NSTEPS; s++)
-        used |= bstep_gate(&pt->bass[0].step[s]) != G_REST || bstep_gate(&pt->bass[1].step[s]) != G_REST;
-    return used;
-}
-
-/* motion lanes of one part pattern: gone, and the knobs back to their own values */
-static void clear_lanes(int pat, int part)
-{
-    int k;
-    for (k = 0; k < NLANE; k++) {
-        lane_t *l = &proj.arr.lane[k];
-        if (l->used && l->pat == pat && l->part == part) {
-            engine_motion_clear(k);
-            if (l->t < NTARGETS)                      /* (T_PROB: no knob) */
-                ui_restore_base(l->t,l->v,l->i);
-        }
-    }
-}
-
-/* part `part` of pattern src onto pattern dst, its lanes too; 0 = done, -1 = lanes did not fit */
-static int copy_part(int dst, int src, int part)
-{
-    pattern_t *d = &proj.pat[dst];
-    const pattern_t *a = &proj.pat[src];
-    int k, rc = 0;
-    if(dst==src)return 0;
-    /* Preflight the complete copy, including whole note sounds. A full pool
-     * must not produce a copied note with missing or mismatched sound state. */
-    int needed=0,available=0;
-    for(k=0;k<NLANE;k++) {
-        const lane_t *l=&proj.arr.lane[k];
-        needed+=l->used && l->pat==src && l->part==part;
-        available+=!l->used || (l->pat==dst && l->part==part);
-    }
-    if(needed>available)return -1;
-    if (part < NKIT) {
-        d->drum[part] = a->drum[part];
-        if (part == PART_909)
-            d->swing = a->swing;                      /* the 909 is the bar: its groove goes with it */
-    } else if (part < PART_BRK)
-        d->bass[part - NKIT] = a->bass[part - NKIT];
-    else
-        d->brk = a->brk;
-    clear_lanes(dst, part);
-    for (k = 0; k < NLANE; k++) {                     /* a copy lands on pattern dst: never copied again */
-        const lane_t *l = &proj.arr.lane[k];
-        int n, i;
-        if (!l->used || l->pat != src || l->part != part)
-            continue;
-        if ((n = motion_alloc(proj.arr.lane, dst, part, l->t, l->v, l->i)) < 0) {
-            rc = -1;
-            break;
-        }
-        for (i = 0; i < NSTEPS; i++)
-            proj.arr.lane[n].val[i] = l->val[i];
-    }
-    return rc;
-}
-
-static void clear_part(pattern_t *p, int part)
-{
-    int i;
-    if (part < NKIT) {
-        int w;
-        for (w = 0; w < NSW; w++) {
-            for (i = 0; i < NDRUM; i++)
-                p->drum[part].hit[i][w] = 0;
-            p->drum[part].accent[w] = 0;
-        }
-    } else if (part < PART_BRK) {
-        for (i = 0; i < NSTEPS; i++)
-            p->bass[part - NKIT].step[i].flags = G_REST;
-    } else {
-        p->brk.steps = 0;
-        for (i = 0; i < 16; i++)
-            p->brk.slice[i] = 0;
-    }
-}
-
-/* ============================================================ help cards === */
-/* Hold one button for HELP_HOLD ms without using it with anything: a card says what it does here,
- * its combinations included. A key, a turn or another button puts the card away (and the
- * combination works as always); letting go of the button after its card does nothing else. */
-#define HELP_HOLD 900u
-#define HELP_HOLD_SAVE 400u                    /* SAVE is held to copy: its card says what will be copied */
-static int perf_testing(void);
-static int perf_save_busy(void);
-#define HELP_LINES 6
-/* Help-card titles use printed legends on SMK; FM-1 retains its panel names.
- * Host tests can select the SMK captions without enabling hardware dependencies. */
-#if X0X_SMK_CAPTIONS
-static const char *const BTN_LABEL[NB] = {"FX", "SCALE", "CHORD", "NOTE REPEAT", "PARA", "GLOBE", "PATCH", "BT", "ARP", "SEQ", "SEQ PLAY", "SEQ REC", "OCTAVE-", "OCTAVE+"};
-static const char *btn_label(int i) { return BTN_LABEL[i]; }
-#elif defined(X0X_HOST)
-static const char *const BTN_LABEL[NB] = {"FX", "SEL", "ENV", "LFO", "EDIT", "GLO", "HOME", "SAVE", "ARP", "SEQ",
-                                          "PLAY / STOP", "REC", "OCT-", "OCT+"};
-static const char *btn_label(int i) { return BTN_LABEL[i]; }
-#else
-static const char *btn_label(int i) { return i == B_PLAY ? "PLAY / STOP" : B_NAME[i]; }
-#endif
-
-static int help_lines(int b, const char *l[HELP_LINES])
-{
-    int n = 0, gen = ui.view == V_GEN, kbd = is_303() && ui.rec;
-#define L(s) (l[n++] = (s))
-    switch (b) {
-    case B_FX: L("THE EFFECTS: REVERB, DELAY,"); L("TAPE AND KIT DRIVE"); L("AGAIN: THE NEXT PAGE"); break;
-    case B_SEL: L("THIS SCREEN AS A LIST"); L("IN A LIST: RUN THE ACTION"); L("IN A QUESTION: YES"); break;
-    case B_ENV:
-        if (is_303()) { L("HOLD + KEY: AN ACCENT"); if (kbd) L("WRITING: + " UI_CAP_OCT ": REST"); }
-        else if (is_drum()) { L("HOLD + WHITE KEY: ACCENT"); L("HOLD + BLACK KEY: LOUD HIT"); }
-        else L("HOLD + KEY: AN ACCENT");
-        break;
-    case B_LFO:
-        L("THE MIXER AND THE MASTER"); L("AGAIN: THE NEXT PAGE");
-        if (ui.view == V_MIX) L(UI_CAP_HOME " + BLACK KEY: MUTE");
-        if (is_303()) { L("HOLD + KEY: A SLIDE"); if (kbd) L("HOLD + " UI_CAP_OCT ": TIE"); }
-        break;
-    case B_EDIT: L("THE PART'S SOUND"); L("AGAIN: THE NEXT PAGE"); L("HOLD A STEP + KNOB: P-LOCK");
-        L("STEP + " UI_CAP_SELECT ": CHANCE"); break;
-    case B_GLO:
-        L("SETTINGS, SAVE, LOAD,"); L("RESET, CLEAR, PERFORMANCE"); L("AGAIN: CLOSE");
-        /* HOME only: the same card, no new screen. A pad tap clears the selected
-         * part of that pattern. Hold one pad and press another to copy that part. */
-        if (ui.view == V_HOME) { L("+ PAD: CLEAR THIS PART"); L("+ HOLD PAD, PRESS PAD: COPY"); }
-        break;
-    case B_HOME:
-#if X0X_BASS_PRESET_PREVIEW
-        if (ui.view==V_PART && is_303() && pg.r[cur_page()][0].kind==R_BENGINE &&
-            engine_bass_preset_pending(bidx())) L("TAP: CANCEL SOUND REQUEST");
-        else
-#endif
-            L("THE PATTERN: ALL FIVE PARTS");
-        L("AGAIN: SONG  + " UI_CAP_SELECT ": TEMPO"); L("+ WHITE KEY: PATTERN");
-        if (is_drum() && part_view()) L("+ BLACK KEY: MUTE THE TRACK");
-        L("+ " UI_CAP_REC ": UNDO  + " UI_CAP_PLAY ": REDO"); L("LIST: BACK   QUESTION: NO");
-        break;
-    case B_SAVE: {                                   /* the pattern a copy takes */
-        static char cp[40], cl[32], st[40];
-        put_s(cp, "+ WHITE KEY: COPY LIVE PARTS");
-        put_s(put_s(cl, "+ " UI_CAP_REC ": CLEAR "), part_name(ui.part));
-        if (ui.rec && !proj.set.autosave_off && save_state() == SAVE_UNSAVED)
-            put_s(st, UI_CAP_REC " OFF FOR AUTOSAVE");
-        else
-            put_s(put_s(st, proj.set.autosave_off ? "AUTO OFF / " : "AUTO ON / "),
-                  save_state() == SAVE_QUEUED ? queued_save_label() : save_state() == SAVE_FAILED ? "SAVE FAILED" :
-                  save_state() == SAVE_UNSAVED ? "UNSAVED" : "SAVED");
-        L("TAP: SAVE EVERYTHING"); L(cp); L(ui.pbank ? "TO P17-32 (+ " UI_CAP_OCT "-: P1-16)" : "TO P1-16 (+ " UI_CAP_OCT "+: P17-32)"); L(cl);
-        L("+ KNOB: FORGET ITS MOTION"); L(st);
-        break;
-    }
-    case B_ARP:
-        L("TB-3PO: THE 303 LINE"); L("GENERATOR (CHICAGO, MIAMI)");
-        if (gen) { L(UI_CAP_OCT "+: A NEW LINE"); L(UI_CAP_OCT "-: MUTATE IT"); }
-        L("AGAIN: THE NEXT PAGE");
-        break;
-    case B_SEQ:
-        L("THE PART'S STEPS: LENGTH, RATE"); L("AGAIN: THE NEXT PAGE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
-        if (is_303()) L("STEP + " UI_CAP_ALGO ": VELOCITY");
-        break;
-    case B_PLAY: L("START / STOP"); L(UI_CAP_HOME " + " UI_CAP_PLAY ": REDO"); break;
-    case B_REC:
-        L("RECORD ON / OFF:"); L(is_303() ? "THE KEYS PLAY AND WRITE NOTES" : "BLACK KEYS, KNOB MOVES");
-        L(UI_CAP_HOME " + " UI_CAP_REC ": UNDO"); L(UI_CAP_SAVE " + " UI_CAP_REC ": CLEAR PART");
-        break;
-    case B_OCTDN:
-    case B_OCTUP:
-        if (gen) L(b == B_OCTUP ? "A NEW 303 LINE" : "MUTATE THE LINE");
-        else if (kbd) { L("THE KEYBOARD'S OCTAVE"); L(UI_CAP_LFO "+" UI_CAP_OCT ": TIE"); L(UI_CAP_ENV "+" UI_CAP_OCT ": REST"); }
-        else if (ui.view == V_HOME || ui.view == V_SONG) L(b == B_OCTUP ? "PATTERNS 17-32" : "PATTERNS 1-16");
-        else {
-            L(b == B_OCTUP ? "THE NEXT 16 STEPS" : "THE 16 STEPS BEFORE"); L("PAGES: 1-16 17-32 33-48 49-64");
-            if (is_303()) L("HOLDING A STEP: ITS OCTAVE");
-        }
-        break;
-    default: break;
-    }
-#undef L
-    return n;
-}
-
-/* SAVE held on its own a moment: invite a destination, without claiming a
- * snapshot exists before the player chooses one. */
-#define COPY_HOLD 250u
-static void copy_tick(uint32_t btn, uint32_t keys)
-{
-    static uint8_t said;
-    uint32_t m = 1u << B_SAVE;
-    if (!(btn & m)) {
-        said = 0;
-        return;
-    }
-    if (!said && btn == m && !keys && !(ui.btn_used & m) && ui.overlay != O_ASK &&
-        plat_ms() - ui.down_t[B_SAVE] >= COPY_HOLD && (int32_t)(ui.turn_t - ui.down_t[B_SAVE]) <= 0) {
-        say("CHOOSE PASTE TARGET", 0);
-        said = 1;
-    }
-}
-
-static void help_tick(uint32_t btn, uint32_t keys)
-{
-    uint32_t now = plat_ms();
-    int i;
-    if (ui.help) {
-        uint32_t m = 1u << (ui.help - 1);
-        if (btn != m || keys || (int32_t)(ui.turn_t - ui.down_t[ui.help - 1]) > 0 || ui.overlay == O_ASK)
-            ui.help = 0;                                 /* used with something, or let go */
-        return;
-    }
-    if (!btn || (btn & (btn - 1u)) || keys || ui.overlay == O_ASK || perf_testing())
-        return;                                          /* exactly one button, nothing else */
-    for (i = 0; i < NB; i++)
-        if (btn == 1u << i && !(ui.btn_used & btn) && now - ui.down_t[i] >= (i == B_SAVE ? HELP_HOLD_SAVE : HELP_HOLD) &&
-            (int32_t)(ui.turn_t - ui.down_t[i]) <= 0) {
-            ui.help = (uint8_t)(i + 1);
-            ui.btn_used |= btn;                          /* its release now does nothing */
-        }
-}
-
-/* ================================================================ undo === */
-/* HOME + REC undoes, HOME + PLAY redoes (undo.c): everything after the settings is undoable, the
- * sound, the patterns, the song and the knob motion. A step is one gesture: what changed between
- * two quiet moments (UNDO_QUIET ms with nothing touched or held), or a whole recording pass. */
-#define UNDO_QUIET 400u
-#define UNDO_OFF __builtin_offsetof(project_t, sound)
-#define UNDO_BYTES (sizeof(project_t) - UNDO_OFF)
-static undo_t undo X0X_POOL;
-/* Project transfers temporarily borrow the undo baseline. The history stays in undo.pool;
- * abort copies the live project back, and successful replacement starts a new history. */
-#define undo_shadow ((uint8_t *)&project_stage + UNDO_OFF)
-#if X0X_BASS_TAGGED_SOUND
-static uint8_t undo_bass_mask,undo_wait; /* 1 undo, 2 redo */
-static int undo_wait_cur;
-static uint32_t undo_wait_used,undo_wait_serial;
-#endif
-static uint8_t undo_lanes;             /* the last undo / redo touched the knob motion */
-
-static void undo_start(void) {
-#if X0X_BASS_TAGGED_SOUND
-    undo_wait=0;
-#endif
-    undo_init(&undo, (uint8_t *)&proj + UNDO_OFF, undo_shadow, UNDO_BYTES); }
-
-static int undo_commit_stable(void)
-{
-#if X0X_BASS_PRESET_PREVIEW
-    /* Preset application writes a bank and tag from the audio boundary. Keep
-     * it pending while undo measures and copies the project snapshot. */
-    engine_bass_edit_hold(1);
-#endif
-    int result = undo_commit(&undo);
-#if X0X_BASS_PRESET_PREVIEW
-    engine_bass_edit_hold(0);
-#endif
-    return result;
-}
-
-static void undo_tick(void)
-{
-    if (project_busy || perf_testing() || (ui.rec && seq.playing) || ui.btn || ui.keys || plat_ms() - ui.act_t < UNDO_QUIET ||
-        (ui.frame & 3u))
-        return;
-    undo_commit_stable();
-}
-
-/* a run of the project changed under the engine: the sound's pots go to the engine again */
-static void undo_changed(uint32_t off, uint32_t len)
-{
-    const uint32_t s0 = __builtin_offsetof(project_t, sound), s1 = s0 + sizeof(proj.sound.v);
-    const uint32_t l0 = __builtin_offsetof(project_t, arr) + __builtin_offsetof(arrange_t, lane);
-    uint32_t a = off + UNDO_OFF, k;
-    for (k = a; k < a + len; k++) {
-        if (k >= s0 && k < s1) {
-            uint32_t x = k - s0, t = x / (NVOICES_MAX * NPARAMS_MAX), v = (x / NPARAMS_MAX) % NVOICES_MAX,
-                     i = x % NPARAMS_MAX;
-#if X0X_BASS_TAGGED_SOUND
-            if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
-               (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A)))))continue;
-#endif
-            if ((int)v < engine_nvoices((int)t) && (int)i < engine_nparams((int)t, (int)v))
-                ui_restore_base((int)t, (int)v, (int)i);
-        } else if (k >= l0) {
-            undo_lanes = 1;
-        }
-    }
-}
-
-/* what an undo step touched, in words: "909 P3", "SOUND", "SONG", "MOTION" */
-static void undo_name(uint32_t lo, uint32_t hi, char *t)
-{
-    const uint32_t p0 = __builtin_offsetof(project_t, pat), a0 = __builtin_offsetof(project_t, arr),
-                   l0 = a0 + __builtin_offsetof(arrange_t, lane);
-    uint32_t a = lo + UNDO_OFF, b = hi + UNDO_OFF;
-    if (b < p0) {
-        put_s(t, "SOUND");
-    } else if (a >= p0 && b < a0 && (a - p0) / sizeof(pattern_t) == (b - p0) / sizeof(pattern_t)) {
-        uint32_t pi = (a - p0) / sizeof(pattern_t), x = (a - p0) % sizeof(pattern_t), y = (b - p0) % sizeof(pattern_t);
-        int pa = (int)(x < __builtin_offsetof(pattern_t, bass) ? x / sizeof(dpart_t)
-                       : x < __builtin_offsetof(pattern_t, brk) ? NKIT + (x - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
-                       : PART_BRK);
-        int pb = (int)(y < __builtin_offsetof(pattern_t, bass) ? y / sizeof(dpart_t)
-                       : y < __builtin_offsetof(pattern_t, brk) ? NKIT + (y - __builtin_offsetof(pattern_t, bass)) / sizeof(bpart_t)
-                       : PART_BRK);
-        char *q = put_s(t, pa == pb ? part_name(pa) : "PATTERN");
-        put_i(put_s(q, " P"), (int)pi + 1);
-    } else if (a >= p0 && b < a0) {
-        put_s(t, "PATTERNS");
-    } else if (a >= a0 && b < l0) {
-        put_s(t, "SONG");
-    } else if (a >= l0) {
-        put_s(t, "MOTION");
-    } else {
-        put_s(t, "CHANGES");
-    }
-}
-
-/* Finish an audio-owned recorder before history or bulk pattern edits. Hold is
- * brief, covers state finalization only, and never reinitializes a voice. */
-static void record_finish(void)
-{
-    seq.rec_mask = seq.rec_ext_mask = 0;
-    engine_project_hold(1);
-    seq.rec_epoch++;
-    seq.rec_ev_gen++;
-    for (int b = 0; b < NBASS; b++) seq_rec_cancel(&seq, b);
-    engine_project_hold(0);
-}
-static void do_undo(int redo)
-{
-    record_finish();
-    uint32_t lo, hi;
-    char t[24];
-#if X0X_BASS_PRESET_PREVIEW && !X0X_BASS_TAGGED_SOUND
-    if(engine_bass_preview_changed()) { say("UNDO UNAVAILABLE",""); return; }
-#endif
-#if X0X_BASS_PRESET_PREVIEW
-    /* Keep the chosen bank stable through target inspection and swap. The
-     * commit helper nests one hold while it scans the undo snapshot. */
-    engine_bass_edit_hold(1);
-#endif
-    undo_commit_stable();                       /* what was just done is a step too */
-#if X0X_BASS_TAGGED_SOUND
-    undo_wait=0;undo_bass_mask=0;
-    int entry=redo?undo.cur:undo.cur-1;
-    if(entry>=0 && entry<undo.n) {
-        bass_base_state_t target;
-        for(int v=0;v<NBASS;v++) {
-            uint32_t cell=__builtin_offsetof(sound_t,v)+((T_303*NVOICES_MAX+v)*NPARAMS_MAX);
-            uint32_t tag=__builtin_offsetof(sound_t,bass)+v*sizeof(bass_sound_tag_t);
-            undo_peek(&undo,entry,cell,target.cell[v],NPARAMS_MAX);
-            undo_peek(&undo,entry,tag,target.tag[v].bytes,BASS_SOUND_TAG_BYTES);
-            if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
-               memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
-        }
-        if(undo_bass_mask) {
-            engine_project_hold(1);
-            int ready=engine_bass_base_ready(undo_bass_mask,&target);
-            if(ready) {
-                engine_project_hold(0);
-                if(ready>0) {
-                    undo_wait=(uint8_t)(redo?2:1);undo_wait_cur=undo.cur;undo_wait_used=undo.used;
-                    undo_wait_serial=engine_bass_choice_serial();say("UNDO WAIT NOTE / INPUT",0);
-                } else say(ready==-4?"UNDO SOUND LOCKS":"UNDO ENGINE UNAVAILABLE",0);
-#if X0X_BASS_PRESET_PREVIEW
-                engine_bass_edit_hold(0);
-#endif
-                return;
-            }
-        }
-    }
-#endif
-    undo_lanes = 0;
-    if (!(redo ? undo_redo : undo_undo)(&undo, undo_changed, &lo, &hi)) {
-#if X0X_BASS_TAGGED_SOUND
-        if(undo_bass_mask)engine_project_hold(0);
-#endif
-#if X0X_BASS_PRESET_PREVIEW
-        engine_bass_edit_hold(0);
-#endif
-        say(redo ? "NOTHING TO REDO" : "NOTHING TO UNDO", 0);
-        return;
-    }
-#if X0X_BASS_TAGGED_SOUND
-    if(undo_bass_mask) {engine_bass_base_restore(undo_bass_mask);engine_project_hold(0);}
-#endif
-#if X0X_BASS_PRESET_PREVIEW
-    engine_bass_edit_hold(0);
-#endif
-    song_structure_revision++;                     /* undo may restore/reorder song bars */
-    if (undo_lanes)
-        engine_motion_reset();
-    engine_brk_loops();
-    ui.outline_ok = 0;
-    if (ui.song_sel > song()->len)
-        ui.song_sel = song()->len;
-    build_pages();
-    mark_dirty();
-    undo_name(lo, hi, t);
-    say(redo ? "REDO " : "UNDO ", t);
-}
-
-/* SAVE while playing waits for the stop: writing the flash stops the audio (the code and the samples
- * are read from it, and a 4 KB erase takes tens of ms) */
-#define AUTOSAVE_QUIET 4000u
-X0X_COLD int ui_boot_flash_busy(void)
-{
-#if BOARD_SMK37
-    extern uint8_t smk_ck_flash_busy(void);
-#endif
-    if (seq.playing || seq.req_start || seq.req_cont || seq.req_stop || ui.rec || perf_save_busy()
-        || engine_project_notes()
-#if BOARD_SMK37
-        || smk_ck_flash_busy()
-#endif
-    )
-        return 1;
-    return 0;
-}
-
-X0X_COLD int ui_project_save(void)
-{
-    int rc;
-#if BOARD_SMK37
-    extern uint8_t smk_ck_flash_busy(void);
-#endif
-#ifndef X0X_HOST
-    extern int store_stage_held(void);
-#endif
-    if (project_busy || ui_boot_flash_busy() || seq.playing || seq.req_start || seq.req_cont || seq.req_stop ||
-        ui.rec || perf_save_busy()
-#if BOARD_SMK37
-        || smk_ck_flash_busy()
-#endif
-#ifndef X0X_HOST
-        || store_stage_held()
-#endif
-    )
-        return UI_PROJECT_BUSY;
-    save_wait = 0;
-    rc = project_save();
-    if (project_storage_unsupported() != 2)
-        say(rc == -9 ? "NEWER DATA: NOT SAVED" : rc == -7 ? "MEMORY FULL: NOT SAVED" : rc ? "SAVE FAILED" : "SAVED", 0);
-    ui.save_failed = rc != 0;
-    if (!rc)
-        ui.dirty = 0;
-    return rc;
-}
-
-static void save_project(void)
-{
-#if BOARD_SMK37
-    extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
-#endif
-    if (project_storage_unsupported() == 2) {
-        save_wait = 0;
-        ui.save_failed = 1;
-        return; /* keep the warning glyph; only validated adoption unlocks */
-    }
-    if (project_busy) {
-        say("PROJECT TRANSFER BUSY", 0);
-        return;
-    }
-    if (!ui_boot_flash_busy()
-#if BOARD_SMK37
-        && !(smk_clip_mode_on() && (smk_ck_flash_busy() || plat_ms() - ui.act_t < AUTOSAVE_QUIET))
-#endif
-    ) {
-        if (ui_project_save() != UI_PROJECT_BUSY)
-            return;
-    }
-    /* A held MIDI note, queued audio input or other transient owner may make
-     * the final readiness check busy. Keep the user's explicit save request. */
-    save_wait = 1;
-    say(queued_save_message(), 0);
-}
-
-/* ============================================================ performance === */
-/* PERF: what the FM-1 measures of itself, a window a second: the clock (the core's cycle counter
- * against the 24 MHz timer), the audio load and its peak, dropouts, stall cycles (when switched on),
- * and each stage's share of the CPU (the engine times them: engine.h ENG_PROF_N). PERF TEST plays
- * three patterns of its own (the factory loop, all five parts, a dense worst case) on the factory
- * sound, 1 s to settle and 3 s measured each, and keeps the table; then it puts back the project's
- * patterns, sound, tempo, mutes, chain and song mode. The project itself is never written. */
-static const char *const PT_N[3] = {"FACTORY LOOP", "ALL FIVE", "WORST CASE"};
-#ifdef PERF_SCRATCH
-#define perf_bench ((pattern_t *)(void *)PERF_SCRATCH)
-#else
-static pattern_t perf_bench[3];
-#endif
-
-static void perf_window(int force)
-{
-    uint32_t now = plat_ms(), t = plat_ticks24(), c = plat_cycles(), f = eng_prof_frames, st[3];
-    uint32_t dt = t - perf.ticks, dc = c - perf.cyc, df = f - perf.frames, sum = 0;
-    float ups;
-    int k;
-    if (!force && now - perf.t_ms < 1000u)
-        return;
-    perf.t_ms = now;
-    if (perf.have && df) {
-        if (plat_cycles_cpu() && dt >= 240u)
-            perf.mhz10 = (uint16_t)(dc / (dt / 240u));          /* cycles per (dt / 24) us, x 10 */
-        ups = plat_cycles_cpu() ? (float)perf.mhz10 * (100000.0f / 44100.0f) : (float)plat_cycles_hz() / 44100.0f;
-        for (k = 0; k < ENG_PROF_N; k++) {
-            uint32_t d = eng_prof[k] - perf.prof[k];
-            sum += d;
-            perf.stage[k] = (uint16_t)((float)d * 1000.0f / ((float)df * ups) + 0.5f);
-        }
-        perf.cps = plat_cycles_cpu() ? (uint16_t)(sum / df) : 0;
-        perf.load = (uint8_t)plat_cpu_pct();
-        perf.peak = (uint8_t)plat_cpu_peak_pct();
-        if (plat_stalls(st) == 0 && dc)
-            for (k = 0; k < 3; k++)
-                perf.stall[k] = (uint8_t)((float)(st[k] - perf.st[k]) * 100.0f / (float)dc + 0.5f);
-    } else {
-        plat_cpu_peak_pct();
-    }
-    perf.ticks = t;
-    perf.cyc = c;
-    perf.frames = f;
-    for (k = 0; k < ENG_PROF_N; k++)
-        perf.prof[k] = eng_prof[k];
-    if (plat_stalls(st) == 0)
-        for (k = 0; k < 3; k++)
-            perf.st[k] = st[k];
-    perf.have = 1;
-}
-
-/* the test's patterns: 0 the factory loop (909 kick, clap, open hats; 303 A; the break), 1 all five,
- * 2 everything dense */
-static void perf_build(void)
-{
-    /* the tracks in key order (pattern.h): 909 BD SD LT MT HT RS CP CH OH CR RD, 808 ... CB CY OH CH */
-    enum { DR_BD, DR_SD, DR_LT, DR_MT, DR_HT, DR_RS, DR_CP, DR_CH, DR_OH, DR_CR, DR_RD };
-    enum { D8_BD, D8_SD, D8_LT, D8_MT, D8_HT, D8_RS, D8_CP, D8_CB, D8_CY, D8_OH, D8_CH };
-    int i;
-    for (i = 0; i < 3; i++) {
-        pattern_t *p = &perf_bench[i];
-        dpart_t *a = &p->drum[0], *b = &p->drum[1];
-        pattern_init(p, 0x3B0u + 977u * (uint32_t)i, 0x5A1u + 613u * (uint32_t)i);
-        tb3po_generate(&p->bass[0]);
-        if (i)
-            tb3po_generate(&p->bass[1]);
-        p->brk.steps = 0xFFFFu;
-        a->hit[DR_BD][0] = 0x1111u;
-        a->hit[DR_CP][0] = 0x1010u;
-        a->hit[DR_OH][0] = 0x4444u;
-        a->accent[0] = 0x0101u;
-        if (i >= 1) {
-            b->hit[D8_BD][0] = 0x1111u;
-            b->hit[D8_CP][0] = 0x1010u;
-            b->hit[D8_CH][0] = 0x1111u;
-            b->hit[D8_OH][0] = 0x4444u;
-            b->hit[D8_CB][0] = 0x0808u;
-        }
-        if (i == 2) {
-            a->hit[DR_SD][0] = 0x1010u;
-            a->hit[DR_CH][0] = 0xFFFFu;
-            a->hit[DR_CR][0] = 0x0001u;
-            a->hit[DR_RD][0] = 0x1111u;
-            a->hit[DR_LT][0] = 0x4000u;
-            a->accent[0] = 0x1111u;
-            b->hit[D8_SD][0] = 0x1010u;
-            b->hit[D8_CH][0] = 0xFFFFu;
-            b->hit[D8_CY][0] = 0x0101u;
-            b->hit[D8_LT][0] = 0x8080u;
-        }
-    }
-}
-
-static void perf_restore(void)
-{
-    int p;
-    record_finish();
-    seq.pat = perf.pat;
-    for (p = 0; p < NPARTS; p++) {
-        seq.ppat[p] = perf.ppat[p];
-        seq.pcue[p] = 0xFF;
-    }
-    seq.mute = perf.mute;
-    seq.song_on = perf.song_on;
-    seq_chain(&seq, perf.ca, perf.cb);
-    seq.bpm = perf.bpm;
-    engine_apply_sound(&proj.sound);
-    engine_motion_enable(1);
-    engine_guard_enable(1);
-    engine_brk_loops();
-}
-
-static void perf_test_start(void)
-{
-    int p;
-    if (perf.test >= 0 && perf.phase != 4)
-        return;
-    perf.pat = seq.pat;
-    for (p = 0; p < NPARTS; p++)
-        perf.ppat[p] = seq.ppat[p];
-    perf.mute = seq.mute;
-    perf.song_on = seq.song_on;
-    perf.ca = seq.chain_a;
-    perf.cb = seq.chain_b;
-    perf.bpm = seq.bpm;
-    if (seq.playing)
-        seq_stop(&seq);
-    perf.test = 0;
-    perf.phase = 0;
-    for (p = 0; p < 3; p++)
-        perf.res_load[p] = perf.res_cps[p] = perf.res_peak[p] = 0;
-}
-
-static void perf_test_abort(void)
-{
-    seq_stop(&seq);
-    perf.phase = 3;
-    perf.test = 0;
-    say("PERF TEST STOPPED", 0);
-}
-
-/* the test, one step a frame (the main loop): the transport changes take a block to land */
-static void perf_test_tick(void)
-{
-    uint32_t now = plat_ms();
-    int p;
-    if (perf.test < 0 || perf.phase == 4)
-        return;
-    switch (perf.phase) {
-    case 0:                                           /* stopped: swap in the test's patterns and sound */
-        if (seq.playing || seq.req_stop)              /* (a pending stop would cancel the start below) */
-            return;
-        record_finish();
-        perf_build();                                 /* here, after the last save that can run (PERF_SCRATCH) */
-        for (p = 0; p < NPARTS; p++) {
-            seq.ppat[p] = 0;
-            seq.pcue[p] = 0xFF;
-        }
-        seq.pat = perf_bench;
-        seq.mute = 0;
-        seq.song_on = 0;
-        seq_chain(&seq, 0, 0);
-        seq.bpm = 125.0f;
-        engine_sound_defaults(&proj.sound);
-        engine_apply_sound(&proj.sound);
-        engine_motion_enable(0);
-        engine_guard_enable(0);
-        engine_brk_loops();
-        seq_start(&seq);
-        perf.phase = 1;
-        perf.test_t0 = now;
-        break;
-    case 1:                                           /* settle on the scenario's pattern */
-        if (!seq.playing && now - perf.test_t0 > 200u) {
-            perf_test_abort();
-            return;
-        }
-        if (now - perf.test_t0 >= 1000u && seq.ppat[PART_909] == perf.test) {
-            perf_window(1);
-            perf.phase = 2;
-            perf.test_t0 = now;
-        }
-        break;
-    case 2:                                           /* measure 3 s */
-        if (!seq.playing) {
-            perf_test_abort();
-            return;
-        }
-        if (now - perf.test_t0 >= 3000u) {
-            int k;
-            uint32_t sum = 0;
-            perf_window(1);
-            for (k = 0; k < ENG_PROF_N; k++)
-                sum += perf.stage[k];
-            perf.res_load[perf.test] = (uint16_t)sum;
-            perf.res_peak[perf.test] = perf.peak;
-            perf.res_cps[perf.test] = perf.cps;
-            if (++perf.test < 3) {
-                seq_cue(&seq, perf.test);
-                perf.phase = 1;
-                perf.test_t0 = now;
-            } else {
-                seq_stop(&seq);
-                perf.phase = 3;
-            }
-        }
-        break;
-    default:                                          /* put everything back once stopped */
-        if (seq.playing || seq.req_stop)
-            return;
-        perf_restore();
-        perf.phase = 4;
-        if (perf.test == 3) {
-            perf.test = PT_DONE;
-            say("PERF TEST DONE", 0);
-        } else {
-            perf.test = PT_IDLE;
-        }
-        break;
-    }
-}
-
-static int saved_sound_present(int part)
-{
-    int target, voice, nvoice, tag;
-    return !sound_reset_span(part, &target, &voice, &nvoice, &tag) &&
-        !sound_reset_empty(&proj.sound, target, voice, nvoice, tag);
-}
-
-static void ask_sound_reset(int part)
-{
-    engine_bass_edit_hold(1);
-    if (saved_sound_present(part)) ask(ACT_RESET_SOUND, part, "RESET SOUND", part_name(part));
-    else say("NO SAVED SOUND ", part_name(part));
-    engine_bass_edit_hold(0);
-}
-
-/* Foreground only. Stack factory image avoids persistent RAM and never borrows
- * project_stage: that object holds the undo baseline. Reset is one gesture. */
-X0X_COLD static void reset_sound(int part)
-{
-    sound_t factory;
-    int target, voice, nvoice, tag;
-    uint8_t mute_proxy = (uint8_t)seq.mute; /* data helper only checks this pointer for null */
-    if (project_busy || sound_reset_span(part, &target, &voice, &nvoice, &tag)) return;
-    engine_bass_edit_hold(1);
-    if (!saved_sound_present(part)) {
-        say("NO SAVED SOUND", 0);
-        engine_bass_edit_hold(0);
-        return;
-    }
-    record_finish(); /* finalize audio-owned recording before the undo snapshot */
-    engine_sound_defaults(&factory);
-#if X0X_BASS_TAGGED_SOUND
-    unsigned mask = tag >= 0 ? 1u << tag : 0;
-    if (mask) {
-        bass_base_state_t next;
-        memcpy(next.cell, factory.v[T_303], sizeof next.cell);
-        memcpy(next.tag, factory.bass, sizeof next.tag);
-        engine_project_hold(1);
-        int ready = engine_bass_base_ready(mask, &next);
-        if (ready) {
-            engine_project_hold(0);
-            ui.overlay = O_ASK; /* retry after notes/input or sound locks are released */
-            say(ready > 0 ? "UNDO WAIT NOTE / INPUT" :
-                ready == -4 ? "UNDO SOUND LOCKS" : "UNDO ENGINE UNAVAILABLE", 0);
-            engine_bass_edit_hold(0);
-            return;
-        }
-    }
-#endif
-    /* Keep preceding mixer/part edits out of the reset's undo entry. */
-    undo_commit_stable();
-    int result = sound_reset_part(&proj.sound, &factory, part, &mute_proxy, &undo);
-    if (result == SOUND_RESET_OK) {
-#if X0X_BASS_TAGGED_SOUND
-        if (mask) engine_bass_base_restore(mask);
-        else
-#endif
-        for (int v = 0; v < nvoice; ++v)
-            for (int i = 0; i < engine_nparams(target, voice + v) && i < NPARAMS_MAX; ++i)
-                ui_restore_base(target, voice + v, i);
-        mark_dirty();
-        build_pages();
-        say("RESET SOUND ", part_name(part));
-    } else say(result == SOUND_RESET_NO_SAVED ? "NO SAVED SOUND" : "UNDO UNAVAILABLE", 0);
-#if X0X_BASS_TAGGED_SOUND
-    if (mask) engine_project_hold(0);
-#endif
-    engine_bass_edit_hold(0);
-}
-
-static void set_view(int v);
-
-X0X_COLD static void run_action(int act, int arg)
-{
-    char t[28];
-    if (act == ACT_CLEAR_PART || act == ACT_CLEAR_PAT || act == ACT_COPY) record_finish();
-    switch (act) {
-    case ACT_HOME_LIVE:
-    case ACT_HOME_PATTERNS:
-        ui.home_live = act == ACT_HOME_LIVE; ui.overlay = O_NONE; break;
-    case ACT_RESET_SOUND: reset_sound(arg); break;
-    case ACT_SAVE: save_project(); break;
-    case ACT_LOAD: (void)ui_project_load(); break;
-    case ACT_CLEAR_PART: {
-        /* Low byte: part. High byte, when set: pattern index + 1. High byte 0
-         * keeps SAVE+REC on the part's current pattern. */
-        int part = arg & 0xFF, spec = (arg >> 8) & 0xFF, pat;
-        char msg[48];
-        if ((unsigned)part >= NPARTS)
-            break;
-        pat = spec ? spec - 1 : seq.ppat[part];
-        if ((unsigned)pat >= NPAT)
-            break;
-        clear_part(&proj.pat[pat], part);
-        clear_lanes(pat, part);
-        mark_dirty();
-        if (!spec)
-            say("CLEARED ", part_name(part));
-        else {
-            put_i(put_s(put_s(put_s(msg, "CLEARED "), part_name(part)), " P"), pat + 1);
-            say(msg, 0);
-        }
-        break;
-    }
-    case ACT_CLEAR_PAT: {
-        int i;
-        for (i = 0; i < NPARTS; i++) {
-            clear_part(pat_of(i), i);
-            clear_lanes(seq.ppat[i], i);
-        }
-        mark_dirty();
-        say("PATTERN CLEARED", 0);
-        break;
-    }
-    case ACT_COPY: {                                  /* parts whose source slot is not the destination */
-        int dst = arg & 0xFF, i, rc = 0, n = 0, only = -1;
-        char one[48];
-        if ((unsigned)dst >= NPAT)
-            break;
-        for (i = 0; i < NPARTS; i++)
-            if (ui.paste_src[i] != dst) {
-                rc |= copy_part(dst, ui.paste_src[i], i);
-                only = n ? -1 : i;
-                n++;
-            }
-        mark_dirty();
-        if (rc)
-            say("MOTION FULL: NOT ALL PASTED", 0);
-        else if (n == 1 && only >= 0) {
-            put_i(put_s(put_s(one, part_name(only)), " PASTED TO P"), dst + 1);
-            say(one, 0);
-        } else {
-            put_i(put_s(t, "PARTS PASTED TO P"), dst + 1);
-            say(t, 0);
-        }
-        break;
-    }
-    case ACT_SONG_INS:
-    case ACT_SONG_DEL: {
-        song_t *sg = song();
-        int k = ui.song_sel, i;
-        if (k >= sg->len) {
-            say("NO BAR SELECTED", 0);
-            break;
-        }
-        if (act == ACT_SONG_INS) {
-            if (sg->len >= NSONG) {
-                say("SONG FULL", 0);
-                break;
-            }
-            for (i = sg->len; i > k; i--)
-                sg->bar[i] = sg->bar[i - 1];
-            sg->len++;
-        } else {
-            for (i = k; i + 1 < sg->len; i++)
-                sg->bar[i] = sg->bar[i + 1];
-            sg->len--;
-        }
-        song_structure_revision++;
-        mark_dirty();
-        say(act == ACT_SONG_INS ? "BAR INSERTED" : "BAR DELETED", 0);
-        break;
-    }
-    case ACT_SONG_CLR:
-        song_structure_revision++;
-        song()->len = 0;
-        ui.song_sel = 0;
-        mark_dirty();
-        say("SONG CLEARED", 0);
-        break;
-    case ACT_RESET:
-        (void)ui_project_reset();
-        break;
-    case ACT_PERF:
-        set_view(V_PERF);
-        break;
-    case ACT_PERF_TEST:
-        ui.overlay = O_NONE;                          /* the table is under the list */
-        perf_test_start();
-        say("PERF TEST: 15 SECONDS", 0);
-        break;
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-    case ACT_PADCAL: {
-        extern void smk_padcal_enter(void);
-        ui.overlay = O_NONE;
-        smk_padcal_enter();
-        break;
-    }
-#endif
-    case ACT_ABOUT: {
-        char full[64], *e;
-        /* The long line alone carries the diagnostic SHA. The header uses a smaller
-         * face when necessary. The settings-row label and compact form omit it. */
-        e = put_s(full, "DnBOX " X0X_VERSION "  MEM ");
-        e = put_s(put_i(e, project_mem_pct()), "%  CPU ");
-        e = put_s(put_i(e, (int)plat_cpu_pct()), "%");
-        if (X0X_GIT_SHA[0])
-            put_s(put_s(e, " g"), X0X_GIT_SHA);
-        for (e = full; *e; e++)
-            ;
-        if ((unsigned)(e - full) < sizeof ui.msg) {
-            say(full, 0);
-            break;
-        }
-        e = put_s(t, "DnBOX ");
-        {
-            const char *v = X0X_VERSION;
-            int n = 0;
-            while (v[n] && n < 8 && e < t + (int)sizeof t - 1)
-                *e++ = v[n++];
-            *e = 0;
-        }
-        e = put_s(e, " M");
-        e = put_i(e, project_mem_pct());
-        e = put_s(e, " C");
-        put_i(e, (int)plat_cpu_pct());
-        say(t, 0);
-        break;
-    }
-    default: break;
-    }
-}
-
-/* ===================================================================== input === */
-/* knob acceleration by speed: a slow turn is one step a detent (fine detail), a quick one up to 8,
- * so a fast half turn sweeps 0-127. Several detents in one read are a fast turn too. Small ranges
- * stay gentler; switches and lists never get here (turn_ref steps them one at a time).
- * SMC strips set accel_smc. Their byte already counts the detents, and the panel's x8 (x16 on a
- * wide range) made a flick leap the pot. A slow click stays one step. A quicker turn still gains,
- * but only the first few detents in that message are multiplied, and a wide range is not doubled. */
-static uint8_t accel_off;              /* the host simulator's "spin": exact steps */
-static uint8_t accel_smc;              /* this step is an SMC strip, not a panel encoder */
-static int32_t accel(int role, int32_t s, int range)
-{
-    uint32_t now = plat_ms(), dt = now - ui.enc_t[role], a = (uint32_t)(s < 0 ? -s : s), m;
-    ui.enc_t[role] = now;
-    if (!a)
-        return s;
-    if (a > 1)
-        dt /= a;                                      /* per detent */
-    ui.enc_run[role] = (uint8_t)(dt < 60u ? (ui.enc_run[role] + a > 255u ? 255u : ui.enc_run[role] + a) : a);
-    if (range <= 24 || accel_off || ui.enc_run[role] < 4u)
-        return s;                                     /* a few clicks, however quick: one each */
-    if (accel_smc) {
-        m = dt < 12u ? 3u : dt < 45u ? 2u : 1u;
-        if (range < 100 && m > 2u)
-            m = 2u;
-        if (m == 1u)
-            return s;
-        {
-            uint32_t head = a < 3u ? a : 3u;
-            uint32_t scaled = head * m + (a - head);
-            return s < 0 ? -(int32_t)scaled : (int32_t)scaled;
-        }
-    }
-    m = dt < 12u ? 8u : dt < 25u ? 5u : dt < 45u ? 3u : 1u;
-    if (range < 100 && m > 3u)
-        m = 3u;
-    if (range > 150 && m > 1u)
-        m *= 2u;
-    return s * (int32_t)m;
-}
-
-static void set_view(int v)
-{
-    brk_choice_cancel();
-    bass_layout_accept();
-    /* A step held on SEQ may carry its p-lock gesture to EDIT's sound knobs.
-     * Return to SEQ after key-up so lock_release still uses those knob refs. */
-    if (ui.view == V_PART && v == V_SEQ && (ui.held_step >= 0 || ui.hold_step >= 0 || ui.brk_held >= 0)) {
-        say("RELEASE STEP FIRST", 0);
-        return;
-    }
-#if BOARD_SMK37
-    smc_ui_cancel();
-#endif
-    if (!(ui.view == V_SEQ && v == V_PART)) {
-        bass_step_cancel();
-        drum_step_cancel();
-        break_step_cancel();
-    }
-    if (v != ui.view)
-        ui.prev_view = ui.view;
-    ui.view = (uint8_t)v;
-    /* EDIT may complete a note recorded on SEQ, but accepts no new recorded
-     * MIDI/key onset. Keep the two recorder contexts distinct across pages. */
-    seq.rec_mask = ui.rec && is_303() && v == V_SEQ ? (uint8_t)(1u << bidx()) : 0;
-    seq.rec_ext_mask = ui.rec ? (uint8_t)((1u << NBASS) - 1u) : 0;
-    seq.rec_hold_mask = ui.rec && is_303() && v == V_PART ? (uint8_t)(1u << bidx()) : 0;
-    ui.overlay = O_NONE;
-    build_pages();
-}
-
-/* a sound knob turned: record its lane (REC, playing), or let the knob win over the lane for a pass */
-static void motion_touch(pref_t r)
-{
-    int part, k;
-    if (r.kind != R_ENG || !seq.playing)
-        return;
-    part = engine_motion_part(r.a, r.b);
-    k = motion_find(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c);
-    if (ui.rec) {
-        if (k < 0 && (k = motion_alloc(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c)) < 0) {
-            say("MOTION FULL", 0);
-            return;
-        }
-        engine_motion_rec(k);
-    } else if (k >= 0) {
-        engine_motion_hold(k);
-    }
-}
-
-/* SAVE held + a sound knob: forget its motion in this pattern */
-static void motion_forget(pref_t r)
-{
-    int part, k;
-    if (r.kind != R_ENG)
-        return;
-    part = engine_motion_part(r.a, r.b);
-    k = motion_find(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c);
-    if (k < 0) {
-        say("NO MOTION ON ", pref_name(r));
-        return;
-    }
-    engine_motion_clear(k);
-    ui_restore_base(r.a,r.b,r.c);
-    mark_dirty();
-    say("MOTION CLEARED: ", pref_name(r));
-}
-
-/* what a knob's lane plays now in this pattern, -1 none (the knob strip draws it) */
-static int motion_now(pref_t r)
-{
-    int part;
-    if (r.kind != R_ENG)
-        return -1;
-    part = engine_motion_part(r.a, r.b);
-    return engine_motion_value(motion_find(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c));
-}
-static int has_motion(pref_t r)
-{
-    int part;
-    if (r.kind != R_ENG)
-        return 0;
-    part = engine_motion_part(r.a, r.b);
-    return motion_find(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c) >= 0;
-}
-
-/* p-locks: on EDIT, a step held (one already there: a tap still toggles it) and a sound knob turned
- * give that step its own value, one step of the knob's lane (motion.h: the other steps keep the knob's) */
-static int held_drum_step(void)
-{
-    return is_drum() && ui.hold_drum == ui.part * NDRUM + ui.sel[ui.part] &&
-           ui.hold_pat == seq.ppat[ui.part] ? ui.hold_step : -1;
-}
-
-static int held_break_step(void)
-{
-    return ui.part == PART_BRK && ui.hold_pat == seq.ppat[PART_BRK] ? ui.brk_held : -1;
-}
-
-static int lock_step(void)
-{
-    if (ui.view != V_PART || ui.overlay != O_NONE)
-        return -1;
-    if (is_303())
-        return ui.rec ? -1 : ui.held_step;
-    return is_drum() ? held_drum_step() : held_break_step();
-}
-static int lockable(pref_t r) { return r.kind == R_ENG && !pref_read_only(r) && engine_motion_part(r.a, r.b) == ui.part; }
-static int lock_of(pref_t r, int s)                  /* step s's own value of r, -1 none */
-{
-    int k;
-    if (s < 0 || !lockable(r))
-        return -1;
-    k = motion_find(proj.arr.lane, seq.ppat[ui.part], ui.part, r.a, r.b, r.c);
-    return k >= 0 && proj.arr.lane[k].val[s] != MOT_NONE ? proj.arr.lane[k].val[s] : -1;
-}
-/* Called under edit_hold: a reference built for an old admitted bank cannot
- * acquire a new meaning merely because a pending selection crossed a boundary. */
-static int original_ref_current(pref_t r)
-{
-    if (r.kind != R_ENG || r.a != T_303 || ui.view != V_PART || !is_303() || r.b != bidx()) return 1;
-    int shown = ui.overlay == O_LIST ? original_list_bank : original_page_bank;
-    if (shown == engine_bass_bank(r.b)) return 1;
-    build_pages();
-    if (ui.overlay == O_LIST) open_list_of_pages();
-    ui.touched = -1;
-    return 0;
-}
-static int original_switch_turn(pref_t r,int current,int direction,int exact_base)
-{
-    if(r.kind!=R_ENG || r.a!=T_303 || !direction)return -1;
-    int kind=engine_bass_sound_bank(&proj.sound,r.b);
-    unsigned states=ui_original_states((unsigned)kind,r.c);
-    if(!states)return -1;
-    float value=(float)current/127.0f;
-    if(exact_base)(void)original_sound_value(proj.sound.v[T_303][r.b],r.c,&value);
-    int next=(int)ui_original_quant(value,states)+(direction>0?1:-1);
-    if(next<0)next=0;
-    if(next>=(int)states)next=(int)states-1;
-    return (next*127+(int)(states-1)/2)/(int)(states-1);
-}
-static int original_display_value(pref_t r)
-{
-    int value = pref_get(r), preview = -1;
-    if (lock_step() >= 0) preview = lock_of(r,lock_step());
-    else preview = motion_now(r);
-    return preview >= 0 ? preview : value;
-}
-static const ui_original_control_view *original_text_view(pref_t r, int value)
-{
-    const uint8_t *cell = proj.sound.v[T_303][r.b];
-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
-    uint32_t relevant = kind == ORIGINAL_SOUND_CHICAGO ? UI_ORIGINAL_CHICAGO_TEXT_MASK :
-        kind == ORIGINAL_SOUND_MIAMI ? UI_ORIGINAL_MIAMI_TEXT_MASK : 0u;
-    uint8_t preview[22] = {0}; uint32_t mask = 0;
-    for (unsigned id = 0; id < original_sound_count(kind); id++) if (relevant & (1u<<id)) {
-        pref_t ref = PR(R_ENG,T_303,r.b,id);
-        int q = lock_step() >= 0 ? lock_of(ref,lock_step()) : motion_now(ref);
-        if (q >= 0) { preview[id] = (uint8_t)q; mask |= 1u<<id; }
-    }
-    if ((relevant & (1u<<r.c)) && value != cell[r.c]) { preview[r.c]=(uint8_t)value; mask |= 1u<<r.c; }
-    return ui_original_controls_update(&original_controls,r.b,cell,preview,mask) ? &original_controls.view : 0;
-}
-
-/* The engine waveform of an oscillator control, with the same lock/motion
- * preview as the text readout. 0 when the slot has no waveform. */
-static const ui_original_wave_cache *original_wave_view(pref_t r, int value)
-{
-    const uint8_t *cell = proj.sound.v[T_303][r.b];
-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return 0; /* Synth One has no Miami oscillator UI */
-    uint32_t relevant = kind == ORIGINAL_SOUND_CHICAGO ? UI_ORIGINAL_CHICAGO_WAVE_MASK : UI_ORIGINAL_MIAMI_WAVE_MASK;
-    uint8_t preview[22] = {0}; uint32_t mask = 0;
-    for (unsigned id = 0; id < original_sound_count(kind); id++) if (relevant & (1u<<id)) {
-        pref_t ref = PR(R_ENG,T_303,r.b,id);
-        int q = lock_step() >= 0 ? lock_of(ref,lock_step()) : motion_now(ref);
-        if (q >= 0) { preview[id] = (uint8_t)q; mask |= 1u<<id; }
-    }
-    if ((relevant & (1u<<r.c)) && value != cell[r.c]) { preview[r.c]=(uint8_t)value; mask |= 1u<<r.c; }
-    return ui_original_wave_update(&original_wave,r.b,cell,preview,mask) ? &original_wave : 0;
-}
-
-static void lock_turn(pref_t r, int e, int role)
-{
-    int break_locked = ui.part == PART_BRK;
-    uint32_t break_state = break_locked ? plat_cq_lock() : 0;
-    int s = lock_step(), part = ui.part, k, cur, nv, message_name = 0;
-    const char *message = 0;
-#if X0X_BASS_PRESET_PREVIEW
-    /* The active preset can change the descriptor at an audio boundary. Keep
-     * descriptor, first lane allocation, lock value and audible preview in
-     * one engine-identity transaction, including all early exits. */
-    int bass_edit = r.kind == R_ENG && r.a == T_303;
-    if (bass_edit) engine_bass_edit_hold(1);
-#endif
-    const x0x_param_t *d = pref_desc(r);
-    lane_t *l;
-    if (s < 0 || !original_ref_current(r)) goto done;
-    if (!d)
-        goto done;
-    if (!lockable(r)) {
-        message = "NO P-LOCK: "; message_name = 1;
-        goto done;
-    }
-    if (is_303())
-        ui.step_edited = 1;                           /* its release keeps the step */
-    else
-        ui.hold_used = 1;
-    k = motion_find(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c);
-    if (ui.btn & (1u << B_SAVE)) {                    /* SAVE + the knob: the step's lock goes */
-        int j, any = 0;
-        ui.btn_used |= 1u << B_SAVE;
-        if (k < 0 || proj.arr.lane[k].val[s] == MOT_NONE)
-            goto done;
-        l = &proj.arr.lane[k];
-        l->val[s] = MOT_NONE;
-        for (j = 0; j < NSTEPS; j++)
-            any |= l->val[j] != MOT_NONE;
-        if (!any)
-            engine_motion_clear(k);
-        if (!seq.playing)
-            ui_restore_base(r.a, r.b, r.c);
-        mark_dirty();
-        message = "P-LOCK CLEARED: "; message_name = 1;
-        goto done;
-    }
-    if (k < 0 && (k = motion_alloc(proj.arr.lane, seq.ppat[part], part, r.a, r.b, r.c)) < 0) {
-        message = "MOTION FULL";
-        goto done;
-    }
-    l = &proj.arr.lane[k];
-    cur = l->val[s] != MOT_NONE ? l->val[s] : proj.sound.v[r.a][r.b][r.c];
-    nv=original_switch_turn(r,cur,e,l->val[s]==MOT_NONE);
-    if(nv<0)
-    {
-    e = d->names || d->max < 24 ? (e > 0 ? 1 : -1) : accel(role, e, d->max);
-    nv = cur + e;
-    nv = nv < 0 ? 0 : nv > d->max ? d->max : nv;
-    }
-    l->val[s] = (uint8_t)nv;
-    if (!seq.playing)                                 /* stopped: heard at once, until the step is let go */
-        engine_set(r.a, r.b, r.c, nv);
-    mark_dirty();
-    ui.touched = (int8_t)(role - EN_K1);
-    ui.touch_until = plat_ms() + 900u;
-    ui.touch_view = ui.view; ui.touch_part = ui.part; ui.touch_page = (uint8_t)cur_page();
-    ui.touch_kind = r.kind; ui.touch_a = r.a; ui.touch_b = r.b; ui.touch_c = r.c;
-done:
-#if X0X_BASS_PRESET_PREVIEW
-    if (bass_edit) engine_bass_edit_hold(0);
-#endif
-    if (break_locked) plat_cq_unlock(break_state);
-    /* Formatting and toast work stays outside the audio-owner transaction. */
-    if (message) say(message, message_name ? caps_of(pref_name(r)) : 0);
-    return;
-}
-static void lock_release(void)                        /* the held step let go: stopped, the knobs' own back */
-{
-    int i;
-    if (seq.playing)
-        return;
-    for (i = 0; i < 4; i++) {
-        pref_t r = pg.r[cur_page()][i];
-        if (lockable(r))
-            ui_restore_base(r.a,r.b,r.c);
-    }
-}
-
-/* Navigation ends a step gesture without treating its later key-up as a tap. The preview belongs
- * to the part that was down, even if a queued pattern switch has changed the screen meanwhile. */
-static void bass_step_cancel(void)
-{
-    if (ui.held_step < 0)
-        return;
-    if (ui.step_preview)
-        engine_bass_off(ui.held_step_part - PART_303A);
-    if (ui.step_edited && lock_step() >= 0)
-        lock_release();
-    ui.step_preview = 0;
-    ui.step_edited = 0;
-    ui.held_step = -1;
-}
-
-static void drum_step_cancel(void)
-{
-    if (ui.hold_step >= 0 && ui.hold_used && is_drum() &&
-        ui.hold_drum == ui.part * NDRUM + ui.sel[ui.part])
-        lock_release();                /* restore before selection/navigation replaces the preview's page */
-    ui.hold_step = -1;
-}
-
-static void break_step_cancel(void)
-{
-    if (ui.part == PART_BRK && ui.brk_held >= 0 && ui.hold_used)
-        lock_release();
-    ui.brk_held = -1;
-}
-
-/* probability: SEQ or EDIT, a step held, SELECT sets its chance (5..100 %, a T_PROB lane: motion.h's
- * MOT_NONE = always). Drums: the selected track's step; the 303s and the break: the step */
-static int held_any_step(void)
-{
-    if (!steps_view() || ui.overlay != O_NONE)
-        return -1;
-    if (is_303())
-        return ui.rec ? -1 : ui.held_step;
-    return is_drum() ? held_drum_step() : held_break_step();
-}
-static void prob_turn(int e)
-{
-    int break_locked = ui.part == PART_BRK;
-    uint32_t break_state = break_locked ? plat_cq_lock() : 0;
-    int s = held_any_step(), part = ui.part, v = part << 4 | (is_drum() ? ui.sel[part] : 0), k, nv, j, any = 0;
-    char t[24], *q;
-    lane_t *l;
-    if (s < 0) {
-        if (break_locked) plat_cq_unlock(break_state);
-        return;
-    }
-    if (is_303())
-        ui.step_edited = 1;
-    else
-        ui.hold_used = 1;
-    k = motion_find(proj.arr.lane, seq.ppat[part], part, T_PROB, v, 0);
-    nv = k >= 0 && proj.arr.lane[k].val[s] != MOT_NONE ? proj.arr.lane[k].val[s] : 100;
-    {   /* one line, turned down from 100 %: 95 .. 5 %, then 1:2 2:2 1:3 .. 8:8 */
-        int pos = nv > 100 ? 20 + nv - PROB_COND : (100 - nv) / 5;
-        pos += e > 0 ? -1 : 1;
-        pos = pos < 0 ? 0 : pos > 19 + PROB_NCOND ? 19 + PROB_NCOND : pos;
-        nv = pos < 20 ? 100 - 5 * pos : PROB_COND + pos - 20;
-    }
-    if (nv != 100 && k < 0 && (k = motion_alloc(proj.arr.lane, seq.ppat[part], part, T_PROB, v, 0)) < 0) {
-        if (break_locked) plat_cq_unlock(break_state);
-        say("MOTION FULL", 0);
-        return;
-    }
-    if (k >= 0) {
-        l = &proj.arr.lane[k];
-        l->val[s] = (uint8_t)(nv != 100 ? nv : MOT_NONE);
-        for (j = 0; j < NSTEPS; j++)
-            any |= l->val[j] != MOT_NONE;
-        if (!any)
-            engine_motion_clear(k);
-    }
-    mark_dirty();
-    if (break_locked) plat_cq_unlock(break_state);
-    q = put_s(put_i(put_s(t, "STEP "), s + 1), ": ");
-    if (nv > 100) {
-        int a, b;
-        prob_cond(nv - PROB_COND, &a, &b);
-        put_i(put_s(put_i(q, a), ":"), b);
-    } else
-        put_s(put_i(q, nv), "%");
-    say(t, 0);
-}
-
-/* the 16 steps on the keys that have values of their own (p-locks, recorded motion) for part's lanes
- * of target t (-1: any), voice v (-1: any) */
-static uint32_t lock_marks(int t, int v, int base)
-{
-    uint32_t m = 0;
-    int k, c;
-    for (k = 0; k < NLANE; k++) {
-        const lane_t *l = &proj.arr.lane[k];
-        if (!l->used || l->part != ui.part || l->pat != seq.ppat[ui.part] || (t >= 0 && l->t != t) ||
-            (v >= 0 && l->v != v))
-            continue;
-        for (c = 0; c < 16; c++)
-            if (base + c < NSTEPS && l->val[base + c] != MOT_NONE)
-                m |= 1u << c;
-    }
-    return m;
-}
-
-static void turn_ref(pref_t r, int e, int knob)
-{
-    if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
-    brk_choice_cancel();
-#if X0X_BASS_PRESET_PREVIEW
-    /* The detent's descriptor, current value, write and motion ownership all
-     * belong to one committed engine, even across an audio boundary. */
-    int bass_edit = r.kind == R_ENG && r.a == T_303;
-    if (bass_edit) engine_bass_edit_hold(1);
-#endif
-    if (!accel_smc && !original_ref_current(r)) {
-        if (bass_edit) engine_bass_edit_hold(0);
-        return;
-    }
-    const x0x_param_t *d = pref_desc(r);
-    if (!d || r.kind == R_ACT || pref_read_only(r)) {
-#if X0X_BASS_PRESET_PREVIEW
-        if (bass_edit) engine_bass_edit_hold(0);
-#endif
-        return;
-    }
-    int switched=original_switch_turn(r,pref_get(r),e,1);
-    if(switched>=0)pref_set_impl(r,switched,!accel_smc);
-    else
-    {
-    if (d->names || d->max < 24
-#if X0X_BASS_PRESET_PREVIEW
-        || r.kind == R_BPRESET || r.kind == R_BPATSND
-#endif
-       )
-        e = e > 0 ? 1 : -1;                          /* a switch: one detent, one position */
-    else
-        e = accel(knob, e, d->max);
-    pref_set_impl(r, pref_get(r) + e,!accel_smc);
-    }
-    if (r.kind == R_ENG)
-        PARAM_TRACE(accel_smc ? PARAM_SMC_KNOB : PARAM_PANEL_KNOB,
-                    r.a, r.b, r.c, pref_get(r));
-    motion_touch(r);
-#if X0X_BASS_PRESET_PREVIEW
-    if (bass_edit) engine_bass_edit_hold(0);
-#endif
-}
-
-static int rec_step(int track) { return seq_rec_step(&seq, track); }
-
-/* Per-step drum velocity lives in a T_VEL motion lane (same packing as T_PROB): pattern size
- * cannot hold an 11Ã—64 plane under the pool/RAM budgets. MOT_NONE = legacy accent law. */
-static void drum_vel_clear_step(int k, int v, int s)
-{
-    int voice = k << 4 | v, lane, j, any = 0;
-    lane_t *l;
-    if ((unsigned)k >= NKIT || (unsigned)v >= NDRUM || (unsigned)s >= NSTEPS)
-        return;
-    lane = motion_find(proj.arr.lane, seq.ppat[k], k, T_VEL, voice, 0);
-    if (lane < 0)
-        return;
-    l = &proj.arr.lane[lane];
-    l->val[s] = MOT_NONE;
-    for (j = 0; j < NSTEPS; j++)
-        any |= l->val[j] != MOT_NONE;
-    if (!any)
-        engine_motion_clear(lane);
-}
-
-static void drum_vel_set_step(int k, int v, int s, uint8_t vel)
-{
-    int voice = k << 4 | v, lane;
-    lane_t *l;
-    if ((unsigned)k >= NKIT || (unsigned)v >= NDRUM || (unsigned)s >= NSTEPS)
-        return;
-    if (!vel)
-        vel = 1;
-    if (vel > 127u)
-        vel = 127u;
-    lane = motion_find(proj.arr.lane, seq.ppat[k], k, T_VEL, voice, 0);
-    if (lane < 0 && (lane = motion_alloc(proj.arr.lane, seq.ppat[k], k, T_VEL, voice, 0)) < 0) {
-        say("MOTION FULL", 0);
-        return;
-    }
-    l = &proj.arr.lane[lane];
-    l->val[s] = vel;
-}
-
-/* A live drum hit recorded on step s: black keys and external MIDI (ext_rec_drain). */
-static void drum_rec_write(int k, int v, int s, int accent, uint8_t vel)
-{
-    if ((unsigned)k >= NKIT || (unsigned)v >= NDRUM || (unsigned)s >= NSTEPS)
-        return;
-    sm_set(pat_of(k)->drum[k].hit[v], s);
-    if (accent)
-        sm_set(pat_of(k)->drum[k].accent, s);
-    drum_vel_set_step(k, v, s, vel);
-    seq_rec_skip(&seq, TRK_DRUM + k, s, v);      /* (the key sounded it) */
-    mark_dirty();
-}
-
-static void drum_key(int v, int down, int step_record)
-{
-    int k = ui.part;
-    uint8_t kv;
-    int accent;
-    if (!down)
-        return;
-    if (ui.sel[k] != v) drum_step_cancel();
-    ui.sel[k] = (uint8_t)v;
-    build_pages();
-    accent = (ui.btn & (1u << B_ENV)) != 0;
-    kv = plat_key_velocity(BLACK_KEY[v]);
-    /* KEY SOUND STOPPED (the default): while the pattern plays a black key only selects its track,
-     * so choosing one to edit does not add a hit to the groove; stopped, it plays it, and with REC
-     * on it always does (that is how drums are recorded). Strike velocity matches 303 FREE PLAY. */
-    if (proj.set.keysound || !seq.playing || ui.rec)
-        engine_drum(k, v, accent ? 1.0f : (float)kv / 127.0f);
-    if (accent)
-        ui.btn_used |= 1u << B_ENV;
-    if (step_record && ui.rec && seq.playing)
-        drum_rec_write(k, v, rec_step(TRK_DRUM + k), accent, accent ? 127u : kv);
-}
-
-/* BREAK step st: on, with its own slice code (0 = the generator's, 1..32 = slot + 1). */
-static void brk_slice_write(brkpart_t *bp, int st, int code)
-{
-    if ((unsigned)st >= 16u)
-        return;
-    bp->slice[st] = (uint8_t)code;
-    bp->steps |= 1u << st;
-    mark_dirty();
-}
-
-/* External MIDI recording for 909, 808 and BREAK (engine midi_in queues the note, on the part's own
- * channel, with its record step). REC on and playing: every part records on its own channel at once,
- * whatever part or view is selected (owner 2026-10-30).
- * The 303s record in the engine (seq_rec_bass). */
-static void ext_rec_drain(void)
-{
-    if (project_busy) return;
-    for (;;) {
-        uint32_t ev, state = plat_cq_lock();
-        int have = engine_rec_ev_get(&ev);
-        /* Audio owns pattern/transport changes. Keep validation and this one
-         * pattern write in the same source-mask transaction, without muting. */
-        if (have && ui.rec && seq.playing) {
-            int part = REC_EV_PART(ev), st = REC_EV_STEP(ev);
-            if (part == PART_BRK)
-                brk_slice_write(&pat_of(PART_BRK)->brk, st & 15, REC_EV_VOICE(ev) + 1);
-            else if (part < NKIT)
-                drum_rec_write(part, REC_EV_VOICE(ev), st, 0, (uint8_t)REC_EV_VEL(ev));
-        }
-        plat_cq_unlock(state);
-        if (!have) break;
-    }
-}
-
-#define STEP_TAP_MS 300u
-/* a white key: a step. An empty one is on at once; one already on comes off on a tap (a quick
- * release), and stays when held (EDIT: its p-locks) */
-static void drum_step(int k, int white, int down)
-{
-    int s = ui.spage * 16 + white;
-    dpart_t *d = &pat_of(k)->drum[k];
-    uint32_t *bits = d->hit[ui.sel[k]];
-    if (s >= NSTEPS)
-        return;
-    if (!down) {
-        if (ui.hold_step >= 0 && (ui.hold_step & 15) == white) {
-            int same_target = ui.hold_drum == k * NDRUM + ui.sel[k];
-            int same = ui.hold_step == s && same_target &&
-                       ui.hold_pat == seq.ppat[k];
-            if (same && !ui.hold_created && !ui.hold_used && plat_ms() - ui.hold_t0 < STEP_TAP_MS) {
-                sm_flip(bits, s);
-                if (!sm_get(bits, s))
-                    drum_vel_clear_step(k, ui.sel[k], s);
-                mark_dirty();
-            }
-            if (same_target && ui.hold_used)
-                lock_release();
-            ui.hold_step = -1;
-        }
-        return;
-    }
-    if (ui.btn & (1u << B_ENV)) {
-        sm_flip(d->accent, s);
-        ui.btn_used |= 1u << B_ENV;
-        mark_dirty();
-        return;
-    }
-    ui.hold_step = (int8_t)s;
-    ui.hold_drum = (uint8_t)(k * NDRUM + ui.sel[k]);
-    ui.hold_pat = seq.ppat[k];
-    ui.hold_used = 0;
-    ui.hold_t0 = plat_ms();
-    ui.hold_created = !sm_get(bits, s);
-    if (ui.hold_created) {
-        sm_flip(bits, s);
-        mark_dirty();
-    }
-}
-
-static int kbd_note(int k) { return 41 + k + 12 * ui.oct; }
-
-/* Slide belongs to the source note, not the newly pressed destination. Only link a
- * note written by this held-key gesture in the same pattern and recording mode. */
-static void bass_rec_link(int b, int step)
-{
-    bpart_t *bp = &cur_pat()->bass[b];
-    int prev = (int)bass_rec_step[b] - 1;
-    int len = bp->len ? bp->len : 16;
-    if (kbd_held_note[b] && prev >= 0 && prev < len && prev != step &&
-        bass_rec_pat[b] == seq.ppat[ui.part] && bass_rec_playing[b] == seq.playing &&
-        bstep_gate(&bp->step[prev]) == G_NOTE && bp->step[prev].note == kbd_held_note[b])
-        bp->step[prev].flags |= BS_SLIDE;
-    bass_rec_step[b] = (uint8_t)(step + 1);
-    bass_rec_pat[b] = seq.ppat[ui.part];
-    bass_rec_playing[b] = seq.playing;
-}
-
-static void bass_write(int b, int note, int gate)
-{
-    bpart_t *bp = &cur_pat()->bass[b];
-    int len = bp->len ? bp->len : 16, w = ui.wpos[b] % len;
-    uint8_t f = (uint8_t)gate;
-    if (gate == G_NOTE) {
-#if X0X_BASS_NOTE_SOUND
-        if(engine_bass_note_capture(proj.arr.lane,seq.ppat[ui.part],b,w,&proj.sound)<0) {
-            say("NOTE SOUND NOT SAVED",0);return;
-        }
-#endif
-        bass_rec_link(b, w);
-        if (ui.btn & (1u << B_ENV)) {
-            f |= BS_ACCENT;
-            ui.btn_used |= 1u << B_ENV;
-        }
-        if (ui.btn & (1u << B_LFO)) {
-            f |= BS_SLIDE;
-            ui.btn_used |= 1u << B_LFO;
-        }
-        bp->step[w].note = (uint8_t)note;
-        bp->step[w].velocity = BASS_VELOCITY_DEFAULT;
-    }
-    if (gate != G_NOTE) {
-        bass_rec_step[b] = 0;
-#if X0X_BASS_NOTE_SOUND
-        bass_note_clear(proj.arr.lane,seq.ppat[ui.part],b,w);
-#endif
-    }
-    (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],b,w,0,0);
-    bp->step[w].flags = f;
-    ui.wpos[b] = (uint8_t)((w + 1) % len);
-    mark_dirty();
-}
-
-static void bass_write_held_chord(int b)
-{
-    uint8_t notes[HELD_CHORD_NOTES];int n=0;
-    for(unsigned j=0;j<kbd_arp_n[b];j++) {
-        unsigned note=kbd_arp_note[b][j];int at=0;
-        while(at<n && notes[at]<note)at++;
-        if(at<n && notes[at]==note)continue;
-        if(n==HELD_CHORD_NOTES){say("CHORD NOT SAVED",0);return;}
-        for(int q=n;q>at;q--)notes[q]=notes[q-1];
-        notes[at]=(uint8_t)note;n++;
-    }
-    if(!n)return;
-    bpart_t *bp=&cur_pat()->bass[b];int len=bp->len?bp->len:16;
-    int extend=kbd_arp_n[b]>1 && bass_rec_step[b] && bass_rec_pat[b]==seq.ppat[ui.part] && !bass_rec_playing[b];
-    int step=extend?(int)bass_rec_step[b]-1:ui.wpos[b]%len;
-    int reserve=engine_note_lock_capture_on() && bass_note_find(proj.arr.lane,seq.ppat[ui.part],b,step)<0;
-    if(!held_chord_write(proj.arr.lane,seq.ppat[ui.part],b,step,notes,-n,reserve)) {say("CHORD NOT SAVED",0);return;}
-    if(engine_bass_note_capture(proj.arr.lane,seq.ppat[ui.part],b,step,&proj.sound)<0) {say("NOTE SOUND NOT SAVED",0);return;}
-    (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],b,step,notes,n);
-    bp->step[step]=(bstep_t){notes[0],G_NOTE,BASS_VELOCITY_DEFAULT};
-    bass_rec_step[b]=(uint8_t)(step+1);bass_rec_pat[b]=seq.ppat[ui.part];bass_rec_playing[b]=0;
-    if(!extend)ui.wpos[b]=(uint8_t)((step+1)%len);
-    mark_dirty();
-}
-
-static void bass_kbd(int key, int step_record)
-{
-    int b = bidx(), n = kbd_note(key);
-    if ((X0X_ORIGINAL_SYNTH || chi_arp_on_part(b)) && kbd_arp_n[b] < UI_BASS_HELD_MAX) {
-        uint32_t i, have = 0;
-        for (i = 0; i < kbd_arp_n[b]; i++)
-            if (kbd_arp_key[b][i] == (uint8_t)(key + 1))
-                have = 1;
-        if (!have) {
-            kbd_arp_key[b][kbd_arp_n[b]] = (uint8_t)(key + 1);
-            kbd_arp_note[b][kbd_arp_n[b]] = (uint8_t)n;
-            kbd_arp_n[b]++;
-        }
-    }
-    if (!(step_record && ui.rec && seq.playing))
-        engine_bass_on_velocity(b, n, (ui.btn & (1u << B_ENV)) != 0,
-                                !chi_arp_on_part(b) && kbd_held_note[b] != 0,
-                                (ui.view == V_PART || (ui.freeplay[b] && !ui.rec)) ?
-                                    plat_key_velocity(key) : BASS_VELOCITY_DEFAULT);
-    if (step_record && ui.rec && !seq.playing) {
-        if(engine_bass_sound_bank(&proj.sound,b)>=2)bass_write_held_chord(b);
-        else bass_write(b, n, G_NOTE);
-    } else if (step_record && ui.rec && seq.playing) {
-        int f = ((ui.btn & (1u << B_ENV)) ? BS_ACCENT : 0) |
-                ((ui.btn & (1u << B_LFO)) ? BS_SLIDE : 0);
-        ui.btn_used |= ui.btn & ((1u << B_ENV) | (1u << B_LFO));
-        seq.rec_mask = (uint8_t)(1u << b);
-        engine_bass_record(b, n, BASS_VELOCITY_DEFAULT, f);
-        mark_dirty();
-    } else
-        bass_rec_step[b] = 0;
-    kbd_held_note[b] = (uint8_t)n;
-    kbd_held_key[b] = (uint8_t)(key + 1);
-}
-
-/* an edit sounds as the drum keys do (KEY SOUND): while stopped or recording, or always */
-static int key_sounds(void) { return proj.set.keysound || !seq.playing || ui.rec; }
-static void bass_step_key(int white, int down)
-{
-    int b = bidx(), s = ui.spage * 16 + white;
-    bpart_t *bp = &cur_pat()->bass[b];
-    if (s >= NSTEPS)
-        return;
-    if (down) {                                       /* an empty step is on at once: hold it to edit it */
-        bass_step_cancel();                            /* a second held key replaces the first preview */
-        ui.held_step = (int8_t)s;
-        ui.held_step_part = ui.part;
-        ui.held_step_pat = seq.ppat[ui.part];
-        ui.step_edited = 0;
-        ui.step_t0 = plat_ms();
-        ui.step_created = bstep_gate(&bp->step[s]) == G_REST;
-        if (ui.step_created) {
-#if X0X_BASS_NOTE_SOUND
-            if(engine_bass_note_capture(proj.arr.lane,seq.ppat[ui.part],b,s,&proj.sound)<0) {
-                bass_step_cancel();say("NOTE SOUND NOT SAVED",0);return;
-            }
-#endif
-            (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],b,s,0,0);
-            bp->step[s].flags = G_NOTE;
-            mark_dirty();
-        }
-        ui.step_preview = key_sounds();               /* as the drum keys */
-        if (ui.step_preview)
-            engine_bass_on_velocity(b, bp->step[s].note + bp->transpose - 24,
-                                    (bp->step[s].flags & BS_ACCENT) != 0, 0, bstep_velocity(&bp->step[s]));
-    } else if (ui.held_step == s && ui.held_step_part == ui.part &&
-               ui.held_step_pat == seq.ppat[ui.part]) {
-        if (!ui.step_created && !ui.step_edited && plat_ms() - ui.step_t0 < STEP_TAP_MS) {   /* a tap takes it off */
-            (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],b,s,0,0);
-            bp->step[s].flags = G_REST;
-#if X0X_BASS_NOTE_SOUND
-            bass_note_clear(proj.arr.lane,seq.ppat[ui.part],b,s);
-#endif
-            mark_dirty();
-        }
-        bass_step_cancel();
-    }
-}
-
-static int all_on(int w)                               /* every part plays pattern w */
-{
-    int p;
-    for (p = 0; p < NPARTS; p++)
-        if (seq.ppat[p] != w)
-            return 0;
-    return 1;
-}
-
-static const uint32_t MUTE_MASK[NPARTS] = {(1u << NDRUM) - 1u, ((1u << NDRUM) - 1u) << NDRUM, 1u << MUTE_BASS0,
-                                           1u << (MUTE_BASS0 + 1), 1u << MUTE_BRK};
-static int part_muted(int p) { return (seq.mute & MUTE_MASK[p]) == MUTE_MASK[p]; }
-
-static int perf_testing(void) { return perf.test >= 0 && perf.phase != 4; }
-/* A queued SAVE runs in phase 0, before perf_build borrows the save scratch and runtime state.
- * From phase 1 through restoration, neither the scratch nor the live settings may be saved. */
-static int perf_save_busy(void) { return perf_testing() && perf.phase != 0; }
-
-/* the held 303 step's note, moved by `by` semitones (KNOB 1: one; OCT: twelve); a rest or a tie
- * becomes a note of its own */
-static void held_note_by(int by)
-{
-    bpart_t *bp = &cur_pat()->bass[bidx()];
-    bstep_t *st = &bp->step[ui.held_step];
-    int n = held_note_of(bp, ui.held_step) + by;
-#if X0X_BASS_NOTE_SOUND
-    if(bstep_gate(st)!=G_NOTE && engine_bass_note_capture(proj.arr.lane,
-       seq.ppat[ui.part],bidx(),ui.held_step,&proj.sound)<0) {
-        say("NOTE SOUND NOT SAVED",0);return;
-    }
-#endif
-    uint8_t notes[HELD_CHORD_NOTES];
-    int count=held_chord_get(proj.arr.lane,seq.ppat[ui.part],bidx(),ui.held_step,st->note,notes);
-    int newroot=n<12?12:n>108?108:n,delta=newroot-st->note,kept=1;
-    if(bstep_gate(st)==G_NOTE && count>1) {
-        notes[0]=(uint8_t)newroot;
-        for(int j=1;j<count;j++) {
-            int pitch=notes[j]+delta;pitch=pitch<0?0:pitch>127?127:pitch;
-            if(pitch>notes[kept-1])notes[kept++]=(uint8_t)pitch;
-        }
-        (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],bidx(),ui.held_step,notes,kept);
-    } else (void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],bidx(),ui.held_step,0,0);
-    st->note = (uint8_t)newroot;
-    if (bstep_gate(st) != G_NOTE)
-        st->flags = (uint8_t)((st->flags & (BS_ACCENT | BS_SLIDE)) | G_NOTE);
-    ui.step_edited = 1;
-    mark_dirty();
-    if (key_sounds()) {                                /* as the drum keys: playing, the line is heard */
-        engine_bass_on_velocity(bidx(), st->note + bp->transpose - 24, 0, 1, bstep_velocity(st));
-        ui.step_preview = 1;
-    }
-}
-
-/* Keyboard mute pickup history is shared only with explicit mute edges, so an
- * off/on pair between scans cannot hide a new epoch. No physical sample is invented. */
-static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;
-static void smk_mute_edge(int target, int silent)
-{
-    int position = target < NPARTS ? part_position(target) : target;
-    if (position / 4 != smk_mute_bank) return;
-    int i = position % 4;
-    uint8_t bit = (uint8_t)(1u << i);
-    pref_t r = target < NPARTS ? PR(R_ENG, T_MIX, target, MX_LEVEL) :
-               PR(R_ENG, T_FX, 0, target == 5 ? FX_RV_LEVEL : FX_DL_LEVEL);
-    smk_mute_intended[i] = (uint8_t)pref_get(r);
-    if (silent) { smk_mute_active |= bit; smk_mute_edit |= bit; }
-    else { smk_mute_active &= (uint8_t)~bit; smk_mute_edit &= (uint8_t)~bit; }
-}
-
-static void mute_part(int p)                         /* a whole part on / off (HOME, MIX's PARTS) */
-{
-    uint32_t mask = MUTE_MASK[p];
-    if (seq.queued_mutes && seq.playing) {
-        seq.mute_q ^= mask;
-        if (seq.mute_q & mask)
-            say(part_muted(p) ? "UNMUTE AT BAR " : "MUTE AT BAR ", part_name(p));
-        else
-            say("CANCELED ", part_name(p));
-        return;
-    }
-    seq.mute = part_muted(p) ? seq.mute & ~mask : seq.mute | mask;
-    if (seq.song_rec && seq.playing && seq.song_pos < song()->len) {   /* song recording: this bar too */
-        song_bar_t *b = &song()->bar[seq.song_pos];
-        b->mute = (uint8_t)(part_muted(p) ? b->mute | 1u << p : b->mute & ~(1u << p));
-        mark_dirty();
-    }
-    smk_mute_edge(p, part_muted(p));
-    say(part_muted(p) ? "MUTED " : "UNMUTED ", part_name(p));
-}
-static int track_muted(int km, int v) { return (int)(seq.vmute >> (km * NDRUM + v) & 1u); }
-/* Only actual level destinations participate. FILTER and navigation never do.
- * A muted kit also silences its voice levels; their separate mute bits survive. */
-static int volume_muted(pref_t r)
-{
-    if (r.kind != R_ENG) return 0;
-    if (r.a == T_MIX && r.b < NPARTS && r.c == MX_LEVEL)
-        return part_muted(r.b);
-    if (r.a <= T_808 && r.b < NDRUM && r.c == find_ref(r.a, r.b, "Level").c)
-        return part_muted(r.a) || track_muted(r.a, r.b);
-    if (r.a == T_FX && !r.b) {
-        int bit = r.c == FX_RV_LEVEL ? 1 : r.c == FX_DL_LEVEL ? 2 : r.c == FX_VOLUME ? 4 : 0;
-        return engine_fx_muted() & bit;
-    }
-    return 0;
-}
-
-static void mute_track(int km, int v)                /* one drum track on / off */
-{
-    uint32_t bit = 1u << (km * NDRUM + v);
-    if (seq.queued_mutes && seq.playing) {
-        seq.vmute_q ^= bit;
-        if (seq.vmute_q & bit)
-            say(track_muted(km, v) ? "UNMUTE AT BAR " : "MUTE AT BAR ", engine_voice_name(km ? T_808 : T_909, v));
-        else
-            say("CANCELED ", engine_voice_name(km ? T_808 : T_909, v));
-        return;
-    }
-    seq.vmute ^= bit;
-    say(track_muted(km, v) ? "MUTED " : "UNMUTED ", engine_voice_name(km ? T_808 : T_909, v));
-}
-
-#if BOARD_SMK37 || X0X_HOST
-void smk_clip_enter_cleanup(void)
-{
-    for (int k = 0; k < 11; k++)
-        if (ui.brk_localkeys & (1u << k))
-            engine_brk_live(k < 8 ? 32 + ui.brk_page * 8 + k : k, 0);
-    ui.brk_localkeys = ui.brk_pinkeys = 0;
-    engine_brk_edit_hold(0);
-    bass_step_cancel();
-    ui.chain_first = -1;
-    ui.hold_step = -1;
-    break_step_cancel();
-    for (int b = 0; b < NBASS; b++)                   /* a 303 key note that still sounds: let it go */
-        if (kbd_held_note[b] || kbd_arp_n[b]) {
-            engine_bass_off(b);
-            kbd_held_note[b] = 0;
-            kbd_held_key[b] = 0;
-            kbd_arp_n[b] = 0;
-            bass_rec_step[b] = 0;
-        }
-}
-#endif
-
-/* Outer C3/D3 count, C#3/D#3 page; E3 remains unassigned. use the authoritative bitmap, not lossy extq.
- * Always update the edge baseline, including modal/clip/busy frames. */
-void ui_brk_page_keys(unsigned keys, int allowed)
-{
-    static unsigned previous;
-    static int eligible_before;
-    int eligible = allowed && !project_busy && !ui.help && ui.overlay == O_NONE &&
-        ui.part == PART_BRK && (ui.view == V_SEQ || ui.view == V_PART) && !ui.btn && !perf_testing();
-    unsigned pressed = keys & ~previous;
-    previous = keys;
-    if (!eligible || !eligible_before) { eligible_before = eligible; return; }
-    if (!pressed) return;
-    if ((pressed & 12u) == 4u || (pressed & 12u) == 8u) {
-        unsigned bank = ui.brk_count_target;
-        pref_t ref = PR(R_BRKSLICE, bank, 0, 0);
-        int value = pref_get(ref) + ((pressed & 4u) ? -1 : 1);
-        if (value < 0) value = 0;
-        if (value > 3) value = 3;
-        pref_set(ref, value);
-        mark_dirty();
-        ui.act_t = plat_ms();
-    }
-    pressed &= 3u;
-    if (!pressed) return;
-    if ((ui.brk_localkeys & 255u) || ui.brk_pinkeys) { say("RELEASE SLICES", 0); return; }
-    int pages = (engine_brk_count(0) + 7) / 8;
-    int page = ui.brk_page < pages ? ui.brk_page : pages - 1;
-    if (pressed == 1 && page > 0) page--;
-    if (pressed == 2 && page + 1 < pages) page++;
-    ui.brk_page = (uint8_t)page;
-    ui.act_t = plat_ms();
-}
-
-/* HOME + held GLOBE. A pattern-pad tap clears that pattern for the selected
- * part. Hold the source pad and press the target pad to copy that part.
- * Release GLOBE with no pad and it still opens settings. Pad calibration
- * consumes GLOBE before this runs (main_fm1.c). */
-static int glo_key = -1, glo_pat = -1, glo_copied;
-static uint32_t glo_key_edges; /* keys that changed this scan; a source must already be held */
-static void globe_part_reset(void)
-{
-    glo_key = -1;
-    glo_pat = -1;
-    glo_copied = 0;
-}
-/* 1 = a copy was armed (including the question). 0 = same pattern, no copy. */
-static int globe_paste_part(int src, int dst)
-{
-    int p;
-    char q[28];
-    if ((unsigned)src >= NPAT || (unsigned)dst >= NPAT || (unsigned)ui.part >= NPARTS || src == dst)
-        return 0;
-    for (p = 0; p < NPARTS; p++)
-        ui.paste_src[p] = (uint8_t)dst;          /* ACT_COPY skips a part already on dst */
-    ui.paste_src[ui.part] = (uint8_t)src;
-    if (part_used(&proj.pat[dst], ui.part)) {
-        put_s(put_i(put_s(q, "PASTE OVER P"), dst + 1), "?");
-        ask(ACT_COPY, dst, q, "THIS PART HAS NOTES");
-    } else
-        run_action(ACT_COPY, dst);
-    return 1;
-}
-
-static int live_central_event(int key,int down);
-static UI_DRAW void key_event(int k, int down)
-{
-    /* End the press-time BREAK owner before modal/view/clip dispatch can hide it.
-     * Paging is blocked while held, so its slice identity remains stable. */
-    int oldbl = KEY_BLACK[k], w = KEY_WHITE[k];
-    if (!down && oldbl >= 0 && ((ui.brk_localkeys | ui.brk_pinkeys) & (1u << oldbl))) {
-        if (ui.brk_localkeys & (1u << oldbl))
-            engine_brk_live(oldbl < 8 ? 32 + ui.brk_page * 8 + oldbl : oldbl, 0);
-        ui.brk_localkeys &= (uint16_t)~(1u << oldbl);
-        ui.brk_pinkeys &= (uint16_t)~(1u << oldbl);
-        engine_brk_edit_hold((ui.brk_localkeys & 255u) || ui.brk_pinkeys);
-        return;
-    }
-    /* SEQ's held step can remain down while EDIT shows its sound knobs. Its
-     * release finishes that same gesture; EDIT never starts an unseen step. */
-    if (!down && w >= 0 && ui.view == V_PART) {
-        if (is_drum() && ui.hold_step >= 0 && (ui.hold_step & 15) == w) {
-            drum_step(ui.part, w, 0);
-            return;
-        }
-        if (is_303() && ui.held_step >= 0 && (ui.held_step & 15) == w) {
-            bass_step_key(w, 0);
-            return;
-        }
-    }
-    if (live_central_event(k,down)) return;
-    if (!down) {
-        for (int b = 0; b < NBASS; b++) {
-            uint32_t i, j, hit = 0;
-            int note = -1;
-            for (i = 0; i < kbd_arp_n[b]; i++)
-                if (kbd_arp_key[b][i] == (uint8_t)(k + 1)) {
-                    note = kbd_arp_note[b][i];
-                    for (j = i + 1; j < kbd_arp_n[b]; j++) {
-                        kbd_arp_key[b][j - 1] = kbd_arp_key[b][j];
-                        kbd_arp_note[b][j - 1] = kbd_arp_note[b][j];
-                    }
-                    kbd_arp_n[b]--;
-                    hit = 1;
-                    break;
-                }
-            if (kbd_held_key[b] == k + 1 || hit) {
-                if ((X0X_ORIGINAL_SYNTH || chi_arp_on_part(b)) && note >= 0)
-                    engine_bass_off_note(b, note);
-                else
-                    engine_bass_off(b);
-                if (!kbd_arp_n[b]) {
-                    kbd_held_note[b] = 0;
-                    kbd_held_key[b] = 0;
-                } else {
-                    kbd_held_note[b] = kbd_arp_note[b][kbd_arp_n[b] - 1u];
-                    kbd_held_key[b] = kbd_arp_key[b][kbd_arp_n[b] - 1u];
-                }
-                bass_rec_step[b] = 0;
-                return;
-            }
-        }
-    }
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);
-    if (smk_clip_mode_on() || smk_padcal_on())
-#else
-    if (smk_clip_mode_on())
-#endif
-        return;   /* clip mode: the pads launch clips, the keybed plays MIDI to Loopy (main_fm1.c clip keys) */
-#endif
-    int bl = KEY_BLACK[k], wp = w >= 0 ? ui.pbank * 16 + w : -1;   /* wp: a white key's pattern */
-    if (ui.overlay == O_ASK || ui.view == V_PERF || perf_testing())
-        return;
-    if (down && w >= 0 && (ui.btn & (1u << B_SAVE))) {     /* SAVE held + white key: paste the pattern here */
-        int p;
-        ui.btn_used |= 1u << B_SAVE;
-        if (all_on(wp))
-            return;
-        for (p = 0; p < NPARTS; p++)
-            ui.paste_src[p] = seq.ppat[p];
-        if (pattern_used(&proj.pat[wp])) {
-            char t[24];
-            put_s(put_i(put_s(t, "PASTE OVER P"), wp + 1), "?");
-            ask(ACT_COPY, wp, t, "IT HAS NOTES");
-        } else
-            run_action(ACT_COPY, wp);
-        return;
-    }
-    /* HOME, GLOBE held, SAVE not held: the pad is this part's pattern, not a cue.
-     * Tap releases clear. A second pad copies the selected part and does not clear. */
-    if (w >= 0 && ui.view == V_HOME && ui.overlay == O_NONE &&
-        (ui.btn & (1u << B_GLO)) && !(ui.btn & (1u << B_SAVE))) {
-        ui.btn_used |= 1u << B_GLO;                 /* release must not open settings */
-        ui.chain_first = -1;                        /* do not chain this pad */
-        if (down) {
-            int source_held = glo_key >= 0 && (ui.keys & ~glo_key_edges & (1u << glo_key));
-            if (!source_held || glo_key == k) {
-                glo_key = k;
-                glo_pat = wp;
-                glo_copied = 0;
-            } else if (globe_paste_part(glo_pat, wp))
-                glo_copied = 1;
-        } else if (k == glo_key) {
-            if (!glo_copied && glo_pat >= 0)
-                run_action(ACT_CLEAR_PART, ui.part | ((glo_pat + 1) << 8));
-            globe_part_reset();
-        }
-        return;
-    }
-    if (ui.view == V_SONG && !(ui.btn & (1u << B_HOME))) {   /* SONG: white = the bar's pattern, black = its mutes */
-        int k = ui.song_sel;
-        if (!down || k >= NSONG || (w < 0 && bl >= NPARTS))
-            return;
-        song_fill(k);
-        if (w >= 0) {
-            int p;
-            for (p = 0; p < NPARTS; p++)
-                song()->bar[k].pat[p] = (uint8_t)wp;
-            if (k + 1 < NSONG)
-                ui.song_sel = (uint8_t)(k + 1);
-        } else {
-            song()->bar[k].mute ^= (uint8_t)(1u << part_at(bl));
-        }
-        mark_dirty();
-        return;
-    }
-    if (w >= 0 && (ui.view == V_HOME || (ui.btn & (1u << B_HOME)))) {
-        if (ui.btn & (1u << B_HOME))
-            ui.btn_used |= 1u << B_HOME;
-        if (down) {
-            if (ui.chain_first >= 0 && ui.chain_first != wp) {
-                char t[16], *q = t;
-                seq_chain(&seq, ui.chain_first, wp);
-                q = put_i(q, (ui.chain_first < wp ? ui.chain_first : wp) + 1);
-                *q++ = '-';
-                put_i(q, (ui.chain_first < wp ? wp : ui.chain_first) + 1);
-                say("CHAIN P", t);
-            } else {
-                ui.chain_first = (int8_t)wp;
-                seq_chain(&seq, 0, 0);
-                seq_cue(&seq, wp);
-            }
-        } else if (ui.chain_first == wp) {
-            ui.chain_first = -1;
-        }
-        return;
-    }
-    if (bl >= 0 && (ui.btn & (1u << B_HOME)) && (drum_mix_page() >= 0 || (ui.view == V_MIX && cur_page() == 0))) {
-        ui.btn_used |= 1u << B_HOME;                  /* MIX + HOME + black key: mute that channel */
-        if (down && drum_mix_page() >= 0)
-            mute_track(drum_mix_page(), bl);
-        else if (down && bl < NPARTS)
-            mute_part(part_at(bl));
-        return;
-    }
-    if (bl >= 0 && ui.view == V_MIX && cur_page() == 0) {   /* MIX's PARTS: black keys 1-5 pick the part */
-        if (down && bl < NPARTS) {
-            ui.mixsel = (uint8_t)part_at(bl);
-            build_pages();
-        }
-        return;
-    }
-    if (bl >= 0 && drum_mix_page() >= 0) {            /* MIX, a drum machine's page: black keys pick the track */
-        if (down) {
-            int km = drum_mix_page();
-            if (ui.sel[km] != bl) drum_step_cancel();
-            ui.sel[km] = (uint8_t)bl;
-            if (proj.set.keysound || !seq.playing)
-                engine_drum(km, bl, 0.75f);
-            build_pages();
-        }
-        return;
-    }
-    if (w >= 0 && drum_mix_page() >= 0) {            /* the SMK pads keep editing this visible kit's steps */
-        drum_step(drum_mix_page(), w, down);          /* also under a settings list or HELP (O_ASK left above) */
-        return;
-    }
-    if (ui.view == V_HOME && bl >= 0) {
-        if (down && bl < NPARTS)
-            mute_part(part_at(bl));
-        return;
-    }
-    if (ui.view == V_MIX || ui.view == V_FX)          /* MASTER, FX: the keys choose nothing (they used to */
-        return;                                       /* play the part's steps or the break's slices) */
-    if (is_drum() && bl >= 0 && (ui.btn & (1u << B_HOME))) {   /* HOME + black key: mute that track */
-        ui.btn_used |= 1u << B_HOME;
-        if (down)
-            mute_track(ui.part, bl);
-        return;
-    }
-    if (is_drum()) {
-        if (bl >= 0)
-            drum_key(bl, down, ui.view == V_SEQ);
-        else if (w >= 0 && (ui.view == V_SEQ || ui.view == V_PART))
-            drum_step(ui.part, w, down); /* parameter pages show and edit the same step lane */
-    } else if (is_303()) {
-        if (kbd_on()) {                                /* REC: the keys play and write notes; FREE PLAY: play */
-            if (down)
-                bass_kbd(k, ui.view == V_SEQ);
-        }
-        else if (w >= 0 && ui.view == V_SEQ)
-            bass_step_key(w, down);
-    } else {
-        brkpart_t *bp = &cur_pat()->brk;
-        int count = engine_brk_count(0);
-        if (!(ui.brk_localkeys & 255u) && !ui.brk_pinkeys && ui.brk_page * 8 >= count)
-            ui.brk_page = (uint8_t)((count - 1) / 8);
-        int slot = ui.brk_page * 8 + bl;
-        if (bl >= 0 && bl < 8 && down && slot >= count) { say("UNUSED SLICE KEY", 0); return; }
-        if (bl >= 0 && bl < 8 && down && ui.brk_held >= 0) {     /* a step held + black 1-8: its own slice */
-            uint32_t state = plat_cq_lock();
-            int st = held_break_step();
-            if (st < 0) { plat_cq_unlock(state); break_step_cancel(); return; }
-            bp = &proj.pat[ui.hold_pat].brk;
-            brk_slice_write(bp, st, bp->slice[st] && (bp->slice[st] - 1) % count == slot ? 0 : slot + 1);
-            int assigned = bp->slice[st];
-            plat_cq_unlock(state);
-            ui.hold_used = 1;                          /* its release keeps the step */
-            ui.brk_pinkeys |= (uint16_t)(1u << bl);
-            engine_brk_edit_hold(1);
-            if (assigned) {
-                char t[24];
-                put_i(put_s(put_i(put_s(t, "STEP "), st + 1), ": SLICE "), slot + 1);
-                say(t, 0);
-            } else
-                say("STEP: THE GENERATOR'S SLICE", 0);
-        } else if (bl >= 0 && !down && (ui.brk_pinkeys & (1u << bl))) {
-            ui.brk_pinkeys &= (uint16_t)~(1u << bl);
-        } else if (bl >= 0) {
-            if (down) ui.brk_localkeys |= (uint16_t)(1u << bl);
-            engine_brk_edit_hold((ui.brk_localkeys & 255u) || ui.brk_pinkeys);
-            engine_brk_live(bl < 8 ? 32 + slot : bl, down);
-        } else if (w >= 0 && down) {                     /* as the drums: empty on at once, a tap takes it off */
-            uint32_t state = plat_cq_lock();
-            bp = &cur_pat()->brk;
-            ui.brk_held = (int8_t)w;
-            ui.hold_pat = seq.ppat[PART_BRK];
-            ui.hold_used = 0;
-            ui.hold_t0 = plat_ms();
-            ui.hold_created = !((bp->steps >> w) & 1u);
-            if (ui.hold_created) {
-                bp->steps |= 1u << w;
-                mark_dirty();
-            }
-            plat_cq_unlock(state);
-        } else if (w >= 0 && ui.brk_held == w) {
-            uint32_t state = plat_cq_lock();
-            /* Validate and mutate the press-time pattern atomically with the
-             * audio task's cue adoption, never a newly selected pattern. */
-            if (held_break_step() == w && !ui.hold_created && !ui.hold_used &&
-                plat_ms() - ui.hold_t0 < STEP_TAP_MS) {
-                proj.pat[ui.hold_pat].brk.steps &= ~(1u << w);
-                mark_dirty();
-            }
-            plat_cq_unlock(state);
-            if (ui.hold_used)
-                lock_release();
-            ui.brk_held = -1;
-        }
-    }
-}
-
-static void list_move(int d)
-{
-    int s = ui.list_sel, step = d < 0 ? -1 : 1, t;
-    for (; d; d -= step) {                             /* a row at a time, over the section headers */
-        for (t = s + step; t >= 0 && t < ui.list_n && list_skip(t); t += step)
-            ;
-        if (t < 0 || t >= ui.list_n)
-            break;
-        s = t;
-    }
-    ui.list_sel = (uint8_t)s;
-    if (list_rows[s].kind == R_BRKSLICE || list_rows[s].kind == R_BRKSLOT)
-        ui.brk_count_target = (uint8_t)(list_rows[s].a != 0);
-    if (ui.list_sel < ui.list_top)
-        ui.list_top = ui.list_sel;
-    if (ui.list_sel >= ui.list_top + 6)
-        ui.list_top = (uint8_t)(ui.list_sel - 5);
-}
-
-static void list_enter(void)
-{
-    pref_t r = list_rows[ui.list_sel];
-    if (r.kind == R_SECTION) {global_section(r.a);return;}
-    if (r.kind != R_ACT)
-        return;
-    if (r.a == ACT_CLEAR_PAT)
-        ask(ACT_CLEAR_PAT, 0, "CLEAR THIS PATTERN?", "ALL FIVE PARTS");
-    else if (r.a == ACT_RESET)
-        ask(ACT_RESET, 0, "RESET PROJECT?", "SAMPLES ARE KEPT");
-    else if (r.a == ACT_LOAD && ui.dirty)
-        ask(ACT_LOAD, 0, "LOAD SAVED PROJECT?", "DISCARD UNSAVED EDITS");
-    else if (r.a == ACT_SONG_CLR)
-        ask(ACT_SONG_CLR, 0, "CLEAR THE SONG?", 0);
-    else
-        run_action(r.a, 0);
-}
-
-#if BOARD_SMK37 || X0X_HOST
-/* The SMK-37 "<" and ">" (smk_arrows.h). 1: a menu list of this file is open (GLO or the list of a page). */
-static int ui_menu_open(void) { return ui.overlay == O_LIST && !perf_testing(); }
-/* The hook for submenu rows. Return 1 if row r is a submenu row and the arrow did its job: ">" enters the
- * submenu, "<" goes back. This lane has no submenu rows. */
-static int list_sub_arrow(pref_t r, int d)
-{
-    if(r.kind!=R_SECTION)return 0;
-    if(d>0)global_section(r.a);
-    return 1;
-}
-/* "<" (d = -1) or ">" (d = +1) in a menu: the value of the selected row one step down or up, as ALGORITHM
- * does (turn_ref). The value stops at its ends. An action row and a section header do nothing. The knob
- * acceleration does not start: the presses and the repeats are 60 ms or more apart (accel). */
-static int ui_menu_arrow(int d)
-{
-#if BOARD_SMK37
-    smc_ui_cancel();
-#endif
-    pref_t r = list_rows[ui.list_sel];
-    if (d < 0 && ui.view == V_GLO && ui.glo_section >= 0) {
-        global_back();                                /* "<" leaves a settings section, as HOME */
-        return 1;                                     /* the held "<" must not edit the section index */
-    }
-    if (list_sub_arrow(r, d))
-        return d > 0;                                 /* the caller consumes this held category-entry arrow */
-    turn_ref(r, d, EN_ALGO);
-    ui.act_t = plat_ms();                             /* (the autosave waits for quiet) */
-    return 0;
-}
-#endif
-
-static void close_overlay(void)
-{
-    if (ui.view == V_GLO) {
-        ui.overlay = O_NONE;
-        set_view(ui.prev_view == V_GLO ? V_PART : ui.prev_view);
-        return;
-    }
-    ui.overlay = O_NONE;
-}
-
-#if X0X_BASS_PRESET_PREVIEW
-/* A tap, not a new press gesture. Live notes/wheels may be the reason for the
- * wait; step edits, help, modal UI and modifier chords retain their priority. */
-static int cancel_sound_request(void)
-{
-    int pending, page=cur_page();
-    if (project_busy || ui.view!=V_PART || !is_303() || ui.overlay!=O_NONE ||
-        ui.help || ui.held_step>=0 || held_any_step()>=0 || page>=pg.n ||
-        pg.r[page][0].kind!=R_BENGINE || pg.r[page][0].b!=bidx() ||
-        ((ui.btn | plat_buttons()) & ~(1u<<B_HOME)) ||
-        (plat_keys() & ~ui.keys)) return 0;
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-    if (smk_clip_mode_on()) return 0;
-#endif
-    /* Nested, bounded hold: no audio-boundary apply between check and cancel.
-     * An unstable producer snapshot is not a confirmed cancel or an undo. */
-    engine_bass_edit_hold(1);
-    pending=engine_bass_preset_pending(bidx());
-    if (pending>0 && pending<6) engine_bass_cancel_preset(bidx());
-    engine_bass_edit_hold(0);
-    return pending!=0; /* transient snapshot: stay here; never claim an undo */
-}
-#endif
-
-/* Shared NO behavior: restore the question's caller, including Global's list. */
-static void answer_no(void)
-{
-    ui.overlay = ui.ask_overlay;
-    say("CANCELLED", 0);
-    if (ui.view == V_GLO) ui.overlay = O_LIST;
-}
-
-/* Return 1 when HOME+PLAY has already performed redo. Otherwise the caller
- * continues its normal PLAY path, after answering NO when a question is open. */
-static int play_answer_question(int home_held)
-{
-    x0x_play_question_t policy = x0x_play_question_resolve(ui.overlay == O_ASK, 1, home_held);
-    for (unsigned i = 0; i < policy.n; ++i) {
-        if (policy.act[i] == X0X_PQ_ANSWER_NO) answer_no();
-        else if (policy.act[i] == X0X_PQ_REDO) {
-            ui.btn_used |= ui.btn & (1u << B_HOME);
-            do_undo(1);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-X0X_COLD static void button_tap(int b)
-{
-    if (ui.brk_choice_on) {
-        if (b == B_SEL) { (void)brk_choice_confirm(); return; }
-        brk_choice_cancel();
-        if (b == B_HOME) return;
-    }
-    if (perf_testing()) {                             /* the test owns the transport: HOME or PLAY stop it */
-        if ((b == B_HOME || b == B_PLAY) && perf.phase != 3)
-            perf_test_abort();
-        return;
-    }
-    if (ui.overlay == O_ASK && b == B_PLAY &&
-        play_answer_question(ui.btn & (1u << B_HOME))) return;
-    if (ui.overlay == O_ASK) {                        /* SEL confirms; HOME answers NO */
-        if (b == B_SEL) {
-            ui.overlay = O_NONE;
-            run_action(ui.ask_act, ui.ask_arg);
-        } else if (b == B_HOME) {
-            answer_no();
-        } else
-            return;
-        if (ui.view == V_GLO)
-            ui.overlay = O_LIST;
-        return;
-    }
-    switch (b) {
-    case B_PLAY:
-        if (ui.btn & (1u << B_HOME)) {               /* HOME + PLAY: redo */
-            ui.btn_used |= 1u << B_HOME;
-            do_undo(1);
-            break;
-        }
-        memset(bass_rec_step, 0, sizeof bass_rec_step);
-        if (seq.playing)
-            seq_stop(&seq);
-        else {
-            seq.song_start = ui.song_sel < song()->len ? ui.song_sel : 0;
-            seq_start(&seq);
-        }
-        break;
-    case B_REC:
-        if (ui.btn & (1u << B_HOME)) {               /* HOME + REC: undo */
-            ui.btn_used |= 1u << B_HOME;
-            do_undo(0);
-            break;
-        }
-        if (ui.btn & (1u << B_SAVE)) {               /* SAVE + REC: clear this part (asks) */
-            char t[24];
-            ui.btn_used |= 1u << B_SAVE;
-            put_s(put_s(t, "CLEAR "), part_name(ui.part));
-            ask(ACT_CLEAR_PART, ui.part, t, "IN THIS PATTERN?");
-            break;
-        }
-        record_finish();
-        bass_step_cancel();                            /* key-up will now take the keyboard path */
-        memset(bass_rec_step, 0, sizeof bass_rec_step);
-        ui.rec = !ui.rec;
-        if (ui.rec && is_303())
-            ui.wpos[bidx()] = 0;
-        say(ui.rec ? "RECORD ON: KEYS + KNOBS" : "RECORD OFF", 0);
-        break;
-    case B_HOME:                                      /* the pattern; again: the song (a list: back) */
-        if(ui.view==V_GLO && ui.overlay==O_LIST && ui.glo_section>=0) {global_back();break;}
-        if (ui.overlay != O_NONE || ui.view == V_GLO)
-            close_overlay();
-#if X0X_BASS_PRESET_PREVIEW
-        else if (cancel_sound_request())
-            break;
-#endif
-        else
-            set_view(ui.view == V_HOME ? V_SONG : V_HOME);
-        break;
-    case B_SEL:
-        if (ui.overlay == O_LIST)
-            list_enter();
-        else
-            open_list_of_pages();
-        break;
-    case B_EDIT:
-        if (ui.view == V_PART && ui.overlay == O_NONE && is_303() &&
-            pg.r[cur_page()][0].kind == R_BENGINE && engine_bass_preset_pending(bidx())) {
-            engine_bass_cancel_preset(bidx()); say("SOUND CHANGE CANCELLED",0); break;
-        }
-        if (ui.view == V_PART && ui.overlay == O_NONE)
-            *page_of(V_PART) = (uint8_t)((cur_page() + 1) % pg.n);
-        else
-            set_view(V_PART);
-        break;
-    case B_ARP:
-        if (!is_303()) {
-            say("TB-3PO: PICK CHICAGO OR MIAMI", 0);
-            break;
-        }
-        if (ui.view == V_GEN && ui.overlay == O_NONE)  /* the generator; again: its next page */
-            *page_of(V_GEN) = (uint8_t)((cur_page() + 1) % pg.n);
-        else
-            set_view(V_GEN);
-        break;
-    case B_FX:
-        if (ui.view == V_FX && ui.overlay == O_NONE)
-            *page_of(V_FX) = (uint8_t)((cur_page() + 1) % pg.n);
-        else
-            set_view(V_FX);
-        break;
-    case B_LFO:
-        if (ui.view == V_MIX && ui.overlay == O_NONE)
-            *page_of(V_MIX) = (uint8_t)((cur_page() + 1) % pg.n);
-        else
-            set_view(V_MIX);
-        break;
-    case B_GLO:
-        if (ui.view == V_GLO)
-            close_overlay();
-        else {
-            set_view(V_GLO);
-            open_global();
-        }
-        break;
-    case B_SEQ:                                       /* the part's steps; again: the next page */
-        if (ui.view == V_SEQ && ui.overlay == O_NONE)
-            *page_of(V_SEQ) = (uint8_t)((cur_page() + 1) % pg.n);
-        else
-            set_view(V_SEQ);
-        break;
-    case B_SAVE: save_project(); break;
-    case B_OCTUP:
-    case B_OCTDN: {
-        int up = b == B_OCTUP;
-        if (ui.btn & (1u << B_SAVE)) {               /* SAVE + OCT: the bank a copy goes to */
-            ui.btn_used |= 1u << B_SAVE;
-            ui.pbank = (uint8_t)up;
-            say(up ? "COPY TO P17-32" : "COPY TO P1-16", 0);
-            ui.help = 0;
-        } else if (steps_view() && is_303() && !ui.rec && ui.held_step >= 0) {   /* a held step: its octave */
-            held_note_by(up ? 12 : -12);
-        } else if (ui.view == V_GEN) {
-            bpart_t *bp = &cur_pat()->bass[bidx()];
-            if (up) {
-                char t[20];
-                bp->gen.seed = tb3po_new_seed(plat_ms() ^ (ui.frame << 7));
-                tb3po_generate(bp);
-                for(int step=0;step<NSTEPS;step++)(void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],bidx(),step,0,0);
-#if X0X_BASS_NOTE_SOUND
-                for(int step=0;step<NSTEPS;step++)bass_note_clear(proj.arr.lane,seq.ppat[ui.part],bidx(),step);
-#endif
-                ui.gen_stale[bidx()] = 0;
-                put_hex(put_s(t, "NEW LINE "), bp->gen.seed & 0xFFFFu, 4);
-                say(t, 0);
-            } else {
-                uint32_t r = bp->gen.seed ^ plat_ms();
-                tb3po_mutate(bp, &r);
-                for(int step=0;step<NSTEPS;step++)(void)held_chord_set(proj.arr.lane,seq.ppat[ui.part],bidx(),step,0,0);
-#if X0X_BASS_NOTE_SOUND
-                for(int step=0;step<NSTEPS;step++)if(bstep_gate(&bp->step[step])!=G_NOTE)
-                    bass_note_clear(proj.arr.lane,seq.ppat[ui.part],bidx(),step);
-#endif
-                ui.gen_stale[bidx()] = 0;
-                say("MUTATED", 0);
-            }
-            mark_dirty();
-        } else if (kbd_on() && steps_view()) {        /* the keyboard's octave */
-            if (ui.view == V_SEQ && (ui.btn & (1u << B_LFO))) { /* SEQ LFO + OCT: a tie */
-                ui.btn_used |= 1u << B_LFO;
-                bass_write(bidx(), 0, G_TIE);
-            } else if (ui.view == V_SEQ && (ui.btn & (1u << B_ENV))) { /* SEQ ENV + OCT: a rest */
-                ui.btn_used |= 1u << B_ENV;
-                bass_write(bidx(), 0, G_REST);
-            } else {
-                char t[12];
-                ui.btn_used |= ui.btn & ((1u << B_LFO) | (1u << B_ENV));
-                ui.oct = (int8_t)(ui.oct + (up ? 1 : -1));
-                ui.oct = ui.oct < -2 ? -2 : ui.oct > 3 ? 3 : ui.oct;
-                put_i(put_s(t, "OCTAVE "), ui.oct);
-                say(t, 0);
-            }
-        } else if (ui.view == V_HOME || ui.view == V_SONG) {   /* the pattern bank: 1-16, 17-32 */
-            ui.pbank = (uint8_t)up;
-            say(up ? "PATTERNS 17-32" : "PATTERNS 1-16", 0);
-        } else {
-            char t[20];
-            int pg_ = ui.spage + (up ? 1 : -1);
-            ui.spage = (uint8_t)(pg_ < 0 ? 0 : pg_ > NSTEPS / 16 - 1 ? NSTEPS / 16 - 1 : pg_);
-            put_i(put_s(put_i(put_s(t, "STEPS "), ui.spage * 16 + 1), "-"), ui.spage * 16 + 16);
-            say(t, 0);
-        }
-        break;
-    }
-    default: break;
-    }
-}
-
-static x0x_panic_chord_t kbd_panic;
-
-/* Controls held across a project transfer cannot start a new panic chord. */
-static void keyboard_panic_reset(uint32_t btn)
-{
-    kbd_panic.active = 0;
-    kbd_panic.inhibited = (uint8_t)((btn & ((1u << B_FX) | (1u << B_SEQ))) != 0u);
-}
-
-static unsigned keyboard_panic(uint32_t btn, uint32_t changed)
-{
-    unsigned held = 0, result;
-    if (!(changed & ((1u << B_FX) | (1u << B_SEQ))))
-        return 0;
-    if (btn & (1u << B_FX))
-        held |= X0X_PANIC_FIRST;
-    if (btn & (1u << B_SEQ))
-        held |= X0X_PANIC_SECOND;
-    result = x0x_panic_chord_update(&kbd_panic, held, X0X_PANIC_KEYBOARD);
-    if (result & X0X_PANIC_FIRE)
-        engine_request_notes_off();
-    return (result & X0X_PANIC_CONSUME) ? 1u : 0u;
-}
-
-/* Physical Free Play rate pads, ported from 6ae0928's division_pad_* route.
- * Original Miami keeps its native macro13/division order. Shape pads untouched. */
-static int division_pad_owner(void)
-{
-#if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    extern uint8_t smk_clip_mode_on(void);
-    /* A settings list or HELP on the synth page does not take the pads: they keep
-     * the rates they show. Only a question (O_ASK) waits for an answer. */
-    if (project_busy || perf_testing() || ui.rec || ui.overlay == O_ASK ||
-        (ui.btn & ((1u << B_HOME) | (1u << B_SAVE))) ||
-        (ui.view != V_SEQ && ui.view != V_PART) || !is_303() ||
-        !ui.freeplay[bidx()] || engine_bass_bank(bidx()) != ORIGINAL_SOUND_MIAMI ||
-        smk_clip_mode_on() || smc_ui_active())
-        return 0;
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);
-    if (smk_padcal_on()) return 0;
-#endif
-    return bidx() + 1;
-#else
-    return 0;
-#endif
-}
-static int division_pad_index(void)
-{
-#if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    int v = pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_RATE));
-    return v < 0 ? 0 : v > 127 ? 7 : (v * 7 + 63) / 127;
-#else
-    return 0;
-#endif
-}
-static const char *division_pad_label(void)
-{
-    static const char *const labels[8] = {"PADS: RATE 1/2", "PADS: RATE 1/4",
-        "PADS: RATE 1/8", "PADS: RATE 1/16", "PADS: RATE 1/3", "PADS: RATE 1/6",
-        "PADS: RATE 1/12", "PADS: RATE 1/24"};
-    return labels[division_pad_index()];
-}
-/* Free Play bottom row: pads 9-12 pick the wobble SHAPE (control 11: TRI, DOWN,
- * UP, SQR); pads 13-16 are empty: dark, and a press does nothing. */
-enum { DIVISION_SHAPE_PADS = 4 };
-static int division_shape_index(void)
-{
-#if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    int v = pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_SHAPE));
-    return v < 0 ? 0 : v > 127 ? 3 : (v * 3 + 63) / 127;
-#else
-    return 0;
-#endif
-}
-static void division_pad_input(void)
-{
-    int owner = division_pad_owner();
-    int pad = plat_division_pad((unsigned)owner);
-#if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    if (owner && pad >= 0 && pad < 8) {
-        pref_set(PR(R_ENG, T_303, owner - 1, ORIGINAL_MIAMI_WOBBLE_RATE), (pad * 127 + 3) / 7);
-        mark_dirty(); ui.act_t = plat_ms();
-        say("WOBBLE ", division_pad_label() + 11);
-    } else if (owner && pad >= 8 && pad < 8 + DIVISION_SHAPE_PADS) {
-        static const char *const shape[DIVISION_SHAPE_PADS] = {"SHAPE TRI","SHAPE DOWN","SHAPE UP","SHAPE SQR"};
-        pref_set(PR(R_ENG, T_303, owner - 1, ORIGINAL_MIAMI_WOBBLE_SHAPE), ((pad - 8) * 127 + 1) / 3);
-        mark_dirty(); ui.act_t = plat_ms();
-        say("WOBBLE ", shape[pad - 8]);
-    }   /* pads 13-16: empty, nothing */
-#else
-    (void)pad;
-#endif
-}
-
-/* 37 physical identities, not indices into the legacy 27-key tables. */
-typedef struct {
-    uint8_t pitch[37],velocity[37],accent[37],down[37],order[37],n;
-    uint64_t suppressed;
-} ui_live_keys_t;
-static ui_live_keys_t live_keys[NBASS] X0X_POOL;
-static plat_outer_event_t live_outer[32] X0X_POOL;
-static uint32_t live_epoch=1,live_generation,live_context,live_wait_generation[NBASS],live_intent_generation[NBASS];
-static int8_t live_owner=-1,live_octave,live_arp;
-static uint8_t live_wait,live_intent;
-static unsigned live_token(unsigned physical)
-{ return physical>=5 && physical<32?physical-4:physical<5?physical+28:physical+1; }
-int ui_live_key_owner(void)
-{
-#if BOARD_SMK37 || defined(X0X_HOST)
-    /* Synth pages keep the keybed: a settings list or HELP on top of SEQ/EDIT
-     * does not take the piano keys. Only a question (O_ASK) waits for an answer. */
-    if(project_busy || perf_testing() || ui.rec || ui.overlay==O_ASK ||
-       (ui.btn&((1u<<B_HOME)|(1u<<B_SAVE))) || (ui.view!=V_SEQ && ui.view!=V_PART) ||
-       !is_303() || (!ui.freeplay[bidx()] && ui.view!=V_PART))return 0; /* EDIT plays (kbd_on): all 37 keys */
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-    if(smk_clip_mode_on() || smc_ui_active())return 0;
-#if X0X_DEV_PADCAL
-    extern uint8_t smk_padcal_on(void);if(smk_padcal_on())return 0;
-#endif
-#endif
-    return bidx()+1;
-#else
-    return 0;
-#endif
-}
-static void ui_live_cancel_voice(int b)
-{
-    if((unsigned)b>=NBASS || (!live_keys[b].n && !(live_intent&(1u<<b))))return;
-    int arp;engine_live_key_state(b,&live_wait_generation[b],&arp,0);
-    engine_live_key_cancel(b);live_wait|=(uint8_t)(1u<<b);live_intent&=(uint8_t)~(1u<<b);
-    uint64_t held=plat_physical_keys();
-    memset(&live_keys[b],0,sizeof live_keys[b]);live_keys[b].suppressed=held;
-    kbd_held_note[b]=kbd_held_key[b]=kbd_arp_n[b]=bass_rec_step[b]=0;
-}
-static int live_send(int b,unsigned physical,int on,int slide)
-{
-    ui_live_keys_t *k=&live_keys[b];
-    if(engine_live_key(b,live_generation,(int)live_token(physical),k->pitch[physical],
-        on?k->velocity[physical]:0,k->accent[physical],slide)) {
-        if(on){live_intent|=(uint8_t)(1u<<b);live_intent_generation[b]=live_generation;k->down[physical]=2;}
-        return 1;
-    }
-    ui_live_cancel_voice(b);return 0;
-}
-static void live_edge(unsigned physical,int velocity,int pitch)
-{
-    if(physical>=37)return;
-    uint64_t bit=(uint64_t)1u<<physical;
-    if(!velocity)for(int b=0;b<NBASS;b++)live_keys[b].suppressed&=~bit;
-    if(live_owner<0 || (live_wait&(1u<<live_owner)))return;
-    int b=live_owner;ui_live_keys_t *k=&live_keys[b];
-    int owns=(live_intent&(1u<<b)) && live_intent_generation[b]==live_generation;
-    if(velocity) {
-        if(k->down[physical] || (k->suppressed&bit))return;
-        if(k->n>=UI_BASS_HELD_MAX){k->suppressed|=bit;return;}
-        k->pitch[physical]=(uint8_t)pitch;k->velocity[physical]=(uint8_t)velocity;
-        k->accent[physical]=(uint8_t)!!(ui.btn&(1u<<B_ENV));k->down[physical]=1;
-        unsigned old=k->n;k->order[k->n++]=(uint8_t)physical;
-        (void)old;
-        if (!live_send(b, physical, 1, 0)) return;
-    } else {
-        if(!k->down[physical])return;
-        unsigned i=0;while(i<k->n && k->order[i]!=physical)i++;
-        int latest=i+1==k->n,active=k->down[physical]==2;k->down[physical]=0;
-        if(i<k->n){for(unsigned j=i+1;j<k->n;j++)k->order[j-1]=k->order[j];k->n--;}
-        (void)latest;
-        if (owns && active && !live_send(b, physical, 0, 0)) return;
-    }
-    if(k->n){unsigned last=k->order[k->n-1];kbd_held_note[b]=k->pitch[last];kbd_held_key[b]=(uint8_t)live_token(last);}
-    else kbd_held_note[b]=kbd_held_key[b]=0;
-    bass_rec_step[b]=0;
-}
-static void live_reconcile(uint64_t physical)
-{
-    for(int b=0;b<NBASS;b++)live_keys[b].suppressed&=physical;
-    if(live_owner>=0) {
-        ui_live_keys_t *k=&live_keys[live_owner];
-        int last=k->n?k->order[k->n-1]:-1;
-        /* Remove missing older keys first: fallback must never transiently
-         * resurrect another key already released in this same snapshot. */
-        for(unsigned p=0;p<37;p++)if((int)p!=last && k->down[p] && !(physical&((uint64_t)1u<<p)))live_edge(p,0,0);
-        if(last>=0 && k->down[last] && !(physical&((uint64_t)1u<<last)))live_edge((unsigned)last,0,0);
-    }
-}
-/* Entry precedes controls; exit cuts off old publication on any context edit.
- * Every input-only and early-return path passes through this wrapper boundary. */
-static void live_boundary(int entry)
-{
-    int owner=ui_live_key_owner()-1,arp=0;uint32_t generation=0,context=0;
-    if(owner>=0) {
-        engine_live_key_state(owner,&generation,&arp,&context);
-        if(arp<0)owner=-1; /* exhausted capability serial: no admission until cold boot */
-        if(owner>=0 && (live_wait&(1u<<owner)) && generation!=live_wait_generation[owner])live_wait&=(uint8_t)~(1u<<owner);
-    }
-    int changed=owner!=live_owner || (owner>=0 && (context!=live_context || arp!=live_arp));
-    int gate_changed=owner>=0 && generation!=live_generation;
-    int pitch_changed=ui.oct!=live_octave,overflow=0,n;
-    uint64_t physical;
-    if(changed) {
-        /* Revoke the old physical keys before discarding their inventory.
-         * A changed serial is not proof that their Note Off was consumed. */
-        if(live_owner>=0) ui_live_cancel_voice(live_owner);
-        live_owner=(int8_t)owner;live_context=context;live_arp=(int8_t)arp;
-    }
-    if(gate_changed && owner>=0 && !changed) ui_live_cancel_voice(owner);
-    live_generation=generation;
-    if(changed || pitch_changed || gate_changed) {
-        live_epoch++;if(!live_epoch)live_epoch=1;
-        plat_outer_keys(live_outer,&physical,&overflow,live_epoch,owner>=0,ui.oct,1);
-        live_octave=ui.oct;
-        if(owner>=0) {
-            for(unsigned p=0;p<37;p++)if(!live_keys[owner].down[p] && (physical&((uint64_t)1u<<p)))
-                live_keys[owner].suppressed|=(uint64_t)1u<<p;
-        }
-        live_reconcile(physical);return;
-    }
-    if(!entry)return;
-    n=plat_outer_keys(live_outer,&physical,&overflow,live_epoch,owner>=0,ui.oct,0);
-    if(overflow) {
-        if(owner>=0)ui_live_cancel_voice(owner);
-        live_epoch++;if(!live_epoch)live_epoch=1;
-        plat_outer_keys(live_outer,&physical,&overflow,live_epoch,owner>=0,ui.oct,1);
-        return;
-    }
-    for(int i=0;i<n;i++)if(owner>=0 && live_outer[i].generation==live_epoch) {
-        unsigned w=live_outer[i].word;live_edge(w&127u,(int)((w>>7)&127u),(int)((w>>14)&127u));
-    }
-    live_reconcile(physical);
-}
-/* Only physical keybed edges enter this route; legacy pad-note aliases retain
- * their existing path. Outer tokens never enter KEY_BLACK or central bitmaps. */
-static int live_central_event(int key,int down)
-{
-    unsigned p=(unsigned)key+5;uint64_t bit=(uint64_t)1u<<p;
-    uint64_t physical=plat_physical_keys();
-    if(down && !(physical&bit))return 0;
-    live_boundary(0);
-    /* A legacy pad/key press accepted before Free Play still owns its original
-     * release. It was never admitted into the new physical-key registry. */
-    if(!down)for(int b=0;b<NBASS;b++)if(!live_keys[b].down[p] && !live_keys[b].n) {
-        int legacy=kbd_held_key[b]==key+1;
-        for(unsigned i=0;i<kbd_arp_n[b];i++)legacy|=kbd_arp_key[b][i]==key+1;
-        if(legacy){live_keys[b].suppressed&=~bit;return 0;}
-    }
-    for(int b=0;b<NBASS;b++)if(live_keys[b].suppressed&bit) {
-        if(!down)live_keys[b].suppressed&=~bit;
-        return 1;
-    }
-    if(live_owner<0)return 0;
-    live_edge(p,down?plat_key_velocity(key):0,kbd_note(key));return 1;
-}
-
-
-X0X_COLD static void input_body(void)
-{
-    uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
-    unsigned panic_consume;
-    if(btn!=ui.btn || keys!=ui.keys)bass_layout_accept();
-#if X0X_BASS_PRESET_PREVIEW
-    static int observed_bank[NBASS]={-1,-1};
-    for(int v=0;v<NBASS;v++) if(observed_bank[v]!=engine_bass_bank(v)) {
-        observed_bank[v]=engine_bass_bank(v);build_pages();
-        if (!(bass_layout_pending_mask & (1u<<v)) && ui.view == V_PART && ui.overlay == O_LIST && is_303() && v == bidx()) open_list_of_pages();
-    }
-#endif
-    uint8_t revision = project_revision;
-    int e;
-    if (project_busy) {
-        project_input_sync();
-#if BOARD_SMK37
-        smc_poll();                                  /* discard controller events while the project is locked */
-#endif
-        return;
-    }
-    if (seq.rec_dirty) { seq.rec_dirty = 0; mark_dirty(); ui.act_t = plat_ms(); }
-    if (seq.rec_refused) {
-        say(seq.rec_refused==3?"CHORD NOT SAVED":seq.rec_refused==2?"NOTE SOUND NOT SAVED":"REC NEEDS FWD/REV",0);
-        seq.rec_refused=0;
-    }
-    seq.rec_mask = ui.rec && is_303() && ui.view == V_SEQ && ui.overlay == O_NONE ?
-                   (uint8_t)(1u << bidx()) : 0;
-    seq.rec_ext_mask = ui.rec && ui.overlay != O_ASK ? (uint8_t)((1u << NBASS) - 1u) : 0;
-    seq.rec_hold_mask = ui.rec && is_303() && ui.view == V_PART && ui.overlay == O_NONE ?
-                        (uint8_t)(1u << bidx()) : 0;
-    for (i = 0; i < NBASS; i++)
-        if (!ui.rec || !kbd_held_note[i] || ui.part != PART_303A + i ||
-            bass_rec_pat[i] != seq.ppat[PART_303A + i] || bass_rec_playing[i] != seq.playing)
-            bass_rec_step[i] = 0;
-    if (ui.held_step >= 0 && (ui.part != ui.held_step_part || seq.ppat[ui.part] != ui.held_step_pat))
-        bass_step_cancel();                            /* playback or a cue changed the pattern under the key */
-    if (ui.brk_held >= 0 && (ui.part != PART_BRK || ui.hold_pat != seq.ppat[PART_BRK]))
-        break_step_cancel();                           /* a stale key must not edit the newly adopted pattern */
-#if BOARD_SMK37
-    smc_poll();
-    if (revision != project_revision)
-        return;
-#endif
-#if BOARD_SMK37
-    extern uint8_t smk_clip_transport_button(uint8_t button, uint8_t pressed);
-    extern uint8_t smk_clip_history_button(uint8_t button, uint8_t pressed, uint8_t patch_held);
-    extern void smk_play_note_button(uint8_t pressed, uint8_t home_held);
-#endif
-    ch = btn ^ ui.btn;
-    panic_consume = keyboard_panic(btn, ch);
-#if BOARD_SMK37
-    if (ch || keys != ui.keys)
-        smc_ui_cancel();
-#endif
-    for (i = 0; i < NB; i++) {
-        uint32_t m = 1u << i;
-        if (!(ch & m))
-            continue;
-        /* PANIC_CONSUME */
-        if ((i == B_FX || i == B_SEQ) && panic_consume) {
-            if (btn & m) {
-                any_button = 1;
-                ui.down_t[i] = plat_ms();
-                ui.btn_used |= m;
-            } else
-                ui.btn_used &= ~m;
-            if (revision != project_revision)
-                return;
-            continue;
-        }
-#if BOARD_SMK37
-        if ((i == B_PLAY || i == B_REC) &&
-            smk_clip_history_button((uint8_t)i, (uint8_t)((btn & m) != 0u), (uint8_t)((btn >> B_HOME) & 1u))) {
-            if (btn & m) {
-                ui.btn_used |= m | 1u << B_HOME;   /* PATCH release does not change the X0X view */
-            } else {
-                ui.btn_used &= ~m;
-            }
-            continue;
-        }
-        if ((i == B_PLAY || i == B_REC) && smk_clip_transport_button((uint8_t)i, (uint8_t)((btn & m) != 0u))) {
-            if (btn & m)
-                ui.btn_used |= m;
-            else
-                ui.btn_used &= ~m;
-            continue;
-        }
-        if (i == B_PLAY)                               /* outside clip mode: also the PLAY note (MID-14) */
-            smk_play_note_button((uint8_t)((btn & m) != 0u), (uint8_t)((btn >> B_HOME) & 1u));
-#endif
-        if (btn & m) {
-            any_button = 1;
-            ui.btn_used &= ~m;
-            ui.down_t[i] = plat_ms();
-            if (i == B_REC || i == B_PLAY)             /* transport acts on the press: timing */
-                button_tap((int)i);
-        } else if (!(ui.btn_used & m) && i != B_REC && i != B_PLAY) {
-            button_tap((int)i);
-        }
-        if (revision != project_revision)
-            return;                                  /* discard the remainder of the old project's input frame */
-    }
-    if (btn || keys || btn != ui.btn || keys != ui.keys)
-        ui.act_t = plat_ms();                         /* held or changed: being played */
-    copy_tick(btn, keys);
-    help_tick(btn, keys);
-    ui.btn = btn;
-    ch = keys ^ ui.keys;
-    ui.keys = keys;
-    /* Drop an armed pad when GLOBE is up or the page changed. A question keeps
-     * the arm: the source slots are already stored, and a release during the
-     * question must not clear. The next press checks that the source is held. */
-    if (!(btn & (1u << B_GLO)) || ui.view != V_HOME)
-        globe_part_reset();
-    glo_key_edges = ch;
-    for (i = 0; i < NKEYS; i++)
-        if (ch & (1u << i))
-            key_event((int)i, (keys >> i) & 1u);
-    build_pages();
-    if (!seq.playing)                                  /* PLAY plays what is on screen: the song on SONG, */
-        seq.song_on = ui.view == V_SONG;               /* else the patterns; playing, it keeps going */
-    seq.song_rec = (uint8_t)(seq.song_on && ui.rec);  /* the song + REC: the song is being written */
-    if (ui.overlay == O_ASK) {                         /* a question: the knobs wait */
-        for (i = 0; i < NE; i++)
-            enc((int)i);
-        return;
-    }
-    if (perf_testing()) {                              /* the test owns the knobs too */
-        for (i = 0; i < NE; i++)
-            enc((int)i);
-        return;
-    }
-    if ((e = enc(EN_SELECT)) != 0) {             /* SELECT: move; with HOME held: tempo */
-        if (held_any_step() >= 0 && !(ui.btn & (1u << B_HOME))) {
-            prob_turn(e);                             /* a step held: its chance */
-        } else if (ui.btn & (1u << B_HOME)) {
-            float bpm = seq.bpm + (float)accel(EN_SELECT, e, 200);
-            seq.bpm = bpm < 20.0f ? 20.0f : bpm > 275.0f ? 275.0f : bpm;
-            ui.btn_used |= 1u << B_HOME;
-            ui.touched = 4;
-            ui.touch_until = plat_ms() + 900u;
-            mark_dirty();
-        } else if (ui.overlay == O_LIST) {
-            list_move(e > 0 ? 1 : -1);
-        } else {
-            int p = cur_page() + (e > 0 ? 1 : -1);
-            if (ui.view == V_MIX || ui.view == V_FX ||
-                (ui.view == V_PART && (is_drum() || is_303()))) /* #63 safe browsing. */
-                *page_of(ui.view) = (uint8_t)(p < 0 ? pg.n-1 : p >= pg.n ? 0 : p);
-            else
-                *page_of(ui.view) = (uint8_t)(p < 0 ? 0 : p >= pg.n ? pg.n - 1 : p);
-        }
-    }
-    if ((e = enc(EN_ALGO)) != 0) {               /* ALGORITHM: part, or held 303 step's velocity */
-        if (ui.overlay == O_LIST) {
-            turn_ref(list_rows[ui.list_sel], e, EN_ALGO);
-        } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
-            bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
-            int v = (int)bstep_velocity(st) + e;
-            st->velocity = (uint8_t)(v < 1 ? 1 : v > 127 ? 127 : v);
-            ui.step_edited = 1;
-            mark_dirty();
-            if (ui.step_preview) {
-                bpart_t *bp = &cur_pat()->bass[bidx()];
-                engine_bass_on_velocity(bidx(), st->note + bp->transpose - 24,
-                                        (st->flags & BS_ACCENT) != 0, 1, st->velocity);
-            }
-        } else {
-            int p = part_neighbor(ui.part, e > 0 ? 1 : -1);
-            if (p != ui.part) {
-                bass_step_cancel();
-                drum_step_cancel();
-                break_step_cancel();
-            }
-            ui.part = (uint8_t)p;
-            if (ui.view == V_GEN && !is_303())         /* TB-3PO is a 303's */
-                set_view(V_PART);
-            ui.outline_ok = 0;
-            build_pages();
-            if (ui.view == V_MIX) {                   /* MIX follows: a drum machine's tracks, else that part on PARTS */
-                int k;
-                ui.mixsel = ui.part;
-                build_pages();
-                for (k = 0; k < pg.n; k++)
-                    if (is_drum() ? pg.title[k][0] == PART_N[ui.part][0] && pg.title[k][4] == 'M' : !k)
-                        *page_of(V_MIX) = (uint8_t)k;
-            }
-        }
-    }
-    if ((e = enc(EN_PRESET)) != 0) {             /* PRESETS: a part's screen, that part; else all five */
-#if X0X_BASS_PRESET_PREVIEW
-        if(ui.view==V_PART && is_303() && pg.r[cur_page()][0].kind==R_BENGINE) {
-            pref_t r=PR(R_BPRESET,0,bidx(),0); pref_set(r,pref_get(r)+(e>0?1:-1));
-        } else
-#endif
-        {
-        int part = part_view() ? ui.part : PART_909, c = seq_cue_of(&seq, part);
-        int p = (c >= 0 ? c : seq.ppat[part]) + (e > 0 ? 1 : -1);
-        p = p < 0 ? 0 : p >= NPAT ? NPAT - 1 : p;
-        seq_chain(&seq, 0, 0);
-        if (part_view())
-            seq_cue_part(&seq, part, p);
-        else
-            seq_cue(&seq, p);
-        ui.pbank = (uint8_t)(p / 16);                 /* HOME shows the bank it is in */
-        }
-    }
-    for (i = 0; i < 4; i++) {
-        if ((e = enc(EN_K1 + (int)i)) == 0)
-            continue;
-        if (lock_step() >= 0) {                         /* EDIT, a step held: its p-lock */
-#if X0X_BASS_PRESET_PREVIEW
-            int bass_edit = is_303();
-            if (bass_edit) {
-                engine_bass_edit_hold(1);
-                /* A bank may have committed since input() refreshed pg.
-                 * Do not reinterpret this detent's old page in the new bank.
-                 * The next input pass rebuilds it before accepting an edit. */
-                if (observed_bank[bidx()] != engine_bass_bank(bidx())) {
-                    engine_bass_edit_hold(0);
-                    continue;
-                }
-            }
-#endif
-            lock_turn(pg.r[cur_page()][i], e, EN_K1 + (int)i);
-#if X0X_BASS_PRESET_PREVIEW
-            if (bass_edit) engine_bass_edit_hold(0);
-#endif
-            continue;
-        }
-        if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {     /* SEQ, a held step's knobs edit it */
-            bpart_t *bp = &cur_pat()->bass[bidx()];
-            bstep_t *st = &bp->step[ui.held_step];
-            ui.step_edited = 1;
-            mark_dirty();
-            if (i == 0) {
-                held_note_by(e);
-            } else if (i == 1) {
-                st->flags = (uint8_t)((st->flags & (BS_ACCENT | BS_SLIDE)) | (bstep_gate(st) + (e > 0 ? 1 : 2)) % 3);
-            } else if (i == 2) {
-                st->flags ^= BS_ACCENT;
-            } else {
-                st->flags ^= BS_SLIDE;
-            }
-            continue;
-        }
-        if (ui.btn & (1u << B_SAVE)) {                  /* SAVE + knob: forget that knob's motion */
-            ui.btn_used |= 1u << B_SAVE;
-            engine_bass_edit_hold(1);
-            if (original_ref_current(pg.r[cur_page()][i])) motion_forget(pg.r[cur_page()][i]);
-            engine_bass_edit_hold(0);
-            continue;
-        }
-        turn_ref(pg.r[cur_page()][i], e, EN_K1 + (int)i);
-        ui.touched = (int8_t)i;
-        ui.touch_until = plat_ms() + 900u;
-        {
-            pref_t r = pg.r[cur_page()][i];
-            ui.touch_view = ui.view; ui.touch_part = ui.part; ui.touch_page = (uint8_t)cur_page();
-            ui.touch_kind = r.kind; ui.touch_a = r.a; ui.touch_b = r.b; ui.touch_c = r.c;
-        }
-    }
-}
-
-static void input(void)
-{
-    live_boundary(1);
-    input_body();
-    seq.rec_ext_mask = ui.rec && !project_busy && ui.overlay != O_ASK ? (uint8_t)((1u << NBASS) - 1u) : 0;
-    live_boundary(0);
-}
-
-/* ================================================================== drawing === */
-#define HDR_H 20
-#define MAIN_Y 20
-#define BAND_H 69                     /* the main area: two bands of 69 (the knob row takes the 6 below) */
-#define KNOB_Y 158
-#define KNOB_H 82
-/* gfx.c sizes the one screen strip (CV_ROWS) to this main area. The unity
- * build sees that macro; a host file that compiles ui.c alone does not. */
-#ifdef CV_ROWS
-_Static_assert(2u * BAND_H <= CV_ROWS, "main area taller than the screen strip");
-_Static_assert(KNOB_H <= CV_ROWS, "knob row taller than the screen strip");
-_Static_assert(HDR_H <= CV_ROWS, "header taller than the screen strip");
-_Static_assert(HDR_H + 2u * BAND_H + KNOB_H == 240u, "the three strips must tile the 240-row panel");
-#endif
-
-#include "lcd_tiles.h"
-/* Dirty-tile DMA uses a dedicated, bounded .bss buffer. Full-row DMA
- * reads the untouched canvas until lcd_sync. Pool capacity is unchanged (0.0.24.1 has only 136 bytes above its pool gate).
- * 48 x 16 x RGB565 = 1536 bytes, 1.024 ms at the SMK-37's 12 MHz SPI. */
-static uint16_t cv_lcd_txbuf[X0X_LCD_MAX_DMA_BYTES / 2u];
-static uint32_t blit_hash[4];
-static uint8_t part_header_snapshot_valid;
-static uint8_t cv_tile_valid[4];
-static uint32_t cv_hash(void)
-{
-    uint32_t i, h = 2166136261u, n = cv_w * cv_h;
-    for (i = 0; i < n; i++)
-        h = (h ^ cv_px[i]) * 16777619u;
-    return h ^ (cv_w << 16) ^ cv_h;
-}
-#if BOARD_SMK37 && !defined(X0X_HOST)
-void smk_ck_poll(void);                     /* clip keybed's MIDI note/arp service in main_fm1.c */
-#endif
-static void cv_lcd_input(void)
-{
-#if X0X_LCD_TRACE
-    lcd_trace_dispatch();
-#endif
-    input();                                /* exact normal key/MIDI input path, preserving queue order */
-    division_pad_input();
-#if BOARD_SMK37 && !defined(X0X_HOST)
-    smk_ck_poll();                          /* clip-mode notes must not wait for the screen */
-#endif
-}
-/* At most one normal foreground dispatch per hardware millisecond.
- * The timer interrupt continues changing plat_ms during each bounded DMA. */
-static void cv_lcd_maybe_input(void)
-{
-    static uint32_t last_ms = UINT32_MAX;
-    const uint32_t now = plat_ms();
-    if (last_ms != now) {
-        last_ms = now;
-        cv_lcd_input();
-    }
-}
-typedef struct { uint32_t x, y; } cv_lcd_pos_t;
-static void cv_lcd_emit(void *context, const uint16_t *px, uint32_t stride,
-                         uint32_t x, uint32_t y, uint32_t w, uint32_t h)
-{
-    const cv_lcd_pos_t *pos = (const cv_lcd_pos_t *)context;
-    /* The previous DMA can still read cv_lcd_txbuf: never overwrite it early.
-     * This wait is bounded by the previous <=1536-byte pixel transfer. */
-    lcd_sync();
-    x0x_lcd_tile_pack(cv_lcd_txbuf, px, stride, x, y, w, h);
-    lcd_blit(pos->x + x, pos->y + y, w, h, cv_lcd_txbuf);
-    cv_lcd_maybe_input();
-}
-/* A whole-strip repaint already has contiguous full-width rows in cv_px.
- * DMA can read directly from that canvas without packing or an extra copy:
- * the next cv_begin() calls lcd_sync() before it writes to the canvas. */
-static void cv_lcd_full(uint32_t x, uint32_t y)
-{
-    if (!cv_w) return;
-    const uint32_t rows_per_dma = X0X_LCD_MAX_DMA_BYTES / (2u * cv_w);
-    for (uint32_t row = 0; row < cv_h; row += rows_per_dma) {
-        const uint32_t h = cv_h - row < rows_per_dma ? cv_h - row : rows_per_dma;
-        lcd_blit(x, y + row, cv_w, h, cv_px + row * cv_w);
-        cv_lcd_maybe_input();
-    }
-}
-static void cv_commit(int region, uint32_t x, uint32_t y)
-{
-    if (region == 0) part_header_snapshot_valid = 0;
-    uint32_t h = cv_hash();
-    if (h != blit_hash[region]) {
-        blit_hash[region] = h;
-        cv_tile_valid[region] = 0;          /* next tiled owner must repaint after a whole-strip owner */
-        cv_lcd_full(x, y);
-    }
-}
-
-/* Hash 16x16 tiles, not the cross product of all changed rows and columns.
- * Adjacent changed tiles are grouped up to 48 pixels wide. Scattered playheads
- * stay separate, and no single display operation blocks input for a whole strip. */
-#define MAIN_ROWS (2 * BAND_H)
-#define KNOB_ROWS KNOB_H
-#define LCD_TILE_ROWS(n) (((n) + X0X_LCD_TILE_H - 1u) / X0X_LCD_TILE_H)
-static uint32_t main_tileh[LCD_TILE_ROWS(MAIN_ROWS) * X0X_LCD_TILE_COLS];
-static uint32_t knob_tileh[LCD_TILE_ROWS(KNOB_ROWS) * X0X_LCD_TILE_COLS];
-static uint32_t header_tileh[LCD_TILE_ROWS(HDR_H) * X0X_LCD_TILE_COLS];
-static uint32_t header_full_hash, popup_knob_full_hash;
-static void cv_commit_rows(int region, uint32_t x, uint32_t y,
-                           uint32_t rows, uint32_t *hashes)
-{
-    cv_lcd_pos_t pos = {x, y};
-    int force = !blit_hash[region] || !cv_tile_valid[region];
-    blit_hash[region] = 1u;
-    cv_tile_valid[region] = 1u;
-    x0x_lcd_tile_commit(cv_px, rows, hashes, force, cv_lcd_emit, &pos);
-}
-static void cv_commit_rect(int region, uint32_t x, uint32_t y)
-{
-    cv_commit_rows(region, x, y, MAIN_ROWS, main_tileh);
-}
-static void cv_commit_knobs(int region)
-{
-    cv_commit_rows(region, 0, KNOB_Y, KNOB_ROWS, knob_tileh);
-}
-
-/* Full-band changes need no per-tile pixel packing. Send the same pixels
- * via 0.0.24.3's <=1,536-byte full-row DMA chunks and initialize the tile
- * hashes so the very next small change stays a dirty-tile update. */
-static void cv_commit_full_with_tiles(int region, uint32_t x, uint32_t y,
-                                      uint32_t rows, uint32_t *hashes)
-{
-    for (uint32_t row = 0; row < rows; row += X0X_LCD_TILE_H) {
-        uint32_t h = rows - row < X0X_LCD_TILE_H ? rows - row : X0X_LCD_TILE_H;
-        for (uint32_t col = 0; col < X0X_LCD_TILE_COLS; ++col)
-            hashes[(row / X0X_LCD_TILE_H) * X0X_LCD_TILE_COLS + col] =
-                x0x_lcd_tile_hash(cv_px, X0X_LCD_WIDTH,
-                                  col * X0X_LCD_TILE_W, row, h);
-    }
-    blit_hash[region] = 1u;
-    cv_tile_valid[region] = 1u;
-    cv_lcd_full(x, y);
-}
-
-/* Tiny beat, cue and status changes use dirty header tiles. Unchanged frames
- * pay only the same single whole-band hash as 0.0.24.3. */
-static void cv_commit_header(void)
-{
-    part_header_snapshot_valid = 0;
-    if (!blit_hash[0] || !cv_tile_valid[0]) {
-        /* Cold full-band transfer already computes all tile hashes. Avoid
-         * hashing the full canvas twice; learn its full hash next frame. */
-        cv_commit_full_with_tiles(0, 0, 0, HDR_H, header_tileh);
-        header_full_hash = 0;
-        return;
-    }
-    uint32_t h = cv_hash();
-    if (h == header_full_hash) return;
-    cv_commit_rows(0, 0, 0, HDR_H, header_tileh);
-    header_full_hash = h;
-}
-
-/* SMC details use small dirty tiles after a full redraw; the separate popup
- * full hash avoids repeated descriptor-band work in a stable frame. */
-static void cv_commit_popup_knobs(void)
-{
-    if (!blit_hash[3] || !cv_tile_valid[3]) {
-        /* First popup redraw uses the established tile hashes for the whole
-         * strip. Defer its duplicate full-canvas hash until the next frame. */
-        cv_commit_full_with_tiles(3, 0, KNOB_Y, KNOB_ROWS, knob_tileh);
-        popup_knob_full_hash = 0;
-        return;
-    }
-    uint32_t h = cv_hash();
-    if (h == popup_knob_full_hash) return;
-    cv_commit_knobs(3);
-    popup_knob_full_hash = h;
-}
-
-static uint16_t blend(uint16_t a, uint16_t b, int t)  /* a..b, t of 16 */
-{
-    int r = ((a >> 11) * (16 - t) + (b >> 11) * t) >> 4, g = (((a >> 5) & 63) * (16 - t) + ((b >> 5) & 63) * t) >> 4,
-        bl = ((a & 31) * (16 - t) + (b & 31) * t) >> 4;
-    return (uint16_t)((r << 11) | (g << 5) | bl);
-}
-static uint16_t part_col(void) { return PART_COL[ui.part]; }
-static uint16_t matrix_col(void)
-{
-    return is_303()?(ui_theme_light?RGB(40,104,30):RGB(164,235,141)):part_col();
-}
-
-/* Owner-approved Chicago second screen only; not a global theme or setting.
- * The first four rows and Miami's OUTPUT/DAMPER controls keep their layout. */
-static int matrix_three_rows(void)
-{
-    return 0; /* Original pages keep four rows per bank. */
-    return ui.view==V_PART && is_303() && cur_page()>=4 && pg.n==7 &&
-           pg.r[4][0].kind==R_ENG && pg.r[4][0].c==CHI_ARP_SWITCH &&
-           pg.r[6][0].kind==R_BENGINE;
-}
-#define SOUND_BASE UI_N_BASE
-#define SOUND_FACE UI_N_FACE
-#define SOUND_EDGE UI_N_EDGE
-#define SOUND_SIDE UI_N_SIDE
-#define SOUND_SELECT UI_N_SELECT
-#define SOUND_SELECT_EDGE UI_N_SELECT_EDGE
-#define SOUND_SELECT_SIDE UI_N_SELECT_SIDE
-#define SOUND_INK UI_N_INK
-#define SOUND_WHITE UI_N_WHITE
-#define SOUND_GRAY UI_N_GRAY
-#define SOUND_DIM UI_N_DIM
-#define SOUND_LINE UI_N_LINE
-#define SOUND_GREEN UI_N_ACCENT
-#define SOUND_AMBER UI_N_AMBER
-
-static uint16_t dim(uint16_t c, int t) { return blend(C_BLACK, c, t); }
-
-static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f, s); }
-
-/* a font's capital line: the first and last rows of 'H' (rounded half coverage), measured
- * once from the glyph bitmap, so text is centred on what the eye sees rather than on the
- * font's cell (which differs per face and size) */
-typedef struct { const felucca_font_t *f; int8_t top, bot; } capm_t;
-static capm_t capm[6];
-static const capm_t *caps(const felucca_font_t *f)
-{
-    int i;
-    for (i = 0; i < 6 && capm[i].f; i++)
-        if (capm[i].f == f)
-            return &capm[i];
-    if (i == 6)
-        i = 5;
-    {
-        uint32_t gi = ((uint32_t)'H' <= f->last ? 'H' : '0') - f->first, w = font_bitmap_width(f, gi), bpr = (w + 1u) / 2u, x, y;
-        const uint8_t *gd = f->data + f->off[gi];
-        int top = -1, bot = 0;
-        for (y = 0; y < f->h; y++)
-            for (x = 0; x < w; x++) {
-                uint32_t a = gd[y * bpr + x / 2u];
-                a = (x & 1u) ? (a & 15u) : (a >> 4);
-                if (a >= 8u) {
-                    if (top < 0)
-                        top = (int)y;
-                    bot = (int)y;
-                }
-            }
-        capm[i].f = f;
-        capm[i].top = (int8_t)(top < 0 ? 0 : top);
-        capm[i].bot = (int8_t)bot;
-    }
-    return &capm[i];
-}
-/* parts of a line ("A 909 GR", "B 909 FL") with a real gap between them: a proportional face's
- * space is too narrow to separate them. A NULL ends the list. */
-static int32_t segs(int32_t x, int32_t y, const felucca_font_t *f, uint16_t c, int32_t gap, const char *a,
-                    const char *b, const char *d, const char *e)
-{
-    const char *p[4] = {a, b, d, e};
-    int i;
-    for (i = 0; i < 4 && p[i]; i++)
-        x = cv_text(x, y, f, p[i], c) + gap;
-    return x;
-}
-
-/* the y to draw f at so its capitals sit centred in [y0, y0 + h) */
-static int32_t vc(const felucca_font_t *f, int32_t y0, int32_t h)
-{
-    const capm_t *m = caps(f);
-    int32_t ch = m->bot - m->top + 1;
-    return y0 + (h - ch + 1) / 2 - m->top;
-}
-/* the y to draw g at so its baseline matches f drawn at y */
-static int32_t base_y(const felucca_font_t *f, int32_t y, const felucca_font_t *g)
-{
-    return y + caps(f)->bot - caps(g)->bot;
-}
-static void text_c(int32_t cx, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)
-{
-    cv_text(cx - tw(f, s) / 2, y, f, s, c);
-}
-static void text_r(int32_t rx, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)
-{
-    cv_text(rx - tw(f, s), y, f, s, c);
-}
-
-/* ---- anti-aliased shapes. Coverage is 0..16; a pixel is blended over what is there. ---- */
-static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
-{
-    uint16_t *q;
-    uint32_t bg;
-    y += cv_oy;
-    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
-        return;
-    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
-    if (a >= 16u) {
-        *q = swap16(c);
-        return;
-    }
-    bg = swap16(*q);
-    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
-                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
-                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
-}
-
-#include "ui_glyph_renderer.h"
-
-/* corner coverage of a radius-r quarter circle, pixel (x, y) of the r x r corner square,
- * 4 x 4 supersampled; and of its 1-px ring (for outlines). Constant data in flash, packed: the
- * r x r square of radius r starts at CORNER_OFF[r]. The values are those that the old start-up
- * loop (corners_init) calculated, to the byte. */
-#define RMAX 8
-static const uint8_t CORNER_OFF[RMAX + 1] = {0, 0, 1, 5, 14, 30, 55, 91, 140};
-/* Lossless nibble encoding: coverage 8 is absent, so nibble 8 encodes 16.
- * FILL's 204 values precede RING's 204 values. Every other coverage is literal. */
-static const uint8_t CORNER_PACKED[204] = {
-    0x6d, 0xff, 0x08, 0xf9, 0x89, 0xf8, 0x88, 0x30, 0x8b, 0xf3, 0x88, 0x8b, 0x88, 0x88, 0x88, 0x00,
-    0xc5, 0x08, 0x8a, 0x88, 0x85, 0x88, 0xc8, 0x88, 0x88, 0x88, 0x88, 0x08, 0x00, 0xd7, 0x08, 0xd1,
-    0x88, 0x08, 0x8d, 0x88, 0x78, 0x88, 0x88, 0xd8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x08, 0x00, 0x92,
-    0x8d, 0x00, 0xf6, 0x88, 0x08, 0x86, 0x88, 0x88, 0xf2, 0x88, 0x88, 0x98, 0x88, 0x88, 0x88, 0x8d,
-    0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x00, 0x00, 0xa3, 0x8e, 0x00, 0x91, 0x88, 0x88, 0x10, 0x8d,
-    0x88, 0x88, 0x90, 0x88, 0x88, 0x88, 0x83, 0x88, 0x88, 0x88, 0x8a, 0x88, 0x88, 0x88, 0x8e, 0x88,
-    0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x6d, 0xff, 0x03, 0xf9, 0xa9, 0xf1, 0x01, 0x30, 0x8b, 0xf3,
-    0x17, 0x7b, 0x00, 0x18, 0x00, 0x00, 0xc5, 0x08, 0xda, 0x05, 0xd5, 0x01, 0xc0, 0x05, 0x00, 0x08,
-    0x00, 0x00, 0x00, 0xd7, 0x08, 0xd1, 0x4b, 0x00, 0x6d, 0x00, 0x70, 0x0b, 0x00, 0xd0, 0x04, 0x00,
-    0x80, 0x00, 0x00, 0x00, 0x00, 0x92, 0x8d, 0x00, 0xf6, 0x39, 0x00, 0xf6, 0x03, 0x00, 0xf2, 0x03,
-    0x00, 0x90, 0x09, 0x00, 0x00, 0x3d, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa3, 0x8e,
-    0x00, 0x91, 0x7e, 0x03, 0x10, 0xad, 0x01, 0x00, 0x90, 0x0a, 0x00, 0x00, 0xe3, 0x01, 0x00, 0x00,
-    0x7a, 0x00, 0x00, 0x00, 0x3e, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00,
-};
-_Static_assert(sizeof CORNER_PACKED * 2u == 408u, "complete corner coverage table");
-static __attribute__((noinline)) uint32_t corner_coverage(uint32_t index)
-{
-    uint32_t a = (CORNER_PACKED[index >> 1] >> ((index & 1u) * 4u)) & 15u;
-    return a == 8u ? 16u : a;
-}
-#define corner_fill_at(r, j, i) corner_coverage(CORNER_OFF[r] + (uint32_t)(j) * (uint32_t)(r) + (uint32_t)(i))
-#define corner_ring_at(r, j, i) corner_coverage(204u + CORNER_OFF[r] + (uint32_t)(j) * (uint32_t)(r) + (uint32_t)(i))
-
-/* a filled rounded rectangle; r is clamped to fit */
-static void rbox(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint16_t c)
-{
-    int32_t i, j;
-    if (w <= 0 || h <= 0)
-        return;
-    if (r > w / 2)
-        r = w / 2;
-    if (r > h / 2)
-        r = h / 2;
-    if (r > RMAX)
-        r = RMAX;
-    if (r < 1) {
-        cv_rect(x, y, w, h, c);
-        return;
-    }
-    cv_rect(x + r, y, w - 2 * r, h, c);
-    cv_rect(x, y + r, r, h - 2 * r, c);
-    cv_rect(x + w - r, y + r, r, h - 2 * r, c);
-    for (j = 0; j < r; j++)
-        for (i = 0; i < r; i++) {
-            uint32_t a = corner_fill_at(r, j, i);
-            px_blend(x + i, y + j, c, a);
-            px_blend(x + w - 1 - i, y + j, c, a);
-            px_blend(x + i, y + h - 1 - j, c, a);
-            px_blend(x + w - 1 - i, y + h - 1 - j, c, a);
-        }
-}
-
-/* a 1-px rounded outline */
-static void rframe(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint16_t c)
-{
-    int32_t i, j;
-    if (r > w / 2)
-        r = w / 2;
-    if (r > h / 2)
-        r = h / 2;
-    if (r > RMAX)
-        r = RMAX;
-    if (r < 1)
-        r = 1;
-    cv_rect(x + r, y, w - 2 * r, 1, c);
-    cv_rect(x + r, y + h - 1, w - 2 * r, 1, c);
-    cv_rect(x, y + r, 1, h - 2 * r, c);
-    cv_rect(x + w - 1, y + r, 1, h - 2 * r, c);
-    for (j = 0; j < r; j++)
-        for (i = 0; i < r; i++) {
-            uint32_t a = corner_ring_at(r, j, i);
-            px_blend(x + i, y + j, c, a);
-            px_blend(x + w - 1 - i, y + j, c, a);
-            px_blend(x + i, y + h - 1 - j, c, a);
-            px_blend(x + w - 1 - i, y + h - 1 - j, c, a);
-        }
-}
-
-/* the radius that suits a box of height h: soft, never round */
-static int32_t rad_of(int32_t h) { return h >= 30 ? 6 : h >= 18 ? 4 : h >= 9 ? 3 : 2; }
-static void box(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c) { rbox(x, y, w, h, rad_of(h < w ? h : w), c); }
-static void frame(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c) { rframe(x, y, w, h, rad_of(h < w ? h : w), c); }
-
-/* an anti-aliased disc of radius r (float) at (cx, cy) */
-static void disc(float cx, float cy, float r, uint16_t c)
-{
-    int32_t x0 = (int32_t)fm_floorf(cx - r - 1.0f), x1 = (int32_t)(cx + r + 1.0f);
-    int32_t y0 = (int32_t)fm_floorf(cy - r - 1.0f), y1 = (int32_t)(cy + r + 1.0f), x, y;
-    for (y = y0; y <= y1; y++)
-        for (x = x0; x <= x1; x++) {
-            float dx = (float)x + 0.5f - cx, dy = (float)y + 0.5f - cy, d = fm_sqrtf(dx * dx + dy * dy);
-            float a = fm_clampf(r - d + 0.5f, 0.0f, 1.0f);
-            px_blend(x, y, c, (uint32_t)(a * 16.0f + 0.5f));
-        }
-}
-static void dot(int32_t x, int32_t y, int32_t r, uint16_t c) { disc((float)x + 0.5f, (float)y + 0.5f, (float)r + 0.3f, c); }
-
-/* atan2 in turns, 0..1 from +x going clockwise on screen (y down) */
-static float turns(float y, float x)
-{
-    float ax = fm_fabsf(x), ay = fm_fabsf(y), a = ax < ay ? ax / (ay + 1e-9f) : ay / (ax + 1e-9f), s = a * a, r;
-    r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;   /* atan on [0, 1] */
-    if (ay > ax)
-        r = 1.57079637f - r;
-    if (x < 0.0f)
-        r = FM_PI - r;
-    if (y < 0.0f)
-        r = FM_TWO_PI - r;
-    return r * (1.0f / FM_TWO_PI);
-}
-
-/* a knob: a 270-degree track from 7:30 to 4:30, thickness th, anti-aliased, round ends; the
- * value filled from the start (or from the top, for a bipolar value) and a round handle */
-#include "ui_arc8_geometry.h"
-static void arc(int32_t cx, int32_t cy, int32_t r, float v, uint16_t track, uint16_t fill, int bipolar)
-{
-    const float th = 3.4f, a0 = 0.375f, sweep = 0.75f;  /* start at 135 degrees, in turns */
-    float ro = (float)r, ri = ro - th, rm = ro - th * 0.5f, fx = (float)cx + 0.5f, fy = (float)cy + 0.5f;
-    float lo = bipolar ? (v < 0.5f ? v : 0.5f) : 0.0f, hi = bipolar ? (v < 0.5f ? 0.5f : v) : v;
-    int32_t x, y;
-    v = fm_clampf(v, 0.0f, 1.0f);
-    if (r == 8) {
-        /* Keep original y/x order, exact float t bits and rounded coverage.
-         * Caps/handle below and every other radius retain the original path. */
-        for (unsigned i = 0; i < sizeof arc8_geometry / sizeof *arc8_geometry; ++i) {
-            float t;
-            memcpy(&t, &arc8_geometry[i].turns_bits, sizeof t);
-            px_blend(cx + arc8_geometry[i].x, cy + arc8_geometry[i].y,
-                     (t >= lo && t <= hi) ? fill : track, arc8_geometry[i].coverage);
-        }
-    } else for (y = -r - 1; y <= r + 1; y++)
-        for (x = -r - 1; x <= r + 1; x++) {
-            float dx = (float)x + 0.5f - 0.5f, dy = (float)y + 0.5f - 0.5f, d = fm_sqrtf(dx * dx + dy * dy), t, a;
-            a = fm_clampf(ro + 0.5f - d, 0.0f, 1.0f) * fm_clampf(d - ri + 0.5f, 0.0f, 1.0f);
-            if (a <= 0.0f)
-                continue;
-            t = turns(dy, dx) - a0;
-            if (t < 0.0f)
-                t += 1.0f;
-            t /= sweep;
-            if (t > 1.0f)
-                continue;                              /* the gap at the bottom; the caps close it */
-            px_blend(cx + x, cy + y, (t >= lo && t <= hi) ? fill : track, (uint32_t)(a * 16.0f + 0.5f));
-        }
-    {   /* round ends: the track's, then the fill's, then the handle */
-        float e0 = (a0) * FM_TWO_PI, e1 = (a0 + sweep) * FM_TWO_PI, ev = (a0 + sweep * v) * FM_TWO_PI;
-        float el = (a0 + sweep * lo) * FM_TWO_PI;
-        disc(fx + fm_cosf(e0) * rm - 0.5f, fy + fm_sinf(e0) * rm - 0.5f, th * 0.5f, lo <= 0.0f && hi > 0.0f ? fill : track);
-        disc(fx + fm_cosf(e1) * rm - 0.5f, fy + fm_sinf(e1) * rm - 0.5f, th * 0.5f, hi >= 1.0f ? fill : track);
-        if (hi > lo)
-            disc(fx + fm_cosf(el) * rm - 0.5f, fy + fm_sinf(el) * rm - 0.5f, th * 0.5f, fill);
-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 1.3f, C_BLACK);
-        disc(fx + fm_cosf(ev) * rm - 0.5f, fy + fm_sinf(ev) * rm - 0.5f, th * 0.5f + 0.6f, C_WHITE);
-    }
-}
-
-static void play_icon(int32_t x, int32_t y, uint16_t c)
-{
-    int32_t i, j;
-    for (j = 0; j < 11; j++)                           /* a triangle, edges anti-aliased */
-        for (i = 0; i < 9; i++) {
-            float fy = (float)j + 0.5f - 5.5f, fx = (float)i + 0.5f;
-            float edge = 8.0f - fx - fm_fabsf(fy) * 1.3f;
-            float a = fm_clampf(edge * 0.7f + 0.5f, 0.0f, 1.0f) * fm_clampf(fx + 0.5f, 0.0f, 1.0f);
-            px_blend(x + i, y + j, c, (uint32_t)(a * 16.0f + 0.5f));
-        }
-}
-
-/* the length of the part on screen, when its keys are steps (0: they are not) */
-static int steps_len(void)
-{
-    if (is_drum())
-        return cur_pat()->drum[ui.part].len;
-    if (is_303() && !ui.rec)
-        return cur_pat()->bass[bidx()].len;
-    return 0;
-}
-
-/* -------------------------------------------------------------- header --- */
-/* Horizontal runs keep the small-cell atlas cheap to paint at either scale. */
-static UI_DRAW void ui_pictogram(int x,int y,int glyph,int scale,uint16_t ink)
-{
-    if ((unsigned)glyph>=UI_G_COUNT || scale<1 || scale>3) return;
-    for (int row=0;row<9;row++) {
-        uint16_t bits=ui_pictogram_row((unsigned)glyph,(unsigned)row);
-        for (int col=0;col<9;) {
-            if (!(bits & (1u<<(8-col)))) { col++; continue; }
-            int start=col;
-            do { col++; } while (col<9 && (bits & (1u<<(8-col))));
-            cv_rect(x+start*scale,y+row*scale,(col-start)*scale,scale,ink);
-        }
-    }
-}
-static UI_DRAW void ui_state_toggle(int x,int y,int on,uint16_t ink)
-{
-    rframe(x,y,18,9,2,ink);
-    cv_rect(x+(on?12:2),y+2,4,5,ink);
-}
-/* Complete sequence identity stays clear of tempo/transport at the right. */
-static UI_DRAW int ui_position_badge(int glyph,int position,int queued,uint16_t ink,uint16_t cue_ink)
-{
-    char number[12],next[12];
-    put_i(number,position); put_i(next,queued);
-    const felucca_font_t *font=&FONT_S;
-    int width=12+tw(font,number)+(queued?15+tw(font,next):0);
-    if (width>53) font=&FONT_T;
-    width=12+tw(font,number)+(queued?15+tw(font,next):0);
-    if (width>53) font=&FONT_XS;
-    ui_pictogram(132,5,glyph,1,ink);
-    int x=cv_text(144,vc(font,1,17),font,number,ink);
-    if (queued) {
-        ui_pictogram(x+3,5,UI_G_NEXT,1,cue_ink);
-        x=cv_text(x+15,vc(font,1,17),font,next,cue_ink);
-    }
-    return x;
-}
-/* Shared flat surface: consistent rounded outline, no per-edge bevel or glare.
- * Callers retain their selected face/edge colors and exact control geometry. */
-enum { UI_PANEL_RADIUS = 8 };
-static UI_DRAW void surface_panel(int x,int y,int w,int h,int active,uint16_t face,uint16_t edge,uint16_t side)
-{
-    int r=UI_PANEL_RADIUS;
-    (void)active; (void)side;
-    if(w<=0 || h<=0) return;
-    if(r>(w-1)/2) r=(w-1)/2;
-    if(r>(h-1)/2) r=(h-1)/2;
-    rbox(x,y,w,h,r,edge);
-    if(w>2 && h>2) rbox(x+1,y+1,w-2,h-2,r>0?r-1:0,face);
-}
-static UI_DRAW void night_panel(int x,int y,int w,int h,int active)
-{
-    surface_panel(x,y,w,h,active,active?SOUND_SELECT:SOUND_FACE,
-                  active?SOUND_SELECT_EDGE:SOUND_EDGE,active?SOUND_SELECT_SIDE:SOUND_SIDE);
-}
-#define sound_slab night_panel
-
-static void pat_glyph_row(int32_t x,int32_t y,const uint8_t strength[8],uint16_t c,int current);
-/* Shared, bounded pictures for status and the existing physical controls. */
-static UI_DRAW void nav_arrow(int x,int y,int direction,uint16_t ink)
-{
-    int tip=x+(direction>0?5:0),tail=x+(direction>0?0:5),back=tip-direction*3;
-    cv_line(tail,y+3,tip,y+3,ink);
-    cv_line(back,y,tip,y+3,ink);cv_line(tip,y+3,back,y+6,ink);
-}
-static UI_DRAW void row_picture(int x,int y,uint16_t ink)
-{
-    for(int row=0;row<3;row++)cv_rect(x,y+1+row*3,10,row==1?2:1,ink);
-}
-static UI_DRAW void header_pattern_badge(int x,int part,int pattern,int current,uint16_t ink)
-{
-    uint8_t strength[8];char number[4];
-    if(part<0 || part>=NPARTS || pattern<0 || pattern>=NPAT)return;
-    frame(x,6,10,7,ink);
-    home_pattern_strength8(&proj.pat[pattern],proj.arr.lane,pattern,part,
-                          proj.set.accent_q7,T_VEL,strength);
-    pat_glyph_row(x+1,8,strength,PART_COL[part],current);
-    put_i(number,pattern+1);cv_text(x+12,vc(&FONT_T,1,17),&FONT_T,number,ink);
-}
-static UI_DRAW void header_pattern_cue(int x,int part)
-{
-    int cue=seq_cue_of(&seq,part);
-    if(seq.song_on || cue<0 || cue==seq.ppat[part])return;
-    /* A live sequencer step may pulse the arrow. Wall time alone never does. */
-    uint16_t ink=seq.playing && (eng_step[TRK_DRUM]&1)?C_WHITE:C_AMB;
-    nav_arrow(x,6,1,ink);header_pattern_badge(x+8,part,cue,0,C_GRAY);
-}
-
-/* Exact inputs of the static PART header; keep the newer audio-owned
- * metro phase and tiled display owner from 8be16486. */
-typedef struct {
-    const char *name;
-    uint16_t colours[5], col;
-    uint8_t light, part, page, pages, phase, rec, save, night, sel;
-    uint8_t playing,song_on,battery;
-    uint16_t pattern;
-    float tempo;
-} part_header_snapshot_t;
-static part_header_snapshot_t part_header_snapshot;
-
-static void dv_full_title(char *t, int part, int v);
-static void dv_header_battery(int x, int y);
-/* The pickup hint must not erase the previous header's chain/page context. */
-static void header_pickup_detail(char *text,int pending)
-{
-    text[0]=0;
-    if(pending)return;
-    if(seq.chain_a!=seq.chain_b && !seq.song_on)put_s(text,"CHN");
-    else if(steps_view() && steps_len()>16)
-        put_i(put_s(put_i(text,ui.spage*16+1),"-"),ui.spage*16+16);
-}
-static const char *header_save_label(int state)
-{
-    return project_storage_unsupported()==2?"!":state==SAVE_QUEUED?queued_save_label():
-        state==SAVE_FAILED?"SAVE FAILED":"UNSAVED";
-}
-/* One identity owner for both cached and freshly painted part headers. */
-static UI_DRAW const char *bass_header_name(void)
-{
-    return engine_bass_bank(bidx()) == ORIGINAL_SOUND_JUNO ? (bidx()?"SUPERJ6 B":"SUPERJ6 A") :
-        engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE ? (bidx()?"S1 B":"S1 A") :
-        engine_bass_bank(bidx()) == ORIGINAL_SOUND_MIAMI ? (bidx()?"MIAMI B":"MIAMI A") :
-        (bidx()?"CHICAGO B":"CHICAGO A");
-}
-static UI_DRAW void draw_header(void)
-{
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-#endif
-    int clip_mode = 0;
-#if BOARD_SMK37
-    clip_mode = smk_clip_mode_on();
-#endif
-    char b[24];
-    int32_t x;
-    int ss = save_state();
-    int edit_step = lock_step();
-    int pickup = ui.msg[0] == 'P' && ui.msg[1] == 'I' && ui.msg[2] == 'C' &&
-                 ui.msg[3] == 'K' && ui.msg[4] == ' ';
-    part_header_snapshot_t snapshot = {0};
-    int cacheable = edit_step < 0 && !seq.ext && !ui.msg_until && ui.view == V_PART && (is_drum() || is_303()) &&
-        ui.overlay == O_NONE && !ui.help && !division_pad_owner() &&
-        seq_cue_of(&seq, ui.part) < 0
-#if BOARD_SMK37
-        && !smk_clip_mode_on()
-#endif
-        ;
-    if (cacheable) {
-        snapshot.name = part_display(ui.part);
-        if (is_303()) snapshot.name = bass_header_name();
-        memcpy(snapshot.colours, pal, sizeof pal);
-        snapshot.col = matrix_col(); snapshot.light = ui_theme_light;
-        snapshot.part = ui.part; snapshot.sel = is_drum()?(uint8_t)ui.sel[ui.part]:0; snapshot.page = (uint8_t)cur_page(); snapshot.pages = pg.n;
-        snapshot.phase = seq.metro_view; snapshot.rec = ui.rec; snapshot.save = (uint8_t)ss;
-        snapshot.playing=seq.playing;snapshot.song_on=seq.song_on;
-        snapshot.pattern=(uint16_t)(seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[ui.part]);
-        snapshot.tempo=seq_tempo(&seq);snapshot.battery=(uint8_t)plat_battery();
-        snapshot.night = (uint8_t)(matrix_three_rows() || X0X_ORIGINAL_SYNTH);
-        if (part_header_snapshot_valid && blit_hash[0] && cv_tile_valid[0] &&
-            !memcmp(&snapshot, &part_header_snapshot, sizeof snapshot)) return;
-    }
-    part_header_snapshot_valid = 0;
-    cv_begin(240, HDR_H, C_BLACK);
-    night_panel(0,0,240,HDR_H,0);
-    if (ui.msg_until && (int32_t)(ui.msg_until - plat_ms()) > 0 && !pickup) {   /* what a button just did */
-        box(0, 0, 240, HDR_H - 1, part_col());
-        if (!memcmp(ui.msg, "NEXT: PAT ", 10)) {
-            int pattern=0, n=10;
-            while (n<(int)sizeof ui.msg-1 && ui.msg[n]>='0' && ui.msg[n]<='9' && pattern<=NPAT)
-                pattern=pattern*10+ui.msg[n++]-'0';
-            put_s(put_s(b, "> "), ui.msg+10);
-            x=(214-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,b))/2;
-            x=cv_text(x,vc(&FONT_B,0,HDR_H-1),&FONT_B,"NEXT",C_BLACK)+6;
-            frame(x,1,12,17,C_BLACK);
-            if (!ui.msg[n] && pattern>0 && pattern<=NPAT) {
-                for (int pos=0;pos<NPARTS;pos++) {
-                    uint8_t strength[8];
-                    home_pattern_strength8(&proj.pat[pattern-1],proj.arr.lane,pattern-1,part_at(pos),
-                                           proj.set.accent_q7,T_VEL,strength);
-                    pat_glyph_row(x+2,2+pos*3,strength,C_BLACK,0);
-                }
-            }
-            cv_text(x+18,vc(&FONT_B,0,HDR_H-1),&FONT_B,b,C_BLACK);
-        } else {   /* #800 NEXT pattern glyph; other messages keep #806's long-text font fallback */
-            /* Reserve the same battery cell as ordinary R22 headers. Long
-             * About identities use two tiny-font rows, not clipped text. */
-            const felucca_font_t *font = tw(&FONT_B, ui.msg) <= 206 ? &FONT_B : &FONT_XS;
-            if (tw(font, ui.msg) <= 206)
-                text_c(107, vc(font, 0, HDR_H - 1), font, ui.msg, C_BLACK);
-            else {
-                char line[sizeof ui.msg];
-                unsigned n = 0, cut;
-                while (n + 1 < sizeof ui.msg && ui.msg[n]) ++n;
-                memcpy(line, ui.msg, sizeof line);
-                while (n && tw(&FONT_T, line) > 206) line[--n] = 0;
-                cut = n;
-                while (cut && ui.msg[cut] != ' ') --cut;
-                if (!cut) cut = n;
-                line[cut] = 0;
-                text_c(107, -1, &FONT_T, line, C_BLACK);
-                text_c(107, 9, &FONT_T,
-                       ui.msg + cut + (ui.msg[cut] == ' '), C_BLACK);
-            }
-        }
-        dv_header_battery(219, 5);
-        cv_commit_header();
-        return;
-    }
-    if (!pickup || (int32_t)(ui.msg_until - plat_ms()) <= 0)
-        ui.msg_until = pickup = 0;
-    { /* All status headers use R22; retain pickup and clip identities below. */
-        const char *name=ui.view==V_PART?part_display(ui.part):
-            ui.view==V_GLO?list_title:VIEW_N[ui.view];
-        char drum_title[24],context_title[32];
-        if(ui.view==V_PART && is_303()) {
-            name=bass_header_name();
-        }
-        if(ui.view==V_PART && is_drum()) {
-            dv_full_title(drum_title, ui.part, ui.sel[ui.part]);
-            name = drum_title;
-        }
-        int free_mode=ui.view==V_SEQ && is_303() && ui.freeplay[bidx()] && !ui.rec;
-        if(ui.view==V_SEQ || ui.view==V_GEN) {
-            put_s(put_s(put_s(context_title,free_mode?bass_header_name():part_display(ui.part))," "),
-                  free_mode?"FREE PLAY":VIEW_N[ui.view]);
-            name=context_title;
-        }
-        if(clip_mode)name="LP";
-        if(pickup)name=ui.msg;
-        sound_slab(0,0,240,HDR_H,0);
-        /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
-        cv_text_clip(4,free_mode&&!pickup&&!clip_mode?4:2,pickup?&FONT_S:free_mode&&!clip_mode?&FONT_T:&FONT_B,name,pickup?C_AMB:part_view()?part_col():SOUND_WHITE,4,125);
-        if((pickup || clip_mode) && ss!=SAVE_SAVED) {
-            const char *label=header_save_label(ss);
-            const felucca_font_t *font=pickup?&FONT_S:&FONT_B;
-            int left=4+tw(font,name)+6,width=tw(&FONT_XS,label)+10;
-            uint16_t ink=ss==SAVE_FAILED?RGB(255,70,70):C_AMB;
-            if(left+width<=130) {
-                box(left,3,width,13,ink);
-                text_c(left+width/2,vc(&FONT_XS,3,13),&FONT_XS,label,C_BLACK);
-            } else if(left+11<=130) {
-                box(left,3,11,13,ink);
-                text_c(left+5,vc(&FONT_XS,3,13),&FONT_XS,ss==SAVE_FAILED?"!":ss==SAVE_QUEUED?"Q":"*",C_BLACK);
-            }
-        }
-        if (division_pad_owner() && !pickup && !clip_mode) {
-            int dx = 4 + tw(&FONT_B, name) + 8;
-            dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
-            cv_text(dx, 6, &FONT_T, division_pad_label() + 11, C_AMB);
-        }
-#if BOARD_SMK37
-        if(clip_mode) {
-            extern uint8_t smk_ck_ext(void);
-            cv_text(132,4,&FONT_T,smk_ck_ext()?"EXT":"INT",smk_ck_ext()?C_AMB:SOUND_GRAY);
-        } else
-#endif
-        if(pickup || !division_pad_owner()) {
-            char pattern[16];
-            int header_part=part_view()?ui.part:PART_909;
-            int cue=seq_cue_of(&seq,header_part);
-            int pending=cue>=0 && cue!=seq.ppat[header_part] && !seq.song_on;
-            char *end=put_i(put_s(pattern,seq.song_on?"S":"P"),
-                (seq.song_on?(seq.playing?seq.song_pos:ui.song_sel):seq.ppat[header_part])+1);
-            if(pending)put_i(put_s(end,">"),cue+1);
-            /* During held-step editing the actual target takes priority over
-             * ordinary pattern context. Release restores the normal header;
-             * engine identity, tempo, transport and battery remain visible. */
-            if(edit_step>=0 && !pickup) put_i(put_s(pattern,"STEP "),edit_step+1);
-            int context_end=cv_text(132,4,&FONT_T,pattern,edit_step>=0?C_AMB:pending?C_AMB:C_WHITE);
-            if(pickup) {
-                char detail[12];header_pickup_detail(detail,pending);
-                cv_text(context_end+3,4,&FONT_T,detail,SOUND_GRAY);
-            }
-        }
-        {   /* tempo, same readout as the shared header */
-            char b[8];
-            static float avg; static int shown;
-            float tmp = seq_tempo(&seq);
-            if (!seq.ext || avg < 1.0f) avg = tmp;
-            avg += (tmp - avg) * 0.03f;
-            if (!seq.ext || fm_fabsf(avg - (float)shown) > 0.6f)
-                shown = (int)(avg + 0.5f);
-            put_i(b, shown);
-            text_r(pickup?215:200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);
-        }
-        if(clip_mode || pickup) {
-            uint8_t phase=seq.metro_view;
-            play_icon(pickup?177:168,4,!phase?C_DIM:phase<=4u?C_WHITE:C_HI);
-        } else if(seq.playing) play_icon(168,4,!seq.metro_view?C_DIM:seq.metro_view<=4u?C_WHITE:C_HI);
-        else cv_rect(170,7,5,5,SOUND_GRAY);
-        if(ui.rec) dot(pickup?190:206,9,3,RGB(255,50,50));
-        dv_header_battery(219, 5);
-        if(ss!=SAVE_SAVED) dot(pickup?237:211,3,1,ss==SAVE_FAILED?RGB(255,70,70):C_AMB);
-        cv_commit_header();
-        if (cacheable) { part_header_snapshot = snapshot; part_header_snapshot_valid = 1; }
-        return;
-    }
-}
-
-/* -------------------------------------------------------------- the views --- */
-static int step_of(int col) { return ui.spage * 16 + col; }
-#define GX 27
-static int32_t col_x(int c) { return GX + c * 13 + (c >> 2); }   /* a pixel between beats */
-
-#define DROW 11                                    /* drum rows: 12 of them over both bands, a gap under */
-static UI_DRAW void draw_drum(int band)
-{
-    int k = ui.part, v, c, len = cur_pat()->drum[k].len;
-    const dpart_t *d = &cur_pat()->drum[k];
-    int ph = seq.playing ? eng_step[TRK_DRUM + k] : -1;
-    uint16_t col = part_col(), on_dim = dim(col, 8);
-    uint32_t lmarks = lock_marks(k == PART_909 ? T_909 : T_808, ui.sel[k], ui.spage * 16) |
-                      lock_marks(T_PROB, k << 4 | ui.sel[k], ui.spage * 16);
-    for (v = 0; v <= NDRUM; v++) {
-        int y = v * DROW + 1 - band * BAND_H, sel = v < NDRUM && v == ui.sel[k];
-        const char *nm = v < NDRUM ? engine_voice_name(k == PART_909 ? T_909 : T_808, v) : "AC";
-        const uint32_t *bits = v < NDRUM ? d->hit[v] : d->accent;
-        int muted = v < NDRUM && ((seq.mute | seq.vmute) & (1u << (k * NDRUM + v)));
-        if (y < -DROW || y >= BAND_H)
-            continue;
-        if (sel)
-            surface_panel(0,y-1,24,DROW,1,col,col,dim(col,5));
-        cv_text(5, vc(&FONT_XS, y - 1, DROW - 1), &FONT_XS, nm, sel ? C_BLACK : muted ? C_LINE : v < NDRUM ? C_GRAY : C_WHITE);
-        for (c = 0; c < 16; c++) {
-            int s = step_of(c), x = col_x(c), hit = s < NSTEPS && sm_get(bits, s);
-            if (s >= len) {
-                cv_rect(x + 5, y + 3, 2, 2, C_LINE);
-                continue;
-            }
-            if (v == NDRUM) {                          /* the accent row: white marks */
-                if (hit)
-                    box(x + 2, y + 1, 8, 6, C_WHITE);
-                else
-                    rbox(x + 2, y + 3, 8, 2, 1, C_LINE);
-                continue;
-            }
-            box(x, y, 12, DROW - 2, hit ? (muted ? C_DIM : sel ? col : on_dim) : (s == ph ? C_DIM : C_LINE));
-            if (hit && s == ph)
-                box(x + 2, y + 2, 8, DROW - 6, C_WHITE);
-            if (hit && sel && ((lmarks >> c) & 1u))      /* the step's own values (p-locks): a notch */
-                cv_rect(x + 8, y + 1, 3, 3, C_BLACK);
-        }
-    }
-}
-
-#define ROLL_TOP 4                                 /* the 303's line: from here (both bands) ... */
-#define ROLL_BOT 92                                /* ... to here; then AC, SL and the step's line */
-static int note_y(int n, int lo, int hi) { return ROLL_BOT - (n - lo) * (ROLL_BOT - ROLL_TOP) / (hi - lo); }
-
-/* A TIE only carries a real NOTE. In particular, an all-TIE/orphan pattern is
- * silent and must not acquire a fictitious pitch on the piano roll. */
-static int note_start_of(const bpart_t *bp, int s)
-{
-    int k;
-    for (k = 0; k < bp->len && bstep_gate(&bp->step[s]) == G_TIE; k++)
-        s = s ? s - 1 : bp->len - 1;
-    return bstep_gate(&bp->step[s]) == G_NOTE ? s : -1;
-}
-
-static int held_note_of(const bpart_t *bp, int s)
-{
-    int start = note_start_of(bp, s);
-    return bp->step[start >= 0 ? start : s].note;
-}
-
-static UI_DRAW void draw_303(int band, int gen)
-{
-    int b = bidx(), c, o = band * BAND_H, n;       /* o: drawn in the screen's rows, minus the band's */
-    const bpart_t *bp = &cur_pat()->bass[b];
-    int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
-    uint16_t col = part_col();
-    uint32_t lmarks = gen ? 0 : lock_marks(-1, -1, ui.spage * 16);
-    char t[40], *q = t;
-    (void)gen;
-    for (c = 0; c < bp->len && c < NSTEPS; c++) {
-        int start = note_start_of(bp, c);
-        if (start >= 0) {
-            int pitch = bp->step[start].note;
-            if (pitch < lo)
-                lo = pitch;
-            if (pitch > hi)
-                hi = pitch;
-        }
-    }
-    if (lo > hi)
-        lo = hi = 12 * (bp->gen.base_oct + 1) + bp->gen.root;
-    lo -= 2;
-    hi += 2;
-    if (hi - lo < 14)
-        hi = lo + 14;
-    for (n = lo; n <= hi; n++)                     /* the line: pitch by height, the root's octaves ruled */
-        if ((n - bp->gen.root) % 12 == 0) {
-            int y = note_y(n, lo, hi) - o;
-            put_note(t, n);
-            cv_rect(GX, y + 2, 213, 1, C_LINE);
-            cv_text(1, y - 4, &FONT_XS, t, C_DIM);
-        }
-    for (c = 0; c < 16; c++) {
-        int s = step_of(c), x = col_x(c), g;
-        const bstep_t *st = &bp->step[s < NSTEPS ? s : 0];
-        if (s >= bp->len) {
-            cv_rect(x + 5, ROLL_BOT + 4 - o, 2, 2, C_LINE);
-            continue;
-        }
-        g = bstep_gate(st);
-        if (s == ph)
-            cv_rect(x, ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
-        if (g != G_REST && note_start_of(bp, s) >= 0) {
-            int hn = held_note_of(bp, s), y = note_y(hn, lo, hi) - o;
-            uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
-            int end = st->flags >> BS_END_SHIFT;
-            int width = end ? (end * 12 + 14) / 15 : 12;
-            box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
-            if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
-                cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
-            if (g == G_TIE) {
-                if (c > 0)                           /* continued from previous visible step */
-                    cv_rect(col_x(c - 1) + 6, y,
-                            x - (col_x(c - 1) + 6) + (width < 6 ? width : 6), 5, fc);
-                else {                               /* page 16â†’17 or loop lastâ†’first */
-                    cv_rect(x - 4, y + 1, 4, 3, fc);
-                    cv_rect(x - 7, y + 2, 3, 1, fc);
-                }
-            }
-            if (c == 15 && bstep_gate(&bp->step[s + 1 < bp->len ? s + 1 : 0]) == G_TIE) {
-                cv_rect(x + 12, y + 1, 2, 3, fc);
-                cv_rect(x + 14, y + 2, 2, 1, fc);
-            }
-            if ((st->flags & BS_SLIDE) && c < 15) {
-                int nx = s + 1 < bp->len ? s + 1 : 0, ny = note_y(bp->step[nx].note, lo, hi) - o;
-                cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
-            }
-        }
-        box(x + 1, 101 - o, 10, 4, g && (st->flags & BS_ACCENT) ? C_WHITE : C_LINE);   /* its accent, its slide */
-        box(x + 1, 113 - o, 10, 4, g && (st->flags & BS_SLIDE) ? col : C_LINE);
-    }
-    cv_text(3, vc(&FONT_XS, 99, 8) - o, &FONT_XS, "AC", C_GRAY);
-    cv_text(3, vc(&FONT_XS, 111, 8) - o, &FONT_XS, "SL", C_GRAY);
-    if (ui.held_step >= 0 || ui.rec) {   /* the step held (or being written) */
-        int s = ui.held_step >= 0 ? ui.held_step : ui.wpos[b];
-        const bstep_t *st = &bp->step[s];
-        q = put_s(q, ui.held_step >= 0 ? "STEP " : "WRITE ");
-        q = put_i(q, s + 1);
-        q = put_s(q, "  ");
-        q = put_note(q, held_note_of(bp, s) + bp->transpose - 24);
-        if (bstep_gate(st) == G_TIE)
-            q = put_s(q, " TIE");
-        if (st->flags & BS_ACCENT)
-            q = put_s(q, " ACC");
-        if (st->flags & BS_SLIDE)
-            q = put_s(q, " SLIDE");
-        put_i(put_s(q, " V"), bstep_velocity(st));
-        cv_text(4, vc(&FONT_B, 122, 16) - o, &FONT_B, t, C_WHITE);
-    } else {                                           /* else the line's scale and seed */
-        char t2[16];
-        q = put_s(q, ROOT_N[bp->gen.root % 12]);
-        q = put_s(q, " ");
-        put_s(q, TB3PO_SCALE_NAMES[bp->gen.scale % TB3PO_NSCALES]);
-        put_hex(put_s(t2, "SEED "), bp->gen.seed & 0xFFFFu, 4);
-        segs(4, vc(&FONT_S, 122, 16) - o, &FONT_S, C_GRAY, 10, t, t2,
-             gen && ui.gen_stale[b] ? "CHANGED" : 0, 0);
-    }
-}
-
-static int strcmp_s(const char *a, const char *b);
-static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int touched, uint16_t col, int height, int night);
-static UI_DRAW int adsr_touch_active(void);
-static UI_DRAW int adsr_row(int page);
-static UI_DRAW void draw_adsr_inline(int page,int active,int y,int h,int off);
-enum { GL_NONE, GL_POWER, GL_DOWN, GL_UP, GL_BOTH, GL_CLOCK, GL_PEDAL };
-static UI_DRAW void matrix_glyph(int x,int y,int glyph,uint16_t c,uint16_t bg);
-
-static UI_DRAW int matrix_row_hint(int x,int y,uint16_t c)
-{
-    cv_text(x,y,&FONT_T,UI_CAP_ARROWS,c);
-    x+=tw(&FONT_T,UI_CAP_ARROWS)+4;
-    matrix_glyph(x,y,GL_BOTH,c,C_BLACK);
-    row_picture(x+14,y,c);
-    return x+24;
-}
-
-/* Physical EDIT caption plus a page and forward arrow, within the old hint. */
-static UI_DRAW int matrix_next_hint(int x,int y,uint16_t c)
-{
-    x=cv_text(x,y,&FONT_T,UI_CAP_EDIT,c)+4;
-    cv_line(x,y,x+8,y,c);cv_line(x+8,y,x+8,y+10,c);
-    cv_line(x+8,y+10,x,y+10,c);cv_line(x,y+10,x,y,c);
-    cv_line(x+2,y+3,x+6,y+3,c);cv_line(x+2,y+6,x+6,y+6,c);
-    cv_line(x+12,y+5,x+22,y+5,c);
-    cv_line(x+18,y+1,x+22,y+5,c);cv_line(x+22,y+5,x+18,y+9,c);
-    return x+23;
-}
-
-static UI_DRAW int matrix_touch_matches(pref_t r, int i)
-{
-    return ui.touched == i && ui.touch_view == ui.view &&
-           ui.touch_part == ui.part && ui.touch_page == cur_page() &&
-           ui.touch_kind == r.kind && ui.touch_a == r.a &&
-           ui.touch_b == r.b && ui.touch_c == r.c;
-}
-
-/* Control rows share the existing main/knob strips; no framebuffer or UI state is added. */
-static UI_DRAW const char *matrix_group(int page)
-{
-    const char *t = pg.title[page];
-    if (!strcmp_s(t,"FX")) {
-        int ty=matrix_value(pg.r[page][0]);
-        return ty==CHI_FX_OFF?"FX / OFF":ty==CHI_FX_COMP?"FX / MASTER":"FX / INSERT";
-    }
-    if (!strcmp_s(t,"AMP ADSR")) return "AMP ENVELOPE";
-    if (!strcmp_s(t,"FILTER ADSR")) return "FILTER ENVELOPE";
-    if (!strcmp_s(t,"WOB / FILT")) return "WOBBLE / FILTER";
-    return t;
-}
-
-/* Describe only mapped slots; sparse rows keep their physical knob numbers. */
-static UI_DRAW void matrix_knob_caption(char *text, int page)
-{
-    (void)page; text[0]=0;
-}
-
-static UI_DRAW void draw_drum_voice(int band);
-/* Same sixteen physical white-key positions as the selected part, not a
- * second sequencer or an invented animation. All four sound banks stay above. */
-static UI_DRAW void sound_step_footer(void)
-{
-    const bpart_t *bp=&cur_pat()->bass[bidx()];
-    int ph=seq.playing?eng_step[TRK_BASS0+bidx()]:-1;
-    for(int c=0;c<16;c++) {
-        int step=step_of(c),x=8+c*14,enabled=step<bp->len;
-        int gate=enabled?bstep_gate(&bp->step[step]):G_REST;
-        char number[8];put_i(number,step+1);
-        text_c(x+6,224-KNOB_Y,&FONT_T,number,enabled?SOUND_GRAY:SOUND_DIM);
-        cv_rect(x,237-KNOB_Y,12,2,enabled?SOUND_LINE:SOUND_SIDE);
-        if(gate!=G_REST)cv_rect(x,237-KNOB_Y,12,gate==G_TIE?1:2,part_col());
-        if(enabled && step==ui.held_step)cv_rect(x,236-KNOB_Y,12,1,SOUND_INK);
-        if(enabled && step==ph)cv_rect(x,239-KNOB_Y,12,1,SOUND_INK);
-    }
-}
-
-static UI_DRAW void draw_part_sound(int band)
-{
-    int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
-    int three=matrix_three_rows(), night=three || X0X_ORIGINAL_SYNTH;
-    int rows=three?3:4, height=three?66:49, step=three?67:50;
-    uint16_t col=matrix_col(), gray=night?SOUND_GRAY:C_GRAY, hint=night?SOUND_AMBER:C_HI;
-    if(night) cv_rect(0,0,240,band==2?KNOB_H:BAND_H,SOUND_BASE);
-    for (row=0;row<rows;row++) {
-        int p=first+row, y=4+row*step-off, active=p==page;
-        uint16_t label=night?(active?SOUND_INK:SOUND_GRAY):(active?C_BLACK:C_GRAY);
-        char t[32];
-        if (p>=pg.n || y+height<=0 || y>=(band==2?KNOB_H:BAND_H)) continue;
-        if (night) sound_slab(3,y,234,height,active);
-        else surface_panel(3,y,234,height,active,active?col:SOUND_FACE,
-                           active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
-        put_s(put_s(put_i(t,row+1),"  "),matrix_group(p));
-        cv_text(8,y,&FONT_T,t,label);
-        if (adsr_row(p)) { draw_adsr_inline(p,active,y+off,height,off); continue; } /* graph replaces A/D/S/R, any row */
-        if (active) {
-            char knobs[20];matrix_knob_caption(knobs,p);
-            text_r(232,y,&FONT_T,knobs,label);
-        }
-        for (k=0;k<4;k++) {
-            int x=4+k*59;
-            if (k && (pg.r[p][k].kind!=R_NONE
-#if X0X_BASS_PRESET_PREVIEW
-                || (k==2 && pg.r[p][0].kind==R_BENGINE)
-#endif
-                )) cv_rect(x,y+14,1,night?height-18:32,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-            draw_param_widget(pg.r[p][k],x,y,59,active,col,height,night);
-        }
-#if X0X_BASS_PRESET_PREVIEW
-        if (!X0X_ORIGINAL_SYNTH && pg.r[p][0].kind==R_BENGINE) {
-            int b=bidx(), pending=engine_bass_preset_pending(b), preset=engine_bass_preset_index(b);
-            int edited=engine_bass_preset_edited(b);
-            const char *status=pending?"WAIT":preset<0?"USER":edited?"EDITED":"ACTIVE";
-            const char *reason=pending==2?"WAIT FOR NOTES/TAIL":pending==3?"RETURN WHEELS":
-                pending==4?"SOUND LOCKS ACTIVE":pending==5?"WAIT FOR INPUT":
-                pending==6?"WAIT FOR UPDATE":"WAIT FOR AUDIO";
-            int iw=pending?9:edited?8:10, vy=y+(night?(pending?31:36):(pending?24:29));
-#if X0X_BASS_TAGGED_SOUND
-            if (engine_bass_sound_bank(&proj.sound,b)<0) {status="UNKNOWN";iw=0;}
-#endif
-            /* K7/K8 stay unmapped. Their shared right half is a status display,
-             * with a compact group measured from the actual text advance and
-             * each primitive's ink width, separated by two pixels. */
-            int gx=180-(tw(&FONT_T,status)+iw+(iw?2:0))/2;
-            uint16_t c=night?(active?SOUND_INK:SOUND_WHITE):(active?C_BLACK:C_HI);
-            text_c(180,y+(night?14:11),&FONT_T,"STATUS",label);
-            cv_text(gx+iw+(iw?2:0),vy,&FONT_T,status,c);
-            if(pending) {
-                cv_line(gx,vy,gx+8,vy,c);cv_line(gx,vy+8,gx+8,vy+8,c);
-                cv_line(gx+1,vy+1,gx+7,vy+7,c);cv_line(gx+7,vy+1,gx+1,vy+7,c);
-                text_c(180,y+(night?49:37),&FONT_T,reason,c);
-            } else if(iw && edited) {
-                cv_line(gx,vy+7,gx+6,vy+1,c);cv_line(gx+1,vy+8,gx+7,vy+2,c);
-            } else if(iw) {
-                cv_line(gx,vy+4,gx+3,vy+7,c);cv_line(gx+3,vy+7,gx+9,vy+1,c);
-            }
-        }
-#endif
-    }
-    if(band==2)sound_step_footer();
-
-}
-
-#include "ui_break_layout_main.h"
-static UI_DRAW void draw_break(int band)
-{
-    break_layout_main(band);
-}
-
-/* Stored forward note-origin semantics, shared with the piano roll. Resolve
- * a possible wrapped hold once, then propagate gates across this 16-step row. */
-static uint32_t bass_content_bits16(const bpart_t *bp, int base)
-{
-    uint32_t bits = 0;
-    int s, held;
-    if (base >= bp->len)
-        return 0;
-    held = note_start_of(bp, base) >= 0;
-    for (s = 0; s < 16 && base + s < bp->len; s++) {
-        int gate = bstep_gate(&bp->step[base + s]);
-        if (gate != G_TIE)
-            held = gate == G_NOTE;
-        if (held)
-            bits |= 1u << (unsigned)s;
-    }
-    return bits;
-}
-
-/* first 16 steps of one part in a pattern (drums: any voice; 303: gates; break: steps) */
-static __attribute__((unused)) uint32_t pat_part_bits16(const pattern_t *pt, int part)
-{
-    int s, len;
-    uint32_t bits = 0;
-    if (part < NKIT) {
-        const dpart_t *d = &pt->drum[part];
-        len = d->len < 16 ? d->len : 16;
-        for (s = 0; s < len; s++) {
-            int v;
-            for (v = 0; v < NDRUM; v++)
-                if (sm_get(d->hit[v], s))
-                    bits |= 1u << (unsigned)s;
-        }
-        return bits;
-    }
-    if (part == PART_BRK)
-        return pt->brk.steps & 0xFFFFu;
-    {
-        const bpart_t *bp = &pt->bass[part - NKIT];
-        return bass_content_bits16(bp, 0);
-    }
-    return bits;
-}
-
-/* 8 px wide row in a pattern glyph: each column is on when either of two 16th steps hits */
-static void pat_glyph_row(int32_t x, int32_t y, const uint8_t strength[8], uint16_t c, int current)
-{
-    int i;
-    for (i = 0; i < 8; i++)
-        if (strength[i])
-            cv_rect(x+i,y,1,3,dim(c,home_glyph_brightness(strength[i],current)));
-}
-
-/* HOME uses full instrument names and shallow lane plates. Display positions
- * never become project/engine IDs; each lane still reads its own current pattern. */
-static void lane(int y, int p, uint32_t bits, int ph, int len, int base)
-{
-    int c, muted = part_muted(p);
-    uint16_t accent = muted ? C_DIM : PART_COL[p];
-    const char *name = part_display(p);
-    night_panel(3,y,234,18,0);
-    cv_rect(4,y+3,2,11,accent);
-    /* Full names fit the default engines. Same-engine A/B and unknown states
-     * retain the stable short lane names instead of colliding with the grid. */
-    if(tw(&FONT_T,name)>49) name=part_s(p);
-    cv_text(9,vc(&FONT_T,y+1,16),&FONT_T,name,accent);
-    for (c = 0; c < 16 && base + c < len; c++) {
-        int x=58+c*11+(c>>2);
-        int on=(bits>>c)&1u;
-        /* Eight-pixel cells have equal five-pixel margins in the 18px plate. */
-        cv_rect(x,y+5,9,8,UI_N_SIDE);
-        cv_rect(x,y+5,9,1,on?accent:UI_N_EDGE);
-        if(on) cv_rect(x+1,y+6,7,6,muted?C_DIM:dim(accent,11));
-        cv_rect(x,y+12,9,1,on?dim(accent,6):UI_N_EDGE);
-        if(seq.playing && (ph&15)==c) cv_rect(x+1,y+14,7,2,C_WHITE);
-    }
-}
-
-/* R22 HOME: pattern numbers name columns, parts name rows. Assignment and
- * stored note/velocity content remain separate; drawing never edits a pattern. */
-static UI_DRAW void draw_home_live(int band)
-{
-    int off=band*BAND_H;
-    cv_text(8,3-off,&FONT_T,"LIVE STEPS",SOUND_GRAY);
-    for(int pos=0;pos<NPARTS;pos++) {
-        int p=part_at(pos),track=p<NKIT?TRK_DRUM+p:p==PART_BRK?TRK_BRK:TRK_BASS0+p-PART_303A;
-        const pattern_t *pt=pat_of(p);
-        int len=p<NKIT?pt->drum[p].len:p==PART_BRK?16:pt->bass[p-PART_303A].len;
-        int ph=seq.playing?eng_step[track]:-1;
-        int base=ph>=0?(ph/16)*16:0;
-        if(base>=len)base=0;
-        uint32_t bits=0;
-        if(p<NKIT)for(int c=0;c<16&&base+c<len;c++)for(int v=0;v<NDRUM;v++)
-            if(sm_get(pt->drum[p].hit[v],base+c))bits|=1u<<c;
-        if(p==PART_BRK)bits=pt->brk.steps;
-        if(part_is_303(p))bits=bass_content_bits16(&pt->bass[p-PART_303A],base);
-        int y=18+pos*24-off,muted=part_muted(p);
-        uint16_t col=muted?SOUND_DIM:PART_COL[p];
-        char range[20],*q=put_i(range,base+1);
-        q=put_i(put_s(q,"-"),base+16<len?base+16:len);put_i(put_s(q," / "),len);
-        night_panel(3,y,234,22,0);
-        char identity[24];
-        const char *name=part_display(p);
-        if(part_is_303(p)) {
-            int voice=p-PART_303A,bank=engine_bass_bank(voice);
-            const char *engine=bank==ORIGINAL_SOUND_JUNO?"SUPERJ6":
-                bank==ORIGINAL_SOUND_SYNTHONE?"SYNTH ONE":bank==ORIGINAL_SOUND_MIAMI?"MIAMI":
-                bank==ORIGINAL_SOUND_CHICAGO?"CHICAGO":"CHOOSE ENGINE";
-            put_s(put_s(identity,engine),voice?" B":" A");name=identity;
-        }
-        cv_text(8,y+1,&FONT_T,name,col);
-        cv_text(8,y+11,&FONT_T,range,SOUND_GRAY);
-        for(int c=0;c<16;c++) {
-            int x=85+c*9,on=(bits>>c)&1u;
-            cv_rect(x,y+5,7,10,base+c<len?SOUND_EDGE:SOUND_SIDE);
-            if(base+c<len&&on)cv_rect(x+1,y+6,5,8,col);
-            if(ph==base+c)cv_rect(x,y+17,7,2,SOUND_WHITE);
-        }
-    }
-}
-
-static UI_DRAW void draw_home(int band)
-{
-    if(ui.home_live){draw_home_live(band);return;}
-    int off=band*BAND_H,c0=ui.pbank*16;
-    char title[24];
-    put_i(put_s(put_i(put_s(title,"PATTERNS "),c0+1),"-"),c0+16);
-    cv_text(8,6-off,&FONT_T,title,SOUND_GRAY);
-    const char *status=save_state()==SAVE_SAVED?"SAVED":header_save_label(save_state());
-    int sw=tw(&FONT_T,status)+10;
-    rbox(237-sw,3-off,sw,14,7,SOUND_FACE);
-    text_r(232,6-off,&FONT_T,status,SOUND_GRAY);
-    rbox(3,20-off,234,112,UI_PANEL_RADIUS,SOUND_FACE);
-    for(int c=0;c<16;c++) {
-        char n[4];put_i(n,c0+c+1);
-        text_c(43+c*12,24-off,&FONT_T,n,SOUND_GRAY);
-    }
-    for(int pos=0;pos<NPARTS;pos++) {
-        int p=part_at(pos),y=38+pos*18-off;
-        cv_text(9,y+1,&FONT_T,part_s(p),PART_COL[p]);
-        for(int c=0;c<16;c++) {
-            int pattern=c0+c,x=38+c*12,current=seq.ppat[p]==pattern;
-            int cue=seq_cue_of(&seq,p),queued=cue==pattern&&cue!=seq.ppat[p];
-            rbox(x,y,10,12,2,UI_N_SIDE);
-            if(current)rframe(x,y,10,12,2,PART_COL[p]);
-            if(queued&&(ui.frame&16u))rframe(x,y,10,12,2,C_WHITE);
-            if(part_used(&proj.pat[pattern],p)) {
-                uint8_t strength[8];
-                home_pattern_strength8(&proj.pat[pattern],proj.arr.lane,pattern,p,
-                    proj.set.accent_q7,T_VEL,strength);
-                pat_glyph_row(x+1,y+4,strength,PART_COL[p],current);
-            }
-            if(seq.chain_a!=seq.chain_b&&pattern>=(seq.chain_a<seq.chain_b?seq.chain_a:seq.chain_b)&&
-                pattern<=(seq.chain_a<seq.chain_b?seq.chain_b:seq.chain_a))cv_rect(x,y+14,10,1,C_AMB);
-        }
-    }
-}
-
-/* SONG: a table of bars, twelve rows across the two bands (the first is the heading) */
-static UI_DRAW void draw_song(int band)
-{
-    const song_t *sg = song();
-    int r, p, top = ui.song_sel > 5 ? ui.song_sel - 5 : 0;
-    for (r = 0; r < 6; r++) {
-        int row = band * 6 + r, y = r * 11, k = top + row - 1;
-        char t[8];
-        if (row == 0) {                                /* the heading */
-            cv_text(4, vc(&FONT_XS, y, 11), &FONT_XS, "BAR", C_GRAY);
-            for (int pos = 0; pos < NPARTS; pos++) {
-                p = part_at(pos);
-                text_c(58 + pos * 36, vc(&FONT_XS, y, 11), &FONT_XS, part_s(p), PART_COL[p]);
-            }
-            continue;
-        }
-        if (k > sg->len || k >= NSONG)
-            break;
-        surface_panel(0,y,236,11,k==ui.song_sel,k==ui.song_sel?SOUND_SELECT:SOUND_FACE,
-                      k==ui.song_sel?SOUND_SELECT_EDGE:SOUND_EDGE,SOUND_SIDE);
-        put_i(t, k + 1);
-        cv_text(4, vc(&FONT_XS, y, 11), &FONT_XS, t, k == ui.song_sel ? C_WHITE : C_GRAY);
-        if (seq.song_on && seq.playing && k == seq.song_pos)
-            play_icon(26, y + 1, seq.song_rec ? RGB(255, 80, 70) : C_WHITE);
-        if (k == sg->len) {                            /* one past the end: where the song grows */
-            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY: WHITE KEYS ADD BARS", k == ui.song_sel ? C_WHITE : C_DIM);
-            continue;
-        }
-        for (int pos = 0; pos < NPARTS; pos++) {
-            p = part_at(pos);
-            int muted = sg->bar[k].mute >> p & 1u;
-            t[0] = 'P';
-            put_i(t + 1, sg->bar[k].pat[p] + 1);
-            text_c(58 + pos * 36, vc(&FONT_XS, y, 11), &FONT_XS, muted ? "-" : t, muted ? C_DIM : PART_COL[p]);
-        }
-        if (SONG_REP(&sg->bar[k]) > 1) {               /* a bar played more than once: x2 .. x8 */
-            t[0] = 'x';
-            put_i(t + 1, SONG_REP(&sg->bar[k]));
-            text_r(238, vc(&FONT_XS, y, 11), &FONT_XS, t, C_WHITE);
-        }
-    }
-}
-
-/* Continuous send track with an explicit setting thumb, including zero/max. */
-static UI_DRAW void night_send(int x,int y,int w,int value,uint16_t col)
-{
-    int at=x+value*(w-3)/127;
-    cv_rect(x,y+2,w,3,UI_N_SIDE);
-    if(value)cv_rect(x,y+3,at-x+2,1,dim(col,8));
-    cv_rect(at,y,3,7,col);
-}
-
-static UI_DRAW void draw_fx(int band)
-{
-    int off=band*BAND_H;
-    char a[16],u[8],t[40],*q;
-    text_c(98,1-off,&FONT_T,"REVERB",C_GRAY);text_c(192,1-off,&FONT_T,"DELAY",C_GRAY);
-    for(int pos=0;pos<NPARTS;pos++) {
-        int p=part_at(pos),y=14+pos*15-off;
-        night_panel(3,y,234,13,0);
-        const char *name=part_display(p);
-        if(tw(&FONT_T,name)>49)name=part_s(p);
-        cv_text(7,y+2,&FONT_T,name,PART_COL[p]);
-        night_send(60,y+3,76,proj.sound.v[T_MIX][p][1],PART_COL[p]);
-        night_send(154,y+3,76,proj.sound.v[T_MIX][p][2],PART_COL[p]);
-    }
-    night_panel(3,92-off,234,20,0);
-    pref_value(PR(R_ENG,T_FX,0,FX_DL_TIME),a,u);
-    q=put_s(put_s(t,"DELAY "),a);
-    pref_value(PR(R_ENG,T_FX,0,FX_DL_TYPE),a,u);
-    put_s(put_s(q,"  "),a);cv_text(9,96-off,&FONT_S,t,C_HI);
-    night_panel(3,116-off,114,20,0);night_panel(123,116-off,114,20,0);
-    cv_text(9,121-off,&FONT_T,"FEEDBACK",C_GRAY);cv_text(129,121-off,&FONT_T,"RV DECAY",C_GRAY);
-    pref_value(PR(R_ENG,T_FX,0,FX_DL_FDBK),a,u);
-    put_s(put_s(t,a),u);
-    text_r(111,121-off,&FONT_T,t,C_WHITE);
-    pref_value(PR(R_ENG,T_FX,0,FX_RV_DECAY),a,u);
-    put_s(put_s(t,a),u);text_r(231,121-off,&FONT_T,t,C_WHITE);
-}
-
-/* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
-static UI_DRAW void draw_drum_mix(int band, int k)
-{
-    int t = k ? T_808 : T_909, v, o = band * BAND_H;
-    uint16_t col = PART_COL[k];
-    for (v = 0; v < NDRUM; v++) {
-        int x = 4 + v * 21, sel = v == ui.sel[k];
-        pref_t lv = find_ref(t, v, "Level"), pn = find_ref(t, v, "Pan");
-        int l = lv.kind ? proj.sound.v[t][v][lv.c] : 0, pa = pn.kind ? proj.sound.v[t][v][pn.c] : 64;
-        int muted = (seq.mute | seq.vmute) & (1u << (k * NDRUM + v)), fh = 96, f = l * fh / 127;
-        /* Shallow strip well and top caption: preserve the 96px level travel,
-         * independent hit brightness and the original pan/control geometry. */
-        surface_panel(x, 0 - o, 19, 134, 0, SOUND_FACE,
-                      sel ? dim(col, 8) : SOUND_EDGE, SOUND_SIDE);
-        surface_panel(x + 1, 1 - o, 17, 12, sel,
-                      sel ? col : SOUND_FACE, sel ? col : SOUND_EDGE, SOUND_SIDE);
-        text_c(x + 10, vc(&FONT_XS, 1, 12) - o, &FONT_XS,
-               engine_voice_name(t, v), sel ? C_BLACK : muted ? C_DIM : C_GRAY);
-        cv_rect(x + 6, 15 - o, 7, fh + 2, UI_N_SHADOW);
-        rbox(x + 7, 16 - o, 5, fh, 2, C_LINE);
-        if (f)                                        /* the level, dim; a hit lights it up to the level */
-            rbox(x + 7, 16 + fh - f - o, 5, f, 2, muted ? C_DIM : dim(col, sel ? 6 : 4));
-        {
-            uint32_t age=0; float envelope=0;
-            int live=engine_drum_view(k,v,&age,&envelope);
-            int hf=live?(int)((float)f*envelope+.5f):0;
-            /* Existing MIX travel and level remain; real voice EG lights separate
-             * 6px segments. This is the track LEVEL control, not a new PART slot. */
-            for(int sy=0;sy<fh;sy+=8) {
-                uint16_t ink=sy<hf && !muted?(sel?C_WHITE:col):
-                    sy<f?(muted?C_DIM:dim(col,sel?6:4)):C_LINE;
-                cv_rect(x+7,16+fh-sy-6-o,5,6,ink);
-            }
-        }
-        rbox(x + 3, 123 - o, 13, 3, 1, C_LINE);          /* the pan, a mark from the middle */
-        rbox(x + 3 + (pa * 10) / 127, 121 - o, 3, 7, 1, sel ? C_WHITE : C_GRAY);
-    }
-}
-
-/* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch â‰¤10 Hz; skip if shape/write
- * index unchanged so SPI stays calm (Baud Girl FM-1+VA scope policy). No second audio tap. */
-static UI_DRAW void draw_master_wave(void)
-{
-    enum { X0=8,W=188,MID=34,AMP=26 };
-    static int16_t latched[SCOPE_N];
-    static uint32_t last_ms, last_w, last_hash;
-    static uint8_t have, flat;
-    uint32_t now = plat_ms(), w = eng_scope_w, h, base;
-    int i, x, y0, y1;
-    if (!have || (int32_t)(now - last_ms) >= 100) {
-        base = w;
-        h = 2166136261u;
-        for (i = 0; i < (int)SCOPE_N; i++)
-            h = (h ^ (uint32_t)(uint16_t)eng_scope[(base + (uint32_t)i) & (SCOPE_N - 1u)]) * 16777619u;
-        if (!have || h != last_hash || w != last_w) {
-            flat = 1;
-            for (i = 0; i < (int)SCOPE_N; i++) {
-                latched[i] = eng_scope[(base + (uint32_t)i) & (SCOPE_N - 1u)];
-                if (latched[i]) flat = 0;
-            }
-            last_hash = h;
-            last_w = w;
-            have = 1;
-        }
-        last_ms = now;
-    }
-    night_panel(3,1,198,66,0);
-    cv_rect(X0,MID,W,1,C_LINE);
-    if (flat) {
-        /* Same inclusive horizontal pixels as 187 adjacent one-pixel spans. */
-        cv_line(X0, MID, X0 + W - 1, MID, part_col());
-        return;
-    }
-    y0 = MID - (int)latched[0] * AMP / 32768;
-    if (y0 < 2)
-        y0 = 2;
-    if (y0 > BAND_H - 3)
-        y0 = BAND_H - 3;
-    for (x = 1; x < W; x++) {
-        int si = x * (int)SCOPE_N / W;
-        y1 = MID - (int)latched[si] * AMP / 32768;
-        if (y1 < 2)
-            y1 = 2;
-        if (y1 > BAND_H - 3)
-            y1 = BAND_H - 3;
-        cv_line(X0 + x - 1, y0, X0 + x, y1, part_col());
-        y0 = y1;
-    }
-}
-
-static UI_DRAW void draw_mix(int band)
-{
-    int p, master = master_mix_page(), wave = wave_mix_page();
-    if (drum_mix_page() >= 0) {
-        draw_drum_mix(band, drum_mix_page());
-        return;
-    }
-    /* MASTER peak history: fixed 98 columns. A scrolling ring rewrote every column each
-     * frame, so cv_commit_rect sent nearly the whole main band (~18 ms SPI) â€” panel tear
-     * ("broken" hist) and knob-strip lag (draw_knobs waits on that blit). Write-head
-     * overwrite + wall-clock sample keeps geometry stable and dirties ~one column. */
-    if (band == 0 && master) {
-        enum { HIST_N = 98, HIST_MS = 20 };             /* ~2 s window; never shrink width */
-        static uint8_t hist[HIST_N];
-        static uint32_t hw, hist_ms;                    /* hw was uint8_t: ring broke every 256 */
-        static uint16_t peak_hold;
-        int x, pk = 0;
-        uint32_t now = plat_ms();
-        for (p = 0; p < NPARTS; p++)
-            pk = eng_peak[p] > pk ? eng_peak[p] : pk;
-        if ((uint16_t)pk > peak_hold)
-            peak_hold = (uint16_t)pk;
-        if (!hist_ms || (int32_t)(now - hist_ms) >= HIST_MS) {
-            hist[hw % (uint32_t)HIST_N] = (uint8_t)(peak_hold * 62 / 32768);
-            hw++;
-            peak_hold = 0;
-            hist_ms = now;                             /* one column per paint when overdue */
-        }
-        for (x = 0; x < HIST_N; x++) {
-            int h = hist[x];
-            cv_rect(4 + x * 2, 66 - h, 2, h + 1, part_col());
-        }
-    }
-    if (band == 0 && wave)
-        draw_master_wave();
-    if (band == 0 && !master && !wave) {               /* channel strips */
-        for (int pos = 0; pos < NPARTS; pos++) {
-            p = part_at(pos);
-            int x = 6 + pos * 38, lvl = proj.sound.v[T_MIX][p][0], pk = eng_peak[p] * 64 / 32768;
-            int selected=cur_page()==0 && p==ui.mixsel;
-            surface_panel(x-2,0,30,BAND_H,selected,selected?dim(PART_COL[p],3):SOUND_FACE,
-                          selected?PART_COL[p]:SOUND_EDGE,SOUND_SIDE);
-            rbox(x + 10, 4, 6, 64, 3, C_LINE);
-            if (pk > 1)
-                rbox(x + 10, 68 - pk, 6, pk, 3, part_muted(p) ? C_DIM : PART_COL[p]);
-            rbox(x + 4, 67 - lvl * 64 / 127, 18, 3, 1, C_WHITE);
-        }
-    }
-    if (band == 0) {                                   /* the master's gain reduction (MASTER and WAVE) */
-        {
-            int gr = (int)(engine_gr_db() * 64.0f / 24.0f);
-            gr = gr > 64 ? 64 : gr;
-            night_panel(205,1,32,66,0);
-            rbox(208,5,7,61,3,C_LINE);
-            if (gr > 1)
-                rbox(208,5,7,gr>61?61:gr,3,RGB(255,80,60));
-            cv_text(218,4,&FONT_T,"GR",C_GRAY);
-        }
-    } else {
-        char t[24], a[12], u[8], *q;
-        if(wave) {
-            night_panel(3,3,114,34,0);night_panel(123,3,114,34,0);
-            cv_text(9,6,&FONT_T,"COMP REDUCTION",C_GRAY);
-            cv_text(129,6,&FONT_T,"PUMP",C_GRAY);
-            if(engine_gr_db()>0.5f)put_s(put_i(put_s(t,"-"),(int)(engine_gr_db()+0.5f))," dB");
-            else put_s(t,"0 dB");
-            cv_text(9,20,&FONT_S,t,C_WHITE);
-            pref_value(PR(R_ENG,T_MST,0,MST_PUMP),a,u);put_s(put_s(t,a),u);
-            cv_text(129,20,&FONT_S,t,C_HI);
-            night_panel(3,42,234,24,0);
-            put_s(put_i(put_s(t,"AUDIO LOAD "),(int)plat_cpu_pct()),"%");
-            cv_text(9,49,&FONT_XS,t,plat_cpu_pct()>85u?C_AMB:C_GRAY);
-            if(engine_guard_active())text_r(229,49,&FONT_XS,"GUARD",C_AMB);
-            return;
-        }
-        for (int pos = 0; pos < NPARTS && !master && !wave; pos++) { /* strip names */
-            p = part_at(pos);
-            text_c(6 + pos * 38 + 13, 0, &FONT_XS, part_s(p), part_muted(p) ? C_LINE : PART_COL[p]);
-        }
-        night_panel(0,14,118,31,0);night_panel(120,14,120,31,0);
-        night_panel(0,46,240,22,0);
-        if ((int)(engine_gr_db() + 0.5f))
-            put_s(put_i(put_s(t, "COMP -"), (int)(engine_gr_db() + 0.5f)), "dB");
-        else
-            put_s(t, "COMP 0dB");
-        cv_text(4, 20, &FONT_B, t, engine_gr_db() > 0.5f ? RGB(255, 110, 90) : C_GRAY);
-        pref_value(PR(R_ENG, T_MST, 0, MST_PUMP), a, u);
-        q = put_s(put_s(t, "PUMP "), a);
-        put_s(q, u);
-        cv_text(124, 20, &FONT_B, t, proj.sound.v[T_MST][0][MST_PUMP] ? C_HI : C_GRAY);
-        put_s(put_i(a, (int)plat_cpu_pct()), "%");
-        cv_text(4, 50, &FONT_XS, "AUDIO LOAD", C_DIM);
-        cv_text(70, 50, &FONT_XS, a, plat_cpu_pct() > 85u ? RGB(255, 60, 60) : C_GRAY);
-        if (engine_guard_active())                    /* the overload guard is saving the CPU */
-            cv_text(100, 50, &FONT_XS, "GUARD", C_AMB);
-    }
-}
-
-/* PERF: the live window, or the test's progress and table */
-static char *put_pct10(char *q, int v)                /* 123 -> "12.3%" */
-{
-    q = put_i(q, v / 10);
-    *q++ = '.';
-    q = put_i(q, v % 10);
-    return put_s(q, "%");
-}
-static UI_DRAW void draw_perf(int band)
-{
-    /* First five match PART_N; only FX/MASTER/SEQ are perf-only. */
-    static const char *const SN_TAIL[ENG_PROF_N - NPARTS] = {"FX", "MASTER", "SEQ"};
-    char t[40], *q;
-    int k;
-#if X0X_LCD_TRACE && !defined(X0X_HOST)
-    /* Development trace readout: last 64 samples, P50/P95/worst in microseconds.
-     * The ordinary PERF display is byte-for-byte unchanged in default builds. */
-    if (band && perf.test < 0) {
-        static const char *const names[LCD_T_COUNT] = {"KEY", "MIDI", "LCD", "FRAME", "TMR5", "AUDIO"};
-        for (int n = 0; n < LCD_T_COUNT; ++n) {
-            q = put_s(t, names[n]); q = put_s(q, " ");
-            q = put_i(q, (int)lcd_trace_percentile((unsigned)n, 50));
-            q = put_s(q, "/");
-            q = put_i(q, (int)lcd_trace_percentile((unsigned)n, 95));
-            q = put_s(q, "/");
-            put_i(q, (int)lcd_trace_hist[n].worst);
-            cv_text(4, 1 + n * 10, &FONT_T, t, C_GRAY);
-        }
-        put_i(put_s(t, "LCD B/FRAME "), (int)lcd_trace_last_frame_bytes);
-        cv_text(4, 61, &FONT_T, t, C_DIM);
-        return;
-    }
-#endif
-    if (band == 0) {
-        q = put_s(t, "CLOCK ");
-        if (perf.mhz10) {
-            q = put_i(q, perf.mhz10 / 10);
-            put_s(q, " MHz");
-        } else
-            put_s(q, plat_cycles_cpu() ? "..." : "--");
-        cv_text(4, 2, &FONT_B, t, C_WHITE);
-        if (plat_cpu2_on())                           /* the cores: one after the second gave up (fm1-x0x#10) */
-            text_r(236, 6, &FONT_XS, "2 CORES", C_GRAY);
-        else {
-            q = put_s(t, "1 CORE");
-            if (plat_cpu2_gave_up() == 1)
-                put_i(put_s(q, ": BAD READS "), (int)plat_cpu2_bad());
-            else if (plat_cpu2_gave_up() == 2)
-                put_s(q, ": 2ND TIMED OUT");
-            text_r(236, 6, &FONT_XS, t, plat_cpu2_gave_up() ? RGB(255, 80, 60) : C_GRAY);
-        }
-        if (X0X_GIT_SHA[0])
-            text_r(236, 16, &FONT_XS, "GIT " X0X_GIT_SHA, C_GRAY);
-        if (perf.test >= 0) {
-            int done = perf.phase == 4;
-            q = put_s(t, done ? "PERF TEST DONE" : "PERF TEST ");
-            if (!done) {
-                q = put_i(q, perf.test + 1);
-                q = put_s(q, "/3  ");
-                put_s(q, PT_N[perf.test < 3 ? perf.test : 2]);
-            }
-            cv_text(4, 24, &FONT_S, t, done ? C_HI : C_AMB);
-            return;
-        }
-        q = put_s(t, "LOAD ");
-        q = put_i(q, perf.load);
-        q = put_s(q, "%  PEAK ");
-        q = put_i(q, perf.peak);
-        q = put_s(q, "%  DROPOUTS ");
-        put_i(q, (int)plat_xruns());
-        cv_text(4, 24, &FONT_S, t, C_HI);
-        if (perf.stalls_on) {
-            q = put_s(t, "STALLS  FETCH ");
-            q = put_i(q, perf.stall[0]);
-            q = put_s(q, "%  READ ");
-            q = put_i(q, perf.stall[1]);
-            q = put_s(q, "%  WRITE ");
-            put_s(put_i(q, perf.stall[2]), "%");
-        } else
-            put_s(t, "STALLS OFF");
-        cv_text(4, 46, &FONT_XS, t, perf.stalls_on ? C_GRAY : C_DIM);
-        if (!perf.stalls_on && plat_irq_stack_size()) {   /* the interrupts' 8 KiB: the deepest so far */
-            q = put_s(t, "IRQ STACK ");
-            q = put_i(q, (int)plat_irq_stack_used());
-            q = put_s(q, " / ");
-            put_s(put_i(q, (int)plat_irq_stack_size()), " B");
-            text_r(236, 46, &FONT_XS, t, plat_irq_stack_used() * 4u > plat_irq_stack_size() * 3u ? RGB(255, 80, 60) : C_GRAY);
-        }
-        return;
-    }
-    if (perf.test >= 0) {                             /* the table, so far */
-        for (k = 0; k < 3; k++) {
-            int y = k * 14 + 2;
-            cv_text(4, y, &FONT_S, PT_N[k], perf.test == k && perf.phase != 4 ? C_AMB : C_GRAY);
-            if (!perf.res_load[k])
-                continue;
-            q = put_pct10(t, perf.res_load[k]);
-            q = put_s(q, " (");
-            q = put_i(q, perf.res_peak[k]);
-            put_s(q, "%)");
-            cv_text(112, y, &FONT_S, t, C_WHITE);
-            if (perf.res_cps[k]) {
-                put_i(t, perf.res_cps[k]);
-                text_r(236, y, &FONT_S, t, C_HI);
-            }
-        }
-        if (perf.phase == 4)
-            cv_text(4, 50, &FONT_XS, "", C_DIM);
-        if (plat_irq_stack_size()) {                 /* the interrupts' stack, the deepest so far (after the test too) */
-            q = put_s(t, "IRQ STACK ");
-            q = put_i(q, (int)plat_irq_stack_used());
-            q = put_s(q, " / ");
-            put_s(put_i(q, (int)plat_irq_stack_size()), " B");
-            text_r(236, 50, &FONT_XS, t, plat_irq_stack_used() * 4u > plat_irq_stack_size() * 3u ? RGB(255, 80, 60) : C_GRAY);
-        }
-        return;
-    }
-    for (k = 0; k < ENG_PROF_N; k++) {                /* each stage's share of the CPU */
-        int x = (k & 1) * 118 + 4, y = (k >> 1) * 12;
-        int stage = k < NPARTS ? part_at(k) : k;
-        cv_text(x, y, &FONT_XS, k < NPARTS ? part_s(stage) : SN_TAIL[k - NPARTS], C_GRAY);
-        put_pct10(t, perf.stage[stage]);
-        text_r(x + 108, y, &FONT_XS, t, C_WHITE);
-    }
-    if (perf.cps) {
-        q = put_s(t, "RENDER ");
-        q = put_i(q, perf.cps);
-        put_s(q, " CYCLES / SAMPLE");
-        cv_text(4, 44, &FONT_XS, t, C_GRAY);
-    }
-    q = put_s(t, engine_guard_active() ? "GUARD ON  " : "GUARD ");   /* the overload guard: engaged, times */
-    put_s(put_i(q, (int)eng_guard_count), "x");
-    text_r(236, 55, &FONT_XS, t, engine_guard_active() ? C_AMB : C_DIM);
-    cv_text(4, 55, &FONT_XS, "", C_DIM);
-}
-
-/* the readout: the knob being turned, large, across the bottom band */
-static UI_DRAW void draw_readout(void)
-{
-    char num[36], unit[8];
-    pref_t r;
-    int32_t w, x;
-    const char *nm;
-    char t[24];
-    if (ui.touched == 4) {
-        r = PR(R_TEMPO, 0, 0, 0);
-        nm = "TEMPO";
-    } else {
-        r = pg.r[cur_page()][ui.touched];
-        nm = caps_of(pref_name(r));
-        if (track_page()) {                              /* a track's own: "BD  Tune" */
-            put_s(put_s(put_s(t, engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])), "  "), nm);
-            nm = t;
-        } else if (in_pattern(r)) {                      /* the pattern's: "P3  LENGTH" (it changes with it) */
-            int pp = r.kind == R_DLEN || r.kind == R_DRATE ? r.a : r.kind >= R_BLEN && r.kind <= R_BTRANS ? NKIT + r.a
-                     : r.kind == R_SWING ? PART_909 : part_view() ? ui.part : PART_909;
-            put_s(put_s(put_i(put_s(t, "P"), seq.ppat[pp] + 1), "  "), nm);
-            nm = t;
-        }
-    }
-    pref_value(r, num, unit);
-    if (r.kind == R_BPRESET) {
-        const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
-                                               (unsigned)engine_bass_requested_preset(r.b));
-        put_s(num,caps_of(name ? name : "USER"));
-        put_i(put_s(t,"PRESET "),engine_bass_requested_preset(r.b)+1); nm=t;
-    }
-    {   /* one row: the name on the left, the value (+ unit) on the right, both on the box's middle */
-        const int32_t bx = 8, by = 14, bw = 224, bh = 50;
-        const felucca_font_t *vf = &FONT_M;           /* (the 31 px face for numbers was dropped: 7.6 KB of flash) */
-        int32_t ly, uw = unit[0] ? tw(&FONT_S, unit) + 3 : 0;
-        if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS) {
-            int room = bw-24-tw(&FONT_B,nm)-10-uw;
-            if (tw(vf,num) > room) {
-                if (tw(&FONT_B,num) <= room) vf=&FONT_B;
-                else if (tw(&FONT_XS,num) <= room) vf=&FONT_XS;
-                else vf=&FONT_T;
-            }
-        }
-        ly = vc(vf, by, bh);
-        box(bx, by, bw, bh, C_BLACK);
-        frame(bx, by, bw, bh, part_col());
-        cv_text(bx + 12, vc(&FONT_B, by, bh), &FONT_B, nm, C_GRAY);
-        w = tw(vf, num);
-        x = bx + bw - 12 - uw - w;
-        cv_text(x, ly, vf, num, C_WHITE);
-        if (unit[0])
-            cv_text(bx + bw - 12 - uw + 3, base_y(vf, ly, &FONT_S), &FONT_S, unit, C_GRAY);
-    }
-}
-
-static const char *action_key_cue(void)
-{
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-    if(smk_clip_mode_on())return ""; /* Physical SCALE is masked; SMC dispatch stays available. */
-#endif
-    return "";
-}
-
-/* Open-beta display to the left of the action arrow. Empty on an unversioned build.
- * The name and the arrow stay put; a label that would touch either one is not drawn. */
-static int release_label_box(const char *label, int selected, int32_t *x, int32_t *w)
-{
-    int32_t name_w, lw, lx;
-    if (!label || !label[0])
-        return 0;
-    name_w = tw(selected ? &FONT_B : &FONT_S, "ABOUT DnBOX");
-    lw = tw(&FONT_XS, label);
-    lx = 226 - tw(&FONT_XS, action_key_cue()) - 8 - lw;
-    if (lx < 8 + name_w + 4 || lx + lw > 226 - tw(&FONT_XS, action_key_cue()) - 8)
-        return 0;
-    *x = lx;
-    *w = lw;
-    return 1;
-}
-
-/* BT NAME row (restored from 0e58b960): the connected peers joined with ", ",
- * held 700 ms at each end and moved at 24 px/s when wider than the row. */
-#define PEER_TEXT_CAP (PLAT_BLE_PEER_CAP*(PLAT_BLE_PEER_NAME_MAX+2u)-1u)
-static struct { char text[PEER_TEXT_CAP]; unsigned count; int state, central, active, travel; uint32_t start; } peer_scroll;
-static void peer_join(char out[PEER_TEXT_CAP], const plat_ble_peers_t *peers)
-{
-    unsigned k=0,count=peers->count<PLAT_BLE_PEER_CAP?peers->count:PLAT_BLE_PEER_CAP;
-    for(unsigned i=0;i<count;i++) {
-        if(i){out[k++]=',';out[k++]=' ';}
-        unsigned n=0;while(n<PLAT_BLE_PEER_NAME_MAX && peers->name[i][n]) {
-            unsigned char ch=(unsigned char)peers->name[i][n++];out[k++]=(char)(ch>=32&&ch<=126?ch:'?');
-        }
-    }
-    if(!k)out[k++]='-';
-    out[k]=0;
-}
-static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel,uint32_t now)
-{
-    if(!peer_scroll.active || strcmp_s(text,peer_scroll.text) || peers->count!=peer_scroll.count ||
-       peers->state!=peer_scroll.state || peers->central!=peer_scroll.central || travel!=peer_scroll.travel) {
-        put_s(peer_scroll.text,text);peer_scroll.count=peers->count;peer_scroll.state=peers->state;
-        peer_scroll.central=peers->central;peer_scroll.travel=travel;peer_scroll.start=now;peer_scroll.active=1;
-    }
-    if(travel<=0)return 0;
-    uint32_t move=((uint32_t)travel*1000u+23u)/24u, phase=(now-peer_scroll.start)%(2u*(700u+move));
-    if(phase<700u)return 0;
-    phase-=700u;
-    if(phase<move)return (int)(phase*24u/1000u);
-    phase-=move;
-    if(phase<700u)return travel;
-    phase-=700u;
-    return travel-(int)(phase*24u/1000u);
-}
-
-/* a list over the main area: six rows of 24 px */
-static UI_DRAW void draw_list(int band)
-{
-    int i;
-    for (i = 0; i < 3; i++) {
-        int row = ui.list_top + band * 3 + i, y = i * 23, sel = row == ui.list_sel;
-        pref_t r;
-        char num[36], unit[8];
-        const x0x_param_t *d;
-        if (row >= ui.list_n)
-            break;
-        r = list_rows[row];
-        if (r.kind == R_HDR) {                         /* a section: whose values follow */
-            char t[28];
-            hdr_name(r.a, t);
-            cv_text(8, vc(&FONT_XS, y + 4, 16), &FONT_XS, t, C_AMB);
-            cv_rect(8, y + 19, 220, 1, C_LINE);
-            continue;
-        }
-        d = pref_desc(r);
-        surface_panel(3,y+1,229,21,sel,sel?dim(part_col(),6):SOUND_FACE,
-                      sel?part_col():SOUND_EDGE,SOUND_SIDE);
-        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);
-        if (r.kind == R_SECTION) {                     /* a GLOBAL category: its chevron */
-            cv_line(221,y+8,225,y+11,sel?C_AMB:C_DIM);cv_line(225,y+11,221,y+14,sel?C_AMB:C_DIM);continue;
-        }
-        if (r.kind == R_ACT) {                         /* an action: the return arrow */
-            uint16_t ac = sel ? C_WHITE : C_DIM;
-            if (r.a == ACT_ABOUT) {
-                int32_t lx, lw;
-                if (release_label_box(X0X_RELEASE_LABEL, sel, &lx, &lw))
-                    cv_text(lx, vc(&FONT_XS, y + 1, 18), &FONT_XS, X0X_RELEASE_LABEL, sel ? C_WHITE : C_HI);
-            }
-            text_r(226,vc(&FONT_XS,y+1,18),&FONT_XS,action_key_cue(),ac);
-            continue;
-        }
-        if(r.kind==R_BTNAME) {                       /* connected peers: one line, scrolls when long */
-            plat_ble_peers_t peers;char shown[PEER_TEXT_CAP];const felucca_font_t *nf=sel?&FONT_B:&FONT_S;
-            plat_ble_peers(&peers);peer_join(shown,&peers);
-            int left=8+tw(nf,"NAME")+8, width=226-left, travel=tw(nf,shown)-width;
-            int offset=peer_offset(shown,&peers,travel,plat_ms());
-            cv_text_clip(left-offset,vc(nf,y+1,18),nf,shown,sel?C_WHITE:C_HI,left,226);continue;
-        }
-        if (r.kind == R_PARTON) {                      /* M7 (#815 item 7): part stripe, switch, no words */
-            int on = pref_get(r);
-            uint16_t ink = PART_COL[r.a % NPARTS];
-            cv_rect(3, y + 1, 2, 21, ink);
-            ui_pictogram(168, y + 6, on ? UI_G_CHECK : UI_G_MUTE, 1, on ? ink : C_DIM);
-            ui_state_toggle(190, y + 6, on, on ? ink : C_GRAY);
-            continue;
-        }
-        pref_value(r, num, unit);
-        if (r.kind == R_BPRESET) {
-            const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
-                                                   (unsigned)engine_bass_requested_preset(r.b));
-            put_s(num,caps_of(name ? name : "USER"));
-        }
-        {
-            const felucca_font_t *nf = sel ? &FONT_B : &FONT_S;
-            if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS) {
-                int room = 226-8-tw(sel ? &FONT_B : &FONT_S,caps_of(pref_name(r)))-8-
-                           (unit[0] ? tw(&FONT_XS,unit)+2 : 0);
-                if (tw(nf,num) > room) nf = tw(&FONT_XS,num) <= room ? &FONT_XS : &FONT_T;
-            }
-            int32_t ny = vc(nf, y + 1, 18), ux = 226 - tw(&FONT_XS, unit);
-            cv_text(ux, base_y(nf, ny, &FONT_XS), &FONT_XS, unit, sel ? C_WHITE : C_GRAY);
-            text_r(unit[0] ? ux - 2 : 226, ny, nf, num, sel ? C_WHITE : C_HI);
-        }
-        if (d && !d->names && d->max >= 24) {          /* a continuous value: its bar */
-            int v = pref_get(r);
-            rbox(108, y + 18, 70, 3, 1, C_LINE);
-            if (v)
-                rbox(108, y + 18, 3 + v * 67 / d->max, 3, 1, sel ? part_col() : C_DIM);
-        }
-    }
-    if (ui.list_n > 6) {                               /* the scrollbar */
-        int h = 2 * BAND_H * 6 / ui.list_n, y = 2 * BAND_H * ui.list_top / ui.list_n - band * BAND_H;
-        rbox(235, 0, 3, BAND_H, 1, C_LINE);
-        rbox(235, y, 3, h, 1, C_HI);
-    }
-}
-
-static UI_DRAW void draw_ask(int band)
-{
-    uint16_t red = RGB(255, 80, 60);
-    if (band == 0) {
-        frame(6, 10, 228, 62, red);
-        cv_rect(7, 71, 226, 1, C_BLACK);
-        text_c(120, 24, &FONT_B, ui.ask_q[0], C_WHITE);
-        text_c(120, 46, &FONT_S, ui.ask_q[1], C_GRAY);
-    } else {
-        cv_rect(6, 0, 1, 44, red);
-        cv_rect(233, 0, 1, 44, red);
-        cv_rect(7, 44, 226, 1, red);
-        box(22, 10, 92, 24, red);
-        text_c(68, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_SEL " YES", C_BLACK);
-        frame(126, 10, 92, 24, C_GRAY);
-        text_c(172, vc(&FONT_B, 10, 24), &FONT_B, UI_CAP_HOME " NO", C_GRAY);
-    }
-}
-
-static UI_DRAW void draw_help(int band)
-{
-    const char *l[HELP_LINES];
-    int n = help_lines(ui.help - 1, l), k;
-    uint16_t c = part_col();
-    if (band == 0) {
-        box(6, 4, 228, 24, c);
-        text_c(120, vc(&FONT_B, 4, 24), &FONT_B, btn_label(ui.help - 1), C_BLACK);
-    }
-    for (k = 0; k < n; k++) {                            /* evenly spaced; a line across the bands in both */
-        int32_t y = 34 + k * 18 - band * BAND_H;
-        if (y > -18 && y < BAND_H)
-            text_c(120, y, &FONT_XS, l[k], C_WHITE);
-    }
-}
-
-#ifdef X0X_HOST
-/* every card, on every kind of screen, fits the screen: 1 = yes (prints the first that does not) */
-static int help_fits(void)
-{
-    static const uint8_t views[] = {V_PART, V_SEQ, V_HOME, V_SONG, V_GEN, V_FX, V_MIX};
-    const char *l[HELP_LINES];
-    ui_t keep = ui;
-    uint8_t keep_any = any_button;
-    int b, p, v, kb, n, k, ok = 1;
-    for (v = 0; v < (int)sizeof views; v++)
-        for (p = 0; p < NPARTS; p++)
-            for (kb = 0; kb < 2; kb++)
-                for (b = 0; b < NB; b++) {
-                    ui.view = views[v];
-                    ui.part = (uint8_t)p;
-                    ui.rec = (uint8_t)kb;
-                    {
-                        const char *fa, *fb, *fc;
-                        int32_t w;
-                        ui.overlay = (uint8_t)(b % 3);           /* none, a list, a question */
-                        ui.gen_stale[0] = (uint8_t)(b & 1);
-                        ui.rec = (uint8_t)(b & 2);
-                        any_button = (uint8_t)(b != 0);
-                        footer_text(&fa, &fb, &fc);
-                        w = 4 + (fa ? tw(&FONT_T, fa) : 0) + (fb ? FOOT_GAP + tw(&FONT_T, fb) : 0) + (fc ? FOOT_GAP + tw(&FONT_T, fc) : 0);
-                        if (w > 236) {
-                            if (ok)
-                                printf("footer too wide: \"%s / %s / %s\" (%d px)\n", fa ? fa : "", fb ? fb : "", fc ? fc : "", (int)w);
-                            ok = 0;
-                        }
-                    }
-                    n = help_lines(b, l);
-                    if (n < 1 || n > HELP_LINES)
-                        ok = 0;
-                    for (k = 0; k < n; k++)
-                        if (tw(&FONT_XS, l[k]) > 224) {
-                            if (ok)
-                                printf("help card too wide: %s: \"%s\" (%d px)\n", btn_label(b), l[k], (int)tw(&FONT_XS, l[k]));
-                            ok = 0;
-                        }
-                }
-    ui = keep;
-    any_button = keep_any;
-    return ok;
-}
-#endif
-
-/* the footer: one line at the bottom of the main area, what the keys do on this screen (until the
- * first button, how to find out what any of them does) */
-static uint16_t footer_text(const char **a, const char **b, const char **c)
-{
-    *a = *b = *c = 0;
-    return C_DIM;
-}
-#define FOOT_Y 71                     /* in the knob row: its last line, in the tiny face */
-static UI_DRAW void draw_footer(void)
-{
-    const char *a, *b, *c;
-    uint16_t col = footer_text(&a, &b, &c);
-    segs(4, vc(&FONT_T, FOOT_Y, 9), &FONT_T, col, FOOT_GAP, a, b, c, 0);
-}
-
-static UI_DRAW void draw_main(void)
-{
-    int band, readout = ui.touched >= 0 && (int32_t)(ui.touch_until - plat_ms()) > 0 &&
-                        ui.overlay == O_NONE && !ui.help;
-    int envelope = readout && adsr_touch_active();
-    if (!readout)
-        ui.touched = -1;
-#if BOARD_SMK37
-    {
-        /* Clip mode: the main area shows the clip grid (main_fm1.c smk_clip_lcd_draw).
-         * The function returns 0 when no redraw is due (rate limit). On exit, the
-         * normal view below draws the full area again at the next frame. */
-        extern uint8_t smk_clip_mode_on(void);
-        extern uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h);
-        extern void smk_clip_lcd_force(void);
-        extern uint8_t smk_clip_wait(void);
-        static uint8_t clip_wait_on;              /* 1: the waiting screen is on the LCD */
-        if (!blit_hash[1]) clip_wait_on = 0u;      /* an SMC screen covered the waiting screen */
-#if X0X_DEV_PADCAL
-        extern uint8_t smk_padcal_on(void);
-        extern uint8_t smk_padcal_draw(uint32_t w, uint32_t h);
-        if (smk_padcal_on()) {                    /* the pad calibration page (main_fm1.c, CLP-79) */
-            clip_wait_on = 0u;                    /* its LCD page replaces the waiting screen */
-            if (smk_padcal_draw(240u, 2u * BAND_H))
-                cv_commit_rect(1, 0, MAIN_Y);
-            return;
-        }
-#endif
-        if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help && smk_clip_wait()) {
-            if (!clip_wait_on) {                  /* CLP-80: no Loopy host: the waiting screen, not the grid */
-                clip_wait_on = 1u;
-                cv_begin(240, 2 * BAND_H, C_BLACK);
-                cv_band(0, 2 * BAND_H);
-                text_c(120, 34, &FONT_B, "WAITING FOR", C_WHITE);
-                text_c(120, 56, &FONT_B, "LOOPY PRO", C_WHITE);
-                text_c(120, 86, &FONT_XS, "USB OR BLUETOOTH", C_GRAY);
-                cv_commit_rect(1, 0, MAIN_Y);
-            }
-            smk_clip_lcd_force();                 /* the grid draws at once when a host comes */
-            return;
-        }
-        clip_wait_on = 0u;
-        if (smk_clip_mode_on() && ui.overlay == O_NONE && !ui.help) {
-            if (smk_clip_lcd_draw(240u, 2u * BAND_H))
-                cv_commit_rect(1, 0, MAIN_Y);
-            return;
-        }
-        if (smk_clip_mode_on())
-            smk_clip_lcd_force();   /* a menu (for example GLO) is on the screen: draw the grid again after it */
-    }
-#endif
-    cv_begin(240, 2 * BAND_H, C_BLACK);           /* both bands, then one transfer: no tear between them */
-    for (band = 0; band < 2; band++) {
-        cv_band(band * BAND_H, BAND_H);
-        if (ui.help)
-            draw_help(band);
-        else if (ui.overlay == O_ASK)
-            draw_ask(band);
-        else if (ui.overlay == O_LIST)
-            draw_list(band);
-        else if (ui.view == V_HOME)
-            draw_home(band);
-        else if (ui.view == V_FX)
-            draw_fx(band);
-        else if (ui.view == V_MIX)
-            draw_mix(band);
-        else if (ui.view == V_SONG)
-            draw_song(band);
-        else if (ui.view == V_PERF)
-            draw_perf(band);
-        else if (ui.view == V_PART && is_drum())
-            draw_drum_voice(band);
-        else if (ui.view == V_PART && is_303())
-            draw_part_sound(band);
-        else if (is_drum())
-            draw_drum(band);
-        else if (is_303())
-            draw_303(band, ui.view == V_GEN);
-        else
-            draw_break(band);
-        if (band == 1 && readout && !envelope &&
-            !(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ)) &&
-            !(ui.brk_choice_on && engine_brk_preview_active()) &&
-            !(ui.view == V_PART && (is_drum() || is_303())))
-            draw_readout();
-    }
-    cv_band(0, 2 * BAND_H);
-    cv_commit_rect(1, 0, MAIN_Y);
-}
-
-/* -------------------------------------------------------------- knob strip --- */
-static void cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)
-{
-    int32_t w = tw(&FONT_B, num) + (unit[0] ? tw(&FONT_XS, unit) + 1 : 0), x = cx - w / 2;
-    x = cv_text(x, y, &FONT_B, num, c);
-    if (unit[0])
-        cv_text(x + 1, base_y(&FONT_B, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
-}
-
-#include "ui_waveform.h"
-
-/* A shape cue, not a sampled oscilloscope. Chicago Wave continuously crossfades
- * saw and square; Miami's carrier, modulator and LFO are discrete choices. */
-static UI_DRAW int wave_shape(pref_t r, int v, int *mix)
-{
-    if (r.kind != R_ENG || r.a != T_303) return 0;
-    /* Original control slots (ui_original_controls.h), never legacy IDs:
-     * Chicago 0 WAVE; Miami 0/6 WAVE (TRI/SAW/SQR/PUL), 11 wobble SHAPE. */
-    unsigned kind = (unsigned)engine_bass_sound_bank(&proj.sound,r.b);
-    if (kind == ORIGINAL_SOUND_CHICAGO) {
-        if (r.c == 0) { *mix = v; return 1; }
-        return 0;
-    }
-    if (kind != ORIGINAL_SOUND_MIAMI || (r.c != 0 && r.c != 6 && r.c != 11)) return 0;
-    const ui_original_control_view *o = original_text_view(r,v);
-    if (!o) return 0;
-    unsigned q = o->shape[r.c == 0 ? 0 : r.c == 6 ? 1 : 2];
-    if (r.c == 11) { /* TRI, DOWN, UP, SQR */
-        if (q == 1 || q == 2) { *mix = 0; return q == 1 ? 4 : 1; } /* 4 falls, 1 rises */
-        *mix = q == 3 ? 127 : 0; return 2;
-    }
-    if (q == 1) { *mix = 0; return 1; }                      /* SAW */
-    *mix = q == 0 ? 0 : 127; return q == 3 ? 3 : 2;          /* TRI, SQR, PUL */
-}
-
-/* Engine waveform cue (restored from ca8299b6): slot 0 is the Chicago
- * oscillator mix or the Miami carrier, 1 the Miami modulator, 2 the wobble. */
-static int original_wave_slot(unsigned kind,int p)
-{
-    if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) return -1;
-    if(p==0)return 0;
-    if(kind==ORIGINAL_SOUND_MIAMI)return p==6?1:p==11?2:-1;
-    return -1;
-}
-static UI_DRAW void draw_original_wave(int cx,int y,const ui_original_wave_cache *v,int slot,uint16_t ink,uint16_t face)
-{
-    cv_rect(cx-14,y+v->zero[slot],UI_ORIGINAL_WAVE_W,1,blend(face,ink,3));
-    for(int i=1;i<UI_ORIGINAL_WAVE_W;i++)
-        cv_line(cx-15+i,y+v->wave[slot][i-1],cx-14+i,y+v->wave[slot][i],ink);
-}
-
-enum { MIAMI_WAVE_HEIGHT=19, MIAMI_WAVE_ZERO=9, MIAMI_WAVE_GAIN=8 };
-/* One affine projection per supported range. The pulse zero is near its low
- * rail, not the midpoint: preserve its +1 / -1/9 relative amplitudes. */
-static float miami_wave_plot_y(int pulse, float v)
-{
-    return pulse ? 1.0f+16.0f*(1.0f-v)/(1.0f+1.0f/9.0f) :
-                   (float)MIAMI_WAVE_ZERO-(float)MIAMI_WAVE_GAIN*v;
-}
-static UI_DRAW void draw_wave_glyph(int cx, int y, int shape, int mix, uint16_t col, uint16_t face)
-{
-    if(shape==2 || shape==3) {
-        /* Integrate line coverage in four horizontal subcolumns. Sample the
-         * actual periodic function, never blur/average its amplitude or duty.
-         * Tall transitions stay vertical; positive values are above the midline.
-         * Use the free value-cell height: 29x19, one cycle. A single
-         * affine scale preserves DC/asymmetry; never split the two polarities. */
-        int x,j,k,pulse=shape==3 && mix!=0;
-        int zero=(int)(miami_wave_plot_y(pulse,0)+.5f);
-        cv_rect(cx-14,y+zero,29,1,blend(face,col,3)); /* zero-amplitude reference */
-        for(x=0;x<29;x++) {
-            unsigned coverage[MIAMI_WAVE_HEIGHT]={0};
-            for(k=0;k<4;k++) {
-                float p0=((float)x+(float)k*.25f)/29.0f;
-                float p1=((float)x+(float)(k+1)*.25f)/29.0f;
-                float a=miami_wave_plot_y(pulse,ui_miami_wave_value(shape==3,mix!=0,p0));
-                float b=miami_wave_plot_y(pulse,ui_miami_wave_value(shape==3,mix!=0,p1));
-                float lo=fm_minf(a,b)-.5f,hi=fm_maxf(a,b)+.5f;
-                for(j=0;j<MIAMI_WAVE_HEIGHT;j++) {
-                    float overlap=fm_minf(hi,(float)j+.5f)-fm_maxf(lo,(float)j-.5f);
-                    if(overlap>0) coverage[j]+=(unsigned)(fm_minf(overlap,1.0f)*4.0f+.5f);
-                }
-            }
-            for(j=0;j<MIAMI_WAVE_HEIGHT;j++) if(coverage[j])px_blend(cx-14+x,y+j,col,coverage[j]);
-        }
-        return;
-    }
-    int i,prev=0;
-    for(i=0;i<29;i++) {
-        int phase=i%14, saw=15-phase*30/13;
-        int square=phase<7?15:-15;
-        int tri=phase<7?15-phase*30/6:-15+(phase-7)*30/6;
-        int pulse=phase<2?-15:15; /* small cue for Miami's 10% pulse, not an oscilloscope */
-        int a=shape==4?-saw:shape==1?(saw*(127-mix)+square*mix)/127:
-              shape==3?(tri*(127-mix)+pulse*mix)/127:(tri*(127-mix)+square*mix)/127;
-        int py=y+(a+15)*8/30;
-        if(i) cv_line(cx-14+i-1,prev,cx-14+i,py,col);
-        prev=py;
-    }
-}
-
-static UI_DRAW const char *matrix_name(pref_t r)
-{
-    if (r.kind==R_ENG && r.a==T_303) return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
-    if (r.kind==R_ENG && r.a==T_303) {
-        switch(r.c) {
-        case BASS303_FATTACK: return "ATTACK";
-        case BASS303_DECAY: return "DECAY";
-        case BASS303_FSUSTAIN: return "SUSTAIN";
-        case BASS303_FRELEASE: return "RELEASE";
-        case CHI_ARP_SWITCH: return "ENABLE";
-        case CHI_ARP_MODE: return "DIRECTION";
-        case CHI_ARP_RANGE: return "OCTAVES";
-        case CHI_ARP_SPEED: return "RATE";
-        case CHI_DAMPER: return "DAMPER";
-        case CHI_FX_TYPE: return "TYPE";
-        case CHI_FX_EDIT1: case CHI_FX_EDIT2: {
-            /* Names describe the existing algorithms, not a universal send.
-             * SHAPE is a coupled macro; raw 0..127 remains a pot, not percent. */
-            int ty=matrix_value(PR(R_ENG,T_303,r.b,CHI_FX_TYPE));
-            if(ty==CHI_FX_OFF)return r.c==CHI_FX_EDIT1?"EDIT 1":"EDIT 2";
-            if (r.c==CHI_FX_EDIT1) {
-                if (ty==CHI_FX_EQ) return "TILT";
-                if (ty==CHI_FX_COMP || ty==CHI_FX_DECIM) return "AMOUNT";
-                if (ty==CHI_FX_RING) return "FREQ";
-                return "MIX";
-            }
-            if(ty==CHI_FX_COMP || ty==CHI_FX_DECIM)return "EDIT 2";
-            if (ty==CHI_FX_EQ || ty==CHI_FX_RING) return "MIX";
-            if (ty==CHI_FX_SHORT_DLY) return "FEEDBACK";
-            if (ty==CHI_FX_BPM_DLY) return "DIVISION";
-            if (ty==CHI_FX_HALL) return "DECAY";
-            return "SHAPE";
-        }
-        default: break;
-        }
-    }
-    return caps_of(pref_name(r));
-}
-
-static int matrix_value(pref_t r)
-{
-    int val = pref_get(r);
-    if (lock_step() >= 0) {
-        int lv = lock_of(r, lock_step());
-        if (lv >= 0) val = lv;
-    } else if (has_motion(r)) {
-        int mv = motion_now(r);
-        if (mv >= 0) val = mv;
-    }
-    return val;
-}
-
-static UI_DRAW int adsr_touch_active(void)
-{
-    pref_t r;
-    int page = cur_page(), i = ui.touched;
-    if (ui.view != V_PART || !is_303() || i < 0 || i > 3 ||
-        (int32_t)(ui.touch_until - plat_ms()) <= 0 ||
-        (strcmp_s(pg.title[page], "AMP ADSR") &&
-         strcmp_s(pg.title[page], "FILTER ADSR"))) return 0;
-    r = pg.r[page][i];
-    return matrix_touch_matches(r, i);
-}
-
-static UI_DRAW void matrix_glyph(int x,int y,int glyph,uint16_t c,uint16_t bg)
-{
-    if (glyph==GL_POWER) {
-        cv_line(x,y+2,x,y+8,c);cv_line(x,y+8,x+3,y+10,c);
-        cv_line(x+3,y+10,x+7,y+10,c);cv_line(x+7,y+10,x+10,y+8,c);
-        cv_line(x+10,y+8,x+10,y+2,c);cv_line(x+5,y,x+5,y+5,c);
-    } else if (glyph==GL_CLOCK) {
-        dot(x+5,y+5,5,c);dot(x+5,y+5,4,bg);
-        cv_line(x+5,y+2,x+5,y+5,c);cv_line(x+5,y+5,x+8,y+5,c);
-    } else if (glyph==GL_PEDAL) {
-        cv_line(x,y+10,x+10,y+10,c);cv_line(x+1,y+8,x+3,y+2,c);
-        cv_line(x+3,y+2,x+9,y+2,c);cv_line(x+9,y+2,x+10,y+8,c);
-        cv_line(x+3,y+5,x+8,y+5,c);
-    } else {
-        int n=glyph==GL_BOTH?2:1;
-        for(int i=0;i<n;i++) {
-            int xx=x+(n==2?i*6:3),up=glyph==GL_UP || (n==2 && !i),tip=y+(up?1:9);
-            cv_line(xx+2,y+1,xx+2,y+9,c);
-            cv_line(xx,tip+(up?2:-2),xx+2,tip,c);
-            cv_line(xx+4,tip+(up?2:-2),xx+2,tip,c);
-        }
-    }
-}
-
-#if X0X_BASS_PRESET_PREVIEW
-/* Bounded ROM names, never a preset number masquerading as its name. During a
- * publication interruption the requested identity is not coherent yet. */
-static const char *matrix_preset_name(int voice)
-{
-    int pending=engine_bass_preset_pending(voice);
-    if(pending==6) return "UPDATING";
-#if X0X_BASS_TAGGED_SOUND
-    if(!pending && engine_bass_sound_bank(&proj.sound,voice)<0) return "UNKNOWN";
-#endif
-    int bank=engine_bass_requested_bank(voice), preset=engine_bass_requested_preset(voice);
-    const char *name=preset>=0?
-        original_sound_name((unsigned)bank,(unsigned)preset)
-        :"USER";
-    return name && name[0]?name:"UNKNOWN";
-}
-
-typedef struct {
-    char line[2][FACTORY_NAME_MAX];
-    const felucca_font_t *font;
-    int lines;
-} preset_text_t;
-
-/* Prefer whole words, then a character boundary for an unusually long word.
- * Fit both lines by measured native-font advance. Every current factory name
- * fits; a future over-wide name gets an explicit trailing '..', not overflow. */
-static UI_DRAW void preset_text(preset_text_t *out,const char *name,int tall)
-{
-    char full[FACTORY_NAME_MAX];int n=0;
-    while(name && name[n] && n<FACTORY_NAME_MAX-1) {
-        unsigned char c=(unsigned char)name[n];
-        full[n]=(char)(c>='a' && c<='z'?c-32:c<32 || c>126?'?':c);n++;
-    }
-    full[n]=0;
-    if(!n) {put_s(full,"UNKNOWN");n=7;}
-    const felucca_font_t *fonts[3]={&FONT_B,&FONT_XS,&FONT_T};
-    for(int f=0;f<3;f++) {
-        out->font=fonts[f];out->lines=1;put_s(out->line[0],full);out->line[1][0]=0;
-        if(tw(out->font,full)<=54) return;
-        if(!tall && f<2) continue;
-        for(int words=1;words>=(f<2?1:0);words--) {
-            int best=-1,score=999;
-            for(int split=1;split<n;split++) {
-                if(words && full[split]!=' ') continue;
-                memcpy(out->line[0],full,(unsigned)split);out->line[0][split]=0;
-                put_s(out->line[1],full+split+(full[split]==' '));
-                int a=tw(out->font,out->line[0]),b=tw(out->font,out->line[1]);
-                int d=a>b?a-b:b-a;
-                if(a<=54 && b<=54 && d<score) {best=split;score=d;}
-            }
-            if(best>=0) {
-                memcpy(out->line[0],full,(unsigned)best);out->line[0][best]=0;
-                put_s(out->line[1],full+best+(full[best]==' '));out->lines=2;return;
-            }
-        }
-    }
-    out->lines=2;out->line[0][0]=out->line[1][0]=0;
-    int i=0;
-    for(int row=0;row<2;row++) {
-        int k=0,limit=row?54-tw(out->font,".."):54;
-        while(i<n && k<FACTORY_NAME_MAX-3) {
-            out->line[row][k]=full[i];out->line[row][k+1]=0;
-            if(tw(out->font,out->line[row])>limit) {out->line[row][k]=0;break;}
-            i++;k++;
-        }
-        if(row) put_s(out->line[row]+k,"..");
-    }
-}
-
-static UI_DRAW void draw_preset_name(int voice,int cx,int y,int height,uint16_t ink)
-{
-    preset_text_t text;preset_text(&text,matrix_preset_name(voice),height>49);
-    int top=height>49?(text.lines==2?28:35):(text.lines==2?21:26);
-    for(int i=0;i<text.lines;i++) text_c(cx,y+top+i*text.font->h,text.font,text.line[i],ink);
-}
-#endif
-
-static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col);
-static UI_DRAW int orig_strip_slot(pref_t r);
-static UI_DRAW int drum_strip_role(pref_t r);
-static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col);
-/* glyph-strip readout: "%" stays in the caps FONT_T run; a letter unit (st, ms,
- * Hz) is drawn lowercase in FONT_XS grey after it, as cell_value does */
-static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink)
-{
-    if (!unit[0] || unit[0] == '%') { char *q = num; while (*q) q++; put_s(q, unit); text_c(cx, y, &FONT_T, num, ink); return; }
-    int w = tw(&FONT_T, num) + tw(&FONT_XS, unit) + 1;
-    int x = cv_text(cx - w / 2, y, &FONT_T, num, ink);
-    cv_text(x + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
-}
-/* drum cells: the readout must sit in x+30..x+57 (glyph left, divider right);
- * a wider one ("1.2kHz") narrows its number to FONT_XS instead of clipping */
-static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, uint16_t ink)
-{
-    const felucca_font_t *f = &FONT_T;
-    int wu = unit[0] && unit[0] != '%' ? tw(&FONT_XS, unit) + 1 : unit[0] ? tw(&FONT_T, unit) : 0;
-    if (tw(f, num) + wu > 27) f = &FONT_XS;
-    if (tw(f, num) + wu > 27 && unit[0]) {
-        /* Retain full precision/unit when a horizontal pair cannot fit. The
-         * two short lines stay within the original readout's right-hand lane. */
-        text_c(x+44,y-5,f,num,ink);
-        text_c(x+44,y+6,&FONT_XS,unit,C_GRAY);
-        return;
-    }
-    if (unit[0] == '%') { char *q = num; while (*q) q++; put_s(q, unit); wu = 0; }
-    int w = tw(f, num) + wu, l = x + 44 - w / 2;
-    if (l < x + 30) l = x + 30;
-    if (l + w > x + 57) l = x + 57 - w;
-    int e = cv_text(l, f == &FONT_T ? y : base_y(&FONT_T, y, &FONT_XS), f, num, ink);
-    if (wu) cv_text(e + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
-}
-static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
-{
-    const x0x_param_t *d=pref_desc(r);
-    char num[16],unit[8],value[24];
-    int cx=x+width/2,val,shape=0,mix=0,lv,discrete=0,glyph=GL_NONE,unused=0,orig_glyph=0;
-    const felucca_font_t *font;
-    uint16_t ink=night?(active?SOUND_INK:SOUND_WHITE):(active?C_BLACK:C_WHITE);
-    int value_y=height>49?35:26, bar_y=height-4;
-    if(!d) return;
-    val=matrix_value(r);
-    if(r.kind==R_ENG && r.a==T_303 &&
-       engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO) {
-        /* Original Chicago slots: 13 ON, 14 MODE, 16 SPEED; readout text stays original. */
-        if(r.c>=13 && r.c<=16) {
-            const ui_original_control_view *o=original_text_view(PR(R_ENG,T_303,r.b,13),matrix_value(PR(R_ENG,T_303,r.b,13)));
-            discrete=orig_glyph=1;
-            if(r.c!=13 && o && !o->arp_on) ink=night?SOUND_DIM:(active?dim(col,4):C_GRAY);
-            if(r.c==13) glyph=GL_POWER;
-            if(r.c==14) { const ui_original_control_view *m=original_text_view(r,val);
-                glyph=m && m->arp_mode==1?GL_DOWN:m && m->arp_mode==2?GL_UP:GL_BOTH; }
-            if(r.c==16) glyph=GL_CLOCK;
-        }
-    }
-    if(0) {
-        if(r.c>=CHI_ARP_SWITCH && r.c<=CHI_ARP_SPEED) {
-            discrete=1;
-            if(r.c!=CHI_ARP_SWITCH && !matrix_value(PR(R_ENG,T_303,r.b,CHI_ARP_SWITCH)))
-                ink=night?SOUND_DIM:(active?dim(col,4):C_GRAY);
-            if(r.c==CHI_ARP_SWITCH) glyph=GL_POWER;
-            if(r.c==CHI_ARP_MODE) glyph=val==CHI_ARP_DOWN?GL_DOWN:val==CHI_ARP_UP?GL_UP:GL_BOTH;
-            if(r.c==CHI_ARP_SPEED) glyph=GL_CLOCK;
-        }
-        if(r.c==CHI_DAMPER) {discrete=1;glyph=GL_PEDAL;}
-        if(r.c==CHI_FX_TYPE) discrete=1;
-        if(r.c==CHI_FX_EDIT1 || r.c==CHI_FX_EDIT2) {
-            int ty=matrix_value(PR(R_ENG,T_303,r.b,CHI_FX_TYPE));
-            if(ty==CHI_FX_OFF || (r.c==CHI_FX_EDIT2 && (ty==CHI_FX_COMP || ty==CHI_FX_DECIM)))
-                {unused=discrete=1;ink=night?SOUND_DIM:(active?dim(col,4):C_GRAY);}
-        }
-    }
-    {
-        int yy=y+(height>49?14:11);
-        uint16_t label = unused ? SOUND_DIM : active ? (night ? SOUND_INK : C_BLACK)
-                                                    : (night ? SOUND_GRAY : C_GRAY);
-        text_c(cx, yy, &FONT_T, matrix_name(r), label);
-    }
-#if X0X_BASS_PRESET_PREVIEW
-    if(r.kind==R_BPRESET) {
-        draw_preset_name(r.b,cx,y,height,ink);
-        cv_rect(x+8,y+bar_y,42,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-        if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+41*(val>d->max?d->max:val)/d->max,1,ink);
-        return;
-    }
-#endif
-    if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
-    if(!shape && !unused && val>=0 && (orig_strip_slot(r) || drum_strip_role(r))) {
-        /* Reuse the knob-strip control_glyph families (0e58b960/5f58a199) in the
-         * wave-glyph layout: glyph left, original readout right, no extra bar.
-         * 909/808 controls draw their own live glyph in the same box. */
-        int drum=drum_strip_role(r)!=0;
-        if(drum) drum_strip_glyph(r,val,x+3,y+22,ink);
-        else orig_strip_glyph(r,val,x+3,y+22,ink);   /* 26x19 box: x+3..x+28 */
-        pref_value_of(r,val,num,unit);
-        if(drum) strip_value_fit(x,y+28,num,unit,ink);
-        else strip_value(x+45,y+28,num,unit,ink);     /* starts >= x+32: 3 px clear of the glyph */
-    } else
-    if(shape) {
-        int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
-        const ui_original_wave_cache *wave=slot>=0?original_wave_view(r,val):0;
-        uint16_t face=night?(active?SOUND_SELECT:SOUND_FACE):(active?col:SOUND_FACE);
-        if(wave) draw_original_wave(cx-10,y+25,wave,slot,ink,face);
-        else draw_wave_glyph(cx-10,y+((shape==2 || shape==3)?25:28),shape,mix,ink,face);
-        pref_value_of(r,val,num,unit);           /* original readout text */
-        strip_value(cx+17,y+28,num,unit,ink);
-    } else {
-        pref_value_of(r,val,num,unit);
-        if(unused) {put_s(num,"--");unit[0]=0;}
-        else if(orig_glyph) {}
-        else if(glyph==GL_POWER || glyph==GL_PEDAL) put_s(num,val>=(glyph==GL_PEDAL?64:1)?"ON":"OFF");
-        else if(discrete && r.c==CHI_ARP_RANGE) put_i(num,val+1);
-        else if(glyph==GL_DOWN || glyph==GL_UP || glyph==GL_BOTH) put_s(num,glyph==GL_DOWN?"DN":glyph==GL_UP?"UP":"UP/DN");
-        put_s(put_s(put_s(value,num),unit[0]?" ":""),unit);
-        int limit=glyph?39:54;
-        font=tw(&FONT_B,value)<=limit?&FONT_B:&FONT_XS;
-        if(tw(font,value)>limit) font=&FONT_T;
-        int w=tw(font,value), left=cx-(w+(glyph?14:0))/2;
-        if(glyph) matrix_glyph(left,y+value_y+1,glyph,ink,night?(active?SOUND_SELECT:SOUND_FACE):(active?col:C_BLACK));
-        cv_text(left+(glyph?14:0),y+value_y,font,value,ink);
-        if(!unused) {
-            cv_rect(x+8,y+bar_y,42,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-            if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+41*(val>d->max?d->max:val)/d->max,1,ink);
-        }
-    }
-    lv=lock_of(r,lock_step());
-    if(lv>=0 || (lock_step()<0 && has_motion(r)))
-        cv_rect(x+53,y+24,2,2,night?SOUND_INK:(active?C_BLACK:lv>=0?C_AMB:C_HI));
-}
-
-/* Stage-normalised parameter preview, not a millisecond axis or an audio trace.
- * Chicago D/R are RC time constants: sample five tau, never quadratic easing.
- * Miami release uses a full-scale slope; its duration from sustain is s*R.
- * The hold interval is illustrative. No persistent renderer state is needed. */
-/* Recognize actual envelope controls, not a label substring. Mixed rows must
- * first be partitioned by the page builder so non-envelope controls are kept. */
-static unsigned adsr_stage_slots(int p,int slot[4])
-{
-    if(slot)for(int i=0;i<4;i++)slot[i]=-1;
-    if(ui.view!=V_PART || !is_303() || p<0 || p>=pg.n)return 0;
-    int bank=engine_bass_sound_bank(&proj.sound,bidx());
-    int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1;
-    if(first<0)return 0;
-    unsigned present=0;
-    for(int k=0;k<4;k++) {
-        pref_t r=pg.r[p][k];if(r.kind==R_NONE)continue;
-        if(r.kind!=R_ENG || r.a!=T_303 || r.b!=bidx() || r.c<first || r.c>first+3)return 0;
-        unsigned stage=(unsigned)(r.c-first);
-        if(present&(1u<<stage))return 0;
-        present|=1u<<stage;if(slot)slot[stage]=k;
-    }
-    return present;
-}
-typedef struct {
-    float attack,decay,sustain,release;
-    float live_level;
-    unsigned live_stage,live_gate,live_active,present;
-    int slot[4];
-    int gate,enabled;
-} ui_adsr_t;
-
-static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
-{
-    int i;
-    float *time[3]={&e->attack,&e->decay,&e->release};
-    *e=(ui_adsr_t){0};e->present=adsr_stage_slots(p,e->slot);
-    if(!e->present)return;
-    /* Only the two admitted original owners below can enable a graph. */
-    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_JUNO) {
-        juno6_envelope_snapshot v;
-        if(!engine_juno_envelope_view(bidx(),&v)){e->enabled=0;return;}
-        e->attack=v.adsr[0];e->decay=v.adsr[1];e->sustain=v.adsr[2];e->release=v.adsr[3];
-        e->live_level=v.level;e->live_stage=v.stage;e->live_gate=v.gate;e->live_active=v.active;
-        e->enabled=3; /* compact Juno linear A/D, geometric R */
-        return;
-    }
-    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_CHICAGO) {
-        /* Original Chicago ENVELOPE slots 7..10 (A, D, S, R): stage-normalised
-         * compiled native controls include each macro's scaling; D/R are RC. */
-        /* Time constants of original_vca_tick (control_math.c), seconds:
-         * A 13a^4+.001 toward 1.3, D 25d^4+.001 toward S, R 25r^4+.002. */
-        /* Native VCA EG controls exactly as the engine compiles them (macro
-         * scaling included); q127 if the runtime view is unavailable. */
-        float native[4]={0,0,0,0};unsigned gate=0;
-        int nv=engine_bass_adsr_view(bidx(),native,&gate);
-        if(!nv){e->enabled=0;return;}
-        e->sustain=native[2];e->gate=(int)gate;
-        for(i=0;i<3;i++) {
-            float x=native[i==2?3:i]; x*=x; x*=x;
-            *time[i]=i==0?13.0f*x+.001f:i==1?25.0f*x+.001f:25.0f*x+.002f;
-        }
-        e->enabled=2; /* 2: original exponential laws */
-        return;
-    }
-    /* An owner change after stage recognition cannot enable the retired
-     * positional bass303 fallback. No unavailable/foreign graph is invented. */
-    e->enabled=0;
-}
-
-/* Every admitted A/D/S/R tuple gets the full-row graph, active or not.
- * Chicago7..10 is the original macro set. Compact Juno5..8 controls one
- * shared amplitude/filter envelope; it is not two independent envelopes.
- * Miami has no A/D/S/R row; Synth One/full SuperJ6 roles remain unadmitted. */
-static UI_DRAW int adsr_row(int p)
-{ return adsr_stage_slots(p,0)!=0 || (p>=0 && p<pg.n && drum_amp_ref(pg.r[p][0]) &&
-    pg.r[p][1].kind==R_NONE && pg.r[p][2].kind==R_NONE && pg.r[p][3].kind==R_NONE); }
-/* Level of one original stage at time t (s): attack toward 1.3 clipped at 1,
- * decay toward sustain, release toward zero (original_vca_tick). */
-static UI_DRAW float adsr_original_level(const ui_adsr_t *e,int stage,float t)
-{
-    if(e->enabled==3) {
-        if(stage==0)return fm_minf(1.0f,t/e->attack);
-        if(stage==1)return fm_maxf(e->sustain,1.0f-(1.0f-e->sustain)*t/e->decay);
-        float step=1.0f-1.0f/fm_maxf(1.0f,e->release*BASS303_SR);
-        float level=e->sustain*fm_powf(step,t*BASS303_SR);
-        return level<.00001f?0:level;
-    }
-    if(stage==0) return fm_minf(1.0f,1.3f-1.3f*fm_expf(-t/e->attack));
-    if(stage==1) return e->sustain+(1.0f-e->sustain)*fm_expf(-t/e->decay);
-    return e->sustain*fm_expf(-t/e->release);
-}
-/* Segment widths follow the real stage durations: attack to full scale,
- * decay to within 1% of sustain, release to the 0.04 cutoff. The sustain
- * plateau has a fixed illustrative width; it is not a time. */
-static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],float dur[3])
-{
-    float sum=0.0f;
-    int k,hold=42,span=width-hold;
-    dur[0]=e->attack*1.466337f;                            /* ln(1.3/0.3) */
-    dur[1]=e->decay*4.6051702f;                            /* ln(100) */
-    dur[2]=e->sustain>0.04f?e->release*fm_logf(e->sustain/0.04f):0.0f;
-    if(e->enabled==3) {
-        dur[0]=e->attack;dur[1]=e->decay;
-        float step=1.0f-1.0f/fm_maxf(1.0f,e->release*BASS303_SR);
-        dur[2]=e->sustain>.00001f && step>0 ? fm_logf(.00001f/e->sustain)/fm_logf(step)/BASS303_SR : 0;
-    }
-    if(e->present!=15u) {
-        int w[4]={0,0,0,0},count=0,last=-1,used=0;
-        for(k=0;k<3;k++){int stage=k==2?3:k;if(e->present&(1u<<stage)){sum+=dur[k];count++;last=stage;}}
-        w[2]=(e->present&4u)?(count?42:width):0;
-        int space=width-w[2],free=space-count*3;
-        for(k=0;k<3;k++){int stage=k==2?3:k;if(e->present&(1u<<stage)){
-            w[stage]=3+(sum>0?(int)(free*dur[k]/sum):free/count);used+=w[stage];}}
-        if(last>=0)w[last]+=space-used;
-        xs[0]=x0;for(k=0;k<4;k++)xs[k+1]=xs[k]+w[k];
-        return;
-    }
-    for(k=0;k<3;k++) sum+=dur[k];
-    /* Each timed stage keeps 3 px so a short stage never vanishes. */
-    int w[3],free=span-9,used=0;
-    for(k=0;k<3;k++) { w[k]=3+(sum>0.0f?(int)((float)free*dur[k]/sum+.5f):free/3); used+=w[k]; }
-    w[1]+=span-used;                                       /* rounding remainder */
-    if(w[1]<3) { w[2]-=3-w[1]; w[1]=3; }
-    xs[0]=x0; xs[1]=x0+w[0]; xs[2]=xs[1]+w[1]; xs[3]=xs[2]+hold; xs[4]=x0+width;
-}
-/* Same full-row visual component for a real finite exponential drum decay.
- * Fixed time domain (the parameter maximum) makes decay edits visible in the
- * curve, not merely its label. The live cursor uses actual hold/ramp counters,
- * not the editable target duration; the separate meter shows raw EG level.
- * BD's real fixed hold is a plateau, never labelled sustain or attack. */
-/* One physical slot/stage/percentage format for every full-row envelope. */
-static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)
-{
-    char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+slot);
-    *end++=' ';*end++=stage;*end++=' ';
-    put_s(put_i(end,(raw*100+63)/127),"%");
-}
-static UI_DRAW void draw_drum_amp_inline(int p,int active,int y,int h,int off)
-{
-    pref_t r=pg.r[p][0];drum909_amp_snapshot v;
-    if(!engine_drum909_amp_view(r.b,&v))return;
-    int x0=13,y0=y+h-5,top=y+22,edited=active && ui.touched==0 &&
-        (int32_t)(ui.touch_until-plat_ms())>0;
-    uint16_t col=active?matrix_col():SOUND_WHITE,ink=edited?SOUND_INK:col;
-    float max_ms=0;
-    if(!drum909_param_si(r.b,r.c,127,&max_ms) || max_ms<=0)return;
-    float horizon=max_ms+v.target_hold_ms,hold=v.target_hold_ms,decay=v.target_decay_ms;
-    int prevx=x0,prevy=top;
-    cv_rect(x0,y0-off,215,1,SOUND_SELECT_SIDE);
-    for(int x=1;x<=214;x++) {
-        float ms=horizon*x/214.0f;
-        float level=ms<=hold?1.0f:ms>=hold+decay?0.0f:fm_expf(fm_logf(.00001f)*(ms-hold)/decay);
-        int yy=y0-(int)(level*(y0-top)+.5f);
-        cv_line(prevx,prevy-off,x0+x,yy-off,ink);prevx=x0+x;prevy=yy;
-    }
-    char num[16],unit[8],label[32];pref_value_of(r,matrix_value(r),num,unit);
-    physical_stage_label(label,0,'D',matrix_value(r));
-    text_c(75,y+8-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
-    put_s(put_s(label,num),unit);
-    int vx=232-tw(&FONT_T,label);
-    cv_text(vx,y-off,&FONT_T,label,edited?SOUND_INK:SOUND_GRAY);
-    text_r(vx-5,y-off,&FONT_T,"DECAY",edited?SOUND_INK:SOUND_GRAY);
-    if(edited)cv_rect(x0,y0+2-off,215,2,SOUND_INK);
-    if(v.active && (v.hold_active || v.ramp_valid)) {
-        float level=fm_maxf(0,fm_minf(1,v.raw_level));
-        /* Current BD trigger fixes the hold at 40ms; SD has none. Ramp
-         * left counts the next sample, so subtract one for last-returned cur.
-         * Target edits never retime the sounding note. */
-        float live_hold=r.b==DR_BD?40.0f:0.0f;
-        float elapsed=v.hold_active?live_hold-v.hold_left/44.1f:
-            live_hold+fm_maxf(0,(float)(v.ramp_ticks-v.ramp_left-1))/44.1f;
-        int px=x0+(int)(214*fm_minf(1,fm_maxf(0,elapsed/horizon))+.5f);
-        int py=y0-(int)(level*(y0-top)+.5f);
-        cv_rect(px,top-off,1,y0-top,SOUND_DIM);cv_rect(px-1,py-1-off,3,3,SOUND_INK);
-        cv_rect(9,top-off,1,y0-top+1,SOUND_DIM);cv_rect(7,py-off,5,1,SOUND_INK);
-    }
-}
-static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
-{
-    if(drum_amp_ref(pg.r[p][0])){draw_drum_amp_inline(p,active,y,h,off);return;}
-    static const char *const names[4]={"ATTACK","DECAY","SUSTAIN","RELEASE"};
-    ui_adsr_t e;
-    int k,touched=active && ui.touched>=0 && ui.touched<4 &&
-        (int32_t)(ui.touch_until-plat_ms())>0?ui.touched:-1,edited=-1;
-    int x0=13,y0=y+h-5,top=y+22,xs[5];
-    uint16_t col=active?matrix_col():SOUND_WHITE,hi=SOUND_INK;   /* inactive: the inactive-row ink */
-    float dur[3];
-    adsr_values(&e,p);
-    if(!e.enabled)return;
-    for(k=0;k<4;k++)if(e.slot[k]>=0 && e.slot[k]==touched)edited=k;
-    adsr_layout(&e,x0,214,xs,dur);
-    int ys=y0-(int)(e.sustain*(y0-top)+0.5f);
-    if(edited>=0) { /* the selected or turned stage and its live value */
-        char num[16],unit[8],t[32];
-        pref_value_of(pg.r[p][e.slot[edited]],matrix_value(pg.r[p][e.slot[edited]]),num,unit);
-        put_s(put_s(put_s(put_s(t,names[edited])," "),num),unit);
-        text_r(232,y-off,&FONT_T,t,hi);
-    }
-    cv_rect(x0,y0-off,215,1,SOUND_SELECT_SIDE);
-    if(e.present&8u)cv_line(xs[3],top-off,xs[3],ys-2-off,SOUND_DIM); /* note-off only for release */
-    for(k=0;k<3;k++) {
-        int stage=k==2?3:k, xa=xs[k==2?3:k], xb=xs[k==2?4:k+1], i, px=xa, py;
-        if(!(e.present&(1u<<stage)))continue;
-        float d=dur[k];
-        float l0=stage==0?0.0f:stage==1?1.0f:e.sustain;
-        py=y0-(int)(l0*(y0-top)+0.5f);
-        int n=xb-xa; if(n<1) n=1;
-        for(i=1;i<=n;i++) {
-            float level=adsr_original_level(&e,k,d*(float)i/(float)n);
-            if(k==2 && i==n) level=0.0f;
-            int ny=y0-(int)(level*(y0-top)+0.5f);
-            cv_line(px,py-off,xa+i,ny-off,edited==stage?hi:col);px=xa+i;py=ny;
-        }
-    }
-    if(e.present&4u)cv_line(xs[2],ys-off,xs[3],ys-off,edited==2?hi:col);
-    for(k=0;k<4;k++) {
-        /* Keep A/D/S/R percentage visible at rest as well as during K5-K8
-         * turns. Same quantisation as the native Chicago value readout. */
-        if(!(e.present&(1u<<k)))continue;
-        char label[20];
-        physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));
-        text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);
-    }
-    {   /* Native state1 contains both decay and sustain. Classify within 1% of S.
-         * Cursor level is always the live EG; the horizontal axis names stages. */
-        float level=0,mod=0; unsigned state=6,held=0;
-        int observed;
-        if(e.enabled==3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
-        else observed=engine_bass_voice_view(bidx(),&level,&mod,&state,&held);
-        if(observed && state!=6) {
-            if(level<0)level=0; if(level>1)level=1;
-            int stage=e.enabled==3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
-                state==0?0:state==3?3:((e.gate && held) ||
-                (level-e.sustain<=.01f && e.sustain-level<=.01f))?2:1;
-            /* A stage/level gauge, separate from the preview's time curve:
-             * Gate mode or release during attack can differ from the schematic.
-             * Dotted vertical rail names the stage; the crossbar is actual level. */
-            int shown=!!(e.present&(1u<<stage));
-            /* An absent stage has no curve playhead. Its actual level remains
-             * visible on a separate left meter, never at a false endpoint. */
-            int x=shown?(xs[stage]+xs[stage+1])/2:9;
-            if(shown)for(int yy=top;yy<=y0;yy+=3) cv_rect(x,yy-off,1,1,SOUND_DIM);
-            else cv_rect(x,top-off,1,y0-top+1,SOUND_DIM);
-            int yy=y0-(int)(level*(y0-top)+.5f)-off;
-            cv_rect(x-2,yy,5,1,hi);
-            cv_rect(x,yy-1,1,3,hi);
-        }
-    }
-    if(edited>=0) { /* underline the highlighted segment */
-        int xa=xs[edited],xb=xs[edited+1];
-        if(xb<=xa) xb=xa+1;
-        cv_rect(xa,y0+2-off,xb-xa+1,2,hi);
-    }
-    {   /* playhead: where the live VCA EG is now, on this graph's own time axis */
-        float adsr[4],lv=0; int st=6,px=-1;
-        int observed;
-        if(e.enabled==3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
-        else observed=engine_bass_env_view(bidx(),adsr,&lv,&st);
-        if(observed && st!=6) {
-            if(lv<0)lv=0; if(lv>1)lv=1;
-            if(e.enabled==3) {
-                /* Position on the canonical curve at the actual sampled level,
-                 * not invented DSP elapsed time (release can begin before S). */
-                float u=0;int stage=st==0?0:st==3?3:e.live_stage==3?2:1;
-                if(stage==0)u=lv;
-                else if(stage==1)u=(1.0f-lv)/fm_maxf(1e-6f,1.0f-e.sustain);
-                else if(stage==2)u=.5f;
-                else if(e.sustain>.00001f && lv>.00001f)
-                    u=fm_logf(lv/e.sustain)/fm_logf(.00001f/e.sustain);
-                else u=1;
-                u=fm_maxf(0,fm_minf(1,u));px=(e.present&(1u<<stage))?xs[stage]+(int)((xs[stage+1]-xs[stage])*u+.5f):-1;
-            } else if(st==0) { float t=-e.attack*fm_logf(fm_maxf(1e-6f,(1.3f-lv)/1.3f));
-                px=xs[0]+(int)((xs[1]-xs[0])*fm_minf(1.0f,t/fm_maxf(dur[0],1e-6f))+.5f); }
-            else if(st==1) {
-                float u=lv-e.sustain,full=1.0f-e.sustain;
-                if(u>.01f*full && full>1e-6f) { float t=-e.decay*fm_logf(u/full);
-                    px=xs[1]+(int)((xs[2]-xs[1])*fm_minf(1.0f,t/fm_maxf(dur[1],1e-6f))+.5f); }
-                else px=(xs[2]+xs[3])/2;          /* holding at sustain: mid plateau */
-            } else if(st==3) {
-                float t=e.sustain>1e-6f&&lv>1e-6f?-e.release*fm_logf(lv/e.sustain):dur[2];
-                px=xs[3]+(int)((xs[4]-xs[3])*fm_minf(1.0f,fm_maxf(0.0f,t)/fm_maxf(dur[2],1e-6f))+.5f);
-            } else px=xs[4];
-            if(e.enabled!=3){int stage=st==0?0:st==3?3:lv-e.sustain>.01f*(1-e.sustain)?1:2;
-                if(!(e.present&(1u<<stage)))px=-1;}
-            if(px>=0){int py=y0-(int)(lv*(y0-top)+.5f);
-            cv_rect(px,top-off,1,y0-top,SOUND_DIM);
-            cv_rect(px-1,py-1-off,3,3,hi);}
-        }
-    }
-}
-
-static const felucca_font_t *original_value_font(const char *num, const char *unit, int width)
-{
-    int used = unit[0] ? tw(&FONT_XS,unit)+1 : 0;
-    if (tw(&FONT_B,num)+used <= width) return &FONT_B;
-    if (tw(&FONT_XS,num)+used <= width) return &FONT_XS;
-    return &FONT_T;
-}
-static void original_cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)
-{
-    const felucca_font_t *font = original_value_font(num,unit,54);
-    int32_t width = tw(font,num)+(unit[0] ? tw(&FONT_XS,unit)+1 : 0);
-    int32_t line = base_y(&FONT_B,y,font), x = cv_text(cx-width/2,line,font,num,c);
-    if (unit[0]) cv_text(x+1,base_y(font,line,&FONT_XS),&FONT_XS,unit,C_GRAY);
-}
-
-/* what the knob strip shows, hashed: it is only redrawn when this changes (the arcs cost a
- * square root and an arctangent per pixel; most frames nothing in the strip moves) */
-/* Schematic filter response: real mode/cutoff/resonance, not an audio plot.
- * Direct filter edits may legitimately leave the DJF macro pot unchanged. */
-static void filter_display(uint8_t *mode,uint8_t *cut,int *res)
-{
-    /* Motion lanes and macro writes can override one another. Read the applied
-     * pots rather than guessing precedence from stored project values. */
-    *mode=(uint8_t)engine_master_get(MST_MODE);
-    *cut=(uint8_t)engine_master_get(MST_CUTOFF);
-    *res=engine_master_get(MST_RESO);
-}
-static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,uint16_t col)
-{
-    int left=cx-19,right=cx+19,pivot=left+7+cutoff*24/127;
-    int pass=y+8,floor=y+18,peak=pass-resonance*7/127;
-    cv_rect(left,floor,39,1,C_LINE);
-    if(!mode) {cv_rect(left,y+10,39,1,C_DIM);return;}
-    if(mode==1) {
-        cv_line(left,pass,pivot-4,pass,col);cv_line(pivot-4,pass,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6,floor,col);cv_line(pivot+6,floor,right,floor,col);
-    } else if(mode==3) {
-        cv_line(left,floor,pivot-6,floor,col);cv_line(pivot-6,floor,pivot,peak,col);
-        cv_line(pivot,peak,pivot+4,pass,col);cv_line(pivot+4,pass,right,pass,col);
-    } else {
-        cv_line(left,floor,pivot-6,floor,col);cv_line(pivot-6,floor,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6,floor,col);cv_line(pivot+6,floor,right,floor,col);
-    }
-}
-static uint8_t tape_glyph_phase, tape_glyph_running;
-static uint32_t tape_glyph_at;
-static void tape_glyph_tick(void)
-{
-    uint32_t now = plat_ms();
-    uint8_t active = engine_tape_active();
-    if (active && tape_glyph_running) {
-        uint32_t steps = (now - tape_glyph_at) / 80u;
-        tape_glyph_phase = (uint8_t)((tape_glyph_phase + steps) % 16u);
-        tape_glyph_at += steps * 80u;
-    } else tape_glyph_at = now;
-    tape_glyph_running = active;
-}
-static uint8_t tempo_glyph_view; /* latched once for signature + complete knob strip */
-static UI_DRAW int perform_glyph(pref_t r,int val,int cx,uint16_t col)
-{
-    if(r.kind==R_TEMPO) {
-        cv_line(cx-10,47,cx-4,28,col);cv_line(cx-4,28,cx+4,28,col);cv_line(cx+4,28,cx+10,47,col);
-        int phase=tempo_glyph_view?tempo_glyph_view-1:0;
-        int arm=tempo_glyph_view?(phase<16?phase-8:24-phase):0;
-        cv_line(cx-10,47,cx+10,47,col);
-        cv_line(cx,43,cx+arm,30,tempo_glyph_view?C_WHITE:C_GRAY);
-        cv_rect(cx+arm*3/4-2,32,5,3,col);
-        if(tempo_glyph_view && phase<4) cv_rect(cx-2,45,5,2,C_WHITE);
-    } else if(r.kind==R_SWING) {
-        int middle=cx+val*7/127;
-        cv_rect(cx-18,43,37,1,C_LINE);
-        cv_rect(cx-18,30,3,14,col);cv_rect(middle,34,3,10,col);cv_rect(cx+16,30,3,14,col);
-    } else if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF) {
-        uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);filter_glyph(cx,28,mode,cut,res,col);
-    } else if(r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP) {
-        int depth=val*14/127;
-        cv_line(cx-18,31,cx-9,31,col);cv_line(cx-9,31,cx-6,31+depth,col);
-        cv_line(cx-6,31+depth,cx+15,31,col);cv_rect(cx+15,31,4,1,col);
-        cv_rect(cx-18,48,37,1,C_LINE);
-    } else return 0;
-    return 1;
-}
-
-/* Shared parameter schematics from the owner-requested card vocabulary. These
- * show control values, never measured audio; labels/units below stay authoritative.
- * One dispatcher serves every ordinary knob strip. SOUND retains its matrix. */
-static UI_DRAW float comp_glyph_output(int value,float input)
-{
- uint8_t threshold,ratio,makeup;
- static const float ratios[]={1,1.5f,2,3,4,6};
- master_comp1_pots(value,&threshold,&ratio,&makeup);
- float t=-48.0f+48.0f*threshold/127.0f,over=input-t,slope=1.0f-1.0f/ratios[ratio],gr=0;
- if(over>=3)gr=slope*over;
- else if(over>-3)gr=slope*(over+3)*(over+3)/12.0f;
- return input-gr; /* Compression shape before makeup, not measured audio. */
-}
-static UI_DRAW int semantic_amount_glyph(pref_t r,int val,int cx,uint16_t col)
-{
- const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
- if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
-  int py=48;
-  cv_line(left,48,cx+18,28,C_LINE);
-  for(int i=1;i<=36;i++) {
-   float input=-48.0f+48.0f*i/36.0f;
-   int y=48-(int)((comp_glyph_output(val,input)+48)*20/48+0.5f);
-   cv_line(left+i-1,py,left+i,y,col);py=y;
-  }
- } else if(r.kind==R_ENG && r.a==T_FX && r.c==FX_DL_FDBK) {
-  float amp=10,feedback=(pref_get(PR(R_ENG,T_FX,0,FX_DL_TYPE))?1.15f:0.85f)*q/127.0f;
-  for(int j=0;j<4;j++) {int h=(int)(amp+0.5f);if(h)cv_rect(left+3+j*10,47-h,2,h,col);amp*=feedback;}
-  cv_rect(left,48,37,1,C_LINE);
- } else if(r.kind==R_SREP) {
-  for(int j=0;j<8;j++)cv_rect(left+j*5,34,3,9,j<=val?col:C_LINE);
- } else if(r.kind==R_ENG && ((r.a==T_FX && (r.c==FX_RV_LEVEL || r.c==FX_DL_LEVEL)) || (r.a==T_MIX && (r.c==MX_REV || r.c==MX_DLY)) || name_is(d,"Rev") || name_is(d,"Dly"))) {
-  int delay=(r.a==T_FX && r.c==FX_DL_LEVEL)||(r.a==T_MIX && r.c==MX_DLY)||name_is(d,"Dly");
-  cv_rect(left,48,37,1,C_LINE);
-  if(delay)for(int j=0;j<4;j++){int h=((16-j*3)*q+126)/127;if(h)cv_rect(left+3+j*10,47-h,2,h,col);}
-  else for(int j=0;j<7;j++){int h=((2+j*2)*q+126)/127;if(h)cv_rect(left+j*6,38-h/2,2,h,col);}
- } else return 0;
- return 1;
-}
-
-static UI_DRAW int glyph_identity_index(int count,int val){if(count<=0)return -1;if(count<=8)return val;return val*7/(count-1);}
-static UI_DRAW void glyph_identity(int count,int val,int l,uint16_t col){int n=count>8?8:count,selected=glyph_identity_index(count,val);for(int j=0;j<n;j++)rbox(l+(j%4)*10,30+j/4*10,7,7,1,j==selected?col:C_LINE);if(!count)cv_rect(l+12,38,13,1,C_LINE);}
-
-/* Qualitative parameter schematics: ordinal TIME spacing, not a measured beat/ms axis. */
-/* Fixed-phase sinusoid progressively flattened toward square as stored DRIVE rises.
- * Qualitative amount icon, not measured audio or selected distortion transfer. */
-static UI_DRAW void drive_amount_glyph(int val,int cx,uint16_t col){
- static const int16_t wave[37]={0,5690,11207,16383,21062,25101,28377,30791,32269,32767,32269,30791,28377,25101,21062,16384,11207,5690,0,-5690,-11207,-16384,-21062,-25101,-28377,-30791,-32269,-32767,-32269,-30791,-28377,-25101,-21062,-16383,-11207,-5690,0};
- int py=38,gain=18161/(143-val);
- for(int x=0;x<=36;x++){
-  int a=wave[x]*gain/127;if(a>32767)a=32767;if(a< -32767)a=-32767;
-  int h=((a<0?-a:a)*8+16383)/32767;int y=38+(a<0?h:-h);
-  if(x)cv_line(cx-19+x,py,cx-18+x,y,col);
-  py=y;
- }
-}
-static UI_DRAW void loop_identity_glyph(int count,int val,int cx,uint16_t col){
- int n=count>8?8:count,selected=glyph_identity_index(count,val);
- if(!count){cv_rect(cx-6,38,13,1,C_LINE);return;}
- int rows=(n+3)/4;
- for(int row=0;row<rows;row++){int nr=n-row*4;if(nr>4)nr=4;int left=cx-(nr*10-3)/2,y=rows==1?35:30+10*row;
- for(int k=0;k<nr;k++)rbox(left+k*10,y,7,7,1,row*4+k==selected?col:C_LINE);}
-}
-
-static UI_DRAW int all_glyph_semantics(pref_t r,int val,int cx,uint16_t col){
- const x0x_param_t*d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,l=cx-18;
- if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DL_TIME){
-  static const int gap[13]={2,3,4,4,5,5,6,6,7,8,8,9,10};int g=gap[val<13?val:0];
-  cv_rect(l,48,37,1,C_LINE);cv_rect(l,29,2,18,col);
-  for(int x=l+g;x<=cx+18;x+=g)cv_rect(x,35,1,12,col);
-  cv_line(l,50,l+g,50,col);
- }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_RV_DECAY){
-  float a=18,fb=.2f+.73f*q/127;
-  cv_rect(l,48,37,1,C_LINE);
-  for(int j=0;j<7;j++){int h=(int)(a+.5f);if(h)cv_rect(l+j*6,47-h,2,h,col);a*=fb;}
- }else if(r.kind==R_SPAT||r.kind==R_BRKSLOT||r.kind==R_SBAR){
-  if(r.kind==R_BRKSLOT)loop_identity_glyph(engine_brk_nslots(),val,cx,col);
-  else glyph_identity(d->max+1,val,l,col);
- }else if(r.kind==R_TAPE){
-  if(val<16){cv_line(l,43,l+8,43,col);cv_line(l+8,43,l+8,33,col);cv_line(l+8,33,l+18,33,col);cv_line(l+18,33,l+18,43,col);cv_line(l+18,43,l+28,43,col);cv_line(l+28,43,l+28,33,col);cv_line(l+28,33,l+36,33,col);}
-  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
- }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DRIVE){
-  drive_amount_glyph(val,cx,col);
- }else return 0;return 1;
-}
-
-static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
-{
-    const x0x_param_t *d=pref_desc(r);
-    int q=d && d->max?(val*127+d->max/2)/d->max:0, left=cx-18, right=cx+18;
-    if(q<0)q=0;
-    if(q>127)q=127;
-    if(all_glyph_semantics(r,val,cx,col))return 1;
-    if(semantic_amount_glyph(r,val,cx,col))return 1;
-    if(is_pan(r) || r.kind==R_BTRANS ||
-       (r.kind==R_ENG && ((r.a==T_BRK && r.c==1) ||
-                          (r.a==T_MST && r.c==MST_DJF)))) {
-        int at=left+q*36/127;
-        cv_rect(left,38,37,1,C_LINE);cv_rect(cx,32,1,13,C_GRAY);
-        cv_rect(left,35,1,7,C_GRAY);cv_rect(right,35,1,7,C_GRAY);
-        cv_rect(at-1,34,3,9,col);
-    } else if(r.kind==R_DLEN || r.kind==R_BLEN || r.kind==R_SLEN || r.kind==R_SBAR || r.kind==R_SPAT || r.kind==R_BRKSLOT) {
-        for(int j=0;j<8;j++) {
-            int x=left+(j%4)*10,y=30+(j/4)*10;
-            rbox(x,y,7,7,1,j<=q*7/127?col:C_LINE);
-        }
-    } else if(r.kind==R_DRATE || r.kind==R_BRATE) {
-        cv_rect(left,38,37,1,C_LINE);
-        static const uint8_t gaps[4]={12,8,6,16}; /* 1/16, 1/16T, 1/32, 1/8T */
-        int gap=gaps[(unsigned)val<4?(unsigned)val:0];
-        for(int x=left+1;x<=right;x+=gap)cv_rect(x,31,2,15,col);
-    } else if(r.kind==R_BDIR) {
-        if(val==3) { /* existing random direction, not an invented trajectory */
-            cv_line(left,43,cx-7,31,col);cv_line(cx-7,31,cx+7,44,col);cv_line(cx+7,44,right,33,col);
-        } else {
-            cv_rect(left,38,37,1,col);
-            if(val!=1){cv_line(right-6,32,right,38,col);cv_line(right,38,right-6,44,col);}
-            if(val!=0){cv_line(left+6,32,left,38,col);cv_line(left,38,left+6,44,col);}
-        }
-    } else if(r.kind==R_TAPE) {
-        for(int side=-1;side<=1;side+=2) {
-            int x=cx+side*10;
-            disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);
-            cv_line(x,37,x+q*4/127,33,col);cv_rect(x-1,36,3,3,col);
-        }
-        cv_rect(cx-10,46,21,1,col);
-    } else if(r.kind==R_SREP || (r.kind==R_ENG && ((r.a==T_FX && (r.c==FX_DL_TIME || r.c==FX_DL_FDBK || r.c==FX_DL_LEVEL)) || (r.a==T_MIX && r.c==MX_DLY) || name_is(d,"Dly")))) {
-        for(int j=0;j<4;j++) {
-            int h=16-j*(4-q*3/127);
-            cv_rect(left+3+j*10,47-h,3,h,col);
-        }
-        cv_line(left+3,29,right,29,C_GRAY);cv_line(left+3,29,left+7,26,C_GRAY);
-    } else if(r.kind==R_ENG && ((r.a==T_FX && (r.c==FX_RV_DECAY || r.c==FX_RV_LEVEL)) || (r.a==T_MIX && r.c==MX_REV) || name_is(d,"Rev"))) {
-        for(int j=0;j<7;j++) {int h=2+j*(q+32)/64;if(h>18)h=18;cv_rect(left+j*6,38-h/2,2,h,col);}
-    } else if(r.kind==R_ENG && r.a==T_FX && (r.c==FX_RV_TONE || r.c==FX_DL_TONE || r.c==FX_RV_HPF)) {
-        int pivot=left+7+q*20/127;
-        cv_rect(left,47,37,1,C_LINE);cv_line(left,32,pivot,32,col);cv_line(pivot,32,right,46,col);
-    } else if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
-        cv_line(left,47,cx,36,col);cv_line(cx,36,right,36-q*8/127,col);
-        cv_rect(left,49,37,1,C_LINE);
-    } else if(r.kind==R_ENG && r.a==T_FX && r.c==FX_DRIVE) {
-        int flat=2+q*8/127;
-        cv_line(left,38,cx-flat,30,col);cv_line(cx-flat,30,cx-2,30,col);
-        cv_line(cx-2,30,cx+2,46,col);cv_line(cx+2,46,cx+flat,46,col);cv_line(cx+flat,46,right,38,col);
-    } else if(d && d->names && d->max<12) {
-        return 0; /* Named switches retain exact position pips. */
-    } else {
-        /* Neutral value scale for parameters without a dedicated schematic.
-         * No faux rotary knob, invented response curve, or new control. */
-        for(int j=0;j<7;j++) {
-            int h=3+j*2;
-            cv_rect(left+j*6,47-h,3,h,q && j*127/6<=q?col:C_LINE);
-        }
-        int at=left+q*36/127;
-        cv_rect(left,49,37,1,C_LINE);cv_rect(at,48,1,3,col);
-    }
-    return 1;
-}
-
-/* Original Chicago/Miami controls without a PART glyph reuse the existing
- * knob-strip families: tone-lowpass, DJF filter peak, drive, bipolar, pips
- * and the neutral value scale. Strip coordinates (y 28..50); caller offsets. */
-static UI_DRAW int orig_strip_slot(pref_t r)
-{
-    if(r.kind!=R_ENG || r.a!=T_303) return 0;
-    int b=engine_bass_sound_bank(&proj.sound,r.b);
-    if(b==ORIGINAL_SOUND_CHICAGO) return r.c>=1 && (r.c<=6 || r.c==11 || r.c==12 || r.c==15 || r.c==17);
-    if(b==ORIGINAL_SOUND_MIAMI) return r.c>=1 && r.c<=15 && r.c!=6 && r.c!=11;
-    return 0;
-}
-/* Original-control glyphs, 26x19 at (gx,gy). Each one pictures what the control
- * does and moves with the value. CUTOFF/PEAK follow filter_glyph and BITE
- * follows drive_amount_glyph (the old knob-strip families), scaled to the cell. */
-#define OG_W 26
-#define OG_H 18
-
-/* Qualitative effect identities in the existing 26x19 box. The short name
- * beside each picture remains authoritative; these are not measured DSP plots. */
-static UI_DRAW void orig_fx_glyph(int type,int gx,int gy,uint16_t col)
-{
-    int right=gx+OG_W-1,bot=gy+OG_H,mid=gy+OG_H/2;
-    switch(type) {
-    case 0: /* bypass */
-        cv_line(gx,mid,right,mid,col);cv_line(gx+10,gy+2,gx+15,bot-2,col);break;
-    case 1: case 7: { /* chorus pair / ensemble trio */
-        int n=type==7?3:2;
-        for(int row=0;row<n;row++) {
-            int y=gy+(n==3?3+row*5:5+row*7),py=y;
-            for(int k=1;k<=4;k++) {
-                int x=gx+k*6,yy=y+(k&1?2:-2);
-                cv_line(gx+(k-1)*6,py,x,yy,col);py=yy;
-            }
-        }
-        break;
-    }
-    case 2: /* phaser notches */
-        cv_line(gx,gy+5,gx+3,gy+5,col);
-        for(int i=0;i<2;i++) {
-            int x=gx+3+i*10;
-            cv_line(x,gy+5,x+4,bot-2,col);cv_line(x+4,bot-2,x+8,gy+5,col);
-            cv_line(x+8,gy+5,i?right:x+10,gy+5,col);
-        }
-        break;
-    case 3: /* ring modulation: alternating lobes under an amplitude envelope */
-        for(int i=0;i<6;i++) {
-            int x=gx+i*4,h=i<3?2+i*2:12-i*2;
-            cv_line(x,mid,x+2,mid+(i&1?h:-h),col);
-            cv_line(x+2,mid+(i&1?h:-h),x+4,mid,col);
-        }
-        break;
-    case 4: /* compressor knee */
-        cv_line(gx,bot,gx+11,gy+7,col);cv_line(gx+11,gy+7,right,gy+3,col);break;
-    case 5: /* decimator steps */
-        for(int i=0;i<4;i++) {
-            int x=gx+i*6,y=gy+15-i*4;
-            cv_line(x,y,x+6,y,col);if(i<3)cv_line(x+6,y,x+6,y-4,col);
-        }
-        break;
-    case 6: /* EQ peak */
-        cv_line(gx,mid,gx+6,mid,col);cv_line(gx+6,mid,gx+12,gy+2,col);
-        cv_line(gx+12,gy+2,gx+18,mid,col);cv_line(gx+18,mid,right,mid,col);break;
-    case 8: /* short delay taps */
-        for(int i=0;i<3;i++)cv_rect(gx+i*9,bot-12+i*4,2,12-i*4,col);
-        cv_line(gx,bot,right,bot,col);break;
-    case 9: /* BPM delay: clock plus taps */
-        cv_line(gx,gy+3,gx+8,gy+3,col);cv_line(gx+8,gy+3,gx+8,gy+11,col);
-        cv_line(gx+8,gy+11,gx,gy+11,col);cv_line(gx,gy+11,gx,gy+3,col);
-        cv_line(gx+4,gy+5,gx+4,gy+7,col);cv_line(gx+4,gy+7,gx+6,gy+7,col);
-        for(int i=0;i<3;i++)cv_rect(gx+12+i*6,bot-12+i*4,1,12-i*4,col);
-        cv_line(gx,bot,right,bot,col);break;
-    case 10: /* hall: room walls and diffuse reflections */
-        cv_line(gx,bot,gx,gy+2,col);cv_line(gx,gy+2,right,gy+2,col);cv_line(right,gy+2,right,bot,col);
-        for(int i=0;i<5;i++)cv_rect(gx+3+i*4,gy+5+i,1,10-i*2,col);
-        break;
-    case 11: /* reverb cut off at a gate */
-        for(int i=0;i<4;i++)cv_rect(gx+i*5,gy+3+i*2,2,12-i*2,col);
-        cv_rect(gx+20,gy+1,2,17,col);cv_line(gx+22,bot,right,bot,col);break;
-    default: break;
-    }
-}
-static float og_shift;                           /* live LFO: the wave scrolls by this much of t */
-static UI_DRAW void og_wave(int gx,int gy,float (*f)(float,float),float q,uint16_t col)
-{   /* f returns -1..1 (up positive) over t 0..1 */
-    int py=0;
-    cv_rect(gx,gy+OG_H,OG_W,1,C_LINE);
-    for(int i=0;i<OG_W;i++) {
-        float v=f((float)i/(OG_W-1)+og_shift,q);
-        if(v>1)v=1; if(v<-1)v=-1;
-        int yy=gy+OG_H/2-(int)(v*6.0f+(v<0?-.5f:.5f));
-        if(i) cv_line(gx+i-1,py,gx+i,yy,col);
-        py=yy;
-    }
-}
-static float og_sin(float t,float k){return fm_sinf(6.2831853f*t*k);}
-static float og_lfo_amp(float t,float q){return (.1f+.9f*q)*fm_sinf(6.2831853f*t*2.0f);}
-static float og_lfo_rate(float t,float q){return fm_sinf(6.2831853f*t*(1.0f+4.0f*q));}
-static float og_bite(float t,float q){float g=.3f+6.0f*q;return fm_tanhf(g*og_sin(t,1.5f))/fm_tanhf(g);}
-static float og_gnaw(float t,float q){float v=og_sin(t,1.5f)*(1.0f+3.0f*q);
-    while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
-static float og_crush(float t,float q){int n=12-(int)(q*10+.5f);float v=og_sin((float)((int)(t*(26-q*20))) /(26-q*20),1.5f);
-    return (float)(int)(v*n+(v<0?-.5f:.5f))/(float)n;}       /* sample-rate + bit reduction */
-static float og_fm(float t,float q){return fm_sinf(6.2831853f*(1.5f*t)+q*1.6f*fm_sinf(6.2831853f*1.5f*t));}
-static UI_DRAW int og_states(pref_t r,int val,int *idx)
-{   /* number of distinct readouts and the index of val among them */
-    char a[16],u[8],prev[16]="";int n=0;*idx=0;
-    for(int v=0;v<=127;v++){pref_value_of(r,v,a,u);if(strcmp_s(a,prev)){n++;put_s(prev,a);}if(v==val)*idx=n-1;}
-    return n;
-}
-/* Chicago ENV glyph: the knee column for a filter position z (0..1). The knee
- * travels gx+2..gx+OG_W-1-ENV_FALL (19 of 26 px), so a full EG is clear to see. */
-#define ENV_FALL 4
-static int env_knee_x(int gx,float z)
-{ z=(z+.5f)*.5f; /* bipolar: cutoff+EG*ENV spans -0.5..1.5, CUTOFF 50% sits mid-cell */
-  z=z<0?0:z>1?1:z; return gx+2+(int)(z*(OG_W-3-ENV_FALL)+.5f); }
-static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
-{
-    const x0x_param_t *d=pref_desc(r);
-    float q=d && d->max?(float)val/(float)d->max:0;
-    int chi=engine_bass_sound_bank(&proj.sound,r.b)==ORIGINAL_SOUND_CHICAGO,c=r.c;
-    int level_role=c==(chi?12:14) || (!chi && (c==1 || c==5));
-    int top=gy+3,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
-    if(q<0)q=0; if(q>1)q=1;
-    float amp=0,mod=0; unsigned state=6,held=0;
-    int sounding=engine_bass_voice_view(r.b,&amp,&mod,&state,&held) && state!=6;
-    if(amp<0)amp=0; if(amp>1)amp=1;
-    if(c==(chi?2:9) || (chi && c==3)) {          /* CUTOFF / PEAK: lowpass response */
-        float cq=q,pq=0;
-        if(chi && c==3){pref_t cr=PR(R_ENG,T_303,r.b,2);const x0x_param_t *dc=pref_desc(cr);
-            cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0;pq=q;}
-        int pivot=gx+4+(int)(cq*14+.5f),peak=top+2-(int)(pq*5+.5f);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        cv_line(gx,top+2,pivot-3,top+2,col);cv_line(pivot-3,top+2,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6>right?right:pivot+6,bot,col);
-        if(pivot+6<right) cv_line(pivot+6,bot,right,bot,col);
-    } else if(chi && c==4) {                     /* ENV: the lowpass knee the filter EG sweeps */
-        /* chicago_voice.c mp4_prepare: z = cutoff + vcf.level * env_depth. The knee
-         * and its resonance bump move LEFT/RIGHT only: x = live CUTOFF + EG x ENV.
-         * The bump height is the live PEAK and never follows the EG. A dim tick
-         * marks where a full EG takes the knee. */
-        pref_t cr=PR(R_ENG,T_303,r.b,2),pr=PR(R_ENG,T_303,r.b,3);
-        const x0x_param_t *dc=pref_desc(cr),*dp=pref_desc(pr);
-        float cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0,pq=dp&&dp->max?(float)matrix_value(pr)/dp->max:0;
-        float depth=2*q-1,eg=0,dd; if(engine_bass_filter_view(r.b,&eg,&dd)) depth=dd;
-        if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
-        int pivot=env_knee_x(gx,cq+eg*depth),tgt=env_knee_x(gx,cq+depth),pass=top+3;
-        int peak=pass-1-(int)(pq*5+.5f);         /* fixed by PEAK: 1..6 px above the passband */
-        int energy=(int)(eg*(depth<0?-depth:depth)*6.0f+.5f);
-        col=depth<0?blend(C_LINE,col,16-energy):blend(col,C_WHITE,energy);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(tgt!=pivot) cv_rect(tgt,bot-3,1,3,C_LINE);
-        if(pivot-2>gx) cv_line(gx,pass,pivot-2,pass,col);
-        cv_line(pivot-2,pass,pivot,peak,col);
-        cv_line(pivot,peak,pivot+ENV_FALL,bot,col);
-        if(pivot+ENV_FALL<right) cv_line(pivot+ENV_FALL,bot,right,bot,col);
-    } else if(c==(chi?1:4)) {                    /* GLIDE: sloped pitch line, slope widens */
-        /* Live: a dot rides the slope as the oscillator pitch glides to the new
-         * note (current -> target from the engine); the travelled part is lit. */
-        static float from[NBASS],to[NBASS]; static uint8_t seen[NBASS];
-        int w=1+(int)(q*18+.5f),x0=gx+(OG_W-1-w)/2,b=r.b<NBASS?r.b:0,on=0;
-        float ph,bi,cu=0,tg=0,f=1;
-        if(engine_bass_motion_view(b,&ph,&bi,&cu,&tg,&on)) {
-            if(!seen[b] || tg!=to[b]) { from[b]=seen[b]?cu:tg; to[b]=tg; seen[b]=1; }
-            if(to[b]!=from[b]) f=(cu-from[b])/(to[b]-from[b]);
-        }
-        if(f<0)f=0; if(f>1)f=1;
-        int dx=x0+(int)(f*w+.5f),dy=bot-1-(int)(f*(bot-1-top)+.5f);
-        if(f>=1) { cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,x0+w,top,col);cv_line(x0+w,top,right,top,col); }
-        else {
-            cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,dx,dy,col);
-            cv_line(dx,dy,x0+w,top,C_LINE);cv_line(x0+w,top,right,top,C_LINE);
-            cv_rect(dx-1,dy-1,3,3,C_WHITE);
-        }
-    } else if(chi && c==5) og_wave(gx,gy,og_bite,q,col);       /* BITE: soft clip */
-    else if(chi && c==6) og_wave(gx,gy,og_gnaw,q,col);         /* GNAW: fold */
-    else if(!chi && c==10) og_wave(gx,gy,og_crush,q,col);      /* CRUSH: bit/rate crush */
-    else if(chi && c==11) {                      /* ENV/GATE toggle */
-        int idx; og_states(r,val,&idx);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(idx){cv_line(gx+2,bot,gx+2,top,col);cv_line(gx+2,top,gx+22,top,col);cv_line(gx+22,top,gx+22,bot,col);}
-        else{cv_line(gx+1,bot,gx+5,top,col);cv_line(gx+5,top,gx+10,mid,col);cv_line(gx+10,mid,gx+18,mid,col);cv_line(gx+18,mid,gx+24,bot,col);}
-    } else if(level_role) {                     /* LEVEL / OUTPUT: live segmented meter */
-        int ceiling=(int)(q*6.0f+.5f),lit=sounding?(int)(q*amp*6.0f+.5f):0;
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        for(int i=0;i<6;i++) {
-            uint16_t ink=i<lit?C_WHITE:i<ceiling?(sounding?blend(C_LINE,col,6):col):C_LINE;
-            cv_rect(gx+i*4,bot-3-i*2,3,2,ink);
-        }
-    } else if(chi && c==15) {                    /* RANGE: octave stairs */
-        int idx,n=og_states(r,val,&idx),sw=OG_W/(n?n:1);
-        for(int k=0;k<n;k++){int h=3+k*(OG_H-3)/(n>1?n-1:1);cv_rect(gx+k*sw,bot-h+1,sw-2,h,k<=idx?col:C_LINE);}
-    } else if(chi && c==17) {                    /* FX TYPE: recognizable effect picture */
-        orig_fx_glyph(val,gx,gy,col);
-    } else if(!chi && c==2) {                    /* SUB: osc square + sub-octave square */
-        int a=1+(int)(q*6+.5f);
-        for(int i=0;i<4;i++){int xx=gx+i*6;cv_line(xx,top,xx+3,top,C_LINE);cv_line(xx+3,top,xx+3,top+4,C_LINE);cv_line(xx+3,top+4,xx+6,top+4,C_LINE);cv_line(xx+6,top+4,xx+6,top,C_LINE);}
-        for(int i=0;i<2;i++){int xx=gx+i*12;cv_line(xx,bot-a,xx+6,bot-a,col);cv_line(xx+6,bot-a,xx+6,bot,col);cv_line(xx+6,bot,xx+12,bot,col);if(xx+12<right)cv_line(xx+12,bot,xx+12,bot-a,col);}
-    } else if(!chi && (c==3 || c==7)) {          /* PITCH / TUNE: centre needle */
-        float ang=(q*2-1)*1.05f; int px=gx+12,py=bot;
-        cv_rect(px,top-2,1,2,C_LINE);cv_rect(gx+1,bot,OG_W-2,1,C_LINE);
-        cv_line(px,py,px+(int)(fm_sinf(ang)*12),py-(int)(fm_cosf(ang)*14),col);
-    } else if(!chi && c==8) og_wave(gx,gy,og_fm,q,col);        /* XMOD DEPTH: FM wave */
-    else if(!chi && (c==12 || c==13)) {          /* WOBBLE depth / RATE: the live MG1 scrolls the wave */
-        float ph=0,bi=0,cu,tg; int on=0; float cyc=c==12?2.0f:1.0f+4.0f*q;
-        if(!engine_bass_motion_view(r.b,&ph,&bi,&cu,&tg,&on) || ph<-1 || ph>1) ph=-1;
-        og_shift=((ph+1)*.5f)/cyc;               /* one MG cycle = one drawn cycle */
-        og_wave(gx,gy,c==12?og_lfo_amp:og_lfo_rate,q,col);
-        {   float v=(c==12?og_lfo_amp:og_lfo_rate)(1.0f+og_shift,q); if(v>1)v=1; if(v<-1)v=-1;
-            int yy=gy+OG_H/2-(int)(v*6.0f+(v<0?-.5f:.5f)); /* og_wave scale */
-            cv_rect(right-1,yy-1,2,3,on?C_WHITE:col); }   /* "now": the wobble's present value */
-        og_shift=0;
-    } else if(!chi && c==15) {                     /* STEREO: L/R spread */
-        int s=1+(int)(q*10+.5f),cx=gx+12;
-        cv_rect(cx,top,1,OG_H-3,C_LINE);
-        cv_rect(cx-s-1,mid-4,2,9,col);cv_rect(cx+s,mid-4,2,9,col);
-    } else {                                     /* last resort: 7-bar scale */
-        for(int j=0;j<7;j++){int h=3+j*2;cv_rect(gx+j*4,bot-h,2,h,q && j*127/6<=q*127?col:C_LINE);}
-    }
-    if(sounding && !(chi && c==4) && !level_role) {
-        /* Three sparse level pips follow actual VCA; a separate modulator cursor
-         * follows the native MG, never wall-clock phase. */
-        int n=(int)(amp*3.0f+.5f);
-        for(int i=0;i<n;i++) cv_rect(gx+2+i*4,bot-1,2,1,C_WHITE);
-        if(!chi && (c==8 || c==12 || c==13)) {
-            if(mod<0)mod=0; if(mod>1)mod=1;
-            cv_rect(gx+1+(int)(mod*23.0f+.5f),gy+1,1,2,C_WHITE);
-        }
-    }
-}
-
-/* ---- 909 / 808 part-page glyphs --------------------------------------------
- * Each one pictures what the control does in the engine, follows the value
- * with the engine's own scaling, and moves with the voice on every hit:
- * drum_live() reads the track's real amplitude envelope (909: the voice EG;
- * 808: the lane's output over its hit peak) and the ms since the hit. Same
- * 26x19 cell as orig_strip_glyph; the caller draws the readout right of it. */
-enum { DG_NONE, DG_DECAY, DG_NTAIL, DG_TUNE, DG_BDSWEEP, DG_ATTACK, DG_LPF, DG_SHELLS, DG_SNAPPY, DG_SOUND, DG_ACCENT, DG_LEVEL };
-static UI_DRAW int drum_strip_role(pref_t r)
-{
-    if(r.kind!=R_ENG || (r.a!=T_909 && r.a!=T_808)) return DG_NONE;
-    const x0x_param_t *d=pref_desc(r);
-    int k9=r.a==T_909;
-    if(!d) return DG_NONE;
-    if((ui.view==V_MIX || ui.view==V_PART) && r.b<NDRUM && name_is(d,"Level")) return DG_LEVEL;
-    if(ui.view!=V_PART) return DG_NONE;
-    if(r.b==NDRUM) return name_is(d,"Accent")||name_is(d,"Veloc")?DG_ACCENT:DG_NONE;
-    if(k9 && r.b==0 /* BD */ && (name_is(d,"Tune")||name_is(d,"P.Dpth")||name_is(d,"Pitch"))) return DG_BDSWEEP;
-    if(name_is(d,"Decay")||name_is(d,"Tail")) return DG_DECAY;
-    if(name_is(d,"Tune")) return DG_TUNE;
-    if(name_is(d,"Attack")) return DG_ATTACK;
-    if(name_is(d,"Snappy")) return DG_SNAPPY;
-    if(name_is(d,"Sound") && d->names) return DG_SOUND;
-    if(name_is(d,"Tone")) return k9?(r.b==1 /* SD */?DG_NTAIL:DG_NONE):r.b==0?DG_LPF:r.b==1?DG_SHELLS:DG_NONE;   /* tracks 0 BD, 1 SD in both kits */
-    return DG_NONE;
-}
-/* the track's live state; the kit cells follow the newest hit of the kit */
-static UI_DRAW int drum_live(pref_t r,uint32_t *age,float *env)
-{
-    int kit=r.a==T_808;
-    *age=0xffffffffu; *env=0;
-    if(r.b!=NDRUM) return engine_drum_view(kit,r.b,age,env);
-    int any=0;
-    for(int k=0;k<NDRUM;k++){uint32_t a;float e;if(engine_drum_view(kit,k,&a,&e)&&a<*age){*age=a;*env=e;any=1;}}
-    return any;
-}
-static UI_DRAW float dg_si(pref_t r,int c,int pot){float x=0;(void)engine_param_si(r.a,r.b,c,pot,&x);return x;}
-/* where the value sits in its range on the engine's own axis: log for Hz/ms/ratio */
-static UI_DRAW float dg_pos(pref_t r,int val)
-{
-    const x0x_param_t *d=pref_desc(r);
-    float x=0; int u=engine_param_si(r.a,r.b,r.c,val,&x);
-    if(u==X0X_U_HZ||u==X0X_U_MS||u==X0X_U_S||u==X0X_U_RATIO){
-        float lo=dg_si(r,r.c,0),hi=dg_si(r,r.c,d->max);
-        if(lo>0 && hi>lo && x>0){float p=fm_log2f(x/lo)/fm_log2f(hi/lo);return p<0?0:p>1?1:p;}
-    }
-    return d && d->max?(float)val/d->max:0;
-}
-static UI_DRAW int dg_rnd(int i){uint32_t h=(uint32_t)i*2654435761u;h^=h>>13;return (int)(h%100u);}
-/* an amplitude tail: full at the hit, -60 dB at xe px; live, the part already
- * played goes dim and a playhead stands at the voice's real level */
-static UI_DRAW void dg_tail(int gx,int gy,int xe,int live,float e,int noisy,uint32_t seed,uint16_t col)
-{   /* idle: the tail outline, -60 dB at xe. Live: a ghost of that outline, and the
-     * part still to play, filled, slid to the left edge: it is e high and
-     * (1 - log2(e)/-9.966) x xe long, so it shrinks both ways as the voice decays */
-    int bot=gy+OG_H,H=OG_H-2;
-    if(xe<2)xe=2; if(xe>OG_W-1)xe=OG_W-1;
-    float sh=0;
-    if(live){ if(e<0.001f)e=0.001f; sh=(float)xe*fm_log2f(e)/-9.966f; }
-    cv_rect(gx,bot,OG_W,1,C_LINE);
-    int h0=-1;
-    for(int x=0;x<=xe;x++){
-        float a=fm_exp2f(-9.966f*(float)x/(float)xe);
-        int h=(int)(a*H+.5f);
-        if(noisy) h=h*(40+dg_rnd(x*7+(int)seed))/140;
-        if(h<1)h=1;
-        uint16_t c=live?C_LINE:col;
-        if(noisy && !live) cv_rect(gx+x,bot-h,1,h,c);
-        else { cv_rect(gx+x,bot-h,1,1,c); if(h0>h+1) cv_rect(gx+x-1,bot-h0,1,h0-h,c); }
-        h0=h;
-    }
-    if(!live) return;
-    for(int x=0;(float)x<=(float)xe-sh;x++){
-        float a=fm_exp2f(-9.966f*((float)x+sh)/(float)xe);
-        int h=(int)(a*H+.5f);
-        if(noisy) h=h*(40+dg_rnd((x+(int)sh)*7+(int)seed))/140;
-        if(h>0) {
-            cv_rect(gx+x,bot-h,1,1,col);
-            if(x==0 || (noisy && x%5==0)) cv_rect(gx+x,bot-h,1,h,x?col:C_WHITE);
-        }
-    }
-}
-static UI_DRAW int dg_tail_px(float ms){if(ms<0)ms=0;if(ms>4000)ms=4000;return 2+(int)(23.0f*fm_sqrtf(ms/4000.0f)+.5f);}
-#define DG_BACK_MS 300u
-/* Shared by the compact and R22 renderers: one existing timestamp per voice. */
-static uint32_t dg_last[2][NDRUM+1];
-static UI_DRAW float dg_live_back(pref_t r,int live)
-{
-    uint32_t tnow=plat_ms();int ki=r.a==T_808,vi=r.b>NDRUM?NDRUM:r.b;
-    if(live)dg_last[ki][vi]=tnow|1u;
-    else if(dg_last[ki][vi] && tnow-dg_last[ki][vi]<DG_BACK_MS)
-        return (float)(tnow-dg_last[ki][vi])/(float)DG_BACK_MS;
-    return 1.0f;
-}
-static UI_DRAW void dv_glyph(pref_t r,float ev,float ox,float oy,float sx,float sy,uint16_t col);
-static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
-{
-    const x0x_param_t *d=pref_desc(r);
-    float q=d && d->max?(float)val/(float)d->max:0,e=0;
-    uint32_t age=0xffffffffu;
-    int live=drum_live(r,&age,&e),role=drum_strip_role(r);
-    /* Use the same semantic picture as the R22 part page: Tune fork,
-     * pitched carrier, Depth sweep, rising attack and real tone response. */
-    if(role==DG_BDSWEEP || role==DG_ATTACK || role==DG_LPF) {
-        dv_glyph(r,(float)val,(float)gx+1,(float)gy+1,23.f/32.f,16.f/18.f,col);
-        return;
-    }
-    int top=gy+1,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
-    /* after the voice ends, the idle glyph comes back over DG_BACK_MS (ink fades in,
-     * the wave regrows) instead of snapping from the last live frame */
-    float back=dg_live_back(r,live);
-    if(!live && back<1.0f && (role==DG_DECAY||role==DG_NTAIL||role==DG_BDSWEEP))
-        col=blend(C_LINE,col,(int)(16.0f*back));
-    if(q<0)q=0; if(q>1)q=1;
-    switch(role){
-    case DG_DECAY: {                             /* DECAY / TAIL: the tail, as long as the real time */
-        float x=0; int u=engine_param_si(r.a,r.b,r.c,val,&x),xe;
-        if(u==X0X_U_MS) xe=dg_tail_px(x);
-        else if(u==X0X_U_S) xe=dg_tail_px(x*1000.0f);
-        else xe=2+(int)(q*23+.5f);               /* 808 decays: no confirmed time (pot/127 to the circuit) */
-        dg_tail(gx,gy,xe,live,e,0,0,col);
-    } break;
-    case DG_NTAIL: {                             /* 909 SD TONE: the snare noise decay in physical ms plus 24 ms hold */
-        float x=dg_si(r,r.c,val);
-        dg_tail(gx,gy,dg_tail_px(24.0f+x),live,e,1,live?age/40u:0,col);
-    } break;
-    case DG_TUNE: {                              /* TUNE: a wave whose cycles follow the real pitch; rings on a hit */
-        /* 808 TUNE and the 909 cymbal TUNE are bipolar semitones (pot 64 = 0 st):
-         * a centre mark shows 0, the tick moves both ways and 2 cycles = no shift.
-         * Pitch occupies rows1..5; the wave stays in rows8..16, with a clear
-         * two-row gutter even at maximum live amplitude. Baseline remains18. */
-        float p=dg_pos(r,val),cyc=1.0f+p*2.0f,amp=live?(1.0f+3.0f*e):(1.0f+3.0f*back),ph=0;
-        int wave_mid=gy+12,py=wave_mid; char n0[16],u0[8];
-        pref_value_of(r,0,n0,u0);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(n0[0]=='-') cv_rect(gx+OG_W/2,bot-3,1,3,C_GRAY);
-        cv_rect(gx+(int)(p*(OG_W-1)+.5f),bot-1,1,2,col);
-        /* A pitch contour is schematic on non-kick voices; only BD909 claims
-         * the measured Hz/time law. It descends toward the tuned floor. */
-        cv_line(gx,top,gx+8,top+3,col);
-        cv_line(gx+8,top+3,right,top+4,col);
-        if(live) {int x=(int)((1.0f-e)*24.0f+.5f);cv_rect(gx+x,top+3,1,2,C_WHITE);}
-        for(int i=0;i<OG_W;i++){
-            int yy=wave_mid-(int)(amp*fm_sinf(6.2831853f*((float)i*cyc/(OG_W-1)+ph))+(.5f));
-            if(i) cv_line(gx+i-1,py,gx+i,yy,col);
-            py=yy;
-        }
-    } break;
-    case DG_SHELLS: {                            /* 808 SD TONE: the two shell resonators' mix (sd_trigger mix1/mix2) */
-        int tp=val;
-        float t=(tp<=64?(float)tp/128.0f:0.5f+(float)(tp-64)*(0.5f/63.0f))*1.5708f;
-        float g1=fm_cosf(t),g2=fm_sinf(t),k=live?(0.3f+0.7f*e):(0.3f+0.7f*back);
-        int x1=gx+7,x2=gx+17,H=OG_H-3;      /* 173 Hz and 336 Hz: one octave apart */
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        for(int s=0;s<2;s++){
-            int xc=s?x2:x1,h=(int)((s?g2:g1)*H*k+.5f);
-            cv_line(xc-4,bot,xc,bot-h,col);cv_line(xc,bot-h,xc+4,bot,col);
-        }
-    } break;
-    case DG_SNAPPY: {                            /* SNAPPY: the noise burst; louder with the amount, fades on a hit */
-        float k=live?e:back;
-        uint32_t s=live?age/40u:0;
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        for(int x=0;x<OG_W;x+=2){
-            float env=fm_exp2f(-(float)x/9.0f);
-            int h=(int)(q*k*env*(OG_H-2)*(35+dg_rnd(x*3+(int)s))/135.0f+.5f);
-            if(h>0) cv_rect(gx+x,bot-h,1,h,col); else cv_rect(gx+x,bot-1,1,1,C_LINE);
-        }
-    } break;
-    case DG_SOUND: {                             /* SOUND switch: one pip per position, the hit lights it */
-        int n=d->max+1,w=(OG_W-2)/n;
-        for(int k=0;k<n;k++){
-            int x=gx+1+k*w,h=9;
-            if(k==val){ if(live) h+=(int)(e*4+.5f); cv_rect(x,mid+4-h,w-3,h,col); }
-            else rbox(x,mid-5,w-3,9,1,C_LINE);
-        }
-    } break;
-    case DG_LEVEL: {                            /* value is ceiling, real envelope pulses segments */
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        int ceiling=(int)(q*6.0f+.5f),lit=live?(int)(q*e*6.0f+.5f):0;
-        for(int i=0;i<6;i++) {
-            int h=3+i*2;
-            cv_rect(gx+i*4,bot-h,3,2,i<lit?C_WHITE:i<ceiling?col:C_LINE);
-        }
-    } break;
-    case DG_ACCENT: {                            /* ACCENT: a plain hit next to an accented one, the gap is the depth */
-        float k=live?(0.6f+0.4f*e):0.6f;           /* a hit in the kit pulses the bars up */
-        int H=OG_H-2,hn=(int)(H*(1.0f-0.7f*q)*k+.5f),ha=(int)(H*k+.5f);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        for(int j=0;j<2;j++){
-            int x=gx+3+j*13,h=j?ha:hn;if(h<1)h=1;
-            cv_line(x-3,bot,x,bot-h,col);cv_line(x,bot-h,x+4,bot,col);
-            if(live)cv_rect(x,bot-h,1,2,C_WHITE);
-        }
-        cv_line(gx+7,top,gx+9,top+2,col);cv_line(gx+9,top+2,gx+7,top+4,col);   /* ">" accent marks */
-        cv_line(gx+19,top,gx+21,top+2,col);cv_line(gx+21,top+2,gx+19,top+4,col);
-    } break;
-    default: break;
-    }
-}
-
-#include "ui_drum_voice.inc"
-
-static UI_DRAW uint32_t knobs_sig(void)
-{
-    uint32_t h = 2166136261u, i;
-    int pgi = cur_page();
-#define MIXIN(v) (h = (h ^ (uint32_t)(v)) * 16777619u)
-    if (ui.view == V_PART && is_303()) {
-        const uint8_t *cell=proj.sound.v[T_303][bidx()];
-        for (unsigned byte=0; byte<ORIGINAL_SOUND_BYTES; byte++) MIXIN(cell[byte]);
-        MIXIN(engine_bass_status(bidx()));
-        { float eg=0,dd=0; if(engine_bass_filter_view(bidx(),&eg,&dd)) MIXIN(env_knee_x(0,eg*dd*(eg>0))); } /* ENV glyph motion: one step per knee pixel */
-        { float a=0,m=0;unsigned s=6,key=0;
-          if(engine_bass_voice_view(bidx(),&a,&m,&s,&key)) {
-              MIXIN((int)(a*32.0f)); MIXIN((int)(m*24.0f)); MIXIN(s); MIXIN(key);
-          }
-        }
-        { float ph=0,bi=0,cu=0,tg=0; int on=0; if(engine_bass_motion_view(bidx(),&ph,&bi,&cu,&tg,&on)) { MIXIN((int)(ph*64.0f)); MIXIN((int)((tg-cu)*16.0f)); } } /* wobble / glide motion */
-        MIXIN(engine_bass_preset_pending(bidx()));
-        MIXIN(engine_bass_requested_bank(bidx())); MIXIN(engine_bass_requested_preset(bidx()));
-    }
-    MIXIN(ui_ease_sig());
-    MIXIN(ui.view);
-    MIXIN(ui.part);
-    MIXIN(division_pad_owner());
-    if (division_pad_owner()) MIXIN(division_pad_index());
-#if X0X_BASS_PRESET_PREVIEW
-    if(is_303()) MIXIN(engine_bass_preset_pending(bidx()));
-#endif
-    MIXIN(pgi);
-    MIXIN(ui.touched);
-    MIXIN(ui.held_step);
-    MIXIN(lock_step() + 1);
-    MIXIN(proj.set.palette);
-    MIXIN(ui.sel[0] | ui.sel[1] << 8);
-    MIXIN(seq.ppat[ui.part]);
-    if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ)) {
-        const brkpart_t *bp=&cur_pat()->brk;
-        MIXIN(bp->steps); for(int k=0;k<16;k++)MIXIN(bp->slice[k]);
-        MIXIN(lock_marks(-1,-1,0)); MIXIN(seq.playing); MIXIN(eng_step[TRK_BRK]);
-        MIXIN(brk_slice_count(bp,0)); MIXIN(brk_slice_count(bp,1));
-        MIXIN(engine_brk_count(0)); /* Sounding snapshot adoption changes footer modulo. */
-        MIXIN(ui.brk_count_target);
-    }
-    MIXIN(ui.song_sel);
-    {
-        const char *fa, *fb, *fc;
-        MIXIN(footer_text(&fa, &fb, &fc));
-        MIXIN((uintptr_t)fa ^ ((uintptr_t)fb << 3) ^ ((uintptr_t)fc << 7));
-        MIXIN(pg.n);
-    }
-    for (i = 0; i < 4; i++) {
-        pref_t r = pg.r[pgi][i];
-        MIXIN(r.kind | r.a << 8 | r.b << 16 | (uint32_t)r.c << 24);
-        MIXIN(pref_get(r));
-        if(r.kind==R_ENG && (r.a==T_909 || r.a==T_808)) {
-            uint32_t age=0;float e=0;int live=drum_live(r,&age,&e);
-            MIXIN(live);if(live){MIXIN((int)(e*32.0f));MIXIN(age/40u);}
-        }
-        if(r.kind==R_TEMPO) MIXIN(tempo_glyph_view);
-        if(r.kind==R_TAPE && pref_get(r)>=16) MIXIN(tape_glyph_phase);
-        if(r.kind==R_BRKSLOT) MIXIN(engine_brk_nslots());
-        if(r.kind==R_SBAR) MIXIN(pref_desc(r)->max);
-        if(r.kind==R_ENG && r.a==T_FX && r.c==FX_DL_FDBK)
-            MIXIN(pref_get(PR(R_ENG,T_FX,0,FX_DL_TYPE)));
-        if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF) {
-            MIXIN(engine_master_get(MST_MODE));
-            MIXIN(engine_master_get(MST_CUTOFF));
-            MIXIN(engine_master_get(MST_RESO));
-        }
-        MIXIN(has_motion(r) | (motion_now(r) + 1) << 1);
-        MIXIN(lock_of(r, lock_step()) + 1);
-    }
-    if (ui.held_step >= 0) {
-        const bstep_t *st = &cur_pat()->bass[bidx()].step[ui.held_step];
-        MIXIN(st->note | st->flags << 8 | st->velocity << 16);
-    }
-#undef MIXIN
-    return h;
-}
-
-static int strcmp_s(const char *a, const char *b)
-{
-    while (*a && *a == *b) {
-        a++;
-        b++;
-    }
-    return *a != *b;
-}
-
-/* the knob row's tag: whose knobs these are (BD, 909 KIT, P3 PATTERN, 909 MIX: BD, 303A STEP 5) */
-static void knob_tag(char *t)
-{
-    int g = pg.group[cur_page()], dm = drum_mix_page();
-    const char *ti = pg.title[cur_page()];
-    if (lock_step() >= 0) {
-        put_i(put_s(put_s(t, is_drum() ? engine_voice_name(ui.part == PART_909 ? T_909 : T_808, ui.sel[ui.part])
-                                        : part_name(ui.part)), " P-LOCK STEP "), lock_step() + 1);
-    } else if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {
-        put_i(put_s(put_s(t, part_name(ui.part)), " STEP "), ui.held_step + 1);
-    } else if (dm >= 0)
-        put_s(put_s(put_s(t, ti), ": "), engine_voice_name(dm ? T_808 : T_909, ui.sel[dm]));
-    else if (ui.view == V_MIX && cur_page() == 0)
-        put_s(put_s(t, "PARTS: "), part_display(ui.mixsel));
-    else if (g == GR_PAT)
-        put_s(put_s(put_i(put_s(t, "P"), seq.ppat[ui.part] + 1), " "), ti);
-    else if (g == GR_KIT || g == GR_SOUND) {
-#if X0X_BASS_PRESET_PREVIEW
-        if(is_303()) put_s(t,ti);
-        else
-#endif
-        put_s(put_s(put_s(t,part_display(ui.part)), " "), ti);
-    }
-    else
-        put_s(t, ti);
-    {   /* a section over several pages (same name): which of them, "BD (1/2)" */
-        int p = cur_page(), a = p, b = p;
-        while (a > 0 && !strcmp_s(pg.title[a - 1], ti))
-            a--;
-        while (b + 1 < pg.n && !strcmp_s(pg.title[b + 1], ti))
-            b++;
-        if (b > a) {
-            char *q = t;
-            while (*q)
-                q++;
-            put_s(put_i(put_s(put_i(put_s(q, " ("), p - a + 1), "/"), b - a + 1), ")");
-        }
-    }
-}
-
-#include "ui_chance_probe.h"
-#include "ui_break_layout_controls.h"
-static UI_DRAW void draw_knobs(void)
-{
-    static uint32_t last_sig;
-    int i, pgi = cur_page();
-    uint32_t sig;
-#if BOARD_SMK37
-    {   /* clip mode, no menu: the KEYS panel (main_fm1.c smk_ck_panel) takes the strip */
-        extern uint8_t smk_ck_knobs_owned(void);
-        extern uint8_t smk_ck_panel(uint32_t *last, uint32_t force);
-        if (smk_ck_knobs_owned()) {
-            blit_hash[3] = 0;                         /* (the knob strip draws all again after it) */
-            if (smk_ck_panel(&last_sig, !blit_hash[2]))
-                cv_commit(2, 0, KNOB_Y);
-            return;
-        }
-        blit_hash[2] = 0;
-    }
-#endif
-    if (ui.view == V_PART && (is_drum() || is_303())) {
-        /* Continuation of the same 4x4 matrix, not a duplicate knob row. */
-        cv_begin(240, KNOB_H, C_BLACK);
-        if (ui.overlay==O_NONE && !ui.help) {
-            if (is_drum()) draw_drum_voice(2);
-            else draw_part_sound(2);
-        }
-        cv_commit_knobs(3);
-        last_sig = 0;
-        return;
-    }
-    tape_glyph_tick();
-    tempo_glyph_view = seq.metro_view;
-    sig = knobs_sig();
-    if (sig == last_sig && blit_hash[3])
-        return;
-    last_sig = sig;
-    cv_begin(240, KNOB_H, C_BLACK);
-    if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE && !ui.help) {
-        break_layout_controls(); cv_commit_knobs(3); return;
-    }
-    /* One shared bounded parameter panel, including its context caption.
-     * Touch/lock/motion remain content states, never separate raised tiles. */
-    night_panel(3,0,234,68,0);
-    {   /* the rule; at its right end, where you are: the tag, then the page dots */
-        char t[36];                    /* room for "303A P-LOCK STEP 16 Â· WBL1 (1/2)" */
-        int dots = pg.n > 1 && ui.view != V_GLO;
-        int32_t xd = 237 - (dots ? pg.n * 5 : 0), xt;
-        knob_tag(t);
-        /* The context caption is a label, not an unexplained horizontal rail. */
-        xt=8;
-        cv_text(xt, vc(&FONT_XS, 0, 11), &FONT_XS, t, C_HI);
-        if (dots) {
-            int k;
-            for (k = 0; k < pg.n; k++)
-                cv_rect(xd + k * 5, 4, 3, 3, k == cur_page() ? C_HI : C_LINE);
-        }
-    }
-    draw_footer();
-    if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {     /* SEQ: the held step's own knobs */
-        static const char *const SN[4] = {"NOTE", "GATE", "ACCENT", "SLIDE"};
-        static const char *const G[3] = {"REST", "NOTE", "TIE"};
-        const bpart_t *bp = &cur_pat()->bass[bidx()];
-        const bstep_t *st = &bp->step[ui.held_step];
-        for (i = 0; i < 4; i++) {
-            char v[12];
-            int cx = i * 60 + 30;
-            if (i == 0)
-                put_note(v, held_note_of(bp, ui.held_step) + bp->transpose - 24);
-            else if (i == 1)
-                put_s(v, G[bstep_gate(st)]);
-            else
-                put_s(v, (st->flags & (i == 2 ? BS_ACCENT : BS_SLIDE)) ? "ON" : "OFF");
-            text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, SN[i], C_GRAY);
-            text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
-        }
-        cv_commit_knobs(3);
-        return;
-    }
-    for (i = 0; i < 4; i++) {
-        pref_t r = pg.r[pgi][i];
-        const x0x_param_t *d = pref_desc(r);
-        char num[16], unit[8];
-        int cx = i * 60 + 30, val, touched = ui.touched == i;
-        uint16_t col = drum_mix_page() >= 0 ? PART_COL[drum_mix_page()] : part_col();   /* MIX: 909 in the 909's */
-        if (!d)
-            continue;
-        /* Selection is the label/value color; no independent tile or relief. */
-        text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);
-        val = pref_get(r);
-        if (lock_step() >= 0) {                        /* a held step: its own value (amber mark: locked) */
-            int lv = lock_of(r, lock_step());
-            if (lv >= 0)
-                val = lv;
-            if (lockable(r))
-                dot(i * 60 + 52, 17, 2, lv >= 0 ? C_AMB : C_LINE);
-        } else if (has_motion(r)) {                    /* recorded motion: a mark, and what it plays now */
-            int mv = motion_now(r);
-            dot(i * 60 + 52, 17, 2, mv >= 0 ? C_WHITE : C_DIM);
-            if (mv >= 0)
-                val = mv;
-        }
-        if(drum_strip_role(r)==DG_LEVEL) {
-            drum_strip_glyph(r,val,cx-13,28,col);
-        } else if(perform_glyph(r,val,cx,col) || control_glyph(r,val,cx,col)) {
-            /* Its existing value/motion/lock path is retained below. */
-        } else if (d->names && d->max < 12) {           /* a switch: positions as pips */
-            int n = d->max + 1, k, pw = n > 6 ? 3 : 6, gap = 2, w0 = n * (pw + gap) - gap;
-            for (k = 0; k < n; k++)
-                box(cx - w0 / 2 + k * (pw + gap), 33, pw, 9, k == val ? col : C_LINE);
-        }
-        pref_value_of(r,val,num,unit);
-        if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF) {
-            uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);
-            pref_value_of(PR(R_ENG,T_MST,0,MST_MODE),mode,num,unit);
-        }
-        if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS)
-            original_cell_value(cx,vc(&FONT_B,53,13),num,unit,touched ? C_WHITE : C_HI);
-        /* Existing FWD/REV/PING/RND pictures already show the direction.
-         * Barlow number/unit ink is 0.5â€“1px right of the PUMP card center. */
-        else if(r.kind!=R_BDIR)
-            cell_value(cx-(r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP),
-                       vc(&FONT_B,53,13),num,unit,touched?C_WHITE:C_HI);
-    }
-    cv_commit_knobs(3);
-}
-
-/* ===================================================================== LEDs === */
-static uint32_t drum_step_lights(int kit)
-{
-    const dpart_t *d = &pat_of(kit)->drum[kit];
-    const uint32_t *bits = (ui.btn & (1u << B_ENV)) ? d->accent : d->hit[ui.sel[kit]];
-    int ph = eng_step[TRK_DRUM + kit];
-    uint32_t lit = 0;
-    for (int i = 0; i < 16; i++) {
-        int s = step_of(i), on = s < d->len && sm_get(bits, s);
-        if (seq.playing && s == ph) on = !on;
-        if (on) lit |= 1u << WHITE_KEY[i];
-    }
-    return lit;
-}
-
-static UI_DRAW void leds(void)
-{
-    uint32_t b = 0, k = 0, d = 0, i;
-    int blink = (ui.frame & 8u) != 0;
-#if BOARD_SMK37
-    extern uint8_t smk_clip_mode_on(void);
-    extern uint8_t smk_apc_transport_led_state(uint8_t note);
-#endif
-    if (seq_clock_waiting(&seq) ? (ui.frame & 32u) != 0 : seq.playing && eng_step[TRK_DRUM] % 4 == 0)
-        b |= 1u << B_PLAY;                            /* EXTERNAL waits for the clock: a slow blink */
-    if (ui.rec)
-        b |= 1u << B_REC;
-#if BOARD_SMK37
-    if (smk_clip_mode_on()) {
-        b &= ~((1u << B_PLAY) | (1u << B_REC));
-        if (smk_apc_transport_led_state(0x5Bu))
-            b |= 1u << B_PLAY;
-        if (smk_apc_transport_led_state(0x5Du))
-            b |= 1u << B_REC;
-    }
-#endif
-    if (ui.view == V_HOME || ui.view == V_SONG || (seq.song_on && blink))
-        b |= 1u << B_HOME;
-    if (ui.view == V_SEQ)
-        b |= 1u << B_SEQ;
-    if (ui.view == V_PART)
-        b |= 1u << B_EDIT;
-    if (ui.view == V_GEN)
-        b |= 1u << B_ARP;
-    if (ui.view == V_FX)
-        b |= 1u << B_FX;
-    if (ui.view == V_MIX)
-        b |= 1u << B_LFO;
-    if (ui.view == V_GLO)
-        b |= 1u << B_GLO;
-    if (ui.overlay != O_NONE)
-        b |= 1u << B_SEL;
-    if (ui.view == V_HOME || ui.view == V_SONG ? ui.pbank : ui.spage)
-        b |= 1u << B_OCTUP;
-    if (save_state() == SAVE_QUEUED || (save_state() == SAVE_FAILED ? (ui.frame & 2u) : save_state() == SAVE_UNSAVED && blink))
-        b |= 1u << B_SAVE;
-    if (proj.set.keyled) {                           /* bright: on / chosen; dim: there, not chosen */
-        if (ui.view == V_HOME || ui.view == V_SONG) {
-            const song_t *sg = song();
-            int bar = ui.view == V_SONG && ui.song_sel < sg->len;
-            int pp = (bar ? sg->bar[ui.song_sel].pat[PART_909] : seq.ppat[PART_909]) - ui.pbank * 16;
-            int cu = seq_cue_of(&seq, PART_909) - ui.pbank * 16;
-            for (i = 0; i < 16; i++)                  /* patterns with notes */
-                if (pattern_used(&proj.pat[ui.pbank * 16 + i]))
-                    d |= 1u << WHITE_KEY[i];
-            if (pp >= 0 && pp < 16 && (ui.view == V_HOME || bar))
-                k |= 1u << WHITE_KEY[pp];
-            if (ui.view == V_HOME && seq_cue_of(&seq, PART_909) >= 0 && blink && cu >= 0 && cu < 16)
-                k |= 1u << WHITE_KEY[cu];
-            for (i = 0; i < NPARTS; i++) {            /* the parts: playing bright, muted dim */
-                int p = part_at((int)i);
-                int muted = ui.view == V_HOME ? part_muted(p) : bar ? (int)(sg->bar[ui.song_sel].mute >> p & 1u) : 1;
-                if (muted)
-                    d |= 1u << BLACK_KEY[i];
-                else
-                    k |= 1u << BLACK_KEY[i];
-            }
-        } else if (ui.view == V_MIX && (cur_page() == 0 || drum_mix_page() >= 0)) {
-            int dm = drum_mix_page(), n = dm >= 0 ? NDRUM : NPARTS, on = dm >= 0 ? ui.sel[dm] : part_position(ui.mixsel);
-            if (dm >= 0) k |= drum_step_lights(dm);
-            for (i = 0; i < (uint32_t)n && i < 11u; i++) {  /* the knobs' channel bright (blinking: muted), */
-                int mu = dm >= 0 ? track_muted(dm, (int)i) : part_muted(part_at((int)i));   /* the others dim, muted dark */
-                if ((int)i == on ? !mu || blink : 0)
-                    k |= 1u << BLACK_KEY[i];
-                else if ((int)i != on && !mu)
-                    d |= 1u << BLACK_KEY[i];
-            }
-        } else if (ui.view == V_MIX || ui.view == V_FX) {
-            /* the master and the effects: the keys have nothing to choose */
-        } else if (is_drum()) {
-            const dpart_t *d0 = &cur_pat()->drum[ui.part];
-            k |= drum_step_lights(ui.part);
-            for (i = 0; i < NDRUM && i < 11u; i++) {    /* the track bright (blinking: muted), the others */
-                int mu = track_muted(ui.part, (int)i);  /* with hits dim, muted dark */
-                if ((int)i == ui.sel[ui.part] ? !mu || blink : 0)
-                    k |= 1u << BLACK_KEY[i];
-                else if ((int)i != ui.sel[ui.part] && sm_any(d0->hit[i]) && !mu)
-                    d |= 1u << BLACK_KEY[i];
-            }
-        } else if (is_303() && !kbd_on()) {           /* notes bright, ties dim */
-            const bpart_t *bp = &cur_pat()->bass[bidx()];
-            int ph = eng_step[TRK_BASS0 + bidx()];
-            for (i = 0; i < 16; i++) {
-                int s = step_of((int)i), g = s < bp->len ? bstep_gate(&bp->step[s]) : G_REST, on = g == G_NOTE;
-                if (seq.playing && s == ph)
-                    on = !on;
-                if (on)
-                    k |= 1u << WHITE_KEY[i];
-                else if (g == G_TIE)
-                    d |= 1u << WHITE_KEY[i];
-            }
-        } else if (is_303()) {                        /* the keyboard: its Cs dim, to find your place */
-            for (i = 0; i < NKEYS; i++)
-                if (i % 12u == 7u)                    /* F3 = 0: C4 = 7, C5 = 19 */
-                    d |= 1u << i;
-        } else if (ui.part == PART_BRK) {
-            int ph = eng_step[TRK_BRK];
-            for (i = 0; i < 16; i++) {
-                int on = (cur_pat()->brk.steps >> i) & 1u;
-                if (seq.playing && (int)i == ph)
-                    on = !on;
-                if (on)
-                    k |= 1u << WHITE_KEY[i];
-            }
-            for (i = 0; i < 8; i++)                   /* the slice pads */
-                d |= 1u << BLACK_KEY[i];
-        }
-    }
-    k |= ui.keys;
-    if (division_pad_owner()) {
-        k = d = 0; /* no fake keybed notes from physical pad LEDs */
-        if (proj.set.keyled) {
-            for (i = 0; i < 8 + DIVISION_SHAPE_PADS; i++) d |= 1u << WHITE_KEY[i];
-            k = 1u << WHITE_KEY[division_pad_index()] | 1u << WHITE_KEY[8 + division_shape_index()];
-        }
-    }
-    plat_keys_dim(d & ~k);
-    plat_glow(proj.set.keyled == 1);
-    plat_play_red(ui.rec);                           /* PLAY green; red while recording */
-    plat_leds(b, k);
-}
-
-/* ===================================================================== frame === */
-X0X_COLD void ui_init(void)
-{
-    ui_ease_reset();
-    part_header_snapshot_valid = 0;
-#if BOARD_SMK37
-    smc_ui_cancel();
-#endif
-    int i;
-    bass_layout_pending_mask = bass_layout_on_sound_page = 0;
-    memset(&ui, 0, sizeof ui);
-    (void)plat_division_pad(0);
-    original_controls.valid = 0;
-    original_wave.valid = 0;
-    memset(kbd_held_note, 0, sizeof kbd_held_note);
-    memset(kbd_held_key, 0, sizeof kbd_held_key);
-    memset(kbd_arp_n, 0, sizeof kbd_arp_n);
-    memset(bass_rec_step, 0, sizeof bass_rec_step);
-    memset(bass_rec_pat, 0, sizeof bass_rec_pat);
-    memset(bass_rec_playing, 0, sizeof bass_rec_playing);
-    undo_lanes = 0;
-    ui.view = V_SEQ;                  /* start on the visible step grid; EDIT opens sound */
-    ui.prev_view = V_PART;
-    ui.part = PART_909;
-    ui.held_step = -1;
-    ui.brk_held = -1;
-    ui.hold_step = -1;
-    ui.chain_first = -1;
-    ui.touched = -1;
-    ui.overlay = O_NONE;
-    ui.outline_ok = 0;
-    ui.dirty = 0;
-    ui.save_failed = 0;
-    save_wait = 0;
-    palette_set(proj.set.palette);
-    for (i = 0; i < 4; i++) {
-        blit_hash[i] = 0;
-        cv_tile_valid[i] = 0;
-    }
-    header_full_hash = popup_knob_full_hash = 0;
-    build_pages();
-    undo_start();                                   /* the project as loaded is where undo stops */
-    if (project_storage_unsupported()) {
-        ui.save_failed = 1;
-        if (project_storage_unsupported() != 2) say("NEWER DATA: LOAD BLOCKED", 0);
-    }
-}
-
-/* A transaction borrows the undo baseline and holds the audio engine. Setting the hold before
- * the transport check closes the gap in which the audio ISR could consume a queued Start. */
-X0X_COLD static int project_acquire(int reset)
-{
-    if (project_busy || perf_testing() || (!reset && (ui.rec || ui.keys || plat_keys() ||
-        plat_physical_keys() ||
-        ui.held_step >= 0 || ui.hold_step >= 0 || ui.brk_held >= 0)))
-        return UI_PROJECT_BUSY;
-#if BOARD_SMK37
-    {
-        extern int smk_project_active(void), smc_project_active(void);
-        if (!reset && (smk_project_active() || smc_project_active()))
-            return UI_PROJECT_BUSY;
-    }
-#endif
-    engine_project_hold(1);
-    if (!reset && (seq.playing || seq.req_start || seq.req_cont || seq.req_stop || engine_project_notes())) {
-        engine_project_hold(0);
-        return UI_PROJECT_BUSY;
-    }
-    project_busy = 1;
-    undo_commit_stable();                       /* no uncommitted gesture is lost when staging borrows shadow */
-    return 0;
-}
-
-int ui_project_begin(void) { return project_acquire(0); }
-
-X0X_COLD void ui_project_end(int apply)
-{
-    if (!project_busy)
-        return;
-    if (apply) {
-        engine_project_flush();                     /* old note-offs use the channels that sent the notes */
-#if BOARD_SMK37
-        {
-            extern void smk_project_reset(void), smc_project_reset(void);
-            smk_project_reset();                    /* clip key notes depend on the old project's scale/chord */
-            smc_project_reset();
-        }
-#endif
-        project_commit_stage();
-        engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
-        seq.bpm = (float)proj.set.bpm_x10 / 10.0f;
-        seq.ext_bpm = seq.bpm;
-        seq.accent_q7 = proj.set.accent_q7;
-        project_apply_io();
-        seq.clk_src = PROJ_CLK_SRC(proj.set.bt);
-#if BOARD_SMK37
-        extern uint8_t smk_clip_mode_on(void);
-        if (smk_clip_mode_on())
-            seq.clk_src = SEQ_CLK_AUTO;
-#endif
-        engine_apply_sound(&proj.sound);
-        engine_brk_loops();
-        ui_init();
-        mark_dirty();                               /* reset/import are saved only by the ordinary save policy */
-        project_revision++;
-    } else {
-        memcpy(undo_shadow, (uint8_t *)&proj + UNDO_OFF, UNDO_BYTES);
-    }
-    project_input_sync();                            /* consume controls held or turned during the transaction */
-    ui.act_t = plat_ms();
-    project_busy = 0;
-    engine_project_release();
-}
-
-X0X_COLD int ui_project_load(void)
-{
-    int rc = ui_project_begin();
-    if (rc) {
-        say("STOP PLAYING TO LOAD", 0);
-        return rc;
-    }
-    rc = project_load_stage();
-    ui_project_end(rc == 0);
-    if (!rc)
-        ui.dirty = 0;                                /* the last saved project is now the live project */
-    say(rc ? "NO VALID SAVED PROJECT" : "SAVED PROJECT LOADED", 0);
-    return rc;
-}
-
-X0X_COLD int ui_project_reset(void)
-{
-    int rc = project_acquire(1);
-    if (rc) {
-        say("PROJECT BUSY", 0);
-        return rc;
-    }
-    project_reset_stage();
-    ui_project_end(1);
-    say("PROJECT RESET: SAMPLES KEPT", 0);
-    return 0;
-}
-
-/* Device Bluetooth intent bypasses project autosave (restored from 0e58b960).
- * No erase during notes, transport, capture or staged flash use. Reject busy
- * audio before acquiring a hold; recheck after the hold for a queued Start.
- * A failed write retries after 1 s. Reset/load must not drop this request. */
-static void device_bt_save(void)
-{
-    int rc;
-    static uint32_t retry_at;
-    if (!project_device_bt_pending() || project_busy || perf_testing() ||
-        (retry_at && (int32_t)(plat_ms() - retry_at) < 0)) return;
-#ifndef X0X_HOST
-    { extern int store_stage_held(void); if (store_stage_held()) return; }
-#endif
-    if (ui_boot_flash_busy()) return;
-    engine_project_hold(1);
-    if (ui_boot_flash_busy()) { engine_project_hold(0); return; }
-    rc = project_device_bt_save();
-    engine_project_hold(0);
-    retry_at = rc ? plat_ms() + 1000u : 0;
-    say(rc ? "BT SAVE FAILED: RETRYING" : "BLUETOOTH SAVED", 0);
-}
-
-/* Per-pattern preset recall: the pattern a bass part plays next (its cue, else the playing
- * one) asks for its preset once, gated to that pattern; the engine switches when that pattern
- * plays and the voice is quiet (engine_bass_select_preset). Unset: nothing is requested. */
-static void pattern_sound_tick(void)
-{
-    static uint8_t seen_pat[NBASS] = {0xFF, 0xFF}, seen_val[NBASS];
-    for (int b = 0; b < NBASS; b++) {
-        int t = TRK_BASS0 + b, cue = seq_cue_of(&seq, t), pat = cue >= 0 ? cue : seq.ppat[t];
-        int gate = engine_bass_preset_gate(b);
-        unsigned ps = proj.pat[pat].rsv[b];
-        if (gate >= 0 && gate != pat && gate != seq.ppat[t] && engine_bass_preset_pending(b))
-            engine_bass_cancel_preset(b);                /* its cue was taken back */
-        if (seen_pat[b] == pat && seen_val[b] == ps) continue;
-        seen_pat[b] = (uint8_t)pat; seen_val[b] = (uint8_t)ps;
-        if (!ps) continue;
-        unsigned kind, one_based;
-        if (!bass_pattern_preset_decode(ps, &kind, &one_based) || !one_based) continue;
-        int bank = (int)kind, preset = (int)one_based - 1;
-        if (engine_bass_requested_bank(b) == bank && engine_bass_requested_preset(b) == preset &&
-            !engine_bass_preset_edited(b) && !engine_bass_preset_pending(b)) continue;
-        (void)engine_bass_select_preset_at(b, bank, preset, &proj.sound, pat);
-    }
-}
-
-/* AUTOSAVE: changes are saved by themselves while the pattern is stopped and nothing has been touched
- * for AUTOSAVE_QUIET ms, at most every AUTOSAVE_GAP ms. Stopped only: a flash erase silences the
- * audio. Only the objects that changed are written (project.c), usually one or two sectors. */
-#define AUTOSAVE_GAP 20000u
-static void autosave(void)
-{
-    uint32_t now = plat_ms();
-#if BOARD_SMK37
-    extern uint8_t smk_ck_flash_busy(void), smk_clip_mode_on(void);
-#endif
-    if (project_busy || ui_boot_flash_busy() || project_storage_unsupported())
-        return;
-    if (save_wait && !seq.playing && !seq.req_start && !seq.req_cont && !seq.req_stop && !ui.rec && !perf_save_busy()) {
-#if BOARD_SMK37
-        if (smk_clip_mode_on() && (smk_ck_flash_busy() || now - ui.act_t < AUTOSAVE_QUIET))
-            return;                                    /* keep the queued SAVE until clip playing has gone quiet */
-#endif
-        save_project();
-        return;
-    }
-#if BOARD_SMK37
-    if (smk_ck_flash_busy())                          /* ui_frame runs before smk_ck_poll on display frames */
-        return;
-#endif
-    if (!ui.dirty || (proj.set.autosave_off && !ui.last_autosave) || seq.playing || seq.req_start || seq.req_cont || seq.req_stop || ui.rec || perf_testing() ||
-        ui.overlay == O_ASK || now - ui.act_t < AUTOSAVE_QUIET || (ui.saved_t && now - ui.saved_t < AUTOSAVE_GAP))
-        return;
-    ui.saved_t = now;
-    ui.last_autosave = 0;
-    switch (project_save()) {
-    case 0:
-        ui.dirty = 0;
-        ui.save_failed = 0;
-        say("AUTOSAVED", 0);
-        break;
-    case -9:
-        ui.save_failed = 1;
-        say("NEWER DATA: NOT SAVED", 0);
-        break;
-    case -7:
-        ui.save_failed = 1;
-        say("MEMORY FULL: NOT SAVED", 0);
-        break;
-    default:
-        ui.save_failed = 1;
-        say("SAVE FAILED", 0);
-        break;
-    }
-}
-
-UI_DRAW void ui_frame(void)
-{
-    uint32_t i;
-    if (ui.brk_choice_on && (!engine_brk_preview_active() || project_busy || seq.ppat[PART_BRK] != ui.brk_choice_pat ||
-        plat_keys() || (plat_buttons() & ~((1u << B_SEL) | (1u << B_HOME))))) brk_choice_cancel();
-    input();
-    division_pad_input();
-    ext_rec_drain();
-    if (project_busy) {
-#if BOARD_SMK37
-        smc_ui_cancel();
-#endif
-        draw_header();                             /* keep transfer status visible; samples and runtime stay untouched */
-        return;
-    }
-#if BOARD_SMK37
-    smc_frame();
-    division_pad_input(); /* Update pad owner after SMC may take the UI. */
-#endif
-    if (!project_busy) {   /* GLO > MIDI > CLOCK SOURCE; clip mode always uses AUTO */
-        static uint8_t waited;
-        uint8_t w;
-#if BOARD_SMK37
-        extern uint8_t smk_clip_mode_on(void);
-        seq.clk_src = smk_clip_mode_on() ? SEQ_CLK_AUTO : PROJ_CLK_SRC(proj.set.bt);
-#else
-        seq.clk_src = PROJ_CLK_SRC(proj.set.bt);
-#endif
-        w = (uint8_t)seq_clock_waiting(&seq);
-        if (w && !waited)
-            say("WAITING FOR CLOCK", 0);
-        waited = w;
-    }
-#if X0X_BASS_TAGGED_SOUND
-    if(undo_wait) {
-        int direction=undo_wait==2;
-        if(undo.cur!=undo_wait_cur || undo.used!=undo_wait_used ||
-           engine_bass_choice_serial()!=undo_wait_serial ||
-           memcmp(undo.region,undo.shadow,undo.len))undo_wait=0;
-        else do_undo(direction);
-    }
-#endif
-    if(ui.overlay!=O_LIST || ui.help) peer_scroll.active=0;
-    else { int visible=0;for(unsigned row=ui.list_top;row<ui.list_n && row<ui.list_top+6u;row++)
-        if(list_rows[row].kind==R_BTNAME)visible=1;
-        if(!visible)peer_scroll.active=0; }
-    undo_tick();
-    pattern_sound_tick();
-    engine_note_lock_refresh();
-    device_bt_save();
-    ui_ease_tick();
-    autosave();
-    if (!project_busy)
-        perf_test_tick();
-    if (ui.view == V_PERF && !perf_testing())
-        perf_window(0);
-    for (i = 0; i < NPARTS; i++)
-        eng_peak[i] = (uint16_t)(eng_peak[i] - (eng_peak[i] >> 3));
-    for (i = 0; i < NKIT * NDRUM; i++) {              /* the drum tracks' hits fall as the part meters do */
-        volatile uint8_t *h = &eng_hit[i / NDRUM][i % NDRUM];
-        *h = (uint8_t)(*h - (*h >> 3) - (*h ? 1 : 0));
-    }
-#if BOARD_SMK37
-    if (smc_ui_active()) {
-        smc_ui_draw();
-        /* Pattern cues use the existing header toast above a retained popup. */
-        if (ui.msg_until && (int32_t)(ui.msg_until - plat_ms()) > 0 &&
-            !memcmp(ui.msg, "NEXT: PAT ", 10))
-            draw_header();
-    }
-    else
-#endif
-    {
-        draw_header();
-        draw_main();
-        draw_knobs();
-    }
-    leds();
-    ui.frame++;
-}
-
-void ui_input_only(void) { input(); division_pad_input(); }
-int ui_dirty(void) { return ui.dirty != 0; }
-void ui_say(const char *a, const char *b) { say(a, b); }
-
-
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×}¹ã¤èµ©hºÚn¶X§zÍKÊˆÔSXÙ[œÙKRY[YšY\ŽˆÔLËŒ[Û›H
+‹Â‹Êˆ\Ù\ˆ[\™˜XÙHŒˆ
+ØÜËÜ[œËÌŒ‹LLLË]ZK›Y
+Nˆ[™[[œ]ØÜ™Y[œËHÛ›ØˆÝš\ˆ
+ˆ\ÝË]Y\Ý[ÛœËH™XYÝ][™HÙ^HYÚË‚ˆ
+‚ˆ
+ˆÜ˜[[X\ŽˆSÓÔ’UHH\‘TÑUÈH]\›‹ÑSPÕH[Ý™H
+YÙHÈ\Ý›ÝÊKÓ“ÐˆKMBˆ
+ˆH›Ý\ˆ˜[Y\È[ˆHÛ›ØˆÝš\
+Ûˆ]™\žHØÜ™Y[ŠKÑSHÜ[ˆÈ[ˆÈY\ËÓQHH˜XÚË‚ˆ
+‚ˆ
+ˆHØÜ™Y[ˆ\È›Ý\ˆ˜[™È
+XY\‹XZ[ˆÜXZ[ˆ›ÝÛKÛ›ØˆÝš\
+KXXÚ˜]Ûˆ[Âˆ
+ˆ™[XØØIÜÈØ[˜\È[™›]YÛ›HÚ[ˆ]È^[ÈÚ[™ÙYˆÔH[YH\ÈHØØ\˜ÙH[™Ë‚ˆ
+‚ˆ
+ˆÙ^\ÎˆŒË‹‘ÍNÈHMˆÚ]HÙ^\È\™HÝ\È
+ÓQNˆ]\›œÊKHLH›XÚÈÙ^\ÈH[Bˆ
+ˆXXÚ[™IÜÈ˜XÚÜÈÜˆHœ™XZÉÜÈÛXÙHYÈ
+ÓQNˆ\]]\ÊKˆ
+‹ÂˆÚ[˜ÛYH‹‹‹ÙÜÙ[Nš‚ˆÚ[˜ÛYHžš‚ˆÚ[˜ÛYH‹‹‹ÜÙ\KÚ[ØÚÜ™š‚ˆÚ[˜ÛYHœ[šX×ØÚÜ™š‚ˆÚ[˜ÛYHœ^WÜ]Y\Ý[Û‹š‚ˆÚ[˜ÛYHšÛYWÜ]\›—ÙÛ\šˆÊˆÓQHÛÛ\]H]\›œË\‹Z]™[ØÚ]H
+‹ÂˆÚ[˜ÛYHZWÜXÝÙÜ˜[\Ëš‚ˆÚ[˜ÛYH‹‹‹ÞØÛÛšˆÊˆÐÓÓˆ[œ][™Y[HÛÙHÙˆHXZ[ˆÛÜZ[›ÜˆÚ^™H
+‹ÂˆÚ[˜ÛYH‹‹‹ÙÜÙ˜\ÝX]š‚ˆÚ[˜ÛYH‹‹‹ÙÜÛX\Ý\‹š‚ˆÚ[˜ÛYH‹‹‹ÙÜÙ[NLKšˆÊˆ\È™[™\™\ˆ\™XÝH\Ù\È—Êˆ[™[NLWÜ\˜[WÜÚH
+‹ÂˆÚ[˜ÛYHZWÛÜšYÚ[˜[ØÛÛ›ÛËš‚ˆÚ[˜ÛYH˜˜\Ü×Ü]\›—Ü™\Ù]š‚‚‹ÊˆÙY\ØÜ™Y[ˆ™[™\™\œÈÝ]ÙˆZ\ˆØ[\œÈÛˆÓRÈÈ™YXÙHÛÙHÚ^™K‚ˆ
+ˆ˜]Ú[™ÈÜ\˜][ÛœË›ÛÈ[™]Y[ÈÛÙHÝ^H[˜Ú[™ÙYˆ
+‹ÂˆÚYˆ“ÐT‘ÔÓRÌÍÈ	‰ˆYš[™Y
+×ØÛ[™××ÊBˆÙYš[™HRWÑUÈ×Ø]šX]W×Ê
+Z[œÚ^™K›Ú[›[™JJBˆÙ[ÙBˆÙYš[™HRWÑUÂˆÙ[™Y‚‚ˆÚ[˜ÛYHZWÛÜšYÚ[˜[ÝØ]™Kš‚ˆÚ[˜ÛYH‹‹‹ÙÜØ˜\Ü×Ü\˜[WÚYËšˆÊˆTÔÌÌ×Êˆ
+HÌÉÜÈYÙ\ÊH
+‹ÂˆÚ[˜ÛYH˜ÚXØYÛ×Ø\œšˆÊˆÒWÐT”Êˆ
+ÚXØYÛÈ]™H\œYÙJH
+‹ÂˆÚ[˜ÛYH˜ÚXØYÛ×ÙžšˆÊˆÒWÑ–ÊˆÑS‘–
+ÈÜ\ÚÔš[™ËÑTKÐÚËÑ[œËÔ\Ù\‹ÔÑKÐ”KÒ[ÑØ]T™]ˆ[œÙ\
+‹ÂˆÚ[˜ÛYH˜ÚXØYÛ×Ø]^šˆÊˆÒWÔ‘S‘ÈÒWÑSTTˆ
+‹ÂˆÚ[˜ÛYH‹‹‹ÙÜÙž\ËšˆÊˆ–Êˆ[™XÙ\È›ÜˆÑS‘–ÛÛ[Z]
+‹ÂˆÚ[˜ÛYH››ÝWÛ˜[Y\ËšˆÊˆÓ“ÕWÓŽˆÛ™Hø )ˆX›HÚ]Û\ØÚÜ™
+‹ÂˆÚ[˜ÛYH[™Ë˜È‚ˆÚ[˜ÛYHœÛÝ[™Ü™\Ù]˜È‚‚‹Êˆš[YÓRËLÍÈ›ËÑ[]HYÙ[™Îˆ[™[˜È
+ÈÛZ×Ú[œ]š
+[š]XÛÛ™š\›YY
+K‚ˆ
+ˆÚ[][]ÜˆÛÛ[X[™È[™ÙÚXØ[]Û‹Ù[˜ÛÙ\ˆ›Û\ÈÈ›ÝÚ[™ÙKˆ
+‹ÂˆÚY›™YˆÔÓR×ÐÐTSÓ”ÂˆÙYš[™HÔÓR×ÐÐTSÓ”È“ÐT‘ÔÓRÌÍÂˆÙ[™Y‚ˆÚYˆÔÓR×ÐÐTSÓ”ÂˆÙYš[™HRWÐÐTÒÓQH”UÒ‚ˆÙYš[™HRWÐÐTÑQU”TH‚ˆÙYš[™HRWÐÐTÔÑS”ÐÐSH‚ˆÙYš[™HRWÐÐTÓ“È““ÕH‘TPU‚ˆÙYš[™HRWÐÐTÑÓÈ‘ÓÐ‘H‚ˆÙYš[™HRWÐÐTÑS•ˆÒÔ‘‚ˆÙYš[™HRWÐÐTÔÐU‘H•‚ˆÙYš[™HRWÐÐTÔ‘PÈ”ÑTH‘PÈ‚ˆÙYš[™HRWÐÐTÔVH”ÑTHVH‚ˆÙYš[™HRWÐÐTÔÑSPÕ’Ìˆ‚ˆÙYš[™HRWÐÐTÐSÓÈ’ÌÈ‚ˆÙYš[™HRWÐÐTÔ‘TÑU’Í‚ˆÙYš[™HRWÐÐTÓÐÕ“ÐÕU‘H‚ˆÙYš[™HRWÑ’T”ÕÒÓ“ÐˆBˆÙYš[™HRWÐÐTÐT”“ÕÔÈˆ‚ˆÙ[ÙBˆÙYš[™HRWÐÐTÒÓQH’ÓQH‚ˆÙYš[™HRWÐÐTÑQU‘QU‚ˆÙYš[™HRWÐÐTÔÑS”ÑS‚ˆÙYš[™HRWÐÐTÓ“È““È‚ˆÙYš[™HRWÐÐTÑÓÈ‘ÓÈ‚ˆÙYš[™HRWÐÐTÑS•ˆ‘S•ˆ‚ˆÙYš[™HRWÐÐTÔÐU‘H”ÐU‘H‚ˆÙYš[™HRWÐÐTÔ‘PÈ”‘PÈ‚ˆÙYš[™HRWÐÐTÔVH”VH‚ˆÙYš[™HRWÐÐTÔÑSPÕ”ÑSPÕ‚ˆÙYš[™HRWÐÐTÐSÓÈSÓÈ‚ˆÙYš[™HRWÐÐTÔ‘TÑU”‘TÑU‚ˆÙYš[™HRWÐÐTÓÐÕ“ÐÕ‚ˆÙYš[™HRWÑ’T”ÕÒÓ“ÐˆBˆÙYš[™HRWÐÐTÐT”“ÕÔÈ”ÑSPÕ‚ˆÙ[™Y‚‚‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOH[Ù[OOH
+‹ÂœÝ]XÈÛÛœÝ[ÝÑVWÕÒUVÓ’ÑVT×HHÌLKKLK‹LKËLKKLK‹ËLKLKKLKLLKLKL‹LKLËMLKM_NÂœÝ]XÈÛÛœÝ[ÝÑVWÐ“PÒÖÓ’ÑVT×HHËLKLKKLK‹LKLKËLKLKLKKLK‹LKËLKLKLKKLKLKLL_NÂ‹Êˆ[™\œÙHÙˆÑVWÕÒUHÈÑVWÐ“PÒÈ
+Ø\È™XZ[[È”ÔÈ]ZWÚ[š]
+K‚ˆ
+ˆÛˆÓRË˜È[˜ÛYYÛZ×Ú[œ]šš\œÝˆHYX\\È\ÙHØ[YHMˆ[™XÙ\Ëˆ
+‹ÂˆÚYˆYš[™Y
+ÓR×Ó”Q
+B—ÔÝ]X×Ø\ÜÙ\
+ÓR×Ó”QOHMK”ÓRÈÚ]KZÙ^HX\\ÈHMˆ[™[Ú]HÙ^\ÈŠNÂˆÙYš[™HÒUWÒÑVHÓR×ÕÒUWÓ“ÕBˆÙ[ÙBœÝ]XÈÛÛœÝZ[ÝÒUWÒÑVVÌM—HHÌ‹‹ËKLKL‹MM‹NNKŒKŒËŸNÂˆÙ[™Y‚œÝ]XÈÛÛœÝZ[Ý“PÒ×ÒÑVVÌLWHHÌKËKLLËMKMËŒŒ‹_NÂ‚™[[HÈ—ÒÓQK—ÔT•—ÑÑS‹—Ñ–—ÓRV—ÑÓË—ÔÓÓ‘Ë—ÔT‘‹—ÔÑTK•’QUÔÈNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ’QU×Ó–Ó•’QUÔ×HHÈ’ÓQH‹ˆ‹•‹LÔÈ‹‘–‹“RV‹‘ÓÐS‹”ÓÓ‘È‹”T‘ˆ‹”ÑTHŸNÂœÝ]XÈÛÛœÝZ[M—ÝT•ÐÓÓÕT”ÖÌ—VÓ”T•×HHÂˆÔ‘ÐŠMKML
+K‘ÐŠMKÌ‹
+K‘ÐŠLÌL
+K‘ÐŠÌŒKMJK‘ÐŠŒMLŒMJ_KˆÔ‘ÐŠLÎKŽK
+K‘ÐŠMÌ‹ÍKŽJK‘ÐŠLÌ
+K‘ÐŠM‹LÌŠK‘ÐŠLMËKM
+_BŸNÂˆÙYš[™HT•ÐÓÓT•ÐÓÓÕT”ÖÝZWÝ[YWÛYÚB‹Êˆ˜\ÜÈÛÝÈ\™H›Ý˜[YYÌÎˆÚXØYÛÈ\ÈHÌÈ[™Ú[™KZX[ZH\È›ÝˆÚÝÛˆ˜[Y\È›ÛÝÈH[™Ú[™H
+\Û˜[YJKˆ
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝT•Ó–Ó”T•×HHÈŽLH‹Ž‹TÔÈH‹TÔÈˆ‹”‘PRÈŸNÂ‹Êˆ™\Ù[][ÛˆÛ›Nˆ[\ÈÙÙ]\‹[ˆHY˜][ÚXØYÛÈˆÈZX[ZHK‚ˆ
+ˆ›Ú™XÝ[™\ËRQHÚ[›™[Ë[™Ú[™H\Ù\È[™[Ø]™Y\œ˜^\ÈÙY\Z\ˆQË‚ˆ
+ˆ[™Ú[™HÚ[™Ù\È™]™\ˆ[Ý™HH\ÚXØ[Ýš\ÜˆH[Ù\Ý\™IÜÈ\Ý[˜][Û‹ˆ
+‹ÂœÝ]XÈÛÛœÝZ[ÝT•ÓÔ‘T–Ó”T•×HHÔT•ÎLKT•ÎT•Ð”’ËT•ÌÌÐ‹T•ÌÌÐ_NÂœÝ]XÈ[\Ú\×Ù[J[\
+HÈ™]\›ˆ\OHT•ÎLH\OHT•ÎÈBœÝ]XÈ[\Ú\×ÌÌÊ[\
+HÈ™]\›ˆ\OHT•ÌÌÐH\OHT•ÌÌÐŽÈBœÝ]XÈ[\Ø]
+[ÜÚ][ÛŠHÈ™]\›ˆT•ÓÔ‘T–ÜÜÚ][Û—NÈBœÝ]XÈ[\ÜÜÚ][ÛŠ[\
+BžÂˆ›Üˆ
+[HHÈH”T•ÎÈJÊÊHYˆ
+\Ø]
+JHOH\
+H™]\›ˆNÂˆ™]\›ˆÂŸBœÝ]XÈ[\Û™ZYÚ›ÜŠ[\[\™XÝ[ÛŠBžÂˆ[ÜÚ][ÛˆH\ÜÜÚ][ÛŠ\
+H
+È\™XÝ[ÛŽÂˆ™]\›ˆ\Ø]
+ÜÚ][ÛˆÈˆÜÚ][ÛˆH”T•ÈÈ”T•ÈHHˆÜÚ][ÛŠNÂŸB‹Êˆ[™HX™[ÎˆT•Óˆ^Ù\”‘PRÈ8¡¤ˆ”’È
+Ú\œÊKˆ™X]ÈHÙXÛÛ™K\Ú[\ˆX›Kˆ
+‹ÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂœÝ]XÈÛÛœÝÚ\ˆ
+˜˜\Ü×Ù\Ü^WÛ˜[YJ[˜[šË[Ý\‹[›ÚXÙJBžÂˆYˆ
+˜[šÈOHÔ’QÒSSÔÓÕS‘Ò•S“ÊH™]\›ˆ˜[šÈOHÝ\ˆÈ
+›ÚXÙOÈ”ÕTT’ˆˆŽˆ”ÕTT’ˆHŠNˆ”ÕTT’ˆŽÂˆYˆ
+˜[šÈOHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘JH™]\›ˆ˜[šÈOHÝ\ˆÂˆ
+›ÚXÙHÈ”ÌHˆˆˆ”ÌHHŠHˆ”ÖS•Ó‘HŽÂˆYŠ˜[šÏO[Ý\ŠH™]\›ˆ˜[šÏÊ›ÚXÙOÈ“RPSRHˆŽˆ“RPSRHHŠNŠ›ÚXÙOÈÒPÐQÓÈˆŽˆÒPÐQÓÈHŠNÂˆ™]\›ˆ˜[šÏÈ“RPSRHŽˆÒPÐQÓÈŽÂŸBˆÙ[™Y‚œÝ]XÈÛÛœÝÚ\ˆ
+œ\Ù\Ü^J[\
+BžÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYˆ
+\Ú\×ÌÌÊ\
+JHÂˆ[›ÚXÙO\\TT•ÌÌÐNÂˆÚYˆÐTÔ×ÕQÑÑQÔÓÕS‘ˆYŠ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™›ÚXÙJO
+\™]\›ˆÒÓÔÑHS‘ÒS‘HŽÂˆÙ[™Y‚ˆ™]\›ˆ˜\Ü×Ù\Ü^WÛ˜[YJ[™Ú[™WØ˜\Ü×Ø˜[šÊ›ÚXÙJK[™Ú[™WØ˜\Ü×Ø˜[šÊK]›ÚXÙJK›ÚXÙJNÂˆBˆÙ[™Y‚ˆ™]\›ˆT•Ó–Ü\NÂŸB‹ÊˆH\	ÜÈÚÝÛˆ˜[YH\Ù\ÈHÞ[ÛÝ	ÜÈXÝX[[™Ú[™HÚ[™ˆ
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+œ\Û˜[YJ[\
+BžÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYˆ
+\Ú\×ÌÌÊ\
+JHÂˆ[›ÚXÙO\\TT•ÌÌÐNÂˆÚYˆÐTÔ×ÕQÑÑQÔÓÕS‘ˆYŠ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™›ÚXÙJO
+\™]\›ˆT•Ó–Ü\NÂˆÙ[™Y‚ˆ™]\›ˆ˜\Ü×Ù\Ü^WÛ˜[YJ[™Ú[™WØ˜\Ü×Ø˜[šÊ›ÚXÙJK[™Ú[™WØ˜\Ü×Ø˜[šÊK]›ÚXÙJK›ÚXÙJNÂˆBˆÙ[™Y‚ˆ™]\›ˆT•Ó–Ü\NÂŸBœÝ]XÈÛÛœÝÚ\ˆ
+œ\ÜÊ[JBžÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYˆ
+\Ú\×ÌÌÊJJHÂˆ[ZKTT•ÌÌÐKY[™Ú[™WØ˜\Ü×Ø˜[šÊŠNÂˆÚYˆÐTÔ×ÕQÑÑQÔÓÕS‘ˆYŠ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™ŠO
+\™]\›ˆÈŽÂˆÙ[™Y‚ˆYˆ
+ˆOHÔ’QÒSSÔÓÕS‘Ò•S“ÊH™]\›ˆˆOH[™Ú[™WØ˜\Ü×Ø˜[šÊK]ŠOÊÈ”ÒˆŽˆ”ÒHŠNˆ”ÒˆŽÂˆYˆ
+ˆOHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘JH™]\›ˆˆOH[™Ú[™WØ˜\Ü×Ø˜[šÊK]ŠHÂˆ
+ˆÈ”ÌPˆˆˆ”ÌPHŠHˆ”ÌHŽÂˆYŠOY[™Ú[™WØ˜\Ü×Ø˜[šÊK]ŠJH™]\›ˆÊÈ“RKPˆŽˆ“RKPHŠNŠÈÒPˆŽˆÒPHŠNÂˆ™]\›ˆÈ“RPHŽˆÒHŽÂˆBˆÙ[™Y‚ˆ™]\›ˆOOTT•Ð”’ÏÈ”’ÈŽ”T•Ó–ÚWNÂŸB‚‹ÊˆÝ™\›^\È˜]ÛˆÝ™\ˆHXZ[ˆ\™XH
+‹Â™[[HÈ×Ó“Ó‘K×ÓTÕ×ÐTÒÈNÂ™[[HÈPÕÓ“Ó‘KPÕÔÐU‘KPÕÓÐQPÕÐÓPT—ÔT•PÕÐÓPT—ÔUPÕÐÓÔKPÕÔ‘TÑUPÕÐP“ÕUPÕÔÓÓ‘×ÒS”ËˆPÕÔÓÓ‘×ÑSPÕÔÓÓ‘×ÐÓ‹PÕÔT‘‹PÕÔT‘—ÕTÕˆÚYˆ“ÐT‘ÔÓRÌÍÈ	‰ˆÑU—ÔQÐSˆPÕÔQÐSˆÙ[™Y‚ˆPÕÔ‘TÑUÔÓÕS‘PÕÒÓQWÓU‘KPÕÒÓQWÔUT“”ËŸNÂ‚\YYˆÝXÝÂˆZ[ÝšY]Ë\™]—ÝšY]ÎÂˆZ[ÝÛYWÛ]™NÈÊˆ[[YHšY]ÈÛ›NÈ™]™\ˆÚ[™Ù\ÈÝÜ™Y]\›ˆ\ÜÚYÛ›Y[
+‹ÂˆZ[ÝÙ[Ó’ÒUNÂˆZ[ÝYÙVÓ•’QUÔ×VÓ”T•×NÂˆZ[ÝÜYÙNÈÊˆHMˆÝ\ÈHÚ]HÙ^\ÈÚÝÎˆHKLMˆ‹ˆÈHKM
+‹ÂˆZ[Ý˜[šÎÈÊˆHMˆ]\›œÈÓQIÜÈÚ]HÙ^\ÈÚÛÜÙNˆHKLM‹HHMËLÌˆ
+‹ÂˆZ[ÝZ^Ù[ÈÊˆRV	ÜÈT•ÎˆH\HÛ›ØœÈÙ]
+›XÚÈÙ^\ÈKMJH
+‹Âˆ[ÝØÝÂˆZ[Ý™XÎÂˆZ[Ýœ™Y\^VÓTÔ×NÈÊˆÑTHˆ”‘QHVNˆHÙ^\È^HHÌË›Ý[™ÈÜš][ˆ
+›ÝØ]™Y
+H
+‹ÂˆZ[ÝÜÜÖÓTÔ×NÂˆ[Ý[ÜÝ\ÂˆZ[Ý[ÜÝ\Ü\[ÜÝ\Ü]ÈÊˆÝÛ™\ˆ]Ù^KYÝÛŽÈH]\›ˆØ[ˆÚ[™ÙH™Y›Ü™HÙ^K]\
+‹ÂˆZ[ÝÝ\ÙY]YÂˆZ[Ý\ÝWÜÜ˜ÖÓ”T•×NÈÊˆÛÝ\˜ÙHÛÝÈÚÜÙ[ˆÚ]H\ÝH\™Ù]ÈÝX›H›ÝYÚÛÛ™š\›X][Ûˆ
+‹ÂˆZ[Ýœš×ØÚÚXÙWÛÛ‹œš×ØÚÚXÙWØ˜[šËœš×ØÚÚXÙWÜÛÝœš×ØÚÚXÙWÜ]ÂˆZ[ÝÝ\Ü™]šY]ÎÈÊˆH[Ý\\ÈÛÝ[™[™È
+Û›HÚ[HÝÜY
+H
+‹ÂˆZ[ÝÝ\ØÜ™X]YÈÊˆH™\ÜÈ\›™YH[Ý\Ûˆ
+]È™[X\ÙHÙY\È]
+H
+‹Âˆ[Ýœš×Ú[ÈÊˆ”‘PRÎˆHÚ]HÙ^H
+M
+H[LH›Û™H
+‹Âˆ[ÝÛÜÝ\ÈÊˆH[HXXÚ[™NˆHÝ\
+Ú]HÙ^JH[LH›Û™H
+‹ÂˆZ[ÝÛÙ[KÛÜ]ÈÊˆÚ]Ý˜XÚÈ[™]\›ˆ]Ù^KYÝÛŽÈ˜]šYØ][ÛˆØ[››Ý™]\™Ù]]È™[X\ÙH
+‹ÂˆZ[ÝÛØÜ™X]YÛÝ\ÙYÈÊˆ[\ÈÈ”‘PRÎˆH™\ÜÈ\›™YHÝ\ÛŽÈHÛ›ØˆÜˆHÛXÙH\ÙY]
+‹Âˆ[ÝÚZ[—Ùš\œÝÂˆ[ÝÝXÚYÈÊˆÛ›ØˆÙ[™Z[™È\›™Y
+H[\ÊKLH›Û™H
+‹ÂˆZ[ÝÝXÚÝšY]ËÝXÚÜ\ÝXÚÜYÙNÂˆZ[ÝÝXÚÚÚ[™ÝXÚØKÝXÚØ‹ÝXÚØÎÈÊˆ^XÝY]Y™Yˆ›ÜˆÝ™\›^\È
+‹ÂˆZ[Ì—ÝÝ\ÝÈÊˆÚ[ˆH[ÌÈÝ\Ù[ÝÛŽˆH\ÙÙÛ\ËHÛÙ\È›Ý
+‹ÂˆZ[Ì—ÝÛÝÈÊˆÚ[ˆ]Ù[ÝÛˆ
+H\ZÙ\È[ˆÛÝ\Ù™ŠH
+‹ÂˆZ[Ýœš×ÜYÙKœš×ØÛÝ[Ý\™Ù]ÂˆZ[M—Ýœš×ÛØØ[Ù^\ÎÂˆZ[M—Ýœš×Ü[šÙ^\ÎÈÊˆ”‘PRÎˆ›XÚÈÙ^\È\ÙYÈÚ]™HH[Ý\]ÈÛXÙH
+Z\ˆ™[X\ÙH\È›Ý]™JH
+‹ÂˆZ[ÝÙ[—ÜÝ[VÓTÔ×NÈÊˆ‹LÔÉÜÈÛ›ØœÈÚ[™ÙYÚ[˜ÙHH[™HØ\ÈÜš][ˆ
+‹ÂˆZ[Ì—Ý‹Ù^\Ë—Ý\ÙYÂˆZ[Ì—Ý[˜×ÝÓ‘WNÂˆZ[Ý[˜×Ü[–Ó‘WNÈÊˆ]ZXÚÈ][È[ˆH›ÝÈ
+XØÙ[\˜][ÛˆØZ]È›ÜˆHÜ[ŠH
+‹ÂˆÚ\ˆ\ÙÖÍNÈÊˆP“ÕUÛ™È[™H[˜ÛY\ÈHXYÛ›ÜÝXÈÛÝ\˜ÙHÒH
+‹ÂˆZ[Ì—Ý\Ù×Ý[[ÂˆZ[Ì—ÝÝXÚÝ[[ÂˆZ[ÝÝ™\›^NÂˆZ[Ý\ÝÜÙ[\ÝÝÜ\ÝÛŽÂˆ[ÝÛ×ÜÙXÝ[ÛŽÈÊˆLNˆÙXÝ[Ûˆ[™^ÈØØ[˜]šYØ][Û‹™]™\ˆ›Ú™XÝÝ]H
+‹ÂˆZ[ÝÛ×Ú[™^Û×ÜÙ[Í—KÛ×ÝÜÍ—NÂˆZ[Ý\Ú×ØXÝÂˆZ[Ý\Ú×ÛÝ™\›^NÂˆZ[M—Ý\Ú×Ø\™ÎÂˆÚ\ˆ\Ú×ÜVÌ—VÌŽNÂˆZ[Ì—Ýœ˜[YNÂˆZ[Ì—Ý\NÂˆZ[Ì—ÝXÝÝÈÊˆH\Ý[YH[ž][™ÈØ\ÈÝXÚY
+]]ÜØ]™HØZ]È›Üˆ]ZY]
+H
+‹ÂˆZ[Ì—ÝØ]™YÝÈÊˆH\Ý]]ÜØ]™H
+‹ÂˆZ[Ý\ÝØ]]ÜØ]™NÈÊˆUUÔÐU‘HØ\È\ÝÝÚ]ÚYÙ™ŽˆÛ™H[Ü™KÚXÚÙY\È]
+‹ÂˆZ[ÝØ]™WÙ˜Z[YÈÊˆH˜Z[YÜš]HÝ^\Èš\ÚX›H[[HØ]™HÝXØÙYYÈ
+‹ÂˆZ[Ý[ÈÊˆH[Ø\™ÛˆØÜ™Y[Žˆ]È]Ûˆ
+ÈK›Û™H
+‹ÂˆZ[Ì—ÝÝÛ—ÝÓ—NÈÊˆÚ[ˆXXÚ]ÛˆÙ[ÝÛˆ
+‹ÂˆZ[Ì—Ý\›—ÝÈÊˆH\Ý[˜ÛÙ\ˆ\›ˆ
+‹ÂˆZ[ÝÝ][™VÌŒÌ—NÈÊˆHœ™XZÈÛÜ	ÜÈÝ][™H
+‹ÂˆZ[Ì—ÝÝ][™WÜ™]š\Ú[ÛŽÂˆZ[ÝÝ][™WÛÚËÝ][™WÜÛÝÂˆZ[ÝÛÛ™×ÜÙ[ÈÊˆHÓÓ‘ÈØÜ™Y[‰ÜÈ˜\ˆ
+‹ÂŸHZWÝÂ‹ÊˆRHÝ]Hš]È›Ü›X[™\›ÙYSNÈ™\Ù\™HHÛÛ™\Ù\™H›Üˆ]Y[Ëˆ
+‹ÂœÝ]XÈZWÝZNÂ‹ÊˆH™[[ÝH[™Ú[™HY]™Yœ™\Ú\ÈH\˜[Y]\ˆ^[Ý]Ú]Ý]Ú[™Ú[™ÈBˆ
+ˆÙ^X›Ø\™	ÜÈ™[Y[X™\™YYÙKˆÙY\HÓÕS‘\YÙHÙ[XÝ[ÛˆY™™XÝ]™HXÜ›ÜÜÈBˆ
+ˆ\Þ[˜Ú›Û›Ý\È˜[šÈÚ[™ÙNÈÛ›H\ÚXØ[Ù^X›Ø\™[œ]XØÙ\ÈH™]ÈYÙKˆ
+‹ÂœÝ]XÈZ[Ý˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚË˜\Ü×Û^[Ý]ÛÛ—ÜÛÝ[™ÜYÙNÂœÝ]XÈ›ÚY˜\Ü×Û^[Ý]Û›ÝWÜ™[[ÝWÙY]
+[›ÚXÙJNÂœÝ]XÈ›ÚY˜\Ü×Û^[Ý]ØXØÙ\
+›ÚY
+NÂ‹ÊˆÓPÈ\ÈH™\Ù[][Ûˆ^Y\ŽÈ]È[\[Y[][Ûˆ›ÛÝÜÈ\Èš[H[ˆH[š]HZ[ˆ
+‹Â›ÚYÛX×ÝZWØØ[˜Ù[
+›ÚY
+NÂš[ÛX×ÝZWØXÝ]™J›ÚY
+NÂ›ÚYÛX×ÝZWÙ˜]Ê›ÚY
+NÂ›ÚYÛX×ÝZWØÛ\ÜÚÝÊ[‹ÛÛœÝÚ\ˆ
+›˜[YKÛÛœÝÚ\ˆ
+˜[YJNÂœÝ]XÈZ[Ý[žWØ]ÛŽÈÊˆH]Ûˆ\È™Y[ˆ™\ÜÙYÚ[˜ÙHÝÙ\‹[Ûˆ
+H›ÛÝ\‰ÜÈš\œÝ[™JH
+‹ÂˆÙYš[™H“ÓÕÑÐTÈÊˆ™]ÙY[ˆH›ÛÝ\‰ÜÈ\È
+‹ÂœÝ]XÈZ[M—Ý›ÛÝ\—Ý^
+ÛÛœÝÚ\ˆ
+Š˜KÛÛœÝÚ\ˆ
+Š˜‹ÛÛœÝÚ\ˆ
+Š˜ÊNÂœÝ]XÈ[]š\Ú[Û—ÜYÛÝÛ™\Š›ÚY
+NÂœÝ]XÈ[]š\Ú[Û—ÜYÚ[™^
+›ÚY
+NÂœÝ]XÈÛÛœÝÚ\ˆ
+™]š\Ú[Û—ÜYÛX™[
+›ÚY
+NÂ‚‹ÊˆÛÛY][™ÈH›Ú™XÝÙY\ÈÚ[™ÙYˆÐU‘H
+ÜˆH]]ÜØ]™JH\ÈÛÜšÈÈÈ
+‹ÂœÝ]XÈ›ÚYX\š×Ù\J›ÚY
+HÈZK™\HHNÈB‚œÝ]XÈZ[ÝØ]™WÝØZ]ÂœÝ]XÈ›ÚY]™WØ›Ý[™\žJ[[žJNÂœÝ]XÈ›ÚYÙ^X›Ø\™Ü[šX×Ü™\Ù]
+Z[Ì—ÝŠNÂœÝ]XÈZ[Ý›Ú™XÝØ\ÞK›Ú™XÝÜ™]š\Ú[ÛŽÂœÝ]XÈZ[Ì—ÝÛÛ™×ÜÝXÝ\™WÜ™]š\Ú[ÛŽÈÊˆ[[YHY[]H\ØÚ›Üˆœ›Þ™[ˆÛÛ™ËX˜\ˆÛÛ›ÛÈ
+‹Âš[ZWÜ›Ú™XÝØ\ÞJ›ÚY
+HÈ™]\›ˆ›Ú™XÝØ\ÞHOHÈB–ÐÓÓÝ]XÈ›ÚY›Ú™XÝÚ[œ]ÜÞ[˜Ê›ÚY
+BžÂˆ[NÂˆZK˜ˆHZK˜—Ý\ÙYH]Ø]ÛœÊ
+NÂˆÙ^X›Ø\™Ü[šX×Ü™\Ù]
+ZK˜ŠNÂˆZKšÙ^\ÈH]ÚÙ^\Ê
+NÂˆ›Üˆ
+HHÈH‘NÈJÊÊHÂˆ
+›ÚY
+\]Ù[˜ÊJNÂˆZK™[˜×Ü[–ÚWHHÂˆBˆÊˆ›Ú™XÝ[™Ý[ÝÛœÈ›Ú™XÝØ\ÞH\™Nˆ™]›ÚÙHHÛ\ÚXØ[\ØÚˆ
+ˆ[™Ý\™\ÜÈÙ^\È[XÜ›ÜÜÈH˜[œÙ™\ˆ™Y›Ü™H[œ]\È[˜X›Yˆ
+‹Âˆ]™WØ›Ý[™\žJ
+NÂŸB™[[HÈÐU‘WÔÐU‘QÐU‘WÕS”ÐU‘QÐU‘WÔUQUQQÐU‘WÑRSQNÂœÝ]XÈ[Ø]™WÜÝ]J›ÚY
+BžÂˆYˆ
+›Ú™XÝÜÝÜ˜YÙWÝ[œÝ\ÜY
+
+HOHŠBˆ™]\›ˆÐU‘WÑRSQÂˆYˆ
+Ø]™WÝØZ]
+Bˆ™]\›ˆÐU‘WÔUQUQQÂˆYˆ
+ZKœØ]™WÙ˜Z[Y
+Bˆ™]\›ˆÐU‘WÑRSQÂˆ™]\›ˆZK™\HÈÐU‘WÕS”ÐU‘QˆÐU‘WÔÐU‘QÂŸBœÝ]XÈÛÛœÝÚ\ˆ
+œ]Y]YYÜØ]™WÛX™[
+›ÚY
+BžÂˆYˆ
+\Ù\Kœ^Z[™È	‰ˆ\Ù\Kœ™\WÜÝ\	‰ˆ\Ù\Kœ™\WØÛÛ	‰ˆ\Ù\Kœ™\WÜÝÜ
+Bˆ™]\›ˆZKœ™XÈÈ”‘PÈÑ‘ˆÈÐU‘Hˆˆ”ÐU‘HÒSˆURQUŽÂˆ™]\›ˆ”ÐU‘HUÕÔŽÂŸBœÝ]XÈÛÛœÝÚ\ˆ
+œ]Y]YYÜØ]™WÛY\ÜØYÙJ›ÚY
+BžÂˆYˆ
+\Ù\Kœ^Z[™È	‰ˆ\Ù\Kœ™\WÜÝ\	‰ˆ\Ù\Kœ™\WØÛÛ	‰ˆ\Ù\Kœ™\WÜÝÜ
+Bˆ™]\›ˆZKœ™XÈÈ”‘PÈÑ‘ˆÈÐU‘Hˆˆ”ÐU‘TÈÒSˆURQUŽÂˆ™]\›ˆ”ÐU‘TÈÒSˆÕÔQŽÂŸB‚‹ÊˆH[˜ÛÙ\œË™XY›ÜˆHRNˆH\›ˆÛÝ[È\È™Z[™ÈÝXÚY
+H]]ÜØ]™HØZ]È›Üˆ]ZY]
+H
+‹ÂœÝ]XÈ[Ì—Ý[˜Ê[›ÛJBžÂˆ[Ì—ÝˆH]Ù[˜Ê›ÛJNÂˆYˆ
+ŠHÂˆ˜\Ü×Û^[Ý]ØXØÙ\
+
+NÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÛX×ÝZWØØ[˜Ù[
+
+NÂˆÙ[™Y‚ˆZK˜XÝÝHZK\›—ÝH]Û\Ê
+NÂˆBˆ™]\›ˆŽÂŸB‚‹ÊˆT‘ˆ
+H\™›Ü›X[˜ÙHØÜ™Y[ˆ[™]È\ÝÈÙYHœ\™›Ü›X[˜ÙHˆ™[ÝÊH
+‹Â™[[HÈÒQHHLKÑÓ‘HHÈNÂœÝ]XÈÝXÝÂˆZ[Ì—ÝÛ\ËXÚÜËÞXËœ˜[Y\Ë›Ù–ÑS‘×Ô“Ñ—Ó—KÝÌ×NÂˆZ[M—ÝZŒLÈÊˆHÔHÛØÚÈLÈH›ÝÛ›ÝÛˆ
+›ÈÞXÛHÛÝ[\ŠH
+‹ÂˆZ[ÝØYXZËÝ[×ÛÛ‹]™NÂˆZ[M—ÝÝYÙVÑS‘×Ô“Ñ—Ó—NÈÊˆXXÚÝYÙIÜÈÚ\™HÙˆHÔKL
+	JH
+‹ÂˆZ[M—ÝÜÎÈÊˆH™[™\‰ÜÈÞXÛ\È\ˆØ[\H
+ÞXÛHÛÝ[\ˆÛ›JH
+‹ÂˆZ[ÝÝ[Ì×NÈÊˆ™]ÚÈ™XYÈÜš]HÝ[ÞXÛ\Ë	H
+‹Âˆ[Ý\Ý\ÙNÈÊˆ\ÝˆÒQKHØÙ[˜\š[È‹Œ‹ÑÓ‘H
+Ú[ˆ\ÙH\È
+NÂˆ
+ˆ\ÙNˆÝÜHÙ]KˆYX\Ý\™KÈ]˜XÚËÛ™H
+‹ÂˆZ[Ì—Ý\ÝÝÂˆZ[M—Ý™\×ÛØYÌ×K™\×ØÜÖÌ×NÈÊˆ\ˆØÙ[˜\š[ÎˆH™[™\‰ÜÈÚ\™HLÞXÛ\È\ˆØ[\H
+‹ÂˆZ[Ý™\×ÜXZÖÌ×NÂˆ]\›—Ý
+œ]ÈÊˆÚ]H\ÝÚ[™Ù\ËÈ]˜XÚÈ
+‹ÂˆZ[Ý]Ó”T•×KÛÛ™×ÛÛ‹ØKØŽÂˆZ[Ì—Ý]]NÂˆ›Ø]œNÂŸH\™ˆHË\ÝHÒQ_NÂ‚œÝ]XÈ]\›—Ý
+œ]ÛÙŠ[\
+HÈ™]\›ˆ	œ›Ú‹œ]ÜÙ\Kœ]Ü\WNÈBœÝ]XÈ]\›—Ý
+˜Ý\—Ü]
+›ÚY
+HÈ™]\›ˆ]ÛÙŠZKœ\
+NÈHÊˆH]\›ˆH\ÛˆØÜ™Y[ˆ^\È
+‹ÂœÝ]XÈ[\ÝšY]Ê›ÚY
+HÈ™]\›ˆZKšY]ÈOH—ÔT•ZKšY]ÈOH—ÔÑTHZKšY]ÈOH—ÑÑSŽÈBœÝ]XÈ[Ý\×ÝšY]Ê›ÚY
+HÈ™]\›ˆZKšY]ÈOH—ÔT•ZKšY]ÈOH—ÔÑTNÈBœÝ]XÈÛÛ™×Ý
+œÛÛ™Ê›ÚY
+HÈ™]\›ˆ	œ›Ú‹˜\œ‹œÛÛ™ÎÈBœÝ]XÈ[\×ÌÌÊ›ÚY
+HÈ™]\›ˆ\Ú\×ÌÌÊZKœ\
+NÈBœÝ]XÈ[\×Ù[J›ÚY
+HÈ™]\›ˆ\Ú\×Ù[JZKœ\
+NÈBœÝ]XÈ[šY
+›ÚY
+HÈ™]\›ˆZKœ\OHT•ÌÌÐˆÈHˆÈBœÝ]XÈ[Ø™ÛÛŠ›ÚY
+HÈ™]\›ˆ\×ÌÌÊ
+H	‰ˆ
+ZKšY]ÈOH—ÔT•ZKœ™XÈZK™œ™Y\^VØšY
+
+WJNÈBœÝ]XÈZ[ÝØ™Ú[Û›ÝVÓTÔ×NÂœÝ]XÈZ[Ý˜\Ü×Ü™X×ÜÝ\ÓTÔ×NÈÊˆ™XÛÜ™YÛÝ\˜ÙHÝ\
+ÈNÈ™\›ÈYX[œÈ›Û™H
+‹ÂœÝ]XÈZ[Ý˜\Ü×Ü™X×Ü]ÓTÔ×K˜\Ü×Ü™X×Ü^Z[™ÖÓTÔ×NÂœÝ]XÈZ[ÝØ™Ú[ÚÙ^VÓTÔ×NÈÊˆ\ÚXØ[Ù^H
+ÈNÈÝ\š]™\ÈØÝ]™H[™\Ú[™Ù\È
+‹Â‹ÊˆÜšYÚ[˜[ÝÛ™\œÈ™XÙZ]™HXXÚ\ÚXØ[Ù^K[™\[™[HÙˆ˜]]™H›ÚXÙH[ØØ][Û‹ˆ
+‹ÂˆÙYš[™HRWÐTÔ×ÒSÓPVÍÝBœÝ]XÈZ[ÝØ™Ø\œÚÙ^VÓTÔ×VÕRWÐTÔ×ÒSÓPVHÔÓÓÈÊˆ\ÚXØ[Ù^H
+ÈH
+‹ÂœÝ]XÈZ[ÝØ™Ø\œÛ›ÝVÓTÔ×VÕRWÐTÔ×ÒSÓPVHÔÓÓÂœÝ]XÈZ[ÝØ™Ø\œÛ–ÓTÔ×HÔÓÓÂœÝ]XÈ[ÚWØ\œÛÛ—Ü\
+[ŠBžÂˆ
+›ÚY
+XŽÈ™]\›ˆÈÊˆ˜]]™HÝÛ™\ˆ™XÙZ]™\È]™\žHÙ^NÈ›È^\›˜[T”
+‹ÂŸBœÝ]XÈ[[Û›ÝWÛÙŠÛÛœÝœ\Ý
+˜œ[ÊNÂœÝ]XÈ›ÚY˜\Ü×ÜÝ\ØØ[˜Ù[
+›ÚY
+NÂœÝ]XÈ›ÚY[WÜÝ\ØØ[˜Ù[
+›ÚY
+NÂœÝ]XÈ›ÚYœ™XZ×ÜÝ\ØØ[˜Ù[
+›ÚY
+NÂ‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOH^[\œÈOOH
+‹ÂœÝ]XÈÚ\ˆ
+œ]ÜÊÚ\ˆ
+˜‹ÛÛœÝÚ\ˆ
+œÊBžÂˆÚ[H
+
+œÊBˆ
+˜ŠÊÈH
+œÊÊÎÂˆ
+˜ˆHÂˆ™]\›ˆŽÂŸBœÝ]XÈÚ\ˆ
+œ]ÚJÚ\ˆ
+˜‹[ŠBžÂˆÚ\ˆÌL—NÂˆ[ˆH™YÈHˆÂˆZ[Ì—ÝHH
+Z[Ì—Ý
+J™YÈÈ]ˆˆŠNÂˆÈÂˆÛŠÊ×HH
+Ú\ŠJ	Ì	È
+ÈH	HLJNÂˆHÏHLNÂˆHÚ[H
+JNÂˆYˆ
+™YÊBˆ
+˜ŠÊÈH	ËIÎÂˆÚ[H
+ŠBˆ
+˜ŠÊÈHËK[—NÂˆ
+˜ˆHÂˆ™]\›ˆŽÂŸBˆÙYš[™H“ÕWÓˆÓ“ÕWÓˆÊˆØ[YHÙ[™H˜[Y\È\ÈÛ\“ÓÕÈÚÜ™Ü[
+‹ÂœÝ]XÈÚ\ˆ
+œ]Û›ÝJÚ\ˆ
+˜‹[ŠBžÂˆˆH]ÜÊ‹“ÕWÓ–Êˆ	HLˆ
+ÈLŠH	HL—JNÂˆ™]\›ˆ]ÚJ‹ˆÈLˆHJNÂŸBœÝ]XÈÚ\ˆ
+œ]Ú^
+Ú\ˆ
+˜‹Z[Ì—Ý‹[YÚ]ÊBžÂˆ[NÂˆ›Üˆ
+HHYÚ]ÈHNÈHHÈKKJBˆ
+˜ŠÊÈHŒLŒÍMÎPPÑQˆ–Êˆˆ
+
+ˆJJH	ˆM]WNÂˆ
+˜ˆHÂˆ™]\›ˆŽÂŸB‚œÝ]XÈ›ÚYØ^JÛÛœÝÚ\ˆ
+˜KÛÛœÝÚ\ˆ
+˜ŠBžÂˆÚ\ˆ
+œHH]ÜÊZK›\ÙËJNÂˆYˆ
+ŠBˆ]ÜÊKŠNÂˆZK›\Ù×Ý[[H]Û\Ê
+H
+ÈLÌNÂŸB‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOH\˜[H™YœÈOOH
+‹Â™[[HÈ—Ó“Ó‘K—ÑS‘Ë—ÔÕÒS‘Ë—ÑS‹—ÑUK—Ð“S‹—Ð”UK—Ð‘T‹—Ð•S”Ë—ÑÑS‹—Ð”’ÔÑUˆ—Ð”’ÔÓPÑK—Ð”’ÔÓÕ—ÕSTË—ÐPÐÑS•—ÐÓÓÕU—Ó“ÕSÕU—ÔSUK—ÒÑVSQ—ÒÑVTÓÕS‘—ÐUUÔÐU‘K—ÐPÕ—ÔÐT‹—ÔÔUˆ—ÔÓS‹—ÔÕSË—Ò‹—ÕTK—ÓRQPÒ—ÓÕUÕQ—ÔÔ‘T—ÐU—ÕTÐ‘•S—Ñ”‘QTVKˆ—Ð•—Ð•ÕU—Ð•SQK—ÐÒÐÒ—ÐÓÔÔË—ÔÓP×Ô“ÓK—ÔÓP×ÓPT—Ð‘S‘ÒS‘K—Ð”‘TÑU—Ð”ÕUTË—ÔÑPÕSÓ‹—ÔT•Ó‹—Ñ’S‘US‘K—ÔUQUQSUUK—Ð”’ÔUK—Ð”UÓ‘—Ó“ÕSÐÒÈNÈÊˆ—ÕTNˆ–	ÜÈÛ™KZÛ›ØˆTH
+QÒH‹ˆÛÜ›ˆ\JH
+‹ÈÊˆ—ÒŽˆH\Ý	ÜÈÙXÝ[ÛˆXY\ˆ
+HH]ÈÜ›Ý\
+K™]™\ˆÙ[XÝY
+‹Â\YYˆÝXÝÈZ[ÝÚ[™K‹ÎÈH™Y—ÝÂˆÙYš[™HŠËK‹ÊH
+
+™Y—Ý
+^ÊÊK
+JK
+ŠK
+Ê_JBˆÙYš[™H“Ó‘HŠ—Ó“Ó‘K
+B‚œÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓÐSÔÑPÕSÓ”ÖÍ—HHÈ“RQH
+ÈÓÐÒÈ‹“QUÓÕ‹UQSÈ‹’ÑVTÈ
+ÈÐÔ‘QSˆ‹”“Ò‘PÕ‹”ÖTÕSHŸNÂœÝ]XÈZWÛÜšYÚ[˜[ØÛÛ›ÛØØXÚHÜšYÚ[˜[ØÛÛ›ÛÈÔÓÓÂœÝ]XÈZWÛÜšYÚ[˜[ÝØ]™WØØXÚHÜšYÚ[˜[ÝØ]™HÔÓÓÈÊˆ[™Ú[™HØ]™Y›Ü›HÝYH
+ØNŽNXˆÈYLŒÍØØÙJH
+‹ÂœÝ]XÈZ[ÝÜšYÚ[˜[ÜYÙWØ˜[šËÜšYÚ[˜[Û\ÝØ˜[šÎÂœÝ]XÈ[ÜšYÚ[˜[Ù\Ü^WÝ˜[YJ™Y—ÝŠNÂœÝ]XÈÛÛœÝZWÛÜšYÚ[˜[ØÛÛ›ÛÝšY]È
+›ÜšYÚ[˜[Ý^ÝšY]Ê™Y—Ý‹[˜[YJNÂœÝ]XÈ›ÚYZ[ÜYÙ\Ê›ÚY
+NÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ‘S‘ÒS‘WÓ–×HHÈÒPÐQÓÈ‹“RPSRH‹”ÖS•Ó‘H‹”ÕTT’ˆŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝ‘S‘ÒS‘WÔHÈ‘S‘ÒS‘H‹Ë‘S‘ÒS‘WÓŸNÂœÝ]XÈÜ\˜[WÝ”‘TÑUÔHÈ”‘TÑU‹MNÂœÝ]XÈÛÛœÝÜ\˜[WÝ”ÕUT×ÔHÈ”ÕUTÈ‹NÂ‹Êˆ\‹\]\›ˆ™\Ù]™XØ[
+ÝÛ™\ˆŒ‹LLKLLˆŽŠNˆÑ‘‹[ÙHH™\Ù][X™\ˆ[ˆBˆ
+ˆ\	ÜÈÝ\œ™[[™Ú[™KˆÛÙ\ÈK‹ŽOPÚXØYÛËLŽK‹ŒMNSZX[ZH[™ˆ
+ˆNLË‹ŒNMZ\ÝÜšXØ[ÛÝLˆ
+[ØY\ÈÞ[Û™H[š]
+Kˆ™]\ÙHHÜšYÚ[˜[]\›ˆž]HÚ]Ý]ZYÜ˜][Û‹ˆ
+‹ÂœÝ]XÈÜ\˜[WÝUÓ‘ÔHÈ”UÓÕS‘‹MNÂ‚œÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝUWÓ–×HHÈŒKÌMˆ‹ŒKÌM•‹ŒKÌÌˆ‹ŒKÎ‹ŒKÎ‹ŒKÍŸNÈÊˆLLÎˆ[™^H]\›‹šUWÊˆ
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ”’×ÔUWÓ–×HHÈŒKÌMˆ‹ŒKÎ‹ŒKÍŸNÈÊˆLLÎˆ”‘PRÈÜ›Ý\ÈMÎÈÝÜ™Y\ÈUWÌM‹ÎÍ
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝT—Ó–×HHÈ‘•Ñ‹”‘Uˆ‹”S‘È‹”“‘ŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓ“Ñ‘—Ó–×HHÈ“Ñ‘ˆ‹“ÓˆŸNÂˆÙYš[™H“ÓÕÓˆ“ÕWÓˆÊˆØ[YHÙ[™H˜[Y\È\È]Û›ÝH
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝSQWÓ–×HHÈ‘Ô‘QSˆ‹SP‘Tˆ‹ÖPSˆ‹”‘Q‹“SÓ“È‹“QÒŸNÂ™[[HÈ×ÑS”Ë×ÐPÐË×ÔÓQK×ÓÐÕË×Ô“ÓÕ×ÔÐÐSK×ÐTÑK×ÓUU‘ÑSˆNÂœÝ]XÈÛÛœÝÜ\˜[WÝÑS—ÔÓ‘ÑS—HHÂˆÈ‘S”È‹LÌKÈPÐÑS•‹LKÈ”ÓQH‹LKKÈ“ÐÕÈ‹‹KKˆÈ”“ÓÕ‹LKK“ÓÕÓŸKÈ”ÐÐSH‹ŒÔ×Ó”ÐÐSTÈHKŒÔ×ÔÐÐSWÓSQTßKÈ“ÐÕU‘H‹KKˆÈ“UUUH‹M‹KŸNÂ™[[HÈÔWÔÕÒS‘ËÔWÑS‹ÔWÑUKÔWÐ“S‹ÔWÐ”UKÔWÐ‘T‹ÔWÐ•S”ËÔWÕSTËÔWÐPÐÑS•ÔWÐÓËÔWÓ“ÕTËˆÔWÕSQKÔWÒÑVSQÔWÒÑVTÓÕS‘ÔWÐUUÔÐU‘K”ÔHNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÑVTÓÕS‘Ó–×HHÈ”ÕÔQ‹SÐVTÈŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝQÒ×Ó–×HHÈ“Ñ‘ˆ‹“Óˆ‹’ÑVTÈŸNÈÊˆÓŽˆHÙ^\Ë[™H[›]]ÛœÈÛÝÈ
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝÑTWÔÓ”ÔWHHÂˆÈ”ÕÒS‘È‹LKÈ“S‘Õ‹”ÕTÈHKMKKÈ”UH‹”UTÈHKUWÓŸKÈ“S‘Õ‹”ÕTÈHKMKKˆÈ”UH‹”UTÈHKUWÓŸKÈ‘Tˆ‹ËT—ÓŸKÈ•S”Ô‹KÈ•STÈ‹MKLKKˆÈPÐÑS•‹LËKÈÓÐÒÈÕU‹KKÓ“Ñ‘—ÓŸKÈ““ÕTÈÕU‹KÓ“Ñ‘—ÓŸKÈ•SQH‹KKSQWÓŸKˆÈ“QÒÈ‹‹KQÒ×ÓŸKÈ’ÑVHÓÕS‘‹KÑVTÓÕS‘ÓŸKˆÈUUÔÐU‘H‹KKÓ“Ñ‘—ÓŸKŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝPÕÔ×HHÂˆÈˆ‹KÈ”ÐU‘H“Ò‘PÕ‹KÈ“ÐQÐU‘Q‹KˆÈÓPTˆTÈT•‹KÈÓPTˆUT“ˆ‹KˆÈÓÔHUT“ˆ‹KÈ”‘TÑU“Ò‘PÕ‹KÈP“ÕU“Ö‹KÈ’S”ÑT•Tˆ‹KˆÈ‘SUHTˆ‹KÈÓPTˆÓÓ‘È‹KÈ”T‘“Ô“PSÑH‹KÈ”•SˆT‘ˆTÕ‹KˆÚYˆ“ÐT‘ÔÓRÌÍÈ	‰ˆÑU—ÔQÐSˆÈ”QÓÓÕT”È‹KˆÙ[™Y‚ˆÐPÕÒÓQWÓU‘WHHÈ“U‘HÕ‘T•’QUÈ‹KˆÐPÕÒÓQWÔUT“”×HHÈ”UT“”È‹KŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÕS×ÔHÈ”ÕSÈ‹KÓ“Ñ‘—ÓŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝRQPÒÔÓ”T•×HHÈÊˆHÑ‘ˆ
+›È›Ý\È[ˆÜˆÝ]
+KKLMˆ
+‹ÂˆÈŽLHRQHÒ‹M‹LKÈŽRQHÒ‹M‹LKKÈTÔÈHRQHÒ‹M‹‹KÈTÔÈˆRQHÒ‹M‹ËKˆÈ”‘PRÈRQHÒ‹M‹_NÂ‹ÊˆMÎˆ\‹\\Ó‹ÓÑ‘ˆ
+Ù\Kœ\ÛÙ™ŠKˆÑ‘ˆÝÜÈ™]È›Ý\Ë[™\[™[Ùˆ]]H[™]™[ˆ
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝ“ÕSÐÒ×ÔHÈ““ÕHÐÒÈ‹KÓ“Ñ‘—ÓŸNÈÊˆ[[YNÈØ\\™HÛ›H
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝT•Ó—ÔÓ”T•×HHÂˆÈŽLH‹KKÓ“Ñ‘—ÓŸKÈŽ‹KKÓ“Ñ‘—ÓŸKÈTÔÈH‹KKÓ“Ñ‘—ÓŸKÈTÔÈˆ‹KKÓ“Ñ‘—ÓŸKˆÈ”‘PRÈ‹KKÓ“Ñ‘—ÓŸ_NÂœÝ]XÈÛÛœÝÜ\˜[WÝUQUQSUUWÔHÈ”UQUQHUUTÈ‹KÓ“Ñ‘—ÓŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝ”’ÔUWÔHÈ”UH‹‹”’×ÔUWÓŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÕUÓ–×HHÈ““Ô“PS‹“ÕQŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÕUÔHÈ“ÕUU‹KÕUÓŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝTÐWÓ–×HHÈ‘“ÓÕÔÈÓ“Ðˆ‹‘•SŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝTÐWÔHÈ•TÐˆUQSÈ‹KTÐWÓŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝS‘WÔHÈ•S‘H‹LËNÈÊˆÛØ˜[›Ý˜\ÜÈ[™Ú[™\ÎÈÝÜ™Y\ÈÚYÛ™YXÙ[\ˆ
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝ”‘QTVWÔHÈ‘”‘QHVH‹KÓ“Ñ‘—ÓŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ”’ÔÓPÑWÓ–×HHÈ‹Ž‹ŒMˆ‹ŒÌˆŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝ”’ÔÓPÑWÔÌ—HHÂˆÈHÓPÑTÈ‹ËK”’ÔÓPÑWÓŸKÈˆÓPÑTÈ‹ËK”’ÔÓPÑWÓŸBŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÔ‘TÔHÈ”‘TPU‹ËNÈÊˆH˜\ˆ^\ÈKN[Y\È
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝUÓ–×HHÈ‘STH‹ŒKÌÈ‹Œ‹ÌÈ‹‘•S‹•TÐˆÕÑTˆ‹‹‹‹ˆŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝUÔHÈUT–H‹KUÓŸNÈÊˆ™XYÛ›H
+]Ø˜]\žJH
+‹ÂˆÙYš[™H•ÓˆÓ“Ñ‘—ÓˆÊˆØ[YHÑ‘‹ÓÓˆX™[È
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝ•ÔHÈ“QUÓÕ‹K•ÓŸNÈÊˆ›Y]ÛÝRQH
+ÓRËLÍÊH
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓP×Ô“ÓWÓ–×HHÈ‘U’PÑH‹”ÓPÈÔÕŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓP×ÓPTÓ–×HHÈ‘UÈ‹•TÑTˆŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÓP×Ô“ÓWÔHÈ•“ÓH‹KÓP×Ô“ÓWÓŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÓP×ÓPTÔHÈ”ÓPÈ‘TÑU‹KÓP×ÓPTÓŸNÂœÝ]XÈÛÛœÝÜ\˜[WÝÒÐÒÔHÈÓTÑVTÈÒ‹LËNÈÊˆÛ\[ÙHÙ^X™YÚ[›™[‹LMH
+HŠH
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓÔÔ×Ó–×HHÈUUÈ‹’S•T“S‹‘VT“SŸNÈÊˆÑTWÐÓ×ÊˆÜ™\ˆ
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝÓÔÔ×ÔHÈÓÐÒÈÓÕTÑH‹‹ÓÔÔ×ÓŸNÂœÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ•ÕUÓ–×HHÈ•SURSP“H‹“Ñ‘ˆ‹”‘TÕT•‹”ÕT•S‘È‹”‘PQH‹ÓÓ“‘PÕQ‹ˆ‘RSQ‹QSPQÑHŸNÈÊˆUÐ“WÊˆÜ™\ˆ
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝ•ÕUÔHÈ”ÕUTÈ‹Ë•ÕUÓŸNÈÊˆ™XYÛ›H
+]Ø›WÜÝ]JH
+‹ÂœÝ]XÈÛÛœÝÜ\˜[WÝÓÓ‘×Ô×HHÂˆÈŽLH‹”UHKKÈŽ‹”UHKKÈTÔÈH‹”UHKKÈTÔÈˆ‹”UHKKˆÈ”‘PRÈ‹”UHKKˆÈ“S‘Õ‹”ÓÓ‘ËKŸNÂ‚œÝ]XÈ[™Y—Ü™XYÛÛ›J™Y—ÝŠBžÂˆYˆ
+‹šÚ[™OH—Ð”ÕUTÊH™]\›ˆNÂˆÊˆH˜[šÈÚ]HÚ[™ÛH™\Ù]
+Þ[Û™HS’U
+H\È›Ý[™ÈÈÚÛÜÙKˆ
+‹ÂˆYˆ
+‹šÚ[™OH—Ð”‘TÑU	‰ˆÜšYÚ[˜[ÜÛÝ[™Ù˜XÝÜšY\Ê
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠJHH]JH™]\›ˆNÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÈ	‰ˆÜšYÚ[˜[ÜÛÝ[™Ú\×Ü\™›Ü›X[˜ÙJˆ
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠK‹˜ÊJH™]\›ˆNÂˆ™]\›ˆ‹šÚ[™OH—ÐU‹šÚ[™OH—Ð•ÕU‹šÚ[™OH—Ð•SQNÂŸB‚‹ÊˆHÛÛ™ÉÜÈ˜\ˆÈ^\ÝÈœ›ÛH\™HÛŽˆH™]È˜\ˆ™\X]ÈHÛ™H™Y›Ü™H
+Hš\œÝˆÚ]^\ÊH
+‹ÂœÝ]XÈ›ÚYÛÛ™×Ùš[
+[ÊBžÂˆÛÛ™×Ý
+œÙÈHÛÛ™Ê
+NÂˆYˆ
+ÙËO›[ˆHÈ	‰ˆÙËO›[ˆ”ÓÓ‘ÊHÛÛ™×ÜÝXÝ\™WÜ™]š\Ú[ÛŠÊÎÂˆÚ[H
+ÙËO›[ˆHÈ	‰ˆÙËO›[ˆ”ÓÓ‘ÊHÂˆÛÛ™×Ø˜\—Ý
+˜ˆH	œÙËO˜˜\–ÜÙËO›[—NÂˆ[ÂˆYˆ
+ÙËO›[ŠBˆ
+˜ˆHÙËO˜˜\–ÜÙËO›[ˆHWNÂˆ[ÙHÂˆ›Üˆ
+HÈ”T•ÎÈ
+ÊÊBˆ‹Oœ]ÜHHÙ\Kœ]ÜNÂˆ‹O›]]HHÂˆBˆÙËO›[ŠÊÎÂˆBŸB‚œÝ]XÈÛÛœÝÜ\˜[WÝ
+œ™Y—Ù\ØÊ™Y—ÝŠBžÂˆÝÚ]Ú
+‹šÚ[™
+HÂˆØ\ÙH—Ð‘S‘ÒS‘Nˆ™]\›ˆ	‘S‘ÒS‘WÔÂˆØ\ÙH—Ð”‘TÑU‚ˆ”‘TÑUÔ›X^H
+Z[Ý
+JÜšYÚ[˜[ÜÛÝ[™Ù˜XÝÜšY\Ê
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠJKLJNÂˆ™]\›ˆ	”‘TÑUÔÂˆØ\ÙH—Ð”ÕUTÎˆ™]\›ˆ	”ÕUT×ÔÂˆØ\ÙH—Ð”UÓ‘‚ˆUÓ‘Ô›X^H
+Z[Ý
+[ÜšYÚ[˜[ÜÛÝ[™Ù˜XÝÜšY\Ê
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠJNÂˆ™]\›ˆ	”UÓ‘ÔÂˆØ\ÙH—Ó“ÕSÐÒÎˆ™]\›ˆ	““ÕSÐÒ×ÔÂˆØ\ÙH—ÑS‘Îˆ™]\›ˆ[™Ú[™WÜ\˜[J‹˜K‹˜‹‹˜ÊNÂˆØ\ÙH—ÑÑSŽˆ™]\›ˆ	‘ÑS—ÔÜ‹˜È	H‘ÑS—NÂˆØ\ÙH—Ð”’ÔÑUˆ™]\›ˆœ™XZÜ×Ü\˜[J‹˜ÊNÂˆØ\ÙH—ÔÕÒS‘Îˆ™]\›ˆ	”ÑTWÔÔÔWÔÕÒS‘×NÂˆØ\ÙH—ÑSŽˆ™]\›ˆ	”ÑTWÔÔÔWÑS—NÂˆØ\ÙH—ÑUNˆ™]\›ˆ	”ÑTWÔÔÔWÑUWNÂˆØ\ÙH—Ð“SŽˆ™]\›ˆ	”ÑTWÔÔÔWÐ“S—NÂˆØ\ÙH—Ð”UNˆ™]\›ˆ	”ÑTWÔÔÔWÐ”UWNÂˆØ\ÙH—Ð‘TŽˆ™]\›ˆ	”ÑTWÔÔÔWÐ‘T—NÂˆØ\ÙH—Ð•S”Îˆ™]\›ˆ	”ÑTWÔÔÔWÐ•S”×NÂˆØ\ÙH—Ð”’ÔÓPÑNˆ™]\›ˆ	”’ÔÓPÑWÔÜ‹˜HOHNÂˆØ\ÙH—Ð”’ÔÓÕˆÂˆÝ]XÈÜ\˜[WÝHÈ“ÓÔ‹NÂˆÝ]XÈÛÛœÝÚ\ˆ
+››Û™V×HHÈ››Û™HŸNÂˆ[ˆH[™Ú[™WØœš×ÛœÛÝÊ
+NÂˆ›X^HˆÈ
+Z[Ý
+JˆHJHˆÂˆ›˜[Y\ÈHˆÈ[™Ú[™WØœš×ÜÛÝÛ˜[Y\Ê
+Hˆ›Û™NÂˆ™]\›ˆ	™ÂˆBˆØ\ÙH—ÕSTÎˆ™]\›ˆ	”ÑTWÔÔÔWÕST×NÂˆØ\ÙH—ÐPÐÑS•ˆ™]\›ˆ	”ÑTWÔÔÔWÐPÐÑS•NÂˆØ\ÙH—ÐÓÓÕUˆ™]\›ˆ	”ÑTWÔÔÔWÐÓ×NÂˆØ\ÙH—Ó“ÕSÕUˆ™]\›ˆ	”ÑTWÔÔÔWÓ“ÕT×NÂˆØ\ÙH—ÔSUNˆ™]\›ˆ	”ÑTWÔÔÔWÕSQWNÂˆØ\ÙH—ÒÑVSQˆ™]\›ˆ	”ÑTWÔÔÔWÒÑVSQNÂˆØ\ÙH—ÒÑVTÓÕS‘ˆ™]\›ˆ	”ÑTWÔÔÔWÒÑVTÓÕS‘NÂˆØ\ÙH—ÐUUÔÐU‘Nˆ™]\›ˆ	”ÑTWÔÔÔWÐUUÔÐU‘WNÂˆØ\ÙH—ÐPÕˆ™]\›ˆ	PÕÔÜ‹˜WNÂˆØ\ÙH—ÔÐTŽˆÂˆÝ]XÈÜ\˜[WÝHÈTˆ‹NÂˆ›X^H
+Z[Ý
+JÛÛ™Ê
+KO›[ˆ”ÓÓ‘ÈÈÛÛ™Ê
+KO›[ˆˆ”ÓÓ‘ÈHJNÂˆ™]\›ˆ	™ÂˆBˆØ\ÙH—ÔÔUˆ™]\›ˆ	”ÓÓ‘×ÔÜ‹˜H	H”T•×NÂˆØ\ÙH—ÓRQPÒˆ™]\›ˆ	“RQPÒÔÜ‹˜H	H”T•×NÂˆØ\ÙH—ÔT•ÓŽˆ™]\›ˆ	”T•Ó—ÔÜ‹˜H	H”T•×NÂˆØ\ÙH—ÔUQUQSUUNˆ™]\›ˆ	”UQUQSUUWÔÂˆØ\ÙH—Ð”’ÔUNˆ™]\›ˆ	”’ÔUWÔÂˆØ\ÙH—ÓÕUÕQˆ™]\›ˆ	“ÕUÔÂˆØ\ÙH—ÕTÐ‘•Sˆ™]\›ˆ	•TÐWÔÂˆØ\ÙH—Ñ’S‘US‘Nˆ™]\›ˆ	•S‘WÔÂˆØ\ÙH—Ñ”‘QTVNˆ™]\›ˆ	‘”‘QTVWÔÂˆØ\ÙH—ÔÔ‘Tˆ™]\›ˆ	”Ô‘TÔÂˆØ\ÙH—ÐUˆ™]\›ˆ	UÔÂˆØ\ÙH—Ð•ˆ™]\›ˆ	•ÔÂˆØ\ÙH—ÔÓP×Ô“ÓNˆ™]\›ˆ	”ÓP×Ô“ÓWÔÂˆØ\ÙH—ÔÓP×ÓPTˆ™]\›ˆ	”ÓP×ÓPTÔÂˆØ\ÙH—ÐÒÐÒˆ™]\›ˆ	ÒÐÒÔÂˆØ\ÙH—ÐÓÔÔÎˆ™]\›ˆ	ÓÔÔ×ÔÂˆØ\ÙH—Ð•ÕUˆ™]\›ˆ	•ÕUÔÂˆØ\ÙH—Ð•SQNˆÈÊˆ™XYÛ›NˆH˜[YH]Y™\\Ù\È
+‹ÂˆÝ]XÈÛÛœÝÚ\ˆ
+››VÌWNÂˆÝ]XÈÛÛœÝÜ\˜[WÝHÈ“SQH‹›_NÂˆ›VÌHH]Ø›WÛ˜[YJ
+VÌHÈ]Ø›WÛ˜[YJ
+Hˆ‹HŽÂˆ™]\›ˆ	™ÂˆBˆØ\ÙH—ÔÓSŽˆ™]\›ˆ	”ÓÓ‘×ÔÍWNÂˆØ\ÙH—ÔÕSÎˆ™]\›ˆ	”ÕS×ÔÂˆØ\ÙH—ÕTNˆÂˆÝ]XÈÛÛœÝÜ\˜[WÝHÈ•TH‹LËÌ‹NÂˆ™]\›ˆ	™ÂˆBˆY˜][ˆ™]\›ˆÂˆBŸB‚‹ÊˆÓPÈÛ˜\ÚÝÈ\ÙHHÝ\Ú\ÙK][\ÙYˆž]HÛˆ]\›ˆ™YœÈÈš[™[‚ˆ
+ˆ^XÝ]\›ˆ
+[™^
+ÈJKˆÜ™[˜\žH[™[™YœÈÙY\L[™›ÛÝÈ^X˜XÚËˆ
+‹ÂœÝ]XÈ]\›—Ý
+œ™Y—Ü]\›Š™Y—ÝŠBžÂˆYˆ
+‹šÚ[™OH—Ð”’ÔUJH™]\›ˆ‹˜ˆÈ	œ›Ú‹œ]Ü‹˜ˆH]WHˆÝ\—Ü]
+
+NÂˆYˆ
+‹šÚ[™—ÔÕÒS‘È‹šÚ[™ˆ—Ð”’ÔÓÕ
+H™]\›ˆÝ\—Ü]
+
+NÂˆYˆ
+‹˜ŠH™]\›ˆ	œ›Ú‹œ]Ü‹˜ˆH]WNÂˆYˆ
+‹šÚ[™H—ÑÑSŠH™]\›ˆÝ\—Ü]
+
+NÂˆ™]\›ˆ]ÛÙŠ‹šÚ[™OH—ÔÕÒS‘ÈÈT•ÎLHˆ‹šÚ[™OH—ÑSˆ‹šÚ[™OH—ÑUHÈ‹˜Hˆ’ÒU
+È‹˜JNÂŸB‚œÝ]XÈRWÑUÈ[™Y—ÙÙ]
+™Y—ÝŠBžÂˆYˆ
+‹šÚ[™OH—Ð”’ÔÓÕ	‰ˆZK˜œš×ØÚÚXÙWÛÛˆ	‰ˆ‹˜HOHZK˜œš×ØÚÚXÙWØ˜[šÈ	‰‚ˆÙ\Kœ]ÔT•Ð”’×HOHZK˜œš×ØÚÚXÙWÜ]
+H™]\›ˆZK˜œš×ØÚÚXÙWÜÛÝÂˆ]\›—Ý
+œH™Y—Ü]\›ŠŠNÂˆÝÚ]Ú
+‹šÚ[™
+HÂˆØ\ÙH—Ð‘S‘ÒS‘Nˆ™]\›ˆ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠNÂˆØ\ÙH—Ð”‘TÑUˆ™]\›ˆ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYÜ™\Ù]
+‹˜ŠNÂˆØ\ÙH—Ð”ÕUTÎˆ™]\›ˆ[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™Ê‹˜ŠH
+ˆ
+È[™Ú[™WØ˜\Ü×ÜÝ]\Ê‹˜ŠNÂˆØ\ÙH—ÑS‘Î‚ˆYˆ
+‹˜HOHÌÌÈ	‰ˆ‹˜ÈOHÔ’QÒSSÔÖS•Ó‘WÔS—ÔUH	‰‚ˆ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠHOHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘H	‰‚ˆJÜšYÚ[˜[ÜÛÝ[™ÙY]ÛX\ÚÊ›Ú‹œÛÝ[™–Ü‹˜WVÜ‹˜—JH	ˆ
+]HÔ’QÒSSÔÖS•Ó‘WÔS—ÔUJJJBˆ™]\›ˆÔ’QÒSSÔÖS•Ó‘WÔS—ÔUWÒS’UÂˆ™]\›ˆ›Ú‹œÛÝ[™–Ü‹˜WVÜ‹˜—VÜ‹˜×NÂˆØ\ÙH—ÔÕÒS‘Îˆ™]\›ˆOœÝÚ[™ÎÂˆØ\ÙH—ÑSŽˆ™]\›ˆO™[VÜ‹˜WK›[ˆHNÂˆØ\ÙH—ÑUNˆ™]\›ˆO™[VÜ‹˜WKœ˜]NÂˆØ\ÙH—Ð“SŽˆ™]\›ˆO˜˜\ÜÖÜ‹˜WK›[ˆHNÂˆØ\ÙH—Ð”UNˆ™]\›ˆO˜˜\ÜÖÜ‹˜WKœ˜]NÂˆØ\ÙH—Ð”’ÔUNˆ™]\›ˆO˜œšËœ˜]HOHUWÎÈHˆO˜œšËœ˜]HOHUWÍÈˆˆÂˆØ\ÙH—Ð‘TŽˆ™]\›ˆO˜˜\ÜÖÜ‹˜WK™\ŽÂˆØ\ÙH—Ð•S”Îˆ™]\›ˆO˜˜\ÜÖÜ‹˜WK˜[œÜÜÙNÂˆØ\ÙH—ÑÑSŽˆÂˆÛÛœÝŒÜ×ØÙ™×Ý
+™ÈH	œO˜˜\ÜÖÜ‹˜WK™Ù[ŽÂˆÝÚ]Ú
+‹˜ÊHÂˆØ\ÙH×ÑS”Îˆ™]\›ˆËO™[œÚ]NÂˆØ\ÙH×ÐPÐÎˆ™]\›ˆËO˜XØÙ[ÂˆØ\ÙH×ÔÓQNˆ™]\›ˆËOœÛYNÂˆØ\ÙH×ÓÐÕÎˆ™]\›ˆËO›ØÝÜ˜[™ÙHHNÂˆØ\ÙH×Ô“ÓÕˆ™]\›ˆËOœ›ÛÝÂˆØ\ÙH×ÔÐÐSNˆ™]\›ˆËOœØØ[NÂˆØ\ÙH×ÐTÑNˆ™]\›ˆËO˜˜\ÙWÛØÝÂˆY˜][ˆ™]\›ˆËO›]]]WØ˜\œÎÂˆBˆBˆØ\ÙH—Ð”’ÔÑUˆ™]\›ˆO˜œšËœÙ]Ü‹˜×NÂˆØ\ÙH—Ð”’ÔÓÕˆ™]\›ˆ‹˜HÈO˜œšËœÛÝØˆˆO˜œšËœÛÝØNÂˆØ\ÙH—Ð”’ÔÓPÑNˆÈ[ÛÙHH
+O˜œšËœÛXÙWÛ[ÙHˆ
+‹˜H
+ˆŠJH	ˆÎÈ™]\›ˆÛÙHˆÈÛÙHˆHˆÛÙNÈBˆØ\ÙH—ÕSTÎˆ™]\›ˆ
+[
+JÙ\K˜œH
+ÈYŠHHŒÂˆØ\ÙH—ÐPÐÑS•ˆ™]\›ˆÙ\K˜XØÙ[ÜMÎÂˆØ\ÙH—ÐÓÓÕUˆ™]\›ˆÙ\KœÙ[™ØÛØÚÎÂˆØ\ÙH—Ó“ÕSÕUˆ™]\›ˆÙ\KœÙ[™Û›Ý\ÎÂˆØ\ÙH—ÔSUNˆ™]\›ˆ›Ú‹œÙ]œ[]NÂˆØ\ÙH—ÒÑVSQˆ™]\›ˆ›Ú‹œÙ]šÙ^[YÂˆØ\ÙH—ÒÑVTÓÕS‘ˆ™]\›ˆ›Ú‹œÙ]šÙ^\ÛÝ[™ÂˆØ\ÙH—ÐUUÔÐU‘Nˆ™]\›ˆ\›Ú‹œÙ]˜]]ÜØ]™WÛÙ™ŽÂˆØ\ÙH—ÔÐTŽˆ™]\›ˆZKœÛÛ™×ÜÙ[ÂˆØ\ÙH—ÔÔUˆÂˆÛÛœÝÛÛ™×Ý
+œÙÈHÛÛ™Ê
+NÂˆ[˜\ˆH‹˜ˆÈ‹˜ˆH]HˆZKœÛÛ™×ÜÙ[Âˆ[ÈH˜\ˆÙËO›[ˆÈ˜\ˆˆ‹˜ˆÈLHˆÙËO›[ˆHNÂˆ™]\›ˆÈHÈÙËO˜˜\–Ú×Kœ]Ü‹˜WHˆÙ\Kœ]Ü‹˜WNÂˆBˆØ\ÙH—ÓRQPÒˆ™]\›ˆÙ\K˜ÚÜ‹˜H	H”T•×HOHÑTWÐÒÓÑ‘ˆÈˆÙ\K˜ÚÜ‹˜H	H”T•×H
+ÈNÂˆØ\ÙH—ÔT•ÓŽˆ™]\›ˆTÑTWÔT•ÓÑ‘Š	œÙ\K‹˜H	H”T•ÊNÂˆØ\ÙH—ÔUQUQSUUNˆ™]\›ˆÙ\Kœ]Y]YYÛ]]\ÎÂˆØ\ÙH—Ð”UÓ‘ˆÂˆZ[ÝÈH]ÛÙŠT•ÌÌÐH
+È
+‹˜ˆ	ˆJJKOœœÝ–Ü‹˜ˆ	ˆWNÂˆ[œÚYÛ™Y˜[šË˜[YNÂˆ™]\›ˆ˜\Ü×Ü]\›—Ü™\Ù]ÙXÛÙJË	˜˜[šË	˜[YJHÈ
+[
+]˜[YHˆÂˆBˆØ\ÙH—Ó“ÕSÐÒÎˆ™]\›ˆ[™Ú[™WÛ›ÝWÛØÚ×ØØ\\™WÛÛŠ
+NÂˆØ\ÙH—ÓÕUÕQˆ™]\›ˆ›Ú‹œÙ]›Ý]ÛÝYÂˆØ\ÙH—ÕTÐ‘•Sˆ™]\›ˆ›Ú‹œÙ]\Ø—Ù[ÂˆØ\ÙH—Ñ’S‘US‘Nˆ™]\›ˆ“Ò—ÕS‘WÓÑŠ	œ›Ú‹œÙ]
+H
+ÈÂˆØ\ÙH—Ñ”‘QTVNˆ™]\›ˆZK™œ™Y\^VÜ‹˜WNÂˆØ\ÙH—ÔÔ‘TˆÂˆ[œÚYÛ™Y˜\ˆH‹˜ˆÈ‹˜ˆH]HˆZKœÛÛ™×ÜÙ[Âˆ™]\›ˆ˜\ˆÛÛ™Ê
+KO›[ˆÈÛÛ™Ê
+KO˜˜\–Ø˜\—K›]]HˆHˆÂˆBˆØ\ÙH—ÐUˆ™]\›ˆ]Ø˜]\žJ
+HÈHˆ]Ø˜]\žJ
+NÂˆØ\ÙH—Ð•ˆ™]\›ˆ›Ú‹œÙ]˜	ˆ]NÂˆØ\ÙH—ÔÓP×Ô“ÓNˆ™]\›ˆHJ›Ú‹œÙ]˜	ˆ“Ò—Ð•ÔÓP×ÐÑS•S
+NÂˆØ\ÙH—ÔÓP×ÓPTˆ™]\›ˆHJ›Ú‹œÙ]˜	ˆ“Ò—Ð•ÔÓP×ÕTÑTŠNÂˆØ\ÙH—ÐÒÐÒˆ™]\›ˆ›Ú‹œÙ]˜Ú×ØÚHŽÂˆØ\ÙH—ÐÓÔÔÎˆ™]\›ˆ“Ò—ÐÓ×ÔÔÊ›Ú‹œÙ]˜
+NÂˆØ\ÙH—Ð•ÕUˆ™]\›ˆ]Ø›WÜÝ]J
+NÂˆØ\ÙH—ÔÓSŽˆ™]\›ˆÛÛ™Ê
+KO›[ŽÂˆØ\ÙH—ÔÕSÎˆ™]\›ˆ\™‹œÝ[×ÛÛŽÂˆØ\ÙH—ÕTNˆ™]\›ˆ›Ú‹œÛÝ[™–ÕÑ–VÌWVÌNÈÊˆ
+Ù\[ˆ[ˆ[™Ú[™HÛÝ›Ý[™È™XYÊH
+‹ÂˆY˜][ˆ™]\›ˆÂˆBŸB‚œÝ]XÈ›ÚYZWÜ™\ÝÜ™WØ˜\ÙJ[\™Ù][›ÚXÙK[\˜[Y]\ŠBžÂˆYˆ
+\™Ù]OHÌÌÊHÂˆYˆ
+
+[œÚYÛ™Y
+]›ÚXÙHTÔÈ	‰ˆÜšYÚ[˜[ÜÛÝ[™Ú\×Ü\™›Ü›X[˜ÙJˆ
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×Ø˜[šÊ›ÚXÙJK
+[œÚYÛ™Y
+\\˜[Y]\ŠJH™]\›ŽÂˆ[™Ú[™WÜÙ]Ø˜\ÙJ\™Ù]›ÚXÙK\˜[Y]\ŠNÈ™]\›ŽÂˆBˆ[™Ú[™WÜÙ]
+\™Ù]›ÚXÙK\˜[Y]\‹›Ú‹œÛÝ[™–Ý\™Ù]VÝ›ÚXÙWVÜ\˜[Y]\—JNÂŸB‚–ÐÓÓÝ]XÈ›ÚY™Y—ÜÙ]Ú[\
+™Y—Ý‹[‹[œ›ÛWÚÙ^X›Ø\™
+BžÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆÊˆœ™Y^™HHXÝ]™H˜[šÈ™Y›Ü™H™XY[™È]È\ØÜš\Ü‹ˆH]Y[È›Ý[™\žBˆ
+ˆX^HÝ\Ú\ÙH™\XÙHÚXØYÛÈÚ]ZX[ZH™]ÙY[ˆÛ[\[™ÝÜ™Kˆ
+‹Âˆ[˜\Ü×ÙY]H‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÎÂˆYˆ
+˜\Ü×ÙY]
+H[™Ú[™WØ˜\Ü×ÙY]ÚÛ
+JNÂˆÙ[™Y‚ˆ]\›—Ý
+œH™Y—Ü]\›ŠŠNÂˆÛÛœÝÜ\˜[WÝ
+™H™Y—Ù\ØÊŠNÂˆYˆ
+Y‹šÚ[™OH—ÐPÕ™Y—Ü™XYÛÛ›JŠJHÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYˆ
+˜\Ü×ÙY]
+H[™Ú[™WØ˜\Ü×ÙY]ÚÛ
+
+NÂˆÙ[™Y‚ˆ™]\›ŽÂˆBˆˆHˆÈˆˆˆO›X^ÈO›X^ˆŽÂˆYˆ
+‹šÚ[™OH—Ð‘S‘ÒS‘H‹šÚ[™OH—Ð”‘TÑU
+HÂˆYˆ
+ˆOH™Y—ÙÙ]
+ŠJH™]\›ŽÂˆ[˜[šÈH‹šÚ[™OH—Ð‘S‘ÒS‘HÈˆˆ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠNÂˆ[™\Ù]H‹šÚ[™OH—Ð‘S‘ÒS‘HÈˆŽÂˆ[˜ÈH[™Ú[™WØ˜\Ü×ÜÙ[XÝÜ™\Ù]
+‹˜‹˜[šË™\Ù]	œ›Ú‹œÛÝ[™
+NÂˆYˆ
+˜ÊHÂˆØ^J˜ÈOHLˆÈ‘S‘ÒS‘HSURSP“Hˆˆ˜ÈOHMÈ”ÓÕS‘ÐÒÔÈÕÓˆS‘Hˆ‚ˆ˜ÈOHMHÈ•S”ÕTÔ•QÓÕS‘ˆˆ’S•SQ‘TÑU‹
+NÂˆ™]\›ŽÂˆBˆYˆ
+Yœ›ÛWÚÙ^X›Ø\™
+H˜\Ü×Û^[Ý]Û›ÝWÜ™[[ÝWÙY]
+‹˜ŠNÂˆ[ÙH˜\Ü×Û^[Ý]ØXØÙ\
+
+NÂˆX\š×Ù\J
+NÂˆYˆ
+œ›ÛWÚÙ^X›Ø\™
+HZ[ÜYÙ\Ê
+NÂˆ™]\›ŽÂˆBˆX\š×Ù\J
+NÂˆÝÚ]Ú
+‹šÚ[™
+HÂˆØ\ÙH—ÑS‘Î‚ˆYˆ
+‹˜HOHÌÌÊHÂˆYˆ
+[ÜšYÚ[˜[ÜÛÝ[™ÜÙ]
+›Ú‹œÛÝ[™–ÕÌÌ×VÜ‹˜—K‹˜Ë
+[œÚYÛ™Y
+]ŠJHÂˆØ^J’S•SQÓÕS‘‹
+NÈœ™XZÎÂˆBˆ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ü™Yœ™\Ú
+	œ›Ú‹œÛÝ[™‹˜ŠNÂˆH[ÙBˆ›Ú‹œÛÝ[™–Ü‹˜WVÜ‹˜—VÜ‹˜×HH
+Z[Ý
+]ŽÂˆ[™Ú[™WÜÙ]
+‹˜K‹˜‹‹˜ËŠNÂˆYˆ
+‹˜HOHÓTÕ	‰ˆ‹˜ÈOHTÕÐÓÓTJHÊˆHXXÜ›ÜÎˆH]Z[È^HÙ]›ÜˆH\Ý
+‹ÂˆX\Ý\—ØÛÛ\WÜÝÊ‹	œ›Ú‹œÛÝ[™–ÕÓTÕVÌVÓTÕÕ‘TÒK	œ›Ú‹œÛÝ[™–ÕÓTÕVÌVÓTÕÔUS×Kˆ	œ›Ú‹œÛÝ[™–ÕÓTÕVÌVÓTÕÓPRÑUTJNÂˆ[ÙHYˆ
+‹˜HOHÓTÕ	‰ˆ‹˜ÈOHTÕÑ‘ŠBˆX\Ý\—Ù™—ÜÝÊ‹	œ›Ú‹œÛÝ[™–ÕÓTÕVÌVÓTÕÓSÑWK	œ›Ú‹œÛÝ[™–ÕÓTÕVÌVÓTÕÐÕUÑ‘—JNÂˆœ™XZÎÂˆØ\ÙH—ÔÕÒS‘ÎˆOœÝÚ[™ÈH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÑSŽˆO™[VÜ‹˜WK›[ˆH
+Z[Ý
+Jˆ
+ÈJNÈœ™XZÎÂˆØ\ÙH—ÑUNˆO™[VÜ‹˜WKœ˜]HH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—Ð“SŽˆO˜˜\ÜÖÜ‹˜WK›[ˆH
+Z[Ý
+Jˆ
+ÈJNÈœ™XZÎÂˆØ\ÙH—Ð”UNˆO˜˜\ÜÖÜ‹˜WKœ˜]HH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—Ð”’ÔUNˆO˜œšËœ˜]HH
+Z[Ý
+JˆOHHÈUWÎˆˆOHˆÈUWÍˆUWÌMŠNÈœ™XZÎÂˆØ\ÙH—Ð‘TŽˆO˜˜\ÜÖÜ‹˜WK™\ˆH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—Ð•S”ÎˆO˜˜\ÜÖÜ‹˜WK˜[œÜÜÙHH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÑÑSŽˆÂˆŒÜ×ØÙ™×Ý
+™ÈH	œO˜˜\ÜÖÜ‹˜WK™Ù[ŽÂˆÝÚ]Ú
+‹˜ÊHÂˆØ\ÙH×ÑS”ÎˆËO™[œÚ]HH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH×ÐPÐÎˆËO˜XØÙ[H
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH×ÔÓQNˆËOœÛYHH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH×ÓÐÕÎˆËO›ØÝÜ˜[™ÙHH
+Z[Ý
+Jˆ
+ÈJNÈœ™XZÎÂˆØ\ÙH×Ô“ÓÕˆËOœ›ÛÝH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH×ÔÐÐSNˆËOœØØ[HH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH×ÐTÑNˆËO˜˜\ÙWÛØÝH
+Z[Ý
+]ŽÈœ™XZÎÂˆY˜][ˆËO›]]]WØ˜\œÈH
+Z[Ý
+]ŽÈœ™XZÎÂˆBˆYˆ
+‹˜ÈOH×ÓUU
+HÊˆH[™HÝ^\ÎˆHÙ][™ÜÈ\™HH™^‘UÈÈUUUIÜÈ
+‹ÂˆZK™Ù[—ÜÝ[VÜ‹˜WHHNÂˆœ™XZÎÂˆBˆØ\ÙH—Ð”’ÔÑUˆO˜œšËœÙ]Ü‹˜×HH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—Ð”’ÔÓPÑNˆÂˆZK˜œš×ØÛÝ[Ý\™Ù]H
+Z[Ý
+J‹˜HOH
+NÂˆ[œÚYÛ™YÚYH‹˜H
+ˆKÛÙHHˆˆÈ
+[œÚYÛ™Y
+]ˆˆ]Hˆ
+[œÚYÛ™Y
+]ŽÂˆO˜œšËœÛXÙWÛ[ÙHH
+Z[Ý
+J
+O˜œšËœÛXÙWÛ[ÙH	ˆŠÝHÚY
+JH
+ÛÙHÚY
+JNÂˆYˆ
+\‹˜ˆOH]ÛÙŠT•Ð”’ÊJH[™Ú[™WØœš×ÛÛÜÊ
+NÂˆœ™XZÎÂˆBˆØ\ÙH—Ð”’ÔÓÕ‚ˆZK˜œš×ØÛÝ[Ý\™Ù]H
+Z[Ý
+J‹˜HOH
+NÂˆYˆ
+‹˜JBˆO˜œšËœÛÝØˆH
+Z[Ý
+]ŽÂˆ[ÙBˆO˜œšËœÛÝØHH
+Z[Ý
+]ŽÂˆYˆ
+\‹˜ˆOH]ÛÙŠT•Ð”’ÊJH[™Ú[™WØœš×ÛÛÜÊ
+NÂˆZK›Ý][™WÛÚÈHÂˆœ™XZÎÂˆØ\ÙH—ÕSTÎˆÙ\K˜œHH
+›Ø]
+Jˆ
+ÈŒ
+NÈœ™XZÎÂˆØ\ÙH—ÐPÐÑS•ˆÙ\K˜XØÙ[ÜMÈH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÐÓÓÕUˆÙ\KœÙ[™ØÛØÚÈH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—Ó“ÕSÕUˆÙ\KœÙ[™Û›Ý\ÈH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÔSUNˆ›Ú‹œÙ]œ[]HH
+Z[Ý
+]ŽÈ[]WÜÙ]
+
+Z[Ì—Ý
+]ŠNÈœ™XZÎÂˆØ\ÙH—ÒÑVSQˆ›Ú‹œÙ]šÙ^[YH
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÒÑVTÓÕS‘ˆ›Ú‹œÙ]šÙ^\ÛÝ[™H
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÐUUÔÐU‘Nˆ›Ú‹œÙ]˜]]ÜØ]™WÛÙ™ˆH
+Z[Ý
+H]ŽÈZK›\ÝØ]]ÜØ]™HH
+Z[Ý
+H]ŽÈœ™XZÎÂˆØ\ÙH—ÔÐTŽˆZKœÛÛ™×ÜÙ[H
+Z[Ý
+]ŽÈœ™XZÎÂˆØ\ÙH—ÔÔUˆÂˆ[œÚYÛ™Y˜\ˆH‹˜ˆÈ‹˜ˆH]HˆZKœÛÛ™×ÜÙ[ÂˆYˆ
+‹˜ˆ	‰ˆ˜\ˆHÛÛ™Ê
+KO›[ŠHœ™XZÎÈÊˆH[]YØÚÙY˜\ˆÝ^\È[]Y
+‹ÂˆÛÛ™×Ùš[
+
+[
+X˜\ŠNÂˆÛÛ™Ê
+KO˜˜\–Ø˜\—Kœ]Ü‹˜WHH
+Z[Ý
+]ŽÂˆœ™XZÎÂˆBˆØ\ÙH—ÓRQPÒˆÙ\K˜ÚÜ‹˜H	H”T•×HH
+Z[Ý
+JˆÈˆHHˆÑTWÐÒÓÑ‘ŠNÈœ™XZÎÂˆØ\ÙH—ÔT•ÓŽˆÙ\Kœ\ÛÙ™ˆH
+Z[Ý
+JˆÈÙ\Kœ\ÛÙ™ˆ	ˆŠ]H
+‹˜H	H”T•ÊJHˆÙ\Kœ\ÛÙ™ˆ]H
+‹˜H	H”T•ÊJNÈœ™XZÎÂˆØ\ÙH—ÔUQUQSUUN‚ˆ“Ò—ÔÑUÔSUUJ	œ›Ú‹œÙ]ŠNÂˆÙ\Kœ]Y]YYÛ]]\ÈH
+Z[Ý
+T“Ò—ÔSUUWÓÑŠ	œ›Ú‹œÙ]
+NÂˆœ™XZÎÂˆØ\ÙH—Ð”UÓ‘ˆÂˆ[œÚYÛ™Y˜[šÈH
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊ‹˜ŠNÂˆ]ÛÙŠT•ÌÌÐH
+È
+‹˜ˆ	ˆJJKOœœÝ–Ü‹˜ˆ	ˆWHBˆ
+Z[Ý
+X˜\Ü×Ü]\›—Ü™\Ù]Ù[˜ÛÙJ˜[šË
+[œÚYÛ™Y
+]ŠNÂˆœ™XZÎÂˆBˆØ\ÙH—Ó“ÕSÐÒÎˆ[™Ú[™WÛ›ÝWÛØÚ×ØØ\\™JŠNÈœ™XZÎÂˆØ\ÙH—ÓÕUÕQˆ›Ú‹œÙ]›Ý]ÛÝYH
+Z[Ý
+]ŽÈ[™Ú[™WÛÝ]ÛÝY
+ŠNÈœ™XZÎÂˆØ\ÙH—ÕTÐ‘•Sˆ›Ú‹œÙ]\Ø—Ù[H
+Z[Ý
+]ŽÈ[™Ú[™WÝ\Ø—Ù[
+ŠNÈœ™XZÎÂˆØ\ÙH—Ñ’S‘US‘Nˆ“Ò—ÔÑUÕS‘J	œ›Ú‹œÙ]ˆH
+NÈ[™Ú[™WØ˜\Ü×Ý[™JˆH
+NÈœ™XZÎÂˆØ\ÙH—ÐÒÐÒˆ›Ú‹œÙ]˜Ú×ØÚH
+Z[Ý
+Jˆ
+ÈŠNÈœ™XZÎÈÊˆÛÝ[™[™È›Ý\È[™ÛˆZ\ˆÝÛˆÚ[›™[
+‹ÂˆØ\ÙH—ÐÓÔÔÎˆÊˆ
+ZWÙœ˜[YHÚ]™\È]ÈHÙ\]Y[˜Ù\ŠH
+‹Âˆ›Ú‹œÙ]˜H
+Z[Ý
+J
+›Ú‹œÙ]˜	ˆ”“Ò—Ð•ÐÓ×ÓPTÒÊH
+Z[Ý
+]ˆH“Ò—Ð•ÐÓ×ÒSŠNÂˆœ™XZÎÂˆØ\ÙH—Ð•‚ˆ›Ú™XÝÙ]šXÙWØÜÙ]
+ˆˆ
+NÂˆ]Ø›WÜÙ]
+ˆˆ
+NÂˆYˆ
+]Ø›WÜÝ]J
+HOHUÐ“WÔ‘TÕT•
+BˆØ^J”‘TÕT•ÈT“ˆÓˆ‹
+NÈÊˆHÛÛ›Û\ˆÝ\ÈÛ›H]ÝÙ\‹[Ûˆ
+‹Âˆ[ÙHYˆ
+›Ú™XÝÙ]šXÙWØÜ[™[™Ê
+JHØ^J•ÐU‘HS‘S‘È‹
+NÂˆœ™XZÎÂˆØ\ÙH—ÔÓP×Ô“ÓN‚ˆ›Ú‹œÙ]˜H
+Z[Ý
+J
+›Ú‹œÙ]˜	ˆ”“Ò—Ð•ÔÓP×ÐÑS•S
+H
+ˆÈ“Ò—Ð•ÔÓP×ÐÑS•SˆJJNÂˆØ^JˆÈ“QUÓÕÔÕˆˆ“QUÓÕU’PÑH‹
+NÂˆœ™XZÎÂˆØ\ÙH—ÔÓP×ÓPT‚ˆ›Ú‹œÙ]˜H
+Z[Ý
+J
+›Ú‹œÙ]˜	ˆ”“Ò—Ð•ÔÓP×ÕTÑTŠH
+ˆÈ“Ò—Ð•ÔÓP×ÕTÑTˆˆJJNÂˆØ^JˆÈ•TÑTŽˆÒMˆ
+ÈSPÈˆˆ‘UÎˆPPÒÒQHSÑH‹
+NÂˆœ™XZÎÂˆØ\ÙH—Ñ”‘QTVN‚ˆYˆ
+ˆ	‰ˆZKœ\OHT•ÌÌÐH
+È‹˜JBˆ˜\Ü×ÜÝ\ØØ[˜Ù[
+
+NÈÊˆH[Ý\]\Ý›Ý™XÛÛYHH[Ù^X›Ø\™›ÝH
+‹ÂˆZK™œ™Y\^VÜ‹˜WHH
+Z[Ý
+]ŽÂˆYˆ
+]ˆ	‰ˆ
+Ø™Ú[Û›ÝVÜ‹˜WHØ™Ø\œÛ–Ü‹˜WJJHÈÊˆHÙ^HÝ[ÝÛŽˆ]]ÛÈ
+‹Âˆ[™Ú[™WØ˜\Ü×ÛÙ™Š‹˜JNÂˆØ™Ú[Û›ÝVÜ‹˜WHHÂˆØ™Ú[ÚÙ^VÜ‹˜WHHÂˆØ™Ø\œÛ–Ü‹˜WHHÂˆBˆœ™XZÎÂˆØ\ÙH—ÔÔ‘TˆÂˆ[œÚYÛ™Y˜\ˆH‹˜ˆÈ‹˜ˆH]HˆZKœÛÛ™×ÜÙ[ÂˆYˆ
+˜\ˆ”ÓÓ‘È	‰ˆ
+\‹˜ˆ˜\ˆÛÛ™Ê
+KO›[ŠJHÂˆÛÛ™×Ùš[
+
+[
+X˜\ŠNÂˆÛÛ™×Ø˜\—Ý
+˜ˆH	œÛÛ™Ê
+KO˜˜\–Ø˜\—NÂˆ‹O›]]HH
+Z[Ý
+J
+‹O›]]H	ˆQJHˆJNÂˆBˆœ™XZÎÂˆBˆØ\ÙH—ÕTNˆÈÊˆ‹ŒMHHÛX[ˆYÚ][[^NÈX›Ý™K\KÙX\š[™È
+‹ÂˆZ[ÝHH
+Z[Ý
+JˆHMŠKÙHH
+Z[Ý
+JHÈ
+ˆHMŠH
+ˆLÈÈLLHˆ›Ú‹œÛÝ[™–ÕÑ–VÌVÑ–ÑÕÑPT—JNÂˆ›Ú‹œÛÝ[™–ÕÑ–VÌWVÌHH
+Z[Ý
+]ŽÂˆ›Ú‹œÛÝ[™–ÕÑ–VÌVÑ–ÑÕTWHHNÂˆ›Ú‹œÛÝ[™–ÕÑ–VÌVÑ–ÑÕÑPT—HHÙNÂˆ[™Ú[™WÜÙ]
+Ñ––ÑÕTKJNÂˆ[™Ú[™WÜÙ]
+Ñ––ÑÕÑPT‹ÙJNÂˆœ™XZÎÂˆBˆØ\ÙH—ÔÕSÎ‚ˆ\™‹œÝ[×ÛÛˆH
+Z[Ý
+]ŽÂˆ]ÜÝ[×Ù[˜X›JŠNÂˆ\™‹š]™HHÈÊˆH™^Ú[™ÝÈÝ\ÈHÛÝ[ÈYØZ[ˆ
+‹Âˆœ™XZÎÂˆØ\ÙH—ÔÓSŽ‚ˆYˆ
+ˆOHÛÛ™Ê
+KO›[ŠHÛÛ™×ÜÝXÝ\™WÜ™]š\Ú[ÛŠÊÎÂˆYˆ
+ˆˆÛÛ™Ê
+KO›[ŠBˆÛÛ™×Ùš[
+ˆHJNÂˆ[ÙBˆÛÛ™Ê
+KO›[ˆH
+Z[M—Ý
+]ŽÂˆYˆ
+ZKœÛÛ™×ÜÙ[ˆÛÛ™Ê
+KO›[ŠBˆZKœÛÛ™×ÜÙ[H
+Z[Ý
+JÛÛ™Ê
+KO›[ˆ”ÓÓ‘ÈÈÛÛ™Ê
+KO›[ˆˆ”ÓÓ‘ÈHJNÂˆœ™XZÎÂˆY˜][ˆœ™XZÎÂˆBˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYˆ
+˜\Ü×ÙY]
+H[™Ú[™WØ˜\Ü×ÙY]ÚÛ
+
+NÂˆÙ[™Y‚ŸBœÝ]XÈ›ÚY™Y—ÜÙ]
+™Y—Ý‹[ŠHÈ™Y—ÜÙ]Ú[\
+‹‹JNÈB‚‹Êˆœ›ÝÜÚ[™È™]™\ˆÚ[™Ù\ÈH]\›‹ˆH^\Ý[™È”‘PRÈ›ÚXÙH]Y][ÛœÈBˆ
+ˆØ[™Y]NÈÑSÛÛ[Z]È[™[žH^]™\ÝÜ™\ÈHÙ[XÝYÛÜËˆ
+‹ÂœÝ]XÈ›ÚYœš×ØÚÚXÙWØØ[˜Ù[
+›ÚY
+BžÂˆYˆ
+]ZK˜œš×ØÚÚXÙWÛÛŠH™]\›ŽÂˆZK˜œš×ØÚÚXÙWÛÛˆHÂˆ[™Ú[™WØœš×Ü™]šY]×Ù[™
+
+NÂˆZK›Ý][™WÛÚÈHÂŸBœÝ]XÈ[œš×ØÚÚXÙWÝ\›Š™Y—Ý‹[JBžÂˆ[ˆH[™Ú[™WØœš×ÛœÛÝÊ
+K˜[YNÂˆYˆ
+[ˆYJH™]\›ˆÂˆYˆ
+ZK˜œš×ØÚÚXÙWÛÛˆ	‰ˆ
+ZK˜œš×ØÚÚXÙWØ˜[šÈOH‹˜HˆZK˜œš×ØÚÚXÙWÜ]OHÙ\Kœ]ÔT•Ð”’×JJHœš×ØÚÚXÙWØØ[˜Ù[
+
+NÂˆ˜[YHHZK˜œš×ØÚÚXÙWÛÛˆÈZK˜œš×ØÚÚXÙWÜÛÝˆ™Y—ÙÙ]
+ŠNÂˆ˜[YH
+ÏHHˆÈHˆLNÂˆ˜[YHH˜[YHÈˆ˜[YHHˆÈˆHHˆ˜[YNÂˆYˆ
+Y[™Ú[™WØœš×Ü™]šY]Ê˜[YJJH™]\›ˆÂˆZK˜œš×ØÚÚXÙWÛÛˆHNÂˆZK˜œš×ØÚÚXÙWØ˜[šÈH
+Z[Ý
+\‹˜NÂˆZK˜œš×ØÚÚXÙWÜÛÝH
+Z[Ý
+]˜[YNÂˆZK˜œš×ØÚÚXÙWÜ]HÙ\Kœ]ÔT•Ð”’×NÂˆZK›Ý][™WÛÚÈHÂˆØ^J”‘U’QUÈ‹
+NÂˆ™]\›ˆNÂŸBœÝ]XÈ[œš×ØÚÚXÙWØÛÛ™š\›J›ÚY
+BžÂˆYˆ
+]ZK˜œš×ØÚÚXÙWÛÛŠH™]\›ˆÂˆYˆ
+Y[™Ú[™WØœš×Ü™]šY]×ØXÝ]™J
+HZK˜œš×ØÚÚXÙWÜ]OHÙ\Kœ]ÔT•Ð”’×JHÈœš×ØÚÚXÙWØØ[˜Ù[
+
+NÈ™]\›ˆÈBˆ[˜[šÈHZK˜œš×ØÚÚXÙWØ˜[šËÛÝHZK˜œš×ØÚÚXÙWÜÛÝÂˆœš×ØÚÚXÙWØØ[˜Ù[
+
+NÂˆ™Y—ÜÙ]Ú[\
+Š—Ð”’ÔÓÕ˜[šË
+KÛÝJNÂˆX\š×Ù\J
+NÂˆØ^JÒÔÑSˆ‹
+NÂˆ™]\›ˆNÂŸB‚‚‚‹ÊˆH˜[YH[ˆØ\][È
+H[™Ú[™\ÉÈÝÛˆ\™HZ^YØ\ÙJNˆÛÈ]H[YH
+‹ÂœÝ]XÈÛÛœÝÚ\ˆ
+˜Ø\×ÛÙŠÛÛœÝÚ\ˆ
+›ŠBžÂˆÝ]XÈÚ\ˆÌ—VÌNÂˆÝ]XÈ[ÎÂˆÚ\ˆ
+œHHÝÈHWNÂˆ[NÂˆ›Üˆ
+HHÈ–ÚWH	‰ˆHŒÎÈJÊÊHÂˆ[œ˜[™ÛˆHHˆ	‰ˆ–ÚKLWOOIÑ	È	‰ˆ–ÚWOOIÛ‰È	‰ˆ–ÚJÌWOOIÐ‰È	‰ˆ–ÚJÌ—OOIÓÉÈ	‰ˆ–ÚJÌ×OOIÖ	ÎÂˆVÚWHHXœ˜[™Ûˆ	‰ˆ–ÚWHH	ØIÈ	‰ˆ–ÚWHH	Þ‰ÈÈ
+Ú\ŠJ–ÚWHHÌŠHˆ–ÚWNÂˆBˆVÚWHHÂˆ™]\›ˆNÂŸB‚‹ÊˆH˜[YH™[Û™ÜÈÈH]\›ˆ
+]Ú[™Ù\ÈÚ[ˆH]\›ˆÙ\ÊK›ÝÈHÛÝ[™
+‹ÂœÝ]XÈ[[—Ü]\›Š™Y—ÝŠBžÂˆÝÚ]Ú
+‹šÚ[™
+HÂˆØ\ÙH—ÔÕÒS‘ÎˆØ\ÙH—ÑSŽˆØ\ÙH—ÑUNˆØ\ÙH—Ð“SŽˆØ\ÙH—Ð”UNˆØ\ÙH—Ð‘TŽˆØ\ÙH—Ð•S”ÎˆØ\ÙH—ÑÑSŽ‚ˆØ\ÙH—Ð”’ÔÑUˆØ\ÙH—Ð”’ÔÓÕˆØ\ÙH—Ð”’ÔÓPÑNˆØ\ÙH—Ð”’ÔUNˆØ\ÙH—Ð”UÓ‘‚ˆ™]\›ˆNÂˆY˜][‚ˆ™]\›ˆÂˆBŸB‚‹ÊˆHÛ›Ø‰ÜÈX™[ˆZ^\ˆ™YœÈ˜[YHZ\ˆ\
+‹ÂœÝ]XÈ[˜[YWÚ\ÊÛÛœÝÜ\˜[WÝ
+™ÛÛœÝÚ\ˆ
+›ŠNÂœÝ]XÈÛÛœÝÚ\ˆ
+œ™Y—Û˜[YJ™Y—ÝŠBžÂˆYŠ‹šÚ[™OT—ÔÑPÕSÓŠ\™]\›ˆÓÐSÔÑPÕSÓ”ÖÜ‹˜OÜ‹˜NŒNÂˆYˆ
+
+‹šÚ[™OH—ÔT•Óˆ‹šÚ[™OH—ÔÔU
+H	‰ˆ\Ú\×ÌÌÊ‹˜H	H”T•ÊJBˆ™]\›ˆ\Û˜[YJ‹˜H	H”T•ÊNÈÊˆH[™Ú[™K™]™\ˆŒÌÈˆ›ÜˆZX[ZH
+‹ÂˆYˆ
+‹šÚ[™OH—ÓRQPÒ	‰ˆ\Ú\×ÌÌÊ‹˜H	H”T•ÊJHÂˆÝ]XÈÚ\ˆÌNÂˆ]ÜÊ]ÜÊ\Û˜[YJ‹˜H	H”T•ÊJKˆRQHÒŠNÂˆ™]\›ˆÂˆBˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝRV–Ó”T•×VÓVÓ”TST×HHÞÈŽLH‹ŽLH•ˆ‹ŽLH‹ŽLHSˆ‹ŽLHÕUŸKˆÈŽ‹Ž•ˆ‹Ž‹ŽSˆ‹ŽÕUŸKˆÈTÔÈH‹H‘Uˆ‹HH‹HSˆ‹HÕUŸKˆÈTÔÈˆ‹ˆ‘Uˆ‹ˆH‹ˆSˆ‹ˆÕUŸKˆÈ”‘PRÈ‹”’È•ˆ‹”’È‹”’ÈSˆ‹”’ÈÕUŸ_NÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝU–Í—VÌ—HHÞÈŽLHSˆ‹ŽSˆŸKÈŽLHUH‹ŽUHŸKÈHSˆ‹ˆSˆŸKˆÈHUH‹ˆUHŸKÈHTˆ‹ˆTˆŸKÈHS”Ô‹ˆS”ÔŸ_NÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÒ–ÓVÓ”TST×HHÈ“U‘S‹”‘Uˆ‹‘H‹”Sˆ‹ÕUŸNÂˆÛÛœÝÜ\˜[WÝ
+™H™Y—Ù\ØÊŠNÂˆÊˆ™\Ù[][ÛˆÛ›Nˆ™]Z[ˆH˜]]™H‘Y[]H[™]Ú\ÝÙY\Û\ˆ
+‹ÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÎLH	‰ˆ˜[YWÚ\Ê”‘ŠJ\™]\›ˆ‘\ŽÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÑTS–Í—HHÈ“S‘Õ‹”UH‹“S‘Õ‹”UH‹‘T‘PÕSÓˆ‹•S”ÔŸNÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÊBˆ™]\›ˆZWÛÜšYÚ[˜[Û˜[YJ
+[œÚYÛ™Y
+Y[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠK‹˜ÊNÂˆYˆ
+‹šÚ[™H—ÑSˆ	‰ˆ‹šÚ[™H—Ð•S”ÊHÊˆÑTNˆH\	ÜÈÝÛŽÈH\Ý[Ù]Ú\™NˆÚÜÙH
+‹Âˆ™]\›ˆZKšY]ÈOH—ÔÑTHÈÑTS–Ü‹šÚ[™H—ÑS—HˆU–Ü‹šÚ[™H—ÑS—VÜ‹˜H	ˆWNÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÓRV	‰ˆZKšY]ÈOH—ÓRV	‰ˆ‹˜ÈVÓ”TSTÊBˆ™]\›ˆÒ–Ü‹˜×NÈÊˆRV	ÜÈT•ÎˆHXÚÙY\	ÜÈ
+‹ÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ
+‹˜HOHÎLH‹˜HOHÎ
+H	‰ˆ‹˜ˆOH‘•SH	‰ˆ‹˜ÈOHJBˆ™]\›ˆPÐÑS•ŽÈÊˆHÚ]ÉÈ\ÙˆXØÙ[È
+‹ÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÓRV	‰ˆ‹˜ˆ”T•È	‰ˆ‹˜ÈOH	‰ˆ\Ú\×ÌÌÊ‹˜ŠJBˆ™]\›ˆ\Û˜[YJ‹˜ŠNÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÓRV	‰ˆ‹˜ˆ”T•È	‰ˆ‹˜ÈVÓ”TSTÊBˆ™]\›ˆRV–Ü‹˜—VÜ‹˜×NÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÑ–
+HÈÊˆHYÙHØ^\ÈÚXÚY™™XÝˆHÛ›Ø‹Ú]
+‹ÂˆÝÚ]Ú
+‹˜ÊHÂˆØ\ÙH–Ô•—ÑPÐVNˆ™]\›ˆ‘PÐVHŽÂˆØ\ÙH–Ô•—ÕÓ‘NˆØ\ÙH–ÑÕÓ‘Nˆ™]\›ˆ•Ó‘HŽÂˆØ\ÙH–ÑÕSQNˆ™]\›ˆ•SQHŽÂˆØ\ÙH–ÑÑ‘’Îˆ™]\›ˆ‘‘QQPÒÈŽÂˆØ\ÙH–Ô•—ÒŽˆ™]\›ˆ”‘UˆÕÈÕUŽÂˆØ\ÙH–ÑÒŽˆ™]\›ˆ‘HÕÈÕUŽÂˆØ\ÙH–Ô•—ÓU‘Sˆ™]\›ˆ”‘Uˆ‘UT“ˆŽÂˆØ\ÙH–ÑÓU‘Sˆ™]\›ˆ‘H‘UT“ˆŽÂˆØ\ÙH–ÑÔS‘Îˆ™]\›ˆ”S‘ËTÓ‘ÈŽÂˆØ\ÙH–ÐÓÓTˆ™]\›ˆ‘ÓQHŽÂˆY˜][ˆœ™XZÎÂˆBˆBˆYˆ
+‹šÚ[™OH—Ð”’ÔÑU	‰ˆ‹˜ÈOH”’×ÐÒSÑJBˆ™]\›ˆˆÒSÑHŽÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ
+‹˜HOHÎLH‹˜HOHÎ
+H	‰ˆ‹˜ˆ‘•SH	‰ˆZKšY]ÈOH—ÓRV	‰ˆZK›Ý™\›^HOH×ÓTÕ
+HÂˆÝ]XÈÚ\ˆÌNÈÊˆRV	ÜÈ\ÝˆÚÜÙH˜XÚÈ
+ŽLH‘U‘SŠH
+‹Âˆ]ÜÊ]ÜÊ]ÜÊ]ÜÊ‹˜HOHÎLHÈŽLHˆˆŽŠK[™Ú[™WÝ›ÚXÙWÛ˜[YJ‹˜K‹˜ŠJKˆŠKÈO›˜[YHˆˆŠNÂˆ™]\›ˆÂˆBˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÊHÂˆÂˆÝÚ]Ú
+‹˜ÊHÂˆØ\ÙHTÔÌÌ×ÐPUPÒÎˆ™]\›ˆUPÒÈŽÂˆØ\ÙHTÔÌÌ×ÐQPÐVNˆ™]\›ˆ‘PÐVHŽÂˆØ\ÙHTÔÌÌ×ÐTÕTÕRSŽˆ™]\›ˆ”ÕTÕRSˆŽÂˆØ\ÙHTÔÌÌ×ÐT‘SPTÑNˆ™]\›ˆ”‘SPTÑHŽÂˆØ\ÙHTÔÌÌ×ÑUPÒÎˆ™]\›ˆ‘ˆUPÒÈŽÂˆØ\ÙHTÔÌÌ×Ñ”ÕTÕRSŽˆ™]\›ˆ‘ˆÕTÕRSˆŽÂˆØ\ÙHTÔÌÌ×Ñ”‘SPTÑNˆ™]\›ˆ‘ˆ‘SPTÑHŽÂˆY˜][ˆœ™XZÎÂˆBˆBˆBˆYˆ
+‹šÚ[™OH—Ð”’ÔÓÕ
+Bˆ™]\›ˆ‹˜HÈ“ÓÔˆˆˆ“ÓÔHŽÂˆ™]\›ˆÈO›˜[YHˆˆŽÂŸB‚‹ÊˆH[ŽˆH\	ÜÈ
+RV
+HÜˆH[H›ÚXÙIÜÈ
+”[ˆ‹]È\ÝÝ
+Nˆ˜]ÛˆÈÈÈ‹]È\˜Èœ›ÛHHZYH
+‹ÂœÝ]XÈ[\×Ü[Š™Y—ÝŠBžÂˆÛÛœÝÜ\˜[WÝ
+™ÂˆYˆ
+‹šÚ[™OH—ÑS‘ÊBˆ™]\›ˆÂˆYˆ
+‹˜HOHÓRV
+Bˆ™]\›ˆ‹˜ÈOHVÔSŽÂˆH™Y—Ù\ØÊŠNÂˆ™]\›ˆ
+‹˜HOHÎLH‹˜HOHÎ
+H	‰ˆ	‰ˆO›˜[YVÌHOH	Ô	È	‰ˆO›˜[YVÌWHOH	ØIÈ	‰ˆO›˜[YVÌ—HOH	Û‰È	‰‚ˆYO›˜[YVÌ×NÂŸB‚œÝ]XÈ[X]š^Ý˜[YJ™Y—ÝŠNÂ‚‹ÊˆÚXØYÛÈØ]H›Ý]\È[\QÔˆÈHš[\ˆ[™\™Y›Ü™H\Ù\Èš[\ˆ[YH]ÜËˆ
+‹ÂœÝ]XÈ›ÚY\Ü^WÛ\Ê›Ø]\ËÚ\ˆ
+›[KÚ\ˆ
+[š]
+BžÂˆYŠ\ÏŒŒˆ	‰ˆ\ÏLŒŠHÂˆ[J[
+J\ÊŒLŒŠÌYŠNÂˆ]ÚJ]ÜÊ]ÚJ[KÌL
+K‹ˆŠK	LL
+NÂˆH[ÙH]ÚJ[K
+[
+J\ÊÌYŠJNÂˆ]ÜÊ[š]›\ÈŠNÂŸBœÝ]XÈÛÛœÝÚ\ˆ
+›ÜšYÚ[˜[ÜÝ]\×Û˜[YJ[›ÚXÙJBžÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ[™[™Ö×HHÈ”‘PQH‹•ÐRU‹’S‹•ÒQS‹“ÐÒÔÈ‹’S”U‹•ÐRUŸNÂˆ[Ý]\ÈH[™Ú[™WØ˜\Ü×ÜÝ]\Ê›ÚXÙJKØZ]H[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™Ê›ÚXÙJNÂˆYˆ
+Ý]\ÈOHJH™]\›ˆÝ]\ÈOHLHÈ‘–ÐRUˆˆ‘ÔT”ˆŽÂˆ™]\›ˆØZ]ˆ	‰ˆØZ]ÈÈ[™[™ÖÝØZ]Hˆ”‘PQHŽÂŸBœÝ]XÈRWÑUÈ[ÜšYÚ[˜[Ý˜[YWÝ^
+™Y—Ý‹[˜[YKÚ\ˆ
+›[KÚ\ˆ
+[š]
+BžÂˆYˆ
+‹šÚ[™OH—Ð‘S‘ÒS‘JHÂˆ]ÜÊ[K˜[YHH	‰ˆ˜[YHHÔ’QÒSSÔÓÕS‘Ò•S“ÈÈ‘S‘ÒS‘WÓ–Ý˜[YWHˆ’S•SQŠNÂˆ™]\›ˆNÂˆBˆYˆ
+‹šÚ[™OH—Ð”‘TÑU
+HÂˆYˆ
+˜[YH
+H]ÜÊ[K•TÑTˆŠNÂˆ[ÙHÂˆÚ\ˆ
+™[™H]ÚJ[K˜[YJÌJNÂˆYˆ
+Y[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™Ê‹˜ŠH	‰ˆ[™Ú[™WØ˜\Ü×Ü™\Ù]ÙY]Y
+‹˜ŠJH]ÜÊ[™ŠˆŠNÂˆBˆ™]\›ˆNÂˆBˆYˆ
+‹šÚ[™OH—Ð”ÕUTÊHÈ]ÜÊ[KÜšYÚ[˜[ÜÝ]\×Û˜[YJ‹˜ŠJNÈ™]\›ˆNÈBˆYˆ
+‹šÚ[™OH—ÑS‘È‹˜HOHÌÌÊH™]\›ˆÂˆ[˜[šÈH[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠNÂˆ[œÚYÛ™YÚ[™H
+[œÚYÛ™Y
+X˜[šËYH‹˜ÎÂˆÛÛœÝZWÛÜšYÚ[˜[ØÛÛ›ÛÝšY]È
+ˆHÂˆÊˆHÛÜœ\]Ú\È›È˜[šÎˆ™]™\ˆ[™^H˜[YHX›H›ÝYÚH[šY]È
+‹ÂˆYˆ
+˜[šÈOHÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÈ	‰ˆ˜[šÈOHÔ’QÒSSÔÓÕS‘ÓRPSRH	‰ˆ˜[šÈOHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘H	‰ˆ˜[šÈOHÔ’QÒSSÔÓÕS‘Ò•S“ÊHÈ]ÜÊ[K’S•SQŠNÈ™]\›ˆNÈBˆYˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘H	‰ˆYOHÔ’QÒSSÔÖS•Ó‘WÔSŠHÂˆYˆ
+]˜[YJH]ÜÊ[K“Ñ‘ˆŠNÂˆ[ÙHÈ]ÚJ[K
+
+˜[YKLJJŒL
+ÍŒÊKÌLŠNÈ]ÜÊ[š]‰HŠNÈBˆ™]\›ˆNÂˆBˆYˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘H	‰ˆYOHÔ’QÒSSÔÖS•Ó‘WÔS—ÔUJHÂˆ›Ø]ŽÂˆYˆ
+[™Ú[™WÜ\˜[WÜÚJÌÌË‹˜‹
+[
+ZY˜[YK	šŠHOHÕWÒŠHÂˆ]ÚJ[K
+[
+Jˆ
+ˆL™ˆ
+ÈYŠJNÂˆ]ÜÊ[š]›RˆŠNÂˆ™]\›ˆNÂˆBˆBˆYˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘H	‰ˆYOHÔ’QÒSSÔÖS•Ó‘WÐÔ•TÒ
+HÂˆ›Ø]ŽÂˆYˆ
+[™Ú[™WÜ\˜[WÜÚJÌÌË‹˜‹
+[
+ZY˜[YK	šŠHOHÕWÒŠHÂˆ]ÚJ[K
+[
+Jˆ
+ÈYŠJNÂˆ]ÜÊ[š]’ˆŠNÂˆ™]\›ˆNÂˆBˆBˆYˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘Ò•S“ÈÚ[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘JHÈ]ÚJ[K
+˜[YJŒL
+ÍŒÊKÌLÊNÈ]ÜÊ[š]‰HŠNÈ™]\›ˆNÈBˆYˆ
+ZWÛÜšYÚ[˜[ÜÝ]\ÊÚ[™Y
+H
+Ú[™OHÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÈ	‰ˆ
+YOHYOH
+JHˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘ÓRPSRH	‰ˆYOHÊJHÂˆˆHÜšYÚ[˜[Ý^ÝšY]Ê‹˜[YJNÂˆYˆ
+]ŠHÈ]ÜÊ[K’S•SQŠNÈ™]\›ˆNÈBˆBˆYˆ
+Ú[™OHÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÊHÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÜYY×HHÈŒKÌˆ‹ŒKÍ‹ŒKÌ•‹ŒKÍ‹ŒKÎ‹ŒKÍ‹ŒKÎ‹ŒKÎ‹ŒKÌMˆ‹ŒKÌÌˆŸNÂˆYˆ
+YOH
+HÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝØ]™V×O^È•’H‹”ÐUÈ‹”ÔTˆ‹”SŸNÂˆYŠ]‹OØ]™WÛÛŠ\]ÜÊ[K“Ñ‘ˆŠNÂˆ[ÙHYŠ‹OØ]™WÛÛOLH‹OœÚ\VÌOO]‹OœÚ\VÌWJ\]ÜÊ[KØ]™VÝ‹OœÚ\VÌWJNÂˆ[ÙHYŠ‹OØ]™WÛÛOLŠ\]ÜÊ[KØ]™VÝ‹OœÚ\VÌWWJNÂˆ[ÙH]ÜÊ]ÜÊ]ÜÊ[KØ]™VÝ‹OœÚ\VÌWJK‹ÈŠKØ]™VÝ‹OœÚ\VÌWWJNÂˆ™]\›ˆNÂˆBˆYˆ
+YOH
+HÈ]ÚJ‹O™[—Ü\˜Ù[ŒÜ]ÜÊ[KŠÈŠN›[K‹O™[—Ü\˜Ù[
+NÈ]ÜÊ[š]‰HŠNÈ™]\›ˆNÈBˆYˆ
+YOHLJHÈ]ÜÊ[K‹O˜[\ÙØ]HÈ‘ÐUHˆˆ‘S•ˆŠNÈ™]\›ˆNÈBˆYˆ
+YOHLÊHÈ]ÜÊ[K‹O˜\œÛÛˆÈ“Óˆˆˆ“Ñ‘ˆŠNÈ™]\›ˆNÈBˆYˆ
+YOHM
+HÈ]ÜÊ[K‹O˜\œÛ[ÙHOHHÈ‘ÕÓˆˆˆ‹O˜\œÛ[ÙHOHˆÈ•Tˆˆ•TÑˆŠNÈ™]\›ˆNÈBˆYˆ
+YOHMJHÈ]ÜÊ[K‹O˜\œÜ˜[™ÙHOHHÈŒHÐÕˆˆ‹O˜\œÜ˜[™ÙHOHˆÈŒˆÐÕˆˆ‘•SŠNÈ™]\›ˆNÈBˆYˆ
+YOHMŠHÈ]ÜÊ[KÜYYÝ‹O˜\œÜÜYYJNÈ™]\›ˆNÈBˆYˆ
+YOHMÊHÂˆÛÛœÝÚ\ˆ
+›˜[YHHÜšYÚ[˜[ÜÛÝ[™ÙžÛ˜[YJ
+[œÚYÛ™Y
+]˜[YJNÂˆ]ÜÊ[K˜[YHÈ˜[YHˆ’S•SQŠNÈ™]\›ˆNÂˆBˆH[ÙHÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÚ\V×HHÈ•’H‹”ÐUÈ‹”ÔTˆ‹”SŸNÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÛØ˜›V×HHÈ•’H‹‘ÕÓˆ‹•T‹”ÔTˆŸNÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ˜]V×HHÈŒKÌˆ‹ŒKÍ‹ŒKÎ‹ŒKÌMˆ‹ŒKÌÈ‹ŒKÍˆ‹ŒKÌLˆ‹ŒKÌŸNÂˆYˆ
+YOHYOHŠHÈ]ÜÊ[KÚ\VÝ‹OœÚ\VÚYOHÈˆWWJNÈ™]\›ˆNÈBˆYˆ
+YOHLJHÈ]ÜÊ[KÛØ˜›VÝ‹OœÚ\VÌ—WJNÈ™]\›ˆNÈBˆYˆ
+YOHLÊHÈ]ÜÊ[K˜]VÝ‹OÛØ˜›WÜ˜]WJNÈ™]\›ˆNÈBˆYˆ
+YOHÊHÈ]ÚJ‹O˜Ø\œšY\—Ü]ÚˆÈ]ÜÊ[KŠÈŠHˆ[K‹O˜Ø\œšY\—Ü]Ú
+NÈ]ÜÊ[š]œÝŠNÈ™]\›ˆNÈBˆYˆ
+YOHÊHÂˆ[[[Ý[H‹Ož[ÙÝ[™NÈÚ\ˆ
+œHH[NÂˆYˆ
+[[Ý[
+HÈHH]ÜÊK‹HŠNÈ[[Ý[HX[[Ý[ÈBˆ[ÙHYˆ
+[[Ý[ˆ
+HHH]ÜÊKŠÈŠNÂˆÊˆ˜]]™N\Èš\Û\ˆÐK]Ë\Û]™H]Ú[[Ý[›Ýš^Y[š[™Ë‚ˆ
+ˆ[ÙÝ[™HÝÜ™\ÈÝ\Ø[™ÎÈÚÝÈ][[Ý[\È\˜Ù[ˆ
+‹ÂˆHH]ÚJK[[Ý[ÌL
+NÈ
+œJÊÈH	Ë‰ÎÈ
+œJÊÈH
+Ú\ŠJ	Ì	ÊØ[[Ý[	LL
+NÈ
+œHHÂˆ]ÜÊ[š]‰HŠNÂˆ™]\›ˆNÂˆBˆBˆ]ÚJ[K
+˜[YJŒL
+ÍŒÊKÌLÊNÈ]ÜÊ[š]‰HŠNÈ™]\›ˆNÂŸB‚‹ÊˆÚYÛ™Y[X™\ˆÚ]Û™HXÚ[X[™[ÝÈL
+
+K[ÙHÚÛH
+‹ÂœÝ]XÈÚ\ˆ
+œ]ÙJÚ\ˆ
+œK›Ø][ÚYÛŠBžÂˆ[H
+[
+J
+ˆLŒˆ
+È
+ÈLYˆˆYŠJNÂˆYˆ
+
+HÈ
+œJÊÈH	ËIÎÈH]ÈH[ÙHYˆ
+ÚYÛˆ	‰ˆˆ
+H
+œJÊÈH	ÊÉÎÂˆYˆ
+L
+HÈHH]ÚJKÈL
+NÈ
+œJÊÈH	Ë‰ÎÈ
+œJÊÈH
+Ú\ŠJ	Ì	È
+È	HL
+NÈ
+œHHÈ™]\›ˆNÈBˆ™]\›ˆ]ÚJK
+
+ÈJHÈL
+NÂŸB‹Êˆ[ˆ[™Ú[™H˜[YH[ˆ]È[š]
+ÕWÊŠKÚÜ[›ÝYÚ›ÜˆHŒÙ[
+‹ÂœÝ]XÈ›ÚY[š]Ý˜[YJ[K›Ø]Ú\ˆ
+›[KÚ\ˆ
+[š]
+BžÂˆÝÚ]Ú
+JHÂˆØ\ÙHÕWÔÕˆ]ÚJ[K
+[
+J
+ÈYŠJNÈ]ÜÊ[š]‰HŠNÈ™]\›ŽÂˆØ\ÙHÕWÑÐRSŽ‚ˆYˆ
+HŒŠHÈ]ÜÊ[K“Ñ‘ˆŠNÈ™]\›ŽÈBˆ]ÙJ[K‹ŒŒ™ˆ
+ˆ›WÛÙÌ™Š
+KJNÈ]ÜÊ[š]™ˆŠNÈ™]\›ŽÂˆØ\ÙHÕWÒŽ‚ˆYˆ
+NNKYŠHÈ]ÚJ[K
+[
+J
+ÈYŠJNÈ]ÜÊ[š]’ˆŠNÈBˆ[ÙHÈ]ÙJ[KÈLŒ‹
+NÈ]ÜÊ[š]šÒˆŠNÈBˆ™]\›ŽÂˆØ\ÙHÕWÓTÎ‚ˆYˆ
+NNKYŠHÈ]ÚJ[K
+[
+J
+ÈYŠJNÈ]ÜÊ[š]›\ÈŠNÈBˆ[ÙHÈ]ÙJ[KÈLŒ‹
+NÈ]ÜÊ[š]œÈŠNÈBˆ™]\›ŽÂˆØ\ÙHÕWÔÎ‚ˆYˆ
+ŽNNMYŠHÈ]ÚJ[K
+[
+J
+ˆLŒˆ
+ÈYŠJNÈ]ÜÊ[š]›\ÈŠNÈBˆ[ÙHÈ]ÙJ[K
+NÈ]ÜÊ[š]œÈŠNÈBˆ™]\›ŽÂˆØ\ÙHÕWÔUSÎˆHL‹Œˆ
+ˆ›WÛÙÌ™Š
+NÈÊˆ˜[›ÝYÚˆÙ[Z]Û™\È
+‹ÂˆØ\ÙHÕWÔÕˆ]ÙJ[KJNÈ]ÜÊ[š]œÝŠNÈ™]\›ŽÂˆY˜][ˆ™]\›ŽÂˆBŸB‚‹ÊˆH˜[YK\ÈH[X™\ˆ[™H[š]
+‹Mˆˆ™ˆŠNÈHÝÚ]ÚÚ]™\È]È˜[YH[™›È[š]
+‹Â–ÐÓÓÝ]XÈ›ÚY™Y—Ý˜[YWÛÙŠ™Y—Ý‹[‹Ú\ˆ
+›[KÚ\ˆ
+[š]
+BžÂˆÛÛœÝÜ\˜[WÝ
+™H™Y—Ù\ØÊŠNÂˆ
+›[HH
+[š]HÂˆYˆ
+Y‹šÚ[™OH—ÐPÕ
+Bˆ™]\›ŽÂˆYˆ
+
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÊH‹šÚ[™OH—Ð‘S‘ÒS‘H‹šÚ[™OH—Ð”‘TÑU‹šÚ[™OH—Ð”ÕUTÊHÂˆ[™Ú[™WØ˜\Ü×ÙY]ÚÛ
+JNÂˆ
+›ÚY
+[ÜšYÚ[˜[Ý˜[YWÝ^
+‹‹[K[š]
+NÂˆ[™Ú[™WØ˜\Ü×ÙY]ÚÛ
+
+NÂˆ™]\›ŽÂˆBˆYˆ
+O›˜[Y\ÊHÂˆÊˆ™]Z[™YÜˆ[˜ÛÛ\]X›HÛÝ[™]H]\Ý›Ý™XÛÛYHHÚ[\ˆÛÚÝ\ˆ
+‹Âˆ]ÜÊ[KˆH	‰ˆˆHO›X^ÈO›˜[Y\ÖÝ—Hˆ’S•SQŠNÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÐ”’È	‰ˆ‹˜ÈOHH	‰ˆˆH	‰ˆˆHO›X^
+Bˆ]ÜÊ[š]œÝŠNÈÊˆœ™XZÜË˜ÎˆÙ[ZHH]ÚHLˆ
+‹Âˆ™]\›ŽÂˆBˆYˆ
+‹šÚ[™OH—ÕTJHÂˆYˆ
+ˆMŠBˆ]ÜÊ[K‘QÒHŠNÂˆ[ÙHÂˆ]ÚJ[K
+ˆHMŠH
+ˆLÈLLJNÂˆ]ÜÊ[š]‰HŠNÂˆBˆ™]\›ŽÂˆBˆYˆ
+\×Ü[ŠŠJHÈÊˆL‹ˆÈ‹ˆLÈ[™Ú[™HÝ^\È‹ŒLÈ
+‹ÂˆYˆ
+ˆOH
+Bˆ]ÜÊ[KÈŠNÂˆ[ÙBˆ]ÚJ]ÜÊ[KˆÈ“ˆˆ”ˆŠKˆˆÈ
+
+HŠH
+ˆL
+ÈÌŠHÈˆ
+
+ˆH
+H
+ˆL
+ÈÌJHÈŒÊNÂˆ™]\›ŽÂˆBˆÝÚ]Ú
+‹šÚ[™
+HÂˆØ\ÙH—ÑS‘Î‚ˆYˆ
+‹˜HOHÓTÕ
+HÈÊˆHX\Ý\ˆ›Ü›X]È]Ù[Žˆ‹LL™ˆˆ
+‹ÂˆÚ\ˆÌM—K
+œHHÂˆ[™Ú[™WÛX\Ý\—Ù›Ü›X]
+‹˜Ë
+NÂˆÚ[H
+
+œH	‰ˆ
+
+œHOH	ËIÈ
+œHOH	Ë‰È
+
+œHH	Ì	È	‰ˆ
+œHH	ÎIÊJJBˆJÊÎÂˆ]ÜÊ[š]JNÂˆ
+œHHÂˆ]ÜÊ[K
+NÂˆ™]\›ŽÂˆBˆYˆ
+‹˜HOHÓRV
+HÂˆYˆ
+‹˜ÈOH
+HÈÊˆ]™[ˆLH‹Ü]X\™H]È
+‹ÂˆYˆ
+]ŠBˆ]ÜÊ[K“Ñ‘ˆŠNÂˆ[ÙHÂˆ›Ø]ˆHL‹ŒL™ˆ
+ˆ›WÛÙÌ™Š
+›Ø]
+]ˆÈLŒŠNÂˆ[LH
+[
+Jˆ
+ˆLŒˆ
+È
+ˆÈLYˆˆYŠJNÂˆÚ\ˆ
+œHH[NÂˆYˆ
+Lˆ
+Bˆ
+œJÊÈH	ÊÉÎÂˆ[ÙHYˆ
+L
+Bˆ
+œJÊÈH	ËIÎÂˆLHLÈ]LˆLÂˆHH]ÚJKLÈL
+NÂˆYˆ
+LL	‰ˆL	HL
+HÂˆ
+œJÊÈH	Ë‰ÎÂˆ]ÚJKL	HL
+NÂˆBˆ]ÜÊ[š]™ˆŠNÂˆBˆ™]\›ŽÂˆBˆ]ÚJ[Kˆ
+ˆLÈLÊNÂˆ]ÜÊ[š]‰HŠNÂˆ™]\›ŽÂˆBˆÈ›Ø]HŒŽÈ[HH[™Ú[™WÜ\˜[WÜÚJ‹˜K‹˜‹‹˜Ë‹	ž
+NÂˆYˆ
+HOHÕWÓ“Ó‘JHÈ[š]Ý˜[YJK[K[š]
+NÈ™]\›ŽÈHBˆ]ÚJ[KŠNÂˆ™]\›ŽÂˆØ\ÙH—ÑSŽ‚ˆØ\ÙH—Ð“SŽˆ]ÚJ[Kˆ
+ÈJNÈ]ÜÊ[š]œÝ\ÈŠNÈ™]\›ŽÂˆØ\ÙH—ÐPÐÑS•ˆ]ÚJ[K
+ŠŒL
+ÍŒÊKÌLÊNÜ]ÜÊ[š]‰HŠNÜ™]\›ŽÂˆØ\ÙH—Ð•S”ÎˆÂˆÚ\ˆ
+œHH[NÂˆYˆ
+ˆˆ
+Bˆ
+œJÊÈH	ÊÉÎÂˆ]ÚJKˆH
+NÂˆ]ÜÊ[š]œÝŠNÂˆ™]\›ŽÂˆBˆØ\ÙH—ÔÕÒS‘Îˆ]ÚJ[KL
+ÈˆÈ
+NÈ]ÜÊ[š]‰HŠNÈ™]\›ŽÂˆØ\ÙH—ÑÑSŽ‚ˆYˆ
+‹˜ÈOH×ÓÐÕÈ‹˜ÈOH×ÐTÑJBˆ]ÚJ[Kˆ
+ÈJNÂˆ[ÙHYˆ
+‹˜ÈOH×ÓUU
+HÂˆYˆ
+]ŠBˆ]ÜÊ[K“Ñ‘ˆŠNÂˆ[ÙHÂˆ]ÚJ[KŠNÂˆ]ÜÊ[š]˜˜\ˆŠNÂˆBˆH[ÙHÂˆ]ÚJ[KŠNÂˆ]ÜÊ[š]‰HŠNÂˆBˆ™]\›ŽÂˆØ\ÙH—Ð”’ÔÑUˆ]ÚJ[KŠNÈ]ÜÊ[š]‰HŠNÈ™]\›ŽÂˆØ\ÙH—ÕSTÎˆ]ÚJ[Kˆ
+ÈŒ
+NÈ]ÜÊ[š]˜œHŠNÈ™]\›ŽÂˆØ\ÙH—Ñ’S‘US‘NˆÂˆ[Ý\ÈHˆHZ[HHÝ\È
+ˆŒNÂˆÚ\ˆ
+™HH[NÂˆYˆ
+Z[Hˆ
+H
+™JÊÈH	ÊÉÎÂˆYˆ
+Z[H
+HÈ
+™JÊÈH	ËIÎÈZ[HH[Z[NÈBˆHH]ÚJKZ[HÈL
+NÂˆ
+™JÊÈH	Ë‰ÎÂˆ
+™JÊÈH
+Ú\ŠJ	Ì	È
+È
+Z[HÈL
+H	HL
+NÂˆ
+™HHÂˆ]ÜÊ[š]’ˆŠNÂˆ™]\›ŽÂˆBˆØ\ÙH—Ð”UÓ‘ˆÂˆ[œÚYÛ™YÈH]ÛÙŠT•ÌÌÐH
+È
+‹˜ˆ	ˆJJKOœœÝ–Ü‹˜ˆ	ˆWNÂˆYˆ
+\ÊHÈ]ÜÊ[K“Ñ‘ˆŠNÈ™]\›ŽÈBˆ[œÚYÛ™YÚ[™™\Ù]ÂˆYˆ
+X˜\Ü×Ü]\›—Ü™\Ù]ÙXÛÙJË	šÚ[™	œ™\Ù]
+JHÈ]ÜÊ[K’S•SQŠNÈ™]\›ŽÈBˆ[VÌHHÚ[™OHÔ’QÒSSÔÓÕS‘Ò•S“ÈÈ	Ò‰ÈˆÚ[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘HÈ	ÔÉÈˆÚ[™OHÔ’QÒSSÔÓÕS‘ÓRPSRHÈ	ÓIÈˆ	ÐÉÎÂˆ]ÚJ[H
+ÈK
+[
+\™\Ù]
+NÂˆ™]\›ŽÂˆBˆØ\ÙH—ÔÐTŽˆ]ÚJ[Kˆ
+ÈJNÈ™]\›ŽÂˆØ\ÙH—ÔÔUˆ[VÌHH	Ô	ÎÈ]ÚJ[H
+ÈKˆ
+ÈJNÈ™]\›ŽÂˆØ\ÙH—ÓRQPÒˆYˆ
+ŠH]ÚJ[KŠNÈ[ÙH]ÜÊ[K“Ñ‘ˆŠNÈ™]\›ŽÂˆØ\ÙH—ÐÒÐÒˆ]ÚJ[Kˆ
+ÈŠNÈ™]\›ŽÂˆØ\ÙH—ÔÔ‘Tˆ[VÌHH	Þ	ÎÈ]ÚJ[H
+ÈKˆ
+ÈJNÈ™]\›ŽÂˆØ\ÙH—ÔÓSŽˆ]ÚJ[KŠNÈ]ÜÊ[š]˜˜\ˆŠNÈ™]\›ŽÂˆY˜][ˆ]ÚJ[KŠNÈ™]\›ŽÂˆBŸBœÝ]XÈ›ÚY™Y—Ý˜[YJ™Y—Ý‹Ú\ˆ
+›[KÚ\ˆ
+[š]
+BžÂˆYˆ
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÊHÈ™Y—Ý˜[YWÛÙŠ‹ÜšYÚ[˜[Ù\Ü^WÝ˜[YJŠK[K[š]
+NÈ™]\›ŽÈBˆ™Y—Ý˜[YWÛÙŠ‹™Y—ÙÙ]
+ŠK[K[š]
+NÂŸB‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOHYÙ\ÈOOH
+‹ÂˆÙYš[™HPVQÑTÈM‹ÊˆYÙHÜ›Ý\ÎˆÚÜÙH˜[Y\ÈHYÙHÛÈ
+HÑS\Ý	ÜÈXY\œËHXY\‰ÜÈÛÛÝ\ŠH
+‹Â™[[HÈÔ—Ó“Ó‘KÔ—ÕPÒËÔ—ÕRVÔ—ÒÒUÔ—ÔUÔ—ÔÓÕS‘Ô—ÓSÔ‘KˆÔ—ÓRQKÔ—ÐUQSËÔ—ÒÑVTËÔ—Ô“Ò‘PÕÔ—ÔÖTÕSKÔ—Ð•NÈÊˆ
+H\ÝÚ^ˆÓÉÜÈÙXÝ[ÛœÊH
+‹ÂˆÙYš[™HPVSÔ‘HM\YYˆÝXÝÂˆ™Y—Ý–ÓPVQÑT×VÍNÂˆÚ\ˆ]VÓPVQÑT×VÌL—NÂˆZ[ÝÜ›Ý\ÓPVQÑT×NÂˆ[ŽÂˆ™Y—Ý[Ü™VÓPVSÔ‘WNÈÊˆHØÜ™Y[‰ÜÈÝ\ˆÛ›ØœÎˆÛ›H[ˆÑS	ÜÈ\Ý[™\ˆSÔ‘H
+‹Âˆ[›[Ü™NÂŸHYÙ\×ÝÂœÝ]XÈYÙ\×ÝÈÔÓÓÂ\YYˆÝXÝÈ™Y—Ý–ÍNÈÚ\ˆ]VÌL—NÈ[YÙKŽÈHYÙWÜ]Y\žWÝÂ‹ÊˆH\ØÜš\Üˆ[Z]\ˆ\ÈÛ™H^XÚ]Ý]]ÛÛ˜XÝˆ]Y\žH[ÙH™XÛÜ™Âˆ
+ˆÛ™H™\]Y\ÝYYÙH\ÈHÛÝ[Ú]Ý]HÙXÛÛ™\œÚ\Ý[YÙHX›Kˆ
+‹Â\YYˆÝXÝÂˆYÙ\×Ý
+œYÙ\ÎÂˆYÙWÜ]Y\žWÝ
+œ]Y\žNÂˆZ[ÝÜ›Ý\ÂŸHYÙWÙ[Z]\—ÝÂ‚œÝ]XÈ›ÚY[Ü™JYÙWÙ[Z]\—Ý
+™[Z]™Y—ÝŠBžÂˆYÙ\×Ý
+œYÙ\ÈH[Z]OœYÙ\ÎÂˆYˆ
+YÙ\È	‰ˆ‹šÚ[™OH—Ó“Ó‘H	‰ˆYÙ\ËO››[Ü™HPVSÔ‘JBˆYÙ\ËO›[Ü™VÜYÙ\ËO››[Ü™JÊ×HHŽÂŸB‚œÝ]XÈ›ÚY]JYÙ\×Ý
+œYÙ\Ë[KÛÛœÝÚ\ˆ
+œÊBžÂˆ[ÈHÂˆÚ[H
+ÖÚ×H	‰ˆÈLJHÂˆYÙ\ËO]VÚWVÚ×HHÖÚ×NÂˆÊÊÎÂˆBˆYÙ\ËO]VÚWVÚ×HHÂŸB‚œÝ]XÈ›ÚYYÜYÙJYÙWÙ[Z]\—Ý
+™[Z]ÛÛœÝÚ\ˆ
+ˆ™Y—ÝK™Y—Ý‹™Y—ÝË™Y—Ý
+BžÂˆYÙWÜ]Y\žWÝ
+œ]Y\žHH[Z]Oœ]Y\žNÂˆYÙ\×Ý
+œYÙ\ÈH[Z]OœYÙ\ÎÂˆYˆ
+]Y\žJHÂˆYˆ
+]Y\žKO›ˆOH]Y\žKOœYÙJHÂˆ]Y\žKOœ–ÌHHNÂˆ]Y\žKOœ–ÌWHHŽÂˆ]Y\žKOœ–Ì—HHÎÂˆ]Y\žKOœ–Ì×HHÂˆ[œÚYÛ™YHHÂˆ›Üˆ
+ÈÚWH	‰ˆHLNÈJÊÊBˆ]Y\žKO]VÚWHHÚWNÂˆ]Y\žKO]VÚWHHÂˆBˆ]Y\žKO›ŠÊÎÂˆ™]\›ŽÂˆBˆYˆ
+YÙ\ËO›ˆHPVQÑTÊBˆ™]\›ŽÂˆYÙ\ËOœ–ÜYÙ\ËO›—VÌHHNÂˆYÙ\ËOœ–ÜYÙ\ËO›—VÌWHHŽÂˆYÙ\ËOœ–ÜYÙ\ËO›—VÌ—HHÎÂˆYÙ\ËOœ–ÜYÙ\ËO›—VÌ×HHÂˆ]JYÙ\ËYÙ\ËO›‹
+NÂˆYÙ\ËO™Ü›Ý\ÜYÙ\ËO›—HH[Z]O™Ü›Ý\ÂˆYÙ\ËO›ŠÊÎÂŸB‚œÝ]XÈ[˜[YWÚ\ÊÛÛœÝÜ\˜[WÝ
+™ÛÛœÝÚ\ˆ
+›ŠBžÂˆÛÛœÝÚ\ˆ
+˜HHÈO›˜[YHˆˆŽÂˆÚ[H
+
+˜H	‰ˆ
+˜HOH
+›ŠHÂˆJÊÎÂˆŠÊÎÂˆBˆ™]\›ˆJ˜H	‰ˆJ›ŽÂŸBœÝ]XÈ™Y—Ýš[™Ü™YŠ[[‹ÛÛœÝÚ\ˆ
+›ŠBžÂˆ[NÂˆ›Üˆ
+HHÈH[™Ú[™WÛœ\˜[\ÊŠNÈJÊÊBˆYˆ
+˜[YWÚ\Ê[™Ú[™WÜ\˜[J‹JKŠJBˆ™]\›ˆŠ—ÑS‘Ë‹JNÂˆ™]\›ˆ“Ó‘NÂŸB‚‹Êˆ[HÛÝ[™Û›ØœÎˆ˜[YY˜[šÜÈÛÈX]Ú[™ÈÛÛ›ÛÈÙY\HØ[YH\ÚXØ[ˆ
+ˆÛ›ØœÈXÜ›ÜÜÈLKÎ˜XÚÜÈ
+ÔX›\ÈY™™\ˆ\ˆ›ÚXÙJKˆ]™[Ô[‹Ô™]‹ÑBˆ
+ˆÝ^HÛˆRVÈš]™KÑ\ÝÝ^H[ˆÑS	ÜÈ\Ýˆ[šÛ›ÝÛˆ˜[Y\ÈÙY\Z\ˆ™[]]™Bˆ
+ˆX›HÜ™\ˆY\ˆH˜[YY˜[šÜËˆ™\ÝÜ™YY\ˆÚXØYÛËX]^[™›ÜY]ˆ
+‹ÂœÝ]XÈ[˜XÚ×Ü\˜[WÜ˜[šÊÛÛœÝÜ\˜[WÝ
+™
+BžÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÜ™\–×HHÂˆ•[™H‹•Û™H‹]XÚÈ‹”ÛÝ[™‹‘XØ^H‹”Û˜\H‹•Z[‹”‘‹”]Ú‹ˆNÂˆ[NÂˆ›Üˆ
+HHÈH
+[
+JÚ^™[ÙˆÜ™\ˆÈÚ^™[Ùˆ
+›Ü™\ŠNÈJÊÊBˆYˆ
+˜[YWÚ\ÊÜ™\–ÚWJJBˆ™]\›ˆNÂˆ™]\›ˆ
+[
+JÚ^™[ÙˆÜ™\ˆÈÚ^™[Ùˆ
+›Ü™\ŠNÂŸB‚‹ÊˆH[H˜XÚÎˆ]ÈÛÝ[™›Ý\ˆÛ›ØœÈHYÙH
+]È’U‘H[™TÕˆÑS	ÜÈ\ÝÈ]È]™[[ˆ[™Ù[™Î‚ˆ
+ˆRV	ÜÈLHRVÈRVYÙJH
+‹Â‹Êˆ^XÝYZ]YXZ[‹X[\ÛÛ›ÛË›Ý]XÚÈX™[È
+‘]XÚÈ\ÈÛXÚÈØZ[ŠKˆ
+‹ÂœÝ]XÈ[[WØ[\Ü™YŠ™Y—ÝŠBžÈ™]\›ˆ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÎLH	‰‚ˆ
+
+‹˜OQ—Ð‘	‰ˆ‹˜ÏOLŠH
+‹˜OQ—ÔÑ	‰ˆ‹˜ÏOLÊJNÈB–ÐÓÓÝ]XÈ›ÚYYÝ˜XÚ×ÜYÙ\ÊYÙWÙ[Z]\—Ý
+™[Z][[ŠBžÂˆÛÛœÝÚ\ˆ
+››HH[™Ú[™WÝ›ÚXÙWÛ˜[YJŠNÂˆ™Y—ÝÛ™Ó”TST×ÓPVNÂˆ[˜[šÖÓ”TST×ÓPVNÂˆ[ˆHKŽÂˆ™Y—Ý[\S“Ó‘NÂˆ›Üˆ
+HHÈH[™Ú[™WÛœ\˜[\ÊŠH	‰ˆˆ”TST×ÓPVÈJÊÊHÂˆÛÛœÝÜ\˜[WÝ
+™H[™Ú[™WÜ\˜[J‹JNÂˆ™Y—ÝTŠ—ÑS‘Ë‹JNÂˆYŠ[WØ[\Ü™YŠŠJ^Ø[\\ŽØÛÛ[YNßBˆYˆ
+˜[YWÚ\Ê‘š]™HŠH˜[YWÚ\Ê‘\ÝŠJBˆ[Ü™J[Z]Š—ÑS‘Ë‹JJNÂˆ[ÙHYˆ
+[˜[YWÚ\Ê“]™[ŠH	‰ˆ[˜[YWÚ\Ê”[ˆŠH	‰ˆ[˜[YWÚ\Ê”™]ˆŠH	‰ˆ[˜[YWÚ\Ê‘HŠJHÂˆ˜[šÖÛ—HH˜XÚ×Ü\˜[WÜ˜[šÊ
+NÂˆÛ™ÛŠÊ×HHŠ—ÑS‘Ë‹JNÂˆBˆBˆ›Üˆ
+HHNÈHŽÈJÊÊHÈÊˆÝX›H[œÙ\[ÛˆžH˜[šÈ
+‹Âˆ™Y—ÝHÛ™ÚWNÂˆ[žH˜[šÖÚWNÂˆ›Üˆ
+ˆHNÈˆˆ	‰ˆ˜[šÖÚˆHWHˆžÈ‹KJHÂˆÛ™Ú—HHÛ™ÚˆHWNÂˆ˜[šÖÚ—HH˜[šÖÚˆHWNÂˆBˆÛ™Ú—HHÂˆ˜[šÖÚ—HHžÂˆBˆ[Z]O™Ü›Ý\HÔ—ÕPÒÎÂˆ›Üˆ
+HHÈHŽÈH
+ÏH
+BˆYÜYÙJ[Z]›KÛ™ÚWKH
+ÈHˆÈÛ™ÚH
+ÈWHˆ“Ó‘KH
+ÈˆˆÈÛ™ÚH
+È—Hˆ“Ó‘KH
+ÈÈˆÈÛ™ÚH
+È×Hˆ“Ó‘JNÂˆYŠ[\šÚ[™OT—Ó“Ó‘JXYÜYÙJ[Z]STS•‘SÔH‹[\“Ó‘K“Ó‘K“Ó‘JNÂŸB‚‹ÊˆÚ\™HHØÜ™Y[‰ÜÈYÙH\ÈÙ\ˆ\ˆ\ÛˆH\	ÜÈØÜ™Y[œÈ
+[™‹LÔÊK[ÙHÛ™H\ˆØÜ™Y[ˆ
+‹ÂœÝ]XÈZ[Ý
+œYÙWÛÙŠ[šY]ÊBžÂˆ™]\›ˆ	ZKœYÙVÝšY]×VÝšY]ÈOH—ÔT•šY]ÈOH—ÔÑTHšY]ÈOH—ÑÑSˆÈZKœ\ˆNÂŸB‚‹Êˆ[[]]X›HYÙH\ØÜš\[ÛœÈ]›ÚY™XZ[[™È›Ý\ˆÛÛœÝ[™Y™\™[˜ÙH™XÛÜ™È]ˆ
+ˆ]™\žHØ[Ú]KˆHÛ›H]ÚYž]H\ÈHÝ\œ™[\Ý›ÚXÙKØÚ[›™[Âˆ
+ˆ“Ó‘H™]Z[œÈ]È[^™\›È™XÛÜ™ˆ\È[œÈÛ›H\š[™ÈRHYÙHÛÛœÝXÝ[Û‹ˆ
+‹Â–ÐÓÓ×Ø]šX]W×Ê
+›Ú[›[™JJHÝ]XÈ›ÚYYÜYÙWÜ™YœÊYÙWÙ[Z]\—Ý
+™[Z]ÛÛœÝÚ\ˆ
+ÛÛœÝ™Y—Ý
+œ™YœË[^\ËZ[Ý˜[YJBžÂˆ™Y—Ý›ÝÖÍNÂˆ›Üˆ
+[HHÈHÈJÊÊHÂˆ›ÝÖÚWHH™YœÖÚWNÂˆYˆ
+›ÝÖÚWKšÚ[™OH—Ó“Ó‘JHÂˆYˆ
+^\ÈOHJH›ÝÖÚWK˜HH˜[YNÂˆYˆ
+^\ÈOHŠH›ÝÖÚWK˜ˆH˜[YNÂˆBˆBˆYÜYÙJ[Z]›ÝÖÌK›ÝÖÌWK›ÝÖÌ—K›ÝÖÌ×JNÂŸB‚–ÐÓÓ×Ø]šX]W×Ê
+›Ú[›[™JJHÝ]XÈ›ÚY[Ü™WÜ™YœÊYÙWÙ[Z]\—Ý
+™[Z]ÛÛœÝ™Y—Ý
+œ™YœË[œÚYÛ™Y‹[^\ËZ[Ý˜[YJBžÂˆ[œÚYÛ™YNÂˆ›Üˆ
+HHÈHŽÈJÊÊHÂˆ™Y—ÝˆH™YœÖÚWNÂˆYˆ
+^\ÈOHJH‹˜HH˜[YNÂˆYˆ
+^\ÈOHŠH‹˜ˆH˜[YNÂˆ[Ü™J[Z]ŠNÂˆBŸB‚‹Êˆ\™H˜]šYØ][Ûˆ[œ]Îˆ[Z]^\Ý[™È\ØÜš\ÜœÈÚ]Ý]Ù^X›Ø\™Û[\[™Ëˆ
+‹ÂœÝ]XÈ›ÚY\ØÜšX™WÜYÙ\ÊYÙ\×Ý
+›Ý]YÙWÜ]Y\žWÝ
+œ]Y\žK[šY]Ë[[Z^Ù[ÛÛœÝZ[Ý
+œÙ[XÝ[ÛŠBžÂˆYÙWÙ[Z]\—ÝÝ]]HÛÝ]]Y\žKÔ—Ó“Ó‘_NÂˆYÙWÙ[Z]\—Ý
+™[Z]H	›Ý]]ÂˆYˆ
+]Y\žJBˆ]Y\žKO›ˆHÂˆ[ÙBˆÝ]O›ˆHÝ]O››[Ü™HHÂˆÝÚ]Ú
+šY]ÊHÂˆØ\ÙH—ÒÓQNˆÊˆH]\›ŽˆÝÈH\È[ˆ›ÝYÚ]
+‹ÂˆØ\ÙH—ÑÓÎ‚ˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÕSTË
+KŠ—ÔÕÒS‘Ë
+KŠ—ÑS‘ËÓTÕTÕÑ‘ŠKŠ—ÑS‘ËÓTÕTÕÔST
+_NÂˆYÜYÙWÜ™YœÊ[Z]”T‘“Ô“H‹™YœË
+NÈHÚ[H
+
+NÂˆœ™XZÎÂˆØ\ÙH—ÔÑTNˆÊˆH\	ÜÈÝ\ÎˆÝÈ]È]\›ˆ[œÈ
+‹Âˆ[Z]O™Ü›Ý\HÔ—ÔUÂˆYˆ
+\Ú\×Ù[J
+JBˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‹
+KŠ—ÑUK
+K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]”ÑTUQSÑH‹™YœËK
+NÈHÚ[H
+
+NÈÊˆ
+HÝÚ[™ÎˆÓQIÜË[\ÉÊH
+‹Âˆ[ÙHYˆ
+\Ú\×ÌÌÊ
+JHÂˆ[ˆHHT•ÌÌÐNÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ð“S‹
+KŠ—Ð”UK
+KŠ—Ð‘T‹
+KŠ—Ð•S”Ë
+_NÂˆYÜYÙWÜ™YœÊ[Z]”ÑTUQSÑH‹™YœËKŠNÈHÚ[H
+
+NÂˆYÜYÙJ[Z]”‘TÑU‹Š—Ð”UÓ‘‹
+K“Ó‘K“Ó‘K“Ó‘JNÈÊˆŒŒNˆ\È]\›‰ÜÈ˜\ÜÈ™\Ù]
+‹Âˆ[Z]O™Ü›Ý\HÔ—Ó“Ó‘NÈÊˆ
+›ÝH]\›‰ÜÎˆ›ÈH[ˆ]È˜[YJH
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ñ”‘QTVK
+K“Ó‘K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]’ÑVTÈ‹™YœËKŠNÈHÚ[H
+
+NÂˆBˆ[ÙHÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ð”’ÔUK
+K“Ó‘K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]”ÑTUQSÑH‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ð”’ÔÑU”’×ÐÓÓTV
+KŠ—Ð”’ÔÑU”’×ÐSÒÔŠKŠ—Ð”’ÔÑU”’×Ô“Ó
+KŠ—Ð”’ÔÑU”’×Ñ’S
+_NÂˆYÜYÙWÜ™YœÊ[Z]‘Ô“ÓÕ‘H‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ð”’ÔÑU”’×ÔŒŠKŠ—Ð”’ÔÑU”’×ÔŒÊKŠ—Ð”’ÔÑU”’×Ô
+KŠ—Ð”’ÔÑU”’×ÔŽ
+_NÂˆYÜYÙWÜ™YœÊ[Z]”‘U’QÈ‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖ×HHÔŠ—Ð”’ÔÑU”’×ÔTÑJKŠ—Ð”’ÔÑU”’×ÐSSŠKŠ—Ð”’ÔÑU”’×Ð“SŠ_NÂˆ[Ü™WÜ™YœÊ[Z]™YœËË
+NÈHÚ[H
+
+NÂˆBˆœ™XZÎÂˆØ\ÙH—ÔT•ˆÊˆH\	ÜÈÛÝ[™
+‹ÂˆYˆ
+\Ú\×Ù[J
+JHÂˆ[HOHT•ÎLHÈÎLHˆÎÂˆYÝ˜XÚ×ÜYÙ\Ê[Z]Ù[XÝ[Û–ÜJNÂˆ[Z]O™Ü›Ý\HÔ—ÒÒUÂˆYˆ
+OHT•ÎLJHÊˆ
+HÚ]	ÜÈØZ[ŽˆHZ^\‰ÜÈ]™[Ù\È]
+H
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÎLK‘•SKJK“Ó‘K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]’ÒU‹™YœË
+NÈHÚ[H
+
+NÂˆ[ÙBˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÎ‘•SKJKŠ—ÑS‘ËÎ‘•SKÒÒUÑTÕ
+KŠ—ÑS‘ËÎ‘•SKÒÒUÑ’U‘JKŠ—ÑS‘ËÎ‘•SKÒÒUÑÓQJ_NÂˆYÜYÙWÜ™YœÊ[Z]’ÒU‹™YœË
+NÈHÚ[H
+
+NÂˆH[ÙHYˆ
+\Ú\×ÌÌÊ
+JHÂˆ[ˆHHT•ÌÌÐNÂˆ[Z]O™Ü›Ý\HÔ—ÔÓÕS‘Âˆ[Ú[™H[™Ú[™WØ˜\Ü×Ø˜[šÊŠKÚXØYÛÈHÚ[™OHÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÎÂˆÛÛœÝ[Ý
+
+œ›ÝÜÊVÍHHÚ[™OHÔ’QÒSSÔÓÕS‘Ò•S“ÈÈZWÛÜšYÚ[˜[Ú[›×Ü›ÝÜÈˆÚ[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘HÈZWÛÜšYÚ[˜[ÜÞ[Û™WÜ›ÝÜÈ‚ˆÚXØYÛÈÈZWÛÜšYÚ[˜[ØÚXØYÛ×Ü›ÝÜÈˆZWÛÜšYÚ[˜[ÛZX[ZWÜ›ÝÜÎÂˆÛÛœÝÚ\ˆ
+˜ÛÛœÝ
+]\ÈHÚ[™OHÔ’QÒSSÔÓÕS‘Ò•S“ÈÈZWÛÜšYÚ[˜[Ú[›×Ý]\ÈˆÚ[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘HÈZWÛÜšYÚ[˜[ÜÞ[Û™WÝ]\È‚ˆÚXØYÛÈÈZWÛÜšYÚ[˜[ØÚXØYÛ×Ý]\ÈˆZWÛÜšYÚ[˜[ÛZX[ZWÝ]\ÎÂˆ[ÛÝ[HÚ[™OHÔ’QÒSSÔÓÕS‘Ò•S“ÈÈRWÓÔ’QÒSSÒ•S“×ÔQÑTÈˆÚ[™OHÔ’QÒSSÔÓÕS‘ÔÖS•Ó‘HÈRWÓÔ’QÒSSÔÖS•Ó‘WÔQÑTÈ‚ˆÚXØYÛÈÈRWÓÔ’QÒSSÐÒPÐQÓ×ÔQÑTÈˆRWÓÔ’QÒSSÓRPSRWÔQÑTÎÂˆ›Üˆ
+[›ÝÈHÈ›ÝÈÛÝ[È›ÝÊÊÊHÂˆ™Y—Ý™YœÖÍNÂˆ›Üˆ
+[ÛÛHÈÛÛÈÛÛ
+ÊÊH™YœÖØÛÛHH›ÝÜÖÜ›Ý×VØÛÛHÈ“Ó‘HˆŠ—ÑS‘ËÌÌË‹›ÝÜÖÜ›Ý×VØÛÛJNÂˆYÜYÙWÜ™YœÊ[Z]]\ÖÜ›Ý×K™YœË
+NÂˆBˆYÜYÙJ[Z]”ÓÕS‘‹Š—Ð‘S‘ÒS‘K‹
+KŠ—Ð”‘TÑU‹
+KŠ—Ð”ÕUTË‹
+K“Ó‘JNÂˆH[ÙHÂˆ[Z]O™Ü›Ý\HÔ—ÔUÈÊˆ
+]ÈÜ›ÛÝ™H[™™]šYÜÎˆÑTJH
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—Ð”’ÔÓÕ
+KŠ—Ð”’ÔÓÕK
+KŠ—Ð”’ÔÑU”’×ÐÒSÑJKŠ—ÑS‘ËÐ”’ËJ_NÂˆYÜYÙWÜ™YœÊ[Z]“ÓÔÈ‹™YœË
+NÈHÚ[H
+
+NÂˆ[Ü™J[Z]Š—ÑS‘ËÐ”’Ë
+JNÂˆ[Ü™J[Z]Š—Ð”’ÔÓPÑK
+JNÂˆ[Ü™J[Z]Š—Ð”’ÔÓPÑKK
+JNÂˆBˆœ™XZÎÂˆØ\ÙH—ÑÑSŽˆÂˆ[ˆHHT•ÌÌÐNÂˆ[Z]O™Ü›Ý\HÔ—ÔUÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑÑS‹×ÑS”ÊKŠ—ÑÑS‹×ÐPÐÊKŠ—ÑÑS‹×ÔÓQJKŠ—ÑÑS‹×ÓÐÕÊ_NÂˆYÜYÙWÜ™YœÊ[Z]‘ÑS‘TUH‹™YœËKŠNÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑÑS‹×Ô“ÓÕ
+KŠ—ÑÑS‹×ÔÐÐSJKŠ—ÑÑS‹×ÐTÑJKŠ—ÑÑS‹×ÓUU
+_NÂˆYÜYÙWÜ™YœÊ[Z]”ÐÐSH‹™YœËKŠNÈHÚ[H
+
+NÂˆœ™XZÎÂˆBˆØ\ÙH—Ñ–ˆÊˆ
+XXÚ\	ÜÈÙ[™ÎˆRV	ÜÈT•ÊH
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÑ––Ô•—ÑPÐVJKŠ—ÑS‘ËÑ––Ô•—ÕÓ‘JK“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]”‘U‘Tˆ‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÑ––ÑÕSQJKŠ—ÑS‘ËÑ––ÑÑ‘’ÊKŠ—ÑS‘ËÑ––ÑÕÓ‘JKŠ—ÕTK
+_NÂˆYÜYÙWÜ™YœÊ[Z]‘SVH‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖ×HHÔŠ—ÑS‘ËÑ––Ô•—ÒŠKŠ—ÑS‘ËÑ––Ô•—ÓU‘S
+KŠ—ÑS‘ËÑ––ÑÒŠKŠ—ÑS‘ËÑ––ÑÓU‘S
+KŠ—ÑS‘ËÑ––ÑÔS‘Ê_NÂˆ[Ü™WÜ™YœÊ[Z]™YœËK
+NÈHÚ[H
+
+NÂˆœ™XZÎÂˆØ\ÙH—ÓRVˆÊˆHÚ[›™[XÚÙYÚ]H›XÚÈÙ^K]È›Ý\ˆÛ›ØœÈ
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÓRVVÓU‘S
+KŠ—ÑS‘ËÓRVVÔSŠKŠ—ÑS‘ËÓRVVÔ‘UŠKŠ—ÑS‘ËÓRVVÑJ_NÂˆYÜYÙWÜ™YœÊ[Z]”T•È‹™YœË‹Z^Ù[
+NÈHÚ[H
+
+NÂˆ›Üˆ
+HÈ’ÒUÈ
+ÊÊHÈÊˆXXÚ[HXXÚ[™IÜÈ˜XÚÜÎˆU‘SS‹‘U‹H
+‹Âˆ[HÈÎˆÎLKˆHÙ[XÝ[Û–ÜNÂˆYÜYÙJ[Z]ÈŽRVˆˆŽLHRV‹š[™Ü™YŠ‹“]™[ŠKš[™Ü™YŠ‹”[ˆŠKš[™Ü™YŠ‹”™]ˆŠKˆš[™Ü™YŠ‹‘HŠJNÂˆBˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÑ––Ñ’U‘JKŠ—ÑS‘ËÓTÕTÕÐÓÓTJKŠ—ÑS‘ËÓTÕTÕÔST
+KŠ—ÑS‘ËÓTÕTÕÑ‘Š_NÂˆYÜYÙWÜ™YœÊ[Z]“PTÕTˆ‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖ×HHÔŠ—ÑS‘ËÓTÕTÕÕ‘TÒ
+KŠ—ÑS‘ËÓTÕTÕÔUSÊKŠ—ÑS‘ËÓTÕTÕÐUPÒÊKŠ—ÑS‘ËÓTÕTÕÔ‘SPTÑJKŠ—ÑS‘ËÓTÕTÕÓPRÑUT
+KŠ—ÑS‘ËÓTÕTÕÓRV
+KŠ—ÑS‘ËÓTÕTÕÔSTÔÊKŠ—ÑS‘ËÓTÕTÕÔ‘TÓÊKŠ—ÑS‘ËÓTÕTÕÓSRU
+KŠ—ÑS‘ËÑ––ÑTÕ
+KŠ—ÑS‘ËÑ––ÐÓÓT
+KŠ—ÑS‘ËÑ––Õ“ÓSQJ_NÂˆ[Ü™WÜ™YœÊ[Z]™YœËL‹
+NÈHÚ[H
+
+NÂˆÊˆÚX›[™ÈÙˆPTÕTŽˆØ[YHÛ›ØœËÜÝ[X\Ý\ˆ[™×ÜØÛÜHØ]™H
+˜]YÚ\›8¢iLˆ™Y˜]ÊH
+‹ÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÑS‘ËÑ––Ñ’U‘JKŠ—ÑS‘ËÓTÕTÕÐÓÓTJKŠ—ÑS‘ËÓTÕTÕÔST
+KŠ—ÑS‘ËÓTÕTÕÑ‘Š_NÂˆYÜYÙWÜ™YœÊ[Z]•ÐU‘H‹™YœË
+NÈHÚ[H
+
+NÂˆœ™XZÎÂˆØ\ÙH—ÔT‘Ž‚ˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÔÕSË
+K“Ó‘K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]”T‘ˆ‹™YœË
+NÈHÚ[H
+
+NÂˆœ™XZÎÂˆØ\ÙH—ÔÓÓ‘Î‚ˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÔÐT‹
+KŠ—ÔÔUT•ÎLK
+KŠ—ÔÔUT•Î
+KŠ—ÔÔUT•Ð”’Ë
+_NÂˆYÜYÙWÜ™YœÊ[Z]Tˆ‹™YœË
+NÈHÚ[H
+
+NÂˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÔŠ—ÔÐT‹
+KŠ—ÔÔUT•ÌÌÐ‹
+KŠ—ÔÔUT•ÌÌÐK
+KŠ—ÔÔ‘T
+_NÂˆYÜYÙWÜ™YœÊ[Z]Tˆ‹™YœË
+NÈHÚ[H
+
+NÂˆœ™XZÎÂˆY˜][ˆœ™XZÎÂˆBˆYˆ
+
+]Y\žHÈ]Y\žKO›ˆˆÝ]O›ŠHOH
+BˆÈÈÝ]XÈÛÛœÝ™Y—Ý™YœÖÍHHÓ“Ó‘K“Ó‘K“Ó‘K“Ó‘_NÂˆYÜYÙWÜ™YœÊ[Z]ˆ‹™YœË
+NÈHÚ[H
+
+NÂŸB‚œÝ]XÈ›ÚYZ[ÜYÙ\Ê›ÚY
+BžÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆ[XšY
+
+KÛYÙOJœYÙWÛÙŠZKšY]ÊNÂˆ[™\Ù\™O]ZKšY]ÏOU—ÔT•	‰ˆ\×ÌÌÊ
+H	‰ˆ
+˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈ	ˆ
+]OŠJNÂˆ[ÙY\ÜÛÝ[™]ZKšY]ÏOU—ÔT•	‰ˆ\×ÌÌÊ
+H	‰ˆÛYÙOË›ˆ	‰‚ˆËœ–ÛÛYÙWVÌKšÚ[™OT—Ð‘S‘ÒS‘H	‰ˆËœ–ÛÛYÙWVÌK˜OXŽÂˆÙ[™Y‚ˆ\ØÜšX™WÜYÙ\Ê	œËZKšY]ËZKœ\ZK›Z^Ù[ZKœÙ[
+NÂˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ\×ÌÌÊ
+JHÜšYÚ[˜[ÜYÙWØ˜[šÈH
+Z[Ý
+Y[™Ú[™WØ˜\Ü×Ø˜[šÊšY
+
+JNÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYŠ\™\Ù\™H	‰ˆÙY\ÜÛÝ[™
+H
+œYÙWÛÙŠZKšY]ÊOJZ[Ý
+JË›‹LJNÂˆÙ[™Y‚ˆYˆ
+ˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆ\™\Ù\™H	‰‚ˆÙ[™Y‚ˆ
+œYÙWÛÙŠZKšY]ÊHHË›ŠH
+œYÙWÛÙŠZKšY]ÊHHÂŸB‚œÝ]XÈ[Ý\—ÜYÙJ›ÚY
+BžÂˆ[YÙHH
+œYÙWÛÙŠZKšY]ÊNÂˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ\×ÌÌÊ
+H	‰‚ˆ
+˜\Ü×Û^[Ý]ÛÛ—ÜÛÝ[™ÜYÙH	ˆ
+]HšY
+
+JJJBˆ™]\›ˆË›ˆHNÂˆ™]\›ˆYÙHË›ˆÈYÙHˆË›ˆHNÂŸB‚œÝ]XÈ›ÚY˜\Ü×Û^[Ý]Û›ÝWÜ™[[ÝWÙY]
+[›ÚXÙJBžÂˆ[œÚYÛ™Yš]H]H
+[œÚYÛ™Y
+]›ÚXÙNÂˆYˆ
+ZKšY]ÈOH—ÔT•Z\×ÌÌÊ
+HšY
+
+HOH›ÚXÙJBˆ™]\›ŽÂˆYˆ
+J˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈ	ˆš]
+H	‰ˆËœ–ØÝ\—ÜYÙJ
+WVÌKšÚ[™OH—Ð‘S‘ÒS‘JBˆ˜\Ü×Û^[Ý]ÛÛ—ÜÛÝ[™ÜYÙHH
+Z[Ý
+Xš]Âˆ˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈH
+Z[Ý
+Xš]ÂŸB‚œÝ]XÈ›ÚY˜\Ü×Û^[Ý]ØXØÙ\
+›ÚY
+BžÂˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ\×ÌÌÊ
+H	‰ˆ
+˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈ	ˆ
+]HšY
+
+JJJBˆ
+œYÙWÛÙŠZKšY]ÊHH
+Z[Ý
+XÝ\—ÜYÙJ
+NÂˆ˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈH˜\Ü×Û^[Ý]ÛÛ—ÜÛÝ[™ÜYÙHHÂŸB‚‹ÊˆRV	ÜÈYÙHÙˆH[HXXÚ[™IÜÈ˜XÚÜÎˆÚXÚXXÚ[™H
+ÈJKLHH›ÝÛ™H
+‹ÂœÝ]XÈ[[WÛZ^ÜYÙJ›ÚY
+BžÂˆÛÛœÝÚ\ˆ
+HË]VØÝ\—ÜYÙJ
+WNÂˆ™]\›ˆZKšY]ÈOH—ÓRV	‰ˆÍHOH	ÓIÈ	‰ˆÍWHOH	ÒIÈ	‰ˆÍ—HOH	Ö	ÈÈ
+ÌHOH	Î	ÊHˆLNÂŸB‚‹ÊˆRVPTÕTˆ
+XZÈ\Ý
+ÈÓÓTÛ›ØœÊNÈ›ÝHÐU‘HÚX›[™È
+‹ÂœÝ]XÈ[X\Ý\—ÛZ^ÜYÙJ›ÚY
+BžÂˆÛÛœÝÚ\ˆ
+HË]VØÝ\—ÜYÙJ
+WNÂˆ™]\›ˆZKšY]ÈOH—ÓRV	‰ˆÌHOH	ÓIÈ	‰ˆÌWHOH	ÐIÈ	‰ˆÌ—HOH	ÔÉÈ	‰ˆÌ×HOH	Õ	ÎÂŸB‚‹ÊˆRVÐU‘Nˆ]™HÜÝ[X\Ý\ˆ[Û›ÈØÛÜHœ›ÛH[™×ÜØÛÜV×H
+‹ÂœÝ]XÈ[Ø]™WÛZ^ÜYÙJ›ÚY
+BžÂˆÛÛœÝÚ\ˆ
+HË]VØÝ\—ÜYÙJ
+WNÂˆ™]\›ˆZKšY]ÈOH—ÓRV	‰ˆÌHOH	ÕÉÈ	‰ˆÌWHOH	ÐIÈ	‰ˆÌ—HOH	Õ‰È	‰ˆÌ×HOH	ÑIÎÂŸB‚‹ÊˆH[HXXÚ[™IÜÈYÙHÙˆHÙ[XÝY˜XÚÉÜÈÝÛˆÛÝ[™
+›ÝHÚÛHÚ]	ÜÎˆÑS‘ËT•ÒU
+H
+‹ÂœÝ]XÈ[˜XÚ×ÜYÙJ›ÚY
+BžÂˆ[ÈHË™Ü›Ý\ØÝ\—ÜYÙJ
+WNÂˆ™]\›ˆZKšY]ÈOH—ÔT•	‰ˆ\×Ù[J
+H	‰ˆ
+ÈOHÔ—ÕPÒÈÈOHÔ—ÕRV
+NÂŸB‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOH\ÝÈOOH
+‹Â‹ÊˆH\Ý\È›ÝÜÈÙˆ™YœËˆÑSÛˆHYÙHÜ[œÈH\ÝÙˆ]™\žHYÙIÜÈÛ›ØœÈ
+HY\šY]ÊNÂˆ
+ˆÓÐS\ÈH\ÝÙˆ]ÈÝÛ‹ˆÑSPÕ[Ý™\ËSÓÔ’UHÚ[™Ù\ËÑS[œÈ[ˆXÝ[Û‹ˆ
+‹ÂˆÙYš[™HTÕÓPVœÝ]XÈ™Y—Ý\ÝÜ›ÝÜÖÓTÕÓPVHÔÓÓÂœÝ]XÈÚ\ˆ\ÝÝ]VÌM—NÂ‚œÝ]XÈ›ÚY\ÝØY
+™Y—ÝŠBžÂˆ[NÂˆYˆ
+‹šÚ[™OH—Ó“Ó‘HZK›\ÝÛˆHTÕÓPV
+Bˆ™]\›ŽÂˆ›Üˆ
+HHÈHZK›\ÝÛŽÈJÊÊHÊˆH™YˆÛˆÛÈYÙ\È
+U‘S
+H\ÝÈÛ˜ÙH
+‹ÂˆYˆ
+\ÝÜ›ÝÜÖÚWKšÚ[™OH‹šÚ[™	‰ˆ\ÝÜ›ÝÜÖÚWK˜HOH‹˜H	‰ˆ\ÝÜ›ÝÜÖÚWK˜ˆOH‹˜ˆ	‰ˆ\ÝÜ›ÝÜÖÚWK˜ÈOH‹˜ÊBˆ™]\›ŽÂˆ\ÝÜ›ÝÜÖÝZK›\ÝÛŠÊ×HHŽÂŸB‚‹ÊˆH\ÝÙXÝ[Û‰ÜÈ˜[YNˆÚÜÙH˜[Y\È›ÛÝÈ
+‹ÂœÝ]XÈ›ÚY—Û˜[YJ[ËÚ\ˆ
+
+BžÂˆÛÛœÝÚ\ˆ
+ÚÈH\×Ù[J
+HÈ[™Ú[™WÝ›ÚXÙWÛ˜[YJZKœ\OHT•ÎLHÈÎLHˆÎZKœÙ[ÝZKœ\JHˆ\Û˜[YJZKœ\
+NÂˆÝÚ]Ú
+ÊHÂˆØ\ÙHÔ—ÕPÒÎˆ]ÜÊ]ÜÊÚÊKŽˆTÈPÒÈŠNÈœ™XZÎÂˆØ\ÙHÔ—ÕRVˆ]ÜÊ]ÜÊÚÊKŽˆPÒÈRVŠNÈœ™XZÎÂˆØ\ÙHÔ—ÒÒUˆ]ÜÊ]ÜÊ\Û˜[YJZKœ\
+JKŽˆSPÒÔÈŠNÈœ™XZÎÂˆØ\ÙHÔ—ÔUˆ]ÜÊ]ÚJ]ÜÊ”ŠKÙ\Kœ]ÝZKœ\H
+ÈJKŽˆHUT“ˆŠNÈœ™XZÎÂˆØ\ÙHÔ—ÓSÔ‘Nˆ]ÜÊ“SÔ‘HŠNÈœ™XZÎÂˆØ\ÙHÔ—ÓRQNˆ]ÜÊ“RQHŠNÈœ™XZÎÂˆØ\ÙHÔ—ÐUQSÎˆ]ÜÊUQSÈŠNÈœ™XZÎÂˆØ\ÙHÔ—ÒÑVTÎˆ]ÜÊ’ÑVTÈS‘ÐÔ‘QSˆŠNÈœ™XZÎÂˆØ\ÙHÔ—Ô“Ò‘PÕˆ]ÜÊ”“Ò‘PÕŠNÈœ™XZÎÂˆØ\ÙHÔ—ÔÖTÕSNˆ]ÜÊ”ÖTÕSHŠNÈœ™XZÎÂˆØ\ÙHÔ—Ð•ˆ]ÜÊ“QUÓÕRQHŠNÈœ™XZÎÂˆY˜][ˆ]ÜÊ]ÜÊ\Û˜[YJZKœ\
+JKŽˆHÓÕS‘ŠNÈœ™XZÎÂˆBŸB‚œÝ]XÈ[\ÝÜÚÚ\
+[JHÈ™]\›ˆHZK›\ÝÛˆ	‰ˆ\ÝÜ›ÝÜÖÚWKšÚ[™OH—ÒŽÈB‚œÝ]XÈ›ÚYÜ[—Û\ÝÛÙ—ÜYÙ\Ê›ÚY
+BžÂˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ\×ÌÌÊ
+JHÜšYÚ[˜[Û\ÝØ˜[šÈHÜšYÚ[˜[ÜYÙWØ˜[šÎÂˆ[Ë\ÝHLKÜ›Ý\ÈHÂˆZK›\ÝÛˆHÂˆ›Üˆ
+HÈË›ŽÈ
+ÊÊBˆYˆ
+Ë™Ü›Ý\ÜHOH
+ÈË™Ü›Ý\ÜHWHˆÔ—Ó“Ó‘JJBˆÜ›Ý\ÊÊÎÂˆ›Üˆ
+HÈË›ŽÈ
+ÊÊHÂˆYˆ
+Ü›Ý\ÈˆH	‰ˆË™Ü›Ý\ÜHOH\Ý	‰ˆZK›\ÝÛˆTÕÓPV
+Bˆ\ÝÜ›ÝÜÖÝZK›\ÝÛŠÊ×HHŠ—Ò‹Ë™Ü›Ý\ÜK
+NÂˆ\ÝHË™Ü›Ý\ÜNÂˆ›Üˆ
+ÈHÈÈÈÊÊÊBˆ\ÝØY
+Ëœ–ÜVûïž:¶‰žËkºwµçBˆ[ÙHYŠÛ\OQÓÑÕÓˆÛ\OQÓÕTÛ\OQÓÐ“Õ
+H]ÜÊ[KÛ\OQÓÑÕÓÈ‘ˆŽ™Û\OQÓÕTÈ•TŽˆ•TÑˆŠNÂˆ]ÜÊ]ÜÊ]ÜÊ˜[YK[JK[š]ÌOÈˆŽˆˆŠK[š]
+NÂˆ[[Z]YÛ\ÌÎNMÂˆ›Û]Ê	‘“Ó•Ð‹˜[YJO[[Z]É‘“Ó•ÐŽ‰‘“Ó•ÖÎÂˆYŠÊ›Û˜[YJO›[Z]
+H›ÛI‘“Ó•ÕÂˆ[Ï]Ê›Û˜[YJKYXÞJÊÊÛ\ÌMŒ
+JKÌŽÂˆYŠÛ\
+HX]š^ÙÛ\
+YJÝ˜[YWÞJÌKÛ\[šËšYÚÊXÝ]™OÔÓÕS‘ÔÑSPÕ”ÓÕS‘ÑPÑJNŠXÝ]™OØÛÛ×Ð“PÒÊJNÂˆÝ—Ý^
+Y
+ÊÛ\ÌMŒ
+KJÝ˜[YWÞK›Û˜[YK[šÊNÂˆYŠ][\ÙY
+HÂˆÝ—Ü™XÝ
+
+ÎJØ˜\—ÞK‹KšYÚÊXÝ]™OÔÓÕS‘ÔÑSPÕÔÒQN”ÓÕS‘ÓS‘JNŠXÝ]™OÙ[JÛÛÊN×ÓS‘JJNÂˆYŠ˜[Œ	‰ˆO›X^
+HÝ—Ü™XÝ
+
+ÎJØ˜\—ÞKJÍJŠ˜[™O›X^ÙO›X^˜[
+KÙO›X^K[šÊNÂˆBˆBˆ[ØÚ×ÛÙŠ‹ØÚ×ÜÝ\
+
+JNÂˆYŠL
+ØÚ×ÜÝ\
+
+O	‰ˆ\×Û[Ý[ÛŠŠJJBˆÝ—Ü™XÝ
+
+ÍLËJÌ‹‹šYÚÔÓÕS‘ÒS’ÎŠXÝ]™OÐ×Ð“PÒÎ›LÐ×ÐSPŽ×ÒJJNÂŸB‚‹ÊˆÝYÙK[›Ü›X[\ÙY\˜[Y]\ˆ™]šY]Ë›ÝHZ[\ÙXÛÛ™^\ÈÜˆ[ˆ]Y[È˜XÙK‚ˆ
+ˆÚXØYÛÈÔˆ\™HÈ[YHÛÛœÝ[ÎˆØ[\Hš]™H]K™]™\ˆ]XY˜]XÈX\Ú[™Ë‚ˆ
+ˆZX[ZH™[X\ÙH\Ù\ÈH[\ØØ[HÛÜNÈ]È\˜][Ûˆœ›ÛHÝ\ÝZ[ˆ\ÈÊ”‹‚ˆ
+ˆHÛ[\˜[\È[\Ý˜]]™Kˆ›È\œÚ\Ý[™[™\™\ˆÝ]H\È™YYYˆ
+‹Â‹Êˆ™XÛÙÛš^™HXÝX[[™[ÜHÛÛ›ÛË›ÝHX™[ÝXœÝš[™ËˆZ^Y›ÝÜÈ]\Ýˆ
+ˆš\œÝ™H\][Û™YžHHYÙHZ[\ˆÛÈ›Û‹Y[™[ÜHÛÛ›ÛÈ\™HÙ\ˆ
+‹ÂœÝ]XÈ[œÚYÛ™YYÜ—ÜÝYÙWÜÛÝÊ[[ÛÝÍJBžÂˆYŠÛÝ
+Y›ÜŠ[OLÚOÚJÊÊ\ÛÝÚWOKLNÂˆYŠZKšY]ÈOU—ÔT•Z\×ÌÌÊ
+H\Ë›Š\™]\›ˆÂˆ[˜[šÏY[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™šY
+
+JNÂˆ[š\œÝX˜[šÏOSÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÏÍÎ˜˜[šÏOSÔ’QÒSSÔÓÕS‘Ò•S“ÏÍN‹LNÂˆYŠš\œÝ
+\™]\›ˆÂˆ[œÚYÛ™Y™\Ù[LÂˆ›ÜŠ[ÏLÚÏÚÊÊÊHÂˆ™Y—Ý\Ëœ–ÜVÚ×NÚYŠ‹šÚ[™OT—Ó“Ó‘JXÛÛ[YNÂˆYŠ‹šÚ[™OT—ÑS‘È‹˜HOUÌÌÈ‹˜ˆOXšY
+
+H‹˜Ïš\œÝ‹˜Ï™š\œÝ
+ÌÊ\™]\›ˆÂˆ[œÚYÛ™YÝYÙOJ[œÚYÛ™Y
+J‹˜ËYš\œÝ
+NÂˆYŠ™\Ù[	Š]OÝYÙJJ\™]\›ˆÂˆ™\Ù[L]OÝYÙNÚYŠÛÝ
+\ÛÝÜÝYÙWOZÎÂˆBˆ™]\›ˆ™\Ù[ÂŸB\YYˆÝXÝÂˆ›Ø]]XÚËXØ^KÝ\ÝZ[‹™[X\ÙNÂˆ›Ø]]™WÛ]™[Âˆ[œÚYÛ™Y]™WÜÝYÙK]™WÙØ]K]™WØXÝ]™K™\Ù[Âˆ[ÛÝÍNÂˆ[Ø]K[˜X›YÂŸHZWØYÜ—ÝÂ‚œÝ]XÈRWÑUÈ›ÚYYÜ—Ý˜[Y\ÊZWØYÜ—Ý
+™K[
+BžÂˆ[NÂˆ›Ø]
+[YVÌ×O^É™KO˜]XÚË	™KO™XØ^K	™KOœ™[X\Ù_NÂˆ
+™OJZWØYÜ—Ý
+^ÌNÙKOœ™\Ù[XYÜ—ÜÝYÙWÜÛÝÊKOœÛÝ
+NÂˆYŠYKOœ™\Ù[
+\™]\›ŽÂˆÊˆÛ›HHÛÈYZ]YÜšYÚ[˜[ÝÛ™\œÈ™[ÝÈØ[ˆ[˜X›HHÜ˜\ˆ
+‹ÂˆYŠ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™šY
+
+JOOSÔ’QÒSSÔÓÕS‘Ò•S“ÊHÂˆ[›Í—Ù[™[ÜWÜÛ˜\ÚÝŽÂˆYŠY[™Ú[™WÚ[›×Ù[™[ÜWÝšY]ÊšY
+
+K	ŠJ^ÙKO™[˜X›YLÜ™]\›ŽßBˆKO˜]XÚÏ]‹˜YÜ–ÌNÙKO™XØ^O]‹˜YÜ–ÌWNÙKOœÝ\ÝZ[]‹˜YÜ–Ì—NÙKOœ™[X\ÙO]‹˜YÜ–Ì×NÂˆKO›]™WÛ]™[]‹›]™[ÙKO›]™WÜÝYÙO]‹œÝYÙNÙKO›]™WÙØ]O]‹™Ø]NÙKO›]™WØXÝ]™O]‹˜XÝ]™NÂˆKO™[˜X›YLÎÈÊˆÛÛ\XÝ[›È[™X\ˆKÑÙ[ÛY]šXÈˆ
+‹Âˆ™]\›ŽÂˆBˆYŠ[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™šY
+
+JOOSÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÊHÂˆÊˆÜšYÚ[˜[ÚXØYÛÈS•‘SÔHÛÝÈË‹ŒL
+KËŠNˆÝYÙK[›Ü›X[\ÙYˆ
+ˆÛÛ\[Y˜]]™HÛÛ›ÛÈ[˜ÛYHXXÚXXÜ›ÉÜÈØØ[[™ÎÈÔˆ\™HËˆ
+‹ÂˆÊˆ[YHÛÛœÝ[ÈÙˆÜšYÚ[˜[Ý˜ØWÝXÚÈ
+ÛÛ›ÛÛX]˜ÊKÙXÛÛ™Î‚ˆ
+ˆHLØW
+ËŒHÝØ\™KŒËY
+ËŒHÝØ\™Ëˆ\—
+ËŒ‹ˆ
+‹ÂˆÊˆ˜]]™HÐHQÈÛÛ›ÛÈ^XÝH\ÈH[™Ú[™HÛÛ\[\È[H
+XXÜ›Âˆ
+ˆØØ[[™È[˜ÛYY
+NÈLLÈYˆH[[YHšY]È\È[˜]˜Z[X›Kˆ
+‹Âˆ›Ø]˜]]™VÍO^ÌNÝ[œÚYÛ™YØ]OLÂˆ[Y[™Ú[™WØ˜\Ü×ØYÜ—ÝšY]ÊšY
+
+K˜]]™K	™Ø]JNÂˆYŠ[Š^ÙKO™[˜X›YLÜ™]\›ŽßBˆKOœÝ\ÝZ[[˜]]™VÌ—NÙKO™Ø]OJ[
+YØ]NÂˆ›ÜŠOLÚOÎÚJÊÊHÂˆ›Ø][˜]]™VÚOOLÌÎšWNÈ
+^È
+^Âˆ
+[YVÚWOZOOLÌLËŒŠž
+ËŒYŽšOOLOÌKŒŠž
+ËŒYŽŒKŒŠž
+ËŒ™ŽÂˆBˆKO™[˜X›YLŽÈÊˆŽˆÜšYÚ[˜[^Û™[X[]ÜÈ
+‹Âˆ™]\›ŽÂˆBˆÊˆ[ˆÝÛ™\ˆÚ[™ÙHY\ˆÝYÙH™XÛÙÛš][ÛˆØ[››Ý[˜X›HH™]\™Yˆ
+ˆÜÚ][Û˜[˜\ÜÌÌÈ˜[˜XÚËˆ›È[˜]˜Z[X›KÙ›Ü™ZYÛˆÜ˜\\È[™[Yˆ
+‹ÂˆKO™[˜X›YLÂŸB‚‹Êˆ]™\žHYZ]YKÑÔËÔˆ\HÙ]ÈH[\›ÝÈÜ˜\XÝ]™HÜˆ›Ý‚ˆ
+ˆÚXØYÛÍË‹ŒL\ÈHÜšYÚ[˜[XXÜ›ÈÙ]ˆÛÛ\XÝ[›ÍK‹ŽÛÛ›ÛÈÛ™Bˆ
+ˆÚ\™Y[\]YKÙš[\ˆ[™[ÜNÈ]\È›ÝÛÈ[™\[™[[™[Ü\Ë‚ˆ
+ˆZX[ZH\È›ÈKÑÔËÔˆ›ÝÎÈÞ[Û™KÙ[Ý\\’ˆ›Û\È™[XZ[ˆ[˜YZ]Yˆ
+‹ÂœÝ]XÈRWÑUÈ[YÜ—Ü›ÝÊ[
+BžÈ™]\›ˆYÜ—ÜÝYÙWÜÛÝÊ
+HOL
+L	‰ˆË›ˆ	‰ˆ[WØ[\Ü™YŠËœ–ÜVÌJH	‰‚ˆËœ–ÜVÌWKšÚ[™OT—Ó“Ó‘H	‰ˆËœ–ÜVÌ—KšÚ[™OT—Ó“Ó‘H	‰ˆËœ–ÜVÌ×KšÚ[™OT—Ó“Ó‘JNÈB‹Êˆ]™[ÙˆÛ™HÜšYÚ[˜[ÝYÙH][YH
+ÊNˆ]XÚÈÝØ\™KŒÈÛ\Y]Kˆ
+ˆXØ^HÝØ\™Ý\ÝZ[‹™[X\ÙHÝØ\™™\›È
+ÜšYÚ[˜[Ý˜ØWÝXÚÊKˆ
+‹ÂœÝ]XÈRWÑUÈ›Ø]YÜ—ÛÜšYÚ[˜[Û]™[
+ÛÛœÝZWØYÜ—Ý
+™K[ÝYÙK›Ø]
+BžÂˆYŠKO™[˜X›YOLÊHÂˆYŠÝYÙOOL
+\™]\›ˆ›WÛZ[™ŠKŒ‹ÙKO˜]XÚÊNÂˆYŠÝYÙOOLJ\™]\›ˆ›WÛX^ŠKOœÝ\ÝZ[‹KŒ‹JKŒ‹YKOœÝ\ÝZ[ŠJÙKO™XØ^JNÂˆ›Ø]Ý\LKŒ‹LKŒ‹Ù›WÛX^ŠKŒ‹KOœ™[X\ÙJTÔÌÌ×ÔÔŠNÂˆ›Ø]]™[YKOœÝ\ÝZ[Š™›WÜÝÙŠÝ\
+TÔÌÌ×ÔÔŠNÂˆ™]\›ˆ]™[ŒYÌ›]™[ÂˆBˆYŠÝYÙOOL
+H™]\›ˆ›WÛZ[™ŠKŒ‹KŒÙ‹LKŒÙŠ™›WÙ^Š]ÙKO˜]XÚÊJNÂˆYŠÝYÙOOLJH™]\›ˆKOœÝ\ÝZ[ŠÊKŒ‹YKOœÝ\ÝZ[ŠJ™›WÙ^Š]ÙKO™XØ^JNÂˆ™]\›ˆKOœÝ\ÝZ[Š™›WÙ^Š]ÙKOœ™[X\ÙJNÂŸB‹ÊˆÙYÛY[ÚYÈ›ÛÝÈH™X[ÝYÙH\˜][ÛœÎˆ]XÚÈÈ[ØØ[Kˆ
+ˆXØ^HÈÚ][ˆIHÙˆÝ\ÝZ[‹™[X\ÙHÈHŒÝ]Ù™‹ˆHÝ\ÝZ[‚ˆ
+ˆ]X]H\ÈHš^Y[\Ý˜]]™HÚYÈ]\È›ÝH[YKˆ
+‹ÂœÝ]XÈRWÑUÈ›ÚYYÜ—Û^[Ý]
+ÛÛœÝZWØYÜ—Ý
+™K[[ÚY[ÖÍWK›Ø]\–Ì×JBžÂˆ›Ø]Ý[OLŒŽÂˆ[ËÛM‹Ü[]ÚYZÛÂˆ\–ÌOYKO˜]XÚÊŒKŒÌÍÙŽÈÊˆŠKŒËÌŒÊH
+‹Âˆ\–ÌWOYKO™XØ^JŒLMÌ™ŽÈÊˆŠL
+H
+‹Âˆ\–Ì—OYKOœÝ\ÝZ[ŒŒÙKOœ™[X\ÙJ™›WÛÙÙŠKOœÝ\ÝZ[‹ÌŒŠNŒŒŽÂˆYŠKO™[˜X›YOLÊHÂˆ\–ÌOYKO˜]XÚÎÙ\–ÌWOYKO™XØ^NÂˆ›Ø]Ý\LKŒ‹LKŒ‹Ù›WÛX^ŠKŒ‹KOœ™[X\ÙJTÔÌÌ×ÔÔŠNÂˆ\–Ì—OYKOœÝ\ÝZ[‹ŒYˆ	‰ˆÝ\ŒÈ›WÛÙÙŠŒY‹ÙKOœÝ\ÝZ[ŠKÙ›WÛÙÙŠÝ\
+KÐTÔÌÌ×ÔÔˆˆÂˆBˆYŠKOœ™\Ù[OLM]JHÂˆ[ÖÍO^ÌKÛÝ[L\ÝKLK\ÙYLÂˆ›ÜŠÏLÚÏÎÚÊÊÊ^Ú[ÝYÙOZÏOLÌÎšÎÚYŠKOœ™\Ù[	Š]OÝYÙJJ^ÜÝ[JÏY\–Ú×NØÛÝ[
+ÊÎÛ\Ý\ÝYÙNß_BˆÖÌ—OJKOœ™\Ù[	JOÊÛÝ[ÍŽÚY
+NŒÂˆ[ÜXÙO]ÚY]ÖÌ—Kœ™YO\ÜXÙKXÛÝ[
+ŒÎÂˆ›ÜŠÏLÚÏÎÚÊÊÊ^Ú[ÝYÙOZÏOLÌÎšÎÚYŠKOœ™\Ù[	Š]OÝYÙJJ^ÂˆÖÜÝYÙWOLÊÊÝ[OŒÊ[
+Jœ™YJ™\–Ú×KÜÝ[JN™œ™YKØÛÝ[
+NÝ\ÙY
+Ï]ÖÜÝYÙWNß_BˆYŠ\ÝL
+]ÖÛ\ÝJÏ\ÜXÙK]\ÙYÂˆÖÌO^Ù›ÜŠÏLÚÏÚÊÊÊ^ÖÚÊÌWO^ÖÚ×JÝÖÚ×NÂˆ™]\›ŽÂˆBˆ›ÜŠÏLÚÏÎÚÊÊÊHÝ[JÏY\–Ú×NÂˆÊˆXXÚ[YYÝYÙHÙY\ÈÈÛÈHÚÜÝYÙH™]™\ˆ˜[š\Ú\Ëˆ
+‹Âˆ[ÖÌ×Kœ™YO\Ü[‹NK\ÙYLÂˆ›ÜŠÏLÚÏÎÚÊÊÊHÈÖÚ×OLÊÊÝ[OŒŒÊ[
+J
+›Ø]
+Yœ™YJ™\–Ú×KÜÝ[JËYŠN™œ™YKÌÊNÈ\ÙY
+Ï]ÖÚ×NÈBˆÖÌWJÏ\Ü[‹]\ÙYÈÊˆ›Ý[™[™È™[XZ[™\ˆ
+‹ÂˆYŠÖÌWOÊHÈÖÌ—KOLË]ÖÌWNÈÖÌWOLÎÈBˆÖÌO^ÈÖÌWO^
+ÝÖÌNÈÖÌ—O^ÖÌWJÝÖÌWNÈÖÌ×O^ÖÌ—JÚÛÈÖÍO^
+ÝÚYÂŸB‹ÊˆØ[YH[\›ÝÈš\ÝX[ÛÛ\Û™[›ÜˆH™X[š[š]H^Û™[X[[HXØ^K‚ˆ
+ˆš^Y[YHÛXZ[ˆ
+H\˜[Y]\ˆX^[][JHXZÙ\ÈXØ^HY]Èš\ÚX›H[ˆBˆ
+ˆÝ\™K›ÝY\™[H]ÈX™[ˆH]™HÝ\œÛÜˆ\Ù\ÈXÝX[ÛÜ˜[\ÛÝ[\œËˆ
+ˆ›ÝHY]X›H\™Ù]\˜][ÛŽÈHÙ\\˜]HY]\ˆÚÝÜÈ˜]ÈQÈ]™[‚ˆ
+ˆ‘	ÜÈ™X[š^YÛ\ÈH]X]K™]™\ˆX™[YÝ\ÝZ[ˆÜˆ]XÚËˆ
+‹Â‹ÊˆÛ™H\ÚXØ[ÛÝÜÝYÙKÜ\˜Ù[YÙH›Ü›X]›Üˆ]™\žH[\›ÝÈ[™[ÜKˆ
+‹ÂœÝ]XÈRWÑUÈ›ÚY\ÚXØ[ÜÝYÙWÛX™[
+Ú\ˆ
+›X™[[ÛÝÚ\ˆÝYÙK[˜]ÊBžÂˆÚ\ˆ
+™[™\]ÚJ]ÜÊX™[’ÈŠKRWÑ’T”ÕÒÓ“ÐŠÜÛÝ
+NÂˆ
+™[™
+ÊÏIÈ	ÎÊ™[™
+ÊÏ\ÝYÙNÊ™[™
+ÊÏIÈ	ÎÂˆ]ÜÊ]ÚJ[™
+˜]ÊŒL
+ÍŒÊKÌLÊK‰HŠNÂŸBœÝ]XÈRWÑUÈ›ÚY˜]×Ù[WØ[\Ú[›[™J[[XÝ]™K[K[[Ù™ŠBžÂˆ™Y—Ý\Ëœ–ÜVÌNÙ[NLWØ[\ÜÛ˜\ÚÝŽÂˆYŠY[™Ú[™WÙ[NLWØ[\ÝšY]Ê‹˜‹	ŠJ\™]\›ŽÂˆ[LLËL^JÚMKÜ^JÌŒ‹Y]YXXÝ]™H	‰ˆZKÝXÚYOL	‰‚ˆ
+[Ì—Ý
+JZKÝXÚÝ[[\]Û\Ê
+JOŒÂˆZ[M—ÝÛÛXXÝ]™OÛX]š^ØÛÛ
+
+N”ÓÕS‘ÕÒUK[šÏYY]YÔÓÕS‘ÒS’Î˜ÛÛÂˆ›Ø]X^Û\ÏLÂˆYŠY[NLWÜ\˜[WÜÚJ‹˜‹‹˜ËLË	›X^Û\ÊHX^Û\ÏL
+\™]\›ŽÂˆ›Ø]Üš^›Û[X^Û\ÊÝ‹\™Ù]ÚÛÛ\ËÛ]‹\™Ù]ÚÛÛ\ËXØ^O]‹\™Ù]ÙXØ^WÛ\ÎÂˆ[™]ž^™]žO]ÜÂˆÝ—Ü™XÝ
+L[Ù™‹ŒMKKÓÕS‘ÔÑSPÕÔÒQJNÂˆ›ÜŠ[LNÞLŒMÞ
+ÊÊHÂˆ›Ø]\ÏZÜš^›ÛŠžÌŒMŒŽÂˆ›Ø]]™[[\ÏZÛÌKŒŽ›\ÏZÛ
+ÙXØ^OÌŒŽ™›WÙ^Š›WÛÙÙŠŒYŠJŠ\ËZÛ
+KÙXØ^JNÂˆ[^O^LJ[
+J]™[
+ŠL]Ü
+JËYŠNÂˆÝ—Û[™J™]ž™]žK[Ù™‹
+Þ^K[Ù™‹[šÊNÜ™]ž^
+ÞÜ™]žO^^NÂˆBˆÚ\ˆ[VÌM—K[š]ÎKX™[ÌÌ—NÜ™Y—Ý˜[YWÛÙŠ‹X]š^Ý˜[YJŠK[K[š]
+NÂˆ\ÚXØ[ÜÝYÙWÛX™[
+X™[	Ñ	ËX]š^Ý˜[YJŠJNÂˆ^ØÊÍKJÎ[Ù™‹	‘“Ó•ÕX™[Y]YÔÓÕS‘ÒS’Î”ÓÕS‘ÑÔVJNÂˆ]ÜÊ]ÜÊX™[[JK[š]
+NÂˆ[žLŒÌ‹]Ê	‘“Ó•ÕX™[
+NÂˆÝ—Ý^
+žK[Ù™‹	‘“Ó•ÕX™[Y]YÔÓÕS‘ÒS’Î”ÓÕS‘ÑÔVJNÂˆ^ÜŠžMKK[Ù™‹	‘“Ó•Õ‘PÐVH‹Y]YÔÓÕS‘ÒS’Î”ÓÕS‘ÑÔVJNÂˆYŠY]Y
+XÝ—Ü™XÝ
+L
+Ì‹[Ù™‹ŒMK‹ÓÕS‘ÒS’ÊNÂˆYŠ‹˜XÝ]™H	‰ˆ
+‹šÛØXÝ]™H‹œ˜[\Ý˜[Y
+JHÂˆ›Ø]]™[Y›WÛX^Š›WÛZ[™ŠK‹œ˜]×Û]™[
+JNÂˆÊˆÝ\œ™[‘šYÙÙ\ˆš^\ÈHÛ]\ÎÈÑ\È›Û™Kˆ˜[\ˆ
+ˆYÛÝ[ÈH™^Ø[\KÛÈÝX˜XÝÛ™H›Üˆ\Ý\™]\›™YÝ\‹‚ˆ
+ˆ\™Ù]Y]È™]™\ˆ™][YHHÛÝ[™[™È›ÝKˆ
+‹Âˆ›Ø]]™WÚÛ\‹˜OQ—Ð‘ÍŒŽŒŒŽÂˆ›Ø][\ÙY]‹šÛØXÝ]™OÛ]™WÚÛ]‹šÛÛYÍŒYŽ‚ˆ]™WÚÛ
+Ù›WÛX^Š
+›Ø]
+J‹œ˜[\ÝXÚÜË]‹œ˜[\ÛYLJJKÍŒYŽÂˆ[^
+Ê[
+JŒM
+™›WÛZ[™ŠK›WÛX^Š[\ÙYÚÜš^›ÛŠJJËYŠNÂˆ[O^LJ[
+J]™[
+ŠL]Ü
+JËYŠNÂˆÝ—Ü™XÝ
+Ü[Ù™‹KL]ÜÓÕS‘ÑSJNØÝ—Ü™XÝ
+LKKLK[Ù™‹ËËÓÕS‘ÒS’ÊNÂˆÝ—Ü™XÝ
+KÜ[Ù™‹KL]Ü
+ÌKÓÕS‘ÑSJNØÝ—Ü™XÝ
+ËK[Ù™‹KKÓÕS‘ÒS’ÊNÂˆBŸBœÝ]XÈRWÑUÈ›ÚY˜]×ØYÜ—Ú[›[™J[[XÝ]™K[K[[Ù™ŠBžÂˆYŠ[WØ[\Ü™YŠËœ–ÜVÌJJ^Ù˜]×Ù[WØ[\Ú[›[™JXÝ]™KKÙ™ŠNÜ™]\›ŽßBˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝ˜[Y\ÖÍO^ÈUPÒÈ‹‘PÐVH‹”ÕTÕRSˆ‹”‘SPTÑHŸNÂˆZWØYÜ—ÝNÂˆ[ËÝXÚYXXÝ]™H	‰ˆZKÝXÚYL	‰ˆZKÝXÚY	‰‚ˆ
+[Ì—Ý
+JZKÝXÚÝ[[\]Û\Ê
+JOŒÝZKÝXÚY‹LKY]YKLNÂˆ[LLËL^JÚMKÜ^JÌŒ‹ÖÍWNÂˆZ[M—ÝÛÛXXÝ]™OÛX]š^ØÛÛ
+
+N”ÓÕS‘ÕÒUKOTÓÕS‘ÒS’ÎÈÊˆ[˜XÝ]™NˆH[˜XÝ]™K\›ÝÈ[šÈ
+‹Âˆ›Ø]\–Ì×NÂˆYÜ—Ý˜[Y\Ê	™K
+NÂˆYŠYK™[˜X›Y
+\™]\›ŽÂˆ›ÜŠÏLÚÏÚÊÊÊZYŠKœÛÝÚ×OL	‰ˆKœÛÝÚ×OO]ÝXÚY
+YY]YZÎÂˆYÜ—Û^[Ý]
+	™KŒMË\ŠNÂˆ[\Ï^LJ[
+JKœÝ\ÝZ[ŠŠL]Ü
+JÌYŠNÂˆYŠY]YL
+HÈÊˆHÙ[XÝYÜˆ\›™YÝYÙH[™]È]™H˜[YH
+‹ÂˆÚ\ˆ[VÌM—K[š]ÎKÌÌ—NÂˆ™Y—Ý˜[YWÛÙŠËœ–ÜVÙKœÛÝÙY]YWKX]š^Ý˜[YJËœ–ÜVÙKœÛÝÙY]YWJK[K[š]
+NÂˆ]ÜÊ]ÜÊ]ÜÊ]ÜÊ˜[Y\ÖÙY]YJKˆŠK[JK[š]
+NÂˆ^ÜŠŒÌ‹K[Ù™‹	‘“Ó•ÕJNÂˆBˆÝ—Ü™XÝ
+L[Ù™‹ŒMKKÓÕS‘ÔÑSPÕÔÒQJNÂˆYŠKœ™\Ù[	ŽJXÝ—Û[™JÖÌ×KÜ[Ù™‹ÖÌ×K\ËL‹[Ù™‹ÓÕS‘ÑSJNÈÊˆ›ÝK[Ù™ˆÛ›H›Üˆ™[X\ÙH
+‹Âˆ›ÜŠÏLÚÏÎÚÊÊÊHÂˆ[ÝYÙOZÏOLÌÎšËO^ÖÚÏOLÌÎš×K^ÖÚÏOLÍšÊÌWKK^KNÂˆYŠJKœ™\Ù[	Š]OÝYÙJJJXÛÛ[YNÂˆ›Ø]Y\–Ú×NÂˆ›Ø]\ÝYÙOOLÌŒŽœÝYÙOOLOÌKŒŽ™KœÝ\ÝZ[ŽÂˆO^LJ[
+J
+ŠL]Ü
+JÌYŠNÂˆ[^‹^NÈYŠJHLNÂˆ›ÜŠOLNÚO[ŽÚJÊÊHÂˆ›Ø]]™[XYÜ—ÛÜšYÚ[˜[Û]™[
+	™KË
+Š›Ø]
+ZKÊ›Ø]
+[ŠNÂˆYŠÏOLˆ	‰ˆOO[ŠH]™[LŒŽÂˆ[žO^LJ[
+J]™[
+ŠL]Ü
+JÌYŠNÂˆÝ—Û[™JK[Ù™‹JÚKžK[Ù™‹Y]YO\ÝYÙOÚN˜ÛÛ
+NÜ^JÚNÜO[žNÂˆBˆBˆYŠKœ™\Ù[	JXÝ—Û[™JÖÌ—K\Ë[Ù™‹ÖÌ×K\Ë[Ù™‹Y]YOLÚN˜ÛÛ
+NÂˆ›ÜŠÏLÚÏÚÊÊÊHÂˆÊˆÙY\KÑÔËÔˆ\˜Ù[YÙHš\ÚX›H]™\Ý\ÈÙ[\È\š[™ÈÍKRÎˆ
+ˆ\›œËˆØ[YH]X[\Ø][Ûˆ\ÈH˜]]™HÚXØYÛÈ˜[YH™XYÝ]ˆ
+‹ÂˆYŠJKœ™\Ù[	Š]OÊJJXÛÛ[YNÂˆÚ\ˆX™[ÌŒNÂˆ\ÚXØ[ÜÝYÙWÛX™[
+X™[KœÛÝÚ×KQÔˆ–Ú×KX]š^Ý˜[YJËœ–ÜVÙKœÛÝÚ×WJJNÂˆ^ØÊÌJÙKœÛÝÚ×JNKJÎ[Ù™‹	‘“Ó•ÕX™[Y]YOZÏÚN”ÓÕS‘ÑÔVJNÂˆBˆÈÊˆ˜]]™HÝ]LHÛÛZ[œÈ›ÝXØ^H[™Ý\ÝZ[‹ˆÛ\ÜÚYžHÚ][ˆIHÙˆË‚ˆ
+ˆÝ\œÛÜˆ]™[\È[Ø^\ÈH]™HQÎÈHÜš^›Û[^\È˜[Y\ÈÝYÙ\Ëˆ
+‹Âˆ›Ø]]™[L[ÙLÈ[œÚYÛ™YÝ]OM‹[LÂˆ[ØœÙ\™YÂˆYŠK™[˜X›YOLÊHÛ]™[YK›]™WÛ]™[Ú[YK›]™WÙØ]NÜÝ]OHYK›]™WØXÝ]™OÍŽ™K›]™WÜÝYÙOOLOÌ™K›]™WÜÝYÙOOMÌÎŒNÛØœÙ\™YLNßBˆ[ÙHØœÙ\™YY[™Ú[™WØ˜\Ü×Ý›ÚXÙWÝšY]ÊšY
+
+K	›]™[	›[Ù	œÝ]K	š[
+NÂˆYŠØœÙ\™Y	‰ˆÝ]HOMŠHÂˆYŠ]™[
+[]™[LÈYŠ]™[ŒJ[]™[LNÂˆ[ÝYÙOYK™[˜X›YOLÏÊK›]™WÜÝYÙOOLOÌ™K›]™WÜÝYÙOOLÌN™K›]™WÜÝYÙOOLÏÌŽŒÊN‚ˆÝ]OOLÌœÝ]OOLÏÌÎŠ
+K™Ø]H	‰ˆ[
+Hˆ
+]™[YKœÝ\ÝZ[KŒYˆ	‰ˆKœÝ\ÝZ[‹[]™[KŒYŠJOÌŽŒNÂˆÊˆHÝYÙKÛ]™[Ø]YÙKÙ\\˜]Hœ›ÛHH™]šY]ÉÜÈ[YHÝ\™N‚ˆ
+ˆØ]H[ÙHÜˆ™[X\ÙH\š[™È]XÚÈØ[ˆY™™\ˆœ›ÛHHØÚ[X]XË‚ˆ
+ˆÝY™\XØ[˜Z[˜[Y\ÈHÝYÙNÈHÜ›ÜÜØ˜\ˆ\ÈXÝX[]™[ˆ
+‹Âˆ[ÚÝÛHHJKœ™\Ù[	Š]OÝYÙJJNÂˆÊˆ[ˆXœÙ[ÝYÙH\È›ÈÝ\™H^ZXYˆ]ÈXÝX[]™[™[XZ[œÂˆ
+ˆš\ÚX›HÛˆHÙ\\˜]HYY]\‹™]™\ˆ]H˜[ÙH[™Ú[ˆ
+‹Âˆ[\ÚÝÛÊÖÜÝYÙWJÞÖÜÝYÙJÌWJKÌŽŽNÂˆYŠÚÝÛŠY›ÜŠ[^O]ÜÞ^O^LÞ^JÏLÊHÝ—Ü™XÝ
+^K[Ù™‹KKÓÕS‘ÑSJNÂˆ[ÙHÝ—Ü™XÝ
+Ü[Ù™‹KL]Ü
+ÌKÓÕS‘ÑSJNÂˆ[^O^LJ[
+J]™[
+ŠL]Ü
+JËYŠK[Ù™ŽÂˆÝ—Ü™XÝ
+L‹^KKKJNÂˆÝ—Ü™XÝ
+^KLKKËJNÂˆBˆBˆYŠY]YL
+HÈÊˆ[™\›[™HHYÚYÚYÙYÛY[
+‹Âˆ[O^ÖÙY]YK^ÖÙY]Y
+ÌWNÂˆYŠ^JH^JÌNÂˆÝ—Ü™XÝ
+KL
+Ì‹[Ù™‹‹^JÌK‹JNÂˆBˆÈÊˆ^ZXYˆÚ\™HH]™HÐHQÈ\È›ÝËÛˆ\ÈÜ˜\	ÜÈÝÛˆ[YH^\È
+‹Âˆ›Ø]YÜ–ÍKLÈ[ÝM‹KLNÂˆ[ØœÙ\™YÂˆYŠK™[˜X›YOLÊ^ÛYK›]™WÛ]™[ÜÝHYK›]™WØXÝ]™OÍŽ™K›]™WÜÝYÙOOLOÌ™K›]™WÜÝYÙOOMÌÎŒNÛØœÙ\™YLNßBˆ[ÙHØœÙ\™YY[™Ú[™WØ˜\Ü×Ù[—ÝšY]ÊšY
+
+KYÜ‹	›‹	œÝ
+NÂˆYŠØœÙ\™Y	‰ˆÝOMŠHÂˆYŠ
+[LÈYŠŒJ[LNÂˆYŠK™[˜X›YOLÊHÂˆÊˆÜÚ][ÛˆÛˆHØ[›ÛšXØ[Ý\™H]HXÝX[Ø[\Y]™[ˆ
+ˆ›Ý[™[YÔ[\ÙY[YH
+™[X\ÙHØ[ˆ™YÚ[ˆ™Y›Ü™HÊKˆ
+‹Âˆ›Ø]OLÚ[ÝYÙO\ÝOLÌœÝOLÏÌÎ™K›]™WÜÝYÙOOLÏÌŽŒNÂˆYŠÝYÙOOL
+]O[ŽÂˆ[ÙHYŠÝYÙOOLJ]OJKŒ‹[ŠKÙ›WÛX^ŠYKM™‹KŒ‹YKœÝ\ÝZ[ŠNÂˆ[ÙHYŠÝYÙOOLŠ]OKYŽÂˆ[ÙHYŠKœÝ\ÝZ[‹ŒYˆ	‰ˆ‹ŒYŠBˆOY›WÛÙÙŠ‹ÙKœÝ\ÝZ[ŠKÙ›WÛÙÙŠŒY‹ÙKœÝ\ÝZ[ŠNÂˆ[ÙHOLNÂˆOY›WÛX^Š›WÛZ[™ŠKJJNÜJKœ™\Ù[	Š]OÝYÙJJOÞÖÜÝYÙWJÊ[
+J
+ÖÜÝYÙJÌWK^ÖÜÝYÙWJJJËYŠN‹LNÂˆH[ÙHYŠÝOL
+HÈ›Ø]KYK˜]XÚÊ™›WÛÙÙŠ›WÛX^ŠYKM™‹
+KŒÙ‹[ŠKÌKŒÙŠJNÂˆ^ÖÌJÊ[
+J
+ÖÌWK^ÖÌJJ™›WÛZ[™ŠKŒ‹Ù›WÛX^Š\–ÌKYKM™ŠJJËYŠNÈBˆ[ÙHYŠÝOLJHÂˆ›Ø]O[‹YKœÝ\ÝZ[‹[LKŒ‹YKœÝ\ÝZ[ŽÂˆYŠO‹ŒYŠ™[	‰ˆ[ŒYKM™ŠHÈ›Ø]KYK™XØ^J™›WÛÙÙŠKÙ[
+NÂˆ^ÖÌWJÊ[
+J
+ÖÌ—K^ÖÌWJJ™›WÛZ[™ŠKŒ‹Ù›WÛX^Š\–ÌWKYKM™ŠJJËYŠNÈBˆ[ÙHJÖÌ—JÞÖÌ×JKÌŽÈÊˆÛ[™È]Ý\ÝZ[ŽˆZY]X]H
+‹ÂˆH[ÙHYŠÝOLÊHÂˆ›Ø]YKœÝ\ÝZ[ŒYKM™‰‰›ŒYKM™ËYKœ™[X\ÙJ™›WÛÙÙŠ‹ÙKœÝ\ÝZ[ŠN™\–Ì—NÂˆ^ÖÌ×JÊ[
+J
+ÖÍK^ÖÌ×JJ™›WÛZ[™ŠKŒ‹›WÛX^ŠŒ‹
+KÙ›WÛX^Š\–Ì—KYKM™ŠJJËYŠNÂˆH[ÙH^ÖÍNÂˆYŠK™[˜X›YOLÊ^Ú[ÝYÙO\ÝOLÌœÝOLÏÌÎ›‹YKœÝ\ÝZ[‹ŒYŠŠKYKœÝ\ÝZ[ŠOÌNŒŽÂˆYŠJKœ™\Ù[	Š]OÝYÙJJJ\KLNßBˆYŠL
+^Ú[O^LJ[
+JŠŠL]Ü
+JËYŠNÂˆÝ—Ü™XÝ
+Ü[Ù™‹KL]ÜÓÕS‘ÑSJNÂˆÝ—Ü™XÝ
+LKKLK[Ù™‹ËËJNßBˆBˆBŸB‚œÝ]XÈÛÛœÝ™[XØØWÙ›ÛÝ
+›ÜšYÚ[˜[Ý˜[YWÙ›Û
+ÛÛœÝÚ\ˆ
+›[KÛÛœÝÚ\ˆ
+[š][ÚY
+BžÂˆ[\ÙYH[š]ÌHÈÊ	‘“Ó•ÖË[š]
+JÌHˆÂˆYˆ
+Ê	‘“Ó•Ð‹[JJÝ\ÙYHÚY
+H™]\›ˆ	‘“Ó•ÐŽÂˆYˆ
+Ê	‘“Ó•ÖË[JJÝ\ÙYHÚY
+H™]\›ˆ	‘“Ó•ÖÎÂˆ™]\›ˆ	‘“Ó•ÕÂŸBœÝ]XÈ›ÚYÜšYÚ[˜[ØÙ[Ý˜[YJ[Þ[KÛÛœÝÚ\ˆ
+›[KÛÛœÝÚ\ˆ
+[š]Z[M—ÝÊBžÂˆÛÛœÝ™[XØØWÙ›ÛÝ
+™›ÛHÜšYÚ[˜[Ý˜[YWÙ›Û
+[K[š]M
+NÂˆ[Ì—ÝÚYHÊ›Û[JJÊ[š]ÌHÈÊ	‘“Ó•ÖË[š]
+JÌHˆ
+NÂˆ[Ì—Ý[™HH˜\ÙWÞJ	‘“Ó•Ð‹K›Û
+KHÝ—Ý^
+Þ]ÚYÌ‹[™K›Û[KÊNÂˆYˆ
+[š]ÌJHÝ—Ý^
+
+ÌK˜\ÙWÞJ›Û[™K	‘“Ó•ÖÊK	‘“Ó•ÖË[š]×ÑÔVJNÂŸB‚‹ÊˆÚ]HÛ›ØˆÝš\ÚÝÜË\ÚYˆ]\ÈÛ›H™Y˜]ÛˆÚ[ˆ\ÈÚ[™Ù\È
+H\˜ÜÈÛÜÝBˆ
+ˆÜ]X\™H›ÛÝ[™[ˆ\˜Ý[™Ù[\ˆ^[È[ÜÝœ˜[Y\È›Ý[™È[ˆHÝš\[Ý™\ÊH
+‹Â‹ÊˆØÚ[X]XÈš[\ˆ™\ÜÛœÙNˆ™X[[ÙKØÝ]Ù™‹Ü™\ÛÛ˜[˜ÙK›Ý[ˆ]Y[ÈÝ‚ˆ
+ˆ\™XÝš[\ˆY]ÈX^HYÚ][X][HX]™HH‘ˆXXÜ›ÈÝ[˜Ú[™ÙYˆ
+‹ÂœÝ]XÈ›ÚYš[\—Ù\Ü^JZ[Ý
+›[ÙKZ[Ý
+˜Ý][
+œ™\ÊBžÂˆÊˆ[Ý[Ûˆ[™\È[™XXÜ›ÈÜš]\ÈØ[ˆÝ™\œšYHÛ™H[›Ý\‹ˆ™XYH\YYˆ
+ˆÝÈ˜]\ˆ[ˆÝY\ÜÚ[™È™XÙY[˜ÙHœ›ÛHÝÜ™Y›Ú™XÝ˜[Y\Ëˆ
+‹Âˆ
+›[ÙOJZ[Ý
+Y[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÓSÑJNÂˆ
+˜Ý]JZ[Ý
+Y[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÐÕUÑ‘ŠNÂˆ
+œ™\ÏY[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÔ‘TÓÊNÂŸBœÝ]XÈRWÑUÈ›ÚYš[\—ÙÛ\
+[Þ[K[[ÙK[Ý]Ù™‹[™\ÛÛ˜[˜ÙKZ[M—ÝÛÛ
+BžÂˆ[YXÞLNKšYÚXÞ
+ÌNK]›Ý[Y
+ÍÊØÝ]Ù™ŠŒÌLÎÂˆ[\ÜÏ^JÎ›ÛÜ^JÌNXZÏ\\ÜË\™\ÛÛ˜[˜ÙJËÌLÎÂˆÝ—Ü™XÝ
+Y›ÛÜ‹ÎKK×ÓS‘JNÂˆYŠ[[ÙJHØÝ—Ü™XÝ
+YJÌLÎKK×ÑSJNÜ™]\›ŽßBˆYŠ[ÙOOLJHÂˆÝ—Û[™JY\ÜË]›ÝM\ÜËÛÛ
+NØÝ—Û[™J]›ÝM\ÜË]›ÝXZËÛÛ
+NÂˆÝ—Û[™J]›ÝXZË]›Ý
+Í‹›ÛÜ‹ÛÛ
+NØÝ—Û[™J]›Ý
+Í‹›ÛÜ‹šYÚ›ÛÜ‹ÛÛ
+NÂˆH[ÙHYŠ[ÙOOLÊHÂˆÝ—Û[™JY›ÛÜ‹]›ÝM‹›ÛÜ‹ÛÛ
+NØÝ—Û[™J]›ÝM‹›ÛÜ‹]›ÝXZËÛÛ
+NÂˆÝ—Û[™J]›ÝXZË]›Ý
+Í\ÜËÛÛ
+NØÝ—Û[™J]›Ý
+Í\ÜËšYÚ\ÜËÛÛ
+NÂˆH[ÙHÂˆÝ—Û[™JY›ÛÜ‹]›ÝM‹›ÛÜ‹ÛÛ
+NØÝ—Û[™J]›ÝM‹›ÛÜ‹]›ÝXZËÛÛ
+NÂˆÝ—Û[™J]›ÝXZË]›Ý
+Í‹›ÛÜ‹ÛÛ
+NØÝ—Û[™J]›Ý
+Í‹›ÛÜ‹šYÚ›ÛÜ‹ÛÛ
+NÂˆBŸBœÝ]XÈZ[Ý\WÙÛ\Ü\ÙK\WÙÛ\Ü[›š[™ÎÂœÝ]XÈZ[Ì—Ý\WÙÛ\Ø]ÂœÝ]XÈ›ÚY\WÙÛ\ÝXÚÊ›ÚY
+BžÂˆZ[Ì—Ý›ÝÈH]Û\Ê
+NÂˆZ[ÝXÝ]™HH[™Ú[™WÝ\WØXÝ]™J
+NÂˆYˆ
+XÝ]™H	‰ˆ\WÙÛ\Ü[›š[™ÊHÂˆZ[Ì—ÝÝ\ÈH
+›ÝÈH\WÙÛ\Ø]
+HÈNÂˆ\WÙÛ\Ü\ÙHH
+Z[Ý
+J
+\WÙÛ\Ü\ÙH
+ÈÝ\ÊH	HMJNÂˆ\WÙÛ\Ø]
+ÏHÝ\È
+ˆNÂˆH[ÙH\WÙÛ\Ø]H›ÝÎÂˆ\WÙÛ\Ü[›š[™ÈHXÝ]™NÂŸBœÝ]XÈZ[Ý[\×ÙÛ\ÝšY]ÎÈÊˆ]ÚYÛ˜ÙH›ÜˆÚYÛ˜]\™H
+ÈÛÛ\]HÛ›ØˆÝš\
+‹ÂœÝ]XÈRWÑUÈ[\™›Ü›WÙÛ\
+™Y—Ý‹[˜[[ÞZ[M—ÝÛÛ
+BžÂˆYŠ‹šÚ[™OT—ÕSTÊHÂˆÝ—Û[™JÞLLËÞMŽÛÛ
+NØÝ—Û[™JÞMŽÞ
+ÍŽÛÛ
+NØÝ—Û[™JÞ
+ÍŽÞ
+ÌLËÛÛ
+NÂˆ[\ÙO][\×ÙÛ\ÝšY]ÏÝ[\×ÙÛ\ÝšY]ËLNŒÂˆ[\›O][\×ÙÛ\ÝšY]ÏÊ\ÙOMÜ\ÙKNŒ\\ÙJNŒÂˆÝ—Û[™JÞLLËÞ
+ÌLËÛÛ
+NÂˆÝ—Û[™JÞËÞ
+Ø\›KÌ[\×ÙÛ\ÝšY]ÏÐ×ÕÒUN×ÑÔVJNÂˆÝ—Ü™XÝ
+Þ
+Ø\›JŒËÍL‹Ì‹KËÛÛ
+NÂˆYŠ[\×ÙÛ\ÝšY]È	‰ˆ\ÙO
+HÝ—Ü™XÝ
+ÞL‹KK‹×ÕÒUJNÂˆH[ÙHYŠ‹šÚ[™OT—ÔÕÒS‘ÊHÂˆ[ZYOXÞ
+Ý˜[
+ËÌLÎÂˆÝ—Ü™XÝ
+ÞLNËÍËK×ÓS‘JNÂˆÝ—Ü™XÝ
+ÞLNÌËMÛÛ
+NØÝ—Ü™XÝ
+ZYKÍËLÛÛ
+NØÝ—Ü™XÝ
+Þ
+ÌM‹ÌËMÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÑ‘ŠHÂˆZ[Ý[ÙKÝ]Ú[™\ÎÙš[\—Ù\Ü^J	›[ÙK	˜Ý]	œ™\ÊNÙš[\—ÙÛ\
+ÞŽ[ÙKÝ]™\ËÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÔST
+HÂˆ[\]˜[
+ŒMÌLÎÂˆÝ—Û[™JÞLNÌKÞNKÌKÛÛ
+NØÝ—Û[™JÞNKÌKÞM‹ÌJÙ\ÛÛ
+NÂˆÝ—Û[™JÞM‹ÌJÙ\Þ
+ÌMKÌKÛÛ
+NØÝ—Ü™XÝ
+Þ
+ÌMKÌKKÛÛ
+NÂˆÝ—Ü™XÝ
+ÞLNÍËK×ÓS‘JNÂˆH[ÙH™]\›ˆÂˆ™]\›ˆNÂŸB‚‹ÊˆÚ\™Y\˜[Y]\ˆØÚ[X]XÜÈœ›ÛHHÝÛ™\‹\™\]Y\ÝYØ\™›ØØX[\žKˆ\ÙBˆ
+ˆÚÝÈÛÛ›Û˜[Y\Ë™]™\ˆYX\Ý\™Y]Y[ÎÈX™[ËÝ[š]È™[ÝÈÝ^H]]Üš]]]™K‚ˆ
+ˆÛ™H\Ü]Ú\ˆÙ\™\È]™\žHÜ™[˜\žHÛ›ØˆÝš\ˆÓÕS‘™]Z[œÈ]ÈX]š^ˆ
+‹ÂœÝ]XÈRWÑUÈ›Ø]ÛÛ\ÙÛ\ÛÝ]]
+[˜[YK›Ø][œ]
+BžÂˆZ[Ý™\ÚÛ˜][ËXZÙ]\ÂˆÝ]XÈÛÛœÝ›Ø]˜][ÜÖ×O^ÌKKY‹‹ËŸNÂˆX\Ý\—ØÛÛ\WÜÝÊ˜[YK	™\ÚÛ	œ˜][Ë	›XZÙ]\
+NÂˆ›Ø]KMŒŠÍŒŠ™\ÚÛÌLËŒ‹Ý™\Z[œ]]ÛÜOLKŒ‹LKŒ‹Ü˜][ÜÖÜ˜][×KÜLÂˆYŠÝ™\LÊYÜ\ÛÜJ›Ý™\ŽÂˆ[ÙHYŠÝ™\‹LÊYÜ\ÛÜJŠÝ™\ŠÌÊJŠÝ™\ŠÌÊKÌL‹ŒŽÂˆ™]\›ˆ[œ]YÜŽÈÊˆÛÛ\™\ÜÚ[ÛˆÚ\H™Y›Ü™HXZÙ]\›ÝYX\Ý\™Y]Y[Ëˆ
+‹ÂŸBœÝ]XÈRWÑUÈ[Ù[X[X×Ø[[Ý[ÙÛ\
+™Y—Ý‹[˜[[ÞZ[M—ÝÛÛ
+BžÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÚ[OY	‰™O›X^Ê˜[
+ŒLÊÙO›X^ÌŠKÙO›X^ŒYXÞLNÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÐÓÓTJHÂˆ[OMÂˆÝ—Û[™JYÞ
+ÌNŽ×ÓS‘JNÂˆ›ÜŠ[OLNÚOLÍŽÚJÊÊHÂˆ›Ø][œ]KMŒŠÍŒŠšKÌÍ‹ŒŽÂˆ[OMJ[
+J
+ÛÛ\ÙÛ\ÛÝ]]
+˜[[œ]
+JÍ
+JŒŒÍ
+ÌYŠNÂˆÝ—Û[™JY
+ÚKLKKY
+ÚKKÛÛ
+NÜO^NÂˆBˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÑ–	‰ˆ‹˜ÏOQ–ÑÑ‘’ÊHÂˆ›Ø][\LL™YY˜XÚÏJ™Y—ÙÙ]
+Š—ÑS‘ËÑ––ÑÕTJJOÌKŒMYŽŒŽYŠJœKÌLËŒŽÂˆ›ÜŠ[LÚÚŠÊÊHÚ[J[
+J[\
+ÌYŠNÚYŠ
+XÝ—Ü™XÝ
+Y
+ÌÊÚŠŒLËZ‹ÛÛ
+NØ[\
+Y™YY˜XÚÎßBˆÝ—Ü™XÝ
+YÍËK×ÓS‘JNÂˆH[ÙHYŠ‹šÚ[™OT—ÔÔ‘T
+HÂˆ›ÜŠ[LÚÚŠÊÊXÝ—Ü™XÝ
+Y
+ÚŠKÍËK]˜[ØÛÛ×ÓS‘JNÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ
+
+‹˜OOUÑ–	‰ˆ
+‹˜ÏOQ–Ô•—ÓU‘S‹˜ÏOQ–ÑÓU‘S
+JH
+‹˜OOUÓRV	‰ˆ
+‹˜ÏOSVÔ‘Uˆ‹˜ÏOSVÑJJH˜[YWÚ\Ê”™]ˆŠH˜[YWÚ\Ê‘HŠJJHÂˆ[[^OJ‹˜OOUÑ–	‰ˆ‹˜ÏOQ–ÑÓU‘S
+_
+‹˜OOUÓRV	‰ˆ‹˜ÏOSVÑJ_˜[YWÚ\Ê‘HŠNÂˆÝ—Ü™XÝ
+YÍËK×ÓS‘JNÂˆYŠ[^JY›ÜŠ[LÚÚŠÊÊ^Ú[J
+M‹ZŠŒÊJœJÌLŠKÌLÎÚYŠ
+XÝ—Ü™XÝ
+Y
+ÌÊÚŠŒLËZ‹ÛÛ
+NßBˆ[ÙH›ÜŠ[LÚÎÚŠÊÊ^Ú[J
+ŠÚŠŒŠJœJÌLŠKÌLÎÚYŠ
+XÝ—Ü™XÝ
+Y
+ÚŠ‹ÎZÌ‹‹ÛÛ
+NßBˆH[ÙH™]\›ˆÂˆ™]\›ˆNÂŸB‚œÝ]XÈRWÑUÈ[Û\ÚY[]WÚ[™^
+[ÛÝ[[˜[
+^ÚYŠÛÝ[L
+\™]\›ˆLNÚYŠÛÝ[N
+\™]\›ˆ˜[Ü™]\›ˆ˜[
+ËÊÛÝ[LJNßBœÝ]XÈRWÑUÈ›ÚYÛ\ÚY[]J[ÛÝ[[˜[[Z[M—ÝÛÛ
+^Ú[XÛÝ[ŽÎ˜ÛÝ[Ù[XÝYYÛ\ÚY[]WÚ[™^
+ÛÝ[˜[
+NÙ›ÜŠ[LÚŽÚŠÊÊ\˜›Þ
+
+Ê‰M
+JŒLÌ
+Ú‹Í
+ŒLËËKO\Ù[XÝYØÛÛ×ÓS‘JNÚYŠXÛÝ[
+XÝ—Ü™XÝ
+
+ÌL‹ÎLËK×ÓS‘JNßB‚‹Êˆ]X[]]]™H\˜[Y]\ˆØÚ[X]XÜÎˆÜ™[˜[SQHÜXÚ[™Ë›ÝHYX\Ý\™Y™X]Û\È^\Ëˆ
+‹Â‹Êˆš^Y\\ÙHÚ[\ÛÚY›ÙÜ™\ÜÚ]™[H›][™YÝØ\™Ü]X\™H\ÈÝÜ™Y’U‘Hš\Ù\Ë‚ˆ
+ˆ]X[]]]™H[[Ý[XÛÛ‹›ÝYX\Ý\™Y]Y[ÈÜˆÙ[XÝY\ÝÜ[Ûˆ˜[œÙ™\‹ˆ
+‹ÂœÝ]XÈRWÑUÈ›ÚYš]™WØ[[Ý[ÙÛ\
+[˜[[ÞZ[M—ÝÛÛ
+^ÂˆÝ]XÈÛÛœÝ[M—ÝØ]™VÌÍ×O^ÌMŽLLLŒËMŒÎËŒLŒ‹LLKŽÍÍËÌÎLKÌŒŽKÌÍËÌŒŽKÌÎLKŽÍÍËLLKŒLŒ‹MŒÎLLŒËMŽLMMŽLLLLŒËLMŒÎLŒLŒ‹LLLKLŽÍÍËLÌÎLKLÌŒŽKLÌÍËLÌŒŽKLÌÎLKLŽÍÍËLLLKLŒLŒ‹LMŒÎËLLLŒËMMŽLNÂˆ[OLÎØZ[LNMŒKÊMË]˜[
+NÂˆ›ÜŠ[LÞLÍŽÞ
+ÊÊ^Âˆ[O]Ø]™VÞJ™ØZ[‹ÌLÎÚYŠOŒÌÍÊXOLÌÍÎÚYŠOLÌÍÊXOKLÌÍÎÂˆ[J
+OËXN˜JJŽ
+ÌMŒÎÊKÌÌÍÎÚ[OLÎ
+ÊOÚ‹Z
+NÂˆYŠ
+XÝ—Û[™JÞLNJÞKÞLN
+ÞKÛÛ
+NÂˆO^NÂˆBŸBœÝ]XÈRWÑUÈ›ÚYÛÜÚY[]WÙÛ\
+[ÛÝ[[˜[[ÞZ[M—ÝÛÛ
+^Âˆ[XÛÝ[ŽÎ˜ÛÝ[Ù[XÝYYÛ\ÚY[]WÚ[™^
+ÛÝ[˜[
+NÂˆYŠXÛÝ[
+^ØÝ—Ü™XÝ
+ÞM‹ÎLËK×ÓS‘JNÜ™]\›ŽßBˆ[›ÝÜÏJŠÌÊKÍÂˆ›ÜŠ[›ÝÏLÜ›ÝÏ›ÝÜÎÜ›ÝÊÊÊ^Ú[œ[‹\›ÝÊÚYŠœ
+[œMÚ[YXÞJœŠŒLLÊKÌ‹O\›ÝÜÏOLOÌÍNŒÌ
+ÌL
+œ›ÝÎÂˆ›ÜŠ[ÏLÚÏœŽÚÊÊÊ\˜›Þ
+Y
+ÚÊŒLKËËK›ÝÊ
+ÚÏO\Ù[XÝYØÛÛ×ÓS‘JNßBŸB‚œÝ]XÈRWÑUÈ[[ÙÛ\ÜÙ[X[XÜÊ™Y—Ý‹[˜[[ÞZ[M—ÝÛÛ
+^ÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÚ[OY	‰™O›X^Ê˜[
+ŒLÊÙO›X^ÌŠKÙO›X^ŒXÞLNÂˆYŠ‹šÚ[™OT—ÑS‘É‰œ‹˜OOUÑ–	‰œ‹˜ÏOQ–ÑÕSQJ^ÂˆÝ]XÈÛÛœÝ[Ø\ÌL×O^Ì‹ËKK‹‹ËKLNÚ[ÏYØ\Ý˜[LÏÝ˜[ŒNÂˆÝ—Ü™XÝ
+ÍËK×ÓS‘JNØÝ—Ü™XÝ
+ŽK‹NÛÛ
+NÂˆ›ÜŠ[[
+ÙÎÞXÞ
+ÌNÞ
+ÏYÊXÝ—Ü™XÝ
+ÍKKL‹ÛÛ
+NÂˆÝ—Û[™JL
+ÙËLÛÛ
+NÂˆY[ÙHYŠ‹šÚ[™OT—ÑS‘É‰œ‹˜OOUÑ–	‰œ‹˜ÏOQ–Ô•—ÑPÐVJ^Âˆ›Ø]OLN˜KŒ™ŠËÌÙŠœKÌLÎÂˆÝ—Ü™XÝ
+ÍËK×ÓS‘JNÂˆ›ÜŠ[LÚÎÚŠÊÊ^Ú[J[
+JJËYŠNÚYŠ
+XÝ—Ü™XÝ
+
+ÚŠ‹ËZ‹ÛÛ
+NØJY˜ŽßBˆY[ÙHYŠ‹šÚ[™OT—ÔÔU‹šÚ[™OT—Ð”’ÔÓÕ‹šÚ[™OT—ÔÐTŠ^ÂˆYŠ‹šÚ[™OT—Ð”’ÔÓÕ
+[ÛÜÚY[]WÙÛ\
+[™Ú[™WØœš×ÛœÛÝÊ
+K˜[ÞÛÛ
+NÂˆ[ÙHÛ\ÚY[]JO›X^
+ÌK˜[ÛÛ
+NÂˆY[ÙHYŠ‹šÚ[™OT—ÕTJ^ÂˆYŠ˜[MŠ^ØÝ—Û[™JË
+ÎËÛÛ
+NØÝ—Û[™J
+ÎË
+ÎÌËÛÛ
+NØÝ—Û[™J
+ÎÌË
+ÌNÌËÛÛ
+NØÝ—Û[™J
+ÌNÌË
+ÌNËÛÛ
+NØÝ—Û[™J
+ÌNË
+ÌŽËÛÛ
+NØÝ—Û[™J
+ÌŽË
+ÌŽÌËÛÛ
+NØÝ—Û[™J
+ÌŽÌË
+ÌÍ‹ÌËÛÛ
+NßBˆ[Ù^Ù›ÜŠ[ÏKLNÜÏLNÜÊÏLŠ^Ú[XÞ
+ÜÊŒLÙ\ØÊ
+›Ø]
+^
+ÌY‹ÍËY‹ËŒ‹×ÓS‘JNÙ\ØÊ
+›Ø]
+^
+ÌY‹ÍËY‹KŒ‹ÓÕS‘ÑPÑJNØÝ—Ü™XÝ
+LKÍ‹ËËÛÛ
+NÜÝ]XÈÛÛœÝ[ÝÌM—O^Ì‹ËË‹L‹LËMMMLËLŸNÜÝ]XÈÛÛœÝ[ÝVÌM—O^ËMMLËL‹‹ËË‹L‹LËMNØÝ—Û[™JÍË
+ÙÝ\WÙÛ\Ü\ÙWKÍÊÙVÝ\WÙÛ\Ü\ÙWKÛÛ
+NßXÝ—Ü™XÝ
+
+Ì‹ÌËK×ÓS‘JNÚ[ÙX\J˜[LMŠJŒÌ‹ÌLLNØÝ—Ü™XÝ
+
+Ì‹ËJÝÙX\‹‹ÛÛ
+NßBˆY[ÙHYŠ‹šÚ[™OT—ÑS‘É‰œ‹˜OOUÑ–	‰œ‹˜ÏOQ–Ñ’U‘J^Âˆš]™WØ[[Ý[ÙÛ\
+˜[ÞÛÛ
+NÂˆY[ÙH™]\›ˆÜ™]\›ˆNÂŸB‚œÝ]XÈRWÑUÈ[ÛÛ›ÛÙÛ\
+™Y—Ý‹[˜[[ÞZ[M—ÝÛÛ
+BžÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÂˆ[OY	‰ˆO›X^Ê˜[
+ŒLÊÙO›X^ÌŠKÙO›X^ŒYXÞLNšYÚXÞ
+ÌNÂˆYŠO
+\OLÂˆYŠOŒLÊ\OLLÎÂˆYŠ[ÙÛ\ÜÙ[X[XÜÊ‹˜[ÞÛÛ
+J\™]\›ˆNÂˆYŠÙ[X[X×Ø[[Ý[ÙÛ\
+‹˜[ÞÛÛ
+J\™]\›ˆNÂˆYŠ\×Ü[ŠŠH‹šÚ[™OT—Ð•S”Èˆ
+‹šÚ[™OT—ÑS‘È	‰ˆ
+
+‹˜OOUÐ”’È	‰ˆ‹˜ÏOLJHˆ
+‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÑ‘ŠJJJHÂˆ[][Y
+ÜJŒÍ‹ÌLÎÂˆÝ—Ü™XÝ
+YÎÍËK×ÓS‘JNØÝ—Ü™XÝ
+ÞÌ‹KLË×ÑÔVJNÂˆÝ—Ü™XÝ
+YÍKKË×ÑÔVJNØÝ—Ü™XÝ
+šYÚÍKKË×ÑÔVJNÂˆÝ—Ü™XÝ
+]LKÍËKÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—ÑSˆ‹šÚ[™OT—Ð“Sˆ‹šÚ[™OT—ÔÓSˆ‹šÚ[™OT—ÔÐTˆ‹šÚ[™OT—ÔÔU‹šÚ[™OT—Ð”’ÔÓÕ
+HÂˆ›ÜŠ[LÚÚŠÊÊHÂˆ[[Y
+Ê‰M
+JŒLOLÌ
+Ê‹Í
+JŒLÂˆ˜›Þ
+KËËK\JËÌLÏØÛÛ×ÓS‘JNÂˆBˆH[ÙHYŠ‹šÚ[™OT—ÑUH‹šÚ[™OT—Ð”UJHÂˆÝ—Ü™XÝ
+YÎÍËK×ÓS‘JNÂˆÝ]XÈÛÛœÝZ[ÝØ\ÖÍO^ÌL‹‹MŸNÈÊˆKÌM‹KÌM•KÌÌ‹KÎ
+‹Âˆ[Ø\YØ\ÖÊ[œÚYÛ™Y
+]˜[Ê[œÚYÛ™Y
+]˜[ŒNÂˆ›ÜŠ[[Y
+ÌNÞ\šYÚÞ
+ÏYØ\
+XÝ—Ü™XÝ
+ÌK‹MKÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—Ð‘TŠHÂˆYŠ˜[OLÊHÈÊˆ^\Ý[™È˜[™ÛH\™XÝ[Û‹›Ý[ˆ[™[Y˜Z™XÝÜžH
+‹ÂˆÝ—Û[™JYËÞMËÌKÛÛ
+NØÝ—Û[™JÞMËÌKÞ
+ÍËÛÛ
+NØÝ—Û[™JÞ
+ÍËšYÚÌËÛÛ
+NÂˆH[ÙHÂˆÝ—Ü™XÝ
+YÎÍËKÛÛ
+NÂˆYŠ˜[OLJ^ØÝ—Û[™JšYÚM‹Ì‹šYÚÎÛÛ
+NØÝ—Û[™JšYÚÎšYÚM‹ÛÛ
+NßBˆYŠ˜[OL
+^ØÝ—Û[™JY
+Í‹Ì‹YÎÛÛ
+NØÝ—Û[™JYÎY
+Í‹ÛÛ
+NßBˆBˆH[ÙHYŠ‹šÚ[™OT—ÕTJHÂˆ›ÜŠ[ÚYOKLNÜÚYOLNÜÚYJÏLŠHÂˆ[XÞ
+ÜÚYJŒLÂˆ\ØÊ
+›Ø]
+^
+ÌY‹ÍËY‹ËŒ‹×ÓS‘JNÙ\ØÊ
+›Ø]
+^
+ÌY‹ÍËY‹KŒ‹ÓÕS‘ÑPÑJNÂˆÝ—Û[™JÍË
+ÜJÌLËÌËÛÛ
+NØÝ—Ü™XÝ
+LKÍ‹ËËÛÛ
+NÂˆBˆÝ—Ü™XÝ
+ÞLL‹ŒKKÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—ÔÔ‘T
+‹šÚ[™OT—ÑS‘È	‰ˆ
+
+‹˜OOUÑ–	‰ˆ
+‹˜ÏOQ–ÑÕSQH‹˜ÏOQ–ÑÑ‘’È‹˜ÏOQ–ÑÓU‘S
+JH
+‹˜OOUÓRV	‰ˆ‹˜ÏOSVÑJH˜[YWÚ\Ê‘HŠJJJHÂˆ›ÜŠ[LÚÚŠÊÊHÂˆ[LM‹ZŠŠ\JŒËÌLÊNÂˆÝ—Ü™XÝ
+Y
+ÌÊÚŠŒLËZËÛÛ
+NÂˆBˆÝ—Û[™JY
+ÌËŽKšYÚŽK×ÑÔVJNØÝ—Û[™JY
+ÌËŽKY
+ÍË‹×ÑÔVJNÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ
+
+‹˜OOUÑ–	‰ˆ
+‹˜ÏOQ–Ô•—ÑPÐVH‹˜ÏOQ–Ô•—ÓU‘S
+JH
+‹˜OOUÓRV	‰ˆ‹˜ÏOSVÔ‘UŠH˜[YWÚ\Ê”™]ˆŠJJHÂˆ›ÜŠ[LÚÎÚŠÊÊHÚ[LŠÚŠŠJÌÌŠKÍÚYŠŒN
+ZLNØÝ—Ü™XÝ
+Y
+ÚŠ‹ÎZÌ‹‹ÛÛ
+NßBˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÑ–	‰ˆ
+‹˜ÏOQ–Ô•—ÕÓ‘H‹˜ÏOQ–ÑÕÓ‘H‹˜ÏOQ–Ô•—ÒŠJHÂˆ[]›Ý[Y
+ÍÊÜJŒŒÌLÎÂˆÝ—Ü™XÝ
+YËÍËK×ÓS‘JNØÝ—Û[™JYÌ‹]›ÝÌ‹ÛÛ
+NØÝ—Û[™J]›ÝÌ‹šYÚ‹ÛÛ
+NÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÐÓÓTJHÂˆÝ—Û[™JYËÞÍ‹ÛÛ
+NØÝ—Û[™JÞÍ‹šYÚÍ‹\JŽÌLËÛÛ
+NÂˆÝ—Ü™XÝ
+YKÍËK×ÓS‘JNÂˆH[ÙHYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÑ–	‰ˆ‹˜ÏOQ–Ñ’U‘JHÂˆ[›]LŠÜJŽÌLÎÂˆÝ—Û[™JYÎÞY›]ÌÛÛ
+NØÝ—Û[™JÞY›]ÌÞL‹ÌÛÛ
+NÂˆÝ—Û[™JÞL‹ÌÞ
+Ì‹‹ÛÛ
+NØÝ—Û[™JÞ
+Ì‹‹Þ
+Ù›]‹ÛÛ
+NØÝ—Û[™JÞ
+Ù›]‹šYÚÎÛÛ
+NÂˆH[ÙHYŠ	‰ˆO›˜[Y\È	‰ˆO›X^LŠHÂˆ™]\›ˆÈÊˆ˜[YYÝÚ]Ú\È™]Z[ˆ^XÝÜÚ][Ûˆ\Ëˆ
+‹ÂˆH[ÙHÂˆÊˆ™]]˜[˜[YHØØ[H›Üˆ\˜[Y]\œÈÚ]Ý]HYXØ]YØÚ[X]XË‚ˆ
+ˆ›È˜]^›Ý\žHÛ›Ø‹[™[Y™\ÜÛœÙHÝ\™KÜˆ™]ÈÛÛ›Ûˆ
+‹Âˆ›ÜŠ[LÚÎÚŠÊÊHÂˆ[LÊÚŠŒŽÂˆÝ—Ü™XÝ
+Y
+ÚŠ‹ËZËH	‰ˆŠŒLËÍ\OØÛÛ×ÓS‘JNÂˆBˆ[][Y
+ÜJŒÍ‹ÌLÎÂˆÝ—Ü™XÝ
+YKÍËK×ÓS‘JNØÝ—Ü™XÝ
+]KËÛÛ
+NÂˆBˆ™]\›ˆNÂŸB‚‹ÊˆÜšYÚ[˜[ÚXØYÛËÓZX[ZHÛÛ›ÛÈÚ]Ý]HT•Û\™]\ÙHH^\Ý[™Âˆ
+ˆÛ›Ø‹\Ýš\˜[Z[Y\ÎˆÛ™K[ÝÜ\ÜË‘ˆš[\ˆXZËš]™Kš\Û\‹\Âˆ
+ˆ[™H™]]˜[˜[YHØØ[KˆÝš\ÛÛÜ™[˜]\È
+HŽ‹L
+NÈØ[\ˆÙ™œÙ]Ëˆ
+‹ÂœÝ]XÈRWÑUÈ[ÜšY×ÜÝš\ÜÛÝ
+™Y—ÝŠBžÂˆYŠ‹šÚ[™OT—ÑS‘È‹˜HOUÌÌÊH™]\›ˆÂˆ[Y[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠNÂˆYŠOSÔ’QÒSSÔÓÕS‘ÐÒPÐQÓÊH™]\›ˆ‹˜ÏLH	‰ˆ
+‹˜ÏMˆ‹˜ÏOLLH‹˜ÏOLLˆ‹˜ÏOLMH‹˜ÏOLMÊNÂˆYŠOSÔ’QÒSSÔÓÕS‘ÓRPSRJH™]\›ˆ‹˜ÏLH	‰ˆ‹˜ÏLMH	‰ˆ‹˜ÈOMˆ	‰ˆ‹˜ÈOLLNÂˆ™]\›ˆÂŸB‹ÊˆÜšYÚ[˜[XÛÛ›ÛÛ\ËžNH]
+ÞÞJKˆXXÚÛ™HXÝ\™\ÈÚ]HÛÛ›Ûˆ
+ˆÙ\È[™[Ý™\ÈÚ]H˜[YKˆÕUÑ‘‹ÔPRÈ›ÛÝÈš[\—ÙÛ\[™’UBˆ
+ˆ›ÛÝÜÈš]™WØ[[Ý[ÙÛ\
+HÛÛ›Ø‹\Ýš\˜[Z[Y\ÊKØØ[YÈHÙ[ˆ
+‹ÂˆÙYš[™HÑ×ÕÈ‚ˆÙYš[™HÑ×ÒN‚‹Êˆ]X[]]]™HY™™XÝY[]Y\È[ˆH^\Ý[™ÈžNH›ÞˆHÚÜ˜[YBˆ
+ˆ™\ÚYHXXÚXÝ\™H™[XZ[œÈ]]Üš]]]™NÈ\ÙH\™H›ÝYX\Ý\™YÔÝËˆ
+‹ÂœÝ]XÈRWÑUÈ›ÚYÜšY×ÙžÙÛ\
+[\K[Þ[ÞKZ[M—ÝÛÛ
+BžÂˆ[šYÚYÞ
+ÓÑ×ÕËLK›ÝYÞJÓÑ×ÒZYYÞJÓÑ×ÒÌŽÂˆÝÚ]Ú
+\JHÂˆØ\ÙHˆÊˆž\\ÜÈ
+‹ÂˆÝ—Û[™JÞZYšYÚZYÛÛ
+NØÝ—Û[™JÞ
+ÌLÞJÌ‹Þ
+ÌMK›ÝL‹ÛÛ
+NØœ™XZÎÂˆØ\ÙHNˆØ\ÙHÎˆÈÊˆÚÜ\ÈZ\ˆÈ[œÙ[X›Hš[È
+‹Âˆ[]\OOMÏÌÎŒŽÂˆ›ÜŠ[›ÝÏLÜ›ÝÏŽÜ›ÝÊÊÊHÂˆ[OYÞJÊOLÏÌÊÜ›ÝÊNJÜ›ÝÊÊKO^NÂˆ›ÜŠ[ÏLNÚÏMÚÊÊÊHÂˆ[YÞ
+ÚÊ‹^O^JÊÉŒOÌŽ‹LŠNÂˆÝ—Û[™JÞ
+ÊËLJJ‹K^KÛÛ
+NÜO^^NÂˆBˆBˆœ™XZÎÂˆBˆØ\ÙHŽˆÊˆ\Ù\ˆ›ÝÚ\È
+‹ÂˆÝ—Û[™JÞÞJÍKÞ
+ÌËÞJÍKÛÛ
+NÂˆ›ÜŠ[OLÚOŽÚJÊÊHÂˆ[YÞ
+ÌÊÚJŒLÂˆÝ—Û[™JÞJÍK
+Í›ÝL‹ÛÛ
+NØÝ—Û[™J
+Í›ÝL‹
+ÎÞJÍKÛÛ
+NÂˆÝ—Û[™J
+ÎÞJÍKOÜšYÚž
+ÌLÞJÍKÛÛ
+NÂˆBˆœ™XZÎÂˆØ\ÙHÎˆÊˆš[™È[Ù[][ÛŽˆ[\›˜][™ÈØ™\È[™\ˆ[ˆ[\]YH[™[ÜH
+‹Âˆ›ÜŠ[OLÚOŽÚJÊÊHÂˆ[YÞ
+ÚJZOÏÌŠÚJŒŽŒL‹ZJŒŽÂˆÝ—Û[™JZY
+Ì‹ZY
+ÊIŒOÚ‹Z
+KÛÛ
+NÂˆÝ—Û[™J
+Ì‹ZY
+ÊIŒOÚ‹Z
+K
+ÍZYÛÛ
+NÂˆBˆœ™XZÎÂˆØ\ÙHˆÊˆÛÛ\™\ÜÛÜˆÛ™YH
+‹ÂˆÝ—Û[™JÞ›ÝÞ
+ÌLKÞJÍËÛÛ
+NØÝ—Û[™JÞ
+ÌLKÞJÍËšYÚÞJÌËÛÛ
+NØœ™XZÎÂˆØ\ÙHNˆÊˆXÚ[X]ÜˆÝ\È
+‹Âˆ›ÜŠ[OLÚOÚJÊÊHÂˆ[YÞ
+ÚJ‹OYÞJÌMKZJÂˆÝ—Û[™JK
+Í‹KÛÛ
+NÚYŠOÊXÝ—Û[™J
+Í‹K
+Í‹KMÛÛ
+NÂˆBˆœ™XZÎÂˆØ\ÙHŽˆÊˆTHXZÈ
+‹ÂˆÝ—Û[™JÞZYÞ
+Í‹ZYÛÛ
+NØÝ—Û[™JÞ
+Í‹ZYÞ
+ÌL‹ÞJÌ‹ÛÛ
+NÂˆÝ—Û[™JÞ
+ÌL‹ÞJÌ‹Þ
+ÌNZYÛÛ
+NØÝ—Û[™JÞ
+ÌNZYšYÚZYÛÛ
+NØœ™XZÎÂˆØ\ÙHˆÊˆÚÜ[^H\È
+‹Âˆ›ÜŠ[OLÚOÎÚJÊÊXÝ—Ü™XÝ
+Þ
+ÚJŽK›ÝLLŠÚJ‹L‹ZJÛÛ
+NÂˆÝ—Û[™JÞ›ÝšYÚ›ÝÛÛ
+NØœ™XZÎÂˆØ\ÙHNˆÊˆ”H[^NˆÛØÚÈ\È\È
+‹ÂˆÝ—Û[™JÞÞJÌËÞ
+ÎÞJÌËÛÛ
+NØÝ—Û[™JÞ
+ÎÞJÌËÞ
+ÎÞJÌLKÛÛ
+NÂˆÝ—Û[™JÞ
+ÎÞJÌLKÞÞJÌLKÛÛ
+NØÝ—Û[™JÞÞJÌLKÞÞJÌËÛÛ
+NÂˆÝ—Û[™JÞ
+ÍÞJÍKÞ
+ÍÞJÍËÛÛ
+NØÝ—Û[™JÞ
+ÍÞJÍËÞ
+Í‹ÞJÍËÛÛ
+NÂˆ›ÜŠ[OLÚOÎÚJÊÊXÝ—Ü™XÝ
+Þ
+ÌLŠÚJ‹›ÝLLŠÚJKL‹ZJÛÛ
+NÂˆÝ—Û[™JÞ›ÝšYÚ›ÝÛÛ
+NØœ™XZÎÂˆØ\ÙHLˆÊˆ[ˆ›ÛÛHØ[È[™Y™\ÙH™Y›XÝ[ÛœÈ
+‹ÂˆÝ—Û[™JÞ›ÝÞÞJÌ‹ÛÛ
+NØÝ—Û[™JÞÞJÌ‹šYÚÞJÌ‹ÛÛ
+NØÝ—Û[™JšYÚÞJÌ‹šYÚ›ÝÛÛ
+NÂˆ›ÜŠ[OLÚONÚJÊÊXÝ—Ü™XÝ
+Þ
+ÌÊÚJÞJÍJÚKKLZJŒ‹ÛÛ
+NÂˆœ™XZÎÂˆØ\ÙHLNˆÊˆ™]™\˜ˆÝ]Ù™ˆ]HØ]H
+‹Âˆ›ÜŠ[OLÚOÚJÊÊXÝ—Ü™XÝ
+Þ
+ÚJKÞJÌÊÚJŒ‹‹L‹ZJŒ‹ÛÛ
+NÂˆÝ—Ü™XÝ
+Þ
+ÌŒÞJÌK‹MËÛÛ
+NØÝ—Û[™JÞ
+ÌŒ‹›ÝšYÚ›ÝÛÛ
+NØœ™XZÎÂˆY˜][ˆœ™XZÎÂˆBŸBœÝ]XÈ›Ø]Ù×ÜÚYÈÊˆ]™H“ÎˆHØ]™HØÜ›ÛÈžH\È]XÚÙˆ
+‹ÂœÝ]XÈRWÑUÈ›ÚYÙ×ÝØ]™J[Þ[ÞK›Ø]
+
+™ŠJ›Ø]›Ø]
+K›Ø]KZ[M—ÝÛÛ
+BžÈÊˆˆ™]\›œÈLK‹ŒH
+\ÜÚ]]™JHÝ™\ˆ‹ŒH
+‹Âˆ[OLÂˆÝ—Ü™XÝ
+ÞÞJÓÑ×ÒÑ×ÕËK×ÓS‘JNÂˆ›ÜŠ[OLÚOÑ×ÕÎÚJÊÊHÂˆ›Ø]YŠ
+›Ø]
+ZKÊÑ×ÕËLJJÛÙ×ÜÚYJNÂˆYŠŒJ]LNÈYŠLJ]KLNÂˆ[^OYÞJÓÑ×ÒÌ‹J[
+JŠ‹ŒŠÊËKYŽ‹YŠJNÂˆYŠJHÝ—Û[™JÞ
+ÚKLKKÞ
+ÚK^KÛÛ
+NÂˆO^^NÂˆBŸBœÝ]XÈ›Ø]Ù×ÜÚ[Š›Ø]›Ø]Ê^Ü™]\›ˆ›WÜÚ[™Š‹ŒŽÌNLÙŠ
+šÊNßBœÝ]XÈ›Ø]Ù×Û›×Ø[\
+›Ø]›Ø]J^Ü™]\›ˆ
+ŒYŠËŽYŠœJJ™›WÜÚ[™Š‹ŒŽÌNLÙŠ
+Œ‹ŒŠNßBœÝ]XÈ›Ø]Ù×Û›×Ü˜]J›Ø]›Ø]J^Ü™]\›ˆ›WÜÚ[™Š‹ŒŽÌNLÙŠ
+ŠKŒŠÍŒŠœJJNßBœÝ]XÈ›Ø]Ù×Øš]J›Ø]›Ø]J^Ù›Ø]ÏKŒÙŠÍ‹ŒŠœNÜ™]\›ˆ›WÝ[šŠÊ›Ù×ÜÚ[ŠKYŠJKÙ›WÝ[šŠÊNßBœÝ]XÈ›Ø]Ù×ÙÛ˜]Ê›Ø]›Ø]J^Ù›Ø][Ù×ÜÚ[ŠKYŠJŠKŒŠÌËŒŠœJNÂˆÚ[JŒ_LJH]ŒOÌ‹]Ž‹L‹]ŽÈ™]\›ˆŽßHÊˆØ]™Y›Û\ˆ
+‹ÂœÝ]XÈ›Ø]Ù×ØÜ\Ú
+›Ø]›Ø]J^Ú[LL‹J[
+JJŒL
+ËYŠNÙ›Ø][Ù×ÜÚ[Š
+›Ø]
+J
+[
+J
+Š‹\JŒŒ
+JJHÊ‹\JŒŒ
+KKYŠNÂˆ™]\›ˆ
+›Ø]
+J[
+JŠ›ŠÊËKYŽ‹YŠJKÊ›Ø]
+[ŽßHÊˆØ[\K\˜]H
+Èš]™YXÝ[Ûˆ
+‹ÂœÝ]XÈ›Ø]Ù×Ù›J›Ø]›Ø]J^Ü™]\›ˆ›WÜÚ[™Š‹ŒŽÌNLÙŠŠKYŠ
+JÜJŒK™Š™›WÜÚ[™Š‹ŒŽÌNLÙŠŒKYŠ
+JNßBœÝ]XÈRWÑUÈ[Ù×ÜÝ]\Ê™Y—Ý‹[˜[[
+šY
+BžÈÊˆ[X™\ˆÙˆ\Ý[˜Ý™XYÝ]È[™H[™^Ùˆ˜[[[Û™È[H
+‹ÂˆÚ\ˆVÌM—KVÎK™]–ÌM—OHˆŽÚ[LÊšYLÂˆ›ÜŠ[LÝLLÎÝŠÊÊ^Ü™Y—Ý˜[YWÛÙŠ‹‹KJNÚYŠÝ˜Û\ÜÊK™]ŠJ^ÛŠÊÎÜ]ÜÊ™]‹JNßZYŠO]˜[
+JšY[‹LNßBˆ™]\›ˆŽÂŸB‹ÊˆÚXØYÛÈS•ˆÛ\ˆHÛ™YHÛÛ[[ˆ›ÜˆHš[\ˆÜÚ][Ûˆˆ
+‹ŒJKˆHÛ™YBˆ
+ˆ˜]™[ÈÞ
+Ì‹‹™Þ
+ÓÑ×ÕËLKQS•—ÑS
+NHÙˆˆ
+KÛÈH[QÈ\ÈÛX\ˆÈÙYKˆ
+‹ÂˆÙYš[™HS•—ÑSœÝ]XÈ[[—ÚÛ™YWÞ
+[Þ›Ø]ŠBžÈJŠËYŠJ‹YŽÈÊˆš\Û\ŽˆÝ]Ù™ŠÑQÊ‘S•ˆÜ[œÈLK‹ŒKKÕUÑ‘ˆL	HÚ]ÈZYXÙ[
+‹Âˆ^ÌžŒOÌNžŽÈ™]\›ˆÞ
+ÌŠÊ[
+JŠŠÑ×ÕËLËQS•—ÑS
+JËYŠNÈBœÝ]XÈRWÑUÈ›ÚYÜšY×ÜÝš\ÙÛ\
+™Y—Ý‹[˜[[Þ[ÞKZ[M—ÝÛÛ
+BžÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÂˆ›Ø]OY	‰ˆO›X^Ê›Ø]
+]˜[Ê›Ø]
+YO›X^ŒÂˆ[ÚOY[™Ú[™WØ˜\Ü×ÜÛÝ[™Ø˜[šÊ	œ›Ú‹œÛÝ[™‹˜ŠOOSÔ’QÒSSÔÓÕS‘ÐÒPÐQÓËÏ\‹˜ÎÂˆ[]™[Ü›ÛOXÏOJÚOÌLŽŒM
+H
+XÚH	‰ˆ
+ÏOLHÏOMJJNÂˆ[ÜYÞJÌË›ÝYÞJÓÑ×ÒZYYÞJÓÑ×ÒÌ‹šYÚYÞ
+ÓÑ×ÕËLNÂˆYŠO
+\OLÈYŠOŒJ\OLNÂˆ›Ø][\L[ÙLÈ[œÚYÛ™YÝ]OM‹[LÂˆ[ÛÝ[™[™ÏY[™Ú[™WØ˜\Ü×Ý›ÚXÙWÝšY]Ê‹˜‹	˜[\	›[Ù	œÝ]K	š[
+H	‰ˆÝ]HOMŽÂˆYŠ[\
+X[\LÈYŠ[\ŒJX[\LNÂˆYŠÏOJÚOÌŽŽJH
+ÚH	‰ˆÏOLÊJHÈÊˆÕUÑ‘ˆÈPRÎˆÝÜ\ÜÈ™\ÜÛœÙH
+‹Âˆ›Ø]ÜO\KOLÂˆYŠÚH	‰ˆÏOLÊ^Ü™Y—ÝÜTŠ—ÑS‘ËÌÌË‹˜‹ŠNØÛÛœÝÜ\˜[WÝ
+™Ï\™Y—Ù\ØÊÜŠNÂˆÜOYÉ‰™ËO›X^Ê›Ø]
+[X]š^Ý˜[YJÜŠKÙËO›X^ŒÜO\NßBˆ[]›ÝYÞ
+Í
+Ê[
+JÜJŒM
+ËYŠKXZÏ]Ü
+Ì‹J[
+JJJËYŠNÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆÝ—Û[™JÞÜ
+Ì‹]›ÝLËÜ
+Ì‹ÛÛ
+NØÝ—Û[™J]›ÝLËÜ
+Ì‹]›ÝXZËÛÛ
+NÂˆÝ—Û[™J]›ÝXZË]›Ý
+ÍœšYÚÜšYÚœ]›Ý
+Í‹›ÝÛÛ
+NÂˆYŠ]›Ý
+ÍšYÚ
+HÝ—Û[™J]›Ý
+Í‹›ÝšYÚ›ÝÛÛ
+NÂˆH[ÙHYŠÚH	‰ˆÏOM
+HÈÊˆS•ŽˆHÝÜ\ÜÈÛ™YHHš[\ˆQÈÝÙY\È
+‹ÂˆÊˆÚXØYÛ×Ý›ÚXÙK˜È\Ü™\\™NˆˆHÝ]Ù™ˆ
+È˜Ù‹›]™[
+ˆ[—Ù\ˆHÛ™YBˆ
+ˆ[™]È™\ÛÛ˜[˜ÙH[\[Ý™HQ•Ô’QÒÛ›NˆH]™HÕUÑ‘ˆ
+ÈQÈS•‹‚ˆ
+ˆH[\ZYÚ\ÈH]™HPRÈ[™™]™\ˆ›ÛÝÜÈHQËˆH[HXÚÂˆ
+ˆX\šÜÈÚ\™HH[QÈZÙ\ÈHÛ™YKˆ
+‹Âˆ™Y—ÝÜTŠ—ÑS‘ËÌÌË‹˜‹ŠKTŠ—ÑS‘ËÌÌË‹˜‹ÊNÂˆÛÛœÝÜ\˜[WÝ
+™Ï\™Y—Ù\ØÊÜŠK
+™\™Y—Ù\ØÊŠNÂˆ›Ø]ÜOYÉ‰™ËO›X^Ê›Ø]
+[X]š^Ý˜[YJÜŠKÙËO›X^ŒOY	‰™O›X^Ê›Ø]
+[X]š^Ý˜[YJŠKÙO›X^ŒÂˆ›Ø]\LŠœKLKYÏLÈYŠ[™Ú[™WØ˜\Ü×Ùš[\—ÝšY]Ê‹˜‹	™YË	™
+JH\YÂˆYŠYÏ
+YYÏLÈYŠYÏŒJYYÏLNÈYŠO
+\OLÈYŠOŒJ\OLNÂˆ[]›ÝY[—ÚÛ™YWÞ
+ÞÜJÙYÊ™\
+KÝY[—ÚÛ™YWÞ
+ÞÜJÙ\
+K\ÜÏ]Ü
+ÌÎÂˆ[XZÏ\\ÜËLKJ[
+JJJËYŠNÈÊˆš^YžHPRÎˆK‹ˆX›Ý™HH\ÜØ˜[™
+‹Âˆ[[™\™ÞOJ[
+JYÊŠ\ËY\™\
+J‹ŒŠËYŠNÂˆÛÛY\Ø›[™
+×ÓS‘KÛÛM‹Y[™\™ÞJN˜›[™
+ÛÛ×ÕÒUK[™\™ÞJNÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆYŠÝO\]›Ý
+HÝ—Ü™XÝ
+Ý›ÝLËKË×ÓS‘JNÂˆYŠ]›ÝL™Þ
+HÝ—Û[™JÞ\ÜË]›ÝL‹\ÜËÛÛ
+NÂˆÝ—Û[™J]›ÝL‹\ÜË]›ÝXZËÛÛ
+NÂˆÝ—Û[™J]›ÝXZË]›Ý
+ÑS•—ÑS›ÝÛÛ
+NÂˆYŠ]›Ý
+ÑS•—ÑSšYÚ
+HÝ—Û[™J]›Ý
+ÑS•—ÑS›ÝšYÚ›ÝÛÛ
+NÂˆH[ÙHYŠÏOJÚOÌN
+JHÈÊˆÓQNˆÛÜY]Ú[™KÛÜHÚY[œÈ
+‹ÂˆÊˆ]™NˆHÝšY\ÈHÛÜH\ÈHÜØÚ[]Üˆ]ÚÛY\ÈÈH™]Âˆ
+ˆ›ÝH
+Ý\œ™[Oˆ\™Ù]œ›ÛHH[™Ú[™JNÈH˜]™[Y\\È]ˆ
+‹ÂˆÝ]XÈ›Ø]œ›ÛVÓTÔ×KÖÓTÔ×NÈÝ]XÈZ[ÝÙY[–ÓTÔ×NÂˆ[ÏLJÊ[
+JJŒN
+ËYŠKYÞ
+ÊÑ×ÕËLK]ÊKÌ‹\‹˜TÔÏÜ‹˜ŽŒÛLÂˆ›Ø]šKÝOLÏLLNÂˆYŠ[™Ú[™WØ˜\Ü×Û[Ý[Û—ÝšY]Ê‹	œ	˜šK	˜ÝK	Ë	›ÛŠJHÂˆYŠ\ÙY[–Ø—HÈO]ÖØ—JHÈœ›ÛVØ—O\ÙY[–Ø—OØÝNÎÈÖØ—O]ÎÈÙY[–Ø—OLNÈBˆYŠÖØ—HOYœ›ÛVØ—JHJÝKYœ›ÛVØ—JKÊÖØ—KYœ›ÛVØ—JNÂˆBˆYŠ
+YLÈYŠŒJYLNÂˆ[^
+Ê[
+JŠÊËYŠKOX›ÝLKJ[
+JŠŠ›ÝLK]Ü
+JËYŠNÂˆYŠLJHÈÝ—Û[™JÞ›ÝLK›ÝLKÛÛ
+NØÝ—Û[™J›ÝLK
+ÝËÜÛÛ
+NØÝ—Û[™J
+ÝËÜšYÚÜÛÛ
+NÈBˆ[ÙHÂˆÝ—Û[™JÞ›ÝLK›ÝLKÛÛ
+NØÝ—Û[™J›ÝLKKÛÛ
+NÂˆÝ—Û[™JK
+ÝËÜ×ÓS‘JNØÝ—Û[™J
+ÝËÜšYÚÜ×ÓS‘JNÂˆÝ—Ü™XÝ
+LKKLKËË×ÕÒUJNÂˆBˆH[ÙHYŠÚH	‰ˆÏOMJHÙ×ÝØ]™JÞÞKÙ×Øš]KKÛÛ
+NÈÊˆ’UNˆÛÙÛ\
+‹Âˆ[ÙHYŠÚH	‰ˆÏOMŠHÙ×ÝØ]™JÞÞKÙ×ÙÛ˜]ËKÛÛ
+NÈÊˆÓUÎˆ›Û
+‹Âˆ[ÙHYŠXÚH	‰ˆÏOLL
+HÙ×ÝØ]™JÞÞKÙ×ØÜ\ÚKÛÛ
+NÈÊˆÔ•TÒˆš]Ü˜]HÜ\Ú
+‹Âˆ[ÙHYŠÚH	‰ˆÏOLLJHÈÊˆS•‹ÑÐUHÙÙÛH
+‹Âˆ[YÈÙ×ÜÝ]\Ê‹˜[	šY
+NÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆYŠY
+^ØÝ—Û[™JÞ
+Ì‹›ÝÞ
+Ì‹ÜÛÛ
+NØÝ—Û[™JÞ
+Ì‹ÜÞ
+ÌŒ‹ÜÛÛ
+NØÝ—Û[™JÞ
+ÌŒ‹ÜÞ
+ÌŒ‹›ÝÛÛ
+NßBˆ[Ù^ØÝ—Û[™JÞ
+ÌK›ÝÞ
+ÍKÜÛÛ
+NØÝ—Û[™JÞ
+ÍKÜÞ
+ÌLZYÛÛ
+NØÝ—Û[™JÞ
+ÌLZYÞ
+ÌNZYÛÛ
+NØÝ—Û[™JÞ
+ÌNZYÞ
+Ì›ÝÛÛ
+NßBˆH[ÙHYŠ]™[Ü›ÛJHÈÊˆU‘SÈÕUUˆ]™HÙYÛY[YY]\ˆ
+‹Âˆ[ÙZ[[™ÏJ[
+JJ‹ŒŠËYŠK]\ÛÝ[™[™ÏÊ[
+JJ˜[\
+‹ŒŠËYŠNŒÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ›ÜŠ[OLÚOŽÚJÊÊHÂˆZ[M—Ý[šÏZO]Ð×ÕÒUNšOÙZ[[™ÏÊÛÝ[™[™ÏØ›[™
+×ÓS‘KÛÛŠN˜ÛÛ
+N×ÓS‘NÂˆÝ—Ü™XÝ
+Þ
+ÚJ›ÝLËZJŒ‹Ë‹[šÊNÂˆBˆH[ÙHYŠÚH	‰ˆÏOLMJHÈÊˆS‘ÑNˆØÝ]™HÝZ\œÈ
+‹Âˆ[Y[Ù×ÜÝ]\Ê‹˜[	šY
+KÝÏSÑ×ÕËÊÛŽŒJNÂˆ›ÜŠ[ÏLÚÏŽÚÊÊÊ^Ú[LÊÚÊŠÑ×ÒLÊKÊŒOÛ‹LNŒJNØÝ—Ü™XÝ
+Þ
+ÚÊœÝË›ÝZ
+ÌKÝËL‹ÏZYØÛÛ×ÓS‘JNßBˆH[ÙHYŠÚH	‰ˆÏOLMÊHÈÊˆ–TNˆ™XÛÙÛš^˜X›HY™™XÝXÝ\™H
+‹ÂˆÜšY×ÙžÙÛ\
+˜[ÞÞKÛÛ
+NÂˆH[ÙHYŠXÚH	‰ˆÏOLŠHÈÊˆÕPŽˆÜØÈÜ]X\™H
+ÈÝX‹[ØÝ]™HÜ]X\™H
+‹Âˆ[OLJÊ[
+JJŠËYŠNÂˆ›ÜŠ[OLÚOÚJÊÊ^Ú[YÞ
+ÚJŽØÝ—Û[™JÜ
+ÌËÜ×ÓS‘JNØÝ—Û[™J
+ÌËÜ
+ÌËÜ
+Í×ÓS‘JNØÝ—Û[™J
+ÌËÜ
+Í
+Í‹Ü
+Í×ÓS‘JNØÝ—Û[™J
+Í‹Ü
+Í
+Í‹Ü×ÓS‘JNßBˆ›ÜŠ[OLÚOŽÚJÊÊ^Ú[YÞ
+ÚJŒLŽØÝ—Û[™J›ÝXK
+Í‹›ÝXKÛÛ
+NØÝ—Û[™J
+Í‹›ÝXK
+Í‹›ÝÛÛ
+NØÝ—Û[™J
+Í‹›Ý
+ÌL‹›ÝÛÛ
+NÚYŠ
+ÌLšYÚ
+XÝ—Û[™J
+ÌL‹›Ý
+ÌL‹›ÝXKÛÛ
+NßBˆH[ÙHYŠXÚH	‰ˆ
+ÏOLÈÏOMÊJHÈÊˆUÒÈS‘NˆÙ[™H™YYH
+‹Âˆ›Ø][™ÏJJŒ‹LJJŒKŒYŽÈ[YÞ
+ÌL‹OX›ÝÂˆÝ—Ü™XÝ
+ÜL‹K‹×ÓS‘JNØÝ—Ü™XÝ
+Þ
+ÌK›ÝÑ×ÕËL‹K×ÓS‘JNÂˆÝ—Û[™JK
+Ê[
+J›WÜÚ[™Š[™ÊJŒLŠKKJ[
+J›WØÛÜÙŠ[™ÊJŒM
+KÛÛ
+NÂˆH[ÙHYŠXÚH	‰ˆÏON
+HÙ×ÝØ]™JÞÞKÙ×Ù›KKÛÛ
+NÈÊˆSÑTˆ“HØ]™H
+‹Âˆ[ÙHYŠXÚH	‰ˆ
+ÏOLLˆÏOLLÊJHÈÊˆÓÐ“H\ÈUNˆH]™HQÌHØÜ›ÛÈHØ]™H
+‹Âˆ›Ø]LšOLÝKÎÈ[ÛLÈ›Ø]ÞXÏXÏOLLÌ‹ŒŽŒKŒŠÍŒŠœNÂˆYŠY[™Ú[™WØ˜\Ü×Û[Ý[Û—ÝšY]Ê‹˜‹	œ	˜šK	˜ÝK	Ë	›ÛŠHLHŒJHKLNÂˆÙ×ÜÚYJ
+
+ÌJJ‹YŠKØÞXÎÈÊˆÛ™HQÈÞXÛHHÛ™H˜]ÛˆÞXÛH
+‹ÂˆÙ×ÝØ]™JÞÞKÏOLLÛÙ×Û›×Ø[\›Ù×Û›×Ü˜]KKÛÛ
+NÂˆÈ›Ø]JÏOLLÛÙ×Û›×Ø[\›Ù×Û›×Ü˜]JJKŒŠÛÙ×ÜÚYJNÈYŠŒJ]LNÈYŠLJ]KLNÂˆ[^OYÞJÓÑ×ÒÌ‹J[
+JŠ‹ŒŠÊËKYŽ‹YŠJNÈÊˆÙ×ÝØ]™HØØ[H
+‹ÂˆÝ—Ü™XÝ
+šYÚLK^KLK‹ËÛÐ×ÕÒUN˜ÛÛ
+NÈHÊˆ››ÝÈŽˆHÛØ˜›IÜÈ™\Ù[˜[YH
+‹ÂˆÙ×ÜÚYLÂˆH[ÙHYŠXÚH	‰ˆÏOLMJHÈÊˆÕT‘SÎˆÔˆÜ™XY
+‹Âˆ[ÏLJÊ[
+JJŒL
+ËYŠKÞYÞ
+ÌLŽÂˆÝ—Ü™XÝ
+ÞÜKÑ×ÒLË×ÓS‘JNÂˆÝ—Ü™XÝ
+Þ\ËLKZYM‹KÛÛ
+NØÝ—Ü™XÝ
+Þ
+ÜËZYM‹KÛÛ
+NÂˆH[ÙHÈÊˆ\Ý™\ÛÜˆËX˜\ˆØØ[H
+‹Âˆ›ÜŠ[LÚÎÚŠÊÊ^Ú[LÊÚŠŒŽØÝ—Ü™XÝ
+Þ
+ÚŠ›ÝZ‹H	‰ˆŠŒLËÍ\JŒLÏØÛÛ×ÓS‘JNßBˆBˆYŠÛÝ[™[™È	‰ˆJÚH	‰ˆÏOM
+H	‰ˆ[]™[Ü›ÛJHÂˆÊˆ™YHÜ\œÙH]™[\È›ÛÝÈXÝX[ÐNÈHÙ\\˜]H[Ù[]ÜˆÝ\œÛÜ‚ˆ
+ˆ›ÛÝÜÈH˜]]™HQË™]™\ˆØ[XÛØÚÈ\ÙKˆ
+‹Âˆ[J[
+J[\
+ŒËŒŠËYŠNÂˆ›ÜŠ[OLÚOŽÚJÊÊHÝ—Ü™XÝ
+Þ
+ÌŠÚJ›ÝLK‹K×ÕÒUJNÂˆYŠXÚH	‰ˆ
+ÏONÏOLLˆÏOLLÊJHÂˆYŠ[Ù
+[[ÙLÈYŠ[ÙŒJ[[ÙLNÂˆÝ—Ü™XÝ
+Þ
+ÌJÊ[
+J[Ù
+ŒŒËŒŠËYŠKÞJÌKK‹×ÕÒUJNÂˆBˆBŸB‚‹ÊˆKKKHLHÈ\\YÙHÛ\ÈKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKBˆ
+ˆXXÚÛ™HXÝ\™\ÈÚ]HÛÛ›ÛÙ\È[ˆH[™Ú[™K›ÛÝÜÈH˜[YBˆ
+ˆÚ]H[™Ú[™IÜÈÝÛˆØØ[[™Ë[™[Ý™\ÈÚ]H›ÚXÙHÛˆ]™\žH]‚ˆ
+ˆ[WÛ]™J
+H™XYÈH˜XÚÉÜÈ™X[[\]YH[™[ÜH
+LNˆH›ÚXÙHQÎÂˆ
+ˆˆH[™IÜÈÝ]]Ý™\ˆ]È]XZÊH[™H\ÈÚ[˜ÙHH]ˆØ[YBˆ
+ˆžNHÙ[\ÈÜšY×ÜÝš\ÙÛ\ÈHØ[\ˆ˜]ÜÈH™XYÝ]šYÚÙˆ]ˆ
+‹Â™[[HÈ×Ó“Ó‘K×ÑPÐVK×Ó•RS×ÕS‘K×Ð‘ÕÑQT×ÐUPÒË×Ó‹×ÔÒSË×ÔÓTK×ÔÓÕS‘×ÐPÐÑS•×ÓU‘SNÂœÝ]XÈRWÑUÈ[[WÜÝš\Ü›ÛJ™Y—ÝŠBžÂˆYŠ‹šÚ[™OT—ÑS‘È
+‹˜HOUÎLH	‰ˆ‹˜HOUÎ
+JH™]\›ˆ×Ó“Ó‘NÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÂˆ[ÎO\‹˜OOUÎLNÂˆYŠY
+H™]\›ˆ×Ó“Ó‘NÂˆYŠ
+ZKšY]ÏOU—ÓRVZKšY]ÏOU—ÔT•
+H	‰ˆ‹˜‘•SH	‰ˆ˜[YWÚ\Ê“]™[ŠJH™]\›ˆ×ÓU‘SÂˆYŠZKšY]ÈOU—ÔT•
+H™]\›ˆ×Ó“Ó‘NÂˆYŠ‹˜OS‘•SJH™]\›ˆ˜[YWÚ\ÊXØÙ[Š_˜[YWÚ\Ê•™[ØÈŠOÑ×ÐPÐÑS•‘×Ó“Ó‘NÂˆYŠÎH	‰ˆ‹˜OLÊˆ‘
+‹È	‰ˆ
+˜[YWÚ\Ê•[™HŠ_˜[YWÚ\Ê”‘Š_˜[YWÚ\Ê”]ÚŠJJH™]\›ˆ×Ð‘ÕÑQTÂˆYŠ˜[YWÚ\Ê‘XØ^HŠ_˜[YWÚ\Ê•Z[ŠJH™]\›ˆ×ÑPÐVNÂˆYŠ˜[YWÚ\Ê•[™HŠJH™]\›ˆ×ÕS‘NÂˆYŠ˜[YWÚ\Ê]XÚÈŠJH™]\›ˆ×ÐUPÒÎÂˆYŠ˜[YWÚ\Ê”Û˜\HŠJH™]\›ˆ×ÔÓTNÂˆYŠ˜[YWÚ\Ê”ÛÝ[™ŠH	‰ˆO›˜[Y\ÊH™]\›ˆ×ÔÓÕS‘ÂˆYŠ˜[YWÚ\Ê•Û™HŠJH™]\›ˆÎOÊ‹˜OLHÊˆÑ
+‹ÏÑ×Ó•RS‘×Ó“Ó‘JNœ‹˜OLÑ×ÓŽœ‹˜OLOÑ×ÔÒSÎ‘×Ó“Ó‘NÈÊˆ˜XÚÜÈ‘HÑ[ˆ›ÝÚ]È
+‹Âˆ™]\›ˆ×Ó“Ó‘NÂŸB‹ÊˆH˜XÚÉÜÈ]™HÝ]NÈHÚ]Ù[È›ÛÝÈH™]Ù\Ý]ÙˆHÚ]
+‹ÂœÝ]XÈRWÑUÈ[[WÛ]™J™Y—Ý‹Z[Ì—Ý
+˜YÙK›Ø]
+™[ŠBžÂˆ[Ú]\‹˜OOUÎÂˆ
+˜YÙOL™™™™™™™NÈ
+™[LÂˆYŠ‹˜ˆOS‘•SJH™]\›ˆ[™Ú[™WÙ[WÝšY]ÊÚ]‹˜‹YÙK[ŠNÂˆ[[žOLÂˆ›ÜŠ[ÏLÚÏ‘•SNÚÊÊÊ^ÝZ[Ì—ÝNÙ›Ø]NÚYŠ[™Ú[™WÙ[WÝšY]ÊÚ]Ë	˜K	™JI‰˜O
+˜YÙJ^Ê˜YÙOXNÊ™[YNØ[žOLNß_Bˆ™]\›ˆ[žNÂŸBœÝ]XÈRWÑUÈ›Ø]×ÜÚJ™Y—Ý‹[Ë[Ý
+^Ù›Ø]LÊ›ÚY
+Y[™Ú[™WÜ\˜[WÜÚJ‹˜K‹˜‹ËÝ	ž
+NÜ™]\›ˆßB‹ÊˆÚ\™HH˜[YHÚ]È[ˆ]È˜[™ÙHÛˆH[™Ú[™IÜÈÝÛˆ^\ÎˆÙÈ›Üˆ‹Û\ËÜ˜][È
+‹ÂœÝ]XÈRWÑUÈ›Ø]×ÜÜÊ™Y—Ý‹[˜[
+BžÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÂˆ›Ø]LÈ[OY[™Ú[™WÜ\˜[WÜÚJ‹˜K‹˜‹‹˜Ë˜[	ž
+NÂˆYŠOOVÕWÒŸOOVÕWÓTßOOVÕWÔßOOVÕWÔUSÊ^Âˆ›Ø]ÏY×ÜÚJ‹‹˜Ë
+KOY×ÜÚJ‹‹˜ËO›X^
+NÂˆYŠÏŒ	‰ˆO›È	‰ˆŒ
+^Ù›Ø]Y›WÛÙÌ™ŠÛÊKÙ›WÛÙÌ™ŠKÛÊNÜ™]\›ˆÌœŒOÌNœßBˆBˆ™]\›ˆ	‰ˆO›X^Ê›Ø]
+]˜[ÙO›X^ŒÂŸBœÝ]XÈRWÑUÈ[×Ü›™
+[J^ÝZ[Ì—ÝJZ[Ì—Ý
+ZJŒMÍMÍŒ]NÚZŒLÎÜ™]\›ˆ
+[
+J	LLJNßB‹Êˆ[ˆ[\]YHZ[ˆ[]H]MŒˆ]HÈ]™KH\[™XYBˆ
+ˆ^YYÛÙ\È[H[™H^ZXYÝ[™È]H›ÚXÙIÜÈ™X[]™[
+‹ÂœÝ]XÈRWÑUÈ›ÚY×ÝZ[
+[Þ[ÞK[K[]™K›Ø]K[›Ú\ÞKZ[Ì—ÝÙYYZ[M—ÝÛÛ
+BžÈÊˆYNˆHZ[Ý][™KMŒˆ]Kˆ]™NˆHÚÜÝÙˆ]Ý][™K[™Bˆ
+ˆ\Ý[È^Kš[YÛYÈHYYÙNˆ]\ÈHYÚ[™ˆ
+ˆ
+HHÙÌŠJKËNKŽMŠHHÛ™ËÛÈ]Úš[šÜÈ›ÝØ^\È\ÈH›ÚXÙHXØ^\È
+‹Âˆ[›ÝYÞJÓÑ×ÒSÑ×ÒLŽÂˆYŠOŠ^OLŽÈYŠO“Ñ×ÕËLJ^OSÑ×ÕËLNÂˆ›Ø]ÚLÂˆYŠ]™J^ÈYŠOŒYŠYOLŒYŽÈÚJ›Ø]
+^J™›WÛÙÌ™ŠJKËNKŽM™ŽÈBˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ[KLNÂˆ›ÜŠ[LÞ^NÞ
+ÊÊ^Âˆ›Ø]OY›WÙ^™ŠNKŽM™ŠŠ›Ø]
+^Ê›Ø]
+^JNÂˆ[J[
+JJ’
+ËYŠNÂˆYŠ›Ú\ÞJHZ
+Š
+Ù×Ü›™
+
+ÊÊ[
+\ÙYY
+JKÌMÂˆYŠJZLNÂˆZ[M—ÝÏ[]™OÐ×ÓS‘N˜ÛÛÂˆYŠ›Ú\ÞH	‰ˆ[]™JHÝ—Ü™XÝ
+Þ
+Þ›ÝZKÊNÂˆ[ÙHÈÝ—Ü™XÝ
+Þ
+Þ›ÝZKKÊNÈYŠš
+ÌJHÝ—Ü™XÝ
+Þ
+ÞLK›ÝZKZÊNÈBˆZÂˆBˆYŠ[]™JH™]\›ŽÂˆ›ÜŠ[LÊ›Ø]
+^J›Ø]
+^K\ÚÞ
+ÊÊ^Âˆ›Ø]OY›WÙ^™ŠNKŽM™ŠŠ
+›Ø]
+^
+ÜÚ
+KÊ›Ø]
+^JNÂˆ[J[
+JJ’
+ËYŠNÂˆYŠ›Ú\ÞJHZ
+Š
+Ù×Ü›™
+
+
+Ê[
+\Ú
+JÊÊ[
+\ÙYY
+JKÌMÂˆYŠŒ
+HÂˆÝ—Ü™XÝ
+Þ
+Þ›ÝZKKÛÛ
+NÂˆYŠOL
+›Ú\ÞH	‰ˆ	MOOL
+JHÝ—Ü™XÝ
+Þ
+Þ›ÝZKØÛÛ×ÕÒUJNÂˆBˆBŸBœÝ]XÈRWÑUÈ[×ÝZ[Ü
+›Ø]\Ê^ÚYŠ\Ï
+[\ÏLÚYŠ\Ï
+[\ÏMÜ™]\›ˆŠÊ[
+JŒËŒŠ™›WÜÜ\Š\ËÍŒŠJËYŠNßBˆÙYš[™H×ÐPÒ×ÓTÈÌB‹ÊˆÚ\™YžHHÛÛ\XÝ[™ŒŒˆ™[™\™\œÎˆÛ™H^\Ý[™È[Y\Ý[\\ˆ›ÚXÙKˆ
+‹ÂœÝ]XÈZ[Ì—Ý×Û\ÝÌ—VÓ‘•SJÌWNÂœÝ]XÈRWÑUÈ›Ø]×Û]™WØ˜XÚÊ™Y—Ý‹[]™JBžÂˆZ[Ì—Ý›ÝÏ\]Û\Ê
+NÚ[ÚO\‹˜OOUÎšO\‹˜“‘•SOÓ‘•SNœ‹˜ŽÂˆYŠ]™JY×Û\ÝÚÚWVÝšWO]›Ýß]NÂˆ[ÙHYŠ×Û\ÝÚÚWVÝšWH	‰ˆ›ÝËY×Û\ÝÚÚWVÝšWO×ÐPÒ×ÓTÊBˆ™]\›ˆ
+›Ø]
+J›ÝËY×Û\ÝÚÚWVÝšWJKÊ›Ø]
+Q×ÐPÒ×ÓTÎÂˆ™]\›ˆKŒŽÂŸBœÝ]XÈRWÑUÈ›ÚY—ÙÛ\
+™Y—Ý‹›Ø]]‹›Ø]Þ›Ø]ÞK›Ø]Þ›Ø]ÞKZ[M—ÝÛÛ
+NÂœÝ]XÈRWÑUÈ›ÚY[WÜÝš\ÙÛ\
+™Y—Ý‹[˜[[Þ[ÞKZ[M—ÝÛÛ
+BžÂˆÛÛœÝÜ\˜[WÝ
+™\™Y—Ù\ØÊŠNÂˆ›Ø]OY	‰ˆO›X^Ê›Ø]
+]˜[Ê›Ø]
+YO›X^ŒOLÂˆZ[Ì—ÝYÙOL™™™™™™™NÂˆ[]™OY[WÛ]™J‹	˜YÙK	™JK›ÛOY[WÜÝš\Ü›ÛJŠNÂˆÊˆ\ÙHHØ[YHÙ[X[XÈXÝ\™H\ÈHŒŒˆ\YÙNˆ[™H›ÜšËˆ
+ˆ]ÚYØ\œšY\‹\ÝÙY\š\Ú[™È]XÚÈ[™™X[Û™H™\ÜÛœÙKˆ
+‹ÂˆYŠ›ÛOOQ×Ð‘ÕÑQT›ÛOOQ×ÐUPÒÈ›ÛOOQ×ÓŠHÂˆ—ÙÛ\
+‹
+›Ø]
+]˜[
+›Ø]
+YÞ
+ÌK
+›Ø]
+YÞJÌKŒË™‹ÌÌ‹™‹M‹™‹ÌN™‹ÛÛ
+NÂˆ™]\›ŽÂˆBˆ[ÜYÞJÌK›ÝYÞJÓÑ×ÒZYYÞJÓÑ×ÒÌ‹šYÚYÞ
+ÓÑ×ÕËLNÂˆÊˆY\ˆH›ÚXÙH[™ËHYHÛ\ÛÛY\È˜XÚÈÝ™\ˆ×ÐPÒ×ÓTÈ
+[šÈ˜Y\È[‹ˆ
+ˆHØ]™H™YÜ›ÝÜÊH[œÝXYÙˆÛ˜\[™Èœ›ÛHH\Ý]™Hœ˜[YH
+‹Âˆ›Ø]˜XÚÏY×Û]™WØ˜XÚÊ‹]™JNÂˆYŠ[]™H	‰ˆ˜XÚÏKŒˆ	‰ˆ
+›ÛOOQ×ÑPÐV_›ÛOOQ×Ó•RS›ÛOOQ×Ð‘ÕÑQT
+JBˆÛÛX›[™
+×ÓS‘KÛÛ
+[
+JM‹ŒŠ˜˜XÚÊJNÂˆYŠO
+\OLÈYŠOŒJ\OLNÂˆÝÚ]Ú
+›ÛJ^ÂˆØ\ÙH×ÑPÐVNˆÈÊˆPÐVHÈRSˆHZ[\ÈÛ™È\ÈH™X[[YH
+‹Âˆ›Ø]LÈ[OY[™Ú[™WÜ\˜[WÜÚJ‹˜K‹˜‹‹˜Ë˜[	ž
+KNÂˆYŠOOVÕWÓTÊHOY×ÝZ[Ü
+
+NÂˆ[ÙHYŠOOVÕWÔÊHOY×ÝZ[Ü
+
+ŒLŒŠNÂˆ[ÙHOLŠÊ[
+JJŒŒÊËYŠNÈÊˆXØ^\Îˆ›ÈÛÛ™š\›YY[YH
+ÝÌLÈÈHÚ\˜ÝZ]
+H
+‹Âˆ×ÝZ[
+ÞÞKK]™KKÛÛ
+NÂˆHœ™XZÎÂˆØ\ÙH×Ó•RSˆÈÊˆLHÑÓ‘NˆHÛ˜\™H›Ú\ÙHXØ^H[ˆ\ÚXØ[\È\È\ÈÛ
+‹Âˆ›Ø]Y×ÜÚJ‹‹˜Ë˜[
+NÂˆ×ÝZ[
+ÞÞK×ÝZ[Ü
+ŒŠÞ
+K]™KKK]™OØYÙKÍNŒÛÛ
+NÂˆHœ™XZÎÂˆØ\ÙH×ÕS‘NˆÈÊˆS‘NˆHØ]™HÚÜÙHÞXÛ\È›ÛÝÈH™X[]ÚÈš[™ÜÈÛˆH]
+‹ÂˆÊˆS‘H[™HLHÞ[X˜[S‘H\™Hš\Û\ˆÙ[Z]Û™\È
+ÝHÝ
+N‚ˆ
+ˆHÙ[™HX\šÈÚÝÜÈHXÚÈ[Ý™\È›ÝØ^\È[™ˆÞXÛ\ÈH›ÈÚY‚ˆ
+ˆ]ÚØØÝ\Y\È›ÝÜÌK‹NÈHØ]™HÝ^\È[ˆ›ÝÜÎ‹ŒM‹Ú]HÛX\‚ˆ
+ˆÛË\›ÝÈÝ]\ˆ]™[ˆ]X^[][H]™H[\]YKˆ˜\Ù[[™H™[XZ[œÌNˆ
+‹Âˆ›Ø]Y×ÜÜÊ‹˜[
+KÞXÏLKŒŠÜ
+Œ‹Œ‹[\[]™OÊKŒŠÌËŒŠ™JNŠKŒŠÌËŒŠ˜˜XÚÊKLÂˆ[Ø]™WÛZYYÞJÌL‹O]Ø]™WÛZYÈÚ\ˆŒÌM—KLÎNÂˆ™Y—Ý˜[YWÛÙŠ‹ŒL
+NÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆYŠŒÌOOIËIÊHÝ—Ü™XÝ
+Þ
+ÓÑ×ÕËÌ‹›ÝLËKË×ÑÔVJNÂˆÝ—Ü™XÝ
+Þ
+Ê[
+J
+ŠÑ×ÕËLJJËYŠK›ÝLKK‹ÛÛ
+NÂˆÊˆH]ÚÛÛÝ\ˆ\ÈØÚ[X]XÈÛˆ›Û‹ZÚXÚÈ›ÚXÙ\ÎÈÛ›H‘LHÛZ[\Âˆ
+ˆHYX\Ý\™Y‹Ý[YH]Ëˆ]\ØÙ[™ÈÝØ\™H[™Y›ÛÜ‹ˆ
+‹ÂˆÝ—Û[™JÞÜÞ
+ÎÜ
+ÌËÛÛ
+NÂˆÝ—Û[™JÞ
+ÎÜ
+ÌËšYÚÜ
+ÍÛÛ
+NÂˆYŠ]™JHÚ[J[
+J
+KŒ‹YJJŒŒŠËYŠNØÝ—Ü™XÝ
+Þ
+ÞÜ
+ÌËK‹×ÕÒUJNßBˆ›ÜŠ[OLÚOÑ×ÕÎÚJÊÊ^Âˆ[^O]Ø]™WÛZYJ[
+J[\
+™›WÜÚ[™Š‹ŒŽÌNLÙŠŠ
+›Ø]
+ZJ˜ÞXËÊÑ×ÕËLJJÜ
+JJÊYŠJNÂˆYŠJHÝ—Û[™JÞ
+ÚKLKKÞ
+ÚK^KÛÛ
+NÂˆO^^NÂˆBˆHœ™XZÎÂˆØ\ÙH×ÔÒSÎˆÈÊˆÑÓ‘NˆHÛÈÚ[™\ÛÛ˜]ÜœÉÈZ^
+ÙÝšYÙÙ\ˆZ^KÛZ^ŠH
+‹Âˆ[]˜[Âˆ›Ø]JMÊ›Ø]
+]ÌLŽŒŽŒYŠÊ›Ø]
+JM
+JŠY‹ÍŒËŒŠJJŒKMÌŽÂˆ›Ø]ÌOY›WØÛÜÙŠ
+KÌY›WÜÚ[™Š
+KÏ[]™OÊŒÙŠÌÙŠ™JNŠŒÙŠÌÙŠ˜˜XÚÊNÂˆ[OYÞ
+ÍËYÞ
+ÌMËSÑ×ÒLÎÈÊˆMÌÈˆ[™ÌÍˆŽˆÛ™HØÝ]™H\\
+‹ÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ›ÜŠ[ÏLÜÏŽÜÊÊÊ^Âˆ[Ï\ÏÞŽžKJ[
+J
+ÏÙÌŽ™ÌJJ’
+šÊËYŠNÂˆÝ—Û[™JËM›ÝË›ÝZÛÛ
+NØÝ—Û[™JË›ÝZÊÍ›ÝÛÛ
+NÂˆBˆHœ™XZÎÂˆØ\ÙH×ÔÓTNˆÈÊˆÓTNˆH›Ú\ÙH\œÝÈÝY\ˆÚ]H[[Ý[˜Y\ÈÛˆH]
+‹Âˆ›Ø]Ï[]™OÙN˜˜XÚÎÂˆZ[Ì—ÝÏ[]™OØYÙKÍNŒÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ›ÜŠ[LÞÑ×ÕÎÞ
+ÏLŠ^Âˆ›Ø][Y›WÙ^™ŠJ›Ø]
+^ÎKŒŠNÂˆ[J[
+JJšÊ™[ŠŠÑ×ÒLŠJŠÍJÙ×Ü›™
+
+ŒÊÊ[
+\ÊJKÌLÍKŒŠËYŠNÂˆYŠŒ
+HÝ—Ü™XÝ
+Þ
+Þ›ÝZKÛÛ
+NÈ[ÙHÝ—Ü™XÝ
+Þ
+Þ›ÝLKKK×ÓS‘JNÂˆBˆHœ™XZÎÂˆØ\ÙH×ÔÓÕS‘ˆÈÊˆÓÕS‘ÝÚ]ÚˆÛ™H\\ˆÜÚ][Û‹H]YÚÈ]
+‹Âˆ[YO›X^
+ÌKÏJÑ×ÕËLŠKÛŽÂˆ›ÜŠ[ÏLÚÏŽÚÊÊÊ^Âˆ[YÞ
+ÌJÚÊËNNÂˆYŠÏO]˜[
+^ÈYŠ]™JH
+ÏJ[
+JJ
+ËYŠNÈÝ—Ü™XÝ
+ZY
+ÍZËLËÛÛ
+NÈBˆ[ÙH˜›Þ
+ZYMKËLËKK×ÓS‘JNÂˆBˆHœ™XZÎÂˆØ\ÙH×ÓU‘SˆÈÊˆ˜[YH\ÈÙZ[[™Ë™X[[™[ÜH[Ù\ÈÙYÛY[È
+‹ÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ[ÙZ[[™ÏJ[
+JJ‹ŒŠËYŠK][]™OÊ[
+JJ™J‹ŒŠËYŠNŒÂˆ›ÜŠ[OLÚOŽÚJÊÊHÂˆ[LÊÚJŒŽÂˆÝ—Ü™XÝ
+Þ
+ÚJ›ÝZË‹O]Ð×ÕÒUNšOÙZ[[™ÏØÛÛ×ÓS‘JNÂˆBˆHœ™XZÎÂˆØ\ÙH×ÐPÐÑS•ˆÈÊˆPÐÑS•ˆHZ[ˆ]™^È[ˆXØÙ[YÛ™KHØ\\ÈH\
+‹Âˆ›Ø]Ï[]™OÊ™ŠÌŠ™JNŒ™ŽÈÊˆH][ˆHÚ][Ù\ÈH˜\œÈ\
+‹Âˆ[SÑ×ÒL‹J[
+J
+ŠKŒ‹LÙŠœJJšÊËYŠKOJ[
+J
+šÊËYŠNÂˆÝ—Ü™XÝ
+Þ›ÝÑ×ÕËK×ÓS‘JNÂˆ›ÜŠ[LÚŽÚŠÊÊ^Âˆ[YÞ
+ÌÊÚŠŒLËZÚNšŽÚYŠJZLNÂˆÝ—Û[™JLË›Ý›ÝZÛÛ
+NØÝ—Û[™J›ÝZ
+Í›ÝÛÛ
+NÂˆYŠ]™JXÝ—Ü™XÝ
+›ÝZK‹×ÕÒUJNÂˆBˆÝ—Û[™JÞ
+ÍËÜÞ
+ÎKÜ
+Ì‹ÛÛ
+NØÝ—Û[™JÞ
+ÎKÜ
+Ì‹Þ
+ÍËÜ
+ÍÛÛ
+NÈÊˆˆˆXØÙ[X\šÜÈ
+‹ÂˆÝ—Û[™JÞ
+ÌNKÜÞ
+ÌŒKÜ
+Ì‹ÛÛ
+NØÝ—Û[™JÞ
+ÌŒKÜ
+Ì‹Þ
+ÌNKÜ
+ÍÛÛ
+NÂˆHœ™XZÎÂˆY˜][ˆœ™XZÎÂˆBŸB‚ˆÚ[˜ÛYHZWÙ[WÝ›ÚXÙKš[˜È‚‚œÝ]XÈRWÑUÈZ[Ì—ÝÛ›Øœ×ÜÚYÊ›ÚY
+BžÂˆZ[Ì—ÝHŒMŒLÍŒŒ]KNÂˆ[ÚHHÝ\—ÜYÙJ
+NÂˆÙYš[™HRVSŠŠH
+H
+ˆ
+Z[Ì—Ý
+JŠJH
+ˆMÍÍÍŒN]JBˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ\×ÌÌÊ
+JHÂˆÛÛœÝZ[Ý
+˜Ù[\›Ú‹œÛÝ[™–ÕÌÌ×VØšY
+
+WNÂˆ›Üˆ
+[œÚYÛ™Yž]OLÈž]OÔ’QÒSSÔÓÕS‘Ð–UTÎÈž]JÊÊHRVSŠÙ[Øž]WJNÂˆRVSŠ[™Ú[™WØ˜\Ü×ÜÝ]\ÊšY
+
+JJNÂˆÈ›Ø]YÏLLÈYŠ[™Ú[™WØ˜\Ü×Ùš[\—ÝšY]ÊšY
+
+K	™YË	™
+JHRVSŠ[—ÚÛ™YWÞ
+YÊ™
+ŠYÏŒ
+JJNÈHÊˆS•ˆÛ\[Ý[ÛŽˆÛ™HÝ\\ˆÛ™YH^[
+‹ÂˆÈ›Ø]OLOLÝ[œÚYÛ™YÏM‹Ù^OLÂˆYŠ[™Ú[™WØ˜\Ü×Ý›ÚXÙWÝšY]ÊšY
+
+K	˜K	›K	œË	šÙ^JJHÂˆRVSŠ
+[
+JJŒÌ‹ŒŠJNÈRVSŠ
+[
+JJŒŒŠJNÈRVSŠÊNÈRVSŠÙ^JNÂˆBˆBˆÈ›Ø]LšOLÝOLÏLÈ[ÛLÈYŠ[™Ú[™WØ˜\Ü×Û[Ý[Û—ÝšY]ÊšY
+
+K	œ	˜šK	˜ÝK	Ë	›ÛŠJHÈRVSŠ
+[
+J
+ŒŠJNÈRVSŠ
+[
+J
+ËXÝJJŒM‹ŒŠJNÈHHÊˆÛØ˜›HÈÛYH[Ý[Ûˆ
+‹ÂˆRVSŠ[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™ÊšY
+
+JJNÂˆRVSŠ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊšY
+
+JJNÈRVSŠ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYÜ™\Ù]
+šY
+
+JJNÂˆBˆRVSŠZWÙX\ÙWÜÚYÊ
+JNÂˆRVSŠZKšY]ÊNÂˆRVSŠZKœ\
+NÂˆRVSŠ]š\Ú[Û—ÜYÛÝÛ™\Š
+JNÂˆYˆ
+]š\Ú[Û—ÜYÛÝÛ™\Š
+JHRVSŠ]š\Ú[Û—ÜYÚ[™^
+
+JNÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYŠ\×ÌÌÊ
+JHRVSŠ[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™ÊšY
+
+JJNÂˆÙ[™Y‚ˆRVSŠÚJNÂˆRVSŠZKÝXÚY
+NÂˆRVSŠZKš[ÜÝ\
+NÂˆRVSŠØÚ×ÜÝ\
+
+H
+ÈJNÂˆRVSŠ›Ú‹œÙ]œ[]JNÂˆRVSŠZKœÙ[ÌHZKœÙ[ÌWH
+NÂˆRVSŠÙ\Kœ]ÝZKœ\JNÂˆYŠZKœ\OTT•Ð”’È	‰ˆ
+ZKšY]ÏOU—ÔT•ZKšY]ÏOU—ÔÑTJJHÂˆÛÛœÝœšÜ\Ý
+˜œI˜Ý\—Ü]
+
+KO˜œšÎÂˆRVSŠœOœÝ\ÊNÈ›ÜŠ[ÏLÚÏMŽÚÊÊÊSRVSŠœOœÛXÙVÚ×JNÂˆRVSŠØÚ×ÛX\šÜÊLKLK
+JNÈRVSŠÙ\Kœ^Z[™ÊNÈRVSŠ[™×ÜÝ\Õ’×Ð”’×JNÂˆRVSŠœš×ÜÛXÙWØÛÝ[
+œ
+JNÈRVSŠœš×ÜÛXÙWØÛÝ[
+œJJNÂˆRVSŠ[™Ú[™WØœš×ØÛÝ[
+
+JNÈÊˆÛÝ[™[™ÈÛ˜\ÚÝYÜ[ÛˆÚ[™Ù\È›ÛÝ\ˆ[Ù[Ëˆ
+‹ÂˆRVSŠZK˜œš×ØÛÝ[Ý\™Ù]
+NÂˆBˆRVSŠZKœÛÛ™×ÜÙ[
+NÂˆÂˆÛÛœÝÚ\ˆ
+™˜K
+™˜‹
+™˜ÎÂˆRVSŠ›ÛÝ\—Ý^
+	™˜K	™˜‹	™˜ÊJNÂˆRVSŠ
+Z[—Ý
+Y˜Hˆ
+
+Z[—Ý
+Y˜ˆÊHˆ
+
+Z[—Ý
+Y˜ÈÊJNÂˆRVSŠË›ŠNÂˆBˆ›Üˆ
+HHÈHÈJÊÊHÂˆ™Y—ÝˆHËœ–ÜÚWVÚWNÂˆRVSŠ‹šÚ[™‹˜H‹˜ˆMˆ
+Z[Ì—Ý
+\‹˜È
+NÂˆRVSŠ™Y—ÙÙ]
+ŠJNÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ
+‹˜OOUÎLH‹˜OOUÎ
+JHÂˆZ[Ì—ÝYÙOLÙ›Ø]OLÚ[]™OY[WÛ]™J‹	˜YÙK	™JNÂˆRVSŠ]™JNÚYŠ]™J^ÓRVSŠ
+[
+JJŒÌ‹ŒŠJNÓRVSŠYÙKÍJNßBˆBˆYŠ‹šÚ[™OT—ÕSTÊHRVSŠ[\×ÙÛ\ÝšY]ÊNÂˆYŠ‹šÚ[™OT—ÕTH	‰ˆ™Y—ÙÙ]
+ŠOLMŠHRVSŠ\WÙÛ\Ü\ÙJNÂˆYŠ‹šÚ[™OT—Ð”’ÔÓÕ
+HRVSŠ[™Ú[™WØœš×ÛœÛÝÊ
+JNÂˆYŠ‹šÚ[™OT—ÔÐTŠHRVSŠ™Y—Ù\ØÊŠKO›X^
+NÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÑ–	‰ˆ‹˜ÏOQ–ÑÑ‘’ÊBˆRVSŠ™Y—ÙÙ]
+Š—ÑS‘ËÑ––ÑÕTJJJNÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÑ‘ŠHÂˆRVSŠ[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÓSÑJJNÂˆRVSŠ[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÐÕUÑ‘ŠJNÂˆRVSŠ[™Ú[™WÛX\Ý\—ÙÙ]
+TÕÔ‘TÓÊJNÂˆBˆRVSŠ\×Û[Ý[ÛŠŠH
+[Ý[Û—Û›ÝÊŠH
+ÈJHJNÂˆRVSŠØÚ×ÛÙŠ‹ØÚ×ÜÝ\
+
+JH
+ÈJNÂˆBˆYˆ
+ZKš[ÜÝ\H
+HÂˆÛÛœÝœÝ\Ý
+œÝH	˜Ý\—Ü]
+
+KO˜˜\ÜÖØšY
+
+WKœÝ\ÝZKš[ÜÝ\NÂˆRVSŠÝO››ÝHÝO™›YÜÈÝO™[ØÚ]HMŠNÂˆBˆÝ[™YˆRVS‚ˆ™]\›ˆÂŸB‚œÝ]XÈ[Ý˜Û\ÜÊÛÛœÝÚ\ˆ
+˜KÛÛœÝÚ\ˆ
+˜ŠBžÂˆÚ[H
+
+˜H	‰ˆ
+˜HOH
+˜ŠHÂˆJÊÎÂˆŠÊÎÂˆBˆ™]\›ˆ
+˜HOH
+˜ŽÂŸB‚‹ÊˆHÛ›Øˆ›ÝÉÜÈYÎˆÚÜÙHÛ›ØœÈ\ÙH\™H
+‘LHÒUÈUT“‹LHRVˆ‘ÌÐHÕTJH
+‹ÂœÝ]XÈ›ÚYÛ›Ø—ÝYÊÚ\ˆ
+
+BžÂˆ[ÈHË™Ü›Ý\ØÝ\—ÜYÙJ
+WKHH[WÛZ^ÜYÙJ
+NÂˆÛÛœÝÚ\ˆ
+HHË]VØÝ\—ÜYÙJ
+WNÂˆYˆ
+ØÚ×ÜÝ\
+
+HH
+HÂˆ]ÚJ]ÜÊ]ÜÊ\×Ù[J
+HÈ[™Ú[™WÝ›ÚXÙWÛ˜[YJZKœ\OHT•ÎLHÈÎLHˆÎZKœÙ[ÝZKœ\JBˆˆ\Û˜[YJZKœ\
+JKˆSÐÒÈÕTŠKØÚ×ÜÝ\
+
+H
+ÈJNÂˆH[ÙHYˆ
+ZKšY]ÈOH—ÔÑTH	‰ˆ\×ÌÌÊ
+H	‰ˆZKš[ÜÝ\H
+HÂˆ]ÚJ]ÜÊ]ÜÊ\Û˜[YJZKœ\
+JKˆÕTŠKZKš[ÜÝ\
+ÈJNÂˆH[ÙHYˆ
+HH
+Bˆ]ÜÊ]ÜÊ]ÜÊJKŽˆŠK[™Ú[™WÝ›ÚXÙWÛ˜[YJHÈÎˆÎLKZKœÙ[ÙWJJNÂˆ[ÙHYˆ
+ZKšY]ÈOH—ÓRV	‰ˆÝ\—ÜYÙJ
+HOH
+Bˆ]ÜÊ]ÜÊ”T•ÎˆŠK\Ù\Ü^JZK›Z^Ù[
+JNÂˆ[ÙHYˆ
+ÈOHÔ—ÔU
+Bˆ]ÜÊ]ÜÊ]ÚJ]ÜÊ”ŠKÙ\Kœ]ÝZKœ\H
+ÈJKˆŠKJNÂˆ[ÙHYˆ
+ÈOHÔ—ÒÒUÈOHÔ—ÔÓÕS‘
+HÂˆÚYˆÐTÔ×Ô‘TÑUÔ‘U’QUÂˆYŠ\×ÌÌÊ
+JH]ÜÊJNÂˆ[ÙBˆÙ[™Y‚ˆ]ÜÊ]ÜÊ]ÜÊ\Ù\Ü^JZKœ\
+JKˆŠKJNÂˆBˆ[ÙBˆ]ÜÊJNÂˆÈÊˆHÙXÝ[ÛˆÝ™\ˆÙ]™\˜[YÙ\È
+Ø[YH˜[YJNˆÚXÚÙˆ[K‘
+KÌŠHˆ
+‹Âˆ[HÝ\—ÜYÙJ
+KHHˆHÂˆÚ[H
+Hˆ	‰ˆ\Ý˜Û\ÜÊË]VØHHWKJJBˆKKNÂˆÚ[H
+ˆ
+ÈHË›ˆ	‰ˆ\Ý˜Û\ÜÊË]VØˆ
+ÈWKJJBˆŠÊÎÂˆYˆ
+ˆˆJHÂˆÚ\ˆ
+œHHÂˆÚ[H
+
+œJBˆJÊÎÂˆ]ÜÊ]ÚJ]ÜÊ]ÚJ]ÜÊKˆ
+ŠKHH
+ÈJK‹ÈŠKˆHH
+ÈJKŠHŠNÂˆBˆBŸB‚ˆÚ[˜ÛYHZWØÚ[˜ÙWÜ›Ø™Kš‚ˆÚ[˜ÛYHZWØœ™XZ×Û^[Ý]ØÛÛ›ÛËš‚œÝ]XÈRWÑUÈ›ÚY˜]×ÚÛ›ØœÊ›ÚY
+BžÂˆÝ]XÈZ[Ì—Ý\ÝÜÚYÎÂˆ[KÚHHÝ\—ÜYÙJ
+NÂˆZ[Ì—ÝÚYÎÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÈÊˆÛ\[ÙK›ÈY[NˆHÑVTÈ[™[
+XZ[—Ù›LK˜ÈÛZ×ØÚ×Ü[™[
+HZÙ\ÈHÝš\
+‹Âˆ^\›ˆZ[ÝÛZ×ØÚ×ÚÛ›Øœ×ÛÝÛ™Y
+›ÚY
+NÂˆ^\›ˆZ[ÝÛZ×ØÚ×Ü[™[
+Z[Ì—Ý
+›\ÝZ[Ì—Ý›Ü˜ÙJNÂˆYˆ
+ÛZ×ØÚ×ÚÛ›Øœ×ÛÝÛ™Y
+
+JHÂˆ›]Ú\ÚÌ×HHÈÊˆ
+HÛ›ØˆÝš\˜]ÜÈ[YØZ[ˆY\ˆ]
+H
+‹ÂˆYˆ
+ÛZ×ØÚ×Ü[™[
+	›\ÝÜÚYËX›]Ú\ÚÌ—JJBˆÝ—ØÛÛ[Z]
+‹Ó“Ð—ÖJNÂˆ™]\›ŽÂˆBˆ›]Ú\ÚÌ—HHÂˆBˆÙ[™Y‚ˆYˆ
+ZKšY]ÈOH—ÔT•	‰ˆ
+\×Ù[J
+H\×ÌÌÊ
+JJHÂˆÊˆÛÛ[X][ÛˆÙˆHØ[YHX]š^›ÝH\XØ]HÛ›Øˆ›ÝËˆ
+‹ÂˆÝ—Ø™YÚ[ŠÓ“Ð—Ò×Ð“PÒÊNÂˆYˆ
+ZK›Ý™\›^OOS×Ó“Ó‘H	‰ˆ]ZKš[
+HÂˆYˆ
+\×Ù[J
+JH˜]×Ù[WÝ›ÚXÙJŠNÂˆ[ÙH˜]×Ü\ÜÛÝ[™
+ŠNÂˆBˆÝ—ØÛÛ[Z]ÚÛ›ØœÊÊNÂˆ\ÝÜÚYÈHÂˆ™]\›ŽÂˆBˆ\WÙÛ\ÝXÚÊ
+NÂˆ[\×ÙÛ\ÝšY]ÈHÙ\K›Y]›×ÝšY]ÎÂˆÚYÈHÛ›Øœ×ÜÚYÊ
+NÂˆYˆ
+ÚYÈOH\ÝÜÚYÈ	‰ˆ›]Ú\ÚÌ×JBˆ™]\›ŽÂˆ\ÝÜÚYÈHÚYÎÂˆÝ—Ø™YÚ[ŠÓ“Ð—Ò×Ð“PÒÊNÂˆYŠZKœ\OTT•Ð”’È	‰ˆ
+ZKšY]ÏOU—ÔT•ZKšY]ÏOU—ÔÑTJH	‰ˆZK›Ý™\›^OOS×Ó“Ó‘H	‰ˆ]ZKš[
+HÂˆœ™XZ×Û^[Ý]ØÛÛ›ÛÊ
+NÈÝ—ØÛÛ[Z]ÚÛ›ØœÊÊNÈ™]\›ŽÂˆBˆÊˆÛ™HÚ\™Y›Ý[™Y\˜[Y]\ˆ[™[[˜ÛY[™È]ÈÛÛ^Ø\[Û‹‚ˆ
+ˆÝXÚÛØÚËÛ[Ý[Ûˆ™[XZ[ˆÛÛ[Ý]\Ë™]™\ˆÙ\\˜]H˜Z\ÙY[\Ëˆ
+‹ÂˆšYÚÜ[™[
+ËŒÍŽ
+NÂˆÈÊˆH[NÈ]]ÈšYÚ[™Ú\™H[ÝH\™NˆHYË[ˆHYÙHÝÈ
+‹ÂˆÚ\ˆÌÍ—NÈÊˆ›ÛÛH›ÜˆŒÌÐHSÐÒÈÕTMˆ0­ÈÐ“H
+KÌŠHˆ
+‹Âˆ[ÝÈHË›ˆˆH	‰ˆZKšY]ÈOH—ÑÓÎÂˆ[Ì—ÝHŒÍÈH
+ÝÈÈË›ˆ
+ˆHˆ
+KÂˆÛ›Ø—ÝYÊ
+NÂˆÊˆHÛÛ^Ø\[Ûˆ\ÈHX™[›Ý[ˆ[™^Z[™YÜš^›Û[˜Z[ˆ
+‹ÂˆNÂˆÝ—Ý^
+˜Ê	‘“Ó•ÖËLJK	‘“Ó•ÖË×ÒJNÂˆYˆ
+ÝÊHÂˆ[ÎÂˆ›Üˆ
+ÈHÈÈË›ŽÈÊÊÊBˆÝ—Ü™XÝ
+
+ÈÈ
+ˆKËËÈOHÝ\—ÜYÙJ
+HÈ×ÒHˆ×ÓS‘JNÂˆBˆBˆ˜]×Ù›ÛÝ\Š
+NÂˆYˆ
+ZKšY]ÈOH—ÔÑTH	‰ˆ\×ÌÌÊ
+H	‰ˆZKš[ÜÝ\H
+HÈÊˆÑTNˆH[Ý\	ÜÈÝÛˆÛ›ØœÈ
+‹ÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÓ–ÍHHÈ““ÕH‹‘ÐUH‹PÐÑS•‹”ÓQHŸNÂˆÝ]XÈÛÛœÝÚ\ˆ
+˜ÛÛœÝÖÌ×HHÈ”‘TÕ‹““ÕH‹•QHŸNÂˆÛÛœÝœ\Ý
+˜œH	˜Ý\—Ü]
+
+KO˜˜\ÜÖØšY
+
+WNÂˆÛÛœÝœÝ\Ý
+œÝH	˜œOœÝ\ÝZKš[ÜÝ\NÂˆ›Üˆ
+HHÈHÈJÊÊHÂˆÚ\ˆ–ÌL—NÂˆ[ÞHH
+ˆŒ
+ÈÌÂˆYˆ
+HOH
+Bˆ]Û›ÝJ‹[Û›ÝWÛÙŠœZKš[ÜÝ\
+H
+ÈœO˜[œÜÜÙHH
+NÂˆ[ÙHYˆ
+HOHJBˆ]ÜÊ‹ÖØœÝ\ÙØ]JÝ
+WJNÂˆ[ÙBˆ]ÜÊ‹
+ÝO™›YÜÈ	ˆ
+HOHˆÈ”×ÐPÐÑS•ˆ”×ÔÓQJJHÈ“Óˆˆˆ“Ñ‘ˆŠNÂˆ^ØÊÞ˜Ê	‘“Ó•ÖËLËL
+K	‘“Ó•ÖËÓ–ÚWK×ÑÔVJNÂˆ^ØÊÞ˜Ê	‘“Ó•ÓKÌÍ
+K	‘“Ó•ÓK‹×ÕÒUJNÂˆBˆÝ—ØÛÛ[Z]ÚÛ›ØœÊÊNÂˆ™]\›ŽÂˆBˆ›Üˆ
+HHÈHÈJÊÊHÂˆ™Y—ÝˆHËœ–ÜÚWVÚWNÂˆÛÛœÝÜ\˜[WÝ
+™H™Y—Ù\ØÊŠNÂˆÚ\ˆ[VÌM—K[š]ÎNÂˆ[ÞHH
+ˆŒ
+ÈÌ˜[ÝXÚYHZKÝXÚYOHNÂˆZ[M—ÝÛÛH[WÛZ^ÜYÙJ
+HHÈT•ÐÓÓÙ[WÛZ^ÜYÙJ
+WHˆ\ØÛÛ
+
+NÈÊˆRVˆLH[ˆHLIÜÈ
+‹ÂˆYˆ
+Y
+BˆÛÛ[YNÂˆÊˆÙ[XÝ[Ûˆ\ÈHX™[Ý˜[YHÛÛÜŽÈ›È[™\[™[[HÜˆ™[YY‹ˆ
+‹Âˆ^ØÊÞ˜Ê	‘“Ó•ÖËLËL
+K	‘“Ó•ÖËØ\×ÛÙŠ™Y—Û˜[YJŠJKÝXÚYÈ×ÕÒUHˆ×ÑÔVJNÂˆ˜[H™Y—ÙÙ]
+ŠNÂˆYˆ
+ØÚ×ÜÝ\
+
+HH
+HÈÊˆH[Ý\ˆ]ÈÝÛˆ˜[YH
+[X™\ˆX\šÎˆØÚÙY
+H
+‹Âˆ[ˆHØÚ×ÛÙŠ‹ØÚ×ÜÝ\
+
+JNÂˆYˆ
+ˆH
+Bˆ˜[HŽÂˆYˆ
+ØÚØX›JŠJBˆÝ
+H
+ˆŒ
+ÈL‹MË‹ˆHÈ×ÐSPˆˆ×ÓS‘JNÂˆH[ÙHYˆ
+\×Û[Ý[ÛŠŠJHÈÊˆ™XÛÜ™Y[Ý[ÛŽˆHX\šË[™Ú]]^\È›ÝÈ
+‹Âˆ[]ˆH[Ý[Û—Û›ÝÊŠNÂˆÝ
+H
+ˆŒ
+ÈL‹MË‹]ˆHÈ×ÕÒUHˆ×ÑSJNÂˆYˆ
+]ˆH
+Bˆ˜[H]ŽÂˆBˆYŠ[WÜÝš\Ü›ÛJŠOOQ×ÓU‘S
+HÂˆ[WÜÝš\ÙÛ\
+‹˜[ÞLLËŽÛÛ
+NÂˆH[ÙHYŠ\™›Ü›WÙÛ\
+‹˜[ÞÛÛ
+HÛÛ›ÛÙÛ\
+‹˜[ÞÛÛ
+JHÂˆÊˆ]È^\Ý[™È˜[YKÛ[Ý[Û‹ÛØÚÈ]\È™]Z[™Y™[ÝËˆ
+‹ÂˆH[ÙHYˆ
+O›˜[Y\È	‰ˆO›X^LŠHÈÊˆHÝÚ]ÚˆÜÚ][ÛœÈ\È\È
+‹Âˆ[ˆHO›X^
+ÈKËÈHˆˆˆÈÈˆ‹Ø\H‹ÌHˆ
+ˆ
+È
+ÈØ\
+HHØ\Âˆ›Üˆ
+ÈHÈÈŽÈÊÊÊBˆ›Þ
+ÞHÌÈˆ
+ÈÈ
+ˆ
+È
+ÈØ\
+KÌËËKÈOH˜[ÈÛÛˆ×ÓS‘JNÂˆBˆ™Y—Ý˜[YWÛÙŠ‹˜[[K[š]
+NÂˆYŠ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÑ‘ŠHÂˆZ[Ý[ÙKÝ]Ú[™\ÎÙš[\—Ù\Ü^J	›[ÙK	˜Ý]	œ™\ÊNÂˆ™Y—Ý˜[YWÛÙŠŠ—ÑS‘ËÓTÕTÕÓSÑJK[ÙK[K[š]
+NÂˆBˆYˆ
+
+‹šÚ[™OH—ÑS‘È	‰ˆ‹˜HOHÌÌÊH‹šÚ[™OH—Ð‘S‘ÒS‘H‹šÚ[™OH—Ð”‘TÑU‹šÚ[™OH—Ð”ÕUTÊBˆÜšYÚ[˜[ØÙ[Ý˜[YJÞ˜Ê	‘“Ó•Ð‹LËLÊK[K[š]ÝXÚYÈ×ÕÒUHˆ×ÒJNÂˆÊˆ^\Ý[™È•ÑÔ‘U‹ÔS‘ËÔ“‘XÝ\™\È[™XYHÚÝÈH\™XÝ[Û‹‚ˆ
+ˆ˜\›ÝÈ[X™\‹Ý[š][šÈ\Èx $Ì\šYÚÙˆHSTØ\™Ù[\‹ˆ
+‹Âˆ[ÙHYŠ‹šÚ[™OT—Ð‘TŠBˆÙ[Ý˜[YJÞJ‹šÚ[™OT—ÑS‘È	‰ˆ‹˜OOUÓTÕ	‰ˆ‹˜ÏOSTÕÔST
+Kˆ˜Ê	‘“Ó•Ð‹LËLÊK[K[š]ÝXÚYÐ×ÕÒUN×ÒJNÂˆBˆÝ—ØÛÛ[Z]ÚÛ›ØœÊÊNÂŸB‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOHQÈOOH
+‹ÂœÝ]XÈZ[Ì—Ý[WÜÝ\ÛYÚÊ[Ú]
+BžÂˆÛÛœÝ\Ý
+™H	œ]ÛÙŠÚ]
+KO™[VÚÚ]NÂˆÛÛœÝZ[Ì—Ý
+˜š]ÈH
+ZK˜ˆ	ˆ
+]H—ÑS•ŠJHÈO˜XØÙ[ˆOš]ÝZKœÙ[ÚÚ]WNÂˆ[H[™×ÜÝ\Õ’×Ñ•SH
+ÈÚ]NÂˆZ[Ì—Ý]HÂˆ›Üˆ
+[HHÈHMŽÈJÊÊHÂˆ[ÈHÝ\ÛÙŠJKÛˆHÈO›[ˆ	‰ˆÛWÙÙ]
+š]ËÊNÂˆYˆ
+Ù\Kœ^Z[™È	‰ˆÈOH
+HÛˆH[ÛŽÂˆYˆ
+ÛŠH]H]HÒUWÒÑVVÚWNÂˆBˆ™]\›ˆ]ÂŸB‚œÝ]XÈRWÑUÈ›ÚYYÊ›ÚY
+BžÂˆZ[Ì—ÝˆHÈHHNÂˆ[›[šÈH
+ZK™œ˜[YH	ˆJHOHÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆ^\›ˆZ[ÝÛZ×ØÛ\Û[ÙWÛÛŠ›ÚY
+NÂˆ^\›ˆZ[ÝÛZ×Ø\×Ý˜[œÜÜÛYÜÝ]JZ[Ý›ÝJNÂˆÙ[™Y‚ˆYˆ
+Ù\WØÛØÚ×ÝØZ][™Ê	œÙ\JHÈ
+ZK™œ˜[YH	ˆÌJHOHˆÙ\Kœ^Z[™È	‰ˆ[™×ÜÝ\Õ’×Ñ•SWH	HOH
+BˆˆH]H—ÔVNÈÊˆVT“SØZ]È›ÜˆHÛØÚÎˆHÛÝÈ›[šÈ
+‹ÂˆYˆ
+ZKœ™XÊBˆˆH]H—Ô‘PÎÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆYˆ
+ÛZ×ØÛ\Û[ÙWÛÛŠ
+JHÂˆˆ	HŠ
+]H—ÔVJH
+]H—Ô‘PÊJNÂˆYˆ
+ÛZ×Ø\×Ý˜[œÜÜÛYÜÝ]JPJJBˆˆH]H—ÔVNÂˆYˆ
+ÛZ×Ø\×Ý˜[œÜÜÛYÜÝ]JQJJBˆˆH]H—Ô‘PÎÂˆBˆÙ[™Y‚ˆYˆ
+ZKšY]ÈOH—ÒÓQHZKšY]ÈOH—ÔÓÓ‘È
+Ù\KœÛÛ™×ÛÛˆ	‰ˆ›[šÊJBˆˆH]H—ÒÓQNÂˆYˆ
+ZKšY]ÈOH—ÔÑTJBˆˆH]H—ÔÑTNÂˆYˆ
+ZKšY]ÈOH—ÔT•
+BˆˆH]H—ÑQUÂˆYˆ
+ZKšY]ÈOH—ÑÑSŠBˆˆH]H—ÐT”ÂˆYˆ
+ZKšY]ÈOH—Ñ–
+BˆˆH]H—Ñ–ÂˆYˆ
+ZKšY]ÈOH—ÓRV
+BˆˆH]H—Ó“ÎÂˆYˆ
+ZKšY]ÈOH—ÑÓÊBˆˆH]H—ÑÓÎÂˆYˆ
+ZK›Ý™\›^HOH×Ó“Ó‘JBˆˆH]H—ÔÑSÂˆYˆ
+ZKšY]ÈOH—ÒÓQHZKšY]ÈOH—ÔÓÓ‘ÈÈZKœ˜[šÈˆZKœÜYÙJBˆˆH]H—ÓÐÕTÂˆYˆ
+Ø]™WÜÝ]J
+HOHÐU‘WÔUQUQQ
+Ø]™WÜÝ]J
+HOHÐU‘WÑRSQÈ
+ZK™œ˜[YH	ˆJHˆØ]™WÜÝ]J
+HOHÐU‘WÕS”ÐU‘Q	‰ˆ›[šÊJBˆˆH]H—ÔÐU‘NÂˆYˆ
+›Ú‹œÙ]šÙ^[Y
+HÈÊˆœšYÚˆÛˆÈÚÜÙ[ŽÈ[Nˆ\™K›ÝÚÜÙ[ˆ
+‹ÂˆYˆ
+ZKšY]ÈOH—ÒÓQHZKšY]ÈOH—ÔÓÓ‘ÊHÂˆÛÛœÝÛÛ™×Ý
+œÙÈHÛÛ™Ê
+NÂˆ[˜\ˆHZKšY]ÈOH—ÔÓÓ‘È	‰ˆZKœÛÛ™×ÜÙ[ÙËO›[ŽÂˆ[H
+˜\ˆÈÙËO˜˜\–ÝZKœÛÛ™×ÜÙ[Kœ]ÔT•ÎLWHˆÙ\Kœ]ÔT•ÎLWJHHZKœ˜[šÈ
+ˆMŽÂˆ[ÝHHÙ\WØÝYWÛÙŠ	œÙ\KT•ÎLJHHZKœ˜[šÈ
+ˆMŽÂˆ›Üˆ
+HHÈHMŽÈJÊÊHÊˆ]\›œÈÚ]›Ý\È
+‹ÂˆYˆ
+]\›—Ý\ÙY
+	œ›Ú‹œ]ÝZKœ˜[šÈ
+ˆMˆ
+ÈWJJBˆH]HÒUWÒÑVVÚWNÂˆYˆ
+H	‰ˆMˆ	‰ˆ
+ZKšY]ÈOH—ÒÓQH˜\ŠJBˆÈH]HÒUWÒÑVVÜNÂˆYˆ
+ZKšY]ÈOH—ÒÓQH	‰ˆÙ\WØÝYWÛÙŠ	œÙ\KT•ÎLJHH	‰ˆ›[šÈ	‰ˆÝHH	‰ˆÝHMŠBˆÈH]HÒUWÒÑVVØÝWNÂˆ›Üˆ
+HHÈH”T•ÎÈJÊÊHÈÊˆH\Îˆ^Z[™ÈœšYÚ]]Y[H
+‹Âˆ[H\Ø]
+
+[
+ZJNÂˆ[]]YHZKšY]ÈOH—ÒÓQHÈ\Û]]Y
+
+Hˆ˜\ˆÈ
+[
+JÙËO˜˜\–ÝZKœÛÛ™×ÜÙ[K›]]Hˆ	ˆ]JHˆNÂˆYˆ
+]]Y
+BˆH]H“PÒ×ÒÑVVÚWNÂˆ[ÙBˆÈH]H“PÒ×ÒÑVVÚWNÂˆBˆH[ÙHYˆ
+ZKšY]ÈOH—ÓRV	‰ˆ
+Ý\—ÜYÙJ
+HOH[WÛZ^ÜYÙJ
+HH
+JHÂˆ[HH[WÛZ^ÜYÙJ
+KˆHHHÈ‘•SHˆ”T•ËÛˆHHHÈZKœÙ[ÙWHˆ\ÜÜÚ][ÛŠZK›Z^Ù[
+NÂˆYˆ
+HH
+HÈH[WÜÝ\ÛYÚÊJNÂˆ›Üˆ
+HHÈH
+Z[Ì—Ý
+[ˆ	‰ˆHL]NÈJÊÊHÈÊˆHÛ›ØœÉÈÚ[›™[œšYÚ
+›[šÚ[™Îˆ]]Y
+K
+‹Âˆ[]HHHHÈ˜XÚ×Û]]Y
+K
+[
+ZJHˆ\Û]]Y
+\Ø]
+
+[
+ZJJNÈÊˆHÝ\œÈ[K]]Y\šÈ
+‹ÂˆYˆ
+
+[
+ZHOHÛˆÈ[]H›[šÈˆ
+BˆÈH]H“PÒ×ÒÑVVÚWNÂˆ[ÙHYˆ
+
+[
+ZHOHÛˆ	‰ˆ[]JBˆH]H“PÒ×ÒÑVVÚWNÂˆBˆH[ÙHYˆ
+ZKšY]ÈOH—ÓRVZKšY]ÈOH—Ñ–
+HÂˆÊˆHX\Ý\ˆ[™HY™™XÝÎˆHÙ^\È]™H›Ý[™ÈÈÚÛÜÙH
+‹ÂˆH[ÙHYˆ
+\×Ù[J
+JHÂˆÛÛœÝ\Ý
+™H	˜Ý\—Ü]
+
+KO™[VÝZKœ\NÂˆÈH[WÜÝ\ÛYÚÊZKœ\
+NÂˆ›Üˆ
+HHÈH‘•SH	‰ˆHL]NÈJÊÊHÈÊˆH˜XÚÈœšYÚ
+›[šÚ[™Îˆ]]Y
+KHÝ\œÈ
+‹Âˆ[]HH˜XÚ×Û]]Y
+ZKœ\
+[
+ZJNÈÊˆÚ]]È[K]]Y\šÈ
+‹ÂˆYˆ
+
+[
+ZHOHZKœÙ[ÝZKœ\HÈ[]H›[šÈˆ
+BˆÈH]H“PÒ×ÒÑVVÚWNÂˆ[ÙHYˆ
+
+[
+ZHOHZKœÙ[ÝZKœ\H	‰ˆÛWØ[žJOš]ÚWJH	‰ˆ[]JBˆH]H“PÒ×ÒÑVVÚWNÂˆBˆH[ÙHYˆ
+\×ÌÌÊ
+H	‰ˆZØ™ÛÛŠ
+JHÈÊˆ›Ý\ÈœšYÚY\È[H
+‹ÂˆÛÛœÝœ\Ý
+˜œH	˜Ý\—Ü]
+
+KO˜˜\ÜÖØšY
+
+WNÂˆ[H[™×ÜÝ\Õ’×ÐTÔÌ
+ÈšY
+
+WNÂˆ›Üˆ
+HHÈHMŽÈJÊÊHÂˆ[ÈHÝ\ÛÙŠ
+[
+ZJKÈHÈœO›[ˆÈœÝ\ÙØ]J	˜œOœÝ\Ü×JHˆ×Ô‘TÕÛˆHÈOH×Ó“ÕNÂˆYˆ
+Ù\Kœ^Z[™È	‰ˆÈOH
+BˆÛˆH[ÛŽÂˆYˆ
+ÛŠBˆÈH]HÒUWÒÑVVÚWNÂˆ[ÙHYˆ
+ÈOH×ÕQJBˆH]HÒUWÒÑVVÚWNÂˆBˆH[ÙHYˆ
+\×ÌÌÊ
+JHÈÊˆHÙ^X›Ø\™ˆ]ÈÜÈ[KÈš[™[Ý\ˆXÙH
+‹Âˆ›Üˆ
+HHÈH’ÑVTÎÈJÊÊBˆYˆ
+H	HLHOHÝJHÊˆŒÈHˆÍHËÍHHNH
+‹ÂˆH]HNÂˆH[ÙHYˆ
+ZKœ\OHT•Ð”’ÊHÂˆ[H[™×ÜÝ\Õ’×Ð”’×NÂˆ›Üˆ
+HHÈHMŽÈJÊÊHÂˆ[ÛˆH
+Ý\—Ü]
+
+KO˜œšËœÝ\ÈˆJH	ˆ]NÂˆYˆ
+Ù\Kœ^Z[™È	‰ˆ
+[
+ZHOH
+BˆÛˆH[ÛŽÂˆYˆ
+ÛŠBˆÈH]HÒUWÒÑVVÚWNÂˆBˆ›Üˆ
+HHÈHÈJÊÊHÊˆHÛXÙHYÈ
+‹ÂˆH]H“PÒ×ÒÑVVÚWNÂˆBˆBˆÈHZKšÙ^\ÎÂˆYˆ
+]š\Ú[Û—ÜYÛÝÛ™\Š
+JHÂˆÈHHÈÊˆ›È˜ZÙHÙ^X™Y›Ý\Èœ›ÛH\ÚXØ[YQÈ
+‹ÂˆYˆ
+›Ú‹œÙ]šÙ^[Y
+HÂˆ›Üˆ
+HHÈH
+ÈU’TÒSÓ—ÔÒTWÔQÎÈJÊÊHH]HÒUWÒÑVVÚWNÂˆÈH]HÒUWÒÑVVÙ]š\Ú[Û—ÜYÚ[™^
+
+WH]HÒUWÒÑVVÎ
+È]š\Ú[Û—ÜÚ\WÚ[™^
+
+WNÂˆBˆBˆ]ÚÙ^\×Ù[J	ˆšÊNÂˆ]ÙÛÝÊ›Ú‹œÙ]šÙ^[YOHJNÂˆ]Ü^WÜ™Y
+ZKœ™XÊNÈÊˆVHÜ™Y[ŽÈ™YÚ[H™XÛÜ™[™È
+‹Âˆ]ÛYÊ‹ÊNÂŸB‚‹ÊˆOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOHœ˜[YHOOH
+‹Â–ÐÓÓ›ÚYZWÚ[š]
+›ÚY
+BžÂˆZWÙX\ÙWÜ™\Ù]
+
+NÂˆ\ÚXY\—ÜÛ˜\ÚÝÝ˜[YHÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÛX×ÝZWØØ[˜Ù[
+
+NÂˆÙ[™Y‚ˆ[NÂˆ˜\Ü×Û^[Ý]Ü[™[™×ÛX\ÚÈH˜\Ü×Û^[Ý]ÛÛ—ÜÛÝ[™ÜYÙHHÂˆY[\Ù]
+	ZKÚ^™[ÙˆZJNÂˆ
+›ÚY
+\]Ù]š\Ú[Û—ÜY
+
+NÂˆÜšYÚ[˜[ØÛÛ›ÛË˜[YHÂˆÜšYÚ[˜[ÝØ]™K˜[YHÂˆY[\Ù]
+Ø™Ú[Û›ÝKÚ^™[ÙˆØ™Ú[Û›ÝJNÂˆY[\Ù]
+Ø™Ú[ÚÙ^KÚ^™[ÙˆØ™Ú[ÚÙ^JNÂˆY[\Ù]
+Ø™Ø\œÛ‹Ú^™[ÙˆØ™Ø\œÛŠNÂˆY[\Ù]
+˜\Ü×Ü™X×ÜÝ\Ú^™[Ùˆ˜\Ü×Ü™X×ÜÝ\
+NÂˆY[\Ù]
+˜\Ü×Ü™X×Ü]Ú^™[Ùˆ˜\Ü×Ü™X×Ü]
+NÂˆY[\Ù]
+˜\Ü×Ü™X×Ü^Z[™ËÚ^™[Ùˆ˜\Ü×Ü™X×Ü^Z[™ÊNÂˆ[™×Û[™\ÈHÂˆZKšY]ÈH—ÔÑTNÈÊˆÝ\ÛˆHš\ÚX›HÝ\ÜšYÈQUÜ[œÈÛÝ[™
+‹ÂˆZKœ™]—ÝšY]ÈH—ÔT•ÂˆZKœ\HT•ÎLNÂˆZKš[ÜÝ\HLNÂˆZK˜œš×Ú[HLNÂˆZKšÛÜÝ\HLNÂˆZK˜ÚZ[—Ùš\œÝHLNÂˆZKÝXÚYHLNÂˆZK›Ý™\›^HH×Ó“Ó‘NÂˆZK›Ý][™WÛÚÈHÂˆZK™\HHÂˆZKœØ]™WÙ˜Z[YHÂˆØ]™WÝØZ]HÂˆ[]WÜÙ]
+›Ú‹œÙ]œ[]JNÂˆ›Üˆ
+HHÈHÈJÊÊHÂˆ›]Ú\ÚÚWHHÂˆÝ—Ý[WÝ˜[YÚWHHÂˆBˆXY\—Ù[Ú\ÚHÜ\ÚÛ›Ø—Ù[Ú\ÚHÂˆZ[ÜYÙ\Ê
+NÂˆ[™×ÜÝ\
+
+NÈÊˆH›Ú™XÝ\ÈØYY\ÈÚ\™H[™ÈÝÜÈ
+‹ÂˆYˆ
+›Ú™XÝÜÝÜ˜YÙWÝ[œÝ\ÜY
+
+JHÂˆZKœØ]™WÙ˜Z[YHNÂˆYˆ
+›Ú™XÝÜÝÜ˜YÙWÝ[œÝ\ÜY
+
+HOHŠHØ^J“‘UÑTˆUNˆÐQ“ÐÒÑQ‹
+NÂˆBŸB‚‹ÊˆH˜[œØXÝ[Ûˆ›Üœ›ÝÜÈH[™È˜\Ù[[™H[™ÛÈH]Y[È[™Ú[™KˆÙ][™ÈHÛ™Y›Ü™Bˆ
+ˆH˜[œÜÜÚXÚÈÛÜÙ\ÈHØ\[ˆÚXÚH]Y[ÈTÔˆÛÝ[ÛÛœÝ[YHH]Y]YYÝ\ˆ
+‹Â–ÐÓÓÝ]XÈ[›Ú™XÝØXÜ]Z\™J[™\Ù]
+BžÂˆYˆ
+›Ú™XÝØ\ÞH\™—Ý\Ý[™Ê
+H
+\™\Ù]	‰ˆ
+ZKœ™XÈZKšÙ^\È]ÚÙ^\Ê
+Hˆ]Ü\ÚXØ[ÚÙ^\Ê
+HˆZKš[ÜÝ\HZKšÛÜÝ\HZK˜œš×Ú[H
+JJBˆ™]\›ˆRWÔ“Ò‘PÕÐ•TÖNÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÂˆ^\›ˆ[ÛZ×Ü›Ú™XÝØXÝ]™J›ÚY
+KÛX×Ü›Ú™XÝØXÝ]™J›ÚY
+NÂˆYˆ
+\™\Ù]	‰ˆ
+ÛZ×Ü›Ú™XÝØXÝ]™J
+HÛX×Ü›Ú™XÝØXÝ]™J
+JJBˆ™]\›ˆRWÔ“Ò‘PÕÐ•TÖNÂˆBˆÙ[™Y‚ˆ[™Ú[™WÜ›Ú™XÝÚÛ
+JNÂˆYˆ
+\™\Ù]	‰ˆ
+Ù\Kœ^Z[™ÈÙ\Kœ™\WÜÝ\Ù\Kœ™\WØÛÛÙ\Kœ™\WÜÝÜ[™Ú[™WÜ›Ú™XÝÛ›Ý\Ê
+JJHÂˆ[™Ú[™WÜ›Ú™XÝÚÛ
+
+NÂˆ™]\›ˆRWÔ“Ò‘PÕÐ•TÖNÂˆBˆ›Ú™XÝØ\ÞHHNÂˆ[™×ØÛÛ[Z]ÜÝX›J
+NÈÊˆ›È[˜ÛÛ[Z]YÙ\Ý\™H\ÈÜÝÚ[ˆÝYÚ[™È›Üœ›ÝÜÈÚYÝÈ
+‹Âˆ™]\›ˆÂŸB‚š[ZWÜ›Ú™XÝØ™YÚ[Š›ÚY
+HÈ™]\›ˆ›Ú™XÝØXÜ]Z\™J
+NÈB‚–ÐÓÓ›ÚYZWÜ›Ú™XÝÙ[™
+[\JBžÂˆYˆ
+\›Ú™XÝØ\ÞJBˆ™]\›ŽÂˆYˆ
+\JHÂˆ[™Ú[™WÜ›Ú™XÝÙ›\Ú
+
+NÈÊˆÛ›ÝK[Ù™œÈ\ÙHHÚ[›™[È]Ù[H›Ý\È
+‹ÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÂˆ^\›ˆ›ÚYÛZ×Ü›Ú™XÝÜ™\Ù]
+›ÚY
+KÛX×Ü›Ú™XÝÜ™\Ù]
+›ÚY
+NÂˆÛZ×Ü›Ú™XÝÜ™\Ù]
+
+NÈÊˆÛ\Ù^H›Ý\È\[™ÛˆHÛ›Ú™XÝ	ÜÈØØ[KØÚÜ™
+‹ÂˆÛX×Ü›Ú™XÝÜ™\Ù]
+
+NÂˆBˆÙ[™Y‚ˆ›Ú™XÝØÛÛ[Z]ÜÝYÙJ
+NÂˆ[™Ú[™WÚ[š]
+›Ú‹œ]	œ›Ú‹˜\œ‹œÛÛ™Ë›Ú‹˜\œ‹›[™K	œ›Ú‹œÛÝ[™
+NÂˆÙ\K˜œHH
+›Ø]
+\›Ú‹œÙ]˜œWÞLÈLŒŽÂˆÙ\K™^ØœHHÙ\K˜œNÂˆÙ\K˜XØÙ[ÜMÈH›Ú‹œÙ]˜XØÙ[ÜMÎÂˆ›Ú™XÝØ\WÚ[Ê
+NÂˆÙ\K˜Û×ÜÜ˜ÈH“Ò—ÐÓ×ÔÔÊ›Ú‹œÙ]˜
+NÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆ^\›ˆZ[ÝÛZ×ØÛ\Û[ÙWÛÛŠ›ÚY
+NÂˆYˆ
+ÛZ×ØÛ\Û[ÙWÛÛŠ
+JBˆÙ\K˜Û×ÜÜ˜ÈHÑTWÐÓ×ÐUUÎÂˆÙ[™Y‚ˆ[™Ú[™WØ\WÜÛÝ[™
+	œ›Ú‹œÛÝ[™
+NÂˆ[™Ú[™WØœš×ÛÛÜÊ
+NÂˆZWÚ[š]
+
+NÂˆX\š×Ù\J
+NÈÊˆ™\Ù]Ú[\Ü\™HØ]™YÛ›HžHHÜ™[˜\žHØ]™HÛXÞH
+‹Âˆ›Ú™XÝÜ™]š\Ú[ÛŠÊÎÂˆH[ÙHÂˆY[XÜJ[™×ÜÚYÝË
+Z[Ý
+ŠIœ›Úˆ
+ÈS‘×ÓÑ‘‹S‘×Ð–UTÊNÂˆBˆ›Ú™XÝÚ[œ]ÜÞ[˜Ê
+NÈÊˆÛÛœÝ[YHÛÛ›ÛÈ[Üˆ\›™Y\š[™ÈH˜[œØXÝ[Ûˆ
+‹ÂˆZK˜XÝÝH]Û\Ê
+NÂˆ›Ú™XÝØ\ÞHHÂˆ[™Ú[™WÜ›Ú™XÝÜ™[X\ÙJ
+NÂŸB‚–ÐÓÓ[ZWÜ›Ú™XÝÛØY
+›ÚY
+BžÂˆ[˜ÈHZWÜ›Ú™XÝØ™YÚ[Š
+NÂˆYˆ
+˜ÊHÂˆØ^J”ÕÔVRS‘ÈÈÐQ‹
+NÂˆ™]\›ˆ˜ÎÂˆBˆ˜ÈH›Ú™XÝÛØYÜÝYÙJ
+NÂˆZWÜ›Ú™XÝÙ[™
+˜ÈOH
+NÂˆYˆ
+\˜ÊBˆZK™\HHÈÊˆH\ÝØ]™Y›Ú™XÝ\È›ÝÈH]™H›Ú™XÝ
+‹ÂˆØ^J˜ÈÈ““ÈSQÐU‘Q“Ò‘PÕˆˆ”ÐU‘Q“Ò‘PÕÐQQ‹
+NÂˆ™]\›ˆ˜ÎÂŸB‚–ÐÓÓ[ZWÜ›Ú™XÝÜ™\Ù]
+›ÚY
+BžÂˆ[˜ÈH›Ú™XÝØXÜ]Z\™JJNÂˆYˆ
+˜ÊHÂˆØ^J”“Ò‘PÕ•TÖH‹
+NÂˆ™]\›ˆ˜ÎÂˆBˆ›Ú™XÝÜ™\Ù]ÜÝYÙJ
+NÂˆZWÜ›Ú™XÝÙ[™
+JNÂˆØ^J”“Ò‘PÕ‘TÑUˆÐSTTÈÑT‹
+NÂˆ™]\›ˆÂŸB‚‹Êˆ]šXÙH›Y]ÛÝ[[ž\\ÜÙ\È›Ú™XÝ]]ÜØ]™H
+™\ÝÜ™Yœ›ÛHMNŽMŒ
+K‚ˆ
+ˆ›È\˜\ÙH\š[™È›Ý\Ë˜[œÜÜØ\\™HÜˆÝYÙY›\Ú\ÙKˆ™Z™XÝ\ÞBˆ
+ˆ]Y[È™Y›Ü™HXÜ]Z\š[™ÈHÛÈ™XÚXÚÈY\ˆHÛ›ÜˆH]Y]YYÝ\‚ˆ
+ˆH˜Z[YÜš]H™]šY\ÈY\ˆHËˆ™\Ù]ÛØY]\Ý›Ý›Ü\È™\]Y\Ýˆ
+‹ÂœÝ]XÈ›ÚY]šXÙWØÜØ]™J›ÚY
+BžÂˆ[˜ÎÂˆÝ]XÈZ[Ì—Ý™]žWØ]ÂˆYˆ
+\›Ú™XÝÙ]šXÙWØÜ[™[™Ê
+H›Ú™XÝØ\ÞH\™—Ý\Ý[™Ê
+Hˆ
+™]žWØ]	‰ˆ
+[Ì—Ý
+J]Û\Ê
+HH™]žWØ]
+H
+JH™]\›ŽÂˆÚY›™YˆÒÔÕˆÈ^\›ˆ[ÝÜ™WÜÝYÙWÚ[
+›ÚY
+NÈYˆ
+ÝÜ™WÜÝYÙWÚ[
+
+JH™]\›ŽÈBˆÙ[™Y‚ˆYˆ
+ZWØ›ÛÝÙ›\ÚØ\ÞJ
+JH™]\›ŽÂˆ[™Ú[™WÜ›Ú™XÝÚÛ
+JNÂˆYˆ
+ZWØ›ÛÝÙ›\ÚØ\ÞJ
+JHÈ[™Ú[™WÜ›Ú™XÝÚÛ
+
+NÈ™]\›ŽÈBˆ˜ÈH›Ú™XÝÙ]šXÙWØÜØ]™J
+NÂˆ[™Ú[™WÜ›Ú™XÝÚÛ
+
+NÂˆ™]žWØ]H˜ÈÈ]Û\Ê
+H
+ÈLHˆÂˆØ^J˜ÈÈ•ÐU‘HRSQˆ‘U–RS‘Èˆˆ“QUÓÕÐU‘Q‹
+NÂŸB‚‹Êˆ\‹\]\›ˆ™\Ù]™XØ[ˆH]\›ˆH˜\ÜÈ\^\È™^
+]ÈÝYK[ÙHH^Z[™Âˆ
+ˆÛ™JH\ÚÜÈ›Üˆ]È™\Ù]Û˜ÙKØ]YÈ]]\›ŽÈH[™Ú[™HÝÚ]Ú\ÈÚ[ˆ]]\›‚ˆ
+ˆ^\È[™H›ÚXÙH\È]ZY]
+[™Ú[™WØ˜\Ü×ÜÙ[XÝÜ™\Ù]
+Kˆ[œÙ]ˆ›Ý[™È\È™\]Y\ÝYˆ
+‹ÂœÝ]XÈ›ÚY]\›—ÜÛÝ[™ÝXÚÊ›ÚY
+BžÂˆÝ]XÈZ[ÝÙY[—Ü]ÓTÔ×HHÌ‘‹‘ŸKÙY[—Ý˜[ÓTÔ×NÂˆ›Üˆ
+[ˆHÈˆTÔÎÈŠÊÊHÂˆ[H’×ÐTÔÌ
+È‹ÝYHHÙ\WØÝYWÛÙŠ	œÙ\K
+K]HÝYHHÈÝYHˆÙ\Kœ]ÝNÂˆ[Ø]HH[™Ú[™WØ˜\Ü×Ü™\Ù]ÙØ]JŠNÂˆ[œÚYÛ™YÈH›Ú‹œ]Ü]KœœÝ–Ø—NÂˆYˆ
+Ø]HH	‰ˆØ]HOH]	‰ˆØ]HOHÙ\Kœ]ÝH	‰ˆ[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™ÊŠJBˆ[™Ú[™WØ˜\Ü×ØØ[˜Ù[Ü™\Ù]
+ŠNÈÊˆ]ÈÝYHØ\ÈZÙ[ˆ˜XÚÈ
+‹ÂˆYˆ
+ÙY[—Ü]Ø—HOH]	‰ˆÙY[—Ý˜[Ø—HOHÊHÛÛ[YNÂˆÙY[—Ü]Ø—HH
+Z[Ý
+\]ÈÙY[—Ý˜[Ø—HH
+Z[Ý
+\ÎÂˆYˆ
+\ÊHÛÛ[YNÂˆ[œÚYÛ™YÚ[™Û™WØ˜\ÙYÂˆYˆ
+X˜\Ü×Ü]\›—Ü™\Ù]ÙXÛÙJË	šÚ[™	›Û™WØ˜\ÙY
+H[Û™WØ˜\ÙY
+HÛÛ[YNÂˆ[˜[šÈH
+[
+ZÚ[™™\Ù]H
+[
+[Û™WØ˜\ÙYHNÂˆYˆ
+[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYØ˜[šÊŠHOH˜[šÈ	‰ˆ[™Ú[™WØ˜\Ü×Ü™\]Y\ÝYÜ™\Ù]
+ŠHOH™\Ù]	‰‚ˆY[™Ú[™WØ˜\Ü×Ü™\Ù]ÙY]Y
+ŠH	‰ˆY[™Ú[™WØ˜\Ü×Ü™\Ù]Ü[™[™ÊŠJHÛÛ[YNÂˆ
+›ÚY
+Y[™Ú[™WØ˜\Ü×ÜÙ[XÝÜ™\Ù]Ø]
+‹˜[šË™\Ù]	œ›Ú‹œÛÝ[™]
+NÂˆBŸB‚‹ÊˆUUÔÐU‘NˆÚ[™Ù\È\™HØ]™YžH[\Ù[™\ÈÚ[HH]\›ˆ\ÈÝÜY[™›Ý[™È\È™Y[ˆÝXÚYˆ
+ˆ›ÜˆUUÔÐU‘WÔURQU\Ë][ÜÝ]™\žHUUÔÐU‘WÑÐT\ËˆÝÜYÛ›NˆH›\Ú\˜\ÙHÚ[[˜Ù\ÈBˆ
+ˆ]Y[ËˆÛ›HHØš™XÝÈ]Ú[™ÙY\™HÜš][ˆ
+›Ú™XÝ˜ÊK\ÝX[HÛ™HÜˆÛÈÙXÝÜœËˆ
+‹ÂˆÙYš[™HUUÔÐU‘WÑÐTŒBœÝ]XÈ›ÚY]]ÜØ]™J›ÚY
+BžÂˆZ[Ì—Ý›ÝÈH]Û\Ê
+NÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆ^\›ˆZ[ÝÛZ×ØÚ×Ù›\ÚØ\ÞJ›ÚY
+KÛZ×ØÛ\Û[ÙWÛÛŠ›ÚY
+NÂˆÙ[™Y‚ˆYˆ
+›Ú™XÝØ\ÞHZWØ›ÛÝÙ›\ÚØ\ÞJ
+H›Ú™XÝÜÝÜ˜YÙWÝ[œÝ\ÜY
+
+JBˆ™]\›ŽÂˆYˆ
+Ø]™WÝØZ]	‰ˆ\Ù\Kœ^Z[™È	‰ˆ\Ù\Kœ™\WÜÝ\	‰ˆ\Ù\Kœ™\WØÛÛ	‰ˆ\Ù\Kœ™\WÜÝÜ	‰ˆ]ZKœ™XÈ	‰ˆ\\™—ÜØ]™WØ\ÞJ
+JHÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆYˆ
+ÛZ×ØÛ\Û[ÙWÛÛŠ
+H	‰ˆ
+ÛZ×ØÚ×Ù›\ÚØ\ÞJ
+H›ÝÈHZK˜XÝÝUUÔÐU‘WÔURQU
+JBˆ™]\›ŽÈÊˆÙY\H]Y]YYÐU‘H[[Û\^Z[™È\ÈÛÛ™H]ZY]
+‹ÂˆÙ[™Y‚ˆØ]™WÜ›Ú™XÝ
+
+NÂˆ™]\›ŽÂˆBˆÚYˆ“ÐT‘ÔÓRÌÍÂˆYˆ
+ÛZ×ØÚ×Ù›\ÚØ\ÞJ
+JHÊˆZWÙœ˜[YH[œÈ™Y›Ü™HÛZ×ØÚ×ÜÛÛˆ\Ü^Hœ˜[Y\È
+‹Âˆ™]\›ŽÂˆÙ[™Y‚ˆYˆ
+]ZK™\H
+›Ú‹œÙ]˜]]ÜØ]™WÛÙ™ˆ	‰ˆ]ZK›\ÝØ]]ÜØ]™JHÙ\Kœ^Z[™ÈÙ\Kœ™\WÜÝ\Ù\Kœ™\WØÛÛÙ\Kœ™\WÜÝÜZKœ™XÈ\™—Ý\Ý[™Ê
+HˆZK›Ý™\›^HOH×ÐTÒÈ›ÝÈHZK˜XÝÝUUÔÐU‘WÔURQU
+ZKœØ]™YÝ	‰ˆ›ÝÈHZKœØ]™YÝUUÔÐU‘WÑÐT
+JBˆ™]\›ŽÂˆZKœØ]™YÝH›ÝÎÂˆZK›\ÝØ]]ÜØ]™HHÂˆÝÚ]Ú
+›Ú™XÝÜØ]™J
+JHÂˆØ\ÙH‚ˆZK™\HHÂˆZKœØ]™WÙ˜Z[YHÂˆØ^JUUÔÐU‘Q‹
+NÂˆœ™XZÎÂˆØ\ÙHNN‚ˆZKœØ]™WÙ˜Z[YHNÂˆØ^J“‘UÑTˆUNˆ“ÕÐU‘Q‹
+NÂˆœ™XZÎÂˆØ\ÙHMÎ‚ˆZKœØ]™WÙ˜Z[YHNÂˆØ^J“QSSÔ–H•Sˆ“ÕÐU‘Q‹
+NÂˆœ™XZÎÂˆY˜][‚ˆZKœØ]™WÙ˜Z[YHNÂˆØ^J”ÐU‘HRSQ‹
+NÂˆœ™XZÎÂˆBŸB‚•RWÑUÈ›ÚYZWÙœ˜[YJ›ÚY
+BžÂˆZ[Ì—ÝNÂˆYˆ
+ZK˜œš×ØÚÚXÙWÛÛˆ	‰ˆ
+Y[™Ú[™WØœš×Ü™]šY]×ØXÝ]™J
+H›Ú™XÝØ\ÞHÙ\Kœ]ÔT•Ð”’×HOHZK˜œš×ØÚÚXÙWÜ]ˆ]ÚÙ^\Ê
+H
+]Ø]ÛœÊ
+H	ˆŠ
+]H—ÔÑS
+H
+]H—ÒÓQJJJJJHœš×ØÚÚXÙWØØ[˜Ù[
+
+NÂˆ[œ]
+
+NÂˆ]š\Ú[Û—ÜYÚ[œ]
+
+NÂˆ^Ü™X×Ù˜Z[Š
+NÂˆYˆ
+›Ú™XÝØ\ÞJHÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÛX×ÝZWØØ[˜Ù[
+
+NÂˆÙ[™Y‚ˆ˜]×ÚXY\Š
+NÈÊˆÙY\˜[œÙ™\ˆÝ]\Èš\ÚX›NÈØ[\\È[™[[YHÝ^H[ÝXÚY
+‹Âˆ™]\›ŽÂˆBˆÚYˆ“ÐT‘ÔÓRÌÍÂˆÛX×Ùœ˜[YJ
+NÂˆ]š\Ú[Û—ÜYÚ[œ]
+
+NÈÊˆ\]HYÝÛ™\ˆY\ˆÓPÈX^HZÙHHRKˆ
+‹ÂˆÙ[™Y‚ˆYˆ
+\›Ú™XÝØ\ÞJHÈÊˆÓÈˆRQHˆÓÐÒÈÓÕTÑNÈÛ\[ÙH[Ø^\È\Ù\ÈUUÈ
+‹ÂˆÝ]XÈZ[ÝØZ]YÂˆZ[ÝÎÂˆÚYˆ“ÐT‘ÔÓRÌÍÂˆ^\›ˆZ[ÝÛZ×ØÛ\Û[ÙWÛÛŠ›ÚY
+NÂˆÙ\K˜Û×ÜÜ˜ÈHÛZ×ØÛ\Û[ÙWÛÛŠ
+HÈÑTWÐÓ×ÐUUÈˆ“Ò—ÐÓ×ÔÔÊ›Ú‹œÙ]˜
+NÂˆÙ[ÙBˆÙ\K˜Û×ÜÜ˜ÈH“Ò—ÐÓ×ÔÔÊ›Ú‹œÙ]˜
+NÂˆÙ[™Y‚ˆÈH
+Z[Ý
+\Ù\WØÛØÚ×ÝØZ][™Ê	œÙ\JNÂˆYˆ
+È	‰ˆ]ØZ]Y
+BˆØ^J•ÐRUS‘È“ÔˆÓÐÒÈ‹
+NÂˆØZ]YHÎÂˆBˆÚYˆÐTÔ×ÕQÑÑQÔÓÕS‘ˆYŠ[™×ÝØZ]
+HÂˆ[\™XÝ[Û][™×ÝØZ]OLŽÂˆYŠ[™Ë˜Ý\ˆO][™×ÝØZ]ØÝ\ˆ[™Ë\ÙYO][™×ÝØZ]Ý\ÙYˆ[™Ú[™WØ˜\Ü×ØÚÚXÙWÜÙ\šX[
+
+HO][™×ÝØZ]ÜÙ\šX[ˆY[XÛ\
+[™Ëœ™YÚ[Û‹[™ËœÚYÝË[™Ë›[ŠJ][™×ÝØZ]LÂˆ[ÙH×Ý[™Ê\™XÝ[ÛŠNÂˆBˆÙ[™Y‚ˆYŠZK›Ý™\›^HOS×ÓTÕZKš[
+HY\—ÜØÜ›Û˜XÝ]™OLÂˆ[ÙHÈ[š\ÚX›OLÙ›ÜŠ[œÚYÛ™Y›ÝÏ]ZK›\ÝÝÜÜ›ÝÏZK›\ÝÛˆ	‰ˆ›ÝÏZK›\ÝÝÜ
+ÍNÜ›ÝÊÊÊBˆYŠ\ÝÜ›ÝÜÖÜ›Ý×KšÚ[™OT—Ð•SQJ]š\ÚX›OLNÂˆYŠ]š\ÚX›J\Y\—ÜØÜ›Û˜XÝ]™OLÈBˆ[™×ÝXÚÊ
+NÂˆ]\›—ÜÛÝ[™ÝXÚÊ
+NÂˆ[™Ú[™WÛ›ÝWÛØÚ×Ü™Yœ™\Ú
+
+NÂˆ]šXÙWØÜØ]™J
+NÂˆZWÙX\ÙWÝXÚÊ
+NÂˆ]]ÜØ]™J
+NÂˆYˆ
+\›Ú™XÝØ\ÞJBˆ\™—Ý\ÝÝXÚÊ
+NÂˆYˆ
+ZKšY]ÈOH—ÔT‘ˆ	‰ˆ\\™—Ý\Ý[™Ê
+JBˆ\™—ÝÚ[™ÝÊ
+NÂˆ›Üˆ
+HHÈH”T•ÎÈJÊÊBˆ[™×ÜXZÖÚWHH
+Z[M—Ý
+J[™×ÜXZÖÚWHH
+[™×ÜXZÖÚWHˆÊJNÂˆ›Üˆ
+HHÈH’ÒU
+ˆ‘•SNÈJÊÊHÈÊˆH[H˜XÚÜÉÈ]È˜[\ÈH\Y]\œÈÈ
+‹Âˆ›Û][HZ[Ý
+šH	™[™×Ú]ÚHÈ‘•SWVÚH	H‘•SWNÂˆ
+šH
+Z[Ý
+J
+šH
+
+šˆÊHH
+
+šÈHˆ
+JNÂˆBˆÚYˆ“ÐT‘ÔÓRÌÍÂˆYˆ
+ÛX×ÝZWØXÝ]™J
+JHÂˆÛX×ÝZWÙ˜]Ê
+NÂˆÊˆ]\›ˆÝY\È\ÙHH^\Ý[™ÈXY\ˆØ\ÝX›Ý™HH™]Z[™YÜ\ˆ
+‹ÂˆYˆ
+ZK›\Ù×Ý[[	‰ˆ
+[Ì—Ý
+JZK›\Ù×Ý[[H]Û\Ê
+JHˆ	‰‚ˆ[Y[XÛ\
+ZK›\ÙË“‘VˆU‹L
+JBˆ˜]×ÚXY\Š
+NÂˆBˆ[ÙBˆÙ[™Y‚ˆÂˆ˜]×ÚXY\Š
+NÂˆ˜]×ÛXZ[Š
+NÂˆ˜]×ÚÛ›ØœÊ
+NÂˆBˆYÊ
+NÂˆZK™œ˜[YJÊÎÂŸB‚›ÚYZWÚ[œ]ÛÛ›J›ÚY
+HÈ[œ]
+
+NÈ]š\Ú[Û—ÜYÚ[œ]
+
+NÈBš[ZWÙ\J›ÚY
+HÈ™]\›ˆZK™\HOHÈB›ÚYZWÜØ^JÛÛœÝÚ\ˆ
+˜KÛÛœÝÚ\ˆ
+˜ŠHÈØ^JKŠNÈB‚‚

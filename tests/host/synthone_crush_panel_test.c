@@ -21,6 +21,15 @@ int main(void)
         assert(pref_get(r) == 0 && pref_get(width) == 0);
         char number[32] = {0}, unit[8] = {0};
         assert(original_value_text(r, 0, number, unit) && !strcmp(number,"48000") && !strcmp(unit,"Hz"));
+        pref_t pan = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN);
+        pref_t pan_rate = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN_RATE);
+        assert(ui_original_synthone_rows[0][2] == pan.c && ui_original_synthone_rows[0][3] == pan_rate.c);
+        assert(pref_get(pan) == 0 && pref_get(pan_rate) == ORIGINAL_SYNTHONE_PAN_RATE_INIT);
+        assert(original_value_text(pan, 0, number, unit) && !strcmp(number, "OFF"));
+        assert(original_value_text(pan_rate, pref_get(pan_rate), number, unit) &&
+               !strcmp(number, "250") && !strcmp(unit, "mHz"));
+        pref_set(pan, 36 + v);
+        pref_set(pan_rate, 97 - v);
         pref_set(width, 67 + v);
         pref_set(r, 127);
         engine_render(block, 256);
@@ -56,7 +65,9 @@ int main(void)
         assert(engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH)) == rates[v]);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_WIDTH)) == 67 + v);
+        assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN)) == 36 + v);
+        assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN_RATE)) == 97 - v);
     }
-    puts("Both Synth One pages preserved independent rate and stereo width across project save, engine switches and reload.");
+    puts("Both Synth One pages preserved independent crush, width, pan depth and pan rate across project save, engine switches and reload.");
     return 0;
 }

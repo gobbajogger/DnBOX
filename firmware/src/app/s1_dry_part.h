@@ -22,11 +22,23 @@ typedef struct {
     s1_dry_controls patch;
 #endif
     s1_stereo_width width;
+    struct {
+        uint32_t phase;
+        float rate, rate_target, depth, depth_target;
+        uint8_t engaged, mix;  /* gain-law transition in 64 samples */
+    } pan;
 } s1_dry_part;
 
 /* Original bitCrushSampleRate is 2048..48000 Hz. Turning up the crush
  * amount lowers the clock from the INIT value to the minimum. */
 static inline float s1_part_crush_hz(float amount) { return 48000.f - 45952.f * amount; }
+/* Three low-rate steps reach the original 0.25 Hz INIT exactly. */
+static inline float s1_pan_hz(unsigned position)
+{
+    const float minimum = 1.f / 1920.f;
+    if (position <= 3) return minimum + (0.25f - minimum) * (float)position / 3.f;
+    return 0.25f + (float)(position - 3u) * (9.75f / 124.f);
+}
 void s1_part_init(s1_dry_part *part);
 void s1_part_all_off(s1_dry_part *part);
 void s1_part_bind_width(s1_dry_part *part, uint8_t *history);

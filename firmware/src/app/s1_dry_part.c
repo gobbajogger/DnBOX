@@ -3,9 +3,7 @@
 #include "../../../experiments/sound-hardware-v1/synthone-widen/widen.h"
 #include "../dsp/fastmath.h"
 #include <stddef.h>
-#if X0X_SYNTHONE_PATCH
 #include "original_sound.h"
-#endif
 #include <string.h>
 
 void s1_part_init(s1_dry_part *part)
@@ -13,6 +11,7 @@ void s1_part_init(s1_dry_part *part)
     memset(part, 0, sizeof *part);
     part->bend = 0.5f;
     part->crush_interval = 1.f;
+    part->pan.rate_target = .25f;
 #if X0X_SYNTHONE_PATCH
     s1_dry_frozen_controls(&part->patch);
 #endif
@@ -167,14 +166,25 @@ static const float crush_intervals[128] = {
 
 int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
-    if (id > 3 || !(value >= 0.0f && value <= 1.0f)) return 0;
-    if (id == 3) {
+    if (id >= ORIGINAL_SYNTHONE_NPARAMS || !(value >= 0.0f && value <= 1.0f)) return 0;
+    unsigned position = (unsigned)(value * 127.f + .5f);
+    if (id == ORIGINAL_SYNTHONE_PAN_RATE) {
+        part->pan.rate_target = s1_pan_hz(position);
+        return 1;
+    }
+    if (id == ORIGINAL_SYNTHONE_PAN) {
+        /* Position 0 recalls legacy dual-unity bypass. The 127 active
+         * positions span the original 0..1 depth including true center. */
+        part->pan.engaged = position != 0;
+        part->pan.depth_target = position ? (float)(position - 1u) / 126.f : 0.f;
+        return 1;
+    }
+    if (id == ORIGINAL_SYNTHONE_WIDTH) {
         if (value != 0.f && !part->width.first) return 0;
         part->width.target = value;
         return 1;
     }
-    if (id == 2) {
-        unsigned position = (unsigned)(value * 127.f + .5f);
+    if (id == ORIGINAL_SYNTHONE_CRUSH) {
         part->crush_interval = crush_intervals[position];
         return 1;
     }
@@ -275,6 +285,76 @@ static void widen_right(s1_stereo_width *width, float *right, unsigned frames)
     width->applied = wet;
 }
 
+/* Soundpipe sp_port, sp_osc and sp_pan2(type 0), at the original 44.1 kHz.
+ * Compute the endpoint sines instead of storing another 4096-word table. */
+static float pan_port(float current, float target)
+{
+    return 0x1.49a000p-13f * target + 0x1.ffeb66p-1f * current;
+}
+
+static unsigned pan_increment(float hz)
+{
+    /* Nearest-even for the nonnegative 24-bit phase increment. */
+    float value = hz * (16777216.f / 44100.f);
+    fm_bits_t nearest = {.f = value + 0x1.8p23f};
+    return nearest.u - 0x4b400000u;
+}
+
+static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned frames)
+{
+    unsigned phase = part->pan.phase;
+    float rate = part->pan.rate;
+    unsigned mix = part->pan.mix;
+    if (!part->pan.engaged && !mix) {
+        /* Keep time even during silent and legacy dry blocks. Once the
+         * binary32 port reaches its fixed point advance a block at once. */
+        for (unsigned i = 0; i < frames; ++i) {
+            float next = pan_port(rate, part->pan.rate_target);
+            unsigned step = pan_increment(next);
+            if (next == rate) {
+                phase += step * (frames - i);
+                break;
+            }
+            rate = next;
+            phase += step;
+        }
+        /* A bypassed depth port may still be decaying after a live edit.
+         * Its setting has no effect on the untouched INIT path. */
+        if (part->pan.depth != 0.f)
+            for (unsigned i = 0; i < frames; ++i) part->pan.depth = pan_port(part->pan.depth, 0.f);
+    } else {
+        float depth = part->pan.depth;
+        for (unsigned i = 0; i < frames; ++i) {
+            rate = pan_port(rate, part->pan.rate_target);
+            depth = pan_port(depth, part->pan.depth_target);
+            unsigned index = (phase >> 12) & 4095u;
+            float a = fm_sin_turns((float)index / 4096.f);
+            float b = fm_sin_turns((float)((index + 1u) & 4095u) / 4096.f);
+            float fraction = (float)(phase & 4095u) / 4096.f;
+            float pan = (a + fraction * (b - a)) * depth;
+            phase += pan_increment(rate);
+            float angle = (1.f + pan) * (FM_PI * .25f);
+            float input = left[i];
+            float l = input * fm_sin_pi(FM_PI * .5f - angle);
+            float r = input * fm_sin_pi(angle);
+            if (part->pan.engaged) { if (mix < 64u) ++mix; }
+            else if (mix) --mix;
+            if (mix < 64u) {
+                float wet = (float)mix / 64.f;
+                l = input + wet * (l - input);
+                r = input + wet * (r - input);
+            }
+            left[i] = l;
+            right[i] = r;
+        }
+        part->pan.depth = depth;
+    }
+    part->pan.phase = phase & 0xffffffu;
+    part->pan.rate = rate;
+    part->pan.mix = (uint8_t)mix;
+    widen_right(&part->width, right, frames);
+}
+
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     if (!frames) return;
@@ -290,7 +370,7 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
      * for a live rate change without running the hold loop on a dry block. */
     if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
         part->crush_last = left[frames - 1u];
-        widen_right(&part->width, right, frames);
+        pan_stereo(part, left, right, frames);
         return;
     }
     for (unsigned f = 0; f < frames; ++f) {
@@ -304,5 +384,5 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
         }
         part->crush_age += 1.f;
     }
-    widen_right(&part->width, right, frames);
+    pan_stereo(part, left, right, frames);
 }
