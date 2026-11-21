@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 13);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 17);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -260,7 +260,7 @@ static void verify_synthone(void)
 #endif
     uint8_t extended[32], saved_lfo[7]={0,0,0,64,0,0,64};
     assert(original_sound_init(extended,ORIGINAL_SOUND_SYNTHONE,0));
-    for(unsigned id=ORIGINAL_SYNTHONE_TREM;id<ORIGINAL_SYNTHONE_NPARAMS;++id){
+    for(unsigned id=ORIGINAL_SYNTHONE_TREM;id<ORIGINAL_SYNTHONE_PHASER_MIX;++id){
         for(unsigned q=0;q<128;++q){
             assert(original_sound_set(extended,id,q));
             unsigned discrete=id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE;
@@ -278,6 +278,28 @@ static void verify_synthone(void)
     }
     assert(original_sound_set(extended,ORIGINAL_SYNTHONE_LFO1_RATE,91));
     for(unsigned slot=0;slot<13;++slot) assert(extended[8+slot]==127-slot);
+#endif
+    unsigned phaser[4]={0,5,0,99};
+    for(unsigned j=0;j<4;++j)
+        for(unsigned q=0;q<128;++q) {
+            phaser[j]=q;
+            assert(original_sound_set(extended,ORIGINAL_SYNTHONE_PHASER_MIX+j,q));
+            assert(original_sound_valid(extended));
+            for(unsigned k=0;k<4;++k)assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+            assert(original_sound_s1_display(extended,0)==64 && original_sound_s1_display(extended,1)==0);
+            assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PAN)==81);
+            assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_WIDTH)==79);
+            assert(original_sound_set(extended,ORIGINAL_SYNTHONE_CRUSH,q));
+            for(unsigned k=0;k<7;++k) {
+#if X0X_SYNTHONE_PATCH
+                if (k==3) continue;
+#endif
+                assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_TREM+k)==saved_lfo[k]);
+            }
+        }
+#if X0X_SYNTHONE_PATCH
+    for(unsigned k=0;k<13;++k) assert(original_sound_s1_set(extended,k,42u+k));
+    for(unsigned k=0;k<4;++k) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
 #endif
     assert(!original_sound_init(bad, ORIGINAL_SOUND_SYNTHONE, 1));
     assert(!original_sound_valid(bad));

@@ -652,7 +652,7 @@ static UI_DRAW int pref_get(pref_t r)
     case R_BPRESET: return engine_bass_requested_preset(r.b);
     case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
     case R_ENG:
-        if (r.a == T_303 && r.c >= ORIGINAL_SYNTHONE_PAN_RATE &&
+        if (r.a == T_303 &&
             engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE)
             return original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
         return proj.sound.v[r.a][r.b][r.c];
@@ -1130,6 +1130,17 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
         if (!value) put_s(num,"OFF");
         else { put_i(num,((value-1)*100+63)/126); put_s(unit,"%"); }
         return 1;
+    }
+    if (kind==ORIGINAL_SOUND_SYNTHONE && id==ORIGINAL_SYNTHONE_PHASER_FEEDBACK) {
+        put_i(num,(value*80+63)/127); put_s(unit,"%"); return 1;
+    }
+    if (kind == ORIGINAL_SOUND_SYNTHONE && (id==ORIGINAL_SYNTHONE_PHASER_RATE || id==ORIGINAL_SYNTHONE_PHASER_WIDTH)) {
+        float physical;
+        if (engine_param_si(T_303,r.b,(int)id,value,&physical)==X0X_U_HZ) {
+            if (id==ORIGINAL_SYNTHONE_PHASER_RATE) physical *= 60.f;
+            put_i(num,(int)(physical+.5f)); put_s(unit,id==ORIGINAL_SYNTHONE_PHASER_RATE ? "BPM" : "Hz");
+            return 1;
+        }
     }
     if (kind == ORIGINAL_SOUND_SYNTHONE && ui_original_states(kind,id)) {
         static const char *const sources[] = {"OFF","LFO 1","LFO 2","BOTH"};

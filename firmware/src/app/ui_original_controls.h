@@ -7,7 +7,7 @@
 
 /* Control metadata only. The released UI still owns all drawing and cadence. */
 enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
-       UI_ORIGINAL_SYNTHONE_PAGES = 3, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = 4, UI_ORIGINAL_JUNO_PAGES = 4 };
 static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
     {11,12,-1,-1}, {13,15,14,16}, {17,18,19,-1}
@@ -22,10 +22,11 @@ static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENV
 static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
     {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE},
     {ORIGINAL_SYNTHONE_TREM,ORIGINAL_SYNTHONE_LFO1_SHAPE,ORIGINAL_SYNTHONE_LFO1_LEVEL,ORIGINAL_SYNTHONE_LFO1_RATE},
-    {-1,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE}
+    {-1,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
+    {ORIGINAL_SYNTHONE_PHASER_MIX,ORIGINAL_SYNTHONE_PHASER_RATE,ORIGINAL_SYNTHONE_PHASER_FEEDBACK,ORIGINAL_SYNTHONE_PHASER_WIDTH}
 };
 static const char *const ui_original_synthone_titles[] = {
-    "SYNTH ONE", "TREMOLO / LFO 1", "TREMOLO / LFO 2"
+    "SYNTH ONE", "TREMOLO / LFO 1", "TREMOLO / LFO 2", "PHASER"
 };
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
@@ -52,6 +53,10 @@ static const char *ui_original_name(unsigned kind, unsigned id)
         if (id == ORIGINAL_SYNTHONE_WIDTH) return "STEREO WIDTH";
         if (id == ORIGINAL_SYNTHONE_PAN) return "PAN DEPTH";
         if (id == ORIGINAL_SYNTHONE_PAN_RATE) return "PAN RATE";
+        if (id == ORIGINAL_SYNTHONE_PHASER_MIX) return "PHASER MIX";
+        if (id == ORIGINAL_SYNTHONE_PHASER_RATE) return "MOD RATE";
+        if (id == ORIGINAL_SYNTHONE_PHASER_FEEDBACK) return "FEEDBACK";
+        if (id == ORIGINAL_SYNTHONE_PHASER_WIDTH) return "NOTCH WIDTH";
         if (id == ORIGINAL_SYNTHONE_TREM) return "TREMOLO SOURCE";
         if (id == ORIGINAL_SYNTHONE_LFO1_SHAPE || id == ORIGINAL_SYNTHONE_LFO2_SHAPE) return "WAVE";
         if (id == ORIGINAL_SYNTHONE_LFO1_LEVEL || id == ORIGINAL_SYNTHONE_LFO2_LEVEL) return "AMOUNT";

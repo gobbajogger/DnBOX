@@ -19,6 +19,13 @@ typedef struct {
     uint8_t shape;
 } s1_trem_lfo;
 
+typedef struct { float z1[4], z2[4], feedback; } s1_phaser_channel;
+typedef struct {
+    s1_phaser_channel channel[2];
+    float target[4], current[4], sine, cosine;
+    unsigned started;
+} s1_phaser;
+
 typedef struct {
     s1_dry_voice voice[S1_CORE_VOICES];
     uint8_t note[S1_CORE_VOICES], down[S1_CORE_VOICES], damper, next;
@@ -34,6 +41,7 @@ typedef struct {
     } pan;
     s1_trem_lfo lfo[2];
     uint8_t tremolo;
+    s1_phaser phaser;
 } s1_dry_part;
 
 /* Original bitCrushSampleRate is 2048..48000 Hz. Turning up the crush
@@ -46,6 +54,7 @@ static inline float s1_pan_hz(unsigned position)
     if (position <= 3) return minimum + (0.25f - minimum) * (float)position / 3.f;
     return 0.25f + (float)(position - 3u) * (9.75f / 124.f);
 }
+float s1_phaser_control(unsigned slot, unsigned position);
 float s1_lfo_hz(unsigned position);
 void s1_part_init(s1_dry_part *part);
 void s1_part_all_off(s1_dry_part *part);
@@ -58,4 +67,5 @@ void s1_part_apply_cell(s1_dry_part *, const uint8_t cell[32]);
 int s1_part_param(s1_dry_part *part, unsigned id, float value);
 int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
 int s1_part_active(const s1_dry_part *part);
+int s1_part_effect_tail(const s1_dry_part *part);
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames);

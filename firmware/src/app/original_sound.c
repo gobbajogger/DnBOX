@@ -49,7 +49,8 @@ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAM
     {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0},{"Width",127,0,0},
     {"Pan",127,0,0},{"Pan Hz",127,ORIGINAL_SYNTHONE_PAN_RATE_INIT,0},
     {"Trem",127,0,0},{"LFO1 wav",127,0,0},{"LFO1 amt",127,0,0},{"LFO1 Hz",127,64,0},
-    {"LFO2 wav",127,0,0},{"LFO2 amt",127,0,0},{"LFO2 Hz",127,64,0}
+    {"LFO2 wav",127,0,0},{"LFO2 amt",127,0,0},{"LFO2 Hz",127,64,0},
+    {"PhMix",127,0,0},{"PhRate",127,5,0},{"PhFeed",127,0,0},{"PhWidth",127,99,0}
 };
 static const char *const original_sound_synthone_names[ORIGINAL_SYNTHONE_FACTORIES] = {
     "INIT"
@@ -153,12 +154,18 @@ uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!cell) return 0;
     uint32_t mask = (uint32_t)cell[22] | (uint32_t)cell[23] << 8 | (uint32_t)cell[24] << 16 | (uint32_t)cell[25] << 24;
-    return cell[29] == ORIGINAL_SOUND_SYNTHONE && cell[31] == 2 ? mask & 0x003fffffu : mask;
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
+        if (cell[31] & 128u) return mask & 0x003fff7fu;
+        if (cell[31] == 2) return mask & 0x003fffffu;
+    }
+    return mask;
 }
 static void original_sound_put_mask(uint8_t cell[ORIGINAL_SOUND_BYTES], uint32_t mask)
 {
-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && cell[31] == 2)
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (cell[31] == 2 || cell[31] & 128u)) {
+        if (cell[31] & 128u) mask |= cell[22] & 128u;
         mask |= ((uint32_t)cell[24] << 16 | (uint32_t)cell[25] << 24) & 0xffc00000u;
+    }
     for (unsigned i = 0; i < 4; ++i) cell[22 + i] = (uint8_t)(mask >> (8 * i));
 }
 
@@ -188,12 +195,23 @@ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES])
  * Bytes 8..20 retain the optional engine's exact payload and edit bits. */
 unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id)
 {
+    if (id >= ORIGINAL_SYNTHONE_NPARAMS) return 0;
+    if (id >= ORIGINAL_SYNTHONE_PHASER_MIX) {
+        if (!(cell[31] & 128u)) return original_sound_synthone_params[id].def;
+        if (id == ORIGINAL_SYNTHONE_PHASER_MIX) return cell[0] & 127u;
+        if (id == ORIGINAL_SYNTHONE_PHASER_RATE) return cell[1] & 127u;
+        if (id == ORIGINAL_SYNTHONE_PHASER_FEEDBACK) return cell[31] & 127u;
+        unsigned width = (cell[22] & 128u) >> 1;
+        for (unsigned i=0;i<6;++i) width |= (unsigned)(cell[i] >> 7) << i;
+        return width;
+    }
     if (id < ORIGINAL_SYNTHONE_BASE_COUNT) {
+        if ((cell[31] & 128u) && id < 2u) return id == 0 ? 64u : 0u;
         if (id == ORIGINAL_SYNTHONE_PAN_RATE && !(original_sound_edit_mask(cell) & (1u << id)))
             return ORIGINAL_SYNTHONE_PAN_RATE_INIT;
-        return cell[id];
+        return cell[id] & 127u;
     }
-    if (cell[31] != 2) return id == ORIGINAL_SYNTHONE_LFO1_RATE || id == ORIGINAL_SYNTHONE_LFO2_RATE ? 64u : 0u;
+    if (cell[31] != 2 && !(cell[31] & 128u)) return id == ORIGINAL_SYNTHONE_LFO1_RATE || id == ORIGINAL_SYNTHONE_LFO2_RATE ? 64u : 0u;
     switch (id) {
     case ORIGINAL_SYNTHONE_LFO1_LEVEL: return cell[6] & 127u;
     case ORIGINAL_SYNTHONE_LFO1_RATE: return cell[7] & 127u;
@@ -206,10 +224,29 @@ unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], uns
 }
 static void s1_put_lfo(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id, unsigned q)
 {
-    if (cell[31] != 2) {
+    if (cell[31] != 2 && !(cell[31] & 128u)) {
         cell[31] = 2;
         cell[22] |= (1u << ORIGINAL_SYNTHONE_TREM);
         cell[7] = cell[25] = 64;
+    }
+    /* The two performance inputs always restore neutral. Only the new format
+     * reuses their display bytes for phaser mix and rate. Feedback occupies
+     * the tag payload. Width uses high bits of bytes 0..5 and mask bit 7. */
+    if (id >= ORIGINAL_SYNTHONE_PHASER_MIX) {
+        if (!(cell[31] & 128u)) {
+            cell[31]=128u;
+            cell[0]=0; cell[1]=5;
+            s1_put_lfo(cell,ORIGINAL_SYNTHONE_PHASER_WIDTH,99);
+        }
+        if (id == ORIGINAL_SYNTHONE_PHASER_FEEDBACK) cell[31]=128u|q;
+        else if (id == ORIGINAL_SYNTHONE_PHASER_WIDTH) {
+            for (unsigned i=0;i<6;++i) cell[i]=(cell[i]&127u)|(((q>>i)&1u)<<7);
+            cell[22]=(cell[22]&127u)|((q&64u)<<1);
+        } else {
+            unsigned byte=id-ORIGINAL_SYNTHONE_PHASER_MIX;
+            cell[byte]=(cell[byte]&128u)|q;
+        }
+        return;
     }
     unsigned slot, lo, hi, bit;
     switch (id) {
@@ -239,7 +276,8 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
         const uint32_t effects = (1u << ORIGINAL_SYNTHONE_BASE_COUNT) - 4u;
         const uint32_t ext = 1u << ORIGINAL_SYNTHONE_TREM;
         unsigned tag = (mask & ext) ? 2u : (mask & effects) ? 1u : 0u;
-        if (cell[31] != tag) return 0;
+        unsigned phaser=cell[31]&128u;
+        if ((phaser ? 2u : cell[31]) != tag) return 0;
         uint32_t allowed = 3u | effects | ext;
 #if X0X_SYNTHONE_PATCH
         allowed |= S1_PATCH_MASK;
@@ -247,7 +285,8 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
         if (mask & ~allowed) return 0;
         for (unsigned i = 0; i < 22; ++i) {
             if (tag == 2 && (i == 6 || i == 7 || i == 21)) continue;
-            if (cell[i] > 127u || (i >= 2 && !(mask & (1u << i)) && cell[i])) return 0;
+            unsigned q=phaser && i<6 ? cell[i]&127u : cell[i];
+            if (q > 127u || (i >= 2 && !(mask & (1u << i)) && q)) return 0;
         }
         return 1;
     }
@@ -295,7 +334,8 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
         return 1;
     }
     uint32_t mask = original_sound_edit_mask(cell) | (UINT32_C(1) << parameter);
-    cell[parameter] = (uint8_t)value;
+    cell[parameter] = cell[29] == ORIGINAL_SOUND_SYNTHONE && (cell[31] & 128u)
+        ? (uint8_t)((cell[parameter]&128u)|value) : (uint8_t)value;
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_CRUSH && cell[31] == 0) cell[31] = 1;
     original_sound_put_mask(cell, mask);
     return 1;
@@ -353,7 +393,8 @@ int original_sound_value(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned para
     }
     float result;
     if (original_sound_edit_mask(cell) & (UINT32_C(1) << parameter)) {
-        if (!original_sound_control_value(cell[29], parameter, cell[parameter], &result)) return 0;
+        unsigned raw=cell[29]==ORIGINAL_SOUND_SYNTHONE ? original_sound_s1_display(cell,parameter) : cell[parameter];
+        if (!original_sound_control_value(cell[29], parameter, raw, &result)) return 0;
     }
     else if (cell[29] == ORIGINAL_SOUND_SYNTHONE)
         result = parameter == ORIGINAL_SYNTHONE_PAN_RATE ? unit_control(ORIGINAL_SYNTHONE_PAN_RATE_INIT) : 0.f;

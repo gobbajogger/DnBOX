@@ -755,6 +755,12 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
             *val = i == ORIGINAL_SYNTHONE_PAN_RATE ? s1_pan_hz((unsigned)pot) : s1_lfo_hz((unsigned)pot);
             return X0X_U_HZ;
         }
+        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && (unsigned)pot < 128u &&
+            (i == ORIGINAL_SYNTHONE_PHASER_RATE || i == ORIGINAL_SYNTHONE_PHASER_WIDTH)) {
+            *val = s1_phaser_control((unsigned)i-ORIGINAL_SYNTHONE_PHASER_MIX,(unsigned)pot);
+            if (i == ORIGINAL_SYNTHONE_PHASER_RATE) *val *= 1.f/60.f;
+            return X0X_U_HZ;
+        }
         return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */
@@ -1470,7 +1476,7 @@ static int mot_base(void *x, int t, int v, int i)
         return perf_ctl[v][(unsigned)i - (original_sound_bend_id(original_bass[v].kind))];
     if (mot_base_snd && t == T_303 && (unsigned)v < NBASS &&
         original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
-        (unsigned)i >= ORIGINAL_SYNTHONE_PAN_RATE && (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
+        (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
         return (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
 }

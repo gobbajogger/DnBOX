@@ -8,6 +8,7 @@ int main(void)
 {
     boot();
     int32_t block[512];
+    const int phaser[2][4]={{89,17,90,114},{123,99,26,53}};
     const int lfo[2][7]={{127,42,117,98,85,37,62},{85,127,65,71,0,92,117}};
     for (int v = 0; v < 2; ++v) {
         assert(engine_bass_select_preset(v, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound) == 0);
@@ -31,6 +32,12 @@ int main(void)
                !strcmp(number, "250") && !strcmp(unit, "mHz"));
         for(unsigned i=0;i<7;++i)
             pref_set(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_TREM+i),lfo[v][i]);
+        for(unsigned i=0;i<4;++i) {
+            pref_t control=PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_PHASER_MIX+i);
+            assert(ui_original_synthone_rows[3][i] == control.c);
+            pref_set(control,phaser[v][i]);
+        }
+        assert(pref_get(PR(R_ENG,T_303,v,0))==64 && pref_get(PR(R_ENG,T_303,v,1))==0);
         pref_set(pan, 36 + v);
         pref_set(pan_rate, 97 - v);
         pref_set(width, 67 + v);
@@ -70,9 +77,11 @@ int main(void)
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_WIDTH)) == 67 + v);
         for(unsigned i=0;i<7;++i)
             assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_TREM+i)) == lfo[v][i]);
+        for(unsigned i=0;i<4;++i)
+            assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_PHASER_MIX+i)) == phaser[v][i]);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN)) == 36 + v);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN_RATE)) == 97 - v);
     }
-    puts("Both Synth One owners preserved independent CRUSH, width, pan and seven tremolo controls across project save, engine switches and reload.");
+    puts("Both Synth One owners preserved independent CRUSH, width, pan, tremolo and phaser controls across project save, engine switches and reload.");
     return 0;
 }

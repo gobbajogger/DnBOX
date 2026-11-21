@@ -12,6 +12,8 @@ void s1_part_init(s1_dry_part *part)
     part->bend = 0.5f;
     part->crush_interval = 1.f;
     part->pan.rate_target = .25f;
+    part->phaser.target[1] = 12.f;
+    part->phaser.target[3] = 800.f;
     part->lfo[0].increment = part->lfo[1].increment = .25f * (1.f / 44100.f);
 #if X0X_SYNTHONE_PATCH
     s1_dry_frozen_controls(&part->patch);
@@ -177,6 +179,11 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
     if (id >= ORIGINAL_SYNTHONE_NPARAMS || !(value >= 0.0f && value <= 1.0f)) return 0;
     unsigned position = (unsigned)(value * 127.f + .5f);
+    if (id >= ORIGINAL_SYNTHONE_PHASER_MIX) {
+        unsigned slot=id-ORIGINAL_SYNTHONE_PHASER_MIX;
+        part->phaser.target[slot]=s1_phaser_control(slot,position);
+        return 1;
+    }
     if (id >= ORIGINAL_SYNTHONE_TREM) {
         unsigned choice = (position * 3u + 63u) / 127u;
         if (id == ORIGINAL_SYNTHONE_TREM) part->tremolo = (uint8_t)choice;
@@ -355,6 +362,8 @@ static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned 
     if (same) { b->phase=a->phase; b->smooth=a->smooth; }
 }
 
+#include "s1_phaser.inc"
+
 static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     tremolo_mono(part,left,right,frames);
@@ -408,6 +417,7 @@ static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned fr
     part->pan.phase = phase & 0xffffffu;
     part->pan.rate = rate;
     part->pan.mix = (uint8_t)mix;
+    phaser_stereo(&part->phaser,left,right,frames);
     widen_right(&part->width, right, frames);
 }
 

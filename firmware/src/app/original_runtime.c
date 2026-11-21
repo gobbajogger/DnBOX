@@ -54,7 +54,7 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
      * edit bits never become inputs to a newly adopted runtime instance. */
     for (unsigned i = 0; i < original_sound_count(kind); ++i)
         if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
-                  ? cell[31] == 2 : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
+                  ? ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX)) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
         float value;
         if (!original_sound_value(cell, i, &value) ||
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
@@ -359,7 +359,7 @@ int original_runtime_active(const original_runtime_part *p)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
     if (p->kind == ORIGINAL_SOUND_SYNTHONE)
-        return s1_part_active(&p->dsp.synthone) || p->dsp.synthone.width.pending;
+        return s1_part_active(&p->dsp.synthone) || s1_part_effect_tail(&p->dsp.synthone);
     return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) :
         p->kind == ORIGINAL_SOUND_MIAMI ? original_miami_backend_active(&p->dsp.miami) :
         original_chicago_backend_active(&p->dsp.chicago);
