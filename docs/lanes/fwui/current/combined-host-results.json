@@ -1,0 +1,252 @@
+{
+  "merge": "3e307cfa455d22dfca5e4ef439080816b4e4f859",
+  "merge_tree": "6702931ce16f7cf0ebada05d95cb1637dc60c5ea",
+  "registry_blob": "b68169614e4aaaa0fe2fd9443006212ede2860ca",
+  "admitted_stock_registrations": 522,
+  "original_unfiltered": {
+    "command": [
+      "sh",
+      "tests/run_tests.sh"
+    ],
+    "started_utc": "2026-11-21T12:39:33.157Z",
+    "status": "interrupted",
+    "completed_registrations": 85,
+    "passed": 73,
+    "failed": 12,
+    "last_registration": "freeplay-live-keys",
+    "terminal_exit": null
+  },
+  "recovery": {
+    "method": "The original prefix and disjoint named continuations of the same registry together assign each of the 522 registrations once.",
+    "status": "Incomplete terminal accounting",
+    "all_cases_terminal": null
+  },
+  "f5": {
+    "status": "PASS",
+    "registered_continuation_command": [
+      "sh",
+      "tests/run_tests.sh",
+      "pads-in-settings",
+      "copy-semantics",
+      "home-globe-part"
+    ],
+    "continuation_exit": 0,
+    "case_results": [
+      {
+        "ordinal": 67,
+        "registration": "held-step-release",
+        "run": "original unfiltered registry",
+        "status": "PASS",
+        "output": "held-step-release: PASS (144 checks, both kits/voices, all four step banks)",
+        "raw_log_sha256": "70d56ba53a2c245b692194c7fd4d4b50aff7ab73cbe1a6aab372d10b6693eab6"
+      },
+      {
+        "ordinal": 90,
+        "registration": "pads-in-settings",
+        "run": "registered continuation",
+        "status": "PASS",
+        "output": "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}",
+        "raw_log_sha256": "3e9439390eb1f76cc36c8e297a031a0cf08ed33ee3b4ec1f62e325adf24e84fe"
+      },
+      {
+        "ordinal": 397,
+        "registration": "copy-semantics",
+        "run": "registered continuation",
+        "status": "PASS",
+        "output": "copy_semantics: ok",
+        "raw_log_sha256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7"
+      },
+      {
+        "ordinal": 399,
+        "registration": "home-globe-part",
+        "run": "registered continuation",
+        "status": "PASS",
+        "output": "home_globe_part: ok",
+        "raw_log_sha256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608"
+      }
+    ],
+    "parameter_page_coverage": {
+      "fixture": "tests/host/pads_in_settings_cases.inc",
+      "function": "parameter_pages",
+      "parts": [
+        "PART_909",
+        "PART_808",
+        "PART_BRK"
+      ]
+    },
+    "registration_logs": {
+      "path": "combined-f5-logs.tar.gz",
+      "bytes": 2842,
+      "sha256": "2ab5d3fe72fd83f2151816f5894cc706d63d8b6efce65fac34ed98a8fdf999fc",
+      "note": "The archive retains all four outputs and an integrity manifest. The held-step compiler log has local paths normalized. Its recorded raw hash uses the original bytes."
+    }
+  },
+  "first_85_failure_review": {
+    "comparison_base": "1c82772bac9a33f030bf954ec6151987aef2cbb8",
+    "predecessor_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+    "source_comparison": "The predecessor snapshot and the consolidated first parent have identical firmware, host, test, tool and experiment trees. The twelve compared test wrappers and entry fixtures are unchanged between the consolidated first parent and merge.",
+    "independent_platform_controls": [
+      "tmpfile() returned NULL with errno 2 (ENOENT).",
+      "A balanced allocation and free exited 0 in the normal build. Its instrumented counterpart printed the expected output and exited 1 with the LeakSanitizer ptrace diagnostic."
+    ],
+    "registrations": [
+      {
+        "registration": "panic-clear",
+        "raw_status": "FAIL",
+        "observed_failure": "tmpfile",
+        "detail": "The MIDI capture stream was NULL at line 196. UBSan then reported rewind(NULL) at line 207.",
+        "ordinal": 10,
+        "raw_log_sha256": "4ada40bb4b96edc313d15113f5138214926bc48766076d365bd6f32c65315700"
+      },
+      {
+        "registration": "panic-order",
+        "raw_status": "FAIL",
+        "observed_failure": "tmpfile",
+        "detail": "The same MIDI capture stream was NULL at line 196. The test subsequently segfaulted.",
+        "ordinal": 74,
+        "raw_log_sha256": "550aa4f4052bb7e41a5ea8853e24f7373f53f0ef96f5694c06aded53cd03e305"
+      },
+      {
+        "registration": "composed-midi-epoch",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "All four strict modes passed. Each corresponding sanitizer process stopped at the runtime diagnostic.",
+        "ordinal": 16,
+        "raw_log_sha256": "bd7a1aa5504779b1a97927bccae3c1fa281ef33e1f6ff1686bfa5ff815a8e448"
+      },
+      {
+        "registration": "original-release-integration",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The native run passed 337,747 checks with PCM hash 6b3c76e678693efb. All 12 normal and instrumented PNG pairs matched, covering 2,077,416 bytes per set.",
+        "ordinal": 56,
+        "raw_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normal_sanitized_png_manifest_sha256": "7b003ce3827948c93dc7b218f5d635a1a92e770cd2646693e84a967b8ea69435"
+      },
+      {
+        "registration": "chicago-fx2-inserts",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The harness printed chicago_fx2_inserts: ok before the sanitizer diagnostic.",
+        "ordinal": 57,
+        "raw_log_sha256": "fec819382929f95c8a545eedcd7c4930dbd78283cc9a4fb960b76291abfe3a1b"
+      },
+      {
+        "registration": "original-sound-cell",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The native run passed all 111 factory programs and 259,404 single-control edits. The directly rerun predecessor produced the identical normal output and the same instrumented failure. The later arithmetic modes remained unqualified.",
+        "ordinal": 58,
+        "raw_log_sha256": "8d6d08cf381e072df32632810d5d7ef3823c48908e811143311d81e4b7366518",
+        "direct_predecessor_replay": {
+          "source_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+          "equivalent_to_first_parent_inputs": true,
+          "wrapper_exit": 1,
+          "log_sha256": "e5a06fcb9e7cdbf133caf0e6725e736d0d5ee9325d61238044bdea703cbe4d4a",
+          "same_sanitizer_boundary_observed": true,
+          "normal_result_identical": true
+        }
+      },
+      {
+        "registration": "original-release-ui",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The native run passed 35,689 checks. All 99 normal and instrumented PNG pairs matched, covering 17,138,682 bytes per set.",
+        "ordinal": 59,
+        "raw_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normal_sanitized_png_manifest_sha256": "8905d056b82f7e704950e12252451710550956846550c4663aaaa96edcb277e6"
+      },
+      {
+        "registration": "sound-reset",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The normal test passed. Its predecessor produced matching normal output and the same sanitizer failure. Subsequent mutation checks were outside this failed invocation.",
+        "ordinal": 66,
+        "raw_log_sha256": "1f9a7d0d3e86bd44b39b742674d0f1a630598f963a150b47ffe59aea3fa92485",
+        "direct_predecessor_replay": {
+          "source_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+          "equivalent_to_first_parent_inputs": true,
+          "wrapper_exit": 1,
+          "log_sha256": "053f141ca584840572e5083075fe34eb3bc1cba93ac64976cb2ea353994046a7",
+          "same_sanitizer_boundary_observed": true,
+          "native_output_identical": true
+        }
+      },
+      {
+        "registration": "panic-notes",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The normal run passed 142 checks. Its predecessor produced the same normal output and sanitizer failure.",
+        "ordinal": 70,
+        "raw_log_sha256": "b87d92935234d3008b4e9ac5ac9b21336b73c43ac66b11b49876b0ba146b5b7f",
+        "direct_predecessor_replay": {
+          "source_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+          "equivalent_to_first_parent_inputs": true,
+          "wrapper_exit": 1,
+          "log_sha256": "83fdd3c0f630701beb3d87a33eb1cc7cbdb435659d38eee3e583ce5cce0d0a36",
+          "same_sanitizer_boundary_observed": true,
+          "native_output_identical": true
+        }
+      },
+      {
+        "registration": "drum-fill",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The normal run passed 100 checks. Its predecessor produced the same normal output and sanitizer failure.",
+        "ordinal": 71,
+        "raw_log_sha256": "7febf864e0e3d3773ba6f0126fa758d8f4832c9f037e5d18f272d97f90141b39",
+        "direct_predecessor_replay": {
+          "source_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+          "equivalent_to_first_parent_inputs": true,
+          "wrapper_exit": 1,
+          "log_sha256": "a83a6d4bbb24093fea11d3282321eaae703edc8623a04d0269da8a696b4c09e3",
+          "same_sanitizer_boundary_observed": true,
+          "native_output_identical": true
+        }
+      },
+      {
+        "registration": "cq-reclaim",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The wrapper recorded the sanitizer runtime diagnostic. It supplied no separate normal verdict.",
+        "ordinal": 72,
+        "raw_log_sha256": "a3ed34aeeed22348440e442829e77b08e8af35e517c797d009ad44937e877b61"
+      },
+      {
+        "registration": "optimization-equivalence",
+        "raw_status": "FAIL",
+        "observed_failure": "LeakSanitizer",
+        "detail": "The LZ differential and undo checks passed before the breaks_silent_skip child reached the sanitizer boundary. A direct predecessor replay of that child produced the same normal output and sanitizer failure. Later checks were outside this invocation.",
+        "ordinal": 81,
+        "raw_log_sha256": "8695bacf0ba12abffe271156a7708d297c67c60d04c59aac3a568957cb830cff",
+        "direct_predecessor_replay": {
+          "source_snapshot": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+          "equivalent_to_first_parent_inputs": true,
+          "wrapper_exit": 1,
+          "log_sha256": "96595f9770eb8c541a882a4aaa6ea41aa37d602031ada9757fdbd5a16ed14f87",
+          "same_sanitizer_boundary_observed": true,
+          "scope": "breaks_silent_skip failing child only"
+        }
+      }
+    ],
+    "assessment": "The first 12 raw failures contain no demonstrated new firmware UI assertion failure. Their recorded failures and the unexecuted portions of fail-fast wrappers remain part of the integration accounting."
+  },
+  "scenarios": {
+    "registrations": 58,
+    "first_passes": 56,
+    "first_failures": [
+      "scenario-upload",
+      "scenario-upload44"
+    ],
+    "reason": "The two scenarios were scheduled on a different partition from the upload-images generator and initially could not read the generated slot image.",
+    "recovery_command": [
+      "sh",
+      "tests/run_tests.sh",
+      "upload-images",
+      "scenario-upload",
+      "scenario-upload44"
+    ],
+    "recovery_exit": 0,
+    "final_passes": 58
+  }
+}
