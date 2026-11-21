@@ -40,6 +40,16 @@ int main(int argc, char **argv)
         pref_set(knob[i], mode == i+1 ? (i == 2 ? 0 : i == 4 ? 31 : 127) : baseline[i]);
     pref_set(knob[0], mode != 0);
     assert(!pref_get(shared));
+    int panel_values[5];
+    for (int i = 0; i < 5; ++i) panel_values[i] = pref_get(knob[i]);
+    ui.part = PART_909;
+    build_pages();
+    for (int page = 0; page < pg.n; ++page)
+        for (int i = 0; i < 4; ++i)
+            assert(!(pg.r[page][i].kind == R_ENG && pg.r[page][i].a == T_808));
+    ui.part = PART_808;
+    build_pages();
+    for (int i = 0; i < 5; ++i) assert(pref_get(knob[i]) == panel_values[i]);
     for (int i = 0; i < 16; ++i) engine_render(out, 256);
     sound_t saved = proj.sound;
     if (reload)

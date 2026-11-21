@@ -1,0 +1,375 @@
+{
+  "source_commit": "0ab227e2f727a9240e7df0ef972c062b5512357e",
+  "emulator_source": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+  "transport": "FM1_STRICT=1, --mhz 360, 922 original events, 8000 ms",
+  "boards": {
+    "elite": {
+      "chicago_miami": {
+        "elf_sha256": "bd38d45528fd4e1db7126d815e80f988005377a75d686d1b425c6535cbdf034d",
+        "fwsc_sha256": "267cb05894cf62bb9e16f5e49f27311f17a91e7d9323d433ac4dc669750b76af",
+        "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+        "seed_sha256": "e9f48fe62138382fd60aef87ba29e5b6bb03f69147eee53012775380ce020bce",
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 120,
+          "max_us": 3806,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9eb8fa54d87a9b9775dd55c07b3d164453884695bd1ed83fe2f63259ee9e6afc",
+          "pcm_bytes": 245760,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "e9f48fe62138382fd60aef87ba29e5b6bb03f69147eee53012775380ce020bce",
+          "final_flash_sha256": "e9f48fe62138382fd60aef87ba29e5b6bb03f69147eee53012775380ce020bce"
+        },
+        "shot": {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 629,
+          "max_us": 12336,
+          "raw_late": 7,
+          "audio_xruns": 7,
+          "pcm_sha256": "2dbda0f06b7396d9dbb8f76646296b4faf18091b66c23a06e8985a29cca3cde8",
+          "pcm_bytes": 1304576,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "e9f48fe62138382fd60aef87ba29e5b6bb03f69147eee53012775380ce020bce",
+          "final_flash_sha256": "e9f48fe62138382fd60aef87ba29e5b6bb03f69147eee53012775380ce020bce"
+        },
+        "guest": {
+          "bass_kinds": [
+            0,
+            1
+          ],
+          "runtime_status": [
+            1,
+            1
+          ],
+          "peak_meter_909_808_A_B_BREAK": [
+            28672,
+            20259,
+            10204,
+            8325,
+            28672
+          ],
+          "triggered_rows_909_808": [
+            11,
+            11
+          ],
+          "last_playhead_steps": [
+            8,
+            5,
+            8,
+            15,
+            8
+          ],
+          "user_zones": [
+            0,
+            1,
+            0
+          ],
+          "loop_count": 1,
+          "first_catalog_slot_zone": [
+            1,
+            0
+          ],
+          "sample_rate": 44100,
+          "stereo_frames": 326144,
+          "first_half_second_nonzero_words": 0,
+          "last_half_second_nonzero_words": 44027,
+          "peak_pcm16": 13238,
+          "pcm_sha256": "2dbda0f06b7396d9dbb8f76646296b4faf18091b66c23a06e8985a29cca3cde8",
+          "observed_halves": 629,
+          "peak_callback_us": 12336,
+          "raw_late": 7,
+          "audio_xruns": 7
+        },
+        "scene_late": 7,
+        "owners_ok": true,
+        "all_active": true,
+        "timing_ok": false,
+        "passed": false
+      },
+      "juno_synthone": {
+        "elf_sha256": "bd38d45528fd4e1db7126d815e80f988005377a75d686d1b425c6535cbdf034d",
+        "fwsc_sha256": "267cb05894cf62bb9e16f5e49f27311f17a91e7d9323d433ac4dc669750b76af",
+        "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+        "seed_sha256": "c0c5565eb23954a1f3488fe26dc906925b90db0898f8533f31463d9a0eb96775",
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 120,
+          "max_us": 2913,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9eb8fa54d87a9b9775dd55c07b3d164453884695bd1ed83fe2f63259ee9e6afc",
+          "pcm_bytes": 245760,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "c0c5565eb23954a1f3488fe26dc906925b90db0898f8533f31463d9a0eb96775",
+          "final_flash_sha256": "c0c5565eb23954a1f3488fe26dc906925b90db0898f8533f31463d9a0eb96775"
+        },
+        "shot": {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 636,
+          "max_us": 10814,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "6809bee0cadaa94d614c6faa8ccf15097a32dbd05d5e5094e636d1d3282dc254",
+          "pcm_bytes": 1304576,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "c0c5565eb23954a1f3488fe26dc906925b90db0898f8533f31463d9a0eb96775",
+          "final_flash_sha256": "c0c5565eb23954a1f3488fe26dc906925b90db0898f8533f31463d9a0eb96775"
+        },
+        "guest": {
+          "bass_kinds": [
+            3,
+            2
+          ],
+          "runtime_status": [
+            1,
+            1
+          ],
+          "peak_meter_909_808_A_B_BREAK": [
+            32767,
+            21657,
+            2669,
+            1287,
+            32767
+          ],
+          "triggered_rows_909_808": [
+            11,
+            11
+          ],
+          "last_playhead_steps": [
+            9,
+            6,
+            9,
+            20,
+            9
+          ],
+          "user_zones": [
+            0,
+            1,
+            0
+          ],
+          "loop_count": 1,
+          "first_catalog_slot_zone": [
+            1,
+            0
+          ],
+          "sample_rate": 44100,
+          "stereo_frames": 326144,
+          "first_half_second_nonzero_words": 0,
+          "last_half_second_nonzero_words": 44034,
+          "peak_pcm16": 13248,
+          "pcm_sha256": "6809bee0cadaa94d614c6faa8ccf15097a32dbd05d5e5094e636d1d3282dc254",
+          "observed_halves": 636,
+          "peak_callback_us": 10814,
+          "raw_late": 0,
+          "audio_xruns": 0
+        },
+        "scene_late": 0,
+        "owners_ok": true,
+        "all_active": true,
+        "timing_ok": true,
+        "passed": true
+      }
+    },
+    "pro": {
+      "chicago_miami": {
+        "elf_sha256": "f333c08e74ea4580892c0bfdce6503cd24f372d9efdfe139b4c9a8c5a5fbfdee",
+        "fwsc_sha256": "c3762dc5785f9ef434d2daf6e512554c7d906aecbb54b836e8d58619af495395",
+        "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+        "seed_sha256": "dcd91fad47fe724ae80883e0b37d77a9f42bf83a290cc25f39758ee0fa90d0f1",
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 120,
+          "max_us": 3788,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9eb8fa54d87a9b9775dd55c07b3d164453884695bd1ed83fe2f63259ee9e6afc",
+          "pcm_bytes": 245760,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "dcd91fad47fe724ae80883e0b37d77a9f42bf83a290cc25f39758ee0fa90d0f1",
+          "final_flash_sha256": "dcd91fad47fe724ae80883e0b37d77a9f42bf83a290cc25f39758ee0fa90d0f1"
+        },
+        "shot": {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 633,
+          "max_us": 12803,
+          "raw_late": 3,
+          "audio_xruns": 3,
+          "pcm_sha256": "e8d2970f706e4c4327263dacf88eade55f533bb8904e71458601527dab38ce79",
+          "pcm_bytes": 1304576,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "dcd91fad47fe724ae80883e0b37d77a9f42bf83a290cc25f39758ee0fa90d0f1",
+          "final_flash_sha256": "dcd91fad47fe724ae80883e0b37d77a9f42bf83a290cc25f39758ee0fa90d0f1"
+        },
+        "guest": {
+          "bass_kinds": [
+            1,
+            0
+          ],
+          "runtime_status": [
+            1,
+            1
+          ],
+          "peak_meter_909_808_A_B_BREAK": [
+            32767,
+            20259,
+            15161,
+            13947,
+            32767
+          ],
+          "triggered_rows_909_808": [
+            11,
+            11
+          ],
+          "last_playhead_steps": [
+            9,
+            6,
+            9,
+            17,
+            9
+          ],
+          "user_zones": [
+            0,
+            1,
+            0
+          ],
+          "loop_count": 1,
+          "first_catalog_slot_zone": [
+            1,
+            0
+          ],
+          "sample_rate": 44100,
+          "stereo_frames": 326144,
+          "first_half_second_nonzero_words": 0,
+          "last_half_second_nonzero_words": 44014,
+          "peak_pcm16": 13244,
+          "pcm_sha256": "e8d2970f706e4c4327263dacf88eade55f533bb8904e71458601527dab38ce79",
+          "observed_halves": 633,
+          "peak_callback_us": 12803,
+          "raw_late": 3,
+          "audio_xruns": 3
+        },
+        "scene_late": 3,
+        "owners_ok": true,
+        "all_active": true,
+        "timing_ok": false,
+        "passed": false
+      },
+      "juno_synthone": {
+        "elf_sha256": "f333c08e74ea4580892c0bfdce6503cd24f372d9efdfe139b4c9a8c5a5fbfdee",
+        "fwsc_sha256": "c3762dc5785f9ef434d2daf6e512554c7d906aecbb54b836e8d58619af495395",
+        "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+        "seed_sha256": "23e34e8cdc780065f3173d2b15483d562b2697eb81168ddb3613958cffef10da",
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 120,
+          "max_us": 2869,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9eb8fa54d87a9b9775dd55c07b3d164453884695bd1ed83fe2f63259ee9e6afc",
+          "pcm_bytes": 245760,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "23e34e8cdc780065f3173d2b15483d562b2697eb81168ddb3613958cffef10da",
+          "final_flash_sha256": "23e34e8cdc780065f3173d2b15483d562b2697eb81168ddb3613958cffef10da"
+        },
+        "shot": {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 636,
+          "max_us": 11250,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "ff691bad3e4f06280b0bb6ec8e26a6cae4854705cc7b7b98a965bb8790e8761e",
+          "pcm_bytes": 1304576,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "23e34e8cdc780065f3173d2b15483d562b2697eb81168ddb3613958cffef10da",
+          "final_flash_sha256": "23e34e8cdc780065f3173d2b15483d562b2697eb81168ddb3613958cffef10da"
+        },
+        "guest": {
+          "bass_kinds": [
+            2,
+            3
+          ],
+          "runtime_status": [
+            1,
+            1
+          ],
+          "peak_meter_909_808_A_B_BREAK": [
+            28672,
+            20687,
+            6124,
+            1648,
+            28672
+          ],
+          "triggered_rows_909_808": [
+            11,
+            11
+          ],
+          "last_playhead_steps": [
+            9,
+            6,
+            9,
+            20,
+            9
+          ],
+          "user_zones": [
+            0,
+            1,
+            0
+          ],
+          "loop_count": 1,
+          "first_catalog_slot_zone": [
+            1,
+            0
+          ],
+          "sample_rate": 44100,
+          "stereo_frames": 326144,
+          "first_half_second_nonzero_words": 0,
+          "last_half_second_nonzero_words": 44008,
+          "peak_pcm16": 13249,
+          "pcm_sha256": "ff691bad3e4f06280b0bb6ec8e26a6cae4854705cc7b7b98a965bb8790e8761e",
+          "observed_halves": 636,
+          "peak_callback_us": 11250,
+          "raw_late": 0,
+          "audio_xruns": 0
+        },
+        "scene_late": 0,
+        "owners_ok": true,
+        "all_active": true,
+        "timing_ok": true,
+        "passed": true
+      }
+    }
+  }
+}
