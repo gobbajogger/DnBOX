@@ -2,14 +2,28 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Repack pinned Chicago inputs losslessly; never modify the pinned header.
 
-Each 32-entry block retains its exact residual payload. Seven header bytes
-store value low27 bits, width5, and signed delta24. High5 value bits are fixed
-per table. Reject any input not representable without truncation.
+Each 32-entry block retains its exact residual payload and the smallest signed
+first difference that covers its original value. The directory uses one base
+and stride per sixteen offsets, plus a signed residual per block.
 """
 import re
 import struct
 import sys
 from pathlib import Path
+
+
+def directory(offsets):
+    bases, strides, residuals = [], [], []
+    for start in range(0, len(offsets), 16):
+        group = offsets[start:start + 16]
+        stride = round((group[-1] - group[0]) / (len(group) - 1)) if len(group) > 1 else 0
+        residual = [position - (group[0] + i * stride) for i, position in enumerate(group)]
+        if not 0 <= stride <= 255 or any(not -128 <= n <= 127 for n in residual):
+            raise ValueError('offset group exceeds its lossless representation')
+        bases.append(group[0])
+        strides.append(stride)
+        residuals.extend(residual)
+    return bases, strides, residuals
 
 
 def generate(source, output):
@@ -42,16 +56,20 @@ def generate(source, output):
             new_offsets.append(len(packed))
             packed.extend((value & 0xffffff).to_bytes(3, 'little'))
             packed.append(((value >> 24) & 7) << 5 | width)
-            packed.extend((delta & 0xffffff).to_bytes(3, 'little'))
+            size = next(n for n in (1, 2, 3) if -(1 << (8*n-1)) <= delta < (1 << (8*n-1)))
+            packed.extend(delta.to_bytes(size, 'little', signed=True))
             packed.extend(data[offset+9:end])
         if len(packed) > 65535:
             raise ValueError('offset overflow')
-        for suffix, values, ctype in [('data', packed, 'uint8_t'), ('offset', new_offsets, 'uint16_t')]:
+        bases, strides, residuals = directory(new_offsets)
+        for suffix, values, ctype in [('data', packed, 'uint8_t'), ('base', bases, 'uint16_t'),
+                                      ('stride', strides, 'uint8_t'), ('residual', residuals, 'int8_t')]:
             lines.append('static const %s %s_%s[%d]={' % (ctype, stem, suffix, len(values)))
             lines.extend(','.join(map(str, values[i:i+24])) + ',' for i in range(0, len(values), 24))
             lines.append('};')
         lines.append('#define %s_prefix 0x%08xu' % (stem, prefix))
-        lines.append('static const original_lossless_table16 %s={%s_data,%s_offset,sizeof %s_data,16385,513};' % (stem, stem, stem, stem))
+        lines.append(f'static const chicago_compact_table {stem}={{'
+                     f'{stem}_data,{stem}_base,{stem}_stride,{stem}_residual,sizeof {stem}_data}};')
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text('\n'.join(lines) + '\n')

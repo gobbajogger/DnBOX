@@ -1,17 +1,30 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "chicago_packed.h"
+#include <stddef.h>
 #ifdef X0X_CHICAGO_COMPACT_HEADERS
+/* Immutable 16,385-entry tables. The generator checks each directory
+ * residual and first difference fits its exact representation. */
+typedef struct {
+ const uint8_t *data;
+ const uint16_t *base;
+ const uint8_t *stride;
+ const int8_t *residual;
+ size_t bytes;
+} chicago_compact_table;
 #include "chicago_compact_private.h"
 static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries,uint32_t entry,uint32_t prefix,uint32_t *out){
- if(bytes<7)return 0;
+ if(bytes<5)return 0;
  unsigned width=(p[3]&31u);if(width>32)return 0;
  size_t residuals=entries>1?entries-2:0,payload=(residuals*width+7u)/8u;
- if(bytes!=7+payload)return 0;
+ if(bytes<5+payload || bytes>7+payload)return 0;
+ size_t header=bytes-payload;
  uint32_t value=(uint32_t)p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|((uint32_t)p[3]>>5)<<24|prefix;
- uint32_t delta=(uint32_t)p[4]|(uint32_t)p[5]<<8|(uint32_t)p[6]<<16;
- delta=(delta^0x800000u)-0x800000u;
+ uint32_t delta=p[4],sign=0x80u;
+ if(header>=6){delta|=(uint32_t)p[5]<<8;sign=0x8000u;}
+ if(header==7){delta|=(uint32_t)p[6]<<16;sign=0x800000u;}
+ delta=(delta^sign)-sign;
  if(entry)value+=delta;
- size_t bit=0;p+=7;
+ size_t bit=0;p+=header;
  /* At widths up to 24, refilling one byte while fewer than width bits
   * remain never exceeds 31 live bits. Consume each payload byte once, with
   * no speculative read past the validated payload and no 64-bit shifts.
@@ -35,12 +48,20 @@ static int chicago_compact_decode(const uint8_t *p,size_t bytes,uint32_t entries
  *out=value;return 1;
 }
 
-static int chicago_compact_lookup(const original_lossless_table16 *t,uint32_t index,uint32_t prefix,uint32_t *out){
- if(!t||!out||!t->data||!t->offset||!t->count||index>=t->count||t->bytes>UINT16_MAX||t->blocks!=(t->count/32u+(t->count%32u!=0))||t->offset[0]!=0)return 0;
- uint32_t block=index/32u,remaining=t->count-block*32u;
- size_t pos=t->offset[block],end=block+1<t->blocks?t->offset[block+1]:t->bytes;
- if(pos>end||end>t->bytes)return 0;
- return chicago_compact_decode(t->data+pos,end-pos,remaining>32?32:remaining,index%32u,prefix,out);
+static size_t chicago_compact_offset(const chicago_compact_table *t, unsigned block)
+{
+ unsigned group=block>>4;
+ return (size_t)((int)t->base[group]+(int)t->stride[group]*(int)(block&15u)+t->residual[block]);
+}
+
+static int chicago_compact_lookup(const chicago_compact_table *t,uint32_t index,uint32_t prefix,uint32_t *out)
+{
+ if(index>=16385u)return 0;
+ unsigned block=index/32u;
+ size_t start=chicago_compact_offset(t,block);
+ size_t end=block<512u ? chicago_compact_offset(t,block+1u) : t->bytes;
+ if(start>end || end>t->bytes)return 0;
+ return chicago_compact_decode(t->data+start,end-start,block<512u ? 32u : 1u,index%32u,prefix,out);
 }
 
 #else
