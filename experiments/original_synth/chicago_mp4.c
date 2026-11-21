@@ -186,12 +186,22 @@ static float ck_fixed_pulse(uint32_t phase,float correction){
  }
  return ck_wave(2,ck_phase(phase),.5f,correction,0.0f);
 }
-static __attribute__((noinline)) int ck_pulse_span(const original_prepared_oscillators *p,
- const ck_slaves *slaves,unsigned even,float gain,float ng,float sl,float sr,
+/* For correction >= .25, every phase at least 1/32 turn from zero
+ * reaches the original saw clamp. The inner region uses the original math. */
+static inline float ck_master_wave(uint32_t phase, float correction, int saw){
+ if(!saw)return ck_fixed_pulse(phase,correction);
+ float q=ck_phase(phase);
+ if(phase-0x04000000u<=0xf8000000u)
+  return q-((int32_t)phase<0?-1.0f:1.0f);
+ return ck_saw(q,correction);
+}
+static __attribute__((noinline)) int ck_master_span(const original_prepared_oscillators *p,
+ const ck_slaves *slaves,unsigned even,original_ramp *gain,int fixed_gain,float ng,float sl,float sr,
  float vco_gain,uint32_t phase[4],uint32_t *nsp,float H[5],
  original_ramp *ra,original_ramp *re,original_ramp *rr,uint32_t *lo,uint32_t *ro,uint32_t n){
  uint32_t attempted=0,at=phase[even],inc=p->controls.increment[even],noise=*nsp;
- float h0=H[0],h1=H[1],h2=H[2],h3=H[3],h4=H[4],scale=gain*.5f;
+ float h0=H[0],h1=H[1],h2=H[2],h3=H[3],h4=H[4],scale=gain->current*.5f;
+ const int saw=p->controls.shape[even]==1;
  original_ramp aa=*ra,ee=*re,rval=*rr;
  int ok=1;
  while(ok && attempted<n){
@@ -203,8 +213,13 @@ static __attribute__((noinline)) int ck_pulse_span(const original_prepared_oscil
   if(!held && n-attempted>12)stop=attempted+12;
   while(attempted<stop){
   unsigned j=attempted++;
-  at-=inc;float term=ck_fixed_pulse(at,p->correction[even])*scale;
-  float mix=even==0?term:0.0f+term;
+  at-=inc;
+  float mix=0.0f;
+  if(gain->current!=0.0f){
+   float term=ck_master_wave(at,p->correction[even],saw)*scale;
+   mix=even==0?term:0.0f+term;
+  }
+  if(!fixed_gain)scale=ck_xadvance(gain)*.5f;
   unsigned choose=(noise&0x40000000u)==0;noise=(noise+noise)^(choose?8393u:0);
   float input=ng*(choose?.5f:-.5f)+mix;input=vco_gain*input;
   if(!original_binary32_isfinite(input)){ok=0;break;}
@@ -247,11 +262,12 @@ int original_chicago_voice_span(original_voice_gain *vg,original_oscillators *ph
     ramp_held(&og[0])&&ramp_held(&og[1])&&ramp_held(&og[2])&&ramp_held(&og[3])&&
     ramp_held(&st[0])&&ramp_held(&st[1])&&ramp_held(&ngr);
  {
-  unsigned single=filter_held?4:single_moving_oscillator(og,p);
-  int parked=filter_held || (ck_fixed(og[0])&&ck_fixed(og[1])&&ck_fixed(og[2])&&ck_fixed(og[3])&&ck_fixed(st[0])&&ck_fixed(st[1])&&ck_fixed(ngr));
-  if(parked && (single==0 || single==2) && og[single].current!=0.0f &&
-     p->controls.shape[single]>=2 && p->controls.width[single]==.5f && p->correction[single]>=.25f)
-   ok=ck_pulse_span(p,&slaves,single,og[single].current,ngr.current,st[0].current,st[1].current,
+  unsigned single=single_moving_oscillator(og,p);
+  int buses_held=filter_held || (ck_fixed(st[0])&&ck_fixed(st[1])&&ck_fixed(ngr));
+  int parked=filter_held || (buses_held && ck_fixed(og[0])&&ck_fixed(og[1])&&ck_fixed(og[2])&&ck_fixed(og[3]));
+  if(buses_held && (single==0 || single==2) && p->correction[single]>=.25f &&
+     (p->controls.shape[single]==1 || (p->controls.shape[single]>=2 && p->controls.width[single]==.5f)))
+   ok=ck_master_span(p,&slaves,single,&og[single],parked,ngr.current,st[0].current,st[1].current,
                     vco_gain,phase,&ns,H,&ra,&re,&rr,left,right,n);
   else
   for(uint32_t k=0;k<n;k++)if(!ck_step(p,&slaves,parked,filter_held,vco_gain,phase,og,st,&ngr,&ns,H,&ra,&re,&rr,left+k,right+k)){ok=0;break;}
