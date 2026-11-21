@@ -40,7 +40,8 @@ static void controls(sc808_engine_t *s, int rv, int dl, int dist, int glue)
 
 int main(int argc, char **argv)
 {
-    if (argc != 7) return 2;
+    if (argc != 8) return 2;
+    int kit_glue = atoi(argv[7]);
     int kit_master = atoi(argv[6]);
     int rv=atoi(argv[1]), dl=atoi(argv[2]), dist=atoi(argv[3]), glue=atoi(argv[4]);
     sc808_engine_t *dry = sc808_create(RATE), *wet = sc808_create(RATE);
@@ -51,6 +52,7 @@ int main(int argc, char **argv)
     drum808_set(&kit, D8_KIT, 0, 127);
     drum808_set(&kit, D8_KIT, D8_KIT_DIST, kit_master ? dist : 0);
     drum808_set(&kit, D8_KIT, D8_KIT_DRIVE, 64);
+    drum808_set(&kit, D8_KIT, D8_KIT_GLUE, kit_glue ? glue : 0);
     fxbus_init(&bus, delay_memory, DELAY_WORDS);
     fxbus_set(&bus, FX_VOLUME, 127);
     fxbus_set(&bus, FX_RV_LEVEL, 93);
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
     fxbus_set(&bus, FX_DL_HPF, 55);
     fxbus_set(&bus, FX_DRIVE, 64);
     fxbus_set(&bus, FX_DIST, kit_master ? 0 : dist);
-    fxbus_set(&bus, FX_COMP, glue);
+    fxbus_set(&bus, FX_COMP, kit_glue ? 0 : glue);
     FILE *file = fopen(argv[5], "wbx");
     if (!file) return 2;
 

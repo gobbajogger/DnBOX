@@ -20,6 +20,7 @@ def main():
     parser.add_argument('upstream', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
+    parser.add_argument('--kit-glue',action='store_true',help='use the dedicated 808 glue detector')
     args = parser.parse_args()
     up = args.upstream.resolve()
     out = args.output.resolve()
@@ -42,6 +43,10 @@ def main():
         objects.append(obj)
     test = out/'compare'
     subprocess.run(['c++',*objects,'-lm','-o',test],check=True)
+    if args.kit_master or args.kit_glue:
+        sweep = out/'kit-controls'
+        subprocess.run(['c++',*flags,HERE/'kit-controls.cpp',*objects[1:-1],'-lm','-o',sweep],check=True)
+        (out/'kit-controls.json').write_bytes(subprocess.check_output([sweep]))
     cases = [('dry',0,0,0,0),('reverb',1,0,0,0),('delay',0,1,0,0),('glue',0,0,0,108)]
     for mode in range(1,8):
         cases.append((f'distortion-{mode}',0,0,mode,0))
@@ -50,7 +55,7 @@ def main():
     dry_digest = None
     for name,rv,dl,dist,glue in cases:
         data = out/(name+'.f32')
-        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data, str(int(args.kit_master))],check=True)
+        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data, str(int(args.kit_master)), str(int(args.kit_glue))],check=True)
         with data.open('rb') as file:
             x, ref, left, right = np.fromfile(file,dtype='<f4').reshape(88200,4).T
         digest = hashlib.sha256(x.tobytes()).hexdigest()
@@ -67,7 +72,7 @@ def main():
                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
         rows.append(row)
     print(json.dumps(rows,indent=2))
-    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','frames_per_case':88200,'sample_rate':44100,
+    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
 

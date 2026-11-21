@@ -2,6 +2,7 @@
 /* Send reverb, synced delay and master stage: a port of 9W9's er99_verb_tick,
  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
 #include "fxbus.h"
+#include "x0x_glue.h"
 #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
 
 static const int32_t fx_cl[4] = { 1116, 1188, 1277, 1356 };
@@ -99,11 +100,7 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
 /* Pot/init path only — not the send/render (X0X_COLD) */
 X0X_COLD static void fx_comp_prep(fxbus_t *f)
 {
-    const float a = f->comp;
-    const float ratio = 2.0f + 3.0f * a;
-    f->c_thr = 10.0f - 18.0f * a;
-    f->c_slope = 1.0f - 1.0f / ratio;
-    f->c_makeup = a * 2.2f + a * a * 6.6f;
+    x0x_glue_prepare(f->comp, &f->c_thr, &f->c_slope, &f->c_makeup);
 }
 
 /* Pot path only — not the send/render (X0X_COLD) */
@@ -422,31 +419,6 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
     f->dl_signal = (uint8_t)signal;
 }
 
-/* Soft-knee glue gain reduction — one body for mono + stereo (same pattern as
- * master soft_ceiling / djf_gsmooth). */
-__attribute__((noinline)) static float fx_comp_gr(float over, float slope)
-{
-    if (over >= 3.0f)
-        return -over * slope;
-    if (over > -3.0f) {
-        const float t = over + 3.0f;
-        return -(t * t) * (1.0f / 12.0f) * slope;
-    }
-    return 0.0f;
-}
-
-/* One glue sample: update det/env, return linear gain (mono + stereo). */
-static inline __attribute__((always_inline)) float fx_comp_gain(float mag, float thr, float slope, float drel,
-                                                    float atk, float rel, float makeup,
-                                                    float *det, float *env)
-{
-    *det = mag > *det ? mag : *det * drel;
-    const float in_db = *det > 1e-9f ? 6.0205999f * fm_log2f(*det) : -120.0f;
-    const float gr = fx_comp_gr(in_db - thr, slope);
-    *env = gr + (*env - gr) * (gr < *env ? atk : rel);
-    return fm_db2lin(*env + makeup);
-}
-
 /* ===================================================================== */
 /* Master: distortion, glue (master_glue), volume                         */
 /* ===================================================================== */
@@ -484,7 +456,7 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
         float det = f->comp_det, env = f->comp_env_db;
         for (int i = 0; i < n; ++i) {
             const float in = out[i];
-            out[i] = in * fx_comp_gain(fm_fabsf(in), thr, slope, drel, atk, rel, makeup, &det, &env);
+            out[i] = in * x0x_glue_gain(fm_fabsf(in), thr, slope, drel, atk, rel, makeup, &det, &env);
         }
         f->comp_det = det;
         f->comp_env_db = env;
@@ -518,7 +490,7 @@ void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const 
         float det = f->comp_det, env = f->comp_env_db;
         for (int i = 0; i < n; ++i) {
             const float ml = fm_fabsf(out_l[i]), mr = fm_fabsf(out_r[i]);
-            const float g = fx_comp_gain(ml > mr ? ml : mr, thr, slope, drel, atk, rel, makeup, &det, &env);
+            const float g = x0x_glue_gain(ml > mr ? ml : mr, thr, slope, drel, atk, rel, makeup, &det, &env);
             out_l[i] *= g;
             out_r[i] *= g;
         }

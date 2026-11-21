@@ -985,7 +985,11 @@ X0X_COLD void engine_apply_sound(const sound_t *s)
 {
     int t, v, i;
 #if X0X_BASS_TAGGED_SOUND
-    bass_restore_sound(s); /* called only at full-project initialization/adoption */
+    /* PERF can adopt both owners while audio is live. Preserve an outer project hold. */
+    uint8_t held = project_hold;
+    engine_project_hold(1);
+    bass_restore_sound(s);
+    engine_project_hold(held);
 #endif
     engine_set(T_MST, 0, MST_COMP1, s->v[T_MST][0][MST_COMP1]);   /* the macros first: the pots they set */
     engine_set(T_MST, 0, MST_DJF, s->v[T_MST][0][MST_DJF]);       /* follow as saved (a project's own sound) */
@@ -2402,8 +2406,9 @@ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_pa
 {
     uint32_t i;
     if (!d808_was_active) {
-        /* CRUSH keeps its sample-and-hold phase across gaps between hits. */
-        if (!d808.master_on || d808.kpot[D8_KIT_DIST] != D8_MASTER_CRUSH)
+        /* CRUSH and the glue detector advance across gaps between hits. */
+        if ((!d808.master_on || d808.kpot[D8_KIT_DIST] != D8_MASTER_CRUSH) &&
+            (!d808.kpot[D8_KIT_GLUE] || (d808.glue_det == 0.0f && d808.glue_env == 0.0f)))
             return;
         for (i = 0; i < n; ++i)
             left808[i] = right808[i] = t1[i] = t2[i] = 0.0f;
@@ -2659,15 +2664,16 @@ static uint32_t plan_cost(uint32_t mask, const uint32_t *cost)
     }
     return main_ticks > worker_ticks ? main_ticks : worker_ticks;
 }
-/* Keep Chicago's deep note-start path and the optional SuperJ6 factory
- * renderer on core 0. The ordinary Juno, Synth One and Miami renderers
- * use owner-local state and fit the worker's guarded user stack. */
+/* Keep Chicago and the optional factory or patch renderers on core 0. */
 static uint32_t c1_allowed(void)
 {
     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
     for (unsigned v = 0; v < NBASS; ++v) {
         const original_runtime_part *part = &original_bass[v];
-        if (part->kind == ORIGINAL_SOUND_MIAMI || part->kind == ORIGINAL_SOUND_SYNTHONE ||
+        if (part->kind == ORIGINAL_SOUND_MIAMI ||
+#if !X0X_SYNTHONE_PATCH
+            part->kind == ORIGINAL_SOUND_SYNTHONE ||
+#endif
             (part->kind == ORIGINAL_SOUND_JUNO
 #if X0X_SUPERJ6_FACTORY
              && !part->dsp.juno.synth.typed

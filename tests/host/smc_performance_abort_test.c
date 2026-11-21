@@ -9,6 +9,7 @@ int smc_connected(void);
 #include "../../host/x0x_host.c"
 #undef main
 #include <assert.h>
+#include "../../firmware/src/app/original_runtime.h"
 uint8_t smk_clip_mode_on(void) { return 0; }
 int smk_ck_smc_turn(int n, int d) { (void)n; (void)d; return 0; }
 int smk_ck_smc_nav(uint8_t n) { (void)n; return 0; }
@@ -183,8 +184,49 @@ static void start_abort_same_poll(void)
     assert(perf_testing() && perf.phase == 3 && ui.view == V_PERF && ui.overlay == O_NONE);
     restore_and_check();
 }
+static int probe_restore, observed_restores;
+
+int __real_original_runtime_init(original_runtime_part *, const uint8_t[32], float,
+                                original_chicago_tuning *, const original_chicago_fx2_cold_owner *);
+int __wrap_original_runtime_init(original_runtime_part *part, const uint8_t cell[32], float bpm,
+                                original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
+{
+    if (probe_restore) {
+        int32_t output[2] = {1, 1};
+        uint32_t before = eng_prof_frames;
+        engine_render(output, 1);
+        assert(eng_prof_frames == before && !output[0] && !output[1]);
+        ++observed_restores;
+    }
+    return __real_original_runtime_init(part, cell, bpm, tuning, fx);
+}
+
+static void check_perf_restore_preemption(void)
+{
+    setup();
+    perf_test_start();
+    probe_restore = 1;
+    perf_test_tick();
+    assert(observed_restores == 2);
+    perf_restore();
+    assert(observed_restores == 4);
+    engine_project_hold(1);
+    engine_apply_sound(&proj.sound);
+    assert(observed_restores == 6);
+    probe_restore = 0;
+    int32_t output[2] = {1, 1};
+    uint32_t before = eng_prof_frames;
+    engine_render(output, 1);
+    assert(eng_prof_frames == before && !output[0] && !output[1]);
+    engine_project_hold(0);
+    engine_render(output, 1);
+    assert(eng_prof_frames == before + 1);
+    perf.test = -1;
+}
+
 int main(void)
 {
+    check_perf_restore_preemption();
     for (route = 0; route < ROUTES; route++) {
         for (int phase = 0; phase < 3; phase++) {
             abort_scenario(phase, 0x5D);

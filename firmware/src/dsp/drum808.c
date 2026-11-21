@@ -22,6 +22,7 @@
  *    the cymbal's envelope error goes from 0.002 dB to 0.019 dB).
  * tests/host/run_drum808.sh renders every sound against 8W8 itself. */
 #include "drum808.h"
+#include "x0x_glue.h"
 #include "fastmath.h"
 #include "../x0x_cold.h"          /* X0X_COLD: cy/hat/cb_init boot; set/get/param UI/MIDI — not render */
 
@@ -1705,8 +1706,8 @@ static const x0x_param_t d8_oh_mid[] = {PP("Decay", 74)};
 static const d8_pmap_t k_m_decay_tune[] = {{K_POT, D8P_LEVEL, 0}, {K_POT, D8P_DECAY, 0},
                                            {K_POT, D8P_TUNE, 0}};
 /* (X0X: the hats' choke is the 909's, fixed: the closed hat cuts the open one) */
-static const x0x_param_t k_p_kit[] = {PP("Level", 100), PP("Accent", 127), {"Dist", 7, 0, k_dist_names}, P_DRIVE};
-static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}, {K_KIT, 2, 0}, {K_KIT, 3, 0}};
+static const x0x_param_t k_p_kit[] = {PP("Level", 100), PP("Accent", 127), {"Dist", 7, 0, k_dist_names}, P_DRIVE, PP("Glue", 0)};
+static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}, {K_KIT, 2, 0}, {K_KIT, 3, 0}, {K_KIT, 4, 0}};
 
 /* Pot maps only — descriptor tables are reached through d8_spec (the old .p/.n
  * fields were never read and only cost flash). Heads omit the shared FX kinds. */
@@ -1934,6 +1935,10 @@ int drum808_nparams(int track) { return track >= 0 && track <= D8_KIT ? d8_nspec
 X0X_COLD int drum808_param_si(int track, int i, int pot, float *val)
 {
     static const uint8_t snd[D8_NUM] = {D8S_BD, D8S_SD, D8S_LT, D8S_MT, D8S_HT, D8S_RS, D8S_CP, D8S_CB, D8S_CY, D8S_OH, D8S_CH};
+    if (track == D8_KIT && i == D8_KIT_GLUE) {
+        *val = (float)pot * (100.0f / 127.0f);
+        return X0X_U_PCT;
+    }
     if(track==D8_KIT && i>=0 && i<2) {
         *val=(float)pot/127*(i?100:1);return i?X0X_U_PCT:X0X_U_GAIN;
     }
@@ -1975,7 +1980,9 @@ __attribute__((noinline)) static void kit_apply(drum808_t *d)
 {
     d->master_vol = (float)d->kpot[0] / 127.0f;
     d->master_on = d->kpot[D8_KIT_DIST] && d->kpot[D8_KIT_DRIVE];
-    d->vol = d->master_on ? 1.0f : d->master_vol;
+    d->vol = d->master_on || d->kpot[D8_KIT_GLUE] ? 1.0f : d->master_vol;
+    x0x_glue_prepare((float)d->kpot[D8_KIT_GLUE] / 127.0f,
+                     &d->glue_thr, &d->glue_slope, &d->glue_makeup);
     if (d->master_on)
         shp_resolve(&d->master, 10.0f * ((float)d->kpot[D8_KIT_DRIVE] / 127.0f), d->kpot[D8_KIT_DIST] - 1);
     d->vel_depth = (float)d->kpot[1] / 127.0f;
@@ -1986,12 +1993,32 @@ __attribute__((noinline)) static void kit_apply(drum808_t *d)
  * DnBOX pans per lane, so its two channels keep independent CRUSH history. */
 void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n)
 {
-    if (!d->master_on)
+    if (!d->master_on && !d->kpot[D8_KIT_GLUE])
         return;
-    int type = d->kpot[D8_KIT_DIST] - 1;
+    if (d->master_on) {
+        int type = d->kpot[D8_KIT_DIST] - 1;
+        for (int i = 0; i < n; ++i) {
+            left[i] = shape(left[i], &d->master, type, d->master_crush[0]);
+            right[i] = shape(right[i], &d->master, type, d->master_crush[1]);
+        }
+    }
+    if (d->kpot[D8_KIT_GLUE]) {
+        /* exp(-1/(t*44100)), for the original 35, 3 and 120 ms poles. */
+        float det = d->glue_det, env = d->glue_env;
+        for (int i = 0; i < n; ++i) {
+            float ml = fm_fabsf(left[i]), mr = fm_fabsf(right[i]);
+            float gain = x0x_glue_gain(ml > mr ? ml : mr, d->glue_thr, d->glue_slope,
+                                       0.999352331629f, 0.992469915234f, 0.999811053378f,
+                                       d->glue_makeup, &det, &env);
+            left[i] *= gain;
+            right[i] *= gain;
+        }
+        d->glue_det = det;
+        d->glue_env = env;
+    }
     for (int i = 0; i < n; ++i) {
-        left[i] = shape(left[i], &d->master, type, d->master_crush[0]) * d->master_vol;
-        right[i] = shape(right[i], &d->master, type, d->master_crush[1]) * d->master_vol;
+        left[i] *= d->master_vol;
+        right[i] *= d->master_vol;
         rev[i] *= d->master_vol;
         dly[i] *= d->master_vol;
     }
