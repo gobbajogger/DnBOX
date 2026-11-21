@@ -60,8 +60,6 @@ unsigned engine_original_tail_state(int v)
 }
 #endif
 static original_runtime_workspace original_workspace POOL;
-_Static_assert(sizeof(original_runtime_workspace) >= 4 * 256 * sizeof(float),
-               "808 metal raw fits in the Chicago workspace");
 static original_chicago_tuning original_tuning POOL;
 static original_chicago_fx2_compact original_fx[NBASS] POOL;
 static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
@@ -2387,7 +2385,6 @@ static uint8_t eng_brk_mark;                           /* brk_midi_count before 
  * is visible. No added audio latency; the sums are the same bits. */
 static uint8_t eng_808_split;
 static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
-static volatile uint8_t eng_808_metal_done;            /* 1: core 0 is done with the metal raw (Chicago workspace) */
 static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
 static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
 static uint8_t eng_do_master;                          /* pipeline this stretch */
@@ -2543,24 +2540,19 @@ static int run_job(int j, int core)
         d808_was_active = (uint8_t)drum808_active(&d808);
         if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
             if (eng_808_split) {
-                /* metal voices (and the bank) while core 1 mixes BD+SD into the buses.
-                 * raw sits in Chicago's workspace: Miami A on core 1 waits on
-                 * eng_808_metal_done before it uses the same union. */
-                float (*raw)[256] = (float (*)[256])(void *)&original_workspace;
+                /* If A renders on core 1, its mix must finish before that core
+                 * can start B. Otherwise core 0 runs A after this 808 job.
+                 * The selected workspace is therefore free until the metal mix
+                 * finishes, even when both bass jobs are on core 1. */
+                float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
+                    ? original_workspace_b.metal : original_workspace.metal;
                 uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
                 drum808_metal_prepare(&d808, raw, (int)n, aud);
-                if (body_wait(core)) {
-                    eng_sync();
-                    eng_808_metal_done = 1;
-                    eng_sync();
+                if (body_wait(core))
                     return 0;
-                }
                 drum808_finish_rest(&d808, (const float (*)[256])raw, left808, right808, t1, t2,
                                     (int)n, aud);
                 bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
-                eng_sync();
-                eng_808_metal_done = 1;
-                eng_sync();
             } else {
                 for (i = 0; i < n; i++)
                     left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
@@ -2583,17 +2575,6 @@ static int run_job(int j, int core)
     } else if (j == JB_A || j == JB_B) {
         /* one bass: its own workspace and L/R, so A and B may run at once on the two cores */
         int bv = j - JB_A, p = PART_303A + bv;
-        /* bass A uses original_workspace; the 808 split parks metal raw there.
-         * Core 1 waits only when 909 was short (the heavy 909 case is already past). */
-        if (core && j == JB_A) {
-#ifdef X0X_HOST
-            if (!eng_808_metal_done)
-                return 0;                             /* host: core 0 finishes 808, then takes A */
-#else
-            while (!eng_808_metal_done)
-                eng_sync();
-#endif
-        }
         float *bl = eng_bass_buf[2 * bv], *br = eng_bass_buf[2 * bv + 1];
         float *bb[NBASS];
         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
@@ -2877,13 +2858,11 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
     eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
     eng_808_body = (uint8_t)!eng_808_split;
-    eng_808_metal_done = (uint8_t)!eng_808_split;
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
         eng_c1_mask = 0;                              /* one core: all of it here */
         eng_808_split = 0;
         eng_808_body = 1;
-        eng_808_metal_done = 1;
     }
 #if X0X_DEBUG
     eng_dbg_nsub++;

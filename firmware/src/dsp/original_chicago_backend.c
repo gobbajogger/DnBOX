@@ -128,6 +128,11 @@ static int initialize(original_chicago_backend *s, unsigned factory,
     if (!original_chicago_voice_init(&s->voice, &s->tables, &seed) ||
         !original_chicago_allocator_bind(&s->allocator, &s->keys, s->held, &s->record,
             1, 1, 1, 1, 0, 0)) return s->status;
+    /* A stolen voice needs up to two 690 Hz envelope ticks to mute and
+     * restart. Keep its previous pitch through both ticks: the scheduler
+     * updates the anchor before the voice runs on each 44.1 kHz frame. */
+    enum { control_period_max = (44100 + 690 - 1) / 690 };
+    s->allocator.gate_duration = 2 * control_period_max + 1;
     s->allocator.scan_index = -1;
     s->allocator.previous_index = 60;
     s->allocator.octave = 1;
