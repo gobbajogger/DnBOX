@@ -11,7 +11,9 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
 
 ## Firmware UI integration
 
-On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) from `lane/fwui` into `integration/dnbox-consolidated`. The merge `3e307cfa455d22dfca5e4ef439080816b4e4f859` contains the tested head `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` and the prior consolidated tip `1c82772bac9a33f030bf954ec6151987aef2cbb8`. The 37 focused registrations, both stock builds and the independent 10/10 screen review passed. The firmware lane tracks the combined hold-GLOBE and pad/LED checks. [Merge](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) · [FWUI checklist](docs/lanes/fwui.md)
+On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) from `lane/fwui` into `integration/dnbox-consolidated`. The merge `3e307cfa455d22dfca5e4ef439080816b4e4f859` contains the tested head `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` and the prior consolidated tip `1c82772bac9a33f030bf954ec6151987aef2cbb8`. The 37 focused registrations, both stock builds and the independent 10/10 screen review passed. [Merge](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) · [FWUI checklist](docs/lanes/fwui.md)
+
+PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 merge. They cover 144 held-step checks, 7,229 pad and LED checks, copy semantics and hold-GLOBE clear/copy. Integ tracks the 522-registration host suite under I2. The initial unfiltered run stopped after 73 passes and 12 failures. [PR #988](https://github.com/gobbajogger/DnBOX/pull/988) · [Combined host results](docs/lanes/fwui/current/combined-host-results.json)
 
 ## Machine-readable roadmap state
 
@@ -50,7 +52,7 @@ On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX
       "dependencies": [
         "M0"
       ],
-      "next_action": "FWUI #975 merged. Verify the F5 hold-GLOBE clear/copy case in the final combined host suite."
+      "next_action": "FWUI #975 merged. PR #988 closed the FWUI checklist after all four integrated F5 controls passed. Integ will complete the host-suite accounting under I2."
     },
     {
       "id": "M3",
@@ -108,7 +110,7 @@ On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX
 }
 ```
 
-## Merged pull requests through `468744971720a81a536308e3bd84bd8766a5ed0f`
+## Merged pull requests through `d4bdf88eefd437ecaf21837eba1011f1756bc57a`
 
 GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merge commit is reachable from this snapshot. The PR head is included for squash merges and deleted branches. Lane acceptance is tracked in `docs/lanes/integ.md`.
 
@@ -130,3 +132,4 @@ GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merg
 | [#981](https://github.com/gobbajogger/DnBOX/pull/981) | `backup/rules-site-gate-20261121` | `69a650da0e7885bc516293bd573313280152d15c` | `1c82772bac9a33f030bf954ec6151987aef2cbb8` |
 | [#975](https://github.com/gobbajogger/DnBOX/pull/975) | `lane/fwui` | `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` | `3e307cfa455d22dfca5e4ef439080816b4e4f859` |
 | [#986](https://github.com/gobbajogger/DnBOX/pull/986) | `lane/integ-fwui-975-qualification` | `b833b53a0f45ddafc9751538fdff6f87c95ff2f9` | `468744971720a81a536308e3bd84bd8766a5ed0f` |
+| [#988](https://github.com/gobbajogger/DnBOX/pull/988) | `lane/integ-fwui-975-host-results` | `0927945a88cc73a714679fe42a0f0f5db013baf0` | `d4bdf88eefd437ecaf21837eba1011f1756bc57a` |
