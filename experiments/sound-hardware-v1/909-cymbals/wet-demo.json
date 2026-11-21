@@ -11,10 +11,12 @@
   },
   "reference_sha256": "0bda67421ea024debcd1792b5509791bb13ac64b8ba73d62be418eaf462f79b6",
   "candidate_sha256": "00f7fab3049e6447c8536af68ced860640a711c88f5f0168343a586efa74424c",
-  "relative_rms": 0.018881907180658592,
+  "relative_rms": 0.018881907180658387,
   "level_db": -0.009748286300101284,
   "spectral_rms_db": 0.4538926351210709,
   "pointwise_suite_failures": 133,
   "matched_input_suite_failures": 0,
-  "pass": true
+  "pass": true,
+  "candidate_baseline": "41eb727421c991d77bd7afbce7c80cb1db94991b",
+  "candidate_808_glue_refactor": "274d968d9c957d26ccc6c36e8b7dd0938ede0f51"
 }
