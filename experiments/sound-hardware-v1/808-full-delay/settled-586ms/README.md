@@ -11,3 +11,10 @@ python replay-settled.py /path/to/DnBOX-at-e3ffb3d8
 ```
 
 [Measured results and retained PCM digests](retained-snapshot.json) · [DSP function](settled-fxbus.c.inc) · [Regression source](settled-exact.c)
+
+The original-render harness accepts the 26,112-frame candidate checkout, an 8W8 checkout containing the pinned upstream commit and a fresh output directory. It records all 338 settings and scores the 257 within the candidate’s delay span. Add `--sustained` for the 68 repeated-hit and four-second-tail cases. A compile-time check rejects a different ring size. The packaged invocation still needs a clean replay.
+
+```sh
+python original/delay_voices.py /path/to/586ms-candidate /path/to/8W8 /tmp/808-standard
+python original/delay_voices.py /path/to/586ms-candidate /path/to/8W8 /tmp/808-tails --sustained
+```
