@@ -2,6 +2,37 @@
  * Existing glyph implementations remain explicitly unqualified until replaced
  * by the canonical per-type adapters; this change establishes family geometry.
  */
+/* Configured GROOVE roles, illustrated using the existing step pips. This
+ * is not a generated pattern, captured hits, or absolute probability.
+ * Protected anchors mark the two maximum-protection positions in the real
+ * anchor curve (positions 0 and 4); other positions are not hard-locked. */
+static int break_groove_pips(pref_t r,int value,int cx,uint16_t col)
+{
+    if(r.kind!=R_BRKSET || (r.c!=BRK_COMPLEX && r.c!=BRK_ANCHOR && r.c!=BRK_FILL))return 0;
+    int ink=(value*16+50)/100;
+    if(r.c==BRK_COMPLEX){
+        for(int i=0;i<8;i++){
+            int x=cx-18+i*5;
+            cv_rect(x,43,3,3,col);
+            cv_rect(x,31+(i&1)*4,3,3,blend(C_LINE,col,ink));
+        }
+    } else if(r.c==BRK_ANCHOR){
+        for(int i=0;i<8;i++){
+            int x=cx-18+i*5, protected=(i&3)==0;
+            cv_rect(x,38,3,3,C_LINE);
+            if(protected)cv_rect(x,32,3,12,blend(C_LINE,col,ink));
+        }
+    } else {
+        int enabled=pref_get(PR(R_BRKSET,0,0,BRK_PHRASE))!=0;
+        for(int i=0;i<8;i++){
+            int x=cx-18+i*4+(i>=4)*4;
+            cv_rect(x,43,3,3,enabled?col:C_LINE);
+            if(i>=4)cv_rect(x,32,3,4,enabled?blend(C_LINE,col,ink):C_LINE);
+        }
+        cv_rect(cx-1,32,1,14,C_LINE);
+    }
+    return 1;
+}
 static void break_layout_controls(void)
 {
     static const int16_t centers[4]={32,90,149,207};
@@ -32,7 +63,7 @@ static void break_layout_controls(void)
             /* Canonical body at local y15 via the existing cv_oy=-13. */
         } else
 #endif
-        if(!(perform_glyph(r,val,cx,part_col())||control_glyph(r,val,cx,part_col()))&&d->names&&d->max<12){
+        if(!(break_groove_pips(r,val,cx,part_col())||perform_glyph(r,val,cx,part_col())||control_glyph(r,val,cx,part_col()))&&d->names&&d->max<12){
             int n=d->max+1,pw=n>6?3:6,w=n*(pw+2)-2;
             for(int k=0;k<n;k++)box(cx-w/2+k*(pw+2),33,pw,9,k==val?part_col():C_LINE);
         }

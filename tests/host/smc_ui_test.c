@@ -85,9 +85,7 @@ static screen_state_t screen_state(void)
 }
 static void unchanged(screen_state_t before)
 {
-    /* Approved #737: a fader/knob move may peek its real page until the
-     * peek expires; the restore is checked after expire(). */
-    if (smc_peek->on) return;
+    CHECK(!smc_peek->on);
     /* Controller popup activity must preserve the complete keyboard state. */
     screen_state_t after = screen_state();
     if (memcmp(&before, &after, sizeof before)) {
@@ -162,6 +160,31 @@ static void test_restore(void)
         if (!i) shot("02-home-restored");
     }
 }
+static void test_home_touch(void)
+{
+    for (int live = 0; live < 2; live++) {
+        for (int encoder = 0; encoder < 2; encoder++) {
+            for (int slot = 0; slot < 8; slot++) {
+                setup(V_HOME, PART_909);
+                if (live) run_action(ACT_HOME_LIVE, 0);
+                screen_state_t before = screen_state();
+                pref_t target = encoder ? smc_knob_target(slot) : smc_target(slot);
+                CHECK(target.kind != R_NONE);
+                if (encoder) knob(slot, 1);
+                else fader(slot, 0);
+                ui_frame();
+                CHECK(smc_ui_active() && smc_ui.kind == encoder && smc_ui.strip == slot);
+                CHECK(!smc_peek->on && ui.view == V_HOME && ui.home_live == live);
+                CHECK(!memcmp(before.page, ui.page, sizeof ui.page));
+                CHECK(ui.part == before.part && ui.mixsel == before.mixsel && ui.prev_view == before.prev_view);
+                CHECK(smc_same(target, encoder ? smc_knob_target(slot) : smc_target(slot)));
+                expire();
+                CHECK(ui.view == V_HOME && ui.home_live == live);
+            }
+        }
+    }
+}
+
 static void test_activity(void)
 {
     setup(V_HOME, PART_303A);
@@ -549,12 +572,10 @@ static void test_track_knob_align(void)
  * SELECT represented only by the separately checked title highlight. */
 static void test_physical_geometry(void)
 {
-    /* Approved #737: a HOME fader move peeks the real MIX page with the
-     * SMC banner and pickup/ACTIVE line. The physical strip overlay below
-     * is the non-peek SMC screen, so drop the peek to check its geometry. */
+    /* The physical SMC strip overlay is presented without replacing HOME. */
     setup(V_HOME, PART_909); fader(0, 0);
-    CHECK(smc_peek->on && ui.view == V_MIX);
-    smc_peek_cancel(); ui_frame();
+    CHECK(!smc_peek->on && ui.view == V_HOME && smc_ui_active());
+    ui_frame();
     for (int n = 0; n < 8; n++) {
         int x = n * 30;
         CHECK(fb[(MAIN_Y + 36) * 240 + x + 8] != 0); /* encoder top */
@@ -565,7 +586,7 @@ static void test_physical_geometry(void)
     }
     /* An encoder interaction highlights its own physical position; it cannot
      * replace the other seven strips with one large readout. */
-    knob(7, 1); smc_peek_cancel(); ui_frame();
+    knob(7, 1); ui_frame();
     CHECK(smc_ui.kind == 1 && smc_ui.strip == 7);
     for (int n = 0; n < 7; n++)
         CHECK(fb[(MAIN_Y + 36) * 240 + n * 30 + 8] != 0);
@@ -585,8 +606,8 @@ static void check_selected(int selected)
 }
 static void test_selected_lane(void)
 {
-    /* Approved #737: a HOME knob move peeks the real MIX page, not the lane screen. */
-    setup(V_HOME, PART_303A); knob(7, 1); ui_frame(); CHECK(smc_peek->on && ui.view == V_MIX);
+    /* HOME knob changes keep the fullscreen SMC grid, not the SMK MIX page. */
+    setup(V_HOME, PART_303A); knob(7, 1); ui_frame(); CHECK(!smc_peek->on && ui.view == V_HOME && smc_ui_active());
     CHECK(smc_ui.kind == 1 && smc_ui.strip == 7);
     shot("14-selected-part-touched-filter");
     setup(V_MIX, PART_303A); smc.mixsel = PART_BRK; knob(0, 1); ui_frame(); check_selected(2);
@@ -723,7 +744,7 @@ static void test_action_captions_and_knobs(void)
 #endif
 int SMC_UI_MAIN(void)
 {
-    test_navigation_replay(); test_distinct_maps(); test_track_knob_align(); test_physical_geometry(); test_selected_lane(); test_drum_titles(); test_action_captions_and_knobs();
+    test_navigation_replay(); test_distinct_maps(); test_track_knob_align(); test_home_touch(); test_physical_geometry(); test_selected_lane(); test_drum_titles(); test_action_captions_and_knobs();
     test_restore(); puts("PASS restore: eight views preserve complete navigation state and exact framebuffer");
     test_activity(); test_existing_feedback(); test_navigation(); test_overlays(); test_clip(); test_actions_and_reset();
     printf("smc_ui: PASS (%u checks)\n", checks);

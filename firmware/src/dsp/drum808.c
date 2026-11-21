@@ -1917,10 +1917,8 @@ __attribute__((noinline)) static int track_sound(const drum808_t *d, int t)
 
 /* Match the editable circuit branches, independent of their audio filters.
  * The resonator decay pots alter feedback/Q, not a discrete envelope. */
-X0X_COLD int drum808_curve(const drum808_t *d,int track,drum_curve_t *v)
+static X0X_COLD int drum808_sound_curve(const drum808_t *d,int s,drum_curve_t *v)
 {
-    if((unsigned)track>=D8_NUM)return 0;
-    int s=track_sound(d,track);
     const float *pv=d->potv[s];
     float t=pv[D8P_DECAY]*1000.f;
     float full_v=4.f+10.f*(SC808_FULL_VELOCITY_GAIN-1.f)/3.f;
@@ -1978,6 +1976,45 @@ X0X_COLD int drum808_curve(const drum808_t *d,int track,drum_curve_t *v)
     return 1;
 }
 
+X0X_COLD int drum808_curve(const drum808_t *d,int track,drum_curve_t *v)
+{
+    if(!d || !v || (unsigned)track>=D8_NUM)return 0;
+    return drum808_sound_curve(d,track_sound(d,track),v);
+}
+
+/* Return sound owner + 1 so the caller can pair the same owner's hit epoch.
+ * Target shape and independent live level remain separate in drum_curve_t. */
+X0X_COLD int drum808_param_curve_preview(const drum808_t *d,int track,int param,int selection,int raw,drum_curve_t *v)
+{
+    if(selection < -1 || selection > 1 || raw < -1 || raw > 127)return 0;
+    if(!d || !v || (unsigned)track>=D8_NUM || (unsigned)param>=d8_nspec[track])return 0;
+    d8_pmap_t m=d8_pmap_at(track,param);
+    int owner;
+    if(m.kind==K_FIXED && m.snd==D8S_MA && m.slot==D8P_X1)owner=m.snd;
+    else if(m.kind==K_POT && m.slot==D8P_DECAY)owner=track==D8_CP && selection>=0 ? (selection?D8S_MA:D8S_CP):track_sound(d,track);
+    else return 0;
+    if(owner!=D8S_MA && owner!=D8S_CP)return 0;
+    if(!drum808_sound_curve(d,owner,v))return 0;
+    /* Resolved UI lock/motion targets never overwrite latched voice state. */
+    if(raw>=0) {
+        if(owner==D8S_MA && m.slot==D8P_X1) {
+            float a=(raw/127.f)/MA_ATK_DEF;
+            v->rise_tau=fm_maxf(.2f,1.2f*a*a);v->rise_end=v->rise_tau*4.60517f;
+        } else {
+            float ms=pot_value(owner,D8P_DECAY,raw)*1000.f;
+            v->fall=owner==D8S_MA?ms*.85f/4.60517f:.0385f*ms;
+        }
+    }
+    /* Parameter rows indicate their real bound stage, not any activity of
+     * the owner. The selected-sound full curve keeps its original semantics. */
+    if(owner==D8S_MA && (m.slot==D8P_X1 ? !d->ma.rising : d->ma.rising))v->elapsed=-1;
+    if(owner==D8S_CP && (d->cp.age<=d->cp.main_open || d->cp.main_target>0))v->elapsed=-1;
+    return owner+1;
+}
+
+X0X_COLD int drum808_param_curve(const drum808_t *d,int track,int param,drum_curve_t *v)
+{ return drum808_param_curve_preview(d,track,param,-1,-1,v); }
+
 int drum808_nparams(int track) { return track >= 0 && track <= D8_KIT ? d8_nspec[track] : 0; }
 
 /* UI readout: a pot's engine value and unit (X0X_U_*). Tune is semitones
@@ -1993,6 +2030,13 @@ X0X_COLD int drum808_param_si(int track, int i, int pot, float *val)
     if (track < 0 || track >= D8_NUM || i < 0 || i >= d8_nspec[track])
         return X0X_U_NONE;
     d8_pmap_t m = d8_pmap_at(track, i);
+    /* Fixed MARACAS excitation remains owned by MA while CLAP is selected.
+     * Nominal target 99% rise, not the discrete/latched transition timestamp. */
+    if(m.kind==K_FIXED && m.snd==D8S_MA && m.slot==D8P_X1) {
+        float a=((float)pot/127.f)/MA_ATK_DEF;
+        *val=fm_maxf(.2f,1.2f*a*a)*4.60517f;
+        return X0X_U_MS;
+    }
     if (m.kind != K_POT)
         return X0X_U_NONE;
     int s = snd[track];

@@ -1,0 +1,129 @@
+{
+  "scope": "Draw-only host process CPU milliseconds; 200 frames per page, matching firmware with only the font encoder/decoder changed. Device timing was not measured.",
+  "per_page": {
+    "original": {
+      "HOME": {
+        "full_ms": 0.227828,
+        "steady_ms": 0.124337
+      },
+      "909": {
+        "full_ms": 0.362655,
+        "steady_ms": 0.310654
+      },
+      "808": {
+        "full_ms": 0.371291,
+        "steady_ms": 0.272925
+      },
+      "MIA": {
+        "full_ms": 0.289441,
+        "steady_ms": 0.246707
+      },
+      "MIAMI_SOUND": {
+        "full_ms": 0.212818,
+        "steady_ms": 0.146433
+      },
+      "CHI": {
+        "full_ms": 0.258943,
+        "steady_ms": 0.207042
+      },
+      "CHICAGO_SOUND": {
+        "full_ms": 1.249387,
+        "steady_ms": 1.25474
+      },
+      "BRK": {
+        "full_ms": 0.217987,
+        "steady_ms": 0.10534
+      },
+      "FX": {
+        "full_ms": 0.237137,
+        "steady_ms": 0.113041
+      },
+      "MIX": {
+        "full_ms": 0.228041,
+        "steady_ms": 0.104146
+      },
+      "WAVE": {
+        "full_ms": 0.191923,
+        "steady_ms": 0.096707
+      },
+      "SONG": {
+        "full_ms": 0.157681,
+        "steady_ms": 0.072073
+      },
+      "DRUM_SEQ": {
+        "full_ms": 0.200849,
+        "steady_ms": 0.094371
+      },
+      "SYNTH_SEQ": {
+        "full_ms": 0.187885,
+        "steady_ms": 0.076985
+      },
+      "GLOBAL": {
+        "full_ms": 0.212759,
+        "steady_ms": 0.116251
+      }
+    },
+    "font": {
+      "HOME": {
+        "full_ms": 0.362809,
+        "steady_ms": 0.187171
+      },
+      "909": {
+        "full_ms": 0.604762,
+        "steady_ms": 0.641346
+      },
+      "808": {
+        "full_ms": 0.915824,
+        "steady_ms": 0.438455
+      },
+      "MIA": {
+        "full_ms": 0.528529,
+        "steady_ms": 0.40282
+      },
+      "MIAMI_SOUND": {
+        "full_ms": 0.363407,
+        "steady_ms": 0.270323
+      },
+      "CHI": {
+        "full_ms": 0.460112,
+        "steady_ms": 0.330475
+      },
+      "CHICAGO_SOUND": {
+        "full_ms": 2.262394,
+        "steady_ms": 2.380501
+      },
+      "BRK": {
+        "full_ms": 0.369444,
+        "steady_ms": 0.197563
+      },
+      "FX": {
+        "full_ms": 0.432644,
+        "steady_ms": 0.239936
+      },
+      "MIX": {
+        "full_ms": 0.343212,
+        "steady_ms": 0.173457
+      },
+      "WAVE": {
+        "full_ms": 0.304088,
+        "steady_ms": 0.144208
+      },
+      "SONG": {
+        "full_ms": 0.253416,
+        "steady_ms": 0.10591
+      },
+      "DRUM_SEQ": {
+        "full_ms": 0.437055,
+        "steady_ms": 0.179798
+      },
+      "SYNTH_SEQ": {
+        "full_ms": 0.352785,
+        "steady_ms": 0.15645
+      },
+      "GLOBAL": {
+        "full_ms": 0.36989,
+        "steady_ms": 0.19156
+      }
+    }
+  }
+}

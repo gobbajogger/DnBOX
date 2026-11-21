@@ -1,0 +1,160 @@
+{
+  "sourceRevision": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "command": "sh tests/run_tests.sh pads-in-settings held-step-release home-globe-part copy-semantics ui-peer-names ui-pan-units ui-battery-levels ui-overlay-battery ui-toast-battery ui-step-lane ui-step-lane-edit ui-step-lane-transaction ui-chance-framebuffer break-step-velocity-engine synthone-slot juno-slot-integration ui-drum-kit-section ui-native-routes ui-startup-loop ui-wave-fallback-frame",
+  "registeredTests": [
+    {
+      "registration": "synthone-slot",
+      "status": "PASS",
+      "logSHA256": "4d8ea5f2af7309f1e56138ae6d89282ff395d9b9e30b5d20c11196b623aa5739",
+      "reported": [
+        "Synth One slot integration: 3976 checks PASS"
+      ]
+    },
+    {
+      "registration": "juno-slot-integration",
+      "status": "PASS",
+      "logSHA256": "03b60e3359076664a26a0394ee76c242583a2695291483d8ffd8355d30ce9bde",
+      "reported": []
+    },
+    {
+      "registration": "held-step-release",
+      "status": "PASS",
+      "logSHA256": "5d71b791ffabb207888567592db320a8f4b1ef784d7f89c2d90672dae47c1a2e",
+      "reported": []
+    },
+    {
+      "registration": "pads-in-settings",
+      "status": "PASS",
+      "logSHA256": "3e9439390eb1f76cc36c8e297a031a0cf08ed33ee3b4ec1f62e325adf24e84fe",
+      "reported": [
+        "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}"
+      ]
+    },
+    {
+      "registration": "ui-peer-names",
+      "status": "PASS",
+      "logSHA256": "ba60952fee25a5e0cb941f20619575cb13a2aceb398159e72d15fd19740788c3",
+      "reported": [
+        "peer names PASS 63 checks"
+      ]
+    },
+    {
+      "registration": "ui-drum-kit-section",
+      "status": "PASS",
+      "logSHA256": "2d9458616f35027a11888ebda90f0679d69ed7530ebfc97a22b47551a659ff0a",
+      "reported": [
+        "PASS native CP/MA SOUND/KIT association and current-source compiled runtime negative"
+      ]
+    },
+    {
+      "registration": "ui-overlay-battery",
+      "status": "PASS",
+      "logSHA256": "0210a0a37213ce77f47337af81feb55e6b78a37b61fa237e2d20424240c41efc",
+      "reported": [
+        "OVERLAY_BATTERY 505 rows in 57 lists, 4040 injected battery-level updates, 263838 checks; other domains NOT_RUN"
+      ]
+    },
+    {
+      "registration": "ui-toast-battery",
+      "status": "PASS",
+      "logSHA256": "3afc875f8f9b0816e0dfd2818451ed01a1b187e0df9ef1b31b0c080567514d32",
+      "reported": [
+        "PASS toast battery: 4 states x 4 levels; text/state preserved; 9747 checks"
+      ]
+    },
+    {
+      "registration": "ui-chance-framebuffer",
+      "status": "PASS",
+      "logSHA256": "44cd23381a30b5a93eafd6e83f21c72d300fc435cdfa041a4098b22e0619408d",
+      "reported": []
+    },
+    {
+      "registration": "break-step-velocity-engine",
+      "status": "PASS",
+      "logSHA256": "bb973851ce381deb117b7e2fa74fd55f75e1ff6d6ff555acb8e4fbc336edb3d2",
+      "reported": [
+        "PASS sequenced BREAK velocity: saved/reloaded, sparse and pattern restore, lane replacement, motion disable; Q15 peaks 127=18430 64=9288 32=4644 0=0"
+      ]
+    },
+    {
+      "registration": "copy-semantics",
+      "status": "PASS",
+      "logSHA256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7",
+      "reported": [
+        "copy_semantics: ok"
+      ]
+    },
+    {
+      "registration": "home-globe-part",
+      "status": "PASS",
+      "logSHA256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608",
+      "reported": [
+        "home_globe_part: ok"
+      ]
+    },
+    {
+      "registration": "ui-battery-levels",
+      "status": "PASS",
+      "logSHA256": "ff0ee35a1d5bcba4449f8b2c736e13ddb13bf414dee14a8d6c23589dfc8fdbf1",
+      "reported": [
+        "PASS battery real theme transitions: 120 part/theme/level states",
+        "PASS four battery levels and header invalidation: 9898 checks"
+      ]
+    },
+    {
+      "registration": "ui-pan-units",
+      "status": "PASS",
+      "logSHA256": "a746cebc6a470652cfd444f0a79ca80424447c96895ffb6e8995335dd088a2f7",
+      "reported": [
+        "PASS production pan L50/C/R50: 10975 checks"
+      ]
+    },
+    {
+      "registration": "ui-native-routes",
+      "status": "PASS",
+      "logSHA256": "343e6c9845777d28eb414a68c039569773acd5bc4e57bb867bc6fe274c95af02",
+      "reported": [
+        "PASS native route host endpoints",
+        "PASS 38 actual 240x240 host frames, 31 exact archive matches"
+      ]
+    },
+    {
+      "registration": "ui-startup-loop",
+      "status": "PASS",
+      "logSHA256": "abd8f29d457e769698659b697c7b57b74ab9198e13b12c51990bcef504f66704",
+      "reported": []
+    },
+    {
+      "registration": "ui-wave-fallback-frame",
+      "status": "PASS",
+      "logSHA256": "2b8203d6b0b3e92c39c887890693338cbf3bbf34f426b1c197f364c1609e1811",
+      "reported": []
+    },
+    {
+      "registration": "ui-step-lane",
+      "status": "PASS",
+      "logSHA256": "4e24b2eb4832a90e428004cea9e10c7acb71396b8557fe36b0669db819d2f089",
+      "reported": [
+        "PASS physical SEQ+SCALE(FM-1 SEL) lane cycle, stored adapter and production/preview renders: 1427 checks; literal touchscreen NOT_RUN"
+      ]
+    },
+    {
+      "registration": "ui-step-lane-edit",
+      "status": "PASS",
+      "logSHA256": "f6c5428c76a9bd87dde1711f0af972bcaae6972e30568df92d1aef4bc51d33d8",
+      "reported": [
+        "PASS physical visible-lane edits: 20 scenarios, 1086 checks; all persisted"
+      ]
+    },
+    {
+      "registration": "ui-step-lane-transaction",
+      "status": "PASS",
+      "logSHA256": "65f3a890d0f72cb46dd68b46dac7ab671cf3d75c610409be1f204aaee3748987",
+      "reported": [
+        "PASS BREAK transaction scopes and current-source stale-read runtime negative"
+      ]
+    }
+  ],
+  "scope": "Stock firmware focused replay. The optional Sound interface, Chicago fixture corrections, layout, catalog, geometry, six links and target simulations have separate evidence. The exact final PR-head result is recorded in the qualification comment."
+}

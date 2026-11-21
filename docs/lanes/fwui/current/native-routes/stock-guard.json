@@ -1,0 +1,283 @@
+{
+  "firmwareCommit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "emulatorRepository": "gobbajogger/DnBOX",
+  "emulatorCommit": "6b60618c8bf344d65a166905fb746f46ab708fcb",
+  "fixture": "tests/ui_inventory/stock_guard_injection.patch",
+  "registerLayout": "fm1_crash_t: magic, count, vec, pc, rets, emu, dbg, sp, psr, icfg, uptime_ms, etm[4], early, core",
+  "clockMHz": 360,
+  "strict": true,
+  "targetChange": "The simulator raises SoC IRQ 1 with DBG bit 4 at 1200 and 9200 ms. The unchanged linked guest runs its exception handler, saves the .noinit record, waits through both four-second deadlines, selects safe mode, scans PLAY and requests all three chip resets.",
+  "oracle": "The host RAM/SPI LCD fixture re-renders each complete diagnostic, safe, retry and post-crash frame using the recorded target crash structure. Every match compares all 57,600 pixels after normalizing the display exporters to the same RGB565 expansion. PNGs are captured from the target, including the real per-model PCs.",
+  "models": {
+    "elite": {
+      "model": "elite",
+      "fwscSha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0",
+      "elfSha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3",
+      "emulatorSha256": "b8a4cb468a800151d37ae3cad5a3eb7fa8cf1757cec39c425b18411f0f9ca915",
+      "guardMs": [
+        1200,
+        9200
+      ],
+      "panelKeys": "15200:SEQPLAY,15600:SEQPLAY^",
+      "shots": {
+        "first": {
+          "lcdFrames": 119,
+          "crashRecord": [
+            1129468744,
+            1,
+            1,
+            33907264,
+            33961318,
+            0,
+            16,
+            29866560,
+            4,
+            904,
+            1200,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "debug": [
+            1145194289,
+            62,
+            3868,
+            905,
+            1,
+            1,
+            7204,
+            13,
+            1469,
+            18,
+            1,
+            0,
+            0
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 1312,
+              "canonicalRgbSha256": "c6fe375269e8a777c676a5095b79c5641f2d522db1c236a96e171a9a9dbadfb1"
+            }
+          },
+          "resetsMs": []
+        },
+        "safe-play": {
+          "lcdFrames": 1250,
+          "crashRecord": [
+            1129468744,
+            2,
+            1,
+            33743526,
+            33676718,
+            0,
+            16,
+            29868028,
+            0,
+            896,
+            3892,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "debug": [
+            1145194289,
+            293,
+            3921,
+            4320,
+            0,
+            3,
+            47654,
+            114,
+            1510,
+            27,
+            3,
+            0,
+            2
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 9312,
+              "canonicalRgbSha256": "a704182431e0d19cb3e777dee572202cb715f9a6662c107d97ed5a3c9042e1b3"
+            },
+            "safe": {
+              "firstMs": 13840,
+              "canonicalRgbSha256": "c0e92c7be9c3df8ff3121d7bba718b1c1f5788d75a1c05c58546a259dea79612"
+            },
+            "retry": {
+              "firstMs": 15216,
+              "canonicalRgbSha256": "28f262dd1f3592b703041324847b0da1cb0f77d5f1cee0d4121a922087d3ce8a"
+            },
+            "post-crash": {
+              "firstMs": 15664,
+              "canonicalRgbSha256": "2e898ae09ae5836693a4f52ab1f4a0ec19593fb124a24e982a5a134efe1258cf"
+            }
+          },
+          "resetsMs": [
+            5307,
+            13307,
+            15239
+          ]
+        }
+      }
+    },
+    "pro": {
+      "model": "pro",
+      "fwscSha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797",
+      "elfSha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54",
+      "emulatorSha256": "b8a4cb468a800151d37ae3cad5a3eb7fa8cf1757cec39c425b18411f0f9ca915",
+      "guardMs": [
+        1200,
+        9200
+      ],
+      "panelKeys": "15200:SEQPLAY,15600:SEQPLAY^",
+      "shots": {
+        "first": {
+          "lcdFrames": 119,
+          "crashRecord": [
+            1129468744,
+            1,
+            1,
+            33932486,
+            33620288,
+            0,
+            16,
+            29867156,
+            1,
+            904,
+            1200,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "debug": [
+            1145194289,
+            62,
+            3869,
+            908,
+            1,
+            1,
+            7204,
+            13,
+            1446,
+            18,
+            1,
+            0,
+            0
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 1312,
+              "canonicalRgbSha256": "d8dfebeab3a556d350d7ed6767ab2fe8bd10e0493dfb622407faaf11b76ec34f"
+            }
+          },
+          "resetsMs": []
+        },
+        "safe-play": {
+          "lcdFrames": 1250,
+          "crashRecord": [
+            1129468744,
+            2,
+            1,
+            33750156,
+            33749932,
+            0,
+            16,
+            29868028,
+            0,
+            896,
+            3892,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "debug": [
+            1145194289,
+            293,
+            3923,
+            4324,
+            0,
+            3,
+            47654,
+            114,
+            1511,
+            27,
+            3,
+            0,
+            2
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 9312,
+              "canonicalRgbSha256": "36bfae562db6df45d0a48bc66b850b330919f9109635d45761e4e2afd14cdec1"
+            },
+            "safe": {
+              "firstMs": 13840,
+              "canonicalRgbSha256": "881ee765c1ee3075798aec78a4b2bfbae5c1b526a35d562e7d3fa07b0a3fb51a"
+            },
+            "retry": {
+              "firstMs": 15216,
+              "canonicalRgbSha256": "fa9e982bc3651f9024fdd47784653216d352da4bf233846fd67511b79f81b04f"
+            },
+            "post-crash": {
+              "firstMs": 15664,
+              "canonicalRgbSha256": "13ce4530eaeca5526a4cec34386e78d43c1f961375c966c48eb5f691aad0b48c"
+            }
+          },
+          "resetsMs": [
+            5307,
+            13307,
+            15239
+          ]
+        }
+      }
+    }
+  },
+  "images": [
+    "guard/elite-first-fault.png",
+    "guard/elite-safe-play-fault.png",
+    "guard/elite-safe-play-post-crash.png",
+    "guard/elite-safe-play-retry.png",
+    "guard/elite-safe-play-safe.png",
+    "guard/pro-first-fault.png",
+    "guard/pro-safe-play-fault.png",
+    "guard/pro-safe-play-post-crash.png",
+    "guard/pro-safe-play-retry.png",
+    "guard/pro-safe-play-safe.png"
+  ],
+  "uiSourceBlob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
+  "hostEmulatorSha256": "b8a4cb468a800151d37ae3cad5a3eb7fa8cf1757cec39c425b18411f0f9ca915",
+  "guardPatchSHA256": "3098be00a65d72f578cc19f3fef3924bb66ddcbf97f11dbc2be5d75b76d5a5f5"
+}

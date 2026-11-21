@@ -52,7 +52,9 @@ static void status_is(const char *status)
     cv_begin(240, KNOB_H, C_BLACK);
     /* F4 (#800) shows the pickup direction and ACTIVE as pictograms, not prose. */
     if (status[0] == 'P') {
-        ui_pictogram(108, 49, strstr(status, " UP ") ? UI_G_UP : UI_G_DOWN, 1, C_HI);
+        int up = !strcmp(status, "PICKUP: UP");
+        CHECK(up || !strcmp(status, "PICKUP: DOWN"));
+        ui_pictogram(108, 49, up ? UI_G_UP : UI_G_DOWN, 1, C_HI);
         ui_pictogram(123, 49, UI_G_TARGET, 1, C_WHITE);
     } else {
         CHECK(!strcmp(status, "ACTIVE"));
@@ -89,7 +91,7 @@ static void crossing_matrix(void)
         sample(strip, start, user);
         CHECK(!writes && !(smc.picked & (1u << strip)));
         /* Movement UI is independent of target acquisition. */
-        status_is(down ? "PICKUP: MOVE DOWN TO TARGET" : "PICKUP: MOVE UP TO TARGET");
+        status_is(down ? "PICKUP: DOWN" : "PICKUP: UP");
         expire(); sample(strip, start, user); CHECK(!smc_ui_active()); CHECK(!writes);
         pref_set(r, target); smc_frame(); writes = 0;
         sample(strip, start, user); CHECK(!writes && !(smc.picked & (1u << strip)));
@@ -127,7 +129,7 @@ static void routing_epochs(void)
     prepare(V_HOME, PART_303A, 0, 64); fader(0, 0);
     smc_ble_link(0); smc_poll(); smc_ble_link(1); smc_poll();
     writes = 0; fader(0, 127); CHECK(!writes && !(smc.picked & 1));
-    status_is("PICKUP: MOVE DOWN TO TARGET");
+    status_is("PICKUP: DOWN");
     fader(0, 0); CHECK(writes == 1 && (smc.picked & 1));
     /* A parked packet at a newly equal target is not a new acceptance. */
     prepare(V_HOME, PART_303A, 0, 64); fader(0, 20); expire();
@@ -255,7 +257,7 @@ static void stateful_sequences(void)
             if (expected) CHECK(written_t == target.a && written_voice == target.b && written_param == target.c);
             if (moved && step % 16 == 0)
                 status_is(accepted ? "ACTIVE" : input < value ?
-                          "PICKUP: MOVE UP TO TARGET" : "PICKUP: MOVE DOWN TO TARGET");
+                          "PICKUP: UP" : "PICKUP: DOWN");
             history = 1; prior = input; cached = pref_get(target);
             if (!(rng & 4)) smc_frame();
         }
@@ -288,7 +290,13 @@ int main(int argc, char **argv)
     printf("smc_pickup_acceptance: PASS (%u assertions)\n", checks);
     CHECK(popup_pickup_hints > 0); /* pickup hint uses the existing SMC footer */
     printf("PASS pickup hint on SMC popup (%u checks)\n", popup_pickup_hints);
-    CHECK(peek_pickup_hints > 0); /* hint drawn on the #737 peek page */
+    prepare(V_HOME, PART_909, 0, 64);
+    smc_view(V_MIX, 0);
+    message(0x90, 0x5D, 127); message(0x80, 0x5D, 0);
+    CHECK(smc.locked && smc_peek->on && ui.view == V_MIX);
+    fader(0, 0);
+    status_is("PICKUP: UP");
+    CHECK(peek_pickup_hints > 0);
     printf("PASS pickup hint on peek page (%u checks)\n", peek_pickup_hints);
     return 0;
 }

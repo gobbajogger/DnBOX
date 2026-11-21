@@ -24,9 +24,9 @@ class CurrentSourceHooks(unittest.TestCase):
             self.prepare(root)
             instrument(root)
             source = (root / FILES[2]).read_text()
-            for role in ('control-banks', 'active-bank', 'voice-body'):
+            for role in ('control-banks', 'active-bank', 'voice-body', 'owner-stage-banks'):
                 self.assertEqual(source.count('first_panel("'+role+'"'), 1)
-            self.assertEqual(source.count('UI_PANEL_RADIUS'), 3)
+            self.assertEqual(source.count('UI_PANEL_RADIUS'), 4)
 
     def test_native_curve_writes_observed_once(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -49,6 +49,21 @@ class CurrentSourceHooks(unittest.TestCase):
                 path.write_text(source.replace(anchor, replacement))
                 with self.assertRaises(ValueError):
                     instrument(root)
+
+    def test_owner_curve_and_shared_steps_observed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);self.prepare(root);instrument(root)
+            source=(root/FILES[2]).read_text()
+            self.assertEqual(source.count('first_finish(stage_before,"envelope-curve",13,top-off,0);'),1)
+            self.assertEqual(source.count('first_finish(before,"step",sx,step_y,0);'),1)
+
+    def test_owner_stage_missing_duplicate_rejected(self):
+        anchor='static UI_DRAW void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uint16_t col)'
+        for replacement in ('',anchor+anchor):
+            with self.subTest(replacement=replacement),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp);self.prepare(root);p=root/FILES[2];source=p.read_text()
+                self.assertEqual(source.count(anchor),1);p.write_text(source.replace(anchor,replacement))
+                with self.assertRaises(ValueError):instrument(root)
 
     def test_missing_or_duplicate_panel_rejected(self):
         anchor = 'rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);'
