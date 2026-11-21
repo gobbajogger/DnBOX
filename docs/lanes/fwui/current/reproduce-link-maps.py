@@ -37,8 +37,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("source", "toolchain", "output"):
         parser.add_argument("--" + name, required=True, type=Path)
+    parser.add_argument("--receipt", type=Path, default=Path(__file__).with_name("stock-fit.json"),
+                        help="stock qualification JSON with linker object order and ELF digests")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    receipt = json.loads(Path(__file__).with_name("stock-fit.json").read_text())
+    receipt = json.loads(args.receipt.read_text())
     for build in receipt["stock_builds"]:
         reproduce(build, args.source.resolve(), args.toolchain.resolve(), args.output.resolve())

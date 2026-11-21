@@ -53,23 +53,35 @@ revisions after project load. Both first ordinary screens match the matching-own
 control at all 57,600 pixels. Reverting the guard makes the seven-case test
 stop during recovery at the unbound pattern table. [Recovery frames and case results](normal-loop/normal-loop.json)
 
-A separate [strict stock-emulator run](stock-boot.json) executed the linked
-JL firmware with the simulated SMK peripherals. At 448 ms the Elite recovery
-splash matched every archived RGB565 pixel. This run stopped before capturing
-the ordinary frame on the instruction emulator. The host replay supplies both
-ordinary frames. Physical LCD timing and color, electrical inputs, flash
-persistence and reset/bootloader transitions still require a board.
+## Stock Elite and Pro startup
 
-The short stock-emulator replay takes a linked stock FWSC and a local
-`fm1-live` binary. It creates private simulated flash, compiles the sample
-and splash records from the same C fixture used by the seven-case test, and
-writes its LCD and log to a fresh output directory. The stock results above
-came from the recorded run. This single-shot command uses the same fixtures
-and still needs a complete rerun.
+Twelve independent `fm1-live` shots ran the two linked stock packages at
+360 MHz with strict alignment, timed LCD transfers and the native IRQ and
+audio paths. The emulator starts at the application entry after the modeled
+SPL handoff. The seven-case C replay above records the first completed UI
+frame. The stock replay checks the splash at 448 ms and the ordinary screen
+at 1,500 ms against those full-frame references. All 57,600 RGB565 values
+match in every comparison. [Stock splash](stock-splash.png) ·
+[Stock ordinary screen](stock-ordinary.png) · [Per-model hashes and logs](stock-boot.json)
+
+| Stock input | Flash operations | Result on each model |
+| --- | ---: | --- |
+| Valid shadow, erased live slot | 18 | Recovered all 4,096 bytes and erased the shadow. |
+| Valid live slot, different stale shadow | 1 | Kept all 4,096 live bytes and erased the shadow. |
+| Fresh process booting the recovered flash | 0 | Read the saved sample and reached the same ordinary screen. |
+
+Each model's three final 1 MiB flash images match byte for byte. Only the
+expected live and shadow sectors changed during recovery. All six ordinary
+checkpoints reported one boot, zero crashes, one stored zone, one BREAK loop
+and 89 audio halves. Physical power-loss persistence, color on glass and
+electrical timing require a board.
+
+Run each model with its own matching FWSC and ELF. The output directory
+must be new.
 
 ```sh
 python3 tests/ui_inventory/stock_boot_fixture.py --model elite --emulator /path/to/fm1-live \
-  --fwsc /path/to/x0x-smk37-elite.fwsc --case recover --ms 448 /tmp/elite-recovery-splash
+  --fwsc /path/to/x0x-smk37-elite.fwsc --elf /path/to/elite/x0x.elf /tmp/elite-recovery
 ```
 
 ## Alternate renderer entry conditions

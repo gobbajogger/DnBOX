@@ -8,7 +8,7 @@
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
       "notConstructed": "Physical power-on and SPL handoff, IRQ/audio/USB electrical behavior, LCD color and flash power-loss persistence on a board.",
-      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json."
+      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json. The linked stock Elite and Pro packages also run from the application entry to the splash and ordinary screen in strict emu360. Fresh-process restarts read the recovered sample without a flash write."
     },
     {
       "ids": [
@@ -43,7 +43,7 @@
         "firmware/src/lcd.c::lcd_init"
       ],
       "notConstructed": "Native LCD power/reset and hardware bus initialization.",
-      "displayEvidence": "The production lcd_init, lcd_window, lcd_data, lcd_fill and lcd_blit run against a RAM SPI endpoint; bounds, pixel counts, clear and display-on are checked. Elite recovery also produced the archived custom splash from the stock package through the strict emulator’s timed SPI/LCD path. All 57,600 decoded RGB565 pixels match; see native-routes/stock-boot.json."
+      "displayEvidence": "The production lcd_init, lcd_window, lcd_data, lcd_fill and lcd_blit run against a RAM SPI endpoint. Both linked stock SMK packages also execute the timed SPI/LCD path in strict emu360. Recovery and already-live splashes at 448 ms and ordinary screens at 1,500 ms match all 57,600 native host RGB565 pixels. See native-routes/stock-boot.json."
     },
     {
       "ids": [

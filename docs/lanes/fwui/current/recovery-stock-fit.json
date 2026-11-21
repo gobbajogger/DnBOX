@@ -1,13 +1,9 @@
 {
-  "status": "PASS",
-  "measured_commit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
-  "measured_tree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
-  "engine_blob": "53d9e5050b334835b3ac7e1fd12347eb3f5efd7c",
-  "engine_sha256": "5842b1e6e83c7f0312b8557d4dbaf638b2fe9420265f6597eefabd8c8b98b30a",
-  "toolchain": {
-    "release": "20260730.1",
-    "clang": "clang version 4.0.1 () ()",
-    "ld": "GNU ld (GNU Binutils) 2.26.51.20160621"
+  "stock_thresholds": {
+    "xip_free_min_bytes": 1024,
+    "pool_margin_min_bytes": 512,
+    "pool_reserve_bytes": 8192,
+    "psram": false
   },
   "sdk": {
     "version": "AC79NN_SDK_V1.2.14_2026-10-13",
@@ -26,61 +22,14 @@
       }
     }
   },
-  "thresholds": {
-    "xip_free_min_bytes": 1024,
-    "pool_margin_min_bytes": 512,
-    "pool_reserve_bytes": 8192,
-    "psram": false
+  "toolchain": {
+    "release": "20260730.1",
+    "clang": "clang version 4.0.1 () ()",
+    "ld": "GNU ld (GNU Binutils) 2.26.51.20160621"
   },
-  "builds": [
-    {
-      "model": "elite",
-      "command": [
-        "./build.sh",
-        "--board",
-        "smk37",
-        "--model",
-        "elite"
-      ],
-      "build_exit": 0,
-      "app_image_bytes": 551160,
-      "xip_free_bytes": 1512,
-      "fwsc_bytes": 651732,
-      "pool_raw_free_bytes": 8972,
-      "pool_reserve_bytes": 8192,
-      "pool_margin_bytes": 780,
-      "ram_data_bss_bytes": 97156,
-      "ram_data_bss_limit_bytes": 98304,
-      "pool_used_bytes": 335092,
-      "pool_limit_bytes": 344064,
-      "map_link_exit": 0,
-      "mapped_elf_byte_identical_to_stock": true
-    },
-    {
-      "model": "pro",
-      "command": [
-        "./build.sh",
-        "--board",
-        "smk37",
-        "--model",
-        "pro"
-      ],
-      "build_exit": 0,
-      "app_image_bytes": 551152,
-      "xip_free_bytes": 1520,
-      "fwsc_bytes": 651730,
-      "pool_raw_free_bytes": 8972,
-      "pool_reserve_bytes": 8192,
-      "pool_margin_bytes": 780,
-      "ram_data_bss_bytes": 97156,
-      "ram_data_bss_limit_bytes": 98304,
-      "pool_used_bytes": 335092,
-      "pool_limit_bytes": 344064,
-      "map_link_exit": 0,
-      "mapped_elf_byte_identical_to_stock": true
-    }
-  ],
-  "postbuild_verification": {
+  "build_input_tree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+  "source_verification": {
+    "status": "VERIFIED",
     "tree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
     "files": 672,
     "verified_paths": [
@@ -94,19 +43,345 @@
       "reference",
       "docs/lanes/fwui/current/reproduce-link-maps.py"
     ],
-    "tracked_mismatches": []
+    "referenceSHA256": "2497e6f07bfd61db7075fac11f4004475fa2c6c5bf52727e00f34aa297ed2c0e",
+    "manifest": "recovery-stock-inputs.json.gz",
+    "post_build": {
+      "files": 672,
+      "tracked_mismatches": []
+    }
   },
-  "comparison": {
-    "previous_measured_commit": "db48241eabca5fd686aabeb5f807ea041b8a4c2c",
-    "previous_xip_free_bytes": {
-      "elite": 1528,
-      "pro": 1536
-    },
-    "image_growth_bytes": {
-      "elite": 16,
-      "pro": 16
-    },
-    "pool_margin_change_bytes": 0
+  "build_input_objects": {
+    "firmware": "4cb64989968d8c860a126bd2b63d065080b5ad7a",
+    "experiments/original_synth": "0cdd656980643a45d2061dc87be292e0426d11ef",
+    "tools/build.py": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
+    "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
   },
-  "retained_evidence": "Both stock build exits, link-map ELF byte comparisons, memory readings and tracked source checks were observed in the serial build. Executor disconnection interrupted retention of the new raw link maps and ELF hashes. Existing final-elite-link.map.gz and final-pro-link.map.gz in this revision describe the preceding qualification."
+  "stock_builds": [
+    {
+      "candidate": "pending-sample startup recovery",
+      "model": "elite",
+      "command": [
+        "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
+        "-plugin",
+        "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/LLVMgold.so",
+        "-plugin-opt=-inline-threshold=0",
+        "-plugin-opt=-inlinehint-threshold=0",
+        "-plugin-opt=-inlinecold-threshold=0",
+        "-plugin-opt=-enable-tail-merge",
+        "-plugin-opt=-tail-merge-size=1",
+        "-plugin-opt=-tail-merge-threshold=10000",
+        "-plugin-opt=-function-sections",
+        "-plugin-opt=-data-sections",
+        "-plugin-opt=-fp-contract=off",
+        "--sort-section=alignment",
+        "--gc-sections",
+        "-e",
+        "_start",
+        "-T",
+        "build/smk37-elite/app.ld",
+        "build/smk37-elite/crt0.o",
+        "build/smk37-elite/fm1_vec.o",
+        "build/smk37-elite/fm1_isr.o",
+        "build/smk37-elite/fm1_cpu1.o",
+        "build/smk37-elite/x0x.o",
+        "build/smk37-elite/o2/dsp_drum909.o",
+        "build/smk37-elite/o2/dsp_drum808.o",
+        "build/smk37-elite/o2/dsp_breaks.o",
+        "build/smk37-elite/o2/dsp_fxbus.o",
+        "build/smk37-elite/o2/dsp_master.o",
+        "build/smk37-elite/o2/dsp_x0x_param.o",
+        "build/smk37-elite/o2/seq_sequencer.o",
+        "build/smk37-elite/o2/seq_tb3po.o",
+        "build/smk37-elite/o2/seq_pattern.o",
+        "build/smk37-elite/o2/seq_motion.o",
+        "build/smk37-elite/o2/app_engine.o",
+        "build/smk37-elite/original/chicago_allocator.o",
+        "build/smk37-elite/original/chicago_arp_control.o",
+        "build/smk37-elite/original/chicago_control_owner.o",
+        "build/smk37-elite/original/chicago_drive.o",
+        "build/smk37-elite/original/chicago_dynamics.o",
+        "build/smk37-elite/original/chicago_engine_output.o",
+        "build/smk37-elite/original/chicago_full_mg.o",
+        "build/smk37-elite/original/chicago_fx2_compact.o",
+        "build/smk37-elite/original/chicago_fx2_wrapper.o",
+        "build/smk37-elite/original/chicago_global_mg.o",
+        "build/smk37-elite/original/chicago_global_stage.o",
+        "build/smk37-elite/original/chicago_key_admission.o",
+        "build/smk37-elite/original/chicago_modulation.o",
+        "build/smk37-elite/original/chicago_mp4.o",
+        "build/smk37-elite/original/chicago_note_context.o",
+        "build/smk37-elite/original/chicago_output.o",
+        "build/smk37-elite/original/chicago_packed.o",
+        "build/smk37-elite/original/chicago_program.o",
+        "build/smk37-elite/original/chicago_program_output.o",
+        "build/smk37-elite/original/chicago_scheduler.o",
+        "build/smk37-elite/original/chicago_selector.o",
+        "build/smk37-elite/original/chicago_smallfx.o",
+        "build/smk37-elite/original/chicago_tuning.o",
+        "build/smk37-elite/original/chicago_voice.o",
+        "build/smk37-elite/original/chicago_voice_owner.o",
+        "build/smk37-elite/original/chicago_voice_snapshot.o",
+        "build/smk37-elite/original/control_math.o",
+        "build/smk37-elite/original/engine_events.o",
+        "build/smk37-elite/original/fixed_fx.o",
+        "build/smk37-elite/original/fused_reference.o",
+        "build/smk37-elite/original/lossless_table.o",
+        "build/smk37-elite/original/master.o",
+        "build/smk37-elite/original/miami_control_owner.o",
+        "build/smk37-elite/original/miami_fx_chain.o",
+        "build/smk37-elite/original/miami_geometry.o",
+        "build/smk37-elite/original/miami_ms20.o",
+        "build/smk37-elite/original/miami_note_context.o",
+        "build/smk37-elite/original/miami_output.o",
+        "build/smk37-elite/original/miami_pitch.o",
+        "build/smk37-elite/original/miami_program.o",
+        "build/smk37-elite/original/miami_selected_voice.o",
+        "build/smk37-elite/original/miami_startup.o",
+        "build/smk37-elite/original/miami_voice_owner.o",
+        "build/smk37-elite/original/miami_voice_snapshot.o",
+        "build/smk37-elite/original/oscillator_motion.o",
+        "build/smk37-elite/original/program_envelope.o",
+        "build/smk37-elite/original/state_codec.o",
+        "build/smk37-elite/original/voice_gain.o",
+        "build/smk37-elite/original/miami_decimator_adapter.o",
+        "build/smk37-elite/original/miami_decimator_component.o",
+        "build/smk37-elite/original/miami_fx_conversion.o",
+        "build/smk37-elite/original/juno6.o",
+        "build/smk37-elite/original/original_chicago_backend.o",
+        "build/smk37-elite/original/original_miami_backend.o",
+        "build/smk37-elite/original/original_runtime.o",
+        "build/smk37-elite/original/original_sound.o",
+        "build/smk37-elite/gfinal/chance_native.o",
+        "-Map",
+        "../elite-portable.map",
+        "-o",
+        "../elite-portable.elf"
+      ],
+      "exit": 0,
+      "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
+      "sections": {
+        ".text": {
+          "equal": true,
+          "size": 547240,
+          "sha256": "ad8ec2ab199d2f8fe4d5662bdf905b156cd1b560ff6c2d815aa770898978717c"
+        },
+        ".data": {
+          "equal": true,
+          "size": 600,
+          "sha256": "a6aa8cdd3993367821a8d95bcfe103d4805cdc8fdc47bc52fd0ab12a7422c65b"
+        },
+        ".ram_text": {
+          "equal": true,
+          "size": 2708,
+          "sha256": "08478496283657c2127bb735266b9bda5a2898e08ec7ba1072aad8d209be6d02"
+        },
+        ".c1_text": {
+          "equal": true,
+          "size": 608,
+          "sha256": "22340cdd347f4aca6481fce1fe351c823f29e8ba3683f6fdf1dfb9c444852ba6"
+        }
+      },
+      "all_allocated_image_sections_identical": true,
+      "entire_elf_byte_identical": true,
+      "original_elf_sha256": "6d1345679819c68862ee7c6081f2f48d72e23e9d1b9590edc7ead3508be07463",
+      "mapped_elf_sha256": "6d1345679819c68862ee7c6081f2f48d72e23e9d1b9590edc7ead3508be07463",
+      "link_map": {
+        "filename": "elite-portable.map",
+        "sha256": "5f0b59bd8e7a319d980328ce2ad4392f052e3caae5ec75af4766a57eff317ab6",
+        "bytes": 211147,
+        "gzip_bytes": 28258
+      },
+      "committed_map": "recovery-elite-link.map.gz",
+      "xip_free_bytes": 1512,
+      "pool_margin_bytes": 780,
+      "pool_raw_free_bytes": 8972,
+      "pool_reserve_bytes": 8192,
+      "command_line_build_exit": 0,
+      "build_command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "elite"
+      ],
+      "build_started_utc": "2026-11-21T07:20:01.090780+00:00",
+      "build_finished_utc": "2026-11-21T07:20:23.018633+00:00",
+      "app_bin": {
+        "bytes": 551160,
+        "sha256": "72ddd680e97f9d74d7e2cb897e9cdc0ca6fa5c99c0ddfc8f5be041b9364b9c09"
+      },
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064,
+      "fwsc": {
+        "bytes": 651732,
+        "sha256": "f486c916a626c435d82dcc047ef00d6b0315acf2ce6d648fa71995455f6227de"
+      }
+    },
+    {
+      "candidate": "pending-sample startup recovery",
+      "model": "pro",
+      "command": [
+        "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
+        "-plugin",
+        "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/LLVMgold.so",
+        "-plugin-opt=-inline-threshold=0",
+        "-plugin-opt=-inlinehint-threshold=0",
+        "-plugin-opt=-inlinecold-threshold=0",
+        "-plugin-opt=-enable-tail-merge",
+        "-plugin-opt=-tail-merge-size=1",
+        "-plugin-opt=-tail-merge-threshold=10000",
+        "-plugin-opt=-function-sections",
+        "-plugin-opt=-data-sections",
+        "-plugin-opt=-fp-contract=off",
+        "--sort-section=alignment",
+        "--gc-sections",
+        "-e",
+        "_start",
+        "-T",
+        "build/smk37/app.ld",
+        "build/smk37/crt0.o",
+        "build/smk37/fm1_vec.o",
+        "build/smk37/fm1_isr.o",
+        "build/smk37/fm1_cpu1.o",
+        "build/smk37/x0x.o",
+        "build/smk37/o2/dsp_drum909.o",
+        "build/smk37/o2/dsp_drum808.o",
+        "build/smk37/o2/dsp_breaks.o",
+        "build/smk37/o2/dsp_fxbus.o",
+        "build/smk37/o2/dsp_master.o",
+        "build/smk37/o2/dsp_x0x_param.o",
+        "build/smk37/o2/seq_sequencer.o",
+        "build/smk37/o2/seq_tb3po.o",
+        "build/smk37/o2/seq_pattern.o",
+        "build/smk37/o2/seq_motion.o",
+        "build/smk37/o2/app_engine.o",
+        "build/smk37/original/chicago_allocator.o",
+        "build/smk37/original/chicago_arp_control.o",
+        "build/smk37/original/chicago_control_owner.o",
+        "build/smk37/original/chicago_drive.o",
+        "build/smk37/original/chicago_dynamics.o",
+        "build/smk37/original/chicago_engine_output.o",
+        "build/smk37/original/chicago_full_mg.o",
+        "build/smk37/original/chicago_fx2_compact.o",
+        "build/smk37/original/chicago_fx2_wrapper.o",
+        "build/smk37/original/chicago_global_mg.o",
+        "build/smk37/original/chicago_global_stage.o",
+        "build/smk37/original/chicago_key_admission.o",
+        "build/smk37/original/chicago_modulation.o",
+        "build/smk37/original/chicago_mp4.o",
+        "build/smk37/original/chicago_note_context.o",
+        "build/smk37/original/chicago_output.o",
+        "build/smk37/original/chicago_packed.o",
+        "build/smk37/original/chicago_program.o",
+        "build/smk37/original/chicago_program_output.o",
+        "build/smk37/original/chicago_scheduler.o",
+        "build/smk37/original/chicago_selector.o",
+        "build/smk37/original/chicago_smallfx.o",
+        "build/smk37/original/chicago_tuning.o",
+        "build/smk37/original/chicago_voice.o",
+        "build/smk37/original/chicago_voice_owner.o",
+        "build/smk37/original/chicago_voice_snapshot.o",
+        "build/smk37/original/control_math.o",
+        "build/smk37/original/engine_events.o",
+        "build/smk37/original/fixed_fx.o",
+        "build/smk37/original/fused_reference.o",
+        "build/smk37/original/lossless_table.o",
+        "build/smk37/original/master.o",
+        "build/smk37/original/miami_control_owner.o",
+        "build/smk37/original/miami_fx_chain.o",
+        "build/smk37/original/miami_geometry.o",
+        "build/smk37/original/miami_ms20.o",
+        "build/smk37/original/miami_note_context.o",
+        "build/smk37/original/miami_output.o",
+        "build/smk37/original/miami_pitch.o",
+        "build/smk37/original/miami_program.o",
+        "build/smk37/original/miami_selected_voice.o",
+        "build/smk37/original/miami_startup.o",
+        "build/smk37/original/miami_voice_owner.o",
+        "build/smk37/original/miami_voice_snapshot.o",
+        "build/smk37/original/oscillator_motion.o",
+        "build/smk37/original/program_envelope.o",
+        "build/smk37/original/state_codec.o",
+        "build/smk37/original/voice_gain.o",
+        "build/smk37/original/miami_decimator_adapter.o",
+        "build/smk37/original/miami_decimator_component.o",
+        "build/smk37/original/miami_fx_conversion.o",
+        "build/smk37/original/juno6.o",
+        "build/smk37/original/original_chicago_backend.o",
+        "build/smk37/original/original_miami_backend.o",
+        "build/smk37/original/original_runtime.o",
+        "build/smk37/original/original_sound.o",
+        "build/smk37/gfinal/chance_native.o",
+        "-Map",
+        "../pro-portable.map",
+        "-o",
+        "../pro-portable.elf"
+      ],
+      "exit": 0,
+      "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
+      "sections": {
+        ".text": {
+          "equal": true,
+          "size": 547232,
+          "sha256": "3486c74f9028b5cb6f2c50fa21fb2c9f11f1a3cd8571f720aa25129e2725c507"
+        },
+        ".data": {
+          "equal": true,
+          "size": 600,
+          "sha256": "e69ddcc18c6b810baa6db55cc33b668e80ebedaece5a96fcbb30d9c499637271"
+        },
+        ".ram_text": {
+          "equal": true,
+          "size": 2708,
+          "sha256": "08478496283657c2127bb735266b9bda5a2898e08ec7ba1072aad8d209be6d02"
+        },
+        ".c1_text": {
+          "equal": true,
+          "size": 608,
+          "sha256": "22340cdd347f4aca6481fce1fe351c823f29e8ba3683f6fdf1dfb9c444852ba6"
+        }
+      },
+      "all_allocated_image_sections_identical": true,
+      "entire_elf_byte_identical": true,
+      "original_elf_sha256": "e02adf021b45f4d493888ac4386b4b3780dee0b7367ac65b6ec5bbe530bab5ac",
+      "mapped_elf_sha256": "e02adf021b45f4d493888ac4386b4b3780dee0b7367ac65b6ec5bbe530bab5ac",
+      "link_map": {
+        "filename": "pro-portable.map",
+        "sha256": "1ca549e1101b7e1bdbc679bf6f259a0d27098b26f69362ef9271a5c6ff2476e6",
+        "bytes": 208913,
+        "gzip_bytes": 28208
+      },
+      "committed_map": "recovery-pro-link.map.gz",
+      "xip_free_bytes": 1520,
+      "pool_margin_bytes": 780,
+      "pool_raw_free_bytes": 8972,
+      "pool_reserve_bytes": 8192,
+      "command_line_build_exit": 0,
+      "build_command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "pro"
+      ],
+      "build_started_utc": "2026-11-21T07:20:23.021064+00:00",
+      "build_finished_utc": "2026-11-21T07:21:05.583519+00:00",
+      "app_bin": {
+        "bytes": 551152,
+        "sha256": "610ddc6cfd38493219c2204829159edd5f409ae81cdec0c03fb849b5e884ec33"
+      },
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064,
+      "fwsc": {
+        "bytes": 651730,
+        "sha256": "511b0adc2f0222f740027a62bc3173d7b2dc7777c2045c0d60aa4300335359e0"
+      }
+    }
+  ],
+  "measured_commit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "status": "PASS"
 }
