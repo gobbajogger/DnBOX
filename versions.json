@@ -2,8 +2,42 @@
   "schema": 2,
   "repo": "https://github.com/gobbajogger/DnBOX",
   "pages": "https://gobbajogger.github.io/DnBOX",
-  "latest": "nightly-79280e76-dev",
+  "latest": "nightly-94197fc8-dev",
   "versions": [
+    {
+      "version": "nightly-94197fc8-dev",
+      "display_version": "0.0.26",
+      "label": "OWNER HARDWARE TESTED \u2014 STARTUP AND RESTART OK ON ELITE AND PRO",
+      "status": "release-checked",
+      "config": "X0X_DEV_PADCAL=0",
+      "hardware_tested": true,
+      "source_commit": "94197fc839b00aff47b98ca02f3c6396e4a6eabf",
+      "source_tree": "72d28fbc741244d18fa3d18495da16ab0fcb1d24",
+      "models": {
+        "elite": {
+          "product": "SMK-37 Elite_900",
+          "sha256": "95b3195f4767ef5df33b365197b01203873e5eec3d7fa497c73e5e509484a4a6",
+          "size": 651732,
+          "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+          "controller_strategy": "bundled",
+          "controller_size": 61552,
+          "pkg": "https://gobbajogger.github.io/DnBOX-nightly/artifacts/nightly-dev/95b3195f4767ef5df33b365197b01203873e5eec3d7fa497c73e5e509484a4a6/DnBOX-0.0.26-SMK37-Elite-94197fc8-hwtest.fwsc"
+        },
+        "pro": {
+          "product": "SMK-37 Pro_900",
+          "sha256": "ce67d560eebd03cb8b9087f7723b1e0b71fb7cca256184cdfdd55a8c27c708b8",
+          "size": 651730,
+          "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+          "controller_strategy": "bundled",
+          "controller_size": 61552,
+          "pkg": "https://gobbajogger.github.io/DnBOX-nightly/artifacts/nightly-dev/ce67d560eebd03cb8b9087f7723b1e0b71fb7cca256184cdfdd55a8c27c708b8/DnBOX-0.0.26-SMK37-Pro-94197fc8-hwtest.fwsc"
+        }
+      },
+      "title": "DnBOX 0.0.26 \u00b7 SMK-37 Elite and Pro",
+      "description": "Current release. The owner verified startup and restart on a real SMK-37 Elite and SMK-37 Pro with these exact packages. Same bytes as the GitHub release v0.0.26 assets (Elite 651,732 B, CRC32 a5953c62; Pro 651,730 B, CRC32 d8957148). Source 94197fc8. Bundled Bluetooth controller a334208b (61,552 B). The earlier 600b 0.0.26 build remains withdrawn. Choose 0.0.25.1 for the fallback.",
+      "evidence_url": "https://github.com/gobbajogger/DnBOX/releases/tag/v0.0.26",
+      "lifecycle": "current"
+    },
     {
       "version": "nightly-79280e76-dev",
       "label": "DEVICE NOT TESTED",
@@ -34,7 +68,7 @@
       },
       "display_version": "0.0.25.1",
       "title": "DnBOX 0.0.25.1 \u00b7 SMK-37 Elite and Pro",
-      "description": "Owner-approved 0.0.25.1 packages. The owner reports successful use and recovery to 25.1; independent exact-package hardware validation for both models is not recorded here. Firmware reports 0.0.25, GIT 79280e76. Bundled Bluetooth controller included. The 600b 0.0.26 build was withdrawn. 0.0.26 at 94197fc8 is a hardware-test build on the nightly; it is not offered here.",
+      "description": "Owner-approved 0.0.25.1 packages. The owner reports successful use and recovery to 25.1; independent exact-package hardware validation for both models is not recorded here. Firmware reports 0.0.25, GIT 79280e76. Bundled Bluetooth controller included. The 600b 0.0.26 build was withdrawn. Kept as the fallback; 0.0.26 is the current release.",
       "evidence_url": "https://github.com/gobbajogger/DnBOX/commit/79280e763341d03ba43266d3e25dad66f12de860",
       "lifecycle": "current"
     },
