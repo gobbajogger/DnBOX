@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
     parser.add_argument('--kit-glue',action='store_true',help='use the dedicated 808 glue detector')
     parser.add_argument('--kit-reverb',action='store_true',help='use the dedicated mono 808 reverb')
+    parser.add_argument('--kit-delay',action='store_true',help='use the bounded private 808 delay')
     args = parser.parse_args()
     up = args.upstream.resolve()
     out = args.output.resolve()
@@ -56,7 +57,7 @@ def main():
     dry_digest = None
     for name,rv,dl,dist,glue in cases:
         data = out/(name+'.f32')
-        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data, str(int(args.kit_master)), str(int(args.kit_glue)), str(int(args.kit_reverb))],check=True)
+        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data, str(int(args.kit_master)), str(int(args.kit_glue)), str(int(args.kit_reverb)), str(int(args.kit_delay))],check=True)
         with data.open('rb') as file:
             x, ref, left, right = np.fromfile(file,dtype='<f4').reshape(88200,4).T
         digest = hashlib.sha256(x.tobytes()).hexdigest()
@@ -73,7 +74,7 @@ def main():
                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
         rows.append(row)
     print(json.dumps(rows,indent=2))
-    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
+    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, maximum 429.569 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
 

@@ -1,0 +1,521 @@
+{
+  "rate": 44100,
+  "frames_per_case": 264600,
+  "shared_reference": "Full 16-bit DnBOX delay, including DnBOX TAPE and PING",
+  "private_reference": "Identical isolated 808 private instance",
+  "cases": [
+    {
+      "mode": 0,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.001155343273239215,
+      "spectral_rms_db": 0.002297560846979291,
+      "passed": true
+    },
+    {
+      "mode": 0,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0023790675480094793,
+      "spectral_rms_db": 0.005040524027632323,
+      "passed": true
+    },
+    {
+      "mode": 0,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.001155343273239215,
+      "spectral_rms_db": 0.002297560846979291,
+      "passed": true
+    },
+    {
+      "mode": 0,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0023790675480094793,
+      "spectral_rms_db": 0.005040524027632323,
+      "passed": true
+    },
+    {
+      "mode": 1,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.001339346692528995,
+      "spectral_rms_db": 0.00187820837947394,
+      "passed": true
+    },
+    {
+      "mode": 1,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0028423467859715374,
+      "spectral_rms_db": 0.005532596286118573,
+      "passed": true
+    },
+    {
+      "mode": 1,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.001339346692528995,
+      "spectral_rms_db": 0.00187820837947394,
+      "passed": true
+    },
+    {
+      "mode": 1,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0028423467859715374,
+      "spectral_rms_db": 0.005532596286118573,
+      "passed": true
+    },
+    {
+      "mode": 2,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.001466301436806737,
+      "spectral_rms_db": 0.002374791981322221,
+      "passed": true
+    },
+    {
+      "mode": 2,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0027597356551150856,
+      "spectral_rms_db": 0.004669825226268942,
+      "passed": true
+    },
+    {
+      "mode": 2,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0014040390854798605,
+      "spectral_rms_db": 0.0023065092828901852,
+      "passed": true
+    },
+    {
+      "mode": 2,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.002314073124902712,
+      "spectral_rms_db": 0.003963398471731523,
+      "passed": true
+    },
+    {
+      "mode": 3,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0009892921427240974,
+      "spectral_rms_db": 0.001807545945513628,
+      "passed": true
+    },
+    {
+      "mode": 3,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.002406899228355097,
+      "spectral_rms_db": 0.004699143075939041,
+      "passed": true
+    },
+    {
+      "mode": 3,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0009137404660599333,
+      "spectral_rms_db": 0.0018038784229733593,
+      "passed": true
+    },
+    {
+      "mode": 3,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0018612838053396407,
+      "spectral_rms_db": 0.0038262666970986054,
+      "passed": true
+    },
+    {
+      "mode": 4,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0014739886149906368,
+      "spectral_rms_db": 0.0024580900293126955,
+      "passed": true
+    },
+    {
+      "mode": 4,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.00199088688738895,
+      "spectral_rms_db": 0.0032937471964146563,
+      "passed": true
+    },
+    {
+      "mode": 4,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0014739886149906368,
+      "spectral_rms_db": 0.0024580900293126955,
+      "passed": true
+    },
+    {
+      "mode": 4,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.00199088688738895,
+      "spectral_rms_db": 0.0032937471964146563,
+      "passed": true
+    },
+    {
+      "mode": 5,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0012783362744782226,
+      "spectral_rms_db": 0.0014886810851541352,
+      "passed": true
+    },
+    {
+      "mode": 5,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.002224162521856226,
+      "spectral_rms_db": 0.002559661535594605,
+      "passed": true
+    },
+    {
+      "mode": 5,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0012783362744782226,
+      "spectral_rms_db": 0.0014886810851541352,
+      "passed": true
+    },
+    {
+      "mode": 5,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.002224162521856226,
+      "spectral_rms_db": 0.002559661535594605,
+      "passed": true
+    },
+    {
+      "mode": 6,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0012207773168605932,
+      "spectral_rms_db": 0.0022967408626851523,
+      "passed": true
+    },
+    {
+      "mode": 6,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.001640339994980714,
+      "spectral_rms_db": 0.0026979857706035185,
+      "passed": true
+    },
+    {
+      "mode": 6,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0011007779834230225,
+      "spectral_rms_db": 0.0023027728156954303,
+      "passed": true
+    },
+    {
+      "mode": 6,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0012035984518334675,
+      "spectral_rms_db": 0.0024665367756634094,
+      "passed": true
+    },
+    {
+      "mode": 7,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0008957582723167648,
+      "spectral_rms_db": 0.0014231784053243832,
+      "passed": true
+    },
+    {
+      "mode": 7,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0015421351849116633,
+      "spectral_rms_db": 0.002259187380556904,
+      "passed": true
+    },
+    {
+      "mode": 7,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.000722390238122051,
+      "spectral_rms_db": 0.0012001065520625396,
+      "passed": true
+    },
+    {
+      "mode": 7,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0010078118507204294,
+      "spectral_rms_db": 0.0017709304145039043,
+      "passed": true
+    },
+    {
+      "mode": 8,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0005199581160573465,
+      "spectral_rms_db": 0.0018636717445262158,
+      "passed": true
+    },
+    {
+      "mode": 8,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0006126412392745228,
+      "spectral_rms_db": 0.004835864288570896,
+      "passed": true
+    },
+    {
+      "mode": 8,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0005199581160573465,
+      "spectral_rms_db": 0.0018636717445262158,
+      "passed": true
+    },
+    {
+      "mode": 8,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0006126412392745228,
+      "spectral_rms_db": 0.004835864288570896,
+      "passed": true
+    },
+    {
+      "mode": 9,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0003601938292867946,
+      "spectral_rms_db": 0.0018223123409513535,
+      "passed": true
+    },
+    {
+      "mode": 9,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0007938024347939327,
+      "spectral_rms_db": 0.005406351960644009,
+      "passed": true
+    },
+    {
+      "mode": 9,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0003601938292867946,
+      "spectral_rms_db": 0.0018223123409513535,
+      "passed": true
+    },
+    {
+      "mode": 9,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0007938024347939327,
+      "spectral_rms_db": 0.005406351960644009,
+      "passed": true
+    },
+    {
+      "mode": 10,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0006309942054536585,
+      "spectral_rms_db": 0.0017437756129436047,
+      "passed": true
+    },
+    {
+      "mode": 10,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0015911077386657766,
+      "spectral_rms_db": 0.005474697448980112,
+      "passed": true
+    },
+    {
+      "mode": 10,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0006576712740731539,
+      "spectral_rms_db": 0.001615409447910296,
+      "passed": true
+    },
+    {
+      "mode": 10,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0012858029334218222,
+      "spectral_rms_db": 0.0038175757274435396,
+      "passed": true
+    },
+    {
+      "mode": 11,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.00024515841931821853,
+      "spectral_rms_db": 0.001835916557261233,
+      "passed": true
+    },
+    {
+      "mode": 11,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0005776225693190293,
+      "spectral_rms_db": 0.005501032607064422,
+      "passed": true
+    },
+    {
+      "mode": 11,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0002869238107317422,
+      "spectral_rms_db": 0.0016852431011337293,
+      "passed": true
+    },
+    {
+      "mode": 11,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.00047008231897068686,
+      "spectral_rms_db": 0.003966426585163487,
+      "passed": true
+    },
+    {
+      "mode": 12,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0007747736254980974,
+      "spectral_rms_db": 0.0016009038512056033,
+      "passed": true
+    },
+    {
+      "mode": 12,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0012134183915321558,
+      "spectral_rms_db": 0.0027043563156714345,
+      "passed": true
+    },
+    {
+      "mode": 12,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0007747736254980974,
+      "spectral_rms_db": 0.0016009038512056033,
+      "passed": true
+    },
+    {
+      "mode": 12,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0012134183915321558,
+      "spectral_rms_db": 0.0027043563156714345,
+      "passed": true
+    },
+    {
+      "mode": 13,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.00023784873879984268,
+      "spectral_rms_db": 0.0012475596820388844,
+      "passed": true
+    },
+    {
+      "mode": 13,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.00037046629084811427,
+      "spectral_rms_db": 0.0025562810075720577,
+      "passed": true
+    },
+    {
+      "mode": 13,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.00023784873879984268,
+      "spectral_rms_db": 0.0012475596820388844,
+      "passed": true
+    },
+    {
+      "mode": 13,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.00037046629084811427,
+      "spectral_rms_db": 0.0025562810075720577,
+      "passed": true
+    },
+    {
+      "mode": 14,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.0007241455074580118,
+      "spectral_rms_db": 0.0014928364510122074,
+      "passed": true
+    },
+    {
+      "mode": 14,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0012999116726350175,
+      "spectral_rms_db": 0.0023723230375677336,
+      "passed": true
+    },
+    {
+      "mode": 14,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.0006194883924031229,
+      "spectral_rms_db": 0.0014371032741166804,
+      "passed": true
+    },
+    {
+      "mode": 14,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.0006787703484311886,
+      "spectral_rms_db": 0.0016641911200574527,
+      "passed": true
+    },
+    {
+      "mode": 15,
+      "side": 0,
+      "interval": "whole",
+      "level_db": 0.00034873303824619337,
+      "spectral_rms_db": 0.001258877719374391,
+      "passed": true
+    },
+    {
+      "mode": 15,
+      "side": 0,
+      "interval": "tail",
+      "level_db": 0.0003444165490584857,
+      "spectral_rms_db": 0.0026285321659390622,
+      "passed": true
+    },
+    {
+      "mode": 15,
+      "side": 1,
+      "interval": "whole",
+      "level_db": 0.00037313968255586164,
+      "spectral_rms_db": 0.001475618734828912,
+      "passed": true
+    },
+    {
+      "mode": 15,
+      "side": 1,
+      "interval": "tail",
+      "level_db": 0.00032303483561644907,
+      "spectral_rms_db": 0.001821175118423372,
+      "passed": true
+    }
+  ],
+  "passed": 64
+}

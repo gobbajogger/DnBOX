@@ -1624,7 +1624,12 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
                 PR(R_ENG,T_808,NDRUM,D8_KIT_RV_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_RV_HPF)};
             add_page_refs(emit, "KIT", refs, 0, 0);
             add_page_refs(emit, "RV BUS", route, 0, 0);
-            add_page_refs(emit, "KIT RV", verb, 0, 0); } while (0);
+            add_page_refs(emit, "KIT RV", verb, 0, 0);
+            static const pref_t dlbus[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_BUS), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TIME), NONE, NONE};
+            static const pref_t echo[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_LEVEL), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_FDBK),
+                PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_HPF)};
+            add_page_refs(emit, "DL 430ms", dlbus, 0, 0);
+            add_page_refs(emit, "KIT DL", echo, 0, 0); } while (0);
         } else if (part_is_303(p)) {
             int b = p - PART_303A;
             emit->group = GR_SOUND;

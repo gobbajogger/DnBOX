@@ -2,6 +2,7 @@
 /* Send reverb, synced delay and master stage: a port of 9W9's er99_verb_tick,
  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
 #include "fxbus.h"
+#include "fxbus_delay_store.h"
 #include "x0x_glue.h"
 #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
 
@@ -93,6 +94,7 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
     float ms = fx_beats[i] * 60000.0f / bpm;
     int frames = f->dlen < 0 ? -f->dlen : f->dlen;
     const float max_ms = (float)(frames - 256) / D9_SR * 1000.0f;
+    if (f->dl_type < 0 && ms > max_ms) ms = max_ms; /* 8W8 clamps at its upper limit. */
     while (ms > max_ms)                 /* longer than the line (1/2. under 90 BPM): half of it, */
         ms *= 0.5f;                     /* which is still on the beat; cutting it short is not */
     f->dl_time_ms = ms;
@@ -171,6 +173,7 @@ X0X_COLD static void fxbus_init_storage(fxbus_t *f, int16_t *dly_buf, int dly_le
     unsigned bytes = packed ? FX_DELAY_BYTES((unsigned)dly_len) : (unsigned)dly_len * sizeof(int16_t);
     for (unsigned i = 0; i < bytes; ++i)
         ((uint8_t *)dly_buf)[i] = 0;
+    if (packed) dly_buf[0] = dly_buf[1] = -1;
     f->dbuf = dly_buf;
     f->dlen = packed ? -dly_len : dly_len;
 
@@ -357,39 +360,6 @@ __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* p
 
 /* The interpolated delay tap d samples behind w. Inlining lets both taps
  * use the current DIGI or TAPE loop state without saving it across calls. */
-/* The original stores trunc(input*2048). A packed signed 14-bit word keeps
- * -6143..6143 exact. The outer codes cover the full original int16 range. */
-static inline unsigned fx14_encode(int sample)
-{
-    unsigned mag = (unsigned)(sample < 0 ? -sample : sample);
-    if (mag > 6143) {
-        mag = 6144 + (mag - 6144 + 6) / 13;
-        if (mag > 8191) mag = 8191;
-    }
-    return (unsigned)(sample < 0 ? -(int)mag : (int)mag) & 16383u;
-}
-
-static inline int fx14_read(const uint8_t *data, int index)
-{
-    unsigned bit = (unsigned)index * 14u, at = bit >> 3, offset = bit & 7u;
-    unsigned packed = data[at] | ((unsigned)data[at+1] << 8);
-    if (offset > 2) packed |= (unsigned)data[at+2] << 16;
-    int signed_code = (int)(((packed >> offset) & 16383u) ^ 8192u) - 8192;
-    int mag = signed_code < 0 ? -signed_code : signed_code;
-    if (mag > 6143) mag = 6144 + 13 * (mag - 6144);
-    return signed_code < 0 ? -mag : mag;
-}
-
-static inline void fx14_write(uint8_t *data, int index, int sample)
-{
-    unsigned bit = (unsigned)index * 14u, at = bit >> 3, offset = bit & 7u;
-    unsigned mask = 16383u << offset, code = fx14_encode(sample) << offset;
-    data[at] = (uint8_t)((data[at] & ~mask) | code);
-    data[at+1] = (uint8_t)((data[at+1] & ~(mask>>8)) | (code>>8));
-    if (offset > 2)
-        data[at+2] = (uint8_t)((data[at+2] & ~(mask>>16)) | (code>>16));
-}
-
 static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d, int packed)
 {
     float rp = (float)w - d;
@@ -398,8 +368,8 @@ static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, in
     const float fr = rp - (float)i0;
     if (i0 >= len) i0 -= len;
     const int32_t i1 = i0 + 1 >= len ? 0 : i0 + 1;
-    const int a = packed ? fx14_read((const uint8_t *)buf, i0) : buf[i0];
-    const int b = packed ? fx14_read((const uint8_t *)buf, i1) : buf[i1];
+    const int a = packed ? fx10_read(buf, len, i0) : buf[i0];
+    const int b = packed ? fx10_read(buf, len, i1) : buf[i1];
     const float b0 = (float)a * (1.0f / 2048.0f), b1 = (float)b * (1.0f / 2048.0f);
     return b0 + (b1 - b0) * fr;
 }
@@ -496,7 +466,7 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
         }
         int16_t word;
         int32_t k = sat12_store(packed ? &word : &buf[w], x + write);
-        if (packed) fx14_write((uint8_t *)buf, w, k);
+        if (packed) fx10_write(buf, len, w, k);
         if (++w >= len) w = 0;
         out[i] += y * lvl;
         if (out_r)
@@ -513,6 +483,37 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
     f->lp = lp;
     f->dl_quiet = quiet;
     f->dl_signal = (uint8_t)signal;
+}
+
+/* The private 8W8 delay uses the 9W9 DIGI arithmetic. Its unused right
+ * reverb allpasses remain zero and feed the delay after the route is closed. */
+X0X_COLD void fxbus_init_808_fx(fxbus_t *f, int16_t *delay)
+{
+    fxbus_init(f, delay, FX_808_DELAY_FRAMES);
+    f->dl_type = -1;
+    for (int i = FX_RV_DECAY; i <= FX_DL_HPF; ++i)
+        fxbus_set(f, i, fx_p[i].ui.def);
+}
+
+int fxbus_808_delay_active(const fxbus_t *f)
+{
+    const float next = f->dcur + (f->dl_time_ms * 0.001f * D9_SR - f->dcur) * 0.0008f;
+    return f->dl_quiet < f->dlen || next != f->dcur;
+}
+
+void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
+{
+    float level = f->dl_level;
+    f->dl_level = level * gain;
+    while (frames > 0) {
+        int n = frames < FX_RV_APR_TOTAL ? frames : FX_RV_APR_TOTAL;
+        fx_delay(f, send ? send : f->apr, left, right, n);
+        if (send) send += n;
+        left += n;
+        right += n;
+        frames -= n;
+    }
+    f->dl_level = level;
 }
 
 /* ===================================================================== */
