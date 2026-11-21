@@ -1,0 +1,821 @@
+diff --git a/experiments/sound-hardware-v1/808-effects/delay_voices.c b/experiments/sound-hardware-v1/808-effects/delay_voices.c
+index f235d9c7..cb578ee1 100644
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.c
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.c
+@@ -9,7 +9,7 @@
+ extern void sc808_capture(float *, float *, float *);
+ static drum808_t kit;
+ static fxbus_t verb;
+-static int16_t ring[FX_808_DELAY_FRAMES];
++static int16_t ring[FX_808_DELAY_WORDS];
+ 
+ static void pot(sc808_engine_t *e, const char *key, int value)
+ {
+@@ -20,7 +20,9 @@ static void pot(sc808_engine_t *e, const char *key, int value)
+ 
+ int main(int argc, char **argv)
+ {
+-    assert(argc == 12);
++    assert(argc == 12 || argc == 13);
++    int total = argc == 13 ? atoi(argv[12]) : 88200;
++    assert(total >= 88200 && total <= 352800);
+     int voice=atoi(argv[1]), rv=atoi(argv[2]), mode=atoi(argv[3]), glue=atoi(argv[4]);
+     sc808_engine_t *ref=sc808_create(44100);
+     assert(ref);
+@@ -57,10 +59,11 @@ int main(int argc, char **argv)
+     }
+     FILE *file=fopen(argv[11],"wbx");
+     assert(file);
+-    for (int pos=0;pos<88200;pos+=128) {
+-        int n=88200-pos<128 ? 88200-pos : 128;
++    for (int pos=0;pos<total;pos+=128) {
++        int n=total-pos<128 ? total-pos : 128;
+         float x[128],rv[128],dl[128],original[128],left[128],right[128];
+-        if (pos==0||pos==3072||pos==12288||pos==20480)
++        if (pos==0||pos==3072||pos==12288||pos==20480 ||
++            (total>88200 && pos < total/2 && pos % 5888 == 0))
+             for(int v=0;v<SC808_NUM_VOICES;++v) if(voice==-1||voice==v)sc808_trigger(ref,v,118);
+         sc808_capture(x,rv,dl);
+         sc808_render(ref,original,n);
+diff --git a/experiments/sound-hardware-v1/808-effects/delay_voices.py b/experiments/sound-hardware-v1/808-effects/delay_voices.py
+index 7d043ab3..69a75d8a 100644
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.py
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.py
+@@ -1,4 +1,4 @@
+-"""Compare the bounded shipping 808 echo to untouched 8W8 processing on every voice."""
++"""Compare the shipping 808 echo to untouched 8W8 processing on every voice."""
+ import argparse, hashlib, json, subprocess, sys
+ from pathlib import Path
+ import numpy as np
+@@ -13,6 +13,8 @@ def main():
+     parser=argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('upstream',type=Path)
+     parser.add_argument('output',type=Path)
++    parser.add_argument('--sustained',action='store_true',
++                        help='repeat hits for four seconds, then compare four seconds of feedback tails')
+     args=parser.parse_args()
+     out=args.output.resolve()
+     out.mkdir(parents=True,exist_ok=False)
+@@ -43,7 +45,7 @@ def main():
+     cases=[]
+     default=[7,68,60,93,55,120]
+     beats=[.125,1/6,.25,1/3,.375,.5,2/3,.75,1,4/3,1.5,2,3]
+-    cap=(19200-256)/44100
++    cap=(88200-256)/44100
+     for voice in [*range(16),-1]:
+         for rv,mode,glue,fb in ((0,0,0,68),(0,0,0,127),(1,0,0,68),(1,1,108,68)):
+             vals=default.copy();vals[1]=fb
+@@ -52,16 +54,25 @@ def main():
+         for bpm in [45,60,90,120,180,240]:
+             for i,beat in enumerate(beats):
+                 vals=default.copy();vals[0]=i;vals[5]=bpm
+-                cases.append((voice,0,0,0,vals,beat*60/bpm<=cap))
++                cases.append((voice,0,0,0,vals,True))
+         for axis in range(1,5):
+             for pos in [0,64,127]:
+                 vals=default.copy();vals[axis]=pos
+                 cases.append((voice,0,0,0,vals,True))
++    frames = 352800 if args.sustained else 88200
++    if args.sustained:
++        cases = [(voice, rv, mode, glue, value, True)
++                 for voice in [*range(16), -1]
++                 for rv, mode, glue, value in (
++                     (0, 0, 0, [12, 127, 127, 127, 55, 45]),
++                     (0, 0, 0, [12, 127, 0, 127, 0, 45]),
++                     (0, 0, 0, [0, 127, 127, 127, 55, 240]),
++                     (1, 1, 108, [12, 127, 127, 127, 55, 45]))]
+     rows=[]
+     for voice,rv,mode,glue,values,within in cases:
+         tmp=out/'pair.f32'
+-        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp],check=True)
+-        pcm=np.fromfile(tmp,dtype='<f4').reshape(88200,4)
++        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp,str(frames)],check=True)
++        pcm=np.fromfile(tmp,dtype='<f4').reshape(frames,4)
+         tmp.unlink()
+         if not np.isfinite(pcm).all() or not np.array_equal(pcm[:,2],pcm[:,3]): raise RuntimeError('invalid mono return')
+         x,ref,port,_=pcm.astype('d').T
+@@ -73,14 +84,25 @@ def main():
+             row.update(return_level_db=level,return_spectral_rms_db=spec,return_pass=bool(abs(level)<=1 and spec<=3))
+         elif not(mode or glue) and not np.array_equal(ref,port):
+             raise RuntimeError('dry alignment failed')
++        if args.sustained:
++            tail_ref,tail_port=ref[frames//2:],port[frames//2:]
++            if np.max(np.abs(tail_ref))>1e-8:
++                lev,sp=channel_score(tail_ref,tail_port,44100,[20,16000])
++                row.update(tail_level_db=lev,tail_spectral_rms_db=sp,tail_pass=bool(abs(lev)<=1 and sp<=3))
++            elif not np.array_equal(tail_ref,tail_port):
++                raise RuntimeError('silent tail differs')
+         rows.append(row)
+     valid=[r for r in rows if r['in_range']]
+-    report={'original':REF,'rate':44100,'frames_per_case':88200,'maximum_delay_seconds':cap,'cases':rows,
++    report={'original':REF,'rate':44100,'frames_per_case':frames,'maximum_delay_seconds':cap,'cases':rows,
+             'in_range_cases':len(valid),'full_pass':sum(r['pass'] for r in valid),
+             'wet_only_pass':sum(r.get('return_pass',False) for r in valid),'wet_only_cases':sum('return_pass' in r for r in valid)}
++    if args.sustained:
++        report.update(tail_pass=sum(r.get('tail_pass', False) for r in valid),
++                      tail_cases=sum('tail_pass' in r for r in valid))
+     (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
+     print({k:v for k,v in report.items() if k!='cases'})
+-    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'])
++    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'] or
++               (args.sustained and report['tail_pass']!=report['tail_cases']))
+ 
+ if __name__=='__main__':
+     raise SystemExit(main())
+diff --git a/experiments/sound-hardware-v1/808-effects/dual_delay.c b/experiments/sound-hardware-v1/808-effects/dual_delay.c
+index 533d0e1d..27ebab5d 100644
+--- a/experiments/sound-hardware-v1/808-effects/dual_delay.c
++++ b/experiments/sound-hardware-v1/808-effects/dual_delay.c
+@@ -9,7 +9,7 @@
+ 
+ enum { SHARED = 79200, BLOCK = 128, FRAMES = 44100 * 6 };
+ static fxbus_t raw_bus, packed_bus, private_bus, isolated_bus;
+-static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_FRAMES], isolated_ring[FX_808_DELAY_FRAMES];
++static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_WORDS], isolated_ring[FX_808_DELAY_WORDS];
+ static struct {
+     unsigned before;
+     int16_t data[(FX_DELAY_BYTES(SHARED)+1)/2];
+diff --git a/experiments/sound-hardware-v1/808-effects/replay.py b/experiments/sound-hardware-v1/808-effects/replay.py
+index 5a84e00b..f4e28600 100644
+--- a/experiments/sound-hardware-v1/808-effects/replay.py
++++ b/experiments/sound-hardware-v1/808-effects/replay.py
+@@ -22,7 +22,7 @@ def main():
+     parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
+     parser.add_argument('--kit-glue',action='store_true',help='use the dedicated 808 glue detector')
+     parser.add_argument('--kit-reverb',action='store_true',help='use the dedicated mono 808 reverb')
+-    parser.add_argument('--kit-delay',action='store_true',help='use the bounded private 808 delay')
++    parser.add_argument('--kit-delay',action='store_true',help='use the full-range private 808 delay')
+     args = parser.parse_args()
+     up = args.upstream.resolve()
+     out = args.output.resolve()
+@@ -74,7 +74,7 @@ def main():
+                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
+         rows.append(row)
+     print(json.dumps(rows,indent=2))
+-    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, maximum 429.569 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
++    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, original maximum 1994.195 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
+        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
+     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
+ 
+diff --git a/experiments/sound-hardware-v1/808-effects/wet.c b/experiments/sound-hardware-v1/808-effects/wet.c
+index 9a4d2e28..dd12a413 100644
+--- a/experiments/sound-hardware-v1/808-effects/wet.c
++++ b/experiments/sound-hardware-v1/808-effects/wet.c
+@@ -12,7 +12,7 @@ static int16_t delay_memory[DELAY_WORDS];
+ static fxbus_t bus;
+ static drum808_t kit;
+ static fxbus_t kit_verb;
+-static int16_t private_delay[FX_808_DELAY_FRAMES];
++static int16_t private_delay[FX_808_DELAY_WORDS];
+ 
+ static void set(sc808_engine_t *s, const char *name, unsigned value)
+ {
+diff --git a/firmware/app.ld b/firmware/app.ld
+index b94dff5c..4d665f9e 100644
+--- a/firmware/app.ld
++++ b/firmware/app.ld
+@@ -26,6 +26,8 @@ MEMORY
+     XPOOL  (rw)  : ORIGIN = 0x01C75200, LENGTH = 0x2400
+     NOINIT (rw)  : ORIGIN = 0x01C7C000, LENGTH = 0x400
+     BLERAM (rw)  : ORIGIN = 0x01C7C400, LENGTH = 0x1000
++    /* Primary SRAM after the BLE host and before the SDK's boot_info block. */
++    AUDIOHIGH (rw) : ORIGIN = 0x01C7D400, LENGTH = 0x2900
+ }
+ SECTIONS
+ {
+@@ -44,6 +46,7 @@ SECTIONS
+     .bss (NOLOAD) : { _bss_start = .; *(.bss*) *(.sbss*) *(COMMON) . = ALIGN(4); _bss_end = .; } > RAM
+     .pool (NOLOAD) : { _pool_start = .; *(.pool*) . = ALIGN(4); _pool_end = .; } > POOL
+     .xpool (NOLOAD) : { _xpool_start = .; *(.xpool*) . = ALIGN(4); _xpool_end = .; } > XPOOL
++    .audiohigh (NOLOAD) : { _audiohigh_start = .; *(.audiohigh*) . = ALIGN(4); _audiohigh_end = .; } > AUDIOHIGH
+     .noinit (NOLOAD) : { *(.noinit*) } > NOINIT
+     .ble_ram (NOLOAD) : { . = ALIGN(64); *(.ble_ram*) } > BLERAM
+     ASSERT(_c1_end <= 0x01C01800, "RAM code reaches the Bluetooth controller RAM")
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index 8ee44c66..ba7c10dd 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -43,12 +43,16 @@ int16_t eng_scope[SCOPE_N] X0X_POOL;
+ volatile uint32_t eng_scope_w;
+ 
+ static drum909_t d909 POOL;
++#if X0X_HIGH_AUDIO_RAM
++static drum808_t d808 X0X_XPOOL;
++#else
+ static drum808_t d808 POOL;
++#endif
+ static volatile uint8_t project_hold;
+ static volatile int brk_preview_slot = -1;
+ static uint8_t brk_preview_audio_on, brk_preview_pattern;
+ static void brk_preview_interrupt(void);
+-static original_runtime_part original_bass[NBASS] POOL;
++static original_runtime_part original_bass[NBASS] X0X_AUDIOHIGH;
+ static uint16_t original_quiet_samples[NBASS], original_switch_gain[NBASS];
+ #ifdef X0X_HOST
+ /* Read-only host diagnostics for the actual adoption boundary. */
+@@ -432,8 +436,8 @@ static master_t mst POOL; /* was BSS; pool after Chicago-insert union frees head
+ #define DLY_LEN 79200
+ static int16_t dly_buf[(FX_DELAY_BYTES(DLY_LEN) + 1u) / 2u] POOL;
+ static fxbus_t d8_verb POOL;
+-static int16_t d8_delay[FX_808_DELAY_FRAMES] POOL;
+-_Static_assert(sizeof dly_buf + sizeof d8_verb + sizeof d8_delay <= 2u * DLY_LEN, "808 private effects must fit in the original delay arena");
++static int16_t d8_delay[FX_808_DELAY_WORDS] POOL;
++_Static_assert(sizeof dly_buf + sizeof d8_verb + sizeof d8_delay <= 2u * DLY_LEN + 14076u + 4064u + 2048u, "the extended private echo must fit in the reclaimed SMK SRAM");
+ static volatile uint8_t project_hold, project_midi_drop;
+ void engine_project_hold(int hold)
+ {
+@@ -2873,6 +2877,7 @@ static uint32_t plan_cost(uint32_t mask, const uint32_t *cost)
+ static uint32_t c1_allowed(void)
+ {
+     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
++    if (d808.kpot[D8_KIT_DL_BUS] || fxbus_808_delay_active(&d8_verb)) m &= ~(1u << JB_808);
+     for (unsigned v = 0; v < NBASS; ++v) {
+         const original_runtime_part *part = &original_bass[v];
+         if (part->kind == ORIGINAL_SOUND_MIAMI ||
+diff --git a/firmware/src/app/main_fm1.c b/firmware/src/app/main_fm1.c
+index 3c1a2ae3..15fb6e1b 100644
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -4,7 +4,7 @@
+ /* X0X on the FM-1: boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5 10 kHz),
+  * audio (ALNK0), USB; then the main loop: UI at ~60 frames/s, input polled in between. */
+ extern uint32_t _data_start[], _data_end[], _data_load[], _bss_start[], _bss_end[];
+-extern uint32_t _xpool_start[], _xpool_end[];
++extern uint32_t _xpool_start[], _xpool_end[], _audiohigh_start[], _audiohigh_end[];
+ extern uint32_t _pool_start[], _pool_end[], _rt_start[], _rt_end[], _rt_load[], _c1_start[], _c1_end[], _c1_load[];
+ 
+ /* --------------------------------------------------------------- audio --- */
+@@ -2624,6 +2624,10 @@ void fm1_cstart(void)
+         *d = 0;
+     for (d = _pool_start; d < _pool_end; d++)
+         *d = 0;
++#if X0X_HIGH_AUDIO_RAM
++    for (d = _audiohigh_start; d < _audiohigh_end; d++)
++        *d = 0;
++#endif
+     for (d = _xpool_start; d < _xpool_end; d++)
+         *d = 0;
+     for (s = _data_load, d = _data_start; d < _data_end; s++, d++)
+diff --git a/firmware/src/app/plat.h b/firmware/src/app/plat.h
+index b57f2737..9c9fee6f 100644
+--- a/firmware/src/app/plat.h
++++ b/firmware/src/app/plat.h
+@@ -22,6 +22,13 @@
+ #define X0X_XPOOL __attribute__((section(".xpool")))
+ #endif
+ 
++/* Reserved application SRAM beyond the SMK BLE host's 4 KiB window. */
++#if X0X_HIGH_AUDIO_RAM && !defined(X0X_HOST)
++#define X0X_AUDIOHIGH __attribute__((section(".audiohigh")))
++#else
++#define X0X_AUDIOHIGH X0X_POOL
++#endif
++
+ /* CQ replacement: exclude only its audio-ISR consumer, preserving an already
+  * disabled source. Host app simulation is single-threaded; interleaving tests
+  * supply a source-mask model when extracting the production queue. */
+diff --git a/firmware/src/app/s1_dry_part.c b/firmware/src/app/s1_dry_part.c
+index d2be6590..854a9055 100644
+--- a/firmware/src/app/s1_dry_part.c
++++ b/firmware/src/app/s1_dry_part.c
+@@ -351,7 +351,7 @@ static float lfo_step(s1_trem_lfo *lfo)
+ /* The two original modulation destinations share clocks and discontinuity
+  * smoothers. The hold clock reads the rising envelope before tremolo applies
+  * its independent inverse envelope to the held sample. */
+-static void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
++static __attribute__((noinline)) void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
+ {
+     s1_trem_lfo *a = &part->lfo[0], *b = &part->lfo[1];
+     for (unsigned i = 0; i < frames; ++i) {
+@@ -465,28 +465,25 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
+ 
+     if (part->crush_route && part->crush_interval > 1.f) {
+         modulated_crush(part, left, right, frames);
+-        pan_stereo(part, left, right, frames);
+-        return;
+-    }
+-    /* The untouched INIT rate takes every input frame. Keep the last sample
+-     * for a live rate change without running the hold loop on a dry block. */
+-    if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
+-        part->crush_last = left[frames - 1u];
+-        tremolo_mono(part, left, right, frames);
+-        pan_stereo(part, left, right, frames);
+-        return;
+-    }
+-    for (unsigned f = 0; f < frames; ++f) {
+-        if (part->crush_next <= part->crush_age) {
+-            part->crush_last = left[f];
+-            part->crush_next += part->crush_interval;
+-            part->crush_next -= part->crush_age;
+-            part->crush_age = 0.f;
++    } else {
++        /* Even while the rate is above 44.1 kHz the saved last sample and
++         * clock must remain valid for a subsequent live control change. */
++        if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
++            part->crush_last = left[frames-1];
+         } else {
+-            left[f] = right[f] = part->crush_last;
++            for (unsigned i=0; i<frames; ++i) {
++                if (part->crush_next <= part->crush_age) {
++                    part->crush_last = left[i];
++                    part->crush_next += part->crush_interval;
++                    part->crush_next -= part->crush_age;
++                    part->crush_age = 0.f;
++                } else {
++                    left[i] = right[i] = part->crush_last;
++                }
++                part->crush_age += 1.f;
++            }
+         }
+-        part->crush_age += 1.f;
++        tremolo_mono(part, left, right, frames);
+     }
+-    tremolo_mono(part, left, right, frames);
+     pan_stereo(part, left, right, frames);
+ }
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 9c10167b..92fdee54 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1644,7 +1644,7 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
+             static const pref_t dlbus[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_BUS), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TIME), NONE, NONE};
+             static const pref_t echo[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_LEVEL), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_FDBK),
+                 PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_HPF)};
+-            add_page_refs(emit, "DL 430ms", dlbus, 0, 0);
++            add_page_refs(emit, "DL 1994ms", dlbus, 0, 0);
+             add_page_refs(emit, "KIT DL", echo, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+diff --git a/firmware/src/dsp/fxbus.c b/firmware/src/dsp/fxbus.c
+index 34f9eb3a..6bb23ee6 100644
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -232,10 +232,47 @@ static inline __attribute__((always_inline)) float dist_one(const d9_shape_t *sh
+     return d9_shape(sh, x * k, crush) * 0.7f;
+ }
+ 
+-static inline __attribute__((always_inline)) float rv_ap_cell(float *cell, float y)
++/* Store the reverb allpasses in binary16. Subnormal cells preserve the
++ * final decay below the smallest normal value; loads restore positive or
++ * negative binary32 exactly before applying the original recurrence. */
++static inline uint16_t rv_store_half(float sample)
+ {
+-    float old = *cell;
+-    *cell = y + old * 0.5f;
++    uint32_t bits;
++    __builtin_memcpy(&bits, &sample, sizeof bits);
++    uint32_t mag = bits & 0x7fffffffu;
++    uint32_t sign = (bits >> 16) & 0x8000u;
++    if (mag < 0x38800000u) {
++        float positive;
++        __builtin_memcpy(&positive, &mag, sizeof positive);
++        positive += 0.5f;
++        __builtin_memcpy(&mag, &positive, sizeof mag);
++        return (uint16_t)(sign | (mag - 0x3f000000u));
++    }
++    if (mag > 0x477fe000u) return (uint16_t)(sign | 0x7bffu);
++    uint32_t rounded = mag + 0xfffu + ((mag >> 13) & 1u);
++    return (uint16_t)(sign | ((rounded - 0x38000000u) >> 13));
++}
++
++static inline float rv_load_half(uint16_t cell)
++{
++    uint32_t mag = cell & 0x7fffu;
++    uint32_t sign = (uint32_t)(cell & 0x8000u) << 16;
++    float value;
++    if (mag < 0x400u) {
++        value = (float)mag * 0x1p-24f;
++        __builtin_memcpy(&mag, &value, sizeof mag);
++    } else {
++        mag = (mag << 13) + 0x38000000u;
++    }
++    mag |= sign;
++    __builtin_memcpy(&value, &mag, sizeof value);
++    return value;
++}
++
++static inline __attribute__((always_inline)) float rv_ap_cell(uint16_t *cell, float y)
++{
++    float old = rv_load_half(*cell);
++    *cell = rv_store_half(y + old * 0.5f);
+     return old - y * 0.5f;
+ }
+ 
+@@ -268,8 +305,8 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
+     cb[1] = cb[0] + fx_cl[0];
+     cb[2] = cb[1] + fx_cl[1];
+     cb[3] = cb[2] + fx_cl[2];
+-    float *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
+-    float *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
++    uint16_t *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
++    uint16_t *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
+     int32_t quiet = f->rv_quiet;
+     /* A pass stops at the first ring end. Every index in its inner loop
+      * addresses contiguous cells in all active delay lines. */
+@@ -289,8 +326,8 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
+         int16_t *c1 = cb[1] + f->cpos[1];
+         int16_t *c2 = cb[2] + f->cpos[2];
+         int16_t *c3 = cb[3] + f->cpos[3];
+-        float *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
+-        float *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
++        uint16_t *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
++        uint16_t *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
+         for (int i = 0; i < count; ++i) {
+             const float sample = in ? in[offset + i] : 0.0f;
+             const float x = d9_biquad_tick(&f->rv_hp, sample);
+@@ -485,35 +522,83 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int
+     f->dl_signal = (uint8_t)signal;
+ }
+ 
+-/* The private 8W8 delay uses the 9W9 DIGI arithmetic. Its unused right
+- * reverb allpasses remain zero and feed the delay after the route is closed. */
++#include "fxbus_808_history.h"
++/* The original mono delay uses a 2 s virtual cursor independent of the
++ * transform packet ring. The explicit 256-sample guard preserves the source's
++ * maximum time. Each return precedes distortion, glue and kit volume. */
++enum { DELAY_808_QUIET = 89088 + 1536 };
+ X0X_COLD void fxbus_init_808_fx(fxbus_t *f, int16_t *delay)
+ {
+-    fxbus_init(f, delay, FX_808_DELAY_FRAMES);
++    fxbus_init_808_reverb(f);
+     f->dl_type = -1;
+-    for (int i = FX_RV_DECAY; i <= FX_DL_HPF; ++i)
++    f->dlen = FX_808_DELAY_FRAMES;
++    f->dbuf = delay;
++    f->bpm = 120.0f;
++    for (int i = FX_DL_TIME; i <= FX_DL_HPF; ++i)
+         fxbus_set(f, i, fx_p[i].ui.def);
++    f->dcur = f->dl_time_ms * 0.001f * D9_SR;
++    f->dl_quiet = DELAY_808_QUIET;
++    echo_history_init(&f->private_transform, delay);
+ }
+ 
+ int fxbus_808_delay_active(const fxbus_t *f)
+ {
+     const float next = f->dcur + (f->dl_time_ms * 0.001f * D9_SR - f->dcur) * 0.0008f;
+-    return f->dl_quiet < f->dlen || next != f->dcur;
++    return f->dl_quiet < DELAY_808_QUIET || next != f->dcur;
+ }
+ 
+-void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
++ECHO_SMALL void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
+ {
+-    float level = f->dl_level;
+-    f->dl_level = level * gain;
+-    while (frames > 0) {
+-        int n = frames < FX_RV_APR_TOTAL ? frames : FX_RV_APR_TOTAL;
+-        fx_delay(f, send ? send : f->apr, left, right, n);
+-        if (send) send += n;
+-        left += n;
+-        right += n;
+-        frames -= n;
++    fx808_history_t *state = &f->private_transform;
++    float target = f->dl_time_ms * .001f * D9_SR;
++    if (f->dl_quiet >= DELAY_808_QUIET) {
++        int i = 0;
++        while (send && i < frames && send[i] == 0)
++            i++;
++        if (!send || i == frames) {
++            for (i = 0; i < frames; i++) {
++                float next = f->dcur + (target - f->dcur) * .0008f;
++                if (next == f->dcur)
++                    break;
++                f->dcur = next;
++            }
++            f->w = (f->w + frames) % FX_808_DELAY_FRAMES;
++            state->source_cursor = (unsigned)f->w;
++            state->physical_cursor =
++                (state->physical_cursor + (unsigned)frames) % state->physical_frames;
++            state->read_hop = ~0u;
++            return;
++        }
++    }
++    float level = f->dl_level * gain;
++    for (int i = 0; i < frames; i++) {
++        float input = send ? send[i] : 0.f;
++        float x = d9_biquad_tick(&f->dl_hp, input);
++        f->dcur += (target - f->dcur) * .0008f;
++        float pos = (float)f->w - f->dcur;
++        if (pos < 0)
++            pos += FX_808_DELAY_FRAMES;
++        int a = (int)pos;
++        float frac = pos - a;
++        if (a >= FX_808_DELAY_FRAMES)
++            a -= FX_808_DELAY_FRAMES;
++        int b = a + 1 >= FX_808_DELAY_FRAMES ? 0 : a + 1;
++        float u = (float)echo_history_read(state, (unsigned)a) * (1.f / 2048);
++        float v = (float)echo_history_read(state, (unsigned)b) * (1.f / 2048);
++        float y = u + (v - u) * frac;
++        f->lp += (y * f->dl_fdbk - f->lp) * f->dl_tc;
++        if (fm_fabsf(f->lp) < 1e-20f)
++            f->lp = 0;
++        int16_t cell;
++        sat12_store(&cell, x + f->lp);
++        echo_history_write(state, cell);
++        f->w++;
++        if (f->w == FX_808_DELAY_FRAMES)
++            f->w = 0;
++        left[i] += y * level;
++        right[i] += y * level;
++        f->dl_quiet = !cell && !input ? f->dl_quiet + 1 : 0;
+     }
+-    f->dl_level = level;
+ }
+ 
+ /* ===================================================================== */
+diff --git a/firmware/src/dsp/fxbus.h b/firmware/src/dsp/fxbus.h
+index 6b84a61a..f4e729a5 100644
+--- a/firmware/src/dsp/fxbus.h
++++ b/firmware/src/dsp/fxbus.h
+@@ -18,7 +18,7 @@
+  * fxbus_init accepts the original int16 ring. fxbus_init_packed uses only
+  * FX_DELAY_BYTES(frames) of aligned storage for a 10-bit mantissa per sample, a
+  * scale per 64 samples and the current write block. The
+- * reverb lines are int16 combs (also 12-bit in 9W9) and float allpasses, inside
++ * reverb lines are int16 combs (also 12-bit in 9W9) and compact floating-point allpasses, inside
+  * the struct. Both effects go idle (no per-sample work) once their input and
+  * their lines are silent. */
+ #pragma once
+@@ -28,7 +28,18 @@
+ 
+ #define FX10_DATA_BYTES(frames) (((frames) * 10u + 7u) / 8u)
+ #define FX_DELAY_BYTES(frames) (132u + FX10_DATA_BYTES(frames) + ((frames) + 63u) / 64u)
+-#define FX_808_DELAY_FRAMES 19200
++#define FX_808_DELAY_FRAMES 88200
++/* 1,392 groups of 64 samples; the first 43 groups occupy unused mono allpass storage. */
++#define FX_808_DELAY_WORDS ((1392u-43u)*22u+1536u)
++typedef struct {
++    unsigned frames, physical_frames, source_cursor, physical_cursor, read_hop;
++    int error[2];
++    uint8_t *packet_data;
++    int16_t *recent;
++    int16_t decoded_hop[64];
++    uint8_t prefix[43*44];
++} fx808_history_t;
++_Static_assert(sizeof(fx808_history_t)<=2072, "private echo prefix must fit the mono allpass overlay");
+ #define FX_RV_COMB_TOTAL (1116 + 1188 + 1277 + 1356)
+ #define FX_RV_AP_TOTAL (556 + 441)
+ #define FX_RV_APR_TOTAL (579 + 457)   /* X0X: the right side's allpasses */
+@@ -45,11 +56,14 @@ struct fxbus {
+     int16_t comb[FX_RV_COMB_TOTAL];
+     volatile uint8_t muted;          /* uses alignment padding: reverb/delay/master output gates, not pots */
+     uint8_t dl_signal; /* input/wet activity from this block, UI-only observer */
+-    float ap[FX_RV_AP_TOTAL];
++    uint16_t ap[FX_RV_AP_TOTAL];
+     int32_t cpos[4], apos[2];
+     float cdmp[4];
+     int32_t rv_quiet;
+-    float apr[FX_RV_APR_TOTAL];       /* X0X stereo: the right side reads the combs with alternating
++    union {
++        uint16_t apr[FX_RV_APR_TOTAL];
++        fx808_history_t private_transform;
++    };       /* X0X stereo: the right side reads the combs with alternating
+                                        * signs through its own allpasses (the left is 9W9's) */
+     int32_t aposr[2];
+     /* delay */
+diff --git a/tests/host/drum808_echo_panel_test.c b/tests/host/drum808_echo_panel_test.c
+index 4818e512..9a824a31 100644
+--- a/tests/host/drum808_echo_panel_test.c
++++ b/tests/host/drum808_echo_panel_test.c
+@@ -27,7 +27,7 @@ int main(int argc, char **argv)
+             pref_t r = pg.r[p][i];
+             if (r.kind != R_ENG || r.a != T_808 || r.b != D8_KIT ||
+                 r.c < D8_KIT_DL_BUS || r.c > D8_KIT_DL_HPF) continue;
+-            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 430ms" : "KIT DL"));
++            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 1994ms" : "KIT DL"));
+             int k = r.c - D8_KIT_DL_BUS;
+             knob[k] = r;
+             found |= 1u << k;
+diff --git a/tools/build.py b/tools/build.py
+index 131e07d0..db104738 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -406,7 +406,7 @@ def app_compile_commands(flags, original_synth, wobble):
+         flags = [*flags, "-DX0X_ORIGINAL_SYNTH=1",
+                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
+     if BOARD == "smk37" and MODEL in ("elite", "pro"):
+-        flags = [*flags, "-flto"]
++        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1"]
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
+diff --git a/firmware/src/dsp/fxbus_808_history.h b/firmware/src/dsp/fxbus_808_history.h
+new file mode 100644
+index 00000000..4105ac3a
+--- /dev/null
++++ b/firmware/src/dsp/fxbus_808_history.h
+@@ -0,0 +1,214 @@
++#define CHUNK 16
++#define FORCEHF 0
++#pragma once
++#define ECHO_SMALL
++#ifndef SHAPE_ALPHA
++#define SHAPE_ALPHA 2
++#endif
++#ifndef PCM_BITS
++#define PCM_BITS 5
++#endif
++#ifndef PCM_GROUP
++#define PCM_GROUP 64
++#endif
++#ifndef PCM_RECENT
++#define PCM_RECENT 1536
++#endif
++enum {
++    BITS = PCM_BITS,
++    GROUP = PCM_GROUP,
++    RECENT = 1536,
++    PACK = (4 + 1 + ((GROUP - 2) * BITS + 7) / 8),
++    RANGE = (1u << (BITS - 1)) - 1
++};
++static unsigned pred_get(const uint8_t *d, unsigned j)
++{
++    unsigned a = j * BITS, o = a & 7u;
++    const uint8_t *p = d + a / 8;
++    unsigned v = p[0];
++    if (o + BITS > 8)
++        v |= p[1] << 8;
++    if (o + BITS > 16)
++        v |= p[2] << 16;
++    return (v >> o) & ((1u << BITS) - 1);
++}
++static void pred_put(uint8_t *d, unsigned j, unsigned q)
++{
++    unsigned a = j * BITS, o = a & 7u;
++    uint8_t *p = d + a / 8;
++    q = (q & ((1u << BITS) - 1)) << o;
++    if (o)
++        p[0] |= q;
++    else
++        p[0] = q;
++    if (o + BITS > 8)
++        p[1] = q >> 8;
++    if (o + BITS > 16)
++        p[2] = q >> 16;
++}
++static inline uint8_t *echo_group(fx808_history_t *p, unsigned g)
++{
++    return g < 43 ? p->prefix + g * PACK : p->packet_data + (g - 43) * PACK;
++}
++static void echo_history_init(fx808_history_t *p, void *arena)
++{
++    p->frames = FX_808_DELAY_FRAMES;
++    p->physical_frames = 89088;
++    p->source_cursor = p->physical_cursor = 0;
++    p->error[0] = p->error[1] = 0;
++    p->read_hop = ~0u;
++    p->packet_data = arena;
++    p->recent = (int16_t *)(p->packet_data + (1392 - 43) * PACK);
++    __builtin_memset(arena, 0, 2 * FX_808_DELAY_WORDS);
++    __builtin_memset(p->prefix, 0, sizeof p->prefix);
++}
++static inline int pred_base(int a, int b, unsigned order)
++{
++    return order == 0 ? 0 : order == 1 ? a : 2 * a - b;
++}
++static inline int pred_limit(int q) { return q < -32767 ? -32767 : q > 32767 ? 32767 : q; }
++static int echo_history_read(fx808_history_t *p, unsigned idx)
++{
++    unsigned age = p->source_cursor >= idx ? p->source_cursor - idx : p->frames + p->source_cursor - idx;
++    unsigned pos = p->physical_cursor >= age ? p->physical_cursor - age
++                                             : p->physical_cursor + p->physical_frames - age;
++    if (age && age <= (PCM_RECENT > GROUP ? PCM_RECENT : GROUP))
++        return p->recent[pos % RECENT];
++    unsigned group = pos / GROUP;
++    int16_t *v = p->decoded_hop;
++    if (p->read_hop != group) {
++        const uint8_t *t = echo_group(p, group);
++        if (t[0] == 240) {
++            for (unsigned i = 0; i < GROUP; i++) {
++                unsigned z = i >> (CHUNK == 16 ? 4 : 3), shift = (t[1 + z / 2] >> (4 * (z & 1))) & 15;
++                unsigned q = pred_get(t + 1 + GROUP / CHUNK / 2, i);
++                int res = (int)(q ^ (1u << (BITS - 1))) - (1 << (BITS - 1));
++                v[i] = (int16_t)(res * (1 << shift));
++            }
++        } else {
++            unsigned ord = t[0] >> 4, step = 1u << (t[0] & 15);
++            v[0] = (int16_t)(t[1] | t[2] << 8);
++            v[1] = (int16_t)(t[3] | t[4] << 8);
++            int a = v[1], b = v[0];
++            for (unsigned i = 2; i < GROUP; i++) {
++                unsigned q = pred_get(t + 5, i - 2);
++                int res = (int)(q ^ (1u << (BITS - 1))) - (1 << (BITS - 1));
++                int x = pred_limit(pred_base(a, b, ord) + res * (int)step);
++                v[i] = (int16_t)x;
++                b = a;
++                a = x;
++            }
++        }
++        p->read_hop = group;
++    }
++    return v[pos % GROUP];
++}
++static void echo_history_write(fx808_history_t *p, int sample)
++{
++    unsigned pos = p->physical_cursor;
++    p->recent[pos % RECENT] = (int16_t)sample;
++    if (++p->physical_cursor == p->physical_frames)
++        p->physical_cursor = 0;
++    if (++p->source_cursor == p->frames)
++        p->source_cursor = 0;
++    if (pos % GROUP != GROUP - 1)
++        return;
++    unsigned g = pos / GROUP;
++    int16_t *v = p->recent + (g * GROUP) % RECENT;
++    uint8_t *t = echo_group(p, g);
++    unsigned total = 0, difference = 0;
++    for (unsigned k = 1; k < GROUP; k++) {
++        int q = v[k], d = q - v[k - 1];
++        total += q < 0 ? -q : q;
++        difference += d < 0 ? -d : d;
++    }
++    if (FORCEHF || 3 * difference > 2 * total) {
++        t[0] = 240;
++        int e1 = (int)p->error[0], e2 = (int)p->error[1];
++        for (unsigned j = 0; j < GROUP / CHUNK; j++) {
++            int peak = 0;
++            for (unsigned k = 0; k < CHUNK; k++) {
++                int q = v[j * CHUNK + k];
++                q = q < 0 ? -q : q;
++                if (q > peak)
++                    peak = q;
++            }
++            unsigned sh = 0;
++            while (((peak + ((1u << sh) / 2)) >> sh) > RANGE)
++                ++sh;
++            if (j % 2)
++                t[1 + j / 2] |= sh << 4;
++            else
++                t[1 + j / 2] = sh;
++            int step = 1 << sh;
++            for (unsigned k = 0; k < CHUNK; k++) {
++                unsigned i = j * CHUNK + k;
++                int req = v[i] + (SHAPE_ALPHA == 1 ? e1 : 2 * e1 - e2);
++                int q = req < 0 ? -((-req + step / 2) >> sh) : ((req + step / 2) >> sh);
++                if (q > (int)RANGE)
++                    q = RANGE;
++                if (q < -(int)RANGE - 1)
++                    q = -(int)RANGE - 1;
++                pred_put(t + 1 + GROUP / CHUNK / 2, i, (unsigned)q);
++                e2 = e1;
++                e1 = req - q * step;
++                if (e1 > step)
++                    e1 = step;
++                if (e1 < -step)
++                    e1 = -step;
++            }
++        }
++        p->error[0] = e1;
++        p->error[1] = e2;
++        if (p->read_hop == g)
++            p->read_hop = ~0u;
++        return;
++    }
++    unsigned peak[3] = {0};
++    for (unsigned i = 2; i < GROUP; i++) {
++        for (unsigned j = 0; j < 3; j++) {
++            int d = v[i] - pred_base(v[i - 1], v[i - 2], j);
++            unsigned a = d < 0 ? -d : d;
++            if (a > peak[j])
++                peak[j] = a;
++        }
++    }
++    unsigned ord = 0;
++    for (unsigned j = 1; j < 3; j++)
++        if (peak[j] < peak[ord])
++            ord = j;
++    unsigned max = peak[ord], sh = 0;
++    while (((max + ((1u << sh) / 2)) >> sh) > RANGE)
++        sh++;
++    t[0] = ord * 16 + sh;
++    t[1] = (uint16_t)v[0];
++    t[2] = (uint16_t)v[0] >> 8;
++    t[3] = (uint16_t)v[1];
++    t[4] = (uint16_t)v[1] >> 8;
++    int a = v[1], b = v[0];
++    int err1 = (int)p->error[0], err2 = (int)p->error[1];
++    for (unsigned i = 2; i < GROUP; i++) {
++        int correction = 0;
++        int target = v[i] + correction, estimate = pred_base(a, b, ord), r = target - estimate;
++        unsigned mag = r < 0 ? -r : r;
++        int q = (int)((mag + ((1u << sh) / 2)) >> sh);
++        if (q > (int)RANGE)
++            q = RANGE;
++        if (r < 0)
++            q = -q;
++        pred_put(t + 5, i - 2, (unsigned)q);
++        b = a;
++        a = pred_limit(estimate + q * (1 << sh));
++        err2 = err1;
++        err1 = target - a;
++        int limit = 1 << sh;
++        if (err1 > limit)
++            err1 = limit;
++        if (err1 < -limit)
++            err1 = -limit;
++    }
++    p->error[0] = err1;
++    p->error[1] = err2;
++    if (p->read_hop == g)
++        p->read_hop = ~0u;
++}
