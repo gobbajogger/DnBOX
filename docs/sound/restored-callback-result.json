@@ -1,0 +1,30 @@
+{
+  "scope": "Fresh source-bound host callback deadlines; no device XRUN/app claim.",
+  "programs": 694,
+  "corpus_complete": true,
+  "diagnostic_ftz": false,
+  "benchmark_tracer_pid": 0,
+  "diagnostic_resources": null,
+  "qualification": "host measurement only",
+  "summary": {
+    "callbacks": 520500,
+    "frames": 66624000,
+    "wall_misses": 3602,
+    "cpu_misses": 2629,
+    "max_wall_ns": 180550311,
+    "max_cpu_ns": 146588785
+  },
+  "nonfinite_words": 0,
+  "process_exit": 1,
+  "status": "DEADLINE_FAIL",
+  "executable_sha256": "2b8ba41d7c6817749323c75b3fca48f697e4450157fa06a884ed03895d080d03",
+  "stream_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "inputs_sha256": "d9f1f391db63f5d46774077e30ace27393035150fbac0c4f4c8571b6680ee77e",
+  "files": {
+    "callback-trace.csv": "ddbe5b7392cef84426883ab015556d612d643dd0e44e7f50a35fb1d1d61f41ed",
+    "callback-programs.jsonl": "e114a0f6179a0b91c992b9d2ec93703c7a20b0d444f0e60480781e58e1888937",
+    "CALLBACK-COMMANDS.json": "178f53af5706c3bf7aa3a38935563f59e7d438e6adc409fb76058903c902aef2",
+    "CALLBACK-ENVIRONMENT.json": "535a7ffa10d09a8933283128330fbd1e5d73461d05201c151b2b1cc17d6dff4c",
+    "callback-run.log": "179f5994d4d3cfd3534ec642a5664866711816fbe65cc5346b97ef933bbcdd6c"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "created_at_utc": "2026-11-18T15:13:53.162335+00:00",
+  "scope": "Compare compact typed-bound validation and explicit counters-off profile against accepted9cdcea source, with no relaxed numeric tolerance. No native timing or Sound completion claim.",
+  "gates": [
+    "All named float-field bounds admit exactly endpoints/interior, reject next representable exterior and NaN/Inf, matching baseline return/state bits.",
+    "Both profiles return identical output bytes and part-state bytes to baseline after every event/block on same inputs. Diagnostic counters match when enabled.",
+    "Counters-off query is0 and nonnullwork rejects with E_UNSUPPORTED before state/output/work mutation, including zero frames.",
+    "Invalid profile macro2 fails compilation."
+  ],
+  "profiles": {
+    "diagnostic": "default1",
+    "compact": "explicit-D DNBX_DIAGNOSTIC_COUNTERS=0"
+  },
+  "compile_contract": "C11 -O2 -fno-fast-math -ffp-contract=off -DX0X_HOST"
+}

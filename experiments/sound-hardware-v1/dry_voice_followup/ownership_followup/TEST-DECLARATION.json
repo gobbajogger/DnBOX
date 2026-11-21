@@ -1,0 +1,37 @@
+{
+  "status": "BEFORE_OWNERSHIP_TEST_BUILD",
+  "written_utc": "2026-11-19T00:08:09.255541+00:00",
+  "test_source_sha256": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+  "driver_sha256": "2b2a48da9b99730c3adce8f95495fc5968cbeab3f3b5877dbd3dc9b84786c16a",
+  "candidate_declaration_sha256": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+  "candidate_files_sha256": {
+    "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "build_command": [
+    "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/src",
+    "/workspace/scratch/e803955aec60/s1_c_ownership/tests/ownership_test.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/src/s1_dry_voice.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor/dnbx_s1_envelope.c",
+    "-o",
+    "/workspace/scratch/e803955aec60/s1_c_ownership/build/ownership_test"
+  ],
+  "scope": "Two owners;4096 frames independently and interleaved per owner;8192 evaluated frames per logical owner; irregular blocks1/17/64; live controls/depth1.2; asymmetric note-off; no reference PCM or saved audio; no fidelity test",
+  "algorithm_changes": "NONE; link frozen C source unchanged"
+}

@@ -1,0 +1,180 @@
+{
+  "schema": "source-free-s1-envelope-hypothesis-v1",
+  "comparison": "exact binary32 words; zero tolerance; no gain/time fitting",
+  "source": "/workspace/scratch/e803955aec60/fidelity_review/proposed_s1_envelope.py",
+  "source_sha256": "ce90901e16910fe54cd4ddb3381f8d4604ec578035f4fcd575d2984d9c7eea98",
+  "input_hashes": {
+    "static": "9b164e9b7ebf3fe95665ceaa64afb39d51442e4167305c5d7bc55e115995ade4",
+    "live": "2cafbc8eb4b7aba8e22e0820ce8116d9dc7a57e6f8c41ed162c44ed98c474cfe"
+  },
+  "status": "EXACT_COMPONENT_MATCH",
+  "results": [
+    {
+      "family": "static",
+      "id": 0,
+      "samples": 88200,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+    },
+    {
+      "family": "static",
+      "id": 1,
+      "samples": 88200,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+    },
+    {
+      "family": "static",
+      "id": 2,
+      "samples": 88200,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+    },
+    {
+      "family": "live",
+      "id": 0,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+    },
+    {
+      "family": "live",
+      "id": 1,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+    },
+    {
+      "family": "live",
+      "id": 2,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+    },
+    {
+      "family": "live",
+      "id": 3,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+    },
+    {
+      "family": "live",
+      "id": 4,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+    },
+    {
+      "family": "live",
+      "id": 5,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+    },
+    {
+      "family": "live",
+      "id": 6,
+      "samples": 16384,
+      "different_words": 0,
+      "first_different_frame": null,
+      "max_absolute_error": 0.0,
+      "rms_error": 0.0,
+      "finite": true,
+      "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+    }
+  ],
+  "negative_controls": [
+    {
+      "mutation": "nominal_attack",
+      "live_case": 0,
+      "rejected": true,
+      "samples": 16384,
+      "different_words": 16384,
+      "first_different_frame": 0,
+      "max_absolute_error": 0.1899961233139038,
+      "rms_error": 0.11660357865541424,
+      "finite": true,
+      "candidate_sha256": "a6bc5847410aff5c1a941a90e34e276f9a09465fed5d167ea405a16425d8b149"
+    },
+    {
+      "mutation": "snap_sustain",
+      "live_case": 3,
+      "rejected": true,
+      "samples": 16384,
+      "different_words": 6384,
+      "first_different_frame": 10000,
+      "max_absolute_error": 0.5972916334867477,
+      "rms_error": 0.04910769807145984,
+      "finite": true,
+      "candidate_sha256": "28678eab99d8ced14c54af35abb0a76bb124100c1ce47de59ef7f175905883f2"
+    },
+    {
+      "mutation": "reset_on_retrigger",
+      "live_case": 5,
+      "rejected": true,
+      "samples": 16384,
+      "different_words": 8191,
+      "first_different_frame": 8193,
+      "max_absolute_error": 0.7990480065345764,
+      "rms_error": 0.1609254850509886,
+      "finite": true,
+      "candidate_sha256": "6cc515a7519171a7329b02928edacd53d7a4d62350f34177b73ad71ae17c2941"
+    },
+    {
+      "mutation": "refresh_running_rate",
+      "live_case": 1,
+      "rejected": true,
+      "samples": 16384,
+      "different_words": 15384,
+      "first_different_frame": 1000,
+      "max_absolute_error": 0.22187727689743042,
+      "rms_error": 0.12790822217153144,
+      "finite": true,
+      "candidate_sha256": "e9551bdadfcce6d5cbea3159d54d9949569180228c27748680d0e7cc65823fb8"
+    }
+  ],
+  "wall_seconds": 0.45846117701148614,
+  "maximum_rss_kib": 13204,
+  "limits": [
+    "Numeric output observations only; no original source used.",
+    "No production activation, instrument conformance, new preset coverage, target math, native timing or memory-fit claim.",
+    "Finite fixture agreement is not proof for all rates, controls or voice lifecycle events."
+  ]
+}

@@ -1,0 +1,2660 @@
+{
+  "ref": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "source": "/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040",
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+      "actual_git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149
+    },
+    {
+      "path": "RULES.md",
+      "git_blob": "9e350962fb0a4f4463d1a66b03b8de37d9dba565",
+      "actual_git_blob": "9e350962fb0a4f4463d1a66b03b8de37d9dba565",
+      "sha256": "5c9737d360b7d23affa7697a827966cc15f56fff73bdb104405ee0b488092a3d",
+      "bytes": 5926
+    },
+    {
+      "path": "CHECKLISTS.md",
+      "git_blob": "89b3cdf5823affca010c6db1fdb096f7fb3e2c90",
+      "actual_git_blob": "89b3cdf5823affca010c6db1fdb096f7fb3e2c90",
+      "sha256": "47572676668e6278a9825e673edbe45b5fb1b4cf17b48953484acd9c4cfcaa91",
+      "bytes": 6431
+    },
+    {
+      "path": "build.sh",
+      "git_blob": "7d13fcb6c33cee8f8f58676a2ce5357f265ec7d7",
+      "actual_git_blob": "7d13fcb6c33cee8f8f58676a2ce5357f265ec7d7",
+      "sha256": "89bc8c609cb9974a359c5980d515437ea8297ed13fb4aaca2e4ab1680daed1fb",
+      "bytes": 1504
+    },
+    {
+      "path": "AGENTS.md",
+      "git_blob": "eaaa50fa82cfebbb490e88066581268cce535e13",
+      "actual_git_blob": "eaaa50fa82cfebbb490e88066581268cce535e13",
+      "sha256": "e614eec0ba26bb4d40f9d2e172bf3140390980c4fa4a75443d2f004e2f5c271e",
+      "bytes": 3892
+    },
+    {
+      "path": "CONSOLIDATED-STATE.md",
+      "git_blob": "011ba0ca4ccee0ad8f66e54d0f7c80fc69ad82d8",
+      "actual_git_blob": "011ba0ca4ccee0ad8f66e54d0f7c80fc69ad82d8",
+      "sha256": "90a4830002fa64d47c9e54e6d13311b49626320e3dff5c2e7602598835c500f4",
+      "bytes": 3200
+    },
+    {
+      "path": "firmware/crt0.S",
+      "git_blob": "5176548c94e58be9dd6f09327a5309686281d6b2",
+      "actual_git_blob": "5176548c94e58be9dd6f09327a5309686281d6b2",
+      "sha256": "2212471c4a70e94022ba24ef65a4b208fadd5f7e33f80745c5f5e8b9f4aa840c",
+      "bytes": 798
+    },
+    {
+      "path": "firmware/app.ld",
+      "git_blob": "b94dff5c0064b8a840e252804fed0ae92bf93454",
+      "actual_git_blob": "b94dff5c0064b8a840e252804fed0ae92bf93454",
+      "sha256": "16ca63a821b7fb1f8ca7218828a5b1dae49250eacd05ac22c9066fe3655bb1ed",
+      "bytes": 3754
+    },
+    {
+      "path": "tools/x0x_slots.py",
+      "git_blob": "155f19f0cfb57106c5cc02ccead132151033f45c",
+      "actual_git_blob": "155f19f0cfb57106c5cc02ccead132151033f45c",
+      "sha256": "0221df00d3c9287f9c82512e57e40dea680617979e192c5ad40ad2ecdb530e87",
+      "bytes": 30410
+    },
+    {
+      "path": "tools/check_original_inputs.py",
+      "git_blob": "54d5f94b1534af1bacb51e97a572effd47064c1d",
+      "actual_git_blob": "54d5f94b1534af1bacb51e97a572effd47064c1d",
+      "sha256": "cf7dab05d015aa5df3045f81fa5a847a0ac5f56c74a8491a660bdb12e7e1c908",
+      "bytes": 5616
+    },
+    {
+      "path": "tools/gen_font.py",
+      "git_blob": "640279a39dcadc06725ff72d85dcdcba9d1a426e",
+      "actual_git_blob": "640279a39dcadc06725ff72d85dcdcba9d1a426e",
+      "sha256": "bdc8cac472dfa2c0b2eb483780e004499316221cd73a4046b35ba95b09b6cc32",
+      "bytes": 15788
+    },
+    {
+      "path": "tools/gen_program_values_compact.py",
+      "git_blob": "7932afef273e80b1bf92531e418001cd1665e265",
+      "actual_git_blob": "7932afef273e80b1bf92531e418001cd1665e265",
+      "sha256": "821eb597ac7cb5da569687325463ede54b5890d578676612a77a1d0b87c6915f",
+      "bytes": 4023
+    },
+    {
+      "path": "tools/build.py",
+      "git_blob": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
+      "actual_git_blob": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
+      "sha256": "8adce422a93b0349689d09473d53a78e495e38719ec5f2c2ddcdf5813cb4e030",
+      "bytes": 43081
+    },
+    {
+      "path": "tools/locked_settings.json",
+      "git_blob": "6682f65776ef4703a456b2a99611b15d3994df1c",
+      "actual_git_blob": "6682f65776ef4703a456b2a99611b15d3994df1c",
+      "sha256": "c82b9d8619f404689f179276c3e59b33bfed513475db04511559c7f943f8b6bc",
+      "bytes": 8001
+    },
+    {
+      "path": "tools/audio_stress_report.py",
+      "git_blob": "fa8b0b9c962a015d096fdf59c9d1ee331641608f",
+      "actual_git_blob": "fa8b0b9c962a015d096fdf59c9d1ee331641608f",
+      "sha256": "a36d14b8a775f64149c44c2dab1f38a01b08e00e13fffa1883ffb8b13fda974d",
+      "bytes": 4636
+    },
+    {
+      "path": "tools/gen_miami_au_battery.py",
+      "git_blob": "4f3bb26586df1d7cbc407ec2d5d6e515f0c18455",
+      "actual_git_blob": "4f3bb26586df1d7cbc407ec2d5d6e515f0c18455",
+      "sha256": "e57171203ab20610661d0153cb4a7548e70202d280d12da60c2ea2eb0c35f24b",
+      "bytes": 2384
+    },
+    {
+      "path": "tools/gen_drum_samples.py",
+      "git_blob": "5dc7f7da33dbfdbccf46c584a367ed6d477c996f",
+      "actual_git_blob": "5dc7f7da33dbfdbccf46c584a367ed6d477c996f",
+      "sha256": "ff2a5d642d30b495fe6b1ddc7c6646ff9211333c082bbfd744cf2f6f6cc1dedc",
+      "bytes": 15603
+    },
+    {
+      "path": "tools/add_ctl.py",
+      "git_blob": "67351363f7fc2336f24e449be2d05b3a9cfed78f",
+      "actual_git_blob": "67351363f7fc2336f24e449be2d05b3a9cfed78f",
+      "sha256": "3580e2be51dc50ef8ec2376cef62e45d32e0b09317116d98a64d049665ddc772",
+      "bytes": 12692
+    },
+    {
+      "path": "tools/check_locked_settings.py",
+      "git_blob": "f1ac9fe3f1535c01cfd37016e158472740a1bc8d",
+      "actual_git_blob": "f1ac9fe3f1535c01cfd37016e158472740a1bc8d",
+      "sha256": "c6b9bcb1f1a26b7a93eda0daec7e6cf62c95e4c99ec13482758199c34b600b4e",
+      "bytes": 4318
+    },
+    {
+      "path": "tools/gen_cache.py",
+      "git_blob": "02146dbb9066ba7546f9e2483282385a5b444aef",
+      "actual_git_blob": "02146dbb9066ba7546f9e2483282385a5b444aef",
+      "sha256": "4a7aae51fc7d426dbb95c120623b89a1d1e56bf379ac67047a66f0b4aadc83bc",
+      "bytes": 8460
+    },
+    {
+      "path": "tools/rom_guard.py",
+      "git_blob": "f8e2845776fd5406ba404b5c9ed10afbb34d8af7",
+      "actual_git_blob": "f8e2845776fd5406ba404b5c9ed10afbb34d8af7",
+      "sha256": "709e39e9ed3e61a23dc904573cb3cb9a28d2cd220d2fa5b427313b6a87ae02ce",
+      "bytes": 13707
+    },
+    {
+      "path": "tools/firmware_build_labels.py",
+      "git_blob": "32fa131cbce901d3844bbba3a5b833fae3139190",
+      "actual_git_blob": "32fa131cbce901d3844bbba3a5b833fae3139190",
+      "sha256": "6dbeefdd9539b2348c0c16507c6f05bd8890eea7cf1050387d402536e1623609",
+      "bytes": 5326
+    },
+    {
+      "path": "tools/gen_manual_figures.py",
+      "git_blob": "9ce702d05376aaa83a3d6d7c0251b4f40a2bf1b2",
+      "actual_git_blob": "9ce702d05376aaa83a3d6d7c0251b4f40a2bf1b2",
+      "sha256": "b8654e3dde701df69116821164531b9beeb40f974ae62863ea47b23ca9b8c22d",
+      "bytes": 9216
+    },
+    {
+      "path": "tools/dnbox-gate.sh",
+      "git_blob": "8fd48cfef5a7a68c623caee1d6569b96cf3735cd",
+      "actual_git_blob": "8fd48cfef5a7a68c623caee1d6569b96cf3735cd",
+      "sha256": "8d3ac5dc44ff1eb07f6d206200645bf99222340714ff005ea9494c7593c57a5b",
+      "bytes": 10341
+    },
+    {
+      "path": "tools/lz4blk.py",
+      "git_blob": "43fbdaaa0d5c4ac1d321464d77fec702ca983818",
+      "actual_git_blob": "43fbdaaa0d5c4ac1d321464d77fec702ca983818",
+      "sha256": "bede501ca8774ba6942b35ad2c43823e9f48f13d0fb001ef9b73cdaf41460e16",
+      "bytes": 2508
+    },
+    {
+      "path": "tools/fm1_install.py",
+      "git_blob": "f57d8e2e8a844b4278efa44aabe5b647d5d5e1c4",
+      "actual_git_blob": "f57d8e2e8a844b4278efa44aabe5b647d5d5e1c4",
+      "sha256": "d088a8a839b4ba0a202a91f26eb46872370dd765c72777ea7bbe04dc7ef0290a",
+      "bytes": 50454
+    },
+    {
+      "path": "tools/fm1pkg_make.py",
+      "git_blob": "91da73ca63594ce75406d0eb616174397a321e55",
+      "actual_git_blob": "91da73ca63594ce75406d0eb616174397a321e55",
+      "sha256": "057b3a9e1089fd668a091b09f171988c38bfddbcf2d06a98320c5a375bb02e3b",
+      "bytes": 13451
+    },
+    {
+      "path": "tools/break_pack.py",
+      "git_blob": "9575aa68875bd05fb8932444592a4d3562b16b2d",
+      "actual_git_blob": "9575aa68875bd05fb8932444592a4d3562b16b2d",
+      "sha256": "869c66e44c769b8bee6d5f8d520cc3e0a0051652f41da6342685aed11748a534",
+      "bytes": 8283
+    },
+    {
+      "path": "tools/gen_builtin_break.c",
+      "git_blob": "02267fbf1f91ea539e1b58a558da77b867d7917a",
+      "actual_git_blob": "02267fbf1f91ea539e1b58a558da77b867d7917a",
+      "sha256": "bea189b02706ba7757004580963e397c933b4b0350879c2af5b9689a39e2ee6d",
+      "bytes": 9104
+    },
+    {
+      "path": "tools/gen_chicago_compact.py",
+      "git_blob": "d68d6ed92b197aba55914207e8c4e439abee86e6",
+      "actual_git_blob": "d68d6ed92b197aba55914207e8c4e439abee86e6",
+      "sha256": "bbca931de311b991b378936c853b126967947be38004fdf0b376ef092235e0a8",
+      "bytes": 3031
+    },
+    {
+      "path": "tools/sampleio.py",
+      "git_blob": "cff1acbc23921b7300dddc32cf8c9dd545976fe7",
+      "actual_git_blob": "cff1acbc23921b7300dddc32cf8c9dd545976fe7",
+      "sha256": "66be9ea59d50892bba542cd5a8d5f20f419403eaae868f8a9d39e7fdb2f89f4e",
+      "bytes": 15161
+    },
+    {
+      "path": "tools/merge_native_constants.py",
+      "git_blob": "caae4ed7dee7dfadd1f2aef83a5a4904963bc746",
+      "actual_git_blob": "caae4ed7dee7dfadd1f2aef83a5a4904963bc746",
+      "sha256": "8de5f46f55714411ab73b5cff778494ea82bf1081e88693d9a87537600caaec3",
+      "bytes": 5779
+    },
+    {
+      "path": "tools/gen_builtin_break.sh",
+      "git_blob": "ce08cc094c396535bd4d32d1431ee1e5e3dfcbf7",
+      "actual_git_blob": "ce08cc094c396535bd4d32d1431ee1e5e3dfcbf7",
+      "sha256": "0d9b0e15dd43f078e40ca030467fb31e7a3825b60354e5ec54e5fc7c690f66b6",
+      "bytes": 1465
+    },
+    {
+      "path": "tools/gen_break_bank.py",
+      "git_blob": "e857d938fd6d337a156dae8d1e9b920b2c264a46",
+      "actual_git_blob": "e857d938fd6d337a156dae8d1e9b920b2c264a46",
+      "sha256": "722d68b1ea6a289d583d39b1f00275317bdb265057db49013d0015e69ce3b6fe",
+      "bytes": 3158
+    },
+    {
+      "path": "tools/gen_chicago_au_battery.py",
+      "git_blob": "0dabc7b6d016ac1fd7f09308624088e897c4ef98",
+      "actual_git_blob": "0dabc7b6d016ac1fd7f09308624088e897c4ef98",
+      "sha256": "5036435485b5f4bc59f6dc9354bd288651e53de3058be2dc3d2cc422d2283397",
+      "bytes": 2534
+    },
+    {
+      "path": "host/x0x_host.c",
+      "git_blob": "510b63af024fef68b31189029b0f1273d47b85f2",
+      "actual_git_blob": "510b63af024fef68b31189029b0f1273d47b85f2",
+      "sha256": "b3bcf5a880c674db759a414a18680a9cbaba4e66d9ffcac0d66040bc243ba27e",
+      "bytes": 53052
+    },
+    {
+      "path": "host/build_host.sh",
+      "git_blob": "02dd3fca21f3526a83a43f1b0c095add240965c9",
+      "actual_git_blob": "02dd3fca21f3526a83a43f1b0c095add240965c9",
+      "sha256": "d4c044dac373d0f4b835ed97c99d4eba815c09e3a3d41aa7dab4d8ab3abde4e3",
+      "bytes": 3203
+    },
+    {
+      "path": "tests/test_scheduler_capacity.py",
+      "git_blob": "a21cf9074379eb3572d2ab9c56bfe9eaff313264",
+      "actual_git_blob": "a21cf9074379eb3572d2ab9c56bfe9eaff313264",
+      "sha256": "3a2596000de65a20d8b6a07e1f8f92b9560d11cf4fe16ccc498424211985a194",
+      "bytes": 2002
+    },
+    {
+      "path": "tests/test_pool_budget.py",
+      "git_blob": "ce242907f5d26e9d0ab2cf24d26eca2af85b7f1a",
+      "actual_git_blob": "ce242907f5d26e9d0ab2cf24d26eca2af85b7f1a",
+      "sha256": "3a35690da4c13724da4b3c3994352ffe78480779583af96d5542c64b9c5f2926",
+      "bytes": 4053
+    },
+    {
+      "path": "tests/target_budget.py",
+      "git_blob": "31e7877675da8396ee36e89bab02f967af7fec46",
+      "actual_git_blob": "31e7877675da8396ee36e89bab02f967af7fec46",
+      "sha256": "58e18c36e0c477a1ff22f1a3c9ddb927ad8d8e41a76e729892309dc6924bbe49",
+      "bytes": 5540
+    },
+    {
+      "path": "ble/ctl/src/config.c",
+      "git_blob": "e36dd8e4872ea75616634f4bdf9baa5bc7d5a3c5",
+      "actual_git_blob": "e36dd8e4872ea75616634f4bdf9baa5bc7d5a3c5",
+      "sha256": "614f9df1733ad05401ff41665924e997728317f6aae3186e8eba16f63f6ecd68",
+      "bytes": 3143
+    },
+    {
+      "path": "ble/ctl/src/ctl_port.h",
+      "git_blob": "9facdbfa2589f29e875096d05fb80698a3d7cb9d",
+      "actual_git_blob": "9facdbfa2589f29e875096d05fb80698a3d7cb9d",
+      "sha256": "54761e1306105b224d62be3f6b2a013d8edf07550ddce8e9f632b87bb627031e",
+      "bytes": 3476
+    },
+    {
+      "path": "assets/909/crash.wav",
+      "git_blob": "7451f3330e6ff3a18f65f3b3c6e9be23d93503df",
+      "actual_git_blob": "7451f3330e6ff3a18f65f3b3c6e9be23d93503df",
+      "sha256": "4a1b8d8828f9e530e9ae7f1a3cdffbcb1466e633a2b0607b3aac914699bc8400",
+      "bytes": 86644
+    },
+    {
+      "path": "assets/909/hh.wav",
+      "git_blob": "3cbd3b911490d38850387931c00f835c386a1034",
+      "actual_git_blob": "3cbd3b911490d38850387931c00f835c386a1034",
+      "sha256": "8ae963e80b8604bf23733545117d3b115767aa48ecd3013ad5d91506337d289a",
+      "bytes": 65536
+    },
+    {
+      "path": "assets/909/README.txt",
+      "git_blob": "2d4959507bdd6c4343d3dc64888b047bd86dc1d1",
+      "actual_git_blob": "2d4959507bdd6c4343d3dc64888b047bd86dc1d1",
+      "sha256": "cf2cb2a5858587489ddf67802117d456cad42b26fad11cc1ec35ddf8af9ed36c",
+      "bytes": 428
+    },
+    {
+      "path": "assets/909/ride.wav",
+      "git_blob": "985f418679f58eed7a340928e1ad18483331d179",
+      "actual_git_blob": "985f418679f58eed7a340928e1ad18483331d179",
+      "sha256": "f1d1cee24a7c91bb2ca9c6eb97badad3841226897ad0daabfc35801371d78182",
+      "bytes": 94042
+    },
+    {
+      "path": "assets/fonts/Barlow-OFL.txt",
+      "git_blob": "2f22ba6ca4dbc12145ae40b14c3368f387cba0e2",
+      "actual_git_blob": "2f22ba6ca4dbc12145ae40b14c3368f387cba0e2",
+      "sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
+      "bytes": 4377
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-Bold.ttf",
+      "git_blob": "ee04b09e31e98d2509354d7003797ec6540e796f",
+      "actual_git_blob": "ee04b09e31e98d2509354d7003797ec6540e796f",
+      "sha256": "5bd6757e459a110da81b44532f0f43058e2dab2401688abca84f2fdbde193cbb",
+      "bytes": 111772
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-SemiBold.ttf",
+      "git_blob": "082c76327d21d663948c8ccd2271fa527bd0c145",
+      "actual_git_blob": "082c76327d21d663948c8ccd2271fa527bd0c145",
+      "sha256": "bd299f4bc5b44d30be8d42e9bad3a5df7d66af1cd55d0ed72a8b8916360a1424",
+      "bytes": 109772
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-Medium.ttf",
+      "git_blob": "415429b64420872f198e76cbb1d309db5bfb1df4",
+      "actual_git_blob": "415429b64420872f198e76cbb1d309db5bfb1df4",
+      "sha256": "4998b693a190b76f2b11315844345a8546c1e2e6a320905507a9eed04edf8b48",
+      "bytes": 105560
+    },
+    {
+      "path": "assets/factory-breaks/provenance.json",
+      "git_blob": "522621a91c26bc31d25678867ecf454a474d03e7",
+      "actual_git_blob": "522621a91c26bc31d25678867ecf454a474d03e7",
+      "sha256": "5f8e4350c5b1e1bc2c60023df4c6e59a693371d47abd6c80ddfb24fda5b4b694",
+      "bytes": 5127
+    },
+    {
+      "path": "assets/factory-breaks/pack.txt",
+      "git_blob": "8ed1921d623523a0a378b8295e2cea933618a09a",
+      "actual_git_blob": "8ed1921d623523a0a378b8295e2cea933618a09a",
+      "sha256": "4109167bfc6561949d70daea9ac96f56668897dd56ca3284167b1d9f95b0e3b9",
+      "bytes": 165
+    },
+    {
+      "path": "assets/factory-breaks/README.md",
+      "git_blob": "b4a783ba0ff656e13f1094b5f2ba4777a46b7550",
+      "actual_git_blob": "b4a783ba0ff656e13f1094b5f2ba4777a46b7550",
+      "sha256": "4bb1d34b2c4559ab3127d081ccb878d26d4d3ca1371471a888166506041df91c",
+      "bytes": 1615
+    },
+    {
+      "path": "docs/lanes/integ.md",
+      "git_blob": "99af940f61d340cba5d892a9fbcc57f5edbc0d62",
+      "actual_git_blob": "99af940f61d340cba5d892a9fbcc57f5edbc0d62",
+      "sha256": "67409cb070a5c2b71daed03021e39966222704bdc3ebfeec4d406189c2625b58",
+      "bytes": 88445
+    },
+    {
+      "path": "experiments/wobble/blep.h",
+      "git_blob": "8bd438f8a1cc09aca3653509d9d4ae029e0cea67",
+      "actual_git_blob": "8bd438f8a1cc09aca3653509d9d4ae029e0cea67",
+      "sha256": "b95e129e11b13b1b56b34ac8be253f6c2e0f04fba11b4874d78dfd483749f4a3",
+      "bytes": 636
+    },
+    {
+      "path": "experiments/wobble/miami_fx_conversion.c",
+      "git_blob": "06a6a5643e0be2a7ffee3689197ee16d6713ad2b",
+      "actual_git_blob": "06a6a5643e0be2a7ffee3689197ee16d6713ad2b",
+      "sha256": "5a8633a5bd719cfc63d4488fb67c368b4949af34bac22fb946e4bfe471ab8828",
+      "bytes": 2913
+    },
+    {
+      "path": "experiments/wobble/wobble.h",
+      "git_blob": "1a6e9344ca8e3362a4d05d539f748c49c44a1d25",
+      "actual_git_blob": "1a6e9344ca8e3362a4d05d539f748c49c44a1d25",
+      "sha256": "961eee3e135fd3e8e16a87905dc3c9cfc9a06d9820e1c4e3acb44a2e9955a6f8",
+      "bytes": 2575
+    },
+    {
+      "path": "experiments/wobble/miami_decimator_component.c",
+      "git_blob": "2188a59712a5df210852d23085002190607699dd",
+      "actual_git_blob": "2188a59712a5df210852d23085002190607699dd",
+      "sha256": "2f45f7c52efa4b43833ace16cf59c4a93c463ea84104ba703bd5c07a6a20677f",
+      "bytes": 3986
+    },
+    {
+      "path": "experiments/wobble/miami_decimator_adapter.c",
+      "git_blob": "6b227793225b0cb4928236ef8c5d83980163829d",
+      "actual_git_blob": "6b227793225b0cb4928236ef8c5d83980163829d",
+      "sha256": "4f86db3de4d32e9df7b801806826938a77677c696c276e78e90df743bb487dbe",
+      "bytes": 2520
+    },
+    {
+      "path": "experiments/wobble/miami_decimator_tables_private.h",
+      "git_blob": "b199b9e7eb789906e0098a232b09a87fb7904059",
+      "actual_git_blob": "b199b9e7eb789906e0098a232b09a87fb7904059",
+      "sha256": "d8ea0ccd02c5bfafcd4af9970f0107d5d4a679c26f6e7651d5c202072d4bea2c",
+      "bytes": 2007
+    },
+    {
+      "path": "experiments/wobble/miami_decimator_component.h",
+      "git_blob": "f302e14242e2645d4fe18ebb88defae97376c202",
+      "actual_git_blob": "f302e14242e2645d4fe18ebb88defae97376c202",
+      "sha256": "40d1f34f6dd6bde5c9be1d3393dbb4aa38d5b4f6a48d6cca6168da5110799d2e",
+      "bytes": 2123
+    },
+    {
+      "path": "experiments/wobble/miami_decimator_adapter.h",
+      "git_blob": "d30d3bffec801fde3477caddfd90b7e7a1a1ff93",
+      "actual_git_blob": "d30d3bffec801fde3477caddfd90b7e7a1a1ff93",
+      "sha256": "17cbe98a9d5a90786e639c572a27968eca57312d3e13bbdd5f907378219280f3",
+      "bytes": 1564
+    },
+    {
+      "path": "experiments/wobble/miami_fx_conversion.h",
+      "git_blob": "abd1f3598ad43715547b0b0370f1eacac5d4f5bf",
+      "actual_git_blob": "abd1f3598ad43715547b0b0370f1eacac5d4f5bf",
+      "sha256": "487d85221006421c2141a3568d27dd905d366c5cf5105064e991aea9fc152a65",
+      "bytes": 3749
+    },
+    {
+      "path": "experiments/original_synth/miami_output.h",
+      "git_blob": "46cc11e8e5810679ca910fac780dfbc2b9550808",
+      "actual_git_blob": "46cc11e8e5810679ca910fac780dfbc2b9550808",
+      "sha256": "38a06ccbde5d5cd65237ddcc8b3386d63f485419544a8f8a529e9ec695e07b76",
+      "bytes": 1833
+    },
+    {
+      "path": "experiments/original_synth/chicago_global_stage.c",
+      "git_blob": "df85aa64428fa54517e7f456e163c646bba921b5",
+      "actual_git_blob": "df85aa64428fa54517e7f456e163c646bba921b5",
+      "sha256": "0a8e59ed4f6ad6a1440fe1298defcf75b88eab45b7768eea5412afa2ba3313c3",
+      "bytes": 1303
+    },
+    {
+      "path": "experiments/original_synth/chicago_global_stage.h",
+      "git_blob": "94858bd8a902ce898e7de345468e9c82cbf29db9",
+      "actual_git_blob": "94858bd8a902ce898e7de345468e9c82cbf29db9",
+      "sha256": "1124db47046d6eba139bf5a6ef95eec07c94316713384439153c056b9c4d2a7e",
+      "bytes": 1514
+    },
+    {
+      "path": "experiments/original_synth/chicago_global_mg.c",
+      "git_blob": "dce859f14344566e3fb8534460cb0e2acd83a0db",
+      "actual_git_blob": "dce859f14344566e3fb8534460cb0e2acd83a0db",
+      "sha256": "c5d56cc8d794b5aa930d38684686f11526a7b1c756d19b99b68297cd6a032c6d",
+      "bytes": 3365
+    },
+    {
+      "path": "experiments/original_synth/miami_interpolation.h",
+      "git_blob": "bea1dbc3d5907a412a600d753b45554c489b2d80",
+      "actual_git_blob": "bea1dbc3d5907a412a600d753b45554c489b2d80",
+      "sha256": "e375b520444a6fafe09b6d3ef9cfc95000a62fdca07dcd3b65a2403b259ae5a5",
+      "bytes": 1949
+    },
+    {
+      "path": "experiments/original_synth/chicago_tuning_private.h",
+      "git_blob": "cd92d0fa4bd30d0d3c6b014d15a325dd2c4a2117",
+      "actual_git_blob": "cd92d0fa4bd30d0d3c6b014d15a325dd2c4a2117",
+      "sha256": "835bb3f2b6fed61b14d5d4a63486aaa3c45686defe210028324076df71e85075",
+      "bytes": 792
+    },
+    {
+      "path": "experiments/original_synth/chicago_tuning.h",
+      "git_blob": "2765a077c9f97afd3c311caed49f2180d44c318d",
+      "actual_git_blob": "2765a077c9f97afd3c311caed49f2180d44c318d",
+      "sha256": "0aa2a254ba7d67c0f72c4b66bbf2f54be2c191f0cfe235817c9bece2cd553315",
+      "bytes": 1628
+    },
+    {
+      "path": "experiments/original_synth/voice_gain.c",
+      "git_blob": "a6c67eac51e2f7862df9e1851aa1580391286885",
+      "actual_git_blob": "a6c67eac51e2f7862df9e1851aa1580391286885",
+      "sha256": "43dcd95eeca614a78bee55b22ea8f2427827c035fcae984afd4522fd812132c7",
+      "bytes": 5284
+    },
+    {
+      "path": "experiments/original_synth/miami_fx_chain.c",
+      "git_blob": "651688c8c52ad1a0360c043459cf77d8fc19ca7d",
+      "actual_git_blob": "651688c8c52ad1a0360c043459cf77d8fc19ca7d",
+      "sha256": "7ba51b4398ae7e93f99bfdac7dceff47dcf54a02a397398fa6f9ec462aac2d62",
+      "bytes": 2871
+    },
+    {
+      "path": "experiments/original_synth/miami_startup.c",
+      "git_blob": "a77406c46763e2f86a1ba6c13e31e5fd5e5e6b03",
+      "actual_git_blob": "a77406c46763e2f86a1ba6c13e31e5fd5e5e6b03",
+      "sha256": "78c3c263e5f2016aeb327edb682a1a4007855333493c64c560419c8175847d39",
+      "bytes": 1100
+    },
+    {
+      "path": "experiments/original_synth/chicago_engine_output.c",
+      "git_blob": "5fae9d1d2f34996827a59c05026e1225b606b469",
+      "actual_git_blob": "5fae9d1d2f34996827a59c05026e1225b606b469",
+      "sha256": "de61949a1ae328559a53150099dfd1c5d59f15b8626c8f7726fe3089cbbb858c",
+      "bytes": 5184
+    },
+    {
+      "path": "experiments/original_synth/miami_n513_private.h",
+      "git_blob": "72c236196f4df9d2696053d6a151f2982b63b5a2",
+      "actual_git_blob": "72c236196f4df9d2696053d6a151f2982b63b5a2",
+      "sha256": "352535f85afdfe0fc94e8ed9b650bba2f04b08b16564f61662e09f56c83f5c9e",
+      "bytes": 6367
+    },
+    {
+      "path": "experiments/original_synth/EXTERNAL-INPUTS.md",
+      "git_blob": "dee4b2760aa9ec2ce5b26d0624a6150921a4877e",
+      "actual_git_blob": "dee4b2760aa9ec2ce5b26d0624a6150921a4877e",
+      "sha256": "93dcbd7deed52fd2f19f54238aa5bb6eaf9911e4ca982cd29fe489291f5e93b4",
+      "bytes": 3013
+    },
+    {
+      "path": "experiments/original_synth/chicago_fx2_wrapper.h",
+      "git_blob": "472eb3a9c7ecb301ce2ab4ef3ab1f46a23728777",
+      "actual_git_blob": "472eb3a9c7ecb301ce2ab4ef3ab1f46a23728777",
+      "sha256": "d7c36e8b60555a828044a1c18053914e8c1d578844be4f42c9d493035bd3c6e4",
+      "bytes": 5071
+    },
+    {
+      "path": "experiments/original_synth/chicago_output.c",
+      "git_blob": "de639556b07855e930ace35e98db06698e31ccf8",
+      "actual_git_blob": "de639556b07855e930ace35e98db06698e31ccf8",
+      "sha256": "1db16e7a2621dfb55cc269e6e3286101927100953d50f4a344c8d8b857b1313c",
+      "bytes": 10271
+    },
+    {
+      "path": "experiments/original_synth/chicago_allocator.c",
+      "git_blob": "1e680a4e1a4b28feae3bb715fb628d9efb70084a",
+      "actual_git_blob": "1e680a4e1a4b28feae3bb715fb628d9efb70084a",
+      "sha256": "89388503fe7bca9aea4911c0536a245bf5da4936bed2975c2a44edcd1c13ee99",
+      "bytes": 13322
+    },
+    {
+      "path": "experiments/original_synth/oscillator_motion.c",
+      "git_blob": "c61ee0651d84bda6405cd3f9030a040978b8f52a",
+      "actual_git_blob": "c61ee0651d84bda6405cd3f9030a040978b8f52a",
+      "sha256": "426d3d2530e9aa5fda1dccc81af86e892adbe66ad71374a0ca1e4012b8bf2f03",
+      "bytes": 9893
+    },
+    {
+      "path": "experiments/original_synth/miami_control_owner.h",
+      "git_blob": "e5e3800eabfdfff935d137546e744b6935d58f14",
+      "actual_git_blob": "e5e3800eabfdfff935d137546e744b6935d58f14",
+      "sha256": "2a352c8b1bbe78d3f2edc633b8861d045c555f50e5fe7375c23b2e829cc27099",
+      "bytes": 1329
+    },
+    {
+      "path": "experiments/original_synth/miami_voice_snapshot.h",
+      "git_blob": "b9de0421953bc06dfd76bdc207be4f8246778f7e",
+      "actual_git_blob": "b9de0421953bc06dfd76bdc207be4f8246778f7e",
+      "sha256": "f5d60eda6a9d585dd0d680b8adadb69c7fb265185f3614d96df68e1fd2cd4343",
+      "bytes": 1789
+    },
+    {
+      "path": "experiments/original_synth/chicago_note_context.c",
+      "git_blob": "b3eb9b77779f723baee5b9aaf2cf3639601a758b",
+      "actual_git_blob": "b3eb9b77779f723baee5b9aaf2cf3639601a758b",
+      "sha256": "dd8fe4d610eb6b7f16a19c8ebb698129d53966000a70e6648bb63ff0f44b2b77",
+      "bytes": 5149
+    },
+    {
+      "path": "experiments/original_synth/state_codec_private.h",
+      "git_blob": "8df3640fb7cd6a0547f26f3543cb8af0c502a0f9",
+      "actual_git_blob": "8df3640fb7cd6a0547f26f3543cb8af0c502a0f9",
+      "sha256": "6fc98bacfdfaa3e05ae7f1846d8f10162f420ea69d606e39fc71b4672dba40ef",
+      "bytes": 1605
+    },
+    {
+      "path": "experiments/original_synth/chicago_drive.c",
+      "git_blob": "8130d9250c7d1171c3f5514e09159479506c69bc",
+      "actual_git_blob": "8130d9250c7d1171c3f5514e09159479506c69bc",
+      "sha256": "10b2e814d74980664cbc148d236400b0b5847349d7b4d6bf7e372f628f783386",
+      "bytes": 4778
+    },
+    {
+      "path": "experiments/original_synth/miami_program_private.h",
+      "git_blob": "0e6589f19b24afee30ea2220f0dca0baee79534d",
+      "actual_git_blob": "0e6589f19b24afee30ea2220f0dca0baee79534d",
+      "sha256": "5b950f6441f38e68c36d303a55361ce1d1e75c23ec05d7a5314fa2c32c3aa460",
+      "bytes": 15451
+    },
+    {
+      "path": "experiments/original_synth/miami_pitch.h",
+      "git_blob": "52caca0b6b87db9bd1a7de9f451d54be462db225",
+      "actual_git_blob": "52caca0b6b87db9bd1a7de9f451d54be462db225",
+      "sha256": "6ef31f82ec0b1d1afda1a95bac10f035b6116d53372f610a1c5765842923ddc5",
+      "bytes": 1735
+    },
+    {
+      "path": "experiments/original_synth/binary32_math.h",
+      "git_blob": "37ffc4c5ae4a38d273808d36ff127d6d74c70f8c",
+      "actual_git_blob": "37ffc4c5ae4a38d273808d36ff127d6d74c70f8c",
+      "sha256": "0581ff3113a555365bbfc9b3ff4362fcc20e997b70ae3b21b6e3f35461021b54",
+      "bytes": 1295
+    },
+    {
+      "path": "experiments/original_synth/EXTERNAL-INPUTS.json",
+      "git_blob": "2dcfda3aa23a08a7605a38aa3c2d955b2337a855",
+      "actual_git_blob": "2dcfda3aa23a08a7605a38aa3c2d955b2337a855",
+      "sha256": "9c7ac9b0a71e775fb7009e2d4035fce827b2c56c4e8e692a7a8910c9c6c881bc",
+      "bytes": 11437
+    },
+    {
+      "path": "experiments/original_synth/chicago_fx2_wrapper.c",
+      "git_blob": "02808db5ac70cda4e7caa696c422cf60ac1ed617",
+      "actual_git_blob": "02808db5ac70cda4e7caa696c422cf60ac1ed617",
+      "sha256": "476a5ea96c8d0edabb385244f3c5a0f14543ec7b7c63630fde114698701eec78",
+      "bytes": 6945
+    },
+    {
+      "path": "experiments/original_synth/binary32_widen.h",
+      "git_blob": "900f180ba13c483b3e0860c16fa064d5ba290cc5",
+      "actual_git_blob": "900f180ba13c483b3e0860c16fa064d5ba290cc5",
+      "sha256": "dd7b3c3b6b2c62f107b24ce6bae9331e1656dd61082ead0207f0de60bdc679d0",
+      "bytes": 1532
+    },
+    {
+      "path": "experiments/original_synth/chicago_fx2_compact.h",
+      "git_blob": "1ddbe826fe31f8a30f5f4ad00ea072eb841b31b1",
+      "actual_git_blob": "1ddbe826fe31f8a30f5f4ad00ea072eb841b31b1",
+      "sha256": "f0c2ec48e2721d7144154416c582f38ee9aed971365a428ca596e00e721c7387",
+      "bytes": 3381
+    },
+    {
+      "path": "experiments/original_synth/fx_tables.h",
+      "git_blob": "95478af4367c6de74533c2861ce43ffa6645b726",
+      "actual_git_blob": "95478af4367c6de74533c2861ce43ffa6645b726",
+      "sha256": "4e5afd7519ac733dc3d028d1cc6cdca097a51876a1db65ac0cdcd5732c50cb00",
+      "bytes": 12934
+    },
+    {
+      "path": "experiments/original_synth/chicago_allocator.h",
+      "git_blob": "fd5c09f5a3dbc9b1b52991559f110cefbb3b2978",
+      "actual_git_blob": "fd5c09f5a3dbc9b1b52991559f110cefbb3b2978",
+      "sha256": "7ad07cb5f85b02202833f63d9b774cbff18f5d8cd6201af7ae5c4272c3de14ef",
+      "bytes": 9723
+    },
+    {
+      "path": "experiments/original_synth/miami_voice_owner.h",
+      "git_blob": "b1f7bab804e5256ba478ca0eb226684d6fcdcb96",
+      "actual_git_blob": "b1f7bab804e5256ba478ca0eb226684d6fcdcb96",
+      "sha256": "e00d57416c3bc399605281eb6fdfbaffbab45c7c4bd1c4f7e07939f4358ade4a",
+      "bytes": 3276
+    },
+    {
+      "path": "experiments/original_synth/chicago_key_admission.h",
+      "git_blob": "9e64bcd4e965d7042bf603d02afe6beb79206008",
+      "actual_git_blob": "9e64bcd4e965d7042bf603d02afe6beb79206008",
+      "sha256": "ea9959beebd724879f766248d3a03d8ddc1c938b82a230a6bd46fea6b383c3ee",
+      "bytes": 1076
+    },
+    {
+      "path": "experiments/original_synth/miami_ms20.c",
+      "git_blob": "4228bb6e93aff1110583a7b0d1db98f8088df7ef",
+      "actual_git_blob": "4228bb6e93aff1110583a7b0d1db98f8088df7ef",
+      "sha256": "fdaa23783e59f85e49013a63d557ad6d9c61430b5026fd50686e04ecdef60f16",
+      "bytes": 12914
+    },
+    {
+      "path": "experiments/original_synth/chicago_dynamics.c",
+      "git_blob": "5ade7f22dd3b9af8a1cb3409ee2606236505a218",
+      "actual_git_blob": "5ade7f22dd3b9af8a1cb3409ee2606236505a218",
+      "sha256": "b42259674ab35d2fbd7aa7ec234b13ad3693930372301bc38e5716a75fef30a3",
+      "bytes": 10109
+    },
+    {
+      "path": "experiments/original_synth/chicago_packed_private.h",
+      "git_blob": "3888079dec80247394e6e8d991bb8b8e999f2f98",
+      "actual_git_blob": "3888079dec80247394e6e8d991bb8b8e999f2f98",
+      "sha256": "cd216647c0b9b4428f3d39e0167e5ee43bd51cf9d575ed3299b3d4af271ded00",
+      "bytes": 99941
+    },
+    {
+      "path": "experiments/original_synth/miami_geometry.c",
+      "git_blob": "13bfe4bb0e4749fe35c79f81d055bf03cc26becc",
+      "actual_git_blob": "13bfe4bb0e4749fe35c79f81d055bf03cc26becc",
+      "sha256": "db9da294503c4c5dfd63fd6b6b1cacbff9c3768fbc9a4ff14ba2053c107ec53b",
+      "bytes": 6070
+    },
+    {
+      "path": "experiments/original_synth/voice_gain.h",
+      "git_blob": "9d1a55d7b45e9431ff3fd39fe7b59788c31a9a9b",
+      "actual_git_blob": "9d1a55d7b45e9431ff3fd39fe7b59788c31a9a9b",
+      "sha256": "0a1b267d3b19c443431386da8080f6842ede68141ef70c4dac9d593dbc9ede29",
+      "bytes": 1700
+    },
+    {
+      "path": "experiments/original_synth/fused_reference.h",
+      "git_blob": "81ce58008e8ac4eed5d20155e6a99cdb5a1990ff",
+      "actual_git_blob": "81ce58008e8ac4eed5d20155e6a99cdb5a1990ff",
+      "sha256": "44f4617f419846ebc5c4ab3ec008876b6e9e2f9ab238c223e7941bb083e8eeb0",
+      "bytes": 1541
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice.c",
+      "git_blob": "66d976d662bd1f756b28731b417df838206f01ff",
+      "actual_git_blob": "66d976d662bd1f756b28731b417df838206f01ff",
+      "sha256": "996ac689daf13fb600de8e4dba46fd6c660229c8b4682964cff4135dc71968fa",
+      "bytes": 27101
+    },
+    {
+      "path": "experiments/original_synth/program_envelope.c",
+      "git_blob": "eb09bff8428d15528fb326b8c5e388d01b0a69e2",
+      "actual_git_blob": "eb09bff8428d15528fb326b8c5e388d01b0a69e2",
+      "sha256": "de3ef01b553a555a3b733013bd2a2f4c98474c785d5fe7eabd3c7c64e1a84dc8",
+      "bytes": 1599
+    },
+    {
+      "path": "experiments/original_synth/program_values_compact.h",
+      "git_blob": "2e8862e18076e6fd92211fc5a2b185701f46a53c",
+      "actual_git_blob": "2e8862e18076e6fd92211fc5a2b185701f46a53c",
+      "sha256": "395710a2a6d180d1bae9a597749743065417c9c6eeada4bb256b1411d404d25a",
+      "bytes": 7581
+    },
+    {
+      "path": "experiments/original_synth/miami_note_context.c",
+      "git_blob": "1ac3c6cd75fa8962a3db62c77cddbaf0fc90815a",
+      "actual_git_blob": "1ac3c6cd75fa8962a3db62c77cddbaf0fc90815a",
+      "sha256": "772db12daf2345613de4a5e46800103fd319c13c92b1c48e128c3bf41ddbb994",
+      "bytes": 5854
+    },
+    {
+      "path": "experiments/original_synth/miami_note_context.h",
+      "git_blob": "59fded9d44bdbcef6997648af29c854489544a51",
+      "actual_git_blob": "59fded9d44bdbcef6997648af29c854489544a51",
+      "sha256": "9c19e35273e1b58f778734bebe27974161625f4bc215abbe7e21640d8075240d",
+      "bytes": 3630
+    },
+    {
+      "path": "experiments/original_synth/chicago_full_mg.h",
+      "git_blob": "bbee2a1569f7f36380f55754bb3ddb8ad1cffc4f",
+      "actual_git_blob": "bbee2a1569f7f36380f55754bb3ddb8ad1cffc4f",
+      "sha256": "2b5d1bb8e8128da3e4b1a0bece1157d7907065f29b9d802986dca9284db3248a",
+      "bytes": 2402
+    },
+    {
+      "path": "experiments/original_synth/chicago_program_output.c",
+      "git_blob": "d8127b4a870486d18510828f7d82d9fa9d05603c",
+      "actual_git_blob": "d8127b4a870486d18510828f7d82d9fa9d05603c",
+      "sha256": "e6c945aa25d923d62661cb70c4efcc1d206f0a3a0d766e6b4a23dce8cbaa25cf",
+      "bytes": 1057
+    },
+    {
+      "path": "experiments/original_synth/chicago_scheduler.c",
+      "git_blob": "d8f9466bf1a3098d525486ced0e98c9fdabc99af",
+      "actual_git_blob": "d8f9466bf1a3098d525486ced0e98c9fdabc99af",
+      "sha256": "a1218b64b4daa10ec2bf9ceef9e95a2d65801b3c3bacf0544744634cd7b44bc9",
+      "bytes": 8392
+    },
+    {
+      "path": "experiments/original_synth/chicago_mp4.c",
+      "git_blob": "705dd72e891eedb55023e1f602b1376cd82feecd",
+      "actual_git_blob": "705dd72e891eedb55023e1f602b1376cd82feecd",
+      "sha256": "0878797b35619a2f92b7f4e80d29e5bbf483cf206474cca0de087f871a90d388",
+      "bytes": 11844
+    },
+    {
+      "path": "experiments/original_synth/chicago_arp_control.h",
+      "git_blob": "fcc99579347288bd80880a336f0a9a8cfbbca725",
+      "actual_git_blob": "fcc99579347288bd80880a336f0a9a8cfbbca725",
+      "sha256": "80f6f5adf45b23202a05a6ce8efbf4fb90fe809270f18a8f9bf9310ec03d393c",
+      "bytes": 4691
+    },
+    {
+      "path": "experiments/original_synth/chicago_clock_span.h",
+      "git_blob": "43cbd15867bc602d93f6bc542dad2df367e5119a",
+      "actual_git_blob": "43cbd15867bc602d93f6bc542dad2df367e5119a",
+      "sha256": "109e886da95c03eed589f8a18c89c70de389124bedc303970f1550d8893fcb0c",
+      "bytes": 1954
+    },
+    {
+      "path": "experiments/original_synth/motion_tables_private.h",
+      "git_blob": "0abf5bc47632aa38b58e52dfc91d58c0e5ee0ca5",
+      "actual_git_blob": "0abf5bc47632aa38b58e52dfc91d58c0e5ee0ca5",
+      "sha256": "92c856c0fe1f7811ec938bbffd4f0cdcbe8b86630eaf537f63ab8ff3d32cb564",
+      "bytes": 757674
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice_snapshot.h",
+      "git_blob": "8ab927c1bf9f624ca9d5b30986e742798d812f7d",
+      "actual_git_blob": "8ab927c1bf9f624ca9d5b30986e742798d812f7d",
+      "sha256": "cb95ba8d15c21a32543a7caa2be625f774811bad61057eb0308305b4208663a3",
+      "bytes": 1502
+    },
+    {
+      "path": "experiments/original_synth/chicago_control_owner.c",
+      "git_blob": "214f942d1c16c5cd1b34661f56290805a6aacf27",
+      "actual_git_blob": "214f942d1c16c5cd1b34661f56290805a6aacf27",
+      "sha256": "75a9e30c026609a9bf449025490db4184e367cf27c24977e7d32f153ab0d7765",
+      "bytes": 1957
+    },
+    {
+      "path": "experiments/original_synth/chicago_program_private.h",
+      "git_blob": "4f386aa0be5aee61744964bfa0c7214940b0b655",
+      "actual_git_blob": "4f386aa0be5aee61744964bfa0c7214940b0b655",
+      "sha256": "b95ed765e55886ed7d1e52ebb06b43d5026743ec6dd17d9a9cf6cc34e9dcc309",
+      "bytes": 21311
+    },
+    {
+      "path": "experiments/original_synth/miami_ms20.h",
+      "git_blob": "fd4b9fe452814e0b207a68fb8e64bb9c6668db63",
+      "actual_git_blob": "fd4b9fe452814e0b207a68fb8e64bb9c6668db63",
+      "sha256": "f8732658eef2710ef1651138b5354a024518e01f2e94cf9c31a65a6278b40753",
+      "bytes": 1461
+    },
+    {
+      "path": "experiments/original_synth/chicago_key_admission.c",
+      "git_blob": "252dd17e86ea64aafda1511a4b998428a687b3f8",
+      "actual_git_blob": "252dd17e86ea64aafda1511a4b998428a687b3f8",
+      "sha256": "f1f453cf9bcb018553485303653e84de7591b190f67aa00014cecb5ad356e2b0",
+      "bytes": 460
+    },
+    {
+      "path": "experiments/original_synth/chicago_dynamics.h",
+      "git_blob": "e8200e394347e2752de03e3e5cfc6ae2bc444119",
+      "actual_git_blob": "e8200e394347e2752de03e3e5cfc6ae2bc444119",
+      "sha256": "0427ae86c0320d9045626875c501f98b4919a66cd7ae0fa7cab8c4f0035bdc68",
+      "bytes": 3888
+    },
+    {
+      "path": "experiments/original_synth/CHICAGO-COMPACT-POLICY.md",
+      "git_blob": "b0a71fd3f0d1c4d9ec04f8b73ce69afe97e62658",
+      "actual_git_blob": "b0a71fd3f0d1c4d9ec04f8b73ce69afe97e62658",
+      "sha256": "d370dc35a476a7504709ccf754d34c64d5e50966651e11f49a862ca7879ad876",
+      "bytes": 8148
+    },
+    {
+      "path": "experiments/original_synth/control_math.c",
+      "git_blob": "eedb121ec9be15f519c3216d9a82f4ebe625b49d",
+      "actual_git_blob": "eedb121ec9be15f519c3216d9a82f4ebe625b49d",
+      "sha256": "d817534bf33c5178d45def221183298aa8f9c5ff2794d9b90b20021a0a8c5332",
+      "bytes": 3412
+    },
+    {
+      "path": "experiments/original_synth/miami_pitch.c",
+      "git_blob": "95d6a0dd206961817eb44e9140107a57cbed0c7f",
+      "actual_git_blob": "95d6a0dd206961817eb44e9140107a57cbed0c7f",
+      "sha256": "73ce1b3d263e8fb811bf8b1541f44f36c30e4a18b99566921de6c19059dbd66c",
+      "bytes": 3198
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice_owner.c",
+      "git_blob": "f88349f74d2fdbb458408787c3356ecbb5a5e8ed",
+      "actual_git_blob": "f88349f74d2fdbb458408787c3356ecbb5a5e8ed",
+      "sha256": "09fc6d928299af309da650941efa031c971025534042e1d98de7ab545f295f9a",
+      "bytes": 7311
+    },
+    {
+      "path": "experiments/original_synth/miami_selected_voice.h",
+      "git_blob": "99432e772c4869cfc3587cddcbe224547f857e10",
+      "actual_git_blob": "99432e772c4869cfc3587cddcbe224547f857e10",
+      "sha256": "355c5d388789adf42dd095e0e18b962b667526bc59a6bb4886de4ea9d80b2944",
+      "bytes": 12248
+    },
+    {
+      "path": "experiments/original_synth/miami_pow2_fma.h",
+      "git_blob": "1948a37fd1c1339dbc592c6a406eb010af447161",
+      "actual_git_blob": "1948a37fd1c1339dbc592c6a406eb010af447161",
+      "sha256": "7b1cac0f28c7198d4c68935da27e364d3d550af14fc494b6556e10eacd008a28",
+      "bytes": 1256
+    },
+    {
+      "path": "experiments/original_synth/chicago_output.h",
+      "git_blob": "ea7ebf37f899cda4b9072d9b7ca1edffe9742024",
+      "actual_git_blob": "ea7ebf37f899cda4b9072d9b7ca1edffe9742024",
+      "sha256": "4a0856d6a78aea96925b785923900a8229fd3689c2e941c8c970e783ac24ce68",
+      "bytes": 6683
+    },
+    {
+      "path": "experiments/original_synth/oscillator_motion.h",
+      "git_blob": "fcdf2725e3dc0a4426ba63e8d0edb41fd60a5f90",
+      "actual_git_blob": "fcdf2725e3dc0a4426ba63e8d0edb41fd60a5f90",
+      "sha256": "fc5a5043e22ba279dc3691f0da3e117f13ce04bc5e16d8e822a283a53ee0747b",
+      "bytes": 3853
+    },
+    {
+      "path": "experiments/original_synth/master_tune_rne.h",
+      "git_blob": "ff40bc0e3308f8bb51ce1e8e9f6ccc33565bdd94",
+      "actual_git_blob": "ff40bc0e3308f8bb51ce1e8e9f6ccc33565bdd94",
+      "sha256": "5005bd3a988b754dd62692288b0431835b44fc174ba0327a4010182f885eca56",
+      "bytes": 2198
+    },
+    {
+      "path": "experiments/original_synth/chicago_packed.h",
+      "git_blob": "16c9dc70b39b992bf60190cb474a23bda93b8271",
+      "actual_git_blob": "16c9dc70b39b992bf60190cb474a23bda93b8271",
+      "sha256": "7127904a002cd6c93e083b9f48bb265cf66c47d313c1180864f7f9689a2b27cc",
+      "bytes": 391
+    },
+    {
+      "path": "experiments/original_synth/binary32_classify.h",
+      "git_blob": "ea30a78de9aed93f5820792fef18c3b5c6e855a2",
+      "actual_git_blob": "ea30a78de9aed93f5820792fef18c3b5c6e855a2",
+      "sha256": "8e663524ecd11c5c29460368f410c88628ad28b880547d5b26c1fea960a6212d",
+      "bytes": 1926
+    },
+    {
+      "path": "experiments/original_synth/chicago_full_mg.c",
+      "git_blob": "ce5e2ad47bb1a1f3fc9eb8ffc8de5d7ed5f6a083",
+      "actual_git_blob": "ce5e2ad47bb1a1f3fc9eb8ffc8de5d7ed5f6a083",
+      "sha256": "a1bff6df86f27a00ee99978c17235fcaa5af1ef07f1a4287def054227b4f5607",
+      "bytes": 1145
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice_owner.h",
+      "git_blob": "4589844e133b8afc2b9cc142b375861dc9420096",
+      "actual_git_blob": "4589844e133b8afc2b9cc142b375861dc9420096",
+      "sha256": "6c178efd3c86d7ee4af7ccb7a68ed9b08f7c39db115e3d19ebd89234ec11bbcd",
+      "bytes": 4162
+    },
+    {
+      "path": "experiments/original_synth/miami_voice_owner.c",
+      "git_blob": "61341b371ca7490e2cc220f04b93e8e5a6ceccaa",
+      "actual_git_blob": "61341b371ca7490e2cc220f04b93e8e5a6ceccaa",
+      "sha256": "f32db0c195470ce15168ade2c868096aba8ca0bba377e57362d128486e8c6eb9",
+      "bytes": 6585
+    },
+    {
+      "path": "experiments/original_synth/miami_selected_voice.c",
+      "git_blob": "53df7778cc3cf538445870ca4ba7f8f7d8b207b5",
+      "actual_git_blob": "53df7778cc3cf538445870ca4ba7f8f7d8b207b5",
+      "sha256": "2aa43af0f706b5a77cd1a1f8214131b956fcfcdfcd29de7c12ca36fd63580e13",
+      "bytes": 22120
+    },
+    {
+      "path": "experiments/original_synth/chicago_program.c",
+      "git_blob": "e58fd5c11a93fc263726eb416cd3c6f78e815bcc",
+      "actual_git_blob": "e58fd5c11a93fc263726eb416cd3c6f78e815bcc",
+      "sha256": "55d5bcd1c66e22b26a83a5ffda39d7fa7f272013f67297d09a24a2c72a204c45",
+      "bytes": 4373
+    },
+    {
+      "path": "experiments/original_synth/master.h",
+      "git_blob": "e69d7235e653bf6796ae99d053c8c430c713abb8",
+      "actual_git_blob": "e69d7235e653bf6796ae99d053c8c430c713abb8",
+      "sha256": "f6a05d40c6012487f41f63b4e22792f6785bd9e4bcfdb11b130be46e8d66c9bb",
+      "bytes": 1488
+    },
+    {
+      "path": "experiments/original_synth/chicago_smallfx.h",
+      "git_blob": "ac0550e7d8722490413755e2d4eb9ccaafcf3cd0",
+      "actual_git_blob": "ac0550e7d8722490413755e2d4eb9ccaafcf3cd0",
+      "sha256": "6fdf696157ad60987ace6fe0896e2f2d93eb29857c9903cfd06665e4e252b1a6",
+      "bytes": 1900
+    },
+    {
+      "path": "experiments/original_synth/lossless_table.h",
+      "git_blob": "e05e0af52f624793a196bfd6e9e249d8661dc1e8",
+      "actual_git_blob": "e05e0af52f624793a196bfd6e9e249d8661dc1e8",
+      "sha256": "4b808d5f515bb5df1189510f04ce4819e7cadf7d7a1663b56d1af5ec4066e58e",
+      "bytes": 1334
+    },
+    {
+      "path": "experiments/original_synth/chicago_engine_output.h",
+      "git_blob": "73bd4ede5060175a4abe9c7d6c19a06537217c87",
+      "actual_git_blob": "73bd4ede5060175a4abe9c7d6c19a06537217c87",
+      "sha256": "f0b20902b0486260d41e2c82daeb252a7a0419d92e51430f48ce95926fb4b9f1",
+      "bytes": 2287
+    },
+    {
+      "path": "experiments/original_synth/chicago_mp4.h",
+      "git_blob": "a6acd034ea953ac74067a936811a66a5b92a36c3",
+      "actual_git_blob": "a6acd034ea953ac74067a936811a66a5b92a36c3",
+      "sha256": "d5ea1b8b541bd84163c2ba9f50d12dc5cf7c48697c08d6bca8a70a4a42234000",
+      "bytes": 1810
+    },
+    {
+      "path": "experiments/original_synth/program_envelope.h",
+      "git_blob": "3be5db7a7be04bd86878fe992c192659cd934f49",
+      "actual_git_blob": "3be5db7a7be04bd86878fe992c192659cd934f49",
+      "sha256": "b7d04b4db25125f2d6417fab5c8042a4a565125d6d1b698c93c8e6390fd60def",
+      "bytes": 1527
+    },
+    {
+      "path": "experiments/original_synth/chicago_scheduler.h",
+      "git_blob": "7e0a99b2aaea759f88140466ffcf951a6e3a1b98",
+      "actual_git_blob": "7e0a99b2aaea759f88140466ffcf951a6e3a1b98",
+      "sha256": "5fc546facb7eaa500fe04dedd6c4514436725ada37810a87bfe5c0b91ecb9fb6",
+      "bytes": 4795
+    },
+    {
+      "path": "experiments/original_synth/chicago_modulation.h",
+      "git_blob": "f2959011d60bfd8d8f05c719886ab56e754f73f3",
+      "actual_git_blob": "f2959011d60bfd8d8f05c719886ab56e754f73f3",
+      "sha256": "76a51f44b6ee3c43586ad31ba97f4435b5982fe7e4ec4c9594dd8994673b8a80",
+      "bytes": 5226
+    },
+    {
+      "path": "experiments/original_synth/state_codec.c",
+      "git_blob": "03bb4419c16529a05358c7d4b22dce46b0b0fe45",
+      "actual_git_blob": "03bb4419c16529a05358c7d4b22dce46b0b0fe45",
+      "sha256": "182079fc5ad20f3f5bcc24c19c82b5f1cb9f66303988ee9160bc61cae39f99bc",
+      "bytes": 2859
+    },
+    {
+      "path": "experiments/original_synth/chicago_tuning.c",
+      "git_blob": "9ff9a6079415ea2c33990e8d57f413cd135d70af",
+      "actual_git_blob": "9ff9a6079415ea2c33990e8d57f413cd135d70af",
+      "sha256": "ae96c0b1f8611e961f65da72cd89d27b14783882e3f6e9ad7eface4cf463053f",
+      "bytes": 3361
+    },
+    {
+      "path": "experiments/original_synth/chicago_modulation.c",
+      "git_blob": "026d59efbba2012009715d86feb6d8411656ce02",
+      "actual_git_blob": "026d59efbba2012009715d86feb6d8411656ce02",
+      "sha256": "c9a276007a2ab42c388451705c0f0c9c568aecb3efd35593cbca5018005bb718",
+      "bytes": 16158
+    },
+    {
+      "path": "experiments/original_synth/miami_geometry.h",
+      "git_blob": "1ea10aa2b4a998ff19af0c9f26a9d6cec9e30a34",
+      "actual_git_blob": "1ea10aa2b4a998ff19af0c9f26a9d6cec9e30a34",
+      "sha256": "00fb6b6ad6f3bcc41a61c33445a528a4032dcee68db52414c804b801d67ffd50",
+      "bytes": 4046
+    },
+    {
+      "path": "experiments/original_synth/miami_control_owner.c",
+      "git_blob": "114e64fecf27a4e195bd477192c3f2feb1e82e24",
+      "actual_git_blob": "114e64fecf27a4e195bd477192c3f2feb1e82e24",
+      "sha256": "d8c6945a689d4e651eaf7c8c13c5b6c8587dee55420cb1e4ec3c13c3f8365c57",
+      "bytes": 1551
+    },
+    {
+      "path": "experiments/original_synth/chicago_global_mg.h",
+      "git_blob": "7187380510ad8dc08ec5df938ec1a145d3bcf6c9",
+      "actual_git_blob": "7187380510ad8dc08ec5df938ec1a145d3bcf6c9",
+      "sha256": "8bd320090e15ea65d0169f4a546025e2cc5b11c2c4bb64fd32a792d955a4b6b2",
+      "bytes": 3342
+    },
+    {
+      "path": "experiments/original_synth/chicago_program_output.h",
+      "git_blob": "2ba2a59a1415706be1d126bd8306ca88e7192cb6",
+      "actual_git_blob": "2ba2a59a1415706be1d126bd8306ca88e7192cb6",
+      "sha256": "6773d52ed424a00a332c9fe61d3743e28d19cd39c2c7cb6b9558c2adebf64c07",
+      "bytes": 1321
+    },
+    {
+      "path": "experiments/original_synth/miami_program.c",
+      "git_blob": "f007bf01279c96756b020d62a33913c8571152b9",
+      "actual_git_blob": "f007bf01279c96756b020d62a33913c8571152b9",
+      "sha256": "9cd43dc57317688d73d6b194f06b0fd6b370a0fdac9ed236041186539f092a4f",
+      "bytes": 2573
+    },
+    {
+      "path": "experiments/original_synth/chicago_note_context.h",
+      "git_blob": "c3b1489d4dd23a7a615d54af580847f3cde13e27",
+      "actual_git_blob": "c3b1489d4dd23a7a615d54af580847f3cde13e27",
+      "sha256": "23a37151d33fb4b2b8b02f44d94612c803f5efbd0b881df0d9c97d59d3b0dee6",
+      "bytes": 2316
+    },
+    {
+      "path": "experiments/original_synth/chicago_program.h",
+      "git_blob": "6e5021eb2cb8b6495fbdfc6201f58a575c95c419",
+      "actual_git_blob": "6e5021eb2cb8b6495fbdfc6201f58a575c95c419",
+      "sha256": "70ee6efa0552db32fc17fba9af8750db6a378de319e47a6c344523fb02f15bd3",
+      "bytes": 1896
+    },
+    {
+      "path": "experiments/original_synth/chicago_smallfx.c",
+      "git_blob": "420a9644a56519f9c7c97f62ae4c7a6b7504bdef",
+      "actual_git_blob": "420a9644a56519f9c7c97f62ae4c7a6b7504bdef",
+      "sha256": "59b9253d3a808ce75cdf0ff1b6ad690adb30553f65296c81c418bfbe1de4d8f4",
+      "bytes": 1853
+    },
+    {
+      "path": "experiments/original_synth/miami_zero.h",
+      "git_blob": "fad5dcfd32129b49a4525ce99bd78a162566efea",
+      "actual_git_blob": "fad5dcfd32129b49a4525ce99bd78a162566efea",
+      "sha256": "a3f0fb0bd642b5b79e3266a3bd274f92f9c7c3a6f2e4df4b65975d722ea4dfc3",
+      "bytes": 1220
+    },
+    {
+      "path": "experiments/original_synth/miami_fx_chain.h",
+      "git_blob": "4b6f74a6d84d2089497f8401720ae494483aaadc",
+      "actual_git_blob": "4b6f74a6d84d2089497f8401720ae494483aaadc",
+      "sha256": "c8a8ba4054ec18bc38751983fbc0d2b5995234b48b3502af5513437a903c714b",
+      "bytes": 1644
+    },
+    {
+      "path": "experiments/original_synth/control_math.h",
+      "git_blob": "cb51ffbce6140730d1bc746334b62a28d8967e0f",
+      "actual_git_blob": "cb51ffbce6140730d1bc746334b62a28d8967e0f",
+      "sha256": "573881848cc69e98ee6c0bfcb5e484b0066ee317ca5bc95f5e49c84d690f91fc",
+      "bytes": 1557
+    },
+    {
+      "path": "experiments/original_synth/miami_voice_snapshot.c",
+      "git_blob": "6a28a8e4af5aa9365a256439599a7ad093fa224a",
+      "actual_git_blob": "6a28a8e4af5aa9365a256439599a7ad093fa224a",
+      "sha256": "b2affecfe77f2f9df0f1adaf82439939ee5cab96ab6443836e7e6e44d5978c58",
+      "bytes": 6216
+    },
+    {
+      "path": "experiments/original_synth/chicago_drive.h",
+      "git_blob": "a461ca0efa3c0f5ae35d738d5ce79afc6a65550e",
+      "actual_git_blob": "a461ca0efa3c0f5ae35d738d5ce79afc6a65550e",
+      "sha256": "2446a940ae575f36550e58c8a4cf0ed4c2e8a99a7d1b473f3849821f5604d26f",
+      "bytes": 1244
+    },
+    {
+      "path": "experiments/original_synth/chicago_drive_private.h",
+      "git_blob": "695c2201be573ee541f7769cef1c8b8ab4239055",
+      "actual_git_blob": "695c2201be573ee541f7769cef1c8b8ab4239055",
+      "sha256": "d0f132e768e11e2e5b62d1dc9e9f047e87b162b5018c0b1b1f69eb1899ac847b",
+      "bytes": 1563
+    },
+    {
+      "path": "experiments/original_synth/chicago_dynamics_private.h",
+      "git_blob": "3cab126a9c5ce479d976fb3765a613d3130ba8dd",
+      "actual_git_blob": "3cab126a9c5ce479d976fb3765a613d3130ba8dd",
+      "sha256": "f1d1ffd15d33001420227d57984e5f9c1373c1460a4ea78f9cec777f72d11f61",
+      "bytes": 8708
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice_snapshot.c",
+      "git_blob": "8520ffcfb6f10148e1fdaf9625a5b35a439c0bb4",
+      "actual_git_blob": "8520ffcfb6f10148e1fdaf9625a5b35a439c0bb4",
+      "sha256": "1acb2943fc4e5f3b2535a07c8703078907f767cc92ddaa3aa75098ca704a9c48",
+      "bytes": 6232
+    },
+    {
+      "path": "experiments/original_synth/fused_reference.c",
+      "git_blob": "c1f9883f6d0331b3d3d68f4df95e74ad5f08d386",
+      "actual_git_blob": "c1f9883f6d0331b3d3d68f4df95e74ad5f08d386",
+      "sha256": "0fb9151ce826fe1941b2634fe4ee56d57da1745333b69786b371bde18568c791",
+      "bytes": 5671
+    },
+    {
+      "path": "experiments/original_synth/engine_events.c",
+      "git_blob": "3a49dcce1cc95b1eecdb371005a5334337bebcbf",
+      "actual_git_blob": "3a49dcce1cc95b1eecdb371005a5334337bebcbf",
+      "sha256": "bf5c5b749a03a79af37af3d1c93d9c1c34adc9ac306cf41a1b0e75766248efb0",
+      "bytes": 3486
+    },
+    {
+      "path": "experiments/original_synth/chicago_voice.h",
+      "git_blob": "a2a57df7215e36c99068175c7a9694650c0abb2c",
+      "actual_git_blob": "a2a57df7215e36c99068175c7a9694650c0abb2c",
+      "sha256": "41257d9d67de900b69b377e68f60c250cb2527f33a2711b02c0184cb47a3fade",
+      "bytes": 11384
+    },
+    {
+      "path": "experiments/original_synth/CHICAGO-PARAMETER-TRACE.json",
+      "git_blob": "6d9f17f45c3985144f92215d4b06e64b22eb2257",
+      "actual_git_blob": "6d9f17f45c3985144f92215d4b06e64b22eb2257",
+      "sha256": "7fcfb2f7e279086e3b733b9b4d622494593aacbb59a10582d77fe59d523d9bfd",
+      "bytes": 7409
+    },
+    {
+      "path": "experiments/original_synth/miami_output.c",
+      "git_blob": "50bdde01c5b379cf3f155fb7b932daae76f82e32",
+      "actual_git_blob": "50bdde01c5b379cf3f155fb7b932daae76f82e32",
+      "sha256": "4d4eeb7d5e233e264e5f32fe6dd7565db59baaae1a668060c31859b957fd9e1c",
+      "bytes": 5171
+    },
+    {
+      "path": "experiments/original_synth/chicago_packed.c",
+      "git_blob": "9119df1bc74044e5cefd10448c9eed782256ecba",
+      "actual_git_blob": "9119df1bc74044e5cefd10448c9eed782256ecba",
+      "sha256": "b7c13bc55a01458d2e62f94fb251f732c56e5ab4db39857c54afd694a620e1dd",
+      "bytes": 3409
+    },
+    {
+      "path": "experiments/original_synth/miami_startup.h",
+      "git_blob": "962ea2a24106c7579ca2878b15e1f72da0a62bb0",
+      "actual_git_blob": "962ea2a24106c7579ca2878b15e1f72da0a62bb0",
+      "sha256": "1e4ae7681bfb6519236f17cbac555d5cae77d35b24e1fd61a7a82faeb01617d6",
+      "bytes": 1751
+    },
+    {
+      "path": "experiments/original_synth/chicago_chorus_span.h",
+      "git_blob": "fa122964123593df78c074d4d12aca05fe47df3a",
+      "actual_git_blob": "fa122964123593df78c074d4d12aca05fe47df3a",
+      "sha256": "67a26f56e2d31fc49bfcb6a12ef0beda38b9055c400a6f9191a77029a0b70c23",
+      "bytes": 2452
+    },
+    {
+      "path": "experiments/original_synth/chicago_fx2_compact.c",
+      "git_blob": "896c12b6b966af98aa2a998323edb0ae8de65ef6",
+      "actual_git_blob": "896c12b6b966af98aa2a998323edb0ae8de65ef6",
+      "sha256": "6505cfda1ee0c00bdcbb2a416f50f59eaf8367584438a64ecdd2b75cfa334c17",
+      "bytes": 9722
+    },
+    {
+      "path": "experiments/original_synth/engine_events.h",
+      "git_blob": "69c2dd0e8f6f5e8fda5dd961b8cfa61d7a142ef8",
+      "actual_git_blob": "69c2dd0e8f6f5e8fda5dd961b8cfa61d7a142ef8",
+      "sha256": "8610ce8fe73ffb14889dbe361f277b615fe5fb950adf1b05c40a1fd9d5dc48f4",
+      "bytes": 2140
+    },
+    {
+      "path": "experiments/original_synth/master.c",
+      "git_blob": "789799c1a9ddc80b6d7c4d7b3c71e580bed19e62",
+      "actual_git_blob": "789799c1a9ddc80b6d7c4d7b3c71e580bed19e62",
+      "sha256": "630257befef497bce6b0ea0516bd58c1f09ae9cdc667f3f20d34267bdfb29a1a",
+      "bytes": 2803
+    },
+    {
+      "path": "experiments/original_synth/fixed_fx.c",
+      "git_blob": "a8294102e2b398a44c67eca5d587a1d6d5ce9b8b",
+      "actual_git_blob": "a8294102e2b398a44c67eca5d587a1d6d5ce9b8b",
+      "sha256": "521e950812409464131360e6f3c55f81ad09fd53334876c7aa7d8cc738b6bb07",
+      "bytes": 2763
+    },
+    {
+      "path": "experiments/original_synth/miami_program.h",
+      "git_blob": "5b55afcab4be454731b1371e90e3c291dfc7ae3f",
+      "actual_git_blob": "5b55afcab4be454731b1371e90e3c291dfc7ae3f",
+      "sha256": "5e64dd9588ced099485fad57fdd3f910ef13dbbf1f206f50ddd745935c2c49ee",
+      "bytes": 1296
+    },
+    {
+      "path": "experiments/original_synth/modulation_private.h",
+      "git_blob": "6aa5131bfe6ec2ca14db17a5878872e621f002ac",
+      "actual_git_blob": "6aa5131bfe6ec2ca14db17a5878872e621f002ac",
+      "sha256": "92c458c409830f95f06f6f0efd62f1b947fc234dc8adef279207da3588705609",
+      "bytes": 3978
+    },
+    {
+      "path": "experiments/original_synth/miami_idle_clock.h",
+      "git_blob": "efe52f8599bbd9b7c698f809a294732de484db93",
+      "actual_git_blob": "efe52f8599bbd9b7c698f809a294732de484db93",
+      "sha256": "f8870e4f340e9db6b7d865ba81bb1e0460e37034158b4956848f4e373fa8bfc1",
+      "bytes": 1738
+    },
+    {
+      "path": "experiments/original_synth/lossless_table.c",
+      "git_blob": "ba76e4d53c20e5f6d434381b6a4593982d67e937",
+      "actual_git_blob": "ba76e4d53c20e5f6d434381b6a4593982d67e937",
+      "sha256": "abaa727cb82c6e6a6ca62ee15735ec1970dfb3bbc47d2adc266dbe9ea8d492cf",
+      "bytes": 3619
+    },
+    {
+      "path": "experiments/original_synth/chicago_selector.c",
+      "git_blob": "678e5046475a51fc5c499b226d66e9d55af1ded8",
+      "actual_git_blob": "678e5046475a51fc5c499b226d66e9d55af1ded8",
+      "sha256": "e28da69f35f1232b7e5e8304024c3ccd143128c55fbe2c6e456881e93d42eead",
+      "bytes": 4012
+    },
+    {
+      "path": "experiments/original_synth/chicago_arp_control.c",
+      "git_blob": "869a6e2074bd3bd773aa50ecdb98e1db6f107e65",
+      "actual_git_blob": "869a6e2074bd3bd773aa50ecdb98e1db6f107e65",
+      "sha256": "9c2c127418565d0fde85398d33687c7488a5e4a33816fa251461853566d1a7e4",
+      "bytes": 2473
+    },
+    {
+      "path": "experiments/original_synth/chicago_selector.h",
+      "git_blob": "9617e304598c3d61c3298dbf077e2936129221bc",
+      "actual_git_blob": "9617e304598c3d61c3298dbf077e2936129221bc",
+      "sha256": "69cfa69227fd896de04a9c1c8b8e81e2307ea131b05e6dfe4f9ce24109a0aebf",
+      "bytes": 2559
+    },
+    {
+      "path": "experiments/original_synth/chicago_fx2_inserts.h",
+      "git_blob": "0dd3e8118c6a26f3fca2092e05d329df413c8d0a",
+      "actual_git_blob": "0dd3e8118c6a26f3fca2092e05d329df413c8d0a",
+      "sha256": "f21f9152453609b5263354fc66927becc9664362bba55dc638d2cbc32ab7ef98",
+      "bytes": 8043
+    },
+    {
+      "path": "experiments/original_synth/fixed_fx.h",
+      "git_blob": "203c94a828b42174c9126a6b1da3a878065e2197",
+      "actual_git_blob": "203c94a828b42174c9126a6b1da3a878065e2197",
+      "sha256": "64652c235ebc3445098ecac6283a9c105da73077a7b657c57bc43a9490ae951c",
+      "bytes": 1693
+    },
+    {
+      "path": "experiments/original_synth/chicago_control_owner.h",
+      "git_blob": "86da671bd005c61ef1b2b2654c18ab3b727d1943",
+      "actual_git_blob": "86da671bd005c61ef1b2b2654c18ab3b727d1943",
+      "sha256": "3bf90c1f630c4dbc1110057a6e4f0dce84b1c2b1a27353315b8c56b95a37f552",
+      "bytes": 2045
+    },
+    {
+      "path": "firmware/src/libc.c",
+      "git_blob": "40628a590ae4e130402c16a292e1b11629d1d1ee",
+      "actual_git_blob": "40628a590ae4e130402c16a292e1b11629d1d1ee",
+      "sha256": "dfefaae7c183c6175dff9efc2dc0fa90df8214532e53b1d1e3a678a12fc5f990",
+      "bytes": 3200
+    },
+    {
+      "path": "firmware/src/storage.c",
+      "git_blob": "922a4dc0ee266c03b7865689ca16ce07f881d234",
+      "actual_git_blob": "922a4dc0ee266c03b7865689ca16ce07f881d234",
+      "sha256": "dcdf60d6ef066574b38d85202b4d53d4f37fc0b4f0c60ebbeeeb41304f319d40",
+      "bytes": 12395
+    },
+    {
+      "path": "firmware/src/gfx.c",
+      "git_blob": "8cbea609dc4b5b8b95fb802c3b55f38711cdaf65",
+      "actual_git_blob": "8cbea609dc4b5b8b95fb802c3b55f38711cdaf65",
+      "sha256": "3efcbeafea44c2754cca3d43bf32aeec70ddc57f49e7344f2931cc165b909fab",
+      "bytes": 12317
+    },
+    {
+      "path": "firmware/src/ui_theme.h",
+      "git_blob": "e4f931f9447de9e6d940988d172dfe27dc995434",
+      "actual_git_blob": "e4f931f9447de9e6d940988d172dfe27dc995434",
+      "sha256": "2576702222d15a535dc943184ea103b86a29c4f621824e26c215e7199c19883e",
+      "bytes": 1559
+    },
+    {
+      "path": "firmware/src/usb.c",
+      "git_blob": "bb4dba222064b7d3542e7ceeebb3bcfc641ec15a",
+      "actual_git_blob": "bb4dba222064b7d3542e7ceeebb3bcfc641ec15a",
+      "sha256": "dd9fdc38bee178f98510995c418fc45b1891fbb8004b5556122c73f2e7f61844",
+      "bytes": 61802
+    },
+    {
+      "path": "firmware/src/lcd.c",
+      "git_blob": "9d5381fb892f0503dd2cbab102b6b770a67454a7",
+      "actual_git_blob": "9d5381fb892f0503dd2cbab102b6b770a67454a7",
+      "sha256": "4532d6324e0a79ab05cf72e39260605e1027c01347fb243ce6c34dcb3e2a0ffc",
+      "bytes": 8279
+    },
+    {
+      "path": "firmware/src/usb_product_name.h",
+      "git_blob": "eec8580a92fa976c00264e9e03553a7947ad62d6",
+      "actual_git_blob": "eec8580a92fa976c00264e9e03553a7947ad62d6",
+      "sha256": "a383f3bfd9c764d2a0c26a4a715f601441b2138ca29f2c990f533ea47fbedc80",
+      "bytes": 1543
+    },
+    {
+      "path": "firmware/src/midi_uart.c",
+      "git_blob": "7e6ce3a74b5f98d37c738d738efbbd3e80a9e812",
+      "actual_git_blob": "7e6ce3a74b5f98d37c738d738efbbd3e80a9e812",
+      "sha256": "ac22bb5504ffcb478e9ef3be3a27603d9a1199ccef655660e13621e2e1c85c87",
+      "bytes": 2988
+    },
+    {
+      "path": "firmware/src/ota.c",
+      "git_blob": "af42a32311ec8ea41167dd0b5abbc1fbeeeba506",
+      "actual_git_blob": "af42a32311ec8ea41167dd0b5abbc1fbeeeba506",
+      "sha256": "2ea442e56b6232b2fcffc1b744a79dcc457b3b0da3a4508603f0e63e30a302cd",
+      "bytes": 16780
+    },
+    {
+      "path": "firmware/src/ble.c",
+      "git_blob": "5f4ce220f04256fde0fffbfa66201c49fd8b6ba8",
+      "actual_git_blob": "5f4ce220f04256fde0fffbfa66201c49fd8b6ba8",
+      "sha256": "fc9397549ed4b135a62df354172e832e598a44d7db0d95bc6bfda83b6c69e0d4",
+      "bytes": 33497
+    },
+    {
+      "path": "firmware/src/x0x.c",
+      "git_blob": "b4c2f46caa9a100199ebf54a15aeed260912eab1",
+      "actual_git_blob": "b4c2f46caa9a100199ebf54a15aeed260912eab1",
+      "sha256": "9fa41676996bff349e58bd03e4bde8b2a9fa5e4f2379760b890d2d442393a3fa",
+      "bytes": 9013
+    },
+    {
+      "path": "firmware/src/x0x_cold.h",
+      "git_blob": "089256ed4b45ceb220aa713a9dfa023efe9b85ad",
+      "actual_git_blob": "089256ed4b45ceb220aa713a9dfa023efe9b85ad",
+      "sha256": "e95f4037d8f8e0dca5c32ba9253fb8aba7baf1d098407998f6a9c0d1857ba663",
+      "bytes": 428
+    },
+    {
+      "path": "firmware/src/crc32_nibble.h",
+      "git_blob": "193ce7bcf580fcb69e59d66e610ce4ea3baaed60",
+      "actual_git_blob": "193ce7bcf580fcb69e59d66e610ce4ea3baaed60",
+      "sha256": "92ee22e7e2bac7c50502671c33dce674afb4085344a3bc725ea277f15002dfb4",
+      "bytes": 1331
+    },
+    {
+      "path": "firmware/loader/loader.ld",
+      "git_blob": "acadd26f556107d8e43125bc929278db2e31cca3",
+      "actual_git_blob": "acadd26f556107d8e43125bc929278db2e31cca3",
+      "sha256": "4acae8c9a16cf9a70f53a546f9175b5a86d2bc5cb6bce39513a2ff3c4fdba4ae",
+      "bytes": 855
+    },
+    {
+      "path": "firmware/loader/ldr_core.c",
+      "git_blob": "6a36ae8a0ad6fb804c8f0cae88446dcfeb0a9aeb",
+      "actual_git_blob": "6a36ae8a0ad6fb804c8f0cae88446dcfeb0a9aeb",
+      "sha256": "634ef4b0fed51ec2824842c05d00737a89b35c9e3d9946d5a8498d9a0d496e24",
+      "bytes": 6072
+    },
+    {
+      "path": "firmware/loader/crt0_ldr.S",
+      "git_blob": "3d8876630b66d30451525cf8f09a9eb89705d3d9",
+      "actual_git_blob": "3d8876630b66d30451525cf8f09a9eb89705d3d9",
+      "sha256": "bd4149b97520d1dcc271f730c5a046b0dbf97909e48e968e0ba18304ffc37841",
+      "bytes": 558
+    },
+    {
+      "path": "firmware/loader/loader.c",
+      "git_blob": "1b256b3901d1b67e67657c5dff723e7fadbbc94f",
+      "actual_git_blob": "1b256b3901d1b67e67657c5dff723e7fadbbc94f",
+      "sha256": "d69c8b2288d17dcb89edeee7730e95cc71208928c2b39cf0ba8c8634cf549db9",
+      "bytes": 4663
+    },
+    {
+      "path": "firmware/hal/fm1_cpu1.S",
+      "git_blob": "7c05c6b810c65cc9668d34528db614bd793f1735",
+      "actual_git_blob": "7c05c6b810c65cc9668d34528db614bd793f1735",
+      "sha256": "3780fbb5681bd189eafc395a0aa2c6c8c7f24a9250e9971b64dc46162f90d526",
+      "bytes": 1158
+    },
+    {
+      "path": "firmware/hal/fm1_cc.h",
+      "git_blob": "7243d70064bae9001e0eedd88565b84da76b6e69",
+      "actual_git_blob": "7243d70064bae9001e0eedd88565b84da76b6e69",
+      "sha256": "21aadf8620c2ac002d1d1931f18be29b0b3308a4d6d26a49452fe169d337e70a",
+      "bytes": 1139
+    },
+    {
+      "path": "firmware/hal/fm1_usb.h",
+      "git_blob": "0781739402f984b7c5c02b3b94d2d093b6c2f039",
+      "actual_git_blob": "0781739402f984b7c5c02b3b94d2d093b6c2f039",
+      "sha256": "1263fe2106705fd49a3421651c27d9455481e1ed824155a1ae3c8407e533e52b",
+      "bytes": 5104
+    },
+    {
+      "path": "firmware/hal/fm1_xip.h",
+      "git_blob": "45830c04bb8463ee27d40ccda2d5317757723872",
+      "actual_git_blob": "45830c04bb8463ee27d40ccda2d5317757723872",
+      "sha256": "dcba6ddb9cd2403e1d97c4db49d836110ef2805d2369db7ed323e3fbe26c56ed",
+      "bytes": 580
+    },
+    {
+      "path": "firmware/hal/fm1_audio.h",
+      "git_blob": "02e2cc32dd1cd9f00aad1e92fc87cb45771bc40a",
+      "actual_git_blob": "02e2cc32dd1cd9f00aad1e92fc87cb45771bc40a",
+      "sha256": "22351440699748546e932098e3016c618d6137dd0ae34557e08a107641d4e62e",
+      "bytes": 3267
+    },
+    {
+      "path": "firmware/hal/fm1_sys.h",
+      "git_blob": "994b394016da2211b7d0b91b79ffa88910d96a89",
+      "actual_git_blob": "994b394016da2211b7d0b91b79ffa88910d96a89",
+      "sha256": "1c1e592fabbbb4c9664659c44685d795e0dcccbf903998936fc31c0d8332e1c9",
+      "bytes": 6783
+    },
+    {
+      "path": "firmware/hal/fm1_lcd_hw.h",
+      "git_blob": "199550ad7d43e689ed88438651b4116d1b3f0f44",
+      "actual_git_blob": "199550ad7d43e689ed88438651b4116d1b3f0f44",
+      "sha256": "867a2f8d3946b6948e52e01cf26ca7e765b173c3446062b15d22d13311a835c5",
+      "bytes": 5163
+    },
+    {
+      "path": "firmware/hal/fm1_input.h",
+      "git_blob": "b4c015e2124f1c50f71636aba42ac5f961bc0d9e",
+      "actual_git_blob": "b4c015e2124f1c50f71636aba42ac5f961bc0d9e",
+      "sha256": "7fe7ef373c77067a742e9200aaae3127e9a52128ed71b8d677868a873671610a",
+      "bytes": 13613
+    },
+    {
+      "path": "firmware/hal/fm1_sync.h",
+      "git_blob": "dd407a3992bdc83551a8acc3f8fa2ad0a91a93f0",
+      "actual_git_blob": "dd407a3992bdc83551a8acc3f8fa2ad0a91a93f0",
+      "sha256": "37775fca968229a69c8f895c66e8a1900704be86e4786f65d2b69c0f926ca7b1",
+      "bytes": 216
+    },
+    {
+      "path": "firmware/hal/fm1_flash_map.h",
+      "git_blob": "1dd139d955362ae648ac49b937a24132d818b99f",
+      "actual_git_blob": "1dd139d955362ae648ac49b937a24132d818b99f",
+      "sha256": "91c1ace65a1b7377f433d6261d01a1861c9cafd3829696557b9538b67b7c5293",
+      "bytes": 9684
+    },
+    {
+      "path": "firmware/hal/fm1_adc.h",
+      "git_blob": "19b253640c2aebe24dfb6acc37fe53d5596e54b4",
+      "actual_git_blob": "19b253640c2aebe24dfb6acc37fe53d5596e54b4",
+      "sha256": "1917870bd802de9134d33335efbcf886b296705dff06688925fd7325589c0c1a",
+      "bytes": 1380
+    },
+    {
+      "path": "firmware/hal/fm1_debug.h",
+      "git_blob": "235a3a001d0f560f6642a199b61ba785d4d215fe",
+      "actual_git_blob": "235a3a001d0f560f6642a199b61ba785d4d215fe",
+      "sha256": "ce54e8792aaf49380dfce1b297eac78f663065b85aa248cf17f7d1c2af70db37",
+      "bytes": 1674
+    },
+    {
+      "path": "firmware/hal/fm1_supply.h",
+      "git_blob": "29dfa2123bfb7de32167be18a4febeabf6064b6e",
+      "actual_git_blob": "29dfa2123bfb7de32167be18a4febeabf6064b6e",
+      "sha256": "8cd1cd34c1308de0e1a53182f208341883d415ccf6e6c250bb4c58720f917641",
+      "bytes": 2926
+    },
+    {
+      "path": "firmware/hal/fm1_timer.h",
+      "git_blob": "c20e10fee980481b6292782e755f95ddcee40e10",
+      "actual_git_blob": "c20e10fee980481b6292782e755f95ddcee40e10",
+      "sha256": "1ec236ce4a75a5b94b9c16999dcdf7d71e4e0c5e0d2f14dbfb87bbaf025e1004",
+      "bytes": 996
+    },
+    {
+      "path": "firmware/hal/fm1_ble.h",
+      "git_blob": "63ea9e64fbe9f0f59289be90043ae4e611917d1e",
+      "actual_git_blob": "63ea9e64fbe9f0f59289be90043ae4e611917d1e",
+      "sha256": "adab8838fd5666c6529d71ad6d88dee8a60a244c2dd700daa00013fdb2b2b73c",
+      "bytes": 3105
+    },
+    {
+      "path": "firmware/hal/fm1_capture_gate.h",
+      "git_blob": "23ca34033683cf5be23e491bdf6f53211e041718",
+      "actual_git_blob": "23ca34033683cf5be23e491bdf6f53211e041718",
+      "sha256": "6b48a1eadfc403d1236c425fd6db5689816aef24d6827a62ae745576e9c4d4c4",
+      "bytes": 3905
+    },
+    {
+      "path": "firmware/hal/fm1_guard.h",
+      "git_blob": "4a23dfedab625b7880bad42a0448ba3180e155f7",
+      "actual_git_blob": "4a23dfedab625b7880bad42a0448ba3180e155f7",
+      "sha256": "1cd32fca5be15a5966a0f6ca0698c9c1942bf57bce3833b2a91d38ad539f8a3b",
+      "bytes": 11463
+    },
+    {
+      "path": "firmware/hal/x0x_ble_abi.h",
+      "git_blob": "8716949b32a1bb11fb3bf5f338f0265dffae9de9",
+      "actual_git_blob": "8716949b32a1bb11fb3bf5f338f0265dffae9de9",
+      "sha256": "be763aee1add23690d5d42d27bf9a37615ae90b53c86ed99100e6b7ceb669867",
+      "bytes": 9245
+    },
+    {
+      "path": "firmware/hal/fm1_uart.h",
+      "git_blob": "3642b0fe66780d0e16af1d73719ca75ac7abcd3d",
+      "actual_git_blob": "3642b0fe66780d0e16af1d73719ca75ac7abcd3d",
+      "sha256": "3c3dfce8ced6964f695f7bd28db0b4e413d00da63915be9c4752bb60af394171",
+      "bytes": 2865
+    },
+    {
+      "path": "firmware/hal/fm1_gpio.h",
+      "git_blob": "cb7db8cc0cacf9878d997cfb00d6fe38780f5e63",
+      "actual_git_blob": "cb7db8cc0cacf9878d997cfb00d6fe38780f5e63",
+      "sha256": "5e3937e32a3b4b9b9ae622c5b42c8819ec8a16f2d76dbddec91654703c77a216",
+      "bytes": 644
+    },
+    {
+      "path": "firmware/hal/fm1_perf.h",
+      "git_blob": "74b60d3f5f52da57c1810b1f1831c3eb2419a239",
+      "actual_git_blob": "74b60d3f5f52da57c1810b1f1831c3eb2419a239",
+      "sha256": "e48cc30adc298de861080fa2815e6861d7081a0c04b81deed3e42eb0cc6dddcf",
+      "bytes": 1885
+    },
+    {
+      "path": "firmware/hal/fm1_isr.S",
+      "git_blob": "56e42599950023245397b234ac42e0f4b112f549",
+      "actual_git_blob": "56e42599950023245397b234ac42e0f4b112f549",
+      "sha256": "782b46976caf4059b2e098ea088405f5f838379891cfb4916b4b5ab8c41b73f3",
+      "bytes": 894
+    },
+    {
+      "path": "firmware/hal/fm1_vec.S",
+      "git_blob": "a0a76430bfd8d8c047a92fe7a64af85e2ea3cf46",
+      "actual_git_blob": "a0a76430bfd8d8c047a92fe7a64af85e2ea3cf46",
+      "sha256": "8f9e787871332f522157d561dc3cfe8906ed0abf160139ed5819cfdeab66f01a",
+      "bytes": 713
+    },
+    {
+      "path": "firmware/hal/fm1_time.h",
+      "git_blob": "d62920d5a72ed30e4876ea39af87db0a86ce98aa",
+      "actual_git_blob": "d62920d5a72ed30e4876ea39af87db0a86ce98aa",
+      "sha256": "e83c725eae2ec5a163771ca2b8f1c0779354456f2e20a32febc7b6755758a97d",
+      "bytes": 1478
+    },
+    {
+      "path": "firmware/hal/smk_input.h",
+      "git_blob": "46ac1cb1ec4d33e1618be8c6057625f48de6a39a",
+      "actual_git_blob": "46ac1cb1ec4d33e1618be8c6057625f48de6a39a",
+      "sha256": "054cfaebb766119d6ca41b6632bbae3e2ec6dbb1f1f11387eebec4ae6a7e98d9",
+      "bytes": 31352
+    },
+    {
+      "path": "firmware/hal/fm1_cpu1.h",
+      "git_blob": "3e3dad1b87f93a6f84eb43b875b711b3e9a59a16",
+      "actual_git_blob": "3e3dad1b87f93a6f84eb43b875b711b3e9a59a16",
+      "sha256": "28ad64570c16eb7e6332aa1cfe65320abb96f93348a19e762552bcb2f87b52f5",
+      "bytes": 18228
+    },
+    {
+      "path": "firmware/hal/x0x_bundle_gate.h",
+      "git_blob": "d7c36292b39d1061d0ef9b6d2198006eed3c6dc5",
+      "actual_git_blob": "d7c36292b39d1061d0ef9b6d2198006eed3c6dc5",
+      "sha256": "5b820702df2161fd1572a94b526eccc26285b2c955bdd3ef338ea8f6dbd06519",
+      "bytes": 764
+    },
+    {
+      "path": "firmware/hal/fm1_irq.h",
+      "git_blob": "e7f23b8fa9c48b73275d217e752d6a3530c675cd",
+      "actual_git_blob": "e7f23b8fa9c48b73275d217e752d6a3530c675cd",
+      "sha256": "9ada88b7bc4981c509bfb9e7bc26f1ab39194653b92a651ac4f54c90edb6d9b1",
+      "bytes": 7732
+    },
+    {
+      "path": "firmware/hal/fm1_flash.h",
+      "git_blob": "d12484e535b5ac6792274da0657f8d426e0d1914",
+      "actual_git_blob": "d12484e535b5ac6792274da0657f8d426e0d1914",
+      "sha256": "732b9abf5b871271ca8e95c02418c785a4683d4abfef1d82af9ee0af56f958b6",
+      "bytes": 9585
+    },
+    {
+      "path": "firmware/hal/fm1_opt.h",
+      "git_blob": "ec1f7957e11f3ebfd892b17abd82c9edcda8d36f",
+      "actual_git_blob": "ec1f7957e11f3ebfd892b17abd82c9edcda8d36f",
+      "sha256": "7d18b6251e909f6531eb0f77dacbf8e2f675d48c9f4e40e7da496ff0827b13d0",
+      "bytes": 299
+    },
+    {
+      "path": "firmware/src/ble/ble_midi_uuid.h",
+      "git_blob": "c2a3faab2c5e7af18b5271be5220c3a1835ec853",
+      "actual_git_blob": "c2a3faab2c5e7af18b5271be5220c3a1835ec853",
+      "sha256": "0a66e5c27998365554ba4f90b5cc178546fac0e216ed7b9401c2757040c96f5e",
+      "bytes": 792
+    },
+    {
+      "path": "firmware/src/ble/ble_midi_host.c",
+      "git_blob": "7adf849a28f328f2696004ac7f7eefd637c18fca",
+      "actual_git_blob": "7adf849a28f328f2696004ac7f7eefd637c18fca",
+      "sha256": "aa808f512b807bd42484347b0cb35d0f321598ba24a23062c1cffe89b12383d8",
+      "bytes": 27275
+    },
+    {
+      "path": "firmware/src/ble/ble_midi_central.c",
+      "git_blob": "5b7cba0f488fb93e6661762ca6060487f52ff823",
+      "actual_git_blob": "5b7cba0f488fb93e6661762ca6060487f52ff823",
+      "sha256": "7fbd91bd346e75b02bd3bb1977d43b40cb85e82561f1cbb30806128ed3f17bae",
+      "bytes": 36933
+    },
+    {
+      "path": "firmware/src/ble/ble_glue.h",
+      "git_blob": "06206564355daab08f98ebdf9a52d1cfe7a8a069",
+      "actual_git_blob": "06206564355daab08f98ebdf9a52d1cfe7a8a069",
+      "sha256": "5d093f3f81ef3f9df4fccce0f863d39268c9fc10cf8e97fa87076df1a7cc7075",
+      "bytes": 8558
+    },
+    {
+      "path": "firmware/src/ble/ble_role.h",
+      "git_blob": "0c8ee5f6eaa89a20f4dce26e4c2252515a3baeb0",
+      "actual_git_blob": "0c8ee5f6eaa89a20f4dce26e4c2252515a3baeb0",
+      "sha256": "307dc4557b850d4a336adf0830f57070caa164f062e90fc6f35fde7189c66454",
+      "bytes": 2047
+    },
+    {
+      "path": "firmware/src/ble/ble_midi_host.h",
+      "git_blob": "92428ab600853c7a30cc3b88bb3ec75044a9bcb0",
+      "actual_git_blob": "92428ab600853c7a30cc3b88bb3ec75044a9bcb0",
+      "sha256": "412e0c608a6068b54cc8fb10263940e055b88d8de6e60bef57c79f397d1efcf2",
+      "bytes": 4704
+    },
+    {
+      "path": "firmware/src/ble/ble_midi_central.h",
+      "git_blob": "1dff7509fb87e3ca36284b6764ad5b31e8c653b0",
+      "actual_git_blob": "1dff7509fb87e3ca36284b6764ad5b31e8c653b0",
+      "sha256": "54d7aa22d67722878d9362c0b3345d7b4b07c6c707628bef1c78555a7d5853dd",
+      "bytes": 3669
+    },
+    {
+      "path": "firmware/src/app/chicago_param_tables.c",
+      "git_blob": "500c43ceaf7d6e96ef84099a6a5614633c2653d6",
+      "actual_git_blob": "500c43ceaf7d6e96ef84099a6a5614633c2653d6",
+      "sha256": "131b38cd310efb04e1da158cc13bd957690999a55b5d072d12054f9c8e842cc9",
+      "bytes": 2997
+    },
+    {
+      "path": "firmware/src/app/original_sound.h",
+      "git_blob": "4bd23aad602bb666b3dfb9ad21d244913e238171",
+      "actual_git_blob": "4bd23aad602bb666b3dfb9ad21d244913e238171",
+      "sha256": "7036aca27ebb19bf92763db335af3e12ed4eee9402395f39e005fdd5eab8abaa",
+      "bytes": 5620
+    },
+    {
+      "path": "firmware/src/app/apc40_pad_gamma.h",
+      "git_blob": "327fbbebfc53de46c777101b50c935d4c39e4ef7",
+      "actual_git_blob": "327fbbebfc53de46c777101b50c935d4c39e4ef7",
+      "sha256": "c4dce93ddbe5cb340570822428cd482e660f0261f7d42f7ef33f64dfe9d3ab04",
+      "bytes": 654
+    },
+    {
+      "path": "firmware/src/app/chicago_crush.h",
+      "git_blob": "c3d7a489dd8aae52bd6d5221b1d214f06336a86f",
+      "actual_git_blob": "c3d7a489dd8aae52bd6d5221b1d214f06336a86f",
+      "sha256": "f9a9e0e3557d45a3d80caf9ccc602f6da6ff121a06a7aea6e43b625f78ea5ac9",
+      "bytes": 2758
+    },
+    {
+      "path": "firmware/src/app/chicago_arp.h",
+      "git_blob": "d313b54540c5a6da738c04ca508d59bdc8e60657",
+      "actual_git_blob": "d313b54540c5a6da738c04ca508d59bdc8e60657",
+      "sha256": "ca06a84baa31ab7e66151b1ab38cd6e725bcebe4112413a12084fa71ce0ba826",
+      "bytes": 6269
+    },
+    {
+      "path": "firmware/src/app/factory_banks.h",
+      "git_blob": "f617cacefe5fd3f4ec97454dd148e913d2f4fb30",
+      "actual_git_blob": "f617cacefe5fd3f4ec97454dd148e913d2f4fb30",
+      "sha256": "26863e690c55c6c4c4d1cbbc0572f656f3b1508bd9d2a002e943c672df8c4a76",
+      "bytes": 2236
+    },
+    {
+      "path": "firmware/src/app/engine.h",
+      "git_blob": "837228376ab751a2146586f8fdae37f0d04f4eba",
+      "actual_git_blob": "837228376ab751a2146586f8fdae37f0d04f4eba",
+      "sha256": "26709f6ef876e0a072bb38bd677a15cdcc63fed5c15d9e21616cac678227b937",
+      "bytes": 18979
+    },
+    {
+      "path": "firmware/src/app/apc40_pad_owner.h",
+      "git_blob": "32fcec5b945d7d3d96e5191a2c2f1e31d36ae356",
+      "actual_git_blob": "32fcec5b945d7d3d96e5191a2c2f1e31d36ae356",
+      "sha256": "f5f4dd1ed43b60f61bbacb5024cccb6f40e55b937b47f01e589103f2b21d4844",
+      "bytes": 2305
+    },
+    {
+      "path": "firmware/src/app/param_trace.h",
+      "git_blob": "f7778a236dfc5f57f0187fcfd801082d73167d98",
+      "actual_git_blob": "f7778a236dfc5f57f0187fcfd801082d73167d98",
+      "sha256": "63339523a850e4b49074f3d1bedfcbc496f003b3e6d2cd694059dcfb3a958ba1",
+      "bytes": 834
+    },
+    {
+      "path": "firmware/src/app/ui_original_wave.h",
+      "git_blob": "568bcf906655b7dc4eae7b22e0ae1b72369cf63f",
+      "actual_git_blob": "568bcf906655b7dc4eae7b22e0ae1b72369cf63f",
+      "sha256": "c48cd6b043a13cd8b00191958b09b55f631b430eea47e968c1decf14a87e1910",
+      "bytes": 5894
+    },
+    {
+      "path": "firmware/src/app/chicago_bpmdly.h",
+      "git_blob": "d517fa98b33f95025df9d7e1e95b756682ec0a3b",
+      "actual_git_blob": "d517fa98b33f95025df9d7e1e95b756682ec0a3b",
+      "sha256": "cba31acac53f7ca5239e9470ffeaf840597e3a449bb0dd15c112a7e24402c57d",
+      "bytes": 3879
+    },
+    {
+      "path": "firmware/src/app/chicago_fx.h",
+      "git_blob": "dadd5dd7f57c0dbd442f715cd5402284630b4253",
+      "actual_git_blob": "dadd5dd7f57c0dbd442f715cd5402284630b4253",
+      "sha256": "2570ec78de3533613bb557365a3b34299bbdc49fa31ce6ae6d51fb6b32b713c8",
+      "bytes": 5989
+    },
+    {
+      "path": "firmware/src/app/ui_chance_probe.h",
+      "git_blob": "df0a57b0bc34a1b9726d0cd326220b08b234ce6f",
+      "actual_git_blob": "df0a57b0bc34a1b9726d0cd326220b08b234ce6f",
+      "sha256": "e07c2efcd861d4c053b9b3aa5c4c21c4a0c2cfa510ba578dcff1ba67c63af140",
+      "bytes": 1708
+    },
+    {
+      "path": "firmware/src/app/apc40_pad_default.h",
+      "git_blob": "4d017b641493c870d7d9c38d82274d8a57c94a31",
+      "actual_git_blob": "4d017b641493c870d7d9c38d82274d8a57c94a31",
+      "sha256": "70cbcf354b8abe519043489a6f4f63098c2953f52ed8e581a149368395ff7100",
+      "bytes": 2221
+    },
+    {
+      "path": "firmware/src/app/factory_banks.c",
+      "git_blob": "340d87fc51e53ddcce3c9484b2e1b1529aeabf14",
+      "actual_git_blob": "340d87fc51e53ddcce3c9484b2e1b1529aeabf14",
+      "sha256": "1a7fa6dcc0ff0ef5b29d2d89ce5c776e604771f64622aa056ac75e7b69b78aec",
+      "bytes": 2062
+    },
+    {
+      "path": "firmware/src/app/ui_pictograms.h",
+      "git_blob": "a916869210680065cedd0d9040ef7ea4bea1f7d5",
+      "actual_git_blob": "a916869210680065cedd0d9040ef7ea4bea1f7d5",
+      "sha256": "e3fb6a51785d3c817ab9fdbe553854480541d88e14e98bb9200d03163285550b",
+      "bytes": 2809
+    },
+    {
+      "path": "firmware/src/app/boot_screen.h",
+      "git_blob": "ac75a56515f29e882d7410c01c3193cc591103e2",
+      "actual_git_blob": "ac75a56515f29e882d7410c01c3193cc591103e2",
+      "sha256": "2ca8a5daa62add5be01c16e138506e25359c2b88fb45f8f4d33321a46e14bdbb",
+      "bytes": 12126
+    },
+    {
+      "path": "firmware/src/app/original_runtime.c",
+      "git_blob": "4561eb9d20972151a76629cfc433b320594533dd",
+      "actual_git_blob": "4561eb9d20972151a76629cfc433b320594533dd",
+      "sha256": "ff014466acfce7f41d960d808b466190ab2d41c4c2427e3f8b0d1abdd9c45284",
+      "bytes": 17187
+    },
+    {
+      "path": "firmware/src/app/bass_presets.h",
+      "git_blob": "d5dd590510ce1e9e56e320a9e7a2434095a2bb4b",
+      "actual_git_blob": "d5dd590510ce1e9e56e320a9e7a2434095a2bb4b",
+      "sha256": "a3d585e569fad8a61bc5f6839368cd3db0586f55e6065b33a8bbcf9205132e51",
+      "bytes": 1602
+    },
+    {
+      "path": "firmware/src/app/main_fm1.c",
+      "git_blob": "8c090941d149854a576557997e62ef97fc0fef3d",
+      "actual_git_blob": "8c090941d149854a576557997e62ef97fc0fef3d",
+      "sha256": "0b32aabfe105baa457a8c8402189e6840c3dbfd7137cc875c9c0b9d43ff98e07",
+      "bytes": 115477
+    },
+    {
+      "path": "firmware/src/app/smk_clip_keys.h",
+      "git_blob": "d78a7dcd1b264acf87bad16912754dfe79f25bec",
+      "actual_git_blob": "d78a7dcd1b264acf87bad16912754dfe79f25bec",
+      "sha256": "662dd784962908eb26b70b00834bfdfa012c0b8c5d540a624a1b9ff8f43eddc3",
+      "bytes": 10503
+    },
+    {
+      "path": "firmware/src/app/note_names.h",
+      "git_blob": "d23aad1787bac2d6533094aca4b24b9bec57b031",
+      "actual_git_blob": "d23aad1787bac2d6533094aca4b24b9bec57b031",
+      "sha256": "c674e12393ac29fa6caab0d27740a17efadd4116c942ca6297aaed8ef0533aa9",
+      "bytes": 845
+    },
+    {
+      "path": "firmware/src/app/brk_pack.h",
+      "git_blob": "8bfe75df9c0a42f0890cdbc7c68df8e1e9203f54",
+      "actual_git_blob": "8bfe75df9c0a42f0890cdbc7c68df8e1e9203f54",
+      "sha256": "e16ce4cba0452fa7a1cdf12183cd43b37f73915b177b924b2da1be4bf3bc6725",
+      "bytes": 3484
+    },
+    {
+      "path": "firmware/src/app/project.c",
+      "git_blob": "8d69214ce9840865a1a007e7fc9d6033a09961d0",
+      "actual_git_blob": "8d69214ce9840865a1a007e7fc9d6033a09961d0",
+      "sha256": "6e6d692942b6823130b67f978528d1d7ac5fb7ed8783cf194a0c807d546fe190",
+      "bytes": 34961
+    },
+    {
+      "path": "firmware/src/app/ui_step_lane.inc",
+      "git_blob": "473f1c52d811666f038d3abdf16c676e91cff7a8",
+      "actual_git_blob": "473f1c52d811666f038d3abdf16c676e91cff7a8",
+      "sha256": "91c2fb6e4118e30fb4d9693814faf46de7171288956cb34ea04fea5f384dd5c2",
+      "bytes": 3426
+    },
+    {
+      "path": "firmware/src/app/smk_arrows.h",
+      "git_blob": "110cfe7fa6567015090da85ca98c7260e4044802",
+      "actual_git_blob": "110cfe7fa6567015090da85ca98c7260e4044802",
+      "sha256": "fc2907106c155feef7ef1cd53da41ef25f87ccb2a02135aa23c0e0deb43ef700",
+      "bytes": 3763
+    },
+    {
+      "path": "firmware/src/app/ui_break_layout_controls.h",
+      "git_blob": "db58d043fd946149d457ff415cf72259626572d5",
+      "actual_git_blob": "db58d043fd946149d457ff415cf72259626572d5",
+      "sha256": "558ec8fc68a187b405522f33db99d9e7f38ed1062fdcce88dab6157e536666d7",
+      "bytes": 2263
+    },
+    {
+      "path": "firmware/src/app/plat.h",
+      "git_blob": "b57f2737c5090feac762286794c3f4b9fa1b28ae",
+      "actual_git_blob": "b57f2737c5090feac762286794c3f4b9fa1b28ae",
+      "sha256": "426e69bb62645a072f3a5f828aeb175fa9854ec9106cc014f8e22b96734019cd",
+      "bytes": 10595
+    },
+    {
+      "path": "firmware/src/app/bass_pattern_preset.h",
+      "git_blob": "c21f8147e02defa2fedddf09a870ca5d861cc13e",
+      "actual_git_blob": "c21f8147e02defa2fedddf09a870ca5d861cc13e",
+      "sha256": "61833353ccc2ddb729b3034708483f939196e2838ae704c6b5734cff03237162",
+      "bytes": 1829
+    },
+    {
+      "path": "firmware/src/app/panic_chord.h",
+      "git_blob": "709f7ba74523b3c3af1b58ca3972f8df7efa05da",
+      "actual_git_blob": "709f7ba74523b3c3af1b58ca3972f8df7efa05da",
+      "sha256": "4b40a434e7c4175cd7cbc086cff8f3001ff71ce9fe3932513caf21c2db3bbd00",
+      "bytes": 1756
+    },
+    {
+      "path": "firmware/src/app/lcd_trace.h",
+      "git_blob": "6f61d6ead230b91af3afc98f4ff5f66c17a32db9",
+      "actual_git_blob": "6f61d6ead230b91af3afc98f4ff5f66c17a32db9",
+      "sha256": "1c19e030f94abfe69f29fc31b274d6873176bf23892730a414a3928ed859c22b",
+      "bytes": 4055
+    },
+    {
+      "path": "firmware/src/app/chicago_sdly.h",
+      "git_blob": "a987c064a8ddd1645e3eaea268268bd78b96b41c",
+      "actual_git_blob": "a987c064a8ddd1645e3eaea268268bd78b96b41c",
+      "sha256": "99e34b9f8b0b5022b952b5ea757a83465715322beabd8065be05777ab7291b84",
+      "bytes": 3272
+    },
+    {
+      "path": "firmware/src/app/chicago_ring.h",
+      "git_blob": "15fcc598d0a14bbacac1b7c3fbee9e876887ac72",
+      "actual_git_blob": "15fcc598d0a14bbacac1b7c3fbee9e876887ac72",
+      "sha256": "cf9ea628a8af6fcf8b438fda21e72083abf336f5fc6ba88d28c2eecbf7d318c1",
+      "bytes": 2065
+    },
+    {
+      "path": "firmware/src/app/undo.c",
+      "git_blob": "b5ee46be8430c4103c8032ae001556119bbf44ef",
+      "actual_git_blob": "b5ee46be8430c4103c8032ae001556119bbf44ef",
+      "sha256": "e837c607966232410a6835f8322485f3adba663b49bd3f6a611f9d861532629e",
+      "bytes": 8000
+    },
+    {
+      "path": "firmware/src/app/sound_reset.h",
+      "git_blob": "cda8359fc60130b853ea4971bc480735fcf67d81",
+      "actual_git_blob": "cda8359fc60130b853ea4971bc480735fcf67d81",
+      "sha256": "5131154c2c3b28230551a98419ad9c010aa7b124b9e9ac7bfa475aed363676a5",
+      "bytes": 2167
+    },
+    {
+      "path": "firmware/src/app/miami_factory_typed.h",
+      "git_blob": "44f137fff25e64870fdda230ab192d1de1026e69",
+      "actual_git_blob": "44f137fff25e64870fdda230ab192d1de1026e69",
+      "sha256": "e069b0fef9d44f605faa4691f1762166613ddfed1344d1ff14f885d181daeb17",
+      "bytes": 13702
+    },
+    {
+      "path": "firmware/src/app/smk_clip_colour.h",
+      "git_blob": "bedac200e91a0eb8783a1d039403bb57230c6fbc",
+      "actual_git_blob": "bedac200e91a0eb8783a1d039403bb57230c6fbc",
+      "sha256": "b588b64a5305b077cb8b5e44e24131b03ab5a246086fe5382ee9ae291fc413fb",
+      "bytes": 1569
+    },
+    {
+      "path": "firmware/src/app/sound_reset.c",
+      "git_blob": "ea2e20ff81fe29f30c0d604c82dd992b203d20e0",
+      "actual_git_blob": "ea2e20ff81fe29f30c0d604c82dd992b203d20e0",
+      "sha256": "9c6ec4fe1df285f8426c959ebfd0044d9b6761a30e3a74955e8518b046580a85",
+      "bytes": 5018
+    },
+    {
+      "path": "firmware/src/app/apc40_pad_names.h",
+      "git_blob": "250036b55e97ba0d659b63a3673e1d32a706af7d",
+      "actual_git_blob": "250036b55e97ba0d659b63a3673e1d32a706af7d",
+      "sha256": "1e25855d6cd0cc76cc65424d9488308d81d96453c7e234d95a1218cfc2a40ac3",
+      "bytes": 1208
+    },
+    {
+      "path": "firmware/src/app/chicago_aux.h",
+      "git_blob": "54e4e0866c3787508f1de229dc05abe783b35397",
+      "actual_git_blob": "54e4e0866c3787508f1de229dc05abe783b35397",
+      "sha256": "3df3d3aafb828e6861262473618a10e635889f4a7976396602c507699b53633c",
+      "bytes": 2174
+    },
+    {
+      "path": "firmware/src/app/panel.c",
+      "git_blob": "60ca44f92557d8682227cdfe5d1ccd1e5c1bac54",
+      "actual_git_blob": "60ca44f92557d8682227cdfe5d1ccd1e5c1bac54",
+      "sha256": "bc8863de58fcec03c5e5b2caf184659b5216f30558f99b44e48764c87cf10c22",
+      "bytes": 5538
+    },
+    {
+      "path": "firmware/src/app/ui_drum_voice.inc",
+      "git_blob": "a0713312b7fe0d6e94b7bc0f2e71b780d4b4640e",
+      "actual_git_blob": "a0713312b7fe0d6e94b7bc0f2e71b780d4b4640e",
+      "sha256": "861988e4b5d59d4f6a73d191641ef5efa808dc609ae9329dffb74c222a761cb4",
+      "bytes": 36178
+    },
+    {
+      "path": "firmware/src/app/apc40_lcd_idle.h",
+      "git_blob": "9e27fae868cf3442b72779ee894c4d027b09a62b",
+      "actual_git_blob": "9e27fae868cf3442b72779ee894c4d027b09a62b",
+      "sha256": "b04478cae037c39817684f0d29654b098e005dd59fc630bd751569cf5c86c797",
+      "bytes": 613
+    },
+    {
+      "path": "firmware/src/app/smc_mixer_edges.h",
+      "git_blob": "ae758e7d01c511d44841098f428126194bd3df1f",
+      "actual_git_blob": "ae758e7d01c511d44841098f428126194bd3df1f",
+      "sha256": "3a0ee8913968dce40c2f19e41265ff41cecec56715dfc1f1c12c09ad4fc0dadd",
+      "bytes": 2214
+    },
+    {
+      "path": "firmware/src/app/smk_inlog.h",
+      "git_blob": "92d246031403bb830f8488c5062d3c04ba351e9a",
+      "actual_git_blob": "92d246031403bb830f8488c5062d3c04ba351e9a",
+      "sha256": "1d335edf2a3d709a060369a9f715ab7a54ed1276289fe5fa10fcc675c7c4e076",
+      "bytes": 3248
+    },
+    {
+      "path": "firmware/src/app/plat_fm1.c",
+      "git_blob": "78f46798c2316d989b12bfe0d5e7d8140dd0033d",
+      "actual_git_blob": "78f46798c2316d989b12bfe0d5e7d8140dd0033d",
+      "sha256": "7c8d2a2a53a189fa7e73172a7defdb7bead62ff4f5b974f8c3361ebecac668f7",
+      "bytes": 15628
+    },
+    {
+      "path": "firmware/src/app/unit_control.h",
+      "git_blob": "bac4773b918d30ab7d6559d7dce0db9e38c18685",
+      "actual_git_blob": "bac4773b918d30ab7d6559d7dce0db9e38c18685",
+      "sha256": "a9cbebb4b9e5e99cd16a029e857139840a8f98e39790687f563460cea6e6e995",
+      "bytes": 1267
+    },
+    {
+      "path": "firmware/src/app/chicago_phaser.h",
+      "git_blob": "3ac773c25f4b49e43830598024329ef0cc0627c1",
+      "actual_git_blob": "3ac773c25f4b49e43830598024329ef0cc0627c1",
+      "sha256": "68d78d2d10c3e64bd55fe9cc11fa439af4657973bf1ef7beb5d9a2f0e4adfeb6",
+      "bytes": 3613
+    },
+    {
+      "path": "firmware/src/app/bass_note_sound.h",
+      "git_blob": "41bdf43c4bb21d62485676fd74c867ed5eb047fb",
+      "actual_git_blob": "41bdf43c4bb21d62485676fd74c867ed5eb047fb",
+      "sha256": "9c21ee6ae0a3a42cd869ffbabf4fe986ed31e0cc3ae186b188d0e49ae491ec83",
+      "bytes": 1009
+    },
+    {
+      "path": "firmware/src/app/chicago_hall.h",
+      "git_blob": "54b84effc21eee7aed3c2688a12e1c2dbda560a7",
+      "actual_git_blob": "54b84effc21eee7aed3c2688a12e1c2dbda560a7",
+      "sha256": "490bbe037f1e66d31c9fc3454f12d79a5e58db0dd4f16a61e8456c73753ff9fa",
+      "bytes": 3905
+    },
+    {
+      "path": "firmware/src/app/ui_glyph_renderer.h",
+      "git_blob": "c8ff85cea0494b5906f80ff4f1b6b867e1b91c62",
+      "actual_git_blob": "c8ff85cea0494b5906f80ff4f1b6b867e1b91c62",
+      "sha256": "ebee44c751965bf29734fc98e8b984c7841c94b9b23ad73d77f1b28fd69a0b20",
+      "bytes": 3838
+    },
+    {
+      "path": "firmware/src/app/smc_fx_map.h",
+      "git_blob": "c04b262d883d926f19770ed896c970a292a174ea",
+      "actual_git_blob": "c04b262d883d926f19770ed896c970a292a174ea",
+      "sha256": "e75b20e1614615f0385ac2ca85a06f541246ee88efdfadcca2941082891669c3",
+      "bytes": 2279
+    },
+    {
+      "path": "firmware/src/app/chicago_eq.h",
+      "git_blob": "cf1e0832086a0356cc9569b444f7b22a6e98dd35",
+      "actual_git_blob": "cf1e0832086a0356cc9569b444f7b22a6e98dd35",
+      "sha256": "dc0965744428b33bcf6a2b9c9c9489d4d99408ad4b7d397cc1e6ce95d810e912",
+      "bytes": 2540
+    },
+    {
+      "path": "firmware/src/app/slots.c",
+      "git_blob": "da7b496dfe5bae03392fe9329e54fefe935838ca",
+      "actual_git_blob": "da7b496dfe5bae03392fe9329e54fefe935838ca",
+      "sha256": "c5909845dca000cebb749eeda8e1a631139942dceb1be3d184c9d6701b0f37ae",
+      "bytes": 5299
+    },
+    {
+      "path": "firmware/src/app/chicago_env.h",
+      "git_blob": "7e2ae40e45b88526c604be018afa69ab515912fc",
+      "actual_git_blob": "7e2ae40e45b88526c604be018afa69ab515912fc",
+      "sha256": "6eade77fde7de8ec92413a02fb20663adcda995ab2048df041250406a169bff4",
+      "bytes": 2272
+    },
+    {
+      "path": "firmware/src/app/smc_fx_strip.h",
+      "git_blob": "70241dcd57532e49cbbd6d28cb2e98bdd0bd0202",
+      "actual_git_blob": "70241dcd57532e49cbbd6d28cb2e98bdd0bd0202",
+      "sha256": "e50edebd067c2ee461ed4b8290f82b6a5e241569e336bf4ad224c7dbd37f5e9c",
+      "bytes": 4567
+    },
+    {
+      "path": "firmware/src/app/original_sound.c",
+      "git_blob": "d8c8c4968283e046fdfead6c5673d34d61ce17b7",
+      "actual_git_blob": "d8c8c4968283e046fdfead6c5673d34d61ce17b7",
+      "sha256": "e89abb1c77a77a27e5c44f7a232a2a0e896d6f502bf32269766fcc4c1f3f0d7d",
+      "bytes": 15286
+    },
+    {
+      "path": "firmware/src/app/smk_padcal.h",
+      "git_blob": "07d347f1c908c0a0e0a095cc755cdecc85d64ee1",
+      "actual_git_blob": "07d347f1c908c0a0e0a095cc755cdecc85d64ee1",
+      "sha256": "6a74d357a045e7fb5696cda8c94157bbce6adcdadc709c69704d96a019e2487d",
+      "bytes": 6915
+    },
+    {
+      "path": "firmware/src/app/smk_clip_arp_share.c",
+      "git_blob": "2f14c203fb217b4f1a099157c6d3d71517d16ae5",
+      "actual_git_blob": "2f14c203fb217b4f1a099157c6d3d71517d16ae5",
+      "sha256": "66ce3455b3373d5f723f5238a9cdaba4dcedd438f13a670b457bfc9c4cf1e97b",
+      "bytes": 1195
+    },
+    {
+      "path": "firmware/src/app/original_runtime.h",
+      "git_blob": "3c5b8570aa0c1f7f905c199c8431986c87c0156a",
+      "actual_git_blob": "3c5b8570aa0c1f7f905c199c8431986c87c0156a",
+      "sha256": "05ad46dae263690a01f3cbd6a6c217a995f52b5a4fb1f994d80dbf6715b3be69",
+      "bytes": 3982
+    },
+    {
+      "path": "firmware/src/app/ui_break_layout_main.h",
+      "git_blob": "5ec260bd8f33887f60fa83d3e8cde13a523572c3",
+      "actual_git_blob": "5ec260bd8f33887f60fa83d3e8cde13a523572c3",
+      "sha256": "7897f672e3cf009d71f7d4996c40074a8ec5f51ca2f293000e9209015a266af2",
+      "bytes": 5105
+    },
+    {
+      "path": "firmware/src/app/ui_arc8_geometry.h",
+      "git_blob": "4180d9bad92a244188be16f4322b48f235cb486c",
+      "actual_git_blob": "4180d9bad92a244188be16f4322b48f235cb486c",
+      "sha256": "3b01fc31ccd9d973fdade0add99590369d718bfac42bf6c44c3bf1273b0304fe",
+      "bytes": 4279
+    },
+    {
+      "path": "firmware/src/app/editor.c",
+      "git_blob": "d3d8e8d5237b00d96cea5c0c7474536e3fb15853",
+      "actual_git_blob": "d3d8e8d5237b00d96cea5c0c7474536e3fb15853",
+      "sha256": "a495c7f1a50366af523e7abcd9c3310fbe75ea376f5df79dc71826e4ac199b66",
+      "bytes": 41661
+    },
+    {
+      "path": "firmware/src/app/lcd_tiles.h",
+      "git_blob": "c159458c8db47b42a996b018efc639caff764975",
+      "actual_git_blob": "c159458c8db47b42a996b018efc639caff764975",
+      "sha256": "e9316a7f37a2d909cdf3a075ef57fbda791037f614b664ad687d76de25921dcf",
+      "bytes": 3107
+    },
+    {
+      "path": "firmware/src/app/smc_fx_map_tables.c",
+      "git_blob": "39d151ee8973cd45b28ebdafff3ea0ef583087fb",
+      "actual_git_blob": "39d151ee8973cd45b28ebdafff3ea0ef583087fb",
+      "sha256": "0265fb57f927c824247912f84f7e6756d3343df1751338d506f2eb5f0a45c570",
+      "bytes": 2717
+    },
+    {
+      "path": "firmware/src/app/apc40_lcd565.h",
+      "git_blob": "5632c6325889199aaf8a909214c1fd6aeb37c5bc",
+      "actual_git_blob": "5632c6325889199aaf8a909214c1fd6aeb37c5bc",
+      "sha256": "269e1b3aa2aeeea2a23d3b23c47b7fe22f5a406ee4e5a5b031dbdf1fd5db0973",
+      "bytes": 1345
+    },
+    {
+      "path": "firmware/src/app/home_pattern_glyph.h",
+      "git_blob": "065933fc65074b196aa70c97cd24d937fe1ec515",
+      "actual_git_blob": "065933fc65074b196aa70c97cd24d937fe1ec515",
+      "sha256": "cd24fc246a92c5f4d0ca990abf2cf71e5f35fc129090f370ca7d0893694a8d21",
+      "bytes": 4028
+    },
+    {
+      "path": "firmware/src/app/bass_identity.h",
+      "git_blob": "241251ce2962e1c1304d2dcfa3c9176b5cc957c7",
+      "actual_git_blob": "241251ce2962e1c1304d2dcfa3c9176b5cc957c7",
+      "sha256": "a7c86521f7774ec4a7b49d811ca2c1a0b67e86a0e873a3e22e2a22e57892bf42",
+      "bytes": 8142
+    },
+    {
+      "path": "firmware/src/app/lz.c",
+      "git_blob": "a22f7528b201b6e23fe5ca72a27ae8eda65a1703",
+      "actual_git_blob": "a22f7528b201b6e23fe5ca72a27ae8eda65a1703",
+      "sha256": "9a0c238ffc7e346bf33f5a741c3d95072aca40b5baf76932a67fbfb71aa04e0f",
+      "bytes": 4732
+    },
+    {
+      "path": "firmware/src/app/wobble_ui.h",
+      "git_blob": "11ec430c87625334763deaced73ce0ef3188eea0",
+      "actual_git_blob": "11ec430c87625334763deaced73ce0ef3188eea0",
+      "sha256": "8f2d18955fe465d048d168601f42d479130f7b432faffc2bb187bc64c28235e6",
+      "bytes": 1369
+    },
+    {
+      "path": "firmware/src/app/smk_chord_detect.h",
+      "git_blob": "89a124ff3c193f00460c6c8c5b763babddfec8e5",
+      "actual_git_blob": "89a124ff3c193f00460c6c8c5b763babddfec8e5",
+      "sha256": "6aabd4dea0239b3596132e7e49edbd53ce01232fc116a69292a6301f5cb12d7d",
+      "bytes": 7052
+    },
+    {
+      "path": "firmware/src/app/version.h",
+      "git_blob": "b390842bae9788b0f596e65c1aeb2f5adc5bd93f",
+      "actual_git_blob": "b390842bae9788b0f596e65c1aeb2f5adc5bd93f",
+      "sha256": "8d11a2ef671657898d1fd64b7b2fa64a0d41edb5b74781f58ff9170dd8c6ca57",
+      "bytes": 390
+    },
+    {
+      "path": "firmware/src/app/smc_mixer.c",
+      "git_blob": "1e1e8d2dc9653ddce205d9f9d7c6a4ec57415262",
+      "actual_git_blob": "1e1e8d2dc9653ddce205d9f9d7c6a4ec57415262",
+      "sha256": "07fd6018789c33049d28678d2c160a9d42d2611085337573dc15dfcd588a61c1",
+      "bytes": 117616
+    },
+    {
+      "path": "firmware/src/app/ui_waveform.h",
+      "git_blob": "19e9e7b4dcc0daefce39b1743ac31442d58bad29",
+      "actual_git_blob": "19e9e7b4dcc0daefce39b1743ac31442d58bad29",
+      "sha256": "0f374a2cbc2d617fad0ff60a0c475de749aa2ce1e111efd945536c590f1bc865",
+      "bytes": 1433
+    },
+    {
+      "path": "firmware/src/app/ui.c",
+      "git_blob": "de3898e639ed8a8bdfcce4c37f40d82c9372b18d",
+      "actual_git_blob": "de3898e639ed8a8bdfcce4c37f40d82c9372b18d",
+      "sha256": "21397ecfba51c71ed2be66ec6dd126f2c352ca88a60672d6779a25e79acafddc",
+      "bytes": 396453
+    },
+    {
+      "path": "firmware/src/app/play_question.h",
+      "git_blob": "b981dc579ded10c535272c217d653afb0637991b",
+      "actual_git_blob": "b981dc579ded10c535272c217d653afb0637991b",
+      "sha256": "f76a890cf5510941f0f79a173c0fb20698029d2d7f24bdf367bd3702bcbd791d",
+      "bytes": 1491
+    },
+    {
+      "path": "firmware/src/app/bass_303_adapt.h",
+      "git_blob": "9defd9aace446de331e17bab7212bda9da609164",
+      "actual_git_blob": "9defd9aace446de331e17bab7212bda9da609164",
+      "sha256": "9a33e89763d3361dd7f2c98656c22603138dd8ce950b993ae0a04c910abda86f",
+      "bytes": 6685
+    },
+    {
+      "path": "firmware/src/app/chicago_ens.h",
+      "git_blob": "bd19df28eb950e780b2fa11a6e3cd368df212dec",
+      "actual_git_blob": "bd19df28eb950e780b2fa11a6e3cd368df212dec",
+      "sha256": "a1979cd36f0efd09217eeacab2777e8892dbd93adc727a26c02edaac49b794b8",
+      "bytes": 3575
+    },
+    {
+      "path": "firmware/src/app/smc_protocol.h",
+      "git_blob": "03a642226aae01ffb9bc29888e0f5802d72ced26",
+      "actual_git_blob": "03a642226aae01ffb9bc29888e0f5802d72ced26",
+      "sha256": "51211b7778da8cc6700204df88bbe30288e606ea91acc6bec232646b363a530e",
+      "bytes": 1663
+    },
+    {
+      "path": "firmware/src/app/smk_apc40.h",
+      "git_blob": "a762d789df1af1d4b5d05425fac866fd07ad3f0c",
+      "actual_git_blob": "a762d789df1af1d4b5d05425fac866fd07ad3f0c",
+      "sha256": "5bd1df1652c4638a6019f22821b62ee150d90300fb19cb504f81136863962d47",
+      "bytes": 26972
+    },
+    {
+      "path": "firmware/src/app/engine.c",
+      "git_blob": "5c81586dfecf743dccc55ab4f3ca44d94d7f284a",
+      "actual_git_blob": "5c81586dfecf743dccc55ab4f3ca44d94d7f284a",
+      "sha256": "8f2245ddae4e472e6a32e1a8733295753ea91b1ac63411c6d1313aa502094bf5",
+      "bytes": 146494
+    },
+    {
+      "path": "firmware/src/app/chicago_cho.h",
+      "git_blob": "bccb6be8d306710ae4c6d355e86a36f23af02539",
+      "actual_git_blob": "bccb6be8d306710ae4c6d355e86a36f23af02539",
+      "sha256": "f0ed9558e7185f134366233f747fe5b076efb1144f7e48f4d304afee3b372f7d",
+      "bytes": 4576
+    },
+    {
+      "path": "firmware/src/app/smc_fx_caption.h",
+      "git_blob": "e54f040034dbe9ada8b17d584193f68dbc271d2c",
+      "actual_git_blob": "e54f040034dbe9ada8b17d584193f68dbc271d2c",
+      "sha256": "43eb7c0954fb6c42df1b0a279a7ad80b28cf538b145c5fefac3a0a1330d4b9ac",
+      "bytes": 899
+    },
+    {
+      "path": "firmware/src/app/ui_original_controls.h",
+      "git_blob": "d2bac1d0dcddc8ee40f75762123521745f7e81f6",
+      "actual_git_blob": "d2bac1d0dcddc8ee40f75762123521745f7e81f6",
+      "sha256": "a399c22a52ae8dbdac34b101e67fc9cf11d97a92b8805f53900a694294d12de3",
+      "bytes": 8221
+    },
+    {
+      "path": "firmware/src/app/x0x.h",
+      "git_blob": "f543188b11812ec187e99b464bdfd5c5b320c134",
+      "actual_git_blob": "f543188b11812ec187e99b464bdfd5c5b320c134",
+      "sha256": "b5b38ad704905ffb3abf9ecb78607839d69110c7ce80b71632391477318469ee",
+      "bytes": 10638
+    },
+    {
+      "path": "firmware/src/app/chicago_gaterev.h",
+      "git_blob": "9a2815c21985972c4230760aa3a5d083662f44b9",
+      "actual_git_blob": "9a2815c21985972c4230760aa3a5d083662f44b9",
+      "sha256": "b296c6a59894625b0cf9f99d8d3aa6fad5baa34222c9c16fe653c60b4fbb0bc5",
+      "bytes": 5339
+    },
+    {
+      "path": "firmware/src/app/original_presets.inc",
+      "git_blob": "2793412ec7ea758840b6b3279c1d0c3e23ae0774",
+      "actual_git_blob": "2793412ec7ea758840b6b3279c1d0c3e23ae0774",
+      "sha256": "d45e796ed1105571a461b30c27b80c9816e78fc2770c185c5f9a88d7d3264bfc",
+      "bytes": 17849
+    },
+    {
+      "path": "firmware/src/dsp/break_retrigger_lut.h",
+      "git_blob": "17df8ef4fa0b39ed94c30812cbabf7f2747046a7",
+      "actual_git_blob": "17df8ef4fa0b39ed94c30812cbabf7f2747046a7",
+      "sha256": "0dd63b1bc0b07a2307e68f60049703a6652a128d1da64e3a61e8445b22e56ad1",
+      "bytes": 14358
+    },
+    {
+      "path": "firmware/src/dsp/wobble_config.h",
+      "git_blob": "3dd6c078aa5d31649f8106d33cd9752615c2d94e",
+      "actual_git_blob": "3dd6c078aa5d31649f8106d33cd9752615c2d94e",
+      "sha256": "5c51b7befc7fcae712e8c2eb070fc960c198f22e7e9d1a4fca2cfd4ba1551a46",
+      "bytes": 640
+    },
+    {
+      "path": "firmware/src/dsp/juno6.h",
+      "git_blob": "915756f12163ddb0106470c286912869f997afef",
+      "actual_git_blob": "915756f12163ddb0106470c286912869f997afef",
+      "sha256": "625ac8ce03b978d996ed995fda11ccd6a838f8c816ba29def8583217c17193d4",
+      "bytes": 1851
+    },
+    {
+      "path": "firmware/src/dsp/drum909.h",
+      "git_blob": "477fcd719559bccd3ecd9906859928036d22255c",
+      "actual_git_blob": "477fcd719559bccd3ecd9906859928036d22255c",
+      "sha256": "5e7c04377da92d2abcc4e9e40b14f8bc06d7983bfa33d2e9b09a80d8517dc8c0",
+      "bytes": 6258
+    },
+    {
+      "path": "firmware/src/dsp/busfx.h",
+      "git_blob": "cf14a57153b37a929486af2cdd7179cc21858df5",
+      "actual_git_blob": "cf14a57153b37a929486af2cdd7179cc21858df5",
+      "sha256": "02475797a36b96dd5d203ff99ac31df9f755dd27d870fb54094c88a22f067e0d",
+      "bytes": 8679
+    },
+    {
+      "path": "firmware/src/dsp/fxbus.h",
+      "git_blob": "2b18d8581dd86539437c1d4eb39be2f78928ab5b",
+      "actual_git_blob": "2b18d8581dd86539437c1d4eb39be2f78928ab5b",
+      "sha256": "492402f5570faa15b24241259c1e76011bfb3054fdee0d2e320b3e9171ca519c",
+      "bytes": 3792
+    },
+    {
+      "path": "firmware/src/dsp/bass_param_ids.h",
+      "git_blob": "fefbc55a7c505fe2476647e7f771f12af5dac083",
+      "actual_git_blob": "fefbc55a7c505fe2476647e7f771f12af5dac083",
+      "sha256": "61fe885516a6175bef3bfa9a2eea8e14aff82127ff9593567a93442cec784bd4",
+      "bytes": 1032
+    },
+    {
+      "path": "firmware/src/dsp/breaks.h",
+      "git_blob": "3b562bb0e355e728fc18426c662839b00fe74e70",
+      "actual_git_blob": "3b562bb0e355e728fc18426c662839b00fe74e70",
+      "sha256": "4b5d0ee554f7ef282891d8f9c1d2cc5adec3eb08bae546da95b372c8e9015366",
+      "bytes": 9391
+    },
+    {
+      "path": "firmware/src/dsp/breaks.c",
+      "git_blob": "2ce07a900880359efafda308ea30df0b6ce5c706",
+      "actual_git_blob": "2ce07a900880359efafda308ea30df0b6ce5c706",
+      "sha256": "b21e7a2421feb6f5d290ea8ab28be8816bae5f6b0a0eb7cb08f5b50180484877",
+      "bytes": 41075
+    },
+    {
+      "path": "firmware/src/dsp/fastmath.h",
+      "git_blob": "666d8e1325d32a76f7b4b964f2808420d3987104",
+      "actual_git_blob": "666d8e1325d32a76f7b4b964f2808420d3987104",
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+      "bytes": 8246
+    },
+    {
+      "path": "firmware/src/dsp/original_miami_backend.c",
+      "git_blob": "0a479fc6157d888ce9b617fc4da109190a7171d7",
+      "actual_git_blob": "0a479fc6157d888ce9b617fc4da109190a7171d7",
+      "sha256": "9a3ffc05d712334e44bf185ec1b68f384562c1c8c7ae258c24072c2344b3dc39",
+      "bytes": 28874
+    },
+    {
+      "path": "firmware/src/dsp/ima_adpcm.h",
+      "git_blob": "0733f882640caa0134b144f1658d01fed5401832",
+      "actual_git_blob": "0733f882640caa0134b144f1658d01fed5401832",
+      "sha256": "85cb1fa2af6563ed875d1c63b278c5adf31b55578b7de6bd925e624671559480",
+      "bytes": 2239
+    },
+    {
+      "path": "firmware/src/dsp/master.h",
+      "git_blob": "66c358aefe0533f0e07f11cb0e0d59a5e20bb168",
+      "actual_git_blob": "66c358aefe0533f0e07f11cb0e0d59a5e20bb168",
+      "sha256": "b4a216724544f1eb3e924a81cefa38cd68257fcccb908bc17a21d8eb9ffbcebd",
+      "bytes": 3823
+    },
+    {
+      "path": "firmware/src/dsp/fxbus.c",
+      "git_blob": "63907ce6557c0593811b536665f996b60f508062",
+      "actual_git_blob": "63907ce6557c0593811b536665f996b60f508062",
+      "sha256": "e76e82082eb9618858b484fbe9956f204adca852b35be4c4bd931ac11757fd3b",
+      "bytes": 21570
+    },
+    {
+      "path": "firmware/src/dsp/original_chicago_backend.h",
+      "git_blob": "7f97284a54eba72f868c04a80ddd29aa92a4aa44",
+      "actual_git_blob": "7f97284a54eba72f868c04a80ddd29aa92a4aa44",
+      "sha256": "a7d44f3f13b1bcf66ee486cfc888f8585f1913986ccd8fb97b279205dcb1b0de",
+      "bytes": 8834
+    },
+    {
+      "path": "firmware/src/dsp/drum909.c",
+      "git_blob": "aba867f8289af56b40bde28b27effe4d9a711bf1",
+      "actual_git_blob": "aba867f8289af56b40bde28b27effe4d9a711bf1",
+      "sha256": "f150f594e07a0caef363629146c8a5cca901ea6240ad728a79c0115bc7e75c41",
+      "bytes": 45712
+    },
+    {
+      "path": "firmware/src/dsp/drum909_dsp.h",
+      "git_blob": "bd0dee18855786d39c002f2c327314e637e0c558",
+      "actual_git_blob": "bd0dee18855786d39c002f2c327314e637e0c558",
+      "sha256": "f2f53c86e4b441897f72125d7d4e63651257d0c5e7540cd309daa655133d5837",
+      "bytes": 13542
+    },
+    {
+      "path": "firmware/src/dsp/drum808.h",
+      "git_blob": "4060a11059484149b48b0447aed1c203acb57ec6",
+      "actual_git_blob": "4060a11059484149b48b0447aed1c203acb57ec6",
+      "sha256": "8ea8c30c80736848ed74a80d7701e1efd15c9d95aefed8b85b17c24d1ffb490a",
+      "bytes": 10107
+    },
+    {
+      "path": "firmware/src/dsp/original_miami_backend.h",
+      "git_blob": "2dac28f7a85c8bf9fd8e2ae3b46a325485d35a94",
+      "actual_git_blob": "2dac28f7a85c8bf9fd8e2ae3b46a325485d35a94",
+      "sha256": "e08380a83faff9b34f3c658aadded4820754e431267423ec779fa38045e16792",
+      "bytes": 7922
+    },
+    {
+      "path": "firmware/src/dsp/master.c",
+      "git_blob": "bbcc1c73eae575752b60a572747ecfcd5088f6ae",
+      "actual_git_blob": "bbcc1c73eae575752b60a572747ecfcd5088f6ae",
+      "sha256": "ff3486879de216c5447c2a301456abc6cf7cd46c4643d93e500d5e6890e966b7",
+      "bytes": 20645
+    },
+    {
+      "path": "firmware/src/dsp/x0x_param.c",
+      "git_blob": "b84beeda87fa4d3eb8fda1c572b96d38cd8bb17f",
+      "actual_git_blob": "b84beeda87fa4d3eb8fda1c572b96d38cd8bb17f",
+      "sha256": "2b64d6929fa0fbe79772365a0436fbd2d838e5a9d3ad1e254b93f890ad340058",
+      "bytes": 943
+    },
+    {
+      "path": "firmware/src/dsp/original_chicago_backend.c",
+      "git_blob": "171be22c8cde1b4170362247da46c4813bfe0860",
+      "actual_git_blob": "171be22c8cde1b4170362247da46c4813bfe0860",
+      "sha256": "fbc457aa50ef99dd0adc38b216b18f9e540a49d8f709bf5883e55b839c52f935",
+      "bytes": 25192
+    },
+    {
+      "path": "firmware/src/dsp/x0x_param.h",
+      "git_blob": "79d0f38d30190eceeda1226f58e631921e29d06f",
+      "actual_git_blob": "79d0f38d30190eceeda1226f58e631921e29d06f",
+      "sha256": "a9341e448f8e2e7c880734f6758df46c0e43669b4c6252b429f7070425b4c800",
+      "bytes": 1761
+    },
+    {
+      "path": "firmware/src/dsp/envelope_snapshot.h",
+      "git_blob": "96441667903ead24b47b023eca58fdb6a24d6a2a",
+      "actual_git_blob": "96441667903ead24b47b023eca58fdb6a24d6a2a",
+      "sha256": "76a2327177444bd317b63b30033cf309f5d5e5acaa07db2e6adada93158dd8e9",
+      "bytes": 971
+    },
+    {
+      "path": "firmware/src/dsp/juno6.c",
+      "git_blob": "6d0254cc094b97cb890b362ca5db9a15190ae160",
+      "actual_git_blob": "6d0254cc094b97cb890b362ca5db9a15190ae160",
+      "sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502",
+      "bytes": 6139
+    },
+    {
+      "path": "firmware/src/dsp/drum808.c",
+      "git_blob": "d784690c7c5ca22ed811c9c94082ce38fabcf90b",
+      "actual_git_blob": "d784690c7c5ca22ed811c9c94082ce38fabcf90b",
+      "sha256": "97bde9251be1bf316dc50fbf2633ec6709c732ef67ca35cf8c45f185db24d614",
+      "bytes": 101918
+    },
+    {
+      "path": "firmware/src/seq/held_chord.h",
+      "git_blob": "ee713e2d3320e4b6eca3c2df42a20f661153a23d",
+      "actual_git_blob": "ee713e2d3320e4b6eca3c2df42a20f661153a23d",
+      "sha256": "44a2bad03ef896f708ab7eda374a6e653e40f0dd72a6af9236d3eb0344a2b880",
+      "bytes": 3043
+    },
+    {
+      "path": "firmware/src/seq/pattern.c",
+      "git_blob": "6f25c2a2f448273f5dffd7befc0d8a2ea6a5888c",
+      "actual_git_blob": "6f25c2a2f448273f5dffd7befc0d8a2ea6a5888c",
+      "sha256": "7cf82c0967fdcd137e7a221c8dbc3e0ebc8675408ed8d2902af4e88097229c9e",
+      "bytes": 1607
+    },
+    {
+      "path": "firmware/src/seq/sequencer.h",
+      "git_blob": "f4b5d83735db10bc6cf16abdf70241d1093117ca",
+      "actual_git_blob": "f4b5d83735db10bc6cf16abdf70241d1093117ca",
+      "sha256": "1fffaf171bf1ec6d7575486dbb2d2c8bffc0801c6bf1cab0a213ddc072d1f3cd",
+      "bytes": 17858
+    },
+    {
+      "path": "firmware/src/seq/tb3po.h",
+      "git_blob": "299225dfe4cb0fa847dc0fd2aa1958d5b93f2f1c",
+      "actual_git_blob": "299225dfe4cb0fa847dc0fd2aa1958d5b93f2f1c",
+      "sha256": "7dd646a572129fc8df5628f6111f68fef6b54476446f75cc5f583b6f110f0073",
+      "bytes": 923
+    },
+    {
+      "path": "firmware/src/seq/tb3po.c",
+      "git_blob": "fc4cb5363f12d05d1f5e0d4ab7f6e620820897ec",
+      "actual_git_blob": "fc4cb5363f12d05d1f5e0d4ab7f6e620820897ec",
+      "sha256": "45115ad56ee96ab9ad0f6609c8194cf95ba472348d0b0bf6a7e7d0e42095e920",
+      "bytes": 6070
+    },
+    {
+      "path": "firmware/src/seq/motion.c",
+      "git_blob": "3834afe5f0a16eebca66f73f26edbfb8e64cc39a",
+      "actual_git_blob": "3834afe5f0a16eebca66f73f26edbfb8e64cc39a",
+      "sha256": "6d907f90ac8aa6077aef51e4bdfa25fdbcdac0c1497b70d17279a64c4fd742bf",
+      "bytes": 7960
+    },
+    {
+      "path": "firmware/src/seq/motion.h",
+      "git_blob": "fcb39561683aa7531fdeeef5d78ae6e0d194425d",
+      "actual_git_blob": "fcb39561683aa7531fdeeef5d78ae6e0d194425d",
+      "sha256": "1eac93af3698769b22a5141e32431bfc46e7926c344dbcc2ac328f66d0f6b4f4",
+      "bytes": 3913
+    },
+    {
+      "path": "firmware/src/seq/pattern.h",
+      "git_blob": "9810f8977dccb726e09d34666657f1e01bf83b1e",
+      "actual_git_blob": "9810f8977dccb726e09d34666657f1e01bf83b1e",
+      "sha256": "39ba28ac063a3df864d498f1cce5ae153b0037767ffdf82315e7827411421191",
+      "bytes": 5814
+    },
+    {
+      "path": "firmware/src/seq/sequencer.c",
+      "git_blob": "1c92a17d43a444d067a8aff60eb0f3a5e8e3fc8f",
+      "actual_git_blob": "1c92a17d43a444d067a8aff60eb0f3a5e8e3fc8f",
+      "sha256": "40a393b76de9f11d41bf99828fab99f87f91e29ed3b21f672c9ab1cf984b8156",
+      "bytes": 59772
+    },
+    {
+      "path": "firmware/src/app/gfinal/ui_chance_exact.c",
+      "git_blob": "d7734eb0c07a8585f4f768cc74b44cbc6fc87719",
+      "actual_git_blob": "d7734eb0c07a8585f4f768cc74b44cbc6fc87719",
+      "sha256": "8e968fd4456286ac6fa95cea73ecc4b0460f11f7257b82752d8bdcc91082c73b",
+      "bytes": 2055
+    },
+    {
+      "path": "firmware/src/app/gfinal/ui_chance_exact.h",
+      "git_blob": "5a6bed054e2363d46c101bedf134f9e38c10e40c",
+      "actual_git_blob": "5a6bed054e2363d46c101bedf134f9e38c10e40c",
+      "sha256": "91946adde94618b729c16f07395c4c119aeefd1b4c4fe3f7c6cba16c9d415a78",
+      "bytes": 330
+    },
+    {
+      "path": "tools/mboot/session_wire.h",
+      "git_blob": "5ed162331d9e3f56819e927b706e86ab6f177849",
+      "actual_git_blob": "5ed162331d9e3f56819e927b706e86ab6f177849",
+      "sha256": "447cbbca64eddc0fa197d57cc60fcc9f9c7ec4bb1424899c8cf6c69db0593b6f",
+      "bytes": 3270
+    },
+    {
+      "path": "tools/mboot/adoption.h",
+      "git_blob": "0b52d1b511d89fe4d75269360c8fdc3d8357ea28",
+      "actual_git_blob": "0b52d1b511d89fe4d75269360c8fdc3d8357ea28",
+      "sha256": "0bda7c10ac9ec9106fa7d9b25b60f3657f24381cd64e64e039a85b94b5af264e",
+      "bytes": 1470
+    },
+    {
+      "path": "tools/mboot/capture_core.h",
+      "git_blob": "0e22c5d3176506261cdd124d158f414277a613f5",
+      "actual_git_blob": "0e22c5d3176506261cdd124d158f414277a613f5",
+      "sha256": "170b21557618ff55c75b7be6a10b6399a1dab4a3812bc74164fedd7fa79939bc",
+      "bytes": 4178
+    },
+    {
+      "path": "tests/host/juno6_runtime_test.c",
+      "git_blob": "364dc33c0d34869e0a6ce0244cf4233efb760298",
+      "actual_git_blob": "364dc33c0d34869e0a6ce0244cf4233efb760298",
+      "sha256": "db94b644a7559b9d175e486bcff7501d8ff3d99b8f869a1e65c44f80fa936e79",
+      "bytes": 1409
+    },
+    {
+      "path": "tests/host/audio_path_stress.py",
+      "git_blob": "84d5b4ebc00696bd2bda3a481fe73c86d38d7f3b",
+      "actual_git_blob": "84d5b4ebc00696bd2bda3a481fe73c86d38d7f3b",
+      "sha256": "ff09c3dce5615f84be329f2f5a69886aff57fb23fb44c4c37d714963fd9e93af",
+      "bytes": 6303
+    },
+    {
+      "path": "tests/host/juno6_test.c",
+      "git_blob": "08a6de8e58840761f81e160de7f318ad1337b96e",
+      "actual_git_blob": "08a6de8e58840761f81e160de7f318ad1337b96e",
+      "sha256": "bd698891374636f3c80bddc7b0116972c12908c64ab6593c9adece0e95809bdf",
+      "bytes": 1926
+    },
+    {
+      "path": "tests/host/synth_peak_test.c",
+      "git_blob": "97b4436f901b8b710a7de00d933e75bc08ccc86d",
+      "actual_git_blob": "97b4436f901b8b710a7de00d933e75bc08ccc86d",
+      "sha256": "1934ba9ca44a44b0339ffce49a91b227b24a446a4dadceb4e01166f25960ed9f",
+      "bytes": 5186
+    },
+    {
+      "path": "tests/host/audio_stress_test.c",
+      "git_blob": "c2471dbb5330ee738bd45f12596cee3911f00e11",
+      "actual_git_blob": "c2471dbb5330ee738bd45f12596cee3911f00e11",
+      "sha256": "f2d43c0d0713e3b8811e9f738c62e8ed364ff9b69d16e43aac1e259f75ccab23",
+      "bytes": 10078
+    },
+    {
+      "path": "tests/host/integration_perf_bench.c",
+      "git_blob": "7d224d93963e9f90e6ca04451dc6fccf337b99eb",
+      "actual_git_blob": "7d224d93963e9f90e6ca04451dc6fccf337b99eb",
+      "sha256": "b598a0d840943806e72ec495efdce202bfe7748981cefa297ba2253bf71bb92c",
+      "bytes": 3104
+    },
+    {
+      "path": "tests/host/chicago_presentation_test.c",
+      "git_blob": "f779ec87e15d2b805bef55ec5dd571fd246be84e",
+      "actual_git_blob": "f779ec87e15d2b805bef55ec5dd571fd246be84e",
+      "sha256": "87cb94050470687047e1df2a4adad963f97a91ba6f8e8cddf687321b1e206a70",
+      "bytes": 19172
+    },
+    {
+      "path": "tests/host/audio_stress_test.sh",
+      "git_blob": "17c0233fbbe0f0e635857f8b47e85f9c7cc8ab45",
+      "actual_git_blob": "17c0233fbbe0f0e635857f8b47e85f9c7cc8ab45",
+      "sha256": "15da424c4047f8db1560c2d964bcb191382ca3f3c13062b7b12aef9b045a1a72",
+      "bytes": 2411
+    },
+    {
+      "path": "tests/host/audio_path_stress.c",
+      "git_blob": "9613c8aedc396d5b5166846b618c374659c81ec0",
+      "actual_git_blob": "9613c8aedc396d5b5166846b618c374659c81ec0",
+      "sha256": "58e877b44675b1ff26e8594abdf0da73118189f8b56a6d2c27b546595535814d",
+      "bytes": 8266
+    },
+    {
+      "path": "tests/host/audio_path_identity.py",
+      "git_blob": "c56607410c1f726790a9dd6373bc90ce1c2ed41c",
+      "actual_git_blob": "c56607410c1f726790a9dd6373bc90ce1c2ed41c",
+      "sha256": "7ef923f988d39ca6b8b255118f40453e6642ecdba0b4e13e6a9470aed93ecf41",
+      "bytes": 3752
+    },
+    {
+      "path": "tests/host/audio_path_identity.c",
+      "git_blob": "decfbe245541058e44e1a4bdf51ba674825d2b62",
+      "actual_git_blob": "decfbe245541058e44e1a4bdf51ba674825d2b62",
+      "sha256": "93f5cd49d128d3b955e84e5fce5dd31b857c58a44c2a5146fddc6569f484df29",
+      "bytes": 5543
+    },
+    {
+      "path": "tests/host/juno6_runtime_test.sh",
+      "git_blob": "b12a094f6670d010b7a5cb81559569bcf19b8cf4",
+      "actual_git_blob": "b12a094f6670d010b7a5cb81559569bcf19b8cf4",
+      "sha256": "758ff7779e9973dc669358fcf1877d02d6c54f0799b250a3809dff709ad0f153",
+      "bytes": 578
+    },
+    {
+      "path": "tests/host/original_build.sh",
+      "git_blob": "5636cc53189829a7c93b99df57e0ba546d4117e8",
+      "actual_git_blob": "5636cc53189829a7c93b99df57e0ba546d4117e8",
+      "sha256": "a3bdca18f4b98c9245be477b1d4097e4bb89b65c54e87a239c3a871d0d3a7129",
+      "bytes": 873
+    }
+  ],
+  "mismatches": []
+}

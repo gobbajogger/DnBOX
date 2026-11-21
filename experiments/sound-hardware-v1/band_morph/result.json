@@ -1,0 +1,50 @@
+{
+  "groups": {
+    "prior_grid": {
+      "pass": 133,
+      "total": 133,
+      "worst_rms_db": 0.1600168131679192,
+      "worst_spectral_db": 0.16009358641606233
+    },
+    "band_edges": {
+      "pass": 520,
+      "total": 520,
+      "worst_rms_db": 0.1600168131679192,
+      "worst_spectral_db": 0.16009358641606233
+    },
+    "prior_steps": {
+      "pass": 4,
+      "total": 4,
+      "worst_rms_db": 0.16004880644514852,
+      "worst_spectral_db": 0.22735103144745045
+    },
+    "phase_matched_steps": {
+      "pass": 91,
+      "total": 91,
+      "worst_rms_db": 0.16138908973195673,
+      "worst_spectral_db": 1.605949093069494
+    },
+    "factory_morph_fields": {
+      "pass": 1388,
+      "total": 1388,
+      "worst_rms_db": 0.16000441100710255,
+      "worst_spectral_db": 0.15999679586091234
+    }
+  },
+  "all_pass": true,
+  "factory_programs": 694,
+  "factory_bandlimited": 214,
+  "factory_raw": 480,
+  "distinct_factory_field_values": [
+    195,
+    199
+  ],
+  "two_owner_edit_and_mute_checks": 4,
+  "limits_db": [
+    1.0,
+    3.0
+  ],
+  "fft_floor_db": -80,
+  "sample_rate_hz": 44100,
+  "intact_program_renders": 0
+}

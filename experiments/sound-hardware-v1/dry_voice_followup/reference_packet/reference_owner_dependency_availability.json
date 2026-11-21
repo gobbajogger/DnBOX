@@ -1,0 +1,1700 @@
+{
+  "schema": "historical dry host compile/link identity inventory v1",
+  "scope": "Read-only metadata; no compilation or reference rendering. Commands below mention prior candidate only as historical harness linkage; do not reuse its source for implementation.",
+  "exact_historical_commands_file": "reference_owner_historical_build_commands.json",
+  "all_recorded_inputs_file": "reference_owner_historical_dependency_hashes.json",
+  "rows": [
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/dry-reference.cpp",
+      "historical_sha256": null,
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/dry-reference.cpp",
+          "sha256": "51cdbae86dcb75bcb57720ca4471b3a0807e51253388f55ea64070bd0dad4653",
+          "bytes": 1713
+        }
+      ],
+      "status": "PRESENT_HASH_NOT_HISTORICALLY_PINNED",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-inputs/tests/fixtures/synthone-factory/fullfx/full_fixture.hpp",
+      "historical_sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/tests/fixtures/synthone-factory/fullfx/full_fixture.hpp",
+          "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+          "bytes": 4162
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/fullfx/full_fixture.hpp",
+          "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+          "bytes": 4162
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/fullfx/full_fixture.hpp",
+          "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+          "bytes": 4162
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/tests/compact_scheduler_test.cpp",
+      "historical_sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/tests/compact_scheduler_test.cpp",
+          "sha256": "7c5b84dc22aa786000f2e23fe60d9da3440b3d521c0d95a4a816f508633fcb0f",
+          "bytes": 28711
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/scheduler.hpp",
+      "historical_sha256": "902982a924af09358d9bd76070ce7cdce1846b50aa029524ea86dde285e0d692",
+      "required_by": "compile dependency",
+      "local_matches": [],
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/shared-graph/shared_graph.hpp",
+      "historical_sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/shared-graph/shared_graph.hpp",
+          "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc",
+          "bytes": 2583
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/shared-graph/../probe/portable_interface.hpp",
+      "historical_sha256": "50a7229f0b7d2b3bd1b74966a2f89a321e6ead9b79e21e25de42c1aca80bac30",
+      "required_by": "compile dependency",
+      "local_matches": [],
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+      "historical_sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+          "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386",
+          "bytes": 51563
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+      "historical_sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+          "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2",
+          "bytes": 129191
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+      "historical_sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+          "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3",
+          "bytes": 847
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/controls/parameter_ports.hpp",
+      "historical_sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/parameter-ports/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/parameter_ports.hpp",
+          "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61",
+          "bytes": 1836
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/controls/generated/parameter_map.hpp",
+      "historical_sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/parameter-ports/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/generated/parameter_map.hpp",
+          "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427",
+          "bytes": 447
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/fixed_array.hpp",
+      "historical_sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/fixed_array.hpp",
+          "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740",
+          "bytes": 591
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/reader/direct_reader.h",
+      "historical_sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/reader/direct_reader.h",
+          "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf",
+          "bytes": 1157
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/compact-reader/compact.h",
+      "historical_sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/scheduler/compact-reader/compact.h",
+          "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+          "bytes": 2085
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/compact-reader/compact.h",
+          "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+          "bytes": 2085
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/scheduler/compact-reader/compact.h",
+          "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+          "bytes": 2085
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/compact-reader/compact.h",
+          "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6",
+          "bytes": 2085
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/oracle/oracle.hpp",
+      "historical_sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/oracle-binding/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/oracle-binding/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/oracle-binding/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/oracle.hpp",
+          "sha256": "4dc52f4d47e24cc276a8b7e8a0b92d2812af0f1d5975844766b58b9c643f99e8",
+          "bytes": 2501
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/oracle/state.hpp",
+      "historical_sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/oracle/state.hpp",
+          "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8",
+          "bytes": 2563
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/probe/wave_frequencies.h",
+      "historical_sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/probe/wave_frequencies.h",
+          "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be",
+          "bytes": 189
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-inputs/tests/fixtures/synthone-factory/fullfx/../frontend/quad_guard.hpp",
+      "historical_sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/tests/fixtures/synthone-factory/frontend/quad_guard.hpp",
+          "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+          "bytes": 872
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/adapter-inputs/tests/fixtures/synthone-factory/frontend/quad_guard.hpp",
+          "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+          "bytes": 872
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/quad_guard.hpp",
+          "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+          "bytes": 872
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/adapter-inputs/tests/fixtures/synthone-factory/frontend/quad_guard.hpp",
+          "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+          "bytes": 872
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/quad_guard.hpp",
+          "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+          "bytes": 872
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source_scheduler.hpp",
+      "historical_sha256": "5cbd6800919d813b4f755783c9aa374f8103d7fb065912eed86b52781a189b19",
+      "required_by": "compile dependency",
+      "local_matches": [],
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source-sequence/source_sequence.hpp",
+      "historical_sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/scheduler/source-sequence/source_sequence.hpp",
+          "sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+          "bytes": 10146
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/source_sequence.hpp",
+          "sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+          "bytes": 10146
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/scheduler/source-sequence/source_sequence.hpp",
+          "sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+          "bytes": 10146
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/source_sequence.hpp",
+          "sha256": "2cb6369b2b6fa76a7313546475fd2db5c1c8462d2f21711aaec5fa3656c3557a",
+          "bytes": 10146
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source-sequence/sequence_types.hpp",
+      "historical_sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-7bd/firmware/src/dsp/synthone/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native-current-7bd/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/native/pi32v2.fsb_gzjh/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/sequence_types.hpp",
+          "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c",
+          "bytes": 4646
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/full_oracle.hpp",
+      "historical_sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle.hpp",
+          "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6",
+          "bytes": 2696
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/full_oracle_state.hpp",
+      "historical_sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/full_oracle_state.hpp",
+          "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870",
+          "bytes": 2045
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source-sequence/original_sequence.hpp",
+      "historical_sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-recovered-originals-reconstruction-20261117-1608/sound-recovery-original-56079/experiments/synthone-port-feasibility-20261114/direct-scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/scheduler/source-sequence/original_sequence.hpp",
+          "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0",
+          "bytes": 20259
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/hc.h",
+      "historical_sha256": null,
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/hc.h",
+          "sha256": "fc35f0d7dc82e2ca9b545942582fcdb7a50cee8f8a729b94f7385123ba0e692a",
+          "bytes": 2062
+        }
+      ],
+      "status": "PRESENT_HASH_NOT_HISTORICALLY_PINNED",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/shaped_env.h",
+      "historical_sha256": null,
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/shaped_env.h",
+          "sha256": "5c1cababb2c45140c9c11165d4f6524ad32a07f4d0077969b02de10322ba09cb",
+          "bytes": 963
+        }
+      ],
+      "status": "PRESENT_HASH_NOT_HISTORICALLY_PINNED",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "fwui-fixed-ma-owner/firmware/src/dsp/envelope_snapshot.h",
+      "historical_sha256": "76a2327177444bd317b63b30033cf309f5d5e5acaa07db2e6adada93158dd8e9",
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/envelope_snapshot.h",
+          "sha256": "76a2327177444bd317b63b30033cf309f5d5e5acaa07db2e6adada93158dd8e9",
+          "bytes": 971
+        },
+        {
+          "path": "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/envelope_snapshot.h",
+          "sha256": "76a2327177444bd317b63b30033cf309f5d5e5acaa07db2e6adada93158dd8e9",
+          "bytes": 971
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/hc.c",
+      "historical_sha256": null,
+      "required_by": "compile dependency",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/hc.c",
+          "sha256": "849dc0fc0942e4c0313ef405ac3212a1f24b7f5f66639e730ad4d0110cab1073",
+          "bytes": 8269
+        }
+      ],
+      "status": "PRESENT_HASH_NOT_HISTORICALLY_PINNED",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-0.o",
+      "historical_sha256": "48a7dbe581c4dab199a46f02bc03926b77b54b3305e7657cd8d37a367464df5d",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-0.o",
+          "sha256": "48a7dbe581c4dab199a46f02bc03926b77b54b3305e7657cd8d37a367464df5d",
+          "bytes": 3536
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-1.o",
+      "historical_sha256": "a5c171bb982cb3ecd64a12147a2b14b7ac2e6b70758a3368d422684290ae838b",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-1.o",
+          "sha256": "a5c171bb982cb3ecd64a12147a2b14b7ac2e6b70758a3368d422684290ae838b",
+          "bytes": 10592
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-2.o",
+      "historical_sha256": "32ebe84463d5521e0caeef7f2dac440b8ea980fe79c4450f6e7b10694e81e413",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-2.o",
+          "sha256": "32ebe84463d5521e0caeef7f2dac440b8ea980fe79c4450f6e7b10694e81e413",
+          "bytes": 3896
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-3.o",
+      "historical_sha256": "3362b220a2ddc921f1a0f97b36969c4013cbbd4b92f7a471d1dc189d612ae4d0",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-3.o",
+          "sha256": "3362b220a2ddc921f1a0f97b36969c4013cbbd4b92f7a471d1dc189d612ae4d0",
+          "bytes": 2464
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-4.o",
+      "historical_sha256": "53e7dd08d5cf2e30de348b370233c131a1a762e91d00901bf29fd0513cc32e5b",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-4.o",
+          "sha256": "53e7dd08d5cf2e30de348b370233c131a1a762e91d00901bf29fd0513cc32e5b",
+          "bytes": 6496
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-5.o",
+      "historical_sha256": "8a32aa95da3cd5d1f82bf6b7f1e0c65314866450564061542096774c16ce6f30",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-5.o",
+          "sha256": "8a32aa95da3cd5d1f82bf6b7f1e0c65314866450564061542096774c16ce6f30",
+          "bytes": 4904
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/dry-reference.o",
+      "historical_sha256": null,
+      "required_by": "link",
+      "local_matches": [],
+      "status": "MISSING",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-7.o",
+      "historical_sha256": "a577ac795cda3a13d0db7973d349d609d8ca4fb5a4d22c9b2edddebe33163baf",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-7.o",
+          "sha256": "a577ac795cda3a13d0db7973d349d609d8ca4fb5a4d22c9b2edddebe33163baf",
+          "bytes": 18720
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/factory-8.o",
+      "historical_sha256": "174b68972a88fbdae0417eedfb4a14d878e7e45e3d7349485684e5dd3bde3ec4",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/factory-8.o",
+          "sha256": "174b68972a88fbdae0417eedfb4a14d878e7e45e3d7349485684e5dd3bde3ec4",
+          "bytes": 18384
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/oracle-frontend.o",
+          "sha256": "174b68972a88fbdae0417eedfb4a14d878e7e45e3d7349485684e5dd3bde3ec4",
+          "bytes": 18384
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-000.o",
+      "historical_sha256": "d4084fa409fb69d3c66c9ee7f8daf177a312cbcb59bb52b4ae408f54cc9023b2",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-000.o",
+          "sha256": "d4084fa409fb69d3c66c9ee7f8daf177a312cbcb59bb52b4ae408f54cc9023b2",
+          "bytes": 7832
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/base.o",
+          "sha256": "d4084fa409fb69d3c66c9ee7f8daf177a312cbcb59bb52b4ae408f54cc9023b2",
+          "bytes": 7832
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-001.o",
+      "historical_sha256": "4c81a1713523f302d6123e7b2e1a3ed9629e908ee11cf1baa15617398ead33ae",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-001.o",
+          "sha256": "4c81a1713523f302d6123e7b2e1a3ed9629e908ee11cf1baa15617398ead33ae",
+          "bytes": 11768
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/ftbl.o",
+          "sha256": "4c81a1713523f302d6123e7b2e1a3ed9629e908ee11cf1baa15617398ead33ae",
+          "bytes": 11768
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-002.o",
+      "historical_sha256": "8fefb6bc9eb43621e9ee8554402fb79e3ded814fb7570445ab64f6517e862a6e",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-002.o",
+          "sha256": "8fefb6bc9eb43621e9ee8554402fb79e3ded814fb7570445ab64f6517e862a6e",
+          "bytes": 3632
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/adsr.o",
+          "sha256": "8fefb6bc9eb43621e9ee8554402fb79e3ded814fb7570445ab64f6517e862a6e",
+          "bytes": 3632
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-003.o",
+      "historical_sha256": "748e6b320708c83286b6b4141ec7b911b949bf8dbcd4e739330d0cd838afc03f",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-003.o",
+          "sha256": "748e6b320708c83286b6b4141ec7b911b949bf8dbcd4e739330d0cd838afc03f",
+          "bytes": 2352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/crossfade.o",
+          "sha256": "748e6b320708c83286b6b4141ec7b911b949bf8dbcd4e739330d0cd838afc03f",
+          "bytes": 2352
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-004.o",
+      "historical_sha256": "fe3ceac6e0937c27faddfa769844e20f537c4bc19e8fb2ca31a732b0c303da50",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-004.o",
+          "sha256": "fe3ceac6e0937c27faddfa769844e20f537c4bc19e8fb2ca31a732b0c303da50",
+          "bytes": 2888
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/osc.o",
+          "sha256": "fe3ceac6e0937c27faddfa769844e20f537c4bc19e8fb2ca31a732b0c303da50",
+          "bytes": 2888
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-005.o",
+      "historical_sha256": "ca496ce9ca8ec306bfd3e0f19decfb63bd344cf2a1e090f1beb23d31da6c1d33",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-005.o",
+          "sha256": "ca496ce9ca8ec306bfd3e0f19decfb63bd344cf2a1e090f1beb23d31da6c1d33",
+          "bytes": 2608
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/fosc.o",
+          "sha256": "ca496ce9ca8ec306bfd3e0f19decfb63bd344cf2a1e090f1beb23d31da6c1d33",
+          "bytes": 2608
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-006.o",
+      "historical_sha256": "5a6cb4f87b0756c92fbf1f27f6a0010c258e3841ebecf10158115c8e9ae6ecb5",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-006.o",
+          "sha256": "5a6cb4f87b0756c92fbf1f27f6a0010c258e3841ebecf10158115c8e9ae6ecb5",
+          "bytes": 2568
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/noise.o",
+          "sha256": "5a6cb4f87b0756c92fbf1f27f6a0010c258e3841ebecf10158115c8e9ae6ecb5",
+          "bytes": 2568
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-007.o",
+      "historical_sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-007.o",
+          "sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6",
+          "bytes": 5352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/moogladder.o",
+          "sha256": "494e6c80f27c9fd81dbe9b26836ba922b239918b0fb1b570fe6041255a5f02f6",
+          "bytes": 5352
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-008.o",
+      "historical_sha256": "a239002f319705a55ae830d6cc675df1c75c7329da79b3787626d235b4c5214a",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-008.o",
+          "sha256": "a239002f319705a55ae830d6cc675df1c75c7329da79b3787626d235b4c5214a",
+          "bytes": 3184
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/butbp.o",
+          "sha256": "a239002f319705a55ae830d6cc675df1c75c7329da79b3787626d235b4c5214a",
+          "bytes": 3184
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-009.o",
+      "historical_sha256": "fa0acb718a97f80cc3f0e5dafc9eba7e851b0775cde4b0bd20f6b5a409266448",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-009.o",
+          "sha256": "fa0acb718a97f80cc3f0e5dafc9eba7e851b0775cde4b0bd20f6b5a409266448",
+          "bytes": 3080
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/buthp.o",
+          "sha256": "fa0acb718a97f80cc3f0e5dafc9eba7e851b0775cde4b0bd20f6b5a409266448",
+          "bytes": 3080
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-010.o",
+      "historical_sha256": "1397991cd953c69e0bce3023736b135ebeef3fb242e78e82b71a5e35849ad2cf",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-010.o",
+          "sha256": "1397991cd953c69e0bce3023736b135ebeef3fb242e78e82b71a5e35849ad2cf",
+          "bytes": 3040
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/port.o",
+          "sha256": "1397991cd953c69e0bce3023736b135ebeef3fb242e78e82b71a5e35849ad2cf",
+          "bytes": 3040
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-011.o",
+      "historical_sha256": "70776c8023169d015795f41b4dfcc188f33361efe4f674f90d4e9786811a47b3",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-011.o",
+          "sha256": "70776c8023169d015795f41b4dfcc188f33361efe4f674f90d4e9786811a47b3",
+          "bytes": 2616
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/phasor.o",
+          "sha256": "70776c8023169d015795f41b4dfcc188f33361efe4f674f90d4e9786811a47b3",
+          "bytes": 2616
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-012.o",
+      "historical_sha256": "8991c3bd3b4ed824396d632c31a67af8f4a5f5008f92df02907d6fb01a7ce9cc",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-012.o",
+          "sha256": "8991c3bd3b4ed824396d632c31a67af8f4a5f5008f92df02907d6fb01a7ce9cc",
+          "bytes": 22752
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-013.o",
+      "historical_sha256": "1d3f2d1d14dd1164668899ed5f6f2a740c000d23441a256bffaca42e7f0adba7",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-013.o",
+          "sha256": "1d3f2d1d14dd1164668899ed5f6f2a740c000d23441a256bffaca42e7f0adba7",
+          "bytes": 22904
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-014.o",
+      "historical_sha256": "cdbe8c7797555c875c7514d6cd4356b417c696fc13a1ba2471e2e106d3d58a68",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-014.o",
+          "sha256": "cdbe8c7797555c875c7514d6cd4356b417c696fc13a1ba2471e2e106d3d58a68",
+          "bytes": 2928
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-014.o",
+          "sha256": "cdbe8c7797555c875c7514d6cd4356b417c696fc13a1ba2471e2e106d3d58a68",
+          "bytes": 2928
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-015.o",
+      "historical_sha256": "42f2359e29d94743a46427228b60a89cb307959c246e5cdc2c4d9bb112566948",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-015.o",
+          "sha256": "42f2359e29d94743a46427228b60a89cb307959c246e5cdc2c4d9bb112566948",
+          "bytes": 7976
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-015.o",
+          "sha256": "42f2359e29d94743a46427228b60a89cb307959c246e5cdc2c4d9bb112566948",
+          "bytes": 7976
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-016.o",
+      "historical_sha256": "bd789fd1aec4e4ab630386f7025f2458c485abec2b4749af51abd239fcbd3c21",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-016.o",
+          "sha256": "bd789fd1aec4e4ab630386f7025f2458c485abec2b4749af51abd239fcbd3c21",
+          "bytes": 2744
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-017.o",
+      "historical_sha256": "ef67a140b65b45c893699b935530821fcc56e966df85becde7edaa280a24ac1b",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-017.o",
+          "sha256": "ef67a140b65b45c893699b935530821fcc56e966df85becde7edaa280a24ac1b",
+          "bytes": 8112
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/compact_note.o",
+          "sha256": "ef67a140b65b45c893699b935530821fcc56e966df85becde7edaa280a24ac1b",
+          "bytes": 8112
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-018.o",
+      "historical_sha256": "ea1cca8aaf8c80c08bb848e8db76e20bdced0482e669e5220228e7e83c6d2839",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-018.o",
+          "sha256": "ea1cca8aaf8c80c08bb848e8db76e20bdced0482e669e5220228e7e83c6d2839",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-018.o",
+          "sha256": "ea1cca8aaf8c80c08bb848e8db76e20bdced0482e669e5220228e7e83c6d2839",
+          "bytes": 2696
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/direct_reader.o",
+          "sha256": "ea1cca8aaf8c80c08bb848e8db76e20bdced0482e669e5220228e7e83c6d2839",
+          "bytes": 2696
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-019.o",
+      "historical_sha256": "35e034c7bdcd9990beb7dac8ac954660cb4eab6bbfb7053f22d00ccb4b7cfb15",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-019.o",
+          "sha256": "35e034c7bdcd9990beb7dac8ac954660cb4eab6bbfb7053f22d00ccb4b7cfb15",
+          "bytes": 3352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-019.o",
+          "sha256": "35e034c7bdcd9990beb7dac8ac954660cb4eab6bbfb7053f22d00ccb4b7cfb15",
+          "bytes": 3352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/runtime_morph.o",
+          "sha256": "35e034c7bdcd9990beb7dac8ac954660cb4eab6bbfb7053f22d00ccb4b7cfb15",
+          "bytes": 3352
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-020.o",
+      "historical_sha256": "2800455ca58c83a2b45f94b59f16e1fa16b487d62d7b6c265595a424c5e24ee2",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-020.o",
+          "sha256": "2800455ca58c83a2b45f94b59f16e1fa16b487d62d7b6c265595a424c5e24ee2",
+          "bytes": 8120
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/runtime_note.o",
+          "sha256": "2800455ca58c83a2b45f94b59f16e1fa16b487d62d7b6c265595a424c5e24ee2",
+          "bytes": 8120
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-021.o",
+      "historical_sha256": "238b8860add9c6f6e62d0cf8cc729e73d7d165c91b5d705b93b5aa1960f303da",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-021.o",
+          "sha256": "238b8860add9c6f6e62d0cf8cc729e73d7d165c91b5d705b93b5aa1960f303da",
+          "bytes": 4408
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/morph.o",
+          "sha256": "238b8860add9c6f6e62d0cf8cc729e73d7d165c91b5d705b93b5aa1960f303da",
+          "bytes": 4408
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-022.o",
+      "historical_sha256": "05f764b4f95862b8574917245ea28d2bc3f235f589cdbf9521353d1582a4055f",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-022.o",
+          "sha256": "05f764b4f95862b8574917245ea28d2bc3f235f589cdbf9521353d1582a4055f",
+          "bytes": 13840
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/voice.o",
+          "sha256": "05f764b4f95862b8574917245ea28d2bc3f235f589cdbf9521353d1582a4055f",
+          "bytes": 13840
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-023.o",
+      "historical_sha256": "9f6d7ea29fb07bd876d94578ec9011c472b80e9714a4cf35b714dd06da047f71",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-023.o",
+          "sha256": "9f6d7ea29fb07bd876d94578ec9011c472b80e9714a4cf35b714dd06da047f71",
+          "bytes": 1352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-023.o",
+          "sha256": "9f6d7ea29fb07bd876d94578ec9011c472b80e9714a4cf35b714dd06da047f71",
+          "bytes": 1352
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/parameter_map.o",
+          "sha256": "9f6d7ea29fb07bd876d94578ec9011c472b80e9714a4cf35b714dd06da047f71",
+          "bytes": 1352
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-024.o",
+      "historical_sha256": "de7579f9c05118dc3f19eaf94cc7c80698016df573f7a1af76c8e14dcd12ba3e",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-024.o",
+          "sha256": "de7579f9c05118dc3f19eaf94cc7c80698016df573f7a1af76c8e14dcd12ba3e",
+          "bytes": 6776
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/baseline/o2.a5c67ubr/ports.o",
+          "sha256": "de7579f9c05118dc3f19eaf94cc7c80698016df573f7a1af76c8e14dcd12ba3e",
+          "bytes": 6776
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-025.o",
+      "historical_sha256": "1e98f858dcaef753823d3f22ccaff356cf7aa1409010579530de4a9d9683612c",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-reviewed-batches-fit-sources-20261117/sound-native-host-qualification/full-build/dependency-025.o",
+          "sha256": "7edbf3edae943fcdff5e9759ef24e2de2eee629bdf7de4550b7e8eed7bf201f0",
+          "bytes": 29192
+        },
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-025.o",
+          "sha256": "11ac608ef78b02dee3128f9accd36c283df0892435d3d519e4986920d2652314",
+          "bytes": 35112
+        }
+      ],
+      "status": "ONLY_DIFFERENT_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-026.o",
+      "historical_sha256": "c392fbbcedb214b2664de77a05d55b16080d5b54c9a7dd1defae60178b052f90",
+      "required_by": "link",
+      "local_matches": [
+        {
+          "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-026.o",
+          "sha256": "c392fbbcedb214b2664de77a05d55b16080d5b54c9a7dd1defae60178b052f90",
+          "bytes": 12288
+        }
+      ],
+      "status": "EXACT_HISTORICAL_HASH_PRESENT",
+      "note": "No source contents opened for this identity check."
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/hc.o",
+      "historical_sha256": null,
+      "required_by": "link",
+      "local_matches": [],
+      "status": "MISSING",
+      "note": "No source contents opened for this identity check."
+    }
+  ],
+  "non_exact_dependencies": [
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/scheduler.hpp",
+      "historical_sha256": "902982a924af09358d9bd76070ce7cdce1846b50aa029524ea86dde285e0d692",
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/experiment/shared-graph/../probe/portable_interface.hpp",
+      "historical_sha256": "50a7229f0b7d2b3bd1b74966a2f89a321e6ead9b79e21e25de42c1aca80bac30",
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/closure/scheduler/source_scheduler.hpp",
+      "historical_sha256": "5cbd6800919d813b4f755783c9aa374f8103d7fb065912eed86b52781a189b19",
+      "status": "EXACT_HISTORICAL_HEADER_IDENTITY_NOT_FOUND"
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/dry-reference.o",
+      "historical_sha256": null,
+      "status": "MISSING"
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/pristine-callback32/dependency-025.o",
+      "historical_sha256": "1e98f858dcaef753823d3f22ccaff356cf7aa1409010579530de4a9d9683612c",
+      "status": "ONLY_DIFFERENT_HASH_PRESENT"
+    },
+    {
+      "historical_path": "/workspace/scratch/857bb2409f82/sound-resume-b90faafd/hardware-core-spike/physical-gain/hc.o",
+      "historical_sha256": null,
+      "status": "MISSING"
+    }
+  ],
+  "compiler_identity": {
+    "historical_driver_names": [
+      "cc",
+      "c++"
+    ],
+    "exact_dry_compiler_version_recorded": false,
+    "observed_host_dependency_elf_comment": "GCC: (Debian 14.2.0-19) 14.2.0",
+    "observation_files": [
+      "DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-000.o",
+      "DnBOX-Sound-native-WIP-20261117-1621/sound-reconstruction-20261117/factory-full/dependency-025.o"
+    ],
+    "inference_limit": "Object comment is recorded for existing host dependencies; it is not proof that missing historical dry object used the same executable."
+  },
+  "existing_exact_reference_dependency_object_count": 34,
+  "reference_only_rebuild_note": "The old harness mixes original/reference and prior candidate output. A fresh reference-only capture can reuse unchanged pinned FullOracle inputs but must omit prior candidate code. Building that opaque reference-owner capture is a separate requested action; no command for a new, unverified harness is invented here. The retained historical command arrays are complete and reviewable."
+}

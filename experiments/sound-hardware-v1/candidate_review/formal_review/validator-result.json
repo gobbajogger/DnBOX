@@ -1,0 +1,24 @@
+{
+  "verdicts": [
+    {
+      "#": 1,
+      "validated": true,
+      "reason": "The pinned historical checker hard-coded compact_profile_review and unconditionally overwrote its receipt while the packaged manifest contained no shared libraries; the current --review-dir selection and exclusive receipt creation resolve this, with the inspected final_test_fixes script and receipt confirming 130 passing fresh-directory cases, rejection of repeated or missing-library runs, and preservation of existing evidence."
+    },
+    {
+      "#": 2,
+      "validated": true,
+      "reason": "The pinned historical main wrote and printed a false acceptance result without returning failure, corroborated by the inspected synthetic control exiting zero; the current main raises SystemExit(1) after preserving the receipt, and final_index_status confirms false and true gates exit one and zero respectively with compiler and DSP leaves stubbed."
+    },
+    {
+      "#": 3,
+      "validated": true,
+      "reason": "The pinned verifier consumed arbitrary CSV rows without checking the declared reference hashes, and the inspected retained-curve control accepted four endpoints under the unchanged declaration; the current preflight verifies all three required reference hashes and records them, with reference_integrity confirming 5,120 unchanged-fixture comparisons and rejection of truncated, altered, missing, or incompletely declared references before output reservation or compiler execution."
+    },
+    {
+      "#": 4,
+      "validated": true,
+      "reason": "The pinned historical compact verifier overwrote the shared timestamped declaration before compile_all attempted to create the already-existing output directory; the current verifier reserves a fresh label first and stores its declaration within that run, while the inspected relocation script and receipts confirm existing-output rejection preserves retained files and a fresh passing result matches its own declaration hash."
+    }
+  ]
+}

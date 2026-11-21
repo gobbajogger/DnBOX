@@ -48,8 +48,9 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
  * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
  * init cell (factory 0); they are never written back. No song-layout change.
- * The 32-byte cell currently stores only the two performance inputs until
- * the 150-parameter Synth One patch format is admitted.
+ * With X0X_SYNTHONE_PATCH enabled, bytes/bits 8..20 hold native INIT
+ * edits in descriptor order. Stock refuses these edited cells. Untouched
+ * cells retain their historical 32 bytes and exact INIT values.
  * The original engines still map to their original selectors; schema1 is refused.
  * Untouched controls come from the immutable binary32 factory data, never
  * their rounded display bytes. Edits represent the firmware's 7-bit controls.
@@ -90,6 +91,9 @@ const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter);
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
+#if X0X_SYNTHONE_PATCH
+int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+#endif
 uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_chicago(original_chicago_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);

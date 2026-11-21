@@ -1,0 +1,97 @@
+{
+  "status": "PASS_PREPARATION_ONLY",
+  "finished_utc": "2026-11-19T00:21:57.422268+00:00",
+  "source_files_sha256": {
+    "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "tests/ownership_test.c": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+    "prepare.py": "f3a36ba98617c0a81ed3f8e5a87766634421d777b2dec15c72a17dc1286be34c",
+    "inputs/NONLINEAR-HYPOTHESIS.md": "ea2e830a98392567a9055b71296feb4764fbb32ecbbf613641823de8f16ace11",
+    "inputs/C-filter-observations.json": "85c088668cb1106cc5c32e6438c0e6535c82ea328d21435c91bb45863c3b372a",
+    "inputs/reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931",
+    "reports/C-to-D.patch": "5bda8714c7be9166cc312f77336bed17a5dbed1e4576312dca607cd927a59d1e"
+  },
+  "compiled_files_sha256": {
+    "build/s1_dry_voice.o": "abcaa1cd4d3bd91e2b8e0f87dc74750d9f0dffa162efa8e479581ae0e1f964d7",
+    "build/s1_dry_host": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751",
+    "build/ownership_test": "4fa487ff457af566aaa6b454bdadf1fb3d69219354507adb59e9df2e80b6784d"
+  },
+  "build_declaration_sha256": "d78429f5cecf577c1e5e79a1f6a77e0a4864799d0a6af01f4b663dac1a156aef",
+  "pretest_declaration_sha256": "959ee2a38f8fd06d88dfdefb336411c9a7cd8f408e7d6ebe41d0ebb09cabaed3",
+  "results": {
+    "describe": {
+      "voice_bytes": 160,
+      "prepared_bytes": 92,
+      "history_bytes": 68,
+      "sample_rate_hz": 44100,
+      "coefficient_hex": [
+        "3f7fce7c",
+        "3f7ed775",
+        "3f7fe249",
+        "3f7fce7c",
+        "3f7fe249",
+        "3f7ffd07"
+      ]
+    },
+    "host-selftest": {
+      "status": "PASS",
+      "checks": [
+        "finite physical input validation",
+        "invalid changes leave state untouched",
+        "full cutoff/depth endpoints",
+        "squared velocity",
+        "independent owners",
+        "zero initialized extra histories",
+        "160 byte object",
+        "explicit unsupported retrigger"
+      ],
+      "note_audio_rendered": false
+    },
+    "ownership-selftest": {
+      "status": "PASS",
+      "logical_owners": 2,
+      "frames_per_execution_per_owner": 4096,
+      "executions_per_owner": 2,
+      "total_evaluated_frames_per_logical_owner": 8192,
+      "compared_sample_words": 8192,
+      "finite_output_checks": 16384,
+      "full_state_checkpoint_checks": 310,
+      "untouched_owner_checks": 310,
+      "block_groups": [
+        1,
+        17,
+        64
+      ],
+      "owner_block_counts": [
+        156,
+        154
+      ],
+      "live_control_edits_per_owner": [
+        4,
+        5
+      ],
+      "note_off_frames": [
+        2049,
+        3071
+      ],
+      "maximum_requested_filter_depth": 1.2,
+      "voice_state_bytes_compared": 160,
+      "candidate_source_modified": false,
+      "reference_pcm_read": false,
+      "audio_files_written": false,
+      "scope": "dynamic ownership and block-partition API test; no fidelity gate"
+    }
+  },
+  "failed_attempts": 0,
+  "C_sources_unchanged": true,
+  "in_memory_ownership_samples_evaluated": true,
+  "reference_pcm_read": false,
+  "pcm_files_written": false,
+  "audio_acceptance_test_executed": false,
+  "core_undefined_symbols_log": "logs/core-undefined-symbols-attempt01.json",
+  "pending_action": "Stop after host/invariant checks; root review and registration before any new component or whole-voice audio comparison."
+}

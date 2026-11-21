@@ -1,0 +1,1166 @@
+{
+  "schema": "Verified source-free original-mono dry references v1",
+  "status": "COMPLETE_60_PHYSICAL_RECORDINGS_180_NOTE_CASES",
+  "archive": {
+    "path": "/workspace/scratch/e803955aec60/dry_reference_recovery/sound-pcm-preservation.tar",
+    "bytes": 211988480,
+    "sha256": "d5d11628a390f19d99783b1fb805979d371f5971efa01737c00bbc1e359b5403",
+    "member_count": 153,
+    "hash_independently_verified": true,
+    "regular_file_count": 138
+  },
+  "sample_rate_hz": 44100,
+  "dtype": "float32 little-endian",
+  "channels": 1,
+  "frames_per_note": 88192,
+  "notes_per_file": 3,
+  "total_files": 60,
+  "total_note_cases": 180,
+  "total_mono_bytes": 63498240,
+  "nonfinite_total": 0,
+  "all_compressed_and_paired_hashes_match_historical_case_plan": true,
+  "dynamic_filter_members_found": [],
+  "dynamic_filter_status": "24_RECORDINGS_72_NOTE_CASES_NOT_IN_THIS_ARCHIVE_AND_NOT_LOCAL",
+  "records": [
+    {
+      "case_id": "physical-gain/20_64_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_64_0.f32.gz",
+      "gzip_bytes": 1411252,
+      "gzip_sha256": "61ae852cf195e294d9a9dc4a1ff2775d73bc6428536b3da91247fe0f93e84f5a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "003734655a1502b0a30fb3c7b2dc7aac29b4e932c05a937e628ca1f8b9a60ca8",
+      "relative_path": "reference_pcm/20_64_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "ca4a55847706466306e4cfc9383f3fe95e649fe1a4c8dbe1e794a7022f825c64",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_500_0.f32.gz",
+      "gzip_bytes": 1329845,
+      "gzip_sha256": "447ffba38287d4872942e40ca73bfbab71c56e0b361c37d2fa97851af7f90d77",
+      "paired_bytes": 2116608,
+      "paired_sha256": "254ac2398b0e2142ae28fb80acb8bcd36ffce2ad60ba64f00e736597ae3955c6",
+      "relative_path": "reference_pcm/20_500_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "4d81d0677f68712d86daab122da57981a1b6ea28e1a2bd3532d371e0e4318a89",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_2000_0.f32.gz",
+      "gzip_bytes": 1255128,
+      "gzip_sha256": "5050aaf9c242c3392075d0217e85a3566700216cde4bb98c7bd2c4da0e69fff2",
+      "paired_bytes": 2116608,
+      "paired_sha256": "2c351028a5eb932961612aa3dec1684f11c15f1295c0137ceb16b2ff20eb68ac",
+      "relative_path": "reference_pcm/20_2000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "e8167a37e2ceae1541f4cce8f0c2b343c01563bd5d6db7d0be704e70acd32c6c",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_8000_0.f32.gz",
+      "gzip_bytes": 1218829,
+      "gzip_sha256": "55a929b6906899002c55cd9c3623e896999728a638326d672563bc59cb8e216f",
+      "paired_bytes": 2116608,
+      "paired_sha256": "fdd9f1b2dfb11f1b556daedfc7f30886135ddb072e5660264e8f33e274327abc",
+      "relative_path": "reference_pcm/20_8000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "1cb33951bcc3415e33dc4e71e9c4f40804f396b20a0fb5297c20d52c752063e7",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_22050_0.f32.gz",
+      "gzip_bytes": 1203453,
+      "gzip_sha256": "93f2e770e855a71563f5bc9ee70d3189198b2466646ea390a09342f13d2e4769",
+      "paired_bytes": 2116608,
+      "paired_sha256": "830a529e7065f5946acf1e92881de5d92a6b869972a54f8051242beb001e8efa",
+      "relative_path": "reference_pcm/20_22050_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "3c0115793ab196780347240b32993b4d96f28ea9a67be3cd0fb390824455e7e1",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_64_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_64_.25.f32.gz",
+      "gzip_bytes": 1434411,
+      "gzip_sha256": "c2a60172b31a5f9518129cba88c8738d19426fb861487231365ff95c266b0de2",
+      "paired_bytes": 2116608,
+      "paired_sha256": "11f1cf15c2ca18171c9eab838a46c5de6d0d94f6a8d0f04b7f18f81393a7517f",
+      "relative_path": "reference_pcm/20_64_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "d2866b01d2f11c9ea9484e47b7762c50f61f0ce9849b20c8afe19791923d9490",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_500_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_500_.25.f32.gz",
+      "gzip_bytes": 1318729,
+      "gzip_sha256": "042432914417552f8dff085e768efd8db8f8fd04a235d2eb772eaf1ca9526f6e",
+      "paired_bytes": 2116608,
+      "paired_sha256": "c7e1fe3d0c56884e6f841cb46dd104ef706f42a95f6b0bffa41c2ba9418c697c",
+      "relative_path": "reference_pcm/20_500_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "9753d35374e286e8810309aa8cd96054e70f302082dae7b5c8ae09446633ed69",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_2000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_2000_.25.f32.gz",
+      "gzip_bytes": 1239092,
+      "gzip_sha256": "e6e1520d22f05a9c16d770a52763cbec7ef9712aa92c4d7c3b0deb19c51cc635",
+      "paired_bytes": 2116608,
+      "paired_sha256": "d83251d43f509bbac56353e2391ff3cd319aff71003de1e4454238f93f23e750",
+      "relative_path": "reference_pcm/20_2000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "9159e962e5347b14ce5482602c6d2c1ddc4cfd07afa95c0fd7cd8c7e68496c03",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_8000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_8000_.25.f32.gz",
+      "gzip_bytes": 1213790,
+      "gzip_sha256": "f8ef88c4a771070644aa8112c31d9dfd12b90e069844ea8c67c558ff704bad90",
+      "paired_bytes": 2116608,
+      "paired_sha256": "643b1367540d01b3cad3758f4e61aec0e2ce9fedf535377e3dd7d920a8be0bc0",
+      "relative_path": "reference_pcm/20_8000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "a9375662b47724893186c4f9af6274aea3ec34ad9e24566475ce1cab87674264",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_22050_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_22050_.25.f32.gz",
+      "gzip_bytes": 1207601,
+      "gzip_sha256": "56a0cc40ee0445af146a655ba7ac9dcb1d905064170a1a1adfce11161bed5165",
+      "paired_bytes": 2116608,
+      "paired_sha256": "bdeb12c08e1fbfb2b5ea03230a8b5379ee935378d1571fdad760c2cf0f2bf28c",
+      "relative_path": "reference_pcm/20_22050_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "33b92a37e46678a6d8f99e916ec21684171c287fa858d2f496f7693709d46d98",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_64_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_64_.5.f32.gz",
+      "gzip_bytes": 1456109,
+      "gzip_sha256": "09f64d10069b6a6b6d799fa67c57ccd06f3c77781143d9b4de686531e715c31a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "9834d5d9cab2282071d76d1f91a897270eeca940f1ec3e4ceeff487f927d514d",
+      "relative_path": "reference_pcm/20_64_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "d9980cd20f48693d60dc8eebc41f7572cceebd6d2eaab9bbf88f6a0618413c2d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_500_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_500_.5.f32.gz",
+      "gzip_bytes": 1329467,
+      "gzip_sha256": "3169acaf7ad9e4b0b5215fac1884575ecea13a9eb95705cb7ed455408a398168",
+      "paired_bytes": 2116608,
+      "paired_sha256": "a9cd65623ad2e30918e1b4ebac67972ab5a8bf91d50978c413deaa43e9af0053",
+      "relative_path": "reference_pcm/20_500_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "d00db794eb1df298e7bfc01248321baa29a5951767841dfd3f2a9071b7209b03",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_2000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_2000_.5.f32.gz",
+      "gzip_bytes": 1243182,
+      "gzip_sha256": "cc0b972ca8481b99b8e892beb6f5380e957ec96744e71efd2593bfe2a995dbf1",
+      "paired_bytes": 2116608,
+      "paired_sha256": "19c4ed793bd95fcb0d28e232aa8c1bec3aea0c3c5d926cb7e53b192d5180b824",
+      "relative_path": "reference_pcm/20_2000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "ca2ec381a1e956114cde3bb12f064bf3659bd7e2e19f3e855e89facb3160022e",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_8000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_8000_.5.f32.gz",
+      "gzip_bytes": 1235285,
+      "gzip_sha256": "05dfad06c6889eaf082a4f8c25b73727791d9d05b53a3255f81a93412f6a245a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "e9cf784339551edd3d1b55a573a08dc080ac2d68c64b2a3bc26b9d940cf63459",
+      "relative_path": "reference_pcm/20_8000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "fedbf45e1f19181842694c79a324341e6ed1b0f81c2ed773b14bc90e202b7944",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_22050_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_22050_.5.f32.gz",
+      "gzip_bytes": 1234711,
+      "gzip_sha256": "f88c922dacd0cfcc65c48cf16a09ed851ccecd922958c7e0bc7d4e41770bb14e",
+      "paired_bytes": 2116608,
+      "paired_sha256": "d8fbc9e7083761feaca8659395ab0fc076278488e9069c717495efe89ba877c9",
+      "relative_path": "reference_pcm/20_22050_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "4b54a8cbbde1a85c0ed894ef4d7a49772316f3ee281f1378a753a159a486e278",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_64_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_64_.9.f32.gz",
+      "gzip_bytes": 1504914,
+      "gzip_sha256": "65f5d9b64091154a3d34090260e5de991f819c368a8168b880072bbaf5e43348",
+      "paired_bytes": 2116608,
+      "paired_sha256": "e6149c27736a2777d0b7d1f7cd0d643cbdfadede3cd253fab3e0a0354e5b8036",
+      "relative_path": "reference_pcm/20_64_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "6861300b526933fb1a6132c4211656f8b7f3c3d3bfa485db043bf598a7e6b2a5",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_500_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_500_.9.f32.gz",
+      "gzip_bytes": 1423825,
+      "gzip_sha256": "43a672c04319c08f66dd5e41cb2f27e115c9d9c44553c8dad2c02a66311c9bd4",
+      "paired_bytes": 2116608,
+      "paired_sha256": "cc8d8ba05176ad540bba2c28e83845974478d7acc759a57f3f010631d859dfaa",
+      "relative_path": "reference_pcm/20_500_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "1fc587f1f61dfa9af219c4b55d283c408948cb606ab42771eabd7630a20e69b0",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_2000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_2000_.9.f32.gz",
+      "gzip_bytes": 1302203,
+      "gzip_sha256": "97d746ad2465df3806d157abbd360d64875aaeeddcc927feb0061fc531f975da",
+      "paired_bytes": 2116608,
+      "paired_sha256": "d47d5f9cc1bfa14a0221c20009d41e196771d449a836caf38553d15ac0bbcec6",
+      "relative_path": "reference_pcm/20_2000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "943e3f5b917fb4a68023b05d6f9ae09d4ecd12cdfb3b6db9b06856b62e77e314",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_8000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_8000_.9.f32.gz",
+      "gzip_bytes": 1340288,
+      "gzip_sha256": "1dbd686097c9fedf0a525cd671d3bde70b99bb3ac12bb267f94b720f496608a8",
+      "paired_bytes": 2116608,
+      "paired_sha256": "1ca4279e2a8c856b60b998d4394a4bf7ce4b6c2c35c50c58771544c7d85d5c6a",
+      "relative_path": "reference_pcm/20_8000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "85d83b6058c2ab92bfc42586b13e04e7532fb27994ba1157284bb023168a4fe3",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/20_22050_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/20_22050_.9.f32.gz",
+      "gzip_bytes": 1320334,
+      "gzip_sha256": "a64ccbdb030d8a477170cf3fd8f0fc68ef9fc3754fe67ccc47aa6475bf8ce6d7",
+      "paired_bytes": 2116608,
+      "paired_sha256": "1866dcf83a64492d78f8efbf69089e4237b670056f05fe7b62ee58ac23eba39c",
+      "relative_path": "reference_pcm/20_22050_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "46a140560bda3535f6bae675cac83e5e407125cf8ae1f91799956a6fc78dd5a7",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_64_0.f32.gz",
+      "gzip_bytes": 1428914,
+      "gzip_sha256": "651b02b4191341d39e1050295f1ea6c033af36f970d6615f1dd8f6ab5771f865",
+      "paired_bytes": 2116608,
+      "paired_sha256": "c41b655c2116a1f8a2a6f0c160b477781d2d1d09f0759629fe391182784f0fc9",
+      "relative_path": "reference_pcm/100_64_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "ac6bd2c66b150bedb56540dab3f91d99ced8567642bb8f4b75e2968a594f3ade",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_0.f32.gz",
+      "gzip_bytes": 1328796,
+      "gzip_sha256": "b6f0faf1c570a7d404faa7496429c4beb778ca520550bcf3b9e0712e39d3e915",
+      "paired_bytes": 2116608,
+      "paired_sha256": "9dc90e6aef5836945cc795585a29baf88a4f5a035352f93a4d71f581797425a0",
+      "relative_path": "reference_pcm/100_500_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "9c30c21f3e49162eba206e25559f7497d03ebd9eb933f7f669f38f4602104903",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_0.f32.gz",
+      "gzip_bytes": 1247477,
+      "gzip_sha256": "9644d721a083b23a8fadb4e2560e62d488b2924f147482a0ec34aa3c2640c815",
+      "paired_bytes": 2116608,
+      "paired_sha256": "86acf3f599d1b793d835f6dba59f913c776dd98051e7647b4d695bab2541bd7a",
+      "relative_path": "reference_pcm/100_2000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "6605cb5c82f41c38b75e9e3598d6e055dd73207a5d8aa5ac71d08748f373e29d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_0.f32.gz",
+      "gzip_bytes": 1216336,
+      "gzip_sha256": "639dae0e6acc8ca46ca4605807053e0a5a07084aa431f67bd1326a12d5d14b58",
+      "paired_bytes": 2116608,
+      "paired_sha256": "fcf3d874a3ccebf769e55822e908556c2841f5a53caa20553fa47aa5251ae25c",
+      "relative_path": "reference_pcm/100_8000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "4890581cf0a79401d54585a9eedfd0f7b26143b36034bd84bebc18a7ee1a698a",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_22050_0.f32.gz",
+      "gzip_bytes": 1203707,
+      "gzip_sha256": "7ae3252883f1f49dd230aed263a3766630a6ad96baa3500b1d97eb3a04e9181d",
+      "paired_bytes": 2116608,
+      "paired_sha256": "1a6eeb3bad6f4a36c41a7390234546fee5656a8cb1789e1ad43fde40297684fd",
+      "relative_path": "reference_pcm/100_22050_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "1e2f4bfc59b9b5c72cad2eec3fc21c55eae87708136276d0be03dff621088c9a",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_64_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_64_.25.f32.gz",
+      "gzip_bytes": 1427274,
+      "gzip_sha256": "3bacaf12c1d1f3701211afd8472790d7c81c3a8e6625422d786a68aaa2b3b075",
+      "paired_bytes": 2116608,
+      "paired_sha256": "3144e23f339db255822f912d13579e480decb5011b827d8ee22c74dad331e97d",
+      "relative_path": "reference_pcm/100_64_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "8b57107c5a077dbe7ead2aa62d2524089c456d8a031e1248da2d74bbe7bf4018",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_500_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_.25.f32.gz",
+      "gzip_bytes": 1314449,
+      "gzip_sha256": "5257d4653a0fce3c5c994c4a7e30f08d0f65abeaf4b2d173d7ee76d26e61638a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "ed2cc59c07b90dae53e32932f8785ac52d470ebeffa8152c3ebc2dbf55e85e69",
+      "relative_path": "reference_pcm/100_500_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "13662e2351370fb61139725072a87d200c81b71ee2af16eabebefa88bca8f5d0",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_2000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_.25.f32.gz",
+      "gzip_bytes": 1237582,
+      "gzip_sha256": "1cdc26326de481f98cd858f74f6f865f9cf84367c6d0dbbf64540ddd8bad0a0f",
+      "paired_bytes": 2116608,
+      "paired_sha256": "2f7f5d3fdf1537dd0b5313ed3ac1fe775c661e9d53d16879006a9c046f2a0830",
+      "relative_path": "reference_pcm/100_2000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "282d4bb3e5d37be26a742dbff9d9a655228a81725337216dde637502579ef063",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_8000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_.25.f32.gz",
+      "gzip_bytes": 1215630,
+      "gzip_sha256": "7bcff56d2fab37c76183f9c360dfd0942789d9955c240d41dc1b18f5d8c4acd8",
+      "paired_bytes": 2116608,
+      "paired_sha256": "127118f23c9bf785a487039933caa6d56e58239874fb3c561218ec5acd0f0ad5",
+      "relative_path": "reference_pcm/100_8000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "17d6002121ba383c3355c8fc38a0f21a767ab46c8408555dc3d6ec028871caa5",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_22050_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_22050_.25.f32.gz",
+      "gzip_bytes": 1207815,
+      "gzip_sha256": "ad7d2ebd90a5a7e0d1b86dd2e81d0d44433d1f151c976af279a476de54902d55",
+      "paired_bytes": 2116608,
+      "paired_sha256": "6220cb7b0ef52bfc0e7669bf3e292bce7ae180e30178af7596ed14dde18d5f39",
+      "relative_path": "reference_pcm/100_22050_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "7654ef2c8ccbf9936095e7063cca47da072f8161715ab7bba41b6505c92262fd",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_64_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_64_.5.f32.gz",
+      "gzip_bytes": 1450431,
+      "gzip_sha256": "26545b098871e80a94abc83ddb362caf0acfa3c68d4bf56e1f32b27972f1aa7a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "a3639a5e63c88fe14bb5a138a0b1602d3a33575f30f9b335c7800d092d80f954",
+      "relative_path": "reference_pcm/100_64_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "21e79f187f2d9006a58f2e52bca33961d0ea8f452561ca788e875a12972c914c",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_500_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_.5.f32.gz",
+      "gzip_bytes": 1319476,
+      "gzip_sha256": "e630251b96d3dbb7692dc04306803997bb6ee0ddbaf5e0eb9df2d40b222631fe",
+      "paired_bytes": 2116608,
+      "paired_sha256": "b57072b500aac9db7a3fe39eeb03419cb3b9e342d5ec3a8c92d5a0325591b0a6",
+      "relative_path": "reference_pcm/100_500_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "9f89c291a7c9c03451d53352ead56e2c70b6a23b59ceb8232604e9694fba93ce",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_2000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_.5.f32.gz",
+      "gzip_bytes": 1244214,
+      "gzip_sha256": "e5a18289121ab1f9d2bf16bf84055e5bdad57c0c317b7919e3c126c339eb468d",
+      "paired_bytes": 2116608,
+      "paired_sha256": "a6647305056aa1ba5f2d9bfeead3e9009e3ae202ae88fa7d3e9aedf9a4d98906",
+      "relative_path": "reference_pcm/100_2000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "bd60ecd180c785cd195e89c524d75a2274302fbe11257cfec08f6e285348a266",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_8000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_.5.f32.gz",
+      "gzip_bytes": 1234329,
+      "gzip_sha256": "c3ff089c76b3272d3732ef532a6c5b2f0e4569a85c012360d7a2a1e1b9947c02",
+      "paired_bytes": 2116608,
+      "paired_sha256": "f5096a5e66f29976387cc5102f5b0ebfe81b7e4e5b75b2ffb320dbf64c96b056",
+      "relative_path": "reference_pcm/100_8000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "22dcb3c829ef8791186b50fc46e3614ffecce15c99464ab7cb0dc510199d221d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_22050_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_22050_.5.f32.gz",
+      "gzip_bytes": 1223766,
+      "gzip_sha256": "6bd8e55ffa2cb1ad371c8813128e1fbb9a2eea3da9eaf954d4fdbc63d485f4a5",
+      "paired_bytes": 2116608,
+      "paired_sha256": "cecfff6f9dcb5c3f8efba75e238eab6599a85791dd03c02b8282f1c44fb1f3e8",
+      "relative_path": "reference_pcm/100_22050_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "0037daf98b6d7e339cdc5daecd1eebe3f8d1788355c88834d9d209427490fdb9",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_64_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_64_.9.f32.gz",
+      "gzip_bytes": 1501262,
+      "gzip_sha256": "04e3c3115bbe91aca685dbcbb7fc684cf9b063c5158cc31dc63e9312fbae1f99",
+      "paired_bytes": 2116608,
+      "paired_sha256": "6dacf9028bfa2761d934bb9297161d23c942906dd85f3335a42af61eee298558",
+      "relative_path": "reference_pcm/100_64_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "2b2e68b5869b3691c69eefa00590d3b46242a532be10e3b4dc17e113c9b45b68",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_500_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_.9.f32.gz",
+      "gzip_bytes": 1424511,
+      "gzip_sha256": "6db306663f2ad3e0ed00c6ff0265ca0b5b38b8e5cc4e2af141ab5d7bc50fe061",
+      "paired_bytes": 2116608,
+      "paired_sha256": "11bbbbe34cc0921667a7a1e7fb4a2eea01c176d455c90596ec2ad9e2ba0252df",
+      "relative_path": "reference_pcm/100_500_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "05da25def2f5659e2ae9d557897fcd51a29d03d7c72eea526c684d995d503f13",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_.9.f32.gz",
+      "gzip_bytes": 1302206,
+      "gzip_sha256": "dadf164aca7355af0a380bc26821935edd7697dd5794d9b14f076622a3502eaf",
+      "paired_bytes": 2116608,
+      "paired_sha256": "c1fe9f3357ed6dc3c66254f68d9d806e0f94e6c1ceb4303e3518eacef837728c",
+      "relative_path": "reference_pcm/100_2000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_8000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_.9.f32.gz",
+      "gzip_bytes": 1340323,
+      "gzip_sha256": "4f3c2ff0779394fcb1c77dcad9ac8b190a8309075403fa369535dc7ab677be67",
+      "paired_bytes": 2116608,
+      "paired_sha256": "e9897c40006a4a62ae7ac61ce5a0b73d9bdaa189ee7acc0d36c0a16d44d52501",
+      "relative_path": "reference_pcm/100_8000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "364cdc86e6d62830377eb26127ee2eee2ea5e1d59204d9b756ccf221b1f46304",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/100_22050_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_22050_.9.f32.gz",
+      "gzip_bytes": 1321859,
+      "gzip_sha256": "89d2f924f1d019769db35d13a40f247601f2cc1c36a8c76cb075f2347c1ccad6",
+      "paired_bytes": 2116608,
+      "paired_sha256": "fe07cf227be8c41a569300b32e1fd298c989a64af265d9dbcdffe891068b431e",
+      "relative_path": "reference_pcm/100_22050_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "83a585e4d45b1f3433f5402c243c3db5b836e97917671d2df7f5b7d88e4221cf",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_64_0.f32.gz",
+      "gzip_bytes": 1413781,
+      "gzip_sha256": "49d75be1101e4c399e559737062b42ec14bd18c86ca7e0673b9dd4dcc07ecc11",
+      "paired_bytes": 2116608,
+      "paired_sha256": "eeca996db10a292400435e0c8436897f2897105dc4948a367bcff6bd757e29a3",
+      "relative_path": "reference_pcm/127_64_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "c2be0ad2c505b65b5bcd843430f0aa2a7d627a5c08d45fbf0f8f1ad8e2df3ef0",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_500_0.f32.gz",
+      "gzip_bytes": 1307718,
+      "gzip_sha256": "d5ebb648a0215229b76c9dcd47b487e5377793f3ae481b66ca28b882890a6d0e",
+      "paired_bytes": 2116608,
+      "paired_sha256": "33f862e73028800f926bff365d3aa6ab78eba86d62f65b4daa03742d44093d7b",
+      "relative_path": "reference_pcm/127_500_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "86a66df3b4be7a698aed628b03ce17389df2c2d4d2eb62aad21f68672ad25ea1",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_2000_0.f32.gz",
+      "gzip_bytes": 1192367,
+      "gzip_sha256": "a2bcfd79ee5c789ef42b22a336213fc91f7b71baab5634896f088997438ad351",
+      "paired_bytes": 2116608,
+      "paired_sha256": "c3c38879a0ce3e9c381a49919f2a29a4dda5350e55ae140391675152b09ee1e7",
+      "relative_path": "reference_pcm/127_2000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "de7dbd6938d4ae3965c4a6cd1f28fef59783d5f83f7d62e3ff931c7025d8c28d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_8000_0.f32.gz",
+      "gzip_bytes": 1170573,
+      "gzip_sha256": "e930a0fa39ecf11889638f7fe250fdc90956160b6f32b9fe8b2d2188ddad1911",
+      "paired_bytes": 2116608,
+      "paired_sha256": "0ee5a18ce911968b23092acb77f9aed1046369ab880dec9c175c8c6732f651e0",
+      "relative_path": "reference_pcm/127_8000_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "423453aef265673164c4718d940322333d1166b23137310943103685e3933be5",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_22050_0.f32.gz",
+      "gzip_bytes": 1153128,
+      "gzip_sha256": "b524c15de2c9243e337dbafe30443495d3ca075d18a55e9b07af4ef9c64a9d04",
+      "paired_bytes": 2116608,
+      "paired_sha256": "4c029a8205ca3b1db6b34b9d82dfb241b9f193a3f7d1be00693a6f99f9e23497",
+      "relative_path": "reference_pcm/127_22050_0.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_0.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "39cae30074a53197a13d4d2d20ed060bd1d49d301ac864a265e539401b9af7ca",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_64_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_64_.25.f32.gz",
+      "gzip_bytes": 1410013,
+      "gzip_sha256": "2ca732ed067c039db5efa3653a57276f5710679418e2024f243137b5a6c8ba24",
+      "paired_bytes": 2116608,
+      "paired_sha256": "b9690902a766abe2e64fd1114a08f663c946247a75a97969476e7c094ddf88d3",
+      "relative_path": "reference_pcm/127_64_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "7beab94b1d7b51d722189d99bb5795e70436d02680ccd9f3f937f0273656a29b",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_500_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_500_.25.f32.gz",
+      "gzip_bytes": 1304930,
+      "gzip_sha256": "dfbfb263227358141b77f957278628194e2fc267bc95a10c12af79c4545ebe10",
+      "paired_bytes": 2116608,
+      "paired_sha256": "b04af6e9cc01dfd45209c9969d9c98343369d65a7650a287846861e9fdf6398f",
+      "relative_path": "reference_pcm/127_500_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "93f16166527b3e282f20b365b9441111dc7eb22bce64c6c6537528d19e7d5be0",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_2000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_2000_.25.f32.gz",
+      "gzip_bytes": 1183840,
+      "gzip_sha256": "274c338f9b68f7069a69a3e6ea5a34361f1c678511894c4cd380481ca90e0375",
+      "paired_bytes": 2116608,
+      "paired_sha256": "efe5c6e248f27de4c705645d97fd38f41799603e76a4e77327b6639929433fd1",
+      "relative_path": "reference_pcm/127_2000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "8e2179237c9fd9b3cd7954e33d7872a1749a0482598c4aa26ff29fe99cfcea08",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_8000_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_8000_.25.f32.gz",
+      "gzip_bytes": 1169129,
+      "gzip_sha256": "0cfe50f8b3a80276c644936fafa26ac1e083f528739872645f27e73ba662d4be",
+      "paired_bytes": 2116608,
+      "paired_sha256": "c68749a5270e665f0ed7532784d0fbe2d8974b3a2a3835be8bf5758ffefdf62d",
+      "relative_path": "reference_pcm/127_8000_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "0dfed150c6279dce12beb906c49f2f2d7ca1e602cfe5bbfb66e333649989db2d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_22050_.25",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_22050_.25.f32.gz",
+      "gzip_bytes": 1162778,
+      "gzip_sha256": "a7193cf56b9d90a0785861e416a499a811a00402be3d58f24daea77aa4e17009",
+      "paired_bytes": 2116608,
+      "paired_sha256": "21a95a2ad7d756e69c6689aa7da07f848d66130097f3b6da1b551f28e9c198e6",
+      "relative_path": "reference_pcm/127_22050_.25.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.25.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "6a8c27cef0dfdd7713fa05b94b05c8d20cf38841fdb8dc19593a0654c4c3718a",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_64_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_64_.5.f32.gz",
+      "gzip_bytes": 1427315,
+      "gzip_sha256": "36d86fd83583ed0b30bf5abd6291145816e8e7987f55c04a1ecb7bbfe6639a44",
+      "paired_bytes": 2116608,
+      "paired_sha256": "dc523ccbfead3aa5343ea9a57921f4e35b9beec1b9d17cf0d9d2cb9a58cd2d41",
+      "relative_path": "reference_pcm/127_64_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "f6a9ee40958f4fc7ae5df5935cb1297579ce58f9b545f9eef8e2d56f8fd830b3",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_500_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_500_.5.f32.gz",
+      "gzip_bytes": 1316698,
+      "gzip_sha256": "01c1f0b1156f0e8f2770d0443ae2c6cc9fa4d5abae56b2233137b938417ad04a",
+      "paired_bytes": 2116608,
+      "paired_sha256": "bd56c17381e2ded9b59d2b07bf7d1c418f7cb7eb3dd3cbad862a9e3d7c8089b4",
+      "relative_path": "reference_pcm/127_500_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "08c65f53fa8688cf78b62499ebad898ab76039d1fa9ce01fd11f37fcb23bdf13",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_2000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_2000_.5.f32.gz",
+      "gzip_bytes": 1212282,
+      "gzip_sha256": "d589325e8ad13d4b0aae229c17b5b5d6ff6434747d83eaea9e336268014f2e97",
+      "paired_bytes": 2116608,
+      "paired_sha256": "43e81335920f21f432945812a6ae769ac150e730f4697328a92d730159ff4226",
+      "relative_path": "reference_pcm/127_2000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "e83c3a1361e2451f24e29875cb3a03e64745b2bc101e8d12a08858e3665d5ce8",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_8000_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_8000_.5.f32.gz",
+      "gzip_bytes": 1197743,
+      "gzip_sha256": "f101f0c95040b22745b5170289c42c6ba34b28f0951a4d2a5942796ff089c8af",
+      "paired_bytes": 2116608,
+      "paired_sha256": "7e71775820e03bae45512c9cda5b66e65ed9dee4875ce12425f8429049c7af2c",
+      "relative_path": "reference_pcm/127_8000_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "6a7de3d1f594d77b7c9f1aaa2622e7a0d9b839f70b981010040a7ad691aad9fa",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_22050_.5",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_22050_.5.f32.gz",
+      "gzip_bytes": 1194311,
+      "gzip_sha256": "cf9b7407304fed7c8e7c3d9115476d54905ca5964c8e1407ee0915bfa2510543",
+      "paired_bytes": 2116608,
+      "paired_sha256": "f12fc3a81aa81a9790aa9a94456849cb80bf859b4ef9ba0c63b5c66bbdc66b43",
+      "relative_path": "reference_pcm/127_22050_.5.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.5.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "b55a86228b4f234978ae32acc6c3b9e3532e4f7cd0b3a27e496f01e58fc785b8",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_64_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_64_.9.f32.gz",
+      "gzip_bytes": 1482373,
+      "gzip_sha256": "0febf53ca4aed3c3c282ae37c86cc831dff78d562fd8a385ef0690f6c01df9d1",
+      "paired_bytes": 2116608,
+      "paired_sha256": "0757c9cbf9f8a76f8be06444b6ab0f66e81d019bcf0fa2fd977379bf6f5e17c5",
+      "relative_path": "reference_pcm/127_64_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "797ce04039ed87b773f5f3c1cee960cec5200326dd2ed2d182256ddabbd6f318",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_500_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_500_.9.f32.gz",
+      "gzip_bytes": 1423014,
+      "gzip_sha256": "ba0f49a48e44f7337d7eb9223107d264ee143f283c4433f250af166ed30e2d0c",
+      "paired_bytes": 2116608,
+      "paired_sha256": "3abd8886d0cd761a1ce8181299e6052a8f3a9b3723cdfb7f8fa20b47d462a8ba",
+      "relative_path": "reference_pcm/127_500_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "17faf923c27fa5a1e817175ea780ed983df67a68c729a710d5a46c7ebb505bb1",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_2000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_2000_.9.f32.gz",
+      "gzip_bytes": 1294943,
+      "gzip_sha256": "d984ff9874ec8025128feb4af1057b2b51b81e52a05ec3934fb415412dedab0e",
+      "paired_bytes": 2116608,
+      "paired_sha256": "d77b50b7432fb656646dee9212695c7e88bfc1c198a77a302c39cf0542487ad7",
+      "relative_path": "reference_pcm/127_2000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "815598254635a480778bb438dee5cacdb1793e9cae0dc4ca31fd1b8d6ac77a2d",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_8000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_8000_.9.f32.gz",
+      "gzip_bytes": 1331252,
+      "gzip_sha256": "6f163c16a44b1e3318a6e3a48bd8d8435e566b528ac0cc86e0cd6df740c9e29e",
+      "paired_bytes": 2116608,
+      "paired_sha256": "f70c92d9b99fec341f39e07be2a56e34240b7851311d728129b9d58b8c04cea8",
+      "relative_path": "reference_pcm/127_8000_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "443660f087ed311737d287cd16a6fdcea8984d57196099672e42e49ef982608b",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    },
+    {
+      "case_id": "physical-gain/127_22050_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/127_22050_.9.f32.gz",
+      "gzip_bytes": 1306966,
+      "gzip_sha256": "45cd1fa22dfdacf740691784b73976f0df81325f7ea197f10ee5e72d460d7a15",
+      "paired_bytes": 2116608,
+      "paired_sha256": "efba83989af4e206849eea79ccdcfa5d88665d7737406b120e88e9016ae78125",
+      "relative_path": "reference_pcm/127_22050_.9.original-mono.f32le",
+      "absolute_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.9.original-mono.f32le",
+      "mono_bytes": 1058304,
+      "mono_sha256": "c74a9ce9a2ef8242f496f353bf8722ca6c186e9de57eba7e49bca8f65559957e",
+      "extraction": "Bit-for-bit column 0 of little-endian float32 shape [3,88192,2]; no numeric transformation.",
+      "nonfinite": 0,
+      "note_order": [
+        36,
+        60,
+        84
+      ]
+    }
+  ]
+}

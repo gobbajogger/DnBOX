@@ -2426,8 +2426,15 @@ static void fm1_main(void)
 #if X0X_BLE
     ble_attach();                                   /* core 1 runs the controller from now on */
 #endif
+#if BOARD_SMK37
+    /* USB reset blocks for 25 ms with interrupts masked. Start the 11.6 ms
+     * audio DMA after that wait so its first free bank gets a full deadline. */
+    usb_start();
+    audio_init();
+#else
     audio_init();
     usb_start();
+#endif
 #if X0X_TRS
     uart_midi_init();                               /* before TIMER5: it read-modify-writes port H too */
 #endif

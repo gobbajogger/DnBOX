@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "workflow": "ce-simplify-code",
+  "scope": [
+    "firmware/src/dsp/dnbx_s1_envelope.c",
+    "firmware/src/dsp/dnbx_s1_envelope.h",
+    "tests/host/test_synthone_dnbx_envelope.py",
+    "firmware/src/dsp/fastmath.h",
+    "tests/run_tests.sh"
+  ],
+  "independent_reviewers": [
+    "/root/s1_reuse_review",
+    "/root/s1_quality_review",
+    "/root/s1_efficiency_review"
+  ],
+  "applied": {
+    "reuse": [
+      "Use the declared F32 Struct for unpacking and word widths."
+    ],
+    "quality": [
+      "Use public reset for fresh test state; remove unused optional state argument.",
+      "Select unchanged live cases by stable IDs.",
+      "Register cleanup before setup can fail; keep setup-only values local.",
+      "Correct reset API comment for zero-retention behavior.",
+      "Document native Clang versus host helper linkage."
+    ],
+    "efficiency": [
+      "Compute mismatch diagnostics only when exact bytes differ."
+    ]
+  },
+  "duplicate_findings_consolidated": [
+    "TemporaryDirectory cleanup appeared under quality and efficiency."
+  ],
+  "skipped": [],
+  "checks": {
+    "selected_dispatcher": [
+      "synthone-envelope-dnbx",
+      "fastmath",
+      "fastmath-ubsan"
+    ],
+    "exit_code": 0,
+    "log": "implementation_evidence/focused-runner-final.log",
+    "c_implementation_unchanged": true,
+    "fastmath_noncomment_source_identical_to_measured_f902_candidate": true,
+    "whole_firmware_gate": "NOT_RUN; not allocated/qualified",
+    "project_typecheck_lint": "No separate project-wide lint/typecheck run; scoped C warning-as-error builds and git diff --check passed."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "reviewer": "adversarial",
+  "findings": [
+    {
+      "title": "Truncated fixtures still produce pinned acceptance receipts",
+      "severity": "P2",
+      "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+      "line": 93,
+      "why_it_matters": "A replay can accept a truncated or replaced amplitude fixture while recording the unchanged declaration that promises all 2,560 rows and pins the original reference hashes. Keeping only the first row of each case still passes the amplitude threshold and rejects both negative controls, reducing the original comparison from 5,120 endpoints to four without making scoped_acceptance_pass false. The current packaged fixtures do match the declared hashes, so this finding concerns the reproducible acceptance mechanism rather than invalidating the captured current results. Checking the declaration's reference hashes before evaluation prevents changed fixtures from silently shrinking or redefining the accepted comparison.",
+      "autofix_class": "manual",
+      "owner": "downstream-resolver",
+      "requires_verification": true,
+      "suggested_fix": "Load ACCEPTANCE-DECLARATION.json before the tests and fail unless every BASE-relative file in reference_hashes exists and its SHA-256 matches. Record the verified actual reference hashes in RESULT.json. Add a focused replay check that retaining only the first CSV row for each case fails before candidate evaluation, while the unchanged packaged fixtures remain accepted; do not change the existing numeric thresholds or DSP source.",
+      "confidence": 100,
+      "evidence": [
+        "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:93 --     rows=list(csv.DictReader((BASE/'mapping/results/implementer_brief/amp_observed_levels.csv').open()))",
+        "experiments/sound-hardware-v1/candidate_review/ACCEPTANCE-DECLARATION.json:4-8 pins three reference hashes, and its envelope_gate.metric requires all 2560 CSV rows. verify_candidate.py:92-93 reads the live metadata and CSV without comparing those hashes; main:260 records only the declaration file hash, not verified reference-file hashes.",
+        "Constructed trigger: retain the header and the first row of each original case in amp_observed_levels.csv. These rows each select frames 3 and 15. verify_candidate.py:108-117 evaluates whatever rows are present and does not require a row count or endpoint set; main:261 only combines the resulting pass booleans.",
+        "Read-only probe used the current error_stats and linear_contour functions against frozen_03/envelope_case1.csv and envelope_case2.csv, whose source hashes match the current core. For the two retained endpoints of case 1, candidate max error is 4.6954855031922094e-08, shifted-grid error is 0.06371962799002259, and linear error is 0.059104590836985174. For case 2 the corresponding errors are 2.0240079681710377e-08, 0.022476598869431694, and 0.020127805888197507. Thus both positive gates pass and all four negative gates reject with only four total comparisons.",
+        "The candidate audio-ratio cross-check at verify_candidate.py:104-107 and all velocity/lifecycle/error/finite/long-duration gates are independent of the CSV row set, so this reduction leaves the remaining acceptance terms unchanged. The declaration hash is also unchanged, allowing a newly emitted passing receipt to carry the original pinned declaration despite consuming different reference bytes.",
+        "Checked current runner SHA-256 6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0; accepted core C 9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa and H a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c. All three currently packaged reference hashes match the declaration. The probe did not modify files, execute original engine code, or rerun timing/native builds."
+      ],
+      "pre_existing": false
+    }
+  ],
+  "residual_risks": [],
+  "testing_gaps": []
+}

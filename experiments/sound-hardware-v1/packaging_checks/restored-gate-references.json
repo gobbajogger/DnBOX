@@ -1,0 +1,258 @@
+[
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "LICENSE",
+    "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "bytes": 35149
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_circuit.h",
+    "git_blob": "93569f10f0ca0be4bce12a42d3e9ddbbfae2b856",
+    "sha256": "4a64a1836582c143630c100c384665ad4323b1e2d420d09c88ff4126e7dd5db9",
+    "bytes": 21974
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_engine.c",
+    "git_blob": "81a0c946c634bf3cbd52b1ed5879328e7ede9efb",
+    "sha256": "8013b3df3385f6551a007a5359f9e6fc1e7eb9391443f3959e0ab912aa7568db",
+    "bytes": 47207
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_engine.h",
+    "git_blob": "b5c2de6a1996900856acbb096d3ca02cafdb8381",
+    "sha256": "04f25799c91d3b5987646f74d61415f5e35f0242e95017d841e4c06a325fb574",
+    "bytes": 7766
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_params.h",
+    "git_blob": "9c0cae0105995e31887ce9cdd7a29cbce5142318",
+    "sha256": "948cf045fc78db695ba70fcadaca3ef08fea961ac069ee3645a2a936dfe49b4e",
+    "bytes": 26801
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_perc909.h",
+    "git_blob": "b0ad749fe54494ecea61d53002eff3aadd159bd2",
+    "sha256": "5d3fbbbc4af297a7c8dcd712faa5ec2ca5664adf9daaf4319e8d960d2d16537d",
+    "bytes": 8275
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_plugin.c",
+    "git_blob": "37df249dcff0c9bbaabafad7e401659ef421b73c",
+    "sha256": "c833e19aa836c4b641c4e7e7f99f96ccf5e1d0503637238d14ffee8f54e16de6",
+    "bytes": 14608
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_pots.h",
+    "git_blob": "0e4b25b08ff3f2fb5d07d6434ee7efa902de4004",
+    "sha256": "3536808283c010bb2feb2e1ce30f66848b61798b91c545c9518e1cbba50591c5",
+    "bytes": 10135
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/er99_tom909.h",
+    "git_blob": "194df7923078c961110abc26f7c8b774cbf9cdb9",
+    "sha256": "29515e11a06f1bd18fe7fcf9565a5bac085d42203ff169b2986bdbec30e2d04d",
+    "bytes": 6632
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/dsp/webaudio.h",
+    "git_blob": "71a62f373633bb14fc5e95e499737e181bd07f60",
+    "sha256": "3ba3d5be5238022d7dde7013dd7975125af6f3dbb24ae5390773247b3fb7d18b",
+    "bytes": 12690
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/samples/crash.wav",
+    "git_blob": "7451f3330e6ff3a18f65f3b3c6e9be23d93503df",
+    "sha256": "4a1b8d8828f9e530e9ae7f1a3cdffbcb1466e633a2b0607b3aac914699bc8400",
+    "bytes": 86644
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/samples/hh.wav",
+    "git_blob": "3cbd3b911490d38850387931c00f835c386a1034",
+    "sha256": "8ae963e80b8604bf23733545117d3b115767aa48ecd3013ad5d91506337d289a",
+    "bytes": 65536
+  },
+  {
+    "repository": "charlesvestal/schwung-9W9",
+    "commit": "10cbe5c1e1c9e65b0818bb34644ab1a13092082c",
+    "path": "src/samples/ride.wav",
+    "git_blob": "985f418679f58eed7a340928e1ad18483331d179",
+    "sha256": "f1d1cee24a7c91bb2ca9c6eb97badad3841226897ad0daabfc35801371d78182",
+    "bytes": 94042
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "LICENSE",
+    "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "bytes": 35149
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_bd_circuit.h",
+    "git_blob": "3505e09815d0c14d19af325ee3be6ecc52de0bfe",
+    "sha256": "ba4be526d507c734814754d04775bb248e7e0590f20a76825cb092c1d4e262aa",
+    "bytes": 17221
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_circuit_common.h",
+    "git_blob": "585f964c19d3d90e92fe03cdd3c9e5cd75a1da7c",
+    "sha256": "a35d63dea29c4e7f5e8864d95b26dfab0ca6567d2fd6e0209bac742cb41c4814",
+    "bytes": 6531
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_cp_circuit.h",
+    "git_blob": "44be9b6cf29843bb53dc0fb501193e8e7c9926a9",
+    "sha256": "14c68a032cd008d5cec7086f70355eac3c897679e521adb4d57928266174307d",
+    "bytes": 9831
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_engine.cpp",
+    "git_blob": "cc58c68a1039b18bebc7fae78422945bba13ab25",
+    "sha256": "81a926b7fbde0b8eb777c53909613afb6396b4fd5eabd773cf30214e1e085f53",
+    "bytes": 42051
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_engine.h",
+    "git_blob": "d569cd3850b7ceeaf996ef0f15f178615ecfa12b",
+    "sha256": "85d142a2ab0f1eb01beac74f25059cc44be3122e3b8a5a271161a061856bff06",
+    "bytes": 3284
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_fx.h",
+    "git_blob": "59ce2d446e92dee35e015ff632c725f6421ad648",
+    "sha256": "b160446c1ca9c00caf6ca4ccc752ce24885dbe73ff09efd85bb35303cfe1ad6d",
+    "bytes": 9205
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_mt_circuit.h",
+    "git_blob": "3aff9732ddf83c8896bc8948fc469e17e792e201",
+    "sha256": "3bdbf5f389100063cbc6287a5bb83160c4db0d1e6075c6398b9ec3ba67a1ba0a",
+    "bytes": 37529
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_params.h",
+    "git_blob": "bac38873268b51748b70166ac6da78e0764b7b24",
+    "sha256": "693a2b775ac6d5f32d514a2d32ed5f4b2b5f74a37aa30f850c1bbd760b802965",
+    "bytes": 44779
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_plugin.cpp",
+    "git_blob": "a8efdde74556e7c53a2cb7bd90d1a3af0b4b34f5",
+    "sha256": "eac0fcc6a0d48f0ef14673ddd5b22530e5ce046a264ce05bca3690ec6542697f",
+    "bytes": 16883
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_rs_circuit.h",
+    "git_blob": "783a38c34c0ef142bcdb4b5b2bfc33f1a997ae2c",
+    "sha256": "40ea48128de7770bf082adb1a4724398d43868d5769350cf22691251df441a9d",
+    "bytes": 8537
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_sd_circuit.h",
+    "git_blob": "58804b6b41a5b3ca3c93a08cff33870bf7cedbbf",
+    "sha256": "116c6dd803740026470a1a5848c82cd7609cb853dee41d526266010d8485cca5",
+    "bytes": 11254
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_shape.h",
+    "git_blob": "6d98205202403a61e19562e26e02c435ebabd07a",
+    "sha256": "34a19fd7ea6d2071ef46df2d32224921a922440414dc8e9ed5cff14d2f0f2417",
+    "bytes": 7196
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_tom_circuit.h",
+    "git_blob": "3ac958b540e02e31c3232468591c6a6ff2cc3748",
+    "sha256": "d35b90513893fad2498ff539b28138195d63e9802a0f09b095d305672b6845b1",
+    "bytes": 13296
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc808_voices.h",
+    "git_blob": "e5215066eb9a214385c9da6b2554904520d11083",
+    "sha256": "58969682be9f3d0feb704a8552427ca9953dc4dd4f66d2ecbae0b135743805a2",
+    "bytes": 31961
+  },
+  {
+    "repository": "charlesvestal/schwung-8W8",
+    "commit": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+    "path": "src/dsp/sc_ugens.h",
+    "git_blob": "f59dae20520b7212ab0fa7ae4491bde81760d14d",
+    "sha256": "af9d55df75d2d2a3587c1eda8a6b3679fffdd7e0ef99da1f6c70e7f05aa01bdd",
+    "bytes": 27358
+  },
+  {
+    "repository": "charlesvestal/schwung-tb3po",
+    "commit": "f49d81d05d1e29ae37728a08e30f193892be3bc9",
+    "path": "LICENSE",
+    "git_blob": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+    "bytes": 35149
+  },
+  {
+    "repository": "charlesvestal/schwung-tb3po",
+    "commit": "f49d81d05d1e29ae37728a08e30f193892be3bc9",
+    "path": "src/dsp/include/plugin_api_v1.h",
+    "git_blob": "d968786f84a60b035c2a763d112b1e26d7e77749",
+    "sha256": "ed1f56dc7773969a367d48b0b63bd06bfa433a43c57cc1827846779701aece5e",
+    "bytes": 6823
+  },
+  {
+    "repository": "charlesvestal/schwung-tb3po",
+    "commit": "f49d81d05d1e29ae37728a08e30f193892be3bc9",
+    "path": "src/dsp/tb3po.c",
+    "git_blob": "51edd01c52736d116936820341d89a4d053824a1",
+    "sha256": "f9345b97eb05692a161893ac1d3d2d100025eb68f4f90e8b7ae7605533d7c9e6",
+    "bytes": 48503
+  }
+]

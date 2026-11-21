@@ -28,13 +28,18 @@ def main():
                  '-Wall', '-Wextra', '-Werror', '-DX0X_HOST', '-Ifirmware/src', '-Ifirmware/src/dsp', '-I' + str(tmp)]
         if unit == 'fxbus':
             run(['python3', 'tools/gen_drum_samples.py', str(tmp / 'x0x_drum_samples.h')])
-        helpers = {'master': 'limit_step(master_t *m, float a) { limit_env(m, a); }',
-                   'drum808': 'tail_step(drum808_t *d, int l, const float *x, int n) { lane_tail(d, l, x, n); }'}
+        helpers = {'master': 'limit_step(master_t *m, float a) { limit_env(m, a); }'}
         for opt in ('-O0', '-O2'):
             ref = tmp / 'reference.c'
             ref_source = old
             if unit == 'fxbus':
                 (tmp / 'fxbus.h').write_bytes(subprocess.check_output(['git', 'show', BASE + ':firmware/src/dsp/fxbus.h'], cwd=ROOT))
+            if unit == 'drum808':
+                # The reference owns its historical layout and uses 8W8's natural releases.
+                header = subprocess.check_output(['git', 'show', BASE + ':firmware/src/dsp/drum808.h'], cwd=ROOT)
+                (tmp / 'drum808.h').write_bytes(header)
+                wrapper = ROOT / 'tests/host/reference/drum808_natural.inc'
+                ref_source = '#define D8_TAIL_DB 0\n' + old + '\n' + wrapper.read_text()
             ref.write_text(ref_source + ('\nvoid reference_' + helpers[unit] + '\n' if unit in helpers else ''))
             candidate = tmp / 'candidate.c'
             candidate.write_text('#include "' + str(ROOT / source) + '"\n' +

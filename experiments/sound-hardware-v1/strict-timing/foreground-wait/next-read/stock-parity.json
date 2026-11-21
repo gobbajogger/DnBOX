@@ -1,0 +1,31 @@
+{
+  "emulator_sha256": "7b6a0af7798de5278e5f812e43865c804f1b273a3d88fc08a62f019caf9ac03f",
+  "elf_sha256": "1130c88adb567502fa55b532a135231f333f9f6c9b93bff17c2196389b455c90",
+  "package_sha256": "eaf36dfcbf7c9a763724d847e7df427f52109e8bd477eb46632fb3a373eb829d",
+  "seed_sha256": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229",
+  "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+  "trace_sha256": "c0840ba6a5a016ffc89a0c0658e2c045f97a8139d6406dd57f44afc6bd022a2e",
+  "map_sha256": "7696b0df29d5464b426785ce2d8965fae1db8bc7bda26063a8636295f5106fa2",
+  "files": {
+    "ram.bin": {
+      "primary": "a7e89bd23bf8f0f82d2c1bfc5db1121b31d180fd92de80fa28997e0ad2049dd8",
+      "diagnostic": "a7e89bd23bf8f0f82d2c1bfc5db1121b31d180fd92de80fa28997e0ad2049dd8"
+    },
+    "flash.bin": {
+      "primary": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229",
+      "diagnostic": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229"
+    },
+    "stereo.s16le": {
+      "primary": "b04e5bbe2f8aeabe55368ed79b1073e6a744dff7e82fc66d7af6dfd94d93f0ec",
+      "diagnostic": "b04e5bbe2f8aeabe55368ed79b1073e6a744dff7e82fc66d7af6dfd94d93f0ec"
+    },
+    "core.csv": {
+      "primary": "226854b537c74e32b5496ee6bacc5c5eeef7d4eea12d6f743633876f4af67735",
+      "diagnostic": "226854b537c74e32b5496ee6bacc5c5eeef7d4eea12d6f743633876f4af67735"
+    },
+    "run.log": {
+      "primary": "20298ce599360bd4379ac329f04770c61955b11abe36e421ae20dd3f26d8daf0",
+      "diagnostic": "20298ce599360bd4379ac329f04770c61955b11abe36e421ae20dd3f26d8daf0"
+    }
+  }
+}

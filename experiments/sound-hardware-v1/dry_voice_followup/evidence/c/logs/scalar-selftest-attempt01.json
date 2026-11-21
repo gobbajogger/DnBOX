@@ -1,0 +1,9 @@
+{
+  "command": [
+    "build/scalar_test"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_dry_voice_c",
+  "exit_status": 0,
+  "stdout": "{\"status\":\"PASS\",\"frozen_scalar_points_exact\":38,\"zero_resonance_B_substeps_exact\":360,\"history_shift_checks\":720,\"maximum_selected_float_contraction\":0.0964563638,\"voice_bytes\":160,\"note_audio_rendered\":false,\"reference_pcm_read\":false,\"qualification\":\"selected scalar/state checks only; no audio gate\"}\n",
+  "stderr": ""
+}

@@ -1,0 +1,594 @@
+{
+  "factory_note": {
+    "chicago": {
+      "presets": 81,
+      "silent_channel_rows": [],
+      "minimum_channel_peak": 0.08152712881565094,
+      "maximum_channel_peak": 0.518277645111084
+    },
+    "miami": {
+      "presets": 30,
+      "silent_channel_rows": [],
+      "minimum_channel_peak": 0.04729125276207924,
+      "maximum_channel_peak": 0.2468889206647873
+    }
+  },
+  "miami_au_3_1_6_measured": [
+    {
+      "configuration": "carrier_filter",
+      "reference_wav_sha256": "5cc3ce44273a5401801799a1d2935266fec5fd8918f6a4098fbdf58ab75f33b3",
+      "pitch_error_cents": 9.632056905690945e-05,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.023974832970318428,
+      "max_relative_harmonic_db": 0.01260706412244604,
+      "pass_goals": true
+    },
+    {
+      "configuration": "carrier_open",
+      "reference_wav_sha256": "fd90dc32160007b538ec0e9331b663fde63f8abe545a60a12ceae86dd2a6b4c7",
+      "pitch_error_cents": 0.0005989089044003199,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.02562007198979852,
+      "max_relative_harmonic_db": 0.0035698279778429882,
+      "pass_goals": true
+    },
+    {
+      "configuration": "square_open",
+      "reference_wav_sha256": "89192d1e137eb42e36949213a946774a861a2dd321a23f0b427f541d7c4d36cf",
+      "pitch_error_cents": 0.004839692268434862,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.000920980481374112,
+      "max_relative_harmonic_db": 0.04718709185420382,
+      "pass_goals": true
+    },
+    {
+      "configuration": "sub_open",
+      "reference_wav_sha256": "c64cd4a70f3ca70cfdc52f51560ca2a56dd6868890281c2ce8acc7e3bf270ba5",
+      "pitch_error_cents": 0.002388095254000943,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.0895891843388724,
+      "max_relative_harmonic_db": 0.01802939517410081,
+      "pass_goals": true
+    },
+    {
+      "configuration": "mod_triangle",
+      "reference_wav_sha256": "04315d36e88766f89b6b0e2eabdf06652fdca212260b9d6c3b806ddd79077aeb",
+      "pitch_error_cents": 0.0021409653437052052,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.0907416748505846,
+      "max_relative_harmonic_db": 0.0037489003484556037,
+      "pass_goals": true
+    },
+    {
+      "configuration": "mod_pulse",
+      "reference_wav_sha256": "ae82d409f1d5225895e1b8908674310bd65864ba5425ef4e1dcf3adfcdbf4c88",
+      "pitch_error_cents": -0.0008634329374128904,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.3782519157141229,
+      "max_relative_harmonic_db": 0.019713989422822993,
+      "pass_goals": true
+    },
+    {
+      "configuration": "mix_depth",
+      "reference_wav_sha256": "1124b1ef7ca19f04c8d501f68ef54adb449cbf574ab87b21789e9003f7ff6cdb",
+      "pitch_error_cents": 0.002498806683634491,
+      "pitch_valid": true,
+      "max_steady_envelope_db": 0.05785999309701293,
+      "max_relative_harmonic_db": 0.012479210967746948,
+      "pass_goals": true
+    }
+  ],
+  "chicago_au_3_1_6_measured": [
+    {
+      "configuration": "cut0.2-n48",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "c72b0489bd5a7240831ade7dec725e34dbaa4870026fa6d13ed05aab2105566c",
+      "steady_rms_db": -3.814039106201686e-05,
+      "pitch_valid": true,
+      "pitch_error_cents": -5.6888415308885184e-05,
+      "max_steady_envelope_db": 0.0002804443451076268,
+      "max_relative_harmonic_db": 0.007974037051397431,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.5604502324299,
+      "before_fix_max_relative_harmonic_db": 2.0475210689424728
+    },
+    {
+      "configuration": "cut0.4-n48",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "89ca40eaff586265cb65775b1ff2180a60c9fe95f62dfd7d3411fd2c691b2d4b",
+      "steady_rms_db": 7.449628898297269e-07,
+      "pitch_valid": true,
+      "pitch_error_cents": -1.1320855099520043e-05,
+      "max_steady_envelope_db": 2.621395085312929e-05,
+      "max_relative_harmonic_db": 5.051837219482991e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.4182720879512303,
+      "before_fix_max_relative_harmonic_db": 0.0323591172920068
+    },
+    {
+      "configuration": "cut0.6-n48",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "b712d3c453239fc35a35d67eb41a9a6187b9753df8c20c204a244a5d9f0b4d2c",
+      "steady_rms_db": -2.6349004604670162e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -3.1551427966427327e-06,
+      "max_steady_envelope_db": 1.737606923132409e-05,
+      "max_relative_harmonic_db": 0.0001523787219284145,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.721660945168904,
+      "before_fix_max_relative_harmonic_db": 0.3599064493414943
+    },
+    {
+      "configuration": "cut0.8-n48",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "55fedc11f8eff483e65feaa23868d7daf8b742451027dcde02f4a1688d481ca2",
+      "steady_rms_db": -2.452709232926546e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 1.1093242476137024e-05,
+      "max_steady_envelope_db": 2.819229309528871e-05,
+      "max_relative_harmonic_db": 9.201535687708429e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.823521669798815,
+      "before_fix_max_relative_harmonic_db": 0.32149526872044376
+    },
+    {
+      "configuration": "cut1.0-n48",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "b71513ce4d22e4d9d3e6cfa9cc0c34fd165cc2243fe1dd9c5dd2e5129a3245ac",
+      "steady_rms_db": -4.353549533037051e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 3.845572178381396e-06,
+      "max_steady_envelope_db": 2.2682610276035338e-05,
+      "max_relative_harmonic_db": 0.00011527827550850134,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.8506443862385193,
+      "before_fix_max_relative_harmonic_db": 0.1318897516441213
+    },
+    {
+      "configuration": "cut0.2-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "d500d0a42ed5eefdbb413cc4cfeb3c2044acf637b085986b867fb49b17a1d1c1",
+      "steady_rms_db": -9.392327097386115e-05,
+      "pitch_valid": true,
+      "pitch_error_cents": 2.3214667530024425e-05,
+      "max_steady_envelope_db": 0.001530481665301701,
+      "max_relative_harmonic_db": 0.07840482688941819,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.6826577002557146,
+      "before_fix_max_relative_harmonic_db": 13.923402496670636
+    },
+    {
+      "configuration": "cut0.4-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "86087c552a99e81655941467b504020066317978bf00c02e93f1792e6a4b7ae5",
+      "steady_rms_db": -1.6519235900344583e-05,
+      "pitch_valid": true,
+      "pitch_error_cents": -1.060814523410205e-05,
+      "max_steady_envelope_db": 6.453742303405251e-05,
+      "max_relative_harmonic_db": 5.1166437362581974e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.466662676297046,
+      "before_fix_max_relative_harmonic_db": 0.06862616609139138
+    },
+    {
+      "configuration": "cut0.6-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "1048d64c5bf3882100c1e787af1f975afb6b5a0f3e16f42b38eb8c5ac0a462fb",
+      "steady_rms_db": 3.475792407036654e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -5.716056259229974e-06,
+      "max_steady_envelope_db": 8.055114484766161e-06,
+      "max_relative_harmonic_db": 8.410037804651438e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.634577010355155,
+      "before_fix_max_relative_harmonic_db": 0.2689935140527169
+    },
+    {
+      "configuration": "cut0.8-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "778dd624e64d3295d9c9fb95cf0b452fe346e30b40c35bc93f624f53283e5133",
+      "steady_rms_db": 1.1561781249788047e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -5.697253747303853e-06,
+      "max_steady_envelope_db": 2.436530845488895e-05,
+      "max_relative_harmonic_db": 0.00021387015847196267,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7966085797956235,
+      "before_fix_max_relative_harmonic_db": 0.4058500864165602
+    },
+    {
+      "configuration": "cut1.0-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "56b18c01741d2c01b4e587fdc5f1c64789e247c070f344308664442a0a8f9cd6",
+      "steady_rms_db": -7.945300538859291e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -5.818450520270489e-06,
+      "max_steady_envelope_db": 3.52911897924547e-05,
+      "max_relative_harmonic_db": 0.00019043662081585921,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.8428088036810624,
+      "before_fix_max_relative_harmonic_db": 0.12875250499319701
+    },
+    {
+      "configuration": "wave0.5",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "703d05d1bede6f4d0b9be9e549da7ae79066a1024e78221fce524579b10d32df",
+      "steady_rms_db": -1.290697151021617e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 5.642576427864861e-06,
+      "max_steady_envelope_db": 6.312119211761145e-06,
+      "max_relative_harmonic_db": 0.000656195479294297,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.775431757571935,
+      "before_fix_max_relative_harmonic_db": 0.4629596128198159
+    },
+    {
+      "configuration": "wave1.0",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "ff315f87ff4408d717301a52d206111045291e74b194d25e93c2601fcdd2df66",
+      "steady_rms_db": -5.182020682919001e-07,
+      "pitch_valid": true,
+      "pitch_error_cents": 9.983434334930854e-06,
+      "max_steady_envelope_db": 9.7663740268739e-06,
+      "max_relative_harmonic_db": 0.00011634802155668922,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.768788893803359,
+      "before_fix_max_relative_harmonic_db": 0.377569898248165
+    },
+    {
+      "configuration": "reso0.5",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "c815ac1e2398162c611c6fb0674924e8ff8aec7b1c2f0aa093c8db2323de8482",
+      "steady_rms_db": 7.311316096551313e-07,
+      "pitch_valid": true,
+      "pitch_error_cents": -8.450673606558072e-06,
+      "max_steady_envelope_db": 1.695429607338521e-05,
+      "max_relative_harmonic_db": 0.0002613015360353188,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7704772846841346,
+      "before_fix_max_relative_harmonic_db": 3.413679975843891
+    },
+    {
+      "configuration": "reso1.0",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "7d09f3d1153e32a004a2c27fa62fa9c8d2c5ab0128dc833ba4052f70149449f9",
+      "steady_rms_db": -4.057852743614594e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 1.3620726364636433e-05,
+      "max_steady_envelope_db": 2.589942598172044e-05,
+      "max_relative_harmonic_db": 0.0003073997023719244,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 1.5108007714614322,
+      "before_fix_max_relative_harmonic_db": 11.628169988431118
+    },
+    {
+      "configuration": "vel40",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "69ec70bc399f91c0120c8d8a6306f1dcf98a238250802b7a959b8639c1f87c7c",
+      "steady_rms_db": -1.5686864242792771e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 1.154561024652958e-05,
+      "max_steady_envelope_db": 7.735760590694833e-06,
+      "max_relative_harmonic_db": 0.0008124467641295041,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7286066459861518,
+      "before_fix_max_relative_harmonic_db": 0.3682923822254587
+    },
+    {
+      "configuration": "vel80",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "b1af0d693d542cf57563aa569530e971376dded50182d84e26e2fc2ff2da3608",
+      "steady_rms_db": 3.7687725160964047e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -1.895345284657938e-06,
+      "max_steady_envelope_db": 1.798211263899861e-05,
+      "max_relative_harmonic_db": 0.0008484037388782895,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.722261861476853,
+      "before_fix_max_relative_harmonic_db": 0.3608827739319409
+    },
+    {
+      "configuration": "vel127",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "2a8d50f909db8ab0ebcdacade109745846dc63d689085b68e6b6481658194069",
+      "steady_rms_db": 1.6110338019109424e-07,
+      "pitch_valid": true,
+      "pitch_error_cents": -6.196504502143327e-06,
+      "max_steady_envelope_db": 1.5260743294056475e-05,
+      "max_relative_harmonic_db": 0.0001888599462915863,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.64567024164743,
+      "before_fix_max_relative_harmonic_db": 0.5960495198786813
+    },
+    {
+      "configuration": "env_positive",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "d08579e98a06f2e422ca7cdbb769e970a763d2c2071d49e87e3db735d33a68f7",
+      "steady_rms_db": 2.7908727141472937e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -6.579165652114011e-06,
+      "max_steady_envelope_db": 1.362869479376292e-05,
+      "max_relative_harmonic_db": 0.0003374531322251073,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.8076575987791137,
+      "before_fix_max_relative_harmonic_db": 0.452146427115629
+    },
+    {
+      "configuration": "env_amp",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "d96a22921ee123da24dfb97be0dbd3642fe2bf7b8d62e68e3651d6fe0815fa9a",
+      "steady_rms_db": 1.0881111533239441e-05,
+      "pitch_valid": true,
+      "pitch_error_cents": 2.7922793953674173e-06,
+      "max_steady_envelope_db": 4.6295040956940364e-05,
+      "max_relative_harmonic_db": 0.00039418557048520597,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7230676116473185,
+      "before_fix_max_relative_harmonic_db": 0.3730168207490365
+    },
+    {
+      "configuration": "attack",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "d1d44b251606397c5bab5700699e57999e501b9a0cc7b5beac83bbe565e995ea",
+      "steady_rms_db": 2.439019559576807e-07,
+      "pitch_valid": true,
+      "pitch_error_cents": 3.7813858904882033e-06,
+      "max_steady_envelope_db": 1.3714709395463856e-05,
+      "max_relative_harmonic_db": 0.000925594222763948,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.722919822508208,
+      "before_fix_max_relative_harmonic_db": 0.3613915613621561
+    },
+    {
+      "configuration": "repeat",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "de389d5efccca3191c52feca84b4dc4025080b6753877ae2fa9e323d9d2d040d",
+      "steady_rms_db": -2.6349004604670162e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -3.1551427966427327e-06,
+      "max_steady_envelope_db": 1.737606923132409e-05,
+      "max_relative_harmonic_db": 0.0001523787219284145,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.721660945168904,
+      "before_fix_max_relative_harmonic_db": 0.3599064493414943
+    },
+    {
+      "configuration": "overlap_glide0",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "0cfcfe4daf39df76409e409e399468711776de11d7a27ffbf7ed766d34685969",
+      "steady_rms_db": -4.71686570139663e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 2.900410416140609e-06,
+      "max_steady_envelope_db": 1.737606923132409e-05,
+      "max_relative_harmonic_db": 0.00018964473074589705,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7212620656498334,
+      "before_fix_max_relative_harmonic_db": 0.33404026162142664
+    },
+    {
+      "configuration": "overlap_glide_mid",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "811d18f82b60ede70da82a5a1113f8b34eefd02153ac4768875d347e373df094",
+      "steady_rms_db": -0.04451544706119781,
+      "pitch_valid": false,
+      "pitch_error_cents": null,
+      "max_steady_envelope_db": 0.7554235121334787,
+      "max_relative_harmonic_db": 2.211604783048167,
+      "pass_goals": false,
+      "before_fix_max_steady_envelope_db": 2.7044515112216088,
+      "before_fix_max_relative_harmonic_db": 2.4002394086270433
+    },
+    {
+      "configuration": "overlap_retrigger",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "0cfcfe4daf39df76409e409e399468711776de11d7a27ffbf7ed766d34685969",
+      "steady_rms_db": -4.71686570139663e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": 2.900410416140609e-06,
+      "max_steady_envelope_db": 1.737606923132409e-05,
+      "max_relative_harmonic_db": 0.00018964473074589705,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.7212620656498334,
+      "before_fix_max_relative_harmonic_db": 0.33404026162142664
+    },
+    {
+      "configuration": "accent_repeat",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "de389d5efccca3191c52feca84b4dc4025080b6753877ae2fa9e323d9d2d040d",
+      "steady_rms_db": -2.6349004604670162e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -3.1551427966427327e-06,
+      "max_steady_envelope_db": 1.737606923132409e-05,
+      "max_relative_harmonic_db": 0.0001523787219284145,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.721660945168904,
+      "before_fix_max_relative_harmonic_db": 0.3599064493414943
+    },
+    {
+      "configuration": "velocity40-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "c4b6c2514aba5bc1f744649978bf6f2200aeb33633e0975f9980ca7f894f7bca",
+      "steady_rms_db": 5.233603398691465e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -3.941206577229658e-06,
+      "max_steady_envelope_db": 1.903544457256305e-05,
+      "max_relative_harmonic_db": 0.00013360351547220262,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.644623048947097,
+      "before_fix_max_relative_harmonic_db": 0.30232717118294516
+    },
+    {
+      "configuration": "velocity80-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "598f6346137b0dc2f0e1bd9b4a15fe7acf31b58d2793b68121c1ca16ed6deee3",
+      "steady_rms_db": -7.3772020820046595e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -8.472817804922168e-06,
+      "max_steady_envelope_db": 2.5099362427423493e-05,
+      "max_relative_harmonic_db": 0.00015393697368892845,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.635601370975056,
+      "before_fix_max_relative_harmonic_db": 0.26969385535382173
+    },
+    {
+      "configuration": "velocity127-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "05a329a39865ca008beb62ed99f5f4457a3a1a29e3806640cba11b1289be881c",
+      "steady_rms_db": -1.8505994776198856e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -3.856593636036924e-07,
+      "max_steady_envelope_db": 2.4116320679081248e-05,
+      "max_relative_harmonic_db": 8.289409286987848e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.634014439192663,
+      "before_fix_max_relative_harmonic_db": 0.2691045720997991
+    },
+    {
+      "configuration": "repeat-n60",
+      "stereo_pcm_exact": false,
+      "candidate_sha256": "4b58cb4b1cd1c1aa498310c168ffbbe7787c244f8bff1c24fc15741f2c13d6f6",
+      "steady_rms_db": 3.475792407036654e-06,
+      "pitch_valid": true,
+      "pitch_error_cents": -5.716056259229974e-06,
+      "max_steady_envelope_db": 8.055114484766161e-06,
+      "max_relative_harmonic_db": 8.410037804651438e-05,
+      "pass_goals": true,
+      "before_fix_max_steady_envelope_db": 2.634577010355155,
+      "before_fix_max_relative_harmonic_db": 0.2689935140527169
+    }
+  ],
+  "firmware_hz": 44100,
+  "chicago_au_hz": 44100,
+  "miami_au_hz": 48000,
+  "factory_stimulus": {
+    "note": 48,
+    "velocity": 80,
+    "note_off_frame": 22050,
+    "frames": 44100
+  },
+  "limits": {
+    "pitch_cents": 2,
+    "steady_envelope_db": 1,
+    "relative_strong_harmonics_db": 1
+  },
+  "chicago_baseline": {
+    "commit": "63278e3322aefa89b25f129ca2fccc35ef3b3b3d",
+    "rows_passing": 0,
+    "tested_change": "Chicago inverted-quadratic oscillator-level curve 2 has unity maximum. Miami retains its original quadratic normalization. No final mixer or per-preset calibration."
+  },
+  "historical_synth684": {
+    "baseline_firmware": "f9ffd12e",
+    "baseline_exact_rows": 15,
+    "baseline_total_rows": 15,
+    "before_fix_exact_rows": 12,
+    "corrected_exact_rows": 2,
+    "notes": "Pinned historical .f32 files are version-specific regression captures. Gain correction changes all 11 Chicago outputs. All four Miami outputs match the PR #973 parent byte for byte. Before this change the fast-FMA compressor conversion changed 22 Chicago p00/fx4 frames, Miami p09 selected voice changed 12 frames, and Miami p18 MS20 changed 57 frames. The historical commit reproduces all 15 checked-in files.",
+    "comparisons": [
+      {
+        "file": "chicago-p00-fx0.f32",
+        "historical_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "before_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "after_sha256": "ceb34cac1d1a8d7905c91429543481df81784b3d5f1102f58c993120aa2392e3",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx1.f32",
+        "historical_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "before_sha256": "893d819a33026206a65a6779f74435be0c5c096fbb806042aefa0f5cd3300213",
+        "after_sha256": "ceb34cac1d1a8d7905c91429543481df81784b3d5f1102f58c993120aa2392e3",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx2.f32",
+        "historical_sha256": "a55b511e231b05fe9a62e9fc0582422ea1301d48485e466a7032eea1fd152400",
+        "before_sha256": "a55b511e231b05fe9a62e9fc0582422ea1301d48485e466a7032eea1fd152400",
+        "after_sha256": "b87c65b7ffc176487df841242e34e46f89c91a32858652e8b3df67a7b332e2e7",
+        "stereo_frames_changed_from_973": 35906
+      },
+      {
+        "file": "chicago-p00-fx3.f32",
+        "historical_sha256": "b3e170587022dcc79d3ab41d8d62409ca5172157878cbff34d1f0e2dfa31ba89",
+        "before_sha256": "b3e170587022dcc79d3ab41d8d62409ca5172157878cbff34d1f0e2dfa31ba89",
+        "after_sha256": "488d75b04b8d6b0e1164abe0f14a4722a113fdc468a9f023a28daccc53ffe0a9",
+        "stereo_frames_changed_from_973": 30396
+      },
+      {
+        "file": "chicago-p00-fx4.f32",
+        "historical_sha256": "a35fa06898e03fec2ae73d8e0cbafdf1c9e5cd6ff982470faccb143f59629717",
+        "before_sha256": "b72a4b7e5242c047d842ca2b503ab6d448cf4a7163d42e1b2d46214a4a8a0a8c",
+        "after_sha256": "11d90300bd28a8dc4ce6c41bf10f44b08e5b35b1fa8fc7c6e10f810bc5b2ab4a",
+        "stereo_frames_changed_from_973": 31656
+      },
+      {
+        "file": "chicago-p00-fx5.f32",
+        "historical_sha256": "2258b8b69fac77f540e576767ac1317a18db19bbac57d3d8a42a1903181210a0",
+        "before_sha256": "2258b8b69fac77f540e576767ac1317a18db19bbac57d3d8a42a1903181210a0",
+        "after_sha256": "f4c0df6cab4fb46ebd6a60acdd9032dbfaab682c089cb3b2a7bdc81009dabd3d",
+        "stereo_frames_changed_from_973": 30389
+      },
+      {
+        "file": "chicago-p00-fx6.f32",
+        "historical_sha256": "b11513afce749884257bb8e33531584f45071c1e70de6b05bf3c522683dffadc",
+        "before_sha256": "b11513afce749884257bb8e33531584f45071c1e70de6b05bf3c522683dffadc",
+        "after_sha256": "c24e8ceef4d967a8b90178b90be17c7d71f1957f9b0c8c22a0aa9e36d3f1a086",
+        "stereo_frames_changed_from_973": 30900
+      },
+      {
+        "file": "chicago-p07-fx0.f32",
+        "historical_sha256": "31f6a59c551bf954bc6f0e4e5a23431df5ce7a28002e1ff6e3ff12675ad91cef",
+        "before_sha256": "31f6a59c551bf954bc6f0e4e5a23431df5ce7a28002e1ff6e3ff12675ad91cef",
+        "after_sha256": "c4c8b16c43893020f145019509b95b769a8a84e50380ab94f7aa9d9e698aa78f",
+        "stereo_frames_changed_from_973": 43929
+      },
+      {
+        "file": "chicago-p19-fx0.f32",
+        "historical_sha256": "c6da1cd5a139be45847a9c403213f50a83d7176c001c5b94bedfd32cf3f979c4",
+        "before_sha256": "c6da1cd5a139be45847a9c403213f50a83d7176c001c5b94bedfd32cf3f979c4",
+        "after_sha256": "f1db4a5a62c24670e2c723a99d587d62af870c7c1df69bfed7ea7e184f4261af",
+        "stereo_frames_changed_from_973": 30183
+      },
+      {
+        "file": "chicago-p33-fx0.f32",
+        "historical_sha256": "e0079955a78c63e8db24b0f5babf0e73a6e11bb50411e75039ece99e6687df6f",
+        "before_sha256": "e0079955a78c63e8db24b0f5babf0e73a6e11bb50411e75039ece99e6687df6f",
+        "after_sha256": "e4132315272ae5bb413e6ae0b74cf8e698218483e18d79263ddc760fddec7e54",
+        "stereo_frames_changed_from_973": 31385
+      },
+      {
+        "file": "chicago-p54-fx0.f32",
+        "historical_sha256": "5ef9d1eaa0aad518ab245daa48e1fd16b25ab1f6628cbb60959ed9e42eaaa65f",
+        "before_sha256": "5ef9d1eaa0aad518ab245daa48e1fd16b25ab1f6628cbb60959ed9e42eaaa65f",
+        "after_sha256": "f2fb349c44df8b5a93e67bf15b6c521a81ac2bfb77b47c2aae54ec2cec41a708",
+        "stereo_frames_changed_from_973": 34310
+      },
+      {
+        "file": "miami-p00-fx0.f32",
+        "historical_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "before_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "after_sha256": "bff43de1f26edc0eaf1876277c0e759c4c9cc785d9e4cf66778c10582c6c9edd",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p09-fx0.f32",
+        "historical_sha256": "e8a7dd2c09e7353d1f46ef7468fe0c111d8202108b5d72aebe57b94dfa8e6622",
+        "before_sha256": "1a737fa1a4b0ba075806afebfc16f89100c46db330c910a5abe2fada3abe40bb",
+        "after_sha256": "1a737fa1a4b0ba075806afebfc16f89100c46db330c910a5abe2fada3abe40bb",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p18-fx0.f32",
+        "historical_sha256": "002bec7fc326717809e205e116998491ee9ecdf8d5e13135f5b676f0cb02efe3",
+        "before_sha256": "59387e83b54da9d08fd9f9de77f585dc4122ce17d8abfd455bbb620ddbe721a5",
+        "after_sha256": "59387e83b54da9d08fd9f9de77f585dc4122ce17d8abfd455bbb620ddbe721a5",
+        "stereo_frames_changed_from_973": 0
+      },
+      {
+        "file": "miami-p29-fx0.f32",
+        "historical_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "before_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "after_sha256": "2f106ade9f913a7845ca6e68019e4033bc988f7ada1f3e6e17f9ee78173e5826",
+        "stereo_frames_changed_from_973": 0
+      }
+    ]
+  }
+}

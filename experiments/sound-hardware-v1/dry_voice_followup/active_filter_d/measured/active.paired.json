@@ -1,0 +1,23 @@
+{
+  "scope": "dry controlled three-pitch screen, not full engine gate",
+  "gain": 1.0,
+  "rows": [
+    {
+      "note": 36,
+      "rms_db": 0.2322267444441285,
+      "spectral_db": 0.6821656102501344
+    },
+    {
+      "note": 60,
+      "rms_db": 0.23911207195823647,
+      "spectral_db": 0.7671471687387921
+    },
+    {
+      "note": 84,
+      "rms_db": 0.19610544102212382,
+      "spectral_db": 2.1061539033521486
+    }
+  ],
+  "nonfinite": 0,
+  "pcm_sha256": "338458922ef3861ec77898dfe386328a2ad6fa19897d265a010d106d96269bce"
+}

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py", line 70, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py", line 36, in main
+    require(not found, "Unpinned native include/library environment: " + ", ".join(found))
+  File "/workspace/scratch/e803955aec60/fit_next_plan/verify_inputs.py", line 20, in require
+    raise RuntimeError(message)
+RuntimeError: Unpinned native include/library environment: CPATH

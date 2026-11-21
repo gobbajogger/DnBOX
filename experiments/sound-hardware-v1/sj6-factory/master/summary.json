@@ -1,0 +1,11 @@
+{
+  "original_au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "bank_sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+  "programs": 640,
+  "unique_factory_values": 453,
+  "over_unity_programs": 8,
+  "greatest_raw": 1.3200000524520874,
+  "observed_calls": 456,
+  "scope": "Original AU callback through its setVolume: message. Object lifetime and libm pow are bridged. No Apple mixer output is substituted or recorded.",
+  "observations_sha256": "ab8cd42f45d6bbee001fe4920fea9143cbe710d2cf46534ff2ac6ed250b10e34"
+}

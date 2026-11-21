@@ -2,6 +2,26 @@
 /* Textually included by engine.c: replacement-only patch publication. */
 static int16_t bass_named_preset[NBASS] = {-1, -1};
 static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
+#if X0X_SYNTHONE_PATCH
+/* One main-loop edit per part. A new adoption invalidates its predecessor,
+ * even on a project reload or a new choice of the same named preset. */
+static volatile uint8_t note_lock_applied[NBASS];
+static volatile uint32_t s1_patch_revision[NBASS];
+static uint32_t s1_patch_identity(unsigned voice)
+{ return (s1_patch_revision[voice] << 1) | voice; }
+
+static volatile struct { uint8_t pending, slot, position; } s1_edit[NBASS];
+int engine_s1_patch_pending(void)
+{ return s1_edit[0].pending || s1_edit[1].pending; }
+
+static void s1_patch_replaced(int voice)
+{
+    ++s1_patch_revision[voice];
+    if (original_bass[voice].kind == ORIGINAL_SOUND_SYNTHONE) note_lock_applied[voice] = 0;
+    s1_edit[voice].pending = 0;
+}
+#endif
+
 static volatile uint32_t bass_request[NBASS], bass_applied[NBASS];
 static uint32_t bass_request_serial;
 static volatile uint32_t bass_publish_seq[NBASS], bass_midi_mark[NBASS], bass_cq_mark[NBASS];
@@ -35,6 +55,63 @@ static void bass_publish_request(int voice, uint32_t token)
     __asm__ volatile("" ::: "memory");
     ++bass_publish_seq[voice];
 }
+#if X0X_SYNTHONE_PATCH
+int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+{
+    if (voice >= NBASS || !out) return 0;
+    uint32_t lock = plat_cq_lock();
+    const original_runtime_part *owner = &original_bass[voice];
+    int ready = owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK;
+    if (ready) {
+        out->revision = s1_patch_identity(voice);
+        out->note_locked = note_lock_applied[voice];
+        out->preset = bass_named_preset[voice];
+        for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+            out->physical[i] = s1_part_patch_value(&owner->dsp.synthone, i);
+    }
+    plat_cq_unlock(lock);
+    return ready;
+}
+
+int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
+{
+    s1_patch_snapshot snapshot;
+    int slot = s1_patch_slot(factory_id);
+    if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
+    const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+    out->revision = snapshot.revision;
+    out->note_locked = snapshot.note_locked;
+    out->preset = snapshot.preset;
+    out->physical = snapshot.physical[slot];
+    out->position = (uint8_t)((out->physical - d->minimum) *
+        (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
+    return 1;
+}
+
+int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position)
+{
+    int slot = s1_patch_slot(factory_id);
+    if (voice >= NBASS || slot < 0 || position > S1_PATCH_STEPS) return S1_EDIT_REJECTED;
+    uint32_t lock = plat_cq_lock();
+    int status = S1_EDIT_REJECTED;
+    uint32_t request = bass_request[voice];
+    if (original_bass[voice].kind == ORIGINAL_SOUND_SYNTHONE &&
+        original_bass[voice].status == ORIGINAL_RUNTIME_OK &&
+        s1_patch_identity(voice) == revision &&
+        !((request & 0x80000000u) && request != bass_applied[voice])) {
+        if (s1_edit[voice].pending || note_lock_applied[voice]) status = S1_EDIT_BUSY;
+        else {
+            s1_edit[voice].slot = (uint8_t)slot;
+            s1_edit[voice].position = (uint8_t)position;
+            s1_edit[voice].pending = 1;
+            status = S1_EDIT_QUEUED;
+        }
+    }
+    plat_cq_unlock(lock);
+    return status;
+}
+#endif
+
 static int bass_has_locks(int voice)
 {
     if (mot.lane) for (int k = 0; k < NLANE; ++k)
@@ -48,6 +125,23 @@ static void bass_tag_set(sound_t *sound, int voice, int bank, int preset, int ed
         (uint16_t)preset, (uint8_t)(edited ? BASS_SOUND_EDITED : 0)};
     (void)bass_sound_tag_encode(&sound->bass[voice], &info, BASS_SOUND_REGISTRY, 4);
 }
+#if X0X_SYNTHONE_PATCH
+static void s1_patch_boundary(void)
+{
+    if (bass_edit_depth || !engine_s1_patch_pending()) return;
+    for (unsigned v = 0; v < NBASS; ++v) {
+        if (!s1_edit[v].pending || note_lock_applied[v]) continue;
+        s1_edit[v].pending = 0;
+        if (!mot_base_snd || original_bass[v].kind != ORIGINAL_SOUND_SYNTHONE ||
+            original_bass[v].status != ORIGINAL_RUNTIME_OK) continue;
+        sound_t *sound = (sound_t *)mot_base_snd;
+        uint8_t *cell = sound->v[T_303][v];
+        if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
+        bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v], 1);
+    }
+}
+#endif
 static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *bank)
 {
     bass_sound_info_t info;
@@ -87,7 +181,11 @@ int engine_bass_sound_validate(const sound_t *sound)
  * and part mixer are applied at that note's onset, before the key. Capture runs
  * only while NOTE LOCK is on (runtime, not saved); with no lock records the
  * onset path does one flag read. */
+#if X0X_SYNTHONE_PATCH
+static volatile uint8_t note_lock_capture, note_lock_any;
+#else
 static volatile uint8_t note_lock_capture, note_lock_any, note_lock_applied[NBASS];
+#endif
 void engine_note_lock_capture(int on) { note_lock_capture = (uint8_t)(on != 0); }
 int engine_note_lock_capture_on(void) { return note_lock_capture; }
 int engine_bass_note_validate(const lane_t *l)
@@ -168,6 +266,10 @@ static void note_lock_restore(int v)
 {
     unsigned n=original_sound_count(original_bass[v].kind);
     note_lock_applied[v]=0;
+#if X0X_SYNTHONE_PATCH
+    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v]);
+#endif
     for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_bass[v].kind,i))apply_base(T_303,v,(int)i);
     for(int i=0;i<MX_NPARAMS;i++)apply_base(T_MIX,PART_303A+v,i);
 }
@@ -181,6 +283,10 @@ static void note_lock_onset(int v)
         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
     }
     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
+#if X0X_SYNTHONE_PATCH
+    if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
+#endif
     unsigned n=original_sound_count(original_bass[v].kind);
     for(unsigned i=0;i<n;i++) {
         float value;
@@ -217,6 +323,9 @@ static int bass_restore_part(const sound_t *sound, int v)
     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
         &original_tuning, &original_fx_owner[v]);
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
+#if X0X_SYNTHONE_PATCH
+    s1_patch_replaced(v);
+#endif
     bass_named_preset[v] = sound->v[T_303][v][30];
     original_seq_note[v] = -1;
     __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
@@ -310,6 +419,9 @@ int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *sound, in
     __asm__ volatile("" ::: "memory");
     uint32_t token = 0x80000000u | ((++bass_request_serial & 0x3fffffu) << 9) |
         ((uint32_t)bank << 7) | (uint32_t)preset;
+#if X0X_SYNTHONE_PATCH
+    s1_edit[v].pending = 0;
+#endif
     bass_preview_dirty = 1;
     bass_publish_request(v, token);
     return 0;
@@ -347,6 +459,9 @@ static void bass_preset_boundary_voice(int v)
         sound_t *sound = (sound_t *)mot_base_snd;
         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
         bass_tag_set(sound, v, bank, preset, 0);
+#if X0X_SYNTHONE_PATCH
+        s1_patch_replaced(v);
+#endif
         bass_named_preset[v] = (int16_t)preset;
         /* A committed bank/preset replacement, never merely a pending request.
          * parameter -1 identifies the bank; parameter -2 the factory index. */

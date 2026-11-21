@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+    "active",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.candidate-mono.f32le"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one",
+  "started_utc": "2026-11-19T00:47:10.802507+00:00",
+  "binary_sha256_before_execution": "988006d70a648c4fc213b8047655df06f9e41e2993a8ab36e763baeecc63c936",
+  "exit_status": 0,
+  "stdout": "{\"mode\":\"active\",\"frames_per_note\":88192,\"notes\":[36,60,84],\"warmup_frames\":176448,\"off_frame\":66112,\"sample_rate_hz\":44100,\"nonfinite\":0,\"phase_at_note_on\":0,\"comparison_gain\":1,\"velocity\":100,\"cutoff_hex\":\"44fa0000\",\"resonance_hex\":\"3f666666\",\"depth_hex\":\"3f99999a\",\"filter_ADSR_hex\":[\"3e4ccccd\",\"3e99999a\",\"3ecccccd\",\"3f000000\"]}\n",
+  "stderr": "",
+  "finished_utc": "2026-11-19T00:47:10.822375+00:00"
+}

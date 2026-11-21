@@ -1,0 +1,323 @@
+{
+  "source": "dea023ce632538621b59bb307ebcaf440805b032",
+  "compact_tree_at_source": "bfd39793b1bf792a0b43b6d635ce3318058717e1",
+  "patch": {
+    "bytes": 19063,
+    "sha256": "cacde184d851e4ceee14cf9a8613b11f0607a564d0c013d3cae3baea067a1fb3"
+  },
+  "emulator_source": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+  "emulator_sha256": "8dca639e2f8b0a992f7e4581563d3497e664c8331ffa86a2e70961e1922076ac",
+  "emulator_compiler": "rustc 1.85.1",
+  "toolchain": "jieli-linux-toolchains-20260730.1",
+  "builds": {
+    "elite": {
+      "sound": {
+        "xip_free": 6156,
+        "pool_free": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "elf": {
+          "bytes": 633928,
+          "sha256": "1130c88adb567502fa55b532a135231f333f9f6c9b93bff17c2196389b455c90"
+        },
+        "app": {
+          "bytes": 546516,
+          "sha256": "4c1fea5eb23ccaa8a5538c994b9552e8164d0fe2ea2b146d4e159ef38387e7cd"
+        },
+        "loader": {
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+        },
+        "package": {
+          "bytes": 651732,
+          "sha256": "eaf36dfcbf7c9a763724d847e7df427f52109e8bd477eb46632fb3a373eb829d"
+        },
+        "typed_apis": {}
+      },
+      "compact": {
+        "xip_free": 2236,
+        "pool_free": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "elf": {
+          "bytes": 638660,
+          "sha256": "ddb6b0ed0bde4c92312dfcca4f9415be631aa82043c0fab8f7d52ff08a339e33"
+        },
+        "app": {
+          "bytes": 550436,
+          "sha256": "8c1efbd0d9edc5258f4454088dd5bfd428521481c2434f3b382acc1934fe7c3b"
+        },
+        "loader": {
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+        },
+        "package": {
+          "bytes": 651732,
+          "sha256": "25505b59a8dd812ee3c01d64b1f0b7c32e09ea820d4fce45e13cf0cc20c55d4a"
+        },
+        "typed_apis": {
+          "engine_superj6_edit": 144,
+          "engine_superj6_pre_note_wave": 192
+        }
+      }
+    },
+    "pro": {
+      "sound": {
+        "xip_free": 6164,
+        "pool_free": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "elf": {
+          "bytes": 633924,
+          "sha256": "0c8a8c40940955be88efed10ccd2bb96684eb5f3c7d7c055ec40675f0baceabd"
+        },
+        "app": {
+          "bytes": 546508,
+          "sha256": "ea33898b9c43c66b62e4bf4e695c9f590ca18ad088554165749b0571ab0ccb8c"
+        },
+        "loader": {
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+        },
+        "package": {
+          "bytes": 651730,
+          "sha256": "8c76d2d49f1cec86fa69aecd5c65391688692be3caba8f9ba93b737c7568ea64"
+        },
+        "typed_apis": {}
+      },
+      "compact": {
+        "xip_free": 2248,
+        "pool_free": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "elf": {
+          "bytes": 638652,
+          "sha256": "eca9ca6921ff48b3bc64647ba50480dbdbda20532112da2e20ca223412f332b6"
+        },
+        "app": {
+          "bytes": 550424,
+          "sha256": "c283edede441070d689eaeeb16883b5d582d9319179b6e208471343fb9d81528"
+        },
+        "loader": {
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+        },
+        "package": {
+          "bytes": 651730,
+          "sha256": "773d5f56ca9eb5d79d0b7d6b5b4425f305d91c631d828ac41cd78acb371ffc8e"
+        },
+        "typed_apis": {
+          "engine_superj6_edit": 144,
+          "engine_superj6_pre_note_wave": 192
+        }
+      }
+    }
+  },
+  "fixed_input_host": {
+    "scenarios": 17,
+    "equal_files": 50,
+    "stock_and_compact": {
+      "all/audio.i32": {
+        "sha256": "cf2da562c5adefc0a9ab862f3f351f2bb2ed3e28f3a8ca74a181ad93fea28df7",
+        "bytes": 1048576
+      },
+      "all/peak-scope.bin": {
+        "sha256": "6f823fc34dbc95901068e5b026859aa533fe35d45055fd8aebb43becac31bb31",
+        "bytes": 138240
+      },
+      "all/usb.i32": {
+        "sha256": "cf2da562c5adefc0a9ab862f3f351f2bb2ed3e28f3a8ca74a181ad93fea28df7",
+        "bytes": 1048576
+      },
+      "solo-mute/audio.i32": {
+        "sha256": "5d7984953b59350f53bf42d7ebe597c9ef35984f680cab0a55e04d74a341b00b",
+        "bytes": 1048576
+      },
+      "solo-mute/peak-scope.bin": {
+        "sha256": "44681f6d6e4b94665b5cd119ec9027dd842f2a8d9bd6d562ccc30e24ada752dd",
+        "bytes": 138240
+      },
+      "solo-mute/usb.i32": {
+        "sha256": "5d7984953b59350f53bf42d7ebe597c9ef35984f680cab0a55e04d74a341b00b",
+        "bytes": 1048576
+      },
+      "mix-sweeps/audio.i32": {
+        "sha256": "bf4daca98b96bed8649395de851e5294fa4bed932d5bdafe6cfd5f38ec52737e",
+        "bytes": 1048576
+      },
+      "mix-sweeps/peak-scope.bin": {
+        "sha256": "8349702ba4db03d96fb4027dbe2777414fe17d6a425dc732a73dd63825976fa3",
+        "bytes": 138240
+      },
+      "mix-sweeps/usb.i32": {
+        "sha256": "bf4daca98b96bed8649395de851e5294fa4bed932d5bdafe6cfd5f38ec52737e",
+        "bytes": 1048576
+      },
+      "preset-fade/audio.i32": {
+        "sha256": "6ab4a93d5135cfe39232b73f9559962b6847609bb318e9985d011184df72f751",
+        "bytes": 1048576
+      },
+      "preset-fade/peak-scope.bin": {
+        "sha256": "3bc329bd6ad9f4c0524e79fcb5a48614abf815beca3bde3cf19b0aa7df7cd983",
+        "bytes": 138240
+      },
+      "preset-fade/usb.i32": {
+        "sha256": "6ab4a93d5135cfe39232b73f9559962b6847609bb318e9985d011184df72f751",
+        "bytes": 1048576
+      },
+      "djf1-static/audio.i32": {
+        "sha256": "7357216f49b1c8022ccbdf0341c5cb3ec890535ea996050319d1188691205fdf",
+        "bytes": 1048576
+      },
+      "djf1-static/peak-scope.bin": {
+        "sha256": "319ae13cef2c23ed5eb2057e02a793861f708f7da98b81257edd8b28fb81a26a",
+        "bytes": 138240
+      },
+      "djf1-static/usb.i32": {
+        "sha256": "7357216f49b1c8022ccbdf0341c5cb3ec890535ea996050319d1188691205fdf",
+        "bytes": 1048576
+      },
+      "djf1-sweep/audio.i32": {
+        "sha256": "259db270da243c7d17901bb3550002af3e390e6675414952aaccfe372d865f68",
+        "bytes": 1048576
+      },
+      "djf1-sweep/peak-scope.bin": {
+        "sha256": "852f88db28baf6a57dc1e2f37ae56c8eeff3622914fe08fd06b8362c1f715d39",
+        "bytes": 138240
+      },
+      "djf1-sweep/usb.i32": {
+        "sha256": "259db270da243c7d17901bb3550002af3e390e6675414952aaccfe372d865f68",
+        "bytes": 1048576
+      },
+      "djf2-static/audio.i32": {
+        "sha256": "db3c7c3f31f634e429bc233fc9c50af416c69ed7bd654ffa41322f37433894c5",
+        "bytes": 1048576
+      },
+      "djf2-static/peak-scope.bin": {
+        "sha256": "bab191ead2e60f268e33700aa8657415a829ab2bab31cf06eb6a1f9b91a25495",
+        "bytes": 138240
+      },
+      "djf2-static/usb.i32": {
+        "sha256": "db3c7c3f31f634e429bc233fc9c50af416c69ed7bd654ffa41322f37433894c5",
+        "bytes": 1048576
+      },
+      "djf2-sweep/audio.i32": {
+        "sha256": "03c0a9207cf22c731f45cea843481de00b0b7029f5bb0b042cb58241e8740217",
+        "bytes": 1048576
+      },
+      "djf2-sweep/peak-scope.bin": {
+        "sha256": "22157ed9084d584b43c6a53c8d52f0a20035b121dc19825e6d8d838b2f3c87da",
+        "bytes": 138240
+      },
+      "djf2-sweep/usb.i32": {
+        "sha256": "03c0a9207cf22c731f45cea843481de00b0b7029f5bb0b042cb58241e8740217",
+        "bytes": 1048576
+      },
+      "djf3-static/audio.i32": {
+        "sha256": "ea2e3e16efe1df4474e75964c55b139066a777766111d424ed6b306d13495828",
+        "bytes": 1048576
+      },
+      "djf3-static/peak-scope.bin": {
+        "sha256": "46c8424f5be44ab7a3a3601f619d99b2617d59af4d41f228b2d2c849cd291d3b",
+        "bytes": 138240
+      },
+      "djf3-static/usb.i32": {
+        "sha256": "ea2e3e16efe1df4474e75964c55b139066a777766111d424ed6b306d13495828",
+        "bytes": 1048576
+      },
+      "djf3-sweep/audio.i32": {
+        "sha256": "2e726c85b5109b9ba951b41aeb8f7db73fc4b9dbf7e65026f627225310deefc8",
+        "bytes": 1048576
+      },
+      "djf3-sweep/peak-scope.bin": {
+        "sha256": "74cb0231d95dded71abf528c379d5ea8c46a0df3b1a6748ff22fbb6119d20d72",
+        "bytes": 138240
+      },
+      "djf3-sweep/usb.i32": {
+        "sha256": "2e726c85b5109b9ba951b41aeb8f7db73fc4b9dbf7e65026f627225310deefc8",
+        "bytes": 1048576
+      },
+      "limiter-off/audio.i32": {
+        "sha256": "7d7fe226a719c9738ab864b8329165a3c5b2d8de877e1d2973556fd8db3b7667",
+        "bytes": 1048576
+      },
+      "limiter-off/peak-scope.bin": {
+        "sha256": "5091b46287d88dddd77ed05e2b5249a5fee4f58740ad146dc340704bce5c1e0e",
+        "bytes": 138240
+      },
+      "limiter-off/usb.i32": {
+        "sha256": "7d7fe226a719c9738ab864b8329165a3c5b2d8de877e1d2973556fd8db3b7667",
+        "bytes": 1048576
+      },
+      "comp/audio.i32": {
+        "sha256": "106b490bcd6e820e51b4881c92d389db57a04393b680f3f1f3ff975b6c5263c4",
+        "bytes": 1048576
+      },
+      "comp/peak-scope.bin": {
+        "sha256": "678610d543d235605c24340bf6ce45a3ca125c825f5e6f88c3a1417ccaf3e395",
+        "bytes": 138240
+      },
+      "comp/usb.i32": {
+        "sha256": "106b490bcd6e820e51b4881c92d389db57a04393b680f3f1f3ff975b6c5263c4",
+        "bytes": 1048576
+      },
+      "usb-full/audio.i32": {
+        "sha256": "435f74b69ae09638e28667766a85739f8e8914b201f863dcac85a0cd0cae31a4",
+        "bytes": 1048576
+      },
+      "usb-full/peak-scope.bin": {
+        "sha256": "ea642b6e2a8f8ae4ad04e11f95d24cb516da35fa8a20c599edf014235143c029",
+        "bytes": 138240
+      },
+      "usb-full/usb.i32": {
+        "sha256": "151531ffb31dcbc7653ab179bff978befad78f0871e0a49c040c4c3080562101",
+        "bytes": 1048576
+      },
+      "usb-normal/audio.i32": {
+        "sha256": "cf2da562c5adefc0a9ab862f3f351f2bb2ed3e28f3a8ca74a181ad93fea28df7",
+        "bytes": 1048576
+      },
+      "usb-normal/peak-scope.bin": {
+        "sha256": "6f823fc34dbc95901068e5b026859aa533fe35d45055fd8aebb43becac31bb31",
+        "bytes": 138240
+      },
+      "usb-normal/usb.i32": {
+        "sha256": "cf2da562c5adefc0a9ab862f3f351f2bb2ed3e28f3a8ca74a181ad93fea28df7",
+        "bytes": 1048576
+      },
+      "dense/audio.i32": {
+        "sha256": "349ffb590591bea5de1cffe9d407921b05a1ba72f6c1aca401689da8dfa67bc9",
+        "bytes": 1048576
+      },
+      "dense/peak-scope.bin": {
+        "sha256": "2ff0ca7ce16238e6b52dcde65287c413f8dd8242b8fa92baff389f9bb28f72f9",
+        "bytes": 138240
+      },
+      "dense/usb.i32": {
+        "sha256": "349ffb590591bea5de1cffe9d407921b05a1ba72f6c1aca401689da8dfa67bc9",
+        "bytes": 1048576
+      },
+      "idle/audio.i32": {
+        "sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "bytes": 1048576
+      },
+      "idle/peak-scope.bin": {
+        "sha256": "3c61e2b8e0ef859d416fe74d670e9b32c289a5dea557b8d40a1368c903d379ed",
+        "bytes": 138240
+      },
+      "idle/usb.i32": {
+        "sha256": "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "bytes": 1048576
+      },
+      "mono/mono-state.bin": {
+        "sha256": "6fffbad5740ea83ea1f027276c134ed031efb047d63f8a286efc051a98158928",
+        "bytes": 1019904
+      },
+      "mono/mono.f32": {
+        "sha256": "51511b9fbcffa181314b6732653c2c2924b771d59f8910d8e9e5fa7910dcf04e",
+        "bytes": 1572864
+      }
+    }
+  },
+  "withdrawn_physical_run": "The preexisting 1 MiB stock flash replaced the candidate firmware in this run. The claimed twelve compact physical comparisons and timing assignments are withdrawn. Native builds and independent host results remain valid."
+}

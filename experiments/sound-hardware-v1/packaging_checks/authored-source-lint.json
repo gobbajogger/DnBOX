@@ -1,0 +1,14 @@
+{
+  "command": "git diff --cached --check -- <authored source paths>",
+  "paths": [
+    "docs/lanes/sound.md",
+    "docs/sound/hardware-first-owner-report.md",
+    "experiments/sound-hardware-v1/reproduce_native.py",
+    "experiments/sound-hardware-v1/hardware_candidate/src",
+    "experiments/sound-hardware-v1/hardware_candidate/tests",
+    "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "scope_note": "Raw captured CSV and command/disassembly logs retain their exact original bytes, including CRLF/trailing tool formatting. Inherited consolidated whitespace is outside this authored-source check."
+}

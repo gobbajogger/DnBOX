@@ -847,6 +847,9 @@ void project_capture_stage(void)
 int project_save(void)
 {
 #if X0X_BASS_TAGGED_SOUND
+#if X0X_SYNTHONE_PATCH
+    if(engine_s1_patch_pending())return -8;
+#endif
     if(engine_bass_sound_validate(&proj.sound))return -9;
     for(int v=0;v<NBASS;v++)if(engine_bass_preset_pending(v))return -8;
 #elif X0X_BASS_PRESET_PREVIEW

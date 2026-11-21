@@ -1,0 +1,285 @@
+{
+  "decision": "PASS only declared original captured amp subset and tested candidate mechanics; full Sound/native timing acceptance remains unqualified",
+  "candidate_sha256": {
+    "dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+  },
+  "scoped_acceptance_pass": true,
+  "amplitude": [
+    {
+      "max_abs": 6.940195698135199e-07,
+      "rms": 2.116131445146204e-07,
+      "comparisons": 1024,
+      "worst_frame": 271,
+      "actual_at_worst": 0.7567344307899475,
+      "original_at_worst": 0.7567351248095173,
+      "pass": true,
+      "case_index": 1,
+      "case_name": "velocity127",
+      "ratio_crosscheck_max_abs": 1.1605597061148387e-07,
+      "ratio_crosscheck_samples": 8191,
+      "ratio_crosscheck_pass": true,
+      "negative_wrong_time_grid": {
+        "max_abs": 0.06371962799002259,
+        "rms": 0.008998397153630364,
+        "comparisons": 1024,
+        "worst_frame": 15,
+        "actual_at_worst": 0.13115757703781128,
+        "original_at_worst": 0.06743794904778869,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.3213231669870835,
+        "rms": 0.18269997759312884,
+        "comparisons": 1024,
+        "worst_frame": 5695,
+        "actual_at_worst": 0.46666665871938073,
+        "original_at_worst": 0.14534349173229724,
+        "pass": false
+      }
+    },
+    {
+      "max_abs": 7.946646328749196e-07,
+      "rms": 1.9952365495449403e-07,
+      "comparisons": 4096,
+      "worst_frame": 1103,
+      "actual_at_worst": 0.8912572860717773,
+      "original_at_worst": 0.8912580807364102,
+      "pass": true,
+      "case_index": 2,
+      "case_name": "nonzero_hold_releasehold",
+      "ratio_crosscheck_max_abs": 1.4049036445307195e-07,
+      "ratio_crosscheck_samples": 32767,
+      "ratio_crosscheck_pass": true,
+      "negative_wrong_time_grid": {
+        "max_abs": 0.022476598869431694,
+        "rms": 0.0026957760892667507,
+        "comparisons": 4096,
+        "worst_frame": 15,
+        "actual_at_worst": 0.045382190495729446,
+        "original_at_worst": 0.022905591626297753,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.2694200169984673,
+        "rms": 0.13404672051551114,
+        "comparisons": 4096,
+        "worst_frame": 5647,
+        "actual_at_worst": 0.7970000020166238,
+        "original_at_worst": 0.5275799850181565,
+        "pass": false
+      }
+    }
+  ],
+  "velocity": {
+    "normalized_linear_ratio_error": 1.8233706078341072e-07,
+    "linear_pass": true,
+    "samples": 4095,
+    "negative_squared_ratio_error": 0.9921259853967569,
+    "negative_squared_rejected": true
+  },
+  "lifecycle_pass": true,
+  "error_preservation_cases": 83,
+  "raw_roundtrip_cases": 11,
+  "finite_cases": 60,
+  "finite_frames": 229888,
+  "finite_max_abs": 7.111831188201904,
+  "long_duration": {
+    "sample_rate": 192000,
+    "duration_frames_each": 3072000,
+    "total_rendered_frames": 6144033,
+    "attack_penultimate": 0.9999998211860657,
+    "attack_endpoint": 1.0,
+    "release_penultimate": 1.1559475154854226e-08,
+    "release_endpoint": 0.0,
+    "attack_monotonic_at_block_endpoints": true,
+    "release_monotonic_at_block_endpoints": true,
+    "peak": 0.07475546002388,
+    "retired": true,
+    "pass": true
+  },
+  "corrected_defect": {
+    "kind": "oldest held voice selection after repeated retirement/reuse",
+    "old_source": "9165342a98263af67e5ce81ebeef6df57ed35a2a31c282c90cf38f82954c3e4d",
+    "old_result": "frozen_01/RESULT.json",
+    "new_result": "frozen_03/RESULT.json",
+    "old_wrong_slot": 1,
+    "correct_slot": 5
+  },
+  "counter_audit": {
+    "public_render_counters": {
+      "frames": 1024,
+      "voice_slots": 6144,
+      "active_voice_samples": 6144,
+      "layer_samples": 12288,
+      "envelope_samples": 24576,
+      "envelope_ticks": 96,
+      "stage_transitions": 144,
+      "exp2_calls": 48,
+      "log2_calls": 48,
+      "small_exp_calls": 0,
+      "lfo_samples": 2048,
+      "blep_calls": 36864,
+      "sine_calls": 0,
+      "maximum_transition_chain": 1
+    },
+    "trace_all_count_sites": {
+      "frames": 1024,
+      "voice_slots": 6144,
+      "active_voice_samples": 6144,
+      "layer_samples": 12288,
+      "envelope_samples": 24576,
+      "envelope_ticks": 160,
+      "stage_transitions": 208,
+      "exp2_calls": 112,
+      "log2_calls": 112,
+      "small_exp_calls": 0,
+      "lfo_samples": 2048,
+      "blep_calls": 36864,
+      "sine_calls": 0,
+      "maximum_transition_chain": 0
+    },
+    "trace_direct_math": {
+      "exp2_calls": 168,
+      "log2_calls": 112
+    },
+    "observable": -3.44719069e-07,
+    "unreported_event_count_sites": {
+      "frames": 0,
+      "voice_slots": 0,
+      "active_voice_samples": 0,
+      "layer_samples": 0,
+      "envelope_samples": 0,
+      "envelope_ticks": 64,
+      "stage_transitions": 64,
+      "exp2_calls": 64,
+      "log2_calls": 64,
+      "small_exp_calls": 0,
+      "lfo_samples": 0,
+      "blep_calls": 0,
+      "sine_calls": 0
+    },
+    "unreported_direct_exp2_calls": 120,
+    "unreported_direct_log2_calls": 64,
+    "instrumentation_limit": "Counter macros and direct exp2/log2 calls only; no native instruction, cycle, branch, memory or complete math-operation instrumentation. maximum_transition_chain is updated outside COUNT, so total trace field is not meaningful."
+  },
+  "zero_stage_counter_audit": [
+    {
+      "events": "two_zero_stage_held_retriggers",
+      "public_stage_transitions": 0,
+      "actual_stage_transitions": 32,
+      "public_exp2": 0,
+      "actual_direct_exp2": 4,
+      "active_voices_after": 2
+    },
+    {
+      "events": "two_zero_stage_note_offs",
+      "public_stage_transitions": 0,
+      "actual_stage_transitions": 24,
+      "public_exp2": 0,
+      "actual_direct_exp2": 0,
+      "active_voices_after": 0
+    }
+  ],
+  "selected_512_host_timing": [
+    {
+      "scenario": "max_blep_steady",
+      "frames_per_part": 512,
+      "counters_enabled": false,
+      "observed_min_ns": 256020,
+      "median_ns": 298032,
+      "p95_ns": 463457,
+      "p99_ns": 688491,
+      "observed_max_ns": 3003125,
+      "accumulated_render_work": {
+        "frames": 0,
+        "voice_slots": 0,
+        "active_voice_samples": 0,
+        "layer_samples": 0,
+        "envelope_samples": 0,
+        "envelope_ticks": 0,
+        "stage_transitions": 0,
+        "exp2_calls": 0,
+        "log2_calls": 0,
+        "small_exp_calls": 0,
+        "lfo_samples": 0,
+        "blep_calls": 0,
+        "sine_calls": 0,
+        "maximum_transition_chain": 0
+      }
+    },
+    {
+      "scenario": "sine_triangle_steady",
+      "frames_per_part": 512,
+      "counters_enabled": false,
+      "observed_min_ns": 256440,
+      "median_ns": 274828,
+      "p95_ns": 417980,
+      "p99_ns": 1082586,
+      "observed_max_ns": 9785132,
+      "accumulated_render_work": {
+        "frames": 0,
+        "voice_slots": 0,
+        "active_voice_samples": 0,
+        "layer_samples": 0,
+        "envelope_samples": 0,
+        "envelope_ticks": 0,
+        "stage_transitions": 0,
+        "exp2_calls": 0,
+        "log2_calls": 0,
+        "small_exp_calls": 0,
+        "lfo_samples": 0,
+        "blep_calls": 0,
+        "sine_calls": 0,
+        "maximum_transition_chain": 0
+      }
+    },
+    {
+      "scenario": "max_blep_event_control_burst",
+      "frames_per_part": 512,
+      "counters_enabled": false,
+      "observed_min_ns": 271072,
+      "median_ns": 311742,
+      "p95_ns": 514994,
+      "p99_ns": 820857,
+      "observed_max_ns": 4032101,
+      "accumulated_render_work": {
+        "frames": 0,
+        "voice_slots": 0,
+        "active_voice_samples": 0,
+        "layer_samples": 0,
+        "envelope_samples": 0,
+        "envelope_ticks": 0,
+        "stage_transitions": 0,
+        "exp2_calls": 0,
+        "log2_calls": 0,
+        "small_exp_calls": 0,
+        "lfo_samples": 0,
+        "blep_calls": 0,
+        "sine_calls": 0,
+        "maximum_transition_chain": 0
+      }
+    }
+  ],
+  "timing_qualification": [
+    "Observed Linux host wall-time distribution, not native worst-case execution time. OS scheduling, frequency, cache and thermal effects are not controlled.",
+    "512 selected frames per part are processed as two256-frame calls per part, matching the native half/chunk quantum only; this is not full firmware audio_half_render.",
+    "Two selected candidate parts and the fixed listed burst are inside the timed region. Other instruments, global/private effects, output/UAC mixing, interrupt interference and event decoding are not included.",
+    "The event API has no queue or event cap. A full callback cost cannot be bounded unless the caller caps event/control delivery per callback. The listed burst is a test workload, not such a production contract.",
+    "Shared host run was not an isolated baseline. A separate native additive link worker reported jobs ending around14:55UTC; this probe ended14:56:29UTC but did not record a start timestamp or lock out other workloads. The earlier preserved attempt ended14:55:48UTC. Do not attribute observed maxima only to DSP execution.",
+    "The final header a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c changes comments only from the measured header4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c. C9cdcea0b is unchanged; frozen_03 revalidates the final header."
+  ],
+  "reference_and_review_limits": [
+    "The fitted amp fixtures were known to implementer; no held-out generalization established.",
+    "No original filter, oscillator, FX, complete preset, lifecycle, polyphony or whole product acceptance.",
+    "Existing full-path host harness has no candidate selector; no full firmware candidate stress result.",
+    "No native execution or device/PSRAM use.",
+    "No original engine source read or transferred by independent reviewer."
+  ],
+  "profiler_source_hashes": {
+    "resource_review/native-baseline-76040/firmware/src/app/main_fm1.c": "0b32aabfe105baa457a8c8402189e6840c3dbfd7137cc875c9c0b9d43ff98e07",
+    "resource_review/native-baseline-76040/firmware/hal/fm1_time.h": "e83c725eae2ec5a163771ca2b8f1c0779354456f2e20a32febc7b6755758a97d",
+    "resource_review/native-baseline-76040/firmware/hal/fm1_perf.h": "e48cc30adc298de861080fa2815e6861d7081a0c04b81deed3e42eb0cc6dddcf"
+  }
+}

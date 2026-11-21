@@ -1,0 +1,124 @@
+{
+  "schema": "required post-link full-original audit v1",
+  "status": "PLAN_ONLY; NO LINK MAP EXISTS YET",
+  "expected_workspace_LOAD_entries": [
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-000.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-001.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-002.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-003.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-004.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-005.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-006.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-007.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-008.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-009.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-010.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-011.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-012.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-014.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-021.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-022.o",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/dependency-025.o"
+  ],
+  "required_defined_demangled_fragments": [
+    "s1scheduler::FullOracle::process(",
+    "s1scheduler::FullOracle::startNote(",
+    "s1scheduler::FullOracle::stopNote(",
+    "S1NoteState::run("
+  ],
+  "forbidden_retained_symbol_fragments": [
+    "s1scheduler::SourceScheduler::",
+    "s1scheduler::RuntimeState::",
+    "s1scheduler::Scheduler::",
+    "s1scheduler::Oracle::",
+    "s1scheduler_reader::",
+    "s1scheduler_compact::",
+    "synthone_ports::Ports::",
+    "s1scheduler::EmptySequencer::process",
+    "s1c_",
+    "s1_morph_",
+    "hc_",
+    "__wrap_"
+  ],
+  "forbidden_other_workspace_LOAD_entries": true,
+  "retained_symbol_scope": "Read nm --defined-only over all global/local symbols, not just exported symbols. Discarded candidate input sections may appear in the map discard list; they must not be retained executable symbols.",
+  "permitted_common_support": "FullOracle, its original sequence adapter, original S1 note/kernel code and common State/Held admission/fixture support. No candidate scheduler or packed-reader runtime is permitted.",
+  "dynamic_dependencies_allowed": [
+    "libstdc++.so.6",
+    "libm.so.6",
+    "libgcc_s.so.1",
+    "libc.so.6"
+  ],
+  "runtime_resolution_requirement": "Every resolved non-vDSO file must match a pinned runtime-file realpath and SHA-256 from toolchain_identity.json; reject any unexpected runtime.",
+  "failure_action": "Preserve all logs, map and objects; do not render, add dependencies, change source or relink under this proposal. Return the exact missing or retained symbol as blocker.",
+  "audit_argv": [
+    {
+      "name": "elf_header",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-readelf",
+        "-h",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    },
+    {
+      "name": "dynamic_dependencies",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-readelf",
+        "-d",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    },
+    {
+      "name": "program_headers",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-readelf",
+        "-l",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    },
+    {
+      "name": "all_defined_demangled_symbols",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-nm",
+        "-C",
+        "--defined-only",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    },
+    {
+      "name": "undefined_demangled_symbols",
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-nm",
+        "-uC",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    },
+    {
+      "name": "runtime_loader_resolution",
+      "argv": [
+        "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+        "--list",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry"
+      ],
+      "timeout_seconds": 5,
+      "max_attempts": 1,
+      "filter_or_voice_process_calls": 0
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "schema": "Frozen D active-filter source-only diagnostic preparation v1",
+  "written_utc": "2026-11-19T00:35:48.316795+00:00",
+  "status": "SOURCE_ONLY_PREPARED_NOT_COMPILED",
+  "scope": "One static identity replay prerequisite, then one newly referenced active three-note capture; no D DSP variant",
+  "source_files_sha256": {
+    "src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89",
+    "check_active.py": "7f447922c64097e1d25d489caa73c89f828d442cb4957efd5d4ce3364a2457d4",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "README.md": "689e63a6fc86a715ca9995455b36248fb3da81bbcf5925fcaf7e774c94ba5423",
+    "NEXT-COMMAND.txt": "e4f294369c75fd157938399c5c448720b09d6e889cd2f4a2deb1ff03118cd7d3",
+    "SOURCE-REVIEW.json": "d57be05b99bb7bd4548dfb7c4160ea1b5b65da7be9f34e9d3bde1630b2bc451f"
+  },
+  "frozen_D_source_sha256": {
+    "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "frozen_D_declaration_sha256": "9e6c7241b36ae4ca4fc0fae2cc764536a8612517c98cec3e2d149236c33cc28a",
+  "D180_summary_sha256": "9f4f5d42595c997c01af70b700c934403d86febacb2bf893745fc4934298f352",
+  "D_selected_static_PCM": {
+    "path": "/workspace/scratch/e803955aec60/s1_dry_voice_d/results/audio180/100_2000_.9.candidate-mono.f32le",
+    "bytes": 1058304,
+    "sha256": "7aded201280455c1ddaee86abab4d82b6d791953e81d0d9cb40e17946cbfa380"
+  },
+  "new_original_active_reference": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "bytes": 1058304,
+    "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74"
+  },
+  "new_original_numeric_manifest_sha256": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+  "reference_pin_status": "Unknown at task assignment; provided by root before this source freeze; PCM will be hash-verified only after execution release",
+  "reference_classification": "NEW_ORIGINAL_REFERENCE_PCM; NOT_MISSING_HISTORICAL_PAIR_RECOVERY",
+  "original_baseline_identity_reported_by_reference_manifest": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+  "protocol": {
+    "source": "case_plan.json numeric contract only",
+    "case_plan_sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "scope": "one new active original capture and one frozen-D active candidate diagnostic; no recovered historical active PCM",
+    "sample_rate_hz": 44100,
+    "notes": [
+      {
+        "midi_note": 36,
+        "frequency_hz": 65.4063949584961,
+        "frequency_f32_hex": "4282d013",
+        "note_record_index": 0
+      },
+      {
+        "midi_note": 60,
+        "frequency_hz": 261.6255798339844,
+        "frequency_f32_hex": "4382d013",
+        "note_record_index": 1
+      },
+      {
+        "midi_note": 84,
+        "frequency_hz": 1046.5023193359375,
+        "frequency_f32_hex": "4482d013",
+        "note_record_index": 2
+      }
+    ],
+    "warmup_frames_per_note": 176448,
+    "frames_per_note": 88192,
+    "block_size": 64,
+    "note_on_frame": 0,
+    "note_off_frame": 66112,
+    "fresh_owner_per_note": true,
+    "phase_at_note_on": 0,
+    "channels": 1,
+    "bytes_per_three_note_mono": 1058304,
+    "amp_ADSR": [
+      0.05,
+      0.005,
+      0.8,
+      0.05
+    ],
+    "modes": {
+      "static": {
+        "case_id": "physical-gain/100_2000_.9",
+        "velocity": 100,
+        "cutoff_hz": 2000,
+        "resonance": 0.8999999761581421,
+        "filter_depth": 0,
+        "filter_ADSR": [
+          0.05,
+          0.05,
+          1,
+          0.5
+        ],
+        "control_hex": {
+          "cutoff": "44fa0000",
+          "resonance": "3f666666",
+          "depth": "00000000",
+          "filter_ADSR": [
+            "3d4ccccd",
+            "3d4ccccd",
+            "3f800000",
+            "3f000000"
+          ],
+          "amp_ADSR": [
+            "3d4ccccd",
+            "3ba3d70a",
+            "3f4ccccd",
+            "3d4ccccd"
+          ]
+        }
+      },
+      "active": {
+        "case_id": "filter-modulation/1.2_2000_0.9",
+        "velocity": 100,
+        "cutoff_hz": 2000,
+        "resonance": 0.8999999761581421,
+        "filter_depth": 1.2000000476837158,
+        "filter_ADSR": [
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "control_hex": {
+          "cutoff": "44fa0000",
+          "resonance": "3f666666",
+          "depth": "3f99999a",
+          "filter_ADSR": [
+            "3e4ccccd",
+            "3e99999a",
+            "3ecccccd",
+            "3f000000"
+          ],
+          "amp_ADSR": [
+            "3d4ccccd",
+            "3ba3d70a",
+            "3f4ccccd",
+            "3d4ccccd"
+          ]
+        }
+      }
+    },
+    "comparison_gain": 1,
+    "normalization": "none",
+    "time_alignment": "none"
+  },
+  "gate": {
+    "comparison_gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0,
+    "normalization": "none",
+    "alignment": "none",
+    "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "build_flags": [
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1"
+  ],
+  "proposed_build_command": [
+    "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_d/vendor",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_d/src",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_d/src/s1_dry_voice.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_d/vendor/dnbx_s1_envelope.c",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/src/active_host.c",
+    "-o",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host"
+  ],
+  "proposed_static_command": [
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+    "static",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/static.candidate-mono.f32le"
+  ],
+  "proposed_active_command": [
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+    "active",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.candidate-mono.f32le"
+  ],
+  "proposed_metric_command": [
+    "python",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/metrics.py",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.paired.f32le",
+    "1"
+  ],
+  "proposed_runner_command": [
+    "python",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/check_active.py",
+    "--d-root",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_d",
+    "--new-original",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "--new-original-sha256",
+    "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74",
+    "--output",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one"
+  ],
+  "build_bound": 1,
+  "static_replay_bound": 1,
+  "active_capture_bound": 1,
+  "metric_execution_bound": 1,
+  "precondition_for_active_capture": "Static PCM byte-identical to pinned D selected PCM; matching source/binary/input hashes and receipts",
+  "mandatory_guards": "Explicit runtime exceptions; no Python assertion statements",
+  "no_overwrite": true,
+  "automatic_retry": false,
+  "failure_is_terminal": true,
+  "host_builds_executed": 0,
+  "static_replays_executed": 0,
+  "active_candidate_captures_executed": 0,
+  "metric_executions": 0,
+  "candidate_PCM_written": false,
+  "new_original_PCM_read_during_preparation": false,
+  "frozen_C_or_D_modified": false,
+  "source_boundary": "Independent frozen D/core/vendors/host; source-free case_plan and numeric original capture manifest only. No original engine source/header/object/capture code/assets or other diagnostic reads.",
+  "pending_action": "Root inspect this freeze and explicitly release execution. Do not compile/render until then.",
+  "unqualified": [
+    "active candidate sound until actual terminal comparison",
+    "remaining71dynamic note cases",
+    "arbitrary modulation",
+    "694presets",
+    "150control IDs",
+    "FX and full lifecycle",
+    "native cost and fit",
+    "callback deadline"
+  ],
+  "production_activation": false
+}

@@ -1,0 +1,1619 @@
+{
+  "created_at_utc": "2026-11-18T14:59:14.358438+00:00",
+  "snapshot_sha256": {
+    "dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+  },
+  "harness_sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594",
+  "declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+  "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+  "floating_contract": "off; host X0X_HOST",
+  "envelope": [
+    {
+      "max_abs": 6.940195698135199e-07,
+      "rms": 2.116131445146204e-07,
+      "comparisons": 1024,
+      "worst_frame": 271,
+      "actual_at_worst": 0.7567344307899475,
+      "original_at_worst": 0.7567351248095173,
+      "pass": true,
+      "case_index": 1,
+      "case_name": "velocity127",
+      "ratio_crosscheck_max_abs": 1.1605597061148387e-07,
+      "ratio_crosscheck_samples": 8191,
+      "ratio_crosscheck_pass": true,
+      "negative_wrong_time_grid": {
+        "max_abs": 0.06371962799002259,
+        "rms": 0.008998397153630364,
+        "comparisons": 1024,
+        "worst_frame": 15,
+        "actual_at_worst": 0.13115757703781128,
+        "original_at_worst": 0.06743794904778869,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.3213231669870835,
+        "rms": 0.18269997759312884,
+        "comparisons": 1024,
+        "worst_frame": 5695,
+        "actual_at_worst": 0.46666665871938073,
+        "original_at_worst": 0.14534349173229724,
+        "pass": false
+      }
+    },
+    {
+      "max_abs": 7.946646328749196e-07,
+      "rms": 1.9952365495449403e-07,
+      "comparisons": 4096,
+      "worst_frame": 1103,
+      "actual_at_worst": 0.8912572860717773,
+      "original_at_worst": 0.8912580807364102,
+      "pass": true,
+      "case_index": 2,
+      "case_name": "nonzero_hold_releasehold",
+      "ratio_crosscheck_max_abs": 1.4049036445307195e-07,
+      "ratio_crosscheck_samples": 32767,
+      "ratio_crosscheck_pass": true,
+      "negative_wrong_time_grid": {
+        "max_abs": 0.022476598869431694,
+        "rms": 0.0026957760892667507,
+        "comparisons": 4096,
+        "worst_frame": 15,
+        "actual_at_worst": 0.045382190495729446,
+        "original_at_worst": 0.022905591626297753,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.2694200169984673,
+        "rms": 0.13404672051551114,
+        "comparisons": 4096,
+        "worst_frame": 5647,
+        "actual_at_worst": 0.7970000020166238,
+        "original_at_worst": 0.5275799850181565,
+        "pass": false
+      }
+    }
+  ],
+  "velocity": {
+    "normalized_linear_ratio_error": 1.8233706078341072e-07,
+    "linear_pass": true,
+    "samples": 4095,
+    "negative_squared_ratio_error": 0.9921259853967569,
+    "negative_squared_rejected": true
+  },
+  "lifecycle": {
+    "block_partition": {
+      "schedules": [
+        [
+          1
+        ],
+        [
+          16
+        ],
+        [
+          64
+        ],
+        [
+          1,
+          3,
+          5,
+          7,
+          13,
+          16
+        ],
+        [
+          1024
+        ]
+      ],
+      "frames": 16384,
+      "bit_identical_output_state_counters": true
+    },
+    "part_isolation": {
+      "pass": true,
+      "tested_interleaves": 64
+    },
+    "layer_envelope_independence": {
+      "amp": [
+        0.7007153034210205,
+        0.09974942356348038
+      ],
+      "filter": [
+        0.302001416683197,
+        0.05093526840209961
+      ],
+      "pass": true
+    },
+    "pedal_up_no_restart": {
+      "pass": true
+    },
+    "pedal_lifecycle": {
+      "held_active": 1,
+      "after_release_active": 0,
+      "pass": true
+    },
+    "oldest_held_after_retirement": {
+      "events": [
+        {
+          "off": 60,
+          "on": 70,
+          "slot": 0
+        },
+        {
+          "off": 61,
+          "on": 71,
+          "slot": 1
+        },
+        {
+          "off": 62,
+          "on": 72,
+          "slot": 2
+        },
+        {
+          "off": 63,
+          "on": 73,
+          "slot": 3
+        },
+        {
+          "off": 64,
+          "on": 74,
+          "slot": 4
+        },
+        {
+          "off": 70,
+          "on": 80,
+          "slot": 0
+        },
+        {
+          "off": 80,
+          "on": 81,
+          "slot": 0
+        },
+        {
+          "off": 81,
+          "on": 82,
+          "slot": 0
+        },
+        {
+          "off": 82,
+          "on": 83,
+          "slot": 0
+        },
+        {
+          "off": 83,
+          "on": 84,
+          "slot": 0
+        },
+        {
+          "off": 84,
+          "on": 85,
+          "slot": 0
+        },
+        {
+          "off": 85,
+          "on": 86,
+          "slot": 0
+        },
+        {
+          "off": 86,
+          "on": 87,
+          "slot": 0
+        },
+        {
+          "off": 87,
+          "on": 88,
+          "slot": 0
+        },
+        {
+          "off": 88,
+          "on": 89,
+          "slot": 0
+        }
+      ],
+      "before": [
+        {
+          "slot": 0,
+          "note": 89,
+          "rank": 0
+        },
+        {
+          "slot": 1,
+          "note": 71,
+          "rank": 4
+        },
+        {
+          "slot": 2,
+          "note": 72,
+          "rank": 3
+        },
+        {
+          "slot": 3,
+          "note": 73,
+          "rank": 2
+        },
+        {
+          "slot": 4,
+          "note": 74,
+          "rank": 1
+        },
+        {
+          "slot": 5,
+          "note": 65,
+          "rank": 5
+        }
+      ],
+      "oldest_note_expected": 65,
+      "expected_slot": 5,
+      "chosen_slot": 5,
+      "pass": true
+    },
+    "same_held_note": {
+      "slot1": 0,
+      "slot2": 0,
+      "active": 1,
+      "pass": true
+    },
+    "all_off": {
+      "pass": true
+    }
+  },
+  "errors": {
+    "validated_error_paths": [
+      {
+        "name": "amp_attack_s_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_attack_s_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_attack_s_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_attack_s_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_attack_s_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_hold_s_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_hold_s_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_hold_s_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_hold_s_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_hold_s_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_decay_s_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_decay_s_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_decay_s_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_decay_s_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_decay_s_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_sustain_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_sustain_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_sustain_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_sustain_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_sustain_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_hold_s_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_hold_s_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_hold_s_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_hold_s_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_hold_s_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_s_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_s_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_s_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_s_-1",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "amp_release_s_17",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_waveform_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_waveform_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_waveform_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pulse_width_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pulse_width_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pulse_width_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_gain_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_gain_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_gain_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_sub_gain_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_sub_gain_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_sub_gain_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_cutoff_hz_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_cutoff_hz_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_cutoff_hz_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_resonance_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_resonance_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_resonance_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_filter_env_hz_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_filter_env_hz_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_filter_env_hz_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_hz_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_hz_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_hz_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_pwm_depth_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_pwm_depth_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_lfo_pwm_depth_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_tune_semitones_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_tune_semitones_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_tune_semitones_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pan_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pan_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "layer_pan_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_note_on",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_velocity",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_note_off",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_sustain",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_velocity_mode",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_layer",
+        "return_code": -1,
+        "expected": -1,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_raw_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_raw_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_raw_-inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_raw_id",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "oversize_render",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "null_render",
+        "return_code": -1,
+        "expected": -1,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "equal_output_buffers",
+        "return_code": -1,
+        "expected": -1,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "zero_render_null",
+        "return_code": 0,
+        "expected": 0,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_init_0",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_init_7999",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_init_192001",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_init_nan",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "bad_init_inf",
+        "return_code": -2,
+        "expected": -2,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "raw_absent",
+        "return_code": -4,
+        "expected": -4,
+        "state_unchanged": true,
+        "output_unchanged": true,
+        "pass": true
+      }
+    ],
+    "raw_admission": [
+      {
+        "id": 0,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 1,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 2,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 3,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 4,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 5,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 6,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 207,
+        "status": 2,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 212,
+        "status": 3,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 214,
+        "status": 3,
+        "bits_preserved": true,
+        "pass": true
+      },
+      {
+        "id": 217,
+        "status": 1,
+        "bits_preserved": true,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  },
+  "finite": {
+    "cases": [
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.580545425415039,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.951347351074219,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 6.44156551361084,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 4.507137298583984,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 4.259294033050537,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.199743270874023,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 0,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 6.909012794494629,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.580545425415039,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.951347351074219,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 6.44156551361084,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 5.961804389953613,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 6.385709285736084,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 6.08244514465332,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "mode": 1,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 7.111831188201904,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.404942989349365,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.9298858642578125,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 5.5958571434021,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 4.057584762573242,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 4.081485748291016,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.162181377410889,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 0,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 6.831431865692139,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.404942989349365,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.9298858642578125,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 5.5958571434021,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 5.076504707336426,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 5.567030906677246,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.927724361419678,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 44100,
+        "mode": 1,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 7.021890640258789,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.32695198059082,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.898672103881836,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 6.032186031341553,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 3.982480525970459,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 4.074666976928711,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.27067756652832,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 0,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 6.846454620361328,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.32695198059082,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.898672103881836,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 6.032186031341553,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 4.626073837280273,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 5.6541852951049805,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.87872314453125,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 48000,
+        "mode": 1,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 7.014350891113281,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.104518890380859,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.682771682739258,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 5.579050064086914,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 3.998054027557373,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 4.359355926513672,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.273133277893066,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 0,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 6.811284065246582,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0,
+        "frames": 4096,
+        "peak": 6.104518890380859,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0.16666667,
+        "frames": 4096,
+        "peak": 4.682771682739258,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0.3333333333333333,
+        "frames": 4096,
+        "peak": 5.579050064086914,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0.5,
+        "frames": 4096,
+        "peak": 4.616759300231934,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0.6666666666666666,
+        "frames": 4096,
+        "peak": 5.033074855804443,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 0.83333333,
+        "frames": 4096,
+        "peak": 5.423771858215332,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 192000,
+        "mode": 1,
+        "wave": 1,
+        "frames": 4096,
+        "peak": 6.857961177825928,
+        "finite": true,
+        "bounded": true,
+        "max_transition_chain": 0
+      },
+      {
+        "sr": 8000,
+        "variant": "one_sample_and_zero",
+        "frames": 128,
+        "peak": 3.237646239995229e-07,
+        "finite": true,
+        "bounded": true,
+        "retired": true,
+        "max_transition_chain": 1
+      },
+      {
+        "sr": 44100,
+        "variant": "one_sample_and_zero",
+        "frames": 128,
+        "peak": 1.0655590187980124e-08,
+        "finite": true,
+        "bounded": true,
+        "retired": true,
+        "max_transition_chain": 1
+      },
+      {
+        "sr": 48000,
+        "variant": "one_sample_and_zero",
+        "frames": 128,
+        "peak": 8.994419431473943e-09,
+        "finite": true,
+        "bounded": true,
+        "retired": true,
+        "max_transition_chain": 1
+      },
+      {
+        "sr": 192000,
+        "variant": "one_sample_and_zero",
+        "frames": 128,
+        "peak": 1.3123291342509447e-09,
+        "finite": true,
+        "bounded": true,
+        "retired": true,
+        "max_transition_chain": 1
+      }
+    ],
+    "total_frames": 229888,
+    "all_pass": true,
+    "peak": 7.111831188201904
+  },
+  "long_durations": {
+    "sample_rate": 192000,
+    "duration_frames_each": 3072000,
+    "total_rendered_frames": 6144033,
+    "attack_penultimate": 0.9999998211860657,
+    "attack_endpoint": 1.0,
+    "release_penultimate": 1.1559475154854226e-08,
+    "release_endpoint": 0.0,
+    "attack_monotonic_at_block_endpoints": true,
+    "release_monotonic_at_block_endpoints": true,
+    "peak": 0.07475546002388,
+    "retired": true,
+    "pass": true
+  },
+  "scoped_acceptance_pass": true
+}

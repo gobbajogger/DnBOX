@@ -1,0 +1,17 @@
+{
+  "cwd": "/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040",
+  "command": [
+    "python3",
+    "tools/build.py",
+    "--board",
+    "smk37",
+    "--model",
+    "elite"
+  ],
+  "env": {
+    "JIELI_TOOLCHAIN": "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1",
+    "AC79_SDK": "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13",
+    "X0X_GEN_CACHE": "/workspace/scratch/67e685478953/superj6_research/resource_review/gen-cache"
+  },
+  "source": "76040daa5b52d686a8b7b544296ba5d79610a95d"
+}

@@ -1,0 +1,79 @@
+{
+  "snapshot_sha256": {
+    "dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+  },
+  "envelope": [
+    {
+      "max_abs": 6.940195698135199e-07,
+      "rms": 2.116131445146204e-07,
+      "comparisons": 1024,
+      "worst_frame": 271,
+      "actual_at_worst": 0.7567344307899475,
+      "original_at_worst": 0.7567351248095173,
+      "pass": true,
+      "case_index": 1,
+      "ratio_crosscheck_pass": true,
+      "ratio_crosscheck_source": "unchanged frozen_03 receipt; no new DSP rendering",
+      "negative_wrong_time_grid": {
+        "max_abs": 0.06371962799002259,
+        "rms": 0.008998397153630364,
+        "comparisons": 1024,
+        "worst_frame": 15,
+        "actual_at_worst": 0.13115757703781128,
+        "original_at_worst": 0.06743794904778869,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.3213231669870835,
+        "rms": 0.18269997759312884,
+        "comparisons": 1024,
+        "worst_frame": 5695,
+        "actual_at_worst": 0.46666665871938073,
+        "original_at_worst": 0.14534349173229724,
+        "pass": false
+      }
+    },
+    {
+      "max_abs": 7.946646328749196e-07,
+      "rms": 1.9952365495449403e-07,
+      "comparisons": 4096,
+      "worst_frame": 1103,
+      "actual_at_worst": 0.8912572860717773,
+      "original_at_worst": 0.8912580807364102,
+      "pass": true,
+      "case_index": 2,
+      "ratio_crosscheck_pass": true,
+      "ratio_crosscheck_source": "unchanged frozen_03 receipt; no new DSP rendering",
+      "negative_wrong_time_grid": {
+        "max_abs": 0.022476598869431694,
+        "rms": 0.0026957760892667507,
+        "comparisons": 4096,
+        "worst_frame": 15,
+        "actual_at_worst": 0.045382190495729446,
+        "original_at_worst": 0.022905591626297753,
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "max_abs": 0.2694200169984673,
+        "rms": 0.13404672051551114,
+        "comparisons": 4096,
+        "worst_frame": 5647,
+        "actual_at_worst": 0.7970000020166238,
+        "original_at_worst": 0.5275799850181565,
+        "pass": false
+      }
+    }
+  ],
+  "velocity": {
+    "linear_pass": true,
+    "negative_squared_rejected": true
+  },
+  "lifecycle": {
+    "synthetic": {
+      "pass": true
+    }
+  },
+  "scoped_acceptance_pass": true
+}
