@@ -16,11 +16,12 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
-/* The selected width history must fit the existing backend pool allocation. */
+/* Width, pan, tremolo and phaser fit the earlier backend pool allocation.
+ * The final master compressor has explicitly budgeted per-owner state. */
 typedef char s1_width_fits_backend_union[
-    sizeof(s1_dry_part) <= sizeof(original_miami_backend) ||
-    sizeof(s1_dry_part) <= sizeof(original_chicago_backend) ||
-    sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno) ? 1 : -1];
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(original_miami_backend) ||
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(original_chicago_backend) ||
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(((original_runtime_backend *)0)->juno) ? 1 : -1];
 typedef struct {
     original_runtime_backend dsp;
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
@@ -51,6 +52,8 @@ typedef union {
  * remain a visible refusal. No old engine or bank is involved. */
 int original_runtime_init(original_runtime_part *, const uint8_t cell[32], float bpm,
     original_chicago_tuning *, const original_chicago_fx2_cold_owner *);
+int original_runtime_init_extended(original_runtime_part *,const uint8_t cell[32],const uint8_t *ext,
+    float bpm,original_chicago_tuning *,const original_chicago_fx2_cold_owner *);
 /* Call on an initialized or zero-initialized part before cold replacement;
  * externally owned Chicago resources must be retired before overwriting it. */
 int original_runtime_retire(original_runtime_part *);

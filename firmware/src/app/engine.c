@@ -894,6 +894,13 @@ static void apply_param(int t, int v, int i, int val)    /* ISR */
 
 void engine_set(int t, int v, int i, int val) { cq_put((uint32_t)t, (uint32_t)v, (uint32_t)i, (uint32_t)val); }
 void engine_set_base(int t, int v, int i) { cq_put(C_BASE, (uint32_t)t, (uint32_t)v, (uint32_t)i); }
+static void apply_master_base(int v,const uint8_t *cell,const uint8_t *ext,unsigned id)
+{
+    unsigned slot=id-ORIGINAL_SYNTHONE_MASTER_VOLUME;
+    unsigned q=original_master_display(cell,ext,id);
+    if (cell[26]=='M') (void)original_runtime_param(&original_bass[v],id,(float)q/127.f);
+    else s1_master_release(&original_bass[v].dsp.synthone.master,slot,q);
+}
 static void apply_base(int t, int v, int i)
 {
     if (!mot_base_snd || (unsigned)t >= NTARGETS || (unsigned)v >= NVOICES_MAX || (unsigned)i >= NPARAMS_MAX) return;
@@ -901,6 +908,10 @@ static void apply_base(int t, int v, int i)
         float value;
         if (original_sound_is_performance(original_bass[v].kind, (unsigned)i)) {
             perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
+            return;
+        }
+        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME) {
+            apply_master_base(v,mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i);
             return;
         }
         if (original_sound_value(mot_base_snd->v[t][v], (unsigned)i, &value))
@@ -1482,7 +1493,9 @@ static int mot_base(void *x, int t, int v, int i)
     if (mot_base_snd && t == T_303 && (unsigned)v < NBASS &&
         original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
         (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
-        return (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
+        return (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
+            (int)original_master_display(mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i) :
+            (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
 }
 static void mot_apply(void *x, int t, int v, int i, int val)

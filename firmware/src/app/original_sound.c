@@ -50,7 +50,9 @@ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAM
     {"Pan",127,0,0},{"Pan Hz",127,ORIGINAL_SYNTHONE_PAN_RATE_INIT,0},
     {"Trem",127,0,0},{"LFO1 wav",127,0,0},{"LFO1 amt",127,0,0},{"LFO1 Hz",127,64,0},
     {"LFO2 wav",127,0,0},{"LFO2 amt",127,0,0},{"LFO2 Hz",127,64,0},
-    {"PhMix",127,0,0},{"PhRate",127,5,0},{"PhFeed",127,0,0},{"PhWidth",127,99,0}
+    {"PhMix",127,0,0},{"PhRate",127,5,0},{"PhFeed",127,0,0},{"PhWidth",127,99,0},
+    {"Master",127,32,0},{"Ratio",127,0,0},{"Thresh",127,127,0},{"Attack",127,0,0},
+    {"Release",127,0,0},{"Makeup",127,18,0}
 };
 static const char *const original_sound_synthone_names[ORIGINAL_SYNTHONE_FACTORIES] = {
     "INIT"
@@ -96,25 +98,17 @@ int original_sound_factory_source(unsigned kind, unsigned factory)
 }
 const char *original_sound_fx_name(unsigned choice)
 { return choice < ORIGINAL_CHICAGO_FX_CHOICES ? original_sound_fx_names[choice] : 0; }
-static const float original_sound_upper_value[64] = {
-    0x1p-1f,     0x1.041042p-1f,     0x1.082082p-1f,     0x1.0c30c4p-1f,
-    0x1.104104p-1f,     0x1.145146p-1f,     0x1.186186p-1f,     0x1.1c71c8p-1f,
-    0x1.208208p-1f,     0x1.24924ap-1f,     0x1.28a28ap-1f,     0x1.2cb2ccp-1f,
-    0x1.30c30cp-1f,     0x1.34d34ep-1f,     0x1.38e38ep-1f,     0x1.3cf3dp-1f,
-    0x1.41041p-1f,     0x1.451452p-1f,     0x1.492492p-1f,     0x1.4d34d4p-1f,
-    0x1.514514p-1f,     0x1.555556p-1f,     0x1.596596p-1f,     0x1.5d75d8p-1f,
-    0x1.618618p-1f,     0x1.65965ap-1f,     0x1.69a69ap-1f,     0x1.6db6dcp-1f,
-    0x1.71c71cp-1f,     0x1.75d75ep-1f,     0x1.79e79ep-1f,     0x1.7df7ep-1f,
-    0x1.82082p-1f,     0x1.861862p-1f,     0x1.8a28a4p-1f,     0x1.8e38e4p-1f,
-    0x1.924924p-1f,     0x1.965966p-1f,     0x1.9a69a8p-1f,     0x1.9e79e8p-1f,
-    0x1.a28a28p-1f,     0x1.a69a6ap-1f,     0x1.aaaaacp-1f,     0x1.aebaecp-1f,
-    0x1.b2cb2cp-1f,     0x1.b6db6ep-1f,     0x1.baebbp-1f,     0x1.befbfp-1f,
-    0x1.c30c3p-1f,     0x1.c71c72p-1f,     0x1.cb2cb4p-1f,     0x1.cf3cf4p-1f,
-    0x1.d34d34p-1f,     0x1.d75d76p-1f,     0x1.db6db8p-1f,     0x1.df7df8p-1f,
-    0x1.e38e38p-1f,     0x1.e79e7ap-1f,     0x1.ebaebcp-1f,     0x1.efbefcp-1f,
-    0x1.f3cf3cp-1f,     0x1.f7df7ep-1f,     0x1.fbefcp-1f,     0x1p+0f,
-
-};
+/* The source centers at .5, then rounds .5 + .5 * float(index / 63).
+ * In this exponent bin the steps are 2^23/63 ulps. Eight upper-half
+ * half-way additions round up once more under nearest-even. */
+static float centered_upper(unsigned index)
+{
+    uint32_t mantissa=133152u*index+(index+1u)/2u;
+    if (index>=32u && index%4u==2u) ++mantissa;
+    uint32_t bits=UINT32_C(0x3f000000)+mantissa;
+    float value; memcpy(&value,&bits,sizeof value);
+    return value;
+}
 static const float original_sound_macro_value[12] = {
     0x0p+0f,     0x1.745d18p-4f,     0x1.745d18p-3f,     0x1.1745d2p-2f,
     0x1.745d18p-2f,     0x1.d1745ep-2f,     0x1.1745d2p-1f,     0x1.45d174p-1f,
@@ -129,7 +123,7 @@ int original_sound_control_value(unsigned kind, unsigned parameter, unsigned con
         *value = original_sound_macro_value[original_sound_fx_macros[control]];
     else if (original_sound_centered(kind, parameter))
         *value = control < 64u ? (float)control / 128.0f :
-            original_sound_upper_value[control - 64u];
+            centered_upper(control-64u);
     else *value = unit_control(control);
     return 1;
 }
@@ -153,7 +147,8 @@ const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter)
 uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!cell) return 0;
-    uint32_t mask = (uint32_t)cell[22] | (uint32_t)cell[23] << 8 | (uint32_t)cell[24] << 16 | (uint32_t)cell[25] << 24;
+    uint32_t marker = cell[26]=='M' ? 1u : 0u;
+    uint32_t mask = marker | (uint32_t)cell[22] | (uint32_t)cell[23] << 8 | (uint32_t)cell[24] << 16 | (uint32_t)cell[25] << 24;
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
         if (cell[31] & 128u) return mask & 0x003fff7fu;
         if (cell[31] == 2) return mask & 0x003fffffu;
@@ -196,6 +191,7 @@ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES])
 unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id)
 {
     if (id >= ORIGINAL_SYNTHONE_NPARAMS) return 0;
+    if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME) return original_sound_synthone_params[id].def;
     if (id >= ORIGINAL_SYNTHONE_PHASER_MIX) {
         if (!(cell[31] & 128u)) return original_sound_synthone_params[id].def;
         if (id == ORIGINAL_SYNTHONE_PHASER_MIX) return cell[0] & 127u;
@@ -268,7 +264,8 @@ static void s1_put_lfo(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id, unsigned
 
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
-    if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
+    if (!cell || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA ||
+        (cell[26] != 'O' && !(cell[26]=='M' && cell[29]==ORIGINAL_SOUND_SYNTHONE))) return 0;
     uint32_t mask = original_sound_edit_mask(cell);
     unsigned count = original_sound_count(cell[29]);
     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
@@ -324,11 +321,38 @@ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsig
     memcpy(cell, next, sizeof next);
     return 1;
 }
+int original_master_valid(const uint8_t *cell,const uint8_t *ext)
+{
+    if (cell[26]!='M') return 1;
+    if (!ext || ext[0]!=1u) return 0;
+    for(unsigned j=1;j<S1_MASTER_EXT_SIZE;++j) if(ext[j]>127u) return 0;
+    return 1;
+}
+unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id)
+{
+    if (id<ORIGINAL_SYNTHONE_MASTER_VOLUME || id>=ORIGINAL_SYNTHONE_NPARAMS) return 0;
+    return cell[26]=='M' ? ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME] : original_sound_synthone_params[id].def;
+}
+int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value)
+{
+    if (cell[29]!=ORIGINAL_SOUND_SYNTHONE || id<ORIGINAL_SYNTHONE_MASTER_VOLUME)
+        return original_sound_set(cell,id,value);
+    if (id>=ORIGINAL_SYNTHONE_NPARAMS || value>127 || !ext || !original_sound_valid(cell) || !original_master_valid(cell,ext)) return 0;
+    if (cell[26]!='M') {
+        ext[0]=1;
+        for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)
+            ext[1+j]=original_sound_synthone_params[ORIGINAL_SYNTHONE_MASTER_VOLUME+j].def;
+        cell[26]='M';
+    }
+    ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME]=(uint8_t)value;
+    return 1;
+}
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value)
 {
     if (!original_sound_valid(cell) || parameter >= original_sound_count(cell[29]) ||
         original_sound_is_performance(cell[29], parameter) ||
         value > original_sound_param(cell[29], parameter)->max) return 0;
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_MASTER_VOLUME) return 0;
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_BASE_COUNT) {
         s1_put_lfo(cell, parameter, value);
         return 1;

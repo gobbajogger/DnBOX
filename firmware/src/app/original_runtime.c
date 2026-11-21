@@ -16,7 +16,12 @@ static int runtime_result(original_runtime_part *p, int ok)
 X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
     original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
 {
-    if (!p || !cell) return ORIGINAL_RUNTIME_INVALID;
+    return original_runtime_init_extended(p,cell,NULL,bpm,tuning,fx);
+}
+X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8_t cell[32],const uint8_t *ext,
+    float bpm,original_chicago_tuning *tuning,const original_chicago_fx2_cold_owner *fx)
+{
+    if (!p || !cell || !original_master_valid(cell,ext)) return ORIGINAL_RUNTIME_INVALID;
     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
     if (!original_sound_valid(cell)) return ORIGINAL_RUNTIME_INVALID;
     unsigned kind = cell[29];
@@ -54,12 +59,17 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
      * edit bits never become inputs to a newly adopted runtime instance. */
     for (unsigned i = 0; i < original_sound_count(kind); ++i)
         if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
-                  ? ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX)) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
+                  ? (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
         float value;
         if (!original_sound_value(cell, i, &value) ||
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
             return runtime_result(p, 0);
     }
+    if (cell[26]=='M')
+        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<ORIGINAL_SYNTHONE_NPARAMS;++id) {
+            unsigned q=original_master_display(cell,ext,id);
+            if(original_runtime_param(p,id,(float)q/127.f)!=ORIGINAL_RUNTIME_OK) return runtime_result(p,0);
+        }
     /* A cold adoption can occur inside the current audio boundary. Publish a
      * prepared instance so its first queued/sequence note never precedes the
      * threshold snapshot. Further prepare calls are explicitly idempotent. */

@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 17);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 23);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -301,6 +301,20 @@ static void verify_synthone(void)
     for(unsigned k=0;k<13;++k) assert(original_sound_s1_set(extended,k,42u+k));
     for(unsigned k=0;k<4;++k) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
 #endif
+    uint8_t master_ext[S1_MASTER_EXT_SIZE], master_cell[32];
+    memcpy(master_cell,extended,32);memset(master_ext,255,sizeof master_ext);
+    assert(original_master_valid(master_cell,master_ext));
+    for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)for(unsigned q=0;q<128;++q){
+        unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME+j;
+        assert(original_sound_set_extended(master_cell,master_ext,id,q));
+        assert(original_master_valid(master_cell,master_ext) && original_sound_valid(master_cell));
+        assert(original_master_display(master_cell,master_ext,id)==q);
+        for(unsigned k=0;k<4;++k)assert(original_sound_s1_display(master_cell,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+    }
+    for(unsigned j=0;j<S1_MASTER_EXT_SIZE;++j){
+        uint8_t clone[S1_MASTER_EXT_SIZE];memcpy(clone,master_ext,sizeof clone);clone[j]=254;
+        assert(!original_master_valid(master_cell,clone));
+    }
     assert(!original_sound_init(bad, ORIGINAL_SOUND_SYNTHONE, 1));
     assert(!original_sound_valid(bad));
 }

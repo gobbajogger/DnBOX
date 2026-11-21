@@ -19,6 +19,15 @@ typedef struct {
     uint8_t shape;
 } s1_trem_lfo;
 
+enum { S1_MASTER_CONTROLS = 6 };
+typedef struct {
+    float target_volume, volume, attack, release, gain_smooth, ratio_scale, threshold, linear_threshold, makeup;
+    float detect[2], gain_db[2];
+    uint8_t knobs[S1_MASTER_CONTROLS], active;
+} s1_master;
+void s1_master_release(s1_master *,unsigned slot,unsigned default_pot);
+void s1_master_targets(s1_master *,const float values[S1_MASTER_CONTROLS]);
+
 typedef struct { float z1[4], z2[4], feedback; } s1_phaser_channel;
 typedef struct {
     s1_phaser_channel channel[2];
@@ -42,6 +51,7 @@ typedef struct {
     s1_trem_lfo lfo[2];
     uint8_t tremolo;
     s1_phaser phaser;
+    s1_master master;
 } s1_dry_part;
 
 /* Original bitCrushSampleRate is 2048..48000 Hz. Turning up the crush

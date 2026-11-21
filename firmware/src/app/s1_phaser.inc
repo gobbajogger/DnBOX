@@ -58,18 +58,26 @@ static void phaser_stereo(s1_phaser *s,float *left,float *right,unsigned n)
         }
         return;
     }
+    /* Once each original binary32 port has reached its fixed point, the
+     * modulation step, radius and crossfade are identical for this block. */
+    unsigned fixed=1;
+    for(unsigned k=0;k<4;++k)
+        if(pan_port(s->current[k],s->target[k])!=s->current[k]) fixed=0;
+    float mix=0.f, sn=0.f, cs=1.f, r2=0.f, r_2=0.f, dry=1.f;
     for(unsigned i=0;i<n;++i) {
-        for(unsigned k=0;k<4;++k)s->current[k]=pan_port(s->current[k],s->target[k]);
-        float mix=s->current[0];
-        if(mix==0.f) continue;
-        float angle=(.10472f/44100.f)*s->current[1];
-        float sn=angle*(1.f-angle*angle*(1.f/6.f)), cs=1.f-.5f*angle*angle;
+        if (!fixed || !i) {
+            for(unsigned k=0;k<4;++k)s->current[k]=pan_port(s->current[k],s->target[k]);
+            mix=s->current[0];
+            float angle=(.10472f/44100.f)*s->current[1];
+            sn=angle*(1.f-angle*angle*(1.f/6.f)); cs=1.f-.5f*angle*angle;
+            float x=(1.f/44100.f)*(-3.14159f*s->current[3]);
+            float radius=1.f+x*(1.f+x*(.5f+x*(1.f/6.f+x*(1.f/24.f+x*(1.f/120.f+x/720.f)))));
+            r2=radius*radius; r_2=-2.f*radius; dry=1.f-mix;
+        }
+        if (mix==0.f) continue;
         float sine=sn*s->cosine+cs*s->sine;
         float cosine=(1.f+(cs*s->cosine-sn*s->sine))-(float)s->started;
         s->sine=sine; s->cosine=cosine; s->started=1;
-        float x=(1.f/44100.f)*(-3.14159f*s->current[3]);
-        float radius=1.f+x*(1.f+x*(.5f+x*(1.f/6.f+x*(1.f/24.f+x*(1.f/120.f+x/720.f)))));
-        float r2=radius*radius, r_2=-2.f*radius, dry=1.f-mix;
         float l=phaser_channel(&s->channel[0],left[i],sine,r2,r_2,s->current[2]);
         float r=phaser_channel(&s->channel[1],right[i],cosine,r2,r_2,s->current[2]);
         left[i]=dry*left[i]+(1.f-dry)*l;

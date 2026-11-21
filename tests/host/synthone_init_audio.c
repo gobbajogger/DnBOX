@@ -176,6 +176,9 @@ static void crush_patch(void)
     bass_identity_t identity;
     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 17;
+    assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
     old_tag[6] = 13;
     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
@@ -208,6 +211,15 @@ static void crush_patch(void)
     assert(original_runtime_render(&part_a, &workspace, l, r, 64) == ORIGINAL_RUNTIME_OK);
     assert(original_runtime_render(&part_b, &workspace, dl, dr, 64) == ORIGINAL_RUNTIME_OK);
     assert(!memcmp(l, r, sizeof l) && memcmp(l, dl, sizeof l));
+    /* All 128 legacy hold lengths, including the source log2/exp2 rounding. */
+    uint32_t interval_hash=UINT32_C(2166136261);
+    for(unsigned q=0;q<128;++q) {
+        assert(original_runtime_param(&part_b,ORIGINAL_SYNTHONE_CRUSH,(float)q/127.f)==ORIGINAL_RUNTIME_OK);
+        uint32_t word; memcpy(&word,&part_b.dsp.synthone.crush_interval,sizeof word);
+        interval_hash=(interval_hash^word)*UINT32_C(16777619);
+    }
+    assert(interval_hash==UINT32_C(1551743393));
+    assert(original_runtime_param(&part_b,ORIGINAL_SYNTHONE_CRUSH,0.f)==ORIGINAL_RUNTIME_OK);
     assert(part_b.dsp.synthone.crush_interval == 1.f);
     assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
     assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
@@ -299,6 +311,15 @@ static void width_patch(void)
 int main(void)
 {
     width_patch();
+    uint8_t master_cell[32],extra[S1_MASTER_EXT_SIZE]={0};
+    assert(original_sound_init(master_cell,ORIGINAL_SOUND_SYNTHONE,0));
+    assert(original_sound_set_extended(master_cell,extra,ORIGINAL_SYNTHONE_MASTER_RATIO,73));
+    assert(original_runtime_init(&part_a,master_cell,120,NULL,NULL)==ORIGINAL_RUNTIME_INVALID);
+    assert(original_runtime_init_extended(&part_a,master_cell,extra,120,NULL,NULL)==ORIGINAL_RUNTIME_OK);
+    assert(part_a.dsp.synthone.master.active==63 && part_a.dsp.synthone.master.knobs[1]==73);
+    extra[3]=128;
+    assert(original_runtime_init_extended(&part_a,master_cell,extra,120,NULL,NULL)==ORIGINAL_RUNTIME_INVALID);
+
     crush_patch();
 #if X0X_SYNTHONE_PATCH
     patch_audio();

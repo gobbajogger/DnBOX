@@ -8,12 +8,26 @@ int main(void)
 {
     boot();
     int32_t block[512];
+    const int comp[2][6]={{97,72,56,18,83,103},{81,13,81,53,28,59}};
     const int phaser[2][4]={{89,17,90,114},{123,99,26,53}};
     const int lfo[2][7]={{127,42,117,98,85,37,62},{85,127,65,71,0,92,117}};
     for (int v = 0; v < 2; ++v) {
         assert(engine_bass_select_preset(v, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound) == 0);
         for (unsigned i = 0; i < 1000 && engine_bass_preset_pending(v); ++i) engine_render(block, 256);
         assert(engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE);
+        /* Entire auxiliary row may contain historical scratch. The primary
+         * cell must explicitly claim it before any bytes become controls. */
+        memset(proj.sound.v[T_303][NBASS+v],0xf3,NPARAMS_MAX);
+        assert(engine_bass_sound_validate(&proj.sound)==0);
+        for(unsigned j=0;j<6;++j) {
+            pref_t fx=PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_MASTER_VOLUME+j);
+            assert(pref_get(fx)==original_sound_param(ORIGINAL_SOUND_SYNTHONE,fx.c)->def);
+        }
+        for(unsigned j=0;j<6;++j) {
+            pref_t fx=PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_MASTER_VOLUME+j);
+            pref_set(fx,comp[v][j]);
+            assert(pref_get(fx)==comp[v][j]);
+        }
         pref_t r = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH);
         assert(ui_original_synthone_rows[0][0] == ORIGINAL_SYNTHONE_CRUSH);
         assert(!strcmp(ui_original_name(ORIGINAL_SOUND_SYNTHONE, r.c), "CRUSH RATE"));
@@ -59,6 +73,12 @@ int main(void)
     for (int v = 0; v < 2; ++v)
         pref_set(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH), rates[v]);
     engine_render(block, 256);
+    undo_start();
+    pref_t ratio=PR(R_ENG,T_303,0,ORIGINAL_SYNTHONE_MASTER_RATIO);
+    pref_set(ratio,47);engine_render(block,256);do_undo(0);
+    assert(!undo_wait && pref_get(ratio)==comp[0][1]);
+    do_undo(1);assert(!undo_wait && pref_get(ratio)==47);
+    do_undo(0);assert(!undo_wait && pref_get(ratio)==comp[0][1]);
     sound_t saved = proj.sound;
     assert(project_save() == 0);
     for (int v = 0; v < 2; ++v) {
@@ -79,9 +99,31 @@ int main(void)
             assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_TREM+i)) == lfo[v][i]);
         for(unsigned i=0;i<4;++i)
             assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_PHASER_MIX+i)) == phaser[v][i]);
+        for(unsigned j=0;j<6;++j)
+            assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_MASTER_VOLUME+j)) == comp[v][j]);
+        engine_note_lock_capture(1);
+        assert(seq_bass_sound_prepare(&seq,v,0,10+v)==0);
+        int lock=bass_note_find(proj.arr.lane,0,v,10+v);
+        assert(lock>=0 && engine_bass_note_validate(&proj.arr.lane[lock])==0);
+        assert(!memcmp(proj.arr.lane[lock].val+BASS_NOTE_USED,proj.sound.v[T_303][NBASS+v],S1_MASTER_EXT_SIZE));
+        lane_t malformed=proj.arr.lane[lock];
+        malformed.val[BASS_NOTE_USED+2]=128;
+        assert(engine_bass_note_validate(&malformed)!=0);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN)) == 36 + v);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN_RATE)) == 97 - v);
     }
-    puts("Both Synth One owners preserved independent CRUSH, width, pan, tremolo and phaser controls across project save, engine switches and reload.");
+    int m=motion_alloc(proj.arr.lane,0,PART_303A,T_303,0,ORIGINAL_SYNTHONE_MASTER_RATIO);
+    assert(m>=0);memset(proj.arr.lane[m].val,113,sizeof proj.arr.lane[m].val);
+    seq_start(&seq);
+    for(unsigned k=0;k<32;++k)engine_render(block,256);
+    assert(engine_motion_value(m)==113);
+    seq.rec_mask=1;engine_bass_record(0,48,93,0);engine_render(block,256);
+    int played=bass_note_find(proj.arr.lane,0,0,seq.rec_bass[0].first);
+    assert(played>=0 && !engine_bass_note_validate(&proj.arr.lane[played]));
+    assert(original_master_display(proj.arr.lane[played].val,proj.arr.lane[played].val+BASS_NOTE_USED,
+        ORIGINAL_SYNTHONE_MASTER_RATIO)==113);
+    assert(pref_get(ratio)==comp[0][1]);
+    seq_stop(&seq);engine_render(block,256);
+    puts("Both Synth One owners preserved independent CRUSH, width, pan, tremolo, phaser and master controls across project save, engine switches and reload.");
     return 0;
 }

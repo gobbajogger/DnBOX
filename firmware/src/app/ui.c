@@ -654,7 +654,9 @@ static UI_DRAW int pref_get(pref_t r)
     case R_ENG:
         if (r.a == T_303 &&
             engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE)
-            return original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
+            return (unsigned)r.c>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
+                original_master_display(proj.sound.v[r.a][r.b],proj.sound.v[r.a][NBASS+r.b],r.c) :
+                original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
         return proj.sound.v[r.a][r.b][r.c];
     case R_SWING: return p->swing;
     case R_DLEN: return p->drum[r.a].len - 1;
@@ -773,7 +775,7 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
     switch (r.kind) {
     case R_ENG:
         if (r.a == T_303) {
-            if (!original_sound_set(proj.sound.v[T_303][r.b],r.c,(unsigned)v)) {
+            if (!original_sound_set_extended(proj.sound.v[T_303][r.b],proj.sound.v[T_303][NBASS+r.b],r.c,(unsigned)v)) {
                 say("INVALID SOUND",0); break;
             }
             engine_bass_sound_refresh(&proj.sound,r.b);
@@ -1129,6 +1131,20 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
     if (kind == ORIGINAL_SOUND_SYNTHONE && id == ORIGINAL_SYNTHONE_PAN) {
         if (!value) put_s(num,"OFF");
         else { put_i(num,((value-1)*100+63)/126); put_s(unit,"%"); }
+        return 1;
+    }
+    if (kind==ORIGINAL_SOUND_SYNTHONE && id>=ORIGINAL_SYNTHONE_MASTER_VOLUME && id<ORIGINAL_SYNTHONE_NPARAMS) {
+        float physical=s1_master_control(id-ORIGINAL_SYNTHONE_MASTER_VOLUME,(unsigned)value);
+        if (id==ORIGINAL_SYNTHONE_MASTER_ATTACK || id==ORIGINAL_SYNTHONE_MASTER_RELEASE) {
+            display_ms(physical*1000.f,num,unit);
+        } else if (id==ORIGINAL_SYNTHONE_MASTER_RATIO || id==ORIGINAL_SYNTHONE_MASTER_THRESHOLD) {
+            if (physical<0) { *num++='-'; physical=-physical; }
+            int t=(int)(physical*10.f+.5f);
+            put_i(put_s(put_i(num,t/10),"."),t%10);
+            put_s(unit,id==ORIGINAL_SYNTHONE_MASTER_RATIO?":1":"dB");
+        } else {
+            put_i(num,(int)(physical*100.f+.5f)); put_s(unit,"%");
+        }
         return 1;
     }
     if (kind==ORIGINAL_SOUND_SYNTHONE && id==ORIGINAL_SYNTHONE_PHASER_FEEDBACK) {
@@ -2299,8 +2315,10 @@ static void do_undo(int redo)
             uint32_t cell=__builtin_offsetof(sound_t,v)+((T_303*NVOICES_MAX+v)*NPARAMS_MAX);
             uint32_t tag=__builtin_offsetof(sound_t,bass)+v*sizeof(bass_sound_tag_t);
             undo_peek(&undo,entry,cell,target.cell[v],NPARAMS_MAX);
+            undo_peek(&undo,entry,cell+NBASS*NPARAMS_MAX,target.ext[v],S1_MASTER_EXT_SIZE);
             undo_peek(&undo,entry,tag,target.tag[v].bytes,BASS_SOUND_TAG_BYTES);
             if(memcmp(target.cell[v],proj.sound.v[T_303][v],NPARAMS_MAX) ||
+               (target.cell[v][26]=='M' && memcmp(target.ext[v],proj.sound.v[T_303][NBASS+v],S1_MASTER_EXT_SIZE)) ||
                memcmp(&target.tag[v],&proj.sound.bass[v],sizeof target.tag[v]))undo_bass_mask|=1u<<v;
         }
         if(undo_bass_mask) {

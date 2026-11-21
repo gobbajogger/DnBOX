@@ -196,7 +196,7 @@ typedef struct {
 #if X0X_BASS_TAGGED_SOUND
 int engine_bass_sound_bank(const sound_t *sound,int voice);
 /* Compact undo candidate: no project-sized automatic scratch. */
-typedef struct { uint8_t cell[NBASS][NPARAMS_MAX]; bass_sound_tag_t tag[NBASS]; } bass_base_state_t;
+typedef struct { uint8_t cell[NBASS][NPARAMS_MAX]; bass_sound_tag_t tag[NBASS]; uint8_t ext[NBASS][S1_MASTER_EXT_SIZE]; } bass_base_state_t;
 int engine_bass_base_ready(unsigned mask,const bass_base_state_t *target);
 void engine_bass_base_restore(unsigned mask); /* caller holds audio; ready was 0 */
 uint32_t engine_bass_choice_serial(void);
