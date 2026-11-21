@@ -7,15 +7,15 @@ Firmware draft [#976](https://github.com/gobbajogger/DnBOX/pull/976) targets `in
 | I0 | **Open.** The first consolidated Local run stopped during the host stage. Results and retests are below. The earlier 501-pass [PR #970 run](https://github.com/gobbajogger/DnBOX/pull/970#issuecomment-6980748381) used the same tree at a different commit. |
 | I1 | **Pass at base.** The [source ledger](../../CONSOLIDATED-STATE.md) names all ten merged PRs, their source and merge SHAs. GitHub compare confirmed each merge is in this base. |
 | I2 | Stock Pro and Elite built with SDK 1.2.14. XIP headroom was 1,188 B and 1,180 B respectively, with a 780 B pool margin above the 8,192 B reserve on both. Final combined builds depend on [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) and [FWUI #975](https://github.com/gobbajogger/DnBOX/pull/975). |
-| I3 | **Open.** The current heavy fixture covers Chicago and Miami. Qualify every engine under heavy playback after the sound and UI changes integrate, and measure the worst margin against 11,609 µs. |
-| I4 | **Pass at consolidated `76040daa`.** A stock Debian Linux guest ran the unchanged compact-program test as uid 1000 with TracerPid 0. The clean control exited zero, the expected 123-byte leak was detected, both sets of 796 exact checks passed, and the corruption control rejected its mutant. [Log and source identities](../../evidence/integ-baseline-76040daa/compact-programs-linux.log). |
+| I3 | **Open.** All 16 ordered pairs of the four available bass banks completed heavy playback in two workloads on the local combined source. Eleven of 32,768 blocks exceeded the 11,609 µs thread-CPU limit. [Per-workload timings](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7057716886). |
+| I4 | **Pass at consolidated `76040daa` and lane `f394ac03`.** Stock Linux ran the original test untraced as uid 1000. It detected the deliberate 123-byte leak, passed both sets of 796 checks and rejected corrupted data. [Consolidated log](../../evidence/integ-baseline-76040daa/compact-programs-linux.log) · [Lane log](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7056736948). |
 | I5 | **Partial.** Five live previews, both URL forms per sample, archive generation and byte-exact simulated restore work. The exact 109,394 B native five-zone pack cannot fit either stock application at the available aligned headroom. See the measurements below. |
 | I6 | Owner requests 26.8, 26.9, 26.11 and 26.12 appear in the roadmap. Complete/Working/Pending are checked against the pinned consolidated SHA. [Nightly #170](https://github.com/gobbajogger/DnBOX-nightly/pull/170) contains the feature inbox and vote reader. This branch applies the existing enhancement label to new requests submitted through the issue form. Authenticated end-to-end vote verification is open. |
 | I7 | The owner retired the old Pages installer paths and kept GitHub’s automatic repository redirects. All current installer links use [stable](https://gobbajogger.github.io/DnBOX/install/) or [nightly](https://gobbajogger.github.io/DnBOX-nightly/install/). No legacy-name site or repository is required. Branch cleanup follows integration of every lane. |
-| C1 | At candidate `82c2b895`, both stock builds, all 16 prerequisites, no-loss and hard-limit checks passed. The host runner reported a LeakSanitizer runtime failure in `composed-midi-epoch`. At `810867e1`, both model builds, all 16 prerequisites, no-loss, limits, flash map and budget passed. [Exact selected-stage log](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7056448293). The full gate remains open. |
+| C1 | **Open.** At `f394ac03`, both stock models built and the unmodified gate passed its strict prerequisites, no-loss and repository limits. The stock Linux guest was killed during host simulator compilation, before any host test or final gate result. [Complete available log](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058191242). |
 | C2 | Straight descendant of the consolidated SHA. This work removes no tracked file. |
 | C3 | Independent final review at every required size is open. |
-| C4 | The hard-limit scan passed at baseline, `82c2b895` and `810867e1`. |
+| C4 | The [tracked-file scan and 50 MiB control](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058009663) passed on `f394ac03`. Both integration trees contain the owner-approved issue form under `.github/ISSUE_TEMPLATE/`. |
 | C5, C6 | Checklist still has open work. Draft remains open. |
 
 ### First consolidated Local run
@@ -35,6 +35,14 @@ A separate FREE PLAY framebuffer test passed the positive render and then exited
 
 The first no-loss step failed because the checkout lacked a parent object. The missing history was restored. The generator scheduler also repeatedly tried to create a lock directory while another job held it. A focused test observed 32 rejected attempts across eight waiters. The runner now uses one blocking FIFO token. All eight waiters completed, and independent capacity, registration and admission tests passed. Host compilers, sanitizer settings, timing limits and firmware code are unchanged.
 
+### Consolidated repeat and stock Linux qualification
+
+The original host report above lists all 26 failures from the interrupted first run. The repeat on the same consolidated SHA returned a failure for six further cases: `original-release-integration`, `original-release-ui`, `panic-clear`, `pattern-preset-notelock`, `ui-theme` and `ui-drum-curve-axes`. The first five reported the LeakSanitizer attach failure. For the drum-curve test, the positive renderer passed its 34,294 assertions. The original missing-curve mutation exceeded its 120-second wrapper deadline. Running its already-built executable again rejected the mutation at the expected `ink>100` assertion. The timeout remains in the baseline inventory.
+
+At 418 returned cases on the repeat, 396 passed and 22 failed. The ten earlier checkout, runtime and Git-input failures subsequently passed in the repeat. The [rolling inventory](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7056756805) records later completions and individual logs. C1 remains open while the complete consolidated repeat is in progress.
+
+At lane `f394ac03`, a stock Debian guest passed the real leak and Chromium controls. The original limit check admitted a small Git blob and rejected a tracked 52,428,800-byte blob. With those checks working, the unmodified gate scanned 5,060 Git objects and entered host compilation. The virtual machine received SIGKILL before the first host case completed. Both the guest and external copies of the partial gate log contain 9,597 identical bytes, SHA-256 `b4b915973855f8d259781dbbf13deee6204351dc4245618a95e82182259405c4`. C1 requires the complete gate on a capable runner. [Strict controls](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058009663) · [Recovered log](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058191242).
+
 ### Owner release and link update
 
 GitHub’s Latest endpoint and the v0.0.26 tag both identify the released source as `94197fc839b00aff47b98ca02f3c6396e4a6eabf`. The owner reports successful startup and restart on a real Elite and Pro. README, CHANGELOG, the release guide and roadmap distinguish this published result from integration builds. The published release description already links both canonical installers. All checked GitHub releases in both repositories use canonical links. The docs link migration preserves issue, commit and comment destinations under the renamed repositories. [Published release](https://github.com/gobbajogger/DnBOX/releases/tag/v0.0.26).
@@ -43,11 +51,17 @@ An uncached read of the deployed installers and their embedded catalogs on 21 No
 
 The candidate `c125477e` built stock Elite and Pro packages byte-identical to the consolidated firmware. A separate composition of Sound `933a6f40` and FWUI `6763b056` had no three-way merge conflicts. Its diagnostic tree `ecde45dde6621a82e750a7ee223a8a5ce9f84a69` linked with XIP margins of 9,104 B (Pro) and 9,092 B (Elite) and a 780 B pool margin on each. Synth One is partial on this tree. In the Chicago/Miami host stress sweep, wall time exceeded the deadline on 22 of 3,072 blocks. All-engine timing remains open. [Native builds and measured peaks](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7055761401).
 
-### Current Sound and FWUI composition
+### Earlier Sound and FWUI composition
 
 Sound `7e68fc39` and FWUI `5f80e1d6` composed against `76040daa` without a conflict. Adding integration `810867e1` required reconciling their two fixes to the FREE PLAY pixel test. The local tree `6308068178d2c1f320fde0962c4061bd52a2f3e6` preserves the inactive mode, missing cue and unexpected cue checks. Its stock Pro and Elite builds passed. Pro had 6,944 B of XIP free, Elite had 6,936 B, and both retained 780 B above the 8,192 B pool reserve. The exact five-sample bank still requires an additional 103,474 B (Pro) or 103,490 B (Elite) with the 1 KiB floor. The compiled Synth One INIT host test covered MIDI audio, note ownership, sustain, pitch, release, voice stealing and panic.
 
 In the 3,072-block Chicago/Miami diagnostic, the chorus workload exceeded the 512-frame period (11,609.977 µs) once on CPU (14,541.589 µs). Wall time exceeded the period on 251 blocks across the three workloads. The host was shared. Device timing and all-engine acceptance remain open. The composed FREE PLAY test exceeded its unmodified 100-second compile timeout before producing a positive result. The earlier composition above remains a historical measurement. Both source PRs are still drafts. [Exact inputs, full resolution and per-workload results](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7056513397).
+
+### Stock fit and heavy playback with four bass banks
+
+Sound `e2e403f9`, FWUI `4c05722d` and integration `f394ac03` produced local tree `3ba62ac5e7b2b8c779c17be80e185bf702612b0b`. The stock Pro application was 546,128 bytes with 6,544 bytes of free XIP. Elite was 546,136 bytes with 6,536 bytes free. Both retained 780 bytes above the 8,192-byte pool reserve. Keeping the 1 KiB XIP floor leaves the owner's exact BREAK bank short by 103,874 bytes on Pro and 103,890 on Elite. The later Sound `96c9f154` composition had identical firmware, tools, tests and build inputs. [Model builds, size checks and packing rejection](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7057455036) · [Later source comparison](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058041362).
+
+The sequencer, drum voices, owner's BREAK audio, both bass parts, MIDI and effects ran together over every ordered pairing of Chicago, Miami, Synth One INIT and Juno. Each pairing ran 1,024 blocks for a master-filter sweep and 1,024 for tempo and continuous control. One pairing completed on a same-condition retry after the first attempt exceeded its original timeout; the silenced-B negative failed as expected. Eleven of the resulting 32,768 blocks exceeded 11,609 µs on the render thread. The worst was 262,311 µs for Miami/Miami. On two repeats each of the two worst pairings there were zero CPU misses over 4,096 blocks and the PCM matched exactly. The original misses remain recorded. Hardware timing and the final merged sources are still outstanding. [Complete workload results](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7057716886).
 
 ### Five BREAK samples
 
@@ -56,6 +70,8 @@ The five canonical ADPCM payloads occupy 109,274 bytes, plus 120 bytes in native
 ### Installer receipts and Local gates
 
 The install-report issue form records the build ID, model, firmware SHA-256, port name, startup result, restart result, browser and notes. Each startup and restart field accepts success, failure or an untested result. The dated Rule 2/C4 note distinguishes the owner’s reported disablement of `gates.yml` from the state returned by the public GitHub API. Repository-wide settings were inaccessible to the public reader.
+
+The [receipt form and installer reader](https://github.com/gobbajogger/DnBOX-nightly/pull/170#issuecomment-7058014195) agreed on both released packages in 90 manual report fixtures and eight generated forms. Mismatched models, package checksums and cached port versions produced zero successful installs across 270 controls. The form is staged on the lane branches.
 
 ## Earlier evidence
 
