@@ -8,7 +8,7 @@ RAM linker regions and reset endpoints. It makes no device connection.
 | Firmware entry | Exercised path | Hardware boundary |
 | --- | --- | --- |
 | `fm1_cstart` | Boots with a pending previous attempt, clears three RAM regions, copies three initialized regions, passes boot status through the clear, selects normal startup or safe mode, and requests the chip updater before LCD initialization after the fourth failed attempt. | Actual addresses, startup assembly, second-core halt and hardware protection registers. |
-| `fm1_main` | Its unchanged startup prefix sees an unrecognized flash ID, takes the RAM-only path, initializes the LCD, draws the factory splash and both post-crash notices, and enters the real safe-mode function on the guarded route. | On the normal path the fixture stops immediately before `x0x_dbg.boots++`. Mounted flash, later engine/audio startup, interrupts and the application loop remain untested here. |
+| `fm1_main` | Its unchanged startup prefix sees an unrecognized flash ID, takes the RAM-only path, initializes the LCD, draws the factory splash and both post-crash notices, and enters the real safe-mode function on the guarded route. | This first fixture stops before `x0x_dbg.boots++`. A second fixture below traverses the complete ordinary loop with a recognized flash ID. |
 | `lcd_init` | Runs the SMK initialization sequence and transfers the complete black clear before DISPON. The test checks every write window and the full pixel count. | Electrical reset, DMA completion, panel timing and color on glass. |
 | `fm1_fault` | Draws six diagnostic rows, polls the production four-second deadline against a test clock and calls reset. | Hardware exception entry, physical delay and reboot. |
 | `safe_main`, `enter_uboot` | Checks PLAY before and after the 500-ms guard, both core readouts, the retry overlay with and without a crash record, USB request, detach, delays, bootguard and bootloader/reset endpoints. | Physical key, USB, watchdog and reset. The OTA service is idle. |
@@ -21,11 +21,33 @@ empty calibration screen, or the retry message over the correct predecessor.
 Each additional PNG and all 38 RGB digests are in this directory. A one-pixel
 vertical displacement of the retry message fails the frame comparison.
 
-The [supplemental screen index](screen-index.tsv) maps all 40 case IDs to their PNGs and decoded RGB digests.
+The [supplemental screen index](screen-index.tsv) maps the 40 recovery, calibration and waveform case IDs to their PNGs and decoded RGB digests.
 
-The primary inventory retains its original 98/118 count. Six additional
-whole function bodies now execute at host endpoints. The partial `fm1_main`
-prefix is recorded separately. Physical startup remains unmeasured.
+The primary inventory retains its original 98/118 count. Seven additional complete function bodies execute across the two host startup fixtures, including `fm1_main`. Physical startup remains unmeasured.
+
+## Recognized flash and the ordinary application loop
+
+Five private SMK host runs execute the complete production `fm1_main`. They
+drive a RAM flash device with a recognized JEDEC ID, the production storage-owner
+and splash-selection functions, a simulated 1-ms clock and both octave buttons.
+The full application frames come from the regular engine, project and UI code.
+The 13 indexed states include three splashes that match their archived decoded
+RGB digests and ten additional 240×240 PNGs. Seven caption masks check 5,272
+ink samples against the finished header, including antialiased edges. All checked
+samples fit in x3–213 and y0–18. [Frame index](normal-loop/screen-index.tsv) ·
+[Case results and input hashes](normal-loop/normal-loop.json)
+
+| Host case | Display and endpoint |
+| --- | --- |
+| Foreign owner, stale OTA staging | The owner reset removes the custom splash, restores the factory startup and shows `OLD DATA CLEARED`. Five mapped OTA sectors clear. The notice expires and the ordinary header returns. |
+| Matching owner, text or picture | Each stored splash matches its archived counterpart. Both runs reach the first ordinary frame without the clear notice. |
+| Release during countdown | The ordinary header displays `UPDATE MODE IN 3..`, `2..` and `1..`. Releasing both octave buttons requests `UPDATE MODE CANCELLED`. In this part view, ordinary octave input then replaces it with `STEPS 17-32` before drawing. Its expiry is also captured. |
+| Hold through exactly 5,000 ms | When a frame is due on this tick it displays `UPDATE MODE IN 0..`. Continuing to hold for 1 ms calls `enter_uboot("UBOOT")`. The earlier recovery fixture covers that endpoint’s visible output. |
+| Release immediately after 5,000 ms | The countdown has already set its state to zero. Releasing both buttons at 5,001 ms skips the cancellation request and the next frame displays `STEPS 17-32`. |
+
+The cases use empty pending-sample shadows. Pending-sample recovery, physical
+flash persistence, audio/IRQ delivery and the bootloader transition remain
+outside this host evidence. The positive cases preserve the firmware countdown.
 
 ## Alternate renderer entry conditions
 
@@ -46,6 +68,7 @@ directory supplied on the command line.
 ```sh
 python3 tests/ui_inventory/native_routes.py /tmp/dnbox-native-routes
 python3 tests/ui_inventory/wave_fallback_frame.py /tmp/dnbox-wave-fallback
+python3 tests/ui_inventory/startup_loop.py /tmp/dnbox-normal-loop
 ```
 
 The Chicago fault-input probe also renders the full first oscillator page with

@@ -80,7 +80,7 @@
       ],
       "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
       "coverage": "Board startup. Both returning-from-crash display variants have captures.",
-      "supplementalEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix and safe_main on simulated failed starts. Default boot and both post-crash notices match the archived frames. Four consecutive failures exit to the modeled updater before LCD initialization."
+      "supplementalEvidence": "The native RAM-only prefix covers both post-crash notices. A second fixture executes the complete normal fm1_main with accepted emulated flash through actual UI frames and the updater request. See native-routes/normal-loop/normal-loop.json."
     },
     {
       "renderer": "firmware/src/app/main_fm1.c::fm1_cstart",

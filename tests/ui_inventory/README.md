@@ -110,3 +110,8 @@ The separate [host startup and recovery replay](../../docs/lanes/fwui/current/na
 executes the production LCD driver, calibration, fault and safe-mode functions
 and the boot guard at RAM-only endpoints. Its exact archive comparisons, new
 frames and geometry negative control can be rerun without the primary walker.
+
+The registered `ui-startup-loop` test follows accepted flash through the
+ordinary application loop. Five private host runs produce 13 full-frame states
+and compare the visible ink in seven notices. The [normal-loop index](../../docs/lanes/fwui/current/native-routes/normal-loop/screen-index.tsv)
+links each state to its frame or previously archived splash.

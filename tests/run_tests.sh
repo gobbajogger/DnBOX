@@ -789,9 +789,11 @@ run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
 run ui-pan-units sh tests/host/ui_pan_units_test.sh
 if [ "$PIL_SKIP" = 1 ]; then
     not_run ui-native-routes Pillow
+    not_run ui-startup-loop Pillow
     not_run ui-wave-fallback-frame Pillow
 else
     run ui-native-routes python3 tests/ui_inventory/native_routes.py "$OUT/native-routes"
+    run ui-startup-loop python3 tests/ui_inventory/startup_loop.py "$OUT/startup-loop"
     run ui-wave-fallback-frame python3 tests/ui_inventory/wave_fallback_frame.py "$OUT/wave-fallback-frame"
 fi
 run ui-step-lane sh tests/host/ui_step_lane_test.sh

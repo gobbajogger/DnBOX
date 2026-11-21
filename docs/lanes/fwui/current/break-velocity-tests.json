@@ -60,7 +60,12 @@
       "positiveExit": 0,
       "staleReadNegativeExit": 1,
       "negativeMarker": "BREAK_TRANSACTION_STALE_READ",
-      "scope": "Host guard observers validate read and write ordering, balanced coverage and no-op/failed edit handling."
+      "scope": "Host guard observers validate read and write ordering, balanced coverage and no-op/failed edit handling.",
+      "correctedSourceCommit": "db48241eabca5fd686aabeb5f807ea041b8a4c2c",
+      "correctedSourceLogsSHA256": {
+        "positive": "1350fff83160560d1ddbf4d80a8335fb0795138170e89be969df6a1af64dbe50",
+        "stale-read": "5cc64c98ed7a735e65e0faf7d561bb2c84aa3db6a2c05bae2c3a4b44189a8fa6"
+      }
     }
   },
   "integratedAudio": {
@@ -134,7 +139,13 @@
       "borrow sequence gain for a live strike"
     ],
     "gccUndefinedBehaviorSanitizer": "PASS",
-    "addressAndLeakSanitizers": "The host LeakSanitizer runtime terminated under ptrace (exit 134); this leg is unqualified."
+    "gccAddressSanitizer": {
+      "result": "PASS",
+      "frames": 72369,
+      "runtimeOptions": "detect_leaks=0:halt_on_error=1",
+      "logSHA256": "14f5ecdc445275a96d2a8428830ac48cb424b70defddb6907da7253c3a115122"
+    },
+    "leakSanitizer": "The combined address/leak run exited 134 because this host runs under ptrace. Standalone ASan and UBSan both completed."
   },
   "existingAudio": {
     "unityComparison": {

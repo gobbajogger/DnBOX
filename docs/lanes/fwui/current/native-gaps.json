@@ -1,14 +1,14 @@
 {
   "productionTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
-  "scope": "The original inventory and its productionTree are retained. The focused native-routes supplement advances six complete host wrappers and the prefix of normal startup. Physical-device and independent visual approval remain open.",
+  "scope": "The original inventory and its productionTree are retained. Seven additional complete function bodies execute on a host. Physical-device and independent visual approval remain open.",
   "routes": [
     {
       "ids": [
         "firmware/src/app/main_fm1.c::fm1_main",
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
-      "notConstructed": "Board reset assembly, physical/linker addresses, successful flash ID and native storage recovery, IRQ delivery, audio bring-up and the normal main loop after the crash notice.",
-      "displayEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix and safe_main on simulated failed starts. Default boot and both post-crash notices match the archived frames. Four consecutive failures exit to the modeled updater before LCD initialization."
+      "notConstructed": "Board reset assembly, physical/linker addresses, pending sample-shadow recovery, native IRQ delivery, audio/USB bring-up and input or timing on a physical panel.",
+      "displayEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix or safe_main. The accepted-JEDEC host fixture also runs the complete fm1_main through the ordinary loop. Foreign and matching owners, stale OTA cleanup, default and stored splashes, notice expiry, the 5-second countdown, and release/hold transitions are checked. See native-routes/normal-loop/normal-loop.json."
     },
     {
       "ids": [
@@ -77,5 +77,6 @@
     "scope": "Original 1,712-frame run; supplemental execution is listed separately."
   },
   "hostSupplement": "native-routes/README.md",
-  "hostSupplementWholeFunctions": 6
+  "hostSupplementWholeFunctions": 7,
+  "normalApplicationLoop": "native-routes/normal-loop/normal-loop.json"
 }
