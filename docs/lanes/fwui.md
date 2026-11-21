@@ -1,5 +1,6 @@
-# Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published gate head: `e43726340aaa298a9fcb0831d9d1f6398245eea8`. Updated: 2026-11-18 12:40 EST.
+# Firmware UI lane
+
+Branch `lane/fwui`, draft PR #975, targeting `integration/dnbox-consolidated`. The independent test-and-merge owner handles the aggregate gate and visual review.
 
 ## Current stock and screen evidence
 
@@ -14,7 +15,7 @@ The control fixes preserve pattern/kit ownership while displaying 808 Accent fir
 
 | Check | Result at this checkpoint |
 |---|---|
-| F1 | FAIL. The source-derived renderer inventory, full 240×240 evidence and R22 review are still being qualified. |
+| F1 | FAIL. The firmware-derived inventory contains 118 stable renderer IDs and 1,689 distinct 240×240 frame captures. The run reached 98 renderer functions and all four targeted pickup/playhead branches. Twenty functions remain unobserved, including hardware entry points and unused helpers. The metadata distinguishes complete UI frames, RAM-backed board painters and display-only boot slices. Independent R22 review remains open. [Stable renderer IDs](fwui/screens/stable-renderer-ids.tsv) · [Frame archive index](fwui/screens/index.json) · [Verification](fwui/screens/verification.json). |
 | F2 | FAIL across all domains. The ordinary walker passed all 1,530 states, 18,571 content checks and 249 drum glyph checks, including its negative controls. It caught and led to fixing 144 overwritten BREAK captions. Additional board-only domains still need geometry audits. [Geometry](fwui/current/geometry.json). |
 | F3 | PASS. Both stock models meet the two memory floors. [Builds and linker verification](fwui/current/stock-fit.json). |
 | F4 | Pan and battery host checks passed, including the 10,975-check pan test, 9,898 battery checks and the overlay battery suite. All-header coverage still needs the board screen inventory. [Control tests](fwui/current/control-tests.json). |
@@ -22,7 +23,7 @@ The control fixes preserve pattern/kit ownership while displaying 808 Accent fir
 | F6 | The four real-data step lanes run in V_SEQ. Hold SEQ and tap SCALE on SMK-37 (SEL on FM-1) to cycle. The host scenario passed 1,427 checks and covers keyboard ownership and four pattern windows. BREAK has no admitted step velocity. Literal label touch has no input path on these boards. |
 | F7 | FAIL. The production Synth One renderer produces zero nonzero stereo frames on the held-note test. Neither editor has an editable Synth One engine control. The compact SuperJ6 slot has only 16 controls on each part. Sound owns the genuine bindings in #973. The visible-text scan also found explanatory copy on the help cards and empty song row. [Rendered text](fwui/current/text-scan.txt). |
 
-C2 passes. Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor and the branch deletes no files relative to it. C1, C3, C4, C5 and C6 remain open. The final Local gate, independent four-size screen review, lane readiness and integration merge remain with their respective owners. The next deliverable is the committed source-derived screen register and native render archive.
+C2 passes. Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor and the branch deletes no files relative to it. C1, C3, C4, C5 and C6 remain open. The final Local gate, independent four-size screen review, lane readiness and integration merge remain with their respective owners. To open a frame, look up its stable ID in the archive index or metadata. Extract the indicated tar.xz part with tar. The PNG members are the native 240×240 framebuffer pixels. The current firmware, generator and model build inputs match the preceding qualified revision. The next deliverable is the extended board geometry replay and the remaining input and caption repairs.
 
 ## Archived qualification history
 
