@@ -125,6 +125,9 @@ ORIGINAL_SYNTH_BACKENDS = [
     "firmware/src/dsp/original_chicago_backend.c",
     "firmware/src/dsp/original_miami_backend.c",
     "firmware/src/app/original_runtime.c",
+    "firmware/src/app/s1_dry_part.c",
+    "firmware/src/dsp/s1_dry_voice.c",
+    "firmware/src/dsp/dnbx_s1_envelope.c",
     "firmware/src/app/original_sound.c",
 ]
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).

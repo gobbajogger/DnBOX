@@ -1,5 +1,30 @@
 # Sound lane
 
+## Production Synth One INIT and original comparisons, 2026-11-21 UTC
+
+The normal key, cell and render paths now play Synth One INIT on both owners. The former fixed one-sixth gain failed all eight original note/chord scenes. The original sums six voices at unity, and the corrected firmware matches that level. The existing Juno with chorus, Chicago and Miami still build. Older descriptions of a silent slot below refer to their historical checkpoints.
+
+| Item | Status | Current evidence |
+| --- | --- | --- |
+| S1 | FAIL | INIT plays with independent voices, pitch bend, damper, note reuse and panic. The [compiled production selector and per-program inventory](../../experiments/sound-hardware-v1/factory-admission/README.md) show 0/694 complete original programs selectable. Per-program xruns remain unmeasured on the production instrument. |
+| S2 | FAIL | The [dry-note comparison](../../experiments/sound-hardware-v1/stock-dry/README.md) passed 180/180 static and 72/72 modulated notes at unity. Eight actual-part comparisons passed including two chords. [Oscillator controls](../../experiments/sound-hardware-v1/band_morph/README.md) passed 18/18 controlled notes. The 694-row inventory records empty metrics for unavailable full-program renders. |
+| S3 | FAIL | The [direct AMP2 replay](../../experiments/sound-hardware-v1/sj6-amp2/README.md) proves four additional second-layer controls and owner isolation in the compact candidate. The [whole-application comparison](../../experiments/sound-hardware-v1/sj6-amp2/entry/results.json) shows legacy packed macro events omit those fields. All 64 controls and complete FX routing remain unverified. |
+| S4 | BLOCKED | [Original inventory and capture contract](../sound/superj6-ab.md). The available original iOS binary requires a compatible host. The recovered 56 WAVs are drum assets and component comparisons. Zero of 14 complete original preset renders have verified stimuli and matching audio. |
+| S5 | FAIL | All 640 SuperJ6 records across 12 banks decoded, with 90,549 source field rows preserved. The compact candidate applied four fields per program, 2,560 writes total. Full parameter binding and project-level bank selection remain incomplete. |
+| S6 | FAIL | The stock INIT image fits both models. Elite has 6,156 bytes free and Pro 6,164, with pool margin 780 on each. [Per-engine RAM/flash](sound-memory.md) and [original delay history counterexamples](../../experiments/sound-hardware-v1/synthone-delay/README.md). Full simultaneous effects and factory instruments have no passing physical image. |
+| S7 | PASS | Case-insensitive whole-word scan of firmware, tests and web has zero matches. |
+| C1 | OPEN | Run the complete Local gate on this source and retain its SHA-specific outcome and log in the PR conversation. Focused INIT, slot, legacy and Juno tests pass. The interrupted pre-change suite already recorded host failures. |
+| C2 | PASS | Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor. No deleted paths in the no-rename comparison. |
+| C3 | OPEN | No screen layout source changed. The designated independent release review has not signed off. |
+| C4 | OPEN | New evidence consists of source, measurements and reproduction material. The exact-head gate owns the repository-wide limits receipt. |
+| C5, C6 | FAIL | Checklist remains open. PR #973 stays in draft pending qualification and integration review. |
+
+### Remaining engineering work
+
+The 32-byte cell exposes INIT and two live performance parameters. A factory importer needs a distinct typed interface for physical parameters, full validation before applying any ordered stream, and preservation of both owners when a program is rejected. App parameter IDs 0 and 1 represent oscillator morphs. Passing them through the existing performance API changes pitch bend and damper. The independent oscillator prototype separates the two domains. The [event review](../../experiments/sound-hardware-v1/stock-dry/event-review.md) also records DnBOX's paired-note-off convention for overlapping presses from the same source.
+
+For SuperJ6, the immediate integration requirement is a typed event to the correct part that can carry the decoded original fields without narrowing to the packed legacy macro ID. Complete original preset captures also need the matching iOS AU host or the authenticated 14/56 comparison archive. The delay comparison documents two distinct audible original histories, the measured available stock storage and the conditions a bounded approximation would need to pass. A complete-preset comparison and the full callback must follow these changes.
+
 ## Stock memory checkpoint, 2026-11-20
 
 The [sound memory report](sound-memory.md) records six new physical links using the existing UI and normal stock linker. Playable Synth One with the shipped Juno leaves 4,160 B XIP on Elite and 4,168 B on Pro. The partial compact SuperJ6 variant leaves 1,864/1,872 B, or 1,928/1,940 B with the range dictionary. Each leaves 8,972 B raw pool, 780 B above reserve. Whole-lane S6 remains FAIL because complete independent instruments and insert histories are still absent. Source patches, attribution and native receipts are in the report.

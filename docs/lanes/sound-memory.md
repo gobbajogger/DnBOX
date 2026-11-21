@@ -1,8 +1,19 @@
 # Sound memory on stock SMK-37 Elite and Pro
 
-S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All three source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
+S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All five source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
 
-## Physical images
+## Production INIT at the qualified source
+
+The shipped Juno, Chicago, Miami and independently implemented Synth One INIT all link through the stock application. Both models use the same firmware source. The seven-file change on parent `933a6f40e8aca72607a258ab42ff21265489903d` reproduces code-only tree `39c6aea21022c93ee95de5a78236b3619b63bcdb`. Per-file pins, ELF sections, per-engine attribution, target ABI, builds and output identities are in the [production receipts](../../experiments/sound-hardware-v1/stock-fit-20261121/final-init-native-receipts.tar.gz).
+
+| Stock model | Image bytes | Free XIP bytes | Free pool bytes | Pool above 8,192 | Free ordinary RAM |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Elite | 546,516 | 6,156 | 8,972 | 780 | 1,100 |
+| Pro | 546,508 | 6,164 | 8,972 | 780 | 1,100 |
+
+Each Synth One part uses 956 bytes of the existing 3,720-byte backend union. Each shipped Juno plus chorus uses 888 bytes. The release image has 268 pool bytes above the required reserve plus safety margin. Two original instruments can require distinct wet reads from five seconds before a live delay edit. See the [per-program and independent-history measurements](../../experiments/sound-hardware-v1/synthone-delay/README.md) for the scope of this constraint.
+
+## Earlier candidate images
 
 These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
 
@@ -11,10 +22,14 @@ These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default 
 | Shipped Juno engine and chorus | `1e18f1b0706a8c1ec17f0939a486382b69111c9b` | 548,512 / 4,160 | 548,504 / 4,168 |
 | Compact Juno facade and core | `2ca530ce1031327a1098f120d1745cc6294a85cc` | 550,808 / 1,864 | 550,800 / 1,872 |
 | Compact core with physical-range dictionary | `731158c6ad7b30addcb6f635f4eca4cbc56bd941` | 550,744 / 1,928 | 550,732 / 1,940 |
+| Compact with direct AMP2 runtime fields | `bf5aed21ca2649c2fce367131afd36565b92a436` | 551,224 / 1,448 | 551,216 / 1,456 |
+| Compact AMP2 with expanded physical-range dictionary | `18f29e2ce3d83d034a76c6ca6ae79962c12d2350` | 551,152 / 1,520 | 551,140 / 1,532 |
 
-In all six links ordinary RAM use is 97,204 of 98,304 bytes, pool use is 335,092 of 344,064, and XPOOL use is 9,216 of 9,216. Raw pool free is 8,972 bytes. This leaves a 780-byte margin over the 8,192-byte reserve, or 268 bytes beyond the additional 512-byte gate requirement. No target runtime or stack high-water measurement was made.
+In all ten links ordinary RAM use is 97,204 of 98,304 bytes, pool use is 335,092 of 344,064, and XPOOL use is 9,216 of 9,216. Raw pool free is 8,972 bytes. This leaves a 780-byte margin over the 8,192-byte reserve, or 268 bytes beyond the additional 512-byte gate requirement. No target runtime or stack high-water measurement was made.
 
 The dictionary saved 64 bytes on Elite and 68 bytes on Pro in this composition. The existing host boundary comparison was rerun with the candidate's actual shared-math and ABI headers. The 944 float boundary cases, four oscillator-mode cases and 576 renders across four rates passed, with identical complete owner state and audio over 31,488 frames. The pulse-width mutant failed. This change alters macro validation; its stock hardware timing was not measured.
+
+Adding direct AMP2 fields to the compact core cost 416 image bytes on each model. Its expanded 11-range dictionary saved 72 bytes on Elite and 76 bytes on Pro. AMP2 owners retain the 24-second amp decay/release bound and generic owners retain the 16-second bound. Both owner profiles passed their own 944 boundary cases, four mode cases, 576 complete-state/audio comparisons and wrong-range negative. These two additional compositions measure deployment size of the direct runtime adapter. Complete preset ingress remains unqualified.
 
 ## Engine-specific measurements
 
