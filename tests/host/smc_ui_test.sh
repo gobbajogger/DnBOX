@@ -3,6 +3,13 @@
 # Optional CC, SAN_FLAGS, SMC_UI_OUT and SMC_UI_SOURCE_FILE support independent replay.
 set -eu
 cd "$(dirname "$0")/../.."
+# These inventories describe the shipping Elite/Pro Synth One pages.
+case ${SMC_UI_TEST_FILE:-} in
+    tests/ui_geometry/capture.c|tests/host/ui_screen_walk.c)
+        export X0X_SYNTHONE_PATCH=1
+        X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1"
+        ;;
+esac
 OUT=${SMC_UI_OUT:-build/host/smc-ui}
 mkdir -p "$OUT"
 awk '/^static const char CK_FLD_N\[\] = /{print}
