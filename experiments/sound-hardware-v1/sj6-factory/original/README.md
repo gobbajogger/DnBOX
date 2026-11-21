@@ -17,7 +17,7 @@ Five chorus cases, a CoreSynth note and a CoreSampler note produced seven byte-i
 
 ## Factory inputs
 
-Generate the 14 input records using the sibling `factory.py` and authenticated exported banks. Run the release audit on the original IPA as data only. Each selected UID has 1 unique same-name-bank entry in that release. All 1,926 ordered control values match binary32. The release bank and exported bank have different UUIDs in all 12 banks. Four volume values have alternate decimal spellings with the same float32 words. Two records differ in non-control metadata. The audit retains both bank UUIDs, each input digest, and those differences.
+The [release matrix selector](../release_matrix.py) takes the build-9 IPA as its only input and emits the 14 complete original bank records, stimulus and audit for the headless host. The [bench commands](../README.md#s4-input-and-scoring) use this input route on both arms. The archived comparison below used an independent bank export. Generate those export records with the sibling `factory.py`, then run the release audit on the original IPA as data only. Each selected UID has 1 unique same-name-bank entry in that release. All 1,926 ordered control values match binary32. The release bank and exported bank have different UUIDs in all 12 banks. Four volume values have alternate decimal spellings with the same float32 words. Two records differ in non-control metadata. The audit retains both bank UUIDs, each input digest, and those differences.
 
 ```sh
 python ../factory.py J6presets.zip matrix /tmp/sj6-selected

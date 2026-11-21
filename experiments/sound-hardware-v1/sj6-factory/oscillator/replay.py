@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from compare import AUDIT, channel_score, json_object
 from factory import load_factory, select, canonical_bytes
+from release_matrix import prepare_release
 import remote_fields
 
 REF = "4ea86b9e869011cae761709d13569b7bc32980a8"
@@ -109,28 +110,35 @@ def selected_record(directory, row, audited):
     return item
 
 
-def cases(archive, suite, selected=None):
-    if archive is None and selected is None:
+def cases(archive, suite, selected=None, release=None):
+    if archive is None and selected is None and release is None:
         for layer in range(2):
             for stop in range(3):
                 yield "control-" + str(stop), layer, np.float32(stop / 3), 0., 0., {}
             for amount in AMOUNTS[suite]:
                 yield "control-pwm-" + str(amount), layer, 1., np.float32(amount), float(amount > 0), {}
         return
+    if release is not None:
+        release_spec, _, released_files = release
+        spec = json.loads(release_spec)
+    else:
+        spec = SPEC
     if selected is not None:
         audit = json_object(AUDIT.read_bytes())
         if audit["spec_sha256"] != digest(SPEC_FILE.read_bytes()):
             raise ValueError("release audit and S4 manifest disagree")
         audited = {entry["uid"]: entry for entry in audit["programs"]}
-    else:
+    elif archive is not None:
         if digest(archive.read_bytes()) != SPEC["archive_sha256"]:
             raise ValueError("expected the authenticated J6presets.zip")
         banks = load_factory(archive)
     catalog = json.loads((HERE.parent.parent / "mapping/results/implementer_brief/public_control_catalog.json").read_bytes())
     keys = {entry["id"]: entry["identifier"] for entry in catalog["controls"]}
-    for row in SPEC["programs"]:
+    for row in spec["programs"]:
         uid = row["program_uid"]
-        if selected is not None:
+        if release is not None:
+            record = json_object(released_files[uid])["preset"]
+        elif selected is not None:
             record = selected_record(selected, row, audited[uid])
         else:
             record = select(banks, row["bank_uuid"], uid)["preset"]
@@ -163,6 +171,7 @@ def main():
     parser.add_argument("--repo", type=Path, required=True)
     inputs = parser.add_mutually_exclusive_group()
     inputs.add_argument("--banks", type=Path)
+    inputs.add_argument("--release-ipa", type=Path, help="original build-9 app with its bundled factory banks")
     inputs.add_argument("--selected-records", type=Path, metavar="DIR",
                         help="14 <UID>.json files from factory.py matrix or their complete extracted presets")
     inputs.add_argument("--suite", choices=NOTES)
@@ -173,12 +182,13 @@ def main():
     args = parser.parse_args()
     suite = args.suite or "controls"
     # Verify every selected record before compiling, writing outputs or scoring.
-    settings = list(cases(args.banks, suite, args.selected_records)) if not args.remote_repo else []
+    release = prepare_release(args.release_ipa) if args.release_ipa else None
+    settings = list(cases(args.banks, suite, args.selected_records, release)) if not args.remote_repo else []
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out, args.after_stock_pad)
     rows = []
-    factory_input = args.banks is not None or args.selected_records is not None
+    factory_input = args.banks is not None or args.selected_records is not None or release is not None
     scope = "factory-main-pass base oscillator only" if factory_input else f"isolated oscillator {suite}"
     if args.remote_repo:
         settings = ((*row, {}) for row in remote_fields.load(args.remote_repo, out, SPEC))
@@ -221,9 +231,15 @@ def main():
         result["remote_commit"] = remote_fields.REMOTE_REV
         result["remote_input_sha256"] = remote_fields.FILES
     if factory_input:
-        result["factory_input"] = "selected records" if args.selected_records is not None else "full archive"
-        result["s4_inputs_sha256"] = digest(SPEC_FILE.read_bytes())
-        result["record_sha256_by_uid"] = {row["program_uid"]: row["record_sha256"] for row in SPEC["programs"]}
+        spec_bytes = release[0] if release else SPEC_FILE.read_bytes()
+        if release:
+            result["factory_input"] = "original build-9 application bundle"
+            result["source_ipa_sha256"] = release[1]["ipa_sha256"]
+        else:
+            result["factory_input"] = "selected records" if args.selected_records is not None else "full archive"
+        result["s4_inputs_sha256"] = digest(spec_bytes)
+        result["record_sha256_by_uid"] = {row["program_uid"]: row["record_sha256"]
+                                          for row in json.loads(spec_bytes)["programs"]}
         result["pwm_amount_stage"] = "main preset pass, before the captured-route postpass and live modulation"
     (out / "result.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(f"{result['passes']}/{len(rows)} isolated oscillator comparisons within limits")

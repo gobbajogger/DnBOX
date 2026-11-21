@@ -37,6 +37,16 @@ The earlier bank scan found 25 programs with all four authored PWM fields. On th
 
 The fixed matrix contains the first program in each original export bank plus *Medieval Sky* and *PWM String Pad*. Each graph starts fresh at 44.1 kHz with the authored internal tempo. A single note, then a chord and a release tail exercise three seconds of stereo output. Both arms use the exact sample positions and unity gain specified in [the matrix](s4-inputs.json). See [the original bench](original/README.md) for the restricted Linux component replay, the released/bundled bank identity audit and the headless Audio Unit host.
 
+The build-9 app bundle contains the factory banks. To prepare the headless AU host's complete `Inputs` directory from that one source and score fresh captures against those release records, run the following from this directory.
+
+```sh
+python3 release_matrix.py "$SJ6_IPA" /tmp/sj6-release-inputs
+python3 compare.py /tmp/original-captures /tmp/firmware-captures \
+    --release-ipa "$SJ6_IPA" --candidate-image "$FIRMWARE" --candidate-commit "$SOURCE_COMMIT"
+```
+
+The selector verifies both the IPA and embedded AU executable SHA-256. It selects the 14 scheduled program UIDs from their audited release banks and retains their original metadata and ordered controls. Both producers use the resulting matrix and its record hashes. Program UIDs, notes, timing, gain and thresholds match the existing schedule. Release bank UUIDs and some stored program positions differ from the export. The scorer independently regenerates the expected metadata and controls from the supplied IPA. This path was tested with a synthetic 14-program, 12-bank application fixture. The authenticated original IPA was unavailable for this run.
+
 Each producer exports the stereo PCM, the receipt, and the applied program state as `<UID>.f32le`, `<UID>.json`, and `<UID>.applied.json`. The scorer checks the selected input against the release audit and complete record hash. It verifies the applied UID, tuning, tempo, input settings, every authored control in the applied snapshot, and the live control words emitted by the producer. The receipt includes the actual event schedule, render start, internal clock mode, fresh-instance reset, unity gain, block size, and digests of the applied state and PCM. Each channel must be finite and contain sound. The original needs the audited AU identity, installed executable digest and qualified load route. The DnBOX capture needs a trusted source revision and the SHA-256 of the independently identified production image used for that capture. Receipt checks establish consistency with these inputs. Producer provenance still depends on running the trusted bench and firmware and collecting their outputs directly.
 
 ```sh
