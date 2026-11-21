@@ -1,0 +1,4 @@
+init_pcm=8934eb02ab5e80a9 runtime_bytes=5360 s1_bytes=1048
+timing 0 0 frames=512 blocks=128 parts=2 voices=12 mean_cpu_us=180.743 max_cpu_us=499.622 max_wall_us=12730.562 deadline_misses=1 hash=52135ea8a5a7b6d1
+timing 0 60 frames=512 blocks=128 parts=2 voices=12 mean_cpu_us=196.492 max_cpu_us=799.230 max_wall_us=21937.419 deadline_misses=5 hash=231e1ad20b65b019
+timing 0 106 frames=512 blocks=128 parts=2 voices=12 mean_cpu_us=189.925 max_cpu_us=724.010 max_wall_us=23673.048 deadline_misses=3 hash=7062dfdcde30c0d9

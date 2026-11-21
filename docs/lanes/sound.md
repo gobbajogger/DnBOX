@@ -19,6 +19,8 @@ The normal key, cell and render paths now play Synth One INIT on both owners. Th
 | C4 | OPEN | New evidence consists of source, measurements and reproduction material. The exact-head gate owns the repository-wide limits receipt. |
 | C5, C6 | FAIL | Checklist remains open. PR #973 stays in draft pending qualification and integration review. |
 
+The [whole-app legacy controls](../../experiments/sound-hardware-v1/sj6-amp2/entry/README.md) include the failing compact-backend legacy test build transcripts. The [focused stock runtime log](../../experiments/sound-hardware-v1/stock-dry/freeze-test.log) and isolated oscillator model logs are retained with their source fixtures. The combined-head Local gate uses the four pinned original comparison repositories and a Pro package built locally from the frozen firmware. The shipped native pair and consolidated ancestry were rechecked for this evidence checkpoint.
+
 ### Remaining engineering work
 
 The 32-byte cell exposes INIT and two live performance parameters. A factory importer needs a distinct typed interface for physical parameters, full validation before applying any ordered stream, and preservation of both owners when a program is rejected. App parameter IDs 0 and 1 represent oscillator morphs. Passing them through the existing performance API changes pitch bend and damper. The independent oscillator prototype separates the two domains. The [event review](../../experiments/sound-hardware-v1/stock-dry/event-review.md) also records DnBOX's paired-note-off convention for overlapping presses from the same source.
