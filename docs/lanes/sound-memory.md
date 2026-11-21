@@ -31,6 +31,10 @@ For the measured live edit, zero startup plus one 460-byte retained checkpoint p
 
 The sparse Chicago renderer with a shared general mixer linked at 546,148 B Elite and 546,140 B Pro, a 368 B application reduction on each. Its zero-XMod and nonzero-XMod costs moved in opposite directions. Both retained ordinary RAM usage of 97,204 B and 8,972 B free pool. [Native and host differential receipts](../../experiments/sound-hardware-v1/strict-timing/chicago-single-oscillator.tar.gz)
 
+The two-tone note history stores 1,568 B per owner before encoder workspace. It missed the four-tap wet-audio criteria on both original programs. Supplying the actual individual voice phases for a separate offline fit required another 29,635,200 B per owner plus 4,160 or 16,448 B of fitted coefficients. At 64 bins, one of eight wet taps passed. These measurements leave the production S6 result open. [Source size and quality measurements](../../experiments/sound-hardware-v1/synthone-delay/note-source-and-voice-phase.tar.gz)
+
+The original voice code can resume from **216 B per voice, or 1,512 B for seven slots**, on the PI32v2 ABI. Across 2,087 forced resets and restores per owner, both complete six-second traces matched all 5,292,000 original binary32 words each. Erasing oscillator phases or filter histories changed more than 2.4 million words on each program. The rest of the scheduler, shared random generator, control smoothers and effects stayed live. This qualifies one part of an independent historical reader. Its remaining state, complete native replay cost and S6 fit are open. [Voice checkpoint, positive and negative controls and target layout](../../experiments/sound-hardware-v1/synthone-delay/original-voice-checkpoint.tar.gz)
+
 ## Earlier candidate images
 
 These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
