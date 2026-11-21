@@ -72,7 +72,7 @@ static fm1_crash_t fm1_crash;
 static int flash_ok;
 static jmp_buf reset_destination;
 enum scenario { CAL_SUCCESS, CAL_BUTTON_TIMEOUT, CAL_KNOB_TIMEOUT, CAL_HELD_TIMEOUT,
-                FAULT, UBOOT, SAFE_PLAY, SAFE_USB, START_NORMAL };
+                FAULT, UBOOT, SAFE_PLAY, SAFE_USB, SAFE_OTA_TIMEOUT, START_NORMAL };
 static enum scenario scenario;
 static char entry_frame[64], exit_frame[64];
 
@@ -92,7 +92,15 @@ static int fm1_enc_take(unsigned id)
     encoder_steps[id] = 0;
     return result;
 }
-static void fm1_delay_ms(uint32_t ms) { fm1_ms += ms; }
+static unsigned ota_requests, ota_erases, failure_holds;
+static void fm1_delay_ms(uint32_t ms)
+{
+    if (scenario == SAFE_OTA_TIMEOUT && ms == 1500) {
+        capture("boot-update-failed");
+        ++failure_holds;
+    }
+    fm1_ms += ms;
+}
 static void fm1_wdt_feed(void);
 #include "app/panel.c"
 static panel_t saved_panel;
@@ -116,6 +124,15 @@ static void fm1_wdt_feed(void)
     char name[80];
     assert(++feeds < 200);
     if (scenario == START_NORMAL) return;
+    if (scenario == SAFE_OTA_TIMEOUT) {
+        if (feeds == 1) {
+            usb.ota_req = 1;
+        } else {
+            capture("safe-after-failed-update");
+            fm1_in.buttons = 1u << panel.btn[B_PLAY];
+        }
+        return;
+    }
     if (scenario == SAFE_PLAY || scenario == SAFE_USB) {
         /* Keep PLAY down across the entry guard, then cross 500 ms. USB
          * recovery instead requests the published bootloader path. */
@@ -153,8 +170,30 @@ static void fm1_guard_lock_top(void) {}
 static void fm1_irq_enable_all(void) {}
 static void usb_retry(uint32_t now) { assert(now == fm1_ms); ++retries; }
 static int capture_maintenance_poll(void) { return 0; }
-static void ota_service(void) {}
-static void ota_session(void) { abort(); }
+/* The host receives each request but never supplies package data. The actual
+ * updater owns the timeout, staging cleanup and failure-screen duration. */
+#define FELUCCA_ID "SMK-37 Pro_900"
+#include "ota.c"
+static int ota_wire_send(const uint8_t *p, uint32_t n)
+{
+    assert(scenario == SAFE_OTA_TIMEOUT && n > 2 && p[0] == 0xf0 && p[n-1] == 0xf7);
+    capture("boot-update-step-1");
+    ++ota_requests;
+    return 0;
+}
+static int ota_frame_get(const uint8_t **p, uint32_t *n) { (void)p; (void)n; return 0; }
+static void ota_frame_done(void) { abort(); }
+static uint32_t ota_now_ms(void) { return fm1_ms; }
+static void ota_idle(void) { fm1_ms += 1000; }
+static int ota_erase(uint32_t off)
+{
+    assert(off == OTA_AREA + ota_erases * 0x1000u && off < OTA_AREA + OTA_AREA_LEN);
+    ++ota_erases;
+    return 0;
+}
+static int ota_prog(uint32_t off, const void *p, uint32_t n) { abort(); }
+static int ota_fread(uint32_t off, void *p, uint32_t n) { abort(); }
+static void ota_commit(const uint8_t *parm) { abort(); }
 static void ed_install_forget(void) {}
 #include "route_bodies.inc"
 #include "native_startup.inc"
@@ -196,7 +235,11 @@ static void recovery(enum scenario s, int core, const char *entry, const char *l
         abort();
     }
     if (s == FAULT) assert(destination == 1 && stops == 1 && ticks >= 5*FM1_TICKS_PER_US*1000000u);
-    else if (s == SAFE_PLAY) assert(destination == 1 && !stops && !bootguard.failed && !bootguard.pending &&
+    else if (s == SAFE_OTA_TIMEOUT) {
+        assert(destination == 1 && feeds == 2 && retries == 2 && detaches == 1 && !stops);
+        assert(failure_holds == 1 && ota_requests == 3 && ota_erases == OTA_AREA_LEN / 0x1000u);
+        assert(fm1_ms == 3 * 5000 + 1500 + 30 && !bootguard.failed && !bootguard.pending && !usb.ota_req);
+    } else if (s == SAFE_PLAY) assert(destination == 1 && !stops && !bootguard.failed && !bootguard.pending &&
                                     retries == 3 && detaches == 1 && fm1_ms == 780);
     else assert(destination == 2 && stops == 1 && detaches == 1 && !bootguard.pending &&
                 (s == UBOOT ? fm1_ms == 50 : retries == 1 && fm1_ms == 300));
@@ -217,6 +260,9 @@ int main(void)
     recovery(SAFE_PLAY,-1,"boot-safe-mode","safe-retry-without-crash");
     recovery(SAFE_USB,0,"boot-safe-crash-core-0","boot-uboot-usb");
     recovery(SAFE_PLAY,1,"boot-safe-crash-core-1","boot-safe-retry");
+    flash_ok = 1;
+    recovery(SAFE_OTA_TIMEOUT,1,"boot-safe-crash-core-1","safe-retry-after-failed-update");
+    flash_ok = 0;
     startup(0, -1, "boot-default");
     startup(0, 0, "boot-post-crash-core-0");
     startup(0, 1, "boot-post-crash-core-1");

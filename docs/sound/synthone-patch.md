@@ -1,6 +1,6 @@
 # Synth One editor interface for FWUI
 
-Build Sound and FWUI together with `X0X_SYNTHONE_PATCH=1`. The current selectable Synth One patch is INIT. The interface in `firmware/src/app/engine.h` enumerates the controls consumed by the selected synthesizer, reads both part and patch ownership, and queues a new value for the audio thread.
+Ordinary SMK-37 Elite and Pro builds enable the Synth One INIT editor. Set `X0X_SYNTHONE_PATCH=0` for the read-only INIT configuration. The interface in `firmware/src/app/engine.h` enumerates the controls consumed by the selected synthesizer, reads both part and patch ownership, and queues a new value for the audio thread.
 
 | Factory ID | Encoder label | Physical range |
 | ---: | --- | --- |
@@ -24,6 +24,6 @@ Each encoder detent changes the position by one of 127 intervals across the desc
 
 Call `engine_s1_patch_set(part, revision, factory_id, position)` with position 0 through 127 inclusive. `S1_EDIT_QUEUED` means the audio thread accepted the request for the next available boundary. Show the applied value from a subsequent snapshot. `S1_EDIT_BUSY` means a previous edit is pending or a note lock owns the current sound. `S1_EDIT_REJECTED` requires a fresh read of the selection and a valid ID and position. A replacement or project reload invalidates the old revision, even when the patch name stays INIT. One part's revision cannot edit the other part.
 
-The enabled firmware saves an explicit edit in project-cell slots 8–20. Existing INIT cells retain their original precision. A project containing these edited slots loads on an enabled build. The default firmware rejects an edited cell. The 13-control test exercises all 1,664 positions, audible control changes, both parts, stale revisions, note locks and project reload. The opt-in +1 ms full physical scene still changes saved bytes on both models.
+The enabled firmware saves an explicit edit in project-cell slots 8–20. Existing INIT cells retain their original precision. A project containing these edited slots loads on a patch-enabled build, including ordinary Elite and Pro firmware. An explicitly patch-disabled build rejects an edited cell. The 13-control test exercises all 1,664 positions, audible control changes, both parts, stale revisions, note locks and project reload. The earlier patch-enabled +1 ms full physical-input replay changed saved bytes on both models.
 
 [Public declarations](../../firmware/src/app/engine.h) · [Descriptors and conversion](../../firmware/src/app/s1_dry_part.c) · [Executable integration test](../../tests/host/synthone_patch_test.c) · [Native receipts](../../experiments/sound-hardware-v1/synthone-patch/verification.tar.gz)

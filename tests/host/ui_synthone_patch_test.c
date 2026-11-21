@@ -132,6 +132,48 @@ static void check_part(unsigned owner)
     button_tap(B_HOME);
 }
 
+/* K2 selects a row and K3 edits it through the part list on SMK-37. */
+static void edit_part_list(unsigned owner, uint8_t positions[S1_PATCH_COUNT])
+{
+    ui.part = (uint8_t)(PART_303A + owner);
+    set_view(V_PART);
+    ui_input_only();
+    *page_of(V_PART) = 0;
+    button_tap(B_SEL);
+    CHECK(ui.overlay == O_LIST);
+    unsigned edited = 0;
+    for (;;) {
+        unsigned row = ui.list_sel;
+        pref_t ref = list_rows[row];
+        if (ref.kind == R_S1PATCH) {
+            CHECK(ref.b == owner && ref.c == edited++);
+            const s1_patch_descriptor *d = s1_patch_at(ref.c);
+            s1_patch_value before, after, peer, peer_after;
+            CHECK(s1_read(ref, &before));
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer));
+            int step = before.position < 64 ? 1 : -1;
+            now_ms += 128;
+            enc_acc[EN_ALGO] = step;
+            ui_input_only();
+            CHECK(ui.overlay == O_LIST && ui.list_sel == row && engine_s1_patch_pending());
+            audio_block();
+            CHECK(s1_read(ref, &after) && after.position == before.position + step);
+            CHECK(after.physical == s1_patch_physical(d, after.position));
+            check_readout(ref, d, after.physical);
+            CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer_after));
+            CHECK(peer_after.revision == peer.revision && peer_after.physical == peer.physical);
+            positions[ref.c] = after.position;
+        }
+        now_ms += 128;
+        enc_acc[EN_SELECT] = 1;
+        ui_input_only();
+        if (ui.list_sel == row) break;
+        CHECK(ui.list_sel > row);
+    }
+    CHECK(edited == S1_PATCH_COUNT);
+    button_tap(B_HOME);
+}
+
 static void simultaneous_detents(void)
 {
     ui.part = PART_303A;
@@ -173,6 +215,9 @@ int main(void)
     simultaneous_detents();
     check_part(0);
     check_part(1);
+    uint8_t list_positions[2][S1_PATCH_COUNT];
+    edit_part_list(0, list_positions[0]);
+    edit_part_list(1, list_positions[1]);
     CHECK(project_validate_for(&proj) == 0);
     CHECK(project_save() == 0);
     sound_t saved = proj.sound;
@@ -195,6 +240,7 @@ int main(void)
             pref_t ref = PR(R_S1PATCH, T_303, part, i);
             s1_patch_value v;
             CHECK(s1_read(ref,&v));
+            CHECK(v.position == list_positions[part][i]);
             check_readout(ref,s1_patch_at(i),v.physical);
         }
     select_bank(0, ORIGINAL_SOUND_MIAMI);

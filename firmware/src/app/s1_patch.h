@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include "../dsp/x0x_param.h"
 
-/* Compile the native target with X0X_SYNTHONE_PATCH=1 to enable this INIT
- * patch interface. The ordinary firmware remains on its verified sound path.
+/* Ordinary SMK-37 Elite and Pro builds enable this dry INIT patch interface.
+ * X0X_SYNTHONE_PATCH=0 explicitly selects the read-only INIT configuration.
  * Stable Synth One factory IDs; performance wheels belong to a separate API.
  * Storage slots are in descriptor order and must never be reordered. Existing
  * OS11 INIT and historical eight-control cells use no bits in this range. */
