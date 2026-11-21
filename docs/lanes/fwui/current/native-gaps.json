@@ -8,35 +8,35 @@
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
       "notConstructed": "Physical power-on and SPL handoff, IRQ/audio/USB electrical behavior, LCD color and flash power-loss persistence on a board.",
-      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json. The linked stock Elite and Pro packages also run from the application entry to the splash and ordinary screen in strict emu360. Fresh-process restarts read the recovered sample without a flash write."
+      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json. The linked stock Elite and Pro packages also run from the application entry to the splash and ordinary screen in strict emu360. Fresh-process restarts read the recovered sample without a flash write. Final Synth One builds repeated the complete suite in native-routes/stock-final.json."
     },
     {
       "ids": [
         "firmware/src/app/main_fm1.c::fm1_fault"
       ],
-      "notConstructed": "CPU exception delivery, actual clock duration and physical reboot.",
-      "displayEvidence": "The complete fault function draws its diagnostics, polls its timer and requests a host reset. Its framebuffer matches the archived diagnostic."
+      "notConstructed": "Electrical fault origin, physical clock accuracy and reboot on a board.",
+      "displayEvidence": "The complete fault function draws its diagnostics, polls its timer and requests a host reset. Its framebuffer matches the archived diagnostic. Both final linked packages take the modeled CPU exception vector twice, record the actual fault PC and diagnostic registers, paint the matching LCD and request timed chip resets. See native-routes/stock-guard.json."
     },
     {
       "ids": [
         "firmware/src/app/main_fm1.c::safe_main"
       ],
-      "notConstructed": "The native watchdog, USB, physical PLAY retry, detach and reset are outside host qualification.",
-      "displayEvidence": "The full safe_main function handles held PLAY across its time guard and a modeled USB bootloader request. Both core cases, prompted retry and the resulting endpoints are checked."
+      "notConstructed": "Physical watchdog, key contacts, USB electrical behavior and power/reset circuitry.",
+      "displayEvidence": "The full safe_main function handles held PLAY across its time guard and a modeled USB bootloader request. Both core cases, prompted retry and the resulting endpoints are checked. After the second modeled guard exception both final packages enter safe mode. Their PLAY contacts within the matrix scanner produce the retry frame and PR_PWR reset, then the post-crash notice. All five per-model recorded recovery states match their crash-register-specific 240×240 oracle. See native-routes/stock-guard.json."
     },
     {
       "ids": [
         "firmware/src/app/main_fm1.c::enter_uboot"
       ],
       "notConstructed": "Physical USB detach and actual bootloader transition.",
-      "displayEvidence": "The complete function executes both direct and USB-request paths, checks detach/delays, clears pending in RAM and reaches the modeled bootloader endpoint."
+      "displayEvidence": "The complete function executes both direct and USB-request paths, checks detach/delays, clears pending in RAM and reaches the modeled bootloader endpoint. Both stock SMK firmwares also reach their matching updater frames, emulated USB detach on the USB route, and a PR_PWR reset with no flash operations. See native-routes/stock-panel.json. The final firmware rerun is in native-routes/stock-final.json."
     },
     {
       "ids": [
         "firmware/src/app/panel.c::panel_setup"
       ],
       "notConstructed": "Electrical matrix/encoder acquisition, physical elapsed time and persistent device storage.",
-      "displayEvidence": "The complete calibration function consumes simulated button edges and encoder turns. All 21 prompts, three timeout/rollback paths, successful RAM persistence and the final clear are checked."
+      "displayEvidence": "The complete calibration function consumes simulated button edges and encoder turns. All 21 prompts, three timeout/rollback paths, successful RAM persistence and the final clear are checked. Both stock packages use the timed matrix/encoder scanner to teach a rotated 14-button mapping and seven encoders with alternating directions. All 21 prompt frames and the title match the archived pixels. The saved 32-byte mapping reloads after a fresh emulator boot. See native-routes/stock-panel.json. Final firmware results are in native-routes/stock-final.json."
     },
     {
       "ids": [
@@ -50,8 +50,8 @@
         "firmware/src/app/ui.c::strip_value_fit",
         "firmware/src/app/ui.c::dg_tail"
       ],
-      "notConstructed": "The firmware drum part and mix dispatch use the dedicated drum painter or a DG_LEVEL strip. Neither selects the generic matrix drum-value fitter or the DG_DECAY/DG_NTAIL tail on admitted drum pages.",
-      "displayEvidence": "The admitted drum part route uses draw_drum_voice; ordinary strip drum dispatch selects DG_LEVEL. These helpers remain unobserved, not synthetically invoked to inflate coverage."
+      "notConstructed": "The final source has no caller of strip_value_fit. Its only call to drum_strip_glyph supplies DG_LEVEL, outside the DG_DECAY/DG_NTAIL branches that invoke dg_tail.",
+      "displayEvidence": "The earlier dispatch analysis is recorded in stockSourceAudit. See finalStockSource for the revised source and both linked ELF symbols."
     },
     {
       "ids": [
@@ -115,5 +115,30 @@
       "notSelectedByStockPageDispatch": 3
     },
     "scope": "All 20 original IDs have dispositions. The source exclusions add zero executed frame or hardware observations. Counts apply to 11bc3f3a. The source scan used exact identifiers and masked comments and literals."
-  }
+  },
+  "stockPanelEmulator": "native-routes/stock-panel.json",
+  "stockFinalEmulator": "native-routes/stock-final.json",
+  "finalStockSource": {
+    "commit": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+    "firmwareTree": "ec650d510c322d14d107c4278d91ab7ad730f394",
+    "uiBlob": "c5203be2a2c64286b0587f9ddded2936473d5e00",
+    "updates": {
+      "strip_value_fit": "The sole identifier occurrence in ui.c is the static definition. The bass matrix no longer contains its former conditional drum caller.",
+      "dg_tail": "The sole production call to drum_strip_glyph supplies the constant DG_LEVEL. Its DG_DECAY and DG_NTAIL cases cannot reach the tail from stock dispatch."
+    },
+    "bothElfSymbols": {
+      "presentBytes": {
+        "drum_strip_glyph": 260,
+        "draw_wave_glyph": 542,
+        "enter_uboot": 98,
+        "fm1_cstart": 6784
+      },
+      "absent": [
+        "strip_value_fit",
+        "dg_tail"
+      ]
+    },
+    "scope": "The 11bc3f3a stockSourceAudit and original 98/118 frame inventory above are historical. These final dispositions add no executed frames."
+  },
+  "stockFaultEmulator": "native-routes/stock-guard.json"
 }

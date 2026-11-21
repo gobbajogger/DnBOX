@@ -1,0 +1,284 @@
+{
+  "firmwareCommit": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+  "firmwareTree": "ec650d510c322d14d107c4278d91ab7ad730f394",
+  "emulatorRepository": "gobbajogger/DnBOX",
+  "emulatorCommit": "6b60618c8bf344d65a166905fb746f46ab708fcb",
+  "fixture": "tests/ui_inventory/stock_guard_injection.patch",
+  "registerLayout": "fm1_crash_t: magic, count, vec, pc, rets, emu, dbg, sp, psr, icfg, uptime_ms, etm[4], early, core",
+  "clockMHz": 360,
+  "strict": true,
+  "targetChange": "The simulator raises SoC IRQ 1 with DBG bit 4 at 1200 and 9200 ms. The unchanged linked guest runs its exception handler, saves the .noinit record, waits through both four-second deadlines, selects safe mode, scans PLAY and requests all three chip resets.",
+  "oracle": "The host RAM/SPI LCD fixture re-renders each complete diagnostic, safe, retry and post-crash frame using the recorded target crash structure. Every match compares all 57,600 pixels after normalizing the display exporters to the same RGB565 expansion. PNGs are captured from the target, including the real per-model PCs.",
+  "models": {
+    "elite": {
+      "model": "elite",
+      "fwscSha256": "5219e7f5f9c1a2b47b23f8d37690f048374be480c9f8281159bf7180db2a2d6b",
+      "elfSha256": "5850e447c4be5d150b137893af2318b52b822a626544d8c9adaceaf0b53db28e",
+      "emulatorSha256": "e4a0db126d31e096f6e548d515ce4a5b77b12e4ccb43111988a07a7e699cf31d",
+      "guardMs": [
+        1200,
+        9200
+      ],
+      "panelKeys": "15200:SEQPLAY,15600:SEQPLAY^",
+      "shots": {
+        "first": {
+          "lcdFrames": 119,
+          "crashRecord": [
+            1129468744,
+            1,
+            1,
+            33687492,
+            33688052,
+            0,
+            16,
+            29868028,
+            3,
+            896,
+            1200,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "debug": [
+            1145194289,
+            62,
+            3932,
+            963,
+            0,
+            1,
+            7202,
+            13,
+            1518,
+            20,
+            1,
+            0,
+            0
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 1312,
+              "canonicalRgbSha256": "f54e936bce711b86770c7fb014a58e9e60c313a3c46b695d45f56608c9e39caa"
+            }
+          },
+          "resetsMs": [],
+          "emulatorOutput": "FWUI injected modeled guard exception at 1200 ms\nirq levels at the end: [7], ie false, skipped 0 cycles\nlast 40 ms: 100% of instructions in ISRs = 106.8 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 23% of the run (429 ms of 1900 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1900 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 119 frames on stdout + work/audio.raw\nflash: 20 erases / programs\n"
+        },
+        "safe-play": {
+          "lcdFrames": 1250,
+          "crashRecord": [
+            1129468744,
+            2,
+            1,
+            33683286,
+            33737894,
+            0,
+            16,
+            29868028,
+            0,
+            896,
+            3893,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "debug": [
+            1145194289,
+            293,
+            4008,
+            4551,
+            0,
+            3,
+            47655,
+            113,
+            1552,
+            29,
+            3,
+            0,
+            2
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 9312,
+              "canonicalRgbSha256": "dffc3985a2b18ea643fdbbaf3849453f1f34a3b34db5f1ff78abc1f9640cabaf"
+            },
+            "safe": {
+              "firstMs": 13840,
+              "canonicalRgbSha256": "b77d7f753bbe736a83e4d26b7978b314fd7200256fc5dcf3d7694eae9678abc7"
+            },
+            "retry": {
+              "firstMs": 15216,
+              "canonicalRgbSha256": "d5d4ebd1a97b42400209a6dcbe066e365440adc19b58341136bfbe601ea773d1"
+            },
+            "post-crash": {
+              "firstMs": 15664,
+              "canonicalRgbSha256": "6c50e1a1aa8c48e0490fad0e7d057718a15cfb4bcf532f3b8ec65772e9d77616"
+            }
+          },
+          "resetsMs": [
+            5307,
+            13307,
+            15238
+          ],
+          "emulatorOutput": "FWUI injected modeled guard exception at 1200 ms\nchip reset at 5307 ms (PR_PWR)\nFWUI injected modeled guard exception at 9200 ms\nchip reset at 13307 ms (PR_PWR)\nchip reset at 15238 ms (PR_PWR)\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 18% of instructions in ISRs = 17.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 7% of the run (1490 ms of 20000 ms)\nLED on-fractions: \nSMK-37 pads (3 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 20000 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 1250 frames on stdout + work/audio.raw\nflash: 20 erases / programs\n"
+        }
+      }
+    },
+    "pro": {
+      "model": "pro",
+      "fwscSha256": "61a21d2da4d195d34970d02b66e79118f1c357b80471112926394d4042e32093",
+      "elfSha256": "0d42a313c4c44ddab0c56eac479ed60be22813dc6d291e5622dc85fc6f1d0a81",
+      "emulatorSha256": "e4a0db126d31e096f6e548d515ce4a5b77b12e4ccb43111988a07a7e699cf31d",
+      "guardMs": [
+        1200,
+        9200
+      ],
+      "panelKeys": "15200:SEQPLAY,15600:SEQPLAY^",
+      "shots": {
+        "first": {
+          "lcdFrames": 119,
+          "crashRecord": [
+            1129468744,
+            1,
+            1,
+            33687494,
+            33688052,
+            0,
+            16,
+            29868028,
+            0,
+            896,
+            1200,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "debug": [
+            1145194289,
+            62,
+            3934,
+            962,
+            0,
+            1,
+            7201,
+            13,
+            1522,
+            20,
+            1,
+            0,
+            0
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 1312,
+              "canonicalRgbSha256": "3f9ea7a2bfb3f30893998752424e28389869fe5302234d6840613eafc95482fb"
+            }
+          },
+          "resetsMs": [],
+          "emulatorOutput": "FWUI injected modeled guard exception at 1200 ms\nirq levels at the end: [7], ie false, skipped 0 cycles\nlast 40 ms: 100% of instructions in ISRs = 106.8 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 23% of the run (429 ms of 1900 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1900 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 119 frames on stdout + work/audio.raw\nflash: 20 erases / programs\n"
+        },
+        "safe-play": {
+          "lcdFrames": 1250,
+          "crashRecord": [
+            1129468744,
+            2,
+            1,
+            33683374,
+            33685364,
+            0,
+            16,
+            29868028,
+            0,
+            896,
+            3893,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "debug": [
+            1145194289,
+            293,
+            4006,
+            4554,
+            0,
+            3,
+            47654,
+            113,
+            1554,
+            29,
+            3,
+            0,
+            2
+          ],
+          "bootguard": [
+            1111970372,
+            0,
+            1
+          ],
+          "firstMatchingFrames": {
+            "fault": {
+              "firstMs": 9312,
+              "canonicalRgbSha256": "a9ec26b596eb3bc8c4660a58ca4628354f236418650eb332e38997f2345eac76"
+            },
+            "safe": {
+              "firstMs": 13840,
+              "canonicalRgbSha256": "b7ee744e05a96a63726016d541bc9738115ae287e0fda8276769f81a446b85c9"
+            },
+            "retry": {
+              "firstMs": 15216,
+              "canonicalRgbSha256": "580095995e8f58cb15f79a1615e2271223bc92cac09ff028d9b48ddbf41d4577"
+            },
+            "post-crash": {
+              "firstMs": 15664,
+              "canonicalRgbSha256": "3d5bb3dbb196eb5a7613906a67dc0eb86a3cf2e7be4862254b1b3315735012f5"
+            }
+          },
+          "resetsMs": [
+            5307,
+            13308,
+            15238
+          ],
+          "emulatorOutput": "FWUI injected modeled guard exception at 1200 ms\nchip reset at 5307 ms (PR_PWR)\nFWUI injected modeled guard exception at 9200 ms\nchip reset at 13308 ms (PR_PWR)\nchip reset at 15238 ms (PR_PWR)\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 17% of instructions in ISRs = 17.4 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 7% of the run (1490 ms of 20000 ms)\nLED on-fractions: \nSMK-37 pads (3 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 20000 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 1250 frames on stdout + work/audio.raw\nflash: 20 erases / programs\n"
+        }
+      }
+    }
+  },
+  "images": [
+    "guard/elite-first-fault.png",
+    "guard/elite-safe-play-fault.png",
+    "guard/elite-safe-play-post-crash.png",
+    "guard/elite-safe-play-retry.png",
+    "guard/elite-safe-play-safe.png",
+    "guard/pro-first-fault.png",
+    "guard/pro-safe-play-fault.png",
+    "guard/pro-safe-play-post-crash.png",
+    "guard/pro-safe-play-retry.png",
+    "guard/pro-safe-play-safe.png"
+  ]
+}

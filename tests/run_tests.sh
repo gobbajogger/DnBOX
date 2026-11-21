@@ -91,6 +91,7 @@ test_class() {
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
     smk-clip-ble-clear|smk-clip-ble-notify|installer-ctl|ctl-read-framing|installer-backup-snapshot) TEST_CLASS=S ;;
     composed-features|composed-panic-cutover|panic-clear|panic-order|panic-mutants|live-key-epoch|midi-epoch-step|composed-ui-identity|synthone-slot|juno-slot-integration|held-chord-integration|poly-chord-integration|project-rates-companion|composed-smc-panic) TEST_CLASS=G ;;
+    ui-synthone-patch|ui-synthone-frames) TEST_CLASS=G ;;   # SMK host fixtures regenerate build/gen
     rec-live-smk) TEST_CLASS=S ;;   # these read build/gen from host-build (phase 1)
     save-note-quiet|original-release-integration|original-release-ui|freeplay-rate-pads|freeplay-live-keys|synth-bus-mute|storage-warning|freeplay-latency|pads-in-settings|boot-screen|ui-theme) TEST_CLASS=G ;;
     rec-held-duration|rec-endpoint-lifecycle|rec-endpoint-storage|rec-nonforward-guard|pattern-preset-notelock) TEST_CLASS=G ;;
@@ -761,6 +762,11 @@ run synth-param-jump sh tests/host/synth_param_jump_test.sh
 run param-write-sources sh tests/host/param_write_sources_test.sh
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-presentation Pillow; else run chicago-presentation sh tests/host/chicago_presentation_test.sh; fi
 if [ "$PIL_SKIP" = 1 ]; then not_run chicago-readout Pillow; else run chicago-readout sh tests/host/chicago_readout_test.sh; fi
+# Sound supplies these descriptors when the two lanes are integrated.
+if [ -f firmware/src/app/s1_patch.h ]; then
+    run ui-synthone-patch env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_synthone_patch_test.c SMC_UI_OUT="$OUT/ui-synthone-patch" sh tests/host/smc_ui_test.sh
+    run ui-synthone-frames env X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS="${X0X_HOST_DEFS:-} -DX0X_SYNTHONE_PATCH=1" SMC_UI_TEST_FILE=tests/host/ui_synthone_frame_test.c SMC_UI_OUT="$OUT/ui-synthone-frames" sh tests/host/smc_ui_test.sh
+fi
 run ui-drum-glyph sh tests/host/ui_drum_glyph_test.sh
 run ui-808-stage-rows sh tests/host/ui_808_stage_rows_test.sh
 run ui-drum-curve-axes python3 tests/host/ui_drum_curve_axes_test.py

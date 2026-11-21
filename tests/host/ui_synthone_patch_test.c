@@ -180,8 +180,19 @@ int main(void)
             check_readout(ref,s1_patch_at(i),v.physical);
         }
     select_bank(0, ORIGINAL_SOUND_MIAMI);
-    CHECK(!s1_read(PR(R_S1PATCH,T_303,0,2), &fresh));
+    pref_t stale = PR(R_S1PATCH,T_303,0,2);
+    CHECK(!s1_read(stale, &fresh));
+    char number[24], unit[12];
+    pref_value(stale, number, unit);
+    CHECK(!strcmp(number, "--") && !*unit);
+    sound_t switched = proj.sound;
+    pref_set(stale, 0);
+    CHECK(!engine_s1_patch_pending() && !memcmp(&switched, &proj.sound, sizeof switched));
+    CHECK(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
+    CHECK(engine_bass_select_preset(0, ORIGINAL_SOUND_SYNTHONE, 1, &proj.sound) == -1);
+    CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_MIAMI && !engine_bass_preset_pending(0));
     CHECK(engine_s1_patch_read(1, 16, &fresh));
+    CHECK(pref_read_only(PR(R_BPRESET,0,1,0)));
     printf("Synth One INIT F7: %u checks, two owners, 13 controls each, 88 captures\n", checks);
     return 0;
 }

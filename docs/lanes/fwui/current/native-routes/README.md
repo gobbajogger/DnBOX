@@ -53,7 +53,7 @@ revisions after project load. Both first ordinary screens match the matching-own
 control at all 57,600 pixels. Reverting the guard makes the seven-case test
 stop during recovery at the unbound pattern table. [Recovery frames and case results](normal-loop/normal-loop.json)
 
-## Stock Elite and Pro startup
+## Stock Elite and Pro startup at `11bc3f3a`
 
 Twelve independent `fm1-live` shots ran the two linked stock packages at
 360 MHz with strict alignment, timed LCD transfers and the native IRQ and
@@ -84,9 +84,80 @@ python3 tests/ui_inventory/stock_boot_fixture.py --model elite --emulator /path/
   --fwsc /path/to/x0x-smk37-elite.fwsc --elf /path/to/elite/x0x.elf /tmp/elite-recovery
 ```
 
+## Stock panel calibration and updater entry at `11bc3f3a`
+
+The stock Elite and Pro packages also consumed scripted SMK matrix keys and
+quadrature encoders through the timed scanner. All 14 button prompts, all
+seven encoder prompts and the title matched their archived full-frame
+references. A rotated button mapping with alternating encoder directions
+changed only the panel-object sector. A fresh emulator process read the
+exact 32 taught bytes without another flash operation.
+
+A MIDI Device Inquiry returned a device reply over the emulated USB cable.
+The updater request drew the USB updater screen, detached and reset the
+chip. Holding both octave buttons for five seconds exercised the other updater
+screen and reset. Neither path changed flash. The simulator restarts the
+application on PR_PWR reset. The board's mask ROM lies outside this
+measurement. [Per-model frame, storage and USB records](stock-panel.json)
+
+```sh
+python3 tests/ui_inventory/stock_panel_routes.py --model pro --emulator /path/to/fm1-live \
+  --fwsc /path/to/x0x-smk37.fwsc --elf /path/to/pro/x0x.elf /tmp/pro-panel
+```
+
+## Final stock rerun after the Synth One UI change
+
+At `61827a7`, both linked packages repeated the startup, cold restart,
+calibration and updater checks above. The 22 target runs retain the
+application counters, LCD comparisons, USB events and flash
+hashes by model. Each recovery, control and cold restart reached one boot,
+31 UI frames, 89 audio halves and zero recorded crashes. Both models detached
+at 2,104 ms and reset at 2,133 ms on USB request, and reset at 6,637 ms on
+the octave hold. The original package results remain pinned to `11bc3f3a`.
+[Final package and ELF hashes, case results and raw logs](stock-final.json)
+
+The final `ui.c` has no production caller of `strip_value_fit`. Its one
+call to `drum_strip_glyph` passes `DG_LEVEL` directly. Neither stock ELF
+contains a separate symbol for `strip_value_fit` or `dg_tail`. Both retain
+`drum_strip_glyph` (260 B), `draw_wave_glyph` (542 B), `enter_uboot` (98 B)
+and `fm1_cstart` (6,784 B). These source and link results leave the original
+frame inventory counts unchanged. [Source and symbol dispositions](../native-gaps.json)
+
+## Linked exception, safe mode and PLAY retry
+
+At `61827a7`, a test-only emulator fixture delivers two modeled guard exceptions
+to each stock firmware. The unchanged CPU interrupt handler records the actual
+PC, vector, return address and diagnostic registers. Both packages show their
+first full diagnostic at 1,312 ms and their second at 9,312 ms. The firmware
+requests PR_PWR reset after each four-second hold. On the next boot,
+`fm1_cstart` selects safe mode. Pressing PLAY on the modeled SMK matrix
+shows the retry overlay at 15,216 ms, resets at 15,238 ms and shows the
+post-crash screen at 15,664 ms. The boot counter reaches three.
+
+| Linked target | First reset | Second reset | Safe frame | Captured target frames |
+| --- | ---: | ---: | ---: | --- |
+| Elite | 5,307 ms | 13,307 ms | 13,840 ms | [Diagnostic](guard/elite-first-fault.png) · [Safe mode](guard/elite-safe-play-safe.png) · [Retry](guard/elite-safe-play-retry.png) |
+| Pro | 5,307 ms | 13,308 ms | 13,840 ms | [Diagnostic](guard/pro-first-fault.png) · [Safe mode](guard/pro-safe-play-safe.png) · [Retry](guard/pro-safe-play-retry.png) |
+
+Each of the five model-specific target frames matches all 57,600 pixels of
+an independent native rendering with that model's saved crash record. The
+emulator fixture changes only the timing of the modeled peripheral exception.
+Physical fault origin, electrical timing and watchdog behavior require a
+board. [Logs, crash records, complete frame hashes and image paths](stock-guard.json)
+
+For this replay, apply `tests/ui_inventory/stock_guard_injection.patch` to
+the external emulator checkout at `gobbajogger/DnBOX@6b60618c` and
+build `fm1-live` in release mode. Then run the firmware checkout's fixture
+once for each matching package and ELF.
+
+```sh
+python3 tests/ui_inventory/stock_guard_routes.py --model elite --emulator /path/to/patched/fm1-live \
+  --fwsc /path/to/x0x-smk37-elite.fwsc --elf /path/to/elite/x0x.elf /tmp/elite-guard
+```
+
 ## Alternate renderer entry conditions
 
-| Renderer(s) | Current production dispatch and evidence |
+| Renderer(s) | Production dispatch at `11bc3f3a` and evidence |
 | --- | --- |
 | `strip_value_fit`, `dg_tail` | `draw_part_sound` calls the generic matrix widget only for bass on the normal part view. Drum part dispatch calls `draw_drum_voice` in both main bands and the knob strip. In other views the generic knob strip calls `drum_strip_glyph` only for `DG_LEVEL`. The tail specifically requires `DG_DECAY` or `DG_NTAIL`. These paths have no admitted route in that dispatch. |
 | `original_cell_value` | Its sole call is in the generic footer for a bass engine or bank parameter. `describe_pages` emits those targets on the bass part view. The part view returns after `draw_part_sound(2)` before reaching the generic footer. The sequencer preset page uses the distinct `R_BPATSND` parameter. |
@@ -151,7 +222,7 @@ cutoff readout, with zero changes elsewhere. These two cases supplement the
 fixture. The project importer rejects a held-step value above its parameter
 maximum in `project_validate_for`.
 
-The stock Elite and Pro symbol tables retain separate symbols for
+At `11bc3f3a` the stock Elite and Pro symbol tables retain separate symbols for
 `enter_uboot` (98 B), `fm1_cstart` (6,784 B), `draw_wave_glyph` (542 B),
 `strip_value_fit` (276 B) and `dg_tail` (512 B). The admission decisions
 above follow actual dispatch. Inlining and elimination limit what these

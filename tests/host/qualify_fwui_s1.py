@@ -28,7 +28,7 @@ def extract(repo, target, commit, paths):
             files.extractall(target, filter="data")
 
 
-def compose(repo, target, fwui):
+def compose(repo, target, fwui, test_ref):
     # Sound supplies the engine, simulator, stock assets and build definition.
     extract(repo, target, SOUND, ["assets/909", "assets/fonts", "firmware", "host",
             "tools", "experiments/original_synth", "experiments/wobble", "build.sh",
@@ -60,8 +60,9 @@ def compose(repo, target, fwui):
             result = subprocess.check_output(["git", "merge-file", "-p", str(path),
                                               str(old), str(updated)])
             path.write_bytes(result)
-    extract(repo, target, fwui, ["tests/host/smc_ui_test.c", "tests/host/smc_ui_test.sh",
-                                "tests/host/ui_synthone_patch_test.c"])
+    extract(repo, target, fwui, ["tests/host/smc_ui_test.c", "tests/host/smc_ui_test.sh"])
+    extract(repo, target, test_ref, ["tests/host/ui_synthone_patch_test.c",
+                                    "tests/host/ui_synthone_frame_test.c"])
     # Some installations keep these headers outside Git. Use only the loader's
     # authorized exact-size and SHA-256 inputs, and still run the standard verifier.
     manifest = json.loads((target / "experiments/original_synth/EXTERNAL-INPUTS.json").read_text())
@@ -77,7 +78,16 @@ def compose(repo, target, fwui):
     subprocess.run(["python3", "tools/check_original_inputs.py"], cwd=target, check=True)
 
 
-def build_boards(source, dest):
+def fingerprint(board_dir, model):
+    out = board_dir / ("smk37" if model == "pro" else "smk37-elite")
+    package = "x0x-smk37.fwsc" if model == "pro" else "x0x-smk37-elite.fwsc"
+    files = {"app": out / "x0x.bin", "elf": out / "x0x.elf", "loader": out / "loader/ota.bin",
+             "package": board_dir / package}
+    return {name: {"bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            for name, path in files.items()}
+
+
+def build_boards(source, dest, reference):
     results = []
     for enabled in (0, 1):
         for model in ("elite", "pro"):
@@ -94,9 +104,12 @@ def build_boards(source, dest):
                 match = re.search(rf"^{caption}: (-?\d+) B$", contents, re.M)
                 result[key] = int(match.group(1)) if match else None
             if rc == 0:
-                output = source / "build" / ("smk37" if model == "pro" else "smk37-elite")
-                result["elf_sha256"] = hashlib.sha256((output / "x0x.elf").read_bytes()).hexdigest()
-                result["app_sha256"] = hashlib.sha256((output / "x0x.bin").read_bytes()).hexdigest()
+                result["binaries"] = fingerprint(source / "build", model)
+                if reference is not None:
+                    expected = reference["builds"][f"{model}-{enabled}"]
+                    result["binary_match"] = result["binaries"] == expected["binaries"]
+                    result["limits_match"] = all(result[k] == expected[k]
+                                                 for k in ("xip_free", "pool_margin", "pool_reserve"))
             result["fit"] = (rc == 0 and result["xip_free"] is not None and result["xip_free"] >= 1024
                              and result["pool_reserve"] == 8192 and result["pool_margin"] is not None
                              and result["pool_margin"] >= 512)
@@ -105,14 +118,18 @@ def build_boards(source, dest):
         # The next feature setting starts with new objects and headers.
         if (source / "build").exists():
             (source / "build").rename(dest / f"native-output-patch{enabled}")
-    if not all(row["fit"] for row in results):
-        raise SystemExit("Stock model/feature matrix failed. See native.json and model logs.")
+    if not all(row["fit"] and row.get("binary_match", True) and row.get("limits_match", True)
+               for row in results):
+        raise SystemExit("Native fit or binary replay failed. See native.json and model logs.")
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("out", type=Path, help="new directory for composed source and receipts")
     parser.add_argument("--fwui", default="HEAD", help="local FWUI commit containing the editor and test")
+    parser.add_argument("--test-ref", default="HEAD", help="local revision of the two FWUI test fixtures")
+    parser.add_argument("--native-receipt", type=Path,
+                        help="require exact ELF, application, loader, package and memory replay from this receipt")
     parser.add_argument("--boards", action="store_true", help="also link stock Elite and Pro, patch off and on")
     parser.add_argument("--repo", type=Path, default=HERE.parents[1],
                         help="local Git repository containing all three pinned commits")
@@ -123,8 +140,12 @@ def main():
     source.mkdir()
     repo = args.repo.resolve()
     fwui = git(repo, "rev-parse", "--verify", args.fwui + "^{commit}").decode().strip()
-    compose(repo, source, fwui)
-    (dest / "refs.json").write_text(json.dumps({"base": BASE, "fwui": fwui, "sound": SOUND}, indent=2) + "\n")
+    test_ref = git(repo, "rev-parse", "--verify", args.test_ref + "^{commit}").decode().strip()
+    compose(repo, source, fwui, test_ref)
+    refs = {"base": BASE, "fwui": fwui, "sound": SOUND,
+            "test_sources": {p: git(repo,"rev-parse",f"{test_ref}:tests/host/{p}").decode().strip()
+                             for p in ("ui_synthone_patch_test.c","ui_synthone_frame_test.c")}}
+    (dest / "refs.json").write_text(json.dumps(refs, indent=2) + "\n")
     env = dict(os.environ, X0X_SYNTHONE_PATCH="1", X0X_HOST_DEFS="-DX0X_SYNTHONE_PATCH=1",
                SMC_UI_OUT=str(dest / "panel"), SMC_UI_TEST_FILE="tests/host/ui_synthone_patch_test.c")
     for name, command in [
@@ -134,6 +155,14 @@ def main():
         with (dest / (name + ".log")).open("w") as log:
             subprocess.run(command, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT,
                            check=True)
+    frame_log = dest / "frame-review.log"
+    frame_env = dict(env, SMC_UI_OUT=str(dest / "frame-review"),
+                     SMC_UI_TEST_FILE="tests/host/ui_synthone_frame_test.c")
+    with frame_log.open("w") as log:
+        subprocess.run(["sh", "tests/host/smc_ui_test.sh"], cwd=source, env=frame_env,
+                       stdout=log, stderr=subprocess.STDOUT, check=True)
+    if "PASS Synth One F7 frame ownership and geometry" not in frame_log.read_text():
+        raise ValueError(f"frame geometry marker missing in {frame_log}")
     generated_font = (source / "build/gen/felucca_font.h").read_text()
     for face, cap in (("T", (2, 9)), ("XS", (3, 11))):
         row = next(line for line in generated_font.splitlines() if f" FONT_{face} = " in line)
@@ -170,8 +199,9 @@ def main():
     manifest = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in pngs}
     (dest / "frames.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"{len(manifest)} captured 240x240 frames in {dest / 'panel'}")
-    if args.boards:
-        build_boards(source, dest)
+    if args.boards or args.native_receipt:
+        reference = json.loads(args.native_receipt.read_text()) if args.native_receipt else None
+        build_boards(source, dest, reference)
 
 
 if __name__ == "__main__":
