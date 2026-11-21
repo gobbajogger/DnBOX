@@ -74,4 +74,5 @@ int juno6_read_envelope(const juno6_t *, juno6_envelope_snapshot *);
 int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
 int juno6_can_edit_amp2(const juno6_t *);
 void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
+void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
 #endif

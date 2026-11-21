@@ -1,5 +1,9 @@
 # Sound lane
 
+## Ordinary Elite and Pro engine qualification, 2026-11-21
+
+PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) carries the shipping 808 release, 909 cymbal, Chicago gain, Synth One retrigger, Juno voice reuse and SMK startup corrections based on sound PR #973. Both boards have native DAC and guest activity measurements for every engine. The [per-engine report](../sound/engine-qualification.md) distinguishes original-render fidelity, native activity and timing, including unavailable original captures.
+
 ## Integrated engine-only factory selection, 2026-11-21
 
 The opt-in firmware accepts a decoded factory row through `engine_superj6_factory_load`. It preserves the first authored binary32 word, resolves each absent PWM control independently to positive zero and applies both layers, AMP2 and master together at the audio boundary. The Linux integration test passed 32 synthetic selections across both owners, 288 authored words and 64 defaults, with invalid, held and superseded requests covered. The focused oscillator comparison reproduced all 298 synthetic probes and eight measurements from the authored PWM String Pad layer settings. The 14 complete S4 records and the original Linux comparison packet are still missing from this checkout. Only six oscillator fields were recovered for PWM String Pad. [Implementation and focused test](../sound/superj6-ab.md#loading-decoded-controls-in-the-engine-only-build)

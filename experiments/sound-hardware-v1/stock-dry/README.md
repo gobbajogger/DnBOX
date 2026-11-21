@@ -15,3 +15,22 @@ tar -xzf part-gain-proof.tar.gz -C /tmp
 ```
 
 The part-level packet contains the original chord producer, a verifier against the actual firmware part, and eight measured note/chord scenes. Two chords are bit-identical to the original singles summed at unity. The fixed one-sixth multiplier failed all eight scenes. The correctly summed part passed eight. Full application FX, factory program binding and the device callback depend on additional work.
+
+
+## Immediate note retriggers
+
+A synth can receive note-off and note-on for the same pitch before rendering the next sample. At velocity 100, the original plays a new attack after this pair. The shipping INIT previously continued sustaining. The production voice now advances its amplitude and filter envelopes once when the gate closes. Both retain their levels, and the oscillator phase and filter delay retain their histories.
+
+The comparison uses the original dry scheduler and the actual firmware part at 44.1 kHz. For each pitch it renders two takes, one held continuously and one with both events at frame 19,200. The three original held-note PCM hashes match the earlier part-level recordings. Subtracting the held take isolates the sound of the retrigger. Before the change all three firmware difference waves were silent. Errors below compare the firmware and original difference waves during the next 8,192 samples, at their original gain and timing.
+
+| MIDI note | Peak change in original | Peak change in firmware | Relative waveform error |
+| ---: | ---: | ---: | ---: |
+| 36 | 0.031088 | 0.031088 | −45.99 dB |
+| 60 | 0.025957 | 0.025952 | −26.69 dB |
+| 84 | 0.032912 | 0.032941 | −41.21 dB |
+
+All eight established INIT note/chord scenes also pass their original 1 dB level and 3 dB spectral limits. Their worst absolute level error is 0.0202 dB and their worst spectral error is 0.3302 dB. These tests cover dry INIT. The factory graph and effects use separate comparisons.
+
+The [84 three-note dry comparisons](retrigger-dry.json.gz) also passed against original PCM independently regenerated from the pinned source. All 84 reference SHA-256 digests matched the recorded references at 44.1 kHz. At unity gain, the 180 static notes had worst absolute level and spectral errors of 0.470 and 0.416 dB. The corresponding maxima for the 72 filter-modulation notes were 0.019 and 1.111 dB. The existing `qualify.py` protocol above reproduces the per-case filters, notes and metrics.
+
+Run `python3 experiments/sound-hardware-v1/stock-dry/compare_retrigger.py /tmp/s1-retrigger` with a fresh output directory. It restores the pinned source, verifies the held-note references and writes the full PCM captures and per-pitch results. To check the negative control, add `--candidate-tree` pointing to a checkout at `63278e3322aefa89b25f129ca2fccc35ef3b3b3d`.

@@ -128,6 +128,20 @@ int main(void)
     }
     CHECK(opens == 2 && owner[0] != owner[1]);
     check_negative();
+    /* Both selected stock presets have an audible PWM LFO. An individual
+     * waveform edit preserves it, and a full factory load supersedes it. */
+    for (unsigned v = 0; v < 2; ++v) {
+        float depth = owner[v]->core.layer[0].params.lfo_pwm_depth;
+        CHECK(depth > 0.f);
+        engine_superj6_pwm pwm = {.amount = .5f, .enable = 1.f};
+        CHECK(engine_superj6_pre_note_wave(v, 0, 1.f, &pwm));
+        boundary();
+        CHECK(owner[v]->core.layer[0].params.lfo_pwm_depth == depth);
+        CHECK(engine_superj6_factory_load(v, &full));
+        boundary();
+        for (unsigned layer = 0; layer < 2; ++layer)
+            CHECK(owner[v]->core.layer[layer].params.lfo_pwm_depth == 0.f);
+    }
     unsigned authored = 0;
     for (unsigned presence = 0; presence < 16; ++presence) {
         sj6_factory_row row = synthetic(presence);

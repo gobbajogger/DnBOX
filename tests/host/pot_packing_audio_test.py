@@ -34,6 +34,7 @@ def main():
             shadow = out / 'shadow' / 'dsp'
             gen.mkdir(parents=True)
             shadow.mkdir(parents=True)
+            (shadow.parent / "x0x_cold.h").write_bytes((dsp_dir.parent / "x0x_cold.h").read_bytes())
             for hdr in dsp_dir.glob('*.h'):
                 if kind == 'baseline':
                     try:
@@ -53,10 +54,13 @@ def main():
             sys.argv = [str(script), str(gen / 'x0x_drum_samples.h')]
             ns['main']()
             (shadow / 'x0x_drum_tables.h').write_bytes((gen / 'x0x_drum_tables.h').read_bytes())
-            (shadow / 'x0x_drum_samples.h').write_bytes((gen / 'x0x_drum_samples.h').read_bytes())
+            # Keep the historical cymbal audio fixed across the table-packing comparison.
+            (shadow / "x0x_drum_samples.h").write_bytes(
+                (tmp / "baseline" / "gen" / "x0x_drum_samples.h").read_bytes())
 
             objects = []
-            for name in ('drum909', 'fxbus'):
+            units = ["drum909", "fxbus"] if kind == "baseline" else ["drum909", "fxbus", "x0x_param"]
+            for name in units:
                 path = 'firmware/src/dsp/' + name + '.c'
                 src = out / (name + '.c')
                 src.write_bytes(old(path) if kind == 'baseline' else (ROOT / path).read_bytes())
