@@ -64,6 +64,12 @@
       "archive_sha256": "a5d0f0519bc14f8f5f1283adb8f9fd6134ece64c03fbac6944f05140e92386b8",
       "archive": "https://github.com/gobbajogger/DnBOX/blob/9e7f92fe053f76cd79919dcfafdd974bdd229a73/evidence/fwui-9dd6f2df/qualification.tar.xz",
       "published_result": "https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7062263095"
+    },
+    "primary_evidence_archive": {
+      "path": "focused-9dd6f2df.tar.xz",
+      "bytes": 11300,
+      "files": 26,
+      "sha256": "4c682bdbe2fbf9f303af425acff0e5237ac45c170102cb8c8f2001299add779c"
     }
   },
   "stock": {
@@ -203,7 +209,9 @@
       "copy-semantics",
       "home-globe-part"
     ],
-    "status_at_ledger_update": "running",
-    "terminal_result": null
+    "status_at_ledger_update": "Unfiltered run interrupted after 85 results. Named recovery started and terminal accounting is pending.",
+    "terminal_result": null,
+    "f5_status": "PASS",
+    "f5_and_registry_evidence": "combined-host-results.json"
   }
 }
