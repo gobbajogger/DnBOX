@@ -20,7 +20,9 @@ typedef struct {
 } s1_dry_controls;
 
 typedef struct {
-    s1_dry_controls controls;
+    /* The envelopes consume the prepared retentions and sustain below. Keep
+     * their physical ADSR inputs only in the editable patch. */
+    float cutoff_hz, resonance, filter_depth, oscillator1_level, balance;
     dnbx_s1_envelope_params amp, filter;
     float cached_cutoff_hz, pole_retention, feedback;
 } s1_dry_prepared;

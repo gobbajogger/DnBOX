@@ -116,7 +116,7 @@ static int initialize(original_chicago_backend *s, unsigned factory,
     s->coefficient_cache.index = UINT32_MAX;
     if (!original_chicago_voice_compile(&s->controls, &s->program) ||
         !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_cached,
-            &s->coefficient_cache, original_pitch44100)) return s->status;
+            &s->coefficient_cache, ORIGINAL_FACTORY_PITCH_44100)) return s->status;
 
     original_chicago_voice_seed seed;
     memset(&seed, 0, sizeof seed);

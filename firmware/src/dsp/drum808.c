@@ -76,7 +76,12 @@
 /* expm1 with full relative accuracy near 0, where 1 - exp(x) is what matters */
 __attribute__((noinline)) static float d8_expm1(float x)
 {
-    if (x > -0.5f && x < 0.5f) {
+    /* From the smallest normal through 2^-25, the last Horner addition
+     * rounds to 1 in binary32. Subnormals retain the original arithmetic. */
+    fm_bits_t mag = { .f = fm_fabsf(x) };
+    if (mag.u - 0x00800000u <= 0x33000000u - 0x00800000u)
+        return x;
+    if (mag.f < 0.5f) {
         float p = 1.0f / 362880.0f;
         p = p * x + 1.0f / 40320.0f;
         p = p * x + 1.0f / 5040.0f;
@@ -459,14 +464,14 @@ static void bd_trigger(d8_bd_t *v, float hz, float decay_k, float tone, float at
     v->coef_age = 0;
 }
 
-D8_TICK float bd_tick(d8_bd_t *v)
+D8_TICK float bd_tick(d8_bd_t *v, int pulse_idle)
 {
     float gate = 0.0f, vplus, mag, x, y, click, out;
-    if (D8_UNLIKELY(v->gate > 0)) {
+    if (!pulse_idle && D8_UNLIKELY(v->gate > 0)) {
         gate = v->accent_v;
         v->gate--;
     }
-    vplus = shaper(&v->shp, gate);
+    vplus = pulse_idle ? 0.0f : shaper(&v->shp, gate);
     v->atk_env *= D8_BD_ATK_C;
     if (v->atk_env < 1e-6f)
         v->atk_env = 0.0f;
@@ -535,14 +540,14 @@ static void sd_trigger(d8_sd_t *v, float ratio, float decay01, float tone01, flo
     v->quiet = 0;
 }
 
-D8_TICK float sd_tick(d8_sd_t *v)
+D8_TICK float sd_tick(d8_sd_t *v, int pulse_idle)
 {
     float gate = 0.0f, vplus, s1, s2, shells, n, vca, noise, out;
-    if (D8_UNLIKELY(v->gate > 0)) {
+    if (!pulse_idle && D8_UNLIKELY(v->gate > 0)) {
         gate = v->accent_v;
         v->gate--;
     }
-    vplus = shaper(&v->shp, gate);
+    vplus = pulse_idle ? 0.0f : shaper(&v->shp, gate);
     s1 = bp_run(&v->bt1, vplus * SD_G1);
     s2 = bp_run(&v->bt2, vplus * SD_G2);
     shells = opamp_clip(s1 * v->mix1 + s2 * v->mix2, 40.0f, 1.0f / 40.0f);
@@ -597,14 +602,14 @@ __attribute__((noinline)) static void tom_trigger(d8_tom_t *v, int mode, float h
     v->quiet = 0;
 }
 
-D8_TICK float tom_tick(d8_tom_t *v)
+D8_TICK float tom_tick(d8_tom_t *v, int pulse_idle)
 {
     float gate = 0.0f, strike, skin = 0.0f, x, y, out;
-    if (D8_UNLIKELY(v->gate > 0)) {
+    if (!pulse_idle && D8_UNLIKELY(v->gate > 0)) {
         gate = v->accent_v;
         v->gate--;
     }
-    strike = shaper(&v->shp, gate) * 4.0f * (v->mode == 0 ? 1.0f : 0.80f);
+    strike = (pulse_idle ? 0.0f : shaper(&v->shp, gate)) * 4.0f * (v->mode == 0 ? 1.0f : 0.80f);
     v->strike_lp_z += (strike - v->strike_lp_z) * v->strike_lp_c;
     strike = v->strike_lp_z;
     if (v->skin_env > 1e-5f) {
@@ -2297,11 +2302,27 @@ static __attribute__((noinline)) int voice_run(drum808_t *d, int l, float *buf, 
 {
     int i;
     switch (l) {
-    case L_BD: for (i = 0; i < m && d->bd.active; i++) buf[i] = bd_tick(&d->bd); break;
-    case L_SD: for (i = 0; i < m && d->sd.active; i++) buf[i] = sd_tick(&d->sd); break;
+    /* Once both the trigger and pulse-shaper state are zero, their
+     * output stays +0 for every remaining sample in this span. */
+    case L_BD: {
+        d8_bd_t *v = &d->bd;
+        const int pulse_idle = v->gate <= 0 && v->shp == 0.0f;
+        if (pulse_idle) v->shp = 0.0f;
+        for (i = 0; i < m && v->active; i++) buf[i] = bd_tick(v, pulse_idle);
+        break;
+    }
+    case L_SD: {
+        d8_sd_t *v = &d->sd;
+        const int pulse_idle = v->gate <= 0 && v->shp == 0.0f;
+        if (pulse_idle) v->shp = 0.0f;
+        for (i = 0; i < m && v->active; i++) buf[i] = sd_tick(v, pulse_idle);
+        break;
+    }
     case L_T0: case L_T1: case L_T2: {
         d8_tom_t *t = &d->tom[l - L_T0];
-        for (i = 0; i < m && t->active; i++) buf[i] = tom_tick(t);
+        const int pulse_idle = t->gate <= 0 && t->shp == 0.0f;
+        if (pulse_idle) t->shp = 0.0f;
+        for (i = 0; i < m && t->active; i++) buf[i] = tom_tick(t, pulse_idle);
         break;
     }
     case L_RS: for (i = 0; i < m && d->rs.active; i++) buf[i] = rs_tick(&d->rs); break;

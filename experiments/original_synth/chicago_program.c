@@ -51,6 +51,8 @@ int original_chicago_program_init(original_chicago_program *p,unsigned factory){
  for(unsigned i=0;i<22;i++){
 #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY
   float x=original_chicago_factory_macro[factory][i];
+#elif defined(ORIGINAL_PROGRAM_VALUES_CHICAGO)
+  float x=compact_chicago_factory_value(factory,i);
 #else
   unsigned bit=(factory*22+i)*9,byte=bit>>3;
   unsigned code=((unsigned)original_chicago_factory_codes[byte]|((unsigned)original_chicago_factory_codes[byte+1]<<8))>>(bit&7);

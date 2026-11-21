@@ -556,6 +556,20 @@ X0X_COLD void drum909_init(drum909_t *d)
 /* ===================================================================== */
 /* Triggers (er99_engine_trigger and the voices' *_trigger)                */
 /* ===================================================================== */
+/* A completed setup retains all coefficients for this ramp. Ticks change
+ * only its current values and remaining count. A changed parameter falls
+ * through to the same complete ramp initialization. */
+__attribute__((noinline)) static void d9_retrigger_ramp(d9_env_t *e, float start, float end, float samples)
+{
+    if (start == e->v0 && end == e->v1 && samples == e->t1 && samples > 1.0f) {
+        e->v = e->cur = start;
+        e->left = e->k;
+        return;
+    }
+    d9_env_set(e, start);
+    d9_env_exp(e, end, samples);
+}
+
 static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
 {
     if (v->click_stale && v->mute > 0)
@@ -573,15 +587,13 @@ static void d9_bt_trigger(d9_bt_t *v, int bd, float accent)
         v->bd_phold = (int32_t)(D9_BD_PHOLD_MS * D9_MS);
         d9_env_set(&v->pitch, v->bd_base);
     } else {
-        d9_env_set(&v->pitch, v->tune * v->sweep_depth);
-        d9_env_exp(&v->pitch, v->tune, v->sweep_time * D9_MS);
+        d9_retrigger_ramp(&v->pitch, v->tune * v->sweep_depth, v->tune, v->sweep_time * D9_MS);
     }
     d9_env_set(&v->amp, 1.0f);
     v->amp_hold_left = (int32_t)(v->amp_hold * D9_MS);
     if (v->amp_hold_left <= 0)
         d9_env_exp(&v->amp, 0.00001f, v->decay * D9_MS);
-    d9_env_set(&v->click_env, 1.0f);
-    d9_env_exp(&v->click_env, 0.00001f, 3.0f * D9_MS);
+    d9_retrigger_ramp(&v->click_env, 1.0f, 0.00001f, 3.0f * D9_MS);
     if (v->snappy > 0.0f) {
         d9_env_set(&v->noise_env, 1.0f);
         v->noise_hold = (int32_t)(24.0f * D9_MS);
@@ -601,18 +613,13 @@ __attribute__((noinline)) static void d9_tom_trigger(d9_tom_t *t, const d9_bt_t 
     for (int i = 0; i < 3; ++i)
         t->ph[i] = D9_PH_QUARTER;
     d9_biquad_reset(&t->dc_block);
-    d9_env_set(&t->pitch, p->tune * p->sweep_depth);
-    d9_env_exp(&t->pitch, p->tune, p->sweep_time * D9_MS);
+    d9_retrigger_ramp(&t->pitch, p->tune * p->sweep_depth, p->tune, p->sweep_time * D9_MS);
     const float d1 = p->decay;
-    d9_env_set(&t->env[0], 1.0f);
-    d9_env_exp(&t->env[0], 0.00001f, d1 * D9_MS);
-    d9_env_set(&t->env[1], 0.55f);
-    d9_env_exp(&t->env[1], 0.00001f, 110.0f * D9_MS);
-    d9_env_set(&t->env[2], 0.45f);
-    d9_env_exp(&t->env[2], 0.00001f, 70.0f * D9_MS);
+    d9_retrigger_ramp(&t->env[0], 1.0f, 0.00001f, d1 * D9_MS);
+    d9_retrigger_ramp(&t->env[1], 0.55f, 0.00001f, 110.0f * D9_MS);
+    d9_retrigger_ramp(&t->env[2], 0.45f, 0.00001f, 70.0f * D9_MS);
     t->noise_level = p->attack;
-    d9_env_set(&t->noise_env, 1.0f);
-    d9_env_exp(&t->noise_env, 0.00001f, 8.0f * D9_MS);
+    d9_retrigger_ramp(&t->noise_env, 1.0f, 0.00001f, 8.0f * D9_MS);
     t->out_gain = p->level * accent;
     t->mute = d9_ceil((d1 + 60.0f) * D9_MS);
 }
@@ -660,8 +667,7 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
         }
         r->noise_mix = 0.35f;
         r->decay = 200.0f;
-        d9_env_set(&r->amp, 1.0f);
-        d9_env_exp(&r->amp, 0.00001f, r->decay * D9_MS);
+        d9_retrigger_ramp(&r->amp, 1.0f, 0.00001f, r->decay * D9_MS);
         r->impulse = 2;
         r->accent = vgain;
         r->mute = d9_ceil((r->decay + 20.0f) * D9_MS);
@@ -684,8 +690,7 @@ void drum909_trigger(drum909_t *d, int voice, float vel)
             d9_env_exp(&o->out, 0.00001f, 3.0f * 0.001f * D9_SR);
             o->mute = d9_ceil(6.0f * 0.001f * D9_SR);
         }
-        d9_env_set(&s->out, s->volume * vgain);
-        d9_env_exp(&s->out, 0.00001f, s->decay * 0.001f * D9_SR);
+        d9_retrigger_ramp(&s->out, s->volume * vgain, 0.00001f, s->decay * 0.001f * D9_SR);
         s->pos = 0;
         s->frac = 0;
         s->dk = 0;                                 /* decode again from the start */

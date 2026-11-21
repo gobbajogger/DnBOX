@@ -240,8 +240,7 @@ static int tail(original_chicago_voice *s,const original_chicago_voice_controls 
  if(!s->prepared.ready||memcmp(&s->prepared.controls,&oc,sizeof oc)){if(!original_oscillator_prepare(&s->prepared,&oc))return 0;s->wave_preparations++;}
  float ng=clamp(c->noise+0.0f,0,1);ng=ng*ng+original_math_float(0x3727c5ac);stage(&s->noise_gain,ng,1.0f/(float)D);
  if(!mp4_prepare(s,c,t,D,kick))return 0;
- original_voice_gain_controls gain;memset(&gain,0,sizeof gain);memcpy(gain.level,c->gain.level,sizeof gain.level);gain.output=c->gain.output;gain.pan=c->gain.pan;gain.curve=c->gain.curve;gain.unison_flag=c->gain.unison_flag;gain.ms20=c->gain.ms20;gain.envelope=s->vca.level;gain.mod_gain=s->mod_gain;gain.velocity=s->velocity;gain.filter_gain=s->filter_postgain;
- if(!original_voice_gain_prepare(&s->gain,&gain,s->activation,D))return 0;
+ if(!original_voice_gain_prepare_chicago(&s->gain,&c->gain,s->activation,D,s->vca.level,s->mod_gain,s->velocity,s->filter_postgain))return 0;
  for(unsigned i=0;i<4;i++)if(s->activation[i]>0)s->activation[i]--;
  s->last_duration=D;s->control_updates++;return 1;
 }

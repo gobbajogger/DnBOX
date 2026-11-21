@@ -425,6 +425,10 @@ def app_compile_commands(flags, original_synth, wobble):
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
         unit_flags = [*o2, *ORIGINAL_SYNTH_FLAGS] if u == "app/engine.c" else o2
+        # Keep the sequencer and its event dispatch compact in the shared
+        # flash cache on a busy audio half.
+        if u == "seq/sequencer.c":
+            unit_flags = flags
         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
             unit_flags = [f for f in unit_flags if f != "-flto"]
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))

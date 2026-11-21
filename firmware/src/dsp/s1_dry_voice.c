@@ -6,7 +6,7 @@
 /* The oscillator and cascaded low-pass stages derive from DnBOX primitives.
  * The response calibration uses only original input/output observations. */
 _Static_assert(sizeof(float) == 4, "binary32 storage required");
-_Static_assert(sizeof(s1_dry_voice) == 156, "bounded single-voice state changed");
+_Static_assert(sizeof(s1_dry_voice) == 124, "bounded single-voice state changed");
 
 static int finite_float(float x)
 {
@@ -52,7 +52,7 @@ static void prepare_filter(s1_dry_prepared *p, float cutoff_hz)
     float step = x * (1.56874466f + x * (-1.73140822f +
                  x * (1.55879259f + x * (-0.711601815f + x * 0.118475673f))));
     p->pole_retention = 1.0f - step;
-    p->feedback = p->controls.resonance *
+    p->feedback = p->resonance *
                   (3.98720139f + x * (3.68178143f - x * 3.93633599f));
     p->cached_cutoff_hz = cutoff_hz;
 }
@@ -83,7 +83,11 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
         !range(controls->oscillator1_level, 0.0f, 1.0f) ||
         !range(controls->balance, 0.0f, 1.0f)) return S1_DRY_RANGE;
     s1_dry_prepared next = {0};
-    next.controls = *controls;
+    next.cutoff_hz = controls->cutoff_hz;
+    next.resonance = controls->resonance;
+    next.filter_depth = controls->filter_depth;
+    next.oscillator1_level = controls->oscillator1_level;
+    next.balance = controls->balance;
     prepare_adsr(&next.amp, &controls->amp);
     prepare_adsr(&next.filter, &controls->filter);
     prepare_filter(&next, s1_dry_cutoff(controls->cutoff_hz,
@@ -152,7 +156,7 @@ void s1_dry_begin_block(s1_dry_voice *voice)
 
 static void update_cutoff(s1_dry_voice *voice, float filter)
 {
-    const s1_dry_controls *p = &voice->prepared.controls;
+    const s1_dry_prepared *p = &voice->prepared;
     float cutoff_hz = s1_dry_cutoff(p->cutoff_hz, p->filter_depth, filter);
     /* Update only when the filter envelope moves the effective cutoff. */
     if (cutoff_hz != voice->prepared.cached_cutoff_hz)
@@ -180,7 +184,7 @@ static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, fl
 
 static float component_gain(const s1_dry_voice *voice)
 {
-    const s1_dry_controls *p = &voice->prepared.controls;
+    const s1_dry_prepared *p = &voice->prepared;
     return (1.0f - p->balance) * p->oscillator1_level;
 }
 
@@ -224,7 +228,7 @@ void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames)
     float amp_term = envelope_term(&voice->amp, &voice->prepared.amp);
     float filter_term = envelope_term(&voice->filter, &voice->prepared.filter);
     const float gain = component_gain(voice);
-    const int modulated = voice->prepared.controls.filter_depth != 0.0f;
+    const int modulated = voice->prepared.filter_depth != 0.0f;
     for (unsigned i = 1; i < frames; ++i) {
         float amp = advance_envelope(&voice->amp, &voice->prepared.amp, &amp_term);
         float filter = advance_envelope(&voice->filter, &voice->prepared.filter, &filter_term);

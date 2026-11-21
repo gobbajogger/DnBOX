@@ -51,6 +51,72 @@ out+='static inline float compact_miami_factory_value(unsigned f,unsigned p){ret
 out+='static inline float compact_miami_base_value(unsigned i){return compact_program_value(compact_miami_base_codes[i]);}\n'
 out+='static inline const char *compact_miami_factory_name(unsigned f){return compact_miami_names+compact_miami_name_offsets[f];}\n#endif\n'
 out+='#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO\n'+arr('uint8_t','compact_chicago_base_codes',code(cb))+arr('uint8_t','compact_chicago_native_codes',chicago_native)+'static inline float compact_chicago_base_value(unsigned i){return compact_program_value(compact_chicago_base_codes[i]);}\n#endif\n'
+# Each row stores the authored macro dictionary indices. A small per-column
+# palette pays for itself only when its narrower field saves more than the
+# palette costs. Reuse the existing Miami/native dictionary for shared words.
+def chicago_factory_header():
+    source = s['chicago_program_private.h']
+    original = values('chicago_program_private.h', 'original_chicago_factory_dictionary', 309)
+    codes = re.search(r'original_chicago_factory_codes\[2005\]=\{(.*?)\};', source, re.S)
+    packed = int.from_bytes(bytes(map(int, codes[1].split(','))), 'little')
+    words = [original[(packed >> (9 * i)) & 511] for i in range(81 * 22)]
+    extra = sorted(set(words) - set(dictionary))
+    all_words = dictionary + extra
+    indices = {word: i for i, word in enumerate(all_words)}
+    assert len(all_words) <= 512
+    # The four consecutive high bytes of the extra words are implicit in their
+    # sorted indices. Store the original three low bytes without rounding.
+    high = sorted(set(word >> 24 for word in extra))
+    assert high == list(range(high[0], high[-1] + 1))
+    limits = [sum(word >> 24 < group for word in extra) for group in high[1:]]
+    high_byte = str(high[0]) + ''.join(f' + (i >= {limit}u)' for limit in limits)
+    payload = [byte for word in extra for byte in word.to_bytes(4, 'little')[:3]]
+    palettes, fields, rows = [], [], [0] * 81
+    shift = 0
+    for column in range(22):
+        values_at_column = [indices[word] for word in words[column::22]]
+        palette = sorted(set(values_at_column))
+        width = (len(palette) - 1).bit_length()
+        if 81 * (9 - width) > 16 * len(palette):
+            indices_at_column = [palette.index(code) for code in values_at_column]
+            offset = len(palettes)
+            palettes.extend(palette)
+        else:
+            width, offset, indices_at_column = 9, 0, values_at_column
+        fields.append((shift, width, offset))
+        for row, code in enumerate(indices_at_column):
+            rows[row] |= code << shift
+        shift += width
+    bitstream = sum(row << (number * shift) for number, row in enumerate(rows))
+    # The decoder reads two bytes even for the final zero-width field.
+    packed_rows = list(bitstream.to_bytes((81 * shift + 7) // 8, 'little')) + [0, 0]
+    assert shift < 256 and len(palettes) < 256
+    section = '#if defined(ORIGINAL_PROGRAM_VALUES_CHICAGO)\n'
+    section += arr('uint8_t', 'compact_chicago_factory_low', payload)
+    section += arr('uint16_t', 'compact_chicago_factory_palette', palettes)
+    section += arr('uint8_t', 'compact_chicago_factory_rows', packed_rows)
+    section += 'static const struct { uint8_t shift, width, offset; } compact_chicago_field[22]={\n'
+    section += ''.join(' {' + ','.join(map(str, field)) + '},\n' for field in fields) + '};\n'
+    section += f'''static inline float compact_chicago_factory_value(unsigned factory, unsigned parameter)
+{{
+    unsigned bit = factory * {shift}u + compact_chicago_field[parameter].shift;
+    unsigned width = compact_chicago_field[parameter].width;
+    const uint8_t *src = compact_chicago_factory_rows + bit / 8;
+    unsigned code = ((src[0] | ((unsigned)src[1] << 8)) >> (bit & 7)) & ((1u << width) - 1);
+    if (width < 9) code = compact_chicago_factory_palette[compact_chicago_field[parameter].offset + code];
+    if (code < {len(dictionary)}u) return compact_program_value(code);
+    unsigned i = code - {len(dictionary)}u;
+    const uint8_t *low = compact_chicago_factory_low + 3 * i;
+    uint32_t high = {high_byte};
+    union {{ uint32_t u; float f; }} value;
+    value.u = (high << 24) | ((uint32_t)low[2] << 16) | ((uint32_t)low[1] << 8) | low[0];
+    return value.f;
+}}
+#endif
+'''
+    return section
+
+out += chicago_factory_header()
 if len(sys.argv)>2:
  raise SystemExit('usage: gen_program_values_compact.py [OUTPUT_HEADER]')
 destination=Path(sys.argv[1]) if len(sys.argv)==2 else D/'program_values_compact.h'

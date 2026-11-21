@@ -42,7 +42,7 @@ int original_miami_backend_init(original_miami_backend *s, unsigned factory, flo
     const original_ms20_tables filter = {
         original_miami_a44100, original_miami_b44100, original_miami_r, original_miami_cap
     };
-    if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, original_pitch44100) ||
+    if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, ORIGINAL_FACTORY_PITCH_44100) ||
         !original_chicago_allocator_bind(&s->allocator, &s->keys, s->held, s->records,
             ORIGINAL_MIAMI_BACKEND_VOICES, ORIGINAL_MIAMI_BACKEND_VOICES,
             ORIGINAL_MIAMI_BACKEND_VOICES, 1, 0, 1)) return 0;

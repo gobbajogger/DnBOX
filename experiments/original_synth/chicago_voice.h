@@ -29,10 +29,6 @@ typedef struct {
  float fine_tune[4];
 } original_chicago_voice_pitch_controls;
 typedef struct {
- float level[4],output,pan;
- uint8_t curve,unison_flag,ms20;
-} original_chicago_voice_gain_controls;
-typedef struct {
  original_chicago_voice_pitch_controls pitch;
  original_chicago_voice_gain_controls gain;
  original_chicago_routing routing;
