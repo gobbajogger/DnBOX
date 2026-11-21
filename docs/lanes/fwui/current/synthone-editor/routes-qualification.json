@@ -1,15 +1,15 @@
 {
   "composition": {
     "base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
-    "fwui": "3f07d97956355e0412b67679819546f2fd6f6df0",
+    "fwui": "ac63b270ed52ef728750afc9edd1f173cb0298db",
     "sound": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
     "test_sources": {
       "ui_synthone_patch_test.c": "27c9ce50e46250036ff1b1c178fdf8725302addc",
       "ui_synthone_frame_test.c": "931836f0a6dfa58b09a637c3aec6ad8c43b6a10a"
     }
   },
-  "published_equivalent_fwui_commit": "b7b91c8b78f572bf69dacc74eabc97ff92879187",
-  "firmware_ui_blob": "0a06855a111284ad2d67cf3f0022ddbac84b5106",
+  "published_equivalent_fwui_commit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmware_ui_blob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
   "host_results": {
     "sound-provider": [
       "Synth One INIT patch: 13 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS",

@@ -14,7 +14,7 @@
   "reportSHA256": "559859ac16f1b15edc724dff0face39726602dd2ad20ecb2d733a91cb6ece61d",
   "frames": 1712,
   "stableStateIDs": 1712,
-  "totalBytes": 2281292,
+  "totalBytes": 2515580,
   "maxPartBytes": 494660,
   "archives": [
     {
@@ -2068,9 +2068,9 @@
     },
     {
       "path": "sound-bank-window.tar.xz",
-      "bytes": 209076,
-      "sha256": "a65c9b058a1010ce5d6ff5f773ed6d94a2048a8e01ccfa03d3b246742a8faaf2",
-      "frames": 253,
+      "bytes": 443364,
+      "sha256": "b7cfda03176cac827f8c20805f77aa9e523ed65d3b04930e8a86752a948f8549",
+      "frames": 528,
       "scope": "Current stock SOUND banks, synth selectors and parameter lists. receipt.json records the final source inputs, predecessor and replacement RGB digests, and measured changed-pixel counts."
     }
   ],

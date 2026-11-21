@@ -20,9 +20,9 @@ The last bank keeps the previous rows visible and editable. Two- and three-contr
 | Firmware source | Elite XIP free | Pro XIP free | Pool margin on both |
 |---|---:|---:|---:|
 | Starting PR head `3e67b59c` | 4,056 B | 4,064 B | 780 B |
-| Stock firmware tree `506f3452` | 1,168 B | 1,176 B | 780 B |
-| Same tree with Sound, patch off | 6,192 B | 6,200 B | 780 B |
-| Same tree with Sound, patch on | 2,656 B | 2,664 B | 780 B |
+| Stock firmware tree `3a81c6fe` | 1,148 B | 1,156 B | 780 B |
+| Same tree with Sound, patch off | 6,172 B | 6,180 B | 780 B |
+| Previous `506f3452` tree with Sound, patch on | 2,656 B | 2,664 B | 780 B |
 
 The stock thresholds require at least 1,024 B free XIP and 512 B above the 8,192 B pool reserve. Sharing Chicago and Miami’s identical 128-word pitch table recovered 512 B. The six model/configuration links each produced an ELF, package and application map. [All six links and hashes](fwui/current/route-native/fit.json)
 
@@ -32,16 +32,16 @@ The pitch comparison covered standalone and combined linkage and all 128 words. 
 
 | Item | Status | Evidence |
 |---|---|---|
-| F1 · R22 and shared glyphs | Independent review in progress | The catalog includes current ordinary and supplemental screens, both bass owners, startup, calibration and guard routes. Remaining ordinary menu slabs are under independent review. [Screen guide](fwui/screens/README.md) |
-| F2 · Geometry | Ordinary walk passed on firmware tree `506f3452` | 1,528 screens, 19,593 content checks and 249 glyph checks passed. The source-qualified supplemental and persisted runs have separate receipts. [Geometry harness](../../tests/ui_geometry/run.py) |
-| F3 · Stock fit | Both stock links passed on firmware tree `506f3452` | Both stock images meet the XIP and pool limits above. [Stock package fingerprints](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) |
+| F1 · R22 and shared glyphs | PASS | The independent reviewer checked all reached menu controls, both bass owners, contextual help, empty musical data and startup routes. The current catalog distinguishes 1,942 active records and two historical placeholders. [Screen guide](fwui/screens/README.md) · [Independent review](fwui/current/panel-routes/independent-review.md) |
+| F2 · Geometry | PASS | The ordinary walk checked 1,528 complete screens, 43,442 text masks, 19,593 content assertions and 249 glyphs. The additional 162 states and 20 saved edits passed 3,336 and 376 masks. Every registered detector control detected its intended mutation. [Geometry and RGB replay](fwui/current/panel-routes/screen-verification.json) |
+| F3 · Stock fit | PASS on `ac63b270` | Both stock images meet the XIP and pool limits above. [Stock package fingerprints](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) |
 | F4 · Pan and battery | Focused qualification | All 27 numeric pan bindings cover L50, C and R50. The two SMC headers use the four-level battery painter. The board reports an unknown/USB state when calibrated percentage data is unavailable. [Pan, four levels, overlay and toast tests](fwui/current/panel-routes/starting-head-regressions.json) |
 | F5 · Pads, LEDs and hold-GLOBE | Focused checks pass, full host result pending | 7,229 pad and LED assertions cover 909, 808, BREAK and the bass parts. GLOBE, copy and held-step cases also ran. [Focused test results](fwui/current/panel-routes/starting-head-regressions.json) |
 | F6 · Per-step slider lane | Host scenario and persistence checks pass | Velocity, chance, pitch and pan survive reload on all five parts. SMK-37 uses held SEQ and SCALE to switch lane, then held SEQ, a step and K3 to edit. FM-1 uses SEL and ALGO. [Twenty edited lanes](fwui/current/break-velocity-tests.json) · [BREAK audio and persistence](fwui/current/panel-routes/starting-head-regressions.json) |
 | F7 · Genuine synth panels | Stock and optional interface checks pass | The admitted Synth One INIT patch exposes 13 physical controls per owner. Compact SuperJ6 exposes 16 controls and four patches. Each editor has real bindings, units and activity glyphs. [Synth One qualification](fwui/current/synthone-editor/routes-qualification.json) · [SuperJ6 evidence](fwui/current/superj6-slot/README.md) |
-| C1 · Exact-head focused tests and both stock builds | Final run in progress | The [PR comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) records the tested source and package hashes. |
+| C1 · Exact-head focused tests and both stock builds | Final run in progress | The [PR comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) records the source and stock package hashes. Tests also cover archived pixels, physical control bindings, the normal startup loop and the Chicago fallback. |
 | C2 · Consolidated ancestry and no loss | Final-head verification pending | The branch includes consolidated `8e4c1a10` as a merge ancestor. |
-| C3 · Independent multi-size review | Open | Independent before/after review covers the native LCD, desktop and both phone orientations. |
+| C3 · Independent multi-size review | PASS, 10/10 | The independent reviewer compared consolidated, starting and final native screens and replayed them at 1440×900, 390×844 and 844×390. All selected before/after browser LCD rasters matched the native captures. [Independent verdict and screen measurements](fwui/current/panel-routes/independent-review.md) |
 | C4 · Hard limits | Final-head verification pending | The gate checks secrets, workflows, installer assets, PSRAM and oversized non-LFS files. |
 | C5 · Every firmware item passes | Open | The remaining measured items are identified above. |
 | C6 · Integration | Draft | Integ owns the integration merge after the checks. [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) |
