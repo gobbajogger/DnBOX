@@ -1,5 +1,11 @@
 # Sound lane
 
+## Factory bank replay and DMA release timing, 2026-11-21
+
+All 694 Synth One bank/position addresses returned the correct program and 99,936 ordered parameter words. The independent upstream save-binding audit verified the factory mapping and 2,105 default substitutions. The packed C reader drove all 694 programs through the host comparison graph at 48 kHz, reproducing 66,624,000 stereo frames byte for byte. The PI32v2 reader and tables need 102,976 read-only bytes plus code. Full stock program selection, production effects and callback qualification are open. [Factory test and native footprint](../../experiments/sound-hardware-v1/factory-admission/README.md#factory-selection-in-the-reference-comparison)
+
+Starting panel settling at the first regular DMA release preserved stock image sizes, the nonzero saved startup and 8,972 free pool bytes on both boards. The 922-event +1 ms input scene measured 10,373 µs on Elite and 10,394 µs on Pro, with 648 halves and zero raw or scene late. The final project differed by 11 and ten bytes and both DAC streams diverged at frame 97,856. This candidate fails behavior qualification. [Patch, per-board measurements and reproduction](../../experiments/sound-hardware-v1/strict-timing/edge-settle/README.md)
+
 ## SuperJ6 bank selection and Synth One editor interface, 2026-11-21
 
 The original AU on the recovered Linux runner reproduced seven stereo component captures byte for byte. Entering the complete instrument initializer reached its first Swift Foundation UUID metadata import before any preset loaded. The headless AUv3 host source and the fixed 14-program stimulus are now available. The Apple host still needs a compatible runtime. S4 has **0/14 complete pairs**. [Original bench, input selection, comparison and reproduction](../../experiments/sound-hardware-v1/sj6-factory/README.md)
