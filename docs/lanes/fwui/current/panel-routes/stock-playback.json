@@ -1,0 +1,239 @@
+{
+  "firmwareCommit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "emulatorRevision": "6b60618c8bf344d65a166905fb746f46ab708fcb",
+  "boardComparisons": {
+    "elite": {
+      "model": "elite",
+      "source": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+      "emulator": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+      "strict": true,
+      "clockMHz": 360,
+      "keys": "1000:pot:1023,1120:SEQ,1180:SEQ^,1270:k5@120,1330:k5^,2080:SEQPLAY,2140:SEQPLAY^,2700:SEQPLAY,2760:SEQPLAY^",
+      "usbMessages": "1500:913c64;1710:813c00;1770:923764;2000:823700",
+      "afterWarmupUs": 1400000,
+      "results": {
+        "final": {
+          "elfSha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3",
+          "packageSha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0",
+          "shots": {
+            "idle": {
+              "halfCount": 81,
+              "maxUs": 3883,
+              "late": 0,
+              "timerIRQ": 9253,
+              "uiFrames": 25,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 61764,
+              "sha256": "815b8d041f4a4b4dc2373c10bda74aad86b2a2af66372a7c8db2048b7b58d387",
+              "peak": 0
+            },
+            "playback": {
+              "halfCount": 218,
+              "maxUs": 5185,
+              "late": 0,
+              "timerIRQ": 25253,
+              "uiFrames": 122,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 132352,
+              "sha256": "9d611a94036e9f63b22130397de12ac6d3cea78f1b27b129123338ae0dc1807d",
+              "peak": 7461,
+              "windows": {
+                "preNote": {
+                  "peak": 0,
+                  "nonzeroSamples": 0
+                },
+                "bassA": {
+                  "peak": 5179,
+                  "nonzeroSamples": 12509
+                },
+                "bassB": {
+                  "peak": 3637,
+                  "nonzeroSamples": 14072
+                },
+                "transport": {
+                  "peak": 2117,
+                  "nonzeroSamples": 38808
+                }
+              }
+            }
+          },
+          "lateDuringPlayback": 0
+        },
+        "unshared": {
+          "elfSha256": "af6f569be5ebc008c20fa4e336bbd5ecf78aa755140504cbb4656c8f0c5aded3",
+          "packageSha256": "6cbced40177e10d9f931bff1e9fca86201d2ac74bfea26a23e83122d8fe55a22",
+          "shots": {
+            "idle": {
+              "halfCount": 81,
+              "maxUs": 3893,
+              "late": 0,
+              "timerIRQ": 9252,
+              "uiFrames": 25,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 61764,
+              "sha256": "815b8d041f4a4b4dc2373c10bda74aad86b2a2af66372a7c8db2048b7b58d387",
+              "peak": 0
+            },
+            "playback": {
+              "halfCount": 218,
+              "maxUs": 5200,
+              "late": 0,
+              "timerIRQ": 25252,
+              "uiFrames": 122,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 132352,
+              "sha256": "9d611a94036e9f63b22130397de12ac6d3cea78f1b27b129123338ae0dc1807d",
+              "peak": 7461,
+              "windows": {
+                "preNote": {
+                  "peak": 0,
+                  "nonzeroSamples": 0
+                },
+                "bassA": {
+                  "peak": 5179,
+                  "nonzeroSamples": 12509
+                },
+                "bassB": {
+                  "peak": 3637,
+                  "nonzeroSamples": 14072
+                },
+                "transport": {
+                  "peak": 2117,
+                  "nonzeroSamples": 38808
+                }
+              }
+            }
+          },
+          "lateDuringPlayback": 0
+        }
+      },
+      "comparison": {
+        "samePCM": true,
+        "maxUsDelta": -15,
+        "sameHalfCount": true
+      },
+      "scope": "Paired 3-second modeled stock panel and USB-MIDI run. All linked inputs except the two checked backend object files are shared. The 1.4-second idle shot measures cumulative startup late count."
+    },
+    "pro": {
+      "model": "pro",
+      "source": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+      "emulator": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+      "strict": true,
+      "clockMHz": 360,
+      "keys": "1000:pot:1023,1120:SEQ,1180:SEQ^,1270:k5@120,1330:k5^,2080:SEQPLAY,2140:SEQPLAY^,2700:SEQPLAY,2760:SEQPLAY^",
+      "usbMessages": "1500:913c64;1710:813c00;1770:923764;2000:823700",
+      "afterWarmupUs": 1400000,
+      "results": {
+        "final": {
+          "elfSha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54",
+          "packageSha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797",
+          "shots": {
+            "idle": {
+              "halfCount": 81,
+              "maxUs": 3885,
+              "late": 0,
+              "timerIRQ": 9253,
+              "uiFrames": 25,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 61764,
+              "sha256": "815b8d041f4a4b4dc2373c10bda74aad86b2a2af66372a7c8db2048b7b58d387",
+              "peak": 0
+            },
+            "playback": {
+              "halfCount": 218,
+              "maxUs": 5174,
+              "late": 0,
+              "timerIRQ": 25253,
+              "uiFrames": 122,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 132352,
+              "sha256": "9d611a94036e9f63b22130397de12ac6d3cea78f1b27b129123338ae0dc1807d",
+              "peak": 7461,
+              "windows": {
+                "preNote": {
+                  "peak": 0,
+                  "nonzeroSamples": 0
+                },
+                "bassA": {
+                  "peak": 5179,
+                  "nonzeroSamples": 12509
+                },
+                "bassB": {
+                  "peak": 3637,
+                  "nonzeroSamples": 14072
+                },
+                "transport": {
+                  "peak": 2117,
+                  "nonzeroSamples": 38808
+                }
+              }
+            }
+          },
+          "lateDuringPlayback": 0
+        },
+        "unshared": {
+          "elfSha256": "2b1f43d21991cedc3058f17cf40addc8b1306d0917280624f816fb30bf4dfb6e",
+          "packageSha256": "a9e8f302f0f6bbb292f63bb2b82e9d8bdc24bd38536289a4034cdeda5c26af90",
+          "shots": {
+            "idle": {
+              "halfCount": 81,
+              "maxUs": 3893,
+              "late": 0,
+              "timerIRQ": 9252,
+              "uiFrames": 25,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 61764,
+              "sha256": "815b8d041f4a4b4dc2373c10bda74aad86b2a2af66372a7c8db2048b7b58d387",
+              "peak": 0
+            },
+            "playback": {
+              "halfCount": 218,
+              "maxUs": 5192,
+              "late": 0,
+              "timerIRQ": 25252,
+              "uiFrames": 122,
+              "bootCount": 1,
+              "crashSeen": 0,
+              "sampleFrames": 132352,
+              "sha256": "9d611a94036e9f63b22130397de12ac6d3cea78f1b27b129123338ae0dc1807d",
+              "peak": 7461,
+              "windows": {
+                "preNote": {
+                  "peak": 0,
+                  "nonzeroSamples": 0
+                },
+                "bassA": {
+                  "peak": 5179,
+                  "nonzeroSamples": 12509
+                },
+                "bassB": {
+                  "peak": 3637,
+                  "nonzeroSamples": 14072
+                },
+                "transport": {
+                  "peak": 2117,
+                  "nonzeroSamples": 38808
+                }
+              }
+            }
+          },
+          "lateDuringPlayback": 0
+        }
+      },
+      "comparison": {
+        "samePCM": true,
+        "maxUsDelta": -18,
+        "sameHalfCount": true
+      },
+      "scope": "Paired 3-second modeled stock panel and USB-MIDI run. All linked inputs except the two checked backend object files are shared. The 1.4-second idle shot measures cumulative startup late count."
+    }
+  }
+}

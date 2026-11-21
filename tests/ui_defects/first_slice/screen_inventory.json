@@ -3868,15 +3868,7 @@
       "family": "engine"
     },
     {
-      "id": "engine-2-part-2-page-1",
-      "family": "engine"
-    },
-    {
       "id": "engine-2-part-3-page-0",
-      "family": "engine"
-    },
-    {
-      "id": "engine-2-part-3-page-1",
       "family": "engine"
     },
     {
@@ -6132,6 +6124,13 @@
         "view-01-part-00-voice-01-page-02",
         "edge-0-view-01-part-00-voice-01-page-02",
         "edge-1-view-01-part-00-voice-01-page-02"
+      ]
+    },
+    {
+      "reason": "Stock Synth One has no editable INIT parameters. Its sole SOUND route is now page 0 on both bass parts. Page 1 was the former SOUND route following an empty bank. The patch-enabled editor is verified separately.",
+      "removed": [
+        "engine-2-part-2-page-1",
+        "engine-2-part-3-page-1"
       ]
     }
   ]

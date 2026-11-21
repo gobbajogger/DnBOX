@@ -1,0 +1,736 @@
+{
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "uiBlob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
+  "base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "input": "3e67b59c8e4dd3d5994680d857ec4e2ea755ab6d",
+  "initialMatrix": {
+    "optionalOscillatorMinimumCoveragePercent": 43.773,
+    "optionalFilterMinimumCoveragePercent": 66.985,
+    "optionalSoundBlankScreenPercent": 60.4
+  },
+  "ordinaryMatrix": {
+    "chicago": {
+      "observations": 64,
+      "minimumCoveragePercent": 71.937,
+      "maximumEmptyScreenPercent": 5.361,
+      "failures": 0
+    },
+    "miami": {
+      "observations": 48,
+      "minimumCoveragePercent": 80.833,
+      "maximumEmptyScreenPercent": 4.243,
+      "failures": 0
+    },
+    "juno": {
+      "observations": 40,
+      "minimumCoveragePercent": 81.19,
+      "maximumEmptyScreenPercent": 5.75,
+      "failures": 0
+    }
+  },
+  "stockPhysicalAssertions": 3976,
+  "stockNativeCaptures": 14,
+  "drumBassPhysicalSelections": 169,
+  "drumKitAndPartListAssertions": 15460,
+  "completeFrameStockInitPageCount": 1,
+  "ordinaryWalks": {
+    "before": {
+      "commit": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+      "exit": 0,
+      "frames": 1530,
+      "markers": [
+        "GEOMETRY findings=0 screens=1530"
+      ]
+    },
+    "input": {
+      "commit": "3e67b59c8e4dd3d5994680d857ec4e2ea755ab6d",
+      "exit": 0,
+      "frames": 1530,
+      "markers": [
+        "GEOMETRY findings=0 screens=1530"
+      ]
+    },
+    "7773": {
+      "commit": "777337289a5b39e77939628f0c832c665d7b9e22",
+      "exit": 0,
+      "frames": 1528,
+      "markers": [
+        "GEOMETRY findings=0 screens=1528"
+      ]
+    },
+    "2e0b": {
+      "commit": "2e0b3dcf37cfc0bb9e0422b8c9a85154f434e9dd",
+      "exit": 0,
+      "frames": 1528,
+      "markers": [
+        "GEOMETRY findings=0 screens=1528"
+      ]
+    },
+    "a1f9": {
+      "commit": "a1f94ba718d92f9b73486c12713037032c9d9ffb",
+      "exit": 0,
+      "frames": 1528,
+      "markers": [
+        "GEOMETRY findings=0 screens=1528"
+      ],
+      "compile": "-O1 -g0, bounded GCC GC; completed after a memory-limited first attempt"
+    },
+    "e96c": {
+      "commit": "e96c0eb0996180333be3299454ad1ccb1fe675a8",
+      "exit": 0,
+      "frames": 1528,
+      "markers": [
+        "GEOMETRY findings=0 screens=1528"
+      ]
+    }
+  },
+  "coverageTriage": {
+    "inputCatalogRecords": 1712,
+    "inputFlags": 817,
+    "inputFlagGroups": {
+      "08-0.tar.xz": 1,
+      "boot-0.tar.xz": 20,
+      "clip-0.tar.xz": 1,
+      "edge-0.tar.xz": 44,
+      "edited-0.tar.xz": 8,
+      "engine-0.tar.xz": 34,
+      "global-0.tar.xz": 7,
+      "hardware-0.tar.xz": 21,
+      "help-0.tar.xz": 443,
+      "list-0.tar.xz": 183,
+      "live-0.tar.xz": 8,
+      "padcal-0.tar.xz": 9,
+      "preview-0.tar.xz": 8,
+      "view-0.tar.xz": 22,
+      "window-0.tar.xz": 8
+    },
+    "freshOrdinaryWalk": "777337289a5b39e77939628f0c832c665d7b9e22",
+    "freshFlags": 548,
+    "freshFlagGroups": {
+      "edge": 40,
+      "engine": 24,
+      "global": 7,
+      "help": 443,
+      "list": 14,
+      "view": 20
+    },
+    "newFlaggedOrdinaryIds": 0,
+    "historicalMenuPanelMeasurements": {
+      "global": {
+        "before": {
+          "samples": 25,
+          "below70": 25,
+          "minimumCoveragePercent": 20.403,
+          "maximumEmptyScreenPercent": 5.245
+        },
+        "input": {
+          "samples": 25,
+          "below70": 25,
+          "minimumCoveragePercent": 55.089,
+          "maximumEmptyScreenPercent": 5.245
+        },
+        "7773": {
+          "samples": 25,
+          "below70": 25,
+          "minimumCoveragePercent": 55.089,
+          "maximumEmptyScreenPercent": 5.245
+        }
+      },
+      "list": {
+        "before": {
+          "samples": 28,
+          "below70": 24,
+          "minimumCoveragePercent": 23.719,
+          "maximumEmptyScreenPercent": 5.278
+        },
+        "input": {
+          "samples": 28,
+          "below70": 24,
+          "minimumCoveragePercent": 55.344,
+          "maximumEmptyScreenPercent": 5.278
+        },
+        "7773": {
+          "samples": 28,
+          "below70": 24,
+          "minimumCoveragePercent": 55.344,
+          "maximumEmptyScreenPercent": 5.278
+        }
+      }
+    },
+    "finalOrdinaryFlags": {
+      "screenCount": 527,
+      "families": {
+        "edge": 40,
+        "engine": 24,
+        "help": 443,
+        "view": 20
+      },
+      "genuineNewMenuDefects": 0,
+      "interpretation": "443 contextual help cards and 84 sequencer, generator, song and edge states; uniform scanlines alone do not measure the content obligation of these routes"
+    }
+  },
+  "drumBeforeAfterUniformY": {
+    "source7Before": [
+      180,
+      240
+    ],
+    "source7After": [
+      219,
+      240
+    ],
+    "source8Before": [
+      203,
+      240
+    ],
+    "source8After": [
+      218,
+      240
+    ],
+    "units": "half-open full-width scanlines in 240\u00d7240 RGB"
+  },
+  "viewport": {
+    "deployedReferenceCSS": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8",
+    "deployedReferenceHTML": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+    "observedViewport": [
+      1348,
+      936
+    ],
+    "actualCanvasPx": [
+      240,
+      240
+    ],
+    "cssCanvasPx": [
+      240,
+      240
+    ],
+    "canvasPosition": [
+      217,
+      142.796875
+    ],
+    "candidateWasmInBrowser": false,
+    "deployedReference": "https://gobbajogger.github.io/DnBOX-nightly/emu/",
+    "independentPanels": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "40e8fb2f89a7aaaf4b494673f60a798840056b01ccab1fccf6cab94aedc4d32a",
+      "ids": 10,
+      "uniqueNativeRGB": 10,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 10,
+          "idComparisons": 10,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 10,
+          "idComparisons": 10,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 10,
+          "idComparisons": 10,
+          "mismatches": 0
+        }
+      ]
+    },
+    "independentOrdinaryBeforeAfter": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "340114b0b2a15a2f82f3fb433ee3255af14cdfc8b3450888e6bcaa854ad58b7b",
+      "ids": 36,
+      "uniqueNativeRGB": 30,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 30,
+          "idComparisons": 36,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 30,
+          "idComparisons": 36,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 30,
+          "idComparisons": 36,
+          "mismatches": 0
+        }
+      ]
+    },
+    "consolidatedBrowserCatalog": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "3669492e6724eacbcf88098c513e5d1a7d781a59d3d3df64626d8cec428cbb16",
+      "ids": 1530,
+      "uniqueNativeRGB": 1412,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        }
+      ]
+    },
+    "initialPRBrowserCatalog": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "c7bfbea9c3d920ad3ecd6280602525a6b7860b2a61c442e2f1c81610e6e69c46",
+      "ids": 1712,
+      "uniqueNativeRGB": 1558,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        }
+      ]
+    },
+    "fullCorrectedBrowserCatalog": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "c27a117418478e645ed11a3f35bb05e658634945275f156c3cb93be8eb2dfc8b",
+      "ids": 1944,
+      "uniqueNativeRGB": 1709,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        }
+      ]
+    }
+  },
+  "c2c4": {
+    "checkedCandidate": "7d3bd621d1bdbbf63aee5ad577e49e11afe1a4dc",
+    "consolidated": "8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374",
+    "ancestor": true,
+    "noLoss": "PASS",
+    "limits": "PASS"
+  },
+  "grade": {
+    "C3": "PASS",
+    "F1": "PASS for the indexed, reachable software routes",
+    "independentCumulativePRScore": 10,
+    "scope": "Independent native and three-size genuine browser replay of the reachable firmware UI, before and after; no unresolved observed visual defect. Physical LCD behavior, electrical timing and optional engine programs outside the admitted provider are separate."
+  },
+  "stockAndJuno": {
+    "frames": 42,
+    "failedFrames": [],
+    "observations": 226,
+    "minimumCoveragePercent": 74.192,
+    "maximumEmptyScreenPercent": 8.984,
+    "failures": 0
+  },
+  "optional": {
+    "frames": 116,
+    "failedFrames": [],
+    "observations": 632,
+    "minimumCoveragePercent": 80.13,
+    "maximumEmptyScreenPercent": 5.575,
+    "failures": 0
+  },
+  "publishedProduction": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "menuLayout": {
+    "input": {
+      "frames": 378,
+      "slabs": 2088,
+      "failedFrames": 275,
+      "failedSlabs": 599,
+      "minimumCoveragePercent": 11.732,
+      "maximumEmptyScreenPercent": 6.201,
+      "maxUniformBodyScanlines": 93
+    },
+    "e96c": {
+      "frames": 378,
+      "slabs": 2088,
+      "failedFrames": 0,
+      "failedSlabs": 0,
+      "minimumCoveragePercent": 78.437,
+      "maximumEmptyScreenPercent": 11.667,
+      "maxUniformBodyScanlines": 25
+    },
+    "trial": {
+      "commit": "a1f94ba718d92f9b73486c12713037032c9d9ffb",
+      "failedFrames": 1,
+      "failedSlabs": 1,
+      "id": "global-section-1-row-04",
+      "actualControl": "Bluetooth NAME / no connected peer",
+      "coveragePercent": 68.597
+    },
+    "catalogReplay": {
+      "registeredTest": "ui-menu-layout",
+      "freshAndIndexedMeasurementsEqual": true,
+      "verifiedRGBFrames": 378,
+      "completeMeasurementSHA256": "31931b40224ac71cfb6db17bb35a925257936eacf490abef8d83a90fadcd47a0",
+      "archiveSHA256": "b7cfda03176cac827f8c20805f77aa9e523ed65d3b04930e8a86752a948f8549"
+    }
+  },
+  "ordinaryPartLists": {
+    "frames": 169,
+    "slabs": 1093,
+    "below70": 0,
+    "minimumCoveragePercent": 80.13,
+    "maxUniformBodyScanlines": 22
+  },
+  "ordinaryPixelDeltas": {
+    "before": {
+      "changedOfMatched1528": 1435,
+      "changedByFamily": {
+        "edge": 200,
+        "engine": 64,
+        "global": 42,
+        "help": 518,
+        "home": 1,
+        "list": 505,
+        "modal": 5,
+        "view": 100
+      }
+    },
+    "input": {
+      "changedOfMatched1528": 526,
+      "changedByFamily": {
+        "edge": 28,
+        "engine": 40,
+        "global": 42,
+        "list": 402,
+        "view": 14
+      }
+    },
+    "2e0b": {
+      "changedOfMatched1528": 275,
+      "changedByFamily": {
+        "global": 42,
+        "list": 233
+      }
+    }
+  },
+  "geometry": {
+    "ordinaryScreens": 1528,
+    "geometryFindings": 0,
+    "presenceChecks": 19593,
+    "presenceMissing": 0,
+    "glyphChecks": 249,
+    "glyphMissing": 0,
+    "glyphDamaged": 0
+  },
+  "chicagoRegressions": {
+    "presentation": 4388,
+    "statusPixelAndBehaviorChecks": 165365
+  },
+  "fullHost": {
+    "preliminaryHead": "bc19de74e7de22efb5520bb5f042cf83b62e3162",
+    "terminal": "interrupted to reserve memory for focused review",
+    "issued": 126,
+    "failuresBeforeInterruption": 15,
+    "observations": [
+      "Linux LeakSanitizer could not start under ptrace in observed linked tests",
+      "Two compilations were killed by the memory limit",
+      "The BLE capture replay returned a generic subprocess error; cause unverified for this run"
+    ]
+  },
+  "guardImageReview": {
+    "models": [
+      "SMK-37 Elite",
+      "SMK-37 Pro"
+    ],
+    "screens": 10,
+    "changedPixels": "Fault register digits, retry/guard/post-crash PC digit regions. Header, status and physical recovery instructions remain intact.",
+    "inspectedComparableStates": [
+      "first-fault",
+      "safe-play-fault",
+      "safe-play-post-crash",
+      "safe-play-retry",
+      "safe-play-safe"
+    ]
+  }
+}

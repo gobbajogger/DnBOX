@@ -1,0 +1,154 @@
+{
+  "status": "FOCUSED_REQUESTED_PASS",
+  "sourceTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "sourceProof": "controls-latest-source-proof.json",
+  "fixtureOverride": {
+    "path": "tests/host/smc_pickup_acceptance_test.c",
+    "gitBlob": "f6fd009b6d9eda71945d9c917912740c72eab36e",
+    "reason": "Exact-equality short UP/DOWN caption selection. All pixel assertions retained. Original failed oracle log remains."
+  },
+  "tests": [
+    {
+      "test": "padcal-flag",
+      "exit": 0,
+      "command": "python3 tests/padcal_flag_test.py",
+      "log": "controls-last-freeze/build/host/latest-controls/padcal-flag.log",
+      "sha256": "8fc3a3b7af77cb22bca5697b42dd0df320be8a7f742a1abca5406669294573eb",
+      "terminal": [
+        "PASS main_fm1.c, flag 0: INLOG has args 0 and 1 only (args 2-5 get the entries reply)",
+        "PASS ui.c, flag 0: key_event keeps the clip mode guard",
+        "PASS plat_fm1.c, flag 0: the clip mode knob and button paths stay",
+        "padcal_flag_test: ok"
+      ]
+    },
+    {
+      "test": "padcal-wiring",
+      "exit": 0,
+      "command": "python3 tests/smk_padcal_wiring_test.py",
+      "log": "controls-last-freeze/build/host/latest-controls/padcal-wiring.log",
+      "sha256": "6a88590ed05266fa0d9392bf0473862fc405476332c69c4d8e2f86bc1adda89f",
+      "terminal": [
+        "PASS LCD: the target colours, the ok dots and the entry number",
+        "PASS RAM only: no settings byte, no flash save",
+        "PASS export: INLOG args 2-5 give 32 entries each (tests/smk_padcal_export_test.py decodes them)",
+        "smk_padcal_wiring_test: ok"
+      ]
+    },
+    {
+      "test": "transaction",
+      "exit": 0,
+      "command": "SAN_FLAGS=-O0 python3 tests/host/ui_step_lane_transaction_test.py",
+      "log": "controls-last-freeze/build/host/latest-controls/transaction.log",
+      "sha256": "65f3a890d0f72cb46dd68b46dac7ab671cf3d75c610409be1f204aaee3748987",
+      "terminal": [
+        "PASS BREAK transaction scopes and current-source stale-read runtime negative"
+      ]
+    },
+    {
+      "test": "smc-pickup-corrected",
+      "exit": 0,
+      "command": "SAN_FLAGS=-O0 sh tests/host/smc_pickup_acceptance_test.sh",
+      "log": "controls-last-freeze/build/host/latest-controls/smc-pickup.corrected.log",
+      "sha256": "61122cb4eeb35e4e57d5cbe38e49b5cd6241398d0a6b4fbe9fe1850437a5ff46",
+      "terminal": [
+        "PASS 4096 stateful input events: target edits, parked away/back plus edits while away, kit/bank/part, lock/unlock, reconnect, duplicates and feedback timing",
+        "smc_pickup_acceptance: PASS (849741 assertions)",
+        "PASS pickup hint on SMC popup (354 checks)",
+        "PASS pickup hint on peek page (1 checks)"
+      ]
+    },
+    {
+      "test": "ui_pan_units",
+      "exit": 0,
+      "command": "Actual production host fixture atO0, linked against independently compiled unchanged original engine objects; see previous exact engine-source comparison",
+      "log": "controls-last-freeze/build/host/latest-controls/ui_pan_units/run.log",
+      "sha256": "83ae2a5a5999d7bffcd0e0fe0663f1bb634b9eafc8ca339b293044e7a89a82c3",
+      "terminal": [
+        "PASS production pan L50/C/R50: 10975 checks"
+      ]
+    },
+    {
+      "test": "ui_battery_levels",
+      "exit": 0,
+      "command": "Actual production host fixture atO0, linked against independently compiled unchanged original engine objects; see previous exact engine-source comparison",
+      "log": "controls-last-freeze/build/host/latest-controls/ui_battery_levels/run.log",
+      "sha256": "0e349d25a38a322b0f975921a92d28352398a83c79e9d8bba948a0b39ed1acbe",
+      "terminal": [
+        "PASS battery real theme transitions: 120 part/theme/level states",
+        "PASS four battery levels and header invalidation: 9898 checks"
+      ]
+    },
+    {
+      "test": "home_globe_part",
+      "exit": 0,
+      "command": "Actual production host fixture atO0, linked against independently compiled unchanged original engine objects; see previous exact engine-source comparison",
+      "log": "controls-last-freeze/build/host/latest-controls/home_globe_part/run.log",
+      "sha256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608",
+      "terminal": [
+        "home_globe_part: ok"
+      ]
+    },
+    {
+      "test": "copy_semantics",
+      "exit": 0,
+      "command": "Actual production host fixture atO0, linked against independently compiled unchanged original engine objects; see previous exact engine-source comparison",
+      "log": "controls-last-freeze/build/host/latest-controls/copy_semantics/run.log",
+      "sha256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7",
+      "terminal": [
+        "copy_semantics: ok"
+      ]
+    },
+    {
+      "test": "pads_in_settings",
+      "exit": 0,
+      "command": "sh tests/host/pads_in_settings_test.sh",
+      "cwd": "controls-latest-pads",
+      "sourceTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+      "log": "/tmp/controls-latest-pads.log",
+      "sha256": "3e9439390eb1f76cc36c8e297a031a0cf08ed33ee3b4ec1f62e325adf24e84fe",
+      "terminal": [
+        "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}"
+      ]
+    }
+  ],
+  "retainedOriginalFailure": {
+    "test": "smc-pickup-original-oracle",
+    "exit": 1,
+    "command": "Same wrapper on uncorrected50122 test fixture",
+    "log": "controls-last-freeze/build/host/latest-controls/smc-pickup.original-50122-fail.log",
+    "sha256": "af4341dac78c77023aa34741119b544aa0c21b710a85a9521bcaadd6b37bdaa3",
+    "terminal": [
+      "tests/host/../../host/../firmware/src/app/ui.c:3655:38: warning: ‘smk_mute_known’ defined but not used [-Wunused-variable]",
+      " 3655 | static uint8_t smk_mute_intended[4], smk_mute_known, smk_mute_active, smk_mute_edit, smk_mute_bank;",
+      "      |                                      ^~~~~~~~~~~~~~",
+      "FAIL tests/host/smc_pickup_acceptance_test.c:62: !memcmp(active_fb + (KNOB_Y + 49) * 240, fb + (KNOB_Y + 49) * 240, 240 * 10 * sizeof *fb)"
+    ]
+  },
+  "transactionResult": "controls-last-freeze/build/host/step-lane-transaction/result.json",
+  "notClaimed": [
+    "Full Local gate",
+    "Physical IRQ,display timing,calibration or device test",
+    "Sound ca0/3f runtime or F7 admission"
+  ],
+  "passedTests": 9,
+  "transactionChecks": 548,
+  "transactionNegative": "Current-source stale-read mutant successfully compiles and exits1 at BREAK_TRANSACTION_STALE_READ.",
+  "relatedPriorRevision": "956a full14 and board-header/cap-metadata receipts remain separate; no claim that the full Local gate has passed at50122.",
+  "logArchive": "closure-logs.json.gz",
+  "previousModelPreservingChecks": {
+    "productionTree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+    "results": {
+      "list-retry": "PASS list feedback current-source positive, ABOUT fit, and 3 compiled runtime negatives",
+      "final-808": "PASS 808 KIT Accent physical hit, three release-derived outlines, idle and settled",
+      "final-909": "PASS native BD sweep semantics/live marker, retained pitch fork and two production negatives",
+      "final-ret": "PASS M2 real framebuffer/physical owners and three compiled current-source runtime negatives",
+      "final-song": "PASS real palette SONG action, missing-cue and unreadable-selection production negatives",
+      "final-chord": "clip chord display: 7049 checks, 7050 captured chord draws passed",
+      "final-song-width": "PASS SONG EMPTY/END selected color and actual graphics, 12 states, 124 checks; no input/hardware or full-screen acceptance",
+      "final-smc": "smc_ui: PASS (8719 checks)",
+      "final-pickup": "PASS pickup hint on peek page (1 checks)",
+      "final-smc-peek": "smc_own_popup: PASS (5058 checks, immediate keyboard invariance)",
+      "final-smc-routes": "PASS: SMC-owned navigation/edits, pickup/frame, keyboard confirmation/help/clip isolation"
+    }
+  }
+}

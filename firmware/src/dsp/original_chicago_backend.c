@@ -3,7 +3,7 @@
 #include "binary32_classify.h"
 #include "binary32_math.h"
 #include "chicago_packed.h"
-#include "motion_tables_private.h"
+#include "original_backend_pitch.h"
 #include <string.h>
 
 #define BACKEND_READY UINT32_C(0x43484231)
@@ -115,7 +115,7 @@ static int initialize(original_chicago_backend *s, unsigned factory,
     s->program = program;
     if (!original_chicago_voice_compile(&s->controls, &s->program) ||
         !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_lookup,
-            NULL, original_pitch44100)) return s->status;
+            NULL, original_backend_pitch44100())) return s->status;
 
     original_chicago_voice_seed seed;
     memset(&seed, 0, sizeof seed);

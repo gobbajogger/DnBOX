@@ -85,7 +85,6 @@ static void panel_setup(void)
     const panel_t old = panel;
     lcd_fill(0, 0, 240, 240, C_BLACK);
     draw_text_box(0, 10, 240, &FONT_S, "HARDWARE CALIBRATION", C_WHITE, 1);
-    draw_text_box(0, 30, 240, &FONT_S, "TEACH EACH BUTTON AND KNOB", C_GRAY, 1);
     while (fm1_in.buttons) {
         fm1_wdt_feed();
         if (fm1_ms - t0 > SETUP_IDLE_MS)

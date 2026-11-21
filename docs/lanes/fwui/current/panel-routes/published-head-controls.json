@@ -1,0 +1,118 @@
+{
+  "publishedHead": "8dedac78dd87763a44a6f981ca663c004d1edfd9",
+  "stockBuilds": {
+    "commit": "8dedac78dd87763a44a6f981ca663c004d1edfd9",
+    "baseline": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "firmware_tree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+    "ui_blob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
+    "source_manifest": {
+      "files": 502,
+      "sha256": "0e8741d6b8f71933ce9b26fae4982556c946eef0151d462619853c5f6493ce4a"
+    },
+    "maps_or_linker_hooks": false,
+    "models": {
+      "elite": {
+        "metrics": {
+          "xip_free": 1148,
+          "pool_raw_free": 8972,
+          "pool_reserve": 8192,
+          "pool_margin": 780
+        },
+        "binaries": {
+          "elf": {
+            "bytes": 639388,
+            "sha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3"
+          },
+          "app": {
+            "bytes": 551524,
+            "sha256": "2e0546c84c2abcf2034999150a507cd1703a422010602b57ea2b9d97675d969a"
+          },
+          "loader": {
+            "bytes": 7616,
+            "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+          },
+          "package": {
+            "bytes": 651732,
+            "sha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0"
+          }
+        },
+        "package_complete": true,
+        "exit": 0
+      },
+      "pro": {
+        "metrics": {
+          "xip_free": 1156,
+          "pool_raw_free": 8972,
+          "pool_reserve": 8192,
+          "pool_margin": 780
+        },
+        "binaries": {
+          "elf": {
+            "bytes": 639380,
+            "sha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54"
+          },
+          "app": {
+            "bytes": 551516,
+            "sha256": "9f8165201f46009f351a4b432690654e3fb584a7372b6303eb8df460a36572fb"
+          },
+          "loader": {
+            "bytes": 7614,
+            "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+          },
+          "package": {
+            "bytes": 651730,
+            "sha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797"
+          }
+        },
+        "package_complete": true,
+        "exit": 0
+      }
+    }
+  },
+  "registeredFocus": [
+    "synthone-slot",
+    "juno-slot-integration",
+    "held-step-release",
+    "pads-in-settings",
+    "ui-peer-names",
+    "ui-drum-kit-section",
+    "ui-overlay-battery",
+    "ui-toast-battery",
+    "break-family-layout",
+    "break-context-label",
+    "ui-chance-framebuffer",
+    "break-step-velocity-engine",
+    "copy-semantics",
+    "home-globe-part",
+    "chicago-presentation",
+    "chicago-readout",
+    "ui-layer-restoration",
+    "ui-battery-levels",
+    "ui-pan-units",
+    "ui-synth-layout",
+    "ui-menu-layout",
+    "ui-screen-index",
+    "ui-native-routes",
+    "ui-startup-loop",
+    "ui-wave-fallback-frame",
+    "ui-step-lane",
+    "ui-step-lane-edit",
+    "ui-step-lane-transaction"
+  ],
+  "additionalRegistered": [
+    "ui-adsr-engine-graph",
+    "ui-glyph-polish"
+  ],
+  "result": "PASS for the 30 listed registrations and both normal stock builds. Four additional layout oracles needed updated coordinates in their own follow-up.",
+  "gateNoLoss": "PASS",
+  "gateLimits": "PASS",
+  "reviewScore": "10/10",
+  "exactHeadComment": "https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842",
+  "logsSha256": {
+    "registered": "9bb50aadd9fac7551a9be5daa120f6fd275feb2bbcdb9095efdb1eac9a5b5800",
+    "additional": "27faaf4623b84f46434508a778fa7f1b7729a3cf9a778e33a8be54ed2f619caa",
+    "limits": "8127f9b2a6830531a085680d0129a11f9e52c29fcbc43e9ae827b545e443d050",
+    "elite": "88127b668d337733cd6e7bfd4666e40e9169e011ba761d5cf244f01969d5500e",
+    "pro": "0470f46fabcb6aa62d0ebc258d603202243cc702d46da84d08f9ad7c7cc51b79"
+  }
+}

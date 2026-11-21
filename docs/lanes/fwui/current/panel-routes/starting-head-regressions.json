@@ -1,0 +1,214 @@
+{
+  "sourceCommit": "3e67b59c8e4dd3d5994680d857ec4e2ea755ab6d",
+  "sourceTree": "0211c0ce10185ae6f04f4f87dbcaff3a7aad5172",
+  "scope": "Independent replay on the starting FWUI PR head. The firmware edit and final active screen catalog have separate receipts.",
+  "tests": [
+    {
+      "domain": "F4",
+      "command": "sh tests/host/ui_pan_units_test.sh",
+      "exit": 0,
+      "sha256": "9b872a8b3cd3257d460904c8fc5277f698c3ecc8c178418cb4fe23cf054a999f",
+      "reportedCount": 10975,
+      "result": "PASS production pan L50/C/R50: 10975 checks"
+    },
+    {
+      "domain": "F4",
+      "command": "sh tests/host/ui_battery_levels_test.sh",
+      "exit": 0,
+      "sha256": "c05a9309f8d2b999d740ada4c46048f17d0461ebaafd18581c238c4d6fd1f97f",
+      "reportedCount": 9898,
+      "result": "PASS four battery levels and header invalidation: 9898 checks"
+    },
+    {
+      "domain": "F4",
+      "command": "sh tests/host/ui_overlay_battery_test.sh",
+      "exit": 0,
+      "sha256": "a0e9ccd3cb5b795ce6eb9a175e5f5ecc2e7a3c65e393925d37f1583a73e8ca4b",
+      "reportedCount": 263838,
+      "result": "OVERLAY_BATTERY 505 rows in 57 lists, 4040 injected battery-level updates, 263838 checks; other domains NOT_RUN"
+    },
+    {
+      "domain": "F4",
+      "command": "sh tests/host/ui_toast_battery_test.sh",
+      "exit": 0,
+      "sha256": "c83d3a143d87dcaaef6670174ea0b3abc3d32d663e8e803060226eafc9261645",
+      "reportedCount": 9747,
+      "result": "PASS toast battery: 4 states x 4 levels; text/state preserved; 9747 checks"
+    },
+    {
+      "domain": "F5",
+      "command": "sh tests/host/pads_in_settings_test.sh",
+      "exit": 0,
+      "sha256": "3e9439390eb1f76cc36c8e297a031a0cf08ed33ee3b4ec1f62e325adf24e84fe",
+      "reportedCount": 7229,
+      "result": "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}"
+    },
+    {
+      "domain": "F5",
+      "command": "sh tests/host/home_globe_part_test.sh",
+      "exit": 0,
+      "sha256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608",
+      "reportedCount": null,
+      "result": "home_globe_part: ok"
+    },
+    {
+      "domain": "F5",
+      "command": "sh tests/host/copy_semantics_test.sh",
+      "exit": 0,
+      "sha256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7",
+      "reportedCount": null,
+      "result": "copy_semantics: ok"
+    },
+    {
+      "domain": "F5",
+      "command": "sh tests/host/held_step_release_test.sh",
+      "exit": 0,
+      "sha256": "9c556ab83364e959ad97c81fba9a75c8c2e9ae75272ebfedd8a2573490f9498b",
+      "reportedCount": 144,
+      "result": "held-step-release: PASS (144 checks, both kits/voices, all four step banks)"
+    },
+    {
+      "domain": "F6",
+      "command": "sh tests/host/ui_step_lane_test.sh",
+      "exit": 0,
+      "sha256": "3d318500835953acb38a8b7868c8ad39a4d787c7bffb3aa213d3b47811c96f36",
+      "reportedCount": 1427,
+      "result": "PASS physical SEQ+SCALE(FM-1 SEL) lane cycle, stored adapter and production/preview renders: 1427 checks; literal touchscreen NOT_RUN"
+    },
+    {
+      "domain": "F6",
+      "command": "sh tests/host/ui_step_lane_edit_test.sh",
+      "exit": 0,
+      "sha256": "12731123d54555854baec02cc7bd5da12e9b1605e0e60493b724b34dd72379e1",
+      "reportedCount": 1086,
+      "result": "PASS physical visible-lane edits: 20 scenarios, 1086 checks; all persisted"
+    },
+    {
+      "domain": "F6",
+      "command": "python3 tests/host/ui_step_lane_transaction_test.py",
+      "exit": 0,
+      "sha256": "65f3a890d0f72cb46dd68b46dac7ab671cf3d75c610409be1f204aaee3748987",
+      "reportedCount": 586,
+      "result": "PASS BREAK transaction scopes and current-source stale-read runtime negative"
+    },
+    {
+      "domain": "F6",
+      "command": "env SMC_UI_TEST_FILE=tests/host/break_step_velocity_engine_test.c sh tests/host/smc_ui_test.sh",
+      "exit": 0,
+      "sha256": "2b2c632a3008511232e6f692b86f3cdebd94be53e7e04eb71953adc293dee880",
+      "reportedCount": null,
+      "result": "PASS sequenced BREAK velocity: saved/reloaded, sparse and pattern restore, lane replacement, motion disable; Q15 peaks 127=18430 64=9288 32=4644 0=0"
+    },
+    {
+      "domain": "F6",
+      "command": "gcc -std=c99 -O2 -ffp-contract=off -DX0X_HOST tests/host/breaks_hit_gain_test.c -lm -o ../focused-results/gain && ../focused-results/gain",
+      "exit": 0,
+      "sha256": "14f5ecdc445275a96d2a8428830ac48cb424b70defddb6907da7253c3a115122",
+      "reportedCount": 72369,
+      "result": "BREAK per-hit gain PASS: 72369 PCM frames, 128 velocities, generator and pin, two overlapping tails, reverse/grain/stutter/32nd, live and preview"
+    },
+    {
+      "domain": "F6",
+      "command": "sh tests/host/run_project_stage.sh",
+      "exit": 0,
+      "sha256": "8f525401952cd8b497944b49ca22d74e649ae1c87b727f2da471bcaeaa8ecc00",
+      "reportedCount": 26869,
+      "result": "project staging: 26869 checks, 0 failures; real storage, defaults and sample metadata"
+    },
+    {
+      "domain": "F6",
+      "command": "sh tests/host/run_adaptive_break_dsp.sh",
+      "exit": 0,
+      "sha256": "74ee2009cc86d5b2047f767d9a65055d067edad3675779277ef6fa5a6f17b085",
+      "reportedCount": 51481,
+      "result": "adaptive DSP: 51481 checks, 0 failures"
+    },
+    {
+      "domain": "F6",
+      "command": "sh tests/host/run_breaks.sh",
+      "exit": 0,
+      "sha256": "bc2b28324123de3ebf37936f29809e780120a4eaebb203510a1ef21d42190b45",
+      "reportedCount": null,
+      "result": "breaks: all ok"
+    },
+    {
+      "domain": "F6",
+      "command": "python3 tests/host/engine_brk_mute_test.py",
+      "exit": 0,
+      "sha256": "51ebd448aab370c65b396bc9842af167dc8dbb00bd4116281a705c284d3d5abc",
+      "reportedCount": null,
+      "result": "engine-brk-mute: production control/renderer and abrupt-cut control PASS"
+    },
+    {
+      "name": "feedback",
+      "command": "sh tests/host/ui_feedback_test.sh",
+      "exit": 0,
+      "sha256": "9187b049657cf24f4e9fca0b309a9aabec00f77a3031eefcde88fd8578dfa5ef",
+      "result": "PASS: help hides pending readout, read-only rows reject edits, MIX WAVE scope draws, MASTER hist write-head stable, HOME pattern glyphs"
+    },
+    {
+      "name": "panic-chord",
+      "command": "sh tests/host/panic_chord_test.sh",
+      "exit": 0,
+      "sha256": "ac9c53524085b6d20b1a0d0c586d7d4154d10d3af2bad13f851a330373b0fcf3",
+      "result": "panic chord: 81 checks, 0 failures"
+    },
+    {
+      "name": "panic-notes",
+      "command": "sh tests/host/panic_notes_test.sh",
+      "exit": 0,
+      "sha256": "4db6ab3beef0539e06a9ddb061faa9087b63b7317c518bede382cb59ed616db3",
+      "result": "panic notes: 142 checks, 0 failures"
+    },
+    {
+      "name": "padcal-flag",
+      "command": "python3 tests/padcal_flag_test.py",
+      "exit": 0,
+      "sha256": "8fc3a3b7af77cb22bca5697b42dd0df320be8a7f742a1abca5406669294573eb",
+      "result": "padcal_flag_test: ok"
+    },
+    {
+      "name": "padcal-wiring",
+      "command": "python3 tests/smk_padcal_wiring_test.py",
+      "exit": 0,
+      "sha256": "6a88590ed05266fa0d9392bf0473862fc405476332c69c4d8e2f86bc1adda89f",
+      "result": "smk_padcal_wiring_test: ok"
+    },
+    {
+      "name": "pickup",
+      "command": "sh tests/host/smc_pickup_acceptance_test.sh",
+      "exit": 0,
+      "sha256": "a92057ed3191541b66f6ad08112e50de298312645726c165c5cbe9a010307606",
+      "result": "PASS pickup hint on peek page (1 checks)"
+    },
+    {
+      "domain": "F5",
+      "command": "TMPDIR=<scratch> SAN_FLAGS=\"-O0 -g0\" python3 tests/host/ui_synth_step_footer_test.py",
+      "exit": 0,
+      "sha256": "ff77b89f9549aee7a2d006728f89dce8992596ba41b18d6db8c48f5bfe9bd96f",
+      "result": "PASS synth parameter16-step lane, actual states and two production negatives"
+    }
+  ],
+  "unchangedIndexedRGBs": 1712,
+  "ordinary": {
+    "screens": 1530,
+    "texts": 41884,
+    "presence": 18571
+  },
+  "persisted": {
+    "status": "PASS",
+    "frames": 20,
+    "audited_texts": 376,
+    "partial_display_slices": 0
+  },
+  "breakBeforeAfterPCM": {
+    "models": 13,
+    "frames": 4705792,
+    "bytes": 18823168,
+    "sha256": "e8724230774e32fefbf18c2ad98d850e68371ad3decd8bcd8e2a0c49abee144d"
+  },
+  "testCorrections": [
+    "Registered BREAK family and context title probes initially failed on outdated coordinates/ownership. Test-only fixes passed the positives and rejected one-pixel runtime damage.",
+    "Unregistered historical breaks_renderer_equivalence shell wrapper does not link the shared IMA tables. Current documented F6 GCC replay with the IMA table definition completed and matched the recorded PCM."
+  ]
+}

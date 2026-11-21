@@ -142,6 +142,7 @@ typedef struct {
     volatile uint8_t playing;         /* 1 = running */
     volatile uint8_t ppat[NTRACKS];   /* the pattern each part plays */
     volatile uint8_t pcue[NTRACKS];   /* each part's cued pattern (0xFF = none) */
+    uint8_t brk_velocity;             /* audio-side T_VEL value for the next sequenced BREAK hit */
     union {
         volatile uint16_t chain;      /* publish a | b << 8 with one aligned store */
         struct {                     /* little-endian read aliases for the main-loop UI */
@@ -246,6 +247,7 @@ extern const uint8_t SEQ_CH_DEFAULT[NTRACKS];
 
 /* steps of one part's rate, in samples Q8 (no swing) at the current tempo */
 uint32_t seq_step_q8(const seq_t *s, int rate);
+int seq_rate_ticks(int rate); /* Clock ticks per step at 24 PPQN. */
 float seq_tempo(const seq_t *s);      /* the tempo in effect (internal or measured) */
 int seq_part_len(const seq_t *s, int t);         /* steps in part t's pattern */
 int seq_next_step(seq_t *s, int t, int p);       /* the step after p (direction; no commit) */

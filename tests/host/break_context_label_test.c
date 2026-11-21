@@ -9,10 +9,14 @@ int main(void){
   ui.msg_until=0;ui.touched=-1;ui.touch_until=0;
   draw_header();draw_main();draw_knobs();
   CHECK(!strcmp(pg.title[cur_page()],title[p]));
+  /* Center the actual cap height in the ten-row title area. The font's
+   * bitmap includes padding above its capital letters. */
+  int origin=vc(&FONT_T,147,10);
   cv_begin(240,20,C_BLACK);cv_text(10,0,&FONT_T,title[p],part_col());
   unsigned pixels=0,missing=0;
   for(int y=0;y<20;y++)for(int x=0;x<125;x++)if(cv_px[y*240+x]==swap16(part_col())){
-   pixels++;if(fb[(147+y)*240+x]!=swap16(part_col())){missing++;fprintf(stderr,"BREAK_CONTEXT_MISSING title=%s theme=%d x=%d y=%d\n",title[p],theme,x,147+y);}
+   CHECK(origin+y>=146 && origin+y<KNOB_Y);
+   pixels++;if(fb[(origin+y)*240+x]!=swap16(part_col())){missing++;fprintf(stderr,"BREAK_CONTEXT_MISSING title=%s theme=%d x=%d y=%d\n",title[p],theme,x,origin+y);}
   }
   CHECK(pixels>0);CHECK(missing==0);
  }

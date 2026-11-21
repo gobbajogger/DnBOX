@@ -2,6 +2,27 @@
 import pathlib,subprocess,tempfile,unittest
 HERE=pathlib.Path(__file__).resolve().parent
 class Scheduler(unittest.TestCase):
+ def classify_envelopes(self,source):
+  # Execute the actual shell classifier: a pattern hidden in a comment must
+  # not count as a serialized generator owner merely because text exists.
+  start=source.index('test_class() {');end=source.index('\n}',start)+2
+  names=['ui-808-stage-rows','chicago-adsr-graph','ui-adsr-engine-graph',
+         'ui-drum-amp-graph','ui-drum-single-lane','ui-settings-sections']
+  script=source[start:end]+'\n'+''.join('test_class '+n+'; printf "%s %s\\n" '+n+' "$TEST_CLASS"\n' for n in names)
+  result=subprocess.run(['sh','-c',script],text=True,capture_output=True,timeout=5)
+  self.assertEqual(result.returncode,0,result.stderr)
+  return dict(line.split() for line in result.stdout.splitlines())
+ def test_envelope_generators_stay_serialized(self):
+  actual=self.classify_envelopes((HERE/'run_tests.sh').read_text())
+  self.assertEqual(actual,dict.fromkeys(('ui-808-stage-rows','chicago-adsr-graph',
+      'ui-adsr-engine-graph','ui-drum-amp-graph','ui-drum-single-lane','ui-settings-sections'),'G'))
+ def test_commented_pattern_mutant_is_parallel(self):
+  source=(HERE/'run_tests.sh').read_text();anchor='\n    chicago-adsr-graph|'
+  self.assertEqual(source.count(anchor),1)
+  actual=self.classify_envelopes(source.replace(anchor,'    chicago-adsr-graph|'))
+  self.assertEqual(actual['ui-808-stage-rows'],'G')
+  for name in actual:
+   if name!='ui-808-stage-rows':self.assertEqual(actual[name],'P')
  def run_case(self,mutant=False,gen_fail=False):
   s=(HERE/'run_tests.sh').read_text();start=s.index('    [ "$cls" = W ] || [ "$cls" = G ] || [ $gw = 1 ]');end=s.index('\n}\nnote()',start);body=s[start:end]
   if mutant:

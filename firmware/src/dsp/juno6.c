@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "juno6.h"
+#include "juno6_controls.h"
 #include <math.h>
 #include "fastmath.h"
 #include <string.h>
@@ -22,10 +23,10 @@ void juno6_render(juno6_t *s, float *out, unsigned n)
  const float attack=1.0f/fm_maxf(1,s->attack*sr);
  const float decay=(1-s->sustain)/fm_maxf(1,s->decay*sr);
  const float release=1.0f/fm_maxf(1,s->release*sr);
- const float base=35+s->cutoff*s->cutoff*12000;
- const float env=7000*s->macro[4];
- const float hp=1.0f/(1.0f+TWO_PI*(15+2000*s->hpf*s->hpf)/sr);
- const float rate=(.1f+8*s->macro[10]*s->macro[10])/sr;
+ const float base=juno6_control_physical(2,s->cutoff);
+ const float env=juno6_control_physical(4,s->macro[4]);
+ const float hp=1.0f/(1.0f+TWO_PI*juno6_control_physical(9,s->hpf)/sr);
+ const float rate=juno6_control_physical(10,s->macro[10])/sr;
  for(unsigned k=0;k<n;k++) {
   float mix=0, lfo=1-4*fm_fabsf(s->lfo_phase-.5f);
   s->lfo_phase+=rate; if(s->lfo_phase>=1)s->lfo_phase-=1;
@@ -33,7 +34,7 @@ void juno6_render(juno6_t *s, float *out, unsigned n)
    juno6_voice_t *v=&s->voice[i];
    if(!v->stage)continue;
    float dt=clampf(v->increment,.000001f,.45f),t=v->phase;
-   float saw=2*t-1-blep(t,dt),width=clampf(s->pulse_width+lfo*s->macro[11]*.2f,.05f,.95f);
+   float saw=2*t-1-blep(t,dt),width=clampf(s->pulse_width+lfo*s->macro[11]*JUNO6_PWM_DEPTH_MAX,.05f,.95f);
    float pulse=(t<width?1.0f:-1.0f)+blep(t,dt),q=t-width;
    if(q<0)q+=1;
    pulse-=blep(q,dt);
@@ -68,15 +69,15 @@ int juno6_set(juno6_t *s,unsigned id,float x) {
  s->macro[id]=x;
  switch(id) {
  case 0:s->waveform=(uint8_t)(x*2.99f);break;
- case 1:s->sub_level=x*.5f;break;
+ case 1:s->sub_level=juno6_control_physical(1,x);break;
  case 2:s->cutoff=x;break;
  case 3:s->resonance=x;break;
- case 5:s->attack=.002f+x*x*3;break;
- case 6:s->decay=.01f+x*x*3;break;
+ case 5:s->attack=juno6_control_physical(5,x);break;
+ case 6:s->decay=juno6_control_physical(6,x);break;
  case 7:s->sustain=x;break;
- case 8:s->release=.01f+x*x*4;break;
+ case 8:s->release=juno6_control_physical(8,x);break;
  case 9:s->hpf=x;break;
- case 12:s->pulse_width=.1f+x*.8f;break;
+ case 12:s->pulse_width=juno6_control_physical(12,x);break;
  case 16:s->bend=(x-.5f)*4;for(unsigned i=0;i<6;i++) if(s->voice[i].stage) s->voice[i].increment=midi_hz(s->voice[i].note)/s->sample_rate*fm_exp2f(s->bend*(1.0f/12.0f));break;
  case 17:s->damper=x>=.5f;if(!s->damper)for(unsigned i=0;i<6;i++)if(!s->voice[i].gate&&s->voice[i].stage)s->voice[i].stage=4;break;
  default:break;

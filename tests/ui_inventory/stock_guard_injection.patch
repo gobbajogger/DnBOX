@@ -1,0 +1,23 @@
+--- a/crates/fm1-live/src/main.rs
++++ b/crates/fm1-live/src/main.rs
+@@ -812,7 +812,20 @@
+     });
+     let mut tp0: std::collections::HashMap<u32, u64> = Default::default();
+     let mut tp1: std::collections::HashMap<u32, u64> = Default::default();
++    // Stateful peripheral fixture for the DnBOX crash/retry screen test.
++    // Deliver the SoC model's exception IRQ; guest code owns the vector,
++    // diagnostic, timeout, boot guard, safe-mode scan and reset.
++    let mut fwui_faults = if std::env::var_os("FM1_DNBOX_GUARD_TEST").is_some() {
++        VecDeque::from([1200u64, 9200u64])
++    } else {
++        VecDeque::new()
++    };
+     while m.soc.periph.ms() + 40 < ms {
++        if fwui_faults.front().is_some_and(|&t| m.soc.periph.ms() >= t) {
++            let t = fwui_faults.pop_front().unwrap();
++            eprintln!("FWUI injected modeled guard exception at {t} ms");
++            m.soc.guard_trip(4);
++        }
+         if want_skip && m.soc.periph.ms() >= skip_from {
+             m.soc.periph.skip_idle = true;
+         }

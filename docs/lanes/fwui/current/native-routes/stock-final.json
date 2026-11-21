@@ -1,0 +1,394 @@
+{
+  "firmwareCommit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "uiSourceBlob": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
+  "emulatorRevision": "6b60618c8bf344d65a166905fb746f46ab708fcb",
+  "clockMHz": 360,
+  "strict": true,
+  "models": {
+    "elite": {
+      "startup": {
+        "model": "elite",
+        "emulatorSha256": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+        "fwscSha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0",
+        "elfSha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3",
+        "clockMHz": 360,
+        "strict": true,
+        "cases": {
+          "package": {
+            "ms": 1,
+            "flashOperations": 0,
+            "finalFlashSha256": "8d132be3062aed1ee9ec1737cd10c440b1e9547f512cb25dc77fb004a92af36a",
+            "rgbSha256": "53853188f83a941e2f45ec1383293ae935106c5721918079000dcb2254fc550b",
+            "rgb565Sha256": "d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a"
+          },
+          "recover-splash": {
+            "ms": 448,
+            "flashOperations": 18,
+            "finalFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+            "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+            "inputFlashSha256": "1cff48ec9323069ca4dc375b9dec0e5e85e508af8cbaf501dd2a772c3974e287"
+          },
+          "recover": {
+            "ms": 1500,
+            "flashOperations": 18,
+            "finalFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "1cff48ec9323069ca4dc375b9dec0e5e85e508af8cbaf501dd2a772c3974e287",
+            "audioHalves": 89,
+            "timerIRQs": 10261,
+            "uiFrames": 31,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          },
+          "already-live-splash": {
+            "ms": 448,
+            "flashOperations": 1,
+            "finalFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+            "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+            "inputFlashSha256": "c25412a17f1cc9180868d158a323784ce5b539e26012d809404cacb439a90ccb"
+          },
+          "already-live": {
+            "ms": 1500,
+            "flashOperations": 1,
+            "finalFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "c25412a17f1cc9180868d158a323784ce5b539e26012d809404cacb439a90ccb",
+            "audioHalves": 89,
+            "timerIRQs": 10267,
+            "uiFrames": 32,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          },
+          "restart": {
+            "ms": 1500,
+            "flashOperations": 0,
+            "finalFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "d6ae0eda2f370d0bc608c1ad5a9c2047eb6476410e20c25999106941623c2a83",
+            "audioHalves": 89,
+            "timerIRQs": 10268,
+            "uiFrames": 32,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          }
+        },
+        "hostSplashMatchingPixels": 57600,
+        "hostOrdinaryMatchingPixels": 57600
+      },
+      "panel": {
+        "model": "elite",
+        "emulatorSha256": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+        "fwscSha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0",
+        "elfSha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3",
+        "cases": {
+          "seed": {
+            "shotMs": 1,
+            "observedFrames": 1,
+            "firstMatchingFrameMs": {},
+            "panelBytes": "0000000000000000000000000000000000000000000000000000000000000000",
+            "flashOperations": 0,
+            "bootCount": 0,
+            "uiFrames": 0,
+            "crashSeen": 0,
+            "audioHalves": 0,
+            "timerIrqs": 0,
+            "finalFlashSha256": "8d132be3062aed1ee9ec1737cd10c440b1e9547f512cb25dc77fb004a92af36a",
+            "keys": ""
+          },
+          "calibration": {
+            "shotMs": 8100,
+            "observedFrames": 507,
+            "firstMatchingFrameMs": {
+              "calibration-title": 608,
+              "hardware-calibration-button-00": 1216,
+              "hardware-calibration-button-01": 1472,
+              "hardware-calibration-button-02": 1616,
+              "hardware-calibration-button-03": 1760,
+              "hardware-calibration-button-04": 1920,
+              "hardware-calibration-button-05": 2064,
+              "hardware-calibration-button-06": 2224,
+              "hardware-calibration-button-07": 2368,
+              "hardware-calibration-button-08": 2512,
+              "hardware-calibration-button-09": 2672,
+              "hardware-calibration-button-10": 2816,
+              "hardware-calibration-button-11": 2960,
+              "hardware-calibration-button-12": 3120,
+              "hardware-calibration-button-13": 3264,
+              "hardware-calibration-encoder-00": 3424,
+              "hardware-calibration-encoder-01": 4000,
+              "hardware-calibration-encoder-02": 4528,
+              "hardware-calibration-encoder-03": 5056,
+              "hardware-calibration-encoder-04": 5568,
+              "hardware-calibration-encoder-05": 6096,
+              "hardware-calibration-encoder-06": 6624
+            },
+            "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+            "flashOperations": 3,
+            "bootCount": 1,
+            "uiFrames": 25,
+            "crashSeen": 0,
+            "audioHalves": 657,
+            "timerIrqs": 76212,
+            "finalFlashSha256": "a0b9c20a9900a8f5dfb4534bd5997c3adb72647613b1a3217f744f8443578a98",
+            "keys": "0:OCTAVE-,0:OCTAVE+,1200:OCTAVE-^,1200:OCTAVE+^,1450:SCALE,1510:SCALE^,1600:CHORD,1660:CHORD^,1750:NOTEREPEAT,1810:NOTEREPEAT^,1900:PARA,1960:PARA^,2050:GLOBE,2110:GLOBE^,2200:PATCH,2260:PATCH^,2350:BT,2410:BT^,2500:ARP,2560:ARP^,2650:SEQ,2710:SEQ^,2800:SEQPLAY,2860:SEQPLAY^,2950:SEQREC,3010:SEQREC^,3100:OCTAVE-,3160:OCTAVE-^,3250:OCTAVE+,3310:OCTAVE+^,3400:FX,3460:FX^,3650:e1:2,4175:e2:-2,4700:e3:2,5225:e4:-2,5750:e5:2,6275:e6:-2,6800:e7:2"
+          },
+          "cold-reload": {
+            "shotMs": 1500,
+            "observedFrames": 94,
+            "firstMatchingFrameMs": {},
+            "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+            "flashOperations": 0,
+            "bootCount": 1,
+            "uiFrames": 31,
+            "crashSeen": 0,
+            "audioHalves": 88,
+            "timerIrqs": 10212,
+            "finalFlashSha256": "a0b9c20a9900a8f5dfb4534bd5997c3adb72647613b1a3217f744f8443578a98",
+            "keys": ""
+          },
+          "usb-updater": {
+            "shotMs": 2600,
+            "observedFrames": 163,
+            "firstMatchingFrameMs": {
+              "boot-uboot-usb": 2080
+            },
+            "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+            "flashOperations": 0,
+            "bootCount": 2,
+            "uiFrames": 62,
+            "crashSeen": 0,
+            "audioHalves": 133,
+            "timerIrqs": 16591,
+            "finalFlashSha256": "9b384aa03e2c5aa96a6509e94c115c295bb8fa376d9f07dd492e52f06406bb41",
+            "keys": "",
+            "resetMs": 2133,
+            "detachMs": 2104,
+            "usbMessages": "1800:f07e7f0601f7;2000:f02224357df7"
+          },
+          "octave-updater": {
+            "shotMs": 7100,
+            "observedFrames": 444,
+            "firstMatchingFrameMs": {
+              "boot-uboot": 6592
+            },
+            "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+            "flashOperations": 0,
+            "bootCount": 2,
+            "uiFrames": 342,
+            "crashSeen": 0,
+            "audioHalves": 520,
+            "timerIrqs": 61585,
+            "finalFlashSha256": "9b384aa03e2c5aa96a6509e94c115c295bb8fa376d9f07dd492e52f06406bb41",
+            "keys": "1500:OCTAVE-,1500:OCTAVE+",
+            "resetMs": 6637
+          }
+        }
+      }
+    },
+    "pro": {
+      "startup": {
+        "model": "pro",
+        "emulatorSha256": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+        "fwscSha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797",
+        "elfSha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54",
+        "clockMHz": 360,
+        "strict": true,
+        "cases": {
+          "package": {
+            "ms": 1,
+            "flashOperations": 0,
+            "finalFlashSha256": "df78af9e07046263987a43df5f26764630ed53e0bbcfd28183f7183036912a38",
+            "rgbSha256": "53853188f83a941e2f45ec1383293ae935106c5721918079000dcb2254fc550b",
+            "rgb565Sha256": "d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a"
+          },
+          "recover-splash": {
+            "ms": 448,
+            "flashOperations": 18,
+            "finalFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+            "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+            "inputFlashSha256": "21f2c670d2647815fcc3688b5ce60efe476e2224bbe6db53474dbdeab9b699df"
+          },
+          "recover": {
+            "ms": 1500,
+            "flashOperations": 18,
+            "finalFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "21f2c670d2647815fcc3688b5ce60efe476e2224bbe6db53474dbdeab9b699df",
+            "audioHalves": 89,
+            "timerIRQs": 10261,
+            "uiFrames": 31,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          },
+          "already-live-splash": {
+            "ms": 448,
+            "flashOperations": 1,
+            "finalFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "rgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+            "rgb565Sha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+            "inputFlashSha256": "f5c9d6b74d0d9ff012028578ac870c50cc852a76ab2ad89e1b274cac147fe312"
+          },
+          "already-live": {
+            "ms": 1500,
+            "flashOperations": 1,
+            "finalFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "f5c9d6b74d0d9ff012028578ac870c50cc852a76ab2ad89e1b274cac147fe312",
+            "audioHalves": 89,
+            "timerIRQs": 10267,
+            "uiFrames": 32,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          },
+          "restart": {
+            "ms": 1500,
+            "flashOperations": 0,
+            "finalFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "rgbSha256": "2f2c92d0a5ba1b7844026294020f79f3097a8a7a0fe3bf151b0ad6015f725209",
+            "rgb565Sha256": "fea68b14ad5a085ebb63340cd24e05f2fecdda9ddcee79872ceceb51dd11f688",
+            "inputFlashSha256": "885cc9688691b4d2421e9ab208fe7cc80ef03dcf069f0f38a8657135376be9dc",
+            "audioHalves": 89,
+            "timerIRQs": 10268,
+            "uiFrames": 32,
+            "boots": 1,
+            "crashSeen": 0,
+            "slotZeroZones": 1,
+            "loopCount": 1
+          }
+        },
+        "hostSplashMatchingPixels": 57600,
+        "hostOrdinaryMatchingPixels": 57600
+      },
+      "panel": {
+        "model": "pro",
+        "emulatorSha256": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e",
+        "fwscSha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797",
+        "elfSha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54",
+        "cases": {
+          "seed": {
+            "shotMs": 1,
+            "observedFrames": 1,
+            "firstMatchingFrameMs": {},
+            "panelBytes": "0000000000000000000000000000000000000000000000000000000000000000",
+            "flashOperations": 0,
+            "bootCount": 0,
+            "uiFrames": 0,
+            "crashSeen": 0,
+            "audioHalves": 0,
+            "timerIrqs": 0,
+            "finalFlashSha256": "df78af9e07046263987a43df5f26764630ed53e0bbcfd28183f7183036912a38",
+            "keys": ""
+          },
+          "calibration": {
+            "shotMs": 8100,
+            "observedFrames": 507,
+            "firstMatchingFrameMs": {
+              "calibration-title": 608,
+              "hardware-calibration-button-00": 1216,
+              "hardware-calibration-button-01": 1472,
+              "hardware-calibration-button-02": 1616,
+              "hardware-calibration-button-03": 1760,
+              "hardware-calibration-button-04": 1920,
+              "hardware-calibration-button-05": 2064,
+              "hardware-calibration-button-06": 2224,
+              "hardware-calibration-button-07": 2368,
+              "hardware-calibration-button-08": 2512,
+              "hardware-calibration-button-09": 2672,
+              "hardware-calibration-button-10": 2816,
+              "hardware-calibration-button-11": 2960,
+              "hardware-calibration-button-12": 3120,
+              "hardware-calibration-button-13": 3264,
+              "hardware-calibration-encoder-00": 3424,
+              "hardware-calibration-encoder-01": 4000,
+              "hardware-calibration-encoder-02": 4528,
+              "hardware-calibration-encoder-03": 5056,
+              "hardware-calibration-encoder-04": 5568,
+              "hardware-calibration-encoder-05": 6096,
+              "hardware-calibration-encoder-06": 6624
+            },
+            "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+            "flashOperations": 3,
+            "bootCount": 1,
+            "uiFrames": 25,
+            "crashSeen": 0,
+            "audioHalves": 657,
+            "timerIrqs": 76212,
+            "finalFlashSha256": "c3885670b65be072359e76e83ec5e3336b8e8520654807269119f2c45e1f32af",
+            "keys": "0:OCTAVE-,0:OCTAVE+,1200:OCTAVE-^,1200:OCTAVE+^,1450:SCALE,1510:SCALE^,1600:CHORD,1660:CHORD^,1750:NOTEREPEAT,1810:NOTEREPEAT^,1900:PARA,1960:PARA^,2050:GLOBE,2110:GLOBE^,2200:PATCH,2260:PATCH^,2350:BT,2410:BT^,2500:ARP,2560:ARP^,2650:SEQ,2710:SEQ^,2800:SEQPLAY,2860:SEQPLAY^,2950:SEQREC,3010:SEQREC^,3100:OCTAVE-,3160:OCTAVE-^,3250:OCTAVE+,3310:OCTAVE+^,3400:FX,3460:FX^,3650:e1:2,4175:e2:-2,4700:e3:2,5225:e4:-2,5750:e5:2,6275:e6:-2,6800:e7:2"
+          },
+          "cold-reload": {
+            "shotMs": 1500,
+            "observedFrames": 94,
+            "firstMatchingFrameMs": {},
+            "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+            "flashOperations": 0,
+            "bootCount": 1,
+            "uiFrames": 31,
+            "crashSeen": 0,
+            "audioHalves": 88,
+            "timerIrqs": 10212,
+            "finalFlashSha256": "c3885670b65be072359e76e83ec5e3336b8e8520654807269119f2c45e1f32af",
+            "keys": ""
+          },
+          "usb-updater": {
+            "shotMs": 2600,
+            "observedFrames": 163,
+            "firstMatchingFrameMs": {
+              "boot-uboot-usb": 2080
+            },
+            "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+            "flashOperations": 0,
+            "bootCount": 2,
+            "uiFrames": 62,
+            "crashSeen": 0,
+            "audioHalves": 133,
+            "timerIrqs": 16591,
+            "finalFlashSha256": "4540c8a0853618bad6923705f3d573387e77e080d191221393086ec106e89f81",
+            "keys": "",
+            "resetMs": 2133,
+            "detachMs": 2104,
+            "usbMessages": "1800:f07e7f0601f7;2000:f02224357df7"
+          },
+          "octave-updater": {
+            "shotMs": 7100,
+            "observedFrames": 444,
+            "firstMatchingFrameMs": {
+              "boot-uboot": 6592
+            },
+            "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+            "flashOperations": 0,
+            "bootCount": 2,
+            "uiFrames": 342,
+            "crashSeen": 0,
+            "audioHalves": 520,
+            "timerIrqs": 61585,
+            "finalFlashSha256": "4540c8a0853618bad6923705f3d573387e77e080d191221393086ec106e89f81",
+            "keys": "1500:OCTAVE-,1500:OCTAVE+",
+            "resetMs": 6637
+          }
+        }
+      }
+    }
+  },
+  "scope": "App entry and peripheral-model timing under fm1-live with private flash. Native startup, calibration, cold reload and reset selection are observed in actual linked code. Physical power cycling, panel and USB electrical behavior and mask ROM execution require hardware.",
+  "hostEmulatorSha256": "4d3142b639e19b7a73125001ef5b315e21859f0e04633090397762ee36918b0e"
+}

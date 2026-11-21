@@ -69,8 +69,8 @@ check("padled_set(ph, w, w, w)" in pf and "w = !i ? 127u : 0u" in pf and "padcal
 check("if (padcal.orient)\n            padcal.orient = 0u;" in pf and "smk_padcal_orient_turn(&padcal, d)" in pf
       and "if (d && padcal.orient && !i)" in pf, "orientation: K2 moves the light, SEQ PLAY confirms (no mark)")
 dr = body(main, "uint8_t smk_padcal_draw(uint32_t w, uint32_t h)")
-check('cv_text(4, 70, &FONT_S, "pad 1 top-left?", C_WHITE)' in dr and "padcal.orient << 4" in dr,
-      "orientation: the LCD asks 'pad 1 top-left?'")
+check('cv_text(4, 70, &FONT_S, "K2: TOP-LEFT PAD", C_WHITE)' in dr and 'cv_text(4, 92, &FONT_S, "PLAY: CONFIRM", C_WHITE)' in dr and "padcal.orient << 4" in dr,
+      "orientation: the LCD identifies the selector and confirmation controls")
 check("cv_rect(x + 12, y + 12, 6, 6, smk_padcal_dot565(c))" in dr and "cv_rect(x + 3, y + 3, 24, 24, c)" in dr,
       "LCD: the ok dot has the contrast colour of its square as drawn (smk_padcal_dot565, boost included)")
 check("APC40_LCD565[n]" in dr and "smk_padcal_is_ok(&padcal, n)" in dr and 'put_i(put_s(t, "#"), e)' in dr,

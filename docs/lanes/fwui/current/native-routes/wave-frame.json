@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "source": "firmware/src/app/ui.c::draw_wave_glyph",
+  "scope": "Normal Chicago page with an intentionally invalid sibling lock injected into RAM; admitted input and hardware behavior are outside the malformed case.",
+  "input": "Held step zero, original Chicago factory zero, cutoff lock 127/128. WAVE remains at its factory value.",
+  "fallbackOnlyPixels": 43,
+  "boundsInclusive": [
+    39,
+    52,
+    67,
+    60
+  ],
+  "rgbSha256": {
+    "chicago-wave-valid-lock": "989f7c86e7b4ef60c3f6a8501b15d286eae5768b003ba3a8c4485ef7819a2dc3",
+    "chicago-wave-invalid-lock": "51e623ef6afeb955455cc72f6a821006364ed79c3d9eb160892e6f38ef235782"
+  },
+  "validToInvalidChangedPixels": {
+    "oscillatorPlot": 90,
+    "siblingCutoffValue": 36
+  },
+  "outsideOwnerChanges": 0,
+  "uiSourceSha256": "27cbf21dde4d75c1676cfa40ff564a31a0b82b851ba73830d9facf4945b67596"
+}

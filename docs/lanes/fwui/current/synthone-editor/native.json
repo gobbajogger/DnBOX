@@ -1,0 +1,118 @@
+{
+  "fwui_commit": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+  "sound_commit": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+  "base_commit": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "fwui_source": {
+    "firmware/src/app/ui.c": "c5203be2a2c64286b0587f9ddded2936473d5e00",
+    "firmware/src/app/ui_original_controls.h": "eb1534e456311f15a70ea2bd7e44e22d7f292205",
+    "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
+  },
+  "stock_thresholds": {
+    "xip_free_min_bytes": 1024,
+    "pool_margin_min_bytes": 512,
+    "pool_reserve_bytes": 8192,
+    "psram": false
+  },
+  "stock_builds": [
+    {
+      "model": "elite",
+      "patch": 0,
+      "exit": 0,
+      "log": "native-elite-patch0.log",
+      "xip_free": 9048,
+      "pool_margin": 780,
+      "pool_reserve": 8192,
+      "elf_sha256": "394caaedfa5fb353d07f6deaa3f7eed556b00db8194203b6322771ca16d22a39",
+      "app_sha256": "1d58a36086ad8720b321b73d3268f5d138b88898a0d34bb91fce7e1f1c003e96",
+      "fit": true,
+      "app_bytes": 543624,
+      "package": {
+        "filename": "x0x-smk37-elite.fwsc",
+        "size": 651732,
+        "sha256": "5b23b60019e6bf417c90dae10261d98cc4caeb252855703fb130ffc21ca48e58"
+      },
+      "normal_ram": {
+        "used": 97156,
+        "limit": 98304,
+        "pool_used": 335092,
+        "pool_limit": 344064
+      },
+      "raw_pool_free": 8972
+    },
+    {
+      "model": "pro",
+      "patch": 0,
+      "exit": 0,
+      "log": "native-pro-patch0.log",
+      "xip_free": 9056,
+      "pool_margin": 780,
+      "pool_reserve": 8192,
+      "elf_sha256": "c7a5212dcd80eab7babd00e6d6df3184ab9259bfac2bee4433688d356e3beed4",
+      "app_sha256": "047be92f5ccd5e8267dd3376a48f39348a1306bf6720955fd4032442ecce4db8",
+      "fit": true,
+      "app_bytes": 543616,
+      "package": {
+        "filename": "x0x-smk37.fwsc",
+        "size": 651730,
+        "sha256": "6daa694d6a3c30ffcec784bac0e0978cff7170af98b62b2d75cced48fb9c7b45"
+      },
+      "normal_ram": {
+        "used": 97156,
+        "limit": 98304,
+        "pool_used": 335092,
+        "pool_limit": 344064
+      },
+      "raw_pool_free": 8972
+    },
+    {
+      "model": "elite",
+      "patch": 1,
+      "exit": 0,
+      "log": "native-elite-patch1.log",
+      "xip_free": 4992,
+      "pool_margin": 780,
+      "pool_reserve": 8192,
+      "elf_sha256": "1296b40f07cfe51eb798f281f4c3beb44db1cf1da53fb937bcb89d541e92cefd",
+      "app_sha256": "5c35587e44a6bec0857a57e2072a0a4ce4c4fbcc7276dc3d84927c1eeef6a061",
+      "fit": true,
+      "app_bytes": 547680,
+      "package": {
+        "filename": "x0x-smk37-elite.fwsc",
+        "size": 651732,
+        "sha256": "74a128385904110b122b83d9606bc4bcd4d788425c1c563c2696210e4ec47587"
+      },
+      "normal_ram": {
+        "used": 97188,
+        "limit": 98304,
+        "pool_used": 335092,
+        "pool_limit": 344064
+      },
+      "raw_pool_free": 8972
+    },
+    {
+      "model": "pro",
+      "patch": 1,
+      "exit": 0,
+      "log": "native-pro-patch1.log",
+      "xip_free": 5000,
+      "pool_margin": 780,
+      "pool_reserve": 8192,
+      "elf_sha256": "2645773d246e28a24ca1e24bd82f4d042de29305a455f8c2aa7a7908483bb4c4",
+      "app_sha256": "253c28de54cebab8f9b8ac009a2c879c02ac6a142c0b2e8f87062f384e6393d0",
+      "fit": true,
+      "app_bytes": 547672,
+      "package": {
+        "filename": "x0x-smk37.fwsc",
+        "size": 651730,
+        "sha256": "f81415f7ae1d0e1d2036b5d0035c72c5b1cf03c693bd79146807d7e28d65b695"
+      },
+      "normal_ram": {
+        "used": 97188,
+        "limit": 98304,
+        "pool_used": 335092,
+        "pool_limit": 344064
+      },
+      "raw_pool_free": 8972
+    }
+  ]
+}

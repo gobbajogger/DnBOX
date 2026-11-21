@@ -1,0 +1,245 @@
+{
+  "status": "PASS",
+  "inputCommit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "inputTree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+  "scope": "The unmodified linked packages run under strict fm1-live at 360 MHz. Physical matrix acquisition, glass and the mask ROM updater itself remain outside this receipt. Update entry uses an emulated cable or the two emulated octave buttons.",
+  "fullFrameOracle": "Each whole LCD framebuffer is converted losslessly back to the archive's RGB565 source palette. Probe timestamps are the first matching 16 ms samples. Native hardware duties and IRQ execution are modeled.",
+  "calibration": "The stock matrix scanner accepts a rotated mapping of 14 buttons and seven encoders with alternating directions. The resulting 32 bytes match both the RAM panel object and the stored copy at 0xA5100. Only the panel object's 4 KiB sector changes. A fresh emulator process restores the mapping from the saved flash without any flash operation.",
+  "updater": "USB Device Inquiry has a valid reply before the request, screen, detach and PR_PWR reset. Keeping the two octave buttons down for five seconds independently produces the other updater screen and reset. Each new application's boot counter reaches two. Neither updater case writes a flash byte.",
+  "results": {
+    "elite": {
+      "model": "elite",
+      "emulatorSha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+      "fwscSha256": "f486c916a626c435d82dcc047ef00d6b0315acf2ce6d648fa71995455f6227de",
+      "elfSha256": "6d1345679819c68862ee7c6081f2f48d72e23e9d1b9590edc7ead3508be07463",
+      "cases": {
+        "seed": {
+          "shotMs": 1,
+          "observedFrames": 1,
+          "firstMatchingFrameMs": {},
+          "panelBytes": "0000000000000000000000000000000000000000000000000000000000000000",
+          "flashOperations": 0,
+          "bootCount": 0,
+          "uiFrames": 0,
+          "crashSeen": 0,
+          "audioHalves": 0,
+          "timerIrqs": 0,
+          "finalFlashSha256": "a18a9a4dca77a315b300e2c4a1344189e37f0c6e544446fef2ed1bc1782925c4",
+          "keys": ""
+        },
+        "calibration": {
+          "shotMs": 8100,
+          "observedFrames": 507,
+          "firstMatchingFrameMs": {
+            "calibration-title": 608,
+            "hardware-calibration-button-00": 1216,
+            "hardware-calibration-button-01": 1472,
+            "hardware-calibration-button-02": 1616,
+            "hardware-calibration-button-03": 1760,
+            "hardware-calibration-button-04": 1920,
+            "hardware-calibration-button-05": 2064,
+            "hardware-calibration-button-06": 2224,
+            "hardware-calibration-button-07": 2368,
+            "hardware-calibration-button-08": 2512,
+            "hardware-calibration-button-09": 2672,
+            "hardware-calibration-button-10": 2816,
+            "hardware-calibration-button-11": 2960,
+            "hardware-calibration-button-12": 3120,
+            "hardware-calibration-button-13": 3264,
+            "hardware-calibration-encoder-00": 3424,
+            "hardware-calibration-encoder-01": 4000,
+            "hardware-calibration-encoder-02": 4528,
+            "hardware-calibration-encoder-03": 5056,
+            "hardware-calibration-encoder-04": 5568,
+            "hardware-calibration-encoder-05": 6096,
+            "hardware-calibration-encoder-06": 6624
+          },
+          "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+          "flashOperations": 3,
+          "bootCount": 1,
+          "uiFrames": 25,
+          "crashSeen": 0,
+          "audioHalves": 657,
+          "timerIrqs": 76212,
+          "finalFlashSha256": "9a1eb0eba2e4d94dd132cca5fa6954f407524b889221ddc3c796b908a6d969b7",
+          "keys": "0:OCTAVE-,0:OCTAVE+,1200:OCTAVE-^,1200:OCTAVE+^,1450:SCALE,1510:SCALE^,1600:CHORD,1660:CHORD^,1750:NOTEREPEAT,1810:NOTEREPEAT^,1900:PARA,1960:PARA^,2050:GLOBE,2110:GLOBE^,2200:PATCH,2260:PATCH^,2350:BT,2410:BT^,2500:ARP,2560:ARP^,2650:SEQ,2710:SEQ^,2800:SEQPLAY,2860:SEQPLAY^,2950:SEQREC,3010:SEQREC^,3100:OCTAVE-,3160:OCTAVE-^,3250:OCTAVE+,3310:OCTAVE+^,3400:FX,3460:FX^,3650:e1:2,4175:e2:-2,4700:e3:2,5225:e4:-2,5750:e5:2,6275:e6:-2,6800:e7:2"
+        },
+        "cold-reload": {
+          "shotMs": 1500,
+          "observedFrames": 94,
+          "firstMatchingFrameMs": {},
+          "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+          "flashOperations": 0,
+          "bootCount": 1,
+          "uiFrames": 31,
+          "crashSeen": 0,
+          "audioHalves": 88,
+          "timerIrqs": 10212,
+          "finalFlashSha256": "9a1eb0eba2e4d94dd132cca5fa6954f407524b889221ddc3c796b908a6d969b7",
+          "keys": ""
+        },
+        "usb-updater": {
+          "shotMs": 2600,
+          "observedFrames": 163,
+          "firstMatchingFrameMs": {
+            "boot-uboot-usb": 2080
+          },
+          "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+          "flashOperations": 0,
+          "bootCount": 2,
+          "uiFrames": 62,
+          "crashSeen": 0,
+          "audioHalves": 133,
+          "timerIrqs": 16592,
+          "finalFlashSha256": "f328b039577ff82312c055420946cb407138c9921eeb89f6b615d5b0eb89e673",
+          "keys": "",
+          "resetMs": 2133,
+          "detachMs": 2104,
+          "usbMessages": "1800:f07e7f0601f7;2000:f02224357df7"
+        },
+        "octave-updater": {
+          "shotMs": 7100,
+          "observedFrames": 444,
+          "firstMatchingFrameMs": {
+            "boot-uboot": 6592
+          },
+          "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+          "flashOperations": 0,
+          "bootCount": 2,
+          "uiFrames": 342,
+          "crashSeen": 0,
+          "audioHalves": 520,
+          "timerIrqs": 61585,
+          "finalFlashSha256": "f328b039577ff82312c055420946cb407138c9921eeb89f6b615d5b0eb89e673",
+          "keys": "1500:OCTAVE-,1500:OCTAVE+",
+          "resetMs": 6637
+        }
+      }
+    },
+    "pro": {
+      "model": "pro",
+      "emulatorSha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+      "fwscSha256": "511b0adc2f0222f740027a62bc3173d7b2dc7777c2045c0d60aa4300335359e0",
+      "elfSha256": "e02adf021b45f4d493888ac4386b4b3780dee0b7367ac65b6ec5bbe530bab5ac",
+      "cases": {
+        "seed": {
+          "shotMs": 1,
+          "observedFrames": 1,
+          "firstMatchingFrameMs": {},
+          "panelBytes": "0000000000000000000000000000000000000000000000000000000000000000",
+          "flashOperations": 0,
+          "bootCount": 0,
+          "uiFrames": 0,
+          "crashSeen": 0,
+          "audioHalves": 0,
+          "timerIrqs": 0,
+          "finalFlashSha256": "78e96f3313ec964fb85f0c75f3a5d2e338f6dbdac80391695dee1741e69aba40",
+          "keys": ""
+        },
+        "calibration": {
+          "shotMs": 8100,
+          "observedFrames": 507,
+          "firstMatchingFrameMs": {
+            "calibration-title": 608,
+            "hardware-calibration-button-00": 1216,
+            "hardware-calibration-button-01": 1472,
+            "hardware-calibration-button-02": 1616,
+            "hardware-calibration-button-03": 1760,
+            "hardware-calibration-button-04": 1920,
+            "hardware-calibration-button-05": 2064,
+            "hardware-calibration-button-06": 2224,
+            "hardware-calibration-button-07": 2368,
+            "hardware-calibration-button-08": 2512,
+            "hardware-calibration-button-09": 2672,
+            "hardware-calibration-button-10": 2816,
+            "hardware-calibration-button-11": 2960,
+            "hardware-calibration-button-12": 3120,
+            "hardware-calibration-button-13": 3264,
+            "hardware-calibration-encoder-00": 3424,
+            "hardware-calibration-encoder-01": 4000,
+            "hardware-calibration-encoder-02": 4528,
+            "hardware-calibration-encoder-03": 5056,
+            "hardware-calibration-encoder-04": 5568,
+            "hardware-calibration-encoder-05": 6096,
+            "hardware-calibration-encoder-06": 6624
+          },
+          "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+          "flashOperations": 3,
+          "bootCount": 1,
+          "uiFrames": 25,
+          "crashSeen": 0,
+          "audioHalves": 657,
+          "timerIrqs": 76212,
+          "finalFlashSha256": "b2d7a7866d116baf3ff155bacd2ba4823d78bcb18151e13c96443a886fdc914e",
+          "keys": "0:OCTAVE-,0:OCTAVE+,1200:OCTAVE-^,1200:OCTAVE+^,1450:SCALE,1510:SCALE^,1600:CHORD,1660:CHORD^,1750:NOTEREPEAT,1810:NOTEREPEAT^,1900:PARA,1960:PARA^,2050:GLOBE,2110:GLOBE^,2200:PATCH,2260:PATCH^,2350:BT,2410:BT^,2500:ARP,2560:ARP^,2650:SEQ,2710:SEQ^,2800:SEQPLAY,2860:SEQPLAY^,2950:SEQREC,3010:SEQREC^,3100:OCTAVE-,3160:OCTAVE-^,3250:OCTAVE+,3310:OCTAVE+^,3400:FX,3460:FX^,3650:e1:2,4175:e2:-2,4700:e3:2,5225:e4:-2,5750:e5:2,6275:e6:-2,6800:e7:2"
+        },
+        "cold-reload": {
+          "shotMs": 1500,
+          "observedFrames": 94,
+          "firstMatchingFrameMs": {},
+          "panelBytes": "534e58500809070d0a0c0b060f101104050e0102030405060701ff01ff01ff01",
+          "flashOperations": 0,
+          "bootCount": 1,
+          "uiFrames": 31,
+          "crashSeen": 0,
+          "audioHalves": 88,
+          "timerIrqs": 10212,
+          "finalFlashSha256": "b2d7a7866d116baf3ff155bacd2ba4823d78bcb18151e13c96443a886fdc914e",
+          "keys": ""
+        },
+        "usb-updater": {
+          "shotMs": 2600,
+          "observedFrames": 163,
+          "firstMatchingFrameMs": {
+            "boot-uboot-usb": 2080
+          },
+          "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+          "flashOperations": 0,
+          "bootCount": 2,
+          "uiFrames": 62,
+          "crashSeen": 0,
+          "audioHalves": 133,
+          "timerIrqs": 16593,
+          "finalFlashSha256": "dccb71da9da22fce5397d233026845ed6a4a60ee256501409e1d4cf07fdf873f",
+          "keys": "",
+          "resetMs": 2134,
+          "detachMs": 2105,
+          "usbMessages": "1800:f07e7f0601f7;2000:f02224357df7"
+        },
+        "octave-updater": {
+          "shotMs": 7100,
+          "observedFrames": 444,
+          "firstMatchingFrameMs": {
+            "boot-uboot": 6592
+          },
+          "panelBytes": "534e58500e0809070d0a0c0b060f101104050102030405060701010101010101",
+          "flashOperations": 0,
+          "bootCount": 2,
+          "uiFrames": 342,
+          "crashSeen": 0,
+          "audioHalves": 520,
+          "timerIrqs": 61585,
+          "finalFlashSha256": "dccb71da9da22fce5397d233026845ed6a4a60ee256501409e1d4cf07fdf873f",
+          "keys": "1500:OCTAVE-,1500:OCTAVE+",
+          "resetMs": 6637
+        }
+      }
+    }
+  },
+  "stdout": {
+    "elite": {
+      "calibration": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 15% of instructions in ISRs = 17.3 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 9% of the run (752 ms of 8100 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 8100 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 507 frames on stdout + work/audio.raw\nflash: 3 erases / programs\n",
+      "cold-reload": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 15% of instructions in ISRs = 17.3 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 22% of the run (324 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 94 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "octave-updater": "chip reset at 6637 ms (PR_PWR)\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 8% of the run (582 ms of 7100 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 7100 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 444 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "seed": "irq levels at the end: [], ie false, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 0% of the run (0 ms of 1 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 1 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "usb-updater": "[   616 ms] usb: Configured { product: \"DnBOX DEV SMK-37 Elite\", vid: 4617, pid: 1 }\n[  1800 ms] usb out: f0 7e 7f 06 01 f7\n[  1803 ms] usb in:  f0 7e 7f 06 02 47 29 00 19 01 02 00 00 7f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f7\n[  2000 ms] usb out: f0 22 24 35 7d f7\n[  2104 ms] usb: Detached\nchip reset at 2133 ms (PR_PWR)\nusb: 0 SIE accesses (0.0 ms of CPU at 5760 cycles each), 0 packets out, 0 in\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 22% of the run (575 ms of 2600 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 2600 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 163 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n"
+    },
+    "pro": {
+      "calibration": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 16% of instructions in ISRs = 17.3 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 9% of the run (752 ms of 8100 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 8100 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 507 frames on stdout + work/audio.raw\nflash: 3 erases / programs\n",
+      "cold-reload": "irq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 16% of instructions in ISRs = 17.3 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 22% of the run (324 ms of 1500 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1500 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 94 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "octave-updater": "chip reset at 6637 ms (PR_PWR)\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 8% of the run (582 ms of 7100 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 7100 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 444 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "seed": "irq levels at the end: [], ie false, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 0% of the run (0 ms of 1 ms)\nLED on-fractions: \nSMK-37 pads (0 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 1 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 1 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n",
+      "usb-updater": "[   616 ms] usb: Configured { product: \"DnBOX DEV SMK-37 Pro\", vid: 4617, pid: 1 }\n[  1800 ms] usb out: f0 7e 7f 06 01 f7\n[  1803 ms] usb in:  f0 7e 7f 06 02 47 29 00 19 01 02 00 00 7f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f7\n[  2000 ms] usb out: f0 22 24 35 7d f7\n[  2105 ms] usb: Detached\nchip reset at 2134 ms (PR_PWR)\nusb: 0 SIE accesses (0.0 ms of CPU at 5760 cycles each), 0 packets out, 0 in\nirq levels at the end: [], ie true, skipped 0 cycles\nlast 40 ms: 0% of instructions in ISRs = 0.0 M ISR instructions per second (clock 5760 MHz)\nLCD: on the wire 22% of the run (575 ms of 2600 ms)\nLED on-fractions: \nSMK-37 pads (1 frames): 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000\nwork/lcd.ppm at 2600 ms; LEDs lit: []; audio peak over the last 0.5 s: 0\nrecorded 163 frames on stdout + work/audio.raw\nflash: 0 erases / programs\n"
+    }
+  }
+}

@@ -21,6 +21,8 @@ CALLS = '''int main(void) {
  drum909_amp_snapshot drum={91}; juno6_envelope_snapshot juno={97};
  drum_curve_t curve={17};
  if(engine_drum808_curve(0,&curve)!=0 || curve.sentinel!=17)return 9;
+ if(engine_drum808_param_curve(6,3,&curve)!=0 || curve.sentinel!=17)return 10;
+ if(engine_drum808_param_curve_preview(6,3,0,127,&curve)!=0 || curve.sentinel!=17)return 11;
  float ms=11,hz=31; engine_decay_view_t decay={41};
  if(engine_bd909_pitch_view(&ms,&hz)!=0 || ms!=11 || hz!=31)return 7;
  if(engine_drum909_decay_view(0,&decay)!=0 || decay.sentinel!=41)return 8;
@@ -70,6 +72,18 @@ class ArchiveUIContract(unittest.TestCase):
         code, diagnostic, runtime = self.compile_run(source)
         self.assertEqual(code, 0, diagnostic)
         self.assertNotEqual(runtime, 0)
+
+    def test_preview_false_available_is_not_accepted(self):
+        old='(void)voice; (void)param; (void)selection; (void)raw; (void)out; return 0;'
+        source=self.source();self.assertEqual(source.count(old),1)
+        code,diagnostic,runtime=self.compile_run(source.replace(old,old.replace('return 0','return 1')))
+        self.assertEqual(code,0,diagnostic);self.assertEqual(runtime,11)
+
+    def test_preview_output_mutation_is_not_accepted(self):
+        old='(void)voice; (void)param; (void)selection; (void)raw; (void)out; return 0;'
+        source=self.source();self.assertEqual(source.count(old),1)
+        code,diagnostic,runtime=self.compile_run(source.replace(old,old.replace('(void)out;','out->sentinel=0;')))
+        self.assertEqual(code,0,diagnostic);self.assertEqual(runtime,11)
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,7 +16,7 @@ p=run('positive')
 if p.returncode or 'PASS empty SONG' not in p.stdout:raise SystemExit(p.stdout[-4000:])
 s=(ROOT/'firmware/src/app/ui.c').read_text()
 mutants=[
- ('missing-cue','k ? "END" : "EMPTY: WHITE KEYS ADD BARS"','k ? "END" : "EMPTY"','EMPTY_SONG_ACTION_CUE_MISSING'),
+ ('missing-cue','k ? "END" : "EMPTY   WHITE KEY: ADD BAR"','k ? "END" : "EMPTY"','EMPTY_SONG_ACTION_CUE_MISSING'),
  ('unreadable-selection','k==ui.song_sel?SOUND_SELECT:SOUND_FACE','k==ui.song_sel?C_WHITE:SOUND_FACE','SONG_SELECTED_CONTRAST_MISSING')]
 for name,anchor,replacement,marker in mutants:
     if s.count(anchor)!=1:raise SystemExit('missing/duplicate SONG mutation anchor: '+name)

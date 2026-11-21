@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "scope": "Saved-source/tree, complete legacy walk/audits, PNG/RGB/actual-state integrity and physical lane family coverage only; F1/R22 acceptance is external and extended final-text geometry requires separate producer.",
+  "reportSHA256": "c1e0359da515999ecca1c00d424c8f444c91defca4c8ebd09986e93ec75d311b",
+  "verifierSHA256": "a105b09705017235ab4039b8be739bdf1cc485682c25c207b8c71c59f981dc1d",
+  "productionTree": {
+    "status": "VERIFIED",
+    "tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+    "files": 5160,
+    "referenceSHA256": "83351e9b9929ca47cb368a6e4cd88b9b8655ac83a95528717a7c2fbef02504a3"
+  },
+  "legacyWalkerFrames": 1530,
+  "legacyGeometry": {
+    "screens": 1530,
+    "texts": 41884,
+    "findings": 0
+  },
+  "actualSnapshots": 1689,
+  "stableStateIDs": 1689,
+  "physicalLaneFamilies": {
+    "0": [
+      "VELOCITY",
+      "CHANCE",
+      "PITCH",
+      "PAN"
+    ],
+    "1": [
+      "VELOCITY",
+      "CHANCE",
+      "PITCH",
+      "PAN"
+    ],
+    "2": [
+      "VELOCITY",
+      "CHANCE",
+      "PITCH",
+      "PAN"
+    ],
+    "3": [
+      "VELOCITY",
+      "CHANCE",
+      "PITCH",
+      "PAN"
+    ],
+    "4": [
+      "VELOCITY",
+      "CHANCE",
+      "PITCH",
+      "PAN"
+    ]
+  },
+  "F1": "UNREVIEWED",
+  "visualApproval": false
+}

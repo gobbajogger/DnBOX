@@ -46,7 +46,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
       "dependencies": [
         "M0"
       ],
-      "next_action": "Coordinate M1 control lists and shared memory budget; qualify combined engines and UI before completion"
+      "next_action": "FWUI #975 merged. Verify the F5 hold-GLOBE clear/copy case in the final combined host suite."
     },
     {
       "id": "M3",
@@ -104,7 +104,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
 }
 ```
 
-## Merged pull requests through `1c82772bac9a33f030bf954ec6151987aef2cbb8`
+## Merged pull requests through `3e307cfa455d22dfca5e4ef439080816b4e4f859`
 
 GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merge commit is reachable from this snapshot. The PR head is included for squash merges and deleted branches. Lane acceptance is tracked in `docs/lanes/integ.md`.
 
@@ -124,3 +124,4 @@ GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merg
 | [#978](https://github.com/gobbajogger/DnBOX/pull/978) | `backup/rules-cleanup-20261121` | `30c834c151193e956ccfd8373dabf3b55052be72` | `8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374` |
 | [#980](https://github.com/gobbajogger/DnBOX/pull/980) | `backup/rules-binary-20261121` | `4592ac7f9d0c45bef0d7769aeb40bfb1b30180fe` | `19c0de8b78b3116e89677332694836b3315756d1` |
 | [#981](https://github.com/gobbajogger/DnBOX/pull/981) | `backup/rules-site-gate-20261121` | `69a650da0e7885bc516293bd573313280152d15c` | `1c82772bac9a33f030bf954ec6151987aef2cbb8` |
+| [#975](https://github.com/gobbajogger/DnBOX/pull/975) | `lane/fwui` | `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` | `3e307cfa455d22dfca5e4ef439080816b4e4f859` |

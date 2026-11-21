@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "bc19de74e7de22efb5520bb5f042cf83b62e3162",
+  "table": "original_pitch44100",
+  "words": 128,
+  "bytes": 512,
+  "element": "signed little-endian int32 at 44100 Hz",
+  "input": "experiments/original_synth/motion_tables_private.h",
+  "inputSHA256": "92c856c0fe1f7811ec938bbffd4f0cdcbe8b86630eaf537f63ab8ff3d32cb564",
+  "references": [
+    "firmware/src/dsp/original_chicago_backend.c",
+    "firmware/src/dsp/original_miami_backend.c"
+  ],
+  "owner": "firmware/src/dsp/original_backend_pitch.h",
+  "sharedTableSHA256": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926",
+  "host": {
+    "compiler": "gcc (Debian 14.2.0-19) 14.2.0",
+    "modes": {
+      "chicago": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926",
+      "miami": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926",
+      "both": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926"
+    },
+    "method": "Compile each actual backend separately with -std=c99 -Os -ffunction-sections -fdata-sections. Link Chicago alone, Miami alone and both with --gc-sections against a driver that writes each lookup word returned by original_backend_pitch44100 in little-endian order. Compare every byte to the 128 words parsed from the pinned input."
+  },
+  "native": {
+    "comparisonSource": "818270b6a706b11e9ad41f150f67b9931c158947",
+    "model": "SMK-37 Elite",
+    "toolchain": "JieLi Linux 20260730.1, clang 4.0.1",
+    "method": "Reuse the same vendor linker, LTO flags, linker script and all other previously linked production objects. Recompile the two backend translation units from the original and candidate source, preserving original build flags. Re-run the recorded stock link for each. Read symbol values, sizes and section offsets from both linked ELF files and hash their actual data bytes.",
+    "unmodifiedProductionElfSHA256": "d889de45ad51c942fe1fa41ce2ba043245a083dd8051e645b5536e8239b3a63e",
+    "controlledLinks": {
+      "base": {
+        "elfSHA256": "d889de45ad51c942fe1fa41ce2ba043245a083dd8051e645b5536e8239b3a63e",
+        "textBytes": 547600,
+        "tables": [
+          {
+            "symbol": "original_pitch44100",
+            "address": "0x0206697c",
+            "bytes": 512,
+            "sha256": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926"
+          },
+          {
+            "symbol": "original_pitch44100.1057",
+            "address": "0x02066b8c",
+            "bytes": 512,
+            "sha256": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926"
+          }
+        ]
+      },
+      "candidate": {
+        "elfSHA256": "8e5275e40f8145a6a3aec45fafed16aa4703b1d74619d243f96fa672216227d3",
+        "textBytes": 547088,
+        "tables": [
+          {
+            "symbol": "original_pitch44100",
+            "address": "0x0206697c",
+            "bytes": 512,
+            "sha256": "77c39cdfb56f1cd4da2bfbe83d1c7902a0a8078e0b66f98045a49d0e9dc20926"
+          }
+        ]
+      }
+    },
+    "backendObjectSHA256": {
+      "chicago": {
+        "base": "251f166129f46bf1c0302a69a7c3551847bbdf4a1cc96e7678ada9bd0816b70b",
+        "candidate": "90f3e5494b320d1b76d511ab7768d905dc9b06f873a99664ab2a7ebcc49e4d6f"
+      },
+      "miami": {
+        "base": "013b6f234d7079e8574a39ed2bc695c07c051ed432a346e11f5c5718a02bbdc4",
+        "candidate": "0b72009ea188c40864df47cb92315097ff55408eb0b89599afb5c2a0eda058bf"
+      }
+    },
+    "savedTextBytes": 512
+  },
+  "qualificationScope": "One immutable value-only table. The exact app-sized comparison isolated the change on candidate 818270b6. Final stock package fingerprints and fit are recorded separately for each model. Object identity and array equality establish data equivalence. Physical audio timing requires measurement on hardware."
+}

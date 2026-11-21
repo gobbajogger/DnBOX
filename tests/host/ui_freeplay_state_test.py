@@ -11,10 +11,13 @@ if p.returncode or 'PASS FREE PLAY' not in p.stdout:raise SystemExit(p.stdout[-3
 s=(root/'firmware/src/app/ui.c').read_text()
 anchor='&& ui.freeplay[bidx()] && !ui.rec'
 if s.count(anchor)!=1:raise SystemExit('missing/duplicate mode anchor')
+cue='free_mode?"FREE PLAY":VIEW_N[ui.view]'
+if s.count(cue)!=1:raise SystemExit('missing/duplicate cue anchor')
 # Before fd29ace4 the sequencer header always used the part/view title and normal
 # header font. Making free_mode false selects those same paths on this checkout.
 controls = [
     ('missing-cue', s.replace(anchor, '&& 0'), 'FREE_PLAY_MODE_CUE_MISSING'),
+    ('missing-label', s.replace(cue, 'VIEW_N[ui.view]'), 'FREE_PLAY_MODE_CUE_MISSING'),
     ('always-free', s.replace(anchor, '&& !ui.rec'), 'FREE_PLAY_MODE_CUE_UNEXPECTED'),
 ]
 for name, text, marker in controls:

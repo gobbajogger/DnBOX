@@ -1,0 +1,17 @@
+state_id	scope	file	png_path_in_archive	rgb_sha256
+boot-custom-picture	normal-fm1_main/host-hardware	../../../screens/boot-0.tar.xz	renders/boot-custom-picture/capture-00.png	44fc1b45aa42eae9a7d5b7ca1b84ff8ef17c282337706c5614b7183ae3442cf4
+boot-custom-text	normal-fm1_main/host-hardware	../../../screens/boot-0.tar.xz	renders/boot-custom-text/capture-00.png	af5f8a788579f1f844d3fcacd34782cb8fb55ae1a5d7c4c8a2efa053e521fb88
+boot-default	normal-fm1_main/host-hardware	../../../screens/boot-0.tar.xz	renders/boot-default/capture-00.png	88d6ca126bc2ac34871375862893f4673e2aead0ff453d6686ad7fe07447ba1f
+startup-notice-expired	normal-fm1_main/host-hardware	startup-notice-expired.png		4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc
+startup-recovered-splash	normal-fm1_main/host-hardware	startup-recovered-splash.png		af5f8a788579f1f844d3fcacd34782cb8fb55ae1a5d7c4c8a2efa053e521fb88
+startup-sample-already-live	normal-fm1_main/host-hardware	startup-sample-already-live.png		4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc
+startup-sample-recovered	normal-fm1_main/host-hardware	startup-sample-recovered.png		4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc
+startup-store-cleared	normal-fm1_main/host-hardware	startup-store-cleared.png		cd1e69536a9a00bb320ad343c22481bf81d3421d2c3f835ec424b98fe56ea03e
+startup-store-owned	normal-fm1_main/host-hardware	startup-store-owned.png		4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc
+update-cancel-expired	normal-fm1_main/host-hardware	update-cancel-expired.png		5e652f91d5c5c196fd91a06bd33239acff366c59f9483da8ce40a996970e0032
+update-hold-0	normal-fm1_main/host-hardware	update-hold-0.png		40e92548a710ffc98524a60341e15046a36067bbff7c150b501ecedb42901460
+update-hold-1	normal-fm1_main/host-hardware	update-hold-1.png		989f48ee1bf667044a4c4d3e73e8ec5ac00d3f383d2669f89a8cc7080de74fb6
+update-hold-2	normal-fm1_main/host-hardware	update-hold-2.png		404eddb0ab25928113a43cf01f38080f2a461c1958cf450af864cc37a352726b
+update-hold-3	normal-fm1_main/host-hardware	update-hold-3.png		89a326edcae05a841357a16ee9a08bb6743dc84f5c17b801e7a76f1054eaa0c2
+update-hold-cancelled	normal-fm1_main/host-hardware	update-hold-cancelled.png		8a2e97b7fbf7757ed9b36114f8dd8c821b9b8f4dc4e7a70f1ec77ad96f17017c
+update-last-tick-release	normal-fm1_main/host-hardware	update-last-tick-release.png		8a2e97b7fbf7757ed9b36114f8dd8c821b9b8f4dc4e7a70f1ec77ad96f17017c
