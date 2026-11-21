@@ -943,39 +943,66 @@ static inline __attribute__((always_inline)) uint32_t bank_dt1(const d8_bank_t *
 __attribute__((noinline)) static void bank_block(d8_bank_t *b, float *bus, float *pair, int m, int cb_on)
 {
     uint32_t dt[6];
+    int edge[6] = {0};
     int i, n;
     for (i = 0; i < 6; i++)
         dt[i] = bank_dt1(b, i);
-    for (n = 0; n < m; n++) {
+    for (n = 0; n < m; ) {
         float sum = 0.0f;
-        if (D8_UNLIKELY(--b->drift_cnt <= 0)) {
+        int next = m;
+        int drift = --b->drift_cnt <= 0;
+        if (D8_UNLIKELY(drift)) {
             b->drift_cnt = 256;
             for (i = 0; i < 6; i++) {
                 b->drift[i] += 2.5e-4f * rng_frand2(&b->rng);
                 b->drift[i] *= 0.98f;
-            }
-            for (i = 0; i < 6; i++)
                 dt[i] = bank_dt1(b, i);
-        }
-        for (i = 0; i < 6; i++) {
-            const uint32_t d = dt[i], old = b->ph[i], t = old + d, u = t - BANK_DUTY;
-            float v;
-            b->ph[i] = t;
-            if (D8_UNLIKELY(t < old || (b->pend_wrap & (1u << i)))) {
-                b->pend_wrap &= (uint8_t)~(1u << i);
-                b->jm1[i] = 0.0052f * rng_frand2(&b->rng);
-                dt[i] = bank_dt1(b, i);           /* (this sample used the old jm1, as before) */
             }
-            v = t < BANK_DUTY ? 1.0f : -1.0f;
-            if (D8_UNLIKELY(t + d - 1u < d + d - 1u))
-                v += blep_fix(t, d);
-            if (D8_UNLIKELY(u + d - 1u < d + d - 1u))
-                v -= blep_fix(u, d);
+        }
+        int high = 0;
+        for (i = 0; i < 6; i++) {
+            const uint32_t d = dt[i], old = b->ph[i], t = old + d;
+            float v = t < BANK_DUTY ? 1.0f : -1.0f;
+            high += t < BANK_DUTY;
+            b->ph[i] = t;
+            if (drift || n == edge[i]) {
+                const uint32_t u = t - BANK_DUTY;
+                if (D8_UNLIKELY(t < old || (b->pend_wrap & (1u << i)))) {
+                    b->pend_wrap &= (uint8_t)~(1u << i);
+                    b->jm1[i] = 0.0052f * rng_frand2(&b->rng);
+                    dt[i] = bank_dt1(b, i);
+                }
+                if (D8_UNLIKELY(t + d - 1u < d + d - 1u))
+                    v += blep_fix(t, d);
+                if (D8_UNLIKELY(u + d - 1u < d + d - 1u))
+                    v -= blep_fix(u, d);
+                /* The next sample within one increment of a corner may
+                 * need a BLEP. Until then the square is exactly constant. */
+                uint32_t dist = t < BANK_DUTY ? BANK_DUTY - t : 0u - t;
+                uint32_t steps = dt[i] ? dist / dt[i] : (uint32_t)m;
+                if (steps > (uint32_t)(m - n)) steps = (uint32_t)(m - n);
+                edge[i] = n + (steps ? (int)steps : 1);
+            }
+            if (edge[i] < next) next = edge[i];
             sum += v * 2.5f;
         }
         bus[n] = sum * (1.0f / 21.0f);
-        if (cb_on)
-            pair[n] = ((b->ph[4] < BANK_DUTY ? 2.5f : -2.5f) + (b->ph[5] < BANK_DUTY ? 2.5f : -2.5f)) * 0.5f;
+        float pair_value = ((b->ph[4] < BANK_DUTY ? 2.5f : -2.5f) +
+                            (b->ph[5] < BANK_DUTY ? 2.5f : -2.5f)) * 0.5f;
+        if (cb_on) pair[n] = pair_value;
+        if (b->drift_cnt < next - n) next = n + b->drift_cnt;
+        int steady = next - n - 1;
+        if (steady > 0) {
+            /* With no BLEP each term is exactly +/-2.5, so the integer
+             * square count gives the same float sum in any addition order. */
+            float value = (float)(2 * high - 6) * 2.5f * (1.0f / 21.0f);
+            for (i = n + 1; i < next; ++i) bus[i] = value;
+            if (cb_on)
+                for (i = n + 1; i < next; ++i) pair[i] = pair_value;
+            for (i = 0; i < 6; ++i) b->ph[i] += (uint32_t)steady * dt[i];
+            b->drift_cnt -= steady;
+        }
+        n = next;
     }
 }
 

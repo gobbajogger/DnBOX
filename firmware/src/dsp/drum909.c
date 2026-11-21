@@ -30,8 +30,17 @@ D9_INLINE float d9_vca(float x)
 
 /* 9W9's back-to-back diode rounding at the two fixed drives the circuits use */
 /* inline with their tanh: they run per sample in the voice loops (no call) */
-D9_INLINE float d9_diode16(float x) { return d9_tanh_inline(1.6f * x) * D9_INV_TANH_1_6; }
-D9_INLINE float d9_diode20(float x) { return d9_tanh_inline(2.0f * x) * D9_INV_TANH_2_0; }
+/* These two callers take only d9_tri: its rounded integer fold gives [-1,1].
+ * Both fixed drives therefore stay inside the real interpolation table. */
+_Static_assert(2 * ((int)X0X_TANH_SCALE + 1) <= X0X_TANH_N, "fixed triangle drives must fit the tanh table");
+D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
+{
+    const float u = drive * x;
+    const float t = d9_tanh_table(fm_fabsf(u) * X0X_TANH_SCALE);
+    return (u < 0.0f ? -t : t) * gain;
+}
+D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
+D9_INLINE float d9_diode20(float x) { return d9_triangle_diode(x, 2.0f, D9_INV_TANH_2_0); }
 /* d9_shape with the diode (every voice's default type) inline, tanh included */
 D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
 {
@@ -950,45 +959,55 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
     const float pre = 1.0f + s->drive * 0.5f;
     const uint8_t *adpcm = s->adpcm;
     const uint32_t len = s->len;
-    /* Decode forward to sample pos+1 (to the last sample at the end): the same
-     * values as a fully decoded buffer. pos only goes up, so each sample is
-     * decoded once (up to 4 a sample at pitch x4). Drive and the shape type
-     * are constant for the block: one loop each, no per-sample branch. */
-#define D9_SMP_CORE \
-        float v = 0.0f; \
-        if (s->pos < len) { \
-            const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len; \
-            while (s->dk < need) { \
-                s->h0 = s->h1; \
-                s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx); \
-            } \
-            const int last = s->pos + 1 >= len; \
-            const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f); \
-            const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f); \
-            const float fr = (float)s->frac * (1.0f / 4294967296.0f); \
-            v = a + (b - a) * fr; \
-            const uint32_t f2 = s->frac + s->incf; \
-            s->pos += s->inc + (f2 < s->frac); \
-            s->frac = f2; \
-        } \
-        v *= d9_env_tick(&s->out);
-    if (!drive) {
-        for (int i = 0; i < m; ++i) { D9_SMP_CORE; bus->y[i] = v; }
-    } else if (s->shape.type == 0) {
-        const float k = s->shape.k, g = s->shape.g;
+    /* At the native sample rate, interpolation at fraction zero yields the
+     * exact integer sample. Keep the decoder's ordinary one-sample lookahead,
+     * including the priming nibble on a new hit. Endpoints, non-integral rates
+     * and an unaligned decoder take the general path. */
+    if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
+        s->pos < len && (unsigned)m < len - s->pos &&
+        (s->dk == s->pos || s->dk == s->pos + 1u)) {
+        if (s->dk == s->pos)
+            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
         for (int i = 0; i < m; ++i) {
-            D9_SMP_CORE;
-            v = d9_tanh_inline(k * (v * pre)) * g;
-            bus->y[i] = v;
+            s->h0 = s->h1;
+            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+            const float v = (float)s->h0 * (1.0f / 32768.0f);
+            bus->y[i] = v * d9_env_tick(&s->out);
         }
+        s->pos += (unsigned)m;
     } else {
         for (int i = 0; i < m; ++i) {
-            D9_SMP_CORE;
-            v = d9_shape_other(&s->shape, v * pre, s->crush_st);
-            bus->y[i] = v;
+            float v = 0.0f;
+            if (s->pos < len) {
+                const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
+                while (s->dk < need) {
+                    s->h0 = s->h1;
+                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+                }
+                const int last = s->pos + 1 >= len;
+                const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
+                const float b = last ? 0.0f : (float)s->h1 * (1.0f / 32768.0f);
+                const float fr = (float)s->frac * (1.0f / 4294967296.0f);
+                v = a + (b - a) * fr;
+                const uint32_t f2 = s->frac + s->incf;
+                s->pos += s->inc + (f2 < s->frac);
+                s->frac = f2;
+            }
+            bus->y[i] = v * d9_env_tick(&s->out);
         }
     }
-#undef D9_SMP_CORE
+    /* Drive reads this voice's decoded output in the original sample order.
+     * Its crush history is disjoint from the decoder and its output envelope. */
+    if (drive) {
+        if (s->shape.type == 0) {
+            const float k = s->shape.k, g = s->shape.g;
+            for (int i = 0; i < m; ++i)
+                bus->y[i] = d9_tanh_inline(k * (bus->y[i] * pre)) * g;
+        } else {
+            for (int i = 0; i < m; ++i)
+                bus->y[i] = d9_shape_other(&s->shape, bus->y[i] * pre, s->crush_st);
+        }
+    }
     d9_emit_block(bus, m);
 }
 
@@ -1084,18 +1103,44 @@ void drum909_render(drum909_t *d, float *dry, float *rev, float *dly, int n)
     d9_render(d, dry, rev, dly, n, 0x7FFu);
 }
 
-void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
-                             int n, uint16_t audible_tracks)
+/* All callers share pan, noise and serial voice state. The engine's 909 job
+ * owns two cleared dry buffers. If every pan stays at unity, the two buses
+ * get the same sequence of binary32 additions, and the mono render computes
+ * that sequence once. Other callers may already have unequal bus contents. */
+static void d9_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                                int n, uint16_t audible_tracks, int cleared)
 {
-    d9_dry_r = dry_r;
-    for (int v = 0; v < DR_NUM; ++v) {             /* every voice's pan glides, sounding or not */
+    int duplicate = cleared;
+    if (n > 256) n = 256;
+    for (int v = 0; v < DR_NUM; ++v) {
         d9_pl0[v] = d->pan_lc[v];
         d9_pr0[v] = d->pan_rc[v];
-        d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n > 256 ? 256 : n);
-        d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n > 256 ? 256 : n);
+        if (d9_pl0[v] == 1.0f && d9_pr0[v] == 1.0f &&
+            d->pan_l[v] == 1.0f && d->pan_r[v] == 1.0f) {
+            d->pan_dl[v] = d->pan_dr[v] = 0.0f;
+        } else {
+            duplicate = 0;
+            d->pan_dl[v] = x0x_glide_block(&d->pan_lc[v], d->pan_l[v], n);
+            d->pan_dr[v] = x0x_glide_block(&d->pan_rc[v], d->pan_r[v], n);
+        }
     }
+    d9_dry_r = duplicate ? 0 : dry_r;
     d9_render(d, dry_l, rev, dly, n, audible_tracks);
+    if (duplicate && n > 0)
+        __builtin_memcpy(dry_r, dry_l, (unsigned)n * sizeof *dry_l);
     d9_dry_r = 0;
+}
+
+void drum909_render_st_cleared(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                               int n, uint16_t audible_tracks)
+{
+    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 1);
+}
+
+void drum909_render_st_masked(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
+                              int n, uint16_t audible_tracks)
+{
+    d9_render_st_masked(d, dry_l, dry_r, rev, dly, n, audible_tracks, 0);
 }
 
 void drum909_render_st(drum909_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n)

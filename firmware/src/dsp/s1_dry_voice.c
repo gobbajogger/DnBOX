@@ -129,7 +129,7 @@ float s1_dry_cutoff(float base_hz, float depth, float envelope)
                     64.0f, 22050.0f);
 }
 
-static float filter_substep(s1_dry_voice *voice, float input)
+static inline __attribute__((always_inline)) float filter_substep(s1_dry_voice *voice, float input)
 {
     float *history = voice->filter_history;
     float A = voice->prepared.pole_retention;
@@ -150,24 +150,22 @@ void s1_dry_begin_block(s1_dry_voice *voice)
         voice->started = 0;
 }
 
-float s1_dry_sample(s1_dry_voice *voice)
+static void update_cutoff(s1_dry_voice *voice, float filter)
 {
-    if (!voice->started) return 0.0f;
-    float amp = dnbx_s1_envelope_sample(&voice->amp, &voice->prepared.amp,
-                                      voice->gate);
-    float filter = dnbx_s1_envelope_sample(&voice->filter,
-                                          &voice->prepared.filter, voice->gate);
     const s1_dry_controls *p = &voice->prepared.controls;
     float cutoff_hz = s1_dry_cutoff(p->cutoff_hz, p->filter_depth, filter);
     /* Update only when the filter envelope moves the effective cutoff. */
     if (cutoff_hz != voice->prepared.cached_cutoff_hz)
         prepare_filter(&voice->prepared, cutoff_hz);
+}
+
+static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, float amp, float component_gain)
+{
     float oscillator = 2.0f * voice->phase - 1.0f;
     /* The unbandlimited source is a periodic 4096-point raw ramp. Its last
      * phase interval interpolates the final point across the seam. */
     if (voice->phase >= 4095.f / 4096.f)
         oscillator -= 2.f * (4096.f * voice->phase - 4095.f);
-    float component_gain = (1.0f - p->balance) * p->oscillator1_level;
     float excitation = oscillator * component_gain;
     excitation *= voice->velocity_squared;
     excitation *= amp;
@@ -178,6 +176,61 @@ float s1_dry_sample(s1_dry_voice *voice)
     voice->phase += voice->phase_increment;
     if (voice->phase >= 1.0f) voice->phase -= 1.0f;
     return output;
+}
+
+static float component_gain(const s1_dry_voice *voice)
+{
+    const s1_dry_controls *p = &voice->prepared.controls;
+    return (1.0f - p->balance) * p->oscillator1_level;
+}
+
+float s1_dry_sample(s1_dry_voice *voice)
+{
+    if (!voice->started) return 0.0f;
+    float amp = dnbx_s1_envelope_sample(&voice->amp, &voice->prepared.amp, voice->gate);
+    float filter = dnbx_s1_envelope_sample(&voice->filter, &voice->prepared.filter, voice->gate);
+    update_cutoff(voice, filter);
+    return oscillator_filter(voice, amp, component_gain(voice));
+}
+
+/* Note, gate and parameter changes arrive between spans. Within a span the
+ * additive term stays fixed until the envelope crosses its attack threshold. */
+static float envelope_term(const dnbx_s1_envelope_state *state,
+                           const dnbx_s1_envelope_params *params)
+{
+    float target = state->stage == DNBX_S1_ENVELOPE_ATTACK ? 1.0f :
+                   state->stage == DNBX_S1_ENVELOPE_DECAY ? params->sustain : 0.0f;
+    return (1.0f - state->retention) * target;
+}
+
+static inline float advance_envelope(dnbx_s1_envelope_state *state,
+                                     const dnbx_s1_envelope_params *params,
+                                     float *term)
+{
+    if (state->stage == DNBX_S1_ENVELOPE_ATTACK && state->level >= 0.99f) {
+        state->stage = DNBX_S1_ENVELOPE_DECAY;
+        state->retention = params->decay_retention;
+        *term = envelope_term(state, params);
+    }
+    state->level = state->retention * state->level + *term;
+    return state->level;
+}
+
+void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames)
+{
+    if (!frames || !voice->started) return;
+    /* Apply pending gate edges and coefficient latches on the first frame. */
+    mix[0] += s1_dry_sample(voice);
+    float amp_term = envelope_term(&voice->amp, &voice->prepared.amp);
+    float filter_term = envelope_term(&voice->filter, &voice->prepared.filter);
+    const float gain = component_gain(voice);
+    const int modulated = voice->prepared.controls.filter_depth != 0.0f;
+    for (unsigned i = 1; i < frames; ++i) {
+        float amp = advance_envelope(&voice->amp, &voice->prepared.amp, &amp_term);
+        float filter = advance_envelope(&voice->filter, &voice->prepared.filter, &filter_term);
+        if (modulated) update_cutoff(voice, filter);
+        mix[i] += oscillator_filter(voice, amp, gain);
+    }
 }
 
 int s1_dry_render(s1_dry_voice *voice, float *mono, unsigned frames)

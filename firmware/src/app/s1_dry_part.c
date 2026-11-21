@@ -235,16 +235,13 @@ int s1_part_active(const s1_dry_part *part)
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     if (!frames) return;
-    for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+    memset(left, 0, frames * sizeof *left);
+    for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
         s1_dry_begin_block(&part->voice[i]);
-
-    for (unsigned f = 0; f < frames; ++f) {
-        float sample = 0.0f;
-        for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
-            if (part->voice[i].started) sample += s1_dry_sample(&part->voice[i]);
-        }
-        left[f] = right[f] = sample;
+        if (part->voice[i].started)
+            s1_dry_mix(&part->voice[i], left, frames);
     }
+    if (left != right) memcpy(right, left, frames * sizeof *left);
 
     /* The untouched INIT rate takes every input frame. Keep the last sample
      * for a live rate change without running the hold loop on a dry block. */
