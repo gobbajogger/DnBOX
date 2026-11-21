@@ -46,7 +46,7 @@ static const uint8_t original_sound_juno_factories[4][16] = {
 };
 static const char *const original_sound_juno_names[4] = {"SUPERJ6 POLY", "SUPERJ6 PAD", "SUPERJ6 PLUCK", "SUPERJ6 BRASS"};
 static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAMS] = {
-    {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0}
+    {"PBend",127,64,0},{"Damper",127,0,0},{"Crush",127,0,0},{"Width",127,0,0}
 };
 static const char *const original_sound_synthone_names[ORIGINAL_SYNTHONE_FACTORIES] = {
     "INIT"
@@ -180,16 +180,18 @@ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES])
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA) return 0;
-    int crush_edit = cell[29] == ORIGINAL_SOUND_SYNTHONE &&
-        (original_sound_edit_mask(cell) & (1u << ORIGINAL_SYNTHONE_CRUSH));
-    if (cell[31] != crush_edit ||
-        (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH])) return 0;
+    uint32_t mask = original_sound_edit_mask(cell);
+    uint32_t effects = (1u << ORIGINAL_SYNTHONE_CRUSH) | (1u << ORIGINAL_SYNTHONE_WIDTH);
+    if (cell[31] != (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & effects))) return 0;
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
+        for (unsigned i = ORIGINAL_SYNTHONE_CRUSH; i <= ORIGINAL_SYNTHONE_WIDTH; ++i)
+            if (!(mask & (1u << i)) && cell[i]) return 0;
+    }
     unsigned count = original_sound_count(cell[29]);
     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
 #if X0X_SYNTHONE_PATCH
-    uint32_t mask = original_sound_edit_mask(cell);
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
-        if (mask & ~(S1_PATCH_MASK | 7u)) return 0;
+        if (mask & ~(S1_PATCH_MASK | 15u)) return 0;
         for (unsigned i = 0; i < 22; ++i) {
             if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
         }
@@ -239,7 +241,7 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
         value > original_sound_param(cell[29], parameter)->max) return 0;
     uint32_t mask = original_sound_edit_mask(cell) | (UINT32_C(1) << parameter);
     cell[parameter] = (uint8_t)value;
-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter == ORIGINAL_SYNTHONE_CRUSH) cell[31] = 1;
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_CRUSH) cell[31] = 1;
     original_sound_put_mask(cell, mask);
     return 1;
 }

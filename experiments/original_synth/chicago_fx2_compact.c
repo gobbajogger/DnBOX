@@ -215,6 +215,13 @@ original_chicago_fx2_cold_owner original_chicago_fx2_compact_owner(original_chic
     return owner;
 }
 
+uint8_t *original_chicago_fx2_compact_free_history(const original_chicago_fx2_cold_owner *owner)
+{
+    if (!owner || owner->select_cold != select_cold) return 0;
+    original_chicago_fx2_compact *s = owner->context;
+    return live(s) && !s->selected ? (uint8_t *)&s->arena : 0;
+}
+
 int original_chicago_fx2_compact_events(original_chicago_fx2_compact *s,
     const original_chicago_drive_event *events,uint32_t n)
 {

@@ -5,7 +5,14 @@
 #include "s1_patch.h"
 #endif
 
-enum { S1_CORE_VOICES = 6 };
+enum { S1_CORE_VOICES = 6, S1_WIDTH_FIRST_FRAMES = 1365, S1_WIDTH_TAIL_BYTES = 2520 };
+
+typedef struct {
+    uint8_t *first;
+    uint8_t tail[S1_WIDTH_TAIL_BYTES];
+    unsigned position, pending;
+    float target, applied;
+} s1_stereo_width;
 
 typedef struct {
     s1_dry_voice voice[S1_CORE_VOICES];
@@ -14,6 +21,7 @@ typedef struct {
 #if X0X_SYNTHONE_PATCH
     s1_dry_controls patch;
 #endif
+    s1_stereo_width width;
 } s1_dry_part;
 
 /* Original bitCrushSampleRate is 2048..48000 Hz. Turning up the crush
@@ -21,6 +29,7 @@ typedef struct {
 static inline float s1_part_crush_hz(float amount) { return 48000.f - 45952.f * amount; }
 void s1_part_init(s1_dry_part *part);
 void s1_part_all_off(s1_dry_part *part);
+void s1_part_bind_width(s1_dry_part *part, uint8_t *history);
 #if X0X_SYNTHONE_PATCH
 int s1_patch_slot(unsigned factory_id);
 float s1_part_patch_value(const s1_dry_part *, unsigned slot);

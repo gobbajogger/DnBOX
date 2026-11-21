@@ -1,7 +1,11 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "original_runtime.h"
+#include "chicago_fx2_compact.h"
 #include "../x0x_cold.h"
 #include <string.h>
+
+typedef char s1_width_fits_retired_insert[
+    sizeof(((original_chicago_fx2_compact *)0)->arena) >= 3u * S1_WIDTH_FIRST_FRAMES ? 1 : -1];
 
 static int runtime_result(original_runtime_part *p, int ok)
 {
@@ -28,6 +32,7 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         rc=ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_init(&p->dsp.synthone);
+        s1_part_bind_width(&p->dsp.synthone, original_chicago_fx2_compact_free_history(fx));
 #if X0X_SYNTHONE_PATCH
         if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
 #endif
@@ -352,7 +357,9 @@ int original_runtime_env_view(const original_runtime_part *p, float adsr[4], flo
 int original_runtime_active(const original_runtime_part *p)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
-    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone) :
+    if (p->kind == ORIGINAL_SOUND_SYNTHONE)
+        return s1_part_active(&p->dsp.synthone) || p->dsp.synthone.width.pending;
+    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) :
         p->kind == ORIGINAL_SOUND_MIAMI ? original_miami_backend_active(&p->dsp.miami) :
         original_chicago_backend_active(&p->dsp.chicago);
 }

@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 3);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 4);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -215,6 +215,15 @@ static void verify_synthone(void)
     memcpy(copy, cell, sizeof cell);
     assert(!original_sound_set(cell, 0, 100) && !memcmp(cell, copy, 32));
     assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
+    uint8_t wet[32];
+    memcpy(wet, cell, sizeof wet);
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_WIDTH, 91));
+    assert(wet[31] == 1 && original_sound_valid(wet) && !original_sound_adopt_legacy_cell(wet));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_CRUSH, 74));
+    assert(wet[ORIGINAL_SYNTHONE_WIDTH] == 91 && wet[ORIGINAL_SYNTHONE_CRUSH] == 74);
+    assert(original_sound_edit_mask(wet) == 12u && original_sound_valid(wet));
+    wet[31] = 0;
+    assert(!original_sound_valid(wet));
     uint8_t bad[32] = {0};
 #if X0X_SYNTHONE_PATCH
     for (unsigned slot=0; slot<13; ++slot) {

@@ -20,8 +20,9 @@
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
 #define ORIGINAL_SYNTHONE_FACTORIES 1u
-#define ORIGINAL_SYNTHONE_NPARAMS 3u
+#define ORIGINAL_SYNTHONE_NPARAMS 4u
 #define ORIGINAL_SYNTHONE_CRUSH 2u
+#define ORIGINAL_SYNTHONE_WIDTH 3u
 #define ORIGINAL_SYNTHONE_INIT_FACTORY 0u
 #define ORIGINAL_CHICAGO_FX_CHOICES 12u
 
@@ -44,7 +45,7 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
 /* New firmware patch representation, not a legacy bank decoder:
  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
  * [29] engine kind; [30] selected factory index; [31] zero, or one for a
- * Synth One cell with an edited crush rate, distinguishing historical cells.
+ * Synth One cell with stock effect edits, distinguishing historical cells.
  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
  * restored-insert ones) and FxType stores a twelve-choice index.
  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id

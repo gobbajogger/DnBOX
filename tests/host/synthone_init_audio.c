@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "app/original_runtime.h"
 #include "app/bass_identity.h"
+#include "chicago_fx2_compact.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -169,10 +170,13 @@ static void patch_audio(void)
 static void crush_patch(void)
 {
     uint8_t cell[32], old[32];
-    const uint8_t old_tag[8] = {0x31,0x31,0x53,0x4f,ORIGINAL_SOUND_SCHEMA,0,2,BASS_IDENTITY_KNOWN};
+    uint8_t old_tag[8] = {0x31,0x31,0x53,0x4f,ORIGINAL_SOUND_SCHEMA,0,2,BASS_IDENTITY_KNOWN};
     const bass_identity_entry_t registry = {ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA,
                                              ORIGINAL_SYNTHONE_NPARAMS, 1};
     bass_identity_t identity;
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 3; /* Projects written with the stock CRUSH control. */
     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
     float amount;
@@ -199,8 +203,93 @@ static void crush_patch(void)
     assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
     assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
 }
+enum { TAP_FRAMES = 2205 };
+typedef struct {
+    uint32_t history[TAP_FRAMES];
+    unsigned pos, changed;
+    float wet;
+} width_reference;
+
+static void check_width(original_runtime_part *part, width_reference *ref, float target, unsigned n)
+{
+    float l[256], r[256];
+    assert(original_runtime_prepare(part, 120.f) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_render(part, &workspace, l, r, n) == ORIGINAL_RUNTIME_OK);
+    const float c2 = (float)pow(.5, (float)(1. / 44100.) / .1f);
+    for (unsigned i = 0; i < n; ++i) {
+        uint32_t tap = ref->history[ref->pos] & UINT32_C(0xffffff00);
+        float delayed;
+        memcpy(&delayed, &tap, sizeof delayed);
+        memcpy(&ref->history[ref->pos], &l[i], sizeof l[i]);
+        ref->pos = (ref->pos + 1) % TAP_FRAMES;
+        ref->wet = (1.f - c2) * target + c2 * ref->wet;
+        float expected = ref->wet * delayed + (1.f - ref->wet) * l[i];
+        assert(!memcmp(&r[i], &expected, sizeof expected));
+        if (l[i] != r[i]) ++ref->changed;
+    }
+}
+
+static void width_patch(void)
+{
+    static original_chicago_fx2_compact fx[2];
+    static original_chicago_tuning tuning;
+    static width_reference refs[2];
+    original_runtime_part *parts[] = {&part_a, &part_b};
+    original_chicago_fx2_cold_owner owners[2];
+    uint8_t saved[2][32], chicago[32];
+    float targets[2] = {0};
+    assert(original_chicago_tuning_bind(&tuning, 0, 0, NULL, 0x6d70));
+    for (unsigned v = 0; v < 2; ++v) {
+        assert(original_chicago_fx2_compact_init(&fx[v]));
+        owners[v] = original_chicago_fx2_compact_owner(&fx[v]);
+        assert(original_sound_init(saved[v], ORIGINAL_SOUND_SYNTHONE, 0));
+        assert(original_sound_set(saved[v], ORIGINAL_SYNTHONE_CRUSH, v ? 0 : 127));
+        assert(original_runtime_init(parts[v], saved[v], 120, &tuning, &owners[v]) == ORIGINAL_RUNTIME_OK);
+        key(parts[v], 47 + 15*v, 100);
+    }
+    /* Warm both rings at zero mix, then run distinct edits across 128 positions.
+     * The post-crush left channel is the independent source for the right tap. */
+    for (unsigned block = 0; block < 153; ++block) {
+        for (unsigned v = 0; v < 2; ++v) {
+            if (block >= 24) {
+                unsigned position = v ? (block - 24) % 128 : 127 - ((block - 24) % 128);
+                assert(original_sound_set(saved[v], ORIGINAL_SYNTHONE_WIDTH, position));
+                assert(original_sound_value(saved[v], ORIGINAL_SYNTHONE_WIDTH, &targets[v]));
+                assert(original_runtime_param(parts[v], ORIGINAL_SYNTHONE_WIDTH, targets[v]) == ORIGINAL_RUNTIME_OK);
+            }
+            check_width(parts[v], &refs[v], targets[v], block % 2 ? 113 : 256);
+        }
+    }
+    assert(refs[0].changed > 10000 && refs[1].changed > 10000);
+    /* Selection retires A's insert. B continues against its uninterrupted oracle. */
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_sound_init(chicago, ORIGINAL_SOUND_CHICAGO, 0));
+    assert(original_runtime_init(&part_a, chicago, 120, &tuning, &owners[0]) == ORIGINAL_RUNTIME_OK);
+    key(&part_a, 51, 100);
+    float scratch_l[256], scratch_r[256];
+    assert(original_runtime_render(&part_a, &workspace, scratch_l, scratch_r, 256) == ORIGINAL_RUNTIME_OK);
+    assert(!original_chicago_fx2_compact_free_history(&owners[0]));
+    check_width(&part_b, &refs[1], targets[1], 256);
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_init(&part_a, saved[0], 120, &tuning, &owners[0]) == ORIGINAL_RUNTIME_OK);
+    memset(&refs[0], 0, sizeof refs[0]);
+    key(&part_a, 73, 100);
+    for (unsigned i = 0; i < 18; ++i) {
+        check_width(&part_a, &refs[0], targets[0], 256);
+        check_width(&part_b, &refs[1], targets[1], 256);
+    }
+    assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
+    assert(refs[0].changed > 2048);
+    assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(!original_runtime_active(&part_a) && part_a.dsp.synthone.width.target == targets[0]);
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_retire(&part_b) == ORIGINAL_RUNTIME_OK);
+    puts("Stereo width: both owners, 128 edits, packed source tap, smoothing, switch, restore and panic passed.");
+}
+
 int main(void)
 {
+    width_patch();
     crush_patch();
 #if X0X_SYNTHONE_PATCH
     patch_audio();

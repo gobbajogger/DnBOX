@@ -50,6 +50,10 @@ int original_chicago_fx2_compact_init(original_chicago_fx2_compact *);
 int original_chicago_fx2_compact_supports(unsigned original_type);
 original_chicago_fx2_cold_owner original_chicago_fx2_compact_owner(original_chicago_fx2_compact *);
 
+/* The enclosing part may reuse its retired insert arena until the next Chicago
+ * selection. An unknown owner or an active selection has no available span. */
+uint8_t *original_chicago_fx2_compact_free_history(const original_chicago_fx2_cold_owner *owner);
+
 /* Immutable, sorted, unsigned EFFECT-INVOCATION LOCAL offsets after the real
  * owner's retiming. The stream is separate from backend engine events. Bind
  * before its actual FX invocation and retain records until consumed/rebound.

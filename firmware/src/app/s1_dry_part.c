@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "s1_dry_part.h"
+#include "../../../experiments/sound-hardware-v1/synthone-widen/widen.h"
 #include "../dsp/fastmath.h"
 #include <stddef.h>
 #if X0X_SYNTHONE_PATCH
@@ -17,6 +18,17 @@ void s1_part_init(s1_dry_part *part)
 #endif
 }
 
+/* The backend union contains the last 840 frames. Its owner's retired Chicago
+ * insert supplies the first 1365 frames. A dry-only host can omit that span. */
+typedef char s1_width_complete_history[
+    3 * S1_WIDTH_FIRST_FRAMES + S1_WIDTH_TAIL_BYTES == S1_WIDEN_BYTES ? 1 : -1];
+
+void s1_part_bind_width(s1_dry_part *part, uint8_t *history)
+{
+    part->width.first = history;
+    if (history) memset(history, 0, 3u * S1_WIDTH_FIRST_FRAMES);
+}
+
 void s1_part_all_off(s1_dry_part *part)
 {
     /* Panic clears notes and performance inputs but leaves the patch playing
@@ -25,8 +37,13 @@ void s1_part_all_off(s1_dry_part *part)
 #if X0X_SYNTHONE_PATCH
     memset(part, 0, offsetof(s1_dry_part, patch));
 #else
-    memset(part, 0, sizeof *part);
+    memset(part, 0, offsetof(s1_dry_part, width));
 #endif
+    if (part->width.first) {
+        memset(part->width.first, 0, 3u * S1_WIDTH_FIRST_FRAMES);
+        memset(part->width.tail, 0, sizeof part->width.tail);
+        part->width.position = part->width.pending = 0;
+    }
     part->bend = 0.5f;
     part->crush_interval = interval;
 }
@@ -150,7 +167,12 @@ static const float crush_intervals[128] = {
 
 int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
-    if (id > 2 || !(value >= 0.0f && value <= 1.0f)) return 0;
+    if (id > 3 || !(value >= 0.0f && value <= 1.0f)) return 0;
+    if (id == 3) {
+        if (value != 0.f && !part->width.first) return 0;
+        part->width.target = value;
+        return 1;
+    }
     if (id == 2) {
         unsigned position = (unsigned)(value * 127.f + .5f);
         part->crush_interval = crush_intervals[position];
@@ -232,6 +254,27 @@ int s1_part_active(const s1_dry_part *part)
     return part->crush_next > part->crush_age && part->crush_last != 0.f;
 }
 
+static void widen_right(s1_stereo_width *width, float *right, unsigned frames)
+{
+    if (!width->first) return;
+    unsigned position = width->position, pending = width->pending;
+    float wet = width->applied;
+    for (unsigned i = 0; i < frames; ++i) {
+        float input = right[i];
+        float delay = s1_widen_tap(width->first, S1_WIDTH_FIRST_FRAMES, width->tail, &position, input);
+        if (input != 0.f) pending = S1_WIDEN_FRAMES;
+        else if (pending) --pending;
+        /* Soundpipe port.c uses a 0.1-second half-time at 44.1 kHz. */
+        if (wet != 0.f || width->target != 0.f) {
+            wet = 0x1.49a000p-13f * width->target + 0x1.ffeb66p-1f * wet;
+            right[i] = wet * delay + (1.f - wet) * input;
+        }
+    }
+    width->position = position;
+    width->pending = pending;
+    width->applied = wet;
+}
+
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     if (!frames) return;
@@ -247,6 +290,7 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
      * for a live rate change without running the hold loop on a dry block. */
     if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
         part->crush_last = left[frames - 1u];
+        widen_right(&part->width, right, frames);
         return;
     }
     for (unsigned f = 0; f < frames; ++f) {
@@ -260,4 +304,5 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
         }
         part->crush_age += 1.f;
     }
+    widen_right(&part->width, right, frames);
 }

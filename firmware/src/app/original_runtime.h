@@ -16,6 +16,11 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
+/* The selected width history must fit the existing backend pool allocation. */
+typedef char s1_width_fits_backend_union[
+    sizeof(s1_dry_part) <= sizeof(original_miami_backend) ||
+    sizeof(s1_dry_part) <= sizeof(original_chicago_backend) ||
+    sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno) ? 1 : -1];
 typedef struct {
     original_runtime_backend dsp;
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
