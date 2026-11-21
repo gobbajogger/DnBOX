@@ -1,0 +1,510 @@
+{
+  "created_utc": "2026-11-18T23:07:40.390984+00:00",
+  "role": "independent review of root-executed exact native pair",
+  "no_new_build_test_emulator_run_by_reviewer": true,
+  "plans": [
+    {
+      "label": "compact-reference-elite-02",
+      "status": "PHYSICAL_LINK_FAILED",
+      "source_manifest_mismatches": [],
+      "compile_units": 74,
+      "compile_commands_exact": true,
+      "all_compilers_exit_zero": true,
+      "link_command_exact": true,
+      "link_exit": 1,
+      "first_start_utc": "2026-11-18T23:04:27.088217+00:00",
+      "last_end_utc": "2026-11-18T23:04:40.839045+00:00",
+      "independently_recomputed_map": {
+        "image_bytes": 553420,
+        "physical_free_bytes": -748,
+        "reserve_margin_bytes": -1772,
+        "pool_raw_free_bytes": 8972,
+        "pool_margin_above_8192": 780,
+        "pool_margin_beyond_required_512": 268,
+        "ordinary_ram_extent_bytes": 97204,
+        "ordinary_ram_free_bytes": 1100,
+        "xpool_free_bytes": 0
+      },
+      "map_matches_runner": true,
+      "artifact_hashes": {
+        "PLAN.json": "49971208c215f59d4ad0ccc1c7b0f7ce7a1c31b764c9cde6e49eda141258b313",
+        "COMMANDS.json": "0c2e280e281a22df159501cf97a499b1167d4b86d7f259c3e8bbeb1be0ead221",
+        "RESULT.json": "0b37f98942d4861a060bbc30913b97affbdc80f25c8484ff77fea8ea4e3f6d3e",
+        "app.map": "63aab078aebb7c012b1749e00988cf0f410613c880450231f0316b5037b2a668",
+        "physical-link.log": "62513f8c5e72cbad3ef8fa5aa1b8b674393cde49bfc0363aa37ec8dd3f9b0507"
+      },
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 549500,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34104220
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34106928
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34107536
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3888,
+          "lma": 29869056
+        }
+      }
+    },
+    {
+      "label": "compact-shared-elite-03",
+      "status": "LINK_MEASURED",
+      "source_manifest_mismatches": [],
+      "compile_units": 74,
+      "compile_commands_exact": true,
+      "all_compilers_exit_zero": true,
+      "link_command_exact": true,
+      "link_exit": 0,
+      "first_start_utc": "2026-11-18T23:04:50.334261+00:00",
+      "last_end_utc": "2026-11-18T23:05:03.983956+00:00",
+      "independently_recomputed_map": {
+        "image_bytes": 546924,
+        "physical_free_bytes": 5748,
+        "reserve_margin_bytes": 4724,
+        "pool_raw_free_bytes": 8972,
+        "pool_margin_above_8192": 780,
+        "pool_margin_beyond_required_512": 268,
+        "ordinary_ram_extent_bytes": 97204,
+        "ordinary_ram_free_bytes": 1100,
+        "xpool_free_bytes": 0
+      },
+      "map_matches_runner": true,
+      "artifact_hashes": {
+        "PLAN.json": "c1db664a35fd1c99e70b88c3d6586b30c0a1442b068338fa7f6f72fd163ba010",
+        "COMMANDS.json": "927671ae0d82fd8ebc893be31ebee318844ed8cade253b54408645035852812f",
+        "RESULT.json": "988b26a886702af7b0c7d35a1f23590a2fc4c49fe283b8d5bafc0a0195847300",
+        "app.map": "1908159f91f0e35493b9a3b5cfabc5b1d7aae75bbe151ebe87fbaf1a1cd733ed",
+        "physical-link.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 543004,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34097724
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34100432
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34101040
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3888,
+          "lma": 29869056
+        }
+      }
+    }
+  ],
+  "serialized": true,
+  "load_image_saving_bytes": 6496,
+  "text_delta_bytes": -6496,
+  "all_other_section_sizes_unchanged": true,
+  "six_declarations_are_only_noncomment_source_change": true,
+  "targeted_symbols": {
+    "fm_exp2_nf": [
+      {
+        "line": "020596c2 gw    F .text\t\t 00000066 fm_exp2_nf",
+        "address": 33920706,
+        "bytes": 102,
+        "binding": "weak-global"
+      }
+    ],
+    "fm_exp2f": [
+      {
+        "line": "0205ab32 gw    F .text\t\t 00000036 fm_exp2f",
+        "address": 33925938,
+        "bytes": 54,
+        "binding": "weak-global"
+      }
+    ],
+    "fm_expf": [
+      {
+        "line": "02059728 gw    F .text\t\t 0000005c fm_expf",
+        "address": 33920808,
+        "bytes": 92,
+        "binding": "weak-global"
+      }
+    ],
+    "fm_log2f": [
+      {
+        "line": "0205a26c gw    F .text\t\t 0000009a fm_log2f",
+        "address": 33923692,
+        "bytes": 154,
+        "binding": "weak-global"
+      }
+    ],
+    "fm_logf": [
+      {
+        "line": "02034ad0 l     F .text\t\t 00000012 fm_logf",
+        "address": 33770192,
+        "bytes": 18,
+        "binding": "local"
+      }
+    ],
+    "fm_db2lin": [
+      {
+        "line": "0205d904 gw    F .text\t\t 0000000e fm_db2lin",
+        "address": 33937668,
+        "bytes": 14,
+        "binding": "weak-global"
+      }
+    ]
+  },
+  "symbol_table_has_no_named_undefined": true,
+  "retained_soft_double_symbols": [],
+  "elf_sha256": "4d70c3c92ba2b9f1159dab1c4390909a692237b7dda7621418898030b78a6d36",
+  "disassembly_scope": {
+    ".text": {
+      "targeted_helper_reference_lines": 102,
+      "unknown_instruction_lines": 8940
+    },
+    ".ram_text": {
+      "targeted_helper_reference_lines": 0,
+      "unknown_instruction_lines": 0
+    },
+    ".c1_text": {
+      "targeted_helper_reference_lines": 0,
+      "unknown_instruction_lines": 0
+    }
+  },
+  "changed_input_sections": [
+    {
+      "section": ".text.d9_render",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 8128,
+      "candidate_bytes": 6532,
+      "delta_bytes": -1596
+    },
+    {
+      "section": ".text.voice_run",
+      "origin": "LTO",
+      "reference_bytes": 4960,
+      "candidate_bytes": 4384,
+      "delta_bytes": -576
+    },
+    {
+      "section": ".text.d9_render_clap",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 1084,
+      "candidate_bytes": 720,
+      "delta_bytes": -364
+    },
+    {
+      "section": ".text.master_process_st",
+      "origin": "build/smk37-elite/o2/dsp_master.o",
+      "reference_bytes": 1766,
+      "candidate_bytes": 1420,
+      "delta_bytes": -346
+    },
+    {
+      "section": ".text.fxbus_process_st",
+      "origin": "build/smk37-elite/o2/dsp_fxbus.o",
+      "reference_bytes": 934,
+      "candidate_bytes": 612,
+      "delta_bytes": -322
+    },
+    {
+      "section": ".text.d9_env_exp",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 578,
+      "candidate_bytes": 266,
+      "delta_bytes": -312
+    },
+    {
+      "section": ".text.busfx_apply",
+      "origin": "LTO",
+      "reference_bytes": 1670,
+      "candidate_bytes": 1380,
+      "delta_bytes": -290
+    },
+    {
+      "section": ".text.fm_exp2f",
+      "origin": "LTO",
+      "reference_bytes": 200,
+      "candidate_bytes": 0,
+      "delta_bytes": -200
+    },
+    {
+      "section": ".text.coef_ms",
+      "origin": "build/smk37-elite/o2/dsp_master.o",
+      "reference_bytes": 204,
+      "candidate_bytes": 24,
+      "delta_bytes": -180
+    },
+    {
+      "section": ".text.d8_exp",
+      "origin": "LTO",
+      "reference_bytes": 214,
+      "candidate_bytes": 38,
+      "delta_bytes": -176
+    },
+    {
+      "section": ".text.d8_expm1",
+      "origin": "LTO",
+      "reference_bytes": 322,
+      "candidate_bytes": 146,
+      "delta_bytes": -176
+    },
+    {
+      "section": ".text.d9_bt_trigger",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 746,
+      "candidate_bytes": 578,
+      "delta_bytes": -168
+    },
+    {
+      "section": ".text.fm_logf",
+      "origin": "LTO",
+      "reference_bytes": 182,
+      "candidate_bytes": 18,
+      "delta_bytes": -164
+    },
+    {
+      "section": ".text.fm_db2lin",
+      "origin": "build/smk37-elite/o2/dsp_master.o",
+      "reference_bytes": 156,
+      "candidate_bytes": 0,
+      "delta_bytes": -156
+    },
+    {
+      "section": ".text.fm_log2f",
+      "origin": "LTO",
+      "reference_bytes": 154,
+      "candidate_bytes": 0,
+      "delta_bytes": -154
+    },
+    {
+      "section": ".text.fm_exp2f",
+      "origin": "build/smk37-elite/o2/dsp_master.o",
+      "reference_bytes": 146,
+      "candidate_bytes": 0,
+      "delta_bytes": -146
+    },
+    {
+      "section": ".text.d8_pow",
+      "origin": "LTO",
+      "reference_bytes": 162,
+      "candidate_bytes": 18,
+      "delta_bytes": -144
+    },
+    {
+      "section": ".text.lane_mix",
+      "origin": "LTO",
+      "reference_bytes": 1600,
+      "candidate_bytes": 1456,
+      "delta_bytes": -144
+    },
+    {
+      "section": ".text.enter_stage",
+      "origin": "LTO",
+      "reference_bytes": 464,
+      "candidate_bytes": 322,
+      "delta_bytes": -142
+    },
+    {
+      "section": ".text.engine_drum_view",
+      "origin": "LTO",
+      "reference_bytes": 544,
+      "candidate_bytes": 404,
+      "delta_bytes": -140
+    },
+    {
+      "section": ".text.set_pot",
+      "origin": "LTO",
+      "reference_bytes": 578,
+      "candidate_bytes": 446,
+      "delta_bytes": -132
+    },
+    {
+      "section": ".text.soft_knee",
+      "origin": "build/smk37-elite/o2/dsp_master.o",
+      "reference_bytes": 376,
+      "candidate_bytes": 244,
+      "delta_bytes": -132
+    },
+    {
+      "section": ".text.brk_inc",
+      "origin": "LTO",
+      "reference_bytes": 220,
+      "candidate_bytes": 90,
+      "delta_bytes": -130
+    },
+    {
+      "section": ".text.cy_run",
+      "origin": "LTO",
+      "reference_bytes": 2974,
+      "candidate_bytes": 2848,
+      "delta_bytes": -126
+    },
+    {
+      "section": ".text.fm_exp2_nf",
+      "origin": "LTO",
+      "reference_bytes": 102,
+      "candidate_bytes": 0,
+      "delta_bytes": -102
+    },
+    {
+      "section": ".text.fm_expf",
+      "origin": "LTO",
+      "reference_bytes": 92,
+      "candidate_bytes": 0,
+      "delta_bytes": -92
+    },
+    {
+      "section": ".text.fm_expf",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 184,
+      "candidate_bytes": 92,
+      "delta_bytes": -92
+    },
+    {
+      "section": ".text.run_job",
+      "origin": "LTO",
+      "reference_bytes": 6400,
+      "candidate_bytes": 6314,
+      "delta_bytes": -86
+    },
+    {
+      "section": ".text.draw_drum_voice",
+      "origin": "LTO",
+      "reference_bytes": 4324,
+      "candidate_bytes": 4300,
+      "delta_bytes": -24
+    },
+    {
+      "section": ".text.draw_adsr_inline",
+      "origin": "LTO",
+      "reference_bytes": 2120,
+      "candidate_bytes": 2110,
+      "delta_bytes": -10
+    },
+    {
+      "section": ".text.adsr_layout",
+      "origin": "LTO",
+      "reference_bytes": 506,
+      "candidate_bytes": 502,
+      "delta_bytes": -4
+    },
+    {
+      "section": ".text.dv_glyph",
+      "origin": "LTO",
+      "reference_bytes": 2990,
+      "candidate_bytes": 3002,
+      "delta_bytes": 12
+    },
+    {
+      "section": ".text.fm_db2lin",
+      "origin": "build/smk37-elite/o2/dsp_fxbus.o",
+      "reference_bytes": 0,
+      "candidate_bytes": 14,
+      "delta_bytes": 14
+    },
+    {
+      "section": ".text.fm_exp2f",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 0,
+      "candidate_bytes": 54,
+      "delta_bytes": 54
+    },
+    {
+      "section": ".text.fm_exp2_nf",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 0,
+      "candidate_bytes": 102,
+      "delta_bytes": 102
+    },
+    {
+      "section": ".text.fm_log2f",
+      "origin": "build/smk37-elite/o2/dsp_drum909.o",
+      "reference_bytes": 0,
+      "candidate_bytes": 154,
+      "delta_bytes": 154
+    }
+  ],
+  "decision": "Accept exact Elite resource comparison and preserve optimization for qualification. No source-level arithmetic, ABI, ownership or state-boundary defect identified. Runtime identity/timing, production-base image and Pro remain unqualified."
+}

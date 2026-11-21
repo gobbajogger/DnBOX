@@ -1,0 +1,55 @@
+{
+  "current_source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+  "cases": [
+    {
+      "case": "old_truncated",
+      "exit_code": 0,
+      "envelope_comparisons": 4,
+      "output_not_reserved_and_compiler_not_reached": false,
+      "pass": true
+    },
+    {
+      "case": "fixed_original",
+      "exit_code": 0,
+      "envelope_comparisons": 5120,
+      "output_not_reserved_and_compiler_not_reached": false,
+      "pass": true
+    },
+    {
+      "case": "fixed_truncated",
+      "exit_code": 2,
+      "envelope_comparisons": null,
+      "output_not_reserved_and_compiler_not_reached": true,
+      "pass": true
+    },
+    {
+      "case": "fixed_changed_json",
+      "exit_code": 2,
+      "envelope_comparisons": null,
+      "output_not_reserved_and_compiler_not_reached": true,
+      "pass": true
+    },
+    {
+      "case": "fixed_changed_brief",
+      "exit_code": 2,
+      "envelope_comparisons": null,
+      "output_not_reserved_and_compiler_not_reached": true,
+      "pass": true
+    },
+    {
+      "case": "fixed_missing_csv",
+      "exit_code": 2,
+      "envelope_comparisons": null,
+      "output_not_reserved_and_compiler_not_reached": true,
+      "pass": true
+    },
+    {
+      "case": "fixed_incomplete_declaration",
+      "exit_code": 2,
+      "envelope_comparisons": null,
+      "output_not_reserved_and_compiler_not_reached": true,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

@@ -1,0 +1,4 @@
+LOCKED ctl_config: cannot read (ble/ctl/src/config.c): [Errno 2] No such file or directory: '/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/ble/ctl/src/config.c'
+LOCKED ctl_ble_irq_prio: cannot read (ble/ctl/src/ctl_port.h): [Errno 2] No such file or directory: '/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/ble/ctl/src/ctl_port.h'
+check_locked_settings: 2 setting(s) differ from tools/locked_settings.json. Change the JSON in its own commit that names the setting, and add a BLE_ATTEMPTS.md row.
+build.py: locked settings differ (see above); the build stops

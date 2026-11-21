@@ -14,9 +14,10 @@
  *   fm_sinf / fm_cosf abs 1e-6 on [-100, 100] (three-part 2pi reduction)
  *   fm_tanf   rel 1e-6 on (-pi/2, pi/2)   fm_sqrtf rel 2e-7
  *
- * The hot helpers are static inline. floor, sin, and cos are one shared body
- * (still inlined at a hot call). None may be called with NaN; none returns a
- * denormal for an in-range argument. */
+ * Small hot helpers are static inline. On native Clang, the FM_ONE exp/log and
+ * floor/sin/cos/wrap helpers share outlined bodies and remain visible for hot
+ * inlining. Host and non-Clang builds use static inline for all helpers. None
+ * may be called with NaN; none returns a denormal for an in-range argument. */
 #pragma once
 #include <stdint.h>
 
@@ -56,7 +57,7 @@ FM_ONE float fm_floorf(float x)
 }
 
 /* 2^n * 2^f for an integer n and |f| <= 0.5 (or a little more) */
-static inline float fm_exp2_nf(int32_t n, float f)
+FM_ONE float fm_exp2_nf(int32_t n, float f)
 {
     fm_bits_t b;
     float p;
@@ -77,7 +78,7 @@ static inline float fm_exp2_nf(int32_t n, float f)
 }
 
 /* 2^x. Split x = n + f, f in [-0.5, 0.5]; fitted polynomial for 2^f. */
-static inline float fm_exp2f(float x)
+FM_ONE float fm_exp2f(float x)
 {
     float fl;
     if (x < -126.0f)
@@ -89,7 +90,7 @@ static inline float fm_exp2f(float x)
 }
 
 /* e^x with Cody-Waite reduction: x = n ln2 + r, so |x| * eps never reaches the result */
-static inline float fm_expf(float x)
+FM_ONE float fm_expf(float x)
 {
     float n;
     if (x < -87.3f)
@@ -102,7 +103,7 @@ static inline float fm_expf(float x)
 }
 
 /* log2(x), x > 0 (denormals and 0 return -126 / -127-ish, never NaN) */
-static inline float fm_log2f(float x)
+FM_ONE float fm_log2f(float x)
 {
     fm_bits_t b;
     float m, t, t2, p;
@@ -128,7 +129,7 @@ static inline float fm_log2f(float x)
     return (float)e + p * t;
 }
 
-static inline float fm_logf(float x) { return fm_log2f(x) * FM_LN2; }
+FM_ONE float fm_logf(float x) { return fm_log2f(x) * FM_LN2; }
 
 /* x^y for x > 0 (x <= 0 returns 0) */
 static inline float fm_powf(float x, float y)
@@ -139,7 +140,7 @@ static inline float fm_powf(float x, float y)
 }
 
 /* 10^(db/20) */
-static inline float fm_db2lin(float db) { return fm_exp2f(db * 0.166096405f); }
+FM_ONE float fm_db2lin(float db) { return fm_exp2f(db * 0.166096405f); }
 
 static inline float fm_tanhf(float x)
 {

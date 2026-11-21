@@ -1,0 +1,80 @@
+{
+  "meaning": "Existing package inputs/receipts referenced without duplicating trace fixtures or build trees.",
+  "files": [
+    {
+      "package_relative_path": "candidate_review/ACCEPTANCE-DECLARATION.json",
+      "sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "bytes": 3158
+    },
+    {
+      "package_relative_path": "candidate_review/frozen_01/RESULT.json",
+      "sha256": "40d96983b42dab6b2e0fd188dccde2c6bab0d79ae32701b72af3cf7a8a8ee237",
+      "bytes": 36975
+    },
+    {
+      "package_relative_path": "candidate_review/frozen_03/RESULT.json",
+      "sha256": "5befcd92b374b599f0c9cef175074d3a34769a84b43c28b635b73a66d37e3f0b",
+      "bytes": 37423
+    },
+    {
+      "package_relative_path": "candidate_review/frozen_03/envelope_case1.csv",
+      "sha256": "975d76d53785a5af87ba465bc0f699328d1d6d43f33ac49cc52296da7e737684",
+      "bytes": 709075
+    },
+    {
+      "package_relative_path": "candidate_review/frozen_03/envelope_case2.csv",
+      "sha256": "ede78b05372691c4a67ef9bb5f3ff5c1ee5f01d8908d9ee75e3f599c1d6be9ae",
+      "bytes": 2862755
+    },
+    {
+      "package_relative_path": "candidate_review/compact_profile_review/RESULT.json",
+      "sha256": "aa2c13c553de2eafee5724d55ad64e5a6cf56ad0c9b244b3494e743423e84491",
+      "bytes": 155333
+    },
+    {
+      "package_relative_path": "candidate_review/compact_profile_review/PUBLIC-BOUNDARIES.json",
+      "sha256": "45fbf243626768128df88c51605af8f227bbfcc5300a94f1e32f953562032075",
+      "bytes": 37289
+    },
+    {
+      "package_relative_path": "candidate_review/callback_audit/RESULT.json",
+      "sha256": "bd214aa675b05e15faf6facd21ad214157d864b6020e67fbebfc2a2325b8ef92",
+      "bytes": 14081
+    },
+    {
+      "package_relative_path": "candidate_review/callback_audit/ZERO-STAGE-RESULT.json",
+      "sha256": "9f177b336c701e0e783368cca49956e28be645d5f0cb70bdc2826913b1134e3f",
+      "bytes": 1379
+    },
+    {
+      "package_relative_path": "candidate_review/history/verify_candidate.py",
+      "sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594",
+      "bytes": 20303
+    },
+    {
+      "package_relative_path": "candidate_review/history/verify_compact_profile.py",
+      "sha256": "1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9",
+      "bytes": 12916
+    },
+    {
+      "package_relative_path": "candidate_review/history/check_compact_public_boundaries.py",
+      "sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18",
+      "bytes": 3805
+    },
+    {
+      "package_relative_path": "mapping/results/implementer_brief/BEHAVIOR-BRIEF.md",
+      "sha256": "a6d6856c4ad2f1487ddd2cebacaf0416449c7307a61db2f0c4c6834b056c16eb",
+      "bytes": 12335
+    },
+    {
+      "package_relative_path": "mapping/results/implementer_brief/recorded_envelope_behavior.json",
+      "sha256": "2f8ab03b1ce874381ae8deb4afd66d016220880512b51c9e2fbe1d63f0f98210",
+      "bytes": 12653
+    },
+    {
+      "package_relative_path": "mapping/results/implementer_brief/amp_observed_levels.csv",
+      "sha256": "e6578b0e5861b7ef73fea6822f8848b897065a66a71fded5db08710dea201b6f",
+      "bytes": 398556
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "scope": "Saved raw candidate PCM hash identity, not a rerender",
+  "case_files": 15,
+  "notes": 45,
+  "identical_files": 15,
+  "rows": [
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "2459fff76d18a197a5598bef9ace35117f89d5ebc37fe774b1e2c3cb97a8fc4d",
+      "C_candidate_sha256": "2459fff76d18a197a5598bef9ace35117f89d5ebc37fe774b1e2c3cb97a8fc4d",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "4862bb90a45384b395f3ace185a2137aed74c8d9cbc760425eee7e00a29a2d1c",
+      "C_candidate_sha256": "4862bb90a45384b395f3ace185a2137aed74c8d9cbc760425eee7e00a29a2d1c",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "54ed1fd20bb2f86e63a1924054e4d2d9425433fb54f7d38d74fd159f16f15390",
+      "C_candidate_sha256": "54ed1fd20bb2f86e63a1924054e4d2d9425433fb54f7d38d74fd159f16f15390",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "c06c1686cca09151bf7ca95ab7cd47c4fce9db47bb8a8ff4cd9b8ed378147a27",
+      "C_candidate_sha256": "c06c1686cca09151bf7ca95ab7cd47c4fce9db47bb8a8ff4cd9b8ed378147a27",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "8328a3a42cac971701d447fec78c7078afd6e37b6d7f01f03c419d186524a14a",
+      "C_candidate_sha256": "8328a3a42cac971701d447fec78c7078afd6e37b6d7f01f03c419d186524a14a",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "d890415df2daa2ced296184af71971399f8c6082ab6bb4748191b964ff1eafb9",
+      "C_candidate_sha256": "d890415df2daa2ced296184af71971399f8c6082ab6bb4748191b964ff1eafb9",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "8e86886b696576c14afa32873b047cc0bd27028c942366ac6ac0be011d34faf2",
+      "C_candidate_sha256": "8e86886b696576c14afa32873b047cc0bd27028c942366ac6ac0be011d34faf2",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "a1987586e01c3b6fd2196c1b0fafbc1a853e467a2b2ad3ac1b515c809e26172e",
+      "C_candidate_sha256": "a1987586e01c3b6fd2196c1b0fafbc1a853e467a2b2ad3ac1b515c809e26172e",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "c499de0eb0c5782e1b9bbffb45a98b490e993b0d439cb5425cbbee5a8918a2de",
+      "C_candidate_sha256": "c499de0eb0c5782e1b9bbffb45a98b490e993b0d439cb5425cbbee5a8918a2de",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "975dfc39eba736de8f70a5c86f01cc8a41fef2df8a0582fd1bd5aa9f72882aa4",
+      "C_candidate_sha256": "975dfc39eba736de8f70a5c86f01cc8a41fef2df8a0582fd1bd5aa9f72882aa4",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "773d120725b619891d45714dd5c445e993631fcd331086be299b5ef1a40c6bc8",
+      "C_candidate_sha256": "773d120725b619891d45714dd5c445e993631fcd331086be299b5ef1a40c6bc8",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "71c500fe413ffd46baf4483c102295543d5bc06c40af4cb20375d5867f9c41eb",
+      "C_candidate_sha256": "71c500fe413ffd46baf4483c102295543d5bc06c40af4cb20375d5867f9c41eb",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "8f14fe0b6c5c33e2ca6249dff2fe869bc5f57ac9bcdbb2f5979c7803b5c08132",
+      "C_candidate_sha256": "8f14fe0b6c5c33e2ca6249dff2fe869bc5f57ac9bcdbb2f5979c7803b5c08132",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/20_64_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "20d15f17e0a8b617d678e4895100b9f3c5528e341ebf7e48c250596f816cc33b",
+      "C_candidate_sha256": "20d15f17e0a8b617d678e4895100b9f3c5528e341ebf7e48c250596f816cc33b",
+      "identical": true
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "bytes": 1058304,
+      "B_candidate_sha256": "137d94f7e628aa7981447f13c7b9cb8afb7dd778aac4d63058892369d5a27d68",
+      "C_candidate_sha256": "137d94f7e628aa7981447f13c7b9cb8afb7dd778aac4d63058892369d5a27d68",
+      "identical": true
+    }
+  ]
+}

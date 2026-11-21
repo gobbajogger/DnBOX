@@ -152,6 +152,9 @@ def fingerprint():
         _add_file(hasher, path)
     for path in _wavs(SRC / "assets" / "909"):
         _add_file(hasher, path)
+    encoded = SRC / "assets" / "909" / "encoded"
+    for name in ("hh.adpcm", "ride.adpcm", "crash.adpcm", "manifest.json"):
+        _add_file(hasher, encoded / name)
     if mode == "factory":
         for path in sorted((SRC / "assets" / "factory-breaks").iterdir()):
             if path.name == "pack.txt" or path.suffix == ".adpcm":

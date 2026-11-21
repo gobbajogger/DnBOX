@@ -1,0 +1,88 @@
+--- a/firmware/hal/smk_input.h
++++ b/firmware/hal/smk_input.h
+@@ -409,4 +409,7 @@
+ }
+
++/* TIMER5 owns the scan. Pair the latest accepted detent with its accumulated delta. */
++static uint32_t smk_detent_ms[FM1_NENC];
++
+ static void smk__encoders(void)                    /* stock decoder: 3-state window, 4 counts a cycle */
+ {
+@@ -434,4 +437,5 @@
+             int32_t s = fm1_in.enc_cnt[e] / SMK_ENC_DIV;
+             fm1_in.enc_steps[e] = (int16_t)(fm1_in.enc_steps[e] + s);
++            smk_detent_ms[e] = fm1_ms;
+             fm1_in.enc_cnt[e] = (int16_t)(fm1_in.enc_cnt[e] - s * SMK_ENC_DIV);
+         }
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -1178,4 +1178,5 @@
+         uint32_t l = fm1__lock();
+         fm1_in.enc_steps[panel.enc[EN_SELECT]] += (int16_t)(d * panel.dir[EN_SELECT]);
++        smk_detent_ms[panel.enc[EN_SELECT]] = fm1_ms;
+         fm1__unlock(l);
+     }
+--- a/firmware/src/app/plat_fm1.c
++++ b/firmware/src/app/plat_fm1.c
+@@ -123,4 +123,9 @@
+ }
+
++#if BOARD_SMK37
++/* ui_knobs dispatches each successful read before reading another role. */
++static uint32_t panel_turn_ms;
++#endif
++
+ int32_t plat_enc(int role)
+ {
+@@ -136,6 +141,14 @@
+ #endif
+         return 0;   /* clip mode: knobs 2-8 send CCs (main_fm1.c ck_controls); knob 1 stays MASTER. Pad calibration: K2-K4 */
+-#endif
++    unsigned e = panel.enc[role];
++    uint32_t flags = fm1__lock();
++    int32_t steps = fm1_in.enc_steps[e];
++    fm1_in.enc_steps[e] = 0;
++    panel_turn_ms = smk_detent_ms[e];
++    fm1__unlock(flags);
++    return steps * panel.dir[role];
++#else
+     return fm1_enc_take(panel.enc[role]) * panel.dir[role];
++#endif
+ }
+
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -2830,5 +2830,10 @@
+ static int32_t accel(int role, int32_t s, int range)
+ {
+-    uint32_t now = plat_ms(), dt = now - ui.enc_t[role], a = (uint32_t)(s < 0 ? -s : s), m;
++#if BOARD_SMK37 && !defined(X0X_HOST)
++    uint32_t now = accel_smc ? plat_ms() : panel_turn_ms;
++#else
++    uint32_t now = plat_ms();
++#endif
++    uint32_t dt = now - ui.enc_t[role], a = (uint32_t)(s < 0 ? -s : s), m;
+     ui.enc_t[role] = now;
+     if (!a)
+@@ -4119,4 +4124,7 @@
+     if (list_sub_arrow(r, d))
+         return d > 0;                                 /* the caller consumes this held category-entry arrow */
++#if BOARD_SMK37 && !defined(X0X_HOST)
++    panel_turn_ms = plat_ms();                   /* menu arrow dispatch has no encoder detent */
++#endif
+     turn_ref(r, d, EN_ALGO);
+     ui.act_t = plat_ms();                             /* (the autosave waits for quiet) */
+--- a/firmware/src/x0x.c
++++ b/firmware/src/x0x.c
+@@ -9,4 +9,5 @@
+ #include "fm1_irq.h"
+ #include "fm1_guard.h"
++static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIMER5 ISR) */
+ #if BOARD_SMK37
+ #define SMK_BIG __attribute__((section(".pool")))   /* SMK buffers in the pool (zeroed at boot): .data+.bss is full */
+@@ -36,5 +37,4 @@
+ #include "gfx.c"
+
+-static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIMER5 ISR) */
+ #define RING_PUBLISH() __asm__ volatile("" ::: "memory")
+ static inline int32_t clamp(int32_t v, int32_t lo, int32_t hi) { return v < lo ? lo : v > hi ? hi : v; }

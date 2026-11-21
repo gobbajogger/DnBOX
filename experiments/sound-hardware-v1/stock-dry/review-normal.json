@@ -1,0 +1,177 @@
+[
+  {
+    "scene": "baseline",
+    "original": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "candidate": "e9c1fe7da00039449eff5e335706b59a7e235a45a0023007fd21d2948b03ac24",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -53.292696611142276,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -22.599255485288516,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -45.16131382811689,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      }
+    ]
+  },
+  {
+    "scene": "held-quiet-balanced",
+    "original": "f4c84a965d4896d6d19d5dd3cf46878644f9dff84b9f63c3294aecf8e0676445",
+    "candidate": "a6bc898af48cec8bd1d6d4d93806b3824376c90084c70e102be07535b73bcc02",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -49.423714777086694,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -24.126294645521185,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -46.48281630638755,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      }
+    ]
+  },
+  {
+    "scene": "held-quiet",
+    "original": "f4c84a965d4896d6d19d5dd3cf46878644f9dff84b9f63c3294aecf8e0676445",
+    "candidate": "dbc921904cbe3aeef5c8f0cbb61022d8f207c8f1f41fa66286b559c080723775",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -49.423714777086694,
+        "last_orig": 0.0,
+        "last_candidate": 0.02116849645972252
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -24.126294645521185,
+        "last_orig": 0.0,
+        "last_candidate": 0.01752716302871704
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -46.48281630638755,
+        "last_orig": 0.0,
+        "last_candidate": 0.02240486815571785
+      }
+    ]
+  },
+  {
+    "scene": "held-repeat-balanced",
+    "original": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "candidate": "e9c1fe7da00039449eff5e335706b59a7e235a45a0023007fd21d2948b03ac24",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -53.292696611142276,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -22.599255485288516,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -45.16131382811689,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      }
+    ]
+  },
+  {
+    "scene": "held-repeat",
+    "original": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "candidate": "97ae754d88b204bb8556d1c0e0e5e9212903815e3c8753ca1e2ec25c6dd77ecc",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -53.292696611142276,
+        "last_orig": 0.0,
+        "last_candidate": 0.13230305910110474
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -22.599255485288516,
+        "last_orig": 0.0,
+        "last_candidate": 0.1095447689294815
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -45.16131382811689,
+        "last_orig": 0.0,
+        "last_candidate": 0.1400303840637207
+      }
+    ]
+  },
+  {
+    "scene": "release-quiet",
+    "original": "1c217791d35e0acdc7ca1098945aa4e7d77876660a84b6ae2579b54ca95c1adb",
+    "candidate": "ed3dd9bc8239dce6b9e4be00f6001cf04e0d74d4be920234831b7f4eac6a0337",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -50.37705521945411,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -23.117193922946257,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -46.029008769071915,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      }
+    ]
+  },
+  {
+    "scene": "release-repeat",
+    "original": "bdc2960e6c5cb6f63469f90815b141f408b86ee5f20d189132782329a85cd990",
+    "candidate": "3a47aac62e81ff0aa8ff80bb6bbd7072c4e58849eeecf44357bce0e6331db4b7",
+    "rows": [
+      {
+        "note": 36,
+        "onset_relative_error_db": -53.363294374044145,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 60,
+        "onset_relative_error_db": -22.35972936348267,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      },
+      {
+        "note": 84,
+        "onset_relative_error_db": -45.2034097692957,
+        "last_orig": 0.0,
+        "last_candidate": 0.0
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "utc": "2026-11-18T23:04:11.294416+00:00",
+  "executor": "local exec_command runtime; no RDC call or fallback",
+  "hostname": "024c984ba261",
+  "kernel": "6.18.57",
+  "pid_namespace": "pid:[4026532393]",
+  "cgroup": "0::/\n",
+  "process_visibility": "exec namespace only; no global process absence inferred",
+  "mem_total_bytes": 10451427328,
+  "mem_available_bytes": 8845271040,
+  "min_admission_bytes": 3200000000,
+  "disk_available_bytes": 41848303616,
+  "runner_sha256": "f896e0fd8ce2719876271476db261002d0909392e8059158427d80118a3b396e",
+  "plans": [
+    {
+      "label": "compact-reference-elite-02",
+      "plan_sha256": "49971208c215f59d4ad0ccc1c7b0f7ce7a1c31b764c9cde6e49eda141258b313",
+      "source_files": 359,
+      "compile_units": 74,
+      "input_check": "PASS",
+      "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+      "linker_sha256": "fd61aff15616bb6f6b58fd2e9ede7af741c7bf05facb3e0cb3d3c9817c268fd9",
+      "link_script_sha256": "4a45da2deaa8825d1e20c26a92cc5f317f28151d6fc55af28ccbf3e8ee3cefdd"
+    },
+    {
+      "label": "compact-shared-elite-03",
+      "plan_sha256": "c1db664a35fd1c99e70b88c3d6586b30c0a1442b068338fa7f6f72fd163ba010",
+      "source_files": 359,
+      "compile_units": 74,
+      "input_check": "PASS",
+      "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+      "linker_sha256": "fd61aff15616bb6f6b58fd2e9ede7af741c7bf05facb3e0cb3d3c9817c268fd9",
+      "link_script_sha256": "4a45da2deaa8825d1e20c26a92cc5f317f28151d6fc55af28ccbf3e8ee3cefdd"
+    }
+  ],
+  "toolchain_versions": [
+    {
+      "binary": "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/bin/clang",
+      "returncode": 0,
+      "stdout": "clang version 4.0.1 () ()\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/bin\n",
+      "stderr": ""
+    },
+    {
+      "binary": "/workspace/scratch/67e685478953/superj6_research/build_inputs/extracted/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
+      "returncode": 0,
+      "stdout": "GNU ld (GNU Binutils) 2.26.51.20160621\nCopyright (C) 2016 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) a later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    }
+  ],
+  "allocation": "PR973 comment6993878224; two serialized Elite full-closure links, reference then shared only",
+  "other_current_workers": "three read-only subagents; no parallel compile/test authorized",
+  "scope": "resource experiment; no fidelity/sanitizer/gate/production acceptance"
+}

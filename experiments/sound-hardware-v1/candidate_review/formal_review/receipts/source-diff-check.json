@@ -1,0 +1,24 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check",
+    "--",
+    "experiments/sound-hardware-v1/hardware_candidate/src",
+    "experiments/sound-hardware-v1/hardware_candidate/tests",
+    "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/dnbx_core.c",
+    "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/dnbx_core.h",
+    "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+    "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+    "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py",
+    "experiments/sound-hardware-v1/candidate_review/run_callback_audit.py",
+    "experiments/sound-hardware-v1/reproduce_native.py",
+    "docs/lanes/sound.md",
+    "docs/sound/hardware-first-owner-report.md"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "",
+  "scope": "New live source, tests/runners, and owner/lane prose; immutable numeric CSV/native tool outputs intentionally excluded from formatting."
+}

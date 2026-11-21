@@ -1,0 +1,1688 @@
+{
+  "created_at_utc": "2026-11-18T15:15:54.735039+00:00",
+  "source": "Faithful copies of current staged Git blobs; no shared project writes.",
+  "input_manifest": [
+    {
+      "path": "experiments/sound-hardware-v1/.gitignore",
+      "bytes": 35,
+      "sha256": "4d3370cdc2d3050f89f06abe8d38b00ceddc092dc1985dbe977b63f617bbc094"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/README.md",
+      "bytes": 3890,
+      "sha256": "279169f05bfb93ed67843bccf42b241afca3ca24af8c7f4c99522a83136dd570"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/ACCEPTANCE-DECLARATION.json",
+      "bytes": 3158,
+      "sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/COMPACT-ACCEPTANCE-DECLARATION.json",
+      "bytes": 955,
+      "sha256": "4a88cf8e5e78137999c33d07ba2f41cad368101ae6a60414bac1cb5f14eda8d4"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/INDEPENDENT-REVIEW.md",
+      "bytes": 17922,
+      "sha256": "8201cc448b814c27890d5b44783a7059c94b3fd322a0652011016704d1f44405"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/MANIFEST.json",
+      "bytes": 11459,
+      "sha256": "d231946986eeece257dbb2693f2ee814d02373ed25bfe58ad720e671584497e3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/REPLAY-PRESERVATION-CHECK.json",
+      "bytes": 600,
+      "sha256": "54b50108864eb90f684a78d7170f7ced608cad577d712ec294513194baf6db9e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/REVIEW-SUMMARY.json",
+      "bytes": 10440,
+      "sha256": "30c03509e77d6034ec2f5b3e87728683671fb3b866f8e41f36ca4f2f897b92ad"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_audit/COMMANDS.json",
+      "bytes": 1525,
+      "sha256": "38dfd139c15909f1545fe71c81fa351fe33fda316123e19811e47b08fd31054e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_audit/RESULT.json",
+      "bytes": 14081,
+      "sha256": "bd214aa675b05e15faf6facd21ad214157d864b6020e67fbebfc2a2325b8ef92"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_audit/ZERO-STAGE-RESULT.json",
+      "bytes": 1379,
+      "sha256": "9f177b336c701e0e783368cca49956e28be645d5f0cb70bdc2826913b1134e3f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_audit/dnbx_core_trace.c",
+      "bytes": 20052,
+      "sha256": "c967a4613e98f4ab21d06519a2d1a2475bf7f0407d74ee648af7d58133dcefff"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_audit/first_attempt/METADATA-FAILURE.json",
+      "bytes": 219,
+      "sha256": "2ce2e054e062ceee4c722e7b3aaebad7d0791caf6728ca07072e298a23610575"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/callback_probe.c",
+      "bytes": 5870,
+      "sha256": "9ee590e9fd695e9c2ae512749b630b4f8ac30b76006606467fc55dde4297202e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py",
+      "bytes": 3805,
+      "sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/COMMANDS.json",
+      "bytes": 1927,
+      "sha256": "1e8fe9e8c7f554b84cfb4af185da77ffc62dc602e209c8b4474f729425b137bf"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/PUBLIC-BOUNDARIES.json",
+      "bytes": 37289,
+      "sha256": "45fbf243626768128df88c51605af8f227bbfcc5300a94f1e32f953562032075"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/RESULT.json",
+      "bytes": 155333,
+      "sha256": "aa2c13c553de2eafee5724d55ad64e5a6cf56ad0c9b244b3494e743423e84491"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/accepted.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/compact.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/diagnostic.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/invalid_profile.build.log",
+      "bytes": 386,
+      "sha256": "4a0268d6a8dcdb74e4d57e2e07cbe8e2fd26e351dd3d59b07c68421ad9926f4c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/snapshot/dnbx_core.c",
+      "bytes": 19939,
+      "sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/snapshot/dnbx_core.h",
+      "bytes": 7939,
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/compact_profile_review/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/COMMANDS.json",
+      "bytes": 482,
+      "sha256": "e7caf5a1aeb85b79d5d10282df72c33113ca10a32a305e10957caa069bf377f5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/RESULT.json",
+      "bytes": 36975,
+      "sha256": "40d96983b42dab6b2e0fd188dccde2c6bab0d79ae32701b72af3cf7a8a8ee237"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/envelope_case1.csv",
+      "bytes": 709075,
+      "sha256": "975d76d53785a5af87ba465bc0f699328d1d6d43f33ac49cc52296da7e737684"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/envelope_case2.csv",
+      "bytes": 2862755,
+      "sha256": "ede78b05372691c4a67ef9bb5f3ff5c1ee5f01d8908d9ee75e3f599c1d6be9ae"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/snapshot/dnbx_core.c",
+      "bytes": 18965,
+      "sha256": "9165342a98263af67e5ce81ebeef6df57ed35a2a31c282c90cf38f82954c3e4d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/snapshot/dnbx_core.h",
+      "bytes": 7001,
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_01/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/COMMANDS.json",
+      "bytes": 482,
+      "sha256": "fc73869ea2854ded2a15954ce181faa8db56c600f33724118e35958c3f2513e3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/RESULT.json",
+      "bytes": 37423,
+      "sha256": "c1ecfc2b628a1460e69de7d73c8c0f6806c47408ef96936b8860328a989b2eac"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/envelope_case1.csv",
+      "bytes": 709075,
+      "sha256": "975d76d53785a5af87ba465bc0f699328d1d6d43f33ac49cc52296da7e737684"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/envelope_case2.csv",
+      "bytes": 2862755,
+      "sha256": "ede78b05372691c4a67ef9bb5f3ff5c1ee5f01d8908d9ee75e3f599c1d6be9ae"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot/dnbx_core.c",
+      "bytes": 19483,
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot/dnbx_core.h",
+      "bytes": 7001,
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/COMMANDS.json",
+      "bytes": 482,
+      "sha256": "62f1e292572a655ee9caf42177e269a98e48dace9a2a85af8c3b7d6b67c37291"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/RESULT.json",
+      "bytes": 37423,
+      "sha256": "5befcd92b374b599f0c9cef175074d3a34769a84b43c28b635b73a66d37e3f0b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/envelope_case1.csv",
+      "bytes": 709075,
+      "sha256": "975d76d53785a5af87ba465bc0f699328d1d6d43f33ac49cc52296da7e737684"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/envelope_case2.csv",
+      "bytes": 2862755,
+      "sha256": "ede78b05372691c4a67ef9bb5f3ff5c1ee5f01d8908d9ee75e3f599c1d6be9ae"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/snapshot/dnbx_core.c",
+      "bytes": 19483,
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/snapshot/dnbx_core.h",
+      "bytes": 7308,
+      "sha256": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/frozen_03/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/COMMANDS.json",
+      "bytes": 491,
+      "sha256": "1d1f0098ef6e115f2901ecb321501a6676c048e220b376946163622ed9a677a9"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/HARNESS-ERROR.json",
+      "bytes": 308,
+      "sha256": "20d72d219314bb91d443e14e0aa25bc1a64837210f4ec27ed6a6975c5b485db6"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/snapshot/dnbx_core.c",
+      "bytes": 18965,
+      "sha256": "9165342a98263af67e5ce81ebeef6df57ed35a2a31c282c90cf38f82954c3e4d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/snapshot/dnbx_core.h",
+      "bytes": 7001,
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/preflight_01/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/ACCEPTANCE-DECLARATION.json",
+      "bytes": 955,
+      "sha256": "9824943e456e149167ec2e41097ee9003b2ca3fdc25e21e68fd72bfa2a40f044"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/COMMANDS.json",
+      "bytes": 2192,
+      "sha256": "f2cc26fc9fda400fd6699de62a1ee82b6ca8cb2a29fb46a58a238ac654408334"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/RESULT.json",
+      "bytes": 155333,
+      "sha256": "66c9bfc0b84fcc3392999e013bc23fb24a6537db170d2606db9687a16f7cb458"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/accepted.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/compact.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/diagnostic.build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/invalid_profile.build.log",
+      "bytes": 450,
+      "sha256": "5cd266dc999d6a0cce72f623081f5dfcc21689ce25f4fa4cf437f81074935aee"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/dnbx_core.c",
+      "bytes": 19939,
+      "sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/dnbx_core.h",
+      "bytes": 7939,
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/relocation_01/snapshot/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/run_callback_audit.py",
+      "bytes": 5037,
+      "sha256": "b8785ea29acadd8bc0f81d53c0cebd71e16d60e73e4398ec9834f5188e7dd5f0"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+      "bytes": 20303,
+      "sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+      "bytes": 13502,
+      "sha256": "5010334abd97fb9014cd0365c0fa85a725d21a89485de3d969cde0435fe5eb17"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/candidate_review/zero_stage_probe.c",
+      "bytes": 1354,
+      "sha256": "c4e336076a31b2e79fcfe33e1a68ff1b935e9f7608e75a0d0645a3a246c87293"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/Makefile",
+      "bytes": 1074,
+      "sha256": "e89cb7b2456bd8efd14807ff70a78ac3960215d48f2cd56dde6be910d9a49aed"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/README.md",
+      "bytes": 19517,
+      "sha256": "b90020a84bd77d1521b595acc4e3cb8fd2aadb1dca8294658f0b6e57d6d5a314"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/build_environment.json",
+      "bytes": 374,
+      "sha256": "3059f6138babb64cf015dbd24c7c08c5c15a170a728e241cd326180a6c2ba8cd"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/candidate_amp_trace.csv",
+      "bytes": 882414,
+      "sha256": "58493b9dc70c2c0596c550f040f7a6428ed2f6512cfae0fd8fdaa2aafea079a2"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/envelope_fit.json",
+      "bytes": 3505,
+      "sha256": "51681d73561d8f2a654f676055fcbfc657a2e70b535e0deb2e9ccc4512e1445e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/functional_tests.txt",
+      "bytes": 645,
+      "sha256": "7aaa31e1af0221011a93ff5e740fe5e5b3d67636b2127d802858d01a093112a5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/host_callback_timing.json",
+      "bytes": 4088,
+      "sha256": "67ad8f9d861d3f42d02240980bb6cbfe9cb7923f89cde424c3f7f8e0838f0a60"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/host_object_sections.txt",
+      "bytes": 388,
+      "sha256": "8f84e80d57b8994278553373973d053396631f2c9971b64170e6fc3e9413338e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/host_stack_usage.txt",
+      "bytes": 1548,
+      "sha256": "f7489d92c5a7cde94a95093ac4256230447999fe9f85633734144901b99a190a"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/host_undefined_symbols.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/native_resource_summary.json",
+      "bytes": 1585,
+      "sha256": "70810c2e7c2a753b850ac9f3b0f3320280c0cbd80ddc681b9037007cf9edf4e3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/raw_control_coverage.csv",
+      "bytes": 27240,
+      "sha256": "4a491490a66e1aa0b87c5bda7c25c6a45cecfc7744596122d9a3a9defe7deace"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/regression_history.json",
+      "bytes": 1034,
+      "sha256": "29cc426bf69c5d7a3d69037771b5acd829226c9b794a650d67767031f7894d51"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/relocation_guard_check.json",
+      "bytes": 211,
+      "sha256": "a3be0b5492c00ee7ddb75a70dd1a5c1bcfabf9a80ac7fb90dc61c5e7cb45f3a2"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/sanitizer_tests.txt",
+      "bytes": 645,
+      "sha256": "73a243c57ccc7e218a9e948c1537bd136b568ef934133cdff8b23af7c7147590"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/size_ledger.json",
+      "bytes": 1570,
+      "sha256": "74d4dafa76f5db45a6d9106b477fd8111903921c7d55e567831e11bef08c5570"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/evidence/source_provenance.json",
+      "bytes": 2520,
+      "sha256": "8ef50d1cfff4e391a222788296830fa36d536f2ec0b9d5deb68e941cf1093c13"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/README.md",
+      "bytes": 5053,
+      "sha256": "9120beaa31f274cb12fd2ee43a205e116f02bfc7c88760dbfe674358fc7c0cfc"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/EQUIVALENCE.json",
+      "bytes": 905,
+      "sha256": "1d5e66acc012665a8cab086d9af87d24758399f52b0d4196eb40eb624d64d11d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/compare_profiles.py",
+      "bytes": 7209,
+      "sha256": "ca572adf5d340288232436ad232cc934700ad07cf6712df46f322dd480e76fee"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/dnbx_core.c",
+      "bytes": 19939,
+      "sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/dnbx_core.h",
+      "bytes": 7939,
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/test_compact.txt",
+      "bytes": 604,
+      "sha256": "8cd4c1f5457c734e40377287e927c9d1122679605360d4498eecaa489e170f35"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/compact_profile/test_diagnostic.txt",
+      "bytes": 645,
+      "sha256": "73a243c57ccc7e218a9e948c1537bd136b568ef934133cdff8b23af7c7147590"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/src/dnbx_core.c",
+      "bytes": 19483,
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/src/dnbx_core.h",
+      "bytes": 7308,
+      "sha256": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/src/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/tests/assess_evidence.py",
+      "bytes": 11847,
+      "sha256": "c6ace2ce44a4e652dbd4bca3fa3a7c0c9a0426b73e36cfdbfc962d11a789cb93"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/tests/bench_core.c",
+      "bytes": 5324,
+      "sha256": "8b448c074bebe9731e8f08e7a54f4402ba337da8823781eb2cd98ae82714078e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/tests/test_core.c",
+      "bytes": 20695,
+      "sha256": "56a3674c2bd7913b508ec7398ada683a9c47676825fb0c49fd32a9215191cd2c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/mapping/results/implementer_brief/BEHAVIOR-BRIEF.md",
+      "bytes": 12335,
+      "sha256": "a6d6856c4ad2f1487ddd2cebacaf0416449c7307a61db2f0c4c6834b056c16eb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/mapping/results/implementer_brief/amp_observed_levels.csv",
+      "bytes": 398556,
+      "sha256": "e6578b0e5861b7ef73fea6822f8848b897065a66a71fded5db08710dea201b6f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/mapping/results/implementer_brief/numeric_behavior_targets.json",
+      "bytes": 3707,
+      "sha256": "78d8245e9540eb0cde63d7526808c36fbc271705d9f51553f3599af264b3a74f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/mapping/results/implementer_brief/public_control_catalog.json",
+      "bytes": 89708,
+      "sha256": "e1be22d91887954da614cf197ef98680d0f21dfc8b9ca9bec1dba0a304f6e711"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/mapping/results/implementer_brief/recorded_envelope_behavior.json",
+      "bytes": 12653,
+      "sha256": "2f8ab03b1ce874381ae8deb4afd66d016220880512b51c9e2fbe1d63f0f98210"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/reproduce_native.py",
+      "bytes": 4569,
+      "sha256": "bcf75130360550c5b43abfcf5900e9fe7958302e769cdf1028cf6b3477daf87e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/CANDIDATE-RESOURCE-REVIEW.md",
+      "bytes": 19474,
+      "sha256": "298709244da71c3d03645b7eda8dc96fd562a04448fcccac5da825eb09c29826"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/RESOURCE-REVIEW.md",
+      "bytes": 19925,
+      "sha256": "1e0ff58015a05c447004e0d4bb0ca2f8d65c82d0b07557c6d371bad3b38b8d84"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/archive-source-compare.json",
+      "bytes": 942,
+      "sha256": "2022fa9e0531f2b25287ce9b104e0a567800da508430ab2b961f892ec262a1c3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/current-candidate-snapshot.txt",
+      "bytes": 92,
+      "sha256": "c7932c7fe141f1092cef8265e75d75649581ce1f51d049a8ccfd1a7b55403501"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/CANDIDATE-PROVENANCE.json",
+      "bytes": 984,
+      "sha256": "4e9f4c767739837bc4ec81cbca8c7dc0085c42332e10f7c0c60923eda5e2c231"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/HEADER-DOCUMENTATION-DELTA.json",
+      "bytes": 2113,
+      "sha256": "be906a865ba00826e67e1bfecc358a0e720d7d1d78cc3cfaa27e7d0941815ab7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/REVIEW-FILE-MANIFEST.json",
+      "bytes": 144632,
+      "sha256": "177c3b8370d83759730c5de8d0925f38b26a0656a0f431da1e059a88ce42c5af"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/analyze_native.py",
+      "bytes": 8628,
+      "sha256": "0a44a88bfc1fe1d85e47a062a56c105c4c1908071a86aa62066f8eb7eb3675e7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/analyze_replacement.py",
+      "bytes": 5328,
+      "sha256": "1fe6fa7cd98b0399ed584bca196b3d8cb1638ac28897f92e0532b6de94ee9114"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/ANALYSIS.json",
+      "bytes": 67983,
+      "sha256": "33399776a025736798f74c4f62e51365f5dad5f2cb4eaf47244eaf74fee546c9"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/COMMANDS.json",
+      "bytes": 122448,
+      "sha256": "8afc2822a74ad8e93f5a767cc2d245849bd614dda82f35589f686a761ae7d69c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/PROVENANCE.json",
+      "bytes": 1837,
+      "sha256": "eecf3f76150e485cc6e670ae25d2169b0a5951b1e0844ab2b531805fee8b2c8d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/RESULT.json",
+      "bytes": 1551003,
+      "sha256": "5c71f427bd3133525d58a62dc402b12d5e98415dbb207aca33094f0bcaa584d7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/SYMBOL-SIZES.csv",
+      "bytes": 8258,
+      "sha256": "2a8cbc5c813e3e43584d1c895c70e1ce9c5876cc909b2c2937c392e1441ce2b7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/builder-EQUIVALENCE.json",
+      "bytes": 905,
+      "sha256": "1d5e66acc012665a8cab086d9af87d24758399f52b0d4196eb40eb624d64d11d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/dnbx_core-counters0-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/dnbx_core-counters1-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-disassembly.log.gz",
+      "bytes": 1866094,
+      "sha256": "d6415cdc199ff8111c335e16b37c3861ebabc92c05505feaf42a55ba8950c5eb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-physical-link.log",
+      "bytes": 465,
+      "sha256": "c6d0311fa2c66ec5bcfb77f9913997ecc972f61be10a8e0e4b9c1327be9b530f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-sections.log",
+      "bytes": 977,
+      "sha256": "1e1fd6225879d0c90e51d62235ff53bd0bfde2f22318b55790bff6c924e5978d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-symbols.log",
+      "bytes": 135440,
+      "sha256": "95172b3764d52338dfff3e7cd7cf89a605ee1af340268cad7a92fbb0866eab74"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-disassembly.log.gz",
+      "bytes": 1866094,
+      "sha256": "c14930e5bac4dc517a719ae59325b32b68438e854cf63cbd11986e2a184ca005"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-physical-link.log",
+      "bytes": 465,
+      "sha256": "26b22d3c4793e5fa52ab2c2e432d0e42a7bae0578c4c627bc239e0b9b2838d5c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-sections.log",
+      "bytes": 977,
+      "sha256": "e22bc8c2cbbefe12847239f7e1b11c540661474a59472e0a5c076dcca8bcacb9"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-symbols.log",
+      "bytes": 135440,
+      "sha256": "3929b5db49df3712562a511ddea918da35daa0db0ef5bd0c23f08bb08494ff33"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/juno6-counters0-compile.log",
+      "bytes": 338,
+      "sha256": "078978daaed74a3b9e6cd86e0d7d3f4eef220c1e96fbb2fbc7c9f6f981b776be"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/juno6-counters1-compile.log",
+      "bytes": 338,
+      "sha256": "078978daaed74a3b9e6cd86e0d7d3f4eef220c1e96fbb2fbc7c9f6f981b776be"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout-extract.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout-variant-header-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout-variant-header-extract.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout-variant.c",
+      "bytes": 326,
+      "sha256": "cfbb99f5bb62f97e748adca1bf9c6860d87298f616a47d9040e2e8402eaf072d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/layout.c",
+      "bytes": 322,
+      "sha256": "18cc13dacb72247b66a21dff79f1dc8a09848655808a87b432b082c3595c26cb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-disassembly.log.gz",
+      "bytes": 1865968,
+      "sha256": "a729a8ec90b0aa4ef1ca495930ea07c194addad3e118858af52b4622809f13ba"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-physical-link.log",
+      "bytes": 463,
+      "sha256": "3bb7680b0fa321c2e68cc24fce32f08f789bb1f51722a4358f0796d10e235bff"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-sections.log",
+      "bytes": 975,
+      "sha256": "f2a61d6770b0d8b2e0c63781f2ba38fae7a62c0670231017a63ed955632ffaa6"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-symbols.log",
+      "bytes": 135432,
+      "sha256": "5462ea65989715b3c5588f5621becf7d0ac21be4362198a9d68cab4d3b296dff"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-disassembly.log.gz",
+      "bytes": 1865969,
+      "sha256": "7f477c059bca1f69a9fb5d32c1dcb87cd17235c50ccc16028e83b69308427c27"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-physical-link.log",
+      "bytes": 463,
+      "sha256": "05191169d2b0c976669064530a7b2900814d2ea4a51ef5cdb97f46d89920970d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-sections.log",
+      "bytes": 975,
+      "sha256": "8bda74ce4c9ddcad6b023b897789cb0178313f926b463902e8995c15c4312b18"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-symbols.log",
+      "bytes": 135432,
+      "sha256": "665ac2a81572358add563b0d95db00152681cf1599abbf1c2ed79d2272fcdeba"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/dnbx_core.c",
+      "bytes": 19939,
+      "sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/dnbx_core.h",
+      "bytes": 7939,
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/juno6.c",
+      "bytes": 4657,
+      "sha256": "41056d2f8634bae4555d723c79cb9610a73afdd1282328e326568b5169320185"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/juno6.h",
+      "bytes": 1142,
+      "sha256": "c2169d8e74d2b8e5623499e83799c464f4f3b54ae66c520025c9a3f5a9f64300"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/compact_variant_native.py",
+      "bytes": 5110,
+      "sha256": "82bb8b933753d7f9d149d023f05c359443a31a8cf60fe55269c5f1ee31fcf907"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/ANALYSIS.json",
+      "bytes": 106147,
+      "sha256": "9defd113159ccd73fdadf5919b2609379f342ff640d3fd03d2a96adaaa087bad"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/COMMANDS.json",
+      "bytes": 115760,
+      "sha256": "69f1312fa0d42a6208ca8855fac72e8d03f0bfcbba80d5eab4e7ebb1bf7c5288"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/RESULT.json",
+      "bytes": 1586946,
+      "sha256": "15ce9b014d48aead9e6a3452e4d6049a3a9afe3f7a946623dae82af3798eed7c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-diagnostic-overflow-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-disassembly.log.gz",
+      "bytes": 1888749,
+      "sha256": "d3b0dad98a4cc6cda1629232a24d9c969138ea636758f1a73be7c4e2767993eb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-physical-link.log",
+      "bytes": 446,
+      "sha256": "d40373692abb3f71765a1c077e4a21e25ae113d3f82b943cb688bc0e7ee9322e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-sections.log",
+      "bytes": 960,
+      "sha256": "874ceb9b2acad508981ae2c5d42eb574fb98c2fd9d756e5ed6b57c901857cb39"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-O2-symbols.log",
+      "bytes": 136076,
+      "sha256": "a8f8066c8a2fd8f3c39001dcaafdfc4cfeee72831381e75e5d5fc2c7691c7cc0"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-diagnostic-overflow-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-disassembly.log.gz",
+      "bytes": 1879854,
+      "sha256": "e7f77551f76de46c6a2b4906865e1829b6e269885a9d5d6f36412df807ea4e7d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-physical-link.log",
+      "bytes": 446,
+      "sha256": "b17fc8363d46790a20200b30bdd79f10bb9389365512b18c724971ae81f38ab3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-sections.log",
+      "bytes": 960,
+      "sha256": "46573b83806866d69fdeeb1c58f054b1d09475c0c50bb01171b38a478c2af0c2"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-elite-Os-symbols.log",
+      "bytes": 136442,
+      "sha256": "116991f69ad4630cea22fd9ae148613d20d1a43cb4f4dcc37a9c61bce1f69c5b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-diagnostic-overflow-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-disassembly.log.gz",
+      "bytes": 1888695,
+      "sha256": "49d967c727f978f28b783afea71bffa594d989e50aea54185193b827912d4a49"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-physical-link.log",
+      "bytes": 444,
+      "sha256": "6a472db912593d4215a46ae12f3690de42840a5c17ece12d4d1679eb69717001"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-sections.log",
+      "bytes": 958,
+      "sha256": "16f77038ca363bba96d83a47df890da3cb1934ea02aa622ce6f00f3f7cf876bb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-O2-symbols.log",
+      "bytes": 136068,
+      "sha256": "28c3a8307839f26b6308db678f2173adaa883b612c09bf3771598b48f6ce0dda"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-diagnostic-overflow-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-disassembly.log.gz",
+      "bytes": 1879897,
+      "sha256": "d8deedc1ed3ca75254a38fe259dd6c2d77383a8d6826b09742fa73b61c91c996"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-physical-link.log",
+      "bytes": 444,
+      "sha256": "d0f635291154d1ff1fb16cf0c691af8398c106cd2e92b8de9b750ee12afb9dd7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-sections.log",
+      "bytes": 958,
+      "sha256": "fa6578b4b77019a1ca4a27760920e259ee99b803d2f32340149895e01ba83668"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/additive-pro-Os-symbols.log",
+      "bytes": 136434,
+      "sha256": "e4f5fc079a045706def19cd249f96fa8543fcacc0adb7fb7b3ed6feeaf0d9965"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/assembly-O2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/assembly-Os.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/compile-O2-lto.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/compile-O2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/compile-Os-lto.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/compile-Os.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-O2-disassembly.log.gz",
+      "bytes": 31114,
+      "sha256": "b295cc6a99fc1408fd56adc8d65051f6b9562d1099e60b7859e1751ba1378b9d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-O2-sections.log",
+      "bytes": 3431,
+      "sha256": "920cee326b420a68012b7017825d898d799f97a6b5df77a116d0b8a41f909036"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-O2-symbols.log",
+      "bytes": 2636,
+      "sha256": "3c9d4cbcdb93082610d48e60918e1894dc013ff7dc704d5ea9505e348e9657f1"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-Os-disassembly.log.gz",
+      "bytes": 22329,
+      "sha256": "ec139020d097a3023f5029ac85bff6b911144b4bfadf75534a94b3b6c753e02d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-Os-sections.log",
+      "bytes": 4219,
+      "sha256": "a9d43d9d052077e687db8db00773da0978a9d00d1d8a65e2a9a7b718f5f3d725"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/core-Os-symbols.log",
+      "bytes": 3076,
+      "sha256": "3b92f3cdb4c4ee588d6dc587b88c405748e769d7c5fdd619804e5258e187ddb4"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/layout-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/layout-extract.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native/layout.c",
+      "bytes": 970,
+      "sha256": "1d79588c42508eb59444c093186284fd9736705320cfb2c4b80e50057607c1bb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/native_probe.py",
+      "bytes": 9716,
+      "sha256": "f13d17925028685ec1cc23971371e5e5c494dc60461eb026bbd061fc7e11ef24"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/prepare_replacement.py",
+      "bytes": 8249,
+      "sha256": "ccb536196943d0d91befbc15bb734b1e3f230f5a3bdf7ae2ceaf1e7c60f21fe8"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-PROVENANCE.json",
+      "bytes": 2855,
+      "sha256": "c8d4e4ff57af988f12c0d417fdce7bbbe10039063db27e371bba5e7bda189513"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/ANALYSIS.json",
+      "bytes": 150227,
+      "sha256": "228ff4f3de9aee07186c5d1b0f33e0854eab6083f4e7d47dd7efc3b093e8a068"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/COMMANDS.json",
+      "bytes": 240205,
+      "sha256": "60375f8ab0e27b40276b4d32c3b7278de3eb672810754224b022a3fab035add7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/RESULT.json",
+      "bytes": 3115827,
+      "sha256": "b1963e9642a5b9c1edf32f92bb3051256979c8628e57859d915f93a8e27fa6a8"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/SMOKE.json",
+      "bytes": 1129,
+      "sha256": "5d9b755789502dbddaa691004c3164b7f62091870dceed5f1c8098109ab88bcb"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/SOURCE-DIFF-AUDIT.json",
+      "bytes": 1204,
+      "sha256": "9fa6bd052da00facf7cb4273f90eadcc3431bcb549d18cf1e525cde9bdc5952d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/SYMBOL-SIZES.csv",
+      "bytes": 20208,
+      "sha256": "3950bacc06d2e56e52a6bbe99038dc92ace705b04ae018cfb859e8794ddc7d26"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-disassembly.log.gz",
+      "bytes": 1874402,
+      "sha256": "545a1f5948802941c56c6170c8a407a352e3ee7a814eb60bdeafb62addc47878"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-physical-link.log",
+      "bytes": 461,
+      "sha256": "9b276efb80d57a6a29dab9ee326627cb5cfb0ee73dcff4c113774afcf6d02a4b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-sections.log",
+      "bytes": 971,
+      "sha256": "1418f4c5d866679fc03ab0402c92e307221c8d0076855df3219b17ba5568b79a"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-all-api-symbols.log",
+      "bytes": 136492,
+      "sha256": "325dc558ab39401bd7735481e341c2b5fb3a6779ae1f8d8744944a86ece58f15"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-disassembly.log.gz",
+      "bytes": 1867418,
+      "sha256": "7b4224fc34e0072a237cc25120f27f608309b16782bc733c1219936f37eb84d8"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-physical-link.log",
+      "bytes": 462,
+      "sha256": "a50f3ad0e043aa7ffae6c8e8e7da195d74ce5d774b2d6f2af1ad8e440e77409e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-sections.log",
+      "bytes": 973,
+      "sha256": "2cc6baa0cb57032a34ff03f29a0f174a8a65256b4ce3c75f9b63270ed99e459b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Os-reachable-symbols.log",
+      "bytes": 135271,
+      "sha256": "d50628263a12a50a41433affc06d06831e88b72dbf02d745e0f7d7222d9c7368"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-disassembly.log.gz",
+      "bytes": 1871947,
+      "sha256": "d17c815ec219057050cfdf087e2591791feacddb7aba91632f4160d206c31e79"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-physical-link.log",
+      "bytes": 461,
+      "sha256": "b2c3ced51bd0370ce875c93e8f6a5de606c0b74cd1b61b1727b775ce0ff0d1c4"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-sections.log",
+      "bytes": 971,
+      "sha256": "72c699b869c9d8dfbdfb16f2df687e3216e6cc4c9bf939d5e1d95b341a23255f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-all-api-symbols.log",
+      "bytes": 136715,
+      "sha256": "1b1d89e2adaa41d471f8b3401d44bfe0fc66bef4aed57f7c3f8b4d9a5ff8d7f5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-dnbx_core-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-juno6-compile.log",
+      "bytes": 345,
+      "sha256": "81a3b87abc86d40ee177c5067dee71eb98078445bcd94d1e4c787e09d7783ce6"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-disassembly.log.gz",
+      "bytes": 1866730,
+      "sha256": "c6906f6243902738064c783c3938b5502a3687cfb9e736d2ced908edf0d36eec"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-physical-link.log",
+      "bytes": 461,
+      "sha256": "acabbef10a7e6177a15a4b1c41da9e73bfb33fa69ff001184bb3cb1cc54739fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-sections.log",
+      "bytes": 973,
+      "sha256": "7c7ab1927b78492402c1ce0a0cd3f9f66051663ad0075e20ce7d980cc3c1a862"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-Oz-reachable-symbols.log",
+      "bytes": 135404,
+      "sha256": "8de74cd91192205440b87d43946cc07f63011aada0eb5ccbb24d3a3f2e310ef7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/elite-official-full-build.log",
+      "bytes": 2256,
+      "sha256": "75763f863748591c965812e47579148cb1fcef37f371d87231c3a245fa5af37b"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/layout-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/layout-extract.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/layout.c",
+      "bytes": 454,
+      "sha256": "4762789a8c17fa234d2c422517aab2f4c645c50871d4be8b2cd477c733b7ed4f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-disassembly.log.gz",
+      "bytes": 1874481,
+      "sha256": "ff280bdad90eec08a5d66547a9f91323ab2220774810ccc795e46ee59fa540e8"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-physical-link.log",
+      "bytes": 459,
+      "sha256": "3c4dfda27e9fba8d10c55404fdccc4826d5b73f7d214bc5b94332c61b182a5e0"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-sections.log",
+      "bytes": 969,
+      "sha256": "a6e5ed2a372f097a6e180a534e1a446b0133f4f458dd4ea595187a4819a83556"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-all-api-symbols.log",
+      "bytes": 136484,
+      "sha256": "7702035cbfda60d767269ff1446f2c5904ca2290b3f190d2303c7e41223807e2"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-disassembly.log.gz",
+      "bytes": 1867419,
+      "sha256": "85755e04d5b3f6329a8a106c91171446d33cb8d107b0c3661052a6916aab8fb9"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-physical-link.log",
+      "bytes": 460,
+      "sha256": "fb3d3c57ea6e38606c7ebd84691b3bd6f03b29bd2579f56459b8b1b7823a1965"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-sections.log",
+      "bytes": 971,
+      "sha256": "e3a9f676a81e2ddf971f35f4449525992a745f01935437004cbe49cf1f4dd4ec"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Os-reachable-symbols.log",
+      "bytes": 135263,
+      "sha256": "429626e9bc9a603d9cd6d63907b50ef0b5190288a89095b195bb1b6c01ba5566"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-disassembly.log.gz",
+      "bytes": 1871835,
+      "sha256": "daca3a30b7ac9a0cb9d06e360668f210b6f4f18b13613481d25137dd1173e759"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-physical-link.log",
+      "bytes": 459,
+      "sha256": "2ba571a3534b9847e9b15e0bfe445ba8b8e8a04a4fa554df1ed42f10e79ddba7"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-sections.log",
+      "bytes": 969,
+      "sha256": "8450f4ae11502dbf19dbeaef812c7fb2769e02e5e191c732728a25c6278b665f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-all-api-symbols.log",
+      "bytes": 136707,
+      "sha256": "7daf014e15f36878caa65f16d738615c51bada51fa01f67464b6b081c37485a3"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-dnbx_core-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-juno6-compile.log",
+      "bytes": 345,
+      "sha256": "81a3b87abc86d40ee177c5067dee71eb98078445bcd94d1e4c787e09d7783ce6"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-DIAGNOSTIC-OVERFLOW.ld",
+      "bytes": 3754,
+      "sha256": "b7ba77c8f16bc924b0a2d00a4714cc37d54a38055b7bceef18433d2f6c021ec5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-diagnostic-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-disassembly.log.gz",
+      "bytes": 1866748,
+      "sha256": "c93d82d221393624270e4f413f514c5e22a6a4344275c78f6a964e297aef8aa2"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-physical-link.log",
+      "bytes": 459,
+      "sha256": "dccb670df90a69ab836b908827b3575fd039267b752f05cb04df5106831e22ac"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-sections.log",
+      "bytes": 971,
+      "sha256": "c33e548b8819dd1347177028896c3c7d0e3e7c4a14b0976a9db1bd7371507bfa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-Oz-reachable-symbols.log",
+      "bytes": 135396,
+      "sha256": "562871646ab48cc9985bc4e3033b61cbee11a03a09ba8cc8d68f23e9682d74cf"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/pro-official-full-build.log",
+      "bytes": 1585,
+      "sha256": "fa2b70631271eb982118e1694f641fdc5d7ddf329f20cfebe19d7de8030e6060"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/smoke-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/smoke-run.log",
+      "bytes": 146,
+      "sha256": "9353f6e4ff599652a71e6ccb10bd07167a7aeaacb34d61c829f00f069be7b295"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement_native.py",
+      "bytes": 8918,
+      "sha256": "5ceef6e4123fb600b5743615e5f2fa1e4fb2754f7a438c0625fe0bc3db9a2766"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/replacement_smoke.c",
+      "bytes": 2193,
+      "sha256": "3bdb2f0a065aa78a926afef9b7cfcb9794e1af241c3215362630b84862fdbf04"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.c",
+      "bytes": 19483,
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.h",
+      "bytes": 7001,
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-elite-attempt1.log",
+      "bytes": 641,
+      "sha256": "9ecebdb8e9314bf7eccf076852c35b12a6145392703998f3badff42ef0c92ee9"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-elite-attempt2.log",
+      "bytes": 1920,
+      "sha256": "5595a756bac468f27726c3b8b584a0cd8d4cae34df21248eaa31e502212ac2d6"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-elite-attempt3.log",
+      "bytes": 1277,
+      "sha256": "28e7a37e94300dd756fc61a92381c79eef88b83106ea880d57ba11e8328e9b9f"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-elite-command.json",
+      "bytes": 653,
+      "sha256": "8efb0f04bb4f9193e76fc101c7811bfbc90a33e25cad88bc71e359105c7ac890"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-elite.log",
+      "bytes": 2036,
+      "sha256": "0196b21bc1d5d3980d80f9ca6467b06929a83c3fab4a3f9f09fd56d61ef210b5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-pro-attempt1.log",
+      "bytes": 1277,
+      "sha256": "ec0b0cff6f82d7f3bf93c5cc38ff2a78ee1924925f599d4367269409c44a26a1"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-pro-command.json",
+      "bytes": 651,
+      "sha256": "8d82e486c5c25d52d0a9cc8ddbb744f9d24c02263b53d13af511cb4e3c615b29"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-pro.log",
+      "bytes": 2016,
+      "sha256": "2a9bf0dab1b8e0dfcc14116c75490cc39d109c714996490350d3a62212c38c20"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-baseline-source-manifest.json",
+      "bytes": 113773,
+      "sha256": "dea45eb3d46b74b45bd62f831fb42a8451fc59e69b495dbb0ec1a63135b9642e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-build-results.json",
+      "bytes": 388,
+      "sha256": "4fe50445b20f57be90639d06ea001101c2674819335465f9912578391d549ffc"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-elite-sections.txt",
+      "bytes": 932,
+      "sha256": "68f82a0ad513bbc0fa26ef2d295cb93c0f73831dd8389e30acb69d0b8bb08464"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-elite-symbols.txt",
+      "bytes": 134348,
+      "sha256": "9cd257397a58b2c0d7a4537dbadb1bfd12f565fdbea755df9aba9d5d62840da4"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-environment.json",
+      "bytes": 466,
+      "sha256": "3e199364305cd0bb657606bb879b828248114f315c26bc4824fbc3b74fdf59f0"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-linked-ledger.json",
+      "bytes": 643892,
+      "sha256": "3c60f9d51505d3f3008a96c72a0e0b29e1ba2db9f3811ad983aa7a01c9928d56"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-pro-sections.txt",
+      "bytes": 926,
+      "sha256": "03362a25e05f8fd750ea15bfb8db6f77c6a52f6a8a16b82b0d8e7f8878358191"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/native-pro-symbols.txt",
+      "bytes": 134336,
+      "sha256": "feac38fcd82e35bf833c871f9a3adef53c9af36e2504e2696ec8546dccb0a5f5"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/firmware/src/app/original_runtime.c",
+      "bytes": 17124,
+      "sha256": "4b2c1f36350c43d293fdf58c1364eb599da3b0e7f955802c5719612011c27852"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/firmware/src/dsp/dnbx_core.c",
+      "bytes": 19483,
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/firmware/src/dsp/dnbx_core.h",
+      "bytes": 7001,
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/firmware/src/dsp/juno6.c",
+      "bytes": 4657,
+      "sha256": "41056d2f8634bae4555d723c79cb9610a73afdd1282328e326568b5169320185"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/firmware/src/dsp/juno6.h",
+      "bytes": 1142,
+      "sha256": "c2169d8e74d2b8e5623499e83799c464f4f3b54ae66c520025c9a3f5a9f64300"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/replacement_overlay/tools/build.py",
+      "bytes": 43117,
+      "sha256": "2af940eca4ecdf2ec56b8c9ed1c70efa110e539451314e90f8da0d9bd2634c5e"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/resource_layout-command.json",
+      "bytes": 1213,
+      "sha256": "87426903854b177162d8e95e65936c5260fe8fa3ac4661ba8a1cfacecee4243d"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/resource_layout.c",
+      "bytes": 1499,
+      "sha256": "e86a5daadfd7a97841d89351634aff82d11090f504788cc49c540018c7a92941"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/resource_layout.json",
+      "bytes": 623,
+      "sha256": "0ca06efd1a0ed19ffe204471a79dd0c9b3f1cc20dd69dbd91f7fcbf5b5f12e51"
+    },
+    {
+      "path": "experiments/sound-hardware-v1/resource_review/resource_layout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "firmware/src/dsp/juno6.c",
+      "bytes": 6139,
+      "sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502"
+    },
+    {
+      "path": "firmware/src/dsp/juno6.h",
+      "bytes": 1851,
+      "sha256": "625ac8ce03b978d996ed995fda11ccd6a838f8c816ba29def8583217c17193d4"
+    },
+    {
+      "path": "firmware/src/dsp/fastmath.h",
+      "bytes": 8246,
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+        "--label",
+        "compact_profile_review"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 2,
+      "expected_exit": 2
+    },
+    {
+      "argv": [
+        "python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+        "--label",
+        "formal_recheck_01"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/hardware_candidate/tests/assess_evidence.py",
+        "--verify-inputs-only"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "make",
+        "-C",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/hardware_candidate",
+        "all"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "make",
+        "-C",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/hardware_candidate",
+        "test"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/hardware_candidate/tests/assess_evidence.py",
+        "--output-dir",
+        "build/formal-assessment"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fno-fast-math",
+        "-ffp-contract=off",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/callback_probe.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot/dnbx_core.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/callback_compile_probe"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fno-fast-math",
+        "-ffp-contract=off",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot",
+        "-DREVIEW_TRACE",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/callback_probe.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/callback_audit/dnbx_core_trace.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/counter_trace_probe"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/counter_trace_probe"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fno-fast-math",
+        "-ffp-contract=off",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/frozen_02/snapshot",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/zero_stage_probe.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/callback_audit/dnbx_core_trace.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/zero_trace_probe"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "argv": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/zero_trace_probe"
+      ],
+      "cwd": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1",
+      "exit_code": 0,
+      "expected_exit": 0
+    }
+  ],
+  "existing_output_rejected_without_retained_mutation": true,
+  "fresh_run_pass": true,
+  "fresh_declaration_matches_result": true,
+  "fresh_boundary_cases": 441,
+  "fresh_audio_frames": 262144,
+  "stock_resolution": {
+    "status": "VERIFIED",
+    "stock_dsp": "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/firmware/src/dsp",
+    "sha256": {
+      "juno6.c": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502",
+      "juno6.h": "625ac8ce03b978d996ed995fda11ccd6a838f8c816ba29def8583217c17193d4",
+      "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    }
+  },
+  "callback_and_zero_stage_dependencies_compile": true,
+  "trace_direct_math": {
+    "exp2_calls": 168,
+    "log2_calls": 112
+  },
+  "zero_stage_transitions": [
+    32,
+    24
+  ],
+  "native_or_long_timing_repeated": false,
+  "all_pass": true
+}

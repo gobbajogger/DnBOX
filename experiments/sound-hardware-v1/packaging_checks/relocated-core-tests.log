@@ -1,0 +1,20 @@
+make: Entering directory '/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/hardware_candidate'
+mkdir -p build
+cc -I src -std=c11 -O2 -ffp-contract=off -fno-fast-math -DX0X_HOST -Wall -Wextra -Werror -fPIC -fstack-usage -c src/dnbx_core.c -o build/dnbx_core.o
+cc -I src -std=c11 -O2 -ffp-contract=off -fno-fast-math -DX0X_HOST -Wall -Wextra -Werror tests/test_core.c build/dnbx_core.o -lm -o build/test_core
+./build/test_core evidence/candidate_amp_trace.csv
+PASS test_init_and_invalid_calls
+PASS test_parameter_rejection_and_raw_admission
+PASS test_scalar_laws_and_waveforms
+PASS test_zero_and_one_sample_restarts
+PASS test_envelopes_separate_and_long_attack
+PASS test_allocator_sustain_and_tail
+PASS test_oldest_after_retirement
+PASS test_layer_and_part_isolation
+PASS test_velocity_modes
+PASS test_block_partition_invariance
+PASS test_finite_parameter_boundaries
+COUNTERS steady_128 frames=128 voice_slots=768 layers=1536 envelopes=3072 lfo=256 blep=4608
+PASS test_callback_counters
+RESULT tests=12 checks=465568 status=PASS part_bytes=2264 params_bytes=96 env_bytes=36 voice_bytes=192 work_bytes=112
+make: Leaving directory '/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/hardware_candidate'

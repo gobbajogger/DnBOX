@@ -1,0 +1,97 @@
+{
+  "scope": "Targeted Python-only negative rechecks. No compiler/native library/DSP execution. Only FixtureIntegrityTest ran, never EnvelopeTest.setUpClass.",
+  "reviewed_source_sha256": {
+    "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/verify_bounds.py": "336f85ca8d9a6bf39b3d81095432b37759fafef1670937d0e56f3d848a2b19bc",
+    "experiments/sound-hardware-v1/coefficient_followup/check.py": "8122646a5a83262775438508f23f22c4d85c19d1f2520202d1266556c7b2e412",
+    "tests/host/test_synthone_dnbx_envelope.py": "7a066f0cd56015700422b7543c1c3532fa59bd2b7c18169680cae41c95bddf03"
+  },
+  "bounds": {
+    "0": {
+      "exception": "AssertionError",
+      "detail": "{'layer': 0, 'field': 0, 'raw': '80000001', 'expected': -2, 'got': [0, 0], 'pass': False}",
+      "init_calls": 6,
+      "success_result_written": false
+    },
+    "1": {
+      "exception": "AssertionError",
+      "detail": "{'layer': 0, 'field': 0, 'raw': '80000001', 'expected': -2, 'got': [0, 0], 'pass': False}",
+      "init_calls": 6,
+      "success_result_written": false
+    },
+    "remaining_assert_statements": 0
+  },
+  "coefficient": [
+    {
+      "mutation": "static_metadata",
+      "optimization": 0,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/envelope_observations.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    },
+    {
+      "mutation": "static_metadata",
+      "optimization": 1,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/envelope_observations.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    },
+    {
+      "mutation": "live_duplicate_metadata",
+      "optimization": 0,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/tests/fixtures/synthone-envelope-live/observations.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    },
+    {
+      "mutation": "live_duplicate_metadata",
+      "optimization": 1,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/tests/fixtures/synthone-envelope-live/observations.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    },
+    {
+      "mutation": "live_plan",
+      "optimization": 0,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/tests/fixtures/synthone-envelope-live/case_plan.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    },
+    {
+      "mutation": "live_plan",
+      "optimization": 1,
+      "exception": "ValueError",
+      "detail": "Pinned observation metadata changed: /workspace/scratch/e803955aec60/followup_package_review/final_checker_mirror/tests/fixtures/synthone-envelope-live/case_plan.json",
+      "compiler_calls": 0,
+      "success_result_written": false
+    }
+  ],
+  "component": {
+    "0": {
+      "duplicate_metadata": "AssertionError: Independent reference identity changed: live_metadata",
+      "empty_retained_pcm": "ValueError: Retained PCM length 0 does not match 327680",
+      "valid_case_count": 10,
+      "valid_samples": 379288,
+      "integrity_tests_run": 2,
+      "integrity_tests_pass": true
+    },
+    "1": {
+      "duplicate_metadata": "AssertionError: Independent reference identity changed: live_metadata",
+      "empty_retained_pcm": "ValueError: Retained PCM length 0 does not match 327680",
+      "valid_case_count": 10,
+      "valid_samples": 379288,
+      "integrity_tests_run": 2,
+      "integrity_tests_pass": true
+    },
+    "optimized_empty_cli": {
+      "exit": 1,
+      "error": "ValueError: Retained PCM length 0 does not match 327680"
+    }
+  },
+  "remaining_actionable_findings": [],
+  "status": "PASS_BOUNDED_RESEARCH_PRESERVATION"
+}

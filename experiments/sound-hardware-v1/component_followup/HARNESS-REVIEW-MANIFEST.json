@@ -1,0 +1,234 @@
+{
+  "schema": "sound-portable-review-manifest-v1",
+  "reviewed_source_sha256": {
+    "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/verify_bounds.py": "336f85ca8d9a6bf39b3d81095432b37759fafef1670937d0e56f3d848a2b19bc",
+    "experiments/sound-hardware-v1/coefficient_followup/check.py": "8122646a5a83262775438508f23f22c4d85c19d1f2520202d1266556c7b2e412",
+    "tests/host/test_synthone_dnbx_envelope.py": "7a066f0cd56015700422b7543c1c3532fa59bd2b7c18169680cae41c95bddf03"
+  },
+  "retained_receipts": [
+    {
+      "path": "REVIEW.md",
+      "bytes": 10008,
+      "sha256": "c57a7857873cc829a978070f976f35fb0a8b9618125c8100b93d3567ae60467f"
+    },
+    {
+      "path": "FINAL-REVIEW.json",
+      "bytes": 3717,
+      "sha256": "9e200de289fe36e3f7f4577206dcc05e231cbb5efbb906118d47a6cb19b3d06c"
+    },
+    {
+      "path": "FINAL-RECHECK.json",
+      "bytes": 4313,
+      "sha256": "777b4406b5641f5ea2410d71d40241c33458ebdd50d69b9d81a02d52c0f0fc67"
+    },
+    {
+      "path": "NEGATIVE-RECEIPT.json",
+      "bytes": 1707,
+      "sha256": "86f6368b3ce2fc06356e8db6424c5a8a05a79c24fc3a1b57d8d5db4f833fd0a3"
+    },
+    {
+      "path": "COMPONENT-METADATA-NEGATIVE.json",
+      "bytes": 742,
+      "sha256": "e3e785054728f2214eae56f7f22bdc58baccc89fcecebfb24be40dd2d7469734"
+    },
+    {
+      "path": "OUTPUT-SAFETY-RECEIPT.json",
+      "bytes": 1512,
+      "sha256": "ab8eefce2fd1b811079619d717eb6847838237555a2afbdb369cd55e8adfc0e4"
+    },
+    {
+      "path": "reproduce_harness_failures.py",
+      "bytes": 7413,
+      "sha256": "d4cc54a958faa42507865be046d004676724defb24003d7962adcc8be11cb169"
+    },
+    {
+      "path": "reproduce_component_metadata.py",
+      "bytes": 3185,
+      "sha256": "205cb891c5106775c2497cadfdfeae5603ceff66feee6c0924a2aa4c1b076f95"
+    },
+    {
+      "path": "recheck_fixed_harnesses.py",
+      "bytes": 8223,
+      "sha256": "e386c966bb673b795af3e0541432088d0ca6af7a948012b896eb5dcef7b7737e"
+    },
+    {
+      "path": "verify_bounds.before.py",
+      "bytes": 12778,
+      "sha256": "d2fb26a739f3794971f92697327ed0372d05535f2f5da59d3961002989ea29bd"
+    },
+    {
+      "path": "coefficient_check.before.py",
+      "bytes": 5392,
+      "sha256": "d964cbc105f534b2a49dee0a6f43cb814651ebe5cbcd400d88aebfe7869b425d"
+    },
+    {
+      "path": "component_test.before.py",
+      "bytes": 9963,
+      "sha256": "0f25a47aa44fabed04327489ffc37bd4f582725d343c1b0ae7a4a88a4d62e7a0"
+    },
+    {
+      "path": "bounds.after.py",
+      "bytes": 13751,
+      "sha256": "336f85ca8d9a6bf39b3d81095432b37759fafef1670937d0e56f3d848a2b19bc"
+    },
+    {
+      "path": "coefficient.after.py",
+      "bytes": 6127,
+      "sha256": "8122646a5a83262775438508f23f22c4d85c19d1f2520202d1266556c7b2e412"
+    },
+    {
+      "path": "component_test.after.py",
+      "bytes": 12203,
+      "sha256": "7a066f0cd56015700422b7543c1c3532fa59bd2b7c18169680cae41c95bddf03"
+    },
+    {
+      "path": "final_integrity_opt0.log",
+      "bytes": 396,
+      "sha256": "a9dda35cef13fadf8cc3beb14dcfc25f5ff3c60bcc5e589bd1b54610422bc270"
+    },
+    {
+      "path": "final_integrity_opt1.log",
+      "bytes": 396,
+      "sha256": "c75ee8ee56e5a63516b53027b182ea695c4ab70b108200ef2e9d966b0a768f8c"
+    },
+    {
+      "path": "duplicated_live_metadata.json",
+      "bytes": 10400,
+      "sha256": "af2e7fa41880f395372735b6c0bfa8482b119e13c3bc12976ec957aad5cf51b6"
+    },
+    {
+      "path": "empty_retained_pcm.f32le",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "bounds_mock_optimized/RESULT.json",
+      "bytes": 155023,
+      "sha256": "0ff342a167f528e139ca3ee2c5632878da282d7d961246d209664ccf9a70c819"
+    }
+  ],
+  "preserved_historical_inputs": [
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/dnbx_core.c",
+      "sha256": "c370368d612410841ce812ec29c74038ff1f224de0047b282e6595a5e4a7ad84",
+      "original_sha256": "c370368d612410841ce812ec29c74038ff1f224de0047b282e6595a5e4a7ad84",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/dnbx_core.h",
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962",
+      "original_sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/fastmath.h",
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+      "original_sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/RECOVERED-RUNNER.py",
+      "sha256": "072b0fa69e11f1f35004c1b52c9961821fc1eb1b843f9e25ec7d22d285e875d5",
+      "original_sha256": "072b0fa69e11f1f35004c1b52c9961821fc1eb1b843f9e25ec7d22d285e875d5",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/RECOVERED-RESULT.json",
+      "sha256": "368e2eb6a98fe2ffc8176b9b43cef0c320ca249646a25d4335c9dfc1783e3930",
+      "original_sha256": "368e2eb6a98fe2ffc8176b9b43cef0c320ca249646a25d4335c9dfc1783e3930",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/bounds-dictionary.patch",
+      "sha256": "773b2cd5df08386ceb1cb85367a992a27945b41114cafbd1b0f56fce0f144ed1",
+      "original_sha256": "773b2cd5df08386ceb1cb85367a992a27945b41114cafbd1b0f56fce0f144ed1",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/REPORT.md",
+      "sha256": "032ff325764fdac13844a3bfce4b86b3babbe2b5cc025b4c596023747bef1957",
+      "original_sha256": "032ff325764fdac13844a3bfce4b86b3babbe2b5cc025b4c596023747bef1957",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/REPORT-fixed.md",
+      "sha256": "aae67d774767ba1f0928e590df2b8904de93f0baa2bb4e3f4f42bf95ce7545b1",
+      "original_sha256": "aae67d774767ba1f0928e590df2b8904de93f0baa2bb4e3f4f42bf95ce7545b1",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/SWEEP.csv",
+      "sha256": "f9ef991b94ef6a489870b739eacc42d18745233f76e5d0b65126420eadcc7749",
+      "original_sha256": "f9ef991b94ef6a489870b739eacc42d18745233f76e5d0b65126420eadcc7749",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/SWEEP-fixed.csv",
+      "sha256": "3cd7a7cff8beffeae683b4a8a5b94266ed55609bed4305db1aaa496c3951bc35",
+      "original_sha256": "3cd7a7cff8beffeae683b4a8a5b94266ed55609bed4305db1aaa496c3951bc35",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/STRESS-fixed.csv",
+      "sha256": "26f09e28d68fc23208a87d9108795c7f8e6961422ac1a27ad5d0459ffba8ac81",
+      "original_sha256": "26f09e28d68fc23208a87d9108795c7f8e6961422ac1a27ad5d0459ffba8ac81",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/coefficients.c",
+      "sha256": "587de061b90863d47dcf5ba5d68a5acf80ff949eeb1f5804ce558bd35eaf1e67",
+      "original_sha256": "587de061b90863d47dcf5ba5d68a5acf80ff949eeb1f5804ce558bd35eaf1e67",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/fixed_candidate.h",
+      "sha256": "ae891a0dcc2d3fd71f5ae59b6882120033fbf4bf0df26d385afe7e7d64435e05",
+      "original_sha256": "ae891a0dcc2d3fd71f5ae59b6882120033fbf4bf0df26d385afe7e7d64435e05",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/fixed_only.c",
+      "sha256": "3c7b22d8f746fc7e228a3e62a0f10bd8277eb8f397b8ba2d62358ea8a544fe47",
+      "original_sha256": "3c7b22d8f746fc7e228a3e62a0f10bd8277eb8f397b8ba2d62358ea8a544fe47",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/sweep.c",
+      "sha256": "324185e40c8052fb0751225ec46931784b8242baf966c54572f09abe1ba65605",
+      "original_sha256": "324185e40c8052fb0751225ec46931784b8242baf966c54572f09abe1ba65605",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/stress_fixed.c",
+      "sha256": "2932c1fd19d9bfb4fce0aa641b82ca117e6f295ba8b05d899c9989bb9288ad61",
+      "original_sha256": "2932c1fd19d9bfb4fce0aa641b82ca117e6f295ba8b05d899c9989bb9288ad61",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/stress-fixed-resource.json",
+      "sha256": "bcc9e6cec6c0475543d07a26b6b8e21caebce37eb8be14fa48ffa7dfbfb2a4e0",
+      "original_sha256": "bcc9e6cec6c0475543d07a26b6b8e21caebce37eb8be14fa48ffa7dfbfb2a4e0",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/sweep-fixed-resource.json",
+      "sha256": "23662cab28341fb17a8245c58306588d68ab47e71d07ea89ca07d40e8e926c72",
+      "original_sha256": "23662cab28341fb17a8245c58306588d68ab47e71d07ea89ca07d40e8e926c72",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/fixed-host-object.json",
+      "sha256": "dc485fdca465fab0fa6e28a56c3d9b4a3d9d255be20b2455b212a0d69e25ce27",
+      "original_sha256": "dc485fdca465fab0fa6e28a56c3d9b4a3d9d255be20b2455b212a0d69e25ce27",
+      "exact_copy": true
+    },
+    {
+      "path": "experiments/sound-hardware-v1/coefficient_followup/RECOVERED-RESULT.json",
+      "sha256": "50897b57dac72449638ec5b2cbffbc83c373d2878e5d6de4c00ddf16e97bbd41",
+      "original_sha256": "50897b57dac72449638ec5b2cbffbc83c373d2878e5d6de4c00ddf16e97bbd41",
+      "exact_copy": true
+    }
+  ],
+  "unlisted_fixture_copies": "Isolated input copies and mocked output directories are reproducible test scratch; original packet identities are pinned by the receipts.",
+  "limitations": "No new source execution or numeric qualification is implied by this manifest."
+}

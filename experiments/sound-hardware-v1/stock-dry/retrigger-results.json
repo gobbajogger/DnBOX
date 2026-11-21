@@ -1,0 +1,38 @@
+[
+  {
+    "key": 36,
+    "reference_peak": 0.031087636947631836,
+    "candidate_peak": 0.031087681651115417,
+    "relative_waveform_error_db": -45.990360375865606,
+    "pcm_sha256": {
+      "reference-36-0.pcm": "8bddacfb05a7adc9208f85b6a71e7d3f4ae7540862ff7a16104fb6ad17791d9f",
+      "reference-36-1.pcm": "358d5a9c9fd30348180dee68b4b03353a94515af98e6472f36eee67f36d93505",
+      "candidate-36-0.pcm": "36693674e33700f64b36a273e70916c8fa6c6ff124ae4607a7fdcc1f3ef0df91",
+      "candidate-36-1.pcm": "347c0957bdad394aa08eb4148ec0ad6aeaf8f381229a2c3940bced5a653f6165"
+    }
+  },
+  {
+    "key": 60,
+    "reference_peak": 0.025956645607948303,
+    "candidate_peak": 0.025951772928237915,
+    "relative_waveform_error_db": -26.69145582506747,
+    "pcm_sha256": {
+      "reference-60-0.pcm": "e1eb795c76693e39ae219b62ba048b249765419e31f94265d961d636e0d6d6bf",
+      "reference-60-1.pcm": "c290eef1fa48cb30925dbc62ed7a5433a60526168e7d78abe1e55c9e6cc66700",
+      "candidate-60-0.pcm": "b7654c3164b167f1f41fac3e682d3959ad7bda75753a3df4b17bbf3e295c28a3",
+      "candidate-60-1.pcm": "4855b5d6cb0f18353158c38a03052d6f9d555465b74536c5e85ee890faa34e3b"
+    }
+  },
+  {
+    "key": 84,
+    "reference_peak": 0.03291243314743042,
+    "candidate_peak": 0.032940641045570374,
+    "relative_waveform_error_db": -41.20866294205025,
+    "pcm_sha256": {
+      "reference-84-0.pcm": "8acb1454eb9886326704d9c38211fffbe554264d2fa559267a774221857e1889",
+      "reference-84-1.pcm": "e672ac2b4de654568025c4c72d1f72dda81939385ce1fbffed223a453687eadf",
+      "candidate-84-0.pcm": "209dc78067528795a1215ba9d7234d03c51010f7462f3d884fe8edcf2bbd3747",
+      "candidate-84-1.pcm": "036453292715bb36762281cd94ca39d4d8d41b123f079c9003875b6dd49ec7cb"
+    }
+  }
+]

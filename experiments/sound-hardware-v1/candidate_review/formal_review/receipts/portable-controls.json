@@ -1,0 +1,93 @@
+{
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_acceptance_exit_status.py",
+        "--package",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+        "--output",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/current_status"
+      ],
+      "exit_code": 0,
+      "stdout": "check_acceptance_exit_status_0.stdout.log",
+      "stderr": "check_acceptance_exit_status_0.stderr.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_acceptance_exit_status.py",
+        "--package",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+        "--output",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/historical_status",
+        "--source-script",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/history/verify_candidate.py",
+        "--false-exit",
+        "0"
+      ],
+      "exit_code": 0,
+      "stdout": "check_acceptance_exit_status_1.stdout.log",
+      "stderr": "check_acceptance_exit_status_1.stderr.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_reference_integrity.py",
+        "--package",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+        "--output",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard"
+      ],
+      "exit_code": 0,
+      "stdout": "check_reference_integrity_2.stdout.log",
+      "stderr": "check_reference_integrity_2.stderr.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_compact_output_preservation.py",
+        "--package",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+        "--output",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/compact_collision"
+      ],
+      "exit_code": 0,
+      "stdout": "check_compact_output_preservation_3.stdout.log",
+      "stderr": "check_compact_output_preservation_3.stderr.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_review/scripts/check_boundary_and_live_controls.py",
+        "--package",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1",
+        "--output",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/boundary_live",
+        "--review-dir",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/libraries"
+      ],
+      "exit_code": 0,
+      "stdout": "check_boundary_and_live_controls_4.stdout.log",
+      "stderr": "check_boundary_and_live_controls_4.stderr.log"
+    }
+  ],
+  "scripts_sha256": {
+    "check_boundary_and_live_controls.py": "cc3d482d626f699b86e404e1e7d3a92608fcc6f2fbcb80050b88c8d45fb871d9",
+    "check_reference_integrity.py": "df66dae696f380cae04363e1edf96b78c34105ae443fb2b19f5d07adb233ab43",
+    "check_compact_output_preservation.py": "d5a34b765e1243d85cafcfbcb566c94663a5e745fb9d16d1f2fe8e680afda574",
+    "check_acceptance_exit_status.py": "25c790387055469a167596c7f90d672a841c4d0057af02d07f19f9a2db739aaa"
+  },
+  "compiled_library_sha256": {
+    "diagnostic.so": "1fd16f2bad4103598fd763d5ba63715384dd5737995004eca2cff9428407345d",
+    "compact.so": "7140540c7035229f5b4b52207548ccea8b57bb4bcf21f23cded707cc81acbb06",
+    "accepted.so": "fadb3f0290e3b3e76008be38f6edcdae4e38dbbf8fed322180b83af23374b795"
+  },
+  "all_pass": true,
+  "scope": "Portable script verification, no original engine or native/long timing execution."
+}

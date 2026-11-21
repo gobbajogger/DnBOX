@@ -1,0 +1,116 @@
+{
+  "destination": "experiments/sound-hardware-v1/sj6-id36-field-adapter",
+  "instruction": "Import only the exact files in this list plus this manifest; no binaries.",
+  "files": [
+    {
+      "path": "sj6_preset_fields.c",
+      "sha256": "c1841889fca152804155705ceb14fd5b28a9ca652501f4aedadaea6dc807e862",
+      "bytes": 2556
+    },
+    {
+      "path": "sj6_preset_fields.h",
+      "sha256": "fe2ba8103571275e0ba30c54d5321b88969df122e3c04f8a40dc95d384e7f4d4",
+      "bytes": 881
+    },
+    {
+      "path": "tests/test_id36.c",
+      "sha256": "5a624b1d9e9cced42cec4bcf7a442f20236affae11555332ec9a88aab053abd8",
+      "bytes": 5748
+    },
+    {
+      "path": "tests/raw_storage_baseline.c",
+      "sha256": "f1e6671750b9386f9b563611a8c3bf6cc66504cefc3ab1eeaeda3429c6cd3937",
+      "bytes": 521
+    },
+    {
+      "path": "verify.py",
+      "sha256": "b1be1873c93976038e41412bd92a2228041a569dd3e3540f98a38ac3539793e1",
+      "bytes": 4417
+    },
+    {
+      "path": "README.md",
+      "sha256": "55e4e723af193c502a6124e3b7b141cca3bb70148e9fdde49c8ba184f26d1314",
+      "bytes": 4325
+    },
+    {
+      "path": "INPUTS.json",
+      "sha256": "6512aa746e1d0b0814134e06b79aba15379d11565008912d1b9ca60722b5d785",
+      "bytes": 1170
+    },
+    {
+      "path": "evidence/red.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/red.stderr",
+      "sha256": "2b27e34af1fe0057b6f95cb8d6c71cf6b5722c3219ff5e8e66790edaf2c58450",
+      "bytes": 87
+    },
+    {
+      "path": "evidence/focused-01/RESULT.json",
+      "sha256": "f295ec469e7309bd55f42a82ff7cca264f0f3048647438f5603b37ebf46a25e2",
+      "bytes": 6130
+    },
+    {
+      "path": "evidence/focused-01/green.build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/green.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/green.stdout",
+      "sha256": "1c4635d75603331b29a550a716fbec33e554d19ddf5457b43175355bb1e6b3af",
+      "bytes": 741
+    },
+    {
+      "path": "evidence/focused-01/linear_attack.build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/linear_attack.stderr",
+      "sha256": "d123d168945ae20b4366bcdc012e1c511da0dbc6281876db1f097ec93e9b308b",
+      "bytes": 82
+    },
+    {
+      "path": "evidence/focused-01/linear_attack.stdout",
+      "sha256": "0ee3a87b1fd91aedb55232ed1e4ca2ee064024830aab15c8acf7a5ac79ce1ee0",
+      "bytes": 125
+    },
+    {
+      "path": "evidence/focused-01/red_raw_only.build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/red_raw_only.stderr",
+      "sha256": "2b27e34af1fe0057b6f95cb8d6c71cf6b5722c3219ff5e8e66790edaf2c58450",
+      "bytes": 87
+    },
+    {
+      "path": "evidence/focused-01/red_raw_only.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/wrong_layer.build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "evidence/focused-01/wrong_layer.stderr",
+      "sha256": "2b27e34af1fe0057b6f95cb8d6c71cf6b5722c3219ff5e8e66790edaf2c58450",
+      "bytes": 87
+    },
+    {
+      "path": "evidence/focused-01/wrong_layer.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ]
+}

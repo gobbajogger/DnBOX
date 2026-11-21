@@ -1,0 +1,22 @@
+{
+  "checked_utc": "2026-11-19T00:47:04.910241+00:00",
+  "disk_free_bytes": 39202447360,
+  "memory": {
+    "MemTotal_bytes": 10451427328,
+    "MemAvailable_bytes": 8883204096
+  },
+  "cpu_count": 9,
+  "load_average": [
+    0.068359375,
+    0.17236328125,
+    0.240234375
+  ],
+  "blocked_environment_keys": [],
+  "authorized_hashes": {
+    "check_active.py": "f661569877044d9f7c52bfaa02c8cc368818aea6e2fe94e7403972147108b6cc",
+    "DECLARATION.json": "373711a1cbfa6d04a5fe40b45abe83cef327e05cb0ac4aa94b761d33190fa862"
+  },
+  "output_directory_absent": true,
+  "root_reports_other_compiler_render_scopes_released": true,
+  "candidate_compiler_or_render_invocations_at_this_point": 0
+}

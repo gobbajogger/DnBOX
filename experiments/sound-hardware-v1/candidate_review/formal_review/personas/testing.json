@@ -1,0 +1,29 @@
+{
+  "reviewer": "testing",
+  "findings": [
+    {
+      "title": "Return failure when candidate acceptance gates fail",
+      "severity": "P2",
+      "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+      "line": 263,
+      "why_it_matters": "The documented verification command exits successfully even when an envelope, allocator, finite-bound or lifecycle acceptance check returns false. These checks generally collect booleans instead of raising assertions, and main only writes and prints the aggregate result; a shell script that uses the command's status can therefore accept a regressed core. Preserve the diagnostic receipt, then return a nonzero status on scoped_acceptance_pass=false, matching the compact-profile verifier.",
+      "autofix_class": "gated_auto",
+      "owner": "downstream-resolver",
+      "requires_verification": true,
+      "suggested_fix": "After writing and printing RESULT.json, add `if not result['scoped_acceptance_pass']: raise SystemExit(1)`. Add a focused harness-level check that stubs one acceptance component to false and verifies a failing process status while the failing receipt is still written; also check that an all-pass result exits zero.",
+      "confidence": 100,
+      "evidence": [
+        "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:263 --     print(json.dumps({k:result[k] for k in ('snapshot_sha256','envelope','velocity','lifecycle','scoped_acceptance_pass')},indent=2))",
+        "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:261 computes scoped_acceptance_pass from reported gate booleans; line 262 writes the receipt, and line 265 invokes main without inspecting or returning the aggregate result.",
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:163-164 explicitly raises SystemExit(1) when scoped_equivalence_pass is false, providing an existing parallel implementation.",
+        "experiments/sound-hardware-v1/candidate_review/frozen_01/RESULT.json retains scoped_acceptance_pass=false for a real oldest-held allocation regression, demonstrating that a false reported gate is a supported and consequential outcome rather than an unreachable scenario.",
+        "Checked current verifier SHA-256 0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594, matching the frozen_03 RESULT harness digest. Current accepted core/header SHA-256 are 9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa / a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c. No build, device, native timing or long-duration test was rerun by this reviewer."
+      ],
+      "pre_existing": false
+    }
+  ],
+  "residual_risks": [],
+  "testing_gaps": [
+    "The live parameter-update policy documented at hardware_candidate/README.md:57 lacks a direct semantic regression check: changing amp/filter sustain during sustain must update immediately, changing a running timed segment must retain its cached endpoint/rate, and the next segment must use the new settings. test_core.c fuzzes updates for finiteness and the compact tests compare profiles to the same baseline, but neither independently asserts these promised trajectories. A short public-API timeline can cover these policy branches without another long-duration run."
+  ]
+}

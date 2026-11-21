@@ -7,7 +7,7 @@ Writes two headers (both flash-resident `static const` data):
   x0x_drum_samples.h  the hi-hat, ride and crash as IMA ADPCM, 44.1 kHz (assets/909/*.wav,
                       from ER-99 via 9W9, GPL-3.0). hh.wav is 24-bit: it is
                       rounded to 16 bits here (the 909's own cymbals are 6-bit),
-                      then all three are encoded with tools/sampleio.py ima_encode
+                      then all three use offline trellis-encoded IMA data
                       (predictor 0 / index 0, low nibble first; the format of the
                       BREAK loops). drum909.c decodes them as they play
                       (firmware/src/dsp/ima_adpcm.h). 4 bits a sample: 55,275 B of
@@ -22,13 +22,13 @@ Writes two headers (both flash-resident `static const` data):
   tools/gen_drum_samples.py [build/gen/x0x_drum_samples.h]
 The tables header is written next to the samples header.
 """
+import hashlib
+import json
 import math
 import struct
 import sys
+import tempfile
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import sampleio as sio  # noqa: E402
 
 SRC = Path(__file__).resolve().parents[1]
 ASSETS = SRC / "assets" / "909"
@@ -226,6 +226,16 @@ def pack_tanh_runs(tab):
     return runs, payload, raw_b, packed_b
 
 
+def write_header(path, content):
+    data = content.encode()
+    if path.is_file() and path.read_bytes() == data:
+        return
+    # Parallel host tests can compile this header as another process generates it.
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as target:
+        target.write(data)
+    Path(target.name).replace(path)
+
+
 def main():
     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
     out_t = out_s.parent / "x0x_drum_tables.h"
@@ -237,16 +247,24 @@ def main():
            " * firmware/src/dsp/ima_adpcm.h decodes it). _LEN is the sample count. */",
            "#pragma once", "#include <stdint.h>", ""]
     total = nbytes = 0
+    encoded_dir = ASSETS / "encoded"
+    manifest = json.loads((encoded_dir / "manifest.json").read_text())
     for name, fn in SAMPLES:
-        pcm, bits = read_wav(ASSETS / fn)
-        data, _ = sio.ima_encode(pcm, 0)
+        wav = ASSETS / fn
+        pcm, bits = read_wav(wav)
+        data = (encoded_dir / wav.with_suffix(".adpcm").name).read_bytes()
+        expected = manifest[wav.stem]
+        if (hashlib.sha256(wav.read_bytes()).hexdigest() != expected["wav_sha256"] or
+                hashlib.sha256(data).hexdigest() != expected["adpcm_sha256"] or
+                len(data) != (len(pcm) + 1) // 2):
+            raise ValueError(f"{fn}: encoded data differs; regenerate with tools/regen_909_cymbals.py")
         total += len(pcm)
         nbytes += len(data)
         hdr.append(f"/* {fn}: {len(pcm)} frames, source {bits}-bit, {len(data)} B of ADPCM */")
         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
         hdr.append(arr("uint8_t", name, list(data), per=24))
         hdr.append("")
-    out_s.write_text("\n".join(hdr))
+    write_header(out_s, "\n".join(hdr))
 
     tab = [f32(math.tanh(TANH_MAX * i / TANH_N)) for i in range(TANH_N + 2)]
     tanh_runs, tanh_words, tanh_raw_b, tanh_packed_b = pack_tanh_runs(tab)
@@ -304,7 +322,7 @@ def main():
     t.append(f"#define X0X_EXP_COUNT {len(EXP_RANGES)}")
     block, packed_exp_b = _lossless_exp_block()
     t += block
-    out_t.write_text("\n".join(t))
+    write_header(out_t, "\n".join(t))
     raw_exp_b = len(EXP_RANGES) * 128 * 4
     print(f"gen_drum_samples: {total} frames ({nbytes} bytes of ADPCM, {total * 2} as int16) -> {out_s.name}; "
           f"tanh {TANH_N + 2} packed {tanh_raw_b}->{tanh_packed_b} B + {len(EXP_RANGES)} pot curves "

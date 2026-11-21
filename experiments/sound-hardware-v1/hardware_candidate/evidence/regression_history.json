@@ -1,0 +1,17 @@
+{
+  "long_attack_precision": {
+    "observed_failure": "The uncorrected float-retention recurrence reached level1 before the integer16second attack endpoint.",
+    "fix": "Stable small exponential step and compensated tick accumulation. Exact endpoint-before-last-sample assertion restored and passes."
+  },
+  "oldest_voice_after_retirement": {
+    "failing_source_sha256": "9165342a98263af67e5ce81ebeef6df57ed35a2a31c282c90cf38f82954c3e4d",
+    "observed_failure": "Independent reproduction and worker test failed: dnbx_note_on(&s,99,127)==5. Retired voice holes caused surviving ranks to reach6 and tie.",
+    "fix": "Compact surviving active ranks with bounded6x6 comparisons in note_on; chosen voice receives rank0.",
+    "passing_source_sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+  },
+  "sanitizer": {
+    "initial_failure": "LeakSanitizer fatal ptrace environment limitation.",
+    "rerun": "ASAN_OPTIONS=detect_leaks=0; address and undefined-behavior checks enabled.",
+    "exit_code": 0
+  }
+}

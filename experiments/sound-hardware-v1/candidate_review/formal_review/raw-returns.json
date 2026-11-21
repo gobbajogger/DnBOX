@@ -1,0 +1,103 @@
+[
+  {
+    "reviewer": "correctness",
+    "findings": [
+      {
+        "title": "Check output existence before overwriting acceptance metadata",
+        "severity": "P2",
+        "file": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+        "line": 144,
+        "confidence": 100,
+        "autofix_class": "gated_auto",
+        "owner": "downstream-resolver",
+        "requires_verification": true,
+        "pre_existing": false,
+        "suggested_fix": "Reserve or reject the requested output directory before writing the acceptance declaration. Support a distinct run label/output directory as verify_candidate.py does, and write the new declaration inside that run directory so existing declarations and results are never overwritten by a rejected rerun. Verify that an existing-output invocation leaves all retained files unchanged and that a fresh run records the hash of its own declaration.",
+        "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:144 --     (HERE/'COMPACT-ACCEPTANCE-DECLARATION.json').write_text(json.dumps(declaration,indent=2)+'\\n')"
+      }
+    ],
+    "residual_risks": [
+      "Original-behavior agreement remains limited to the two supplied 48 kHz amplitude fixtures also used for fitting. The recorded metadata and current documentation explicitly leave original 44.1 kHz scheduling, active original filter-envelope behavior, and whole-instrument equivalence unqualified; the reviewed core and compact-equivalence results do not close those boundaries."
+    ],
+    "testing_gaps": []
+  },
+  {
+    "reviewer": "testing",
+    "findings": [
+      {
+        "title": "Return failure when candidate acceptance gates fail",
+        "severity": "P2",
+        "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+        "line": 263,
+        "confidence": 100,
+        "autofix_class": "gated_auto",
+        "owner": "downstream-resolver",
+        "requires_verification": true,
+        "pre_existing": false,
+        "suggested_fix": "After writing and printing RESULT.json, add `if not result['scoped_acceptance_pass']: raise SystemExit(1)`. Add a focused harness-level check that stubs one acceptance component to false and verifies a failing process status while the failing receipt is still written; also check that an all-pass result exits zero.",
+        "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:263 --     print(json.dumps({k:result[k] for k in ('snapshot_sha256','envelope','velocity','lifecycle','scoped_acceptance_pass')},indent=2))"
+      }
+    ],
+    "residual_risks": [],
+    "testing_gaps": [
+      "The live parameter-update policy documented at hardware_candidate/README.md:57 lacks a direct semantic regression check: changing amp/filter sustain during sustain must update immediately, changing a running timed segment must retain its cached endpoint/rate, and the next segment must use the new settings. test_core.c fuzzes updates for finiteness and the compact tests compare profiles to the same baseline, but neither independently asserts these promised trajectories. A short public-API timeline can cover these policy branches without another long-duration run."
+    ]
+  },
+  {
+    "reviewer": "maintainability",
+    "findings": [
+      {
+        "title": "Allow public-boundary checks to consume fresh review outputs",
+        "severity": "P2",
+        "file": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py",
+        "line": 7,
+        "confidence": 100,
+        "autofix_class": "gated_auto",
+        "owner": "downstream-resolver",
+        "requires_verification": true,
+        "pre_existing": false,
+        "suggested_fix": "Add a required --review-dir (or matching --label) argument and resolve all three shared-library inputs from that fresh verifier output directory. Write PUBLIC-BOUNDARIES.json into the selected fresh directory, refusing an existing receipt, or accept an explicit new output path. Document the follow-up command after verify_compact_profile.py and verify it using a new label while confirming the retained compact_profile_review/PUBLIC-BOUNDARIES.json hash is unchanged.",
+        "first_evidence": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:7 -- OUT=ROOT/'compact_profile_review'"
+      }
+    ],
+    "residual_risks": [],
+    "testing_gaps": []
+  },
+  {
+    "reviewer": "performance",
+    "findings": [],
+    "residual_risks": [
+      "The immediate event/control API has bounded work per call but no event-delivery cap. The callback audit exercises a fixed burst, so its 168 direct exp2 calls, 112 log2 calls, 208 stage entries and 160 envelope ticks are workload observations, not a bound for arbitrary caller event traffic. The header, audit receipt and owner report state this limitation correctly; no candidate-source defect is asserted.",
+      "The native linked receipts establish replacement image/resource costs, not runtime speed. The compact reachable image remains physically oversized by 748/740 bytes and misses the existing free-XIP requirement by 1772/1764 bytes. Counter-off saves no additional image bytes in the measured LTO/null-work adapter. Current reports preserve these failures and do not infer native timing or hardware admission from the 152-byte compact reduction."
+    ],
+    "testing_gaps": [
+      "No complete native 512-frame/44100-Hz callback measurement covers the candidate together with its macro facade, preserved chorus/high-pass, global/private effects, drums/BREAK, mixing/USB, event decoding and interrupt/cache interference under a bounded event policy. Existing host measurements exercise the selected two-part engine/event slice only; local native frame bounds also exclude enclosing runtime/interrupt frames and are not stack high-water evidence. This is an explicitly open integration qualification, not a new gate for the research core. No build, timing rerun or device execution was performed in this read-only review."
+    ]
+  },
+  {
+    "reviewer": "project-standards",
+    "findings": [],
+    "residual_risks": [],
+    "testing_gaps": []
+  },
+  {
+    "reviewer": "adversarial",
+    "findings": [
+      {
+        "title": "Truncated fixtures still produce pinned acceptance receipts",
+        "severity": "P2",
+        "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+        "line": 93,
+        "confidence": 100,
+        "autofix_class": "manual",
+        "owner": "downstream-resolver",
+        "requires_verification": true,
+        "pre_existing": false,
+        "suggested_fix": "Load ACCEPTANCE-DECLARATION.json before the tests and fail unless every BASE-relative file in reference_hashes exists and its SHA-256 matches. Record the verified actual reference hashes in RESULT.json. Add a focused replay check that retaining only the first CSV row for each case fails before candidate evaluation, while the unchanged packaged fixtures remain accepted; do not change the existing numeric thresholds or DSP source.",
+        "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:93 --     rows=list(csv.DictReader((BASE/'mapping/results/implementer_brief/amp_observed_levels.csv').open()))"
+      }
+    ],
+    "residual_risks": [],
+    "testing_gaps": []
+  }
+]

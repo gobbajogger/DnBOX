@@ -1,0 +1,43 @@
+{
+  "declared_at_utc": "2026-11-18T14:50:26.570389+00:00",
+  "scope": "Independent checks of clean candidate public interface, captured original amp subset and bounded candidate mechanics. No original engine source used. No full Sound acceptance.",
+  "reference_hashes": {
+    "mapping/results/implementer_brief/BEHAVIOR-BRIEF.md": "a6d6856c4ad2f1487ddd2cebacaf0416449c7307a61db2f0c4c6834b056c16eb",
+    "mapping/results/implementer_brief/recorded_envelope_behavior.json": "2f8ab03b1ce874381ae8deb4afd66d016220880512b51c9e2fbe1d63f0f98210",
+    "mapping/results/implementer_brief/amp_observed_levels.csv": "e6578b0e5861b7ef73fea6822f8848b897065a66a71fded5db08710dea201b6f"
+  },
+  "envelope_gate": {
+    "cases": [
+      1,
+      2
+    ],
+    "sample_rate": 48000,
+    "metric": "Maximum absolute error between candidate public amp snapshot AFTER rendering sample n and original measured first/last inferred amplitude at EXACT recorded frame n, all 2560 CSV rows; also compare candidate dry output/reference-output cancellation as black-box cross-check. No fitted time shift or re-fit of thresholds.",
+    "max_abs_acceptance": 0.001,
+    "justification": "0.1% of full-scale envelope. This is over 5000 times the largest reported 1.796592e-7 capture interpolation residual and safely covers binary32 recurrence noise while rejecting a 16-frame grid error or linear curve. It is an explicit scoped engineering acceptance threshold, not an original product audio-tolerance requirement.",
+    "finite_required": true,
+    "secondary_rms_reported": true,
+    "candidate_audio_ratio_crosscheck_max_abs": 2e-06
+  },
+  "negative_controls": [
+    {
+      "name": "wrong_time_grid",
+      "action": "Compare same candidate contour shifted by exactly +16 frames to original timestamps. Must fail maxabs1e-3."
+    },
+    {
+      "name": "linear_envelope",
+      "action": "Replace each timed contour with a linear AHDSHR segment using the physical durations. Must fail maxabs1e-3."
+    },
+    {
+      "name": "wrong_velocity",
+      "action": "Compare candidate squared velocity mode to captured linear 127:1 gain requirement. Must fail normalized ratio tolerance1e-4."
+    }
+  ],
+  "velocity_gate": {
+    "normalized_gain_ratio": "output(v1)*127 / output(v127) at well-conditioned nonzero samples, default linear mode",
+    "max_abs_error": 0.0001
+  },
+  "lifecycle_gate": "Part instances and layer/envelope states independent; serialized event timeline gives identical output and final state for all tested block partitions; sustain-up does not restart notes already in release; released note retires and allocation oldest policy remains correctly ordered; invalid arguments preserve state/output for explicitly validated errors.",
+  "finite_bound_gate": "Finite accepted parameters and public events at sr8000/44100/48000/192000 keep output finite and within declared32.0 bound with float tolerance1e-5. Caller does not edit private state.",
+  "timing_scope": "Host full callback-like sequence, including fixed explicitly counted event/control bursts, both parts and render; no native WCET/xrun inference. Counter audit includes omitted event/control operations."
+}

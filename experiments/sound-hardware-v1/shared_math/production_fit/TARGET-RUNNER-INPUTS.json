@@ -1,0 +1,20 @@
+{
+  "emulator_binary": {
+    "path": "/workspace/scratch/cc2e3d785d40/private-runs/final-runner-preflight/execution-inputs/fm1-live",
+    "bytes": 4978480,
+    "sha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8"
+  },
+  "diagnostic_runner": {
+    "path": "/workspace/scratch/cc2e3d785d40/diag-emulator/dnbox/dropout/runner.py",
+    "sha256": "6d3da2532a29d3382d877ae3f109f343e8a9c9e0358b63701031f3557effeb89",
+    "scope": "old94197fc8 observer-off/on identity, not new firmware pair",
+    "short_mode": "--smoke nine-second observation plus bootstrap, settling and isolated BREAK witness"
+  },
+  "canonical_host_runner": {
+    "path": "/workspace/scratch/e803955aec60/DnBOX/tests/host/audio_path_identity.py",
+    "sha256": "7ef923f988d39ca6b8b255118f40453e6642ecdba0b4e13e6a9470aed93ecf41",
+    "scope": "host-only; native FM_ONE branch not exercised"
+  },
+  "target_identity_status": "BLOCKED_NO_PINNED_CURRENT_IMAGE_PAIR_AND_CROSS_ENGINE_IDENTITY_DRIVER",
+  "emulator_execution": "NOT_RUN"
+}

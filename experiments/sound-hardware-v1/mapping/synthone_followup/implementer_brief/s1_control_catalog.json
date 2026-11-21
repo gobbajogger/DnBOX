@@ -1,0 +1,3500 @@
+{
+  "schema": "S1 public control identity and binary32 physical bounds v1",
+  "parameter_count": 150,
+  "do_not_use_superj6_ids": true,
+  "units_warning": "Unqualified native values are not normalized UI pots.",
+  "controls": [
+    {
+      "id": 0,
+      "name": "index1",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "waveform1",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 551,
+      "factory_unique_command_or_default_values": 195
+    },
+    {
+      "id": 1,
+      "name": "index2",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "waveform2",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 570,
+      "factory_unique_command_or_default_values": 199
+    },
+    {
+      "id": 2,
+      "name": "morphBalance",
+      "minimum": 0.0,
+      "default": 0.5,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "vcoBalance",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 666,
+      "factory_unique_command_or_default_values": 151
+    },
+    {
+      "id": 3,
+      "name": "morph1SemitoneOffset",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 24.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41c00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "vco1Semitone",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        24.0
+      ],
+      "factory_nonzero_count": 229,
+      "factory_unique_command_or_default_values": 24
+    },
+    {
+      "id": 4,
+      "name": "morph2SemitoneOffset",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 24.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41c00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "vco2Semitone",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        24.0
+      ],
+      "factory_nonzero_count": 414,
+      "factory_unique_command_or_default_values": 24
+    },
+    {
+      "id": 5,
+      "name": "morph1Volume",
+      "minimum": 0.0,
+      "default": 0.800000011920929,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f4ccccd",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "vco1Volume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 650,
+      "factory_unique_command_or_default_values": 146
+    },
+    {
+      "id": 6,
+      "name": "morph2Volume",
+      "minimum": 0.0,
+      "default": 0.800000011920929,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f4ccccd",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "vco2Volume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 629,
+      "factory_unique_command_or_default_values": 160
+    },
+    {
+      "id": 7,
+      "name": "subVolume",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "subVolume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 589,
+      "factory_unique_command_or_default_values": 291
+    },
+    {
+      "id": 8,
+      "name": "subOctaveDown",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "subOsc24Toggled",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 105,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 9,
+      "name": "subIsSquare",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "subOscSquareToggled",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 272,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 10,
+      "name": "fmVolume",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "fmVolume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 574,
+      "factory_unique_command_or_default_values": 271
+    },
+    {
+      "id": 11,
+      "name": "fmAmount",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 15.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "41700000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "fmAmount",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        15.0
+      ],
+      "factory_nonzero_count": 275,
+      "factory_unique_command_or_default_values": 174
+    },
+    {
+      "id": 12,
+      "name": "noiseVolume",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 0.25,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3e800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "noiseVolume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.5
+      ],
+      "factory_nonzero_count": 444,
+      "factory_unique_command_or_default_values": 209
+    },
+    {
+      "id": 13,
+      "name": "lfo1Index",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "lfoWaveform",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 168,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 14,
+      "name": "lfo1Amplitude",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "lfoAmplitude",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 550,
+      "factory_unique_command_or_default_values": 271
+    },
+    {
+      "id": 15,
+      "name": "lfo1Rate",
+      "minimum": 0.0005208333604969084,
+      "default": 0.25,
+      "maximum": 80.0,
+      "min_default_max_f32_hex": [
+        "3a088889",
+        "3e800000",
+        "42a00000"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": true,
+      "preset_key": "lfoRate",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        53.333335876464844
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 238
+    },
+    {
+      "id": 16,
+      "name": "cutoff",
+      "minimum": 64.0,
+      "default": 20000.0,
+      "maximum": 22050.0,
+      "min_default_max_f32_hex": [
+        "42800000",
+        "469c4000",
+        "46ac4400"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "cutoff",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        64.0,
+        22050.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 475
+    },
+    {
+      "id": 17,
+      "name": "resonance",
+      "minimum": 0.0,
+      "default": 0.10000000149011612,
+      "maximum": 0.9800000190734863,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3dcccccd",
+        "3f7ae148"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "resonance",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.9481500387191772
+      ],
+      "factory_nonzero_count": 624,
+      "factory_unique_command_or_default_values": 177
+    },
+    {
+      "id": 18,
+      "name": "filterMix",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        1.0,
+        1.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 19,
+      "name": "filterADSRMix",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.2000000476837158,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f99999a"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "filterADSRMix",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.2000000476837158
+      ],
+      "factory_nonzero_count": 598,
+      "factory_unique_command_or_default_values": 214
+    },
+    {
+      "id": 20,
+      "name": "isMono",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "isMono",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 326,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 21,
+      "name": "glide",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 0.20000000298023224,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3e4ccccd"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "glide",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.20000000298023224
+      ],
+      "factory_nonzero_count": 331,
+      "factory_unique_command_or_default_values": 158
+    },
+    {
+      "id": 22,
+      "name": "filterAttackDuration",
+      "minimum": 0.0005000000237487257,
+      "default": 0.05000000074505806,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3a03126f",
+        "3d4ccccd",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "filterAttack",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0005000000237487257,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 142
+    },
+    {
+      "id": 23,
+      "name": "filterDecayDuration",
+      "minimum": 0.004999999888241291,
+      "default": 0.05000000074505806,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3ba3d70a",
+        "3d4ccccd",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "filterDecay",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.004999999888241291,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 285
+    },
+    {
+      "id": 24,
+      "name": "filterSustainLevel",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "filterSustain",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 539,
+      "factory_unique_command_or_default_values": 207
+    },
+    {
+      "id": 25,
+      "name": "filterReleaseDuration",
+      "minimum": 0.0,
+      "default": 0.5,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f000000",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "filterRelease",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        2.0
+      ],
+      "factory_nonzero_count": 651,
+      "factory_unique_command_or_default_values": 236
+    },
+    {
+      "id": 26,
+      "name": "attackDuration",
+      "minimum": 0.0005000000237487257,
+      "default": 0.05000000074505806,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3a03126f",
+        "3d4ccccd",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "attackDuration",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0005000000237487257,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 128
+    },
+    {
+      "id": 27,
+      "name": "decayDuration",
+      "minimum": 0.004999999888241291,
+      "default": 0.004999999888241291,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3ba3d70a",
+        "3ba3d70a",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "decayDuration",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.004999999888241291,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 298
+    },
+    {
+      "id": 28,
+      "name": "sustainLevel",
+      "minimum": 0.0,
+      "default": 0.800000011920929,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f4ccccd",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "sustainLevel",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 547,
+      "factory_unique_command_or_default_values": 187
+    },
+    {
+      "id": 29,
+      "name": "releaseDuration",
+      "minimum": 0.004000000189989805,
+      "default": 0.05000000074505806,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3b83126f",
+        "3d4ccccd",
+        "40000000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "releaseDuration",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.004000000189989805,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 320
+    },
+    {
+      "id": 30,
+      "name": "morph2Detuning",
+      "minimum": -4.0,
+      "default": 0.0,
+      "maximum": 4.0,
+      "min_default_max_f32_hex": [
+        "c0800000",
+        "00000000",
+        "40800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "vco2Detuning",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -4.0,
+        4.0
+      ],
+      "factory_nonzero_count": 581,
+      "factory_unique_command_or_default_values": 264
+    },
+    {
+      "id": 31,
+      "name": "detuningMultiplier",
+      "minimum": 1.0,
+      "default": 1.0,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "3f800000",
+        "40000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        1.0,
+        1.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 32,
+      "name": "masterVolume",
+      "minimum": 0.0,
+      "default": 0.5,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f000000",
+        "40000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "masterVolume",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.10249998420476913,
+        2.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 384
+    },
+    {
+      "id": 33,
+      "name": "bitCrushDepth",
+      "minimum": 1.0,
+      "default": 24.0,
+      "maximum": 24.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "41c00000",
+        "41c00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        24.0,
+        24.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 34,
+      "name": "bitCrushSampleRate",
+      "minimum": 2048.0,
+      "default": 48000.0,
+      "maximum": 48000.0,
+      "min_default_max_f32_hex": [
+        "45000000",
+        "473b8000",
+        "473b8000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "crushFreq",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        2048.0,
+        48000.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 163
+    },
+    {
+      "id": 35,
+      "name": "autoPanAmount",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "autoPanAmount",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 342,
+      "factory_unique_command_or_default_values": 158
+    },
+    {
+      "id": 36,
+      "name": "autoPanFrequency",
+      "minimum": 0.0005208333604969084,
+      "default": 0.25,
+      "maximum": 10.0,
+      "min_default_max_f32_hex": [
+        "3a088889",
+        "3e800000",
+        "41200000"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": true,
+      "preset_key": "autoPanFrequency",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0005208333604969084,
+        8.000000953674316
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 68
+    },
+    {
+      "id": 37,
+      "name": "reverbOn",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "reverbToggled",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 551,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 38,
+      "name": "reverbFeedback",
+      "minimum": 0.0,
+      "default": 0.5,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "reverbFeedback",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 669,
+      "factory_unique_command_or_default_values": 303
+    },
+    {
+      "id": 39,
+      "name": "reverbHighPass",
+      "minimum": 80.0,
+      "default": 700.0,
+      "maximum": 900.0,
+      "min_default_max_f32_hex": [
+        "42a00000",
+        "442f0000",
+        "44610000"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "reverbHighPass",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        80.0,
+        900.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 207
+    },
+    {
+      "id": 40,
+      "name": "reverbMix",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "reverbMix",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 633,
+      "factory_unique_command_or_default_values": 276
+    },
+    {
+      "id": 41,
+      "name": "delayOn",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "delayToggled",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 533,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 42,
+      "name": "delayFeedback",
+      "minimum": 0.0,
+      "default": 0.10000000149011612,
+      "maximum": 0.8999999761581421,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3dcccccd",
+        "3f666666"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "delayFeedback",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.8999999761581421
+      ],
+      "factory_nonzero_count": 638,
+      "factory_unique_command_or_default_values": 264
+    },
+    {
+      "id": 43,
+      "name": "delayTime",
+      "minimum": 0.00036281178472563624,
+      "default": 0.25,
+      "maximum": 2.5,
+      "min_default_max_f32_hex": [
+        "39be37c6",
+        "3e800000",
+        "40200000"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": true,
+      "preset_key": "delayTime",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.00036281178472563624,
+        2.499999761581421
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 199
+    },
+    {
+      "id": 44,
+      "name": "delayMix",
+      "minimum": 0.0,
+      "default": 0.125,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3e000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "delayMix",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 649,
+      "factory_unique_command_or_default_values": 300
+    },
+    {
+      "id": 45,
+      "name": "lfo2Index",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "lfo2Waveform",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 162,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 46,
+      "name": "lfo2Amplitude",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "lfo2Amplitude",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 620,
+      "factory_unique_command_or_default_values": 237
+    },
+    {
+      "id": 47,
+      "name": "lfo2Rate",
+      "minimum": 0.0005208333604969084,
+      "default": 0.25,
+      "maximum": 80.0,
+      "min_default_max_f32_hex": [
+        "3a088889",
+        "3e800000",
+        "42a00000"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": true,
+      "preset_key": "lfo2Rate",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        53.333335876464844
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 238
+    },
+    {
+      "id": 48,
+      "name": "cutoffLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "cutoffLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 444,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 49,
+      "name": "resonanceLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "resonanceLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 124,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 50,
+      "name": "oscMixLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "oscMixLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 157,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 51,
+      "name": "reverbMixLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "reverbMixLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 75,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 52,
+      "name": "decayLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "decayLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 99,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 53,
+      "name": "noiseLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "noiseLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 139,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 54,
+      "name": "fmLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "fmLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 276,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 55,
+      "name": "detuneLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "detuneLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 204,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 56,
+      "name": "filterEnvLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "filterEnvLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 153,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 57,
+      "name": "pitchLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "pitchLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 177,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 58,
+      "name": "bitcrushLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "bitcrushLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 114,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 59,
+      "name": "tremoloLFO",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "tremoloLFO",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 74,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 60,
+      "name": "arpDirection",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "40000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpDirection",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        2.0
+      ],
+      "factory_nonzero_count": 136,
+      "factory_unique_command_or_default_values": 3
+    },
+    {
+      "id": 61,
+      "name": "arpInterval",
+      "minimum": 0.0,
+      "default": 12.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "41400000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpInterval",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        12.0
+      ],
+      "factory_nonzero_count": 681,
+      "factory_unique_command_or_default_values": 28
+    },
+    {
+      "id": 62,
+      "name": "arpIsOn",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "isArpMode",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 338,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 63,
+      "name": "arpOctave",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 3.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "40400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpOctave",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.0
+      ],
+      "factory_nonzero_count": 589,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 64,
+      "name": "arpRate",
+      "minimum": 1.0,
+      "default": 120.0,
+      "maximum": 200.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "42f00000",
+        "43480000"
+      ],
+      "units": "BPM",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpRate",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        1.0,
+        200.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 75
+    },
+    {
+      "id": 65,
+      "name": "arpIsSequencer",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpIsSequencer",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 386,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 66,
+      "name": "arpTotalSteps",
+      "minimum": 1.0,
+      "default": 4.0,
+      "maximum": 16.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "40800000",
+        "41800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "arpTotalSteps",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        1.0,
+        16.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 11
+    },
+    {
+      "id": 67,
+      "name": "sequencerPattern00",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 0,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 153,
+      "factory_unique_command_or_default_values": 13
+    },
+    {
+      "id": 68,
+      "name": "sequencerPattern01",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 1,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 157,
+      "factory_unique_command_or_default_values": 18
+    },
+    {
+      "id": 69,
+      "name": "sequencerPattern02",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 2,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 236,
+      "factory_unique_command_or_default_values": 21
+    },
+    {
+      "id": 70,
+      "name": "sequencerPattern03",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 3,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 182,
+      "factory_unique_command_or_default_values": 20
+    },
+    {
+      "id": 71,
+      "name": "sequencerPattern04",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 4,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 225,
+      "factory_unique_command_or_default_values": 19
+    },
+    {
+      "id": 72,
+      "name": "sequencerPattern05",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 5,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 189,
+      "factory_unique_command_or_default_values": 21
+    },
+    {
+      "id": 73,
+      "name": "sequencerPattern06",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 6,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 276,
+      "factory_unique_command_or_default_values": 20
+    },
+    {
+      "id": 74,
+      "name": "sequencerPattern07",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 7,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 226,
+      "factory_unique_command_or_default_values": 20
+    },
+    {
+      "id": 75,
+      "name": "sequencerPattern08",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 8,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 181,
+      "factory_unique_command_or_default_values": 19
+    },
+    {
+      "id": 76,
+      "name": "sequencerPattern09",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 9,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 147,
+      "factory_unique_command_or_default_values": 17
+    },
+    {
+      "id": 77,
+      "name": "sequencerPattern10",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 10,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 205,
+      "factory_unique_command_or_default_values": 20
+    },
+    {
+      "id": 78,
+      "name": "sequencerPattern11",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 11,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 197,
+      "factory_unique_command_or_default_values": 19
+    },
+    {
+      "id": 79,
+      "name": "sequencerPattern12",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 12,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 196,
+      "factory_unique_command_or_default_values": 19
+    },
+    {
+      "id": 80,
+      "name": "sequencerPattern13",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 13,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 175,
+      "factory_unique_command_or_default_values": 22
+    },
+    {
+      "id": 81,
+      "name": "sequencerPattern14",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 14,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 225,
+      "factory_unique_command_or_default_values": 17
+    },
+    {
+      "id": 82,
+      "name": "sequencerPattern15",
+      "minimum": -12.0,
+      "default": 0.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "c1400000",
+        "00000000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqPatternNote",
+      "preset_array_index": 15,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -12.0,
+        12.0
+      ],
+      "factory_nonzero_count": 206,
+      "factory_unique_command_or_default_values": 21
+    },
+    {
+      "id": 83,
+      "name": "sequencerOctBoost00",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 0,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 15,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 84,
+      "name": "sequencerOctBoost01",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 1,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 9,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 85,
+      "name": "sequencerOctBoost02",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 2,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 22,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 86,
+      "name": "sequencerOctBoost03",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 3,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 19,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 87,
+      "name": "sequencerOctBoost04",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 4,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 23,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 88,
+      "name": "sequencerOctBoost05",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 5,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 9,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 89,
+      "name": "sequencerOctBoost06",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 6,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 18,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 90,
+      "name": "sequencerOctBoost07",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 7,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 14,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 91,
+      "name": "sequencerOctBoost08",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 8,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 16,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 92,
+      "name": "sequencerOctBoost09",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 9,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 14,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 93,
+      "name": "sequencerOctBoost10",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 10,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 20,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 94,
+      "name": "sequencerOctBoost11",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 11,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 23,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 95,
+      "name": "sequencerOctBoost12",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 12,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 20,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 96,
+      "name": "sequencerOctBoost13",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 13,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 11,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 97,
+      "name": "sequencerOctBoost14",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 14,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 40,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 98,
+      "name": "sequencerOctBoost15",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqOctBoost",
+      "preset_array_index": 15,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 32,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 99,
+      "name": "sequencerNoteOn00",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 0,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 672,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 100,
+      "name": "sequencerNoteOn01",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 1,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 460,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 101,
+      "name": "sequencerNoteOn02",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 2,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 591,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 102,
+      "name": "sequencerNoteOn03",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 3,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 534,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 103,
+      "name": "sequencerNoteOn04",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 4,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 592,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 104,
+      "name": "sequencerNoteOn05",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 5,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 528,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 105,
+      "name": "sequencerNoteOn06",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 6,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 598,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 106,
+      "name": "sequencerNoteOn07",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 7,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 546,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 107,
+      "name": "sequencerNoteOn08",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 8,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 630,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 108,
+      "name": "sequencerNoteOn09",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 9,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 533,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 109,
+      "name": "sequencerNoteOn10",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 10,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 597,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 110,
+      "name": "sequencerNoteOn11",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 11,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 584,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 111,
+      "name": "sequencerNoteOn12",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 12,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 607,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 112,
+      "name": "sequencerNoteOn13",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 13,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 585,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 113,
+      "name": "sequencerNoteOn14",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 14,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 621,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 114,
+      "name": "sequencerNoteOn15",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_array_key": "seqNoteOn",
+      "preset_array_index": 15,
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 579,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 115,
+      "name": "filterType",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 2.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "40000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "filterType",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        2.0
+      ],
+      "factory_nonzero_count": 96,
+      "factory_unique_command_or_default_values": 3
+    },
+    {
+      "id": 116,
+      "name": "phaserMix",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "phaserMix",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 359,
+      "factory_unique_command_or_default_values": 185
+    },
+    {
+      "id": 117,
+      "name": "phaserRate",
+      "minimum": 1.0,
+      "default": 12.0,
+      "maximum": 300.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "41400000",
+        "43960000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "phaserRate",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        1.0,
+        300.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 163
+    },
+    {
+      "id": 118,
+      "name": "phaserFeedback",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 0.800000011920929,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f4ccccd"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "phaserFeedback",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.800000011920929
+      ],
+      "factory_nonzero_count": 348,
+      "factory_unique_command_or_default_values": 165
+    },
+    {
+      "id": 119,
+      "name": "phaserNotchWidth",
+      "minimum": 100.0,
+      "default": 800.0,
+      "maximum": 1000.0,
+      "min_default_max_f32_hex": [
+        "42c80000",
+        "44480000",
+        "447a0000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "phaserNotchWidth",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        100.0,
+        1000.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 171
+    },
+    {
+      "id": 120,
+      "name": "monoIsLegato",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "isLegato",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 83,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 121,
+      "name": "widen",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "widen",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 214,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 122,
+      "name": "compressorMasterRatio",
+      "minimum": 1.0,
+      "default": 20.0,
+      "maximum": 20.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "41a00000",
+        "41a00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorMasterRatio",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        20.0
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 8
+    },
+    {
+      "id": 123,
+      "name": "compressorReverbInputRatio",
+      "minimum": 1.0,
+      "default": 13.0,
+      "maximum": 20.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "41500000",
+        "41a00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbInputRatio",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        13.0
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 6
+    },
+    {
+      "id": 124,
+      "name": "compressorReverbWetRatio",
+      "minimum": 1.0,
+      "default": 13.0,
+      "maximum": 20.0,
+      "min_default_max_f32_hex": [
+        "3f800000",
+        "41500000",
+        "41a00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbWetRatio",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        13.0
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 5
+    },
+    {
+      "id": 125,
+      "name": "compressorMasterThreshold",
+      "minimum": -60.0,
+      "default": -9.0,
+      "maximum": 0.0,
+      "min_default_max_f32_hex": [
+        "c2700000",
+        "c1100000",
+        "00000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorMasterThreshold",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -33.599998474121094,
+        0.0
+      ],
+      "factory_nonzero_count": 225,
+      "factory_unique_command_or_default_values": 6
+    },
+    {
+      "id": 126,
+      "name": "compressorReverbInputThreshold",
+      "minimum": -60.0,
+      "default": -8.5,
+      "maximum": 0.0,
+      "min_default_max_f32_hex": [
+        "c2700000",
+        "c1080000",
+        "00000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbInputThreshold",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -32.849998474121094,
+        0.0
+      ],
+      "factory_nonzero_count": 226,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 127,
+      "name": "compressorReverbWetThreshold",
+      "minimum": -60.0,
+      "default": -8.0,
+      "maximum": 0.0,
+      "min_default_max_f32_hex": [
+        "c2700000",
+        "c1000000",
+        "00000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbWetThreshold",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -35.70000076293945,
+        0.0
+      ],
+      "factory_nonzero_count": 229,
+      "factory_unique_command_or_default_values": 5
+    },
+    {
+      "id": 128,
+      "name": "compressorMasterAttack",
+      "minimum": 0.0,
+      "default": 0.0010000000474974513,
+      "maximum": 0.009999999776482582,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3a83126f",
+        "3c23d70a"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorMasterAttack",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.0025499998591840267
+      ],
+      "factory_nonzero_count": 225,
+      "factory_unique_command_or_default_values": 3
+    },
+    {
+      "id": 129,
+      "name": "compressorReverbInputAttack",
+      "minimum": 0.0,
+      "default": 0.0010000000474974513,
+      "maximum": 0.009999999776482582,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3a83126f",
+        "3c23d70a"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbInputAttack",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.0010000000474974513
+      ],
+      "factory_nonzero_count": 224,
+      "factory_unique_command_or_default_values": 3
+    },
+    {
+      "id": 130,
+      "name": "compressorReverbWetAttack",
+      "minimum": 0.0,
+      "default": 0.0010000000474974513,
+      "maximum": 0.009999999776482582,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3a83126f",
+        "3c23d70a"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbWetAttack",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.0010000000474974513
+      ],
+      "factory_nonzero_count": 223,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 131,
+      "name": "compressorMasterRelease",
+      "minimum": 0.0,
+      "default": 0.15000000596046448,
+      "maximum": 0.5,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3e19999a",
+        "3f000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorMasterRelease",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.2487500011920929
+      ],
+      "factory_nonzero_count": 228,
+      "factory_unique_command_or_default_values": 5
+    },
+    {
+      "id": 132,
+      "name": "compressorReverbInputRelease",
+      "minimum": 0.0,
+      "default": 0.22499999403953552,
+      "maximum": 0.5,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3e666666",
+        "3f000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbInputRelease",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.22499999403953552
+      ],
+      "factory_nonzero_count": 226,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 133,
+      "name": "compressorReverbWetRelease",
+      "minimum": 0.0,
+      "default": 0.15000000596046448,
+      "maximum": 0.5,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3e19999a",
+        "3f000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbWetRelease",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.3462499976158142
+      ],
+      "factory_nonzero_count": 230,
+      "factory_unique_command_or_default_values": 6
+    },
+    {
+      "id": 134,
+      "name": "compressorMasterMakeupGain",
+      "minimum": 0.5,
+      "default": 2.0,
+      "maximum": 4.0,
+      "min_default_max_f32_hex": [
+        "3f000000",
+        "40000000",
+        "40800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorMasterMakeupGain",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.5450000762939453
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 18
+    },
+    {
+      "id": 135,
+      "name": "compressorReverbInputMakeupGain",
+      "minimum": 0.5,
+      "default": 1.8799999952316284,
+      "maximum": 4.0,
+      "min_default_max_f32_hex": [
+        "3f000000",
+        "3ff0a3d7",
+        "40800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbInputMakeupGain",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        3.2825000286102295
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 10
+    },
+    {
+      "id": 136,
+      "name": "compressorReverbWetMakeupGain",
+      "minimum": 0.5,
+      "default": 1.8799999952316284,
+      "maximum": 4.0,
+      "min_default_max_f32_hex": [
+        "3f000000",
+        "3ff0a3d7",
+        "40800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "compressorReverbWetMakeupGain",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        2.1449999809265137
+      ],
+      "factory_nonzero_count": 693,
+      "factory_unique_command_or_default_values": 10
+    },
+    {
+      "id": 137,
+      "name": "delayInputCutoffTrackingRatio",
+      "minimum": 0.5,
+      "default": 0.75,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "3f000000",
+        "3f400000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "delayInputCutoffTrackingRatio",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.5,
+        0.8962500095367432
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 6
+    },
+    {
+      "id": 138,
+      "name": "delayInputResonance",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 0.9800000190734863,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f7ae148"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "delayInputResonance",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.5194000005722046
+      ],
+      "factory_nonzero_count": 5,
+      "factory_unique_command_or_default_values": 4
+    },
+    {
+      "id": 139,
+      "name": "tempoSyncToArpRate",
+      "minimum": 0.0,
+      "default": 1.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "3f800000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "tempoSyncToArpRate",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 569,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 140,
+      "name": "pitchbend",
+      "minimum": 0.0,
+      "default": 8192.0,
+      "maximum": 16383.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "46000000",
+        "467ffc00"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": true,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        8192.0,
+        8192.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 141,
+      "name": "pitchbendMinSemitones",
+      "minimum": -24.0,
+      "default": -12.0,
+      "maximum": 0.0,
+      "min_default_max_f32_hex": [
+        "c1c00000",
+        "c1400000",
+        "00000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "pitchbendMinSemitones",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        -24.0,
+        0.0
+      ],
+      "factory_nonzero_count": 464,
+      "factory_unique_command_or_default_values": 7
+    },
+    {
+      "id": 142,
+      "name": "pitchbendMaxSemitones",
+      "minimum": 0.0,
+      "default": 12.0,
+      "maximum": 24.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "41400000",
+        "41c00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "pitchbendMaxSemitones",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        24.0
+      ],
+      "factory_nonzero_count": 464,
+      "factory_unique_command_or_default_values": 7
+    },
+    {
+      "id": 143,
+      "name": "frequencyA4",
+      "minimum": 410.0,
+      "default": 440.0,
+      "maximum": 470.0,
+      "min_default_max_f32_hex": [
+        "43cd0000",
+        "43dc0000",
+        "43eb0000"
+      ],
+      "units": "Hz",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "frequencyA4",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        410.0,
+        440.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 5
+    },
+    {
+      "id": 144,
+      "name": "portamentoHalfTime",
+      "minimum": 9.999999974752427e-07,
+      "default": 0.10000000149011612,
+      "maximum": 0.9900000095367432,
+      "min_default_max_f32_hex": [
+        "358637bd",
+        "3dcccccd",
+        "3f7d70a4"
+      ],
+      "units": "seconds",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        0.10000000149011612,
+        0.10000000149011612
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 145,
+      "name": "oscBandlimitIndexOverride",
+      "minimum": -1.0,
+      "default": -1.0,
+      "maximum": 12.0,
+      "min_default_max_f32_hex": [
+        "bf800000",
+        "bf800000",
+        "41400000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "factory_command_count": 0,
+      "factory_command_or_default_range": [
+        -1.0,
+        -1.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 146,
+      "name": "oscBandlimitEnable",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "oscBandlimitEnable",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        1.0
+      ],
+      "factory_nonzero_count": 214,
+      "factory_unique_command_or_default_values": 2
+    },
+    {
+      "id": 147,
+      "name": "arpSeqTempoMultiplier",
+      "minimum": 0.010416666977107525,
+      "default": 0.25,
+      "maximum": 8.0,
+      "min_default_max_f32_hex": [
+        "3c2aaaab",
+        "3e800000",
+        "41000000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": true,
+      "preset_key": "arpSeqTempoMultiplier",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0625,
+        1.0
+      ],
+      "factory_nonzero_count": 694,
+      "factory_unique_command_or_default_values": 8
+    },
+    {
+      "id": 148,
+      "name": "transpose",
+      "minimum": -24.0,
+      "default": 0.0,
+      "maximum": 24.0,
+      "min_default_max_f32_hex": [
+        "c1c00000",
+        "00000000",
+        "41c00000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": false,
+      "dependent_normalized_api": false,
+      "preset_key": "transpose",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.0
+      ],
+      "factory_nonzero_count": 0,
+      "factory_unique_command_or_default_values": 1
+    },
+    {
+      "id": 149,
+      "name": "adsrPitchTracking",
+      "minimum": 0.0,
+      "default": 0.0,
+      "maximum": 1.0,
+      "min_default_max_f32_hex": [
+        "00000000",
+        "00000000",
+        "3f800000"
+      ],
+      "units": "physical/native; see behavior brief",
+      "smoothed_in_frozen_reference": true,
+      "dependent_normalized_api": false,
+      "preset_key": "adsrPitchTracking",
+      "factory_command_count": 694,
+      "factory_command_or_default_range": [
+        0.0,
+        0.12688438594341278
+      ],
+      "factory_nonzero_count": 17,
+      "factory_unique_command_or_default_values": 12
+    }
+  ]
+}

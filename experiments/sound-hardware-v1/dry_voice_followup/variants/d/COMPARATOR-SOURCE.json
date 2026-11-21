@@ -1,0 +1,15 @@
+{
+  "id": "d_ch4_centered_linear_feedback",
+  "expected_host_bytes": 160,
+  "source_root_for_root_to_register": "/workspace/scratch/e803955aec60/s1_dry_voice_d",
+  "files": {
+    "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "historical_audio_reports": null,
+  "audio_status": "NO_REFERENCE_COMPARISON_OR_PCM_CAPTURE"
+}

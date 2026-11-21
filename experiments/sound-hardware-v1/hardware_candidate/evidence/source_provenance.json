@@ -1,0 +1,55 @@
+{
+  "candidate_sources": [
+    {
+      "path": "src/dnbx_core.c",
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa"
+    },
+    {
+      "path": "src/dnbx_core.h",
+      "sha256": "4bd92cc4971eb4ba03befb1cd3851900e7d69f47b3e5099f2f4b2c68c08d2f3c"
+    },
+    {
+      "path": "src/fastmath.h",
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    }
+  ],
+  "notes": "Stock permitted breaks.c/.h absent at specified commit; no other copies read.",
+  "original_engine_source_read": false,
+  "permitted_inputs": [
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/firmware/76040daa5b52d686a8b7b544296ba5d79610a95d/firmware/src/dsp/juno6.c",
+      "sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/firmware/76040daa5b52d686a8b7b544296ba5d79610a95d/firmware/src/dsp/juno6.h",
+      "sha256": "625ac8ce03b978d996ed995fda11ccd6a838f8c816ba29def8583217c17193d4"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/firmware/76040daa5b52d686a8b7b544296ba5d79610a95d/firmware/src/dsp/fastmath.h",
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/mapping/results/implementer_brief/BEHAVIOR-BRIEF.md",
+      "sha256": "a6d6856c4ad2f1487ddd2cebacaf0416449c7307a61db2f0c4c6834b056c16eb"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/mapping/results/implementer_brief/amp_observed_levels.csv",
+      "sha256": "e6578b0e5861b7ef73fea6822f8848b897065a66a71fded5db08710dea201b6f"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/mapping/results/implementer_brief/numeric_behavior_targets.json",
+      "sha256": "78d8245e9540eb0cde63d7526808c36fbc271705d9f51553f3599af264b3a74f"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/mapping/results/implementer_brief/public_control_catalog.json",
+      "sha256": "e1be22d91887954da614cf197ef98680d0f21dfc8b9ca9bec1dba0a304f6e711"
+    },
+    {
+      "path": "/workspace/scratch/67e685478953/superj6_research/mapping/results/implementer_brief/recorded_envelope_behavior.json",
+      "sha256": "2f8ab03b1ce874381ae8deb4afd66d016220880512b51c9e2fbe1d63f0f98210"
+    }
+  ],
+  "prior_source_adaptation_used": false,
+  "production_writes": false,
+  "stock_fastmath_vendored_unchanged": true
+}
