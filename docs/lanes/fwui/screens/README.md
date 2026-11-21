@@ -32,4 +32,6 @@ The catalog contains 1,968 entries. The 1,538 ordinary walker states include 1,5
 
 The previous 1,944-entry catalog was painted into the published emulator shell at desktop and both phone sizes. [Viewport measurements and RGB comparisons](../current/panel-routes/viewport-replay.json)
 
-The 132 default-editor captures and 14 earlier selector captures were replayed at native size inside the three archived shell viewports. [Native and viewport review](../current/synthone-editor/default-review/review.md)
+All 1,968 indexed native images retained all their pixels in each of the three archived shell layouts. [5,904 viewport comparisons](../current/panel-routes/catalog-viewport-199f0444.json)
+
+The default editor and prior selector also received an independent before-and-after review at those sizes. [Native and viewport review](../current/synthone-editor/default-review/review.md)
