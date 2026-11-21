@@ -14,7 +14,7 @@ Use Chrome or Edge on a computer, with the keyboard on USB:
 
 **[Open the installer](https://gobbajogger.github.io/DnBOX/install/)**
 
-You can also download the current Elite and Pro packages from **[GitHub Releases (latest)](https://github.com/gobbajogger/DnBOX/releases/latest)** (v0.0.25.1).
+You can also download the current Elite and Pro packages from **[GitHub Releases (latest)](https://github.com/gobbajogger/DnBOX/releases/latest)** (v0.0.26). The release page lists each file's size, CRC32 and SHA-256. The same 0.0.26 packages are also on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/).
 
 - Pick the package that matches your model (**Elite** or **Pro**). Starrykey 37 Play uses the SMK-37 Pro package.
 - **Back up your sample slots before you install.** The installer can do this for you.
@@ -24,7 +24,7 @@ See the [manual](https://gobbajogger.github.io/DnBOX/manual/) (written for the F
 
 ### Hardware test status
 
-**v0.0.25.1 has been software-checked. It has not been signed off as a physical device test.** DnBOX is beta software. It is meant for everyday playing, but a very busy pattern can push the hardware to its limit. When that happens, the firmware trades a little sound quality to keep playing rather than drop out. Installing it is at your own risk.
+**v0.0.26 was tested by the owner on a real SMK-37 Elite and SMK-37 Pro. Startup and restart were OK.** It also passed the software checks listed in the [v0.0.26 release notes](https://github.com/gobbajogger/DnBOX/releases/tag/v0.0.26). DnBOX is beta software. It is meant for everyday playing, but a very busy pattern can push the hardware to its limit. When that happens, the firmware trades a little sound quality to keep playing rather than drop out. Installing it is at your own risk.
 
 ## Restore and rescue
 
@@ -35,7 +35,7 @@ If an install fails, the keyboard becomes unresponsive, or you want the factory 
 3. On an FM-1 that keeps crashing, the device starts in a safe mode. The [manual's Troubleshooting](https://gobbajogger.github.io/DnBOX/manual/) section covers the rest.
 4. If you still have a sample-slot backup, restore it after the keyboard is running again (the installer or `tools/x0x_slots.py restore`).
 
-A **0.0.26** package was briefly offered on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/) and was **withdrawn** after a black-screen boot. Do not install 0.0.26. Use the restore steps above if that package is already on a device.
+History: an earlier **0.0.26** package was briefly offered on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/) and was **withdrawn** after startup and restart problems (a black-screen boot). The current v0.0.26 packages replace it and include the boot-guard correction for that issue. If the withdrawn package is still on a device, use the restore steps above, then install the current v0.0.26.
 
 ## FAQ
 
@@ -43,7 +43,7 @@ A **0.0.26** package was briefly offered on the [nightly installer](https://gobb
 
 **Do I have to back up first?** Yes, if you have anything in the sample slots you want to keep. The installer can back them up. An install that would otherwise lose loops saves them first and writes them back after, but a backup of your own is still the safe option.
 
-**Has this been tested on a real keyboard?** The current public package, v0.0.25.1, is software-checked only. It is **not** labelled hardware-tested.
+**Has this been tested on a real keyboard?** Yes. The owner tested the current release, v0.0.26, on a real SMK-37 Elite and SMK-37 Pro; startup and restart were OK. Its emulator timing result is not a hardware result.
 
 **How do I go back to stock firmware?** Use the installer restore option, or M-VAVE M-UPGRADE. See [Restore and rescue](#restore-and-rescue).
 

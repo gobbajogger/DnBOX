@@ -33,4 +33,4 @@ The gate script [tools/dnbox-gate.sh](https://github.com/gobbajogger/DnBOX/blob/
 Historical note: the older x0x37 instructions (the previous AGENTS.md, `skills/x0x37-*`, `.agents/skills/x0x37-*`, `.cursor/skills`) are history and have no force.
 
 ## Never
-Force-push; push or merge to `main` without the User; Secrets in Git; PSRAM; device writes (flash, release, BTIF, USRTRIM, efuse, key_mac, bootloader); GitHub Actions or workflow files; Cursor cloud agents; SuperJ6 .ipa or AU installer in Git.
+Force-push; push or merge to `main` without the User; Secrets in Git; PSRAM; device writes (flash, release, BTIF, USRTRIM, efuse, key_mac, bootloader); GitHub Actions or workflow files; Cursor cloud agents; SuperJ6 .ipa or AU installer in Git; `.img`, `.component` or `.vst3` files in Git. `.fwsc` firmware and sanitized test evidence may be in Git ([RULES 13](https://github.com/gobbajogger/DnBOX/blob/integration/dnbox-consolidated/RULES.md)).
