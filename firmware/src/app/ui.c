@@ -431,6 +431,9 @@ enum { R_NONE, R_ENG, R_SWING, R_DLEN, R_DRATE, R_BLEN, R_BRATE, R_BDIR, R_BTRAN
        R_BRKSLICE, R_BRKSLOT, R_TEMPO, R_ACCENT, R_CLKOUT, R_NOTEOUT, R_PALETTE, R_KEYLED, R_KEYSOUND, R_AUTOSAVE, R_ACT, R_SBAR, R_SPAT,
        R_SLEN, R_STALLS, R_HDR, R_TAPE, R_MIDICH, R_OUTLOUD, R_SREP, R_BATT, R_USBFULL, R_FREEPLAY,
        R_BT, R_BTSTAT, R_BTNAME, R_CKCH, R_CLKSRC, R_SMC_ROLE, R_SMC_MAP, R_BENGINE, R_BPRESET, R_BSTATUS, R_SECTION, R_PARTON, R_FINETUNE, R_QUEUEMUTE, R_BRKRATE, R_BPATSND, R_NOTELOCK };   /* R_TAPE: FX's one-knob TAPE (DIGI .. worn tape) */          /* R_HDR: a list's section header (a = its group), never selected */
+#if X0X_SYNTHONE_PATCH
+enum { R_S1PATCH = R_NOTELOCK + 1 };
+#endif
 typedef struct { uint8_t kind, a, b, c; } pref_t;
 #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
 #define NONE PR(R_NONE, 0, 0, 0)
@@ -442,6 +445,29 @@ static uint8_t original_page_bank, original_list_bank;
 static int original_display_value(pref_t r);
 static const ui_original_control_view *original_text_view(pref_t r, int value);
 static void build_pages(void);
+#if X0X_SYNTHONE_PATCH
+/* A matrix band takes one coherent snapshot. Input handlers always read the
+ * owner immediately before queuing a change against its revision. */
+static const s1_patch_snapshot *s1_draw_patch;
+static int s1_read(pref_t r, s1_patch_value *value)
+{
+    const s1_patch_descriptor *d = s1_patch_at(r.c);
+    return d && engine_s1_patch_read(r.b, d->factory_id, value);
+}
+static void s1_edit(pref_t r, int value, int relative)
+{
+    s1_patch_value owner;
+    if (!s1_read(r, &owner)) return;
+    if (relative) value += owner.position;
+    if (value < 0) value = 0;
+    if (value > S1_PATCH_STEPS) value = S1_PATCH_STEPS;
+    const s1_patch_descriptor *d = s1_patch_at(r.c);
+    int status = engine_s1_patch_set(r.b, owner.revision, d->factory_id, (unsigned)value);
+    if (status == S1_EDIT_QUEUED) mark_dirty();
+    else say(status == S1_EDIT_BUSY ? (owner.note_locked ? "NOTE LOCK" : "EDIT BUSY - RETRY") :
+             "PATCH CHANGED", 0);
+}
+#endif
 static const char *const BENGINE_N[] = {"CHICAGO", "MIAMI", "SYNTH ONE", "SUPERJ6"};
 static const x0x_param_t BENGINE_P = {"ENGINE",3,0,BENGINE_N};
 static x0x_param_t BPRESET_P = {"PRESET",54,0,0};
@@ -559,6 +585,15 @@ static void song_fill(int k)
 static const x0x_param_t *pref_desc(pref_t r)
 {
     switch (r.kind) {
+#if X0X_SYNTHONE_PATCH
+    case R_S1PATCH: {
+        const s1_patch_descriptor *d = s1_patch_at(r.c);
+        static x0x_param_t pot = {0, S1_PATCH_STEPS, 0, 0};
+        if (!d) return 0;
+        pot.name = d->label;
+        return &pot;
+    }
+#endif
     case R_BENGINE: return &BENGINE_P;
     case R_BPRESET:
         BPRESET_P.max = (uint8_t)(original_sound_factories((unsigned)engine_bass_requested_bank(r.b))-1);
@@ -651,6 +686,16 @@ static UI_DRAW int pref_get(pref_t r)
         seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
     pattern_t *p = pref_pattern(r);
     switch (r.kind) {
+#if X0X_SYNTHONE_PATCH
+    case R_S1PATCH: {
+        const s1_patch_descriptor *d = s1_patch_at(r.c);
+        if (d && s1_draw_patch && bidx() == r.b)
+            return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
+                         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
+        s1_patch_value value;
+        return s1_read(r, &value) ? value.position : 0;
+    }
+#endif
     case R_BENGINE: return engine_bass_requested_bank(r.b);
     case R_BPRESET: return engine_bass_requested_preset(r.b);
     case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
@@ -737,6 +782,9 @@ static void ui_restore_base(int target, int voice, int parameter)
 
 X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 {
+#if X0X_SYNTHONE_PATCH
+    if (r.kind == R_S1PATCH) { s1_edit(r, v, 0); return; }
+#endif
 #if X0X_BASS_PRESET_PREVIEW
     /* Freeze the active bank before reading its descriptor. The audio boundary
      * may otherwise replace Chicago with Miami between clamp and store. */
@@ -1214,6 +1262,21 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
     *num = *unit = 0;
     if (!d || r.kind == R_ACT)
         return;
+#if X0X_SYNTHONE_PATCH
+    if (r.kind == R_S1PATCH) {
+        const s1_patch_descriptor *patch = s1_patch_at(r.c);
+        float physical;
+        if (s1_draw_patch && bidx() == r.b)
+            physical = s1_draw_patch->physical[r.c];
+        else {
+            s1_patch_value owner;
+            if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
+            physical = owner.physical;
+        }
+        unit_value(patch->unit, s1_patch_display(patch, physical), num, unit);
+        return;
+    }
+#endif
     if ((r.kind == R_ENG && r.a == T_303) || r.kind == R_BENGINE || r.kind == R_BPRESET || r.kind == R_BSTATUS) {
         engine_bass_edit_hold(1);
         (void)original_value_text(r,v,num,unit);
@@ -1598,6 +1661,12 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
             for (int row = 0; row < count; row++) {
                 pref_t refs[4];
                 for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
+#if X0X_SYNTHONE_PATCH
+                if (kind == ORIGINAL_SOUND_SYNTHONE) {
+                    for (int col=0; col<4; ++col)
+                        if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
+                }
+#endif
                 add_page_refs(emit, titles[row],refs,0,0);
             }
             add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
@@ -3243,6 +3312,9 @@ static uint32_t lock_marks(int t, int v, int base)
 
 static void turn_ref(pref_t r, int e, int knob)
 {
+#if X0X_SYNTHONE_PATCH
+    if (r.kind == R_S1PATCH) { s1_edit(r, accel(knob, e, S1_PATCH_STEPS), 1); return; }
+#endif
     if (r.kind == R_BRKSLOT && !r.b) { (void)brk_choice_turn(r, e); return; }
     brk_choice_cancel();
 #if X0X_BASS_PRESET_PREVIEW
@@ -5930,8 +6002,16 @@ static UI_DRAW void sound_step_footer(void)
     }
 }
 
+#if X0X_SYNTHONE_PATCH
+static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink);
+#endif
 static UI_DRAW void draw_part_sound(int band)
 {
+#if X0X_SYNTHONE_PATCH
+    s1_patch_snapshot patch;
+    if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE &&
+        engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
+#endif
     int page=cur_page(), first=page/4*4, row, k, off=band*BAND_H;
     int three=matrix_three_rows(), night=three || X0X_ORIGINAL_SYNTH;
     int rows=three?3:4, height=three?66:49, step=three?67:50;
@@ -5947,6 +6027,13 @@ static UI_DRAW void draw_part_sound(int band)
                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
         put_s(put_s(put_i(t,row+1),"  "),matrix_group(p));
         cv_text(8,y,&FONT_T,t,label);
+#if X0X_SYNTHONE_PATCH
+        if (s1_draw_patch && pg.r[p][0].kind == R_S1PATCH &&
+            (pg.r[p][0].c == 5 || pg.r[p][0].c == 9)) {
+            s1_envelope_row(p, y, height, active ? SOUND_INK : SOUND_WHITE);
+            continue;
+        }
+#endif
         if (adsr_row(p)) { draw_adsr_inline(p,active,y+off,height,off); continue; } /* graph replaces A/D/S/R, any row */
         if (active) {
             char knobs[20];matrix_knob_caption(knobs,p);
@@ -5994,6 +6081,9 @@ static UI_DRAW void draw_part_sound(int band)
     }
     if(band==2)sound_step_footer();
 
+#if X0X_SYNTHONE_PATCH
+    s1_draw_patch = 0;
+#endif
 }
 
 #include "ui_break_layout_main.h"
@@ -7214,9 +7304,10 @@ static UI_DRAW void draw_preset_name(int voice,int cx,int y,int height,uint16_t 
 #endif
 
 static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col);
+#if X0X_SYNTHONE_PATCH
+static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,uint16_t col);
+#endif
 static UI_DRAW int orig_strip_slot(pref_t r);
-static UI_DRAW int drum_strip_role(pref_t r);
-static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col);
 /* glyph-strip readout: "%" stays in the caps FONT_T run; a letter unit (st, ms,
  * Hz) is drawn lowercase in FONT_XS grey after it, as cell_value does */
 static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink)
@@ -7301,17 +7392,45 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         return;
     }
 #endif
+#if X0X_SYNTHONE_PATCH
+    if (r.kind == R_S1PATCH && s1_draw_patch && r.c < 2) {
+        /* Both controls scale oscillator 1 in Sound's admitted INIT voice.
+         * These bars show that source's configured and gated amplitudes. */
+        const float *params = s1_draw_patch->physical;
+        float gain = (1.f - params[0]) * params[1];
+        float amp, filter; unsigned stage, held;
+        int active_voice = engine_bass_voice_view(r.b, &amp, &filter, &stage, &held) && stage != 6;
+        int lit = active_voice ? (int)(amp*gain*6.f+.5f) : 0;
+        int ceiling = (int)(gain*6.f+.5f);
+        for (int i=0; i<6; i++) {
+            uint16_t color = i<lit ? (active ? SOUND_BASE : SOUND_INK) :
+                             i<ceiling ? ink : SOUND_DIM;
+            cv_rect(cx-12+4*i,y+31-2*i,3,2,color);
+        }
+        pref_value_of(r, val, num, unit);
+        strip_value(cx, y+35, num, unit, ink);
+        return;
+    }
+    if (r.kind == R_S1PATCH && s1_draw_patch && r.c >= 2 && r.c <= 4) {
+        const float *params = s1_draw_patch->physical;
+        float amp, env = 0, observed; unsigned stage, held;
+        if (engine_bass_voice_view(r.b, &amp, &observed, &stage, &held) && stage != 6)
+            env = observed;
+        float hz = params[2] * (1.f - params[4] * (1.f - env));
+        hz = fm_minf(22050.f, fm_maxf(64.f, hz));
+        int knee = (int)((hz-64.f) * (127.f / (22050.f-64.f)) + .5f);
+        filter_glyph(cx, y+21, 1, knee, (int)(params[3]*(127.f/.98f)+.5f), ink);
+        pref_value_of(r, val, num, unit);
+        strip_value(cx, y+36, num, unit, ink);
+        return;
+    }
+#endif
     if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
-    if(!shape && !unused && val>=0 && (orig_strip_slot(r) || drum_strip_role(r))) {
-        /* Reuse the knob-strip control_glyph families (0e58b960/5f58a199) in the
-         * wave-glyph layout: glyph left, original readout right, no extra bar.
-         * 909/808 controls draw their own live glyph in the same box. */
-        int drum=drum_strip_role(r)!=0;
-        if(drum) drum_strip_glyph(r,val,x+3,y+22,ink);
-        else orig_strip_glyph(r,val,x+3,y+22,ink);   /* 26x19 box: x+3..x+28 */
+    if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
+        /* Drum parts draw their own rows in draw_drum_voice. */
+        orig_strip_glyph(r,val,x+3,y+22,ink);
         pref_value_of(r,val,num,unit);
-        if(drum) strip_value_fit(x,y+28,num,unit,ink);
-        else strip_value(x+45,y+28,num,unit,ink);     /* starts >= x+32: 3 px clear of the glyph */
+        strip_value(x+45,y+28,num,unit,ink);
     } else
     if(shape) {
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -7451,6 +7570,13 @@ static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],fl
         float step=1.0f-1.0f/fm_maxf(1.0f,e->release*BASS303_SR);
         dur[2]=e->sustain>.00001f && step>0 ? fm_logf(.00001f/e->sustain)/fm_logf(step)/BASS303_SR : 0;
     }
+#if X0X_SYNTHONE_PATCH
+    if (e->enabled == 4) {
+        dur[0] = .6f * 4.6051702f * e->attack;
+        dur[1] = 4.6051702f * e->decay;
+        dur[2] = 4.6051702f * e->release;
+    }
+#endif
     if(e->present!=15u) {
         int w[4]={0,0,0,0},count=0,last=-1,used=0;
         for(k=0;k<3;k++){int stage=k==2?3:k;if(e->present&(1u<<stage)){sum+=dur[k];count++;last=stage;}}
@@ -7470,6 +7596,56 @@ static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],fl
     if(w[1]<3) { w[2]-=3-w[1]; w[1]=3; }
     xs[0]=x0; xs[1]=x0+w[0]; xs[2]=xs[1]+w[1]; xs[3]=xs[2]+hold; xs[4]=x0+width;
 }
+#if X0X_SYNTHONE_PATCH
+/* The original S1 recurrences approach 1, sustain and 0 respectively.
+ * Attack switches at .99; decay and release are shown to 1% of their span.
+ * The live meter uses the observed filter/amp level of this part. The filter
+ * observer does not expose its stage, so no stage or time cursor is inferred. */
+static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink)
+{
+    pref_t first = pg.r[page][0];
+    const float *a = &s1_draw_patch->physical[first.c];
+    ui_adsr_t e = {0};
+    int xs[5]; float duration[3];
+    e.present = 15;
+    e.attack=a[0]; e.decay=a[1]; e.sustain=a[2]; e.release=a[3]; e.enabled=4;
+    adsr_layout(&e, 13, 214, xs, duration);
+    int top=y+24, bottom=y+height-5, scale=bottom-top;
+    if (page == cur_page() && adsr_touch_active()) {
+        const s1_patch_descriptor *selected=s1_patch_at(pg.r[page][ui.touched].c);
+        text_r(232,y,&FONT_T,selected->label,ink);
+    }
+    for (int k=0; k<4; ++k) {
+        pref_t r=pg.r[page][k];
+        char num[16], unit[8], label[24];
+        pref_value_of(r, 0, num, unit);
+        char *q=put_i(put_s(label,"K"),UI_FIRST_KNOB+k);
+        *q++=' '; *q++="ADSR"[k]; *q++=' '; put_s(q,num);
+        strip_value(31+59*k,y+11,label,unit,ink);
+        int span=xs[k+1]-xs[k], prev=0;
+        float tail=1.f, retention=fm_expf(-4.6051702f / span);
+        if (k==3 && a[3]==0.f) {
+            cv_line(xs[k],bottom-(int)(a[2]*scale+.5f),xs[k],bottom,ink);
+            cv_line(xs[k],bottom,xs[k+1],bottom,ink);
+            continue;
+        }
+        for (int i=0; i<=span; ++i) {
+            float v=k==0 ? 1.f-tail : k==1 ? a[2]+(.99f-a[2])*tail :
+                    k==2 ? a[2] : a[2]*tail;
+            int py=bottom-(int)(v*scale+.5f);
+            if (i) cv_line(xs[k]+i-1,prev,xs[k]+i,py,ink);
+            prev=py; tail*=retention;
+        }
+    }
+    float amp, filter; unsigned stage, held;
+    if (engine_bass_voice_view(first.b, &amp, &filter, &stage, &held) && stage!=6) {
+        float level=first.c==5 ? filter : amp;
+        int py=bottom-(int)(fm_maxf(0.f,fm_minf(1.f,level))*scale+.5f);
+        cv_rect(8,top,1,scale+1,SOUND_DIM);
+        cv_rect(6,py,5,1,ink);
+    }
+}
+#endif
 /* Same full-row visual component for a real finite exponential drum decay.
  * Fixed time domain (the parameter maximum) makes decay edits visible in the
  * curve, not merely its label. The live cursor uses actual hold/ramp counters,
@@ -7667,6 +7843,10 @@ static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,
 {
     int left=cx-19,right=cx+19,pivot=left+7+cutoff*24/127;
     int pass=y+8,floor=y+18,peak=pass-resonance*7/127;
+#if X0X_SYNTHONE_PATCH
+    /* In the four-row patch matrix the lower line belongs to the unit readout. */
+    if (s1_draw_patch) floor=y+14;
+#endif
     cv_rect(left,floor,39,1,C_LINE);
     if(!mode) {cv_rect(left,y+10,39,1,C_DIM);return;}
     if(mode==1) {
@@ -8222,12 +8402,12 @@ static UI_DRAW void dg_accent(int gx,int gy,int w,int h,float q,int live,float e
 }
 
 static UI_DRAW void dv_glyph(pref_t r,float ev,float ox,float oy,float sx,float sy,uint16_t col);
-static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
+static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col,int role)
 {
     const x0x_param_t *d=pref_desc(r);
     float q=d && d->max?(float)val/(float)d->max:0,e=0;
     uint32_t age=0xffffffffu;
-    int live=drum_live(r,&age,&e),role=drum_strip_role(r);
+    int live=drum_live(r,&age,&e);
     /* Use the same semantic picture as the R22 part page: Tune fork,
      * pitched carrier, Depth sweep, rising attack and real tone response. */
     if(role==DG_BDSWEEP || role==DG_ATTACK || role==DG_LPF) {
@@ -8569,7 +8749,7 @@ static UI_DRAW void draw_knobs(void)
                 val = mv;
         }
         if(drum_strip_role(r)==DG_LEVEL) {
-            drum_strip_glyph(r,val,cx-13,28,col);
+            drum_strip_glyph(r,val,cx-13,28,col,DG_LEVEL);
         } else if(perform_glyph(r,val,cx,col) || control_glyph(r,val,cx,col)) {
             /* Its existing value/motion/lock path is retained below. */
         } else if (d->names && d->max < 12) {           /* a switch: positions as pips */

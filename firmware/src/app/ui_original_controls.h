@@ -7,7 +7,11 @@
 
 /* Control metadata only. The released UI still owns all drawing and cadence. */
 enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
+#if X0X_SYNTHONE_PATCH
+       UI_ORIGINAL_SYNTHONE_PAGES = 4, UI_ORIGINAL_JUNO_PAGES = 4 };
+#else
        UI_ORIGINAL_SYNTHONE_PAGES = 1, UI_ORIGINAL_JUNO_PAGES = 4 };
+#endif
 static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
     {11,12,-1,-1}, {13,15,14,16}, {17,18,19,-1}
@@ -19,12 +23,23 @@ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
 };
 static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
+#if X0X_SYNTHONE_PATCH
+/* Indices into Sound's stable storage order. Factory IDs belong to the
+ * descriptor and are never passed to the bend/damper performance API. */
+static const int8_t ui_original_synthone_rows[][4] = {
+    {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12}
+};
+static const char *const ui_original_synthone_titles[] = {
+    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR"
+};
+#else
 static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
     {-1,-1,-1,-1}
 };
 static const char *const ui_original_synthone_titles[] = {
     "SYNTH ONE"
 };
+#endif
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
 };

@@ -117,7 +117,7 @@ static void test_motion(int part)
 }
 static uint32_t direct_drum(pref_t r,int value)
 {
- cv_begin(240,KNOB_H,C_BLACK);drum_strip_glyph(r,value,10,10,C_HI);
+ cv_begin(240,KNOB_H,C_BLACK);drum_strip_glyph(r,value,10,10,C_HI,drum_strip_role(r));
  uint32_t h=2166136261u;
  for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)){
   if(!(x>=10 && x<36 && y>=10 && y<=28))fprintf(stderr,"drum bounds kit=%u voice=%u control=%u value=%d xy=%d,%d\n",r.a,r.b,r.c,value,x,y);
