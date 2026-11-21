@@ -125,8 +125,19 @@ ORIGINAL_SYNTH_BACKENDS = [
     "firmware/src/dsp/original_chicago_backend.c",
     "firmware/src/dsp/original_miami_backend.c",
     "firmware/src/app/original_runtime.c",
+    "firmware/src/app/s1_dry_part.c",
+    "firmware/src/dsp/s1_dry_voice.c",
+    "firmware/src/dsp/dnbx_s1_envelope.c",
     "firmware/src/app/original_sound.c",
 ]
+
+# Native and host front ends import this same source composition.
+SUPERJ6_FACTORY = os.environ.get("X0X_SUPERJ6_FACTORY", "0")
+if SUPERJ6_FACTORY not in ("0", "1"):
+    raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
+if SUPERJ6_FACTORY == "1":
+    ORIGINAL_SYNTH_BACKENDS.insert(0, "firmware/src/dsp/dnbx_core.c")
+
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
 ORIGINAL_SYNTH_O2_UNITS = {
@@ -382,6 +393,16 @@ def require_original_synth_sources(root=None):
                          "; ".join(inputs["errors"]))
 
 
+def synthone_patch_setting():
+    # The ordinary Elite and Pro ship the dry INIT editor. The alternative
+    # SuperJ6 factory configuration keeps its explicit patch/link policy.
+    stock_smk = BOARD == "smk37" and MODEL in ("elite", "pro") and SUPERJ6_FACTORY == "0"
+    value = os.environ.get("X0X_SYNTHONE_PATCH", "1" if stock_smk else "0")
+    if value not in ("0", "1"):
+        raise SystemExit("X0X_SYNTHONE_PATCH: 0 or 1")
+    return value
+
+
 def app_compile_commands(flags, original_synth, wobble):
     """Return the exact app compile/link input plan without running tools."""
     if not original_synth:
@@ -396,6 +417,10 @@ def app_compile_commands(flags, original_synth, wobble):
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         flags = [*flags, "-flto"]
+    synthone_patch = synthone_patch_setting()
+    flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+    if SUPERJ6_FACTORY == "1":
+        flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
     if chance_probe not in ("0", "1"):
         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
@@ -426,6 +451,11 @@ def app_compile_commands(flags, original_synth, wobble):
                 uf = [f for f in uf if f != "-flto"]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
+            if SUPERJ6_FACTORY == "1" and synthone_patch == "1":
+                uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
+            if SUPERJ6_FACTORY == "1" and Path(u).stem in {"dnbx_core", "juno6"}:
+                uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
+                uf = [*uf, "-DDNBX_DIAGNOSTIC_COUNTERS=0"]
             units.append(("cc", *uf, "-c", Path(u), "-o", o))
             objs.append(o)
     if chance_probe == "1":
@@ -443,6 +473,13 @@ def build_app():
     if original_synth:
         require_original_synth_sources()
     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
+    factory_roots = []
+    if SUPERJ6_FACTORY == "1":
+        names = ["engine_superj6_factory_load"]
+        if synthone_patch_setting() != "1":
+            names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+        for name in names:
+            factory_roots.extend(("-u", name))
     # Diagnostic builds must opt in explicitly; never alter release defaults.
     diagnostic_guard = os.environ.get("X0X_DIAG_DISABLE_LOAD_GUARD", "0")
     if diagnostic_guard not in ("0", "1"):
@@ -465,8 +502,8 @@ def build_app():
             flags.append(f"-D{flag}={v}")
     # Sound-selector previews use tagged storage but deliberately leave the
     # separate per-note snapshot lifecycle disabled until it is qualified.
-    bass_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND")
-    for flag in bass_flags:
+    sound_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND")
+    for flag in sound_flags:
         v = os.environ.get(flag)
         if v is not None:
             if v not in ("0", "1"):
@@ -522,7 +559,7 @@ def build_app():
                     "-plugin-opt=-tail-merge-size=1", "-plugin-opt=-tail-merge-threshold=10000",
                     "-plugin-opt=-function-sections", "-plugin-opt=-data-sections",
                     "-plugin-opt=-fp-contract=off", "--sort-section=alignment"]
-    tc("pi32v2/bin/ld", *lto_link, "--gc-sections", "-e", "_start", "-T", ld, *objs, "-o", elf)
+    tc("pi32v2/bin/ld", *lto_link, "--gc-sections", *factory_roots, "-e", "_start", "-T", ld, *objs, "-o", elf)
     for sect in ("text.bin", "data.bin", "ramtext.bin", "c1text.bin"):
         (OUT / sect).unlink(missing_ok=True)
     *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),

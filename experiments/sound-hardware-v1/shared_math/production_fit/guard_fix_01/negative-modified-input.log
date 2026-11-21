@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 70, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 47, in main
+    require(manifest(root) == plan["all_input_manifest"], "Prepared inputs changed or gained files")
+  File "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/negative_modified_input/verify_inputs.py", line 20, in require
+    raise RuntimeError(message)
+RuntimeError: Prepared inputs changed or gained files

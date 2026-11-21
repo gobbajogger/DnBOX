@@ -1,0 +1,21 @@
+{
+  "compile_argv": [
+    "cc",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-std=c99",
+    "-Wall",
+    "-I/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-tree/firmware/src/dsp",
+    "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement_smoke.c",
+    "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-tree/firmware/src/dsp/juno6.c",
+    "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-tree/firmware/src/dsp/dnbx_core.c",
+    "-lm",
+    "-o",
+    "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/replacement-smoke"
+  ],
+  "compile_returncode": 0,
+  "run_returncode": 0,
+  "output": "PASS two instances, 6 voices and 2 layers each, 512 frames each; energy 7.51797633683e-05 6.6866340146e-05; facade 2356, chorus 536 bytes on host\n",
+  "scope": "Adapter smoke only, no complete firmware, timing, or original-fidelity conclusion"
+}

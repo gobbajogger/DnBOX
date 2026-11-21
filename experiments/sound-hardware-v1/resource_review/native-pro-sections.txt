@@ -1,0 +1,20 @@
+
+/workspace/scratch/67e685478953/superj6_research/resource_review/native-baseline-76040/build/smk37/x0x.elf:	file format ELF32-pi32v2
+
+Sections:
+Idx Name          Size      Address          Type
+  0               00000000 0000000000000000 
+  1 .text         00085aec 0000000002000120 TEXT DATA 
+  2 .ram_sink     00000400 0000000001c00000 BSS
+  3 .ram_text     00000a94 0000000001c00400 TEXT DATA 
+  4 .c1_text      00000260 0000000001c00e94 TEXT DATA 
+  5 .data         00000258 0000000001c08000 DATA 
+  6 .c1stack      00001200 0000000001c74000 BSS
+  7 .bss          00017954 0000000001c08260 BSS
+  8 .pool         00051cf4 0000000001c20000 BSS
+  9 .xpool        00002400 0000000001c75200 BSS
+ 10 .noinit       00000134 0000000001c7c000 BSS
+ 11 .ble_ram      00000f2c 0000000001c7c400 BSS
+ 12 .shstrtab     00000070 0000000000000000 
+ 13 .symtab       0000ac50 0000000000000000 
+ 14 .strtab       00009c93 0000000000000000 

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-nm",
+    "-u",
+    "build/s1_dry_voice.o"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_dry_voice_d",
+  "started_utc": "2026-11-19T00:21:57.414179+00:00",
+  "exit_status": 0,
+  "stdout": "                 U dnbx_s1_envelope_configure\n                 U dnbx_s1_envelope_sample\n",
+  "stderr": "",
+  "finished_utc": "2026-11-19T00:21:57.416165+00:00"
+}

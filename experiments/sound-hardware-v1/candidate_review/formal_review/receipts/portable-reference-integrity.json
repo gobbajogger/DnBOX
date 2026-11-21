@@ -1,0 +1,160 @@
+{
+  "purpose": "Reference provenance guard/control-flow verification; no compiler, DSP, original engine, native timing or long test execution.",
+  "current_source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+  "old_source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+  "cases": [
+    {
+      "case": "old_truncated",
+      "source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+      "mutation": "truncate",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/old_truncated/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/old_truncated",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 0,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": true,
+      "envelope_comparisons": 4,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": false,
+      "verified_reference_sha256": null,
+      "pass": true
+    },
+    {
+      "case": "fixed_original",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "none",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_original/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_original",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 0,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": true,
+      "envelope_comparisons": 5120,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": false,
+      "verified_reference_sha256": {
+        "mapping/results/implementer_brief/BEHAVIOR-BRIEF.md": "a6d6856c4ad2f1487ddd2cebacaf0416449c7307a61db2f0c4c6834b056c16eb",
+        "mapping/results/implementer_brief/amp_observed_levels.csv": "e6578b0e5861b7ef73fea6822f8848b897065a66a71fded5db08710dea201b6f",
+        "mapping/results/implementer_brief/recorded_envelope_behavior.json": "2f8ab03b1ce874381ae8deb4afd66d016220880512b51c9e2fbe1d63f0f98210"
+      },
+      "pass": true
+    },
+    {
+      "case": "fixed_truncated",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "truncate",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_truncated/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_truncated",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 2,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": null,
+      "envelope_comparisons": null,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": true,
+      "verified_reference_sha256": null,
+      "pass": true
+    },
+    {
+      "case": "fixed_changed_json",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "json",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_changed_json/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_changed_json",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 2,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": null,
+      "envelope_comparisons": null,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": true,
+      "verified_reference_sha256": null,
+      "pass": true
+    },
+    {
+      "case": "fixed_changed_brief",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "brief",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_changed_brief/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_changed_brief",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 2,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": null,
+      "envelope_comparisons": null,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": true,
+      "verified_reference_sha256": null,
+      "pass": true
+    },
+    {
+      "case": "fixed_missing_csv",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "missing",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_missing_csv/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_missing_csv",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 2,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": null,
+      "envelope_comparisons": null,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": true,
+      "verified_reference_sha256": null,
+      "pass": true
+    },
+    {
+      "case": "fixed_incomplete_declaration",
+      "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "mutation": "declaration",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/guard_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_incomplete_declaration/candidate_review/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/portable_recheck/reference_guard/fixed_incomplete_declaration",
+        "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/frozen_03"
+      ],
+      "exit_code": 2,
+      "synthetic_nonreference_leaves": true,
+      "full_audio_acceptance_claim": false,
+      "scoped_acceptance_reported": null,
+      "envelope_comparisons": null,
+      "original_declaration_sha256": "10e93fc3fcf0d316ee19c173748ff5d3da5ff61f83e43898a6aa20a95af814be",
+      "output_not_reserved_and_compiler_not_reached": true,
+      "verified_reference_sha256": null,
+      "pass": true
+    }
+  ],
+  "old_negative_control_detected": true,
+  "all_pass": true
+}

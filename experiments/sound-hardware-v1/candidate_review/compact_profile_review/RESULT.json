@@ -1,0 +1,6315 @@
+{
+  "created_at_utc": "2026-11-18T15:06:24.854416+00:00",
+  "candidate_sha256": {
+    "dnbx_core.c": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+  },
+  "baseline_sha256": {
+    "dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c"
+  },
+  "harness_sha256": "1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9",
+  "declaration_sha256": "4a88cf8e5e78137999c33d07ba2f41cad368101ae6a60414bac1cb5f14eda8d4",
+  "boundary_equivalence": {
+    "cases": [
+      {
+        "field": "amp.attack_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.attack_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.hold_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.decay_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "hi",
+        "binary32_hex": "3f800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "hi_inside",
+        "binary32_hex": "3f7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "hi_outside",
+        "binary32_hex": "3f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "mid",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.sustain",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_hold_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "amp.release_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.attack_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.hold_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.decay_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "hi",
+        "binary32_hex": "3f800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "hi_inside",
+        "binary32_hex": "3f7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "hi_outside",
+        "binary32_hex": "3f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "mid",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.sustain",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_hold_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter.release_s",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "hi",
+        "binary32_hex": "3f800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "hi_inside",
+        "binary32_hex": "3f7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "hi_outside",
+        "binary32_hex": "3f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "mid",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "waveform",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "lo",
+        "binary32_hex": "3cf5c28f",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "lo_inside",
+        "binary32_hex": "3cf5c290",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "lo_outside",
+        "binary32_hex": "3cf5c28e",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "hi",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "hi_inside",
+        "binary32_hex": "3effffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "hi_outside",
+        "binary32_hex": "3f000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "mid",
+        "binary32_hex": "3e87ae14",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pulse_width",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "hi",
+        "binary32_hex": "40800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "hi_inside",
+        "binary32_hex": "407fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "hi_outside",
+        "binary32_hex": "40800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "mid",
+        "binary32_hex": "40000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "gain",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "hi",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "hi_inside",
+        "binary32_hex": "3effffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "hi_outside",
+        "binary32_hex": "3f000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "mid",
+        "binary32_hex": "3e800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "sub_gain",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "lo",
+        "binary32_hex": "41a00000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "lo_inside",
+        "binary32_hex": "41a00001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "lo_outside",
+        "binary32_hex": "419fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "hi",
+        "binary32_hex": "469c4000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "hi_inside",
+        "binary32_hex": "469c3fff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "hi_outside",
+        "binary32_hex": "469c4001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "mid",
+        "binary32_hex": "461c6800",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "cutoff_hz",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "hi",
+        "binary32_hex": "3f800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "hi_inside",
+        "binary32_hex": "3f7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "hi_outside",
+        "binary32_hex": "3f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "mid",
+        "binary32_hex": "3f000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "resonance",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "lo",
+        "binary32_hex": "c69c4000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "lo_inside",
+        "binary32_hex": "c69c3fff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "lo_outside",
+        "binary32_hex": "c69c4001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "hi",
+        "binary32_hex": "469c4000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "hi_inside",
+        "binary32_hex": "469c3fff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "hi_outside",
+        "binary32_hex": "469c4001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "mid",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "filter_env_hz",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "hi",
+        "binary32_hex": "41800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "hi_inside",
+        "binary32_hex": "417fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "hi_outside",
+        "binary32_hex": "41800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "mid",
+        "binary32_hex": "41000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_hz",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "lo",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "lo_inside",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "lo_outside",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "hi",
+        "binary32_hex": "3ef0a3d7",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "hi_inside",
+        "binary32_hex": "3ef0a3d6",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "hi_outside",
+        "binary32_hex": "3ef0a3d8",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "mid",
+        "binary32_hex": "3e70a3d7",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "lfo_pwm_depth",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "lo",
+        "binary32_hex": "c2400000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "lo_inside",
+        "binary32_hex": "c23fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "lo_outside",
+        "binary32_hex": "c2400001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "hi",
+        "binary32_hex": "42400000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "hi_inside",
+        "binary32_hex": "423fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "hi_outside",
+        "binary32_hex": "42400001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "mid",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "tune_semitones",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "lo",
+        "binary32_hex": "bf800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "lo_inside",
+        "binary32_hex": "bf7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "lo_outside",
+        "binary32_hex": "bf800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "hi",
+        "binary32_hex": "3f800000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "hi_inside",
+        "binary32_hex": "3f7fffff",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "hi_outside",
+        "binary32_hex": "3f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "mid",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_zero",
+        "binary32_hex": "00000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_zero",
+        "binary32_hex": "80000000",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_inf",
+        "binary32_hex": "7f800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_inf",
+        "binary32_hex": "ff800000",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_qnan",
+        "binary32_hex": "7fc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_qnan",
+        "binary32_hex": "ffc00001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_snan",
+        "binary32_hex": "7f800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_snan",
+        "binary32_hex": "ff800001",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_max",
+        "binary32_hex": "7f7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_max",
+        "binary32_hex": "ff7fffff",
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "plus_subnormal",
+        "binary32_hex": "00000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "pan",
+        "input": "minus_subnormal",
+        "binary32_hex": "80000001",
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "oscillator_mode",
+        "value": 0,
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "oscillator_mode",
+        "value": 1,
+        "expected_return": 0,
+        "returns": {
+          "accepted": 0,
+          "diagnostic": 0,
+          "compact": 0
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "oscillator_mode",
+        "value": 2,
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      },
+      {
+        "field": "oscillator_mode",
+        "value": 4294967295,
+        "expected_return": -2,
+        "returns": {
+          "accepted": -2,
+          "diagnostic": -2,
+          "compact": -2
+        },
+        "state_equal": true,
+        "rejection_unchanged": true,
+        "pass": true
+      }
+    ],
+    "case_count": 441,
+    "all_pass": true
+  },
+  "capability_contract": {
+    "cases": [
+      {
+        "name": "profile_query",
+        "diagnostic": 1,
+        "compact": 0,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_0",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_256",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1024",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1025",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "uninitialized_precedes_profile_check",
+        "return_code": -3,
+        "pass": true
+      },
+      {
+        "name": "zero_frames_null_work",
+        "return_code": 0,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  },
+  "audio_state_equivalence": {
+    "seed_hex": "D0B0C0DE",
+    "total_frames_over_parts": 262144,
+    "cases": [
+      {
+        "sample_rate": 8000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 169,
+        "event_or_control_calls": 259,
+        "stereo_audio_sha256": {
+          "accepted": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959",
+          "diagnostic": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959",
+          "compact": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 44100,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 157,
+        "event_or_control_calls": 217,
+        "stereo_audio_sha256": {
+          "accepted": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb",
+          "diagnostic": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb",
+          "compact": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 48000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 183,
+        "event_or_control_calls": 339,
+        "stereo_audio_sha256": {
+          "accepted": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18",
+          "diagnostic": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18",
+          "compact": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 192000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 160,
+        "event_or_control_calls": 286,
+        "stereo_audio_sha256": {
+          "accepted": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1",
+          "diagnostic": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1",
+          "compact": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  },
+  "invalid_profile_compile_rejected": true,
+  "scoped_equivalence_pass": true
+}

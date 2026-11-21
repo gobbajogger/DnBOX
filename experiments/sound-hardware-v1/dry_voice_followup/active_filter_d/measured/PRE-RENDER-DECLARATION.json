@@ -1,0 +1,52 @@
+{
+  "status": "BUILT_NOT_RENDERED",
+  "written_utc": "2026-11-19T00:47:10.781936+00:00",
+  "run_declaration_sha256": "b84c4219aeabc1b2310b22b20451df20933a516816aabd7e6aa962ef3d317ddb",
+  "binary_sha256": "988006d70a648c4fc213b8047655df06f9e41e2993a8ab36e763baeecc63c936",
+  "commands": {
+    "build": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor",
+      "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src/s1_dry_voice.c",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor/dnbx_s1_envelope.c",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness/src/active_host.c",
+      "-o",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host"
+    ],
+    "static": [
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+      "static",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/static.candidate-mono.f32le"
+    ],
+    "active": [
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+      "active",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.candidate-mono.f32le"
+    ]
+  },
+  "source_files_sha256": {
+    "src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89",
+    "check_active.py": "f661569877044d9f7c52bfaa02c8cc368818aea6e2fe94e7403972147108b6cc",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "README.md": "c1767652068ab6a600de28cde0c3c59c85e8aa52a249d6fee12b5c195ccf1851",
+    "NEXT-COMMAND.txt": "e29a1d66e62e744eb66e5a85c7d79a5d16d9011f0e9d2bb1d323e339f8201878",
+    "SOURCE-REVIEW.json": "abb037a1e6d15703c45ade582ace4bf1eed4da526eb944babb37bd263037952c"
+  },
+  "new_original_sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74",
+  "baseline_sha256": "7aded201280455c1ddaee86abab4d82b6d791953e81d0d9cb40e17946cbfa380",
+  "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+  "comparison_gain": 1
+}

@@ -1,0 +1,22 @@
+{
+  "root_authorized_proposal_sha256": "36d914226f921180f3c7d79643105e900650f65d9d3a1c5016e496891cb57aed",
+  "wrapper_sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4",
+  "original_staged_inputs_verified": 39,
+  "derived_numeric_inputs_verified": 3,
+  "unpinned_injection_environment": [],
+  "child_environment": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C",
+    "LANG": "C",
+    "TZ": "UTC",
+    "TMPDIR": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/tmp"
+  },
+  "system_assembler_identity": {
+    "path": "/usr/bin/x86_64-linux-gnu-as",
+    "bytes": 795184,
+    "sha256": "07dd8551ea0aa065975e4dddb8e1bb7dc308d12d54eca22c3858db79467c7cb9"
+  },
+  "guard_implementation": "explicit exceptions and conditional checks; no asserts",
+  "executor_sha256": "772b2522f5ebfc9e08bfa5d59c83ed965dc3a95171df2754cd493726a468c013",
+  "native_target_plans_allocated": 0
+}

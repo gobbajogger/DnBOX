@@ -1,0 +1,77 @@
+{
+  "created_at_utc": "2026-11-18T15:26:38.703092+00:00",
+  "scope": "All six reviewer outcomes collected; targeted owner fixes verified independently.",
+  "resolutions": [
+    {
+      "reviewer": "correctness",
+      "title": "Check output existence before overwriting acceptance metadata",
+      "original_source_sha256": "1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9",
+      "fixed_source_sha256": "5010334abd97fb9014cd0365c0fa85a725d21a89485de3d969cde0435fe5eb17",
+      "status": "resolved_verified",
+      "resolution": "Root reserved a fresh label before any output, added per-run acceptance declaration, and preserved historical runner. Independent copied-index run rejects existing output without mutation; fresh 441-case / 262144-frame run passes with matching declaration digest.",
+      "evidence": [
+        "validation/RESULT.json",
+        "validation/final_test_fixes/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/RESULT.json": "c8cf606941b69b4014ce1390faf168bd56e648c39ef2cd0f4ea8d2263368782e",
+        "validation/final_test_fixes/RESULT.json": "720ba7a22d8f7163346280070779080f1211ee0b7f9c3f1679ca65acdfb75e67"
+      }
+    },
+    {
+      "reviewer": "testing",
+      "title": "Return failure when candidate acceptance gates fail",
+      "original_source_sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594",
+      "fixed_source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+      "status": "resolved_verified",
+      "resolution": "Root makes the real main exit 1 after writing a false acceptance receipt. Synthetic leaf stubs exercise actual aggregation/output/exit logic: old false exits 0; fixed false exits 1; fixed true exits 0. No DSP or compiler executes in this status control.",
+      "evidence": [
+        "validation/original_status_negative/RESULT.json",
+        "validation/fixed_index_status/RESULT.json",
+        "validation/final_index_status/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/original_status_negative/RESULT.json": "6421a037bc662106f43d6ad4e12c88383c9b0626ebd09325d54a2b1fa804fbde",
+        "validation/fixed_index_status/RESULT.json": "366b5c4f59c3cb7de91c90bb58dc857b552552737cf42f60d21cd556909e7063",
+        "validation/final_index_status/RESULT.json": "f899acb74507abaa092dd0d56b468ebe4094e84c2a4a84357958853f8fb2d5ad"
+      },
+      "verified_current_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774"
+    },
+    {
+      "reviewer": "maintainability",
+      "title": "Allow public-boundary checks to consume fresh review outputs",
+      "original_source_sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18",
+      "fixed_source_sha256": "49c1ed054174d96fb2c415f975be49a4e307ae808715923a369a175be90e2ae4",
+      "status": "resolved_verified",
+      "resolution": "Root added explicit review directory selection, required three libraries, and exclusive receipt writing. Independent 130-case run passes from the previously compiled private fresh label; repeat and missing-library negatives reject with no prior-result mutation.",
+      "evidence": [
+        "validation/final_test_fixes/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/final_test_fixes/RESULT.json": "720ba7a22d8f7163346280070779080f1211ee0b7f9c3f1679ca65acdfb75e67"
+      }
+    },
+    {
+      "reviewer": "adversarial",
+      "title": "Truncated fixtures still produce pinned acceptance receipts",
+      "original_source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+      "fixed_source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "status": "resolved_verified",
+      "resolution": "Root validates the exact three declared reference SHA256s before reserving output and records actual verified hashes. Unchanged references pass and retain 5120 endpoints. Truncated CSV, one-byte JSON/brief changes, missing CSV, and incomplete declaration all reject before output or compiler; pre-fix truncated control demonstrates four endpoints can otherwise pass. This probes orchestration using retained curves and stubbed nonreference leaves, not a new full DSP acceptance run.",
+      "evidence": [
+        "validation/reference_integrity/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/reference_integrity/RESULT.json": "9d8391057fefaf66afec70b4d6b1e1a62cfeecd65d5b0012078c74cd1af6c673"
+      }
+    }
+  ],
+  "testing_gap_followup": {
+    "claim": "Live envelope parameter update policy",
+    "status": "covered_by_short_public_api_regression",
+    "evidence": "validation/final_test_fixes/RESULT.json",
+    "amp_test_sha256": "cc29a14dbc3d0283ab5bec269629510184355eeaba0682feca0ae01c9666f0d1",
+    "filter_test_sha256": "04d444438ff0c6aa3e0586beaaa3d636167ba3574ed449710e504f45dc69cefa",
+    "coverage": "Cached running attack/release, following decay uses changed duration/sustain, immediate live sustain; amplitude and independently owned filter."
+  }
+}

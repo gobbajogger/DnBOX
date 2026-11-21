@@ -1,0 +1,54 @@
+{
+  "candidate_source": "7597ce1ca32c188d4bb8c44acbdf4823391c1538",
+  "reference_source": "4ea86b9e869011cae761709d13569b7bc32980a8",
+  "scope": "isolated pre-filter oscillator on Linux",
+  "reference": "archived original-derived analytic oscillator",
+  "frames_per_case": 8192,
+  "sample_rate": 44100,
+  "original_au_executions": 0,
+  "complete_preset_pairs": 0,
+  "suites": {
+    "controls": {
+      "passed": 48,
+      "cases": 48,
+      "paired_pcm_digests_matching_archive": 48,
+      "max_abs_level_db": 0.0006708071488163145,
+      "max_spectral_db": 0.2642860712953232,
+      "result_json_sha256": "0cd02e7964ddbb1bc26cdbacc389e5d56b99ce008a7a35787a5b021db777d13c"
+    },
+    "range": {
+      "passed": 154,
+      "cases": 154,
+      "paired_pcm_digests_matching_archive": 154,
+      "max_abs_level_db": 0.0007601068818161951,
+      "max_spectral_db": 0.5325226395094743,
+      "result_json_sha256": "030ed8bd525b1988c8d9a85a7afff1b2fdacdcbe56bf5b1a9598b8185cf38167"
+    },
+    "holdout": {
+      "passed": 96,
+      "cases": 96,
+      "paired_pcm_digests_matching_archive": 96,
+      "max_abs_level_db": 0.00849792032784092,
+      "max_spectral_db": 0.5187378927378563,
+      "result_json_sha256": "786db5dc6dc9b1612efb11dc476dbeb688d4a16c65717781d159c967a4f61883"
+    },
+    "pwm-string-pad": {
+      "passed": 8,
+      "cases": 8,
+      "paired_pcm_digests_matching_archive": 8,
+      "max_abs_level_db": 9.842000700234469e-05,
+      "max_spectral_db": 0.06695599484477241,
+      "result_json_sha256": "5c3a311c1aa7c9c6e7774240d2841f9649b192ebe3ba3a7dd105849bee7cf289"
+    }
+  },
+  "candidate_files": {
+    "dnbx_core.c": "eb8a090f12ceb0498c2d310c9b979f0c15621fc9da427079748e43a7e3a8f3e5",
+    "dnbx_core.h": "8648ba886d19575bf0683549e92abed1346f3e430d1419008a2513b2c6e31ca2",
+    "fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "juno6.c": "8012a85cc9960c0f41e755cea026fd79e4cec0fd3c3b519ee8aebd66acea42cc",
+    "juno6.h": "30140e0c674cf3228dd304e34a96c29609cad9134849893370acaade2efdcc2f",
+    "juno6_factory.inc": "00510eee13b98d82b7ef609bc9d75a432f81ca1d60933f496689716d98175814"
+  },
+  "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3",
+  "remote_source": "90cf5429a0aac5929c72d8abf387d70c399488ad"
+}

@@ -1,0 +1,2253 @@
+{
+  "native_layout": {
+    "part": 2264,
+    "env": 36,
+    "params": 96,
+    "voice": 192,
+    "work": 112,
+    "adapter": 2356,
+    "chorus": 536,
+    "macro_offset": 2264,
+    "hpf_offset": 2336,
+    "hp_state_offset": 2340,
+    "hp_input_offset": 2348
+  },
+  "builds": [
+    {
+      "model": "elite",
+      "optimization": "Oz",
+      "diagnostic_counters": 1,
+      "physical_link_returncode": 1,
+      "diagnostic_only": true,
+      "free_bytes": -748,
+      "gate_shortfall_bytes": 1772,
+      "xip_gate": "FAIL",
+      "explicit_extra_link_root": "dnbx_diagnostic_counters_enabled",
+      "elf": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters1-DIAGNOSTIC-OVERFLOW.elf",
+      "elf_sha256": "a5df49f061b6688f6e86423eb28dbb6d9024fe395435bacc6cb3ceeab8e88158",
+      "undefined": [],
+      "soft_double_symbols": [],
+      "load_image_bytes": 553420,
+      "incremental_image_bytes": 1928,
+      "stack": {
+        "frames": {
+          "juno6_render_stereo": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 92,
+            "fixed_frame_bytes": 144,
+            "callees": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_render_stereo+0x110",
+              "juno6_render_stereo+0x12A",
+              "juno6_render_stereo+0x134",
+              "juno6_render_stereo+0x136",
+              "juno6_render_stereo+0x15E",
+              "juno6_render_stereo+0x172",
+              "juno6_render_stereo+0x174",
+              "juno6_render_stereo+0x182",
+              "juno6_render_stereo+0x18E",
+              "juno6_render_stereo+0x1A4",
+              "juno6_render_stereo+0x1AC",
+              "juno6_render_stereo+0x212",
+              "juno6_render_stereo+0x21C",
+              "juno6_render_stereo+0x238",
+              "juno6_render_stereo+0x270",
+              "juno6_render_stereo+0x286",
+              "juno6_render_stereo+0x2A2",
+              "juno6_render_stereo+0x2A8",
+              "juno6_render_stereo+0x2BA",
+              "juno6_render_stereo+0x2C2",
+              "juno6_render_stereo+0x2F6",
+              "juno6_render_stereo+0x31A",
+              "juno6_render_stereo+0x346",
+              "juno6_render_stereo+0x34C",
+              "juno6_render_stereo+0x392",
+              "juno6_render_stereo+0x3CC",
+              "juno6_render_stereo+0x3CE",
+              "juno6_render_stereo+0x40",
+              "juno6_render_stereo+0x6A",
+              "juno6_render_stereo+0x76",
+              "juno6_render_stereo+0xDC",
+              "shape+0x5A",
+              "shape+0x62",
+              "shape+0x7C",
+              "shape+0x94"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x38",
+              "envelope_sample+0x48",
+              "envelope_sample+0xC"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x30",
+              "dnbx_note_off+0x40",
+              "increment+0x34",
+              "prepare_tick+0x1E",
+              "prepare_tick+0x46",
+              "prepare_tick+0x7A",
+              "release_voice+0x1E",
+              "release_voice+0x26",
+              "voice_active.1042+0x16"
+            ],
+            "edges": []
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x14",
+              "settle+0x3A",
+              "settle+0x68",
+              "settle+0x6E"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1195_0_0_+0x138",
+              ".GJTIE1195_0_0_+0x13E",
+              ".GJTIE1195_0_0_+0x16",
+              ".GJTIE1195_0_0_+0x19E",
+              ".GJTIE1195_0_0_+0x1A0",
+              ".GJTIE1195_0_0_+0x56",
+              ".GJTIE1195_0_0_+0x6E",
+              ".GJTIE1195_0_0_+0x86",
+              ".GJTIE1195_0_0_+0x94",
+              ".GJTIE1195_0_0_+0xEC"
+            ],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "fm_exp2f.1041": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_exp2f.1041+0x8E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x32",
+              "shape+0x54",
+              "shape+0x72",
+              "shape+0x88",
+              "shape+0xB2"
+            ],
+            "edges": [
+              "blep",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "valid.1040": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "valid.1040+0x10",
+              "valid.1040+0x12"
+            ],
+            "edges": []
+          },
+          "voice_active.1042": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1042+0x1E"
+            ],
+            "edges": []
+          },
+          "juno6_set": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 156,
+            "fixed_frame_bytes": 208,
+            "callees": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1208_0_0_+0x126",
+              ".GJTIE1208_0_0_+0x128",
+              ".GJTIE1208_0_0_+0x76",
+              ".GJTIE1208_0_0_+0x90",
+              ".GJTIE1208_0_0_+0xCE",
+              "juno6_set+0x14",
+              "juno6_set+0x17E",
+              "juno6_set+0x28",
+              "juno6_set+0x62",
+              "juno6_set+0x78",
+              "juno6_set+0x7E",
+              "juno6_set+0x90",
+              "juno6_set+0x9C",
+              "juno6_set+0xA6"
+            ],
+            "edges": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x22"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "juno6_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_note_on+0x112",
+              "juno6_note_on+0x11A",
+              "juno6_note_on+0x124",
+              "juno6_note_on+0x12C",
+              "juno6_note_on+0x16E",
+              "juno6_note_on+0x1B2",
+              "juno6_note_on+0x1B6",
+              "juno6_note_on+0x1BA",
+              "juno6_note_on+0x1C4",
+              "juno6_note_on+0x28",
+              "juno6_note_on+0x32",
+              "juno6_note_on+0x42",
+              "juno6_note_on+0x5A",
+              "juno6_note_on+0x72",
+              "juno6_note_on+0x90",
+              "juno6_note_on+0xB8",
+              "juno6_note_on+0xC8",
+              "juno6_note_on+0xEE"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x4A",
+              "dnbx_note_off+0x50"
+            ],
+            "edges": [
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "juno6_chorus_process": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "fm_sinf"
+            ],
+            "potential_tail_callees": [
+              "juno6_chorus_process+0x10E",
+              "juno6_chorus_process+0x172",
+              "juno6_chorus_process+0x36"
+            ],
+            "edges": [
+              "fm_sinf"
+            ]
+          },
+          "fm_sinf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_wrap_pi"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi"
+            ],
+            "edges": [
+              "fm_sin_pi",
+              "fm_wrap_pi"
+            ]
+          },
+          "fm_wrap_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "juno6_read_envelope": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [],
+            "potential_tail_callees": [
+              "juno6_read_envelope+0x2A",
+              "juno6_read_envelope+0x38",
+              "juno6_read_envelope+0x4A",
+              "juno6_read_envelope+0x66",
+              "juno6_read_envelope+0x6E",
+              "juno6_read_envelope+0xA4"
+            ],
+            "edges": []
+          }
+        },
+        "root_paths": {
+          "juno6_render_stereo": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "juno6_render_stereo",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_set": {
+            "complete": true,
+            "bytes": 324,
+            "path": [
+              "juno6_set",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_note_on": {
+            "complete": true,
+            "bytes": 216,
+            "path": [
+              "juno6_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_chorus_process": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_chorus_process",
+              "fm_sinf",
+              "fm_sin_pi"
+            ]
+          },
+          "juno6_read_envelope": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_read_envelope"
+            ]
+          }
+        },
+        "missing": [],
+        "scope": "Fixed frames/direct calls within adapter and core only; caller/interrupt stacks and hardware high water excluded"
+      }
+    },
+    {
+      "model": "pro",
+      "optimization": "Oz",
+      "diagnostic_counters": 1,
+      "physical_link_returncode": 1,
+      "diagnostic_only": true,
+      "free_bytes": -740,
+      "gate_shortfall_bytes": 1764,
+      "xip_gate": "FAIL",
+      "explicit_extra_link_root": "dnbx_diagnostic_counters_enabled",
+      "elf": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters1-DIAGNOSTIC-OVERFLOW.elf",
+      "elf_sha256": "69ca7bc515909ea183ad5a5d5960ce1b1052fcbb054a3594dcd041e89f4c015e",
+      "undefined": [],
+      "soft_double_symbols": [],
+      "load_image_bytes": 553412,
+      "incremental_image_bytes": 1928,
+      "stack": {
+        "frames": {
+          "juno6_render_stereo": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 92,
+            "fixed_frame_bytes": 144,
+            "callees": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_render_stereo+0x110",
+              "juno6_render_stereo+0x12A",
+              "juno6_render_stereo+0x134",
+              "juno6_render_stereo+0x136",
+              "juno6_render_stereo+0x15E",
+              "juno6_render_stereo+0x172",
+              "juno6_render_stereo+0x174",
+              "juno6_render_stereo+0x182",
+              "juno6_render_stereo+0x18E",
+              "juno6_render_stereo+0x1A4",
+              "juno6_render_stereo+0x1AC",
+              "juno6_render_stereo+0x212",
+              "juno6_render_stereo+0x21C",
+              "juno6_render_stereo+0x238",
+              "juno6_render_stereo+0x270",
+              "juno6_render_stereo+0x286",
+              "juno6_render_stereo+0x2A2",
+              "juno6_render_stereo+0x2A8",
+              "juno6_render_stereo+0x2BA",
+              "juno6_render_stereo+0x2C2",
+              "juno6_render_stereo+0x2F6",
+              "juno6_render_stereo+0x31A",
+              "juno6_render_stereo+0x346",
+              "juno6_render_stereo+0x34C",
+              "juno6_render_stereo+0x392",
+              "juno6_render_stereo+0x3CC",
+              "juno6_render_stereo+0x3CE",
+              "juno6_render_stereo+0x40",
+              "juno6_render_stereo+0x6A",
+              "juno6_render_stereo+0x76",
+              "juno6_render_stereo+0xDC",
+              "shape+0x5A",
+              "shape+0x62",
+              "shape+0x7C",
+              "shape+0x94"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x38",
+              "envelope_sample+0x48",
+              "envelope_sample+0xC"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x30",
+              "dnbx_note_off+0x40",
+              "increment+0x34",
+              "prepare_tick+0x1E",
+              "prepare_tick+0x46",
+              "prepare_tick+0x7A",
+              "release_voice+0x1E",
+              "release_voice+0x26",
+              "voice_active.1042+0x16"
+            ],
+            "edges": []
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x14",
+              "settle+0x3A",
+              "settle+0x68",
+              "settle+0x6E"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1195_0_0_+0x138",
+              ".GJTIE1195_0_0_+0x13E",
+              ".GJTIE1195_0_0_+0x16",
+              ".GJTIE1195_0_0_+0x19E",
+              ".GJTIE1195_0_0_+0x1A0",
+              ".GJTIE1195_0_0_+0x56",
+              ".GJTIE1195_0_0_+0x6E",
+              ".GJTIE1195_0_0_+0x86",
+              ".GJTIE1195_0_0_+0x94",
+              ".GJTIE1195_0_0_+0xEC"
+            ],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "fm_exp2f.1041": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_exp2f.1041+0x8E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x32",
+              "shape+0x54",
+              "shape+0x72",
+              "shape+0x88",
+              "shape+0xB2"
+            ],
+            "edges": [
+              "blep",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "valid.1040": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "valid.1040+0x10",
+              "valid.1040+0x12"
+            ],
+            "edges": []
+          },
+          "voice_active.1042": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1042+0x1E"
+            ],
+            "edges": []
+          },
+          "juno6_set": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 156,
+            "fixed_frame_bytes": 208,
+            "callees": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1208_0_0_+0x126",
+              ".GJTIE1208_0_0_+0x128",
+              ".GJTIE1208_0_0_+0x76",
+              ".GJTIE1208_0_0_+0x90",
+              ".GJTIE1208_0_0_+0xCE",
+              "juno6_set+0x14",
+              "juno6_set+0x17E",
+              "juno6_set+0x28",
+              "juno6_set+0x62",
+              "juno6_set+0x78",
+              "juno6_set+0x7E",
+              "juno6_set+0x90",
+              "juno6_set+0x9C",
+              "juno6_set+0xA6"
+            ],
+            "edges": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x22"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "juno6_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_note_on+0x112",
+              "juno6_note_on+0x11A",
+              "juno6_note_on+0x124",
+              "juno6_note_on+0x12C",
+              "juno6_note_on+0x16E",
+              "juno6_note_on+0x1B2",
+              "juno6_note_on+0x1B6",
+              "juno6_note_on+0x1BA",
+              "juno6_note_on+0x1C4",
+              "juno6_note_on+0x28",
+              "juno6_note_on+0x32",
+              "juno6_note_on+0x42",
+              "juno6_note_on+0x5A",
+              "juno6_note_on+0x72",
+              "juno6_note_on+0x90",
+              "juno6_note_on+0xB8",
+              "juno6_note_on+0xC8",
+              "juno6_note_on+0xEE"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x4A",
+              "dnbx_note_off+0x50"
+            ],
+            "edges": [
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "juno6_chorus_process": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "fm_sinf"
+            ],
+            "potential_tail_callees": [
+              "juno6_chorus_process+0x10E",
+              "juno6_chorus_process+0x172",
+              "juno6_chorus_process+0x36"
+            ],
+            "edges": [
+              "fm_sinf"
+            ]
+          },
+          "fm_sinf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_wrap_pi"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi"
+            ],
+            "edges": [
+              "fm_sin_pi",
+              "fm_wrap_pi"
+            ]
+          },
+          "fm_wrap_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "juno6_read_envelope": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [],
+            "potential_tail_callees": [
+              "juno6_read_envelope+0x2A",
+              "juno6_read_envelope+0x38",
+              "juno6_read_envelope+0x4A",
+              "juno6_read_envelope+0x66",
+              "juno6_read_envelope+0x6E",
+              "juno6_read_envelope+0xA4"
+            ],
+            "edges": []
+          }
+        },
+        "root_paths": {
+          "juno6_render_stereo": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "juno6_render_stereo",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_set": {
+            "complete": true,
+            "bytes": 324,
+            "path": [
+              "juno6_set",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_note_on": {
+            "complete": true,
+            "bytes": 216,
+            "path": [
+              "juno6_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_chorus_process": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_chorus_process",
+              "fm_sinf",
+              "fm_sin_pi"
+            ]
+          },
+          "juno6_read_envelope": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_read_envelope"
+            ]
+          }
+        },
+        "missing": [],
+        "scope": "Fixed frames/direct calls within adapter and core only; caller/interrupt stacks and hardware high water excluded"
+      }
+    },
+    {
+      "model": "elite",
+      "optimization": "Oz",
+      "diagnostic_counters": 0,
+      "physical_link_returncode": 1,
+      "diagnostic_only": true,
+      "free_bytes": -748,
+      "gate_shortfall_bytes": 1772,
+      "xip_gate": "FAIL",
+      "explicit_extra_link_root": "dnbx_diagnostic_counters_enabled",
+      "elf": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/elite-Oz-counters0-DIAGNOSTIC-OVERFLOW.elf",
+      "elf_sha256": "c0af10c11e321278a5ebedf7ace79068f1d2633286acad87af6cc2ef1f269bb1",
+      "undefined": [],
+      "soft_double_symbols": [],
+      "load_image_bytes": 553420,
+      "incremental_image_bytes": 1928,
+      "stack": {
+        "frames": {
+          "juno6_render_stereo": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 92,
+            "fixed_frame_bytes": 144,
+            "callees": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_render_stereo+0x110",
+              "juno6_render_stereo+0x12A",
+              "juno6_render_stereo+0x134",
+              "juno6_render_stereo+0x136",
+              "juno6_render_stereo+0x15E",
+              "juno6_render_stereo+0x172",
+              "juno6_render_stereo+0x174",
+              "juno6_render_stereo+0x182",
+              "juno6_render_stereo+0x18E",
+              "juno6_render_stereo+0x1A4",
+              "juno6_render_stereo+0x1AC",
+              "juno6_render_stereo+0x212",
+              "juno6_render_stereo+0x21C",
+              "juno6_render_stereo+0x238",
+              "juno6_render_stereo+0x270",
+              "juno6_render_stereo+0x286",
+              "juno6_render_stereo+0x2A2",
+              "juno6_render_stereo+0x2A8",
+              "juno6_render_stereo+0x2BA",
+              "juno6_render_stereo+0x2C2",
+              "juno6_render_stereo+0x2F6",
+              "juno6_render_stereo+0x31A",
+              "juno6_render_stereo+0x346",
+              "juno6_render_stereo+0x34C",
+              "juno6_render_stereo+0x392",
+              "juno6_render_stereo+0x3CC",
+              "juno6_render_stereo+0x3CE",
+              "juno6_render_stereo+0x40",
+              "juno6_render_stereo+0x6A",
+              "juno6_render_stereo+0x76",
+              "juno6_render_stereo+0xDC",
+              "shape+0x5A",
+              "shape+0x62",
+              "shape+0x7C",
+              "shape+0x94"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x38",
+              "envelope_sample+0x48",
+              "envelope_sample+0xC"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x30",
+              "dnbx_note_off+0x40",
+              "increment+0x34",
+              "prepare_tick+0x1E",
+              "prepare_tick+0x46",
+              "prepare_tick+0x7A",
+              "release_voice+0x1E",
+              "release_voice+0x26",
+              "voice_active.1042+0x16"
+            ],
+            "edges": []
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x14",
+              "settle+0x3A",
+              "settle+0x68",
+              "settle+0x6E"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1195_0_0_+0x138",
+              ".GJTIE1195_0_0_+0x13E",
+              ".GJTIE1195_0_0_+0x16",
+              ".GJTIE1195_0_0_+0x19E",
+              ".GJTIE1195_0_0_+0x1A0",
+              ".GJTIE1195_0_0_+0x56",
+              ".GJTIE1195_0_0_+0x6E",
+              ".GJTIE1195_0_0_+0x86",
+              ".GJTIE1195_0_0_+0x94",
+              ".GJTIE1195_0_0_+0xEC"
+            ],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "fm_exp2f.1041": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_exp2f.1041+0x8E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x32",
+              "shape+0x54",
+              "shape+0x72",
+              "shape+0x88",
+              "shape+0xB2"
+            ],
+            "edges": [
+              "blep",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "valid.1040": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "valid.1040+0x10",
+              "valid.1040+0x12"
+            ],
+            "edges": []
+          },
+          "voice_active.1042": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1042+0x1E"
+            ],
+            "edges": []
+          },
+          "juno6_set": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 156,
+            "fixed_frame_bytes": 208,
+            "callees": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1208_0_0_+0x126",
+              ".GJTIE1208_0_0_+0x128",
+              ".GJTIE1208_0_0_+0x76",
+              ".GJTIE1208_0_0_+0x90",
+              ".GJTIE1208_0_0_+0xCE",
+              "juno6_set+0x14",
+              "juno6_set+0x17E",
+              "juno6_set+0x28",
+              "juno6_set+0x62",
+              "juno6_set+0x78",
+              "juno6_set+0x7E",
+              "juno6_set+0x90",
+              "juno6_set+0x9C",
+              "juno6_set+0xA6"
+            ],
+            "edges": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x22"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "juno6_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_note_on+0x112",
+              "juno6_note_on+0x11A",
+              "juno6_note_on+0x124",
+              "juno6_note_on+0x12C",
+              "juno6_note_on+0x16E",
+              "juno6_note_on+0x1B2",
+              "juno6_note_on+0x1B6",
+              "juno6_note_on+0x1BA",
+              "juno6_note_on+0x1C4",
+              "juno6_note_on+0x28",
+              "juno6_note_on+0x32",
+              "juno6_note_on+0x42",
+              "juno6_note_on+0x5A",
+              "juno6_note_on+0x72",
+              "juno6_note_on+0x90",
+              "juno6_note_on+0xB8",
+              "juno6_note_on+0xC8",
+              "juno6_note_on+0xEE"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x4A",
+              "dnbx_note_off+0x50"
+            ],
+            "edges": [
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "juno6_chorus_process": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "fm_sinf"
+            ],
+            "potential_tail_callees": [
+              "juno6_chorus_process+0x10E",
+              "juno6_chorus_process+0x172",
+              "juno6_chorus_process+0x36"
+            ],
+            "edges": [
+              "fm_sinf"
+            ]
+          },
+          "fm_sinf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_wrap_pi"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi"
+            ],
+            "edges": [
+              "fm_sin_pi",
+              "fm_wrap_pi"
+            ]
+          },
+          "fm_wrap_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "juno6_read_envelope": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [],
+            "potential_tail_callees": [
+              "juno6_read_envelope+0x2A",
+              "juno6_read_envelope+0x38",
+              "juno6_read_envelope+0x4A",
+              "juno6_read_envelope+0x66",
+              "juno6_read_envelope+0x6E",
+              "juno6_read_envelope+0xA4"
+            ],
+            "edges": []
+          }
+        },
+        "root_paths": {
+          "juno6_render_stereo": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "juno6_render_stereo",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_set": {
+            "complete": true,
+            "bytes": 324,
+            "path": [
+              "juno6_set",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_note_on": {
+            "complete": true,
+            "bytes": 216,
+            "path": [
+              "juno6_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_chorus_process": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_chorus_process",
+              "fm_sinf",
+              "fm_sin_pi"
+            ]
+          },
+          "juno6_read_envelope": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_read_envelope"
+            ]
+          }
+        },
+        "missing": [],
+        "scope": "Fixed frames/direct calls within adapter and core only; caller/interrupt stacks and hardware high water excluded"
+      }
+    },
+    {
+      "model": "pro",
+      "optimization": "Oz",
+      "diagnostic_counters": 0,
+      "physical_link_returncode": 1,
+      "diagnostic_only": true,
+      "free_bytes": -740,
+      "gate_shortfall_bytes": 1764,
+      "xip_gate": "FAIL",
+      "explicit_extra_link_root": "dnbx_diagnostic_counters_enabled",
+      "elf": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/pro-Oz-counters0-DIAGNOSTIC-OVERFLOW.elf",
+      "elf_sha256": "6c014c8a8997975f498c9b75d107e76603a90befcf95f63f76905f27c00f376c",
+      "undefined": [],
+      "soft_double_symbols": [],
+      "load_image_bytes": 553412,
+      "incremental_image_bytes": 1928,
+      "stack": {
+        "frames": {
+          "juno6_render_stereo": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 92,
+            "fixed_frame_bytes": 144,
+            "callees": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_render_stereo+0x110",
+              "juno6_render_stereo+0x12A",
+              "juno6_render_stereo+0x134",
+              "juno6_render_stereo+0x136",
+              "juno6_render_stereo+0x15E",
+              "juno6_render_stereo+0x172",
+              "juno6_render_stereo+0x174",
+              "juno6_render_stereo+0x182",
+              "juno6_render_stereo+0x18E",
+              "juno6_render_stereo+0x1A4",
+              "juno6_render_stereo+0x1AC",
+              "juno6_render_stereo+0x212",
+              "juno6_render_stereo+0x21C",
+              "juno6_render_stereo+0x238",
+              "juno6_render_stereo+0x270",
+              "juno6_render_stereo+0x286",
+              "juno6_render_stereo+0x2A2",
+              "juno6_render_stereo+0x2A8",
+              "juno6_render_stereo+0x2BA",
+              "juno6_render_stereo+0x2C2",
+              "juno6_render_stereo+0x2F6",
+              "juno6_render_stereo+0x31A",
+              "juno6_render_stereo+0x346",
+              "juno6_render_stereo+0x34C",
+              "juno6_render_stereo+0x392",
+              "juno6_render_stereo+0x3CC",
+              "juno6_render_stereo+0x3CE",
+              "juno6_render_stereo+0x40",
+              "juno6_render_stereo+0x6A",
+              "juno6_render_stereo+0x76",
+              "juno6_render_stereo+0xDC",
+              "shape+0x5A",
+              "shape+0x62",
+              "shape+0x7C",
+              "shape+0x94"
+            ],
+            "edges": [
+              "envelope_sample",
+              "shape",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "envelope_sample": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_sample+0x38",
+              "envelope_sample+0x48",
+              "envelope_sample+0xC"
+            ],
+            "edges": [
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "prepare_tick": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x30",
+              "dnbx_note_off+0x40",
+              "increment+0x34",
+              "prepare_tick+0x1E",
+              "prepare_tick+0x46",
+              "prepare_tick+0x7A",
+              "release_voice+0x1E",
+              "release_voice+0x26",
+              "voice_active.1042+0x16"
+            ],
+            "edges": []
+          },
+          "settle": {
+            "recognized": true,
+            "saved_register_bytes": 36,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 36,
+            "callees": [
+              "enter_stage"
+            ],
+            "potential_tail_callees": [
+              "settle+0x14",
+              "settle+0x3A",
+              "settle+0x68",
+              "settle+0x6E"
+            ],
+            "edges": [
+              "enter_stage"
+            ]
+          },
+          "enter_stage": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1195_0_0_+0x138",
+              ".GJTIE1195_0_0_+0x13E",
+              ".GJTIE1195_0_0_+0x16",
+              ".GJTIE1195_0_0_+0x19E",
+              ".GJTIE1195_0_0_+0x1A0",
+              ".GJTIE1195_0_0_+0x56",
+              ".GJTIE1195_0_0_+0x6E",
+              ".GJTIE1195_0_0_+0x86",
+              ".GJTIE1195_0_0_+0x94",
+              ".GJTIE1195_0_0_+0xEC"
+            ],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "fm_exp2f.1041": {
+            "recognized": true,
+            "saved_register_bytes": 12,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 12,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_exp2f.1041+0x8E"
+            ],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "fm_floorf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "shape": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [
+              "blep",
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi",
+              "shape+0x32",
+              "shape+0x54",
+              "shape+0x72",
+              "shape+0x88",
+              "shape+0xB2"
+            ],
+            "edges": [
+              "blep",
+              "fm_floorf",
+              "fm_sin_pi"
+            ]
+          },
+          "blep": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "fm_sin_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [],
+            "edges": []
+          },
+          "valid.1040": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "valid.1040+0x10",
+              "valid.1040+0x12"
+            ],
+            "edges": []
+          },
+          "voice_active.1042": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [],
+            "potential_tail_callees": [
+              "voice_active.1042+0x1E"
+            ],
+            "edges": []
+          },
+          "juno6_set": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 156,
+            "fixed_frame_bytes": 208,
+            "callees": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              ".GJTIE1208_0_0_+0x126",
+              ".GJTIE1208_0_0_+0x128",
+              ".GJTIE1208_0_0_+0x76",
+              ".GJTIE1208_0_0_+0x90",
+              ".GJTIE1208_0_0_+0xCE",
+              "juno6_set+0x14",
+              "juno6_set+0x17E",
+              "juno6_set+0x28",
+              "juno6_set+0x62",
+              "juno6_set+0x78",
+              "juno6_set+0x7E",
+              "juno6_set+0x90",
+              "juno6_set+0x9C",
+              "juno6_set+0xA6"
+            ],
+            "edges": [
+              "increment",
+              "memcpy",
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "increment": {
+            "recognized": true,
+            "saved_register_bytes": 8,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 8,
+            "callees": [
+              "fm_exp2f.1041"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_exp2f.1041"
+            ]
+          },
+          "memcpy": {
+            "recognized": true,
+            "saved_register_bytes": 24,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 24,
+            "callees": [],
+            "potential_tail_callees": [
+              "memcpy+0x10",
+              "memcpy+0x14",
+              "memcpy+0x2E",
+              "memcpy+0x44",
+              "memcpy+0x64",
+              "memcpy+0x6A",
+              "memcpy+0x78",
+              "memcpy+0x7E"
+            ],
+            "edges": []
+          },
+          "release_voice": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [
+              "envelope_off"
+            ],
+            "potential_tail_callees": [
+              "release_voice+0xC"
+            ],
+            "edges": [
+              "envelope_off"
+            ]
+          },
+          "envelope_off": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "settle"
+            ],
+            "potential_tail_callees": [
+              "envelope_off+0x22"
+            ],
+            "edges": [
+              "enter_stage",
+              "settle"
+            ]
+          },
+          "juno6_note_on": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 16,
+            "fixed_frame_bytes": 68,
+            "callees": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ],
+            "potential_tail_callees": [
+              "juno6_note_on+0x112",
+              "juno6_note_on+0x11A",
+              "juno6_note_on+0x124",
+              "juno6_note_on+0x12C",
+              "juno6_note_on+0x16E",
+              "juno6_note_on+0x1B2",
+              "juno6_note_on+0x1B6",
+              "juno6_note_on+0x1BA",
+              "juno6_note_on+0x1C4",
+              "juno6_note_on+0x28",
+              "juno6_note_on+0x32",
+              "juno6_note_on+0x42",
+              "juno6_note_on+0x5A",
+              "juno6_note_on+0x72",
+              "juno6_note_on+0x90",
+              "juno6_note_on+0xB8",
+              "juno6_note_on+0xC8",
+              "juno6_note_on+0xEE"
+            ],
+            "edges": [
+              "dnbx_note_off",
+              "envelope_on",
+              "increment",
+              "memset",
+              "valid.1040",
+              "voice_active.1042"
+            ]
+          },
+          "dnbx_note_off": {
+            "recognized": true,
+            "saved_register_bytes": 32,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 32,
+            "callees": [
+              "release_voice",
+              "valid.1040"
+            ],
+            "potential_tail_callees": [
+              "dnbx_note_off+0x22",
+              "dnbx_note_off+0x4A",
+              "dnbx_note_off+0x50"
+            ],
+            "edges": [
+              "release_voice",
+              "valid.1040"
+            ]
+          },
+          "envelope_on": {
+            "recognized": true,
+            "saved_register_bytes": 16,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 16,
+            "callees": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "enter_stage",
+              "prepare_tick",
+              "settle"
+            ]
+          },
+          "memset": {
+            "recognized": true,
+            "saved_register_bytes": 20,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 20,
+            "callees": [],
+            "potential_tail_callees": [
+              "memset+0x10",
+              "memset+0x30",
+              "memset+0x3C",
+              "memset+0x5A",
+              "memset+0x5E",
+              "memset+0x68",
+              "memset+0x6C",
+              "memset+0xC"
+            ],
+            "edges": []
+          },
+          "juno6_chorus_process": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [
+              "fm_sinf"
+            ],
+            "potential_tail_callees": [
+              "juno6_chorus_process+0x10E",
+              "juno6_chorus_process+0x172",
+              "juno6_chorus_process+0x36"
+            ],
+            "edges": [
+              "fm_sinf"
+            ]
+          },
+          "fm_sinf": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_wrap_pi"
+            ],
+            "potential_tail_callees": [
+              "fm_sin_pi"
+            ],
+            "edges": [
+              "fm_sin_pi",
+              "fm_wrap_pi"
+            ]
+          },
+          "fm_wrap_pi": {
+            "recognized": true,
+            "saved_register_bytes": 0,
+            "local_and_outgoing_bytes": 0,
+            "fixed_frame_bytes": 0,
+            "callees": [
+              "fm_floorf"
+            ],
+            "potential_tail_callees": [],
+            "edges": [
+              "fm_floorf"
+            ]
+          },
+          "juno6_read_envelope": {
+            "recognized": true,
+            "saved_register_bytes": 52,
+            "local_and_outgoing_bytes": 8,
+            "fixed_frame_bytes": 60,
+            "callees": [],
+            "potential_tail_callees": [
+              "juno6_read_envelope+0x2A",
+              "juno6_read_envelope+0x38",
+              "juno6_read_envelope+0x4A",
+              "juno6_read_envelope+0x66",
+              "juno6_read_envelope+0x6E",
+              "juno6_read_envelope+0xA4"
+            ],
+            "edges": []
+          }
+        },
+        "root_paths": {
+          "juno6_render_stereo": {
+            "complete": true,
+            "bytes": 236,
+            "path": [
+              "juno6_render_stereo",
+              "envelope_sample",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_set": {
+            "complete": true,
+            "bytes": 324,
+            "path": [
+              "juno6_set",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_note_on": {
+            "complete": true,
+            "bytes": 216,
+            "path": [
+              "juno6_note_on",
+              "dnbx_note_off",
+              "release_voice",
+              "envelope_off",
+              "settle",
+              "enter_stage",
+              "fm_exp2f.1041",
+              "fm_floorf"
+            ]
+          },
+          "juno6_chorus_process": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_chorus_process",
+              "fm_sinf",
+              "fm_sin_pi"
+            ]
+          },
+          "juno6_read_envelope": {
+            "complete": true,
+            "bytes": 60,
+            "path": [
+              "juno6_read_envelope"
+            ]
+          }
+        },
+        "missing": [],
+        "scope": "Fixed frames/direct calls within adapter and core only; caller/interrupt stacks and hardware high water excluded"
+      }
+    }
+  ]
+}

@@ -1196,6 +1196,14 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
     const ui_original_control_view *v = 0;
     /* a corrupt patch has no bank: never index a name table through a null view */
     if (bank != ORIGINAL_SOUND_CHICAGO && bank != ORIGINAL_SOUND_MIAMI && bank != ORIGINAL_SOUND_SYNTHONE && bank != ORIGINAL_SOUND_JUNO) { put_s(num,"INVALID"); return 1; }
+    if (kind == ORIGINAL_SOUND_SYNTHONE && id == ORIGINAL_SYNTHONE_CRUSH) {
+        float hz;
+        if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) {
+            put_i(num, (int)(hz + .5f));
+            put_s(unit, "Hz");
+            return 1;
+        }
+    }
     if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
@@ -1686,7 +1694,8 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
                 pref_t refs[4];
                 for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
 #if X0X_SYNTHONE_PATCH
-                if (kind == ORIGINAL_SOUND_SYNTHONE) {
+                /* The final EFFECT row uses the engine's independent control slot. */
+                if (kind == ORIGINAL_SOUND_SYNTHONE && row + 1 < count) {
                     for (int col=0; col<4; ++col)
                         if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
                 }
@@ -6038,14 +6047,14 @@ static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink);
 #endif
 #if !X0X_SYNTHONE_PATCH
 static const char *matrix_preset_name(int voice);
-/* Stock INIT exposes engine selection and readback, with no editable patch. */
+/* The compact SOUND page shows the engine, preset and application state. */
 static UI_DRAW void draw_init_selector(int band)
 {
     int off = band * BAND_H;
     for (int k = 0; k < 3; ++k) {
         int y = 4 + 67*k - off;
         if (y + 66 <= 0 || y >= (band == 2 ? KNOB_H : BAND_H)) continue;
-        pref_t r = pg.r[0][k];
+        pref_t r = pg.r[cur_page()][k];
         char label[24], num[36], unit[8];
         char *end = label;
         if (k < 2 && ui.overlay != O_LIST) end = put_s(put_i(put_s(end, "K"), UI_FIRST_KNOB + k), "  ");
@@ -6078,7 +6087,8 @@ static UI_DRAW void draw_part_sound(int band)
         engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
 #endif
 #if !X0X_SYNTHONE_PATCH
-    if (pg.n == 1 && pg.r[0][0].kind == R_BENGINE) {
+    if (pg.n == 2 && pg.r[cur_page()][0].kind == R_BENGINE &&
+        engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
         draw_init_selector(band);
         return;
     }
@@ -6118,8 +6128,8 @@ static UI_DRAW void draw_part_sound(int band)
          * Spread those same controls across the panel without moving a binding. */
         int columns = 4;
         if (X0X_ORIGINAL_SYNTH && pg.r[p][3].kind == R_NONE)
-            columns = pg.r[p][2].kind == R_NONE ? 2 : 3;
-        int cell_width = columns == 4 ? 59 : columns == 3 ? 78 : 118;
+            columns = pg.r[p][1].kind == R_NONE ? 1 : pg.r[p][2].kind == R_NONE ? 2 : 3;
+        int cell_width = columns == 4 ? 59 : columns == 3 ? 78 : columns == 2 ? 118 : 232;
         for (k=0;k<columns;k++) {
             int x=4+k*cell_width;
             if (k && (pg.r[p][k].kind!=R_NONE
@@ -6853,12 +6863,6 @@ static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel
 /* Lists share the body with the lower controls, except for full PART editors. */
 static UI_DRAW void draw_list(int band)
 {
-#if !X0X_SYNTHONE_PATCH
-    if (ui.list_n == 3 && list_rows[0].kind == R_BENGINE) {
-        draw_init_selector(band);
-        return;
-    }
-#endif
     int visible = visible_list_rows();
     int pitch = ui.list_n && ui.list_n < visible ? visible * 23 / ui.list_n : 23;
     int extra = visible == 6 ? (pitch - 23) / 2 : 0;
@@ -7525,11 +7529,12 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
     if(r.kind==R_ENG && val>=0 && val<=d->max) shape=wave_shape(r,val,&mix);
     if(!shape && !unused && val>=0 && orig_strip_slot(r)) {
         /* Drum parts draw their own rows in draw_drum_voice. */
-        orig_strip_glyph(r,val,x+3,y+22,ink);
+        int single = width == 232;
+        orig_strip_glyph(r,val,single ? cx-46 : x+3,y+22,ink);
         pref_value_of(r,val,num,unit);
         if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
             strip_value_fit(x, y+28, num, unit, ink);
-        else strip_value(x+width-14,y+28,num,unit,ink);
+        else strip_value(single ? cx+23 : x+width-14,y+28,num,unit,ink);
     } else
     if(shape) {
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -8153,6 +8158,7 @@ static UI_DRAW int orig_strip_slot(pref_t r)
 {
     if(r.kind!=R_ENG || r.a!=T_303) return 0;
     int b=engine_bass_sound_bank(&proj.sound,r.b);
+    if(b==ORIGINAL_SOUND_SYNTHONE) return r.c == ORIGINAL_SYNTHONE_CRUSH;
     if(b==ORIGINAL_SOUND_JUNO) return r.c < 16 && (r.c < 5 || r.c > 8);
     if(b==ORIGINAL_SOUND_CHICAGO) return r.c>=1 && (r.c<=6 || r.c==11 || r.c==12 || r.c==15 || r.c==17);
     if(b==ORIGINAL_SOUND_MIAMI) return r.c>=1 && r.c<=15 && r.c!=6 && r.c!=11;
@@ -8244,6 +8250,11 @@ static float og_sin(float t,float k){return fm_sinf(6.2831853f*t*k);}
 static float og_bite(float t,float q){float g=.3f+6.0f*q;return fm_tanhf(g*og_sin(t,1.5f))/fm_tanhf(g);}
 static float og_gnaw(float t,float q){float v=og_sin(t,1.5f)*(1.0f+3.0f*q);
     while(v>1||v<-1) v=v>1?2-v:-2-v; return v;}             /* wavefolder */
+/* Sample-and-hold retains the input amplitude between clock ticks. */
+static float og_rate_hold(float t,float q){
+    int steps = 2 + (int)((1.f-q)*24.f + .5f);
+    return og_sin((float)(int)(t*steps)/(float)steps,1.5f);
+}
 static float og_crush(float t,float q){int n=12-(int)(q*10+.5f);float v=og_sin((float)((int)(t*(26-q*20))) /(26-q*20),1.5f);
     return (float)(int)(v*n+(v<0?-.5f:.5f))/(float)n;}       /* sample-rate + bit reduction */
 static float og_fm(float t,float q){return fm_sinf(6.2831853f*(1.5f*t)+q*1.6f*fm_sinf(6.2831853f*1.5f*t));}
@@ -8369,6 +8380,10 @@ static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col
     const x0x_param_t *d=pref_desc(r);
     float q=d && d->max?(float)val/(float)d->max:0;
     int bank=engine_bass_sound_bank(&proj.sound,r.b), c=r.c;
+    if (bank == ORIGINAL_SOUND_SYNTHONE && c == ORIGINAL_SYNTHONE_CRUSH) {
+        og_wave(gx,gy,og_rate_hold,q,col);
+        return;
+    }
     if (bank == ORIGINAL_SOUND_JUNO) { juno_strip_glyph(r, q, gx, gy, col); return; }
     int chi=bank==ORIGINAL_SOUND_CHICAGO;
     int level_role=c==(chi?12:14) || (!chi && (c==1 || c==5));

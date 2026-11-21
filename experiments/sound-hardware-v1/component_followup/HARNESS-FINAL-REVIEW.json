@@ -1,0 +1,80 @@
+{
+  "schema": "sound-portable-followup-independent-review-v1",
+  "created_utc": "2026-11-18T23:31:27.903276+00:00",
+  "base_head": "9be11840b11d256f22a9af19d290cfe96f31a429",
+  "status": "PASS_BOUNDED_RESEARCH_PRESERVATION",
+  "admission": "Source-only portable research artifact preservation on the existing draft lane; no production/full-lane/consolidated merge admission.",
+  "reviewed_source_sha256": {
+    "experiments/sound-hardware-v1/hardware_candidate/size_variants/bounds_dictionary/verify_bounds.py": "336f85ca8d9a6bf39b3d81095432b37759fafef1670937d0e56f3d848a2b19bc",
+    "experiments/sound-hardware-v1/coefficient_followup/check.py": "8122646a5a83262775438508f23f22c4d85c19d1f2520202d1266556c7b2e412",
+    "tests/host/test_synthone_dnbx_envelope.py": "7a066f0cd56015700422b7543c1c3532fa59bd2b7c18169680cae41c95bddf03"
+  },
+  "resolved_findings": [
+    {
+      "id": "R1",
+      "severity": "P2",
+      "finding": "Optimized Python elided bounds checks and required C calls while result fields claimed success.",
+      "before_evidence": "NEGATIVE-RECEIPT.json",
+      "resolution": "22 assert statements replaced by explicit require calls. Same broken-library control rejects in normal and optimized modes; no success result emitted.",
+      "status": "VERIFIED_FIXED"
+    },
+    {
+      "id": "R2",
+      "severity": "P2",
+      "finding": "Unpinned metadata permitted duplicate case selection with unchanged 379,288 count while 98,304 live reference words were skipped.",
+      "before_evidence": [
+        "NEGATIVE-RECEIPT.json",
+        "COMPONENT-METADATA-NEGATIVE.json"
+      ],
+      "resolution": "Static/live observation JSON and live case plan pinned. Portable checker rejects each metadata change before compilation; fixtures reject duplicates in both Python modes.",
+      "status": "VERIFIED_FIXED"
+    },
+    {
+      "id": "R3",
+      "severity": "P2",
+      "finding": "Optimized retained-red helper returned success for an empty PCM after its assert length gate was removed.",
+      "before_evidence": "COMPONENT-METADATA-NEGATIVE.json",
+      "resolution": "Explicit PCM length check raises ValueError in both modes; actual optimized CLI exits 1.",
+      "status": "VERIFIED_FIXED"
+    }
+  ],
+  "remaining_actionable_source_findings": [],
+  "recheck_receipt": "FINAL-RECHECK.json",
+  "output_safety": "Both initial portable scripts reject existing and symlink-to-existing output directories with nonzero exit and preserve sentinel contents.",
+  "historical_numeric_claims_checked": {
+    "old_sweep_points": 9600096,
+    "old_sweep_mismatches_preserved": 250955,
+    "fixed_sweep_points": 3200032,
+    "fixed_sweep_mismatches": 0,
+    "fixed_stress_points": 2160000,
+    "fixed_stress_mismatches": 0,
+    "fixed_total_points": 5360032,
+    "recorded_packet_words_per_method": 379288,
+    "negative_different_words": 8332
+  },
+  "qualification_limits_verified": [
+    "Original observations remain limited to 44,100 Hz.",
+    "Other rates compare with an inferred mathematical hypothesis.",
+    "Finite fixed-candidate results do not prove universal correct rounding.",
+    "792-byte host object is not target cost.",
+    "79-byte bounds object delta is not a linked-image saving."
+  ],
+  "coverage": [
+    "correctness",
+    "testing",
+    "reuse",
+    "quality",
+    "efficiency"
+  ],
+  "not_run": [
+    "Original engine source inspection",
+    "compiler/native library execution",
+    "native toolchain or emulator",
+    "full suite",
+    "RDC",
+    "GitHub",
+    "DSP mutant reruns"
+  ],
+  "canonical_edits_by_reviewer": false,
+  "packaging_reminder": "Root was notified to refresh portable HOST-RESULT/PORTABLE-RESULT from its final guarded runs; preserve all RECOVERED history."
+}

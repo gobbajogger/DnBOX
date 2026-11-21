@@ -1,0 +1,11 @@
+{
+  "existing_output_refused": true,
+  "retained_receipts_unchanged": true,
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "usage: run_callback_audit.py [-h] --label LABEL\nrun_callback_audit.py: error: evidence directory already exists; select a new label\n",
+  "sha256": [
+    "bd214aa675b05e15faf6facd21ad214157d864b6020e67fbebfc2a2325b8ef92",
+    "38dfd139c15909f1545fe71c81fa351fe33fda316123e19811e47b08fd31054e"
+  ]
+}

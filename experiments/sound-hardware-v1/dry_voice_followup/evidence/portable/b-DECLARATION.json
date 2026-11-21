@@ -1,0 +1,74 @@
+{
+  "written_utc": "2026-11-18T23:57:09.858098+00:00",
+  "status": "BEFORE_FIRST_COMPARISON",
+  "variant": {
+    "id": "ch4_2x_slope4",
+    "source_root": "variants/b",
+    "files": {
+      "src/s1_dry_voice.c": "01227b32191870eee8b74d0638ec16f1f31f36b23dc05bd1ec29a911e19a67cc",
+      "src/s1_dry_voice.h": "7d781ffae5c568af2c3ced58009c4474897d2211b10e44dfaec7ed609a7dc7ac",
+      "src/host.c": "b2247bcd0cd5e0985791e80a0f214d91e99648d783ddf401348c9a28338f0258",
+      "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+      "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+      "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+      "build.sh": "cdd2ea4c093336e140ab86929218ac0d89cdea57b0dab964a5e4b4a7d535cd4c",
+      "run_screen.py": "fd1254a4866a1ae49532027ee6e0df5071dd3aa07fbf0277eee2b510642b8c09",
+      "DECLARATION.json": "d348235c8763026060ff926765b07a62a8532c5d7a8800db24ba42d883a67f5a"
+    },
+    "historical_executable_sha256": "af8ac90658258d7d3ca48b46656c6132e6f4afb66e8076ec8a814b6082d4de27",
+    "expected_host_bytes": 152,
+    "historical_reports_sha256": "da37ad1cd46e00ff20b40134a9f8965a14fc6f56fa08e88925cf529eafb5e99f"
+  },
+  "manifest_sha256": "a272b1120f1dd416ce521ab0d65391266b201efe5493681d859b771b40449785",
+  "plan_sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+  "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+  "execution": {
+    "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+    "compiler_version": "x86_64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "command": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-Ivendor",
+      "-Isrc",
+      "src/s1_dry_voice.c",
+      "vendor/dnbx_s1_envelope.c",
+      "src/host.c",
+      "-o",
+      "s1_dry_host"
+    ],
+    "executable_sha256": "af8ac90658258d7d3ca48b46656c6132e6f4afb66e8076ec8a814b6082d4de27",
+    "description": {
+      "voice_bytes": 152,
+      "prepared_bytes": 92,
+      "history_bytes": 60,
+      "sample_rate_hz": 44100,
+      "coefficient_hex": [
+        "3f7fce7c",
+        "3f7ed775",
+        "3f7fe249",
+        "3f7fce7c",
+        "3f7fe249",
+        "3f7ffd07"
+      ]
+    }
+  },
+  "case_ids": [
+    "physical-gain/100_2000_.9"
+  ],
+  "gain": 1,
+  "rms_limit_db": 1,
+  "spectral_limit_db": 3,
+  "nonfinite_limit": 0,
+  "alignment": "none",
+  "normalization": "none",
+  "numpy_version": "2.3.5"
+}

@@ -1,0 +1,31 @@
+tests/host/juno6_test.c: In function ‘gates’:
+tests/host/juno6_test.c:8:44: error: ‘juno6_t’ has no member named ‘voice’
+    8 |  unsigned n=0;for(unsigned i=0;i<6;i++)n+=s->voice[i].gate!=0;return n;
+      |                                            ^~
+tests/host/juno6_test.c: In function ‘main’:
+tests/host/juno6_test.c:15:2: error: implicit declaration of function ‘juno6_render’; did you mean ‘dnbx_render’? [-Wimplicit-function-declaration]
+   15 |  juno6_render(&s,mono,512);
+      |  ^~~~~~~~~~~~
+      |  dnbx_render
+In file included from tests/host/juno6_test.c:2:
+tests/host/juno6_test.c:20:43: error: ‘juno6_t’ has no member named ‘voice’
+   20 |  assert(juno6_note_on(&s,72,110));assert(s.voice[0].note==72&&gates(&s)==6);
+      |                                           ^
+tests/host/juno6_test.c:23:10: error: ‘juno6_t’ has no member named ‘voice’
+   23 |  assert(s.voice[0].stage!=4&&!s.voice[0].gate);
+      |          ^
+tests/host/juno6_test.c:23:32: error: ‘juno6_t’ has no member named ‘voice’
+   23 |  assert(s.voice[0].stage!=4&&!s.voice[0].gate);
+      |                                ^
+tests/host/juno6_test.c:24:37: error: ‘juno6_t’ has no member named ‘voice’
+   24 |  assert(juno6_set(&s,17,0));assert(s.voice[0].stage==4);
+      |                                     ^
+tests/host/juno6_test.c:25:19: error: ‘juno6_t’ has no member named ‘voice’
+   25 |  float increment=s.voice[1].increment;
+      |                   ^
+tests/host/juno6_test.c:26:37: error: ‘juno6_t’ has no member named ‘voice’
+   26 |  assert(juno6_set(&s,16,1));assert(s.voice[1].increment>increment);
+      |                                     ^
+tests/host/juno6_test.c:28:48: error: ‘juno6_t’ has no member named ‘damper’
+   28 |  juno6_all_off(&s);assert(!juno6_active(&s)&&!s.damper);
+      |                                                ^

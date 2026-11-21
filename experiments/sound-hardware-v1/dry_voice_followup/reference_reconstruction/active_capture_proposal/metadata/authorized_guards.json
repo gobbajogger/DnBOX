@@ -1,0 +1,39 @@
+{
+  "schema": "explicit active-capture guard receipt v1",
+  "proposal_sha256": "088ce262d3bcc3a336b63cf4ad4a3d3914b3ca5235e32b177a3405395a81ec35",
+  "original_executable_sha256": "edf9f733ff449ecf345f9843952dea5d7cdab00825de88e4d7c3c61e6135f91d",
+  "public_wrapper_sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4",
+  "all_stated_pins_verified": true,
+  "baseline_exact_PCM_reverified": true,
+  "injection_environment_rejected_if_nonempty": [
+    "CPATH",
+    "C_INCLUDE_PATH",
+    "CPLUS_INCLUDE_PATH",
+    "OBJC_INCLUDE_PATH",
+    "LIBRARY_PATH",
+    "LD_LIBRARY_PATH",
+    "LD_PRELOAD",
+    "LD_AUDIT",
+    "GCC_EXEC_PREFIX",
+    "COMPILER_PATH",
+    "GCC_SPECS",
+    "CFLAGS",
+    "CXXFLAGS",
+    "CPPFLAGS",
+    "LDFLAGS",
+    "DEPENDENCIES_OUTPUT",
+    "SUNPRO_DEPENDENCIES"
+  ],
+  "nonempty_injection_environment": [],
+  "child_environment": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C",
+    "LANG": "C",
+    "TZ": "UTC",
+    "TMPDIR": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/tmp"
+  },
+  "protected_artifacts_verified": 16,
+  "guard_style": "explicit conditional failures; no asserts",
+  "compiler_or_linker_invocations": 0,
+  "output_path_new": true
+}

@@ -1,0 +1,42 @@
+
+/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/native/core-O2.o:	file format ELF32-pi32v2
+
+SYMBOL TABLE:
+00000000         *UND*		 00000000 
+00000000 l    df *ABS*		 00000000 /workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/src/dnbx_core.c
+00000042         .text.enter_stage		 00000000 .GJTIE10_0_0_
+0000003c         .text.enter_stage		 00000000 .GJTIS10_0_0_
+00000000 l       .rodata..Lswitch.table		 00000014 .Lswitch.table
+00000000 l     F .text.enter_stage		 0000028e enter_stage
+00000000 l     F .text.envelope_sample		 00000158 envelope_sample
+00000000 l     F .text.envelope_valid		 00000098 envelope_valid
+00000000 l     F .text.release_voice		 00000146 release_voice
+00000000 l     F .text.shape		 000001bc shape
+00000000 g     F .text.dnbx_abi_version		 00000006 dnbx_abi_version
+00000000 g     F .text.dnbx_active_voices		 00000142 dnbx_active_voices
+00000000 g     F .text.dnbx_all_off		 00000038 dnbx_all_off
+00000000 g     F .text.dnbx_attack_from_unit		 00000166 dnbx_attack_from_unit
+00000000 g     F .text.dnbx_default_layer_params		 00000078 dnbx_default_layer_params
+00000000 g     F .text.dnbx_get_layer		 00000032 dnbx_get_layer
+00000000 g     F .text.dnbx_init		 0000011a dnbx_init
+00000000 g     F .text.dnbx_layer_params_size		 00000004 dnbx_layer_params_size
+00000000 g     F .text.dnbx_lfo_from_unit		 00000154 dnbx_lfo_from_unit
+00000000 g     F .text.dnbx_note_off		 00000108 dnbx_note_off
+00000000 g     F .text.dnbx_note_on		 00000710 dnbx_note_on
+00000000 g     F .text.dnbx_part_size		 00000006 dnbx_part_size
+00000000 g     F .text.dnbx_pwm_from_unit		 0000003a dnbx_pwm_from_unit
+00000000 g     F .text.dnbx_range_from_stop		 00000030 dnbx_range_from_stop
+00000000 g     F .text.dnbx_read_raw		 00000046 dnbx_read_raw
+00000000 g     F .text.dnbx_read_voice		 00000092 dnbx_read_voice
+00000000 g     F .text.dnbx_render		 000004a8 dnbx_render
+00000000 g     F .text.dnbx_set_layer		 000002d6 dnbx_set_layer
+00000000 g     F .text.dnbx_set_sustain		 000000b4 dnbx_set_sustain
+00000000 g     F .text.dnbx_set_velocity_mode		 00000026 dnbx_set_velocity_mode
+00000000 g     F .text.dnbx_store_raw		 00000056 dnbx_store_raw
+00000000 g     F .text.dnbx_wave_probe		 00000014 dnbx_wave_probe
+00000000 g     F .text.dnbx_wave_probe_mode		 00000104 dnbx_wave_probe_mode
+00000000 g     F .text.dnbx_work_size		 00000004 dnbx_work_size
+00000000 gw    F .text.fm_floorf		 0000001c fm_floorf
+00000000 gw    F .text.fm_sin_pi		 00000062 fm_sin_pi
+00000000         *UND*		 00000000 memcpy
+00000000         *UND*		 00000000 memset

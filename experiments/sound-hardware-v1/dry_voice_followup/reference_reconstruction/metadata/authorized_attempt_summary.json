@@ -1,0 +1,49 @@
+{
+  "status": "EXACT_BASELINE_IDENTITY_CONFIRMED; ACTIVE_CAPTURE_NOT_RUN",
+  "proposal_sha256": "36d914226f921180f3c7d79643105e900650f65d9d3a1c5016e496891cb57aed",
+  "compiler_driver_commands": 18,
+  "host_links": 1,
+  "read_only_audits": 6,
+  "baseline_captures": 1,
+  "active_modulation_captures": 0,
+  "native_target_links": 0,
+  "retries": 0,
+  "baseline_result": {
+    "classification": "NEW_ORIGINAL_RECONSTRUCTION_BASELINE_IDENTITY_CHECK",
+    "case_id": "physical-gain/100_2000_.9",
+    "output_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/outputs/physical-gain_100_2000_r0.9.original-mono.f32le",
+    "expected_bytes": 1058304,
+    "actual_bytes": 1058304,
+    "expected_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "actual_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "exact_identity": true,
+    "wrapper_receipt": {
+      "classification": "NEW_RECONSTRUCTED_ORIGINAL_DRY_CAPTURE",
+      "case_id": "physical-gain/100_2000_.9",
+      "sample_rate_hz": 44100,
+      "mono_channel": "original_left",
+      "notes": [
+        36,
+        60,
+        84
+      ],
+      "velocity": 100,
+      "notes_completed": 3,
+      "fresh_original_per_note": true,
+      "controls_from_pinned_physical_vector": true,
+      "warmup_frames": 529344,
+      "retained_frames": 264576,
+      "total_reference_frames": 793920,
+      "process_calls": 12405,
+      "block_size": 64,
+      "note_off_frame_per_note": 66112,
+      "warmup_nonfinite_count": 0,
+      "output_nonfinite_count": 0,
+      "status": 0
+    },
+    "active_modulation_captures": 0,
+    "native_target_links": 0
+  },
+  "protected_filter_and_alias_inputs_unchanged": true,
+  "all_attempt_logs_preserved": true
+}

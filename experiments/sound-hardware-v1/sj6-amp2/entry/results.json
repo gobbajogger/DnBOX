@@ -1,0 +1,23 @@
+{
+  "unedited": {
+    "stereo_frames": 32768,
+    "nonzero_words": 65408,
+    "changed_words_vs_unedited": 0,
+    "first_changed_frame": null,
+    "sha256": "b955c3c5459d07c5b862217f0a75bc0b4d328cfaf0542785fbecd18e90093454"
+  },
+  "tagged-amp2": {
+    "stereo_frames": 32768,
+    "nonzero_words": 65408,
+    "changed_words_vs_unedited": 0,
+    "first_changed_frame": null,
+    "sha256": "b955c3c5459d07c5b862217f0a75bc0b4d328cfaf0542785fbecd18e90093454"
+  },
+  "stock-attack": {
+    "stereo_frames": 32768,
+    "nonzero_words": 65408,
+    "changed_words_vs_unedited": 65396,
+    "first_changed_frame": 64,
+    "sha256": "78b02bd683df39ed3706702e2b44283e5f60eae381228cbb8bfd9bbfa4198252"
+  }
+}

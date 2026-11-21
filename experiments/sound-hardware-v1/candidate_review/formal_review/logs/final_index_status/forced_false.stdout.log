@@ -1,0 +1,29 @@
+{
+  "snapshot_sha256": {
+    "dnbx_core.c": "6606c163f1b14168010ec5e3f3915f22476630e98f4b78b3c8d407e717753eb8",
+    "fastmath.h": "6606c163f1b14168010ec5e3f3915f22476630e98f4b78b3c8d407e717753eb8",
+    "dnbx_core.h": "6606c163f1b14168010ec5e3f3915f22476630e98f4b78b3c8d407e717753eb8"
+  },
+  "envelope": [
+    {
+      "pass": false,
+      "ratio_crosscheck_pass": true,
+      "negative_wrong_time_grid": {
+        "pass": false
+      },
+      "negative_linear_envelope": {
+        "pass": false
+      }
+    }
+  ],
+  "velocity": {
+    "linear_pass": true,
+    "negative_squared_rejected": true
+  },
+  "lifecycle": {
+    "synthetic": {
+      "pass": true
+    }
+  },
+  "scoped_acceptance_pass": false
+}

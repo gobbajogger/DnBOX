@@ -1,0 +1,12 @@
+{
+  "status": "complete",
+  "run_id": "formal_ce_review_20261118",
+  "artifact_path": "candidate_review/formal_review",
+  "reviewed_files": 342,
+  "reviewers_completed": 6,
+  "independent_validator_batches_completed": 1,
+  "findings_resolved_and_verified": 4,
+  "open_actionable_findings": 0,
+  "scope_manifest_sha256": "ef28caa0f91078fe466524f0cc5b52d5608b344a33ed813d3f50729bed0aeadd",
+  "limits": "Research-source review only; no full Sound, existing-PR readiness, production activation, native flash fit or whole-callback admission. Formal review evidence and publication manifest are later evidence-only additions."
+}

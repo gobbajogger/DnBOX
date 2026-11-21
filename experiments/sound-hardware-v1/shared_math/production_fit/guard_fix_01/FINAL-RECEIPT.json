@@ -1,0 +1,84 @@
+{
+  "status": "PASS_GUARD_FIX_NO_NATIVE_EXECUTION",
+  "created_utc": "2026-11-18T23:47:00.830084+00:00",
+  "before_receipt": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/BEFORE.json",
+  "before_receipt_sha256": "8219e0b30cae3e83011a28b0dd2b34bbb6d373e6be77f5c8335316483c32491c",
+  "validation_receipt": "/workspace/scratch/e803955aec60/fit_next_plan/guard_fix_01/VALIDATION.json",
+  "validation_receipt_sha256": "72eae405269f73209df5a8d666dbe4c700503c10d37a3ebb9701fb809edf3ade",
+  "files": {
+    "prepare_production.py": {
+      "sha256": "89a98c9deb479b57b89fcf7d994861b64ed4b6ec11dd36e2f4846d5167c9aefd",
+      "bytes": 12141
+    },
+    "verify_inputs.py": {
+      "sha256": "38b9676de48bed752d94ffd412248b556f4672507df04d52b544d90422d30b09",
+      "bytes": 3978
+    },
+    "native_fit_replay.py": {
+      "sha256": "f896e0fd8ce2719876271476db261002d0909392e8059158427d80118a3b396e",
+      "bytes": 14483
+    },
+    "NEXT-PRODUCTION-PLAN.md": {
+      "sha256": "80d9bbee8586211d4b43792b226c65922a87b0337a20a50e086a0c573f2d2bd3",
+      "bytes": 15982
+    },
+    "PREPARATION-STATUS.md": {
+      "sha256": "a9f655d63359bd461e3ab191cc6d51baea9c8ce3a05827684a8fd80fb50044b2",
+      "bytes": 614
+    },
+    "PREPARATION-CHECKS.json": {
+      "sha256": "87da11cdd17b40f54e599e38fd7193414064f8bcc46e5868b63f0c81665046c2",
+      "bytes": 4584
+    },
+    "PRODUCTION-PREPARATION.json": {
+      "sha256": "417a64624fc0d46ecf98f5f9456d43a652c73023beac67440de5f53b93318e87",
+      "bytes": 17100
+    },
+    "TOOLCHAIN-INPUTS.json": {
+      "sha256": "d1d7f3df116af504437ac8526a142e6e4830ae48039aaaf54ced25383527d40a",
+      "bytes": 29162
+    },
+    "guard_fix_01/check_guards.py": {
+      "sha256": "8cd6364214e8cb7fbc9f04fc1d99b8fd94681b2ba2ff9387ddc5cb4ef9765bd0",
+      "bytes": 6727
+    },
+    "guard_fix_01/COMMANDS.json": {
+      "sha256": "b6ee2d1acc06f1823ad96c2c5a7a4e1af009b975a8c5700ea975e1f7dea38217",
+      "bytes": 7987
+    }
+  },
+  "mandatory_assert_nodes": 0,
+  "negative_cases": 5,
+  "normal_input_verifications": 4,
+  "future_execute_entry": "python3 verify_inputs.py --execute --plan EXACT_PREPARED_PLAN",
+  "historical_executor_unchanged": true,
+  "production_plans_and_trees_unchanged": [
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json",
+      "sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9",
+      "source_files": 357,
+      "tree_unchanged": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/PLAN.json",
+      "sha256": "a8ba4504d514db2160af53fd76db0e2441d63420a92723104d64f70ef0e7c22d",
+      "source_files": 357,
+      "tree_unchanged": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json",
+      "sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+      "source_files": 357,
+      "tree_unchanged": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/PLAN.json",
+      "sha256": "253510c1009f19be438504be7e8d0a4554f006d321f87a40c3c03d888a4b83e4",
+      "source_files": 357,
+      "tree_unchanged": true
+    }
+  ],
+  "native_execution": "NOT_RUN",
+  "emulator_execution": "NOT_RUN",
+  "allocation": "REQUIRED"
+}

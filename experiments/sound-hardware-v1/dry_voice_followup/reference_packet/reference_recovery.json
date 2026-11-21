@@ -1,0 +1,132 @@
+{
+  "status": "PHYSICAL_PCM_RECOVERED_AND_INDEPENDENTLY_VERIFIED; DYNAMIC_FILTER_PCM_STILL_MISSING",
+  "preferred_recovery": "Complete for all 60 physical-gain recordings; use original mono files and unchanged metrics. Dynamic24 remains missing.",
+  "selected_case": {
+    "case_id": "physical-gain/100_2000_.9",
+    "velocity": 100,
+    "cutoff_hz": 2000,
+    "resonance": 0.8999999761581421,
+    "filter_depth": 0,
+    "parameter_overrides": {
+      "16": 2000.0,
+      "17": 0.8999999761581421,
+      "19": 0.0
+    },
+    "historical_paired_pcm_sha256": "c1fe9f3357ed6dc3c66254f68d9d806e0f94e6c1ceb4303e3518eacef837728c",
+    "historical_paired_bytes": 2116608,
+    "historical_gzip_sha256": "dadf164aca7355af0a380bc26821935edd7697dd5794d9b14f076622a3502eaf",
+    "historical_gzip_bytes": 1302206,
+    "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_2000_.9.f32.gz",
+    "local_pcm_present": true,
+    "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_2000_.9.json",
+    "historical_report_sha256": "f7b46f293708117569f1faa5cb7de9f76b57ee2986dd987a512727ca49bd1cf7",
+    "historical_rows": [
+      {
+        "note": 36,
+        "rms_db": 5.342850850541651e-05,
+        "spectral_db": 0.0005481663018097555
+      },
+      {
+        "note": 60,
+        "rms_db": 6.087098102458594e-05,
+        "spectral_db": 0.00020253202332587016
+      },
+      {
+        "note": 84,
+        "rms_db": 6.359448182158257e-05,
+        "spectral_db": 0.00011374105654249629
+      }
+    ],
+    "historical_nonfinite": 0,
+    "observed_settled_log": [
+      "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+      "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+      "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+    ],
+    "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.9.original-mono.f32le",
+    "current_reference_mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+    "current_reference_mono_bytes": 1058304,
+    "initial_inventory_pcm_missing": true,
+    "current_reference_mono_relative_path": "reference_pcm/100_2000_.9.original-mono.f32le"
+  },
+  "archived_pcm": {
+    "name": "sound-pcm-preservation.tar",
+    "library_file_id": "libfile_fde3_f-63d0512781708191a4f53e3346480783_2021479872048191acbfdca1f870a539",
+    "file_id": "file_00000000710481f58f686dc59283cc92",
+    "size_bytes": 211988480,
+    "historical_archive_sha256": "d5d11628a390f19d99783b1fb805979d371f5971efa01737c00bbc1e359b5403",
+    "metadata_read_confirmed": true,
+    "archive_downloaded_or_member_verified_this_task": true,
+    "documented_physical_gzip_file_count": 60,
+    "member_prefix_not_inspected": false,
+    "path_suffix_of_smallest_selected_member": "physical-gain/100_2000_.9.f32.gz",
+    "archive_downloaded_by": "Root",
+    "actual_member_prefix": "sound-pcm-preservation/"
+  },
+  "historical_physical_interface": [
+    "physical-gain/dry-reference",
+    "public-morphs.f32",
+    "OUT.f32",
+    "2000",
+    ".9",
+    "100"
+  ],
+  "historical_dynamic_interface": [
+    "filter-modulation/dry-reference",
+    "public-morphs.f32",
+    "OUT.f32",
+    "2000",
+    "0.9",
+    "100",
+    "1.2"
+  ],
+  "historical_physical_harness_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/dry-reference.cpp",
+  "historical_physical_harness_sha256": "51cdbae86dcb75bcb57720ca4471b3a0807e51253388f55ea64070bd0dad4653",
+  "historical_dynamic_harness_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/dry-reference.cpp",
+  "historical_dynamic_harness_sha256": "78980c02e62c2cd82141f1f877362fd91625342041bac92bb3de0712dfafacb9",
+  "historical_binary_present": false,
+  "exact_existing_original_api": [
+    "FullOracle::init(tables,44100,parameters,150,tuning,128)",
+    "FullOracle::process(64,0,left,right)",
+    "FullOracle::startNote(note,velocity)",
+    "FullOracle::stopNote(note)"
+  ],
+  "new_reference_owner_capture_plan": {
+    "count": 1,
+    "case_id": "physical-gain/100_2000_.9",
+    "must_preserve": "Original reference algorithms and selected numeric parameters remain unchanged; a reference-only harness may omit historical candidate rendering. Root receives PCM and metadata only.",
+    "source_handling": "Reference owner alone builds/links the pinned reference; no original DSP or historical candidate implementation is given to root.",
+    "reference_render_frames_total": 793920,
+    "reference_warmup_frames_total": 529344,
+    "reference_recorded_frames_total": 264576,
+    "output_reference_mono_bytes": 1058304,
+    "output_paired_bytes_if_historical_replay": 2116608,
+    "host_timeout_s": 15,
+    "historical_timeout_source": "physical-gain/run.py",
+    "historical_matrix_elapsed_s": 35.373608112335205,
+    "single_case_elapsed_s_recorded": null,
+    "no_compile_or_reference_execution_this_task": true
+  },
+  "existing_other_host_binary": {
+    "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-test",
+    "usable_for_this_contract": false,
+    "reason": "Inspected preset_audio.cpp fixes 48000 Hz, 96000-frame changing-note preset scenes and common FX; it cannot reproduce the 44100-Hz dry contract without a new harness."
+  },
+  "dynamic_pcm": {
+    "documented_last_path": "/tmp/sound-filter-modulation",
+    "present": false,
+    "durable_matching_archive_found": false,
+    "note": "Historical paired hashes remain in all 24 per-case JSONs. A narrow Library title search found no modulation PCM archive; this is not proof no other archive contains them."
+  },
+  "filter_only_reference": {
+    "matching_impulse_sine_level_pcm_or_harness_found": false,
+    "searched": "Provided owner evidence, reconstructed sound reference inventories, local dry PCM filenames and reports. Only unrelated Hall impulse/tonal report mentions appeared.",
+    "limitation": "The 180+72 voice cases cannot isolate filter transfer from oscillator phase. No phase-independent filter acceptance claimed.",
+    "archive_inspection_added": "All 138 archive members inspected. None are filter-only impulse/sine/level captures; no filter-modulation member."
+  },
+  "root_scope_update": "Root recovered the exact archive; the recovery worker independently verified all60 physical-gain member/paired hashes and extracted original mono only. No dynamic-filter member exists in this archive.",
+  "initial_inventory_status": "BLOCKED: historical dry replay executable and required PCM absent locally",
+  "current_reference_pcm_manifest": "reference_pcm_manifest.json",
+  "archive_work": "Archive read and numeric-only extraction, no original renderer or compiler executed.",
+  "comparison_plumbing_verification": "utility_verification/RESULT.json: identity0dB; half-amplitude negative control fails with gain1; no synth render."
+}

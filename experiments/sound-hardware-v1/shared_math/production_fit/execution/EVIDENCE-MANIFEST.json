@@ -1,0 +1,1761 @@
+{
+  "created_utc": "2026-11-19T00:32:11.522180+00:00",
+  "files": [
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/ALLOCATION-6995594729.json",
+      "bytes": 6277,
+      "sha256": "e113e3f8af5d5155615204acdceacfbc723647d9b75393be167ffe0b91b0c111"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/INITIAL-PREFLIGHT.json",
+      "bytes": 4543,
+      "sha256": "952ee39e46d37eb95521436fdd36fb3bf32ddc5c23b73c5b01c6ee526f9c4051"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/PUBLISHED-SOURCE-RECONCILIATION.json",
+      "bytes": 2045,
+      "sha256": "0eb60f0cbb8f40905f11727738dac9ed137f0eec7a60b26dfdcf011cbf11df48"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/ROOT-RELEASE.json",
+      "bytes": 582,
+      "sha256": "5af314ca8b94dd70f38a27f6d1d9ea9e64492f94ae5ace9721c611030bb9b19e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/STOCK-FIT-REPORT.md",
+      "bytes": 9379,
+      "sha256": "f3c56c4b420711aa62459b4470b8ecfb061880cf386621f8fba29f76810522c9"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/STOCK-FIT-SUMMARY.json",
+      "bytes": 19655,
+      "sha256": "00116911145036c4a4f6a860be30d773dddd7cf4878aabe7b67c99fb0fc5c90c"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-elite-04-admission.json",
+      "bytes": 1583,
+      "sha256": "5d85aabba28221a3f0dbc74fad4692091e940ec16be4379c3408f5290f3255a9"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-elite-04-initial-input-check.log",
+      "bytes": 346,
+      "sha256": "958317a0a36a3b66ced134af0ae7f8e18f2a58aaa822ece908532c01b9d2188e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-elite-04-outer.log",
+      "bytes": 6351,
+      "sha256": "17b6bd7e3f9bf593c66dacc4c2b94d7860b92d928fc39ec6de963ca809581c17"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-elite-04-terminal.json",
+      "bytes": 3779,
+      "sha256": "2246ad60f4093ce3202ac594210f475da136790bea4fd84e17ba5d1ab2252154"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-pro-06-admission.json",
+      "bytes": 1641,
+      "sha256": "0baf2e0deb8be518977bb2a5bb592d4c890ea5f22280f55d435dcdbb4cecb1fa"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-pro-06-initial-input-check.log",
+      "bytes": 344,
+      "sha256": "02676f0b2833a86c24772e416d3c0f9c10b85d38ab031992c08e75ae78a8c7d4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-pro-06-outer.log",
+      "bytes": 5911,
+      "sha256": "b2e4808adf552248cdf2206c32506216a5201b0b9ff4e9c88d19a58ba4c2b324"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-reference-pro-06-terminal.json",
+      "bytes": 3772,
+      "sha256": "abf4dac522c6de814518cd426325bc30bd78323388872c5ebb152296da487f72"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-elite-05-admission.json",
+      "bytes": 1639,
+      "sha256": "2912e75711872b0c887119b8cad6990674e484b1d67a008f802889bfda3b6bb4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-elite-05-initial-input-check.log",
+      "bytes": 343,
+      "sha256": "790b845071b1c152944571eacc0857c950e7d76b414aba9545c4b8c8c0ed5e7b"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-elite-05-outer.log",
+      "bytes": 6349,
+      "sha256": "23b1b79bfa0da350ba3c904f7e6a6dac67e9adc093d23f0f91139ebaa4487760"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-elite-05-terminal.json",
+      "bytes": 3770,
+      "sha256": "ee8e841b26f448193a5f4bb46e210bb8c4d799f57719bcf60cca02bf1b667ecf"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-pro-07-admission.json",
+      "bytes": 1635,
+      "sha256": "78e0a0107a852035a5757c55d2f7e76a3ec181ac9275d8e4945e30ab11686514"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-pro-07-initial-input-check.log",
+      "bytes": 341,
+      "sha256": "6c312802de0b73da55504f2663ec7ce7d3ccf3a9aac70114c5cd0897edf63535"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-pro-07-outer.log",
+      "bytes": 5909,
+      "sha256": "8debc0197f4b4bb4092e6e5ca95e917bd0e98c35888ede5d758beb2dc8ba682e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/production-shared-pro-07-terminal.json",
+      "bytes": 3772,
+      "sha256": "9eafd41cd74b7010e32914a9b2a8a76430941e9bd9a4e711e08f27a54505269c"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/stock_fit_execution/run_one_allocated_plan.py",
+      "bytes": 8869,
+      "sha256": "0d795826fc315a5c8bd7b622576c33cbec03bb9e5173797df773f1e17b425594"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/COMMANDS.json",
+      "bytes": 110096,
+      "sha256": "357f03ec0b0188e338dc4d61414f2bf02438070490870155a3986e3986c3d4de"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json",
+      "bytes": 189087,
+      "sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/RESULT.json",
+      "bytes": 2050,
+      "sha256": "e0d872b5a1eae890872bf23e7009d2d12dc60f370cb7522b2d97ff5446fe2b01"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/app.elf",
+      "bytes": 638732,
+      "sha256": "262aecf1718137d0210f18d6a601e2df977ec8897c35dffa2cf201311f3aba6b"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/app.map",
+      "bytes": 209860,
+      "sha256": "e5584fde647d006c8cb8006a2a4eab518d997bf45bd834d84ae02ad25d2a22a5"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_crt0.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_fm1_cpu1.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_fm1_isr.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_fm1_vec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_gfinal_chance_native.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_app_engine.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_breaks.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_drum808.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_drum909.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_fxbus.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_dsp_x0x_param.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_seq_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_seq_pattern.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_seq_sequencer.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_o2_seq_tb3po.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_allocator.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_arp_control.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_drive.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_dynamics.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_engine_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_full_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_fx2_compact.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_fx2_wrapper.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_global_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_global_stage.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_key_admission.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_modulation.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_mp4.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_packed.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_program_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_scheduler.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_selector.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_smallfx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_tuning.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_chicago_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_control_math.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_engine_events.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_fixed_fx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_fused_reference.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_juno6.o.log",
+      "bytes": 224,
+      "sha256": "4f351dc07ac352494f2f9050c5a621bea74ebec242e7053f244c70fe48b355c4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_lossless_table.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_decimator_adapter.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_decimator_component.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_fx_chain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_fx_conversion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_geometry.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_ms20.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_pitch.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_selected_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_startup.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_miami_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_original_chicago_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_original_miami_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_original_runtime.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_original_sound.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_oscillator_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_program_envelope.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_state_codec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_original_voice_gain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/compile-build_smk37-elite_x0x.o.log",
+      "bytes": 814,
+      "sha256": "981edd77a4973be98bdf25a1e6d8eb2c4faaef6dc21f5745a06184853a81bfb0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/disassembly.log",
+      "bytes": 8598131,
+      "sha256": "d180d6b2f960511ab58289d6ba03cc0b8cde9b794bd49beff42687b1880b5f58"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/physical-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/sections.log",
+      "bytes": 916,
+      "sha256": "015603ec71fce5fad8dfc3d49737db4f75a781e95123d7d2d748cc8172c407c3"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/symbols.log",
+      "bytes": 134332,
+      "sha256": "ffe1b94d6bf589a5c4af62cd294464e61258d63e44c3983ac8af8a3787cc815f"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/COMMANDS.json",
+      "bytes": 110078,
+      "sha256": "6e232bb0babc54b6e61a3aa07fb27775d05cd9faf5fc3c4f40264ea3a172f77e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/PLAN.json",
+      "bytes": 189063,
+      "sha256": "a8ba4504d514db2160af53fd76db0e2441d63420a92723104d64f70ef0e7c22d"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/RESULT.json",
+      "bytes": 2048,
+      "sha256": "1c21a921e743640e4e56eb1dad625a03b0cd128d4a25edb1410d1a489b9acded"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/app.elf",
+      "bytes": 631004,
+      "sha256": "18fd069d556c6d882e69b42e2c37e0a2deb2cc81274e19160dc5419ea22978a4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/app.map",
+      "bytes": 210771,
+      "sha256": "d9fb6c57669dfcfff0d0d8625ce0b2d02b6446e8aae2a07b501d346b231e21e6"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_crt0.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_fm1_cpu1.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_fm1_isr.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_fm1_vec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_gfinal_chance_native.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_app_engine.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_breaks.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_drum808.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_drum909.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_fxbus.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_dsp_x0x_param.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_seq_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_seq_pattern.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_seq_sequencer.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_o2_seq_tb3po.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_allocator.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_arp_control.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_drive.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_dynamics.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_engine_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_full_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_fx2_compact.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_fx2_wrapper.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_global_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_global_stage.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_key_admission.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_modulation.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_mp4.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_packed.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_program_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_scheduler.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_selector.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_smallfx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_tuning.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_chicago_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_control_math.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_engine_events.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_fixed_fx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_fused_reference.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_juno6.o.log",
+      "bytes": 224,
+      "sha256": "4f351dc07ac352494f2f9050c5a621bea74ebec242e7053f244c70fe48b355c4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_lossless_table.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_decimator_adapter.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_decimator_component.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_fx_chain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_fx_conversion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_geometry.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_ms20.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_pitch.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_selected_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_startup.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_miami_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_original_chicago_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_original_miami_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_original_runtime.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_original_sound.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_oscillator_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_program_envelope.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_state_codec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_original_voice_gain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/compile-build_smk37-elite_x0x.o.log",
+      "bytes": 814,
+      "sha256": "981edd77a4973be98bdf25a1e6d8eb2c4faaef6dc21f5745a06184853a81bfb0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/disassembly.log",
+      "bytes": 8460518,
+      "sha256": "879a1f982c85b4e31c9dbb419963493446d5882c8b084a87a1e0aa868bea34fc"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/physical-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/sections.log",
+      "bytes": 913,
+      "sha256": "a2c598c82be5dcef0677207d4a929a985f5e7a993a59757be7b10ef7db398c72"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/symbols.log",
+      "bytes": 134198,
+      "sha256": "88faab9ef3777ee7929eba09c677cb3ce0e6f6375dd42575dd830e9aacb42b6d"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/COMMANDS.json",
+      "bytes": 105866,
+      "sha256": "5f0beb9240ddc6ac615e67b5828db0155243a3f2cc11eaca023f47b9c3a9b3f7"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json",
+      "bytes": 184697,
+      "sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/RESULT.json",
+      "bytes": 2048,
+      "sha256": "6e2e2b55fe007f65acbc9a6fda31e291eb7313ac5ae4e767046cc9e344b10c23"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/app.elf",
+      "bytes": 638724,
+      "sha256": "1a1e8a569e5a3525fbfbf1ef776b29db764d4b8bc3f203d1831d1bc3ca38063c"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/app.map",
+      "bytes": 207626,
+      "sha256": "8b3436853ec25cd4a588a01a42ba072352893d9b3b2f3c0ffd814d9154002f4b"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_crt0.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_fm1_cpu1.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_fm1_isr.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_fm1_vec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_gfinal_chance_native.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_app_engine.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_breaks.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_drum808.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_drum909.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_fxbus.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_dsp_x0x_param.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_seq_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_seq_pattern.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_seq_sequencer.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_o2_seq_tb3po.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_allocator.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_arp_control.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_drive.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_dynamics.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_engine_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_full_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_fx2_compact.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_fx2_wrapper.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_global_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_global_stage.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_key_admission.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_modulation.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_mp4.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_packed.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_program_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_scheduler.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_selector.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_smallfx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_tuning.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_chicago_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_control_math.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_engine_events.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_fixed_fx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_fused_reference.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_juno6.o.log",
+      "bytes": 224,
+      "sha256": "4f351dc07ac352494f2f9050c5a621bea74ebec242e7053f244c70fe48b355c4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_lossless_table.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_decimator_adapter.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_decimator_component.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_fx_chain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_fx_conversion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_geometry.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_ms20.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_pitch.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_selected_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_startup.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_miami_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_original_chicago_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_original_miami_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_original_runtime.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_original_sound.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_oscillator_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_program_envelope.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_state_codec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_original_voice_gain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/compile-build_smk37_x0x.o.log",
+      "bytes": 814,
+      "sha256": "981edd77a4973be98bdf25a1e6d8eb2c4faaef6dc21f5745a06184853a81bfb0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/disassembly.log",
+      "bytes": 8598122,
+      "sha256": "c934299bfb94c10a69a2eb8003592212a72b2d2c36bdd3aefb6a569827a52df2"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/physical-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/sections.log",
+      "bytes": 914,
+      "sha256": "a01bea0ac0a38b67040b0611c4ac429501a850181a6b117d628369fc9046a945"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/symbols.log",
+      "bytes": 134324,
+      "sha256": "c3f0a9120e819dde3468864c96014d575e2893ee873e598c8f4a1d61ef5e12e2"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/COMMANDS.json",
+      "bytes": 105848,
+      "sha256": "5ad75f3471674bd7f5a32e05704ab6ca0eb196113aadbcc188d2f8b7dcea3735"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/PLAN.json",
+      "bytes": 184673,
+      "sha256": "253510c1009f19be438504be7e8d0a4554f006d321f87a40c3c03d888a4b83e4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/RESULT.json",
+      "bytes": 2046,
+      "sha256": "bca60796186958c33818dd08096dd97bb363cf427ec3415f58a327bb42cd5fe8"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/app.elf",
+      "bytes": 631000,
+      "sha256": "9738ecf42696a3c4d973c370bcc7d4eeb2ad9f9dd6f15826a82e116053ef6140"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/app.map",
+      "bytes": 208471,
+      "sha256": "dcd3286799482c4e4e18b8c531948ac1974a84302dd1d1a06ae5dd32ef63bbc0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_crt0.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_fm1_cpu1.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_fm1_isr.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_fm1_vec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_gfinal_chance_native.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_app_engine.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_breaks.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_drum808.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_drum909.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_fxbus.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_dsp_x0x_param.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_seq_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_seq_pattern.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_seq_sequencer.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_o2_seq_tb3po.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_allocator.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_arp_control.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_drive.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_dynamics.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_engine_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_full_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_fx2_compact.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_fx2_wrapper.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_global_mg.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_global_stage.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_key_admission.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_modulation.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_mp4.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_packed.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_program_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_scheduler.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_selector.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_smallfx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_tuning.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_chicago_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_control_math.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_engine_events.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_fixed_fx.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_fused_reference.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_juno6.o.log",
+      "bytes": 224,
+      "sha256": "4f351dc07ac352494f2f9050c5a621bea74ebec242e7053f244c70fe48b355c4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_lossless_table.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_master.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_control_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_decimator_adapter.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_decimator_component.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_fx_chain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_fx_conversion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_geometry.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_ms20.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_note_context.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_output.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_pitch.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_program.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_selected_voice.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_startup.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_voice_owner.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_miami_voice_snapshot.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_original_chicago_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_original_miami_backend.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_original_runtime.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_original_sound.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_oscillator_motion.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_program_envelope.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_state_codec.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_original_voice_gain.o.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/compile-build_smk37_x0x.o.log",
+      "bytes": 814,
+      "sha256": "981edd77a4973be98bdf25a1e6d8eb2c4faaef6dc21f5745a06184853a81bfb0"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/disassembly.log",
+      "bytes": 8460251,
+      "sha256": "b74e70990e9ec188e4d289aadcf53f47f2cb642893f506d3ba4628c72c1b0447"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/physical-link.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/sections.log",
+      "bytes": 911,
+      "sha256": "6ea0b6caf12a82029711862ec16e07eae55496f32c61ab8142c158e6d8529a7a"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/symbols.log",
+      "bytes": 134190,
+      "sha256": "e7a7778dab191ac760862cc1fe8e1835c53c04815a483088b2a4322bb091db04"
+    }
+  ],
+  "scope": "Report/outer receipts plus every raw top-level native-plan artifact; source trees and objects are not duplicated."
+}

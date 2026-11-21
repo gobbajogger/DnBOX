@@ -1,0 +1,30 @@
+{
+  "schema": "Active-filter source-only final review freeze v2",
+  "excludes_self": true,
+  "files_sha256": {
+    "DECLARATION.json": "373711a1cbfa6d04a5fe40b45abe83cef327e05cb0ac4aa94b761d33190fa862",
+    "NEXT-COMMAND.txt": "e29a1d66e62e744eb66e5a85c7d79a5d16d9011f0e9d2bb1d323e339f8201878",
+    "README.md": "c1767652068ab6a600de28cde0c3c59c85e8aa52a249d6fee12b5c195ccf1851",
+    "SOURCE-REVIEW.json": "abb037a1e6d15703c45ade582ace4bf1eed4da526eb944babb37bd263037952c",
+    "check_active.py": "f661569877044d9f7c52bfaa02c8cc368818aea6e2fe94e7403972147108b6cc",
+    "inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "pre-root-review/DECLARATION.json": "207f589cac583ee2823b6ae577e0ab7f10764459f26de4703b5291a7de140a67",
+    "pre-root-review/EVIDENCE-MANIFEST.json": "579d732854a2225310eb37258081c74848348370c5cf368e2ae009c741a75fae",
+    "pre-root-review/NEXT-COMMAND.txt": "e4f294369c75fd157938399c5c448720b09d6e889cd2f4a2deb1ff03118cd7d3",
+    "pre-root-review/README.md": "689e63a6fc86a715ca9995455b36248fb3da81bbcf5925fcaf7e774c94ba5423",
+    "pre-root-review/SOURCE-REVIEW.json": "d57be05b99bb7bd4548dfb7c4160ea1b5b65da7be9f34e9d3bde1630b2bc451f",
+    "pre-root-review/check_active.py": "7f447922c64097e1d25d489caa73c89f828d442cb4957efd5d4ce3364a2457d4",
+    "pre-root-review/inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "pre-root-review/inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "pre-root-review/inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "pre-root-review/metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "pre-root-review/src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89",
+    "src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89"
+  },
+  "compiled_files": [],
+  "candidate_pcm_files": [],
+  "pre_root_review_freeze_preserved": true
+}

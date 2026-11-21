@@ -1,0 +1,121 @@
+{
+  "scope": "Host source-derived frontend/fullFX reference; no native admission",
+  "upstream_source": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "files": [
+    {
+      "path": "frontend/AKSynthOneRate.h",
+      "sha256": "4643ef26cdc9d322b552817870bb239ac4fbfda5e3bef752653600a9b1ff5f7a",
+      "bytes": 759
+    },
+    {
+      "path": "frontend/S1Rate.hpp",
+      "sha256": "aaa6c2a89c608349a42a7a2bdb5e8eee8cd8415127fdafd10d9a248eaaf1ae78",
+      "bytes": 9333
+    },
+    {
+      "path": "frontend/oracle_controls.cpp",
+      "sha256": "dcc548628adf342ad8a41e53df0f853b8e226d97775de8e568647198ac730f8a",
+      "bytes": 9756
+    },
+    {
+      "path": "frontend/oracle_controls.hpp",
+      "sha256": "af987a9a6e660a508f90edcc056b1584ec8c6477bcb5dc5af8cdebb8f7ba872c",
+      "bytes": 3368
+    },
+    {
+      "path": "frontend/preset_audio.cpp",
+      "sha256": "f4d55d04153b057bc9b28e4e30dbaf5b9debe30e8dd33ccfae7e2d644118d53b",
+      "bytes": 4119
+    },
+    {
+      "path": "frontend/source_controls.cpp",
+      "sha256": "9a2519b13a0c5ab4b087883162a3283a75ececa770d034f8b5369a88c5cfc0f1",
+      "bytes": 9749
+    },
+    {
+      "path": "frontend/source_controls.hpp",
+      "sha256": "1e3afde92cb925fd9dc13bdafb634cd69d91b0043e97433e767be40cad9e41e9",
+      "bytes": 3298
+    },
+    {
+      "path": "fullfx/compat/AudioKit/AKInterop.h",
+      "sha256": "6c03e2d632669b5ba1b6736e3d4901e5a9a0c80f008b22a670481a7fcaef2541",
+      "bytes": 39
+    },
+    {
+      "path": "fullfx/compat/AudioKit/AKSoundpipeKernel.hpp",
+      "sha256": "1a00ed8f540105fcd3863fc588b2dfcc686016f2dbca5a6e1f110367efa0c51c",
+      "bytes": 86
+    },
+    {
+      "path": "fullfx/full_fixture.hpp",
+      "sha256": "69b87b293609ecb06fd1663f4fbbfbc1aff01cbf29ce1d07f7d88064ea1af894",
+      "bytes": 4162
+    },
+    {
+      "path": "fullfx/fx_compressor.hpp",
+      "sha256": "f7d7c7cb5cd6092550a7e457304f86af4fab225ee1b25745f9a98bfca7ecbe38",
+      "bytes": 2244
+    },
+    {
+      "path": "fullfx/source_fx.hpp",
+      "sha256": "aee3fe78b450b35bfe6d40741d12dcedf02e24388bdf07850bde7b13d8d8d33e",
+      "bytes": 19388
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/lib/faust/CUI.h",
+      "sha256": "53704ff4bf3b6c6894052833d73522692ece1f0dfb7e874fbe0972ad42991805",
+      "bytes": 679
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/compressor.c",
+      "sha256": "c071c4b804d2053717da5a74dd1fceb63c21773cfecd73685369596de99cf675",
+      "bytes": 4271
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/delay.c",
+      "sha256": "e4461a15add3f9851a5798a251dbe3eb8b9c7dc48ce3d86b3c583443c1a27fdb",
+      "bytes": 865
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/pan2.c",
+      "sha256": "eeb6b4a813b0df331edd9af096a965fbcc91f177689fb8f3c0fd6499c60da255",
+      "bytes": 1604
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/phaser.c",
+      "sha256": "986a702623791d889321142be39b77f386ba5d97967c7a7cc48792167736b362",
+      "bytes": 10155
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/revsc.c",
+      "sha256": "f13e4cf1619ccd630848e099517615e4b2942c12ef117f98d70dfda5700cb3ce",
+      "bytes": 8675
+    },
+    {
+      "path": "fullfx/upstream/AudioKit/Core/Soundpipe/modules/vdelay.c",
+      "sha256": "9df1510722e55febadc10f26e14f48e7a8f1badbab633360c8053309c45a7f78",
+      "bytes": 2623
+    },
+    {
+      "path": "frontend/Preset.swift",
+      "sha256": "3eb38db2464d0b21702f70a3fd747865e9d8a32839fdad72b2282379c98719ed",
+      "bytes": 16443
+    },
+    {
+      "path": "frontend/PresetDataManager.swift",
+      "sha256": "64f059169ac08c1c4404cf52136f5a8d0e9fcc071cfa0ff4a3cf1ac53fce6dfc",
+      "bytes": 17512
+    },
+    {
+      "path": "frontend/fx_resource_probe.cpp",
+      "sha256": "30964af557097a5ed7f6548931dcd4a4f936b854c7b9624a82f43be05c0f6276",
+      "bytes": 1329
+    },
+    {
+      "path": "frontend/quad_guard.hpp",
+      "sha256": "a5068109ffb316e8da2a207dd8054f70fb0ac47bcb1f96a13974e334f8635136",
+      "bytes": 872
+    }
+  ]
+}

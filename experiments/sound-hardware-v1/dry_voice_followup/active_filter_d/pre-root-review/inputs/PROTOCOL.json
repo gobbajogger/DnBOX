@@ -1,0 +1,106 @@
+{
+  "source": "case_plan.json numeric contract only",
+  "case_plan_sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+  "scope": "one new active original capture and one frozen-D active candidate diagnostic; no recovered historical active PCM",
+  "sample_rate_hz": 44100,
+  "notes": [
+    {
+      "midi_note": 36,
+      "frequency_hz": 65.4063949584961,
+      "frequency_f32_hex": "4282d013",
+      "note_record_index": 0
+    },
+    {
+      "midi_note": 60,
+      "frequency_hz": 261.6255798339844,
+      "frequency_f32_hex": "4382d013",
+      "note_record_index": 1
+    },
+    {
+      "midi_note": 84,
+      "frequency_hz": 1046.5023193359375,
+      "frequency_f32_hex": "4482d013",
+      "note_record_index": 2
+    }
+  ],
+  "warmup_frames_per_note": 176448,
+  "frames_per_note": 88192,
+  "block_size": 64,
+  "note_on_frame": 0,
+  "note_off_frame": 66112,
+  "fresh_owner_per_note": true,
+  "phase_at_note_on": 0,
+  "channels": 1,
+  "bytes_per_three_note_mono": 1058304,
+  "amp_ADSR": [
+    0.05,
+    0.005,
+    0.8,
+    0.05
+  ],
+  "modes": {
+    "static": {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "filter_ADSR": [
+        0.05,
+        0.05,
+        1,
+        0.5
+      ],
+      "control_hex": {
+        "cutoff": "44fa0000",
+        "resonance": "3f666666",
+        "depth": "00000000",
+        "filter_ADSR": [
+          "3d4ccccd",
+          "3d4ccccd",
+          "3f800000",
+          "3f000000"
+        ],
+        "amp_ADSR": [
+          "3d4ccccd",
+          "3ba3d70a",
+          "3f4ccccd",
+          "3d4ccccd"
+        ]
+      }
+    },
+    "active": {
+      "case_id": "filter-modulation/1.2_2000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.2000000476837158,
+      "filter_ADSR": [
+        0.2,
+        0.3,
+        0.4,
+        0.5
+      ],
+      "control_hex": {
+        "cutoff": "44fa0000",
+        "resonance": "3f666666",
+        "depth": "3f99999a",
+        "filter_ADSR": [
+          "3e4ccccd",
+          "3e99999a",
+          "3ecccccd",
+          "3f000000"
+        ],
+        "amp_ADSR": [
+          "3d4ccccd",
+          "3ba3d70a",
+          "3f4ccccd",
+          "3d4ccccd"
+        ]
+      }
+    }
+  },
+  "comparison_gain": 1,
+  "normalization": "none",
+  "time_alignment": "none"
+}

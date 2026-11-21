@@ -1,0 +1,30 @@
+{
+  "captured_utc": "2026-11-18T15:04:19.754620+00:00",
+  "files": [
+    {
+      "source": "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/size_variants/compact_profile/dnbx_core.c",
+      "snapshot": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/dnbx_core.c",
+      "sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b",
+      "bytes": 19939
+    },
+    {
+      "source": "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/size_variants/compact_profile/dnbx_core.h",
+      "snapshot": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/dnbx_core.h",
+      "sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962",
+      "bytes": 7939
+    },
+    {
+      "source": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-tree/firmware/src/dsp/juno6.c",
+      "snapshot": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/juno6.c",
+      "sha256": "41056d2f8634bae4555d723c79cb9610a73afdd1282328e326568b5169320185",
+      "bytes": 4657
+    },
+    {
+      "source": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-tree/firmware/src/dsp/juno6.h",
+      "snapshot": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/src/juno6.h",
+      "sha256": "c2169d8e74d2b8e5623499e83799c464f4f3b54ae66c520025c9a3f5a9f64300",
+      "bytes": 1142
+    }
+  ],
+  "scope": "Same real Juno replacement; only frozen candidate and explicit diagnostic profile changed; capability query retained"
+}

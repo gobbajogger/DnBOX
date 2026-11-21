@@ -1,0 +1,15 @@
+--- a/firmware/src/app/main_fm1.c
++++ b/firmware/src/app/main_fm1.c
+@@ -2465,7 +2465,12 @@
+      * lit when the render began stayed lit through it, so the LEDs flickered with the audio load. */
+     fm1_timer5_start(isr_timer5, 4);
+     fm1_guard_lock_top();
++    /* A pre-rendered G1 frees the stock first IRQ's foreground interval.
++     * Preserve that boot interval before the panel and LCD settle timers. */
++    uint32_t boot_render_us = boot_silent_half ? x0x_dbg.last_us : 0u;
+     fm1_irq_enable_all();
++    if (boot_render_us)
++        fm1_delay_us(boot_render_us);
+     fm1_delay_ms(30);
+ #if BOARD_SMK37
+     if ((fm1_in.buttons & FM1_OCT_BOTH) == FM1_OCT_BOTH)

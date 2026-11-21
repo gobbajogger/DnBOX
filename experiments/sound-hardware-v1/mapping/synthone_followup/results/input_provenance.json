@@ -1,0 +1,226 @@
+{
+  "upstream_s1_pin": "6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "reference_only": "Original source is not included in the implementer packet. No original algorithms were copied into candidate code here.",
+  "files": {
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/firmware/src/dsp/synthone_controls_data.inc": {
+      "sha256": "2180c7385ce792eb5f97769301ab83e11998a97d35af768d38c1e6922f1b4b38",
+      "bytes": 16270
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/controls/generated/parameter_map.cpp": {
+      "sha256": "71b50fadd233d7092abec38be6ce92353a734c578ce68f2a0e3ac1f23bc67cae",
+      "bytes": 845
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/commands/ORIGINAL-PRESET-COMMANDS.json": {
+      "sha256": "25a9c436f4dc7c37517c77acb632ccdf0753a885ee474e1e8f93c02b0c099a2e",
+      "bytes": 6180368
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/FACTORY-RESULT.json": {
+      "sha256": "d98d682baee662fda95d096e6ddb3f40f2b5c47488b0d3e36ea7a57e5d5fce66",
+      "bytes": 876
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-build-commands.json": {
+      "sha256": "42939a3f902fcae7d4857a08aba79901663dc721d4ebe9d66e8703e781919f01",
+      "bytes": 26103
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/commands/preset-commands.bin": {
+      "sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+      "bytes": 802272
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/MANIFEST.json": {
+      "sha256": "806d92dae2ef75b073168e5b85ee2dc6055f2c3b10ceca3a0e40933514c37622",
+      "bytes": 3074
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/BankA.json": {
+      "sha256": "1486c2b1fcb922d145541c96f436e7e15d755dba72ff9a8030052ef22d224bed",
+      "bytes": 152843
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Bonus.json": {
+      "sha256": "e189a9782469bd851d97a2bd157cfdd43692621287de68eb2909e8aabbd4b996",
+      "bytes": 392851
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Brice Beasley.json": {
+      "sha256": "a42a515cc66fc392f8831efa4865145dc9e2c8a8d9bc2554d1fd8a1aed242d45",
+      "bytes": 141354
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/DJ Puzzle.json": {
+      "sha256": "6263b4c08143d5f62192ad48c881129ae0c2df80256abd010dee89ede10b6506",
+      "bytes": 83700
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Electronisounds.json": {
+      "sha256": "94447bcafd93b8e534b99347ef1a2ab7f96006364c36e85c88825e2480a026e7",
+      "bytes": 130496
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Francis Preve.json": {
+      "sha256": "7e45e985951bcff09de2745d7223a8523c559f7ae30c032cfeed81c6bf317187",
+      "bytes": 75532
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/JEC.json": {
+      "sha256": "9af56a4f52d050c98da8bfc6bc355ac872772cdd419def188bb644b0c9dff0c0",
+      "bytes": 377802
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Red Sky Lullaby.json": {
+      "sha256": "db813fe373ebd0c2434c8c0af376b245c331c35080b396bce83bc4d9f2fb0aac",
+      "bytes": 311963
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Sound of Izrael 2.json": {
+      "sha256": "edf48f200ed2510b03d4b5e9e4c92c0306af0e38776c0916794d90e79572d861",
+      "bytes": 163872
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Sound of Izrael.json": {
+      "sha256": "1f100f20227401a47e17f91bac5be44efc6d5fef8d97f7ed2a64a2a7e1426462",
+      "bytes": 382672
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Spidericemidas.json": {
+      "sha256": "1cb034e91677be3b7bc0cddca64d821ddbfc132d79f98e4211053867f76eec35",
+      "bytes": 195532
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/assets/factory_banks/synthone/Starter Bank.json": {
+      "sha256": "f4da92584505084e3b0277cf1e1f1911050837014a5fa7371cc6879421cbe908",
+      "bytes": 58280
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/Preset.swift": {
+      "sha256": "3eb38db2464d0b21702f70a3fd747865e9d8a32839fdad72b2282379c98719ed",
+      "bytes": 16443
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/PresetDataManager.swift": {
+      "sha256": "64f059169ac08c1c4404cf52136f5a8d0e9fcc071cfa0ff4a3cf1ac53fce6dfc",
+      "bytes": 17512
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/SUMMARY.json": {
+      "sha256": "0aca21ecbbc4a405d48516170f5c3be4497e9bf232515da7285ce1b95f199886",
+      "bytes": 32912
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/SUMMARY.json": {
+      "sha256": "dece44e10f6b301296bd8a634ce411c471c26aebab5e3298440d4537e5d402ca",
+      "bytes": 12921
+    },
+    "/workspace/scratch/67e685478953/superj6_research/mapping/synthone_followup/results/s1_envelope_full.csv": {
+      "sha256": "a58aa34bea4f821d84619060381f86aa39b3c77a5c2661b272a33307381c7d08",
+      "bytes": 6142685
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/CLASSIC-HANDOFF.md": {
+      "sha256": "cdea6d1475a50e8e1afe9beeb4a7fa87ba813381da3156ecdb11c752047d6740",
+      "bytes": 6160
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/dry-reference.cpp": {
+      "sha256": "78980c02e62c2cd82141f1f877362fd91625342041bac92bb3de0712dfafacb9",
+      "bytes": 1949
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/law-test.c": {
+      "sha256": "7b6f2021010b68101312311c4c9696c17cd043eaddef5bb9da61324a339911fb",
+      "bytes": 689
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/law-red.log": {
+      "sha256": "e93f6410c94cfd7e6f561a2cf3591683163ba78a4f2cd55a74bddbae73d9bcdd",
+      "bytes": 48
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/law-green.log": {
+      "sha256": "b880d9b1c8fa09c84169e59d84919aa4e85234783f8bf62e2d33eafb32e5385c",
+      "bytes": 48
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/PROGRESS-V3.md": {
+      "sha256": "7ad5015c6eff11c5b136072d09f861261dc70ad9f132e43e39c9a80d49adc0a3",
+      "bytes": 6587
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/metrics.py": {
+      "sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+      "bytes": 997
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/dry-reference.cpp": {
+      "sha256": "51cdbae86dcb75bcb57720ca4471b3a0807e51253388f55ea64070bd0dad4653",
+      "bytes": 1713
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/env-result.log": {
+      "sha256": "773dbdd1c1a0080899873527593da07ce79967b6dc3bc14558ef71673b1e6ac8",
+      "bytes": 37
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/env-test.c": {
+      "sha256": "9e5ad905dafa79daba47fbeb8f62d31e65ab62ec236169d10056cefff674c710",
+      "bytes": 823
+    },
+    "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/prepared-core/result.log": {
+      "sha256": "f94a00b90006414f291f2c63e3133187d357eee0241a93a8ea98cd065533d435",
+      "bytes": 85
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/probe/portable_voice.cpp": {
+      "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb",
+      "bytes": 16843
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/adsr.c": {
+      "sha256": "816310221f5ce2e04751d7f284a61cc9057cbabf44deef7366a085c57ca310dc",
+      "bytes": 2066
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/closure/master/AudioKitSynthOne/DSP/S1Parameter.h": {
+      "sha256": "9598182b88dd9fdc7f31332857647a63913e232cb40d85169978b2ccdf271783",
+      "bytes": 4436
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/frontend/preset_audio.cpp": {
+      "sha256": "f4d55d04153b057bc9b28e4e30dbaf5b9debe30e8dd33ccfae7e2d644118d53b",
+      "bytes": 4119
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/factory-inputs/tests/fixtures/synthone-factory/fullfx/source_fx.hpp": {
+      "sha256": "aee3fe78b450b35bfe6d40741d12dcedf02e24388bdf07850bde7b13d8d8d33e",
+      "bytes": 19388
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/original_synth/chicago_mp4.c": {
+      "sha256": "0878797b35619a2f92b7f4e80d29e5bbf483cf206474cca0de087f871a90d388",
+      "bytes": 11844
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/original_synth/chicago_mp4.h": {
+      "sha256": "d5ea1b8b541bd84163c2ba9f50d12dc5cf7c48697c08d6bca8a70a4a42234000",
+      "bytes": 1810
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/original_synth/miami_ms20.c": {
+      "sha256": "fdaa23783e59f85e49013a63d557ad6d9c61430b5026fd50686e04ecdef60f16",
+      "bytes": 12914
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/original_synth/miami_ms20.h": {
+      "sha256": "f8732658eef2710ef1651138b5354a024518e01f2e94cf9c31a65a6278b40753",
+      "bytes": 1461
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/original_synth/chicago_voice.c": {
+      "sha256": "996ac689daf13fb600de8e4dba46fd6c660229c8b4682964cff4135dc71968fa",
+      "bytes": 27101
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/juno6.c": {
+      "sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502",
+      "bytes": 6139
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/master.c": {
+      "sha256": "ff3486879de216c5447c2a301456abc6cf7cd46c4643d93e500d5e6890e966b7",
+      "bytes": 20645
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/master.h": {
+      "sha256": "b4a216724544f1eb3e924a81cefa38cd68257fcccb908bc17a21d8eb9ffbcebd",
+      "bytes": 3823
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/drum909_dsp.h": {
+      "sha256": "f2f53c86e4b441897f72125d7d4e63651257d0c5e7540cd309daa655133d5837",
+      "bytes": 13542
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/dsp/busfx.h": {
+      "sha256": "02475797a36b96dd5d203ff99ac31df9f755dd27d870fb54094c88a22f067e0d",
+      "bytes": 8679
+    },
+    "/workspace/scratch/67e685478953/superj6_research/sound_lane/firmware/src/app/original_sound.c": {
+      "sha256": "e89abb1c77a77a27e5c44f7a232a2a0e896d6f502bf32269766fcc4c1f3f0d7d",
+      "bytes": 15286
+    },
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.c": {
+      "sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+      "bytes": 19483
+    },
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/dnbx_core.h": {
+      "sha256": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c",
+      "bytes": 7308
+    },
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/src/fastmath.h": {
+      "sha256": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+      "bytes": 8246
+    },
+    "/workspace/scratch/67e685478953/superj6_research/hardware_candidate/evidence/source_provenance.json": {
+      "sha256": "3687373f4b102d719c11798d725226090db1fe36c054ee0ef95d6e65b7d1ef8b",
+      "bytes": 2520
+    }
+  }
+}

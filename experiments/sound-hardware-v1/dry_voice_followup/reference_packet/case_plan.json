@@ -1,0 +1,4532 @@
+{
+  "schema": "source-free Synth One historical dry comparison contract v1",
+  "status": "180_PHYSICAL_NOTE_CASES_REFERENCE_PCM_RECOVERED; 72_DYNAMIC_FILTER_NOTE_CASES_PCM_MISSING; no new render or candidate acceptance",
+  "sample_rate_hz": 44100,
+  "channels_compared": 1,
+  "historical_paired_layout": [
+    "original_left_mono",
+    "historical_candidate_mono"
+  ],
+  "historical_dtype": "float32 little endian",
+  "notes": [
+    {
+      "midi_note": 36,
+      "frequency_hz": 65.4063949584961,
+      "frequency_f32_hex": "4282d013",
+      "note_record_index": 0,
+      "paired_byte_offset": 0,
+      "mono_byte_offset": 0
+    },
+    {
+      "midi_note": 60,
+      "frequency_hz": 261.6255798339844,
+      "frequency_f32_hex": "4382d013",
+      "note_record_index": 1,
+      "paired_byte_offset": 705536,
+      "mono_byte_offset": 352768
+    },
+    {
+      "midi_note": 84,
+      "frequency_hz": 1046.5023193359375,
+      "frequency_f32_hex": "4482d013",
+      "note_record_index": 2,
+      "paired_byte_offset": 1411072,
+      "mono_byte_offset": 705536
+    }
+  ],
+  "warmup_frames_per_note": 176448,
+  "warmup_block_count": 2757,
+  "block_size": 64,
+  "frames_per_note": 88192,
+  "recorded_block_count": 1378,
+  "note_on_frame": 0,
+  "note_off_frame": 66112,
+  "note_off_block": 1033,
+  "fresh_oracle_per_note": true,
+  "no_post_noteoff_gate_extension": true,
+  "raw_mono_bytes_per_three_note_candidate": 1058304,
+  "comparison_gain": 1,
+  "base_control_values_f32": [
+    1.0,
+    1.0,
+    0.5,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.25,
+    20000.0,
+    0.10000000149011612,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.05000000074505806,
+    0.05000000074505806,
+    1.0,
+    0.5,
+    0.05000000074505806,
+    0.004999999888241291,
+    0.800000011920929,
+    0.05000000074505806,
+    0.0,
+    1.0,
+    0.5,
+    24.0,
+    48000.0,
+    0.0,
+    0.25,
+    1.0,
+    0.5,
+    700.0,
+    0.0,
+    0.0,
+    0.10000000149011612,
+    0.25,
+    0.125,
+    0.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    12.0,
+    0.0,
+    1.0,
+    120.0,
+    0.0,
+    4.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    12.0,
+    0.0,
+    800.0,
+    0.0,
+    0.0,
+    20.0,
+    13.0,
+    13.0,
+    -9.0,
+    -8.5,
+    -8.0,
+    0.0010000000474974513,
+    0.0010000000474974513,
+    0.0010000000474974513,
+    0.15000000596046448,
+    0.22499999403953552,
+    0.15000000596046448,
+    2.0,
+    1.8799999952316284,
+    1.8799999952316284,
+    0.75,
+    0.0,
+    1.0,
+    8192.0,
+    -12.0,
+    12.0,
+    440.0,
+    9.999999974752427e-07,
+    -1.0,
+    0.0,
+    0.25,
+    0.0,
+    0.0
+  ],
+  "base_control_values_f32_hex": [
+    "3f800000",
+    "3f800000",
+    "3f000000",
+    "00000000",
+    "00000000",
+    "3f800000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "3e800000",
+    "469c4000",
+    "3dcccccd",
+    "3f800000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "3d4ccccd",
+    "3d4ccccd",
+    "3f800000",
+    "3f000000",
+    "3d4ccccd",
+    "3ba3d70a",
+    "3f4ccccd",
+    "3d4ccccd",
+    "00000000",
+    "3f800000",
+    "3f000000",
+    "41c00000",
+    "473b8000",
+    "00000000",
+    "3e800000",
+    "3f800000",
+    "3f000000",
+    "442f0000",
+    "00000000",
+    "00000000",
+    "3dcccccd",
+    "3e800000",
+    "3e000000",
+    "00000000",
+    "00000000",
+    "3e800000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "3f800000",
+    "41400000",
+    "00000000",
+    "3f800000",
+    "42f00000",
+    "00000000",
+    "40800000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "00000000",
+    "41400000",
+    "00000000",
+    "44480000",
+    "00000000",
+    "00000000",
+    "41a00000",
+    "41500000",
+    "41500000",
+    "c1100000",
+    "c1080000",
+    "c1000000",
+    "3a83126f",
+    "3a83126f",
+    "3a83126f",
+    "3e19999a",
+    "3e666666",
+    "3e19999a",
+    "40000000",
+    "3ff0a3d7",
+    "3ff0a3d7",
+    "3f400000",
+    "00000000",
+    "3f800000",
+    "46000000",
+    "c1400000",
+    "41400000",
+    "43dc0000",
+    "358637bd",
+    "bf800000",
+    "00000000",
+    "3e800000",
+    "00000000",
+    "00000000"
+  ],
+  "control_names_by_id": [
+    "index1",
+    "index2",
+    "morphBalance",
+    "morph1SemitoneOffset",
+    "morph2SemitoneOffset",
+    "morph1Volume",
+    "morph2Volume",
+    "subVolume",
+    "subOctaveDown",
+    "subIsSquare",
+    "fmVolume",
+    "fmAmount",
+    "noiseVolume",
+    "lfo1Index",
+    "lfo1Amplitude",
+    "lfo1Rate",
+    "cutoff",
+    "resonance",
+    "filterMix",
+    "filterADSRMix",
+    "isMono",
+    "glide",
+    "filterAttackDuration",
+    "filterDecayDuration",
+    "filterSustainLevel",
+    "filterReleaseDuration",
+    "attackDuration",
+    "decayDuration",
+    "sustainLevel",
+    "releaseDuration",
+    "morph2Detuning",
+    "detuningMultiplier",
+    "masterVolume",
+    "bitCrushDepth",
+    "bitCrushSampleRate",
+    "autoPanAmount",
+    "autoPanFrequency",
+    "reverbOn",
+    "reverbFeedback",
+    "reverbHighPass",
+    "reverbMix",
+    "delayOn",
+    "delayFeedback",
+    "delayTime",
+    "delayMix",
+    "lfo2Index",
+    "lfo2Amplitude",
+    "lfo2Rate",
+    "cutoffLFO",
+    "resonanceLFO",
+    "oscMixLFO",
+    "reverbMixLFO",
+    "decayLFO",
+    "noiseLFO",
+    "fmLFO",
+    "detuneLFO",
+    "filterEnvLFO",
+    "pitchLFO",
+    "bitcrushLFO",
+    "tremoloLFO",
+    "arpDirection",
+    "arpInterval",
+    "arpIsOn",
+    "arpOctave",
+    "arpRate",
+    "arpIsSequencer",
+    "arpTotalSteps",
+    "sequencerPattern00",
+    "sequencerPattern01",
+    "sequencerPattern02",
+    "sequencerPattern03",
+    "sequencerPattern04",
+    "sequencerPattern05",
+    "sequencerPattern06",
+    "sequencerPattern07",
+    "sequencerPattern08",
+    "sequencerPattern09",
+    "sequencerPattern10",
+    "sequencerPattern11",
+    "sequencerPattern12",
+    "sequencerPattern13",
+    "sequencerPattern14",
+    "sequencerPattern15",
+    "sequencerOctBoost00",
+    "sequencerOctBoost01",
+    "sequencerOctBoost02",
+    "sequencerOctBoost03",
+    "sequencerOctBoost04",
+    "sequencerOctBoost05",
+    "sequencerOctBoost06",
+    "sequencerOctBoost07",
+    "sequencerOctBoost08",
+    "sequencerOctBoost09",
+    "sequencerOctBoost10",
+    "sequencerOctBoost11",
+    "sequencerOctBoost12",
+    "sequencerOctBoost13",
+    "sequencerOctBoost14",
+    "sequencerOctBoost15",
+    "sequencerNoteOn00",
+    "sequencerNoteOn01",
+    "sequencerNoteOn02",
+    "sequencerNoteOn03",
+    "sequencerNoteOn04",
+    "sequencerNoteOn05",
+    "sequencerNoteOn06",
+    "sequencerNoteOn07",
+    "sequencerNoteOn08",
+    "sequencerNoteOn09",
+    "sequencerNoteOn10",
+    "sequencerNoteOn11",
+    "sequencerNoteOn12",
+    "sequencerNoteOn13",
+    "sequencerNoteOn14",
+    "sequencerNoteOn15",
+    "filterType",
+    "phaserMix",
+    "phaserRate",
+    "phaserFeedback",
+    "phaserNotchWidth",
+    "monoIsLegato",
+    "widen",
+    "compressorMasterRatio",
+    "compressorReverbInputRatio",
+    "compressorReverbWetRatio",
+    "compressorMasterThreshold",
+    "compressorReverbInputThreshold",
+    "compressorReverbWetThreshold",
+    "compressorMasterAttack",
+    "compressorReverbInputAttack",
+    "compressorReverbWetAttack",
+    "compressorMasterRelease",
+    "compressorReverbInputRelease",
+    "compressorReverbWetRelease",
+    "compressorMasterMakeupGain",
+    "compressorReverbInputMakeupGain",
+    "compressorReverbWetMakeupGain",
+    "delayInputCutoffTrackingRatio",
+    "delayInputResonance",
+    "tempoSyncToArpRate",
+    "pitchbend",
+    "pitchbendMinSemitones",
+    "pitchbendMaxSemitones",
+    "frequencyA4",
+    "portamentoHalfTime",
+    "oscBandlimitIndexOverride",
+    "oscBandlimitEnable",
+    "arpSeqTempoMultiplier",
+    "transpose",
+    "adsrPitchTracking"
+  ],
+  "historical_common_patch": {
+    "frames_per_case": 88192,
+    "warmup_frames": 176448,
+    "note_on_frame": 0,
+    "note_off_frame": 66112,
+    "oscillator1_morph": 1,
+    "oscillator1_level": 1,
+    "balance": 0.5,
+    "oscillator2_level": 0,
+    "sub_level": 0,
+    "fm_level": 0,
+    "noise_level": 0,
+    "bandlimit_enable": 0,
+    "filter_type": 0,
+    "parameter_smoothing_half_time_s": 1e-06,
+    "amp_ADSR": [
+      0.05,
+      0.005,
+      0.8,
+      0.05
+    ],
+    "filter_ADSR_physical_gain": [
+      0.05,
+      0.05,
+      1,
+      0.5
+    ],
+    "filter_ADSR_modulation": [
+      0.2,
+      0.3,
+      0.4,
+      0.5
+    ],
+    "velocity_modulation_matrix": 100,
+    "comparison_gain": 1,
+    "master_and_FX": "excluded from dry comparison",
+    "tuning": "Reference owner supplies the exact per-note frequency; do not fit it per output or silently change tuning."
+  },
+  "physical_case_file_count": 60,
+  "modulation_case_file_count": 24,
+  "total_note_cases": 252,
+  "cases": [
+    {
+      "case_id": "physical-gain/20_64_0",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "003734655a1502b0a30fb3c7b2dc7aac29b4e932c05a937e628ca1f8b9a60ca8",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "61ae852cf195e294d9a9dc4a1ff2775d73bc6428536b3da91247fe0f93e84f5a",
+      "historical_gzip_bytes": 1411252,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_64_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_64_0.json",
+      "historical_report_sha256": "3f4d6665c55a6cf0b8710cb6ecfdf1e3cbd43a9c00e7435e42febf8ff101829b",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.794477495011298e-05,
+          "spectral_db": 0.003334879877140823
+        },
+        {
+          "note": 60,
+          "rms_db": 6.639283567358304e-05,
+          "spectral_db": 0.0003147076483690097
+        },
+        {
+          "note": 84,
+          "rms_db": 6.937029641277015e-05,
+          "spectral_db": 0.00022087125064256647
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_0.original-mono.f32le",
+      "current_reference_mono_sha256": "ca4a55847706466306e4cfc9383f3fe95e649fe1a4c8dbe1e794a7022f825c64",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_64_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_500_0",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "254ac2398b0e2142ae28fb80acb8bcd36ffce2ad60ba64f00e736597ae3955c6",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "447ffba38287d4872942e40ca73bfbab71c56e0b361c37d2fa97851af7f90d77",
+      "historical_gzip_bytes": 1329845,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_500_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_500_0.json",
+      "historical_report_sha256": "dcb5ed4044c33ee8973d04d5e198cbbfc9900bbe37fcd8d40cf82bc42956235e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.3930454007956244e-05,
+          "spectral_db": 0.001127576065971917
+        },
+        {
+          "note": 60,
+          "rms_db": 6.660237985885799e-05,
+          "spectral_db": 0.0003716383178464833
+        },
+        {
+          "note": 84,
+          "rms_db": 6.951770231535806e-05,
+          "spectral_db": 0.00014260598085609287
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_0.original-mono.f32le",
+      "current_reference_mono_sha256": "4d81d0677f68712d86daab122da57981a1b6ea28e1a2bd3532d371e0e4318a89",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_500_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_2000_0",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "2c351028a5eb932961612aa3dec1684f11c15f1295c0137ceb16b2ff20eb68ac",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "5050aaf9c242c3392075d0217e85a3566700216cde4bb98c7bd2c4da0e69fff2",
+      "historical_gzip_bytes": 1255128,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_2000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_2000_0.json",
+      "historical_report_sha256": "c906557a9c2d4d63c7476e00c85601ce3705752e2286f632d0041e997bf6cec9",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.03774048541665e-05,
+          "spectral_db": 0.0006659721419246628
+        },
+        {
+          "note": 60,
+          "rms_db": 6.307833037538073e-05,
+          "spectral_db": 0.0002331327422624133
+        },
+        {
+          "note": 84,
+          "rms_db": 6.413023540305149e-05,
+          "spectral_db": 0.00011846936131395435
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "e8167a37e2ceae1541f4cce8f0c2b343c01563bd5d6db7d0be704e70acd32c6c",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_2000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_8000_0",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "fdd9f1b2dfb11f1b556daedfc7f30886135ddb072e5660264e8f33e274327abc",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "55a929b6906899002c55cd9c3623e896999728a638326d672563bc59cb8e216f",
+      "historical_gzip_bytes": 1218829,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_8000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_8000_0.json",
+      "historical_report_sha256": "5fe231a7d06a96f8912d218f3e2ece5b7ecfd051962524c6b7f461a5f8a3cb39",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.149327275243853e-05,
+          "spectral_db": 0.00039776590626679773
+        },
+        {
+          "note": 60,
+          "rms_db": 6.23229359036129e-05,
+          "spectral_db": 0.00014866527172970246
+        },
+        {
+          "note": 84,
+          "rms_db": 6.447038005634986e-05,
+          "spectral_db": 8.499952580249692e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "1cb33951bcc3415e33dc4e71e9c4f40804f396b20a0fb5297c20d52c752063e7",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_8000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_22050_0",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "830a529e7065f5946acf1e92881de5d92a6b869972a54f8051242beb001e8efa",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "93f2e770e855a71563f5bc9ee70d3189198b2466646ea390a09342f13d2e4769",
+      "historical_gzip_bytes": 1203453,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_22050_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_22050_0.json",
+      "historical_report_sha256": "0f30570fa2fc2f0c10050fc50470c059a12edaf57884abfe739c0b0abd1ad9b1",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.135708162788514e-05,
+          "spectral_db": 0.0003318024107673697
+        },
+        {
+          "note": 60,
+          "rms_db": 6.220521485965439e-05,
+          "spectral_db": 0.00013194585944109532
+        },
+        {
+          "note": 84,
+          "rms_db": 6.452737437774223e-05,
+          "spectral_db": 7.654635488913599e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_0.original-mono.f32le",
+      "current_reference_mono_sha256": "3c0115793ab196780347240b32993b4d96f28ea9a67be3cd0fb390824455e7e1",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_22050_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_64_.25",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "11f1cf15c2ca18171c9eab838a46c5de6d0d94f6a8d0f04b7f18f81393a7517f",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "c2a60172b31a5f9518129cba88c8738d19426fb861487231365ff95c266b0de2",
+      "historical_gzip_bytes": 1434411,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_64_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_64_.25.json",
+      "historical_report_sha256": "2ff8985b88284c8f5f993abd6c5a126b3ecdf4876d8c793b97c4965bb42ef9ce",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.677197648449491e-05,
+          "spectral_db": 0.0017252609359491554
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010807525181602516,
+          "spectral_db": 0.000292245861657651
+        },
+        {
+          "note": 84,
+          "rms_db": 5.55812529810764e-05,
+          "spectral_db": 0.00010875263322943966
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "d2866b01d2f11c9ea9484e47b7762c50f61f0ce9849b20c8afe19791923d9490",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_64_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_500_.25",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "c7e1fe3d0c56884e6f841cb46dd104ef706f42a95f6b0bffa41c2ba9418c697c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "042432914417552f8dff085e768efd8db8f8fd04a235d2eb772eaf1ca9526f6e",
+      "historical_gzip_bytes": 1318729,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_500_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_500_.25.json",
+      "historical_report_sha256": "913ebd7f78d11acf612eb24568fbc000194013538e81508086e47e9a221c0678",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.126965604689182e-05,
+          "spectral_db": 0.000983890029482463
+        },
+        {
+          "note": 60,
+          "rms_db": 6.270100887880018e-05,
+          "spectral_db": 0.000344055442681556
+        },
+        {
+          "note": 84,
+          "rms_db": 7.244751342559271e-05,
+          "spectral_db": 0.00014024210135100715
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "9753d35374e286e8810309aa8cd96054e70f302082dae7b5c8ae09446633ed69",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_500_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_2000_.25",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "d83251d43f509bbac56353e2391ff3cd319aff71003de1e4454238f93f23e750",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "e6e1520d22f05a9c16d770a52763cbec7ef9712aa92c4d7c3b0deb19c51cc635",
+      "historical_gzip_bytes": 1239092,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_2000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_2000_.25.json",
+      "historical_report_sha256": "81464d6aae47e6be78bcf9e1e9f3238566d81441eaebad7c1e101f680cc78229",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.0886044047695246e-05,
+          "spectral_db": 0.000599889396566414
+        },
+        {
+          "note": 60,
+          "rms_db": 6.219007478383395e-05,
+          "spectral_db": 0.00022617616180999232
+        },
+        {
+          "note": 84,
+          "rms_db": 6.417147497145176e-05,
+          "spectral_db": 0.0001254106797055526
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "9159e962e5347b14ce5482602c6d2c1ddc4cfd07afa95c0fd7cd8c7e68496c03",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_2000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_8000_.25",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "643b1367540d01b3cad3758f4e61aec0e2ce9fedf535377e3dd7d920a8be0bc0",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "f8ef88c4a771070644aa8112c31d9dfd12b90e069844ea8c67c558ff704bad90",
+      "historical_gzip_bytes": 1213790,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_8000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_8000_.25.json",
+      "historical_report_sha256": "8e45a40575facc530e753de5b65d619369146f00a763f60932c8a685113e8ba3",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.12303705448308e-05,
+          "spectral_db": 0.0003611272003116164
+        },
+        {
+          "note": 60,
+          "rms_db": 6.217198921396826e-05,
+          "spectral_db": 0.00013899342532002436
+        },
+        {
+          "note": 84,
+          "rms_db": 6.458119460764659e-05,
+          "spectral_db": 8.067693930563192e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "a9375662b47724893186c4f9af6274aea3ec34ad9e24566475ce1cab87674264",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_8000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_22050_.25",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "bdeb12c08e1fbfb2b5ea03230a8b5379ee935378d1571fdad760c2cf0f2bf28c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "56a0cc40ee0445af146a655ba7ac9dcb1d905064170a1a1adfce11161bed5165",
+      "historical_gzip_bytes": 1207601,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_22050_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_22050_.25.json",
+      "historical_report_sha256": "cc5efae450010ce6cb3da229a661f1d0ef69f2d7eef86443a33cfc9be6f3353f",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.101662937515808e-05,
+          "spectral_db": 0.00033030159598500985
+        },
+        {
+          "note": 60,
+          "rms_db": 6.193364399272528e-05,
+          "spectral_db": 0.0001320760577537226
+        },
+        {
+          "note": 84,
+          "rms_db": 6.424225529738919e-05,
+          "spectral_db": 7.604838664719226e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "33b92a37e46678a6d8f99e916ec21684171c287fa858d2f496f7693709d46d98",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_22050_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_64_.5",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "9834d5d9cab2282071d76d1f91a897270eeca940f1ec3e4ceeff487f927d514d",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "09f64d10069b6a6b6d799fa67c57ccd06f3c77781143d9b4de686531e715c31a",
+      "historical_gzip_bytes": 1456109,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_64_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_64_.5.json",
+      "historical_report_sha256": "61bf8c754a598e6fe9e97e968e1bfb7b420227889e44098819449f0793dd8122",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.073069899957659e-05,
+          "spectral_db": 0.0007497757567536506
+        },
+        {
+          "note": 60,
+          "rms_db": 9.39143413623427e-05,
+          "spectral_db": 0.0002899126596794516
+        },
+        {
+          "note": 84,
+          "rms_db": 6.006779833680992e-05,
+          "spectral_db": 0.00010311452174899125
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "d9980cd20f48693d60dc8eebc41f7572cceebd6d2eaab9bbf88f6a0618413c2d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_64_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_500_.5",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "a9cd65623ad2e30918e1b4ebac67972ab5a8bf91d50978c413deaa43e9af0053",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "3169acaf7ad9e4b0b5215fac1884575ecea13a9eb95705cb7ed455408a398168",
+      "historical_gzip_bytes": 1329467,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_500_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_500_.5.json",
+      "historical_report_sha256": "8a4036d8d2519c79f8d918eb0e9804c30da89cbd1025463b310b156b982fdb10",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.8653394134238845e-05,
+          "spectral_db": 0.0009422062526039892
+        },
+        {
+          "note": 60,
+          "rms_db": 6.253460338750104e-05,
+          "spectral_db": 0.00035826829441747696
+        },
+        {
+          "note": 84,
+          "rms_db": 7.472428956716641e-05,
+          "spectral_db": 0.00013114144558020382
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "d00db794eb1df298e7bfc01248321baa29a5951767841dfd3f2a9071b7209b03",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_500_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_2000_.5",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "19c4ed793bd95fcb0d28e232aa8c1bec3aea0c3c5d926cb7e53b192d5180b824",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "cc0b972ca8481b99b8e892beb6f5380e957ec96744e71efd2593bfe2a995dbf1",
+      "historical_gzip_bytes": 1243182,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_2000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_2000_.5.json",
+      "historical_report_sha256": "5bce12b89c5941bcc10051ef66d7b242df1202233a479ccf420cddf98de8843e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.063089072512583e-05,
+          "spectral_db": 0.0005842554392131063
+        },
+        {
+          "note": 60,
+          "rms_db": 6.197562152174038e-05,
+          "spectral_db": 0.00021335367538717417
+        },
+        {
+          "note": 84,
+          "rms_db": 6.43018665272102e-05,
+          "spectral_db": 0.0001192719895315779
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "ca2ec381a1e956114cde3bb12f064bf3659bd7e2e19f3e855e89facb3160022e",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_2000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_8000_.5",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "e9cf784339551edd3d1b55a573a08dc080ac2d68c64b2a3bc26b9d940cf63459",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "05dfad06c6889eaf082a4f8c25b73727791d9d05b53a3255f81a93412f6a245a",
+      "historical_gzip_bytes": 1235285,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_8000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_8000_.5.json",
+      "historical_report_sha256": "cbfb0909530ce3c297ea7b7e15dece0d530d18089ecfc679ca923535c6103056",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.106220917674918e-05,
+          "spectral_db": 0.0003418846310859121
+        },
+        {
+          "note": 60,
+          "rms_db": 6.213085782127064e-05,
+          "spectral_db": 0.0001365320426483201
+        },
+        {
+          "note": 84,
+          "rms_db": 6.45421078534769e-05,
+          "spectral_db": 8.064928827748667e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "fedbf45e1f19181842694c79a324341e6ed1b0f81c2ed773b14bc90e202b7944",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_8000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_22050_.5",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "d8fbc9e7083761feaca8659395ab0fc076278488e9069c717495efe89ba877c9",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "f88c922dacd0cfcc65c48cf16a09ed851ccecd922958c7e0bc7d4e41770bb14e",
+      "historical_gzip_bytes": 1234711,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_22050_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_22050_.5.json",
+      "historical_report_sha256": "27478fc793df6bee6dd545deac46960cc94edc02e88e176d8b48fe754425fef4",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.085021312255713e-05,
+          "spectral_db": 0.0003301406900704262
+        },
+        {
+          "note": 60,
+          "rms_db": 6.181612305737368e-05,
+          "spectral_db": 0.00013206093855271727
+        },
+        {
+          "note": 84,
+          "rms_db": 6.410766087007062e-05,
+          "spectral_db": 7.648289038759362e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "4b54a8cbbde1a85c0ed894ef4d7a49772316f3ee281f1378a753a159a486e278",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_22050_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_64_.9",
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "e6149c27736a2777d0b7d1f7cd0d643cbdfadede3cd253fab3e0a0354e5b8036",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "65f5d9b64091154a3d34090260e5de991f819c368a8168b880072bbaf5e43348",
+      "historical_gzip_bytes": 1504914,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_64_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_64_.9.json",
+      "historical_report_sha256": "c4e916de0b27aa71613665eb0993c4b8dce8d9d63e744b39734550c2a8e4b612",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 8.330673292165893e-06,
+          "spectral_db": 0.0003821036560146521
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010133695876339738,
+          "spectral_db": 0.005416813121084339
+        },
+        {
+          "note": 84,
+          "rms_db": 2.345423942811368e-05,
+          "spectral_db": 0.0011154076780054824
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "6861300b526933fb1a6132c4211656f8b7f3c3d3bfa485db043bf598a7e6b2a5",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_64_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_500_.9",
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "cc8d8ba05176ad540bba2c28e83845974478d7acc759a57f3f010631d859dfaa",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "43a672c04319c08f66dd5e41cb2f27e115c9d9c44553c8dad2c02a66311c9bd4",
+      "historical_gzip_bytes": 1423825,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_500_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_500_.9.json",
+      "historical_report_sha256": "d388185d52e1458bfeeb2b9e5f9866f18e3dca69024ce1501b288e1b7ce586a9",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.895403807053834e-05,
+          "spectral_db": 0.0009189710029428203
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010129669162966629,
+          "spectral_db": 0.00033791550296102444
+        },
+        {
+          "note": 84,
+          "rms_db": 7.327551248074554e-05,
+          "spectral_db": 0.0001353566389670435
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "1fc587f1f61dfa9af219c4b55d283c408948cb606ab42771eabd7630a20e69b0",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_500_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_2000_.9",
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "d47d5f9cc1bfa14a0221c20009d41e196771d449a836caf38553d15ac0bbcec6",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "97d746ad2465df3806d157abbd360d64875aaeeddcc927feb0061fc531f975da",
+      "historical_gzip_bytes": 1302203,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_2000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_2000_.9.json",
+      "historical_report_sha256": "03d007a57c1b171ea697b065ccf60a40165e39abf13917b0b039fea5c4d10f52",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.356715316566757e-05,
+          "spectral_db": 0.000548035347602164
+        },
+        {
+          "note": 60,
+          "rms_db": 6.081225157115301e-05,
+          "spectral_db": 0.00020320137931117928
+        },
+        {
+          "note": 84,
+          "rms_db": 6.35745616138493e-05,
+          "spectral_db": 0.00011362010151571188
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "943e3f5b917fb4a68023b05d6f9ae09d4ecd12cdfb3b6db9b06856b62e77e314",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_2000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_8000_.9",
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "1ca4279e2a8c856b60b998d4394a4bf7ce4b6c2c35c50c58771544c7d85d5c6a",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "1dbd686097c9fedf0a525cd671d3bde70b99bb3ac12bb267f94b720f496608a8",
+      "historical_gzip_bytes": 1340288,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_8000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_8000_.9.json",
+      "historical_report_sha256": "97cf61b16de854b3bee91395e875d61e47fe923a529d1c5af5829a2f10349a15",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.951126065545482e-05,
+          "spectral_db": 0.00033075571387366435
+        },
+        {
+          "note": 60,
+          "rms_db": 6.200315683006727e-05,
+          "spectral_db": 0.00013408198955542806
+        },
+        {
+          "note": 84,
+          "rms_db": 6.13810006354396e-05,
+          "spectral_db": 7.975851769416972e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "85d83b6058c2ab92bfc42586b13e04e7532fb27994ba1157284bb023168a4fe3",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_8000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/20_22050_.9",
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "1866dcf83a64492d78f8efbf69089e4237b670056f05fe7b62ee58ac23eba39c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "a64ccbdb030d8a477170cf3fd8f0fc68ef9fc3754fe67ccc47aa6475bf8ce6d7",
+      "historical_gzip_bytes": 1320334,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/20_22050_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/20_22050_.9.json",
+      "historical_report_sha256": "5da54cf08b912255f58b09a2e1d1ec9ff630a48081cac1448afdb7c261a002f9",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.944695717328329e-05,
+          "spectral_db": 0.0003304171166100647
+        },
+        {
+          "note": 60,
+          "rms_db": 6.072606040777822e-05,
+          "spectral_db": 0.00013215123184164872
+        },
+        {
+          "note": 84,
+          "rms_db": 6.22783426374922e-05,
+          "spectral_db": 7.635260074731069e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "46a140560bda3535f6bae675cac83e5e407125cf8ae1f91799956a6fc78dd5a7",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/20_22050_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_64_0",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "c41b655c2116a1f8a2a6f0c160b477781d2d1d09f0759629fe391182784f0fc9",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "651b02b4191341d39e1050295f1ea6c033af36f970d6615f1dd8f6ab5771f865",
+      "historical_gzip_bytes": 1428914,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_64_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_64_0.json",
+      "historical_report_sha256": "004734d76ddad2be0267ffa6877d3ff67fdf0c733688cc6e3c300ca2c582e38d",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.757104072864878e-05,
+          "spectral_db": 0.003281173320204802
+        },
+        {
+          "note": 60,
+          "rms_db": 8.244401832681786e-05,
+          "spectral_db": 0.0002778101317609949
+        },
+        {
+          "note": 84,
+          "rms_db": 4.749563990084209e-05,
+          "spectral_db": 0.00014770573166036783
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_0.original-mono.f32le",
+      "current_reference_mono_sha256": "ac6bd2c66b150bedb56540dab3f91d99ced8567642bb8f4b75e2968a594f3ade",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_64_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "9dc90e6aef5836945cc795585a29baf88a4f5a035352f93a4d71f581797425a0",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "b6f0faf1c570a7d404faa7496429c4beb778ca520550bcf3b9e0712e39d3e915",
+      "historical_gzip_bytes": 1328796,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_500_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_500_0.json",
+      "historical_report_sha256": "b810328890023bfe4841b39eef1c9f26428a8e66f49717c8689d1aa2b4a3e656",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.415577180926618e-05,
+          "spectral_db": 0.0010052587191334552
+        },
+        {
+          "note": 60,
+          "rms_db": 6.675995572637261e-05,
+          "spectral_db": 0.00036610333341062593
+        },
+        {
+          "note": 84,
+          "rms_db": 6.824847960909024e-05,
+          "spectral_db": 0.00015063183450067898
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_0.original-mono.f32le",
+      "current_reference_mono_sha256": "9c30c21f3e49162eba206e25559f7497d03ebd9eb933f7f669f38f4602104903",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_500_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "86acf3f599d1b793d835f6dba59f913c776dd98051e7647b4d695bab2541bd7a",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "9644d721a083b23a8fadb4e2560e62d488b2924f147482a0ec34aa3c2640c815",
+      "historical_gzip_bytes": 1247477,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_2000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_2000_0.json",
+      "historical_report_sha256": "3154c43f71313f662ec889baf8c1f03d49d48193328d16a4f0975090f72154cb",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.076790023377328e-05,
+          "spectral_db": 0.0006643701723771977
+        },
+        {
+          "note": 60,
+          "rms_db": 6.305406640035406e-05,
+          "spectral_db": 0.00023552073307375908
+        },
+        {
+          "note": 84,
+          "rms_db": 6.373172769626996e-05,
+          "spectral_db": 0.00012258275124552484
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "6605cb5c82f41c38b75e9e3598d6e055dd73207a5d8aa5ac71d08748f373e29d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_2000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "fcf3d874a3ccebf769e55822e908556c2841f5a53caa20553fa47aa5251ae25c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "639dae0e6acc8ca46ca4605807053e0a5a07084aa431f67bd1326a12d5d14b58",
+      "historical_gzip_bytes": 1216336,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_8000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_8000_0.json",
+      "historical_report_sha256": "bf3e699b72f5d082e95aaa054234e7e497ac96381f16e8c34a05113f416f1c82",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.152425764550349e-05,
+          "spectral_db": 0.00039723949030700395
+        },
+        {
+          "note": 60,
+          "rms_db": 6.239064268118695e-05,
+          "spectral_db": 0.00014876175328370835
+        },
+        {
+          "note": 84,
+          "rms_db": 6.470946990432162e-05,
+          "spectral_db": 8.556352382188477e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "4890581cf0a79401d54585a9eedfd0f7b26143b36034bd84bebc18a7ee1a698a",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_8000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_22050_0",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "1a6eeb3bad6f4a36c41a7390234546fee5656a8cb1789e1ad43fde40297684fd",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "7ae3252883f1f49dd230aed263a3766630a6ad96baa3500b1d97eb3a04e9181d",
+      "historical_gzip_bytes": 1203707,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_22050_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_22050_0.json",
+      "historical_report_sha256": "ea49f540790fcbabf46b47b8441d08a8b4fa23a3b749b6a93e51283c21a64a54",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.136342531873416e-05,
+          "spectral_db": 0.0003309259450047736
+        },
+        {
+          "note": 60,
+          "rms_db": 6.219480726027949e-05,
+          "spectral_db": 0.00013207283439947736
+        },
+        {
+          "note": 84,
+          "rms_db": 6.448997425811984e-05,
+          "spectral_db": 7.655539442603995e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_0.original-mono.f32le",
+      "current_reference_mono_sha256": "1e2f4bfc59b9b5c72cad2eec3fc21c55eae87708136276d0be03dff621088c9a",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_22050_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_64_.25",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "3144e23f339db255822f912d13579e480decb5011b827d8ee22c74dad331e97d",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "3bacaf12c1d1f3701211afd8472790d7c81c3a8e6625422d786a68aaa2b3b075",
+      "historical_gzip_bytes": 1427274,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_64_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_64_.25.json",
+      "historical_report_sha256": "a0e0e9f98b27d35494b1c726a7fe13429119432e0d89fd413f776aaa10831cd9",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.665147264682716e-05,
+          "spectral_db": 0.0016820186266712969
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010397975801722181,
+          "spectral_db": 0.00029096506623942987
+        },
+        {
+          "note": 84,
+          "rms_db": 5.030490443439978e-05,
+          "spectral_db": 0.00012188563246931146
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "8b57107c5a077dbe7ead2aa62d2524089c456d8a031e1248da2d74bbe7bf4018",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_64_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_500_.25",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "ed2cc59c07b90dae53e32932f8785ac52d470ebeffa8152c3ebc2dbf55e85e69",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "5257d4653a0fce3c5c994c4a7e30f08d0f65abeaf4b2d173d7ee76d26e61638a",
+      "historical_gzip_bytes": 1314449,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_500_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_500_.25.json",
+      "historical_report_sha256": "9d343fd544dec5e43346d36be52db17bfeca347d26342d483cbe6e67df1074e5",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.238515110329056e-05,
+          "spectral_db": 0.0009622889411368241
+        },
+        {
+          "note": 60,
+          "rms_db": 6.217052056146357e-05,
+          "spectral_db": 0.0003654876082590924
+        },
+        {
+          "note": 84,
+          "rms_db": 7.3364008181053e-05,
+          "spectral_db": 0.00013719715590491697
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "13662e2351370fb61139725072a87d200c81b71ee2af16eabebefa88bca8f5d0",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_500_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_2000_.25",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "2f7f5d3fdf1537dd0b5313ed3ac1fe775c661e9d53d16879006a9c046f2a0830",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "1cdc26326de481f98cd858f74f6f865f9cf84367c6d0dbbf64540ddd8bad0a0f",
+      "historical_gzip_bytes": 1237582,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_2000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_2000_.25.json",
+      "historical_report_sha256": "842ca0851d609c2e74b6b72d4af50d1d5716d700d2bb16d713e4b82179974be7",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.0625009446749735e-05,
+          "spectral_db": 0.0006032123910177732
+        },
+        {
+          "note": 60,
+          "rms_db": 6.210288707246577e-05,
+          "spectral_db": 0.00022870560171928562
+        },
+        {
+          "note": 84,
+          "rms_db": 6.419340467482749e-05,
+          "spectral_db": 0.00011942565213431065
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "282d4bb3e5d37be26a742dbff9d9a655228a81725337216dde637502579ef063",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_2000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_8000_.25",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "127118f23c9bf785a487039933caa6d56e58239874fb3c561218ec5acd0f0ad5",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "7bcff56d2fab37c76183f9c360dfd0942789d9955c240d41dc1b18f5d8c4acd8",
+      "historical_gzip_bytes": 1215630,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_8000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_8000_.25.json",
+      "historical_report_sha256": "7da72e2757088107b899444149aaf7263542e0598e09c598a82a9003633fb600",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.122340775037167e-05,
+          "spectral_db": 0.0003612540046772374
+        },
+        {
+          "note": 60,
+          "rms_db": 6.216664979028961e-05,
+          "spectral_db": 0.0001386153508642741
+        },
+        {
+          "note": 84,
+          "rms_db": 6.452738712412798e-05,
+          "spectral_db": 8.074362424487517e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "17d6002121ba383c3355c8fc38a0f21a767ab46c8408555dc3d6ec028871caa5",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_8000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_22050_.25",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "6220cb7b0ef52bfc0e7669bf3e292bce7ae180e30178af7596ed14dde18d5f39",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "ad7d2ebd90a5a7e0d1b86dd2e81d0d44433d1f151c976af279a476de54902d55",
+      "historical_gzip_bytes": 1207815,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_22050_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_22050_.25.json",
+      "historical_report_sha256": "9e80f04e650946b8131ad4d4bece425405112440c3f0cb316eddb7fe9cb189cb",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.101509694807337e-05,
+          "spectral_db": 0.0003304639231112982
+        },
+        {
+          "note": 60,
+          "rms_db": 6.193124847765856e-05,
+          "spectral_db": 0.00013204727683331402
+        },
+        {
+          "note": 84,
+          "rms_db": 6.426361750578548e-05,
+          "spectral_db": 7.595211421809603e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "7654ef2c8ccbf9936095e7063cca47da072f8161715ab7bba41b6505c92262fd",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_22050_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_64_.5",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "a3639a5e63c88fe14bb5a138a0b1602d3a33575f30f9b335c7800d092d80f954",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "26545b098871e80a94abc83ddb362caf0acfa3c68d4bf56e1f32b27972f1aa7a",
+      "historical_gzip_bytes": 1450431,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_64_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_64_.5.json",
+      "historical_report_sha256": "950ea6bf39a0dfe40d4ac37d6b7287e49d45844f39aeb0410e3633fd7a48fa5c",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 4.984396546923634e-05,
+          "spectral_db": 0.00075829156344132
+        },
+        {
+          "note": 60,
+          "rms_db": 9.791218521301056e-05,
+          "spectral_db": 0.0002760494766823042
+        },
+        {
+          "note": 84,
+          "rms_db": 6.205938212006039e-05,
+          "spectral_db": 0.00012943494530415125
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "21e79f187f2d9006a58f2e52bca33961d0ea8f452561ca788e875a12972c914c",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_64_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_500_.5",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "b57072b500aac9db7a3fe39eeb03419cb3b9e342d5ec3a8c92d5a0325591b0a6",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "e630251b96d3dbb7692dc04306803997bb6ee0ddbaf5e0eb9df2d40b222631fe",
+      "historical_gzip_bytes": 1319476,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_500_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_500_.5.json",
+      "historical_report_sha256": "619071b2ba53a2374e3372b19d06acc6e64066c1b84153eac9d3030ee281247c",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.894042691162868e-05,
+          "spectral_db": 0.0009453832538085326
+        },
+        {
+          "note": 60,
+          "rms_db": 6.230066952420978e-05,
+          "spectral_db": 0.0003635745441239494
+        },
+        {
+          "note": 84,
+          "rms_db": 7.506828243796902e-05,
+          "spectral_db": 0.00013871481605623275
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "9f89c291a7c9c03451d53352ead56e2c70b6a23b59ceb8232604e9694fba93ce",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_500_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_2000_.5",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "a6647305056aa1ba5f2d9bfeead3e9009e3ae202ae88fa7d3e9aedf9a4d98906",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "e5a18289121ab1f9d2bf16bf84055e5bdad57c0c317b7919e3c126c339eb468d",
+      "historical_gzip_bytes": 1244214,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_2000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_2000_.5.json",
+      "historical_report_sha256": "d92ac2873cf068eda3d128229cab685040a5b92f813587d271d9c1b7cf51de4f",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.0549661200403707e-05,
+          "spectral_db": 0.0005852287035353786
+        },
+        {
+          "note": 60,
+          "rms_db": 6.204239581559425e-05,
+          "spectral_db": 0.00021776823688375322
+        },
+        {
+          "note": 84,
+          "rms_db": 6.422243648749626e-05,
+          "spectral_db": 0.00012053384896095616
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "bd60ecd180c785cd195e89c524d75a2274302fbe11257cfec08f6e285348a266",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_2000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_8000_.5",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "f5096a5e66f29976387cc5102f5b0ebfe81b7e4e5b75b2ffb320dbf64c96b056",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "c3ff089c76b3272d3732ef532a6c5b2f0e4569a85c012360d7a2a1e1b9947c02",
+      "historical_gzip_bytes": 1234329,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_8000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_8000_.5.json",
+      "historical_report_sha256": "afe8b737f0abc68c31fb6e46e5be9ad0365041c774a08731071a7e10b2f4ed90",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.104029681166853e-05,
+          "spectral_db": 0.0003421411390792943
+        },
+        {
+          "note": 60,
+          "rms_db": 6.214272908383718e-05,
+          "spectral_db": 0.00013671213179123576
+        },
+        {
+          "note": 84,
+          "rms_db": 6.45728480606054e-05,
+          "spectral_db": 8.063001642177432e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "22dcb3c829ef8791186b50fc46e3614ffecce15c99464ab7cb0dc510199d221d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_8000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_22050_.5",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "cecfff6f9dcb5c3f8efba75e238eab6599a85791dd03c02b8282f1c44fb1f3e8",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "6bd8e55ffa2cb1ad371c8813128e1fbb9a2eea3da9eaf954d4fdbc63d485f4a5",
+      "historical_gzip_bytes": 1223766,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_22050_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_22050_.5.json",
+      "historical_report_sha256": "c53ca5966b3c2c2b90e260bd682c6b375e5e2c072c18ea553e9951ec05e99bda",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.084859342056141e-05,
+          "spectral_db": 0.0003302148614159545
+        },
+        {
+          "note": 60,
+          "rms_db": 6.183760351480033e-05,
+          "spectral_db": 0.00013198726477719035
+        },
+        {
+          "note": 84,
+          "rms_db": 6.408761731536949e-05,
+          "spectral_db": 7.63733975668949e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "0037daf98b6d7e339cdc5daecd1eebe3f8d1788355c88834d9d209427490fdb9",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_22050_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_64_.9",
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "6dacf9028bfa2761d934bb9297161d23c942906dd85f3335a42af61eee298558",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "04e3c3115bbe91aca685dbcbb7fc684cf9b063c5158cc31dc63e9312fbae1f99",
+      "historical_gzip_bytes": 1501262,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_64_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_64_.9.json",
+      "historical_report_sha256": "9726fdf3f851598339bab04dfacea097c58a854f2961625d8787a159a95e34a4",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.935242894760111e-06,
+          "spectral_db": 0.0004679394848296851
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00013075611673406606,
+          "spectral_db": 0.005425824870207458
+        },
+        {
+          "note": 84,
+          "rms_db": 2.8594644185983993e-05,
+          "spectral_db": 0.00109528804102016
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "2b2e68b5869b3691c69eefa00590d3b46242a532be10e3b4dc17e113c9b45b68",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_64_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_500_.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "11bbbbe34cc0921667a7a1e7fb4a2eea01c176d455c90596ec2ad9e2ba0252df",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "6db306663f2ad3e0ed00c6ff0265ca0b5b38b8e5cc4e2af141ab5d7bc50fe061",
+      "historical_gzip_bytes": 1424511,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_500_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_500_.9.json",
+      "historical_report_sha256": "e54dea733f78bc963bb28b4bfdbc3d8091895d1f48728125d6cce490c100cc3e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.875791990818832e-05,
+          "spectral_db": 0.0009198258667075124
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010140802173023744,
+          "spectral_db": 0.00033775473336700764
+        },
+        {
+          "note": 84,
+          "rms_db": 7.26339912513748e-05,
+          "spectral_db": 0.0001315911109804002
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "05da25def2f5659e2ae9d557897fcd51a29d03d7c72eea526c684d995d503f13",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_500_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "c1fe9f3357ed6dc3c66254f68d9d806e0f94e6c1ceb4303e3518eacef837728c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "dadf164aca7355af0a380bc26821935edd7697dd5794d9b14f076622a3502eaf",
+      "historical_gzip_bytes": 1302206,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_2000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_2000_.9.json",
+      "historical_report_sha256": "f7b46f293708117569f1faa5cb7de9f76b57ee2986dd987a512727ca49bd1cf7",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.342850850541651e-05,
+          "spectral_db": 0.0005481663018097555
+        },
+        {
+          "note": 60,
+          "rms_db": 6.087098102458594e-05,
+          "spectral_db": 0.00020253202332587016
+        },
+        {
+          "note": 84,
+          "rms_db": 6.359448182158257e-05,
+          "spectral_db": 0.00011374105654249629
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_2000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_8000_.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "e9897c40006a4a62ae7ac61ce5a0b73d9bdaa189ee7acc0d36c0a16d44d52501",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "4f3c2ff0779394fcb1c77dcad9ac8b190a8309075403fa369535dc7ab677be67",
+      "historical_gzip_bytes": 1340323,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_8000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_8000_.9.json",
+      "historical_report_sha256": "f8376cf08e0c75695da488c3039ac6a13f82528ba985553221a0bf8b63abc7df",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.957820138496063e-05,
+          "spectral_db": 0.0003307908393713242
+        },
+        {
+          "note": 60,
+          "rms_db": 6.196580365813129e-05,
+          "spectral_db": 0.00013425328725008836
+        },
+        {
+          "note": 84,
+          "rms_db": 6.139528553575988e-05,
+          "spectral_db": 7.953050933738093e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "364cdc86e6d62830377eb26127ee2eee2ea5e1d59204d9b756ccf221b1f46304",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_8000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/100_22050_.9",
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "fe07cf227be8c41a569300b32e1fd298c989a64af265d9dbcdffe891068b431e",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "89d2f924f1d019769db35d13a40f247601f2cc1c36a8c76cb075f2347c1ccad6",
+      "historical_gzip_bytes": 1321859,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/100_22050_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/100_22050_.9.json",
+      "historical_report_sha256": "2cc22b733cff662b15205abbb43048858907e6546f4f29bb31d38ad32a7484c4",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.941756425277453e-05,
+          "spectral_db": 0.0003303661507877183
+        },
+        {
+          "note": 60,
+          "rms_db": 6.073917178485755e-05,
+          "spectral_db": 0.00013210944263937778
+        },
+        {
+          "note": 84,
+          "rms_db": 6.222401174122436e-05,
+          "spectral_db": 7.635565349904447e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "83a585e4d45b1f3433f5402c243c3db5b836e97917671d2df7f5b7d88e4221cf",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/100_22050_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_64_0",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "eeca996db10a292400435e0c8436897f2897105dc4948a367bcff6bd757e29a3",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "49d75be1101e4c399e559737062b42ec14bd18c86ca7e0673b9dd4dcc07ecc11",
+      "historical_gzip_bytes": 1413781,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_64_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_64_0.json",
+      "historical_report_sha256": "6e54bf76ae168758fb83caaa5b7337b0755b0dce8a5aee6b53ce1d7a09a34332",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.9802793820366016e-05,
+          "spectral_db": 0.003218335152073584
+        },
+        {
+          "note": 60,
+          "rms_db": 8.432220231277525e-05,
+          "spectral_db": 0.0002765933062799882
+        },
+        {
+          "note": 84,
+          "rms_db": 6.265413649709603e-05,
+          "spectral_db": 0.00016013173157886337
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_0.original-mono.f32le",
+      "current_reference_mono_sha256": "c2be0ad2c505b65b5bcd843430f0aa2a7d627a5c08d45fbf0f8f1ad8e2df3ef0",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_64_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_500_0",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "33f862e73028800f926bff365d3aa6ab78eba86d62f65b4daa03742d44093d7b",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "d5ebb648a0215229b76c9dcd47b487e5377793f3ae481b66ca28b882890a6d0e",
+      "historical_gzip_bytes": 1307718,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_500_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_500_0.json",
+      "historical_report_sha256": "1a9b44448b4499be7b38d18e02f16e590c63e044fd278c5e1c65e7b6f379c852",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.48497322361891e-05,
+          "spectral_db": 0.0009670193824817386
+        },
+        {
+          "note": 60,
+          "rms_db": 6.715067987396864e-05,
+          "spectral_db": 0.00033539094546168537
+        },
+        {
+          "note": 84,
+          "rms_db": 7.16521846805971e-05,
+          "spectral_db": 0.0001541961487198787
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_0.original-mono.f32le",
+      "current_reference_mono_sha256": "86a66df3b4be7a698aed628b03ce17389df2c2d4d2eb62aad21f68672ad25ea1",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_500_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_2000_0",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "c3c38879a0ce3e9c381a49919f2a29a4dda5350e55ae140391675152b09ee1e7",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "a2bcfd79ee5c789ef42b22a336213fc91f7b71baab5634896f088997438ad351",
+      "historical_gzip_bytes": 1192367,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_2000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_2000_0.json",
+      "historical_report_sha256": "55b45a57594f9732f2c263169c3f0a4afedb13f95f01ac5ecc5fdc0007828f8e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.1854124264968e-05,
+          "spectral_db": 0.0006574695832236417
+        },
+        {
+          "note": 60,
+          "rms_db": 6.223138782724321e-05,
+          "spectral_db": 0.00023439528436723078
+        },
+        {
+          "note": 84,
+          "rms_db": 6.40322714118828e-05,
+          "spectral_db": 0.00012002736436177706
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "de7dbd6938d4ae3965c4a6cd1f28fef59783d5f83f7d62e3ff931c7025d8c28d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_2000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_8000_0",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "0ee5a18ce911968b23092acb77f9aed1046369ab880dec9c175c8c6732f651e0",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "e930a0fa39ecf11889638f7fe250fdc90956160b6f32b9fe8b2d2188ddad1911",
+      "historical_gzip_bytes": 1170573,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_8000_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_8000_0.json",
+      "historical_report_sha256": "6c972bc4ce0b5634377c7d25ab2556d375e32cabeb5de5a8edca43b382bca78d",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.152678759662229e-05,
+          "spectral_db": 0.00039690400451773244
+        },
+        {
+          "note": 60,
+          "rms_db": 6.231616159612392e-05,
+          "spectral_db": 0.00014848564917745941
+        },
+        {
+          "note": 84,
+          "rms_db": 6.458386443253398e-05,
+          "spectral_db": 8.392665090620094e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_0.original-mono.f32le",
+      "current_reference_mono_sha256": "423453aef265673164c4718d940322333d1166b23137310943103685e3933be5",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_8000_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_22050_0",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.0,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "4c029a8205ca3b1db6b34b9d82dfb241b9f193a3f7d1be00693a6f99f9e23497",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "b524c15de2c9243e337dbafe30443495d3ca075d18a55e9b07af4ef9c64a9d04",
+      "historical_gzip_bytes": 1153128,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_22050_0.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_22050_0.json",
+      "historical_report_sha256": "9ef039fecb28a69e21df27431c5b9d6a8be331e5d0d8de0bf059a7f0e389a188",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.136160830718513e-05,
+          "spectral_db": 0.00033115589931598683
+        },
+        {
+          "note": 60,
+          "rms_db": 6.221267633434612e-05,
+          "spectral_db": 0.0001321114130813334
+        },
+        {
+          "note": 84,
+          "rms_db": 6.459272407703598e-05,
+          "spectral_db": 7.65931521914486e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_0.original-mono.f32le",
+      "current_reference_mono_sha256": "39cae30074a53197a13d4d2d20ed060bd1d49d301ac864a265e539401b9af7ca",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_22050_0.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_64_.25",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "b9690902a766abe2e64fd1114a08f663c946247a75a97969476e7c094ddf88d3",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "2ca732ed067c039db5efa3653a57276f5710679418e2024f243137b5a6c8ba24",
+      "historical_gzip_bytes": 1410013,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_64_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_64_.25.json",
+      "historical_report_sha256": "aa8aacd520cd476ee6a792825908d893e943a93af70143e355e0d483ce92aeb5",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.6333607200718184e-05,
+          "spectral_db": 0.0016918961453579434
+        },
+        {
+          "note": 60,
+          "rms_db": 9.825644673439714e-05,
+          "spectral_db": 0.0002810164173496268
+        },
+        {
+          "note": 84,
+          "rms_db": 4.586768716783952e-05,
+          "spectral_db": 0.00010240943286382195
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "7beab94b1d7b51d722189d99bb5795e70436d02680ccd9f3f937f0273656a29b",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_64_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_500_.25",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "b04af6e9cc01dfd45209c9969d9c98343369d65a7650a287846861e9fdf6398f",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "dfbfb263227358141b77f957278628194e2fc267bc95a10c12af79c4545ebe10",
+      "historical_gzip_bytes": 1304930,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_500_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_500_.25.json",
+      "historical_report_sha256": "93a5b97a4900bce3c421ecce5aa0522d186604e2916b75fe5e9e0c82b121ea5a",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.205367344060574e-05,
+          "spectral_db": 0.0009557583936997896
+        },
+        {
+          "note": 60,
+          "rms_db": 6.251740523431659e-05,
+          "spectral_db": 0.00036910455402293645
+        },
+        {
+          "note": 84,
+          "rms_db": 7.296607181162444e-05,
+          "spectral_db": 0.000147912362503525
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "93f16166527b3e282f20b365b9441111dc7eb22bce64c6c6537528d19e7d5be0",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_500_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_2000_.25",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "efe5c6e248f27de4c705645d97fd38f41799603e76a4e77327b6639929433fd1",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "274c338f9b68f7069a69a3e6ea5a34361f1c678511894c4cd380481ca90e0375",
+      "historical_gzip_bytes": 1183840,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_2000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_2000_.25.json",
+      "historical_report_sha256": "299c719ff1db40bfbe521a536ecaaf589a06bc46f5ca5875876dd7a4660f784b",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.1005369771953884e-05,
+          "spectral_db": 0.0005998241930660107
+        },
+        {
+          "note": 60,
+          "rms_db": 6.223680179093248e-05,
+          "spectral_db": 0.00022189241098448528
+        },
+        {
+          "note": 84,
+          "rms_db": 6.415941880901802e-05,
+          "spectral_db": 0.00011717411059997514
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "8e2179237c9fd9b3cd7954e33d7872a1749a0482598c4aa26ff29fe99cfcea08",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_2000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_8000_.25",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "c68749a5270e665f0ed7532784d0fbe2d8974b3a2a3835be8bf5758ffefdf62d",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "0cfe50f8b3a80276c644936fafa26ac1e083f528739872645f27e73ba662d4be",
+      "historical_gzip_bytes": 1169129,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_8000_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_8000_.25.json",
+      "historical_report_sha256": "6ef0dec2a806e6fb0cd57ac716d65efef50bdad9257acc2b33c5467960f96dfe",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.127220540214518e-05,
+          "spectral_db": 0.00036084134330571874
+        },
+        {
+          "note": 60,
+          "rms_db": 6.221939085596979e-05,
+          "spectral_db": 0.00013871882326137224
+        },
+        {
+          "note": 84,
+          "rms_db": 6.462962145554667e-05,
+          "spectral_db": 8.08736336313289e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "0dfed150c6279dce12beb906c49f2f2d7ca1e602cfe5bbfb66e333649989db2d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_8000_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_22050_.25",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.25,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "21a95a2ad7d756e69c6689aa7da07f848d66130097f3b6da1b551f28e9c198e6",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "a7193cf56b9d90a0785861e416a499a811a00402be3d58f24daea77aa4e17009",
+      "historical_gzip_bytes": 1162778,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_22050_.25.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_22050_.25.json",
+      "historical_report_sha256": "81ea3e2ab0abbf8bb2b1d974b0dd617b3710e83118150f6204083450f6aefe04",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.101339055367812e-05,
+          "spectral_db": 0.0003303951311783971
+        },
+        {
+          "note": 60,
+          "rms_db": 6.196437131997641e-05,
+          "spectral_db": 0.00013205968988866049
+        },
+        {
+          "note": 84,
+          "rms_db": 6.434281464054976e-05,
+          "spectral_db": 7.609957736759841e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.25.original-mono.f32le",
+      "current_reference_mono_sha256": "6a8c27cef0dfdd7713fa05b94b05c8d20cf38841fdb8dc19593a0654c4c3718a",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_22050_.25.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_64_.5",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "dc523ccbfead3aa5343ea9a57921f4e35b9beec1b9d17cf0d9d2cb9a58cd2d41",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "36d86fd83583ed0b30bf5abd6291145816e8e7987f55c04a1ecb7bbfe6639a44",
+      "historical_gzip_bytes": 1427315,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_64_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_64_.5.json",
+      "historical_report_sha256": "75f5b0138335b89286e77e419311759ffda21e5d90503e66cf8a3434329a88bd",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.065595404357643e-05,
+          "spectral_db": 0.000764392857960053
+        },
+        {
+          "note": 60,
+          "rms_db": 9.966017101560465e-05,
+          "spectral_db": 0.0002957715423905057
+        },
+        {
+          "note": 84,
+          "rms_db": 5.674716124151403e-05,
+          "spectral_db": 9.034124055353939e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "f6a9ee40958f4fc7ae5df5935cb1297579ce58f9b545f9eef8e2d56f8fd830b3",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_64_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_500_.5",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "bd56c17381e2ded9b59d2b07bf7d1c418f7cb7eb3dd3cbad862a9e3d7c8089b4",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "01c1f0b1156f0e8f2770d0443ae2c6cc9fa4d5abae56b2233137b938417ad04a",
+      "historical_gzip_bytes": 1316698,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_500_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_500_.5.json",
+      "historical_report_sha256": "8f580fff1f79badc0694578b43a693f39fc76c19904c9288f925a8f50e5b8286",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.8790342119544714e-05,
+          "spectral_db": 0.0009423187362923634
+        },
+        {
+          "note": 60,
+          "rms_db": 6.273915750784131e-05,
+          "spectral_db": 0.0003610223557914463
+        },
+        {
+          "note": 84,
+          "rms_db": 7.496588502997175e-05,
+          "spectral_db": 0.00014002364391706536
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "08c65f53fa8688cf78b62499ebad898ab76039d1fa9ce01fd11f37fcb23bdf13",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_500_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_2000_.5",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "43e81335920f21f432945812a6ae769ac150e730f4697328a92d730159ff4226",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "d589325e8ad13d4b0aae229c17b5b5d6ff6434747d83eaea9e336268014f2e97",
+      "historical_gzip_bytes": 1212282,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_2000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_2000_.5.json",
+      "historical_report_sha256": "2b50d4ed3876c671b560e95e973c6c91bcfb20efc2e6e7873ebd45ccca40c687",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.042810541448751e-05,
+          "spectral_db": 0.0005857686388193165
+        },
+        {
+          "note": 60,
+          "rms_db": 6.201525375153898e-05,
+          "spectral_db": 0.00021361060680554668
+        },
+        {
+          "note": 84,
+          "rms_db": 6.432774784522814e-05,
+          "spectral_db": 0.00011380143716689623
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "e83c3a1361e2451f24e29875cb3a03e64745b2bc101e8d12a08858e3665d5ce8",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_2000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_8000_.5",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "7e71775820e03bae45512c9cda5b66e65ed9dee4875ce12425f8429049c7af2c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "f101f0c95040b22745b5170289c42c6ba34b28f0951a4d2a5942796ff089c8af",
+      "historical_gzip_bytes": 1197743,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_8000_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_8000_.5.json",
+      "historical_report_sha256": "1831f3cd5fc591e56094583c150f66835122634be16b20bbec5f0477e78c2661",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.10731826177161e-05,
+          "spectral_db": 0.0003418067609516448
+        },
+        {
+          "note": 60,
+          "rms_db": 6.213772700840482e-05,
+          "spectral_db": 0.00013645081721624057
+        },
+        {
+          "note": 84,
+          "rms_db": 6.457529623647503e-05,
+          "spectral_db": 8.061821203478126e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "6a7de3d1f594d77b7c9f1aaa2622e7a0d9b839f70b981010040a7ad691aad9fa",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_8000_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_22050_.5",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.5,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "f12fc3a81aa81a9790aa9a94456849cb80bf859b4ef9ba0c63b5c66bbdc66b43",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "cf9b7407304fed7c8e7c3d9115476d54905ca5964c8e1407ee0915bfa2510543",
+      "historical_gzip_bytes": 1194311,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_22050_.5.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_22050_.5.json",
+      "historical_report_sha256": "d59520eb8d374c379fbb5b93ebf7524a8936b0e4802edf423b48ed1fe2801bb8",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.08458805453207e-05,
+          "spectral_db": 0.0003301416213305534
+        },
+        {
+          "note": 60,
+          "rms_db": 6.182695645103568e-05,
+          "spectral_db": 0.00013193609194489287
+        },
+        {
+          "note": 84,
+          "rms_db": 6.409814751230845e-05,
+          "spectral_db": 7.643147576794842e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.5.original-mono.f32le",
+      "current_reference_mono_sha256": "b55a86228b4f234978ae32acc6c3b9e3532e4f7cd0b3a27e496f01e58fc785b8",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_22050_.5.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_64_.9",
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 64.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "0757c9cbf9f8a76f8be06444b6ab0f66e81d019bcf0fa2fd977379bf6f5e17c5",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "0febf53ca4aed3c3c282ae37c86cc831dff78d562fd8a385ef0690f6c01df9d1",
+      "historical_gzip_bytes": 1482373,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_64_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_64_.9.json",
+      "historical_report_sha256": "85e110269609e1079c3875e541218dff8d8cae199c4084dfbe01ea4f627d204e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.613333655264337e-06,
+          "spectral_db": 0.00043118353572579605
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00012707105395268138,
+          "spectral_db": 0.005345028453208736
+        },
+        {
+          "note": 84,
+          "rms_db": 2.7734932352809923e-05,
+          "spectral_db": 0.0010861119114654939
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=64 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=64 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "797ce04039ed87b773f5f3c1cee960cec5200326dd2ed2d182256ddabbd6f318",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_64_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_500_.9",
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "3abd8886d0cd761a1ce8181299e6052a8f3a9b3723cdfb7f8fa20b47d462a8ba",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "ba0f49a48e44f7337d7eb9223107d264ee143f283c4433f250af166ed30e2d0c",
+      "historical_gzip_bytes": 1423014,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_500_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_500_.9.json",
+      "historical_report_sha256": "7e58d3963e678ce35ca443dc2622c4d4e50634e0e4bfabf074eccc89425600ea",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.869426274498561e-05,
+          "spectral_db": 0.0009201925667227162
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010135393924164856,
+          "spectral_db": 0.0003388516778443629
+        },
+        {
+          "note": 84,
+          "rms_db": 7.312639435599498e-05,
+          "spectral_db": 0.00013303657534237612
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "17faf923c27fa5a1e817175ea780ed983df67a68c729a710d5a46c7ebb505bb1",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_500_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_2000_.9",
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "d77b50b7432fb656646dee9212695c7e88bfc1c198a77a302c39cf0542487ad7",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "d984ff9874ec8025128feb4af1057b2b51b81e52a05ec3934fb415412dedab0e",
+      "historical_gzip_bytes": 1294943,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_2000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_2000_.9.json",
+      "historical_report_sha256": "6920096fd57cab030215bc0a480b8c6d4aded3bd0d82e492f34ad7a1cc57256e",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.345642015767332e-05,
+          "spectral_db": 0.0005478636972524602
+        },
+        {
+          "note": 60,
+          "rms_db": 6.088433696860695e-05,
+          "spectral_db": 0.00020248639319192695
+        },
+        {
+          "note": 84,
+          "rms_db": 6.348730783342879e-05,
+          "spectral_db": 0.0001143348349574528
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "815598254635a480778bb438dee5cacdb1793e9cae0dc4ca31fd1b8d6ac77a2d",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_2000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_8000_.9",
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "f70c92d9b99fec341f39e07be2a56e34240b7851311d728129b9d58b8c04cea8",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "6f163c16a44b1e3318a6e3a48bd8d8435e566b528ac0cc86e0cd6df740c9e29e",
+      "historical_gzip_bytes": 1331252,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_8000_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_8000_.9.json",
+      "historical_report_sha256": "083fc9a6750953aa9cc70108ee4d2ef76369b9f5ef6235dcb98f67a1fb62f530",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.9556710254629115e-05,
+          "spectral_db": 0.00033076854356998655
+        },
+        {
+          "note": 60,
+          "rms_db": 6.203124243941756e-05,
+          "spectral_db": 0.0001340990598102803
+        },
+        {
+          "note": 84,
+          "rms_db": 6.137144937303205e-05,
+          "spectral_db": 7.950631875941701e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "443660f087ed311737d287cd16a6fdcea8984d57196099672e42e49ef982608b",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_8000_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "physical-gain/127_22050_.9",
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0,
+      "parameter_overrides": {
+        "16": 22050.0,
+        "17": 0.8999999761581421,
+        "19": 0.0
+      },
+      "historical_paired_pcm_sha256": "efba83989af4e206849eea79ccdcfa5d88665d7737406b120e88e9016ae78125",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_sha256": "45cd1fa22dfdacf740691784b73976f0df81325f7ea197f10ee5e72d460d7a15",
+      "historical_gzip_bytes": 1306966,
+      "historical_gzip_path": "/tmp/sound-pcm-preservation/physical-gain/127_22050_.9.f32.gz",
+      "local_pcm_present": true,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-hardware-core-spike-v4/hardware-core-spike/physical-gain/127_22050_.9.json",
+      "historical_report_sha256": "d740fbf1abf6e35497ab16c86410c86934dacc47d5a04136f10b29478dddd679",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.943974625377806e-05,
+          "spectral_db": 0.00033041616854281923
+        },
+        {
+          "note": 60,
+          "rms_db": 6.07188589165343e-05,
+          "spectral_db": 0.00013219165418962753
+        },
+        {
+          "note": 84,
+          "rms_db": 6.231736690809147e-05,
+          "spectral_db": 7.631634936299255e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=22050 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=22050 ampA=0.0500000007"
+      ],
+      "current_reference_mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.9.original-mono.f32le",
+      "current_reference_mono_sha256": "c74a9ce9a2ef8242f496f353bf8722ca6c186e9de57eba7e49bca8f65559957e",
+      "current_reference_mono_bytes": 1058304,
+      "initial_inventory_pcm_missing": true,
+      "current_reference_mono_relative_path": "reference_pcm/127_22050_.9.original-mono.f32le"
+    },
+    {
+      "case_id": "filter-modulation/0_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "9dc90e6aef5836945cc795585a29baf88a4f5a035352f93a4d71f581797425a0",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_500_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_500_0.json",
+      "historical_report_sha256": "6517423b48f87729b9864ce51b207409c2857f6072137c9dc6e5a4dee4e79091",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.415577180926618e-05,
+          "spectral_db": 0.0010052587191334552
+        },
+        {
+          "note": 60,
+          "rms_db": 6.675995572637261e-05,
+          "spectral_db": 0.00036610333341062593
+        },
+        {
+          "note": 84,
+          "rms_db": 6.824847960909024e-05,
+          "spectral_db": 0.00015063183450067898
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0_500_0.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "11bbbbe34cc0921667a7a1e7fb4a2eea01c176d455c90596ec2ad9e2ba0252df",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_500_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_500_0.9.json",
+      "historical_report_sha256": "e8cc90fd95fd5a6111b629cce4885eb857b235b0e0652966d63d92a8ba24b3cc",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.875791990818832e-05,
+          "spectral_db": 0.0009198258667075124
+        },
+        {
+          "note": 60,
+          "rms_db": 0.00010140802173023744,
+          "spectral_db": 0.00033775473336700764
+        },
+        {
+          "note": 84,
+          "rms_db": 7.26339912513748e-05,
+          "spectral_db": 0.0001315911109804002
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "86acf3f599d1b793d835f6dba59f913c776dd98051e7647b4d695bab2541bd7a",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_2000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_2000_0.json",
+      "historical_report_sha256": "4744ab51ecf44fc27f5d0d5c84261158a8cf49bca74077f1fbcf42cd9e32fdca",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.076790023377328e-05,
+          "spectral_db": 0.0006643701723771977
+        },
+        {
+          "note": 60,
+          "rms_db": 6.305406640035406e-05,
+          "spectral_db": 0.00023552073307375908
+        },
+        {
+          "note": 84,
+          "rms_db": 6.373172769626996e-05,
+          "spectral_db": 0.00012258275124552484
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0_2000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "c1fe9f3357ed6dc3c66254f68d9d806e0f94e6c1ceb4303e3518eacef837728c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_2000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_2000_0.9.json",
+      "historical_report_sha256": "7d2b672c64077d627d988198ea888e662ddb029b4b0a41b2e4f80c742a224b9b",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.342850850541651e-05,
+          "spectral_db": 0.0005481663018097555
+        },
+        {
+          "note": 60,
+          "rms_db": 6.087098102458594e-05,
+          "spectral_db": 0.00020253202332587016
+        },
+        {
+          "note": 84,
+          "rms_db": 6.359448182158257e-05,
+          "spectral_db": 0.00011374105654249629
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "fcf3d874a3ccebf769e55822e908556c2841f5a53caa20553fa47aa5251ae25c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_8000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_8000_0.json",
+      "historical_report_sha256": "e432d47b006b4103183b71b23a252f64749f10dad347290942a0662c8563c050",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.152425764550349e-05,
+          "spectral_db": 0.00039723949030700395
+        },
+        {
+          "note": 60,
+          "rms_db": 6.239064268118695e-05,
+          "spectral_db": 0.00014876175328370835
+        },
+        {
+          "note": 84,
+          "rms_db": 6.470946990432162e-05,
+          "spectral_db": 8.556352382188477e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0_8000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 0.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "e9897c40006a4a62ae7ac61ce5a0b73d9bdaa189ee7acc0d36c0a16d44d52501",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0_8000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_8000_0.9.json",
+      "historical_report_sha256": "4c7591e9a5943ea45f5f16baf9148b327020d2b9fd57f6c8800762e65ef9dc9d",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.957820138496063e-05,
+          "spectral_db": 0.0003307908393713242
+        },
+        {
+          "note": 60,
+          "rms_db": 6.196580365813129e-05,
+          "spectral_db": 0.00013425328725008836
+        },
+        {
+          "note": 84,
+          "rms_db": 6.139528553575988e-05,
+          "spectral_db": 7.953050933738093e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "c75ed6480d7de37a1db8700f163fdcb0ae82a3a02d5649ffbf3c3219d35cf145",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_500_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_500_0.json",
+      "historical_report_sha256": "c3d8a65ddcb50f3fcbbf8889cfb569561daf09279c209ceabb2d0b4b94a6af82",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.113153144815525e-05,
+          "spectral_db": 0.0010129821898289737
+        },
+        {
+          "note": 60,
+          "rms_db": 4.346906749614702e-05,
+          "spectral_db": 0.00018805053142822913
+        },
+        {
+          "note": 84,
+          "rms_db": 3.133572728980467e-05,
+          "spectral_db": 5.5115191350648844e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_500_0.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "8dfe64c105cdc9b9c0c7e42f4508d3fa165555919576d7ccdfcc8e615d86c635",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_500_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_500_0.9.json",
+      "historical_report_sha256": "5f0bf4d701f536dc832a021789ee411429767d3194790831c3c711544fb371d0",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 4.7221325744590956e-05,
+          "spectral_db": 0.0009464117903890605
+        },
+        {
+          "note": 60,
+          "rms_db": 6.483017087419312e-05,
+          "spectral_db": 0.00016227345866737385
+        },
+        {
+          "note": 84,
+          "rms_db": 2.2303597685116934e-05,
+          "spectral_db": 5.568172196458372e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "8bc603b3d515871837babb71d5a20d366852f957a4d3633c98a3bbbcf373c06e",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_2000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_2000_0.json",
+      "historical_report_sha256": "d3668e866e7692c1d59e7f3af65200815263600cbe1b13915278429480dc85ef",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.161644035258736e-05,
+          "spectral_db": 0.0006807255152059321
+        },
+        {
+          "note": 60,
+          "rms_db": 5.9037063215691664e-05,
+          "spectral_db": 0.00020286513995403595
+        },
+        {
+          "note": 84,
+          "rms_db": 4.2988211396409765e-05,
+          "spectral_db": 6.95932022844199e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_2000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "70e36e319c7221c6d1e457413bd8f9c4b489c836954ae7587a48dd2d748b65a3",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_2000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_2000_0.9.json",
+      "historical_report_sha256": "11348bf0b9489544175e05ee1702cbc96969b66c1eec43e637e4635d8d2b9163",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.446571115685353e-05,
+          "spectral_db": 0.0005957362313739694
+        },
+        {
+          "note": 60,
+          "rms_db": 5.57664974799672e-05,
+          "spectral_db": 0.00019547767020587707
+        },
+        {
+          "note": 84,
+          "rms_db": 6.45432675604999e-05,
+          "spectral_db": 0.00010155603919926619
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "02d3bf2df9d7a8f393b38b37f1d809f531591f20ef7396b632e81096c2a4025e",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_8000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_8000_0.json",
+      "historical_report_sha256": "f4a6a18986c96252ad08a1453b6a58cf945f2e019ca618a7cb87b1e46890ba9c",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.147669368911532e-05,
+          "spectral_db": 0.00041408559958139237
+        },
+        {
+          "note": 60,
+          "rms_db": 6.153084134599331e-05,
+          "spectral_db": 0.00013632943321826655
+        },
+        {
+          "note": 84,
+          "rms_db": 6.072028621149717e-05,
+          "spectral_db": 6.609785744992365e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/0.5_8000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 0.5,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 0.5,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "d9d502b3bfcb2f704d6a8829693802c7e311dc8cc3b5227707a7d20e1ff49d03",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/0.5_8000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_8000_0.9.json",
+      "historical_report_sha256": "15d080b99785b800c515d97240613d324c4c2158bd4949b7b060c0122713972d",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.022610257406821e-05,
+          "spectral_db": 0.0003430394654335921
+        },
+        {
+          "note": 60,
+          "rms_db": 6.6876664388564e-05,
+          "spectral_db": 0.0001326874024376891
+        },
+        {
+          "note": 84,
+          "rms_db": 5.730369613179506e-05,
+          "spectral_db": 7.361910409521387e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "c8b5e850a90d44ca74fa3f630503a5181c93d5661f3f3c7205af32d26a9cf95d",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_500_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_500_0.json",
+      "historical_report_sha256": "c3b6012ba26f75f5a57a8457f1e6242430d056fc42e5f170173a20161763253c",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.0978241350171353e-05,
+          "spectral_db": 0.000701378812486033
+        },
+        {
+          "note": 60,
+          "rms_db": 1.0576000543480474e-05,
+          "spectral_db": 7.783203671316277e-05
+        },
+        {
+          "note": 84,
+          "rms_db": 1.3416784066471298e-05,
+          "spectral_db": 4.8736210929587424e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_500_0.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "d355a78461c37501ca685de8546eed2738faee7c4d74fb1cec5ee38255e4b63a",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_500_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_500_0.9.json",
+      "historical_report_sha256": "90def7cf97385f1281cce2ec72f5c4cdc603bea73de534c8663efd8b656d10e7",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 8.286425185196649e-05,
+          "spectral_db": 0.0006681499193907514
+        },
+        {
+          "note": 60,
+          "rms_db": 6.886494609250046e-06,
+          "spectral_db": 0.0006560264252929879
+        },
+        {
+          "note": 84,
+          "rms_db": 3.7912882045119742e-06,
+          "spectral_db": 0.0003109059579914743
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "1788982410689fe49d758dfaa0af5d00a0b1f7897b6f0849107fbcee43642eea",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_2000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_2000_0.json",
+      "historical_report_sha256": "6b70c29e900e48e095c6e637db5fd330093bedec9c1dd5bff9ba1cab3141ac56",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.022501462929264e-05,
+          "spectral_db": 0.0006870315238106249
+        },
+        {
+          "note": 60,
+          "rms_db": 4.904779470112031e-05,
+          "spectral_db": 0.0001531868197512198
+        },
+        {
+          "note": 84,
+          "rms_db": 9.890496342093143e-06,
+          "spectral_db": 3.216503412514819e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_2000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "d5cb9531d2984b9a11bb45080b21d9a1758884cef91881243dde13db29981210",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_2000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_2000_0.9.json",
+      "historical_report_sha256": "e1e85218101d67ec40ff0977b57957c97738c22ec1c25b6b7be82df40910f50f",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.6249470537123435e-05,
+          "spectral_db": 0.0005977915328391796
+        },
+        {
+          "note": 60,
+          "rms_db": 8.82331453966811e-05,
+          "spectral_db": 8.76683185469597e-05
+        },
+        {
+          "note": 84,
+          "rms_db": 9.25493832740038e-06,
+          "spectral_db": 0.00019414531202460475
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "23440e34f3de87f84d5b4b0757392002b5b8a25ebbf21a0ab43ebe8a0848d5c3",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_8000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_8000_0.json",
+      "historical_report_sha256": "eee027d0e6f8a5d1abde69c0f9625568f1826a51ebe43f365bfc0dc97d1109ac",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.110241856821608e-05,
+          "spectral_db": 0.00042634783372032557
+        },
+        {
+          "note": 60,
+          "rms_db": 5.939174460773196e-05,
+          "spectral_db": 0.00012514645388600636
+        },
+        {
+          "note": 84,
+          "rms_db": 4.993207301604879e-05,
+          "spectral_db": 4.9421408917707306e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1_8000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.0,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 1.0,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "1de9e96b6faa8bb607321110912afc544e0380d32f8c390221c6b7ff84857c1e",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1_8000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_8000_0.9.json",
+      "historical_report_sha256": "26ad2cf6441d055646f536be939aaf78cdfc0af6da85a262df475bff413f79c7",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.466790724103491e-05,
+          "spectral_db": 0.0003720993246063119
+        },
+        {
+          "note": 60,
+          "rms_db": 7.25560873233242e-05,
+          "spectral_db": 0.00028355995336962724
+        },
+        {
+          "note": 84,
+          "rms_db": 9.103469062457323e-05,
+          "spectral_db": 9.483772746838482e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_500_0",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.0,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "6b67605841e767eca14ecca5732c55e848dccf2d5e1609117b6915d25c511b9c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_500_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_500_0.json",
+      "historical_report_sha256": "fb27bd0ccfdf069989176de50e5ab634dad645f5084f9a61ec6e1a7c0b29b043",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.9628803482893745e-05,
+          "spectral_db": 0.0007197494821156882
+        },
+        {
+          "note": 60,
+          "rms_db": 3.0638367016156475e-06,
+          "spectral_db": 6.951854375609325e-05
+        },
+        {
+          "note": 84,
+          "rms_db": 7.4332157044330384e-06,
+          "spectral_db": 5.926903112248253e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_500_0.9",
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 500.0,
+        "17": 0.8999999761581421,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "3bfb396524ae7358758e336f0eec89ca79a374cd8d49085ef02e0544530df453",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_500_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_500_0.9.json",
+      "historical_report_sha256": "a327ebbdd5592e47b5ad98e763dd8a5d9007f7f9a102f25e49fdd3984db25c1f",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 3.857036162366326e-05,
+          "spectral_db": 0.02380014809445087
+        },
+        {
+          "note": 60,
+          "rms_db": 4.696407123169402e-06,
+          "spectral_db": 0.0014492721324937453
+        },
+        {
+          "note": 84,
+          "rms_db": 0.0003255912716613262,
+          "spectral_db": 0.012198076365708172
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=499.999969 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=499.999969 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_2000_0",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.0,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "836a3ac22fe9e85a5fe40bd587281e9fbfa0bfa7711dbcb5ba0fa46fcad48e93",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_2000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_2000_0.json",
+      "historical_report_sha256": "3e4c21fd9acedad33166aeae4ca239d585c25e024e2628cc5c92ebbee94dea34",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 5.8679525116352824e-05,
+          "spectral_db": 0.0002820719533783503
+        },
+        {
+          "note": 60,
+          "rms_db": 3.856709274550302e-05,
+          "spectral_db": 0.00011831377339493055
+        },
+        {
+          "note": 84,
+          "rms_db": 2.171356689130343e-06,
+          "spectral_db": 2.363925310596351e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_2000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 2000.0,
+        "17": 0.8999999761581421,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "f0f95c5ec0e496beaec004602b347bea41be069388e69c42f9f28b69c110e98a",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_2000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_2000_0.9.json",
+      "historical_report_sha256": "afefe88e1f563eb299a3f0ba247bd3b22d6e9395dd39343d628605aac12f4af9",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 7.450911230089309e-05,
+          "spectral_db": 0.0001873337763496055
+        },
+        {
+          "note": 60,
+          "rms_db": 4.4679524968504326e-05,
+          "spectral_db": 0.00015475850959130742
+        },
+        {
+          "note": 84,
+          "rms_db": 1.858682491022808e-06,
+          "spectral_db": 0.0009456122970758397
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=1999.99988 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_8000_0",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.0,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "dc3986c9c515ed27a1c883c84b029842b0b58b0d3da33b1505b2d7bc3de6938c",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_8000_0.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_8000_0.json",
+      "historical_report_sha256": "0da1b176c5783f4379225b302f849088bfdfaabe784335f9c397952462d15c00",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 6.0898703844718564e-05,
+          "spectral_db": 0.00013471711958476298
+        },
+        {
+          "note": 60,
+          "rms_db": 5.738480939746356e-05,
+          "spectral_db": 8.669744472671059e-05
+        },
+        {
+          "note": 84,
+          "rms_db": 3.9328024575015e-05,
+          "spectral_db": 4.0138608031347054e-05
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    },
+    {
+      "case_id": "filter-modulation/1.2_8000_0.9",
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance": 0.8999999761581421,
+      "filter_depth": 1.2000000476837158,
+      "parameter_overrides": {
+        "16": 8000.0,
+        "17": 0.8999999761581421,
+        "19": 1.2000000476837158,
+        "22": 0.20000000298023224,
+        "23": 0.30000001192092896,
+        "24": 0.4000000059604645,
+        "25": 0.5
+      },
+      "historical_paired_pcm_sha256": "5c64f620a57ad269f93816b1cc1c8769637e58b4a85c4c8f66ea0c68501f1d54",
+      "historical_paired_bytes": 2116608,
+      "historical_gzip_path": "/tmp/sound-filter-modulation/1.2_8000_0.9.f32.gz",
+      "historical_gzip_sha256": null,
+      "local_pcm_present": false,
+      "historical_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_8000_0.9.json",
+      "historical_report_sha256": "4a6364595b5436393cf8f0b7f431d78f18a661bd04ab4b6f4e4bc2a98a8eef67",
+      "historical_rows": [
+        {
+          "note": 36,
+          "rms_db": 7.094093576581536e-05,
+          "spectral_db": 0.0001853035798033777
+        },
+        {
+          "note": 60,
+          "rms_db": 8.254081517717963e-05,
+          "spectral_db": 0.00015010347132304904
+        },
+        {
+          "note": 84,
+          "rms_db": 4.671987198271476e-05,
+          "spectral_db": 0.00013996375132521542
+        }
+      ],
+      "historical_nonfinite": 0,
+      "observed_settled_log": [
+        "note=36 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=60 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007",
+        "note=84 effective_detune=1 cutoff=7999.99951 ampA=0.0500000007"
+      ]
+    }
+  ]
+}

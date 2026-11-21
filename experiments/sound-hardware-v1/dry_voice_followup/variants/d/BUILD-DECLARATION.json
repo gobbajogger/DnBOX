@@ -1,0 +1,154 @@
+{
+  "schema": "Independent S1 Variant D pre-build freeze v1",
+  "written_utc": "2026-11-19T00:21:56.965081+00:00",
+  "status": "BEFORE_HOST_BUILD_OR_CANDIDATE_EXECUTION",
+  "variant": {
+    "id": "d_ch4_centered_linear_feedback",
+    "expected_host_bytes": 160,
+    "source_root_for_root_to_register": "/workspace/scratch/e803955aec60/s1_dry_voice_d",
+    "files": {
+      "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+      "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+      "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+      "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+      "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+      "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+    },
+    "historical_audio_reports": null,
+    "audio_status": "NO_REFERENCE_COMPARISON_OR_PCM_CAPTURE"
+  },
+  "exact_change": "Only nonzero feedback: phi(d)=5*d; d=w/(1+5*c). C complete r=0 branch, q/w/c ordering, four forward stages, histories, control law, excitation and gain unchanged.",
+  "candidate_choice_count_in_this_task": 1,
+  "source_files_sha256": {
+    "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "tests/ownership_test.c": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+    "prepare.py": "f3a36ba98617c0a81ed3f8e5a87766634421d777b2dec15c72a17dc1286be34c",
+    "inputs/NONLINEAR-HYPOTHESIS.md": "ea2e830a98392567a9055b71296feb4764fbb32ecbbf613641823de8f16ace11",
+    "inputs/C-filter-observations.json": "85c088668cb1106cc5c32e6438c0e6535c82ea328d21435c91bb45863c3b372a",
+    "inputs/reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931",
+    "reports/C-to-D.patch": "5bda8714c7be9166cc312f77336bed17a5dbed1e4576312dca607cd927a59d1e"
+  },
+  "frozen_C_files_sha256": {
+    "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "frozen_C_declaration_sha256": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+  "complete_r0_branch_source_byte_identical": true,
+  "other_five_renderer_source_files_byte_identical": true,
+  "ownership_test_source_byte_identical": true,
+  "source_free_packet_sha256": {
+    "case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "gate": {
+    "comparison_gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0,
+    "alignment": "none",
+    "normalization": "none",
+    "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "build_flags": [
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-Ivendor",
+    "-Isrc"
+  ],
+  "build_commands_serial": {
+    "build-core": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-Ivendor",
+      "-Isrc",
+      "-c",
+      "src/s1_dry_voice.c",
+      "-o",
+      "build/s1_dry_voice.o"
+    ],
+    "build-host": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-Ivendor",
+      "-Isrc",
+      "build/s1_dry_voice.o",
+      "vendor/dnbx_s1_envelope.c",
+      "src/host.c",
+      "-o",
+      "build/s1_dry_host"
+    ],
+    "build-ownership": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-Ivendor",
+      "-Isrc",
+      "build/s1_dry_voice.o",
+      "vendor/dnbx_s1_envelope.c",
+      "tests/ownership_test.c",
+      "-o",
+      "build/ownership_test"
+    ]
+  },
+  "test_commands_serial": {
+    "describe": [
+      "/workspace/scratch/e803955aec60/s1_dry_voice_d/build/s1_dry_host",
+      "--describe"
+    ],
+    "host-selftest": [
+      "/workspace/scratch/e803955aec60/s1_dry_voice_d/build/s1_dry_host",
+      "--selftest"
+    ],
+    "ownership-selftest": [
+      "/workspace/scratch/e803955aec60/s1_dry_voice_d/build/ownership_test"
+    ]
+  },
+  "test_scope": "Unchanged host configuration/reset/gate invariants; unchanged focused ownership API test, 4096 frames independently plus 4096 interleaved per logical owner. Two owners, irregular 1/17/64 blocks, asymmetric off, live physical edits including depth1.2; in-memory samples only.",
+  "reference_pcm_read_by_preparation": false,
+  "audio_capture_or_reference_comparison_authorized": false,
+  "original_source_boundary": "Frozen independent C, approved DnBOX vendors, independent numeric diagnosis and source-free observations only; no original engine source, header, object, assets or historical source-aware code.",
+  "pending_action": "Stop after host/invariant checks; root review and registration before any new component or whole-voice audio comparison.",
+  "production_activation": false
+}
