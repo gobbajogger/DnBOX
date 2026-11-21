@@ -1,0 +1,58 @@
+[
+ {
+  "board": "elite",
+  "path": "elite/measure/results.json",
+  "elf_sha256": "11e71d0374ce4525d126eecbd7343a83610bf06d0b460e711dffe55c3d11e253",
+  "fwsc_sha256": "39d4ed4c2dce6724f56388d3ac87dd8f225fc70f0d7378fefe2f5952d9e79531",
+  "pcm_sha256": "48a038e828f758edcee4f0f5772a081dd92c96e5dfb04d3f71248a0b48b28915",
+  "max_us": 10893,
+  "late": 0,
+  "xruns": 0,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ },
+ {
+  "board": "pro",
+  "path": "pro/measure/results.json",
+  "elf_sha256": "27409b3d0e96f1f75effdcf64845b42a602600b77729c7fc274ad5038709ca10",
+  "fwsc_sha256": "d776238122e4cccf8809d8c09a20ca8e38aafeb0f285f609c3def9f58ab06425",
+  "pcm_sha256": "ff995502914544134b6e119c764a20f532f27fc0afb9410afcbbb030f4bb3612",
+  "max_us": 11640,
+  "late": 1,
+  "xruns": 1,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ }
+]
