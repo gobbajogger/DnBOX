@@ -14,7 +14,7 @@
   "reportSHA256": "559859ac16f1b15edc724dff0face39726602dd2ad20ecb2d733a91cb6ece61d",
   "frames": 1712,
   "stableStateIDs": 1712,
-  "totalBytes": 2072216,
+  "totalBytes": 2281292,
   "maxPartBytes": 494660,
   "archives": [
     {
@@ -2065,7 +2065,18 @@
       "sha256": "4d27990cecb6ff46b2f4ec292fe37c9ce6687bbc20ac599d43cb759b1743b24f",
       "frames": 12,
       "scope": "BREAK velocity: ordinary states, live, preview and persisted physical edit. receipt.json identifies inputs and per-state predecessor digests."
+    },
+    {
+      "path": "sound-bank-window.tar.xz",
+      "bytes": 209076,
+      "sha256": "a65c9b058a1010ce5d6ff5f773ed6d94a2048a8e01ccfa03d3b246742a8faaf2",
+      "frames": 253,
+      "scope": "Current stock SOUND banks, synth selectors and parameter lists. receipt.json records the final source inputs, predecessor and replacement RGB digests, and measured changed-pixel counts."
     }
   ],
-  "baseArchiveBytes": 2059384
+  "baseArchiveBytes": 2059384,
+  "retiredStates": {
+    "engine-2-part-2-page-1": "55cc349c0e5f193b0db44fd149e49fa1ec3a9af81a43a80d7b08675d210f43bb",
+    "engine-2-part-3-page-1": "de6f1b155cd1edbbeabebfb14d74e5c66a3b36b7d9b37d240347d6e2a8ecd9f2"
+  }
 }

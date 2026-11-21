@@ -1,0 +1,240 @@
+{
+  "published_commit": "b7b91c8b78f572bf69dacc74eabc97ff92879187",
+  "published_equivalent_paths": [
+    "firmware",
+    "host",
+    "tools",
+    "assets",
+    "ble",
+    "build.sh",
+    "experiments/original_synth",
+    "experiments/wobble",
+    "tests/host/qualify_fwui_s1.py",
+    "tests/host/ui_synthone_patch_test.c",
+    "tests/host/ui_synthone_frame_test.c",
+    "tests/host/smc_ui_test.c",
+    "tests/host/smc_ui_test.sh",
+    "tests/host/juno_slot_integration_test.c",
+    "tests/ui_inventory/superj6_slot.py"
+  ],
+  "firmware_ui_blob": "0a06855a111284ad2d67cf3f0022ddbac84b5106",
+  "firmware_tree": "506f3452afcb0e1dc8508993394d44cf86c44466",
+  "build_input_commit": "3f07d97956355e0412b67679819546f2fd6f6df0",
+  "sound_provider": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+  "composition_base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "checked_source_sets": {
+    "sound": {
+      "files": 589,
+      "sha256": "ee25b3bd3b751756f618db4d86f727225eae772d5113949363837c7e837ede25"
+    },
+    "stock": {
+      "files": 502,
+      "sha256": "7643b652ab472e7c1c101ff94a491eb11323cef7d7f338794911d996cbceef79"
+    }
+  },
+  "source_manifest_sha256": "bf1c0fe4ccb9863e6eb531217675674f958162dd5e7ffd6af01ebb69a839b877",
+  "sdk_inputs": {
+    "uboot.boot": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+    "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+    "cfg/eq_cfg_hw.bin": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8"
+  },
+  "toolchain_inputs": {
+    "pi32v2/bin/clang": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+    "pi32v2/bin/ld": "fd61aff15616bb6f6b58fd2e9ede7af741c7bf05facb3e0cb3d3c9817c268fd9",
+    "pi32v2/bin/LLVMgold.so": "2ca8dafde18070d6a42fc47fc2ec4723946cf3d2404ca25981de5070beb1aa12"
+  },
+  "memory_thresholds_bytes": {
+    "xip_free_min": 1024,
+    "pool_margin_min": 512,
+    "pool_reserve_min": 8192
+  },
+  "map_method": "The production link writes the map and ELF in one invocation. The package fingerprints belong to that build.",
+  "builds": [
+    {
+      "profile": "stock",
+      "model": "elite",
+      "memory_bytes": {
+        "xip_free": 1168,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 551504,
+          "sha256": "ee4b74ec40cbf7715c6ff3f16fe824d044f2df98016782c42466cccad0110605"
+        },
+        "elf": {
+          "bytes": 639388,
+          "sha256": "91b97f8efe4aecbd7e0274364c649915f6b6b079ae3abfcfa740b66813227485"
+        },
+        "loader": {
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+        },
+        "package": {
+          "bytes": 651732,
+          "sha256": "c91dd802336e590e4391bf585ad5ab30b5fe989986dd56f390eec485e085fedb"
+        }
+      },
+      "link_map": "stock-elite.map.gz",
+      "map_sha256": "65f3ca70d2fe5631dee43f6e72a15e5535e93e47f912b8bb76ab1b67e7f48372",
+      "compressed_map_sha256": "6c728905781b571faa077f47fcfe2c7749a3c36062d9299387409957af95af18"
+    },
+    {
+      "profile": "stock",
+      "model": "pro",
+      "memory_bytes": {
+        "xip_free": 1176,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 551496,
+          "sha256": "ff8e6e1400b5ab75c63abc91fbe95fbbd7209a15a7bc994bb02c5bdc6276ff3e"
+        },
+        "elf": {
+          "bytes": 639380,
+          "sha256": "4fca6ee8bfe0b1b6a3ead2acde32bac4fdc6b6fd8f80fce6b8cab09a0ee39ffe"
+        },
+        "loader": {
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+        },
+        "package": {
+          "bytes": 651730,
+          "sha256": "ba36ee34fde99f5fde708b373038633808f6e0fd4b6e55241878706e86c77a5f"
+        }
+      },
+      "link_map": "stock-pro.map.gz",
+      "map_sha256": "fa589b1f1540ed109f358c82ca79a32a5f9879e623a314fe4ce388b7064e2898",
+      "compressed_map_sha256": "825cc947129a2cffb525e07335406a1c25084176e9fb2499782c3ff4de12faa4"
+    },
+    {
+      "profile": "sound-off",
+      "model": "elite",
+      "memory_bytes": {
+        "xip_free": 6192,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 546480,
+          "sha256": "14ded89c8a610abf4266017ffb01331458133c7c62f260f3729fe2b6deaea8b4"
+        },
+        "elf": {
+          "bytes": 634588,
+          "sha256": "c8c3dff8e67460c31fc1d5efbf7011dc349a1f2a17594f55d88fb94887c555d6"
+        },
+        "loader": {
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+        },
+        "package": {
+          "bytes": 651732,
+          "sha256": "f055710ce8d57d610016356fa0c39d775a04df30b2727076440858cc567ba288"
+        }
+      },
+      "link_map": "sound-off-elite.map.gz",
+      "map_sha256": "19d4ef90f91fcecd705493fb387b7a1f1bfcb7cd9d015953c5e6919bae38a86b",
+      "compressed_map_sha256": "61e007a9267260b448e35a6cfa8bb28f5cbc5d860e3e5653635f8e38fbc1e69e"
+    },
+    {
+      "profile": "sound-off",
+      "model": "pro",
+      "memory_bytes": {
+        "xip_free": 6200,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 546472,
+          "sha256": "6b7d33234f4180bc21d32e89ea93f3133801cb5c7ad3397f19427cdc3bc1a1c8"
+        },
+        "elf": {
+          "bytes": 634580,
+          "sha256": "e95073d6f5ae08901882a66d9010240383228c77e97c0cf62ea4c7bd77ad203d"
+        },
+        "loader": {
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+        },
+        "package": {
+          "bytes": 651730,
+          "sha256": "4f63e4bc420130c147fb90109521b1ae98ac4d9ff889565e4936c2e1dcd67499"
+        }
+      },
+      "link_map": "sound-off-pro.map.gz",
+      "map_sha256": "c2a8e40e7cec5210e8a2bd04e7b22805a18d2760d5e97bc55d99487e24a388ee",
+      "compressed_map_sha256": "4589542855012e156019f5fd6384c86ece1bc9ecaa05ebc7c14c7a0cb30df0c8"
+    },
+    {
+      "profile": "sound-on",
+      "model": "elite",
+      "memory_bytes": {
+        "xip_free": 2656,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 550016,
+          "sha256": "5d11fbe1d34045d44fd9aef1c8a0ca92441c08e20068e1428d6fc1eb9d992b1e"
+        },
+        "elf": {
+          "bytes": 637688,
+          "sha256": "3921231ff4560c6fe80cfd568cda17d64ae95182c114748b461562ac4c4a46b9"
+        },
+        "loader": {
+          "bytes": 7616,
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+        },
+        "package": {
+          "bytes": 651732,
+          "sha256": "3b8e226a2c1d320705720d56575d579bb310e271cfddf93fb8bc14726d0b3315"
+        }
+      },
+      "link_map": "sound-on-elite.map.gz",
+      "map_sha256": "e80afa473ab2c06fba0bf05aaf43de3de83af770f77953199a270c9d87421521",
+      "compressed_map_sha256": "5f4fc11580ffc4ca9b432698b49f04b413f85b2357b6d25bacd2ba2888f23bdf"
+    },
+    {
+      "profile": "sound-on",
+      "model": "pro",
+      "memory_bytes": {
+        "xip_free": 2664,
+        "pool_raw_free": 8972,
+        "pool_margin": 780,
+        "pool_reserve": 8192
+      },
+      "binaries": {
+        "app": {
+          "bytes": 550008,
+          "sha256": "58d167869083db7e6596c02a211836cb758d6fea2552f43b7292a13291e29755"
+        },
+        "elf": {
+          "bytes": 637680,
+          "sha256": "2bc3f4ca931113f8b3f2f23b569654631eea88ea943e9e5f3b55ebe738d88f67"
+        },
+        "loader": {
+          "bytes": 7614,
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+        },
+        "package": {
+          "bytes": 651730,
+          "sha256": "d703c360246e8889c33e42e59a9cd61c809746b7e38a7dd0fdf7aba91b9d0fd0"
+        }
+      },
+      "link_map": "sound-on-pro.map.gz",
+      "map_sha256": "793e5081eda37331eed697ab35906e11d65b984ded890728f62c3636ff79d977",
+      "compressed_map_sha256": "46ccb531c3e6cfc539d85b3c6fcc66dbd5c27a4e63e5eef6b5176bab2cf55965"
+    }
+  ]
+}

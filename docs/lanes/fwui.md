@@ -1,18 +1,56 @@
 # Firmware UI lane
 
-The existing [draft PR #975](https://github.com/gobbajogger/DnBOX/pull/975) targets `integration/dnbox-consolidated`. The [previous native qualification comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7057196568) records the focused results and stock sizes at `4c05722d`. The [previous qualification](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7056161789) covers the baseline at `5f80e1d6`.
+[PR #975](https://github.com/gobbajogger/DnBOX/pull/975) targets `integration/dnbox-consolidated`. The [qualification comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) records the published SHA, stock builds and review status.
 
-## Startup and bass-panel routes
+## Find a screen
 
-Startup and normal playback use the same display. Follow the splash to the first sequencer frame, or follow the pending-sample, updater, calibration, and guard paths in the [startup route inventory](fwui/current/native-routes/README.md). For either bass part, press **PARA**, use **K2** to select **SOUND**, and use **K5** to select the engine. The final page keeps its preceding controls visible. On stock Synth One, SOUND displays the engine, preset and application status. On a Sound build with the editor enabled, K5–K8 edit the selected row and **SCALE** opens the parameter list.
+The [screen guide](fwui/screens/README.md) and [searchable catalog](fwui/screens/screen-index.tsv) link 1,944 records and cover normal startup, pending-sample recovery, calibration, updater, safe mode, playing states and both bass editors. The catalog records the source, archive or direct PNG path, and decoded RGB hash for each native 240×240 capture. The two retired stock placeholder pages retain their earlier hashes under `history/`.
 
-SuperJ6 exposes four selectable presets and sixteen physical controls per bass part. The regression drives the panel through both owners, changes every macro, checks live filter and level pixels, and reloads the project. The audio replay reproduced all 6,291,456 stereo frames across four presets, sixteen controls and 128 positions. [SuperJ6 routes, units and captures](fwui/current/superj6-slot/README.md) · [Synth One parameter reference](fwui/current/synthone-editor/README.md)
+| Route | Controls and behavior |
+|---|---|
+| Startup and recovery | Follow the splash to the first sequencer frame. Recovering a pending BREAK sample restores all 4,096 bytes. The first ordinary screen matches the already-restored control. The two octave buttons enter the update countdown. [Startup captures](fwui/current/native-routes/normal-loop/normal-loop.json) |
+| Stock Synth One | On either bass part, press **PARA**, turn **K2** to SOUND and select SYNTH ONE with **K5**. The panel shows the engine, preset and actual application state. **SCALE** opens the three-entry list. [Fourteen native frames](fwui/current/panel-routes/stock-init/frames.json) |
+| Optional Synth One | On a build with Sound #973 and the patch enabled, **K2** chooses the oscillator, filter, two envelope pages or SOUND. **K5–K8** edit the mapped controls. **SCALE**, **K2** and **K3** open, select and edit the real factory IDs. Both owners have independent state. [Controls and ranges](fwui/current/synthone-editor/README.md) · [122 native captures](fwui/current/synthone-editor/routes.json) |
+| Compact SuperJ6 | Choose SUPERJ6 in SOUND. **K4** or **K6** selects one of the four stock presets. Each bass part has sixteen real DSP controls, plus the full parameter list. All 6,291,456 stereo frames in the parameter sweep matched the original compact engine. [Controls and audio comparison](fwui/current/superj6-slot/README.md) · [28 native captures](fwui/current/superj6-slot/frames.json) |
 
-The optional editor passed the foreground coverage and empty-area checks on 352 panels in 88 firmware frames. The independent review found that stock parameter lists left the lower strip empty. Long drum and bass lists now use nine real entries. Short lists distribute their entries across the available height. Stock Synth One has three selectable entries and uses the full-height summary rows. Both owners have captures for ready, requested, updating and long-name states and every stock list selection. [Stock selector and short-list captures](fwui/current/panel-routes/stock-init/frames.json)
+The last bank keeps the previous rows visible and editable. Two- and three-control rows use the available width. Drum and bass parameter lists show up to nine real entries and distribute short lists across their available height.
 
-Chicago and Miami now share one immutable 512-byte copy of the same 128-word pitch table. Independent standalone and combined probes checked every byte. A same-object native comparison recovered 512 bytes. The stock builds immediately before the short-list spacing change retained 1,344 B on Elite, 1,352 B on Pro and 780 B above the pool reserve. Final catalog, final builds and acceptance are in qualification. The branch incorporates the consolidated policy at `8e4c1a10`; lane promotion uses focused tests, both builds, no loss and independent review. [Pitch table comparison](fwui/current/panel-routes/shared-pitch.json) · [Starting-head focused tests](fwui/current/panel-routes/starting-head-regressions.json)
+## Stock memory
 
-## Previous firmware and stock limits
+| Firmware source | Elite XIP free | Pro XIP free | Pool margin on both |
+|---|---:|---:|---:|
+| Starting PR head `3e67b59c` | 4,056 B | 4,064 B | 780 B |
+| Stock firmware tree `506f3452` | 1,168 B | 1,176 B | 780 B |
+| Same tree with Sound, patch off | 6,192 B | 6,200 B | 780 B |
+| Same tree with Sound, patch on | 2,656 B | 2,664 B | 780 B |
+
+The stock thresholds require at least 1,024 B free XIP and 512 B above the 8,192 B pool reserve. Sharing Chicago and Miami’s identical 128-word pitch table recovered 512 B. The six model/configuration links each produced an ELF, package and application map. [All six links and hashes](fwui/current/route-native/fit.json)
+
+The pitch comparison covered standalone and combined linkage and all 128 words. [Native link and pitch-table comparison](fwui/current/panel-routes/shared-pitch.json)
+
+## Finish-line checklist
+
+| Item | Status | Evidence |
+|---|---|---|
+| F1 · R22 and shared glyphs | Independent review in progress | The catalog includes current ordinary and supplemental screens, both bass owners, startup, calibration and guard routes. Remaining ordinary menu slabs are under independent review. [Screen guide](fwui/screens/README.md) |
+| F2 · Geometry | Ordinary walk passed on firmware tree `506f3452` | 1,528 screens, 19,593 content checks and 249 glyph checks passed. The source-qualified supplemental and persisted runs have separate receipts. [Geometry harness](../../tests/ui_geometry/run.py) |
+| F3 · Stock fit | Both stock links passed on firmware tree `506f3452` | Both stock images meet the XIP and pool limits above. [Stock package fingerprints](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) |
+| F4 · Pan and battery | Focused qualification | All 27 numeric pan bindings cover L50, C and R50. The two SMC headers use the four-level battery painter. The board reports an unknown/USB state when calibrated percentage data is unavailable. [Pan, four levels, overlay and toast tests](fwui/current/panel-routes/starting-head-regressions.json) |
+| F5 · Pads, LEDs and hold-GLOBE | Focused checks pass, full host result pending | 7,229 pad and LED assertions cover 909, 808, BREAK and the bass parts. GLOBE, copy and held-step cases also ran. [Focused test results](fwui/current/panel-routes/starting-head-regressions.json) |
+| F6 · Per-step slider lane | Host scenario and persistence checks pass | Velocity, chance, pitch and pan survive reload on all five parts. SMK-37 uses held SEQ and SCALE to switch lane, then held SEQ, a step and K3 to edit. FM-1 uses SEL and ALGO. [Twenty edited lanes](fwui/current/break-velocity-tests.json) · [BREAK audio and persistence](fwui/current/panel-routes/starting-head-regressions.json) |
+| F7 · Genuine synth panels | Stock and optional interface checks pass | The admitted Synth One INIT patch exposes 13 physical controls per owner. Compact SuperJ6 exposes 16 controls and four patches. Each editor has real bindings, units and activity glyphs. [Synth One qualification](fwui/current/synthone-editor/routes-qualification.json) · [SuperJ6 evidence](fwui/current/superj6-slot/README.md) |
+| C1 · Exact-head focused tests and both stock builds | Final run in progress | The [PR comment](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842) records the tested source and package hashes. |
+| C2 · Consolidated ancestry and no loss | Final-head verification pending | The branch includes consolidated `8e4c1a10` as a merge ancestor. |
+| C3 · Independent multi-size review | Open | Independent before/after review covers the native LCD, desktop and both phone orientations. |
+| C4 · Hard limits | Final-head verification pending | The gate checks secrets, workflows, installer assets, PSRAM and oversized non-LFS files. |
+| C5 · Every firmware item passes | Open | The remaining measured items are identified above. |
+| C6 · Integration | Draft | Integ owns the integration merge after the checks. [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) |
+
+Sound owns the broader original Synth One and SuperJ6 factory libraries in [PR #973](https://github.com/gobbajogger/DnBOX/pull/973). The firmware captures and linked-image simulations qualify software behavior. Measurements of physical flash retention, electrical USB detach and on-glass color require a device. [Native evidence boundaries](fwui/current/native-routes/README.md)
+
+## Qualification at earlier revisions
+
+### Previous firmware and stock limits
 
 The [published firmware](https://github.com/gobbajogger/DnBOX/commit/61827a714ca7b240c01a55ed347b5fd7b847c7c2) contains the BREAK startup fix and the Synth One editor. The stock FWUI branch builds on its own. The editor runs when built with [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) and `X0X_SYNTHONE_PATCH=1`. The [control reference](fwui/current/synthone-editor/README.md) lists every factory ID, physical range, edit step, unit and display format for both bass parts.
 
@@ -40,7 +78,7 @@ The main index contains 1,712 state IDs with 240×240 PNGs and decoded RGB hashe
 
 The supplemental index covers startup, recovery, calibration and the Chicago waveform fallback. In the first 38 startup and calibration cases, 31 frames exactly reproduce the archive under the production control flow and seven have new full-frame pixel oracles. A one-pixel displacement fails the comparison. Six complete native functions run against simulated hardware, as does the initial RAM-only path in `fm1_main`. Two more captures distinguish the Chicago page with an admitted cutoff lock from the same page with a malformed sibling lock. Only the latter selects the fallback painter. Removing that painter changes 43 pixels within its plot. All 111 Chicago/Miami factory cells and 124,032 admitted single-control previews retain the normal projection. A separate replay of the complete normal startup function accepted an emulated flash ID and exercised seven ordinary boot, update and pending-shadow routes. It captured 16 states, reproduced three archived splashes and checked 5,272 ink pixels across seven final caption masks. At exactly 5,000 ms the update display can read `0..`. On release the octave input displays `STEPS 17-32`. [Normal startup receipt](fwui/current/native-routes/normal-loop/normal-loop.json). The original scan counted 98 observed renderers among 118 discovered. [Supplemental frame index](fwui/current/native-routes/screen-index.tsv) · [Native execution and hardware boundaries](fwui/current/native-routes/README.md) · [Renderer dispositions](fwui/current/renderer-gaps.json).
 
-## Checklist
+## Checklist at the starting PR head
 
 | Item | Status | Evidence and remaining work |
 |---|---|---|
@@ -70,7 +108,7 @@ At `11bc3f3a`, 20 IDs fell outside the original screen inventory. Seven executed
 
 The editor reads the applied patch at a render boundary for each part. All 13 parameters accept 128 positions. Factory selection and project reload invalidate a queued edit from the prior revision. A second encoder turn on the same part before the next audio block gives an explicit retry cue. The peer part can accept its own edit in that block. Reload restored the entire saved sound, including the other bass part. With a sounding note on A, all four display rows responded while B stayed pixel-identical to idle. [Filter ADSR](fwui/current/synthone-editor/filter-adsr.png) · [Engine and preset](fwui/current/synthone-editor/sound-selector.png) · [Busy cue](fwui/current/synthone-editor/edit-busy.png)
 
-## Remaining acceptance
+## Acceptance remaining at the starting PR head
 
 Sound owns enabling its patch interface by default and the remaining 694-program factory-bank work. On this revision INIT is the only admitted Synth One program. Test-and-merge owns the independent full Local gate and complete R22 visual acceptance. Electrical controls, on-glass appearance, physical flash retention across power loss, USB electrical detach and physical reset require a board. Integ owns readiness and merge of the draft. [Sound #973](https://github.com/gobbajogger/DnBOX/pull/973) · [Native boundaries](fwui/current/native-routes/README.md)
 

@@ -142,8 +142,9 @@ def replay(app, html, rows, frames, size, output):
     # CSS can produce subpixels. Qt snaps the painted box to the nearest device pixel.
     x, y = int(x + 0.5), int(y + 0.5)
     images = {row["rgb_sha256"]: row["state_id"] for row in rows
-              if row["state_id"] in ("startup/startup-sample-recovered", "synth-one/bass-A-page-5-k0-overview",
-                                    "superj6/slot-b-matrix-0")}
+              if row["state_id"] in ("global-section-1-row-04", "startup/startup-sample-recovered",
+                                    "synth-one/bass-A-page-5-k0-overview",
+                                    "superj6/slot-b-matrix-oscillator")}
     print(f"Browser viewport {width}x{height}, {len(frames)} distinct images", flush=True)
     for sha, png in frames.items():
         paint_frame(app, frame, png)
