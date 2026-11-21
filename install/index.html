@@ -2214,7 +2214,7 @@ const TEXT = {
     helptext: "見つからない場合は他の MIDI アプリを閉じてください。中断した更新は、多くの場合、USB ケーブルを挿し直して「ファームウェアを書き込む」を再度押せば再開できます。",
     helpmanual: "マニュアルを開く", hintblocked: "検証済みの機種別パッケージが必要です。",
     hintverifying: "パッケージの読み込み・整合性確認を待ってください。",
-    hintack: "開発版の注意事項を確認し、チェックを入れてください。",
+    hintack: "上の機種と同意事項を確認し、チェックを入れてください。",
     hintready: "書き込む準備ができました。開始前に機種と内容をもう一度確認します。",
     hintbusy: "インストールの処理中です。USB を抜かず、ページを閉じないでください。",
     latestdev: "最新の利用可能な DEV", devchecked: "DEV CHECKED", hardwareuntested: "実機未テスト", superseded: "旧ビルド・非推奨",
@@ -2576,6 +2576,14 @@ function mainPinFor(v) {
       v.hardware_tested === pin.hardware_tested ? pin : null;
   } catch { return null; }
 }
+// Only a pin can mark a row tested; a catalog hardware_tested flag alone never does.
+function testedByPin(v) {
+  return mainPinFor(v)?.hardware_tested === true;
+}
+// Pinned rows show their public version (e.g. 0.0.26); anything else keeps its catalog id.
+function statusVersionLabel(v) {
+  return mainPinFor(v) && typeof v.display_version === "string" && v.display_version ? v.display_version : v?.version;
+}
 function versions() {
   return archivedCatalogVersions().filter(v => !!mainPinFor(v) && !catalogDenied(v));
 }
@@ -2746,9 +2754,9 @@ function renderBuildInfo(v,p) {
   const b=$("buildbadges");b.replaceChildren();
   if(v.version===catalogLive.latest && v.status==="dev-checked") b.append(buildBadge(t("latestdev"),"important"));
   if(v.status==="dev-checked") b.append(buildBadge(t("devchecked")));
-  const ownerTested = mainPinFor(v)?.hardware_tested === true;
+  const ownerTested = testedByPin(v);
   if(ownerTested) b.append(buildBadge(t("verrelease")),buildBadge(t("ownertested"),"important"));
-  if(v.hardware_tested!==true) b.append(buildBadge(t("hardwareuntested"),"important"));
+  if(!ownerTested) b.append(buildBadge(t("hardwareuntested"),"important"));
   if(v.lifecycle==="superseded") b.append(buildBadge(t("superseded"),"blocked"));
   $("buildsummary").textContent=v.description||v.title||"";
   $("buildprovenance").textContent="Build: "+v.version+" · Source: "+(v.source_commit||"unknown")+
@@ -2767,7 +2775,7 @@ function renderBuildHistory() {
     const badges=document.createElement("div");badges.className="build-badges";
     badges.append(buildBadge(versions().includes(v) ? "Owner-approved " + (v.display_version || v.version) : "Archived · not installable", versions().includes(v) ? "important" : "blocked"));
     if(v.status==="dev-checked")badges.append(buildBadge(t("devchecked")));
-    if(v.hardware_tested!==true)badges.append(buildBadge(t("hardwareuntested"),"important"));
+    if(!testedByPin(v))badges.append(buildBadge(t("hardwareuntested"),"important"));
     if(v.lifecycle==="superseded")badges.append(buildBadge(t("superseded"),"blocked"));
     el.append(badges);
     const p=document.createElement("p");p.textContent=v.description||"";el.append(p);
@@ -2881,7 +2889,7 @@ async function loadSelectedPackage() {
     // already checked against the immutable package digest and model identity.
     verifiedDownload = { pkg, model, identity, version: ver.version,
       href: URL.createObjectURL(new Blob([raw], {type: "application/octet-stream"})) };
-    say(`DnBOX ${ver.version} · ${MODELS[model] || model}`);
+    say(`DnBOX ${statusVersionLabel(ver)} · ${MODELS[model] || model}`);
     refreshMeta();
   } catch (e) { if (isLatest()) sayK("loadfail", e.message); }
 }
