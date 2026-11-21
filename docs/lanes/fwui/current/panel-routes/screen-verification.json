@@ -828,5 +828,6 @@
     "ordinary": "The independent walk exported e96c0eb0 and instrumented it with tests/ui_geometry/instrument.py. A compiler dependency trace authenticated the reused executable against ac63b270. On ac63 the same executable ran the full ordinary positive with FWUI_TEXT_TRACE=1 and the complete tests/ui_geometry/run.py mutation checks. Each independent and replayed PNG was decoded and compared.",
     "extended": "Run the preparation phase of tests/ui_inventory/run.py on an authenticated ac63b270 Git archive, then run tests/ui_geometry_extra/extend.py with F2_EXTRAS_ONLY=1 and tests/ui_geometry_extra/run_edited.py. The host compiler used -O0 -g0. Verify the explicit layers against a fresh run of tests/host/ui_layer_restoration_test.sh. The final nonordinary trace reference uses the actual F1_FRAME, F1_STATE, F2_EXTRA and decoded PNG bytes."
   },
-  "nonordinaryReferenceSHA256": "2d7135fc97ba3f521f3fd2ce119adc8904b5c86ce85b28665d5c304aa477be52"
+  "nonordinaryReferenceSHA256": "a89079d73a74a071987d18482791677222066e87e9e6e3930cd75f380dfc8ac5",
+  "nonordinaryReference": "nonordinary-reference.json.gz"
 }

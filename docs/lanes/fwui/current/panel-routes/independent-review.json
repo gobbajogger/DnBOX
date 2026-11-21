@@ -512,10 +512,86 @@
           "mismatches": 0
         }
       ]
+    },
+    "fullCorrectedBrowserCatalog": {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "c27a117418478e645ed11a3f35bb05e658634945275f156c3cb93be8eb2dfc8b",
+      "ids": 1944,
+      "uniqueNativeRGB": 1709,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        }
+      ]
     }
   },
   "c2c4": {
-    "checkedCandidate": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "checkedCandidate": "7d3bd621d1bdbbf63aee5ad577e49e11afe1a4dc",
     "consolidated": "8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374",
     "ancestor": true,
     "noLoss": "PASS",
@@ -523,7 +599,7 @@
   },
   "grade": {
     "C3": "PASS",
-    "F1": "PASS for reachable inventoried firmware screens; historical 17:00 references are named by design guidance",
+    "F1": "PASS for the indexed, reachable software routes",
     "independentCumulativePRScore": 10,
     "scope": "Independent native and three-size genuine browser replay of the reachable firmware UI, before and after; no unresolved observed visual defect. Physical LCD behavior, electrical timing and optional engine programs outside the admitted provider are separate."
   },
@@ -570,6 +646,13 @@
       "id": "global-section-1-row-04",
       "actualControl": "Bluetooth NAME / no connected peer",
       "coveragePercent": 68.597
+    },
+    "catalogReplay": {
+      "registeredTest": "ui-menu-layout",
+      "freshAndIndexedMeasurementsEqual": true,
+      "verifiedRGBFrames": 378,
+      "completeMeasurementSHA256": "31931b40224ac71cfb6db17bb35a925257936eacf490abef8d83a90fadcd47a0",
+      "archiveSHA256": "b7cfda03176cac827f8c20805f77aa9e523ed65d3b04930e8a86752a948f8549"
     }
   },
   "ordinaryPartLists": {
@@ -633,6 +716,21 @@
       "Linux LeakSanitizer could not start under ptrace in observed linked tests",
       "Two compilations were killed by the memory limit",
       "The BLE capture replay returned a generic subprocess error; cause unverified for this run"
+    ]
+  },
+  "guardImageReview": {
+    "models": [
+      "SMK-37 Elite",
+      "SMK-37 Pro"
+    ],
+    "screens": 10,
+    "changedPixels": "Fault register digits, retry/guard/post-crash PC digit regions. Header, status and physical recovery instructions remain intact.",
+    "inspectedComparableStates": [
+      "first-fault",
+      "safe-play-fault",
+      "safe-play-post-crash",
+      "safe-play-retry",
+      "safe-play-safe"
     ]
   }
 }

@@ -27,3 +27,5 @@ cd docs/lanes/fwui/screens
 rg '^(startup/|stock-init/|synth-one/|superj6/)' screen-index.tsv
 tar -xOf ../current/synthone-editor/routes.tar.xz list-B-factory-id-16.png > /tmp/synth-one-cutoff.png
 ```
+
+The full catalog was also painted into the published emulator shell at desktop and both phone sizes. [Viewport measurements and RGB comparisons](../current/panel-routes/viewport-replay.json)
