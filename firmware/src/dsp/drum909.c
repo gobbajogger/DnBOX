@@ -837,6 +837,24 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
     d9_emit_block(bus, m);
 }
 
+/* Each value uses the same binary32 recurrence as d9_env_tick().  The last
+ * tick of a ramp installs its exact target before the next sample. */
+__attribute__((noinline)) static void d9_env_values(d9_env_t *e, float *out, int n)
+{
+    if (!n) return;
+    int moving = e->left < n ? e->left : n;
+    const float ratio = e->r;
+    float v = e->v;
+    for (int i = 0; i < moving; ++i) {
+        out[i] = v;
+        v *= ratio;
+    }
+    if (moving && !(e->left -= moving)) v = e->v1;
+    for (int i = moving; i < n; ++i) out[i] = v;
+    e->cur = out[n - 1];
+    e->v = v;
+}
+
 /* Toms (er99_tom909_render): three VCOs on their own envelopes + stick noise.
  * The two upper partials and the stick are attack features (110 / 70 / 8 ms);
  * once their envelopes have run out (-100 dB) they are skipped. */
@@ -854,26 +872,33 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const 
         d9_warm(&t->noise_bp, nz);
         t->stick_warm = 0;
     }
-    for (int i = 0; i < m; ++i) {
-        const float f = d9_env_tick(&t->pitch);
-        float o = 0.0f;
-        t->ph[0] += d9_inc(f);
-        o += d9_triangle20(t->ph[0]) * d9_env_tick(&t->env[0]);
-        if (t->env[1].left) {
-            t->ph[1] += d9_inc(f * 1.50f);
-            o += d9_triangle20(t->ph[1]) * d9_env_tick(&t->env[1]);
+    static const float ratio[3] = {1.0f, 1.5f, 2.75f};
+    enum { span = 32 };
+    float pitch[span], amp[span];
+    for (int k = 0; k < m; k += span) {
+        int count = m - k < span ? m - k : span;
+        float *y = bus->y + k;
+        d9_env_values(&t->pitch, pitch, count);
+        for (int i = 0; i < count; ++i) y[i] = 0.0f;
+        for (int j = 0; j < 3; ++j) {
+            const int active = j && t->env[j].left < count ? t->env[j].left : count;
+            uint32_t phase = t->ph[j];
+            d9_env_values(&t->env[j], amp, active);
+            for (int i = 0; i < active; ++i) {
+                phase += d9_inc(pitch[i] * ratio[j]);
+                y[i] += d9_triangle20(phase) * amp[i];
+            }
+            t->ph[j] = phase;
         }
-        if (t->env[2].left) {
-            t->ph[2] += d9_inc(f * 2.75f);
-            o += d9_triangle20(t->ph[2]) * d9_env_tick(&t->env[2]);
+        const int stick_count = t->noise_env.left < count ? t->noise_env.left : count;
+        d9_env_values(&t->noise_env, amp, stick_count);
+        for (int i = 0; i < stick_count; ++i)
+            amp[i] = d9_biquad_tick(&t->noise_bp, nz[k+i]) * amp[i] * stick_g;
+        for (int i = stick_count; i < count; ++i) amp[i] = 0.0f;
+        for (int i = 0; i < count; ++i) {
+            float sample = d9_shape_v(&p->shape, y[i] * 0.55f + amp[i], t->crush_st);
+            y[i] = d9_biquad_tick(&t->dc_block, sample) * t->out_gain;
         }
-        o *= 0.55f;
-        float stick = 0.0f;
-        if (t->noise_env.left)
-            stick = d9_biquad_tick(&t->noise_bp, nz[i]) * d9_env_tick(&t->noise_env) * stick_g;
-        float y = d9_shape_v(&p->shape, o + stick, t->crush_st);
-        y = d9_biquad_tick(&t->dc_block, y);
-        bus->y[i] = y * t->out_gain;
     }
     d9_emit_block(bus, m);
     if (!t->noise_env.left)
@@ -977,14 +1002,23 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
     if (m > 0 && s->inc == 1u && !(s->incf | s->frac) &&
         s->pos < len && (unsigned)m < len - s->pos &&
         (s->dk == s->pos || s->dk == s->pos + 1u)) {
-        if (s->dk == s->pos)
-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+        uint32_t next = s->dk;
+        int32_t pred = s->pred, idx = s->idx;
+        int32_t h0 = s->h0, h1 = s->h1;
+        d9_env_values(&s->out, bus->y, m);
+        if (next == s->pos)
+            h1 = ima_decode(adpcm, next++, &pred, &idx);
         for (int i = 0; i < m; ++i) {
-            s->h0 = s->h1;
-            s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
-            const float v = (float)s->h0 * (1.0f / 32768.0f);
-            bus->y[i] = v * d9_env_tick(&s->out);
+            h0 = h1;
+            h1 = ima_decode(adpcm, next++, &pred, &idx);
+            const float v = (float)h0 * (1.0f / 32768.0f);
+            bus->y[i] = v * bus->y[i];
         }
+        s->h0 = h0;
+        s->h1 = h1;
+        s->dk = next;
+        s->pred = pred;
+        s->idx = idx;
         s->pos += (unsigned)m;
     } else {
         for (int i = 0; i < m; ++i) {
