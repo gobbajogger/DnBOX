@@ -1388,11 +1388,18 @@ void engine_motion_clear(int k)
     int restore = lane->used && lane->t != 0xfdu && lane->t != HELD_CHORD_TARGET;
     int t = lane->t, v = lane->v, i = lane->i;
     if (original_motion_performance(t, v, i)) restore = 0;
+    /* BREAK velocity is a sequencer byte, so remove it and restore its owner
+     * in the same audio boundary. A queued base would have no pattern ID. */
+    int break_velocity = restore && t == T_VEL && v == (PART_BRK << 4);
+    uint32_t state = break_velocity ? plat_cq_lock() : 0;
     lane->used = 0;
     __asm__ volatile("" ::: "memory");
     mot.rt[k].applied = MOT_NONE;
     mot.rt[k].ramp = mot.rt[k].rec_req = mot.rt[k].hold_req = 0;
-    if (restore) engine_set_base(t, v, i);
+    if (break_velocity) {
+        if (lane->pat == seq.ppat[PART_BRK]) seq.brk_velocity = 127;
+        plat_cq_unlock(state);
+    } else if (restore) engine_set_base(t, v, i);
 }
 static void s_transport(void *, int);
 static const seq_sink_t SINK = {s_drum_seq, s_bon, s_boff, s_brk, s_brkstop, s_midi, s_step, 0
