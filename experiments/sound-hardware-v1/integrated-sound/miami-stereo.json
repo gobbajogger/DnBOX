@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "base": "7f9a8a352bfef18368e034e1f9178c75f33a10da",
+  "tested_patch_sha256": "0948f5506c467f390f38ec73514fa8dfd316f787a653fd4b58d648919d3e9caa",
+  "retirement": {
+    "commit": "18481a6374e7ee1bf319c6fd57b546ed5a75eaf3",
+    "build_gate": "tools/build.py:synth_build_config",
+    "panel_contract": "docs/testing/release-chicago-miami-idle.md",
+    "active_route": "firmware/src/app/original_runtime.c:original_runtime_render -> original_miami_backend_render_stereo",
+    "active_parameter": {
+      "name": "Stereo",
+      "id": 15
+    },
+    "historical_only": "WBL1 Bass Split"
+  },
+  "unchanged_baseline": {
+    "direct_command": "sh tests/host/run_miami_stereo_split.sh",
+    "exit": 1,
+    "log_sha256": "da70d02c78f6a4a8f7ebe80c3b8bf14e1c59ef9e3635614f468ed1544dce4850",
+    "reason": "The historical WBL1 implementation was removed. The old direct wrapper linked a caller with unresolved wobble_* symbols.",
+    "unregistered_command": "sh tests/run_tests.sh miami-stereo-split",
+    "unregistered_matches": 0,
+    "unregistered_exit": 0,
+    "supported_dispatch_pass": [
+      "miami-table-interpolation",
+      "miami-coef-cache"
+    ]
+  },
+  "positive": {
+    "command": "sh tests/run_tests.sh miami-stereo",
+    "exit": 0,
+    "sample_rate": 44100,
+    "frames_per_trial": 12288,
+    "warmup_frames": 4096,
+    "note": 48,
+    "velocity": 100,
+    "stereo_macro": [
+      0,
+      0.5,
+      1
+    ],
+    "rows": [
+      {
+        "factory": 0,
+        "side_over_mid": [
+          0.00601236,
+          0.12819075,
+          0.25038886
+        ]
+      },
+      {
+        "factory": 1,
+        "side_over_mid": [
+          0.00191523,
+          0.04067516,
+          0.07943299
+        ]
+      },
+      {
+        "factory": 29,
+        "side_over_mid": [
+          0.00450155,
+          0.09603391,
+          0.18755542
+        ]
+      }
+    ],
+    "log_sha256": "78f8ce1c2ef727dfe20a08c9574c35d90a6f8f362a63d20c3b5ffc64a532f411"
+  },
+  "negative": {
+    "command": "sh \"$EVIDENCE_DIR/miami-mono-negative.sh\"",
+    "change": "The GNU linker wraps the real Miami backend renderer and copies completed left output over right.",
+    "mutant_dispatch_exit": 1,
+    "expected_diagnostic": "Stereo failed to increase side/mid RMS",
+    "mutant_side_over_mid": [
+      0,
+      0,
+      0
+    ],
+    "mutant_log_sha256": "db7d77cc0525dbc398e8be58e730d744d53d683ded3a35f2814666acb58ca035"
+  },
+  "historical": {
+    "commit": "0c228a97e67a73c0b377f62728603d94fb1bec66",
+    "command": "sh tests/host/run_miami_stereo_split.sh --legacy \"$WBL1_SOURCE_TREE\"",
+    "exit": 0,
+    "test_source_sha256": "3bb903dc7f846a26574a145f05a5a6c844dce08580170c9f5685290b99e07347",
+    "wbl1_source_sha256": "75b98bfde6756fd52ed90185b35f256ddce770a4a2c6b692b11f47171e0accd7",
+    "result": "Sub centered, side energy in body, frequency and slope laws and mono downmix passed."
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "elite": {
+    "ordinary": {
+      "source_head": "ce89f1d529e656430f4cec5b5b71012d59bd3afd",
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7875,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "765777742a9cf6b0dac086c0ddd248b9037b661a42100c8bfd1c869d69e7b67d",
+      "elf_sha256": "9c3f54b53ceac680aef213367487dc4b0475aa65a22c8fdee1c65548d66c0547",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "173eedebf0a52d45debc6d8b9d3f9e5aaa4bc7402cefc506cfaf9066418286a0",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    },
+    "combined": {
+      "source_head": "0d1314234e539d5a129608c8aeb80cbb232c5ad4",
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7979,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "8dd6d34f489b4513e00b0510b87f80ddc605cd37e08d5364425f19b58c8e5b1f",
+      "elf_sha256": "f73101e69ccc36c021be0efcb2f46539d787bfd230d329a855db707b6c43b565",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "36076290b2bd279b3331a9fad4487ad12b529a4c3051f7036d6954f3c421725d",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    },
+    "equal_pcm_words": true,
+    "different_pcm16_words": 0,
+    "first_different_stereo_frame": null,
+    "mismatched_frames": 0,
+    "max_abs_pcm16": 0,
+    "rms_pcm16": 0.0
+  },
+  "pro": {
+    "ordinary": {
+      "source_head": "5837c73f754a667c526edd420aefbe7cf3a071bf",
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7876,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "c67d8c231bd45b9581da67fe508ddf7142a4f1c26ef1eecfb921d25c04475bc6",
+      "elf_sha256": "5e499d61dfa7f75d39765940a1aaf7ef09b3eaeb232d93e1918bfd917af9f734",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "db19497fa93a541a3854321b9feae2cd31b69fc62498b0929fdb759f3504ff4a",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    },
+    "combined": {
+      "source_head": "ce89f1d529e656430f4cec5b5b71012d59bd3afd",
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7968,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "1ca8a369608d7c175a3c7e43c156cb68dbe7f2918ed1b34c35242ca66f18ab77",
+      "elf_sha256": "9e508e21aee67d382f184ce55f18feeaf5beea2e60f2e5bcef2adcce33c1e7d7",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "4d24aff30819178513f5ccaad648fc90c38baa6c9957dcdcc3c7e186c77eca37",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    },
+    "equal_pcm_words": true,
+    "different_pcm16_words": 0,
+    "first_different_stereo_frame": null,
+    "mismatched_frames": 0,
+    "max_abs_pcm16": 0,
+    "rms_pcm16": 0.0
+  }
+}

@@ -8,8 +8,9 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / 'sj6-factory/native'))
+sys.path.insert(0, str(HERE.parents[2] / 'tools'))
 from score_scene import compare_raw, digest, read_project
-from replay import validate_seed
+from fm1_rescue import package_flash_image
 
 
 def captures(directory, elf, fwsc):
@@ -17,7 +18,10 @@ def captures(directory, elf, fwsc):
     assert report['elf_sha256'] == digest(elf)
     assert report['fwsc_sha256'] == digest(fwsc)
     seed = directory / 'seed/flash.bin'
-    validate_seed(fwsc, seed)
+    protected = package_flash_image(fwsc.read_bytes())
+    seed_bytes = seed.read_bytes()
+    assert len(protected) == 0x9d000 and len(seed_bytes) == 0x100000
+    assert seed_bytes[:len(protected)] == protected
     shots = {}
     for row in report['runs']:
         shift = row['shift_ms']
@@ -27,15 +31,18 @@ def captures(directory, elf, fwsc):
         assert row['initial_flash_sha256'] == digest(seed)
         assert row['scene_sha256'] == digest(folder / 'scene.keys')
         assert row['final_flash_sha256'] == digest(folder / 'flash.bin')
-        validate_seed(fwsc, folder / 'flash.bin')
+        flashed = (folder / 'flash.bin').read_bytes()
+        assert len(flashed) == len(seed_bytes) and flashed[:len(protected)] == protected
         assert row['pcm_sha256'] == digest(folder / 'stereo.s16le')
         assert row['pcm_bytes'] == (folder / 'stereo.s16le').stat().st_size
         shots[shift] = row
     assert set(shots) == set(range(6))
-    return report, shots, seed.read_bytes()[0x9d000:]
+    return report, shots, seed_bytes[len(protected):]
 
 
 def main():
+    if not __debug__:
+        raise RuntimeError("Run with Python assertions enabled to verify the input receipts")
     parser = argparse.ArgumentParser(description=__doc__)
     for profile in ('stock', 'wide'):
         for path in ('dir', 'elf', 'fwsc'):

@@ -28,3 +28,5 @@ Use `contact.py --strict-dir <checkout>/experiments/sound-hardware-v1/strict-tim
 | Pro peak in µs | 10,491 | 10,354 | 10,507 | 10,315 | 10,462 | 10,512 | 1,097 µs |
 
 All twelve runs completed 648 halves with zero late transfers and zero xruns. All twelve live project and stereo hashes differ from their own same-model, same-offset archived references. Both saved Clip startups matched every project byte and all 30,208 stereo frames, including ten nonzero channel words on physical edge 4.
+
+Two further foreground polling trials reproduced the original queued hit in a focused snapshot. The first changed 131,972 full-scene stereo frames and moved the first difference earlier. The second changed 129,551 frames and 13 project bytes. Both remain experimental. [Patches, contact trace and full-scene measurements](foreground-trials.tar.gz)

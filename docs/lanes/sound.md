@@ -10,18 +10,38 @@ The sound branch includes the original-engine corrections from [#985](https://gi
 | 909 | 108/108 against the original 9W9 cymbals within 1 dB level and 3 dB spectral error. The separate pointwise test against the WAVs still reports 133 failures. |
 | BREAK | All 40 slices across five loops passed the straight-playback comparison with BB Gen. After the 88-frame onset ramp and known slice-boundary offsets, 694,381 PCM16 words matched. |
 | Chicago | All 81 factory programs sounded on both channels. The AU comparison improved from 0/29 to 28/29. Overlapping-note glide differs by 2.212 dB against the 1 dB strong-harmonic limit. |
-| Miami | All 30 factory programs sounded on both channels. All seven measured AU configurations passed pitch, envelope and harmonics. |
+| Miami | All 30 factory programs sounded on both channels. All seven measured AU configurations passed pitch, envelope and harmonics. The current Stereo control widens all three tested presets and rejects a forced mono render. [Stereo regression](../../experiments/sound-hardware-v1/integrated-sound/miami-stereo.json) |
 | Synth One | INIT retriggered at three pitches against the original. With the width option, both owners passed all 14 controls at 128 positions and 985,600 original width-history comparisons. |
 | Juno / SuperJ6 | Four shipping Juno presets render stereo. The SuperJ6 factory loader passed 32 synthetic selections on both owners. The separate Linux CoreSampler covers 36 controlled note renders, 48 layer/PWM comparisons and eight authored PWM String Pad layer comparisons. |
 
-The optional stereo-width control uses a private 50 ms history on each selected Synth One part. With both editors enabled, the application has 3,028 B free flash on Elite and 3,036 B on Pro. Both keep 9,024 B of free pool, 832 B above reserve. The prior combined profile overflowed Elite flash by 3,104 B on the consolidated FWUI source before the new Chicago encoding. The rebuilt coefficient reader matches all 32,770 source words. [Per-engine RAM and flash](sound-memory.md) · [Editor and ownership tests](../../experiments/sound-hardware-v1/integrated-sound/width-host.json)
+[Original-reference results](../../experiments/sound-hardware-v1/integrated-sound/engine-host-summary.json) · [Commands, reference inputs and exit statuses](../../experiments/sound-hardware-v1/integrated-sound/all-engines.json.gz)
+
+On the calibrated default project, all 24 matched-package eight-second runs completed 647 halves with zero late transfers or xruns. Each used 922 physical input events, at shifts 0 through 5 ms. The margin target requires a peak at or below 10,909 µs. Matches compare each opt-in run with ordinary firmware of the same source, model and shift. [Elite captures](../../experiments/sound-hardware-v1/integrated-sound/physical-elite.json) · [Pro captures](../../experiments/sound-hardware-v1/integrated-sound/physical-pro.json)
+
+| Board | Ordinary worst (µs) | Width + factory worst (µs) | Width + factory margin (µs) | Live PCM / project matches |
+| --- | ---: | ---: | ---: | ---: |
+| Elite | 11,386 | 11,460 | 149 | 0/6 PCM, 0/6 project |
+| Pro | 11,390 | 11,353 | 256 | 0/6 PCM, 0/6 project |
+
+The populated eight-second input replay missed the 11,609 µs deadline in all four combined-firmware runs. Warm boot had zero late transfers. Every populated scene activated both drum kits, both basses and a full-rate BREAK loop.
+
+| Board | Bass A / B | Peak (µs) | DMA xruns |
+| --- | --- | ---: | ---: |
+| Elite | Chicago / Miami | 13,706 | 72 |
+| Elite | Juno / Synth One | 12,901 | 27 |
+| Pro | Miami / Chicago | 15,576 | 100 |
+| Pro | Synth One / Juno | 14,790 | 119 |
+
+The earlier experimental 648-half planner on `63278e33` reached 10,464 µs Elite and 10,512 µs Pro across the six shifts per board with zero late or xruns. It reproduced the saved Clip startup, but every live stereo stream and final project differed. At 3,181 ms the Elite candidate still had a hit in the queue that stock had played at 3,171 ms. [Populated results](../../experiments/sound-hardware-v1/integrated-sound/native-selected-and-heavy.json) · [Separate timing candidate](../../experiments/sound-hardware-v1/strict-timing/original-bank-planner/README.md)
+
+The optional stereo-width control uses a private 50 ms history on each selected Synth One part. With the editor, width and SuperJ6 factory loader enabled, the application has 3,028 B free flash on Elite and 3,036 B on Pro. Both keep 9,024 B of free pool, 832 B above reserve. The prior combined profile overflowed Elite flash by 3,104 B on the consolidated FWUI source before the new Chicago encoding. The rebuilt coefficient reader matches all 32,770 source words. [Per-engine RAM and flash](sound-memory.md) · [Editor and ownership tests](../../experiments/sound-hardware-v1/integrated-sound/width-host.json)
 
 | Checklist | Current status | Qualification boundary |
 | --- | --- | --- |
-| S1 | FAIL | The production selector offers INIT. The compiled selector exposes 0/694 complete factory programs. The zero-miss callback contract also remains open. |
+| S1 | FAIL | The production selector offers INIT. The compiled selector exposes 0/694 complete factory programs. On this shared host, dual INIT missed 0 CPU and 12 wall deadlines in 2,048 callbacks. With 808/909 it missed 65 CPU and 199 wall deadlines. Both scenes had zero nonfinite preconversion samples. [Callback results](../../experiments/sound-hardware-v1/integrated-sound/callback.json) |
 | S2 | FAIL | The original host graph supports all 694 programs. A complete independent production renderer must load each one before its level and spectral errors can be scored. |
 | S3 | FAIL | The integrated importer binds 11 main-pass fields. The separate range prototype verifies the three evidenced ID 86 stops. Remaining controls and complete FX routing require original state and output validation. |
-| S4 | BLOCKED | 0/14 complete original stereo pairs. Six authenticated PWM String Pad words and the Linux CoreSampler qualify the oscillator. The 14 selected program records and matching original full-preset PCM are unavailable on this host. |
+| S4 | BLOCKED | 0/14 complete original stereo pairs. Six authenticated PWM String Pad words and the Linux CoreSampler qualify the oscillator. The 14 selected program records and matching original full-preset PCM are unavailable on this Linux host. The identified build-9 original targets iOS. [Exact original and bank identities, program list and stimulus](../sound/superj6-ab.md) |
 | S5 | FAIL | 640 records across 12 banks were previously decoded. Complete parameter-by-parameter application and selection of every record remain open. |
 | S6 | FAIL | All seven current engine paths link within stock Elite/Pro memory. The complete factory instruments with independent original effects still lack a fitting image. |
 | S7 | PASS | `git grep -niw drone -- firmware tests web` returned zero matches. |
