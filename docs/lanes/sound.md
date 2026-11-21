@@ -36,6 +36,8 @@ The published phase-restored build reproduced its 199,282-frame prefix on Elite 
 
 A read-only stock Elite +1 replay tested whether existing LCD waits could absorb a shorter callback without moving foreground input. Its three over-target halves interrupted pixel drawing with zero SPI time remaining. Of 112 other IRQs that interrupted the SPI wait routine, none returned before that transfer had already finished. [Interrupted native PCs, SPI deadlines and calibrated physical replay](../../experiments/sound-hardware-v1/strict-timing/foreground-wait/README.md)
 
+After the stock peak at DMA release 450, the equal-size image returned from audio 1.274 ms earlier and read the firmware clock 21.882 ms earlier. Before the first differing DAC half, stock read fader value 97 at 7,023.401 ms and the equal-size image read 107 at 7,035.209 ms. Neither made an intervening SPI transfer or status poll before this fader decision. [Matched read timings, transfer deadlines and observer calibration](../../experiments/sound-hardware-v1/strict-timing/foreground-wait/next-read/README.md)
+
 ## First-block interrupt handoff and input timing, 2026-11-21
 
 The rebuilt public emulator reproduced the original +1 ms stock results on Elite and Pro, including every stereo frame, the full project and maxima of 11,323 and 11,318 µs. A one-shot audio interrupt preserved the nonzero saved startup and the silent spacer after a 50 ms clock pause. The full +1 ms live scene measured **10,535 µs Elite** and **10,339 µs Pro**, both with 648 halves and zero raw or scene late. It added 96 B of application flash and changed 10 and 4 project bytes. The foreground alternative reached 10,387 µs on Elite but lost a 909 step and shortened bass B from 35 to 32.

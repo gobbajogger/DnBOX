@@ -94,5 +94,26 @@
       "sha256": "aa3785b6847849c4d2e7290472950f49238ce6332bf6f45665b70c6dcd43613b"
     }
   },
-  "log_archive_sha256": "c34a5ef1190fdc502cc28612636766aeeb36bc5f0a71ce6ed353bdf17583d90a"
+  "log_archive_sha256": "c34a5ef1190fdc502cc28612636766aeeb36bc5f0a71ce6ed353bdf17583d90a",
+  "reproduced_at": [
+    {
+      "commit": "343e2f43d1c409335af9c82d3865d3572849b5a2",
+      "models": [
+        "elite",
+        "pro"
+      ],
+      "profiles": [
+        "superj6",
+        "default",
+        "superj6_and_synthone_editor"
+      ],
+      "matching_sha256": 24,
+      "products": [
+        "app",
+        "elf",
+        "loader",
+        "fwsc"
+      ]
+    }
+  ]
 }
