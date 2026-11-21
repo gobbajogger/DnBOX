@@ -1,5 +1,22 @@
 # Integration baseline
 
+## Current integration qualification
+
+Firmware [#976](https://github.com/gobbajogger/DnBOX/pull/976) incorporated consolidated `1c82772b` at `bdef4bca`. All tracked paths from both parents are present. Firmware and nightly use the same rules blob `d66eb78b94ef207660565a186322fc0025e85506`. The subsequent scheduler test fix is `7f87de10`. The [focused log](../../evidence/integ-b5207372/focused.txt) records the results.
+
+| Item | Result |
+|---|---|
+| I0 and I1 | All 14 recorded firmware merge commits are reachable. The full host suite and strict emulator gate are reserved for the final lane merge. |
+| I2 | The [combined source](https://github.com/gobbajogger/DnBOX/commit/b5207372b5d342575b70b651b7dd413527c2f161) includes integration, Sound `63278e33` and FWUI `9dd6f2df`. Both native packages passed model identity, CRC and stock partition checks. Elite used 546,500 B of application space and Pro used 546,492 B. XIP free was 6,172 B and 6,180 B. Both retained 780 B above the pool reserve. Final consolidated builds depend on acceptance and integration of the source lanes. [Packages, manifest and build logs](https://github.com/gobbajogger/DnBOX/tree/0f5171501677793ddd3a5318cc00bba6199bb9ca/artifacts/integ-candidates/b5207372) |
+| I3 | Two 32,768-block, stock zero-loop sweeps recorded 42 and 294 thread-CPU misses at 11,609 µs. Peaks were 48,802.468 and 357,656.158 µs. All 32 PCM and 32 meter/scope digests matched between runs and against the prior three-lane build. The muted-part control failed as expected. Independent fixed-work CPU controls missed 21 times on CPU 3 and eight times on CPU 6. Zero-dropout timing remains open. [Raw runs, controls and reproduction scripts](../../evidence/integ-b5207372/heavy-playback.tar.xz) |
+| I4 | Passed at `7f87de10` in a stock Debian 6.12.117 guest as uid 1000 with no tracer. The independent control detected the deliberate 123-byte leak. The unchanged test passed both sets of 796 binary32/name checks and rejected corrupted metadata, exit 0. [Guest output](../../evidence/integ-b5207372/compact-stock-linux.txt) |
+| I5 | The five original samples form a 109,394 B bank. Preserving alignment and the 1,024 B reserve leaves 5,136 B on Elite and 5,152 B on Pro. The stock packer rejected all 31 nonempty subsets on each model. The native reader accepted exact-capacity controls and all five zones in a sufficiently large fixture. The chooser and decoder passed. All ten live preview URLs served the expected audio, and the unknown zone returned HTTP 404. Embedding the originals in the stock applications remains open. [Fit measurements](../../evidence/integ-b5207372/break-fit.tar.xz) · [Live preview digests](../../evidence/integ-b5207372/live-previews.json) |
+| I6 | The roadmap matches consolidated `1c82772b`. The signed-in owner submitted [test proposal #984](https://github.com/gobbajogger/DnBOX/issues/984) through the GitHub app. The inbox rendered the issue and refreshed its live count at zero. The issue closed with zero opening-post thumbs-up reactions. The mounted five-size voting fixture passed. A signed-in opening-post vote and refreshed increment remain open. |
+| I7 | Cleanup follows the remaining lane merges. Both source PRs are open drafts. |
+| C1–C4 | The scheduler test now waits for both workers to start and fails if they run serially. All 13 admission cases, the serialized negative, four capacity tests, 14 selector cases, seven roadmap cases, both forms, all ten original input checks and the FREE PLAY framebuffer check passed. The cold framebuffer attempt exceeded its 100-second limit. A cached GCC rerun preserved that limit and rejected both mutations. The combined Juno runtime and both BREAK retrigger configurations also passed. |
+
+## Previous checkpoints
+
 Firmware draft [#976](https://github.com/gobbajogger/DnBOX/pull/976) incorporates the consolidated merge of [#978](https://github.com/gobbajogger/DnBOX/pull/978) at `8e4c1a10dbc6c84d2c6d8c4bf086d1ef699f3374`. The firmware and nightly consolidated rules match byte for byte (Git blob `bb02f20c3761abeac2cfda7f4f7153eaa6454ff9`). The branch ruleset allows `lane/integ`.
 
 | Item | State and evidence |
