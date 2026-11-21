@@ -1,0 +1,14 @@
+{
+  "sourceTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "verifiedGitBlobs": 5188,
+  "productionMismatches": 0,
+  "explicitTestFixtureOverride": [
+    {
+      "path": "tests/host/smc_pickup_acceptance_test.c",
+      "treeBlob": "655cf9eec58207ac7288de12ef908b0d2e0c81eb",
+      "actualBlob": "f6fd009b6d9eda71945d9c917912740c72eab36e",
+      "sha256": "f8e7bf3378247e290c935251b930225fe37b7f6b48933f3e72ca7043a6c638bb"
+    }
+  ],
+  "reason": "Parent corrected short UP/DOWN caption oracle using exact equality and retained all pixel assertions. Original50122 failing log retained separately. No production source change."
+}

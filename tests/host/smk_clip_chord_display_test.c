@@ -4,12 +4,7 @@
 #include "smk_clip_knob_test.c"
 #undef main
 #include <assert.h>
-typedef struct {
-    uint8_t h, pad, first, last;
-    const uint8_t *adv, *bw;
-    const uint16_t *off;
-    const uint8_t *data;
-} felucca_font_t;
+#include "chord_font_types.inc"
 #include "felucca_font.h"
 #include "chord_metrics.inc"
 static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f,s); }

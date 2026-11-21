@@ -4,7 +4,7 @@
 #include "../../../experiments/original_synth/binary32_math.h"
 #include "../../../experiments/original_synth/miami_idle_clock.h"
 #include "../../../experiments/original_synth/miami_zero.h"
-#include "../../../experiments/original_synth/motion_tables_private.h"
+#include "original_backend_pitch.h"
 #include <string.h>
 
 #define BACKEND_READY UINT32_C(0x4d424531)
@@ -42,7 +42,7 @@ int original_miami_backend_init(original_miami_backend *s, unsigned factory, flo
     const original_ms20_tables filter = {
         original_miami_a44100, original_miami_b44100, original_miami_r, original_miami_cap
     };
-    if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, original_pitch44100) ||
+    if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, original_backend_pitch44100()) ||
         !original_chicago_allocator_bind(&s->allocator, &s->keys, s->held, s->records,
             ORIGINAL_MIAMI_BACKEND_VOICES, ORIGINAL_MIAMI_BACKEND_VOICES,
             ORIGINAL_MIAMI_BACKEND_VOICES, 1, 0, 1)) return 0;

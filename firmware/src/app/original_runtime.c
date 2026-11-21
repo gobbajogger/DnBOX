@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "original_runtime.h"
+#include "../dsp/juno6_controls.h"
 #include "../x0x_cold.h"
 #include <string.h>
 
@@ -94,12 +95,15 @@ int original_runtime_param(original_runtime_part *p, unsigned parameter, float v
     if(p->kind==ORIGINAL_SOUND_JUNO){
         int ok=juno6_set(&p->dsp.juno.synth,parameter,value);
 #if X0X_SUPERJ6_FACTORY
-        if(!ok && parameter>=JUNO6_APP_PARAM_BASE+119 && parameter<=JUNO6_APP_PARAM_BASE+122 &&
-           !juno6_can_edit_amp2(&p->dsp.juno.synth)) return ORIGINAL_RUNTIME_INVALID;
-        if(ok && parameter < JUNO6_APP_PARAM_BASE) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
-#else
-        if(ok) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
+        if (!ok && parameter >= JUNO6_APP_PARAM_BASE + 119 && parameter <= JUNO6_APP_PARAM_BASE + 122 &&
+            !juno6_can_edit_amp2(&p->dsp.juno.synth))
+            return ORIGINAL_RUNTIME_INVALID;
+        if (parameter >= JUNO6_APP_PARAM_BASE)
+            return runtime_result(p, ok);
 #endif
+        if (ok) juno6_chorus_set(&p->dsp.juno.chorus,
+            juno6_control_physical(13, p->dsp.juno.synth.macro[13]), 5.4f,
+            juno6_control_physical(14, p->dsp.juno.synth.macro[14]));
         return runtime_result(p,ok);
     }
     if (p->kind == ORIGINAL_SOUND_SYNTHONE)

@@ -68,7 +68,13 @@ def instrument(root):
     anchor = matches[0]
     text=once(text,anchor,'{first_panel("active-bank",6,ay,228,ah);'+anchor+'}')
     text=once(text,'rbox(3, py, 234, ph, UI_PANEL_RADIUS, SOUND_FACE);','first_panel("voice-body",3,py,234,ph);rbox(3, py, 234, ph, UI_PANEL_RADIUS, SOUND_FACE);')
-    text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
+    if 'dv_voice_steps(' in text:
+        step='cv_rect(sx,step_y,11,4,live?C_WHITE:hit?col:SOUND_LINE);'
+        text=once(text,step,'{uint16_t before[CV_MAX];first_snapshot(before);'+step+'first_finish(before,"step",sx,step_y,0);}')
+    else:
+        text=once(text,'cv_rect(sx, sy, 11, 4, sc);','{uint16_t before[CV_MAX];first_snapshot(before);cv_rect(sx, sy, 11, 4, sc);first_finish(before,"step",sx,sy,0);}')
+    if 'dv_cp_stage_page(' in text:
+        text=once(text,'rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);','first_panel("owner-stage-banks",3,24-off,234,213);rbox(3,24-off,234,213,UI_PANEL_RADIUS,SOUND_FACE);')
     sig='static '+draw+'void dv_tune_fork(float ox, float oy, float sx, float sy, float tune01, uint16_t col)'
     text=once(text,sig+'\n{',sig+'\n{\n    first_glyph_type="tuning-fork";')
     # Route marker belongs to actual Pitch branch if present, not inferred from name.
@@ -107,6 +113,15 @@ def instrument(root):
         '    uint16_t curve_before[CV_MAX];first_snapshot(curve_before);\n'
         '    cv_poly_aa(points,used/2,col);\n'
         '    first_finish(curve_before,"envelope-curve",13,top,0);')
+    # New owner-bound rows: record only the real polyline raster, separately
+    # from physical captions/axes and the genuine live level tick.
+    if 'dv_bound_stage(' in text:
+        sig='static '+draw+'void dv_bound_stage(drum_curve_t *v,int stage,int top,int off,uint16_t col)'
+        if text.count(sig)!=1:raise ValueError('Expected exactly one owner-bound stage renderer')
+        text=once(text,'    cv_poly_aa(points,used,col);',
+            '    uint16_t stage_before[CV_MAX];first_snapshot(stage_before);\n'
+            '    cv_poly_aa(points,used,col);\n'
+            '    first_finish(stage_before,"envelope-curve",13,top-off,0);')
     # Real body paths are included in ink measurements, but panel fills are not.
     sig='static '+draw+'void dv_body_pictogram('
     start=text.index(sig); brace=text.index('{',start);signature=text[start:brace].strip()

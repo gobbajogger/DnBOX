@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "sources": {
+    "firmware/src/app/ui.c": "481bcad86fdc6e4c045d676a5d61463cbdece550",
+    "firmware/src/gfx.c": "3d6a039aa42733a59286921c30fe5677d9b81162",
+    "firmware/src/app/smc_mixer.c": "24006c925f2068c1ffaa8b4080b47f6c1bd15e7b",
+    "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
+  },
+  "frames": [
+    {
+      "state": {
+        "id": "tempo-layer-base",
+        "view": 0,
+        "part": 0,
+        "page": 0,
+        "overlay": 0,
+        "touched": -1,
+        "nowMs": 1000,
+        "touchUntil": 0
+      },
+      "png": "tempo-layer-base.png",
+      "sha256": "a94165af22357e9206bb76dfceafbd0675ba466547a4e54621942d31e7e973c2"
+    },
+    {
+      "state": {
+        "id": "tempo-layer-overlay",
+        "view": 0,
+        "part": 0,
+        "page": 0,
+        "overlay": 0,
+        "touched": 4,
+        "nowMs": 1000,
+        "touchUntil": 2000
+      },
+      "png": "tempo-layer-overlay.png",
+      "sha256": "34c5c8b9b73ba44da8e10f95adb8d1b2fcf1dad1ee14b1de647bfd606e464fa9"
+    },
+    {
+      "state": {
+        "id": "tempo-layer-restored",
+        "view": 0,
+        "part": 0,
+        "page": 0,
+        "overlay": 0,
+        "touched": -1,
+        "nowMs": 2500,
+        "touchUntil": 2000
+      },
+      "png": "tempo-layer-restored.png",
+      "sha256": "a94165af22357e9206bb76dfceafbd0675ba466547a4e54621942d31e7e973c2"
+    }
+  ],
+  "popupBounds": [
+    8,
+    103,
+    232,
+    153
+  ],
+  "outsidePopupChanges": 0,
+  "baseMainRestoration": "BYTE_IDENTICAL",
+  "damagedRestorationRejected": true,
+  "positiveLogSHA256": "94e9bc156a99c54475003ffa2796de83d0111fc3755c4f56d62168f3231d180b",
+  "negativeLogSHA256": "70bee722949b1359ff04f1b2d123408d3ade137108a6dbda03f6d6c79eb75d21"
+}

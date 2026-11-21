@@ -141,6 +141,20 @@ int engine_drum808_curve(int voice,drum_curve_t *view)
     plat_cq_unlock(lock);
     return ok;
 }
+int engine_drum808_param_curve_preview(int voice,int param,int selection,int raw,drum_curve_t *view)
+{
+    if(!view)return 0;
+    uint32_t lock=plat_cq_lock();
+    int owner=drum808_param_curve_preview(&d808,voice,param,selection,raw,view);
+    if(owner && view->elapsed>=0) {
+        int slot=owner==D8S_MA+1?NDRUM+1:voice;
+        view->elapsed=(d8_frame-d8_trigger_frame[slot])/44.1f;
+    }
+    plat_cq_unlock(lock);
+    return owner;
+}
+int engine_drum808_param_curve(int voice,int param,drum_curve_t *view)
+{ return engine_drum808_param_curve_preview(voice,param,-1,-1,view); }
 int engine_drum909_decay_view(int voice,engine_decay_view_t *out)
 {
     if(!out || voice<DR_SD || voice>DR_RD || voice==DR_RS)return 0;
@@ -1323,7 +1337,7 @@ static void s_brk(void *x, int s16, int bar, float spb, int en)
             breaks_set(&brk, i, bp->set[i]);
         }
     breaks_pin(&brk, (int)bp->slice[s16 & 15] - 1);   /* the step's own slice, if it has one */
-    breaks_step(&brk, s16, bar, spb, en);
+    breaks_step_velocity(&brk, s16, bar, spb, en, seq.brk_velocity);
 }
 static void brk_midi_discard(void);
 static void s_brkstop(void *x) { (void)x; breaks_stop(&brk); brk_midi_discard(); }
@@ -1423,7 +1437,7 @@ static int mot_base(void *x, int t, int v, int i)
     if (t == T_PROB)
         return 100;                                   /* always */
     if (t == T_VEL)
-        return 0;                                     /* legacy accent / accent_q7 */
+        return v == (PART_BRK << 4) ? 127 : 0;         /* BREAK unity; drums use the accent law */
     if (t >= NTARGETS)
         return 100;
     if (t == T_303 && (unsigned)v < NBASS && i == mod_param(v) && mod_ctl[v] >= 0)
@@ -1442,8 +1456,11 @@ static void mot_apply(void *x, int t, int v, int i, int val)
             prob[v >> 4][v & 15] = (uint8_t)val;
     } else if (t == T_VEL) {
         int kit = v >> 4, voice = v & 15;
-        if ((unsigned)kit < NKIT && (unsigned)voice < NDRUM)
-            seq.drum_vel[kit][voice] = (uint8_t)(val < 0 ? 0 : val > 127 ? 127 : val);
+        uint8_t velocity = (uint8_t)(val < 0 ? 0 : val > 127 ? 127 : val);
+        if (v == (PART_BRK << 4))
+            seq.brk_velocity = velocity;
+        else if ((unsigned)kit < NKIT && (unsigned)voice < NDRUM)
+            seq.drum_vel[kit][voice] = velocity;
     } else if (t < NTARGETS)
         apply_param(t, v, i, val);
 }
@@ -1482,11 +1499,18 @@ void engine_motion_clear(int k)
     int restore = lane->used && lane->t != 0xfdu && lane->t != HELD_CHORD_TARGET;
     int t = lane->t, v = lane->v, i = lane->i;
     if (original_motion_performance(t, v, i)) restore = 0;
+    /* BREAK velocity is a sequencer byte, so remove it and restore its owner
+     * in the same audio boundary. A queued base would have no pattern ID. */
+    int break_velocity = restore && t == T_VEL && v == (PART_BRK << 4);
+    uint32_t state = break_velocity ? plat_cq_lock() : 0;
     lane->used = 0;
     __asm__ volatile("" ::: "memory");
     mot.rt[k].applied = MOT_NONE;
     mot.rt[k].ramp = mot.rt[k].rec_req = mot.rt[k].hold_req = 0;
-    if (restore) engine_set_base(t, v, i);
+    if (break_velocity) {
+        if (lane->pat == seq.ppat[PART_BRK]) seq.brk_velocity = 127;
+        plat_cq_unlock(state);
+    } else if (restore) engine_set_base(t, v, i);
 }
 static void s_transport(void *, int);
 static const seq_sink_t SINK = {s_drum_seq, s_bon, s_boff, s_brk, s_brkstop, s_midi, s_step, 0
@@ -3044,6 +3068,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;
         motion_release(&mot);
+        seq.brk_velocity = 127; /* undo/load may already have removed the lane that supplied it */
     }
     mot_was_on = mot_on;
     guard_apply();
@@ -3329,6 +3354,10 @@ void engine_master_format(int i, char *buf) { master_format(&mst, i, buf); }
 
 X0X_COLD void engine_brk_loops(void)
 {
+    /* Boot can restore a sample before engine_init binds the pattern table.
+     * fm1_main publishes the recovered loops after loading the project. */
+    if (!seq.pat)
+        return;
     if (brk_preview_slot >= 0 && brk_preview_pattern != seq.ppat[TRK_BRK]) {
         cq_put(C_BRK, 32, 0, 1);
         brk_preview_slot = -1;

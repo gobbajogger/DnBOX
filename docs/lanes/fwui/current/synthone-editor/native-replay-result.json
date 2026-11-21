@@ -1,0 +1,57 @@
+{
+  "fwui": "61827a714ca7b240c01a55ed347b5fd7b847c7c2",
+  "sound": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+  "expected_receipt": "native-replay.json",
+  "expected_receipt_sha256": "7aa16a865a00ad99b077567ba88c69eb9a8a45dcfdbc6aa6e48c204aadfbbcc6",
+  "qualifier_blob": "d3782e75576a8088154e03b28abe4f436a1b3b29",
+  "board_count": 4,
+  "matched_binary_fingerprints": 16,
+  "all_board_fits": true,
+  "frames_matched_archived_sha256": 88,
+  "results": [
+    {
+      "model": "elite",
+      "patch": 0,
+      "exit": 0,
+      "xip_free": 9048,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "fit": true,
+      "binary_match": true,
+      "limits_match": true
+    },
+    {
+      "model": "pro",
+      "patch": 0,
+      "exit": 0,
+      "xip_free": 9056,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "fit": true,
+      "binary_match": true,
+      "limits_match": true
+    },
+    {
+      "model": "elite",
+      "patch": 1,
+      "exit": 0,
+      "xip_free": 4992,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "fit": true,
+      "binary_match": true,
+      "limits_match": true
+    },
+    {
+      "model": "pro",
+      "patch": 1,
+      "exit": 0,
+      "xip_free": 5000,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "fit": true,
+      "binary_match": true,
+      "limits_match": true
+    }
+  ]
+}

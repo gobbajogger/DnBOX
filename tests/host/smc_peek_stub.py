@@ -21,7 +21,6 @@ static struct { uint8_t on, peer, saved_view; } smc_peek_stub;
 static __attribute__((unused)) void smc_peek_cancel(void) { smc_peek_stub.on = 0; }
 static __attribute__((unused)) void smc_peek_tick(void) {}
 static __attribute__((unused)) void smc_peek_locked_page(void) {}
-static __attribute__((unused)) void smc_peek_begin(int n) { (void)n; }
 '''
 
 

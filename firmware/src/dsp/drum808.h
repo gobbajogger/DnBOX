@@ -230,6 +230,12 @@ void drum808_pan_settle(drum808_t *d);   /* every pan to its target at once (the
 int drum808_nparams(int track);                           /* D8_KIT = kit-wide */
 /* UI glyph motion: the track's live output level over its hit peak, 0..1; -1 unknown */
 int drum808_curve(const drum808_t *d,int track,drum_curve_t *view);
+/* MA/CP bound stages only; other owners unavailable. Caller serializes with render/set.
+ * Returns sound owner + 1, zero if unavailable.
+ * elapsed is valid only while the bound stage is active; target and live level differ. */
+int drum808_param_curve(const drum808_t *d,int track,int param,drum_curve_t *view);
+/* -1 keeps applied targets; otherwise selection0/1 and raw0..127 are read-only UI targets. */
+int drum808_param_curve_preview(const drum808_t *d,int track,int param,int selection,int raw,drum_curve_t *view);
 float drum808_env(const drum808_t *d, int track);
 const x0x_param_t *drum808_param(int track, int i);
 int drum808_param_si(int track, int i, int pot, float *val);

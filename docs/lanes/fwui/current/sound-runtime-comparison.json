@@ -1,0 +1,62 @@
+{
+  "fwui_build_input_tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "sound_candidate": "ca0c00a4e5863132de4a66f5d1c477c14d699be5",
+  "scope": "Isolated host comparison. Nine named runtime/build dependencies were overlaid solely for the second observation. The shipping FWUI branch keeps its own admitted sound sources. The diagnostic enumerates editable engine parameters on each part and measures one held note per runtime.",
+  "sound_candidate_blobs": [
+    {
+      "path": "firmware/src/app/original_runtime.c",
+      "sha": "7b6a129b47056ea8d0feb16619318a82476df68e"
+    },
+    {
+      "path": "firmware/src/app/original_runtime.h",
+      "sha": "fb3cbd7b567a640e4d25b13cd82b237675f2a965"
+    },
+    {
+      "path": "firmware/src/app/s1_dry_part.c",
+      "sha": "bd58cf61897755920bebdae704f40fd33f78d0de"
+    },
+    {
+      "path": "firmware/src/app/s1_dry_part.h",
+      "sha": "33fdc0fe3a99e2d6d7c2d849b6a4528c204de85e"
+    },
+    {
+      "path": "firmware/src/dsp/s1_dry_voice.c",
+      "sha": "70a67cb1dfeed73893b42c7e875d64f6547313e8"
+    },
+    {
+      "path": "firmware/src/dsp/s1_dry_voice.h",
+      "sha": "cd2a19747954476af0b6962e389b7e11a106dc58"
+    },
+    {
+      "path": "tools/build.py",
+      "sha": "261985fb84126d51545adee7f53d2e766f818ff3"
+    },
+    {
+      "path": "firmware/src/dsp/dnbx_s1_envelope.c",
+      "sha": "c18c0f1f1940682756a4518a8eb55e2333addf39"
+    },
+    {
+      "path": "firmware/src/dsp/dnbx_s1_envelope.h",
+      "sha": "98214d46e5b696795c1da793109519260345a724"
+    }
+  ],
+  "fwui_only": [
+    "Synth One runtime: 0/8192 nonzero stereo frames",
+    "Synth One editor A: 0 distinct engine controls",
+    "Synth One editor B: 0 distinct engine controls",
+    "SuperJ6 slot runtime: 8192/8192 nonzero stereo frames",
+    "SuperJ6 slot editor A: 16 distinct engine controls",
+    "SuperJ6 slot editor B: 16 distinct engine controls"
+  ],
+  "with_sound_candidate": [
+    "Synth One runtime: 8192/8192 nonzero stereo frames",
+    "Synth One editor A: 0 distinct engine controls",
+    "Synth One editor B: 0 distinct engine controls",
+    "SuperJ6 slot runtime: 8192/8192 nonzero stereo frames",
+    "SuperJ6 slot editor A: 16 distinct engine controls",
+    "SuperJ6 slot editor B: 16 distinct engine controls"
+  ],
+  "candidate_diagnostic_exit": 1,
+  "equivalent_sound_pr_head": "3f00cf7395efd5fe4e9785083334e04387c83484",
+  "equivalence": "The complete ca0c00a4..3f00cf73 change set contains only documentation and experiments/sound-hardware-v1 files; the nine measured firmware input blobs are identical."
+}
