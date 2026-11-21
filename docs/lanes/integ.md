@@ -20,6 +20,16 @@ The two stock heavy sweeps each covered 32,768 blocks. At 11,609 µs the render 
 
 The stock BREAK packer reproduced both deficits in the table. An additional lossless experiment compressed the application and five-zone bank in independent 1 KiB pages. The results still exceeded the stock region by 25,399 B on Elite and 25,453 B on Pro before decoder space. The ten public preview URLs matched the expected audio hashes and the missing-zone control returned 404. [Exact inputs, fit tests and preview checks](../../evidence/integ-45b09b2d/break-fit.tar.xz)
 
+### Cloud replay on the updated Sound source
+
+Stock Sound source `5837c73f` reproduced all eight firmware fingerprints in Sound's `2fe5930c` manifest. Both package checks passed. The five original inputs used by the native sample reader reproduced both shortfalls above. The Juno runtime passed its six-voice sustain, release and render checks. The unchanged BREAK probability suite passed its original-law check and both corruption controls.
+
+A further 32,768-block heavy sweep on that source recorded 11 thread-CPU misses and 1,206 wall-clock misses at 11,609 µs. The worst thread-CPU and wall times were 75,212.934 and 207,355.472 µs. All 32 audio and all 32 meter/scope hashes matched both independent combined-source runs at `c51d9d86`. The muted bass B check returned the expected exit 3. An independent fixed-work run on the same CPU recorded 35 misses in 32,768 blocks of 850,000 iterations. Zero-dropout timing remains open.
+
+On integration `711df7b3`, the unchanged FREE PLAY wrapper passed its positive and all three framebuffer controls. The final run took 130.688 seconds overall. The four cases took 12.695, 44.582, 29.678 and 43.676 seconds against 100 seconds each. The cold and partially warmed attempts exceeded a case deadline. On the passing run GCC compiled the mutated unit separately for each control, linked four distinct executables and ran each one.
+
+A fresh ref audit found all 488 historical tips and verified that all eight protected PR heads still match their archive refs. At that check firmware had 12 branches and three open drafts. Nightly had seven branches and two open drafts. The final host and emulator gates and cleanup depend on the remaining lane merges. [Native build and timing output, sample fit, FREE PLAY and ref checks](../../evidence/integ-stock-replay/sound-5837c73f.tar.xz)
+
 ## Earlier stock verification at 2c16e15f
 
 Integration `2c16e15f` contains consolidated `46874497`, including FWUI #975 and its qualification #986. On this exact source, native Elite and Pro packages passed the stock parser and matched all eight #986 application, ELF, loader and package hashes. The scheduler, four FREE PLAY framebuffer cases, overlay registration, roadmap, issue forms, ten original input checks and all 16 recorded merge ancestors passed. [Focused results](../../evidence/integ-c28ae27c/firmware-focused.tar.xz) · [Stock #976 builds and bank-fit tests](../../evidence/integ-c28ae27c/firmware-native.tar.xz)
