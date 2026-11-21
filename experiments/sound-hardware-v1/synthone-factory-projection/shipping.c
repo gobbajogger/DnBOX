@@ -6,6 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if PROJECT_CRUSH_LFO
+enum { CONTROL_COUNT = 22, LAST_CONTROL = ORIGINAL_SYNTHONE_CRUSH_LFO };
+#else
+enum { CONTROL_COUNT = 21, LAST_CONTROL = ORIGINAL_SYNTHONE_MASTER_MAKEUP };
+#endif
+
 static original_runtime_part part;
 static original_runtime_workspace workspace;
 static original_chicago_fx2_compact insert;
@@ -17,6 +23,9 @@ static float physical(unsigned id, unsigned q)
     case ORIGINAL_SYNTHONE_CRUSH: return s1_part_crush_hz(unit);
     case ORIGINAL_SYNTHONE_PAN: return ((float)q - 1.f) / 126.f;
     case ORIGINAL_SYNTHONE_PAN_RATE: return s1_pan_hz(q);
+#if PROJECT_CRUSH_LFO
+    case ORIGINAL_SYNTHONE_CRUSH_LFO:
+#endif
     case ORIGINAL_SYNTHONE_TREM:
     case ORIGINAL_SYNTHONE_LFO1_SHAPE:
     case ORIGINAL_SYNTHONE_LFO2_SHAPE: return (float)((q * 3u + 63u) / 127u);
@@ -40,8 +49,8 @@ int main(int argc, char **argv)
     uint8_t cell[32], ext[7] = {0}, pot[ORIGINAL_SYNTHONE_NPARAMS] = {0};
     assert(selected < 694 && original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
     FILE *targets = fopen(argv[1], "rb");
-    assert(targets && fseek(targets, (long)selected * 21 * sizeof(float), SEEK_SET) == 0);
-    for (unsigned id = 2; id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; ++id) {
+    assert(targets && fseek(targets, (long)selected * CONTROL_COUNT * sizeof(float), SEEK_SET) == 0);
+    for (unsigned id = 2; id <= LAST_CONTROL; ++id) {
         float target;
         assert(fread(&target, sizeof target, 1, targets) == 1 && isfinite(target));
         unsigned best = id == ORIGINAL_SYNTHONE_PAN ? 1u : 0u;
@@ -51,8 +60,8 @@ int main(int argc, char **argv)
         assert(original_sound_set_extended(cell, ext, id, best));
     }
     assert(fclose(targets) == 0);
-    for (unsigned id = 2; id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; ++id) {
-        unsigned saved = id >= ORIGINAL_SYNTHONE_MASTER_VOLUME ?
+    for (unsigned id = 2; id <= LAST_CONTROL; ++id) {
+        unsigned saved = id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP ?
             original_master_display(cell,ext,id) : original_sound_s1_display(cell,id);
         assert(physical(id,saved) == physical(id,pot[id]));
     }
@@ -60,7 +69,7 @@ int main(int argc, char **argv)
     original_chicago_fx2_cold_owner owner = original_chicago_fx2_compact_owner(&insert);
     assert(original_runtime_init_extended(&part, cell, ext, 120, NULL, &owner) == ORIGINAL_RUNTIME_OK);
     FILE *controls = fopen(argv[4], "wb");
-    assert(controls && fwrite(pot+2, 1, 21, controls) == 21 && fclose(controls) == 0);
+    assert(controls && fwrite(pot+2, 1, CONTROL_COUNT, controls) == CONTROL_COUNT && fclose(controls) == 0);
     FILE *pcm = fopen(argv[3], "wb");
     assert(pcm);
     for (unsigned at = 0; at < 132300;) {

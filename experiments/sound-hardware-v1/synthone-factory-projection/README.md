@@ -6,12 +6,15 @@ The original arm loads all 144 ordered frontend commands into the pinned AudioKi
 
 No audio normalization or time alignment is applied. Each channel must contain signal and meet both limits. Spectral error is the RMS dB difference of frame-averaged amplitude spectra, using 512-sample Hann windows, 128-sample hops and a floor 80 dB below the original peak bin. The complete factory commands, voice, delays and reverbs remain outside the shipping instrument. Differences here include all of those contributions. The separate original-host replay and individual effect tests answer different questions.
 
+On firmware `7acc039a861da947a80f12a440fcc135e1ee76db`, the additional route maps original parameter 58 to either LFO or their average. All 694 original-versus-shipping stereo comparisons were evaluated at 22 available panel settings. Both thresholds together passed on 0/694. The 580 programs with that route off produced the same stock stereo hashes as the 21-control run. For the 114 routed programs, both arms were regenerated and every original digest matched the first run. [22-control summary](summary-22.json) · [694 program scores](rows-22.jsonl.gz).
+
 ## Replay
 
 Generate the verified source closure and factory command pack following [the original factory fixture](../../../tests/fixtures/synthone-factory/README.md). Use `tests/host/run_synthone_factory.py --source-build SOURCE --output FACTORY_BUILD --build-only` for the verified build. From the repository root run the following with Python, NumPy, GCC and G++.
 
 ```sh
 OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT
+OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT_22 --crush-lfo
 ```
 
 [Summary and input digests](summary.json) · [694 per-program records, compressed JSON Lines](rows.jsonl.gz). Each record includes the original bank and index, the submitted panel positions, both stereo PCM SHA-256 hashes, and the separate level and spectral results for each channel.

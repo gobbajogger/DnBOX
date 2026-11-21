@@ -21,7 +21,7 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
-def compile_producers(build, out):
+def compile_producers(build, out, crush_lfo=False):
     commands = json.loads((build / 'factory-build-commands.json').read_text())
     cc = next(cmd.copy() for cmd in commands if any(a.endswith('/preset_audio.cpp') for a in cmd))
     cc[cc.index('-c')+1] = str(HERE / 'original.cpp')
@@ -37,6 +37,7 @@ def compile_producers(build, out):
              '-DX0X_WOBBLE=0', '-DX0X_DEV_WOBBLE=0', '-DORIGINAL_USE_SOFT_FMA', '-DMIAMI_FX_NO_HOST_FENV',
              '-Iexperiments/original_synth', '-Iexperiments/wobble', '-Ifirmware/src',
              '-Ifirmware/src/app', '-Ifirmware/src/dsp', '-Ibuild/gen']
+    flags.append('-DPROJECT_CRUSH_LFO='+str(int(crush_lfo)))
     subprocess.run([os.environ.get('CC','cc'), *flags, HERE/'shipping.c', *ORIGINAL_SYNTH_UNITS,
                     *ORIGINAL_SYNTH_BACKENDS, '-Wl,--gc-sections', '-lm', '-o', out/'shipping'],
                    cwd=ROOT, check=True)
@@ -46,7 +47,7 @@ def compile_producers(build, out):
                     '-o', out/'controls'], check=True)
 
 
-def panel_targets(build, out, cases):
+def panel_targets(build, out, cases, crush_lfo=False):
     command_file = build/'commands/preset-commands.bin'
     streams = []
     for option in ([], ['--tremolo'], ['--phaser'], ['--master']):
@@ -57,9 +58,9 @@ def panel_targets(build, out, cases):
     for i, case in enumerate(cases):
         controls = dict(case['commands'])
         rows.append([controls[34], controls[121], *streams[0][i], *streams[1][i],
-                     *streams[2][i], *streams[3][i]])
+                     *streams[2][i], *streams[3][i], *([controls[58]] if crush_lfo else [])])
     targets = np.asarray(rows, dtype='<f4')
-    assert targets.shape == (694, len(IDS)) and np.isfinite(targets).all()
+    assert targets.shape == (694, len(IDS)+int(crush_lfo)) and np.isfinite(targets).all()
     targets.tofile(out/'panel-targets.f32')
 
 
@@ -98,13 +99,14 @@ def main():
     parser.add_argument('factory_build', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--count', default=694, type=int)
+    parser.add_argument('--crush-lfo', action='store_true', help='Include original parameter 58 on firmware with the crush LFO route')
     args=parser.parse_args()
     assert 1 <= args.count <= 694
     build, out = args.factory_build.resolve(), args.output.resolve()
     out.mkdir(parents=True,exist_ok=True)
     cases = json.loads((build/'commands/ORIGINAL-PRESET-COMMANDS.json').read_text())['cases']
-    compile_producers(build,out)
-    panel_targets(build,out,cases)
+    compile_producers(build,out,args.crush_lfo)
+    panel_targets(build,out,cases,args.crush_lfo)
     cases_out=[]
     with tempfile.TemporaryDirectory(dir=out) as td, (out/'rows.jsonl').open('w') as journal:
         for i, case in enumerate(cases[:args.count]):
@@ -113,13 +115,13 @@ def main():
             journal.write(json.dumps(row,ensure_ascii=False)+'\n')
             journal.flush()
     result = {'rate':44100,'frames_per_program':FRAMES,'programs':len(cases_out),
-              'original_frontend_writes_per_program':144,'projected_original_control_ids':IDS,
+              'original_frontend_writes_per_program':144,'projected_original_control_ids':IDS+([58] if args.crush_lfo else []),
               'frames_per_arm':len(cases_out)*FRAMES,
               'reference_checksums':{n:digest((build/n).read_bytes()) for n in
                   ('factory-inputs/public-morphs.f32','factory-inputs/compact.bin',
                    'TESTED-SOURCES.json','FACTORY-INPUTS.json')},
               'source':'AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314',
-              'comparison':'Complete original factory voice and effects versus shipping INIT with 21 nearest saved FX panel settings, host-compiled ordinary firmware backend.',
+              'comparison':'Complete original factory voice and effects versus shipping INIT with nearest saved FX panel settings, host-compiled ordinary firmware backend.',
               'row_file_sha256':digest((out/'rows.jsonl').read_bytes()),
               'commands_sha256':digest((build/'commands/preset-commands.bin').read_bytes()),
               'stereo_pass':sum(r['pass'] for r in cases_out),
