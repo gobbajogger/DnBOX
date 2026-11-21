@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "s1_dry_part.h"
 #include "../dsp/fastmath.h"
+#include <stddef.h>
 #if X0X_SYNTHONE_PATCH
 #include "original_sound.h"
-#include <stddef.h>
 #endif
 #include <string.h>
 
@@ -11,20 +11,27 @@ void s1_part_init(s1_dry_part *part)
 {
     memset(part, 0, sizeof *part);
     part->bend = 0.5f;
+    part->crush_interval = 1.f;
 #if X0X_SYNTHONE_PATCH
     s1_dry_frozen_controls(&part->patch);
 #endif
 }
 
-#if X0X_SYNTHONE_PATCH
 void s1_part_all_off(s1_dry_part *part)
 {
     /* Panic clears notes and performance inputs but leaves the patch playing
      * on this owner available to the next note. */
+    float interval = part->crush_interval;
+#if X0X_SYNTHONE_PATCH
     memset(part, 0, offsetof(s1_dry_part, patch));
+#else
+    memset(part, 0, sizeof *part);
+#endif
     part->bend = 0.5f;
+    part->crush_interval = interval;
 }
 
+#if X0X_SYNTHONE_PATCH
 /* Linear 7-bit edits across the original physical domains implemented by
  * s1_dry_configure. The INIT preset retains its exact unquantized values. */
 static const struct {
@@ -103,9 +110,52 @@ static float pitch_hz(const s1_dry_part *part, unsigned key)
     return unbent * fm_exp2f((part->bend - 0.5f) * (4.0f / 12.0f));
 }
 
+/* Original 44.1 kHz hold intervals for the 128 front-panel positions.
+ * The original rounds log2(hz) to binary32 before exp2; the few ulps
+ * change which frame is held over a sustained note. */
+static const float crush_intervals[128] = {
+    0x1.000000p+0f, 0x1.000000p+0f, 0x1.000000p+0f, 0x1.000000p+0f,
+    0x1.000000p+0f, 0x1.000000p+0f, 0x1.000000p+0f, 0x1.000000p+0f,
+    0x1.000000p+0f, 0x1.000000p+0f, 0x1.000000p+0f, 0x1.007742p+0f,
+    0x1.02975cp+0f, 0x1.04c098p+0f, 0x1.06f32ep+0f, 0x1.092f42p+0f,
+    0x1.0b752cp+0f, 0x1.0dc532p+0f, 0x1.101f7ep+0f, 0x1.12846ep+0f,
+    0x1.14f432p+0f, 0x1.176f2cp+0f, 0x1.19f59cp+0f, 0x1.1c87cep+0f,
+    0x1.1f2630p+0f, 0x1.21d0f4p+0f, 0x1.24888ep+0f, 0x1.274d5ep+0f,
+    0x1.2a1fa8p+0f, 0x1.2cffecp+0f, 0x1.2fee7ep+0f, 0x1.32ebd8p+0f,
+    0x1.35f872p+0f, 0x1.3914a2p+0f, 0x1.3c4102p+0f, 0x1.3f7e0cp+0f,
+    0x1.42cc34p+0f, 0x1.462c0ep+0f, 0x1.499e26p+0f, 0x1.4d2314p+0f,
+    0x1.50bb7cp+0f, 0x1.5467f8p+0f, 0x1.582924p+0f, 0x1.5bffcap+0f,
+    0x1.5fec9cp+0f, 0x1.63f062p+0f, 0x1.680bd4p+0f, 0x1.6c3fd8p+0f,
+    0x1.708d46p+0f, 0x1.74f518p+0f, 0x1.797822p+0f, 0x1.7e177ep+0f,
+    0x1.82d424p+0f, 0x1.87af54p+0f, 0x1.8caa08p+0f, 0x1.91c598p+0f,
+    0x1.970348p+0f, 0x1.9c6468p+0f, 0x1.a1ea7ap+0f, 0x1.a796e6p+0f,
+    0x1.ad6b52p+0f, 0x1.b3695ap+0f, 0x1.b992e6p+0f, 0x1.bfe9aap+0f,
+    0x1.c66fbap+0f, 0x1.cd2712p+0f, 0x1.d41220p+0f, 0x1.db3302p+0f,
+    0x1.e28c6cp+0f, 0x1.ea20f4p+0f, 0x1.f1f366p+0f, 0x1.fa06c2p+0f,
+    0x1.012f26p+1f, 0x1.057ebep+1f, 0x1.09f3ecp+1f, 0x1.0e90b0p+1f,
+    0x1.135724p+1f, 0x1.18498cp+1f, 0x1.1d6a46p+1f, 0x1.22bbe8p+1f,
+    0x1.284148p+1f, 0x1.2dfd58p+1f, 0x1.33f36ap+1f, 0x1.3a26dep+1f,
+    0x1.409ba2p+1f, 0x1.4755b6p+1f, 0x1.4e59a8p+1f, 0x1.55ac34p+1f,
+    0x1.5d52c4p+1f, 0x1.655302p+1f, 0x1.6db34ap+1f, 0x1.767a7cp+1f,
+    0x1.7fb038p+1f, 0x1.895ce6p+1f, 0x1.9389a2p+1f, 0x1.9e40bcp+1f,
+    0x1.a98d8cp+1f, 0x1.b57c76p+1f, 0x1.c21bccp+1f, 0x1.cf7b12p+1f,
+    0x1.ddabeap+1f, 0x1.ecc258p+1f, 0x1.fcd4a0p+1f, 0x1.06fe36p+2f,
+    0x1.102b52p+2f, 0x1.1a025ap+2f, 0x1.249644p+2f, 0x1.2ffd4ep+2f,
+    0x1.3c5104p+2f, 0x1.49af80p+2f, 0x1.583c1ep+2f, 0x1.68209ap+2f,
+    0x1.798ef2p+2f, 0x1.8cc334p+2f, 0x1.a2066ap+2f, 0x1.b9b212p+2f,
+    0x1.d43526p+2f, 0x1.f21b02p+2f, 0x1.0a0a90p+3f, 0x1.1d8450p+3f,
+    0x1.3411ccp+3f, 0x1.4e7d6ap+3f, 0x1.6dde20p+3f, 0x1.93bde2p+3f,
+    0x1.c25ca4p+3f, 0x1.fd2792p+3f, 0x1.24cd0cp+4f, 0x1.588800p+4f,
+};
+
 int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
-    if (id > 1 || !(value >= 0.0f && value <= 1.0f)) return 0;
+    if (id > 2 || !(value >= 0.0f && value <= 1.0f)) return 0;
+    if (id == 2) {
+        unsigned position = (unsigned)(value * 127.f + .5f);
+        part->crush_interval = crush_intervals[position];
+        return 1;
+    }
     if (id == 0) {
         part->bend = value;
         for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
@@ -179,7 +229,7 @@ int s1_part_active(const s1_dry_part *part)
 {
     for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
         if (part->voice[i].started) return 1;
-    return 0;
+    return part->crush_next > part->crush_age && part->crush_last != 0.f;
 }
 
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
@@ -194,5 +244,23 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
             if (part->voice[i].started) sample += s1_dry_sample(&part->voice[i]);
         }
         left[f] = right[f] = sample;
+    }
+
+    /* The untouched INIT rate takes every input frame. Keep the last sample
+     * for a live rate change without running the hold loop on a dry block. */
+    if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
+        part->crush_last = left[frames - 1u];
+        return;
+    }
+    for (unsigned f = 0; f < frames; ++f) {
+        if (part->crush_next <= part->crush_age) {
+            part->crush_last = left[f];
+            part->crush_next += part->crush_interval;
+            part->crush_next -= part->crush_age;
+            part->crush_age = 0.f;
+        } else {
+            left[f] = right[f] = part->crush_last;
+        }
+        part->crush_age += 1.f;
     }
 }

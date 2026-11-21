@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 2);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 3);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -235,7 +235,7 @@ static void verify_synthone(void)
     bad[23] &= (uint8_t)~1u; /* a value without its edit bit */
     assert(!original_sound_valid(bad));
     memcpy(bad,cell,sizeof bad);
-    bad[22] |= 4u; /* reserved edit bit */
+    bad[22] |= 4u; /* a crush edit needs its format marker */
     assert(!original_sound_valid(bad));
     memset(bad,0,sizeof bad);
 #else

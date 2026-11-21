@@ -1122,6 +1122,14 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
     const ui_original_control_view *v = 0;
     /* a corrupt patch has no bank: never index a name table through a null view */
     if (bank != ORIGINAL_SOUND_CHICAGO && bank != ORIGINAL_SOUND_MIAMI && bank != ORIGINAL_SOUND_SYNTHONE && bank != ORIGINAL_SOUND_JUNO) { put_s(num,"INVALID"); return 1; }
+    if (kind == ORIGINAL_SOUND_SYNTHONE && id == ORIGINAL_SYNTHONE_CRUSH) {
+        float hz;
+        if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) {
+            put_i(num, (int)(hz + .5f));
+            put_s(unit, "Hz");
+            return 1;
+        }
+    }
     if (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {

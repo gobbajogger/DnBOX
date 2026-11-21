@@ -724,6 +724,12 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
     switch (t) {
     case T_909: return drum909_param_si(v, i, pot, val);
     case T_808: return drum808_param_si(v, i, pot, val);
+    case T_303:
+        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && i == (int)ORIGINAL_SYNTHONE_CRUSH && (unsigned)pot < 128u) {
+            *val = s1_part_crush_hz(unit_control((unsigned)pot));
+            return X0X_U_HZ;
+        }
+        return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */
         if (i == 0) { *val = (float)pot / 127.0f; return X0X_U_GAIN; }
@@ -853,7 +859,7 @@ static void apply_base(int t, int v, int i)
     if (t == T_303 && (unsigned)v < NBASS) {
         float value;
         if (original_sound_is_performance(original_bass[v].kind, (unsigned)i)) {
-            perf_apply(v, i, (unsigned)i == original_sound_count(original_bass[v].kind) - 2u ? 64 : 0, 1);
+            perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
             return;
         }
         if (original_sound_value(mot_base_snd->v[t][v], (unsigned)i, &value))
@@ -1401,7 +1407,7 @@ static void perf_apply(int v, int i, int val, int live)
 {
     float value;
     if ((unsigned)v >= NBASS) return;
-    unsigned first = original_sound_count(original_bass[v].kind) - 2u;
+    unsigned first = original_sound_bend_id(original_bass[v].kind);
     if ((unsigned)i < first || (unsigned)i > first + 1u) return;
     if (val < 0) val = 0;
     if (val > 127) val = 127;
@@ -1429,7 +1435,7 @@ static int mot_base(void *x, int t, int v, int i)
     if (t == T_303 && (unsigned)v < NBASS && i == mod_param(v) && mod_ctl[v] >= 0)
         return mod_ctl[v];
     if (original_motion_performance(t, v, i))
-        return perf_ctl[v][(unsigned)i - (original_sound_count(original_bass[v].kind) - 2u)];
+        return perf_ctl[v][(unsigned)i - (original_sound_bend_id(original_bass[v].kind))];
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
 }
 static void mot_apply(void *x, int t, int v, int i, int val)
@@ -1928,12 +1934,12 @@ __attribute__((noinline)) static void midi_in(uint32_t pkt)
             } else if (ty == 0xb0 && d1 == 64) {
                 /* damper: sustain pedal CC64 (no wheel mapping) */
                 PARAM_TRACE(PARAM_MIDI, T_303, k,
-                            (int)original_sound_count(original_bass[k].kind) - 1, d2);
-                perf_apply(k, (int)original_sound_count(original_bass[k].kind) - 1, d2, 1);
+                            (int)original_sound_bend_id(original_bass[k].kind) + 1, d2);
+                perf_apply(k, (int)original_sound_bend_id(original_bass[k].kind) + 1, d2, 1);
             } else if (ty == 0xe0) {
                 unsigned bend = (unsigned)d1 | (unsigned)d2 << 7;
                 float value = bend < 8192 ? (float)bend / 16384.0f : 0.5f + (float)(bend - 8192) / 16382.0f;
-                unsigned parameter = original_sound_count(original_bass[k].kind) - 2;
+                unsigned parameter = original_sound_bend_id(original_bass[k].kind);
                 PARAM_TRACE(PARAM_MIDI, T_303, k, (int)parameter, (int)(bend >> 7));
                 perf_ctl[k][0] = (uint8_t)(bend >> 7);
                 ext_touch[k] |= 1u;
