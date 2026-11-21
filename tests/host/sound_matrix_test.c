@@ -117,9 +117,11 @@ static void geometry(void)
         for(int page=0;page<pg.n;page++) {
             *page_of(V_PART)=page;render();
             /* The current slab geometry retains the original palette. */
-            for(int r=0;r<4 && page/4*4+r<pg.n;r++) {
+            /* The last two Miami pages share a window with FILTER and WOBBLE. */
+            int active = bank == ORIGINAL_SOUND_MIAMI && page >= 4 ? page - 2 : page % 4;
+            for(int r=0;r<4;r++) {
                 int y=24+r*50+24;
-                CHECK(fb[y*240+7]==swap16(r==page%4?SOUND_SELECT:SOUND_FACE));
+                CHECK(fb[y*240+7]==swap16(r==active?SOUND_SELECT:SOUND_FACE));
             }
             for(int state=SAVE_SAVED;state<=SAVE_FAILED;state++) {
                 ui.dirty=state==SAVE_UNSAVED;save_wait=state==SAVE_QUEUED;ui.save_failed=state==SAVE_FAILED;

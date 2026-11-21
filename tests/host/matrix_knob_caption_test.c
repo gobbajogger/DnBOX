@@ -9,7 +9,7 @@ static const char *const physical[16]={"","","","","","","","","","","","","",""
 static const char *const logical[16]={"","","","","","","","","","","","","","","",""};
 static void check_caption(const char *caption,const char *name)
 {
-    int page=cur_page(),r=page%4,top=24+r*50;
+    int page=cur_page();
     /* The native Chicago envelope graph replaces the active row widgets and
      * caption; its saved bindings are still checked independently below. */
     if(engine_bass_bank(bidx())==ORIGINAL_SOUND_CHICAGO && page==3)caption="";
@@ -19,9 +19,12 @@ static void check_caption(const char *caption,const char *name)
     int bank=engine_bass_bank(bidx());
     CHECK(bank==ORIGINAL_SOUND_CHICAGO || bank==ORIGINAL_SOUND_MIAMI);
     CHECK(page>=0 && page<(bank==ORIGINAL_SOUND_CHICAGO?8:6));
+    /* Miami pages 5 and 6 occupy rows 3 and 4 of the final four-row window. */
+    int tail = bank == ORIGINAL_SOUND_MIAMI && page >= 4;
+    int r = tail ? page - 2 : page % 4, top = 24 + r * 50;
     const char *expected_title=bank==ORIGINAL_SOUND_CHICAGO?chi_titles[page]:mia_titles[page];
     CHECK(!strcmp_s(matrix_group(page),expected_title));
-    char title[80];put_s(put_s(put_i(title,r+1),"  "),expected_title);
+    char title[80];put_s(put_s(put_i(title,(tail ? page : r)+1),"  "),expected_title);
     
     CHECK(8+tw(&FONT_T,title)+8<=232-tw(&FONT_T,caption));
     sound_t before=proj.sound;int dirty=ui.dirty,sw=save_wait;

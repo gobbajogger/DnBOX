@@ -7,12 +7,17 @@ static unsigned failures, expectations;
 static uint16_t captured[240*240];
 static void capture(const char *name){ui.msg_until=0;ui_frame();memcpy(captured,fb,sizeof fb);if(name)shot(name);}
 static int word(const char *s,int row){
- const felucca_font_t *fonts[]={&FONT_XS,&FONT_S,&FONT_B};int y0=MAIN_Y+(row-ui.list_top)*23;
+ const felucca_font_t *fonts[]={&FONT_XS,&FONT_S,&FONT_B};
+ /* The GLOBAL menu occupies 138 px above the lower controls. Its four- and
+  * five-item sections center taller slabs in each row. */
+ int pitch=ui.list_n<6 ? 138/ui.list_n : 23;
+ int height=21+(pitch-23)/2;
+ int y0=MAIN_Y+(row-ui.list_top)*pitch+(pitch-2-height)/2;
  for(unsigned f=0;f<3;f++){
   cv_begin(240,24,C_BLACK);cv_band(0,24);cv_text(0,0,fonts[f],s,C_WHITE);int w=tw(fonts[f],s),h=0;
   for(int y=0;y<24;y++)for(int x=0;x<w;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)&&y+1>h)h=y+1;
   if(!h)continue;
-  for(int y=y0;y+h<=y0+21;y++)for(int x=120;x+w<=228;x++){
+  for(int y=y0;y+h<=y0+height+1;y++)for(int x=120;x+w<=228;x++){
    uint16_t ink=0;int ok=1;
    for(int j=0;j<h&&ok;j++)for(int i=0;i<w;i++)if(cv_px[j*240+i]==swap16(C_WHITE)){
     uint16_t p=captured[(y+j)*240+x+i];if(!ink)ink=p;else if(p!=ink){ok=0;break;}}

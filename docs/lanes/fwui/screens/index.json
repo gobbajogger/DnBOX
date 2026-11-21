@@ -1,5 +1,19 @@
 {
   "schema": 1,
+  "scope": "The original packing job supplied status, F1, R22VisualReview, sourceCoverage, frames and stableStateIDs below. Its archive keeps the baseline pixels needed to replay replacements and the retired IDs. See currentCatalog for the reviewed inventory.",
+  "currentCatalog": {
+    "file": "screen-index.tsv",
+    "firmwareRevision": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "frames": 1944,
+    "active": 1942,
+    "historical": 2,
+    "indexSHA256": "3bb90e7312f957d3e05635915c6d8c60a03a7d3dcd27456f317654327ddcb1c5",
+    "screenGuide": "README.md",
+    "F1": "PASS",
+    "R22IndependentScore": "10/10",
+    "review": "../current/panel-routes/independent-review.json",
+    "viewports": "../current/panel-routes/viewport-replay.json"
+  },
   "status": "PASS",
   "F1": "UNREVIEWED",
   "R22VisualReview": "UNREVIEWED",
@@ -2057,7 +2071,7 @@
     }
   ],
   "packerSHA256": "93c3d7d4b3a0a420a111e23962e14ae63b063dc199814ebc5238c78b8d77df92",
-  "note": "Direct tar.xz extraction yields stable state/instance PNG paths. PNG compression=0 exposes shared pixels to xz; exact decoded RGB verified. Byte-identical PNGs use archive-local hardlinks. No visual approval.",
+  "note": "Direct tar.xz extraction yields stable PNG paths. The original pack stores uncompressed PNGs to share pixels across xz blocks and uses archive-local hardlinks for byte-identical images. The active index verifies each decoded RGB image. The independent visual verdict is linked in currentCatalog.",
   "replacementArchives": [
     {
       "path": "f6-velocity.tar.xz",
