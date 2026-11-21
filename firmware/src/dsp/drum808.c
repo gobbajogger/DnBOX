@@ -1066,11 +1066,8 @@ static void cy_trigger(d8_cy_t *v, float decay_s, float accent_v)
     v->quiet = 0;
 }
 
-D8_TICK float cy_tick(d8_cy_t *v, float bus)
+static inline __attribute__((always_inline)) void cy_advance_sustain(d8_cy_t *v)
 {
-    float b1, b2, g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
-    b1 = opamp_clip(bq3_run(&v->bp1, k_cy_bp1, bus), 14.0f, 1.0f / 14.0f);
-    b2 = opamp_clip(bq3_run(&v->bp2, k_cy_bp2, bus), 14.0f, 1.0f / 14.0f);
     if (D8_UNLIKELY(v->e1t > 0.0f)) {
         v->e1 += (v->e1t - v->e1) * v->atk_c;
         if (v->e1 > v->e1t * 0.99f)
@@ -1087,6 +1084,14 @@ D8_TICK float cy_tick(d8_cy_t *v, float bus)
                 v->e1 = 0.0f;
         }
     }
+}
+
+D8_TICK float cy_tick(d8_cy_t *v, float bus)
+{
+    float b1, b2, g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
+    b1 = opamp_clip(bq3_run(&v->bp1, k_cy_bp1, bus), 14.0f, 1.0f / 14.0f);
+    b2 = opamp_clip(bq3_run(&v->bp2, k_cy_bp2, bus), 14.0f, 1.0f / 14.0f);
+    cy_advance_sustain(v);
     v->e2 *= v->d2;
     v->e3 *= v->d3;
     g1 = knee_gate(v->e1);
@@ -1115,160 +1120,77 @@ D8_TICK float cy_tick(d8_cy_t *v, float bus)
     return y;
 }
 
-/* One stretch of the cymbal: the same ops as cy_tick, with state and the
- * constant coefficients in scalars (their address is never taken, so they
- * do not alias the float output buf). Written back once at the end. */
-__attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf, const float *restrict bus, int m)
+/* Each pass keeps the delay state of one branch in registers. A span ends at or before
+ * the earliest possible 401st quiet sample. When already at 400, evaluate
+ * one sample before deciding whether the voice continues. */
+__attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf,
+                                            const float *restrict bus, int m)
 {
-    const float c10 = k_cy_bp1[0], c11 = k_cy_bp1[1], c12 = k_cy_bp1[2], c13 = k_cy_bp1[3];
-    const float c14 = k_cy_bp1[4], c15 = k_cy_bp1[5], c16 = k_cy_bp1[6];
-    const float c20 = k_cy_bp2[0], c21 = k_cy_bp2[1], c22 = k_cy_bp2[2], c23 = k_cy_bp2[3];
-    const float c24 = k_cy_bp2[4], c25 = k_cy_bp2[5], c26 = k_cy_bp2[6];
-    const float sus1_b0 = v->sus1.b0, sus1_e1 = v->sus1.e1, sus1_e2 = v->sus1.e2;
-    const float sus2_b0 = v->sus2.b0, sus2_e1 = v->sus2.e1, sus2_e2 = v->sus2.e2;
-    const float br_b0 = v->body_res.b0, br_e1 = v->body_res.e1, br_e2 = v->body_res.e2;
-    const float sk_n0 = v->body_sk.n0, sk_n1 = v->body_sk.n1, sk_n2 = v->body_sk.n2;
-    const float sk_e1 = v->body_sk.e1, sk_e2 = v->body_sk.e2;
-    const float th_n0 = v->top_hp.n0, th_n1 = v->top_hp.n1, th_n2 = v->top_hp.n2;
-    const float th_e1 = v->top_hp.e1, th_e2 = v->top_hp.e2;
-    const float oh_n0 = v->out_hp.n0, oh_n1 = v->out_hp.n1, oh_n2 = v->out_hp.n2;
-    const float oh_e1 = v->out_hp.e1, oh_e2 = v->out_hp.e2;
-    const float hpa_a = v->body_hpa.a, crhp_a = v->crash_hp.a, dc_a = v->dc.a;
-    const float d1 = v->d1, d2 = v->d2, d3 = v->d3, atk_c = v->atk_c;
-    float bp1z0 = v->bp1.z[0], bp1z1 = v->bp1.z[1], bp1z2 = v->bp1.z[2];
-    float bp2z0 = v->bp2.z[0], bp2z1 = v->bp2.z[1], bp2z2 = v->bp2.z[2];
-    float sus1_z1 = v->sus1.z1, sus1_z2 = v->sus1.z2;
-    float sus2_z1 = v->sus2.z1, sus2_z2 = v->sus2.z2;
-    float br_z1 = v->body_res.z1, br_z2 = v->body_res.z2;
-    float sk_z1 = v->body_sk.z1, sk_z2 = v->body_sk.z2;
-    float th_z1 = v->top_hp.z1, th_z2 = v->top_hp.z2;
-    float oh_z1 = v->out_hp.z1, oh_z2 = v->out_hp.z2;
-    float hpa_y = v->body_hpa.y, hpa_z = v->body_hpa.z;
-    float crhp_y = v->crash_hp.y, crhp_z = v->crash_hp.z;
-    float dc_y = v->dc.y, dc_z = v->dc.z;
-    float blp0 = v->body_lp[0], blp1 = v->body_lp[1];
-    float flp0 = v->floor_lp[0], flp1 = v->floor_lp[1];
-    float clp0 = v->crash_lp[0], clp1 = v->crash_lp[1];
-    float top_lp = v->top_lp;
-    float e1 = v->e1, e2 = v->e2, e3 = v->e3, e1t = v->e1t, e1_base = v->e1_base;
-    int32_t e1_n = v->e1_n, quiet = v->quiet;
-    uint8_t e1_ramp = v->e1_ramp, active = v->active;
-    int i;
-
-    for (i = 0; i < m && active; i++) {
-        float bus_x = bus[i];
-        float b1, b2, g1, g2, g3, sus, body_pre, body_dk, body, top_in, top, c1, y;
-        float bx, yy;
-        /* bq3 bp1 + opamp: the same ops as bq3_run(&v->bp1, k_cy_bp1, bus) */
-        y = c10 * bus_x + bp1z0;
-        bp1z0 = c11 * bus_x - c14 * y + bp1z1;
-        bp1z1 = c12 * bus_x - c15 * y + bp1z2;
-        bp1z2 = c13 * bus_x - c16 * y;
-        b1 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
-        /* bq3 bp2 */
-        y = c20 * bus_x + bp2z0;
-        bp2z0 = c21 * bus_x - c24 * y + bp2z1;
-        bp2z1 = c22 * bus_x - c25 * y + bp2z2;
-        bp2z2 = c23 * bus_x - c26 * y;
-        b2 = opamp_clip(y, 14.0f, 1.0f / 14.0f);
-        if (D8_UNLIKELY(e1t > 0.0f)) {
-            e1 += (e1t - e1) * atk_c;
-            if (e1 > e1t * 0.99f)
-                e1t = 0.0f;
-        } else {                                      /* linear discharge, as start - n step */
-            if (D8_UNLIKELY(!e1_ramp)) {
-                e1_ramp = 1;
-                e1_base = e1;
-                e1_n = 0;
-            }
-            if (e1 > 0.0f) {
-                e1 = e1_base - (float)(++e1_n) * d1;
-                if (e1 < 0.0f)
-                    e1 = 0.0f;
-            }
+    enum { CY_SPAN = 16 };
+    float g1[CY_SPAN], g2[CY_SPAN], g3[CY_SPAN];
+    float b1[CY_SPAN], pre[CY_SPAN], mix[CY_SPAN];
+    int offset = 0;
+    while (offset < m && v->active) {
+        int count = m - offset;
+        if (count > CY_SPAN)
+            count = CY_SPAN;
+        if (v->quiet >= 400)
+            count = 1;
+        else if (count > 401 - v->quiet)
+            count = 401 - v->quiet;
+        for (int i = 0; i < count; ++i) {
+            cy_advance_sustain(v);
+            g1[i] = knee_gate(v->e1);
         }
-        e2 *= d2;
-        e3 *= d3;
-        g1 = knee_gate(e1);
-        g2 = knee_gate(e2);
-        g3 = knee_gate(e3);
-        /* bp_run sus1 then sus2, as in (1.4f * bp(sus1) + bp(sus2)) * g1 */
-        bx = sus1_b0 * b1;
-        yy = bx + sus1_z1;
-        sus1_z1 = (yy + yy + sus1_z2) - sus1_e1 * yy;
-        sus1_z2 = (-bx - yy) - sus1_e2 * yy;
-        sus = 1.4f * yy;
-        bx = sus2_b0 * b1;
-        yy = bx + sus2_z1;
-        sus2_z1 = (yy + yy + sus2_z2) - sus2_e1 * yy;
-        sus2_z2 = (-bx - yy) - sus2_e2 * yy;
-        sus = (sus + yy) * g1;
-        /* hp1 body_hpa, then bq body_sk */
-        hpa_y = hpa_a * (hpa_y + b2 - hpa_z);
-        hpa_z = b2;
-        yy = sk_n0 * hpa_y + sk_z1;
-        sk_z1 = (sk_n1 * hpa_y + (yy + yy + sk_z2)) - sk_e1 * yy;
-        sk_z2 = (sk_n2 * hpa_y - yy) - sk_e2 * yy;
-        body_pre = yy;
-        /* bp body_res */
-        bx = br_b0 * body_pre;
-        yy = bx + br_z1;
-        br_z1 = (yy + yy + br_z2) - br_e1 * yy;
-        br_z2 = (-bx - yy) - br_e2 * yy;
-        body_dk = yy;
-        blp0 += (body_dk - blp0) * D8_CY_BODY_LPC; body_dk = blp0;
-        blp1 += (body_dk - blp1) * D8_CY_BODY_LPC; body_dk = blp1;
-        flp0 += (body_pre - flp0) * D8_CY_FLOOR_LPC;
-        flp1 += (flp0 - flp1) * D8_CY_FLOOR_LPC;
-        body = body_dk * g2 + flp1 * (0.065f * g1);
-        /* bq top_hp */
-        yy = th_n0 * body_pre + th_z1;
-        th_z1 = (th_n1 * body_pre + (yy + yy + th_z2)) - th_e1 * yy;
-        th_z2 = (th_n2 * body_pre - yy) - th_e2 * yy;
-        top_in = yy;
-        top_lp += (top_in - top_lp) * D8_CY_TOP_LPC;
-        top = top_lp * (g3 + 0.005f * g1);
-        /* hp1 crash_hp */
-        crhp_y = crhp_a * (crhp_y + b1 - crhp_z);
-        crhp_z = b1;
-        c1 = crhp_y;
-        clp0 += (c1 - clp0) * D8_CY_CRASH_LPC; c1 = clp0;
-        clp1 += (c1 - clp1) * D8_CY_CRASH_LPC; c1 = clp1;
-        y = sus * 0.042f + body * 1.00f + top * 0.58f + c1 * (0.016f * g2);
-        /* bq out_hp, then hp1 dc */
-        y = y * 0.74f;
-        yy = oh_n0 * y + oh_z1;
-        oh_z1 = (oh_n1 * y + (yy + yy + oh_z2)) - oh_e1 * yy;
-        oh_z2 = (oh_n2 * y - yy) - oh_e2 * yy;
-        dc_y = dc_a * (dc_y + yy - dc_z);
-        dc_z = yy;
-        y = dc_y;
-        if (y > 3.2e-5f || y < -3.2e-5f)
-            quiet = 0;
-        else if (++quiet > 400 && e1 < DIODE_VON * 0.5f && e2 < DIODE_VON && e3 < DIODE_VON)
-            active = 0;
-        buf[i] = y;
+        for (int i = 0; i < count; ++i) {
+            v->e2 *= v->d2;
+            v->e3 *= v->d3;
+            g2[i] = knee_gate(v->e2);
+            g3[i] = knee_gate(v->e3);
+        }
+        for (int i = 0; i < count; ++i) {
+            b1[i] = opamp_clip(bq3_run(&v->bp1, k_cy_bp1, bus[offset + i]), 14.0f, 1.0f / 14.0f);
+        }
+        for (int i = 0; i < count; ++i) {
+            pre[i] = opamp_clip(bq3_run(&v->bp2, k_cy_bp2, bus[offset + i]), 14.0f, 1.0f / 14.0f);
+        }
+        for (int i = 0; i < count; ++i) {
+            mix[i] = (1.4f * bp_run(&v->sus1, b1[i]) + bp_run(&v->sus2, b1[i])) * g1[i] * 0.042f;
+        }
+        for (int i = 0; i < count; ++i) {
+            pre[i] = bq_run(&v->body_sk, hp1_run(&v->body_hpa, pre[i]));
+        }
+        for (int i = 0; i < count; ++i) {
+            float body_pre = pre[i];
+            float body_dk = bp_run(&v->body_res, body_pre);
+            v->body_lp[0] += (body_dk - v->body_lp[0]) * D8_CY_BODY_LPC;
+            v->body_lp[1] += (v->body_lp[0] - v->body_lp[1]) * D8_CY_BODY_LPC;
+            v->floor_lp[0] += (body_pre - v->floor_lp[0]) * D8_CY_FLOOR_LPC;
+            v->floor_lp[1] += (v->floor_lp[0] - v->floor_lp[1]) * D8_CY_FLOOR_LPC;
+            mix[i] += v->body_lp[1] * g2[i] + v->floor_lp[1] * (0.065f * g1[i]);
+        }
+        for (int i = 0; i < count; ++i) {
+            float top_in = bq_run(&v->top_hp, pre[i]);
+            v->top_lp += (top_in - v->top_lp) * D8_CY_TOP_LPC;
+            mix[i] += v->top_lp * (g3[i] + 0.005f * g1[i]) * 0.58f;
+        }
+        for (int i = 0; i < count; ++i) {
+            float c1 = hp1_run(&v->crash_hp, b1[i]);
+            v->crash_lp[0] += (c1 - v->crash_lp[0]) * D8_CY_CRASH_LPC;
+            v->crash_lp[1] += (v->crash_lp[0] - v->crash_lp[1]) * D8_CY_CRASH_LPC;
+            mix[i] += v->crash_lp[1] * (0.016f * g2[i]);
+        }
+        for (int i = 0; i < count; ++i) {
+            float y = hp1_run(&v->dc, bq_run(&v->out_hp, mix[i] * 0.74f));
+            v->quiet = y > 3.2e-5f || y < -3.2e-5f ? 0 : v->quiet + 1;
+            buf[offset + i] = y;
+        }
+        if (v->quiet > 400 && v->e1 < DIODE_VON * 0.5f &&
+            v->e2 < DIODE_VON && v->e3 < DIODE_VON)
+            v->active = 0;
+        offset += count;
     }
-
-    v->bp1.z[0] = bp1z0; v->bp1.z[1] = bp1z1; v->bp1.z[2] = bp1z2;
-    v->bp2.z[0] = bp2z0; v->bp2.z[1] = bp2z1; v->bp2.z[2] = bp2z2;
-    v->sus1.z1 = sus1_z1; v->sus1.z2 = sus1_z2;
-    v->sus2.z1 = sus2_z1; v->sus2.z2 = sus2_z2;
-    v->body_res.z1 = br_z1; v->body_res.z2 = br_z2;
-    v->body_sk.z1 = sk_z1; v->body_sk.z2 = sk_z2;
-    v->top_hp.z1 = th_z1; v->top_hp.z2 = th_z2;
-    v->out_hp.z1 = oh_z1; v->out_hp.z2 = oh_z2;
-    v->body_hpa.y = hpa_y; v->body_hpa.z = hpa_z;
-    v->crash_hp.y = crhp_y; v->crash_hp.z = crhp_z;
-    v->dc.y = dc_y; v->dc.z = dc_z;
-    v->body_lp[0] = blp0; v->body_lp[1] = blp1;
-    v->floor_lp[0] = flp0; v->floor_lp[1] = flp1;
-    v->crash_lp[0] = clp0; v->crash_lp[1] = clp1;
-    v->top_lp = top_lp;
-    v->e1 = e1; v->e2 = e2; v->e3 = e3; v->e1t = e1t; v->e1_base = e1_base;
-    v->e1_n = e1_n; v->quiet = quiet;
-    v->e1_ramp = e1_ramp; v->active = active;
-    return i;
+    return offset;
 }
 
 /* ---- hi-hats: sc808_mt_circuit.h HatCircuit ---- */

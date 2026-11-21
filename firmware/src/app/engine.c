@@ -2266,6 +2266,7 @@ __attribute__((noinline)) static void scale_glide(float *buf, glide_t *g, uint32
     uint32_t i;
     float c = g->cur, t = g->tgt;
     if (c == t) {
+        if (c == 1.0f) return;
         for (i = 0; i < n; i++)
             buf[i] *= c;
         return;
@@ -2353,21 +2354,10 @@ __attribute__((noinline)) static void kit_sends(int b, const float *m, uint32_t 
     meter(b, m, mix_level[b], n);
 }
 
-/* ---- the two cores' jobs, balanced per stretch ----
- * Five jobs: the 909 (renders straight into dry_l..dly, the mix's first term), the 808
- * (its L/R in the stretch's out_l/out_r window, its sends in t1/t2), bass A and bass B
- * (each its own workspace and L/R in XPOOL) and the break (kbuf). Recorder state shared
- * with the sequencer stays on core 0 (before and after the jobs).
- * Each job mixes itself on the core that rendered it, in the one-core order (909, 808,
- * bass A, bass B, then the break by core 0), so every sum is the one the single core
- * made: the same bits wherever a job runs. eng_stage counts the mixes done; a job waits
- * only for lower stages, and each core runs its jobs in that order, so no core waits
- * for the other's later work. A job and its state belong to one core for a whole
- * stretch: the plan changes only between stretches, while core 1 is idle.
- * The plan: each job's cost per 256 frames is measured where it runs (24 MHz timer,
- * fast rise, slow fall); before a stretch every split is costed against the stage
- * order, and the cheapest is taken only when it beats the current one by 1/8
- * (sticky: no flip-flop, and a job stays in one core's cache). */
+/* The two cores render disjoint parts into private buffers. The 909 writes the
+ * first term of the output buses. Core 0 then adds 808, bass A, bass B and BREAK
+ * in the same order on every plan. Recorder and sequencer state stay on core 0.
+ * The partition may change only between stretches, after the previous join. */
 enum { JB_909, JB_808, JB_A, JB_B, JB_BRK, JB_N };
 static int brk_silent_now = 1;
 static uint8_t d808_was_active;
@@ -2377,20 +2367,13 @@ static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
 static original_runtime_workspace original_workspace_b X0X_XPOOL;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
-static volatile uint32_t eng_stage;                    /* mixes done this stretch: 1 909, 2 808, 3 basses */
 static volatile uint8_t eng_c1_next;                   /* core 1: the next of its jobs to start */
 static uint8_t eng_c1_mask;                            /* jobs on core 1 this stretch (bit per JB_*) */
 static uint8_t eng_plan;                               /* the plan in force (the same bits) */
 static uint32_t eng_job_cost[JB_N];                    /* ticks per 256 frames when active */
 static uint32_t eng_job_arg;                           /* this stretch's n, 808 mask and window offset */
 static uint8_t eng_job_solo;
-static uint8_t eng_c1_waited;                          /* core 0 has called plat_cpu2_wait this stretch */
 static uint8_t eng_brk_mark;                           /* brk_midi_count before core 1 could add any */
-/* same-block 808 split: BD+SD (a prefix of the mix, about 1.2 ms) on core 1,
- * metals' voices on core 0 in parallel, mid lanes and metal mix after the body
- * is visible. No added audio latency; the sums are the same bits. */
-static uint8_t eng_808_split;
-static volatile uint8_t eng_808_body;                  /* 1: BD+SD is in left808/right808 */
 static float eng_vol;                                  /* this callback's master volume (render_sub may master) */
 static uint8_t eng_master_done;                        /* 1: this stretch ran the master */
 static uint8_t eng_do_master;                          /* pipeline this stretch */
@@ -2398,8 +2381,6 @@ static uint32_t eng_mastered;                          /* contiguous prefix alre
 static volatile uint32_t eng_fx_done;                  /* frames of FX visible to core 0 (tail pipeline) */
 static float *eng_fx_ol, *eng_fx_or;
 static uint32_t eng_fx_n;
-static void c1_take_over(uint32_t s);
-static void d808_body_run(void);
 static void core2_fx(uint32_t arg);
 
 /* the second core still working: 1, done: 0, it failed: -1 (fm1: plat_fm1.c). One core: done. */
@@ -2438,87 +2419,42 @@ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_pa
     kit_sends(PART_808, left808, n);
 }
 
-/* wait for a stage. Core 1 spins (core 0 never stops). Core 0: 0 = reached, 1 = core 1
- * will not reach it (it failed, or on the host it runs lazily): run its jobs here. */
-static int stage_wait(uint32_t s, int core)
+static int glide_silent(const glide_t *g)
 {
-    uint32_t t0;
-    if (eng_stage >= s)
-        return 0;
-    if (core) {
-#ifdef X0X_HOST
-        return 1;                                        /* host: core 0 resumes it in order */
-#else
-        while (eng_stage < s)
-            eng_sync();
-        return 0;
-#endif
-    }
-    t0 = plat_ticks24();
-    for (;;) {
-        eng_sync();
-        if (eng_stage >= s)
-            return 0;
-        if (plat_cpu2_busy() <= 0 || plat_ticks24() - t0 > 24000u * 24u) {
-            c1_take_over(s);                             /* failed, or the host: run its jobs here */
-            return eng_stage >= s ? 0 : 1;
-        }
-    }
+    return g->cur == 0.0f && g->tgt == 0.0f;
 }
 
-/* BD+SD into zeroed buses. Core 1 runs this at the start of the stretch; core 0
- * only if core 1 did not (it failed, or one core). */
-static void d808_body_run(void)
+/* A rendered bass owns its original-synth workspace until the next stretch.
+ * Build a mono copy only while a send is audible or gliding. */
+static void prepare_bass_mix(int bv, float *left, float *right, unsigned n, uint8_t solo_parts)
+{
+    int p = PART_303A + bv;
+    glide_t *g = mix_glide[p];
+    int solo_out = solo_parts && !(solo_parts & (1u << p)) && original_quiet_samples[bv] >= 512u;
+    original_quiet_samples[bv] = bass_quiet_next[bv];
+    mix_targets(p, mix_level[p], solo_parts);
+    if (solo_out)
+        for (unsigned i = 0; i < GL_N; ++i) g[i].cur = 0.0f;
+    if (!glide_silent(&g[GL_REV]) || !glide_silent(&g[GL_DLY])) {
+        float *send = (bv ? &original_workspace_b : &original_workspace)->mono_send;
+        for (unsigned i = 0; i < n; ++i) send[i] = .5f * (left[i] + right[i]);
+    }
+    float peak = 0.0f;
+    for (unsigned i = 0; i < n; ++i) {
+        float l = fm_fabsf(left[i]), r = fm_fabsf(right[i]);
+        if (l > peak) peak = l;
+        if (r > peak) peak = r;
+    }
+    /* Level is nonnegative. Scaling the highest magnitude once gives the
+     * same rounded peak as scaling each magnitude before comparison. */
+    peak *= mix_level[p];
+    if (peak > part_peak[p]) part_peak[p] = peak;
+}
+
+static void run_job(int j, int core)
 {
     uint32_t arg = eng_job_arg, n = arg & 0xFFu ? arg & 0xFFu : 256u, i;
-    uint32_t offset = (arg >> 20) & 0xFFu;
-    float *left808 = t0 + offset, *right808 = tr + offset;
-    for (i = 0; i < n; i++)
-        left808[i] = right808[i] = t1[i] = t2[i] = 0.0f;
-    drum808_render_st_lanes(&d808, left808, right808, t1, t2, (int)n,
-                            (uint16_t)(arg >> 9 & 0x7FFu), D8_LANES_BODY);
-    eng_sync();
-    eng_808_body = 1;
-    eng_sync();
-}
-
-/* 0 = body visible, 1 = it will not be (caller must not mix mid/metals onto it). */
-static int body_wait(int core)
-{
-    uint32_t t0;
-    if (eng_808_body)
-        return 0;
-    if (core) {
-#ifdef X0X_HOST
-        return 1;
-#else
-        while (!eng_808_body)
-            eng_sync();
-        return 0;
-#endif
-    }
-    t0 = plat_ticks24();
-    for (;;) {
-        eng_sync();
-        if (eng_808_body)
-            return 0;
-        if (plat_cpu2_busy() <= 0 || plat_ticks24() - t0 > 24000u * 24u) {
-            if (!eng_c1_waited) {
-                eng_c1_waited = 1;
-                (void)plat_cpu2_wait();
-            }
-            if (!eng_808_body)
-                d808_body_run();
-            return eng_808_body ? 0 : 1;
-        }
-    }
-}
-
-/* one job, render and mix; core 1: not timed by the cycle counter (core 0's) */
-static int run_job(int j, int core)
-{
-    uint32_t arg = eng_job_arg, n = arg & 0xFFu ? arg & 0xFFu : 256u, i;
-    uint32_t offset = (arg >> 20) & 0xFFu, tk = plat_ticks24(), wt = 0, w0;
+    uint32_t offset = (arg >> 20) & 0xFFu, tk = plat_ticks24();
     uint8_t solo_parts = eng_job_solo;
     uint32_t solo = smc_solo_state;
     int active = 1;
@@ -2532,7 +2468,7 @@ static int run_job(int j, int core)
             drum909_advance_noise(&d909, (int)n);       /* retain the exact restart noise/history */
             drum909_pan_settle(&d909);                    /* silent: pans move at once, no glide */
         } else {
-            drum909_render_st_masked(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
+            drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
             for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
@@ -2545,45 +2481,20 @@ static int run_job(int j, int core)
         }
         if (!core)
             PROF_ADD(PR_909, p9);
-        eng_sync();
-        eng_stage = 1;
     } else if (j == JB_808) {
         PROF_T(p8);
         d808_was_active = (uint8_t)drum808_active(&d808);
         if (d808_was_active) {                            /* silent, it does nothing (and is not mixed) */
-            if (eng_808_split) {
-                /* If A renders on core 1, its mix must finish before that core
-                 * can start B. Otherwise core 0 runs A after this 808 job.
-                 * The selected workspace is therefore free until the metal mix
-                 * finishes, even when both bass jobs are on core 1. */
-                float (*raw)[256] = (eng_c1_mask & (1u << JB_A))
-                    ? original_workspace_b.metal : original_workspace.metal;
-                uint16_t aud = (uint16_t)(arg >> 9 & 0x7FFu);
-                drum808_metal_prepare(&d808, raw, (int)n, aud);
-                if (body_wait(core))
-                    return 0;
-                drum808_finish_rest(&d808, (const float (*)[256])raw, left808, right808, t1, t2,
-                                    (int)n, aud);
-                bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
-            } else {
-                for (i = 0; i < n; i++)
-                    left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
-                drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
-                bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
-            }
+            for (i = 0; i < n; i++)
+                left808[i] = t1[i] = t2[i] = right808[i] = 0.0f;
+            drum808_render_st_masked(&d808, left808, right808, t1, t2, (int)n, (uint16_t)(arg >> 9 & 0x7FFu));
+            bfx_shape(PART_808, left808, right808, t1, t2, 4, (int)n);
         } else {
             active = 0;
             drum808_pan_settle(&d808);
         }
-        w0 = plat_ticks24();
-        if (stage_wait(1, core))
-            return 0;
-        wt = plat_ticks24() - w0;
-        mix_808(left808, right808, n, solo_parts);
         if (!core)
             PROF_ADD(PR_808, p8);
-        eng_sync();
-        eng_stage = 2;
     } else if (j == JB_A || j == JB_B) {
         /* one bass: its own workspace and L/R, so A and B may run at once on the two cores */
         int bv = j - JB_A, p = PART_303A + bv;
@@ -2647,38 +2558,8 @@ static int run_job(int j, int core)
                 bass_quiet_next[bv] = q;
             }
             bfx_shape(p, bb[bv], bb[1-bv], 0, 0, 2, (int)n);
+            prepare_bass_mix(bv, bl, br, n, solo_parts);
         }
-        w0 = plat_ticks24();
-        if (stage_wait((uint32_t)(2 + bv), core))         /* A mixes after the 808, B after A */
-            return 0;
-        wt = plat_ticks24() - w0;
-        if (status == ORIGINAL_RUNTIME_OK) {
-            /* A part that was silent when Solo excluded it must not leak a new
-             * note through the 10 ms mix glide-out: start its glides at zero.
-             * (The quiet count from before this stretch, as the one-core order read it.) */
-            int solo_out = solo_parts && !(solo_parts & (1u << p)) && original_quiet_samples[bv] >= 512u;
-            original_quiet_samples[bv] = bass_quiet_next[bv];
-            mix_targets(p, mix_level[p], solo_parts);
-            if (solo_out) for (i = 0; i < GL_N; ++i) mix_glide[p][i].cur = 0.0f;
-            add_glide(dry_l, bb[bv], &mix_glide[p][GL_L], n);
-            add_glide(dry_r, bb[1-bv], &mix_glide[p][GL_R], n);
-            {
-                float pk = part_peak[p], g = mix_level[p];
-                for (i = 0; i < n; ++i) {
-                    float l = bb[bv][i], r = bb[1-bv][i];
-                    float a = fm_fabsf(l) * g;
-                    if (a > pk) pk = a;
-                    a = fm_fabsf(r) * g;
-                    if (a > pk) pk = a;
-                    bb[bv][i] = .5f * (l + r);
-                }
-                part_peak[p] = pk;
-            }
-            add_glide(rev, bb[bv], &mix_glide[p][GL_REV], n);
-            add_glide(dly, bb[bv], &mix_glide[p][GL_DLY], n);
-        }
-        eng_sync();
-        eng_stage = (uint32_t)(3 + bv);
     } else {
         PROF_T(pk);
         brk_silent_now = breaks_silent(&brk);             /* the render writes zeros: nothing to mix */
@@ -2691,8 +2572,42 @@ static int run_job(int j, int core)
             PROF_ADD(PR_BRK, pk);
     }
     if (active)
-        job_cost(j, plat_ticks24() - tk - wt, n);
-    return 1;
+        job_cost(j, plat_ticks24() - tk, n);
+}
+
+static void mix_bass(int bv, unsigned n)
+{
+    glide_t *g = mix_glide[PART_303A + bv];
+    float *send = (bv ? &original_workspace_b : &original_workspace)->mono_send;
+    add_glide(dry_l, eng_bass_buf[2 * bv], &g[GL_L], n);
+    add_glide(dry_r, eng_bass_buf[2 * bv + 1], &g[GL_R], n);
+    add_glide(rev, send, &g[GL_REV], n);
+    add_glide(dly, send, &g[GL_DLY], n);
+}
+
+/* A local render can mix an available prefix while the worker advances through
+ * later parts. The worker publishes its next job only after a memory barrier. */
+static int render_ready(int job, int local_through)
+{
+    if (eng_c1_mask & (1u << job))
+        return eng_c1_next > job;
+    return local_through >= job;
+}
+
+static int mix_ready_prefix(int next, int local_through, unsigned n, unsigned offset,
+                            uint8_t solo_parts)
+{
+    if (!render_ready(JB_909, local_through))
+        return next;
+    while (next <= JB_B && render_ready(next, local_through)) {
+        eng_sync();
+        if (next == JB_808)
+            mix_808(t0 + offset, tr + offset, n, solo_parts);
+        else if (bass_render_ok[next - JB_A])
+            mix_bass(next - JB_A, n);
+        ++next;
+    }
+    return next;
 }
 
 /* core 1's share: its jobs in stage order (arg: unused, the plan is in eng_*).
@@ -2701,21 +2616,13 @@ static void core2_jobs(uint32_t arg)
 {
     int j;
     (void)arg;
-    if (eng_808_split && !eng_808_body)
-        d808_body_run();
     for (j = eng_c1_next; j < JB_N; j++) {
         if (!(eng_c1_mask & (1u << j)))
             continue;
         eng_c1_next = (uint8_t)j;
         eng_sync();
-#ifdef X0X_HOST
-        /* the host runs this at once, inside plat_cpu2_run: a job whose mix needs core 0's
-         * stages is left whole for core 0 to run in order (the same sums) */
-        if (eng_stage < (j == JB_808 ? 1u : j == JB_A ? 2u : j == JB_B ? 3u : 0u))
-            return;
-#endif
-        if (!run_job(j, 1))
-            return;
+        run_job(j, 1);
+        eng_sync();
         eng_c1_next = (uint8_t)(j + 1);
         eng_sync();
     }
@@ -2723,56 +2630,51 @@ static void core2_jobs(uint32_t arg)
     eng_sync();
 }
 
-/* core 0 runs what core 1 did not finish, in order, up to stage s (JB_N + 1: all of it).
+/* After the join, core 0 completes any unfinished worker jobs in order.
  * The device: core 1 failed (plat_cpu2_wait holds it; a job it was inside runs again, as
  * the one-job fallback always did). The host: core 1 runs lazily, and here is where. */
-static void c1_take_over(uint32_t s)
+static void c1_take_over(void)
 {
     int j;
-    if (!eng_c1_waited) {
-        eng_c1_waited = 1;
-        (void)plat_cpu2_wait();
-    }
     eng_sync();
-    for (j = eng_c1_next; j < JB_N && eng_stage < s; j++) {
+    for (j = eng_c1_next; j < JB_N; j++) {
         if (!(eng_c1_mask & (1u << j)))
             continue;
         eng_c1_next = (uint8_t)j;
         if (j == JB_BRK)
             brk_midi_count = eng_brk_mark;               /* drop a failed remote job's descriptors */
-        (void)run_job(j, 0);
+        run_job(j, 0);
         eng_c1_next = (uint8_t)(j + 1);
     }
 }
 
 #define ENG_C1_LAT (24u * 10u)                         /* ticks: a hand-over and its wait, about */
-/* the stretch's cost (ticks) of a split m (bit j: job j on core 1), in the stage order.
- * A job renders as soon as its core is free; only its mix (about 1/16 of it) waits for the
- * part before it (run_job: render, stage_wait, mix). Counting the whole job as waiting made
- * every split with the 303s apart cost the same as one core, so 909-only won the tie. */
-static uint32_t plan_cost(uint32_t m, const uint32_t *c)
+/* The renders run independently until the ordered mix. */
+static uint32_t plan_cost(uint32_t mask, const uint32_t *cost)
 {
-    uint32_t t[2] = {0u, m ? ENG_C1_LAT : 0u}, s, x;
-    int k, j;
-    k = (int)(m & 1u); t[k] += c[JB_909]; s = t[k];
-    for (j = JB_808; j <= JB_B; j++) {
-        k = (int)(m >> j & 1u);
-        x = c[j] >> 4;
-        t[k] += c[j] - x;                               /* render */
-        if (t[k] < s) t[k] = s;                         /* the part before it mixed */
-        t[k] += x; s = t[k];                            /* its mix */
+    uint32_t main_ticks = 0, worker_ticks = mask ? ENG_C1_LAT : 0;
+    for (int j = 0; j < JB_N; ++j) {
+        if (mask & (1u << j)) worker_ticks += cost[j];
+        else main_ticks += cost[j];
     }
-    k = (int)(m >> 4 & 1u); t[k] += c[JB_BRK];          /* mixed by core 0 after both */
-    return t[0] > t[1] ? t[0] : t[1];
+    return main_ticks > worker_ticks ? main_ticks : worker_ticks;
 }
-/* jobs core 1 may take: a Chicago part stays on core 0. Its note start (voice resume, the
- * full note mask) goes about 3 KB deep, more than core 1's 2,816-byte stack (fm1-emu stack
- * mark: 2,988 B with Chicago there; static path 2,384 B plus indirect calls). */
+/* Keep Chicago's deep note-start path and the optional SuperJ6 factory
+ * renderer on core 0. The ordinary Juno, Synth One and Miami renderers
+ * use owner-local state and fit the worker's guarded user stack. */
 static uint32_t c1_allowed(void)
 {
     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
-    if (original_bass[0].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_A;
-    if (original_bass[1].kind == ORIGINAL_SOUND_MIAMI) m |= 1u << JB_B;
+    for (unsigned v = 0; v < NBASS; ++v) {
+        const original_runtime_part *part = &original_bass[v];
+        if (part->kind == ORIGINAL_SOUND_MIAMI || part->kind == ORIGINAL_SOUND_SYNTHONE ||
+            (part->kind == ORIGINAL_SOUND_JUNO
+#if X0X_SUPERJ6_FACTORY
+             && !part->dsp.juno.synth.typed
+#endif
+            ))
+            m |= 1u << (JB_A + v);
+    }
     return m;
 }
 /* before a stretch of n frames: the split to use (sticky; idle jobs stay on core 0) */
@@ -2797,13 +2699,13 @@ static uint32_t plan_pick(uint32_t n)
     best &= act & ok;
     bc = plan_cost(best, c);
     cost = bc;
-    for (m = 0; m < (1u << JB_N); m++) {
-        uint32_t k;
-        if (m & ~(act & ok))
-            continue;
-        k = plan_cost(m, c);
+    const uint32_t allowed = act & ok;
+    m = 0;
+    do {
+        uint32_t k = plan_cost(m, c);
         if (k < bc) { bc = k; best = m; }
-    }
+        m = (m - allowed) & allowed;
+    } while (m);
 
     if (bc * 8u < cost * 7u || (eng_plan & ~(act & ok)))   /* 1/8 better, or a job of it went idle */
         eng_plan = (uint8_t)best;
@@ -2860,42 +2762,37 @@ __attribute__((noinline)) static void render_sub(float *out_l, float *out_r, uin
     eng_job_arg = (n & 0xFFu) | (uint32_t)smc_audible_drums(solo, PART_808) << 9 | (offset << 20);
     eng_job_solo = solo_parts;
     eng_brk_mark = brk_midi_count;
-    eng_stage = 0;
     eng_c1_next = 0;
-    eng_c1_waited = 0;
     bass_render_ok[0] = bass_render_ok[1] = 0;
     original_rec_cancel_cut();                        /* both basses' recorder state: here, before the jobs */
     m = plan_pick(n);
     eng_c1_mask = (uint8_t)m;
-    /* 808 stays on core 0 and core 1 has other work: move the BD+SD prefix */
-    eng_808_split = (uint8_t)(!(m & (1u << JB_808)) && m && drum808_active(&d808));
-    eng_808_body = (uint8_t)!eng_808_split;
     eng_sync();
     if (m && !plat_cpu2_run(core2_jobs, 0u)) {
         eng_c1_mask = 0;                              /* one core: all of it here */
-        eng_808_split = 0;
-        eng_808_body = 1;
     }
 #if X0X_DEBUG
     eng_dbg_nsub++;
     uint32_t w0 = plat_ticks24();
 #endif
-    for (j = 0; j < JB_N; j++)
-        if (!(eng_c1_mask & (1u << j)))
-            (void)run_job(j, 0);
+    int next = JB_808;
+    for (j = 0; j < JB_N; j++) {
+        if (!(eng_c1_mask & (1u << j))) {
+            run_job(j, 0);
+            next = mix_ready_prefix(next, j, n, offset, solo_parts);
+        }
+    }
     if (eng_c1_mask) {
         uint32_t pt = plat_cycles();
-        if (!eng_c1_waited) {
-            eng_c1_waited = 1;
-            if (plat_cpu2_wait())
-                eng_c1_waited = 2;
-        }
-        c1_take_over(JB_N + 1u);                      /* failed, or the host: the rest here */
+        (void)plat_cpu2_wait();
+        c1_take_over();
+        eng_c1_next = JB_N;
         PROF_ADD(PR_808, pt);                         /* core 0's wait for core 1 (as before) */
     }
 #if X0X_DEBUG
     eng_dbg_wait += plat_ticks24() - w0;              /* now: core 0's whole job span */
 #endif
+    (void)mix_ready_prefix(next, JB_N, n, offset, solo_parts);
     brk_midi_drain();
     for (j = 0; j < NBASS; j++)                       /* the recorder (shared with the sequencer): core 0 */
         if (bass_render_ok[j]) original_rec_recover_off(j);

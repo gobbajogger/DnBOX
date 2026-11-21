@@ -40,7 +40,18 @@ D9_INLINE float d9_triangle_diode(float x, float drive, float gain)
     return (u < 0.0f ? -t : t) * gain;
 }
 D9_INLINE float d9_diode16(float x) { return d9_triangle_diode(x, 1.6f, D9_INV_TANH_1_6); }
-D9_INLINE float d9_diode20(float x) { return d9_triangle_diode(x, 2.0f, D9_INV_TANH_2_0); }
+/* A fold is nonnegative and at most 2^31-1. Scaling the triangle
+ * subtraction by 256 is exact throughout binary32's normal range.
+ * This is the fixed 2x diode lookup coordinate, before sign/magnitude. */
+D9_INLINE float d9_triangle20(uint32_t phase)
+{
+    if (X0X_TANH_SCALE != 128.0f)
+        return d9_triangle_diode(d9_tri(phase), 2.0f, D9_INV_TANH_2_0);
+    const uint32_t folded = phase ^ (uint32_t)((int32_t)phase >> 31);
+    const float coordinate = (float)(int32_t)folded * 0x1p-22f - 256.0f;
+    const float result = d9_tanh_table(fm_fabsf(coordinate));
+    return (coordinate < 0.0f ? -result : result) * D9_INV_TANH_2_0;
+}
 /* d9_shape with the diode (every voice's default type) inline, tanh included */
 D9_INLINE float d9_shape_v(const d9_shape_t *s, float x, float *st)
 {
@@ -803,8 +814,8 @@ static void d9_render_sd(d9_bt_t *v, const float *nz, const d9_bus_t *bus, int n
 
         v->ph += d9_inc(f);
         v->ph2 += d9_inc(f * ratio);
-        float o = d9_diode20(d9_tri(v->ph));
-        o += d9_diode20(d9_tri(v->ph2)) * mix2;
+        float o = d9_triangle20(v->ph);
+        o += d9_triangle20(v->ph2) * mix2;
         o *= inv_mix;
         float y = d9_shape_v(&v->shape, o, v->crush_st) * amp;
 
@@ -847,14 +858,14 @@ static void d9_render_tom(d9_tom_t *t, const d9_bt_t *p, const float *nz, const 
         const float f = d9_env_tick(&t->pitch);
         float o = 0.0f;
         t->ph[0] += d9_inc(f);
-        o += d9_diode20(d9_tri(t->ph[0])) * d9_env_tick(&t->env[0]);
+        o += d9_triangle20(t->ph[0]) * d9_env_tick(&t->env[0]);
         if (t->env[1].left) {
             t->ph[1] += d9_inc(f * 1.50f);
-            o += d9_diode20(d9_tri(t->ph[1])) * d9_env_tick(&t->env[1]);
+            o += d9_triangle20(t->ph[1]) * d9_env_tick(&t->env[1]);
         }
         if (t->env[2].left) {
             t->ph[2] += d9_inc(f * 2.75f);
-            o += d9_diode20(d9_tri(t->ph[2])) * d9_env_tick(&t->env[2]);
+            o += d9_triangle20(t->ph[2]) * d9_env_tick(&t->env[2]);
         }
         o *= 0.55f;
         float stick = 0.0f;
