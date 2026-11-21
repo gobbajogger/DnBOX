@@ -1,5 +1,34 @@
 # Sound lane
 
+## Current sound qualification on Elite and Pro
+
+The sound branch includes the original-engine corrections from [#985](https://github.com/gobbajogger/DnBOX/pull/985) and consolidated FWUI through `46874497`. On firmware source `5837c73f`, all seven engines produced stereo output during eight strict 360 MHz emulator runs. Each selected-instrument run captured 96,768 stereo frames with zero late transfers and zero xruns. Both kits triggered all eleven rows. The two bass parts and loaded BREAK sample played together. The calibrated 922-event scene and the complete original factory gates are separate tests. [Selected-instrument receipts](../../experiments/sound-hardware-v1/integrated-sound/selected-results.json)
+
+| Engine | Original comparison or focused playback result |
+| --- | --- |
+| 808 | 436/436 against 8W8 with the shipping release and choke path. Before the fix, 42 cases exceeded the pointwise tolerance. |
+| 909 | 108/108 against the original 9W9 cymbals within 1 dB level and 3 dB spectral error. The separate pointwise test against the WAVs still reports 133 failures. |
+| BREAK | All 40 slices across five loops passed the straight-playback comparison with BB Gen. After the 88-frame onset ramp and known slice-boundary offsets, 694,381 PCM16 words matched. |
+| Chicago | All 81 factory programs sounded on both channels. The AU comparison improved from 0/29 to 28/29. Overlapping-note glide differs by 2.212 dB against the 1 dB strong-harmonic limit. |
+| Miami | All 30 factory programs sounded on both channels. All seven measured AU configurations passed pitch, envelope and harmonics. |
+| Synth One | INIT retriggered at three pitches against the original. With the width option, both owners passed all 14 controls at 128 positions and 985,600 original width-history comparisons. |
+| Juno / SuperJ6 | Four shipping Juno presets render stereo. The SuperJ6 factory loader passed 32 synthetic selections on both owners. The separate Linux CoreSampler covers 36 controlled note renders, 48 layer/PWM comparisons and eight authored PWM String Pad layer comparisons. |
+
+The optional stereo-width control uses a private 50 ms history on each selected Synth One part. With both editors enabled, the application has 3,028 B free flash on Elite and 3,036 B on Pro. Both keep 9,024 B of free pool, 832 B above reserve. The prior combined profile overflowed Elite flash by 3,104 B on the consolidated FWUI source before the new Chicago encoding. The rebuilt coefficient reader matches all 32,770 source words. [Per-engine RAM and flash](sound-memory.md) · [Editor and ownership tests](../../experiments/sound-hardware-v1/integrated-sound/width-host.json)
+
+| Checklist | Current status | Qualification boundary |
+| --- | --- | --- |
+| S1 | FAIL | The production selector offers INIT. The compiled selector exposes 0/694 complete factory programs. The zero-miss callback contract also remains open. |
+| S2 | FAIL | The original host graph supports all 694 programs. A complete independent production renderer must load each one before its level and spectral errors can be scored. |
+| S3 | FAIL | The integrated importer binds 11 main-pass fields. The separate range prototype verifies the three evidenced ID 86 stops. Remaining controls and complete FX routing require original state and output validation. |
+| S4 | BLOCKED | 0/14 complete original stereo pairs. Six authenticated PWM String Pad words and the Linux CoreSampler qualify the oscillator. The 14 selected program records and matching original full-preset PCM are unavailable on this host. |
+| S5 | FAIL | 640 records across 12 banks were previously decoded. Complete parameter-by-parameter application and selection of every record remain open. |
+| S6 | FAIL | All seven current engine paths link within stock Elite/Pro memory. The complete factory instruments with independent original effects still lack a fitting image. |
+| S7 | PASS | `git grep -niw drone -- firmware tests web` returned zero matches. |
+
+The 240 × 240 firmware review found only 58 changed pixels in the new width cell on each part. The original 13-control configuration reproduced all 122 recorded panel and frame hashes. The reviewer placed both native frames into hash-verified archived shell captures at 1440 × 900, 390 × 844 and 844 × 390. All 18 composites preserve every pixel outside the LCD. Fresh candidate browser captures remain outstanding. [Before and after](../../experiments/sound-hardware-v1/integrated-sound/width-before-after.png) · [Independent review](../../experiments/sound-hardware-v1/integrated-sound/width-review-ledger.json) · [Viewport comparisons](../../experiments/sound-hardware-v1/integrated-sound/viewports/composites.json)
+
+
 ## Ordinary Elite and Pro engine qualification, 2026-11-21
 
 PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) carries the shipping 808 release, 909 cymbal, Chicago gain, Synth One retrigger, Juno voice reuse and SMK startup corrections based on sound PR #973. Both boards have native DAC and guest activity measurements for every engine. The [per-engine report](../sound/engine-qualification.md) distinguishes original-render fidelity, native activity and timing, including unavailable original captures.
