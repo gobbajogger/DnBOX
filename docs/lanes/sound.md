@@ -1,5 +1,11 @@
 # Sound lane
 
+## Stock memory checkpoint, 2026-11-20
+
+The [sound memory report](sound-memory.md) records six new physical links using the existing UI and normal stock linker. Playable Synth One with the shipped Juno leaves 4,160 B XIP on Elite and 4,168 B on Pro. The partial compact SuperJ6 variant leaves 1,864/1,872 B, or 1,928/1,940 B with the range dictionary. Each leaves 8,972 B raw pool, 780 B above reserve. Whole-lane S6 remains FAIL because complete independent instruments and insert histories are still absent. Source patches, attribution and native receipts are in the report.
+
+The current lead task is to test the filter response on the original note recordings and verify both the factory parameter namespace and the working oscillator/control candidates. The complete branch gate and independent review are outstanding. The live base is `76040daa5b52d686a8b7b544296ba5d79610a95d`; GitHub and the local merge-base agree, and the no-rename diff contains no deleted paths. Scope and evidence prior to this checkpoint follow below.
+
 ## Independent SuperJ6 layer 1 attack field — 2026-11-19
 
 The [SuperJ6 field adapter](../../experiments/sound-hardware-v1/sj6-id36-field-adapter/CURRENT.md)

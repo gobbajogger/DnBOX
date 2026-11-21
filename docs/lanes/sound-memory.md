@@ -1,0 +1,43 @@
+# Sound memory on stock SMK-37 Elite and Pro
+
+S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All three source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
+
+## Physical images
+
+These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
+
+| Playable partial Synth One with | Code tree on the PR parent | Elite image / free XIP (B) | Pro image / free XIP (B) |
+| --- | --- | ---: | ---: |
+| Shipped Juno engine and chorus | `1e18f1b0706a8c1ec17f0939a486382b69111c9b` | 548,512 / 4,160 | 548,504 / 4,168 |
+| Compact Juno facade and core | `2ca530ce1031327a1098f120d1745cc6294a85cc` | 550,808 / 1,864 | 550,800 / 1,872 |
+| Compact core with physical-range dictionary | `731158c6ad7b30addcb6f635f4eca4cbc56bd941` | 550,744 / 1,928 | 550,732 / 1,940 |
+
+In all six links ordinary RAM use is 97,204 of 98,304 bytes, pool use is 335,092 of 344,064, and XPOOL use is 9,216 of 9,216. Raw pool free is 8,972 bytes. This leaves a 780-byte margin over the 8,192-byte reserve, or 268 bytes beyond the additional 512-byte gate requirement. No target runtime or stack high-water measurement was made.
+
+The dictionary saved 64 bytes on Elite and 68 bytes on Pro in this composition. The existing host boundary comparison was rerun with the candidate's actual shared-math and ABI headers. The 944 float boundary cases, four oscillator-mode cases and 576 renders across four rates passed, with identical complete owner state and audio over 31,488 frames. The pulse-width mutant failed. This change alters macro validation; its stock hardware timing was not measured.
+
+## Engine-specific measurements
+
+The first table uses the shipped-Juno/S1 composition. Clang compiled the owner sizes for the PI32v2 target. The drum/BREAK entries are their actual image pool symbols. The firmware allocates two 5,184-byte owner objects in `original_bass`. Each contains one 3,720-byte backend union plus shared ownership state. Per-owner figures describe alternative union members. Independently, the two 5,120-byte workspaces are physically retained in POOL and XPOOL. The stock shared bus retains 18,316 bytes in `fx` and 158,400 bytes in `dly_buf`. The selected insert arenas `original_fx` occupy 8,504 bytes across both slots.
+
+| Engine | Backend per owner or fixed drum/BREAK object (B) | Named functions in flash (B) | Named read-only data in flash (B) |
+| --- | ---: | ---: | ---: |
+| Chicago | 3,492 | 29,460 | 34,453 |
+| Miami | 3,720 | 18,280 | 5,327 |
+| Shipped Juno with chorus | 888 | 2,340 | 0 |
+| Partial Synth One | 1,048 | 2,638 | 0 |
+| 808 | 3,680 | 342 | 11 |
+| 909 | 7,612 | 3,836 | 32 |
+| BREAK | 6,772 | 1,646 | 0 |
+
+The compact SuperJ6 backend plus chorus uses 2,892 bytes inside the same union. Its dedicated functions/read-only data measure 3,498/184 bytes in the initial compact composition and 3,514/103 bytes with the dictionary. The totals in each row match across both models.
+
+Flash attribution counts disjoint, nonzero ELF `.text` symbol ranges with an engine prefix. Function symbols are counted separately from named constant bytes. Compact Juno also owns the source-verified local `params_valid.bounds` and `params_valid.field_range`. Data merged into anonymous literals, inlined code in generic callers, shared DSP, padding and the remaining firmware are left unattributed. The shipped-Juno/S1 images have 450,147/450,139 bytes outside those named ranges. These counts are lower bounds for engine-specific storage. A zero means that no named constant was attributed by the stated rule.
+
+## Reproduction and limits
+
+The proof packet contains the model logs, linked ELF symbol/section tables, exact source and output SHA-256s, physical linker script, PI32v2 ABI probe, readback and symbol-counting code. The JieLi Clang and linker match their pinned digests and `clang --version` returns 4.0.1. The three AC79 V1.2.14 packaging files match the individual pins in `tools/build.py`. Rebuild with those verified inputs for each model in turn. Use `common/bin/objdump -t -h build/<model>/x0x.elf` and the packet's `link_attribution.py` to reproduce the flash counts.
+
+Shared sends and the partial synth inserts exercised in these images do not supply four independent ten-second delay histories. The earlier original renderer allocated 7,056,016 bytes for those four buffers at 44.1 kHz; its warm shortened-ring oracle diverged at frame 220,528. Acceptance still requires a stock-fitting independent design, matched original audio and full callback qualification.
+
+[Native measurement packet](../../experiments/sound-hardware-v1/stock-fit-20261121/native-receipts.tar.gz)
