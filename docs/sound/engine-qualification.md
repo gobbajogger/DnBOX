@@ -50,6 +50,8 @@ All four populated runs triggered all 11 rows in each kit, produced signal on bo
 
 The ordinary images retain 4,604 bytes of XIP on Elite and 4,616 on Pro. Both retain 2,064 pool bytes above the 8 KiB reserve. The check matched 1,923 tracked paths for each board to the measured source. [Six strict replays, native counters, PCM and package digests](../../experiments/sound-hardware-v1/selected-native/populated-42ae56e1.json)
 
+The strict runner also compares the incremental stereo capture length against six seconds of 44.1 kHz DMA, to within one half-buffer, and reads the guest crash handler and retained record. A fault at 6.65 seconds in an experimental full-delay image was rejected. [Healthy and truncated captures](../../experiments/sound-hardware-v1/selected-native/capture-health-receipts.json)
+
 A second build and replay reproduced the package and ELF hashes, all four populated stereo PCM digests and every guest counter at `42ae56e1`. An additional saved Juno/Synth One project enabled the phaser and master compressor. Elite peaked at 11,055 µs and Pro at 11,388 µs, both with zero late transfers and zero xruns. [Independent ordinary and wet project replays](../../experiments/sound-hardware-v1/selected-native/independent-populated-42ae56e1.json)
 
 At `87a2fbde9c58aa79d51dad7b29d9537348ee5ed8`, Elite passes both requested populated scenes. Pro passes Juno and Synth One. Its Chicago and Miami scene exceeds the deadline by 435 µs and records two late transfers. All 636 verified build inputs match this source. Elite uses 552,484 application bytes with 188 free. Pro uses 552,472 with 200 free. Each uses 96,260 bytes of normal RAM and 333,880 pool bytes, leaving 10,184 pool bytes free and 1,992 above reserve.
