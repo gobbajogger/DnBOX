@@ -167,12 +167,29 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     exe = compile_renderer(out)
     if args.probe_chicago_anchor:
+        packet = json.loads((ROOT / "tests/fixtures/chicago-au-3.1.6.json").read_text())
+        controls = next(row["controls"] for row in packet["rows"] if row["name"] == "overlap_glide_mid")
+        # A stolen voice can take two envelope ticks to restart. Sweep the
+        # second note across a full tick, ascending and descending. A long
+        # diagnostic timer preserves the prior note for this spaced phrase.
+        for offset in range(64):
+            first, second, third = (36, 43, 39) if offset % 2 == 0 else (72, 65, 69)
+            events = ((0, 144, first, 100), (3000 + offset, 144, second, 100),
+                      (5500, 128, first, 0), (8500 + offset, 144, third, 90),
+                      (11000, 128, second, 0), (12500, 128, third, 0))
+            render_args = (exe, "chicago", 0, controls, 13230, events)
+            actual = render(*render_args)
+            previous_note = render(*render_args, probe_anchor_frames=2205)
+            cold_note = render(*render_args, probe_anchor_frames=0)
+            if not np.array_equal(actual, previous_note) or np.array_equal(actual, cold_note):
+                raise SystemExit(f"Chicago glide anchor failed at onset offset {offset}")
+        print("Chicago preserved the previous pitch at all 64 onset offsets.")
         rows = []
-        for duration in (0, 64, 95, 96, 256, 441, 2205, 11025, 11026):
+        for duration in (0, 64, 95, 96, 129, 256, 441, 2205, 11025, 11026):
             row, = compare_chicago(exe, probe_anchor_frames=duration)
             rows.append({"diagnostic_anchor_frames": duration, **row})
         (out / "anchor-probe.json").write_text(json.dumps(rows, indent=2, allow_nan=False) + "\n")
-        print(f"Measured {len(rows)} diagnostic durations. Current firmware uses 0.")
+        print(f"Measured {len(rows)} diagnostic durations.")
         return 0
     factory = {}
     for engine, total in (("chicago", 81), ("miami", 30)):

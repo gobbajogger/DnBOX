@@ -1,5 +1,9 @@
 # Sound lane
 
+## Draft #985 populated playback and original effects
+
+The [engine qualification report](../sound/engine-qualification.md) tracks the four populated 360 MHz scenes, effects coverage and the S4 pairs. The Chicago overlap correction passes its level and harmonic checks across the measured transition, and 64 onset offsets select the preceding pitch. Both parts have an independent Synth One rate reducer with 128 original-stage comparisons. The seven-engine effects matrix, final populated deadlines and 14 full original stereo pairs remain open. Use the original build-9 app and its embedded AU for S4. The release banks supply the selections directly.
+
 ## Ordinary Elite and Pro engine qualification, 2026-11-21
 
 PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) carries the shipping 808 release, 909 cymbal, Chicago gain, Synth One retrigger, Juno voice reuse and SMK startup corrections based on sound PR #973. Both boards have native DAC and guest activity measurements for every engine. The [per-engine report](../sound/engine-qualification.md) distinguishes original-render fidelity, native activity and timing, including unavailable original captures.

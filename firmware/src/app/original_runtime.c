@@ -247,11 +247,7 @@ int original_runtime_all_off(original_runtime_part *p)
         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
         p->dsp.juno.chorus.write=0;ok=1;
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
-#if X0X_SYNTHONE_PATCH
         s1_part_all_off(&p->dsp.synthone);
-#else
-        s1_part_init(&p->dsp.synthone);
-#endif
         ok = 1;
     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
         ok = original_miami_backend_all_off(&p->dsp.miami);
