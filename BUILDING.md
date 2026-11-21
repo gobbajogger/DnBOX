@@ -406,9 +406,9 @@ For the owner's five original 22,050 Hz zones, use `MODEL=elite ./build.sh --sta
 or `MODEL=pro ./build.sh --starting-breaks`. These builds append the pinned
 [five-zone bank](assets/starting-breaks/NOTICE.md) to the linked application and require
 1,024 erased bytes below the Bluetooth block. A build with insufficient room
-reports the bank size and available bytes. Both current stock models reject
-this option. The 109,394-byte bank exceeds the available 5,168 bytes on Elite
-and 5,184 bytes on Pro. [Stock fit measurements](docs/lanes/integ.md).
+reports the bank size and available bytes. In the measured combination with
+Sound #973 and FWUI #975, the 109,394-byte bank exceeds the available 5,168
+bytes on Elite and 5,184 bytes on Pro. [Stock fit measurements](docs/lanes/integ.md).
 The same `--starting-breaks` option
 on `tools/package_stock_loops.py` composes the bank into a compatible checked
 package. Existing applications built with a compiled BREAK bank use that bank
