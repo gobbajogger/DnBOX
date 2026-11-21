@@ -58,7 +58,8 @@
       "archive_integrity": "verified",
       "usable_for": "gobbajogger/DnBOX firmware builds on Linux x86_64",
       "verified_command": "pi32v2/bin/clang --version",
-      "packaged_in_bundle": false
+      "packaged_in_bundle": true,
+      "bundle_member": "toolchain/jieli-linux-toolchains-20260730.1.zip"
     },
     {
       "filename": "LoopyX0X37-Project-Sources-Bootstrap-20261023(1)(1).zip",
@@ -68,7 +69,8 @@
       "archive_integrity": "verified",
       "contains_source_for": "gobbajogger/X0X37-for-Loopy-Pro at historical 7537a46ab49419920428299db8f3321d01e6fd16 only; not DnBOX source",
       "usable_for": "historical fetch/integrity-script patterns; do not substitute for either source repo",
-      "packaged_in_bundle": false
+      "packaged_in_bundle": false,
+      "note": "Historical bootstrap source is unrelated to DnBOX; only the integrity/restore workflow concepts were reused."
     },
     {
       "filename": "AC79NN_SDK_V1.2.14_2026-10-13",
@@ -80,7 +82,7 @@
         "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
         "cfg/eq_cfg_hw.bin": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8"
       },
-      "note": "Older V1.2.1 SDK in bootstrap does not satisfy current firmware pin; actual V1.2.14 archive must be retrieved and checked."
+      "note": "The older bootstrap's reference to V1.2.1 cannot satisfy current V1.2.14 SDK requirement. The SDK is absent from this package and current container."
     }
   ],
   "required_host_platform": "Linux x86_64",
