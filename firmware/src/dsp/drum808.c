@@ -1568,12 +1568,10 @@ __attribute__((noinline)) static int cb_run(d8_cb_t *restrict v, float *restrict
 /* the drive stage: sc808_shape.h                                          */
 /* ======================================================================= */
 
-static void shp_resolve(drum808_t *d, int s)
+static void shp_resolve(d8_shp_t *p, float drive, int type)
 {
-    d8_shp_t *p = &d->shp[s];
     static const float k_mk_exp[7] = {0.0f, 0.6f, 0.42f, 0.65f, 0.45f, 0.5f, 0.0f};
-    int type = d->pot[s][D8P_DIST];
-    p->drive = d->potv[s][D8P_DRIVE];
+    p->drive = drive;
     p->k = 1.0f + p->drive;
     p->mk = type >= 1 && type <= 5 ? 1.0f / d8_pow(p->k, k_mk_exp[type]) : 1.0f;
     p->dn = p->drive >= 1.0e-3f ? 0.5f / fm_tanhf(0.5f * p->drive) : 1.0f;
@@ -1716,21 +1714,21 @@ static void set_pot(drum808_t *d, int s, int slot, int v)
     d->pot[s][slot] = (uint8_t)v;
     d->potv[s][slot] = slot == D8P_DIST ? (float)v : pot_value(s, slot, v);
     if (slot == D8P_DRIVE || slot == D8P_DIST)
-        shp_resolve(d, s);
+        shp_resolve(&d->shp[s], d->potv[s][D8P_DRIVE], d->pot[s][D8P_DIST]);
 }
 
 /* a track's parameter list: which sound slot each knob edits */
 enum { K_POT, K_FIXED, K_SWITCH, K_KIT, K_PAN };
 typedef struct { uint8_t kind, slot, snd; } d8_pmap_t;
 
-static const char *const k_dist_names[7] = {"DIODE", "CLIP", "SAT", "BFZ", "PDIST", "FOLD", "CRUSH"};
+static const char *const k_dist_names[] = {"OFF", "DIODE", "CLIP", "SAT", "BFZ", "PDIST", "FOLD", "CRUSH"};
 static const char *const k_tom_names[2] = {"TOM", "CONGA"};
 static const char *const k_rim_names[2] = {"RIM", "CLAVE"};
 static const char *const k_clap_names[2] = {"CLAP", "MARAC"};
 
 #define PP(name, def) {name, 127, def, 0}
 #define P_DRIVE {"Drive", 127, 0, 0}
-#define P_DIST {"Dist", 6, 0, k_dist_names}
+#define P_DIST {"Dist", 6, 0, k_dist_names + 1}
 #define P_REV {"Rev", 127, 0, 0}
 #define P_DLY {"Dly", 127, 0, 0}
 
@@ -1785,8 +1783,8 @@ static const x0x_param_t d8_oh_mid[] = {PP("Decay", 74)};
 static const d8_pmap_t k_m_decay_tune[] = {{K_POT, D8P_LEVEL, 0}, {K_POT, D8P_DECAY, 0},
                                            {K_POT, D8P_TUNE, 0}};
 /* (X0X: the hats' choke is the 909's, fixed: the closed hat cuts the open one) */
-static const x0x_param_t k_p_kit[] = {PP("Level", 100), PP("Accent", 127)};
-static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}};
+static const x0x_param_t k_p_kit[] = {PP("Level", 100), PP("Accent", 127), {"Dist", 7, 0, k_dist_names}, P_DRIVE};
+static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}, {K_KIT, 2, 0}, {K_KIT, 3, 0}};
 
 /* Pot maps only — descriptor tables are reached through d8_spec (the old .p/.n
  * fields were never read and only cost flash). Heads omit the shared FX kinds. */
@@ -2053,9 +2051,28 @@ X0X_COLD const x0x_param_t *drum808_param(int track, int i)
 
 __attribute__((noinline)) static void kit_apply(drum808_t *d)
 {
-    d->vol = (float)d->kpot[0] / 127.0f;
+    d->master_vol = (float)d->kpot[0] / 127.0f;
+    d->master_on = d->kpot[D8_KIT_DIST] && d->kpot[D8_KIT_DRIVE];
+    d->vol = d->master_on ? 1.0f : d->master_vol;
+    if (d->master_on)
+        shp_resolve(&d->master, 10.0f * ((float)d->kpot[D8_KIT_DRIVE] / 127.0f), d->kpot[D8_KIT_DIST] - 1);
     d->vel_depth = (float)d->kpot[1] / 127.0f;
     d->choke = 1;                                 /* CH cuts OH */
+}
+
+/* The upstream master shapes the sum (per-lane drive occurs before the sum).
+ * DnBOX pans per lane, so its two channels keep independent CRUSH history. */
+void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n)
+{
+    if (!d->master_on)
+        return;
+    int type = d->kpot[D8_KIT_DIST] - 1;
+    for (int i = 0; i < n; ++i) {
+        left[i] = shape(left[i], &d->master, type, d->master_crush[0]) * d->master_vol;
+        right[i] = shape(right[i], &d->master, type, d->master_crush[1]) * d->master_vol;
+        rev[i] *= d->master_vol;
+        dly[i] *= d->master_vol;
+    }
 }
 
 /* UI/MIDI pot path — not the 808 audio render (X0X_COLD). drum808_init stays hot/untouched. */

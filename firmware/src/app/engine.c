@@ -2420,8 +2420,14 @@ static void job_cost(int j, uint32_t ticks, uint32_t n)
 static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
 {
     uint32_t i;
-    if (!d808_was_active)
-        return;
+    if (!d808_was_active) {
+        /* CRUSH keeps its sample-and-hold phase across gaps between hits. */
+        if (!d808.master_on || d808.kpot[D8_KIT_DIST] != D8_MASTER_CRUSH)
+            return;
+        for (i = 0; i < n; ++i)
+            left808[i] = right808[i] = t1[i] = t2[i] = 0.0f;
+    }
+    drum808_kit_process(&d808, left808, right808, t1, t2, (int)n);
     mix_targets(PART_808, mix_level[PART_808], solo_parts);
     add_glide(dry_l, left808, &mix_glide[PART_808][GL_L], n);
     add_glide(dry_r, right808, &mix_glide[PART_808][GL_R], n);

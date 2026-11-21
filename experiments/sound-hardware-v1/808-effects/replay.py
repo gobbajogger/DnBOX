@@ -19,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('upstream', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
     args = parser.parse_args()
     up = args.upstream.resolve()
     out = args.output.resolve()
@@ -34,7 +35,7 @@ def main():
     subprocess.run([sys.executable, ROOT/'tools/gen_drum_samples.py', gen/'x0x_drum_samples.h'],check=True,cwd=ROOT)
     flags = ['-O2','-ffp-contract=off','-fno-fast-math','-I'+str(source),'-I'+str(dsp),'-I'+str(gen)]
     objects = []
-    for i, unit in enumerate((source/'sc808_engine.cpp', dsp/'fxbus.c', dsp/'x0x_param.c', dsp/'drum909.c', HERE/'wet.c')):
+    for i, unit in enumerate((source/'sc808_engine.cpp', dsp/'fxbus.c', dsp/'x0x_param.c', dsp/'drum909.c', dsp/'drum808.c', HERE/'wet.c')):
         obj = out/f'{i}.o'
         tool = 'c++' if i == 0 else 'cc'
         subprocess.run([tool,*flags,'-c',unit,'-o',obj],check=True)
@@ -49,7 +50,7 @@ def main():
     dry_digest = None
     for name,rv,dl,dist,glue in cases:
         data = out/(name+'.f32')
-        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data],check=True)
+        subprocess.run([test, str(rv), str(dl), str(dist), str(glue), data, str(int(args.kit_master))],check=True)
         with data.open('rb') as file:
             x, ref, left, right = np.fromfile(file,dtype='<f4').reshape(88200,4).T
         digest = hashlib.sha256(x.tobytes()).hexdigest()
@@ -66,7 +67,7 @@ def main():
                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
         rows.append(row)
     print(json.dumps(rows,indent=2))
-    (out/'results.json').write_text(json.dumps({'original':REF,'frames_per_case':88200,'sample_rate':44100,
+    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','frames_per_case':88200,'sample_rate':44100,
        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
 

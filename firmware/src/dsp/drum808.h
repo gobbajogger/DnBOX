@@ -172,12 +172,15 @@ typedef struct {                    /* a sound's drive stage, resolved from its 
 struct drum808 {
     uint8_t pot[D8S_NUM][D8P_NUM];
     uint8_t sw[D8_NUM];               /* LT/MT/HT tom|conga, RS rim|clave, CP clap|maracas */
-    uint8_t kpot[3];                  /* kit: level, accent, choke */
+    uint8_t kpot[4];                  /* kit: level, accent, distortion, drive */
+    uint8_t master_on;
     uint8_t tpan[D8_NUM];             /* X0X: each track's pan pot (a track, not a sound: tom / conga share it) */
     float pan_l[D8_NUM], pan_r[D8_NUM];
     float pan_lc[D8_NUM], pan_rc[D8_NUM], pan_dl[D8_NUM], pan_dr[D8_NUM];   /* gliding: now, per sample */
     float potv[D8S_NUM][D8P_NUM];     /* engineering values of pot[] */
     d8_shp_t shp[D8S_NUM];
+    d8_shp_t master;
+    float master_crush[2][2], master_vol;
     float vol, vel_depth;
     int32_t choke;
 
@@ -196,6 +199,9 @@ struct drum808 {
 };
 typedef struct drum808 drum808_t;
 
+enum { D8_KIT_DIST = 2, D8_KIT_DRIVE = 3, D8_MASTER_CRUSH = 7 };
+/* Finalize the sole owner's summed dry kit and mono send stems in place. */
+void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n);
 void drum808_init(drum808_t *d);                          /* 8W8 defaults */
 void drum808_trigger(drum808_t *d, int track, float vel); /* vel 0..1, 1.0 = accent */
 void drum808_render(drum808_t *d, float *dry, float *rev, float *dly, int n);

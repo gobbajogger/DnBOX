@@ -1583,7 +1583,7 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
                 do { static const pref_t refs[4] = {PR(R_ENG, T_909, NDRUM, 1), NONE, NONE, NONE};
             add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
             else
-                do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), NONE, NONE, NONE};
+                do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), PR(R_ENG, T_808, NDRUM, D8_KIT_DIST), PR(R_ENG, T_808, NDRUM, D8_KIT_DRIVE), NONE};
             add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
         } else if (part_is_303(p)) {
             int b = p - PART_303A;

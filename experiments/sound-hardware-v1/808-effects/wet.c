@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "sc808_engine.h"
 #include "fxbus.h"
+#include "drum808.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 enum { RATE = 44100, FRAMES = 88200, BLOCK = 128, DELAY_WORDS = 79200 };
 static int16_t delay_memory[DELAY_WORDS];
 static fxbus_t bus;
+static drum808_t kit;
 
 static void set(sc808_engine_t *s, const char *name, unsigned value)
 {
@@ -38,12 +40,17 @@ static void controls(sc808_engine_t *s, int rv, int dl, int dist, int glue)
 
 int main(int argc, char **argv)
 {
-    if (argc != 6) return 2;
+    if (argc != 7) return 2;
+    int kit_master = atoi(argv[6]);
     int rv=atoi(argv[1]), dl=atoi(argv[2]), dist=atoi(argv[3]), glue=atoi(argv[4]);
     sc808_engine_t *dry = sc808_create(RATE), *wet = sc808_create(RATE);
     if (!dry || !wet) return 2;
     controls(dry, 0, 0, 0, 0);
     controls(wet, rv, dl, dist, glue);
+    drum808_init(&kit);
+    drum808_set(&kit, D8_KIT, 0, 127);
+    drum808_set(&kit, D8_KIT, D8_KIT_DIST, kit_master ? dist : 0);
+    drum808_set(&kit, D8_KIT, D8_KIT_DRIVE, 64);
     fxbus_init(&bus, delay_memory, DELAY_WORDS);
     fxbus_set(&bus, FX_VOLUME, 127);
     fxbus_set(&bus, FX_RV_LEVEL, 93);
@@ -56,11 +63,11 @@ int main(int argc, char **argv)
     fxbus_set(&bus, FX_DL_TONE, 60);
     fxbus_set(&bus, FX_DL_HPF, 55);
     fxbus_set(&bus, FX_DRIVE, 64);
-    fxbus_set(&bus, FX_DIST, dist);
+    fxbus_set(&bus, FX_DIST, kit_master ? 0 : dist);
     fxbus_set(&bus, FX_COMP, glue);
     FILE *file = fopen(argv[5], "wbx");
     if (!file) return 2;
-    const float silence[BLOCK] = {0};
+
     for (int offset = 0; offset < FRAMES; offset += BLOCK) {
         int n = FRAMES-offset < BLOCK ? FRAMES-offset : BLOCK;
         float x[BLOCK], reference[BLOCK], left[BLOCK], right[BLOCK];
@@ -72,14 +79,21 @@ int main(int argc, char **argv)
         sc808_render(wet, reference, n);
         /* One post-fader snare at unity volume and unity selected sends.
          * Its original dry signal is also the candidate's exact FX input. */
-        fxbus_process_st(&bus, x, x, rv ? x : silence, dl ? x : silence, left, right, n);
+        float kl[BLOCK], kr[BLOCK], send_r[BLOCK], send_d[BLOCK];
+        for (int i = 0; i < n; ++i) {
+            kl[i] = kr[i] = x[i];
+            send_r[i] = rv ? x[i] : 0.0f;
+            send_d[i] = dl ? x[i] : 0.0f;
+        }
+        drum808_kit_process(&kit, kl, kr, send_r, send_d, n);
+        fxbus_process_st(&bus, kl, kr, send_r, send_d, left, right, n);
         for (int i=0; i<n; ++i) {
             const float values[] = {x[i], reference[i], left[i], right[i]};
             for (unsigned j=0; j<4; ++j) if (!isfinite(values[j])) return 4;
             if (fwrite(values, sizeof values, 1, file) != 1) return 5;
         }
     }
-    printf("drive at position 64: %.9g on 8W8, %.9g on DnBOX\n", 10.*64./127., (double)bus.drive);
+    printf("drive at position 64: %.9g on 8W8, %.9g on DnBOX\n", 10.*64./127., (double)(kit_master ? kit.master.drive : bus.drive));
     sc808_destroy(wet);
     sc808_destroy(dry);
     return fclose(file) != 0;
