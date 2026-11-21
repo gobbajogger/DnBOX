@@ -165,6 +165,8 @@ static void geo_audit(const char *screen) {
    if(sx<0||sx>=240||sy<0||sy>=240||fb[sy*240+sx]!=swap16(e.col))missing++;
   }
   if(expected)audited++;
+  if(expected && !missing && getenv("FWUI_TEXT_TRACE"))
+      printf("UI_TEXT\t%s\t%d\t%d\t%s\n", screen, e.x, e.y, e.text);
   if(missing){geo_findings++;printf("GEOMETRY screen=%s text=[%s] at=%d,%d missing=%u/%u\n",screen,e.text,e.x,e.y,missing,expected);}
  }
  if(audit_frames==0 && getenv("AUDIT_MUTATE_ZERO"))audited=0;

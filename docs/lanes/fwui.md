@@ -1,13 +1,28 @@
-# Firmware UI lane
-Owner: FWUI. Branch `lane/fwui`, draft PR #975. Integ owns aggregate qualification.
+# Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
+Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published gate head: `e43726340aaa298a9fcb0831d9d1f6398245eea8`. Updated: 2026-11-18 12:40 EST.
 
-## Current checkpoint — 20 November 2026
+## Current stock and screen evidence
 
-The firmware on `04b5c8495c5ae4df91e3c2afd06cc81f35c077b8` contains consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d`. A fresh checkout matched all 5,071 paths and the ten pinned original inputs. Both stock builds completed locally with AC79 1.2.14 and JieLi 20260730.1. Elite has 1,028 B XIP free, Pro 1,036 B. Each has 8,972 B free in the pool, 780 B above the 8,192 B reserve. Both application binaries matched the independently retained KIT build byte for byte. The margin above F3 is 4 B and 12 B respectively. The actual linker maps were reproduced with the original objects and link order. Every image section matched the stock link byte for byte. [Build logs, linker maps and hashes](fwui/stock-04b5/).
+The code and generated resources in this revision were built from Git tree `3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493`. The two final firmware images use stock SMK-37 memory. Both genuine linker-map relinks reproduced the original ELF byte for byte. The prior baseline measured 1,028 / 1,036 B XIP free. [Current link maps, inputs and logs](fwui/current/) · [Baseline](fwui/stock-04b5/).
 
-The semantic-caption walker reached 1,530 states on that same commit with 40,967 text checks, zero findings, 17,741 presence checks and 249 glyph pixel checks. Its full set of runtime negative controls passed. The board painters, every renderer and independent visual approval still require separate coverage.
+| Stock model | XIP free | XIP floor | Pool free | Margin above 8,192 B reserve | Normal RAM used |
+|---|---:|---:|---:|---:|---:|
+| Elite | 2,276 B | 1,024 B | 8,972 B | 780 B | 97,204 / 98,304 B |
+| Pro | 2,288 B | 1,024 B | 8,972 B | 780 B | 97,204 / 98,304 B |
 
-Next: exercise HOME fader/encoder pickup on the SMC grid and verify the combined stock image. The source-derived screen inventory includes board-only routes. F7 is blocked on the genuine Sound interfaces: the production Synth One slot has no editable sound parameters and renders silence, and the compact Juno slot exposes 16 panel controls. The Sound owner is developing the full engines in #973. F1/F2/F4–F7 and C1/C3–C6 remain open. C2 ancestry passes. No paths deleted.
+The control fixes preserve pattern/kit ownership while displaying 808 Accent firing and 909 BD Tune, actual sequencer clock rates, BREAK groove, Miami wobble, and the effective master compression curve. FX RETURN uses the established K7/K8 send controls. HOME faders and encoders now show SMC pickup in the SMC grid. Explicit PAGE/PAUSE remains the route to a peer peek. The lossless font encoding preserved the tested pixels and advances. The host draw benchmark recorded higher CPU cost, with the slowest full page at 2.26 ms. [Timing by page](fwui/current/host-font-timing.json).
+
+| Check | Result at this checkpoint |
+|---|---|
+| F1 | FAIL. The source-derived renderer inventory, full 240×240 evidence and R22 review are still being qualified. |
+| F2 | FAIL across all domains. The ordinary walker passed all 1,530 states, 18,571 content checks and 249 drum glyph checks, including its negative controls. It caught and led to fixing 144 overwritten BREAK captions. Additional board-only domains still need geometry audits. [Geometry](fwui/current/geometry.json). |
+| F3 | PASS. Both stock models meet the two memory floors. [Builds and linker verification](fwui/current/stock-fit.json). |
+| F4 | Pan and battery host checks passed, including the 10,975-check pan test, 9,898 battery checks and the overlay battery suite. All-header coverage still needs the board screen inventory. [Control tests](fwui/current/control-tests.json). |
+| F5 | The real pad/LED scenario passed 7,229 checks on 909, 808 and BREAK. Hold-GLOBE and copy semantics passed. Full host suite at the final PR head remains open. |
+| F6 | The four real-data step lanes run in V_SEQ. Hold SEQ and tap SCALE on SMK-37 (SEL on FM-1) to cycle. The host scenario passed 1,427 checks and covers keyboard ownership and four pattern windows. BREAK has no admitted step velocity. Literal label touch has no input path on these boards. |
+| F7 | FAIL. The production Synth One renderer produces zero nonzero stereo frames on the held-note test. Neither editor has an editable Synth One engine control. The compact SuperJ6 slot has only 16 controls on each part. Sound owns the genuine bindings in #973. The visible-text scan also found explanatory copy on the help cards and empty song row. [Rendered text](fwui/current/text-scan.txt). |
+
+C2 passes. Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor and the branch deletes no files relative to it. C1, C3, C4, C5 and C6 remain open. The final Local gate, independent four-size screen review, lane readiness and integration merge remain with their respective owners. The next deliverable is the committed source-derived screen register and native render archive.
 
 ## Archived qualification history
 
@@ -33,9 +48,9 @@ A narrow PASS below qualifies only the identified repaired production source. Fu
 
 ## Now / next
 
-- Now: retain published e437 through Integ's actual terminal. Prepare the independently reviewed, single-line KIT section title correction and its focused regression on the same lane; no competing publication or gate.
-- Next: coordinate the exact reviewed KIT successor with Integ after terminal and fresh head/base checks. Integ alone qualifies its publication through one full gate and required integration checks; this writer does not mark Ready or merge.
-- Then: reconcile the separately prepared selector/glyph work onto fresh accepted consolidated after current repair integration. Its scoped native behavior, geometry and stock resource checks pass; it remains unpublished and is excluded from this correction delivery.
+- Now: preserve the published KIT successor04b5c849 while Integ owns its exact resource/review/full-gate qualification. The historical e437 gate is terminal FAIL with502 PASS, one executor gate-trap FAIL and zero NOT_RUN; no original failure is rewritten.
+- Next: retain the independently reviewed list-feedback and REVERB-return implementation as a separate local follow-on on this lane. It is excluded from published04b5 and cannot advance the remote while Integ qualifies that head. Reconcile against fresh accepted consolidated before the next coordinated publication.
+- Then: complete the remaining SOUND/HOME/BREAK compositions and actual owner/state qualification. The prepared selector remains separately preserved. Missing originals and full-engine runtime admission remain explicit; this writer neither runs a duplicate aggregate gate nor marks Ready or merges.
 
 ## Blockers and recovery
 
@@ -113,3 +128,18 @@ The independent real-framebuffer regression first compiles unchanged e437 and fa
 Independent stock native Elite/Pro builds exit0 at1028/1036 B XIP free,780 B pool margin and8192 B pool reserve. KIT costs16 B versus e437; affected local frame allocations are unchanged. These are direct measurements, not whole-stack, timing or device proof. Three simplification passes found no worthwhile change. Completed independent ce-code-review run kit-e437-20261118-independent reports no actionable findings; no aggregate gate acceptance follows.
 
 The e437 full gate remains owned solely by Integ; at12:32:59 EST it had359 PASS and one gate-trap failure caused by executor placement beneath /tmp. The original failure and this active run are preserved. Do not publish this successor until terminal is recorded and exact head/base are rechecked in coordination. Keep selector WIP and separate whole-page list/caption work outside this narrow delivery. No files are deleted. Exact source, test, native, review and recovery receipts are maintained on [the FWUI implementation Page](https://chatgpt.com/space/page_800ecfd4f2a08191884949bf6bbee920).
+
+
+### 2026-11-18 KIT publication and prepared whole-page follow-on
+
+[Integ recorded e437 terminal and released only the bounded KIT successor](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6986875406). All503 host records completed:502 PASS,1 unchanged gate-trap executor-path FAIL,0 NOT_RUN. The authentic failure status is59281879061. Elite/Pro, flashmap, budget, UI-defects and drone passed. The historical FAIL is preserved. The new raw terminal archive remains to be consumed here when its exact durable version is delivered; primary owner records and authentic status are retained separately.
+
+[Published KIT readback](https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-6987047092): existing lane/fwui and draft PR975 head04b5c8495c5ae4df91e3c2afd06cc81f35c077b8, tree0bfb78f8a15f0eeef079ea32661f03aa271c6376, parent e437, actual base76040daa. The authenticated API changes author/committer metadata, mapping reviewed local0b4ff454 to04b5 with identical tree, parent and complete message bytes. CAS expected e437 and force=false were used. Independent audit confirms all5071 remote entries, five changed paths, two added tests, no deletions and5066 unaffected parent entries. Local0b4 and all12 selector WIP files remain recoverable exactly. Integ retains all independent acceptance, full-gate and integration ownership.
+
+This separate prepared change restores actual SCALE cues on action/category list rows, respecting physical CLIP ownership. GLOBAL PARTON keeps its existing stripes, pictograms and switches and renders ON/OFF through the same descriptor owner. Native baseline RED had204 expectations/142 missing/224 preserved; candidate GREEN has204/0/224. Three compiled current-source negatives reject missing cue22, wrong part owner80 and inverted state160. All44 matched frames have zero changes outside the measured cue/value bands. ABOUT50 and real physical PARTON72 checks pass, as do existing settings763 and list70. The final wrapper clears stale receipts and owns/kills/reaps its compiler process group on timeout; two full repeat runs and a genuine owned-child timeout qualification pass. Independent ce-code-review is complete without actionable findings.
+
+REVERB now exposes existing REV RETURN on K7 and DLY RETURN on K8 while retaining K5 DECAY, K6 TONE and every DELAY control. The list builder explicitly keeps the returns in their original MORE positions, preserving all11 unique FX controls and exact12-row order. Native tests pass468 checks and capture96 real frames. All48 DELAY frames are identical; REVERB changes stay within new controls and the established contextual popup. Three freshly compiled current-source negatives reject swapped owners, missing front slots and list reordering. The final wrapper's two persistent-output repeats and owned-child timeout qualification pass. Independent ce-code-review is complete without actionable findings; the96 fresh combined frames match the preserved green frames exactly.
+
+Both new tests are registered once in shared-generator classG. No old test oracle or threshold is weakened. The exact KIT+list+REVERB source has stock XIP1060/1068 B free, poolmargin780 B and reserve8192 B; all floors remain1024/512. A separate actual stock measurement of selector+KIT+list+REVERB also gives1060/1068 and780, establishing measured net selector composition cost0 B. All5080 snapshot paths retain exact bytes/modes after build. Five composed positive scenarios pass and render205 frames; independent unit negatives remain separate. These receipts do not establish a whole-call-stack, timing, hardware, complete UI or aggregate gate PASS.
+
+Independent SOUND/BREAK mapping identifies concrete remaining geometry work: generic footer is bypassed; SOUND navigation captions must follow ordinary/held/PATCH/pending input ownership and cannot overwrite CP y28/212. BREAK count/page text shares the PENDING/LIVE/MORE band, and the reference STEP instruction at238 collides with current lock notches238..239. Do not hide existing status, assignments or locks to insert text. HOME simultaneous matrix plus five independent live lanes remains a separate composition. All12 edition2 original/observer/runtime gap groups remain open with exact per-key records; inventory coverage does not mean per-control runtime acceptance. Full reports, native receipts, original failures, exact patches and recovery remain on the existing implementation Page.

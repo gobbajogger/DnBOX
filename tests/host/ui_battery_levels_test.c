@@ -93,8 +93,13 @@ int main(void)
     }
     fixture_clip_external_clock=0;clip_grid_mode=0;
     for(int peek=0;peek<2;peek++) {
-        setup(V_HOME,PART_909);fader(0,0);CHECK(smc_ui_active() && smc_peek->on);
-        if(!peek)smc_peek_cancel();
+        setup(V_HOME,PART_909);
+        if(peek) {
+            smc_view(V_MIX,0);
+            message(0x90,0x5D,127);message(0x80,0x5D,0);
+            CHECK(smc.locked && smc_peek->on && ui.view==V_MIX);
+        }
+        fader(0,0);CHECK(smc_ui_active() && smc_peek->on==peek);
         for(int level=0;level<4;level++) {
             host_battery_level=level;now_ms+=50;ui_frame();CHECK(smc_ui_active());
             for(int cell=0;cell<3;cell++)CHECK(fb[8*240+222+cell*4]==swap16(cell<level?SOUND_GRAY:SOUND_LINE));

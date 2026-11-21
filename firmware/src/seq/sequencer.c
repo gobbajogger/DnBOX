@@ -431,7 +431,7 @@ static int clamp_steps(int n)
     return n < 1 ? 1 : n > NSTEPS ? NSTEPS : n;
 }
 
-static int rate_ticks(int rate)
+int seq_rate_ticks(int rate)
 {
     return (int)TICKS_PER_STEP[(unsigned)rate < NRATES ? (unsigned)rate : RATE_16];
 }
@@ -482,14 +482,14 @@ static int chain_slot_len(const seq_t *s, uint32_t restarted)
         if (s->ppat[t] >= NPAT) return 1;
     p = &s->pat[s->ppat[TRK_DRUM]];
     bar_len = clamp_steps(p->drum[0].len);
-    bar_t = bar_len * rate_ticks(p->drum[0].rate);
+    bar_t = bar_len * seq_rate_ticks(p->drum[0].rate);
     max_t = bar_t;                                   /* at least one 909 pass */
 
     /* 808 (the 909 sets the bar, already in max_t) */
     p = &s->pat[s->ppat[1]];
     if (!SEQ_PART_OFF(s, 1) && !seq_part_muted(s, 1) &&
         drum_plays(&p->drum[1], (s->mute | s->vmute) >> NDRUM)) {
-        int tt = clamp_steps(p->drum[1].len) * rate_ticks(p->drum[1].rate);
+        int tt = clamp_steps(p->drum[1].len) * seq_rate_ticks(p->drum[1].rate);
         if (tt > max_t) max_t = tt;
     }
     for (t = 0; t < NBASS; t++) {
@@ -499,13 +499,13 @@ static int chain_slot_len(const seq_t *s, uint32_t restarted)
             !bass_plays(&p->bass[t], s->t[tr].sounding,
                         !s->t[tr].started || (restarted & (1u << tr))))
             continue;
-        tt = clamp_steps(p->bass[t].len) * rate_ticks(p->bass[t].rate);
+        tt = clamp_steps(p->bass[t].len) * seq_rate_ticks(p->bass[t].rate);
         if (tt > max_t) max_t = tt;
     }
     p = &s->pat[s->ppat[TRK_BRK]];
     /* BREAK's sequencer clock is 16 steps at 1/16, even when RATE_8 / RATE_4 group them. */
     if (!SEQ_PART_OFF(s, TRK_BRK) && !seq_part_muted(s, TRK_BRK) && brk_plays(&p->brk)) {
-        int tt = 16 * rate_ticks(RATE_16);
+        int tt = 16 * seq_rate_ticks(RATE_16);
         if (tt > max_t) max_t = tt;
     }
     n_bars = (max_t + bar_t - 1) / bar_t;

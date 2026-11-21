@@ -1,49 +1,61 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
-/* Read-only presentation of existing stored step values. No new project planes. */
-enum { UI_LANE_VELOCITY, UI_LANE_CHANCE, UI_LANE_PITCH, UI_LANE_PAN, UI_LANE_COUNT };
-static uint8_t ui_step_lane;
-static int step_lane_motion(int part,int voice,int step,int target,int parameter,int fallback)
+/* Stored pattern/next-trigger values; no audio or project planes are added. */
+typedef struct {
+    const pattern_t *pat;
+    const lane_t *motion;
+    int part,voice,kind,maximum,fallback,available;
+} step_lane_context_t;
+static void step_lane_prepare(step_lane_context_t *c,int part,int voice,int kind)
 {
-    int k=motion_find(proj.arr.lane,seq.ppat[part],part,target,voice,parameter);
-    return k>=0 && proj.arr.lane[k].val[step]!=MOT_NONE?proj.arr.lane[k].val[step]:fallback;
+    pref_t ref=NONE;
+    const x0x_param_t *desc;
+    int target=-1,parameter=0,motion_voice=voice;
+    memset(c,0,sizeof *c);c->maximum=127;
+    c->part=part;c->voice=voice;c->kind=kind;
+    if((unsigned)part>=NPARTS || (unsigned)kind>=UI_LANE_COUNT ||
+       (part<NKIT && (unsigned)voice>=NDRUM))return;
+    c->pat=pat_of(part);c->available=1;
+    if(kind==UI_LANE_CHANCE) {
+        target=T_PROB;motion_voice=(part<<4)|(part<NKIT?voice:0);
+        c->maximum=c->fallback=100;
+    } else if(kind==UI_LANE_VELOCITY) {
+        if(part<NKIT) {target=T_VEL;motion_voice=(part<<4)|voice;}
+        else if(!part_is_303(part))c->available=0; /* BREAK velocity is not admitted. */
+    } else if(kind==UI_LANE_PITCH && part_is_303(part)) {
+        /* Native stored note below, without an invented parameter lock. */
+    } else {
+        if(kind==UI_LANE_PAN)
+            ref=part<NKIT?find_ref(part==PART_909?T_909:T_808,voice,"Pan"):PR(R_ENG,T_MIX,part,MX_PAN);
+        else if(part<NKIT) {
+            int engine=part==PART_909?T_909:T_808;
+            ref=find_ref(engine,voice,"Pitch");
+            if(ref.kind==R_NONE)ref=find_ref(engine,voice,"Tune");
+        } else ref=find_ref(T_BRK,0,"Pitch");
+        desc=pref_desc(ref);
+        if(ref.kind!=R_ENG || !desc || desc->max<=0)c->available=0;
+        else {target=ref.a;motion_voice=ref.b;parameter=ref.c;c->maximum=desc->max;c->fallback=pref_get(ref);}
+    }
+    if(target>=0) {
+        int k=motion_find(proj.arr.lane,seq.ppat[part],part,target,motion_voice,parameter);
+        if(k>=0)c->motion=&proj.arr.lane[k];
+    }
+}
+static int step_lane_read(const step_lane_context_t *c,int step,int *conditional)
+{
+    int value=c->fallback;*conditional=0;
+    if(!c->available || (unsigned)step>=NSTEPS)return -1;
+    if(c->motion && c->motion->val[step]!=MOT_NONE)value=c->motion->val[step];
+    if(c->kind==UI_LANE_CHANCE)*conditional=value>100;
+    else if(c->kind==UI_LANE_VELOCITY) {
+        if(c->part<NKIT)return value?value:sm_get(c->pat->drum[c->part].accent,step)?127:seq.accent_q7;
+        return bstep_velocity(&c->pat->bass[c->part-PART_303A].step[step]);
+    } else if(c->kind==UI_LANE_PITCH && part_is_303(c->part))return c->pat->bass[c->part-PART_303A].step[step].note;
+    return value;
 }
 static int step_lane_value(int part,int voice,int step,int kind,int *maximum,int *conditional)
 {
-    const pattern_t *pat;
-    pref_t ref=NONE;
-    const x0x_param_t *desc;
-    int value;
-    *maximum=127;*conditional=0;
-    if((unsigned)part>=NPARTS || (unsigned)step>=NSTEPS || (unsigned)kind>=UI_LANE_COUNT ||
-       (part<NKIT && (unsigned)voice>=NDRUM))return -1;
-    pat=pat_of(part);
-    if(kind==UI_LANE_CHANCE) {
-        value=step_lane_motion(part,(part<<4)|(part<NKIT?voice:0),step,T_PROB,0,100);
-        *maximum=100;*conditional=value>100;
-        return value;
-    }
-    if(kind==UI_LANE_VELOCITY) {
-        if(part<NKIT) {
-            value=step_lane_motion(part,(part<<4)|voice,step,T_VEL,0,0);
-            return value?value:sm_get(pat->drum[part].accent,step)?127:seq.accent_q7;
-        }
-        if(part_is_303(part))return bstep_velocity(&pat->bass[part-PART_303A].step[step]);
-        /* BREAK has no admitted per-step velocity path yet. Never call LEVEL velocity. */
-        return -1;
-    }
-    if(kind==UI_LANE_PAN) {
-        ref=part<NKIT?find_ref(part==PART_909?T_909:T_808,voice,"Pan"):PR(R_ENG,T_MIX,part,MX_PAN);
-    } else if(part_is_303(part)) {
-        return pat->bass[part-PART_303A].step[step].note;
-    } else if(part<NKIT) {
-        int target=part==PART_909?T_909:T_808;
-        ref=find_ref(target,voice,"Pitch");
-        if(ref.kind==R_NONE)ref=find_ref(target,voice,"Tune");
-    } else ref=find_ref(T_BRK,0,"Pitch");
-    desc=pref_desc(ref);
-    if(ref.kind!=R_ENG || !desc || desc->max<=0)return -1;
-    *maximum=desc->max;
-    return step_lane_motion(part,ref.b,step,ref.a,ref.c,pref_get(ref));
+    step_lane_context_t c;step_lane_prepare(&c,part,voice,kind);*maximum=c.maximum;
+    return step_lane_read(&c,step,conditional);
 }
 static int step_lane_has_note(int part,int voice,int step)
 {
@@ -57,11 +69,12 @@ static UI_DRAW void draw_step_lane(void)
     static const char *const labels[UI_LANE_COUNT]={"VELOCITY","CHANCE","PITCH","PAN"};
     int kind=ui_step_lane<UI_LANE_COUNT?ui_step_lane:UI_LANE_VELOCITY;
     int part=ui.part,voice=part<NKIT?ui.sel[part]:0;
+    step_lane_context_t context;step_lane_prepare(&context,part,voice,kind);
     cv_rect(0,69,240,13,SOUND_FACE); /* replace only the old footer, preserve four knobs */
     cv_text(4,69,&FONT_T,labels[kind],SOUND_GRAY);
     for(int c=0;c<16;c++) {
-        int step=part==PART_BRK?c:step_of(c),maximum,conditional;
-        int value=step_lane_value(part,voice,step,kind,&maximum,&conditional);
+        int step=part==PART_BRK?c:step_of(c),maximum=context.maximum,conditional;
+        int value=step_lane_read(&context,step,&conditional);
         int x=69+c*10;
         uint16_t ink=step_lane_has_note(part,voice,step)?part_col():SOUND_LINE;
         cv_rect(x,72,1,8,SOUND_LINE);

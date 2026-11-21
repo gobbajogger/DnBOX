@@ -1,0 +1,93 @@
+{
+  "build_input_tree": "3a08f435bb9a7d1643f21b41ed4cbfaadb9b2493",
+  "scope": "Focused real host inputs, engine and framebuffer. The full host suite and independent review each require their own result.",
+  "tests": [
+    {
+      "test": "ui_pan_units",
+      "exit": 0,
+      "observations": [
+        "PASS production pan L50/C/R50: 10975 checks"
+      ]
+    },
+    {
+      "test": "ui_battery_levels",
+      "exit": 0,
+      "observations": [
+        "PASS battery real theme transitions: 120 part/theme/level states",
+        "PASS four battery levels and header invalidation: 9898 checks"
+      ]
+    },
+    {
+      "test": "ui_overlay_battery",
+      "exit": 0,
+      "observations": [
+        "LIST_COVERAGE view=8 part=3 voice=0 first=1 selectable=6 captured=6 unique=6",
+        "LIST_COVERAGE view=8 part=4 voice=0 first=0 selectable=12 captured=12 unique=12",
+        "OVERLAY_BATTERY 505 rows in 57 lists, 4040 injected battery-level updates, 263838 checks; other domains NOT_RUN"
+      ]
+    },
+    {
+      "test": "ui_toast_battery",
+      "exit": 0,
+      "observations": [
+        "PASS toast battery: 4 states x 4 levels; text/state preserved; 9747 checks"
+      ]
+    },
+    {
+      "test": "held_step_release",
+      "exit": 0,
+      "observations": [
+        "held-step-release: PASS (144 checks, both kits/voices, all four step banks)"
+      ]
+    },
+    {
+      "test": "ui_step_lane_preview",
+      "exit": 0,
+      "observations": [
+        "PASS physical SEQ+SELECT lane cycle, stored adapter and production/preview renders: 1427 checks; literal touchscreen NOT_RUN"
+      ]
+    },
+    {
+      "test": "home_globe_part",
+      "exit": 0,
+      "observations": [
+        "home_globe_part: ok"
+      ]
+    },
+    {
+      "test": "copy_semantics",
+      "exit": 0,
+      "observations": [
+        "copy_semantics: ok"
+      ]
+    },
+    {
+      "test": "panic_chord",
+      "exit": 0,
+      "observations": [
+        "panic chord: 81 checks, 0 failures"
+      ]
+    },
+    {
+      "test": "ui_synth_step_footer",
+      "exit": 0,
+      "observations": [
+        "PASS synth parameter absolute16-step lane all current identities/parts/themes/lengths/windows"
+      ]
+    },
+    {
+      "test": "ui_feedback",
+      "exit": 0,
+      "observations": [
+        "PASS: help hides pending readout, read-only rows reject edits, MIX WAVE scope draws, MASTER hist write-head stable, HOME pattern glyphs"
+      ]
+    },
+    {
+      "test": "pads_in_settings_dedicated_wrapper",
+      "exit": 0,
+      "observations": [
+        "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}"
+      ]
+    }
+  ]
+}

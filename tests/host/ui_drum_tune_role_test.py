@@ -18,7 +18,7 @@ def run(name,source=None):
 p=run('positive')
 if p.returncode or 'PASS BD Tune' not in p.stdout:raise SystemExit(p.stdout[-3000:])
 s=(root/'firmware/src/app/ui_drum_voice.inc').read_text()
-for name,a,b,marker in [('name-overrides-role','role == DG_NONE && d && name_is(d, "Tune")','d && name_is(d, "Tune")','BD_TUNE_ROLE_OVERRIDDEN'),('missing-live-marker','cv_rect(mx-1,my-1,3,3,C_WHITE);','(void)mx;(void)my;','BD_TUNE_LIVE_MARKER_MISSING')]:
+for name,a,b,marker in [('name-overrides-role','role == DG_NONE && d && name_is(d, "Tune")','d && name_is(d, "Tune")','BD_TUNE_RASTER_MISMATCH'),('missing-live-marker','cv_rect(left + x - 1, y - 1, 3, 3, C_WHITE);','(void)x;(void)y;','BD_TUNE_LIVE_MARKER_MISSING')]:
  if s.count(a)!=1:raise SystemExit('missing/duplicate anchor '+name)
  with tempfile.TemporaryDirectory(prefix='drum-role-negative-') as d:
   f=Path(d)/'ui.c';f.write_bytes((root/'firmware/src/app/ui.c').read_bytes());(Path(d)/'ui_drum_voice.inc').write_text(s.replace(a,b));p=run(name,f)

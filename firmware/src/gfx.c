@@ -174,6 +174,24 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
     return ch - f->first;
 }
 
+#if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
+/* Internal normalized crop descriptor, consumed by both the painter and its tests. */
+static uint32_t font_crop_read(const uint8_t **gp)
+{
+    const uint8_t *d=*gp;
+#ifdef FONT_ALPHA_CROP
+    uint32_t n=(uint32_t)d[0]|((uint32_t)d[1]<<8);
+    d+=2;
+    if(n!=65535u) {
+        *gp=d;
+        return (n&3u)|((n&60u)<<4)|((n&1984u)<<6)|((n&63488u)<<7);
+    }
+#endif
+    *gp=d+3;
+    return d[0]|((uint32_t)d[1]<<8)|((uint32_t)d[2]<<16);
+}
+#endif
+
 /* text in colour c, each pixel's coverage blended over what is already on the canvas (an
  * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
 static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c, int32_t clip_left, int32_t clip_right)
@@ -183,7 +201,10 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
     for (; *s; s++) {
         uint32_t gi = glyph(f, (uint8_t)*s), gx, gy, w, height = f->h;
         uint32_t crop_x = 0, crop_y = 0;
-#ifdef FONT_LZ_CROP
+#if defined(FONT_ALPHA_CROP)
+        uint8_t above[32] = {0};
+        uint32_t code_bits=0, code_left=0;
+#elif defined(FONT_LZ_CROP)
         uint8_t history[256];
         uint32_t written = 0, left = 0, distance = 0, byte = 0;
 #elif defined(FONT_PACKBITS)
@@ -192,23 +213,38 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        w = font_bitmap_width(f, gi);
-#if !defined(FONT_PACKBITS) && !defined(FONT_LZ_CROP)
-        bpr = (w + 1u) / 2u;
-#endif
         gd = f->data + f->off[gi];
-#ifdef FONT_LZ_CROP
-        uint32_t rectangle = gd[0] | ((uint32_t)gd[1] << 8) | ((uint32_t)gd[2] << 16);
-        gd += 3;
+#if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
+        uint32_t rectangle = font_crop_read(&gd);
         crop_x = rectangle & 63u;
         crop_y = (rectangle >> 6) & 63u;
         w = (rectangle >> 12) & 63u;
         height = rectangle >> 18;
+#else
+        w = font_bitmap_width(f, gi);
+#ifndef FONT_PACKBITS
+        bpr = (w + 1u) / 2u;
+#endif
 #endif
         for (gy = 0; gy < height; gy++)
             for (gx = 0; gx < w; gx++) {
                 uint32_t a;
-#ifdef FONT_LZ_CROP
+#if defined(FONT_ALPHA_CROP)
+                /* Per-glyph bitstream; exact alpha uses the already decoded previous
+                 * row only. Generated codebooks cover all values in at most 7 bits. */
+                const uint8_t *model=FONT_ALPHA_MODEL[above[gx]];
+                uint32_t n=0, first=0, sym=0;
+                for (unsigned k=0;k<7;k++) {
+                    if(!code_left) { code_bits=*gd++; code_left=8; }
+                    n=(n<<1)|((code_bits>>(--code_left))&1u);
+                    uint32_t count=model[k];
+                    if(n<count) { sym=first+n; break; }
+                    n-=count;
+                    first+=count;
+                }
+                a=(model[7+(sym>>1)]>>((sym&1u)?0:4))&15u;
+                above[gx]=(uint8_t)a;
+#elif defined(FONT_LZ_CROP)
                 /* Generated streams never reference before their own glyph;
                  * the ring is bounded and needs no clear or shared state. */
                 if (!(gx & 1u)) {
@@ -242,7 +278,9 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                 a = gd[gy * bpr + gx / 2u];
 #endif
                 int32_t px = x - f->pad + (int32_t)(gx + crop_x), py = y + (int32_t)(gy + crop_y) + cv_oy;
+#ifndef FONT_ALPHA_CROP
                 a = (gx & 1u) ? (a & 15u) : (a >> 4);
+#endif
                 if (!a || px < clip_left || px >= clip_right || (uint32_t)px >= cv_w || py < cv_y0 || py >= cv_y1)
                     continue;
                 if (a == 15u) {

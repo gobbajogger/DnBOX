@@ -288,7 +288,13 @@ int main(int argc, char **argv)
     printf("smc_pickup_acceptance: PASS (%u assertions)\n", checks);
     CHECK(popup_pickup_hints > 0); /* pickup hint uses the existing SMC footer */
     printf("PASS pickup hint on SMC popup (%u checks)\n", popup_pickup_hints);
-    CHECK(peek_pickup_hints > 0); /* hint drawn on the #737 peek page */
+    prepare(V_HOME, PART_909, 0, 64);
+    smc_view(V_MIX, 0);
+    message(0x90, 0x5D, 127); message(0x80, 0x5D, 0);
+    CHECK(smc.locked && smc_peek->on && ui.view == V_MIX);
+    fader(0, 0);
+    status_is("PICKUP: MOVE UP TO TARGET");
+    CHECK(peek_pickup_hints > 0);
     printf("PASS pickup hint on peek page (%u checks)\n", peek_pickup_hints);
     return 0;
 }

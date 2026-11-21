@@ -30,7 +30,6 @@ static uint8_t smc_slot;
  * home strip, then restore. One owner peer. State lives in a byte buffer, like
  * smc_ui_raw; no extra paint cache or framebuffer. */
 #define SMC_PEEK_MS 1200u
-#define SMC_PEEK_MASTER (1 + NKIT)
 #define SMC_PEEK_CURSORS 4u
 struct smc_peek_cursor {
     uint8_t view, part_slot, page;
@@ -1510,17 +1509,6 @@ static __attribute__((noinline)) void smc_peek_page(int view, int page, int mix,
     smc_peek->until = plat_ms() + SMC_PEEK_MS;
 }
 
-/* Faders and HOME encoders open their real strip page, never the menu. */
-static void smc_peek_begin(int n)
-{
-    static const uint8_t map[8] = {
-        V_MIX, V_MIX, V_MIX, V_MIX, V_MIX,
-        V_FX, V_FX | 0x10, V_MIX | (SMC_PEEK_MASTER << 4)
-    };
-    int mix = n < 5 ? n : ui.mixsel;
-    smc_peek_page(map[n] & 15u, map[n] >> 4, mix, ui.part);
-}
-
 static void smc_peek_locked_page(void)
 {
     if (!smc.locked) return;
@@ -1556,16 +1544,6 @@ static __attribute__((noinline)) void smc_peek_tick(void)
         smc_ui.context = smc_ui_context();
         smc_slot = saved;
     }
-}
-
-static void smc_show(int n, int knob, pref_t r)
-{
-    if ((unsigned)n < 8u && r.kind != R_NONE &&
-        (smc_same(r, smc_home_target(n)) ||
-         (knob && (smc.locked ? smc.lock_view == V_HOME :
-                   smc_peek->on ? smc_peek->saved_view == V_HOME : ui.view == V_HOME))))
-        smc_peek_begin(n);            /* before the overlay: its context is the peek page */
-    smc_ui_begin(n, knob);
 }
 
 static void smc_notice(int n)
@@ -1623,7 +1601,7 @@ static void smc_fader(int n, uint8_t v)
     }
 show:
     if (moved) {
-        smc_show(n, 0, r);
+        smc_ui_begin(n, 0);
         ui.act_t = plat_ms();
     }
 }
@@ -1666,7 +1644,7 @@ static void smc_knob(int n, int delta)
     ui.enc_t[EN_K1] = saved_t;
     ui.enc_run[EN_K1] = saved_run;
     ui.act_t = plat_ms();
-    smc_show(n, 1, r);
+    smc_ui_begin(n, 1);
 }
 
 static void smc_view(int view, int page)

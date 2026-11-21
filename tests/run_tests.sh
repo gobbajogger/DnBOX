@@ -85,7 +85,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-808-accent|ui-step-lane|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -100,7 +100,7 @@ test_class() {
     dsp-host-linkage|drum-pan|stereo|drum909-adpcm|drum909|copy-semantics|song-actions|home-globe-part|ui-feedback|home-overview|part-order|sound-matrix|sound-layout|chicago-presentation|chicago-readout|matrix-knob-caption|preset-navigation-noop|ui-303-entry|host-build|gen-nonfont-tables|project-protocol|project-runtime|project-stage|project-save-preflight|smp-begin-cancel|smc-fx-caption|smc-fx-page-port|smc-fx-two-page-strip|smc-fx-echo-page|smc-fx-peer-view|smc-fx-preset-preserve|smc-reachability|smc-ui|drum-page-contract|smc-ui-popup|smc-remainder|smc-popup-engine|smc-audit-core|smc-audit-contract|ui-shared-glyph|ui-glyph-polish|ui-tape-reel|ui-perf-labels|ui-chicago-env-motion|ui-drum-mix-material|smc-mixer-page|smc-ui-bounds|smc-ui-negative|smc-drum-mutes|smc-drum-rs|smc-performance-abort|smc-record-feedback|smc-lock|smc-lock-beat|smc-multi-peer|smc-multi-peer-negative|smc-select-mode|smc-pause-loss|smk-wheel-mode|perf-wheel-motion|miami-mw-wobble|smc-pickup-acceptance) TEST_CLASS=G ;;
     adaptive-break-controls|adaptive-break-storage) TEST_CLASS=G ;;
     synth-param-jump|param-write-sources|ui-drum-glyph|ui-808-stage-rows|ui-drum-curve-axes|ui-fx-feedback-context|ui-no-loss-return|ui-song-empty-action|ui-key-sound-state|ui-drum-mix-selected|ui-synth-step-footer|ui-sound-footer-oracle|ui-release-footer-mutants|ui-pattern-sound-identity|ui-freeplay-state|ui-drum-tune-role|ui-snare-tone-law) TEST_CLASS=G ;;   # regenerates build/gen via smc_ui_test.sh
-    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-drum-kit-section|ui-settings-sections) TEST_CLASS=G ;;
+    chicago-adsr-graph|ui-adsr-engine-graph|ui-drum-amp-graph|ui-drum-single-lane|ui-drum-kit-section|ui-list-feedback|ui-reverb-return|ui-settings-sections) TEST_CLASS=G ;;
     bass-presets-map|bass-presets-export|bass-presets-live|bass-legacy-display|bass-tagged-storage|bass-303-adapt) TEST_CLASS=G ;;
     scenario-*|perf-scratch) TEST_CLASS=C ;;   # perf-scratch compares with scenario perfsave: it runs after the scenarios
     *) TEST_CLASS=P ;;
@@ -520,6 +520,8 @@ run ui-waveform-truth sh tests/host/ui_waveform_truth_test.sh  # Miami TRI/SQR/P
 run ui-page-wrap python3 tests/host/ui_page_wrap_test.py  # production SELECT handler; no generated inputs
 run chicago-adsr-graph sh tests/host/chicago_adsr_graph_test.sh
 run ui-settings-sections sh tests/host/ui_settings_sections_test.sh
+run ui-list-feedback python3 tests/host/ui_list_feedback_test.py
+run ui-reverb-return python3 tests/host/ui_reverb_return_test.py
 run smc-ui-bounds sh tests/host/smc_ui_bounds_test.sh
 run smc-ui-negative python3 tests/host/smc_ui_negative_test.py
 run smc-mapping python3 tests/host/smc_mapping_test.py
@@ -767,6 +769,7 @@ run ui-sound-footer-oracle python3 tests/host/ui_sound_footer_oracle_test.py
 run ui-release-footer-mutants python3 tests/host/ui_release_footer_mutants.py
 run ui-freeplay-state python3 tests/host/ui_freeplay_state_test.py
 run ui-pattern-sound-identity sh tests/host/ui_pattern_sound_identity_test.sh
+run ui-808-accent env SMC_UI_TEST_FILE=tests/host/ui_808_accent_test.c sh tests/host/smc_ui_test.sh
 run ui-drum-tune-role python3 tests/host/ui_drum_tune_role_test.py
 run ui-snare-tone-law python3 tests/host/ui_snare_tone_law_test.py
 run ui-drum-mix-selected python3 tests/host/ui_drum_mix_selected_voice_test.py
@@ -778,6 +781,7 @@ run ui-owner-units sh tests/host/ui_owner_units_test.sh
 run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
 run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
 run ui-pan-units sh tests/host/ui_pan_units_test.sh
+run ui-step-lane sh tests/host/ui_step_lane_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
 run ui-perf-labels sh tests/host/ui_perf_labels_test.sh
