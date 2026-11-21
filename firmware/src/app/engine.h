@@ -99,6 +99,31 @@ int engine_bass_adsr_view(int voice, float values[4], unsigned *gate);
 /* Compact Juno shared amp/filter envelope, physical controls and real stage.
  * Coherent main-loop snapshot under the existing audio-source mask. */
 int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
+#if X0X_SUPERJ6_FACTORY
+enum engine_superj6_field {
+    ENGINE_SJ6_MASTER_VOLUME = 0,
+    ENGINE_SJ6_AMP2_ATTACK = 119, ENGINE_SJ6_AMP2_DECAY,
+    ENGINE_SJ6_AMP2_SUSTAIN, ENGINE_SJ6_AMP2_RELEASE
+};
+/* Main loop. Stage an original binary32 control value on the current Juno owner.
+ * The master accepts factory values through 1.32. AMP2 accepts 0 through 1.
+ * Repeated edits to a field in one callback interval retain the last value.
+ * Shipping voices must be idle before the first AMP2 edit. Typed voices accept
+ * AMP2 while sounding. Returns zero on a busy/wrong owner or invalid field/value. */
+int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit);
+typedef struct { float amount, enable; } engine_superj6_pwm;
+/* Stage original wave 82/83 plus optional PWM 78/79 and 210/211. Only an
+ * idle owner is supported. A missing PWM snapshot is valid for non-square
+ * waveforms, for which the original base duty is always 0.5. */
+int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+                                 const engine_superj6_pwm *pwm);
+#include "superj6_factory.h"
+/* Queue one complete main-pass program for an idle Juno owner. The program
+ * holds this owner's typed edit slots until the next audio boundary. A newer
+ * native preset or a voice that became active before commit supersedes it.
+ * Returns zero on invalid, busy, or unselected owners, without staging edits. */
+int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row);
+#endif
 /* UI-only snapshot of the real amplitude EG and first modulator. */
 int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
 /* drums, UI: ms since the track's last hit, its live amp envelope 0..1; 0 when silent */

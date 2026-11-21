@@ -2,6 +2,10 @@
 
 S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All five source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
 
+## Linked factory loader and shipping Juno on stock hardware
+
+The integrated SuperJ6 profile retains an atomic decoded-row loader and both individual edit functions. Its Elite/Pro applications occupy 551,476/551,464 bytes and leave 1,196/1,208 bytes of XIP. Adding the Synth One editor retains the bulk SuperJ6 entry point, with 1,152/1,164 bytes free. All four links leave 780 pool bytes above the 8,192-byte reserve. The regular configuration reproduces the stock Elite and Pro binaries. These measurements cover the linked control subset. The full factory-bank storage, remaining parameter bindings and instrument effects still need qualification. [Native verification](../../experiments/sound-hardware-v1/sj6-factory/firmware/verification.json)
+
 ## Corrected SuperJ6 factory oscillator on current firmware
 
 At source `dea023ce` the compact application with retained typed waveform/PWM, AMP2 and master controls builds for Elite at 550,436 bytes and Pro at 550,424 bytes. Free XIP is 2,236 and 2,248 bytes. Both retain 8,972 free pool bytes and 1,100 bytes of ordinary RAM. Each six-voice part uses 192 bytes of additional independent oscillator history within the existing backend allocation. The complete factory table requires another 122,359 read-only bytes. On-device storage, selection of all 640 programs and the complete effects graph remain unqualified. [Patch, budgets and binary identities](../../experiments/sound-hardware-v1/sj6-factory/native/README.md)

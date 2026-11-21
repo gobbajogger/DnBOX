@@ -6,6 +6,14 @@ The November 21 rerun on the recovered Linux bench reproduced seven original com
 
 The owner reports a subsequent original engine-only Linux run with 22 oscillator-layer comparisons and three programs stopped on omitted PWM. The compact loader now resolves those missing controls from the build-9 defaults. The corrected oscillator passed 298 controlled probes and eight measurements using the two authored layers of PWM String Pad against the archived analytic reference. The remaining 13 selected records and the original Linux capture packet were unavailable for this replay. The oscillator scores cover an isolated stage. The three-second stereo preset matrix still has zero complete original/firmware pairs. [Loader trace and oscillator comparison](../../experiments/sound-hardware-v1/sj6-factory/oscillator/README.md)
 
+## Loading decoded controls in the engine-only build
+
+Enable `X0X_SUPERJ6_FACTORY=1` for either native model or the Linux host. A factory-bank reader initializes one `sj6_factory_row` to zero per selected program. Feed the authored control IDs and their original binary32 words, in order, through `sj6_factory_add_word`. The first occurrence wins. The supported fields are master volume (0), two waveform selectors (82–83), AMP2 ADSR (119–122), PWM amounts (78–79) and PWM enables (210–211).
+
+Call `engine_superj6_factory_load(owner, &row)` after selecting an idle Juno owner. A successful return stages all 11 resolved fields for the next audio block. Missing PWM values take binary32 positive zero. Authored signed zeros retain their representation. An absent selector, AMP2 value or master, an invalid value or a busy owner rejects the whole row. A new preset or voice that takes ownership before the audio boundary cancels the staged row. The opposite part keeps its own state. The application selects the compact renderer for the decoded program and restores the shipping renderer on ordinary preset adoption. [Decoder](../../firmware/src/app/superj6_factory.h) · [Application integration test](../../tests/host/superj6_factory_load_test.c)
+
+The focused test runs from the repo root with `sh tests/host/superj6_factory_load_test.sh`. Passing a directory containing the authenticated export’s compiled `bank_data.inc` also exercises the complete bank through this entry point. The loader covers the original main-pass fields above. Live LFO destination resolution, remaining instrument and FX parameters, and full-preset stereo scoring have separate evidence requirements.
+
 ## Verified originals
 
 | Input | Bytes | SHA-256 |

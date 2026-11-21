@@ -1,5 +1,17 @@
 # Sound lane
 
+## Integrated engine-only factory selection, 2026-11-21
+
+The opt-in firmware accepts a decoded factory row through `engine_superj6_factory_load`. It preserves the first authored binary32 word, resolves each absent PWM control independently to positive zero and applies both layers, AMP2 and master together at the audio boundary. The Linux integration test passed 32 synthetic selections across both owners, 288 authored words and 64 defaults, with invalid, held and superseded requests covered. The focused oscillator comparison reproduced all 298 synthetic probes and eight measurements from the authored PWM String Pad layer settings. The 14 complete S4 records and the original Linux comparison packet are still missing from this checkout. Only six oscillator fields were recovered for PWM String Pad. [Implementation and focused test](../sound/superj6-ab.md#loading-decoded-controls-in-the-engine-only-build)
+
+| Linked configuration | Elite free XIP | Pro free XIP | Free pool on both |
+| --- | ---: | ---: | ---: |
+| Ordinary firmware | 6,156 B | 6,164 B | 8,972 B |
+| SuperJ6 factory loader and individual control entries | 1,196 B | 1,208 B | 8,972 B |
+| SuperJ6 factory loader and Synth One editor | 1,152 B | 1,164 B | 8,972 B |
+
+All six native packages built. Both ordinary ELFs, applications, loaders and packages match their archived stock digests. The combined profile size-optimizes the original-synth units normally built with `-Os`, preserves the `-O2` real-time units, and retains the bulk factory loader for the on-device integration point. The four shipping Juno presets enter the shipping renderer on ordinary selection. The physical replay now checks the installed package bytes against the seed before starting any shot. [Native identities, footprint, BREAK word checks and host measurements](../../experiments/sound-hardware-v1/sj6-factory/firmware/verification.json)
+
 ## Compact SuperJ6 on both models, 2026-11-21
 
 The corrected waveform and PWM entry points now link on the current firmware base. The compact image occupies 550,436 bytes on Elite and 550,424 bytes on Pro, leaving 2,236 and 2,248 bytes of XIP and 8,972 free pool bytes on each. The original twelve shots restored the complete stock flash over these candidate packages. Those compact physical-parity and timing claims are withdrawn. A fresh replay must initialize flash from each candidate and verify its protected firmware bytes before scoring. All 50 files from the independent 17-scenario host comparison matched stock. [Exact source, native builds and per-shift comparison](../../experiments/sound-hardware-v1/sj6-factory/native/README.md)
@@ -13,6 +25,10 @@ The build-9 main preset loader supplies binary32 positive zero independently for
 The corrected compact oscillator passed 298 of 298 isolated layer comparisons against the archived Linux analytic oscillator reference. The previous compact implementation passed zero. The largest level difference after correction was 0.00850 dB and the largest spectral difference was 0.533 dB. Both legacy modes retained their stereo hashes. The archived six oscillator fields for Intro Bank / PWM String Pad enabled eight additional measurements. Both authored layers passed at all four pitches, with a worst spectral difference of 0.067 dB. The full bank export and original Linux engine capture packet are needed to rerun the owner’s 22 prior layer comparisons and three stopped presets. Full-preset S4 remains unqualified. [Comparison, source, individual scores and commands](../../experiments/sound-hardware-v1/sj6-factory/oscillator/README.md)
 
 At PR source `dea023ce632538621b59bb307ebcaf440805b032` both fresh ordinary model builds reproduced the existing stock ELFs and packages. Elite occupies 546,516 B and Pro occupies 546,508 B, with 8,972 B of free pool on each. The production Juno runtime regression passed. All 50 stock host audio and state files from 17 scenarios matched their archived digests. These receipts accompany the subsequent compact link and strict timing work. The shipping backend is unchanged at this checkpoint. Synth One’s 694-program comparison is complete under the owner’s scope.
+
+## Elite cutoff timing and equal-size replay, 2026-11-21
+
+The published phase-restored build reproduced its 199,282-frame prefix on Elite +1 ms. The first cutoff error came from the foreground acceleration clock. Its tenth knob edit occurred three milliseconds later than stock, moving the following edit across the 12 ms gain threshold. Measuring detents at scanner acceptance corrected that cutoff at 4,946 ms but changed bass B pattern length. Sharing the identical IMA rounding table in the phase-restored source recovers its 64 extra flash bytes. This build matches the stock application length on Elite and Pro. The Elite +1 run retained the first 290,880 of 333,312 stereo frames, reached 10,455 µs with zero late transfers or xruns and changed ten final project bytes. [Native results, source and observer evidence](../../experiments/sound-hardware-v1/strict-timing/scan-time/README.md)
 
 ## First-block interrupt handoff and input timing, 2026-11-21
 

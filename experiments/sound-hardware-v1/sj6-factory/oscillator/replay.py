@@ -60,7 +60,8 @@ def build(compact, repo, out):
     flags = ["-O2", "-fPIC", "-shared", "-ffp-contract=off", "-fno-fast-math"]
     subprocess.run(["c++", "-std=c++17", *flags, "-I", out, HERE / "reference.cpp",
                     "-o", out / "reference.so"], check=True)
-    subprocess.run(["cc", "-std=c11", *flags, "-I", dsp, out / "core_tap.c",
+    subprocess.run(["cc", "-std=c11", *flags, "-DX0X_SUPERJ6_FACTORY=1", "-DDNBX_DIAGNOSTIC_COUNTERS=0",
+                    "-I", dsp, out / "core_tap.c",
                     dsp / "juno6.c", HERE / "candidate.c", "-o", out / "candidate.so"], check=True)
     reference = ct.CDLL(str(out / "reference.so")).reference_oscillator
     reference.argtypes = [ct.c_uint, ct.c_float, ct.c_float, F32, ct.c_size_t]
@@ -79,8 +80,10 @@ def build(compact, repo, out):
         if actual != LEGACY_HASHES[mode]:
             raise ValueError(f"compact legacy mode {mode} stereo hash differs: {actual}")
         stock_hashes.append(actual)
-    return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in
-                                  ("dnbx_core.c", "dnbx_core.h", "fastmath.h", "juno6.c", "juno6.h")}
+    inputs = ["dnbx_core.c", "dnbx_core.h", "fastmath.h", "juno6.c", "juno6.h"]
+    if (dsp / "juno6_factory.inc").exists():
+        inputs.append("juno6_factory.inc")
+    return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in inputs}
 
 
 def cases(archive, suite):

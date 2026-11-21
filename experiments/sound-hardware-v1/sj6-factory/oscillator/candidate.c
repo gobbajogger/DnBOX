@@ -72,6 +72,12 @@ int stock_stereo(unsigned mode, float *samples, size_t count)
     for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
         dnbx_layer_params p;
         if (dnbx_get_layer(&part.core, layer, &p) != DNBX_OK) return 0;
+        if (layer == 0) {
+            /* Select the app renderer on dual builds, then restore its original
+             * layer parameters before exercising the two compact quality modes. */
+            const juno6_oscillator_edit wave = {0.f, 0.f, 0.f};
+            juno6_apply_pre_note_wave(&part, layer, &wave);
+        }
         p.oscillator_mode = mode;
         if (dnbx_set_layer(&part.core, layer, &p) != DNBX_OK) return 0;
     }

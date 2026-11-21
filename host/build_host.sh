@@ -26,6 +26,11 @@ case "${X0X_SYNTHONE_PATCH:-0}" in
     0|1) ;;
     *) echo 'X0X_SYNTHONE_PATCH: 0 or 1' >&2; exit 2 ;;
 esac
+case "${X0X_SUPERJ6_FACTORY:-0}" in
+    0) SJ6_DEFS= ;;
+    1) SJ6_DEFS='-DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0' ;;
+    *) echo 'X0X_SUPERJ6_FACTORY: 0 or 1' >&2; exit 2 ;;
+esac
 U="firmware/src/dsp/drum909.c firmware/src/dsp/drum808.c firmware/src/dsp/x0x_param.c firmware/src/dsp/breaks.c
    firmware/src/dsp/fxbus.c firmware/src/dsp/master.c firmware/src/seq/sequencer.c firmware/src/seq/tb3po.c
    firmware/src/seq/pattern.c firmware/src/seq/motion.c firmware/src/app/engine.c
@@ -55,6 +60,6 @@ PY
 esac
 # shellcheck disable=SC2086
 $CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
-    -DX0X_HOST -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} $SYNTH_DEFS ${X0X_HOST_DEFS:-} -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
+    -DX0X_HOST -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} $SYNTH_DEFS $SJ6_DEFS ${X0X_HOST_DEFS:-} -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
     -o ${X0X_HOST_OUT:-build/host/x0x_host} host/x0x_host.c $U -lm
 echo "host: build/host/x0x_host"

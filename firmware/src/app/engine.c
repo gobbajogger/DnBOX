@@ -201,6 +201,117 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
     plat_cq_unlock(flags);
     return ok;
 }
+
+#if X0X_SUPERJ6_FACTORY
+/* The high bit reserves both existing mailboxes as one factory transaction. */
+#define SJ6_FACTORY_GROUP 0x80u
+
+X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row)
+{
+    const unsigned required = (1u << SJ6_ROW_AMOUNT) - 1u;
+    if (owner >= NBASS || !row || (row->present & required) != required) return 0;
+    float value[SJ6_ROW_COUNT];
+    for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
+        value[i] = row->present & (1u << i) ? row->value[i] : 0.f;
+        float limit = i == SJ6_ROW_MASTER ? JUNO6_FACTORY_MASTER_MAX : 1.f;
+        if (!(value[i] >= 0 && value[i] <= limit)) return 0;
+    }
+
+    uint32_t flags = plat_cq_lock();
+    original_runtime_part *part = &original_bass[owner];
+    juno6_t *synth = &part->dsp.juno.synth;
+    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
+                 !synth->pending_wave_mask && !synth->pending_field_mask &&
+                 !juno6_active(synth) && !engine_bass_preset_pending(owner);
+    if (accept) {
+        memcpy(synth->pending_field, value, sizeof synth->pending_field);
+        for (unsigned layer = 0; layer < 2; ++layer) {
+            synth->pending_wave[layer] = (juno6_oscillator_edit){
+                value[SJ6_ROW_WAVE + layer], value[SJ6_ROW_AMOUNT + layer], value[SJ6_ROW_ENABLE + layer]};
+        }
+        synth->pending_wave_mask = 3u;
+        synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u;
+    }
+    plat_cq_unlock(flags);
+    return accept;
+}
+
+int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
+{
+    unsigned slot = 4;
+    float limit = JUNO6_FACTORY_MASTER_MAX;
+    if (field != ENGINE_SJ6_MASTER_VOLUME) {
+        slot = (unsigned)field - ENGINE_SJ6_AMP2_ATTACK;
+        if (slot >= 4) return 0;
+        limit = 1.f;
+    }
+    if (owner >= NBASS || !(unit >= 0 && unit <= limit)) return 0;
+    uint32_t flags = plat_cq_lock();
+    original_runtime_part *part = &original_bass[owner];
+    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
+                 !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
+                 (slot == 4 || juno6_can_edit_amp2(&part->dsp.juno.synth));
+    if (accept) {
+        juno6_t *synth = &part->dsp.juno.synth;
+        synth->pending_field[slot] = unit;
+        synth->pending_field_mask |= (uint8_t)(1u << slot);
+    }
+    plat_cq_unlock(flags);
+    return accept;
+}
+int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+                                 const engine_superj6_pwm *pwm)
+{
+    if (owner >= NBASS || layer >= 2 || !(selector >= 0 && selector <= 1)) return 0;
+    if (pwm ? !(pwm->amount >= 0 && pwm->amount <= 1 && pwm->enable >= 0 && pwm->enable <= 1)
+            : selector == 1) return 0;
+    uint32_t flags = plat_cq_lock();
+    original_runtime_part *part = &original_bass[owner];
+    int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO &&
+                 part->status == ORIGINAL_RUNTIME_OK &&
+                 !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) && !juno6_active(&part->dsp.juno.synth);
+    if (accept) {
+        juno6_t *synth = &part->dsp.juno.synth;
+        juno6_oscillator_edit event = {selector, pwm ? pwm->amount : 0, pwm ? pwm->enable : -1};
+        synth->pending_wave[layer] = event;
+        synth->pending_wave_mask |= (uint8_t)(1u << layer);
+    }
+    plat_cq_unlock(flags);
+    return accept;
+}
+static void apply_superj6_edits(void)
+{
+    for (unsigned owner = 0; owner < NBASS; ++owner) {
+        original_runtime_part *part = &original_bass[owner];
+        if (part->kind != ORIGINAL_SOUND_JUNO || part->status != ORIGINAL_RUNTIME_OK) continue;
+        juno6_t *synth = &part->dsp.juno.synth;
+        unsigned waves = synth->pending_wave_mask;
+        if (waves) {
+            synth->pending_wave_mask = 0;
+            int active = juno6_active(synth);
+            if ((synth->pending_field_mask & SJ6_FACTORY_GROUP) && (active || engine_bass_preset_pending(owner))) {
+                synth->pending_field_mask = 0;
+                continue;
+            }
+            if (!active)
+                for (unsigned layer = 0; layer < 2; ++layer)
+                    if (waves & (1u << layer))
+                        juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);
+        }
+        unsigned mask = synth->pending_field_mask;
+        if (!mask) continue;
+        synth->pending_field_mask = 0;
+        if (mask & (1u << 4))
+            (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
+                                         synth->pending_field[4]);
+        for (unsigned slot = 0; slot < 4; ++slot)
+            if (mask & (1u << slot))
+                (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
+                                             synth->pending_field[slot]);
+    }
+}
+#endif
+
 int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
 { return (unsigned)v < NBASS && original_runtime_motion_view(&original_bass[v], phase, bipolar, current, target, active); }
 int engine_bass_env_view(int v, float adsr[4], float *level, int *state)
@@ -2927,6 +3038,9 @@ void engine_render(int32_t *out_lr, uint32_t n)
     s1_patch_boundary();
 #endif
     original_prepare_all(); /* precedes every serial frame-zero edit and key */
+#if X0X_SUPERJ6_FACTORY
+    apply_superj6_edits();
+#endif
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;
         motion_release(&mot);

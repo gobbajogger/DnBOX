@@ -93,7 +93,13 @@ int original_runtime_param(original_runtime_part *p, unsigned parameter, float v
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;
     if(p->kind==ORIGINAL_SOUND_JUNO){
         int ok=juno6_set(&p->dsp.juno.synth,parameter,value);
+#if X0X_SUPERJ6_FACTORY
+        if(!ok && parameter>=JUNO6_APP_PARAM_BASE+119 && parameter<=JUNO6_APP_PARAM_BASE+122 &&
+           !juno6_can_edit_amp2(&p->dsp.juno.synth)) return ORIGINAL_RUNTIME_INVALID;
+        if(ok && parameter < JUNO6_APP_PARAM_BASE) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
+#else
         if(ok) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
+#endif
         return runtime_result(p,ok);
     }
     if (p->kind == ORIGINAL_SOUND_SYNTHONE)
@@ -290,10 +296,18 @@ X0X_COLD int original_runtime_voice_view(const original_runtime_part *p, float *
             }
         }
     } else if(p->kind==ORIGINAL_SOUND_JUNO){
+#if X0X_SUPERJ6_FACTORY
+        juno6_envelope_snapshot view;
+        if(juno6_read_envelope(&p->dsp.juno.synth,&view)&&view.active&&
+           (p->dsp.juno.synth.typed || view.level>0.f)){
+            *level=view.level;*state=view.stage==1?0u:view.stage==4?3u:1u;*key_down=view.gate;
+        }
+#else
         for(unsigned i=0;i<JUNO6_VOICES;i++){
             const juno6_voice_t *v=&p->dsp.juno.synth.voice[i];
             if(v->stage && v->envelope>*level){*level=v->envelope;*state=v->stage==1?0u:v->stage==4?3u:1u;*key_down=v->gate;}
         }
+#endif
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
         const s1_dry_part *part = &p->dsp.synthone;
         int selected = -1;
@@ -355,9 +369,22 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
     if (runtime_stale_tick(p, frames) != ORIGINAL_RUNTIME_OK) return p->status;
     int ok;
     if(p->kind==ORIGINAL_SOUND_JUNO){
+#if X0X_SUPERJ6_FACTORY
+        ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+        if(ok){
+            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+            /* The original master attenuator follows the instrument effects. */
+            float gain=p->dsp.juno.synth.master_gain;
+            if(gain!=1.f) for(unsigned i=0;i<frames;++i){
+                left[i]*=gain;
+                right[i]*=gain;
+            }
+        }
+#else
         juno6_render(&p->dsp.juno.synth,left,frames);
         memcpy(right,left,frames*sizeof *right);
         juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);ok=1;
+#endif
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_render(&p->dsp.synthone,left,right,frames);
         ok = 1;

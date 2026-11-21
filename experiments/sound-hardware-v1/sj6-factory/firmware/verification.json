@@ -1,0 +1,272 @@
+{
+  "source_objects": {
+    "firmware": "0135f73fa041eb6a567421b3ac943cd1dd294f21",
+    "host": "f15571483bc5d821b081433f2b71433e1739bcb6",
+    "tests/host/superj6_factory_load_test.c": "a457c1dc1164ee6d07ae170dbcfb3223c49860e4",
+    "tools/build.py": "60f2d8ffcb97f60bcef5a94386c0905f6eece205"
+  },
+  "toolchain": "jieli-linux-toolchains-20260730.1",
+  "sdk_inputs": {
+    "uboot.boot": {
+      "bytes": 14444,
+      "sha256": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e"
+    },
+    "cfg_tool.bin": {
+      "bytes": 383,
+      "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b"
+    },
+    "cfg/eq_cfg_hw.bin": {
+      "bytes": 1278,
+      "sha256": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8"
+    }
+  },
+  "fixed_oscillator_and_loader": {
+    "duplicate_and_presence_unit": "1/1 synthetic",
+    "tests": {
+      "controls": {
+        "pass": 48,
+        "same_reference_and_candidate_pcm_sha256_as_archive": true,
+        "unchanged_with_active_peers": 48,
+        "max_abs_level_db": 0.0006708071488163145,
+        "max_spectral_db": 0.2642860712953232,
+        "min_correlation": 0.9993744947353833,
+        "same_complete_scored_rows_as_archive": true
+      },
+      "holdout": {
+        "pass": 96,
+        "same_reference_and_candidate_pcm_sha256_as_archive": true,
+        "unchanged_with_active_peers": 96,
+        "max_abs_level_db": 0.00849792032784092,
+        "max_spectral_db": 0.5187378927378563,
+        "min_correlation": 0.966495103780124,
+        "same_complete_scored_rows_as_archive": true
+      },
+      "range": {
+        "pass": 154,
+        "same_reference_and_candidate_pcm_sha256_as_archive": true,
+        "unchanged_with_active_peers": 154,
+        "max_abs_level_db": 0.0007601068818161951,
+        "max_spectral_db": 0.5325226395094743,
+        "min_correlation": 0.9812523715562348,
+        "same_complete_scored_rows_as_archive": true
+      },
+      "remote": {
+        "pass": 8,
+        "same_reference_and_candidate_pcm_sha256_as_archive": true,
+        "unchanged_with_active_peers": 8,
+        "max_abs_level_db": 9.842000700234469e-05,
+        "max_spectral_db": 0.06695599484477241,
+        "min_correlation": 0.9999032945939046,
+        "same_complete_scored_rows_as_archive": true
+      }
+    },
+    "compact_quality_mode_sha256": [
+      "0bf8c021876aaeda60c4288dbaa8cb6eab99046e7459512675b23e7356b30fab",
+      "10f4073e2f0aedaddb1db3621689e647131e58f004a043e0579eb05140ad79ba"
+    ],
+    "factory_renderer_source_sha256": {
+      "dnbx_core.c": "981655ee877044206002b43bb8e8ecc7a586e2071d58057185e3fb579e0d7207",
+      "dnbx_core.h": "8648ba886d19575bf0683549e92abed1346f3e430d1419008a2513b2c6e31ca2",
+      "fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+      "juno6.c": "b40317367fefcc35054996960aa73d36fe896365a34dadcb5770bc3558a2985c",
+      "juno6.h": "e9a049f1446d204c03b0dc135f19f5309937a3bf4b7e6401de51c8dfe7aa733f",
+      "juno6_factory.inc": "d33ba2623262eab303a9b17fdb0de21314aebb5b90588cb364642849f7955df4"
+    },
+    "integrated_full_engine_loader": {
+      "observed": "synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS",
+      "log_sha256": "e8e64e686bcea77e7226386d139042936e1ac19114aea081d243fafd5701c932"
+    }
+  },
+  "break_table_check": {
+    "oracle_source": "dea023ce632538621b59bb307ebcaf440805b032",
+    "lookup_bytes": 975,
+    "stored_table_sha256": "7a6cd0bcb6560b738184b183ecc9d183ca3110308a3f135decaab79b4b03afdc",
+    "include_sha256": "57a38ce49a5ec1a047461184e839699062312556f1bc103b06354f8e66d22393",
+    "host_compilers": [
+      "gcc -O0",
+      "gcc -O2",
+      "gcc -Os",
+      "gcc -O3"
+    ],
+    "host_ubsan": true,
+    "original_words": 1542,
+    "output_sha256": "a7a97d79618f43da2f1a0d4682733cd81083c048526b2b035455a9da9a6aa8e7",
+    "native_probe_bytes": 1464,
+    "native_probe_sha256": "9ab76f58ad42a2e3780c39999274663cbc79bd77ed2e5c7d1c9178d8e1beef5c",
+    "emulator_source": "ba83317aa55cbcdb2830c5da97d5f64b763499e2"
+  },
+  "builds": {
+    "elite": {
+      "default": {
+        "free_xip": 6156,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97204,
+        "images": {
+          "app": {
+            "bytes": 546516,
+            "sha256": "4c1fea5eb23ccaa8a5538c994b9552e8164d0fe2ea2b146d4e159ef38387e7cd"
+          },
+          "elf": {
+            "bytes": 633928,
+            "sha256": "1130c88adb567502fa55b532a135231f333f9f6c9b93bff17c2196389b455c90"
+          },
+          "loader": {
+            "bytes": 7616,
+            "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+          },
+          "fwsc": {
+            "bytes": 651732,
+            "sha256": "eaf36dfcbf7c9a763724d847e7df427f52109e8bd477eb46632fb3a373eb829d"
+          }
+        },
+        "retained_factory_symbols": {}
+      },
+      "superj6": {
+        "free_xip": 1196,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97204,
+        "images": {
+          "app": {
+            "bytes": 551476,
+            "sha256": "47975458b91c0002d643556049c21bec050405756e1a2be17fbd227a8ebb277d"
+          },
+          "elf": {
+            "bytes": 640164,
+            "sha256": "95516c14cf62c02bf4c78b88212619bf4700d089b0cbc63b669d889176c9c767"
+          },
+          "loader": {
+            "bytes": 7616,
+            "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+          },
+          "fwsc": {
+            "bytes": 651732,
+            "sha256": "aaeddbb0cd845d92ce68aa7605b012ca369695eeca887a77a05b5dede9024abe"
+          }
+        },
+        "retained_factory_symbols": {
+          "engine_superj6_edit": 168,
+          "engine_superj6_factory_load": 262,
+          "engine_superj6_pre_note_wave": 204
+        }
+      },
+      "superj6_and_synthone_editor": {
+        "free_xip": 1152,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97220,
+        "images": {
+          "app": {
+            "bytes": 551520,
+            "sha256": "8dc425b4456a3eaf6d541f969ffacc7f4f40890d6dd1e624a94db4827fc3a8ae"
+          },
+          "elf": {
+            "bytes": 640680,
+            "sha256": "7a5418eabc92f4b042ef3b2435f2fa85f7d0a61e6d75a363820712b722b2ff46"
+          },
+          "loader": {
+            "bytes": 7616,
+            "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+          },
+          "fwsc": {
+            "bytes": 651732,
+            "sha256": "999977419b4a2664bfd6fe9ad7428d52e35f73aa09093847c8be824996587b9b"
+          }
+        },
+        "retained_factory_symbols": {
+          "engine_superj6_factory_load": 262
+        }
+      }
+    },
+    "pro": {
+      "default": {
+        "free_xip": 6164,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97204,
+        "images": {
+          "app": {
+            "bytes": 546508,
+            "sha256": "ea33898b9c43c66b62e4bf4e695c9f590ca18ad088554165749b0571ab0ccb8c"
+          },
+          "elf": {
+            "bytes": 633924,
+            "sha256": "0c8a8c40940955be88efed10ccd2bb96684eb5f3c7d7c055ec40675f0baceabd"
+          },
+          "loader": {
+            "bytes": 7614,
+            "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+          },
+          "fwsc": {
+            "bytes": 651730,
+            "sha256": "8c76d2d49f1cec86fa69aecd5c65391688692be3caba8f9ba93b737c7568ea64"
+          }
+        },
+        "retained_factory_symbols": {}
+      },
+      "superj6": {
+        "free_xip": 1208,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97204,
+        "images": {
+          "app": {
+            "bytes": 551464,
+            "sha256": "4f6a7a22dab3615d3f3b27dfe3de4455e01d626d6564150e1e708b1f7d555451"
+          },
+          "elf": {
+            "bytes": 638880,
+            "sha256": "49f067b08f72d6a3dc28c433eeb125f8a6fe04b771c094aaebc9542b707fe35d"
+          },
+          "loader": {
+            "bytes": 7614,
+            "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+          },
+          "fwsc": {
+            "bytes": 651730,
+            "sha256": "e9c2d4d20d8f6bc7bf1a73e213926b469bd435ecab9171bf3edef20dd39ba301"
+          }
+        },
+        "retained_factory_symbols": {
+          "engine_superj6_edit": 168,
+          "engine_superj6_factory_load": 262,
+          "engine_superj6_pre_note_wave": 204
+        }
+      },
+      "superj6_and_synthone_editor": {
+        "free_xip": 1164,
+        "free_pool": 8972,
+        "pool_reserve": 8192,
+        "pool_margin": 780,
+        "ordinary_ram_bytes": 97220,
+        "images": {
+          "app": {
+            "bytes": 551508,
+            "sha256": "f8760c3acf4c006686e4aff29eecb6c73440df271661bdbe8c8eec6594538ead"
+          },
+          "elf": {
+            "bytes": 640676,
+            "sha256": "9e0ec39aea33fe6da557a7b067b7903ee5e7ae4c93f68ea65cbea12fc4bdaa02"
+          },
+          "loader": {
+            "bytes": 7614,
+            "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+          },
+          "fwsc": {
+            "bytes": 651730,
+            "sha256": "f60f4b5a82261ce3db9534218a2427135d0a8eb74985005a3d6f8549eafe2eff"
+          }
+        },
+        "retained_factory_symbols": {
+          "engine_superj6_factory_load": 262
+        }
+      }
+    }
+  }
+}
