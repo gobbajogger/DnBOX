@@ -2,7 +2,7 @@
 
 On the SMK-37 Elite and Pro, choose a bass part and press **PARA**. Turn **K2** to the **SOUND** row, then turn **K5** to **SUPERJ6**. **K4** or **K6** selects POLY, PAD, PLUCK or BRASS. While a change waits for the audio owner, the SOUND row shows the requested preset and the reason it is waiting. READY identifies the applied selection. Turn K2 to a parameter row and use K5–K8 to edit it. **SCALE** opens the part list. K2 moves through the list and K3 edits the selected control. **PATCH** closes the list.
 
-The 8,918 host checks covered physical edits on both parts, all 128 formatted positions for each of the 16 macros, waveform, sub and LFO pixel landmarks, and the filter and level response to a sounding note. The measured production UI blob is `5ec9acd66078b836708b2df90bc6f800d991d7fb`.
+The 8,918 host checks covered physical edits on both parts, all 128 formatted positions for each of the 16 macros, waveform, sub and LFO pixel landmarks, and the filter and level response to a sounding note. The measured production UI blob is `0a06855a111284ad2d67cf3f0022ddbac84b5106`.
 
 Independent image review of the eight preset selectors passed 32 panel checks. The SOUND row covered 85.55% of its panel, and the largest empty rectangle occupied 4.00% of the screen.
 

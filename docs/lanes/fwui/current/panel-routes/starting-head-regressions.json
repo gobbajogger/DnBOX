@@ -180,6 +180,13 @@
       "exit": 0,
       "sha256": "a92057ed3191541b66f6ad08112e50de298312645726c165c5cbe9a010307606",
       "result": "PASS pickup hint on peek page (1 checks)"
+    },
+    {
+      "domain": "F5",
+      "command": "TMPDIR=<scratch> SAN_FLAGS=\"-O0 -g0\" python3 tests/host/ui_synth_step_footer_test.py",
+      "exit": 0,
+      "sha256": "ff77b89f9549aee7a2d006728f89dce8992596ba41b18d6db8c48f5bfe9bd96f",
+      "result": "PASS synth parameter16-step lane, actual states and two production negatives"
     }
   ],
   "unchangedIndexedRGBs": 1712,

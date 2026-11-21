@@ -1,6 +1,6 @@
 # Synth One INIT on bass A and B
 
-Select Synth One on either bass part. K1–K4 on FM-1 and K5–K8 on SMK-37 address the four columns on the selected row. The same parameters are available in the part list. The SOUND page selects the engine and shows the active preset. INIT is the one Synth One preset admitted by this version of Sound. SuperJ6 keeps its existing pages. [FM-1 and SMK caption comparison](board-captions.md)
+Select Synth One on either bass part. K1–K4 on FM-1 and K5–K8 on SMK-37 address the four columns on the selected row. The same parameters are available in the part list. The SOUND page selects the engine and shows the active preset. INIT is the one Synth One preset admitted by this version of Sound. The shared SOUND page keeps the preceding rows visible as the selection moves to the final bank. [Screen guide](../../screens/README.md) · [Compact SuperJ6 controls](../superj6-slot/README.md). [FM-1 and SMK caption comparison](board-captions.md)
 
 | Row | Column | Factory ID | Display label | Physical range | One position | Display |
 |---|---:|---:|---|---|---|---|

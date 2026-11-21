@@ -112,6 +112,25 @@ and the boot guard at RAM-only endpoints. Its exact archive comparisons, new
 frames and geometry negative control can be rerun without the primary walker.
 
 The registered `ui-startup-loop` test follows accepted flash through the
-ordinary application loop. Five private host runs produce 13 full-frame states
+ordinary application loop. Seven private host runs produce 16 full-frame states
 and compare the visible ink in seven notices. The [normal-loop index](../../docs/lanes/fwui/current/native-routes/normal-loop/screen-index.tsv)
 links each state to its frame or previously archived splash.
+
+
+The [firmware screen guide](../../docs/lanes/fwui/screens/README.md) joins these case IDs with the stock selector, optional Synth One matrix, parameter list, live voice and contention states, and both SuperJ6 slots. The five-column TSV keeps the original case IDs. The two former stock placeholder pages remain under `history/`. Run the catalog verifier with `--check` to compare the complete output byte-for-byte against the committed TSV.
+
+### Desktop and mobile LCD presentation
+
+Use the deployed DnBOX-nightly emulator’s `emu/index.html` and `emu/style.css`.
+The replay checks both assets against their published SHA-256 values. It places
+each distinct native RGB frame on the actual LCD canvas, measures its visible
+bounds, and compares the browser-painted pixels with the native capture at
+1440×900, 390×844 and 844×390. It runs offline with Python 3, Pillow, PyQt5 and
+Qt WebKit. The native fixtures exercise firmware controls and audio separately.
+
+```sh
+python3 tests/ui_inventory/viewport_replay.py /path/to/emu \
+  docs/lanes/fwui/screens/screen-index.tsv /tmp/fwui-viewport
+```
+
+[Published emulator shell](https://gobbajogger.github.io/DnBOX-nightly/emu/)

@@ -30,6 +30,97 @@ static void render_check(int choice,int state)
  for(int s=0;s<16;s++){cv_rect(9+s*14,0,11,4,s==0?C_WHITE:(s&1)?part_col():SOUND_LINE);char n[4];put_i(n,s+1);text_c(14+s*14,6,&FONT_T,n,SOUND_GRAY);}
  CHECK(!memcmp(fb+212*240,cv_px,240*16*sizeof(uint16_t)));
 }
+/* Compare every interactive slab with its unlabelled native surface, retaining
+ * only the real text, readout and value meter. Each slab is 227x19 inside its
+ * outline, so even its complete interior is below the 12%-of-LCD area limit. */
+static void check_list_slab(int displayed, int y)
+{
+    pref_t r = list_rows[displayed];
+    if (r.kind == R_HDR) return;
+    int selected = displayed == ui.list_sel;
+    uint16_t face = selected ? dim(part_col(),6) : SOUND_FACE;
+    cv_begin(240, 23, C_BLACK);
+    surface_panel(3, 1, 229, 21, selected, face, selected ? part_col() : SOUND_EDGE, SOUND_SIDE);
+    int xmin = 231, xmax = 3, ymin = 21, ymax = 1;
+    for (int dy = 2; dy <= 20; ++dy) {
+        for (int x = 4; x <= 230; ++x) {
+            if (fb[(y + dy) * 240 + x] == cv_px[dy * 240 + x]) continue;
+            if (x < xmin) xmin = x;
+            if (x > xmax) xmax = x;
+            if (dy < ymin) ymin = dy;
+            if (dy > ymax) ymax = dy;
+        }
+    }
+    int area = xmin <= xmax ? (xmax - xmin + 1) * (ymax - ymin + 1) : 0;
+    if (100 * area < 70 * (227 * 19))
+        fprintf(stderr, "Underfilled list row %s (%d, %d) bounds %d,%d to %d,%d\n",
+                pref_name(r), ui.part, displayed, xmin, ymin, xmax, ymax);
+    CHECK(100 * area >= 70 * (227 * 19));
+
+    /* The 909 descriptor spells this value Diode. Its face has a lowercase
+     * d, so a naive draw would literally produce a mixture of cases. */
+    const x0x_param_t *d = pref_desc(r);
+    if (ui.part == PART_909 && selected && d && d->names &&
+        !strcmp(d->names[pref_get(r)], "Diode")) {
+        cv_begin(240, 23, face);
+        text_r(226, vc(&FONT_B, 4, 18), &FONT_B, "DIODE", C_WHITE);
+        int pixels = 0;
+        for (int dy = 2; dy <= 20; ++dy)
+            for (int x = 180; x < 226; ++x) {
+                uint16_t expected = cv_px[dy * 240 + x];
+                if (expected == swap16(face)) continue;
+                ++pixels;
+                CHECK(fb[(y + dy) * 240 + x] == expected);
+            }
+        CHECK(pixels > 0);
+    }
+}
+
+/* Replay every selectable row of the ordinary drum and bass parts through SCALE and K2.
+ * A seven- or eight-row list formerly stopped before the lower LCD strip. */
+static void check_list_spacing(void)
+{
+    unsigned captured = 0;
+    for (int part = PART_909; part <= PART_303B; ++part) {
+        int voices = part < NKIT ? NDRUM : 1;
+        for (int voice = 0; voice < voices; ++voice) {
+            setup(V_PART, part);
+            if (part < NKIT) ui.sel[part] = (uint8_t)voice;
+            build_pages();
+            button_tap(B_SEL);
+            CHECK(ui.overlay == O_LIST);
+            for (;;) {
+                unsigned row = ui.list_sel;
+                ui_frame();
+                unsigned gap = 0, longest = 0;
+                for (unsigned y = 0; y < 240; ++y) {
+                    const uint16_t *pixels = fb + 240 * y;
+                    unsigned x = 1;
+                    while (x < 240 && pixels[x] == pixels[0]) ++x;
+                    gap = x == 240 ? gap + 1 : 0;
+                    if (gap > longest) longest = gap;
+                }
+                if (100 * longest > 12 * 240)
+                    fprintf(stderr, "List contains %u empty scanlines: kit %d voice %d row %u\n",
+                            longest, part, voice, row);
+                CHECK(100 * longest <= 12 * 240);
+                int count = ui.list_n < 9 ? ui.list_n : 9;
+                int pitch = 207 / count;
+                for (int i = 0; i < count; ++i)
+                    check_list_slab(ui.list_top + i, 20 + (pitch - 23) / 2 + i * pitch);
+                ++captured;
+                now_ms += 128;
+                enc_acc[EN_SELECT] = 1;
+                ui_input_only();
+                if (ui.list_sel == row) break;
+                CHECK(ui.list_sel > row);
+            }
+            button_tap(B_HOME);
+            CHECK(ui.overlay == O_NONE);
+        }
+    }
+    printf("Drum and bass lists: %u complete physical selection frames passed panel and empty-band limits\n", captured);
+}
 int main(void)
 {
  for(int theme=0;theme<2;theme++)for(int choice=0;choice<2;choice++){
@@ -45,6 +136,7 @@ int main(void)
    enc_acc[EN_SELECT]=1;ui_input_only();
   }
  }
+ check_list_spacing();
  fprintf(stderr,"KIT_SECTION_STATES=%u failures=%u checks=%u\n",states,failures,checks);
  CHECK(!failures);puts("PASS CP/MA real framebuffer SOUND/KIT page association, both palettes, physical navigation/held/released and full step lane");return 0;
 }
