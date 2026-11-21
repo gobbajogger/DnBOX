@@ -1,0 +1,53 @@
+{
+  "original": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "source_command_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "frames_per_arm": 91816200,
+  "programs": 694,
+  "original_delay_on_and_positive_mix": 525,
+  "history_samples_per_owner": 551262,
+  "two_units_in_live_sweep": true,
+  "reference_history_bytes_per_owner": 7056016,
+  "limits": {
+    "maximum_absolute_level_db": 1,
+    "maximum_spectrum_rms_db": 3
+  },
+  "modes": {
+    "float32": {
+      "bytes_per_owner": 2205048,
+      "bytes_for_two_owners": 4410096,
+      "complete": {
+        "within_limits": 694,
+        "failed": [],
+        "worst_spectral_db": 0.023491448399041527,
+        "worst_absolute_level_db": 2.9946228861648356e-05
+      },
+      "wet": {
+        "within_limits": 694,
+        "failed": [],
+        "worst_spectral_db": 6.0726141246183865e-05,
+        "worst_absolute_level_db": 3.8842293951940145e-07
+      }
+    },
+    "binary16": {
+      "bytes_per_owner": 1102524,
+      "bytes_for_two_owners": 2205048,
+      "complete": {
+        "within_limits": 692,
+        "failed": [
+          "Theoretical Evolution Pad",
+          "Awakening Drone"
+        ],
+        "worst_spectral_db": 9.403617252505358,
+        "worst_absolute_level_db": 0.0014603319015668503
+      },
+      "wet": {
+        "within_limits": 694,
+        "failed": [],
+        "worst_spectral_db": 0.2682803792384281,
+        "worst_absolute_level_db": 0.0005945981542253838
+      }
+    }
+  },
+  "rows_sha256": "21541b3445605817288ba0439f6b9d998ea69741137cca53646275d0ed652d41",
+  "live_scores_sha256": "84befeaeca0158840680bdde89a98f66b560c3b097b9f38b8dcf60d8cbd9faf2"
+}
