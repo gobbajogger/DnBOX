@@ -1,0 +1,114 @@
+[
+ {
+  "board": "elite",
+  "path": "elite/heavy01/results.json",
+  "elf_sha256": "202b30e99d519da2e029f53a928effaffaa6e977a84dcc643a7e3da125cce86f",
+  "fwsc_sha256": "8a536be7b1c16348d1b6d6a11caf7396448b70f07740649fc725ad4fbb4b0caa",
+  "pcm_sha256": "163c3484cd205d30c1a16d7c8afbab16c86459e9657422f8cba43af9ec89bd09",
+  "max_us": 11492,
+  "late": 0,
+  "xruns": 0,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ },
+ {
+  "board": "elite",
+  "path": "elite/heavy32/results.json",
+  "elf_sha256": "202b30e99d519da2e029f53a928effaffaa6e977a84dcc643a7e3da125cce86f",
+  "fwsc_sha256": "8a536be7b1c16348d1b6d6a11caf7396448b70f07740649fc725ad4fbb4b0caa",
+  "pcm_sha256": "4f7380b369777ff4f49d3940c7009d4411c35c52ee92d952b3cb76ce3c941566",
+  "max_us": 10099,
+  "late": 0,
+  "xruns": 0,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ },
+ {
+  "board": "pro",
+  "path": "pro/heavy10/results.json",
+  "elf_sha256": "968f30bf1fc5cac1c2abef7c044099f2bbab707893e147e6b6eeab95d7957e8f",
+  "fwsc_sha256": "10f2a2a82480a231792ec9d90a203499a1c5741600810154e7dbcc4df67904ec",
+  "pcm_sha256": "9c802cc85f29a6f720c5d7a74529e8ea3c4347017058bfa89942a4d12e4803ec",
+  "max_us": 11325,
+  "late": 0,
+  "xruns": 0,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ },
+ {
+  "board": "pro",
+  "path": "pro/heavy23/results.json",
+  "elf_sha256": "968f30bf1fc5cac1c2abef7c044099f2bbab707893e147e6b6eeab95d7957e8f",
+  "fwsc_sha256": "10f2a2a82480a231792ec9d90a203499a1c5741600810154e7dbcc4df67904ec",
+  "pcm_sha256": "ca83559b99eba97ab271413c0de328c6eec2107fb6930fa3fe1eb977cc73b824",
+  "max_us": 10687,
+  "late": 0,
+  "xruns": 0,
+  "health": {
+   "expected_post_boot_pcm_bytes": 1058400,
+   "captured_post_boot_pcm_bytes": 1058816,
+   "tolerance_pcm_bytes": 2048,
+   "duration_ok": true,
+   "boot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "shot_fault": {
+    "record": null,
+    "handler_active": false
+   },
+   "fault_record_changed": false,
+   "retained_fault": false,
+   "fault_ok": true,
+   "passed": true
+  }
+ }
+]
