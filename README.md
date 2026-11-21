@@ -12,9 +12,9 @@ The factory sound is set up for big beat, so it should make noise the moment you
 
 Use Chrome or Edge on a computer, with the keyboard on USB:
 
-**[Open the installer](https://gobbajogger.github.io/DnBOX/install/)**
+**[Open the main installer](https://gobbajogger.github.io/DnBOX/install/)** (its catalog currently lists 0.0.25.1)
 
-You can also download the current Elite and Pro packages from **[GitHub Releases (latest)](https://github.com/gobbajogger/DnBOX/releases/latest)** (v0.0.26). The release page lists each file's size, CRC32 and SHA-256. The same 0.0.26 packages are also on the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/).
+The latest release, v0.0.26, is on **[GitHub Releases (latest)](https://github.com/gobbajogger/DnBOX/releases/latest)** and in the [nightly installer](https://gobbajogger.github.io/DnBOX-nightly/install/). The release page lists each file's size, CRC32 and SHA-256.
 
 - Pick the package that matches your model (**Elite** or **Pro**). Starrykey 37 Play uses the SMK-37 Pro package.
 - **Back up your sample slots before you install.** The installer can do this for you.
@@ -39,7 +39,7 @@ History: an earlier **0.0.26** package was briefly offered on the [nightly insta
 
 ## FAQ
 
-**Which package should I use?** SMK-37 Elite uses the Elite package. SMK-37 Pro and Starrykey 37 Play use the Pro package. Pick the matching file in the installer or on the [latest release](https://github.com/gobbajogger/DnBOX/releases/latest).
+**Which package should I use?** SMK-37 Elite uses the Elite package. SMK-37 Pro and Starrykey 37 Play use the Pro package. Pick the matching file in an installer or on the [latest release](https://github.com/gobbajogger/DnBOX/releases/latest) (v0.0.26). The main installer currently lists 0.0.25.1; the nightly installer lists 0.0.26.
 
 **Do I have to back up first?** Yes, if you have anything in the sample slots you want to keep. The installer can back them up. An install that would otherwise lose loops saves them first and writes them back after, but a backup of your own is still the safe option.
 
@@ -47,7 +47,7 @@ History: an earlier **0.0.26** package was briefly offered on the [nightly insta
 
 **How do I go back to stock firmware?** Use the installer restore option, or M-VAVE M-UPGRADE. See [Restore and rescue](#restore-and-rescue).
 
-**Where is the source and the issue tracker?** This repository. Repository and Pages URLs still use the previous name because the GitHub repository has not been renamed.
+**Where is the source and the issue tracker?** This repository, `gobbajogger/DnBOX`. It was renamed from `X0X37-for-Loopy-Pro`, and old GitHub repository links redirect here. The website is at [gobbajogger.github.io/DnBOX](https://gobbajogger.github.io/DnBOX/).
 
 **How do I report a bug or a vulnerability?** Use the bug-report issue form for ordinary problems. See [SECURITY.md](SECURITY.md) for vulnerabilities. Do not attach private backups or credentials.
 

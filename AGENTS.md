@@ -13,7 +13,7 @@ DnBOX is firmware for the SMK-37 keyboard (Elite and Pro builds; this repo, `gob
 ## How work reaches main
 - Lanes work on `lane/<lane>-<topic>` branches cut from `integration/dnbox-consolidated` and merge there (RULES 5 and 9). Never branch from `main` for lane work.
 - Firmware reaches `main` only as a PR the User merges (RULES 1 and 11), after the full Local gate passes at the exact SHA (RULES 9), the User's own device tests on SMK-37 Elite and Pro, and independent QA. Device writes (flashing, firmware releases, BTIF, USRTRIM, efuse, key_mac, bootloader) are the User's only (RULES 15).
-- A docs-only PR into `main` (`.md` files only) needs content, link and policy checks and an independent QA review.
+- Documentation-only PRs (only .md docs; no firmware, code, .github, Pages, installer or gh-pages files) may be merged into `main` or `nightly` by an agent once content, link and policy checks and an independent QA review pass. They need no full Local gate and no device tests ([RULES 9 and 11](https://github.com/gobbajogger/DnBOX/blob/integration/dnbox-consolidated/RULES.md)).
 - Release naming and steps: [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Local gate (one command)
@@ -33,4 +33,4 @@ The gate script [tools/dnbox-gate.sh](https://github.com/gobbajogger/DnBOX/blob/
 Historical note: the older x0x37 instructions (the previous AGENTS.md, `skills/x0x37-*`, `.agents/skills/x0x37-*`, `.cursor/skills`) are history and have no force.
 
 ## Never
-Force-push; push or merge to `main` without the User; Secrets in Git; PSRAM; device writes (flash, release, BTIF, USRTRIM, efuse, key_mac, bootloader); GitHub Actions or workflow files; Cursor cloud agents; SuperJ6 .ipa or AU installer in Git; `.img`, `.component` or `.vst3` files in Git. `.fwsc` firmware and sanitized test evidence may be in Git ([RULES 13](https://github.com/gobbajogger/DnBOX/blob/integration/dnbox-consolidated/RULES.md)).
+Force-push; push or merge firmware or code to `main` without the User (documentation-only PRs: [RULES 9](https://github.com/gobbajogger/DnBOX/blob/integration/dnbox-consolidated/RULES.md)); Secrets in Git; PSRAM; device writes (flash, release, BTIF, USRTRIM, efuse, key_mac, bootloader); GitHub Actions or workflow files; Cursor cloud agents; SuperJ6 .ipa or AU installer in Git; `.img`, `.component` or `.vst3` files in Git. `.fwsc` firmware and sanitized test evidence may be in Git ([RULES 13](https://github.com/gobbajogger/DnBOX/blob/integration/dnbox-consolidated/RULES.md)).
