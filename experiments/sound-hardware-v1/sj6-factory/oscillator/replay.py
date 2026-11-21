@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 
 import numpy as np
 
@@ -22,6 +23,7 @@ REF_HASH = "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
 F32 = ct.POINTER(ct.c_float)
 NOTES = {
     "controls": (48, 60, 64, 67),
+    "sampler-notes": (48, 60, 64, 67, 0, 23, 87, 105, 127),
     "range": (24, 36, 43, 55, 59, 71, 72, 76, 79, 84, 96),
     "holdout": (37, 50, 62, 68, 75, 82, 91, 101),
 }
@@ -87,6 +89,28 @@ def build(compact, repo, out):
     return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in inputs}
 
 
+def build_sampler_reference(repo, out):
+    # Materialize the comparison-only source directly from the pinned Git commit.
+    package = "experiments/superj6-original-reference-20261115/sampler"
+    archive = out / "source.tar"
+    subprocess.run(["git", "-C", repo, "archive", "-o", archive, REF, package], check=True)
+    with tarfile.open(archive) as files:
+        files.extractall(out, filter="data")
+    source = out / package
+    common = source / "DunneCore/Common"
+    flags = ["-O2", "-fPIC", "-ffp-contract=off", "-fno-fast-math"]
+    numeric = out / "numeric.o"
+    subprocess.run(["cc", "-std=c11", *flags, "-I", common, "-c", common / "numeric_boundary.c",
+                    "-o", numeric], check=True)
+    cpp = sorted((source / "DunneCore").rglob("*.cpp"))
+    subprocess.run(["c++", "-std=c++17", "-shared", *flags, "-I", source / "include", "-I", common,
+                    "-I", source / "DunneCore/Sampler", *cpp, HERE / "sampler_reference.cpp", numeric,
+                    "-o", out / "sampler.so"], check=True)
+    reference = ct.CDLL(str(out / "sampler.so")).sampler_reference
+    reference.argtypes = [ct.c_uint, ct.c_float, ct.c_uint, F32, F32, ct.c_size_t]
+    return reference
+
+
 def selected_record(directory, row, audited):
     uid = row["program_uid"]
     if audited["uid"] != uid or audited["supplied_bank_uuid"] != row["bank_uuid"]:
@@ -109,6 +133,10 @@ def selected_record(directory, row, audited):
 
 def cases(archive, suite, selected=None):
     if archive is None and selected is None:
+        if suite == "sampler-notes":
+            for shape in range(4):
+                yield "sampler-note-" + str(shape), 0, np.float32(shape / 3), 0., 0., {}
+            return
         for layer in range(2):
             for stop in range(3):
                 yield "control-" + str(stop), layer, np.float32(stop / 3), 0., 0., {}
@@ -166,13 +194,18 @@ def main():
     inputs.add_argument("--suite", choices=NOTES)
     inputs.add_argument("--remote-repo", type=Path, help="Nightly Git checkout for the checked PWM String Pad fields")
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--sampler-reference", action="store_true",
+                        help="Run the archived CoreSampler note and stereo render path with neutral physical controls")
     args = parser.parse_args()
     suite = args.suite or "controls"
+    if suite == "sampler-notes" and (args.remote_repo or args.selected_records or args.banks):
+        parser.error("--suite sampler-notes uses four controlled waveforms")
     # Verify every selected record before compiling, writing outputs or scoring.
     settings = list(cases(args.banks, suite, args.selected_records)) if not args.remote_repo else []
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out)
+    sampler = build_sampler_reference(args.repo, out) if args.sampler_reference or suite == "sampler-notes" else None
     rows = []
     factory_input = args.banks is not None or args.selected_records is not None
     scope = "factory-main-pass base oscillator only" if factory_input else f"isolated oscillator {suite}"
@@ -192,12 +225,18 @@ def main():
             if not candidate(layer, selector, amount, enable, note, ct.byref(increment),
                              with_peers.ctypes.data_as(F32), FRAMES, 1) or not np.array_equal(b.view(np.uint32), with_peers.view(np.uint32)):
                 raise RuntimeError("another oscillator changed the selected layer's signal")
-            if not reference(stop, width, increment.value, a.ctypes.data_as(F32), FRAMES):
+            pitch = {}
+            if sampler:
+                original_increment = ct.c_float()
+                if not sampler(stop, width, note, ct.byref(original_increment), a.ctypes.data_as(F32), FRAMES):
+                    raise RuntimeError("original sampler failed to render the selected note")
+                pitch["original_increment"] = original_increment.value
+            elif not reference(stop, width, increment.value, a.ctypes.data_as(F32), FRAMES):
                 raise RuntimeError("reference render failed")
             if not all(np.all(np.isfinite(x)) and np.any(x) for x in (a, b)):
                 raise ValueError("non-finite or silent oscillator")
             rms, spectral = channel_score(a, b, SPEC["sample_rate"], SPEC["band_hz"])
-            rows.append({**authored, "case": uid, "layer": layer + 1, "note": note, "shape": stop,
+            rows.append({**authored, **pitch, "case": uid, "layer": layer + 1, "note": note, "shape": stop,
                          "selector": float(selector), "amount": float(amount), "enable": float(enable),
                          "increment": increment.value, "reference_width": width,
                          "reference_sha256": digest(a.tobytes()), "candidate_sha256": digest(b.tobytes()),
@@ -211,6 +250,13 @@ def main():
               "frames_per_case": FRAMES, "rate": SPEC["sample_rate"],
               "unchanged_with_other_layer_and_voice": len(rows),
               "passes": sum(row["pass"] for row in rows), "total": len(rows), "cases": rows}
+    if sampler:
+        result["sampler_harness_sha256"] = digest((HERE / "sampler_reference.cpp").read_bytes())
+        result["candidate_harness_sha256"] = digest((HERE / "candidate.c").read_bytes())
+        result["reference_path"] = "CoreSampler note-on, independently prepared pitch and stereo analytic voice output"
+        result["sampler_source_tree"] = subprocess.check_output(
+            ["git", "-C", args.repo, "rev-parse", REF + ":experiments/superj6-original-reference-20261115/sampler"],
+            text=True).strip()
     if args.remote_repo:
         result["remote_commit"] = remote_fields.REMOTE_REV
         result["remote_input_sha256"] = remote_fields.FILES

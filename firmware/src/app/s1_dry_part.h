@@ -13,6 +13,11 @@ typedef struct {
     float bend;
 #if X0X_SYNTHONE_PATCH
     s1_dry_controls patch;
+#if X0X_SYNTHONE_WIDEN
+    uint8_t widen_tail[2520];
+    unsigned widen_frame;
+    float widen_target, widen_current;
+#endif
 #endif
 } s1_dry_part;
 

@@ -12,6 +12,29 @@ Each result compares 8,192 samples at 44.1 kHz, starting with an idle oscillator
 
 **Reference and scope.** The comparison reference is the standalone analytic oscillator in the archived source port at `4ea86b9e869011cae761709d13569b7bc32980a8`. The historical qualification compared 42 sampler-component histories in total, spanning sample playback, envelope, filter and analytic fallback modes. That total does not identify a count of isolated oscillator captures. The public archive retains the comparison source and aggregate results. The original per-case PCM and control/event plan needed for direct replay are absent. This replay compiles the pinned header in a separate comparison library and runs it on Linux. It does not execute the original AU binary. The 298 controls are isolated probes, and zero complete presets were scored here. Runtime selection of an analytic fallback or a sample asset, effective LFO routes, instrument tuning, simultaneous sources, effects, retrigger and the complete three-second S4 graph need their own comparisons. [Archived original component and scope](https://github.com/gobbajogger/DnBOX/blob/4ea86b9e869011cae761709d13569b7bc32980a8/experiments/superj6-original-reference-20261115/README.md)
 
+## Linux CoreSampler voice comparison
+
+The source-derived original CoreSampler admitted the MIDI notes through its key map, selected a voice, prepared pitch from its own tuning table and rendered stereo output in 16-frame calls. A silent looping PCM buffer made accidental sample playback detectable. The analytic voice used unity sustain, zero attack, hold and decay, maximum velocity and bypassed filter and modulation. The complete 8,192-frame output at 44.1 kHz includes the normal initial gain ramp. The two original channels matched bit for bit. The firmware independently prepared the same MIDI pitch and exposed its selected layer immediately after the oscillator.
+
+| Input settings | Passed | Largest absolute level difference | Largest spectral distance |
+|---|---:|---:|---:|
+| Four waveforms at nine MIDI pitches on layer 1, 50% square duty | 36/36 | 0.014524 dB | 0.264292 dB |
+| Six waveform and width settings at the four S4 pitches on each layer | 48/48 | 0.012938 dB | 0.264292 dB |
+| Both authored PWM String Pad oscillator settings at the four S4 pitches | 8/8 | 0.004097 dB | 0.066963 dB |
+
+These suites overlap. All three used the existing 1 dB level and 3 dB spectral limits over 20 Hz–16 kHz. Every firmware recording also matched its rerender with the opposite layer and an additional voice sounding. The events and input gains remained fixed. The [per-note receipts](sampler-voice-results.json.gz) include both phase increments, PCM hashes, scores, source identities and original field provenance. The firmware source was `63278e3322aefa89b25f129ca2fccc35ef3b3b3d`. The comparison source was `4ea86b9e869011cae761709d13569b7bc32980a8`. The Linux reference uses the sampler component. Full S4 still needs the complete 14 preset records, routing and effects and matching final stereo renders.
+
+From the Sound checkout, use Python with NumPy, C and C++ compilers. The last command also requires Node.js and a Nightly checkout containing the Remote revision. Use fresh output paths. Each command rejects silent or nonfinite audio and exits nonzero for an out-of-tolerance score.
+
+```sh
+git fetch --no-tags --depth=1 origin 4ea86b9e869011cae761709d13569b7bc32980a8
+git -C "$nightly" fetch --no-tags --depth=1 origin 90cf5429a0aac5929c72d8abf387d70c399488ad
+bench=experiments/sound-hardware-v1/sj6-factory/oscillator/replay.py
+python3 "$bench" --compact . --repo . --suite sampler-notes --out /tmp/sj6-sampler-notes
+python3 "$bench" --compact . --repo . --sampler-reference --suite controls --out /tmp/sj6-sampler-controls
+python3 "$bench" --compact . --repo . --sampler-reference --remote-repo "$nightly" --out /tmp/sj6-sampler-authored
+```
+
 ## Independent candidate
 
 `factory-oscillator.patch` selects the new quality mode only when an original pre-note shape is applied. The candidate retains DnBOX sine and polynomial BLEP primitives. A unit-gain reference probe at increment 1/1024 measured a sine peak near 0.500, an inverted triangle approaching 0.495, a saw ramp slope of 0.68 per cycle and a 0.594 change between PWM plateaus. The positive pulse ends at wrap. At width 0.30, measured plateau levels were −0.1782 and +0.4158. The candidate uses these scalar observations, centers the pulse by its duty and corrects triangle slope reversals using the integral of DnBOX's polynomial BLEP.

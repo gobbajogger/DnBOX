@@ -450,6 +450,27 @@ static void build_pages(void);
 /* A matrix band takes one coherent snapshot. Input handlers always read the
  * owner immediately before queuing a change against its revision. */
 static const s1_patch_snapshot *s1_draw_patch;
+#if X0X_SYNTHONE_WIDEN
+static float s1_draw_width;
+#endif
+
+static inline int s1_matrix_snapshot(unsigned part, s1_patch_snapshot *patch)
+{
+#if X0X_SYNTHONE_WIDEN
+    return engine_s1_patch_snapshot_widen(part, patch, &s1_draw_width);
+#else
+    return engine_s1_patch_snapshot(part, patch);
+#endif
+}
+
+static inline float s1_matrix_physical(unsigned slot)
+{
+#if X0X_SYNTHONE_WIDEN
+    if (slot == S1_PATCH_LEGACY_COUNT) return s1_draw_width;
+#endif
+    return s1_draw_patch->physical[slot];
+}
+
 static int s1_read(pref_t r, s1_patch_value *value)
 {
     const s1_patch_descriptor *d = s1_patch_at(r.c);
@@ -691,7 +712,7 @@ static UI_DRAW int pref_get(pref_t r)
     case R_S1PATCH: {
         const s1_patch_descriptor *d = s1_patch_at(r.c);
         if (d && s1_draw_patch && bidx() == r.b)
-            return (int)((s1_draw_patch->physical[r.c] - d->minimum) *
+            return (int)((s1_matrix_physical(r.c) - d->minimum) *
                          (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
         s1_patch_value value;
         return s1_read(r, &value) ? value.position : 0;
@@ -1291,7 +1312,7 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         const s1_patch_descriptor *patch = s1_patch_at(r.c);
         float physical;
         if (s1_draw_patch && bidx() == r.b)
-            physical = s1_draw_patch->physical[r.c];
+            physical = s1_matrix_physical(r.c);
         else {
             s1_patch_value owner;
             if (!s1_read(r, &owner)) { put_s(num, "--"); return; }
@@ -1693,7 +1714,12 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
 #endif
                 add_page_refs(emit, titles[row],refs,0,0);
             }
-            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
+            pref_t fourth = NONE;
+#if X0X_SYNTHONE_WIDEN
+            if (kind == ORIGINAL_SOUND_SYNTHONE)
+                fourth = PR(R_S1PATCH, T_303, b, S1_PATCH_LEGACY_COUNT);
+#endif
+            add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),fourth);
         } else {
             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
             do { static const pref_t refs[4] = {PR(R_BRKSLOT, 0, 0, 0), PR(R_BRKSLOT, 1, 0, 0), PR(R_BRKSET, 0, 0, BRK_BCHANCE), PR(R_ENG, T_BRK, 0, 1)};
@@ -6075,7 +6101,7 @@ static UI_DRAW void draw_part_sound(int band)
 #if X0X_SYNTHONE_PATCH
     s1_patch_snapshot patch;
     if (engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE &&
-        engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
+        s1_matrix_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
 #endif
 #if !X0X_SYNTHONE_PATCH
     if (pg.n == 1 && pg.r[0][0].kind == R_BENGINE) {

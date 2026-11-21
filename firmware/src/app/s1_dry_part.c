@@ -45,7 +45,10 @@ static const struct {
     S1_FIELD(26, "AMP ATTACK", amp.attack_s, .0005f, 2, X0X_U_S),
     S1_FIELD(27, "AMP DECAY", amp.decay_s, .005f, 2, X0X_U_S),
     S1_FIELD(28, "AMP SUSTAIN", amp.sustain, 0, 1, X0X_U_PCT),
-    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S)
+    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S),
+#if X0X_SYNTHONE_WIDEN
+    {{"WIDEN", 0, 1, 121, X0X_U_PCT}, 0},
+#endif
 #undef S1_FIELD
 };
 
@@ -67,6 +70,9 @@ float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
 
 float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
 {
+#if X0X_SYNTHONE_WIDEN
+    if (slot == S1_PATCH_LEGACY_COUNT) return part->widen_target;
+#endif
     const uint8_t *base = (const uint8_t *)&part->patch;
     return *(const float *)(base + patch_parameters[slot].offset);
 }
@@ -76,7 +82,12 @@ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
     s1_dry_controls next;
     s1_dry_frozen_controls(&next);
     uint32_t mask = original_sound_edit_mask(cell);
-    for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+#if X0X_SYNTHONE_WIDEN
+    unsigned widen_byte = S1_PATCH_FIRST_BYTE + S1_PATCH_LEGACY_COUNT;
+    part->widen_target = (mask & (UINT32_C(1) << widen_byte))
+        ? s1_patch_physical(s1_patch_at(S1_PATCH_LEGACY_COUNT), cell[widen_byte]) : 0.f;
+#endif
+    for (unsigned i = 0; i < S1_PATCH_LEGACY_COUNT; ++i) {
         unsigned byte = S1_PATCH_FIRST_BYTE + i;
         if (mask & (UINT32_C(1) << byte)) {
             float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);

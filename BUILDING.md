@@ -22,6 +22,8 @@ The build makes three files in `build/`:
 
 The optional `X0X_SUPERJ6_FACTORY=1` enables the typed SuperJ6 renderer for the host and native builds. Cold selection still uses the shipping Juno. A decoded waveform can select the two-layer renderer on an idle owner, and a tagged AMP2 edit can select its BLEP mode. AMP2 edits on a sounding or releasing shipping voice are rejected without altering its state. The master applies after chorus on either renderer. Use `engine_superj6_factory_load` to stage both layers and all 11 supported main-pass fields in one audio transaction. The combined `X0X_SYNTHONE_PATCH=1 X0X_SUPERJ6_FACTORY=1` build retains that bulk entry and the Synth One editor. Individual edit functions can also be linked by actual callers. Both profiles use the bit-exact packed BREAK lookup. [Loading decoded records and running the host test](docs/sound/superj6-ab.md#loading-decoded-controls-in-the-engine-only-build)
 
+Add `X0X_SYNTHONE_WIDEN=1` with `X0X_SYNTHONE_PATCH=1` for the 14th Synth One control, stereo width. Elite and Pro use losslessly packed Chicago coefficients when both the Synth One editor and SuperJ6 factory loader are enabled. Run `sh tests/host/synthone_widen_test.sh` and `python3 tests/test_chicago_compact_headers.py` to exercise the width history and coefficient reader.
+
 ## Prerequisites (macOS)
 
 - Python 3 with Pillow: `pip3 install Pillow` (Cloud Agent / host bootstrap: `bash tools/agent_env_install.sh`, also the environment `install` in `.cursor/environment.json`)

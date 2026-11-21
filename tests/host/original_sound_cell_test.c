@@ -2,6 +2,9 @@
 #include "../../firmware/src/app/original_sound.h"
 #include "../../firmware/src/app/unit_control.h"
 #include "../../firmware/src/app/bass_pattern_preset.h"
+#if X0X_SYNTHONE_PATCH
+#include "../../firmware/src/app/s1_patch.h"
+#endif
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -217,7 +220,7 @@ static void verify_synthone(void)
     assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
     uint8_t bad[32] = {0};
 #if X0X_SYNTHONE_PATCH
-    for (unsigned slot=0; slot<13; ++slot) {
+    for (unsigned slot=0; slot<S1_PATCH_COUNT; ++slot) {
         assert(original_sound_s1_set(cell,slot,0));
         assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
         assert(original_sound_s1_set(cell,slot,127));
@@ -225,7 +228,7 @@ static void verify_synthone(void)
     }
     memcpy(copy,cell,sizeof copy);
     assert(!original_sound_s1_set(cell,0,128) && !memcmp(cell,copy,sizeof copy));
-    assert(!original_sound_s1_set(cell,13,0) && !memcmp(cell,copy,sizeof copy));
+    assert(!original_sound_s1_set(cell,S1_PATCH_COUNT,0) && !memcmp(cell,copy,sizeof copy));
     for(unsigned i=0;i<22;++i) {
         memcpy(bad,cell,sizeof bad);
         bad[i]=128;
@@ -235,8 +238,12 @@ static void verify_synthone(void)
     bad[23] &= (uint8_t)~1u; /* a value without its edit bit */
     assert(!original_sound_valid(bad));
     memcpy(bad,cell,sizeof bad);
-    bad[22] |= 4u; /* reserved edit bit */
-    assert(!original_sound_valid(bad));
+    for (unsigned bit = 0; bit < 32; ++bit) {
+        if (bit < 2 || (bit >= S1_PATCH_FIRST_BYTE && bit < S1_PATCH_FIRST_BYTE + S1_PATCH_COUNT)) continue;
+        memcpy(bad,cell,sizeof bad);
+        bad[22 + bit/8] |= (uint8_t)(1u << (bit % 8));
+        assert(!original_sound_valid(bad));
+    }
     memset(bad,0,sizeof bad);
 #else
     /* A project made with the opt-in provider must be refused by the stock

@@ -65,6 +65,9 @@ _Static_assert(sizeof(original_runtime_workspace) >= 4 * 256 * sizeof(float),
 static original_chicago_tuning original_tuning POOL;
 static original_chicago_fx2_compact original_fx[NBASS] POOL;
 static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
+#if X0X_SYNTHONE_WIDEN
+#include "s1_selected_widen.inc"
+#endif
 static uint8_t original_fx_ready;
 static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
 static uint8_t original_midi_channel[NBASS];
@@ -2624,6 +2627,9 @@ static int run_job(int j, int core)
         bass_adapt_pre(bv, (unsigned)n);
         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
                                              bb[bv], bb[1-bv], n);
+#if X0X_SYNTHONE_WIDEN
+        if (status == ORIGINAL_RUNTIME_OK) s1_widen_render(bv, bb[1-bv], (unsigned)n);
+#endif
         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
         if (!core)
             PROF_ADD(2 + bv, pb);

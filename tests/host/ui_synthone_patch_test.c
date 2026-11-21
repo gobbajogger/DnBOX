@@ -34,7 +34,12 @@ static void check_readout(pref_t ref, const s1_patch_descriptor *d, float physic
 
 static void check_part(unsigned owner)
 {
-    static const unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
+    static const unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,
+#if X0X_SYNTHONE_WIDEN
+                                   121,
+#endif
+    };
+    CHECK(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
     static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "SOUND"};
     int visited = 0;
     ui.part = (uint8_t)(PART_303A + owner);
@@ -50,8 +55,8 @@ static void check_part(unsigned owner)
         for (int k = 0; k < 4; ++k) {
             pref_t ref = pg.r[p][k];
             if (ref.kind == R_NONE) continue;
-            if (p == 4) {
-                CHECK(k < 3 && ref.b == owner);
+            if (p == 4 && k < 3) {
+                CHECK(ref.b == owner);
                 CHECK(ref.kind == (k == 0 ? R_BENGINE : k == 1 ? R_BPRESET : R_BSTATUS));
                 continue;
             }
@@ -126,7 +131,12 @@ static void check_part(unsigned owner)
         CHECK(ui.list_sel > row);
     }
     CHECK(seen == S1_PATCH_COUNT);
-    CHECK(ui.list_sel + 1 == ui.list_n && list_rows[ui.list_sel].kind == R_BSTATUS);
+    CHECK(ui.list_sel + 1 == ui.list_n);
+#if X0X_SYNTHONE_WIDEN
+    CHECK(list_rows[ui.list_sel].kind == R_S1PATCH && list_rows[ui.list_sel].c == S1_PATCH_LEGACY_COUNT);
+#else
+    CHECK(list_rows[ui.list_sel].kind == R_BSTATUS);
+#endif
     ui_frame();
     shot(owner ? "list-B-last" : "list-A-last");
     button_tap(B_HOME);
@@ -211,6 +221,6 @@ int main(void)
     CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_MIAMI && !engine_bass_preset_pending(0));
     CHECK(engine_s1_patch_read(1, 16, &fresh));
     CHECK(pref_read_only(PR(R_BPRESET,0,1,0)));
-    printf("Synth One INIT F7: %u checks, two owners, 13 controls each, 88 captures\n", checks);
+    printf("Synth One INIT F7: %u checks, two owners, %u controls each\n", checks, (unsigned)S1_PATCH_COUNT);
     return 0;
 }

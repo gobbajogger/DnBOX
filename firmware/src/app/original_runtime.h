@@ -16,6 +16,12 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
+#if X0X_SYNTHONE_WIDEN
+_Static_assert(sizeof(s1_dry_part) <= sizeof(original_chicago_backend) ||
+               sizeof(s1_dry_part) <= sizeof(original_miami_backend) ||
+               sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
+               "Synth One widening must fit its original owner");
+#endif
 typedef struct {
     original_runtime_backend dsp;
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];

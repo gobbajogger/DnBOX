@@ -185,7 +185,13 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
 #if X0X_SYNTHONE_PATCH
     uint32_t mask = original_sound_edit_mask(cell);
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
+#if X0X_SYNTHONE_WIDEN
+        /* The cell permits performance bits 0..1 and patch bits 8..21.
+         * Check the spare bits in the serialized bytes alongside their data. */
+        if ((cell[22] & 0xfcu) || (cell[24] & 0xc0u) || cell[25]) return 0;
+#else
         if (mask & ~(S1_PATCH_MASK | 3u)) return 0;
+#endif
         for (unsigned i = 0; i < 22; ++i) {
             if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
         }

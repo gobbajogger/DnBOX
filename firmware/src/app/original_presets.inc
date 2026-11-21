@@ -56,7 +56,11 @@ static void bass_publish_request(int voice, uint32_t token)
     ++bass_publish_seq[voice];
 }
 #if X0X_SYNTHONE_PATCH
+#if X0X_SYNTHONE_WIDEN
+int engine_s1_patch_snapshot_widen(unsigned voice, s1_patch_snapshot *out, float *widen_target)
+#else
 int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+#endif
 {
     if (voice >= NBASS || !out) return 0;
     uint32_t lock = plat_cq_lock();
@@ -66,23 +70,37 @@ int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
         out->revision = s1_patch_identity(voice);
         out->note_locked = note_lock_applied[voice];
         out->preset = bass_named_preset[voice];
-        for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
+#if X0X_SYNTHONE_WIDEN
+        if (widen_target) *widen_target = owner->dsp.synthone.widen_target;
+#endif
+        for (unsigned i = 0; i < S1_PATCH_LEGACY_COUNT; ++i)
             out->physical[i] = s1_part_patch_value(&owner->dsp.synthone, i);
     }
     plat_cq_unlock(lock);
     return ready;
 }
 
+#if X0X_SYNTHONE_WIDEN
+int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
+{ return engine_s1_patch_snapshot_widen(voice, out, NULL); }
+#endif
+
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
 {
     s1_patch_snapshot snapshot;
     int slot = s1_patch_slot(factory_id);
+#if X0X_SYNTHONE_WIDEN
+    float widen_target;
+    if (slot < 0 || !out || !engine_s1_patch_snapshot_widen(voice, &snapshot, &widen_target)) return 0;
+    out->physical = slot == S1_PATCH_LEGACY_COUNT ? widen_target : snapshot.physical[slot];
+#else
     if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
+    out->physical = snapshot.physical[slot];
+#endif
     const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
     out->revision = snapshot.revision;
     out->note_locked = snapshot.note_locked;
     out->preset = snapshot.preset;
-    out->physical = snapshot.physical[slot];
     out->position = (uint8_t)((out->physical - d->minimum) *
         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
     return 1;
@@ -322,6 +340,9 @@ static int bass_restore_part(const sound_t *sound, int v)
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
         &original_tuning, &original_fx_owner[v]);
+#if X0X_SYNTHONE_WIDEN
+    s1_widen_adopt(v, rc);
+#endif
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
 #if X0X_SYNTHONE_PATCH
     s1_patch_replaced(v);
@@ -449,6 +470,9 @@ static void bass_preset_boundary_voice(int v)
         }
         int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
             &original_tuning, &original_fx_owner[v]);
+#if X0X_SYNTHONE_WIDEN
+        s1_widen_adopt(v, rc);
+#endif
         if (rc != ORIGINAL_RUNTIME_OK) {
             /* A failed adoption remains visible and needs a fresh explicit
              * request; do not rerun expensive initialization every block. */
