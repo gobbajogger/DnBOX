@@ -91,13 +91,13 @@ def measure_panel(image, title, top, height):
     return measure_ink(ink, title)
 
 
-def list_row_ink(image, y):
-    # Each rounded interactive row is an independent 229x21 surface. Its
-    # 227x19 interior contains the label, value, unit and optional meter.
+def list_row_ink(image, y, height=19):
+    # Each rounded interactive row has a 227px interior with its label,
+    # value, unit and optional meter. Short menus may have taller rows.
     # Never count the tint or antialiased shoulders of the row as content.
-    ink = Image.new("L", (227, 19))
-    for dy in range(2, 21):
-        left, right = (12, 224) if dy in [2, 3, 19, 20] else (8, 227)
+    ink = Image.new("L", (227, height))
+    for dy in range(2, height + 2):
+        left, right = (12, 224) if dy in [2, 3, height, height + 1] else (8, 227)
         scan = [image.getpixel((x, y + dy)) for x in range(left, right)]
         face = Counter(scan).most_common(1)[0][0]
         for x, pixel in enumerate(scan, left):

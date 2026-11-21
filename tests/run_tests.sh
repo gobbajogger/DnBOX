@@ -796,11 +796,13 @@ run ui-pan-units sh tests/host/ui_pan_units_test.sh
 if [ "$PIL_SKIP" = 1 ]; then
     not_run ui-screen-index Pillow
     not_run ui-synth-layout Pillow
+    not_run ui-menu-layout Pillow
     not_run ui-native-routes Pillow
     not_run ui-startup-loop Pillow
     not_run ui-wave-fallback-frame Pillow
 else
     run ui-synth-layout python3 tests/host/check_synthone_layout.py --catalog docs/lanes/fwui/screens
+    run ui-menu-layout python3 tests/host/check_menu_layout.py --catalog docs/lanes/fwui/screens
     run ui-screen-index python3 tests/ui_inventory/screen_index.py docs/lanes/fwui/screens docs/lanes/fwui/screens/screen-index.tsv --check
     run ui-native-routes python3 tests/ui_inventory/native_routes.py "$OUT/native-routes"
     run ui-startup-loop python3 tests/ui_inventory/startup_loop.py "$OUT/startup-loop"

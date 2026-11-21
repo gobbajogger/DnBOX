@@ -281,12 +281,26 @@ static void presentation(const char *dir)
             sound_t before=proj.sound;uint32_t dirty=ui.dirty;int sw=save_wait;
             snprintf(name,sizeof name,"%s-%c-row-%d",bank?"miami":"chicago",'a'+v,p+1);shot(dir,name);
             CHECK(!memcmp(&before,&proj.sound,sizeof before));CHECK(ui.dirty==dirty && save_wait==sw);
-            /* Every admitted row uses four-row 50px spacing. Sparse columns
-             * remain empty, with no invented control in their cell interior. */
-            int top=24+(p%4)*50;
-            for(int k=0;k<4;k++)if(pg.r[p][k].kind==R_NONE)
-                for(int y=16;y<43;y++)for(int x=9+k*59;x<58+k*59;x++)
-                    CHECK(fb[(top+y)*240+x]==swap16(SOUND_SELECT));
+            /* A sparse hardware mapping still contains only its real controls.
+             * Independently compose those controls over the full row and match
+             * the completed LCD, including the former empty right-hand area. */
+            int controls = p == count ? 3 : 4;
+            if (p < count)
+                while (controls && want[p][controls-1] < 0) --controls;
+            if (controls < 4) {
+                int width = controls == 2 ? 118 : 78;
+                int first = p < 4 ? 0 : pg.n - 4;
+                int top = 24 + 50 * (p - first);
+                cv_begin(240, 49, SOUND_SELECT);
+                for (int k = 0; k < controls; ++k) {
+                    int x = 4 + k * width;
+                    if (k) cv_rect(x, 14, 1, 31, SOUND_SELECT_SIDE);
+                    draw_param_widget(pg.r[p][k], x, 0, width, 1, matrix_col(), 49, 1);
+                }
+                for (int y = 16; y < 43; ++y)
+                    CHECK(!memcmp(fb + (top + y)*240 + 9, cv_px + y*240 + 9,
+                                  222*sizeof(*fb)));
+            }
         }
         *page_of(V_PART)=count;engine_bass_wheel_owners(1u<<v);request(v,bank^1);
         const char *lines[HELP_LINES];int n=help_lines(B_HOME,lines);
