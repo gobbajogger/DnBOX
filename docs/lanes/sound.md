@@ -560,3 +560,7 @@ The experimental `firmware/src/dsp/synthone/scheduler/oracle/state.hpp` moved to
 The callback benchmark and its original deadline contract were recovered from `55e1288d`. The untraced 48 kHz host test used 128-frame blocks. The full 694-program result was DEADLINE_FAIL. [Timing receipt](../sound/restored-callback-result.json)
 
 At 44.1 kHz the four original ten-second delay histories alone allocate 7,056,016 bytes. In a fresh component test with pseudorandom input and a two-second delay, reducing the ring from ten seconds to 5.0001 seconds changed an output word at frame 220,528. An earlier minimum-size native build with link-time optimization still exceeded Elite XIP by 25,528 bytes and Pro by 25,520. The current build flags and effect behavior are preserved.
+
+## Populated strict emu360 comparison
+
+The calibrated 8-second replay used all 922 physical input events on the ordinary Elite and Pro packages. On source `54b0b230`, Juno + Synth One reached 11,105 µs on Elite and 11,512 µs on Pro, each with zero raw late transfers and zero DMA xruns. The calibrated defaults reached 9,244 and 9,102 µs with zero late transfers or xruns. Chicago + Miami still exceeded the 11,609 µs deadline, reaching 13,591 µs with 35 late transfers on Elite and 13,079 µs with 46 on Pro. The receipt identifies both packages, the emulator, the source commit and project readbacks. [Raw comparison](../../experiments/sound-hardware-v1/selected-native/independent-render-results.json)
