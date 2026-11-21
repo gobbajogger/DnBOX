@@ -45,10 +45,14 @@ The pitch comparison covered standalone and combined linkage and all 128 words. 
 | C2 · Consolidated ancestry and no loss | PASS at `9dd6f2df` | The lane contains consolidated `1c82772b`. The independent no-loss check passed with zero deleted paths. [Qualification record](fwui/current/integration-qualification.json) |
 | C3 · Independent multi-size review | PASS, 10/10 | The independent reviewer compared consolidated, starting and final native screens and replayed them at 1440×900, 390×844 and 844×390. All 1,944 catalog IDs matched the browser-painted LCD pixels at every size. [Independent verdict](fwui/current/panel-routes/independent-review.md) · [Full three-size replay](fwui/current/panel-routes/viewport-replay.json) |
 | C4 · Hard limits | PASS at `9dd6f2df` | The independent limits check passed. The Rule 13 audit covered 5,386 tracked paths and 2,445 members of all 48 changed archives, with zero prohibited types. [Qualification record](fwui/current/integration-qualification.json) · [Stock memory fit](fwui/current/route-native/fit.json) |
-| C5 · Every firmware item passes | Pending complete registry accounting | All seven FWUI items have passing evidence. The original host run stopped after 73 passes and 12 failures. The remaining registrations and any further firmware UI findings require a final accounting. [Original outcomes and recovery](fwui/current/combined-host-results.json) |
+| C5 · Every firmware item passes | PASS on `3e307cfa` | F1–F7 each have a passing result and linked evidence on the qualified firmware tree. The combined pad, LED and hold-GLOBE results close the last open FWUI item. [FWUI qualification](fwui/current/integration-qualification.json) · [Integrated controls](fwui/current/combined-host-results.json) |
 | C6 · Integration | PASS at `3e307cfa` | Integ marked the PR ready and merged it on 21 November 2026. The two parents are the verified consolidated base `1c82772b` and the qualified lane head `9dd6f2df`. [Merged PR](https://github.com/gobbajogger/DnBOX/pull/975) · [Merge commit](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) |
 
 Sound owns the broader original Synth One and SuperJ6 factory libraries in [PR #973](https://github.com/gobbajogger/DnBOX/pull/973). The firmware captures and linked-image simulations qualify software behavior. Measurements of physical flash retention, electrical USB detach and on-glass color require a device. [Native evidence boundaries](fwui/current/native-routes/README.md)
+
+## What's left
+
+No FWUI checklist items remain open. Integ tracks the full 522-registration accounting and its aggregate result under I2. [Integration checklist](../../CHECKLISTS.md) · [Observed host results](fwui/current/combined-host-results.json)
 
 ## Qualification at earlier revisions
 
