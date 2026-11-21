@@ -351,7 +351,7 @@ static float lfo_step(s1_trem_lfo *lfo)
 /* The two original modulation destinations share clocks and discontinuity
  * smoothers. The hold clock reads the rising envelope before tremolo applies
  * its independent inverse envelope to the held sample. */
-static void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
+static __attribute__((noinline)) void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     s1_trem_lfo *a = &part->lfo[0], *b = &part->lfo[1];
     for (unsigned i = 0; i < frames; ++i) {
@@ -465,28 +465,25 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
 
     if (part->crush_route && part->crush_interval > 1.f) {
         modulated_crush(part, left, right, frames);
-        pan_stereo(part, left, right, frames);
-        return;
-    }
-    /* The untouched INIT rate takes every input frame. Keep the last sample
-     * for a live rate change without running the hold loop on a dry block. */
-    if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
-        part->crush_last = left[frames - 1u];
-        tremolo_mono(part, left, right, frames);
-        pan_stereo(part, left, right, frames);
-        return;
-    }
-    for (unsigned f = 0; f < frames; ++f) {
-        if (part->crush_next <= part->crush_age) {
-            part->crush_last = left[f];
-            part->crush_next += part->crush_interval;
-            part->crush_next -= part->crush_age;
-            part->crush_age = 0.f;
+    } else {
+        /* Even while the rate is above 44.1 kHz the saved last sample and
+         * clock must remain valid for a subsequent live control change. */
+        if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
+            part->crush_last = left[frames-1];
         } else {
-            left[f] = right[f] = part->crush_last;
+            for (unsigned i=0; i<frames; ++i) {
+                if (part->crush_next <= part->crush_age) {
+                    part->crush_last = left[i];
+                    part->crush_next += part->crush_interval;
+                    part->crush_next -= part->crush_age;
+                    part->crush_age = 0.f;
+                } else {
+                    left[i] = right[i] = part->crush_last;
+                }
+                part->crush_age += 1.f;
+            }
         }
-        part->crush_age += 1.f;
+        tremolo_mono(part, left, right, frames);
     }
-    tremolo_mono(part, left, right, frames);
     pan_stereo(part, left, right, frames);
 }

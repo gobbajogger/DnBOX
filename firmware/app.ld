@@ -26,6 +26,8 @@ MEMORY
     XPOOL  (rw)  : ORIGIN = 0x01C75200, LENGTH = 0x2400
     NOINIT (rw)  : ORIGIN = 0x01C7C000, LENGTH = 0x400
     BLERAM (rw)  : ORIGIN = 0x01C7C400, LENGTH = 0x1000
+    /* Primary SRAM after the BLE host and before the SDK's boot_info block. */
+    AUDIOHIGH (rw) : ORIGIN = 0x01C7D400, LENGTH = 0x2900
 }
 SECTIONS
 {
@@ -44,6 +46,7 @@ SECTIONS
     .bss (NOLOAD) : { _bss_start = .; *(.bss*) *(.sbss*) *(COMMON) . = ALIGN(4); _bss_end = .; } > RAM
     .pool (NOLOAD) : { _pool_start = .; *(.pool*) . = ALIGN(4); _pool_end = .; } > POOL
     .xpool (NOLOAD) : { _xpool_start = .; *(.xpool*) . = ALIGN(4); _xpool_end = .; } > XPOOL
+    .audiohigh (NOLOAD) : { _audiohigh_start = .; *(.audiohigh*) . = ALIGN(4); _audiohigh_end = .; } > AUDIOHIGH
     .noinit (NOLOAD) : { *(.noinit*) } > NOINIT
     .ble_ram (NOLOAD) : { . = ALIGN(64); *(.ble_ram*) } > BLERAM
     ASSERT(_c1_end <= 0x01C01800, "RAM code reaches the Bluetooth controller RAM")

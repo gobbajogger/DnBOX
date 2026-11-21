@@ -1,0 +1,102 @@
+{
+  "elite/heavy01": {
+    "elf_sha256": "deb2b5fa186a3a3b144b3f32fdbb6cc6d67ac8e3f252c194e27c2215bcd08ef6",
+    "timing_ok": true,
+    "max_us": 11502,
+    "late": 0,
+    "xruns": 0,
+    "capture_health": {
+      "expected_post_boot_pcm_bytes": 1058400,
+      "captured_post_boot_pcm_bytes": 1058816,
+      "tolerance_pcm_bytes": 2048,
+      "duration_ok": true,
+      "boot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "shot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "fault_record_changed": false,
+      "retained_fault": false,
+      "fault_ok": true,
+      "passed": true
+    }
+  },
+  "elite/heavy32": {
+    "elf_sha256": "deb2b5fa186a3a3b144b3f32fdbb6cc6d67ac8e3f252c194e27c2215bcd08ef6",
+    "timing_ok": true,
+    "max_us": 10553,
+    "late": 0,
+    "xruns": 0,
+    "capture_health": {
+      "expected_post_boot_pcm_bytes": 1058400,
+      "captured_post_boot_pcm_bytes": 1058816,
+      "tolerance_pcm_bytes": 2048,
+      "duration_ok": true,
+      "boot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "shot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "fault_record_changed": false,
+      "retained_fault": false,
+      "fault_ok": true,
+      "passed": true
+    }
+  },
+  "pro/heavy10": {
+    "elf_sha256": "0b17b4c191f1d32de8e37093aa659491693d641661c8d61ccc6e57b4dfc133ce",
+    "timing_ok": true,
+    "max_us": 11286,
+    "late": 0,
+    "xruns": 0,
+    "capture_health": {
+      "expected_post_boot_pcm_bytes": 1058400,
+      "captured_post_boot_pcm_bytes": 1058816,
+      "tolerance_pcm_bytes": 2048,
+      "duration_ok": true,
+      "boot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "shot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "fault_record_changed": false,
+      "retained_fault": false,
+      "fault_ok": true,
+      "passed": true
+    }
+  },
+  "pro/heavy23": {
+    "elf_sha256": "0b17b4c191f1d32de8e37093aa659491693d641661c8d61ccc6e57b4dfc133ce",
+    "timing_ok": true,
+    "max_us": 10887,
+    "late": 0,
+    "xruns": 0,
+    "capture_health": {
+      "expected_post_boot_pcm_bytes": 1058400,
+      "captured_post_boot_pcm_bytes": 1058816,
+      "tolerance_pcm_bytes": 2048,
+      "duration_ok": true,
+      "boot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "shot_fault": {
+        "record": null,
+        "handler_active": false
+      },
+      "fault_record_changed": false,
+      "retained_fault": false,
+      "fault_ok": true,
+      "passed": true
+    }
+  }
+}

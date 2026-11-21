@@ -43,12 +43,16 @@ int16_t eng_scope[SCOPE_N] X0X_POOL;
 volatile uint32_t eng_scope_w;
 
 static drum909_t d909 POOL;
+#if X0X_HIGH_AUDIO_RAM
+static drum808_t d808 X0X_XPOOL;
+#else
 static drum808_t d808 POOL;
+#endif
 static volatile uint8_t project_hold;
 static volatile int brk_preview_slot = -1;
 static uint8_t brk_preview_audio_on, brk_preview_pattern;
 static void brk_preview_interrupt(void);
-static original_runtime_part original_bass[NBASS] POOL;
+static original_runtime_part original_bass[NBASS] X0X_AUDIOHIGH;
 static uint16_t original_quiet_samples[NBASS], original_switch_gain[NBASS];
 #ifdef X0X_HOST
 /* Read-only host diagnostics for the actual adoption boundary. */
