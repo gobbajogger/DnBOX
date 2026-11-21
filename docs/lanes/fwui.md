@@ -1,5 +1,15 @@
-# Lane: fwui   (copy to docs/lanes/fwui.md; update in every push)
-Owner: Classic FWUI successor (Dot FWUI relinquished writing). Branch: `lane/fwui`. Draft PR: #975. Published gate head: `e43726340aaa298a9fcb0831d9d1f6398245eea8`. Updated: 2026-11-18 12:40 EST.
+# Firmware UI lane
+Owner: FWUI. Branch `lane/fwui`, draft PR #975. Integ owns aggregate qualification.
+
+## Current checkpoint — 20 November 2026
+
+The firmware on `04b5c8495c5ae4df91e3c2afd06cc81f35c077b8` contains consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d`. A fresh checkout matched all 5,071 paths and the ten pinned original inputs. Both stock builds completed locally with AC79 1.2.14 and JieLi 20260730.1. Elite has 1,028 B XIP free, Pro 1,036 B. Each has 8,972 B free in the pool, 780 B above the 8,192 B reserve. Both application binaries matched the independently retained KIT build byte for byte. The margin above F3 is 4 B and 12 B respectively. The actual linker maps were reproduced with the original objects and link order. Every image section matched the stock link byte for byte. [Build logs, linker maps and hashes](fwui/stock-04b5/).
+
+The semantic-caption walker reached 1,530 states on that same commit with 40,967 text checks, zero findings, 17,741 presence checks and 249 glyph pixel checks. Its full set of runtime negative controls passed. The board painters, every renderer and independent visual approval still require separate coverage.
+
+Next: exercise HOME fader/encoder pickup on the SMC grid and verify the combined stock image. The source-derived screen inventory includes board-only routes. F7 is blocked on the genuine Sound interfaces: the production Synth One slot has no editable sound parameters and renders silence, and the compact Juno slot exposes 16 panel controls. The Sound owner is developing the full engines in #973. F1/F2/F4–F7 and C1/C3–C6 remain open. C2 ancestry passes. No paths deleted.
+
+## Archived qualification history
 
 ## Checklist (from CHECKLISTS.md)
 
