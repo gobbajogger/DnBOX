@@ -2,6 +2,7 @@
 #ifndef X0X_ORIGINAL_CHICAGO_BACKEND_H
 #define X0X_ORIGINAL_CHICAGO_BACKEND_H
 #include "chicago_note_context.h"
+#include "chicago_packed.h"
 #include "engine_events.h"
 
 enum {
@@ -36,6 +37,7 @@ typedef struct {
     original_chicago_program program;
     original_chicago_voice_controls controls;
     original_chicago_voice_tables tables;
+    original_chicago_packed_cache coefficient_cache;
     original_chicago_voice voice;
     original_pending_note pending;
     original_chicago_extra_sources extra;

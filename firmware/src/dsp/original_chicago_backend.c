@@ -113,9 +113,10 @@ static int initialize(original_chicago_backend *s, unsigned factory,
     s->factory = factory;
     s->fz = fz;
     s->program = program;
+    s->coefficient_cache.index = UINT32_MAX;
     if (!original_chicago_voice_compile(&s->controls, &s->program) ||
-        !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_lookup,
-            NULL, original_pitch44100)) return s->status;
+        !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_cached,
+            &s->coefficient_cache, original_pitch44100)) return s->status;
 
     original_chicago_voice_seed seed;
     memset(&seed, 0, sizeof seed);
