@@ -11,7 +11,11 @@ The shipped Juno, Chicago, Miami and independently implemented Synth One INIT al
 | Elite | 546,516 | 6,156 | 8,972 | 780 | 1,100 |
 | Pro | 546,508 | 6,164 | 8,972 | 780 | 1,100 |
 
-Each Synth One part uses 956 bytes of the existing 3,720-byte backend union. Each shipped Juno plus chorus uses 888 bytes. The release image has 268 pool bytes above the required reserve plus safety margin. Two original instruments can require distinct wet reads from five seconds before a live delay edit. See the [per-program and independent-history measurements](../../experiments/sound-hardware-v1/synthone-delay/README.md) for the scope of this constraint.
+An independent reconstruction reproduced the ELF, BIN, FWSC and linker script for both models, eight files total. ELF symbol attribution for this source gives 1,764 bytes of Synth One functions and 48 bytes of named constants. Each Synth One part uses 956 bytes of the existing 3,720-byte backend union. Each shipped Juno plus chorus uses 888 bytes. The release image has 268 pool bytes above the required reserve plus safety margin. Two original instruments can require distinct wet reads from five seconds before a live delay edit. See the [per-program and independent-history measurements](../../experiments/sound-hardware-v1/synthone-delay/README.md) for the scope of this constraint.
+
+The compact SuperJ6 candidate with a typed event explicitly retained for sizing leaves 1,136 B XIP on Elite and 1,148 B on Pro. It preserves the 780 B pool margin. Its base is the isolated AMP2 plus range-dictionary tree below. Its full preset importer remains outstanding. [Typed source and actual audio-block measurements](../../experiments/sound-hardware-v1/sj6-amp2/typed-entry.md)
+
+A bounded four-ring delay tested in two real factory graphs used 2,748 B per owner. Eight slow controls passed. The two released factory histories failed all six preregistered measurements, reaching up to 18.735 dB absolute level error and 27.596 dB spectral error in the final mix. [Source, receipts and measurement protocol](../../experiments/sound-hardware-v1/synthone-delay/bounded-delay.md)
 
 ## Earlier candidate images
 
