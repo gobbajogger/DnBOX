@@ -58,4 +58,4 @@ python3 compare.py /path/to/original-captures /path/to/dnbox-captures \
     --candidate-commit "$FULL_SOURCE_COMMIT"
 ```
 
-Each channel must pass the existing 1 dB absolute RMS-level and 3 dB log-spectral limits in 20 Hz–16 kHz. The spectral calculation uses 2,048-frame Hann windows, 512-frame hops and a reference-relative −80 dB floor. Unusable captures yield exit 2. A fully scored matrix outside tolerance yields exit 1. The recovered material supplies zero qualifying pairs. The seven Linux component replays have their own input and output hashes.
+Each channel must pass the existing 1 dB absolute RMS-level and 3 dB log-spectral limits in 20 Hz–16 kHz. The spectral calculation uses 2,048-frame Hann windows, 512-frame hops and a reference-relative −80 dB floor. Unusable captures yield exit 2. A fully scored matrix outside tolerance yields exit 1. The [firmware control and stereo test](candidate/README.md) exercises the guarded production factory transaction, reads back the live instrument state and measures partial renders. The recovered material supplies zero qualifying pairs. The seven Linux component replays have their own input and output hashes.
