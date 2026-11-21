@@ -1,0 +1,237 @@
+{
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "shipping_baseline": "42ae56e1d83127fd9855fb8e86f8907af216b63a",
+  "comparison": "Independent restored host effects and original factory command order. Only RevSC line storage substituted. Current firmware whole-factory programs qualified: 0/694.",
+  "rate_hz": 44100,
+  "frames_per_program": 132300,
+  "sample_frames_per_variant": 91816200,
+  "ordered_factory_command_stream_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "input_check": "Bitwise equal on both channels before all per-frame RevSC calls, for all 694 actual original programs.",
+  "scoring": {
+    "gain": 1.0,
+    "fft": 512,
+    "hop": 128,
+    "relative_spectral_floor_db": -80,
+    "max_abs_rms_difference_db": 1,
+    "max_spectral_rms_difference_db": 3,
+    "final_mark": "Both final stereo channels must pass independently. Isolated wet scores are reported separately."
+  },
+  "codec": "Full-rate, 16-frame power-of-two fraction block scale, second-order prediction and sequential four-sample decoder cache. Original per-line lengths, filter and modulated cubic taps, feedback and return topology.",
+  "shadow_check": {
+    "independent_encoder_shadow_exact": true,
+    "total_stereo_frames": 1587600,
+    "program_index_and_capture_sha256": [
+      [
+        153,
+        "63305af0c7d4eceec8b7b7bb052320f0b18035cfaf0ec70bcac31f7d46f422f2"
+      ],
+      [
+        252,
+        "c9039e82ea7c30355092988c8393e9e11b9580d90028e9f559eda05d5779ad76"
+      ],
+      [
+        366,
+        "697636ef65d74a3c734fdaf874647e7b720c458881ab588c8c92fc1e977175a4"
+      ],
+      [
+        384,
+        "f1503cab46d63499357b64197ac986b3fae4b72b69bda81cc70dad0197139bc1"
+      ],
+      [
+        386,
+        "d384610319be666f57a92ca5e7b40d7b5fa73ab2a93daf27d5c5f6d4de812c3f"
+      ],
+      [
+        456,
+        "11034ac34c6812323f6c6a7fd4d1d6e9413b8b3fbaa333558888423ff69ca961"
+      ],
+      [
+        459,
+        "de234ed297c10e9babdfa705840ff4678d2d6dc4a83ab4da5598167db7856c6a"
+      ],
+      [
+        1,
+        "b3ba613a02e682af7238509478fb94a56d7b7fec6566bfcba0da0df8fa22e834"
+      ],
+      [
+        0,
+        "999ab4a5c1032b26cc587a9763d0eeb719578a82a0bdb5d7648d4f0bf531a8d5"
+      ],
+      [
+        8,
+        "f38c8a69644110ac2e211101aa71cd89d524922d77e7aa5de8f921b46585068d"
+      ],
+      [
+        533,
+        "cf5e1e22e7eacbc43271165a047ea80a5b822eac4ea87a079f41887cbfb986c9"
+      ],
+      [
+        656,
+        "188e3394db0f6a6dbe716a0ac19e41b5397f1130a90e146e9309629fac1c37fb"
+      ]
+    ]
+  },
+  "variants": {
+    "4": {
+      "history_and_codec_state_bytes_per_owner": 14848,
+      "all": {
+        "programs": 694,
+        "both_final_channels_pass": 682,
+        "both_isolated_wet_channels_pass": 591,
+        "max_abs_final_rms_db": 0.0300790325465243,
+        "max_final_spectral_rms_db": 19.32565038247595,
+        "worst_spectrum_program": "JEC Alarming!"
+      },
+      "full_mix_34": {
+        "programs": 34,
+        "both_final_channels_pass": 33,
+        "both_isolated_wet_channels_pass": 31,
+        "max_abs_final_rms_db": 0.029741739366770763,
+        "max_final_spectral_rms_db": 3.397529482590503,
+        "worst_spectrum_program": "Shimmershine Pad"
+      },
+      "failing_final_programs": [
+        {
+          "index": 175,
+          "name": "BB Wildchild Singers Lead",
+          "abs_rms_db": 0.0002584737597190967,
+          "spectral_db": 4.414621009972631
+        },
+        {
+          "index": 293,
+          "name": "JEC String Machine 2",
+          "abs_rms_db": 0.01759071929570403,
+          "spectral_db": 3.9124473681495737
+        },
+        {
+          "index": 294,
+          "name": "JEC Hollores Bass 2",
+          "abs_rms_db": 0.0008647149061825263,
+          "spectral_db": 3.9521135403755863
+        },
+        {
+          "index": 308,
+          "name": "JEC Filtered Dubrec! 2",
+          "abs_rms_db": 0.0020931642239315216,
+          "spectral_db": 6.386007289082244
+        },
+        {
+          "index": 339,
+          "name": "JEC Alarming!",
+          "abs_rms_db": 0.003405042061872742,
+          "spectral_db": 19.32565038247595
+        },
+        {
+          "index": 343,
+          "name": "JEC Hybrid Drone Bass",
+          "abs_rms_db": 0.0008828257895510573,
+          "spectral_db": 4.603636232741646
+        },
+        {
+          "index": 350,
+          "name": "JEC Warm Steel Pans",
+          "abs_rms_db": 0.00022112634334952441,
+          "spectral_db": 3.029856397370904
+        },
+        {
+          "index": 361,
+          "name": "JEC Deep Mono Pad",
+          "abs_rms_db": 0.0036481263503454595,
+          "spectral_db": 9.401371852863626
+        },
+        {
+          "index": 362,
+          "name": "JEC Sub Res Lead",
+          "abs_rms_db": 0.003157334951602875,
+          "spectral_db": 5.663963699726924
+        },
+        {
+          "index": 377,
+          "name": "Fluted Pad",
+          "abs_rms_db": 0.008342522621541237,
+          "spectral_db": 3.7548756009773494
+        },
+        {
+          "index": 381,
+          "name": "Not Quite Right Pad",
+          "abs_rms_db": 0.01021992280285524,
+          "spectral_db": 3.576339845161892
+        },
+        {
+          "index": 384,
+          "name": "Shimmershine Pad",
+          "abs_rms_db": 0.029741739366770763,
+          "spectral_db": 3.397529482590503
+        }
+      ]
+    },
+    "5": {
+      "history_and_codec_state_bytes_per_owner": 17944,
+      "all": {
+        "programs": 694,
+        "both_final_channels_pass": 690,
+        "both_isolated_wet_channels_pass": 673,
+        "max_abs_final_rms_db": 0.008059667668048928,
+        "max_final_spectral_rms_db": 14.02864724070511,
+        "worst_spectrum_program": "JEC Alarming!"
+      },
+      "full_mix_34": {
+        "programs": 34,
+        "both_final_channels_pass": 34,
+        "both_isolated_wet_channels_pass": 34,
+        "max_abs_final_rms_db": 0.006668969579091115,
+        "max_final_spectral_rms_db": 1.1625481694267819,
+        "worst_spectrum_program": "Shimmershine Pad"
+      },
+      "failing_final_programs": [
+        {
+          "index": 308,
+          "name": "JEC Filtered Dubrec! 2",
+          "abs_rms_db": 0.0007542932502500729,
+          "spectral_db": 3.322119311572312
+        },
+        {
+          "index": 339,
+          "name": "JEC Alarming!",
+          "abs_rms_db": 0.0002929957694410301,
+          "spectral_db": 14.02864724070511
+        },
+        {
+          "index": 361,
+          "name": "JEC Deep Mono Pad",
+          "abs_rms_db": 0.00081302265742558,
+          "spectral_db": 4.237644207565785
+        },
+        {
+          "index": 362,
+          "name": "JEC Sub Res Lead",
+          "abs_rms_db": 0.00031529789447693585,
+          "spectral_db": 3.157676091921515
+        }
+      ]
+    }
+  },
+  "native_strict_360mhz": {
+    "scope": "Five-bit variant, isolated stereo RevSC only, 40 blocks of 256 frames. Both stereo dynamics stages, high-pass filters and other voices excluded. Fast floating variant outputs a different checksum and has not been scored independently over the factory corpus.",
+    "profiles": {
+      "literal": {
+        "min_us": 7413.416666666667,
+        "max_us": 7539.791666666667,
+        "result_checksum": 3119563341,
+        "target_elf_sha256": "75e81ae64956aa9257cd6001dd31d72c31d3483a303adccb6f43276772d9b4a7"
+      },
+      "fast": {
+        "min_us": 3020.375,
+        "max_us": 3071.9166666666665,
+        "result_checksum": 805917023,
+        "target_elf_sha256": "92e93cbd44bc9c4b633b4b86e8d99a328e6d37ad78eb7022a6b6309b7ce4dcf7"
+      }
+    }
+  },
+  "capacity": {
+    "stock_pool_margin_after_reserve_bytes": 2064,
+    "original_RevSC_state_bytes_per_owner_extra": 364,
+    "remaining_overhead": "Original input/wet stereo dynamics, highpass filters and controls are additional. Two owners require independent memories."
+  },
+  "proof_archive_sha256": "d01b2a2ba35b9c2265efea5e540bba497c7d127ddf02a4b3b0d6d655ab23b44b"
+}
