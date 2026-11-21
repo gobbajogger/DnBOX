@@ -19,6 +19,10 @@ A bounded four-ring delay tested in two real factory graphs used 2,748 B per own
 
 A 2,712-byte checkpoint design fit per owner and reproduced 176,400 feedback words with an ideal input provider. Prewarming reduced the predicted half to 893 µs. A subsequent delay-time edit changed every one of 2,048 tap words on one owner while the other owner stayed byte-identical. Reconstructing the requested history cost 23,211 µs, including 15,325 µs on the longer of two cursors. Both exceed the 11,609 µs deadline. [Target timing and live-edit replay](../../experiments/sound-hardware-v1/synthone-delay/prewarm-live-edit-proof.tar.gz)
 
+Pruning unused feedback dependencies made the active cursor pair 660 B. Four existing 452-byte checkpoints bring the experimental state to 2,468 B per owner. On the same live edit, the target calculated and emitted all 2,048 original tap words for the edited part in 16,148 µs and all 2,048 for the other part in 1,228 µs. This still assumes access to the exact earlier dry samples and controls. [Split-cursor code and costs](../../experiments/sound-hardware-v1/synthone-delay/split-cursor-proof.tar.gz)
+
+A bounded dry-source provider using eight bins per recorded note period occupied 224 B for saved data or 300 B including the active encoder. All four wet paths failed the 24 dB signal-to-noise contract on both original programs. The edited owner's long cursor alone took 14,752 µs on PI32v2. [Provider memory, accuracy and target timing](../../experiments/sound-hardware-v1/synthone-delay/bounded-periodic-source-proof.tar.gz)
+
 ## Earlier candidate images
 
 These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
