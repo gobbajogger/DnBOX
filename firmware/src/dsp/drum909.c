@@ -540,9 +540,9 @@ X0X_COLD void drum909_init(drum909_t *d)
         d9_smp_rate(s);
         d9_env_set(&s->out, 0.0f);
         d9_shape_prep(&s->shape, s->drive, s->dist_type);
-        if (i == 2) { s->adpcm = x0x_smp_crash; s->len = X0X_SMP_CRASH_LEN; }
-        else if (i == 3) { s->adpcm = x0x_smp_ride; s->len = X0X_SMP_RIDE_LEN; }
-        else { s->adpcm = x0x_smp_hh; s->len = X0X_SMP_HH_LEN; }
+        if (i == 2) { s->adpcm = x0x_smp_crash_packed; s->len = X0X_SMP_CRASH_LEN; }
+        else if (i == 3) { s->adpcm = x0x_smp_ride_packed; s->len = X0X_SMP_RIDE_LEN; }
+        else { s->adpcm = x0x_smp_hh_packed; s->len = X0X_SMP_HH_LEN; }
     }
 
     d->accent = 2.0f;
@@ -712,6 +712,7 @@ typedef struct {
     float *dry_r, pl, pr;     /* X0X stereo: dry_r 0 = mono (dry gets y as 9W9's) */
     float dpl, dpr;           /* the pans' glide per sample this block (0 settled) */
     float *y;                 /* the voice's samples this block, mixed after its loop (d9_emit_block) */
+    uint32_t *prefix_cursor;  /* null when a fixture supplies ordinary raw nibbles */
 } d9_bus_t;
 
 /* a voice's block into the buses, after its sample loop: per sample the same products and
@@ -1021,6 +1022,27 @@ __attribute__((noinline)) static void d9_render_clap(d9_clap_t *v, const float *
     d9_emit_block(bus, m);
 }
 
+/* The leading nibbles remain directly addressable. After the lead-in, advance
+ * one canonical Huffman word per original nibble and restore its sign. The
+ * entropy decoder is reset from the immutable head whenever a voice restarts. */
+static inline unsigned d9_cymbal_nibble(const uint8_t *data, uint32_t *stream, unsigned index)
+{
+    if (!stream || index < X0X_CYMBAL_HEAD) {
+        unsigned byte = data[index >> 1];
+        return (byte >> (4 * (index & 1))) & 15;
+    }
+    unsigned cursor = *stream;
+    if (index == X0X_CYMBAL_HEAD)
+        cursor = (X0X_CYMBAL_HEAD * 4u << 1) | (data[X0X_CYMBAL_HEAD / 2 - 1] >> 7);
+    unsigned pos = cursor >> 1;
+    const uint8_t *at = data + pos / 8;
+    unsigned window = ((unsigned)at[0] | ((unsigned)at[1] << 8)) >> (pos & 7u);
+    unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
+    unsigned code = (pair & 15u) ^ ((cursor & 1u) << 3);
+    *stream = ((pos + (pair >> 4)) << 1) | (code >> 3);
+    return code;
+}
+
 /* Hats, ride, crash (render_sampler) */
 static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
 {
@@ -1045,12 +1067,44 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
         int32_t h0 = s->h0, h1 = s->h1;
         d9_env_values(&s->out, bus->y, m);
         if (next == s->pos)
-            h1 = ima_decode(adpcm, next++, &pred, &idx);
-        for (int i = 0; i < m; ++i) {
+            h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, next++), &pred, &idx);
+        int raw = m;
+        if (bus->prefix_cursor) {
+            unsigned available = next < X0X_CYMBAL_HEAD ? X0X_CYMBAL_HEAD - next : 0;
+            if (available < (unsigned)raw) raw = (int)available;
+        }
+        for (int i = 0; i < raw; i++) {
             h0 = h1;
             h1 = ima_decode(adpcm, next++, &pred, &idx);
-            const float v = (float)h0 * (1.0f / 32768.0f);
-            bus->y[i] = v * bus->y[i];
+            bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
+        }
+        if (raw < m) {
+            unsigned cursor = next == X0X_CYMBAL_HEAD
+                ? (X0X_CYMBAL_HEAD * 8u) | (adpcm[X0X_CYMBAL_HEAD / 2 - 1] >> 7)
+                : *bus->prefix_cursor;
+            unsigned pos = cursor >> 1, bits = 24u - (pos & 7u);
+            const uint8_t *read = adpcm + pos / 8;
+            unsigned window = (read[0] | (unsigned)read[1] << 8 | (unsigned)read[2] << 16) >> (pos & 7u);
+            unsigned sign = (cursor & 1u) << 3;
+            read += 3;
+            for (int i = raw; i < m; i++) {
+                unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
+                unsigned code = (pair & 15u) ^ sign, width = pair >> 4;
+                sign = code & 8;
+                window >>= width;
+                pos += width;
+                bits -= width;
+                if (bits < 8u) {
+                    window |= (read[0] | (unsigned)read[1] << 8) << bits;
+                    read += 2;
+                    bits += 16;
+                }
+                h0 = h1;
+                h1 = ima_decode_code(code, &pred, &idx);
+                bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
+            }
+            *bus->prefix_cursor = pos * 2u + (sign >> 3);
+            next += (unsigned)(m - raw);
         }
         s->h0 = h0;
         s->h1 = h1;
@@ -1065,7 +1119,7 @@ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
                 const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
                 while (s->dk < need) {
                     s->h0 = s->h1;
-                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
+                    s->h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, s->dk++), &s->pred, &s->idx);
                 }
                 const int last = s->pos + 1 >= len;
                 const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
@@ -1178,6 +1232,7 @@ static void d9_render(drum909_t *d, float *dry, float *rev, float *dly, int n, u
         d9_smp_t *s = &d->smp[order[k] - DR_CH];
         if (s->mute > 0) {
             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
+            bus.prefix_cursor = &d->prefix_cursor[order[k] - DR_CH];
             d9_render_smp(s, &bus, n);
         }
     }

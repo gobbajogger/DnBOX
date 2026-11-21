@@ -107,6 +107,7 @@ struct drum909 {
     float nz_buf[DR_NZ_BUF];      /* noise, linear; the block plus >= DR_NZ_HIST before it */
     int32_t nz_pos;               /* where the next block's noise starts */
     uint8_t pots[DR_NUM + 1][DR_MAX_PARAMS];
+    uint32_t prefix_cursor[4];    /* one independent lossless ADPCM bit cursor per cymbal */
 };
 typedef struct drum909 drum909_t;
 
