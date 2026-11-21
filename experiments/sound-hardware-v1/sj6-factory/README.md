@@ -4,7 +4,7 @@ The authenticated bank export contains 640 programs. The C reader selects each b
 
 The PI32v2 object compiled with the stock compiler at `-Oz` has 374 bytes of code and 122,359 bytes of read-only data, including the identities. The production image has 6,156 bytes free on Elite and 6,164 on Pro before the required 1,024-byte XIP reserve. This bank representation exceeds that space. It is an audition and integration input.
 
-The compact DnBOX application received master volume, both waveform selections, available PWM controls and the four second-layer amplitude controls for 474 records. The other 166 required missing PWM state for a square wave. Across the accepted selections, 3,418 authored words matched DSP readback after a real audio boundary, and the other part retained its exact raw parameter state. The independent [master-volume check](master/README.md) covered all 640 records. Complete FX, additional musical controls and physical firmware bank selection remain open.
+The earlier compact application replay applied 474 programs and refused 166 programs containing a square wave without serialized PWM settings. The two layers accounted for 84 and 117 such square-wave records, respectively. The build-9 main preset pass resolves each missing PWM amount and switch independently to positive binary32 zero. The revised fixture stages those four effective words even when the serialized fields are absent. Its presence mask continues to distinguish an authored zero from a default. Only the master, the two waveforms, the four PWM controls and the four second-layer amplitude controls enter this fixture. The independent [master-volume check](master/README.md) covered all 640 records. Complete FX, additional musical controls and physical firmware bank selection remain open.
 
 ## Run the factory checks
 
@@ -17,6 +17,21 @@ python3 factory.py /path/to/J6presets.zip matrix /tmp/sj6-selected
 ```
 
 For the application replay use the compact waveform and typed AMP2 tree specified in the adjacent `sj6-amp2/oscillator-prenote.tar.gz`, then apply [the compact master-volume patch](master/compact-master.patch). Run its normal host build with this directory's `compact_application.c` as `SMC_UI_TEST_FILE`, a fresh `SMC_UI_OUT`, and `X0X_HOST_DEFS="-Itests/host -I/tmp/sj6-reader -Wl,--wrap=juno6_init"`.
+
+### Missing PWM fields during preset selection
+
+The archived inspection of AU build 9 (executable SHA-256 `a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1`) locates the main preset pass at `0x10026926c`. Its reconstructed loader applies the first matching control or that ID's default. Main-order positions 163–166 are IDs 78, 79, 210 and 211. All four default entries point to `0x10001f2e0` and record literal word `0x00000000`. The separate postpass can reapply LFO destination base controls 184, 186, 188 and 190 when the captured destinations are 78 or 79. These observations establish the main-pass inputs. Final modulation and complete stereo audio require a separate original-engine run. [Inspected order and default expressions](https://github.com/gobbajogger/DnBOX/blob/5d18b182955d107c7f8ca09fb5b0b08a83a6adc9/experiments/superj6-conductor-source-20261115/control_contract.json) · [Main-pass and postpass implementation](https://github.com/gobbajogger/DnBOX/blob/5d18b182955d107c7f8ca09fb5b0b08a83a6adc9/experiments/superj6-conductor-source-20261115/preset_executor.cpp)
+
+Run the Linux regression against the compact waveform, AMP2 and master tree. It uses 128 synthetic records covering four waveforms, all 16 PWM presence combinations and explicit zero/nonzero values. Each selection follows a previously enabled square PWM setting on the same owner. The reference is the pinned Python reconstruction of the inspected main pass. The C fixture reads back both layers after the ordinary host audio boundary, checks base duty and verifies the peer's raw state.
+
+```sh
+git fetch --no-tags --depth=1 origin refs/tags/archive/sound/superj6-live-voice-20261116
+python3 replay_pwm_defaults.py /path/to/compact-tree
+```
+
+The Linux regression completed 512 applications (two owners, each with 128 seeded transitions). It verified 5,120 authored readbacks and 512 defaulted PWM readbacks. The archived source-derived C++ reference also passed 15,574 main-pass checks and 624 PWM postpass checks.
+
+The earlier bank scan found 25 programs with all four authored PWM fields. On the authenticated export, the revised fixture consequently expects 640 programs, 4,580 authored words and 2,460 defaulted PWM words. The export and pinned original AU were unavailable for this rerun. No fresh full-bank replay or complete original preset audio was obtained.
 
 ## S4 input and scoring
 
