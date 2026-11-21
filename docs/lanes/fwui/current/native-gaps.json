@@ -7,8 +7,8 @@
         "firmware/src/app/main_fm1.c::fm1_main",
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
-      "notConstructed": "Board reset assembly, physical/linker addresses, pending sample-shadow recovery, native IRQ delivery, audio/USB bring-up and input or timing on a physical panel.",
-      "displayEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix or safe_main. The accepted-JEDEC host fixture also runs the complete fm1_main through the ordinary loop. Foreign and matching owners, stale OTA cleanup, default and stored splashes, notice expiry, the 5-second countdown, and release/hold transitions are checked. See native-routes/normal-loop/normal-loop.json."
+      "notConstructed": "Board reset assembly and addresses, native IRQ/audio/USB bring-up, physical panel behavior and flash persistence. The new pending-shadow cases still need the complete compiled startup-loop run and captured frames.",
+      "displayEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix or safe_main. The accepted-JEDEC host fixture also runs the complete fm1_main through the ordinary loop. Foreign and matching owners, stale OTA cleanup, default and stored splashes, notice expiry, the 5-second countdown, and release/hold transitions are checked. See native-routes/normal-loop/normal-loop.json. The recovery regression in tests/ui_inventory/startup_loop.c seeds a valid shadow and an already-live control and captures the splash and first ordinary frame after checking sector contents and loop publication. The interpreted C startup prefix produced the post-recovery custom-text splash and matched all archived pixels. See native-routes/pending-shadow/README.md. The seven-case compiled replay and first regular UI frame remain pending."
     },
     {
       "ids": [
@@ -57,8 +57,8 @@
       "ids": [
         "firmware/src/app/ui.c::draw_wave_glyph"
       ],
-      "notConstructed": "No single admitted non-performance control preview on any Chicago/Miami factory cell selected this fallback. Combined valid previews and physical devices remain outside this sweep.",
-      "displayEvidence": "A malformed sibling cutoff lock exercises the real projector rejection and fallback on a full Chicago oscillator page. Painter elision localizes 43 pixels. See native-routes/wave-frame.json."
+      "notConstructed": "No admitted combination of Chicago or Miami waveform edits and previews selects this fallback on the current oscillator pages. This conclusion follows from the finite native-field domain. Physical-device observation remains open.",
+      "displayEvidence": "A malformed sibling cutoff lock exercises the real projector rejection and fallback on a full Chicago oscillator page. Painter elision localizes 43 pixels. See native-routes/wave-frame.json. The simultaneous-preview source audit and its assumptions are in native-routes/README.md#simultaneous-wave-previews."
     },
     {
       "ids": [
@@ -68,7 +68,7 @@
       "displayEvidence": "describe_pages emits sound/bank controls under V_PART. draw_knobs returns after draw_part_sound for that view; the V_SEQ preset uses R_BPATSND. See native-routes/README.md."
     }
   ],
-  "otherHelpers": "The report and stable-ID table retain every additional unobserved function classified NO_DIRECT_CALL_PATH_REVIEW_REQUIRED; that classification does not prove absence of callbacks or macro reachability.",
+  "otherHelpers": "The stock source review in renderer-gaps.json traces nine helpers with no reachable caller and three page/parameter combinations excluded by dispatch. These dispositions add no observed functions.",
   "sourceCoverage": {
     "status": "PARTIAL",
     "observedFunctions": 98,
@@ -78,5 +78,6 @@
   },
   "hostSupplement": "native-routes/README.md",
   "hostSupplementWholeFunctions": 7,
-  "normalApplicationLoop": "native-routes/normal-loop/normal-loop.json"
+  "normalApplicationLoop": "native-routes/normal-loop/normal-loop.json",
+  "pendingSampleSplash": "native-routes/pending-shadow/README.md"
 }

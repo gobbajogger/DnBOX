@@ -61,7 +61,8 @@ INPUTS = (
     "firmware/src/ota.c", "firmware/hal/smk_input.h", "firmware/hal/fm1_irq.h",
     "firmware/hal/fm1_flash_map.h", "tests/ui_inventory/startup_loop.c",
     "tests/ui_inventory/startup_loop.py", "tests/ui_inventory/run.py",
-    "tests/host/smc_ui_test.c", "tests/host/smc_ui_test.sh",
+    "tests/host/smc_ui_test.c", "tests/host/smc_ui_test.sh", "host/x0x_host.c",
+    "firmware/src/app/slots.c", "firmware/src/seq/sequencer.c",
 )
 
 
@@ -82,7 +83,7 @@ def main(output):
         masks={}
         digests={}
         case_frames={}
-        for mode in ("normal","owned","picture","hold","last-release"):
+        for mode in ("normal","owned","picture","hold","last-release","recover","live-shadow"):
             case=tmp/mode
             case.mkdir()
             env=dict(os.environ,SMC_UI_OUT=str(host), SMC_UI_TEST_FILE="tests/ui_inventory/startup_loop.c",
@@ -114,8 +115,17 @@ def main(output):
                         rgb.save(output/path.name,optimize=True)
     expected={"startup-store-cleared","update-hold-3","update-hold-2","update-hold-1",
               "update-hold-0","update-hold-cancelled","update-last-tick-release"}
-    if set(masks)!=expected or set(digests)!=expected|{"startup-store-owned","startup-notice-expired","update-cancel-expired","boot-default","boot-custom-text","boot-custom-picture"}:
+    sample_states = {"startup-recovered-splash", "startup-sample-recovered", "startup-sample-already-live"}
+    if set(masks)!=expected or set(digests)!=expected|sample_states|{"startup-store-owned","startup-notice-expired","update-cancel-expired","boot-default","boot-custom-text","boot-custom-picture"}:
         raise ValueError("incomplete normal startup coverage")
+    if set(case_frames["recover"]) != {"startup-recovered-splash", "startup-sample-recovered"}:
+        raise ValueError("missing post-recovery splash or first UI frame")
+    if set(case_frames["live-shadow"]) != {"boot-custom-text", "startup-sample-already-live"}:
+        raise ValueError("missing live-slot control frame")
+    if digests["startup-recovered-splash"] != splashes["boot-custom-text"]["rgb_sha256"]:
+        raise ValueError("post-recovery splash differs from archived custom-text splash")
+    if digests["startup-sample-recovered"] != digests["startup-sample-already-live"]:
+        raise ValueError("first ordinary frame differs for identical restored and already-live sample")
     index_file = output/"screen-index.tsv"
     with index_file.open("w", newline="") as dest:
         writer = csv.writer(dest, delimiter="\t", lineterminator="\n")
@@ -134,13 +144,15 @@ def main(output):
         rgbSha256=digests,
         bounds="All seven final caption masks match the native font, including antialiasing, within x3..213 and above the lower edge of the native header.",
         cases={
+            "recover": "Matching owner, erased live sample sector, valid shadow. Sixteen ordered 256-byte writes restore the complete sector before LCD initialization. The archived custom splash is reproduced and the first UI frame matches the already-live sample control after project initialization.",
+            "live-shadow": "Matching owner, valid live sample and a different valid shadow. Startup clears the stale shadow without erasing or programming the live sample.",
             "normal": "Foreign owner with custom data, no pending sample shadow and stale OTA staging. Native owner reset restores the factory splash. Five OTA sectors clear. OLD DATA CLEARED expires. Releasing both octaves after the 1.. frame requests UPDATE MODE CANCELLED. Ordinary octave input replaces it with STEPS 17-32 before rendering.",
             "owned": "Matching owner, custom text splash, first ordinary frame without a clear notice.",
             "picture": "Matching owner, custom picture splash, first ordinary frame without a clear notice.",
             "hold": "Both octaves stay held. At 5000 ms a due frame displays UPDATE MODE IN 0... At 5001 ms the native loop calls enter_uboot with UBOOT.",
             "last-release": "At exactly 5000 ms the frame displays UPDATE MODE IN 0.. and shown becomes zero. Both buttons release at 5001 ms. The firmware skips the cancellation notice and renders STEPS 17-32 at the next due frame."
         },
-        scope="Complete production fm1_main on the SMK host with accepted emulated JEDEC, RAM storage, empty sample shadows, simulated board interfaces and scripted clocks and buttons. Pending sample recovery, physical drivers, IRQ/audio timing and actual bootloader execution remain outside this capture."
+        scope="Complete production fm1_main on the SMK host with accepted emulated JEDEC, RAM storage, valid and stale sample shadow cases, simulated board interfaces and scripted clocks and buttons. Physical flash, drivers, IRQ/audio timing and actual bootloader execution remain outside this capture."
     )
     (output/"normal-loop.json").write_text(json.dumps(report,indent=2)+"\n")
     print(json.dumps(report))

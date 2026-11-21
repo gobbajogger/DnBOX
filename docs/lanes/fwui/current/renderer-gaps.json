@@ -330,5 +330,32 @@
       "supplementalEvidence": "The production lcd_init, lcd_window, lcd_data, lcd_fill and lcd_blit run against a RAM SPI endpoint; bounds, pixel counts, clear and display-on are checked."
     }
   ],
-  "hostSupplement": "native-routes/README.md"
+  "hostSupplement": "native-routes/README.md",
+  "stockSourceReview": {
+    "commit": "4c05722d5144b652acddf587ea41050fcbbacd2b",
+    "firmwareSrcTree": "945de28c1e75468f9b1dea48fd190ad928fb9fc4",
+    "firmwareHalTree": "990d42491dc824ee929fc2c7cf93634c071cd813",
+    "scannedFiles": 174,
+    "scope": "All tracked .c, .h, .inc and .S files under firmware/src and firmware/hal, including inactive source. Checked full identifier occurrences, not only direct-call syntax. Reviewed the reset assembly and linker script for named entries separately. This is a source disposition, not an additional executed function or physical measurement.",
+    "tokenPasting": "The only ## in the scanned C tokens constructs X0X_EXP_##tab in drum909.c. It cannot form a listed helper name.",
+    "noReferenceOutsideDefinition": [
+      "ui_position_badge",
+      "header_pattern_cue",
+      "matrix_row_hint",
+      "matrix_next_hint",
+      "cv_blit_from"
+    ],
+    "onlyReferencedFromUncalledHelper": {
+      "nav_arrow": "header_pattern_cue",
+      "header_pattern_badge": "header_pattern_cue",
+      "row_picture": "matrix_row_hint"
+    },
+    "lane": "Only ui.c:6060 spells lane followed by an opening parenthesis. The other identifier occurrences refer to structure members, offsets, parameter declarations or local variables, including the address of the local step_lane_snapshot_t in knobs_sig.",
+    "excludedByPageDispatch": {
+      "strip_value_fit": "Its only call requires a drum reference in draw_param_widget. That widget is called only from draw_part_sound on bass pages. Both the main-band and knob-strip drum selection dispatch to draw_drum_voice.",
+      "dg_tail": "Its callers require DG_DECAY or DG_NTAIL in drum_strip_glyph. Outside the bass matrix widget, the only call to drum_strip_glyph requires DG_LEVEL. drum_strip_role rejects a bass reference.",
+      "original_cell_value": "describe_pages only emits R_ENG/T_303 and the three R_BENGINE/R_BPRESET/R_BSTATUS controls under V_PART for bass. draw_knobs returns at ui.c:8495 for that part and view. V_SEQ uses R_BPATSND, which does not satisfy the call predicate."
+    },
+    "admittedWavePreviews": "native-routes/README.md#simultaneous-wave-previews"
+  }
 }

@@ -3237,6 +3237,10 @@ void engine_master_format(int i, char *buf) { master_format(&mst, i, buf); }
 
 X0X_COLD void engine_brk_loops(void)
 {
+    /* Boot can restore a sample before engine_init binds the pattern table.
+     * fm1_main publishes the recovered loops after loading the project. */
+    if (!seq.pat)
+        return;
     if (brk_preview_slot >= 0 && brk_preview_pattern != seq.ppat[TRK_BRK]) {
         cq_put(C_BRK, 32, 0, 1);
         brk_preview_slot = -1;

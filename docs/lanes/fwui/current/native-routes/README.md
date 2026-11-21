@@ -45,9 +45,14 @@ samples fit in x3–213 and y0–18. [Frame index](normal-loop/screen-index.tsv)
 | Hold through exactly 5,000 ms | When a frame is due on this tick it displays `UPDATE MODE IN 0..`. Continuing to hold for 1 ms calls `enter_uboot("UBOOT")`. The earlier recovery fixture covers that endpoint’s visible output. |
 | Release immediately after 5,000 ms | The countdown has already set its state to zero. Releasing both buttons at 5,001 ms skips the cancellation request and the next frame displays `STEPS 17-32`. |
 
-The cases use empty pending-sample shadows. Pending-sample recovery, physical
-flash persistence, audio/IRQ delivery and the bootloader transition remain
-outside this host evidence. The positive cases preserve the firmware countdown.
+The five archived runs use empty sample shadows. Two additional cases in
+`startup_loop.py` exercise a valid shadow after power loss and a valid live slot
+with stale shadow data. They compare all 4,096 bytes before LCD initialization,
+observe the engine enumerate the zone and refresh its banks after the project
+loads, and capture the splash and first ordinary frame. A separate [interpreted C replay](pending-shadow/README.md) captured the
+startup splash after restoring the sector. The seven-case native run and its
+new ordinary frame remain pending. The five-case report remains the historical
+record. Physical flash, IRQ/audio timing and bootloader transitions need a board.
 
 ## Alternate renderer entry conditions
 
@@ -55,9 +60,43 @@ outside this host evidence. The positive cases preserve the firmware countdown.
 | --- | --- |
 | `strip_value_fit`, `dg_tail` | `draw_part_sound` calls the generic matrix widget only for bass on the normal part view. Drum part dispatch calls `draw_drum_voice` in both main bands and the knob strip. In other views the generic knob strip calls `drum_strip_glyph` only for `DG_LEVEL`. The tail specifically requires `DG_DECAY` or `DG_NTAIL`. These paths have no admitted route in that dispatch. |
 | `original_cell_value` | Its sole call is in the generic footer for a bass engine or bank parameter. `describe_pages` emits those targets on the bass part view. The part view returns after `draw_part_sound(2)` before reaching the generic footer. The sequencer preset page uses the distinct `R_BPATSND` parameter. |
-| `draw_wave_glyph` | A supported oscillator shape must survive `wave_shape` while its original waveform projection fails. The host scan covers 111 Chicago/Miami factories and 124,032 single-control previews with zero rejections. Every deliberately out-of-range preview supplied to the projector is rejected. Multiple simultaneous edits are outside this scan. |
+| `draw_wave_glyph` | A supported oscillator shape must survive `wave_shape` while its original waveform projection fails. The host scan covers 111 Chicago/Miami factories and 124,032 single-control previews with zero rejections. The [field ownership and range proof](#simultaneous-wave-previews) also covers valid simultaneous previews. The malformed-lock fixture exercises the fallback painter. |
 | `ui_position_badge`, `header_pattern_cue`, `matrix_row_hint`, `matrix_next_hint`, `lane`, `cv_blit_from` | These static functions have no caller in the registered firmware sources in the inventory. |
 | `nav_arrow`, `header_pattern_badge`, `row_picture` | Only the uncalled helpers in the preceding row reference them. |
+
+## Simultaneous wave previews
+
+At #975 commit `4c05722d`, the wave projector rejects invalid cells, masks or
+control values before drawing. For an admitted Chicago or Miami cell, the
+bounds of its native fields also hold under *any combination* of stored edits
+and preview values. This is a source-level result for the normal oscillator
+pages. The compiled single-control sweep and malformed-lock framebuffer test
+remain separate evidence.
+
+| Projector reads | Which controls can change them | Bounds after simultaneous edits |
+| --- | --- | --- |
+| Chicago shape IDs 1/9, width 22 | All three come from the fixed compact base. | Shape indices 1 and 3, width 0.5. |
+| Chicago gain IDs 3/11 | Only macro 0 writes these two targets. Its two affine maps and their final quantizers stay in [0,1]. | Each rounded gain lies in 0..32768. Edits to other controls cannot change it. |
+| Miami shape IDs 1/5/43 | Macros 0/6/11 each select a separate lookup table. | The carrier yields 0..2 and the two other shapes yield 0..3, giving 48 supported shape triples. |
+| Miami width 22 | Fixed compact base. | Stored binary32 value 0.9010000228881836. |
+
+The [Chicago setter](../../../../../experiments/original_synth/chicago_program.c)
+and [Miami setter](../../../../../experiments/original_synth/miami_program.c)
+assign only the target indices between the selected macro's consecutive table
+offsets. Native readback selects that field or the fixed base. Factory loading,
+[patch restoration](../../../../../firmware/src/app/original_sound.c) and
+[wave projection](../../../../../firmware/src/app/ui_original_wave.h) use those
+same setters. An admitted preview can replace its own earlier value, and cannot
+change another macro's targets. Both setters accept every finite normalized
+value in [0,1]; admitted control bytes have that conversion. The shape and
+gain rejection tests inspect individual fields. Drawing the wave after those
+checks introduces no additional rejection. This is why the disjoint field
+bounds cover combined edits without enumerating the Cartesian product.
+
+Run `node tests/ui_inventory/wave_preview_domain.cjs` from the repository
+root to read both generated mapping tables and the compact binary32 dictionary.
+Two in-memory negative controls were rejected: assigning Chicago shape 1 to
+a mutable macro, and adding index 4 to a Miami shape lookup.
 
 ## Reproduce
 

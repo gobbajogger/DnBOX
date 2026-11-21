@@ -2,11 +2,26 @@
 /* Complete production fm1_main, with RAM-only flash and panel input.
  * Capture after the real ui_frame() completes each requested main-loop state. */
 #define SMC_UI_MAIN retained_smc_ui_main
+/* Observe storage enumeration by the separately linked engine, delegating to
+ * the existing host slot implementation for the actual image/zone count. */
+#define plat_slot_zones startup_host_slot_zones
 #include "../host/smc_ui_test.c"
+#undef plat_slot_zones
 #include <setjmp.h>
 
 static uint8_t flash_memory[0x100000];
 static unsigned erases, reads, prog_count, branch, captions, frame_count, owner_kind, irq_ready, clear_calls, cancel_calls, ota_erases, sample_writes;
+enum { SAMPLE_EMPTY, SAMPLE_RESTORE, SAMPLE_KEEP_LIVE };
+static int sample_case;
+static unsigned live_erases, shadow_erases, recovered_zone_scans;
+
+int plat_slot_zones(int k)
+{
+    int zones = startup_host_slot_zones(k);
+    if (sample_case != SAMPLE_EMPTY && k == 0 && seq.pat && zones == 1)
+        ++recovered_zone_scans;
+    return zones;
+}
 static int flash_ok, safe_mode, ed_install_pending;
 static uint32_t ed_reboot_at, batt_raw, master_q12;
 static struct {uint32_t magic,boots,max_us,ui_frames,crash_seen;} x0x_dbg;
@@ -25,6 +40,8 @@ enum { NORMAL, OWNED, HOLD_TO_END, LAST_TICK_RELEASE };
 #define FELUCCA_DATA_FAMILY "X0X"
 #define FELUCCA_DATA_UNTAGGED_OK 0
 #include "normal_constants.inc"
+
+static uint8_t expected_sector[ST_SECTOR];
 
 static uint8_t *fm1_xip_ptr(uint32_t off)
 {
@@ -60,19 +77,39 @@ static void fm1_wdt_feed(void);
 static int ed_silence_erase4k(uint32_t off,uint32_t *duration) {
     (void)duration;
     CHECK(off==SMP_USER_OFF(0) || off==SMP_SEC0_BACKUP_OFF(0));
-    memset(off==SMP_USER_OFF(0)?slot_img[0]:flash_memory+off,0xff,ST_SECTOR);
+    if (off == SMP_USER_OFF(0)) {
+        ++live_erases;
+        memset(slot_img[0], 0xff, ST_SECTOR);
+    } else {
+        ++shadow_erases;
+        memset(flash_memory+off, 0xff, ST_SECTOR);
+    }
     return 0;
 }
 static int fl_write(uint32_t off,const void *src,uint32_t n) {
     CHECK(off>=SMP_USER_OFF(0) && off+n<=SMP_USER_OFF(0)+ST_SECTOR && n==256);
+    CHECK(off == SMP_USER_OFF(0) + sample_writes * n);
     memcpy(slot_img[0]+off-SMP_USER_OFF(0),src,n); ++sample_writes; return 0;
 }
 static void ed_smp_inval(uint32_t k) { CHECK(k==0); }
-static void lcd_init(void) { lcd_fill(0,0,240,240,0); }
+static void lcd_init(void)
+{
+    if (sample_case != SAMPLE_EMPTY) {
+        CHECK(!seq.pat && usr_nz[0] == 1 && plat_slot_zones(0) == 1);
+        CHECK(!memcmp(slot_img[0], expected_sector, ST_SECTOR));
+        CHECK(shadow_erases == 1);
+        for (unsigned i = 0; i < ST_SECTOR; ++i)
+            CHECK(flash_memory[SMP_SEC0_BACKUP_OFF(0) + i] == 0xff);
+        CHECK(live_erases == (sample_case == SAMPLE_RESTORE ? 1u : 0u));
+        CHECK(sample_writes == (sample_case == SAMPLE_RESTORE ? ST_SECTOR / sizeof ed_smp_buf : 0u));
+    }
+    lcd_fill(0,0,240,240,0);
+}
 static void safe_main(void) { abort(); }
 static void fm1_input_init(void) {
     CHECK(flash_ok && (boot_pick(flash_memory+BOOT_SEC0,flash_memory+BOOT_SEC1)>=0)==(branch==OWNED));
-    shot(branch!=OWNED?"boot-default":owner_kind?"boot-custom-picture":"boot-custom-text");
+    if (sample_case == SAMPLE_RESTORE) shot("startup-recovered-splash");
+    else shot(branch!=OWNED?"boot-default":owner_kind?"boot-custom-picture":"boot-custom-text");
 }
 static void fm1_adc_init(void) {}
 static void smk_trim_load(const void *ref) { CHECK(ref==flash_memory+SMK_TRIM_FLASH); }
@@ -85,7 +122,17 @@ static void isr_timer5(void) {}
 static void fm1_timer5_start(void (*f)(void),unsigned p) { CHECK(f==isr_timer5 && p==4); }
 static void fm1_guard_lock_top(void) {}
 static void fm1_irq_enable_all(void) { irq_ready=1; }
-static void ble_prepare(int on) { CHECK(on==1); }
+static void ble_prepare(int on)
+{
+    CHECK(on==1);
+    if (sample_case != SAMPLE_EMPTY) {
+        /* The normal startup refresh has run, but the first main-loop refresh
+         * and the UI's lazy catalog access have not. Both bank revisions
+         * start at zero in breaks_init and the revision getter never scans. */
+        CHECK(recovered_zone_scans > 0);
+        CHECK(engine_brk_outline_revision(0) && engine_brk_outline_revision(1));
+    }
+}
 static void ble_start(void) {}
 static void ble_attach(void) {}
 static void uart_midi_init(void) {}
@@ -142,7 +189,18 @@ static void smk_frame(void)
     ++frame_count;
     switch(now_ms){
     case 400:
-        if(branch==OWNED) { CHECK(!st_owner_cleared && !ui.msg_until); shot("startup-store-owned"); longjmp(completed,1); }
+        if (branch == OWNED) {
+            CHECK(!st_owner_cleared && !ui.msg_until);
+            if (sample_case != SAMPLE_EMPTY) {
+                int loop_count = engine_brk_nslots();
+                CHECK(seq.pat == proj.pat && loop_count > 0);
+                CHECK(!strcmp(engine_brk_slot_names()[loop_count-1], "BR1"));
+                shot(sample_case == SAMPLE_RESTORE ? "startup-sample-recovered" : "startup-sample-already-live");
+            } else {
+                shot("startup-store-owned");
+            }
+            longjmp(completed,1);
+        }
         CHECK(st_owner_cleared && clear_calls==1);
         caption("OLD DATA CLEARED","startup-store-cleared");
         break;
@@ -182,16 +240,49 @@ static void seed_splash(int picture) {
     boot_p32(record+12,length);boot_p32(record+16,boot_crc(pay,length));boot_p32(record+20,boot_crc(record,20));
     CHECK(boot_image_state(record,NULL));
 }
+/* Build a complete last-good sector with a CRC-checked one-zone sample.
+ * Distinct fill bytes distinguish a restored shadow from the stale backup
+ * that must be discarded when the live sector is already valid. */
+static void sample_sector(uint8_t *sector, uint8_t fill)
+{
+    smp_user_hdr_t h = {
+        .magic = SMP_USER_MAGIC, .version = 1, .nz = 1, .name = "RECOVER",
+        .data_len = 128, .zone = {{ .n = 256, .rate = 1u << 16, .hi = 127 }}
+    };
+    memset(sector, fill, ST_SECTOR);
+    h.crc = st_crc32(sector + SMP_USER_DATA, h.data_len);
+    memcpy(sector, &h, sizeof h);
+}
+
+static void seed_pending_sample(void)
+{
+    uint8_t *shadow = flash_memory + SMP_SEC0_BACKUP_OFF(0);
+    sample_sector(expected_sector, 0x36);
+    slot_is_img[0] = 1;
+    if (sample_case == SAMPLE_RESTORE) {
+        memcpy(shadow, expected_sector, ST_SECTOR);
+        CHECK(!smp_header_valid(smp_hdr(slot_img[0]), 0));
+    } else {
+        memcpy(slot_img[0], expected_sector, ST_SECTOR);
+        sample_sector(shadow, 0x59);
+        CHECK(smp_header_valid(smp_hdr(slot_img[0]), 0));
+    }
+    CHECK(ed_smp_backup_present(0));
+}
+
 int main(int argc,char **argv)
 {
     (void)argc;(void)argv;
     const char *mode=getenv("STARTUP_CASE");
     owner_kind=!strcmp(mode,"picture");
-    branch=(owner_kind || !strcmp(mode,"owned"))?OWNED:!strcmp(mode,"hold")?HOLD_TO_END:!strcmp(mode,"last-release")?LAST_TICK_RELEASE:NORMAL;
+    sample_case = !strcmp(mode, "recover") ? SAMPLE_RESTORE :
+                  !strcmp(mode, "live-shadow") ? SAMPLE_KEEP_LIVE : SAMPLE_EMPTY;
+    branch=(sample_case != SAMPLE_EMPTY || owner_kind || !strcmp(mode,"owned"))?OWNED:!strcmp(mode,"hold")?HOLD_TO_END:!strcmp(mode,"last-release")?LAST_TICK_RELEASE:NORMAL;
     memset(flash_memory,0xff,sizeof flash_memory);
     memcpy(flash_memory+ST_OWNER_SECTOR,branch==OWNED?"SMK37DATAX0X":"SMK37DATAOLD",12);
     memset(flash_memory+ST_OWNER_SECTOR+12,0,4);
     memset(slot_img,0xff,sizeof slot_img);
+    if (sample_case != SAMPLE_EMPTY) seed_pending_sample();
     seed_splash(owner_kind);
     if(branch==NORMAL) flash_memory[OTA_AREA]=0;
     int exit_code=setjmp(completed);
@@ -206,7 +297,10 @@ int main(int argc,char **argv)
     if(branch==NORMAL) {
         CHECK(!sample_writes && !ed_smp_backup_present(0));
         CHECK(ota_erases==5 && flash_memory[OTA_AREA]==255);
-    } else CHECK(!ota_erases && !sample_writes);
+    } else {
+        CHECK(!ota_erases);
+        if (sample_case == SAMPLE_EMPTY) CHECK(!sample_writes);
+    }
     puts("PASS complete fm1_main host path");
     return 0;
 }
