@@ -26,7 +26,18 @@ PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) starts at sound PR [#97
 | Synth One | The shipping rate reducer matched the original stage at all 128 front-panel positions, including live changes, with zero stereo sample differences over 1,916,928 frames of common dry input. [Rate-reducer result](../../experiments/sound-hardware-v1/stock-dry/bitcrush-result.json). The final stereo width tap now uses a 6,615-byte history per selected owner from its existing storage. Both profiles passed 66,072 stereo frames each across 128 positions, including owner switches and cold restore. Substituting this 24-bit tap in the original host graph previously passed all 694 factory stimuli. [Production width results and reference scope](../../experiments/sound-hardware-v1/synthone-widen/stock-result.json) | Compare the shipping firmware against all 694 original factory programs with their programmed effects enabled. The original also uses tremolo, autopan, phaser, filtered ping-pong delay, reverb dynamics, and master dynamics. The full original host graph reproduced all 694 effects-on factory programs using original and compact assets. Both arms produced 66,624,000 stereo frames with zero differing samples and matched all 1,388 archived digests. [Host factory results](synthone-factory-effects-repeat.json) |
 | Juno / SuperJ6 | The shipping Juno has stereo chorus. The optional factory path accepts decoded controls. | Render all 14 full presets through the original AU, including its post-engine processing. Oscillator agreement covers one component. |
 
-## Populated-scene qualification in progress
+## Populated-scene qualification
+
+The ordinary firmware at `93b1ad76f32b761cd2a9b04154f298c9e981093f` passed the requested Juno/Synth One timing gate on both models. Chicago/Miami exceeded the deadline on both. All four 8-second runs used 922 events at strict 360 MHz and verified both synth owners, all 22 kit tracks, the full-rate BREAK loop and nonzero final audio. Counters include startup.
+
+| Populated scene | Elite peak µs | Elite late / xruns | Pro peak µs | Pro late / xruns |
+| --- | ---: | ---: | ---: | ---: |
+| Chicago and Miami | 12,487 | 7 / 7 | 13,420 | 17 / 17 |
+| Juno and Synth One | 11,003 | 0 / 0 | 11,156 | 0 / 0 |
+
+Elite used the listed part order and Pro reversed it. [Native captures, project identities and guest counters](../../experiments/sound-hardware-v1/selected-native/populated-93b1ad76.json)
+
+A separate optimized build at `0f019f32` produced Chicago/Miami peaks of 12,285 µs with 6 late transfers on Elite and 12,163 µs with 5 late transfers on Pro. Its Juno/Synth One peaks were 10,541 and 11,202 µs, both with zero late transfers. [Six strict measurements](../../experiments/sound-hardware-v1/selected-native/populated-optimized-results.json)
 
 At source `3bad8d0e6acf639ce8cad1a8b7e82f6aa0b37387`, the split 808 uses whichever bass workspace is free under the selected job order. This lets bass A render while the other core finishes the metals. The Juno voice and chorus loops also avoid repeated work. The strict timing runner now requires 11 triggered rows on each kit and the expected full-rate user loop. Both ordinary development builds passed at this source. Elite occupied 547,452 bytes, with 5,220 bytes of XIP free. Pro occupied 547,440 bytes, with 5,232 bytes of XIP free. Each had 9,024 pool bytes free, 832 above reserve. The ordinary firmware at `93b1ad76` includes the independent mixer, private 808 drive and glue, and Synth One stereo width. Both native builds passed the 8 KiB pool reserve. Elite used 545,652 application bytes and retained 7,020 bytes of XIP. Pro used 545,644 bytes and retained 7,028 bytes of XIP. Both had 8,956 pool bytes free, 764 above reserve. The build inputs matched all 633 checked source, tool and asset paths. [Package and ELF identities](engine-resources-93b1ad76.json) The following historical peaks identify the tested sources.
 
