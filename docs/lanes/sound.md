@@ -1,5 +1,22 @@
 # Sound lane
 
+## emu360 timing margin
+
+The owner requested a worst block of 10,909 µs or less against the 11,609 µs limit, with zero late and unchanged audio behavior, flash use and 8,192 B pool reserve. Both boards run the stock firmware from `ca0c00a4e5863132de4a66f5d1c477c14d699be5` in `fm1-live` at 360 MHz with `FM1_STRICT=1`. The 8-second scene has 922 events. Each shift moves every press, release and MIDI event by the same amount.
+
+| Scene shift | Current Elite (µs) | Current Pro (µs) | Historical Elite replay (µs) |
+| --- | ---: | ---: | ---: |
+| +0 ms | 11,402 | 11,289 | 11,406 |
+| +1 ms | 11,323 | 11,318 | 11,440 |
+| +2 ms | 11,319 | 11,087 | — |
+| +3 ms | 11,282 | — | — |
+| +4 ms | — | — | — |
+| +5 ms | — | — | — |
+
+A dash means the run has no recorded result at this checkpoint. Each reported shot completed 648 halves with **0 late during the scene and 1 raw late**. The first IRQ reaches the second DMA half with less than 1 ms left before the next boundary. The separate same-image 2-second warmed boot also records one late. The historical d4088e60 Elite replay reproduced the owner’s 11,440 µs at +1 ms and the previously published 11,406 µs unshifted.
+
+The current Elite unshifted maximum occurred in half 603, at 7.466 s. The 909 and Chicago bass consumed 78,993 and 75,964 guest timer ticks in that half. A diagnostic mixer/planner variant reached 11,291 µs unshifted. It changed the app footprint by −48 B and the first DAC difference occurred at stereo frame 160,324. Its timing does not qualify it for production. The production Elite and Pro images remain 546,516 and 546,508 B. Each retains 8,972 B of pool, or 780 B above reserve. The scene requests BREAK events and the stock image has no optional factory loop bank installed. [Reproduction and measurements](../../experiments/sound-hardware-v1/strict-timing/README.md)
+
 ## Production Synth One INIT and original comparisons, 2026-11-21 UTC
 
 The normal key, cell and render paths now play Synth One INIT on both owners. The former fixed one-sixth gain failed all eight original note/chord scenes. The original sums six voices at unity, and the corrected firmware matches that level. The existing Juno with chorus, Chicago and Miami still build. Older descriptions of a silent slot below refer to their historical checkpoints.
@@ -8,7 +25,7 @@ The normal key, cell and render paths now play Synth One INIT on both owners. Th
 | --- | --- | --- |
 | S1 | FAIL | INIT plays with independent voices, pitch bend, damper, note reuse and panic. The [compiled production selector and per-program inventory](../../experiments/sound-hardware-v1/factory-admission/README.md) show 0/694 complete original programs selectable. In [2,048 production callback blocks per scene](../../experiments/sound-hardware-v1/stock-dry/callback.md), dual INIT missed 0 CPU and 8 wall deadlines. Adding 808/909 missed 1 CPU and 8 wall deadlines. All samples were finite. Neither scene met the zero-miss contract. |
 | S2 | FAIL | The [dry-note comparison](../../experiments/sound-hardware-v1/stock-dry/README.md) passed 180/180 static and 72/72 modulated notes at unity. Eight actual-part comparisons passed including two chords. [Oscillator controls](../../experiments/sound-hardware-v1/band_morph/README.md) passed 18/18 controlled notes. The 694-row inventory records empty metrics for unavailable full-program renders. |
-| S3 | FAIL | The [direct AMP2 replay](../../experiments/sound-hardware-v1/sj6-amp2/README.md) proves four additional second-layer controls and owner isolation in the compact candidate. The packed macro drops these original fields. A [separate typed application entry](../../experiments/sound-hardware-v1/sj6-amp2/typed-entry.md) applied all four through the real audio block on both owners. It has no shipping bank importer. All 64 controls and complete FX routing remain unverified. |
+| S3 | FAIL | The [direct AMP2 replay](../../experiments/sound-hardware-v1/sj6-amp2/README.md) proves four additional second-layer controls and owner isolation in the compact candidate. The packed macro drops these original fields. A [separate typed application entry](../../experiments/sound-hardware-v1/sj6-amp2/typed-entry.md) applied all four through the real audio block on both owners. It has no shipping bank importer. A separate pre-note waveform/PWM entry qualifies both layers on 474/640 authored programs, but its native link misses the required XIP reserve. All 64 controls and complete FX routing remain unverified. |
 | S4 | BLOCKED | [Original inventory and capture contract](../sound/superj6-ab.md). The available original iOS binary requires a compatible host. The recovered 56 WAVs are drum assets and component comparisons. Zero of 14 complete original preset renders have verified stimuli and matching audio. |
 | S5 | FAIL | All 640 SuperJ6 records across 12 banks decoded, with 90,549 source field rows preserved. The compact candidate applied four fields per program, 2,560 writes total. All 2,560 values also matched bit-for-bit after 320 actual block boundaries. The source has 640 distinct complete records and only 539 distinct AMP2 tuples. Full parameter binding and bank selection remain incomplete. |
 | S6 | FAIL | The stock INIT image fits both models. Elite has 6,156 bytes free and Pro 6,164, with pool margin 780 on each. [Per-engine RAM/flash](sound-memory.md) and [original delay history counterexamples](../../experiments/sound-hardware-v1/synthone-delay/README.md). Full simultaneous effects and factory instruments have no passing physical image. |

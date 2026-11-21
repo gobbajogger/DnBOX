@@ -12,3 +12,5 @@ cmp programs.csv /tmp/factory-programs.csv
 ```
 
 The generated command manifest has SHA-256 `25a9c436f4dc7c37517c77acb632ccdf0753a885ee474e1e8f93c02b0c099a2e`.
+
+The [historical 694-row oscillator comparison](historical-oscillator-v3.json.gz) replayed both sides through the same original graph. It reported 492 bit-identical programs, 202 with differing words, maximum RMS error 0.000633 dB and maximum spectral error 0.048300 dB. Its per-program comparisons qualify the oscillator substitution in that graph. The production complete-program admission count remains 0/694.
