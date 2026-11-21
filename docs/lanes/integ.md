@@ -1,3 +1,21 @@
+# Integration baseline
+
+Target `integration/dnbox-consolidated` at `76040daa5b52d686a8b7b544296ba5d79610a95d`. Work continues on `lane/integ`. GitHub rejected creation of `lane/integ-baseline` (HTTP 422). The active branch-name ruleset reserves `lane/integ` for this lane. No other open integration PR existed when the work started.
+
+| Item | Evidence at this checkpoint |
+|---|---|
+| I0 | The FWUI PR head passed 501 host tests. The consolidated squash has the same tree. Its independent exact-commit baseline remains to be verified. [#970 gate record](https://github.com/gobbajogger/DnBOX/pull/970#issuecomment-6980748381). |
+| I1 | `CONSOLIDATED-STATE.md` records 10 merged PRs and their source and merge SHAs. GitHub compare confirms ancestry for each. |
+| I2–I3 | Final combined firmware and all-engine dropout qualification depend on the open Sound and FWUI PRs. |
+| I4–I5 | See the compact-program sanitizer and five-BREAK restore records below. Final composition qualification is open. |
+| I6 | Reconcile the owner-request rows, generated status views and the feature-list voting implementation. |
+| I7 | Both canonical installer URLs return 200. The two old Pages paths return 404. Cleanup is deferred until the lanes merge. |
+| C1–C6 | Candidate gate and independent review remain outstanding. The draft is ineligible for merge. |
+
+This checkpoint changes documentation only. Stock firmware source, build configuration and memory layout have no delta from the base. Exact-candidate gate and memory measurements are outstanding.
+
+## Earlier evidence
+
 Move: M0 (clean start and green gate)   PR: #955   Head: this commit
 LEFT items PASS: 0/2; failing: L15 L16
 Gate at head: M0 start checks pending; corrected limits self-match and size-loop false failures; full green gate remains follow-up
