@@ -20,6 +20,14 @@ The two stock heavy sweeps each covered 32,768 blocks. At 11,609 µs the render 
 
 The stock BREAK packer reproduced both deficits in the table. An additional lossless experiment compressed the application and five-zone bank in independent 1 KiB pages. The results still exceeded the stock region by 25,399 B on Elite and 25,453 B on Pro before decoder space. The ten public preview URLs matched the expected audio hashes and the missing-zone control returned 404. [Exact inputs, fit tests and preview checks](../../evidence/integ-45b09b2d/break-fit.tar.xz)
 
+### Replay of late blocks and sanitizer checks
+
+The Miami/Chicago probe located eight late blocks. On replay of the same workload, those same block positions took 633.424–1,411.873 µs. No late position repeated across the paired runs. The production binary and output digests matched the measurement controls. I3 remains open at the original 11,609 µs threshold. [Per-block observations and controls](../../evidence/integ-45b09b2d/late-block-replay.tar.xz)
+
+The compact-program test ran in an untraced stock Debian 6.12.117 guest as UID 1000. The clean sanitizer control exited zero and the deliberate 123-byte leak exited 23. The original wrapper passed two sets of 796 exact value/name checks and rejected corrupted metadata. The FREE PLAY framebuffer wrapper also passed the positive render and all three mutations with cached GCC objects at its original deadline. [Sanitizer output and source hashes](../../evidence/integ-45b09b2d/compact-stock-linux.tar.xz) · [Framebuffer results](../../evidence/integ-45b09b2d/freeplay.tar.xz)
+
+The fresh local combination `b51a352f` retains every path from integration `cfbdb7ae` and Sound `f013ecc6`. Its eight production build inputs, including the complete firmware, tools, assets and BLE trees, match the independently built `45b09b2d` source. The new Sound test registration is included. The combined suite, strict emulator run and branch cleanup remain pending the final lane merge. [Input comparison](../../evidence/integ-b51a352f/inputs.json) · [Reproducible combined source bundle](../../evidence/integ-b51a352f/combined.bundle)
+
 ### Cloud replay on the updated Sound source
 
 Stock Sound source `5837c73f` reproduced all eight firmware fingerprints in Sound's `2fe5930c` manifest. Both package checks passed. The five original inputs used by the native sample reader reproduced both shortfalls above. The Juno runtime passed its six-voice sustain, release and render checks. The unchanged BREAK probability suite passed its original-law check and both corruption controls.
