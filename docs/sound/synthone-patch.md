@@ -1,6 +1,6 @@
 # Synth One editor interface for FWUI
 
-Ordinary SMK-37 Elite and Pro builds enable the Synth One INIT editor. Set `X0X_SYNTHONE_PATCH=0` for the read-only INIT configuration. The interface in `firmware/src/app/engine.h` enumerates the controls consumed by the selected synthesizer, reads both part and patch ownership, and queues a new value for the audio thread.
+Ordinary SMK-37 Elite and Pro builds enable the Synth One INIT editor. Set `X0X_SYNTHONE_PATCH=0` to omit the 13 dry-patch controls. Both configurations expose the rate reducer on the EFFECT page for each bass part. The interface in `firmware/src/app/engine.h` enumerates the controls consumed by the selected synthesizer, reads both part and patch ownership, and queues a new value for the audio thread.
 
 | Factory ID | Encoder label | Physical range |
 | ---: | --- | --- |
@@ -17,6 +17,8 @@ Ordinary SMK-37 Elite and Pro builds enable the Synth One INIT editor. Set `X0X_
 | 27 | AMP DECAY | 0.005–2 s |
 | 28 | AMP SUSTAIN | 0–1 |
 | 29 | AMP RELEASE | 0.004–2 s |
+
+The EFFECT page and parameter list label the rate reducer `CRUSH RATE`. Its separate engine slot `ORIGINAL_SYNTHONE_CRUSH` uses 128 positions from 48,000 Hz down to 2,048 Hz. Each part stores its own setting. Use the ordinary `T_303` control path for this slot. The patch descriptor whose factory ID is 2 controls oscillator balance.
 
 Use `engine_s1_patch_snapshot(part, &snapshot)` to read all values from one audio boundary. A successful result supplies the preset, revision, note-lock state and physical targets. Enumerate the slots with `s1_patch_at(i)`. The slot's index addresses `snapshot.physical[i]`. Use the descriptor's `factory_id` when calling the individual reader or setter. Store the latest revision with the selected part. A rejected snapshot means that the editor does not currently own a readable Synth One patch on that part.
 

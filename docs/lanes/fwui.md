@@ -2,13 +2,13 @@
 
 ## Keyboard controls after #975
 
-[Draft PR #987](https://github.com/gobbajogger/DnBOX/pull/987) starts at consolidated `46874497` and includes Sound [#985](https://github.com/gobbajogger/DnBOX/pull/985) at `6c91d26e`. The tables farther down describe earlier revisions.
+[Draft PR #987](https://github.com/gobbajogger/DnBOX/pull/987) starts at consolidated `46874497` and includes Sound [#985](https://github.com/gobbajogger/DnBOX/pull/985) at `0b0ff56b`. The tables farther down describe earlier revisions.
 
 | Item | Change under qualification |
 |---|---|
-| F6 BREAK velocity | The sequencer-to-audio regression now sets four hit velocities through the physical SEQ, step and K3 input path before saving, reloading and measuring their output. It also checks an older explicit unity value, a sparse step and a pattern change. |
+| F6 BREAK velocity | The sequencer-to-audio regression now sets four hit velocities through the physical SEQ, step and K3 input path before saving, reloading and measuring their output. It also checks an older explicit unity value, a sparse step and a pattern change. Programmed retriggers and live stutter each retain their triggering hit’s gain. |
 | F1/F2 native recovery | A failed updater session entered from safe mode returns to the safe-mode screen. The native replay covers package entry, timeout, restored screen and PLAY retry, including an omitted-redraw control. |
-| F7 Synth One | Ordinary SMK-37 Elite and Pro builds enable the 13 controls supported by the Synth One INIT provider on each bass part. The focused panel test edits every list control through the keyboard and checks reload and peer-part isolation. The optional factory graph remains a separate Sound configuration. |
+| F7 Synth One | Ordinary SMK-37 Elite and Pro builds enable the 13 controls supported by the Synth One INIT provider on each bass part. The EFFECT page adds the native CRUSH RATE in Hz, independently of the 13 patch controls. The focused panel test edits every list control through the keyboard and checks reload and peer-part isolation. The optional factory graph remains a separate Sound configuration. |
 | F3 stock fit | Both packages, flash bounds, the 1,024-byte XIP floor and the 512-byte pool margin above the 8,192-byte reserve require measurements on this composition. |
 
 The focused regressions, independent screen review and ordinary Elite and Pro links are in progress. Integration owns the combined host suite.

@@ -32,15 +32,44 @@ static void check_readout(pref_t ref, const s1_patch_descriptor *d, float physic
     CHECK(!strcmp(pref_name(ref), d->label));
 }
 
+static int turn_crush(pref_t r, int encoder, int delta)
+{
+    unsigned owner = r.b;
+    CHECK(r.kind == R_ENG && r.a == T_303 && r.c == ORIGINAL_SYNTHONE_CRUSH);
+    CHECK(!strcmp(pref_name(r), "CRUSH RATE") && !pref_read_only(r));
+    const pref_t other = PR(R_ENG,T_303,1-owner,ORIGINAL_SYNTHONE_CRUSH);
+    int before = pref_get(r), peer = pref_get(other);
+    s1_patch_snapshot patch_before, patch_after;
+    CHECK(engine_s1_patch_snapshot(owner, &patch_before));
+    for (int n = 0; n < abs(delta); ++n) {
+        now_ms += 128;
+        enc_acc[encoder] = delta > 0 ? 1 : -1;
+        ui_input_only();
+        audio_block();
+    }
+    int position = before + delta;
+    CHECK(pref_get(r) == position && pref_get(other) == peer);
+    CHECK(proj.sound.v[T_303][owner][ORIGINAL_SYNTHONE_CRUSH] == position);
+    CHECK(engine_s1_patch_snapshot(owner, &patch_after));
+    CHECK(!memcmp(patch_before.physical, patch_after.physical, sizeof patch_before.physical));
+    float hz;
+    CHECK(engine_param_si(T_303, owner, ORIGINAL_SYNTHONE_CRUSH, position, &hz) == X0X_U_HZ);
+    char num[16], unit[8], expected[16];
+    snprintf(expected, sizeof expected, "%d", (int)(hz + .5f));
+    pref_value(r, num, unit);
+    CHECK(!strcmp(num, expected) && !strcmp(unit, "Hz"));
+    return position;
+}
+
 static void check_part(unsigned owner)
 {
     static const unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
-    static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "SOUND"};
+    static const char *const titles[] = {"OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT", "SOUND"};
     int visited = 0;
     ui.part = (uint8_t)(PART_303A + owner);
     set_view(V_PART);
     ui_input_only(); /* Observe current bank before turning a physical control. */
-    CHECK(pg.n == 5);
+    CHECK(pg.n == 6);
     for (int p = 0; p < pg.n; ++p) {
         *page_of(V_PART) = (uint8_t)p;
         CHECK(!strcmp(pg.title[p], titles[p]));
@@ -51,6 +80,15 @@ static void check_part(unsigned owner)
             pref_t ref = pg.r[p][k];
             if (ref.kind == R_NONE) continue;
             if (p == 4) {
+                CHECK(k == 0 && ref.b == owner && pref_get(ref) == 0);
+                capture(owner, p, k, "before");
+                CHECK(turn_crush(ref, EN_K1, 12) == 12);
+                capture(owner, p, k, "touched");
+                now_ms += 1200;
+                capture(owner, p, k, "applied");
+                continue;
+            }
+            if (p == 5) {
                 CHECK(k < 3 && ref.b == owner);
                 CHECK(ref.kind == (k == 0 ? R_BENGINE : k == 1 ? R_BPRESET : R_BSTATUS));
                 continue;
@@ -117,6 +155,10 @@ static void check_part(unsigned owner)
             snprintf(name, sizeof name, "list-%c-factory-id-%02u", 'A' + owner, d->factory_id);
             ui_frame();
             shot(name);
+        } else if (r.kind == R_ENG) {
+            CHECK(r.b == owner && r.c == ORIGINAL_SYNTHONE_CRUSH);
+            ui_frame();
+            shot(owner ? "list-B-crush-rate" : "list-A-crush-rate");
         }
         now_ms += 100;
         enc_acc[EN_SELECT] = 1;
@@ -141,7 +183,7 @@ static void edit_part_list(unsigned owner, uint8_t positions[S1_PATCH_COUNT])
     *page_of(V_PART) = 0;
     button_tap(B_SEL);
     CHECK(ui.overlay == O_LIST);
-    unsigned edited = 0;
+    unsigned edited = 0, crush_edits = 0;
     for (;;) {
         unsigned row = ui.list_sel;
         pref_t ref = list_rows[row];
@@ -163,6 +205,9 @@ static void edit_part_list(unsigned owner, uint8_t positions[S1_PATCH_COUNT])
             CHECK(engine_s1_patch_read(1-owner, d->factory_id, &peer_after));
             CHECK(peer_after.revision == peer.revision && peer_after.physical == peer.physical);
             positions[ref.c] = after.position;
+        } else if (ref.kind == R_ENG) {
+            CHECK(ref.b == owner && turn_crush(ref, EN_ALGO, owner ? -1 : 1) == (owner ? 11 : 13));
+            ++crush_edits;
         }
         now_ms += 128;
         enc_acc[EN_SELECT] = 1;
@@ -170,7 +215,7 @@ static void edit_part_list(unsigned owner, uint8_t positions[S1_PATCH_COUNT])
         if (ui.list_sel == row) break;
         CHECK(ui.list_sel > row);
     }
-    CHECK(edited == S1_PATCH_COUNT);
+    CHECK(edited == S1_PATCH_COUNT && crush_edits == 1);
     button_tap(B_HOME);
 }
 
@@ -243,6 +288,10 @@ int main(void)
             CHECK(v.position == list_positions[part][i]);
             check_readout(ref,s1_patch_at(i),v.physical);
         }
+    for (unsigned part = 0; part < 2; ++part) {
+        pref_t crush = PR(R_ENG, T_303, part, ORIGINAL_SYNTHONE_CRUSH);
+        CHECK(pref_get(crush) == (part ? 11 : 13));
+    }
     select_bank(0, ORIGINAL_SOUND_MIAMI);
     pref_t stale = PR(R_S1PATCH,T_303,0,2);
     CHECK(!s1_read(stale, &fresh));
@@ -257,6 +306,6 @@ int main(void)
     CHECK(engine_bass_bank(0) == ORIGINAL_SOUND_MIAMI && !engine_bass_preset_pending(0));
     CHECK(engine_s1_patch_read(1, 16, &fresh));
     CHECK(pref_read_only(PR(R_BPRESET,0,1,0)));
-    printf("Synth One INIT F7: %u checks, two owners, 13 controls each, 88 captures\n", checks);
+    printf("Synth One INIT F7: %u checks, two owners, 13 patch controls and CRUSH RATE each, 96 matrix captures\n", checks);
     return 0;
 }

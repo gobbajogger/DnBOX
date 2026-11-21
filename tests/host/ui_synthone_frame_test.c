@@ -41,31 +41,31 @@ static void show(unsigned part)
     draw_header(); draw_main(); draw_knobs();
 }
 
-/* A turn from the fourth row to SOUND must paint four numbered rows, keep
+/* A turn from EFFECT to SOUND must paint four numbered rows, keep
  * the selected part's knob assignments, and refresh the step footer. */
 static void selector_window(unsigned owner)
 {
     static const char *const titles[] = {
-        "2  FILTER", "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  SOUND"
+        "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  EFFECT", "6  SOUND"
     };
     show(owner);
-    *page_of(V_PART) = 3;
+    *page_of(V_PART) = 4;
     draw_main(); draw_knobs();
     for (int direction = 1; direction >= -1; direction -= 2) {
         enc_acc[EN_SELECT] = direction;
         now_ms += 100;
         ui_frame();
-        CHECK(cur_page() == (direction == 1 ? 4 : 3));
+        CHECK(cur_page() == (direction == 1 ? 5 : 4));
         memcpy(baseline[owner], fb, sizeof fb);
         memset(blit_hash, 0, sizeof blit_hash);
         memset(cv_tile_valid, 0, sizeof cv_tile_valid);
         draw_header(); draw_main(); draw_knobs();
         CHECK(!memcmp(baseline[owner], fb, sizeof fb));
         if (direction < 0) continue;
-        CHECK(pg.r[4][0].kind == R_BENGINE && pg.r[4][0].b == owner);
-        CHECK(pg.r[4][1].kind == R_BPRESET && pref_read_only(pg.r[4][1]));
-        CHECK(pg.r[4][2].kind == R_BSTATUS && pref_read_only(pg.r[4][2]));
-        CHECK(pg.r[4][3].kind == R_NONE);
+        CHECK(pg.r[5][0].kind == R_BENGINE && pg.r[5][0].b == owner);
+        CHECK(pg.r[5][1].kind == R_BPRESET && pref_read_only(pg.r[5][1]));
+        CHECK(pg.r[5][2].kind == R_BSTATUS && pref_read_only(pg.r[5][2]));
+        CHECK(pg.r[5][3].kind == R_NONE);
         for (int row = 0; row < 4; ++row) {
             uint16_t ink = swap16(row == 3 ? SOUND_INK : SOUND_GRAY);
             cv_begin(240, 14, C_BLACK);
