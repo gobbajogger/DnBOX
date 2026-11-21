@@ -1,1 +1,4 @@
-1530 ordinary states, 749 distinct rendered strings; 0 known instructional captions in that walker. Additional SMC and board copy requires its own audit.
+Input tree 50122c5d95009e0aacef384efad52f1cf0396f31
+1,530 ordinary states: 749 distinct rendered strings and zero known legacy instructional captions.
+182 additional and edited states: 323 fully visible strings. 50 named recovery, pickup, calibration and edited-step cases have explicit required/forbidden label checks. Runtime missing-pixel and stale-draw scenarios are both rejected.
+885 distinct strings across the two measured vocabularies. The extended table also retains partially visible text and its native pixel provenance. Physical controls, safety actions, status and values remain visible. These scoped scans do not certify every possible dynamic string or whole-device path.

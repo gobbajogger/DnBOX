@@ -56,5 +56,7 @@
     "SuperJ6 slot editor A: 16 distinct engine controls",
     "SuperJ6 slot editor B: 16 distinct engine controls"
   ],
-  "candidate_diagnostic_exit": 1
+  "candidate_diagnostic_exit": 1,
+  "equivalent_sound_pr_head": "3f00cf7395efd5fe4e9785083334e04387c83484",
+  "equivalence": "The complete ca0c00a4..3f00cf73 change set contains only documentation and experiments/sound-hardware-v1 files; the nine measured firmware input blobs are identical."
 }

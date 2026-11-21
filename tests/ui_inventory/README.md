@@ -88,3 +88,12 @@ its own isolated copy of the prepared source, preserving the primary attempt.
 It adds all declared part/lane edit states to `combined-report.json` and retains
 the separate invocation, exact fixture hash, instrumented inputs and native PNGs.
 Host project writer/reader persistence is tested; no device persistence is used.
+
+The searchable screen index lists each stable state, its archive part, the PNG
+path within that part, the scope of the capture and the decoded RGB hash. This
+command reads the published archives, checks every regular PNG and archive-local
+hardlink against the frame map, and reproduces the index.
+
+```sh
+python3 tests/ui_inventory/screen_index.py docs/lanes/fwui/screens /tmp/screen-index.tsv
+```

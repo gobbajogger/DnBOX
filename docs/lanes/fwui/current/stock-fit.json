@@ -1,20 +1,20 @@
 {
-  "build_input_tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "build_input_tree": "50122c5d95009e0aacef384efad52f1cf0396f31",
   "source_verification": {
     "status": "VERIFIED",
-    "tree": "956a004d8abc991093318b1d067bfe32e6b914c7",
-    "files": 5160,
-    "referenceSHA256": "83351e9b9929ca47cb368a6e4cd88b9b8655ac83a95528717a7c2fbef02504a3"
+    "tree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+    "files": 5188,
+    "referenceSHA256": "42a325193373b10930852f0705816c521891f72be008dd740f7bf36c63173feb"
   },
   "build_input_objects": {
-    "firmware": "7a36babbb1437f6049da21b7fc3d19d2f39bf8c6",
+    "firmware": "5da2184b98a1e7cb2cfe43f674abdec2632fa264",
     "experiments/original_synth": "0cdd656980643a45d2061dc87be292e0426d11ef",
     "tools/build.py": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
     "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
   },
   "stock_builds": [
     {
-      "candidate": "metrics",
+      "candidate": "closure",
       "model": "elite",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -109,22 +109,22 @@
         "build/smk37-elite/original/original_sound.o",
         "build/smk37-elite/gfinal/chance_native.o",
         "-Map",
-        "<native>/evidence/metrics-elite-link.map",
+        "<native>/closure-stock-50122c5d/elite-link.map",
         "-o",
-        "<native>/evidence/metrics-elite-mapped.elf"
+        "<native>/closure-stock-50122c5d/elite-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546920,
-          "sha256": "5d429235fed81250c269009a424caf259efbad98df49ed0fcd9389c8dd69b5d9"
+          "size": 546840,
+          "sha256": "dccf882c6c8587cba4dfb39dc5b5d4c49c9178ef1bd6df5a8a463f060685060f"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "13c0d9e2a33f119c60a922a4772c4b6c51df5ac7a9a55dc6ebd315e04316f5e2"
+          "sha256": "3a17e0a6ed6d1ef495bc8172007b30d49e29164744a3e770dece4ffadc766e11"
         },
         ".ram_text": {
           "equal": true,
@@ -139,22 +139,40 @@
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "1a5c42a69a7149b22b22d2f30e9dd97ef1e802a34501bef73f73f19206a48fa7",
-      "mapped_elf_sha256": "1a5c42a69a7149b22b22d2f30e9dd97ef1e802a34501bef73f73f19206a48fa7",
+      "original_elf_sha256": "f97e581b849ac20f4a136ca0fb2e0129b32c38f0414804af7b11bd6b74470ce1",
+      "mapped_elf_sha256": "f97e581b849ac20f4a136ca0fb2e0129b32c38f0414804af7b11bd6b74470ce1",
       "link_map": {
-        "filename": "metrics-elite-link.map",
-        "sha256": "129be864ba6c03c02a501f1875b783b73ec688461c5133e6a4d5acedd9e42744",
-        "bytes": 211198,
-        "gzip_bytes": 28318
+        "filename": "elite-link.map",
+        "sha256": "17383be903ca65afff153aa3b14814986902253583184fbf28dba8e11547382d",
+        "bytes": 211204,
+        "gzip_bytes": 28356
       },
       "committed_map": "final-elite-link.map.gz",
-      "xip_free_bytes": 1832,
+      "xip_free_bytes": 1912,
       "pool_margin_bytes": 780,
       "pool_raw_free_bytes": 8972,
-      "command_line_build_exit": 0
+      "pool_reserve_bytes": 8192,
+      "command_line_build_exit": 0,
+      "build_command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "elite"
+      ],
+      "build_started_utc": "2026-11-21T02:36:17.225563+00:00",
+      "build_finished_utc": "2026-11-21T02:39:40.066345+00:00",
+      "app_bin": {
+        "bytes": 550760,
+        "sha256": "8dff94fcd2b03a7ddf25c281d25a2faed5dfa8c0cfac51ab34ed81c245c66707"
+      },
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064
     },
     {
-      "candidate": "metrics",
+      "candidate": "closure",
       "model": "pro",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -249,22 +267,22 @@
         "build/smk37/original/original_sound.o",
         "build/smk37/gfinal/chance_native.o",
         "-Map",
-        "<native>/evidence/metrics-pro-link.map",
+        "<native>/closure-stock-50122c5d/pro-link.map",
         "-o",
-        "<native>/evidence/metrics-pro-mapped.elf"
+        "<native>/closure-stock-50122c5d/pro-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546908,
-          "sha256": "4cc808896c0ddcf1d91ab12dc4f36a04351e62f66d8de26d46ec46edf10fa988"
+          "size": 546832,
+          "sha256": "98788de325b429cedf365799d684bda59043516b3d8a7fcddc10cda898822f67"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "9c8ced45710b61c41631183746cc31d012f2581d43983b4055a71550a51bc8f0"
+          "sha256": "661842ac087bfd3ad47b5ab19b1502ce7edc0d36208a894830de82741b819c62"
         },
         ".ram_text": {
           "equal": true,
@@ -279,19 +297,43 @@
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "f8d6af08959b2de0ace3726c42d86b3622ca40c30eb85ee35774aadcc6d78eee",
-      "mapped_elf_sha256": "f8d6af08959b2de0ace3726c42d86b3622ca40c30eb85ee35774aadcc6d78eee",
+      "original_elf_sha256": "a3dd66e900fc01ca7924adc656bc3d49846ad534e12121c6352930b9093fbd74",
+      "mapped_elf_sha256": "a3dd66e900fc01ca7924adc656bc3d49846ad534e12121c6352930b9093fbd74",
       "link_map": {
-        "filename": "metrics-pro-link.map",
-        "sha256": "7c95caecac80a0aec24e350c1e7e957cadea12757a8f8a370fe693bb8f7bfeb8",
-        "bytes": 208964,
-        "gzip_bytes": 28286
+        "filename": "pro-link.map",
+        "sha256": "8f0a38d303aecebc4ba76841a0b10b60072599c4fb36ad7bbd60dd8ec1725f74",
+        "bytes": 208970,
+        "gzip_bytes": 28301
       },
       "committed_map": "final-pro-link.map.gz",
-      "xip_free_bytes": 1844,
+      "xip_free_bytes": 1920,
       "pool_margin_bytes": 780,
       "pool_raw_free_bytes": 8972,
-      "command_line_build_exit": 0
+      "pool_reserve_bytes": 8192,
+      "command_line_build_exit": 0,
+      "build_command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "pro"
+      ],
+      "build_started_utc": "2026-11-21T02:39:40.074814+00:00",
+      "build_finished_utc": "2026-11-21T02:42:25.379517+00:00",
+      "app_bin": {
+        "bytes": 550752,
+        "sha256": "f04b88cece8ae232d1fa724148f448c04112055e3b1d8286304e364477a3820d"
+      },
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064
     }
-  ]
+  ],
+  "stock_thresholds": {
+    "xip_free_min_bytes": 1024,
+    "pool_margin_min_bytes": 512,
+    "pool_reserve_bytes": 8192,
+    "psram": false
+  }
 }

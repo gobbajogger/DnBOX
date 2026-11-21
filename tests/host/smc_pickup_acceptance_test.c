@@ -52,7 +52,9 @@ static void status_is(const char *status)
     cv_begin(240, KNOB_H, C_BLACK);
     /* F4 (#800) shows the pickup direction and ACTIVE as pictograms, not prose. */
     if (status[0] == 'P') {
-        ui_pictogram(108, 49, strstr(status, " UP ") ? UI_G_UP : UI_G_DOWN, 1, C_HI);
+        int up = !strcmp(status, "PICKUP: UP");
+        CHECK(up || !strcmp(status, "PICKUP: DOWN"));
+        ui_pictogram(108, 49, up ? UI_G_UP : UI_G_DOWN, 1, C_HI);
         ui_pictogram(123, 49, UI_G_TARGET, 1, C_WHITE);
     } else {
         CHECK(!strcmp(status, "ACTIVE"));

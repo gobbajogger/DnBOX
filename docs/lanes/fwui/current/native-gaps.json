@@ -1,5 +1,5 @@
 {
-  "productionTree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "productionTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
   "scope": "Explicit native route limitations; source-only display slices and measured runtime coverage do not qualify external F1/R22 acceptance.",
   "routes": [
     {
@@ -7,8 +7,8 @@
         "firmware/src/app/main_fm1.c::fm1_main",
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
-      "notConstructed": "Actual native startup, linker/RAM setup, flash admission, interrupts and audio startup; post-reset crash-notice branch (both core variants) is not dynamically entered by the host walker.",
-      "displayEvidence": "The complete default/custom boot display renderer is captured separately through the host LCD framebuffer oracle."
+      "notConstructed": "Physical startup, linker setup, flash admission, interrupts and audio startup. The host does not start the native board.",
+      "displayEvidence": "Default/custom boot screens and both post-reset core notices over the actual boot screen are captured. Native startup itself has no complete host execution."
     },
     {
       "ids": [
@@ -21,8 +21,8 @@
       "ids": [
         "firmware/src/app/main_fm1.c::safe_main"
       ],
-      "notConstructed": "Actual watchdog/USB safe-mode loop, native PLAY retry and its STARTING DnBOX... transition.",
-      "displayEvidence": "Exact static safe-mode display prefixes, including both crash core diagnostics, are captured."
+      "notConstructed": "The native watchdog, USB, physical PLAY retry, detach and reset are outside host qualification.",
+      "displayEvidence": "Safe mode, both crash-core diagnostics and the source-exact retry status over its actual predecessor are captured."
     },
     {
       "ids": [
@@ -62,5 +62,11 @@
       "displayEvidence": "They remain explicit source/runtime coverage gaps requiring entry-condition review."
     }
   ],
-  "otherHelpers": "The report and stable-ID table retain every additional unobserved function classified NO_DIRECT_CALL_PATH_REVIEW_REQUIRED; that classification does not prove absence of callbacks or macro reachability."
+  "otherHelpers": "The report and stable-ID table retain every additional unobserved function classified NO_DIRECT_CALL_PATH_REVIEW_REQUIRED; that classification does not prove absence of callbacks or macro reachability.",
+  "sourceCoverage": {
+    "status": "PARTIAL",
+    "observedFunctions": 98,
+    "inventoriedFunctions": 118,
+    "unobservedFunctions": 20
+  }
 }

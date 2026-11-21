@@ -1,0 +1,322 @@
+{
+  "productionTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "scope": "Source references and reachability notes for 20 unobserved renderer functions. This lexical supplement does not certify absence of indirect calls, runtime coverage, or independent visual acceptance. No synthetic call contributes to observed counts.",
+  "routes": [
+    {
+      "renderer": "firmware/src/app/main_fm1.c::fm1_fault",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/hal/fm1_irq.h",
+          "line": 53
+        },
+        {
+          "path": "firmware/hal/fm1_irq.h",
+          "line": 159
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2229
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Native exception callback. Fault and boot notices have real display captures."
+    },
+    {
+      "renderer": "firmware/src/app/main_fm1.c::enter_uboot",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2252
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2344
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2504
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2549
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Both source-backed mode-entry display prefixes have captures."
+    },
+    {
+      "renderer": "firmware/src/app/main_fm1.c::safe_main",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2285
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2381
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Safe mode and software retry have retained-framebuffer captures. The native wait and reboot are hardware-owned."
+    },
+    {
+      "renderer": "firmware/src/app/main_fm1.c::fm1_main",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2349
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2633
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Board startup. Both returning-from-crash display variants have captures."
+    },
+    {
+      "renderer": "firmware/src/app/main_fm1.c::fm1_cstart",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2588
+        },
+        {
+          "path": "firmware/crt0.S",
+          "line": 25
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Assembly enters the real board startup entry."
+    },
+    {
+      "renderer": "firmware/src/app/panel.c::panel_setup",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2443
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2446
+        },
+        {
+          "path": "firmware/src/app/panel.c",
+          "line": 82
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Panel-selection and clockwise teaching prompts are captured. Native matrix reads and saving calibration are outside the fixture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::ui_position_badge",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5413
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::nav_arrow",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5452
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5478
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::row_picture",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5458
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5870
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::header_pattern_badge",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5462
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5478
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::header_pattern_cue",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5472
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::matrix_row_hint",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5865
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::matrix_next_hint",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 5875
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::lane",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 6060
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::draw_wave_glyph",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 7009
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 7321
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "An alternate waveform painter for a missing original-wave view. No captured engine/page selected this fallback."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::strip_value_fit",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 7231
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 7313
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Selected only for a drum strip role in the generic matrix. Captured admitted drum pages use the dedicated drum painter."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::original_cell_value",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 7646
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 8589
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Generic knob-footer readout for original engines and bank controls. Admitted engine page owners intercepted these cases in captured states."
+    },
+    {
+      "renderer": "firmware/src/app/ui.c::dg_tail",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 8155
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 8250
+        },
+        {
+          "path": "firmware/src/app/ui.c",
+          "line": 8254
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "An alternative tail graph. Reached live drum controls use their admitted renderer."
+    },
+    {
+      "renderer": "firmware/src/gfx.c::cv_blit_from",
+      "sourceDisposition": "NO_DIRECT_CALL_PATH_REVIEW_REQUIRED",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/gfx.c",
+          "line": 117
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Source helper with no proven path from a reached production display. A definition, or a reference from another unobserved helper, does not constitute a state capture."
+    },
+    {
+      "renderer": "firmware/src/lcd.c::lcd_init",
+      "sourceDisposition": "DIRECT_CALL_REACHABLE",
+      "declarationsAndCallSites": [
+        {
+          "path": "firmware/src/lcd.c",
+          "line": 161
+        },
+        {
+          "path": "firmware/src/app/main_fm1.c",
+          "line": 2370
+        }
+      ],
+      "scope": "Same translation unit for the generic C identifier lane. Others cover firmware sources.",
+      "coverage": "Panel power, reset and hardware bus. Captures use the host LCD oracle."
+    }
+  ]
+}

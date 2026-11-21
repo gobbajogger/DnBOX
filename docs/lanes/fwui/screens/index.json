@@ -9,13 +9,13 @@
     "inventoriedFunctions": 118,
     "unobservedFunctions": 20
   },
-  "sourceClosure": "c751712670d5ddc79a70ba5f455c46e551a42cf46e6f546101b23bfa083b848f",
+  "sourceClosure": "8a83da6a980acb97622c2c83dec9cd40dd8ee44935481e22c944df6834ac7550",
   "reportFile": "combined-report.json",
-  "reportSHA256": "de5d6faa24aa60f4ef10588a1f18d15fcc7c89d4b095be725400e8c52b6d93ec",
-  "frames": 1709,
-  "stableStateIDs": 1709,
-  "totalBytes": 2133496,
-  "maxPartBytes": 569260,
+  "reportSHA256": "559859ac16f1b15edc724dff0face39726602dd2ad20ecb2d733a91cb6ece61d",
+  "frames": 1712,
+  "stableStateIDs": 1712,
+  "totalBytes": 2059384,
+  "maxPartBytes": 494660,
   "archives": [
     {
       "path": "01-0.tar.xz",
@@ -206,16 +206,19 @@
     },
     {
       "path": "boot-0.tar.xz",
-      "bytes": 14244,
-      "sha256": "8b6197c5497f77da224b44f4d91d355bcdf0504ca9e1137bc6d8982e26f823a4",
+      "bytes": 15716,
+      "sha256": "79cc85fc4164807383f706c1d29510e840867c31abaf236090a32929947b7ce7",
       "entries": [
         "renders/boot-crash-diagnostics/capture-00.png",
         "renders/boot-custom-picture/capture-00.png",
         "renders/boot-custom-text/capture-00.png",
         "renders/boot-default/capture-00.png",
+        "renders/boot-post-crash-core-0/capture-00.png",
+        "renders/boot-post-crash-core-1/capture-00.png",
         "renders/boot-safe-crash-core-0/capture-00.png",
         "renders/boot-safe-crash-core-1/capture-00.png",
         "renders/boot-safe-mode/capture-00.png",
+        "renders/boot-safe-retry/capture-00.png",
         "renders/boot-uboot/capture-00.png",
         "renders/boot-uboot-usb/capture-00.png",
         "renders/boot-update-dry-run/capture-00.png",
@@ -678,8 +681,8 @@
     },
     {
       "path": "hardware-0.tar.xz",
-      "bytes": 11328,
-      "sha256": "b7958c5d7496db69b0443ba7d5b376fefa799907f4890a31256026b7fa214c13",
+      "bytes": 10580,
+      "sha256": "c9a162b0c51118c8ad73850b43b534643d6c7ce4aaca77c47e72dd66218d6b61",
       "entries": [
         "renders/hardware-calibration-button-00/capture-00.png",
         "renders/hardware-calibration-button-01/capture-00.png",
@@ -1801,8 +1804,8 @@
     },
     {
       "path": "padcal-0.tar.xz",
-      "bytes": 11940,
-      "sha256": "e8bd1432565aa8ade28d47439a998dadc4da6bf2e6bc95b6ecbded27fb4d5562",
+      "bytes": 12108,
+      "sha256": "a3dd088cfa974423d51a489b69ac1d4f6d4c394bb685923cf0247e31beba670c",
       "entries": [
         "renders/padcal-orientation/capture-00.png",
         "renders/padcal-page-0/capture-00.png",
@@ -1852,8 +1855,8 @@
     },
     {
       "path": "smc-0.tar.xz",
-      "bytes": 17572,
-      "sha256": "f31068dfa8fe6e71dfbc3363df1f3ae3a2c072ce9ed665627820e8907b7fafc3",
+      "bytes": 17168,
+      "sha256": "f9790ccc9961fbb0a3489286d71655dd9a41b8076e8ed68fa4c332fb3220d46b",
       "entries": [
         "renders/smc-explicit-peek-pickup/capture-00.png",
         "renders/smc-fill-request/capture-00.png"
@@ -2022,8 +2025,8 @@
     },
     {
       "path": "metadata-0.tar.xz",
-      "bytes": 569260,
-      "sha256": "86b9aaee8be277205edbfbab47586b0cc56d563385796bc9ad06946aec5ff69d",
+      "bytes": 494660,
+      "sha256": "5730a9650951036488041e3c2ffae5a1ceac25c82776aedf0c49720ff67d1af0",
       "entries": [
         "frame-map.json",
         "report.json",
@@ -2031,14 +2034,12 @@
         "source-inventory.json",
         "source-closure.json",
         "render.log",
-        "production-tree.json",
         "production-tree-receipt.json",
         "runner-inputs.json",
         "native-display-slices.json",
         "stable-renderer-ids.tsv",
         "combined-stable-renderer-ids.tsv",
         "verification.json",
-        "delivery-verifier.py",
         "extensions/edited-lanes/report.json",
         "extensions/edited-lanes/render.log",
         "extensions/edited-lanes/instrumented-inputs.json",
