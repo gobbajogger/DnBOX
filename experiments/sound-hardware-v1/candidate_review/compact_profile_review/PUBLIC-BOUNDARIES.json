@@ -1,0 +1,1884 @@
+{
+  "scope": "Additional affected public range APIs, strict floating point; no timing repeated.",
+  "cases": [
+    {
+      "api": "dnbx_init",
+      "input": "low",
+      "bits": "45fa0000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "low_inside",
+      "bits": "45fa0001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "low_outside",
+      "bits": "45f9ffff",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "high",
+      "bits": "483b8000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "high_inside",
+      "bits": "483b7fff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "high_outside",
+      "bits": "483b8001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_init",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "state_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_attack_from_unit",
+      "input": "mid_stop",
+      "bits": "3f000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_lfo_from_unit",
+      "input": "mid_stop",
+      "bits": "3f000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_pwm_from_unit",
+      "input": "mid_stop",
+      "bits": "3f000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_range_from_stop",
+      "input": "mid_stop",
+      "bits": "3f000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "phase",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "low",
+      "bits": "358637bd",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "low_inside",
+      "bits": "358637be",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "low_outside",
+      "bits": "358637bc",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "high",
+      "bits": "3ee66666",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "high_inside",
+      "bits": "3ee66665",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "high_outside",
+      "bits": "3ee66667",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "increment",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "low",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "low_inside",
+      "bits": "00000001",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "low_outside",
+      "bits": "80000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "high",
+      "bits": "3f800000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "high_inside",
+      "bits": "3f7fffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "high_outside",
+      "bits": "3f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "waveform",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "low",
+      "bits": "3cf5c28f",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "low_inside",
+      "bits": "3cf5c290",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "low_outside",
+      "bits": "3cf5c28e",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "high",
+      "bits": "3f000000",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "high_inside",
+      "bits": "3effffff",
+      "expected": 0,
+      "returns": [
+        0,
+        0,
+        0
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "high_outside",
+      "bits": "3f000001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "plus_zero",
+      "bits": "00000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "minus_zero",
+      "bits": "80000000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "plus_inf",
+      "bits": "7f800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "minus_inf",
+      "bits": "ff800000",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "plus_qnan",
+      "bits": "7fc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "minus_qnan",
+      "bits": "ffc00001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "plus_snan",
+      "bits": "7f800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    },
+    {
+      "api": "dnbx_wave_probe_mode",
+      "field": "pulse_width",
+      "input": "minus_snan",
+      "bits": "ff800001",
+      "expected": -2,
+      "returns": [
+        -2,
+        -2,
+        -2
+      ],
+      "output_bits_equal": true,
+      "unchanged_if_invalid": true,
+      "pass": true
+    }
+  ],
+  "case_count": 130,
+  "all_pass": true,
+  "harness_sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18"
+}

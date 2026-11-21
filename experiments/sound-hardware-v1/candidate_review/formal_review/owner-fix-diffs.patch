@@ -1,0 +1,151 @@
+--- /workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/original_status_negative/verify_candidate.py
++++ /workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/verify_candidate.py
+@@ -4,7 +4,7 @@
+ Creates its own frozen review snapshot. Never modifies implementation input.
+ """
+ import argparse, collections, ctypes as C, csv, datetime, hashlib, json, math
+-import pathlib, shutil, subprocess, sys
++import pathlib, re, shutil, subprocess, sys
+ 
+ HERE = pathlib.Path(__file__).resolve().parent
+ BASE = HERE.parent
+@@ -19,6 +19,24 @@
+     _fields_ = [(n,C.c_uint64) for n in WORK_NAMES] + [('maximum_transition_chain',C.c_uint32),('reserved',C.c_uint32)]
+ 
+ def sha(p): return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
++def verify_references():
++    """Reject altered/missing fixtures before reserving output or evaluating DSP."""
++    declaration=json.loads((HERE/'ACCEPTANCE-DECLARATION.json').read_text())
++    expected=declaration['reference_hashes']
++    required={
++        'mapping/results/implementer_brief/BEHAVIOR-BRIEF.md',
++        'mapping/results/implementer_brief/recorded_envelope_behavior.json',
++        'mapping/results/implementer_brief/amp_observed_levels.csv',
++    }
++    if set(expected)!=required:
++        raise ValueError('acceptance declaration must pin all three reference files')
++    verified={}
++    for relative in sorted(required):
++        actual=sha(BASE/relative)
++        if not re.fullmatch(r'[0-9a-f]{64}',expected[relative]) or actual!=expected[relative]:
++            raise ValueError(f'reference SHA256 mismatch: {relative}')
++        verified[relative]=actual
++    return verified
+ def raw(x): return C.string_at(C.addressof(x),C.sizeof(x))
+ def finite(xs): return all(math.isfinite(x) for x in xs)
+ def bind(path):
+@@ -251,15 +269,24 @@
+ 
+ def main():
+     parser=argparse.ArgumentParser();parser.add_argument('--label',required=True);parser.add_argument('--source',type=pathlib.Path,default=BASE/'hardware_candidate/src');args=parser.parse_args()
++    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',args.label):
++        parser.error('--label must be a single safe directory name')
++    try:
++        verified_references=verify_references()
++    except (OSError,ValueError,KeyError,TypeError) as exc:
++        parser.error(str(exc))
+     out=HERE/args.label;out.mkdir();snap=out/'snapshot';snap.mkdir()
+     for name in ('dnbx_core.c','dnbx_core.h','fastmath.h'):shutil.copy2(args.source/name,snap/name)
+     command=['cc','-std=c11','-Wall','-Wextra','-Werror','-O2','-ffp-contract=off','-DX0X_HOST','-fPIC','-shared',str(snap/'dnbx_core.c'),'-o',str(out/'libcandidate.so')]
+     cp=subprocess.run(command,text=True,capture_output=True);(out/'build.log').write_text(cp.stdout+cp.stderr)
+     (out/'COMMANDS.json').write_text(json.dumps({'build':command,'invocation':sys.argv},indent=2)+'\n');cp.check_returncode()
+     d=bind(out/'libcandidate.so');api=Api(d)
+-    result={'created_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'snapshot_sha256':{p.name:sha(p) for p in snap.iterdir()},'harness_sha256':sha(__file__),'declaration_sha256':sha(HERE/'ACCEPTANCE-DECLARATION.json'),'compiler':subprocess.check_output(['cc','--version'],text=True).splitlines()[0],'floating_contract':'off; host X0X_HOST','envelope':envelope_tests(api,out),'velocity':velocity_tests(api),'lifecycle':lifecycle_tests(api),'errors':error_tests(api),'finite':finite_tests(api),'long_durations':long_duration_tests(api)}
++    result={'created_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'snapshot_sha256':{p.name:sha(p) for p in snap.iterdir()},'harness_sha256':sha(__file__),'declaration_sha256':sha(HERE/'ACCEPTANCE-DECLARATION.json'),'verified_reference_sha256':verified_references,'compiler':subprocess.check_output(['cc','--version'],text=True).splitlines()[0],'floating_contract':'off; host X0X_HOST','envelope':envelope_tests(api,out),'velocity':velocity_tests(api),'lifecycle':lifecycle_tests(api),'errors':error_tests(api),'finite':finite_tests(api),'long_durations':long_duration_tests(api)}
+     result['scoped_acceptance_pass']=all(x['pass'] and x['ratio_crosscheck_pass'] and not x['negative_wrong_time_grid']['pass'] and not x['negative_linear_envelope']['pass'] for x in result['envelope']) and result['velocity']['linear_pass'] and result['velocity']['negative_squared_rejected'] and all(x.get('pass',x.get('bit_identical_output_state_counters',False)) for x in result['lifecycle'].values()) and result['errors']['all_pass'] and result['finite']['all_pass'] and result['long_durations']['pass']
+     (out/'RESULT.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+     print(json.dumps({k:result[k] for k in ('snapshot_sha256','envelope','velocity','lifecycle','scoped_acceptance_pass')},indent=2))
+ 
++    if not result['scoped_acceptance_pass']:
++        raise SystemExit(1)
++
+ if __name__=='__main__': main()
+
+--- /workspace/scratch/67e685478953/superj6_research/candidate_review/verify_compact_profile.py
++++ /workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Independent bounded equivalence review of the explicitly selected compact profile."""
+-import ctypes as C, datetime, hashlib, json, pathlib, random, shutil, struct, subprocess
++import argparse, ctypes as C, datetime, hashlib, json, pathlib, random, re, shutil, struct, subprocess
+ from verify_candidate import Env, Params, Work, Api, bind, raw, WORK_NAMES
+ 
+ HERE=pathlib.Path(__file__).resolve().parent
+@@ -23,7 +23,7 @@
+ def snapshot(p):return raw(p)
+ 
+ def compile_all():
+-    OUT.mkdir();sources=OUT/'snapshot';sources.mkdir()
++    sources=OUT/'snapshot';sources.mkdir()
+     original=BASE/'hardware_candidate/size_variants/compact_profile'
+     for n,h in EXPECTED.items():
+         assert sha(original/n)==h,(n,sha(original/n),h)
+@@ -139,13 +139,28 @@
+     return {'seed_hex':'D0B0C0DE','total_frames_over_parts':total_frames,'cases':records,'all_pass':all(x['pass'] for x in records)}
+ 
+ def main():
++    global OUT
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--label',required=True,help='New evidence directory name; existing evidence is never overwritten')
++    args=parser.parse_args()
++    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*',args.label):
++        parser.error('label must be a simple new directory name')
++    OUT=HERE/args.label
++    try:
++        OUT.mkdir()
++    except FileExistsError:
++        parser.error('evidence directory already exists; select a new label')
+     declaration={'created_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Compare compact typed-bound validation and explicit counters-off profile against accepted9cdcea source, with no relaxed numeric tolerance. No native timing or Sound completion claim.','gates':['All named float-field bounds admit exactly endpoints/interior, reject next representable exterior and NaN/Inf, matching baseline return/state bits.','Both profiles return identical output bytes and part-state bytes to baseline after every event/block on same inputs. Diagnostic counters match when enabled.','Counters-off query is0 and nonnullwork rejects with E_UNSUPPORTED before state/output/work mutation, including zero frames.','Invalid profile macro2 fails compilation.'],'profiles':{'diagnostic':'default1','compact':'explicit-D DNBX_DIAGNOSTIC_COUNTERS=0'},'compile_contract':'C11 -O2 -fno-fast-math -ffp-contract=off -DX0X_HOST'}
+-    # Keep the predeclaration outside the not-yet-created frozen result directory.
+-    (HERE/'COMPACT-ACCEPTANCE-DECLARATION.json').write_text(json.dumps(declaration,indent=2)+'\n')
++    # Declare inside the newly owned directory before any comparison runs.
++    declaration_path=OUT/'ACCEPTANCE-DECLARATION.json'
++    declaration_path.write_text(json.dumps(declaration,indent=2)+'\n')
+     libs,invalid=compile_all()
+-    result={'created_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'candidate_sha256':{p.name:sha(p) for p in (OUT/'snapshot').iterdir()},'baseline_sha256':{p.name:sha(p) for p in (HERE/'frozen_03/snapshot').iterdir()},'harness_sha256':sha(pathlib.Path(__file__)),'declaration_sha256':sha(HERE/'COMPACT-ACCEPTANCE-DECLARATION.json'),'boundary_equivalence':boundaries(libs),'capability_contract':capability_checks(libs),'audio_state_equivalence':compare_audio_state(libs),'invalid_profile_compile_rejected':invalid}
++    result={'created_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'candidate_sha256':{p.name:sha(p) for p in (OUT/'snapshot').iterdir()},'baseline_sha256':{p.name:sha(p) for p in (HERE/'frozen_03/snapshot').iterdir()},'harness_sha256':sha(pathlib.Path(__file__)),'declaration_sha256':sha(declaration_path),'boundary_equivalence':boundaries(libs),'capability_contract':capability_checks(libs),'audio_state_equivalence':compare_audio_state(libs),'invalid_profile_compile_rejected':invalid}
+     result['scoped_equivalence_pass']=result['boundary_equivalence']['all_pass'] and result['capability_contract']['all_pass'] and result['audio_state_equivalence']['all_pass'] and invalid
+     (OUT/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n')
+     print(json.dumps({k:result[k] for k in ('candidate_sha256','boundary_equivalence','capability_contract','audio_state_equivalence','invalid_profile_compile_rejected','scoped_equivalence_pass') if k!='boundary_equivalence'}|{'boundary_cases':result['boundary_equivalence']['case_count'],'boundaries_pass':result['boundary_equivalence']['all_pass']},indent=2))
+ 
++    if not result['scoped_equivalence_pass']:
++        raise SystemExit(1)
++
+ if __name__=='__main__':main()
+
+--- /workspace/scratch/67e685478953/superj6_research/candidate_review/check_compact_public_boundaries.py
++++ /workspace/scratch/67e685478953/superj6_research/sound_lane/experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Focused comparison of other public APIs affected by compact range()."""
+-import ctypes as C, hashlib, json, pathlib, struct
++import argparse, ctypes as C, hashlib, json, pathlib, struct
+ from verify_candidate import Api, bind, raw
+ from verify_compact_profile import bits, nextbits, value
+ ROOT=pathlib.Path(__file__).resolve().parent
+@@ -13,6 +13,15 @@
+             'plus_qnan':0x7fc00001,'minus_qnan':0xffc00001,'plus_snan':0x7f800001,'minus_snan':0xff800001}
+ 
+ def main():
++    global OUT
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--review-dir',type=pathlib.Path,required=True,help='Fresh compact verification directory containing accepted/diagnostic/compact libraries')
++    args=parser.parse_args()
++    OUT=args.review_dir.expanduser().resolve()
++    if (OUT/'PUBLIC-BOUNDARIES.json').exists():
++        parser.error('boundary receipt already exists; use a new compact verification run')
++    if not all((OUT/(name+'.so')).is_file() for name in ('accepted','diagnostic','compact')):
++        parser.error('review directory must contain all three compiled libraries')
+     apis={k:Api(bind(OUT/(k+'.so'))) for k in ('accepted','diagnostic','compact')};checks=[]
+     for name,b in samples(8000,192000).items():
+         v=value(b);expected=0 if 8000<=v<=192000 else -2;got=[];states=[];unchanged=True
+@@ -40,7 +49,8 @@
+                 if expected:unchanged &= before==raw(out)
+             checks.append({'api':'dnbx_wave_probe_mode','field':field,'input':name,'bits':f'{b:08x}','expected':expected,'returns':got,'output_bits_equal':len(set(outs))==1,'unchanged_if_invalid':unchanged,'pass':got==[expected]*3 and len(set(outs))==1 and unchanged})
+     result={'scope':'Additional affected public range APIs, strict floating point; no timing repeated.','cases':checks,'case_count':len(checks),'all_pass':all(x['pass'] for x in checks),'harness_sha256':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()}
+-    (OUT/'PUBLIC-BOUNDARIES.json').write_text(json.dumps(result,indent=2)+'\n')
++    with (OUT/'PUBLIC-BOUNDARIES.json').open('x') as output:
++        output.write(json.dumps(result,indent=2)+'\n')
+     print(json.dumps({'case_count':len(checks),'all_pass':result['all_pass']},indent=2))
+     if not result['all_pass']:raise SystemExit(1)
+ 

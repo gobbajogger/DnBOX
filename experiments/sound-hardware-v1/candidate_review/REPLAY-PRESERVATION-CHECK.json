@@ -1,0 +1,10 @@
+{
+  "existing_label_exit": 2,
+  "retained_files_unchanged": true,
+  "path_escape_label_exit": 2,
+  "retained_sha256": {
+    "experiments/sound-hardware-v1/candidate_review/COMPACT-ACCEPTANCE-DECLARATION.json": "4a88cf8e5e78137999c33d07ba2f41cad368101ae6a60414bac1cb5f14eda8d4",
+    "experiments/sound-hardware-v1/candidate_review/compact_profile_review/RESULT.json": "aa2c13c553de2eafee5724d55ad64e5a6cf56ad0c9b244b3494e743423e84491"
+  },
+  "diagnostic": "usage: verify_compact_profile.py [-h] --label LABEL\nverify_compact_profile.py: error: evidence directory already exists; select a new label"
+}

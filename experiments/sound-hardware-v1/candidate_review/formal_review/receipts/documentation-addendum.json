@@ -1,0 +1,21 @@
+{
+  "method": "Read staged documentation, checked arithmetic and agreement with retained selected-probe facts; resource source-audit specifics remain attributed evidence. No new native build/timing or recovery download.",
+  "files_sha256": {
+    "docs/LIBRARY-INDEX.md": "d526360996b23cddc7ffe2c88605869a5850cbe495fe402a6d53528e35420299",
+    "docs/sound/hardware-first-owner-report.md": "89e14225e9d8557f2f40af3f874de20fcd4e443c6984e4defce7a72da78cfee9",
+    "docs/lanes/sound.md": "65439a125528dc268dfb31fe8f7e9aa16142d100e51cdabbd7b9f4b36a632263",
+    "experiments/sound-hardware-v1/README.md": "23e2e7fda13b140bb6e330ff020a69f3b76a4530652def356e820d5102fc36a5",
+    "experiments/sound-hardware-v1/resource_review/NARROW-STOCK-ADAPTER-DECISION.md": "fa1d961a50bff7007cc41a5566b2dafdef2ea4d8b597e40a7e2ef6b18a69512d",
+    "experiments/sound-hardware-v1/resource_review/CALLBACK-ADMISSION-CONTRACT.md": "546006a2944def2852b21ac3619b6161f7f7971f091701dc403b5261d1e6a665"
+  },
+  "arithmetic_checks": {
+    "descriptor_sum": 351,
+    "sequencer_structural_calls": 584,
+    "sequencer_dispatch_opportunities": 23360,
+    "stock_growth_elite": 156,
+    "stock_growth_pro": 164,
+    "compact_net_growth": 1928,
+    "fault_timeout_exceeds_half_deadline": true
+  },
+  "claims_preserve_no_full_WCET_or_fit": true
+}

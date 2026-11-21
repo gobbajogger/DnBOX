@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "original_sound.h"
 #include "unit_control.h"
+#if X0X_SYNTHONE_PATCH
+#include "s1_patch.h"
+#endif
 #include <string.h>
 
 static const char *const original_sound_fx_names[ORIGINAL_CHICAGO_FX_CHOICES] = {
@@ -179,7 +182,25 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
     if (!cell || cell[26] != 'O' || cell[27] != 'S' || cell[28] != ORIGINAL_SOUND_SCHEMA || cell[31]) return 0;
     unsigned count = original_sound_count(cell[29]);
     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
+#if X0X_SYNTHONE_PATCH
+    uint32_t mask = original_sound_edit_mask(cell);
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
+#if X0X_SYNTHONE_WIDEN
+        /* The cell permits performance bits 0..1 and patch bits 8..21.
+         * Check the spare bits in the serialized bytes alongside their data. */
+        if ((cell[22] & 0xfcu) || (cell[24] & 0xc0u) || cell[25]) return 0;
+#else
+        if (mask & ~(S1_PATCH_MASK | 3u)) return 0;
+#endif
+        for (unsigned i = 0; i < 22; ++i) {
+            if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
+        }
+        return 1;
+    }
+    if (mask >> count) return 0;
+#else
     if (original_sound_edit_mask(cell) >> count) return 0;
+#endif
     for (unsigned i = 0; i < count; ++i) if (cell[i] > original_sound_param(cell[29], i)->max) return 0;
     for (unsigned i = count; i < 22; ++i) if (cell[i]) return 0;
     return 1;
@@ -223,6 +244,18 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
     original_sound_put_mask(cell, mask);
     return 1;
 }
+#if X0X_SYNTHONE_PATCH
+int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
+{
+    if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
+        !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+    unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+    cell[byte] = (uint8_t)position;
+    original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+    return 1;
+}
+#endif
+
 int original_sound_restore_miami(original_miami_program *out, const uint8_t cell[ORIGINAL_SOUND_BYTES])
 {
     if (!out || !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_MIAMI) return 0;

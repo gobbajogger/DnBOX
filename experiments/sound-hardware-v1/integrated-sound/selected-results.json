@@ -1,0 +1,494 @@
+{
+  "elite": {
+    "bass1": {
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        0,
+        6326,
+        8253,
+        28672
+      ],
+      "triggered_rows_909_808": [
+        0,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13124,
+      "pcm_sha256": "6ed7f93df6fa4deaff2047bad13bdd7bb61f3750d8195992206b9af599e09c1b",
+      "observed_halves": 188,
+      "peak_callback_us": 7064,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "8dd6d34f489b4513e00b0510b87f80ddc605cd37e08d5364425f19b58c8e5b1f",
+      "elf_sha256": "f73101e69ccc36c021be0efcb2f46539d787bfd230d329a855db707b6c43b565",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "283598f3437761c173bf1f34d60e54882fd7b682919ea3de054903640eace82d",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "f49e069c1ddc99d8f8235dc31f6dcd8233b9ef293ca870b4b341dcb45f78b6cc",
+      "active_parts": [
+        2,
+        3,
+        4
+      ],
+      "passed": true
+    },
+    "bass2": {
+      "bass_kinds": [
+        3,
+        2
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        0,
+        1362,
+        2429,
+        32767
+      ],
+      "triggered_rows_909_808": [
+        0,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44094,
+      "peak_pcm16": 13129,
+      "pcm_sha256": "050a271228734cdf33ffc511683911bf71815861b5a09835a06f91abcaa4c7e1",
+      "observed_halves": 188,
+      "peak_callback_us": 7226,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "8dd6d34f489b4513e00b0510b87f80ddc605cd37e08d5364425f19b58c8e5b1f",
+      "elf_sha256": "f73101e69ccc36c021be0efcb2f46539d787bfd230d329a855db707b6c43b565",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "c86cea1dec9792f678397c5872b1f1dc358bf5c6e54f857ff9b1c139db8b4686",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "e21b592fa5e36cfe53a15c4bb4562eb1a1c9e85c7b7146927ca252eb7758de99",
+      "active_parts": [
+        2,
+        3,
+        4
+      ],
+      "passed": true
+    },
+    "kit808": {
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        16008,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        0,
+        11
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44076,
+      "peak_pcm16": 13122,
+      "pcm_sha256": "3208229b3557dcd6e9f86b91e1257d5489b3b51670269814ce8b68a339013273",
+      "observed_halves": 188,
+      "peak_callback_us": 8974,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "8dd6d34f489b4513e00b0510b87f80ddc605cd37e08d5364425f19b58c8e5b1f",
+      "elf_sha256": "f73101e69ccc36c021be0efcb2f46539d787bfd230d329a855db707b6c43b565",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "2fca8317d6b272191b54f66f1b5fb50a3dfde59489abc6c0a421817fea7adf0e",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "b46a814af6850d7fa1674e66ad051f2b5065be3e4b085e5b80070b39f6f6807b",
+      "active_parts": [
+        1
+      ],
+      "passed": true
+    },
+    "kit909": {
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7979,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "8dd6d34f489b4513e00b0510b87f80ddc605cd37e08d5364425f19b58c8e5b1f",
+      "elf_sha256": "f73101e69ccc36c021be0efcb2f46539d787bfd230d329a855db707b6c43b565",
+      "stock_seed_sha256": "e5f168643dd6cde2d4a9b7ae68c61f255b91ad45f5e910795ff4fda601fbb3bd",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "36076290b2bd279b3331a9fad4487ad12b529a4c3051f7036d6954f3c421725d",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    }
+  },
+  "pro": {
+    "bass1": {
+      "bass_kinds": [
+        1,
+        0
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        0,
+        9516,
+        7229,
+        32767
+      ],
+      "triggered_rows_909_808": [
+        0,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44094,
+      "peak_pcm16": 13116,
+      "pcm_sha256": "86dc8c166edd6903774bdd7dafd5b938eff98f9fee99458a7ce0c756766c5336",
+      "observed_halves": 188,
+      "peak_callback_us": 7272,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "1ca8a369608d7c175a3c7e43c156cb68dbe7f2918ed1b34c35242ca66f18ab77",
+      "elf_sha256": "9e508e21aee67d382f184ce55f18feeaf5beea2e60f2e5bcef2adcce33c1e7d7",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "b220bc62ac3460a6eb4164043c829af81dc37c9826b1736b8315f196bccb9ad2",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "a2d980c6d9b2028bd536b0c597b3a13aefd4f0567d9023ee659e243edfee4ff6",
+      "active_parts": [
+        2,
+        3,
+        4
+      ],
+      "passed": true
+    },
+    "bass2": {
+      "bass_kinds": [
+        2,
+        3
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        0,
+        2622,
+        1996,
+        32767
+      ],
+      "triggered_rows_909_808": [
+        0,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44100,
+      "peak_pcm16": 13129,
+      "pcm_sha256": "be6dc826e91ed4baa12b3f82c97e1a7cd45dafc122e5def2d4b91899cd63a482",
+      "observed_halves": 188,
+      "peak_callback_us": 7182,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "1ca8a369608d7c175a3c7e43c156cb68dbe7f2918ed1b34c35242ca66f18ab77",
+      "elf_sha256": "9e508e21aee67d382f184ce55f18feeaf5beea2e60f2e5bcef2adcce33c1e7d7",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "16e6be0cc23e1de27b0657cee59f04ffa8bfec89995b4777856b388d44aa8f23",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "9fcd7db89cf7df567a4d041a92eb964a538bfaf40a3d196782d02575ea67cb16",
+      "active_parts": [
+        2,
+        3,
+        4
+      ],
+      "passed": true
+    },
+    "kit808": {
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        0,
+        16008,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        0,
+        11
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44076,
+      "peak_pcm16": 13122,
+      "pcm_sha256": "3208229b3557dcd6e9f86b91e1257d5489b3b51670269814ce8b68a339013273",
+      "observed_halves": 188,
+      "peak_callback_us": 8968,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "1ca8a369608d7c175a3c7e43c156cb68dbe7f2918ed1b34c35242ca66f18ab77",
+      "elf_sha256": "9e508e21aee67d382f184ce55f18feeaf5beea2e60f2e5bcef2adcce33c1e7d7",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "2fca8317d6b272191b54f66f1b5fb50a3dfde59489abc6c0a421817fea7adf0e",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "f52bf8e6124d53f5b0e2564917d127da7c2f361337fa892513be7ab73d8ef352",
+      "active_parts": [
+        1
+      ],
+      "passed": true
+    },
+    "kit909": {
+      "bass_kinds": [
+        0,
+        1
+      ],
+      "runtime_status": [
+        1,
+        1
+      ],
+      "peak_meter_909_808_A_B_BREAK": [
+        24487,
+        0,
+        0,
+        0,
+        0
+      ],
+      "triggered_rows_909_808": [
+        11,
+        0
+      ],
+      "last_playhead_steps": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "user_zones": [
+        0,
+        1,
+        0
+      ],
+      "loop_count": 1,
+      "first_catalog_slot_zone": [
+        1,
+        0
+      ],
+      "sample_rate": 44100,
+      "stereo_frames": 96768,
+      "first_half_second_nonzero_words": 0,
+      "last_half_second_nonzero_words": 44089,
+      "peak_pcm16": 13113,
+      "pcm_sha256": "a789d15f8e7b036b335b110bde5eeac5778b620fe7d60d04bc7ac2449cb074b5",
+      "observed_halves": 188,
+      "peak_callback_us": 7968,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "emulator_sha256": "086c9134b9e1047c99401d367a45d7906f6bd1a0342af3273efae15fd7c00b6e",
+      "firmware_sha256": "1ca8a369608d7c175a3c7e43c156cb68dbe7f2918ed1b34c35242ca66f18ab77",
+      "elf_sha256": "9e508e21aee67d382f184ce55f18feeaf5beea2e60f2e5bcef2adcce33c1e7d7",
+      "stock_seed_sha256": "297302f56716b98578dd895cf246cdc73b06fce85d4ab0fb222ce34a13eda3ff",
+      "project_objects_sha256": "c577490ae3b9bb720627b4038253aa092e82916318a2f67d20be3c98b8221c62",
+      "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+      "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+      "initial_flash_sha256": "4d24aff30819178513f5ccaad648fc90c38baa6c9957dcdcc3c7e186c77eca37",
+      "active_parts": [
+        0
+      ],
+      "passed": true
+    }
+  }
+}

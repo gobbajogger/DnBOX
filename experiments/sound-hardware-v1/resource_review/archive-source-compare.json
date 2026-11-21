@@ -1,0 +1,31 @@
+{
+  "matching": 300,
+  "different": [
+    "tools/build.py",
+    "firmware/src/app/engine.h",
+    "firmware/src/app/ui_chance_probe.h",
+    "firmware/src/app/ui_pictograms.h",
+    "firmware/src/app/ui_drum_voice.inc",
+    "firmware/src/app/original_sound.c",
+    "firmware/src/app/ui.c",
+    "firmware/src/app/engine.c",
+    "firmware/src/dsp/drum909.c",
+    "firmware/src/dsp/drum808.h",
+    "firmware/src/dsp/envelope_snapshot.h",
+    "firmware/src/dsp/drum808.c",
+    "firmware/src/app/gfinal/ui_chance_exact.c"
+  ],
+  "not_current_tree": [
+    "LICENSE",
+    "docs/lanes/integ.md",
+    "tests/host/audio_path_stress.py",
+    "tests/host/synth_peak_test.c",
+    "tests/host/audio_stress_test.c",
+    "tests/host/chicago_presentation_test.c",
+    "tests/host/audio_stress_test.sh",
+    "tests/host/audio_path_stress.c",
+    "tests/host/audio_path_identity.py",
+    "tests/host/audio_path_identity.c",
+    "tests/host/original_build.sh"
+  ]
+}

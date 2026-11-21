@@ -1,0 +1,37 @@
+{
+  "factory": {
+    "banks": 12,
+    "programs": 640,
+    "serialized_field_rows": 90549,
+    "known_rows_by_role": {
+      "global_preserved_by_engine_preset": 75,
+      "main_preset_control": 90049,
+      "recognized_legacy_outside_main_order": 151
+    },
+    "legacy_name_only": {
+      "neonlimiterAmount": 240,
+      "neontubeRageAmount": 34
+    },
+    "all_name_binary32_roundtrip_sha256": "34b5a527a8bc4c1f19198fded89a108153735c47561c6550ca3080a07f9f52c4"
+  },
+  "runtime": {
+    "factory_records": 640,
+    "field_edits": 2560,
+    "long_decays": 22,
+    "raw_only_fields": 87640,
+    "global_fields_skipped": 75,
+    "presence_readbacks": 139520,
+    "maximum_absolute_error": 2.56362248052e-06,
+    "layer1_changed_samples": 0,
+    "layer2_changed_samples": [
+      17706,
+      17602,
+      17602,
+      16384
+    ],
+    "frames_per_audio_pair": 32768,
+    "peer_audible_samples": 254,
+    "part_bytes": 2264,
+    "juno_bytes": 2356
+  }
+}

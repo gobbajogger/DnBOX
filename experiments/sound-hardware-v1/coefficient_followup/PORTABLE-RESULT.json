@@ -1,0 +1,871 @@
+{
+  "comparison": "exact binary32 words, zero tolerance; no fitted gain or time alignment",
+  "input_hashes": {
+    "static": "9b164e9b7ebf3fe95665ceaa64afb39d51442e4167305c5d7bc55e115995ade4",
+    "live": "2cafbc8eb4b7aba8e22e0820ce8116d9dc7a57e6f8c41ed162c44ed98c474cfe"
+  },
+  "methods": {
+    "coeff_fast": {
+      "samples": 379288,
+      "different_words": 0,
+      "cases": [
+        {
+          "family": "static",
+          "id": 0,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+        },
+        {
+          "family": "static",
+          "id": 1,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+        },
+        {
+          "family": "static",
+          "id": 2,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+        },
+        {
+          "family": "live",
+          "id": 0,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 1,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 2,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 3,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+        },
+        {
+          "family": "live",
+          "id": 4,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 5,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+        },
+        {
+          "family": "live",
+          "id": 6,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+        }
+      ]
+    },
+    "coeff_exp2": {
+      "samples": 379288,
+      "different_words": 0,
+      "cases": [
+        {
+          "family": "static",
+          "id": 0,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+        },
+        {
+          "family": "static",
+          "id": 1,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+        },
+        {
+          "family": "static",
+          "id": 2,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+        },
+        {
+          "family": "live",
+          "id": 0,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 1,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 2,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 3,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+        },
+        {
+          "family": "live",
+          "id": 4,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 5,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+        },
+        {
+          "family": "live",
+          "id": 6,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+        }
+      ]
+    },
+    "coeff_double_x": {
+      "samples": 379288,
+      "different_words": 0,
+      "cases": [
+        {
+          "family": "static",
+          "id": 0,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+        },
+        {
+          "family": "static",
+          "id": 1,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+        },
+        {
+          "family": "static",
+          "id": 2,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+        },
+        {
+          "family": "live",
+          "id": 0,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 1,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 2,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 3,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+        },
+        {
+          "family": "live",
+          "id": 4,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 5,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+        },
+        {
+          "family": "live",
+          "id": 6,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+        }
+      ]
+    },
+    "coeff_fixed": {
+      "samples": 379288,
+      "different_words": 0,
+      "cases": [
+        {
+          "family": "static",
+          "id": 0,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+        },
+        {
+          "family": "static",
+          "id": 1,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+        },
+        {
+          "family": "static",
+          "id": 2,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+        },
+        {
+          "family": "live",
+          "id": 0,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 1,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 2,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 3,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+        },
+        {
+          "family": "live",
+          "id": 4,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 5,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+        },
+        {
+          "family": "live",
+          "id": 6,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+        }
+      ]
+    },
+    "coeff_oracle": {
+      "samples": 379288,
+      "different_words": 0,
+      "cases": [
+        {
+          "family": "static",
+          "id": 0,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "aac416d7decf6b0a913cdf9bb3029305358e0790a74677fd36bd8a334e94bf38"
+        },
+        {
+          "family": "static",
+          "id": 1,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "7b913d4a6e7d0191a426c256dafe1900ba347fd1d9dbf787ba0c28f445e34aa8"
+        },
+        {
+          "family": "static",
+          "id": 2,
+          "samples": 88200,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "19f889ffcf59744691f9302fe970f57cda2101294f651fb29becc456be126293"
+        },
+        {
+          "family": "live",
+          "id": 0,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 1,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 2,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 3,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "85a6160479acf71607cc395f273751293ababf42455066f789053920780ba153"
+        },
+        {
+          "family": "live",
+          "id": 4,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+        },
+        {
+          "family": "live",
+          "id": 5,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "a79469d92c145265dca159aef1fa3b12258e6cd51167ae6c846714cad4c9c3f0"
+        },
+        {
+          "family": "live",
+          "id": 6,
+          "samples": 16384,
+          "different_words": 0,
+          "first_different_frame": null,
+          "max_absolute_error": 0.0,
+          "rms_error": 0.0,
+          "finite": true,
+          "candidate_sha256": "23f576567cc99abefd654bb8dc0176aaa744be78959ed4baa468f1b47c23e616"
+        }
+      ]
+    }
+  },
+  "coefficient_words": [
+    {
+      "seconds": 0.05000000074505806,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "49e27f3f",
+        "coeff_exp2": "49e27f3f",
+        "coeff_double_x": "49e27f3f",
+        "coeff_fixed": "49e27f3f",
+        "coeff_oracle": "49e27f3f"
+      }
+    },
+    {
+      "seconds": 0.05000000074505806,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "7cce7f3f",
+        "coeff_exp2": "7cce7f3f",
+        "coeff_double_x": "7cce7f3f",
+        "coeff_fixed": "7cce7f3f",
+        "coeff_oracle": "7cce7f3f"
+      }
+    },
+    {
+      "seconds": 0.004999999888241291,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "75d77e3f",
+        "coeff_exp2": "75d77e3f",
+        "coeff_double_x": "75d77e3f",
+        "coeff_fixed": "75d77e3f",
+        "coeff_oracle": "75d77e3f"
+      }
+    },
+    {
+      "seconds": 0.004999999888241291,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "82127e3f",
+        "coeff_exp2": "82127e3f",
+        "coeff_double_x": "82127e3f",
+        "coeff_fixed": "82127e3f",
+        "coeff_oracle": "82127e3f"
+      }
+    },
+    {
+      "seconds": 0.20000000298023224,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "92f87f3f",
+        "coeff_exp2": "92f87f3f",
+        "coeff_double_x": "92f87f3f",
+        "coeff_fixed": "92f87f3f",
+        "coeff_oracle": "92f87f3f"
+      }
+    },
+    {
+      "seconds": 0.20000000298023224,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "9ef37f3f",
+        "coeff_exp2": "9ef37f3f",
+        "coeff_double_x": "9ef37f3f",
+        "coeff_fixed": "9ef37f3f",
+        "coeff_oracle": "9ef37f3f"
+      }
+    },
+    {
+      "seconds": 0.30000001192092896,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "0cfb7f3f",
+        "coeff_exp2": "0cfb7f3f",
+        "coeff_double_x": "0cfb7f3f",
+        "coeff_fixed": "0cfb7f3f",
+        "coeff_oracle": "0cfb7f3f"
+      }
+    },
+    {
+      "seconds": 0.30000001192092896,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "bff77f3f",
+        "coeff_exp2": "bff77f3f",
+        "coeff_double_x": "bff77f3f",
+        "coeff_fixed": "bff77f3f",
+        "coeff_oracle": "bff77f3f"
+      }
+    },
+    {
+      "seconds": 0.5,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "07fd7f3f",
+        "coeff_exp2": "07fd7f3f",
+        "coeff_double_x": "07fd7f3f",
+        "coeff_fixed": "07fd7f3f",
+        "coeff_oracle": "07fd7f3f"
+      }
+    },
+    {
+      "seconds": 0.5,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "0cfb7f3f",
+        "coeff_exp2": "0cfb7f3f",
+        "coeff_double_x": "0cfb7f3f",
+        "coeff_fixed": "0cfb7f3f",
+        "coeff_oracle": "0cfb7f3f"
+      }
+    },
+    {
+      "seconds": 0.0005000000237487257,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "3ca6743f",
+        "coeff_exp2": "3ca6743f",
+        "coeff_double_x": "3ca6743f",
+        "coeff_fixed": "3ca6743f",
+        "coeff_oracle": "3ca6743f"
+      }
+    },
+    {
+      "seconds": 0.0005000000237487257,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "fe5c6d3f",
+        "coeff_exp2": "fe5c6d3f",
+        "coeff_double_x": "fe5c6d3f",
+        "coeff_fixed": "fe5c6d3f",
+        "coeff_oracle": "fe5c6d3f"
+      }
+    },
+    {
+      "seconds": 0.004000000189989805,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "888d7e3f",
+        "coeff_exp2": "888d7e3f",
+        "coeff_double_x": "888d7e3f",
+        "coeff_fixed": "888d7e3f",
+        "coeff_oracle": "888d7e3f"
+      }
+    },
+    {
+      "seconds": 0.004000000189989805,
+      "attack": true,
+      "words_le": {
+        "coeff_fast": "b8977d3f",
+        "coeff_exp2": "b8977d3f",
+        "coeff_double_x": "b8977d3f",
+        "coeff_fixed": "b8977d3f",
+        "coeff_oracle": "b8977d3f"
+      }
+    }
+  ],
+  "edge_probes": [
+    {
+      "seconds": 0.0,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "00000000",
+        "coeff_exp2": "00000000",
+        "coeff_double_x": "00000000",
+        "coeff_fixed": "00000000",
+        "coeff_oracle": "00000000"
+      }
+    },
+    {
+      "seconds": 1.000000013351432e-10,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "00000000",
+        "coeff_exp2": "00000000",
+        "coeff_double_x": "00000000",
+        "coeff_fixed": "00000000",
+        "coeff_oracle": "00000000"
+      }
+    },
+    {
+      "seconds": 2.519526276500983e-07,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "00000000",
+        "coeff_exp2": "00000000",
+        "coeff_double_x": "00000000",
+        "coeff_fixed": "27ec0800",
+        "coeff_oracle": "27ec0800"
+      }
+    },
+    {
+      "seconds": 2.2675736488508846e-07,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "00000000",
+        "coeff_exp2": "00000000",
+        "coeff_double_x": "00000000",
+        "coeff_fixed": "1b000000",
+        "coeff_oracle": "1b000000"
+      }
+    },
+    {
+      "seconds": 2.159594032491441e-07,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "00000000",
+        "coeff_exp2": "00000000",
+        "coeff_double_x": "00000000",
+        "coeff_fixed": "00000000",
+        "coeff_oracle": "00000000"
+      }
+    },
+    {
+      "seconds": 0.0005000000237487257,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "3ca6743f",
+        "coeff_exp2": "3ca6743f",
+        "coeff_double_x": "3ca6743f",
+        "coeff_fixed": "3ca6743f",
+        "coeff_oracle": "3ca6743f"
+      }
+    },
+    {
+      "seconds": 2.0,
+      "attack": false,
+      "words_le": {
+        "coeff_fast": "42ff7f3f",
+        "coeff_exp2": "42ff7f3f",
+        "coeff_double_x": "42ff7f3f",
+        "coeff_fixed": "42ff7f3f",
+        "coeff_oracle": "42ff7f3f"
+      }
+    }
+  ],
+  "negative_control": {
+    "mutation": "one ULP higher attack retention",
+    "rejected": true,
+    "samples": 16384,
+    "different_words": 8332,
+    "first_different_frame": 0,
+    "max_absolute_error": 0.0008636713027954102,
+    "rms_error": 7.188004516572009e-05,
+    "finite": true,
+    "candidate_sha256": "c7431e6d60fbaf115fd7a691a15db66cd0b7fe6c8fbafd902c389a8c58084a22"
+  },
+  "wall_seconds": 2.1073895969893783,
+  "maximum_rss_kib": 19080,
+  "source_hashes": {
+    "candidate.h": "e4a497ae1d55ccf9af954c86bc5fc1059a404cd05d62126e61f23c073ecd81ec",
+    "fixed_candidate.h": "ae891a0dcc2d3fd71f5ae59b6882120033fbf4bf0df26d385afe7e7d64435e05",
+    "coefficients.c": "587de061b90863d47dcf5ba5d68a5acf80ff949eeb1f5804ce558bd35eaf1e67",
+    "check.py": "8122646a5a83262775438508f23f22c4d85c19d1f2520202d1266556c7b2e412",
+    "sweep.c": "324185e40c8052fb0751225ec46931784b8242baf966c54572f09abe1ba65605",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "proposed_s1_envelope.py": "ce90901e16910fe54cd4ddb3381f8d4604ec578035f4fcd575d2984d9c7eea98"
+  },
+  "metadata_sha256": {
+    "experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/envelope_observations.json": "108f75f3965c95e1d3e2259e9d70f076bea4ca18843ec0af29e1477c0dd6d163",
+    "tests/fixtures/synthone-envelope-live/observations.json": "03bbf96fd3171db6af5854241b7ec3272ecff3f44161dc2caa282070b2882390",
+    "tests/fixtures/synthone-envelope-live/case_plan.json": "336e0313c6b1a4f3fb39a232f6ca74f7a53c2103cdedb225518070740dd3f4a3"
+  },
+  "build_command": [
+    "cc",
+    "-std=c99",
+    "-O2",
+    "-shared",
+    "-fPIC",
+    "-DX0X_HOST",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-I/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/candidate_review/compact_profile_review/snapshot",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/coefficient_followup/coefficients.c",
+    "-lm",
+    "-o",
+    "/workspace/scratch/e803955aec60/implementation_evidence/coefficient-portable-guarded/coefficients.so"
+  ],
+  "build_exit": 0,
+  "scoped_pass": true
+}

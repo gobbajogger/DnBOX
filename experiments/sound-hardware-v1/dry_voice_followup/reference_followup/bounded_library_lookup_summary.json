@@ -1,0 +1,25 @@
+{
+  "schema": "bounded exact missing-identity Library lookup v1",
+  "created_utc_date": "2026-11-19",
+  "hash_and_historical_tree_queries": [
+    "\"902982a924af09358d9bd76070ce7cdce1846b50aa029524ea86dde285e0d692\"",
+    "\"50a7229f0b7d2b3bd1b74966a2f89a321e6ead9b79e21e25de42c1aca80bac30\"",
+    "\"5cbd6800919d813b4f755783c9aa374f8103d7fb065912eed86b52781a189b19\"",
+    "\"1e98f858dcaef753823d3f22ccaff356cf7aa1409010579530de4a9d9683612c\"",
+    "\"pristine-callback32\""
+  ],
+  "hash_and_tree_results_count": 20,
+  "literal_query_terms_seen_in_returned_snippets": 0,
+  "title_only_queries": [
+    "\"scheduler.hpp\"",
+    "\"source_scheduler.hpp\"",
+    "\"portable_interface.hpp\"",
+    "\"dependency-025.o\"",
+    "\"pristine-callback32\""
+  ],
+  "title_exact_results_count": 0,
+  "conclusion": "No verified exact missing input recovered by these bounded queries.",
+  "limitation": "This is not an exhaustive absence claim for unindexed archive contents. The known local recovery inventory remains authoritative for previously inspected archives; no broad repeated Library or filesystem search was performed.",
+  "previous_pcm_search_scope": "The prior packet already recorded a narrow modulation-archive title search and inventories of the named source/PCM archives. That exhausted lookup was not repeated.",
+  "scope": "Counts and exact task queries only; unrelated search result identifiers omitted."
+}

@@ -1,0 +1,518 @@
+{
+  "schema": "exact staged original-reference closure v1",
+  "created_utc": "2026-11-19T00:15:14.613808+00:00",
+  "count": 39,
+  "source_root": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full",
+  "staged_root": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference",
+  "original_source_files_unmodified": true,
+  "canonical_git_writes": false,
+  "rows": [
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/baseline/o2.a5c67ubr/public-morphs.f32",
+        "bytes": 852176,
+        "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+        "bytes": 852176,
+        "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/generated/parameter_map.hpp",
+        "bytes": 447,
+        "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/controls/generated/parameter_map.hpp",
+        "bytes": 447,
+        "sha256": "5c2f6af11680eada602624ba29b6db78a100a97d858dd1f852f64b079c64a427"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/controls/parameter_ports.hpp",
+        "bytes": 1836,
+        "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/controls/parameter_ports.hpp",
+        "bytes": 1836,
+        "sha256": "b533cc60b93da7df64aca34be3f382ff0191ffd2c4f6db6275bffcd06c665f61"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+        "bytes": 129191,
+        "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/lib/dr_wav/dr_wav.h",
+        "bytes": 129191,
+        "sha256": "0189f571847dd300c4749830f66c21003ab1d5ee17f0c64ab56659c3c5351ed2"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/adsr.c",
+        "bytes": 2066,
+        "sha256": "816310221f5ce2e04751d7f284a61cc9057cbabf44deef7366a085c57ca310dc"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/adsr.c",
+        "bytes": 2066,
+        "sha256": "816310221f5ce2e04751d7f284a61cc9057cbabf44deef7366a085c57ca310dc"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c",
+        "bytes": 4448,
+        "sha256": "65eea7830ffdc039e8e18a6234c676f0b2e31b9cc02d5ee51020d94070bd7296"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/base.c",
+        "bytes": 4448,
+        "sha256": "65eea7830ffdc039e8e18a6234c676f0b2e31b9cc02d5ee51020d94070bd7296"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/butbp.c",
+        "bytes": 1644,
+        "sha256": "35228571e2904402ec60b733713090c768ca84f5dab96521b9fd6b7f74dac867"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/butbp.c",
+        "bytes": 1644,
+        "sha256": "35228571e2904402ec60b733713090c768ca84f5dab96521b9fd6b7f74dac867"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/buthp.c",
+        "bytes": 1663,
+        "sha256": "00d71f10b1cd4ae80cbdd8c221dd6f92781231bb0ac43426fe3fc512ab31cadf"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/buthp.c",
+        "bytes": 1663,
+        "sha256": "00d71f10b1cd4ae80cbdd8c221dd6f92781231bb0ac43426fe3fc512ab31cadf"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/crossfade.c",
+        "bytes": 488,
+        "sha256": "2a472e538671aea47e8db36c671ee6804f176cc6a951c267de27c6344152b906"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/crossfade.c",
+        "bytes": 488,
+        "sha256": "2a472e538671aea47e8db36c671ee6804f176cc6a951c267de27c6344152b906"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/fosc.c",
+        "bytes": 2018,
+        "sha256": "bffb48406abd1705f8d9b3ddde5dad449dafabb1fe6ed091b6decac3f76557b6"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/fosc.c",
+        "bytes": 2018,
+        "sha256": "bffb48406abd1705f8d9b3ddde5dad449dafabb1fe6ed091b6decac3f76557b6"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c",
+        "bytes": 9100,
+        "sha256": "1f5a6aa4fded5dcceae3859717b0722d8efeb1b9ffa129f6bd7a6425be29e9c0"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/ftbl.c",
+        "bytes": 9100,
+        "sha256": "1f5a6aa4fded5dcceae3859717b0722d8efeb1b9ffa129f6bd7a6425be29e9c0"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/moogladder.c",
+        "bytes": 3201,
+        "sha256": "d784563da2cd3243ab28f9020aa696db0d2ea208d92924c97ae36a1aba4a01ba"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/moogladder.c",
+        "bytes": 3201,
+        "sha256": "d784563da2cd3243ab28f9020aa696db0d2ea208d92924c97ae36a1aba4a01ba"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/noise.c",
+        "bytes": 524,
+        "sha256": "cf33ac6e9f99b85f386643b96e8de32db717101a4be3a158e9aa75a422a0dbae"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/noise.c",
+        "bytes": 524,
+        "sha256": "cf33ac6e9f99b85f386643b96e8de32db717101a4be3a158e9aa75a422a0dbae"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/osc.c",
+        "bytes": 1451,
+        "sha256": "630f55b96f50e56d1d9735fd67654b980523023dbca634ae5479f5d0d6aa6b9d"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/osc.c",
+        "bytes": 1451,
+        "sha256": "630f55b96f50e56d1d9735fd67654b980523023dbca634ae5479f5d0d6aa6b9d"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/phasor.c",
+        "bytes": 993,
+        "sha256": "264477d11086f19f4702c598604748ada3b445b58a80ab4e8108cff0d37e3103"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/phasor.c",
+        "bytes": 993,
+        "sha256": "264477d11086f19f4702c598604748ada3b445b58a80ab4e8108cff0d37e3103"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/port.c",
+        "bytes": 1163,
+        "sha256": "2a0451a80fd74ab52805114609bb937df662492858f5768c120da8af7af1a490"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/modules/port.c",
+        "bytes": 1163,
+        "sha256": "2a0451a80fd74ab52805114609bb937df662492858f5768c120da8af7af1a490"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+        "bytes": 51563,
+        "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe/soundpipe.h",
+        "bytes": 51563,
+        "sha256": "f3a87027492c30d73c5d87d964010f3042220dbcd436556c0b47c82119781386"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c",
+        "bytes": 3601,
+        "sha256": "455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c",
+        "bytes": 3601,
+        "sha256": "455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+        "bytes": 847,
+        "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/soundpipeextension.h",
+        "bytes": 847,
+        "sha256": "71b6cbe60b8cbc1cba7bf801b10410a33f7f52cf92572e93762b1c9ea9f629a3"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/portable_interface.hpp",
+        "bytes": 9271,
+        "sha256": "85f94a7f2f5c590ddcc83d7021c77be6d72f2647b8761d8f6de7cd32ee0e0963"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/probe/portable_interface.hpp",
+        "bytes": 9271,
+        "sha256": "85f94a7f2f5c590ddcc83d7021c77be6d72f2647b8761d8f6de7cd32ee0e0963"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/portable_voice.cpp",
+        "bytes": 16843,
+        "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/probe/portable_voice.cpp",
+        "bytes": 16843,
+        "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/probe/wave_frequencies.h",
+        "bytes": 189,
+        "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/probe/wave_frequencies.h",
+        "bytes": 189,
+        "sha256": "80cee39150503efd05b1bf5ea8f0e117dea401f8814ecc8a6664cdb2827cf1be"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/experiment/shared-graph/shared_graph.hpp",
+        "bytes": 2583,
+        "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/experiment/shared-graph/shared_graph.hpp",
+        "bytes": 2583,
+        "sha256": "137576968b44d5508f919ad54a49a717a3bcec0482e25cde64bb3c7a26231bfc"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/checked_domain.cpp",
+        "bytes": 1598,
+        "sha256": "353696102b6cf9cdb1432e79e3d89dbaff033bca8c6894c51b630ab268abffb2"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/checked_domain.cpp",
+        "bytes": 1598,
+        "sha256": "353696102b6cf9cdb1432e79e3d89dbaff033bca8c6894c51b630ab268abffb2"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/compact-reader/compact.h",
+        "bytes": 2085,
+        "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/compact-reader/compact.h",
+        "bytes": 2085,
+        "sha256": "fd5c5c69f1cbc1960d0c8e48fcaad336487dafa8f5ad1bb42c487877230755c6"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/compact_note.hpp",
+        "bytes": 187,
+        "sha256": "a60abde6f97fda1f63cb182b6521420ff3cf0d22711239956a7cca080cec28a2"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/compact_note.hpp",
+        "bytes": 187,
+        "sha256": "a60abde6f97fda1f63cb182b6521420ff3cf0d22711239956a7cca080cec28a2"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/fixed_array.hpp",
+        "bytes": 591,
+        "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/fixed_array.hpp",
+        "bytes": 591,
+        "sha256": "59996ab6623acb2dcd31ce91d46ae4df4e7dc918156e341767558281c0751740"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/float_math.h",
+        "bytes": 2314,
+        "sha256": "96c9feca77a87aa581b41e160a76c214d54645b27abfe447e8c726390a394d19"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/float_math.h",
+        "bytes": 2314,
+        "sha256": "96c9feca77a87aa581b41e160a76c214d54645b27abfe447e8c726390a394d19"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.cpp",
+        "bytes": 15066,
+        "sha256": "b277765fe76447b81c55da91e4b70ed1d28f5151971a4f956cd2c187bc516fe2"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/full_oracle.cpp",
+        "bytes": 15066,
+        "sha256": "b277765fe76447b81c55da91e4b70ed1d28f5151971a4f956cd2c187bc516fe2"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle.hpp",
+        "bytes": 2696,
+        "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/full_oracle.hpp",
+        "bytes": 2696,
+        "sha256": "f96fb1a7fff822870bbbb7047fdb9eb6d1f266c2db3bd7c33709501646458db6"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/full_oracle_state.hpp",
+        "bytes": 2045,
+        "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/full_oracle_state.hpp",
+        "bytes": 2045,
+        "sha256": "b5aac8a8c2a684cfe54f556f76e525f366a991e686dd4a8991a2e4ffea7c3870"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/oracle/state.hpp",
+        "bytes": 2563,
+        "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/oracle/state.hpp",
+        "bytes": 2563,
+        "sha256": "4e01c666594c785dc46fc2db05dceb858428c2fb8796af47de7ead8ece2e85c8"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/direct_reader.h",
+        "bytes": 1157,
+        "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/reader/direct_reader.h",
+        "bytes": 1157,
+        "sha256": "ad6ef571ed39bbcf8b3f090bd97355c5145eeb5c9af225878b2fc4dc100589bf"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/reader/runtime_note.hpp",
+        "bytes": 182,
+        "sha256": "2943c6d7ab1d283e8518fb52d9f93ffd9a74249f6c5f677f224a068673ee0d80"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/reader/runtime_note.hpp",
+        "bytes": 182,
+        "sha256": "2943c6d7ab1d283e8518fb52d9f93ffd9a74249f6c5f677f224a068673ee0d80"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/scheduler.cpp",
+        "bytes": 20808,
+        "sha256": "aebcbaf53423ca916b8c746dbb9811279e1bd8dfccaf9a6af1150b56c1542fb5"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/scheduler.cpp",
+        "bytes": 20808,
+        "sha256": "aebcbaf53423ca916b8c746dbb9811279e1bd8dfccaf9a6af1150b56c1542fb5"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/scheduler.hpp",
+        "bytes": 9575,
+        "sha256": "764a81e077ef194fd05ad5af978b1176a0f0feb242ebbb9dbe86ff4e26fc93c9"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/scheduler.hpp",
+        "bytes": 9575,
+        "sha256": "764a81e077ef194fd05ad5af978b1176a0f0feb242ebbb9dbe86ff4e26fc93c9"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/original_sequence.hpp",
+        "bytes": 20259,
+        "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/source-sequence/original_sequence.hpp",
+        "bytes": 20259,
+        "sha256": "8255b02f857d30c5759d6d3edf5d4f6c4c94231da0f0899ee0ebce7caa2123c0"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/67e685478953/superj6_research/sound_reference/DnBOX-Sound-694-factory-reconstruction-20261117-1612/sound-reconstruction-20261117/factory-full/closure/scheduler/source-sequence/sequence_types.hpp",
+        "bytes": 4646,
+        "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/staged_reference/closure/scheduler/source-sequence/sequence_types.hpp",
+        "bytes": 4646,
+        "sha256": "216c886213354f6df0136d6c958976c56ba738c1580444e95d1c823de5f8aa5c"
+      },
+      "comparison_only": true
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/e803955aec60/dry_reference_packet/case_plan.json",
+        "bytes": 177344,
+        "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
+      },
+      "staged": {
+        "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/case_plan.json",
+        "bytes": 177344,
+        "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
+      },
+      "comparison_only": true
+    }
+  ]
+}

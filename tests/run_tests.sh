@@ -298,9 +298,12 @@ W="-O2 -ffp-contract=off -Wall -Wextra -Wdouble-promotion -Werror"
 # Composed 0.0.25 regressions exercise the production UI, engine, storage and MIDI paths.
 run composed-features sh tests/host/composed_features_test.sh
 run juno6-runtime sh tests/host/juno6_runtime_test.sh "$OUT/juno6-runtime"
+run synthone-init-audio sh tests/host/synthone_init_audio.sh "$OUT/synthone-init-audio"
 run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
 run legacy-slot2-map sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Iexperiments/original_synth tests/host/legacy_slot2_map_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/legacy_slot2_map && $OUT/legacy_slot2_map"
 run juno6-dsp sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src/dsp -o $OUT/juno6_test tests/host/juno6_test.c firmware/src/dsp/juno6.c -lm && $OUT/juno6_test"
+run juno6-factory sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0 -Ifirmware/src/dsp -o $OUT/juno6_factory tests/host/juno6_factory_test.c firmware/src/dsp/juno6.c firmware/src/dsp/dnbx_core.c -lm && $OUT/juno6_factory"
+run superj6-factory-load sh tests/host/superj6_factory_load_test.sh
 run usb-retry sh tests/host/run_usb_retry.sh
 run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
 run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c SMC_UI_OUT=build/host/composed-smc-panic sh tests/host/smc_ui_test.sh
@@ -308,6 +311,7 @@ run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
 run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
 run synthone-slot env SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/synthone-slot sh tests/host/smc_ui_test.sh
+run synthone-envelope-dnbx python3 -B tests/host/test_synthone_dnbx_envelope.py
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
 run project-rates-companion sh tests/host/project_rates_companion_test.sh
@@ -493,6 +497,7 @@ run smc-pause-loss sh tests/host/smc_pause_loss_test.sh
 run smk-wheel-mode sh tests/host/smk_wheel_mode_test.sh
 run miami-table-interpolation sh tests/host/run_miami_table_interpolation.sh
 run miami-coef-cache sh tests/host/run_miami_coef_cache.sh
+run miami-stereo sh tests/host/run_miami_stereo_split.sh
 run legacy-303-project sh tests/host/legacy_303_project_test.sh   # old bass303 projects load as the Chicago default, no crash, no save
 run smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py

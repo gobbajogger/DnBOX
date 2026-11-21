@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "baseline_sha256": "7aded201280455c1ddaee86abab4d82b6d791953e81d0d9cb40e17946cbfa380",
+  "replay_sha256": "7aded201280455c1ddaee86abab4d82b6d791953e81d0d9cb40e17946cbfa380",
+  "byte_identical": true,
+  "receipt": {
+    "mode": "static",
+    "frames_per_note": 88192,
+    "notes": [
+      36,
+      60,
+      84
+    ],
+    "warmup_frames": 176448,
+    "off_frame": 66112,
+    "sample_rate_hz": 44100,
+    "nonfinite": 0,
+    "phase_at_note_on": 0,
+    "comparison_gain": 1,
+    "velocity": 100,
+    "cutoff_hex": "44fa0000",
+    "resonance_hex": "3f666666",
+    "depth_hex": "00000000",
+    "filter_ADSR_hex": [
+      "3d4ccccd",
+      "3d4ccccd",
+      "3f800000",
+      "3f000000"
+    ]
+  }
+}

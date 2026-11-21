@@ -1,0 +1,27 @@
+{
+  "schema": "S1 component envelope diagnostic, declared before execution, v1",
+  "purpose": "Observe previously unmeasured live parameter changes and one-sample gate restarts; compare the accepted DnBOX core only where component orchestration is comparable.",
+  "sample_rate": 44100,
+  "frames_per_case": 16384,
+  "settings_ADSR": [0.05, 0.005, 0.8, 0.05],
+  "gate_on_frame": 0,
+  "gate_off_frame": 12288,
+  "candidate_mapping": "Direct physical ADSR to current amp AHDSHR, with hold and release hold zero; no timing, scale or gain fitting.",
+  "threshold": null,
+  "verdict_policy": "Diagnostic measurements only. Exact frame/word differences are reported, not treated as a predeclared acceptance tolerance. S1/SJ6 full-instrument admission remains open.",
+  "cases": [
+    {"id": 0, "name": "unchanged", "change_frame": -1, "parameter": -1, "value": 0, "gap_frame": -1, "candidate_comparable": true},
+    {"id": 1, "name": "attack_edit", "change_frame": 1000, "parameter": 0, "value": 0.2, "gap_frame": -1, "candidate_comparable": true},
+    {"id": 2, "name": "decay_edit", "change_frame": 7000, "parameter": 1, "value": 0.2, "gap_frame": -1, "candidate_comparable": true},
+    {"id": 3, "name": "sustain_edit", "change_frame": 10000, "parameter": 2, "value": 0.2, "gap_frame": -1, "candidate_comparable": true},
+    {"id": 4, "name": "release_edit", "change_frame": 13000, "parameter": 3, "value": 0.3, "gap_frame": -1, "candidate_comparable": true},
+    {"id": 5, "name": "retrigger_during_decay", "change_frame": -1, "parameter": -1, "value": 0, "gap_frame": 8192, "candidate_comparable": false},
+    {"id": 6, "name": "retrigger_during_attack", "change_frame": -1, "parameter": -1, "value": 0, "gap_frame": 1000, "candidate_comparable": false}
+  ],
+  "limits": [
+    "Original source executes only in the comparison binary.",
+    "Retrigger cases describe a single original ADSR component receiving a one-sample low gate; they do not establish full-instrument note allocation or lifecycle.",
+    "Candidate comparison uses the public part/set-layer/note/render/read-voice APIs and makes no claim of S1 conformance.",
+    "No whole preset, original app, complete FX, target timing, or native hardware test is run."
+  ]
+}

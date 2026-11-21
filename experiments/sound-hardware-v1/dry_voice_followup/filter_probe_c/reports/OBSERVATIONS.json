@@ -1,0 +1,793 @@
+{
+  "schema": "matched frozen C filter-only numeric observations v1",
+  "status": "DIAGNOSTIC_COMPLETE_NO_ACCEPTANCE_THRESHOLD",
+  "response_records": 8,
+  "protocol": {
+    "sample_rate_hz": 44100,
+    "cutoff_hz": 2000,
+    "fresh_owner_per_record": true,
+    "resonance_f32_hex": [
+      "00000000",
+      "3f666666"
+    ],
+    "silent_prewarm_frames": 4096,
+    "retained_frames": 32768,
+    "steady_window": [
+      16384,
+      32768
+    ],
+    "response_records": 8,
+    "filter_path": "unchanged frozen C private filter_substep twice with held input, mean of two outputs",
+    "oscillator_VCA_envelope_advance": false,
+    "gain_alignment_fitting_normalization": "none"
+  },
+  "analysis": {
+    "acceptance_gate": "none; component diagnostic, not historic three-note gate",
+    "rms": "unmodified whole and16384:32768 input/output RMS and20log10 output/input ratio; null when input RMS zero",
+    "sine_spectral": "fixed2000Hz and harmonics2-5 projections in steady Hann window; report transfer ratio/phase and harmonics relative to own fundamental; no fitting or waveform adjustment",
+    "impulse_spectral": "whole unwindowed fixed-frequency response ratios at0,500,1000,2000,4000,8000,16000,22050Hz",
+    "reference_differences": "unshifted direct differences and measured ratio differences only",
+    "feedback_argument": "read-only reconstructed(current output+4old1+6old2+4old3+old4)/16; not exact traced solver d; never fed to DSP"
+  },
+  "declaration_sha256": "aa379b545c0515a25e6ee83505b94e1c9b5bd51014f1dd4e5d9ade79db8c8d99",
+  "capture_result_sha256": "98c086bda4bbaeb91dc2a503eeefbbe1949d287b53a87075e878ac3674ceabd6",
+  "total_candidate_nonfinite": 0,
+  "rows": [
+    {
+      "case_id": "impulse_a38d1b717_r00000000",
+      "input_kind": "impulse",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+      "input_sha256": "315f40d24b918c665d1b28a2cb97d1378c6a6ae2b5b661dc297161e937814799",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/impulse_a38d1b717_r00000000.original-filter.f32le",
+      "reference_sha256": "a359504d52a530642a8d765d0eb63d8e07d8aa6bcb57c4c07ba2b7abadb0d113",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r00000000.C-filter.f32le",
+      "candidate_sha256": "0d4fcff004cf87cfcaf64d74bc312db736f1a6638ad3ee833bc3dd7bf8862245",
+      "windows": {
+        "whole": {
+          "input_rms": 5.52427158846506e-07,
+          "reference_rms": 1.1480035783278966e-07,
+          "candidate_rms": 1.1652612211671186e-07,
+          "reference_rms_gain_db": -13.646635595773876,
+          "candidate_rms_gain_db": -13.517034555590968,
+          "candidate_minus_reference_rms_db": 0.12960104018291022,
+          "direct_unshifted_difference_rms": 4.87548087802713e-09,
+          "direct_unshifted_max_absolute_difference": 3.014165486092679e-07
+        },
+        "steady": {
+          "input_rms": 0.0,
+          "reference_rms": 4.203895392974451e-45,
+          "candidate_rms": 1.6815581571897805e-44,
+          "reference_rms_gain_db": null,
+          "candidate_rms_gain_db": null,
+          "candidate_minus_reference_rms_db": 12.041199826559248,
+          "direct_unshifted_difference_rms": 1.2611686178923354e-44,
+          "direct_unshifted_max_absolute_difference": 1.2611686178923354e-44
+        }
+      },
+      "reference_peak_abs": 6.1916352933621965e-06,
+      "candidate_peak_abs": 6.363966804201482e-06,
+      "reference_peak_frame": 10,
+      "candidate_peak_frame": 10,
+      "last4096_reference_rms": 4.203895392974451e-45,
+      "last4096_candidate_rms": 1.6815581571897805e-44,
+      "diagnostic": {
+        "method": "Whole32768-sample unwindowed fixed-frequency response ratios for exact shared impulse; no alignment or fit",
+        "rows": [
+          {
+            "frequency_hz": 0,
+            "reference_gain_db": -1.6460332588818003e-07,
+            "candidate_gain_db": -4.3932640509706843e-07,
+            "candidate_minus_reference_gain_db": -2.747230797886702e-07,
+            "reference_phase_degrees": 0.0,
+            "candidate_phase_degrees": 0.0,
+            "candidate_minus_reference_phase_degrees": 0.0
+          },
+          {
+            "frequency_hz": 500,
+            "reference_gain_db": -1.1168954013978272,
+            "candidate_gain_db": -1.0540781826320833,
+            "candidate_minus_reference_gain_db": 0.06281721876574259,
+            "reference_phase_degrees": -53.79011716870313,
+            "candidate_phase_degrees": -52.16022947082728,
+            "candidate_minus_reference_phase_degrees": 1.6298876978758408
+          },
+          {
+            "frequency_hz": 1000,
+            "reference_gain_db": -4.092742451375262,
+            "candidate_gain_db": -3.8800837010354474,
+            "candidate_minus_reference_gain_db": 0.21265875033981443,
+            "reference_phase_degrees": -101.04877943205727,
+            "candidate_phase_degrees": -98.29072730470729,
+            "candidate_minus_reference_phase_degrees": 2.7580521273499947
+          },
+          {
+            "frequency_hz": 2000,
+            "reference_gain_db": -12.582803301146742,
+            "candidate_gain_db": -12.055960339433385,
+            "candidate_minus_reference_gain_db": 0.5268429617133578,
+            "reference_phase_degrees": -167.47337737740247,
+            "candidate_phase_degrees": -164.06114800193794,
+            "candidate_minus_reference_phase_degrees": 3.41222937546455
+          },
+          {
+            "frequency_hz": 4000,
+            "reference_gain_db": -28.853683932000855,
+            "candidate_gain_db": -28.018247012474752,
+            "candidate_minus_reference_gain_db": 0.8354369195261045,
+            "reference_phase_degrees": 135.44453487035847,
+            "candidate_phase_degrees": 138.13640305804682,
+            "candidate_minus_reference_phase_degrees": 2.691868187688329
+          },
+          {
+            "frequency_hz": 8000,
+            "reference_gain_db": -50.43753240474672,
+            "candidate_gain_db": -49.45883974983449,
+            "candidate_minus_reference_gain_db": 0.9786926549122337,
+            "reference_phase_degrees": 118.31408860275585,
+            "candidate_phase_degrees": 119.85781474701676,
+            "candidate_minus_reference_phase_degrees": 1.5437261442609078
+          },
+          {
+            "frequency_hz": 16000,
+            "reference_gain_db": -74.1316609392456,
+            "candidate_gain_db": -73.11419818440588,
+            "candidate_minus_reference_gain_db": 1.0174627548397306,
+            "reference_phase_degrees": 153.02879792955272,
+            "candidate_phase_degrees": 153.7057910991692,
+            "candidate_minus_reference_phase_degrees": 0.6769931696164575
+          },
+          {
+            "frequency_hz": 22050,
+            "reference_gain_db": -81.25197333225191,
+            "candidate_gain_db": -80.24299196266531,
+            "candidate_minus_reference_gain_db": 1.008981369586612,
+            "reference_phase_degrees": -179.9999999996866,
+            "candidate_phase_degrees": -179.99999999970788,
+            "candidate_minus_reference_phase_degrees": -2.1255697079135158e-11
+          }
+        ]
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 8.871855110932636e-10,
+        "peak_abs": 6.361730328308113e-06,
+        "rms": 1.1635023237225769e-07
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 9.265603661042452e-84,
+        "peak_abs": 1.6815581571897805e-44,
+        "rms": 1.6815581571897805e-44
+      }
+    },
+    {
+      "case_id": "impulse_a38d1b717_r3f666666",
+      "input_kind": "impulse",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+      "input_sha256": "315f40d24b918c665d1b28a2cb97d1378c6a6ae2b5b661dc297161e937814799",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/impulse_a38d1b717_r3f666666.original-filter.f32le",
+      "reference_sha256": "03648c81026761549fbb96d8c8caff415e2e04cc2c991423a510a7c2ed0a4311",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r3f666666.C-filter.f32le",
+      "candidate_sha256": "1851fa5a2b221d618e6f07c309ca171fb4d6829c43c9942499ec44fd5a93885d",
+      "windows": {
+        "whole": {
+          "input_rms": 5.52427158846506e-07,
+          "reference_rms": 1.6701152476874432e-07,
+          "candidate_rms": 1.7715820680521182e-07,
+          "reference_rms_gain_db": -10.390571610329536,
+          "candidate_rms_gain_db": -9.87827491682584,
+          "candidate_minus_reference_rms_db": 0.5122966935036949,
+          "direct_unshifted_difference_rms": 4.9257478379414045e-08,
+          "direct_unshifted_max_absolute_difference": 3.982179066497338e-07
+        },
+        "steady": {
+          "input_rms": 0.0,
+          "reference_rms": 4.203895392974451e-45,
+          "candidate_rms": 4.22672143150935e-08,
+          "reference_rms_gain_db": null,
+          "candidate_rms_gain_db": null,
+          "candidate_minus_reference_rms_db": 740.0470345029759,
+          "direct_unshifted_difference_rms": 4.22672143150935e-08,
+          "direct_unshifted_max_absolute_difference": 5.96970721744583e-08
+        }
+      },
+      "reference_peak_abs": 4.77746698379633e-06,
+      "candidate_peak_abs": 5.085468728793785e-06,
+      "reference_peak_frame": 7,
+      "candidate_peak_frame": 7,
+      "last4096_reference_rms": 4.203895392974451e-45,
+      "last4096_candidate_rms": 4.225969451599134e-08,
+      "diagnostic": {
+        "method": "Whole32768-sample unwindowed fixed-frequency response ratios for exact shared impulse; no alignment or fit",
+        "rows": [
+          {
+            "frequency_hz": 0,
+            "reference_gain_db": -13.732528437907387,
+            "candidate_gain_db": -13.174165771053577,
+            "candidate_minus_reference_gain_db": 0.5583626668538112,
+            "reference_phase_degrees": 0.0,
+            "candidate_phase_degrees": 0.0,
+            "candidate_minus_reference_phase_degrees": 0.0
+          },
+          {
+            "frequency_hz": 500,
+            "reference_gain_db": -13.221784969275959,
+            "candidate_gain_db": -12.78888300936565,
+            "candidate_minus_reference_gain_db": 0.4329019599103088,
+            "reference_phase_degrees": -8.93132107095744,
+            "candidate_phase_degrees": -8.26751819497318,
+            "candidate_minus_reference_phase_degrees": 0.6638028759842585
+          },
+          {
+            "frequency_hz": 1000,
+            "reference_gain_db": -11.40839417556837,
+            "candidate_gain_db": -10.673288125788305,
+            "candidate_minus_reference_gain_db": 0.7351060497800638,
+            "reference_phase_degrees": -18.179323044716106,
+            "candidate_phase_degrees": -17.019737940883765,
+            "candidate_minus_reference_phase_degrees": 1.1595851038323424
+          },
+          {
+            "frequency_hz": 2000,
+            "reference_gain_db": 8.219670352086613,
+            "candidate_gain_db": 3.93613573089349,
+            "candidate_minus_reference_gain_db": -4.283534621193122,
+            "reference_phase_degrees": -164.66371664546782,
+            "candidate_phase_degrees": -170.47466217045172,
+            "candidate_minus_reference_phase_degrees": -5.810945524983911
+          },
+          {
+            "frequency_hz": 4000,
+            "reference_gain_db": -28.48755603768469,
+            "candidate_gain_db": -27.55677867461113,
+            "candidate_minus_reference_gain_db": 0.9307773630735626,
+            "reference_phase_degrees": 127.56701750928629,
+            "candidate_phase_degrees": 129.93794917744688,
+            "candidate_minus_reference_phase_degrees": 2.370931668160587
+          },
+          {
+            "frequency_hz": 8000,
+            "reference_gain_db": -50.474892834289975,
+            "candidate_gain_db": -49.12198212660516,
+            "candidate_minus_reference_gain_db": 1.3529107076848124,
+            "reference_phase_degrees": 117.66856769809421,
+            "candidate_phase_degrees": 119.83285184289305,
+            "candidate_minus_reference_phase_degrees": 2.164284144798822
+          },
+          {
+            "frequency_hz": 16000,
+            "reference_gain_db": -74.13498110983338,
+            "candidate_gain_db": -73.0004712619767,
+            "candidate_minus_reference_gain_db": 1.1345098478566618,
+            "reference_phase_degrees": 152.99375687655504,
+            "candidate_phase_degrees": 145.40806363677228,
+            "candidate_minus_reference_phase_degrees": -7.585693239782765
+          },
+          {
+            "frequency_hz": 22050,
+            "reference_gain_db": -81.25353851044622,
+            "candidate_gain_db": -77.27413769624681,
+            "candidate_minus_reference_gain_db": 3.9794008141993946,
+            "reference_phase_degrees": 179.9999999975019,
+            "candidate_phase_degrees": -1.8090078549888247e-08,
+            "candidate_minus_reference_phase_degrees": 179.99999998440802
+          }
+        ]
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 2.0282571588825724e-09,
+        "peak_abs": 5.0748832904901064e-06,
+        "rms": 1.7592256294146786e-07
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 5.765825879605637e-11,
+        "peak_abs": 5.9367075699867655e-08,
+        "rms": 4.194747212121511e-08
+      }
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+      "input_sha256": "06196f135dcb21162dd08f5db34512b5cb5573027cecf8c00c25868e2fd00e56",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a38d1b717_r00000000.original-filter.f32le",
+      "reference_sha256": "ae61cb21601383930eb057dd43de5b27933369ba68227ff8c3750da777e15b0f",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r00000000.C-filter.f32le",
+      "candidate_sha256": "aea9398f430505de625f520b4b03dba80db53e342e1c044e3b8cb4ab2d2b350a",
+      "windows": {
+        "whole": {
+          "input_rms": 7.07089240557257e-05,
+          "reference_rms": 1.6613073300092143e-05,
+          "candidate_rms": 1.7651291212712152e-05,
+          "reference_rms_gain_db": -12.580484951492632,
+          "candidate_rms_gain_db": -12.053954976048262,
+          "candidate_minus_reference_rms_db": 0.5265299754443694,
+          "direct_unshifted_difference_rms": 1.4552194276012343e-06,
+          "direct_unshifted_max_absolute_difference": 2.505134034436196e-06
+        },
+        "steady": {
+          "input_rms": 7.070901155858137e-05,
+          "reference_rms": 1.6608777307250288e-05,
+          "candidate_rms": 1.7647408639332874e-05,
+          "reference_rms_gain_db": -12.582742084529539,
+          "candidate_rms_gain_db": -12.055876481055067,
+          "candidate_minus_reference_rms_db": 0.5268656034744705,
+          "direct_unshifted_difference_rms": 1.4553606573691365e-06,
+          "direct_unshifted_max_absolute_difference": 2.058141035377048e-06
+        }
+      },
+      "reference_peak_abs": 3.8373655115719885e-05,
+      "candidate_peak_abs": 3.947884397348389e-05,
+      "reference_peak_frame": 15,
+      "candidate_peak_frame": 15,
+      "last4096_reference_rms": 1.6602769726526273e-05,
+      "last4096_candidate_rms": 1.7640584495841556e-05,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": -12.582802262716005,
+          "fundamental_transfer_phase_degrees": -167.47338214843106,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -173.25788800829625,
+            "3": -169.53416206954873,
+            "4": -180.94872913245496,
+            "5": -171.2169153302911
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -166.15911098540164
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": -12.05595837314454,
+          "fundamental_transfer_phase_degrees": -164.06114886403412,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -162.54984167196895,
+            "3": -161.72623411871479,
+            "4": -168.37535965080082,
+            "5": -174.96804599616556
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -158.52274670405387
+        },
+        "candidate_minus_reference_fundamental_gain_db": 0.5268438895714666,
+        "candidate_minus_reference_fundamental_phase_degrees": 3.412233284396934,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 2.0110117584512438e-05,
+        "peak_abs": 3.944811419387406e-05,
+        "rms": 1.7517306934690255e-05
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 1.0050476161203745e-05,
+        "peak_abs": 2.4768021148702246e-05,
+        "rms": 1.7513314690343042e-05
+      }
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+      "input_sha256": "06196f135dcb21162dd08f5db34512b5cb5573027cecf8c00c25868e2fd00e56",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a38d1b717_r3f666666.original-filter.f32le",
+      "reference_sha256": "86fe9790b66b3417aded7cbfa0bbcbdea59851736b42f1d2c2067db742a14f72",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r3f666666.C-filter.f32le",
+      "candidate_sha256": "626977ffdcb56415c616a84428c037fc740b83cb531dafef7f809fc574764ed6",
+      "windows": {
+        "whole": {
+          "input_rms": 7.07089240557257e-05,
+          "reference_rms": 0.00018194952425198247,
+          "candidate_rms": 0.00016537091680067032,
+          "reference_rms_gain_db": 8.209533910451356,
+          "candidate_rms_gain_db": 7.379698105082561,
+          "candidate_minus_reference_rms_db": -0.8298358053687944,
+          "direct_unshifted_difference_rms": 1.8506741140525618e-05,
+          "direct_unshifted_max_absolute_difference": 3.470986848697066e-05
+        },
+        "steady": {
+          "input_rms": 7.070901155858137e-05,
+          "reference_rms": 0.00018216385188860412,
+          "candidate_rms": 0.00016549349365336827,
+          "reference_rms_gain_db": 8.219748693179852,
+          "candidate_rms_gain_db": 7.386123159115243,
+          "candidate_minus_reference_rms_db": -0.8336255340646108,
+          "direct_unshifted_difference_rms": 1.849766684041422e-05,
+          "direct_unshifted_max_absolute_difference": 2.616379060782492e-05
+        }
+      },
+      "reference_peak_abs": 0.0002748760743997991,
+      "candidate_peak_abs": 0.00025694112991914153,
+      "reference_peak_frame": 335,
+      "candidate_peak_frame": 280,
+      "last4096_reference_rms": 0.0001820941437932039,
+      "last4096_candidate_rms": 0.00016543325844706801,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": 8.21967076301396,
+          "fundamental_transfer_phase_degrees": -164.66371695911278,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -169.59486062309384,
+            "3": -185.61972968757235,
+            "4": -168.60093206430076,
+            "5": -171.57433451997275
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -164.9468534691941
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": 7.386062507066686,
+          "fundamental_transfer_phase_degrees": -167.30921357548954,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -129.03155259515796,
+            "3": -109.02258980855949,
+            "4": -161.208418620399,
+            "5": -141.95909219034579
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -108.97725242627567
+        },
+        "candidate_minus_reference_fundamental_gain_db": -0.8336082559472746,
+        "candidate_minus_reference_fundamental_phase_degrees": -2.6454966163767657,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 0.0017651324617974182,
+        "peak_abs": 0.0002546761734265601,
+        "rms": 0.00016411515439452307
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 0.0008838678606283119,
+        "peak_abs": 0.00023226482062455034,
+        "rms": 0.00016423613027863606
+      }
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.009999999776482582,
+      "input_amplitude_f32_hex": "3c23d70a",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+      "input_sha256": "333dd9b60d8abe336172af685e602b1b8a37b023c4c3332cf9648e6eebafc9ae",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3c23d70a_r00000000.original-filter.f32le",
+      "reference_sha256": "41037bf8f0a8490c760fdd5cbcb28ecea5da6d917cf10a66b314d6687cc1e81c",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r00000000.C-filter.f32le",
+      "candidate_sha256": "48fc98757c981802f25ac332c7f3e9f3440ce66c8fd06e521df3302ac01ed5c2",
+      "windows": {
+        "whole": {
+          "input_rms": 0.007070892441261151,
+          "reference_rms": 0.0016613073499802701,
+          "candidate_rms": 0.0017651291326553126,
+          "reference_rms_gain_db": -12.580484890916923,
+          "candidate_rms_gain_db": -12.053954963869005,
+          "candidate_minus_reference_rms_db": 0.5265299270479171,
+          "direct_unshifted_difference_rms": 0.00014552192298616037,
+          "direct_unshifted_max_absolute_difference": 0.00025051413103938103
+        },
+        "steady": {
+          "input_rms": 0.007070901191572361,
+          "reference_rms": 0.0016608777505326526,
+          "candidate_rms": 0.0017647408762644652,
+          "reference_rms_gain_db": -12.582742024812967,
+          "candidate_rms_gain_db": -12.05587646423349,
+          "candidate_minus_reference_rms_db": 0.5268655605794772,
+          "direct_unshifted_difference_rms": 0.00014553604660942447,
+          "direct_unshifted_max_absolute_difference": 0.00020581437274813652
+        }
+      },
+      "reference_peak_abs": 0.0038373658899217844,
+      "candidate_peak_abs": 0.00394788384437561,
+      "reference_peak_frame": 15,
+      "candidate_peak_frame": 15,
+      "last4096_reference_rms": 0.001660276992213184,
+      "last4096_candidate_rms": 0.0017640584640354622,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": -12.582802201336868,
+          "fundamental_transfer_phase_degrees": -167.4733821065558,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -177.0489348793559,
+            "3": -170.71054500786087,
+            "4": -171.613978982414,
+            "5": -167.56998668547294
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -164.57694504129446
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": -12.055958360903105,
+          "fundamental_transfer_phase_degrees": -164.06114950583353,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -173.82861134988354,
+            "3": -171.77715755845102,
+            "4": -164.4948002885953,
+            "5": -163.11515401954273
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -160.2175454203748
+        },
+        "candidate_minus_reference_fundamental_gain_db": 0.5268438404337629,
+        "candidate_minus_reference_fundamental_phase_degrees": 3.4122326007222705,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 0.2011011787741987,
+        "peak_abs": 0.003944810800021514,
+        "rms": 0.0017517307062261598
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 0.100504763184743,
+        "peak_abs": 0.0024768025759840384,
+        "rms": 0.001751331482736783
+      }
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.009999999776482582,
+      "input_amplitude_f32_hex": "3c23d70a",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+      "input_sha256": "333dd9b60d8abe336172af685e602b1b8a37b023c4c3332cf9648e6eebafc9ae",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3c23d70a_r3f666666.original-filter.f32le",
+      "reference_sha256": "4f2aaf3d896cf3a6ddddd98783cb7a0bbbd815170d053aa08e15b5f7ae8785fe",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r3f666666.C-filter.f32le",
+      "candidate_sha256": "6bd52241bb37e393d76f5852be300e09d2c5ba134073019a7de9c044fdb91f35",
+      "windows": {
+        "whole": {
+          "input_rms": 0.007070892441261151,
+          "reference_rms": 0.018194954683349508,
+          "candidate_rms": 0.013176244778097776,
+          "reference_rms_gain_db": 8.209534944605576,
+          "candidate_rms_gain_db": 5.406348463833009,
+          "candidate_minus_reference_rms_db": -2.8031864807725677,
+          "direct_unshifted_difference_rms": 0.005055626615578586,
+          "direct_unshifted_max_absolute_difference": 0.008884336799383163
+        },
+        "steady": {
+          "input_rms": 0.007070901191572361,
+          "reference_rms": 0.0182163876375992,
+          "candidate_rms": 0.013184046748580775,
+          "reference_rms_gain_db": 8.21974981690974,
+          "candidate_rms_gain_db": 5.411479316399641,
+          "candidate_minus_reference_rms_db": -2.8082705005100985,
+          "direct_unshifted_difference_rms": 0.005058750395244765,
+          "direct_unshifted_max_absolute_difference": 0.007151631638407707
+        }
+      },
+      "reference_peak_abs": 0.027487605810165405,
+      "candidate_peak_abs": 0.020393550395965576,
+      "reference_peak_frame": 335,
+      "candidate_peak_frame": 214,
+      "last4096_reference_rms": 0.01820941680093324,
+      "last4096_candidate_rms": 0.01317918232710413,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": 8.219671897918895,
+          "fundamental_transfer_phase_degrees": -164.6637197552365,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -165.7110496677058,
+            "3": -168.50976207029046,
+            "4": -170.94606933008478,
+            "5": -177.47540281239097
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -162.9437973502973
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": 5.411413296990517,
+          "fundamental_transfer_phase_degrees": -166.57231411438207,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -155.49059242898923,
+            "3": -73.2374856849661,
+            "4": -168.14114479822908,
+            "5": -106.34003621507176
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -73.23536034428608
+        },
+        "candidate_minus_reference_fundamental_gain_db": -2.808258600928376,
+        "candidate_minus_reference_fundamental_phase_degrees": -1.908594359145553,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 11.205782087438838,
+        "peak_abs": 0.020286541781388223,
+        "rms": 0.013076186950046644
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 5.609481347922082,
+        "peak_abs": 0.018504851264879107,
+        "rms": 0.013083875009948025
+      }
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.25,
+      "input_amplitude_f32_hex": "3e800000",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+      "input_sha256": "49d6d2276f0879b291d15f0dc19e287618113736e804fb8992255cc621bfeba1",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3e800000_r00000000.original-filter.f32le",
+      "reference_sha256": "ccecdfbfab6d86c15cf0d706b63b44e1ab512c1e70d7534c08752a60aa61b1a3",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r00000000.C-filter.f32le",
+      "candidate_sha256": "277ffd45c0a8f50ae0bbfeb0731c1e90bfe404448c4cfffad62f6ecd65ea3fb4",
+      "windows": {
+        "whole": {
+          "input_rms": 0.17677231555821526,
+          "reference_rms": 0.04153268413789748,
+          "candidate_rms": 0.044128230057201075,
+          "reference_rms_gain_db": -12.58048503211468,
+          "candidate_rms_gain_db": -12.05395484364201,
+          "candidate_minus_reference_rms_db": 0.526530188472673,
+          "direct_unshifted_difference_rms": 0.0036380497418092446,
+          "direct_unshifted_max_absolute_difference": 0.00626286119222641
+        },
+        "steady": {
+          "input_rms": 0.17677253431751222,
+          "reference_rms": 0.04152194415423251,
+          "candidate_rms": 0.04411852364074426,
+          "reference_rms_gain_db": -12.582742165535667,
+          "candidate_rms_gain_db": -12.055876345321598,
+          "candidate_minus_reference_rms_db": 0.5268658202140698,
+          "direct_unshifted_difference_rms": 0.003638402819972437,
+          "direct_unshifted_max_absolute_difference": 0.005145341157913208
+        }
+      },
+      "reference_peak_abs": 0.09593413770198822,
+      "candidate_peak_abs": 0.09869709610939026,
+      "reference_peak_frame": 15,
+      "candidate_peak_frame": 15,
+      "last4096_reference_rms": 0.04150692521211949,
+      "last4096_candidate_rms": 0.044101463354592856,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": -12.582802341803776,
+          "fundamental_transfer_phase_degrees": -167.47338212570594,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -168.5405077290159,
+            "3": -170.26030781420292,
+            "4": -171.4899534215775,
+            "5": -178.4314528209202
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -164.95619831245227
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": -12.05595824047875,
+          "fundamental_transfer_phase_degrees": -164.061148261903,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -186.2463266310245,
+            "3": -170.65777708359988,
+            "4": -177.20820456153416,
+            "5": -174.77959626917686
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -168.5199489971329
+        },
+        "candidate_minus_reference_fundamental_gain_db": 0.5268441013250261,
+        "candidate_minus_reference_fundamental_phase_degrees": 3.412233863802906,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 125.68824644508804,
+        "peak_abs": 0.0986202685162425,
+        "rms": 0.04379326934748209
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 62.815481826155086,
+        "peak_abs": 0.061920050997287035,
+        "rms": 0.043783288753692376
+      }
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.25,
+      "input_amplitude_f32_hex": "3e800000",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+      "input_sha256": "49d6d2276f0879b291d15f0dc19e287618113736e804fb8992255cc621bfeba1",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3e800000_r3f666666.original-filter.f32le",
+      "reference_sha256": "c2ca3c127f65632d618789cf1703e751560bd61308b71b725750a50b223121bb",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r3f666666.C-filter.f32le",
+      "candidate_sha256": "9b634361efd955f2a9870651d3ed3ffbd66be85840fdb304b13b07d020ab60e3",
+      "windows": {
+        "whole": {
+          "input_rms": 0.17677231555821526,
+          "reference_rms": 0.4548738085955657,
+          "candidate_rms": 0.12934585827163972,
+          "reference_rms_gain_db": 8.209533605341054,
+          "candidate_rms_gain_db": -2.7132344781623914,
+          "candidate_minus_reference_rms_db": -10.922768083503446,
+          "direct_unshifted_difference_rms": 0.32568645500809085,
+          "direct_unshifted_max_absolute_difference": 0.5048851370811462
+        },
+        "steady": {
+          "input_rms": 0.17677253431751222,
+          "reference_rms": 0.45540962498925464,
+          "candidate_rms": 0.12937245915422702,
+          "reference_rms_gain_db": 8.219748336554,
+          "candidate_rms_gain_db": -2.7114590966775824,
+          "candidate_minus_reference_rms_db": -10.931207433231583,
+          "direct_unshifted_difference_rms": 0.32603829526631145,
+          "direct_unshifted_max_absolute_difference": 0.46100175380706787
+        }
+      },
+      "reference_peak_abs": 0.6871899962425232,
+      "candidate_peak_abs": 0.20254382491111755,
+      "reference_peak_frame": 335,
+      "candidate_peak_frame": 59,
+      "last4096_reference_rms": 0.4552353546587134,
+      "last4096_candidate_rms": 0.12932298803783984,
+      "diagnostic": {
+        "reference": {
+          "fundamental_transfer_gain_db": 8.219670402101219,
+          "fundamental_transfer_phase_degrees": -164.66371538461348,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -184.2518595966287,
+            "3": -171.26022646619413,
+            "4": -174.82144078619882,
+            "5": -183.22943206268164
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -169.34518037210887
+        },
+        "candidate": {
+          "fundamental_transfer_gain_db": -2.7115483826662734,
+          "fundamental_transfer_phase_degrees": -164.84206221156987,
+          "harmonic_2_to_5_db_relative_to_fundamental": {
+            "2": -167.19458862104324,
+            "3": -55.519204539609184,
+            "4": -163.9819417362767,
+            "5": -86.71682266175112
+          },
+          "combined_harmonics_2_to_5_db_relative_to_fundamental": -55.51590952192457
+        },
+        "candidate_minus_reference_fundamental_gain_db": -10.93121878476749,
+        "candidate_minus_reference_fundamental_phase_degrees": -0.1783468269563841,
+        "method": "Fixed2000Hz and harmonics2-5 direct projections on16384:32768, symmetric Hann; ratios only, no waveform gain/phase fitting. This is not a full THD measurement."
+      },
+      "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+      "reconstructed_all": {
+        "count": 65536,
+        "sum_squares": 1079.8503771366452,
+        "peak_abs": 0.20093704853206873,
+        "rms": 0.12836358176597107
+      },
+      "reconstructed_steady": {
+        "count": 32768,
+        "sum_squares": 540.1423767761237,
+        "peak_abs": 0.18166470061987638,
+        "rms": 0.1283893966879218
+      }
+    }
+  ]
+}

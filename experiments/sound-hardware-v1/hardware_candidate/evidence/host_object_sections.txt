@@ -1,0 +1,15 @@
+build/dnbx_core.o  :
+section            size   addr
+.text              9530      0
+.data                 0      0
+.bss                  0      0
+.rodata              52      0
+.rodata.cst4        208      0
+.rodata.cst16        32      0
+.rodata.cst8         32      0
+.comment             32      0
+.note.GNU-stack       0      0
+.eh_frame           992      0
+Total             10878
+
+

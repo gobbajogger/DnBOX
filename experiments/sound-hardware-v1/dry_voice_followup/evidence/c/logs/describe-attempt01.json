@@ -1,0 +1,10 @@
+{
+  "command": [
+    "build/s1_dry_host",
+    "--describe"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_dry_voice_c",
+  "exit_status": 0,
+  "stdout": "{\"voice_bytes\":160,\"prepared_bytes\":92,\"history_bytes\":68,\"sample_rate_hz\":44100,\"coefficient_hex\":[\"3f7fce7c\",\"3f7ed775\",\"3f7fe249\",\"3f7fce7c\",\"3f7fe249\",\"3f7ffd07\"]}\n",
+  "stderr": ""
+}

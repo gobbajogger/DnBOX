@@ -1,0 +1,36 @@
+--- original.cpp
++++ comparison.cpp
+@@ -138,12 +138,6 @@
+         std::fprintf(stderr, "usage: capture_original_dry TABLES.f32 CONTROLS.f32le TUNING.f32le NEW_OUTPUT.f32le CASE_ID\n");
+         return 2;
+     }
+-    const bool baseline = std::strcmp(argv[5], kBaseline) == 0;
+-    const bool active = std::strcmp(argv[5], kActive) == 0;
+-    if (!baseline && !active) {
+-        std::fprintf(stderr, "case is outside the two prepared numeric fixtures\n");
+-        return 2;
+-    }
+     const std::uint32_t endian_check = 1;
+     if (*reinterpret_cast<const unsigned char *>(&endian_check) != 1 ||
+         std::fegetround() != FE_TONEAREST) {
+@@ -152,11 +146,6 @@
+     }
+     std::array<float, kControls> controls{};
+     if (!read_floats(argv[2], controls.data(), controls.size())) return 1;
+-    if (bits(controls[16]) != 0x44fa0000u || bits(controls[17]) != 0x3f666666u ||
+-        bits(controls[19]) != (baseline ? 0x00000000u : 0x3f99999au)) {
+-        std::fprintf(stderr, "case cutoff/resonance/depth identity differs\n");
+-        return 1;
+-    }
+     TableInput fixture;
+     if (!fixture.load(argv[1], argv[3])) return 1;
+     OutputFile output;
+@@ -204,7 +193,7 @@
+                 "\"warmup_frames\":%u,\"retained_frames\":%u,\"total_reference_frames\":%u,"
+                 "\"process_calls\":%u,\"block_size\":64,\"note_off_frame_per_note\":66112,"
+                 "\"warmup_nonfinite_count\":%u,\"output_nonfinite_count\":%u,\"status\":%d}\n",
+-                baseline ? kBaseline : kActive, kRate, notes_completed, warmup_frames,
++                argv[5], kRate, notes_completed, warmup_frames,
+                 retained_frames, total_frames, process_calls, warmup_nonfinite,
+                 output_nonfinite, status);
+     return status;

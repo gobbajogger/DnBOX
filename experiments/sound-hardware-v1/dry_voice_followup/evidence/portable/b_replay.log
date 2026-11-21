@@ -1,0 +1,20 @@
+physical-gain/100_2000_.9: FAIL
+{
+  "scope": "Static dry voice only; zero intact preset coverage",
+  "variant": "ch4_2x_slope4",
+  "case_files": 1,
+  "note_cases": 3,
+  "accepted_files": 0,
+  "accepted_notes": 2,
+  "maximum_rms_db": 1.9348981746235328,
+  "maximum_spectral_db": 3.099491563393029,
+  "accepted": false,
+  "unqualified": [
+    "72 dynamic cases",
+    "694 intact presets",
+    "150 controls",
+    "native fit",
+    "callback deadline",
+    "production activation"
+  ]
+}

@@ -1,0 +1,203 @@
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -10,12 +10,26 @@
+        ORIGINAL_INPUT_KEYS, ORIGINAL_INPUT_SEQUENCE, ORIGINAL_INPUT_COUNT };
+ enum { ORIGINAL_RUNTIME_OK = 1, ORIGINAL_RUNTIME_INVALID = 0,
+        ORIGINAL_RUNTIME_NEEDS_FX = -1, ORIGINAL_RUNTIME_FAULT = -2 };
++enum { WIDEN_FIRST_BYTES = 4095, WIDEN_TAIL_BYTES = 2520 };
++typedef struct {
++    s1_dry_part voice;
++    uint8_t tail[WIDEN_TAIL_BYTES];
++    unsigned position;
++    float applied_widen;
++} s1_wide_backend;
++
+ typedef union {
+     original_chicago_backend chicago;
+     original_miami_backend miami;
+     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
+-    s1_dry_part synthone;
++    s1_wide_backend synthone;
+ } original_runtime_backend;
++/* The existing union is bounded by its original constituents; reject a
++ * future backend growth that would create an incremental allocation. */
++_Static_assert(sizeof(s1_wide_backend) <= sizeof(original_chicago_backend) ||
++               sizeof(s1_wide_backend) <= sizeof(original_miami_backend) ||
++               sizeof(s1_wide_backend) <= sizeof(((original_runtime_backend *)0)->juno),
++               "widen must fit the inactive backend tail");
+ typedef struct {
+     original_runtime_backend dsp;
+     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -27,7 +27,7 @@
+         juno6_chorus_init(&p->dsp.juno.chorus,44100);
+         rc=ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-        s1_part_init(&p->dsp.synthone);
++        s1_part_init(&p->dsp.synthone.voice);
+         rc = ORIGINAL_RUNTIME_OK;
+     } else if (kind == ORIGINAL_SOUND_MIAMI)
+         rc = original_miami_backend_init(&p->dsp.miami, factory, bpm) ? 1 : -2;
+@@ -93,8 +93,14 @@
+         if(ok) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
+         return runtime_result(p,ok);
+     }
++    /* Diagnostic entry for source field 121 after parameter smoothing. */
++    if (p->kind == ORIGINAL_SOUND_SYNTHONE && parameter == 121u) {
++        if (!(value >= 0.f && value <= 1.f)) return ORIGINAL_RUNTIME_INVALID;
++        p->dsp.synthone.applied_widen = value;
++        return ORIGINAL_RUNTIME_OK;
++    }
+     if (p->kind == ORIGINAL_SOUND_SYNTHONE)
+-        return runtime_result(p, s1_part_param(&p->dsp.synthone, parameter, value));
++        return runtime_result(p, s1_part_param(&p->dsp.synthone.voice, parameter, value));
+     return runtime_result(p, p->kind == ORIGINAL_SOUND_MIAMI ?
+         original_miami_backend_set_macro(&p->dsp.miami, parameter, value) :
+         original_chicago_backend_set(&p->dsp.chicago, parameter, value) == ORIGINAL_CHICAGO_BACKEND_OK);
+@@ -107,7 +113,7 @@
+         juno6_note_off(&p->dsp.juno.synth,(uint8_t)key);return ORIGINAL_RUNTIME_OK;
+     }
+     if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+-        return runtime_result(p, s1_part_note(&p->dsp.synthone,key,velocity));
++        return runtime_result(p, s1_part_note(&p->dsp.synthone.voice,key,velocity));
+     }
+     return runtime_result(p, p->kind == ORIGINAL_SOUND_MIAMI ?
+         (velocity ? original_miami_backend_note_on(&p->dsp.miami, key, velocity) :
+@@ -235,7 +241,7 @@
+         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
+         p->dsp.juno.chorus.write=0;ok=1;
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+-        s1_part_init(&p->dsp.synthone);
++        s1_part_init(&p->dsp.synthone.voice);
+         ok = 1;
+     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
+         ok = original_miami_backend_all_off(&p->dsp.miami);
+@@ -253,7 +259,7 @@
+ int original_runtime_owned(const original_runtime_part *p)
+ {
+     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
+-    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone) :
++    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone.voice) :
+         p->kind == ORIGINAL_SOUND_MIAMI ? original_miami_backend_voice_active(&p->dsp.miami) :
+         original_chicago_backend_active(&p->dsp.chicago);
+ }
+@@ -288,7 +294,7 @@
+             if(v->stage && v->envelope>*level){*level=v->envelope;*state=v->stage==1?0u:v->stage==4?3u:1u;*key_down=v->gate;}
+         }
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+-        const s1_dry_part *part = &p->dsp.synthone;
++        const s1_dry_part *part = &p->dsp.synthone.voice;
+         int selected = -1;
+         for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
+             if (part->voice[i].started &&
+@@ -335,7 +341,7 @@
+ int original_runtime_active(const original_runtime_part *p)
+ {
+     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
+-    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone) :
++    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone.voice) :
+         p->kind == ORIGINAL_SOUND_MIAMI ? original_miami_backend_active(&p->dsp.miami) :
+         original_chicago_backend_active(&p->dsp.chicago);
+ }
+@@ -352,7 +358,7 @@
+         memcpy(right,left,frames*sizeof *right);
+         juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);ok=1;
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+-        s1_part_render(&p->dsp.synthone,left,right,frames);
++        s1_part_render(&p->dsp.synthone.voice,left,right,frames);
+         ok = 1;
+     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
+         original_miami_backend_workspace workspace = {w->miami.left, w->miami.right,
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -65,6 +65,7 @@
+ static original_chicago_tuning original_tuning POOL;
+ static original_chicago_fx2_compact original_fx[NBASS] POOL;
+ static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
++#include "selected_widen.inc"
+ static uint8_t original_fx_ready;
+ static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
+ static uint8_t original_midi_channel[NBASS];
+@@ -2489,6 +2490,7 @@
+         bass_adapt_pre(bv, (unsigned)n);
+         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+                                              bb[bv], bb[1-bv], n);
++        if (status == ORIGINAL_RUNTIME_OK) widen_render(bv, bb[1-bv], (unsigned)n);
+         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
+         if (!core)
+             PROF_ADD(2 + bv, pb);
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -216,6 +216,7 @@
+     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
+     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
+         &original_tuning, &original_fx_owner[v]);
++    widen_adopt(v,rc);
+     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
+     bass_named_preset[v] = sound->v[T_303][v][30];
+     original_seq_note[v] = -1;
+@@ -337,6 +338,7 @@
+         }
+         int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
+             &original_tuning, &original_fx_owner[v]);
++        widen_adopt(v,rc);
+         if (rc != ORIGINAL_RUNTIME_OK) {
+             /* A failed adoption remains visible and needs a fresh explicit
+              * request; do not rerun expensive initialization every block. */
+--- /dev/null
++++ b/firmware/src/app/selected_widen.inc
+@@ -0,0 +1,53 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#include "widen.h"
++
++enum { WIDEN_FIRST_FRAMES = WIDEN_FIRST_BYTES / 3 };
++_Static_assert(sizeof original_fx[0].arena >= WIDEN_FIRST_BYTES, "Chicago insert space");
++_Static_assert(WIDEN_FIRST_FRAMES * 3 == WIDEN_FIRST_BYTES, "whole frames");
++_Static_assert(WIDEN_FIRST_BYTES + WIDEN_TAIL_BYTES == S1_WIDEN_BYTES, "entire ring");
++
++static int widen_owns_storage(int v)
++{
++    return original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
++           original_bass[v].status == ORIGINAL_RUNTIME_OK && !original_fx[v].selected;
++}
++
++#ifdef X0X_WIDEN_PROBE
++extern void widen_probe_reset(int v);
++extern void widen_probe_frame(int v, float input, float delayed, float output, float wet);
++int widen_probe_set(int v, float wet)
++{
++    if ((unsigned)v >= NBASS || !widen_owns_storage(v)) return 0;
++    return original_runtime_param(&original_bass[v], 121u, wet);
++}
++#endif
++
++static void widen_adopt(int v, int status)
++{
++    if (status != ORIGINAL_RUNTIME_OK || !widen_owns_storage(v)) return;
++    /* original_runtime_init has zeroed the entire backend, including the
++     * tail, write index and applied mix. Chicago's cold release owns the
++     * other span until successful Synth One adoption. */
++    memset(&original_fx[v].arena, 0, WIDEN_FIRST_BYTES);
++#ifdef X0X_WIDEN_PROBE
++    widen_probe_reset(v);
++#endif
++}
++
++static void widen_render(int v, float *right, unsigned n)
++{
++    if (!widen_owns_storage(v)) return;
++    s1_wide_backend *backend = &original_bass[v].dsp.synthone;
++    uint8_t *first = (uint8_t *)&original_fx[v].arena;
++    unsigned index = backend->position;
++    float wet = backend->applied_widen;
++    for (unsigned i = 0; i < n; ++i) {
++        float input = right[i];
++        float delay = s1_widen_tap(first, WIDEN_FIRST_FRAMES, backend->tail, &index, input);
++        if (wet != 0.f) right[i] = wet * delay + (1.f - wet) * input;
++#ifdef X0X_WIDEN_PROBE
++        widen_probe_frame(v, input, delay, right[i], wet);
++#endif
++    }
++    backend->position = index;
++}

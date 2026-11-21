@@ -1,0 +1,8 @@
+In file included from tests/host/juno6_runtime_test.c:2:
+tests/host/juno6_runtime_test.c: In function ‘main’:
+tests/host/juno6_runtime_test.c:13:50: error: ‘juno6_t’ has no member named ‘voice’
+   13 |  for(unsigned i=0;i<6;i++)assert(p.dsp.juno.synth.voice[i].gate);
+      |                                                  ^
+tests/host/juno6_runtime_test.c:21:26: error: ‘juno6_t’ has no member named ‘damper’
+   21 |  assert(!p.dsp.juno.synth.damper);
+      |                          ^

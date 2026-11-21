@@ -1,0 +1,345 @@
+{
+  "schema": "frozen variant C read-only review audit v1",
+  "declaration_sha256": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+  "source_sha256": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+  "status": "CONSISTENT_FROZEN_C_SOURCE_AND_SCALAR_EVIDENCE",
+  "new_compiler_calls": 0,
+  "new_render_calls": 0,
+  "new_metric_calls": 0,
+  "new_scalar_test_calls": 0,
+  "checked": {
+    "source_files_sha256": [
+      {
+        "path": "src/s1_dry_voice.c",
+        "sha256": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+        "bytes": 9743
+      },
+      {
+        "path": "src/s1_dry_voice.h",
+        "sha256": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+        "bytes": 2406
+      },
+      {
+        "path": "src/host.c",
+        "sha256": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+        "bytes": 6578
+      },
+      {
+        "path": "vendor/fastmath.h",
+        "sha256": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+        "bytes": 8325
+      },
+      {
+        "path": "vendor/dnbx_s1_envelope.c",
+        "sha256": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+        "bytes": 2037
+      },
+      {
+        "path": "vendor/dnbx_s1_envelope.h",
+        "sha256": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+        "bytes": 2295
+      },
+      {
+        "path": "tests/scalar_test.c",
+        "sha256": "41085e1cb0564971f699251c8c45d5cb609d558a3e563fb4520301ee161b7c5f",
+        "bytes": 6820
+      },
+      {
+        "path": "tests/scalar_cases.h",
+        "sha256": "f11c74353772662071372c3ae0f33fb0bd21e6c7ae0424f5acb5c55b62a07e2d",
+        "bytes": 1987
+      },
+      {
+        "path": "tests/make_scalar_fixtures.py",
+        "sha256": "fc861ce13592ce07a64ec060f9eb5cda56c2ecd637fa3561f39ab4f8d7f8edde",
+        "bytes": 1580
+      },
+      {
+        "path": "build.sh",
+        "sha256": "0908bab25841da1c8f379400c369feefcaf56a16cb03b0a94f43638ccd4834ed",
+        "bytes": 971
+      },
+      {
+        "path": "inputs/centered_feedback_proposal.c",
+        "sha256": "7dae0fb90e85669ce9901e07955fe334e228d328da86cf12b88c9ba8330a4b5e",
+        "bytes": 3691
+      },
+      {
+        "path": "inputs/README.md",
+        "sha256": "faed37f5454f20ec844bb4ab058db4d91b54feb12e6597f9c2f5d46b02fbd1cc",
+        "bytes": 12570
+      },
+      {
+        "path": "inputs/scalar_checks.py",
+        "sha256": "e3df442f546e407e427afc2bd8d110c3db26fb675d952e7607d5f8b6f82601c8",
+        "bytes": 6060
+      },
+      {
+        "path": "inputs/scalar_results.json",
+        "sha256": "9664a074b4c457b5a6d5dc8ea273c43b712455c876b600405ed04799267d7b94",
+        "bytes": 21593
+      },
+      {
+        "path": "READY.md",
+        "sha256": "887980da596cd7bd3219ba04f06b068627fd65cc51c1cd655b3d80cf0f5e338a",
+        "bytes": 6278
+      },
+      {
+        "path": "NEXT-COMMAND.txt",
+        "sha256": "4dbac3962c922215e1d1c2b93664906837b544cbf70c3dc5363984f5fac24fa8",
+        "bytes": 394
+      },
+      {
+        "path": "COMPARATOR-SOURCE.json",
+        "sha256": "05de37374c94364363845176289e807aa56b501bfe67e0c0d45fc23342b124b1",
+        "bytes": 812
+      }
+    ],
+    "compiled_files_sha256": [
+      {
+        "path": "build/s1_dry_voice.o",
+        "sha256": "1f8fffc1620a41a27ae9003cf73081f755177a385703cec37ec6d74d91f21a60",
+        "bytes": 10448
+      },
+      {
+        "path": "build/s1_dry_host",
+        "sha256": "838c151b0d59f4be8c959a6430499d529a686f5d5f3afaaaaf26749cf26b1e38",
+        "bytes": 21424
+      },
+      {
+        "path": "build/scalar_test",
+        "sha256": "2b6bae03915612247f4b604bdfde4d9372143451ab1756896dcde029c71b95a9",
+        "bytes": 20888
+      }
+    ],
+    "test_evidence_sha256": [
+      {
+        "path": "results/describe.json",
+        "sha256": "134e27c66974897ac22aa9bced7c50636795ab25517eb57d2f4e67b9e7ae320a",
+        "bytes": 222
+      },
+      {
+        "path": "results/host-selftest.json",
+        "sha256": "d46898fc5e9ac262e918b0f8b1ca36261a3ca12464f5192044727b431862254e",
+        "bytes": 344
+      },
+      {
+        "path": "results/scalar-selftest.json",
+        "sha256": "b43075f119deb805c54b44296c808702c938e46c67ae73532ff0d081d8cfeda8",
+        "bytes": 342
+      },
+      {
+        "path": "logs/describe-attempt01.json",
+        "sha256": "a0d9d3ca2845f577a145f595e89b234faf77b530a027de8e2c2420465eb747cd",
+        "bytes": 367
+      },
+      {
+        "path": "logs/host-selftest-attempt01.json",
+        "sha256": "32dec867c79522d0fb628c08994a33b29eeeec10b1833e1b78f799c4f71dae29",
+        "bytes": 489
+      },
+      {
+        "path": "logs/scalar-selftest-attempt01.json",
+        "sha256": "6b45c05de3b8a9ce33ec1471a3a0af308e1b9d0251ba46106513f39f5cc7e496",
+        "bytes": 486
+      },
+      {
+        "path": "logs/numeric-fixture-generation.json",
+        "sha256": "fc81b3e97180b95c41fc6b7d0c81af6b72d6475450879bf25445e28735d4c42c",
+        "bytes": 203
+      },
+      {
+        "path": "logs/core-undefined-symbols.txt",
+        "sha256": "b949cb460b2ebe47b14d0551aff3a0653a7b6e00542ba028792c04d105321b6d",
+        "bytes": 89
+      },
+      {
+        "path": "logs/host-undefined-symbols.txt",
+        "sha256": "6ccd65c50d33e7cc3087863f0c482501d4e77440d17a6dd3623a851a20fd39a7",
+        "bytes": 685
+      },
+      {
+        "path": "logs/compiler.txt",
+        "sha256": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc",
+        "bytes": 231
+      }
+    ]
+  },
+  "diagnosis_input_identity": {
+    "README.md": true,
+    "centered_feedback_proposal.c": true,
+    "scalar_checks.py": true,
+    "scalar_results.json": true
+  },
+  "source_free_packet_identity": {
+    "case_plan.json": true,
+    "metrics.py": true,
+    "reference_pcm_manifest.json": true
+  },
+  "vendor_identity_with_B": {
+    "fastmath.h": true,
+    "dnbx_s1_envelope.c": true,
+    "dnbx_s1_envelope.h": true
+  },
+  "unchanged_B_function_bodies": {
+    "finite_float": true,
+    "range": true,
+    "valid_adsr": true,
+    "retention": true,
+    "prepare_adsr": true,
+    "prepare_filter": true,
+    "s1_dry_reset": true,
+    "s1_dry_frozen_controls": true,
+    "s1_dry_configure": true,
+    "s1_dry_start": true,
+    "s1_dry_note_off": true,
+    "s1_dry_cutoff": true,
+    "chicago_nonlinear": true,
+    "s1_dry_sample": true,
+    "s1_dry_render": true
+  },
+  "centered_proposal_equal_after_helper_inlining": true,
+  "renderer_main_body_equal_to_B": true,
+  "solver_fixture_count": 38,
+  "solver_fixtures_match_independent_numeric_results": true,
+  "test_logs": {
+    "describe": {
+      "matches_result": true,
+      "exit_status": 0,
+      "stderr_empty": true
+    },
+    "host-selftest": {
+      "matches_result": true,
+      "exit_status": 0,
+      "stderr_empty": true
+    },
+    "scalar-selftest": {
+      "matches_result": true,
+      "exit_status": 0,
+      "stderr_empty": true
+    }
+  },
+  "pcm_paths_present": [
+    "results/audio180/100_8000_.25.candidate-mono.f32le",
+    "results/audio180/127_8000_.25.candidate-mono.f32le",
+    "results/audio180/127_22050_0.paired.f32",
+    "results/audio180/127_22050_.5.candidate-mono.f32le",
+    "results/audio180/127_64_.9.candidate-mono.f32le",
+    "results/audio180/100_22050_0.candidate-mono.f32le",
+    "results/audio180/127_2000_.5.paired.f32",
+    "results/audio180/127_2000_.25.paired.f32",
+    "results/audio180/100_2000_.5.candidate-mono.f32le",
+    "results/audio180/20_500_0.candidate-mono.f32le",
+    "results/audio180/100_2000_.9.candidate-mono.f32le",
+    "results/audio180/20_64_.9.candidate-mono.f32le",
+    "results/audio180/20_64_.25.paired.f32",
+    "results/audio180/20_64_.9.paired.f32",
+    "results/audio180/100_22050_.5.paired.f32",
+    "results/audio180/100_2000_.25.paired.f32",
+    "results/audio180/20_2000_.5.paired.f32",
+    "results/audio180/20_2000_.25.paired.f32",
+    "results/audio180/127_8000_.9.candidate-mono.f32le",
+    "results/audio180/127_8000_0.paired.f32",
+    "results/audio180/127_64_.5.candidate-mono.f32le",
+    "results/audio180/127_500_0.candidate-mono.f32le",
+    "results/audio180/20_8000_.25.candidate-mono.f32le",
+    "results/audio180/127_8000_.5.candidate-mono.f32le",
+    "results/audio180/127_2000_0.candidate-mono.f32le",
+    "results/audio180/20_8000_.25.paired.f32",
+    "results/audio180/100_2000_0.candidate-mono.f32le",
+    "results/audio180/127_500_0.paired.f32",
+    "results/audio180/127_500_.9.candidate-mono.f32le",
+    "results/audio180/20_8000_0.candidate-mono.f32le",
+    "results/audio180/20_500_0.paired.f32",
+    "results/audio180/20_22050_.9.candidate-mono.f32le",
+    "results/audio180/100_500_.5.paired.f32",
+    "results/audio180/20_8000_.5.paired.f32",
+    "results/audio180/20_64_0.paired.f32",
+    "results/audio180/100_22050_.5.candidate-mono.f32le",
+    "results/audio180/100_500_.5.candidate-mono.f32le",
+    "results/audio180/127_8000_.5.paired.f32",
+    "results/audio180/100_2000_.25.candidate-mono.f32le",
+    "results/audio180/127_22050_.5.paired.f32",
+    "results/audio180/100_2000_.9.paired.f32",
+    "results/audio180/100_64_.25.paired.f32",
+    "results/audio180/100_64_.9.candidate-mono.f32le",
+    "results/audio180/20_500_.25.candidate-mono.f32le",
+    "results/audio180/100_2000_.5.paired.f32",
+    "results/audio180/127_2000_.5.candidate-mono.f32le",
+    "results/audio180/127_500_.25.paired.f32",
+    "results/audio180/100_22050_.9.paired.f32",
+    "results/audio180/20_8000_0.paired.f32",
+    "results/audio180/20_22050_0.paired.f32",
+    "results/audio180/127_22050_.9.candidate-mono.f32le",
+    "results/audio180/127_64_.9.paired.f32",
+    "results/audio180/20_22050_.25.candidate-mono.f32le",
+    "results/audio180/20_2000_0.paired.f32",
+    "results/audio180/127_22050_.9.paired.f32",
+    "results/audio180/100_64_.25.candidate-mono.f32le",
+    "results/audio180/20_22050_.5.candidate-mono.f32le",
+    "results/audio180/100_500_.25.candidate-mono.f32le",
+    "results/audio180/20_500_.9.candidate-mono.f32le",
+    "results/audio180/127_22050_.25.paired.f32",
+    "results/audio180/20_64_.25.candidate-mono.f32le",
+    "results/audio180/20_500_.25.paired.f32",
+    "results/audio180/20_22050_.5.paired.f32",
+    "results/audio180/20_8000_.9.candidate-mono.f32le",
+    "results/audio180/127_500_.9.paired.f32",
+    "results/audio180/100_8000_0.candidate-mono.f32le",
+    "results/audio180/127_64_0.paired.f32",
+    "results/audio180/100_64_.5.paired.f32",
+    "results/audio180/20_22050_.25.paired.f32",
+    "results/audio180/127_22050_.25.candidate-mono.f32le",
+    "results/audio180/100_500_.9.paired.f32",
+    "results/audio180/100_8000_.25.paired.f32",
+    "results/audio180/127_2000_.9.paired.f32",
+    "results/audio180/127_2000_0.paired.f32",
+    "results/audio180/127_64_.5.paired.f32",
+    "results/audio180/20_2000_.9.paired.f32",
+    "results/audio180/100_22050_.25.candidate-mono.f32le",
+    "results/audio180/20_2000_.5.candidate-mono.f32le",
+    "results/audio180/127_500_.25.candidate-mono.f32le",
+    "results/audio180/100_64_0.paired.f32",
+    "results/audio180/20_500_.9.paired.f32",
+    "results/audio180/100_500_.25.paired.f32",
+    "results/audio180/100_64_0.candidate-mono.f32le",
+    "results/audio180/127_8000_0.candidate-mono.f32le",
+    "results/audio180/100_22050_0.paired.f32",
+    "results/audio180/20_22050_.9.paired.f32",
+    "results/audio180/20_64_.5.paired.f32",
+    "results/audio180/127_64_0.candidate-mono.f32le",
+    "results/audio180/127_8000_.25.paired.f32",
+    "results/audio180/127_64_.25.candidate-mono.f32le",
+    "results/audio180/20_8000_.9.paired.f32",
+    "results/audio180/20_2000_.9.candidate-mono.f32le",
+    "results/audio180/100_8000_.9.candidate-mono.f32le",
+    "results/audio180/100_22050_.9.candidate-mono.f32le",
+    "results/audio180/100_500_0.paired.f32",
+    "results/audio180/127_22050_0.candidate-mono.f32le",
+    "results/audio180/127_8000_.9.paired.f32",
+    "results/audio180/100_8000_.5.paired.f32",
+    "results/audio180/20_500_.5.paired.f32",
+    "results/audio180/100_64_.5.candidate-mono.f32le",
+    "results/audio180/100_500_.9.candidate-mono.f32le",
+    "results/audio180/127_2000_.25.candidate-mono.f32le",
+    "results/audio180/127_500_.5.paired.f32",
+    "results/audio180/100_22050_.25.paired.f32",
+    "results/audio180/20_500_.5.candidate-mono.f32le",
+    "results/audio180/100_500_0.candidate-mono.f32le",
+    "results/audio180/100_8000_0.paired.f32",
+    "results/audio180/20_2000_.25.candidate-mono.f32le",
+    "results/audio180/20_64_.5.candidate-mono.f32le",
+    "results/audio180/20_64_0.candidate-mono.f32le",
+    "results/audio180/127_2000_.9.candidate-mono.f32le",
+    "results/audio180/20_22050_0.candidate-mono.f32le",
+    "results/audio180/100_64_.9.paired.f32",
+    "results/audio180/100_2000_0.paired.f32",
+    "results/audio180/100_8000_.5.candidate-mono.f32le",
+    "results/audio180/20_2000_0.candidate-mono.f32le",
+    "results/audio180/100_8000_.9.paired.f32",
+    "results/audio180/127_64_.25.paired.f32",
+    "results/audio180/20_8000_.5.candidate-mono.f32le",
+    "results/audio180/127_500_.5.candidate-mono.f32le"
+  ],
+  "issues": []
+}

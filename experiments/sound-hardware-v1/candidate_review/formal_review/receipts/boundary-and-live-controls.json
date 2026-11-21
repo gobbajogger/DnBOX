@@ -1,0 +1,141 @@
+{
+  "source": "Exact current indexed blobs copied into reviewer-owned storage",
+  "inputs_sha256": {
+    "candidate_review/verify_candidate.py": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+    "candidate_review/verify_compact_profile.py": "5010334abd97fb9014cd0365c0fa85a725d21a89485de3d969cde0435fe5eb17",
+    "candidate_review/check_compact_public_boundaries.py": "49c1ed054174d96fb2c415f975be49a4e307ae808715923a369a175be90e2ae4",
+    "candidate_review/run_callback_audit.py": "c9c610ec3dcf4f9d9a80276c5cbc83edbb95b23978e968865ea97adc450a4e99",
+    "hardware_candidate/src/dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "hardware_candidate/src/dnbx_core.h": "a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c",
+    "hardware_candidate/src/fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "hardware_candidate/tests/test_live_controls.c": "cc29a14dbc3d0283ab5bec269629510184355eeaba0682feca0ae01c9666f0d1"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/runners/check_compact_public_boundaries.py",
+        "--review-dir",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/formal_recheck_01"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/runners/check_compact_public_boundaries.py",
+        "--review-dir",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/relocated_tree/experiments/sound-hardware-v1/candidate_review/formal_recheck_01"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/runners/check_compact_public_boundaries.py",
+        "--review-dir",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/missing_libraries"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/runners/verify_compact_profile.py",
+        "--label",
+        "retained"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/runners/run_callback_audit.py",
+        "--label",
+        "retained"
+      ],
+      "exit_code": 2,
+      "expected_exit_code": 2
+    },
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/accepted_src",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/test_live_controls.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/accepted_src/dnbx_core.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/live_amp"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/live_amp"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "cc",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-ffp-contract=off",
+        "-fno-fast-math",
+        "-DX0X_HOST",
+        "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/accepted_src",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/test_live_filter_controls.c",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/accepted_src/dnbx_core.c",
+        "-o",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/live_filter"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_test_fixes/live_filter"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    }
+  ],
+  "boundary_cases": 130,
+  "fresh_boundary_pass": true,
+  "prior_receipts_unchanged": true,
+  "repeat_boundary_rejected_without_mutation": true,
+  "missing_libraries_rejected_without_mutation": true,
+  "compact_and_callback_existing_outputs_rejected_without_execution": true,
+  "live_control_policy_tests": [
+    {
+      "envelope": "amp",
+      "test_sha256": "cc29a14dbc3d0283ab5bec269629510184355eeaba0682feca0ae01c9666f0d1",
+      "pass": true,
+      "stdout": "PASS live controls: cached attack/release, next decay, immediate sustain"
+    },
+    {
+      "envelope": "filter",
+      "test_sha256": "04d444438ff0c6aa3e0586beaaa3d636167ba3574ed449710e504f45dc69cefa",
+      "pass": true,
+      "stdout": "PASS live controls: cached attack/release, next decay, immediate sustain"
+    }
+  ],
+  "native_or_long_timing_repeated": false,
+  "all_pass": true
+}

@@ -1,0 +1,150 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -54,7 +54,10 @@
+     };
+     _Static_assert(offsetof(dnbx_layer_params,oscillator_mode)==23*sizeof(float),
+                    "parameter fields must match typed bounds table");
+-    if (!p || p->oscillator_mode>DNBX_OSC_RAW) return 0;
++    if (!p || p->oscillator_mode > DNBX_OSC_SUPERJ6) return 0;
++    if (p->oscillator_mode == DNBX_OSC_SUPERJ6 &&
++        (!superj6_amp_range || (p->waveform != 0 && p->waveform != 1.f / 3.f &&
++         p->waveform != 2.f / 3.f && p->waveform != 1))) return 0;
+     if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16)) return 0;
+     for (unsigned i=0;i<23;i++) {
+         float value;
+@@ -104,6 +107,52 @@
+     float a=shape(first,t,dt,width,mode,w);
+     if (first >= 3 || frac == 0.0f) return a;
+     return a+(shape(first+1,t,dt,width,mode,w)-a)*frac;
++}
++
++/* First-order allpass in transposed form, with one delayed state. */
++static float phase_section(float x, float a, float *history)
++{
++    float y = a * x + *history;
++    *history = x - a * y;
++    return y;
++}
++
++static float factory_shape(unsigned stop, float t, float dt, float width, dnbx_work *w)
++{
++    if (stop == 1) {
++        float triangle = -shape(1, t, dt, width, DNBX_OSC_STOCK_BLEP, w);
++        float distance = .25f * (1.f - fm_fabsf(triangle));
++        if (distance < dt) {
++            /* Integrate the polynomial BLEP across the nearest slope reversal. */
++            float u = 1.f - distance / dt;
++            float correction = (4.f / 3.f) * dt * u * u * u;
++            triangle += triangle < 0 ? correction : -correction;
++        }
++        return .495f * triangle;
++    }
++    if (stop == 2) return .34f * shape(2, t, dt, width, DNBX_OSC_STOCK_BLEP, w);
++    /* A positive pulse ends at wrap; remove its duty-dependent mean. */
++    return -.297f * (shape(3, t, dt, 1.f - width, DNBX_OSC_STOCK_BLEP, w)
++                    - (1.f - 2.f * width));
++}
++
++static float factory_oscillator(dnbx_layer_voice *voice, float wave, float width, dnbx_work *w)
++{
++    unsigned stop = (unsigned)(wave * 3.f);
++    float t = voice->phase, dt = voice->increment;
++    if (stop == 0) return .5f * shape(0, t, dt, width, DNBX_OSC_STOCK_BLEP, w);
++
++    float half_step = .5f * dt;
++    float second_phase = t + half_step;
++    if (second_phase >= 1) second_phase -= 1;
++    /* Independently fitted halfband phases after two DnBOX oscillator samples. */
++    float first = factory_shape(stop, t, half_step, width, w);
++    float second = factory_shape(stop, second_phase, half_step, width, w);
++    second = phase_section(second, 0.09110601f, &voice->oscillator_history[0]);
++    first = phase_section(first, 0.31684510f, &voice->oscillator_history[1]);
++    second = phase_section(second, 0.58723765f, &voice->oscillator_history[2]);
++    first = phase_section(first, 0.85663281f, &voice->oscillator_history[3]);
++    return .5f * (first + second);
+ }
+
+ static void enter_stage(dnbx_envelope_state *e, const dnbx_envelope_params *p,
+@@ -410,7 +459,9 @@
+                 const dnbx_layer_params *p=&s->layer[l].params;
+                 float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+                 float env=envelope_sample(&lv->filter,&p->filter,s->sample_rate,w);
+-                float x=oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
++                float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
++                    ? factory_oscillator(lv, p->waveform, width[l], w)
++                    : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
+                 x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                 /* Existing DnBOX two-pole recurrence, with explicit saturation
+                  * guards to make a finite bound part of this candidate ABI. */
+--- a/firmware/src/dsp/dnbx_core.h
++++ b/firmware/src/dsp/dnbx_core.h
+@@ -18,10 +18,10 @@
+ #if DNBX_DIAGNOSTIC_COUNTERS != 0 && DNBX_DIAGNOSTIC_COUNTERS != 1
+ #error DNBX_DIAGNOSTIC_COUNTERS_must_be_zero_or_one
+ #endif
+-#define DNBX_ABI_MAJOR UINT32_C(1)
++#define DNBX_ABI_MAJOR UINT32_C(2)
+ #define DNBX_ABI_MINOR UINT32_C(0)
+ #define DNBX_ABI_VERSION ((DNBX_ABI_MAJOR << 16) | DNBX_ABI_MINOR)
+-typedef char dnbx_abi_version_value_check[(DNBX_ABI_VERSION == UINT32_C(65536)) ? 1 : -1];
++typedef char dnbx_abi_version_value_check[(DNBX_ABI_VERSION == UINT32_C(131072)) ? 1 : -1];
+ #define DNBX_VOICES 6u
+ #define DNBX_LAYERS 2u
+ #define DNBX_RAW_CONTROLS 218u
+@@ -35,7 +35,7 @@
+ enum { DNBX_RAW_STORED_ONLY = 1, DNBX_RAW_RESERVED = 2,
+        DNBX_RAW_EXTERNALLY_OWNED = 3 };
+ enum { DNBX_VELOCITY_LINEAR = 0, DNBX_VELOCITY_SQUARED = 1 };
+-enum { DNBX_OSC_STOCK_BLEP = 0, DNBX_OSC_RAW = 1 };
++enum { DNBX_OSC_STOCK_BLEP = 0, DNBX_OSC_RAW = 1, DNBX_OSC_SUPERJ6 = 2 };
+ enum { DNBX_ENV_IDLE, DNBX_ENV_ATTACK, DNBX_ENV_HOLD,
+        DNBX_ENV_DECAY, DNBX_ENV_SUSTAIN,
+        DNBX_ENV_RELEASE_HOLD, DNBX_ENV_RELEASE };
+@@ -63,8 +63,7 @@
+     float lfo_pwm_depth;     /* Duty excursion 0 .. .47, final duty .03 .. .5. */
+     float tune_semitones;    /* -48 .. 48, pitch increments cap at .45 cycles/sample. */
+     float pan;              /* -1 left, 0 equal half gains, +1 right. */
+-    uint32_t oscillator_mode; /* Explicit stock BLEP or raw; no original
+-                               * enabled-bandlimit equivalence is implied. */
++    uint32_t oscillator_mode; /* Stock BLEP, raw, or a discrete factory oscillator. */
+ } dnbx_layer_params;
+
+ /* Public layout supports static allocation; fields below are implementation
+@@ -76,6 +75,7 @@
+ } dnbx_envelope_state;
+ typedef struct {
+     float phase, increment, subphase, filter_first, filter_second;
++    float oscillator_history[4];
+     dnbx_envelope_state amp, filter;
+ } dnbx_layer_voice;
+ typedef struct {
+@@ -159,7 +159,7 @@
+ int dnbx_lfo_from_unit(float unit, float *hz);
+ int dnbx_pwm_from_unit(float unit, float *duty);
+ int dnbx_range_from_stop(float stop, float *ratio);
+-/* Checked standalone oscillator probe for behavior tests. */
++/* Stateless probes support stock BLEP and raw. Factory shapes use voice history. */
+ int dnbx_wave_probe(float phase, float increment, float waveform,
+                     float pulse_width, float *sample);
+ int dnbx_wave_probe_mode(float phase, float increment, float waveform,
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -62,6 +62,7 @@
+     /* Adjacent binary32 threshold points bound truncation of binary64 3*x. */
+     unsigned stop = (edit->selector >= 0x1.555556p-2f)
+                   + (edit->selector >= 0x1.555556p-1f) + (edit->selector == 1);
++    params.oscillator_mode = DNBX_OSC_SUPERJ6;
+     params.waveform = stop * (1.f / 3.f);
+     params.pulse_width = .5f;
+     if (stop == 3 && edit->enable > .5f)
+@@ -115,7 +116,9 @@
+   dnbx_layer_params p;
+   if(dnbx_get_layer(&s->core,l,&p)!=DNBX_OK)return 0;
+   switch(id){
+-  case 0:p.waveform=(2+x)/3;break;
++  case 0:
++   if (p.oscillator_mode == DNBX_OSC_SUPERJ6) p.oscillator_mode = DNBX_OSC_STOCK_BLEP;
++   p.waveform=(2+x)/3;break;
+   case 1:p.sub_gain=x*.5f;break;
+   case 2:p.cutoff_hz=35+x*x*12000;break;
+   case 3:p.resonance=x;break;

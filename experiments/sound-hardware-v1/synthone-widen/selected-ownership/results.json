@@ -1,0 +1,86 @@
+{
+  "source_commit": "03f92a7d94ad29bdb4a6bb238311ba12776401ea",
+  "packed_widen_header_sha256": "e2ab905c7b100f9ab3695aeaf7bf2364014fd051f8a87dd9ea689e874225818d",
+  "selected_widen_patch_sha256": "10a6cab308fe6e47219644a0f6a7cf84e149597833cef659f9ec906c39063372",
+  "sample_rate_hz": 44100,
+  "delay_frames": 2205,
+  "first_arena_bytes": 4095,
+  "backend_tail_bytes": 2520,
+  "stock_host": {
+    "counters": [
+      "blocks=182 project_bytes=36420"
+    ],
+    "pcm_bytes": 372736,
+    "pcm_sha256": "2c1215f841e8f466bdf88ba47693d91ddd04e4d0749d979700e2a8d165f2ac49",
+    "proj_bytes": 36420,
+    "proj_sha256": "ba21b060ba401661ee9c1bda3f9eaef5c4e162de53493eb9ccfee5617e76d1e5"
+  },
+  "diagnostic_dry_host": {
+    "counters": [
+      "blocks=182 project_bytes=36420",
+      "part=0 checked=32512 dry=32512 wet=0 nonzero_taps=26787 audible_wet=0 resets=2 input_hash=27a8ad90",
+      "part=1 checked=45312 dry=45312 wet=0 nonzero_taps=42834 audible_wet=0 resets=1 input_hash=c733e5f2"
+    ],
+    "pcm_bytes": 372736,
+    "pcm_sha256": "2c1215f841e8f466bdf88ba47693d91ddd04e4d0749d979700e2a8d165f2ac49",
+    "proj_bytes": 36420,
+    "proj_sha256": "ba21b060ba401661ee9c1bda3f9eaef5c4e162de53493eb9ccfee5617e76d1e5"
+  },
+  "diagnostic_wet_host": {
+    "counters": [
+      "blocks=184 project_bytes=36420",
+      "part=0 checked=33024 dry=5632 wet=27392 nonzero_taps=27290 audible_wet=25147 resets=2 input_hash=d0c4a590",
+      "part=1 checked=45824 dry=4864 wet=40960 nonzero_taps=43345 audible_wet=40948 resets=1 input_hash=dca4513d"
+    ],
+    "pcm_bytes": 376832,
+    "pcm_sha256": "df440c44ba5980f65125cd56b66a5f174c039b586e04668e7020fd2c237b397c",
+    "proj_bytes": 36420,
+    "proj_sha256": "ba21b060ba401661ee9c1bda3f9eaef5c4e162de53493eb9ccfee5617e76d1e5"
+  },
+  "native": {
+    "elite": {
+      "stock_bytes": 546516,
+      "app_bytes": 546884,
+      "delta_bytes": 368,
+      "stock_app_sha256": "4c1fea5eb23ccaa8a5538c994b9552e8164d0fe2ea2b146d4e159ef38387e7cd",
+      "diagnostic_app_sha256": "6c127e16678d13d702203de8def4df24e8673505f2eb829305933eb34520fc71",
+      "qualification": [
+        "XIP free: 5788 B",
+        "pool raw free: 8972 B",
+        "pool reserve: 8192 B",
+        "pool margin: 780 B",
+        "ok    .ram_text: 843 insns, no calls",
+        "ok    app code area 552672 B, 5788 B free (Bluetooth block at app.bin 0x86ee0)",
+        "ok    no soft-double routines (single-precision FPU only)",
+        "ok    image 546884 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064",
+        "ok    register access: hal/ only (src/, loader/ clean)"
+      ],
+      "section_symbols": [
+        "01c3c150 l       .pool\t\t 00002880 original_bass",
+        "01c45ea4 l       .pool\t\t 00002138 original_fx"
+      ]
+    },
+    "pro": {
+      "stock_bytes": 546508,
+      "app_bytes": 546876,
+      "delta_bytes": 368,
+      "stock_app_sha256": "ea33898b9c43c66b62e4bf4e695c9f590ca18ad088554165749b0571ab0ccb8c",
+      "diagnostic_app_sha256": "b8802953e5e92646a7c033725ca834f22f5ef223575a6f1acc96c24fae7d1901",
+      "qualification": [
+        "XIP free: 5796 B",
+        "pool raw free: 8972 B",
+        "pool reserve: 8192 B",
+        "pool margin: 780 B",
+        "ok    .ram_text: 843 insns, no calls",
+        "ok    app code area 552672 B, 5796 B free (Bluetooth block at app.bin 0x86ee0)",
+        "ok    no soft-double routines (single-precision FPU only)",
+        "ok    image 546876 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064",
+        "ok    register access: hal/ only (src/, loader/ clean)"
+      ],
+      "section_symbols": [
+        "01c3c150 l       .pool\t\t 00002880 original_bass",
+        "01c45ea4 l       .pool\t\t 00002138 original_fx"
+      ]
+    }
+  }
+}

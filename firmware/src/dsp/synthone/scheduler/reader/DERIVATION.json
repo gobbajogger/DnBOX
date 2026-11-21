@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "scope": "Runtime-only voice call adapter and four morph loads; original oracle/member/C morph unchanged",
+  "inputs": [
+    {
+      "path": "probe/portable_voice.cpp",
+      "sha256": "24076a252ffca60e469bef7e9d74f5ed6ed9769e1fc5757cde8d03e9805372cb"
+    },
+    {
+      "path": "audiokit-4.9.2/AudioKit/Core/SoundpipeExtension/modules/oscmorph2d.c",
+      "sha256": "455c56d1f12e3b62d89eea1f83ef9bbd14402b37b14db4b54051383a1d64af0c"
+    }
+  ],
+  "original_member_function_sha256": "15dddc1d3d4b91b4d7a0c370548f39fc53c9fcb7a0a560bcc88f4d235ec3ffd7",
+  "original_member_body_sha256": "1358da75a73620603b7987d0680ff616ee80b90ae8ba78152a796c2a5aff3800",
+  "original_morph_function_sha256": "8ce4c509a5c73490c5602b00d066eb9b849b7df277610e85b7068264417c3eaf",
+  "private_helper_bodies_sha256": {
+    "getParam": "90e7d9d495899bbcfa922fc859daa27635676cbdb65293fb789cbe3fc94599e4",
+    "sampleRate": "aadf8a4d53e6ddcd749443fd23f39e3a39b536c54fc5fe701f1cd6759791ea2e",
+    "nnToHz": "c769a761b2d0db6aac9f5307830add07371286754e24e5c3052a4ca21439e6d0"
+  },
+  "voice_allowed_changes": [
+    "sixteen references to actual note fields",
+    "exact private helper bodies",
+    "two morph call-name redirects",
+    "explicit failed-read result propagation"
+  ],
+  "morph_allowed_changes": [
+    "distinct symbol and binding parameter",
+    "admitted metadata/bounds rejection",
+    "row-index bookkeeping instead of raw payload pointers",
+    "four checked direct-word reads and bit copies",
+    "index floor is the binary32 image of libm floor inside the signed-32 domain; interpolation and phase arithmetic otherwise unchanged"
+  ],
+  "outputs": [
+    {
+      "path": "runtime_note.cpp",
+      "bytes": 12119,
+      "sha256": "573111ce4bb0c1042b4fe3a876c52c03571f42e8b9fe0c00d393176d6f38ac8c"
+    },
+    {
+      "path": "morph_compute.c",
+      "bytes": 3215,
+      "sha256": "efbcec6086814cec6de4d51cb776a420771b344ad88d9c8fe8c6023e1b84c617"
+    }
+  ]
+}

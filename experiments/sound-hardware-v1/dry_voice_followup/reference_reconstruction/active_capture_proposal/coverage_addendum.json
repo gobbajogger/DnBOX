@@ -1,0 +1,42 @@
+{
+  "schema": "additive reference coverage event v1",
+  "historical_missing_registry": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/missing_active_modulation_pcm.json",
+    "bytes": 10980,
+    "sha256": "eb15a8f174cda744babe5c3ec7287d7d6bdb925c03192c813436f3612e26453e"
+  },
+  "historical_missing_status_unchanged": {
+    "files": 18,
+    "notes": 54,
+    "status": "Historical paired PCM remains unrecovered; this registry was not rewritten"
+  },
+  "zero_depth_aliases": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/depth_zero_identity_aliases.json",
+    "bytes": 8572,
+    "sha256": "01496b5441c9e43f961a692322fb3e041e0ffc654861ac9bfb3922e90fc6ed1f"
+  },
+  "zero_depth_alias_status_unchanged": {
+    "labelled_files": 6,
+    "labelled_note_slots": 18,
+    "new_independent_observations": 0
+  },
+  "new_reference_observation": {
+    "case_id": "filter-modulation/1.2_2000_0.9",
+    "files": 1,
+    "notes": [
+      36,
+      60,
+      84
+    ],
+    "new_note_observations": 3,
+    "reference": {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+      "bytes": 1058304,
+      "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74"
+    },
+    "classification": "New original mono capture from the baseline-validated reconstruction, not recovered historical pair bytes"
+  },
+  "all_other_active_case_captures_not_run": true,
+  "independent_engine_acceptance_inferred": false,
+  "historical_failure_or_threshold_edits": false
+}

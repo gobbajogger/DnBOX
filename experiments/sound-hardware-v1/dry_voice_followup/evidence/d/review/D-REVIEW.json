@@ -1,0 +1,193 @@
+{
+  "schema": "independent frozen Variant D review v1",
+  "reviewed_utc": "2026-11-19T00:27:15.712286+00:00",
+  "status": "READY_FOR_ONE_UNCHANGED_180_NOTE_COMPARATOR",
+  "gate_admission": false,
+  "audio_result": "NOT_ASSESSED",
+  "declaration_sha256": "9e6c7241b36ae4ca4fc0fae2cc764536a8612517c98cec3e2d149236c33cc28a",
+  "core_source_sha256": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+  "semantic_changes_exactly_proposed_two": true,
+  "r0_branch_byte_identical_to_C": true,
+  "other_five_renderer_sources_identical_to_C": {
+    "src/s1_dry_voice.h": true,
+    "src/host.c": true,
+    "vendor/fastmath.h": true,
+    "vendor/dnbx_s1_envelope.c": true,
+    "vendor/dnbx_s1_envelope.h": true
+  },
+  "canonical_import_six_source_hashes_match": {
+    "src/s1_dry_voice.c": true,
+    "src/s1_dry_voice.h": true,
+    "src/host.c": true,
+    "vendor/fastmath.h": true,
+    "vendor/dnbx_s1_envelope.c": true,
+    "vendor/dnbx_s1_envelope.h": true
+  },
+  "ownership_source_sha256": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+  "ownership_source_reused_results_fresh_D": true,
+  "test_receipts": {
+    "describe": {
+      "matches_frozen_result_command_and_binary": true,
+      "exit_status": 0,
+      "binary_sha256": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751"
+    },
+    "host-selftest": {
+      "matches_frozen_result_command_and_binary": true,
+      "exit_status": 0,
+      "binary_sha256": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751"
+    },
+    "ownership-selftest": {
+      "matches_frozen_result_command_and_binary": true,
+      "exit_status": 0,
+      "binary_sha256": "4fa487ff457af566aaa6b454bdadf1fb3d69219354507adb59e9df2e80b6784d"
+    }
+  },
+  "checked_file_groups": {
+    "source_files_sha256": [
+      {
+        "path": "src/s1_dry_voice.c",
+        "sha256": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1"
+      },
+      {
+        "path": "src/s1_dry_voice.h",
+        "sha256": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2"
+      },
+      {
+        "path": "src/host.c",
+        "sha256": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07"
+      },
+      {
+        "path": "vendor/fastmath.h",
+        "sha256": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d"
+      },
+      {
+        "path": "vendor/dnbx_s1_envelope.c",
+        "sha256": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9"
+      },
+      {
+        "path": "vendor/dnbx_s1_envelope.h",
+        "sha256": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+      },
+      {
+        "path": "tests/ownership_test.c",
+        "sha256": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e"
+      },
+      {
+        "path": "prepare.py",
+        "sha256": "f3a36ba98617c0a81ed3f8e5a87766634421d777b2dec15c72a17dc1286be34c"
+      },
+      {
+        "path": "inputs/NONLINEAR-HYPOTHESIS.md",
+        "sha256": "ea2e830a98392567a9055b71296feb4764fbb32ecbbf613641823de8f16ace11"
+      },
+      {
+        "path": "inputs/C-filter-observations.json",
+        "sha256": "85c088668cb1106cc5c32e6438c0e6535c82ea328d21435c91bb45863c3b372a"
+      },
+      {
+        "path": "inputs/reference_pcm_manifest.json",
+        "sha256": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931"
+      },
+      {
+        "path": "reports/C-to-D.patch",
+        "sha256": "5bda8714c7be9166cc312f77336bed17a5dbed1e4576312dca607cd927a59d1e"
+      },
+      {
+        "path": "READY.md",
+        "sha256": "62b5dcfaabd29074fd861423508352823d82331cfa9e80d5cc0bc86f8213ae57"
+      },
+      {
+        "path": "NEXT-COMMAND.txt",
+        "sha256": "91a86f34848872d91df02390a0d9150c37061bb7a545aad01d90396db89e6a73"
+      },
+      {
+        "path": "COMPARATOR-SOURCE.json",
+        "sha256": "2ff199e0a1b93586063b3b3e196c25de1cf6a1ec0697d01fde1beb8a9de13590"
+      }
+    ],
+    "compiled_files_sha256": [
+      {
+        "path": "build/s1_dry_voice.o",
+        "sha256": "abcaa1cd4d3bd91e2b8e0f87dc74750d9f0dffa162efa8e479581ae0e1f964d7"
+      },
+      {
+        "path": "build/s1_dry_host",
+        "sha256": "1a9691cedd3836364dc3d4e96f7fed87604b00570efabf729e7e4e6e7f6e8751"
+      },
+      {
+        "path": "build/ownership_test",
+        "sha256": "4fa487ff457af566aaa6b454bdadf1fb3d69219354507adb59e9df2e80b6784d"
+      }
+    ],
+    "test_evidence_sha256": [
+      {
+        "path": "logs/build-core-attempt01.json",
+        "sha256": "01bba5689c31e67497e21be8c804f066a5342a504c944ed8a09e8b8ea1090ffe"
+      },
+      {
+        "path": "logs/build-host-attempt01.json",
+        "sha256": "321a431212d15ed4c65cdac61d36fa591a16d5c6b1e141786c64c0d9a34f2501"
+      },
+      {
+        "path": "logs/build-ownership-attempt01.json",
+        "sha256": "3232725c131aa020baebcb083852e04eb066dd373bc899743a0211b70bde7bc5"
+      },
+      {
+        "path": "logs/compiler-version-attempt01.json",
+        "sha256": "0d1bb1e85c8e425592628a59965ee3897593e0b46fec08bd954a967f434c650d"
+      },
+      {
+        "path": "logs/core-undefined-symbols-attempt01.json",
+        "sha256": "aff57ee213edca9511f67c99ed739b3818d10ed2a2847ed7c7add58e5962508f"
+      },
+      {
+        "path": "logs/describe-attempt01.json",
+        "sha256": "695f4250f67d5623ad17d9c430bf13e99cf69016e41de04ea8144ff9bb074b0b"
+      },
+      {
+        "path": "logs/host-selftest-attempt01.json",
+        "sha256": "1e1f61b766618b2c4d6ac24d1926191d57168596dafed31dddb75219252b7878"
+      },
+      {
+        "path": "logs/ownership-selftest-attempt01.json",
+        "sha256": "1efe9e58603ce63d3f5fda9fd4a6a6ceb1d7099669e517261345edab8db782fb"
+      },
+      {
+        "path": "results/describe.json",
+        "sha256": "134e27c66974897ac22aa9bced7c50636795ab25517eb57d2f4e67b9e7ae320a"
+      },
+      {
+        "path": "results/host-selftest.json",
+        "sha256": "d46898fc5e9ac262e918b0f8b1ca36261a3ca12464f5192044727b431862254e"
+      },
+      {
+        "path": "results/ownership-selftest.json",
+        "sha256": "81445032f118001f4bbe565265a98cbe458c3ff9ff5d183efe51e4c73be388a4"
+      }
+    ]
+  },
+  "evidence_manifest_files_checked": 33,
+  "issues": [],
+  "scope_notes": [
+    "Historical prepare.py assertions are not the future portable gate",
+    "Ownership/partition checks do not establish reference audio fidelity",
+    "C nonlinear scalar fixtures were not used for D",
+    "Removed saturation bound is explicitly unqualified; no new clamp introduced"
+  ],
+  "new_executions": {
+    "compiler": 0,
+    "candidate_or_test_binary": 0,
+    "audio_renderer": 0,
+    "metric": 0,
+    "native": 0,
+    "emulator": 0,
+    "rdc": 0,
+    "github": 0
+  },
+  "source_boundary": "Only frozen C/D, independent diagnosis, saved allowed ownership source/logs and source-free metadata; no original engine algorithms",
+  "canonical_or_candidate_files_edited": false,
+  "report": {
+    "path": "/workspace/scratch/e803955aec60/dry_harness_review/D-REVIEW.md",
+    "sha256": "23905d4be7958638fa42c53d1a2de6d6683a02725d8a26f4c0f2f39eb9e3344e"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "finished_utc": "2026-11-19T00:47:11.080685+00:00",
+  "scope": "One new active-filter three-note diagnostic, not a 72-case or full-engine gate",
+  "case_id": "filter-modulation/1.2_2000_0.9",
+  "gain": 1,
+  "static_replay_byte_identical": true,
+  "gate": {
+    "comparison_gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0,
+    "normalization": "none",
+    "alignment": "none",
+    "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "rows": [
+    {
+      "note": 36,
+      "rms_db": 0.2322267444441285,
+      "spectral_db": 0.6821656102501344
+    },
+    {
+      "note": 60,
+      "rms_db": 0.23911207195823647,
+      "spectral_db": 0.7671471687387921
+    },
+    {
+      "note": 84,
+      "rms_db": 0.19610544102212382,
+      "spectral_db": 2.1061539033521486
+    }
+  ],
+  "nonfinite": 0,
+  "accepted_notes": 3,
+  "new_original_sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74",
+  "candidate_sha256": "7ac88e50c0d0566c1a707dbeda8c81bed5b0848cfe44634011228999ea1f02b1",
+  "paired_sha256": "338458922ef3861ec77898dfe386328a2ad6fa19897d265a010d106d96269bce",
+  "host_binary_sha256": "988006d70a648c4fc213b8047655df06f9e41e2993a8ab36e763baeecc63c936",
+  "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+  "counts": {
+    "host_builds": 1,
+    "static_replays": 1,
+    "active_captures": 1,
+    "metric_executions": 1
+  },
+  "D_source_unchanged": true,
+  "production_activation": false,
+  "failure_policy": "Terminal result; no adjustment, automatic repeat or new variant"
+}

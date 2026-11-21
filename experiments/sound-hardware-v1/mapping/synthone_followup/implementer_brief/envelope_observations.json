@@ -1,0 +1,119 @@
+{
+  "scope": "Fresh frozen original S1 ADSR component execution. No complete app or voice lifecycle claim.",
+  "format": "Little-endian float32; three concatenated case-major sequences; one scalar sample per audio frame",
+  "sample_rate": 44100,
+  "binary_file": "s1_envelope_observations.f32le",
+  "sha256": "9b164e9b7ebf3fe95665ceaa64afb39d51442e4167305c5d7bc55e115995ade4",
+  "frames": 264600,
+  "cases": [
+    {
+      "case": 0,
+      "settings_ADSR": [
+        0.05000000074505806,
+        0.004999999888241291,
+        0.800000011920929,
+        0.05000000074505806
+      ],
+      "frames": 88200,
+      "byte_offset": 0,
+      "note_on_frame": 0,
+      "note_off_frame": 44100,
+      "peak_frame": 6092,
+      "peak_level": 0.9900013208389282,
+      "selected_observations": {
+        "0": 0.0007555484771728516,
+        "1": 0.0015105260536074638,
+        "16": 0.012766980566084385,
+        "22": 0.01723395101726055,
+        "441": 0.2840024530887604,
+        "2204": 0.8111147880554199,
+        "2205": 0.8112574815750122,
+        "4410": 0.9643493890762329,
+        "8819": 0.8000065684318542,
+        "8820": 0.8000065684318542,
+        "22050": 0.8000065684318542,
+        "44099": 0.8000065684318542,
+        "44100": 0.7996438145637512,
+        "44101": 0.7992812395095825,
+        "46305": 0.2941722869873047,
+        "66150": 3.630321953096427e-05,
+        "88199": 1.6488893583854747e-09
+      }
+    },
+    {
+      "case": 1,
+      "settings_ADSR": [
+        0.20000000298023224,
+        0.30000001192092896,
+        0.4000000059604645,
+        0.5
+      ],
+      "frames": 88200,
+      "byte_offset": 352800,
+      "note_on_frame": 0,
+      "note_off_frame": 44100,
+      "peak_frame": 24370,
+      "peak_level": 0.9900005459785461,
+      "selected_observations": {
+        "0": 0.00018894672393798828,
+        "1": 0.0003778577665798366,
+        "16": 0.003207243513315916,
+        "22": 0.004336754325777292,
+        "441": 0.080129474401474,
+        "2204": 0.34075942635536194,
+        "2205": 0.3408840000629425,
+        "4410": 0.5654839873313904,
+        "8819": 0.8111249208450317,
+        "8820": 0.8111606240272522,
+        "22050": 0.9844987988471985,
+        "44099": 0.5326951146125793,
+        "44100": 0.5326709747314453,
+        "44101": 0.5326468348503113,
+        "46305": 0.4819711446762085,
+        "66150": 0.1959208846092224,
+        "88199": 0.07206467539072037
+      }
+    },
+    {
+      "case": 2,
+      "settings_ADSR": [
+        0.0005000000237487257,
+        0.004999999888241291,
+        0.0,
+        0.004000000189989805
+      ],
+      "frames": 88200,
+      "byte_offset": 705600,
+      "note_on_frame": 0,
+      "note_off_frame": 44100,
+      "peak_frame": 60,
+      "peak_level": 0.990055501461029,
+      "selected_observations": {
+        "0": 0.07279980182647705,
+        "1": 0.14029979705810547,
+        "16": 0.7233378887176514,
+        "22": 0.8242112994194031,
+        "441": 0.17589159309864044,
+        "2204": 5.927247548243031e-05,
+        "2205": 5.900427277083509e-05,
+        "4410": 2.678745669726368e-09,
+        "8819": 5.546225327652737e-18,
+        "8820": 5.521129081458184e-18,
+        "22050": 1.5414283107572988e-43,
+        "44099": 1.5414283107572988e-43,
+        "44100": 1.5274153261140506e-43,
+        "44101": 1.5134023414708024e-43,
+        "46305": 1.233142648605839e-43,
+        "66150": 1.233142648605839e-43,
+        "88199": 1.233142648605839e-43
+      }
+    }
+  ],
+  "limits": [
+    "Separate from SuperJ6 AHDSHR captures and fits.",
+    "No original engine source or recurrence is included in the implementer packet.",
+    "Static ADSR values only; live automation, retrigger, event ordering, and full voice retirement remain unqualified.",
+    "Both amp and filter reference paths use this ADSR component, but the filter-to-frequency route needs independent verification.",
+    "Two-second traces do not establish that release reaches exactly zero."
+  ]
+}
