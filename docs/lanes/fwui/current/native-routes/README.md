@@ -27,12 +27,12 @@ The primary inventory retains its original 98/118 count. Seven additional comple
 
 ## Recognized flash and the ordinary application loop
 
-Five private SMK host runs execute the complete production `fm1_main`. They
+Seven private SMK host runs execute the complete production `fm1_main`. They
 drive a RAM flash device with a recognized JEDEC ID, the production storage-owner
 and splash-selection functions, a simulated 1-ms clock and both octave buttons.
 The full application frames come from the regular engine, project and UI code.
-The 13 indexed states include three splashes that match their archived decoded
-RGB digests and ten additional 240×240 PNGs. Seven caption masks check 5,272
+The 16 indexed states include three splashes that match their archived decoded
+RGB digests and 13 additional 240×240 PNGs. Seven caption masks check 5,272
 ink samples against the finished header, including antialiased edges. All checked
 samples fit in x3–213 and y0–18. [Frame index](normal-loop/screen-index.tsv) ·
 [Case results and input hashes](normal-loop/normal-loop.json)
@@ -45,14 +45,32 @@ samples fit in x3–213 and y0–18. [Frame index](normal-loop/screen-index.tsv)
 | Hold through exactly 5,000 ms | When a frame is due on this tick it displays `UPDATE MODE IN 0..`. Continuing to hold for 1 ms calls `enter_uboot("UBOOT")`. The earlier recovery fixture covers that endpoint’s visible output. |
 | Release immediately after 5,000 ms | The countdown has already set its state to zero. Releasing both buttons at 5,001 ms skips the cancellation request and the next frame displays `STEPS 17-32`. |
 
-The five archived runs use empty sample shadows. Two additional cases in
-`startup_loop.py` exercise a valid shadow after power loss and a valid live slot
-with stale shadow data. They compare all 4,096 bytes before LCD initialization,
-observe the engine enumerate the zone and refresh its banks after the project
-loads, and capture the splash and first ordinary frame. A separate [interpreted C replay](pending-shadow/README.md) captured the
-startup splash after restoring the sector. The seven-case native run and its
-new ordinary frame remain pending. The five-case report remains the historical
-record. Physical flash, IRQ/audio timing and bootloader transitions need a board.
+The last two runs start with a valid sample shadow. The recovery case restores
+all 4,096 bytes in 16 ordered writes before LCD initialization. The control
+retains a valid live sector and discards a different stale shadow without
+writing the live sector. Each run sees the user zone and both BREAK bank
+revisions after project load. Both first ordinary screens match the matching-owner
+control at all 57,600 pixels. Reverting the guard makes the seven-case test
+stop during recovery at the unbound pattern table. [Recovery frames and case results](normal-loop/normal-loop.json)
+
+A separate [strict stock-emulator run](stock-boot.json) executed the linked
+JL firmware with the simulated SMK peripherals. At 448 ms the Elite recovery
+splash matched every archived RGB565 pixel. This run stopped before capturing
+the ordinary frame on the instruction emulator. The host replay supplies both
+ordinary frames. Physical LCD timing and color, electrical inputs, flash
+persistence and reset/bootloader transitions still require a board.
+
+The short stock-emulator replay takes a linked stock FWSC and a local
+`fm1-live` binary. It creates private simulated flash, compiles the sample
+and splash records from the same C fixture used by the seven-case test, and
+writes its LCD and log to a fresh output directory. The stock results above
+came from the recorded run. This single-shot command uses the same fixtures
+and still needs a complete rerun.
+
+```sh
+python3 tests/ui_inventory/stock_boot_fixture.py --model elite --emulator /path/to/fm1-live \
+  --fwsc /path/to/x0x-smk37-elite.fwsc --case recover --ms 448 /tmp/elite-recovery-splash
+```
 
 ## Alternate renderer entry conditions
 

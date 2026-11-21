@@ -1,14 +1,14 @@
 {
   "productionTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
-  "scope": "The original inventory and its productionTree are retained. Seven additional complete function bodies execute on a host. Physical-device and independent visual approval remain open.",
+  "scope": "The original inventory and productionTree are retained. The host startup replays exercise seven additional complete function bodies. The strict stock-emulator results below cover a subset of target instruction and peripheral-model paths. Hardware measurements and independent visual approval remain open.",
   "routes": [
     {
       "ids": [
         "firmware/src/app/main_fm1.c::fm1_main",
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
-      "notConstructed": "Board reset, IRQ/audio/USB timing on hardware, physical panel behavior and flash persistence.",
-      "displayEvidence": "The compiled seven-case fixture executes complete fm1_main with simulated flash and hardware, including recovery and already-live controls. It checks the restored sector and BREAK publication, captures the post-recovery splash and first regular frame, and compares decoded pixels. See native-routes/normal-loop/normal-loop.json. The complete fm1_cstart fixture separately reaches the RAM-only fm1_main prefix or safe_main over private linker regions."
+      "notConstructed": "Physical power-on and SPL handoff, IRQ/audio/USB electrical behavior, LCD color and flash power-loss persistence on a board.",
+      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json."
     },
     {
       "ids": [
@@ -43,7 +43,7 @@
         "firmware/src/lcd.c::lcd_init"
       ],
       "notConstructed": "Native LCD power/reset and hardware bus initialization.",
-      "displayEvidence": "The production lcd_init, lcd_window, lcd_data, lcd_fill and lcd_blit run against a RAM SPI endpoint; bounds, pixel counts, clear and display-on are checked."
+      "displayEvidence": "The production lcd_init, lcd_window, lcd_data, lcd_fill and lcd_blit run against a RAM SPI endpoint; bounds, pixel counts, clear and display-on are checked. Elite recovery also produced the archived custom splash from the stock package through the strict emulator’s timed SPI/LCD path. All 57,600 decoded RGB565 pixels match; see native-routes/stock-boot.json."
     },
     {
       "ids": [
@@ -79,5 +79,41 @@
   "hostSupplement": "native-routes/README.md",
   "hostSupplementWholeFunctions": 7,
   "normalApplicationLoop": "native-routes/normal-loop/normal-loop.json",
-  "pendingSampleSplash": "native-routes/pending-shadow/README.md"
+  "pendingSampleSplash": "native-routes/pending-shadow/README.md",
+  "stockBootEmulator": "native-routes/stock-boot.json",
+  "stockSourceAudit": {
+    "commit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+    "firmwareTree": "4cb64989968d8c860a126bd2b63d065080b5ad7a",
+    "sourceFilesChecked": 174,
+    "previousReview": "4c05722d5144b652acddf587ea41050fcbbacd2b",
+    "deltaFromPreviousReview": [
+      "firmware/src/app/engine.c:engine_brk_loops guards an unbound seq.pat"
+    ],
+    "noReferencedCaller": [
+      "ui_position_badge",
+      "header_pattern_cue",
+      "matrix_row_hint",
+      "matrix_next_hint",
+      "cv_blit_from"
+    ],
+    "calledOnlyByUnreachedHelper": {
+      "nav_arrow": "header_pattern_cue",
+      "header_pattern_badge": "header_pattern_cue",
+      "row_picture": "matrix_row_hint"
+    },
+    "laneLocalName": "The lane painter has one occurrence followed by a call parenthesis, its definition. The prior source review distinguishes same-name locals and fields.",
+    "dispatchExcluded": {
+      "strip_value_fit": "Its only call requires a drum reference in draw_param_widget. That widget is called only from draw_part_sound on bass pages. Both the main-band and knob-strip drum selection dispatch to draw_drum_voice.",
+      "dg_tail": "Its callers require DG_DECAY or DG_NTAIL in drum_strip_glyph. Outside the bass matrix widget, the only call to drum_strip_glyph requires DG_LEVEL. drum_strip_role rejects a bass reference.",
+      "original_cell_value": "describe_pages only emits R_ENG/T_303 and the three R_BENGINE/R_BPRESET/R_BSTATUS controls under V_PART for bass. draw_knobs returns at ui.c:8495 for that part and view. V_SEQ uses R_BPATSND, which does not satisfy the call predicate."
+    },
+    "classificationCounts": {
+      "originallyUnobserved": 20,
+      "executedInHostBootCalibrationOrLCD": 7,
+      "observedWithMalformedSiblingLock": 1,
+      "noReachableCaller": 9,
+      "notSelectedByStockPageDispatch": 3
+    },
+    "scope": "All 20 original IDs have dispositions. The source exclusions add zero executed frame or hardware observations. Counts apply to 11bc3f3a. The source scan used exact identifiers and masked comments and literals."
+  }
 }

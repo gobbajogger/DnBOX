@@ -1,0 +1,81 @@
+{
+  "status": "PARTIAL",
+  "inputCommit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "inputTree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+  "emulator": "fm1-live",
+  "emulatorSha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+  "clockMHz": 360,
+  "strict": true,
+  "deviceConnections": 0,
+  "seed": "Fresh private 1 MiB emulated flash from the respective linked package. A 1 ms seed shot reported zero flash operations. The two cases used the matching owner tag, the DnBOX/STILL record and the exact sample_sector and seed_splash bodies from tests/ui_inventory/startup_loop.c. Sample sector size 4096. Slot zero and shadow addresses are 0xC2000 and 0xB0000.",
+  "modelPackages": {
+    "elite": {
+      "bytes": 651732,
+      "buildName": "x0x-smk37-elite.fwsc"
+    },
+    "pro": {
+      "bytes": 651730,
+      "buildName": "x0x-smk37.fwsc"
+    }
+  },
+  "modelSource": "The two firmware packages came from the serial stock builds. Package hashes were not retained before the executor disconnected.",
+  "applicationEntry": "The emulator hands over at the packaged app entry after modeling the SPL. The stock crt0.S _start then sets stacks and calls fm1_cstart.",
+  "coldElite": {
+    "case": "Fresh factory flash without a sample shadow. The emulator's default key/PLAY inputs were enabled for this exploratory shot.",
+    "exit": 0,
+    "shotMs": 1600,
+    "last40msIsrInstructionPercent": 18,
+    "interruptsEnabled": true,
+    "skippedCycles": 0,
+    "lcdWireMs": 326,
+    "flashOperations": 20,
+    "peakLastHalfSecond": 61,
+    "lcdFile": "work/lcd.ppm",
+    "scope": "Timed SPI/LCD activity and execution in IRQs from the linked Elite image. The resulting LCD was not used as the sample-recovery frame oracle."
+  },
+  "sampleRuns": {
+    "caseInputs": {
+      "recover": "Erased live sector, good shadow filled with 0x36 outside the valid one-zone header.",
+      "alreadyLive": "Good live sector and distinct valid stale shadow filled with 0x59 outside the header."
+    },
+    "inputScript": "FM1_BENCH_KEYS was empty to suppress the default key/PLAY sequence.",
+    "command": "FM1_STRICT=1 FM1_BENCH_KEYS='' FM1_DUMPRAM=<case>/ram.bin fm1-live --fwsc <model>.fwsc --mhz 360 --lcd-only --shot 1500 --record frames --flash flash.bin",
+    "readback": [
+      {
+        "model": "Elite",
+        "sample": "recover",
+        "stage": "Complete custom-text splash",
+        "nominalFrameMs": 448,
+        "emulatorRgbSha256Prefix": "17230dfccf",
+        "matchedPanelPixels": 57600,
+        "comparison": "Each RGB565 value matched the seven-case host splash. 384 RGB888 pixels differed in an exported low bit by at most one channel level. The difference box was x101..138, y98..146.",
+        "comparatorPanelOrderSha256": "3f3295b59fadf90714afffd3760db7ecced667ac52e82e5352e9849e4f0b546a",
+        "comparatorRgbSha256": "af5f8a788579f1f844d3fcacd34782cb8fb55ae1a5d7c4c8a2efa053e521fb88",
+        "referenceEmulatorRgbSha256": "17230dfccf677511bd4806d81e0580ae3ace8c16a781933009e20fcdec65b3df",
+        "referenceEmulatorRgbDerivation": "Expand the verified archived RGB565 values using fm1-live's bit replication. The computed full digest agrees with the recorded 10-character prefix. The direct Elite check compared every source pixel in RGB565."
+      },
+      {
+        "model": "Pro",
+        "sample": "recover",
+        "stage": "Same sampled splash hash prefix at 416 ms",
+        "emulatorRgbSha256Prefix": "17230dfccf"
+      },
+      {
+        "model": "Pro",
+        "sample": "alreadyLive",
+        "stage": "Same sampled splash hash prefix at 416 ms",
+        "emulatorRgbSha256Prefix": "17230dfccf"
+      },
+      {
+        "model": "Elite",
+        "sample": "alreadyLive",
+        "stage": "Capture read back through LCD clear at 368 ms. A complete splash was not checked."
+      }
+    ],
+    "scope": "The printed SHA prefix is a diagnostic identifier. The pixel-by-pixel comparison was performed for Elite recovery. A recorded process exited on signal 9 before its ordinary-frame and final-flash receipts were obtained. No model/fixture pair has an accepted ordinary-frame or flash-persistence result from fm1-live in this receipt."
+  },
+  "hostOrdinaryEvidence": "normal-loop/normal-loop.json",
+  "replay": "../../../../../tests/ui_inventory/stock_boot_fixture.py",
+  "replayNote": "The portable replay uses an independent single-shot checkpoint to avoid storing a movie. The stock package, sample generator and RGB565 comparison were exercised in the recording above. The packaged single-shot wrapper awaits an end-to-end run.",
+  "hardware": "The emulator models the processor and peripherals. Panel color/timing, physical scan and power-loss behavior on SMK hardware remain open."
+}
