@@ -1,0 +1,112 @@
+{
+  "status": "PASS",
+  "measured_commit": "11bc3f3a0e9c361dcfb51a95bbc03eef9fec7a75",
+  "measured_tree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+  "engine_blob": "53d9e5050b334835b3ac7e1fd12347eb3f5efd7c",
+  "engine_sha256": "5842b1e6e83c7f0312b8557d4dbaf638b2fe9420265f6597eefabd8c8b98b30a",
+  "toolchain": {
+    "release": "20260730.1",
+    "clang": "clang version 4.0.1 () ()",
+    "ld": "GNU ld (GNU Binutils) 2.26.51.20160621"
+  },
+  "sdk": {
+    "version": "AC79NN_SDK_V1.2.14_2026-10-13",
+    "pins": {
+      "uboot.boot": {
+        "sha256": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+        "bytes": 14444
+      },
+      "cfg_tool.bin": {
+        "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+        "bytes": 383
+      },
+      "cfg/eq_cfg_hw.bin": {
+        "sha256": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8",
+        "bytes": 1278
+      }
+    }
+  },
+  "thresholds": {
+    "xip_free_min_bytes": 1024,
+    "pool_margin_min_bytes": 512,
+    "pool_reserve_bytes": 8192,
+    "psram": false
+  },
+  "builds": [
+    {
+      "model": "elite",
+      "command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "elite"
+      ],
+      "build_exit": 0,
+      "app_image_bytes": 551160,
+      "xip_free_bytes": 1512,
+      "fwsc_bytes": 651732,
+      "pool_raw_free_bytes": 8972,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 780,
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064,
+      "map_link_exit": 0,
+      "mapped_elf_byte_identical_to_stock": true
+    },
+    {
+      "model": "pro",
+      "command": [
+        "./build.sh",
+        "--board",
+        "smk37",
+        "--model",
+        "pro"
+      ],
+      "build_exit": 0,
+      "app_image_bytes": 551152,
+      "xip_free_bytes": 1520,
+      "fwsc_bytes": 651730,
+      "pool_raw_free_bytes": 8972,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 780,
+      "ram_data_bss_bytes": 97156,
+      "ram_data_bss_limit_bytes": 98304,
+      "pool_used_bytes": 335092,
+      "pool_limit_bytes": 344064,
+      "map_link_exit": 0,
+      "mapped_elf_byte_identical_to_stock": true
+    }
+  ],
+  "postbuild_verification": {
+    "tree": "a4b3def06dbf610286bc78f71284e0ec40d489db",
+    "files": 672,
+    "verified_paths": [
+      "build.sh",
+      "ble",
+      "firmware",
+      "tools",
+      "assets",
+      "host",
+      "experiments",
+      "reference",
+      "docs/lanes/fwui/current/reproduce-link-maps.py"
+    ],
+    "tracked_mismatches": []
+  },
+  "comparison": {
+    "previous_measured_commit": "db48241eabca5fd686aabeb5f807ea041b8a4c2c",
+    "previous_xip_free_bytes": {
+      "elite": 1528,
+      "pro": 1536
+    },
+    "image_growth_bytes": {
+      "elite": 16,
+      "pro": 16
+    },
+    "pool_margin_change_bytes": 0
+  },
+  "retained_evidence": "Both stock build exits, link-map ELF byte comparisons, memory readings and tracked source checks were observed in the serial build. Executor disconnection interrupted retention of the new raw link maps and ELF hashes. Existing final-elite-link.map.gz and final-pro-link.map.gz in this revision describe the preceding qualification."
+}

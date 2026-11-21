@@ -7,8 +7,8 @@
         "firmware/src/app/main_fm1.c::fm1_main",
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
-      "notConstructed": "Board reset assembly and addresses, native IRQ/audio/USB bring-up, physical panel behavior and flash persistence. The new pending-shadow cases still need the complete compiled startup-loop run and captured frames.",
-      "displayEvidence": "Complete fm1_cstart over private linker regions enters the original fm1_main RAM-only prefix or safe_main. The accepted-JEDEC host fixture also runs the complete fm1_main through the ordinary loop. Foreign and matching owners, stale OTA cleanup, default and stored splashes, notice expiry, the 5-second countdown, and release/hold transitions are checked. See native-routes/normal-loop/normal-loop.json. The recovery regression in tests/ui_inventory/startup_loop.c seeds a valid shadow and an already-live control and captures the splash and first ordinary frame after checking sector contents and loop publication. The interpreted C startup prefix produced the post-recovery custom-text splash and matched all archived pixels. See native-routes/pending-shadow/README.md. The seven-case compiled replay and first regular UI frame remain pending."
+      "notConstructed": "Board reset, IRQ/audio/USB timing on hardware, physical panel behavior and flash persistence.",
+      "displayEvidence": "The compiled seven-case fixture executes complete fm1_main with simulated flash and hardware, including recovery and already-live controls. It checks the restored sector and BREAK publication, captures the post-recovery splash and first regular frame, and compares decoded pixels. See native-routes/normal-loop/normal-loop.json. The complete fm1_cstart fixture separately reaches the RAM-only fm1_main prefix or safe_main over private linker regions."
     },
     {
       "ids": [
