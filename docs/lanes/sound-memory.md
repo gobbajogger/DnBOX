@@ -27,6 +27,10 @@ The packed provider with its 224 B of stored records, count/end metadata, both h
 
 A separate finite low-pass stage passed 75 original control trajectories and all 252 existing dry-note comparisons. Its full applications occupy 546,676 B Elite and 546,668 B Pro, with 5,996 and 6,004 B of XIP free. The pool stays at 8,972 B, and ordinary RAM use stays at 97,204 B. This diagnostic adds 160 B to each stock application. [Physical results](../../experiments/sound-hardware-v1/stock-dry/live-cutoff-proof.tar.gz)
 
+For the measured live edit, zero startup plus one 460-byte retained checkpoint provided both historical cursor starts. The full state with two synchronized workers, the source records and concurrent encoder uses 1,484 B per owner at 8 bins or 2,716 B at 64 bins. The larger representation leaves 48 B under the 2,764 B owner bound on this stimulus. It takes 14,720.716 µs for the edited warm half, and all 1,024 samples in each owner's final stereo output differ from the original. The ideal-dry control reconstructs the final words exactly. [Native layouts, scheduling and final audio](../../experiments/sound-hardware-v1/synthone-delay/dual-core-complete-wet-proof.tar.gz)
+
+The sparse Chicago renderer with a shared general mixer linked at 546,148 B Elite and 546,140 B Pro, a 368 B application reduction on each. Its zero-XMod and nonzero-XMod costs moved in opposite directions. Both retained ordinary RAM usage of 97,204 B and 8,972 B free pool. [Native and host differential receipts](../../experiments/sound-hardware-v1/strict-timing/chicago-single-oscillator.tar.gz)
+
 ## Earlier candidate images
 
 These local stock builds use `BOARD=smk37 MODEL=elite|pro sh build.sh`, default development identity 900 and the default empty BREAK bank. The physical application area is 552,672 bytes. Each image includes the four-byte end marker. Each row has exit 0 for both models. All trees derive from `0cddaeb822458fdf4ed3b0b9035fcf22248fda10`.
