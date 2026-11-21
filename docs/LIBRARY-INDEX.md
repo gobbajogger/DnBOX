@@ -19,3 +19,11 @@ These archives preserve generated test outputs from the consolidated baseline at
 Download an archive and its matching JSON manifest. Check both byte sizes with `wc -c` and both digests with `sha256sum`. Extract each archive into its own empty scratch directory with `tar --zstd -xf ARCHIVE -C DIRECTORY`. Verify the extracted paths, byte sizes, SHA-256 digests and modes against the manifest.
 
 The first manifest maps archive paths to 1,871 passing-test outputs. The second lists 747 members under `members`, comprising 370 normal/sanitized PNG pairs and seven host executables from the [stock Linux replay](https://github.com/gobbajogger/DnBOX/pull/976#issuecomment-7058333600).
+
+## Combined firmware cloud qualification
+
+| Recovery filename | Bytes | SHA-256 |
+|---|---:|---|
+| `combined-3c6a5a04.zip` | 3,179,654 | `c5d6af67efa4b26b2ae538314f28ecbfdcc200643d681d1feaf85708d4b82aa1` |
+
+Download the named ZIP into an empty directory. Check its byte count and SHA-256 against the table, then use `unzip -t` to verify its contents. The archive contains the two stock model packages and their application and link artifacts. The latest three-lane rebuild reproduced the application, ELF and package hashes for each model. [Exact model hashes](../evidence/integ-cloud-3c6a5a04/refreshed-build-identity.json)

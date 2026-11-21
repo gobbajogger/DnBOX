@@ -82,7 +82,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
       "dependencies": [
         "M0"
       ],
-      "next_action": "Compact-program LeakSanitizer passed at 76040daa. Resolve stock flash space for five BREAK samples and verify an authenticated feature vote."
+      "next_action": "Compact-program LeakSanitizer passed again at 2643d690. Embed the five original BREAK samples in both stock models and verify a signed-in opening-post vote through inbox refresh."
     },
     {
       "id": "M6",
