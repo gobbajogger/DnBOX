@@ -1,0 +1,41 @@
+state_id	scope	file	png_path_in_archive	rgb_sha256
+boot-crash-diagnostics	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-crash-diagnostics/capture-00.png	36256d7d4697be3cfd338d10fd3d7d71339d595140b9bce36dc10e33a2c9b665
+boot-default	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-default/capture-00.png	88d6ca126bc2ac34871375862893f4673e2aead0ff453d6686ad7fe07447ba1f
+boot-post-crash-core-0	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-post-crash-core-0/capture-00.png	27b4d2ef3e9ce89da122318026e947dbf24079239e8e0100081a074e09e9e723
+boot-post-crash-core-1	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-post-crash-core-1/capture-00.png	112fb5f8e567936bf7d8080da481392be7af274254a9543ed88733e9325f40a3
+boot-safe-crash-core-0	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-safe-crash-core-0/capture-00.png	978c43055c276c2d66e6b255152372128bcbd929cc9b70a25e360932d42ba436
+boot-safe-crash-core-1	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-safe-crash-core-1/capture-00.png	4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c
+boot-safe-mode	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-safe-mode/capture-00.png	85e63bd61181dd25f398da07df0b1c2e958751fffb4af5fa55d418e5e3080807
+boot-safe-retry	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-safe-retry/capture-00.png	5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607
+boot-uboot	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-uboot/capture-00.png	366a57d5698271821aa6578a2a2d2f005d8a115357f56adf227d454034865b02
+boot-uboot-usb	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-uboot-usb/capture-00.png	08701d5c9615690a4c606dcf0543ba4bea375db56f6e91f386fdda4291325c24
+calibration-button-timeout-clear	native-control-flow/host-hardware	calibration-button-timeout-clear.png		7641e31024b4ffd1f2628ea5fd5b740eaf455933fd9485155260ab30b9c09a21
+calibration-encoder-timeout-clear	native-control-flow/host-hardware	calibration-encoder-timeout-clear.png		7641e31024b4ffd1f2628ea5fd5b740eaf455933fd9485155260ab30b9c09a21
+calibration-held-timeout-clear	native-control-flow/host-hardware	calibration-held-timeout-clear.png		7641e31024b4ffd1f2628ea5fd5b740eaf455933fd9485155260ab30b9c09a21
+calibration-saved-clear	native-control-flow/host-hardware	calibration-saved-clear.png		7641e31024b4ffd1f2628ea5fd5b740eaf455933fd9485155260ab30b9c09a21
+calibration-title	native-control-flow/host-hardware	calibration-title.png		157e37b0110c09ce8e391bfed2f5c35d4c4a1a3727c53de691feddf0ca597616
+hardware-calibration-button-00	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-00/capture-00.png	2728180460fece1a16d26e35d6a0898bd0b29fe93479ab466d0140e3add83069
+hardware-calibration-button-01	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-01/capture-00.png	1792b4382a561768517b8536bf670fba88ffa6c7961fdf69b9c700d5b87af198
+hardware-calibration-button-02	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-02/capture-00.png	40bb6254357001dc5787fbc0ff90099e8b1fda6cbc2839760412755fbea89551
+hardware-calibration-button-03	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-03/capture-00.png	6200bf6b74b66dc16a201169b45a5d48a49f8253d0efbc0a58c5475f0c206bdc
+hardware-calibration-button-04	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-04/capture-00.png	7dcfe7b0ebb536a0ae5f34358b172044496aba2b479289487098bf2ffb0050aa
+hardware-calibration-button-05	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-05/capture-00.png	8cbb6be4f35608d950fd445ed2dbf18c43f8b361a22c246cec9a0ef5e973fe22
+hardware-calibration-button-06	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-06/capture-00.png	971412e9588a61f87fa9dff79564358d4af255266c96a1bfc6a79ffbbfcf8068
+hardware-calibration-button-07	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-07/capture-00.png	acf2fea4782ae257d32234801547579ecb19fb4ccbe28974f2269a937e165f5a
+hardware-calibration-button-08	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-08/capture-00.png	ac3017dfdb55fdc3cae1a014258a0b72680ad95a58cb2f74eaab01955fd59295
+hardware-calibration-button-09	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-09/capture-00.png	92883bb78f10a64b53ea4c2b88e27727b4d1ddf3101d4f2b54009b131233225f
+hardware-calibration-button-10	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-10/capture-00.png	fd8ff0f92c11a46dfc56743ea548a74c5bed1103bb9b026503c65c0be630dd47
+hardware-calibration-button-11	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-11/capture-00.png	fc6d137ec841a5744ba84fe8308c6d54d24ee3b18fdf3be11924c62267e388d0
+hardware-calibration-button-12	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-12/capture-00.png	ed7983f7f8126334d03e9803adac6fc9d47503ebf14354746a1e12cf6a22acd2
+hardware-calibration-button-13	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-button-13/capture-00.png	1c8a56230416101af5b2026eb8527bb1fa6c1073af4f702d253b7e83bb78cddd
+hardware-calibration-encoder-00	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-00/capture-00.png	26b0c46fef223831b8b8244ddb2a6f14c5a1952fc7638fa6551bee33083565b2
+hardware-calibration-encoder-01	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-01/capture-00.png	4c602c51f6a1cc02a96da7da68359591bd87941fb798ec6e15e3aa5e2944c652
+hardware-calibration-encoder-02	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-02/capture-00.png	dfa321e27a5625ec59933a5f00bf81292c546a4cca6fb89c03adb69e17d3687d
+hardware-calibration-encoder-03	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-03/capture-00.png	937000631d3e4073ce2413f10b068b9da1a3b1920d944037e451f5a85e3e8fd7
+hardware-calibration-encoder-04	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-04/capture-00.png	06c19ef831fad8040acd4bccba523b6f86f6baf15dd1f67fa0a51b2e93621d52
+hardware-calibration-encoder-05	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-05/capture-00.png	487c2d98c4df56d8bf1893ec2f1ecaf9d6af8c5fba6e9c0c89a3e7762056b096
+hardware-calibration-encoder-06	native-control-flow/host-hardware	../../screens/hardware-0.tar.xz	renders/hardware-calibration-encoder-06/capture-00.png	70bc62d5250b2b9b7a87bbc1d0f1132ae3dcfd6c70cc93d7ea1deed0e47d52f7
+lcd-init-clear	native-control-flow/host-hardware	lcd-init-clear.png		53853188f83a941e2f45ec1383293ae935106c5721918079000dcb2254fc550b
+safe-retry-without-crash	native-control-flow/host-hardware	safe-retry-without-crash.png		bba9ed5f5655870378f7cb021a66f5e56a6a3f62bafd58cd410777ef3a80eccf
+chicago-wave-valid-lock	full-frame/valid-input	chicago-wave-valid-lock.png		0400029b2e45e67876f6c4a63e9a5e024695cc016b6106528c976bd8c7d174b7
+chicago-wave-invalid-lock	full-frame/malformed-RAM-input	chicago-wave-invalid-lock.png		a4ddb1ee33a4ae3c910ef64accafe76b213a063bc903c1769b27ad1b4d845a28

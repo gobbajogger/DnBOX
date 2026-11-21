@@ -14,7 +14,7 @@
   "reportSHA256": "559859ac16f1b15edc724dff0face39726602dd2ad20ecb2d733a91cb6ece61d",
   "frames": 1712,
   "stableStateIDs": 1712,
-  "totalBytes": 2059384,
+  "totalBytes": 2072216,
   "maxPartBytes": 494660,
   "archives": [
     {
@@ -2057,5 +2057,15 @@
     }
   ],
   "packerSHA256": "93c3d7d4b3a0a420a111e23962e14ae63b063dc199814ebc5238c78b8d77df92",
-  "note": "Direct tar.xz extraction yields stable state/instance PNG paths. PNG compression=0 exposes shared pixels to xz; exact decoded RGB verified. Byte-identical PNGs use archive-local hardlinks. No visual approval."
+  "note": "Direct tar.xz extraction yields stable state/instance PNG paths. PNG compression=0 exposes shared pixels to xz; exact decoded RGB verified. Byte-identical PNGs use archive-local hardlinks. No visual approval.",
+  "replacementArchives": [
+    {
+      "path": "f6-velocity.tar.xz",
+      "bytes": 12832,
+      "sha256": "4d27990cecb6ff46b2f4ec292fe37c9ce6687bbc20ac599d43cb759b1743b24f",
+      "frames": 12,
+      "scope": "BREAK velocity: ordinary states, live, preview and persisted physical edit. receipt.json identifies inputs and per-state predecessor digests."
+    }
+  ],
+  "baseArchiveBytes": 2059384
 }

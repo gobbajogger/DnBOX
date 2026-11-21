@@ -88,5 +88,37 @@
     "needed": "Sound reconciles/adopts the typed physical setter, provides authoritative readback/serialization/audio-boundary ownership, then FWUI can map genuine controls and requalify combined exact image. Full150 controls/694 complete presets still separate."
   },
   "conclusion": "No evidence that a genuine port is impossible. There is no safe FWUI-only rows binding to the historical private renderer or current2-performance-ID namespace. Bounded genuine oscillator binding is feasible after Sound candidate admission; current real voice activity observation can support a read-only glyph, not substitute for editable instrument controls.",
-  "connectorManifest": "f7-research/connector-manifest.json"
+  "connectorManifest": "f7-research/connector-manifest.json",
+  "currentSoundReadback": {
+    "head": "d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9",
+    "comparedFrom": "04db2d778113928c624dec7a96eaa97597afa3e5",
+    "compare": "https://github.com/gobbajogger/DnBOX/compare/04db2d778113928c624dec7a96eaa97597afa3e5...d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9",
+    "delta": {
+      "commits": 1,
+      "laneDocuments": 2,
+      "experiments": 7,
+      "productionPaths": 0
+    },
+    "readSourceBlobs": {
+      "firmware/src/app/original_runtime.c": "7b6a129b47056ea8d0feb16619318a82476df68e",
+      "firmware/src/app/original_runtime.h": "fb3cbd7b567a640e4d25b13cd82b237675f2a965",
+      "firmware/src/app/s1_dry_part.c": "bd58cf61897755920bebdae704f40fd33f78d0de",
+      "firmware/src/app/s1_dry_part.h": "33fdc0fe3a99e2d6d7c2d849b6a4528c204de85e",
+      "firmware/src/app/ui.c": "de3898e639ed8a8bdfcce4c37f40d82c9372b18d",
+      "firmware/src/app/ui_original_controls.h": "d2bac1d0dcddc8ee40f75762123521745f7e81f6"
+    },
+    "runtime": "original_runtime_param dispatches to s1_part_param, which accepts normalized bend (ID 0) and damper (ID 1). The factory oscillator setter, per-part patch readback and serialization are still awaiting Sound admission.",
+    "editorControlsPerPart": {
+      "Synth One": 0,
+      "SuperJ6": 16,
+      "evidence": "Earlier isolated runtime enumeration; current source and control tables verified."
+    },
+    "cutoffExperiment": {
+      "source": "https://github.com/gobbajogger/DnBOX/blob/d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9/docs/lanes/sound.md#L146",
+      "stockComponentCases": "68/75",
+      "candidateComponentCases": "75/75",
+      "candidateImageDeltaEachModelBytes": 160,
+      "status": "Sound reports an isolated component comparison. Production admission remains open."
+    }
+  }
 }

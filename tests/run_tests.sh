@@ -85,7 +85,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -562,6 +562,8 @@ run break-outline-snapshot sh tests/host/break_outline_snapshot_test.sh
 run ui-chance-framebuffer sh tests/host/ui_chance_framebuffer_test.sh
 run break-preview-decoder python3 -B tests/host/engine_break_preview_test.py
 run break-preview-integration env SMC_UI_TEST_FILE=tests/host/break_preview_midi_test.c SMC_UI_OUT=build/host/break-preview-integration sh tests/host/smc_ui_test.sh
+run break-hit-gain sh -c "$CC -std=c99 -O2 -ffp-contract=off -DX0X_HOST tests/host/breaks_hit_gain_test.c -lm -o $OUT/break-hit-gain && $OUT/break-hit-gain"
+run break-step-velocity-engine env SMC_UI_TEST_FILE=tests/host/break_step_velocity_engine_test.c SMC_UI_OUT=build/host/break-step-velocity-engine sh tests/host/smc_ui_test.sh
 run engine-brk-mute python3 -B tests/host/engine_brk_mute_test.py   # real BREAK gate, immediate mute and abrupt-cut control
 run brk-loops-seamless python3 -B tests/host/engine_brk_loops_seamless_gate_test.py   # no brk_hold mute; engine_brk_loops flushes deferred bank publish (#354)
 run brk-outline sh -c "$CC -std=c11 -O1 -Wall -Wextra -Werror -o $OUT/brk_outline_test tests/host/brk_outline_test.c && $OUT/brk_outline_test"   # abs(-32768) outline peaks must not wrap to blank
@@ -785,6 +787,13 @@ run ui-owner-units sh tests/host/ui_owner_units_test.sh
 run ui-drum-shared-glyph sh tests/host/ui_drum_shared_glyph_test.sh
 run ui-battery-levels sh tests/host/ui_battery_levels_test.sh
 run ui-pan-units sh tests/host/ui_pan_units_test.sh
+if [ "$PIL_SKIP" = 1 ]; then
+    not_run ui-native-routes Pillow
+    not_run ui-wave-fallback-frame Pillow
+else
+    run ui-native-routes python3 tests/ui_inventory/native_routes.py "$OUT/native-routes"
+    run ui-wave-fallback-frame python3 tests/ui_inventory/wave_fallback_frame.py "$OUT/wave-fallback-frame"
+fi
 run ui-step-lane sh tests/host/ui_step_lane_test.sh
 run ui-step-lane-edit sh tests/host/ui_step_lane_edit_test.sh
 run ui-step-lane-transaction python3 tests/host/ui_step_lane_transaction_test.py

@@ -1,4 +1,8 @@
 {
+  "status": "SUPERSEDED",
+  "currentQualification": "break-velocity-tests.json",
+  "supersededByProductionCommit": "ff748e6e54ed1c72091063518a775b28ec54a9ee",
+  "historicalScope": "This investigation describes the pre-implementation source tree named below. The replacement qualification records the implemented per-hit gain path.",
   "sourceTree": "956a004d8abc991093318b1d067bfe32e6b914c7",
   "scope": "Investigation only; no BREAK velocity DSP or project changes made",
   "dispatch": [

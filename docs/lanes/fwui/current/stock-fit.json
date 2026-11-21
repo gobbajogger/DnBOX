@@ -1,20 +1,20 @@
 {
-  "build_input_tree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "build_input_tree": "36786dccccfd6cd56cfae43477ddb1133b728e1f",
   "source_verification": {
     "status": "VERIFIED",
-    "tree": "50122c5d95009e0aacef384efad52f1cf0396f31",
-    "files": 5188,
-    "referenceSHA256": "42a325193373b10930852f0705816c521891f72be008dd740f7bf36c63173feb"
+    "tree": "36786dccccfd6cd56cfae43477ddb1133b728e1f",
+    "files": 5220,
+    "referenceSHA256": "b053b873de78dacb134b6f4f9e9940b664d6214e49b7b2ced56948d6cc619ec7"
   },
   "build_input_objects": {
-    "firmware": "5da2184b98a1e7cb2cfe43f674abdec2632fa264",
+    "firmware": "02663651eed320308eb7f8156afc368499f127ee",
     "experiments/original_synth": "0cdd656980643a45d2061dc87be292e0426d11ef",
     "tools/build.py": "b9e00d4c7f92ca6fe22ccbfdc556c6c5215e3089",
     "tools/gen_font.py": "8721a0db9fd68fe6fa2c5cb48494de8b1b02549e"
   },
   "stock_builds": [
     {
-      "candidate": "closure",
+      "candidate": "sequenced BREAK per-hit velocity",
       "model": "elite",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -109,22 +109,22 @@
         "build/smk37-elite/original/original_sound.o",
         "build/smk37-elite/gfinal/chance_native.o",
         "-Map",
-        "<native>/closure-stock-50122c5d/elite-link.map",
+        "<replay>/elite-link.map",
         "-o",
-        "<native>/closure-stock-50122c5d/elite-mapped.elf"
+        "<replay>/elite-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546840,
-          "sha256": "dccf882c6c8587cba4dfb39dc5b5d4c49c9178ef1bd6df5a8a463f060685060f"
+          "size": 547224,
+          "sha256": "e020465e2b0fdbd80570d00d6bb9b0454500793fd21e228044b8df8d358a5a8e"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "3a17e0a6ed6d1ef495bc8172007b30d49e29164744a3e770dece4ffadc766e11"
+          "sha256": "cfbfbc023f269c1fc279448a3b95959e8f72230ca7f6ab325f7367aa91690ed5"
         },
         ".ram_text": {
           "equal": true,
@@ -139,16 +139,16 @@
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "f97e581b849ac20f4a136ca0fb2e0129b32c38f0414804af7b11bd6b74470ce1",
-      "mapped_elf_sha256": "f97e581b849ac20f4a136ca0fb2e0129b32c38f0414804af7b11bd6b74470ce1",
+      "original_elf_sha256": "fecb331f859584c9bdb2e2b109d68b82dd97ef224e429491c9b66e777b388d47",
+      "mapped_elf_sha256": "fecb331f859584c9bdb2e2b109d68b82dd97ef224e429491c9b66e777b388d47",
       "link_map": {
         "filename": "elite-link.map",
-        "sha256": "17383be903ca65afff153aa3b14814986902253583184fbf28dba8e11547382d",
-        "bytes": 211204,
-        "gzip_bytes": 28356
+        "sha256": "793e27ad4531d363d3f94b34bef1df7abcd91c47a82291ed60605a1200fe44e0",
+        "bytes": 211190,
+        "gzip_bytes": 28321
       },
       "committed_map": "final-elite-link.map.gz",
-      "xip_free_bytes": 1912,
+      "xip_free_bytes": 1528,
       "pool_margin_bytes": 780,
       "pool_raw_free_bytes": 8972,
       "pool_reserve_bytes": 8192,
@@ -160,11 +160,11 @@
         "--model",
         "elite"
       ],
-      "build_started_utc": "2026-11-21T02:36:17.225563+00:00",
-      "build_finished_utc": "2026-11-21T02:39:40.066345+00:00",
+      "build_started_utc": "2026-11-21T04:09:43.636937+00:00",
+      "build_finished_utc": "2026-11-21T04:11:13.848112+00:00",
       "app_bin": {
-        "bytes": 550760,
-        "sha256": "8dff94fcd2b03a7ddf25c281d25a2faed5dfa8c0cfac51ab34ed81c245c66707"
+        "bytes": 551144,
+        "sha256": "699047b5dfa360ab22f5abb104e5f4e261b063bb104d2a42dfef4de63e4e39c5"
       },
       "ram_data_bss_bytes": 97156,
       "ram_data_bss_limit_bytes": 98304,
@@ -172,7 +172,7 @@
       "pool_limit_bytes": 344064
     },
     {
-      "candidate": "closure",
+      "candidate": "sequenced BREAK per-hit velocity",
       "model": "pro",
       "command": [
         "<native>/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld",
@@ -267,22 +267,22 @@
         "build/smk37/original/original_sound.o",
         "build/smk37/gfinal/chance_native.o",
         "-Map",
-        "<native>/closure-stock-50122c5d/pro-link.map",
+        "<replay>/pro-link.map",
         "-o",
-        "<native>/closure-stock-50122c5d/pro-mapped.elf"
+        "<replay>/pro-mapped.elf"
       ],
       "exit": 0,
       "linker_version": "GNU ld (GNU Binutils) 2.26.51.20160621",
       "sections": {
         ".text": {
           "equal": true,
-          "size": 546832,
-          "sha256": "98788de325b429cedf365799d684bda59043516b3d8a7fcddc10cda898822f67"
+          "size": 547216,
+          "sha256": "33c9834a9b430325f10aa72f9a77eced6d5b82499cc578740c176c3a729086dc"
         },
         ".data": {
           "equal": true,
           "size": 600,
-          "sha256": "661842ac087bfd3ad47b5ab19b1502ce7edc0d36208a894830de82741b819c62"
+          "sha256": "7977271fa102fed11fc9b9b0205253c2658d286c2394c38605de182b5932787c"
         },
         ".ram_text": {
           "equal": true,
@@ -297,16 +297,16 @@
       },
       "all_allocated_image_sections_identical": true,
       "entire_elf_byte_identical": true,
-      "original_elf_sha256": "a3dd66e900fc01ca7924adc656bc3d49846ad534e12121c6352930b9093fbd74",
-      "mapped_elf_sha256": "a3dd66e900fc01ca7924adc656bc3d49846ad534e12121c6352930b9093fbd74",
+      "original_elf_sha256": "dfffb9b084ecbda2f1e6a657d143ee8336f236d8509f12faf7d26d78bd369b6d",
+      "mapped_elf_sha256": "dfffb9b084ecbda2f1e6a657d143ee8336f236d8509f12faf7d26d78bd369b6d",
       "link_map": {
         "filename": "pro-link.map",
-        "sha256": "8f0a38d303aecebc4ba76841a0b10b60072599c4fb36ad7bbd60dd8ec1725f74",
-        "bytes": 208970,
-        "gzip_bytes": 28301
+        "sha256": "90d01600ecbdb150db01f681dde8d38affe4a5b85ad7fab0063e7b0bc2d347dc",
+        "bytes": 208956,
+        "gzip_bytes": 28271
       },
       "committed_map": "final-pro-link.map.gz",
-      "xip_free_bytes": 1920,
+      "xip_free_bytes": 1536,
       "pool_margin_bytes": 780,
       "pool_raw_free_bytes": 8972,
       "pool_reserve_bytes": 8192,
@@ -318,11 +318,11 @@
         "--model",
         "pro"
       ],
-      "build_started_utc": "2026-11-21T02:39:40.074814+00:00",
-      "build_finished_utc": "2026-11-21T02:42:25.379517+00:00",
+      "build_started_utc": "2026-11-21T04:11:13.851107+00:00",
+      "build_finished_utc": "2026-11-21T04:12:57.214510+00:00",
       "app_bin": {
-        "bytes": 550752,
-        "sha256": "f04b88cece8ae232d1fa724148f448c04112055e3b1d8286304e364477a3820d"
+        "bytes": 551136,
+        "sha256": "c30e21b3bd37772033898b11152c27f9ce61447090f3ec9623d83a13843e8907"
       },
       "ram_data_bss_bytes": 97156,
       "ram_data_bss_limit_bytes": 98304,
@@ -335,5 +335,27 @@
     "pool_margin_min_bytes": 512,
     "pool_reserve_bytes": 8192,
     "psram": false
+  },
+  "sdk": {
+    "version": "AC79NN_SDK_V1.2.14_2026-10-13",
+    "pins": {
+      "uboot.boot": {
+        "sha256": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+        "bytes": 14444
+      },
+      "cfg_tool.bin": {
+        "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+        "bytes": 383
+      },
+      "cfg/eq_cfg_hw.bin": {
+        "sha256": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8",
+        "bytes": 1278
+      }
+    }
+  },
+  "toolchain": {
+    "release": "20260730.1",
+    "clang": "clang version 4.0.1 () ()",
+    "ld": "GNU ld (GNU Binutils) 2.26.51.20160621"
   }
 }

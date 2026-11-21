@@ -440,6 +440,26 @@ static void test_semantic_rejection(void)
     project_stage.arr.lane[0].part = PART_303A;
     project_stage.arr.lane[0].v = (uint8_t)(PART_303A << 4);
     CHECK(project_validate_stage() == -1);
+    lane_t *brk = &project_stage.arr.lane[0];
+    brk->part = PART_BRK;
+    brk->v = PART_BRK << 4;
+    brk->val[0] = 0;
+    CHECK(project_validate_stage() == 0); /* silent, unity and absent in one BREAK lane */
+    brk->val[0] = 128;
+    CHECK(project_validate_stage() == -1);
+    brk->val[0] = 1;
+    brk->v++;
+    CHECK(project_validate_stage() == -1);
+    brk->v = PART_808 << 4;
+    CHECK(project_validate_stage() == -1);
+    brk->v = PART_BRK << 4;
+    brk->i = 1;
+    CHECK(project_validate_stage() == -1);
+    brk->i = 0;
+    project_stage.arr.lane[1] = *brk;
+    CHECK(project_validate_stage() == -1); /* two owners would disagree with the editor */
+    project_stage.arr.lane[1].pat = (brk->pat + 1u) % NPAT;
+    CHECK(project_validate_stage() == 0);
     check_live_unchanged();
 }
 

@@ -71,7 +71,7 @@ int main(void)
     pat_of(PART_303A)->bass[0].step[32].velocity=93;
     CHECK(value(PART_303A,0,32,UI_LANE_PITCH)==71);
     CHECK(value(PART_303A,0,32,UI_LANE_VELOCITY)==93);
-    CHECK(value(PART_BRK,0,0,UI_LANE_VELOCITY)==-1); /* no invented volume mapping */
+    CHECK(value(PART_BRK,0,0,UI_LANE_VELOCITY)==127); /* original strike gain */
     CHECK(value(-1,0,0,UI_LANE_PAN)==-1);
     CHECK(value(PART_909,NDRUM,0,UI_LANE_PAN)==-1);
     project_t *before=malloc(sizeof proj);CHECK(before);memcpy(before,&proj,sizeof proj);

@@ -97,3 +97,16 @@ hardlink against the frame map, and reproduces the index.
 ```sh
 python3 tests/ui_inventory/screen_index.py docs/lanes/fwui/screens /tmp/screen-index.tsv
 ```
+
+The searchable `docs/lanes/fwui/screens/screen-index.tsv` points to the current
+capture for each state. `screen_index.py` verifies the original archive, then
+verifies each replacement against the previous RGB digest. The BREAK velocity
+archive contains 12 replacements. Its `receipt.json` identifies the production
+inputs, the changed pixels and the nine ordinary-frame geometry checks. Replay
+the ordinary, live, preview and held-edit captures against the index with
+`python3 tests/ui_inventory/break_velocity_frames.py /new/output`.
+
+The separate [host startup and recovery replay](../../docs/lanes/fwui/current/native-routes/README.md)
+executes the production LCD driver, calibration, fault and safe-mode functions
+and the boot guard at RAM-only endpoints. Its exact archive comparisons, new
+frames and geometry negative control can be rerun without the primary walker.

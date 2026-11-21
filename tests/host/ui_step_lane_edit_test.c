@@ -29,17 +29,17 @@ static void release_step(void)
 {held_keys=0;++now_ms;input();ui_frame();}
 static void full_motion_table(void)
 {
-    const int parts[]={PART_909,PART_303A,PART_BRK};
-    const int kinds[]={UI_LANE_VELOCITY,UI_LANE_PAN,UI_LANE_PITCH};
+    const int parts[]={PART_909,PART_303A,PART_BRK,PART_BRK};
+    const int kinds[]={UI_LANE_VELOCITY,UI_LANE_PAN,UI_LANE_PITCH,UI_LANE_VELOCITY};
     static lane_t before[NLANE];
-    for(int n=0;n<3;n++) {
+    for(int n=0;n<4;n++) {
         int part=parts[n];fresh(part);ui_step_lane=(uint8_t)kinds[n];hold_step(part,0);
         for(int k=0;k<NLANE;k++) {
             int owner=k/NPAT,index=motion_alloc(proj.arr.lane,k%NPAT,owner,T_MIX,owner,MX_LEVEL);
             CHECK(index>=0);proj.arr.lane[index].val[1]=50;
         }
         int value=lane_value(part,0,kinds[n]);memcpy(before,proj.arr.lane,sizeof before);
-        edit_once(1);CHECK(lane_value(part,0,kinds[n])==value);
+        edit_once(n==3?-1:1);CHECK(lane_value(part,0,kinds[n])==value);
         CHECK(!memcmp(before,proj.arr.lane,sizeof before));CHECK(motion_count(proj.arr.lane)==NLANE);
         CHECK(strstr(ui.msg,"MOTION FULL"));release_step();CHECK(step_lane_has_note(part,0,0));
     }
@@ -83,17 +83,15 @@ int main(void)
     for(int part=0;part<NPARTS;part++)for(int kind=0;kind<UI_LANE_COUNT;kind++) {
         fresh(part);ui_step_lane=(uint8_t)kind;hold_step(part,0);
         ++now_ms;ui_frame();int before=lane_value(part,0,kind),page=cur_page();
-        CHECK((before<0)==(part==PART_BRK && kind==UI_LANE_VELOCITY));
+        CHECK(before>=0);
         memcpy(before_fb,fb,sizeof fb);
         held_btn=1u<<B_SEQ;++now_ms;input();
         for(int turn=0;turn<(kind==UI_LANE_CHANCE?8:1);turn++) {
-            enc_acc[EN_ALGO]=kind==UI_LANE_CHANCE?-1:24;++now_ms;input();
+            enc_acc[EN_ALGO]=kind==UI_LANE_CHANCE?-1:part==PART_BRK && kind==UI_LANE_VELOCITY?-64:24;++now_ms;input();
         }
         ui_frame();
         int after=lane_value(part,0,kind);
-        if(before<0)CHECK(after==before);else {
-            CHECK(after!=before);CHECK(changed_rows(227,240,before_fb,fb)>0);
-        }
+        CHECK(after!=before);CHECK(changed_rows(227,240,before_fb,fb)>0);
         CHECK(ui.part==part && ui.view==V_SEQ && ui.overlay==O_NONE && cur_page()==page);
         held_btn=0;++now_ms;input();held_keys=0;++now_ms;input();ui_frame();
         CHECK(lane_value(part,0,kind)==after);CHECK(cur_page()==page);
@@ -106,6 +104,6 @@ int main(void)
         printf("EDIT part=%d kind=%d before=%d after=%d persisted=1\n",part,kind,before,after);
         scenarios++;
     }
-    printf("PASS physical visible-lane edits: %u scenarios, %u checks; unavailable quantities retained\n",scenarios,checks);
+    printf("PASS physical visible-lane edits: %u scenarios, %u checks; all persisted\n",scenarios,checks);
     return 0;
 }

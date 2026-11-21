@@ -78,6 +78,22 @@ int main(void)
     own=motion_alloc(proj.arr.lane,0,PART_BRK,pitch.a,pitch.b,pitch.c);CHECK(own>=0);
     proj.arr.lane[own].val[0]=(uint8_t)pref_desc(pitch)->max;turn(1,1);CHECK(!ui.dirty);
     fresh(PART_BRK,UI_LANE_VELOCITY);turn(1,1);CHECK(!ui.dirty && !motion_count(proj.arr.lane));
+    reset_observer();turn(-127,1);
+    own=motion_find(proj.arr.lane,0,PART_BRK,T_VEL,PART_BRK<<4,0);
+    CHECK(own>=0 && proj.arr.lane[own].val[0]==0 && ui.dirty);
+    CHECK(proj.arr.lane[own].val[1]==MOT_NONE);
+    ui.dirty=0;reset_observer();turn(-1,1);CHECK(!ui.dirty && proj.arr.lane[own].val[0]==0);
+    reset_observer();interrupt_lane=own;turn(1,1);
+    require_marker(proj.arr.lane[own].val[0]==101,"BREAK_VELOCITY_STALE_READ");
+    require_marker(!outside_prepare && !outside_read,"BREAK_VELOCITY_READ_OUTSIDE_TRANSACTION");
+    proj.arr.lane[own].val[1]=38;reset_observer();turn(26,1);
+    CHECK(proj.arr.lane[own].val[0]==MOT_NONE && proj.arr.lane[own].val[1]==38);
+    proj.arr.lane[own].val[1]=MOT_NONE;proj.arr.lane[own].val[0]=126;
+    reset_observer();turn(1,1);CHECK(!proj.arr.lane[own].used);
+    /* The redraw signature and the strip read a consistent snapshot as well. */
+    reset_observer();monitor=1;(void)knobs_sig();draw_step_lane();monitor=0;
+    require_marker(!depth && locks>=2 && locks==unlocks && !outside_prepare && !outside_read,
+                   "BREAK_DISPLAY_READ_OUTSIDE_TRANSACTION");
     fresh(PART_BRK,UI_LANE_PAN);ui.brk_held=-1;monitor=1;CHECK(!step_lane_turn(1));monitor=0;CHECK(!depth && locks==1 && unlocks==1 && !ui.dirty);
     fresh(PART_BRK,UI_LANE_PAN);monitor=1;CHECK(!step_lane_turn(0));monitor=0;CHECK(!locks && !unlocks && !ui.dirty);
     fresh(PART_BRK,UI_LANE_CHANCE);turn(-1,1);
