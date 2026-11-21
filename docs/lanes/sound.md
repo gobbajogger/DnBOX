@@ -34,9 +34,41 @@ The −400 B combination also measured 11,238 µs unshifted on Pro. Initializing
 
 The −400 B combination matched all 50 deterministic audio and state outputs across 17 host scenarios. In the unshifted Elite live run, however, five of 36,420 project bytes differed from stock. Two 909 step masks, the 808 pattern length and two sound settings changed. Of the post-PLAY event rows, 296 matched at the same rendered frame, three were present only on stock and one only on the candidate. The phase-sensitive physical setup also yields different project bytes across shifts on unmodified stock. None of these candidates has been enabled. [Control, project, onset and timing receipts](../../experiments/sound-hardware-v1/strict-timing/current-sweep-proof.tar.gz)
 
+### Exact-size emu360 results
+
+Both candidates occupy 546,516 B on Elite and 546,508 B on Pro. Both retain 8,972 B of free pool. The second candidate computes the original 909 nonlinear table coordinate directly from the triangle phase. All 75,497,473 reachable rounded inputs matched word for word. Both candidates passed 17 fixed-input production host scenarios and matched all 50 state and audio files.
+
+| Shift | First exact-size Elite (µs) | First exact-size Pro (µs) | Direct-coordinate Elite (µs) | Direct-coordinate Pro (µs) |
+| --- | ---: | ---: | ---: | ---: |
+| Control | 11,144 | 11,158 | 10,652 | 10,903 |
+| +1 ms | 11,080 | 10,844 | 10,908 | 10,902 |
+| +2 ms | 11,148 | 11,142 | 10,877 | 10,813 |
+| +3 ms | 11,136 | 11,057 | 10,589 | 10,939 |
+| +4 ms | 11,133 | 11,181 | 10,937 | 10,904 |
+| +5 ms | 10,931 | 10,827 | Pending | Pending |
+
+All listed candidate shots ended at 8,000 ms with 922 uniformly shifted events, zero skipped emulator cycles and zero raw or scene late. They completed 647 halves because USB settles before audio DMA starts. Stock completed 648. Extending the +1 ms Pro control on the first candidate to 8,012 ms produced 648 halves and the same 10,844 µs maximum. [Per-shot image, project and DAC identities](../../experiments/sound-hardware-v1/strict-timing/candidate-measurements.json)
+
+For the measured +1 through +5 ms direct-coordinate shots, Elite recorded 10,937 µs at +4 ms, 3/4 measured offsets at or below target and Pro recorded 10,939 µs at +3 ms, 3/4 measured offsets at or below target. At +1 ms the same-offset native project differed from stock in 11 bytes on Elite and four on Pro. Both contain a changed 909 hit mask. The candidate remains experimental. [DSP source, native sizes, fixture and differential](../../experiments/sound-hardware-v1/strict-timing/direct-coordinate-proof.tar.gz)
+
+### Playback of one identical saved project
+
+Stock Elite performed a normal Stop and Save to a disposable emulator flash file. Both images subsequently loaded the exact same 36,420-byte project through normal firmware boot. A single Play press replaced all programming gestures for this supplemental comparison. Stock and the first exact-size candidate emitted the same 276 musical and control events at the same rendered frames over 123,392 frames. The DAC was bit-identical over the 207 corresponding halves that both completed by their DMA deadline, covering 105,984 stereo frames.
+
+| Image | Worst block | Raw late | Late during playback test |
+| --- | ---: | ---: | ---: |
+| Stock Elite | 12,923 µs | 34 | 33 |
+| First exact-size Elite candidate | 12,579 µs | 6 | 6 |
+
+The continuous DAC capture differs at missed deadlines. These saved-project results use a different stimulus from the 922-event sweep above. [Save/load, stimulus, event and PCM proof](../../experiments/sound-hardware-v1/strict-timing/saved-project-and-events.tar.gz)
+
 ### S6 feedback and storage
 
 A two-cursor experiment with four checkpoints needs 2,712 B per owner and returned 176,400 original wet words exactly with an ideal random-access dry source. The first wet callback still needs 49,662 source frames per owner. An optimistic 360 MHz kernel needed 19.769 ms and 23.582 ms for its two cursors, or 43.351 ms serially for one owner. Even with a core per cursor, the larger cursor exceeds 11.609 ms. The stock app and both 1 MiB flash images contained zero exact nonzero 128-sample source blocks in the tested formats. The live feedback, independent part histories and actual dry-source generation still need a fitting implementation. [Source, model receipts and replay](../../experiments/sound-hardware-v1/synthone-delay/checkpoint-provider-feedback.tar.gz)
+
+Forecasting instead of waiting for the tap brought one owner's predicted wet half to 893 µs. Feeding 378 earlier frames per owner per callback completed the prewarming in time. One legal live delay-time edit at frame 242,550 then changed all 2,048 tap words on that owner. The peer stayed byte-identical. Exact regeneration for the edit took 23.211 ms with an ideal source, including 15.325 ms for the longer cursor alone. S6 remains FAIL. [Live edit and target states](../../experiments/sound-hardware-v1/synthone-delay/prewarm-live-edit-proof.tar.gz)
+
+The separate zero-XMod Chicago optimization matched 840,000 host cases and all 60 target state and PCM cases. It saved 33.9 µs at 256 moving frames with zero XMod, and added 3.1 µs to one nonzero-XMod case. [Target differential](../../experiments/sound-hardware-v1/strict-timing/chicago-xmod-proof.tar.gz)
 
 ## Production Synth One INIT and original comparisons, 2026-11-21 UTC
 
@@ -51,7 +83,7 @@ The normal key, cell and render paths now play Synth One INIT on both owners. Th
 | S5 | FAIL | All 640 SuperJ6 records across 12 banks decoded, with 90,549 source field rows preserved. The compact candidate applied four fields per program, 2,560 writes total. All 2,560 values also matched bit-for-bit after 320 actual block boundaries. The source has 640 distinct complete records and only 539 distinct AMP2 tuples. Full parameter binding and bank selection remain incomplete. |
 | S6 | FAIL | The stock INIT image fits both models. Elite has 6,156 bytes free and Pro 6,164, with pool margin 780 on each. [Per-engine RAM/flash](sound-memory.md) and [original delay history counterexamples](../../experiments/sound-hardware-v1/synthone-delay/README.md). Full simultaneous effects and factory instruments have no passing physical image. |
 | S7 | PASS | Case-insensitive whole-word scan of firmware, tests and web has zero matches. |
-| C1 | OPEN | Run the complete Local gate on this source and retain its SHA-specific outcome and log in the PR conversation. Focused INIT, slot, legacy and Juno tests pass. All four original comparison checkouts are available at their exact pinned commits. The interrupted pre-change suite already recorded host failures, including LeakSanitizer terminating in multiple host binaries. |
+| C1 | OPEN | The canonical Local gate is running on source ca0c00a4e5863132de4a66f5d1c477c14d699be5. The full suite has recorded failures. Four focused reference reruns passed after restoring seven pinned source objects. The TouchOSC test passed with the verified upstream Lua 5.1 interpreter. The original key-sound test and its missing-cue control passed. The drum AMP test passed 238 normal checks, both graph controls and both caption mutants. Five browser safety checks passed. The full browser test still requires the pinned headless shell 1234, whose download returned HTTP 403. LeakSanitizer also recorded a ptrace permission failure in this environment. The terminal gate log is pending. Focused INIT, slot, legacy and Juno tests pass. All four original comparison checkouts are available at their exact pinned commits. The interrupted pre-change suite already recorded host failures, including LeakSanitizer terminating in multiple host binaries. |
 | C2 | PASS | Consolidated `76040daa5b52d686a8b7b544296ba5d79610a95d` is an ancestor. No deleted paths in the no-rename comparison. |
 | C3 | OPEN | No screen layout source changed. The designated independent release review has not signed off. |
 | C4 | OPEN | New evidence consists of source, measurements and reproduction material. The exact-head gate owns the repository-wide limits receipt. |

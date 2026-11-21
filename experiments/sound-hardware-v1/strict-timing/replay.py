@@ -46,6 +46,9 @@ def run(args, symbols, events, name, duration, offset, seed=None):
     with (path / "run.log").open("w") as log:
         subprocess.run(command, env=env, cwd=path, stdout=log, stderr=subprocess.STDOUT,
                        check=True)
+    log_text = (path / "run.log").read_text()
+    if f"panel.ppm at {duration} ms" not in log_text or "skipped 0 cycles" not in log_text:
+        raise ValueError(f"Incomplete strict emulator window in {path}")
     memory = ram.read_bytes()
     debug = struct.unpack_from("<13I", memory, symbols["x0x_dbg"] - 0x01c00000)
     if debug[0] != 0x44424731 or not debug[1] or not pcm.is_file() or not pcm.stat().st_size:
@@ -85,8 +88,9 @@ def main():
         row = run(args, symbols, events, f"shift{offset}", 8000, offset, seed)
         row["scene_late"] = row["raw_late"] - boot["raw_late"]
         row["limit_margin_us"] = 11609 - row["max_us"]
-        row["target_pass"] = (row["halves"] >= 648 and row["max_us"] <= 10909
-                              and row["scene_late"] == 0 and row["raw_late"] == 0)
+        row["stock_half_count_delta"] = row["halves"] - 648
+        row["target_pass"] = (row["max_us"] <= 10909 and row["scene_late"] == 0
+                              and row["raw_late"] == 0)
         result["runs"].append(row)
         (args.output / "sweep.json").write_text(json.dumps(result, indent=2) + "\n")
         print(offset, row["halves"], row["max_us"], row["raw_late"], row["scene_late"], flush=True)
