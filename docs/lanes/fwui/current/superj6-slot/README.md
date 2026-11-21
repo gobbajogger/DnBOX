@@ -1,10 +1,12 @@
 # SuperJ6 panel route
 
-On the SMK-37 Elite and Pro, choose a bass part and press **PARA**. Turn **K2** to the **SOUND** row, then turn **K5** to **SUPERJ6**. **K4** or **K6** selects POLY, PAD, PLUCK or BRASS. The SOUND row shows the applied preset and status. Turn K2 to a parameter row and use K5–K8 to edit it. **SCALE** opens the part list. K2 moves through the list and K3 edits the selected control. **PATCH** closes the list.
+On the SMK-37 Elite and Pro, choose a bass part and press **PARA**. Turn **K2** to the **SOUND** row, then turn **K5** to **SUPERJ6**. **K4** or **K6** selects POLY, PAD, PLUCK or BRASS. While a change waits for the audio owner, the SOUND row shows the requested preset and the reason it is waiting. READY identifies the applied selection. Turn K2 to a parameter row and use K5–K8 to edit it. **SCALE** opens the part list. K2 moves through the list and K3 edits the selected control. **PATCH** closes the list.
 
-The 8,918 host checks covered physical edits on both parts, all 128 formatted positions for each of the 16 macros, waveform, sub and LFO pixel landmarks, and the filter and level response to a sounding note. The measured production UI blob is `e6b2880b4121a32c20b5aa95ebbbcb52d95dc88a`.
+The 8,918 host checks covered physical edits on both parts, all 128 formatted positions for each of the 16 macros, waveform, sub and LFO pixel landmarks, and the filter and level response to a sounding note. The measured production UI blob is `5ec9acd66078b836708b2df90bc6f800d991d7fb`.
 
-The 26 captures follow these panel inputs in the SMK host with the production selector, sound provider and framebuffer. Each part has four preset selector frames, four parameter rows and five list positions. [Frames and pixel hashes](frames.json) · [240×240 PNG archive](frames.tar.gz)
+Independent image review of the eight preset selectors passed 32 panel checks. The SOUND row covered 85.55% of its panel, and the largest empty rectangle occupied 4.00% of the screen.
+
+The 28 captures follow these panel inputs in the SMK host with the production selector, sound provider and framebuffer. Each part has four preset selector frames, four parameter rows and six list positions, including the final STATUS entry. [Frames and pixel hashes](frames.json) · [240×240 PNG archive](frames.tar.gz)
 
 ## Stock compact controls
 

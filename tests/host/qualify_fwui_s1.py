@@ -127,6 +127,7 @@ def build_boards(source, dest, reference):
 def archive_routes(dest):
     ids = (2, 5, 16, 17, 19, 22, 23, 24, 25, 26, 27, 28, 29)
     expected = {f"list-{owner}-factory-id-{control:02d}.png" for owner in "AB" for control in ids}
+    expected.update(f"list-{owner}-last.png" for owner in "AB")
     lists = sorted((dest / "panel").glob("list-*.png"))
     if {path.name for path in lists} != expected:
         raise ValueError("Incomplete Synth One part-list capture")

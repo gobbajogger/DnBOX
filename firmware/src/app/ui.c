@@ -4161,6 +4161,12 @@ static UI_DRAW void key_event(int k, int down)
     }
 }
 
+/* The drum and bass matrices have a third strip for real list rows. */
+static int visible_list_rows(void)
+{
+    return ui.view == V_PART && (is_drum() || is_303()) ? 9 : 6;
+}
+
 static void list_move(int d)
 {
     int s = ui.list_sel, step = d < 0 ? -1 : 1, t;
@@ -4176,8 +4182,9 @@ static void list_move(int d)
         ui.brk_count_target = (uint8_t)(list_rows[s].a != 0);
     if (ui.list_sel < ui.list_top)
         ui.list_top = ui.list_sel;
-    if (ui.list_sel >= ui.list_top + 6)
-        ui.list_top = (uint8_t)(ui.list_sel - 5);
+    int visible = visible_list_rows();
+    if (ui.list_sel >= ui.list_top + visible)
+        ui.list_top = (uint8_t)(ui.list_sel - visible + 1);
 }
 
 static void list_enter(void)
@@ -6041,7 +6048,7 @@ static UI_DRAW void draw_init_selector(int band)
         pref_t r = pg.r[0][k];
         char label[24], num[36], unit[8];
         char *end = label;
-        if (k < 2) end = put_s(put_i(put_s(end, "K"), UI_FIRST_KNOB + k), "  ");
+        if (k < 2 && ui.overlay != O_LIST) end = put_s(put_i(put_s(end, "K"), UI_FIRST_KNOB + k), "  ");
         put_s(end, caps_of(pref_name(r)));
         pref_value(r, num, unit);
         const char *value = num;
@@ -6052,12 +6059,13 @@ static UI_DRAW void draw_init_selector(int band)
         } else if (k == 2) {
             glyph = !strcmp_s(num, "READY") ? UI_G_CHECK : UI_G_HOLD;
         }
-        sound_slab(3, y, 234, 66, !k);
-        uint16_t ink = !k ? SOUND_INK : SOUND_WHITE;
-        cv_text(12, y+6, &FONT_XS, label, ink);
-        ui_pictogram(12, y+31, glyph, 2, ink);
+        int selected = ui.overlay == O_LIST ? k == ui.list_sel : k == 0;
+        sound_slab(3, y, 234, 66, selected);
+        uint16_t ink = selected ? SOUND_INK : SOUND_WHITE;
+        cv_text(12, y+3, &FONT_XS, label, ink);
+        ui_pictogram(103, y+22, glyph, 2, ink);
         const felucca_font_t *font = tw(&FONT_M, value) <= 187 ? &FONT_M : &FONT_B;
-        cv_text(40, y+27, font, value, ink);
+        text_r(229, base_y(&FONT_M, y+38, font), font, value, ink);
     }
     if (band == 2) sound_step_footer();
 }
@@ -6106,13 +6114,12 @@ static UI_DRAW void draw_part_sound(int band)
             char knobs[20];matrix_knob_caption(knobs,p);
             text_r(232,y,&FONT_T,knobs,label);
         }
-        int columns = 4, cell_width = 59;
-#if X0X_SYNTHONE_PATCH
-        if (s1_draw_patch && pg.r[p][0].kind == R_S1PATCH) {
-            columns = pg.r[p][0].c == 0 ? 2 : 3;
-            cell_width = 236 / columns;
-        }
-#endif
+        /* Original page descriptors keep all their mapped knobs on the left.
+         * Spread those same controls across the panel without moving a binding. */
+        int columns = 4;
+        if (X0X_ORIGINAL_SYNTH && pg.r[p][3].kind == R_NONE)
+            columns = pg.r[p][2].kind == R_NONE ? 2 : 3;
+        int cell_width = columns == 4 ? 59 : columns == 3 ? 78 : 118;
         for (k=0;k<columns;k++) {
             int x=4+k*cell_width;
             if (k && (pg.r[p][k].kind!=R_NONE
@@ -6843,12 +6850,21 @@ static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel
     return travel-(int)(phase*24u/1000u);
 }
 
-/* a list over the main area: six rows of 24 px */
+/* Every 69-pixel strip paints three consecutive list rows. */
 static UI_DRAW void draw_list(int band)
 {
-    int i;
-    for (i = 0; i < 3; i++) {
-        int row = ui.list_top + band * 3 + i, y = i * 23, sel = row == ui.list_sel;
+#if !X0X_SYNTHONE_PATCH
+    if (ui.list_n == 3 && list_rows[0].kind == R_BENGINE) {
+        draw_init_selector(band);
+        return;
+    }
+#endif
+    int visible = visible_list_rows();
+    int pitch = visible == 9 && ui.list_n && ui.list_n < 9 ? 207 / ui.list_n : 23;
+    for (int i = 0; i < visible; i++) {
+        int y = i * pitch + (pitch - 23) / 2 - band * BAND_H;
+        if (y + 23 <= 0 || y >= BAND_H) continue;
+        int row = ui.list_top + i, sel = row == ui.list_sel;
         pref_t r;
         char num[36], unit[8];
         const x0x_param_t *d;
@@ -6863,9 +6879,11 @@ static UI_DRAW void draw_list(int band)
             continue;
         }
         d = pref_desc(r);
+        int has_bar = d && !d->names && d->max >= 24;
+        int inset = visible == 9 && !has_bar ? 3 : 0;
         surface_panel(3,y+1,229,21,sel,sel?dim(part_col(),6):SOUND_FACE,
                       sel?part_col():SOUND_EDGE,SOUND_SIDE);
-        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);
+        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);
         if (r.kind == R_SECTION) {                     /* a GLOBAL category: its chevron */
             cv_line(221,y+8,225,y+11,sel?C_AMB:C_DIM);cv_line(225,y+11,221,y+14,sel?C_AMB:C_DIM);
         }
@@ -6894,6 +6912,7 @@ static UI_DRAW void draw_list(int band)
             ui_state_toggle(190, y + 6, on, on ? ink : C_GRAY);
         }
         pref_value(r, num, unit);
+        if (visible == 9 && r.kind == R_ENG && d && d->names) put_s(num, caps_of(num));
         if (r.kind == R_BPRESET) {
             const char *name = original_sound_name((unsigned)engine_bass_requested_bank(r.b),
                                                    (unsigned)engine_bass_requested_preset(r.b));
@@ -6906,19 +6925,20 @@ static UI_DRAW void draw_list(int band)
                            (unit[0] ? tw(&FONT_XS,unit)+2 : 0);
                 if (tw(nf,num) > room) nf = tw(&FONT_XS,num) <= room ? &FONT_XS : &FONT_T;
             }
-            int32_t ny = vc(nf, y + 1, 18), ux = (r.kind==R_PARTON?158:226) - tw(&FONT_XS, unit);
+            int32_t ny = vc(nf, y + 1 + inset, 18), ux = (r.kind==R_PARTON?158:226) - tw(&FONT_XS, unit);
             cv_text(ux, base_y(nf, ny, &FONT_XS), &FONT_XS, unit, sel ? C_WHITE : C_GRAY);
             text_r(unit[0] ? ux - 2 : ux, ny, nf, num, sel ? C_WHITE : C_HI);
         }
-        if (d && !d->names && d->max >= 24) {          /* a continuous value: its bar */
+        if (has_bar) {
             int v = pref_get(r);
             rbox(108, y + 18, 70, 3, 1, C_LINE);
             if (v)
                 rbox(108, y + 18, 3 + v * 67 / d->max, 3, 1, sel ? part_col() : C_DIM);
         }
     }
-    if (ui.list_n > 6) {                               /* the scrollbar */
-        int h = 2 * BAND_H * 6 / ui.list_n, y = 2 * BAND_H * ui.list_top / ui.list_n - band * BAND_H;
+    if (ui.list_n > visible) {
+        int height = visible * 23;
+        int h = height * visible / ui.list_n, y = height * ui.list_top / ui.list_n - band * BAND_H;
         rbox(235, 0, 3, BAND_H, 1, C_LINE);
         rbox(235, y, 3, h, 1, C_HI);
     }
@@ -7461,8 +7481,8 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
 #if X0X_BASS_PRESET_PREVIEW
     if(r.kind==R_BPRESET) {
         draw_preset_name(r.b,cx,y,height,ink);
-        cv_rect(x+8,y+bar_y,42,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-        if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+41*(val>d->max?d->max:val)/d->max,1,ink);
+        cv_rect(x+8,y+bar_y,width-17,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
+        if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+(width-18)*(val>d->max?d->max:val)/d->max,1,ink);
         return;
     }
 #endif
@@ -7507,7 +7527,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         pref_value_of(r,val,num,unit);
         if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
             strip_value_fit(x, y+28, num, unit, ink);
-        else strip_value(x+45,y+28,num,unit,ink);
+        else strip_value(x+width-14,y+28,num,unit,ink);
     } else
     if(shape) {
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
@@ -7532,8 +7552,8 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         if(glyph) matrix_glyph(left,y+value_y+1,glyph,ink,night?(active?SOUND_SELECT:SOUND_FACE):(active?col:C_BLACK));
         cv_text(left+(glyph?14:0),y+value_y,font,value,ink);
         if(!unused) {
-            cv_rect(x+8,y+bar_y,42,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
-            if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+41*(val>d->max?d->max:val)/d->max,1,ink);
+            cv_rect(x+8,y+bar_y,width-17,1,night?(active?SOUND_SELECT_SIDE:SOUND_LINE):(active?dim(col,3):C_LINE));
+            if(val>0 && d->max) cv_rect(x+8,y+bar_y,1+(width-18)*(val>d->max?d->max:val)/d->max,1,ink);
         }
     }
     lv=lock_of(r,lock_step());
@@ -8852,7 +8872,7 @@ static UI_DRAW void draw_knobs(void)
         if (ui.overlay==O_NONE && !ui.help) {
             if (is_drum()) draw_drum_voice(2);
             else draw_part_sound(2);
-        }
+        } else if (ui.overlay == O_LIST && !ui.help) draw_list(2);
         cv_commit_knobs(3);
         last_sig = 0;
         return;

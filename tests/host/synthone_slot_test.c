@@ -25,27 +25,30 @@ static void render_blocks(unsigned count)
 #if !X0X_SYNTHONE_PATCH
 /* Compare ink in the completed framebuffer with independently composed labels,
  * readouts and pictograms. A missing or misplaced item fails its own row. */
-static void selector_row(int row, const char *label, const char *value, int glyph)
+static void selector_row(int row, const char *label, const char *value, int glyph, int selected)
 {
     int y = 24 + row * 67;
-    uint16_t ink = row ? SOUND_WHITE : SOUND_INK;
-    uint16_t face = row ? SOUND_FACE : SOUND_SELECT;
-    cv_begin(220, 56, face);
+    uint16_t ink = selected ? SOUND_INK : SOUND_WHITE;
+    uint16_t face = selected ? SOUND_SELECT : SOUND_FACE;
+    cv_begin(218, 60, face);
     cv_text(0, 0, &FONT_XS, label, ink);
     const felucca_font_t *font = tw(&FONT_M, value) <= 187 ? &FONT_M : &FONT_B;
     CHECK(tw(font, value) <= 187);
-    cv_text(28, 21, font, value, ink);
-    ui_pictogram(0, 25, glyph, 2, ink);
-    for (int dy = 0; dy < 50; ++dy)
-        CHECK(!memcmp(fb + (y + 6 + dy) * 240 + 12, cv_px + dy * 220, 220 * sizeof(*fb)));
+    text_r(217, base_y(&FONT_M,35,font), font, value, ink);
+    ui_pictogram(91, 19, glyph, 2, ink);
+    for (int dy = 0; dy < 60; ++dy) {
+        int equal = !memcmp(fb + (y + 3 + dy) * 240 + 12, cv_px + dy * 218, 218 * sizeof(*fb));
+        if (!equal) fprintf(stderr, "Stock INIT row %s, value %s, mismatched line %d\n",label,value,dy);
+        CHECK(equal);
+    }
 }
 
 static void selector_frame(const char *bank, const char *preset, const char *status, int locked)
 {
     ui_frame();
-    selector_row(0, BOARD_SMK37 ? "K5  ENGINE" : "K1  ENGINE", bank, UI_G_SOUND);
-    selector_row(1, BOARD_SMK37 ? "K6  PRESET" : "K2  PRESET", preset, locked ? UI_G_LOCK : UI_G_LIST);
-    selector_row(2, "STATUS", status, !strcmp(status,"READY") ? UI_G_CHECK : UI_G_HOLD);
+    selector_row(0, BOARD_SMK37 ? "K5  ENGINE" : "K1  ENGINE", bank, UI_G_SOUND, 1);
+    selector_row(1, BOARD_SMK37 ? "K6  PRESET" : "K2  PRESET", preset, locked ? UI_G_LOCK : UI_G_LIST, 0);
+    selector_row(2, "STATUS", status, !strcmp(status,"READY") ? UI_G_CHECK : UI_G_HOLD, 0);
     /* Number positions follow the sixteen physical white-key steps in bank 1. */
     uint16_t background = fb[230 * 240 + 239];
     for (int k = 0; k < 16; ++k) {
@@ -104,6 +107,33 @@ static void physical_detent(int column, int delta)
     ui_input_only();
 }
 
+static void short_list(int voice)
+{
+    static const char *const names[] = {"engine", "preset", "status"};
+    static const int kinds[] = {R_BENGINE, R_BPRESET, R_BSTATUS};
+    button_tap(B_SEL);  /* SCALE opens the actual list from SOUND. */
+    CHECK(ui.overlay == O_LIST && ui.list_n == 3);
+    for (int row = 0; row < 3; ++row) {
+        if (row) {
+            now_ms += 128;
+            enc_acc[EN_SELECT] = 1;
+            ui_input_only();
+        }
+        CHECK(ui.list_top == 0 && ui.list_sel == row);
+        CHECK(list_rows[row].kind == kinds[row] && list_rows[row].b == voice);
+        ui_frame();
+        selector_row(0, "ENGINE", "SYNTH ONE", UI_G_SOUND, row == 0);
+        selector_row(1, "PRESET", "INIT", UI_G_LOCK, row == 1);
+        selector_row(2, "STATUS", "READY", UI_G_CHECK, row == 2);
+        char name[64];
+        snprintf(name, sizeof name, "stock-init-list-%s-%c", names[row], 'a' + voice);
+        shot(name);
+    }
+    button_tap(B_HOME);  /* PATCH returns to this owner's only SOUND page. */
+    CHECK(ui.overlay == O_NONE && ui.view == V_PART && bidx() == voice && cur_page() == 0);
+    selector_frame("SYNTH ONE", "INIT", "READY", 1);
+}
+
 static void stock_selector(int voice)
 {
     CHECK(pg.n == 1 && cur_page() == 0 && !strcmp(pg.title[0],"SOUND"));
@@ -116,6 +146,7 @@ static void stock_selector(int voice)
     CHECK(engine_bass_choice_serial() == serial && !engine_bass_preset_pending(voice));
     selector_frame("SYNTH ONE", "INIT", "READY", 1);
     shot(voice ? "stock-init-ready-b" : "stock-init-ready-a");
+    short_list(voice);
 
     /* K5 changes the requested bank while a held Synth One note retains its
      * applied owner. K6 now selects the pending bank's real factory preset. */

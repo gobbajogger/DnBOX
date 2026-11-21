@@ -202,6 +202,7 @@ static void check_panel_route(int owner)
         } else {
             CHECK(r.kind == (row == 16 ? R_BENGINE : row == 17 ? R_BPRESET : R_BSTATUS));
             if (row == 16) capture_route(owner, "list", "sound");
+            if (r.kind == R_BSTATUS) capture_route(owner, "list", "last");
         }
         if (row < 18) panel_turn(EN_SELECT, 1);
     }

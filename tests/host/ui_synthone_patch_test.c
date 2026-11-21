@@ -108,7 +108,7 @@ static void check_part(unsigned owner)
         pref_t r = list_rows[row];
         if (r.kind == R_S1PATCH) {
             CHECK(r.b == owner && r.c == seen++);
-            CHECK(row >= ui.list_top && row < (unsigned)ui.list_top + 6);
+            CHECK(row >= ui.list_top && row < (unsigned)ui.list_top + 9);
             s1_patch_value v;
             CHECK(s1_read(r, &v));
             const s1_patch_descriptor *d = s1_patch_at(r.c);
@@ -126,6 +126,9 @@ static void check_part(unsigned owner)
         CHECK(ui.list_sel > row);
     }
     CHECK(seen == S1_PATCH_COUNT);
+    CHECK(ui.list_sel + 1 == ui.list_n && list_rows[ui.list_sel].kind == R_BSTATUS);
+    ui_frame();
+    shot(owner ? "list-B-last" : "list-A-last");
     button_tap(B_HOME);
 }
 

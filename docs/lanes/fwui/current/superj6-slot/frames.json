@@ -2,7 +2,7 @@
   "provider": "Stock compact juno6 slot",
   "platform": "SMK-37 host",
   "archive": "frames.tar.gz",
-  "archive_sha256": "cccbfe667c9ef1fe4bed2ea8578cc16d41017aa4486bc9d9d329386be8f9e634",
+  "archive_sha256": "e10db0e9d4a4f7438a150a2370f5d4f782e994a772e21a296fe6197d245ed844",
   "frames": [
     {
       "file": "slot-a-matrix-oscillator.png",
@@ -51,8 +51,8 @@
       "state": "oscillator",
       "width": 240,
       "height": 240,
-      "sha256": "c654cd776fe5e5072543ca5d66501604c3731f075e2676571dcd5b853531fe3d",
-      "rgb_sha256": "7e0b62cee85accc92a68a0094821b9b9f5943b6d3fe53596fcba6e29487eb0c4"
+      "sha256": "63bcb1dabd86dc21af68625a6dcf5b9d56a9221b72abe015f62e006e34019061",
+      "rgb_sha256": "c223415f9601051d0f2ef70a0f8092d42221f7877ab43f3562f7967b9ecfa059"
     },
     {
       "file": "slot-a-list-filter.png",
@@ -61,8 +61,8 @@
       "state": "filter",
       "width": 240,
       "height": 240,
-      "sha256": "f362e2a548d28cbc4d8797e8f476d2bc718e911bb907e42214e41299fcf1ed21",
-      "rgb_sha256": "4298d96add7faf417f029f9c260e781bb2b04aa1c9031d99fc28111ba35838ea"
+      "sha256": "256ef78e79889f19b10be30a678bc554c3a30d2924f8aabca81f0b80bb19429e",
+      "rgb_sha256": "ddc93031b9bf2e90d7892356bf9267e2e3f808a10feb708a9d19138e790239a1"
     },
     {
       "file": "slot-a-list-envelope.png",
@@ -71,8 +71,8 @@
       "state": "envelope",
       "width": 240,
       "height": 240,
-      "sha256": "919038de984429fb6b36111cc0eca903bfcb7daf5b8f1cb7f374b65e54ef76be",
-      "rgb_sha256": "a609ea8fdd53e8dab7b1b6f0702b1c154ac6d3bb6b1cf4c7ad715dbc34170487"
+      "sha256": "68463b8086e10de7c6ac68a255a1d2d7e30001d934bfc3c0f83b619e167ba499",
+      "rgb_sha256": "fbfeff36e7dac8a77e501ff1d06ad57ba59b169bdfd9f20435e9ad3de6666861"
     },
     {
       "file": "slot-a-list-lfo-chorus.png",
@@ -81,8 +81,8 @@
       "state": "lfo-chorus",
       "width": 240,
       "height": 240,
-      "sha256": "3355212332a1614b11e2034f27d5a99794d76795a9b4afd981d6c4a1aca516a3",
-      "rgb_sha256": "6baff0e6bf0afca6c51c846b44e3aa29de7e514255e442b5655f8e9313145e92"
+      "sha256": "7fa2bdc0b520f6235c5075ca93e690c9de10ac21e35f946c273fb6a9545a2afc",
+      "rgb_sha256": "278c7f974cab7f5c9b45c925f1d3f277568f17fca70c7271df29fb3b53d39c29"
     },
     {
       "file": "slot-a-list-sound.png",
@@ -91,8 +91,18 @@
       "state": "sound",
       "width": 240,
       "height": 240,
-      "sha256": "e12efabc600b340ab92e434a9b18708b0f071010ab9c23e93053f90e91278529",
-      "rgb_sha256": "67f380ace169c185fceeafbe83365a7510eba1ab06b1c99e325ba74f67db6915"
+      "sha256": "24246c35153bf51dab3108af19f4a095b585c82424124f01856ec761d597f9ec",
+      "rgb_sha256": "7a55367e6133eff51f4311329511269e9708926d71ca0fc275a19e5cc9e07d98"
+    },
+    {
+      "file": "slot-a-list-last.png",
+      "owner": "A",
+      "route": "list",
+      "state": "last",
+      "width": 240,
+      "height": 240,
+      "sha256": "daf089802eecb5e7a0a85c6d31cd512a6e684582809fa1f2b27004ac5633b64b",
+      "rgb_sha256": "51194d8505df52feddd9dfc57461b9dfdbc90ea954ad85a01dfb2a27ea5680a3"
     },
     {
       "file": "slot-a-sound-poly.png",
@@ -101,8 +111,8 @@
       "state": "poly",
       "width": 240,
       "height": 240,
-      "sha256": "1502fa5c5a5eceae08f1a5deefddc5d35d6e1f850e4a6df667d55ad515eb6488",
-      "rgb_sha256": "081d0527a8d33d98e1a5168a30956196192a1525673181a36683c96afcc48229"
+      "sha256": "cf0eb389a72e3213422262ad16a9b1383a7e2c45e0fded128e6b734c61cbed2c",
+      "rgb_sha256": "36d86418f7e5f0afddecb8977a8c3a77fb3690cea1a4267e7780a5db50295525"
     },
     {
       "file": "slot-a-sound-pad.png",
@@ -111,8 +121,8 @@
       "state": "pad",
       "width": 240,
       "height": 240,
-      "sha256": "fbdeb2633d7e1e158a42c35f94faa9d5fe1aac9a83dca97a231671238ea13897",
-      "rgb_sha256": "21c628f2b9ca93c3887f6dbe7aee5cdf4ffdb4945483e3b47e3a28f07393ba66"
+      "sha256": "34b8643caf738b3e690dc01adb43c5436d71c022f27a8985fb2eab8f9f6f1aeb",
+      "rgb_sha256": "a006c69aa8846a8054c3d2c42283c1668ef6f0dbb1483b39ba5c5799c4d628c4"
     },
     {
       "file": "slot-a-sound-pluck.png",
@@ -121,8 +131,8 @@
       "state": "pluck",
       "width": 240,
       "height": 240,
-      "sha256": "671569965c1e6bb48dfa77e200b7fdd2404c40501e0972875ab44aa869cf3f94",
-      "rgb_sha256": "423ff73784b16431c01d5fac63f98f4e6bc073e87fad9c9ac41f0e1ec124cbcc"
+      "sha256": "629d297553501299b556f2704a2c66d0daadfa649c4a87c5cc767fee69e44f03",
+      "rgb_sha256": "b338e27d46a1d74ef0f7586024ecfaa1db4664c394ee6113c6a0c397006e2986"
     },
     {
       "file": "slot-a-sound-brass.png",
@@ -131,8 +141,8 @@
       "state": "brass",
       "width": 240,
       "height": 240,
-      "sha256": "d3ce4321ad0cc07dda3786c44cbefab32a740a450e4b0f952bb2de478ed65517",
-      "rgb_sha256": "32a5f02df8f360bb9e8aa6a70bc3da62f6310701e5a7ef50bb128fbf83702cc0"
+      "sha256": "b8aa5bdc9beb4f16f83b883a0160c384cee51b4d838e86657603f12bed96050a",
+      "rgb_sha256": "10d6d1327e9f5f873d4e86914a96b2832086df7621a6a9a6de5ce325ceca7f2f"
     },
     {
       "file": "slot-b-matrix-oscillator.png",
@@ -181,8 +191,8 @@
       "state": "oscillator",
       "width": 240,
       "height": 240,
-      "sha256": "ebf8fcfa9c10bcc144188484d12310914f01a3e5f528054c67cbabbd16152682",
-      "rgb_sha256": "12de28fd65f22902c31abc1e9da01d60b4fe184bcc97320e262ac5591000f7ef"
+      "sha256": "bd808711ffed7a5ea6c218a999778b39337d54223787fc14779da0416885a149",
+      "rgb_sha256": "e1d53a91146f6aa5fa2040b61b8c3717db5453cccdebd148671d1a166bc899e3"
     },
     {
       "file": "slot-b-list-filter.png",
@@ -191,8 +201,8 @@
       "state": "filter",
       "width": 240,
       "height": 240,
-      "sha256": "050643efbda6b964623c9cda324d5e4ea8e28b085ca2090c3175f469a9a5e18c",
-      "rgb_sha256": "9b9171d54283d6ad55d83c02dd7f67d9fdab11d35500532777d071324fac870e"
+      "sha256": "31a1e27c5e432d59fc826478b5c3f42b830c53221b13fba7a395974f8b4057f4",
+      "rgb_sha256": "20cb636e900cb91f374f428eb54c65a661c4ccc37d94e52171826499c6aeb7fd"
     },
     {
       "file": "slot-b-list-envelope.png",
@@ -201,8 +211,8 @@
       "state": "envelope",
       "width": 240,
       "height": 240,
-      "sha256": "82b89fbf1e67ebfc374819fa250b4ca393ddc3bb73cee90caf852b949bb89bf5",
-      "rgb_sha256": "4be5c4a3f3a2ffb1a883c0eebc2fa3b08133fec91c0a76acd3732de9f31f4440"
+      "sha256": "c57cf6dc2c39be6dc78dd90d358d1a11e729ed6c443af4f10fcc257b34701a41",
+      "rgb_sha256": "84053e1e679394c1a27c1ebe5c2ee79bedc69b5f464b74ff65d0f5c2edc62b6e"
     },
     {
       "file": "slot-b-list-lfo-chorus.png",
@@ -211,8 +221,8 @@
       "state": "lfo-chorus",
       "width": 240,
       "height": 240,
-      "sha256": "d913dda402cc6cc79292e741491eb19057cdbc4082eeb4580948a491ca5ea66b",
-      "rgb_sha256": "b63898e30e21b4a5b4fc09ece0e569aa4495d72f10e1062b9ae89bade7d43a36"
+      "sha256": "88564c6fadfbdef4c3c1069a7a0269ee32c9521324d1442c92a120448af577b3",
+      "rgb_sha256": "51c2dd449c6773c76bda23032359e2996c93f4d3bda7583cad6c53abb27d6a99"
     },
     {
       "file": "slot-b-list-sound.png",
@@ -221,8 +231,18 @@
       "state": "sound",
       "width": 240,
       "height": 240,
-      "sha256": "7902a91896b020f736f4c861622bcc65493c8b5e46fd5d0338fe9d2d1d41f8cc",
-      "rgb_sha256": "fccce85d63410b8f0899acb65709c17e484a3e4937509ce490d2b91a3d650c26"
+      "sha256": "f7c46f1ca617249f3846263356efb8f67bfbbf00ecab3d4e220853898a767c9b",
+      "rgb_sha256": "af8eabeb44158c557b067a4c64d9da2d1f44da7eff052d9afdb5c815704ae34a"
+    },
+    {
+      "file": "slot-b-list-last.png",
+      "owner": "B",
+      "route": "list",
+      "state": "last",
+      "width": 240,
+      "height": 240,
+      "sha256": "2425e1cf1b65bd40ffb2c16ed1fc962f0ff412141f76c3e4f2b8e0c0abaa87d0",
+      "rgb_sha256": "15ecd247c4f6bc5ae03d2cc8330b22c306fb2e4fe74066aef706e7b0fabcd341"
     },
     {
       "file": "slot-b-sound-poly.png",
@@ -231,8 +251,8 @@
       "state": "poly",
       "width": 240,
       "height": 240,
-      "sha256": "5396f683f4ebd7fed2b1edc98a9bbfa50af69446a9e291cfe7d8591fa88a3c87",
-      "rgb_sha256": "b3586ec03a202cb86b3473882cc145124dbcb60b5ae7746d5c9adfbea5bca1b9"
+      "sha256": "5c67333241bd4bf8a41bd90528fd430b4d8d3dcd5d6d9ea8712c681669d64d76",
+      "rgb_sha256": "f8f9cd333e3145bdb078f4de3a126a4df2a1ad06abf5579723de6b929e4a6a51"
     },
     {
       "file": "slot-b-sound-pad.png",
@@ -241,8 +261,8 @@
       "state": "pad",
       "width": 240,
       "height": 240,
-      "sha256": "070c14d0be2a6a69f1f552627b5c06212d756c65e58f246b91cd3fe21734936f",
-      "rgb_sha256": "dffef79838075595392ffacc947a6ef74377227d3d655c4e37b94a8a7dcade7b"
+      "sha256": "ed6a76d90dbc8e951b152ea744855baadc3137647e9cf4d0201eed69b269567e",
+      "rgb_sha256": "e88a79f3f0b3579e0685983b0e012bf08bc97967b98131aca9a3bc6bfbe56b79"
     },
     {
       "file": "slot-b-sound-pluck.png",
@@ -251,8 +271,8 @@
       "state": "pluck",
       "width": 240,
       "height": 240,
-      "sha256": "cf6fef0518034845d5522c089d52f0769561f7d8bf70fe3a44d723588edcf0b3",
-      "rgb_sha256": "ef3a11f9ffea5fa43f531839004edf0fb54568555a085e230ead4fb726e647ac"
+      "sha256": "15a843268edc038b13b0740e8289aa47bf2c447058652a8580b9872883ec17e2",
+      "rgb_sha256": "2186e8d48fd3eccfeae9611dd1f6798cc8d9beb8a73311e2cce2f3ee347e70c8"
     },
     {
       "file": "slot-b-sound-brass.png",
@@ -261,8 +281,8 @@
       "state": "brass",
       "width": 240,
       "height": 240,
-      "sha256": "98caf9cd5beadd8b1525e4e6b885ef35449af6da00126c51fbc040994d7caaa7",
-      "rgb_sha256": "516b52e33a9305085cae47911faef18e55bebfa5e9b8cc8d28a75012c25b0121"
+      "sha256": "d2766a730b9b9a34eb3bca889611eca5db309a182ae8f578ce28b3a3f0d5b94e",
+      "rgb_sha256": "2a5760a1b637014a813d633e1be4916b1dcef3d4ba124e84c7b61bb5765ecbbd"
     }
   ]
 }

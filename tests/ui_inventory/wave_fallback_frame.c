@@ -49,7 +49,7 @@ int main(void)
         if (y<min_y) min_y=y;
         if (y>max_y) max_y=y;
     }
-    CHECK(count>0 && min_x>=4 && max_x<63 && min_y>=24 && max_y<73);
+    CHECK(count>0 && min_x>=38 && max_x<69 && min_y>=24 && max_y<73);
     printf("WAVE_FALLBACK %d %d %d %d %d\n", count,min_x,min_y,max_x,max_y);
     return 0;
 }

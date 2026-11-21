@@ -24,7 +24,7 @@ def page_difference(directory):
     diff = ImageChops.difference(load("chicago-wave-valid-lock"), load("chicago-wave-invalid-lock"))
     # V_PART original-wave cell, and the first value in its FILTER 1 row.
     # The oscillator and the deliberately changed sibling are the only owners.
-    boxes = {"oscillatorPlot": (8,47,39,70), "siblingCutoffValue": (34,94,63,122)}
+    boxes = {"oscillatorPlot": (38,47,69,70), "siblingCutoffValue": (53,94,82,122)}
     diff_counts = {}
     for name, box in boxes.items():
         count = sum(n for n, color in diff.crop(box).getcolors(240*240) if color != (0,0,0))

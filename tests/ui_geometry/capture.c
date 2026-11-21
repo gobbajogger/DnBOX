@@ -64,12 +64,16 @@ static void expect_region(const char *screen,const char *kind,const char *text,i
 static void required_other_content(const char *screen) {
  if(ui.help)return;
  if(ui.overlay==O_LIST) {
-  for(int row=ui.list_top;row<ui.list_n&&row<ui.list_top+6;row++) {
-   pref_t r=list_rows[row];char label[64],num[64],unit[8];int y=HDR_H+(row-ui.list_top)*23;
+  int visible=ui.view==V_PART && (is_drum() || is_303()) ? 9 : 6;
+  int pitch=visible==9 && ui.list_n && ui.list_n<9 ? 207/ui.list_n : 23;
+  for(int row=ui.list_top;row<ui.list_n&&row<ui.list_top+visible;row++) {
+   pref_t r=list_rows[row];char label[64],num[64],unit[8];int y=HDR_H+(row-ui.list_top)*pitch+(pitch-23)/2;
    if(r.kind==R_HDR){hdr_name(r.a,label);expect_region(screen,"list-section",label,0,y,240,y+23);list_presence_checks++;continue;}
    snprintf(label,sizeof label,"%s",caps_of(pref_name(r)));expect_region(screen,"list-label",label,0,y,240,y+23);list_presence_checks++;
    if(r.kind==R_SECTION||r.kind==R_ACT||r.kind==R_BTNAME||r.kind==R_PARTON)continue;
    pref_value(r,num,unit);
+   if(visible==9 && r.kind==R_ENG && pref_desc(r) && pref_desc(r)->names)
+    for(char *c=num;*c;c++)if(*c>='a' && *c<='z')*c=(char)(*c-'a'+'A');
    if(r.kind==R_BPRESET){const char *name=original_sound_name((unsigned)engine_bass_requested_bank(r.b),(unsigned)engine_bass_requested_preset(r.b));snprintf(num,sizeof num,"%s",caps_of(name?name:"USER"));}
    expect_region(screen,"list-value",num,0,y,240,y+23);list_presence_checks++;
    if(unit[0]){expect_region(screen,"list-unit",unit,0,y,240,y+23);list_presence_checks++;}
@@ -89,12 +93,14 @@ static void required_other_content(const char *screen) {
    for(int k=0;k<3;k++){
     int top=HDR_H+4+k*67;
     expect_region(screen,"stock-init-label",labels[k],6,top,100,top+26);
-    expect_region(screen,"stock-init-value",values[k],32,top+22,224,top+63);
+    expect_region(screen,"stock-init-value",values[k],32,top+33,231,top+66);
     synth_presence_checks+=2;
    }
    return;
   }
 #endif
+  int width=!X0X_ORIGINAL_SYNTH || pg.r[page][3].kind!=R_NONE ? 59 :
+            pg.r[page][2].kind!=R_NONE ? 78 : 118;
   for(int k=0;k<4;k++) {
    pref_t r=pg.r[page][k];if(!pref_desc(r))continue;char label[64],num[32],unit[8],joined[48];
    if(adsr_row(page)){
@@ -109,19 +115,19 @@ static void required_other_content(const char *screen) {
      snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
               !strcmp(unit,"%") ? "%" : "");
      if(strcmp(unit,"%")) {
-      expect_region(screen,"synth-envelope-unit",unit,k*59,y,(k+1)*59+4,y+height);
+      expect_region(screen,"synth-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
       synth_presence_checks++;
      }
     } else snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
-    expect_region(screen,"synth-envelope",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;continue;
+    expect_region(screen,"synth-envelope",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
    }
-   snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*59,y,(k+1)*59+4,y+height);synth_presence_checks++;
+   snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;
    if(r.kind==R_BPRESET)continue; /* wrapped preset names have their own tested formatter */
    pref_value_of(r,matrix_value(r),num,unit);snprintf(joined,sizeof joined,"%s%s",num,unit);
-   int present=seen_region(joined,k*59,y,(k+1)*59+4,y+height);
+   int present=seen_region(joined,k*width,y,(k+1)*width+4,y+height);
    snprintf(joined,sizeof joined,"%s%s%s",num,unit[0]?" ":"",unit);
-   present|=seen_region(joined,k*59,y,(k+1)*59+4,y+height);
-   present|=seen_region(num,k*59,y,(k+1)*59+4,y+height)&&(!unit[0]||seen_region(unit,k*59,y,(k+1)*59+4,y+height));
+   present|=seen_region(joined,k*width,y,(k+1)*width+4,y+height);
+   present|=seen_region(num,k*width,y,(k+1)*width+4,y+height)&&(!unit[0]||seen_region(unit,k*width,y,(k+1)*width+4,y+height));
    presence_checks++;synth_presence_checks++;
    if(!present){presence_missing++;printf("MISSING_CONTENT screen=%s kind=synth-value expected=[%s%s]\n",screen,num,unit);}
   }

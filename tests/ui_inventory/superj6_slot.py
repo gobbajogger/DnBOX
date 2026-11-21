@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
-"""Package the 26 SMK host frames reached by juno_slot_integration_test.c."""
+"""Package the 28 SMK host frames reached by juno_slot_integration_test.c."""
 import argparse
 import gzip
 import hashlib
@@ -20,7 +20,7 @@ def package(source, output):
     groups = ["oscillator", "filter", "envelope", "lfo-chorus"]
     routes = {
         "matrix": groups,
-        "list": groups + ["sound"],
+        "list": groups + ["sound", "last"],
         "sound": ["poly", "pad", "pluck", "brass"],
     }
     frames = []
