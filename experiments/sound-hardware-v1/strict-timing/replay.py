@@ -8,6 +8,10 @@ from pathlib import Path
 import shutil
 import struct
 import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "tools"))
+from fm1_rescue import package_flash_image
 
 
 def digest(path):
@@ -24,7 +28,19 @@ def read_symbols(elf):
     return names
 
 
+def validate_seed(fwsc, seed):
+    """A restored emulator flash replaces package code as well as user state."""
+    protected = package_flash_image(fwsc.read_bytes())
+    if len(protected) != 0x9d000 or seed.stat().st_size != 0x100000:
+        raise ValueError("Unexpected SMK package or flash extent")
+    with seed.open("rb") as source:
+        if source.read(len(protected)) != protected:
+            raise ValueError("Seed firmware bytes differ from the requested package")
+
+
 def run(args, symbols, events, name, duration, offset, seed=None):
+    if seed is not None:
+        validate_seed(args.fwsc, seed)
     path = args.output / name
     path.mkdir()
     (path / "work").mkdir()

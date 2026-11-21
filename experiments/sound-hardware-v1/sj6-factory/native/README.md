@@ -12,16 +12,7 @@ The linked experiment combines the decoded waveform/PWM, AMP2 and master-volume 
 
 Both compact targets use the standard board model and linker layout, size optimization on the two Juno DSP units, disabled diagnostic counters and the ordinary stock BREAK table. The calibrated eight-second scene exercises the panel, encoders, MIDI, sequencer, DAC and saved project. The separate published-Juno preset test measures what a user hears when selecting each of those four voices. [Host test and per-preset measurements](../native-host/README.md)
 
-All 12 same-offset compact DAC captures matched the stock PCM and the 36,420-byte project. Each scene rendered 333,312 stereo frames over 648 halves. Both builds reproduced stock's single late transfer during startup and zero additional late transfers during the scene. Across shifts 0 through +5 ms the worst blocks were 11,402 µs on Elite and 11,318 µs on Pro, leaving 207 and 291 µs against 11,609 µs. The requested minimum is 700 µs. The 17 fixed-input host scenarios also matched all 50 stock audio and state files.
-
-| Input shift | Elite peak, µs | Pro peak, µs | Stock DAC and project |
-| --- | ---: | ---: | --- |
-| 0 ms | 11,402 | 11,289 | Both match |
-| +1 ms | 11,323 | 11,318 | Both match |
-| +2 ms | 11,319 | 11,087 | Both match |
-| +3 ms | 11,282 | 11,241 | Both match |
-| +4 ms | 11,297 | 11,303 | Both match |
-| +5 ms | 11,272 | 11,272 | Both match |
+**Correction.** The first twelve replay shots restored the complete stock flash over the supplied compact package. They ran stock code. The previous compact physical parity and timing claims are withdrawn. The 17 fixed-input host scenarios independently matched all 50 stock audio/state files. Native image and pool measurements above came from the compact link.
 
 ## Reproduce the native experiment
 
@@ -63,7 +54,7 @@ do
         for shift in 0 1 2 3 4 5
         do
             python3 "$bench/native/score_scene.py" "$model" "$build/$board/x0x.elf" \
-                "$out/shift$shift" "$shift" || exit 1
+                "$out/shift$shift" "$shift" --stock-seed "$work/stock-$model-sweep/seed/flash.bin" || exit 1
         done
     done
 done
