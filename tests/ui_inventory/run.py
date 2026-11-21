@@ -160,6 +160,20 @@ static void f1_native_clip_keys(void) {
         original=exact_function(original_main,signature);original=original[:original.index(stop)]
         slices.append(dict(source='firmware/src/app/main_fm1.c',signature=signature,stopBefore=stop.strip(),
                            sha256=hashlib.sha256(original.encode()).hexdigest(),method='EXACT_DISPLAY_PREFIX; hardware/control-flow tail NOT_RUN'))
+    # Repaint transitions over their real predecessor so unchanged pixels and
+    # previously drawn labels remain part of the framebuffer.
+    retry_start = '            draw_text_box(0, 172, 240, &FONT_S, "STARTING DnBOX...'
+    notice_start = "        b[0] = 'P';"
+    notice_guard = 'fm1_crash.count != x0x_dbg.crash_seen'
+    def display_statements(source, start, end, guard):
+        begin = source.index(start, source.index(guard))
+        return source[begin:source.index(end, begin)]
+    retry = display_statements(original_main, retry_start, '            usb_detach();', 'static void safe_main(void)')
+    notice = display_statements(original_main, notice_start, '        fm1_wdt_feed();', notice_guard)
+    for signature, statements in [('static void safe_main(void)', retry), ('fm1_main post-reset crash notice', notice)]:
+        slices.append(dict(source='firmware/src/app/main_fm1.c', signature=signature,
+                           sha256=hashlib.sha256(statements.encode()).hexdigest(),
+                           method='EXACT_DISPLAY_STATEMENTS_OVER_REAL_PREDECESSOR; native reset and hardware tail NOT_RUN'))
     x0x=(work/'firmware/src/x0x.c').read_text()
     ota=exact_function(x0x,'static void ota_show(uint32_t step, int32_t code)')
     panel=(work/'firmware/src/app/panel.c').read_text()
@@ -190,6 +204,14 @@ static void f1_boot_displays(void) {
  memset(&fm1_crash,0,sizeof fm1_crash);f1_reset();safe_main();shot("boot-safe-mode");
  fm1_crash.magic=FM1_CRASH_MAGIC;fm1_crash.pc=0x12345678;fm1_crash.vec=1;fm1_crash.dbg=0x1000;
  for(int core=0;core<2;core++) {fm1_crash.core=core;f1_reset();safe_main();char name[64];snprintf(name,sizeof name,"boot-safe-crash-core-%d",core);shot(name);}
+ f1_reset();safe_main();
+'''+retry+'''
+ shot("boot-safe-retry");
+ for(int core=0;core<2;core++) {
+  char b[16],name[64];fm1_crash.core=core;f1_reset();draw_boot_screen(0);
+'''+notice+'''
+  snprintf(name,sizeof name,"boot-post-crash-core-%d",core);shot(name);
+ }
  f1_reset();fm1_fault(&fm1_crash);shot("boot-crash-diagnostics");
  f1_reset();enter_uboot("UBOOT");shot("boot-uboot");
  f1_reset();enter_uboot("UBOOT (USB)");shot("boot-uboot-usb");

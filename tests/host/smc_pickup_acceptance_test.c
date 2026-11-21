@@ -89,7 +89,7 @@ static void crossing_matrix(void)
         sample(strip, start, user);
         CHECK(!writes && !(smc.picked & (1u << strip)));
         /* Movement UI is independent of target acquisition. */
-        status_is(down ? "PICKUP: MOVE DOWN TO TARGET" : "PICKUP: MOVE UP TO TARGET");
+        status_is(down ? "PICKUP: DOWN" : "PICKUP: UP");
         expire(); sample(strip, start, user); CHECK(!smc_ui_active()); CHECK(!writes);
         pref_set(r, target); smc_frame(); writes = 0;
         sample(strip, start, user); CHECK(!writes && !(smc.picked & (1u << strip)));
@@ -127,7 +127,7 @@ static void routing_epochs(void)
     prepare(V_HOME, PART_303A, 0, 64); fader(0, 0);
     smc_ble_link(0); smc_poll(); smc_ble_link(1); smc_poll();
     writes = 0; fader(0, 127); CHECK(!writes && !(smc.picked & 1));
-    status_is("PICKUP: MOVE DOWN TO TARGET");
+    status_is("PICKUP: DOWN");
     fader(0, 0); CHECK(writes == 1 && (smc.picked & 1));
     /* A parked packet at a newly equal target is not a new acceptance. */
     prepare(V_HOME, PART_303A, 0, 64); fader(0, 20); expire();
@@ -255,7 +255,7 @@ static void stateful_sequences(void)
             if (expected) CHECK(written_t == target.a && written_voice == target.b && written_param == target.c);
             if (moved && step % 16 == 0)
                 status_is(accepted ? "ACTIVE" : input < value ?
-                          "PICKUP: MOVE UP TO TARGET" : "PICKUP: MOVE DOWN TO TARGET");
+                          "PICKUP: UP" : "PICKUP: DOWN");
             history = 1; prior = input; cached = pref_get(target);
             if (!(rng & 4)) smc_frame();
         }
@@ -293,7 +293,7 @@ int main(int argc, char **argv)
     message(0x90, 0x5D, 127); message(0x80, 0x5D, 0);
     CHECK(smc.locked && smc_peek->on && ui.view == V_MIX);
     fader(0, 0);
-    status_is("PICKUP: MOVE UP TO TARGET");
+    status_is("PICKUP: UP");
     CHECK(peek_pickup_hints > 0);
     printf("PASS pickup hint on peek page (%u checks)\n", peek_pickup_hints);
     return 0;

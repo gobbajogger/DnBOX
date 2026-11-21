@@ -58,28 +58,47 @@ static int step_lane_read(const step_lane_context_t *c,int step,int *conditional
  * Generic parameter edits belong to the next trigger, without a live preview. */
 X0X_COLD static int step_lane_turn(int e)
 {
-    int step=held_any_step(),part=ui.part,conditional,value,k;
+    int part=ui.part,step,conditional,value,next,k,handled=1,changed=0,full=0;
+    uint32_t state=0;
     step_lane_context_t c;
-    if(step<0 || !e)return 0;
+    if(!e)return 0;
+    /* Chance owns its complete BREAK transaction; never nest that guard. */
+    if(ui_step_lane==UI_LANE_CHANCE) {prob_turn(e);return 1;}
+    if(part==PART_BRK)state=plat_cq_lock();
+    step=held_any_step();
+    if(step<0) {handled=0;goto done;}
     step_lane_prepare(&c,part,part<NKIT?ui.sel[part]:0,ui_step_lane);
     value=step_lane_read(&c,step,&conditional);
     if(is_303())ui.step_edited=1;else ui.hold_used=1;
-    if(value<0)return 1; /* unavailable native quantity; never substitute LEVEL */
-    if(c.kind==UI_LANE_CHANCE) {prob_turn(e);return 1;}
-    value+=e;value=value<1&&c.kind==UI_LANE_VELOCITY?1:value<0?0:value>c.maximum?c.maximum:value;
+    if(value<0)goto done; /* unavailable native quantity; never substitute LEVEL */
+    if(c.kind==UI_LANE_PITCH && is_303()) {
+        held_note_by(e); /* native helper owns successful edits and dirty state */
+        goto done;
+    }
+    next=value+e;
+    next=next<1&&c.kind==UI_LANE_VELOCITY?1:next<0?0:next>c.maximum?c.maximum:next;
+    if(next==value)goto done;
     if(c.kind==UI_LANE_VELOCITY) {
-        if(part<NKIT)drum_vel_set_step(part,ui.sel[part],step,(uint8_t)value);
-        else cur_pat()->bass[bidx()].step[step].velocity=(uint8_t)value;
-    } else if(c.kind==UI_LANE_PITCH && is_303())held_note_by(e);
-    else {
-        uint32_t state=part==PART_BRK?plat_cq_lock():0;
+        if(part<NKIT) {
+            drum_vel_set_step(part,ui.sel[part],step,(uint8_t)next);
+            k=motion_find(proj.arr.lane,seq.ppat[part],part,T_VEL,(part<<4)|ui.sel[part],0);
+            changed=k>=0 && proj.arr.lane[k].val[step]==next;
+        } else {
+            cur_pat()->bass[bidx()].step[step].velocity=(uint8_t)next;
+            changed=1;
+        }
+    } else {
         k=motion_find(proj.arr.lane,seq.ppat[part],part,c.ref.a,c.ref.b,c.ref.c);
         if(k<0)k=motion_alloc(proj.arr.lane,seq.ppat[part],part,c.ref.a,c.ref.b,c.ref.c);
-        if(k>=0)proj.arr.lane[k].val[step]=(uint8_t)value;
-        if(part==PART_BRK)plat_cq_unlock(state);
-        if(k<0) {say("MOTION FULL",0);return 1;}
+        if(k<0) {full=1;goto done;}
+        proj.arr.lane[k].val[step]=(uint8_t)next;
+        changed=1;
     }
-    mark_dirty();return 1;
+done:
+    if(part==PART_BRK)plat_cq_unlock(state);
+    if(changed)mark_dirty();
+    if(full)say("MOTION FULL",0);
+    return handled;
 }
 static int step_lane_value(int part,int voice,int step,int kind,int *maximum,int *conditional)
 {

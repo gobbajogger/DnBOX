@@ -1431,7 +1431,7 @@ void smc_ui_draw(void)
             if (smc_ui.kind == 0 && r.kind != R_NONE &&
                 !(smc.picked & (1u << smc_ui.strip))) {
                 status = smc.last[smc_ui.strip] < smc_scaled(r) ?
-                         "PICKUP: MOVE UP TO TARGET" : "PICKUP: MOVE DOWN TO TARGET";
+                         "PICKUP: UP" : "PICKUP: DOWN";
                 sc = C_HI;
             }
             cv_begin(240, HDR_H, C_BLACK);
