@@ -22,7 +22,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
       "merge_sha": "",
       "owner": "integ",
       "dependencies": [],
-      "next_action": "Complete the interrupted firmware gate at 76040daa and review the 104 nightly references from 914d68e8."
+      "next_action": "Reconcile the 23 host failures recorded at firmware 76040daa and qualify the current consolidated firmware and nightly baselines."
     },
     {
       "id": "M1",
@@ -104,7 +104,7 @@ Broad unmerged work is retained at `backup/integ-before-start-split-20261116`, e
 }
 ```
 
-## Merged pull requests through `76040daa5b52d686a8b7b544296ba5d79610a95d`
+## Merged pull requests through `d729626b659080e59584227c03352dab07bb5b53`
 
 GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merge commit is reachable from this snapshot. The PR head is included for squash merges and deleted branches. Lane acceptance is tracked in `docs/lanes/integ.md`.
 
@@ -120,3 +120,4 @@ GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merg
 | [#970](https://github.com/gobbajogger/DnBOX/pull/970) | `lane/fwui` | `6fa8bb32fdff0198957616d239a6c56e9be73f06` | `76040daa5b52d686a8b7b544296ba5d79610a95d` |
 | [#972](https://github.com/gobbajogger/DnBOX/pull/972) | `lane/integ` | `06bd40c57cefcdf6c751b318b1cbaea0914fa8bb` | `c54d43b8806173b43c1ca49d93bd790e09833426` |
 | [#974](https://github.com/gobbajogger/DnBOX/pull/974) | `lane/integ` | `66acd3f06193d6ee37e5a50eaa45ab71e1cb93da` | `f753443cf31bf912356b27df022f951b8c82fcd8` |
+| [#977](https://github.com/gobbajogger/DnBOX/pull/977) | `backup/rules-fix-20261121` | `370d4c5cdc1a3601947beb8f35f0a7b0e72a3843` | `d729626b659080e59584227c03352dab07bb5b53` |
