@@ -18,19 +18,28 @@ FRAME_PIXELS = 240 * 240
 # The brighter of the outline, face and divider colors is the outline in both
 # selected states. Excluding this layer prevents a bare rounded slab from passing.
 OUTLINES = {(32, 56, 57), (57, 93, 65)}
-BODY = ["oscillator", "filter", "filter-envelope", "amp-envelope", "sound"]
+BODY = ["oscillator", "filter", "filter-envelope", "amp-envelope", "effect", "sound"]
 
 
-def editor_cases(directory):
+def editor_cases(directory, historical=False):
+    pages = BODY[:4] + ["sound"] if historical else BODY
+    counts = [2, 3, 4, 4, 0] if historical else [2, 3, 4, 4, 1, 0]
     for owner in "AB":
-        for page, count in enumerate([2, 3, 4, 4, 0], 1):
-            rows = BODY[:4] if page < 5 else BODY[1:]
+        for page, count in enumerate(counts, 1):
+            rows = pages[:4] if page <= 4 else pages[-4:]
             boxes = [(title, 24 + 50 * row, 49) for row, title in enumerate(rows)]
             prefix = f"bass-{owner}-page-{page}-k"
             yield directory / f"{prefix}0-overview.png", boxes
             for col in range(5, 5 + count):
                 for event in ["before", "touched", "applied"]:
                     yield directory / f"{prefix}{col}-{event}.png", boxes
+
+
+def editor_live(directory):
+    boxes = [(title, 24 + 50 * row, 49) for row, title in enumerate(BODY[:4])]
+    for name in ("bass-a-attack", "bass-a-held", "bass-a-released",
+                 "bass-b-idle-control", "bass-b-held-control", "simultaneous-editor-busy"):
+        yield directory / (name + ".png"), boxes
 
 
 def stock_cases(directory):
@@ -42,11 +51,13 @@ def stock_cases(directory):
             yield directory / f"stock-init-{state}-{owner}.png", boxes
 
 
-def editor_lists(directory):
+def editor_lists(directory, historical=False):
     ids = [2, 5, 16, 17, 19, 22, 23, 24, 25, 26, 27, 28, 29]
     for owner in "AB":
         for row, factory_id in enumerate(ids):
             yield directory / f"list-{owner}-factory-id-{factory_id:02d}.png", min(row, 8)
+        if not historical:
+            yield directory / f"list-{owner}-crush-rate.png", 8
         yield directory / f"list-{owner}-last.png", 8
 
 
@@ -156,21 +167,25 @@ def archived_cases(archive_path, cases):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--editor", type=Path, help="host captures from the patch-enabled panel")
+    parser.add_argument("--historical-editor", action="store_true", help="use the earlier five-page, 13-parameter layout for loose editor files")
+    parser.add_argument("--editor-live", type=Path, help="Synth One held, released and pending-edit captures")
     parser.add_argument("--stock", type=Path, help="host captures from the stock INIT selector")
     parser.add_argument("--editor-lists", type=Path, help="optional Synth One physical list captures")
     parser.add_argument("--juno", type=Path, help="compact SuperJ6 matrix and physical list captures")
     parser.add_argument("--catalog", type=Path, help="committed docs/lanes/fwui/screens directory")
     parser.add_argument("--output", type=Path, help="write per-frame measurements as JSON")
     args = parser.parse_args()
-    if not any([args.editor, args.editor_lists, args.stock, args.juno, args.catalog]):
+    if not any([args.editor, args.editor_lists, args.editor_live, args.stock, args.juno, args.catalog]):
         parser.error("provide a framebuffer directory or --catalog")
     cases = []
     if args.editor:
-        cases.extend(editor_cases(args.editor))
+        cases.extend(editor_cases(args.editor, args.historical_editor))
+    if args.editor_live:
+        cases.extend(editor_live(args.editor_live))
     if args.stock:
         cases.extend(stock_cases(args.stock))
     if args.editor_lists:
-        cases.extend(editor_lists(args.editor_lists))
+        cases.extend(editor_lists(args.editor_lists, args.historical_editor))
     if args.juno:
         cases.extend(juno_cases(args.juno))
     if args.catalog:
@@ -180,7 +195,12 @@ def main():
     if args.catalog:
         editor = current / "synthone-editor"
         results.extend(archived_cases(editor / "routes.tar.xz",
-                                      [*editor_cases(editor), *editor_lists(editor)]))
+                                      [*editor_cases(editor, historical=True), *editor_lists(editor, historical=True), *editor_live(editor)]))
+        results.extend(archived_cases(editor / "default-review/routes.tar.xz",
+                                      [*editor_cases(editor), *editor_lists(editor), *editor_live(editor)]))
+        old_effect = judge(editor / "default-review/effect-before-layout.png", [("effect", 124, 49)])
+        if old_effect["status"] != "FAIL" or old_effect["panels"][0].get("coveragePercent", 100) >= 70:
+            raise ValueError("Accepted the earlier undersized EFFECT row")
         juno = current / "superj6-slot"
         results.extend(archived_cases(juno / "frames.tar.gz", juno_cases(juno)))
     failures = [r for r in results if r["status"] == "FAIL"]

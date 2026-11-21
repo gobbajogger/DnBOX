@@ -70,6 +70,8 @@ revisions after project load. Both first ordinary screens match the matching-own
 control at all 57,600 pixels. Reverting the guard makes the seven-case test
 stop during recovery at the unbound pattern table. [Recovery frames and case results](normal-loop/normal-loop.json)
 
+The patch-enabled host replay at `199f0444` reproduced all 16 native frame hashes and all seven case-to-frame mappings. [Current ordinary startup replay](normal-loop/replay-199f0444.json)
+
 ## Stock Elite and Pro startup at `11bc3f3a`
 
 Twelve independent `fm1-live` shots ran the two linked stock packages at
