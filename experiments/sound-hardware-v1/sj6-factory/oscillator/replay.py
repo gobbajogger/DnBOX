@@ -45,7 +45,7 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def build(compact, repo, out):
+def build(compact, repo, out, after_stock_pad=False):
     header = subprocess.check_output(["git", "-C", repo, "show", f"{REF}:{HEADER}"])
     if digest(header) != REF_HASH:
         raise ValueError("reference input checksum differs")
@@ -61,6 +61,8 @@ def build(compact, repo, out):
     flags = ["-O2", "-fPIC", "-shared", "-ffp-contract=off", "-fno-fast-math"]
     subprocess.run(["c++", "-std=c++17", *flags, "-I", out, HERE / "reference.cpp",
                     "-o", out / "reference.so"], check=True)
+    if after_stock_pad:
+        flags.append("-DSJ6_PROBE_STOCK_PAD")
     subprocess.run(["cc", "-std=c11", *flags, "-DX0X_SUPERJ6_FACTORY=1", "-DDNBX_DIAGNOSTIC_COUNTERS=0",
                     "-I", dsp, out / "core_tap.c",
                     dsp / "juno6.c", HERE / "candidate.c", "-o", out / "candidate.so"], check=True)
@@ -165,6 +167,8 @@ def main():
                         help="14 <UID>.json files from factory.py matrix or their complete extracted presets")
     inputs.add_argument("--suite", choices=NOTES)
     inputs.add_argument("--remote-repo", type=Path, help="Nightly Git checkout for the checked PWM String Pad fields")
+    parser.add_argument("--after-stock-pad", action="store_true",
+                        help="seed the stock PAD PWM macros before the factory program transition")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     suite = args.suite or "controls"
@@ -172,7 +176,7 @@ def main():
     settings = list(cases(args.banks, suite, args.selected_records)) if not args.remote_repo else []
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out)
+    reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out, args.after_stock_pad)
     rows = []
     factory_input = args.banks is not None or args.selected_records is not None
     scope = "factory-main-pass base oscillator only" if factory_input else f"isolated oscillator {suite}"
@@ -211,6 +215,8 @@ def main():
               "frames_per_case": FRAMES, "rate": SPEC["sample_rate"],
               "unchanged_with_other_layer_and_voice": len(rows),
               "passes": sum(row["pass"] for row in rows), "total": len(rows), "cases": rows}
+    if args.after_stock_pad:
+        result["stock_pad_predecessor"] = {"rate_7bit": 12, "depth_7bit": 15}
     if args.remote_repo:
         result["remote_commit"] = remote_fields.REMOTE_REV
         result["remote_input_sha256"] = remote_fields.FILES

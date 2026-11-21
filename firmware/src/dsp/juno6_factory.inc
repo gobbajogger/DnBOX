@@ -81,6 +81,16 @@ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillato
     }
 }
 
+/* A new factory program owns both base waveforms. Modulation depth from
+ * the previous stock Juno program is unrelated to its original LFO routes. */
+void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2])
+{
+    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
+        s->core.layer[layer].params.lfo_pwm_depth = 0.f;
+        juno6_apply_pre_note_wave(s, layer, &waves[layer]);
+    }
+}
+
 /* Setters run at block boundaries on a single-precision target. Scale the
  * significand by 101/250 and round once, as the original Double setter does.
  * All factory inputs are zero or normal with exponent at least three. */

@@ -426,8 +426,14 @@ static int end_admitted(original_chicago_backend *s, float *left, float *right, 
         original_chicago_engine_output_process_zero : original_chicago_engine_output_process;
     if (!output(&s->output, &ow, &fw, &s->controls.routing,
         w->core_left, w->core_right, w->core_left, w->core_right, s->block_frames, s->fz)) return fault(s);
-    memcpy(left, w->core_left, sizeof *left * s->block_frames);
-    memcpy(right, w->core_right, sizeof *right * s->block_frames);
+    /* Match Chicago 3.1.6's stereo output level. The six calibration
+     * captures have a mean +2.679211 dB error before this trim. Apply it
+     * after the instrument's nonlinear master, before the track mixer. */
+    const float output_gain = 0.73458057f;
+    for (uint32_t i = 0; i < s->block_frames; ++i) {
+        left[i] = original_math_float(w->core_left[i]) * output_gain;
+        right[i] = original_math_float(w->core_right[i]) * output_gain;
+    }
     s->block_open = 0;
     s->block_prepared = 0;
     s->block_frames = 0;

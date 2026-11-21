@@ -29,7 +29,15 @@ int candidate_oscillator(unsigned layer, float selector, float amount, float ena
     juno6_t part;
     juno6_init(&part, 44100.f);
     juno6_oscillator_edit edit = {selector, amount, enable};
+#ifdef SJ6_PROBE_STOCK_PAD
+    /* Rate and depth are the shipping PAD's original 7-bit macro values. */
+    if (!juno6_set(&part, 10, 12.f / 127.f) || !juno6_set(&part, 11, 15.f / 127.f)) return 0;
+    juno6_oscillator_edit waves[2] = {0};
+    waves[layer] = edit;
+    juno6_apply_factory_waves(&part, waves);
+#else
     juno6_apply_pre_note_wave(&part, layer, &edit);
+#endif
     const unsigned ids[] = {82 + layer, 78 + layer, 210 + layer};
     const float expected[] = {selector, amount, enable};
     for (unsigned i = 0; i < 3; ++i) {

@@ -57,6 +57,30 @@ static void retrigger_trace(const uint8_t cell[32])
     assert(after->velocity_squared == fraction * fraction);
 }
 
+/* A note-off and the next note-on can share one audio boundary. The
+ * original takes one amp/filter envelope step at note-off, leaving phase
+ * and filter delay untouched. The next rendered sample starts its attack. */
+static void adjacent_note_edges(const uint8_t cell[32])
+{
+    assert(original_runtime_init(&part_a, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    key(&part_a, 60, 100);
+    render(&part_a, 300);
+    s1_dry_voice *voice = &part_a.dsp.synthone.voice[0];
+    s1_dry_voice held = *voice;
+    assert(held.amp.stage == DNBX_S1_ENVELOPE_DECAY);
+    key(&part_a, 60, 0);
+    assert(voice->amp.stage == DNBX_S1_ENVELOPE_RELEASE);
+    assert(voice->filter.stage == DNBX_S1_ENVELOPE_RELEASE);
+    assert(voice->amp.level == held.amp.level * held.prepared.amp.release_retention);
+    assert(voice->filter.level == held.filter.level * held.prepared.filter.release_retention);
+    assert(voice->phase == held.phase);
+    assert(!memcmp(voice->filter_history, held.filter_history, sizeof held.filter_history));
+    key(&part_a, 60, 100);
+    render(&part_a, 1);
+    assert(voice->amp.stage == DNBX_S1_ENVELOPE_ATTACK);
+    assert(voice->amp.level > held.amp.level);
+}
+
 static void allocation_trace(const uint8_t cell[32])
 {
     const unsigned notes[] = {36, 43, 50, 58, 65, 72};
@@ -201,5 +225,6 @@ int main(void)
     }
     retrigger_trace(cell);
     allocation_trace(cell);
+    adjacent_note_edges(cell);
     puts("Synth One INIT: stock and legacy cells, audible MIDI, two owners, sustain, pitch, release, voice steal and panic PASS");
 }

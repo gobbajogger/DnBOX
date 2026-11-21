@@ -289,11 +289,13 @@ static void apply_superj6_edits(void)
         if (waves) {
             synth->pending_wave_mask = 0;
             int active = juno6_active(synth);
-            if ((synth->pending_field_mask & SJ6_FACTORY_GROUP) && (active || engine_bass_preset_pending(owner))) {
-                synth->pending_field_mask = 0;
-                continue;
-            }
-            if (!active)
+            if (synth->pending_field_mask & SJ6_FACTORY_GROUP) {
+                if (active || engine_bass_preset_pending(owner)) {
+                    synth->pending_field_mask = 0;
+                    continue;
+                }
+                juno6_apply_factory_waves(synth, synth->pending_wave);
+            } else if (!active)
                 for (unsigned layer = 0; layer < 2; ++layer)
                     if (waves & (1u << layer))
                         juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);

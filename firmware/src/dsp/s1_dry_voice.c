@@ -113,7 +113,13 @@ int s1_dry_start(s1_dry_voice *voice, float frequency_hz,
 int s1_dry_note_off(s1_dry_voice *voice)
 {
     if (!voice || !voice->configured) return S1_DRY_ARGUMENT;
-    voice->gate = 0;
+    if (voice->gate) {
+        /* The instrument advances both envelopes on the release edge. This
+         * preserves a retrigger even when both events precede the next sample. */
+        voice->gate = 0;
+        dnbx_s1_envelope_sample(&voice->amp, &voice->prepared.amp, 0);
+        dnbx_s1_envelope_sample(&voice->filter, &voice->prepared.filter, 0);
+    }
     return S1_DRY_OK;
 }
 
