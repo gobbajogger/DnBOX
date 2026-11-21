@@ -23,14 +23,14 @@ typedef union {
 
 /* One stable, caller-owned object per part. The selected scalar union is 96 B
  * on pi32v2; the stereo Chorus arena is 4096 B. Every part owns disjoint storage.
- * No heap, global scratch, history compression or reduced control range.
+ * The selected memory profile determines Hall and BPM history precision.
  * The original all 30/shared-arena owner cannot be obtained from this object. */
 typedef struct {
     original_chicago_fx2_compact_state state;
-    /* One 4096 B arena per part. Chorus uses it as two 1024-sample rings; the
+    /* Each part owns one arena. Chorus uses two 1024-sample rings. The
      * archived Chicago inserts (Ensemble, Short Delay, BPM Delay, Hall, Gate
      * Reverb) reuse the same bytes. Only the selected algorithm owns it, so the
-     * five extra inserts add no history RAM. */
+     * full-history profile sizes this arena for the original BPM delay. */
     union {
         int16_t history[ORIGINAL_CHICAGO_FX2_COMPACT_HISTORY_SAMPLES];
         chi_fx2_insert_arena insert;
@@ -67,7 +67,12 @@ int original_chicago_fx2_compact_events(original_chicago_fx2_compact *,
 /* Original direct callbacks, for the selected object only. Type 5 resets the
  * selected kernel; type 2 also resets Chorus. This is not a cold selection. */
 void original_chicago_fx2_compact_direct_event(original_chicago_fx2_compact *,unsigned type);
-/* Keep the same compile-time bound in the strict C99 host fixtures too. */
+/* Check both native profiles in C99 host builds as well. */
+#if X0X_CHICAGO_FULL_HISTORY
+typedef char original_chicago_full_insert_arena_fits[
+    sizeof(chi_fx2_insert_arena) == sizeof(chi_bpmdly_t) ? 1 : -1];
+#else
 typedef char original_chicago_compact_insert_arena_fits[
     sizeof(chi_fx2_insert_arena) <= ORIGINAL_CHICAGO_FX2_COMPACT_HISTORY_SAMPLES * 2u ? 1 : -1];
+#endif
 #endif

@@ -11,14 +11,17 @@ committed. It preserves the original selected processor's arithmetic, precision,
 control range, constructor defaults, ordinary reset behavior and local invocation
 boundaries after that fresh selection.
 
-`original_chicago_fx2_compact` owns one scalar union and a 4096 B selected-history
-arena. Chorus and the restored inserts share that arena within each part.
-Hall uses the named port's Q12 allpass storage; BPM Delay uses its 2032-slot
-half-rate ring. These two compact storage choices do not claim bit-exact equality
-to the archived float-allpass/full-rate effects. Each firmware part requires its
-own stable object. There is no heap
-allocation, frame-sized temporary, shared history between parts or shortened
-Chorus history. The original bank, `original_chicago_fx2_owner` and
+Each part owns a selected-processor union. On SMK-37 Elite and Pro the union
+is 8,204 bytes. Hall runs the archived floating-point allpasses and BPM Delay
+runs the archived 4,096-sample full-rate Q15 ring, including its original
+interpolator, initialization and tempo setters. On the other profiles the
+union is 4,096 bytes. Those builds use the Q12 allpasses and a 2,032-slot
+half-rate BPM delay. Chorus uses its full original history on both profiles.
+Neither part borrows another part's storage. Selection performs no heap
+allocation and requires no frame-sized temporary.
+[Factory stereo comparisons and Elite/Pro measurements](../sound-hardware-v1/chicago-factory-inserts/README.md)
+
+The original bank, `original_chicago_fx2_owner` and
 `original_chicago_backend_init` retain their explicit full original reference
 contracts. A compact owner cannot be passed as a complete original owner.
 

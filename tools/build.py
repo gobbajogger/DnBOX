@@ -406,7 +406,7 @@ def app_compile_commands(flags, original_synth, wobble):
         flags = [*flags, "-DX0X_ORIGINAL_SYNTH=1",
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
-        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1"]
+        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1", "-DX0X_CHICAGO_FULL_HISTORY=1"]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
