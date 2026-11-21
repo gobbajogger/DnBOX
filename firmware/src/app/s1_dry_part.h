@@ -49,7 +49,8 @@ typedef struct {
         uint8_t engaged, mix;  /* gain-law transition in 64 samples */
     } pan;
     s1_trem_lfo lfo[2];
-    uint8_t tremolo;
+    uint8_t tremolo, crush_route;
+    float crush_log_hz;
     s1_phaser phaser;
     s1_master master;
 } s1_dry_part;

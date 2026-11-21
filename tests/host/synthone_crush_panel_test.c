@@ -28,6 +28,11 @@ int main(void)
             pref_set(fx,comp[v][j]);
             assert(pref_get(fx)==comp[v][j]);
         }
+        pref_t route = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH_LFO);
+        assert(ui_original_synthone_rows[2][0] == ORIGINAL_SYNTHONE_CRUSH_LFO);
+        assert(pref_get(route) == 0);
+        pref_set(route,v ? 85 : 127);
+        assert(pref_get(route) == (v ? 85 : 127));
         pref_t r = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH);
         assert(ui_original_synthone_rows[0][0] == ORIGINAL_SYNTHONE_CRUSH);
         assert(!strcmp(ui_original_name(ORIGINAL_SOUND_SYNTHONE, r.c), "CRUSH RATE"));
@@ -91,6 +96,8 @@ int main(void)
     engine_apply_sound(&proj.sound);
     engine_render(block, 256);
     assert(!memcmp(&saved, &proj.sound, sizeof saved));
+    for (int v=0;v<2;++v)
+        assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_CRUSH_LFO)) == (v ? 85 : 127));
     for (int v = 0; v < 2; ++v) {
         assert(engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH)) == rates[v]);
@@ -124,6 +131,6 @@ int main(void)
         ORIGINAL_SYNTHONE_MASTER_RATIO)==113);
     assert(pref_get(ratio)==comp[0][1]);
     seq_stop(&seq);engine_render(block,256);
-    puts("Both Synth One owners preserved independent CRUSH, width, pan, tremolo, phaser and master controls across project save, engine switches and reload.");
+    puts("Both Synth One owners preserved independent CRUSH and its LFO route, width, pan, tremolo, phaser and master controls across project save, engine switches and reload.");
     return 0;
 }

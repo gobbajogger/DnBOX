@@ -73,7 +73,7 @@ static inline int bass_identity_adopt(bass_identity_t *tag)
 {
     if (!tag) return 0;
     if (tag->engine == ORIGINAL_SOUND_SYNTHONE_ID && tag->schema == ORIGINAL_SOUND_SCHEMA &&
-        ((tag->count >= 2 && tag->count <= 4) || tag->count == ORIGINAL_SYNTHONE_BASE_COUNT || tag->count == 13 || tag->count == 17) && tag->state == BASS_IDENTITY_KNOWN) {
+        ((tag->count >= 2 && tag->count <= 4) || tag->count == ORIGINAL_SYNTHONE_BASE_COUNT || tag->count == 13 || tag->count == 17 || tag->count == 23) && tag->state == BASS_IDENTITY_KNOWN) {
         tag->count = ORIGINAL_SYNTHONE_NPARAMS;
         return 1;
     }

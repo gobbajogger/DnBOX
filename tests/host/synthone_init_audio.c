@@ -176,6 +176,9 @@ static void crush_patch(void)
     bass_identity_t identity;
     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 23;
+    assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
     old_tag[6] = 17;
     assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);

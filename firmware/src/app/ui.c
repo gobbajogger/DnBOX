@@ -654,7 +654,7 @@ static UI_DRAW int pref_get(pref_t r)
     case R_ENG:
         if (r.a == T_303 &&
             engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE)
-            return (unsigned)r.c>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
+            return original_sound_s1_master_id((unsigned)r.c) ?
                 original_master_display(proj.sound.v[r.a][r.b],proj.sound.v[r.a][NBASS+r.b],r.c) :
                 original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
         return proj.sound.v[r.a][r.b][r.c];
@@ -1133,7 +1133,7 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
         else { put_i(num,((value-1)*100+63)/126); put_s(unit,"%"); }
         return 1;
     }
-    if (kind==ORIGINAL_SOUND_SYNTHONE && id>=ORIGINAL_SYNTHONE_MASTER_VOLUME && id<ORIGINAL_SYNTHONE_NPARAMS) {
+    if (kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(id)) {
         float physical=s1_master_control(id-ORIGINAL_SYNTHONE_MASTER_VOLUME,(unsigned)value);
         if (id==ORIGINAL_SYNTHONE_MASTER_ATTACK || id==ORIGINAL_SYNTHONE_MASTER_RELEASE) {
             display_ms(physical*1000.f,num,unit);
@@ -1161,7 +1161,7 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
     if (kind == ORIGINAL_SOUND_SYNTHONE && ui_original_states(kind,id)) {
         static const char *const sources[] = {"OFF","LFO 1","LFO 2","BOTH"};
         static const char *const waves[] = {"SINE","SQUARE","SAW","REV SAW"};
-        put_s(num,(id==ORIGINAL_SYNTHONE_TREM ? sources : waves)[(value*3+63)/127]);
+        put_s(num,((id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_CRUSH_LFO) ? sources : waves)[(value*3+63)/127]);
         return 1;
     }
     if (kind == ORIGINAL_SOUND_SYNTHONE &&

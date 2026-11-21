@@ -22,13 +22,13 @@ static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENV
 static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
     {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE},
     {ORIGINAL_SYNTHONE_TREM,ORIGINAL_SYNTHONE_LFO1_SHAPE,ORIGINAL_SYNTHONE_LFO1_LEVEL,ORIGINAL_SYNTHONE_LFO1_RATE},
-    {-1,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
+    {ORIGINAL_SYNTHONE_CRUSH_LFO,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
     {ORIGINAL_SYNTHONE_PHASER_MIX,ORIGINAL_SYNTHONE_PHASER_RATE,ORIGINAL_SYNTHONE_PHASER_FEEDBACK,ORIGINAL_SYNTHONE_PHASER_WIDTH},
     {ORIGINAL_SYNTHONE_MASTER_VOLUME,ORIGINAL_SYNTHONE_MASTER_RATIO,ORIGINAL_SYNTHONE_MASTER_THRESHOLD,ORIGINAL_SYNTHONE_MASTER_MAKEUP},
     {ORIGINAL_SYNTHONE_MASTER_ATTACK,ORIGINAL_SYNTHONE_MASTER_RELEASE,-1,-1}
 };
 static const char *const ui_original_synthone_titles[] = {
-    "SYNTH ONE", "TREMOLO / LFO 1", "TREMOLO / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
+    "SYNTH ONE", "TREMOLO / LFO 1", "CRUSH / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
 };
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
@@ -51,10 +51,11 @@ static const char *ui_original_name(unsigned kind, unsigned id)
     if(kind==ORIGINAL_SOUND_JUNO)return id<16?juno[id]:"";
     if (kind == ORIGINAL_SOUND_CHICAGO && id < 20) return chicago[id];
     if (kind == ORIGINAL_SOUND_SYNTHONE) {
-        if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id < ORIGINAL_SYNTHONE_NPARAMS) {
+        if (original_sound_s1_master_id(id)) {
             static const char *const names[]={"INPUT LEVEL","RATIO","THRESHOLD","ATTACK","RELEASE","MAKEUP"};
             return names[id-ORIGINAL_SYNTHONE_MASTER_VOLUME];
         }
+        if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) return "CRUSH SOURCE";
         if (id == ORIGINAL_SYNTHONE_CRUSH) return "CRUSH RATE";
         if (id == ORIGINAL_SYNTHONE_WIDTH) return "STEREO WIDTH";
         if (id == ORIGINAL_SYNTHONE_PAN) return "PAN DEPTH";
@@ -76,7 +77,7 @@ static const char *ui_original_name(unsigned kind, unsigned id)
 static unsigned ui_original_states(unsigned kind, unsigned id)
 {
     if (kind == ORIGINAL_SOUND_SYNTHONE &&
-        (id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE)) return 4;
+        (id==ORIGINAL_SYNTHONE_CRUSH_LFO || id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE)) return 4;
     if (kind == ORIGINAL_SOUND_CHICAGO) {
         if (id == 11 || id == 13) return 2;
         if (id == 14 || id == 15) return 3;

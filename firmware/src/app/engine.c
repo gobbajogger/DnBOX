@@ -910,7 +910,7 @@ static void apply_base(int t, int v, int i)
             perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
             return;
         }
-        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME) {
+        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id((unsigned)i)) {
             apply_master_base(v,mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i);
             return;
         }
@@ -1496,7 +1496,7 @@ static int mot_base(void *x, int t, int v, int i)
     if (mot_base_snd && t == T_303 && (unsigned)v < NBASS &&
         original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
         (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
-        return (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
+        return original_sound_s1_master_id((unsigned)i) ?
             (int)original_master_display(mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i) :
             (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;

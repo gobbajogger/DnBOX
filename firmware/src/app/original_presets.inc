@@ -292,7 +292,7 @@ static void note_lock_onset(int v)
     for(unsigned i=0;i<n;i++) {
         float value;
         if(original_sound_is_performance(original_bass[v].kind,i))continue;
-        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && i>=ORIGINAL_SYNTHONE_MASTER_VOLUME) {
+        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(i)) {
             apply_master_base(v,l->val,l->val+BASS_NOTE_USED,i);
             continue;
         }

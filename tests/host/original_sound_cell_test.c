@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 23);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 24);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -301,6 +301,18 @@ static void verify_synthone(void)
     for(unsigned k=0;k<13;++k) assert(original_sound_s1_set(extended,k,42u+k));
     for(unsigned k=0;k<4;++k) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
 #endif
+    /* A modulation route and the first two optional dry edits share bytes
+     * on disk. Each edit must preserve the other's complete value. */
+    for (unsigned route = 0; route < 4; ++route) {
+        unsigned q=(route*127u+1u)/3u;
+        assert(original_sound_set(extended,ORIGINAL_SYNTHONE_CRUSH_LFO,q));
+#if X0X_SYNTHONE_PATCH
+        assert(original_sound_s1_set(extended,0,93) && original_sound_s1_set(extended,1,42));
+        assert((extended[8]&127u)==93u && (extended[9]&127u)==42u);
+#endif
+        assert(original_sound_valid(extended));
+        assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_CRUSH_LFO)==q);
+    }
     uint8_t master_ext[S1_MASTER_EXT_SIZE], master_cell[32];
     memcpy(master_cell,extended,32);memset(master_ext,255,sizeof master_ext);
     assert(original_master_valid(master_cell,master_ext));

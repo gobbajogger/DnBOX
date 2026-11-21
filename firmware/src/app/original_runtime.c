@@ -59,14 +59,14 @@ X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8
      * edit bits never become inputs to a newly adopted runtime instance. */
     for (unsigned i = 0; i < original_sound_count(kind); ++i)
         if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
-                  ? (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
+                  ? (i == ORIGINAL_SYNTHONE_CRUSH_LFO || (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX)))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
         float value;
         if (!original_sound_value(cell, i, &value) ||
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
             return runtime_result(p, 0);
     }
     if (cell[26]=='M')
-        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<ORIGINAL_SYNTHONE_NPARAMS;++id) {
+        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<=ORIGINAL_SYNTHONE_MASTER_MAKEUP;++id) {
             unsigned q=original_master_display(cell,ext,id);
             if(original_runtime_param(p,id,(float)q/127.f)!=ORIGINAL_RUNTIME_OK) return runtime_result(p,0);
         }

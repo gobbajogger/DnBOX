@@ -106,7 +106,7 @@ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
         unsigned byte = S1_PATCH_FIRST_BYTE + i;
         if (mask & (UINT32_C(1) << byte)) {
             float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
-            *field = s1_patch_physical(s1_patch_at(i), cell[byte]);
+            *field = s1_patch_physical(s1_patch_at(i), cell[byte] & 127u);
         }
     }
     if (!memcmp(&next, &part->patch, sizeof next)) return;
@@ -174,6 +174,10 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
     if (id >= ORIGINAL_SYNTHONE_NPARAMS || !(value >= 0.0f && value <= 1.0f)) return 0;
     unsigned position = (unsigned)(value * 127.f + .5f);
+    if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) {
+        part->crush_route = (uint8_t)((position * 3u + 63u) / 127u);
+        return 1;
+    }
     if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME) {
         master_param(&part->master,id-ORIGINAL_SYNTHONE_MASTER_VOLUME,position);
         return 1;
@@ -212,6 +216,7 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
     }
     if (id == ORIGINAL_SYNTHONE_CRUSH) {
         part->crush_interval = crush_interval(position);
+        part->crush_log_hz = fm_log2f(s1_part_crush_hz(value));
         return 1;
     }
     if (id == 0) {
@@ -343,6 +348,31 @@ static float lfo_step(s1_trem_lfo *lfo)
     lfo->smooth=0x1.8338p-9f*wave+0x1.fe7cc8p-1f*lfo->smooth;
     return 1.f - (.5f*(1.f-lfo->smooth)*lfo->level);
 }
+/* The two original modulation destinations share clocks and discontinuity
+ * smoothers. The hold clock reads the rising envelope before tremolo applies
+ * its independent inverse envelope to the held sample. */
+static void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
+{
+    s1_trem_lfo *a = &part->lfo[0], *b = &part->lfo[1];
+    for (unsigned i = 0; i < frames; ++i) {
+        float gain1 = lfo_step(a), gain2 = lfo_step(b);
+        if (part->crush_next <= part->crush_age) {
+            float mod1 = .5f * (1.f + a->smooth) * a->level;
+            float mod2 = .5f * (1.f + b->smooth) * b->level;
+            float mod = part->crush_route == 1 ? mod1 : part->crush_route == 2 ? mod2 : .5f * (mod1 + mod2);
+            float hz = fm_exp2f(part->crush_log_hz + 4.f * mod);
+            float interval = hz < 44100.f ? 44100.f / hz : 1.f;
+            part->crush_last = left[i];
+            part->crush_next += interval;
+            part->crush_next -= part->crush_age;
+            part->crush_age = 0.f;
+        }
+        part->crush_age += 1.f;
+        float out = part->crush_last;
+        if (part->tremolo) out *= part->tremolo == 1 ? gain1 : part->tremolo == 2 ? gain2 : .5f * (gain1 + gain2);
+        left[i] = right[i] = out;
+    }
+}
 static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     s1_trem_lfo *a=&part->lfo[0], *b=&part->lfo[1];
@@ -366,7 +396,7 @@ static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned 
 
 static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
-    tremolo_mono(part,left,right,frames);
+
     unsigned phase = part->pan.phase;
     float rate = part->pan.rate;
     unsigned mix = part->pan.mix;
@@ -433,10 +463,16 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
     }
     if (left != right) memcpy(right, left, frames * sizeof *left);
 
+    if (part->crush_route && part->crush_interval > 1.f) {
+        modulated_crush(part, left, right, frames);
+        pan_stereo(part, left, right, frames);
+        return;
+    }
     /* The untouched INIT rate takes every input frame. Keep the last sample
      * for a live rate change without running the hold loop on a dry block. */
     if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
         part->crush_last = left[frames - 1u];
+        tremolo_mono(part, left, right, frames);
         pan_stereo(part, left, right, frames);
         return;
     }
@@ -451,5 +487,6 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
         }
         part->crush_age += 1.f;
     }
+    tremolo_mono(part, left, right, frames);
     pan_stereo(part, left, right, frames);
 }
