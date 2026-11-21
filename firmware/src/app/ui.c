@@ -6829,8 +6829,8 @@ static void peer_join(char out[PEER_TEXT_CAP], const plat_ble_peers_t *peers)
             unsigned char ch=(unsigned char)peers->name[i][n++];out[k++]=(char)(ch>=32&&ch<=126?ch:'?');
         }
     }
-    if(!k)out[k++]='-';
-    out[k]=0;
+    if(k) out[k]=0;
+    else put_s(out, "NONE");
 }
 static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel,uint32_t now)
 {
@@ -6850,7 +6850,7 @@ static int peer_offset(const char *text,const plat_ble_peers_t *peers,int travel
     return travel-(int)(phase*24u/1000u);
 }
 
-/* Every 69-pixel strip paints three consecutive list rows. */
+/* Lists share the body with the lower controls, except for full PART editors. */
 static UI_DRAW void draw_list(int band)
 {
 #if !X0X_SYNTHONE_PATCH
@@ -6860,10 +6860,11 @@ static UI_DRAW void draw_list(int band)
     }
 #endif
     int visible = visible_list_rows();
-    int pitch = visible == 9 && ui.list_n && ui.list_n < 9 ? 207 / ui.list_n : 23;
+    int pitch = ui.list_n && ui.list_n < visible ? visible * 23 / ui.list_n : 23;
+    int extra = visible == 6 ? (pitch - 23) / 2 : 0;
     for (int i = 0; i < visible; i++) {
-        int y = i * pitch + (pitch - 23) / 2 - band * BAND_H;
-        if (y + 23 <= 0 || y >= BAND_H) continue;
+        int y = i * pitch + (pitch - 23 - extra) / 2 - band * BAND_H;
+        if (y + 23 + extra <= 0 || y >= BAND_H) continue;
         int row = ui.list_top + i, sel = row == ui.list_sel;
         pref_t r;
         char num[36], unit[8];
@@ -6880,10 +6881,11 @@ static UI_DRAW void draw_list(int band)
         }
         d = pref_desc(r);
         int has_bar = d && !d->names && d->max >= 24;
-        int inset = visible == 9 && !has_bar ? 3 : 0;
-        surface_panel(3,y+1,229,21,sel,sel?dim(part_col(),6):SOUND_FACE,
+        int inset = has_bar ? 0 : 3;
+        surface_panel(3,y+1,229,21+extra,sel,sel?dim(part_col(),6):SOUND_FACE,
                       sel?part_col():SOUND_EDGE,SOUND_SIDE);
         cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);
+        y += extra;
         if (r.kind == R_SECTION) {                     /* a GLOBAL category: its chevron */
             cv_line(221,y+8,225,y+11,sel?C_AMB:C_DIM);cv_line(225,y+11,221,y+14,sel?C_AMB:C_DIM);
         }
@@ -6892,9 +6894,9 @@ static UI_DRAW void draw_list(int band)
             if (r.kind == R_ACT && r.a == ACT_ABOUT) {
                 int32_t lx, lw;
                 if (release_label_box(X0X_RELEASE_LABEL, sel, &lx, &lw))
-                    cv_text(lx, vc(&FONT_XS, y + 1, 18), &FONT_XS, X0X_RELEASE_LABEL, sel ? C_WHITE : C_HI);
+                    cv_text(lx, vc(&FONT_XS, y + 1 + inset, 18), &FONT_XS, X0X_RELEASE_LABEL, sel ? C_WHITE : C_HI);
             }
-            text_r(r.kind==R_SECTION?213:226,vc(&FONT_XS,y+1,18),&FONT_XS,action_key_cue(),ac);
+            text_r(r.kind==R_SECTION?213:226,vc(&FONT_XS,y+1+inset,18),&FONT_XS,action_key_cue(),ac);
             continue;
         }
         if(r.kind==R_BTNAME) {                       /* connected peers: one line, scrolls when long */
@@ -6902,7 +6904,7 @@ static UI_DRAW void draw_list(int band)
             plat_ble_peers(&peers);peer_join(shown,&peers);
             int left=8+tw(nf,"NAME")+8, width=226-left, travel=tw(nf,shown)-width;
             int offset=peer_offset(shown,&peers,travel,plat_ms());
-            cv_text_clip(left-offset,vc(nf,y+1,18),nf,shown,sel?C_WHITE:C_HI,left,226);continue;
+            cv_text_clip(left-(travel<0?travel:offset),vc(nf,y+1+inset,18),nf,shown,sel?C_WHITE:C_HI,left,226);continue;
         }
         if (r.kind == R_PARTON) {                      /* part stripe and switch; value text shares the descriptor */
             int on = pref_get(r);

@@ -65,18 +65,19 @@ static void required_other_content(const char *screen) {
  if(ui.help)return;
  if(ui.overlay==O_LIST) {
   int visible=ui.view==V_PART && (is_drum() || is_303()) ? 9 : 6;
-  int pitch=visible==9 && ui.list_n && ui.list_n<9 ? 207/ui.list_n : 23;
+  int pitch=ui.list_n && ui.list_n<visible ? visible*23/ui.list_n : 23;
+  int extra=visible==6?(pitch-23)/2:0;
   for(int row=ui.list_top;row<ui.list_n&&row<ui.list_top+visible;row++) {
-   pref_t r=list_rows[row];char label[64],num[64],unit[8];int y=HDR_H+(row-ui.list_top)*pitch+(pitch-23)/2;
-   if(r.kind==R_HDR){hdr_name(r.a,label);expect_region(screen,"list-section",label,0,y,240,y+23);list_presence_checks++;continue;}
-   snprintf(label,sizeof label,"%s",caps_of(pref_name(r)));expect_region(screen,"list-label",label,0,y,240,y+23);list_presence_checks++;
+   pref_t r=list_rows[row];char label[64],num[64],unit[8];int y=HDR_H+(row-ui.list_top)*pitch+(pitch-23-extra)/2;
+   if(r.kind==R_HDR){hdr_name(r.a,label);expect_region(screen,"list-section",label,0,y,240,y+23+extra);list_presence_checks++;continue;}
+   snprintf(label,sizeof label,"%s",caps_of(pref_name(r)));expect_region(screen,"list-label",label,0,y,240,y+23+extra);list_presence_checks++;
    if(r.kind==R_SECTION||r.kind==R_ACT||r.kind==R_BTNAME||r.kind==R_PARTON)continue;
    pref_value(r,num,unit);
    if(visible==9 && r.kind==R_ENG && pref_desc(r) && pref_desc(r)->names)
     for(char *c=num;*c;c++)if(*c>='a' && *c<='z')*c=(char)(*c-'a'+'A');
    if(r.kind==R_BPRESET){const char *name=original_sound_name((unsigned)engine_bass_requested_bank(r.b),(unsigned)engine_bass_requested_preset(r.b));snprintf(num,sizeof num,"%s",caps_of(name?name:"USER"));}
-   expect_region(screen,"list-value",num,0,y,240,y+23);list_presence_checks++;
-   if(unit[0]){expect_region(screen,"list-unit",unit,0,y,240,y+23);list_presence_checks++;}
+   expect_region(screen,"list-value",num,0,y,240,y+23+extra);list_presence_checks++;
+   if(unit[0]){expect_region(screen,"list-unit",unit,0,y,240,y+23+extra);list_presence_checks++;}
   }
  }
  if(ui.overlay==O_NONE&&ui.view==V_PART&&is_303()) {
