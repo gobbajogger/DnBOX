@@ -1711,8 +1711,13 @@ static const x0x_param_t d8_oh_mid[] = {PP("Decay", 74)};
 static const d8_pmap_t k_m_decay_tune[] = {{K_POT, D8P_LEVEL, 0}, {K_POT, D8P_DECAY, 0},
                                            {K_POT, D8P_TUNE, 0}};
 /* (X0X: the hats' choke is the 909's, fixed: the closed hat cuts the open one) */
-static const x0x_param_t k_p_kit[] = {PP("Level", 100), PP("Accent", 127), {"Dist", 7, 0, k_dist_names}, P_DRIVE, PP("Glue", 0)};
-static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}, {K_KIT, 2, 0}, {K_KIT, 3, 0}, {K_KIT, 4, 0}};
+static const char *const k_rv_bus[] = {"SYS", "KIT"};
+static const x0x_param_t k_p_kit[] = {
+    PP("Level", 100), PP("Accent", 127), {"Dist", 7, 0, k_dist_names}, P_DRIVE, PP("Glue", 0),
+    {"RevBus", 1, 0, k_rv_bus}, PP("RvDec", 73), PP("RvTone", 57), PP("RvHPF", 62), PP("RvLvl", 85)
+};
+static const d8_pmap_t k_m_kit[] = {{K_KIT, 0, 0}, {K_KIT, 1, 0}, {K_KIT, 2, 0}, {K_KIT, 3, 0}, {K_KIT, 4, 0},
+    {K_KIT, 5, 0}, {K_KIT, 6, 0}, {K_KIT, 7, 0}, {K_KIT, 8, 0}, {K_KIT, 9, 0}};
 
 /* Pot maps only — descriptor tables are reached through d8_spec (the old .p/.n
  * fields were never read and only cost flash). Heads omit the shared FX kinds. */
@@ -1985,7 +1990,7 @@ __attribute__((noinline)) static void kit_apply(drum808_t *d)
 {
     d->master_vol = (float)d->kpot[0] / 127.0f;
     d->master_on = d->kpot[D8_KIT_DIST] && d->kpot[D8_KIT_DRIVE];
-    d->vol = d->master_on || d->kpot[D8_KIT_GLUE] ? 1.0f : d->master_vol;
+    d->vol = d->master_on || d->kpot[D8_KIT_GLUE] || d->kpot[D8_KIT_RV_BUS] ? 1.0f : d->master_vol;
     x0x_glue_prepare((float)d->kpot[D8_KIT_GLUE] / 127.0f,
                      &d->glue_thr, &d->glue_slope, &d->glue_makeup);
     if (d->master_on)
@@ -1998,7 +2003,7 @@ __attribute__((noinline)) static void kit_apply(drum808_t *d)
  * DnBOX pans per lane, so its two channels keep independent CRUSH history. */
 void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n)
 {
-    if (!d->master_on && !d->kpot[D8_KIT_GLUE])
+    if (!d->master_on && !d->kpot[D8_KIT_GLUE] && !d->kpot[D8_KIT_RV_BUS])
         return;
     if (d->master_on) {
         int type = d->kpot[D8_KIT_DIST] - 1;
@@ -2089,8 +2094,8 @@ void drum808_init(drum808_t *d)
         d->tpan[s] = 64;                          /* centre */
         d->pan_l[s] = d->pan_r[s] = d->pan_lc[s] = d->pan_rc[s] = 1.0f;
     }
-    d->kpot[0] = 100;
-    d->kpot[1] = 127;
+    for (unsigned i = 0; i < sizeof d->kpot; ++i)
+        d->kpot[i] = k_p_kit[i].def;
     kit_apply(d);
 
     rng_seed(&d->sd.rng, 0x808D51Eu);

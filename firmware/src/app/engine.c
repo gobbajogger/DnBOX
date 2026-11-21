@@ -430,7 +430,9 @@ uint8_t engine_fx_muted(void) { return fx.muted; }
 static master_t mst POOL; /* was BSS; pool after Chicago-insert union frees headroom */
 /* Mix delay ring: 1.80 s @ 44.1 kHz (was 2.00 s / 88200). Recovers pool for product WBL1 + ≥8192 free. */
 #define DLY_LEN 79200
-static int16_t dly_buf[DLY_LEN] POOL;
+static int16_t dly_buf[(FX_DELAY_BYTES(DLY_LEN) + 1u) / 2u] POOL;
+static fxbus_t d8_verb POOL;
+_Static_assert(sizeof dly_buf + sizeof d8_verb <= 2u * DLY_LEN, "808 reverb must fit in the delay arena");
 static volatile uint8_t project_hold, project_midi_drop;
 void engine_project_hold(int hold)
 {
@@ -739,7 +741,10 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
 {
     switch (t) {
     case T_909: return drum909_param_si(v, i, pot, val);
-    case T_808: return drum808_param_si(v, i, pot, val);
+    case T_808:
+        if (v == D8_KIT && i >= D8_KIT_RV_DECAY && i <= D8_KIT_RV_LEVEL)
+            return fxbus_param_si(FX_RV_DECAY + i - D8_KIT_RV_DECAY, pot, val);
+        return drum808_param_si(v, i, pot, val);
     case T_303:
         if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && i == (int)ORIGINAL_SYNTHONE_CRUSH && (unsigned)pot < 128u) {
             *val = s1_part_crush_hz(unit_control((unsigned)pot));
@@ -833,7 +838,11 @@ static void apply_param(int t, int v, int i, int val)    /* ISR */
 {
     switch (t) {
     case T_909: drum909_set(&d909, v, i, val); break;
-    case T_808: drum808_set(&d808, v, i, val); break;
+    case T_808:
+        drum808_set(&d808, v, i, val);
+        if (v == D8_KIT && i >= D8_KIT_RV_DECAY && i <= D8_KIT_RV_LEVEL)
+            fxbus_set(&d8_verb, FX_RV_DECAY + i - D8_KIT_RV_DECAY, val);
+        break;
     case T_303:
         if (v < 0 || v >= NBASS)
             break;
@@ -2446,10 +2455,18 @@ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_pa
     if (!d808_was_active) {
         /* CRUSH and the glue detector advance across gaps between hits. */
         if ((!d808.master_on || d808.kpot[D8_KIT_DIST] != D8_MASTER_CRUSH) &&
-            (!d808.kpot[D8_KIT_GLUE] || (d808.glue_det == 0.0f && d808.glue_env == 0.0f)))
+            (!d808.kpot[D8_KIT_GLUE] || (d808.glue_det == 0.0f && d808.glue_env == 0.0f)) &&
+            !fxbus_reverb_active(&d8_verb))
             return;
         for (i = 0; i < n; ++i)
             left808[i] = right808[i] = t1[i] = t2[i] = 0.0f;
+    }
+    const int private_reverb = d808.kpot[D8_KIT_RV_BUS];
+    if (private_reverb || fxbus_reverb_active(&d8_verb)) {
+        float tail_gain = private_reverb || d808.master_on || d808.kpot[D8_KIT_GLUE] ? 1.0f : d808.master_vol;
+        fxbus_808_reverb(&d8_verb, private_reverb ? t1 : 0, left808, right808, (int)n, tail_gain);
+        if (private_reverb)
+            for (i = 0; i < n; ++i) t1[i] = 0.0f;
     }
     drum808_kit_process(&d808, left808, right808, t1, t2, (int)n);
     mix_targets(PART_808, mix_level[PART_808], solo_parts);
@@ -3481,7 +3498,8 @@ X0X_COLD void engine_init(pattern_t *patterns, song_t *song, lane_t *lanes, cons
     brk_wheel = brk_wheel_seen = 0; brk_bend_owner = -1;
     breaks_init(&brk);
     brk.accepted = s_brk_accepted;
-    fxbus_init(&fx, dly_buf, DLY_LEN);
+    fxbus_init_packed(&fx, dly_buf, DLY_LEN);
+    fxbus_init_808_reverb(&d8_verb);
     tape_signal_seen = 0;
     master_init(&mst);
     seq_init(&seq, patterns);

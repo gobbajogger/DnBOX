@@ -33,7 +33,7 @@ def main():
         archive.extractall(original,filter='data')
     tar.unlink()
     binary = out/'build'
-    env = dict(os.environ, NINEW9_DIR=str(original), D9_TEST_OUT=str(binary), D9_DEMO_WAV=str(out/'matched.wav'))
+    env = dict(os.environ, NINEW9_DIR=str(original), D9_PACKED_DELAY="1", D9_TEST_OUT=str(binary), D9_DEMO_WAV=str(out/'matched.wav'))
     matched_log = out/'matched-source.log'
     with matched_log.open('wb') as log:
         matched = subprocess.run(['sh','tests/host/run_drum909.sh'],env=env,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)

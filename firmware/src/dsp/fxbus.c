@@ -91,7 +91,8 @@ __attribute__((noinline)) static void fx_retime(fxbus_t *f)
     if (i > 12) i = 12;
     const float bpm = f->bpm >= 20.0f ? f->bpm : 120.0f;
     float ms = fx_beats[i] * 60000.0f / bpm;
-    const float max_ms = (float)(f->dlen - 256) / D9_SR * 1000.0f;
+    int frames = f->dlen < 0 ? -f->dlen : f->dlen;
+    const float max_ms = (float)(frames - 256) / D9_SR * 1000.0f;
     while (ms > max_ms)                 /* longer than the line (1/2. under 90 BPM): half of it, */
         ms *= 0.5f;                     /* which is still on the beat; cutting it short is not */
     f->dl_time_ms = ms;
@@ -162,15 +163,16 @@ void fxbus_set_bpm(fxbus_t *f, float bpm)
 }
 
 /* Boot only (engine_init). fxbus_process and the reverb/delay ticks stay -O2. */
-X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
+X0X_COLD static void fxbus_init_storage(fxbus_t *f, int16_t *dly_buf, int dly_len, int packed)
 {
     uint8_t *p = (uint8_t *)f;
     for (unsigned i = 0; i < sizeof(*f); ++i)
         p[i] = 0;
-    for (int i = 0; i < dly_len; ++i)
-        dly_buf[i] = 0;
+    unsigned bytes = packed ? FX_DELAY_BYTES((unsigned)dly_len) : (unsigned)dly_len * sizeof(int16_t);
+    for (unsigned i = 0; i < bytes; ++i)
+        ((uint8_t *)dly_buf)[i] = 0;
     f->dbuf = dly_buf;
-    f->dlen = dly_len;
+    f->dlen = packed ? -dly_len : dly_len;
 
     f->rv_decay = 0.62f; f->rv_damp = 0.75f - 0.45f * 0.55f; f->rv_level = 0.8f;
     d9_biquad_set(&f->rv_hp, D9_HP, 150.0f, 0.7071f);
@@ -200,6 +202,16 @@ X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
         f->pots[i] = fx_p[i].ui.def;
 }
 
+
+X0X_COLD void fxbus_init(fxbus_t *f, int16_t *data, int frames)
+{
+    fxbus_init_storage(f, data, frames, 0);
+}
+
+X0X_COLD void fxbus_init_packed(fxbus_t *f, int16_t *data, int frames)
+{
+    fxbus_init_storage(f, data, frames, 1);
+}
 
 /* 12-bit sat store (toward zero). Shared by reverb combs + delay DIGI/TAPE writes. */
 static inline __attribute__((always_inline)) int32_t sat12_store(int16_t *cell, float v)
@@ -236,11 +248,11 @@ static inline __attribute__((always_inline)) float rv_comb_cell(int16_t *cell, f
 /* ===================================================================== */
 /* Reverb (er99_verb_tick), adds its return into out                      */
 /* ===================================================================== */
-static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int n)
+static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int n, int mono_return)
 {
     if (f->rv_quiet >= FX_RV_QUIET) {
         int any = 0;
-        for (int i = 0; i < n; ++i)
+        for (int i = 0; in && i < n; ++i)
             if (in[i] != 0.0f) { any = 1; break; }
         if (!any)
             return;                         /* silent in, silent lines: 0 out */
@@ -268,7 +280,7 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
             int room = fx_al[j] - f->apos[j];
             if (room < count) count = room;
             room = fx_alr[j] - f->aposr[j];
-            if (out_r && room < count) count = room;
+            if (out_r && !mono_return && room < count) count = room;
         }
         int16_t *c0 = cb[0] + f->cpos[0];
         int16_t *c1 = cb[1] + f->cpos[1];
@@ -277,7 +289,8 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
         float *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
         float *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
         for (int i = 0; i < count; ++i) {
-            const float x = d9_biquad_tick(&f->rv_hp, in[offset + i]);
+            const float sample = in ? in[offset + i] : 0.0f;
+            const float x = d9_biquad_tick(&f->rv_hp, sample);
             int32_t wr = 0;
             const float y0 = rv_comb_cell(&c0[i], &f->cdmp[0], x, damp, fb, &wr);
             const float y1 = rv_comb_cell(&c1[i], &f->cdmp[1], x, damp, fb, &wr);
@@ -285,13 +298,16 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
             const float y3 = rv_comb_cell(&c3[i], &f->cdmp[3], x, damp, fb, &wr);
             float y = ((0.0f + y0 + y1) + y2 + y3) * 0.25f;
             y = rv_ap_cell(&l0[i], y);
-            out[offset + i] += rv_ap_cell(&l1[i], y) * lvl;
-            if (out_r) {
+            float wet = rv_ap_cell(&l1[i], y) * lvl;
+            out[offset + i] += wet;
+            if (mono_return)
+                out_r[offset + i] += wet;
+            else if (out_r) {
                 y = ((0.0f + y0 - y1) + y2 - y3) * 0.25f;
                 y = rv_ap_cell(&r0[i], y);
                 out_r[offset + i] += rv_ap_cell(&r1[i], y) * lvl;
             }
-            quiet = (wr == 0 && in[offset + i] == 0.0f) ? quiet + 1 : 0;
+            quiet = (wr == 0 && sample == 0.0f) ? quiet + 1 : 0;
         }
         for (int j = 0; j < 4; ++j) {
             f->cpos[j] += count;
@@ -300,7 +316,7 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
         for (int j = 0; j < 2; ++j) {
             f->apos[j] += count;
             if (f->apos[j] == fx_al[j]) f->apos[j] = 0;
-            if (out_r) {
+            if (out_r && !mono_return) {
                 f->aposr[j] += count;
                 if (f->aposr[j] == fx_alr[j]) f->aposr[j] = 0;
             }
@@ -311,6 +327,26 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
 }
 
 /* ===================================================================== */
+/* The private 8W8 return uses the original mono tap on both dry channels. */
+X0X_COLD void fxbus_init_808_reverb(fxbus_t *f)
+{
+    uint8_t *memory = (uint8_t *)f;
+    for (unsigned i = 0; i < sizeof *f; ++i) memory[i] = 0;
+    f->rv_quiet = FX_RV_QUIET;
+    for (int i = FX_RV_DECAY; i <= FX_RV_LEVEL; ++i)
+        fxbus_set(f, i, fx_p[i].ui.def);
+}
+
+int fxbus_reverb_active(const fxbus_t *f) { return f->rv_quiet < FX_RV_QUIET; }
+
+void fxbus_808_reverb(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
+{
+    float level = f->rv_level;
+    f->rv_level = level * gain;
+    fx_reverb(f, send, left, right, frames, 1);
+    f->rv_level = level;
+}
+
 /* Delay (er99_dly_tick), adds its return into out                        */
 /* ===================================================================== */
 __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* parabolic sine of a turn */
@@ -321,7 +357,40 @@ __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* p
 
 /* The interpolated delay tap d samples behind w. Inlining lets both taps
  * use the current DIGI or TAPE loop state without saving it across calls. */
-static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
+/* The original stores trunc(input*2048). A packed signed 14-bit word keeps
+ * -6143..6143 exact. The outer codes cover the full original int16 range. */
+static inline unsigned fx14_encode(int sample)
+{
+    unsigned mag = (unsigned)(sample < 0 ? -sample : sample);
+    if (mag > 6143) {
+        mag = 6144 + (mag - 6144 + 6) / 13;
+        if (mag > 8191) mag = 8191;
+    }
+    return (unsigned)(sample < 0 ? -(int)mag : (int)mag) & 16383u;
+}
+
+static inline int fx14_read(const uint8_t *data, int index)
+{
+    unsigned bit = (unsigned)index * 14u, at = bit >> 3, offset = bit & 7u;
+    unsigned packed = data[at] | ((unsigned)data[at+1] << 8);
+    if (offset > 2) packed |= (unsigned)data[at+2] << 16;
+    int signed_code = (int)(((packed >> offset) & 16383u) ^ 8192u) - 8192;
+    int mag = signed_code < 0 ? -signed_code : signed_code;
+    if (mag > 6143) mag = 6144 + 13 * (mag - 6144);
+    return signed_code < 0 ? -mag : mag;
+}
+
+static inline void fx14_write(uint8_t *data, int index, int sample)
+{
+    unsigned bit = (unsigned)index * 14u, at = bit >> 3, offset = bit & 7u;
+    unsigned mask = 16383u << offset, code = fx14_encode(sample) << offset;
+    data[at] = (uint8_t)((data[at] & ~mask) | code);
+    data[at+1] = (uint8_t)((data[at+1] & ~(mask>>8)) | (code>>8));
+    if (offset > 2)
+        data[at+2] = (uint8_t)((data[at+2] & ~(mask>>16)) | (code>>16));
+}
+
+static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d, int packed)
 {
     float rp = (float)w - d;
     while (rp < 0.0f) rp += flen;
@@ -329,7 +398,9 @@ static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, in
     const float fr = rp - (float)i0;
     if (i0 >= len) i0 -= len;
     const int32_t i1 = i0 + 1 >= len ? 0 : i0 + 1;
-    const float b0 = (float)buf[i0] * (1.0f / 2048.0f), b1 = (float)buf[i1] * (1.0f / 2048.0f);
+    const int a = packed ? fx14_read((const uint8_t *)buf, i0) : buf[i0];
+    const int b = packed ? fx14_read((const uint8_t *)buf, i1) : buf[i1];
+    const float b0 = (float)a * (1.0f / 2048.0f), b1 = (float)b * (1.0f / 2048.0f);
     return b0 + (b1 - b0) * fr;
 }
 
@@ -340,7 +411,8 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
 {
     f->dl_signal = 0;
     const float target = f->dl_time_ms * 0.001f * D9_SR;
-    const int32_t len = f->dlen;
+    const int packed = f->dlen < 0;
+    const int32_t len = packed ? -f->dlen : f->dlen;
     const int tape = f->dl_type == 1;
     if (f->dl_quiet >= len) {
         int any = 0;
@@ -410,8 +482,8 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
             fp += flut_i;
             d = dcur + wow_a * fx_psin(wp) + flut_a * fx_psin(fp);
         }
-        const float y = dl_tap(buf, len, flen, w, d);
-        const float y2 = ping ? dl_tap(buf, len, flen, w, 2.0f * d) : y;
+        const float y = dl_tap(buf, len, flen, w, d, packed);
+        const float y2 = ping ? dl_tap(buf, len, flen, w, 2.0f * d, packed) : y;
         signal |= in[i] != 0.0f || y != 0.0f || (out_r && y2 != 0.0f);
         lp += (y2 * fdbk - lp) * tc;
         if (fm_fabsf(lp) < 1e-20f) lp = 0.0f;
@@ -422,7 +494,9 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int 
             s -= hp;
             write = s;
         }
-        int32_t k = sat12_store(&buf[w], x + write);       /* 12-bit, toward zero */
+        int16_t word;
+        int32_t k = sat12_store(packed ? &word : &buf[w], x + write);
+        if (packed) fx14_write((uint8_t *)buf, w, k);
         if (++w >= len) w = 0;
         out[i] += y * lvl;
         if (out_r)
@@ -464,7 +538,7 @@ void fxbus_process(fxbus_t *f, const float *dry, const float *rev, const float *
     if (n > 256)
         n = 256;
     __builtin_memcpy(out, dry, (unsigned)n * sizeof(float));
-    fx_reverb(f, rev, out, 0, n);
+    fx_reverb(f, rev, out, 0, n, 0);
     fx_delay(f, dly, out, 0, n);
 
     if (f->dist_mode >= 1) {
@@ -497,7 +571,7 @@ void fxbus_process_st(fxbus_t *f, const float *dry_l, const float *dry_r, const 
         n = 256;
     __builtin_memcpy(out_l, dry_l, (unsigned)n * sizeof(float));
     __builtin_memcpy(out_r, dry_r, (unsigned)n * sizeof(float));
-    fx_reverb(f, rev, out_l, out_r, n);
+    fx_reverb(f, rev, out_l, out_r, n, 0);
     fx_delay(f, dly, out_l, out_r, n);
     if (f->dist_mode >= 1) {
         const float k = f->drive;

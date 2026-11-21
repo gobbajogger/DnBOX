@@ -4,7 +4,7 @@
  *
  * Same circuit models, pot tables, defaults, kit trims, velocity law and hat
  * choke as 8W8's sc808_engine.cpp. The 808 kit has its own drive and glue;
- * the firmware's shared fxbus supplies the reverb and delay returns. The
+ * its original reverb can run before the kit master. The shared fxbus supplies delay. The
  * sequencer owns mutes, note routing and persistent state.
  *
  * ELEVEN TRACKS, sixteen sounds, the way the TR-808 itself does it: LT/MT/HT
@@ -172,7 +172,7 @@ typedef struct {                    /* a sound's drive stage, resolved from its 
 struct drum808 {
     uint8_t pot[D8S_NUM][D8P_NUM];
     uint8_t sw[D8_NUM];               /* LT/MT/HT tom|conga, RS rim|clave, CP clap|maracas */
-    uint8_t kpot[5];                  /* kit: level, accent, distortion, drive, glue */
+    uint8_t kpot[10];                 /* levels, shaper, glue and private reverb */
     uint8_t master_on;
     uint8_t tpan[D8_NUM];             /* X0X: each track's pan pot (a track, not a sound: tom / conga share it) */
     float pan_l[D8_NUM], pan_r[D8_NUM];
@@ -200,7 +200,8 @@ struct drum808 {
 };
 typedef struct drum808 drum808_t;
 
-enum { D8_KIT_DIST = 2, D8_KIT_DRIVE = 3, D8_KIT_GLUE = 4, D8_MASTER_CRUSH = 7 };
+enum { D8_KIT_DIST = 2, D8_KIT_DRIVE = 3, D8_KIT_GLUE = 4, D8_KIT_RV_BUS = 5, D8_KIT_RV_DECAY = 6,
+       D8_KIT_RV_TONE = 7, D8_KIT_RV_HPF = 8, D8_KIT_RV_LEVEL = 9, D8_MASTER_CRUSH = 7 };
 /* Finalize the sole owner's summed dry kit and mono send stems in place. */
 void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n);
 void drum808_init(drum808_t *d);                          /* 8W8 defaults */

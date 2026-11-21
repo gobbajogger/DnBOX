@@ -1602,7 +1602,12 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
             add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
             else
                 do { static const pref_t refs[4] = {PR(R_ENG, T_808, NDRUM, 1), PR(R_ENG, T_808, NDRUM, D8_KIT_DIST), PR(R_ENG, T_808, NDRUM, D8_KIT_DRIVE), PR(R_ENG, T_808, NDRUM, D8_KIT_GLUE)};
-            add_page_refs(emit, "KIT", refs, 0, 0); } while (0);
+            static const pref_t route[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_RV_BUS), NONE, NONE, NONE};
+            static const pref_t verb[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_RV_LEVEL), PR(R_ENG,T_808,NDRUM,D8_KIT_RV_DECAY),
+                PR(R_ENG,T_808,NDRUM,D8_KIT_RV_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_RV_HPF)};
+            add_page_refs(emit, "KIT", refs, 0, 0);
+            add_page_refs(emit, "RV BUS", route, 0, 0);
+            add_page_refs(emit, "KIT RV", verb, 0, 0); } while (0);
         } else if (part_is_303(p)) {
             int b = p - PART_303A;
             emit->group = GR_SOUND;

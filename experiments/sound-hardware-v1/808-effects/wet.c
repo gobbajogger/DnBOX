@@ -11,6 +11,7 @@ enum { RATE = 44100, FRAMES = 88200, BLOCK = 128, DELAY_WORDS = 79200 };
 static int16_t delay_memory[DELAY_WORDS];
 static fxbus_t bus;
 static drum808_t kit;
+static fxbus_t kit_verb;
 
 static void set(sc808_engine_t *s, const char *name, unsigned value)
 {
@@ -40,7 +41,8 @@ static void controls(sc808_engine_t *s, int rv, int dl, int dist, int glue)
 
 int main(int argc, char **argv)
 {
-    if (argc != 8) return 2;
+    if (argc != 9) return 2;
+    int kit_reverb = atoi(argv[8]);
     int kit_glue = atoi(argv[7]);
     int kit_master = atoi(argv[6]);
     int rv=atoi(argv[1]), dl=atoi(argv[2]), dist=atoi(argv[3]), glue=atoi(argv[4]);
@@ -53,7 +55,13 @@ int main(int argc, char **argv)
     drum808_set(&kit, D8_KIT, D8_KIT_DIST, kit_master ? dist : 0);
     drum808_set(&kit, D8_KIT, D8_KIT_DRIVE, 64);
     drum808_set(&kit, D8_KIT, D8_KIT_GLUE, kit_glue ? glue : 0);
-    fxbus_init(&bus, delay_memory, DELAY_WORDS);
+    drum808_set(&kit, D8_KIT, D8_KIT_RV_BUS, kit_reverb);
+    fxbus_init_808_reverb(&kit_verb);
+    fxbus_set(&kit_verb, FX_RV_LEVEL, 93);
+    fxbus_set(&kit_verb, FX_RV_DECAY, 70);
+    fxbus_set(&kit_verb, FX_RV_TONE, 60);
+    fxbus_set(&kit_verb, FX_RV_HPF, 55);
+    fxbus_init_packed(&bus, delay_memory, DELAY_WORDS);
     fxbus_set(&bus, FX_VOLUME, 127);
     fxbus_set(&bus, FX_RV_LEVEL, 93);
     fxbus_set(&bus, FX_RV_DECAY, 70);
@@ -86,6 +94,10 @@ int main(int argc, char **argv)
             kl[i] = kr[i] = x[i];
             send_r[i] = rv ? x[i] : 0.0f;
             send_d[i] = dl ? x[i] : 0.0f;
+        }
+        if (kit_reverb) {
+            fxbus_808_reverb(&kit_verb, send_r, kl, kr, n, 1.0f);
+            memset(send_r, 0, (size_t)n * sizeof send_r[0]);
         }
         drum808_kit_process(&kit, kl, kr, send_r, send_d, n);
         fxbus_process_st(&bus, kl, kr, send_r, send_d, left, right, n);
