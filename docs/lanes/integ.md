@@ -43,6 +43,10 @@ The candidate `c125477e` built stock Elite and Pro packages byte-identical to th
 
 The five canonical ADPCM payloads occupy 109,274 bytes, plus 120 bytes in native bank structures. The resulting pack SHA-256 is `8df1316157fc8ce8dcb87cfd267fea83790702ccd1963ae91c0de60ca255b582`. Native placement rejected both stock images. The aligned space available is 1,184 B on Pro and 1,168 B on Elite. Retaining 1 KiB free requires another 109,234 B on Pro and 109,250 B on Elite. The tested offline export is 110,844 bytes and uses three zones in slot 1 and two in slot 2. The live exporter produced SHA-256 `3a7f19858d23309dac7375b88d0537cae7854ad65680edd1f95d4dbc0beed4c6`. User-selected restore is available. A default delivery needs either additional measured space or a separately approved slot-initialization scheme which preserves existing user recordings.
 
+### Installer receipts and Local gates
+
+The install-report issue form records the build ID, model, firmware SHA-256, port name, startup result, restart result, browser and notes. Each startup and restart field accepts success, failure or an untested result. The dated Rule 2/C4 note distinguishes the owner’s reported disablement of `gates.yml` from the state returned by the public GitHub API. Repository-wide settings were inaccessible to the public reader.
+
 ## Earlier evidence
 
 Move: M0 (clean start and green gate)   PR: #955   Head: this commit

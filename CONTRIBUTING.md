@@ -6,6 +6,8 @@ Thanks for your interest in DnBOX. By taking part in this repository you agree t
 
 Install from the [web installer](https://gobbajogger.github.io/DnBOX/install/) or the [v0.0.26 release](https://github.com/gobbajogger/DnBOX/releases/tag/v0.0.26). Pick the Elite or Pro package that matches your keyboard, back up sample slots first, and do not unplug USB while writing. See the [README](README.md) and the [manual](https://gobbajogger.github.io/DnBOX/manual/).
 
+After an install attempt, record the build, package checksum and what happened on your keyboard. [Open an install report](https://github.com/gobbajogger/DnBOX/issues/new?template=install-report.yml).
+
 ## Reporting a problem or idea
 
 Please use the issue forms:
