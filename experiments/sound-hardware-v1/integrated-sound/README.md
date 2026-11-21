@@ -31,3 +31,13 @@ The [sound lane](../../../docs/lanes/sound.md) records the per-engine contracts 
 Run `python3 tests/test_chicago_compact_headers.py` and `sh tests/host/synthone_widen_test.sh` from the source root. The width test restores its independent Soundpipe inputs from the repository. [Full width host results](width-host.json) · [Native display review](width-review-ledger.json) · [Browser shell composites](viewports/composites.json)
 
 The production callback replay extracts the compiled stock render block and checks 2,048 dual-INIT callbacks per scene with and without 808/909. All 12 voices and finite preconversion samples were checked. The host was under concurrent load. Both deadline misses and successful checks are recorded. To reproduce, extract [the callback fixture](../stock-dry/callback-proof.tar.gz), run its `build.py <checkout> <out>`, then `report.py <out>`. The packet's historical replay wrapper checks the older source hashes. [Current callback measurements](callback.json) · [Compiled input manifest](callback-build.json.gz)
+
+## Chicago lookup under concurrent calls
+
+The combined dense reader uses immutable tables. An independent review reproduced an existing ordinary-reader defect. A cold lookup of UINT32_MAX hit the empty-cache sentinel. A controlled interleaving of two writers also produced coefficients from different indices. The shipping planner keeps Chicago on CPU 0. A 1.2-million-call stress run did not observe a spontaneous race.
+
+A candidate moved the cache into each Chicago owner and rejected invalid input before lookup. It preserved all eight widest-profile artifacts across both boards. Ordinary Elite matched the entire +1 ms physical stream and project. Ordinary Pro changed 43,789 of 331,776 stereo frames and three mixer levels (909 115→105, 808 115→112 and bass B 115→105). The candidate remains in the [reproducible experiment](owner-cache-experiment.tar.gz); the ordinary firmware retains its measured baseline.
+
+## All 694 Synth One host programs
+
+The [portable input guide](../../../assets/test-inputs/synthone/README.md) restores the 97 pinned input files and runs the generic original-versus-compact host comparison. Both paths share the original effects. Each program produces 96,000 stereo frames at 48 kHz per arm. The [fresh result and digest comparison](factory-host.json) and [694 per-program rows](factory-host-programs.jsonl.gz) cover the host graph. The production selector returns `NO_FACTORY_BINDING` for every original entry when the [admission CSV](../factory-admission/programs.csv) is regenerated.
