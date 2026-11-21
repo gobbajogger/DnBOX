@@ -364,8 +364,8 @@ int original_runtime_active(const original_runtime_part *p)
         original_chicago_backend_active(&p->dsp.chicago);
 }
 
-int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
-    float *left, float *right, unsigned frames)
+static int render_stereo(original_runtime_part *p, original_runtime_workspace *w,
+    float *left, float *right, unsigned frames, int owned)
 {
     if (!p || !w || !left || !right || frames > 256) return 0;
     if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
@@ -392,16 +392,45 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
         s1_part_render(&p->dsp.synthone,left,right,frames);
         ok = 1;
     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
-        original_miami_backend_workspace workspace = {w->miami.left, w->miami.right,
-            {w->miami.dry[0], w->miami.dry[1], w->miami.scratch[0], w->miami.scratch[1], 256}};
-        ok = original_miami_backend_render_stereo(&p->dsp.miami, &workspace, left, right, frames);
+        if (owned) {
+            original_miami_fx_workspace fx = {w->engine.fx.miami.dry[0], w->engine.fx.miami.dry[1],
+                w->engine.fx.miami.scratch[0], w->engine.fx.miami.scratch[1], 256};
+            ok = original_miami_backend_render_words(&p->dsp.miami, &fx, w->engine.channels[0].words,
+                                                    w->engine.channels[1].words, frames);
+        } else {
+            original_miami_backend_workspace workspace = {w->miami.left, w->miami.right,
+                {w->miami.dry[0], w->miami.dry[1], w->miami.scratch[0], w->miami.scratch[1], 256}};
+            ok = original_miami_backend_render_stereo(&p->dsp.miami, &workspace, left, right, frames);
+        }
     } else {
-        original_chicago_backend_workspace workspace = {w->chicago.left, w->chicago.right,
-            w->chicago.converted[0], w->chicago.converted[1],
-            {w->chicago.scratch[0], w->chicago.scratch[1], w->chicago.scratch[2], w->chicago.scratch[3]}, 256};
-        ok = original_chicago_backend_render(&p->dsp.chicago, &workspace, NULL, 0,
-            left, right, frames) == ORIGINAL_CHICAGO_BACKEND_OK;
+        if (owned) {
+            original_chicago_backend_workspace workspace = {
+                w->engine.channels[0].words, w->engine.channels[1].words,
+                w->engine.fx.chicago.converted[0], w->engine.fx.chicago.converted[1],
+                {w->engine.fx.chicago.scratch[0], w->engine.fx.chicago.scratch[1],
+                 w->engine.fx.chicago.scratch[2], w->engine.fx.chicago.scratch[3]}, 256};
+            ok = original_chicago_backend_render_in_place(&p->dsp.chicago, &workspace, frames) ==
+                 ORIGINAL_CHICAGO_BACKEND_OK;
+        } else {
+            original_chicago_backend_workspace workspace = {w->chicago.left, w->chicago.right,
+                w->chicago.converted[0], w->chicago.converted[1],
+                {w->chicago.scratch[0], w->chicago.scratch[1], w->chicago.scratch[2], w->chicago.scratch[3]}, 256};
+            ok = original_chicago_backend_render(&p->dsp.chicago, &workspace, NULL, 0,
+                left, right, frames) == ORIGINAL_CHICAGO_BACKEND_OK;
+        }
     }
     return runtime_result(p, ok);
 }
 
+
+int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
+    float *left, float *right, unsigned frames)
+{
+    return render_stereo(p, w, left, right, frames, 0);
+}
+
+int original_runtime_render_owned(original_runtime_part *p, original_runtime_workspace *w, unsigned frames)
+{
+    if (!w) return 0;
+    return render_stereo(p, w, w->engine.channels[0].samples, w->engine.channels[1].samples, frames, 1);
+}

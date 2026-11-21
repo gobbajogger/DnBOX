@@ -1,0 +1,95 @@
+{
+  "scope": "Factory oscillator register and native selected Juno/Synth One scenes. Full original program comparisons scored here: 0.",
+  "firmware_base": "7597ce1ca32c188d4bb8c44acbdf4823391c1538",
+  "trial_overlay_before_16_frame_cymbal_sha256": "e758751598811d369f09aa5a52e3bd7fff5aa5bcfd3a5f2e0f73ce4414ebe248",
+  "16_frame_cymbal_source_sha256": "6c2c1aeff713ab045faf948d2abe5924a6ff19d750869d8051a36010d7e81287",
+  "register_firmware_and_host_test_patch_sha256": "7dccae9dae4c9d0ea6ddc062e9536c58d13cb6ada0aebb74aed80959fe055c38",
+  "register_reference_files_patch_sha256": "a88d62ec785f8bc199c69619ffd60037f50a07a5d37c083e3f5796f9de573c40",
+  "register": {
+    "control": 86,
+    "source_csv_sha256": "14fd2646763d3b718c307e9b8cd59e4876351b56f162bbf74f439e2c263259c8",
+    "unique_bank_and_position_rows": 640,
+    "banks": 12,
+    "counts_at_16_8_4_foot": [
+      192,
+      374,
+      74
+    ],
+    "firmware_owners_exercised": 2,
+    "layers_per_owner": 2,
+    "subsequent_bends_semitones": [
+      -2,
+      0,
+      2
+    ],
+    "matched_stereo_frames": 18432,
+    "nonneutral_blocks_distinguished": 96,
+    "original_sampler_pitch_words": 9,
+    "maximum_pitch_error_ulp": 0,
+    "host_test_log_sha256": "8cbb8f4c61ff61f0eb4b234f41ec1c132b4bc53176a4a92891355972c58b0135"
+  },
+  "native_scene": "Strict emulator, 360 MHz, 922 events over 8 s at offset 0, Elite Juno A/Synth One B, Pro Synth One A/Juno B. Selected regular firmware presets monitor stack in the linked package. The separate host test applies the factory register.",
+  "native": [
+    {
+      "profile": "sj6-elite",
+      "package_sha256": "67f4c0f431689726cfdbb2716d184bb8cbf97639dfcc26a01688366ebbae8c08",
+      "app_bytes": 548356,
+      "xip_free_bytes": 4316,
+      "pool_free_bytes": 9024,
+      "pool_above_reserve_bytes": 832,
+      "core1_stack_used_bytes": 1116,
+      "core1_above_guard_bytes": 2980,
+      "core1_fallback": 0,
+      "halves": 636,
+      "peak_us": 10780,
+      "raw_late": 0,
+      "audio_xruns": 0
+    },
+    {
+      "profile": "sj6-pro",
+      "package_sha256": "ddd2dadbd4333c7f05967acaabacc251a4a9a57ee651772d4848cb7b614223b9",
+      "app_bytes": 548344,
+      "xip_free_bytes": 4328,
+      "pool_free_bytes": 9024,
+      "pool_above_reserve_bytes": 832,
+      "core1_stack_used_bytes": 2116,
+      "core1_above_guard_bytes": 1980,
+      "core1_fallback": 0,
+      "halves": 636,
+      "peak_us": 11248,
+      "raw_late": 0,
+      "audio_xruns": 0
+    },
+    {
+      "profile": "dual-elite",
+      "package_sha256": "d70ed01c3069065680ec2d521041ab8f84dda234b5cb8f3bbe3673ff4bba627b",
+      "app_bytes": 548320,
+      "xip_free_bytes": 4352,
+      "pool_free_bytes": 9024,
+      "pool_above_reserve_bytes": 832,
+      "core1_stack_used_bytes": 1116,
+      "core1_above_guard_bytes": 2980,
+      "core1_fallback": 0,
+      "halves": 636,
+      "peak_us": 10788,
+      "raw_late": 0,
+      "audio_xruns": 0
+    },
+    {
+      "profile": "dual-pro",
+      "package_sha256": "a1378828e5efe9781f137200108e978c6542907c893be0b3261aba4ebf32a0d5",
+      "app_bytes": 548308,
+      "xip_free_bytes": 4364,
+      "pool_free_bytes": 9024,
+      "pool_above_reserve_bytes": 832,
+      "core1_stack_used_bytes": 2116,
+      "core1_above_guard_bytes": 1980,
+      "core1_fallback": 0,
+      "halves": 636,
+      "peak_us": 11299,
+      "raw_late": 0,
+      "audio_xruns": 0
+    }
+  ],
+  "detailed_receipt_sha256": "cbb16ce6ec4685fdede8bb4e1d407910449644b3a645e55a2faf5fe05f0b2a4f"
+}

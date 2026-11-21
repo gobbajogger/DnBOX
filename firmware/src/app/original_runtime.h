@@ -31,8 +31,17 @@ typedef struct {
     uint8_t kind;
     int8_t status;
 } original_runtime_part;
+typedef union { uint32_t words[256]; float samples[256]; } original_runtime_channel;
 typedef union {
-    float mono_send[256]; /* rendered bass send, after the instrument releases its scratch */
+    float mono_send[256]; /* public workspace layout */
+    struct {
+        original_runtime_channel channels[2];
+        union {
+            float mono_send[256];
+            struct { int16_t converted[2][256], scratch[4][256]; } chicago;
+            struct { int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
+        } fx;
+    } engine;
     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
     struct { uint32_t left[256], right[256]; int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
 } original_runtime_workspace;
@@ -70,3 +79,6 @@ int original_runtime_env_view(const original_runtime_part *, float adsr[4], floa
 int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
     float *left, float *right, unsigned frames);
 
+
+/* Engine-owned stereo remains in this workspace until the ordered mix. */
+int original_runtime_render_owned(original_runtime_part *, original_runtime_workspace *, unsigned frames);

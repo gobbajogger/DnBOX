@@ -564,3 +564,13 @@ At 44.1 kHz the four original ten-second delay histories alone allocate 7,056,01
 ## Populated strict emu360 comparison
 
 The calibrated 8-second replay used all 922 physical input events on the ordinary Elite and Pro packages. On source `54b0b230`, Juno + Synth One reached 11,105 µs on Elite and 11,512 µs on Pro, each with zero raw late transfers and zero DMA xruns. The calibrated defaults reached 9,244 and 9,102 µs with zero late transfers or xruns. Chicago + Miami still exceeded the 11,609 µs deadline, reaching 13,591 µs with 35 late transfers on Elite and 13,079 µs with 46 on Pro. The receipt identifies both packages, the emulator, the source commit and project readbacks. [Raw comparison](../../experiments/sound-hardware-v1/selected-native/independent-render-results.json)
+
+On source `0f019f32` both calibrated defaults and both populated Juno + Synth One scenes passed again. Chicago + Miami still missed the requested deadline. All four populated readbacks exercised both 11-row kits, both selected synth owners and BREAK. [Package identities, guest readbacks and timing](../../experiments/sound-hardware-v1/selected-native/populated-optimized-results.json)
+
+| 8-second replay | Elite peak / late / xruns | Pro peak / late / xruns |
+| --- | ---: | ---: |
+| Calibrated default | 8,524 µs / 0 / 0 | 8,511 µs / 0 / 0 |
+| Juno + Synth One | 10,541 µs / 0 / 0 | 11,202 µs / 0 / 0 |
+| Chicago + Miami | 12,285 µs / 6 / 6 | 12,163 µs / 5 / 5 |
+
+The SuperJ6 factory loader now routes the archived 16′, 8′ and 4′ oscillator register for both owners and layers. The 640-setting host replay matched 18,432 stereo frames exactly. The complete-program stereo criterion remains open at 0 of 14 scored. [Register verification](../../experiments/sound-hardware-v1/sj6-factory/register/verification.json)

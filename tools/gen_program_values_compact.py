@@ -26,6 +26,16 @@ for u in factory+mb+cb:
  if u not in dictionary:dictionary.append(u)
 assert len(dictionary)<=256
 code=lambda a:[dictionary.index(u) for u in a]
+# The same byte encodes either a dictionary value or a live target. Only the
+# native lookup table is retained in the linked synth; the raw base accessor
+# remains available to the metadata oracle.
+mapping=re.search(r'original_chicago_mappings\[29\]=\{(.*?)\};',s['chicago_program_private.h'],re.S)
+native_ids=[int(v) for v in re.findall(r'\{(\d+),',mapping[1])]
+assert len(native_ids)==len(set(native_ids))==29
+chicago_native=code(cb)
+assert len(dictionary)+len(native_ids)<=256
+for slot,native_id in enumerate(native_ids):
+ chicago_native[native_id]=len(dictionary)+slot
 names=re.findall(r'"(.*?)"',re.search(r'original_miami_factory_name\[30\]\[24\]=\{(.*?)\};',s['miami_program_private.h'],re.S)[1]);assert len(names)==30
 payload=[];offset=[]
 for name in names:offset.append(len(payload));payload+=list(name.encode('ascii')+b'\0')
@@ -40,7 +50,7 @@ out+='#ifdef ORIGINAL_PROGRAM_VALUES_MIAMI\n'+arr('uint8_t','compact_miami_facto
 out+='static inline float compact_miami_factory_value(unsigned f,unsigned p){return p<16u?compact_program_value(compact_miami_factory_codes[f*16u+p]):p==16u?0.5f:0.0f;}\n'
 out+='static inline float compact_miami_base_value(unsigned i){return compact_program_value(compact_miami_base_codes[i]);}\n'
 out+='static inline const char *compact_miami_factory_name(unsigned f){return compact_miami_names+compact_miami_name_offsets[f];}\n#endif\n'
-out+='#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO\n'+arr('uint8_t','compact_chicago_base_codes',code(cb))+'static inline float compact_chicago_base_value(unsigned i){return compact_program_value(compact_chicago_base_codes[i]);}\n#endif\n'
+out+='#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO\n'+arr('uint8_t','compact_chicago_base_codes',code(cb))+arr('uint8_t','compact_chicago_native_codes',chicago_native)+'static inline float compact_chicago_base_value(unsigned i){return compact_program_value(compact_chicago_base_codes[i]);}\n#endif\n'
 if len(sys.argv)>2:
  raise SystemExit('usage: gen_program_values_compact.py [OUTPUT_HEADER]')
 destination=Path(sys.argv[1]) if len(sys.argv)==2 else D/'program_values_compact.h'

@@ -241,22 +241,28 @@ static inline __attribute__((always_inline)) void comp_tick(master_t *m, float *
 }
 
 /* Look-ahead limiter envelope + gain — one body for mono and stereo. */
-static inline __attribute__((always_inline)) void limit_env(master_t *m, float a)
+static inline __attribute__((always_inline)) void limit_advance(float *env, float *inv, int *hold,
+                                                               float *gain, float a)
 {
-    if (a >= m->env) {
-        m->env = a;
-        m->hold = MST_LA;
-        m->inv_env = a > 0.8f ? 1.0f / a : 0.0f;
-    } else if (m->hold) {
-        m->hold--;
+    if (a >= *env) {
+        *env = a;
+        (*hold) = MST_LA;
+        *inv = a > 0.8f ? 1.0f / a : 0.0f;
+    } else if ((*hold)) {
+        (*hold)--;
     } else {
-        m->env *= 0.99985f;
-        m->inv_env *= 1.0001500225f;                 /* 1 / 0.99985 */
+        *env *= 0.99985f;
+        *inv *= 1.0001500225f;                 /* 1 / 0.99985 */
     }
     {
-        float want = m->env > 0.8f ? 0.8f * m->inv_env : 1.0f;
-        m->gain += (want - m->gain) * (want < m->gain ? (5.0f / MST_LA) : 0.002f);
+        float want = *env > 0.8f ? 0.8f * *inv : 1.0f;
+        *gain += (want - *gain) * (want < *gain ? (5.0f / MST_LA) : 0.002f);
     }
+}
+
+static inline __attribute__((always_inline)) void limit_env(master_t *m, float a)
+{
+    limit_advance(&m->env, &m->inv_env, &m->hold, &m->gain, a);
 }
 
 /* One DJF SVF channel step — shared by mono and L/R stereo (same pattern as soft_ceiling). */
@@ -362,11 +368,40 @@ static int master_settled_zero(master_t *m, const float *l, const float *r, int 
     return 1;
 }
 
+/* With a settled volume and the filter and compressor bypassed, only the
+ * look-ahead limiter advances. The level and ring histories stay local. */
+__attribute__((noinline)) static void limit_fixed_st(master_t *m, float *l, float *r, int n, float v)
+{
+    float env = m->env, inv = m->inv_env, gain = m->gain;
+    int hold = m->hold, pos = m->la_pos;
+    for (int i = 0; i < n; ++i) {
+        const float left = l[i] * v, right = r[i] * v;
+        limit_advance(&env, &inv, &hold, &gain, fm_maxf(fm_fabsf(left), fm_fabsf(right)));
+        const float dl = m->la[pos], dr = m->la_r[pos];
+        m->la[pos] = left;
+        m->la_r[pos] = right;
+        pos = (pos + 1) & (MST_LA - 1);
+        l[i] = soft_ceiling(dl * gain);
+        r[i] = soft_ceiling(dr * gain);
+    }
+    m->env = env;
+    m->inv_env = inv;
+    m->gain = gain;
+    m->hold = hold;
+    m->la_pos = pos;
+}
+
 void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
 {
     if (master_settled_zero(m, xl, xr, n, volume)) return;
     int i, mode = m->pot[MST_MODE], comp_on = m->comp_on, limit = m->pot[MST_LIMIT];
     float k = m->k, grmax = 0.0f, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
+    if (!comp_on && !mode && limit && vc == volume) {
+        limit_fixed_st(m, xl, xr, n, vc);
+        m->vol_cur = vc;
+        m->gr_view = 0.0f > m->gr_view ? 0.0f : m->gr_view * 0.93f;
+        return;
+    }
     float det_in = 0.0f, att_in = 0.0f, rel_in = 0.0f, pump_in = 0.0f;
     if (comp_on) {
         det_in = 1.0f - m->a_det;

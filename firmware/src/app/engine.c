@@ -203,13 +203,18 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
 #if X0X_SUPERJ6_FACTORY
 /* The high bit reserves both existing mailboxes as one factory transaction. */
 #define SJ6_FACTORY_GROUP 0x80u
+/* Published and consumed under the factory group flag, one mailbox per synth owner. */
+static float pending_factory_range[NBASS];
 
 X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row)
 {
     const unsigned required = (1u << SJ6_ROW_AMOUNT) - 1u;
     if (owner >= NBASS || !row || (row->present & required) != required) return 0;
-    float value[SJ6_ROW_COUNT];
-    for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
+    fm_bits_t range = {.f = row->present & (1u << SJ6_ROW_RANGE) ? row->value[SJ6_ROW_RANGE] : .5f};
+    /* The release bank contains only 16', 8' and 4'. Preserve either signed zero. */
+    if ((range.u << 1) && range.u != 0x3f000000u && range.u != 0x3f800000u) return 0;
+    float value[SJ6_ROW_RANGE];
+    for (unsigned i = 0; i < SJ6_ROW_RANGE; ++i) {
         value[i] = row->present & (1u << i) ? row->value[i] : 0.f;
         float limit = i == SJ6_ROW_MASTER ? JUNO6_FACTORY_MASTER_MAX : 1.f;
         if (!(value[i] >= 0 && value[i] <= limit)) return 0;
@@ -227,6 +232,7 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
             synth->pending_wave[layer] = (juno6_oscillator_edit){
                 value[SJ6_ROW_WAVE + layer], value[SJ6_ROW_AMOUNT + layer], value[SJ6_ROW_ENABLE + layer]};
         }
+        pending_factory_range[owner] = range.f;
         synth->pending_wave_mask = 3u;
         synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u;
     }
@@ -234,7 +240,7 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
     return accept;
 }
 
-int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
+X0X_COLD int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
 {
     unsigned slot = 4;
     float limit = JUNO6_FACTORY_MASTER_MAX;
@@ -257,7 +263,7 @@ int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float u
     plat_cq_unlock(flags);
     return accept;
 }
-int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
+X0X_COLD int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
                                  const engine_superj6_pwm *pwm)
 {
     if (owner >= NBASS || layer >= 2 || !(selector >= 0 && selector <= 1)) return 0;
@@ -277,37 +283,47 @@ int engine_superj6_pre_note_wave(unsigned owner, unsigned layer, float selector,
     plat_cq_unlock(flags);
     return accept;
 }
+/* Only the rare admitted control transaction takes this path. Keep the
+ * per-block owner and mailbox checks in the ordinary render loop. */
+static X0X_COLD __attribute__((noinline)) void apply_superj6_pending(original_runtime_part *part, unsigned owner)
+{
+    juno6_t *synth = &part->dsp.juno.synth;
+    unsigned waves = synth->pending_wave_mask;
+    if (waves) {
+        synth->pending_wave_mask = 0;
+        int active = juno6_active(synth);
+        if (synth->pending_field_mask & SJ6_FACTORY_GROUP) {
+            if (active || engine_bass_preset_pending(owner)) {
+                synth->pending_field_mask = 0;
+                return;
+            }
+            (void)dnbx_store_raw(&synth->core, 86, pending_factory_range[owner]);
+            juno6_apply_factory_waves(synth, synth->pending_wave);
+        } else if (!active)
+            for (unsigned layer = 0; layer < 2; ++layer)
+                if (waves & (1u << layer))
+                    juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);
+    }
+    unsigned mask = synth->pending_field_mask;
+    if (!mask) return;
+    synth->pending_field_mask = 0;
+    if (mask & (1u << 4))
+        (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
+                                     synth->pending_field[4]);
+    for (unsigned slot = 0; slot < 4; ++slot)
+        if (mask & (1u << slot))
+            (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
+                                         synth->pending_field[slot]);
+}
+
 static void apply_superj6_edits(void)
 {
     for (unsigned owner = 0; owner < NBASS; ++owner) {
         original_runtime_part *part = &original_bass[owner];
         if (part->kind != ORIGINAL_SOUND_JUNO || part->status != ORIGINAL_RUNTIME_OK) continue;
-        juno6_t *synth = &part->dsp.juno.synth;
-        unsigned waves = synth->pending_wave_mask;
-        if (waves) {
-            synth->pending_wave_mask = 0;
-            int active = juno6_active(synth);
-            if (synth->pending_field_mask & SJ6_FACTORY_GROUP) {
-                if (active || engine_bass_preset_pending(owner)) {
-                    synth->pending_field_mask = 0;
-                    continue;
-                }
-                juno6_apply_factory_waves(synth, synth->pending_wave);
-            } else if (!active)
-                for (unsigned layer = 0; layer < 2; ++layer)
-                    if (waves & (1u << layer))
-                        juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);
-        }
-        unsigned mask = synth->pending_field_mask;
-        if (!mask) continue;
-        synth->pending_field_mask = 0;
-        if (mask & (1u << 4))
-            (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
-                                         synth->pending_field[4]);
-        for (unsigned slot = 0; slot < 4; ++slot)
-            if (mask & (1u << slot))
-                (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
-                                             synth->pending_field[slot]);
+        const juno6_t *synth = &part->dsp.juno.synth;
+        if (synth->pending_wave_mask || synth->pending_field_mask)
+            apply_superj6_pending(part, owner);
     }
 }
 #endif
@@ -2367,7 +2383,6 @@ static int brk_silent_now = 1;
 static uint8_t d808_was_active;
 /* each bass's L/R, and bass B's own workspace (A keeps original_workspace): XPOOL, which
  * either core may write (core 0's stacks are closed to core 1's writes, fm1_guard.h) */
-static float eng_bass_buf[2 * NBASS][256] X0X_XPOOL;
 static original_runtime_workspace original_workspace_b X0X_XPOOL;
 static uint32_t bass_quiet_next[NBASS];               /* the quiet count after this stretch's render */
 static uint8_t bass_render_ok[NBASS];
@@ -2375,6 +2390,11 @@ static volatile uint8_t eng_c1_next;                   /* core 1: the next of it
 static uint8_t eng_c1_mask;                            /* jobs on core 1 this stretch (bit per JB_*) */
 static uint8_t eng_plan;                               /* the plan in force (the same bits) */
 static uint32_t eng_job_cost[JB_N];                    /* ticks per 256 frames when active */
+/* An inactive oscillator with an insert tail costs less than a sounding
+ * voice. Keep both observations so a release or reattack can use its own
+ * measured time on the very next stretch. */
+static uint32_t eng_bass_cost[NBASS][2];
+static uint8_t eng_bass_voiced[NBASS];
 static uint32_t eng_job_arg;                           /* this stretch's n, 808 mask and window offset */
 static uint8_t eng_job_solo;
 static uint8_t eng_brk_mark;                           /* brk_midi_count before core 1 could add any */
@@ -2395,11 +2415,25 @@ __attribute__((weak)) void plat_cpu2_sync(void) {}
 
 static void job_cost(int j, uint32_t ticks, uint32_t n)
 {
-    uint32_t c, e = eng_job_cost[j];
-    if (n < 64u)
-        return;                                         /* a short stretch is mostly set-up */
-    c = ticks * 256u / n;
-    eng_job_cost[j] = c > e ? c : e - ((e - c) >> 4);   /* rise at once, fall over ~16 stretches */
+    if (n < 64u) return;
+    uint32_t *estimate = &eng_job_cost[j];
+    if (j == JB_A || j == JB_B) {
+        unsigned v = (unsigned)(j - JB_A);
+        estimate = &eng_bass_cost[v][eng_bass_voiced[v]];
+    }
+    uint32_t c = ticks * 256u / n, e = *estimate;
+    *estimate = c > e ? c : e - ((e - c) >> 3);
+    eng_job_cost[j] = *estimate;
+}
+
+/* In the settled case each lane has a constant multiplier and both kit
+ * sends are silent. Each bus still receives its original product or sum. */
+static int kit_mix_settled(const glide_t *g)
+{
+    return g[GL_L].cur == g[GL_L].tgt && g[GL_R].cur == g[GL_R].tgt &&
+           g[GL_VREV].cur == g[GL_VREV].tgt && g[GL_VDLY].cur == g[GL_VDLY].tgt &&
+           g[GL_L].cur > 0 && g[GL_R].cur > 0 && g[GL_VREV].cur > 0 && g[GL_VDLY].cur > 0 &&
+           g[GL_REV].cur == 0 && g[GL_REV].tgt == 0 && g[GL_DLY].cur == 0 && g[GL_DLY].tgt == 0;
 }
 
 static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_parts)
@@ -2415,6 +2449,23 @@ static void mix_808(float *left808, float *right808, uint32_t n, uint8_t solo_pa
     }
     drum808_kit_process(&d808, left808, right808, t1, t2, (int)n);
     mix_targets(PART_808, mix_level[PART_808], solo_parts);
+    const glide_t *g = mix_glide[PART_808];
+    if (kit_mix_settled(g)) {
+        float peak = 0.0f;
+        const float gl = g[GL_L].cur, gr = g[GL_R].cur, vr = g[GL_VREV].cur, vd = g[GL_VDLY].cur;
+        for (i = 0; i < n; ++i) {
+            const float l = left808[i], r = right808[i];
+            dry_l[i] += l * gl;
+            dry_r[i] += r * gr;
+            rev[i] += t1[i] * vr;
+            dly[i] += t2[i] * vd;
+            float a = fm_fabsf((l + r) * .5f);
+            if (a > peak) peak = a;
+        }
+        peak *= mix_level[PART_808];
+        if (peak > part_peak[PART_808]) part_peak[PART_808] = peak;
+        return;
+    }
     add_glide(dry_l, left808, &mix_glide[PART_808][GL_L], n);
     add_glide(dry_r, right808, &mix_glide[PART_808][GL_R], n);
     add_glide(rev, t1, &mix_glide[PART_808][GL_VREV], n);
@@ -2441,7 +2492,7 @@ static void prepare_bass_mix(int bv, float *left, float *right, unsigned n, uint
     if (solo_out)
         for (unsigned i = 0; i < GL_N; ++i) g[i].cur = 0.0f;
     if (!glide_silent(&g[GL_REV]) || !glide_silent(&g[GL_DLY])) {
-        float *send = (bv ? &original_workspace_b : &original_workspace)->mono_send;
+        float *send = (bv ? &original_workspace_b : &original_workspace)->engine.fx.mono_send;
         for (unsigned i = 0; i < n; ++i) send[i] = .5f * (left[i] + right[i]);
     }
     float peak = 0.0f;
@@ -2476,13 +2527,30 @@ static void run_job(int j, int core)
             drum909_render_st_cleared(&d909, dry_l, dry_r, rev, dly, (int)n, smc_audible_drums(solo, PART_909));
             mix_targets(PART_909, mix_level[PART_909], solo_parts);
             bfx_shape(PART_909, dry_l, dry_r, rev, dly, 4, (int)n);
-            for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
-                mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
-            scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
-            scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
-            scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
-            scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
-            kit_sends(PART_909, mono, n);
+            const glide_t *g = mix_glide[PART_909];
+            if (kit_mix_settled(g)) {
+                const float gl = g[GL_L].cur, gr = g[GL_R].cur, vr = g[GL_VREV].cur, vd = g[GL_VDLY].cur;
+                float peak = 0.0f;
+                for (i = 0; i < n; ++i) {
+                    const float l = dry_l[i], r = dry_r[i];
+                    float a = fm_fabsf((l + r) * .5f);
+                    if (a > peak) peak = a;
+                    dry_l[i] = l * gl;
+                    dry_r[i] = r * gr;
+                    rev[i] *= vr;
+                    dly[i] *= vd;
+                }
+                peak *= mix_level[PART_909];
+                if (peak > part_peak[PART_909]) part_peak[PART_909] = peak;
+            } else {
+                for (i = 0; i < n; i++)                       /* kit send: filtered sides, still centred */
+                    mono[i] = (dry_l[i] + dry_r[i]) * 0.5f;
+                scale_glide(dry_l, &mix_glide[PART_909][GL_L], n);   /* then the part's PAN over the kit */
+                scale_glide(dry_r, &mix_glide[PART_909][GL_R], n);
+                scale_glide(rev, &mix_glide[PART_909][GL_VREV], n);
+                scale_glide(dly, &mix_glide[PART_909][GL_VDLY], n);
+                kit_sends(PART_909, mono, n);
+            }
         }
         if (!core)
             PROF_ADD(PR_909, p9);
@@ -2503,14 +2571,14 @@ static void run_job(int j, int core)
     } else if (j == JB_A || j == JB_B) {
         /* one bass: its own workspace and L/R, so A and B may run at once on the two cores */
         int bv = j - JB_A, p = PART_303A + bv;
-        float *bl = eng_bass_buf[2 * bv], *br = eng_bass_buf[2 * bv + 1];
+        original_runtime_workspace *w = bv ? &original_workspace_b : &original_workspace;
+        float *bl = w->engine.channels[0].samples, *br = w->engine.channels[1].samples;
         float *bb[NBASS];
         bb[bv] = bl; bb[1 - bv] = br;                     /* bass B renders right-left, as always */
         PROF_T(pb);
         (void)original_runtime_prepare(&original_bass[bv], seq_tempo(&seq));
         bass_adapt_pre(bv, (unsigned)n);
-        int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
-                                             bb[bv], bb[1-bv], n);
+        int status = original_runtime_render_owned(&original_bass[bv], w, n);
         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
         if (!core)
             PROF_ADD(2 + bv, pb);
@@ -2583,9 +2651,10 @@ static void run_job(int j, int core)
 static void mix_bass(int bv, unsigned n)
 {
     glide_t *g = mix_glide[PART_303A + bv];
-    float *send = (bv ? &original_workspace_b : &original_workspace)->mono_send;
-    add_glide(dry_l, eng_bass_buf[2 * bv], &g[GL_L], n);
-    add_glide(dry_r, eng_bass_buf[2 * bv + 1], &g[GL_R], n);
+    float *send = (bv ? &original_workspace_b : &original_workspace)->engine.fx.mono_send;
+    original_runtime_workspace *w = bv ? &original_workspace_b : &original_workspace;
+    add_glide(dry_l, w->engine.channels[0].samples, &g[GL_L], n);
+    add_glide(dry_r, w->engine.channels[1].samples, &g[GL_R], n);
     add_glide(rev, send, &g[GL_REV], n);
     add_glide(dly, send, &g[GL_DLY], n);
 }
@@ -2700,6 +2769,11 @@ static uint32_t plan_pick(uint32_t n)
     if (drum808_active(&d808)) act |= 1u << JB_808;
     act |= 1u << JB_A | 1u << JB_B;
     if (!breaks_silent(&brk)) act |= 1u << JB_BRK;
+    for (unsigned v = 0; v < NBASS; ++v) {
+        eng_bass_voiced[v] = (uint8_t)(original_runtime_owned(&original_bass[v]) != 0);
+        uint32_t estimate = eng_bass_cost[v][eng_bass_voiced[v]];
+        if (estimate) eng_job_cost[JB_A + v] = estimate;
+    }
     for (j = 0; j < JB_N; j++)                         /* a short stretch still pays a call's set-up */
         c[j] = (act >> j & 1u) ? eng_job_cost[j] * nn / 256u : 0u;
     best &= act & ok;
@@ -2713,7 +2787,7 @@ static uint32_t plan_pick(uint32_t n)
         m = (m - allowed) & allowed;
     } while (m);
 
-    if (bc * 8u < cost * 7u || (eng_plan & ~(act & ok)))   /* 1/8 better, or a job of it went idle */
+    if (bc * 16u < cost * 15u || (eng_plan & ~(act & ok)))   /* switch for a measured 1/16 gain or an ineligible job */
         eng_plan = (uint8_t)best;
     return eng_plan & act & ok;
 }

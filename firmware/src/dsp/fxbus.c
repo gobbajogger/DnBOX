@@ -202,7 +202,7 @@ X0X_COLD void fxbus_init(fxbus_t *f, int16_t *dly_buf, int dly_len)
 
 
 /* 12-bit sat store (toward zero). Shared by reverb combs + delay DIGI/TAPE writes. */
-static inline __attribute__((always_inline)) int32_t sat12_store_i(int16_t *cell, float v)
+static inline __attribute__((always_inline)) int32_t sat12_store(int16_t *cell, float v)
 {
     int32_t k = (int32_t)(v * 2048.0f);
     if (k > 32767) k = 32767;
@@ -210,7 +210,6 @@ static inline __attribute__((always_inline)) int32_t sat12_store_i(int16_t *cell
     *cell = (int16_t)k;
     return k;
 }
-__attribute__((noinline)) static int32_t sat12_store(int16_t *cell, float v) { return sat12_store_i(cell, v); }
 
 /* Distortion sample — one body; stereo process_st calls this for L and R. */
 static inline __attribute__((always_inline)) float dist_one(const d9_shape_t *sh, float x, float k, float *crush)
@@ -218,25 +217,19 @@ static inline __attribute__((always_inline)) float dist_one(const d9_shape_t *sh
     return d9_shape(sh, x * k, crush) * 0.7f;
 }
 
-/* One Schroeder allpass step — shared by L/R reverb (mono 2×, stereo 4×). Inlined: per sample,
- * a call and its register saves cost more than the step (fm1-emu cost table, TPROF 2026-11-12). */
-static inline __attribute__((always_inline)) float rv_ap(float *ab, int32_t *pos, int32_t alen, float y)
+static inline __attribute__((always_inline)) float rv_ap_cell(float *cell, float y)
 {
-    const int32_t p = *pos;
-    const float bo = ab[p];
-    ab[p] = y + bo * 0.5f;
-    *pos = p + 1 >= alen ? 0 : p + 1;
-    return bo - y * 0.5f;
+    float old = *cell;
+    *cell = y + old * 0.5f;
+    return old - y * 0.5f;
 }
 
-/* One Schroeder comb step — 4 combs a sample; inlined (see rv_ap). */
-static inline __attribute__((always_inline)) float rv_comb(fxbus_t *f, int16_t *b, int c, float x, float damp, float fb, int32_t *wr)
+static inline __attribute__((always_inline)) float rv_comb_cell(int16_t *cell, float *state,
+                                                                float x, float damp, float fb, int32_t *wr)
 {
-    const int32_t p = f->cpos[c];
-    const float y = (float)b[p] * (1.0f / 2048.0f);
-    f->cdmp[c] = y + (f->cdmp[c] - y) * damp;
-    *wr |= sat12_store_i(&b[p], x + f->cdmp[c] * fb);
-    f->cpos[c] = p + 1 >= fx_cl[c] ? 0 : p + 1;
+    const float y = (float)*cell * (1.0f / 2048.0f);
+    *state = y + (*state - y) * damp;
+    *wr |= sat12_store(cell, x + *state * fb);
     return y;
 }
 
@@ -263,26 +256,56 @@ static void fx_reverb(fxbus_t *f, const float *in, float *out, float *out_r, int
     float *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
     float *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
     int32_t quiet = f->rv_quiet;
-    for (int i = 0; i < n; ++i) {
-        const float x = d9_biquad_tick(&f->rv_hp, in[i]);
-        float acc = 0.0f, acc_r = 0.0f;
-        int32_t wr = 0;
+    /* A pass stops at the first ring end. Every index in its inner loop
+     * addresses contiguous cells in all active delay lines. */
+    for (int offset = 0; offset < n;) {
+        int count = n - offset;
         for (int c = 0; c < 4; ++c) {
-            const float y = rv_comb(f, cb[c], c, x, damp, fb, &wr);
-            acc += y;
-            acc_r += (c & 1) ? -y : y;
+            int room = fx_cl[c] - f->cpos[c];
+            if (room < count) count = room;
         }
-        float y = acc * 0.25f;
-        y = rv_ap(ab0, &f->apos[0], fx_al[0], y);
-        y = rv_ap(ab1, &f->apos[1], fx_al[1], y);
-        out[i] += y * lvl;
-        if (out_r) {                        /* the right: the combs, alternate signs, its own allpasses */
-            float yr = acc_r * 0.25f;
-            yr = rv_ap(ar0, &f->aposr[0], fx_alr[0], yr);
-            yr = rv_ap(ar1, &f->aposr[1], fx_alr[1], yr);
-            out_r[i] += yr * lvl;
+        for (int j = 0; j < 2; ++j) {
+            int room = fx_al[j] - f->apos[j];
+            if (room < count) count = room;
+            room = fx_alr[j] - f->aposr[j];
+            if (out_r && room < count) count = room;
         }
-        quiet = (wr == 0 && in[i] == 0.0f) ? quiet + 1 : 0;
+        int16_t *c0 = cb[0] + f->cpos[0];
+        int16_t *c1 = cb[1] + f->cpos[1];
+        int16_t *c2 = cb[2] + f->cpos[2];
+        int16_t *c3 = cb[3] + f->cpos[3];
+        float *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
+        float *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
+        for (int i = 0; i < count; ++i) {
+            const float x = d9_biquad_tick(&f->rv_hp, in[offset + i]);
+            int32_t wr = 0;
+            const float y0 = rv_comb_cell(&c0[i], &f->cdmp[0], x, damp, fb, &wr);
+            const float y1 = rv_comb_cell(&c1[i], &f->cdmp[1], x, damp, fb, &wr);
+            const float y2 = rv_comb_cell(&c2[i], &f->cdmp[2], x, damp, fb, &wr);
+            const float y3 = rv_comb_cell(&c3[i], &f->cdmp[3], x, damp, fb, &wr);
+            float y = ((0.0f + y0 + y1) + y2 + y3) * 0.25f;
+            y = rv_ap_cell(&l0[i], y);
+            out[offset + i] += rv_ap_cell(&l1[i], y) * lvl;
+            if (out_r) {
+                y = ((0.0f + y0 - y1) + y2 - y3) * 0.25f;
+                y = rv_ap_cell(&r0[i], y);
+                out_r[offset + i] += rv_ap_cell(&r1[i], y) * lvl;
+            }
+            quiet = (wr == 0 && in[offset + i] == 0.0f) ? quiet + 1 : 0;
+        }
+        for (int j = 0; j < 4; ++j) {
+            f->cpos[j] += count;
+            if (f->cpos[j] == fx_cl[j]) f->cpos[j] = 0;
+        }
+        for (int j = 0; j < 2; ++j) {
+            f->apos[j] += count;
+            if (f->apos[j] == fx_al[j]) f->apos[j] = 0;
+            if (out_r) {
+                f->aposr[j] += count;
+                if (f->aposr[j] == fx_alr[j]) f->aposr[j] = 0;
+            }
+        }
+        offset += count;
     }
     f->rv_quiet = quiet;
 }
@@ -296,10 +319,9 @@ __attribute__((noinline)) static float fx_psin(uint32_t ph)                 /* p
     return 4.0f * x * (1.0f - fm_fabsf(x));
 }
 
-/* the line at d samples behind w, interpolated (X0X: the ping-pong tap).
- * Outlined once: fx_delay calls this many times (mono + stereo / PING taps);
- * one body beats N inlined copies on pi32 (-O2). */
-__attribute__((noinline)) static float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
+/* The interpolated delay tap d samples behind w. Inlining lets both taps
+ * use the current DIGI or TAPE loop state without saving it across calls. */
+static inline __attribute__((always_inline)) float dl_tap(const int16_t *buf, int32_t len, float flen, int32_t w, float d)
 {
     float rp = (float)w - d;
     while (rp < 0.0f) rp += flen;

@@ -142,6 +142,9 @@ int original_chicago_backend_begin(original_chicago_backend *,
     uint32_t event_count, uint32_t frames);
 int original_chicago_backend_frame(original_chicago_backend *);
 int original_chicago_backend_end(original_chicago_backend *, float *left, float *right);
+/* Validated engine-owned words remain in workspace.core_left/core_right. */
+int original_chicago_backend_render_in_place(original_chicago_backend *, original_chicago_backend_workspace *,
+    uint32_t frames);
 int original_chicago_backend_render(original_chicago_backend *,
     original_chicago_backend_workspace *, const original_engine_event *,
     uint32_t event_count, float *left, float *right, uint32_t frames);

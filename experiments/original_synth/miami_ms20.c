@@ -150,6 +150,44 @@ static inline __attribute__((always_inline)) void k_osc_odd(unsigned shape,uint3
  }
  *phase_p=phase;*og_p=og;
 }
+
+/* A signed-zero or sub-ulp step can leave a gain unchanged throughout the span. */
+static int k_fixed_gain(original_ramp r){
+ uint32_t before=original_math_bits(r.current);
+ return before==original_math_bits(k_gain_advance(&r));
+}
+static inline int32_t k_mod_delta(float wave,float xmod,float base){
+ float st=clamp(wave*xmod+base,-1,1)*0x1p31f;
+ return st>=0x1p31f?INT32_MAX:(int32_t)st;
+}
+/* The unity-corrected, half-width pulse uses two saturated saws away from
+ * either discontinuity. Preserve the positive half's rounded phase addition. */
+static __attribute__((noinline)) void k_pulse_fixed(unsigned first,uint32_t *phase_p,float gain,
+ uint32_t inc,float xmod,float base,float *mix,int32_t *step,uint32_t n){
+ uint32_t phase=*phase_p;
+ const int32_t plus=k_mod_delta(1.0f,xmod,base),minus=k_mod_delta(-1.0f,xmod,base);
+ const float scale=gain*.5f;
+ for (uint32_t j=0;j<n;j++){
+  phase-=inc;
+  const uint32_t half=phase&0x7fffffffu;
+  float wave; int32_t delta;
+  if(half-0x02000000u<=0x7c000000u){
+   if((int32_t)phase<0){wave=1.0f;delta=plus;}
+   else{
+    float q=k_phase(phase);
+    wave=(q-1.0f)-(((q+1.0f)-2.0f)+1.0f);
+    delta=wave==-1.0f?minus:k_mod_delta(wave,xmod,base);
+   }
+  }else{
+   wave=k_wave_c(2,k_phase(phase),.5f,1.0f,0.0f,0);
+   delta=k_mod_delta(wave,xmod,base);
+  }
+  step[j]=delta;
+  if(gain!=0.0f){float term=wave*scale;mix[j]=first?term:mix[j]+term;}
+  else if(first)mix[j]=0.0f;
+ }
+ *phase_p=phase;
+}
 #define K_SHAPES(sh,CALL) do{ if((sh)==0){enum{K_S=0};CALL;} else if((sh)==1){enum{K_S=1};CALL;} else {enum{K_S=2};CALL;} }while(0)
 int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *vg,original_oscillators *ph,
  const original_prepared_oscillators *p,float vco_gain,float *L,float *R,uint32_t n){
@@ -170,13 +208,24 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
  float mix[K_SPAN];int32_t step[K_SPAN];
  while(n){   /* callers pass control spans of <= 64 frames (render_span): one pass */
  const uint32_t m=n<K_SPAN?n:K_SPAN;
- K_SHAPES(c->shape[0],k_osc_even(K_S,1,&phase[0],&og[0],c->increment[0],c->width[0],p->correction[0],p->triangle[0],zero_triangle[0],xmod,b1,pstep1,mix,step,m));
- K_SHAPES(c->shape[1],k_osc_odd(K_S,&phase[1],&og[1],c->width[1],p->correction[1],p->triangle[1],zero_triangle[1],mix,step,m));
- K_SHAPES(c->shape[2],k_osc_even(K_S,0,&phase[2],&og[2],c->increment[2],c->width[2],p->correction[2],p->triangle[2],zero_triangle[2],xmod,b3,pstep3,mix,step,m));
- K_SHAPES(c->shape[3],k_osc_odd(K_S,&phase[3],&og[3],c->width[3],p->correction[3],p->triangle[3],zero_triangle[3],mix,step,m));
+ if(c->shape[0]>=2 && c->width[0]==.5f && p->correction[0]==1.0f && k_fixed_gain(og[0]))
+  k_pulse_fixed(1,&phase[0],og[0].current,c->increment[0],xmod,b1,mix,step,m);
+ else K_SHAPES(c->shape[0],k_osc_even(K_S,1,&phase[0],&og[0],c->increment[0],c->width[0],p->correction[0],p->triangle[0],zero_triangle[0],xmod,b1,pstep1,mix,step,m));
+ if(og[1].current==0.0f && k_fixed_gain(og[1])){
+  uint32_t delta=0;for(uint32_t j=0;j<m;j++)delta+=(uint32_t)step[j];phase[1]-=delta;
+ }else K_SHAPES(c->shape[1],k_osc_odd(K_S,&phase[1],&og[1],c->width[1],p->correction[1],p->triangle[1],zero_triangle[1],mix,step,m));
+ if(c->shape[2]>=2 && c->width[2]==.5f && p->correction[2]==1.0f && k_fixed_gain(og[2]))
+  k_pulse_fixed(0,&phase[2],og[2].current,c->increment[2],xmod,b3,mix,step,m);
+ else K_SHAPES(c->shape[2],k_osc_even(K_S,0,&phase[2],&og[2],c->increment[2],c->width[2],p->correction[2],p->triangle[2],zero_triangle[2],xmod,b3,pstep3,mix,step,m));
+ if(og[3].current==0.0f && k_fixed_gain(og[3])){
+  uint32_t delta=0;for(uint32_t j=0;j<m;j++)delta+=(uint32_t)step[j];phase[3]-=delta;
+ }else K_SHAPES(c->shape[3],k_osc_odd(K_S,&phase[3],&og[3],c->width[3],p->correction[3],p->triangle[3],zero_triangle[3],mix,step,m));
+ int filter_held=original_math_bits(advance(&ra))==original_math_bits(ra.current)&&
+  original_math_bits(advance(&rr))==original_math_bits(rr.current)&&original_math_bits(advance(&rn))==original_math_bits(rn.current);
  /* MS-20: mix[] -> the nonlinear output, in place */
  for(uint32_t j=0;j<m;j++){
-  float g=advance(&ra),r=advance(&rr),ng=advance(&rn);ra.current=g;rr.current=r;rn.current=ng;
+  if(!filter_held){ra.current=advance(&ra);rr.current=advance(&rr);rn.current=advance(&rn);}
+  float g=ra.current,r=rr.current,ng=rn.current;
   unsigned choose=(noise&0x40000000u)==0;noise=(noise+noise)^(choose?8393u:0);
   float nz=choose?.5f:-.5f;float v=ng*nz+mix[j];v=vco_gain*v;
   float x=v*fl(0x3fa47678);x=x*fl(0x3dcccccd);
@@ -190,7 +239,9 @@ int original_miami_voice_render_add(original_miami_ms20 *f,original_voice_gain *
   mix[j]=nl;
  }
  /* stereo gain */
- for(uint32_t j=0;j<m;j++){
+ if(k_fixed_gain(st[0]) && k_fixed_gain(st[1])){
+  for(uint32_t j=0;j<m;j++){L[j]=L[j]+mix[j]*st[0].current;R[j]=R[j]+mix[j]*st[1].current;}
+ }else for(uint32_t j=0;j<m;j++){
   float l=k_gain_advance(&st[0]),rg=k_gain_advance(&st[1]);
   L[j]=L[j]+mix[j]*l;R[j]=R[j]+mix[j]*rg;
  }

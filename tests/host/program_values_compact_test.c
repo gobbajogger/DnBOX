@@ -17,5 +17,12 @@ int main(void){unsigned n=0;
  }
  for(unsigned i=0;i<109;i++){if(bits(compact_miami_base_value(i))!=bits(original_miami_base[i]))return fprintf(stderr,"miami base %u mismatch\n",i),1;n++;}
  for(unsigned i=0;i<117;i++){if(bits(compact_chicago_base_value(i))!=bits(original_chicago_base[i]))return fprintf(stderr,"chicago base %u mismatch\n",i),1;n++;}
+ for(unsigned id=0;id<117;id++){
+  unsigned code=compact_chicago_native_codes[id],words=sizeof original_program_value_words/sizeof original_program_value_words[0],slot=0;
+  while(slot<29 && original_chicago_mappings[slot].native_id!=id)slot++;
+  if(slot<29 ? code!=words+slot : code>=words || bits(compact_program_value(code))!=bits(original_chicago_base[id]))
+   return fprintf(stderr,"chicago native %u mismatch\n",id),1;
+  n++;
+ }
  printf("PASS compact program metadata: %u exact binary32/name checks\n",n);return 0;
 }

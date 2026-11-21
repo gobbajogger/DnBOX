@@ -1121,9 +1121,8 @@ D8_TICK float cy_tick(d8_cy_t *v, float bus)
     return y;
 }
 
-/* Each pass keeps the delay state of one branch in registers. A span ends at or before
- * the earliest possible 401st quiet sample. When already at 400, evaluate
- * one sample before deciding whether the voice continues. */
+/* Each pass keeps the delay state of one branch in registers. The stop test at the end
+ * of each span observes the earliest sample that can retire the voice. */
 __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict buf,
                                             const float *restrict bus, int m)
 {
@@ -1135,10 +1134,16 @@ __attribute__((noinline)) static int cy_run(d8_cy_t *restrict v, float *restrict
         int count = m - offset;
         if (count > CY_SPAN)
             count = CY_SPAN;
-        if (v->quiet >= 400)
-            count = 1;
-        else if (count > 401 - v->quiet)
-            count = 401 - v->quiet;
+        if (v->quiet > 400 - count) {
+            /* During linear discharge the last value is the smallest. A
+             * quiet tail with sustain still above its stop threshold can
+             * advance in full spans without probing each sample. */
+            int held = v->e1t == 0.0f && v->e1_ramp && v->e1 > 0.0f &&
+                v->d1 >= 0.0f && v->e1_n <= INT32_MAX - count &&
+                v->e1_base - (float)(v->e1_n + count) * v->d1 >= DIODE_VON * 0.5f;
+            if (!held)
+                count = v->quiet >= 400 ? 1 : 401 - v->quiet;
+        }
         for (int i = 0; i < count; ++i) {
             cy_advance_sustain(v);
             g1[i] = knee_gate(v->e1);

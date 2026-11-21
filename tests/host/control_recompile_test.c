@@ -81,10 +81,27 @@ static void production_owner_test(void){
    }else{
     original_chicago_program p=part.dsp.chicago.program;original_chicago_voice_controls controls;
     CHECK(original_chicago_program_set(&p,id,value));CHECK(original_chicago_voice_compile(&controls,&p));widths=0;
+    int changed=memcmp(p.target,part.dsp.chicago.program.target,sizeof p.target)!=0;
     CHECK(original_runtime_param(&part,id,value)==ORIGINAL_RUNTIME_OK);
-    CHECK(widths==(id==0?4:0));CHECK(!memcmp(&part.dsp.chicago.program,&p,sizeof p));
+    CHECK(widths==(id==0&&changed?4:0));CHECK(!memcmp(&part.dsp.chicago.program,&p,sizeof p));
     CHECK(!memcmp(&part.dsp.chicago.controls,&controls,sizeof controls));
    }
+  }
+  if(!kind){
+   original_chicago_backend *b=&part.dsp.chicago;
+   for(unsigned id=0;id<22;id++){
+    original_chicago_program p=b->program;original_chicago_voice_controls expected;
+    CHECK(original_chicago_program_set(&p,id,p.macro[id]));
+    CHECK(original_chicago_voice_compile(&expected,&p));widths=0;
+    CHECK(original_runtime_param(&part,id,p.macro[id])==ORIGINAL_RUNTIME_OK);
+    CHECK(!widths&&!memcmp(&p,&b->program,sizeof p)&&!memcmp(&expected,&b->controls,sizeof expected));
+   }
+   original_chicago_program p=b->program;original_chicago_voice_controls actual=b->controls,save=actual;
+   CHECK(original_chicago_program_set(&p,0,p.macro[0]));p.target[15]=NAN;
+   CHECK(!original_chicago_voice_recompile_unchanged(&actual,&p));
+   CHECK(!memcmp(&actual,&save,sizeof actual));
+   p=b->program;p.revision+=2;widths=0;
+   CHECK(original_chicago_voice_recompile_unchanged(&actual,&p)&&widths==4);
   }
   CHECK(original_runtime_retire(&part)==ORIGINAL_RUNTIME_OK);
  }

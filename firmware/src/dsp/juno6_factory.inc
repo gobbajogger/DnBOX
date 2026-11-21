@@ -3,6 +3,9 @@ void juno6_init(juno6_t *s,float sr)
 {
  stock_init(s,sr);
  (void)dnbx_init_superj6(&s->core,s->sample_rate);
+ /* Register is neutral until a factory load owns the raw control. Leave its
+  * presence bit clear so an ordinary preset still reports it as unbound. */
+ s->core.raw[86]=.5f;
  s->master_gain=1.f;
 }
 int juno6_note_on(juno6_t *s,uint8_t note,uint8_t velocity)
@@ -83,10 +86,16 @@ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillato
 
 /* A new factory program owns both base waveforms. Modulation depth from
  * the previous stock Juno program is unrelated to its original LFO routes. */
+static float factory_tune(const juno6_t *s)
+{
+    return s->bend + 24.f * (s->core.raw[86] - .5f);
+}
+
 void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2])
 {
     for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
         s->core.layer[layer].params.lfo_pwm_depth = 0.f;
+        s->core.layer[layer].params.tune_semitones = factory_tune(s);
         juno6_apply_pre_note_wave(s, layer, &waves[layer]);
     }
 }
@@ -152,7 +161,7 @@ int juno6_set(juno6_t *s,unsigned id,float x)
   case 11:p.lfo_pwm_depth=x*.2f;break;
   case 12:p.pulse_width=clampf(s->pulse_width,.03f,.5f);break;
   case 15:p.gain=x;break;
-  case 16:p.tune_semitones=s->bend;break;
+  case 16:p.tune_semitones=factory_tune(s);break;
   default:break;
   }
   if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return 0;

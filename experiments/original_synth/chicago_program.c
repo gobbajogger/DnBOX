@@ -62,8 +62,14 @@ int original_chicago_program_init(original_chicago_program *p,unsigned factory){
 }
 int original_chicago_program_native(const original_chicago_program *p,unsigned id,float *out){
  if(!p||!out||id>=117)return 0;
+#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO
+ unsigned code=compact_chicago_native_codes[id];
+ unsigned values=sizeof original_program_value_words/sizeof original_program_value_words[0];
+ *out=code<values?compact_program_value(code):p->target[code-values];return 1;
+#else
  for(unsigned i=0;i<29;i++)if(original_chicago_mappings[i].native_id==id){*out=p->target[i];return 1;}
  *out=ORIGINAL_CHICAGO_BASE_VALUE(id);return 1;
+#endif
 }
 const char *original_chicago_program_name(unsigned factory){
  if(factory>=81)return NULL;

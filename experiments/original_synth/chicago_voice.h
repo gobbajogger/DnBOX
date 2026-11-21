@@ -52,6 +52,10 @@ int original_chicago_voice_compile(original_chicago_voice_controls *out,const or
  * unready snapshot or a revision gap use full compilation. Failure is atomic. */
 int original_chicago_voice_recompile(original_chicago_voice_controls *out,
  const original_chicago_program *program,unsigned macro);
+/* The owner verified every mapped target is bit-identical to the preceding
+ * snapshot. Preserve revision and validation even for a repeated edit. */
+int original_chicago_voice_recompile_unchanged(original_chicago_voice_controls *out,
+ const original_chicago_program *program);
 typedef struct {float phase,unipolar,bipolar,hold;uint32_t noise;uint8_t wrapped;} original_chicago_voice_mg;
 typedef struct {
  uint32_t oscillator_phase[4],noise;

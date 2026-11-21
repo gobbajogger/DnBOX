@@ -16,11 +16,11 @@ void __wrap_juno6_init(juno6_t *s, float rate)
     if (opens < 2) owner[opens++] = s;
 }
 
-/* API slots 0..10. Expected IDs are independent of the decoder. */
-static const unsigned id[] = {119,120,121,122,0,82,83,78,79,210,211};
+/* Expected IDs follow the row ABI independently of the decoder. */
+static const unsigned id[] = {119,120,121,122,0,82,83,78,79,210,211,86};
 static const uint32_t example[] = {
     0x80000000,0x3e800000,0x3f000000,0x3f400000,0x3fa8f5c3,
-    0x3f800000,0x3f800000,0x80000000,0x3e800000,0x3f800000,0x80000000
+    0x3f800000,0x3f800000,0x80000000,0x3e800000,0x3f800000,0x80000000,0x3f000000
 };
 static sj6_factory_row synthetic(unsigned presence)
 {
@@ -49,6 +49,7 @@ static void rejected(unsigned v, const sj6_factory_row *row)
 static void check_negative(void)
 {
     sj6_factory_row full = synthetic(15);
+    sj6_factory_add_word(&full, 86, 0x3f000000u);
     rejected(0, NULL);
     CHECK(!engine_superj6_factory_load(2, &full));
     for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
@@ -84,10 +85,108 @@ static void check_negative(void)
     rejected(0, &full);
     engine_bass_cancel_preset(0);
 }
+static void check_range(void)
+{
+    const uint32_t stops[] = {0x80000000u, 0x3f000000u, 0x3f800000u};
+    /* Original CoreSampler note increments at 44.1 kHz, from the pinned
+     * sampler_reference.cpp driver. Rows are 16/8/4-foot register, columns
+     * are -2/0/+2 semitones of subsequent performance bend (MIDI 60 input). */
+    const uint32_t pitch[3][3] = {
+        {0x3b2d3057,0x3b4265db,0x3b5a3449},
+        {0x3bad3056,0x3bc265db,0x3bda3449},
+        {0x3c2d3057,0x3c4265db,0x3c5a3449}
+    };
+    unsigned frames = 0, changed = 0, maximum_ulps = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        sj6_factory_row neutral = synthetic(15);
+        CHECK(engine_superj6_factory_load(v, &neutral));
+        boundary();
+        juno6_t base = *owner[v];
+        for (unsigned i = 0; i < 3; ++i) {
+            sj6_factory_row row = neutral;
+            sj6_factory_add_word(&row, 86, stops[i]);
+            sj6_factory_add_word(&row, 86, 0x7fc00000u);
+            CHECK(engine_superj6_factory_load(v, &row));
+            boundary();
+            check_word(v, SJ6_ROW_RANGE, stops[i]);
+            for (unsigned bend = 0; bend < 3; ++bend) {
+                juno6_t actual = *owner[v], expected = base, unshifted = base;
+                juno6_all_off(&actual);
+                juno6_all_off(&expected);
+                juno6_all_off(&unshifted);
+                CHECK(juno6_note_on(&actual, 60, 100));
+                CHECK(juno6_note_on(&expected, 48 + 12*i, 100));
+                CHECK(juno6_note_on(&unshifted, 60, 100));
+                float al[128], ar[128], el[128], er[128], ul[128], ur[128];
+                for (unsigned block = 0; block < 8; ++block) {
+                    if (block == 3) {
+                        CHECK(juno6_set(&actual, 16, .5f*bend));
+                        CHECK(juno6_set(&expected, 16, .5f*bend));
+                        CHECK(juno6_set(&unshifted, 16, .5f*bend));
+                    }
+                    for (unsigned layer = 0; layer < 2; ++layer) {
+                        float increment = actual.core.voice[0].layer[layer].increment;
+                        CHECK(increment == expected.core.voice[0].layer[layer].increment);
+                        uint32_t word;
+                        memcpy(&word, &increment, sizeof word);
+                        uint32_t target = pitch[i][block < 3 ? 1 : bend];
+                        unsigned diff = word > target ? word - target : target - word;
+                        CHECK(diff <= 2);
+                        if (diff > maximum_ulps) maximum_ulps = diff;
+                    }
+                    CHECK(juno6_render_stereo(&actual, al, ar, 128));
+                    CHECK(juno6_render_stereo(&expected, el, er, 128));
+                    CHECK(juno6_render_stereo(&unshifted, ul, ur, 128));
+                    CHECK(!memcmp(al, el, sizeof al) && !memcmp(ar, er, sizeof ar));
+                    if (i != 1) {
+                        CHECK(memcmp(al, ul, sizeof al) || memcmp(ar, ur, sizeof ar));
+                        ++changed;
+                    }
+                    frames += 128;
+                }
+            }
+        }
+        sj6_factory_row off_stop = neutral;
+        sj6_factory_add_word(&off_stop, 86, 0x3e800000u);
+        rejected(v, &off_stop);
+        CHECK(engine_superj6_factory_load(v, &neutral));
+        boundary();
+        check_word(v, SJ6_ROW_RANGE, 0x3f000000u);
+        CHECK(owner[v]->core.layer[0].params.tune_semitones == owner[v]->bend);
+        CHECK(owner[v]->core.layer[1].params.tune_semitones == owner[v]->bend);
+    }
+    CHECK(frames == 18432 && changed == 96);
+    printf("range: two owners, three stops, three bend values, %u matched stereo frames, %u changed blocks, max pitch error %u ULP\n",
+           frames, changed, maximum_ulps);
+}
+/* Each line is one authored range word from the authenticated metrics table.
+ * Other controls in these rows are fixtures; this exercises the register only. */
+static void check_register_file(const char *path)
+{
+    FILE *f = fopen(path, "r");
+    CHECK(f != NULL);
+    unsigned bits, rows = 0;
+    while (fscanf(f, "%x", &bits) == 1) {
+        sj6_factory_row row = synthetic(15);
+        sj6_factory_add_word(&row, 86, bits);
+        for (unsigned v = 0; v < 2; ++v) {
+            CHECK(engine_superj6_factory_load(v, &row));
+            boundary();
+            check_word(v, SJ6_ROW_RANGE, bits);
+            int semitones = bits == 0 ? -12 : bits == 0x3f800000u ? 12 : 0;
+            for (unsigned layer = 0; layer < 2; ++layer)
+                CHECK(owner[v]->core.layer[layer].params.tune_semitones == owner[v]->bend + semitones);
+        }
+        ++rows;
+    }
+    CHECK(feof(f) && rows == 640);
+    fclose(f);
+    printf("%u archived register words applied to both owners and both layers\n", rows);
+}
 #ifdef SJ6_AUTHORED_BANK
 static void check_bank(void)
 {
-    unsigned programs = 0, authored = 0, defaulted = 0;
+    unsigned programs = 0, authored = 0, defaulted = 0, register_words = 0;
     for (unsigned b = 0; b < BANK_COUNT; ++b) {
         for (unsigned p = 0; p < bank_start[b+1] - (unsigned)bank_start[b]; ++p) {
             sj6_record_reader reader;
@@ -101,16 +200,18 @@ static void check_bank(void)
             CHECK(engine_superj6_factory_load(v, &row));
             boundary();
             for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
-                bits = 0;
+                bits = i == SJ6_ROW_RANGE ? 0x3f000000u : 0;
                 if (row.present & (1u << i)) {
                     memcpy(&bits, &row.value[i], sizeof bits);
-                    ++authored;
-                } else ++defaulted;
+                    if (i == SJ6_ROW_RANGE) ++register_words;
+                    else ++authored;
+                } else if (i != SJ6_ROW_RANGE) ++defaulted;
                 check_word(v, i, bits);
             }
         }
     }
-    printf("programs=%u authored_words=%u defaulted_pwm_words=%u\n", programs, authored, defaulted);
+    printf("programs=%u authored_words=%u defaulted_pwm_words=%u authored_register_words=%u\n",
+           programs, authored, defaulted, register_words);
     CHECK(programs == 640 && authored == 4580 && defaulted == 2460);
 }
 #endif
@@ -127,6 +228,10 @@ int main(void)
         CHECK(!engine_bass_preset_pending(v));
     }
     CHECK(opens == 2 && owner[0] != owner[1]);
+    for (unsigned v = 0; v < 2; ++v) {
+        float raw;
+        CHECK(dnbx_read_raw(&owner[v]->core, 86, &raw) == DNBX_E_ABSENT);
+    }
     check_negative();
     /* Both selected stock presets have an audible PWM LFO. An individual
      * waveform edit preserves it, and a full factory load supersedes it. */
@@ -156,7 +261,8 @@ int main(void)
             boundary();
             for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
                 unsigned present = (row.present >> i) & 1u;
-                check_word(v, i, present ? example[i] : 0u);
+                uint32_t fallback = i == SJ6_ROW_RANGE ? 0x3f000000u : 0u;
+                check_word(v, i, present ? example[i] : fallback);
                 authored += present;
             }
             CHECK(!memcmp(old, peer->core.raw, sizeof old));
@@ -164,6 +270,9 @@ int main(void)
         }
     }
     CHECK(authored == 288);
+    check_range();
+    const char *register_file = getenv("SJ6_REGISTER_WORDS");
+    if (register_file) check_register_file(register_file);
     printf("synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS\n");
 #ifdef SJ6_AUTHORED_BANK
     check_bank();
