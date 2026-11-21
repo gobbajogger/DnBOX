@@ -652,10 +652,9 @@ static UI_DRAW int pref_get(pref_t r)
     case R_BPRESET: return engine_bass_requested_preset(r.b);
     case R_BSTATUS: return engine_bass_preset_pending(r.b) * 4 + engine_bass_status(r.b);
     case R_ENG:
-        if (r.a == T_303 && r.c == ORIGINAL_SYNTHONE_PAN_RATE &&
-            engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE &&
-            !(original_sound_edit_mask(proj.sound.v[r.a][r.b]) & (1u << ORIGINAL_SYNTHONE_PAN_RATE)))
-            return ORIGINAL_SYNTHONE_PAN_RATE_INIT;
+        if (r.a == T_303 && r.c >= ORIGINAL_SYNTHONE_PAN_RATE &&
+            engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE)
+            return original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
         return proj.sound.v[r.a][r.b][r.c];
     case R_SWING: return p->swing;
     case R_DLEN: return p->drum[r.a].len - 1;
@@ -1132,7 +1131,14 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
         else { put_i(num,((value-1)*100+63)/126); put_s(unit,"%"); }
         return 1;
     }
-    if (kind == ORIGINAL_SOUND_SYNTHONE && id == ORIGINAL_SYNTHONE_PAN_RATE) {
+    if (kind == ORIGINAL_SOUND_SYNTHONE && ui_original_states(kind,id)) {
+        static const char *const sources[] = {"OFF","LFO 1","LFO 2","BOTH"};
+        static const char *const waves[] = {"SINE","SQUARE","SAW","REV SAW"};
+        put_s(num,(id==ORIGINAL_SYNTHONE_TREM ? sources : waves)[(value*3+63)/127]);
+        return 1;
+    }
+    if (kind == ORIGINAL_SOUND_SYNTHONE &&
+        (id == ORIGINAL_SYNTHONE_PAN_RATE || id == ORIGINAL_SYNTHONE_LFO1_RATE || id == ORIGINAL_SYNTHONE_LFO2_RATE)) {
         float hz;
         if (engine_param_si(T_303, r.b, (int)id, value, &hz) == X0X_U_HZ) {
             put_i(num, (int)(hz * 1000.f + .5f));
@@ -3119,7 +3125,7 @@ static void lock_turn(pref_t r, int e, int role)
         goto done;
     }
     l = &proj.arr.lane[k];
-    cur = l->val[s] != MOT_NONE ? l->val[s] : proj.sound.v[r.a][r.b][r.c];
+    cur = l->val[s] != MOT_NONE ? l->val[s] : pref_get(r);
     nv=original_switch_turn(r,cur,e,l->val[s]==MOT_NONE);
     if(nv<0)
     {

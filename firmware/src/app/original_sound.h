@@ -20,7 +20,13 @@
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
 #define ORIGINAL_SYNTHONE_FACTORIES 1u
-#define ORIGINAL_SYNTHONE_NPARAMS 6u
+#define ORIGINAL_SYNTHONE_NPARAMS 13u
+#define ORIGINAL_SYNTHONE_BASE_COUNT 6u
+enum {
+    ORIGINAL_SYNTHONE_TREM = ORIGINAL_SYNTHONE_BASE_COUNT,
+    ORIGINAL_SYNTHONE_LFO1_SHAPE, ORIGINAL_SYNTHONE_LFO1_LEVEL, ORIGINAL_SYNTHONE_LFO1_RATE,
+    ORIGINAL_SYNTHONE_LFO2_SHAPE, ORIGINAL_SYNTHONE_LFO2_LEVEL, ORIGINAL_SYNTHONE_LFO2_RATE
+};
 #define ORIGINAL_SYNTHONE_CRUSH 2u
 #define ORIGINAL_SYNTHONE_WIDTH 3u
 #define ORIGINAL_SYNTHONE_PAN 4u
@@ -96,6 +102,7 @@ const char *original_sound_fx_name(unsigned choice);
 uint32_t original_sound_engine_id(unsigned kind);
 const char *original_sound_name(unsigned kind, unsigned factory);
 const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter);
+unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter);
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);

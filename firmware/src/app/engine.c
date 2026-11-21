@@ -750,8 +750,9 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
             *val = s1_part_crush_hz(unit_control((unsigned)pot));
             return X0X_U_HZ;
         }
-        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && i == (int)ORIGINAL_SYNTHONE_PAN_RATE && (unsigned)pot < 128u) {
-            *val = s1_pan_hz((unsigned)pot);
+        if (engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE && (unsigned)pot < 128u &&
+            (i == ORIGINAL_SYNTHONE_PAN_RATE || i == ORIGINAL_SYNTHONE_LFO1_RATE || i == ORIGINAL_SYNTHONE_LFO2_RATE)) {
+            *val = i == ORIGINAL_SYNTHONE_PAN_RATE ? s1_pan_hz((unsigned)pot) : s1_lfo_hz((unsigned)pot);
             return X0X_U_HZ;
         }
         return X0X_U_NONE;
@@ -1469,6 +1470,10 @@ static int mot_base(void *x, int t, int v, int i)
         return mod_ctl[v];
     if (original_motion_performance(t, v, i))
         return perf_ctl[v][(unsigned)i - (original_sound_bend_id(original_bass[v].kind))];
+    if (mot_base_snd && t == T_303 && (unsigned)v < NBASS &&
+        original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
+        (unsigned)i >= ORIGINAL_SYNTHONE_PAN_RATE && (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
+        return (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
 }
 static void mot_apply(void *x, int t, int v, int i, int val)

@@ -12,6 +12,7 @@ void s1_part_init(s1_dry_part *part)
     part->bend = 0.5f;
     part->crush_interval = 1.f;
     part->pan.rate_target = .25f;
+    part->lfo[0].increment = part->lfo[1].increment = .25f * (1.f / 44100.f);
 #if X0X_SYNTHONE_PATCH
     s1_dry_frozen_controls(&part->patch);
 #endif
@@ -164,10 +165,29 @@ static const float crush_intervals[128] = {
     0x1.c25ca4p+3f, 0x1.fd2792p+3f, 0x1.24cd0cp+4f, 0x1.588800p+4f,
 };
 
+float s1_lfo_hz(unsigned position)
+{
+    if (position == 0) return 1.f / 1920.f;
+    if (position == 127) return 80.f;
+    float offset=(float)position - 64.f;
+    return .25f * fm_exp2f(offset * (position < 64 ? 8.906890596f/64.f : 8.321928095f/63.f));
+}
+
 int s1_part_param(s1_dry_part *part, unsigned id, float value)
 {
     if (id >= ORIGINAL_SYNTHONE_NPARAMS || !(value >= 0.0f && value <= 1.0f)) return 0;
     unsigned position = (unsigned)(value * 127.f + .5f);
+    if (id >= ORIGINAL_SYNTHONE_TREM) {
+        unsigned choice = (position * 3u + 63u) / 127u;
+        if (id == ORIGINAL_SYNTHONE_TREM) part->tremolo = (uint8_t)choice;
+        else {
+            s1_trem_lfo *lfo = &part->lfo[id >= ORIGINAL_SYNTHONE_LFO2_SHAPE];
+            if (id == ORIGINAL_SYNTHONE_LFO1_SHAPE || id == ORIGINAL_SYNTHONE_LFO2_SHAPE) lfo->shape = (uint8_t)choice;
+            else if (id == ORIGINAL_SYNTHONE_LFO1_LEVEL || id == ORIGINAL_SYNTHONE_LFO2_LEVEL) lfo->level = value;
+            else lfo->increment = s1_lfo_hz(position) * (1.f / 44100.f);
+        }
+        return 1;
+    }
     if (id == ORIGINAL_SYNTHONE_PAN_RATE) {
         part->pan.rate_target = s1_pan_hz(position);
         return 1;
@@ -300,8 +320,44 @@ static unsigned pan_increment(float hz)
     return nearest.u - 0x4b400000u;
 }
 
+/* The source uses two independent floating phasors and a separate
+ * 5.3125 ms half-time discontinuity smoother for each wave. The inverse
+ * envelope follows smoothing; the third route averages the two envelopes. */
+static float lfo_step(s1_trem_lfo *lfo)
+{
+    float phase=lfo->phase, wave;
+    lfo->phase=phase+lfo->increment;
+    if (lfo->phase >= 1.f) lfo->phase -= 1.f;
+    switch (lfo->shape) {
+    case 1: wave=phase > .5f ? 1.f : -1.f; break;
+    case 2: wave=(phase-.5f)*2.f; break;
+    case 3: wave=(.5f-phase)*2.f; break;
+    default: wave=fm_sin_pi((phase > .5f ? phase-1.f : phase)*FM_TWO_PI); break;
+    }
+    lfo->smooth=0x1.8338p-9f*wave+0x1.fe7cc8p-1f*lfo->smooth;
+    return 1.f - (.5f*(1.f-lfo->smooth)*lfo->level);
+}
+static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned frames)
+{
+    s1_trem_lfo *a=&part->lfo[0], *b=&part->lfo[1];
+    /* The default phases and waves match. Keep one warm clock history until
+     * the user separates them, including the pre-edit and silent intervals. */
+    int same=a->shape==b->shape && a->increment==b->increment &&
+             a->phase==b->phase && a->smooth==b->smooth;
+    for (unsigned i=0;i<frames;++i) {
+        float gain1=lfo_step(a);
+        float gain2=same ? 1.f-(.5f*(1.f-a->smooth)*b->level) : lfo_step(b);
+        if (part->tremolo) {
+            float gain=part->tremolo == 1 ? gain1 : part->tremolo == 2 ? gain2 : .5f*(gain1+gain2);
+            left[i]=right[i]=left[i]*gain;
+        }
+    }
+    if (same) { b->phase=a->phase; b->smooth=a->smooth; }
+}
+
 static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
+    tremolo_mono(part,left,right,frames);
     unsigned phase = part->pan.phase;
     float rate = part->pan.rate;
     unsigned mix = part->pan.mix;

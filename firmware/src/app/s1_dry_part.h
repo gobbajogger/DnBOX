@@ -15,6 +15,11 @@ typedef struct {
 } s1_stereo_width;
 
 typedef struct {
+    float phase, increment, smooth, level;
+    uint8_t shape;
+} s1_trem_lfo;
+
+typedef struct {
     s1_dry_voice voice[S1_CORE_VOICES];
     uint8_t note[S1_CORE_VOICES], down[S1_CORE_VOICES], damper, next;
     float bend, crush_interval, crush_next, crush_age, crush_last;
@@ -27,6 +32,8 @@ typedef struct {
         float rate, rate_target, depth, depth_target;
         uint8_t engaged, mix;  /* gain-law transition in 64 samples */
     } pan;
+    s1_trem_lfo lfo[2];
+    uint8_t tremolo;
 } s1_dry_part;
 
 /* Original bitCrushSampleRate is 2048..48000 Hz. Turning up the crush
@@ -39,6 +46,7 @@ static inline float s1_pan_hz(unsigned position)
     if (position <= 3) return minimum + (0.25f - minimum) * (float)position / 3.f;
     return 0.25f + (float)(position - 3u) * (9.75f / 124.f);
 }
+float s1_lfo_hz(unsigned position);
 void s1_part_init(s1_dry_part *part);
 void s1_part_all_off(s1_dry_part *part);
 void s1_part_bind_width(s1_dry_part *part, uint8_t *history);

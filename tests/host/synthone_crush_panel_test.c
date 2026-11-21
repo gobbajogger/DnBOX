@@ -8,6 +8,7 @@ int main(void)
 {
     boot();
     int32_t block[512];
+    const int lfo[2][7]={{127,42,117,98,85,37,62},{85,127,65,71,0,92,117}};
     for (int v = 0; v < 2; ++v) {
         assert(engine_bass_select_preset(v, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound) == 0);
         for (unsigned i = 0; i < 1000 && engine_bass_preset_pending(v); ++i) engine_render(block, 256);
@@ -28,6 +29,8 @@ int main(void)
         assert(original_value_text(pan, 0, number, unit) && !strcmp(number, "OFF"));
         assert(original_value_text(pan_rate, pref_get(pan_rate), number, unit) &&
                !strcmp(number, "250") && !strcmp(unit, "mHz"));
+        for(unsigned i=0;i<7;++i)
+            pref_set(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_TREM+i),lfo[v][i]);
         pref_set(pan, 36 + v);
         pref_set(pan_rate, 97 - v);
         pref_set(width, 67 + v);
@@ -65,9 +68,11 @@ int main(void)
         assert(engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH)) == rates[v]);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_WIDTH)) == 67 + v);
+        for(unsigned i=0;i<7;++i)
+            assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_TREM+i)) == lfo[v][i]);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN)) == 36 + v);
         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_PAN_RATE)) == 97 - v);
     }
-    puts("Both Synth One pages preserved independent crush, width, pan depth and pan rate across project save, engine switches and reload.");
+    puts("Both Synth One owners preserved independent CRUSH, width, pan and seven tremolo controls across project save, engine switches and reload.");
     return 0;
 }

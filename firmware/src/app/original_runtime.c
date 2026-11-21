@@ -53,7 +53,8 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
     /* All admitted factories have neutral bend/damper. Archived performance
      * edit bits never become inputs to a newly adopted runtime instance. */
     for (unsigned i = 0; i < original_sound_count(kind); ++i)
-        if ((edits & (UINT32_C(1) << i)) && !original_sound_is_performance(kind, i)) {
+        if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
+                  ? cell[31] == 2 : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
         float value;
         if (!original_sound_value(cell, i, &value) ||
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
