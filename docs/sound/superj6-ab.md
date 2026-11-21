@@ -4,6 +4,8 @@
 
 The November 21 rerun on the recovered Linux bench reproduced seven original component captures byte for byte. Complete instrument initialization stopped at the first Swift Foundation UUID metadata request. The engine-only AU host, 14 fixed input records, authenticated release audit, and stereo scoring command are in the [factory bench](../../experiments/sound-hardware-v1/sj6-factory/README.md). The two arms still need complete-preset renders before any score can be reported.
 
+The owner reports a subsequent original engine-only Linux run with 22 oscillator-layer comparisons and three programs stopped on omitted PWM. The compact loader now resolves those missing controls from the build-9 defaults. The corrected oscillator passed 298 controlled probes and eight measurements using the two authored layers of PWM String Pad against the archived analytic reference. The remaining 13 selected records and the original Linux capture packet were unavailable for this replay. The oscillator scores cover an isolated stage. The three-second stereo preset matrix still has zero complete original/firmware pairs. [Loader trace and oscillator comparison](../../experiments/sound-hardware-v1/sj6-factory/oscillator/README.md)
+
 ## Verified originals
 
 | Input | Bytes | SHA-256 |

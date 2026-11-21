@@ -2,6 +2,10 @@
 
 S6 remains **FAIL**. The regular native build links and packages a playable partial Synth One with either the shipped Juno backend or the experimental compact SuperJ6 backend. All five source variants below preserve the shipped UI and run with stock memory. The simultaneous full SuperJ6 and Synth One control sets, factory programs and independent original FX histories still require implementation and a new pair of links.
 
+## Corrected SuperJ6 factory oscillator on current firmware
+
+At source `dea023ce` the compact application with retained typed waveform/PWM, AMP2 and master controls builds for Elite at 550,436 bytes and Pro at 550,424 bytes. Free XIP is 2,236 and 2,248 bytes. Both retain 8,972 free pool bytes and 1,100 bytes of ordinary RAM. Each six-voice part uses 192 bytes of additional independent oscillator history within the existing backend allocation. The complete factory table requires another 122,359 read-only bytes. On-device storage, selection of all 640 programs and the complete effects graph remain unqualified. [Patch, budgets and binary identities](../../experiments/sound-hardware-v1/sj6-factory/native/README.md)
+
 ## Production INIT at the qualified source
 
 The shipped Juno, Chicago, Miami and independently implemented Synth One INIT all link through the stock application. Both models use the same firmware source. The seven-file change on parent `933a6f40e8aca72607a258ab42ff21265489903d` reproduces code-only tree `39c6aea21022c93ee95de5a78236b3619b63bcdb`. Per-file pins, ELF sections, per-engine attribution, target ABI, builds and output identities are in the [production receipts](../../experiments/sound-hardware-v1/stock-fit-20261121/final-init-native-receipts.tar.gz).

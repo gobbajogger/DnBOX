@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from compare import channel_score
 from factory import load_factory, select, canonical_bytes
+import remote_fields
 
 REF = "4ea86b9e869011cae761709d13569b7bc32980a8"
 HEADER = "experiments/superj6-original-reference-20261115/sampler/DunneCore/Common/OriginalAnalyticOscillator.h"
@@ -29,6 +30,12 @@ AMOUNTS = {
     "range": (0., .37, .83, 1.),
     "holdout": (.023, .71, .965),
 }
+# Frozen from the pre-correction compact tree, d371377ada1f15a75ce33868c7d04172b273f8bb.
+# These two probes check compact legacy quality modes independently of factory scores.
+LEGACY_HASHES = (
+    "0bf8c021876aaeda60c4288dbaa8cb6eab99046e7459512675b23e7356b30fab",
+    "10f4073e2f0aedaddb1db3621689e647131e58f004a043e0579eb05140ad79ba",
+)
 FRAMES = 8192
 SPEC = json.loads((HERE.parent / 's4-inputs.json').read_bytes())
 
@@ -68,7 +75,10 @@ def build(compact, repo, out):
         pcm = np.zeros(2048, np.float32)
         if not stock(mode, pcm.ctypes.data_as(F32), len(pcm) // 2) or not np.any(pcm):
             raise RuntimeError("legacy render failed")
-        stock_hashes.append(digest(pcm.tobytes()))
+        actual = digest(pcm.astype("<f4", copy=False).tobytes())
+        if actual != LEGACY_HASHES[mode]:
+            raise ValueError(f"compact legacy mode {mode} stereo hash differs: {actual}")
+        stock_hashes.append(actual)
     return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in
                                   ("dnbx_core.c", "dnbx_core.h", "fastmath.h", "juno6.c", "juno6.h")}
 
@@ -77,9 +87,9 @@ def cases(archive, suite):
     if archive is None:
         for layer in range(2):
             for stop in range(3):
-                yield "control-" + str(stop), layer, np.float32(stop / 3), 0., 0.
+                yield "control-" + str(stop), layer, np.float32(stop / 3), 0., 0., {}
             for amount in AMOUNTS[suite]:
-                yield "control-pwm-" + str(amount), layer, 1., np.float32(amount), float(amount > 0)
+                yield "control-pwm-" + str(amount), layer, 1., np.float32(amount), float(amount > 0), {}
         return
     if digest(archive.read_bytes()) != SPEC["archive_sha256"]:
         raise ValueError("expected the authenticated J6presets.zip")
@@ -90,12 +100,23 @@ def cases(archive, suite):
         record = select(banks, row["bank_uuid"], row["program_uid"])["preset"]
         if digest(canonical_bytes(record)) != row["record_sha256"]:
             raise ValueError(f"record checksum differs for {row['program_uid']}")
-        fields = {p["identifier"]: np.float32(p["value"]) for p in record["parameterValues"]}
-        for layer in range(2):
-            # The original main preset pass defaults these two fields to +0.
-            # This component excludes later LFO/live-control modulation.
-            yield (row["program_uid"], layer, fields[keys[82 + layer]],
-                   fields.get(keys[78 + layer], 0.), fields.get(keys[210 + layer], 0.))
+        yield from authored_layers(record, keys)
+
+
+def authored_layers(record, keys):
+    fields = {}
+    for parameter in record["parameterValues"]:
+        # Original main-pass lookup takes the first matching identifier.
+        fields.setdefault(parameter["identifier"], np.float32(parameter["value"]))
+    for layer in range(2):
+        amount = fields.get(keys[78 + layer])
+        enable = fields.get(keys[210 + layer])
+        # Absent controls default independently to positive zero in the main
+        # pass. A live route snapshot and receiver are needed for later stages.
+        details = {"authored_pwm_amount": None if amount is None else float(amount),
+                   "authored_pwm_enable": None if enable is None else float(enable)}
+        yield (record["uid"], layer, fields[keys[82 + layer]],
+               0. if amount is None else amount, 0. if enable is None else enable, details)
 
 
 def main():
@@ -105,6 +126,7 @@ def main():
     inputs = parser.add_mutually_exclusive_group()
     inputs.add_argument("--banks", type=Path)
     inputs.add_argument("--suite", choices=NOTES)
+    inputs.add_argument("--remote-repo", type=Path, help="Nightly Git checkout for the checked PWM String Pad fields")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     out = args.out.resolve()
@@ -112,7 +134,12 @@ def main():
     reference, candidate, stock_hashes, inputs = build(args.compact, args.repo, out)
     suite = args.suite or "controls"
     rows = []
-    for uid, layer, selector, amount, enable in cases(args.banks, suite):
+    settings = cases(args.banks, suite)
+    scope = "factory-main-pass base oscillator only" if args.banks else f"isolated oscillator {suite}"
+    if args.remote_repo:
+        settings = ((*row, {}) for row in remote_fields.load(args.remote_repo, out, SPEC))
+        scope = "six Remote-verified PWM String Pad control words, pre-filter oscillator only"
+    for uid, layer, selector, amount, enable, authored in settings:
         stop = int(3 * float(selector))
         width = .5 - .47 * float(amount) if stop == 3 and enable > .5 else .5
         for note in NOTES[suite]:
@@ -123,14 +150,14 @@ def main():
                 raise RuntimeError("compact render failed")
             with_peers = np.empty_like(b)
             if not candidate(layer, selector, amount, enable, note, ct.byref(increment),
-                             with_peers.ctypes.data_as(F32), FRAMES, 1) or not np.array_equal(b, with_peers):
+                             with_peers.ctypes.data_as(F32), FRAMES, 1) or not np.array_equal(b.view(np.uint32), with_peers.view(np.uint32)):
                 raise RuntimeError("another oscillator changed the selected layer's signal")
             if not reference(stop, width, increment.value, a.ctypes.data_as(F32), FRAMES):
                 raise RuntimeError("reference render failed")
             if not all(np.all(np.isfinite(x)) and np.any(x) for x in (a, b)):
                 raise ValueError("non-finite or silent oscillator")
             rms, spectral = channel_score(a, b, SPEC["sample_rate"], SPEC["band_hz"])
-            rows.append({"case": uid, "layer": layer + 1, "note": note, "shape": stop,
+            rows.append({**authored, "case": uid, "layer": layer + 1, "note": note, "shape": stop,
                          "selector": float(selector), "amount": float(amount), "enable": float(enable),
                          "increment": increment.value, "reference_width": width,
                          "reference_sha256": digest(a.tobytes()), "candidate_sha256": digest(b.tobytes()),
@@ -139,11 +166,16 @@ def main():
                          "correlation": float(np.corrcoef(a, b)[0, 1]),
                          "pass": abs(rms) <= SPEC["level_limit_db"] and spectral <= SPEC["spectral_limit_db"]})
     result = {"reference_commit": REF, "reference_header_sha256": REF_HASH, "candidate_files": inputs,
-              "scope": "factory-main-pass base oscillator only" if args.banks else f"isolated oscillator {suite}",
+              "scope": scope,
               "stock_stereo_sha256_by_mode": stock_hashes,
               "frames_per_case": FRAMES, "rate": SPEC["sample_rate"],
               "unchanged_with_other_layer_and_voice": len(rows),
               "passes": sum(row["pass"] for row in rows), "total": len(rows), "cases": rows}
+    if args.remote_repo:
+        result["remote_commit"] = remote_fields.REMOTE_REV
+        result["remote_input_sha256"] = remote_fields.FILES
+    if args.banks:
+        result["pwm_amount_stage"] = "main preset pass, before the captured-route postpass and live modulation"
     (out / "result.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(f"{result['passes']}/{len(rows)} isolated oscillator comparisons within limits")
     return int(result["passes"] != len(rows))

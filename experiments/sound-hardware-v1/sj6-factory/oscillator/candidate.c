@@ -8,10 +8,14 @@ static float *output;
 static size_t capacity;
 static size_t written;
 static unsigned selected_layer;
+static unsigned sounding_paths;
 
 void observe_oscillator(unsigned voice, unsigned layer, float x)
 {
-    if (output && voice == 0 && layer == selected_layer) {
+    if (!output) return;
+    if (voice < 2 && layer < 2 && x != 0.f)
+        sounding_paths |= 1u << (voice * 2 + layer);
+    if (voice == 0 && layer == selected_layer) {
         if (written < capacity) output[written] = x;
         ++written;
     }
@@ -35,7 +39,10 @@ int candidate_oscillator(unsigned layer, float selector, float amount, float ena
     }
     if (add_peers) {
         juno6_oscillator_edit other = {1.f, .78125f, 1.f};
-        juno6_apply_pre_note_wave(&part, layer ^ 1u, &other);
+        unsigned peer = layer ^ 1u;
+        juno6_apply_pre_note_wave(&part, peer, &other);
+        float raw;
+        if (dnbx_read_raw(&part.core, 78 + peer, &raw) != DNBX_OK || raw != other.amount) return 0;
     }
     if (!juno6_note_on(&part, note, 127)) return 0;
     if (add_peers && !juno6_note_on(&part, (note + 19) % 128, 73)) return 0;
@@ -44,6 +51,7 @@ int candidate_oscillator(unsigned layer, float selector, float amount, float ena
     capacity = count;
     written = 0;
     selected_layer = layer;
+    sounding_paths = 0;
     for (size_t done = 0; done < count;) {
         float left[128], right[128];
         unsigned frames = count - done < 128 ? (unsigned)(count - done) : 128;
@@ -51,7 +59,7 @@ int candidate_oscillator(unsigned layer, float selector, float amount, float ena
         done += frames;
     }
     output = NULL;
-    return written == count;
+    return written == count && (!add_peers || sounding_paths == 15u);
 }
 
 /* Exercise both legacy quality modes, including a normal macro edit after the
