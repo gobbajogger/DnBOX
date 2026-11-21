@@ -31,4 +31,6 @@ The comparison uses the original dry scheduler and the actual firmware part at 4
 
 All eight established INIT note/chord scenes also pass their original 1 dB level and 3 dB spectral limits. Their worst absolute level error is 0.0202 dB and their worst spectral error is 0.3302 dB. These tests cover dry INIT. The factory graph and effects use separate comparisons.
 
+The [84 three-note dry comparisons](retrigger-dry.json.gz) also passed against original PCM independently regenerated from the pinned source. All 84 reference SHA-256 digests matched the recorded references at 44.1 kHz. At unity gain, the 180 static notes had worst absolute level and spectral errors of 0.470 and 0.416 dB. The corresponding maxima for the 72 filter-modulation notes were 0.019 and 1.111 dB. The existing `qualify.py` protocol above reproduces the per-case filters, notes and metrics.
+
 Run `python3 experiments/sound-hardware-v1/stock-dry/compare_retrigger.py /tmp/s1-retrigger` with a fresh output directory. It restores the pinned source, verifies the held-note references and writes the full PCM captures and per-pitch results. To check the negative control, add `--candidate-tree` pointing to a checkout at `63278e3322aefa89b25f129ca2fccc35ef3b3b3d`.

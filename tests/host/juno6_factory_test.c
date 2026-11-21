@@ -30,8 +30,28 @@ static void check_mono(void)
     }
 }
 
+static void check_typed_rekey(void)
+{
+    for (unsigned pedal = 0; pedal < 2; ++pedal) {
+        juno6_t s;
+        const juno6_oscillator_edit wave = {1.f, .5f, 1.f};
+        float l[256], r[256];
+        juno6_init(&s, 44100);
+        juno6_apply_pre_note_wave(&s, 0, &wave);
+        assert(juno6_note_on(&s, 67, 92) && juno6_note_on(&s, 60, 100));
+        for (unsigned i = 0; i < 8; ++i) assert(juno6_render_stereo(&s, l, r, 256));
+        if (pedal) assert(juno6_set(&s, 17, 1.f));
+        juno6_note_off(&s, 60);
+        assert(juno6_render_stereo(&s, l, r, 64));
+        assert(juno6_note_on(&s, 60, 83));
+        assert(dnbx_active_voices(&s.core) == 2 && s.core.voice[1].note == 60 &&
+               s.core.voice[1].gate && s.core.voice[0].note == 67 && s.core.voice[0].gate);
+    }
+}
+
 int main(void)
 {
+    check_typed_rekey();
     check_mono();
     juno6_t s, saved;
     juno6_envelope_snapshot view;

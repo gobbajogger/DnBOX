@@ -324,14 +324,19 @@ int dnbx_get_layer(const dnbx_part *s,unsigned l,dnbx_layer_params *p)
 }
 int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
 {
-    unsigned chosen=0; int found=0;
+    unsigned chosen=0; int found=0, retrigger=0;
     if (!valid(s)) return DNBX_E_UNINITIALIZED;
     if (note>127 || velocity>127) return DNBX_E_RANGE;
     if (!velocity) { dnbx_note_off(s,note); return DNBX_NOTE_OFF_ONLY; }
     /* DnBOX allocator policy: same held note, silent slot, first released
      * slot, then oldest held slot. Bounded ranks avoid timestamp rollover. */
-    for (unsigned i=0;i<DNBX_VOICES;i++)
-        if (s->voice[i].gate && s->voice[i].note==note) { chosen=i; found=1; break; }
+    for (unsigned i=0;i<DNBX_VOICES;i++) {
+        const dnbx_voice *v = &s->voice[i];
+        /* In SuperJ6 a ringing pitch keeps its slot through pedal and release. */
+        if (v->note == note && (v->gate || (s->superj6_amp_range && voice_active(v)))) {
+            chosen=i; found=1; retrigger=1; break;
+        }
+    }
     if (!found) for (unsigned i=0;i<DNBX_VOICES;i++)
         if (!voice_active(&s->voice[i])) { chosen=i; found=1; break; }
     if (!found) for (unsigned i=0;i<DNBX_VOICES;i++)
@@ -339,7 +344,6 @@ int dnbx_note_on(dnbx_part *s,unsigned note,unsigned velocity)
     if (!found) for (unsigned i=1;i<DNBX_VOICES;i++)
         if (s->voice[i].age_rank>s->voice[chosen].age_rank) chosen=i;
     dnbx_voice *v=&s->voice[chosen];
-    int retrigger=v->gate && v->note==note;
     uint8_t next_rank[DNBX_VOICES]={0};
     /* Retirement can leave gaps, so compact the surviving order rather than
      * incrementing stale ranks. At most 36 comparisons per note-on, outside
