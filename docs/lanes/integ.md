@@ -1,6 +1,18 @@
 # Integration baseline
 
-## Stock build and timing verification after FWUI merged
+## Current combined qualification
+
+The [tested combination](https://github.com/gobbajogger/DnBOX/commit/c51d9d8647fb72ae0628af6fef7fb8cfbcbd40e9) includes FWUI #975 and the engine and 909 sample changes that Sound #973 incorporated from #985. The [subsequent two-parent comparison](https://github.com/gobbajogger/DnBOX/commit/3571c7dc29722356e486701fbe566da13cd36f04) retains all 6,918 paths from integration `711df7b3` and Sound `2fe5930c`. The 78 stock translation units, 71 playback translation units and 166 compiler dependencies matched the build, and five regenerated stock headers matched byte-for-byte. Consolidated is `46874497`. [Source comparison and input proof](../../evidence/integ-c51d9d86/source-equivalence.tar.xz)
+
+| Item | Latest result |
+|---|---|
+| I2 | Fresh Elite and Pro builds passed their stock package checks and matched independent GitHub binary downloads. Elite produced a 546,468 B application and a 651,732 B package. Pro produced a 546,460 B application and a 651,730 B package. Free XIP was 6,204 / 6,212 B and each model had 832 B above the pool reserve. Sound #973 remains open. [Packages and build logs](https://github.com/gobbajogger/DnBOX/tree/959bf9489f949713997410d81dba798aaa73e6cf/artifacts/integ-candidates/c51d9d86) |
+| I3 | Two complete 32,768-block heavy playback runs recorded 13 and 15 render-thread CPU misses at 11,609 µs. Peaks were 88,185.258 and 125,209.990 µs. The ordinary-load run recorded 866 wall misses and the repeat recorded 2,731. All 32 PCM and 32 meter/scope digests matched across the new runs. All 64 changed from the previous Sound source. Every workload exercised five parts and both drum kits. Muting Bass B failed as expected. The same-CPU fixed-work controls missed eight times during browser qualification and 36 times after all local builds and browsers ended. Zero-dropout qualification remains open. [Raw traces, mutations and controls](../../evidence/integ-c51d9d86/heavy-playback.tar.xz) |
+| I4 | Stock Debian LeakSanitizer passed the compact-program test, detected the deliberate leak, and rejected the corrupted metadata. [Guest transcript](../../evidence/integ-b5207372/compact-stock-linux.txt) |
+| I5 | The five original BREAK samples require 109,394 B. Stock budgets after alignment and reserve are 5,168 B Elite and 5,184 B Pro, short by 104,226 B and 104,210 B. All 31 nonempty subsets failed on both models. The exact-capacity, one-byte-over, full five-zone fixture, production chooser and native preview checks passed. [Packer and reader evidence](../../evidence/integ-c51d9d86/break-fit.tar.xz) |
+| I6–I7 | The owner submitted [#984](https://github.com/gobbajogger/DnBOX/issues/984). The production inbox refreshed at zero and the issue closed with zero opening-post reactions. Five-width fixture voting passed. The signed-in increment, final consolidated builds, parallel 501-case host and strict emu360 gates, and post-merge cleanup remain open. |
+
+## Earlier stock verification at 2c16e15f
 
 Integration `2c16e15f` contains consolidated `46874497`, including FWUI #975 and its qualification #986. On this exact source, native Elite and Pro packages passed the stock parser and matched all eight #986 application, ELF, loader and package hashes. The scheduler, four FREE PLAY framebuffer cases, overlay registration, roadmap, issue forms, ten original input checks and all 16 recorded merge ancestors passed. [Focused results](../../evidence/integ-c28ae27c/firmware-focused.tar.xz) · [Stock #976 builds and bank-fit tests](../../evidence/integ-c28ae27c/firmware-native.tar.xz)
 
@@ -8,7 +20,7 @@ The [combined source](https://github.com/gobbajogger/DnBOX/commit/c28ae27c2c6a1a
 
 The fourth independent fixed-work control recorded seven misses in 32,768 blocks on CPU 0, with a 44,665.406 µs peak. The preceding three controls recorded 21, 8 and 105 misses. The two heavy playback runs still stand at 42 and 294 misses. The five original samples require 109,394 B. The combined install permits 5,136 B on Elite and 5,152 B on Pro after alignment and reserve. The standalone #976 builds also rejected every nonempty subset. [Later fixed-work controls](../../evidence/integ-c28ae27c/fixed-work-controls.tar.xz)
 
-## Current integration qualification
+## Qualification before Sound incorporated #985
 
 Firmware [#976](https://github.com/gobbajogger/DnBOX/pull/976) incorporates consolidated `46874497`. [FWUI #975](https://github.com/gobbajogger/DnBOX/pull/975) merged at `3e307cfa`, and [#986](https://github.com/gobbajogger/DnBOX/pull/986) records its focused tests, stock builds and independent screen review. The merge retains the positive FREE PLAY check and the three distinct controls for inactive mode, missing label and unexpected cue. All tracked paths from both parents are present. Firmware and nightly use the same rules blob `d66eb78b94ef207660565a186322fc0025e85506`. The scheduler test fix is `7f87de10`. The [focused log](../../evidence/integ-b5207372/focused.txt) records the results.
 
