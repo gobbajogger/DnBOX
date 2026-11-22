@@ -14,3 +14,5 @@ MODEL=pro ./build.sh
 ```
 
 Change `MODEL` to `elite` for the other package. The published [native profile](../native-profile.json) pins the ELF, FWSC and emulator flash image hashes. Run the strict 360 MHz calibrated populated playback in `experiments/sound-hardware-v1/selected-native`. Use owners 0 1 and 3 2 on Elite, and 1 0 and 2 3 on Pro. Stage highpass and full-level sub for the Juno/Synth One pair. Apply the existing `activate_mode2.py` offline fixture to the composed engine for the separate wet tests. Every replay requires a firmware-matched project seed and a mode readback on the intended owner for wet qualification.
+
+A clean Git reconstruction preserved Integration’s legacy Juno control helper expressions. It produced byte-identical stock and instrumented ELF and FWSC files for both boards. All six repeated emulator captures matched the reported results and PCM hashes. The [reconstruction receipt](reconstruction.json) pins those comparisons and the exact ancestry.
