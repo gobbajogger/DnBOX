@@ -1,0 +1,8 @@
+baseline link exit 0 
+baseline ELF hash 5a108a3ddbab2414f817d3bf7fdff4e01a30beecea3b875f3cd1118df9db36bd
+.text 547512 9be6310591ba714321f0cb2960028715e6aa3b78c2a17c3bd6c09c78da05aa9c byte_equal True
+.ram_text 2708 08478496283657c2127bb735266b9bda5a2898e08ec7ba1072aad8d209be6d02 byte_equal True
+.c1_text 608 142ba82c355f41a1f9e141b7fb56d8375a0b50aee1c681edcabdbd4b9e4e9ce2 byte_equal True
+.data 612 5ce303e674d9421863c6d6e76d6a5fd36ef31ac3241ebb120fad163cd052e14a byte_equal True
+scalar-core-only link exit 0 
+{"base_bytes": 551444, "scalar_core_bytes": 552468, "delta_bytes": 1024, "free": 204, "floor": 1024, "deficit": 820}

@@ -1084,6 +1084,12 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     ed_send();
 }
 
+/* Requires the caller to supply an incarnation, a source-owned catalog and a
+ * checked queue adapter. Stock builds leave this path unbound. */
+#ifdef ED_DNR2_STATE
+#include "dnr2_scalar.h"
+#endif
+
 /* Return 1 only when this check left a non-editor frame pending for OTA. */
 static int ed_service(void)
 {
@@ -1104,6 +1110,18 @@ static int ed_service(void)
     boot_housekeep();
     if (!ota_frame_get(&p, &n))
         return 0;
+#ifdef ED_DNR2_STATE
+    if (n >= 4u && p[0] == 0x7du && p[1] == 'D' && p[2] == 'N' && p[3] == 2u) {
+        int reply = ED_MAINTENANCE_ADMIT() && !ed_project.mode && !ui_project_busy() &&
+            !ui_boot_flash_busy() &&
+            dnr2_scalar_frame(&ED_DNR2_STATE, p, n, fm1_ms, ED_DNR2_READ(),
+                              ED_DNR2_WRITE, ed_out);
+        ota_frame_done();
+        if (reply)
+            ota_wire_send(ed_out, DN_REPLY);
+        return 0;
+    }
+#endif
     if (n < 4u || p[0] != ED_HDR0 || p[1] != ED_HDR1 || p[2] != ED_HDR2) {
         if (ed_project.mode) {
             ota_frame_done();                        /* OTA and project operations share scratch */

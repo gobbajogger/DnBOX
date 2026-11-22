@@ -1,5 +1,13 @@
 # Integration baseline
 
+## Scalar Remote producer and shared XIP budget — 2026-11-22 (WORKING)
+
+The branch includes the firmware host-setup repair and a software-only scalar producer candidate. With the production editor and the real host engine, 909 MIX Level Apply and Undo each admit one queue command, change the authoritative project value at admission, and change engine gain at consumption. Replaying Apply adds no command. A full queue preserves the project and revision. An explicit test hook on the normal panel writer preserves conflict detection after an A–B–A edit. The Remote candidate’s Nightly module confirms the addressed fields and fresh readbacks in the software fixture. [Proof and reproduction](../../evidence/integ-resume/dnr2-scalar/README.md)
+
+The cached stock Elite relink reproduces all baseline loadable bytes. The scalar core alone adds 1,024 B and leaves 204 B free, 820 B below the 1,024 B minimum before the production adapter. The unbound editor path produces identical nonempty preprocessed unity code on Elite and Pro. The shipped stock app/FWSC and offline five-zone package receipts still apply. Stock INFO returns 25 bytes and stock DNR2 HELLO returns zero. This evidence does not qualify production Remote or TouchOSC.
+
+The next shared measurement needs the exact composed Sound/FWUI candidate. Sound `6302424e` reports a 2,960 B XIP recovery paired with 4,104 B additional pool demand on a separate opt-in profile. Applying that trade to the current Integration pool margin of 832 B would exceed the available reserve. Qualification requires a single combined link preserving both floors, checked production queue/writer revision coverage, and a boot identity. Keep production admission off and run the full Local and strict ten-minute gates once on the final combined sources.
+
 ## Stock Remote protocol isolation and Elite fit — 2026-11-22 (WORKING)
 
 Integration and Remote stock Elite/Pro application and FWSC hashes match. The existing builds, five-sample offline readback and matching Remote proposals are reused. The existing stock probe reproduced INFO at 25 bytes and DNR2 HELLO at zero. The editor defers DNR2 to OTA, which discards it. The archived real-engine Apply/Undo proof uses a test-only catalog.

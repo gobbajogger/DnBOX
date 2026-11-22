@@ -1,0 +1,11 @@
+DNR2 stock dispatcher returned 0 bytes; expected 51
+stock INFO: 25 reply bytes
+stock INFO: 25 reply bytes
+DNR2 HELLO: 51 reply bytes
+addressed scalar READ/Apply/READ/Undo/READ: 75 -> 76 -> 75, revisions 1/2/3
+replay, foreign address, malformed input, ABA, full queue, lease expiry, close, project and maintenance guards: PASS
+project protocol: staging, exact chunks, CRC/capacity, confirmation, timeout and full sample headers ok
+PASS Apply and Undo each queue one real 909 MIX Level message and change audio only on consumption
+PASS real panel A-B-A edits invalidate the stale Undo even when the value returns
+PASS real saturated producer queue rejects Apply before project publication or revision change
+{"softwareOnly":true,"testScalar":true,"stockCatalogAdmitted":false,"hello":{"status":0,"count":1,"crc":1272963953},"addressed":[[2,0,1,75],[3,1,2,76],[2,0,2,76],[2,0,2,76],[3,1,3,75],[2,0,3,75]]}
