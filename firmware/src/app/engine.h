@@ -103,6 +103,7 @@ int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
 enum engine_superj6_field {
     ENGINE_SJ6_MASTER_VOLUME = 0,
     ENGINE_SJ6_AMP1_ATTACK = 36,
+    ENGINE_SJ6_LFO1_HZ_RATE = 88,
     ENGINE_SJ6_AMP2_ATTACK = 119, ENGINE_SJ6_AMP2_DECAY,
     ENGINE_SJ6_AMP2_SUSTAIN, ENGINE_SJ6_AMP2_RELEASE
 };
@@ -111,7 +112,8 @@ enum engine_superj6_field {
  * Repeated edits to a field in one callback interval retain the last value.
  * Shipping voices must be idle before the first AMP2 edit. Typed voices accept
  * AMP2 while sounding. AMP1 attack is an independent pre-note edit and requires
- * an idle owner at admission and commit. Returns zero on a busy/wrong owner
+ * an idle owner at admission and commit. LFO1 Hz rate edits the compact PWM
+ * LFO on an already typed owner. Returns zero on a busy/wrong owner
  * or invalid field/value. */
 int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit);
 typedef struct { float amount, enable; } engine_superj6_pwm;

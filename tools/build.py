@@ -409,6 +409,11 @@ def app_compile_commands(flags, original_synth, wobble):
         flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1", "-DX0X_CHICAGO_FULL_HISTORY=1"]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+    boot_tanh = os.environ.get("X0X_TANH_BOOT_TABLE", "0")
+    if boot_tanh not in ("0", "1"):
+        raise SystemExit("X0X_TANH_BOOT_TABLE: 0 or 1")
+    if boot_tanh == "1":
+        flags = [*flags, "-DX0X_TANH_BOOT_TABLE=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
     if chance_probe not in ("0", "1"):
         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")

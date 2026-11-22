@@ -72,6 +72,18 @@ void juno6_apply_pre_note_attack(juno6_t *s, float raw)
     s->typed = 1;
 }
 
+/* Independent compact PWM LFO. Hz mode does not establish a factory route. */
+void juno6_apply_lfo1_hz(juno6_t *s, float raw)
+{
+    float hz;
+    if (!s->typed || dnbx_lfo_from_unit(raw, &hz) != DNBX_OK ||
+        dnbx_store_raw(&s->core, 88, raw) != DNBX_RAW_STORED_ONLY) return;
+    /* The phase increment reads this parameter directly. Keep running
+     * phases, envelopes and voice increments untouched. */
+    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer)
+        s->core.layer[layer].params.lfo_hz = hz;
+}
+
 /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
 void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)
@@ -102,10 +114,12 @@ static float factory_tune(const juno6_t *s)
     return s->bend + 24.f * (s->core.raw[86] - .5f);
 }
 
-void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2])
+void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2], int sub_mute)
 {
     for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
         s->core.layer[layer].params.lfo_pwm_depth = 0.f;
+        /* Only the exact off endpoint has a qualified sub transfer. */
+        s->core.layer[layer].params.sub_gain = sub_mute ? 0.f : s->sub_level;
         s->core.layer[layer].params.tune_semitones = factory_tune(s);
         juno6_apply_pre_note_wave(s, layer, &waves[layer]);
     }

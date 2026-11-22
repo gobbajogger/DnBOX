@@ -11,6 +11,9 @@
 #include "ima_adpcm.h"
 #include <stddef.h>
 #include "../x0x_cold.h"          /* X0X_COLD: init/set/get are boot/UI/MIDI — not d9_render */
+#if X0X_TANH_BOOT_TABLE
+#include "../app/plat.h" /* X0X_POOL is shared by both audio cores. */
+#endif
 
 #define D9_VCA_VT 0.0002f
 #define D9_VCA_NORM (1.0f / (1.0f - D9_VCA_VT))
@@ -450,9 +453,38 @@ X0X_COLD static void d9_bt_init(d9_bt_t *v)
     d9_shape_prep(&v->shape, v->drive, v->dist_type);
 }
 
+#if X0X_TANH_BOOT_TABLE
+/* Both cores read the reconstructed table after engine initialization. */
+float x0x_tanh_raw[X0X_TANH_N + 2u] X0X_POOL;
+
+static X0X_COLD void drum909_expand_tanh(void)
+{
+    const uint8_t *src = x0x_tanh_boot_data;
+    uint32_t word = 0, first = 0, second = 0;
+    for (unsigned i = 0; i < X0X_TANH_N + 2u; ++i) {
+        uint32_t encoded = 0;
+        unsigned shift = 0;
+        uint8_t next;
+        do {
+            next = *src++;
+            encoded |= (uint32_t)(next & 127u) << shift;
+            shift += 7;
+        } while (next & 128u);
+        second += (encoded >> 1) ^ (0u - (encoded & 1u));
+        first += second;
+        word += first;
+        union { uint32_t bits; float sample; } value = {word};
+        x0x_tanh_raw[i] = value.sample;
+    }
+}
+#endif
+
 /* Boot only (engine_init). d9_render and drum909_trigger stay -O2. */
 X0X_COLD void drum909_init(drum909_t *d)
 {
+#if X0X_TANH_BOOT_TABLE
+    drum909_expand_tanh();
+#endif
     uint8_t *p = (uint8_t *)d;
     for (unsigned i = 0; i < sizeof(*d); ++i)
         p[i] = 0;

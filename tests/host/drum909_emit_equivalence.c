@@ -37,6 +37,15 @@ static void check_state(const drum909_t *candidate, const drum909_t *original,
 
 int main(void)
 {
+#if X0X_TANH_BOOT_TABLE
+    drum909_t probe;
+    drum909_init(&probe);
+    for (unsigned i = 0; i < X0X_TANH_N + 2u; ++i) {
+        const float expected = x0x_tanh_value(i);
+        check(&x0x_tanh_raw[i], &expected, sizeof expected, "boot tanh table", 0, 0, (int)i);
+    }
+    printf("PASS: %u boot tanh words match the existing decoder\n", X0X_TANH_N + 2u);
+#endif
     unsigned blocks = 0;
     /* Exercise ringing through signed zero/subnormal histories, impulse
      * boundaries, partial final blocks and the eventual silent state. */

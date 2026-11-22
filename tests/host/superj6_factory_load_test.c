@@ -229,6 +229,47 @@ static void check_layer_one_attack(void)
     }
     printf("Layer 1 attack: 10 endpoints, %u stereo frames bit-exact against direct physical settings\n", rendered);
 }
+static void check_lfo_hz_edit(unsigned v)
+{
+    static const float values[] = {0.f, .25f, .5f, .75f, 1.f};
+    static const float hertz[] = {0.f, .158219575f, 1.591073f, 6.1386657f, 16.f};
+    const enum engine_superj6_field field = ENGINE_SJ6_LFO1_HZ_RATE;
+    juno6_t *s = owner[v];
+    CHECK(s->typed && s->core.layer[0].params.lfo_pwm_depth > 0.f);
+    CHECK(!engine_superj6_edit(v, field, -1.f));
+    CHECK(!engine_superj6_edit(v, field, 1.1f));
+    float stopped_left[256], stopped_right[256];
+    for (unsigned k = 0; k < sizeof values / sizeof *values; ++k) {
+        juno6_t *peer = owner[v ^ 1u];
+        float peer_hz = peer->core.layer[0].params.lfo_hz;
+        float before_hz = s->core.layer[0].params.lfo_hz;
+        CHECK(engine_superj6_edit(v, field, values[k]));
+        CHECK(s->core.layer[0].params.lfo_hz == before_hz);
+        boundary();
+        CHECK(peer->core.layer[0].params.lfo_hz == peer_hz);
+        for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
+            float error = s->core.layer[layer].params.lfo_hz - hertz[k];
+            CHECK(error >= -.00001f && error <= .00001f);
+        }
+        float raw;
+        CHECK(dnbx_read_raw(&s->core, 88, &raw) == DNBX_OK && raw == values[k]);
+
+        juno6_t copy = *s;
+        juno6_all_off(&copy);
+        CHECK(juno6_note_on(&copy, 60, 100));
+        float left[256], right[256];
+        for (unsigned block = 0; block < 8; ++block)
+            CHECK(juno6_render_stereo(&copy, left, right, 256));
+        if (!k) {
+            memcpy(stopped_left, left, sizeof left);
+            memcpy(stopped_right, right, sizeof right);
+        } else {
+            CHECK(memcmp(stopped_left, left, sizeof left) || memcmp(stopped_right, right, sizeof right));
+        }
+    }
+    printf("LFO1 Hz: owner %u, five exact-range endpoints and four audible PWM-rate changes\n", v);
+}
+
 static void check_factory_chorus_bypass(void)
 {
     static original_runtime_part active;
@@ -299,11 +340,56 @@ static void check_factory_chorus_bypass(void)
     printf("Factory chorus: signed-zero switches bypass bit-exactly over %u audible stereo frames\n",
            exact_frames);
 }
+static void check_factory_sub_off(void)
+{
+    unsigned muted_frames = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        juno6_t *s = owner[v];
+        juno6_t *peer = owner[v ^ 1u];
+        const float peer_gain = peer->core.layer[0].params.sub_gain;
+        sj6_factory_row on = synthetic(15);
+        sj6_factory_add_word(&on, 202, 0x3f800000u);
+        CHECK(engine_superj6_factory_load(v, &on));
+        boundary();
+        const float fallback = s->core.layer[0].params.sub_gain;
+        CHECK(fallback > 0.f);
+        sj6_factory_row off = synthetic(15);
+        sj6_factory_add_word(&off, 202, 0x80000000u);
+        sj6_factory_add_word(&off, 202, 0x3f800000u);
+        sj6_factory_row invalid = off;
+        invalid.value[SJ6_ROW_SUB_VOLUME] = 1.5f;
+        rejected(v, &invalid);
+        CHECK(engine_superj6_factory_load(v, &off));
+        CHECK(s->core.layer[0].params.sub_gain == fallback);
+        boundary();
+        CHECK(peer->core.layer[0].params.sub_gain == peer_gain);
+        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+            CHECK(s->core.layer[l].params.sub_gain == 0.f);
+
+        juno6_t muted = *s, baseline = *s;
+        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+            baseline.core.layer[l].params.sub_gain = fallback;
+        CHECK(juno6_note_on(&muted, 60, 100) && juno6_note_on(&baseline, 60, 100));
+        float ml[256], mr[256], bl[256], br[256];
+        CHECK(juno6_render_stereo(&muted, ml, mr, 256));
+        CHECK(juno6_render_stereo(&baseline, bl, br, 256));
+        CHECK(memcmp(ml, bl, sizeof ml) || memcmp(mr, br, sizeof mr));
+        muted_frames += 256;
+
+        CHECK(engine_superj6_factory_load(v, &on));
+        boundary();
+        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+            CHECK(s->core.layer[l].params.sub_gain == fallback);
+    }
+    printf("Factory sub mute: %u audible stereo frames with the inherited sub removed\n", muted_frames);
+}
+
 #ifdef SJ6_AUTHORED_BANK
 static void check_bank(void)
 {
     unsigned programs = 0, authored = 0, defaulted = 0, register_words = 0;
     unsigned chorus_switch_words = 0, chorus_bypass_programs = 0;
+    unsigned authored_sub_levels = 0, muted_sub_programs = 0;
     const unsigned chorus_mask = (1u << SJ6_ROW_CHORUS_I) | (1u << SJ6_ROW_CHORUS_II);
     for (unsigned b = 0; b < BANK_COUNT; ++b) {
         for (unsigned p = 0; p < bank_start[b+1] - (unsigned)bank_start[b]; ++p) {
@@ -321,6 +407,12 @@ static void check_bank(void)
                 row.value[SJ6_ROW_CHORUS_I] == 0.f && row.value[SJ6_ROW_CHORUS_II] == 0.f;
             CHECK(owner[v]->factory_chorus_bypass == chorus_off);
             chorus_bypass_programs += (unsigned)chorus_off;
+            int sub_authored = (row.present & (1u << SJ6_ROW_SUB_VOLUME)) != 0;
+            int sub_off = sub_authored && row.value[SJ6_ROW_SUB_VOLUME] == 0.f;
+            authored_sub_levels += (unsigned)sub_authored;
+            muted_sub_programs += (unsigned)sub_off;
+            for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+                CHECK(owner[v]->core.layer[l].params.sub_gain == (sub_off ? 0.f : owner[v]->sub_level));
             for (unsigned slot = SJ6_ROW_CHORUS_I; slot <= SJ6_ROW_CHORUS_II; ++slot)
                 if (row.present & (1u << slot)) ++chorus_switch_words;
             for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
@@ -338,6 +430,8 @@ static void check_bank(void)
            programs, authored, defaulted, register_words);
     printf("authored_chorus_switch_words=%u chorus_bypass_programs=%u\n",
            chorus_switch_words, chorus_bypass_programs);
+    printf("authored_sub_levels=%u muted_sub_programs=%u\n", authored_sub_levels, muted_sub_programs);
+    CHECK(authored_sub_levels == 640 && muted_sub_programs == 180);
     CHECK(programs == 640 && authored == 4580 && defaulted == 2460 && register_words == 640);
 }
 #endif
@@ -358,6 +452,7 @@ int main(void)
         float raw;
         CHECK(dnbx_read_raw(&owner[v]->core, 86, &raw) == DNBX_E_ABSENT);
     }
+    CHECK(!engine_superj6_edit(0, ENGINE_SJ6_LFO1_HZ_RATE, .5f));
     check_negative();
     /* Both selected stock presets have an audible PWM LFO. An individual
      * waveform edit preserves it, and a full factory load supersedes it. */
@@ -368,6 +463,7 @@ int main(void)
         CHECK(engine_superj6_pre_note_wave(v, 0, 1.f, &pwm));
         boundary();
         CHECK(owner[v]->core.layer[0].params.lfo_pwm_depth == depth);
+        check_lfo_hz_edit(v);
         CHECK(engine_superj6_factory_load(v, &full));
         boundary();
         for (unsigned layer = 0; layer < 2; ++layer)
@@ -399,6 +495,7 @@ int main(void)
     check_range();
     check_layer_one_attack();
     check_factory_chorus_bypass();
+    check_factory_sub_off();
     const char *register_file = getenv("SJ6_REGISTER_WORDS");
     if (register_file) check_register_file(register_file);
     printf("synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS\n");

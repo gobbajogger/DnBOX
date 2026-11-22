@@ -94,6 +94,26 @@ def read_wav(path):
     return out, bits
 
 
+def pack_tanh_boot(table):
+    """Zigzag/LEB128 third differences of the binary32 words."""
+    previous = first = second = 0
+    packed = []
+    for sample in table:
+        word, = struct.unpack("<I", struct.pack("<f", sample))
+        next_first = word - previous
+        next_second = next_first - first
+        delta = next_second - second
+        if not -(1 << 31) <= delta < (1 << 31):
+            raise ValueError("tanh boot-table delta does not fit signed 32 bits")
+        encoded = (delta << 1) ^ (delta >> 31)
+        while encoded >= 128:
+            packed.append((encoded & 127) | 128)
+            encoded >>= 7
+        packed.append(encoded)
+        previous, first, second = word, next_first, next_second
+    return packed
+
+
 def arr(ctype, name, vals, fmt=str, per=12, shared=False):
     # shared: a table several units include, defined once (in the unit that defines
     # X0X_DRUM_TABLES_DEFINE, drum909.c) and declared extern in the rest. Static gave each unit its own
@@ -373,10 +393,17 @@ def main():
           "#endif",
           arr("uint32_t", "x0x_tanh_words", tanh_words,
               lambda v: f"0x{v:08x}u", per=8, shared=True),
-          "/* Direct tanh reads: flash/rodata only, one copy (shared), no RAM.",
+          "/* Direct tanh reads: one shared table, either in flash or expanded at boot.",
           " * Retain the packed representation above for the old decoder oracle.",
           " * cfloat emits a decimal literal that round-trips to the same binary32. */",
+          "#if X0X_TANH_BOOT_TABLE",
+          "extern float x0x_tanh_raw[X0X_TANH_N + 2u];",
+          "#ifdef X0X_DRUM_TABLES_DEFINE",
+          arr("uint8_t", "x0x_tanh_boot_data", pack_tanh_boot(tab), per=24),
+          "#endif",
+          "#else",
           arr("float", "x0x_tanh_raw", tab, cfloat, per=6, shared=True),
+          "#endif",
           "/* Exact binary32 table entry i (0 .. X0X_TANH_N+1). Hot-path inline. */",
           "static inline float x0x_tanh_value(unsigned i)",
           "{",

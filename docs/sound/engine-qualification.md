@@ -1,5 +1,11 @@
 # SMK-37 sound engine qualification
 
+## Resumed Sound work
+
+The opt-in SuperJ6 editor applies the sourced LFO1 Hz law to the compact PWM LFO on a typed owner. Five reference endpoints passed on each owner and every tested nonzero speed changed the audio. The factory loader now recognizes authored sub level zero and removes the inherited sub on both layers. The authenticated bank verified 640 sub-level words, including 180 zero presets. Nonzero levels use the existing gain pending a verified transfer curve. The original factory LFO destination and active FX graphs remain open. [Focused software evidence](../../evidence/sound-resume/superj6-focused.txt).
+
+The optional `X0X_TANH_BOOT_TABLE=1` profile uses shared pool storage for one boot-expanded 909 tanh lookup. The isolated dual-engine links at `e3559ad3` recovered 2,960 B of XIP per board at a cost of 4,104 B of pool. Elite and Pro retained 5,376 and 5,388 B of XIP with 3,804 B of pool margin each. All 1,026 lookup words and 23,280 stock PCM/state blocks per optimization level matched. The strict populated Elite precheck peaked at 8,058 µs with zero late callbacks and xruns. Integration's DNR2 baseline has its own resource constraints. A combined build needs an exact measurement before applying this trade. [Isolated memory and timing evidence](../../evidence/sound-resume/boot-table/budget.json).
+
 ## Current software qualification — source `3b480381`
 
 Elite and Pro link with the Synth One editor, sub oscillator and the SuperJ6 factory, direct edit and pre-note waveform entry points enabled. Elite retains 2,416 bytes of XIP and Pro retains 2,424. Both retain 7,908 bytes above the pool reserve. The flash map passed. The ordinary applications and packages from `f185ea2d` match the stock bytes. The subsequent source change only affects the opt-in linker roots. [Firmware packages, native symbols and build identities](../../evidence/sound-qualification/3b480381/native-profile.json).
