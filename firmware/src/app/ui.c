@@ -5692,9 +5692,11 @@ static UI_DRAW void draw_header(void)
         }
         int free_mode=ui.view==V_SEQ && is_303() && ui.freeplay[bidx()] && !ui.rec;
         if(ui.view==V_SEQ || ui.view==V_GEN) {
-            put_s(put_s(put_s(context_title,free_mode?bass_header_name():part_display(ui.part))," "),
-                  free_mode?"FREE PLAY":VIEW_N[ui.view]);
-            name=context_title;
+            name=free_mode?bass_header_name():part_display(ui.part);
+            if(ui.view!=V_GEN || engine_bass_bank(bidx())!=ORIGINAL_SOUND_MIAMI) {
+                put_s(put_s(put_s(context_title,name)," "),free_mode?"FREE PLAY":VIEW_N[ui.view]);
+                name=context_title;
+            }
         }
         int mix_kit=drum_mix_page();
         if(mix_kit>=0)name=pg.title[cur_page()];
@@ -5837,36 +5839,37 @@ static int held_note_of(const bpart_t *bp, int s)
 }
 
 /* GEN uses the same pitch and step positions as the notes drawn above it. */
-static UI_DRAW void draw_gen_roll(const bpart_t *bp, int ph, int lo, int hi, int o, uint16_t col)
+static UI_DRAW void draw_gen_roll(int active, int lo, int hi, int o)
 {
-    int active = ph - step_of(0);
-    if ((unsigned)active < 16 && ph < bp->len)
-        cv_rect(col_x(active), ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
+    if ((unsigned)active < 16)
+        cv_rect(col_x(active), ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(part_col(), 2));
     for (int c = 0; c <= 16; ++c)
         cv_rect(col_x(c) - 1, ROLL_TOP - 4 - o, 1, ROLL_BOT + 6,
                 (c & 3) ? C_LINE : C_DIM);
     int prev_y = ROLL_BOT + 1;
-    for (int n = lo; n <= hi; ++n) {
+    cv_rect(5, ROLL_TOP - o, 18, ROLL_BOT + 1 - ROLL_TOP, C_LINE);
+    int n = lo;
+    do {
         int y = note_y(n, lo, hi);
         int h = prev_y - y;
         prev_y = y;
         unsigned pitch = (unsigned)(n + 12) % 12;
         int inset = (0x54au & (1u << pitch)) ? 12 : 0;
-        cv_rect(5, y - o, 18, h, C_LINE);
         cv_rect(5 + inset, y - o, 18 - inset, h - (h > 1), C_GRAY);
         cv_rect(GX, y + 2 - o, 211, 1, pitch ? C_LINE : C_DIM);
-    }
+    } while (n++ < hi);
 }
 
 static UI_DRAW void draw_303(int band, int gen)
 {
     int b = bidx(), c, o = band * BAND_H, n;       /* o: drawn in the screen's rows, minus the band's */
     const bpart_t *bp = &cur_pat()->bass[b];
+    int len = bp->len < NSTEPS ? bp->len : NSTEPS;
     int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
     uint16_t col = part_col();
     uint32_t lmarks = gen ? 0 : lock_marks(-1, -1, ui.spage * 16);
     char t[40], *q = t;
-    for (c = 0; c < bp->len && c < NSTEPS; c++) {
+    for (c = 0; c < len; c++) {
         if (bstep_gate(&bp->step[c]) == G_NOTE) {
             int pitch = bp->step[c].note;
             if (pitch < lo)
@@ -5881,31 +5884,35 @@ static UI_DRAW void draw_303(int band, int gen)
     hi += 2;
     if (hi - lo < 14)
         hi = lo + 14;
-    if (gen)
-        draw_gen_roll(bp, ph, lo, hi, o, col);
-    else for (n = lo; n <= hi; n++)                 /* SEQ retains root-octave guides */
-        if ((n - bp->gen.root) % 12 == 0) {
+    if (gen) {
+        draw_gen_roll(ph < len ? ph - step_of(0) : -1, lo, hi, o);
+        ph = -1;
+    } else {
+        /* Eleven octaves keep the root offset positive over the MIDI range. */
+        n = lo + (int)((unsigned)(12 * 11 + bp->gen.root - lo) % 12u);
+        for (; n <= hi; n += 12) {
             int y = note_y(n, lo, hi) - o;
             put_note(t, n);
             cv_rect(GX, y + 2, 213, 1, C_LINE);
             cv_text(1, y - 4, &FONT_XS, t, C_DIM);
         }
-    for (c = 0; c < 16; c++) {
-        int s = step_of(c), x = col_x(c), g;
-        const bstep_t *st = &bp->step[s < NSTEPS ? s : 0];
-        if (s >= bp->len) {
+    }
+    int x = GX;
+    for (c = 0; c < 16; c++, x += 13 + !(c & 3)) {
+        int s = step_of(c);
+        if (s >= len) {
             cv_rect(x + 5, ROLL_BOT + 4 - o, 2, 2, C_LINE);
             continue;
         }
-        g = bstep_gate(st);
-        if (!gen && s == ph)
+        const bstep_t *st = &bp->step[s];
+        if (s == ph)
             cv_rect(x, ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
-        int start = g == G_REST ? -1 : note_start_of(bp, s);
+        int start = note_start_of(bp, s);
         if (start >= 0) {
             int y = note_y(bp->step[start].note, lo, hi) - o;
             uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
             int end = st->flags >> BS_END_SHIFT;
-            int width = end ? (end * 12 + 14) / 15 : 12;
+            int width = end ? end - end / 5 : 12; /* ceil(end * 12 / 15) */
             box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
             if (s == ui.held_step && (st->flags & BS_ACCENT)) {
                 int inset = width > 2;
@@ -5913,21 +5920,24 @@ static UI_DRAW void draw_303(int band, int gen)
             }
             if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
                 cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
-            if (g == G_TIE) {
+            if (bstep_gate(st) == G_TIE) {
                 if (c > 0) {                         /* continued from previous visible step */
                     int lead = 7 + !(c & 3);
                     cv_rect(x - lead, y, lead + (width < 6 ? width : 6), 5, fc);
                 } else {                               /* page 16→17 or loop last→first */
-                    cv_rect(x - 4, y + 1, 4, 3, fc);
-                    cv_rect(x - 7, y + 2, 3, 1, fc);
+                    cv_rect(GX - 4, y + 1 + gen, 4, gen ? 1 : 3, fc);
+                    if (!gen)
+                        cv_rect(GX - 7, y + 2, 3, 1, fc);
                 }
             }
-            if (c == 15 && bstep_gate(&bp->step[s + 1 < bp->len ? s + 1 : 0]) == G_TIE) {
-                cv_rect(x + 12, y + 1, 2, 3, fc);
-                cv_rect(x + 14, y + 2, 2, 1, fc);
+            const bstep_t *next = &bp->step[s + 1 == len ? 0 : s + 1];
+            if (c == 15 && bstep_gate(next) == G_TIE) {
+                cv_rect(237, y + 1, 2, 3, fc);
+                cv_rect(239, y + 2, 1, 1, fc);
             }
             if (st->flags & BS_SLIDE) {
-                int nx = s + 1 < bp->len ? s + 1 : 0, ny = note_y(bp->step[nx].note, lo, hi) - o;
+                /* A rest or tie has no new pitch. Keep the GEN slide cue on its note. */
+                int ny = gen && bstep_gate(next) != G_NOTE ? y : note_y(next->note, lo, hi) - o;
                 if (c < 15)
                     cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
                 else

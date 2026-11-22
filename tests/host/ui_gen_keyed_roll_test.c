@@ -20,6 +20,105 @@ static void capture(const char *kind, int owner, int phase)
     shot(name);
 }
 
+static void check_title(const char *expected)
+{
+    cv_begin(240, HDR_H, C_BLACK);
+    sound_slab(0, 0, 240, HDR_H, 0);
+    cv_text_clip(4, 2, &FONT_B, expected, part_col(), 4, 125);
+    uint16_t ink = swap16(part_col());
+    for (int y = 2; y < 17; ++y) {
+        int equal = 1;
+        for (int x = 4; x < 125; ++x)
+            equal &= (fb[y * 240 + x] == ink) == (cv_px[y * 240 + x] == ink);
+        CHECK(equal);
+    }
+}
+
+static void reach_step(int owner, int target)
+{
+    for (int block = 0; block < 1400; ++block) {
+        int32_t audio[512];
+        engine_render(audio, 256);
+        if (seq.playing && eng_step[TRK_BASS0 + owner] == target)
+            return;
+    }
+    CHECK(0 && "sequencer never reached the boundary step");
+}
+
+static void check_tie_boundary(int owner, int wrap, int enforce)
+{
+    setup(V_SEQ, PART_303A + owner);
+    bpart_t *bp = &cur_pat()->bass[owner];
+    bp->len = wrap ? 16 : 32;
+    memset(bp->step, 0, sizeof bp->step);
+    int next = wrap ? 0 : 16;
+    bp->step[15] = (bstep_t){60, G_NOTE, 96};
+    bp->step[next] = (bstep_t){0, G_TIE, 96};
+    button_tap(B_ARP);
+    button_tap(B_PLAY);
+    reach_step(owner, 15);
+    int y = MAIN_Y + note_y(60, 58, 72) + 2;
+    capture("tie-out", owner, wrap);
+    if (enforce)
+        CHECK(fb[y * 240 + 239] == swap16(dim(part_col(), 9)));
+    if (!wrap) {
+        button_tap(B_SEQ);
+        button_tap(B_OCTUP);
+        CHECK(ui.spage == 1);
+        button_tap(B_ARP);
+        CHECK(ui.view == V_GEN && ui.spage == 1);
+    }
+    reach_step(owner, next);
+    capture("tie-in", owner, wrap);
+    uint16_t key_row[18];
+    memcpy(key_row, fb + y * 240 + 5, sizeof key_row);
+    if (enforce) {
+        CHECK(fb[y * 240 + 23] == swap16(dim(part_col(), 9)));
+        CHECK(fb[y * 240 + 26] == swap16(dim(part_col(), 9)));
+    }
+    bp->step[next].flags = G_REST;
+    capture("tie-in-control", owner, wrap);
+    if (enforce)
+        CHECK(!memcmp(key_row, fb + y * 240 + 5, sizeof key_row));
+}
+
+static void check_slide_and_range(int owner, int enforce)
+{
+    setup(V_SEQ, PART_303A + owner);
+    bpart_t *bp = &cur_pat()->bass[owner];
+    bp->len = 16;
+    memset(bp->step, 0, sizeof bp->step);
+    bp->step[4] = (bstep_t){60, G_NOTE | BS_SLIDE, 96};
+    bp->step[5].note = 127;
+    capture("seq-slide-rest", owner, 0);
+    button_tap(B_ARP);
+    capture("gen-slide-rest", owner, 0);
+    memcpy(before_fb, fb, sizeof before_fb);
+    bp->step[5].note = 60;
+    capture("gen-slide-rest-control", owner, 0);
+    if (enforce) {
+        int y = MAIN_Y + note_y(60, 58, 72) + 2;
+        CHECK(!memcmp(before_fb, fb, sizeof before_fb));
+        CHECK(fb[y * 240 + col_x(4) + 14] == swap16(C_WHITE));
+    }
+    bp->step[5] = (bstep_t){127, G_TIE, 96};
+    capture("gen-slide-tie", owner, 0);
+    memcpy(before_fb, fb, sizeof before_fb);
+    bp->step[5].note = 60;
+    capture("gen-slide-tie-control", owner, 0);
+    if (enforce)
+        CHECK(!memcmp(before_fb, fb, sizeof before_fb));
+    bp->step[0] = (bstep_t){0, G_NOTE, 96};
+    bp->step[15] = (bstep_t){127, G_NOTE, 96};
+    capture("gen-extrema", owner, 0);
+    if (enforce) {
+        int bottom = MAIN_Y + note_y(0, -2, 129) + 2;
+        int top = MAIN_Y + note_y(127, -2, 129) + 2;
+        CHECK(fb[bottom * 240 + col_x(0) + 4] == swap16(dim(part_col(), 9)));
+        CHECK(fb[top * 240 + col_x(15) + 4] == swap16(dim(part_col(), 9)));
+    }
+}
+
 int main(void)
 {
     int baseline = getenv("GEN_ROLL_BASELINE") != NULL;
@@ -65,11 +164,19 @@ int main(void)
                 CHECK(fb[25 * 240 + col_x(phase) - 1] == swap16((phase & 3) ? C_LINE : C_DIM));
             }
         }
+        const char *title = owner ? "CHICAGO TB-3PO" : "MIAMI";
+        if (!baseline)
+            check_title(title);
         button_tap(B_ARP);
         CHECK(ui.view == V_GEN && !strcmp(pg.title[cur_page()], "SCALE"));
         check_controls(owner, scale);
         capture("scale", owner, 15);
+        if (!baseline)
+            check_title(title);
         CHECK(!memcmp(bp, &seeded, sizeof seeded));
+        check_tie_boundary(owner, 0, !baseline);
+        check_tie_boundary(owner, 1, !baseline);
+        check_slide_and_range(owner, !baseline);
     }
     for (int page = 0; page < 2; ++page) {
         setup(V_FX, PART_303A);
