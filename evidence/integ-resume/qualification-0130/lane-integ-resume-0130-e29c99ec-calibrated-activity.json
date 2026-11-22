@@ -1,0 +1,337 @@
+{
+  "firmware_commit": "e29c99ec2cc610e5af3de575e85771f666b239f4",
+  "firmware_tree": "8609f75308f10874a7ba4aec1c1fb309023c100b",
+  "timing_summary_sha256": "08c84b2f6de17134015da8fc64e000d62ae92e86baed8754f58992d6925c8941",
+  "field_layout": {
+    "part_size": 5184,
+    "keys": 3720,
+    "kind": 5180,
+    "status": 5181,
+    "seq_size": 440,
+    "seq_playing": 8,
+    "miami_voice_size": 432,
+    "miami_note": 2813,
+    "miami_velocity": 2772,
+    "miami_wave_preparations": 2788,
+    "chicago_note": 872,
+    "chicago_velocity": 852,
+    "chicago_wave_preparations": 848
+  },
+  "scope": "End-of-shot guest snapshots. Per-part dry PCM was not captured. The kit hit records and synth voice histories do not establish per-half activity.",
+  "models": {
+    "elite": {
+      "boot": {
+        "pcm_bytes": 268288,
+        "pcm_stereo_frames": 67072,
+        "dac_half_transfers": 131,
+        "guest_completed_halves": 131,
+        "guest_in_audio_at_capture": 0,
+        "engine_rendered_frames": 67072,
+        "transport_running": false,
+        "909_last_hit_ms_nonzero_by_track": {},
+        "808_last_hit_ms_nonzero_by_track": {},
+        "808_active_at_last_sampled_stretch": false,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 0,
+            "velocity": 0,
+            "wave_preparations": 0
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": true
+      },
+      "shift0": {
+        "pcm_bytes": 1327104,
+        "pcm_stereo_frames": 331776,
+        "dac_half_transfers": 648,
+        "guest_completed_halves": 647,
+        "guest_in_audio_at_capture": 1,
+        "engine_rendered_frames": 331776,
+        "transport_running": true,
+        "909_last_hit_ms_nonzero_by_track": {
+          "1": 7939,
+          "2": 7939,
+          "3": 7939,
+          "4": 7939,
+          "5": 7939,
+          "6": 7939,
+          "7": 7939,
+          "8": 7939,
+          "9": 7939,
+          "10": 7939
+        },
+        "808_last_hit_ms_nonzero_by_track": {
+          "1": 7939
+        },
+        "808_active_at_last_sampled_stretch": true,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 45,
+            "velocity": 100,
+            "wave_preparations": 285
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": false
+      },
+      "shift1": {
+        "pcm_bytes": 1327104,
+        "pcm_stereo_frames": 331776,
+        "dac_half_transfers": 648,
+        "guest_completed_halves": 647,
+        "guest_in_audio_at_capture": 1,
+        "engine_rendered_frames": 331776,
+        "transport_running": true,
+        "909_last_hit_ms_nonzero_by_track": {
+          "1": 7939,
+          "2": 7939,
+          "3": 7939,
+          "4": 7939,
+          "5": 7939,
+          "6": 7939,
+          "7": 7939,
+          "8": 7939,
+          "9": 7939,
+          "10": 7939
+        },
+        "808_last_hit_ms_nonzero_by_track": {
+          "1": 7939
+        },
+        "808_active_at_last_sampled_stretch": true,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 45,
+            "velocity": 100,
+            "wave_preparations": 233
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": false
+      }
+    },
+    "pro": {
+      "boot": {
+        "pcm_bytes": 268288,
+        "pcm_stereo_frames": 67072,
+        "dac_half_transfers": 131,
+        "guest_completed_halves": 131,
+        "guest_in_audio_at_capture": 0,
+        "engine_rendered_frames": 67072,
+        "transport_running": false,
+        "909_last_hit_ms_nonzero_by_track": {},
+        "808_last_hit_ms_nonzero_by_track": {},
+        "808_active_at_last_sampled_stretch": false,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 0,
+            "velocity": 0,
+            "wave_preparations": 0
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": true
+      },
+      "shift0": {
+        "pcm_bytes": 1327104,
+        "pcm_stereo_frames": 331776,
+        "dac_half_transfers": 648,
+        "guest_completed_halves": 647,
+        "guest_in_audio_at_capture": 1,
+        "engine_rendered_frames": 331776,
+        "transport_running": true,
+        "909_last_hit_ms_nonzero_by_track": {
+          "1": 7939,
+          "2": 7939,
+          "3": 7939,
+          "4": 7939,
+          "5": 7939,
+          "6": 7939,
+          "7": 7939,
+          "8": 7939,
+          "9": 7939,
+          "10": 7939
+        },
+        "808_last_hit_ms_nonzero_by_track": {
+          "1": 7939
+        },
+        "808_active_at_last_sampled_stretch": true,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 45,
+            "velocity": 100,
+            "wave_preparations": 285
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": false
+      },
+      "shift1": {
+        "pcm_bytes": 1327104,
+        "pcm_stereo_frames": 331776,
+        "dac_half_transfers": 648,
+        "guest_completed_halves": 647,
+        "guest_in_audio_at_capture": 1,
+        "engine_rendered_frames": 331776,
+        "transport_running": true,
+        "909_last_hit_ms_nonzero_by_track": {
+          "1": 7939,
+          "2": 7939,
+          "3": 7939,
+          "4": 7939,
+          "5": 7939,
+          "6": 7939,
+          "7": 7939,
+          "8": 7939,
+          "9": 7939,
+          "10": 7939
+        },
+        "808_last_hit_ms_nonzero_by_track": {
+          "1": 7939
+        },
+        "808_active_at_last_sampled_stretch": true,
+        "synth_part_midi_channel_guest_wire_zero_based": [
+          1,
+          2
+        ],
+        "part_a": {
+          "engine": "Miami",
+          "voices": [
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            },
+            {
+              "note": 0,
+              "velocity": 0,
+              "wave_preparations": 0
+            }
+          ]
+        },
+        "part_b": {
+          "engine": "Chicago",
+          "voice": {
+            "note": 45,
+            "velocity": 100,
+            "wave_preparations": 233
+          }
+        },
+        "break_runtime_pack_count": 0,
+        "break_runtime_loop_count": 0,
+        "break_terminal_pcm_abs_peak": 0.0,
+        "break_terminal_silent_predicate": false
+      }
+    }
+  }
+}

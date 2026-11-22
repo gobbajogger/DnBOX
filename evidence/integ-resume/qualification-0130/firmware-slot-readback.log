@@ -1,0 +1,10 @@
+  slot 0: 3 zone(s) from the image
+  slot 1: 2 zone(s) from the image
+host: 0 ms simulated, 0 blits, render 0.0% of real time (host CPU)
+PASS SMK stock slot 1 zone 1, BR1, 34800 frames, 22050 Hz exact ADPCM readback
+PASS SMK stock slot 1 zone 2, BR1, 41788 frames, 22050 Hz exact ADPCM readback
+PASS SMK stock slot 1 zone 3, BR1, 42862 frames, 22050 Hz exact ADPCM readback
+PASS SMK stock slot 2 zone 1, BR2, 46184 frames, 22050 Hz exact ADPCM readback
+PASS SMK stock slot 2 zone 2, BR2, 52913 frames, 22050 Hz exact ADPCM readback
+PASS all five restored sample zones available to normal BREAK engine
+exit=0

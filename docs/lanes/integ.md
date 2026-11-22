@@ -1,5 +1,15 @@
 # Integration baseline
 
+## Software-only BREAK verification and gate disposition — 2026-11-22 (WORKING)
+
+Offline ZIP inspection passed for both pinned stock model packages and the standard sample import. The production SMK slot reader ran in a stock-like host harness, read all five zones from the extracted slot images byte for byte, and made all five available to the normal BREAK engine. The package and its two model-specific partition maps remained unchanged. The passing mock demonstrated byte-exact readback and occupied third-slot preservation. Physical operations are outside the owner’s requested software-only scope.
+
+The strict eight-second diagnostics are bounded timing evidence. Guest memory confirms 909 and 808 kit hits and Chicago activity. Miami was selected but lacked a positive terminal voice-history witness. BREAK contained zero loaded loops. The exact end snapshots show an active render at the last DMA edge, explaining 648 transferred versus 647 completed render halves. The final combined ten-minute gate still needs loaded BREAK and observed activity across the required engines.
+
+The host failure snapshot captures results emitted by both running checkouts. It is not a terminal gate receipt. Several tests hit the known LeakSanitizer runtime failure. The four other-engine original comparison repositories were not fetched after the owner's scope correction. The unchanged host runner logged both drum comparisons as NOT_RUN, and the internal sequencer test separately logged the omitted TB3PO original comparison. Other registered host tests continue unchanged. The exact consolidated `no-loss` and `limits` steps passed in a focused rerun with the live tracking ref restored.
+
+[Stock slot reader](../../evidence/integ-resume/qualification-0130/firmware-slot-readback.log) · [Gate failure ledger](../../evidence/integ-resume/qualification-0130/consolidated-failure-ledger.json) · [Emulator handoff](../../evidence/integ-resume/qualification-0130/lane-integ-resume-0130-e29c99ec-strict-emu360-handoff.md)
+
 ## Stock delivery archive and bounded strict playback — 2026-11-22 (WORKING)
 
 The stock delivery ZIP now includes the existing firmware license and notices, SDK/vendor license texts and the starting BREAK asset notice. All ten members passed ZIP integrity checks. The Elite and Pro FWSC and five-zone sample archive are byte-identical to the previously checked inputs. The 1,315,181-byte ZIP has SHA-256 `9593532d8773fb58d6f9655c198adcce04fc415d25a9863c1462d8af827c9c5e` and CRC32 `63c151fd`. It supersedes the smaller test archive without notices.
