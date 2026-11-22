@@ -1,0 +1,135 @@
+{
+  "rate": 44100,
+  "frames_per_program": 132300,
+  "programs": 694,
+  "original_frontend_writes_per_program": 144,
+  "projected_original_control_ids": [
+    34,
+    121,
+    35,
+    36,
+    59,
+    13,
+    14,
+    15,
+    45,
+    46,
+    47,
+    116,
+    117,
+    118,
+    119,
+    32,
+    122,
+    125,
+    128,
+    131,
+    134,
+    58,
+    2,
+    5,
+    16,
+    17,
+    19,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "projected_voice_ids": [
+    2,
+    5,
+    16,
+    17,
+    19,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "frames_per_arm": 91816200,
+  "reference_checksums": {
+    "factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "factory-inputs/compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5",
+    "TESTED-SOURCES.json": "0895ccad37129cb8d1571e17f6cbc1be2052262abd31c71a73e8cdd4e69cba13",
+    "FACTORY-INPUTS.json": "35de2aa8c01be45b65de01f9f446f61b7aaf6ddd2d65786a816ac31bac0dbf98"
+  },
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "comparison": "Complete original factory voice and effects versus host firmware INIT with nearest saved FX settings and editable voice controls.",
+  "row_file_sha256": "31328ee913bf698482d6e2db91dea882daf800612568a2dce5adfe2fdd4a0b2b",
+  "commands_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "stereo_pass": 0,
+  "left_pass": 0,
+  "right_pass": 0,
+  "firmware_source_commit": "6e3055e52d4cfc70c5af472d0727eb82b4efa882",
+  "acceptance": {
+    "maximum_absolute_level_db": 1,
+    "maximum_spectral_rms_db": 3,
+    "both_channels_required": true
+  },
+  "readback_positions_checked": 24290,
+  "original_stereo_sha256_matching_archived_22_control_rows": 694,
+  "parallel_rows_equal_to_prior_serial_rows": 56,
+  "rows_gzip_sha256": "231db1b64684ecb967b12563305e0a8b73d2e482a7b73c24a19a8a67ffa69fef",
+  "channels": [
+    {
+      "side": "left",
+      "active_pairs": 616,
+      "median_spectral_rms_db": 12.93806817839631,
+      "median_absolute_level_db": 9.16174043244018
+    },
+    {
+      "side": "right",
+      "active_pairs": 616,
+      "median_spectral_rms_db": 11.880374118140132,
+      "median_absolute_level_db": 9.425588982592945
+    }
+  ],
+  "producer_sha256": {
+    "original": "df09a23567c2d1d33badd2de456710f0648a2f8bbeb5a2177414dc7338b293bb",
+    "shipping": "aff55d3c3fa8637828fb2e6da4c3c9d2c01e0bfcfd91747b8a23b6a49bb3a0f8",
+    "controls": "e2b8be4e872b4328849a417b004f35f6dd4e65415b28c317fe04068810f78b5d"
+  },
+  "runner_source_sha256": {
+    "original.cpp": "2a2885038d5f0e04249dcf731f7a0892d0cba7f81c46e6aef34803b15ca05a2d",
+    "shipping.c": "530381ddb1592c791b7aba93069d5fdc1cc76b52caaabd4969a6989c6c3d204e",
+    "replay.py": "57b72d0bd271fe5e2d7f66666bd1ca34c263864b9b454dd7df4f612ce992f8c3"
+  },
+  "input_guard_tests": {
+    "factory_generator": 1,
+    "factory_runner": 9
+  },
+  "closest_pair": {
+    "index": 673,
+    "name": "\ud83d\udd77- Who Are You?",
+    "channels": [
+      {
+        "level_db": 0.15396165719819688,
+        "spectral_db": 3.2602211763250706,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 0.5639757303148772,
+        "spectral_db": 3.249731416576293,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "pass": false
+  },
+  "silent_firmware_rows": {
+    "total": 78,
+    "zero_oscillator_1_level_only": 44,
+    "full_oscillator_2_balance_only": 32,
+    "both": 2
+  }
+}

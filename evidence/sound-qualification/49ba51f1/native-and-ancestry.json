@@ -1,0 +1,52 @@
+{
+  "source": "49ba51f13f76d0e709d7b6c32d12f31972c1d985",
+  "native": {
+    "elite": {
+      "xip_free_bytes": 7796,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908,
+      "application_bytes": 544876,
+      "fwsc": "artifacts/sound-qualification/49ba51f1/sound-engine-qualification-resume-work-49ba51f1-elite.fwsc",
+      "fwsc_sha256": "c8aa3ee2f48cdcf3209443d01c78061c2848ceb193bed89844a151f6f8db0528",
+      "elf_sha256": "920fdc3dd621feeb00af7456e04087866c2da6580cfad1824b0bee4ae5c81717",
+      "application_sha256": "3d16061eaa7f7f35e2fcd8a62386d0631771056aa863f1e35e3d524b80e25715"
+    },
+    "pro": {
+      "xip_free_bytes": 7804,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908,
+      "application_bytes": 544868,
+      "fwsc": "artifacts/sound-qualification/49ba51f1/sound-engine-qualification-resume-work-49ba51f1-pro.fwsc",
+      "fwsc_sha256": "1f8ef6f97b440d7f93055cf22adf74cf03576bfb9f15210f92186d74bc773bdc",
+      "elf_sha256": "ab560e263a46d7393ff682517d157dc97deac046aef40c07d22049398202f350",
+      "application_sha256": "4dfd4a128b4a3a546e73527a2c5877ec4d88e94757c3c586520edf3bed578b61"
+    }
+  },
+  "build_commands": [
+    "MODEL=elite ./build.sh",
+    "MODEL=pro ./build.sh"
+  ],
+  "strict_populated_timing": "NOT_RUN",
+  "integration": {
+    "tip": "f1786ebec2616477163b62b029c7e77405a9c3de",
+    "merge_base": "0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e",
+    "ahead": 67,
+    "behind": 53,
+    "conflict_paths": [
+      "firmware/src/app/original_runtime.c",
+      "firmware/src/app/smc_mixer.c",
+      "firmware/src/app/ui.c",
+      "firmware/src/app/ui_original_controls.h",
+      "firmware/src/dsp/breaks.c",
+      "firmware/src/dsp/breaks.h",
+      "firmware/src/dsp/original_chicago_backend.c",
+      "firmware/src/dsp/original_miami_backend.c",
+      "firmware/src/gfx.c",
+      "tests/host/break_retrigger_lut_test.c",
+      "tools/build.py",
+      "tools/gen_font.py"
+    ]
+  }
+}

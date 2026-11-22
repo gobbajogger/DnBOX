@@ -1112,10 +1112,14 @@ static int ed_service(void)
         return 0;
 #ifdef ED_DNR2_STATE
     if (n >= 4u && p[0] == 0x7du && p[1] == 'D' && p[2] == 'N' && p[3] == 2u) {
-        int reply = ED_MAINTENANCE_ADMIT() && !ed_project.mode && !ui_project_busy() &&
-            !ui_boot_flash_busy() &&
-            dnr2_scalar_frame(&ED_DNR2_STATE, p, n, fm1_ms, ED_DNR2_READ(),
-                              ED_DNR2_WRITE, ed_out);
+        int reply = 0;
+        if (ED_MAINTENANCE_ADMIT() && !ed_project.mode && !ui_project_busy() && !ui_boot_flash_busy()) {
+#ifdef ED_DNR2_START
+            ED_DNR2_START();
+#endif
+            reply = dnr2_scalar_frame(&ED_DNR2_STATE, p, n, fm1_ms, ED_DNR2_READ(),
+                                      ED_DNR2_WRITE, ed_out);
+        }
         ota_frame_done();
         if (reply)
             ota_wire_send(ed_out, DN_REPLY);

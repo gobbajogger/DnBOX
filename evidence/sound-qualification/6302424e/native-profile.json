@@ -1,0 +1,33 @@
+{
+  "source": "6302424e0f6297de204bdc17dda71009f2297130",
+  "software_only": true,
+  "flags": {
+    "X0X_TANH_BOOT_TABLE": 1,
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "boards": {
+    "elite": {
+      "fwsc_sha256": "f38f449670bd25e3bdcf3ebf4393a4a4d9130f10ee84a227f9131200c8338176",
+      "elf_sha256": "7daf61cc13ce2abba733fb1ed199e3d59a0e9f7a26c97df96a02e8ea9c736e03",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-6302424e-elite-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "b9ccb4463fcfddc4fd952c5fa3e018acd7b590a04f008df193857d703b00de7e",
+      "stock_fwsc_sha256": "c8aa3ee2f48cdcf3209443d01c78061c2848ceb193bed89844a151f6f8db0528",
+      "xip_free_bytes": 5168,
+      "pool_margin_bytes": 3804
+    },
+    "pro": {
+      "fwsc_sha256": "9a5c6ac1102502123116472fbb03a570b7b88fd4ff265623137299fbab8bc89c",
+      "elf_sha256": "21744cddcf5ffb3d6ece7bd6c63b9d11525906728f3be35724c430f8f2396df4",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-6302424e-pro-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "7ffa52ffd7bb41ccdee6ee090f2e07883dd7459c7a6ccfe92c924a436611050f",
+      "stock_fwsc_sha256": "1f8ef6f97b440d7f93055cf22adf74cf03576bfb9f15210f92186d74bc773bdc",
+      "xip_free_bytes": 5180,
+      "pool_margin_bytes": 3804
+    }
+  },
+  "renders_and_logs": {
+    "name": "lane-sound-engine-qualification-resume-work-6302424e-software-qualification-renders-and-logs.zip",
+    "sha256": "4d5a5c3c7a7df9c9203d1ce8abd6ba4fb46fbac7435829c8470936e3426a5909"
+  }
+}

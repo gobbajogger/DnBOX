@@ -1,0 +1,19 @@
+{
+  "test": "tests/host/run_synthone_factory.py effects-on oracle and compact asset adapter",
+  "programs": 694,
+  "sample_rate": 48000,
+  "stereo_frames_per_program": 96000,
+  "stereo_frames_per_arm": 66624000,
+  "different_pcm_words": 0,
+  "matched_preexisting_program_arm_sha256": 1388,
+  "original_effects": "Both host paths run the complete pinned original kernel and factory parameter stream, including original effects. The compact arm changes morph asset delivery only.",
+  "stock_firmware_scope": "This run does not exercise the stock preset selector or firmware effects chain.",
+  "sha256": {
+    "docs/sound/v2-synthone-factory-pcm-manifest.json": "68c7f2d14fdcd1df74aa2888bb0b2d9e3bf77e500232a8cc4ecdff45bcb3b508",
+    "factory-test": "94030888eb3629843b4ecad2c78e64c961dc320a5f842f04203a3669299f741c",
+    "TESTED-SOURCES.json": "0895ccad37129cb8d1571e17f6cbc1be2052262abd31c71a73e8cdd4e69cba13",
+    "factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "factory-inputs/compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5",
+    "commands/preset-commands.bin": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af"
+  }
+}

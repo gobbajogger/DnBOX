@@ -136,17 +136,18 @@ static void s1_patch_boundary(void)
             original_bass[v].status != ORIGINAL_RUNTIME_OK) continue;
         sound_t *sound = (sound_t *)mot_base_snd;
         uint8_t *cell = sound->v[T_303][v];
-        if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
+        uint8_t *ext = sound->v[T_303][NBASS+v];
+        if (!original_sound_s1_set_extended(cell, ext, s1_edit[v].slot, s1_edit[v].position)) continue;
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell, ext);
         bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v], 1);
     }
 }
 #endif
-static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *bank)
+static int bass_tagged_cell_validate(uint8_t *cell,const uint8_t *ext,bass_sound_tag_t *tag,int *bank)
 {
     bass_sound_info_t info;
     int adopted = original_sound_adopt_legacy_cell(cell);
-    if (!original_sound_valid(cell)) return -9;
+    if (!original_sound_valid(cell) || !original_master_valid(cell,ext)) return -9;
     if (adopted) {
         bass_sound_info_t next = {{ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA,
             (uint8_t)original_sound_count(ORIGINAL_SOUND_SYNTHONE), BASS_IDENTITY_KNOWN}, 0, 0};
@@ -166,7 +167,7 @@ int engine_bass_sound_bank(const sound_t *sound, int voice)
     int bank;
     sound_t *mut = (sound_t *)sound;
     return mut && (unsigned)voice < NBASS &&
-        !bass_tagged_cell_validate(mut->v[T_303][voice], &mut->bass[voice], &bank) ? bank : -1;
+        !bass_tagged_cell_validate(mut->v[T_303][voice],mut->v[T_303][NBASS+voice],&mut->bass[voice],&bank) ? bank : -1;
 }
 int engine_bass_sound_validate(const sound_t *sound)
 {
@@ -195,8 +196,8 @@ int engine_bass_note_validate(const lane_t *l)
     if(l->used!=1 || l->t!=BASS_NOTE_TARGET || l->pat>=NPAT ||
        l->part<PART_303A || l->part>PART_303B || l->v>=NSTEPS ||
        l->i!=BASS_NOTE_VERSION || l->rsv)return -1;
-    for(int i=BASS_NOTE_USED;i<NSTEPS;i++)if(l->val[i])return -1;
-    int rc=bass_tagged_cell_validate(mut->val,(bass_sound_tag_t *)(mut->val+BASS_NOTE_TAG),&bank);
+    for(int i=BASS_NOTE_USED+(l->val[26]=='M'?S1_MASTER_EXT_SIZE:0);i<NSTEPS;i++)if(l->val[i])return -1;
+    int rc=bass_tagged_cell_validate(mut->val,mut->val+BASS_NOTE_USED,(bass_sound_tag_t *)(mut->val+BASS_NOTE_TAG),&bank);
     if(rc)return rc;
     for(int i=0;i<MX_NPARAMS;i++)if(l->val[BASS_NOTE_MIX+i]>engine_param(T_MIX,l->part,i)->max)return -1;
     return 0;
@@ -212,6 +213,7 @@ static int bass_note_capture(lane_t *lanes,int pat,int voice,int step,const soun
     next.used=1;next.gen=(uint8_t)(lanes[k].gen+1);next.t=BASS_NOTE_TARGET;
     next.pat=(uint8_t)pat;next.part=(uint8_t)(PART_303A+voice);next.v=(uint8_t)step;next.i=BASS_NOTE_VERSION;
     __builtin_memcpy(next.val,sound->v[T_303][voice],NPARAMS_MAX);
+    if (next.val[26]=='M') __builtin_memcpy(next.val+BASS_NOTE_USED,sound->v[T_303][NBASS+voice],S1_MASTER_EXT_SIZE);
     __builtin_memcpy(next.val+BASS_NOTE_MIX,sound->v[T_MIX][PART_303A+voice],MX_NPARAMS);
     if(effective) {
         /* Audio owns motion runtime. Capture what this accepted edge hears,
@@ -221,7 +223,7 @@ static int bass_note_capture(lane_t *lanes,int pat,int voice,int step,const soun
             int value=motion_value(&mot,j);
             if(value<0 || l->part!=PART_303A+voice)continue;
             if(l->t==T_303 && l->v==voice && l->i<NPARAMS_MAX)
-                (void)original_sound_set(next.val,l->i,(unsigned)value);
+                (void)original_sound_set_extended(next.val,next.val+BASS_NOTE_USED,l->i,(unsigned)value);
             if(l->t==T_MIX && l->v==PART_303A+voice && l->i<MX_NPARAMS)
                 next.val[BASS_NOTE_MIX+l->i]=(uint8_t)value;
         }
@@ -268,7 +270,8 @@ static void note_lock_restore(int v)
     note_lock_applied[v]=0;
 #if X0X_SYNTHONE_PATCH
     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v]);
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v],
+                           mot_base_snd->v[T_303][NBASS+v]);
 #endif
     for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_bass[v].kind,i))apply_base(T_303,v,(int)i);
     for(int i=0;i<MX_NPARAMS;i++)apply_base(T_MIX,PART_303A+v,i);
@@ -282,15 +285,26 @@ static void note_lock_onset(int v)
         int k=bass_note_find(mot.lane,seq.ppat[TRK_BASS0+v],v,eng_step[TRK_BASS0+v]);
         if(k>=0 && mot.lane[k].val[29]==(uint8_t)original_bass[v].kind)l=&mot.lane[k];
     }
+#if X0X_SUPERJ6_STOCK_PRESET
+    /* Preset locks edit panel controls within an existing topology. A legacy
+     * Juno lock and a WIDE lock cannot safely replace one another at onset. */
+    if (l && original_bass[v].kind == ORIGINAL_SOUND_JUNO &&
+        (l->val[30] == ORIGINAL_JUNO_WIDE_PRESET) != original_bass[v].dsp.juno.synth.stock_preset)
+        l = NULL;
+#endif
     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
 #if X0X_SYNTHONE_PATCH
     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val, l->val+BASS_NOTE_USED);
 #endif
     unsigned n=original_sound_count(original_bass[v].kind);
     for(unsigned i=0;i<n;i++) {
         float value;
         if(original_sound_is_performance(original_bass[v].kind,i))continue;
+        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(i)) {
+            apply_master_base(v,l->val,l->val+BASS_NOTE_USED,i);
+            continue;
+        }
         if(original_sound_value(l->val,i,&value))(void)original_runtime_param(&original_bass[v],i,value);
     }
     for(int i=0;i<MX_NPARAMS;i++)apply_param(T_MIX,PART_303A+v,i,l->val[BASS_NOTE_MIX+i]);
@@ -320,8 +334,11 @@ static int bass_restore_part(const sound_t *sound, int v)
 {
     if (engine_bass_sound_bank(sound, v) < 0) return 0;
     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
-    int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
-        &original_tuning, &original_fx_owner[v]);
+    int rc = original_runtime_init_extended(&original_bass[v],sound->v[T_303][v],sound->v[T_303][NBASS+v],
+        seq_tempo(&seq),&original_tuning,&original_fx_owner[v]);
+#if X0X_SUPERJ6_STOCK_PRESET
+    if (rc == ORIGINAL_RUNTIME_OK) superj6_stock_preset(v, sound->v[T_303][v]);
+#endif
     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
 #if X0X_SYNTHONE_PATCH
     s1_patch_replaced(v);
@@ -390,7 +407,7 @@ int engine_bass_base_ready(unsigned mask, const bass_base_state_t *target)
         uint8_t cell[ORIGINAL_SOUND_BYTES];
         bass_sound_tag_t tag = target->tag[v];
         memcpy(cell, target->cell[v], sizeof cell);
-        if (bass_tagged_cell_validate(cell, &tag, &bank)) return -5;
+        if (bass_tagged_cell_validate(cell,target->ext[v],&tag,&bank)) return -5;
         if (!engine_bass_bank_available(v, bank)) return -2;
         if (bass_has_locks(v)) return -4;
         /* Typed history restore retains its existing admission contract. Only
@@ -457,6 +474,9 @@ static void bass_preset_boundary_voice(int v)
         }
         original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
         sound_t *sound = (sound_t *)mot_base_snd;
+#if X0X_SUPERJ6_STOCK_PRESET
+        superj6_stock_preset(v, next);
+#endif
         __builtin_memcpy(sound->v[T_303][v], next, sizeof next);
         bass_tag_set(sound, v, bank, preset, 0);
 #if X0X_SYNTHONE_PATCH

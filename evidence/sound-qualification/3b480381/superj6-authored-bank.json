@@ -1,0 +1,27 @@
+{
+  "programs": 640,
+  "banks": 12,
+  "fields": 90549,
+  "layouts": 14,
+  "payload_bytes": 95055,
+  "dictionary_words": 2903,
+  "archive_sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+  "selected_by_uid_and_position": 640,
+  "ordered_binary32_checked": 90549,
+  "ordered_check_sha256": "efd56343eae8dfa9668b3b9f2f065a3c3cdb4a2ca970e4a9ac916fd1081ce9a1",
+  "invalid_selections_rejected": 24,
+  "firmware_source": "f185ea2d7d80373493aff5a0341154ed1fa882e9",
+  "software_only": true,
+  "programs_accepted_by_supported_loader": 640,
+  "authored_envelope_wave_pwm_master": 4580,
+  "authored_register": 640,
+  "authored_chorus_switches": 1280,
+  "chorus_bypass_programs": 300,
+  "pwm_defaults": 2460,
+  "unresolved_legacy_names": [
+    "neonlimiterAmount",
+    "neontubeRageAmount"
+  ],
+  "original_au_executed": false,
+  "qualifying_s4_pairs": 0
+}

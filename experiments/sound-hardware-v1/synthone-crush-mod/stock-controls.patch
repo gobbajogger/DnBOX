@@ -1,0 +1,439 @@
+diff --git a/firmware/src/app/bass_identity.h b/firmware/src/app/bass_identity.h
+index 6dca6e82..c7975342 100644
+--- a/firmware/src/app/bass_identity.h
++++ b/firmware/src/app/bass_identity.h
+@@ -73,7 +73,7 @@ static inline int bass_identity_adopt(bass_identity_t *tag)
+ {
+     if (!tag) return 0;
+     if (tag->engine == ORIGINAL_SOUND_SYNTHONE_ID && tag->schema == ORIGINAL_SOUND_SCHEMA &&
+-        ((tag->count >= 2 && tag->count <= 4) || tag->count == ORIGINAL_SYNTHONE_BASE_COUNT || tag->count == 13 || tag->count == 17) && tag->state == BASS_IDENTITY_KNOWN) {
++        ((tag->count >= 2 && tag->count <= 4) || tag->count == ORIGINAL_SYNTHONE_BASE_COUNT || tag->count == 13 || tag->count == 17 || tag->count == 23) && tag->state == BASS_IDENTITY_KNOWN) {
+         tag->count = ORIGINAL_SYNTHONE_NPARAMS;
+         return 1;
+     }
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index e2593edc..8ee44c66 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -910,7 +910,7 @@ static void apply_base(int t, int v, int i)
+             perf_apply(v, i, (unsigned)i == original_sound_bend_id(original_bass[v].kind) ? 64 : 0, 1);
+             return;
+         }
+-        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME) {
++        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id((unsigned)i)) {
+             apply_master_base(v,mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i);
+             return;
+         }
+@@ -1496,7 +1496,7 @@ static int mot_base(void *x, int t, int v, int i)
+     if (mot_base_snd && t == T_303 && (unsigned)v < NBASS &&
+         original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
+         (unsigned)i < ORIGINAL_SYNTHONE_NPARAMS)
+-        return (unsigned)i>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
++        return original_sound_s1_master_id((unsigned)i) ?
+             (int)original_master_display(mot_base_snd->v[t][v],mot_base_snd->v[t][NBASS+v],(unsigned)i) :
+             (int)original_sound_s1_display(mot_base_snd->v[t][v], (unsigned)i);
+     return mot_base_snd ? mot_base_snd->v[t][v][i] : 0;
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+index 13e278a8..9c4cc065 100644
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -292,7 +292,7 @@ static void note_lock_onset(int v)
+     for(unsigned i=0;i<n;i++) {
+         float value;
+         if(original_sound_is_performance(original_bass[v].kind,i))continue;
+-        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && i>=ORIGINAL_SYNTHONE_MASTER_VOLUME) {
++        if (original_bass[v].kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(i)) {
+             apply_master_base(v,l->val,l->val+BASS_NOTE_USED,i);
+             continue;
+         }
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+index 0c6a3b88..285977b8 100644
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -59,14 +59,14 @@ X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8
+      * edit bits never become inputs to a newly adopted runtime instance. */
+     for (unsigned i = 0; i < original_sound_count(kind); ++i)
+         if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
+-                  ? (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
++                  ? (i == ORIGINAL_SYNTHONE_CRUSH_LFO || (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX)))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
+         float value;
+         if (!original_sound_value(cell, i, &value) ||
+             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
+             return runtime_result(p, 0);
+     }
+     if (cell[26]=='M')
+-        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<ORIGINAL_SYNTHONE_NPARAMS;++id) {
++        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<=ORIGINAL_SYNTHONE_MASTER_MAKEUP;++id) {
+             unsigned q=original_master_display(cell,ext,id);
+             if(original_runtime_param(p,id,(float)q/127.f)!=ORIGINAL_RUNTIME_OK) return runtime_result(p,0);
+         }
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+index e90392f9..14310d37 100644
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -52,7 +52,7 @@ static const x0x_param_t original_sound_synthone_params[ORIGINAL_SYNTHONE_NPARAM
+     {"LFO2 wav",127,0,0},{"LFO2 amt",127,0,0},{"LFO2 Hz",127,64,0},
+     {"PhMix",127,0,0},{"PhRate",127,5,0},{"PhFeed",127,0,0},{"PhWidth",127,99,0},
+     {"Master",127,32,0},{"Ratio",127,0,0},{"Thresh",127,127,0},{"Attack",127,0,0},
+-    {"Release",127,0,0},{"Makeup",127,18,0}
++    {"Release",127,0,0},{"Makeup",127,18,0},{"Cr LFO",127,0,0}
+ };
+ static const char *const original_sound_synthone_names[ORIGINAL_SYNTHONE_FACTORIES] = {
+     "INIT"
+@@ -191,6 +191,10 @@ int original_sound_adopt_legacy_cell(uint8_t cell[ORIGINAL_SOUND_BYTES])
+ unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id)
+ {
+     if (id >= ORIGINAL_SYNTHONE_NPARAMS) return 0;
++    if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) {
++        unsigned route = (cell[8] >> 7) | ((cell[9] >> 7) << 1);
++        return (route * 127u + 1u) / 3u;
++    }
+     if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME) return original_sound_synthone_params[id].def;
+     if (id >= ORIGINAL_SYNTHONE_PHASER_MIX) {
+         if (!(cell[31] & 128u)) return original_sound_synthone_params[id].def;
+@@ -225,6 +229,13 @@ static void s1_put_lfo(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned id, unsigned
+         cell[22] |= (1u << ORIGINAL_SYNTHONE_TREM);
+         cell[7] = cell[25] = 64;
+     }
++    /* The optional patch uses only the lower seven bits of these positions. */
++    if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) {
++        unsigned route = (q * 3u + 63u) / 127u;
++        cell[8] = (cell[8] & 127u) | ((route & 1u) << 7);
++        cell[9] = (cell[9] & 127u) | ((route >> 1) << 7);
++        return;
++    }
+     /* The two performance inputs always restore neutral. Only the new format
+      * reuses their display bytes for phaser mix and rate. Feedback occupies
+      * the tag payload. Width uses high bits of bytes 0..5 and mask bit 7. */
+@@ -282,7 +293,8 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+         if (mask & ~allowed) return 0;
+         for (unsigned i = 0; i < 22; ++i) {
+             if (tag == 2 && (i == 6 || i == 7 || i == 21)) continue;
+-            unsigned q=phaser && i<6 ? cell[i]&127u : cell[i];
++            unsigned packed = (phaser && i<6) || (tag==2 && (i==8 || i==9));
++            unsigned q=packed ? cell[i]&127u : cell[i];
+             if (q > 127u || (i >= 2 && !(mask & (1u << i)) && q)) return 0;
+         }
+         return 1;
+@@ -330,12 +342,12 @@ int original_master_valid(const uint8_t *cell,const uint8_t *ext)
+ }
+ unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id)
+ {
+-    if (id<ORIGINAL_SYNTHONE_MASTER_VOLUME || id>=ORIGINAL_SYNTHONE_NPARAMS) return 0;
++    if (!original_sound_s1_master_id(id)) return 0;
+     return cell[26]=='M' ? ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME] : original_sound_synthone_params[id].def;
+ }
+ int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value)
+ {
+-    if (cell[29]!=ORIGINAL_SOUND_SYNTHONE || id<ORIGINAL_SYNTHONE_MASTER_VOLUME)
++    if (cell[29]!=ORIGINAL_SOUND_SYNTHONE || !original_sound_s1_master_id(id))
+         return original_sound_set(cell,id,value);
+     if (id>=ORIGINAL_SYNTHONE_NPARAMS || value>127 || !ext || !original_sound_valid(cell) || !original_master_valid(cell,ext)) return 0;
+     if (cell[26]!='M') {
+@@ -352,7 +364,7 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
+     if (!original_sound_valid(cell) || parameter >= original_sound_count(cell[29]) ||
+         original_sound_is_performance(cell[29], parameter) ||
+         value > original_sound_param(cell[29], parameter)->max) return 0;
+-    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_MASTER_VOLUME) return 0;
++    if (cell[29] == ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(parameter)) return 0;
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && parameter >= ORIGINAL_SYNTHONE_BASE_COUNT) {
+         s1_put_lfo(cell, parameter, value);
+         return 1;
+@@ -370,7 +382,7 @@ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, uns
+     if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
+         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
+-    cell[byte] = (uint8_t)position;
++    cell[byte] = (cell[byte] & 128u) | (uint8_t)position;
+     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+     return 1;
+ }
+diff --git a/firmware/src/app/original_sound.h b/firmware/src/app/original_sound.h
+index dd9d6068..0832d184 100644
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -20,7 +20,7 @@
+ #define ORIGINAL_SOUND_SCHEMA 2u
+ #define ORIGINAL_CHICAGO_FACTORIES 81u
+ #define ORIGINAL_SYNTHONE_FACTORIES 1u
+-#define ORIGINAL_SYNTHONE_NPARAMS 23u
++#define ORIGINAL_SYNTHONE_NPARAMS 24u
+ #define ORIGINAL_SYNTHONE_BASE_COUNT 6u
+ enum {
+     ORIGINAL_SYNTHONE_TREM = ORIGINAL_SYNTHONE_BASE_COUNT,
+@@ -29,8 +29,11 @@ enum {
+     ORIGINAL_SYNTHONE_PHASER_MIX, ORIGINAL_SYNTHONE_PHASER_RATE,
+     ORIGINAL_SYNTHONE_PHASER_FEEDBACK, ORIGINAL_SYNTHONE_PHASER_WIDTH,
+     ORIGINAL_SYNTHONE_MASTER_VOLUME, ORIGINAL_SYNTHONE_MASTER_RATIO, ORIGINAL_SYNTHONE_MASTER_THRESHOLD,
+-    ORIGINAL_SYNTHONE_MASTER_ATTACK, ORIGINAL_SYNTHONE_MASTER_RELEASE, ORIGINAL_SYNTHONE_MASTER_MAKEUP
++    ORIGINAL_SYNTHONE_MASTER_ATTACK, ORIGINAL_SYNTHONE_MASTER_RELEASE, ORIGINAL_SYNTHONE_MASTER_MAKEUP,
++    ORIGINAL_SYNTHONE_CRUSH_LFO
+ };
++static inline int original_sound_s1_master_id(unsigned id)
++{ return id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; }
+ /* A master edit claims seven bytes in the owner's auxiliary row. The main
+  * cell explicitly binds that row; historical project padding stays inert. */
+ enum { S1_MASTER_EXT_SIZE=7 };
+diff --git a/firmware/src/app/s1_dry_part.c b/firmware/src/app/s1_dry_part.c
+index f00277bd..d2be6590 100644
+--- a/firmware/src/app/s1_dry_part.c
++++ b/firmware/src/app/s1_dry_part.c
+@@ -106,7 +106,7 @@ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte)) {
+             float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
+-            *field = s1_patch_physical(s1_patch_at(i), cell[byte]);
++            *field = s1_patch_physical(s1_patch_at(i), cell[byte] & 127u);
+         }
+     }
+     if (!memcmp(&next, &part->patch, sizeof next)) return;
+@@ -174,6 +174,10 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+ {
+     if (id >= ORIGINAL_SYNTHONE_NPARAMS || !(value >= 0.0f && value <= 1.0f)) return 0;
+     unsigned position = (unsigned)(value * 127.f + .5f);
++    if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) {
++        part->crush_route = (uint8_t)((position * 3u + 63u) / 127u);
++        return 1;
++    }
+     if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME) {
+         master_param(&part->master,id-ORIGINAL_SYNTHONE_MASTER_VOLUME,position);
+         return 1;
+@@ -212,6 +216,7 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+     }
+     if (id == ORIGINAL_SYNTHONE_CRUSH) {
+         part->crush_interval = crush_interval(position);
++        part->crush_log_hz = fm_log2f(s1_part_crush_hz(value));
+         return 1;
+     }
+     if (id == 0) {
+@@ -343,6 +348,31 @@ static float lfo_step(s1_trem_lfo *lfo)
+     lfo->smooth=0x1.8338p-9f*wave+0x1.fe7cc8p-1f*lfo->smooth;
+     return 1.f - (.5f*(1.f-lfo->smooth)*lfo->level);
+ }
++/* The two original modulation destinations share clocks and discontinuity
++ * smoothers. The hold clock reads the rising envelope before tremolo applies
++ * its independent inverse envelope to the held sample. */
++static void modulated_crush(s1_dry_part *part, float *left, float *right, unsigned frames)
++{
++    s1_trem_lfo *a = &part->lfo[0], *b = &part->lfo[1];
++    for (unsigned i = 0; i < frames; ++i) {
++        float gain1 = lfo_step(a), gain2 = lfo_step(b);
++        if (part->crush_next <= part->crush_age) {
++            float mod1 = .5f * (1.f + a->smooth) * a->level;
++            float mod2 = .5f * (1.f + b->smooth) * b->level;
++            float mod = part->crush_route == 1 ? mod1 : part->crush_route == 2 ? mod2 : .5f * (mod1 + mod2);
++            float hz = fm_exp2f(part->crush_log_hz + 4.f * mod);
++            float interval = hz < 44100.f ? 44100.f / hz : 1.f;
++            part->crush_last = left[i];
++            part->crush_next += interval;
++            part->crush_next -= part->crush_age;
++            part->crush_age = 0.f;
++        }
++        part->crush_age += 1.f;
++        float out = part->crush_last;
++        if (part->tremolo) out *= part->tremolo == 1 ? gain1 : part->tremolo == 2 ? gain2 : .5f * (gain1 + gain2);
++        left[i] = right[i] = out;
++    }
++}
+ static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned frames)
+ {
+     s1_trem_lfo *a=&part->lfo[0], *b=&part->lfo[1];
+@@ -366,7 +396,7 @@ static void tremolo_mono(s1_dry_part *part, float *left, float *right, unsigned
+ 
+ static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned frames)
+ {
+-    tremolo_mono(part,left,right,frames);
++
+     unsigned phase = part->pan.phase;
+     float rate = part->pan.rate;
+     unsigned mix = part->pan.mix;
+@@ -433,10 +463,16 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
+     }
+     if (left != right) memcpy(right, left, frames * sizeof *left);
+ 
++    if (part->crush_route && part->crush_interval > 1.f) {
++        modulated_crush(part, left, right, frames);
++        pan_stereo(part, left, right, frames);
++        return;
++    }
+     /* The untouched INIT rate takes every input frame. Keep the last sample
+      * for a live rate change without running the hold loop on a dry block. */
+     if (part->crush_interval == 1.f && part->crush_age == 1.f && part->crush_next == 1.f) {
+         part->crush_last = left[frames - 1u];
++        tremolo_mono(part, left, right, frames);
+         pan_stereo(part, left, right, frames);
+         return;
+     }
+@@ -451,5 +487,6 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
+         }
+         part->crush_age += 1.f;
+     }
++    tremolo_mono(part, left, right, frames);
+     pan_stereo(part, left, right, frames);
+ }
+diff --git a/firmware/src/app/s1_dry_part.h b/firmware/src/app/s1_dry_part.h
+index 4153e1b7..ec1f9cf9 100644
+--- a/firmware/src/app/s1_dry_part.h
++++ b/firmware/src/app/s1_dry_part.h
+@@ -49,7 +49,8 @@ typedef struct {
+         uint8_t engaged, mix;  /* gain-law transition in 64 samples */
+     } pan;
+     s1_trem_lfo lfo[2];
+-    uint8_t tremolo;
++    uint8_t tremolo, crush_route;
++    float crush_log_hz;
+     s1_phaser phaser;
+     s1_master master;
+ } s1_dry_part;
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 978cebf2..9c10167b 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -654,7 +654,7 @@ static UI_DRAW int pref_get(pref_t r)
+     case R_ENG:
+         if (r.a == T_303 &&
+             engine_bass_sound_bank(&proj.sound,r.b) == ORIGINAL_SOUND_SYNTHONE)
+-            return (unsigned)r.c>=ORIGINAL_SYNTHONE_MASTER_VOLUME ?
++            return original_sound_s1_master_id((unsigned)r.c) ?
+                 original_master_display(proj.sound.v[r.a][r.b],proj.sound.v[r.a][NBASS+r.b],r.c) :
+                 original_sound_s1_display(proj.sound.v[r.a][r.b],r.c);
+         return proj.sound.v[r.a][r.b][r.c];
+@@ -1133,7 +1133,7 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
+         else { put_i(num,((value-1)*100+63)/126); put_s(unit,"%"); }
+         return 1;
+     }
+-    if (kind==ORIGINAL_SOUND_SYNTHONE && id>=ORIGINAL_SYNTHONE_MASTER_VOLUME && id<ORIGINAL_SYNTHONE_NPARAMS) {
++    if (kind==ORIGINAL_SOUND_SYNTHONE && original_sound_s1_master_id(id)) {
+         float physical=s1_master_control(id-ORIGINAL_SYNTHONE_MASTER_VOLUME,(unsigned)value);
+         if (id==ORIGINAL_SYNTHONE_MASTER_ATTACK || id==ORIGINAL_SYNTHONE_MASTER_RELEASE) {
+             display_ms(physical*1000.f,num,unit);
+@@ -1161,7 +1161,7 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
+     if (kind == ORIGINAL_SOUND_SYNTHONE && ui_original_states(kind,id)) {
+         static const char *const sources[] = {"OFF","LFO 1","LFO 2","BOTH"};
+         static const char *const waves[] = {"SINE","SQUARE","SAW","REV SAW"};
+-        put_s(num,(id==ORIGINAL_SYNTHONE_TREM ? sources : waves)[(value*3+63)/127]);
++        put_s(num,((id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_CRUSH_LFO) ? sources : waves)[(value*3+63)/127]);
+         return 1;
+     }
+     if (kind == ORIGINAL_SOUND_SYNTHONE &&
+diff --git a/firmware/src/app/ui_original_controls.h b/firmware/src/app/ui_original_controls.h
+index 60c89e37..1882cabe 100644
+--- a/firmware/src/app/ui_original_controls.h
++++ b/firmware/src/app/ui_original_controls.h
+@@ -22,13 +22,13 @@ static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENV
+ static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
+     {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE},
+     {ORIGINAL_SYNTHONE_TREM,ORIGINAL_SYNTHONE_LFO1_SHAPE,ORIGINAL_SYNTHONE_LFO1_LEVEL,ORIGINAL_SYNTHONE_LFO1_RATE},
+-    {-1,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
++    {ORIGINAL_SYNTHONE_CRUSH_LFO,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
+     {ORIGINAL_SYNTHONE_PHASER_MIX,ORIGINAL_SYNTHONE_PHASER_RATE,ORIGINAL_SYNTHONE_PHASER_FEEDBACK,ORIGINAL_SYNTHONE_PHASER_WIDTH},
+     {ORIGINAL_SYNTHONE_MASTER_VOLUME,ORIGINAL_SYNTHONE_MASTER_RATIO,ORIGINAL_SYNTHONE_MASTER_THRESHOLD,ORIGINAL_SYNTHONE_MASTER_MAKEUP},
+     {ORIGINAL_SYNTHONE_MASTER_ATTACK,ORIGINAL_SYNTHONE_MASTER_RELEASE,-1,-1}
+ };
+ static const char *const ui_original_synthone_titles[] = {
+-    "SYNTH ONE", "TREMOLO / LFO 1", "TREMOLO / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
++    "SYNTH ONE", "TREMOLO / LFO 1", "CRUSH / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
+ };
+ static const char *const ui_original_chicago_titles[] = {
+     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
+@@ -51,10 +51,11 @@ static const char *ui_original_name(unsigned kind, unsigned id)
+     if(kind==ORIGINAL_SOUND_JUNO)return id<16?juno[id]:"";
+     if (kind == ORIGINAL_SOUND_CHICAGO && id < 20) return chicago[id];
+     if (kind == ORIGINAL_SOUND_SYNTHONE) {
+-        if (id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id < ORIGINAL_SYNTHONE_NPARAMS) {
++        if (original_sound_s1_master_id(id)) {
+             static const char *const names[]={"INPUT LEVEL","RATIO","THRESHOLD","ATTACK","RELEASE","MAKEUP"};
+             return names[id-ORIGINAL_SYNTHONE_MASTER_VOLUME];
+         }
++        if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) return "CRUSH SOURCE";
+         if (id == ORIGINAL_SYNTHONE_CRUSH) return "CRUSH RATE";
+         if (id == ORIGINAL_SYNTHONE_WIDTH) return "STEREO WIDTH";
+         if (id == ORIGINAL_SYNTHONE_PAN) return "PAN DEPTH";
+@@ -76,7 +77,7 @@ static const char *ui_original_name(unsigned kind, unsigned id)
+ static unsigned ui_original_states(unsigned kind, unsigned id)
+ {
+     if (kind == ORIGINAL_SOUND_SYNTHONE &&
+-        (id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE)) return 4;
++        (id==ORIGINAL_SYNTHONE_CRUSH_LFO || id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE)) return 4;
+     if (kind == ORIGINAL_SOUND_CHICAGO) {
+         if (id == 11 || id == 13) return 2;
+         if (id == 14 || id == 15) return 3;
+diff --git a/tests/host/original_sound_cell_test.c b/tests/host/original_sound_cell_test.c
+index 638e4966..4871a2c9 100644
+--- a/tests/host/original_sound_cell_test.c
++++ b/tests/host/original_sound_cell_test.c
+@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
+ static void verify_synthone(void)
+ {
+     uint8_t cell[32], copy[32];
+-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 23);
++    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 24);
+     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
+     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
+     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
+@@ -301,6 +301,18 @@ static void verify_synthone(void)
+     for(unsigned k=0;k<13;++k) assert(original_sound_s1_set(extended,k,42u+k));
+     for(unsigned k=0;k<4;++k) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+ #endif
++    /* A modulation route and the first two optional dry edits share bytes
++     * on disk. Each edit must preserve the other's complete value. */
++    for (unsigned route = 0; route < 4; ++route) {
++        unsigned q=(route*127u+1u)/3u;
++        assert(original_sound_set(extended,ORIGINAL_SYNTHONE_CRUSH_LFO,q));
++#if X0X_SYNTHONE_PATCH
++        assert(original_sound_s1_set(extended,0,93) && original_sound_s1_set(extended,1,42));
++        assert((extended[8]&127u)==93u && (extended[9]&127u)==42u);
++#endif
++        assert(original_sound_valid(extended));
++        assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_CRUSH_LFO)==q);
++    }
+     uint8_t master_ext[S1_MASTER_EXT_SIZE], master_cell[32];
+     memcpy(master_cell,extended,32);memset(master_ext,255,sizeof master_ext);
+     assert(original_master_valid(master_cell,master_ext));
+diff --git a/tests/host/synthone_crush_panel_test.c b/tests/host/synthone_crush_panel_test.c
+index dda328b5..bfb5a712 100644
+--- a/tests/host/synthone_crush_panel_test.c
++++ b/tests/host/synthone_crush_panel_test.c
+@@ -28,6 +28,11 @@ int main(void)
+             pref_set(fx,comp[v][j]);
+             assert(pref_get(fx)==comp[v][j]);
+         }
++        pref_t route = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH_LFO);
++        assert(ui_original_synthone_rows[2][0] == ORIGINAL_SYNTHONE_CRUSH_LFO);
++        assert(pref_get(route) == 0);
++        pref_set(route,v ? 85 : 127);
++        assert(pref_get(route) == (v ? 85 : 127));
+         pref_t r = PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH);
+         assert(ui_original_synthone_rows[0][0] == ORIGINAL_SYNTHONE_CRUSH);
+         assert(!strcmp(ui_original_name(ORIGINAL_SOUND_SYNTHONE, r.c), "CRUSH RATE"));
+@@ -91,6 +96,8 @@ int main(void)
+     engine_apply_sound(&proj.sound);
+     engine_render(block, 256);
+     assert(!memcmp(&saved, &proj.sound, sizeof saved));
++    for (int v=0;v<2;++v)
++        assert(pref_get(PR(R_ENG,T_303,v,ORIGINAL_SYNTHONE_CRUSH_LFO)) == (v ? 85 : 127));
+     for (int v = 0; v < 2; ++v) {
+         assert(engine_bass_bank(v) == ORIGINAL_SOUND_SYNTHONE);
+         assert(pref_get(PR(R_ENG, T_303, v, ORIGINAL_SYNTHONE_CRUSH)) == rates[v]);
+@@ -124,6 +131,6 @@ int main(void)
+         ORIGINAL_SYNTHONE_MASTER_RATIO)==113);
+     assert(pref_get(ratio)==comp[0][1]);
+     seq_stop(&seq);engine_render(block,256);
+-    puts("Both Synth One owners preserved independent CRUSH, width, pan, tremolo, phaser and master controls across project save, engine switches and reload.");
++    puts("Both Synth One owners preserved independent CRUSH and its LFO route, width, pan, tremolo, phaser and master controls across project save, engine switches and reload.");
+     return 0;
+ }
+diff --git a/tests/host/synthone_init_audio.c b/tests/host/synthone_init_audio.c
+index 4683cee3..d8fc55e9 100644
+--- a/tests/host/synthone_init_audio.c
++++ b/tests/host/synthone_init_audio.c
+@@ -176,6 +176,9 @@ static void crush_patch(void)
+     bass_identity_t identity;
+     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
++    old_tag[6] = 23;
++    assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
++    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+     old_tag[6] = 17;
+     assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
+     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);

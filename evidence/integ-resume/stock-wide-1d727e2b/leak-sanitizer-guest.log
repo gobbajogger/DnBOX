@@ -1,0 +1,24 @@
+Linux (none) 6.12.117+deb13-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.117-1 (2026-11-12) x86_64 GNU/Linux
+uid=1000(tester) gid=1000(tester) groups=1000(tester)
+TracerPid:	0
+I4_CLEAN_EXIT=0
+
+=================================================================
+==177==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 123 byte(s) in 1 object(s) allocated from:
+    #0 0x7f7aac683c57 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x560100139217 in leak /tmp/leak.c:2
+
+SUMMARY: AddressSanitizer: 123 byte(s) leaked in 1 allocation(s).
+SUMMARY: AddressSanitizer: 123 byte(s) leaked in 1 allocation(s).
+I4_LEAK_EXIT=23
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+PASS genuine 123-byte LeakSanitizer negative control rejected
+PASS compact program metadata: 3591 exact binary32/name checks
+PASS compact program metadata: 3591 exact binary32/name checks
+PASS metadata corruption negative control rejected
+I4_COMPACT_EXIT=0
+I4_GUEST_EXIT=0
+[   16.806101] reboot: Power down
+QEMU_EXIT=0

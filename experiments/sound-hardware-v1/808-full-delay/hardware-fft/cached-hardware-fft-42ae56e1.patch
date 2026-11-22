@@ -1,0 +1,1588 @@
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.c
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.c
+@@ -9,7 +9,7 @@
+ extern void sc808_capture(float *, float *, float *);
+ static drum808_t kit;
+ static fxbus_t verb;
+-static int16_t ring[FX_808_DELAY_FRAMES];
++static int16_t ring[FX_808_DELAY_WORDS];
+ 
+ static void pot(sc808_engine_t *e, const char *key, int value)
+ {
+@@ -20,7 +20,9 @@
+ 
+ int main(int argc, char **argv)
+ {
+-    assert(argc == 12);
++    assert(argc == 12 || argc == 13);
++    int total = argc == 13 ? atoi(argv[12]) : 88200;
++    assert(total >= 88200 && total <= 352800);
+     int voice=atoi(argv[1]), rv=atoi(argv[2]), mode=atoi(argv[3]), glue=atoi(argv[4]);
+     sc808_engine_t *ref=sc808_create(44100);
+     assert(ref);
+@@ -57,10 +59,11 @@
+     }
+     FILE *file=fopen(argv[11],"wbx");
+     assert(file);
+-    for (int pos=0;pos<88200;pos+=128) {
+-        int n=88200-pos<128 ? 88200-pos : 128;
++    for (int pos=0;pos<total;pos+=128) {
++        int n=total-pos<128 ? total-pos : 128;
+         float x[128],rv[128],dl[128],original[128],left[128],right[128];
+-        if (pos==0||pos==3072||pos==12288||pos==20480)
++        if (pos==0||pos==3072||pos==12288||pos==20480 ||
++            (total>88200 && pos < total/2 && pos % 5888 == 0))
+             for(int v=0;v<SC808_NUM_VOICES;++v) if(voice==-1||voice==v)sc808_trigger(ref,v,118);
+         sc808_capture(x,rv,dl);
+         sc808_render(ref,original,n);
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.py
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.py
+@@ -1,4 +1,4 @@
+-"""Compare the bounded shipping 808 echo to untouched 8W8 processing on every voice."""
++"""Compare the shipping 808 echo to untouched 8W8 processing on every voice."""
+ import argparse, hashlib, json, subprocess, sys
+ from pathlib import Path
+ import numpy as np
+@@ -13,6 +13,8 @@
+     parser=argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('upstream',type=Path)
+     parser.add_argument('output',type=Path)
++    parser.add_argument('--sustained',action='store_true',
++                        help='repeat hits for four seconds, then compare four seconds of feedback tails')
+     args=parser.parse_args()
+     out=args.output.resolve()
+     out.mkdir(parents=True,exist_ok=False)
+@@ -43,7 +45,7 @@
+     cases=[]
+     default=[7,68,60,93,55,120]
+     beats=[.125,1/6,.25,1/3,.375,.5,2/3,.75,1,4/3,1.5,2,3]
+-    cap=(19200-256)/44100
++    cap=(88200-256)/44100
+     for voice in [*range(16),-1]:
+         for rv,mode,glue,fb in ((0,0,0,68),(0,0,0,127),(1,0,0,68),(1,1,108,68)):
+             vals=default.copy();vals[1]=fb
+@@ -52,16 +54,25 @@
+         for bpm in [45,60,90,120,180,240]:
+             for i,beat in enumerate(beats):
+                 vals=default.copy();vals[0]=i;vals[5]=bpm
+-                cases.append((voice,0,0,0,vals,beat*60/bpm<=cap))
++                cases.append((voice,0,0,0,vals,True))
+         for axis in range(1,5):
+             for pos in [0,64,127]:
+                 vals=default.copy();vals[axis]=pos
+                 cases.append((voice,0,0,0,vals,True))
++    frames = 352800 if args.sustained else 88200
++    if args.sustained:
++        cases = [(voice, rv, mode, glue, value, True)
++                 for voice in [*range(16), -1]
++                 for rv, mode, glue, value in (
++                     (0, 0, 0, [12, 127, 127, 127, 55, 45]),
++                     (0, 0, 0, [12, 127, 0, 127, 0, 45]),
++                     (0, 0, 0, [0, 127, 127, 127, 55, 240]),
++                     (1, 1, 108, [12, 127, 127, 127, 55, 45]))]
+     rows=[]
+     for voice,rv,mode,glue,values,within in cases:
+         tmp=out/'pair.f32'
+-        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp],check=True)
+-        pcm=np.fromfile(tmp,dtype='<f4').reshape(88200,4)
++        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp,str(frames)],check=True)
++        pcm=np.fromfile(tmp,dtype='<f4').reshape(frames,4)
+         tmp.unlink()
+         if not np.isfinite(pcm).all() or not np.array_equal(pcm[:,2],pcm[:,3]): raise RuntimeError('invalid mono return')
+         x,ref,port,_=pcm.astype('d').T
+@@ -73,14 +84,25 @@
+             row.update(return_level_db=level,return_spectral_rms_db=spec,return_pass=bool(abs(level)<=1 and spec<=3))
+         elif not(mode or glue) and not np.array_equal(ref,port):
+             raise RuntimeError('dry alignment failed')
++        if args.sustained:
++            tail_ref,tail_port=ref[frames//2:],port[frames//2:]
++            if np.max(np.abs(tail_ref))>1e-8:
++                lev,sp=channel_score(tail_ref,tail_port,44100,[20,16000])
++                row.update(tail_level_db=lev,tail_spectral_rms_db=sp,tail_pass=bool(abs(lev)<=1 and sp<=3))
++            elif not np.array_equal(tail_ref,tail_port):
++                raise RuntimeError('silent tail differs')
+         rows.append(row)
+     valid=[r for r in rows if r['in_range']]
+-    report={'original':REF,'rate':44100,'frames_per_case':88200,'maximum_delay_seconds':cap,'cases':rows,
++    report={'original':REF,'rate':44100,'frames_per_case':frames,'maximum_delay_seconds':cap,'cases':rows,
+             'in_range_cases':len(valid),'full_pass':sum(r['pass'] for r in valid),
+             'wet_only_pass':sum(r.get('return_pass',False) for r in valid),'wet_only_cases':sum('return_pass' in r for r in valid)}
++    if args.sustained:
++        report.update(tail_pass=sum(r.get('tail_pass', False) for r in valid),
++                      tail_cases=sum('tail_pass' in r for r in valid))
+     (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
+     print({k:v for k,v in report.items() if k!='cases'})
+-    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'])
++    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'] or
++               (args.sustained and report['tail_pass']!=report['tail_cases']))
+ 
+ if __name__=='__main__':
+     raise SystemExit(main())
+--- a/experiments/sound-hardware-v1/808-effects/dual_delay.c
++++ b/experiments/sound-hardware-v1/808-effects/dual_delay.c
+@@ -9,7 +9,7 @@
+ 
+ enum { SHARED = 79200, BLOCK = 128, FRAMES = 44100 * 6 };
+ static fxbus_t raw_bus, packed_bus, private_bus, isolated_bus;
+-static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_FRAMES], isolated_ring[FX_808_DELAY_FRAMES];
++static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_WORDS], isolated_ring[FX_808_DELAY_WORDS];
+ static struct {
+     unsigned before;
+     int16_t data[(FX_DELAY_BYTES(SHARED)+1)/2];
+@@ -108,7 +108,23 @@
+             assert(fwrite(data,sizeof data,1,out)==1);
+         }
+     }
+-    assert(!memcmp(private_ring,isolated_ring,sizeof private_ring));
++    /* The compressed arena owns three pointers to its own backing storage.
++     * Compare complete persistent state after normalizing those addresses. */
++    fx808_transform_t private_state=*(fx808_transform_t *)private_ring;
++    fx808_transform_t isolated_state=*(fx808_transform_t *)isolated_ring;
++    assert((uint8_t *)private_state.packet_data-(uint8_t *)private_ring ==
++           (uint8_t *)isolated_state.packet_data-(uint8_t *)isolated_ring);
++    assert((uint8_t *)private_state.decoded_hop-(uint8_t *)private_ring ==
++           (uint8_t *)isolated_state.decoded_hop-(uint8_t *)isolated_ring);
++    assert(private_state.spectrum_cache==&private_bus.private_spectra);
++    assert(isolated_state.spectrum_cache==&isolated_bus.private_spectra);
++    private_state.spectrum_cache=isolated_state.spectrum_cache;
++    private_state.packet_data=isolated_state.packet_data;
++    private_state.decoded_hop=isolated_state.decoded_hop;
++    assert(!memcmp(&private_state,&isolated_state,sizeof private_state));
++    assert(!memcmp(&private_bus.private_spectra,&isolated_bus.private_spectra,sizeof private_bus.private_spectra));
++    size_t offset=(sizeof(private_state)+3u)&~(size_t)3u;
++    assert(!memcmp((uint8_t *)private_ring+offset,(uint8_t *)isolated_ring+offset,sizeof private_ring-offset));
+     assert(tail8 && tail9);
+     assert(packed_ring.before==0xa8910d30u && packed_ring.after==0xa8910d30u);
+     return fclose(out)!=0;
+--- a/experiments/sound-hardware-v1/808-effects/replay.py
++++ b/experiments/sound-hardware-v1/808-effects/replay.py
+@@ -22,7 +22,7 @@
+     parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
+     parser.add_argument('--kit-glue',action='store_true',help='use the dedicated 808 glue detector')
+     parser.add_argument('--kit-reverb',action='store_true',help='use the dedicated mono 808 reverb')
+-    parser.add_argument('--kit-delay',action='store_true',help='use the bounded private 808 delay')
++    parser.add_argument('--kit-delay',action='store_true',help='use the full-range private 808 delay')
+     args = parser.parse_args()
+     up = args.upstream.resolve()
+     out = args.output.resolve()
+@@ -74,7 +74,7 @@
+                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
+         rows.append(row)
+     print(json.dumps(rows,indent=2))
+-    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, maximum 429.569 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
++    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, original maximum 1994.195 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
+        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
+     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
+ 
+--- a/experiments/sound-hardware-v1/808-effects/wet.c
++++ b/experiments/sound-hardware-v1/808-effects/wet.c
+@@ -12,7 +12,7 @@
+ static fxbus_t bus;
+ static drum808_t kit;
+ static fxbus_t kit_verb;
+-static int16_t private_delay[FX_808_DELAY_FRAMES];
++static int16_t private_delay[FX_808_DELAY_WORDS];
+ 
+ static void set(sc808_engine_t *s, const char *name, unsigned value)
+ {
+--- /dev/null
++++ b/firmware/hal/fm1_fft128.h
+@@ -0,0 +1,24 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++/* Forward, complex, 128 points. The measured SDK descriptor is 0x20800720.
++ * Set SAME_ADR for the shared input/output buffer. The 808 echo owns this
++ * peripheral for the duration of a job. */
++static inline int fm1_fft128_forward(int32_t *words)
++{
++    volatile uint32_t *const regs=(volatile uint32_t *)0x01ee0400u;
++    if(regs[0]&1u) return 0;
++    static uint32_t desc[4] __attribute__((aligned(16)));
++    desc[0]=0x20800721u;
++    desc[1]=desc[2]=(uint32_t)(uintptr_t)words;
++    desc[3]=0;
++    __asm__ volatile("csync" ::: "memory");
++    regs[1]=(uint32_t)(uintptr_t)desc;
++    regs[0]=0x141u;
++    for(unsigned poll=0;poll<4096;poll++){
++        if(regs[0]&0x80u){regs[0]=0x140u;__asm__ volatile("ssync" ::: "memory");return 1;}
++    }
++    regs[0]=0;
++    __asm__ volatile("ssync" ::: "memory");
++    return 0;
++}
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -432,8 +432,8 @@
+ #define DLY_LEN 79200
+ static int16_t dly_buf[(FX_DELAY_BYTES(DLY_LEN) + 1u) / 2u] POOL;
+ static fxbus_t d8_verb POOL;
+-static int16_t d8_delay[FX_808_DELAY_FRAMES] POOL;
+-_Static_assert(sizeof dly_buf + sizeof d8_verb + sizeof d8_delay <= 2u * DLY_LEN, "808 private effects must fit in the original delay arena");
++static _Alignas(fx808_transform_t) int16_t d8_delay[FX_808_DELAY_WORDS] POOL;
++_Static_assert(sizeof dly_buf + sizeof d8_verb + sizeof d8_delay <= 2u * DLY_LEN + 2u * (FX_RV_AP_TOTAL + FX_RV_APR_TOTAL), "808 private effects must fit in the delay arena and the shared reverb savings");
+ static volatile uint8_t project_hold, project_midi_drop;
+ void engine_project_hold(int hold)
+ {
+@@ -2873,6 +2873,10 @@
+ static uint32_t c1_allowed(void)
+ {
+     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
++    /* The privately routed 808 is a stateful commit. Keep its full measured
++     * cost on the owner so another render can overlap its history work. */
++    if (d808.kpot[D8_KIT_DL_BUS] || fxbus_808_delay_active(&d8_verb))
++        m &= ~(1u << JB_808);
+     for (unsigned v = 0; v < NBASS; ++v) {
+         const original_runtime_part *part = &original_bass[v];
+         if (part->kind == ORIGINAL_SOUND_MIAMI ||
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1644,7 +1644,7 @@
+             static const pref_t dlbus[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_BUS), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TIME), NONE, NONE};
+             static const pref_t echo[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_LEVEL), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_FDBK),
+                 PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_HPF)};
+-            add_page_refs(emit, "DL 430ms", dlbus, 0, 0);
++            add_page_refs(emit, "DL 2s", dlbus, 0, 0);
+             add_page_refs(emit, "KIT DL", echo, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -540,9 +540,9 @@
+         d9_smp_rate(s);
+         d9_env_set(&s->out, 0.0f);
+         d9_shape_prep(&s->shape, s->drive, s->dist_type);
+-        if (i == 2) { s->adpcm = x0x_smp_crash; s->len = X0X_SMP_CRASH_LEN; }
+-        else if (i == 3) { s->adpcm = x0x_smp_ride; s->len = X0X_SMP_RIDE_LEN; }
+-        else { s->adpcm = x0x_smp_hh; s->len = X0X_SMP_HH_LEN; }
++        if (i == 2) { s->adpcm = x0x_smp_crash_packed; s->len = X0X_SMP_CRASH_LEN; }
++        else if (i == 3) { s->adpcm = x0x_smp_ride_packed; s->len = X0X_SMP_RIDE_LEN; }
++        else { s->adpcm = x0x_smp_hh_packed; s->len = X0X_SMP_HH_LEN; }
+     }
+ 
+     d->accent = 2.0f;
+@@ -712,6 +712,7 @@
+     float *dry_r, pl, pr;     /* X0X stereo: dry_r 0 = mono (dry gets y as 9W9's) */
+     float dpl, dpr;           /* the pans' glide per sample this block (0 settled) */
+     float *y;                 /* the voice's samples this block, mixed after its loop (d9_emit_block) */
++    uint32_t *prefix_cursor;  /* null when a fixture supplies ordinary raw nibbles */
+ } d9_bus_t;
+ 
+ /* a voice's block into the buses, after its sample loop: per sample the same products and
+@@ -1021,6 +1022,27 @@
+     d9_emit_block(bus, m);
+ }
+ 
++/* The leading nibbles remain directly addressable. After the lead-in, advance
++ * one canonical Huffman word per original nibble and restore its sign. The
++ * entropy decoder is reset from the immutable head whenever a voice restarts. */
++static inline unsigned d9_cymbal_nibble(const uint8_t *data, uint32_t *stream, unsigned index)
++{
++    if (!stream || index < X0X_CYMBAL_HEAD) {
++        unsigned byte = data[index >> 1];
++        return (byte >> (4 * (index & 1))) & 15;
++    }
++    unsigned cursor = *stream;
++    if (index == X0X_CYMBAL_HEAD)
++        cursor = (X0X_CYMBAL_HEAD * 4u << 1) | (data[X0X_CYMBAL_HEAD / 2 - 1] >> 7);
++    unsigned pos = cursor >> 1;
++    const uint8_t *at = data + pos / 8;
++    unsigned window = ((unsigned)at[0] | ((unsigned)at[1] << 8)) >> (pos & 7u);
++    unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
++    unsigned code = (pair & 15u) ^ ((cursor & 1u) << 3);
++    *stream = ((pos + (pair >> 4)) << 1) | (code >> 3);
++    return code;
++}
++
+ /* Hats, ride, crash (render_sampler) */
+ static void d9_render_smp(d9_smp_t *s, const d9_bus_t *bus, int n)
+ {
+@@ -1045,12 +1067,44 @@
+         int32_t h0 = s->h0, h1 = s->h1;
+         d9_env_values(&s->out, bus->y, m);
+         if (next == s->pos)
+-            h1 = ima_decode(adpcm, next++, &pred, &idx);
+-        for (int i = 0; i < m; ++i) {
++            h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, next++), &pred, &idx);
++        int raw = m;
++        if (bus->prefix_cursor) {
++            unsigned available = next < X0X_CYMBAL_HEAD ? X0X_CYMBAL_HEAD - next : 0;
++            if (available < (unsigned)raw) raw = (int)available;
++        }
++        for (int i = 0; i < raw; i++) {
+             h0 = h1;
+             h1 = ima_decode(adpcm, next++, &pred, &idx);
+-            const float v = (float)h0 * (1.0f / 32768.0f);
+-            bus->y[i] = v * bus->y[i];
++            bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
++        }
++        if (raw < m) {
++            unsigned cursor = next == X0X_CYMBAL_HEAD
++                ? (X0X_CYMBAL_HEAD * 8u) | (adpcm[X0X_CYMBAL_HEAD / 2 - 1] >> 7)
++                : *bus->prefix_cursor;
++            unsigned pos = cursor >> 1, bits = 24u - (pos & 7u);
++            const uint8_t *read = adpcm + pos / 8;
++            unsigned window = (read[0] | (unsigned)read[1] << 8 | (unsigned)read[2] << 16) >> (pos & 7u);
++            unsigned sign = (cursor & 1u) << 3;
++            read += 3;
++            for (int i = raw; i < m; i++) {
++                unsigned pair = x0x_cymbal_prefix[window & X0X_CYMBAL_MASK];
++                unsigned code = (pair & 15u) ^ sign, width = pair >> 4;
++                sign = code & 8;
++                window >>= width;
++                pos += width;
++                bits -= width;
++                if (bits < 8u) {
++                    window |= (read[0] | (unsigned)read[1] << 8) << bits;
++                    read += 2;
++                    bits += 16;
++                }
++                h0 = h1;
++                h1 = ima_decode_code(code, &pred, &idx);
++                bus->y[i] = ((float)h0 * (1.0f / 32768.0f)) * bus->y[i];
++            }
++            *bus->prefix_cursor = pos * 2u + (sign >> 3);
++            next += (unsigned)(m - raw);
+         }
+         s->h0 = h0;
+         s->h1 = h1;
+@@ -1065,7 +1119,7 @@
+                 const uint32_t need = s->pos + 2 < len ? s->pos + 2 : len;
+                 while (s->dk < need) {
+                     s->h0 = s->h1;
+-                    s->h1 = ima_decode(adpcm, s->dk++, &s->pred, &s->idx);
++                    s->h1 = ima_decode_code(d9_cymbal_nibble(adpcm, bus->prefix_cursor, s->dk++), &s->pred, &s->idx);
+                 }
+                 const int last = s->pos + 1 >= len;
+                 const float a = (float)(last ? s->h1 : s->h0) * (1.0f / 32768.0f);
+@@ -1178,6 +1232,7 @@
+         d9_smp_t *s = &d->smp[order[k] - DR_CH];
+         if (s->mute > 0) {
+             d9_bus(&bus, d, order[k], dry, rev, dly, audible_tracks);
++            bus.prefix_cursor = &d->prefix_cursor[order[k] - DR_CH];
+             d9_render_smp(s, &bus, n);
+         }
+     }
+--- a/firmware/src/dsp/drum909.h
++++ b/firmware/src/dsp/drum909.h
+@@ -107,6 +107,7 @@
+     float nz_buf[DR_NZ_BUF];      /* noise, linear; the block plus >= DR_NZ_HIST before it */
+     int32_t nz_pos;               /* where the next block's noise starts */
+     uint8_t pots[DR_NUM + 1][DR_MAX_PARAMS];
++    uint32_t prefix_cursor[4];    /* one independent lossless ADPCM bit cursor per cymbal */
+ };
+ typedef struct drum909 drum909_t;
+ 
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -3,6 +3,7 @@
+  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
+ #include "fxbus.h"
+ #include "fxbus_delay_store.h"
++#include "fxbus_808_transform.h"
+ #include "x0x_glue.h"
+ #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
+ 
+@@ -232,10 +233,47 @@
+     return d9_shape(sh, x * k, crush) * 0.7f;
+ }
+ 
+-static inline __attribute__((always_inline)) float rv_ap_cell(float *cell, float y)
+-{
+-    float old = *cell;
+-    *cell = y + old * 0.5f;
++/* Store the reverb allpasses in binary16. Subnormal cells preserve the
++ * final decay below the smallest normal value; loads restore positive or
++ * negative binary32 exactly before applying the original recurrence. */
++static inline uint16_t rv_store_half(float sample)
++{
++    uint32_t bits;
++    __builtin_memcpy(&bits, &sample, sizeof bits);
++    uint32_t mag = bits & 0x7fffffffu;
++    uint32_t sign = (bits >> 16) & 0x8000u;
++    if (mag < 0x38800000u) {
++        float positive;
++        __builtin_memcpy(&positive, &mag, sizeof positive);
++        positive += 0.5f;
++        __builtin_memcpy(&mag, &positive, sizeof mag);
++        return (uint16_t)(sign | (mag - 0x3f000000u));
++    }
++    if (mag > 0x477fe000u) return (uint16_t)(sign | 0x7bffu);
++    uint32_t rounded = mag + 0xfffu + ((mag >> 13) & 1u);
++    return (uint16_t)(sign | ((rounded - 0x38000000u) >> 13));
++}
++
++static inline float rv_load_half(uint16_t cell)
++{
++    uint32_t mag = cell & 0x7fffu;
++    uint32_t sign = (uint32_t)(cell & 0x8000u) << 16;
++    float value;
++    if (mag < 0x400u) {
++        value = (float)mag * 0x1p-24f;
++        __builtin_memcpy(&mag, &value, sizeof mag);
++    } else {
++        mag = (mag << 13) + 0x38000000u;
++    }
++    mag |= sign;
++    __builtin_memcpy(&value, &mag, sizeof value);
++    return value;
++}
++
++static inline __attribute__((always_inline)) float rv_ap_cell(uint16_t *cell, float y)
++{
++    float old = rv_load_half(*cell);
++    *cell = rv_store_half(y + old * 0.5f);
+     return old - y * 0.5f;
+ }
+ 
+@@ -268,8 +306,8 @@
+     cb[1] = cb[0] + fx_cl[0];
+     cb[2] = cb[1] + fx_cl[1];
+     cb[3] = cb[2] + fx_cl[2];
+-    float *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
+-    float *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
++    uint16_t *ab0 = f->ap, *ab1 = f->ap + fx_al[0];
++    uint16_t *ar0 = f->apr, *ar1 = f->apr + fx_alr[0];
+     int32_t quiet = f->rv_quiet;
+     /* A pass stops at the first ring end. Every index in its inner loop
+      * addresses contiguous cells in all active delay lines. */
+@@ -289,8 +327,8 @@
+         int16_t *c1 = cb[1] + f->cpos[1];
+         int16_t *c2 = cb[2] + f->cpos[2];
+         int16_t *c3 = cb[3] + f->cpos[3];
+-        float *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
+-        float *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
++        uint16_t *l0 = ab0 + f->apos[0], *r0 = ar0 + f->aposr[0];
++        uint16_t *l1 = ab1 + f->apos[1], *r1 = ar1 + f->aposr[1];
+         for (int i = 0; i < count; ++i) {
+             const float sample = in ? in[offset + i] : 0.0f;
+             const float x = d9_biquad_tick(&f->rv_hp, sample);
+@@ -485,35 +523,84 @@
+     f->dl_signal = (uint8_t)signal;
+ }
+ 
+-/* The private 8W8 delay uses the 9W9 DIGI arithmetic. Its unused right
+- * reverb allpasses remain zero and feed the delay after the route is closed. */
++/* The original mono delay uses a 2 s virtual cursor independent of the
++ * transform packet ring. The explicit 256-sample guard preserves the source's
++ * maximum time. Each return precedes distortion, glue and kit volume. */
++enum { DELAY_808_QUIET = 89088 + 1536 };
+ X0X_COLD void fxbus_init_808_fx(fxbus_t *f, int16_t *delay)
+ {
+-    fxbus_init(f, delay, FX_808_DELAY_FRAMES);
++    fxbus_init_808_reverb(f);
+     f->dl_type = -1;
+-    for (int i = FX_RV_DECAY; i <= FX_DL_HPF; ++i)
++    f->dlen = FX_808_DELAY_FRAMES;
++    f->dbuf = delay;
++    f->bpm = 120.0f;
++    for (int i = FX_DL_TIME; i <= FX_DL_HPF; ++i)
+         fxbus_set(f, i, fx_p[i].ui.def);
++    f->dcur = f->dl_time_ms * 0.001f * D9_SR;
++    f->dl_quiet = DELAY_808_QUIET;
++    fx808_transform_t *state = (fx808_transform_t *)delay;
++    state->spectrum_cache = &f->private_spectra;
++    echo_history_init(state, (uint8_t *)delay + (sizeof(*state)+3u)/4u*4u);
+ }
+ 
+ int fxbus_808_delay_active(const fxbus_t *f)
+ {
+     const float next = f->dcur + (f->dl_time_ms * 0.001f * D9_SR - f->dcur) * 0.0008f;
+-    return f->dl_quiet < f->dlen || next != f->dcur;
+-}
+-
+-void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
+-{
+-    float level = f->dl_level;
+-    f->dl_level = level * gain;
+-    while (frames > 0) {
+-        int n = frames < FX_RV_APR_TOTAL ? frames : FX_RV_APR_TOTAL;
+-        fx_delay(f, send ? send : f->apr, left, right, n);
+-        if (send) send += n;
+-        left += n;
+-        right += n;
+-        frames -= n;
+-    }
+-    f->dl_level = level;
++    return f->dl_quiet < DELAY_808_QUIET || next != f->dcur;
++}
++
++ECHO_SMALL void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
++{
++    fx808_transform_t *state = (fx808_transform_t *)f->dbuf;
++    float target = f->dl_time_ms * .001f * D9_SR;
++    if (f->dl_quiet >= DELAY_808_QUIET) {
++        int i = 0;
++        while (send && i < frames && send[i] == 0)
++            i++;
++        if (!send || i == frames) {
++            for (i = 0; i < frames; i++) {
++                float next = f->dcur + (target - f->dcur) * .0008f;
++                if (next == f->dcur)
++                    break;
++                f->dcur = next;
++            }
++            f->w = (f->w + frames) % FX_808_DELAY_FRAMES;
++            state->source_cursor = (unsigned)f->w;
++            state->physical_cursor =
++                (state->physical_cursor + (unsigned)frames) % state->physical_frames;
++            state->read_hop = ~0u;
++            return;
++        }
++    }
++    float level = f->dl_level * gain;
++    for (int i = 0; i < frames; i++) {
++        float input = send ? send[i] : 0.f;
++        float x = d9_biquad_tick(&f->dl_hp, input);
++        f->dcur += (target - f->dcur) * .0008f;
++        float pos = (float)f->w - f->dcur;
++        if (pos < 0)
++            pos += FX_808_DELAY_FRAMES;
++        int a = (int)pos;
++        float frac = pos - a;
++        if (a >= FX_808_DELAY_FRAMES)
++            a -= FX_808_DELAY_FRAMES;
++        int b = a + 1 >= FX_808_DELAY_FRAMES ? 0 : a + 1;
++        float u = (float)echo_history_read(state, (unsigned)a) * (1.f / 2048);
++        float v = (float)echo_history_read(state, (unsigned)b) * (1.f / 2048);
++        float y = u + (v - u) * frac;
++        f->lp += (y * f->dl_fdbk - f->lp) * f->dl_tc;
++        if (fm_fabsf(f->lp) < 1e-20f)
++            f->lp = 0;
++        int16_t cell;
++        sat12_store(&cell, x + f->lp);
++        echo_history_write(state, cell);
++        f->w++;
++        if (f->w == FX_808_DELAY_FRAMES)
++            f->w = 0;
++        left[i] += y * level;
++        right[i] += y * level;
++        f->dl_quiet = !cell && !input ? f->dl_quiet + 1 : 0;
++    }
+ }
+ 
+ /* ===================================================================== */
+--- a/firmware/src/dsp/fxbus.h
++++ b/firmware/src/dsp/fxbus.h
+@@ -18,7 +18,7 @@
+  * fxbus_init accepts the original int16 ring. fxbus_init_packed uses only
+  * FX_DELAY_BYTES(frames) of aligned storage for a 10-bit mantissa per sample, a
+  * scale per 64 samples and the current write block. The
+- * reverb lines are int16 combs (also 12-bit in 9W9) and float allpasses, inside
++ * reverb lines are int16 combs (also 12-bit in 9W9) and compact floating-point allpasses, inside
+  * the struct. Both effects go idle (no per-sample work) once their input and
+  * their lines are silent. */
+ #pragma once
+@@ -28,7 +28,7 @@
+ 
+ #define FX10_DATA_BYTES(frames) (((frames) * 10u + 7u) / 8u)
+ #define FX_DELAY_BYTES(frames) (132u + FX10_DATA_BYTES(frames) + ((frames) + 63u) / 64u)
+-#define FX_808_DELAY_FRAMES 19200
++#define FX_808_DELAY_FRAMES 88200
+ #define FX_RV_COMB_TOTAL (1116 + 1188 + 1277 + 1356)
+ #define FX_RV_AP_TOTAL (556 + 441)
+ #define FX_RV_APR_TOTAL (579 + 457)   /* X0X: the right side's allpasses */
+@@ -38,6 +38,27 @@
+        FX_DL_TIME, FX_DL_FDBK, FX_DL_TONE, FX_DL_LEVEL,
+        FX_DL_HPF, FX_DL_TYPE, FX_DL_WEAR, FX_DL_PING, FX_NPARAMS };
+ 
++/* Private 808 mono delay scratch overlays the 909-only right reverb allpasses. */
++#pragma pack(push,4)
++typedef struct {
++    void *spectrum_cache;
++    unsigned cache_group;
++    int16_t group_samples[8];
++    uint8_t *packet_data;
++    uint32_t frames, physical_frames, physical_cursor, source_cursor, read_hop;
++    uint8_t current_signal, previous_signal;
++    int16_t recent[1536];
++    int16_t *decoded_hop;
++    float coefficients[256];
++} fx808_transform_t;
++#pragma pack(pop)
++typedef struct {
++    unsigned tag[2];
++    float coefficients[2][256];
++} fx808_cache_t;
++_Static_assert(sizeof(fx808_cache_t) <= FX_RV_APR_TOTAL * sizeof(uint16_t), "two decoded 808 spectra must fit in the private mono reverb right cells");
++#define FX_808_DELAY_WORDS (19744u + 1740u + (sizeof(fx808_transform_t)+3u)/4u*2u)
++
+ struct fxbus {
+     /* reverb */
+     float rv_decay, rv_damp, rv_level;
+@@ -45,11 +66,15 @@
+     int16_t comb[FX_RV_COMB_TOTAL];
+     volatile uint8_t muted;          /* uses alignment padding: reverb/delay/master output gates, not pots */
+     uint8_t dl_signal; /* input/wet activity from this block, UI-only observer */
+-    float ap[FX_RV_AP_TOTAL];
++    uint16_t ap[FX_RV_AP_TOTAL];
+     int32_t cpos[4], apos[2];
+     float cdmp[4];
+     int32_t rv_quiet;
+-    float apr[FX_RV_APR_TOTAL];       /* X0X stereo: the right side reads the combs with alternating
++    union {
++        uint16_t apr[FX_RV_APR_TOTAL];
++        fx808_cache_t private_spectra;
++        float private_delay_silence[FX_RV_APR_TOTAL / 2];
++    };       /* X0X stereo: the right side reads the combs with alternating
+                                        * signs through its own allpasses (the left is 9W9's) */
+     int32_t aposr[2];
+     /* delay */
+--- /dev/null
++++ b/firmware/src/dsp/fxbus_808_transform.h
+@@ -0,0 +1,562 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#ifdef __clang__
++#define ECHO_SMALL __attribute__((minsize, noinline))
++#else
++#define ECHO_SMALL __attribute__((noinline))
++#endif
++/* Overlapping 256-point type-IV cosine transforms are represented using
++ * 3.5 bits per history sample. Persistent storage is exactly 112 bytes/hop. */
++enum {
++    ECHO_HOP = 256,
++    ECHO_WINDOW = 512,
++    ECHO_RECENT = 1536,
++    ECHO_BAND_BINS = 16,
++    ECHO_BANDS = 16,
++    BAND_WEIGHT = 6,
++    LOW_BAND_WEIGHT = 16,
++    LOW_BAND_GAP = 9,
++    ALLOCATION_STEP = 40,
++    PACKET_BITS = 896,
++    PACKET_BYTES = 112
++};
++static const uint32_t echo_phase[] = {
++0x00000000u,0x3b490192u,0x3bc90192u,0x3c16c12eu,0x3c490192u,0x3c7b41f6u,0x3c96c12eu,0x3cafe160u,0x3cc90192u,0x3ce221c4u,0x3cfb41f6u,0x3d0a3114u,0x3d16c12eu,0x3d235147u,0x3d2fe160u,0x3d3c7179u,0x3d490192u,0x3d5589abu,0x3d6211c4u,0x3d6e99ddu,0x3d7b21f6u,0x3d83d508u,0x3d8a1914u,0x3d905d21u,0x3d96a12du,0x3d9ce53au,0x3da32946u,0x3da96d53u,0x3dafb15fu,0x3db5f56cu,0x3dbc3978u,0x3dc27d85u,0x3dc8c192u,0x3dcf019eu,0x3dd541aau,0x3ddb81b7u,0x3de1c1c4u,0x3de7fdd0u,0x3dee39dcu,0x3df475e9u,0x3dfab1f5u,0x3e007701u,0x3e039507u,0x3e06b30du,0x3e09d114u,0x3e0ced1au,0x3e100920u,0x3e132526u,0x3e16412cu,0x3e195b33u,0x3e1c7539u,0x3e1f8f3fu,0x3e22a945u,0x3e25c34cu,0x3e28dd52u,0x3e2bf758u,0x3e2f115eu,0x3e322964u,0x3e35416au,0x3e385971u,0x3e3b7177u,0x3e3e877du,0x3e419d83u,0x3e44b389u,0x3e47c990u,0x3e4adb96u,0x3e4ded9cu,0x3e50ffa2u,0x3e5411a8u,0x3e5723aeu,0x3e5a35b4u,0x3e5d47bbu,0x3e6059c1u,0x3e6369c7u,0x3e6679cdu,0x3e6989d3u,0x3e6c99d9u,0x3e6fa7dfu,0x3e72b5e5u,0x3e75c3ecu,0x3e78d1f2u,0x3e7bdbf8u,0x3e7ee5feu,0x3e80f802u,0x3e827d05u,0x3e840108u,0x3e85850bu,0x3e87090eu,0x3e888d11u,0x3e8a1014u,0x3e8b9317u,0x3e8d161au,0x3e8e991du,0x3e901b20u,0x3e919d23u,0x3e931f26u,0x3e94a129u,0x3e96212cu,0x3e97a12fu,0x3e992132u,0x3e9aa135u,0x3e9c1f38u,0x3e9d9d3bu,0x3e9f1b3eu,0x3ea09941u,0x3ea21644u,0x3ea39347u,0x3ea5104au,0x3ea68d4du,0x3ea80950u,0x3ea98553u,0x3eab0156u,0x3eac7d59u,0x3eadf75cu,0x3eaf715fu,0x3eb0eb62u,0x3eb26565u,0x3eb3dd68u,0x3eb5556bu,0x3eb6cd6eu,0x3eb84571u,0x3eb9bb73u,0x3ebb3176u,0x3ebca779u,0x3ebe1d7cu,0x3ebf917fu,0x3ec10582u,0x3ec27985u,0x3ec3ed88u,0x3ec5608bu,0x3ec6d38eu,0x3ec84691u,0x3ec9b993u,0x3ecb2a96u,0x3ecc9b99u,0x3ece0c9cu,0x3ecf7d9fu,0x3ed0eba2u,0x3ed259a5u,0x3ed3c7a8u,0x3ed535aau,0x3ed6a2adu,0x3ed80fb0u,0x3ed97cb3u,0x3edae9b6u,0x3edc53b9u,0x3eddbdbbu,0x3edf27beu,0x3ee091c1u,0x3ee1f9c4u,0x3ee361c7u,0x3ee4c9cau,0x3ee631ccu,0x3ee797cfu,0x3ee8fdd2u,0x3eea63d5u,0x3eebc9d8u,0x3eed2ddau,0x3eee91ddu,0x3eeff5e0u,0x3ef159e3u,0x3ef2bbe5u,0x3ef41de8u,0x3ef57febu,0x3ef6e1eeu,0x3ef840f0u,0x3ef99ff3u,0x3efafef6u,0x3efc5df9u,0x3efdb9fbu,0x3eff15feu,0x3f003900u,0x3f00e702u,0x3f019483u,0x3f024205u,0x3f02ef86u,0x3f039d07u,0x3f044889u,0x3f04f40au,0x3f059f8bu,0x3f064b0du,0x3f06f58eu,0x3f07a00fu,0x3f084a91u,0x3f08f512u,0x3f099e93u,0x3f0a4815u,0x3f0af196u,0x3f0b9b17u,0x3f0c4299u,0x3f0cea1au,0x3f0d919bu,0x3f0e391cu,0x3f0edf9eu,0x3f0f861fu,0x3f102ca0u,0x3f10d322u,0x3f1178a3u,0x3f121e24u,0x3f12c3a6u,0x3f136927u,0x3f140ca8u,0x3f14b029u,0x3f1553abu,0x3f15f72cu,0x3f16992du,0x3f173b2eu,0x3f17dd30u,0x3f187f31u,0x3f192032u,0x3f19c134u,0x3f1a6235u,0x3f1b0336u,0x3f1ba237u,0x3f1c4138u,0x3f1ce03au,0x3f1d7f3bu,0x3f1e1d3cu,0x3f1ebb3du,0x3f1f593fu,0x3f1ff740u,0x3f209341u,0x3f212f42u,0x3f21cb44u,0x3f226745u,0x3f2301c6u,0x3f239c47u,0x3f2436c8u,0x3f24d14au,0x3f256acbu,0x3f26044cu,0x3f269dcdu,0x3f27374eu,0x3f27ce50u,0x3f286551u,0x3f28fc52u,0x3f299353u,0x3f2a2954u,0x3f2abf55u,0x3f2b5557u,0x3f2beb58u,0x3f2c7f59u,0x3f2d135au,0x3f2da75bu,0x3f2e3b5cu,0x3f2ecddeu,0x3f2f605fu,0x3f2ff2e0u,0x3f308561u,0x3f311662u,0x3f31a763u,0x3f323864u,0x3f32c966u,0x3f335867u,0x3f33e768u,0x3f347669u,0x3f35056au,0x3f35926bu,0x3f361f6cu,0x3f36ac6du,0x3f37396eu,0x3f37c4f0u,0x3f385071u,0x3f38dbf2u,0x3f396773u,0x3f39f174u,0x3f3a7b75u,0x3f3b0576u,0x3f3b8f77u,0x3f3c1778u,0x3f3c9f79u,0x3f3d277au,0x3f3daf7bu,0x3f3e357cu,0x3f3ebb7du,0x3f3f417eu,0x3f3fc780u,0x3f404b81u,0x3f40cf82u,0x3f415383u,0x3f41d784u,0x3f425a05u,0x3f42dc86u,0x3f435f07u,0x3f43e188u,0x3f446209u,0x3f44e28au,0x3f45630bu,0x3f45e38cu,0x3f46620du,0x3f46e08eu,0x3f475f0fu,0x3f47dd90u,0x3f485a91u,0x3f48d792u,0x3f495493u,0x3f49d194u,0x3f4a4c15u,0x3f4ac696u,0x3f4b4116u,0x3f4bbb97u,0x3f4c3498u,0x3f4cad99u,0x3f4d269au,0x3f4d9f9bu,0x3f4e161cu,0x3f4e8c9du,0x3f4f031eu,0x3f4f799fu,0x3f4feea0u,0x3f5063a1u,0x3f50d8a2u,0x3f514da3u,0x3f51c023u,0x3f5232a4u,0x3f52a525u,0x3f5317a6u,0x3f5388a7u,0x3f53f9a8u,0x3f546aa9u,0x3f54dbaau,0x3f554a2bu,0x3f55b8abu,0x3f56272cu,0x3f5695adu,0x3f57022eu,0x3f576eafu,0x3f57db30u,0x3f5847b1u,0x3f58b231u,0x3f591cb2u,0x3f598733u,0x3f59f1b4u,0x3f5a5a35u,0x3f5ac2b6u,0x3f5b2b36u,0x3f5b93b7u,0x3f5bfa38u,0x3f5c60b9u,0x3f5cc73au,0x3f5d2dbau,0x3f5d91bbu,0x3f5df5bcu,0x3f5e59bdu,0x3f5ebdbdu,0x3f5f1fbeu,0x3f5f81bfu,0x3f5fe3c0u,0x3f6045c1u,0x3f60a5c1u,0x3f6105c2u,0x3f6165c3u,0x3f61c5c4u,0x3f622344u,0x3f6280c5u,0x3f62de46u,0x3f633bc6u,0x3f639747u,0x3f63f2c8u,0x3f644e49u,0x3f64a9c9u,0x3f65034au,0x3f655ccbu,0x3f65b64bu,0x3f660fccu,0x3f6666cdu,0x3f66bdcdu,0x3f6714ceu,0x3f676bcfu,0x3f67c0cfu,0x3f6815d0u,0x3f686ad1u,0x3f68bfd1u,0x3f691252u,0x3f6964d3u,0x3f69b753u,0x3f6a09d4u,0x3f6a5a55u,0x3f6aaad5u,0x3f6afb56u,0x3f6b4bd7u,0x3f6b99d7u,0x3f6be7d8u,0x3f6c35d8u,0x3f6c83d9u,0x3f6ccf5au,0x3f6d1adau,0x3f6d665bu,0x3f6db1dbu,0x3f6dfb5cu,0x3f6e44ddu,0x3f6e8e5du,0x3f6ed7deu,0x3f6f1f5eu,0x3f6f66dfu,0x3f6fae5fu,0x3f6ff5e0u,0x3f703ae0u,0x3f707fe1u,0x3f70c4e2u,0x3f7109e2u,0x3f714c63u,0x3f718ee3u,0x3f71d164u,0x3f7213e4u,0x3f7253e5u,0x3f7293e5u,0x3f72d3e6u,0x3f7313e6u,0x3f7351e7u,0x3f738fe7u,0x3f73cde8u,0x3f740be8u,0x3f744769u,0x3f7482e9u,0x3f74be69u,0x3f74f9eau,0x3f7532eau,0x3f756bebu,0x3f75a4ebu,0x3f75ddecu,0x3f7614ecu,0x3f764bedu,0x3f7682edu,0x3f76b9edu,0x3f76ee6eu,0x3f7722eeu,0x3f77576fu,0x3f778befu,0x3f77bdefu,0x3f77eff0u,0x3f7821f0u,0x3f7853f1u,0x3f788371u,0x3f78b2f1u,0x3f78e272u,0x3f7911f2u,0x3f793f72u,0x3f796cf3u,0x3f799a73u,0x3f79c7f4u,0x3f79f2f4u,0x3f7a1df4u,0x3f7a48f5u,0x3f7a73f5u,0x3f7a9bf5u,0x3f7ac3f6u,0x3f7aebf6u,0x3f7b13f6u,0x3f7b39f6u,0x3f7b5ff7u,0x3f7b85f7u,0x3f7babf7u,0x3f7bcff8u,0x3f7bf3f8u,0x3f7c17f8u,0x3f7c3bf8u,0x3f7c5cf9u,0x3f7c7df9u,0x3f7c9ef9u,0x3f7cbff9u,0x3f7cde7au,0x3f7cfcfau,0x3f7d1b7au,0x3f7d39fau,0x3f7d567bu,0x3f7d72fbu,0x3f7d8f7bu,0x3f7dabfbu,0x3f7dc5fcu,0x3f7ddffcu,0x3f7df9fcu,0x3f7e13fcu,0x3f7e2afcu,0x3f7e41fcu,0x3f7e58fdu,0x3f7e6ffdu,0x3f7e84fdu,0x3f7e99fdu,0x3f7eaefdu,0x3f7ec3feu,0x3f7ed67eu,0x3f7ee8feu,0x3f7efb7eu,0x3f7f0dfeu,0x3f7f1dfeu,0x3f7f2dfeu,0x3f7f3dfeu,0x3f7f4dffu,0x3f7f5b7fu,0x3f7f68ffu,0x3f7f767fu,0x3f7f83ffu,0x3f7f8f7fu,0x3f7f9affu,0x3f7fa67fu,0x3f7fb1ffu,0x3f7fba7fu,0x3f7fc300u,0x3f7fcb80u,0x3f7fd400u,0x3f7fda00u,0x3f7fe000u,0x3f7fe600u,0x3f7fec00u,0x3f7ff000u,0x3f7ff400u,0x3f7ff800u,0x3f7ffc00u,0x3f7ffd00u,0x3f7ffe00u,0x3f7fff00u,0x3f800000u};
++static inline float echo_sine(int step)
++{
++    unsigned phase=(unsigned)step, i=phase&1023;
++    union { unsigned u;float f; } sample;
++    sample.u=echo_phase[i<=512?i:1024-i]^((phase&1024u)<<21);
++    return sample.f;
++}
++static inline float echo_cosine(int step) { return echo_sine(step + 2 * ECHO_HOP); }
++static inline int nearest_sample(float x) { return (int)(x + (x < 0 ? -.5f : .5f)); }
++static __attribute__((noinline)) void mdct_fft(fx808_transform_t *p, int sign)
++{
++    for (unsigned i = 1, j = 0; i < (ECHO_HOP / 2); i++) {
++        unsigned bit = (ECHO_HOP / 2) / 2;
++        for (; j & bit; bit >>= 1)
++            j ^= bit;
++        j ^= bit;
++        if (i < j) {
++            float t = p->coefficients[2 * i];
++            p->coefficients[2 * i] = p->coefficients[2 * j];
++            p->coefficients[2 * j] = t;
++            t = p->coefficients[ECHO_HOP - 1 - 2 * i];
++            p->coefficients[ECHO_HOP - 1 - 2 * i] = p->coefficients[ECHO_HOP - 1 - 2 * j];
++            p->coefficients[ECHO_HOP - 1 - 2 * j] = t;
++        }
++    }
++    for (unsigned n = 2; n <= (ECHO_HOP / 2); n *= 2)
++        for (unsigned j = 0; j < n / 2; j++) {
++            int step = sign * (int)(8 * ECHO_HOP / n * j);
++            float wc = echo_cosine(step), ws = echo_sine(step);
++            for (unsigned a = j; a < (ECHO_HOP / 2); a += n) {
++                unsigned b = a + n / 2;
++                float r = wc * p->coefficients[2 * b] - ws * p->coefficients[ECHO_HOP - 1 - 2 * b],
++                      i = wc * p->coefficients[ECHO_HOP - 1 - 2 * b] + ws * p->coefficients[2 * b];
++                p->coefficients[2 * b] = p->coefficients[2 * a] - r;
++                p->coefficients[ECHO_HOP - 1 - 2 * b] = p->coefficients[ECHO_HOP - 1 - 2 * a] - i;
++                p->coefficients[2 * a] += r;
++                p->coefficients[ECHO_HOP - 1 - 2 * a] += i;
++            }
++        }
++}
++static inline void bit_put(uint8_t *data, unsigned *at, unsigned value, unsigned bits)
++{
++    unsigned pos = *at, off = pos & 7, end = off + bits;
++    uint8_t *dst = data + pos / 8;
++    *at = pos + bits;
++    value = (value & ((1u << bits) - 1)) << off;
++    dst[0] |= (uint8_t)value;
++    if (end > 8) dst[1] |= (uint8_t)(value >> 8);
++    if (end > 16) dst[2] |= (uint8_t)(value >> 16);
++    if (end > 24) dst[3] |= (uint8_t)(value >> 24);
++}
++static inline unsigned bit_get(const uint8_t *data, unsigned *at, unsigned bits)
++{
++    unsigned pos = *at, off = pos & 7, end = off + bits;
++    const uint8_t *src = data + pos / 8;
++    unsigned value = src[0];
++    *at = pos + bits;
++    if (end > 8) value |= (unsigned)src[1]<<8;
++    if (end > 16) value |= (unsigned)src[2]<<16;
++    if (end > 24) value |= (unsigned)src[3]<<24;
++    return (value >> off) & ((1u << bits)-1);
++}
++/* Send one half-octave peak per band of coefficients and allocate whole bit planes. Both
++ * decoder and encoder derive the widths from these transmitted peaks. */
++static ECHO_SMALL void allocate_bit_planes(const unsigned *rel, unsigned *width)
++{
++    unsigned lo = rel[0], high = 31;
++    if (rel[1] < lo)
++        lo = rel[1];
++    for (unsigned b = ECHO_BANDS / 2; b < ECHO_BANDS; b++)
++        if (rel[b] < high)
++            high = rel[b];
++    unsigned weight = high >= lo + LOW_BAND_GAP ? LOW_BAND_WEIGHT : BAND_WEIGHT;
++    enum { planes = (PACKET_BITS - 5 - 5 * ECHO_BANDS) / ECHO_BAND_BINS };
++    unsigned lower=0, upper=31*LOW_BAND_WEIGHT+18*ALLOCATION_STEP;
++    while (lower<upper) {
++        unsigned limit=(lower+upper)/2, count=0;
++        for (unsigned i=0;i<ECHO_BANDS;i++) {
++            unsigned cost=rel[i]*weight;
++            if (rel[i]!=31 && cost<=limit) {
++                unsigned n=1+(limit-cost)/ALLOCATION_STEP;
++                count+=n>18?18:n;
++            }
++        }
++        if (count<planes) lower=limit+1;
++        else upper=limit;
++    }
++    unsigned used=0;
++    for(unsigned i=0;i<ECHO_BANDS;i++) {
++        unsigned cost=rel[i]*weight;
++        unsigned n=cost<lower && rel[i]!=31 ? 1+(lower-1-cost)/ALLOCATION_STEP : 0;
++        width[i]=n>18?18:n;
++        used+=width[i];
++    }
++    for(unsigned i=0;i<ECHO_BANDS && used<planes;i++)
++        if(rel[i]!=31 && width[i]<18 && rel[i]*weight+width[i]*ALLOCATION_STEP==lower) {
++            width[i]++;
++            used++;
++        }
++}
++static inline float packet_scale(unsigned e, unsigned r)
++{
++    union {
++        uint32_t u;
++        float f;
++    } p;
++    p.u = (unsigned)((int)e - (int)(r / 2) + 127) << 23;
++    return (r & 1) ? p.f * .7071067811865475244f : p.f;
++}
++/* A transient can borrow two previously silent packets. They remain live
++ * longer than any valid read of the enhanced hop at the maximum tap. */
++static inline unsigned onset_bit(const uint8_t *a, const uint8_t *b, unsigned pos)
++{
++    const uint8_t *x = pos < (PACKET_BYTES - 1) * 8 ? a : b;
++    return (x[1 + (pos / 8) % (PACKET_BYTES - 1)] >> (pos & 7)) & 1;
++}
++static ECHO_SMALL void onset_put(uint8_t *a, uint8_t *b, unsigned *pos, unsigned val, unsigned n)
++{
++    for (unsigned i = 0; i < n; i++, (*pos)++) {
++        uint8_t *x = *pos < (PACKET_BYTES - 1) * 8 ? a : b;
++        if (val & (1u << i))
++            x[1 + (*pos / 8) % (PACKET_BYTES - 1)] |= 1u << (*pos & 7);
++    }
++}
++static ECHO_SMALL unsigned onset_get(const uint8_t *a, const uint8_t *b, unsigned *pos, unsigned n)
++{
++    unsigned v = 0;
++    for (unsigned i = 0; i < n; i++, (*pos)++)
++        v |= onset_bit(a, b, *pos) << i;
++    return v;
++}
++static inline unsigned map_signed(int d) { return d < 0 ? (unsigned)(-2 * d - 1) : (unsigned)(2 * d); }
++static inline int from_mapped(unsigned x) { return (x & 1) ? -(int)(x / 2) - 1 : (int)(x / 2); }
++static inline unsigned prior_packet(unsigned idx, unsigned d, unsigned blocks)
++{
++    return (idx + blocks - d) % blocks;
++}
++static ECHO_SMALL void onset_store(fx808_transform_t *p, unsigned idx, unsigned start)
++{
++    unsigned blocks = p->physical_frames / ECHO_HOP;
++    uint8_t *two = p->packet_data + prior_packet(idx, 2, blocks) * PACKET_BYTES,
++            *three = p->packet_data + prior_packet(idx, 3, blocks) * PACKET_BYTES;
++    if ((two[0] & 31) != 30 || (three[0] & 31) != 30)
++        return;
++    if (p->physical_frames - (p->frames - 256) < 2 * ECHO_HOP)
++        return;
++    unsigned mode[ECHO_HOP / 32], opt[ECHO_HOP / 32], costsum = 0;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        int v[32];
++        for (unsigned j = 0; j < 32; j++)
++            v[j] = p->recent[(start + 32 * group + j) % ECHO_RECENT];
++        unsigned best = ~0u, order = 0, kbest = 0;
++        int nz = 0;
++        for (int j = 0; j < 32; j++)
++            nz |= v[j] != 0;
++        if (!nz) {
++            best = 2;
++            order = 3;
++        } else
++            for (unsigned o = 0; o <= 2; o++) {
++                unsigned z[32],sum=0;
++                for(unsigned j=o;j<32;j++) {
++                    int pred=o==0?0:o==1?v[j-1]:2*v[j-1]-v[j-2];
++                    z[j]=map_signed(v[j]-pred);sum+=z[j];
++                }
++                unsigned mean=sum/(32-o);
++                int center=mean ? 31-__builtin_clz(mean) : 0;
++                int lo=center>2?center-2:0;if(lo>10)lo=10;
++                int hi=center+2;if(hi>10)hi=10;
++                for(int k=lo;k<=hi;k++){
++                    unsigned cost=6+16*o+(32-o)*(1+k);
++                    for(unsigned j=o;j<32 && cost<best;j++)cost+=z[j]>>k;
++                    if(cost<best){best=cost;order=o;kbest=(unsigned)k;}
++                }
++            }
++        mode[group] = order;
++        opt[group] = kbest;
++        costsum += best;
++        if (costsum > 2 * (PACKET_BYTES - 1) * 8)
++            return;
++    }
++    __builtin_memset(two, 0, PACKET_BYTES);
++    __builtin_memset(three, 0, PACKET_BYTES);
++    two[0] = 31 | (2 << 5);
++    three[0] = 31 | (3 << 5);
++    unsigned pos = 0;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        unsigned o = mode[group], k = opt[group];
++        onset_put(two, three, &pos, o, 2);
++        if (o == 3)
++            continue;
++        onset_put(two, three, &pos, k, 4);
++        int v[32];
++        for (unsigned j = 0; j < 32; j++)
++            v[j] = p->recent[(start + 32 * group + j) % ECHO_RECENT];
++        for (unsigned j = 0; j < o; j++)
++            onset_put(two, three, &pos, (unsigned)v[j] & 65535, 16);
++        for (unsigned j = o; j < 32; j++) {
++            int pred = o == 0 ? 0 : o == 1 ? v[j - 1] : 2 * v[j - 1] - v[j - 2];
++            unsigned x = map_signed(v[j] - pred);
++            pos += x >> k;
++            onset_put(two, three, &pos, 1, 1);
++            onset_put(two, three, &pos, x, k);
++        }
++    }
++    p->packet_data[idx * PACKET_BYTES + PACKET_BYTES - 2] |= 128;
++}
++static ECHO_SMALL int onset_restore(fx808_transform_t *p, unsigned idx)
++{
++    if (!(p->packet_data[idx * PACKET_BYTES + PACKET_BYTES - 2] & 128))
++        return 0;
++    unsigned blocks = p->physical_frames / ECHO_HOP, pos = 0;
++    const uint8_t *two = p->packet_data + prior_packet(idx, 2, blocks) * PACKET_BYTES,
++                  *three = p->packet_data + prior_packet(idx, 3, blocks) * PACKET_BYTES;
++    if (two[0] != (31 | (2 << 5)) || three[0] != (31 | (3 << 5)))
++        return 0;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        unsigned o = onset_get(two, three, &pos, 2);
++        int16_t *v = p->decoded_hop + group * 32;
++        if (o == 3) {
++            __builtin_memset(v, 0, 64);
++            continue;
++        }
++        unsigned k = onset_get(two, three, &pos, 4);
++        for (unsigned j = 0; j < o; j++)
++            v[j] = (int16_t)onset_get(two, three, &pos, 16);
++        for (unsigned j = o; j < 32; j++) {
++            unsigned run = 0;
++            while (!onset_get(two, three, &pos, 1))
++                run++;
++            int pred = o == 0 ? 0 : o == 1 ? v[j - 1] : 2 * v[j - 1] - v[j - 2];
++            v[j] = (int16_t)(pred + from_mapped((run << k) | onset_get(two, three, &pos, k)));
++        }
++    }
++    return 1;
++}
++
++/* Pair x[2m] with x[N-1-2m]. A positive N/2-point complex FFT after
++ * pre-rotation, followed by a post-rotation, produces the even DCT-IV bins
++ * in its real part and the reversed, odd bins in the imaginary part. */
++#if defined(__PI32V2__)
++#include "../../hal/fm1_fft128.h"
++#endif
++/* The forward unit uses the opposite imaginary sign. Pre- and post-rotation
++ * may share their buffer with the complex integer words. */
++static int echo_fft_fixed(fx808_transform_t *p)
++{
++#if defined(__PI32V2__)
++    /* Use a static DMA buffer. PI32v2 call frames guarantee word alignment;
++     * local objects with larger alignment may have a different DMA address. */
++    static int32_t words[ECHO_HOP] __attribute__((aligned(16),section(".pool")));
++#else
++    int32_t words[ECHO_HOP];
++#endif
++    float peak=0;
++    for(unsigned i=0;i<ECHO_HOP;i++){
++        float a=fm_fabsf(p->coefficients[i]);if(a>peak)peak=a;
++    }
++    if(peak==0)return 1;
++    union { float f; uint32_t u; } e={.f=peak};
++    unsigned exp=e.u>>23;
++    /* Clip the 128 complex sums below the signed 29-bit output range even
++     * when every input contributes its full real and imaginary parts. */
++    e.u=(272u-exp)<<23;float mult=e.f;
++    e.u=(exp-18u)<<23;float inverse=e.f;
++    for(unsigned i=0;i<128;i++){
++        words[2*i]=nearest_sample(p->coefficients[2*i]*mult);
++        words[2*i+1]=nearest_sample(-p->coefficients[255-2*i]*mult);
++    }
++#if defined(__PI32V2__)
++    if(!fm1_fft128_forward(words))return 0;
++#else
++    /* The host exercises the same input and output rounding and signs. */
++    for(unsigned i=0;i<128;i++){
++        p->coefficients[2*i]=(float)words[2*i];
++        p->coefficients[255-2*i]=(float)-words[2*i+1];
++    }
++    mdct_fft(p,1);
++    for(unsigned i=0;i<128;i++){
++        words[2*i]=nearest_sample(p->coefficients[2*i]);
++        words[2*i+1]=nearest_sample(-p->coefficients[255-2*i]);
++    }
++#endif
++    for(unsigned i=0;i<128;i++){
++        p->coefficients[2*i]=(float)words[2*i]*inverse;
++        p->coefficients[255-2*i]=(float)-words[2*i+1]*inverse;
++    }
++    return 1;
++}
++static __attribute__((noinline)) void echo_dct_iv(fx808_transform_t *p)
++{
++    for (unsigned m = 0; m < ECHO_HOP / 2; m++) {
++        float e = p->coefficients[2 * m], o = p->coefficients[ECHO_HOP - 1 - 2 * m];
++        float c = echo_cosine(4 * m), s = echo_sine(4 * m);
++        p->coefficients[2 * m] = e * c + o * s;
++        p->coefficients[ECHO_HOP - 1 - 2 * m] = e * s - o * c;
++    }
++    if(!echo_fft_fixed(p)) mdct_fft(p, 1);
++    for (unsigned m = 0; m < ECHO_HOP / 2; m++) {
++        float c = echo_cosine(4 * m + 1), s = echo_sine(4 * m + 1);
++        float re = p->coefficients[2 * m], im = p->coefficients[ECHO_HOP - 1 - 2 * m];
++        p->coefficients[2 * m] = re * c - im * s;
++        p->coefficients[ECHO_HOP - 1 - 2 * m] = re * s + im * c;
++    }
++}
++static inline float windowed(fx808_transform_t *p, unsigned base, unsigned i)
++{
++    return (float)p->recent[(base + i) % ECHO_RECENT] * echo_sine((int)(2 * i + 1));
++}
++typedef fx808_cache_t echo_cache_t;
++static inline echo_cache_t *echo_cache(const fx808_transform_t *p){return p->spectrum_cache;}
++static inline uint8_t *echo_widths(const fx808_transform_t *p,unsigned i){return (uint8_t *)(p->decoded_hop+ECHO_HOP)+10*i;}
++static __attribute__((noinline)) void encode_echo_packet(fx808_transform_t *p, unsigned index)
++{
++    if (!p->current_signal && !p->previous_signal) {
++        uint8_t *quiet = p->packet_data + index * PACKET_BYTES;
++        __builtin_memset(quiet, 0, PACKET_BYTES);
++        quiet[0] = 30;
++        return;
++    }
++    unsigned a = (p->physical_cursor + ECHO_RECENT - ECHO_WINDOW) % ECHO_RECENT;
++    for (unsigned j = 0; j < ECHO_HOP / 2; j++)
++        p->coefficients[j] =
++            -windowed(p, a, 3 * ECHO_HOP / 2 - 1 - j) - windowed(p, a, 3 * ECHO_HOP / 2 + j);
++    for (unsigned j = ECHO_HOP / 2; j < ECHO_HOP; j++)
++        p->coefficients[j] = windowed(p, a, j - ECHO_HOP / 2) - windowed(p, a, 3 * ECHO_HOP / 2 - 1 - j);
++    echo_dct_iv(p);
++    float maxb[ECHO_BANDS] = {0}, peak = 0;
++    for (unsigned k = 0; k < ECHO_HOP; k++) {
++        float mag = fm_fabsf(p->coefficients[k]);
++        if (mag > maxb[k / ECHO_BAND_BINS])
++            maxb[k / ECHO_BAND_BINS] = mag;
++        if (mag > peak)
++            peak = mag;
++    }
++    uint8_t *dst = p->packet_data + index * PACKET_BYTES;
++    __builtin_memset(dst, 0, PACKET_BYTES);
++    unsigned at = 0;
++    union {
++        uint32_t u;
++        float f;
++    } word;
++    word.f = peak;
++    int e = peak <= 1 ? 0 : (int)(word.u >> 23) - 127 + ((word.u & 8388607u) != 0);
++    if (peak == 0) {
++        dst[0] = 30;
++        return;
++    }
++    bit_put(dst, &at, (unsigned)e, 5);
++    unsigned rel[ECHO_BANDS], width[ECHO_BANDS];
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned r=31;
++        if(maxb[b]>0){
++            union {float f;unsigned u;} z={.f=maxb[b]};
++            int base=(int)(z.u>>23)-127;
++            z.u=(z.u&8388607u)|(127u<<23);
++            int relative=2*(e-base)-(z.f>=1.189207115f)-(z.f>=1.681792831f);
++            r=relative<0?0:relative<31?(unsigned)relative:31;
++        }
++        rel[b] = r;
++        bit_put(dst, &at, r, 5);
++    }
++    allocate_bit_planes(rel, width);
++    uint8_t *record=echo_widths(p,index);
++    for(unsigned j=0;j<10;j++)record[j]=0;
++    unsigned width_pos=0;
++    for(unsigned j=0;j<ECHO_BANDS;j++)bit_put(record,&width_pos,width[j],5);
++
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned w = width[b];
++        if (!w)
++            continue;
++        int max = (1 << (w - 1)) - 1;
++        float mult = (float)max / packet_scale((unsigned)e, rel[b]);
++        for (unsigned j = 0; j < ECHO_BAND_BINS; j++) {
++            int q = nearest_sample(p->coefficients[b * ECHO_BAND_BINS + j] * mult);
++            if (q > max)
++                q = max;
++            if (q < -max)
++                q = -max;
++            bit_put(dst, &at, (unsigned)q, w);
++        }
++    }
++
++    unsigned nz = 0;
++    for (unsigned i = 0; i < ECHO_HOP; i++)
++        if (p->recent[(a + i) % ECHO_RECENT] != 0)
++            nz |= 1u << (i / (ECHO_HOP / 8));
++    dst[PACKET_BYTES - 1] = (uint8_t)nz;
++    if (nz)
++        onset_store(p, index, a);
++}
++static __attribute__((noinline)) void decode_echo_spectrum(fx808_transform_t *p, unsigned idx)
++{
++    unsigned at = 0, rel[ECHO_BANDS], width[ECHO_BANDS];
++    const uint8_t *src = p->packet_data + idx * PACKET_BYTES;
++    unsigned e = bit_get(src, &at, 5);
++    if (e >= 30) {
++        __builtin_memset(p->coefficients, 0, sizeof p->coefficients);
++        return;
++    }
++    for (unsigned b = 0; b < ECHO_BANDS; b++)
++        rel[b] = bit_get(src, &at, 5);
++    const uint8_t *record=echo_widths(p,idx);
++    unsigned width_pos=0;
++    for(unsigned j=0;j<ECHO_BANDS;j++)width[j]=bit_get(record,&width_pos,5);
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned w = width[b];
++        float step = w > 1 ? packet_scale(e, rel[b]) / ((1 << (w - 1)) - 1) : 0;
++        for (unsigned j = 0; j < ECHO_BAND_BINS; j++) {
++            int q = 0;
++            if (w) {
++                unsigned h = 1u << (w - 1);
++                q = (int)(bit_get(src, &at, w) ^ h) - (int)h;
++            }
++            p->coefficients[b * ECHO_BAND_BINS + j] = (float)q * step;
++        }
++    }
++    echo_dct_iv(p);
++}
++static inline float unfold(const float *c, unsigned t)
++{
++    float z = t < ECHO_HOP / 2       ? c[t + ECHO_HOP / 2]
++              : t < 3 * ECHO_HOP / 2 ? -c[3 * ECHO_HOP / 2 - 1 - t]
++                                     : -c[t - 3 * ECHO_HOP / 2];
++    return z * (2.f / ECHO_HOP) * echo_sine(2 * t + 1);
++}
++/* The right half is only needed while reconstructing one hop. Preserve
++ * its fractional samples at quiet levels in the existing int16 read cache.
++ * A normal binary16 significand suffices within the quantized delay range. */
++static inline int16_t pack_overlap(float value)
++{
++    union {
++        float f;
++        uint32_t u;
++    } bits = {.f = value};
++    uint32_t mag = bits.u & 0x7fffffffu;
++    if (mag < 0x38800000u)
++        return 0;
++    unsigned half = ((mag + 0x1000u) >> 13) - (112u << 10);
++    return (int16_t)((bits.u >> 16 & 0x8000u) | half);
++}
++static inline float unpack_overlap(int16_t value)
++{
++    unsigned half = (uint16_t)value, mag = half & 0x7fffu;
++    union {
++        float f;
++        uint32_t u;
++    } bits;
++    bits.u = mag ? ((half & 0x8000u) << 16) | ((mag + (112u << 10)) << 13) : 0;
++    return bits.f;
++}
++static const float *lookup_spectrum(fx808_transform_t *p, unsigned idx)
++{
++    echo_cache_t *cache=echo_cache(p);
++    unsigned slot=idx&1;
++    if(cache->tag[slot]!=idx){
++        decode_echo_spectrum(p,idx);
++        __builtin_memcpy(cache->coefficients[slot],p->coefficients,ECHO_HOP*sizeof(float));
++        cache->tag[slot]=idx;
++    }
++    return cache->coefficients[slot];
++}
++static int read_echo_sample(fx808_transform_t *p,unsigned idx,unsigned i)
++{
++    unsigned blocks=p->physical_frames/ECHO_HOP;
++    uint8_t *data=p->packet_data+idx*PACKET_BYTES;
++    if(!(data[PACKET_BYTES-1]&(1u<<(i/(ECHO_HOP/8)))))return 0;
++    if(data[PACKET_BYTES-2]&128 && (data[0]&31)<30){
++        if(p->read_hop!=idx) {
++            if(onset_restore(p,idx))p->read_hop=idx;
++        }
++        if(p->read_hop==idx) return p->decoded_hop[i];
++    }
++    unsigned group=idx*(ECHO_HOP/8)+(i/8);
++    if(p->cache_group!=group){
++        unsigned prev=idx?idx-1:blocks-1;
++        const float *a=(p->packet_data[prev*PACKET_BYTES]&31)<30 ? lookup_spectrum(p,prev):0;
++        const float *b=(data[0]&31)<30 ? lookup_spectrum(p,idx):0;
++        for(unsigned j=0;j<8;j++){
++            unsigned t=(i&~7u)+j;
++            float lo=a?unpack_overlap(pack_overlap(unfold(a,ECHO_HOP+t))):0;
++            float hi=b?unfold(b,t):0;
++            int q=nearest_sample(lo+hi);p->group_samples[j]=(int16_t)(q< -32767?-32767:q>32767?32767:q);
++        }
++        p->cache_group=group;
++    }
++    return p->group_samples[i&7u];
++}
++static ECHO_SMALL void echo_history_init(fx808_transform_t *p, void *arena)
++{
++    p->frames = FX_808_DELAY_FRAMES;
++    p->physical_frames = ((FX_808_DELAY_FRAMES + ECHO_RECENT - 1) / ECHO_RECENT) * ECHO_RECENT;
++    p->physical_cursor = p->source_cursor = 0;
++    p->read_hop = ~0u;
++    p->current_signal = p->previous_signal = 0;
++    p->cache_group=~0u;
++    p->packet_data = (uint8_t *)arena;
++    __builtin_memset(arena, 0, (p->physical_frames / ECHO_HOP) * PACKET_BYTES);
++    __builtin_memset(p->recent, 0, sizeof p->recent);
++    for (unsigned j = 0; j < p->physical_frames / ECHO_HOP; j++)
++        p->packet_data[j * PACKET_BYTES] = 30;
++    p->decoded_hop = (int16_t *)(p->packet_data + (p->physical_frames / ECHO_HOP) * PACKET_BYTES);
++    echo_cache(p)->tag[0]=echo_cache(p)->tag[1]=~0u;
++}
++/* Convert the original engine cursor into age before indexing the
++ * hop-aligned packet ring. Its 89,088 samples include the analysis guard. */
++static inline int echo_history_read(fx808_transform_t *p, unsigned idx)
++{
++    unsigned age = (p->source_cursor >= idx) ? p->source_cursor - idx : p->frames + p->source_cursor - idx;
++    unsigned physical_cursor = p->physical_cursor >= age ? p->physical_cursor - age
++                                                         : p->physical_frames + p->physical_cursor - age;
++    /* A decoded block needs its successor for overlap/add. Return the original
++       staged data until the following complete block has been encoded. */
++    if (age > 0 && age <= ECHO_RECENT)
++        return p->recent[physical_cursor % ECHO_RECENT];
++    return read_echo_sample(p,physical_cursor/ECHO_HOP,physical_cursor%ECHO_HOP);
++}
++static inline void echo_history_write(fx808_transform_t *p, int sample)
++{
++    p->current_signal |= sample != 0;
++    p->recent[p->physical_cursor % ECHO_RECENT] = (int16_t)sample;
++    if (++p->source_cursor == p->frames)
++        p->source_cursor = 0;
++    if (++p->physical_cursor == p->physical_frames)
++        p->physical_cursor = 0;
++    if (p->physical_cursor % ECHO_HOP == 0) {
++        unsigned blocks = p->physical_frames / ECHO_HOP, h = p->physical_cursor / ECHO_HOP,
++                 idx = (h + blocks - 2) % blocks;
++        encode_echo_packet(p, idx);
++        if(p->cache_group/(ECHO_HOP/8)==idx || p->cache_group/(ECHO_HOP/8)==(idx+1)%blocks)p->cache_group=~0u;
++        if(echo_cache(p)->tag[idx&1]==idx)echo_cache(p)->tag[idx&1]=~0u;
++        p->previous_signal = p->current_signal;
++        p->current_signal = 0;
++        if (p->read_hop == idx || p->read_hop == (idx + 1) % blocks)
++            p->read_hop = ~0u;
++    }
++}
+--- a/firmware/src/dsp/ima_adpcm.h
++++ b/firmware/src/dsp/ima_adpcm.h
+@@ -32,9 +32,8 @@
+     0,0,0,0,0,0,0,0, 0,0,1,1,0,0,1,1,
+     0,1,0,1,0,1,0,1, 0,1,1,2,0,1,1,2
+ };
+-static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++static inline int32_t ima_decode_code(uint32_t code, int32_t *pred, int32_t *idx)
+ {
+-    uint32_t byte = d[i >> 1], code = (i & 1u) ? (byte >> 4) : (byte & 15u);
+     uint32_t mag = code & 7u;
+     int32_t step = IMA_STEP_T[*idx];
+     int32_t delta = ((step * (int32_t)(2u * mag + 1u)) >> 3) - IMA_ROUND_CORR[((step & 7) << 3) | mag];
+@@ -44,3 +43,10 @@
+     *idx = x < 0 ? 0 : x > 88 ? 88 : x;
+     return *pred;
+ }
++
++
++static inline int32_t ima_decode(const uint8_t *d, uint32_t i, int32_t *pred, int32_t *idx)
++{
++    uint32_t byte = d[i >> 1];
++    return ima_decode_code((i & 1u) ? byte >> 4 : byte & 15u, pred, idx);
++}
+--- a/tests/host/cymbal_ref.py
++++ b/tests/host/cymbal_ref.py
+@@ -84,6 +84,7 @@
+         parser.error("the dated A/B comparison requires --historical")
+     out.mkdir(parents=True, exist_ok=True)
+     header = ["#pragma once", "#include <stdint.h>"]
++    histories = {}
+     for c, fn in CYM:
+         pcm, _ = gds.read_wav(gds.ASSETS / fn)
+         n = len(pcm)
+@@ -91,6 +92,7 @@
+             data, _ = sio.ima_encode(pcm, 0)
+             if hashlib.sha256(data).hexdigest() != HISTORICAL[c]:
+                 sys.exit(f"{c}: historical A/B encoder drifted")
++            histories[c] = data
+             header.extend([f"#define X0X_SMP_{c.upper()}_LEN {n}u",
+                            gds.arr("uint8_t", f"x0x_smp_{c}", data, per=24)])
+         else:
+@@ -108,6 +110,13 @@
+         (out / f"{c}.ref").write_bytes(struct.pack(f"<{n}h", *ref))
+         (out / f"{c}.pcm").write_bytes(struct.pack(f"<{n}h", *pcm))
+     if args.historical:
++        codes, lookup = gds.cymbal_codes(histories.values())
++        header.extend([f"#define X0X_CYMBAL_HEAD {gds.CYMBAL_HEAD}u",
++                       f"#define X0X_CYMBAL_MASK {len(lookup)-1}u",
++                       gds.arr("uint8_t", "x0x_cymbal_prefix", lookup, per=24)])
++        for name, data in histories.items():
++            header.append(gds.arr("uint8_t", f"x0x_smp_{name}_packed",
++                                  gds.pack_cymbal(data, codes, lookup), per=24))
+         (out / "x0x_drum_samples.h").write_text("\n".join(header))
+         print("Historical A/B stream digests matched.", f"External decode: {ab or 'unavailable'}")
+     else:
+--- a/tests/host/drum808_echo_panel_test.c
++++ b/tests/host/drum808_echo_panel_test.c
+@@ -27,7 +27,7 @@
+             pref_t r = pg.r[p][i];
+             if (r.kind != R_ENG || r.a != T_808 || r.b != D8_KIT ||
+                 r.c < D8_KIT_DL_BUS || r.c > D8_KIT_DL_HPF) continue;
+-            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 430ms" : "KIT DL"));
++            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 2s" : "KIT DL"));
+             int k = r.c - D8_KIT_DL_BUS;
+             knob[k] = r;
+             found |= 1u << k;
+--- a/tests/host/drum909_adpcm_test.c
++++ b/tests/host/drum909_adpcm_test.c
+@@ -67,6 +67,8 @@
+     memset(&bus, 0, sizeof bus);
+     bus.dry = dry;
+     bus.y = y;
++    uint32_t cursor = 0;
++    bus.prefix_cursor = &cursor;
+     uint32_t k = 0;
+     while (s->pos < s->len && k < max) {
+         memset(dry, 0, sizeof dry);
+@@ -81,13 +83,13 @@
+ int main(int argc, char **argv)
+ {
+     if (argc < 2) { fprintf(stderr, "usage: %s REFDIR\n", argv[0]); return 2; }
+-    struct { const char *name; const uint8_t *adpcm; uint32_t len, bytes; } C[3] = {
+-        {"hh", x0x_smp_hh, X0X_SMP_HH_LEN, sizeof x0x_smp_hh},
+-        {"ride", x0x_smp_ride, X0X_SMP_RIDE_LEN, sizeof x0x_smp_ride},
+-        {"crash", x0x_smp_crash, X0X_SMP_CRASH_LEN, sizeof x0x_smp_crash}};
++    struct { const char *name; const uint8_t *adpcm, *packed; uint32_t len, bytes, packed_bytes; } C[3] = {
++        {"hh", x0x_smp_hh, x0x_smp_hh_packed, X0X_SMP_HH_LEN, sizeof x0x_smp_hh, sizeof x0x_smp_hh_packed},
++        {"ride", x0x_smp_ride, x0x_smp_ride_packed, X0X_SMP_RIDE_LEN, sizeof x0x_smp_ride, sizeof x0x_smp_ride_packed},
++        {"crash", x0x_smp_crash, x0x_smp_crash_packed, X0X_SMP_CRASH_LEN, sizeof x0x_smp_crash, sizeof x0x_smp_crash_packed}};
+     static const float PITCH[] = {0.25f, 0.5f, 0.7937005f, 1.0f, 1.3348398f, 2.0f, 3.1748021f, 4.0f};
+     int bad = 0;
+-    uint32_t flash = 0, pcm_bytes = 0;
++    uint32_t flash = sizeof x0x_cymbal_prefix, pcm_bytes = 0;
+     for (int c = 0; c < 3; c++) {
+         const uint32_t n = C[c].len;
+         int16_t *ref = load(argv[1], C[c].name, "ref", n), *pcm = load(argv[1], C[c].name, "pcm", n);
+@@ -101,7 +103,7 @@
+             es += (double)(dec[i] - pcm[i]) * (dec[i] - pcm[i]);
+             ps += (double)pcm[i] * pcm[i];
+         }
+-        flash += C[c].bytes;
++        flash += C[c].packed_bytes;
+         pcm_bytes += n * 2;
+         const double snr = 10.0 * log10(ps / es);
+         const int ok = maxd <= 1 && C[c].bytes == (n + 1) / 2 && snr > 15.0;
+@@ -114,7 +116,7 @@
+         for (unsigned p = 0; p < sizeof PITCH / sizeof PITCH[0]; p++) {
+             d9_smp_t s;
+             memset(&s, 0, sizeof s);
+-            s.adpcm = C[c].adpcm;
++            s.adpcm = C[c].packed;
+             s.len = n;
+             s.pitch = PITCH[p];
+             d9_smp_rate(&s);
+@@ -138,7 +140,7 @@
+         {
+             d9_smp_t s;
+             memset(&s, 0, sizeof s);
+-            s.adpcm = C[c].adpcm;
++            s.adpcm = C[c].packed;
+             s.len = n;
+             s.pitch = 1.3348398f;
+             d9_smp_rate(&s);
+@@ -147,9 +149,11 @@
+             d9_bus_t bus;
+             static float y[256];
+             memset(&bus, 0, sizeof bus);
++            uint32_t cursor = 0;
++            bus.prefix_cursor = &cursor;
+             bus.dry = dry;
+             bus.y = y;
+-            for (int k = 0; k < 40; k++)
++            for (int k = 0; k < 140; k++)
+                 d9_render_smp(&s, &bus, 32);
+             trig(&s);
+             const uint32_t na = play_pcm(dec, n, s.pitch, a, 4 * n + 64);
+@@ -157,7 +161,7 @@
+             uint32_t diff = 0;
+             for (uint32_t i = 0; i < na && i < nb; i++)
+                 diff += memcmp(&a[i], &b[i], sizeof(float)) != 0;
+-            printf("  %s %-5s retrigger at 1280 samples: %u differ\n", diff ? "FAIL" : "ok  ", C[c].name, diff);
++            printf("  %s %-5s retrigger at 4480 samples: %u differ\n", diff ? "FAIL" : "ok  ", C[c].name, diff);
+             bad += diff != 0;
+         }
+         free(a); free(b); free(dec); free(ref); free(pcm);
+--- a/tests/host/drum909_emit_equivalence.c
++++ b/tests/host/drum909_emit_equivalence.c
+@@ -2,6 +2,7 @@
+ /* Compare the isolated emit/rim/clap candidates with a pinned source baseline. */
+ #include "drum909.h"
+ #include <stdio.h>
++#include <stddef.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+@@ -23,6 +24,17 @@
+         exit(1);
+     }
+ }
++/* The pinned implementation holds raw nibble pointers. Keep those live while
++ * it renders, and compare all shared DSP state with only the pointers normalized.
++ * The extra prefix cursors are private to the new storage representation. */
++static void check_state(const drum909_t *candidate, const drum909_t *original,
++                        const char *label, int seed, int dist, int block)
++{
++    drum909_t copy = *candidate;
++    for (int i = 0; i < 4; i++) copy.smp[i].adpcm = original->smp[i].adpcm;
++    check(&copy, original, offsetof(drum909_t, prefix_cursor), label, seed, dist, block);
++}
++
+ int main(void)
+ {
+     unsigned blocks = 0;
+@@ -48,7 +60,7 @@
+             drum909_render_st_masked(&a, x[0], x[1], x[2], x[3], n, 0x7ff);
+             ref_drum909_render_st_masked(&b, y[0], y[1], y[2], y[3], n, 0x7ff);
+             check(x, y, sizeof x, "ring PCM", phase, -1, block);
+-            check(&a, &b, sizeof a, "ring state", phase, -1, block);
++            check_state(&a, &b, "ring state", phase, -1, block);
+             ++blocks;
+         }
+     }
+@@ -56,14 +68,7 @@
+         drum909_t a, b;
+         memset(&a, 0, sizeof a); memset(&b, 0, sizeof b);
+         drum909_init(&a); ref_drum909_init(&b);
+-        /* Each TU has its own static sample arrays. Check their bytes, then use
+-         * the same immutable arrays so full-state memcmp includes all pointers. */
+-        for (int v = 0; v < 4; ++v) {
+-            check(&a.smp[v].len, &b.smp[v].len, sizeof a.smp[v].len, "sample length", seed, dist, -1);
+-            check(a.smp[v].adpcm, b.smp[v].adpcm, (a.smp[v].len + 1u) / 2u, "sample bytes", seed, dist, -1);
+-            b.smp[v].adpcm = a.smp[v].adpcm;
+-        }
+-        check(&a, &b, sizeof a, "init", seed, dist, -1);
++        check_state(&a, &b, "init", seed, dist, -1);
+         rng = (unsigned)seed;
+         for (int block = 0; block < 520; ++block) {
+             if (block % 31 == 0) {
+@@ -80,8 +85,6 @@
+             /* The pinned base has no panic API; compare its real reset lifecycle. */
+             if (block % 97 == 96) {
+                 drum909_init(&a); ref_drum909_init(&b);
+-                /* Reset restores each TU's separately allocated immutable arrays. */
+-                for (int v = 0; v < 4; ++v) b.smp[v].adpcm = a.smp[v].adpcm;
+             }
+             if (block % 19 == 0) for (int v = 0; v < DR_NUM; ++v) {
+                 const float vel = (float)(next() % 128u) / 127.0f;
+@@ -108,10 +111,10 @@
+                 ref_drum909_render_st_masked(&b, y[0], y[1], br, bd, n, mask);
+             }
+             check(x, y, sizeof x, "PCM", seed, dist, block);
+-            check(&a, &b, sizeof a, "state", seed, dist, block);
++            check_state(&a, &b, "state", seed, dist, block);
+             ++blocks;
+         }
+     }
+-    printf("PASS: %u blocks; full state (%zu bytes) and four PCM buses identical\n", blocks, sizeof(drum909_t));
++    printf("PASS: %u blocks; shared DSP state (%zu bytes) and four PCM buses identical\n", blocks, offsetof(drum909_t, prefix_cursor));
+     return 0;
+ }
+--- a/tests/host/drum909_integral_test.c
++++ b/tests/host/drum909_integral_test.c
+@@ -1,6 +1,7 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #define _POSIX_C_SOURCE 200809L
+ #include <stdio.h>
++#include <stddef.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <time.h>
+@@ -8,6 +9,13 @@
+ 
+ void ref_drum909_render_st_masked(drum909_t *, float *, float *, float *, float *, int, uint16_t);
+ void ref_drum909_render(drum909_t *, float *, float *, float *, int);
++void ref_drum909_init(drum909_t *);
++static void restore_raw_sources(drum909_t *d)
++{
++    drum909_t original = {0};
++    ref_drum909_init(&original);
++    for (int i = 0; i < 4; i++) d->smp[i].adpcm = original.smp[i].adpcm;
++}
+ static uint32_t rng = 1;
+ static uint32_t random_u32(void)
+ {
+@@ -45,7 +53,8 @@
+             drum909_trigger(&a, v, 0.8f);
+         }
+         rate(&a, seed);
+-        b = a; /* Use the same sample pointers, so full-state memcmp is valid. */
++        b = a;
++        restore_raw_sources(&b);
+         for (int step = 0; step < 1300; ++step) {
+             float x[4][256], y[4][256];
+             const int n = step % 257;
+@@ -84,15 +93,18 @@
+                 drum909_render(&a, x[0], x[2], x[3], n);
+                 ref_drum909_render(&b, y[0], y[2], y[3], n);
+             }
+-            if (memcmp(&a, &b, sizeof a) || memcmp(x, y, sizeof x)) {
++            drum909_t comparable = a;
++            for (int j = 0; j < 4; j++) comparable.smp[j].adpcm = b.smp[j].adpcm;
++            int mismatch = memcmp(&comparable, &b, offsetof(drum909_t, prefix_cursor));
++            if (mismatch || memcmp(x, y, sizeof x)) {
+                 fprintf(stderr, "FAIL seed=%d step=%d n=%d state=%d pcm=%d\n", seed, step, n,
+-                    memcmp(&a, &b, sizeof a), memcmp(x, y, sizeof x));
++                    mismatch, memcmp(x, y, sizeof x));
+                 exit(1);
+             }
+             ++calls;
+         }
+     }
+-    printf("PASS %u calls: complete drum909_t (%zu bytes) and four PCM buses bit-identical\n", calls, sizeof(drum909_t));
++    printf("PASS %u calls: shared DSP state (%zu bytes) and four PCM buses bit-identical\n", calls, offsetof(drum909_t, prefix_cursor));
+ }
+ static double now(void)
+ {
+@@ -105,6 +117,7 @@
+     drum909_t d;
+     float bus[4][32];
+     memset(&d, 0, sizeof d); drum909_init(&d);
++    if (reference) restore_raw_sources(&d);
+     for (int j = 0; j < 4; ++j) {
+         d.smp[j].inc = 1;
+         d.smp[j].incf = fractional ? 0x80000000u : 0;
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -236,6 +236,82 @@
+     Path(target.name).replace(path)
+ 
+ 
++# Keep the first 46 ms in their original nibble format; ordinary retriggers
++# do not need a prefix decode. Sign is predicted from the previous nibble
++# in the tail, with a single seven-bit inverse table shared by the three WAVs.
++CYMBAL_HEAD = 2048
++
++
++def cymbal_codes(samples):
++    from collections import Counter
++    from heapq import heappop, heappush
++
++    counts = Counter()
++    for data in samples:
++        previous = (data[CYMBAL_HEAD // 2 - 1] >> 4) & 8
++        for byte in data[CYMBAL_HEAD // 2:]:
++            for nibble in (byte & 15, byte >> 4):
++                counts[nibble ^ previous] += 1
++                previous = nibble & 8
++    heap = []
++    for nibble in range(16):
++        heappush(heap, (counts[nibble], [nibble]))
++    widths = [0] * 16
++    while len(heap) > 1:
++        fa, a = heappop(heap)
++        fb, b = heappop(heap)
++        for symbol in a + b:
++            widths[symbol] += 1
++        heappush(heap, (fa + fb, a + b))
++    max_bits = max(widths)
++    lookup = [None] * (1 << max_bits)
++    codes = [None] * 16
++    code = old = 0
++    for n, symbol in sorted((width, i) for i, width in enumerate(widths)):
++        code <<= n - old
++        # Stream bits are consumed least-significant first on the board.
++        word = int(format(code, f'0{n}b')[::-1], 2)
++        codes[symbol] = (word, n)
++        for row in range(word, len(lookup), 1 << n):
++            assert lookup[row] is None
++            lookup[row] = n << 4 | symbol
++        code += 1
++        old = n
++    assert None not in lookup and max_bits <= 8
++    return codes, lookup
++
++
++def pack_cymbal(data, codes, lookup):
++    out = bytearray(data[:CYMBAL_HEAD // 2])
++    previous = (out[-1] >> 4) & 8
++    bits = filled = 0
++    for byte in data[CYMBAL_HEAD // 2:]:
++        for nibble in (byte & 15, byte >> 4):
++            code, width = codes[nibble ^ previous]
++            previous = nibble & 8
++            bits |= code << filled
++            filled += width
++            if filled >= 8:
++                out.append(bits & 255)
++                bits >>= 8
++                filled -= 8
++    if filled:
++        out.append(bits)
++    out.extend((0, 0, 0, 0))  # suffix lookahead in the streamed prefix reader
++    # Invert the complete generated stream, including a possible pad nibble.
++    pos = CYMBAL_HEAD * 4
++    previous = (data[CYMBAL_HEAD // 2 - 1] >> 4) & 8
++    for i in range(CYMBAL_HEAD, 2 * len(data)):
++        at = pos >> 3
++        window = (out[at] | out[at + 1] << 8) >> (pos & 7)
++        code = lookup[window & (len(lookup) - 1)]
++        decoded = (code & 15) ^ previous
++        assert decoded == ((data[i >> 1] >> (4 * (i & 1))) & 15)
++        pos += code >> 4
++        previous = decoded & 8
++    return out
++
++
+ def main():
+     out_s = Path(sys.argv[1]) if len(sys.argv) > 1 else SRC / "build" / "gen" / "x0x_drum_samples.h"
+     out_t = out_s.parent / "x0x_drum_tables.h"
+@@ -249,6 +325,11 @@
+     total = nbytes = 0
+     encoded_dir = ASSETS / "encoded"
+     manifest = json.loads((encoded_dir / "manifest.json").read_text())
++    codes, lookup = cymbal_codes([(encoded_dir / (Path(fn).stem + '.adpcm')).read_bytes()
++                                  for _, fn in SAMPLES])
++    hdr.extend([f'#define X0X_CYMBAL_HEAD {CYMBAL_HEAD}u',
++                f'#define X0X_CYMBAL_MASK {len(lookup) - 1}u',
++                arr("uint8_t", "x0x_cymbal_prefix", lookup, per=24)])
+     for name, fn in SAMPLES:
+         wav = ASSETS / fn
+         pcm, bits = read_wav(wav)
+@@ -262,7 +343,8 @@
+         nbytes += len(data)
+         hdr.append(f"/* {fn}: {len(pcm)} frames, source {bits}-bit, {len(data)} B of ADPCM */")
+         hdr.append(f"#define {name.upper()}_LEN {len(pcm)}u")
+-        hdr.append(arr("uint8_t", name, list(data), per=24))
++        hdr.append(arr("uint8_t", name, list(data), per=24))  # raw ADPCM comparison oracle
++        hdr.append(arr("uint8_t", name + "_packed", list(pack_cymbal(data, codes, lookup)), per=24))
+         hdr.append("")
+     write_header(out_s, "\n".join(hdr))
+ 

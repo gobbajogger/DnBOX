@@ -1,0 +1,50 @@
+{
+  "elite": {
+    "elf": "deb2b5fa186a3a3b144b3f32fdbb6cc6d67ac8e3f252c194e27c2215bcd08ef6",
+    "fwsc": "041557e675896e4b7d17f26faf5aa2b877bf3c3e87b89d0ba742951c2f3386df",
+    "pool_bytes": 319732,
+    "xpool_bytes": 8828,
+    "audiohigh_bytes": 10368,
+    "ble_bytes": 3888,
+    "scenes": {
+      "01": {
+        "max_us": 11502,
+        "raw_late": 0,
+        "xruns": 0,
+        "nonzero_engine_bytes": 2930,
+        "pcm_sha256": "04bdca894c2af6e16b0663441bc2df66ccbebbebdbed1a4182d70b500c0813ac"
+      },
+      "32": {
+        "max_us": 10553,
+        "raw_late": 0,
+        "xruns": 0,
+        "nonzero_engine_bytes": 3700,
+        "pcm_sha256": "00b6c0fb85da698fd73833b1a0b1bfb89e0423cbad513746115b016f41929d14"
+      }
+    }
+  },
+  "pro": {
+    "elf": "0b17b4c191f1d32de8e37093aa659491693d641661c8d61ccc6e57b4dfc133ce",
+    "fwsc": "4b2aabf4a0d656fd89d02830b989a889495d9f2d6a0fc4286f4998f7249db59a",
+    "pool_bytes": 319732,
+    "xpool_bytes": 8828,
+    "audiohigh_bytes": 10368,
+    "ble_bytes": 3884,
+    "scenes": {
+      "10": {
+        "max_us": 11286,
+        "raw_late": 0,
+        "xruns": 0,
+        "nonzero_engine_bytes": 2945,
+        "pcm_sha256": "194ef2144b4e6cf1e1f755cf519d64ea3bf9ecf99733309f0c19635599017658"
+      },
+      "23": {
+        "max_us": 10887,
+        "raw_late": 0,
+        "xruns": 0,
+        "nonzero_engine_bytes": 3671,
+        "pcm_sha256": "caffc3cad171d38398a6f2e241623de4118e8ca8691a010ff5dfcf990b7065de"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "description": "host kernel-only parity of candidate private 808 delay vs its scalar per-sample branch",
+  "history_duration_ms": 592.1088435374149,
+  "maximum_configurable_tap_ms": 586.3038548752834,
+  "not_qualified": [
+    "original 8W8 effects-on output",
+    "firmware flash/pool fit",
+    "Elite/Pro emulation timing",
+    "full original 1994 ms echo"
+  ],
+  "results": [
+    {
+      "cases": 8192,
+      "dynamic_cases": 3072,
+      "frames": 1052672,
+      "mono_cases": 4096,
+      "optimization": "-O0",
+      "pcm_ring_state_mismatches": 0,
+      "quiet_cases": 3072,
+      "settled_cases": 2048,
+      "stereo_cases": 4096
+    },
+    {
+      "cases": 8192,
+      "dynamic_cases": 3072,
+      "frames": 1052672,
+      "mono_cases": 4096,
+      "optimization": "-O2",
+      "pcm_ring_state_mismatches": 0,
+      "quiet_cases": 3072,
+      "settled_cases": 2048,
+      "stereo_cases": 4096
+    }
+  ],
+  "ring_frames": 26112,
+  "sample_rate_hz": 44100,
+  "scope": "interpolation, ring history, output and state; fixture HPF is not original 8W8",
+  "source": "experiments/sound-hardware-v1/808-full-delay/settled-586ms/settled-fxbus.c.inc",
+  "source_git_blob_sha1": "e82e6af2f8739c8020cc54ca4c9c3e1002a1822c"
+}

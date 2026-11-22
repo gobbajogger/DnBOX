@@ -1,0 +1,20 @@
+Synth One INIT patch: 16 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS
+Stereo width: both owners, 128 edits, packed source tap, smoothing, switch, restore and panic passed.
+Synth One sub bypass: 40,960 stereo frames preserved across v1 and sub-only v2.
+factory ID 2 changed 20480 of 20480 frames
+factory ID 5 changed 20480 of 20480 frames
+factory ID 16 changed 20480 of 20480 frames
+factory ID 17 changed 20480 of 20480 frames
+factory ID 19 changed 20480 of 20480 frames
+factory ID 22 changed 18430 of 20480 frames
+factory ID 23 changed 14451 of 20480 frames
+factory ID 24 changed 14451 of 20480 frames
+factory ID 25 changed 8960 of 20480 frames
+factory ID 26 changed 18431 of 20480 frames
+factory ID 27 changed 14451 of 20480 frames
+factory ID 28 changed 14451 of 20480 frames
+factory ID 29 changed 8960 of 20480 frames
+factory ID 7 changed 20480 of 20480 frames
+factory ID 8 changed 20479 of 20480 frames
+factory ID 9 changed 20480 of 20480 frames
+Synth One INIT: stock and legacy cells, audible MIDI, two owners, sustain, pitch, release, voice steal and panic PASS

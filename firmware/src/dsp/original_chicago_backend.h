@@ -2,6 +2,7 @@
 #ifndef X0X_ORIGINAL_CHICAGO_BACKEND_H
 #define X0X_ORIGINAL_CHICAGO_BACKEND_H
 #include "chicago_note_context.h"
+#include "chicago_packed.h"
 #include "engine_events.h"
 
 enum {
@@ -36,6 +37,7 @@ typedef struct {
     original_chicago_program program;
     original_chicago_voice_controls controls;
     original_chicago_voice_tables tables;
+    original_chicago_packed_cache coefficient_cache;
     original_chicago_voice voice;
     original_pending_note pending;
     original_chicago_extra_sources extra;
@@ -142,6 +144,9 @@ int original_chicago_backend_begin(original_chicago_backend *,
     uint32_t event_count, uint32_t frames);
 int original_chicago_backend_frame(original_chicago_backend *);
 int original_chicago_backend_end(original_chicago_backend *, float *left, float *right);
+/* Validated engine-owned words remain in workspace.core_left/core_right. */
+int original_chicago_backend_render_in_place(original_chicago_backend *, original_chicago_backend_workspace *,
+    uint32_t frames);
 int original_chicago_backend_render(original_chicago_backend *,
     original_chicago_backend_workspace *, const original_engine_event *,
     uint32_t event_count, float *left, float *right, uint32_t frames);

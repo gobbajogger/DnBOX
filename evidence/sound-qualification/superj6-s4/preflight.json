@@ -1,0 +1,19 @@
+{
+  "result": "PASS_STATIC_SOURCE_AUDIT_ONLY",
+  "source": "s4-inputs.json and original/bundled-bank-audit.json",
+  "selected_programs": 14,
+  "selected_banks": 12,
+  "matched_selected_uids_and_bank_ids": 14,
+  "authored_parameter_records": 1926,
+  "entries_with_decimal_spelling_differences": 4,
+  "entries_with_metadata_differences": 2,
+  "original_au_digest_claimed_by_audit": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "original_ipa_digest_claimed_by_audit": "dde4992f24f52d4390391069025b27092a2f327e3a53115bdd53a6ede0dffa8e",
+  "frames_per_stereo_program": 132300,
+  "events_per_program": 8,
+  "qualifying_original_stereo_renders": 0,
+  "qualifying_firmware_stereo_pairs": 0,
+  "caveat": "Original AU executable was not executed, no original stereo PCM generated; recorded checks are fixture metadata only.",
+  "matrix_sha256": "d4ac2cea455728a20a1146264117a79f31809f9dd2d1f83de6733f58cf04a3f3",
+  "audit_sha256": "876ebcea6be9ee04a24ed96f371d13d8f1a9aac2e9e9eb8c7d60a5d14de53f97"
+}

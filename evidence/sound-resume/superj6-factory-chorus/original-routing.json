@@ -1,0 +1,163 @@
+{
+  "original_executable_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "factory_bank_sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+  "scope": "Original ARM64 control math and graph routing with synthetic owners. No original AU framework or factory instrument render.",
+  "executed": {
+    "factory_programs": 640,
+    "switch_transition_checks": 24,
+    "version_threshold_tests": 4,
+    "j60_scalar_checks": 18
+  },
+  "version_normalized_default": 1.0,
+  "version_authored_counts": {
+    "None": 572,
+    "0": 46,
+    "1": 22
+  },
+  "factory_routes": {
+    "j60v2_mode_1": 199,
+    "j60v2_mode_2": 95,
+    "bypass": 300,
+    "legacy_mode_3": 43,
+    "legacy_mode_2": 2,
+    "legacy_mode_1": 1
+  },
+  "synthetic_routes": {
+    "version0_mode0": [
+      [
+        "legacy_off"
+      ],
+      [
+        "j60_stop"
+      ]
+    ],
+    "version0_mode1": [
+      [
+        "legacy_on"
+      ],
+      [
+        "j60_stop"
+      ]
+    ],
+    "version0_mode2": [
+      [
+        "legacy_on"
+      ],
+      [
+        "j60_stop"
+      ]
+    ],
+    "version0_mode3": [
+      [
+        "legacy_on"
+      ],
+      [
+        "j60_stop"
+      ]
+    ],
+    "version1_mode0": [
+      [
+        "legacy_off"
+      ],
+      [
+        "j60_stop"
+      ]
+    ],
+    "version1_mode1": [
+      [
+        "legacy_off"
+      ],
+      [
+        "au_param",
+        0,
+        1.0
+      ],
+      [
+        "j60_start"
+      ]
+    ],
+    "version1_mode2": [
+      [
+        "legacy_off"
+      ],
+      [
+        "au_param",
+        0,
+        2.0
+      ],
+      [
+        "j60_start"
+      ]
+    ],
+    "version1_mode3": [
+      [
+        "legacy_off"
+      ],
+      [
+        "au_param",
+        0,
+        3.0
+      ],
+      [
+        "j60_start"
+      ]
+    ]
+  },
+  "j60_parameter_defaults": {
+    "215": {
+      "control": "rate_scale",
+      "raw_default": 0.5,
+      "au_parameter": 1,
+      "au_default": 1.0,
+      "tested_endpoints": 5
+    },
+    "216": {
+      "control": "depth_scale",
+      "raw_default": 0.5,
+      "au_parameter": 2,
+      "au_default": 1.0,
+      "tested_endpoints": 5
+    },
+    "217": {
+      "control": "mix",
+      "raw_default": 1.0,
+      "au_parameter": 3,
+      "au_default": 1.0,
+      "tested_endpoints": 5
+    }
+  },
+  "j60_parameter_authored_counts": {
+    "215": 0,
+    "216": 0,
+    "217": 0
+  },
+  "legacy_parameters_not_applied_to_j60": {
+    "42": {
+      "raw_default": 0.40400001406669617,
+      "capture": "legacy_frequency",
+      "transfer_multiplier": 16.0,
+      "transfer_exponent": 3.33,
+      "effective_default": 0.7822939630742601,
+      "authored_count": 26,
+      "distinct_words_tested": 4
+    },
+    "43": {
+      "raw_default": 0.20200000703334808,
+      "capture": "legacy_depth",
+      "transfer_multiplier": 0.97,
+      "transfer_exponent": 1.0,
+      "effective_default": 0.19594000682234763,
+      "authored_count": 26,
+      "distinct_words_tested": 4
+    },
+    "44": {
+      "raw_default": 0.5049999952316284,
+      "capture": "legacy_mix",
+      "transfer_multiplier": 1.0,
+      "transfer_exponent": 1.0,
+      "effective_default": 0.5049999952316284,
+      "authored_count": 26,
+      "distinct_words_tested": 3
+    }
+  }
+}

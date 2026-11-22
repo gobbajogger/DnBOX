@@ -39,9 +39,11 @@ uint8_t smk_clip_lcd_draw(uint32_t w, uint32_t h)
 void smk_clip_lcd_force(void) { clip_forces++; clip_dirty = 1; }
 uint8_t smk_clip_wait(void) { return clip_waiting; }
 uint8_t smk_apc_transport_led_state(uint8_t n) { (void)n; return 0; }
+#ifndef SMC_UI_REAL_PADCAL
 uint8_t smk_padcal_on(void) { return 0; }
 void smk_padcal_enter(void) {}
 uint8_t smk_padcal_draw(uint32_t w, uint32_t h) { (void)w; (void)h; return 0; }
+#endif
 #ifndef SMC_UI_SEND_IMPLEMENTED
 int plat_ble_smc_send(const uint8_t *m, uint8_t n) { (void)m; (void)n; return 1; }
 #endif

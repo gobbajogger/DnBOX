@@ -206,9 +206,25 @@ static void ota_commit(const uint8_t *parm)
 #define PROJECT_IO_BUFFER st_buf
 _Static_assert(sizeof st_buf >= PLAT_STORE_MAX, "project object fits the store buffer");
 #include "app/project.c"
+#if X0X_DNR2_SCRATCH
+#define X0X_DNR2_FREESTANDING 1
+#include "app/dnr2_scalar.h"
+#undef X0X_DNR2_FREESTANDING
+static dnr2_scalar dnr2_scratch;
+#define DNR2_SOURCE_CHANGED() (dnr2_scratch.revision ? (void)dnr2_scalar_changed(&dnr2_scratch) : (void)0)
+#endif
 #include "app/ui.c"
 #if BOARD_SMK37
 #include "app/smc_mixer.c"
+#endif
+#if X0X_DNR2_SCRATCH
+#if X0X_DNR2_NATIVE
+#include "fm1_entropy.h"
+#define DNR2_NATIVE_RANDOM(high) fm1_entropy_word(high)
+#else
+#define DNR2_SCRATCH_CLOCK() fm1_ticks()
+#endif
+#include "app/dnr2_scratch_binding.inc"
 #endif
 #include "app/editor.c"
 #include "app/main_fm1.c"

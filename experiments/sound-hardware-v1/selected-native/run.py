@@ -75,6 +75,8 @@ def prepare_flash(args, objects):
         "elf_sha256": sha(args.elf.read_bytes()),
         "stock_seed_sha256": sha(stock),
         "project_objects_sha256": sha(objects),
+        "synthone_sub_seed": args.synthone_sub,
+        "synthone_filter_seed": args.synthone_filter,
         "source_sample_sha256": sha(sample.read_bytes()),
         "slot_adpcm_sha256": sha(data),
         "initial_flash_sha256": sha(flash),
@@ -96,7 +98,7 @@ def run_shot(args, out, flash):
                        cwd=out, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
 
 
-def measure(elf, out, duration_ms=2800):
+def measure(elf, out, duration_ms=2800, capture_rate=44100):
     log = (out / "run.log").read_text()
     if f"panel.ppm at {duration_ms} ms" not in log or "skipped 0 cycles" not in log:
         raise ValueError("Incomplete strict emulator shot")
@@ -122,7 +124,7 @@ def measure(elf, out, duration_ms=2800):
     triggered = [sum(t != 0 for t in last_hit_ms[:11]), sum(t != 0 for t in last_hit_ms[11:])]
     pcm = (out / "stereo.s16le").read_bytes()
     audio = np.frombuffer(pcm, "<i2").astype(np.int32)
-    if len(audio) <= 2 * 44100 or len(audio) % 2:
+    if len(audio) <= 2 * capture_rate or len(audio) % 2:
         raise ValueError("Incomplete stereo DMA capture")
     return {
         "bass_kinds": list(kinds),
@@ -133,10 +135,10 @@ def measure(elf, out, duration_ms=2800):
         "user_zones": list(region("usr_nz")),
         "loop_count": struct.unpack("<I", region("nloops"))[0],
         "first_catalog_slot_zone": [region("loop_slot")[0], region("loop_zone")[0]],
-        "sample_rate": 44100,
+        "sample_rate": capture_rate,
         "stereo_frames": len(audio) // 2,
-        "first_half_second_nonzero_words": int(np.count_nonzero(audio[:44100])),
-        "last_half_second_nonzero_words": int(np.count_nonzero(audio[-44100:])),
+        "first_half_second_nonzero_words": int(np.count_nonzero(audio[:capture_rate])),
+        "last_half_second_nonzero_words": int(np.count_nonzero(audio[-capture_rate:])),
         "peak_pcm16": int(np.abs(audio).max()),
         "pcm_sha256": sha(pcm),
         "observed_halves": dbg[1],
@@ -155,17 +157,28 @@ def main():
     parts = parser.add_mutually_exclusive_group()
     parts.add_argument("--kit", choices=("909", "808"), help="play only the selected kit")
     parts.add_argument("--ensemble", action="store_true", help="play both kits, both basses and BREAK")
+    parser.add_argument("--synthone-sub", action="store_true",
+                        help="enable the full-level sine sub oscillator on selected Synth One owners")
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--stage-only", action="store_true", help="emit a fresh seed for another scene")
     action.add_argument("--rescore", action="store_true", help="read a completed shot in OUTPUT")
+    parser.add_argument("--synthone-filter", choices=("bandpass", "highpass"))
     args = parser.parse_args()
+    if (args.synthone_sub or args.synthone_filter) and (
+            not args.ensemble or 2 not in (args.bass_a, args.bass_b)):
+        parser.error("Synth One seed edits require an ensemble with a Synth One owner")
     kit = 2 if args.ensemble else {None: -1, "909": 0, "808": 1}[args.kit]
     out = args.output.resolve()
     objects = out / "save-objects.bin"
     with tempfile.TemporaryDirectory() as tmp:
         rebuilt = Path(tmp) / "save-objects.bin"
-        subprocess.run([args.project_builder.resolve(), str(args.bass_a), str(args.bass_b),
-                        str(kit), rebuilt], check=True)
+        command = [args.project_builder.resolve(), str(args.bass_a), str(args.bass_b),
+                   str(kit), rebuilt]
+        if args.synthone_sub:
+            command.append("--synthone-sub")
+        if args.synthone_filter:
+            command.append("--synthone-filter=" + args.synthone_filter)
+        subprocess.run(command, check=True)
         project = rebuilt.read_bytes()
     if args.rescore:
         if objects.read_bytes() != project:

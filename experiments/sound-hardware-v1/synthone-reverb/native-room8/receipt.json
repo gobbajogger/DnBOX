@@ -1,0 +1,254 @@
+{
+  "base": "bf48ce83bea6f8d332dddff11e5407c4fd744fc6",
+  "source_tree": "cb3fa22dbfa7253b7858269c1ee96fbe798faed1",
+  "patch_sha256": "3074e5ad393e66c81b7f005e4231c41d16ad45c0bdbf176bf468b5360bb83895",
+  "stock_808_echo_supported_ms": 430,
+  "current_808_history_frames": 19200,
+  "room_bits": 8,
+  "room_block_bytes": 17,
+  "room_geometry": {
+    "blocks_per_owner": 1548,
+    "private_blocks": 60,
+    "external_buffers_blocks_per_owner": [
+      598,
+      710,
+      139,
+      41
+    ],
+    "external_bytes_per_owner": 25296,
+    "disjoint_owners": 2
+  },
+  "products": {
+    "elite": {
+      "x0x.elf": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "x0x.fwsc": "5271369463d8bd1852cd937251714af58f6a30b41040c612834233e4a2c4c202",
+      "clean_full_rebuild_identical": true,
+      "xip_free_bytes": 2932,
+      "pool_free_bytes": 8376,
+      "mandatory_pool_reserve": 8192,
+      "main_ram_free_bytes": 392,
+      "data_ways_free_for_sram": 7,
+      "instruction_ways_active": 8
+    },
+    "pro": {
+      "x0x.elf": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "x0x.fwsc": "371611a2a1ab173b8ec16743c1c54fe43dccb0ff684473e27162e516a0e4356c",
+      "clean_full_rebuild_identical": true,
+      "xip_free_bytes": 2940,
+      "pool_free_bytes": 8376,
+      "mandatory_pool_reserve": 8192,
+      "main_ram_free_bytes": 392,
+      "data_ways_free_for_sram": 7,
+      "instruction_ways_active": 8
+    }
+  },
+  "strict_scenes": [
+    {
+      "scene": "chicago_miami",
+      "model": "elite",
+      "owners": [
+        0,
+        1
+      ],
+      "source_elf_sha256": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "5ecf646ef874f070d22da030989e849f30b01dc1710270a395d3cfdc440fcce1",
+      "pcm_bytes": 1302528,
+      "max_us": 11473,
+      "raw_late": 0,
+      "scene_late": 0,
+      "xruns": 0,
+      "timing_pass": true,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 4756,
+      "worker_user_free_bytes": 1780,
+      "authored_room_owners": []
+    },
+    {
+      "scene": "juno_s1",
+      "model": "elite",
+      "owners": [
+        3,
+        2
+      ],
+      "source_elf_sha256": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "0568250c6adc1a560875a1ba41c5a70b3013da42188f15f71051899243ddd5bb",
+      "pcm_bytes": 1302528,
+      "max_us": 10067,
+      "raw_late": 0,
+      "scene_late": 0,
+      "xruns": 0,
+      "timing_pass": true,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": []
+    },
+    {
+      "scene": "chicago_miami",
+      "model": "pro",
+      "owners": [
+        1,
+        0
+      ],
+      "source_elf_sha256": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "4690e7f9ef348b7c252d6585d01f88de35a60d5fb8663056840e3f1ffbb5194c",
+      "pcm_bytes": 1302528,
+      "max_us": 11634,
+      "raw_late": 1,
+      "scene_late": 1,
+      "xruns": 1,
+      "timing_pass": false,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 4756,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": []
+    },
+    {
+      "scene": "juno_s1",
+      "model": "pro",
+      "owners": [
+        2,
+        3
+      ],
+      "source_elf_sha256": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "59d0f48d086e8bd3ab9295f0be5783d65ed0a9aeed536e27a3b3a5a491e71877",
+      "pcm_bytes": 1302528,
+      "max_us": 10763,
+      "raw_late": 0,
+      "scene_late": 0,
+      "xruns": 0,
+      "timing_pass": true,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": []
+    },
+    {
+      "scene": "both_s1_wet",
+      "model": "elite",
+      "owners": [
+        2,
+        2
+      ],
+      "source_elf_sha256": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "5dad71f38b5ddfdce9ec4f624c0501c14fea698e0b8c23c2e5f5b656a3ec76a2",
+      "pcm_bytes": 1302528,
+      "max_us": 15910,
+      "raw_late": 133,
+      "scene_late": 132,
+      "xruns": 133,
+      "timing_pass": false,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": [
+        0,
+        1
+      ]
+    },
+    {
+      "scene": "juno_s1_wet",
+      "model": "elite",
+      "owners": [
+        3,
+        2
+      ],
+      "source_elf_sha256": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "60f77bf82f7255bbbb5f23b396565aac97fb4b906d9701155e9ea76ceb391a32",
+      "pcm_bytes": 1302528,
+      "max_us": 14041,
+      "raw_late": 64,
+      "scene_late": 64,
+      "xruns": 64,
+      "timing_pass": false,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": [
+        1
+      ]
+    },
+    {
+      "scene": "both_s1_wet",
+      "model": "pro",
+      "owners": [
+        2,
+        2
+      ],
+      "source_elf_sha256": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "8bd3c0bd9481a0dc3c644025ea59397983b16e705b3014dcc4833f7ef02cadc9",
+      "pcm_bytes": 1302528,
+      "max_us": 15915,
+      "raw_late": 132,
+      "scene_late": 131,
+      "xruns": 132,
+      "timing_pass": false,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": [
+        0,
+        1
+      ]
+    },
+    {
+      "scene": "juno_s1_wet",
+      "model": "pro",
+      "owners": [
+        2,
+        3
+      ],
+      "source_elf_sha256": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "strict_duration_ms": 8000,
+      "events": 922,
+      "pcm_sha256": "36b3e8d391a5413213c041b6bd41d0812a6245854685fb3c09084fa152992f16",
+      "pcm_bytes": 1302528,
+      "max_us": 14298,
+      "raw_late": 97,
+      "scene_late": 97,
+      "xruns": 97,
+      "timing_pass": false,
+      "all_parts_active": true,
+      "capture_health": true,
+      "irq0_free_bytes": 5352,
+      "worker_user_free_bytes": 2344,
+      "authored_room_owners": [
+        0
+      ]
+    }
+  ],
+  "host_full_694": {
+    "report_sha256": "5cb5994f1ad80f1cf48761c59cc4f951ffd6b8a277ae2f21c6f5f82ef417099f",
+    "final_stereo_pass": 694,
+    "isolated_wet_stereo_pass": 692,
+    "controls": "original continuous program controls on the independently measured selected graph; linked firmware exposes seven controls and does not embed this bank",
+    "replay_scope": "host full wet graph measured before the semantically equivalent software-double-free room rounding helper"
+  },
+  "known_open": [
+    "active full-rate reverb misses deadline",
+    "Pro Chicago/Miami has one late callback",
+    "physical hardware cache and audio timing are unmeasured",
+    "edited rooms on this exact stage continually report tails and block idle undo; subsequent 9-bit candidate includes energetic-block idle expiry and selector guard"
+  ]
+}

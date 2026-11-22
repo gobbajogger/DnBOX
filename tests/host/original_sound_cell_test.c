@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 3);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 24);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -215,6 +215,18 @@ static void verify_synthone(void)
     memcpy(copy, cell, sizeof cell);
     assert(!original_sound_set(cell, 0, 100) && !memcmp(cell, copy, 32));
     assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
+    uint8_t wet[32];
+    memcpy(wet, cell, sizeof wet);
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_WIDTH, 91));
+    assert(wet[31] == 1 && original_sound_valid(wet) && !original_sound_adopt_legacy_cell(wet));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_CRUSH, 74));
+    assert(wet[ORIGINAL_SYNTHONE_WIDTH] == 91 && wet[ORIGINAL_SYNTHONE_CRUSH] == 74);
+    assert(original_sound_edit_mask(wet) == 12u && original_sound_valid(wet));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_PAN_RATE, 0));
+    assert(original_sound_set(wet, ORIGINAL_SYNTHONE_PAN, 1));
+    assert(original_sound_edit_mask(wet) == 60u && original_sound_valid(wet));
+    wet[31] = 0;
+    assert(!original_sound_valid(wet));
     uint8_t bad[32] = {0};
 #if X0X_SYNTHONE_PATCH
     for (unsigned slot=0; slot<13; ++slot) {
@@ -246,6 +258,75 @@ static void verify_synthone(void)
     bad[23] = 1;
     assert(!original_sound_valid(bad) && !original_sound_adopt_legacy_cell(bad));
 #endif
+    uint8_t extended[32], saved_lfo[7]={0,0,0,64,0,0,64};
+    assert(original_sound_init(extended,ORIGINAL_SOUND_SYNTHONE,0));
+    for(unsigned id=ORIGINAL_SYNTHONE_TREM;id<ORIGINAL_SYNTHONE_PHASER_MIX;++id){
+        for(unsigned q=0;q<128;++q){
+            assert(original_sound_set(extended,id,q));
+            unsigned discrete=id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE;
+            saved_lfo[id-ORIGINAL_SYNTHONE_TREM]=discrete ? (((q*3u+63u)/127u)*127u+1u)/3u : q;
+            assert(original_sound_valid(extended) && !original_sound_adopt_legacy_cell(extended));
+            for(unsigned j=0;j<7;++j) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_TREM+j)==saved_lfo[j]);
+        }
+    }
+    assert(extended[31]==2 && original_sound_set(extended,ORIGINAL_SYNTHONE_PAN,81));
+    assert(extended[31]==2 && original_sound_set(extended,ORIGINAL_SYNTHONE_WIDTH,79));
+#if X0X_SYNTHONE_PATCH
+    for(unsigned slot=0;slot<13;++slot) {
+        assert(original_sound_s1_set(extended,slot,127-slot) && original_sound_valid(extended));
+        for(unsigned j=0;j<7;++j) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_TREM+j)==saved_lfo[j]);
+    }
+    assert(original_sound_set(extended,ORIGINAL_SYNTHONE_LFO1_RATE,91));
+    for(unsigned slot=0;slot<13;++slot) assert(extended[8+slot]==127-slot);
+#endif
+    unsigned phaser[4]={0,5,0,99};
+    for(unsigned j=0;j<4;++j)
+        for(unsigned q=0;q<128;++q) {
+            phaser[j]=q;
+            assert(original_sound_set(extended,ORIGINAL_SYNTHONE_PHASER_MIX+j,q));
+            assert(original_sound_valid(extended));
+            for(unsigned k=0;k<4;++k)assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+            assert(original_sound_s1_display(extended,0)==64 && original_sound_s1_display(extended,1)==0);
+            assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PAN)==81);
+            assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_WIDTH)==79);
+            assert(original_sound_set(extended,ORIGINAL_SYNTHONE_CRUSH,q));
+            for(unsigned k=0;k<7;++k) {
+#if X0X_SYNTHONE_PATCH
+                if (k==3) continue;
+#endif
+                assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_TREM+k)==saved_lfo[k]);
+            }
+        }
+#if X0X_SYNTHONE_PATCH
+    for(unsigned k=0;k<13;++k) assert(original_sound_s1_set(extended,k,42u+k));
+    for(unsigned k=0;k<4;++k) assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+#endif
+    /* A modulation route and the first two optional dry edits share bytes
+     * on disk. Each edit must preserve the other's complete value. */
+    for (unsigned route = 0; route < 4; ++route) {
+        unsigned q=(route*127u+1u)/3u;
+        assert(original_sound_set(extended,ORIGINAL_SYNTHONE_CRUSH_LFO,q));
+#if X0X_SYNTHONE_PATCH
+        assert(original_sound_s1_set(extended,0,93) && original_sound_s1_set(extended,1,42));
+        assert((extended[8]&127u)==93u && (extended[9]&127u)==42u);
+#endif
+        assert(original_sound_valid(extended));
+        assert(original_sound_s1_display(extended,ORIGINAL_SYNTHONE_CRUSH_LFO)==q);
+    }
+    uint8_t master_ext[S1_MASTER_EXT_SIZE], master_cell[32];
+    memcpy(master_cell,extended,32);memset(master_ext,255,sizeof master_ext);
+    assert(original_master_valid(master_cell,master_ext));
+    for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)for(unsigned q=0;q<128;++q){
+        unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME+j;
+        assert(original_sound_set_extended(master_cell,master_ext,id,q));
+        assert(original_master_valid(master_cell,master_ext) && original_sound_valid(master_cell));
+        assert(original_master_display(master_cell,master_ext,id)==q);
+        for(unsigned k=0;k<4;++k)assert(original_sound_s1_display(master_cell,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+    }
+    for(unsigned j=0;j<S1_MASTER_EXT_SIZE;++j){
+        uint8_t clone[S1_MASTER_EXT_SIZE];memcpy(clone,master_ext,sizeof clone);clone[j]=254;
+        assert(!original_master_valid(master_cell,clone));
+    }
     assert(!original_sound_init(bad, ORIGINAL_SOUND_SYNTHONE, 1));
     assert(!original_sound_valid(bad));
 }

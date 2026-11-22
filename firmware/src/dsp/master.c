@@ -241,26 +241,32 @@ static inline __attribute__((always_inline)) void comp_tick(master_t *m, float *
 }
 
 /* Look-ahead limiter envelope + gain — one body for mono and stereo. */
-static inline __attribute__((always_inline)) void limit_env(master_t *m, float a)
+static inline __attribute__((always_inline)) void limit_advance(float *env, float *inv, int *hold,
+                                                               float *gain, float a)
 {
-    if (a >= m->env) {
-        m->env = a;
-        m->hold = MST_LA;
-        m->inv_env = a > 0.8f ? 1.0f / a : 0.0f;
-    } else if (m->hold) {
-        m->hold--;
+    if (a >= *env) {
+        *env = a;
+        (*hold) = MST_LA;
+        *inv = a > 0.8f ? 1.0f / a : 0.0f;
+    } else if ((*hold)) {
+        (*hold)--;
     } else {
-        m->env *= 0.99985f;
-        m->inv_env *= 1.0001500225f;                 /* 1 / 0.99985 */
+        *env *= 0.99985f;
+        *inv *= 1.0001500225f;                 /* 1 / 0.99985 */
     }
     {
-        float want = m->env > 0.8f ? 0.8f * m->inv_env : 1.0f;
-        m->gain += (want - m->gain) * (want < m->gain ? (5.0f / MST_LA) : 0.002f);
+        float want = *env > 0.8f ? 0.8f * *inv : 1.0f;
+        *gain += (want - *gain) * (want < *gain ? (5.0f / MST_LA) : 0.002f);
     }
 }
 
+static inline __attribute__((always_inline)) void limit_env(master_t *m, float a)
+{
+    limit_advance(&m->env, &m->inv_env, &m->hold, &m->gain, a);
+}
+
 /* One DJF SVF channel step — shared by mono and L/R stereo (same pattern as soft_ceiling). */
-__attribute__((noinline)) static float djf_tick(float s, float *ic1, float *ic2, int mode, float g,
+static inline __attribute__((always_inline)) float djf_tick(float s, float *ic1, float *ic2, int mode, float g,
                                                 float a1, float k)
 {
     float v3 = s - *ic2;
@@ -362,11 +368,94 @@ static int master_settled_zero(master_t *m, const float *l, const float *r, int 
     return 1;
 }
 
+/* With a settled volume and the filter and compressor bypassed, only the
+ * look-ahead limiter advances. The level and ring histories stay local. */
+__attribute__((noinline)) static void limit_fixed_st(master_t *m, float *l, float *r, int n, float v)
+{
+    float env = m->env, inv = m->inv_env, gain = m->gain;
+    int hold = m->hold, pos = m->la_pos;
+    for (int i = 0; i < n; ++i) {
+        const float left = l[i] * v, right = r[i] * v;
+        limit_advance(&env, &inv, &hold, &gain, fm_maxf(fm_fabsf(left), fm_fabsf(right)));
+        const float dl = m->la[pos], dr = m->la_r[pos];
+        m->la[pos] = left;
+        m->la_r[pos] = right;
+        pos = (pos + 1) & (MST_LA - 1);
+        l[i] = soft_ceiling(dl * gain);
+        r[i] = soft_ceiling(dr * gain);
+    }
+    m->env = env;
+    m->inv_env = inv;
+    m->gain = gain;
+    m->hold = hold;
+    m->la_pos = pos;
+}
+
+/* Read both inputs before updating either channel, including mono aliases. */
+static inline __attribute__((always_inline)) void comp_st_sample(master_t *m, float *l, float *r, float *grmax,
+                                                                float det_in, float att_in, float rel_in,
+                                                                float pump_in)
+{
+    const float s = *l, sr = *r;
+    /* Both powers are formed like the mono detector so equal channels match it. */
+    m->ms = fm_flush(m->a_det * m->ms + 0.5f * (det_in * s * s + det_in * sr * sr));
+    comp_tick(m, grmax, att_in, rel_in, pump_in);
+    *l = s + (s * m->g_lin - s) * m->mix;
+    *r = sr + (sr * m->g_lin - sr) * m->mix;
+}
+
+/* The compressor, settled filter and limiter each own their history. Running
+ * their passes in signal order keeps their samples and state in order. */
+__attribute__((noinline)) static float comp_fixed_st(master_t *restrict m, float *l, float *r, int n)
+{
+    const float det_in = 1.0f - m->a_det, att_in = 1.0f - m->a_att;
+    const float rel_in = 1.0f - m->a_rel, pump_in = 1.0f - m->a_pump;
+    float grmax = 0.0f;
+    for (int i = 0; i < n; ++i)
+        comp_st_sample(m, l + i, r + i, &grmax, det_in, att_in, rel_in, pump_in);
+    return grmax;
+}
+
+/* Process one channel while its coefficients are settled. */
+__attribute__((noinline)) static void djf_fixed(master_t *m, float *x, int n, float *ic1, float *ic2)
+{
+    const float g = m->g, a1 = m->a1, k = m->k;
+    const int mode = m->pot[MST_MODE];
+    float s1 = *ic1, s2 = *ic2;
+    for (int i = 0; i < n; ++i) {
+        x[i] = djf_tick(x[i], &s1, &s2, mode, g, a1, k);
+    }
+    *ic1 = s1;
+    *ic2 = s2;
+}
+
 void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
 {
     if (master_settled_zero(m, xl, xr, n, volume)) return;
     int i, mode = m->pot[MST_MODE], comp_on = m->comp_on, limit = m->pot[MST_LIMIT];
     float k = m->k, grmax = 0.0f, vc = m->vol_cur < 0.0f ? volume : m->vol_cur;
+    if (!comp_on && !mode && limit && vc == volume) {
+        limit_fixed_st(m, xl, xr, n, vc);
+        m->vol_cur = vc;
+        m->gr_view = 0.0f > m->gr_view ? 0.0f : m->gr_view * 0.93f;
+        return;
+    }
+    /* Separate passes require independent channels. Mono aliases are safe
+     * before the limiter when the stereo filter is bypassed. */
+    uintptr_t distance = (uintptr_t)xl > (uintptr_t)xr ?
+                         (uintptr_t)xl - (uintptr_t)xr : (uintptr_t)xr - (uintptr_t)xl;
+    if (comp_on && (!mode || m->g == m->g_t) && limit && vc == volume &&
+        n > 0 && ((!mode && distance == 0) || distance >= (uintptr_t)n * sizeof *xl)) {
+        grmax = comp_fixed_st(m, xl, xr, n);
+        if (mode) {
+            djf_fixed(m, xl, n, &m->ic1, &m->ic2);
+            djf_fixed(m, xr, n, &m->ic1r, &m->ic2r);
+        }
+        limit_fixed_st(m, xl, xr, n, vc);
+        m->vol_cur = vc;
+        m->gr_view = grmax > m->gr_view ? grmax : m->gr_view * 0.93f;
+        return;
+    }
     float det_in = 0.0f, att_in = 0.0f, rel_in = 0.0f, pump_in = 0.0f;
     if (comp_on) {
         det_in = 1.0f - m->a_det;
@@ -376,19 +465,8 @@ void master_process_st(master_t *m, float *xl, float *xr, int n, float volume)
     }
     for (i = 0; i < n; i++) {
         float s = xl[i], sr = xr[i];
-        if (comp_on) {
-            float wet;
-            /* the level: mean square over ~8 ms, x2 so a sine reads its peak. Read sample by sample
-             * (|x|), the reduction chased every cycle of a bass note and grabbed each kick within a
-             * millisecond: audio-rate gain movement, heard as clicks */
-            /* both sides' power, each term as master_process forms it, so l == r gives its value */
-            m->ms = fm_flush(m->a_det * m->ms + 0.5f * (det_in * s * s + det_in * sr * sr));
-            comp_tick(m, &grmax, att_in, rel_in, pump_in);
-            wet = s * m->g_lin;
-            s = s + (wet - s) * m->mix;
-            wet = sr * m->g_lin;
-            sr = sr + (wet - sr) * m->mix;
-        }
+        if (comp_on)
+            comp_st_sample(m, &s, &sr, &grmax, det_in, att_in, rel_in, pump_in);
         if (mode) {
             float g = m->g != m->g_t ? djf_gsmooth(m, k) : m->g, a1 = m->a1;
             s = djf_tick(s, &m->ic1, &m->ic2, mode, g, a1, k);

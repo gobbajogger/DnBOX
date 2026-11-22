@@ -158,6 +158,11 @@ static UI_DRAW void draw_step_lane(void)
     step_lane_snapshot_t snapshot;step_lane_snapshot(&snapshot,kind);
     cv_rect(0,69,240,13,SOUND_FACE); /* replace only the old footer, preserve four knobs */
     cv_text(4,69,&FONT_T,labels[kind],SOUND_GRAY);
+    /* BREAK's playback position remains visible even when the step is a rest. */
+    if(ui.part==PART_BRK && seq.playing) {
+        unsigned phase=eng_step[TRK_BRK];
+        if(phase<16)cv_rect(67+phase*10,71,5,1,part_col());
+    }
     for(int c=0;c<16;c++) {
         int maximum=snapshot.maximum,value=snapshot.value[c];
         int x=69+c*10;

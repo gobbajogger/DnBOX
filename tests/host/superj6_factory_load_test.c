@@ -3,6 +3,7 @@
 #define SMC_UI_MAIN retained_ui_tests
 #include "smc_ui_test.c"
 #include "app/original_runtime.h"
+#include <stddef.h>
 #ifdef SJ6_AUTHORED_BANK
 #include "../../experiments/sound-hardware-v1/sj6-factory/bank_reader.c"
 #endif
@@ -16,11 +17,11 @@ void __wrap_juno6_init(juno6_t *s, float rate)
     if (opens < 2) owner[opens++] = s;
 }
 
-/* API slots 0..10. Expected IDs are independent of the decoder. */
-static const unsigned id[] = {119,120,121,122,0,82,83,78,79,210,211};
+/* Expected IDs follow the row ABI independently of the decoder. */
+static const unsigned id[] = {119,120,121,122,0,82,83,78,79,210,211,86};
 static const uint32_t example[] = {
     0x80000000,0x3e800000,0x3f000000,0x3f400000,0x3fa8f5c3,
-    0x3f800000,0x3f800000,0x80000000,0x3e800000,0x3f800000,0x80000000
+    0x3f800000,0x3f800000,0x80000000,0x3e800000,0x3f800000,0x80000000,0x3f000000
 };
 static sj6_factory_row synthetic(unsigned presence)
 {
@@ -49,9 +50,10 @@ static void rejected(unsigned v, const sj6_factory_row *row)
 static void check_negative(void)
 {
     sj6_factory_row full = synthetic(15);
+    sj6_factory_add_word(&full, 86, 0x3f000000u);
     rejected(0, NULL);
     CHECK(!engine_superj6_factory_load(2, &full));
-    for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
+    for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
         sj6_factory_row bad = full;
         if (i < SJ6_ROW_AMOUNT) {
             bad.present &= ~(1u << i);
@@ -84,10 +86,353 @@ static void check_negative(void)
     rejected(0, &full);
     engine_bass_cancel_preset(0);
 }
+static void check_range(void)
+{
+    const uint32_t stops[] = {0x80000000u, 0x3f000000u, 0x3f800000u};
+    /* Original CoreSampler note increments at 44.1 kHz, from the pinned
+     * sampler_reference.cpp driver. Rows are 16/8/4-foot register, columns
+     * are -2/0/+2 semitones of subsequent performance bend (MIDI 60 input). */
+    const uint32_t pitch[3][3] = {
+        {0x3b2d3057,0x3b4265db,0x3b5a3449},
+        {0x3bad3056,0x3bc265db,0x3bda3449},
+        {0x3c2d3057,0x3c4265db,0x3c5a3449}
+    };
+    unsigned frames = 0, changed = 0, maximum_ulps = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        sj6_factory_row neutral = synthetic(15);
+        CHECK(engine_superj6_factory_load(v, &neutral));
+        boundary();
+        juno6_t base = *owner[v];
+        for (unsigned i = 0; i < 3; ++i) {
+            sj6_factory_row row = neutral;
+            sj6_factory_add_word(&row, 86, stops[i]);
+            sj6_factory_add_word(&row, 86, 0x7fc00000u);
+            CHECK(engine_superj6_factory_load(v, &row));
+            boundary();
+            check_word(v, SJ6_ROW_RANGE, stops[i]);
+            for (unsigned bend = 0; bend < 3; ++bend) {
+                juno6_t actual = *owner[v], expected = base, unshifted = base;
+                juno6_all_off(&actual);
+                juno6_all_off(&expected);
+                juno6_all_off(&unshifted);
+                CHECK(juno6_note_on(&actual, 60, 100));
+                CHECK(juno6_note_on(&expected, 48 + 12*i, 100));
+                CHECK(juno6_note_on(&unshifted, 60, 100));
+                float al[128], ar[128], el[128], er[128], ul[128], ur[128];
+                for (unsigned block = 0; block < 8; ++block) {
+                    if (block == 3) {
+                        CHECK(juno6_set(&actual, 16, .5f*bend));
+                        CHECK(juno6_set(&expected, 16, .5f*bend));
+                        CHECK(juno6_set(&unshifted, 16, .5f*bend));
+                    }
+                    for (unsigned layer = 0; layer < 2; ++layer) {
+                        float increment = actual.core.voice[0].layer[layer].increment;
+                        CHECK(increment == expected.core.voice[0].layer[layer].increment);
+                        uint32_t word;
+                        memcpy(&word, &increment, sizeof word);
+                        uint32_t target = pitch[i][block < 3 ? 1 : bend];
+                        unsigned diff = word > target ? word - target : target - word;
+                        CHECK(diff <= 2);
+                        if (diff > maximum_ulps) maximum_ulps = diff;
+                    }
+                    CHECK(juno6_render_stereo(&actual, al, ar, 128));
+                    CHECK(juno6_render_stereo(&expected, el, er, 128));
+                    CHECK(juno6_render_stereo(&unshifted, ul, ur, 128));
+                    CHECK(!memcmp(al, el, sizeof al) && !memcmp(ar, er, sizeof ar));
+                    if (i != 1) {
+                        CHECK(memcmp(al, ul, sizeof al) || memcmp(ar, ur, sizeof ar));
+                        ++changed;
+                    }
+                    frames += 128;
+                }
+            }
+        }
+        sj6_factory_row off_stop = neutral;
+        sj6_factory_add_word(&off_stop, 86, 0x3e800000u);
+        rejected(v, &off_stop);
+        CHECK(engine_superj6_factory_load(v, &neutral));
+        boundary();
+        check_word(v, SJ6_ROW_RANGE, 0x3f000000u);
+        CHECK(owner[v]->core.layer[0].params.tune_semitones == owner[v]->bend);
+        CHECK(owner[v]->core.layer[1].params.tune_semitones == owner[v]->bend);
+    }
+    CHECK(frames == 18432 && changed == 96);
+    printf("range: two owners, three stops, three bend values, %u matched stereo frames, %u changed blocks, max pitch error %u ULP\n",
+           frames, changed, maximum_ulps);
+}
+/* Each line is one authored range word from the authenticated metrics table.
+ * Other controls in these rows are fixtures; this exercises the register only. */
+static void check_register_file(const char *path)
+{
+    FILE *f = fopen(path, "r");
+    CHECK(f != NULL);
+    unsigned bits, rows = 0;
+    while (fscanf(f, "%x", &bits) == 1) {
+        sj6_factory_row row = synthetic(15);
+        sj6_factory_add_word(&row, 86, bits);
+        for (unsigned v = 0; v < 2; ++v) {
+            CHECK(engine_superj6_factory_load(v, &row));
+            boundary();
+            check_word(v, SJ6_ROW_RANGE, bits);
+            int semitones = bits == 0 ? -12 : bits == 0x3f800000u ? 12 : 0;
+            for (unsigned layer = 0; layer < 2; ++layer)
+                CHECK(owner[v]->core.layer[layer].params.tune_semitones == owner[v]->bend + semitones);
+        }
+        ++rows;
+    }
+    CHECK(feof(f) && rows == 640);
+    fclose(f);
+    printf("%u archived register words applied to both owners and both layers\n", rows);
+}
+static void check_layer_one_attack(void)
+{
+    const enum engine_superj6_field attack_id = ENGINE_SJ6_AMP1_ATTACK;
+    static const float values[] = {0.f, .25f, .5f, .75f, 1.f};
+    static const float seconds[] = {.002f, .1601998f, 1.5928741f, 6.1398985f, 16.f};
+    unsigned rendered = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        juno6_t *s = owner[v];
+        CHECK(!juno6_active(s));
+        CHECK(!engine_superj6_edit(v, attack_id, -1.f));
+        CHECK(!engine_superj6_edit(v, attack_id, 1.1f));
+        CHECK(engine_superj6_edit(v, attack_id, .25f));
+        CHECK(juno6_note_on(s, 60, 100));
+        CHECK(!engine_superj6_edit(v, attack_id, .5f));
+        boundary();
+        float raw;
+        CHECK(dnbx_read_raw(&s->core, 36, &raw) == DNBX_E_ABSENT);
+        juno6_all_off(s);
+        for (unsigned k = 0; k < sizeof values / sizeof *values; ++k) {
+            juno6_t baseline = *s, expected = *s;
+            const dnbx_layer_params layer_two = s->core.layer[1].params;
+            const float peer_attack = owner[v ^ 1u]->core.layer[0].params.amp.attack_s;
+            CHECK(engine_superj6_edit(v, attack_id, values[k]));
+            CHECK(s->core.layer[0].params.amp.attack_s == baseline.core.layer[0].params.amp.attack_s);
+            boundary();
+            CHECK(dnbx_read_raw(&s->core, 36, &raw) == DNBX_OK && raw == values[k]);
+            dnbx_layer_params target;
+            CHECK(dnbx_get_layer(&expected.core, 0, &target) == DNBX_OK);
+            CHECK(dnbx_attack_from_unit(values[k], &target.amp.attack_s) == DNBX_OK);
+            float error = s->core.layer[0].params.amp.attack_s - seconds[k];
+            CHECK(error >= -.00001f && error <= .00001f);
+            CHECK(!memcmp(&s->core.layer[1].params, &layer_two, sizeof layer_two));
+            CHECK(owner[v ^ 1u]->core.layer[0].params.amp.attack_s == peer_attack);
+            CHECK(dnbx_set_layer(&expected.core, 0, &target) == DNBX_OK);
+            juno6_t actual = *s;
+            CHECK(juno6_note_on(&actual, 60, 100) && juno6_note_on(&expected, 60, 100));
+            float al[256], ar[256], el[256], er[256];
+            CHECK(juno6_render_stereo(&actual, al, ar, 256));
+            CHECK(juno6_render_stereo(&expected, el, er, 256));
+            CHECK(!memcmp(al, el, sizeof al) && !memcmp(ar, er, sizeof ar));
+            rendered += 256;
+        }
+    }
+    printf("Layer 1 attack: 10 endpoints, %u stereo frames bit-exact against direct physical settings\n", rendered);
+}
+static void check_lfo_hz_edit(unsigned v)
+{
+    static const float values[] = {0.f, .25f, .5f, .75f, 1.f};
+    static const float hertz[] = {0.f, .158219575f, 1.591073f, 6.1386657f, 16.f};
+    const enum engine_superj6_field field = ENGINE_SJ6_LFO1_HZ_RATE;
+    juno6_t *s = owner[v];
+    CHECK(s->typed && s->core.layer[0].params.lfo_pwm_depth > 0.f);
+    CHECK(!engine_superj6_edit(v, field, -1.f));
+    CHECK(!engine_superj6_edit(v, field, 1.1f));
+    float stopped_left[256], stopped_right[256];
+    for (unsigned k = 0; k < sizeof values / sizeof *values; ++k) {
+        juno6_t *peer = owner[v ^ 1u];
+        float peer_hz = peer->core.layer[0].params.lfo_hz;
+        float before_hz = s->core.layer[0].params.lfo_hz;
+        CHECK(engine_superj6_edit(v, field, values[k]));
+        CHECK(s->core.layer[0].params.lfo_hz == before_hz);
+        boundary();
+        CHECK(peer->core.layer[0].params.lfo_hz == peer_hz);
+        for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
+            float error = s->core.layer[layer].params.lfo_hz - hertz[k];
+            CHECK(error >= -.00001f && error <= .00001f);
+        }
+        float raw;
+        CHECK(dnbx_read_raw(&s->core, 88, &raw) == DNBX_OK && raw == values[k]);
+
+        juno6_t copy = *s;
+        juno6_all_off(&copy);
+        CHECK(juno6_note_on(&copy, 60, 100));
+        float left[256], right[256];
+        for (unsigned block = 0; block < 8; ++block)
+            CHECK(juno6_render_stereo(&copy, left, right, 256));
+        if (!k) {
+            memcpy(stopped_left, left, sizeof left);
+            memcpy(stopped_right, right, sizeof right);
+        } else {
+            CHECK(memcmp(stopped_left, left, sizeof left) || memcmp(stopped_right, right, sizeof right));
+        }
+    }
+    printf("LFO1 Hz: owner %u, five exact-range endpoints and four audible PWM-rate changes\n", v);
+}
+
+static void check_factory_chorus_bypass(void)
+{
+    static original_runtime_part active;
+    static original_runtime_workspace workspace;
+    static juno6_chorus_memory history;
+    unsigned exact_frames = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        /* No complete factory row is persisted in the legacy project cell. */
+        unsigned char saved_sound[sizeof proj.sound];
+        memcpy(saved_sound, &proj.sound, sizeof saved_sound);
+        for (unsigned mode = 0; mode < 6; ++mode) {
+            sj6_factory_row row = synthetic(15);
+            if (mode >= 1) sj6_factory_add_word(&row, 40, mode >= 4 ? 0x3f800000u : 0x80000000u);
+            if (mode >= 2) sj6_factory_add_word(&row, 41, mode >= 3 ? 0x3f800000u : 0u);
+            if (mode == 5) sj6_factory_add_word(&row, 208, 0u);
+            unsigned peer_bypass = owner[v ^ 1u]->factory_chorus_bypass;
+            CHECK(engine_superj6_factory_load(v, &row));
+            CHECK(owner[v]->factory_chorus_bypass == (mode == 3));
+            boundary();
+            CHECK(owner[v ^ 1u]->factory_chorus_bypass == peer_bypass);
+            const original_runtime_part *part = (const void *)((const unsigned char *)owner[v] -
+                offsetof(original_runtime_part, dsp.juno.synth));
+            active = *part;
+            if (active.dsp.juno.chorus.factory.mode) {
+                history = *active.dsp.juno.chorus.factory.history;
+                active.dsp.juno.chorus.factory.history = &history;
+            }
+            CHECK(active.dsp.juno.chorus.factory.mode == (mode == 3 ? 2u : mode == 4 ? 3u : 0u));
+            CHECK(active.dsp.juno.chorus.mix > 0.f);
+            CHECK(juno6_note_on(&active.dsp.juno.synth, 60, 100));
+            juno6_t dry = active.dsp.juno.synth;
+            juno6_chorus_t chorus = active.dsp.juno.chorus;
+            float al[256], ar[256], dl[256], dr[256];
+            CHECK(juno6_render_stereo(&dry, dl, dr, 256));
+            CHECK(original_runtime_render(&active, &workspace, al, ar, 256) == ORIGINAL_RUNTIME_OK);
+            float gain = dry.master_gain;
+            float energy = 0.f;
+            for (unsigned i = 0; i < 256; ++i) {
+                dl[i] *= gain;
+                dr[i] *= gain;
+                energy += dl[i] * dl[i] + dr[i] * dr[i];
+            }
+            CHECK(energy > 0.f);
+            int exact = !memcmp(al, dl, sizeof al) && !memcmp(ar, dr, sizeof ar);
+            CHECK(exact == (mode == 2));
+            CHECK((!memcmp(&chorus, &active.dsp.juno.chorus, sizeof chorus)) == (mode == 2));
+            if (exact) exact_frames += 256;
+            if (active.dsp.juno.chorus.factory.mode) {
+                CHECK(original_runtime_all_off(&active) == ORIGINAL_RUNTIME_OK);
+                CHECK(original_runtime_render(&active, &workspace, al, ar, 256) == ORIGINAL_RUNTIME_OK);
+                for (unsigned i = 0; i < 256; ++i) CHECK(al[i] == 0.f && ar[i] == 0.f);
+            }
+            CHECK(!memcmp(saved_sound, &proj.sound, sizeof saved_sound));
+        }
+    }
+    sj6_factory_row off = synthetic(15);
+    sj6_factory_add_word(&off, 40, 0u);
+    sj6_factory_add_word(&off, 40, 0x3f800000u); /* first occurrence wins */
+    sj6_factory_add_word(&off, 41, 0u);
+    for (unsigned v = 0; v < 2; ++v) {
+        sj6_factory_row bad = off;
+        bad.value[SJ6_ROW_CHORUS_II] = 1.5f;
+        rejected(v, &bad);
+        bad = off;
+        sj6_factory_add_word(&bad, 208, 0x7fc00000u);
+        rejected(v, &bad);
+        CHECK(engine_superj6_factory_load(v, &off));
+        boundary();
+        CHECK(owner[v]->factory_chorus_bypass);
+    }
+    sound_t saved_sound = proj.sound;
+    /* The SMC fixture force-selects its BT role without the persisted clock bit. */
+    proj.set.bt |= PROJ_BT_CLK_IN;
+    CHECK(project_save() == 0);
+    CHECK(project_load() == 0);
+    engine_apply_sound(&proj.sound);
+    boundary();
+    CHECK(!memcmp(&saved_sound, &proj.sound, sizeof saved_sound));
+    for (unsigned v = 0; v < 2; ++v) {
+        CHECK(engine_bass_bank(v) == ORIGINAL_SOUND_JUNO);
+        CHECK(!owner[v]->factory_chorus_bypass && !owner[v]->typed);
+    }
+    printf("Factory chorus: signed-zero switches bypass bit-exactly over %u audible stereo frames\n",
+           exact_frames);
+}
+static uint32_t sub_word(float value)
+{
+    fm_bits_t bits = {.f = value};
+    return bits.u;
+}
+
+static void check_factory_sub_gain(void)
+{
+    /* Four nonzero points and both signed zeros from the original setter
+     * receipt, plus representable underflow boundaries for our adapter. */
+    static const uint32_t raw_words[] = {
+        0x00000000u, 0x80000000u, 0x3e800000u, 0x3f000000u,
+        0x3f400000u, 0x3f800000u, 0x00000001u, 0x007fffffu, 0x00800000u
+    };
+    static const uint32_t gain_words[] = {
+        0x00000000u, 0x00000000u, 0x3e4ed917u, 0x3eced917u,
+        0x3f1b22d1u, 0x3f4ed917u, 0x00000001u, 0x00676c8au, 0x00676c8bu
+    };
+    unsigned audio_frames = 0;
+    for (unsigned v = 0; v < 2; ++v) {
+        juno6_t *s = owner[v];
+        juno6_t *peer = owner[v ^ 1u];
+        const float peer_gain = peer->core.layer[0].params.sub_gain;
+        const float fallback = s->sub_level;
+        CHECK(fallback > 0.f);
+        float stopped_left[256], stopped_right[256];
+        for (unsigned k = 0; k < sizeof raw_words / sizeof *raw_words; ++k) {
+            sj6_factory_row row = synthetic(15);
+            sj6_factory_add_word(&row, 202, raw_words[k]);
+            sj6_factory_add_word(&row, 202, 0x3f800000u);
+            float before = s->core.layer[0].params.sub_gain;
+            CHECK(engine_superj6_factory_load(v, &row));
+            CHECK(s->core.layer[0].params.sub_gain == before);
+            boundary();
+            CHECK(peer->core.layer[0].params.sub_gain == peer_gain);
+            for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+                CHECK(sub_word(s->core.layer[l].params.sub_gain) == gain_words[k]);
+            float raw;
+            CHECK(dnbx_read_raw(&s->core, 202, &raw) == DNBX_OK);
+            CHECK(sub_word(raw) == raw_words[k]);
+
+            if (k == 0 || (k >= 2 && k <= 5)) {
+                juno6_t copy = *s;
+                float left[256], right[256];
+                CHECK(juno6_note_on(&copy, 60, 100));
+                CHECK(juno6_render_stereo(&copy, left, right, 256));
+                if (!k) {
+                    memcpy(stopped_left, left, sizeof left);
+                    memcpy(stopped_right, right, sizeof right);
+                } else {
+                    CHECK(memcmp(stopped_left, left, sizeof left) || memcmp(stopped_right, right, sizeof right));
+                }
+                audio_frames += 256;
+            }
+        }
+        sj6_factory_row invalid = synthetic(15);
+        sj6_factory_add_word(&invalid, 202, 0x3fc00000u);
+        rejected(v, &invalid);
+
+        sj6_factory_row absent = synthetic(15);
+        CHECK(engine_superj6_factory_load(v, &absent));
+        boundary();
+        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+            CHECK(s->core.layer[l].params.sub_gain == fallback);
+        float raw;
+        CHECK(dnbx_read_raw(&s->core, 202, &raw) == DNBX_E_ABSENT);
+    }
+    printf("SuperJ6 sub gain: two owners, 18 endpoint checks, %u audible stereo frames\n", audio_frames);
+}
+
 #ifdef SJ6_AUTHORED_BANK
 static void check_bank(void)
 {
-    unsigned programs = 0, authored = 0, defaulted = 0;
+    unsigned programs = 0, authored = 0, defaulted = 0, register_words = 0;
+    unsigned chorus_switch_words = 0, chorus_bypass_programs = 0;
+    unsigned authored_sub_levels = 0, muted_sub_programs = 0;
+    unsigned active_modes[4] = {0}, legacy_modes[4] = {0}, authored_chorus_versions = 0;
+    const unsigned chorus_mask = (1u << SJ6_ROW_CHORUS_I) | (1u << SJ6_ROW_CHORUS_II);
     for (unsigned b = 0; b < BANK_COUNT; ++b) {
         for (unsigned p = 0; p < bank_start[b+1] - (unsigned)bank_start[b]; ++p) {
             sj6_record_reader reader;
@@ -100,18 +445,56 @@ static void check_bank(void)
             unsigned v = programs++ % 2;
             CHECK(engine_superj6_factory_load(v, &row));
             boundary();
-            for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
-                bits = 0;
+            int chorus_off = (row.present & chorus_mask) == chorus_mask &&
+                row.value[SJ6_ROW_CHORUS_I] == 0.f && row.value[SJ6_ROW_CHORUS_II] == 0.f;
+            CHECK(owner[v]->factory_chorus_bypass == chorus_off);
+            chorus_bypass_programs += (unsigned)chorus_off;
+            CHECK((row.present & chorus_mask) == chorus_mask);
+            const unsigned switches = (row.value[SJ6_ROW_CHORUS_I] > 0.f) +
+                2u * (row.value[SJ6_ROW_CHORUS_II] > 0.f);
+            const int version_present = (row.present & (1u << SJ6_ROW_CHORUS_VERSION)) != 0;
+            const int original_v2 = !version_present || row.value[SJ6_ROW_CHORUS_VERSION] >= .5f;
+            const original_runtime_part *part = (const void *)((const unsigned char *)owner[v] -
+                offsetof(original_runtime_part, dsp.juno.synth));
+            CHECK(part->dsp.juno.chorus.factory.mode == (original_v2 ? switches : 0));
+            if (switches) ++(original_v2 ? active_modes : legacy_modes)[switches];
+            authored_chorus_versions += (unsigned)version_present;
+            int sub_authored = (row.present & (1u << SJ6_ROW_SUB_VOLUME)) != 0;
+            int sub_off = sub_authored && row.value[SJ6_ROW_SUB_VOLUME] == 0.f;
+            authored_sub_levels += (unsigned)sub_authored;
+            muted_sub_programs += (unsigned)sub_off;
+            float expected_gain = sub_authored ? (float)(.808 * (double)row.value[SJ6_ROW_SUB_VOLUME]) : owner[v]->sub_level;
+            for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+                CHECK(sub_word(owner[v]->core.layer[l].params.sub_gain) == sub_word(expected_gain));
+            float sub_raw;
+            CHECK(dnbx_read_raw(&owner[v]->core, 202, &sub_raw) == DNBX_OK);
+            CHECK(sub_word(sub_raw) == sub_word(row.value[SJ6_ROW_SUB_VOLUME]));
+            for (unsigned slot = SJ6_ROW_CHORUS_I; slot <= SJ6_ROW_CHORUS_II; ++slot)
+                if (row.present & (1u << slot)) ++chorus_switch_words;
+            for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
+                bits = i == SJ6_ROW_RANGE ? 0x3f000000u : 0;
                 if (row.present & (1u << i)) {
                     memcpy(&bits, &row.value[i], sizeof bits);
-                    ++authored;
-                } else ++defaulted;
+                    if (i == SJ6_ROW_RANGE) ++register_words;
+                    else ++authored;
+                } else if (i != SJ6_ROW_RANGE) ++defaulted;
                 check_word(v, i, bits);
             }
         }
     }
-    printf("programs=%u authored_words=%u defaulted_pwm_words=%u\n", programs, authored, defaulted);
-    CHECK(programs == 640 && authored == 4580 && defaulted == 2460);
+    printf("programs=%u authored_words=%u defaulted_pwm_words=%u authored_register_words=%u\n",
+           programs, authored, defaulted, register_words);
+    printf("authored_chorus_switch_words=%u chorus_bypass_programs=%u\n",
+           chorus_switch_words, chorus_bypass_programs);
+    printf("authored_sub_levels=%u muted_sub_programs=%u\n", authored_sub_levels, muted_sub_programs);
+    CHECK(authored_sub_levels == 640 && muted_sub_programs == 180);
+    CHECK(authored_chorus_versions == 68);
+    CHECK(active_modes[1] == 199 && active_modes[2] == 95 && active_modes[3] == 0);
+    CHECK(legacy_modes[1] == 1 && legacy_modes[2] == 2 && legacy_modes[3] == 43);
+    printf("J60V2 authored/default routes=%u/%u/%u; legacy=%u/%u/%u; version words=%u\n",
+           active_modes[1], active_modes[2], active_modes[3],
+           legacy_modes[1], legacy_modes[2], legacy_modes[3], authored_chorus_versions);
+    CHECK(programs == 640 && authored == 4580 && defaulted == 2460 && register_words == 640);
 }
 #endif
 int main(void)
@@ -127,6 +510,11 @@ int main(void)
         CHECK(!engine_bass_preset_pending(v));
     }
     CHECK(opens == 2 && owner[0] != owner[1]);
+    for (unsigned v = 0; v < 2; ++v) {
+        float raw;
+        CHECK(dnbx_read_raw(&owner[v]->core, 86, &raw) == DNBX_E_ABSENT);
+    }
+    CHECK(!engine_superj6_edit(0, ENGINE_SJ6_LFO1_HZ_RATE, .5f));
     check_negative();
     /* Both selected stock presets have an audible PWM LFO. An individual
      * waveform edit preserves it, and a full factory load supersedes it. */
@@ -137,6 +525,7 @@ int main(void)
         CHECK(engine_superj6_pre_note_wave(v, 0, 1.f, &pwm));
         boundary();
         CHECK(owner[v]->core.layer[0].params.lfo_pwm_depth == depth);
+        check_lfo_hz_edit(v);
         CHECK(engine_superj6_factory_load(v, &full));
         boundary();
         for (unsigned layer = 0; layer < 2; ++layer)
@@ -154,9 +543,10 @@ int main(void)
             memcpy(old_presence, peer->core.raw_present, sizeof old_presence);
             CHECK(engine_superj6_factory_load(v, &row));
             boundary();
-            for (unsigned i = 0; i < SJ6_ROW_COUNT; ++i) {
+            for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
                 unsigned present = (row.present >> i) & 1u;
-                check_word(v, i, present ? example[i] : 0u);
+                uint32_t fallback = i == SJ6_ROW_RANGE ? 0x3f000000u : 0u;
+                check_word(v, i, present ? example[i] : fallback);
                 authored += present;
             }
             CHECK(!memcmp(old, peer->core.raw, sizeof old));
@@ -164,6 +554,12 @@ int main(void)
         }
     }
     CHECK(authored == 288);
+    check_range();
+    check_layer_one_attack();
+    check_factory_chorus_bypass();
+    check_factory_sub_gain();
+    const char *register_file = getenv("SJ6_REGISTER_WORDS");
+    if (register_file) check_register_file(register_file);
     printf("synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS\n");
 #ifdef SJ6_AUTHORED_BANK
     check_bank();

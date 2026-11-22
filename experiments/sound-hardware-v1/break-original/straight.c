@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
-/* The plugin and firmware receive the same decoded loop at unity rate. */
+/* The plugin and firmware receive matched slice timing at the requested playback rate. */
 #include "plugin_api_v1.h"
 #include "breaks.h"
 #include <errno.h>
@@ -34,10 +34,12 @@ static float get_bpm(void) { return tempo; }
 
 int main(int argc, char **argv)
 {
-    if (argc != 8 && argc != 9) return 2;
+    if (argc != 8 && argc != 9 && argc != 10) return 2;
+    float speed = argc == 10 ? strtof(argv[9], NULL) : 1.f;
+    if (!(speed >= .5f && speed <= 2.f)) return 2;
     const int divisions[] = {2, 3, 4, 8};
     int rate_index = -1;
-    int clocked = argc == 9;
+    int clocked = argc >= 9;
     if (clocked && strcmp(argv[8], "off")) {
         if (strlen(argv[8]) != 1 || argv[8][0] < '0' || argv[8][0] > '3') return 2;
         rate_index = argv[8][0] - '0';
@@ -45,7 +47,7 @@ int main(int argc, char **argv)
     unsigned samples = (unsigned)strtoul(argv[1], NULL, 10);
     unsigned frames = (unsigned)strtoul(argv[2], NULL, 10);
     unsigned slice = (unsigned)strtoul(argv[7], NULL, 10);
-    if (slice >= 8 || samples < 64 || frames == 0 || frames >= samples / 8) return 2;
+    if (slice >= 8 || samples < 64 || frames == 0 || frames >= (unsigned)ceilf((float)(samples / 8) / speed)) return 2;
     if (clocked && slice != 1) return 2;
     unsigned bytes = (samples + 1) / 2;
     uint8_t *encoded = malloc(bytes);
@@ -56,9 +58,9 @@ int main(int argc, char **argv)
     if (!out) return 3;
 
     /* BB Gen divides the loop into eight integer-length slices. DnBOX uses
-     * the exact samples per bar. Give each its native integer-unity-rate
-     * transport setting. Both play the same source onset without a seek. */
-    tempo = 44100.f * 60.f / (2.f * (float)(samples / 8));
+     * the exact samples per bar. Scale each native transport setting by
+     * the same requested speed. Both play the same source onset without a seek. */
+    tempo = (44100.f * 60.f / (2.f * (float)(samples / 8))) * speed;
     const host_api_v1_t host = {.api_version=1, .sample_rate=44100, .frames_per_block=128,
                                 .get_bpm=get_bpm, .get_clock_status=get_clock};
     plugin_api_v2_t *api = move_plugin_init_v2(&host);
@@ -85,7 +87,7 @@ int main(int argc, char **argv)
     breaks_set(&part, BRK_COMPLEX, 0);
     breaks_set(&part, BRK_LEVEL, 127);
     if (rate_index >= 0) breaks_set(&part, BRK_R2 + rate_index, 100);
-    breaks_step(&part, 0, 0, (float)samples / 16.f, 1);
+    breaks_step(&part, 0, 0, ((float)samples / 16.f) / speed, 1);
     float mono[128];
     if (clocked) {
         /* Startup forces both generators dry. BB Gen tests its free-running
@@ -99,7 +101,7 @@ int main(int argc, char **argv)
             breaks_render(&part, mono, (int)n);
             warm -= n;
         }
-        breaks_step(&part, 2, 0, (float)samples / 16.f, 1);
+        breaks_step(&part, 2, 0, ((float)samples / 16.f) / speed, 1);
     } else if (slice) {
         /* Commit transport start before sending a manual slice selection. */
         api->render_block(plugin, stereo, 1);

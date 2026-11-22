@@ -1,0 +1,302 @@
+{
+  "current42-elite-on": {
+    "firmware_sha256": "8a536be7b1c16348d1b6d6a11caf7396448b70f07740649fc725ad4fbb4b0caa",
+    "elf_sha256": "202b30e99d519da2e029f53a928effaffaa6e977a84dcc643a7e3da125cce86f",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "ba7cc8783870a06653be9e6e5db8d7bdde4ab9be2311ae1ebaaa20de28a24467",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "545a0efe60efa51d8a3e9bb858a19ad23be87cd2dad1efea7103de299475a24a",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      4011,
+      2077,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  },
+  "current42-pro-on": {
+    "firmware_sha256": "10f2a2a82480a231792ec9d90a203499a1c5741600810154e7dbcc4df67904ec",
+    "elf_sha256": "968f30bf1fc5cac1c2abef7c044099f2bbab707893e147e6b6eeab95d7957e8f",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "61bdbd3dd26e845eb3c3b7006ec6908fec1a3cf3687e832ff0ba3f495ac22091",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "106694f95d2caf9f31d4405bd0648aec821b620af6a67fa1d5278c7096760e73",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      3989,
+      2074,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  },
+  "s4-coldway42-elite-on": {
+    "firmware_sha256": "b02bcd6d3514286ea3e2e33d340ea2bea5a3a827c8bfaf1f932cc7297e9fafa6",
+    "elf_sha256": "556eb0cde3597af3a59e44d3471a3194e4f3782ef35a6824b76d0f15303bae52",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "1685f8605a82a677f31b8bf1d8028c0187fc69b05b19c8deb9be7ccdc67c9d7b",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "1ded84be9872ec6324ecf1cdc53634ae07d45adb4bbb5fa4963b12cb0a87eb6d",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      4007,
+      2071,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  },
+  "s4-coldway42-pro-on": {
+    "firmware_sha256": "b01cfa019fc1f68677c93e66174a4a2be6b272b449963833c90ba80c4eba84b0",
+    "elf_sha256": "1872faa1a5fd0f9ec3e350a1a14b18b2a4c2960f4913c9b4f9f7c72a84e6cf5b",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "ec28ad6941cb079af00870ce8193a768f3276b17438887aab5dfe7e5503498ba",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "fb4864598b7493fff980995f28e61aa15c74fdff9a3b859634e199cb5cc5d05c",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      4000,
+      2070,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  },
+  "s4-upperram42-elite-on": {
+    "firmware_sha256": "041557e675896e4b7d17f26faf5aa2b877bf3c3e87b89d0ba742951c2f3386df",
+    "elf_sha256": "deb2b5fa186a3a3b144b3f32fdbb6cc6d67ac8e3f252c194e27c2215bcd08ef6",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "f0498a78460fc26d21e41061a1ac845e1663dddd8da917537435f61a34f61926",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "5e501187b05a80ca28d7965ff8bf362b70e4655cdaecb0e70d9a78126788dc65",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      4012,
+      2101,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  },
+  "s4-upperram42-pro-on": {
+    "firmware_sha256": "4b2aabf4a0d656fd89d02830b989a889495d9f2d6a0fc4286f4998f7249db59a",
+    "elf_sha256": "0b17b4c191f1d32de8e37093aa659491693d641661c8d61ccc6e57b4dfc133ce",
+    "controller_sha256": "a334208b51f62bc7231ebb76a6de0dfa260033d7f7316e5b92053c540bc1d984",
+    "package_with_controller_sha256": "f20dc0f06f7f39cd829ee65728e4cc0a088065771ca54f7ed5c08a73006397d2",
+    "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+    "staged_flash_sha256": "b66b5f8505d27528298973913793899fb43b5d9245ed7f7f2592e547a4fb3ea4",
+    "saved_ble": 1,
+    "startup_state": {
+      "ble_boot_on": 1,
+      "ble_blocked": 0,
+      "ble_c0_ready": 1,
+      "ble_dead": 0,
+      "ble_want": 1,
+      "ble_up": 1,
+      "ble_host_on": 1
+    },
+    "mailbox_head": [
+      1481458264,
+      2,
+      0,
+      9,
+      0,
+      0,
+      9,
+      0,
+      2,
+      0,
+      0,
+      536870912
+    ],
+    "audio": [
+      1145194289,
+      136,
+      4009,
+      2092,
+      0,
+      0
+    ],
+    "guard": [
+      1146242882,
+      1,
+      0,
+      0,
+      0,
+      0,
+      251,
+      2
+    ]
+  }
+}

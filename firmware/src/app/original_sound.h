@@ -12,7 +12,12 @@
 #define ORIGINAL_SOUND_JUNO 3u
 #define ORIGINAL_SOUND_JUNO_ID UINT32_C(0x4f4a5531)
 #define ORIGINAL_JUNO_NPARAMS 18u
+#if X0X_SUPERJ6_STOCK_PRESET
+#define ORIGINAL_JUNO_WIDE_PRESET 4u
+#define ORIGINAL_JUNO_FACTORIES 5u
+#else
 #define ORIGINAL_JUNO_FACTORIES 4u
+#endif
 #define ORIGINAL_SOUND_CHICAGO_ID UINT32_C(0x4f434831)
 #define ORIGINAL_SOUND_MIAMI_ID UINT32_C(0x4f4d4931)
 #define ORIGINAL_SOUND_SYNTHONE_ID UINT32_C(0x4f533131)
@@ -20,8 +25,43 @@
 #define ORIGINAL_SOUND_SCHEMA 2u
 #define ORIGINAL_CHICAGO_FACTORIES 81u
 #define ORIGINAL_SYNTHONE_FACTORIES 1u
-#define ORIGINAL_SYNTHONE_NPARAMS 3u
+#define ORIGINAL_SYNTHONE_NPARAMS 24u
+#define ORIGINAL_SYNTHONE_BASE_COUNT 6u
+enum {
+    ORIGINAL_SYNTHONE_TREM = ORIGINAL_SYNTHONE_BASE_COUNT,
+    ORIGINAL_SYNTHONE_LFO1_SHAPE, ORIGINAL_SYNTHONE_LFO1_LEVEL, ORIGINAL_SYNTHONE_LFO1_RATE,
+    ORIGINAL_SYNTHONE_LFO2_SHAPE, ORIGINAL_SYNTHONE_LFO2_LEVEL, ORIGINAL_SYNTHONE_LFO2_RATE,
+    ORIGINAL_SYNTHONE_PHASER_MIX, ORIGINAL_SYNTHONE_PHASER_RATE,
+    ORIGINAL_SYNTHONE_PHASER_FEEDBACK, ORIGINAL_SYNTHONE_PHASER_WIDTH,
+    ORIGINAL_SYNTHONE_MASTER_VOLUME, ORIGINAL_SYNTHONE_MASTER_RATIO, ORIGINAL_SYNTHONE_MASTER_THRESHOLD,
+    ORIGINAL_SYNTHONE_MASTER_ATTACK, ORIGINAL_SYNTHONE_MASTER_RELEASE, ORIGINAL_SYNTHONE_MASTER_MAKEUP,
+    ORIGINAL_SYNTHONE_CRUSH_LFO
+};
+static inline int original_sound_s1_master_id(unsigned id)
+{ return id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; }
+/* A master edit claims seven bytes in the owner's auxiliary row. The main
+ * cell explicitly binds that row; historical project padding stays inert. */
+enum { S1_MASTER_EXT_SIZE=7 };
+float s1_master_control(unsigned slot,unsigned pot);
+/* In the extended format an opt-in voice edit can own this adjunct without
+ * enabling master processing. Old cells with only master controls remain v1. */
+static inline int original_master_edited(const uint8_t *cell, const uint8_t *ext)
+{
+#if X0X_SYNTHONE_PATCH
+    return cell[26] == 'M' && ext && (ext[0] & 1u);
+#else
+    (void)ext;
+    return cell[26] == 'M';
+#endif
+}
+int original_master_valid(const uint8_t *cell,const uint8_t *ext);
+unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id);
+int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value);
 #define ORIGINAL_SYNTHONE_CRUSH 2u
+#define ORIGINAL_SYNTHONE_WIDTH 3u
+#define ORIGINAL_SYNTHONE_PAN 4u
+#define ORIGINAL_SYNTHONE_PAN_RATE 5u
+#define ORIGINAL_SYNTHONE_PAN_RATE_INIT 3u
 #define ORIGINAL_SYNTHONE_INIT_FACTORY 0u
 #define ORIGINAL_CHICAGO_FX_CHOICES 12u
 
@@ -44,7 +84,7 @@ static inline int original_sound_is_performance(unsigned kind, unsigned paramete
 /* New firmware patch representation, not a legacy bank decoder:
  * [0..21] macro display bytes; [22..25] LE edit mask; [26..27] 'OS'; [28] version;
  * [29] engine kind; [30] selected factory index; [31] zero, or one for a
- * Synth One cell with an edited crush rate, distinguishing historical cells.
+ * Synth One cell with stock effect edits, distinguishing historical cells.
  * Chicago indexes all 81 programs (the 55 compact ones first, then the 26
  * restored-insert ones) and FxType stores a twelve-choice index.
  * Kind 2 is Synth One. New writes use persistent id OS11. Historical id
@@ -92,11 +132,14 @@ const char *original_sound_fx_name(unsigned choice);
 uint32_t original_sound_engine_id(unsigned kind);
 const char *original_sound_name(unsigned kind, unsigned factory);
 const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter);
+unsigned original_sound_s1_display(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter);
 int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsigned factory);
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
 #if X0X_SYNTHONE_PATCH
 int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, unsigned position);
+unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot);
 #endif
 uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);

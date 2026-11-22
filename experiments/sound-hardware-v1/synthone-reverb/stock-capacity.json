@@ -1,0 +1,118 @@
+{
+  "firmware_commit": "2996e3876975664ad1add74d1033ed12666a8cdf",
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "revsc_c_git_blob": "af8092c35c91539a5915ee9f7944bbd7014410f8",
+  "original_restore_targets": {
+    "ids": [
+      37,
+      38,
+      39,
+      40,
+      51,
+      123,
+      126,
+      129,
+      132,
+      135,
+      124,
+      127,
+      130,
+      133,
+      136
+    ],
+    "programs": 694,
+    "on_positive_mix": 543,
+    "off": 143,
+    "on_zero_mix": 8,
+    "on_full_mix": 34,
+    "wet_lfo_route_counts": {
+      "0": 468,
+      "1": 27,
+      "2": 24,
+      "3": 24
+    },
+    "input_dynamics_distinct_tuples": 9,
+    "wet_dynamics_distinct_tuples": 10,
+    "input_dynamics_distinct_tuples_on_wet": 9,
+    "wet_dynamics_distinct_tuples_on_wet": 10,
+    "wet_feedback_minmax": [
+      0.08250000327825546,
+      1.0
+    ],
+    "wet_highpass_minmax": [
+      80.0,
+      900.0
+    ]
+  },
+  "pi32v2_byte_sizes": {
+    "revsc": 364,
+    "revsc_dl": 40,
+    "buthp": 52,
+    "compressor_wrapper": 40,
+    "compressor_faust_dsp": 56,
+    "crossfade": 4,
+    "vdelay": 32,
+    "moogladder": 64
+  },
+  "original_reverb": {
+    "ring_samples": [
+      2539,
+      2838,
+      3317,
+      3603,
+      3973,
+      4198,
+      2243,
+      1979
+    ],
+    "history_bytes_per_owner": 98760,
+    "complete_revsc_bytes_per_owner": 99124,
+    "revsc_two_highpasses_four_compressors_two_crossfades_per_owner": 99620,
+    "same_for_two_owners": 199240,
+    "excluded": [
+      "graph handles",
+      "allocator overhead",
+      "parameter ports"
+    ]
+  },
+  "candidate_history_bytes_per_owner": 946,
+  "candidate_revsc_state_and_history_bytes_per_owner": 1310,
+  "ordinary_elite": {
+    "fwsc_sha256": "853c6e8cdf01517b01e19899c8dd28b053b6bd099f7c38b0fb5bfeae909baed8",
+    "elf_sha256": "3ab68389336835bdfcb77f8594142db9f9d5e383c9a159620d9e5a5c9cf6a02e",
+    "xip_free": 4812,
+    "static_data_bss": 96260,
+    "static_ram_free": 2044,
+    "pool_used": 333808,
+    "pool_raw_free": 10256,
+    "pool_reserve": 8192,
+    "pool_margin": 2064
+  },
+  "factory_reader": {
+    "factory_rows": 694,
+    "stable_factory_address": "original bank filename stem and stored position",
+    "ordered_words_verified_across_all_banks": 99936,
+    "invalid_selection_preserves_outputs": true,
+    "command_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+    "include_sha256": "5a11751a160d074c90163e8bbbd92e0e2519838c4bfe79e7db07c5d43d7c8b90",
+    "target_object_sha256": "8c95a45e8e5fc7ca9b0c2126262641ee2a3fd57b43a50cdbfa45bd4d8974ccc6",
+    "standalone_target_optimization": "PI32v2 R3 -mfprev1 -Oz -ffunction-sections -fdata-sections, prior to target linking",
+    "target_sections": {
+      ".text.s1_factory_lookup": 58,
+      ".text.s1_factory_name": 28,
+      ".text.s1_factory_read": 104,
+      ".rodata.banks": 144,
+      ".rodata.names": 11198,
+      ".rodata.name_offsets": 1388,
+      ".rodata.fields": 864,
+      ".rodata.rows": 50664,
+      ".rodata.words": 38568,
+      ".rodata.str1.1": 148
+    },
+    "readonly_raw_bytes": 102974,
+    "reader_text_bytes": 190,
+    "readonly_object_order_zlib9_bytes": 64946,
+    "readonly_object_order_xz9_bytes": 56544,
+    "compressed_scope": "Each compressor processed all data sections as a single stream. The totals exclude a decoder, random-access index, relocation and cold workspace. These are measured encodings, not information-theoretic lower bounds."
+  }
+}

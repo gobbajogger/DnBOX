@@ -46,6 +46,11 @@ static fxbus_t F;
 static int16_t DLY[DLY_LEN];
 static float bufp[NLEN * 2], bufr[NLEN * 2], bufd[NLEN * 2];
 static int fails;
+static void init_bus(void)
+{
+    if (getenv("D9_PACKED_DELAY")) fxbus_init_packed(&F, DLY, DLY_LEN);
+    else fxbus_init(&F, DLY, DLY_LEN);
+}
 
 /* 9W9 trigger ids for DR_BD..DR_RD */
 static const int ref_trig[DR_NUM] = { 0, 1, 2, 3, 4, 5, 6, 8, 7, 10, 9 };
@@ -144,7 +149,7 @@ static double run_case(const char *label, const int *trig, int ntrig, int vel, c
     void *ref = ref_new(g_dir), *refd = refd_new(g_dir);
     (void)kind;
     drum909_init(&D);
-    fxbus_init(&F, DLY, DLY_LEN);
+    init_bus();
     for (int i = 0; i < ns; ++i) {
         const char *key = s[i].fx ? fkeys[s[i].idx] : dkeys[s[i].voice][s[i].idx];
         if (s[i].fx)
@@ -335,7 +340,7 @@ static void check_tables(void)
         double worst = 0;
         void *ref = ref_new(0);
         drum909_init(&D);
-        fxbus_init(&F, DLY, DLY_LEN);
+        init_bus();
         for (int v = 0; v <= DR_KIT; ++v)
             for (int i = 0; i < drum909_nparams(v); ++i) {
                 float pv;
@@ -386,7 +391,7 @@ static void tape_checks(void)
     static const int wears[3] = { 0, 64, 127 };
     for (int k = 0; k < 3; ++k) {
         drum909_init(&D);
-        fxbus_init(&F, DLY, DLY_LEN);
+        init_bus();
         fxbus_set(&F, FX_DL_TYPE, 1);
         fxbus_set(&F, FX_DL_WEAR, wears[k]);
         fxbus_set(&F, FX_DL_FDBK, 127);
@@ -426,7 +431,7 @@ static int demo(const char *path)
     float *rmono = (float *)calloc((size_t)total, sizeof(float));
     void *ref = ref_new(g_dir);
     drum909_init(&D);
-    fxbus_init(&F, DLY, DLY_LEN);
+    init_bus();
     fxbus_set_bpm(&F, bpm);
     ref_set_raw(ref, "dly_bpm", bpm);
     /* a little reverb on the clap (and snare fills), delay on the rim, a touch
@@ -505,6 +510,16 @@ static int demo(const char *path)
                            (double)w / spstep, sqrt(e / 441), sqrt(a / 441));
             }
         }
+    }
+    const char *pair_path = getenv("D9_DEMO_PAIR");
+    if (pair_path) {
+        FILE *pair = fopen(pair_path, "wb");
+        if (!pair)
+            return 1;
+        int ok = fwrite(rmono, sizeof *rmono, (size_t)total, pair) == (size_t)total &&
+                 fwrite(mono, sizeof *mono, (size_t)total, pair) == (size_t)total;
+        if (fclose(pair) || !ok)
+            return 1;
     }
     FILE *f = fopen(path, "wb");
     if (!f) { printf("cannot write %s\n", path); return 1; }

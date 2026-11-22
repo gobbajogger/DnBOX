@@ -1,0 +1,434 @@
+[
+  {
+    "owner": 0,
+    "start_s": 0,
+    "end_s": 5,
+    "original_sha256": "0c1abf73187f49c677866f3b7dc52f697976ceb691fb5c6955336f93e820b8e2",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 9.460544062431876e-07,
+          "spectral_db": 3.7676939210483905e-05,
+          "peak_error": 6.103515625e-05,
+          "passed": true
+        },
+        {
+          "level_db": 3.336519558599871e-05,
+          "spectral_db": 0.28888977212491523,
+          "peak_error": 0.00013650953769683838,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 0,
+    "end_s": 5,
+    "original_sha256": "1ad08c054fbb0a55acb85ffb597afb6996a0bf63258b1a23c91a1d809b46a3f7",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": -3.037631519642865e-14,
+          "spectral_db": 5.679762521835163e-09,
+          "peak_error": 4.656612873077393e-10,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 4.668413921201208e-05,
+          "spectral_db": 0.00043397901881575654,
+          "peak_error": 6.103515625e-05,
+          "passed": true
+        },
+        {
+          "level_db": 3.144216825676108e-05,
+          "spectral_db": 0.041578733746316904,
+          "peak_error": 0.0001220703125,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 0,
+    "start_s": 5,
+    "end_s": 7,
+    "original_sha256": "83393808ad0aaca53ffd9caf295b12d7172f87217af5d2814f64a7279a26d4b2",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": -2.655398747418974e-06,
+          "spectral_db": 6.370796524854249e-05,
+          "peak_error": 6.103515625e-05,
+          "passed": true
+        },
+        {
+          "level_db": 4.276421666210329e-05,
+          "spectral_db": 0.7856987013907691,
+          "peak_error": 0.0001356750726699829,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 5,
+    "end_s": 7,
+    "original_sha256": "c2a1ee780cfba9f15af79fae31c654dfc1cf1ee27203bec9fda62753f92cb220",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 4.9184259134718405e-09,
+          "spectral_db": 1.192794416821991e-08,
+          "peak_error": 3.5762786865234375e-07,
+          "passed": true
+        },
+        {
+          "level_db": 7.481636126975882e-08,
+          "spectral_db": 2.9596869144293167e-05,
+          "peak_error": 2.384185791015625e-06,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 1.5379387577311912e-05,
+          "spectral_db": 0.00014359980215654895,
+          "peak_error": 0.0015246868133544922,
+          "passed": true
+        },
+        {
+          "level_db": -1.7318982545120852e-05,
+          "spectral_db": 0.2140448843782709,
+          "peak_error": 0.005215883255004883,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 0,
+    "start_s": 7,
+    "end_s": 10,
+    "original_sha256": "bf2d190ec134e418fb4ff62a3b31ccea16758a86c311616ae129216b39fe228b",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 6.494552621694517e-11,
+          "spectral_db": 1.7977845922304872e-08,
+          "peak_error": 5.960464477539063e-08,
+          "passed": true
+        },
+        {
+          "level_db": -1.0469271780446572e-08,
+          "spectral_db": 5.054737565081877e-06,
+          "peak_error": 3.5762786865234375e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": -1.643326768567501e-05,
+          "spectral_db": 6.847087510532517e-05,
+          "peak_error": 0.00018328428268432617,
+          "passed": true
+        },
+        {
+          "level_db": 0.00011111227363879727,
+          "spectral_db": 0.029867766730327018,
+          "peak_error": 0.0008809566497802734,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 7,
+    "end_s": 10,
+    "original_sha256": "07d4972f449fd18f6bb3478b1055c47197f4fca1042a6d638d7b1874bfded69c",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 2.030137862229742e-09,
+          "spectral_db": 1.2857735691983065e-08,
+          "peak_error": 1.7881393432617188e-07,
+          "passed": true
+        },
+        {
+          "level_db": 7.88269894889359e-08,
+          "spectral_db": 5.509302372452967e-06,
+          "peak_error": 2.384185791015625e-06,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": -2.5917550446028963e-06,
+          "spectral_db": 0.00015028279524354987,
+          "peak_error": 0.001082777976989746,
+          "passed": true
+        },
+        {
+          "level_db": -4.2769971869141955e-06,
+          "spectral_db": 0.020295619340704313,
+          "peak_error": 0.004787445068359375,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 0,
+    "start_s": 10,
+    "end_s": 11,
+    "original_sha256": "fb88c93fe579732d896094639782bd54301e282a686f103fb21722639fabc919",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 1.7798592050137547e-11,
+          "spectral_db": 7.7338792370245e-11,
+          "peak_error": 2.9802322387695312e-08,
+          "passed": true
+        },
+        {
+          "level_db": -1.85180864201921e-09,
+          "spectral_db": 7.2471084577021786e-06,
+          "peak_error": 2.384185791015625e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 2.4061262605787944e-05,
+          "spectral_db": 0.00010357609837420421,
+          "peak_error": 0.0001735985279083252,
+          "passed": true
+        },
+        {
+          "level_db": 7.667467729012304e-05,
+          "spectral_db": 0.11460086996789297,
+          "peak_error": 0.0008280277252197266,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 10,
+    "end_s": 11,
+    "original_sha256": "6d3b962a0b74a54e3c07f1d7c937050241f5508ce44b98bd7a7b9e391cf69ab6",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": 7.558800163022108e-08,
+          "spectral_db": 1.5528069349565137e-05,
+          "peak_error": 1.9073486328125e-06,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 1.703589374119614e-05,
+          "spectral_db": 8.323605826117875e-05,
+          "peak_error": 6.103515625e-05,
+          "passed": true
+        },
+        {
+          "level_db": 1.3727293974689966e-05,
+          "spectral_db": 0.059099638923786786,
+          "peak_error": 0.004618406295776367,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 0,
+    "start_s": 11,
+    "end_s": 12,
+    "original_sha256": "51668d692d4119f29695ac04adb64ebd2ceb27da75addfa5460cab7518cca820",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": -2.8764504526895807e-09,
+          "spectral_db": 9.782268903469135e-06,
+          "peak_error": 2.384185791015625e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 9.752210623207402e-06,
+          "spectral_db": 0.00010075177089878868,
+          "peak_error": 0.00016826391220092773,
+          "passed": true
+        },
+        {
+          "level_db": 7.235412559311399e-05,
+          "spectral_db": 0.13689386537719828,
+          "peak_error": 0.000872492790222168,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 11,
+    "end_s": 12,
+    "original_sha256": "e70c1bbc7c0e94f038987b6bc1e7deba496d72a9b35fd7d04753dab3e29fc37e",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": 1.6414742567223063e-08,
+          "spectral_db": 2.6368319535119227e-06,
+          "peak_error": 1.1920928955078125e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": -0.00029345842412858644,
+          "spectral_db": 0.004192217687155005,
+          "peak_error": 0.00022858381271362305,
+          "passed": true
+        },
+        {
+          "level_db": 6.461021443201035e-05,
+          "spectral_db": 0.009605300033714646,
+          "peak_error": 0.0004140138626098633,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 0,
+    "start_s": 12,
+    "end_s": 15,
+    "original_sha256": "2f54ad89699680dd02c9ca1bd14d25cff7a4c21a863238d6e4bf9e98bf3d5703",
+    "modes": {
+      "float32": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": -2.7337941153240775e-09,
+          "spectral_db": 3.8081898551617545e-06,
+          "peak_error": 2.384185791015625e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": 0.0,
+          "spectral_db": 0.0,
+          "peak_error": 0.0,
+          "passed": true
+        },
+        {
+          "level_db": 7.12602152347804e-05,
+          "spectral_db": 0.04129267563813367,
+          "peak_error": 0.000872492790222168,
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "owner": 1,
+    "start_s": 12,
+    "end_s": 15,
+    "original_sha256": "ad3d380898015a1a6cf3a12551a991f6be5cb92268017fdc6fb92988600b766d",
+    "modes": {
+      "float32": [
+        {
+          "level_db": -2.1101365407258335e-10,
+          "spectral_db": 2.5956774995912804e-09,
+          "peak_error": 5.960464477539063e-08,
+          "passed": true
+        },
+        {
+          "level_db": 3.469656961091135e-08,
+          "spectral_db": 4.929626629551237e-06,
+          "peak_error": 3.5762786865234375e-07,
+          "passed": true
+        }
+      ],
+      "binary16": [
+        {
+          "level_db": -8.49927924530306e-06,
+          "spectral_db": 5.863716308695829e-05,
+          "peak_error": 0.00017026066780090332,
+          "passed": true
+        },
+        {
+          "level_db": 2.101313237356432e-06,
+          "spectral_db": 0.022796231416184504,
+          "peak_error": 0.0008977651596069336,
+          "passed": true
+        }
+      ]
+    }
+  }
+]

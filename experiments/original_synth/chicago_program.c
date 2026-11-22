@@ -51,6 +51,8 @@ int original_chicago_program_init(original_chicago_program *p,unsigned factory){
  for(unsigned i=0;i<22;i++){
 #ifdef ORIGINAL_CHICAGO_EXPANDED_FACTORY
   float x=original_chicago_factory_macro[factory][i];
+#elif defined(ORIGINAL_PROGRAM_VALUES_CHICAGO)
+  float x=compact_chicago_factory_value(factory,i);
 #else
   unsigned bit=(factory*22+i)*9,byte=bit>>3;
   unsigned code=((unsigned)original_chicago_factory_codes[byte]|((unsigned)original_chicago_factory_codes[byte+1]<<8))>>(bit&7);
@@ -62,8 +64,23 @@ int original_chicago_program_init(original_chicago_program *p,unsigned factory){
 }
 int original_chicago_program_native(const original_chicago_program *p,unsigned id,float *out){
  if(!p||!out||id>=117)return 0;
+#ifdef ORIGINAL_PROGRAM_VALUES_CHICAGO
+ unsigned code=compact_chicago_native_codes[id];
+ unsigned values=sizeof original_program_value_words/sizeof original_program_value_words[0];
+ *out=code<values?compact_program_value(code):p->target[code-values];return 1;
+#else
  for(unsigned i=0;i<29;i++)if(original_chicago_mappings[i].native_id==id){*out=p->target[i];return 1;}
  *out=ORIGINAL_CHICAGO_BASE_VALUE(id);return 1;
+#endif
+}
+/* The shipping Wave macro changes the levels of oscillators 1 and 3.
+ * Check the metadata in this translation unit so alternate profiles can
+ * fall back to the full compiler. The shipping check folds at build time. */
+int original_chicago_program_osc_mix(const original_chicago_program *p,float *level1,float *level3){
+ unsigned first=original_chicago_macro_start[0];
+ if(!p||!level1||!level3||original_chicago_macro_start[1]!=first+2||
+    original_chicago_mappings[first].native_id!=3||original_chicago_mappings[first+1].native_id!=11)return 0;
+ *level1=p->target[first];*level3=p->target[first+1];return 1;
 }
 const char *original_chicago_program_name(unsigned factory){
  if(factory>=81)return NULL;

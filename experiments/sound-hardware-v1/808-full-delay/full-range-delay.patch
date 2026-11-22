@@ -1,0 +1,851 @@
+diff --git a/experiments/sound-hardware-v1/808-effects/delay_voices.c b/experiments/sound-hardware-v1/808-effects/delay_voices.c
+index f235d9c7a56ca1f48e16d14a0141340e0bd0c971..cb578ee1914b751f4f227379982e2fa08c0de60a 100644
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.c
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.c
+@@ -9,7 +9,7 @@
+ extern void sc808_capture(float *, float *, float *);
+ static drum808_t kit;
+ static fxbus_t verb;
+-static int16_t ring[FX_808_DELAY_FRAMES];
++static int16_t ring[FX_808_DELAY_WORDS];
+ 
+ static void pot(sc808_engine_t *e, const char *key, int value)
+ {
+@@ -20,7 +20,9 @@ static void pot(sc808_engine_t *e, const char *key, int value)
+ 
+ int main(int argc, char **argv)
+ {
+-    assert(argc == 12);
++    assert(argc == 12 || argc == 13);
++    int total = argc == 13 ? atoi(argv[12]) : 88200;
++    assert(total >= 88200 && total <= 352800);
+     int voice=atoi(argv[1]), rv=atoi(argv[2]), mode=atoi(argv[3]), glue=atoi(argv[4]);
+     sc808_engine_t *ref=sc808_create(44100);
+     assert(ref);
+@@ -57,10 +59,11 @@ int main(int argc, char **argv)
+     }
+     FILE *file=fopen(argv[11],"wbx");
+     assert(file);
+-    for (int pos=0;pos<88200;pos+=128) {
+-        int n=88200-pos<128 ? 88200-pos : 128;
++    for (int pos=0;pos<total;pos+=128) {
++        int n=total-pos<128 ? total-pos : 128;
+         float x[128],rv[128],dl[128],original[128],left[128],right[128];
+-        if (pos==0||pos==3072||pos==12288||pos==20480)
++        if (pos==0||pos==3072||pos==12288||pos==20480 ||
++            (total>88200 && pos < total/2 && pos % 5888 == 0))
+             for(int v=0;v<SC808_NUM_VOICES;++v) if(voice==-1||voice==v)sc808_trigger(ref,v,118);
+         sc808_capture(x,rv,dl);
+         sc808_render(ref,original,n);
+diff --git a/experiments/sound-hardware-v1/808-effects/delay_voices.py b/experiments/sound-hardware-v1/808-effects/delay_voices.py
+index 7d043ab36b140573bbe20679edbacbe33c4f7d91..69a75d8ab94fd530710aae62158591d11b67bef2 100644
+--- a/experiments/sound-hardware-v1/808-effects/delay_voices.py
++++ b/experiments/sound-hardware-v1/808-effects/delay_voices.py
+@@ -1,4 +1,4 @@
+-"""Compare the bounded shipping 808 echo to untouched 8W8 processing on every voice."""
++"""Compare the shipping 808 echo to untouched 8W8 processing on every voice."""
+ import argparse, hashlib, json, subprocess, sys
+ from pathlib import Path
+ import numpy as np
+@@ -13,6 +13,8 @@ def main():
+     parser=argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('upstream',type=Path)
+     parser.add_argument('output',type=Path)
++    parser.add_argument('--sustained',action='store_true',
++                        help='repeat hits for four seconds, then compare four seconds of feedback tails')
+     args=parser.parse_args()
+     out=args.output.resolve()
+     out.mkdir(parents=True,exist_ok=False)
+@@ -43,7 +45,7 @@ def main():
+     cases=[]
+     default=[7,68,60,93,55,120]
+     beats=[.125,1/6,.25,1/3,.375,.5,2/3,.75,1,4/3,1.5,2,3]
+-    cap=(19200-256)/44100
++    cap=(88200-256)/44100
+     for voice in [*range(16),-1]:
+         for rv,mode,glue,fb in ((0,0,0,68),(0,0,0,127),(1,0,0,68),(1,1,108,68)):
+             vals=default.copy();vals[1]=fb
+@@ -52,16 +54,25 @@ def main():
+         for bpm in [45,60,90,120,180,240]:
+             for i,beat in enumerate(beats):
+                 vals=default.copy();vals[0]=i;vals[5]=bpm
+-                cases.append((voice,0,0,0,vals,beat*60/bpm<=cap))
++                cases.append((voice,0,0,0,vals,True))
+         for axis in range(1,5):
+             for pos in [0,64,127]:
+                 vals=default.copy();vals[axis]=pos
+                 cases.append((voice,0,0,0,vals,True))
++    frames = 352800 if args.sustained else 88200
++    if args.sustained:
++        cases = [(voice, rv, mode, glue, value, True)
++                 for voice in [*range(16), -1]
++                 for rv, mode, glue, value in (
++                     (0, 0, 0, [12, 127, 127, 127, 55, 45]),
++                     (0, 0, 0, [12, 127, 0, 127, 0, 45]),
++                     (0, 0, 0, [0, 127, 127, 127, 55, 240]),
++                     (1, 1, 108, [12, 127, 127, 127, 55, 45]))]
+     rows=[]
+     for voice,rv,mode,glue,values,within in cases:
+         tmp=out/'pair.f32'
+-        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp],check=True)
+-        pcm=np.fromfile(tmp,dtype='<f4').reshape(88200,4)
++        subprocess.run([exe,*map(str,[voice,rv,mode,glue,*values]),tmp,str(frames)],check=True)
++        pcm=np.fromfile(tmp,dtype='<f4').reshape(frames,4)
+         tmp.unlink()
+         if not np.isfinite(pcm).all() or not np.array_equal(pcm[:,2],pcm[:,3]): raise RuntimeError('invalid mono return')
+         x,ref,port,_=pcm.astype('d').T
+@@ -73,14 +84,25 @@ def main():
+             row.update(return_level_db=level,return_spectral_rms_db=spec,return_pass=bool(abs(level)<=1 and spec<=3))
+         elif not(mode or glue) and not np.array_equal(ref,port):
+             raise RuntimeError('dry alignment failed')
++        if args.sustained:
++            tail_ref,tail_port=ref[frames//2:],port[frames//2:]
++            if np.max(np.abs(tail_ref))>1e-8:
++                lev,sp=channel_score(tail_ref,tail_port,44100,[20,16000])
++                row.update(tail_level_db=lev,tail_spectral_rms_db=sp,tail_pass=bool(abs(lev)<=1 and sp<=3))
++            elif not np.array_equal(tail_ref,tail_port):
++                raise RuntimeError('silent tail differs')
+         rows.append(row)
+     valid=[r for r in rows if r['in_range']]
+-    report={'original':REF,'rate':44100,'frames_per_case':88200,'maximum_delay_seconds':cap,'cases':rows,
++    report={'original':REF,'rate':44100,'frames_per_case':frames,'maximum_delay_seconds':cap,'cases':rows,
+             'in_range_cases':len(valid),'full_pass':sum(r['pass'] for r in valid),
+             'wet_only_pass':sum(r.get('return_pass',False) for r in valid),'wet_only_cases':sum('return_pass' in r for r in valid)}
++    if args.sustained:
++        report.update(tail_pass=sum(r.get('tail_pass', False) for r in valid),
++                      tail_cases=sum('tail_pass' in r for r in valid))
+     (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
+     print({k:v for k,v in report.items() if k!='cases'})
+-    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'])
++    return int(report['full_pass']!=len(valid) or report['wet_only_pass']!=report['wet_only_cases'] or
++               (args.sustained and report['tail_pass']!=report['tail_cases']))
+ 
+ if __name__=='__main__':
+     raise SystemExit(main())
+diff --git a/experiments/sound-hardware-v1/808-effects/dual_delay.c b/experiments/sound-hardware-v1/808-effects/dual_delay.c
+index 533d0e1df3a10fdb24588dc331699029300541c0..27ebab5d85c829e2f84832bf23c9b4bdac1abfe2 100644
+--- a/experiments/sound-hardware-v1/808-effects/dual_delay.c
++++ b/experiments/sound-hardware-v1/808-effects/dual_delay.c
+@@ -9,7 +9,7 @@
+ 
+ enum { SHARED = 79200, BLOCK = 128, FRAMES = 44100 * 6 };
+ static fxbus_t raw_bus, packed_bus, private_bus, isolated_bus;
+-static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_FRAMES], isolated_ring[FX_808_DELAY_FRAMES];
++static int16_t raw_ring[SHARED], private_ring[FX_808_DELAY_WORDS], isolated_ring[FX_808_DELAY_WORDS];
+ static struct {
+     unsigned before;
+     int16_t data[(FX_DELAY_BYTES(SHARED)+1)/2];
+diff --git a/experiments/sound-hardware-v1/808-effects/replay.py b/experiments/sound-hardware-v1/808-effects/replay.py
+index 5a84e00b66aa2b6a25710429bcd5dcbea97889c2..f4e2860060e864f0183496b2196add13c104d170 100644
+--- a/experiments/sound-hardware-v1/808-effects/replay.py
++++ b/experiments/sound-hardware-v1/808-effects/replay.py
+@@ -22,7 +22,7 @@ def main():
+     parser.add_argument('--kit-master',action='store_true',help='use the dedicated 808 kit shaper')
+     parser.add_argument('--kit-glue',action='store_true',help='use the dedicated 808 glue detector')
+     parser.add_argument('--kit-reverb',action='store_true',help='use the dedicated mono 808 reverb')
+-    parser.add_argument('--kit-delay',action='store_true',help='use the bounded private 808 delay')
++    parser.add_argument('--kit-delay',action='store_true',help='use the full-range private 808 delay')
+     args = parser.parse_args()
+     up = args.upstream.resolve()
+     out = args.output.resolve()
+@@ -74,7 +74,7 @@ def main():
+                           'sha256':hashlib.sha256(signal.tobytes()).hexdigest()}
+         rows.append(row)
+     print(json.dumps(rows,indent=2))
+-    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, maximum 429.569 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
++    (out/'results.json').write_text(json.dumps({'original':REF,'master':'808 kit' if args.kit_master else 'shared bus','reverb':'808 kit' if args.kit_reverb else 'shared bus','delay':'808 kit, original maximum 1994.195 ms' if args.kit_delay else 'shared bus','glue':'808 kit' if args.kit_glue else 'shared bus','frames_per_case':88200,'sample_rate':44100,
+        'dry_source_sha256':dry_digest,'limits':{'absolute_level_db':1,'spectral_rms_db':3},'cases':rows},indent=2)+'\n')
+     return int(not all(r['left']['pass'] and r['right']['pass'] for r in rows))
+ 
+diff --git a/experiments/sound-hardware-v1/808-effects/wet.c b/experiments/sound-hardware-v1/808-effects/wet.c
+index 9a4d2e28b8bf944ab9a08fab13dc7136966e44a3..dd12a413ac9c058864c845d9fd563d30342ab4d1 100644
+--- a/experiments/sound-hardware-v1/808-effects/wet.c
++++ b/experiments/sound-hardware-v1/808-effects/wet.c
+@@ -12,7 +12,7 @@ static int16_t delay_memory[DELAY_WORDS];
+ static fxbus_t bus;
+ static drum808_t kit;
+ static fxbus_t kit_verb;
+-static int16_t private_delay[FX_808_DELAY_FRAMES];
++static int16_t private_delay[FX_808_DELAY_WORDS];
+ 
+ static void set(sc808_engine_t *s, const char *name, unsigned value)
+ {
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+index b8e16aea26a235324aaafc40165a9c5fd6a2fdde..a1b8e3505937016838a36294509dee3721ad0417 100644
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -432,7 +432,7 @@ static master_t mst POOL; /* was BSS; pool after Chicago-insert union frees head
+ #define DLY_LEN 79200
+ static int16_t dly_buf[(FX_DELAY_BYTES(DLY_LEN) + 1u) / 2u] POOL;
+ static fxbus_t d8_verb POOL;
+-static int16_t d8_delay[FX_808_DELAY_FRAMES] POOL;
++static int16_t d8_delay[FX_808_DELAY_WORDS] POOL;
+ _Static_assert(sizeof dly_buf + sizeof d8_verb + sizeof d8_delay <= 2u * DLY_LEN, "808 private effects must fit in the original delay arena");
+ static volatile uint8_t project_hold, project_midi_drop;
+ void engine_project_hold(int hold)
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 978cebf249263215e9de2329dfc341452b5e51f9..27aefcf4119b7127ac83dba4e41cff7f840eec88 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1644,7 +1644,7 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
+             static const pref_t dlbus[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_BUS), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TIME), NONE, NONE};
+             static const pref_t echo[4] = {PR(R_ENG,T_808,NDRUM,D8_KIT_DL_LEVEL), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_FDBK),
+                 PR(R_ENG,T_808,NDRUM,D8_KIT_DL_TONE), PR(R_ENG,T_808,NDRUM,D8_KIT_DL_HPF)};
+-            add_page_refs(emit, "DL 430ms", dlbus, 0, 0);
++            add_page_refs(emit, "DL 2s", dlbus, 0, 0);
+             add_page_refs(emit, "KIT DL", echo, 0, 0); } while (0);
+         } else if (part_is_303(p)) {
+             int b = p - PART_303A;
+diff --git a/firmware/src/dsp/fxbus.c b/firmware/src/dsp/fxbus.c
+index 34f9eb3a1452721100c71ae68d4b7ac8138c767b..01919a555e0af2b0642b87984029a4583aeaca4d 100644
+--- a/firmware/src/dsp/fxbus.c
++++ b/firmware/src/dsp/fxbus.c
+@@ -3,6 +3,7 @@
+  * er99_dly_tick, master distortion and master_glue (GPL-3.0). See fxbus.h. */
+ #include "fxbus.h"
+ #include "fxbus_delay_store.h"
++#include "fxbus_808_transform.h"
+ #include "x0x_glue.h"
+ #include "../x0x_cold.h"          /* X0X_COLD: fxbus_init is boot only, not the send/render */
+ 
+@@ -485,35 +486,82 @@ static void fx_delay(fxbus_t *f, const float *in, float *out, float *out_r, int
+     f->dl_signal = (uint8_t)signal;
+ }
+ 
+-/* The private 8W8 delay uses the 9W9 DIGI arithmetic. Its unused right
+- * reverb allpasses remain zero and feed the delay after the route is closed. */
++/* The original mono delay uses a 2 s virtual cursor independent of the
++ * transform packet ring. The explicit 256-sample guard preserves the source's
++ * maximum time. Each return precedes distortion, glue and kit volume. */
++enum { DELAY_808_QUIET = 89088 + 1536 };
+ X0X_COLD void fxbus_init_808_fx(fxbus_t *f, int16_t *delay)
+ {
+-    fxbus_init(f, delay, FX_808_DELAY_FRAMES);
++    fxbus_init_808_reverb(f);
+     f->dl_type = -1;
+-    for (int i = FX_RV_DECAY; i <= FX_DL_HPF; ++i)
++    f->dlen = FX_808_DELAY_FRAMES;
++    f->dbuf = delay;
++    f->bpm = 120.0f;
++    for (int i = FX_DL_TIME; i <= FX_DL_HPF; ++i)
+         fxbus_set(f, i, fx_p[i].ui.def);
++    f->dcur = f->dl_time_ms * 0.001f * D9_SR;
++    f->dl_quiet = DELAY_808_QUIET;
++    echo_history_init(&f->private_transform, delay);
+ }
+ 
+ int fxbus_808_delay_active(const fxbus_t *f)
+ {
+     const float next = f->dcur + (f->dl_time_ms * 0.001f * D9_SR - f->dcur) * 0.0008f;
+-    return f->dl_quiet < f->dlen || next != f->dcur;
++    return f->dl_quiet < DELAY_808_QUIET || next != f->dcur;
+ }
+ 
+-void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
++ECHO_SMALL void fxbus_808_delay(fxbus_t *f, const float *send, float *left, float *right, int frames, float gain)
+ {
+-    float level = f->dl_level;
+-    f->dl_level = level * gain;
+-    while (frames > 0) {
+-        int n = frames < FX_RV_APR_TOTAL ? frames : FX_RV_APR_TOTAL;
+-        fx_delay(f, send ? send : f->apr, left, right, n);
+-        if (send) send += n;
+-        left += n;
+-        right += n;
+-        frames -= n;
++    fx808_transform_t *state = &f->private_transform;
++    float target = f->dl_time_ms * .001f * D9_SR;
++    if (f->dl_quiet >= DELAY_808_QUIET) {
++        int i = 0;
++        while (send && i < frames && send[i] == 0)
++            i++;
++        if (!send || i == frames) {
++            for (i = 0; i < frames; i++) {
++                float next = f->dcur + (target - f->dcur) * .0008f;
++                if (next == f->dcur)
++                    break;
++                f->dcur = next;
++            }
++            f->w = (f->w + frames) % FX_808_DELAY_FRAMES;
++            state->source_cursor = (unsigned)f->w;
++            state->physical_cursor =
++                (state->physical_cursor + (unsigned)frames) % state->physical_frames;
++            state->read_hop = ~0u;
++            return;
++        }
++    }
++    float level = f->dl_level * gain;
++    for (int i = 0; i < frames; i++) {
++        float input = send ? send[i] : 0.f;
++        float x = d9_biquad_tick(&f->dl_hp, input);
++        f->dcur += (target - f->dcur) * .0008f;
++        float pos = (float)f->w - f->dcur;
++        if (pos < 0)
++            pos += FX_808_DELAY_FRAMES;
++        int a = (int)pos;
++        float frac = pos - a;
++        if (a >= FX_808_DELAY_FRAMES)
++            a -= FX_808_DELAY_FRAMES;
++        int b = a + 1 >= FX_808_DELAY_FRAMES ? 0 : a + 1;
++        float u = (float)echo_history_read(state, (unsigned)a) * (1.f / 2048);
++        float v = (float)echo_history_read(state, (unsigned)b) * (1.f / 2048);
++        float y = u + (v - u) * frac;
++        f->lp += (y * f->dl_fdbk - f->lp) * f->dl_tc;
++        if (fm_fabsf(f->lp) < 1e-20f)
++            f->lp = 0;
++        int16_t cell;
++        sat12_store(&cell, x + f->lp);
++        echo_history_write(state, cell);
++        f->w++;
++        if (f->w == FX_808_DELAY_FRAMES)
++            f->w = 0;
++        left[i] += y * level;
++        right[i] += y * level;
++        f->dl_quiet = !cell && !input ? f->dl_quiet + 1 : 0;
+     }
+-    f->dl_level = level;
+ }
+ 
+ /* ===================================================================== */
+diff --git a/firmware/src/dsp/fxbus.h b/firmware/src/dsp/fxbus.h
+index 6b84a61a4f661504a664b26182d7ea018b0f91d5..ebe08d002e911dff3695311c4f99b59ae549903f 100644
+--- a/firmware/src/dsp/fxbus.h
++++ b/firmware/src/dsp/fxbus.h
+@@ -28,7 +28,8 @@
+ 
+ #define FX10_DATA_BYTES(frames) (((frames) * 10u + 7u) / 8u)
+ #define FX_DELAY_BYTES(frames) (132u + FX10_DATA_BYTES(frames) + ((frames) + 63u) / 64u)
+-#define FX_808_DELAY_FRAMES 19200
++#define FX_808_DELAY_FRAMES 88200
++#define FX_808_DELAY_WORDS 19744 /* 348 MDCT packets of 112 B plus one signed 256-sample read cache. */
+ #define FX_RV_COMB_TOTAL (1116 + 1188 + 1277 + 1356)
+ #define FX_RV_AP_TOTAL (556 + 441)
+ #define FX_RV_APR_TOTAL (579 + 457)   /* X0X: the right side's allpasses */
+@@ -38,6 +39,19 @@ enum { FX_VOLUME, FX_DIST, FX_DRIVE, FX_COMP,
+        FX_DL_TIME, FX_DL_FDBK, FX_DL_TONE, FX_DL_LEVEL,
+        FX_DL_HPF, FX_DL_TYPE, FX_DL_WEAR, FX_DL_PING, FX_NPARAMS };
+ 
++/* Private 808 mono delay scratch overlays the 909-only right reverb allpasses. */
++#pragma pack(push,4)
++typedef struct {
++    uint8_t *packet_data;
++    uint32_t frames, physical_frames, physical_cursor, source_cursor, read_hop;
++    uint8_t current_signal, previous_signal;
++    int16_t recent[1536];
++    int16_t *decoded_hop;
++    float coefficients[256];
++} fx808_transform_t;
++#pragma pack(pop)
++_Static_assert(sizeof(fx808_transform_t) <= sizeof(float) * FX_RV_APR_TOTAL, "private 808 delay scratch");
++
+ struct fxbus {
+     /* reverb */
+     float rv_decay, rv_damp, rv_level;
+@@ -49,7 +63,7 @@ struct fxbus {
+     int32_t cpos[4], apos[2];
+     float cdmp[4];
+     int32_t rv_quiet;
+-    float apr[FX_RV_APR_TOTAL];       /* X0X stereo: the right side reads the combs with alternating
++    union { float apr[FX_RV_APR_TOTAL]; fx808_transform_t private_transform; };       /* X0X stereo: the right side reads the combs with alternating
+                                        * signs through its own allpasses (the left is 9W9's) */
+     int32_t aposr[2];
+     /* delay */
+diff --git a/tests/host/drum808_echo_panel_test.c b/tests/host/drum808_echo_panel_test.c
+index 4818e5128a7683ed4f8441f72d58687a68e85fa8..1aa9e7d405fff147ac499f3413bed9dba687367b 100644
+--- a/tests/host/drum808_echo_panel_test.c
++++ b/tests/host/drum808_echo_panel_test.c
+@@ -27,7 +27,7 @@ int main(int argc, char **argv)
+             pref_t r = pg.r[p][i];
+             if (r.kind != R_ENG || r.a != T_808 || r.b != D8_KIT ||
+                 r.c < D8_KIT_DL_BUS || r.c > D8_KIT_DL_HPF) continue;
+-            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 430ms" : "KIT DL"));
++            assert(!strcmp(pg.title[p], r.c <= D8_KIT_DL_TIME ? "DL 2s" : "KIT DL"));
+             int k = r.c - D8_KIT_DL_BUS;
+             knob[k] = r;
+             found |= 1u << k;
+diff --git a/firmware/src/dsp/fxbus_808_transform.h b/firmware/src/dsp/fxbus_808_transform.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..fcb4e7da2ff9161bca2663841a265b16d2b6c33d
+--- /dev/null
++++ b/firmware/src/dsp/fxbus_808_transform.h
+@@ -0,0 +1,480 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#ifdef __clang__
++#define ECHO_SMALL __attribute__((minsize, noinline))
++#else
++#define ECHO_SMALL __attribute__((noinline))
++#endif
++/* Overlapping 256-point type-IV cosine transforms are represented using
++ * 3.5 bits per history sample. Persistent storage is exactly 112 bytes/hop. */
++enum {
++    ECHO_HOP = 256,
++    ECHO_WINDOW = 512,
++    ECHO_RECENT = 1536,
++    ECHO_BAND_BINS = 16,
++    ECHO_BANDS = 16,
++    BAND_WEIGHT = 6,
++    LOW_BAND_WEIGHT = 16,
++    LOW_BAND_GAP = 9,
++    ALLOCATION_STEP = 40,
++    PACKET_BITS = 896,
++    PACKET_BYTES = 112
++};
++static const int16_t mdct_lut[] = {
++    0,     402,   804,   1206,  1608,  2009,  2410,  2811,  3212,  3612,  4011,  4410,  4808,  5205,  5602,
++    5998,  6393,  6786,  7179,  7571,  7962,  8351,  8739,  9126,  9512,  9896,  10278, 10659, 11039, 11417,
++    11793, 12167, 12539, 12910, 13279, 13645, 14010, 14372, 14732, 15090, 15446, 15800, 16151, 16499, 16846,
++    17189, 17530, 17869, 18204, 18537, 18868, 19195, 19519, 19841, 20159, 20475, 20787, 21096, 21403, 21705,
++    22005, 22301, 22594, 22884, 23170, 23452, 23731, 24007, 24279, 24547, 24811, 25072, 25329, 25582, 25832,
++    26077, 26319, 26556, 26790, 27019, 27245, 27466, 27683, 27896, 28105, 28310, 28510, 28706, 28898, 29085,
++    29268, 29447, 29621, 29791, 29956, 30117, 30273, 30424, 30571, 30714, 30852, 30985, 31113, 31237, 31356,
++    31470, 31580, 31685, 31785, 31880, 31971, 32057, 32137, 32213, 32285, 32351, 32412, 32469, 32521, 32567,
++    32609, 32646, 32678, 32705, 32728, 32745, 32757, 32765, 32767, 32767};
++static ECHO_SMALL float echo_sine(int step)
++{
++    unsigned p = (unsigned)step & (8 * ECHO_HOP - 1), q = p / (2 * ECHO_HOP), i = p % (2 * ECHO_HOP);
++    unsigned x = (q & 1) ? 2 * ECHO_HOP - i : i;
++    int base = mdct_lut[x / 4];
++    float s = (float)(4 * base + (mdct_lut[x / 4 + 1] - base) * (int)(x % 4)) * (1.f / (4 * 32767.f));
++    return q >= 2 ? -s : s;
++}
++static ECHO_SMALL float echo_cosine(int step) { return echo_sine(step + 2 * ECHO_HOP); }
++static ECHO_SMALL int nearest_sample(float x) { return (int)(x + (x < 0 ? -.5f : .5f)); }
++static ECHO_SMALL void mdct_fft(fx808_transform_t *p, int sign)
++{
++    for (unsigned i = 1, j = 0; i < (ECHO_HOP / 2); i++) {
++        unsigned bit = (ECHO_HOP / 2) / 2;
++        for (; j & bit; bit >>= 1)
++            j ^= bit;
++        j ^= bit;
++        if (i < j) {
++            float t = p->coefficients[2 * i];
++            p->coefficients[2 * i] = p->coefficients[2 * j];
++            p->coefficients[2 * j] = t;
++            t = p->coefficients[ECHO_HOP - 1 - 2 * i];
++            p->coefficients[ECHO_HOP - 1 - 2 * i] = p->coefficients[ECHO_HOP - 1 - 2 * j];
++            p->coefficients[ECHO_HOP - 1 - 2 * j] = t;
++        }
++    }
++    for (unsigned n = 2; n <= (ECHO_HOP / 2); n *= 2)
++        for (unsigned j = 0; j < n / 2; j++) {
++            int step = sign * (int)(8 * ECHO_HOP / n * j);
++            float wc = echo_cosine(step), ws = echo_sine(step);
++            for (unsigned a = j; a < (ECHO_HOP / 2); a += n) {
++                unsigned b = a + n / 2;
++                float r = wc * p->coefficients[2 * b] - ws * p->coefficients[ECHO_HOP - 1 - 2 * b],
++                      i = wc * p->coefficients[ECHO_HOP - 1 - 2 * b] + ws * p->coefficients[2 * b];
++                p->coefficients[2 * b] = p->coefficients[2 * a] - r;
++                p->coefficients[ECHO_HOP - 1 - 2 * b] = p->coefficients[ECHO_HOP - 1 - 2 * a] - i;
++                p->coefficients[2 * a] += r;
++                p->coefficients[ECHO_HOP - 1 - 2 * a] += i;
++            }
++        }
++}
++static ECHO_SMALL void bit_put(uint8_t *p, unsigned *at, unsigned x, unsigned bits)
++{
++    for (unsigned j = 0; j < bits; j++, (*at)++)
++        if (x & (1u << j))
++            p[*at / 8] |= (uint8_t)(1u << (*at % 8));
++}
++static ECHO_SMALL unsigned bit_get(const uint8_t *p, unsigned *at, unsigned bits)
++{
++    unsigned x = 0;
++    for (unsigned j = 0; j < bits; j++, (*at)++)
++        x |= ((unsigned)(p[*at / 8] >> (*at % 8)) & 1) << j;
++    return x;
++}
++/* Send one half-octave peak per band of coefficients and allocate whole bit planes. Both
++ * decoder and encoder derive the widths from these transmitted peaks. */
++static ECHO_SMALL void allocate_bit_planes(const unsigned *rel, unsigned *width)
++{
++    unsigned lo = rel[0], high = 31;
++    if (rel[1] < lo)
++        lo = rel[1];
++    for (unsigned b = ECHO_BANDS / 2; b < ECHO_BANDS; b++)
++        if (rel[b] < high)
++            high = rel[b];
++    unsigned weight = high >= lo + LOW_BAND_GAP ? LOW_BAND_WEIGHT : BAND_WEIGHT;
++    int priority[ECHO_BANDS];
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        width[b] = 0;
++        priority[b] = rel[b] == 31 ? -10000 : -(int)(rel[b] * weight);
++    }
++    for (unsigned i = 0; i < (PACKET_BITS - 5 - 5 * ECHO_BANDS) / ECHO_BAND_BINS; i++) {
++        int k = 0;
++        for (int b = 1; b < ECHO_BANDS; b++)
++            if (priority[b] > priority[k])
++                k = b;
++        if (priority[k] <= -10000)
++            break;
++        if (++width[k] >= 18)
++            priority[k] = -10000;
++        else
++            priority[k] -= ALLOCATION_STEP;
++    }
++}
++static ECHO_SMALL float packet_scale(unsigned e, unsigned r)
++{
++    union {
++        uint32_t u;
++        float f;
++    } p;
++    p.u = (unsigned)((int)e - (int)(r / 2) + 127) << 23;
++    return (r & 1) ? p.f * .7071067811865475244f : p.f;
++}
++/* A transient can borrow two previously silent packets. They remain live
++ * longer than any valid read of the enhanced hop at the maximum tap. */
++static ECHO_SMALL unsigned onset_bit(const uint8_t *a, const uint8_t *b, unsigned pos)
++{
++    const uint8_t *x = pos < (PACKET_BYTES - 1) * 8 ? a : b;
++    return (x[1 + (pos / 8) % (PACKET_BYTES - 1)] >> (pos & 7)) & 1;
++}
++static ECHO_SMALL void onset_put(uint8_t *a, uint8_t *b, unsigned *pos, unsigned val, unsigned n)
++{
++    for (unsigned i = 0; i < n; i++, (*pos)++) {
++        uint8_t *x = *pos < (PACKET_BYTES - 1) * 8 ? a : b;
++        if (val & (1u << i))
++            x[1 + (*pos / 8) % (PACKET_BYTES - 1)] |= 1u << (*pos & 7);
++    }
++}
++static ECHO_SMALL unsigned onset_get(const uint8_t *a, const uint8_t *b, unsigned *pos, unsigned n)
++{
++    unsigned v = 0;
++    for (unsigned i = 0; i < n; i++, (*pos)++)
++        v |= onset_bit(a, b, *pos) << i;
++    return v;
++}
++static ECHO_SMALL unsigned map_signed(int d) { return d < 0 ? (unsigned)(-2 * d - 1) : (unsigned)(2 * d); }
++static ECHO_SMALL int from_mapped(unsigned x) { return (x & 1) ? -(int)(x / 2) - 1 : (int)(x / 2); }
++static ECHO_SMALL unsigned prior_packet(unsigned idx, unsigned d, unsigned blocks)
++{
++    return (idx + blocks - d) % blocks;
++}
++static ECHO_SMALL void onset_store(fx808_transform_t *p, unsigned idx, unsigned start)
++{
++    unsigned blocks = p->physical_frames / ECHO_HOP;
++    uint8_t *two = p->packet_data + prior_packet(idx, 2, blocks) * PACKET_BYTES,
++            *three = p->packet_data + prior_packet(idx, 3, blocks) * PACKET_BYTES;
++    if ((two[0] & 31) != 30 || (three[0] & 31) != 30)
++        return;
++    if (p->physical_frames - (p->frames - 256) < 2 * ECHO_HOP)
++        return;
++    unsigned mode[ECHO_HOP / 32], opt[ECHO_HOP / 32], costsum = 0;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        int v[32];
++        for (unsigned j = 0; j < 32; j++)
++            v[j] = p->recent[(start + 32 * group + j) % ECHO_RECENT];
++        unsigned best = ~0u, order = 0, kbest = 0;
++        int nz = 0;
++        for (int j = 0; j < 32; j++)
++            nz |= v[j] != 0;
++        if (!nz) {
++            best = 2;
++            order = 3;
++        } else
++            for (unsigned o = 0; o <= 2; o++)
++                for (unsigned k = 0; k <= 10; k++) {
++                    unsigned cost = 6 + 16 * o + (32 - o) * (1 + k);
++                    for (unsigned j = o; j < 32 && cost < best; j++) {
++                        int pred = o == 0 ? 0 : o == 1 ? v[j - 1] : 2 * v[j - 1] - v[j - 2];
++                        cost += map_signed(v[j] - pred) >> k;
++                    }
++                    if (cost < best) {
++                        best = cost;
++                        order = o;
++                        kbest = k;
++                    }
++                }
++        mode[group] = order;
++        opt[group] = kbest;
++        costsum += best;
++        if (costsum > 2 * (PACKET_BYTES - 1) * 8)
++            return;
++    }
++    __builtin_memset(two, 0, PACKET_BYTES);
++    __builtin_memset(three, 0, PACKET_BYTES);
++    two[0] = 31 | (2 << 5);
++    three[0] = 31 | (3 << 5);
++    unsigned pos = 0;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        unsigned o = mode[group], k = opt[group];
++        onset_put(two, three, &pos, o, 2);
++        if (o == 3)
++            continue;
++        onset_put(two, three, &pos, k, 4);
++        int v[32];
++        for (unsigned j = 0; j < 32; j++)
++            v[j] = p->recent[(start + 32 * group + j) % ECHO_RECENT];
++        for (unsigned j = 0; j < o; j++)
++            onset_put(two, three, &pos, (unsigned)v[j] & 65535, 16);
++        for (unsigned j = o; j < 32; j++) {
++            int pred = o == 0 ? 0 : o == 1 ? v[j - 1] : 2 * v[j - 1] - v[j - 2];
++            unsigned x = map_signed(v[j] - pred);
++            pos += x >> k;
++            onset_put(two, three, &pos, 1, 1);
++            onset_put(two, three, &pos, x, k);
++        }
++    }
++    p->packet_data[idx * PACKET_BYTES + PACKET_BYTES - 2] |= 128;
++}
++static ECHO_SMALL void onset_restore(fx808_transform_t *p, unsigned idx)
++{
++    if (!(p->packet_data[idx * PACKET_BYTES + PACKET_BYTES - 2] & 128))
++        return;
++    unsigned blocks = p->physical_frames / ECHO_HOP, pos = 0;
++    const uint8_t *two = p->packet_data + prior_packet(idx, 2, blocks) * PACKET_BYTES,
++                  *three = p->packet_data + prior_packet(idx, 3, blocks) * PACKET_BYTES;
++    if (two[0] != (31 | (2 << 5)) || three[0] != (31 | (3 << 5)))
++        return;
++    for (unsigned group = 0; group < ECHO_HOP / 32; group++) {
++        unsigned o = onset_get(two, three, &pos, 2);
++        int16_t *v = p->decoded_hop + group * 32;
++        if (o == 3) {
++            __builtin_memset(v, 0, 64);
++            continue;
++        }
++        unsigned k = onset_get(two, three, &pos, 4);
++        for (unsigned j = 0; j < o; j++)
++            v[j] = (int16_t)onset_get(two, three, &pos, 16);
++        for (unsigned j = o; j < 32; j++) {
++            unsigned run = 0;
++            while (!onset_get(two, three, &pos, 1))
++                run++;
++            int pred = o == 0 ? 0 : o == 1 ? v[j - 1] : 2 * v[j - 1] - v[j - 2];
++            v[j] = (int16_t)(pred + from_mapped((run << k) | onset_get(two, three, &pos, k)));
++        }
++    }
++}
++
++/* Pair x[2m] with x[N-1-2m]. A positive N/2-point complex FFT after
++ * pre-rotation, followed by a post-rotation, produces the even DCT-IV bins
++ * in its real part and the reversed, odd bins in the imaginary part. */
++static ECHO_SMALL void echo_dct_iv(fx808_transform_t *p)
++{
++    for (unsigned m = 0; m < ECHO_HOP / 2; m++) {
++        float e = p->coefficients[2 * m], o = p->coefficients[ECHO_HOP - 1 - 2 * m];
++        float c = echo_cosine(4 * m), s = echo_sine(4 * m);
++        p->coefficients[2 * m] = e * c + o * s;
++        p->coefficients[ECHO_HOP - 1 - 2 * m] = e * s - o * c;
++    }
++    mdct_fft(p, 1);
++    for (unsigned m = 0; m < ECHO_HOP / 2; m++) {
++        float c = echo_cosine(4 * m + 1), s = echo_sine(4 * m + 1);
++        float re = p->coefficients[2 * m], im = p->coefficients[ECHO_HOP - 1 - 2 * m];
++        p->coefficients[2 * m] = re * c - im * s;
++        p->coefficients[ECHO_HOP - 1 - 2 * m] = re * s + im * c;
++    }
++}
++static ECHO_SMALL float windowed(fx808_transform_t *p, unsigned base, unsigned i)
++{
++    return (float)p->recent[(base + i) % ECHO_RECENT] * echo_sine((int)(2 * i + 1));
++}
++static ECHO_SMALL void encode_echo_packet(fx808_transform_t *p, unsigned index)
++{
++    if (!p->current_signal && !p->previous_signal) {
++        uint8_t *quiet = p->packet_data + index * PACKET_BYTES;
++        __builtin_memset(quiet, 0, PACKET_BYTES);
++        quiet[0] = 30;
++        return;
++    }
++    unsigned a = (p->physical_cursor + ECHO_RECENT - ECHO_WINDOW) % ECHO_RECENT;
++    for (unsigned j = 0; j < ECHO_HOP / 2; j++)
++        p->coefficients[j] =
++            -windowed(p, a, 3 * ECHO_HOP / 2 - 1 - j) - windowed(p, a, 3 * ECHO_HOP / 2 + j);
++    for (unsigned j = ECHO_HOP / 2; j < ECHO_HOP; j++)
++        p->coefficients[j] = windowed(p, a, j - ECHO_HOP / 2) - windowed(p, a, 3 * ECHO_HOP / 2 - 1 - j);
++    echo_dct_iv(p);
++    float maxb[ECHO_BANDS] = {0}, peak = 0;
++    for (unsigned k = 0; k < ECHO_HOP; k++) {
++        float mag = fm_fabsf(p->coefficients[k]);
++        if (mag > maxb[k / ECHO_BAND_BINS])
++            maxb[k / ECHO_BAND_BINS] = mag;
++        if (mag > peak)
++            peak = mag;
++    }
++    uint8_t *dst = p->packet_data + index * PACKET_BYTES;
++    __builtin_memset(dst, 0, PACKET_BYTES);
++    unsigned at = 0;
++    union {
++        uint32_t u;
++        float f;
++    } word;
++    word.f = peak;
++    int e = peak <= 1 ? 0 : (int)(word.u >> 23) - 127 + ((word.u & 8388607u) != 0);
++    if (peak == 0) {
++        dst[0] = 30;
++        return;
++    }
++    bit_put(dst, &at, (unsigned)e, 5);
++    unsigned rel[ECHO_BANDS], width[ECHO_BANDS];
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned r = 0;
++        float scale = packet_scale((unsigned)e, 0);
++        while (r < 31 && maxb[b] < scale * .8408964152537145f) {
++            scale *= .7071067811865475f;
++            r++;
++        }
++        rel[b] = r;
++        bit_put(dst, &at, r, 5);
++    }
++    allocate_bit_planes(rel, width);
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned w = width[b];
++        if (!w)
++            continue;
++        int max = (1 << (w - 1)) - 1;
++        float mult = (float)max / packet_scale((unsigned)e, rel[b]);
++        for (unsigned j = 0; j < ECHO_BAND_BINS; j++) {
++            int q = nearest_sample(p->coefficients[b * ECHO_BAND_BINS + j] * mult);
++            if (q > max)
++                q = max;
++            if (q < -max)
++                q = -max;
++            bit_put(dst, &at, (unsigned)q, w);
++        }
++    }
++
++    unsigned nz = 0;
++    for (unsigned i = 0; i < ECHO_HOP; i++)
++        if (p->recent[(a + i) % ECHO_RECENT] != 0)
++            nz |= 1u << (i / (ECHO_HOP / 8));
++    dst[PACKET_BYTES - 1] = (uint8_t)nz;
++    if (nz)
++        onset_store(p, index, a);
++}
++static ECHO_SMALL void decode_echo_spectrum(fx808_transform_t *p, unsigned idx)
++{
++    unsigned at = 0, rel[ECHO_BANDS], width[ECHO_BANDS];
++    const uint8_t *src = p->packet_data + idx * PACKET_BYTES;
++    unsigned e = bit_get(src, &at, 5);
++    if (e >= 30) {
++        __builtin_memset(p->coefficients, 0, sizeof p->coefficients);
++        return;
++    }
++    for (unsigned b = 0; b < ECHO_BANDS; b++)
++        rel[b] = bit_get(src, &at, 5);
++    allocate_bit_planes(rel, width);
++    for (unsigned b = 0; b < ECHO_BANDS; b++) {
++        unsigned w = width[b];
++        float step = w > 1 ? packet_scale(e, rel[b]) / ((1 << (w - 1)) - 1) : 0;
++        for (unsigned j = 0; j < ECHO_BAND_BINS; j++) {
++            int q = 0;
++            if (w) {
++                unsigned h = 1u << (w - 1);
++                q = (int)(bit_get(src, &at, w) ^ h) - (int)h;
++            }
++            p->coefficients[b * ECHO_BAND_BINS + j] = (float)q * step;
++        }
++    }
++    echo_dct_iv(p);
++}
++static ECHO_SMALL float unfold(const fx808_transform_t *p, unsigned t)
++{
++    float z = t < ECHO_HOP / 2       ? p->coefficients[t + ECHO_HOP / 2]
++              : t < 3 * ECHO_HOP / 2 ? -p->coefficients[3 * ECHO_HOP / 2 - 1 - t]
++                                     : -p->coefficients[t - 3 * ECHO_HOP / 2];
++    return z * (2.f / ECHO_HOP) * echo_sine(2 * t + 1);
++}
++/* The right half is only needed while reconstructing one hop. Preserve
++ * its fractional samples at quiet levels in the existing int16 read cache.
++ * A normal binary16 significand suffices within the quantized delay range. */
++static inline int16_t pack_overlap(float value)
++{
++    union {
++        float f;
++        uint32_t u;
++    } bits = {.f = value};
++    uint32_t mag = bits.u & 0x7fffffffu;
++    if (mag < 0x38800000u)
++        return 0;
++    unsigned half = ((mag + 0x1000u) >> 13) - (112u << 10);
++    return (int16_t)((bits.u >> 16 & 0x8000u) | half);
++}
++static inline float unpack_overlap(int16_t value)
++{
++    unsigned half = (uint16_t)value, mag = half & 0x7fffu;
++    union {
++        float f;
++        uint32_t u;
++    } bits;
++    bits.u = mag ? ((half & 0x8000u) << 16) | ((mag + (112u << 10)) << 13) : 0;
++    return bits.f;
++}
++/* A hop is the sum of the right half of its previous inverse transform and
++ * the left half of its own. Consecutive reads share the inverse overlap. */
++static ECHO_SMALL void load_echo_hop(fx808_transform_t *p, unsigned idx)
++{
++    unsigned blocks = p->physical_frames / ECHO_HOP;
++    if (p->read_hop == idx)
++        return;
++    unsigned prev = idx ? idx - 1 : blocks - 1;
++    if ((p->packet_data[idx * PACKET_BYTES] & 31) >= 30 &&
++        (p->packet_data[prev * PACKET_BYTES] & 31) >= 30) {
++        __builtin_memset(p->decoded_hop, 0, ECHO_HOP * sizeof(int16_t));
++        p->read_hop = idx;
++        return;
++    }
++    decode_echo_spectrum(p, prev);
++    for (unsigned i = 0; i < ECHO_HOP; i++) {
++        p->decoded_hop[i] = pack_overlap(unfold(p, ECHO_HOP + i));
++    }
++    decode_echo_spectrum(p, idx);
++    for (unsigned i = 0; i < ECHO_HOP; i++) {
++        int q = nearest_sample(unpack_overlap(p->decoded_hop[i]) + unfold(p, i));
++        if (q > 32767)
++            q = 32767;
++        if (q < -32767)
++            q = -32767;
++        p->decoded_hop[i] = (int16_t)q;
++        if (!(p->packet_data[idx * PACKET_BYTES + PACKET_BYTES - 1] & (1u << (i / (ECHO_HOP / 8)))))
++            p->decoded_hop[i] = 0;
++    }
++    if ((p->packet_data[idx * PACKET_BYTES] & 31) < 30)
++        onset_restore(p, idx);
++    p->read_hop = idx;
++}
++static ECHO_SMALL void echo_history_init(fx808_transform_t *p, void *arena)
++{
++    p->frames = FX_808_DELAY_FRAMES;
++    p->physical_frames = ((FX_808_DELAY_FRAMES + ECHO_RECENT - 1) / ECHO_RECENT) * ECHO_RECENT;
++    p->physical_cursor = p->source_cursor = 0;
++    p->read_hop = ~0u;
++    p->packet_data = (uint8_t *)arena;
++    __builtin_memset(arena, 0, (p->physical_frames / ECHO_HOP) * PACKET_BYTES);
++    __builtin_memset(p->recent, 0, sizeof p->recent);
++    for (unsigned j = 0; j < p->physical_frames / ECHO_HOP; j++)
++        p->packet_data[j * PACKET_BYTES] = 30;
++    p->decoded_hop = (int16_t *)(p->packet_data + (p->physical_frames / ECHO_HOP) * PACKET_BYTES);
++}
++/* Convert the original engine cursor into age before indexing the
++ * hop-aligned packet ring. Its 89,088 samples include the analysis guard. */
++static ECHO_SMALL int echo_history_read(fx808_transform_t *p, unsigned idx)
++{
++    unsigned age = (p->source_cursor >= idx) ? p->source_cursor - idx : p->frames + p->source_cursor - idx;
++    unsigned physical_cursor = p->physical_cursor >= age ? p->physical_cursor - age
++                                                         : p->physical_frames + p->physical_cursor - age;
++    /* A decoded block needs its successor for overlap/add. Return the original
++       staged data until the following complete block has been encoded. */
++    if (age > 0 && age <= ECHO_RECENT)
++        return p->recent[physical_cursor % ECHO_RECENT];
++    load_echo_hop(p, physical_cursor / ECHO_HOP);
++    return p->decoded_hop[physical_cursor % ECHO_HOP];
++}
++static ECHO_SMALL void echo_history_write(fx808_transform_t *p, int sample)
++{
++    p->current_signal |= sample != 0;
++    p->recent[p->physical_cursor % ECHO_RECENT] = (int16_t)sample;
++    if (++p->source_cursor == p->frames)
++        p->source_cursor = 0;
++    if (++p->physical_cursor == p->physical_frames)
++        p->physical_cursor = 0;
++    if (p->physical_cursor % ECHO_HOP == 0) {
++        unsigned blocks = p->physical_frames / ECHO_HOP, h = p->physical_cursor / ECHO_HOP,
++                 idx = (h + blocks - 2) % blocks;
++        encode_echo_packet(p, idx);
++        p->previous_signal = p->current_signal;
++        p->current_signal = 0;
++        if (p->read_hop == idx || p->read_hop == (idx + 1) % blocks)
++            p->read_hop = ~0u;
++    }
++}

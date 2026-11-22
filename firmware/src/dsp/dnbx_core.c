@@ -46,7 +46,7 @@ static int params_valid(const dnbx_layer_params *p, unsigned superj6_amp_range)
     /* Reuse identical physical ranges without changing their binary32 bounds.
      * Field order remains guarded by the offset assertion below. */
     static const float bounds[11][2]={
-        {0,16},{0,1},{.03f,.5f},{0,4},{0,.5f},
+        {0,16},{0,1},{.03f,.5f},{0,4},{0,.808f},
         {20,20000},{-20000,20000},{0,.47f},{-48,48},{-1,1},{0,24}
     };
     static const uint8_t field_range[23]={
@@ -58,7 +58,7 @@ static int params_valid(const dnbx_layer_params *p, unsigned superj6_amp_range)
     if (p->oscillator_mode == DNBX_OSC_SUPERJ6 &&
         (!superj6_amp_range || (p->waveform != 0 && p->waveform != 1.f / 3.f &&
          p->waveform != 2.f / 3.f && p->waveform != 1))) return 0;
-    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16)) return 0;
+    if (!superj6_amp_range && (p->amp.decay_s > 16 || p->amp.release_s > 16 || p->sub_gain > .5f)) return 0;
     for (unsigned i=0;i<23;i++) {
         float value;
         memcpy(&value,(const unsigned char *)p+i*sizeof(float),sizeof value);

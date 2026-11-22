@@ -1,0 +1,34 @@
+{
+  "code_base": "e3559ad37c354c02d49f8b99c68fa1982b2ec4b9",
+  "measured_change": "boot tanh table only before synth-control patches",
+  "firmware_flags": {
+    "X0X_TANH_BOOT_TABLE": 1,
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "elite": {
+    "xip_free_bytes": 5376,
+    "pool_margin_bytes": 3804
+  },
+  "pro": {
+    "xip_free_bytes": 5388,
+    "pool_margin_bytes": 3804
+  },
+  "delta_each_board": {
+    "xip_free_bytes": 2960,
+    "pool_margin_bytes": -4104
+  },
+  "table_word_matches": 1026,
+  "stock_regression_blocks_per_level": 23280,
+  "stock_optimization_levels": [
+    "-O0",
+    "-O2"
+  ],
+  "elite_populated_precheck": {
+    "max_us": 8058,
+    "raw_late": 0,
+    "audio_xruns": 0
+  },
+  "integration_budget_snapshot": "74d36ac4841e971a5b06ebba0ca93b006f7f31e6",
+  "integrated_fit": "unmeasured; requires exact combined links before use"
+}

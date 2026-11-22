@@ -47,9 +47,16 @@ void motion_step(motion_t *m, int part, int pat, int step, int next, int pass)
     m->last[part] = (uint8_t)step;
     if (next < 0 || next >= NSTEPS)
         next = 0;
+    /* A preset can have no motion lanes. Skip unused leading groups before
+     * the first callback. The second pass still visits any newly added slot. */
+    int first = 0;
+    while (first <= NLANE - 4 && !(m->lane[first + 0].used | m->lane[first + 1].used | m->lane[first + 2].used | m->lane[first + 3].used))
+        first += 4;
+    if (first >= NLANE)
+        return;
     /* Restore departing patterns first; a later slot must never overwrite
      * the active pattern for the same parameter with the base value. */
-    for (phase = 0; phase < 2; phase++) for (k = 0; k < NLANE; k++) {
+    for (phase = 0; phase < 2; phase++) for (k = phase ? 0 : first; k < NLANE; k++) {
         lane_t *l = &m->lane[k];
         lane_rt_t *r = &m->rt[k];
         int v, nv;

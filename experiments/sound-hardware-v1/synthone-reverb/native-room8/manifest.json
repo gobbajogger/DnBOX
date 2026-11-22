@@ -1,0 +1,41 @@
+{
+  "base": "bf48ce83bea6f8d332dddff11e5407c4fd744fc6",
+  "tree": "cb3fa22dbfa7253b7858269c1ee96fbe798faed1",
+  "patch_sha256": "3074e5ad393e66c81b7f005e4231c41d16ad45c0bdbf176bf468b5360bb83895",
+  "paths": {
+    "experiments/original_synth/chicago_mp4.c": "16547d09ac7598ef76e4c55ba5c391a428572def",
+    "firmware/app.ld": "a67ca53450a8bec00115ad8bed9f21a78b28b0b7",
+    "firmware/hal/fm1_sound_ram.h": "974e05f3ed536a7766c3149c06eaf04211db27ba",
+    "firmware/src/app/bass_identity.h": "da8964974122e4ea2535267584b33f044572403d",
+    "firmware/src/app/engine.c": "239661ed41108552c0a372f0b36d8f63515a784d",
+    "firmware/src/app/engine.h": "1e31b5207b30ed44e7023b7a2464b80b8313e46e",
+    "firmware/src/app/main_fm1.c": "30d729822c1ccce8e852df73df8feaadc6541897",
+    "firmware/src/app/original_presets.inc": "0a47947d7bbab033b2babce661fdd55fc657d59d",
+    "firmware/src/app/original_runtime.c": "fcac635aacd1bfcf01e49988f6fee88a8fc2b448",
+    "firmware/src/app/original_sound.c": "1ff6537f4951e47fd315b438e0cbad138be6c9f3",
+    "firmware/src/app/original_sound.h": "5865d7c340374b9fe0760ca3145bb920879e20bf",
+    "firmware/src/app/plat.h": "ea49465880a09e9cc2fbc79297afdf582187a2cd",
+    "firmware/src/app/s1_board_ram.inc": "0c9191ea0ce71e385fe540411fae69a617c196ad",
+    "firmware/src/app/s1_dry_part.c": "95277ef5145d2f06516649f170e7aa90eeb3cd44",
+    "firmware/src/app/s1_dry_part.h": "33414320431b74778e0db55f7ea6bbefdb5f3be5",
+    "firmware/src/app/s1_phaser.inc": "1c731f9ea634cc6a5c445cfad1479496fc322cc9",
+    "firmware/src/app/s1_reverb.h": "f6bfacc1fd2802599851f075b697bbf0e16df3a6",
+    "firmware/src/app/s1_revsc.inc": "420dced478242ca97f5e9f14d4135785cfe2e652",
+    "firmware/src/app/s1_room_fx.inc": "b366e7c2324ac2a2322bde9721de863e741bc688",
+    "firmware/src/app/s1_room_presets.inc": "107531017261f3c9aaafe8e0cea6a103d4d7c7bc",
+    "firmware/src/app/ui.c": "97e1c9e09d4f100a98e43e8fc6e7fdb11036ed9b",
+    "firmware/src/app/ui_original_controls.h": "dd8b18e1dcf0745c5bd0dbcff727f5a1d4d211b7",
+    "firmware/src/dsp/breaks.c": "6dbb41802c75cd23f1e19e0435538c7f54c22e3c",
+    "firmware/src/x0x.c": "57e0544dc9f7740e9d35b5baa5ef1881b3d7709f"
+  },
+  "products": {
+    "elite": {
+      "x0x.elf": "bd7bfa397f5d72f39eb24760b4bd2cf89343acb051141393ded9b200a57eac76",
+      "x0x.fwsc": "5271369463d8bd1852cd937251714af58f6a30b41040c612834233e4a2c4c202"
+    },
+    "pro": {
+      "x0x.elf": "b3cf2b8ec8cadb97756e9cceb683cb5355690d6a326ae65b6597456afcc05918",
+      "x0x.fwsc": "371611a2a1ab173b8ec16743c1c54fe43dccb0ff684473e27162e516a0e4356c"
+    }
+  }
+}

@@ -2,14 +2,10 @@
 /* Archived Chicago inserts (#569/#577 era chicago_*.h) as compact FX2 kernels:
  * type 3 Ensemble, 12 Short Delay, 13 BPM Delay, 15 Hall, 16 Gate Reverb.
  *
- * The archived DSP is mono and float. Here it runs on the (L+R)/2 sum; the wet
- * signal goes to both channels and each channel keeps its own dry. All five
- * live in the compact object's 4096 B Chorus arena (one algorithm is selected
- * at a time), so they add no per-part history RAM:
- *   Ensemble, Short Delay, Gate Reverb: archived structs, unchanged.
- *   Hall: archived combs; the two allpass lines are Q12 int16, not float.
- *   BPM Delay: same ~92 ms range as the archived 4096-sample ring, stored at
- *   half rate (2-sample averages, linear read) in 2032 int16 slots. */
+ * The archived mono processor receives (L+R)/2. Each channel keeps its dry
+ * signal and receives the wet return. Elite and Pro use the original float
+ * Hall allpasses and full-rate 4,096-sample BPM delay. The smaller profile
+ * shares a 4,096-byte arena, with Q12 Hall allpasses and half-rate BPM history. */
 #ifndef ORIGINAL_CHICAGO_FX2_INSERTS_H
 #define ORIGINAL_CHICAGO_FX2_INSERTS_H
 #include <stdint.h>
@@ -24,6 +20,7 @@
 #define CHI_FX2_BLOCK 32
 #define CHI_BPM2_SLOTS 2032u
 
+#if !X0X_CHICAGO_FULL_HISTORY
 typedef struct {
     int16_t comb[CHI_HALL_COMB_N];
     int16_t ap0[CHI_HALL_AP0], ap1[CHI_HALL_AP1]; /* Q12 */
@@ -38,12 +35,19 @@ typedef struct {
     float pair, fb, wet, delay;  /* delay in full-rate samples */
 } chi_bpm2_t;
 
+#endif
+
 typedef union {
     chi_ens_t ens;
     chi_sdly_t sdly;
     chi_gaterev_t grev;
+#if X0X_CHICAGO_FULL_HISTORY
+    chi_hall_t hall;
+    chi_bpmdly_t bpm;
+#else
     chi_hall_q_t hall;
     chi_bpm2_t bpm;
+#endif
 } chi_fx2_insert_arena;
 
 static inline int chi_fx2_insert_supports(unsigned type)
@@ -51,6 +55,7 @@ static inline int chi_fx2_insert_supports(unsigned type)
     return type == 3u || type == 12u || type == 13u || type == 15u || type == 16u;
 }
 
+#if !X0X_CHICAGO_FULL_HISTORY
 static inline void chi_hall_q_process(chi_hall_q_t *h, float *buf, int n)
 {
     static const uint16_t cl[4] = { CHI_HALL_C0, CHI_HALL_C1, CHI_HALL_C2, CHI_HALL_C3 };
@@ -127,6 +132,8 @@ static inline void chi_bpm2_process(chi_bpm2_t *d, float *buf, int n)
     }
 }
 
+#endif
+
 static inline void chi_fx2_insert_init(chi_fx2_insert_arena *a, unsigned type)
 {
     memset(a, 0, sizeof *a);
@@ -134,8 +141,13 @@ static inline void chi_fx2_insert_init(chi_fx2_insert_arena *a, unsigned type)
     case 3: chi_ens_init(&a->ens); break;
     case 12: chi_sdly_init(&a->sdly); break;
     case 16: chi_gaterev_init(&a->grev); break;
+#if X0X_CHICAGO_FULL_HISTORY
+    case 15: chi_hall_init(&a->hall); break;
+    default: chi_bpmdly_init(&a->bpm); break;
+#else
     case 15: a->hall.damp = 0.42f; a->hall.lvl = 0.67f; break;
     default: a->bpm.delay = 512.0f; break;
+#endif
     }
 }
 
@@ -144,6 +156,10 @@ static inline void chi_fx2_insert_set(chi_fx2_insert_arena *a, unsigned type, ui
     switch (type) {
     case 3: chi_ens_set(&a->ens, e1, e2, CHI_FX2_SR); break;
     case 12: chi_sdly_set(&a->sdly, e1, e2, CHI_FX2_SR); break;
+#if X0X_CHICAGO_FULL_HISTORY
+    case 13: chi_bpmdly_set_bpm(&a->bpm, e1, e2, CHI_FX2_SR, (float)bpm_times10 * 0.1f); break;
+    case 15: chi_hall_set(&a->hall, e1, e2, CHI_FX2_SR); break;
+#else
     case 13: chi_bpm2_set(&a->bpm, e1, e2, bpm_times10); break;
     case 15: {
         float send = (float)e1 * (1.0f / 127.0f);
@@ -151,6 +167,7 @@ static inline void chi_fx2_insert_set(chi_fx2_insert_arena *a, unsigned type, ui
         a->hall.damp = 0.42f; a->hall.lvl = 0.67f;
         a->hall.wet = send < 0.5f ? 0.5f : send;
         break; }
+#endif
     case 16: chi_gaterev_set(&a->grev, e1, e2, CHI_FX2_SR); break;
     default: break;
     }
@@ -175,8 +192,13 @@ static inline void chi_fx2_insert_process(chi_fx2_insert_arena *a, unsigned type
         switch (type) {
         case 3: wet = a->ens.wet; chi_ens_process(&a->ens, m, (int)c); break;
         case 12: wet = a->sdly.wet; chi_sdly_process(&a->sdly, m, (int)c); break;
+#if X0X_CHICAGO_FULL_HISTORY
+        case 13: wet = a->bpm.wet; chi_bpmdly_process(&a->bpm, m, (int)c); break;
+        case 15: wet = a->hall.wet; chi_hall_process(&a->hall, m, (int)c); break;
+#else
         case 13: wet = a->bpm.wet; chi_bpm2_process(&a->bpm, m, (int)c); break;
         case 15: wet = a->hall.wet; chi_hall_q_process(&a->hall, m, (int)c); break;
+#endif
         default: wet = 0.0f; chi_gaterev_process(&a->grev, m, (int)c); break;
         }
         if (type == 16u) { /* Gate Reverb filters its dry path: apply the mono result */

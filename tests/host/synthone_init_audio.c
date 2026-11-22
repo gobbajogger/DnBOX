@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "app/original_runtime.h"
 #include "app/bass_identity.h"
+#include "chicago_fx2_compact.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -114,31 +115,65 @@ static void allocation_trace(const uint8_t cell[32])
 }
 
 #if X0X_SYNTHONE_PATCH
+/* Sub edits with zero level are acoustically inert, both for a factory
+ * INIT cell and for a legacy adjunct with authored master controls. */
+static void sub_bypass(void)
+{
+    for (unsigned master = 0; master < 2; ++master) {
+        uint8_t cell[32], extended[32], ext[S1_MASTER_EXT_SIZE] = {0}, upgraded[S1_MASTER_EXT_SIZE];
+        assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+        if (master) {
+            assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME, 66));
+            assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO, 93));
+        }
+        memcpy(extended, cell, sizeof extended);
+        memcpy(upgraded, ext, sizeof upgraded);
+        assert(original_sound_s1_set_extended(extended, upgraded, S1_PATCH_SUB_OCTAVE, 127));
+        assert(original_sound_s1_set_extended(extended, upgraded, S1_PATCH_SUB_SQUARE, 127));
+        assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_init_extended(&part_b, extended, upgraded, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        key(&part_a, 60, 105); key(&part_b, 60, 105);
+        for (unsigned block = 0; block < 320; ++block) {
+            if (block == 90) { key(&part_a, 67, 107); key(&part_b, 67, 107); }
+            if (block == 200) { key(&part_a, 60, 0); key(&part_b, 60, 0); }
+            float al[64], ar[64], bl[64], br[64];
+            assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
+            assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
+            assert(!memcmp(al, bl, sizeof al) && !memcmp(ar, br, sizeof ar));
+        }
+    }
+    puts("Synth One sub bypass: 40,960 stereo frames preserved across v1 and sub-only v2.");
+}
+
 /* Play identical notes on live production voices. Apply one native control to
  * A, retaining phase and both envelope histories. B remains the independent
  * control. Filter envelope parameters need nonzero depth to be audible. */
 static void patch_audio(void)
 {
-    const unsigned changed[] = {127,0,0,0,0,127,127,0,0,127,127,0,0};
+    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127,127};
     uint8_t cell[32];
     for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
         assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
         assert(original_sound_s1_set(cell, 4, 90)); /* filterADSRMix */
         assert(original_sound_s1_set(cell, 7, 30)); /* filterSustainLevel */
         assert(original_sound_s1_set(cell, 1, 90)); /* morph1Volume */
-        assert(original_runtime_init(&part_a, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
-        assert(original_runtime_init(&part_b, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        uint8_t ext[S1_MASTER_EXT_SIZE] = {0};
+        if (slot == S1_PATCH_SUB_OCTAVE || slot == S1_PATCH_SUB_SQUARE)
+            assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 63));
+        assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_init_extended(&part_b, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
         key(&part_a, 60, 105); key(&part_b, 60, 105);
         float al[64], ar[64], bl[64], br[64];
         assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
         assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
         assert(!memcmp(al, bl, sizeof al));
         s1_dry_voice before = part_a.dsp.synthone.voice[0];
-        assert(original_sound_s1_set(cell, slot, changed[slot]));
+        assert(original_sound_s1_set_extended(cell, ext, slot, changed[slot]));
         assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
-        s1_part_apply_cell(&part_a.dsp.synthone, cell);
+        s1_part_apply_cell(&part_a.dsp.synthone, cell, ext);
         const s1_dry_voice *after = &part_a.dsp.synthone.voice[0];
-        assert(after->phase == before.phase && !memcmp(&after->amp, &before.amp, sizeof before.amp));
+        assert(after->phase == before.phase && after->sub.phase == before.sub.phase);
+        assert(!memcmp(&after->amp, &before.amp, sizeof before.amp));
         assert(!memcmp(&after->filter, &before.filter, sizeof before.filter));
         unsigned different = 0;
         for (unsigned block = 0; block < 320; ++block) {
@@ -169,10 +204,28 @@ static void patch_audio(void)
 static void crush_patch(void)
 {
     uint8_t cell[32], old[32];
-    const uint8_t old_tag[8] = {0x31,0x31,0x53,0x4f,ORIGINAL_SOUND_SCHEMA,0,2,BASS_IDENTITY_KNOWN};
+    uint8_t old_tag[8] = {0x31,0x31,0x53,0x4f,ORIGINAL_SOUND_SCHEMA,0,2,BASS_IDENTITY_KNOWN};
     const bass_identity_entry_t registry = {ORIGINAL_SOUND_SYNTHONE_ID, ORIGINAL_SOUND_SCHEMA,
                                              ORIGINAL_SYNTHONE_NPARAMS, 1};
     bass_identity_t identity;
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 23;
+    assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 17;
+    assert(bass_identity_decode(&identity,old_tag,sizeof old_tag,&registry,1)==BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 13;
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 6; /* Existing autopan projects have no extended LFO header. */
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 4; /* Projects with stock CRUSH and stereo width. */
+    assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
+    assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
+    old_tag[6] = 3; /* Projects written with the stock CRUSH control. */
     assert(bass_identity_decode(&identity, old_tag, sizeof old_tag, &registry, 1) == BASS_IDENTITY_READY);
     assert(identity.count == ORIGINAL_SYNTHONE_NPARAMS);
     float amount;
@@ -195,15 +248,152 @@ static void crush_patch(void)
     assert(original_runtime_render(&part_a, &workspace, l, r, 64) == ORIGINAL_RUNTIME_OK);
     assert(original_runtime_render(&part_b, &workspace, dl, dr, 64) == ORIGINAL_RUNTIME_OK);
     assert(!memcmp(l, r, sizeof l) && memcmp(l, dl, sizeof l));
+    /* All 128 legacy hold lengths, including the source log2/exp2 rounding. */
+    uint32_t interval_hash=UINT32_C(2166136261);
+    for(unsigned q=0;q<128;++q) {
+        assert(original_runtime_param(&part_b,ORIGINAL_SYNTHONE_CRUSH,(float)q/127.f)==ORIGINAL_RUNTIME_OK);
+        uint32_t word; memcpy(&word,&part_b.dsp.synthone.crush_interval,sizeof word);
+        interval_hash=(interval_hash^word)*UINT32_C(16777619);
+    }
+    assert(interval_hash==UINT32_C(1551743393));
+    assert(original_runtime_param(&part_b,ORIGINAL_SYNTHONE_CRUSH,0.f)==ORIGINAL_RUNTIME_OK);
     assert(part_b.dsp.synthone.crush_interval == 1.f);
     assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
     assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
 }
+enum { TAP_FRAMES = 2205 };
+typedef struct {
+    uint32_t history[TAP_FRAMES];
+    unsigned pos, changed;
+    float wet;
+} width_reference;
+
+static void check_width(original_runtime_part *part, width_reference *ref, float target, unsigned n)
+{
+    float l[256], r[256];
+    assert(original_runtime_prepare(part, 120.f) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_render(part, &workspace, l, r, n) == ORIGINAL_RUNTIME_OK);
+    const float c2 = (float)pow(.5, (float)(1. / 44100.) / .1f);
+    for (unsigned i = 0; i < n; ++i) {
+        uint32_t tap = ref->history[ref->pos] & UINT32_C(0xffffff00);
+        float delayed;
+        memcpy(&delayed, &tap, sizeof delayed);
+        memcpy(&ref->history[ref->pos], &l[i], sizeof l[i]);
+        ref->pos = (ref->pos + 1) % TAP_FRAMES;
+        ref->wet = (1.f - c2) * target + c2 * ref->wet;
+        float expected = ref->wet * delayed + (1.f - ref->wet) * l[i];
+        assert(!memcmp(&r[i], &expected, sizeof expected));
+        if (l[i] != r[i]) ++ref->changed;
+    }
+}
+
+static void width_patch(void)
+{
+    static original_chicago_fx2_compact fx[2];
+    static original_chicago_tuning tuning;
+    static width_reference refs[2];
+    original_runtime_part *parts[] = {&part_a, &part_b};
+    original_chicago_fx2_cold_owner owners[2];
+    uint8_t saved[2][32], chicago[32];
+    float targets[2] = {0};
+    assert(original_chicago_tuning_bind(&tuning, 0, 0, NULL, 0x6d70));
+    for (unsigned v = 0; v < 2; ++v) {
+        assert(original_chicago_fx2_compact_init(&fx[v]));
+        owners[v] = original_chicago_fx2_compact_owner(&fx[v]);
+        assert(original_sound_init(saved[v], ORIGINAL_SOUND_SYNTHONE, 0));
+        assert(original_sound_set(saved[v], ORIGINAL_SYNTHONE_CRUSH, v ? 0 : 127));
+        assert(original_runtime_init(parts[v], saved[v], 120, &tuning, &owners[v]) == ORIGINAL_RUNTIME_OK);
+        key(parts[v], 47 + 15*v, 100);
+    }
+    /* Warm both rings at zero mix, then run distinct edits across 128 positions.
+     * The post-crush left channel is the independent source for the right tap. */
+    for (unsigned block = 0; block < 153; ++block) {
+        for (unsigned v = 0; v < 2; ++v) {
+            if (block >= 24) {
+                unsigned position = v ? (block - 24) % 128 : 127 - ((block - 24) % 128);
+                assert(original_sound_set(saved[v], ORIGINAL_SYNTHONE_WIDTH, position));
+                assert(original_sound_value(saved[v], ORIGINAL_SYNTHONE_WIDTH, &targets[v]));
+                assert(original_runtime_param(parts[v], ORIGINAL_SYNTHONE_WIDTH, targets[v]) == ORIGINAL_RUNTIME_OK);
+            }
+            check_width(parts[v], &refs[v], targets[v], block % 2 ? 113 : 256);
+        }
+    }
+    assert(refs[0].changed > 10000 && refs[1].changed > 10000);
+    /* Selection retires A's insert. B continues against its uninterrupted oracle. */
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_sound_init(chicago, ORIGINAL_SOUND_CHICAGO, 0));
+    assert(original_runtime_init(&part_a, chicago, 120, &tuning, &owners[0]) == ORIGINAL_RUNTIME_OK);
+    key(&part_a, 51, 100);
+    float scratch_l[256], scratch_r[256];
+    assert(original_runtime_render(&part_a, &workspace, scratch_l, scratch_r, 256) == ORIGINAL_RUNTIME_OK);
+    assert(!original_chicago_fx2_compact_free_history(&owners[0]));
+    check_width(&part_b, &refs[1], targets[1], 256);
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_init(&part_a, saved[0], 120, &tuning, &owners[0]) == ORIGINAL_RUNTIME_OK);
+    memset(&refs[0], 0, sizeof refs[0]);
+    key(&part_a, 73, 100);
+    for (unsigned i = 0; i < 18; ++i) {
+        check_width(&part_a, &refs[0], targets[0], 256);
+        check_width(&part_b, &refs[1], targets[1], 256);
+    }
+    assert(part_a.dsp.synthone.crush_interval == 44100.f / 2048.f);
+    assert(refs[0].changed > 2048);
+    assert(original_runtime_all_off(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(!original_runtime_active(&part_a) && part_a.dsp.synthone.width.target == targets[0]);
+    assert(original_runtime_retire(&part_a) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_retire(&part_b) == ORIGINAL_RUNTIME_OK);
+    puts("Stereo width: both owners, 128 edits, packed source tap, smoothing, switch, restore and panic passed.");
+}
+
+
+#if X0X_SYNTHONE_PATCH
+static void alternate_filter_live_cutoff(void)
+{
+    float peak[2] = {0};
+    for (unsigned kind = 1; kind < 3; ++kind) {
+        for (unsigned resonance = 0; resonance <= 4; ++resonance) {
+            s1_dry_voice voice = {0};
+            s1_dry_controls controls;
+            s1_dry_frozen_controls(&controls);
+            controls.filter_type = (float)kind;
+            controls.resonance = resonance * .245f;
+            controls.filter_depth = 1.2f;
+            assert(s1_dry_configure(&voice, &controls) == S1_DRY_OK);
+            assert(s1_dry_start(&voice, 194.209f, 127, 0.f) == S1_DRY_OK);
+            for (unsigned stage = 0; stage <= 24; ++stage) {
+                controls.cutoff_hz = stage % 4 < 2 ? 22050.f : 64.f;
+                controls.filter_depth = stage % 2 ? 1.2f : 0.f;
+                assert(s1_dry_configure(&voice, &controls) == S1_DRY_OK);
+                for (unsigned frame = 0; frame < 22050u; ++frame) {
+                    const float sample = fabsf(s1_dry_sample(&voice));
+                    assert(sample < 2.f);
+                    if (sample > peak[kind - 1]) peak[kind - 1] = sample;
+                }
+            }
+        }
+    }
+    printf("Synth One alternate-filter live cutoff: 5,512,500 finite samples, bandpass peak %.6f, highpass peak %.6f.\n",
+           peak[0], peak[1]);
+}
+#endif
+
 int main(void)
 {
+    width_patch();
+    uint8_t master_cell[32],extra[S1_MASTER_EXT_SIZE]={0};
+    assert(original_sound_init(master_cell,ORIGINAL_SOUND_SYNTHONE,0));
+    assert(original_sound_set_extended(master_cell,extra,ORIGINAL_SYNTHONE_MASTER_RATIO,73));
+    assert(original_runtime_init(&part_a,master_cell,120,NULL,NULL)==ORIGINAL_RUNTIME_INVALID);
+    assert(original_runtime_init_extended(&part_a,master_cell,extra,120,NULL,NULL)==ORIGINAL_RUNTIME_OK);
+    assert(part_a.dsp.synthone.master.active==63 && part_a.dsp.synthone.master.knobs[1]==73);
+    extra[3]=128;
+    assert(original_runtime_init_extended(&part_a,master_cell,extra,120,NULL,NULL)==ORIGINAL_RUNTIME_INVALID);
+
     crush_patch();
 #if X0X_SYNTHONE_PATCH
+    sub_bypass();
     patch_audio();
+    alternate_filter_live_cutoff();
 #endif
     uint8_t cell[32], legacy[32];
     assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY));

@@ -1,0 +1,701 @@
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+index 9e06f903..44e9cbfa 100644
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -85,6 +85,9 @@ int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *ou
+     out->physical = snapshot.physical[slot];
+     out->position = (uint8_t)((out->physical - d->minimum) *
+         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
++    if (factory_id == 30u)
++        out->position = (uint8_t)(64.f + out->physical *
++                                  (out->physical <= 0.f ? 16.f : 15.75f) + .5f);
+     return 1;
+ }
+ 
+@@ -196,7 +199,8 @@ int engine_bass_note_validate(const lane_t *l)
+     if(l->used!=1 || l->t!=BASS_NOTE_TARGET || l->pat>=NPAT ||
+        l->part<PART_303A || l->part>PART_303B || l->v>=NSTEPS ||
+        l->i!=BASS_NOTE_VERSION || l->rsv)return -1;
+-    for(int i=BASS_NOTE_USED+(l->val[26]=='M'?S1_MASTER_EXT_SIZE:0);i<NSTEPS;i++)if(l->val[i])return -1;
++    for (unsigned i = BASS_NOTE_USED + original_sound_ext_bytes(l->val, l->val + BASS_NOTE_USED);
++         i < NSTEPS; ++i) if (l->val[i]) return -1;
+     int rc=bass_tagged_cell_validate(mut->val,mut->val+BASS_NOTE_USED,(bass_sound_tag_t *)(mut->val+BASS_NOTE_TAG),&bank);
+     if(rc)return rc;
+     for(int i=0;i<MX_NPARAMS;i++)if(l->val[BASS_NOTE_MIX+i]>engine_param(T_MIX,l->part,i)->max)return -1;
+@@ -213,7 +217,9 @@ static int bass_note_capture(lane_t *lanes,int pat,int voice,int step,const soun
+     next.used=1;next.gen=(uint8_t)(lanes[k].gen+1);next.t=BASS_NOTE_TARGET;
+     next.pat=(uint8_t)pat;next.part=(uint8_t)(PART_303A+voice);next.v=(uint8_t)step;next.i=BASS_NOTE_VERSION;
+     __builtin_memcpy(next.val,sound->v[T_303][voice],NPARAMS_MAX);
+-    if (next.val[26]=='M') __builtin_memcpy(next.val+BASS_NOTE_USED,sound->v[T_303][NBASS+voice],S1_MASTER_EXT_SIZE);
++    const uint8_t *ext = sound->v[T_303][NBASS+voice];
++    unsigned ext_bytes = original_sound_ext_bytes(next.val, ext);
++    if (ext_bytes) __builtin_memcpy(next.val+BASS_NOTE_USED,ext,ext_bytes);
+     __builtin_memcpy(next.val+BASS_NOTE_MIX,sound->v[T_MIX][PART_303A+voice],MX_NPARAMS);
+     if(effective) {
+         /* Audio owns motion runtime. Capture what this accepted edge hears,
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+index 440a314e..819acf21 100644
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -342,15 +342,19 @@ int original_master_valid(const uint8_t *cell,const uint8_t *ext)
+      * square. Its two-bit format marker leaves a single reserved-bit error
+      * invalid in v1. Byte zero retains bit 0 for master edit presence. */
+     if (ext[3] & ext[4] & 128u) {
+-        for (unsigned j=1; j<S1_MASTER_EXT_SIZE; ++j) {
+-            if (j >= 5 && (ext[j] & 128u)) return 0;
++        const int osc2 = original_sound_ext_bytes(cell, ext) == S1_MASTER_EXT_SIZE;
++        for (unsigned j=1; j<S1_MASTER_VALUES_BYTES; ++j) {
++            if (!osc2 && j >= 5 && (ext[j] & 128u)) return 0;
+             if (!(ext[0] & 1u) && (ext[j] & 127u)) return 0;
+         }
++        if (osc2)
++            for (unsigned j=S1_MASTER_VALUES_BYTES; j<S1_MASTER_EXT_SIZE; ++j)
++                if (ext[j] & 128u) return 0;
+         return 1;
+     }
+ #endif
+     if (ext[0]!=1u) return 0;
+-    for(unsigned j=1;j<S1_MASTER_EXT_SIZE;++j) if(ext[j]>127u) return 0;
++    for(unsigned j=1;j<S1_MASTER_VALUES_BYTES;++j) if(ext[j]>127u) return 0;
+     return 1;
+ }
+ unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id)
+@@ -372,7 +376,7 @@ int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned
+     if (!original_master_edited(cell, ext)) {
+         if (cell[26] != 'M') memset(ext, 0, S1_MASTER_EXT_SIZE);
+         ext[0] |= 1u;
+-        for (unsigned j=0; j<S1_MASTER_EXT_SIZE-1; ++j)
++        for (unsigned j=0; j<S1_MASTER_VALUES_BYTES-1; ++j)
+             ext[1+j]=(ext[1+j]&128u)|original_sound_synthone_params[ORIGINAL_SYNTHONE_MASTER_VOLUME+j].def;
+         cell[26]='M';
+     }
+@@ -381,7 +385,7 @@ int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned
+ #else
+     if (cell[26]!='M') {
+         ext[0]=1;
+-        for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)
++        for(unsigned j=0;j<S1_MASTER_VALUES_BYTES-1;++j)
+             ext[1+j]=original_sound_synthone_params[ORIGINAL_SYNTHONE_MASTER_VOLUME+j].def;
+         cell[26]='M';
+     }
+@@ -417,8 +421,16 @@ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, uns
+     return 1;
+ }
+ 
+-unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot)
++unsigned original_sound_s1_extension_position(const uint8_t *cell, const uint8_t *ext, unsigned slot)
+ {
++    if (slot >= S1_PATCH_OSC2_LEVEL) {
++        static const uint8_t defaults[] = {0, 127, 42, 64};
++        const unsigned control = slot - S1_PATCH_OSC2_LEVEL;
++        if (control >= sizeof defaults) return 0;
++        if (original_sound_ext_bytes(cell, ext) == S1_MASTER_EXT_SIZE)
++            return ext[S1_MASTER_VALUES_BYTES + control];
++        return defaults[control];
++    }
+     if (cell[26] != 'M' || !ext || !(ext[3] & ext[4] & 128u)) return 0;
+     if (slot == S1_PATCH_SUB_LEVEL) return ext[0] >> 1;
+     if (slot == S1_PATCH_SUB_OCTAVE) return (ext[1] & 128u) ? 127u : 0u;
+@@ -438,7 +450,16 @@ int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, u
+     }
+     ext[3] |= 128u;
+     ext[4] |= 128u;
+-    if (slot == S1_PATCH_SUB_LEVEL) ext[0] = (ext[0] & 1u) | (uint8_t)(position << 1);
++    if (slot >= S1_PATCH_OSC2_LEVEL) {
++        if (original_sound_ext_bytes(cell, ext) != S1_MASTER_EXT_SIZE) {
++            for (unsigned i = S1_PATCH_OSC2_LEVEL; i < S1_PATCH_COUNT; ++i)
++                ext[S1_MASTER_VALUES_BYTES + i-S1_PATCH_OSC2_LEVEL] =
++                    (uint8_t)original_sound_s1_extension_position(cell, ext, i);
++            ext[5] |= 128u;
++            ext[6] |= 128u;
++        }
++        ext[S1_MASTER_VALUES_BYTES + slot-S1_PATCH_OSC2_LEVEL] = (uint8_t)position;
++    } else if (slot == S1_PATCH_SUB_LEVEL) ext[0] = (ext[0] & 1u) | (uint8_t)(position << 1);
+     else {
+         const unsigned index = slot == S1_PATCH_SUB_OCTAVE ? 1u : 2u;
+         ext[index] = (ext[index] & 127u) | (position >= 64u ? 128u : 0u);
+diff --git a/firmware/src/app/original_sound.h b/firmware/src/app/original_sound.h
+index f79e35a2..d47ef559 100644
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -36,7 +36,14 @@ static inline int original_sound_s1_master_id(unsigned id)
+ { return id >= ORIGINAL_SYNTHONE_MASTER_VOLUME && id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; }
+ /* A master edit claims seven bytes in the owner's auxiliary row. The main
+  * cell explicitly binds that row; historical project padding stays inert. */
+-enum { S1_MASTER_EXT_SIZE=7 };
++enum {
++    S1_MASTER_VALUES_BYTES = 7,
++#if X0X_SYNTHONE_PATCH
++    S1_MASTER_EXT_SIZE = 11,
++#else
++    S1_MASTER_EXT_SIZE = S1_MASTER_VALUES_BYTES,
++#endif
++};
+ float s1_master_control(unsigned slot,unsigned pot);
+ /* In the extended format an opt-in voice edit can own this adjunct without
+  * enabling master processing. Old cells with only master controls remain v1. */
+@@ -50,6 +57,16 @@ static inline int original_master_edited(const uint8_t *cell, const uint8_t *ext
+ #endif
+ }
+ int original_master_valid(const uint8_t *cell,const uint8_t *ext);
++static inline unsigned original_sound_ext_bytes(const uint8_t *cell, const uint8_t *ext)
++{
++    if (cell[26] != 'M') return 0;
++#if X0X_SYNTHONE_PATCH
++    if (ext && (ext[3] & ext[4] & ext[5] & ext[6] & 128u)) return S1_MASTER_EXT_SIZE;
++#else
++    (void)ext;
++#endif
++    return S1_MASTER_VALUES_BYTES;
++}
+ unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id);
+ int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value);
+ #define ORIGINAL_SYNTHONE_CRUSH 2u
+@@ -134,7 +151,7 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
+ #if X0X_SYNTHONE_PATCH
+ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+ int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, unsigned position);
+-unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot);
++unsigned original_sound_s1_extension_position(const uint8_t *cell, const uint8_t *ext, unsigned slot);
+ #endif
+ uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+ int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+diff --git a/firmware/src/app/s1_dry_part.c b/firmware/src/app/s1_dry_part.c
+index 7a36faea..fe4a0031 100644
+--- a/firmware/src/app/s1_dry_part.c
++++ b/firmware/src/app/s1_dry_part.c
+@@ -74,7 +74,11 @@ static const struct {
+     S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S),
+     S1_FIELD(7, "SUB LEVEL", sub_level, 0, 1, X0X_U_PCT),
+     S1_FIELD(8, "SUB OCTAVE", sub_extra_octave, 0, 1, X0X_U_PCT),
+-    S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT)
++    S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT),
++    S1_FIELD(6, "OSC 2 LEVEL", osc2_level, 0, 1, X0X_U_PCT),
++    S1_FIELD(1, "OSC 2 WAVE", osc2_wave, 0, 1, X0X_U_PCT),
++    S1_FIELD(4, "OSC 2 TUNE", osc2_tune, -12, 24, X0X_U_ST),
++    S1_FIELD(30, "OSC 2 DETUNE", osc2_detune, -4, 4, X0X_U_HZ)
+ #undef S1_FIELD
+ };
+ 
+@@ -90,8 +94,11 @@ int s1_patch_slot(unsigned id)
+ 
+ float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
+ {
+-    if (d->factory_id == 8u || d->factory_id == 9u) return position >= 64u ? 1.f : 0.f;
+     if (position >= S1_PATCH_STEPS) return d->maximum;
++    if (d->factory_id == 4u) return (float)((position * 36u + 63u) / 127u) - 12.f;
++    if (d->factory_id == 30u)
++        return ((float)position - 64.f) * (position <= 64u ? 1.f/16.f : 4.f/63.f);
++    if (d->factory_id == 8u || d->factory_id == 9u) return position >= 64u ? 1.f : 0.f;
+     return d->minimum + (d->maximum - d->minimum) * ((float)position / S1_PATCH_STEPS);
+ }
+ 
+@@ -101,6 +108,8 @@ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+     return *(const float *)(base + patch_parameters[slot].offset);
+ }
+ 
++static void update_osc2_pitch(s1_dry_part *, unsigned slot);
++
+ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32], const uint8_t *ext)
+ {
+     s1_dry_controls next;
+@@ -115,16 +124,19 @@ void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32], const uint8_t
+     }
+     for (unsigned i = S1_PATCH_SUB_LEVEL; i < S1_PATCH_COUNT; ++i) {
+         float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
+-        *field = s1_patch_physical(s1_patch_at(i), original_sound_s1_sub_position(cell, ext, i));
++        *field = s1_patch_physical(s1_patch_at(i), original_sound_s1_extension_position(cell, ext, i));
+     }
+     if (!memcmp(&next, &part->patch, sizeof next)) return;
+     part->patch = next;
+-    for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+-        if (part->voice[i].started) (void)s1_dry_configure(&part->voice[i], &next);
++    for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
++        if (!part->voice[i].started) continue;
++        (void)s1_dry_configure(&part->voice[i], &next);
++        update_osc2_pitch(part, i);
++    }
+ }
+ #endif
+ 
+-static float pitch_hz(const s1_dry_part *part, unsigned key)
++static float note_hz(unsigned key)
+ {
+     /* One equal-tempered octave at A4 = 440 Hz, rounded to binary32.
+      * Scaling by an integer power of two preserves every unbent note. */
+@@ -133,10 +145,28 @@ static float pitch_hz(const s1_dry_part *part, unsigned key)
+         10.30086136f, 10.91338253f, 11.56232548f, 12.24985695f,
+         12.97827148f, 13.75f, 14.56761742f, 15.43385315f
+     };
+-    float unbent = octave_hz[key % 12u] * (float)(1u << (key / 12u));
+-    return unbent * fm_exp2f((part->bend - 0.5f) * (4.0f / 12.0f));
++    return octave_hz[key % 12u] * (float)(1u << (key / 12u));
++}
++
++static float pitch_hz(const s1_dry_part *part, unsigned key)
++{
++    return note_hz(key) * fm_exp2f((part->bend - 0.5f) * (4.0f / 12.0f));
+ }
+ 
++#if X0X_SYNTHONE_PATCH
++static void update_osc2_pitch(s1_dry_part *part, unsigned slot)
++{
++    s1_dry_voice *voice = &part->voice[slot];
++    const float base = note_hz(part->note[slot]);
++    const float tune = fm_exp2f(part->patch.osc2_tune * (1.f / 12.f));
++    float hz = base * tune;
++    hz *= fm_exp2f((part->bend - 0.5f) * (4.f / 12.f));
++    hz += part->patch.osc2_detune * (base / 261.6255653006f);
++    if (hz < 0.f) hz = 0.f;
++    s1_sub_pitch(&voice->osc2, hz, 2.f, 0);
++}
++#endif
++
+ /* Original 44.1 kHz hold intervals for the 128 front-panel positions.
+  * The original rounds log2(hz) to binary32 before exp2; the few ulps
+  * change which frame is held over a sustained note. */
+@@ -233,6 +263,7 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
+             if (part->voice[i].started) {
+ #if X0X_SYNTHONE_PATCH
+                 s1_dry_pitch(&part->voice[i], pitch_hz(part, part->note[i]));
++                update_osc2_pitch(part, i);
+ #else
+                 part->voice[i].phase_increment = pitch_hz(part, part->note[i]) / S1_DRY_SAMPLE_RATE;
+ #endif
+@@ -287,6 +318,7 @@ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
+ #if X0X_SYNTHONE_PATCH
+     const s1_dry_controls *controls = &part->patch;
+     const uint32_t sub_phase = voice->sub.phase;
++    const uint32_t osc2_phase = voice->osc2.phase;
+ #else
+     s1_dry_controls frozen;
+     s1_dry_frozen_controls(&frozen);
+@@ -298,9 +330,13 @@ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
+         return 0;
+ #if X0X_SYNTHONE_PATCH
+     voice->sub.phase = sub_phase;
++    voice->osc2.phase = osc2_phase;
+ #endif
+     part->next = (slot + 1u) % S1_CORE_VOICES;
+     part->note[slot] = (uint8_t)key;
++#if X0X_SYNTHONE_PATCH
++    update_osc2_pitch(part, slot);
++#endif
+     part->down[slot] = 1;
+     return 1;
+ }
+@@ -476,7 +512,11 @@ void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frame
+     for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
+         s1_dry_begin_block(&part->voice[i]);
+         if (part->voice[i].started)
+-            s1_dry_mix(&part->voice[i], left, frames);
++            s1_dry_mix(&part->voice[i], left, frames
++#if X0X_SYNTHONE_PATCH
++                       , &part->patch
++#endif
++            );
+     }
+     if (left != right) memcpy(right, left, frames * sizeof *left);
+ 
+diff --git a/firmware/src/app/s1_patch.h b/firmware/src/app/s1_patch.h
+index 9a47a2fd..35022c13 100644
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -11,6 +11,7 @@
+ enum {
+     S1_PATCH_FIRST_BYTE = 8, S1_PATCH_CELL_COUNT = 13, S1_PATCH_STEPS = 127,
+     S1_PATCH_SUB_LEVEL = S1_PATCH_CELL_COUNT, S1_PATCH_SUB_OCTAVE, S1_PATCH_SUB_SQUARE,
++    S1_PATCH_OSC2_LEVEL, S1_PATCH_OSC2_WAVE, S1_PATCH_OSC2_TUNE, S1_PATCH_OSC2_DETUNE,
+     S1_PATCH_COUNT
+ };
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_CELL_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+diff --git a/firmware/src/dsp/s1_dry_voice.c b/firmware/src/dsp/s1_dry_voice.c
+index 162aebba..bd8b370a 100644
+--- a/firmware/src/dsp/s1_dry_voice.c
++++ b/firmware/src/dsp/s1_dry_voice.c
+@@ -7,7 +7,8 @@
+  * The response calibration uses only original input/output observations. */
+ _Static_assert(sizeof(float) == 4, "binary32 storage required");
+ #if X0X_SYNTHONE_PATCH
+-_Static_assert(sizeof(s1_dry_voice) == 144, "bounded editable single-voice state changed");
++#include "s1_osc2.h"
++_Static_assert(sizeof(s1_dry_voice) == 152, "bounded editable single-voice state changed");
+ #else
+ _Static_assert(sizeof(s1_dry_voice) == 124, "bounded single-voice state changed");
+ #endif
+@@ -74,7 +75,7 @@ void s1_dry_frozen_controls(s1_dry_controls *p)
+         {0.05f, 0.05f, 1.0f, 0.5f},
+         2000.0f, 0.9f, 0.0f, 1.0f, 0.5f
+ #if X0X_SYNTHONE_PATCH
+-        , 0.f, 0.f, 0.f
++        , 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f
+ #endif
+     };
+ }
+@@ -92,7 +93,11 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
+ #if X0X_SYNTHONE_PATCH
+     if (!range(controls->sub_level, 0.f, 1.f) ||
+         !range(controls->sub_extra_octave, 0.f, 1.f) ||
+-        !range(controls->sub_square, 0.f, 1.f)) return S1_DRY_RANGE;
++        !range(controls->sub_square, 0.f, 1.f) ||
++        !range(controls->osc2_level, 0.f, 1.f) ||
++        !range(controls->osc2_wave, 0.f, 1.f) ||
++        !range(controls->osc2_tune, -12.f, 24.f) ||
++        !range(controls->osc2_detune, -4.f, 4.f)) return S1_DRY_RANGE;
+ #endif
+     s1_dry_prepared next = {0};
+     next.cutoff_hz = controls->cutoff_hz;
+@@ -194,7 +199,20 @@ static void update_cutoff(s1_dry_voice *voice, float filter)
+         prepare_filter(&voice->prepared, cutoff_hz);
+ }
+ 
+-static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, float amp, float component_gain)
++#if X0X_SYNTHONE_PATCH
++typedef struct {
++    s1_osc2_morph morph;
++    float level, balance;
++} s1_osc2_mix;
++#define S1_OSC2_ARG , const s1_osc2_mix *osc2
++#define S1_OSC2_PASS , osc2
++#else
++#define S1_OSC2_ARG
++#define S1_OSC2_PASS
++#endif
++
++static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, float amp,
++                                                        float component_gain S1_OSC2_ARG)
+ {
+     float oscillator = 2.0f * voice->phase - 1.0f;
+     /* The unbandlimited source is a periodic 4096-point raw ramp. Its last
+@@ -204,6 +222,14 @@ static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, fl
+     float excitation = oscillator * component_gain;
+     excitation *= voice->velocity_squared;
+ #if X0X_SYNTHONE_PATCH
++    if (osc2) {
++        const uint32_t phase = voice->osc2.phase;
++        voice->osc2.phase = (phase + voice->osc2.step) & (S1_SUB_PERIOD - 1u);
++        if (osc2->level != 0.f && osc2->balance != 0.f) {
++            const float wave = s1_osc2_wave(osc2->morph, phase) * voice->velocity_squared;
++            excitation += (wave * osc2->level) * osc2->balance;
++        }
++    }
+     /* The source clocks a silent sub too, so raising its level preserves phase. */
+     const float sub = s1_sub_sample(&voice->sub, voice->velocity_squared,
+                                      voice->prepared.sub_level, voice->prepared.sub_square);
+@@ -225,13 +251,22 @@ static float component_gain(const s1_dry_voice *voice)
+     return (1.0f - p->balance) * p->oscillator1_level;
+ }
+ 
+-float s1_dry_sample(s1_dry_voice *voice)
++static float dry_sample(s1_dry_voice *voice S1_OSC2_ARG)
+ {
+     if (!voice->started) return 0.0f;
+     float amp = dnbx_s1_envelope_sample(&voice->amp, &voice->prepared.amp, voice->gate);
+     float filter = dnbx_s1_envelope_sample(&voice->filter, &voice->prepared.filter, voice->gate);
+     update_cutoff(voice, filter);
+-    return oscillator_filter(voice, amp, component_gain(voice));
++    return oscillator_filter(voice, amp, component_gain(voice) S1_OSC2_PASS);
++}
++
++float s1_dry_sample(s1_dry_voice *voice)
++{
++#if X0X_SYNTHONE_PATCH
++    return dry_sample(voice, NULL);
++#else
++    return dry_sample(voice);
++#endif
+ }
+ 
+ /* Note, gate and parameter changes arrive between spans. Within a span the
+@@ -257,11 +292,20 @@ static inline float advance_envelope(dnbx_s1_envelope_state *state,
+     return state->level;
+ }
+ 
+-void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames)
++void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames
++#if X0X_SYNTHONE_PATCH
++                , const s1_dry_controls *controls
++#endif
++)
+ {
+     if (!frames || !voice->started) return;
++#if X0X_SYNTHONE_PATCH
++    const s1_osc2_mix osc2_config = {s1_osc2_morph_at(controls->osc2_wave),
++                                     controls->osc2_level, controls->balance};
++    const s1_osc2_mix *osc2 = &osc2_config;
++#endif
+     /* Apply pending gate edges and coefficient latches on the first frame. */
+-    mix[0] += s1_dry_sample(voice);
++    mix[0] += dry_sample(voice S1_OSC2_PASS);
+     float amp_term = envelope_term(&voice->amp, &voice->prepared.amp);
+     float filter_term = envelope_term(&voice->filter, &voice->prepared.filter);
+     const float gain = component_gain(voice);
+@@ -270,7 +314,7 @@ void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames)
+         float amp = advance_envelope(&voice->amp, &voice->prepared.amp, &amp_term);
+         float filter = advance_envelope(&voice->filter, &voice->prepared.filter, &filter_term);
+         if (modulated) update_cutoff(voice, filter);
+-        mix[i] += oscillator_filter(voice, amp, gain);
++        mix[i] += oscillator_filter(voice, amp, gain S1_OSC2_PASS);
+     }
+ }
+ 
+diff --git a/firmware/src/dsp/s1_dry_voice.h b/firmware/src/dsp/s1_dry_voice.h
+index 289d4ef9..686b6c4a 100644
+--- a/firmware/src/dsp/s1_dry_voice.h
++++ b/firmware/src/dsp/s1_dry_voice.h
+@@ -22,6 +22,7 @@ typedef struct {
+     float oscillator1_level, balance;
+ #if X0X_SYNTHONE_PATCH
+     float sub_level, sub_extra_octave, sub_square;
++    float osc2_level, osc2_wave, osc2_tune, osc2_detune;
+ #endif
+ } s1_dry_controls;
+ 
+@@ -44,7 +45,7 @@ typedef struct {
+     float filter_history[5];
+     uint8_t gate, started, configured, reserved;
+ #if X0X_SYNTHONE_PATCH
+-    s1_sub_osc sub;
++    s1_sub_osc sub, osc2;
+     float sub_base_hz;
+ #endif
+ } s1_dry_voice;
+@@ -68,7 +69,11 @@ int s1_dry_note_off(s1_dry_voice *voice);
+ void s1_dry_begin_block(s1_dry_voice *voice);
+ float s1_dry_sample(s1_dry_voice *voice);
+ /* Add one active voice after the caller has applied its block boundary. */
+-void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames);
++void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames
++#if X0X_SYNTHONE_PATCH
++                , const s1_dry_controls *controls
++#endif
++);
+ int s1_dry_render(s1_dry_voice *voice, float *mono, unsigned frames);
+ /* Exposed physical control law for numerical validation, not a control ID API. */
+ float s1_dry_cutoff(float base_hz, float depth, float envelope);
+diff --git a/firmware/src/dsp/s1_osc2.h b/firmware/src/dsp/s1_osc2.h
+new file mode 100644
+index 00000000..a756ebb9
+--- /dev/null
++++ b/firmware/src/dsp/s1_osc2.h
+@@ -0,0 +1,42 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#pragma once
++#include <stdint.h>
++
++enum { S1_OSC2_SIZE = 4096, S1_OSC2_PHASE_BITS = 12 };
++
++typedef struct {
++    float fraction;
++    unsigned shape;
++} s1_osc2_morph;
++
++static inline s1_osc2_morph s1_osc2_morph_at(float position)
++{
++    float row = 3.f * position;
++    unsigned shape = (unsigned)row;
++    return (s1_osc2_morph){row - (float)shape, shape};
++}
++
++/* The four original unbandlimited rows are analytic at the sample knots.
++ * Interpolate adjacent knots, including both pulse edges and the wrap. */
++static inline float s1_osc2_knot(unsigned shape, unsigned index)
++{
++    switch (shape) {
++    case 0: return (float)(index <= 2048u ? index : 4096u - index) * (1.f / 1024.f) - 1.f;
++    case 1: return index < 2048u ? -1.f : 1.f;
++    case 2: return index < 512u ? -1.f : 1.f;
++    default: return (float)index * (1.f / 2048.f) - 1.f;
++    }
++}
++
++static inline float s1_osc2_wave(s1_osc2_morph morph, uint32_t phase)
++{
++    const unsigned a = phase >> S1_OSC2_PHASE_BITS;
++    const unsigned b = (a + 1u) & (S1_OSC2_SIZE - 1u);
++    const unsigned adjacent = morph.shape < 3u ? morph.shape + 1u : morph.shape;
++    const float x = (1.f - morph.fraction) * s1_osc2_knot(morph.shape, a) +
++                    morph.fraction * s1_osc2_knot(adjacent, a);
++    const float y = (1.f - morph.fraction) * s1_osc2_knot(morph.shape, b) +
++                    morph.fraction * s1_osc2_knot(adjacent, b);
++    const float fraction = (float)(phase & (S1_OSC2_SIZE - 1u)) * (1.f / 4096.f);
++    return x + (y - x) * fraction;
++}
+diff --git a/tests/host/original_sound_cell_test.c b/tests/host/original_sound_cell_test.c
+index 4871a2c9..b89166ad 100644
+--- a/tests/host/original_sound_cell_test.c
++++ b/tests/host/original_sound_cell_test.c
+@@ -316,14 +316,14 @@ static void verify_synthone(void)
+     uint8_t master_ext[S1_MASTER_EXT_SIZE], master_cell[32];
+     memcpy(master_cell,extended,32);memset(master_ext,255,sizeof master_ext);
+     assert(original_master_valid(master_cell,master_ext));
+-    for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)for(unsigned q=0;q<128;++q){
++    for(unsigned j=0;j<S1_MASTER_VALUES_BYTES-1;++j)for(unsigned q=0;q<128;++q){
+         unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME+j;
+         assert(original_sound_set_extended(master_cell,master_ext,id,q));
+         assert(original_master_valid(master_cell,master_ext) && original_sound_valid(master_cell));
+         assert(original_master_display(master_cell,master_ext,id)==q);
+         for(unsigned k=0;k<4;++k)assert(original_sound_s1_display(master_cell,ORIGINAL_SYNTHONE_PHASER_MIX+k)==phaser[k]);
+     }
+-    for(unsigned j=0;j<S1_MASTER_EXT_SIZE;++j){
++    for(unsigned j=0;j<S1_MASTER_VALUES_BYTES;++j){
+         uint8_t clone[S1_MASTER_EXT_SIZE];memcpy(clone,master_ext,sizeof clone);clone[j]=254;
+         assert(!original_master_valid(master_cell,clone));
+     }
+diff --git a/tests/host/synthone_init_audio.c b/tests/host/synthone_init_audio.c
+index fc450816..e649393a 100644
+--- a/tests/host/synthone_init_audio.c
++++ b/tests/host/synthone_init_audio.c
+@@ -150,7 +150,7 @@ static void sub_bypass(void)
+  * control. Filter envelope parameters need nonzero depth to be audible. */
+ static void patch_audio(void)
+ {
+-    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127};
++    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127,127,0,127,127};
+     uint8_t cell[32];
+     for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
+         assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+@@ -160,6 +160,8 @@ static void patch_audio(void)
+         uint8_t ext[S1_MASTER_EXT_SIZE] = {0};
+         if (slot == S1_PATCH_SUB_OCTAVE || slot == S1_PATCH_SUB_SQUARE)
+             assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 63));
++        if (slot > S1_PATCH_OSC2_LEVEL)
++            assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_OSC2_LEVEL, 63));
+         assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+         assert(original_runtime_init_extended(&part_b, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+         key(&part_a, 60, 105); key(&part_b, 60, 105);
+@@ -172,7 +174,8 @@ static void patch_audio(void)
+         assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
+         s1_part_apply_cell(&part_a.dsp.synthone, cell, ext);
+         const s1_dry_voice *after = &part_a.dsp.synthone.voice[0];
+-        assert(after->phase == before.phase && after->sub.phase == before.sub.phase);
++        assert(after->phase == before.phase && after->sub.phase == before.sub.phase &&
++               after->osc2.phase == before.osc2.phase);
+         assert(!memcmp(&after->amp, &before.amp, sizeof before.amp));
+         assert(!memcmp(&after->filter, &before.filter, sizeof before.filter));
+         unsigned different = 0;
+diff --git a/tests/host/synthone_osc2_reference.c b/tests/host/synthone_osc2_reference.c
+new file mode 100644
+index 00000000..01683a31
+--- /dev/null
++++ b/tests/host/synthone_osc2_reference.c
+@@ -0,0 +1,36 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#include "s1_osc2.h"
++#include <assert.h>
++#include <stdio.h>
++#include <stdint.h>
++
++int main(int argc, char **argv)
++{
++    assert(argc == 2);
++    FILE *f = fopen(argv[1], "rb");
++    assert(f);
++    static float source[4][4097];
++    assert(fread(source, sizeof(float), 4*4097, f) == 4*4097 && !fclose(f));
++    unsigned comparisons = 0;
++    const unsigned offsets[] = {0, 1, 1024, 2048, 3072, 4095};
++    for (unsigned q = 0; q < 128; ++q) {
++        const float position = (float)q / 127.f;
++        const float row = 3.f * position;
++        const unsigned a = (unsigned)row;
++        const unsigned b = a < 3 ? a + 1 : a;
++        const float t = row - a;
++        const s1_osc2_morph morph = s1_osc2_morph_at(position);
++        for (unsigned idx = 0; idx < 4096; ++idx) {
++            const unsigned wrapped = (idx + 1u) % 4096u;
++            const float x = (1.f - t) * source[a][idx] + t * source[b][idx];
++            const float y = (1.f - t) * source[a][wrapped] + t * source[b][wrapped];
++            for (unsigned i = 0; i < sizeof offsets / sizeof offsets[0]; ++i) {
++                const float expected = x + (y-x) * ((float)offsets[i] / 4096.f);
++                assert(s1_osc2_wave(morph, (idx << 12) | offsets[i]) == expected);
++                ++comparisons;
++            }
++        }
++    }
++    printf("Raw oscillator 2: %u exact source interpolation comparisons, including both pulse edges and wrap.\n",
++           comparisons);
++}
+diff --git a/tests/host/synthone_patch_test.c b/tests/host/synthone_patch_test.c
+index 1ef08fc4..2f6f0e3e 100644
+--- a/tests/host/synthone_patch_test.c
++++ b/tests/host/synthone_patch_test.c
+@@ -67,7 +67,7 @@ static void sub_extension_cells(void)
+     const uint8_t expected[S1_MASTER_EXT_SIZE] = {1, 37, 38, 39, 40, 41, 42};
+     assert(!memcmp(ext, expected, sizeof ext));
+     assert(original_master_valid(cell, ext) && original_master_edited(cell, ext));
+-    assert(!original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL));
++    assert(!original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_LEVEL));
+     assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 86));
+     assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_OCTAVE, 127));
+     assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_SQUARE, 127));
+@@ -76,16 +76,16 @@ static void sub_extension_cells(void)
+         assert(original_master_display(cell, ext, id) == 20 + id);
+     assert(original_sound_s1_display(cell, ORIGINAL_SYNTHONE_LFO2_LEVEL) == 93);
+     assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO, 72));
+-    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
+-    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_OCTAVE) == 127);
+-    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
++    assert(original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
++    assert(original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_OCTAVE) == 127);
++    assert(original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
+     assert(original_master_display(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO) == 72);
+     uint8_t corrupt[S1_MASTER_EXT_SIZE];
+     memcpy(corrupt, ext, sizeof corrupt);
+     corrupt[5] |= 128u;
+     assert(!original_master_valid(cell, corrupt));
+     assert(!original_sound_s1_set_extended(cell, corrupt, S1_PATCH_SUB_LEVEL, 1));
+-    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
++    assert(original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
+ 
+     /* An opted-in sub-only cell leaves the ordinary master bypassed. A later
+      * first master edit starts from the legacy defaults, keeping the sub. */
+@@ -97,7 +97,7 @@ static void sub_extension_cells(void)
+     assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME, 64));
+     assert(original_master_valid(cell, ext) && original_master_edited(cell, ext));
+     assert(original_master_display(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME) == 64);
+-    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
++    assert(original_sound_s1_extension_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
+ }
+ 
+ int main(void)
+@@ -110,18 +110,18 @@ int main(void)
+     assert(a.physical == 2000.f && b.physical == 2000.f && !a.note_locked);
+     assert(engine_s1_patch_set(1, a.revision, 16, 0) == S1_EDIT_REJECTED);
+     assert(engine_s1_patch_set(0, a.revision, 0, 0) == S1_EDIT_REJECTED);
+-    assert(engine_s1_patch_set(0, a.revision, 1, 0) == S1_EDIT_REJECTED);
++    assert(engine_s1_patch_set(0, a.revision, 3, 0) == S1_EDIT_REJECTED);
+     assert(engine_s1_patch_set(0, a.revision, 16, 128) == S1_EDIT_REJECTED);
+     assert(!engine_s1_patch_read(2, 16, &a));
+     assert(!s1_patch_at(S1_PATCH_COUNT));
+     assert(!engine_bass_preset_edited(0) && !engine_bass_preset_edited(1));
+ 
+-    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,7,8,9};
++    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,7,8,9,6,1,4,30};
+     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         const s1_patch_descriptor *d = s1_patch_at(i);
+         assert(d && *d->label && d->factory_id == ids[i] && d->minimum < d->maximum);
+-        assert(d->unit == X0X_U_HZ || d->unit == X0X_U_S || d->unit == X0X_U_PCT);
++        assert(d->unit == X0X_U_HZ || d->unit == X0X_U_S || d->unit == X0X_U_PCT || d->unit == X0X_U_ST);
+         assert(s1_patch_physical(d, 0) == d->minimum && s1_patch_physical(d, 127) == d->maximum);
+         /* Sweep every position on one part, reading the other owner's target
+          * and comparing its entire sound cell and identity after each edit. */
+@@ -135,7 +135,9 @@ int main(void)
+             block();
+             s1_patch_value actual = read_patch(0, ids[i]);
+             unsigned position = (ids[i] == 8u || ids[i] == 9u) ? (q >= 64u ? 127u : 0u) : q;
+-            assert(actual.physical == s1_patch_physical(d, q) && actual.position == position);
++            assert(actual.physical == s1_patch_physical(d, q));
++            if (ids[i] == 4u) assert(s1_patch_physical(d, actual.position) == actual.physical);
++            else assert(actual.position == position);
+             assert(read_patch(1, ids[i]).physical == other.physical);
+             assert(!memcmp(original.v[T_303][1], proj.sound.v[T_303][1], ORIGINAL_SOUND_BYTES));
+             assert(!memcmp(&original.bass[1], &proj.sound.bass[1], sizeof original.bass[1]));
+@@ -171,5 +173,5 @@ int main(void)
+     assert(!engine_s1_patch_read(1, 16, &b));
+     assert(engine_s1_patch_set(1, b.revision, 16, 127) == S1_EDIT_REJECTED);
+     note_lock();
+-    puts("Synth One INIT patch: 16 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
++    puts("Synth One INIT patch: 20 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
+ }

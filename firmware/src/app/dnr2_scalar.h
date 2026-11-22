@@ -2,7 +2,9 @@
 #ifndef X0X_DNR2_SCALAR_H
 #define X0X_DNR2_SCALAR_H
 #include <stdint.h>
+#ifndef X0X_DNR2_FREESTANDING
 #include <string.h>
+#endif
 
 /* One stored, independent U32 parameter. No held input or float exposure. */
 enum {
@@ -39,6 +41,19 @@ static void dnr2_put(uint8_t *p, unsigned n, uint32_t value)
         *p++ = (uint8_t)(value & 127u);
         value >>= 7;
     }
+}
+
+/* A fresh address for this boot. Correlation only, not peer authentication.
+ * Obvious missing/stuck entropy holds the endpoint closed. */
+static int dnr2_boot_address(dnr2_scalar *s, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
+{
+    if (a == b && b == c && c == d)
+        return 0;
+    dnr2_put(s->unit, 4, (a & DN_LIMIT) | 1u);
+    dnr2_put(s->unit_high, 5, b);
+    dnr2_put(s->unit_high + 5, 5, c);
+    dnr2_put(s->unit_high + 10, 5, d);
+    return 1;
 }
 
 static int dnr2_zero(const uint8_t *p, unsigned n)

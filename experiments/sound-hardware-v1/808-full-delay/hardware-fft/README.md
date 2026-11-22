@@ -1,0 +1,11 @@
+# Hardware FFT trial for the full 808 delay
+
+The original 8W8 maximum delay is 87,944 samples at 44.1 kHz. This experimental implementation stores 348 overlapping 256-sample transform packets and 1,536 recent original samples. The private 808 and shared 909 retain separate histories. An aligned DMA buffer feeds the AC79 complex FFT unit. Two cached inverse transforms and stored band widths reduce the work during time edits. The host comparison exercises the fixed-point input and output conversion used by the device. The chip's measured transform can differ from the ideal transform by a few integer units.
+
+Apply `cached-hardware-fft-42ae56e1.patch` to a checkout of `42ae56e1d83127fd9855fb8e86f8907af216b63a` with `git apply`. The patch includes the exact 909 representation used by these images. Use the commands in the [full-delay experiment](../README.md) with fresh output directories. For the active saved project, apply `../active-project.patch` to the same source before building the project writer. The primary upstream 8W8 commit is `94aa2716d4c2e5851fc7c5dbb4c17adfd133c997`.
+
+All 338 full mixes, 315 energized isolated returns, 68 sustained mixes, 48 sustained isolated returns and 68 long tails passed the 1 dB level and 3 dB spectral limits. These are host comparisons against pinned original renders. The ordinary Elite and Pro images have 1,084 and 1,092 bytes of flash free. Both retain 8,624 pool bytes, including the 8,192-byte reserve.
+
+The strict 360 MHz Elite Chicago/Miami project with the private echo active reached 13,569 µs, 40 late callbacks and 40 xruns. Both original synth owners and all five parts were active. Comparing the 2,000 ms startup capture and the 8,000 ms full shot yields 1,058,816 additional stereo PCM bytes. The full six-second interval is 1,058,400 bytes and the DMA half is 2,048 bytes. Both guest crash records were clear. The 429.569 ms private delay remains the production implementation at this source.
+
+The [measured FM-1 transforms](https://github.com/joakimeriksson/fm1-emu/blob/master/tests/hwdsp/fm1.txt) supply the 128-point descriptor in `fft/COMPLEX_FFT128/imp0`. The [emulator's FFT model](https://github.com/joakimeriksson/fm1-emu/blob/master/crates/fm1-soc/src/hwdsp.rs) reports 1,628 cycles for the complex 128-point job.

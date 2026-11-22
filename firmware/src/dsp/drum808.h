@@ -3,9 +3,9 @@
  * GPL-3.0; the rim shot is Yoshinosuke Horiuchi's sc808, MIT) ported to the FM-1.
  *
  * Same circuit models, pot tables, defaults, kit trims, velocity law and hat
- * choke as 8W8's sc808_engine.cpp. What is NOT here: 8W8's own reverb, delay,
- * master drive / glue and note map (the firmware's fxbus does the sends and the
- * master), its mutes (the sequencer's business) and its state blob.
+ * choke as 8W8's sc808_engine.cpp. The 808 kit has its own drive and glue;
+ * its original reverb can run before the kit master. The shared fxbus supplies delay. The
+ * sequencer owns mutes, note routing and persistent state.
  *
  * ELEVEN TRACKS, sixteen sounds, the way the TR-808 itself does it: LT/MT/HT
  * each switch Tom / Conga, RS switches Rim / Claves and CP switches Clap /
@@ -172,12 +172,16 @@ typedef struct {                    /* a sound's drive stage, resolved from its 
 struct drum808 {
     uint8_t pot[D8S_NUM][D8P_NUM];
     uint8_t sw[D8_NUM];               /* LT/MT/HT tom|conga, RS rim|clave, CP clap|maracas */
-    uint8_t kpot[3];                  /* kit: level, accent, choke */
+    uint8_t kpot[16];                 /* levels, shaper, glue and private sends */
+    uint8_t master_on;
     uint8_t tpan[D8_NUM];             /* X0X: each track's pan pot (a track, not a sound: tom / conga share it) */
     float pan_l[D8_NUM], pan_r[D8_NUM];
     float pan_lc[D8_NUM], pan_rc[D8_NUM], pan_dl[D8_NUM], pan_dr[D8_NUM];   /* gliding: now, per sample */
     float potv[D8S_NUM][D8P_NUM];     /* engineering values of pot[] */
     d8_shp_t shp[D8S_NUM];
+    d8_shp_t master;
+    float master_crush[2][2], master_vol;
+    float glue_thr, glue_slope, glue_makeup, glue_det, glue_env;
     float vol, vel_depth;
     int32_t choke;
 
@@ -196,12 +200,20 @@ struct drum808 {
 };
 typedef struct drum808 drum808_t;
 
+enum { D8_KIT_DIST = 2, D8_KIT_DRIVE = 3, D8_KIT_GLUE = 4, D8_KIT_RV_BUS = 5, D8_KIT_RV_DECAY = 6,
+       D8_KIT_RV_TONE = 7, D8_KIT_RV_HPF = 8, D8_KIT_RV_LEVEL = 9, D8_KIT_DL_BUS = 10, D8_KIT_DL_TIME, D8_KIT_DL_FDBK,
+       D8_KIT_DL_TONE, D8_KIT_DL_LEVEL, D8_KIT_DL_HPF, D8_MASTER_CRUSH = 7 };
+/* Finalize the sole owner's summed dry kit and mono send stems in place. */
+void drum808_kit_process(drum808_t *d, float *left, float *right, float *rev, float *dly, int n);
 void drum808_init(drum808_t *d);                          /* 8W8 defaults */
 void drum808_trigger(drum808_t *d, int track, float vel); /* vel 0..1, 1.0 = accent */
 void drum808_render(drum808_t *d, float *dry, float *rev, float *dly, int n);
 /* X0X stereo: each track placed by its PAN into dry_l / dry_r (sends mono); all centred, both are
  * drum808_render's dry exactly */
 void drum808_render_st(drum808_t *d, float *dry_l, float *dry_r, float *rev, float *dly, int n);
+/* Cleared, distinct dry buffers yield the same signal as masked stereo. */
+void drum808_render_st_cleared(drum808_t *d, float *left, float *right, float *rev, float *dly,
+                              int n, uint16_t audible_tracks);
 /* Only selected tracks reach dry/send buses; every voice still advances normally. */
 void drum808_render_st_masked(drum808_t *d, float *dry_l, float *dry_r, float *rev, float *dly,
                              int n, uint16_t audible_tracks);

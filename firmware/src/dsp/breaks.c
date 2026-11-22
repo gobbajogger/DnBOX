@@ -56,11 +56,7 @@ static void brk_config_unlock(uint32_t state) { (void)state; }
 #endif
 #include "fastmath.h"
 #include "ima_adpcm.h"
-#if X0X_SUPERJ6_FACTORY
 #include "break_retrigger_packed.h"
-#else
-#include "break_retrigger_lut.h"
-#endif
 
 /* ---- parameters ------------------------------------------------------------------------- */
 

@@ -15,7 +15,7 @@ static float clampf(float x,float a,float b){return x<a?a:x>b?b:x;}
 #define JUNO6_LEGACY(result, name) result juno6_##name
 #endif
 static float midi_hz(unsigned n){return 440.0f*fm_exp2f(((float)n-69.0f)*(1.0f/12.0f));}
-static float blep(float t,float dt){if(t<dt){t/=dt;return t+t-t*t-1.0f;}if(t>1.0f-dt){t=(t-1.0f)/dt;return t*t+t+t+1.0f;}return 0.0f;}
+static inline __attribute__((always_inline)) float blep(float t,float dt){if(t<dt){t/=dt;return t+t-t*t-1.0f;}if(t>1.0f-dt){t=(t-1.0f)/dt;return t*t+t+t+1.0f;}return 0.0f;}
 JUNO6_LEGACY(void, init)(juno6_t*s,float sr){memset(s,0,sizeof *s);s->sample_rate=sr>8000?sr:44100;s->attack=.008f;s->decay=.28f;s->sustain=.72f;s->release=.24f;s->cutoff=.68f;s->resonance=.12f;s->pulse_width=.5f;s->sub_level=.22f;s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;s->macro[15]=1.0f;s->macro[16]=.5f;}
 /* Re-key the sounding pitch even after key-up, while pedal or release keeps it alive. */
 JUNO6_LEGACY(int, note_on)(juno6_t*s,uint8_t note,uint8_t vel){unsigned i,chosen=0;uint32_t oldest;if(!vel){juno6_note_off(s,note);return 1;}for(i=0;i<6;i++)if(s->voice[i].stage&&s->voice[i].note==note){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate&&s->voice[i].envelope<.0001f){chosen=i;goto assign;}for(i=0;i<6;i++)if(!s->voice[i].gate){chosen=i;goto assign;}oldest=s->voice[0].age;for(i=1;i<6;i++)if(s->voice[i].age<oldest){oldest=s->voice[i].age;chosen=i;}assign:{juno6_voice_t*v=&s->voice[chosen];v->note=note;v->gate=1;v->stage=1;v->age=++s->age;v->increment=midi_hz(note)/s->sample_rate*fm_exp2f(s->bend*(1.0f/12.0f));v->velocity=(float)vel/127.0f;if(v->envelope<.0001f)v->phase=0;}return 1;}
@@ -98,9 +98,29 @@ JUNO6_LEGACY(void, render)(juno6_t *s, float *out, unsigned n)
  }
 }
 void juno6_chorus_init(juno6_chorus_t*c,float sr){memset(c,0,sizeof *c);c->sample_rate=sr>8000?sr:44100;c->rate_hz=.8f;c->depth_ms=3.4f;c->mix=.22f;}
-void juno6_chorus_set(juno6_chorus_t*c,float r,float d,float m){c->rate_hz=clampf(r,.1f,5);c->depth_ms=clampf(d,1.7f,5.4f);c->mix=clampf(m,0,.5f);}
+void juno6_chorus_set(juno6_chorus_t *c, float r, float d, float m)
+{
+    c->rate_hz=clampf(r,.1f,5);
+    c->depth_ms=clampf(d,1.7f,5.4f);
+    c->mix=clampf(m,0,.5f);
+#if X0X_SUPERJ6_STOCK_PRESET
+    if (c->factory.follow_panel) {
+        c->factory.mix = c->mix;
+        c->factory.phase_step = (uint32_t)(c->rate_hz * (4294967296.f / c->sample_rate));
+    }
+#endif
+}
+#if X0X_SUPERJ6_FACTORY
+#include "juno6_chorus_factory.inc"
+#endif
 void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
 {
+#if X0X_SUPERJ6_FACTORY
+ if (c->factory.mode) {
+  render_factory_chorus(c, l, r, n);
+  return;
+ }
+#endif
  const float sr = c->sample_rate;
  const float min_delay = sr * .0017f, max_delay = fm_minf(255, sr * .0054f);
  const float depth = c->depth_ms * .001f - .0017f;

@@ -3,6 +3,9 @@ void juno6_init(juno6_t *s,float sr)
 {
  stock_init(s,sr);
  (void)dnbx_init_superj6(&s->core,s->sample_rate);
+ /* Register is neutral until a factory load owns the raw control. Leave its
+  * presence bit clear so an ordinary preset still reports it as unbound. */
+ s->core.raw[86]=.5f;
  s->master_gain=1.f;
 }
 int juno6_note_on(juno6_t *s,uint8_t note,uint8_t velocity)
@@ -58,19 +61,47 @@ static int set_amp2(dnbx_part *core, unsigned id, float raw)
     return dnbx_store_raw(core, id, raw) == DNBX_RAW_STORED_ONLY;
 }
 
+/* Called for an independent layer-one edit on the idle audio owner. */
+void juno6_apply_pre_note_attack(juno6_t *s, float raw)
+{
+    dnbx_layer_params layer;
+    if (dnbx_get_layer(&s->core, 0, &layer) != DNBX_OK ||
+        dnbx_attack_from_unit(raw, &layer.amp.attack_s) != DNBX_OK ||
+        dnbx_set_layer(&s->core, 0, &layer) != DNBX_OK) return;
+    (void)dnbx_store_raw(&s->core, 36, raw);
+    s->typed = 1;
+}
+
+/* Independent compact PWM LFO. Hz mode does not establish a factory route. */
+void juno6_apply_lfo1_hz(juno6_t *s, float raw)
+{
+    float hz;
+    if (!s->typed || dnbx_lfo_from_unit(raw, &hz) != DNBX_OK ||
+        dnbx_store_raw(&s->core, 88, raw) != DNBX_RAW_STORED_ONLY) return;
+    /* The phase increment reads this parameter directly. Keep running
+     * phases, envelopes and voice increments untouched. */
+    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer)
+        s->core.layer[layer].params.lfo_hz = hz;
+}
+
+static float factory_waveform(float selector)
+{
+    /* Adjacent binary32 points bound truncation of binary64 3*selector. */
+    unsigned stop = (selector >= 0x1.555556p-2f) +
+                    (selector >= 0x1.555556p-1f) + (selector == 1);
+    return stop * (1.f / 3.f);
+}
+
 /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
 void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)
 {
     dnbx_layer_params params;
     if (dnbx_get_layer(&s->core, layer, &params) != DNBX_OK) return;
-    /* Adjacent binary32 threshold points bound truncation of binary64 3*x. */
-    unsigned stop = (edit->selector >= 0x1.555556p-2f)
-                  + (edit->selector >= 0x1.555556p-1f) + (edit->selector == 1);
     params.oscillator_mode = DNBX_OSC_SUPERJ6;
-    params.waveform = stop * (1.f / 3.f);
+    params.waveform = factory_waveform(edit->selector);
     params.pulse_width = .5f;
-    if (stop == 3 && edit->enable > .5f)
+    if (edit->selector == 1.f && edit->enable > .5f)
         (void)dnbx_pwm_from_unit(edit->amount, &params.pulse_width);
     if (dnbx_set_layer(&s->core, layer, &params) != DNBX_OK) return;
     s->typed = 1;
@@ -83,33 +114,52 @@ void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillato
 
 /* A new factory program owns both base waveforms. Modulation depth from
  * the previous stock Juno program is unrelated to its original LFO routes. */
-void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2])
+static float factory_tune(const juno6_t *s)
 {
-    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
-        s->core.layer[layer].params.lfo_pwm_depth = 0.f;
-        juno6_apply_pre_note_wave(s, layer, &waves[layer]);
-    }
+    return s->bend + 24.f * (s->core.raw[86] - .5f);
 }
 
-/* Setters run at block boundaries on a single-precision target. Scale the
- * significand by 101/250 and round once, as the original Double setter does.
- * All factory inputs are zero or normal with exponent at least three. */
-static float master_from_raw(float raw)
+/* The measured sub and master scalar paths use 101/125 and 101/250.
+ * Round the integer significand once, without soft-double calls on target. */
+static float volume_from_raw(float raw, unsigned half)
 {
-    fm_bits_t value = {.f=raw};
+    if (raw == 0.f) return 0.f;
+    fm_bits_t value = {.f = raw};
     unsigned exponent = value.u >> 23;
-    if (raw == 0) return 0.f;
-    if (exponent < 3) return raw * .404f;
-    uint32_t significand = (value.u & 0x7fffffu) | 0x800000u;
+    /* Preserve the previous master behavior for non-factory tiny values. */
+    if (half && exponent < 3) return raw * .404f;
+    uint32_t significand = (value.u & 0x7fffffu) | (exponent ? 0x800000u : 0u);
     uint32_t numerator = significand * 101u;
-    unsigned result_exponent = exponent - 2;
+    if (exponent <= 1) {
+        value.u = (numerator + 62u) / 125u;
+        return value.f;
+    }
+    unsigned result_exponent = exponent - 1 - half;
     if (numerator < (125u << 23)) {
         numerator *= 2;
         --result_exponent;
     }
-    /* The normal-result denominator 125 is odd, so a tie is impossible. */
+    /* The denominator is odd, so there is no tie. */
     value.u = (result_exponent << 23) + (numerator + 62u) / 125u;
     return value.f;
+}
+
+void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2], float sub_volume)
+{
+    enum { SUB_VOLUME_ID = 202 };
+    float sub_gain = s->sub_level;
+    if (sub_volume >= 0.f) {
+        sub_gain = volume_from_raw(sub_volume, 0);
+        (void)dnbx_store_raw(&s->core, SUB_VOLUME_ID, sub_volume);
+    } else {
+        s->core.raw_present[SUB_VOLUME_ID / 32] &= ~(1u << (SUB_VOLUME_ID % 32));
+    }
+    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
+        s->core.layer[layer].params.lfo_pwm_depth = 0.f;
+        s->core.layer[layer].params.sub_gain = sub_gain;
+        s->core.layer[layer].params.tune_semitones = factory_tune(s);
+        juno6_apply_pre_note_wave(s, layer, &waves[layer]);
+    }
 }
 
 int juno6_set(juno6_t *s,unsigned id,float x)
@@ -118,7 +168,7 @@ int juno6_set(juno6_t *s,unsigned id,float x)
  if(id==JUNO6_APP_PARAM_BASE){
   if(!(x>=0 && x<=JUNO6_FACTORY_MASTER_MAX))return 0;
   if(dnbx_store_raw(&s->core,0,x)!=DNBX_RAW_STORED_ONLY)return 0;
-  s->master_gain=master_from_raw(x);
+  s->master_gain=volume_from_raw(x,1);
   return 1;
  }
  if(!(x>=0&&x<=1))return 0;
@@ -138,6 +188,12 @@ int juno6_set(juno6_t *s,unsigned id,float x)
   if(dnbx_get_layer(&s->core,l,&p)!=DNBX_OK)return 0;
   switch(id){
   case 0:
+#if X0X_SUPERJ6_STOCK_PRESET
+   if (s->stock_preset) {
+    p.waveform = factory_waveform(x);
+    break;
+   }
+#endif
    if (p.oscillator_mode == DNBX_OSC_SUPERJ6) p.oscillator_mode = DNBX_OSC_STOCK_BLEP;
    p.waveform=(2+x)/3;break;
   case 1:p.sub_gain=s->sub_level;break;
@@ -152,7 +208,7 @@ int juno6_set(juno6_t *s,unsigned id,float x)
   case 11:p.lfo_pwm_depth=x*.2f;break;
   case 12:p.pulse_width=clampf(s->pulse_width,.03f,.5f);break;
   case 15:p.gain=x;break;
-  case 16:p.tune_semitones=s->bend;break;
+  case 16:p.tune_semitones=factory_tune(s);break;
   default:break;
   }
   if(dnbx_set_layer(&s->core,l,&p)!=DNBX_OK)return 0;

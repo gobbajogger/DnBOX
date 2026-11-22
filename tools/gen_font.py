@@ -319,6 +319,40 @@ def pack_cropped_alpha(pixels, width, height, models):
     return prefix
 
 
+def entropy_codes(payloads):
+    """Encode byte ranks in eight prefix groups using four to ten bits each."""
+    counts = Counter(byte for data in payloads for byte in data)
+    symbols = sorted(range(256), key=lambda b: (-counts[b], b))
+    codes = {}
+    for rank, byte in enumerate(symbols):
+        group = max(0, rank.bit_length() - 1)
+        width = max(1, group)
+        base = 1 << group if group else 0
+        codes[byte] = (group | ((rank - base) << 3), 3 + width)
+    return symbols, codes
+
+
+def encode_glyphs(data, offsets, codes):
+    """Keep glyphs byte-addressable and bound the decoder's two-byte lookahead."""
+    starts = sorted(set(offsets))
+    ends = starts[1:] + [len(data)]
+    encoded, new_offsets = [], {}
+    for start, end in zip(starts, ends):
+        new_offsets[start] = len(encoded)
+        reservoir = bits = 0
+        for byte in data[start:end]:
+            word, width = codes[byte]
+            reservoir |= word << bits
+            bits += width
+            while bits >= 8:
+                encoded.append(reservoir & 255)
+                reservoir >>= 8
+                bits -= 8
+        if bits:
+            encoded.append(reservoir)
+    return encoded + [0, 0], [new_offsets[start] for start in offsets]
+
+
 def main(out, compressed=True, codec=None):
     codec = codec or ("crop-alpha" if FONTSET == "barlow" else "crop-lz")
     assert codec in ("crop-alpha", "crop-lz", "packbits")
@@ -330,6 +364,7 @@ def main(out, compressed=True, codec=None):
         lines.append({"crop-alpha": "#define FONT_ALPHA_CROP 1", "crop-lz": "#define FONT_LZ_CROP 1",
                       "packbits": "#define FONT_PACKBITS 1"}[codec])
     configs = []
+    roles = []
     for name, ttf, px, scale, pixel, first, last in SIZES:
         h, glyphs = render(ttf, px, scale, pixel, first, last)
         if name in KEEP:
@@ -386,6 +421,15 @@ def main(out, compressed=True, codec=None):
                         else pack_glyph(raw) if compressed else raw)
         if models is not None:
             data.append(0)  # bounded seven-bit lookahead at the final glyph
+        roles.append((name, ttf, px, h, scale, first, last, glyphs, data, offs))
+    entropy = compressed and codec == "crop-lz"
+    if entropy:
+        symbols, codes = entropy_codes(role[-2] for role in roles)
+        lines.append("#define FONT_ENTROPY 1")
+        lines.append("static const uint8_t font_symbols[256] = {" + ",".join(map(str, symbols)) + "};")
+    for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
+        if entropy:
+            data, offs = encode_glyphs(data, offs, codes)
         assert len(data) < 65536
         lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
         for i in range(0, len(data), 24):

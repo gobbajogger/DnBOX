@@ -18,7 +18,7 @@ compile() {
 # Rename only the runtime object. Its internal calls remain internal, so one
 # outer timed entry includes their work exactly once. Works with ELF and Mach-O.
 renames=
-for entry in prepare key param init render release_source cut_source all_off retire; do
+for entry in prepare key param init render_owned release_source cut_source all_off retire; do
     renames="$renames -Doriginal_runtime_$entry=stress_real_original_runtime_$entry"
 done
 compile $renames -c firmware/src/app/original_runtime.c -o "$OUT/runtime.o"

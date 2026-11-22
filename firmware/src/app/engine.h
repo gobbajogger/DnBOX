@@ -103,6 +103,8 @@ int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
 #if X0X_SUPERJ6_FACTORY
 enum engine_superj6_field {
     ENGINE_SJ6_MASTER_VOLUME = 0,
+    ENGINE_SJ6_AMP1_ATTACK = 36,
+    ENGINE_SJ6_LFO1_HZ_RATE = 88,
     ENGINE_SJ6_AMP2_ATTACK = 119, ENGINE_SJ6_AMP2_DECAY,
     ENGINE_SJ6_AMP2_SUSTAIN, ENGINE_SJ6_AMP2_RELEASE
 };
@@ -110,7 +112,10 @@ enum engine_superj6_field {
  * The master accepts factory values through 1.32. AMP2 accepts 0 through 1.
  * Repeated edits to a field in one callback interval retain the last value.
  * Shipping voices must be idle before the first AMP2 edit. Typed voices accept
- * AMP2 while sounding. Returns zero on a busy/wrong owner or invalid field/value. */
+ * AMP2 while sounding. AMP1 attack is an independent pre-note edit and requires
+ * an idle owner at admission and commit. LFO1 Hz rate edits the compact PWM
+ * LFO on an already typed owner. Returns zero on a busy/wrong owner
+ * or invalid field/value. */
 int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit);
 typedef struct { float amount, enable; } engine_superj6_pwm;
 /* Stage original wave 82/83 plus optional PWM 78/79 and 210/211. Only an
@@ -197,7 +202,7 @@ typedef struct {
 #if X0X_BASS_TAGGED_SOUND
 int engine_bass_sound_bank(const sound_t *sound,int voice);
 /* Compact undo candidate: no project-sized automatic scratch. */
-typedef struct { uint8_t cell[NBASS][NPARAMS_MAX]; bass_sound_tag_t tag[NBASS]; } bass_base_state_t;
+typedef struct { uint8_t cell[NBASS][NPARAMS_MAX]; bass_sound_tag_t tag[NBASS]; uint8_t ext[NBASS][S1_MASTER_EXT_SIZE]; } bass_base_state_t;
 int engine_bass_base_ready(unsigned mask,const bass_base_state_t *target);
 void engine_bass_base_restore(unsigned mask); /* caller holds audio; ready was 0 */
 uint32_t engine_bass_choice_serial(void);
@@ -275,6 +280,9 @@ static inline int engine_bass_is_wobble(int voice)
 
 /* main loop -> ISR */
 void engine_set(int target, int voice, int i, int value);   /* queued; the sound_t mirror is the caller's */
+#if X0X_DNR2_SCRATCH
+int engine_try_set_remote_909_level(uint8_t value);
+#endif
 void engine_set_base(int target, int voice, int i);         /* exact patch value, after a temporary edit */
 #if X0X_ORIGINAL_SYNTH
 #ifdef X0X_HOST

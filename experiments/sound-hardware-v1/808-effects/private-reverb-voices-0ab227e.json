@@ -1,0 +1,657 @@
+{
+  "original": "94aa2716d4c2e5851fc7c5dbb4c17adfd133c997",
+  "rate": 44100,
+  "frames_per_case": 88200,
+  "cases": [
+    {
+      "voice": 0,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": 0.0,
+      "spectral_rms_db": 0.0,
+      "pass": true,
+      "reference_sha256": "2a6f895ff7c170e08b5aa73c0849418c84a121eb0d4bc40280ed748e4da33de8"
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -8.718785880091424e-06,
+      "spectral_rms_db": 0.0006768373651518389,
+      "pass": true,
+      "reference_sha256": "22cf2a5e98b40172139f6f4ae1c971390f4e74022aa9310e8e74bc54dd9228c3",
+      "return_level_db": -6.841030777206293e-05,
+      "return_spectral_rms_db": 0.002059880607804934,
+      "return_pass": true
+    },
+    {
+      "voice": 2,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": 7.398578024782948e-05,
+      "spectral_rms_db": 0.06397659590725838,
+      "pass": true,
+      "reference_sha256": "7a46d3b9904df97193b5a1e3d5f50de13633889065b64f0c1856bd38a9adc057",
+      "return_level_db": 6.46782939483854e-05,
+      "return_spectral_rms_db": 0.27087769754276647,
+      "return_pass": true
+    },
+    {
+      "voice": 3,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -3.3660939494868755e-05,
+      "spectral_rms_db": 0.07979282024942275,
+      "pass": true,
+      "reference_sha256": "295df869d6c0d1d06a4bd59f638280a69e1324986dde40c9428c878e112e17d2",
+      "return_level_db": -0.00011177370577745518,
+      "return_spectral_rms_db": 0.32884558870625064,
+      "return_pass": true
+    },
+    {
+      "voice": 4,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -4.156240876998285e-05,
+      "spectral_rms_db": 0.08916753652736824,
+      "pass": true,
+      "reference_sha256": "a6107a6dd8e36359ba98517620400877ca8668aafaf0ad30efd587aaaf0e42f4",
+      "return_level_db": -0.0001948879630875303,
+      "return_spectral_rms_db": 0.1321479454528408,
+      "return_pass": true
+    },
+    {
+      "voice": 5,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -2.5252792317626955e-05,
+      "spectral_rms_db": 0.05493412660206905,
+      "pass": true,
+      "reference_sha256": "576be2bcf5f969ebc110a40cc629bfc06d42bee0909893ad33e3e9ffcb388881",
+      "return_level_db": -0.00010020496189568905,
+      "return_spectral_rms_db": 0.18698938551540314,
+      "return_pass": true
+    },
+    {
+      "voice": 6,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -4.8559553141843676e-05,
+      "spectral_rms_db": 0.06108103735410475,
+      "pass": true,
+      "reference_sha256": "7b98906539b03b7f5592b4f1124766ea387b9419f9caef848bedbecc8101a582",
+      "return_level_db": -0.00013145548392782681,
+      "return_spectral_rms_db": 0.1496214019705552,
+      "return_pass": true
+    },
+    {
+      "voice": 7,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -2.9021874579574464e-05,
+      "spectral_rms_db": 0.06390458551874129,
+      "pass": true,
+      "reference_sha256": "fdfadd0a499c2b3206135f4f5a1a48b06c3c37f5b3600179887e313e60f2bd08",
+      "return_level_db": -8.873351034646864e-05,
+      "return_spectral_rms_db": 0.1700689277594433,
+      "return_pass": true
+    },
+    {
+      "voice": 8,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -9.394846075937262e-06,
+      "spectral_rms_db": 0.002253294728686597,
+      "pass": true,
+      "reference_sha256": "055187d3bcaf42d51882ee51e97f2563b4ae7bfb1e4e0bef6162ef4cd92f8723",
+      "return_level_db": -1.3818894863984266e-05,
+      "return_spectral_rms_db": 0.007004050903507079,
+      "return_pass": true
+    },
+    {
+      "voice": 9,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": 1.4946733586341564e-05,
+      "spectral_rms_db": 0.01890989447956095,
+      "pass": true,
+      "reference_sha256": "9d49ed762dbb4dfb8c1e38ed3c1eaeba850b1e3db6d7bdb2f2ef6c78b304607e",
+      "return_level_db": 3.0597146789275375e-05,
+      "return_spectral_rms_db": 0.044781952695107534,
+      "return_pass": true
+    },
+    {
+      "voice": 10,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -4.047837702620238e-06,
+      "spectral_rms_db": 0.022297012329042725,
+      "pass": true,
+      "reference_sha256": "4fa7c1efdccfb25cd22b0ea63394f40d6b7fa3eb4a99ea8bc3a93ffe6fe8a1ca",
+      "return_level_db": 3.5739904391879784e-06,
+      "return_spectral_rms_db": 0.026181508262072828,
+      "return_pass": true
+    },
+    {
+      "voice": 11,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -2.0832780382185025e-06,
+      "spectral_rms_db": 0.006241495725602892,
+      "pass": true,
+      "reference_sha256": "ea225af3a29d73e3caf1864e59b27bf46e49b030345ad5744ae01785fcbcb979",
+      "return_level_db": -4.409226831938657e-06,
+      "return_spectral_rms_db": 0.009339006964044336,
+      "return_pass": true
+    },
+    {
+      "voice": 12,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -2.0215511631578177e-05,
+      "spectral_rms_db": 0.0008819861942036949,
+      "pass": true,
+      "reference_sha256": "c94aad1c51bec211ff08ee576e35cc06914bb5e4a03afb4172583565d866e4a0",
+      "return_level_db": -2.8065047285866273e-05,
+      "return_spectral_rms_db": 0.002748523909513935,
+      "return_pass": true
+    },
+    {
+      "voice": 13,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": 5.419719337663852e-06,
+      "spectral_rms_db": 0.04103608561631166,
+      "pass": true,
+      "reference_sha256": "30f72b37e981bf06fd67df8cd8065eab54126426300034032a350008fe0e1529",
+      "return_level_db": 3.8922317359668985e-06,
+      "return_spectral_rms_db": 0.04157168881568485,
+      "return_pass": true
+    },
+    {
+      "voice": 14,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": 8.591256359306229e-07,
+      "spectral_rms_db": 0.05884190502225308,
+      "pass": true,
+      "reference_sha256": "5a01d0703388a512817270c5da4b4003ce9c112c3bbb31a17b0d1f3ecaff184d",
+      "return_level_db": 7.713345483531088e-06,
+      "return_spectral_rms_db": 0.06332538600515765,
+      "return_pass": true
+    },
+    {
+      "voice": 15,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -6.185703785253577e-06,
+      "spectral_rms_db": 0.010501689478787308,
+      "pass": true,
+      "reference_sha256": "b5d6e6f4bccc1257c978a713d9e043cacf22aa17b86188343e8edc444539b222",
+      "return_level_db": -1.180553445360136e-05,
+      "return_spectral_rms_db": 0.010813030375153907,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        93
+      ],
+      "level_db": -1.0757737609146241e-05,
+      "spectral_rms_db": 0.0003698751713422901,
+      "pass": true,
+      "reference_sha256": "5b84f402913c5f087f345ddb476094f4431aa823a936d65161a74988b804cd61",
+      "return_level_db": -3.364774217295346e-05,
+      "return_spectral_rms_db": 0.0008789113297737792,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        0,
+        60,
+        55,
+        93
+      ],
+      "level_db": -1.5445723032404553e-05,
+      "spectral_rms_db": 0.000501130814368317,
+      "pass": true,
+      "reference_sha256": "ed56114cc47ad4db45f47676a33cc6654c178f6715d3fea1ccb4f38202027b45",
+      "return_level_db": -3.599168926696489e-05,
+      "return_spectral_rms_db": 0.0015403300445473208,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        64,
+        60,
+        55,
+        93
+      ],
+      "level_db": -3.384583618490967e-05,
+      "spectral_rms_db": 0.0006414931399323235,
+      "pass": true,
+      "reference_sha256": "1bfbec67aceb748a16c026d0720bc18713fd3ccdd706c839cd533c689d39e0cb",
+      "return_level_db": -0.0001049984798578721,
+      "return_spectral_rms_db": 0.0017482461855649137,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        127,
+        60,
+        55,
+        93
+      ],
+      "level_db": -0.0001277148020752782,
+      "spectral_rms_db": 0.0014544685106617206,
+      "pass": true,
+      "reference_sha256": "60e36ccdc4c43aefcedbcb51b55a5be7ed5b883b7ad97119ff02235ea1797903",
+      "return_level_db": -0.00018472099046943757,
+      "return_spectral_rms_db": 0.003261405841656978,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        0,
+        55,
+        93
+      ],
+      "level_db": -3.284556251829237e-05,
+      "spectral_rms_db": 0.0006671581492650609,
+      "pass": true,
+      "reference_sha256": "f277a82efbf1941e99e1f2b3eb8fa4354dd79c4e4a433e515ae4431224f4a59a",
+      "return_level_db": -0.00010867828724597771,
+      "return_spectral_rms_db": 0.0018049319396874822,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        64,
+        55,
+        93
+      ],
+      "level_db": -4.5212587552856805e-05,
+      "spectral_rms_db": 0.0007389429947472955,
+      "pass": true,
+      "reference_sha256": "962204f5315dc9bb7602ecc38e5be83efebb93f62b8183db218e78aebbd0449d",
+      "return_level_db": -0.0001092320681678589,
+      "return_spectral_rms_db": 0.0017890630115722024,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        127,
+        55,
+        93
+      ],
+      "level_db": -2.8324629718605042e-05,
+      "spectral_rms_db": 0.0006262065337800162,
+      "pass": true,
+      "reference_sha256": "a05aa78a8b1a15068400229d7999f144a3749c8be9854f1d66424724ed78852b",
+      "return_level_db": -0.00010738297902883323,
+      "return_spectral_rms_db": 0.0015661649173186291,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        0,
+        93
+      ],
+      "level_db": 0.00015063721491720224,
+      "spectral_rms_db": 0.0016170907487572737,
+      "pass": true,
+      "reference_sha256": "3bd20ed69ed8b17d3ae884498f655ca41e2cfa1cd01304235ac48e26163642ef",
+      "return_level_db": 0.000641999438934905,
+      "return_spectral_rms_db": 0.003771003874746321,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        64,
+        93
+      ],
+      "level_db": -7.602996949464293e-06,
+      "spectral_rms_db": 0.0005635292461611855,
+      "pass": true,
+      "reference_sha256": "3eaca8f9bb0b60bed008cd3e021a9c8dae4bc0111ffa4f8773d2933e31c8fddc",
+      "return_level_db": -4.354182631235523e-05,
+      "return_spectral_rms_db": 0.0013225706271057412,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        127,
+        93
+      ],
+      "level_db": 2.0906742116272127e-07,
+      "spectral_rms_db": 0.00010739012553073961,
+      "pass": true,
+      "reference_sha256": "10e512850c62d92bb4501d013ec8ba29098c59bdacc9dc4bff1ca536e1ac88d6",
+      "return_level_db": -4.430564177455613e-06,
+      "return_spectral_rms_db": 0.001138411320012921,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        0
+      ],
+      "level_db": 0.0,
+      "spectral_rms_db": 0.0,
+      "pass": true,
+      "reference_sha256": "af58d031262c209a04e2de71d5a719d8eaacc08c793b1ccd61e500e8497173b4"
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        64
+      ],
+      "level_db": -3.535279745104849e-06,
+      "spectral_rms_db": 0.0005045708507919052,
+      "pass": true,
+      "reference_sha256": "63743ffb9736d2284b107439cfbf784ccfcf1d7909889afc91f58f45024940b5",
+      "return_level_db": -6.841620834321614e-05,
+      "return_spectral_rms_db": 0.0020598113604398814,
+      "return_pass": true
+    },
+    {
+      "voice": 1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        127
+      ],
+      "level_db": -1.569239537827904e-05,
+      "spectral_rms_db": 0.0008349209033876564,
+      "pass": true,
+      "reference_sha256": "a332b74d5ac980969d796fc14880b67d9059ad25da3af28a81519236ed4a0e5f",
+      "return_level_db": -6.841509851982475e-05,
+      "return_spectral_rms_db": 0.0020598275668125194,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        0,
+        60,
+        55,
+        93
+      ],
+      "level_db": -5.120456154109433e-07,
+      "spectral_rms_db": 0.0003061228348961596,
+      "pass": true,
+      "reference_sha256": "2b7d64f70e165863aff225418e1b32dda4977e993edeab310e462005f16152d5",
+      "return_level_db": -1.1923282050957569e-05,
+      "return_spectral_rms_db": 0.0008075255304300653,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        64,
+        60,
+        55,
+        93
+      ],
+      "level_db": -1.4292047511527134e-05,
+      "spectral_rms_db": 0.00036855419712371725,
+      "pass": true,
+      "reference_sha256": "be063c94ff92e0b74ec11184f614b348cf63e8b4372bca4f86f88ef08a2a5ba0",
+      "return_level_db": -3.336263723199708e-05,
+      "return_spectral_rms_db": 0.0007933809129927488,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        127,
+        60,
+        55,
+        93
+      ],
+      "level_db": -2.9464309983943826e-05,
+      "spectral_rms_db": 0.0005469537926781356,
+      "pass": true,
+      "reference_sha256": "367f8d26d0ad7b4a8a83454ebe305234459e4f9a5b8db0eaa1f4f3a373d15341",
+      "return_level_db": -7.886719638558413e-05,
+      "return_spectral_rms_db": 0.001030463743723758,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        0,
+        55,
+        93
+      ],
+      "level_db": -1.1503214429363937e-06,
+      "spectral_rms_db": 0.00034673298636655233,
+      "pass": true,
+      "reference_sha256": "2fc22df1fc04393fe7d15f3e4e55c114fea6e38912b3d2a364dac613c73996b0",
+      "return_level_db": -2.6067821811906432e-05,
+      "return_spectral_rms_db": 0.0009152328324023957,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        64,
+        55,
+        93
+      ],
+      "level_db": -5.042495222186201e-06,
+      "spectral_rms_db": 0.00037526667994233423,
+      "pass": true,
+      "reference_sha256": "bd952d75f3973415f0d5e80f4946c127618c1ccf3a2b94f815bc3ebe17626372",
+      "return_level_db": -2.796270720265656e-05,
+      "return_spectral_rms_db": 0.0008723566947556606,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        127,
+        55,
+        93
+      ],
+      "level_db": -6.282263947274623e-06,
+      "spectral_rms_db": 0.0003745488657020734,
+      "pass": true,
+      "reference_sha256": "c9758683a7ca151a61e42f06e27fac4d9cd0c9fa3fd8b1e8f3217f721c19742e",
+      "return_level_db": -1.613087103910933e-05,
+      "return_spectral_rms_db": 0.0007304013387262883,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        0,
+        93
+      ],
+      "level_db": 0.00015669584601287845,
+      "spectral_rms_db": 0.0009305594421654574,
+      "pass": true,
+      "reference_sha256": "e72d7d66cd226734544eba5891482136182a5743b61617e2004d1c3afa14dbb2",
+      "return_level_db": 0.0007198008361203581,
+      "return_spectral_rms_db": 0.0020217705923441303,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        64,
+        93
+      ],
+      "level_db": -6.396886172751383e-06,
+      "spectral_rms_db": 0.0003263837106597179,
+      "pass": true,
+      "reference_sha256": "557945b42d63906e39102b54b36fe018dff6a2e7025b00a31a85dd35a086f45b",
+      "return_level_db": -1.999011788013394e-05,
+      "return_spectral_rms_db": 0.0007580088665564202,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        127,
+        93
+      ],
+      "level_db": -2.0806512161727955e-06,
+      "spectral_rms_db": 0.0001308679559169987,
+      "pass": true,
+      "reference_sha256": "ec380f92be92cb88d7c775a95444518be2df4eda940a8b8fadb3be5065658838",
+      "return_level_db": -2.316037582545126e-05,
+      "return_spectral_rms_db": 0.0004706706012784512,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        0
+      ],
+      "level_db": 0.0,
+      "spectral_rms_db": 0.0,
+      "pass": true,
+      "reference_sha256": "bd5da89eb47f116f96e93ce7f81b47e4a9f581d746fdd8a5aab576ae4b48537e"
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        64
+      ],
+      "level_db": -6.468316644202115e-06,
+      "spectral_rms_db": 0.0002744211474602469,
+      "pass": true,
+      "reference_sha256": "bb46b3947726f35a3884ebd152d104e1f2b72b0bbdeb3f35b2324f5f518e10fd",
+      "return_level_db": -3.3647479263426354e-05,
+      "return_spectral_rms_db": 0.0008789603872820075,
+      "return_pass": true
+    },
+    {
+      "voice": -1,
+      "decay_tone_hpf_level": [
+        70,
+        60,
+        55,
+        127
+      ],
+      "level_db": -1.5498387414446714e-05,
+      "spectral_rms_db": 0.0004594793548256321,
+      "pass": true,
+      "reference_sha256": "5b1723ce847d105c4d3c67239d1b81d901f7b2ed93865f359e929ce7b2fc7521",
+      "return_level_db": -3.3656157362239414e-05,
+      "return_spectral_rms_db": 0.0008788874908995342,
+      "return_pass": true
+    }
+  ],
+  "full_pass": 41,
+  "wet_only_pass": 38,
+  "wet_only_cases": 38
+}

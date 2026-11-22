@@ -8,6 +8,7 @@
  *     129..158      = Miami factory (0x80 | one-based)
  *     0xC1..0xC4    = historical slot-2 codes; all load as Synth One init
  *     0xE1..0xE4    = Juno factory (one-based)
+ *     0xE5          = source-owned SUPERJ6 WIDE (build opt-in)
  * Codes outside these ranges are malformed, not guessed.
  * New Synth One recalls write only 0xC1 (init). 0xC2..0xC4 remain load-only.
  */

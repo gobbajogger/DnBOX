@@ -1,8 +1,12 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "original_runtime.h"
 #include "../dsp/juno6_controls.h"
+#include "chicago_fx2_compact.h"
 #include "../x0x_cold.h"
 #include <string.h>
+
+typedef char s1_width_fits_retired_insert[
+    sizeof(((original_chicago_fx2_compact *)0)->arena) >= 3u * S1_WIDTH_FIRST_FRAMES ? 1 : -1];
 
 static int runtime_result(original_runtime_part *p, int ok)
 {
@@ -13,7 +17,12 @@ static int runtime_result(original_runtime_part *p, int ok)
 X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[32], float bpm,
     original_chicago_tuning *tuning, const original_chicago_fx2_cold_owner *fx)
 {
-    if (!p || !cell) return ORIGINAL_RUNTIME_INVALID;
+    return original_runtime_init_extended(p,cell,NULL,bpm,tuning,fx);
+}
+X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8_t cell[32],const uint8_t *ext,
+    float bpm,original_chicago_tuning *tuning,const original_chicago_fx2_cold_owner *fx)
+{
+    if (!p || !cell || !original_master_valid(cell,ext)) return ORIGINAL_RUNTIME_INVALID;
     (void)original_sound_adopt_legacy_cell((uint8_t *)cell);
     if (!original_sound_valid(cell)) return ORIGINAL_RUNTIME_INVALID;
     unsigned kind = cell[29];
@@ -29,8 +38,10 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         rc=ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_init(&p->dsp.synthone);
+        s1_part_bind_width(&p->dsp.synthone, original_chicago_fx2_compact_free_history(fx));
 #if X0X_SYNTHONE_PATCH
-        if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
+        if ((original_sound_edit_mask(cell) & S1_PATCH_MASK) || cell[26] == 'M')
+            s1_part_apply_cell(&p->dsp.synthone, cell, ext);
 #endif
         rc = ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_MIAMI)
@@ -49,12 +60,18 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
     /* All admitted factories have neutral bend/damper. Archived performance
      * edit bits never become inputs to a newly adopted runtime instance. */
     for (unsigned i = 0; i < original_sound_count(kind); ++i)
-        if ((edits & (UINT32_C(1) << i)) && !original_sound_is_performance(kind, i)) {
+        if ((kind == ORIGINAL_SOUND_SYNTHONE && i >= ORIGINAL_SYNTHONE_BASE_COUNT
+                  ? (i == ORIGINAL_SYNTHONE_CRUSH_LFO || (i < ORIGINAL_SYNTHONE_MASTER_VOLUME && ((cell[31] & 128u) || (cell[31] == 2 && i < ORIGINAL_SYNTHONE_PHASER_MIX)))) : (edits & (UINT32_C(1) << i)) != 0) && !original_sound_is_performance(kind, i)) {
         float value;
         if (!original_sound_value(cell, i, &value) ||
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
             return runtime_result(p, 0);
     }
+    if (original_master_edited(cell, ext))
+        for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<=ORIGINAL_SYNTHONE_MASTER_MAKEUP;++id) {
+            unsigned q=original_master_display(cell,ext,id);
+            if(original_runtime_param(p,id,(float)q/127.f)!=ORIGINAL_RUNTIME_OK) return runtime_result(p,0);
+        }
     /* A cold adoption can occur inside the current audio boundary. Publish a
      * prepared instance so its first queued/sequence note never precedes the
      * threshold snapshot. Further prepare calls are explicitly idempotent. */
@@ -245,6 +262,9 @@ int original_runtime_all_off(original_runtime_part *p)
     if(p->kind==ORIGINAL_SOUND_JUNO){
         juno6_all_off(&p->dsp.juno.synth);
         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
+#if X0X_SUPERJ6_FACTORY
+        juno6_chorus_clear_factory(&p->dsp.juno.chorus);
+#endif
         p->dsp.juno.chorus.write=0;ok=1;
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_all_off(&p->dsp.synthone);
@@ -355,13 +375,15 @@ int original_runtime_env_view(const original_runtime_part *p, float adsr[4], flo
 int original_runtime_active(const original_runtime_part *p)
 {
     if (!p || p->status != ORIGINAL_RUNTIME_OK) return 0;
-    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) : p->kind == ORIGINAL_SOUND_SYNTHONE ? s1_part_active(&p->dsp.synthone) :
+    if (p->kind == ORIGINAL_SOUND_SYNTHONE)
+        return s1_part_active(&p->dsp.synthone) || s1_part_effect_tail(&p->dsp.synthone);
+    return p->kind == ORIGINAL_SOUND_JUNO ? juno6_active(&p->dsp.juno.synth) :
         p->kind == ORIGINAL_SOUND_MIAMI ? original_miami_backend_active(&p->dsp.miami) :
         original_chicago_backend_active(&p->dsp.chicago);
 }
 
-int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
-    float *left, float *right, unsigned frames)
+static int render_stereo(original_runtime_part *p, original_runtime_workspace *w,
+    float *left, float *right, unsigned frames, int owned)
 {
     if (!p || !w || !left || !right || frames > 256) return 0;
     if (p->status != ORIGINAL_RUNTIME_OK) return p->status;
@@ -371,7 +393,8 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
 #if X0X_SUPERJ6_FACTORY
         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
         if(ok){
-            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+            if (!p->dsp.juno.synth.factory_chorus_bypass)
+                juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
             /* The original master attenuator follows the instrument effects. */
             float gain=p->dsp.juno.synth.master_gain;
             if(gain!=1.f) for(unsigned i=0;i<frames;++i){
@@ -388,16 +411,45 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
         s1_part_render(&p->dsp.synthone,left,right,frames);
         ok = 1;
     } else if (p->kind == ORIGINAL_SOUND_MIAMI) {
-        original_miami_backend_workspace workspace = {w->miami.left, w->miami.right,
-            {w->miami.dry[0], w->miami.dry[1], w->miami.scratch[0], w->miami.scratch[1], 256}};
-        ok = original_miami_backend_render_stereo(&p->dsp.miami, &workspace, left, right, frames);
+        if (owned) {
+            original_miami_fx_workspace fx = {w->engine.fx.miami.dry[0], w->engine.fx.miami.dry[1],
+                w->engine.fx.miami.scratch[0], w->engine.fx.miami.scratch[1], 256};
+            ok = original_miami_backend_render_words(&p->dsp.miami, &fx, w->engine.channels[0].words,
+                                                    w->engine.channels[1].words, frames);
+        } else {
+            original_miami_backend_workspace workspace = {w->miami.left, w->miami.right,
+                {w->miami.dry[0], w->miami.dry[1], w->miami.scratch[0], w->miami.scratch[1], 256}};
+            ok = original_miami_backend_render_stereo(&p->dsp.miami, &workspace, left, right, frames);
+        }
     } else {
-        original_chicago_backend_workspace workspace = {w->chicago.left, w->chicago.right,
-            w->chicago.converted[0], w->chicago.converted[1],
-            {w->chicago.scratch[0], w->chicago.scratch[1], w->chicago.scratch[2], w->chicago.scratch[3]}, 256};
-        ok = original_chicago_backend_render(&p->dsp.chicago, &workspace, NULL, 0,
-            left, right, frames) == ORIGINAL_CHICAGO_BACKEND_OK;
+        if (owned) {
+            original_chicago_backend_workspace workspace = {
+                w->engine.channels[0].words, w->engine.channels[1].words,
+                w->engine.fx.chicago.converted[0], w->engine.fx.chicago.converted[1],
+                {w->engine.fx.chicago.scratch[0], w->engine.fx.chicago.scratch[1],
+                 w->engine.fx.chicago.scratch[2], w->engine.fx.chicago.scratch[3]}, 256};
+            ok = original_chicago_backend_render_in_place(&p->dsp.chicago, &workspace, frames) ==
+                 ORIGINAL_CHICAGO_BACKEND_OK;
+        } else {
+            original_chicago_backend_workspace workspace = {w->chicago.left, w->chicago.right,
+                w->chicago.converted[0], w->chicago.converted[1],
+                {w->chicago.scratch[0], w->chicago.scratch[1], w->chicago.scratch[2], w->chicago.scratch[3]}, 256};
+            ok = original_chicago_backend_render(&p->dsp.chicago, &workspace, NULL, 0,
+                left, right, frames) == ORIGINAL_CHICAGO_BACKEND_OK;
+        }
     }
     return runtime_result(p, ok);
 }
 
+
+int original_runtime_render(original_runtime_part *p, original_runtime_workspace *w,
+    float *left, float *right, unsigned frames)
+{
+    return render_stereo(p, w, left, right, frames, 0);
+}
+
+int original_runtime_render_owned(original_runtime_part *p, original_runtime_workspace *w, unsigned frames)
+{
+    if (!w) return 0;
+    return render_stereo(p, w, w->engine.channels[0].samples, w->engine.channels[1].samples, frames, 1);
+}

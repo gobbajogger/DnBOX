@@ -1,0 +1,286 @@
+{
+  "firmware_commit": "87a2fbde9c58aa79d51dad7b29d9537348ee5ed8",
+  "original": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "soundpipe_compressor_git_blob": "f245e7faca0e3ba06542c17dc5b4c0e77962cf7a",
+  "source_stereo_wrapper_git_blob": "c7bb750840eefd7a245a6a07bbc8bde6a96a40ed",
+  "replay": "sh experiments/sound-hardware-v1/synthone-master/replay.sh build/master --factory",
+  "physical_controls": {
+    "volume": 32,
+    "master_ratio": 122,
+    "master_threshold": 125,
+    "master_attack": 128,
+    "master_release": 131,
+    "master_makeup": 134
+  },
+  "scope": "Each owner applies the original master volume port and gain, then two independent Soundpipe-style detectors and their original makeup before stereo width. Legacy INIT retains the dry path. This compares the master stage on identical input. Original full factory patches and reverb-side dynamics are outside this stage measurement.",
+  "host_profiles": [
+    "ordinary",
+    "optional patch"
+  ],
+  "host_owner_sequences": {
+    "A": {
+      "stereo_frames": 115996,
+      "changed_frames": 81543,
+      "input_silent_frames": 33341,
+      "reduced_samples": 162738,
+      "peak_error": 5.21540642e-08,
+      "rms_error": 2.72673385e-09,
+      "error_to_signal_db": -131.524
+    },
+    "B": {
+      "stereo_frames": 116100,
+      "changed_frames": 81621,
+      "input_silent_frames": 33415,
+      "reduced_samples": 149998,
+      "peak_error": 1.78813934e-07,
+      "rms_error": 1.05415239e-08,
+      "error_to_signal_db": -138.315
+    }
+  },
+  "factory_stage": {
+    "programs": 694,
+    "stereo_frames": 30605400,
+    "unique_original_five_control_tuples": 19,
+    "unique_source_clamped_five_control_tuples": 18,
+    "most_common_raw_tuple_count": 455,
+    "most_common_clamped_tuple_count": 456,
+    "second_common_tuple_count": 219,
+    "distinct_original_master_volume_values": 384,
+    "programs_with_over_one_percent_reduction_on_single_note_probe": 9,
+    "source_controls_peak_error": 2.38418579e-07,
+    "source_controls_worst_program_rms": 2.79918668e-08,
+    "nearest_seven_bit_changed_vectors": 601,
+    "nearest_seven_bit_peak_error": 0.0120961666,
+    "nearest_seven_bit_worst_program_rms": 0.00415499385,
+    "worst_rounded_program": {
+      "bank": "JEC.json",
+      "position": 1,
+      "name": "JEC 8 Bit Shot",
+      "flat_zero_based_index": 279
+    }
+  },
+  "persistence": [
+    "Both owners retained independent compressor and motion edits across save, changes to Chicago/Miami, reload and PCM playback.",
+    "Project cell extension ownership, initialization, malformed/stale backing bytes and stock/optional editor paths exercised.",
+    "Independent note lock, capture and undo/redo use an explicitly tagged seven-byte override."
+  ],
+  "cold_tables": {
+    "oscillator_tuning_words": 64,
+    "crush_hold_words": 128,
+    "all_words_exact": true,
+    "combined_fnv32": "5c7db9a1",
+    "image_bytes_saved_on_each_board": 528
+  },
+  "native": {
+    "elite": {
+      "image_bytes": 552484,
+      "xip_free": 188,
+      "static_data_bss": 96260,
+      "pool_used": 333880,
+      "pool_raw_free": 10184,
+      "pool_reserve": 8192,
+      "pool_margin": 1992,
+      "master_state_bytes_per_owner": 60,
+      "image_sha256": "e47b7fd717e520b167bae610bbf442b79317fb15138b611a1674a9e6b19b33b8",
+      "elf_sha256": "76a12b4909a4beec0b1f0312348085f79c0e5642d960f8b63a4748bde49924cc",
+      "fwsc_sha256": "9ec3e29adfb323dcf1308c37bd2339e2ac91c665858c5f02891dcdb7cd3790d7"
+    },
+    "pro": {
+      "image_bytes": 552472,
+      "xip_free": 200,
+      "static_data_bss": 96260,
+      "pool_used": 333880,
+      "pool_raw_free": 10184,
+      "pool_reserve": 8192,
+      "pool_margin": 1992,
+      "master_state_bytes_per_owner": 60,
+      "image_sha256": "7a2f5495c7db66de19591fbe624c0e09dcfa641addf133f4c77997387cc712a6",
+      "elf_sha256": "7403409ff495e2d53f09121c54289d1fc7ac495c63a32962d60b048b4b09ca90",
+      "fwsc_sha256": "3032fd1411eff3e9176fbe1872bd4f88e95193f1273603b75388b74517fe7557"
+    }
+  },
+  "strict_juno_synthone": {
+    "elite": {
+      "dry": {
+        "program": "ordinary INIT",
+        "passed": true,
+        "all_active": true,
+        "peak_us": 10590,
+        "scene_late": 0,
+        "raw_late": 0,
+        "xruns": 0,
+        "observed_halves": 636,
+        "sample_rate": 44100,
+        "strict_mhz": 360,
+        "duration_ms": 8000,
+        "pcm_sha256": "2e9cfce4859d50bdad77698c646a60dc9fe3bb9a86a6df6617f36b1f053a1b32",
+        "phaser_knobs_requested": null,
+        "master_knobs_observed": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "master_mask_observed": 0,
+        "detectors_observed": [
+          0.0,
+          0.0
+        ],
+        "gain_db_observed": [
+          0.0,
+          0.0
+        ],
+        "inputs": {
+          "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+          "firmware_sha256": "9ec3e29adfb323dcf1308c37bd2339e2ac91c665858c5f02891dcdb7cd3790d7",
+          "elf_sha256": "76a12b4909a4beec0b1f0312348085f79c0e5642d960f8b63a4748bde49924cc",
+          "stock_seed_sha256": "3a53452361a175a01bd225434bfd8f320b4791b8b504322ca70121e19a60690c",
+          "project_objects_sha256": "f2f1e00592b0c766f17dccedcfd45a44f4fd18648a28fff6e873ad53d1f17e60",
+          "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+          "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+          "initial_flash_sha256": "eecab6b64f069ffd216e3352b39414595ee3155976087e2c68d9ea94c2a41d0c"
+        }
+      },
+      "wet": {
+        "program": "ordinary both original phaser and master edited",
+        "passed": true,
+        "all_active": true,
+        "peak_us": 11260,
+        "scene_late": 0,
+        "raw_late": 0,
+        "xruns": 0,
+        "observed_halves": 636,
+        "sample_rate": 44100,
+        "strict_mhz": 360,
+        "duration_ms": 8000,
+        "pcm_sha256": "f350442788746fee8c0787bbc27693be6355245b931840eff0f391e57805ae04",
+        "phaser_knobs_requested": [
+          96,
+          43,
+          63,
+          91
+        ],
+        "master_knobs_observed": [
+          112,
+          127,
+          60,
+          13,
+          38,
+          54
+        ],
+        "master_mask_observed": 63,
+        "detectors_observed": [
+          0.16054274141788483,
+          0.003666334319859743
+        ],
+        "gain_db_observed": [
+          -15.012953758239746,
+          -1.5414283107572988e-44
+        ],
+        "inputs": {
+          "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+          "firmware_sha256": "9ec3e29adfb323dcf1308c37bd2339e2ac91c665858c5f02891dcdb7cd3790d7",
+          "elf_sha256": "76a12b4909a4beec0b1f0312348085f79c0e5642d960f8b63a4748bde49924cc",
+          "stock_seed_sha256": "3a53452361a175a01bd225434bfd8f320b4791b8b504322ca70121e19a60690c",
+          "project_objects_sha256": "c5232a8c4160fce469e6dd9467c7793a5e83874d20aab17a309751f67bbf2d4c",
+          "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+          "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+          "initial_flash_sha256": "511744a3c45574ae7c14405814eb7f2dfa9851dd202f9cadc25161296c1d1904"
+        }
+      }
+    },
+    "pro": {
+      "dry": {
+        "program": "ordinary INIT",
+        "passed": true,
+        "all_active": true,
+        "peak_us": 11096,
+        "scene_late": 0,
+        "raw_late": 0,
+        "xruns": 0,
+        "observed_halves": 636,
+        "sample_rate": 44100,
+        "strict_mhz": 360,
+        "duration_ms": 8000,
+        "pcm_sha256": "13c7b814e055d1ae8da0d26c8f5bb3807adb26bb025dd6eccdbfa673a52a7a2d",
+        "phaser_knobs_requested": null,
+        "master_knobs_observed": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "master_mask_observed": 0,
+        "detectors_observed": [
+          0.0,
+          0.0
+        ],
+        "gain_db_observed": [
+          0.0,
+          0.0
+        ],
+        "inputs": {
+          "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+          "firmware_sha256": "3032fd1411eff3e9176fbe1872bd4f88e95193f1273603b75388b74517fe7557",
+          "elf_sha256": "7403409ff495e2d53f09121c54289d1fc7ac495c63a32962d60b048b4b09ca90",
+          "stock_seed_sha256": "501ebbe270a6461ee5b35438bed61d24d864a6e4101574eb5c3d42f819df312c",
+          "project_objects_sha256": "1e8e30a808f9b38ccd65e8026120eab61b41e91ec903fed0a9329e3b33294ded",
+          "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+          "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+          "initial_flash_sha256": "2414137b1b5fb4a90496a61473d514e225d8cde01865f1174d80d06d2f72341e"
+        }
+      },
+      "wet": {
+        "program": "ordinary both original phaser and master edited",
+        "passed": false,
+        "all_active": true,
+        "peak_us": 11939,
+        "scene_late": 1,
+        "raw_late": 1,
+        "xruns": 1,
+        "observed_halves": 635,
+        "sample_rate": 44100,
+        "strict_mhz": 360,
+        "duration_ms": 8000,
+        "pcm_sha256": "615d99d392288f215772ba35866d8e76e026689d032e0d2e4991dd98388dbd55",
+        "phaser_knobs_requested": [
+          96,
+          43,
+          63,
+          91
+        ],
+        "master_knobs_observed": [
+          112,
+          127,
+          60,
+          13,
+          38,
+          54
+        ],
+        "master_mask_observed": 63,
+        "detectors_observed": [
+          0.14589229226112366,
+          0.2559891939163208
+        ],
+        "gain_db_observed": [
+          -14.212519645690918,
+          -18.82512855529785
+        ],
+        "inputs": {
+          "emulator_sha256": "4238d31a19e2c783421d20c15c80872709ee00c07c441364eba78f1b07e79712",
+          "firmware_sha256": "3032fd1411eff3e9176fbe1872bd4f88e95193f1273603b75388b74517fe7557",
+          "elf_sha256": "7403409ff495e2d53f09121c54289d1fc7ac495c63a32962d60b048b4b09ca90",
+          "stock_seed_sha256": "501ebbe270a6461ee5b35438bed61d24d864a6e4101574eb5c3d42f819df312c",
+          "project_objects_sha256": "3c2469f89ff04f1e3fa5d2af360b4b38f8f24f55c62bbf5c0621129af07966c5",
+          "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+          "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+          "initial_flash_sha256": "eed562f2345b8d4f70dc8bfae9002caa6fb82fd3fe81592f4282937437ccb988"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,421 @@
+{
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "command_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "sample_rate_hz": 44100,
+  "factor": 30,
+  "filter_and_dynamics": "Independent original full graphs. Before each reverb call every input word must match across all three graphs. Panning, lowpass/ping-pong, both stereo reverb compressors, master, width and all other source effects/parameters are identical.",
+  "contract": {
+    "fft": 512,
+    "hop": 128,
+    "linear_gain": 1,
+    "floor_db": -80,
+    "max_absolute_rms_db": 1,
+    "max_spectrum_rms_db": 3
+  },
+  "candidates": {
+    "multirate": "Eight mu-law histories at 1470 Hz, block-mean downconversion and causal linear interpolation. Original line times, modulation and feedback.",
+    "shortened": "The same eight mu-law histories at 44100 Hz, delays shortened 30x, feedback transformed to its 30th root to compensate decay length."
+  },
+  "rows": [
+    {
+      "program_index": 1,
+      "name": "Dat Bomb Bass, Yo",
+      "bank": "BankA.json",
+      "bank_index": 1,
+      "original_reverb_controls": {
+        "37": 0.0,
+        "38": 0.6077499985694885,
+        "39": 900.0,
+        "40": 0.0,
+        "51": 0.0,
+        "123": 13.0,
+        "126": -8.5,
+        "129": 0.0010000000474974513,
+        "132": 0.22499999403953552,
+        "135": 1.8799999952316284,
+        "124": 13.0,
+        "127": -8.0,
+        "130": 0.0010000000474974513,
+        "133": 0.15000000596046448,
+        "136": 1.8799999952316284
+      },
+      "ring_allocation": "full_bytes=98760 compact_bytes=946 full_lines=2539,2838,3317,3603,3973,4198,2243,1979,",
+      "frames": 132300,
+      "capture_sha256": "e5e54c1fed0ec993ac9c2ed440a2f792633742bec419b6e0caea54144d57cda8",
+      "comparisons": {
+        "multirate": {
+          "wet_left": {
+            "signed_rms_db": -15.208214428194784,
+            "spectral_rms_db": 33.50735065322848,
+            "peak_error": 0.45468599908053875,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": -12.627992710196816,
+            "spectral_rms_db": 33.87810624960237,
+            "peak_error": 0.68049730733037,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 0.0,
+            "spectral_rms_db": 0.0,
+            "peak_error": 0.0,
+            "pass": true
+          },
+          "final_right": {
+            "signed_rms_db": 0.0,
+            "spectral_rms_db": 0.0,
+            "peak_error": 0.0,
+            "pass": true
+          }
+        },
+        "shortened": {
+          "wet_left": {
+            "signed_rms_db": 15.65582159364368,
+            "spectral_rms_db": 13.27701723226428,
+            "peak_error": 2.2697187568992376,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": 16.621781377000925,
+            "spectral_rms_db": 12.673052648361592,
+            "peak_error": 2.458172231912613,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 0.0,
+            "spectral_rms_db": 0.0,
+            "peak_error": 0.0,
+            "pass": true
+          },
+          "final_right": {
+            "signed_rms_db": 0.0,
+            "spectral_rms_db": 0.0,
+            "peak_error": 0.0,
+            "pass": true
+          }
+        }
+      }
+    },
+    {
+      "program_index": 0,
+      "name": "Synthwave 1974",
+      "bank": "BankA.json",
+      "bank_index": 0,
+      "original_reverb_controls": {
+        "37": 1.0,
+        "38": 0.7253998517990112,
+        "39": 246.0500030517578,
+        "40": 0.1574999988079071,
+        "51": 0.0,
+        "123": 13.0,
+        "126": -8.5,
+        "129": 0.0010000000474974513,
+        "132": 0.22499999403953552,
+        "135": 1.8799999952316284,
+        "124": 13.0,
+        "127": -8.0,
+        "130": 0.0010000000474974513,
+        "133": 0.15000000596046448,
+        "136": 1.8799999952316284
+      },
+      "ring_allocation": "full_bytes=98760 compact_bytes=946 full_lines=2539,2838,3317,3603,3973,4198,2243,1979,",
+      "frames": 132300,
+      "capture_sha256": "362626ec109d1677a66e5e65b293e9eed3ec8731615d57c594264391605de181",
+      "comparisons": {
+        "multirate": {
+          "wet_left": {
+            "signed_rms_db": -5.93463218431319,
+            "spectral_rms_db": 20.697805472922706,
+            "peak_error": 0.8081578016281128,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": -5.945115941366618,
+            "spectral_rms_db": 18.85863277096584,
+            "peak_error": 1.0122789442539215,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": -1.6453269618364952,
+            "spectral_rms_db": 2.8027093495197857,
+            "peak_error": 0.7980031222105026,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": -0.36564504479516985,
+            "spectral_rms_db": 0.6065610062857036,
+            "peak_error": 0.7214442640542984,
+            "pass": true
+          }
+        },
+        "shortened": {
+          "wet_left": {
+            "signed_rms_db": 14.036032263915155,
+            "spectral_rms_db": 14.24489186125576,
+            "peak_error": 2.9026726074516773,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": 10.013606996531566,
+            "spectral_rms_db": 12.058578863983517,
+            "peak_error": 2.846334785223007,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 3.3102947366208886,
+            "spectral_rms_db": 2.9044811077536323,
+            "peak_error": 1.0389223992824554,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": -0.31565772007149634,
+            "spectral_rms_db": 1.1491750296861305,
+            "peak_error": 0.9266522824764252,
+            "pass": true
+          }
+        }
+      }
+    },
+    {
+      "program_index": 8,
+      "name": "June Oh 06 Sqr",
+      "bank": "BankA.json",
+      "bank_index": 8,
+      "original_reverb_controls": {
+        "37": 1.0,
+        "38": 0.2737750709056854,
+        "39": 394.9250793457031,
+        "40": 0.135000079870224,
+        "51": 0.0,
+        "123": 13.0,
+        "126": -8.5,
+        "129": 0.0010000000474974513,
+        "132": 0.22499999403953552,
+        "135": 1.8799999952316284,
+        "124": 13.0,
+        "127": -8.0,
+        "130": 0.0010000000474974513,
+        "133": 0.15000000596046448,
+        "136": 1.8799999952316284
+      },
+      "ring_allocation": "full_bytes=98760 compact_bytes=946 full_lines=2539,2838,3317,3603,3973,4198,2243,1979,",
+      "frames": 132300,
+      "capture_sha256": "50f005dbf1c17c9cc46b61b438caf66f5663b677ebd41bc1184f7bc857c2fe57",
+      "comparisons": {
+        "multirate": {
+          "wet_left": {
+            "signed_rms_db": -6.738522951452274,
+            "spectral_rms_db": 21.638055429063943,
+            "peak_error": 0.391951035708189,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": -4.02195628184118,
+            "spectral_rms_db": 21.164067785047287,
+            "peak_error": 0.39780885353684425,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 0.06988455996887336,
+            "spectral_rms_db": 0.11212711920613588,
+            "peak_error": 0.11023023724555969,
+            "pass": true
+          },
+          "final_right": {
+            "signed_rms_db": -0.25265045206695813,
+            "spectral_rms_db": 0.11132684320978924,
+            "peak_error": 0.1118873655796051,
+            "pass": true
+          }
+        },
+        "shortened": {
+          "wet_left": {
+            "signed_rms_db": 17.6619381271882,
+            "spectral_rms_db": 23.11410229418581,
+            "peak_error": 2.536520626395941,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": 18.563212795458114,
+            "spectral_rms_db": 22.089408343444703,
+            "peak_error": 1.9311541393399239,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": -0.07744199251073636,
+            "spectral_rms_db": 2.252914755099852,
+            "peak_error": 0.3451109528541565,
+            "pass": true
+          },
+          "final_right": {
+            "signed_rms_db": -0.5014533275723388,
+            "spectral_rms_db": 2.252121752938467,
+            "peak_error": 0.25281629990786314,
+            "pass": true
+          }
+        }
+      }
+    },
+    {
+      "program_index": 533,
+      "name": "Hunted pad",
+      "bank": "Sound of Izrael.json",
+      "bank_index": 16,
+      "original_reverb_controls": {
+        "37": 1.0,
+        "38": 0.824999988079071,
+        "39": 254.25,
+        "40": 1.0,
+        "51": 3.0,
+        "123": 13.0,
+        "126": -8.5,
+        "129": 0.0010000000474974513,
+        "132": 0.22499999403953552,
+        "135": 1.8799999952316284,
+        "124": 13.0,
+        "127": -8.0,
+        "130": 0.0010000000474974513,
+        "133": 0.15000000596046448,
+        "136": 1.8799999952316284
+      },
+      "ring_allocation": "full_bytes=98760 compact_bytes=946 full_lines=2539,2838,3317,3603,3973,4198,2243,1979,",
+      "frames": 132300,
+      "capture_sha256": "9faec72c22fd36e3dcd4861989eeecbfcc2f2c44f8385d7b41efdda37b6ca2ed",
+      "comparisons": {
+        "multirate": {
+          "wet_left": {
+            "signed_rms_db": -5.812587201569731,
+            "spectral_rms_db": 30.100672508751664,
+            "peak_error": 0.6315691769123077,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": -3.5159618205835,
+            "spectral_rms_db": 28.1936975431277,
+            "peak_error": 0.9140997529029846,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": -4.624221241044305,
+            "spectral_rms_db": 13.944349008007705,
+            "peak_error": 1.2810902297496796,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": -2.185748658090872,
+            "spectral_rms_db": 13.549888494250098,
+            "peak_error": 2.104302167892456,
+            "pass": false
+          }
+        },
+        "shortened": {
+          "wet_left": {
+            "signed_rms_db": 10.024362322805985,
+            "spectral_rms_db": 7.648927746064895,
+            "peak_error": 1.7035458087921143,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": 9.451913580970109,
+            "spectral_rms_db": 7.338830927439394,
+            "peak_error": 2.2184962928295135,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 3.4158825392613417,
+            "spectral_rms_db": 4.307305588667831,
+            "peak_error": 1.6510359644889832,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": 2.5522551614792226,
+            "spectral_rms_db": 4.287865038643673,
+            "peak_error": 1.8713607788085938,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "program_index": 656,
+      "name": "\ud83d\udd77- Lost in Space",
+      "bank": "Spidericemidas.json",
+      "bank_index": 38,
+      "original_reverb_controls": {
+        "37": 1.0,
+        "38": 0.7975000143051147,
+        "39": 340.3500061035156,
+        "40": 1.0,
+        "51": 0.0,
+        "123": 1.0,
+        "126": 0.0,
+        "129": 0.0,
+        "132": 0.0,
+        "135": 0.5,
+        "124": 1.0,
+        "127": 0.0,
+        "130": 0.0,
+        "133": 0.0,
+        "136": 0.5
+      },
+      "ring_allocation": "full_bytes=98760 compact_bytes=946 full_lines=2539,2838,3317,3603,3973,4198,2243,1979,",
+      "frames": 132300,
+      "capture_sha256": "733d1bcd959d5db8c30054aeb33db60d09dd51376ba35cb95570d88059df26c8",
+      "comparisons": {
+        "multirate": {
+          "wet_left": {
+            "signed_rms_db": -10.973369438740066,
+            "spectral_rms_db": 24.303279441193872,
+            "peak_error": 0.23749767616391182,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": -13.08903581999823,
+            "spectral_rms_db": 25.757665953957364,
+            "peak_error": 0.2584776896983385,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": -8.005726439615175,
+            "spectral_rms_db": 5.52515646408582,
+            "peak_error": 0.11637407913804054,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": -10.53463406255707,
+            "spectral_rms_db": 7.586554419845122,
+            "peak_error": 0.12650658609345555,
+            "pass": false
+          }
+        },
+        "shortened": {
+          "wet_left": {
+            "signed_rms_db": 20.090122590839567,
+            "spectral_rms_db": 12.86502733661265,
+            "peak_error": 1.7053431309759617,
+            "pass": false
+          },
+          "wet_right": {
+            "signed_rms_db": 18.532206115204456,
+            "spectral_rms_db": 12.27962587300835,
+            "peak_error": 1.7996605187654495,
+            "pass": false
+          },
+          "final_left": {
+            "signed_rms_db": 19.76162232602607,
+            "spectral_rms_db": 11.610507597734767,
+            "peak_error": 0.8411980792880058,
+            "pass": false
+          },
+          "final_right": {
+            "signed_rms_db": 18.31894672054102,
+            "spectral_rms_db": 11.570518105399742,
+            "peak_error": 0.8875574767589569,
+            "pass": false
+          }
+        }
+      }
+    }
+  ]
+}

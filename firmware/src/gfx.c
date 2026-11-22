@@ -145,23 +145,64 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
             cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
 }
 
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
+static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
+{
+    uint16_t *q;
+    uint32_t bg;
+    y += cv_oy;
+    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+        return;
+    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
+    if (a >= 16u) {
+        *q = swap16(c);
+        return;
+    }
+    bg = swap16(*q);
+    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
+                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
+                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
+}
+
+static int cv_abs(int value) { return value < 0 ? -value : value; }
+
+/* Integer 1 px strokes. Keep axis-aligned pixels solid. On a slope, the
+ * projected filter footprint spans at most three pixels on the minor axis. */
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
 static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
 {
-    int32_t dx = x1 > x0 ? x1 - x0 : x0 - x1, sx = x0 < x1 ? 1 : -1;
-    int32_t dy = y1 > y0 ? y0 - y1 : y1 - y0, sy = y0 < y1 ? 1 : -1;
-    int32_t err = dx + dy, guard = 2000;
-    while (guard--) {                       /* bounded: a line is never longer than 480 px */
-        int32_t e2 = 2 * err;               /* both tests use the same error value */
-        cv_pset(x0, y0, c);
-        if (x0 == x1 && y0 == y1)
-            break;
-        if (e2 >= dy) {
-            err += dy;
-            x0 += sx;
-        }
-        if (e2 <= dx) {
-            err += dx;
-            y0 += sy;
+    int dx = x1 - x0, dy = y1 - y0;
+    if (!dx || !dy) {
+        cv_rect(dx < 0 ? x1 : x0, dy < 0 ? y1 : y0,
+                cv_abs(dx) + 1, cv_abs(dy) + 1, c);
+        return;
+    }
+    int steep = cv_abs(dy) > cv_abs(dx);
+    int major = steep ? y0 : x0, end = steep ? y1 : x1;
+    int minor = steep ? x0 : y0, last = steep ? x1 : y1;
+    if (major > end) {
+        int m = major;
+        major = end;
+        end = m;
+        m = minor;
+        minor = last;
+        last = m;
+    }
+    int n = end - major;
+    int advance = ((last - minor) * 65536) / n;
+    int falloff = 16 - cv_abs(advance) / 16384;
+    int p = minor * 65536;
+    for (int i = 0; i <= n && i < 2000; i++, p += advance) {
+        int at = i == n ? last : (p + 32768) >> 16;
+        int delta = i == n ? 0 : p - at * 65536;
+        for (int off = -1; off <= 1; off++) {
+            int alpha = 16 - ((cv_abs(delta - off * 65536) * falloff + 32768) >> 16);
+            if (alpha > 0)
+                px_blend(steep ? at + off : major + i, steep ? major + i : at + off, c, (uint32_t)alpha);
         }
     }
 }
@@ -197,6 +238,30 @@ static uint32_t font_crop_read(const uint8_t **gp)
 
 /* text in colour c, each pixel's coverage blended over what is already on the canvas (an
  * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
+#ifdef FONT_ENTROPY
+typedef struct {
+    const uint8_t *next;
+    uint32_t word, bits;
+} font_stream_t;
+
+/* Each three-bit group identifies a power-of-two range of byte ranks. The
+ * generator appends two guard bytes for the last glyph's lookahead. */
+static inline uint32_t font_byte(font_stream_t *s)
+{
+    while (s->bits < 10u) {
+        s->word |= (uint32_t)*s->next++ << s->bits;
+        s->bits += 8u;
+    }
+    uint32_t group = s->word & 7u;
+    uint32_t width = group ? group : 1u;
+    uint32_t base = group ? 1u << group : 0u;
+    uint32_t rank = base + ((s->word >> 3) & ((1u << width) - 1u));
+    s->word >>= 3u + width;
+    s->bits -= 3u + width;
+    return font_symbols[rank];
+}
+#endif
+
 static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c, int32_t clip_left, int32_t clip_right)
 {
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
@@ -219,6 +284,17 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         gd = f->data + f->off[gi];
 #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
         uint32_t rectangle = font_crop_read(&gd);
+#ifdef FONT_LZ_CROP
+#ifdef FONT_ENTROPY
+        font_stream_t stream = {f->data + f->off[gi], 0, 0};
+        rectangle = font_byte(&stream);
+        rectangle |= font_byte(&stream) << 8;
+        rectangle |= font_byte(&stream) << 16;
+#define FONT_BYTE() font_byte(&stream)
+#else
+#define FONT_BYTE() (*gd++)
+#endif
+#endif
         crop_x = rectangle & 63u;
         crop_y = (rectangle >> 6) & 63u;
         w = (rectangle >> 12) & 63u;
@@ -250,15 +326,16 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
                  * the ring is bounded and needs no clear or shared state. */
                 if (!(gx & 1u)) {
                     if (!left) {
-                        uint32_t token = *gd++;
-                        distance = token & 128u ? *gd++ : 0;
+                        uint32_t token = FONT_BYTE();
+                        distance = token & 128u ? FONT_BYTE() : 0;
                         left = (token & 127u) + (distance ? 3u : 1u);
                     }
-                    byte = distance ? history[(written - distance) & 255u] : *gd++;
+                    byte = distance ? history[(written - distance) & 255u] : FONT_BYTE();
                     history[written++ & 255u] = (uint8_t)byte;
                     left--;
                 }
                 a = byte;
+#undef FONT_BYTE
 #elif defined(FONT_PACKBITS)
                 /* Decode one byte per pixel pair; odd-width rows discard their
                  * padding nibble exactly as the original bitmap reader did. */

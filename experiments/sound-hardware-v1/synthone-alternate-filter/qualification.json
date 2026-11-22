@@ -1,0 +1,60 @@
+{
+  "production_preimage": "e3559ad37c354c02d49f8b99c68fa1982b2ec4b9",
+  "patch_sha256": "4fd34f63b7948ec40bbf6655534b980814bec74b60d0e474d2c923b1bd0ca133",
+  "original_pcm_hashes_verified": 694,
+  "unchanged_lowpass_firmware_pcm_hashes": 598,
+  "authored_route_counts": {
+    "lowpass": 598,
+    "bandpass": 60,
+    "highpass": 36
+  },
+  "baseline_stereo_pass": 7,
+  "candidate_stereo_pass": 8,
+  "gained": [
+    {
+      "index": 352,
+      "name": "JEC Solina Strings Bright",
+      "before": [
+        {
+          "level_db": 0.9458207811068609,
+          "spectral_db": 52.85755046593673,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 2.4171929289136687,
+          "spectral_db": 50.88371441537803,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "after": [
+        {
+          "level_db": 0.07809506540095741,
+          "spectral_db": 2.858434250091701,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": 0.22592626499495166,
+          "spectral_db": 2.6162995283333954,
+          "active": true,
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "lost": [],
+  "matrix": "factory-39.jsonl.gz",
+  "control_readbacks": 27066,
+  "comparable_frames_per_arm": 91816200,
+  "load_save_note_locks": "passed in host production path",
+  "new_voice_state_bytes": 0,
+  "added_cell_adjunct_bytes": 0,
+  "retuning_stress": {
+    "samples": 5512500,
+    "bandpass_absolute_peak": 0.7242873,
+    "highpass_absolute_peak": 1.3331816,
+    "asserted_peak_bound": 2.0
+  }
+}

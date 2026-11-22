@@ -1,0 +1,500 @@
+{
+  "byte_specialized_eight_bit": {
+    "equivalence": "Every wet and final stereo sample required to match the optimized eight-bit graph bit-for-bit.",
+    "programs_verified": 694,
+    "standalone_elf_bytes": {
+      "sp_compact_compute": 1156,
+      "sp_compact_init": 736,
+      "next_random_lineseg": 232,
+      "RevSC_parameter_table": 128,
+      "reciprocal_table": 16,
+      "sum_excluding_compiler_helpers_controls_and_side_graph": 2268
+    },
+    "matched_native_checksum": true
+  },
+  "status": "experimental source-graph comparisons; ordinary firmware factory qualification remains 0/694",
+  "firmware_control": "42ae56e1d83127fd9855fb8e86f8907af216b63a",
+  "original_source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "command_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "stereo_frames_per_graph": 91816200,
+  "sample_rate_hz": 44100,
+  "scoring": "Both final stereo channels measured independently at unity, maximum 1 dB absolute RMS difference and 3 dB FFT spectrum RMS difference, 512 FFT/128 hop/-80 dB floor. Wet return scored independently.",
+  "per_program_results": {
+    "literal": {
+      "6": {
+        "all": {
+          "programs": 694,
+          "both_final_channels_pass": 693,
+          "both_isolated_wet_channels_pass": 689,
+          "worst_absolute_final_rms_db": 0.004074441103541147,
+          "worst_final_spectrum": {
+            "flat_index": 339,
+            "name": "JEC Alarming!",
+            "worst_spectral_rms_db": 9.139445360041927
+          },
+          "failed_final": [
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 9.139445360041927
+            }
+          ],
+          "failed_isolated_wet": [
+            {
+              "flat_index": 301,
+              "name": "JEC High Pass Poly 2",
+              "worst_spectral_rms_db": 9.082628739140672
+            },
+            {
+              "flat_index": 303,
+              "name": "JEC Hats 2",
+              "worst_spectral_rms_db": 3.113542102166589
+            },
+            {
+              "flat_index": 308,
+              "name": "JEC Filtered Dubrec! 2",
+              "worst_spectral_rms_db": 7.361871830172842
+            },
+            {
+              "flat_index": 336,
+              "name": "JEC Un Dallapé per Alessandro 2",
+              "worst_spectral_rms_db": 6.112690174537653
+            },
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 14.797211019026348
+            }
+          ]
+        },
+        "full_mix": {
+          "programs": 34,
+          "both_final_channels_pass": 34,
+          "both_isolated_wet_channels_pass": 34,
+          "worst_absolute_final_rms_db": 0.0018658261939920964,
+          "worst_final_spectrum": {
+            "flat_index": 384,
+            "name": "Shimmershine Pad",
+            "worst_spectral_rms_db": 0.30675406818516693
+          },
+          "failed_final": [],
+          "failed_isolated_wet": []
+        }
+      },
+      "8": {
+        "all": {
+          "programs": 694,
+          "both_final_channels_pass": 694,
+          "both_isolated_wet_channels_pass": 692,
+          "worst_absolute_final_rms_db": 0.0005823924828284212,
+          "worst_final_spectrum": {
+            "flat_index": 339,
+            "name": "JEC Alarming!",
+            "worst_spectral_rms_db": 1.822017281505855
+          },
+          "failed_final": [],
+          "failed_isolated_wet": [
+            {
+              "flat_index": 301,
+              "name": "JEC High Pass Poly 2",
+              "worst_spectral_rms_db": 3.293086582441187
+            },
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 5.414971465079012
+            }
+          ]
+        },
+        "full_mix": {
+          "programs": 34,
+          "both_final_channels_pass": 34,
+          "both_isolated_wet_channels_pass": 34,
+          "worst_absolute_final_rms_db": 0.0002863192818327689,
+          "worst_final_spectrum": {
+            "flat_index": 252,
+            "name": "Solaris",
+            "worst_spectral_rms_db": 0.024852385549400835
+          },
+          "failed_final": [],
+          "failed_isolated_wet": []
+        }
+      }
+    },
+    "optimized": {
+      "6": {
+        "all": {
+          "programs": 694,
+          "both_final_channels_pass": 693,
+          "both_isolated_wet_channels_pass": 689,
+          "worst_absolute_final_rms_db": 0.002007177280448077,
+          "worst_final_spectrum": {
+            "flat_index": 339,
+            "name": "JEC Alarming!",
+            "worst_spectral_rms_db": 9.127865376425808
+          },
+          "failed_final": [
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 9.127865376425808
+            }
+          ],
+          "failed_isolated_wet": [
+            {
+              "flat_index": 301,
+              "name": "JEC High Pass Poly 2",
+              "worst_spectral_rms_db": 9.08262847748983
+            },
+            {
+              "flat_index": 303,
+              "name": "JEC Hats 2",
+              "worst_spectral_rms_db": 3.113551305254268
+            },
+            {
+              "flat_index": 308,
+              "name": "JEC Filtered Dubrec! 2",
+              "worst_spectral_rms_db": 7.361871738557793
+            },
+            {
+              "flat_index": 336,
+              "name": "JEC Un Dallapé per Alessandro 2",
+              "worst_spectral_rms_db": 6.093173768657729
+            },
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 14.753417145646797
+            }
+          ]
+        },
+        "full_mix": {
+          "programs": 34,
+          "both_final_channels_pass": 34,
+          "both_isolated_wet_channels_pass": 34,
+          "worst_absolute_final_rms_db": 0.002007177280448077,
+          "worst_final_spectrum": {
+            "flat_index": 384,
+            "name": "Shimmershine Pad",
+            "worst_spectral_rms_db": 0.3078839539648887
+          },
+          "failed_final": [],
+          "failed_isolated_wet": []
+        }
+      },
+      "8": {
+        "all": {
+          "programs": 694,
+          "both_final_channels_pass": 694,
+          "both_isolated_wet_channels_pass": 692,
+          "worst_absolute_final_rms_db": 0.0005203783722570125,
+          "worst_final_spectrum": {
+            "flat_index": 339,
+            "name": "JEC Alarming!",
+            "worst_spectral_rms_db": 1.8227462208683536
+          },
+          "failed_final": [],
+          "failed_isolated_wet": [
+            {
+              "flat_index": 301,
+              "name": "JEC High Pass Poly 2",
+              "worst_spectral_rms_db": 3.290851081333099
+            },
+            {
+              "flat_index": 339,
+              "name": "JEC Alarming!",
+              "worst_spectral_rms_db": 5.414909567942336
+            }
+          ]
+        },
+        "full_mix": {
+          "programs": 34,
+          "both_final_channels_pass": 34,
+          "both_isolated_wet_channels_pass": 34,
+          "worst_absolute_final_rms_db": 0.0005203783722570125,
+          "worst_final_spectrum": {
+            "flat_index": 384,
+            "name": "Shimmershine Pad",
+            "worst_spectral_rms_db": 0.024069031486916557
+          },
+          "failed_final": [],
+          "failed_isolated_wet": []
+        }
+      }
+    }
+  },
+  "native_pi32v2_strict_360mhz_per_256_stereo_frames": {
+    "6": {
+      "history_codec_state_bytes": 21040,
+      "side_graph_bytes_excluding_handles": 860,
+      "two_owner_bytes": 43800,
+      "target_elf_sha256": "f28fad1a065c3b339e8ceb8ae334d7fb98bc30b3167a7d839e494f2d7eec7730",
+      "target_binary_sha256": "c020a692c2ad988f78a6ec1beff97bed7d7ac6e70c423b453ffe8416b57931dd",
+      "result_checksum": 3961849118,
+      "ticks_24mhz": [
+        73743,
+        72953,
+        72950,
+        72964,
+        72967,
+        72939,
+        72966,
+        72921,
+        72788,
+        72788,
+        72793,
+        72717,
+        72663,
+        72702,
+        72557,
+        72499,
+        72492,
+        72577,
+        72568,
+        72503,
+        72559,
+        72560,
+        72586,
+        72517,
+        72572,
+        72606,
+        72575,
+        72556,
+        72607,
+        72499,
+        72655,
+        72606,
+        72609,
+        72469,
+        72568,
+        72584,
+        72566,
+        72564,
+        72582,
+        72639
+      ],
+      "min_us": 3019.5416666666665,
+      "max_us": 3072.625
+    },
+    "8": {
+      "history_codec_state_bytes": 27232,
+      "side_graph_bytes_excluding_handles": 860,
+      "two_owner_bytes": 56184,
+      "target_elf_sha256": "c698151708bc626171c61705972e058f7ed93a441a4d715949f384d019c2fe88",
+      "target_binary_sha256": "68df164406545b79e77770522a7c3ca4fe5d755e53fc4c52d7545c11c9f7f320",
+      "result_checksum": 1016483735,
+      "ticks_24mhz": [
+        70153,
+        69406,
+        69412,
+        69422,
+        69430,
+        69401,
+        69420,
+        69420,
+        69394,
+        69480,
+        69549,
+        69577,
+        69550,
+        69675,
+        69638,
+        69635,
+        69744,
+        69840,
+        69830,
+        69773,
+        69838,
+        69823,
+        69847,
+        69798,
+        69816,
+        69855,
+        69840,
+        69822,
+        69862,
+        69779,
+        69900,
+        69850,
+        69877,
+        69751,
+        69816,
+        69845,
+        69824,
+        69818,
+        69846,
+        69866
+      ],
+      "min_us": 2891.4166666666665,
+      "max_us": 2923.0416666666665
+    },
+    "byte_specialized_eight": {
+      "history_codec_state_bytes": 27232,
+      "target_elf_sha256": "726959d9b8e29d5041f6cf3f13791a22c40f5e0c4641245aa8f6b9337a9bed44",
+      "target_binary_sha256": "44c82bc1ebdee1d1b4afbc431219cf52baf89afe90ac7c18bc0d62197e7f04fe",
+      "result_checksum": 1016483735,
+      "ticks_24mhz": [
+        61413,
+        60708,
+        60686,
+        60728,
+        60685,
+        60701,
+        60710,
+        60691,
+        60620,
+        60711,
+        60703,
+        60681,
+        60652,
+        60705,
+        60642,
+        60632,
+        60661,
+        60720,
+        60716,
+        60688,
+        60712,
+        60721,
+        60726,
+        60700,
+        60710,
+        60743,
+        60705,
+        60703,
+        60726,
+        60672,
+        60764,
+        60723,
+        60741,
+        60660,
+        60704,
+        60717,
+        60710,
+        60712,
+        60728,
+        60752
+      ],
+      "min_us": 2525.8333333333335,
+      "max_us": 2558.875
+    },
+    "float_history_control": {
+      "history_codec_state_bytes": 98760,
+      "target_elf_sha256": "2ba5a23df9e6a8f1aa738c53c10c240252492beb2378297db0e330e2eefc697d",
+      "target_binary_sha256": "df3667f111771bd2b47c79dc1f1addec50aec6acf7b9688297b25b03696d07b1",
+      "result_checksum": 1474739137,
+      "ticks_24mhz": [
+        30745,
+        30509,
+        30509,
+        30509,
+        30509,
+        30509,
+        30509,
+        30511,
+        30511,
+        30511,
+        30511,
+        30509,
+        30511,
+        30511,
+        30508,
+        30513,
+        30511,
+        30511,
+        30509,
+        30511,
+        30509,
+        30509,
+        30510,
+        30510,
+        30509,
+        30511,
+        30510,
+        30511,
+        30509,
+        30511,
+        30513,
+        30508,
+        30510,
+        30510,
+        30511,
+        30508,
+        30509,
+        30509,
+        30513,
+        30510
+      ],
+      "min_us": 1271.1666666666667,
+      "max_us": 1281.0416666666667
+    }
+  },
+  "native_scope": "Only the optimized RevSC module timed, at feedback .835 using TIMER4. Voices, two stereo dynamics stages, filters and lane render are excluded.",
+  "ordinary_pool_margin_above_reserve": 2064,
+  "lossless_Rice_eight_bit_live_payload_only": {
+    "JEC Filtered Dubrec! 2": {
+      "joint_peak_bytes": 26109,
+      "sum_of_line_peaks_bytes": 26174
+    },
+    "JEC Alarming!": {
+      "joint_peak_bytes": 23228,
+      "sum_of_line_peaks_bytes": 23427
+    },
+    "JEC Deep Mono Pad": {
+      "joint_peak_bytes": 23373,
+      "sum_of_line_peaks_bytes": 23526
+    },
+    "JEC Sub Res Lead": {
+      "joint_peak_bytes": 26082,
+      "sum_of_line_peaks_bytes": 26109
+    },
+    "Shimmershine Pad": {
+      "joint_peak_bytes": 26205,
+      "sum_of_line_peaks_bytes": 26225
+    },
+    "Pulsating Ultraworlds": {
+      "joint_peak_bytes": 26221,
+      "sum_of_line_peaks_bytes": 26230
+    },
+    "Awakening Drone": {
+      "joint_peak_bytes": 26237,
+      "sum_of_line_peaks_bytes": 26238
+    },
+    "Infinite Tension FX": {
+      "joint_peak_bytes": 26207,
+      "sum_of_line_peaks_bytes": 26221
+    },
+    "Synthwave 1974": {
+      "joint_peak_bytes": 26167,
+      "sum_of_line_peaks_bytes": 26181
+    },
+    "June Oh 06 Sqr": {
+      "joint_peak_bytes": 26125,
+      "sum_of_line_peaks_bytes": 26151
+    },
+    "Hunted pad": {
+      "joint_peak_bytes": 26233,
+      "sum_of_line_peaks_bytes": 26237
+    },
+    "🕷- Lost in Space": {
+      "joint_peak_bytes": 26238,
+      "sum_of_line_peaks_bytes": 26238
+    }
+  },
+  "bounded_five_or_six_bit_with_eight_bit_escapes": {
+    "owner_allocations": [
+      19632,
+      22720
+    ],
+    "JEC_Alarming_final_spectrum_db": [
+      14.081,
+      7.823
+    ],
+    "source": "Each 16-frame group tries 11 integer predictors and 8 Rice parameters for the eight-bit stream within the per-block budget."
+  },
+  "adaptive_seven_pole_focus": {
+    "five_bit_JEC_Alarming_final_spectrum_db": 3.123,
+    "five_bit_Awakening_Drone_final_spectrum_db": 3.632
+  },
+  "archive_sha256": "39194e8c1acbd25c8a6ff103cbd351d9cab5187ddb05c670f5957269076c9c9a"
+}

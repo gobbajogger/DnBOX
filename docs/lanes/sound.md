@@ -1,5 +1,29 @@
 # Sound lane
 
+### Current software-only candidate — `3b480381`
+
+The final combined opt-in packages link on stock Elite and Pro with 2,416 and 2,424 B XIP left and 7,908 B of pool margin on each. The four required populated replays and two active-sub stress runs passed with 0 late, 0 xruns and a maximum of 8,046 µs. The retired-name scan is empty and legacy slot migration passed. The 694-program Synth One projection meets both original audio limits on seven programs. The authenticated SuperJ6 selector passed all 640 source programs and the supported controls applied through the real host firmware loader. Full SuperJ6 controls, active FX, 640-program complete mapping and original S4 pairs remain open. Integration preview remains below the XIP floor. [Exact software qualification and artifacts](../sound/engine-qualification.md#current-software-qualification--source-3b480381).
+
+
+### Software-only candidate qualification — 2026-11-22 UTC
+
+Source `f405ac99` passed all eight populated SuperJ6-enabled and dual-profile replays with zero late, zero xruns and peaks of 6,920–8,127 µs against 11,609 µs. Both native models meet the stock limits. Synth One's 694-program control projection reproduced the original hashes and passed 0/694 complete audio comparisons. SuperJ6 Layer 1 attack and explicitly disabled chorus passed the focused bit-exact tests. Full FX, preset application and S4 remain open. Integration's isolated conflict resolution stays below the required XIP floor on both boards. [Exact-source qualification](../sound/engine-qualification.md#software-only-native-qualification-at-f405ac99).
+
+### Exact-source qualification checkpoint — 2026-11-22 UTC
+
+Original-engine comparisons cover Synth One and SuperJ6. Existing engines enter the populated playback, lifecycle and native resource checks. Source `49ba51f1` stock Elite and Pro built with 7,796/7,804 B XIP free and 7,908 B pool margin each. Integration `f1786ebe` diverges from the measured head. A virtual merge found 12 conflicts. The earlier 808 and Chicago comparison receipts are retained in checkpoint `6e3055e5` history. [Qualification](../sound/engine-qualification.md#active-qualification-scope--2026-11-22-utc) · [Exact build and ancestry evidence](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).
+
+
+## 2026-11-22 S4 preflight and integration ancestry
+
+A read-only comparison of `sj6-factory/s4-inputs.json` and `original/bundled-bank-audit.json` matched all 14 selected UIDs and 12 bank identities, with 1,926 authored controls and the eight-event stereo schedule. [Verifier](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight.mjs) · [receipt](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight-result.json). This is **not original-AU execution** and the S4 gate remains **0/14, NOT_RUN**.
+
+At this check, `integration/dnbox-consolidated` was `53` commits ahead of the sound branch, while the sound branch was `66` ahead of integration (merge base `0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e`). C2 requires a real, no-loss merge; it has **not** been met. Do not synthesize a two-parent commit pointing at the sound-only tree, because that would silently drop concurrent integration changes. Recreate a full current source checkout and perform a verified merge before qualification and integration.
+
+## 2026-11-22 native-effects checkpoint on sound resume
+
+Branch `lane/sound-engine-qualification-resume` at start `230a73e4ac075f3752926b3a65130181de5c723a`: verified the existing long-delay kernel against its scalar fallback on 8,192 blocks and 1,052,672 frames at each of `-O0` and `-O2`, with zero PCM/ring/state mismatches. See [replay](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/replay-fxbus-edge.py), [receipt](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/edge-result.json), and [qualification scope](../sound/engine-qualification.md#native-808-long-delay-kernel-checkpoint--2026-11-22-utc). This is a focused component comparison only: original 8W8 effects-on parity, 1.994-second tail, Elite/Pro exact-head links and strict timing remain **NOT_RUN**, as does full SuperJ6 S4 (0/14). The provided shared-inputs bundle is toolchain-only, the SDK archive is not available as authorized raw bytes in this runtime, original AU preset renders require a compatible original host, and the connected DnBOX cloud devices are offline. Do not mark the sound lane DONE.
+
 ## Draft #985 populated playback and original effects
 
 The [engine qualification report](../sound/engine-qualification.md) tracks the four populated 360 MHz scenes, effects coverage and the S4 pairs. The Chicago overlap correction passes its level and harmonic checks across the measured transition, and 64 onset offsets select the preceding pitch. Both parts have an independent Synth One rate reducer with 128 original-stage comparisons. The seven-engine effects matrix, final populated deadlines and 14 full original stereo pairs remain open. Use the original build-9 app and its embedded AU for S4. The release banks supply the selections directly.
@@ -560,3 +584,17 @@ The experimental `firmware/src/dsp/synthone/scheduler/oracle/state.hpp` moved to
 The callback benchmark and its original deadline contract were recovered from `55e1288d`. The untraced 48 kHz host test used 128-frame blocks. The full 694-program result was DEADLINE_FAIL. [Timing receipt](../sound/restored-callback-result.json)
 
 At 44.1 kHz the four original ten-second delay histories alone allocate 7,056,016 bytes. In a fresh component test with pseudorandom input and a two-second delay, reducing the ring from ten seconds to 5.0001 seconds changed an output word at frame 220,528. An earlier minimum-size native build with link-time optimization still exceeded Elite XIP by 25,528 bytes and Pro by 25,520. The current build flags and effect behavior are preserved.
+
+## Populated strict emu360 comparison
+
+The calibrated 8-second replay used all 922 physical input events on the ordinary Elite and Pro packages. On source `54b0b230`, Juno + Synth One reached 11,105 µs on Elite and 11,512 µs on Pro, each with zero raw late transfers and zero DMA xruns. The calibrated defaults reached 9,244 and 9,102 µs with zero late transfers or xruns. Chicago + Miami still exceeded the 11,609 µs deadline, reaching 13,591 µs with 35 late transfers on Elite and 13,079 µs with 46 on Pro. The receipt identifies both packages, the emulator, the source commit and project readbacks. [Raw comparison](../../experiments/sound-hardware-v1/selected-native/independent-render-results.json)
+
+On source `0f019f32` both calibrated defaults and both populated Juno + Synth One scenes passed again. Chicago + Miami still missed the requested deadline. All four populated readbacks exercised both 11-row kits, both selected synth owners and BREAK. [Package identities, guest readbacks and timing](../../experiments/sound-hardware-v1/selected-native/populated-optimized-results.json)
+
+| 8-second replay | Elite peak / late / xruns | Pro peak / late / xruns |
+| --- | ---: | ---: |
+| Calibrated default | 8,524 µs / 0 / 0 | 8,511 µs / 0 / 0 |
+| Juno + Synth One | 10,541 µs / 0 / 0 | 11,202 µs / 0 / 0 |
+| Chicago + Miami | 12,285 µs / 6 / 6 | 12,163 µs / 5 / 5 |
+
+The SuperJ6 factory loader now routes the archived 16′, 8′ and 4′ oscillator register for both owners and layers. The 640-setting host replay matched 18,432 stereo frames exactly. The complete-program stereo criterion remains open at 0 of 14 scored. [Register verification](../../experiments/sound-hardware-v1/sj6-factory/register/verification.json)

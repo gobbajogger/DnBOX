@@ -14,6 +14,12 @@ Call `engine_superj6_factory_load(owner, &row)` after selecting an idle Juno own
 
 The focused test runs from the repo root with `sh tests/host/superj6_factory_load_test.sh`. Passing a directory containing the authenticated export’s compiled `bank_data.inc` also exercises the complete bank through this entry point. The loader covers the original main-pass fields above. Live LFO destination resolution, remaining instrument and FX parameters, and full-preset stereo scoring have separate evidence requirements.
 
+### Layer-one attack and dry chorus routing
+
+The opt-in renderer can stage SuperJ6 Layer 1 attack (ID 36) for an idle owner. Admission and the audio boundary both check ownership before applying the existing physical attack transfer. A held note or arriving preset cancels the staged write. Ten endpoints across the two parts produced 2,560 stereo frames bit-exact against the direct physical setter.
+
+Factory IDs 40 and 41 retain authored presence. The opt-in route bypasses chorus when both switches explicitly contain zero, including signed zero. The two-owner test matched 512 audible stereo frames bit for bit against the same dry render after master gain. A missing switch or active mode still selects the existing Juno chorus. The test verifies independent owners, rejection, and ordinary project save/reload. Active original chorus and complete original factory playback remain unqualified.
+
 ## Verified originals
 
 | Input | Bytes | SHA-256 |
@@ -35,6 +41,10 @@ Targeted searches of the authorized project files and Library for SuperJ6, 14/56
 | Private model/source continuation, `2bf91cf7a85cb2a0fd1322acd67f07cd2a63b4fd17127c8070d36ae94b1437f6` | Five WAV files, all kit/BREAK assets. Its independent source review also records the missing full instrument graph. |
 
 The next capture needs either the authenticated comparison ZIP or stereo output from the original AU/app for 14 identified factory presets with the actual sample rate, note/velocity/release events, reset, transport and capture length. The candidate must load those same programs and replay those events. One original record is already pinned for a first comparison: *Medieval Sky*, UID `87E999B2-447E-4B2E-9EA9-AE53F4DEE44B` in Sound Test Room, with 114 fields. Its enabled LFO2 has a nonzero amount and destination-index 25. The two installers and original JSON provide the input data; the missing input to the bench is the output of the complete original preset graph and the corresponding qualified candidate preset path. [Original graph and selected record evidence](https://chatgpt.com/library?file_id=libfile_fde3_f-997eee43234c81918afec06ba3d46632_2021479872048191acbfdca1f870a539&account_id=personal)
+
+## Authenticated 640-program replay
+
+The recovered export matched its pinned SHA-256. Both selector paths returned all 640 programs in 12 banks and preserved all 90,549 ordered binary32 values. The real firmware loader accepted every program and verified 4,580 authored envelope, waveform, PWM and master words, 640 authored register words and 2,460 PWM defaults. The archive still contains legacy fields with unresolved sounding behavior. Complete active FX and preset execution remain open. [Bank verifier and fixture](../../experiments/sound-hardware-v1/sj6-factory/README.md).
 
 ## Next non-envelope controls supported by the original evidence
 

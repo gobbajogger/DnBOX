@@ -1,0 +1,39 @@
+{
+  "firmware_control": "42ae56e1d83127fd9855fb8e86f8907af216b63a",
+  "stage": "Only the 50 ms right-channel widening history is replaced in the original complete factory graph. Final left channel must remain word-exact.",
+  "control_original_capture_digests_matching_existing_programs": 694,
+  "full_original_factory_programs": 694,
+  "complete_stereo_pairs_passing_E6M9": 694,
+  "frames_per_program": 88200,
+  "rate_hz": 44100,
+  "ordered_setters_per_program": 144,
+  "history_bytes_per_owner": 4410,
+  "original_24bit_history_bytes_per_owner": 6615,
+  "worst_spectrum_program_index": 251,
+  "worst_right_spectral_rms_db": 0.28899755463271726,
+  "worst_level_program_index": 333,
+  "worst_absolute_right_level_db": 9.443447124690606e-05,
+  "round_to_nearest_bfloat16_focused": {
+    "251": 3.137052776643058,
+    "339": 4.3457828714841265
+  },
+  "effect_on_existing_ABI": {
+    "synthone_state_bytes": [
+      3564,
+      1360
+    ],
+    "miami_state_bytes": 3720,
+    "backend_union_bytes": [
+      3720,
+      3720
+    ],
+    "runtime_owner_bytes": [
+      5184,
+      5184
+    ],
+    "common_pool_recovered": 0,
+    "selected_synthone_private_bytes_freed": 2204
+  },
+  "shipping": "Retain current 24-bit width until a separately qualified effect uses the recovered private space.",
+  "proof_archive_sha256": "03cd53d89eb6d114236137e59b7fc83f7e62f629ea59be96a78d118f6cae17fa"
+}

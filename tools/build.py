@@ -417,11 +417,28 @@ def app_compile_commands(flags, original_synth, wobble):
         flags = [*flags, "-DX0X_ORIGINAL_SYNTH=1",
                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
-        flags = [*flags, "-flto"]
+        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1", "-DX0X_CHICAGO_FULL_HISTORY=1"]
     synthone_patch = synthone_patch_setting()
     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+    stock_preset = os.environ.get("X0X_SUPERJ6_STOCK_PRESET", "0")
+    if stock_preset not in ("0", "1") or (stock_preset == "1" and SUPERJ6_FACTORY != "1"):
+        raise SystemExit("X0X_SUPERJ6_STOCK_PRESET requires X0X_SUPERJ6_FACTORY=1")
+    if stock_preset == "1":
+        flags.append("-DX0X_SUPERJ6_STOCK_PRESET=1")
+    boot_tanh = os.environ.get("X0X_TANH_BOOT_TABLE", "0")
+    if boot_tanh not in ("0", "1"):
+        raise SystemExit("X0X_TANH_BOOT_TABLE: 0 or 1")
+    if boot_tanh == "1":
+        flags = [*flags, "-DX0X_TANH_BOOT_TABLE=1"]
+    if os.environ.get("X0X_DNR2_NATIVE") == "1" and os.environ.get("X0X_DNR2_SCRATCH") != "1":
+        raise SystemExit("X0X_DNR2_NATIVE requires the guarded DNR2 binding")
+    for flag in ("X0X_COMPOSE_S1_EFFECTS", "X0X_DNR2_SCRATCH", "X0X_DNR2_NATIVE"):
+        if os.environ.get(flag, "0") not in ("0", "1"):
+            raise SystemExit(f"{flag}: 0 or 1")
+        if os.environ.get(flag) == "1":
+            flags.append(f"-D{flag}=1")
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
     if chance_probe not in ("0", "1"):
         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
@@ -438,8 +455,16 @@ def app_compile_commands(flags, original_synth, wobble):
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
         unit_flags = [*o2, *ORIGINAL_SYNTH_FLAGS] if u == "app/engine.c" else o2
+        # Keep the sequencer and its event dispatch compact in the shared
+        # flash cache on a busy audio half.
+        if u == "seq/sequencer.c":
+            unit_flags = flags
         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
             unit_flags = [f for f in unit_flags if f != "-flto"]
+        if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":
+            unit_flags = ["-Os" if flag == "-O2" else flag for flag in unit_flags]
+        if u in {"dsp/drum909.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":
+            unit_flags = ["-Oz" if flag in ("-O2", "-Os") else flag for flag in unit_flags]
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
         objs.append(o)
     if original_synth:
@@ -476,9 +501,8 @@ def build_app(starting_breaks=False):
     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
     factory_roots = []
     if SUPERJ6_FACTORY == "1":
-        names = ["engine_superj6_factory_load"]
-        if synthone_patch_setting() != "1":
-            names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+        names = ("engine_superj6_factory_load", "engine_superj6_edit",
+                 "engine_superj6_pre_note_wave")
         for name in names:
             factory_roots.extend(("-u", name))
     # Diagnostic builds must opt in explicitly; never alter release defaults.

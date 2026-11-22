@@ -1,0 +1,34 @@
+--- a/experiments/sound-hardware-v1/selected-native/project.c
++++ b/experiments/sound-hardware-v1/selected-native/project.c
+@@ -25,6 +25,31 @@
+         assert(!engine_bass_preset_pending(voice));
+         assert(engine_bass_bank(voice) == (int)kind[voice]);
+ 
++        if (kind[voice]==ORIGINAL_SOUND_SYNTHONE) {
++            const unsigned ids[]={ORIGINAL_SYNTHONE_CRUSH, ORIGINAL_SYNTHONE_CRUSH_LFO,
++                ORIGINAL_SYNTHONE_LFO1_SHAPE, ORIGINAL_SYNTHONE_LFO1_LEVEL, ORIGINAL_SYNTHONE_LFO1_RATE,
++                ORIGINAL_SYNTHONE_LFO2_SHAPE, ORIGINAL_SYNTHONE_LFO2_LEVEL, ORIGINAL_SYNTHONE_LFO2_RATE};
++            const int rates[]={119,127,42,119,92,85,89,82};
++            for (unsigned k=0;k<8;++k) {
++                pref_t control=PR(R_ENG,T_303,voice,ids[k]);
++                pref_set(control,rates[k]);
++                assert(pref_get(control)==rates[k]);
++            }
++            const int controls[4]={96,43,63,91};
++            for (int k=0;k<4;++k) {
++                pref_t control=PR(R_ENG,T_303,voice,ORIGINAL_SYNTHONE_PHASER_MIX+k);
++                pref_set(control,controls[k]);
++                assert(pref_get(control)==controls[k]);
++            }
++            const int master[6]={112,127,60,13,38,54};
++            for (int k=0;k<6;++k) {
++                pref_t control=PR(R_ENG,T_303,voice,ORIGINAL_SYNTHONE_MASTER_VOLUME+k);
++                pref_set(control,master[k]);
++                assert(pref_get(control)==master[k]);
++            }
++            engine_render(buffer,256);
++            assert(engine_bass_sound_validate(&proj.sound)==0);
++        }
+         bpart_t *part = &pat->bass[voice];
+         part->len = 16;
+         for (int i = 0; i < part->len; ++i) {

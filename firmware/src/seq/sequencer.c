@@ -254,6 +254,7 @@ static uint32_t bass_slot_q8(const seq_t *s, int b, int p)
     int t = TRK_BASS0 + b;
     uint32_t L = seq_step_q8(s, bpart(s, b)->rate);
     uint32_t sw = swing_q8(s, bpart(s, b)->rate, L);
+    if (!sw) return L;
     if (bpart(s, b)->dir == DIR_RANDOM)
         return (s->t[t].mut_steps & RANDOM_SWING_ODD) ? L + sw : L - sw;
     int np = next_pos((seq_t *)s, t, p, 0);
@@ -687,13 +688,15 @@ static uint32_t fire_step(seq_t *s, int t, const seq_sink_t *o)
             tr->ext_due--;
     } else {
         /* the step that follows p: swung if it is an odd one */
-        int np = next_pos(s, t, p, 0);
         uint32_t sw = swing_q8(s, rate, L);
-        if (bass && bpart(s, t - TRK_BASS0)->dir == DIR_RANDOM) {
+        if (!sw)
+            tr->to_next = carry + L;
+        else if (bass && bpart(s, t - TRK_BASS0)->dir == DIR_RANDOM) {
             /* Swing belongs to successive musical time slots, not to the
              * parity of the randomly selected source-step position. */
             tr->to_next = carry + ((tr->mut_steps & RANDOM_SWING_ODD) ? L + sw : L - sw);
         } else {
+            int np = next_pos(s, t, p, 0);
             tr->to_next = carry + ((np & 1) ? L + sw : L - sw);
             if (!(np & 1) && (p & 1) == 0)           /* even -> even (odd lengths, wraps): no swing */
                 tr->to_next = carry + L;

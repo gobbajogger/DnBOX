@@ -4,10 +4,12 @@
 
 /* A foreground reader starts each program at {0} and feeds its authored
  * fields in record order. The first occurrence of each supported ID wins.
- * Presence distinguishes authored +0/-0 from an absent PWM word. */
+ * Presence distinguishes authored +0/-0 from absent PWM or chorus switch words. */
 enum {
     SJ6_ROW_AMP2 = 0, SJ6_ROW_MASTER = 4, SJ6_ROW_WAVE = 5,
-    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_COUNT = 11
+    SJ6_ROW_AMOUNT = 7, SJ6_ROW_ENABLE = 9, SJ6_ROW_RANGE = 11,
+    SJ6_ROW_CHORUS_I = 12, SJ6_ROW_CHORUS_II = 13, SJ6_ROW_SUB_VOLUME = 14,
+    SJ6_ROW_CHORUS_VERSION = 15, SJ6_ROW_COUNT = 16
 };
 typedef struct {
     float value[SJ6_ROW_COUNT];
@@ -18,6 +20,10 @@ static inline void sj6_factory_add_word(sj6_factory_row *row, unsigned id, uint3
 {
     unsigned slot;
     if (id == 0) slot = SJ6_ROW_MASTER;
+    else if (id == 86) slot = SJ6_ROW_RANGE;
+    else if (id == 202) slot = SJ6_ROW_SUB_VOLUME;
+    else if (id == 208) slot = SJ6_ROW_CHORUS_VERSION;
+    else if (id == 40 || id == 41) slot = SJ6_ROW_CHORUS_I + id - 40;
     else if (id >= 119 && id <= 122) slot = SJ6_ROW_AMP2 + id - 119;
     else if (id == 82 || id == 83) slot = SJ6_ROW_WAVE + id - 82;
     else if (id == 78 || id == 79) slot = SJ6_ROW_AMOUNT + id - 78;

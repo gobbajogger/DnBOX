@@ -5,13 +5,18 @@
 #include <string.h>
 #endif /* Native unity build supplies the freestanding memory routines. */
 
+#ifndef X0X_COMPOSE_S1_EFFECTS
+#define X0X_COMPOSE_S1_EFFECTS 0
+#endif
+
 /* Control metadata only. The released UI still owns all drawing and cadence. */
 enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
 #if X0X_SYNTHONE_PATCH
-       UI_ORIGINAL_SYNTHONE_PAGES = 5, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = 5 + (X0X_COMPOSE_S1_EFFECTS ? 5 : 0),
 #else
-       UI_ORIGINAL_SYNTHONE_PAGES = 1, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = X0X_COMPOSE_S1_EFFECTS ? 6 : 1,
 #endif
+       UI_ORIGINAL_JUNO_PAGES = 4 };
 static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
     {11,12,-1,-1}, {13,15,14,16}, {17,18,19,-1}
@@ -23,20 +28,31 @@ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
 };
 static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
-#if X0X_SYNTHONE_PATCH
-/* Indices into Sound's stable storage order. Factory IDs belong to the
- * descriptor and are never passed to the bend/damper performance API. */
 static const int8_t ui_original_synthone_rows[][4] = {
+#if X0X_SYNTHONE_PATCH
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12},
+#endif
+#if X0X_COMPOSE_S1_EFFECTS
+    {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE},
+    {ORIGINAL_SYNTHONE_TREM,ORIGINAL_SYNTHONE_LFO1_SHAPE,ORIGINAL_SYNTHONE_LFO1_LEVEL,ORIGINAL_SYNTHONE_LFO1_RATE},
+    {ORIGINAL_SYNTHONE_CRUSH_LFO,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
+    {ORIGINAL_SYNTHONE_PHASER_MIX,ORIGINAL_SYNTHONE_PHASER_RATE,ORIGINAL_SYNTHONE_PHASER_FEEDBACK,ORIGINAL_SYNTHONE_PHASER_WIDTH},
+    {ORIGINAL_SYNTHONE_MASTER_VOLUME,ORIGINAL_SYNTHONE_MASTER_RATIO,ORIGINAL_SYNTHONE_MASTER_THRESHOLD,ORIGINAL_SYNTHONE_MASTER_MAKEUP},
+    {ORIGINAL_SYNTHONE_MASTER_ATTACK,ORIGINAL_SYNTHONE_MASTER_RELEASE,-1,-1}
+#else
     {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
+#endif
 };
 static const char *const ui_original_synthone_titles[] = {
-    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT"
-};
-#else
-static const int8_t ui_original_synthone_rows[][4] = {{ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}};
-static const char *const ui_original_synthone_titles[] = {"EFFECT"};
+#if X0X_SYNTHONE_PATCH
+    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR",
 #endif
+#if X0X_COMPOSE_S1_EFFECTS
+    "EFFECT", "TREMOLO / LFO 1", "CRUSH / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
+#else
+    "EFFECT"
+#endif
+};
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
 };
@@ -57,13 +73,34 @@ static const char *ui_original_name(unsigned kind, unsigned id)
     static const char *const juno[] = {"WAVE MIX","SUB","BASE CUTOFF","RESONANCE","ENV DEPTH","ATTACK","DECAY","SUSTAIN","RELEASE","HIGH PASS","LFO RATE","PWM DEPTH","WIDTH","CHORUS RATE","CHORUS MIX","LEVEL"};
     if(kind==ORIGINAL_SOUND_JUNO)return id<16?juno[id]:"";
     if (kind == ORIGINAL_SOUND_CHICAGO && id < 20) return chicago[id];
-    if (kind == ORIGINAL_SOUND_SYNTHONE) return id == ORIGINAL_SYNTHONE_CRUSH ? "CRUSH RATE" : "";
+    if (kind == ORIGINAL_SOUND_SYNTHONE) {
+        if (original_sound_s1_master_id(id)) {
+            static const char *const names[]={"INPUT LEVEL","RATIO","THRESHOLD","ATTACK","RELEASE","MAKEUP"};
+            return names[id-ORIGINAL_SYNTHONE_MASTER_VOLUME];
+        }
+        if (id == ORIGINAL_SYNTHONE_CRUSH_LFO) return "CRUSH SOURCE";
+        if (id == ORIGINAL_SYNTHONE_CRUSH) return "CRUSH RATE";
+        if (id == ORIGINAL_SYNTHONE_WIDTH) return "STEREO WIDTH";
+        if (id == ORIGINAL_SYNTHONE_PAN) return "PAN DEPTH";
+        if (id == ORIGINAL_SYNTHONE_PAN_RATE) return "PAN RATE";
+        if (id == ORIGINAL_SYNTHONE_PHASER_MIX) return "PHASER MIX";
+        if (id == ORIGINAL_SYNTHONE_PHASER_RATE) return "MOD RATE";
+        if (id == ORIGINAL_SYNTHONE_PHASER_FEEDBACK) return "FEEDBACK";
+        if (id == ORIGINAL_SYNTHONE_PHASER_WIDTH) return "NOTCH WIDTH";
+        if (id == ORIGINAL_SYNTHONE_TREM) return "TREMOLO SOURCE";
+        if (id == ORIGINAL_SYNTHONE_LFO1_SHAPE || id == ORIGINAL_SYNTHONE_LFO2_SHAPE) return "WAVE";
+        if (id == ORIGINAL_SYNTHONE_LFO1_LEVEL || id == ORIGINAL_SYNTHONE_LFO2_LEVEL) return "AMOUNT";
+        if (id == ORIGINAL_SYNTHONE_LFO1_RATE || id == ORIGINAL_SYNTHONE_LFO2_RATE) return "RATE";
+        return "";
+    }
     return kind == ORIGINAL_SOUND_MIAMI && id < 16 ? miami[id] : "";
 }
 
 /* Storage remains q127; an encoder detent moves one original selector state. */
 static unsigned ui_original_states(unsigned kind, unsigned id)
 {
+    if (kind == ORIGINAL_SOUND_SYNTHONE &&
+        (id==ORIGINAL_SYNTHONE_CRUSH_LFO || id==ORIGINAL_SYNTHONE_TREM || id==ORIGINAL_SYNTHONE_LFO1_SHAPE || id==ORIGINAL_SYNTHONE_LFO2_SHAPE)) return 4;
     if (kind == ORIGINAL_SOUND_CHICAGO) {
         if (id == 11 || id == 13) return 2;
         if (id == 14 || id == 15) return 3;

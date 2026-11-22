@@ -1,6 +1,14 @@
 # Synth One factory A/B
 
-The acceptance limits are an absolute RMS-level difference of at most **1 dB** and a log-spectral RMS difference of at most **3 dB** from 20 Hz through 16 kHz on each channel. Both arms use the same note schedule at unity gain. The production selector currently exposes INIT. Complete production-firmware factory comparisons stand at **0/694**.
+The acceptance limits are an absolute RMS-level difference of at most **1 dB** and a log-spectral RMS difference of at most **3 dB** from 20 Hz through 16 kHz on each channel. Both arms use the same note schedule at unity gain. The production selector currently exposes INIT. Complete production-firmware factory loading stands at **0/694**.
+
+## Current production control projection
+
+The host bench applied the 13 supported voice edits through the persisted Synth One cell and 22 effect settings through the existing panel controls. All 24,290 values read back across 694 programs. The 694 source-derived original stereo hashes matched the archived capture set. Across 91,816,200 stereo frames per arm, **0/694** complete pairs met both original limits. The candidate produced 78 silent programs when the saved balance or level removed oscillator 1. The closest pair, factory index 673, still exceeded the spectral threshold on both channels. Full production bank selection and the original voice and effect graph remain open. [Input, worst cases and replay](../../experiments/sound-hardware-v1/synthone-factory-projection/README.md).
+
+## Opt-in sub oscillator
+
+Original IDs 7, 8 and 9 now set sub level, an extra octave down and sine or square in the editable INIT voice. The existing project size is preserved. Legacy master controls and bypass retain their bytes and the sub fields survive save/load and note locks. The integrated 38-control projection reproduced all 694 original stereo hashes. It recovered 63 previously silent programs, kept all 110 zero-sub renders bit-identical and passed both original limits on **7/694** programs. The remaining 687 exceed at least one limit. [Independent oscillator comparison, preset results and replay](../../experiments/sound-hardware-v1/synthone-sub/README.md).
 
 ## Harmonic oscillator in the full factory fixture
 

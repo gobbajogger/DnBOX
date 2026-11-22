@@ -1,5 +1,10 @@
 # Integration baseline
 
+## Stock SuperJ6 WIDE and untraced sanitizer qualification — 2026-11-22 (WORKING)
+
+The [software evidence](../../evidence/integ-resume/stock-wide-1d727e2b/README.md) carries the exact merged #991 MIX amber sources and the latest scoped Sound input. Stock SuperJ6 WIDE adds source-owned preset ID 4 and pattern recall E5 under the explicit candidate profile. The first note and saved project path passed on both owners. Normal package, flash map and native Remote USB checks passed on Elite and Pro with 1,032 and 1,040 B XIP free and 732 B of pool margin each. I4 passed in an untraced offline Debian guest on all ten exact inputs, with the genuine leak and corruption controls. Wet-path deadline, WIDE Wave and Width display qualification, final Nightly source pairing and aggregate release gates remain open.
+
+
 ## Stock native Remote and merged FWUI — 2026-11-22 (WORKING)
 
 The [native software packet](../../evidence/integ-resume/native-remote-156f4629/README.md) preserves exact Sound `0ac65800`, consolidated FWUI `86e0f63f`, and current Integration ancestry. Both stock builds fit with 1,368 B Elite and 1,380 B Pro XIP free and 732 B of pool margin each. The native emulated USB exchange passed addressed Apply and Undo on both models. The separate eight-second populated scenes peaked at 7,467 / 8,281 µs with zero late halves or xruns. The merged Juno slot host case passed 8,918 assertions. Both final combined Local gates, strict ten-minute playback and current LeakSanitizer acceptance are open. Existing offline five-sample BREAK verification is retained. The private Project Sources originals and staged archive remain preserved locally.

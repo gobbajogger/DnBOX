@@ -16,6 +16,12 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
+/* Width, pan, tremolo and phaser fit the earlier backend pool allocation.
+ * The final master compressor has explicitly budgeted per-owner state. */
+typedef char s1_width_fits_backend_union[
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(original_miami_backend) ||
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(original_chicago_backend) ||
+    __builtin_offsetof(s1_dry_part,master) <= sizeof(((original_runtime_backend *)0)->juno) ? 1 : -1];
 typedef struct {
     original_runtime_backend dsp;
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
@@ -26,8 +32,17 @@ typedef struct {
     uint8_t kind;
     int8_t status;
 } original_runtime_part;
+typedef union { uint32_t words[256]; float samples[256]; } original_runtime_channel;
 typedef union {
-    float metal[4][256]; /* split 808 render, before the owning bass uses this space */
+    float mono_send[256]; /* public workspace layout */
+    struct {
+        original_runtime_channel channels[2];
+        union {
+            float mono_send[256];
+            struct { int16_t converted[2][256], scratch[4][256]; } chicago;
+            struct { int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
+        } fx;
+    } engine;
     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
     struct { uint32_t left[256], right[256]; int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
 } original_runtime_workspace;
@@ -37,6 +52,8 @@ typedef union {
  * remain a visible refusal. No old engine or bank is involved. */
 int original_runtime_init(original_runtime_part *, const uint8_t cell[32], float bpm,
     original_chicago_tuning *, const original_chicago_fx2_cold_owner *);
+int original_runtime_init_extended(original_runtime_part *,const uint8_t cell[32],const uint8_t *ext,
+    float bpm,original_chicago_tuning *,const original_chicago_fx2_cold_owner *);
 /* Call on an initialized or zero-initialized part before cold replacement;
  * externally owned Chicago resources must be retired before overwriting it. */
 int original_runtime_retire(original_runtime_part *);
@@ -65,3 +82,6 @@ int original_runtime_env_view(const original_runtime_part *, float adsr[4], floa
 int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
     float *left, float *right, unsigned frames);
 
+
+/* Engine-owned stereo remains in this workspace until the ordered mix. */
+int original_runtime_render_owned(original_runtime_part *, original_runtime_workspace *, unsigned frames);

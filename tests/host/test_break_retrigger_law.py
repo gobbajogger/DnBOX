@@ -14,6 +14,8 @@ class ProbabilityLaw(unittest.TestCase):
     def build(self, folder, header=None, generate=False):
         source = SOURCE.read_text().replace('break_retrigger_reference.inc', str(ROOT / 'tests/host/break_retrigger_reference.inc'))
         source = source.replace('../../firmware/src/dsp/fastmath.h', str(ROOT / 'firmware/src/dsp/fastmath.h'))
+        source = source.replace('../../firmware/src/dsp/break_retrigger_packed.h',
+                                str(ROOT / 'firmware/src/dsp/break_retrigger_packed.h'))
         if header is not None:
             path = folder / 'table.h'
             path.write_text(header)

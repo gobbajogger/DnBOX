@@ -20,7 +20,7 @@ int original_pw_width(unsigned shape,float intensity,float source,float width,fl
 int original_chicago_voice_recompile(original_chicago_voice_controls *,const original_chicago_program *,unsigned);
 int original_miami_voice_recompile(original_miami_voice_controls *,const original_miami_program *,unsigned);
 #endif
-#define EXERCISE(kind,factories,macros,targets,bend,cutoff) \
+#define EXERCISE(kind,factories,macros,targets,bend,cutoff,gain) \
 static void kind##_test(void){ \
  for(unsigned factory=0;factory<factories;factory++){ \
   original_##kind##_program p;original_##kind##_voice_controls actual,expected; \
@@ -29,7 +29,7 @@ static void kind##_test(void){ \
    unsigned id=step%3==0?bend:step%3==1?cutoff:(step/3)%macros;float value=(float)((step*29)%129)/128; \
    CHECK(original_##kind##_program_set(&p,id,value));CHECK(original_##kind##_voice_compile(&expected,&p));widths=0; \
    CHECK(original_##kind##_voice_recompile(&actual,&p,id));CHECK(!memcmp(&actual,&expected,sizeof actual)); \
-   CHECK(widths==((id==bend||id==cutoff)?0:4)); \
+   CHECK(widths==((id==bend||id==cutoff||id==gain)?0:4)); \
   } \
   /* A revision mismatch or unready cache must rebuild, including wraparound. */ \
   actual.revision^=17;CHECK(original_##kind##_program_set(&p,bend,.5f));widths=0; \
@@ -57,8 +57,8 @@ static void kind##_test(void){ \
   CHECK(original_##kind##_voice_recompile(&a,&p,bend));CHECK(!memcmp(&a,&e,sizeof a)); \
  } \
 }
-EXERCISE(chicago,81,22,29,20,2)
-EXERCISE(miami,30,18,24,16,12)
+EXERCISE(chicago,81,22,29,20,2,0)
+EXERCISE(miami,30,18,24,16,12,18)
 static void production_owner_test(void){
  static original_runtime_part part;
  static original_chicago_tuning tuning;
@@ -82,9 +82,25 @@ static void production_owner_test(void){
     original_chicago_program p=part.dsp.chicago.program;original_chicago_voice_controls controls;
     CHECK(original_chicago_program_set(&p,id,value));CHECK(original_chicago_voice_compile(&controls,&p));widths=0;
     CHECK(original_runtime_param(&part,id,value)==ORIGINAL_RUNTIME_OK);
-    CHECK(widths==(id==0?4:0));CHECK(!memcmp(&part.dsp.chicago.program,&p,sizeof p));
+    CHECK(!widths);CHECK(!memcmp(&part.dsp.chicago.program,&p,sizeof p));
     CHECK(!memcmp(&part.dsp.chicago.controls,&controls,sizeof controls));
    }
+  }
+  if(!kind){
+   original_chicago_backend *b=&part.dsp.chicago;
+   for(unsigned id=0;id<22;id++){
+    original_chicago_program p=b->program;original_chicago_voice_controls expected;
+    CHECK(original_chicago_program_set(&p,id,p.macro[id]));
+    CHECK(original_chicago_voice_compile(&expected,&p));widths=0;
+    CHECK(original_runtime_param(&part,id,p.macro[id])==ORIGINAL_RUNTIME_OK);
+    CHECK(!widths&&!memcmp(&p,&b->program,sizeof p)&&!memcmp(&expected,&b->controls,sizeof expected));
+   }
+   original_chicago_program p=b->program;original_chicago_voice_controls actual=b->controls,save=actual;
+   CHECK(original_chicago_program_set(&p,0,p.macro[0]));p.target[15]=NAN;
+   CHECK(!original_chicago_voice_recompile_unchanged(&actual,&p));
+   CHECK(!memcmp(&actual,&save,sizeof actual));
+   p=b->program;p.revision+=2;widths=0;
+   CHECK(original_chicago_voice_recompile_unchanged(&actual,&p)&&widths==4);
   }
   CHECK(original_runtime_retire(&part)==ORIGINAL_RUNTIME_OK);
  }

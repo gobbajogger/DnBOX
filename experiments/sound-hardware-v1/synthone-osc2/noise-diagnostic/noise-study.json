@@ -1,0 +1,890 @@
+[
+  {
+    "index": 19,
+    "mode": 0,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.11505704442076188,
+        "spectral_db": 2.757648575662285,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.03253357032205244,
+        "spectral_db": 2.760512803372636,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "545f1f1d227d1a2d3951a1632f9d9279dcab7221e86439f41b1537056ed4a08c",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 19,
+    "mode": 1,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7416121619430576,
+        "spectral_db": 3.610293776506979,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.6714127552778858,
+        "spectral_db": 3.6180538239839,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "1174a22cc3ef8bdef0136e7b24ced5be109f4aafa7d8851bdde355fa85db65bc",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 19,
+    "mode": 8,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.1127600865739159,
+        "spectral_db": 2.6510123169361393,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.029585073880985763,
+        "spectral_db": 2.6553643508382323,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 22050,
+    "first_mismatch": 22050,
+    "stock_sha256": "3b1b210494edc1f321ba36bd65bb62b6063678d9db4780a1fba8e5d161f45954",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 19,
+    "mode": 9,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7351382550990747,
+        "spectral_db": 2.889721865030041,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.6654099664896047,
+        "spectral_db": 2.8976130112862224,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 66790,
+    "first_mismatch": 66790,
+    "stock_sha256": "8427471a787d3443ba39c2afcd29d4428dcd5fee70b76b265c0761eb297007b4",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 19,
+    "mode": 25,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7351382550990747,
+        "spectral_db": 2.889721865030041,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.6654099664896047,
+        "spectral_db": 2.8976130112862224,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "8427471a787d3443ba39c2afcd29d4428dcd5fee70b76b265c0761eb297007b4",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 19,
+    "mode": 57,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7356025986710839,
+        "spectral_db": 2.9978722284011736,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.666114949795527,
+        "spectral_db": 3.0062655237853164,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "98ff737fc320d51300a1651a77623d385846900c95b2cb5f29d28eb36c56be1d",
+    "original_sha256": "3f82d0f0a3bf2df1efb9d6c69b245ee8ac21b6d9105fb62a70ed119e82778835"
+  },
+  {
+    "index": 86,
+    "mode": 0,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 2.5032902740558023,
+        "spectral_db": 1.8294462922443133,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 2.4788992175626485,
+        "spectral_db": 1.854848495623056,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "528026de5a35371e762fb706445ab8e6c1cef7ce682c11e296e61493e5963500",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 86,
+    "mode": 1,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 1.432098147121961,
+        "spectral_db": 1.5031282353589024,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 1.2010195616903934,
+        "spectral_db": 1.5176147734780936,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "a22ca6ead631fc778e598e7c47b70fd05e3c0c62b7758a782a5ca5b0841149be",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 86,
+    "mode": 8,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 2.505866653664342,
+        "spectral_db": 1.902165415210457,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 2.481683623022324,
+        "spectral_db": 1.9280393291312636,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "76d06363dfb871644d615ff54c26bd052feac3e3e6bb189afa72dae09c5f9502",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 86,
+    "mode": 9,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 1.4366969275658592,
+        "spectral_db": 1.6167056399713429,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 1.2060424051636849,
+        "spectral_db": 1.63097667617353,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "04d351e2b44da28b0c73fbc2fb55e56e4143521d21419af1dd80a66c4ef91d6a",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 86,
+    "mode": 25,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 1.4326743787080096,
+        "spectral_db": 1.6099284394270343,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 1.2023201822356646,
+        "spectral_db": 1.6256790015301374,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "93abac5503c1feb6bd4c639d7ee0d559114798a5564a61019f1e877587291953",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 86,
+    "mode": 57,
+    "raw_peak": 0.06648179888725281,
+    "original_first_draw": 22050,
+    "original_last_draw": 84325,
+    "original_draw_frames": 62276,
+    "scores": [
+      {
+        "level_db": 1.4326743787080096,
+        "spectral_db": 1.6099284394270343,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 1.2023201822356646,
+        "spectral_db": 1.6256790015301374,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "93abac5503c1feb6bd4c639d7ee0d559114798a5564a61019f1e877587291953",
+    "original_sha256": "1fcb3c3567574887d2345c4f5ca82c5c862696d4f24d52f606efaf1ad367929f"
+  },
+  {
+    "index": 130,
+    "mode": 0,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": 0.9546648787851153,
+        "spectral_db": 3.3577814131736687,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 0.7990619490197173,
+        "spectral_db": 3.344717520279591,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "57dc29f684d5f1b6e31f7c1fb9aec96769cfca88a2ce3e49d77a0309772a250d",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 130,
+    "mode": 1,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": -0.3809820170668283,
+        "spectral_db": 2.3698365196376794,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.5365849468322264,
+        "spectral_db": 2.365975666656807,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "931e575a1dda71c66cd384c1076e61faa485604af1155256b2fef3497da9cee7",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 130,
+    "mode": 8,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": 1.0137074960920311,
+        "spectral_db": 5.951550057347703,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": 0.8581045663266328,
+        "spectral_db": 5.940412070471909,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "d53dc7567f6a9ef9d03a767d6ade0e22b2cfccdb8b4f0e2b360e62b105f8772a",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 130,
+    "mode": 9,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": -0.32144536390634576,
+        "spectral_db": 4.888188725344136,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.4770482936717433,
+        "spectral_db": 4.882020591500495,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "fa31cc89bb1ced1700e11c1fa5b7fea30ed3209a3a11f95be8fb0872d1bab5c2",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 130,
+    "mode": 25,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": -0.3390946259473291,
+        "spectral_db": 4.812366758889489,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.4946975557127272,
+        "spectral_db": 4.806388462522723,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "29ea579c9063fc35d4291be258be6a6f957f1e26a7bcf9876e710b182986a6df",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 130,
+    "mode": 57,
+    "raw_peak": 0.11810296028852463,
+    "original_first_draw": 22050,
+    "original_last_draw": 119849,
+    "original_draw_frames": 97800,
+    "scores": [
+      {
+        "level_db": -0.3390946259473291,
+        "spectral_db": 4.812366758889489,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.4946975557127272,
+        "spectral_db": 4.806388462522723,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "29ea579c9063fc35d4291be258be6a6f957f1e26a7bcf9876e710b182986a6df",
+    "original_sha256": "90cff773b34776d66521dd738ec2831d1f4f8fc6dbf4d1ee527d4b81bbef5539"
+  },
+  {
+    "index": 195,
+    "mode": 0,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.08346103177664911,
+        "spectral_db": 2.747749708210258,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.000930065851330441,
+        "spectral_db": 2.75027348596714,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "3d0f770d51cc776a85846d54ffd10204c8473ee913ac0648245b85e4a65efb5a",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 195,
+    "mode": 1,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7100117672575688,
+        "spectral_db": 3.5873459708223012,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.6398068828510711,
+        "spectral_db": 3.5951409527449596,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "93c97a78a57fdfc953a5340190c7b634456d6c955f84a7bc0eeb4fd4ffc8c471",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 195,
+    "mode": 8,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.08116408012735163,
+        "spectral_db": 2.6483483170963815,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": 0.002018434844184466,
+        "spectral_db": 2.6523298030762206,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 22050,
+    "first_mismatch": 22050,
+    "stock_sha256": "c87c21767db958ca29f05173b435a6de726921e5b32f35b24c31877724f0df1f",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 195,
+    "mode": 9,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7035379257269431,
+        "spectral_db": 2.8703464598525263,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.6338041402524628,
+        "spectral_db": 2.878271852051782,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 66790,
+    "first_mismatch": 66790,
+    "stock_sha256": "0cb5c5225b5cab96f624d00e7ceb70578dd3fd64ac88af558011b5d3e83b4c62",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 195,
+    "mode": 25,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7035379257269431,
+        "spectral_db": 2.8703464598525263,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.6338041402524628,
+        "spectral_db": 2.878271852051782,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "0cb5c5225b5cab96f624d00e7ceb70578dd3fd64ac88af558011b5d3e83b4c62",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 195,
+    "mode": 57,
+    "raw_peak": 0.11122962087392807,
+    "original_first_draw": 0,
+    "original_last_draw": 66917,
+    "original_draw_frames": 66918,
+    "scores": [
+      {
+        "level_db": -0.7040022552031231,
+        "spectral_db": 2.977311161497686,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.634509110991557,
+        "spectral_db": 2.985740152862558,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "c90ba88fb3b235dddaddacf2b3eaffbf5f2a703cbee12204ff9d4f57631ae5c9",
+    "original_sha256": "3b99829e5f13b148d19b8c70849e118ed2a8c51c5826c113aa06e1df63ed70e0"
+  },
+  {
+    "index": 213,
+    "mode": 0,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -0.35612630455740923,
+        "spectral_db": 3.1382758643047266,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.35612668159881467,
+        "spectral_db": 3.138275585192525,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "c8f7dd1cbf5d62a79c374ce00f94e07f6114404e1d7ae3a341df75422b26b343",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 213,
+    "mode": 1,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -1.3555304628835922,
+        "spectral_db": 3.1109044987006342,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.3555308399249968,
+        "spectral_db": 3.1109042939649405,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "bc50ba08d2b40d21c0989615df31a985d6b884e72c76d7ca709628c19c81820b",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 213,
+    "mode": 8,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -0.3535715637534262,
+        "spectral_db": 3.2936419979294618,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -0.3535719407948309,
+        "spectral_db": 3.2936416584347272,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "298cebf0b4a98df739b4a89cc43523df7cd109ad5dc2e9e97c62e903ebbee83b",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 213,
+    "mode": 9,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -1.3538614232114026,
+        "spectral_db": 3.2374896681304253,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.3538618002528078,
+        "spectral_db": 3.2374894758808455,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "9b2e749d796237bb720b193319c96921f7f27f9d265e799c91e2b2f75215de1b",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 213,
+    "mode": 25,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -1.3538595544938454,
+        "spectral_db": 3.216615219655073,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.3538599315352506,
+        "spectral_db": 3.216614996736093,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "334a37738276ecff85519bc4985256089b24ab8719de206e0cb30ed79499dafe",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 213,
+    "mode": 57,
+    "raw_peak": 0.051230091601610184,
+    "original_first_draw": 4793,
+    "original_last_draw": 70245,
+    "original_draw_frames": 62758,
+    "scores": [
+      {
+        "level_db": -1.3543893419650375,
+        "spectral_db": 3.1947092659549465,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.3543897190064424,
+        "spectral_db": 3.1947090462681658,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "stock_sha256": "8bed6bd510de999fea929fcdbc70deee87f5b5d4b08153c84a9049d17e69d7d2",
+    "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42"
+  },
+  {
+    "index": 581,
+    "mode": 0,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": -1.8966968577798825e-05,
+        "spectral_db": 1.6338328995228801,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -1.939115693806628e-05,
+        "spectral_db": 1.6338326112941024,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "e97bf4190775ff62e12bad2226b6c7d07bc0fed7683d9de7a4317c3622fa0899",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  },
+  {
+    "index": 581,
+    "mode": 1,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": -0.044391084156582064,
+        "spectral_db": 2.07202694683202,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.044391508344942626,
+        "spectral_db": 2.0720266220092145,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "ee85c43c89fca5e8cd0954a653cbfffb26d9d0079d69bb4b7ae804477639cd1e",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  },
+  {
+    "index": 581,
+    "mode": 8,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": 0.02606205934579863,
+        "spectral_db": 1.6279805672781698,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": 0.026061635157437875,
+        "spectral_db": 1.627980276061831,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "90ab62d7690fe0bb648c6ad47e8b57b2efa62e44d23f6545dccd038f4b42a0dd",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  },
+  {
+    "index": 581,
+    "mode": 9,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": -0.026192683218742956,
+        "spectral_db": 2.1345812879025403,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.026193107407103497,
+        "spectral_db": 2.1345809659385173,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "seed_match_frames": 0,
+    "first_mismatch": 0,
+    "stock_sha256": "5ba7b83554e9d5e727bb1a090369530f256d1035ef2ae8e98caba4b6e60894d6",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  },
+  {
+    "index": 581,
+    "mode": 25,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": -0.059250772042210645,
+        "spectral_db": 2.0384996870016105,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.05925119623057116,
+        "spectral_db": 2.0384993591987888,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "65bc6c806323270439a78007e6ee0d7b9544f3dcd09797061e769847b895c4d9",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  },
+  {
+    "index": 581,
+    "mode": 57,
+    "raw_peak": 0.23933447897434235,
+    "original_first_draw": 22050,
+    "original_last_draw": 66149,
+    "original_draw_frames": 44100,
+    "scores": [
+      {
+        "level_db": -0.059250772042210645,
+        "spectral_db": 2.0384996870016105,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.05925119623057116,
+        "spectral_db": 2.0384993591987888,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "stock_sha256": "65bc6c806323270439a78007e6ee0d7b9544f3dcd09797061e769847b895c4d9",
+    "original_sha256": "0fac3bdccf1aa2b7ad72baff6ec9cba8637caf26f98fd8bd67545205cf220fb1"
+  }
+]

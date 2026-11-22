@@ -1,0 +1,18 @@
+--- a/experiments/sound-hardware-v1/selected-native/project.c
++++ b/experiments/sound-hardware-v1/selected-native/project.c
+@@ -47,6 +47,15 @@
+     pat->brk.steps = notes ? 0xffff : 0;
+     pat->brk.slot_a = pat->brk.slot_b = 0;
+     pat->brk.set[BRK_COMPLEX] = 0;
++    /* The ordinary kit panel routes every available send into the original
++       maximum delay. Leave all bass, kit, BREAK and sequencer events as staged. */
++    for (int v=0; v<D8_KIT;v++)
++        for (int i=0;i<drum808_nparams(v);i++)
++            if (!strcmp(drum808_param(v,i)->name,"Dly"))
++                pref_set(PR(R_ENG,T_808,v,i),127);
++    const int echo_settings[6]={1,12,127,127,127,55};
++    for (int i=0;i<6;i++) pref_set(PR(R_ENG,T_808,D8_KIT,D8_KIT_DL_BUS+i),echo_settings[i]);
++    assert(proj.sound.v[T_808][D8_KIT][D8_KIT_DL_BUS]==1);
+     assert(project_save() == 0);
+ 
+     FILE *f = fopen(argv[4], "wbx");
