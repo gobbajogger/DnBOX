@@ -12,6 +12,20 @@ The saved Synth One pitch LFO applies the original positive modulation gain to o
 
 The opt-in SuperJ6 factory loader now follows authenticated build-9 chorus version and switch routing. It selects the new independent stereo path for 294 J60V2 factory programs, the existing legacy chorus for 46, and the bit-exact dry path for 300. The three independent wet modes passed the archived component tests at the unchanged 1 dB RMS and 3 dB spectral limits, with 2.064 dB worst spectral error. Both bypass cases stayed bit-exact. All six longer impulse trains passed across 44.1 and 48 kHz. Six of twelve sustained chord cases passed, so broader wet parity remains open. [Original routing, integrated loader checks and component results](../../evidence/sound-resume/superj6-factory-chorus/). The shipped path uses independent 16-bit per-owner delay histories in pool storage. The packed histories preserved every archived and impulse-train score and kept six sustained passes. Panic clears the active histories and the focused factory suite verified silence afterward. [Packed-history comparison](../../evidence/sound-resume/superj6-factory-chorus/compact-comparison.json).
 
+## Exact Sound and combined software builds — source `bb836379`
+
+The exact Sound packages retain 4,928 bytes of XIP on Elite and 4,936 on Pro, with 1,244 bytes of pool margin each. All eight strict populated scenes passed below 11,609 µs with zero late callbacks or xruns. The combined composition reuses Integration `156f4629` and qualifies the additional 808 size optimization separately. Chicago, Miami, 808, 909 and BREAK use stock playback regression criteria. Original engine comparisons cover Synth One and SuperJ6. [Sound .fwsc packages](../../artifacts/sound-qualification/bb836379/) · [Exact profile and all recordings](../../evidence/sound-qualification/bb836379/).
+
+| Populated software scene | Sound Elite | Sound Pro | Combined Elite | Combined Pro |
+| --- | ---: | ---: | ---: | ---: |
+| Chicago and Miami | 8,865 µs | 8,783 µs | 8,845 µs | 8,877 µs |
+| Juno and Synth One | 7,754 µs | 8,225 µs | — | — |
+| Juno and Synth One, bandpass with full sub | 7,752 µs | 8,003 µs | — | — |
+| Juno and Synth One, highpass with full sub | 7,697 µs | 7,965 µs | 7,729 µs | 8,281 µs |
+| Instrumented mode-2 wet chorus and highpass Synth One | 11,170 µs | 11,108 µs | 11,345 µs | 11,137 µs |
+
+All six combined captures also had zero late callbacks, zero xruns and no new guest fault. The standard combined images retain 1,740/1,748 bytes of XIP and 1,244 bytes of pool margin. The combined active-wet images retained 1,496/1,504 bytes of XIP. Guest RAM verified that mode 2 was active on the intended Juno owner. This qualifies the pinned software composition. Integration branch `d63620b9` was used for the ancestry check. The additional compiler setting and the software replay are available for Integration to apply on its own branch. [Combined source recipe](../../evidence/sound-qualification/bb836379/combined/).
+
 ## Active SuperJ6 software qualification
 
 The independent chorus runs in a separate optimized translation unit. It reuses the inactive legacy delay storage and shares identical input history until the two channels differ. Bounded typed-voice tiling keeps the render order, and owner-local Juno jobs can use the existing worker before the ordered mix. The dual-engine build uses the tested Integration size profile on 808, 909 and BREAK.
