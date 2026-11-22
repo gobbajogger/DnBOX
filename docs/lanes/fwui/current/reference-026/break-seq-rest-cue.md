@@ -37,3 +37,13 @@ These are candidates for role selection, not accepted reference-versus-current c
 Archived ZIP SHA, group counts, candidate GIF dimensions/frame counts and original/current source text were checked. **NOT_RUN:** current exact-head host RED/GREEN, 0.0.26 native render, current 199f full-page render, Elite/Pro builds, four-size independent visual review. Build and current source/SDK environment are not present on this worker; the source checkout and revision-specific reference payload must be restored before code qualification. The checksum note for AC79 SDK is not the SDK archive.
 
 **Next:** recover original/reference inputs and current build tree, capture 0.0.26 and production BREAK rest-phase sequences under the same physical route, add a regression and minimal verified fix, run focused host tests and stock Elite/Pro builds, then continue full-page role matching.
+
+## 2026-11-22 — reproducible historical-input decode gate
+
+From an environment with Pillow and the existing Library archive `DnBOX-975-all-GIFs.zip`, run:
+
+```sh
+python3 tests/ui_inventory/fwui_archived_gif_integrity.py DnBOX-975-all-GIFs.zip --output /tmp/fwui-historical-gif-audit.json
+```
+
+Executed against the exact 14,222,261-byte archive used in this checkpoint: **PASS_ARCHIVE_ONLY_NOT_ORIGINAL_026_NOT_CURRENT**. ZIP CRC found no bad members; Pillow decoded every frame of **1,880** GIFs, all **240×240**, with **0** errors. The frame-count distribution is 1,742 one-frame GIFs, ten two-frame, sixteen three-frame, one five-frame, five eleven-frame, five sixteen-frame, seven seventeen-frame, 93 eighteen-frame and one 56-frame. The reproducible script and sanitized [test output](archived-gif-audit.json) are committed at the same branch head. The success criterion is **only historical archive integrity**; neither the 0.0.26 pixels nor the current device renderer has been run. The candidate [contact sheet](https://chatgpt.com/library?file_id=libfile_fde3_f-adc4f8678484819198fca1f74ff6f625_2021479872048191acbfdca1f870a539&account_id=personal) and the exact [audit report](https://chatgpt.com/library?file_id=libfile_fde3_f-9af0150afc30819197c7474df5572558_2021479872048191acbfdca1f870a539&account_id=personal) also reside under `/LoopyX0X37/Project Sources`, tagged with the first checkpoint commit `70ddd1ac`.
