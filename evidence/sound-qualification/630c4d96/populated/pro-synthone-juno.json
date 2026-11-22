@@ -1,0 +1,111 @@
+{
+  "elf_sha256": "dfe51c01fe90d5c635bc157609bf915fd4d96e77e621c65a4eb1460b3b8f4651",
+  "fwsc_sha256": "30f8700a1dd65230f2d199d3a2c09328be7834ae38a5e098c0b188935b7d5b3a",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "seed_sha256": "2c44dffc7a59aeccd9a25af749b8d85350b90ca900f0ae2540d709b6d8bb7592",
+  "boot": {
+    "duration_ms": 2000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 131,
+    "max_us": 2361,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "45a0650fce9482f94cb54087e52e3aa95ab5d0d2d7ca3dd3115bea7ac0af58c3",
+    "pcm_bytes": 352940,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "2c44dffc7a59aeccd9a25af749b8d85350b90ca900f0ae2540d709b6d8bb7592",
+    "final_flash_sha256": "2c44dffc7a59aeccd9a25af749b8d85350b90ca900f0ae2540d709b6d8bb7592"
+  },
+  "shot": {
+    "duration_ms": 8000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 648,
+    "max_us": 7618,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "25d6f08d351dbf47eb36449b3f7285bdb95ab4d93ca288c8aec47a63481c4765",
+    "pcm_bytes": 1411764,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "2c44dffc7a59aeccd9a25af749b8d85350b90ca900f0ae2540d709b6d8bb7592",
+    "final_flash_sha256": "2c44dffc7a59aeccd9a25af749b8d85350b90ca900f0ae2540d709b6d8bb7592"
+  },
+  "guest": {
+    "bass_kinds": [
+      2,
+      3
+    ],
+    "runtime_status": [
+      1,
+      1
+    ],
+    "peak_meter_909_808_A_B_BREAK": [
+      32767,
+      23486,
+      8139,
+      1822,
+      32767
+    ],
+    "triggered_rows_909_808": [
+      11,
+      11
+    ],
+    "last_playhead_steps": [
+      9,
+      6,
+      9,
+      27,
+      9
+    ],
+    "user_zones": [
+      0,
+      1,
+      0
+    ],
+    "loop_count": 1,
+    "first_catalog_slot_zone": [
+      1,
+      0
+    ],
+    "sample_rate": 44118,
+    "stereo_frames": 352941,
+    "first_half_second_nonzero_words": 0,
+    "last_half_second_nonzero_words": 44046,
+    "peak_pcm16": 13150,
+    "pcm_sha256": "25d6f08d351dbf47eb36449b3f7285bdb95ab4d93ca288c8aec47a63481c4765",
+    "observed_halves": 648,
+    "peak_callback_us": 7618,
+    "raw_late": 0,
+    "audio_xruns": 0
+  },
+  "capture_health": {
+    "expected_post_boot_pcm_bytes": 1058832,
+    "captured_post_boot_pcm_bytes": 1058824,
+    "tolerance_pcm_bytes": 2048,
+    "duration_ok": true,
+    "boot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "shot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "fault_record_changed": false,
+    "retained_fault": false,
+    "fault_ok": true,
+    "passed": true
+  },
+  "scene_late": 0,
+  "owners_ok": true,
+  "all_active": true,
+  "timing_ok": true,
+  "passed": true
+}

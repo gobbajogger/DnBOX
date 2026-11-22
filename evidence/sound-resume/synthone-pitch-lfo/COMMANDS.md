@@ -13,4 +13,4 @@ cc -std=c11 -O1 -DX0X_HOST -DX0X_SYNTHONE_PATCH=1 -D_POSIX_C_SOURCE=200809L -Ifi
 build/pitch-patch-test
 ```
 
-The factory limits are 1 dB level and 3 dB spectrum per channel. The existing 39-control row matrix is the independent baseline. The two native build logs exercise the stock board package checks. Strict timing remains pending on this source.
+The factory limits are 1 dB level and 3 dB spectrum per channel. The existing 39-control row matrix is the independent baseline. The two native build logs exercise the stock board package checks. The standard strict scenes for the same production source are in [exact native qualification](../../sound-qualification/630c4d96/).

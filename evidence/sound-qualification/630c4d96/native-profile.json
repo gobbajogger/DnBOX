@@ -1,0 +1,44 @@
+{
+  "source": "630c4d96f8210e0729fb79cfc0d0da3ff90821d3",
+  "software_only": true,
+  "flags": {
+    "X0X_TANH_BOOT_TABLE": 1,
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "boards": {
+    "elite": {
+      "fwsc": "lane-sound-engine-qualification-resume-work-630c4d96-elite-dual-sound.fwsc",
+      "fwsc_sha256": "809a8042f6e85052af1c1f3e90259e849d290a97ffc16b35931f08e48935737a",
+      "elf_sha256": "c7d3322e8bb2bdf8d5363039e74772a2264c1016af8cdd4b874b20d0ebcb7e96",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-630c4d96-elite-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "ad7437042b4bc12dbf64444b05f87d4cf36c1f2eace40481259d66831d548634",
+      "xip_free_bytes": 1664,
+      "pool_margin_bytes": 732
+    },
+    "pro": {
+      "fwsc": "lane-sound-engine-qualification-resume-work-630c4d96-pro-dual-sound.fwsc",
+      "fwsc_sha256": "30f8700a1dd65230f2d199d3a2c09328be7834ae38a5e098c0b188935b7d5b3a",
+      "elf_sha256": "dfe51c01fe90d5c635bc157609bf915fd4d96e77e621c65a4eb1460b3b8f4651",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-630c4d96-pro-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "d5a3400eeebab28edb53c007ceac2d620daaf6694d1eda8aa36a2ed72f86ad7e",
+      "xip_free_bytes": 1672,
+      "pool_margin_bytes": 732
+    }
+  },
+  "strict_scene_peaks_us": {
+    "elite-chicago-miami": 8251,
+    "elite-juno-synthone": 6922,
+    "elite-juno-synthone-bandpass": 7242,
+    "elite-juno-synthone-highpass": 7234,
+    "pro-miami-chicago": 8019,
+    "pro-synthone-juno": 7618,
+    "pro-synthone-juno-bandpass": 7727,
+    "pro-synthone-juno-highpass": 7710
+  },
+  "renders_and_logs": {
+    "name": "lane-sound-engine-qualification-resume-work-630c4d96-software-qualification-renders-and-logs.zip",
+    "sha256": "dcb922b55cf1730e1b2a65cca81d495e16ea88dba5a2b37881a14b1265f2057c",
+    "transfer": "preserved locally per owner direction"
+  }
+}
