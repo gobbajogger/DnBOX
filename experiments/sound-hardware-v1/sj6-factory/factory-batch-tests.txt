@@ -1,0 +1,19 @@
+test_identity_gain_and_frequency (test_comparison.ComparisonTests.test_identity_gain_and_frequency) ... ok
+test_missing_captures_and_wrong_record (test_comparison.ComparisonTests.test_missing_captures_and_wrong_record) ... ok
+test_qualified_pair_and_evidence_refusals (test_comparison.ComparisonTests.test_qualified_pair_and_evidence_refusals) ... ok
+test_installed_records_match_ipa_without_claiming_archive_verification (test_release_matrix.InstalledBundleTests.test_installed_records_match_ipa_without_claiming_archive_verification) ... ok
+test_macos_layout_and_ios_wrapper (test_release_matrix.InstalledBundleTests.test_macos_layout_and_ios_wrapper) ... ok
+test_rejects_changed_executable_and_duplicate_bank (test_release_matrix.InstalledBundleTests.test_rejects_changed_executable_and_duplicate_bank) ... ok
+test_rejects_mutated_banks_even_with_the_verified_executable (test_release_matrix.InstalledBundleTests.test_rejects_mutated_banks_even_with_the_verified_executable) ... ok
+test_pinned_release_selection (test_release_matrix.ReleaseMatrixTests.test_pinned_release_selection) ... ok
+test_archived_s4_receipt_keeps_its_matrix_and_scores (test_factory_batch.FactoryBatchTests.test_archived_s4_receipt_keeps_its_matrix_and_scores) ... ok
+test_factory_matrix_requires_exact_authenticated_factory_shape (test_factory_batch.FactoryBatchTests.test_factory_matrix_requires_exact_authenticated_factory_shape) ... ok
+test_invalid_pcm_never_leaves_an_archive (test_factory_batch.FactoryBatchTests.test_invalid_pcm_never_leaves_an_archive) ... ok
+test_reuse_validates_stimulus_identity_and_never_masks_partial_output (test_factory_batch.FactoryBatchTests.test_reuse_validates_stimulus_identity_and_never_masks_partial_output) ... ok
+test_scores_independently_pinned_candidate (test_factory_batch.FactoryBatchTests.test_scores_independently_pinned_candidate) ... ok
+test_verified_lossless_archive (test_factory_batch.FactoryBatchTests.test_verified_lossless_archive) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.373s
+
+OK
