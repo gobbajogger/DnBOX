@@ -1,0 +1,77 @@
+{
+  "software_only": true,
+  "firmware_source": "3b480381bbbe971fec5f48e8f23bf26fd050ba82",
+  "firmware_tree": "06ad5b99087a1c6a351aedd5e2c7a86817ca7fd2",
+  "build_tools_tree": "9bbb82a01f089f88a64999ba6091c0218a3499cb",
+  "profile": {
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "emulator": {
+    "name": "fm1-live v0.5.1",
+    "source": "c7e47c4fcbdaafb4beffa40493da1b2b07ffa263",
+    "sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+    "strict": true,
+    "clock_mhz": 360,
+    "capture_rate_hz": 44118
+  },
+  "limits": {
+    "xip_free_bytes": 1024,
+    "pool_margin_bytes": 512,
+    "max_callback_us_exclusive": 11609
+  },
+  "models": {
+    "elite": {
+      "xip_free_bytes": 2416,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908,
+      "app_size_bytes": 550256,
+      "app_sha256": "daafa0b02c6526d63d6543fa6e355951d136f414f5a0cd37f93dbdc8e0444452",
+      "elf_sha256": "350b25f9cebd0b40c0380e41030d85a53e1567e6588aea9d5250ea311d00c23c",
+      "fwsc": "artifacts/sound-qualification/3b480381/lane-sound-engine-qualification-resume-work-3b480381-elite-dual-sound.fwsc",
+      "fwsc_sha256": "9b015bfac64dba2bdf6c2a45628d8c8cc867c8ee828aa3164d882ec630bb43ce",
+      "emulator_flash_img": "lane-sound-engine-qualification-resume-work-3b480381-elite-dual-sound-emulator-flash.img",
+      "emulator_flash_sha256": "cdcae9e47036557bef9392578b358e83078742ff9fdb9f62400f33ffc612c67a",
+      "stock_app_sha256": "3d16061eaa7f7f35e2fcd8a62386d0631771056aa863f1e35e3d524b80e25715",
+      "stock_fwsc_sha256": "c8aa3ee2f48cdcf3209443d01c78061c2848ceb193bed89844a151f6f8db0528",
+      "stock_bit_identity_vs_49ba51f1": true,
+      "superj6_linker_symbols": {
+        "engine_superj6_edit": "020484ca 000000d4 T engine_superj6_edit",
+        "engine_superj6_factory_load": "02048336 00000174 T engine_superj6_factory_load",
+        "engine_superj6_pre_note_wave": "0204859e 000000ca T engine_superj6_pre_note_wave"
+      }
+    },
+    "pro": {
+      "xip_free_bytes": 2424,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908,
+      "app_size_bytes": 550248,
+      "app_sha256": "c1c186c8251a28d6a3d343a66ed30ab8093ef644e3eb70228fc34858adcec136",
+      "elf_sha256": "2a66d48030fb90b414a897650e18ff38581ccc95ceb4643dd21e29b9008badc0",
+      "fwsc": "artifacts/sound-qualification/3b480381/lane-sound-engine-qualification-resume-work-3b480381-pro-dual-sound.fwsc",
+      "fwsc_sha256": "ebe7d9462a7768137b1e34fce16381b360e7f8d22a4bdc4bb1711ac7f47032c9",
+      "emulator_flash_img": "lane-sound-engine-qualification-resume-work-3b480381-pro-dual-sound-emulator-flash.img",
+      "emulator_flash_sha256": "a1b14a5e23c1216073fe6d9a03865463e6a6f300cced86b23d421e781bf3d6e3",
+      "stock_app_sha256": "4dfd4a128b4a3a546e73527a2c5877ec4d88e94757c3c586520edf3bed578b61",
+      "stock_fwsc_sha256": "1f8ef6f97b440d7f93055cf22adf74cf03576bfb9f15210f92186d74bc773bdc",
+      "stock_bit_identity_vs_49ba51f1": true,
+      "superj6_linker_symbols": {
+        "engine_superj6_edit": "020484ca 000000d4 T engine_superj6_edit",
+        "engine_superj6_factory_load": "02048336 00000174 T engine_superj6_factory_load",
+        "engine_superj6_pre_note_wave": "0204859e 000000ca T engine_superj6_pre_note_wave"
+      }
+    }
+  },
+  "scene_timing": {
+    "elite-chicago-miami": 8046,
+    "elite-juno-synthone": 7018,
+    "elite-juno-synthone-sub": 7356,
+    "pro-miami-chicago": 7949,
+    "pro-synthone-juno": 7571,
+    "pro-synthone-juno-sub": 7450
+  },
+  "host_evidence_source": "f185ea2d7d80373493aff5a0341154ed1fa882e9",
+  "default_build_evidence": "f185ea2d. The only later change is inside the disabled SuperJ6 linker-root branch."
+}

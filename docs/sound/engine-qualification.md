@@ -1,5 +1,24 @@
 # SMK-37 sound engine qualification
 
+## Current software qualification — source `3b480381`
+
+Elite and Pro link with the Synth One editor, sub oscillator and the SuperJ6 factory, direct edit and pre-note waveform entry points enabled. Elite retains 2,416 bytes of XIP and Pro retains 2,424. Both retain 7,908 bytes above the pool reserve. The flash map passed. The ordinary applications and packages from `f185ea2d` match the stock bytes. The subsequent source change only affects the opt-in linker roots. [Firmware packages, native symbols and build identities](../../evidence/sound-qualification/3b480381/native-profile.json).
+
+| Software-only strict scene | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Populated Chicago and Miami | 8,046 µs | 7,949 µs |
+| Populated Juno and Synth One | 7,018 µs | 7,571 µs |
+| Populated Juno and Synth One with the sub oscillator at full level | 7,356 µs | 7,450 µs |
+
+All six runs used strict public `fm1-live` v0.5.1 at 360 MHz. Both drum kits, both synth parts and BREAK were active in each 922-event run. The guest completed 648 halves in eight seconds with zero late callbacks, zero xruns and no new or active fault. Both sub-enabled seeds changed the captured DAC output against their matched zero-sub seed. The held-chord, panic, release, legacy slot and note-lock tests passed. [Per-scene receipts](../../evidence/sound-qualification/3b480381/populated/) · [Held-chord](../../evidence/sound-qualification/3b480381/final-held.txt) · [Panic](../../evidence/sound-qualification/3b480381/final-panic.txt) · [Synth One edit and persistence](../../evidence/sound-qualification/3b480381/synthone-sub-integrated.txt).
+
+- **Synth One.** The independent sine and square sub oscillator passes the component comparison. The integrated 38-control projection renders all 694 source programs. Seven meet the unchanged 1 dB and 3 dB stereo limits. The sub recovered 63 previously silent rows and preserved all 110 zero-sub firmware waveforms bit for bit. Full factory voice, effect and preset selection remains open. [Oscillator comparison](../../evidence/sound-qualification/3b480381/synthone-sub-reference.json) · [Exact 694-program rerun](../../evidence/sound-qualification/3b480381/synthone-factory-repeat.json).
+- **SuperJ6.** Both selectors preserved 90,549 ordered binary32 values across 640 authenticated programs in 12 banks. The supported firmware path accepted all 640 and verified 4,580 authored core control words, 640 register words, 1,280 chorus switches and 2,460 PWM defaults. Three hundred programs selected the dry bypass. Full 64-control behavior, active original effects and complete mapping remain open, including the two named legacy fields. S4 remains 0/14. The authorized software host with the registered build-9 `aumu/AuPr/jay6` Audio Unit is unavailable. [Authored selector and loader receipt](../../evidence/sound-qualification/3b480381/superj6-authored-bank.json) · [Original capture contract](superj6-ab.md).
+- **Integration ancestry.** The branch and `f1786ebe` diverge. The isolated 12-conflict resolution preview preserved all tracked files from both parents. Its best older stock links left 980 and 992 bytes of XIP against the 1,024-byte minimum. [Exact ancestry and preview evidence](../../evidence/sound-qualification/3b480381/integration-ancestry.json).
+
+[Project Sources artifact names and SHA-256](../../evidence/sound-qualification/3b480381/project-artifacts.json).
+
+
 PR [#985](https://github.com/gobbajogger/DnBOX/pull/985) starts at sound PR [#973](https://github.com/gobbajogger/DnBOX/pull/973), commit `63278e3322aefa89b25f129ca2fccc35ef3b3b3d`. The ordinary firmware exposes two drum kits, a BREAK sampler and four selectable synth engines. Either bass part can own any of the four synths.
 
 ## Per-engine results

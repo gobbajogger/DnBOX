@@ -1,0 +1,128 @@
+{
+  "elf_sha256": "350b25f9cebd0b40c0380e41030d85a53e1567e6588aea9d5250ea311d00c23c",
+  "fwsc_sha256": "9b015bfac64dba2bdf6c2a45628d8c8cc867c8ee828aa3164d882ec630bb43ce",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "seed_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881",
+  "boot": {
+    "duration_ms": 2000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 131,
+    "max_us": 2364,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "45a0650fce9482f94cb54087e52e3aa95ab5d0d2d7ca3dd3115bea7ac0af58c3",
+    "pcm_bytes": 352940,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881",
+    "final_flash_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881"
+  },
+  "shot": {
+    "duration_ms": 8000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 648,
+    "max_us": 7018,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "af3628778660bae705179869fd224c8de864fa87fc1003281f82ddec58105062",
+    "pcm_bytes": 1411764,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881",
+    "final_flash_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881"
+  },
+  "guest": {
+    "bass_kinds": [
+      3,
+      2
+    ],
+    "runtime_status": [
+      1,
+      1
+    ],
+    "peak_meter_909_808_A_B_BREAK": [
+      32767,
+      27306,
+      2415,
+      1904,
+      32767
+    ],
+    "triggered_rows_909_808": [
+      11,
+      11
+    ],
+    "last_playhead_steps": [
+      9,
+      6,
+      9,
+      27,
+      9
+    ],
+    "user_zones": [
+      0,
+      1,
+      0
+    ],
+    "loop_count": 1,
+    "first_catalog_slot_zone": [
+      1,
+      0
+    ],
+    "sample_rate": 44118,
+    "stereo_frames": 352941,
+    "first_half_second_nonzero_words": 0,
+    "last_half_second_nonzero_words": 44042,
+    "peak_pcm16": 13150,
+    "pcm_sha256": "af3628778660bae705179869fd224c8de864fa87fc1003281f82ddec58105062",
+    "observed_halves": 648,
+    "peak_callback_us": 7018,
+    "raw_late": 0,
+    "audio_xruns": 0
+  },
+  "capture_health": {
+    "expected_post_boot_pcm_bytes": 1058832,
+    "captured_post_boot_pcm_bytes": 1058824,
+    "tolerance_pcm_bytes": 2048,
+    "duration_ok": true,
+    "boot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "shot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "fault_record_changed": false,
+    "retained_fault": false,
+    "fault_ok": true,
+    "passed": true
+  },
+  "scene_late": 0,
+  "owners_ok": true,
+  "all_active": true,
+  "timing_ok": true,
+  "passed": true,
+  "firmware_source": "3b480381bbbe971fec5f48e8f23bf26fd050ba82",
+  "software_only": true,
+  "source_profile": {
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "seed_inputs": {
+    "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+    "firmware_sha256": "9b015bfac64dba2bdf6c2a45628d8c8cc867c8ee828aa3164d882ec630bb43ce",
+    "elf_sha256": "350b25f9cebd0b40c0380e41030d85a53e1567e6588aea9d5250ea311d00c23c",
+    "stock_seed_sha256": "dc7147d83f80875a6407c1a5b543b8e460d3b202d863250b1b8998356a8091f8",
+    "project_objects_sha256": "41e1a5d446792552ebaf5829e3ee23530e45a51c1921ac73ebd0b0069ad3a1bd",
+    "synthone_sub_seed": false,
+    "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+    "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937",
+    "initial_flash_sha256": "ed16249db9c3fd2db61e7a1f741ada7e75d0161930e03edf9ac6472131450881"
+  }
+}

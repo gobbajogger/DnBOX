@@ -1,5 +1,10 @@
 # Sound lane
 
+### Current software-only candidate — `3b480381`
+
+The final combined opt-in packages link on stock Elite and Pro with 2,416 and 2,424 B XIP left and 7,908 B of pool margin on each. The four required populated replays and two active-sub stress runs passed with 0 late, 0 xruns and a maximum of 8,046 µs. The retired-name scan is empty and legacy slot migration passed. The 694-program Synth One projection meets both original audio limits on seven programs. The authenticated SuperJ6 selector passed all 640 source programs and the supported controls applied through the real host firmware loader. Full SuperJ6 controls, active FX, 640-program complete mapping and original S4 pairs remain open. Integration preview remains below the XIP floor. [Exact software qualification and artifacts](../sound/engine-qualification.md#current-software-qualification--source-3b480381).
+
+
 ### Software-only candidate qualification — 2026-11-22 UTC
 
 Source `f405ac99` passed all eight populated SuperJ6-enabled and dual-profile replays with zero late, zero xruns and peaks of 6,920–8,127 µs against 11,609 µs. Both native models meet the stock limits. Synth One's 694-program control projection reproduced the original hashes and passed 0/694 complete audio comparisons. SuperJ6 Layer 1 attack and explicitly disabled chorus passed the focused bit-exact tests. Full FX, preset application and S4 remain open. Integration's isolated conflict resolution stays below the required XIP floor on both boards. [Exact-source qualification](../sound/engine-qualification.md#software-only-native-qualification-at-f405ac99).
