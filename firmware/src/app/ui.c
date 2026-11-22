@@ -5836,6 +5836,28 @@ static int held_note_of(const bpart_t *bp, int s)
     return bp->step[start >= 0 ? start : s].note;
 }
 
+/* GEN uses the same pitch and step positions as the notes drawn above it. */
+static UI_DRAW void draw_gen_roll(const bpart_t *bp, int ph, int lo, int hi, int o, uint16_t col)
+{
+    int active = ph - step_of(0);
+    if ((unsigned)active < 16 && ph < bp->len)
+        cv_rect(col_x(active), ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
+    for (int c = 0; c <= 16; ++c)
+        cv_rect(col_x(c) - 1, ROLL_TOP - 4 - o, 1, ROLL_BOT + 6,
+                (c & 3) ? C_LINE : C_DIM);
+    int prev_y = ROLL_BOT + 1;
+    for (int n = lo; n <= hi; ++n) {
+        int y = note_y(n, lo, hi);
+        int h = prev_y - y;
+        prev_y = y;
+        unsigned pitch = (unsigned)(n + 12) % 12;
+        int inset = (0x54au & (1u << pitch)) ? 12 : 0;
+        cv_rect(5, y - o, 18, h, C_LINE);
+        cv_rect(5 + inset, y - o, 18 - inset, h - (h > 1), C_GRAY);
+        cv_rect(GX, y + 2 - o, 211, 1, pitch ? C_LINE : C_DIM);
+    }
+}
+
 static UI_DRAW void draw_303(int band, int gen)
 {
     int b = bidx(), c, o = band * BAND_H, n;       /* o: drawn in the screen's rows, minus the band's */
@@ -5844,11 +5866,9 @@ static UI_DRAW void draw_303(int band, int gen)
     uint16_t col = part_col();
     uint32_t lmarks = gen ? 0 : lock_marks(-1, -1, ui.spage * 16);
     char t[40], *q = t;
-    (void)gen;
     for (c = 0; c < bp->len && c < NSTEPS; c++) {
-        int start = note_start_of(bp, c);
-        if (start >= 0) {
-            int pitch = bp->step[start].note;
+        if (bstep_gate(&bp->step[c]) == G_NOTE) {
+            int pitch = bp->step[c].note;
             if (pitch < lo)
                 lo = pitch;
             if (pitch > hi)
@@ -5861,7 +5881,9 @@ static UI_DRAW void draw_303(int band, int gen)
     hi += 2;
     if (hi - lo < 14)
         hi = lo + 14;
-    for (n = lo; n <= hi; n++)                     /* the line: pitch by height, the root's octaves ruled */
+    if (gen)
+        draw_gen_roll(bp, ph, lo, hi, o, col);
+    else for (n = lo; n <= hi; n++)                 /* SEQ retains root-octave guides */
         if ((n - bp->gen.root) % 12 == 0) {
             int y = note_y(n, lo, hi) - o;
             put_note(t, n);
@@ -5876,10 +5898,11 @@ static UI_DRAW void draw_303(int band, int gen)
             continue;
         }
         g = bstep_gate(st);
-        if (s == ph)
+        if (!gen && s == ph)
             cv_rect(x, ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
-        if (g != G_REST && note_start_of(bp, s) >= 0) {
-            int hn = held_note_of(bp, s), y = note_y(hn, lo, hi) - o;
+        int start = g == G_REST ? -1 : note_start_of(bp, s);
+        if (start >= 0) {
+            int y = note_y(bp->step[start].note, lo, hi) - o;
             uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
             int end = st->flags >> BS_END_SHIFT;
             int width = end ? (end * 12 + 14) / 15 : 12;
@@ -5891,10 +5914,10 @@ static UI_DRAW void draw_303(int band, int gen)
             if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
                 cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
             if (g == G_TIE) {
-                if (c > 0)                           /* continued from previous visible step */
-                    cv_rect(col_x(c - 1) + 6, y,
-                            x - (col_x(c - 1) + 6) + (width < 6 ? width : 6), 5, fc);
-                else {                               /* page 16→17 or loop last→first */
+                if (c > 0) {                         /* continued from previous visible step */
+                    int lead = 7 + !(c & 3);
+                    cv_rect(x - lead, y, lead + (width < 6 ? width : 6), 5, fc);
+                } else {                               /* page 16→17 or loop last→first */
                     cv_rect(x - 4, y + 1, 4, 3, fc);
                     cv_rect(x - 7, y + 2, 3, 1, fc);
                 }
@@ -6388,19 +6411,12 @@ static UI_DRAW void draw_fx(int band)
     }
     pref_value(PR(R_ENG,T_FX,0,FX_DL_TYPE),a,u);
     put_s(q,a);cv_text(9,96-off,&FONT_S,t,C_HI);
-    if(!delay) {
-        night_panel(3,116-off,114,20,0);
-        cv_text(9,121-off,&FONT_T,"FEEDBACK",C_GRAY);
-        pref_value(PR(R_ENG,T_FX,0,FX_DL_FDBK),a,u);
-        put_s(put_s(t,a),u);
-        text_r(111,121-off,&FONT_T,t,C_WHITE);
-    } else {
-        night_panel(123,116-off,114,20,0);
-        cv_text(129,121-off,&FONT_T,"RV DECAY",C_GRAY);
-        pref_value(PR(R_ENG,T_FX,0,FX_RV_DECAY),a,u);
-        put_s(put_s(t,a),u);
-        text_r(231,121-off,&FONT_T,t,C_WHITE);
-    }
+    int x = delay ? 123 : 3;
+    night_panel(x,116-off,114,20,0);
+    cv_text(x+6,121-off,&FONT_T,delay ? "RV DECAY" : "FEEDBACK",C_GRAY);
+    pref_value(PR(R_ENG,T_FX,0,delay ? FX_RV_DECAY : FX_DL_FDBK),a,u);
+    put_s(put_s(t,a),u);
+    text_r(x+108,121-off,&FONT_T,t,C_WHITE);
 }
 
 /* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
