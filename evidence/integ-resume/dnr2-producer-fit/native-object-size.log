@@ -1,0 +1,23 @@
+/workspace/scratch/857bb2409f82/integ-resume-0130/dnr2-fit/remote_core.o  :
+section              size   addr
+.text                   0      0
+.text.dnr2_init        96      0
+.text.dnr2_changed     20      0
+.text.release_all      40      0
+.text.dnr2_tick        26      0
+.text.dnr2_handle    1582      0
+Total                1764
+
+
+/workspace/scratch/857bb2409f82/integ-resume-0130/dnr2-fit/remote_wire.o  :
+section                     size   addr
+.text                          0      0
+.text.u7                      22      0
+.text.dnr2_decode            258      0
+.text.p7                      16      0
+.text.dnr2_encode_command    302      0
+.text.dnr2_encode_reply      276      0
+.text.dnr2_receive            52      0
+Total                        926
+
+

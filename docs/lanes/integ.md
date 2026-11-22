@@ -1,5 +1,11 @@
 # Integration baseline
 
+## Stock Remote protocol isolation and Elite fit — 2026-11-22 (WORKING)
+
+Integration and Remote stock Elite/Pro application and FWSC hashes match. The existing builds, five-sample offline readback and matching Remote proposals are reused. The existing stock probe reproduced INFO at 25 bytes and DNR2 HELLO at zero. The editor defers DNR2 to OTA, which discards it. The archived real-engine Apply/Undo proof uses a test-only catalog.
+
+Using cached Elite objects, the baseline relink reproduced all four stock loadable sections. The existing receive/reply codec alone adds 576 B and leaves 652 B free, below the 1,024 B reserve. The reference core and codec overflow the entire stock region by 928 B before dispatcher and catalog integration. Firmware owns the producer gap and Remote owns the consumer. The measured implementation does not fit, so production stays fail-closed while the smaller producer route or measured combined headroom is evaluated. [Pinned reproduction and fit results](../../evidence/integ-resume/dnr2-producer-fit/README.md)
+
 ## Firmware gate disposition — 2026-11-22 (WORKING)
 
 The firmware candidate suite retained 245 passes, 22 failures and two NOT_RUN comparisons. The consolidated host stage retained 244 passes, 21 failures and two NOT_RUN comparisons. Their executor sessions ended without a terminal result, so neither completed the Local gate. The failure ledger includes exact registration names and logs, including the observed sanitizer runtime failures and the shared host-setup assertion. The independent stock builds and package checks above retain their focused scope. The next full host and 10-minute strict runs belong on the final integrated source.

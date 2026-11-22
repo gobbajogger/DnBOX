@@ -1,0 +1,65 @@
+{
+  "production_firmware": {
+    "consolidated": "f1786ebec2616477163b62b029c7e77405a9c3de",
+    "integration_source": "e29c99ec2cc610e5af3de575e85771f666b239f4",
+    "local_execution": "5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7",
+    "tree": "8609f75308f10874a7ba4aec1c1fb309023c100b",
+    "editor_blob": "d3d8e8d5237b00d96cea5c0c7474536e3fb15853",
+    "ota_blob": "af42a32311ec8ea41167dd0b5abbc1fbeeeba506"
+  },
+  "shared_stock": {
+    "elite": {
+      "application_sha256": "650b8dced69b28dea1f549fb87fc0610e5afc3b9aec66c85bd5cedc56f246f45",
+      "application_bytes": 551444,
+      "fwsc_sha256": "3aaba53459442cdd1f652dedf2c438a30189e4f5d06859270e9b0da1bd9bfecd",
+      "xip_free_bytes": 1228
+    },
+    "pro": {
+      "application_sha256": "9713b37ed8cf4c712de66bbab7c7cdcbd9a5324f2784b7f806eba53f279614ce",
+      "application_bytes": 551436,
+      "fwsc_sha256": "8f399e350a3af8ded3bee7f05d60f4b01c966b785d7a336c90dcd371178cef92",
+      "xip_free_bytes": 1236
+    },
+    "same_application_and_package_bytes": true,
+    "stock_rebuilds": 0
+  },
+  "existing_tests": {
+    "nightly_remote_head": "995d5493386fad889ca8106758567c9fe80a47d5",
+    "stock_probe_git_blob": "bc7a18bf5edad035d82e793a48d09f2f7e347fe1",
+    "stock_probe_sha256": "74b51ab4828f4b5fe35802a0636fa238927f86c8303ec7326fb80ecef7c34574",
+    "info_reply_bytes": 25,
+    "dnr2_hello_reply_bytes": 0,
+    "dnr2_hello_deferred": true,
+    "real_core_firmware": "246ea3718c6c72ba80bbd1aafcd5356f871c78c8",
+    "real_core_browser_source": "183207ed2b7dd7b346ca5871408b292df4fb0ae2",
+    "real_core_browser_log_sha256": "2943a3b7f8863c1a4ccba5fca0bd33162185b1a0df9142813cd33ff4ffc64df1",
+    "browser_scope": "Test-only catalog. Chicago Cutoff READ 32, queued SET 33, fresh READ 33, guarded Undo, fresh READ 32. No native catalog admission."
+  },
+  "elite_cached_relink": {
+    "app_code_limit_bytes": 552672,
+    "required_reserve_bytes": 1024,
+    "baseline_usable_headroom_bytes": 204,
+    "baseline_loadable_sections_byte_identical": [
+      ".text",
+      ".ram_text",
+      ".c1_text",
+      ".data"
+    ],
+    "unchanged_codec": {
+      "added_app_bytes": 576,
+      "xip_free_bytes": 652,
+      "reserve_shortfall_bytes": 372
+    },
+    "unchanged_core_plus_receive_codec": {
+      "link_exit": 1,
+      "raw_xip_overflow_bytes": 928,
+      "minimum_required_reclaim_before_dispatch_catalog_and_application_mark_bytes": 1952
+    },
+    "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+    "link_plugin_sha256": "2ca8dafde18070d6a42fc47fc2ec4723946cf3d2404ca25981de5070beb1aa12",
+    "reference_source_commit": "05850decd20fa8e397e0ea9d39231cca7ab669cc",
+    "inputs_use_current_linker_script": true,
+    "pro_relinks": 0
+  },
+  "disposition": "Existing implementation exceeds Elite flash. Production dispatcher and catalog remain closed. Firmware integration owns the producer slice; Remote owns browser catalog consumer and can reuse its archived exact-core trace. Repeat size only on changed inputs. Final combined gate pending."
+}
