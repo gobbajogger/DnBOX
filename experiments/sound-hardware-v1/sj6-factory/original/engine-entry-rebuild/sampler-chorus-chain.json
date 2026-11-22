@@ -1,0 +1,26 @@
+{
+  "matrix_sha256": "08b912309b24edceebb159b8e3b1be1b3befc706201602212885ad73dd6cd3e0",
+  "sampler_recorded_pcm_sha256": "d968981e0c352593665bf112d3f66a585cff414abd313ef29b5b9b33b804004c",
+  "sampler_source_float32_sha256": "03a7c9fc8e9f90ff83e8efc347d1fee4722452e1766b4887ae9c8da7711b72c9",
+  "authored_preset_uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+  "factory_chorus_switches": [
+    0,
+    0
+  ],
+  "sample_rate": 48000,
+  "frames": 4096,
+  "bypass_bit_exact": true,
+  "bypass_pcm_sha256": "6a80526e139eaee5c17c6cd0bf7d7ecd62753ef9bdfaaa1bce664d7dece284c8",
+  "diagnostic_wet_pcm_sha256": "06bde0f22f534b326dc09b892a553d0da2459d7061fce8de8d95ff88e490dc89",
+  "wet_settings": {
+    "mode": 1,
+    "rate": 0.85,
+    "depth": 1.1,
+    "mix": 1.0
+  },
+  "wet_settings_are_authored": false,
+  "factory_preset_applied": false,
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}

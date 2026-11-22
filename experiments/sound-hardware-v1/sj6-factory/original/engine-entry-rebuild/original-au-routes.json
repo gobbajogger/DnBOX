@@ -1,0 +1,40 @@
+{
+  "classes": {
+    "_TtC10SuperJ6_AU23KingOfDigital_AudioUnit": {
+      "class": "0x100784420",
+      "methods_address": "0x1005ed948",
+      "implementations": {
+        "factoryPresets": "0x1000bdf50",
+        "setCurrentPreset:": "0x1000be540",
+        "setFullState:": "0x1000bf120",
+        "allocateRenderResourcesAndReturnError:": "0x1000c3f44"
+      }
+    },
+    "_TtC10SuperJ6_AU24AKAUv3ExtensionAudioUnit": {
+      "class": "0x100784988",
+      "methods_address": "0x1005edae8",
+      "implementations": {
+        "internalRenderBlock": "0x1000c6198"
+      }
+    }
+  },
+  "first_non_nil_imports": {
+    "setCurrentPreset:": {
+      "call_site": "0x1000be55c",
+      "stub": "0x1005d99fc",
+      "import": "_objc_retain",
+      "executed_instructions": 8
+    },
+    "setFullState:": {
+      "call_site": "0x1000bf158",
+      "stub": "0x1005d7adc",
+      "import": "_$sSD10FoundationE36_unconditionallyBridgeFromObjectiveCySDyxq_GSo12NSDictionaryCSgFZ",
+      "executed_instructions": 15
+    }
+  },
+  "authenticated_factory_uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+  "factory_preset_applied": false,
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}

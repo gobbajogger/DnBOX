@@ -1,0 +1,23 @@
+{
+  "source": {
+    "executable_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+    "bench_sha256": "c1b7e99bf4f3054f114557a66c5ad8060525a5f8065e3ff3c7d208dbe2d9bf9c",
+    "export_record_sha256": "d7281f4528a3cfd66ba72784d8b2f1744cfbc5752f7191b69492a29a256dc791",
+    "uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B"
+  },
+  "sample_rate": 44100,
+  "channels": 2,
+  "component": "AKSamplerDSP",
+  "authored_field": "neonfilterSustain",
+  "internal_dsp_address": 18,
+  "factory_graph_route_verified": false,
+  "factory_preset_applied": false,
+  "before_float_bits": "0x3f800000",
+  "authored_float_bits": "0x3e459988",
+  "dsp_readback_float_bits": "0x3e459988",
+  "restored_float_bits": "0x3f800000",
+  "direct_core_readback_float_bits": "0x3e459988",
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}

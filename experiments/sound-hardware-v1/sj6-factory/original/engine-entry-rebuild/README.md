@@ -30,3 +30,20 @@ placeholder address. It has no live Objective-C receiver or applied preset.
 The alternate AU/export ZIP route was also exercised and stopped at the same
 Foundation import. Its canonical authored record hash differs from the
 canonical bundled IPA record hash, and each route validates its own identity.
+
+## Factory and component boundaries
+
+Run probe_original_au_routes.py with the same --repo and --ipa-recovery
+arguments as the initializer checkpoint. It reads the original Objective-C
+class and method metadata and executes the two non-nil state entry paths
+until their first import. The receiver and argument markers are never used as
+working runtime objects. A successful probe records the import endpoints.
+
+Run probe_sampler_authored_state.py with --repo, --banks J6presets.zip,
+--bench-archive SuperJ6-bounded-reference-bench-20261115.private.zip, and
+--bench-directory pointing to the extracted bench in the original component
+replay layout. It authenticates the required bench members against the ZIP
+and the running original AU bytes against the executable pin. It passes the
+exact Medieval Sky filter-sustain field to the original sampler DSP and
+core setter and checks both readbacks. This covers an individually applied
+component value. Full factory recall and original stereo audio remain pending.
