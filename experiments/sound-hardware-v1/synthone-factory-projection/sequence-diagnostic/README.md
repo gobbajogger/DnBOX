@@ -60,3 +60,5 @@ With matched events, #213 improves from 8.812 to 3.127 dB spectral error and fro
 python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/cutoff_candidate.py \
   VERIFIED_SEQUENCE_OUTPUT PANEL_TARGETS FACTORY_BUILD NEW_OUTPUT
 ```
+
+Run the same command with `--coupled` to also apply authored filter-envelope LFO routes 1 and 2. The additional multiplier scales the envelope depth before the cutoff mixer. The original cutoff-only receipt reproduces byte for byte after adding this option. The coupled trial retains the #139 gain and nine direct-note pass guards. #213 still fails at 3.038 dB spectral error versus the 3.000 dB limit. Under exact matched events it measures 3.120 dB spectral and +1.610 dB level. The trial remains host-only. [Coupled result](cutoff-coupled-result.json).

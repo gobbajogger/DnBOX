@@ -1,0 +1,990 @@
+{
+  "source": "f6c2f17087dea9de52dc77f88dd271aab6692ef1",
+  "bank_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "rows": [
+    {
+      "index": 10,
+      "guard": true,
+      "route": 0,
+      "arms": {
+        "0:0": {
+          "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+          "scores": [
+            {
+              "level_db": -0.429231895308326,
+              "spectral_db": 2.684690679059448,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.5245934929174931,
+              "spectral_db": 2.6888131006848988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+          "scores": [
+            {
+              "level_db": -0.429231895308326,
+              "spectral_db": 2.684690679059448,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.5245934929174931,
+              "spectral_db": 2.6888131006848988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "2:0": {
+          "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+          "scores": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+          "scores": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 3
+    },
+    {
+      "index": 86,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "988539f5fffbb72499084a0e32bcc6ec0775e31ef4d736fb8a164755229ea830",
+          "scores": [
+            {
+              "level_db": 0.025157157724971374,
+              "spectral_db": 1.5445260838236845,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.13238902972133548,
+              "spectral_db": 1.5745121345475337,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "988539f5fffbb72499084a0e32bcc6ec0775e31ef4d736fb8a164755229ea830",
+          "scores": [
+            {
+              "level_db": 0.025157157724971374,
+              "spectral_db": 1.5445260838236845,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.13238902972133548,
+              "spectral_db": 1.5745121345475337,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 130,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "c51ff366b33b91def25c96d54dea9cbecccdc4e3871440bf1465b16a2f912c65",
+          "scores": [
+            {
+              "level_db": -0.7090908733165656,
+              "spectral_db": 2.6566173329644585,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.8646938030819634,
+              "spectral_db": 2.659165373522219,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "696c9039c15cb27856854232514b62b0ba07468803f524812b8329f4b4d89887",
+          "scores": [
+            {
+              "level_db": -0.7819803784511676,
+              "spectral_db": 2.20849759643292,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.9375833082165659,
+              "spectral_db": 2.2140279621178176,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 138,
+      "guard": false,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "b4f0ab40fc209d84bbaf32091ebea95b08f317cf5190bfc5734ce7dccac83bf1",
+          "scores": [
+            {
+              "level_db": -0.32005338142335116,
+              "spectral_db": 3.475537049002872,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.28792962582455184,
+              "spectral_db": 3.484361442514858,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "0:1": {
+          "sha256": "7322acbe65969e4282a50900122f3b8f605aa6ebeb95bce401a60c3cb4363b10",
+          "scores": [
+            {
+              "level_db": -0.6786181146373927,
+              "spectral_db": 4.051526664091888,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.6464943590385936,
+              "spectral_db": 4.054858133676357,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:0": {
+          "sha256": "89f5640d1593ffbdf98dec19029f919a446adf23aacb2ba8600362b86c4026e2",
+          "scores": [
+            {
+              "level_db": 3.1379031741766634,
+              "spectral_db": 3.1763851731757335,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.1700269297754624,
+              "spectral_db": 3.1810651532933165,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "cb3c9a6c2cd1995a63aef6e7b7f0e11cd072c01c87ad539f6d2541232521d713",
+          "scores": [
+            {
+              "level_db": 2.9378889597466284,
+              "spectral_db": 3.136524762152355,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.970012715345428,
+              "spectral_db": 3.144402049562817,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 139,
+      "guard": false,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "6418e377f3280664296c64e73aa323a73d9ed17d9e05408ac3c3cdc939c2ed5d",
+          "scores": [
+            {
+              "level_db": 0.9909921071376981,
+              "spectral_db": 2.507029558236661,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 1.0091783158998497,
+              "spectral_db": 2.500754512417024,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "0:1": {
+          "sha256": "9d5a9263691c81e9b66b5a34e00d4f17940032598e78505b03a6bb0878bbb984",
+          "scores": [
+            {
+              "level_db": 0.9303108557234763,
+              "spectral_db": 1.929803644711006,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.9484970644856272,
+              "spectral_db": 1.916651208966582,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "2:0": {
+          "sha256": "65890a9a7c8af698e238db12e805c9a0605660ab7d97f8f1516b61637a8f2e3b",
+          "scores": [
+            {
+              "level_db": 2.702689547243999,
+              "spectral_db": 3.5804624386809802,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.7208757560061496,
+              "spectral_db": 3.579339558568102,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "0e80f38a4708a1c6014cfbc82b357220aecfe42bad99dfc816d8562aceb74d5b",
+          "scores": [
+            {
+              "level_db": 2.643555428123019,
+              "spectral_db": 2.2917093104436486,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.6617416368851696,
+              "spectral_db": 2.2853041579300584,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 172,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "62ca0910ac662d605ffbba73e6c3a83a04350b47bda46dbfa127d140e1baa5b2",
+          "scores": [
+            {
+              "level_db": 0.7735884245761628,
+              "spectral_db": 2.8699575152210994,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.752740785206285,
+              "spectral_db": 2.9538401541501296,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "73ba7dadab6002193bdd16b2e0a4268398323caab9c943b1c802eac76b82c1bd",
+          "scores": [
+            {
+              "level_db": 0.776290340663527,
+              "spectral_db": 2.736453810234085,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.7552347868894793,
+              "spectral_db": 2.826739869641008,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 213,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "73b288f0fd23b88bc17774ff851ef7576d830738b91f5201b0ddfd231163706a",
+          "scores": [
+            {
+              "level_db": -0.6720435160434821,
+              "spectral_db": 2.6991087244128495,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.6720438930848871,
+              "spectral_db": 2.6991084853737313,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "3c5d31a243b35770201e81ed85b770bca0bf198dbd281e7741acbda14a8649a4",
+          "scores": [
+            {
+              "level_db": -0.7032056506158519,
+              "spectral_db": 3.038043290741645,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.703206027657257,
+              "spectral_db": 3.0380433484088085,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:0": {
+          "sha256": "0e17cfd16df77bb37e1504d45d803be9f40cb97c76909f5bed65f10f0e6ece74",
+          "scores": [
+            {
+              "level_db": 1.8342253445517231,
+              "spectral_db": 8.812388670303966,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.834224967510318,
+              "spectral_db": 8.812388381464919,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "b9f083a9ddf12902d70ce75e8c82acd01452fdbd0d9e229bb807cb7d515b7aa0",
+          "scores": [
+            {
+              "level_db": 1.6097759585236568,
+              "spectral_db": 3.1203084428797667,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.6097755814822516,
+              "spectral_db": 3.120308267537472,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 2
+    },
+    {
+      "index": 221,
+      "guard": true,
+      "route": 0,
+      "arms": {
+        "0:0": {
+          "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+          "scores": [
+            {
+              "level_db": -0.429231895308326,
+              "spectral_db": 2.684690679059448,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.5245934929174931,
+              "spectral_db": 2.6888131006848988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+          "scores": [
+            {
+              "level_db": -0.429231895308326,
+              "spectral_db": 2.684690679059448,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.5245934929174931,
+              "spectral_db": 2.6888131006848988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "2:0": {
+          "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+          "scores": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+          "scores": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 3
+    },
+    {
+      "index": 352,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "3240a4025fd921691f12d641b1c687186047e68d34aaa35735686fb1ae78a0f2",
+          "scores": [
+            {
+              "level_db": 0.19748445339485707,
+              "spectral_db": 2.882189014187372,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.3595959424974973,
+              "spectral_db": 2.613874575339353,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "f90bf9f7299b3a90c6405956630ad60e90a6abc6e50903c99e600d3cd967f1bc",
+          "scores": [
+            {
+              "level_db": 0.6844340700586784,
+              "spectral_db": 2.9098912755727877,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.8524965434666566,
+              "spectral_db": 2.6240505604389055,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 398,
+      "guard": true,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "1b429e77c9bf375523bb85db037c96ae0f8d212f7f31eeb979796f6bb9c52aaa",
+          "scores": [
+            {
+              "level_db": -0.42391781925941896,
+              "spectral_db": 2.184553207407157,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.6040811115623562,
+              "spectral_db": 2.2282610965942675,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "d4fb81100125d0cb99201d55100add9c624a74fcacde4ae352e600989b602594",
+          "scores": [
+            {
+              "level_db": -0.310151537925867,
+              "spectral_db": 2.214708495309484,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.48895606120609714,
+              "spectral_db": 2.261287266147292,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 2
+    },
+    {
+      "index": 410,
+      "guard": false,
+      "route": 1,
+      "arms": {
+        "0:0": {
+          "sha256": "18f0ec9149d030238f70ae224d9570f0aa548944fc67b72421933426de73f73e",
+          "scores": [
+            {
+              "level_db": 1.0688439736866133,
+              "spectral_db": 3.354512891892247,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 0.02342046355904128,
+              "spectral_db": 3.370438946125367,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "0:1": {
+          "sha256": "416c810145ea1e19369fc0cfd364c1ccfd1946a7fe3d290dfc4f29efa1627512",
+          "scores": [
+            {
+              "level_db": 1.082646854430684,
+              "spectral_db": 3.3454127287843534,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 0.035316539800692645,
+              "spectral_db": 3.3634067334321145,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:0": {
+          "sha256": "25a8ed6d1ea08cc4587b7193de92a33852120fa28a72d75b471bcddd9cd59be7",
+          "scores": [
+            {
+              "level_db": 0.906075878098387,
+              "spectral_db": 3.53352827508293,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.1325233540023328,
+              "spectral_db": 3.5840123767474443,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "461edd406617157d47a748d530b9fb92cad15ef645e22fc04309fb0227a8c84e",
+          "scores": [
+            {
+              "level_db": 0.9329491519507778,
+              "spectral_db": 3.5622339206390112,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.10736128628800884,
+              "spectral_db": 3.6120989186158727,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 1
+    },
+    {
+      "index": 481,
+      "guard": true,
+      "route": 3,
+      "arms": {
+        "0:0": {
+          "sha256": "36375f1ce2f36336c5478a9b4f17a94c90aee348e68daadb0672d94e04a6e182",
+          "scores": [
+            {
+              "level_db": -0.40919762186913666,
+              "spectral_db": 2.5469760154957983,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.07114789965332113,
+              "spectral_db": 2.710052428667336,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "36375f1ce2f36336c5478a9b4f17a94c90aee348e68daadb0672d94e04a6e182",
+          "scores": [
+            {
+              "level_db": -0.40919762186913666,
+              "spectral_db": 2.5469760154957983,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.07114789965332113,
+              "spectral_db": 2.710052428667336,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "2:0": {
+          "sha256": "bc549c7f59ad14fd48f9f9c9f4fc80e1080e682322cd05226667b63a447ae89b",
+          "scores": [
+            {
+              "level_db": 4.323370203606157,
+              "spectral_db": 4.683757913223808,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.473928529584243,
+              "spectral_db": 4.645989759055475,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "bc549c7f59ad14fd48f9f9c9f4fc80e1080e682322cd05226667b63a447ae89b",
+          "scores": [
+            {
+              "level_db": 4.323370203606157,
+              "spectral_db": 4.683757913223808,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.473928529584243,
+              "spectral_db": 4.645989759055475,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 482,
+      "guard": false,
+      "route": 0,
+      "arms": {
+        "0:0": {
+          "sha256": "c080e7ee5aadc9922dae701988c7aa56faf87804c5801f469126b5549178c339",
+          "scores": [
+            {
+              "level_db": -1.1098231868361665,
+              "spectral_db": 1.3763934094820658,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.046152022270364,
+              "spectral_db": 1.376508403377517,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "0:1": {
+          "sha256": "c080e7ee5aadc9922dae701988c7aa56faf87804c5801f469126b5549178c339",
+          "scores": [
+            {
+              "level_db": -1.1098231868361665,
+              "spectral_db": 1.3763934094820658,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.046152022270364,
+              "spectral_db": 1.376508403377517,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:0": {
+          "sha256": "5b69585317c00a5e2737e5f1604d24eea89bfc3929a7f7a6aaa25124e6dfc05e",
+          "scores": [
+            {
+              "level_db": -0.3138601481316011,
+              "spectral_db": 1.660892564096051,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25018898356579855,
+              "spectral_db": 1.659336634788748,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "2:1": {
+          "sha256": "5b69585317c00a5e2737e5f1604d24eea89bfc3929a7f7a6aaa25124e6dfc05e",
+          "scores": [
+            {
+              "level_db": -0.3138601481316011,
+              "spectral_db": 1.660892564096051,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25018898356579855,
+              "spectral_db": 1.659336634788748,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 0
+    },
+    {
+      "index": 531,
+      "guard": true,
+      "route": 3,
+      "arms": {
+        "0:0": {
+          "sha256": "7115e57078ff88ef850dcb8136d3c248d976ef6a31a60408bef478c7e15752fb",
+          "scores": [
+            {
+              "level_db": 0.8881082372992146,
+              "spectral_db": 2.598522023229016,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25040980835522275,
+              "spectral_db": 2.6119205663920884,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        },
+        "0:1": {
+          "sha256": "7115e57078ff88ef850dcb8136d3c248d976ef6a31a60408bef478c7e15752fb",
+          "scores": [
+            {
+              "level_db": 0.8881082372992146,
+              "spectral_db": 2.598522023229016,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25040980835522275,
+              "spectral_db": 2.6119205663920884,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": true
+        }
+      },
+      "env_route": 3
+    },
+    {
+      "index": 664,
+      "guard": false,
+      "route": 2,
+      "arms": {
+        "0:0": {
+          "sha256": "0b598df9518a98ac82dab086ee67ecd86c665ee356d51f24dbc30b1767c9dcae",
+          "scores": [
+            {
+              "level_db": 1.1015692000003952,
+              "spectral_db": 2.640552836258303,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.0245053996578746,
+              "spectral_db": 2.756226212021674,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": false
+        },
+        "0:1": {
+          "sha256": "bfb459eec752c63cb887b1f48616df051e7ded1d0291b2bc113728ed5cfeac22",
+          "scores": [
+            {
+              "level_db": 1.1276127698007854,
+              "spectral_db": 2.691143456232834,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.01616575385837485,
+              "spectral_db": 2.810109831775488,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "passed": false
+        },
+        "2:0": {
+          "sha256": "cea8c33b2b6b775eb4a8dee96e3ce4ce308c6833b57c6277fc998c284200c879",
+          "scores": [
+            {
+              "level_db": 6.088980894002518,
+              "spectral_db": 5.54819378928183,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.651655014243149,
+              "spectral_db": 5.550946077630442,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        },
+        "2:1": {
+          "sha256": "b167698882eace1a704930ee535e844bfb1b8460ca346be51cc5d11e88ecfd23",
+          "scores": [
+            {
+              "level_db": 6.117475507141181,
+              "spectral_db": 5.3465703503917,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.670251435786938,
+              "spectral_db": 5.4275031132792035,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "passed": false
+        }
+      },
+      "env_route": 0
+    }
+  ]
+}

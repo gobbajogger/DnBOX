@@ -28,6 +28,7 @@ def main():
     ap.add_argument('panel_targets', type=Path)
     ap.add_argument('factory_build', type=Path)
     ap.add_argument('output', type=Path)
+    ap.add_argument('--coupled', action='store_true', help='Also enable the authored filter-envelope LFO routes 1 and 2')
     args = ap.parse_args()
     fixture, targets, build, out = [p.resolve() for p in
         (args.sequence_replay, args.panel_targets, args.factory_build, args.output)]
@@ -39,8 +40,8 @@ def main():
     assert sha(targets) == 'd72756ce2b5898b275e65f5b301527f2e687eb7df6c1c0ea0a8c3d5967237833'
     a = (fixture/'shipping.c').read_text()
     assert a.count('static void key(') == 1 and a.count('assert(mode <= 2);') == 1
-    a = a.replace('static void key(', 'unsigned s1_cutoff_probe_route;\nstatic void key(')
-    a = a.replace('assert(mode <= 2);', 'assert(mode <= 2);\n    s1_cutoff_probe_route = (unsigned)strtoul(getenv("S1_PROBE_ROUTE"), NULL, 10);')
+    a = a.replace('static void key(', 'unsigned s1_cutoff_probe_route, s1_env_probe_route;\nstatic void key(')
+    a = a.replace('assert(mode <= 2);', 'assert(mode <= 2);\n    s1_cutoff_probe_route = (unsigned)strtoul(getenv("S1_PROBE_ROUTE"), NULL, 10);\n    s1_env_probe_route = (unsigned)strtoul(getenv("S1_ENV_PROBE_ROUTE"), NULL, 10);\n    assert(s1_cutoff_probe_route <= 2u && s1_env_probe_route <= 2u);')
     (out/'shipping.c').write_text(a)
     cmd = json.loads((fixture/'commands.json').read_text())['compile_candidate']
     for name in cmd:
@@ -53,7 +54,8 @@ def main():
     source = source.replace(site, (HERE/'cutoff_probe.inc').read_text()+'\n'+site)
     site = '    if (((pitch_route & 1u) && part->lfo[0].level != 0.f) ||'
     assert source.count(site) == 1
-    source = source.replace(site, '''    if (s1_cutoff_probe_route && part->lfo[s1_cutoff_probe_route - 1u].level != 0.f)
+    source = source.replace(site, '''    if ((s1_cutoff_probe_route && part->lfo[s1_cutoff_probe_route - 1u].level != 0.f) ||
+        (s1_env_probe_route && part->lfo[s1_env_probe_route - 1u].level != 0.f))
         cutoff_probe_mix(part, left, frames, s1_cutoff_probe_route);
     else if (((pitch_route & 1u) && part->lfo[0].level != 0.f) ||''')
     (out/'voice.c').write_text(source)
@@ -74,7 +76,8 @@ def main():
         base = baseline[i]
         active = dict(struct.iter_unpack('<If', bank_bytes[12+i*1156:12+i*1156+1152]))
         route = int(active[48])
-        assert route in (0,1,2,3)
+        env_route = int(active[56])
+        assert route in (0,1,2,3) and env_route in (0,1,2,3)
         oracle, events = out/'original.f32', out/'events.i32'
         if i in focus:
             oracle, events = fixture/str(i)/'original.f32', fixture/str(i)/'events.i32'
@@ -88,11 +91,13 @@ def main():
         assert sha(oracle) == base['original_sha256']
         original = np.fromfile(oracle, dtype='<f4').reshape(-1,2)
         row = {'index': i, 'guard': i in guards, 'route': route, 'arms': {}}
+        if args.coupled: row['env_route'] = env_route
         for mode in (0,2) if i in focus else (0,):
             for candidate in (False, True):
                 pcm, panel = out/'pcm.f32', out/'panel.u8'
                 enabled = route if candidate and route in (1,2) else 0
-                env = {**os.environ, 'S1_PROBE_ROUTE': str(enabled)}
+                enabled_env = env_route if candidate and args.coupled and env_route in (1,2) else 0
+                env = {**os.environ, 'S1_PROBE_ROUTE': str(enabled), 'S1_ENV_PROBE_ROUTE': str(enabled_env)}
                 subprocess.run([out/'shipping', targets, str(i), pcm, panel, str(mode), events], check=True, env=env)
                 assert list(panel.read_bytes()) == base['panel']
                 if not candidate:
