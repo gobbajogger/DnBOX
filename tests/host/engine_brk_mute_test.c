@@ -187,6 +187,7 @@ static void fixture(int running)
     split_frames = 256;
     probability_skip = 0;
     seq.pat = &pattern;
+    seq.brk_velocity = 127; /* fixture supplies its own seq_init */
     seq.playing = (uint8_t)running;
     pattern.brk.steps = 0xFFFFu;
     breaks_init(&brk);
