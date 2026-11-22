@@ -48,6 +48,27 @@ static void prepare_adsr(dnbx_s1_envelope_params *out, const s1_dry_adsr *in)
         retention(in->release_s, 1.0f));
 }
 
+#if X0X_SYNTHONE_PATCH
+/* The bilinear Butterworth transfer functions use topology-preserving
+ * integrator states, so live cutoff changes do not reinterpret the delays
+ * of a direct-form recurrence. Sine/cosine products avoid the Nyquist pole
+ * of tan() without requiring extra per-voice state. */
+static void prepare_alternate(s1_dry_prepared *p, float *history, float cutoff)
+{
+    const float theta = cutoff * (FM_PI / S1_DRY_SAMPLE_RATE);
+    const float sn = fm_sin_pi(theta);
+    const float cs = fm_sin_pi(.5f * FM_PI - theta);
+    const float sc = sn * cs;
+    const float norm = p->filter_type == 1u ? 1.f - history[4] :
+                       1.f / (1.f + 1.4142135623730950488f * sc);
+    p->pole_retention = cs * cs * norm;
+    p->feedback = sc * norm;
+    history[2] = sn * sn * norm;
+    if (p->filter_type == 1u) history[3] = history[4] * cs / sn;
+    p->cached_cutoff_hz = cutoff;
+}
+#endif
+
 static void prepare_filter(s1_dry_prepared *p, float cutoff_hz)
 {
     /* Fitted to independent impulse observations at twelve cutoff settings.
@@ -74,7 +95,7 @@ void s1_dry_frozen_controls(s1_dry_controls *p)
         {0.05f, 0.05f, 1.0f, 0.5f},
         2000.0f, 0.9f, 0.0f, 1.0f, 0.5f
 #if X0X_SYNTHONE_PATCH
-        , 0.f, 0.f, 0.f
+        , 0.f, 0.f, 0.f, 0.f
 #endif
     };
 }
@@ -92,7 +113,9 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
 #if X0X_SYNTHONE_PATCH
     if (!range(controls->sub_level, 0.f, 1.f) ||
         !range(controls->sub_extra_octave, 0.f, 1.f) ||
-        !range(controls->sub_square, 0.f, 1.f)) return S1_DRY_RANGE;
+        !range(controls->sub_square, 0.f, 1.f) ||
+        !range(controls->filter_type, 0.f, 2.f) ||
+        controls->filter_type != (float)(unsigned)controls->filter_type) return S1_DRY_RANGE;
 #endif
     s1_dry_prepared next = {0};
     next.cutoff_hz = controls->cutoff_hz;
@@ -102,8 +125,21 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
     next.balance = controls->balance;
     prepare_adsr(&next.amp, &controls->amp);
     prepare_adsr(&next.filter, &controls->filter);
-    prepare_filter(&next, s1_dry_cutoff(controls->cutoff_hz,
-        controls->filter_depth, voice->filter.level));
+    const float cutoff = s1_dry_cutoff(controls->cutoff_hz, controls->filter_depth, voice->filter.level);
+#if X0X_SYNTHONE_PATCH
+    next.filter_type = (uint8_t)controls->filter_type;
+    if (next.filter_type != voice->prepared.filter_type)
+        memset(voice->filter_history, 0, sizeof voice->filter_history);
+    if (next.filter_type) {
+        if (next.filter_type == 1u) {
+            const float bw = (fm_exp2f(1.f - next.resonance) - 1.f) * (FM_PI / 16.f);
+            const float tg = fm_tanf(bw);
+            voice->filter_history[4] = tg / (1.f + tg);
+        }
+        prepare_alternate(&next, voice->filter_history, cutoff);
+    } else
+#endif
+    prepare_filter(&next, cutoff);
 #if X0X_SYNTHONE_PATCH
     next.sub_level = controls->sub_level;
     next.sub_extra_octave = controls->sub_extra_octave >= 0.5f;
@@ -190,8 +226,14 @@ static void update_cutoff(s1_dry_voice *voice, float filter)
     const s1_dry_prepared *p = &voice->prepared;
     float cutoff_hz = s1_dry_cutoff(p->cutoff_hz, p->filter_depth, filter);
     /* Update only when the filter envelope moves the effective cutoff. */
-    if (cutoff_hz != voice->prepared.cached_cutoff_hz)
-        prepare_filter(&voice->prepared, cutoff_hz);
+    if (cutoff_hz == voice->prepared.cached_cutoff_hz) return;
+#if X0X_SYNTHONE_PATCH
+    if (voice->prepared.filter_type) {
+        prepare_alternate(&voice->prepared, voice->filter_history, cutoff_hz);
+        return;
+    }
+#endif
+    prepare_filter(&voice->prepared, cutoff_hz);
 }
 
 static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, float amp, float component_gain)
@@ -211,9 +253,27 @@ static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, fl
 #endif
     excitation *= amp;
     /* The oscillator and envelopes advance once per output frame. */
-    float first = filter_substep(voice, excitation);
-    float second = filter_substep(voice, excitation);
-    float output = 0.5f * (first + second);
+    float output;
+#if X0X_SYNTHONE_PATCH
+    if (voice->prepared.filter_type) {
+        float *history = voice->filter_history;
+        const float delta = excitation - history[1];
+        const float v1 = voice->prepared.pole_retention * history[0] +
+                         voice->prepared.feedback * delta;
+        const float v2 = history[1] + voice->prepared.feedback * history[0] +
+                         history[2] * delta;
+        output = voice->prepared.filter_type == 1u ?
+                 history[3] * history[0] + history[4] * delta :
+                 excitation - 1.4142135623730950488f * v1 - v2;
+        history[0] = 2.f * v1 - history[0];
+        history[1] = 2.f * v2 - history[1];
+    } else
+#endif
+    {
+        float first = filter_substep(voice, excitation);
+        float second = filter_substep(voice, excitation);
+        output = 0.5f * (first + second);
+    }
     voice->phase += voice->phase_increment;
     if (voice->phase >= 1.0f) voice->phase -= 1.0f;
     return output;

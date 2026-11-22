@@ -150,7 +150,7 @@ static void sub_bypass(void)
  * control. Filter envelope parameters need nonzero depth to be audible. */
 static void patch_audio(void)
 {
-    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127};
+    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127,127};
     uint8_t cell[32];
     for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
         assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
@@ -345,6 +345,38 @@ static void width_patch(void)
     puts("Stereo width: both owners, 128 edits, packed source tap, smoothing, switch, restore and panic passed.");
 }
 
+
+#if X0X_SYNTHONE_PATCH
+static void alternate_filter_live_cutoff(void)
+{
+    float peak[2] = {0};
+    for (unsigned kind = 1; kind < 3; ++kind) {
+        for (unsigned resonance = 0; resonance <= 4; ++resonance) {
+            s1_dry_voice voice = {0};
+            s1_dry_controls controls;
+            s1_dry_frozen_controls(&controls);
+            controls.filter_type = (float)kind;
+            controls.resonance = resonance * .245f;
+            controls.filter_depth = 1.2f;
+            assert(s1_dry_configure(&voice, &controls) == S1_DRY_OK);
+            assert(s1_dry_start(&voice, 194.209f, 127, 0.f) == S1_DRY_OK);
+            for (unsigned stage = 0; stage <= 24; ++stage) {
+                controls.cutoff_hz = stage % 4 < 2 ? 22050.f : 64.f;
+                controls.filter_depth = stage % 2 ? 1.2f : 0.f;
+                assert(s1_dry_configure(&voice, &controls) == S1_DRY_OK);
+                for (unsigned frame = 0; frame < 22050u; ++frame) {
+                    const float sample = fabsf(s1_dry_sample(&voice));
+                    assert(sample < 2.f);
+                    if (sample > peak[kind - 1]) peak[kind - 1] = sample;
+                }
+            }
+        }
+    }
+    printf("Synth One alternate-filter live cutoff: 5,512,500 finite samples, bandpass peak %.6f, highpass peak %.6f.\n",
+           peak[0], peak[1]);
+}
+#endif
+
 int main(void)
 {
     width_patch();
@@ -361,6 +393,7 @@ int main(void)
 #if X0X_SYNTHONE_PATCH
     sub_bypass();
     patch_audio();
+    alternate_filter_live_cutoff();
 #endif
     uint8_t cell[32], legacy[32];
     assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY));

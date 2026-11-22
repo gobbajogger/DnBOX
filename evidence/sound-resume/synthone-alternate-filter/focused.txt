@@ -1,0 +1,5 @@
+Synth One INIT patch: 17 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS
+Synth One sub bypass: 40,960 stereo frames preserved across v1 and sub-only v2.
+factory ID 115 changed 20480 of 20480 frames
+Synth One alternate-filter live cutoff: 5,512,500 finite samples, bandpass peak 0.724287, highpass peak 1.333182.
+Synth One INIT: stock and legacy cells, audible MIDI, two owners, sustain, pitch, release, voice steal and panic PASS

@@ -333,6 +333,17 @@ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsig
     memcpy(cell, next, sizeof next);
     return 1;
 }
+#if X0X_SYNTHONE_PATCH
+/* The V2 tag is 1100. The two alternate-filter tags differ from it in
+ * three bits, so one corrupt reserved bit cannot turn V2 into a filter edit.
+ * All four marker bytes retain their existing seven-bit master controls. */
+static unsigned s1_adjunct_tag(const uint8_t *ext)
+{
+    return (ext[3] >> 7) * 8u + (ext[4] >> 7) * 4u +
+           (ext[5] >> 7) * 2u + (ext[6] >> 7);
+}
+#endif
+
 int original_master_valid(const uint8_t *cell,const uint8_t *ext)
 {
     if (cell[26]!='M') return 1;
@@ -341,11 +352,10 @@ int original_master_valid(const uint8_t *cell,const uint8_t *ext)
     /* V2 uses high bits of the first two master values for octave and
      * square. Its two-bit format marker leaves a single reserved-bit error
      * invalid in v1. Byte zero retains bit 0 for master edit presence. */
-    if (ext[3] & ext[4] & 128u) {
-        for (unsigned j=1; j<S1_MASTER_EXT_SIZE; ++j) {
-            if (j >= 5 && (ext[j] & 128u)) return 0;
+    const unsigned tag = s1_adjunct_tag(ext);
+    if (tag == 12u || tag == 11u || tag == 7u) {
+        for (unsigned j = 1; j < S1_MASTER_EXT_SIZE; ++j)
             if (!(ext[0] & 1u) && (ext[j] & 127u)) return 0;
-        }
         return 1;
     }
 #endif
@@ -419,7 +429,11 @@ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, uns
 
 unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot)
 {
-    if (cell[26] != 'M' || !ext || !(ext[3] & ext[4] & 128u)) return 0;
+    if (cell[26] != 'M' || !ext) return 0;
+    const unsigned tag = s1_adjunct_tag(ext);
+    if (tag != 12u && tag != 11u && tag != 7u) return 0;
+    if (slot == S1_PATCH_FILTER_TYPE)
+        return tag == 11u ? 64u : tag == 7u ? 127u : 0u;
     if (slot == S1_PATCH_SUB_LEVEL) return ext[0] >> 1;
     if (slot == S1_PATCH_SUB_OCTAVE) return (ext[1] & 128u) ? 127u : 0u;
     if (slot == S1_PATCH_SUB_SQUARE) return (ext[2] & 128u) ? 127u : 0u;
@@ -436,8 +450,14 @@ int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, u
         memset(ext, 0, S1_MASTER_EXT_SIZE);
         cell[26] = 'M';
     }
-    ext[3] |= 128u;
-    ext[4] |= 128u;
+    unsigned tag = s1_adjunct_tag(ext);
+    if (slot == S1_PATCH_FILTER_TYPE)
+        tag = position <= 31u ? 12u : position >= 96u ? 7u : 11u;
+    else if (tag != 11u && tag != 7u)
+        tag = 12u;
+    for (unsigned j = 3; j < S1_MASTER_EXT_SIZE; ++j)
+        ext[j] = (ext[j] & 127u) | (uint8_t)((tag << (j + 1u)) & 128u);
+    if (slot == S1_PATCH_FILTER_TYPE) return 1;
     if (slot == S1_PATCH_SUB_LEVEL) ext[0] = (ext[0] & 1u) | (uint8_t)(position << 1);
     else {
         const unsigned index = slot == S1_PATCH_SUB_OCTAVE ? 1u : 2u;

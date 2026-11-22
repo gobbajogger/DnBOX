@@ -74,7 +74,8 @@ static const struct {
     S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S),
     S1_FIELD(7, "SUB LEVEL", sub_level, 0, 1, X0X_U_PCT),
     S1_FIELD(8, "SUB OCTAVE", sub_extra_octave, 0, 1, X0X_U_PCT),
-    S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT)
+    S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT),
+    S1_FIELD(115, "FILTER TYPE", filter_type, 0, 2, X0X_U_NONE)
 #undef S1_FIELD
 };
 
@@ -90,6 +91,7 @@ int s1_patch_slot(unsigned id)
 
 float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
 {
+    if (d->factory_id == 115u) return (float)((position * 2u + 63u) / 127u);
     if (d->factory_id == 8u || d->factory_id == 9u) return position >= 64u ? 1.f : 0.f;
     if (position >= S1_PATCH_STEPS) return d->maximum;
     return d->minimum + (d->maximum - d->minimum) * ((float)position / S1_PATCH_STEPS);

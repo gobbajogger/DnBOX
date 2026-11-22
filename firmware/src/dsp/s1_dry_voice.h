@@ -21,7 +21,7 @@ typedef struct {
     float cutoff_hz, resonance, filter_depth;
     float oscillator1_level, balance;
 #if X0X_SYNTHONE_PATCH
-    float sub_level, sub_extra_octave, sub_square;
+    float sub_level, sub_extra_octave, sub_square, filter_type;
 #endif
 } s1_dry_controls;
 
@@ -33,7 +33,7 @@ typedef struct {
     float cached_cutoff_hz, pole_retention, feedback;
 #if X0X_SYNTHONE_PATCH
     float sub_level;
-    uint8_t sub_extra_octave, sub_square;
+    uint8_t sub_extra_octave, sub_square, filter_type;
 #endif
 } s1_dry_prepared;
 
