@@ -73,7 +73,7 @@ void s1_part_bind_width(s1_dry_part *part, uint8_t *history);
 #if X0X_SYNTHONE_PATCH
 int s1_patch_slot(unsigned factory_id);
 float s1_part_patch_value(const s1_dry_part *, unsigned slot);
-void s1_part_apply_cell(s1_dry_part *, const uint8_t cell[32]);
+void s1_part_apply_cell(s1_dry_part *, const uint8_t cell[32], const uint8_t *ext);
 #endif
 int s1_part_param(s1_dry_part *part, unsigned id, float value);
 int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);

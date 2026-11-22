@@ -8,8 +8,12 @@
  * Stable Synth One factory IDs; performance wheels belong to a separate API.
  * Storage slots are in descriptor order and must never be reordered. Existing
  * OS11 INIT and historical eight-control cells use no bits in this range. */
-enum { S1_PATCH_FIRST_BYTE = 8, S1_PATCH_COUNT = 13, S1_PATCH_STEPS = 127 };
-#define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+enum {
+    S1_PATCH_FIRST_BYTE = 8, S1_PATCH_CELL_COUNT = 13, S1_PATCH_STEPS = 127,
+    S1_PATCH_SUB_LEVEL = S1_PATCH_CELL_COUNT, S1_PATCH_SUB_OCTAVE, S1_PATCH_SUB_SQUARE,
+    S1_PATCH_COUNT
+};
+#define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_CELL_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
 
 typedef struct {
     const char *label;

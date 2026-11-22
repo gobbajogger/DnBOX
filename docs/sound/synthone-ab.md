@@ -6,6 +6,10 @@ The acceptance limits are an absolute RMS-level difference of at most **1 dB** a
 
 The host bench applied the 13 supported voice edits through the persisted Synth One cell and 22 effect settings through the existing panel controls. All 24,290 values read back across 694 programs. The 694 source-derived original stereo hashes matched the archived capture set. Across 91,816,200 stereo frames per arm, **0/694** complete pairs met both original limits. The candidate produced 78 silent programs when the saved balance or level removed oscillator 1. The closest pair, factory index 673, still exceeded the spectral threshold on both channels. Full production bank selection and the original voice and effect graph remain open. [Input, worst cases and replay](../../experiments/sound-hardware-v1/synthone-factory-projection/README.md).
 
+## Opt-in sub oscillator
+
+Original IDs 7, 8 and 9 now set sub level, an extra octave down and sine or square in the editable INIT voice. The existing project size is preserved. Legacy master controls and bypass retain their bytes and the sub fields survive save/load and note locks. The integrated 38-control projection reproduced all 694 original stereo hashes. It recovered 63 previously silent programs, kept all 110 zero-sub renders bit-identical and passed both original limits on **7/694** programs. The remaining 687 exceed at least one limit. [Independent oscillator comparison, preset results and replay](../../experiments/sound-hardware-v1/synthone-sub/README.md).
+
 ## Harmonic oscillator in the full factory fixture
 
 A fresh build of the pack-free harmonic oscillator ran against the original raw-table oracle with the original downstream effects. Both arms applied 144 ordered commands for each of 694 programs, played the six-note factory stimulus at 48 kHz, and generated 96,000 stereo frames per program. The candidate ran without opening a packed wavetable file. All 1,388 stereo PCM digests matched the recovered independent comparison. Left and right were scored individually with 2,048-sample Hann windows, 512-sample hops and a reference-relative −80 dB floor.

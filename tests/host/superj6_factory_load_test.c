@@ -303,6 +303,8 @@ static void check_factory_chorus_bypass(void)
 static void check_bank(void)
 {
     unsigned programs = 0, authored = 0, defaulted = 0, register_words = 0;
+    unsigned chorus_switch_words = 0, chorus_bypass_programs = 0;
+    const unsigned chorus_mask = (1u << SJ6_ROW_CHORUS_I) | (1u << SJ6_ROW_CHORUS_II);
     for (unsigned b = 0; b < BANK_COUNT; ++b) {
         for (unsigned p = 0; p < bank_start[b+1] - (unsigned)bank_start[b]; ++p) {
             sj6_record_reader reader;
@@ -315,6 +317,12 @@ static void check_bank(void)
             unsigned v = programs++ % 2;
             CHECK(engine_superj6_factory_load(v, &row));
             boundary();
+            int chorus_off = (row.present & chorus_mask) == chorus_mask &&
+                row.value[SJ6_ROW_CHORUS_I] == 0.f && row.value[SJ6_ROW_CHORUS_II] == 0.f;
+            CHECK(owner[v]->factory_chorus_bypass == chorus_off);
+            chorus_bypass_programs += (unsigned)chorus_off;
+            for (unsigned slot = SJ6_ROW_CHORUS_I; slot <= SJ6_ROW_CHORUS_II; ++slot)
+                if (row.present & (1u << slot)) ++chorus_switch_words;
             for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
                 bits = i == SJ6_ROW_RANGE ? 0x3f000000u : 0;
                 if (row.present & (1u << i)) {
@@ -328,7 +336,9 @@ static void check_bank(void)
     }
     printf("programs=%u authored_words=%u defaulted_pwm_words=%u authored_register_words=%u\n",
            programs, authored, defaulted, register_words);
-    CHECK(programs == 640 && authored == 4580 && defaulted == 2460);
+    printf("authored_chorus_switch_words=%u chorus_bypass_programs=%u\n",
+           chorus_switch_words, chorus_bypass_programs);
+    CHECK(programs == 640 && authored == 4580 && defaulted == 2460 && register_words == 640);
 }
 #endif
 int main(void)

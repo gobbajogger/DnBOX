@@ -39,7 +39,8 @@ X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8
         s1_part_init(&p->dsp.synthone);
         s1_part_bind_width(&p->dsp.synthone, original_chicago_fx2_compact_free_history(fx));
 #if X0X_SYNTHONE_PATCH
-        if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
+        if ((original_sound_edit_mask(cell) & S1_PATCH_MASK) || cell[26] == 'M')
+            s1_part_apply_cell(&p->dsp.synthone, cell, ext);
 #endif
         rc = ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_MIAMI)
@@ -65,7 +66,7 @@ X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8
             original_runtime_param(p, i, value) != ORIGINAL_RUNTIME_OK)
             return runtime_result(p, 0);
     }
-    if (cell[26]=='M')
+    if (original_master_edited(cell, ext))
         for(unsigned id=ORIGINAL_SYNTHONE_MASTER_VOLUME;id<=ORIGINAL_SYNTHONE_MASTER_MAKEUP;++id) {
             unsigned q=original_master_display(cell,ext,id);
             if(original_runtime_param(p,id,(float)q/127.f)!=ORIGINAL_RUNTIME_OK) return runtime_result(p,0);

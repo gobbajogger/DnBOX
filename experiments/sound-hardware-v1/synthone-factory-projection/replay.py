@@ -22,7 +22,7 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
-def compile_producers(build, out, crush_lfo, voice):
+def compile_producers(build, out, crush_lfo, voice, sub):
     commands = json.loads((build / 'factory-build-commands.json').read_text())
     cc = next(cmd.copy() for cmd in commands if any(a.endswith('/preset_audio.cpp') for a in cmd))
     cc[cc.index('-c')+1] = str(HERE / 'original.cpp')
@@ -39,6 +39,8 @@ def compile_producers(build, out, crush_lfo, voice):
              '-Iexperiments/original_synth', '-Iexperiments/wobble', '-Ifirmware/src',
              '-Ifirmware/src/app', '-Ifirmware/src/dsp', '-Ibuild/gen']
     flags.append('-DPROJECT_CRUSH_LFO='+str(int(crush_lfo)))
+    if sub:
+        flags.append('-DS1_PROJ_SUB=1')
     subprocess.run([os.environ.get('CC','cc'), *flags, HERE/'shipping.c', *ORIGINAL_SYNTH_UNITS,
                     *ORIGINAL_SYNTH_BACKENDS, '-Wl,--gc-sections', '-lm', '-o', out/'shipping'],
                    cwd=ROOT, check=True)
@@ -103,15 +105,18 @@ def main():
     parser.add_argument('--count', default=694, type=int)
     parser.add_argument('--crush-lfo', action='store_true', help='Include original parameter 58 on firmware with the crush LFO route')
     parser.add_argument('--voice', action='store_true', help='Also project the editable voice patch through the persisted firmware cell')
+    parser.add_argument('--sub', action='store_true', help='Include sub level, octave and waveform when projecting voice edits')
     parser.add_argument('--jobs', default=1, type=int, help='Render independent programs concurrently')
     args=parser.parse_args()
+    if args.sub and not args.voice:
+        parser.error('--sub requires --voice')
     if args.jobs < 1:
         parser.error('--jobs must be positive')
     assert 1 <= args.count <= 694
     build, out = args.factory_build.resolve(), args.output.resolve()
     out.mkdir(parents=True,exist_ok=True)
     cases = json.loads((build/'commands/ORIGINAL-PRESET-COMMANDS.json').read_text())['cases']
-    compile_producers(build, out, args.crush_lfo, args.voice)
+    compile_producers(build, out, args.crush_lfo, args.voice, args.sub)
     voice_ids = []
     if args.voice:
         voice_ids = [int(id_) for id_ in subprocess.check_output(

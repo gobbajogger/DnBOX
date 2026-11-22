@@ -38,6 +38,17 @@ static inline int original_sound_s1_master_id(unsigned id)
  * cell explicitly binds that row; historical project padding stays inert. */
 enum { S1_MASTER_EXT_SIZE=7 };
 float s1_master_control(unsigned slot,unsigned pot);
+/* In the extended format an opt-in voice edit can own this adjunct without
+ * enabling master processing. Old cells with only master controls remain v1. */
+static inline int original_master_edited(const uint8_t *cell, const uint8_t *ext)
+{
+#if X0X_SYNTHONE_PATCH
+    return cell[26] == 'M' && ext && (ext[0] & 1u);
+#else
+    (void)ext;
+    return cell[26] == 'M';
+#endif
+}
 int original_master_valid(const uint8_t *cell,const uint8_t *ext);
 unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id);
 int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value);
@@ -122,6 +133,8 @@ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsig
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value);
 #if X0X_SYNTHONE_PATCH
 int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position);
+int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, unsigned position);
+unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot);
 #endif
 uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);

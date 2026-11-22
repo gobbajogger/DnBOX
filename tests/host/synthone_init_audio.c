@@ -115,31 +115,65 @@ static void allocation_trace(const uint8_t cell[32])
 }
 
 #if X0X_SYNTHONE_PATCH
+/* Sub edits with zero level are acoustically inert, both for a factory
+ * INIT cell and for a legacy adjunct with authored master controls. */
+static void sub_bypass(void)
+{
+    for (unsigned master = 0; master < 2; ++master) {
+        uint8_t cell[32], extended[32], ext[S1_MASTER_EXT_SIZE] = {0}, upgraded[S1_MASTER_EXT_SIZE];
+        assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+        if (master) {
+            assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME, 66));
+            assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO, 93));
+        }
+        memcpy(extended, cell, sizeof extended);
+        memcpy(upgraded, ext, sizeof upgraded);
+        assert(original_sound_s1_set_extended(extended, upgraded, S1_PATCH_SUB_OCTAVE, 127));
+        assert(original_sound_s1_set_extended(extended, upgraded, S1_PATCH_SUB_SQUARE, 127));
+        assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_init_extended(&part_b, extended, upgraded, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        key(&part_a, 60, 105); key(&part_b, 60, 105);
+        for (unsigned block = 0; block < 320; ++block) {
+            if (block == 90) { key(&part_a, 67, 107); key(&part_b, 67, 107); }
+            if (block == 200) { key(&part_a, 60, 0); key(&part_b, 60, 0); }
+            float al[64], ar[64], bl[64], br[64];
+            assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
+            assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
+            assert(!memcmp(al, bl, sizeof al) && !memcmp(ar, br, sizeof ar));
+        }
+    }
+    puts("Synth One sub bypass: 40,960 stereo frames preserved across v1 and sub-only v2.");
+}
+
 /* Play identical notes on live production voices. Apply one native control to
  * A, retaining phase and both envelope histories. B remains the independent
  * control. Filter envelope parameters need nonzero depth to be audible. */
 static void patch_audio(void)
 {
-    const unsigned changed[] = {127,0,0,0,0,127,127,0,0,127,127,0,0};
+    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127};
     uint8_t cell[32];
     for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
         assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
         assert(original_sound_s1_set(cell, 4, 90)); /* filterADSRMix */
         assert(original_sound_s1_set(cell, 7, 30)); /* filterSustainLevel */
         assert(original_sound_s1_set(cell, 1, 90)); /* morph1Volume */
-        assert(original_runtime_init(&part_a, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
-        assert(original_runtime_init(&part_b, cell, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        uint8_t ext[S1_MASTER_EXT_SIZE] = {0};
+        if (slot == S1_PATCH_SUB_OCTAVE || slot == S1_PATCH_SUB_SQUARE)
+            assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 63));
+        assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_init_extended(&part_b, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
         key(&part_a, 60, 105); key(&part_b, 60, 105);
         float al[64], ar[64], bl[64], br[64];
         assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
         assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
         assert(!memcmp(al, bl, sizeof al));
         s1_dry_voice before = part_a.dsp.synthone.voice[0];
-        assert(original_sound_s1_set(cell, slot, changed[slot]));
+        assert(original_sound_s1_set_extended(cell, ext, slot, changed[slot]));
         assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
-        s1_part_apply_cell(&part_a.dsp.synthone, cell);
+        s1_part_apply_cell(&part_a.dsp.synthone, cell, ext);
         const s1_dry_voice *after = &part_a.dsp.synthone.voice[0];
-        assert(after->phase == before.phase && !memcmp(&after->amp, &before.amp, sizeof before.amp));
+        assert(after->phase == before.phase && after->sub.phase == before.sub.phase);
+        assert(!memcmp(&after->amp, &before.amp, sizeof before.amp));
         assert(!memcmp(&after->filter, &before.filter, sizeof before.filter));
         unsigned different = 0;
         for (unsigned block = 0; block < 320; ++block) {
@@ -325,6 +359,7 @@ int main(void)
 
     crush_patch();
 #if X0X_SYNTHONE_PATCH
+    sub_bypass();
     patch_audio();
 #endif
     uint8_t cell[32], legacy[32];

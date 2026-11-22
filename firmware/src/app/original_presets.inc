@@ -136,8 +136,9 @@ static void s1_patch_boundary(void)
             original_bass[v].status != ORIGINAL_RUNTIME_OK) continue;
         sound_t *sound = (sound_t *)mot_base_snd;
         uint8_t *cell = sound->v[T_303][v];
-        if (!original_sound_s1_set(cell, s1_edit[v].slot, s1_edit[v].position)) continue;
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell);
+        uint8_t *ext = sound->v[T_303][NBASS+v];
+        if (!original_sound_s1_set_extended(cell, ext, s1_edit[v].slot, s1_edit[v].position)) continue;
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, cell, ext);
         bass_tag_set(sound, v, ORIGINAL_SOUND_SYNTHONE, bass_named_preset[v], 1);
     }
 }
@@ -269,7 +270,8 @@ static void note_lock_restore(int v)
     note_lock_applied[v]=0;
 #if X0X_SYNTHONE_PATCH
     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v]);
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, mot_base_snd->v[T_303][v],
+                           mot_base_snd->v[T_303][NBASS+v]);
 #endif
     for(unsigned i=0;i<n;i++)if(!original_sound_is_performance(original_bass[v].kind,i))apply_base(T_303,v,(int)i);
     for(int i=0;i<MX_NPARAMS;i++)apply_base(T_MIX,PART_303A+v,i);
@@ -286,7 +288,7 @@ static void note_lock_onset(int v)
     if(!l) { if(note_lock_applied[v])note_lock_restore(v); return; }
 #if X0X_SYNTHONE_PATCH
     if (original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE)
-        s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val);
+        s1_part_apply_cell(&original_bass[v].dsp.synthone, l->val, l->val+BASS_NOTE_USED);
 #endif
     unsigned n=original_sound_count(original_bass[v].kind);
     for(unsigned i=0;i<n;i++) {

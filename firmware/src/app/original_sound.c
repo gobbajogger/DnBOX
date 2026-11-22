@@ -336,20 +336,49 @@ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsig
 int original_master_valid(const uint8_t *cell,const uint8_t *ext)
 {
     if (cell[26]!='M') return 1;
-    if (!ext || ext[0]!=1u) return 0;
+    if (!ext) return 0;
+#if X0X_SYNTHONE_PATCH
+    /* V2 uses high bits of the first two master values for octave and
+     * square. Its two-bit format marker leaves a single reserved-bit error
+     * invalid in v1. Byte zero retains bit 0 for master edit presence. */
+    if (ext[3] & ext[4] & 128u) {
+        for (unsigned j=1; j<S1_MASTER_EXT_SIZE; ++j) {
+            if (j >= 5 && (ext[j] & 128u)) return 0;
+            if (!(ext[0] & 1u) && (ext[j] & 127u)) return 0;
+        }
+        return 1;
+    }
+#endif
+    if (ext[0]!=1u) return 0;
     for(unsigned j=1;j<S1_MASTER_EXT_SIZE;++j) if(ext[j]>127u) return 0;
     return 1;
 }
 unsigned original_master_display(const uint8_t *cell,const uint8_t *ext,unsigned id)
 {
     if (!original_sound_s1_master_id(id)) return 0;
-    return cell[26]=='M' ? ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME] : original_sound_synthone_params[id].def;
+    if (!original_master_edited(cell, ext)) return original_sound_synthone_params[id].def;
+#if X0X_SYNTHONE_PATCH
+    return ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME] & 127u;
+#else
+    return ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME];
+#endif
 }
 int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned value)
 {
     if (cell[29]!=ORIGINAL_SOUND_SYNTHONE || !original_sound_s1_master_id(id))
         return original_sound_set(cell,id,value);
     if (id>=ORIGINAL_SYNTHONE_NPARAMS || value>127 || !ext || !original_sound_valid(cell) || !original_master_valid(cell,ext)) return 0;
+#if X0X_SYNTHONE_PATCH
+    if (!original_master_edited(cell, ext)) {
+        if (cell[26] != 'M') memset(ext, 0, S1_MASTER_EXT_SIZE);
+        ext[0] |= 1u;
+        for (unsigned j=0; j<S1_MASTER_EXT_SIZE-1; ++j)
+            ext[1+j]=(ext[1+j]&128u)|original_sound_synthone_params[ORIGINAL_SYNTHONE_MASTER_VOLUME+j].def;
+        cell[26]='M';
+    }
+    const unsigned index = 1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME;
+    ext[index]=(ext[index]&128u)|(uint8_t)value;
+#else
     if (cell[26]!='M') {
         ext[0]=1;
         for(unsigned j=0;j<S1_MASTER_EXT_SIZE-1;++j)
@@ -357,6 +386,7 @@ int original_sound_set_extended(uint8_t *cell,uint8_t *ext,unsigned id,unsigned 
         cell[26]='M';
     }
     ext[1+id-ORIGINAL_SYNTHONE_MASTER_VOLUME]=(uint8_t)value;
+#endif
     return 1;
 }
 int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, unsigned value)
@@ -379,11 +409,40 @@ int original_sound_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, u
 #if X0X_SYNTHONE_PATCH
 int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, unsigned position)
 {
-    if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS ||
+    if (slot >= S1_PATCH_CELL_COUNT || position > S1_PATCH_STEPS ||
         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
     unsigned byte = S1_PATCH_FIRST_BYTE + slot;
     cell[byte] = (cell[byte] & 128u) | (uint8_t)position;
     original_sound_put_mask(cell, original_sound_edit_mask(cell) | (UINT32_C(1) << byte));
+    return 1;
+}
+
+unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot)
+{
+    if (cell[26] != 'M' || !ext || !(ext[3] & ext[4] & 128u)) return 0;
+    if (slot == S1_PATCH_SUB_LEVEL) return ext[0] >> 1;
+    if (slot == S1_PATCH_SUB_OCTAVE) return (ext[1] & 128u) ? 127u : 0u;
+    if (slot == S1_PATCH_SUB_SQUARE) return (ext[2] & 128u) ? 127u : 0u;
+    return 0;
+}
+
+int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, unsigned position)
+{
+    if (slot < S1_PATCH_CELL_COUNT) return original_sound_s1_set(cell, slot, position);
+    if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS || !ext ||
+        !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE ||
+        !original_master_valid(cell, ext)) return 0;
+    if (cell[26] != 'M') {
+        memset(ext, 0, S1_MASTER_EXT_SIZE);
+        cell[26] = 'M';
+    }
+    ext[3] |= 128u;
+    ext[4] |= 128u;
+    if (slot == S1_PATCH_SUB_LEVEL) ext[0] = (ext[0] & 1u) | (uint8_t)(position << 1);
+    else {
+        const unsigned index = slot == S1_PATCH_SUB_OCTAVE ? 1u : 2u;
+        ext[index] = (ext[index] & 127u) | (position >= 64u ? 128u : 0u);
+    }
     return 1;
 }
 #endif

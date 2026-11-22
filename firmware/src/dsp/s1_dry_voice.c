@@ -6,7 +6,11 @@
 /* The oscillator and cascaded low-pass stages derive from DnBOX primitives.
  * The response calibration uses only original input/output observations. */
 _Static_assert(sizeof(float) == 4, "binary32 storage required");
+#if X0X_SYNTHONE_PATCH
+_Static_assert(sizeof(s1_dry_voice) == 144, "bounded editable single-voice state changed");
+#else
 _Static_assert(sizeof(s1_dry_voice) == 124, "bounded single-voice state changed");
+#endif
 
 static int finite_float(float x)
 {
@@ -69,6 +73,9 @@ void s1_dry_frozen_controls(s1_dry_controls *p)
         {0.05f, 0.005f, 0.8f, 0.05f},
         {0.05f, 0.05f, 1.0f, 0.5f},
         2000.0f, 0.9f, 0.0f, 1.0f, 0.5f
+#if X0X_SYNTHONE_PATCH
+        , 0.f, 0.f, 0.f
+#endif
     };
 }
 
@@ -82,6 +89,11 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
         !range(controls->filter_depth, 0.0f, 1.2f) ||
         !range(controls->oscillator1_level, 0.0f, 1.0f) ||
         !range(controls->balance, 0.0f, 1.0f)) return S1_DRY_RANGE;
+#if X0X_SYNTHONE_PATCH
+    if (!range(controls->sub_level, 0.f, 1.f) ||
+        !range(controls->sub_extra_octave, 0.f, 1.f) ||
+        !range(controls->sub_square, 0.f, 1.f)) return S1_DRY_RANGE;
+#endif
     s1_dry_prepared next = {0};
     next.cutoff_hz = controls->cutoff_hz;
     next.resonance = controls->resonance;
@@ -92,10 +104,25 @@ int s1_dry_configure(s1_dry_voice *voice, const s1_dry_controls *controls)
     prepare_adsr(&next.filter, &controls->filter);
     prepare_filter(&next, s1_dry_cutoff(controls->cutoff_hz,
         controls->filter_depth, voice->filter.level));
+#if X0X_SYNTHONE_PATCH
+    next.sub_level = controls->sub_level;
+    next.sub_extra_octave = controls->sub_extra_octave >= 0.5f;
+    next.sub_square = controls->sub_square >= 0.5f;
+    s1_sub_pitch(&voice->sub, voice->sub_base_hz, 1.f, next.sub_extra_octave);
+#endif
     voice->prepared = next;
     voice->configured = 1;
     return S1_DRY_OK;
 }
+
+#if X0X_SYNTHONE_PATCH
+void s1_dry_pitch(s1_dry_voice *voice, float frequency_hz)
+{
+    voice->phase_increment = frequency_hz / S1_DRY_SAMPLE_RATE;
+    voice->sub_base_hz = frequency_hz;
+    s1_sub_pitch(&voice->sub, frequency_hz, 1.f, voice->prepared.sub_extra_octave);
+}
+#endif
 
 int s1_dry_start(s1_dry_voice *voice, float frequency_hz,
                  unsigned velocity, float phase)
@@ -109,7 +136,11 @@ int s1_dry_start(s1_dry_voice *voice, float frequency_hz,
     float fraction = (float)velocity / 127.0f;
     voice->velocity_squared = fraction * fraction;
     voice->phase = phase;
+#if X0X_SYNTHONE_PATCH
+    s1_dry_pitch(voice, frequency_hz);
+#else
     voice->phase_increment = frequency_hz / S1_DRY_SAMPLE_RATE;
+#endif
     voice->gate = voice->started = 1;
     return S1_DRY_OK;
 }
@@ -172,6 +203,12 @@ static __attribute__((noinline)) float oscillator_filter(s1_dry_voice *voice, fl
         oscillator -= 2.f * (4096.f * voice->phase - 4095.f);
     float excitation = oscillator * component_gain;
     excitation *= voice->velocity_squared;
+#if X0X_SYNTHONE_PATCH
+    /* The source clocks a silent sub too, so raising its level preserves phase. */
+    const float sub = s1_sub_sample(&voice->sub, voice->velocity_squared,
+                                     voice->prepared.sub_level, voice->prepared.sub_square);
+    if (voice->prepared.sub_level != 0.f) excitation += sub;
+#endif
     excitation *= amp;
     /* The oscillator and envelopes advance once per output frame. */
     float first = filter_substep(voice, excitation);

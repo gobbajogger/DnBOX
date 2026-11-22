@@ -71,7 +71,10 @@ static const struct {
     S1_FIELD(26, "AMP ATTACK", amp.attack_s, .0005f, 2, X0X_U_S),
     S1_FIELD(27, "AMP DECAY", amp.decay_s, .005f, 2, X0X_U_S),
     S1_FIELD(28, "AMP SUSTAIN", amp.sustain, 0, 1, X0X_U_PCT),
-    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S)
+    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S),
+    S1_FIELD(7, "SUB LEVEL", sub_level, 0, 1, X0X_U_PCT),
+    S1_FIELD(8, "SUB OCTAVE", sub_extra_octave, 0, 1, X0X_U_PCT),
+    S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT)
 #undef S1_FIELD
 };
 
@@ -87,6 +90,7 @@ int s1_patch_slot(unsigned id)
 
 float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
 {
+    if (d->factory_id == 8u || d->factory_id == 9u) return position >= 64u ? 1.f : 0.f;
     if (position >= S1_PATCH_STEPS) return d->maximum;
     return d->minimum + (d->maximum - d->minimum) * ((float)position / S1_PATCH_STEPS);
 }
@@ -97,17 +101,21 @@ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
     return *(const float *)(base + patch_parameters[slot].offset);
 }
 
-void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32])
+void s1_part_apply_cell(s1_dry_part *part, const uint8_t cell[32], const uint8_t *ext)
 {
     s1_dry_controls next;
     s1_dry_frozen_controls(&next);
     uint32_t mask = original_sound_edit_mask(cell);
-    for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+    for (unsigned i = 0; i < S1_PATCH_CELL_COUNT; ++i) {
         unsigned byte = S1_PATCH_FIRST_BYTE + i;
         if (mask & (UINT32_C(1) << byte)) {
             float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
             *field = s1_patch_physical(s1_patch_at(i), cell[byte] & 127u);
         }
+    }
+    for (unsigned i = S1_PATCH_SUB_LEVEL; i < S1_PATCH_COUNT; ++i) {
+        float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
+        *field = s1_patch_physical(s1_patch_at(i), original_sound_s1_sub_position(cell, ext, i));
     }
     if (!memcmp(&next, &part->patch, sizeof next)) return;
     part->patch = next;
@@ -222,8 +230,13 @@ int s1_part_param(s1_dry_part *part, unsigned id, float value)
     if (id == 0) {
         part->bend = value;
         for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
-            if (part->voice[i].started)
+            if (part->voice[i].started) {
+#if X0X_SYNTHONE_PATCH
+                s1_dry_pitch(&part->voice[i], pitch_hz(part, part->note[i]));
+#else
                 part->voice[i].phase_increment = pitch_hz(part, part->note[i]) / S1_DRY_SAMPLE_RATE;
+#endif
+            }
         }
     } else {
         part->damper = value >= 0.5f;
@@ -273,6 +286,7 @@ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
     s1_dry_voice *voice = &part->voice[slot];
 #if X0X_SYNTHONE_PATCH
     const s1_dry_controls *controls = &part->patch;
+    const uint32_t sub_phase = voice->sub.phase;
 #else
     s1_dry_controls frozen;
     s1_dry_frozen_controls(&frozen);
@@ -282,6 +296,9 @@ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity)
     if (s1_dry_configure(voice, controls) != S1_DRY_OK ||
         s1_dry_start(voice, pitch_hz(part, key), velocity, 0.0f) != S1_DRY_OK)
         return 0;
+#if X0X_SYNTHONE_PATCH
+    voice->sub.phase = sub_phase;
+#endif
     part->next = (slot + 1u) % S1_CORE_VOICES;
     part->note[slot] = (uint8_t)key;
     part->down[slot] = 1;

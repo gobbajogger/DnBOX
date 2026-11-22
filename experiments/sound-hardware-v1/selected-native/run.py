@@ -75,6 +75,7 @@ def prepare_flash(args, objects):
         "elf_sha256": sha(args.elf.read_bytes()),
         "stock_seed_sha256": sha(stock),
         "project_objects_sha256": sha(objects),
+        "synthone_sub_seed": args.synthone_sub,
         "source_sample_sha256": sha(sample.read_bytes()),
         "slot_adpcm_sha256": sha(data),
         "initial_flash_sha256": sha(flash),
@@ -155,17 +156,24 @@ def main():
     parts = parser.add_mutually_exclusive_group()
     parts.add_argument("--kit", choices=("909", "808"), help="play only the selected kit")
     parts.add_argument("--ensemble", action="store_true", help="play both kits, both basses and BREAK")
+    parser.add_argument("--synthone-sub", action="store_true",
+                        help="enable the full-level sine sub oscillator on selected Synth One owners")
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--stage-only", action="store_true", help="emit a fresh seed for another scene")
     action.add_argument("--rescore", action="store_true", help="read a completed shot in OUTPUT")
     args = parser.parse_args()
+    if args.synthone_sub and (not args.ensemble or 2 not in (args.bass_a, args.bass_b)):
+        parser.error("--synthone-sub requires an ensemble with a Synth One owner")
     kit = 2 if args.ensemble else {None: -1, "909": 0, "808": 1}[args.kit]
     out = args.output.resolve()
     objects = out / "save-objects.bin"
     with tempfile.TemporaryDirectory() as tmp:
         rebuilt = Path(tmp) / "save-objects.bin"
-        subprocess.run([args.project_builder.resolve(), str(args.bass_a), str(args.bass_b),
-                        str(kit), rebuilt], check=True)
+        command = [args.project_builder.resolve(), str(args.bass_a), str(args.bass_b),
+                   str(kit), rebuilt]
+        if args.synthone_sub:
+            command.append("--synthone-sub")
+        subprocess.run(command, check=True)
         project = rebuilt.read_bytes()
     if args.rescore:
         if objects.read_bytes() != project:

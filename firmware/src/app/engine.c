@@ -930,7 +930,7 @@ static void apply_master_base(int v,const uint8_t *cell,const uint8_t *ext,unsig
 {
     unsigned slot=id-ORIGINAL_SYNTHONE_MASTER_VOLUME;
     unsigned q=original_master_display(cell,ext,id);
-    if (cell[26]=='M') (void)original_runtime_param(&original_bass[v],id,(float)q/127.f);
+    if (original_master_edited(cell, ext)) (void)original_runtime_param(&original_bass[v],id,(float)q/127.f);
     else s1_master_release(&original_bass[v].dsp.synthone.master,slot,q);
 }
 static void apply_base(int t, int v, int i)

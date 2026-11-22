@@ -14,7 +14,11 @@ enum { CONTROL_COUNT = 21, LAST_CONTROL = ORIGINAL_SYNTHONE_MASTER_MAKEUP };
 #endif
 
 #if X0X_SYNTHONE_PATCH
+#ifdef S1_PROJ_SUB
 enum { VOICE_COUNT = S1_PATCH_COUNT };
+#else
+enum { VOICE_COUNT = S1_PATCH_CELL_COUNT };
+#endif
 #else
 enum { VOICE_COUNT = 0 };
 #endif
@@ -85,7 +89,7 @@ int main(int argc, char **argv)
             if (fabsf(target - s1_patch_physical(d, q)) < fabsf(target - s1_patch_physical(d, best)))
                 best = q;
         voice_positions[slot] = (uint8_t)best;
-        assert(original_sound_s1_set(cell, slot, best));
+        assert(original_sound_s1_set_extended(cell, ext, slot, best));
     }
 #endif
     assert(fclose(targets) == 0);

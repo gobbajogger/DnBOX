@@ -57,8 +57,52 @@ static void note_lock(void)
     block();
 }
 
+static void sub_extension_cells(void)
+{
+    uint8_t cell[32], ext[S1_MASTER_EXT_SIZE] = {0};
+    assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+    for (unsigned id = ORIGINAL_SYNTHONE_MASTER_VOLUME; id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; ++id)
+        assert(original_sound_set_extended(cell, ext, id, 20 + id));
+    assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_LFO2_LEVEL, 93));
+    const uint8_t expected[S1_MASTER_EXT_SIZE] = {1, 37, 38, 39, 40, 41, 42};
+    assert(!memcmp(ext, expected, sizeof ext));
+    assert(original_master_valid(cell, ext) && original_master_edited(cell, ext));
+    assert(!original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL));
+    assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 86));
+    assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_OCTAVE, 127));
+    assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_SQUARE, 127));
+    assert(original_master_valid(cell, ext) && original_master_edited(cell, ext));
+    for (unsigned id = ORIGINAL_SYNTHONE_MASTER_VOLUME; id <= ORIGINAL_SYNTHONE_MASTER_MAKEUP; ++id)
+        assert(original_master_display(cell, ext, id) == 20 + id);
+    assert(original_sound_s1_display(cell, ORIGINAL_SYNTHONE_LFO2_LEVEL) == 93);
+    assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO, 72));
+    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
+    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_OCTAVE) == 127);
+    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
+    assert(original_master_display(cell, ext, ORIGINAL_SYNTHONE_MASTER_RATIO) == 72);
+    uint8_t corrupt[S1_MASTER_EXT_SIZE];
+    memcpy(corrupt, ext, sizeof corrupt);
+    corrupt[5] |= 128u;
+    assert(!original_master_valid(cell, corrupt));
+    assert(!original_sound_s1_set_extended(cell, corrupt, S1_PATCH_SUB_LEVEL, 1));
+    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_LEVEL) == 86);
+
+    /* An opted-in sub-only cell leaves the ordinary master bypassed. A later
+     * first master edit starts from the legacy defaults, keeping the sub. */
+    assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
+    memset(ext, 255, sizeof ext);
+    assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_SQUARE, 127));
+    assert(original_master_valid(cell, ext) && !original_master_edited(cell, ext));
+    assert(original_master_display(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME) == 32);
+    assert(original_sound_set_extended(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME, 64));
+    assert(original_master_valid(cell, ext) && original_master_edited(cell, ext));
+    assert(original_master_display(cell, ext, ORIGINAL_SYNTHONE_MASTER_VOLUME) == 64);
+    assert(original_sound_s1_sub_position(cell, ext, S1_PATCH_SUB_SQUARE) == 127);
+}
+
 int main(void)
 {
+    sub_extension_cells();
     boot();
     select_patch(0, ORIGINAL_SOUND_SYNTHONE);
     select_patch(1, ORIGINAL_SOUND_SYNTHONE);
@@ -72,7 +116,7 @@ int main(void)
     assert(!s1_patch_at(S1_PATCH_COUNT));
     assert(!engine_bass_preset_edited(0) && !engine_bass_preset_edited(1));
 
-    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
+    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,7,8,9};
     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
         const s1_patch_descriptor *d = s1_patch_at(i);
@@ -90,7 +134,8 @@ int main(void)
             assert(engine_s1_patch_set(0, a.revision, ids[i], q) == S1_EDIT_BUSY);
             block();
             s1_patch_value actual = read_patch(0, ids[i]);
-            assert(actual.physical == s1_patch_physical(d, q) && actual.position == q);
+            unsigned position = (ids[i] == 8u || ids[i] == 9u) ? (q >= 64u ? 127u : 0u) : q;
+            assert(actual.physical == s1_patch_physical(d, q) && actual.position == position);
             assert(read_patch(1, ids[i]).physical == other.physical);
             assert(!memcmp(original.v[T_303][1], proj.sound.v[T_303][1], ORIGINAL_SOUND_BYTES));
             assert(!memcmp(&original.bass[1], &proj.sound.bass[1], sizeof original.bass[1]));
@@ -126,5 +171,5 @@ int main(void)
     assert(!engine_s1_patch_read(1, 16, &b));
     assert(engine_s1_patch_set(1, b.revision, 16, 127) == S1_EDIT_REJECTED);
     note_lock();
-    puts("Synth One INIT patch: 13 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
+    puts("Synth One INIT patch: 16 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
 }

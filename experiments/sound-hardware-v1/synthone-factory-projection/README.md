@@ -22,8 +22,11 @@ Generate the verified source closure and factory command pack following [the ori
 OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT
 OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT_22 --crush-lfo
 OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT_VOICE --crush-lfo --voice --jobs 5
+OPENBLAS_NUM_THREADS=1 python experiments/sound-hardware-v1/synthone-factory-projection/replay.py FACTORY_BUILD OUTPUT_SUB --crush-lfo --voice --sub --jobs 5
 ```
 
 The optional voice run takes its ordered factory IDs from the compiled firmware descriptors. It chooses the closest physical edit for each original value, writes the production sound cell, cold-initializes a normal runtime owner, and checks the applied value. It uses the same 132,300-frame stimulus, original renderer, and stereo acceptance limits as the effects-only comparison. Each row lists effects positions first, followed by voice positions in the summary's `projected_voice_ids` order. The parallel worker count changes only host render scheduling. Rows are written in factory order.
 
 [Summary and input digests](summary.json) · [694 per-program records, compressed JSON Lines](rows.jsonl.gz). Each record includes the original bank and index, the submitted panel positions, both stereo PCM SHA-256 hashes, and the separate level and spectral results for each channel.
+
+The sub option applies the three additional persisted controls. [Sub oscillator measurements](../synthone-sub/README.md).

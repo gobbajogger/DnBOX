@@ -10,10 +10,16 @@
 
 int main(int argc, char **argv)
 {
-    assert(argc == 5);
+    assert(argc == 5 || (argc == 6 && !strcmp(argv[5], "--synthone-sub")));
+    const int sub = argc == 6;
+#if !X0X_SYNTHONE_PATCH
+    assert(!sub);
+#endif
     const unsigned kind[2] = {(unsigned)atoi(argv[1]), (unsigned)atoi(argv[2])};
     const int kit = atoi(argv[3]); /* -1 bass/BREAK, 0/1 isolated kit, 2 all parts. */
     assert(kit >= -1 && kit <= 2);
+    assert(!sub || (kit == 2 && (kind[0] == ORIGINAL_SOUND_SYNTHONE ||
+                                kind[1] == ORIGINAL_SOUND_SYNTHONE)));
     const int notes = kit < 0 || kit == 2;
     boot();
     pattern_t *pat = &proj.pat[0];
@@ -24,6 +30,19 @@ int main(int argc, char **argv)
             engine_render(buffer, 256);
         assert(!engine_bass_preset_pending(voice));
         assert(engine_bass_bank(voice) == (int)kind[voice]);
+#if X0X_SYNTHONE_PATCH
+        if (sub && kind[voice] == ORIGINAL_SOUND_SYNTHONE) {
+            unsigned id = s1_patch_at(S1_PATCH_SUB_LEVEL)->factory_id;
+            s1_patch_value value;
+            assert(engine_s1_patch_read(voice, id, &value));
+            assert(engine_s1_patch_set(voice, value.revision, id, S1_PATCH_STEPS) == S1_EDIT_QUEUED);
+            for (int i = 0; i < 16 && engine_s1_patch_pending(); ++i)
+                engine_render(buffer, 256);
+            assert(!engine_s1_patch_pending());
+            assert(engine_s1_patch_read(voice, id, &value) &&
+                   value.position == S1_PATCH_STEPS && value.physical > 0.f);
+        }
+#endif
 
         bpart_t *part = &pat->bass[voice];
         part->len = 16;
