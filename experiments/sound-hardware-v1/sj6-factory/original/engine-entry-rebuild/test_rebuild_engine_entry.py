@@ -53,6 +53,24 @@ class EngineEntryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             runner.macho_tables(bytes(len(data)))
 
+    def test_chained_stub_requires_pointer_in_page_chain(self):
+        data, stub = make_test_image()
+        data = bytearray(data)
+        struct.pack_into("<3I", data, 0xc00, 0x90000010, 0xf9461210, 0xd61f0200)
+        struct.pack_into("<Q", data, 0xc18, 2 << 51)
+        struct.pack_into("<Q", data, 0xc20, 1 << 63)
+        struct.pack_into("<7I", data, 0xd00, 0, 28, 60, 64, 1, 1, 0)
+        struct.pack_into("<2I", data, 0xd1c, 1, 8)
+        struct.pack_into("<IHHQIHH", data, 0xd24, 24, 4096, 6, 0, 0, 1, 0xc18)
+        struct.pack_into("<I", data, 0xf70, 0xc0000000)
+        data[0xd40:0xd4b] = b"_test_bind\0"
+        tables = list(runner.macho_tables(data))
+        tables[4] = (0xd00, 0x80)
+        self.assertEqual(runner.import_at(data, tables, stub), "_test_bind")
+        struct.pack_into("<Q", data, 0xc18, 0)
+        with self.assertRaisesRegex(ValueError, "not an on-chain bind"):
+            runner.import_at(data, tables, stub)
+
     @unittest.skipUnless(importlib.util.find_spec("unicorn"), "Unicorn not available")
     def test_synthetic_exec_stops_at_import(self):
         data, stub = make_test_image()

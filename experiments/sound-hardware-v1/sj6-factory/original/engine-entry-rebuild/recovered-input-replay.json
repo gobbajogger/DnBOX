@@ -1,0 +1,89 @@
+{
+  "ipa": {
+    "complete_graph_instances": 0,
+    "original_stereo_captures": 0,
+    "qualified_s4_pairs": 0,
+    "factory_stimulus": {
+      "uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+      "record_sha256": "edefa7b42dc0359c9f1c0a63dcebe82da138f6f8fb11924b42e94f4e67535bb6",
+      "release_item_sha256": "91210d3749ddb60ec6c5a561227a0badba6301c804d60c651218f1d40aaefce7",
+      "release_bank_uuid": "3BEFC062-9432-499D-92A4-B6C76C892910",
+      "bank_identity": {
+        "factory_bank_count": 12,
+        "factory_program_count": 640,
+        "authored_control_words": 90549,
+        "audit_sha256": "f77beb30c07ffc6b66cdc4be8723bdcde5cc81e4fb477693bad3ebff6753e37c"
+      },
+      "sample_rate": 44100,
+      "capture_frames": 132300,
+      "events": 8
+    },
+    "status": "BLOCKED_AT_REAL_FRAMEWORK_IMPORT",
+    "initializer": "0x100059aec",
+    "call_site": "0x100059b14",
+    "stub": "0x1005d762c",
+    "import": "_$s10Foundation4UUIDVMa",
+    "executed_original_instructions": 11,
+    "exit": 2
+  },
+  "au": {
+    "complete_graph_instances": 0,
+    "original_stereo_captures": 0,
+    "qualified_s4_pairs": 0,
+    "factory_stimulus": {
+      "uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+      "record_sha256": "d7281f4528a3cfd66ba72784d8b2f1744cfbc5752f7191b69492a29a256dc791",
+      "sample_rate": 44100,
+      "capture_frames": 132300,
+      "events": 8
+    },
+    "status": "BLOCKED_AT_REAL_FRAMEWORK_IMPORT",
+    "initializer": "0x100059aec",
+    "call_site": "0x100059b14",
+    "stub": "0x1005d762c",
+    "import": "_$s10Foundation4UUIDVMa",
+    "executed_original_instructions": 11,
+    "exit": 2
+  },
+  "direct": {
+    "authenticated_stimulus_uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+    "preset_applied": false,
+    "complete_graph_instances": 0,
+    "original_stereo_captures": 0,
+    "qualified_s4_pairs": 0,
+    "routes": [
+      {
+        "entry": "0x1002af36c",
+        "call_site": "0x1002af398",
+        "stub": "0x1005d9dec",
+        "import": "_swift_getSingletonMetadata",
+        "executed_instructions": 10,
+        "receiver": "metadata request zero"
+      },
+      {
+        "entry": "0x1002b07d8",
+        "call_site": "0x1002b0808",
+        "stub": "0x1005d79bc",
+        "import": "_$s8Dispatch0A13WorkItemFlagsVMa",
+        "executed_instructions": 13,
+        "receiver": "placeholder"
+      }
+    ],
+    "exit": 2
+  },
+  "bounded_replay": {
+    "original_au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+    "unicorn_version": "2.1.4",
+    "scenes": {
+      "original-chorus-mode1-mix0-start1.f32le-stereo.private.pcm": "91c0d1714393d7bae29b14b259af99290c99383d620846a10bc569bd4fcf50f7",
+      "original-chorus-mode1-mix1-start0.f32le-stereo.private.pcm": "91c0d1714393d7bae29b14b259af99290c99383d620846a10bc569bd4fcf50f7",
+      "original-chorus-mode1-mix1-start1.f32le-stereo.private.pcm": "e653e0b415a812fe1540d4966afccbdcca5030573aea0157377d48ada19c35b4",
+      "original-chorus-mode2-mix1-start1.f32le-stereo.private.pcm": "7a942b0dcbda97058afd41b725d5b0fe8f751ac323146bb05687ea93f5b9c4cb",
+      "original-chorus-mode3-mix1-start1.f32le-stereo.private.pcm": "761a38c63404a8c6ab7d4e08c1b6b78ec9887758d5bb8a18729413f782ad4237",
+      "original-sampler-synthetic-C4-v100.f32le-stereo.private.pcm": "99224d97daf82878b8fa39a6d6e4d6dabffecabf9f7bacff670cde7c580187b7",
+      "original-synth-default-C4-v100.f32le-stereo.private.pcm": "237c56e1af64427c0145a75352a2de0645717e05a637384db3bda2717f1997e1"
+    },
+    "matches_prior_components": true,
+    "complete_preset_renders": 0
+  }
+}

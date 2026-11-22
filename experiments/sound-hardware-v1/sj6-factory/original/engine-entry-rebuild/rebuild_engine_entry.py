@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 import struct
 import sys
-from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 IPA_RECOVERY_SHA = "3cc86adee1b4b8a0516306f02d6ffeb2e828144565a824e75624212998366592"
@@ -50,7 +49,7 @@ def macho_tables(data):
         raise ValueError("Expected a 64-bit ARM64 Mach-O")
     if 32 + commands_size > len(data):
         raise ValueError("Truncated Mach-O load commands")
-    segments, stub_section, symbols, indirect = [], None, None, None
+    segments, stub_section, symbols, indirect, fixups = [], None, None, None, None
     offset = 32
     for _ in range(count):
         command, size = struct.unpack_from("<2I", data, offset)
@@ -74,20 +73,92 @@ def macho_tables(data):
             symbols = struct.unpack_from("<4I", data, offset + 8)
         elif command == 0xB:
             indirect = struct.unpack_from("<2I", data, offset + 56)
+        elif command == 0x80000034:
+            fixups = struct.unpack_from("<2I", data, offset + 8)
         offset += size
     if not segments or stub_section is None or symbols is None or indirect is None:
         raise ValueError("Missing Mach-O segments, stubs, or symbol tables")
-    return segments, stub_section, symbols, indirect
+    return segments, stub_section, symbols, indirect, fixups
+
+
+def chained_import(data, segments, fixups, address):
+    def locate(guest, length):
+        for start, _, offset, size, _ in segments:
+            if start <= guest and guest + length <= start + size:
+                return start, offset, size
+        raise ValueError("Chained pointer or stub is outside file-backed segments")
+
+    start, offset, _ = locate(address, 12)
+    adrp, ldr, branch = struct.unpack_from("<3I", data, offset + address - start)
+    if adrp & 0x9F00001F != 0x90000010 or ldr & 0xFFC003FF != 0xF9400210 or branch != 0xD61F0200:
+        raise ValueError("Unsupported chained stub instructions")
+    imm = ((adrp >> 5) & 0x7FFFF) * 4 + ((adrp >> 29) & 3)
+    if imm & (1 << 20):
+        imm -= 1 << 21
+    pointer = (address & ~0xFFF) + (imm << 12) + ((ldr >> 10) & 0xFFF) * 8
+    start, offset, size = locate(pointer, 8)
+    chain = chained_pointer(data, segments[0][0], start, offset, size, pointer, fixups)
+    return chain
+
+
+def chained_pointer(data, image_base, start, file_offset, file_size, pointer, fixups):
+    base, size = fixups
+    if base + size > len(data) or size < 28:
+        raise ValueError("Invalid chained fixup extent")
+    version, starts, imports, strings, count, entry_format, string_format = struct.unpack_from("<7I", data, base)
+    if (version, entry_format, string_format) != (0, 1, 0):
+        raise ValueError("Unsupported chained import table formats")
+    if not 28 <= starts <= imports - 4 <= strings - 4 < size - 4 or count > (strings - imports) // 4:
+        raise ValueError("Invalid chained import table offsets")
+    seg_count, = struct.unpack_from("<I", data, base + starts)
+    if starts + 4 + seg_count * 4 > imports:
+        raise ValueError("Truncated chained segment table")
+    for i in range(seg_count):
+        entry, = struct.unpack_from("<I", data, base + starts + 4 + 4 * i)
+        if not entry:
+            continue
+        segment = starts + entry
+        if segment + 22 > imports:
+            raise ValueError("Truncated chained segment header")
+        extent, page_size, fmt, vm_offset, _, pages = struct.unpack_from("<IHHQIH", data, base + segment)
+        if image_base + vm_offset != start:
+            continue
+        if fmt != 6 or not page_size or segment + extent > imports or 22 + 2 * pages > extent:
+            raise ValueError("Unsupported chained segment pointer format or extent")
+        page, displacement = divmod(pointer - start, page_size)
+        if page >= pages:
+            break
+        head, = struct.unpack_from("<H", data, base + segment + 22 + page * 2)
+        if head >= 0x8000:
+            break
+        page_base = page * page_size
+        while head <= displacement and head + 8 <= min(page_size, file_size - page_base):
+            word, = struct.unpack_from("<Q", data, file_offset + page_base + head)
+            if head == displacement:
+                ordinal = word & 0xFFFFFF
+                if not word >> 63 or ordinal >= count:
+                    raise ValueError("Invalid chained bind")
+                item, = struct.unpack_from("<I", data, base + imports + 4 * ordinal)
+                name = base + strings + (item >> 9)
+                return data[name:data.index(0, name, base + size)].decode()
+            stride = ((word >> 51) & 0xFFF) * 4
+            if not stride:
+                break
+            head += stride
+        break
+    raise ValueError("Stub pointer is not an on-chain bind")
 
 
 def import_at(data, tables, address):
-    _, (start, length, first, stride), (symoff, count, stroff, strsize), (indoff, indcount) = tables
+    segments, (start, length, first, stride), (symoff, count, stroff, strsize), (indoff, indcount), fixups = tables
     if not stride or not start <= address < start + length or (address - start) % stride:
         raise ValueError("Initializer target is not an aligned imported stub")
     slot = first + (address - start) // stride
     if slot >= indcount:
         raise ValueError("Initializer import slot is outside the indirect symbol table")
     index, = struct.unpack_from("<I", data, indoff + 4 * slot)
+    if index & 0xC0000000 and fixups is not None:
+        return chained_import(data, segments, fixups, address)
     if index >= count:
         raise ValueError("Initializer import symbol is outside the symbol table")
     string_index, = struct.unpack_from("<I", data, symoff + 16 * index)
@@ -152,20 +223,23 @@ def recovered_release(repo, recovery):
         raise ValueError("Recovered IPA SHA-256 does not match the build-9 release")
     source = repo / "experiments/sound-hardware-v1/sj6-factory"
     sys.path.insert(0, str(source))
-    from original.audit_all_programs import banks
-    from original.audit_bundled_banks import PREFIX
+    sys.path.insert(0, str(source / "original"))
+    from audit_all_programs import banks
+    from audit_bundled_banks import PREFIX
     from release_matrix import prepare_release
     with ZipFile(BytesIO(ipa)) as archive:
         image = archive.read(IPA_MEMBER)
         audit_bytes = (source / "original/all-programs.json").read_bytes()
         bank_identity = release_container_identity(banks(archive, PREFIX), json.loads(audit_bytes))
     bank_identity["audit_sha256"] = sha(audit_bytes)
-    # The existing release selector reads an on-disk input. Give it only the
-    # authenticated inner IPA in a private temporary directory.
-    with TemporaryDirectory(prefix="sj6-build9-") as tmp:
-        path = Path(tmp) / "build9.ipa"
-        path.write_bytes(ipa)
-        schedule_bytes, _, records = prepare_release(path)
+    class ReleaseBytes:
+        def is_dir(self):
+            return False
+
+        def read_bytes(self):
+            return ipa
+
+    schedule_bytes, _, records = prepare_release(ReleaseBytes())
     schedule = json.loads(schedule_bytes)
     row, = (row for row in schedule["programs"] if row["program_uid"] == UID)
     return image, {"uid": UID, "record_sha256": row["record_sha256"],
