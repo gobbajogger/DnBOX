@@ -57,24 +57,30 @@
   },
   "focused_checks": [
     {
-      "name": "tests/host/ui_break_preview_test.py",
+      "name": "custom_ui_break_chooser_harness",
       "status": "PASS",
-      "command": "python3 tests/host/ui_break_preview_test.py",
+      "command": "cc -std=c99 -Wall -Wextra -Werror; execute temporary host harness",
       "source_path": "firmware/src/app/ui.c",
       "source_blob_sha": "2cf5beae94ee319b2fc57a3728701855f57e45d0",
-      "test_blob_sha": "85d7305ca728935755eaae01b9093538121f3d9b",
-      "scope": "Exact production brk_choice_cancel/turn/confirm functions extracted from the branch source; engine boundary stubbed. Preview, cancel, confirm, stale-pattern, refused-preview and empty-bank cases passed. This is not the audio decoder test or a full firmware build."
+      "repository_test_file": "tests/host/ui_break_preview_test.py",
+      "repository_test_blob_sha": "85d7305ca728935755eaae01b9093538121f3d9b",
+      "repository_test_status": "NOT_RUN",
+      "scope": "Exact production brk_choice_cancel/turn/confirm function bodies copied from this branch; custom harness stubs the engine boundary. Preview, cancel, confirm, stale-pattern, refused-preview and empty-bank cases passed. Not the full audio decoder path."
     },
     {
-      "name": "StockBreakFit.test_pinned_native_build_capacity",
+      "name": "custom_stock_capacity_metadata_arithmetic",
       "status": "PASS",
-      "command": "PYTHONPATH=tests python3 -m unittest starting_break_stock_fit_checkpoint_test.StockBreakFit.test_pinned_native_build_capacity -v",
-      "test_blob_sha": "925896f0121c66b7039cfdb04263cbd92c31c2ff",
-      "input_blobs": {
-        "checkpoint": "af132ff1b721696c48073177fb19169d7beea577",
-        "native_builds": "18df226be6e0eea8b3f728f3ec0b96fe662cde08"
+      "command": "temporary Python arithmetic check",
+      "input_files": {
+        "checkpoint_path": "evidence/integ-resume/starting-breaks-checkpoint.json",
+        "checkpoint_blob_sha": "af132ff1b721696c48073177fb19169d7beea577",
+        "native_builds_path": "evidence/integ-starting-breaks/native-builds.json",
+        "native_builds_blob_sha": "18df226be6e0eea8b3f728f3ec0b96fe662cde08"
       },
-      "scope": "Historical native-build manifest arithmetic only; confirms the recorded stock five-zone pack does not fit."
+      "repository_test_file": "tests/starting_break_stock_fit_checkpoint_test.py",
+      "repository_test_blob_sha": "925896f0121c66b7039cfdb04263cbd92c31c2ff",
+      "repository_test_status": "NOT_RUN",
+      "scope": "Custom arithmetic check using the pinned historical manifest values copied from branch evidence; confirms recorded five-zone pack exceeds both recorded stock budgets. Does not parse the canonical binary pack or qualify current builds."
     }
   ],
   "historical_receipts": {
@@ -676,7 +682,10 @@
     "strict_heavy_zero_late": "NOT_RUN",
     "engine_audio_preview": "NOT_RUN",
     "fwsc": "NOT_BUILT",
-    "img": "NOT_BUILT"
+    "img": "NOT_BUILT",
+    "repo_ui_preview_test": "NOT_RUN",
+    "repo_capacity_test": "NOT_RUN"
   },
-  "next_item": "Obtain a complete current source checkout and SDK bytes, complete a no-loss merge from consolidated, then rebuild and requalify stock Elite and Pro."
+  "next_item": "Obtain a complete current source checkout and SDK bytes, complete a no-loss merge from consolidated, then rebuild and requalify stock Elite and Pro.",
+  "correction": "The two PASS results above are custom extracted-function/metadata harnesses, not executions of the repository test scripts; the repository scripts themselves were not run."
 }
