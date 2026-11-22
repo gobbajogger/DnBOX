@@ -13,4 +13,5 @@ complete group.
 
 The ZIP transports the firmware and samples together. The .fwsc updates the
 firmware, and the separate .x0xslots Restore supplies the samples. See
-MANIFEST.json for model identities, CRC-32 and SHA-256 checksums.
+MANIFEST.json for model identities, CRC-32 and SHA-256 checksums. The license
+files and the starting BREAK asset notice accompany this bundle.

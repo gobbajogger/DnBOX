@@ -1,0 +1,269 @@
+{
+  "firmware_commit": "e29c99ec2cc610e5af3de575e85771f666b239f4",
+  "firmware_tree": "8609f75308f10874a7ba4aec1c1fb309023c100b",
+  "emulator": {
+    "source_repository": "https://github.com/gobbajogger/DnBOX",
+    "source_tag": "archive/diag/dropout-observer-20261113",
+    "source_commit": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+    "source_tree": "469b393685d819770c8e528849a0e5c6bebb60a8",
+    "source_clean": true,
+    "historical_binary_sha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+    "previous_documented_observer_binary_sha256": "8dca639e2f8b0a992f7e4581563d3497e664c8331ffa86a2e70961e1922076ac",
+    "historical_patched_file_sha256_verified": {
+      "crates/fm1-live/src/main.rs": "aaa348fd3ad5baf4ff6053d5232cca2467fc9625faf865a9a2d01a1e496e0466",
+      "crates/fm1-soc/src/lib.rs": "f58ee1ed92f58160e05bf1adc00bb20f0135a010c349f6b43ee6df7e58295bed",
+      "crates/fm1-soc/src/machine.rs": "c24444fbb6a330be1722ba7db29492cdce1c7807cd599a1df5a27523f824f0a7",
+      "crates/fm1-soc/src/periph.rs": "6d48280c439f8067e2c7ecaa952bef663f28f12e5391eed86510efeb9db37c2a",
+      "crates/fm1-soc/src/dnbox_observer.rs": "1fa99350b4eba3ffba2c1faf68efbbd3dba6e28662a47f6c108c4d89da3da8c9"
+    },
+    "cargo_lock_sha256": "89faec398e9954dfc87bc15583f686e0ac810d42c7253d4416189f1dfe338563",
+    "rust_manifest_url": "https://static.rust-lang.org/dist/channel-rust-1.85.1.toml",
+    "rust_manifest_sha256": "1e7dae690cd12e27405a97e64704917489a27c650201bf47780a936055d67909",
+    "rust_components_sha256_verified": {
+      "rustc": "92a5c532b9e87912190128704e0d65825912e3b08a6ee9203c4068d6d1df62c4",
+      "cargo": "7373132c13e394755d15f01bda4374af59b4daef01b12a83cb3df3f3be38e289",
+      "rust-std": "0aaeffba85359503f874315cd08e0ae8490275d14b41470d36d4fa57fd085916"
+    },
+    "development_debs_sha256": {
+      "wayland.deb": "66055b7df9a6c4b15fe0b52a42a76680bb4d0f4d1083800e7cd7ba26e59e68ed",
+      "x11.deb": "530de60c9c6dadd997ae7d74eca2a41b25e849373a5ad5dcdb619aa05713d6e0",
+      "alsa.deb": "dfa8e8a133ef8704093d03464d86a3e86d26232baf1e3827aa030cb68c437e1c"
+    },
+    "rustc": "rustc 1.85.1 (4eb161250 2025-03-15)",
+    "cargo": "cargo 1.85.1 (d73d2caf9 2024-12-31)",
+    "build_command": "cargo build --offline --locked --release -p fm1-live",
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "isolation": "Bubblewrap, no credentials or host device files mounted, read-only source/input mounts, seccomp blocks network I/O",
+    "rebuilt_executable_sha256": "3063cd6dda355cfc2f3f461efc163a73d2da1ba32cec535a6465cf607ec6b872"
+  },
+  "driver": "experiments/sound-hardware-v1/strict-timing/replay.py",
+  "driver_sha256": "91092c3ad1702afc46356d8940c876c2f133fa51ad23d704577d145cc634a3ba",
+  "playback_scope": "Calibration and historical 922-event bounded stock replay; factory BREAK bank unavailable in this package; no all-engine or ten-minute claim.",
+  "final_combined_10_minute": "PENDING_FINAL_COMBINED_SHA",
+  "limit_us_exclusive": 11609,
+  "late_limit": 0,
+  "models": {
+    "elite": {
+      "emulator_sha256": "3063cd6dda355cfc2f3f461efc163a73d2da1ba32cec535a6465cf607ec6b872",
+      "elf_sha256": "6253d7d94205f0b578edf7cc9804b5c64744572477fa5eb9e72821f88e3d6332",
+      "fwsc_sha256": "3aaba53459442cdd1f652dedf2c438a30189e4f5d06859270e9b0da1bd9bfecd",
+      "seed": {
+        "duration_ms": 2000,
+        "shift_ms": 0,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 131,
+        "max_us": 3884,
+        "raw_late": 0,
+        "audio_xruns": 0,
+        "pcm_sha256": "42a2b3e1e1b168d84f5912c8ad600c36e6259fe59b3835b032115bf552185bc1",
+        "pcm_bytes": 268288,
+        "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+        "initial_flash_sha256": null,
+        "final_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+        "peak_s16le_abs": 0,
+        "artifact_sha256": {
+          "run.log": "a5d4213ff0def0a785233be7f4152c3d906e35f3c270951ea02e4290dcb14e71",
+          "ram.bin": "380b9f8ae9a293e7b3f1b7944624d19d5d8e1e3aae6f698104d85abc1982ac98",
+          "core.csv": "3319bcc70decd72ea78ffaa5b2bcaca7529593e62458c28bfdada2034e5a8723",
+          "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+        },
+        "under_limit_and_zero_raw_late": true
+      },
+      "boot": {
+        "duration_ms": 2000,
+        "shift_ms": 0,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 131,
+        "max_us": 3885,
+        "raw_late": 0,
+        "audio_xruns": 0,
+        "pcm_sha256": "42a2b3e1e1b168d84f5912c8ad600c36e6259fe59b3835b032115bf552185bc1",
+        "pcm_bytes": 268288,
+        "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+        "initial_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+        "final_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+        "peak_s16le_abs": 0,
+        "artifact_sha256": {
+          "run.log": "82f16c23f3ad0884932556f7c8a388d2830f9e7cdda1dd61596ee679d6b6e605",
+          "ram.bin": "501722b9c7e2ea1e26e011326344326fd44a70936bba28a66ed767f2e5def4bc",
+          "core.csv": "d61bb9b477a32655b4fdba6051bec8f493014c171a107308774d93144d5742b5",
+          "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+        },
+        "under_limit_and_zero_raw_late": true
+      },
+      "runs": [
+        {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 647,
+          "max_us": 11235,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "5354ead860f263971a0f713ec23151c55f1a505b207e57f631418129b4b1eadd",
+          "pcm_bytes": 1327104,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+          "final_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+          "scene_late": 0,
+          "limit_margin_us": 374,
+          "stock_half_count_delta": -1,
+          "target_pass": false,
+          "peak_s16le_abs": 13179,
+          "artifact_sha256": {
+            "run.log": "941fbfa486f9fb3050ec9c36e48cfa83f93953f4d501d38699e63463301c1bb4",
+            "ram.bin": "7752f282ac09635a0182b72691b65b5f11d15debc7b1cb08bbeb44dbd4607101",
+            "core.csv": "147fa07c3b093d838bf6743a1fbe0e9be5f99d10c8e159d12a5b59c835a77d02",
+            "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+          },
+          "under_limit_and_zero_raw_late": true
+        },
+        {
+          "duration_ms": 8000,
+          "shift_ms": 1,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 647,
+          "max_us": 11199,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "368b83059bcd5b7e42be93df58896c8b8f06745b0d83505aaf4125658da65f5b",
+          "pcm_bytes": 1327104,
+          "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+          "initial_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+          "final_flash_sha256": "0030a0df7a4070fd3f082eda1d996c778f7547f959c6ceab0e15163355316ede",
+          "scene_late": 0,
+          "limit_margin_us": 410,
+          "stock_half_count_delta": -1,
+          "target_pass": false,
+          "peak_s16le_abs": 13179,
+          "artifact_sha256": {
+            "run.log": "b9cccf2980a806a067da47879ff92e9d6f122bfbeb0c26dfe0332cc7219ce808",
+            "ram.bin": "2b12752b9e606247c11b96cafeadaafdfa248899c44e439795a46cafd2ee3bcf",
+            "core.csv": "5647c4e7df2dc57a6d1c763916bf1e9f090458cb90e9fcb67c093d9409158200",
+            "scene.keys": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0"
+          },
+          "under_limit_and_zero_raw_late": true
+        }
+      ]
+    },
+    "pro": {
+      "emulator_sha256": "3063cd6dda355cfc2f3f461efc163a73d2da1ba32cec535a6465cf607ec6b872",
+      "elf_sha256": "70fc8f2f6cfc6c466a801f55f8cc3515c594cf8e1a2271fba3ca4c51db5f6c81",
+      "fwsc_sha256": "8f399e350a3af8ded3bee7f05d60f4b01c966b785d7a336c90dcd371178cef92",
+      "seed": {
+        "duration_ms": 2000,
+        "shift_ms": 0,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 131,
+        "max_us": 3888,
+        "raw_late": 0,
+        "audio_xruns": 0,
+        "pcm_sha256": "42a2b3e1e1b168d84f5912c8ad600c36e6259fe59b3835b032115bf552185bc1",
+        "pcm_bytes": 268288,
+        "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+        "initial_flash_sha256": null,
+        "final_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+        "peak_s16le_abs": 0,
+        "artifact_sha256": {
+          "run.log": "a5d4213ff0def0a785233be7f4152c3d906e35f3c270951ea02e4290dcb14e71",
+          "ram.bin": "689c89897fd64830c268a9d06bd8603e6459bc77cb7275a1cd1c7e76985c5695",
+          "core.csv": "35592e149d969bcbb7150cd7a4f711796ad0a575079fe88bfd38ea570946b5d3",
+          "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+        },
+        "under_limit_and_zero_raw_late": true
+      },
+      "boot": {
+        "duration_ms": 2000,
+        "shift_ms": 0,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 131,
+        "max_us": 3888,
+        "raw_late": 0,
+        "audio_xruns": 0,
+        "pcm_sha256": "42a2b3e1e1b168d84f5912c8ad600c36e6259fe59b3835b032115bf552185bc1",
+        "pcm_bytes": 268288,
+        "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+        "initial_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+        "final_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+        "peak_s16le_abs": 0,
+        "artifact_sha256": {
+          "run.log": "82f16c23f3ad0884932556f7c8a388d2830f9e7cdda1dd61596ee679d6b6e605",
+          "ram.bin": "fa4507b0737cb1e32a8356e93fb0eb226634f8a38c16cd587844e65e4d5a9fcd",
+          "core.csv": "1000d54496f247905147c54d8ebfb60682ffc675b66066fa97c44d1d375e3f67",
+          "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+        },
+        "under_limit_and_zero_raw_late": true
+      },
+      "runs": [
+        {
+          "duration_ms": 8000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 647,
+          "max_us": 11244,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "912770cdaa96165c084e064991c794301dfbb66c2b78414d42ff5702eddbc886",
+          "pcm_bytes": 1327104,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+          "final_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+          "scene_late": 0,
+          "limit_margin_us": 365,
+          "stock_half_count_delta": -1,
+          "target_pass": false,
+          "peak_s16le_abs": 13180,
+          "artifact_sha256": {
+            "run.log": "48e3e3075d8d19e63dedb8e5551d116dacece86d1b0932198e9d33a404f8b0b3",
+            "ram.bin": "199c9c53649b98442d70d86031d2b271c04f41645f6b60c908773b3513aa4bca",
+            "core.csv": "2000b4ea3e126e0f2fcbb94d99324cc353dcf5a61f65b659963e65fffa9903bc",
+            "scene.keys": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271"
+          },
+          "under_limit_and_zero_raw_late": true
+        },
+        {
+          "duration_ms": 8000,
+          "shift_ms": 1,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 647,
+          "max_us": 11212,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "694cddadb06eea642e83e9f20ecf96285b87aa01c6ed9c4baad104564130d49a",
+          "pcm_bytes": 1327104,
+          "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+          "initial_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+          "final_flash_sha256": "d39a54cb195229d55e39cd66ce851b31198a54d7817aee06e8f9352ecc6aa4ec",
+          "scene_late": 0,
+          "limit_margin_us": 397,
+          "stock_half_count_delta": -1,
+          "target_pass": false,
+          "peak_s16le_abs": 13179,
+          "artifact_sha256": {
+            "run.log": "5faa99b455eaa6f7fc6edc146662785af0a3c9dbad12b5504c31cb0b178e720a",
+            "ram.bin": "cee7f00beaf456cbb5f846a96ed3ee5e54fcd22e34b0ae99a9048eac16d978e8",
+            "core.csv": "17f8fdbb14d7c3f370829607f347becf877e9b559ffbacd79da973e30c99362c",
+            "scene.keys": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0"
+          },
+          "under_limit_and_zero_raw_late": true
+        }
+      ]
+    }
+  }
+}

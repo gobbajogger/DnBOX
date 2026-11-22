@@ -1,5 +1,13 @@
 # Integration baseline
 
+## Stock delivery archive and bounded strict playback — 2026-11-22 (WORKING)
+
+The stock delivery ZIP now includes the existing firmware license and notices, SDK/vendor license texts and the starting BREAK asset notice. All ten members passed ZIP integrity checks. The Elite and Pro FWSC and five-zone sample archive are byte-identical to the previously checked inputs. The 1,315,181-byte ZIP has SHA-256 `9593532d8773fb58d6f9655c198adcce04fc415d25a9863c1462d8af827c9c5e` and CRC32 `63c151fd`. It supersedes the smaller test archive without notices.
+
+Archived observer at `ba83317aa55cbcdb2830c5da97d5f64b763499e2` ran the 922-event stock diagnostics for 8 seconds at `FM1_STRICT=1`, 360 MHz. Elite peaked at 11,235 and 11,199 µs at offsets 0 and +1 ms. Pro peaked at 11,244 and 11,212 µs. All four had zero raw late, zero scene late and zero xruns. Each emitted 648 DMA halves and recorded 647 guest render completions. The historical helper's separate 10,909 µs research target was not met. The diagnostic has no populated BREAK sample, covers a limited set of synth owners and does not qualify the ten-minute final combined gate.
+
+[Archive](../../evidence/integ-resume/qualification-0130/lane-integ-resume-0130-e29c99ec-stock-firmware-starting-breaks.zip) · [Timing receipt](../../evidence/integ-resume/qualification-0130/lane-integ-resume-0130-e29c99ec-calibrated-summary.json) · [Existing status transport fixture](../../evidence/integ-resume/qualification-0130/gate-status-transport.json)
+
 ## Stock package and BREAK samples together — 2026-11-22 (WORKING)
 
 The owner clarified that the five samples need to ship with the stock firmware. The existing 0x9D000-byte update image and two-entry FWSC format preserve the stock flash boundaries. The distribution ZIP contains both checked model packages and the existing `.x0xslots` import for the original five 22,050 Hz zones. Use normal Restore with two confirmed empty compatible slots after installing the model-specific package. Neither the stock app nor its partitions change. Mocked standard restore and readback verified both model maps and the five original ADPCM byte sequences. A full import into an occupied large slot was rejected in migration planning without writes, and existing slot 3 data survived import into the two empty slots. Production firmware-reader evidence is tracked separately.
