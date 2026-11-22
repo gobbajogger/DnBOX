@@ -1,0 +1,330 @@
+{
+  "rate": 44100,
+  "frames_per_program": 132300,
+  "programs": 694,
+  "original_frontend_writes_per_program": 144,
+  "projected_original_control_ids": [
+    34,
+    121,
+    35,
+    36,
+    59,
+    13,
+    14,
+    15,
+    45,
+    46,
+    47,
+    116,
+    117,
+    118,
+    119,
+    32,
+    122,
+    125,
+    128,
+    131,
+    134,
+    58,
+    2,
+    5,
+    16,
+    17,
+    19,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    7,
+    8,
+    9,
+    6,
+    1,
+    4,
+    30
+  ],
+  "projected_voice_ids": [
+    2,
+    5,
+    16,
+    17,
+    19,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    7,
+    8,
+    9,
+    6,
+    1,
+    4,
+    30
+  ],
+  "frames_per_arm": 91816200,
+  "reference_checksums": {
+    "factory-inputs/public-morphs.f32": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5",
+    "factory-inputs/compact.bin": "a5cf8182b8bc9ca0a1b034a6b63f55d2cdc1087df38d6b1433da4fb56e5eccd5",
+    "TESTED-SOURCES.json": "0895ccad37129cb8d1571e17f6cbc1be2052262abd31c71a73e8cdd4e69cba13",
+    "FACTORY-INPUTS.json": "35de2aa8c01be45b65de01f9f446f61b7aaf6ddd2d65786a816ac31bac0dbf98"
+  },
+  "source": "AudioKit/AudioKitSynthOne@6466a3715c96b7ecf1dd255a218cbd571408a314",
+  "comparison": "Complete original factory voice and effects versus host firmware INIT with nearest saved FX settings and editable voice controls.",
+  "row_file_sha256": "7626bf9a33b0f85d8f0935330c443e4b27c1d33c1d8d03fc6ee8517b7c418064",
+  "commands_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "stereo_pass": 7,
+  "left_pass": 8,
+  "right_pass": 8,
+  "firmware_source_commit": "e3559ad37c354c02d49f8b99c68fa1982b2ec4b9",
+  "production_patch_sha256": "2154ba93f3d534a285e0f98b2aac855b17c87a30b889cad94355373048fb8fe4",
+  "rows_gzip_sha256": "8ed29bf38f8230d57f890772b43e96cecc55b7c615ab8c9982a6afa192d25290",
+  "original_pcm_hashes_reproduced": 694,
+  "firmware_readback_positions": 29148,
+  "audible": 682,
+  "newly_audible": [
+    178,
+    187,
+    408
+  ],
+  "newly_silent": [],
+  "bypass_identical_pcm_hashes": 66,
+  "median_spectral_rms_db": [
+    9.927701210997892,
+    9.26630319433805
+  ],
+  "median_absolute_level_db": [
+    3.6729975526649223,
+    3.655362395324332
+  ],
+  "reference_limits": {
+    "absolute_level_db": 1,
+    "spectral_rms_db": 3
+  },
+  "raw_morph_exact_comparisons": 3145728,
+  "crossings": [
+    {
+      "index": 19,
+      "name": "Electro Clash Bass",
+      "prior": [
+        {
+          "level_db": -0.36288045277521613,
+          "spectral_db": 3.4874981357640342,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.2780684093962297,
+          "spectral_db": 3.502986553083295,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": -0.11505704442076188,
+          "spectral_db": 2.757648575662285,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.03253357032205244,
+          "spectral_db": 2.760512803372636,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.00276125012896955,
+      "detune_lfo": 0.0
+    },
+    {
+      "index": 86,
+      "name": "ElectroTrash Bass",
+      "prior": [
+        {
+          "level_db": 0.025157157724971374,
+          "spectral_db": 1.5445260838236845,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.13238902972133548,
+          "spectral_db": 1.5745121345475337,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": 2.5032902740558023,
+          "spectral_db": 1.8294462922443133,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 2.4788992175626485,
+          "spectral_db": 1.854848495623056,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.031601253896951675,
+      "detune_lfo": 0.0
+    },
+    {
+      "index": 130,
+      "name": "Rogue Lead",
+      "prior": [
+        {
+          "level_db": -0.7090908733165656,
+          "spectral_db": 2.6566173329644585,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.8646938030819634,
+          "spectral_db": 2.659165373522219,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": 0.9546648787851153,
+          "spectral_db": 3.3577814131736687,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.7990619490197173,
+          "spectral_db": 3.344717520279591,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.06441124528646469,
+      "detune_lfo": 0.0
+    },
+    {
+      "index": 195,
+      "name": "EBM",
+      "prior": [
+        {
+          "level_db": -0.3312827329383031,
+          "spectral_db": 3.4653218653819846,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.24646404382951723,
+          "spectral_db": 3.4806946801765766,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": -0.08346103177664911,
+          "spectral_db": 2.747749708210258,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.000930065851330441,
+          "spectral_db": 2.75027348596714,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.00276125012896955,
+      "detune_lfo": 0.0
+    },
+    {
+      "index": 213,
+      "name": "ARP - 138 Trance Bass 2",
+      "prior": [
+        {
+          "level_db": -0.6720435160434821,
+          "spectral_db": 2.6991087244128495,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.6720438930848871,
+          "spectral_db": 2.6991084853737313,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": -0.35612630455740923,
+          "spectral_db": 3.1382758643047266,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.35612668159881467,
+          "spectral_db": 3.138275585192525,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.0076049999333918095,
+      "detune_lfo": 0.0
+    },
+    {
+      "index": 581,
+      "name": "Basta",
+      "prior": [
+        {
+          "level_db": -0.36519838147911765,
+          "spectral_db": 3.694169974021004,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.3651988056674782,
+          "spectral_db": 3.69417039759532,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "osc2": [
+        {
+          "level_db": -1.8966968577798825e-05,
+          "spectral_db": 1.6338328995228801,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -1.939115693806628e-05,
+          "spectral_db": 1.6338326112941024,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "bandlimit": 0.0,
+      "mono": 1.0,
+      "glide": 0.0,
+      "detune_lfo": 0.0
+    }
+  ]
+}

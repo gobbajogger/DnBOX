@@ -1,0 +1,26 @@
+{
+  "exact_sound_source": "6302424e0f6297de204bdc17dda71009f2297130",
+  "software_only": true,
+  "build": 9,
+  "component": {
+    "type": "aumu",
+    "manufacturer": "AuPr",
+    "subtype": "jay6",
+    "cpu": "ARM64",
+    "minimum_ios": "15.0",
+    "sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1"
+  },
+  "authorized_host_at_check": "Primary Mac mini offline",
+  "linux_isolated_component_blocker": "Swift Foundation UUID metadata during instrument initialization",
+  "qualified_stereo_pairs": 0,
+  "required_stereo_pairs": 14,
+  "missing_chorus_bench": {
+    "name": "SuperJ6-bounded-reference-bench-20261115.private.zip",
+    "sha256": "c1b7e99bf4f3054f114557a66c5ad8060525a5f8065e3ff3c7d208dbe2d9bf9c",
+    "required_active_modes": 3,
+    "bypass_cases": 2,
+    "frames_per_case": 4096,
+    "sample_rate": 48000,
+    "channels": 2
+  }
+}

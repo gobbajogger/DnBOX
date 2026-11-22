@@ -1,0 +1,632 @@
+[
+  {
+    "index": 86,
+    "source_poly": [
+      {
+        "level_db": 0.6544039031990995,
+        "spectral_db": 1.6267600802707896,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": 0.7070761828055833,
+        "spectral_db": 1.6154477909889373,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": 181.33178310850934,
+          "spectral_db": 220.55559445751936,
+          "active": false,
+          "pass": false
+        },
+        {
+          "level_db": 180.31130289978492,
+          "spectral_db": 220.54994488892473,
+          "active": false,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 3.8785459360015846,
+          "spectral_db": 1.7882934291342003,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 3.6584455790747423,
+          "spectral_db": 1.7748799346841646,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": 0.24629956740260223,
+          "spectral_db": 2.0676350287694967,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": 0.6546170588454594,
+          "spectral_db": 2.1184020097763296,
+          "active": true,
+          "pass": true
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": 1.6625725646157115,
+          "spectral_db": 6.924787103703371,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 1.9222096097797077,
+          "spectral_db": 6.9034971585674745,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 0.6824434280935117,
+          "spectral_db": 1.7357080427186697,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": 0.48457373664740516,
+          "spectral_db": 1.7335120427947197,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": 0.3597802264208536,
+          "spectral_db": 2.009210347114459,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": 0.6199571294634426,
+          "spectral_db": 2.010263854820659,
+          "active": true,
+          "pass": true
+        }
+      ]
+    }
+  },
+  {
+    "index": 130,
+    "source_poly": [
+      {
+        "level_db": -1.2521260929026277,
+        "spectral_db": 1.8626442082807817,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.6970520628833083,
+        "spectral_db": 1.8893003880851746,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": 183.5401995811538,
+          "spectral_db": 226.78698568471302,
+          "active": false,
+          "pass": false
+        },
+        {
+          "level_db": 183.5401995811538,
+          "spectral_db": 226.78698568471302,
+          "active": false,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 2.4031491666103904,
+          "spectral_db": 2.1535436817301687,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 2.343367924548337,
+          "spectral_db": 2.1383917679019557,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.5252755600099789,
+          "spectral_db": 5.813913275292136,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.4626496913879435,
+          "spectral_db": 5.80449644203378,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": 0.6599852321953993,
+          "spectral_db": 4.62821924542755,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.5864518709347253,
+          "spectral_db": 4.6238346356609705,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": -0.725218315936347,
+          "spectral_db": 1.6894821467642942,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.8093925306151044,
+          "spectral_db": 1.693085687993242,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -1.746997821387743,
+          "spectral_db": 2.6533136187043427,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.2124508073939113,
+          "spectral_db": 2.6827942169060957,
+          "active": true,
+          "pass": false
+        }
+      ]
+    }
+  },
+  {
+    "index": 213,
+    "source_poly": [
+      {
+        "level_db": -1.9328975469526495,
+        "spectral_db": 3.0549469379198717,
+        "active": true,
+        "pass": false
+      },
+      {
+        "level_db": -1.9328979346492927,
+        "spectral_db": 3.0549468106650566,
+        "active": true,
+        "pass": false
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": -0.7643403693085489,
+          "spectral_db": 10.898054016232084,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.764340744220682,
+          "spectral_db": 10.898054017248597,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 0.6007847895773926,
+          "spectral_db": 4.245106405373735,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.6007844127282509,
+          "spectral_db": 4.245105021261575,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -1.248526576807759,
+          "spectral_db": 5.544323186783466,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -1.2485269549517055,
+          "spectral_db": 5.544323845916186,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": -0.9590945699371027,
+          "spectral_db": 10.246481782454772,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.9590949556896549,
+          "spectral_db": 10.246482184857038,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": -2.1658905967794753,
+          "spectral_db": 3.3257449811711193,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.1658909844819356,
+          "spectral_db": 3.3257446426773583,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -1.929172361258331,
+          "spectral_db": 5.716727871472787,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -1.9291727497073687,
+          "spectral_db": 5.716728775653823,
+          "active": true,
+          "pass": false
+        }
+      ]
+    }
+  },
+  {
+    "index": 19,
+    "source_poly": [
+      {
+        "level_db": -0.26031390778837354,
+        "spectral_db": 2.584987532391392,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.18463710765058414,
+        "spectral_db": 2.600455384813322,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": -2.769743745493656,
+          "spectral_db": 18.92589635354491,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.281828048869324,
+          "spectral_db": 19.77509032277285,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 1.7609703663774132,
+          "spectral_db": 3.6521467345989236,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.7623682404134767,
+          "spectral_db": 3.6451151167164144,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.9237684642195618,
+          "spectral_db": 3.9953871639010416,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.11132050464606406,
+          "spectral_db": 3.9789234541150735,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": -3.0062059414753275,
+          "spectral_db": 18.149334570276125,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.699519893345955,
+          "spectral_db": 18.839788620874135,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 1.5439843199946537,
+          "spectral_db": 3.015086302049655,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.49743634876896253,
+          "spectral_db": 3.00800634907053,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.9272320782937917,
+          "spectral_db": 4.451692771033993,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.06206390726439852,
+          "spectral_db": 4.460946505065884,
+          "active": true,
+          "pass": false
+        }
+      ]
+    }
+  },
+  {
+    "index": 195,
+    "source_poly": [
+      {
+        "level_db": -0.22872088549543537,
+        "spectral_db": 2.5779248775991777,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.1530371932523831,
+        "spectral_db": 2.5929053383428293,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": -2.7381294093571484,
+          "spectral_db": 18.90812567908067,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.2502090013108162,
+          "spectral_db": 19.756121821242623,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 1.7925562393325207,
+          "spectral_db": 3.6712495188772705,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.7939544107386992,
+          "spectral_db": 3.664186031715943,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.892137029981898,
+          "spectral_db": 4.009148106850963,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.07968897049730155,
+          "spectral_db": 3.992640341815355,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": -2.9745925447633867,
+          "spectral_db": 18.131421439223573,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -2.667902600517251,
+          "spectral_db": 18.821404264473852,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 1.575569240948339,
+          "spectral_db": 3.029416480546272,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 0.5290210446581758,
+          "spectral_db": 3.022217113866252,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.8956031452967341,
+          "spectral_db": 4.46520946395949,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.030432479431525737,
+          "spectral_db": 4.4741818350422164,
+          "active": true,
+          "pass": false
+        }
+      ]
+    }
+  },
+  {
+    "index": 581,
+    "source_poly": [
+      {
+        "level_db": -0.09072806785741236,
+        "spectral_db": 1.765643023034709,
+        "active": true,
+        "pass": true
+      },
+      {
+        "level_db": -0.09072852339244758,
+        "spectral_db": 1.765642806364002,
+        "active": true,
+        "pass": true
+      }
+    ],
+    "source_window_mono": {
+      "first-note": [
+        {
+          "level_db": 169.08035065299237,
+          "spectral_db": 208.55393008361727,
+          "active": false,
+          "pass": false
+        },
+        {
+          "level_db": 169.08035065299237,
+          "spectral_db": 208.55393008361727,
+          "active": false,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": -0.0029069062729007193,
+          "spectral_db": 2.387111612633715,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.0029072726965501516,
+          "spectral_db": 2.3871111898709407,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.19599108852627267,
+          "spectral_db": 1.7755947028429027,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.195991534783833,
+          "spectral_db": 1.7755945796531218,
+          "active": true,
+          "pass": true
+        }
+      ]
+    },
+    "source_window_poly": {
+      "first-note": [
+        {
+          "level_db": 69.22588198788193,
+          "spectral_db": 68.6065939363337,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 69.22588158665656,
+          "spectral_db": 68.60659321071509,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "overlap": [
+        {
+          "level_db": 0.010684832279109066,
+          "spectral_db": 2.524298552885532,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": 0.010684439934555846,
+          "spectral_db": 2.5242986070940194,
+          "active": true,
+          "pass": true
+        }
+      ],
+      "post-overlap": [
+        {
+          "level_db": -0.3258965444871221,
+          "spectral_db": 1.8032977292809491,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.32589702337963544,
+          "spectral_db": 1.8032975966882026,
+          "active": true,
+          "pass": true
+        }
+      ]
+    }
+  }
+]
