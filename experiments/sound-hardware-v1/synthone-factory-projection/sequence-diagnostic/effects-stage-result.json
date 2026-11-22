@@ -1,0 +1,1644 @@
+{
+  "source": "f6c2f17087dea9de52dc77f88dd271aab6692ef1",
+  "source_fx_header_sha256": "aee3fe78b450b35bfe6d40741d12dcedf02e24388bdf07850bde7b13d8d8d33e",
+  "rows": [
+    {
+      "index": 139,
+      "name": "BB \u201cKids\u201d On G3 Seq",
+      "event_sha256": "13304829f6909af1bb180dd7d954763179e005d1218461034594865049689955",
+      "original_sha256": "d1e004c61c1a1bc34db2505a40c58ecaa4066fe61f27377043f200886a8424f8",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "6418e377f3280664296c64e73aa323a73d9ed17d9e05408ac3c3cdc939c2ed5d",
+            "scores": [
+              {
+                "level_db": 0.9909921071376981,
+                "spectral_db": 2.507029558236661,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 1.0091783158998497,
+                "spectral_db": 2.500754512417024,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "b80af3f165957d9056e9a7b9652eff2dca93ad50c1425c516daa665d9d15a4db",
+            "scores": [
+              {
+                "level_db": -2.5757776449975704,
+                "spectral_db": 2.7685192965776007,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.5295383731896406,
+                "spectral_db": 2.756957297262909,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "b80af3f165957d9056e9a7b9652eff2dca93ad50c1425c516daa665d9d15a4db",
+            "scores": [
+              {
+                "level_db": -2.5757776449975704,
+                "spectral_db": 2.7685192965776007,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.5295383731896406,
+                "spectral_db": 2.756957297262909,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "b99bacf578515b22ba6997cedcede7a518d53e080787bd54fb63a6e79b16f52f",
+            "scores": [
+              {
+                "level_db": 1.0257500309881142,
+                "spectral_db": 3.7525071116224105,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.0439366186983887,
+                "spectral_db": 3.748533733758461,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "11717077697b944579b06bf2616dbe3d567b3d741b65e6e7726be3cba2ef73c9",
+            "scores": [
+              {
+                "level_db": -2.5887108151571736,
+                "spectral_db": 2.8452723564951765,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.5705242283256515,
+                "spectral_db": 2.8350162483785333,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "65890a9a7c8af698e238db12e805c9a0605660ab7d97f8f1516b61637a8f2e3b",
+            "scores": [
+              {
+                "level_db": 2.702689547243999,
+                "spectral_db": 3.5804624386809802,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.7208757560061496,
+                "spectral_db": 3.579339558568102,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "835a096833fe14f786810b0498d0cce4532f48e93a26d8d35ef4c991e2481de8",
+            "scores": [
+              {
+                "level_db": -0.9084906467519991,
+                "spectral_db": 2.345214627298402,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.843141441850135,
+                "spectral_db": 2.3365557636300784,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "835a096833fe14f786810b0498d0cce4532f48e93a26d8d35ef4c991e2481de8",
+            "scores": [
+              {
+                "level_db": -0.9084906467519991,
+                "spectral_db": 2.345214627298402,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.843141441850135,
+                "spectral_db": 2.3365557636300784,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "309956b47b99dcc2637668e62b224e9b91dbe6a949247b39c9e5a814452de296",
+            "scores": [
+              {
+                "level_db": 2.737605336573152,
+                "spectral_db": 4.307203980001667,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.7557919245464024,
+                "spectral_db": 4.306530411886956,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "753dcd395d764eb3610d6cc16734dee28157879e939331da50ae5734477e0d77",
+            "scores": [
+              {
+                "level_db": -0.9535310283637882,
+                "spectral_db": 2.399378767458001,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.9353444353129864,
+                "spectral_db": 2.392018405817656,
+                "active": true,
+                "pass": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 664,
+      "name": "\ud83d\udd77- Arhythmatics",
+      "event_sha256": "b90337f410779b4111a4e75046335c744844ec085198adb1ee76010da3cae8ef",
+      "original_sha256": "0e81f0f20405f0e60dda91d44dc5763de9da443fc6e2d51ca1c76e2005c25291",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "0b598df9518a98ac82dab086ee67ecd86c665ee356d51f24dbc30b1767c9dcae",
+            "scores": [
+              {
+                "level_db": 1.1015692000003952,
+                "spectral_db": 2.640552836258303,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.0245053996578746,
+                "spectral_db": 2.756226212021674,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "7a6614104cd644fba1343e394512b3eb71940da1ec8991b1d1f777ff9d79b0f6",
+            "scores": [
+              {
+                "level_db": -4.155381763110041,
+                "spectral_db": 6.067137094525012,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -5.3774535625311,
+                "spectral_db": 6.990195946695119,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "ae77d22311eec7fd19721b14fec70b6e0e5bffa503ee01286eacdb048fe892e3",
+            "scores": [
+              {
+                "level_db": -2.4050632348043703,
+                "spectral_db": 3.6891831830420556,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -3.7976948778911264,
+                "spectral_db": 4.363550932371356,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "b7aa687d8b296adae929674f6c133f82d531b503d82644c027bef5d4df3bf8d1",
+            "scores": [
+              {
+                "level_db": -0.6899494008131521,
+                "spectral_db": 3.2908805651977207,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.6570832085538991,
+                "spectral_db": 3.828632677666384,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "b6230275a385461f230b4c0bb9f126dd97ac69b11c619b57482f4b2a09aa22c2",
+            "scores": [
+              {
+                "level_db": -4.237147669432477,
+                "spectral_db": 6.195208694939954,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -5.414933998497605,
+                "spectral_db": 7.093035510105113,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "cea8c33b2b6b775eb4a8dee96e3ce4ce308c6833b57c6277fc998c284200c879",
+            "scores": [
+              {
+                "level_db": 6.088980894002518,
+                "spectral_db": 5.54819378928183,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 5.651655014243149,
+                "spectral_db": 5.550946077630442,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "1a39bb104b3d6da3b0bf196cf91901695b79e80d1bd497523038db3eb45e3cd4",
+            "scores": [
+              {
+                "level_db": 0.02903996432927169,
+                "spectral_db": 2.3957510347723954,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.3859063733316739,
+                "spectral_db": 2.7926226374298344,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "7ccf67888b6ce292ed3afe7296980bc0e6a3ca0da21281c4ced489ad27ba0ff9",
+            "scores": [
+              {
+                "level_db": 2.353792217505371,
+                "spectral_db": 2.6710793801025874,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.7331928416488909,
+                "spectral_db": 2.503428654736777,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "c51bd0841e5db38929fec79d15b6cc920b3488cb0678b2d25881c5bc3273bb23",
+            "scores": [
+              {
+                "level_db": 3.754633101830694,
+                "spectral_db": 3.100872690396522,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.5154981752093253,
+                "spectral_db": 2.9685500558004065,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "6622762889a85b0457703ed774e8c1bd2c4f32fa8a97c648c2d8f7ded1387edd",
+            "scores": [
+              {
+                "level_db": -0.02452183140352375,
+                "spectral_db": 2.4714890932612867,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.42618920498919266,
+                "spectral_db": 2.865087713580592,
+                "active": true,
+                "pass": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 482,
+      "name": "Soi ARP 17",
+      "event_sha256": "71f7d66727cfab412c39ee8f8cc088ace78eb48e4ef2cf4c386d029174cd6f65",
+      "original_sha256": "d82fd86273a5341a37d4a0e32109fb3cb65884f301fb075b23cd532d983afb7e",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "c080e7ee5aadc9922dae701988c7aa56faf87804c5801f469126b5549178c339",
+            "scores": [
+              {
+                "level_db": -1.1098231868361665,
+                "spectral_db": 1.3763934094820658,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.046152022270364,
+                "spectral_db": 1.376508403377517,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "56ca972b3df5cca2247becf228d6c8f3add897f1ed0106ea691a4d36c06d5e44",
+            "scores": [
+              {
+                "level_db": -1.9505539002382963,
+                "spectral_db": 1.1891187782876387,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.8999555950237625,
+                "spectral_db": 1.1828519403033364,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "56ca972b3df5cca2247becf228d6c8f3add897f1ed0106ea691a4d36c06d5e44",
+            "scores": [
+              {
+                "level_db": -1.9505539002382963,
+                "spectral_db": 1.1891187782876387,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.8999555950237625,
+                "spectral_db": 1.1828519403033364,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "0feed431ea0eb7b0e51f74d787f1e76cc8bb505a5c1b78a57094943231797dac",
+            "scores": [
+              {
+                "level_db": -1.0690941234809634,
+                "spectral_db": 1.222553601728187,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.005422569511116,
+                "spectral_db": 1.224809174931963,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "315f7bf00020f288922dcf77c483caf58a9e6c230684d1bbbc07c448e472a63f",
+            "scores": [
+              {
+                "level_db": -1.8520984362118165,
+                "spectral_db": 1.1924167446327236,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.788426880001288,
+                "spectral_db": 1.1913312578085593,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "5b69585317c00a5e2737e5f1604d24eea89bfc3929a7f7a6aaa25124e6dfc05e",
+            "scores": [
+              {
+                "level_db": -0.3138601481316011,
+                "spectral_db": 1.660892564096051,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.25018898356579855,
+                "spectral_db": 1.659336634788748,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "b957d2df60300d5364f2c6fc70191eb667930b4d41e4e81d11e83c7d2e3f95f7",
+            "scores": [
+              {
+                "level_db": -1.1984857157485185,
+                "spectral_db": 2.173442847765958,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.0613388299310131,
+                "spectral_db": 2.1691166084913,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "b957d2df60300d5364f2c6fc70191eb667930b4d41e4e81d11e83c7d2e3f95f7",
+            "scores": [
+              {
+                "level_db": -1.1984857157485185,
+                "spectral_db": 2.173442847765958,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.0613388299310131,
+                "spectral_db": 2.1691166084913,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "f98a9d09811c5a6d75c1ad21679a1fecb60c8b7e22e8d0af056902d5410b4fef",
+            "scores": [
+              {
+                "level_db": -0.2762554982813385,
+                "spectral_db": 1.5319151356028593,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.21258395339896322,
+                "spectral_db": 1.5305723546102217,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "d54df221f792b09aea22af0dc3b962a05e2bbff12de5f33102d18e6197742da4",
+            "scores": [
+              {
+                "level_db": -1.0638442750057606,
+                "spectral_db": 2.1943540469689675,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.0001727302512653,
+                "spectral_db": 2.1915657209698263,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 410,
+      "name": "Yeah Yare Yayr",
+      "event_sha256": "91ea748f7510b849a79214d5b492af92565525e0cf7ba136aa5f05af12fb8d7e",
+      "original_sha256": "7ae12f9f37c7639d3f9f41db2f830917b92ccb9bb7668b22121ef78c3455280b",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "18f0ec9149d030238f70ae224d9570f0aa548944fc67b72421933426de73f73e",
+            "scores": [
+              {
+                "level_db": 1.0688439736866133,
+                "spectral_db": 3.354512891892247,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 0.02342046355904128,
+                "spectral_db": 3.370438946125367,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "8dffe839e3829804eb2ad9898eeb8d0ac22350f5e71b5f4c4e3d203509511b0d",
+            "scores": [
+              {
+                "level_db": 0.026534999654873027,
+                "spectral_db": 2.2509399095957203,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.6563294487350466,
+                "spectral_db": 2.2092137281239883,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "16de42d14c40f4c66699f10b37aaf82c7034059de0ead1bc368856e22c478c20",
+            "scores": [
+              {
+                "level_db": 1.1189419372726888,
+                "spectral_db": 2.7518941428805426,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 0.052975496455369336,
+                "spectral_db": 2.6212504663223566,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "8dffe839e3829804eb2ad9898eeb8d0ac22350f5e71b5f4c4e3d203509511b0d",
+            "scores": [
+              {
+                "level_db": 0.026534999654873027,
+                "spectral_db": 2.2509399095957203,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.6563294487350466,
+                "spectral_db": 2.2092137281239883,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "8dffe839e3829804eb2ad9898eeb8d0ac22350f5e71b5f4c4e3d203509511b0d",
+            "scores": [
+              {
+                "level_db": 0.026534999654873027,
+                "spectral_db": 2.2509399095957203,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.6563294487350466,
+                "spectral_db": 2.2092137281239883,
+                "active": true,
+                "pass": true
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "25a8ed6d1ea08cc4587b7193de92a33852120fa28a72d75b471bcddd9cd59be7",
+            "scores": [
+              {
+                "level_db": 0.906075878098387,
+                "spectral_db": 3.53352827508293,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.1325233540023328,
+                "spectral_db": 3.5840123767474443,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "53d1dc3160e6484d7704fbd9a2c1f110f83b1495c4e6a99f3d84ec201db1bb99",
+            "scores": [
+              {
+                "level_db": 0.013473326068520773,
+                "spectral_db": 2.8213971878671282,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -1.1331267080486989,
+                "spectral_db": 2.94719105749207,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "ff90f5065dea38f1a549f2363b435c3259dbdfcc4c2383f486cd30957d7a7e7a",
+            "scores": [
+              {
+                "level_db": 0.9576229797239986,
+                "spectral_db": 2.598623898611688,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.10164089309959239,
+                "spectral_db": 2.6046758446678524,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "53d1dc3160e6484d7704fbd9a2c1f110f83b1495c4e6a99f3d84ec201db1bb99",
+            "scores": [
+              {
+                "level_db": 0.013473326068520773,
+                "spectral_db": 2.8213971878671282,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -1.1331267080486989,
+                "spectral_db": 2.94719105749207,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "53d1dc3160e6484d7704fbd9a2c1f110f83b1495c4e6a99f3d84ec201db1bb99",
+            "scores": [
+              {
+                "level_db": 0.013473326068520773,
+                "spectral_db": 2.8213971878671282,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -1.1331267080486989,
+                "spectral_db": 2.94719105749207,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 138,
+      "name": "BB Driving Line Seq",
+      "event_sha256": "61c33523fa4909605ba0f84411604d8a400c68926c42192c1d0fe21c50a6c62d",
+      "original_sha256": "b418ebefa64b50207179590f2d505317f6943d4cf8d952f8ffb069ce9b67a3c6",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "b4f0ab40fc209d84bbaf32091ebea95b08f317cf5190bfc5734ce7dccac83bf1",
+            "scores": [
+              {
+                "level_db": -0.32005338142335116,
+                "spectral_db": 3.475537049002872,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.28792962582455184,
+                "spectral_db": 3.484361442514858,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "b501920d13c370f991401f7f55e8d0679f2d63502c55b290b94f0b40c3e98596",
+            "scores": [
+              {
+                "level_db": -1.1990572035443483,
+                "spectral_db": 7.8305453336200825,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.156465270951918,
+                "spectral_db": 7.848827157723765,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "729a78bc48e3bc6921364459476e31f6b0832e31a79ce9f9dd971c27ab28e67b",
+            "scores": [
+              {
+                "level_db": -0.3237740655425267,
+                "spectral_db": 7.981127249069169,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.2916499278796145,
+                "spectral_db": 7.999384243887203,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "b501920d13c370f991401f7f55e8d0679f2d63502c55b290b94f0b40c3e98596",
+            "scores": [
+              {
+                "level_db": -1.1990572035443483,
+                "spectral_db": 7.8305453336200825,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.156465270951918,
+                "spectral_db": 7.848827157723765,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "b501920d13c370f991401f7f55e8d0679f2d63502c55b290b94f0b40c3e98596",
+            "scores": [
+              {
+                "level_db": -1.1990572035443483,
+                "spectral_db": 7.8305453336200825,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.156465270951918,
+                "spectral_db": 7.848827157723765,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "89f5640d1593ffbdf98dec19029f919a446adf23aacb2ba8600362b86c4026e2",
+            "scores": [
+              {
+                "level_db": 3.1379031741766634,
+                "spectral_db": 3.1763851731757335,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.1700269297754624,
+                "spectral_db": 3.1810651532933165,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "b16d8d39e467e2776a8fca209e9dc6792b8e759ca7d4969eac9e403a3eb3d5c0",
+            "scores": [
+              {
+                "level_db": 2.095532287669271,
+                "spectral_db": 5.510436980127401,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.088259693175976,
+                "spectral_db": 5.529185790450974,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "1843cf8fc4d0192130150203debb7dba4ff5d84b27018a0db44f0a9064847e32",
+            "scores": [
+              {
+                "level_db": 3.13423357756961,
+                "spectral_db": 5.779103876846336,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.1663577197977153,
+                "spectral_db": 5.7963719242115195,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "b16d8d39e467e2776a8fca209e9dc6792b8e759ca7d4969eac9e403a3eb3d5c0",
+            "scores": [
+              {
+                "level_db": 2.095532287669271,
+                "spectral_db": 5.510436980127401,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.088259693175976,
+                "spectral_db": 5.529185790450974,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "b16d8d39e467e2776a8fca209e9dc6792b8e759ca7d4969eac9e403a3eb3d5c0",
+            "scores": [
+              {
+                "level_db": 2.095532287669271,
+                "spectral_db": 5.510436980127401,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.088259693175976,
+                "spectral_db": 5.529185790450974,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 10,
+      "name": "ARP - Kiss Me, You Spy!",
+      "event_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "original_sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+            "scores": [
+              {
+                "level_db": -0.429231895308326,
+                "spectral_db": 2.684690679059448,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.5245934929174931,
+                "spectral_db": 2.6888131006848988,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "ac78f634800b15d26e98cc11893c83dd774ae9484026e29a0c77cbf30de7eba1",
+            "scores": [
+              {
+                "level_db": -3.0428652916829653,
+                "spectral_db": 3.4784704507741186,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -3.1968303143666983,
+                "spectral_db": 3.6211382516872237,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "26c0d44ddc38216a4fcf217c086b005595d13c4cda00c39e9a0fb4de441bafa7",
+            "scores": [
+              {
+                "level_db": -2.5663162778294657,
+                "spectral_db": 3.166132714873616,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.677009876391776,
+                "spectral_db": 3.2919108844955187,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "39be237be5d719bac7ab02ae84b05bd91d594469bccaf3ac9c7794d9861520bd",
+            "scores": [
+              {
+                "level_db": -0.9712707275219511,
+                "spectral_db": 2.4956327345698432,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -1.1022483456646919,
+                "spectral_db": 2.5619407311730775,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "6b972e6488585c101716b82687c2133562e991bef4cf3c868419441f766ceb24",
+            "scores": [
+              {
+                "level_db": -3.2091382190934254,
+                "spectral_db": 3.5491900495809996,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -3.396068981630991,
+                "spectral_db": 3.700601843138112,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+            "scores": [
+              {
+                "level_db": 3.613717234704612,
+                "spectral_db": 3.7365108385827615,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.4048211035530986,
+                "spectral_db": 3.7026824996964645,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "53798ed267acaf4bacbe6a2b91e48fae4ba7184d453793975e7a7ee9fe6ce6f6",
+            "scores": [
+              {
+                "level_db": 0.9311892026159367,
+                "spectral_db": 2.039197897534521,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 0.8134087566187432,
+                "spectral_db": 1.912167428208046,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "06f48f3b7944fdd3e98969b0a81d8e93c2296bc8680425fc4c5da2d027f1dcb4",
+            "scores": [
+              {
+                "level_db": 1.4128516913250246,
+                "spectral_db": 2.376023536512109,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.3213404540450329,
+                "spectral_db": 2.2329657765550635,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "7f442ad5ee7798d5b0c1ad547612c24bfa191bab6a3ef6b2617ef0f4c99f9d28",
+            "scores": [
+              {
+                "level_db": 3.060133105806097,
+                "spectral_db": 3.6749719259014118,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.8245301505625005,
+                "spectral_db": 3.5370976802532073,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "add193c4992053dff7b289a5579d68c8bc760a9a0c5ca091df7ff2e397e0c268",
+            "scores": [
+              {
+                "level_db": 0.8557967770814102,
+                "spectral_db": 1.9791360879605695,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 0.5752369479334739,
+                "spectral_db": 1.8479807641136121,
+                "active": true,
+                "pass": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 221,
+      "name": "ARP - Kiss Me, You Spy!",
+      "event_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "original_sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94",
+            "scores": [
+              {
+                "level_db": -0.429231895308326,
+                "spectral_db": 2.684690679059448,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.5245934929174931,
+                "spectral_db": 2.6888131006848988,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "ac78f634800b15d26e98cc11893c83dd774ae9484026e29a0c77cbf30de7eba1",
+            "scores": [
+              {
+                "level_db": -3.0428652916829653,
+                "spectral_db": 3.4784704507741186,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -3.1968303143666983,
+                "spectral_db": 3.6211382516872237,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "26c0d44ddc38216a4fcf217c086b005595d13c4cda00c39e9a0fb4de441bafa7",
+            "scores": [
+              {
+                "level_db": -2.5663162778294657,
+                "spectral_db": 3.166132714873616,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.677009876391776,
+                "spectral_db": 3.2919108844955187,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "39be237be5d719bac7ab02ae84b05bd91d594469bccaf3ac9c7794d9861520bd",
+            "scores": [
+              {
+                "level_db": -0.9712707275219511,
+                "spectral_db": 2.4956327345698432,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -1.1022483456646919,
+                "spectral_db": 2.5619407311730775,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "6b972e6488585c101716b82687c2133562e991bef4cf3c868419441f766ceb24",
+            "scores": [
+              {
+                "level_db": -3.2091382190934254,
+                "spectral_db": 3.5491900495809996,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -3.396068981630991,
+                "spectral_db": 3.700601843138112,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "48f5affee9672c9aa04bad93208c8eb166e350d6b816746fc94414e65a5fd3ff",
+            "scores": [
+              {
+                "level_db": 3.613717234704612,
+                "spectral_db": 3.7365108385827615,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.4048211035530986,
+                "spectral_db": 3.7026824996964645,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "53798ed267acaf4bacbe6a2b91e48fae4ba7184d453793975e7a7ee9fe6ce6f6",
+            "scores": [
+              {
+                "level_db": 0.9311892026159367,
+                "spectral_db": 2.039197897534521,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 0.8134087566187432,
+                "spectral_db": 1.912167428208046,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "06f48f3b7944fdd3e98969b0a81d8e93c2296bc8680425fc4c5da2d027f1dcb4",
+            "scores": [
+              {
+                "level_db": 1.4128516913250246,
+                "spectral_db": 2.376023536512109,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.3213404540450329,
+                "spectral_db": 2.2329657765550635,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "7f442ad5ee7798d5b0c1ad547612c24bfa191bab6a3ef6b2617ef0f4c99f9d28",
+            "scores": [
+              {
+                "level_db": 3.060133105806097,
+                "spectral_db": 3.6749719259014118,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.8245301505625005,
+                "spectral_db": 3.5370976802532073,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "add193c4992053dff7b289a5579d68c8bc760a9a0c5ca091df7ff2e397e0c268",
+            "scores": [
+              {
+                "level_db": 0.8557967770814102,
+                "spectral_db": 1.9791360879605695,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 0.5752369479334739,
+                "spectral_db": 1.8479807641136121,
+                "active": true,
+                "pass": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 213,
+      "name": "ARP - 138 Trance Bass 2",
+      "event_sha256": "bc54b76b7bd77bb5b129f26787c7a571550cdf2cb8666fccbf258344bed9751d",
+      "original_sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "73b288f0fd23b88bc17774ff851ef7576d830738b91f5201b0ddfd231163706a",
+            "scores": [
+              {
+                "level_db": -0.6720435160434821,
+                "spectral_db": 2.6991087244128495,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": -0.6720438930848871,
+                "spectral_db": 2.6991084853737313,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "027580aac00c44cee27240b51d2a1cacec33e4b4f094d745b9ace0bd93a33a4e",
+            "scores": [
+              {
+                "level_db": -0.629478281861942,
+                "spectral_db": 3.4571233111808684,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.6294782775357652,
+                "spectral_db": 3.4571235547759986,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "027580aac00c44cee27240b51d2a1cacec33e4b4f094d745b9ace0bd93a33a4e",
+            "scores": [
+              {
+                "level_db": -0.629478281861942,
+                "spectral_db": 3.4571233111808684,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.6294782775357652,
+                "spectral_db": 3.4571235547759986,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "027580aac00c44cee27240b51d2a1cacec33e4b4f094d745b9ace0bd93a33a4e",
+            "scores": [
+              {
+                "level_db": -0.629478281861942,
+                "spectral_db": 3.4571233111808684,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.6294782775357652,
+                "spectral_db": 3.4571235547759986,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "027580aac00c44cee27240b51d2a1cacec33e4b4f094d745b9ace0bd93a33a4e",
+            "scores": [
+              {
+                "level_db": -0.629478281861942,
+                "spectral_db": 3.4571233111808684,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.6294782775357652,
+                "spectral_db": 3.4571235547759986,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "0e17cfd16df77bb37e1504d45d803be9f40cb97c76909f5bed65f10f0e6ece74",
+            "scores": [
+              {
+                "level_db": 1.8342253445517231,
+                "spectral_db": 8.812388670303966,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.834224967510318,
+                "spectral_db": 8.812388381464919,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "b56fce7da90835b491a3072601baf0a918bc20602eec3d723b437d73a11df9b1",
+            "scores": [
+              {
+                "level_db": 1.8765540956400029,
+                "spectral_db": 9.156027713568426,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.8765540963242786,
+                "spectral_db": 9.156027922812498,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "b56fce7da90835b491a3072601baf0a918bc20602eec3d723b437d73a11df9b1",
+            "scores": [
+              {
+                "level_db": 1.8765540956400029,
+                "spectral_db": 9.156027713568426,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.8765540963242786,
+                "spectral_db": 9.156027922812498,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "b56fce7da90835b491a3072601baf0a918bc20602eec3d723b437d73a11df9b1",
+            "scores": [
+              {
+                "level_db": 1.8765540956400029,
+                "spectral_db": 9.156027713568426,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.8765540963242786,
+                "spectral_db": 9.156027922812498,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "b56fce7da90835b491a3072601baf0a918bc20602eec3d723b437d73a11df9b1",
+            "scores": [
+              {
+                "level_db": 1.8765540956400029,
+                "spectral_db": 9.156027713568426,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 1.8765540963242786,
+                "spectral_db": 9.156027922812498,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "index": 481,
+      "name": "Soi ARP 16",
+      "event_sha256": "79db110d498589e39394c635f7cf33546b928adffa156a5cbf4af45d9f055cfe",
+      "original_sha256": "f8d474c97009e86fd6567cdb327d5d65472399438c868d16f38368e98830344b",
+      "arms": {
+        "direct": {
+          "firmware": {
+            "sha256": "36375f1ce2f36336c5478a9b4f17a94c90aee348e68daadb0672d94e04a6e182",
+            "scores": [
+              {
+                "level_db": -0.40919762186913666,
+                "spectral_db": 2.5469760154957983,
+                "active": true,
+                "pass": true
+              },
+              {
+                "level_db": 0.07114789965332113,
+                "spectral_db": 2.710052428667336,
+                "active": true,
+                "pass": true
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "ecae225f68a8aaf06b623d6d8215510ba82de1f3e5e718700ad95f2b641b92f5",
+            "scores": [
+              {
+                "level_db": -2.9083011641286163,
+                "spectral_db": 5.264924039409402,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.4450781075411627,
+                "spectral_db": 5.339140653908122,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "04f92d270c7c6b671d1e2c5c77ebe3fcf44c1e54da9fa70be79411b4cdaef169",
+            "scores": [
+              {
+                "level_db": -1.1746531139840442,
+                "spectral_db": 3.3440191001939836,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -0.8602228696433379,
+                "spectral_db": 3.475932545791074,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "124eb438bc6e75a60ddf75b7b1fc31bfa908967753117dc6d38697aa14cc5e9f",
+            "scores": [
+              {
+                "level_db": -1.970226312969683,
+                "spectral_db": 4.391098405192219,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -1.2824554350322626,
+                "spectral_db": 4.463259638122271,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "2fe6c36f9c58c855c2fdd4316104a9f98df9066021dbaebe673cd7088d777826",
+            "scores": [
+              {
+                "level_db": -2.974242179153081,
+                "spectral_db": 5.40228585474711,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": -2.326644945326199,
+                "spectral_db": 5.46790208444914,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        },
+        "oracle_events": {
+          "firmware": {
+            "sha256": "bc549c7f59ad14fd48f9f9c9f4fc80e1080e682322cd05226667b63a447ae89b",
+            "scores": [
+              {
+                "level_db": 4.323370203606157,
+                "spectral_db": 4.683757913223808,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 4.473928529584243,
+                "spectral_db": 4.645989759055475,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_all_fx": {
+            "sha256": "763a2657f759fce3eacb72cfcb1c2aafac9b53a6d37c86c6f587c283c2b7d59c",
+            "scores": [
+              {
+                "level_db": 2.0818127726851503,
+                "spectral_db": 1.858648970517212,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.8494224508381794,
+                "spectral_db": 1.8611507622993415,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_delay": {
+            "sha256": "712f87fbcbc22b5d4df435c1cd227e16c4ec7099328bbdd114acf6668ffb3e71",
+            "scores": [
+              {
+                "level_db": 3.3758446197440826,
+                "spectral_db": 3.724148586239679,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.8452976410670563,
+                "spectral_db": 3.6979253787883675,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_without_reverb": {
+            "sha256": "10682bd60c58ac23571d24b93bb2da184b251ea96008efb83065653e16d40266",
+            "scores": [
+              {
+                "level_db": 2.8592559217168056,
+                "spectral_db": 2.7402137196936183,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 3.458183233602071,
+                "spectral_db": 2.7348530994322315,
+                "active": true,
+                "pass": false
+              }
+            ]
+          },
+          "original_muted_wet_reverb": {
+            "sha256": "98a9c434f50112a05799eab306ebb494f032c357c4069bdc2837b35d27432031",
+            "scores": [
+              {
+                "level_db": 1.8140887948666575,
+                "spectral_db": 1.806638314618632,
+                "active": true,
+                "pass": false
+              },
+              {
+                "level_db": 2.4001233472924466,
+                "spectral_db": 1.7930931196369453,
+                "active": true,
+                "pass": false
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
