@@ -1,0 +1,33 @@
+{
+  "source": "d5f5cd7054d41b662f2dda91eeed43c130679a7d",
+  "software_only": true,
+  "flags": {
+    "X0X_TANH_BOOT_TABLE": 1,
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1
+  },
+  "boards": {
+    "elite": {
+      "fwsc": "lane-sound-engine-qualification-resume-work-d5f5cd70-elite-dual-sound.fwsc",
+      "fwsc_sha256": "e215937e2d156a791fed8e2f7f83b9b7b721d4f92d9a2d1c7c055ad4c40afc35",
+      "elf_sha256": "5a70c9dbad15fd57d0ab5289b608268f481a221e0d8128fd0afa318844725ff2",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-d5f5cd70-elite-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "98b62e701c83eefa7e590da70fb734c20ca63e22a7f109ba403597bfbae8edc7",
+      "xip_free_bytes": 5072,
+      "pool_margin_bytes": 3804
+    },
+    "pro": {
+      "fwsc": "lane-sound-engine-qualification-resume-work-d5f5cd70-pro-dual-sound.fwsc",
+      "fwsc_sha256": "2e417ed3a2419c96f6b8a53a76a7c3d078c956c80ed9919a1d19b5992c7119f7",
+      "elf_sha256": "9af005cccda788d77e96aba639d2193e17c6df4a1d29788be4f8fb48f9c64c22",
+      "emulator_img": "lane-sound-engine-qualification-resume-work-d5f5cd70-pro-dual-sound-emulator-flash.img",
+      "emulator_img_sha256": "452a3f7be83dfc2f253f8cca0e0e1ed8cf547ac5b85274c8a17e7d32c19a1739",
+      "xip_free_bytes": 5084,
+      "pool_margin_bytes": 3804
+    }
+  },
+  "renders_and_logs": {
+    "name": "lane-sound-engine-qualification-resume-work-d5f5cd70-software-qualification-renders-and-logs.zip",
+    "sha256": "98dae7d753e12e87ee2dea36c860eb0b7e3e593f0443e9f07ea793740c0d75d5"
+  }
+}

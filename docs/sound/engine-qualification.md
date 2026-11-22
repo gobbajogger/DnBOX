@@ -6,7 +6,23 @@ The opt-in SuperJ6 editor applies the sourced LFO1 Hz law to the compact PWM LFO
 
 The optional `X0X_TANH_BOOT_TABLE=1` profile uses shared pool storage for one boot-expanded 909 tanh lookup. The isolated dual-engine links at `e3559ad3` recovered 2,960 B of XIP per board at a cost of 4,104 B of pool. Elite and Pro retained 5,376 and 5,388 B of XIP with 3,804 B of pool margin each. All 1,026 lookup words and 23,280 stock PCM/state blocks per optimization level matched. The strict populated Elite precheck peaked at 8,058 µs with zero late callbacks and xruns. Integration's DNR2 baseline has its own resource constraints. A combined build needs an exact measurement before applying this trade. [Isolated memory and timing evidence](../../evidence/sound-resume/boot-table/budget.json).
 
-## Current software qualification — source `6302424e`
+## Current software qualification — source `d5f5cd70`
+
+The exact Elite and Pro packages include the authenticated SuperJ6 sub gain. Elite retains 5,072 bytes of XIP and Pro retains 5,084. Both retain 3,804 bytes above the pool reserve. All six strict 360 MHz software runs completed 648 audio halves across 922 events with zero late callbacks, zero xruns and no new guest fault. [Native build and per-scene receipts](../../evidence/sound-qualification/d5f5cd70/) · [Elite and Pro .fwsc files](../../artifacts/sound-qualification/d5f5cd70/).
+
+| Populated software scene | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Chicago and Miami | 7,963 µs | 8,005 µs |
+| Juno and Synth One | 6,917 µs | 7,547 µs |
+| Juno and Synth One with full Synth One sub level | 7,322 µs | 7,455 µs |
+
+The fresh original ARM64 chorus probe ran three active J60V2 modes and two bypass cases with original parameter readbacks. Both bypass cases matched bit for bit. Each active case differs from the existing DnBOX chorus. The private reference pack includes all five raw stereo captures, candidate comparisons, the authored vectors for all 640 programs and the 14-program S4 stimulus. The complete ARM64 engine and effects runner or its exact execution receipt still needs recovery. Complete original factory audio remains 0/640 and S4 remains 0/14. [Replay commands](../../experiments/sound-hardware-v1/sj6-factory/original/README.md) · [Reference pack identity and coverage](../../evidence/sound-qualification/superj6-s4/arm64-reference-pack.json).
+
+The exact Synth One noise diagnostic tested all six programs whose pass status changed in the oscillator 2 study. Even with the original draw timing, seed, amplitude, volume and LFO gain, the existing graph recovered none of the three lost passes. The oscillator 2 development candidate remains experiment-only. [Noise projection and results](../../experiments/sound-hardware-v1/synthone-osc2/noise-diagnostic/).
+
+Both emulator images, their render and log archive, and the reference pack were verified in private LoopyX0X37 Project Sources. The retired-name scan had zero matches. The Sound and pinned Integration branches still diverge from `0b0ff56b`. [Exact ancestry and budget snapshots](../../evidence/sound-qualification/d5f5cd70/integration-ancestry.json).
+
+## Previous software qualification — source `6302424e`
 
 Both stock-board images were built with the Synth One patch editor, SuperJ6 factory support and the boot-expanded tanh lookup. Elite retains 5,168 bytes of XIP and Pro retains 5,180. Both retain 3,804 bytes above the pool reserve. The ordinary builds reproduce the previous ordinary packages and applications byte for byte. [Build identities, package hashes and Project Sources filenames](../../evidence/sound-qualification/6302424e/native-profile.json).
 

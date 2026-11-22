@@ -1,5 +1,5 @@
 {
-  "exact_sound_source": "6302424e0f6297de204bdc17dda71009f2297130",
+  "exact_sound_source": "d5f5cd7054d41b662f2dda91eeed43c130679a7d",
   "software_only": true,
   "build": 9,
   "component": {
@@ -10,8 +10,6 @@
     "minimum_ios": "15.0",
     "sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1"
   },
-  "authorized_host_at_check": "Primary Mac mini offline",
-  "linux_isolated_component_blocker": "Swift Foundation UUID metadata during instrument initialization",
   "qualified_stereo_pairs": 0,
   "required_stereo_pairs": 14,
   "missing_chorus_bench": {
@@ -22,5 +20,14 @@
     "frames_per_case": 4096,
     "sample_rate": 48000,
     "channels": 2
+  },
+  "historical_apple_host_at_check": "Primary Mac mini offline",
+  "historical_bounded_instrument_init_stop": "Swift Foundation UUID metadata during instrument initialization",
+  "current_required_input": "Complete ARM64 engine and FX runner or exact prior full execution receipt",
+  "current_search_result": "No verified source located in Project Sources, Library search, visible project records or workspace",
+  "full_runner_execution_attempted": false,
+  "missing_bounded_musical_loop_matrix": {
+    "name": "SuperJ6-real-asset-musical-loop-matrix-20261115.private.zip",
+    "sha256": "08b912309b24edceebb159b8e3b1be1b3befc706201602212885ad73dd6cd3e0"
   }
 }

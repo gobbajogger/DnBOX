@@ -1,0 +1,154 @@
+{
+  "original_au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "layout": "planar binary32 little endian",
+  "stimulus_sha256": "b8c62ee11d2b0076adabad520d62485b3532619e1f77572cd74b6afb8b3c3113",
+  "frames": 4096,
+  "rate": 48000,
+  "reference_runtime": "Unicorn 2.1.4",
+  "runner_sha256": "60b7e4b600bec4b5ed48b45c238d4997e7f6aaa694fd6b3c93e239ab8f68271e",
+  "cases": [
+    {
+      "case": "mode1-mix1-start0",
+      "reference_sha256": "b8c62ee11d2b0076adabad520d62485b3532619e1f77572cd74b6afb8b3c3113",
+      "dry_equal": true,
+      "params_readback": {
+        "mode": 1.0,
+        "frequency_scale": 1.0,
+        "depth_scale": 1.0,
+        "mix": 1.0,
+        "ramp_duration": 0.0
+      },
+      "started": false,
+      "left_energy": 0.0625,
+      "right_energy": 0.015625,
+      "candidate_sha256": "b8c62ee11d2b0076adabad520d62485b3532619e1f77572cd74b6afb8b3c3113",
+      "bit_exact": true,
+      "levels_spectra_db": [
+        [
+          0.0,
+          null
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "case": "mode1-mix0-start1",
+      "reference_sha256": "b8c62ee11d2b0076adabad520d62485b3532619e1f77572cd74b6afb8b3c3113",
+      "dry_equal": true,
+      "params_readback": {
+        "mode": 1.0,
+        "frequency_scale": 1.0,
+        "depth_scale": 1.0,
+        "mix": 0.0,
+        "ramp_duration": 0.0
+      },
+      "started": true,
+      "left_energy": 0.0625,
+      "right_energy": 0.015625,
+      "candidate_sha256": "b8c62ee11d2b0076adabad520d62485b3532619e1f77572cd74b6afb8b3c3113",
+      "bit_exact": true,
+      "levels_spectra_db": [
+        [
+          0.0,
+          null
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "case": "mode1-mix1-start1",
+      "reference_sha256": "efa541b243e6ee9d5d51a0e7c0923412afd63d2c5fd8af9638b44bb498e7606f",
+      "dry_equal": false,
+      "params_readback": {
+        "mode": 1.0,
+        "frequency_scale": 1.0,
+        "depth_scale": 1.0,
+        "mix": 1.0,
+        "ramp_duration": 0.0
+      },
+      "started": true,
+      "left_energy": 0.08728671665444505,
+      "right_energy": 0.02187684872132278,
+      "candidate_sha256": "c25472e943b6904f7c7fb5288988d18ee1c4e088f3455a75b903448336805f48",
+      "bit_exact": false,
+      "levels_spectra_db": [
+        [
+          -3.5169981468229667,
+          21.99954136873656
+        ],
+        [
+          -3.2636858817071044,
+          10.876507315453994
+        ]
+      ]
+    },
+    {
+      "case": "mode2-mix1-start1",
+      "reference_sha256": "c530f75f4160fe53eba50442517c4f422c416fe7441754b7ca9b592629c67a7b",
+      "dry_equal": false,
+      "params_readback": {
+        "mode": 2.0,
+        "frequency_scale": 1.0,
+        "depth_scale": 1.0,
+        "mix": 1.0,
+        "ramp_duration": 0.0
+      },
+      "started": true,
+      "left_energy": 0.08718496942405918,
+      "right_energy": 0.02188711764371211,
+      "candidate_sha256": "c25472e943b6904f7c7fb5288988d18ee1c4e088f3455a75b903448336805f48",
+      "bit_exact": false,
+      "levels_spectra_db": [
+        [
+          -3.51193276725244,
+          21.94410703350545
+        ],
+        [
+          -3.2657239677313123,
+          10.918269409966092
+        ]
+      ]
+    },
+    {
+      "case": "mode3-mix1-start1",
+      "reference_sha256": "bb6eb59a12ea64e12b88e9f4fd0c33f341c704e06be03075a6a44cdbb20d123e",
+      "dry_equal": false,
+      "params_readback": {
+        "mode": 3.0,
+        "frequency_scale": 1.0,
+        "depth_scale": 1.0,
+        "mix": 1.0,
+        "ramp_duration": 0.0
+      },
+      "started": true,
+      "left_energy": 0.087732102050698,
+      "right_energy": 0.021916960252835464,
+      "candidate_sha256": "c25472e943b6904f7c7fb5288988d18ee1c4e088f3455a75b903448336805f48",
+      "bit_exact": false,
+      "levels_spectra_db": [
+        [
+          -3.5391019227356257,
+          8.842248497271875
+        ],
+        [
+          -3.271641445324889,
+          10.98744474757375
+        ]
+      ]
+    }
+  ],
+  "candidate_source": "d5f5cd7054d41b662f2dda91eeed43c130679a7d",
+  "candidate_runner_sha256": "1c3228298d7d671eebeb34952c25c919afa693790046678aceadf1a27a0a8b13",
+  "candidate_wet_controls": {
+    "rate_hz": 0.8,
+    "depth_ms": 3.4,
+    "mix": 0.22
+  },
+  "candidate_wet_route": "stock chorus at reset defaults for each original wet mode"
+}
