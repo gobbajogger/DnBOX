@@ -1,0 +1,56 @@
+{
+  "source_trees": [
+    {
+      "repository": "gobbajogger/DnBOX",
+      "commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+      "tree": "a4876790880cae769298f6701e8ab5db1d970b30",
+      "blobs": 6865,
+      "bytes": 145411116,
+      "result": "PASS"
+    },
+    {
+      "repository": "gobbajogger/DnBOX-nightly",
+      "commit": "583f622961fc9975fac746592ce6c483073c4170",
+      "tree": "7c10299ae8ccccb72771cd75b490b67bf2238eac",
+      "blobs": 1117,
+      "bytes": 37805424,
+      "result": "PASS"
+    }
+  ],
+  "sdk_inputs": [
+    {
+      "path": "SDK/cpu/wl82/tools/uboot.boot",
+      "sha256": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+      "result": "PASS"
+    },
+    {
+      "path": "SDK/cpu/wl82/tools/cfg_tool.bin",
+      "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+      "result": "PASS"
+    },
+    {
+      "path": "SDK/cpu/wl82/tools/cfg/eq_cfg_hw.bin",
+      "sha256": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8",
+      "result": "PASS"
+    }
+  ],
+  "compiler": {
+    "archive_sha256": "a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd",
+    "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+    "version": "clang version 4.0.1 () ()\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/857bb2409f82/prep-exact-inputs-20261122/local-restore/restored-toolchain/jieli-linux-toolchains-20260730.1/pi32v2/bin\n",
+    "result": "PASS"
+  },
+  "sdk_pin_test": {
+    "command": "AC79_SDK=<bundle>/SDK python3 tests/sdk_pin_test.py",
+    "returncode": 0,
+    "stdout": "PASS SDK tag is V1.2.14\nPASS SDK pins are the V1.2.14 hashes\nPASS a wrong SDK file stops the build: build: SDK uboot.boot sha256 5cb4069ee6d6db16be731e43499086dd377667abd37d877227450c8b453aa263 does not match pinned AC79NN_SDK_V1.2.14_2026-10-13 (64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e)\nPASS AC79_SDK /workspace/scratch/857bb2409f82/prep-exact-inputs-20261122/local-restore/SDK matches the pins\n",
+    "result": "PASS"
+  },
+  "target_compile": {
+    "target": "pi32v2",
+    "object_size": 416,
+    "object_sha256": "35797fcc77a5c443ff8f96bba1ab8fc065026da44c6bb0b2ce5267c449a5ceb7",
+    "result": "PASS"
+  },
+  "result": "PASS"
+}

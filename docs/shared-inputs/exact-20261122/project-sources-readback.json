@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-22T01:47:00.144311+00:00",
+  "worker": "verify_nightly_tree fresh-worker task",
+  "browser_tab": "8",
+  "source_ui": "https://chatgpt.com/g/g-p-ad9d6d4ab04c8191af6aa22fd752707e/project?tab=sources",
+  "route": "Independent browser tab; filename Actions > Download for bundle and manifest",
+  "downloaded_bundle_path": "/opt/codex/downloads/119ad751-c8bc-4afa-bdae-d1caa5a8d954/8175b0e2-37dc-401b-b2f8-829d1c5444ff",
+  "downloaded_manifest_path": "/opt/codex/downloads/119ad751-c8bc-4afa-bdae-d1caa5a8d954/4134d6aa-63c4-47ee-bcf1-ee383c25f8c7",
+  "bundle_size_bytes": 127006815,
+  "bundle_sha256": "96c3a29b328048b94f9553de8ae0ff1ce6cc474c2ee3bc39fc2f7e950fd0f115",
+  "external_manifest_size_bytes": 4408,
+  "external_manifest_sha256": "107e7d4bb26f2819bc4bfde7c7e3d9390bf90872653af9f8d29d661fbe74e7d1",
+  "verification_script_sha256": "15508a93d93bdc5f5288f58722c842796fbaca61e625e8094d14d9c9e499412f",
+  "original_parent_bundle_or_checkouts_used": false,
+  "extraction_directory": "/workspace/scratch/857bb2409f82/prep-exact-inputs-20261122/fresh-worker-readback/unpacked",
+  "verification_result": "PASS",
+  "verification_result_sha256": "0e20e9d4475c01d31ef0bb56bfa394885d3a691897bca734f111e293c42d3953"
+}

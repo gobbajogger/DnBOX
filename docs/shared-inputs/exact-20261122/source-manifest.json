@@ -1,5 +1,5 @@
 {
-  "status": "WORKING",
+  "status": "DONE",
   "checkpoint_base": "6f6d1ba272fb553085b45879154623eb6cf66233",
   "checkpoint_branch": "lane/prep-exact-inputs-20261122-0100",
   "sources": [
@@ -16,7 +16,7 @@
       "working_tree_clean": true
     }
   ],
-  "source_recovery": "PASS real authenticated Git clones; clean checkouts",
+  "source_recovery": "PASS authorized public Git transport; clean exact checkouts",
   "sdk_test": "PASS actual tests/sdk_pin_test.py with AC79_SDK and no skipped check",
-  "delivery": "PENDING bundle and fresh-worker restore"
+  "delivery": "PASS independent Project Sources download and fresh-worker offline restore; see manifest.json and fresh-worker-restore-result.json"
 }

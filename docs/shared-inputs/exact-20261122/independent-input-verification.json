@@ -1,0 +1,48 @@
+{
+  "firmware": {
+    "commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+    "tree": "a4876790880cae769298f6701e8ab5db1d970b30",
+    "blobs": 6865,
+    "bytes": 145411116,
+    "modes": {
+      "100644": 6687,
+      "100755": 178
+    },
+    "filesystem_git_blob_and_modes": "PASS",
+    "reconstructed_git_tree": "PASS",
+    "archive_members": "PASS all paths bytes and executable bits",
+    "symlinks": 0,
+    "gitlinks": 0,
+    "export_attributes": false
+  },
+  "nightly": {
+    "commit": "583f622961fc9975fac746592ce6c483073c4170",
+    "tree": "7c10299ae8ccccb72771cd75b490b67bf2238eac",
+    "blobs": 1117,
+    "bytes": 37805424,
+    "modes": {
+      "100644": 1113,
+      "100755": 4
+    },
+    "filesystem_git_blob_and_modes": "PASS",
+    "reconstructed_git_tree": "PASS",
+    "symlinks": 0,
+    "gitlinks": 0,
+    "export_attributes": false
+  },
+  "compiler": {
+    "tar_xz_sha256": "a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd",
+    "zip_sha256": "ed379c483468c44f10cf3be7db32356b9623e16320a021cf2a4e06ec96ab5f19",
+    "tar_xz_size_bytes": 26027508,
+    "project_zip_size_bytes": 49449905,
+    "original_member_manifest": "PASS 695 entries",
+    "regular_files": 599,
+    "symlinks": 44,
+    "directories": 52,
+    "project_zip_equivalence": "PASS all regular files and symlink targets identical; 10 macOS metadata extras only; executable bits preserved",
+    "compiler_sha256": "c45189ee624de0430deb0db02e6dce171fb5538e7fe323e3964dc8ac6236240f",
+    "version": "clang 4.0.1",
+    "result": "PASS"
+  },
+  "verification_method": "Three independent delegated workers used separate read-only evidence slices for firmware, nightly and compiler. Parent assembled and verified the result."
+}
