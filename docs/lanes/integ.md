@@ -1,5 +1,15 @@
 # Integration baseline
 
+## Stock package and BREAK samples together — 2026-11-22 (WORKING)
+
+The owner clarified that the five samples need to ship with the stock firmware. The existing 0x9D000-byte update image and two-entry FWSC format preserve the stock flash boundaries. The distribution ZIP contains both checked model packages and the existing `.x0xslots` import for the original five 22,050 Hz zones. Use normal Restore with two confirmed empty compatible slots after installing the model-specific package. Neither the stock app nor its partitions change. Mocked standard restore and readback verified both model maps and the five original ADPCM byte sequences. A full import into an occupied large slot was rejected in migration planning without writes, and existing slot 3 data survived import into the two empty slots. Production firmware-reader evidence is tracked separately.
+
+[Distribution ZIP](../../evidence/integ-resume/qualification-0130/lane-integ-resume-0130-e29c99ec-stock-firmware-starting-breaks.zip) · [Manifest](../../evidence/integ-resume/qualification-0130/stock-bundle-manifest.json) · [Readback log](../../evidence/integ-resume/qualification-0130/bundle-readback.log)
+
+The archived 360 MHz emulator rebuilt from the recorded observer source. Both stock models completed two-second cold and warm calibrated preflights with zero late transfers and valid PCM. A bounded eight-second timing result follows separately. The final ten-minute all-engine run follows upstream lane integration.
+
+The current consolidated ledger includes firmware PR #987 and has the same M0–M6 state block as Nightly. All three regenerated roadmap views match across the repositories. The gate report parser passed seven controls. The live GitHub connection confirmed owner identity; its commit-status interface has read access, and the local GitHub CLI has no credentials for `--post`.
+
 ## Stock qualification and five-zone BREAK result — 2026-11-22 (WORKING)
 
 - The resolved tree `8609f75308f10874a7ba4aec1c1fb309023c100b` is published at `e29c99ec2cc610e5af3de575e85771f666b239f4`. Checks ran on the identical local tree at `5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7`. Its parents are the previous lane `95624daf00fd73e373f4d8cd133de9016c8b7f7c` and consolidated `f1786ebec2616477163b62b029c7e77405a9c3de`. Consolidated is reachable and no files are deleted relative to it.

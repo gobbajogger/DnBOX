@@ -1,0 +1,126 @@
+{
+  "format": "DnBOX stock firmware and samples distribution bundle",
+  "version": 1,
+  "firmware_source": {
+    "github_commit": "e29c99ec2cc610e5af3de575e85771f666b239f4",
+    "local_commit": "5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7",
+    "tree": "8609f75308f10874a7ba4aec1c1fb309023c100b"
+  },
+  "sample_exporter": {
+    "source_commit": "938c6aa6f49564c59df58517f68c44eb97dfa84b",
+    "blob": "8e8e6e8c195eff047cb490386fa90d8fbcce0afe"
+  },
+  "delivery": "Choose one .fwsc matching the hardware. Separately import the bundled .x0xslots into two confirmed empty compatible destinations.",
+  "models": [
+    {
+      "model": "Elite",
+      "package_identity": "SMK-37 Elite_900",
+      "file": "x0x-smk37-elite.fwsc",
+      "bytes": 651732,
+      "crc32": "4f0ac8ea",
+      "sha256": "3aaba53459442cdd1f652dedf2c438a30189e4f5d06859270e9b0da1bd9bfecd",
+      "slot_map": [
+        [
+          794624,
+          81920
+        ],
+        [
+          876544,
+          122880
+        ],
+        [
+          733184,
+          32768
+        ]
+      ],
+      "mock_blank_restore_exact": true,
+      "occupied_third_slot_preserved": true,
+      "occupied_large_slot_reported_no_full_fit": true
+    },
+    {
+      "model": "Pro",
+      "package_identity": "SMK-37 Pro_900",
+      "file": "x0x-smk37.fwsc",
+      "bytes": 651730,
+      "crc32": "29443b7e",
+      "sha256": "8f399e350a3af8ded3bee7f05d60f4b01c966b785d7a336c90dcd371178cef92",
+      "slot_map": [
+        [
+          794624,
+          81920
+        ],
+        [
+          876544,
+          122880
+        ],
+        [
+          733184,
+          32768
+        ]
+      ],
+      "mock_blank_restore_exact": true,
+      "occupied_third_slot_preserved": true,
+      "occupied_large_slot_reported_no_full_fit": true
+    }
+  ],
+  "samples": {
+    "file": "DnBOX-starting-breaks.x0xslots",
+    "bytes": 110844,
+    "crc32": "2144df1c",
+    "sha256": "3a7f19858d23309dac7375b88d0537cae7854ad65680edd1f95d4dbc0beed4c6",
+    "images": [
+      {
+        "bytes": 60237,
+        "crc32": "961626d5",
+        "sha256": "46292ed04a201deae83eaa55d7711ba4e5491a62a100bf1f0ab815d0e9ca6e3a"
+      },
+      {
+        "bytes": 50061,
+        "crc32": "9a09fdb9",
+        "sha256": "550c9035eedd403e117d054f21eb042370bbeec414a8f246b7aec9f9239100fe"
+      }
+    ],
+    "zones": [
+      {
+        "label": "BR1 1",
+        "rate_hz": 22050,
+        "frames": 34800,
+        "bytes": 17400,
+        "crc32": "b7a06d07",
+        "sha256": "e31e12c634892f111cec79c039d1f03557e285d2150039e23e812d65fac57cb7"
+      },
+      {
+        "label": "BR1 2",
+        "rate_hz": 22050,
+        "frames": 41788,
+        "bytes": 20894,
+        "crc32": "2c4565e5",
+        "sha256": "86e1b81443ae4855f5400c967dcd549adaf12d95820fbc02ecdbd37116ab9e65"
+      },
+      {
+        "label": "BR1 3",
+        "rate_hz": 22050,
+        "frames": 42862,
+        "bytes": 21431,
+        "crc32": "b7a538ea",
+        "sha256": "4902fac640c81d9bdf7b80d690a881415687e6bb5ac2b128762c50bac78355ad"
+      },
+      {
+        "label": "BR2 1",
+        "rate_hz": 22050,
+        "frames": 46184,
+        "bytes": 23092,
+        "crc32": "5efde932",
+        "sha256": "fe7c05941ac762a48031139f0ada046bb43b39cc8a48d63ffa059c2e73447544"
+      },
+      {
+        "label": "BR2 2",
+        "rate_hz": 22050,
+        "frames": 52913,
+        "bytes": 26457,
+        "crc32": "c1aa5008",
+        "sha256": "fa00ba42e238c900746e5e397eb0a46ec17b2b2cca1387822f44b8544a2f2a05"
+      }
+    ]
+  }
+}

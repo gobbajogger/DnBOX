@@ -1,0 +1,34 @@
+{
+  "source_repository": "https://github.com/gobbajogger/DnBOX",
+  "source_tag": "archive/diag/dropout-observer-20261113",
+  "source_commit": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+  "source_tree": "469b393685d819770c8e528849a0e5c6bebb60a8",
+  "source_clean": true,
+  "historical_binary_sha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+  "previous_documented_observer_binary_sha256": "8dca639e2f8b0a992f7e4581563d3497e664c8331ffa86a2e70961e1922076ac",
+  "historical_patched_file_sha256_verified": {
+    "crates/fm1-live/src/main.rs": "aaa348fd3ad5baf4ff6053d5232cca2467fc9625faf865a9a2d01a1e496e0466",
+    "crates/fm1-soc/src/lib.rs": "f58ee1ed92f58160e05bf1adc00bb20f0135a010c349f6b43ee6df7e58295bed",
+    "crates/fm1-soc/src/machine.rs": "c24444fbb6a330be1722ba7db29492cdce1c7807cd599a1df5a27523f824f0a7",
+    "crates/fm1-soc/src/periph.rs": "6d48280c439f8067e2c7ecaa952bef663f28f12e5391eed86510efeb9db37c2a",
+    "crates/fm1-soc/src/dnbox_observer.rs": "1fa99350b4eba3ffba2c1faf68efbbd3dba6e28662a47f6c108c4d89da3da8c9"
+  },
+  "cargo_lock_sha256": "89faec398e9954dfc87bc15583f686e0ac810d42c7253d4416189f1dfe338563",
+  "rust_manifest_url": "https://static.rust-lang.org/dist/channel-rust-1.85.1.toml",
+  "rust_manifest_sha256": "1e7dae690cd12e27405a97e64704917489a27c650201bf47780a936055d67909",
+  "rust_components_sha256_verified": {
+    "rustc": "92a5c532b9e87912190128704e0d65825912e3b08a6ee9203c4068d6d1df62c4",
+    "cargo": "7373132c13e394755d15f01bda4374af59b4daef01b12a83cb3df3f3be38e289",
+    "rust-std": "0aaeffba85359503f874315cd08e0ae8490275d14b41470d36d4fa57fd085916"
+  },
+  "development_debs_sha256": {
+    "wayland.deb": "66055b7df9a6c4b15fe0b52a42a76680bb4d0f4d1083800e7cd7ba26e59e68ed",
+    "x11.deb": "530de60c9c6dadd997ae7d74eca2a41b25e849373a5ad5dcdb619aa05713d6e0",
+    "alsa.deb": "dfa8e8a133ef8704093d03464d86a3e86d26232baf1e3827aa030cb68c437e1c"
+  },
+  "rustc": "rustc 1.85.1 (4eb161250 2025-03-15)",
+  "cargo": "cargo 1.85.1 (d73d2caf9 2024-12-31)",
+  "build_command": "cargo build --offline --locked --release -p fm1-live",
+  "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "isolation": "Bubblewrap, no credentials or host device files mounted, read-only source/input mounts, seccomp blocks network I/O"
+}

@@ -15,6 +15,10 @@ On 21 November 2026, Integ merged [PR #975](https://github.com/gobbajogger/DnBOX
 
 PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 merge. They cover 144 held-step checks, 7,229 pad and LED checks, copy semantics and hold-GLOBE clear/copy. Integ tracks the 522-registration host suite under I2. The initial unfiltered run stopped after 73 passes and 12 failures. [PR #988](https://github.com/gobbajogger/DnBOX/pull/988) · [Combined host results](docs/lanes/fwui/current/combined-host-results.json)
 
+## Integration candidate ancestry — 22 November 2026
+
+Firmware consolidated is `f1786ebec2616477163b62b029c7e77405a9c3de` and Nightly consolidated is `583f622961fc9975fac746592ce6c483073c4170`. The respective integration candidate source commits `e29c99ec2cc610e5af3de575e85771f666b239f4` and `938c6aa6f49564c59df58517f68c44eb97dfa84b` contain those exact bases. Each has zero deleted paths relative to its base. See [the lane ledger](docs/lanes/integ.md) for focused tests and blockers. Final gates, merges and release acceptance remain with the coordinator.
+
 ## Machine-readable roadmap state
 
 ```json
@@ -28,7 +32,7 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
       "merge_sha": "",
       "owner": "integ",
       "dependencies": [],
-      "next_action": "Reconcile the 23 host failures recorded at firmware 76040daa and qualify the current consolidated firmware and nightly baselines."
+      "next_action": "Use the pinned Local gate receipts at firmware f1786ebe and Nightly 583f6229 to reconcile failures and verify authenticated status reporting."
     },
     {
       "id": "M1",
@@ -52,7 +56,7 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
       "dependencies": [
         "M0"
       ],
-      "next_action": "FWUI #975 merged. PR #988 closed the FWUI checklist after all four integrated F5 controls passed. Integ will complete the host-suite accounting under I2."
+      "next_action": "FWUI #975, #988 and #987 are recorded in firmware consolidated. Final combined screen and runtime evidence remains required."
     },
     {
       "id": "M3",
@@ -64,7 +68,7 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
       "dependencies": [
         "M0"
       ],
-      "next_action": "Complete exact-head checks and integrate; no move completion asserted"
+      "next_action": "Resolve the independent Remote owner-baseline findings, then qualify the changed screens and runtime on the combined Nightly source."
     },
     {
       "id": "M4",
@@ -76,7 +80,7 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
       "dependencies": [
         "M0"
       ],
-      "next_action": "Use M2 render inputs as they arrive; require final same-SHA render parity before completion"
+      "next_action": "Resolve the Build History current-versus-archive copy conflict; qualify the changed references and final firmware display parity."
     },
     {
       "id": "M5",
@@ -88,7 +92,7 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
       "dependencies": [
         "M0"
       ],
-      "next_action": "Compact-program LeakSanitizer passed again at 2643d690. Embed the five original BREAK samples in both stock models and verify a signed-in opening-post vote through inbox refresh."
+      "next_action": "Co-deliver the five original BREAK samples with the stock model packages and verify standard import and readback. Verify compact-program LeakSanitizer and live owner vote persistence."
     },
     {
       "id": "M6",
@@ -104,13 +108,13 @@ PR #988 closed the FWUI checklist after all four F5 controls passed on the #975 
         "M4",
         "M5"
       ],
-      "next_action": "Complete exact-head checks and integrate; no move completion asserted"
+      "next_action": "After the lane merges, run both Local gates and strict ten-minute playback on the combined source; hand off exact evidence and safe cleanup reachability to the coordinator."
     }
   ]
 }
 ```
 
-## Merged pull requests through `d4bdf88eefd437ecaf21837eba1011f1756bc57a`
+## Merged pull requests through `f1786ebec2616477163b62b029c7e77405a9c3de`
 
 GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merge commit is reachable from this snapshot. The PR head is included for squash merges and deleted branches. Lane acceptance is tracked in `docs/lanes/integ.md`.
 
@@ -133,3 +137,4 @@ GitHub reports these PRs merged into `integration/dnbox-consolidated`. Each merg
 | [#975](https://github.com/gobbajogger/DnBOX/pull/975) | `lane/fwui` | `9dd6f2df020340f7a82ab241ef07c6ec16195ebc` | `3e307cfa455d22dfca5e4ef439080816b4e4f859` |
 | [#986](https://github.com/gobbajogger/DnBOX/pull/986) | `lane/integ-fwui-975-qualification` | `b833b53a0f45ddafc9751538fdff6f87c95ff2f9` | `468744971720a81a536308e3bd84bd8766a5ed0f` |
 | [#988](https://github.com/gobbajogger/DnBOX/pull/988) | `lane/integ-fwui-975-host-results` | `0927945a88cc73a714679fe42a0f0f5db013baf0` | `d4bdf88eefd437ecaf21837eba1011f1756bc57a` |
+| [#987](https://github.com/gobbajogger/DnBOX/pull/987) | `lane/fwui-controls` | `d62a7cfc0bef0ea66d28f1423e0a4dc6345fef54` | `f1786ebec2616477163b62b029c7e77405a9c3de` |
