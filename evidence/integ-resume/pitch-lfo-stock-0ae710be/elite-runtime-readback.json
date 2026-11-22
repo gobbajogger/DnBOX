@@ -1,0 +1,82 @@
+{
+  "packages_verified": true,
+  "results_sha256": "1e828578a0f6f82c95c1059d6f80032abe3012f64e0f722b83111bd85c247150",
+  "input_receipt_sha256": "7c72a09e2bab37c043675c627e849021090d83fbd709319f8693bcbd76d64479",
+  "target_layout_sha256": "0fbec989f06b359cc2080d97c3311de105ed0e02f6ec14aea73ac0dc6737a309",
+  "stages": {
+    "boot": {
+      "ram_sha256": "737888fdc7a75f80940e5bf14bec4ff7da602c7e8f7f59c96f6a3a932750c9f3",
+      "synthone_part": "B",
+      "synthone_filter_type": 2.0,
+      "synthone_sub_level": 1.0,
+      "synthone_voices": [
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        }
+      ],
+      "juno_part": "A",
+      "juno_typed": false,
+      "juno_stock_wide_preset": false,
+      "juno_factory_chorus_mode": 0,
+      "juno_legacy_chorus_mix": 0.17716535925865173
+    },
+    "heavy": {
+      "ram_sha256": "ea1e4af77bab4812f8d9c4bdcc0d83b13c75ed7f02792f06bc365434997e9e74",
+      "synthone_part": "B",
+      "synthone_filter_type": 2.0,
+      "synthone_sub_level": 1.0,
+      "synthone_voices": [
+        {
+          "prepared_filter_type": 2,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 2,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 2,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        }
+      ],
+      "juno_part": "A",
+      "juno_typed": false,
+      "juno_stock_wide_preset": false,
+      "juno_factory_chorus_mode": 0,
+      "juno_legacy_chorus_mix": 0.17716535925865173
+    }
+  }
+}

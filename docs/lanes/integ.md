@@ -1,5 +1,10 @@
 # Integration baseline
 
+## Newest Sound pitch-LFO stock fit — 2026-11-22 (WORKING)
+
+The [exact stock packet](../../evidence/integ-resume/pitch-lfo-stock-0ae710be/README.md) carries Sound `ad86777e` with the retained WIDE and Remote code and merged #991 UI. The 808 compile option recovered 2,352 B on each model. Elite and Pro retain 2,568 and 2,580 B free XIP plus 732 B pool margin each. Eight-second populated legacy-Juno and highpass Synth One software timing reached 7,822 / 8,222 µs with zero late halves and xruns. Both exact native USB transactions and package checks passed. Active WIDE wet deadline, current one-scalar shipping decision and full final gates remain open.
+
+
 ## Stock SuperJ6 WIDE and untraced sanitizer qualification — 2026-11-22 (WORKING)
 
 The [software evidence](../../evidence/integ-resume/stock-wide-1d727e2b/README.md) carries the exact merged #991 MIX amber sources and the latest scoped Sound input. Stock SuperJ6 WIDE adds source-owned preset ID 4 and pattern recall E5 under the explicit candidate profile. The first note and saved project path passed on both owners. Normal package, flash map and native Remote USB checks passed on Elite and Pro with 1,032 and 1,040 B XIP free and 732 B of pool margin each. I4 passed in an untraced offline Debian guest on all ten exact inputs, with the genuine leak and corruption controls. Wet-path deadline, WIDE Wave and Width display qualification, final Nightly source pairing and aggregate release gates remain open.

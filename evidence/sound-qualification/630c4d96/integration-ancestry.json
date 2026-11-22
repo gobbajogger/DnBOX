@@ -1,0 +1,21 @@
+{
+  "sound": "630c4d96f8210e0729fb79cfc0d0da3ff90821d3",
+  "integration": "86e0f63f0c353d05452b98f5601c92ccb491cd04",
+  "integration_ref": "lane/integ-resume-0130",
+  "merge_base": "0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e",
+  "sound_only_commits": 84,
+  "integration_only_commits": 62,
+  "receipt_commit": "d63620b9253fc3656c5a9200be3f4936ddb83bc1",
+  "combined_base_xip_free_bytes": {
+    "elite": 1368,
+    "pro": 1380
+  },
+  "combined_base_pool_margin_bytes": 732,
+  "stock_xip_floor_bytes": 1024,
+  "sound_only_pitch_xip_growth_bytes": {
+    "elite": 796,
+    "pro": 800
+  },
+  "combined_build_tested": false,
+  "note": "The previous combined image used Sound 0ac65800. Its 344/356 B spendable XIP is below the separate measured Sound pitch cost. The exact combined candidate requires new reclaim and a fresh link."
+}

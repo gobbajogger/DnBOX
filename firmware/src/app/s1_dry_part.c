@@ -75,7 +75,8 @@ static const struct {
     S1_FIELD(7, "SUB LEVEL", sub_level, 0, 1, X0X_U_PCT),
     S1_FIELD(8, "SUB OCTAVE", sub_extra_octave, 0, 1, X0X_U_PCT),
     S1_FIELD(9, "SUB SQUARE", sub_square, 0, 1, X0X_U_PCT),
-    S1_FIELD(115, "FILTER TYPE", filter_type, 0, 2, X0X_U_NONE)
+    S1_FIELD(115, "FILTER TYPE", filter_type, 0, 2, X0X_U_NONE),
+    S1_FIELD(57, "PITCH LFO", pitch_lfo, 0, 3, X0X_U_NONE)
 #undef S1_FIELD
 };
 
@@ -91,6 +92,7 @@ int s1_patch_slot(unsigned id)
 
 float s1_patch_physical(const s1_patch_descriptor *d, unsigned position)
 {
+    if (d->factory_id == 57u) return (float)((position * 3u + 63u) / 127u);
     if (d->factory_id == 115u) return (float)((position * 2u + 63u) / 127u);
     if (d->factory_id == 8u || d->factory_id == 9u) return position >= 64u ? 1.f : 0.f;
     if (position >= S1_PATCH_STEPS) return d->maximum;
@@ -471,10 +473,44 @@ static void pan_stereo(s1_dry_part *part, float *left, float *right, unsigned fr
     widen_right(&part->width, right, frames);
 }
 
+#if X0X_SYNTHONE_PATCH
+static void pitch_lfo_mix(s1_dry_part *part, float *left, unsigned frames, unsigned route)
+{
+    enum { PITCH_SPAN = 32 };
+    /* Effects advance the real clocks after the dry mix. Preview the same
+     * positive gains here without advancing those shared clocks twice. */
+    s1_trem_lfo a = part->lfo[0], b = part->lfo[1];
+    for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+        s1_dry_begin_block(&part->voice[i]);
+    for (unsigned offset = 0; offset < frames; offset += PITCH_SPAN) {
+        const unsigned count = frames - offset < PITCH_SPAN ? frames - offset : PITCH_SPAN;
+        float ratio[PITCH_SPAN];
+        for (unsigned i = 0; i < count; ++i) {
+            if (route & 1u) (void)lfo_step(&a);
+            if (route & 2u) (void)lfo_step(&b);
+            const float gain_a = .5f * (1.f + a.smooth) * a.level;
+            const float gain_b = .5f * (1.f + b.smooth) * b.level;
+            const float gain = route == 1u ? gain_a : route == 2u ? gain_b : .5f*(gain_a+gain_b);
+            ratio[i] = 1.f + 0.0594630944f * gain;
+        }
+        for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+            if (part->voice[i].started)
+                s1_dry_mix_pitch(&part->voice[i], left + offset, ratio, count);
+    }
+}
+#endif
+
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames)
 {
     if (!frames) return;
     memset(left, 0, frames * sizeof *left);
+#if X0X_SYNTHONE_PATCH
+    const unsigned pitch_route = (unsigned)part->patch.pitch_lfo;
+    if (((pitch_route & 1u) && part->lfo[0].level != 0.f) ||
+        ((pitch_route & 2u) && part->lfo[1].level != 0.f))
+        pitch_lfo_mix(part, left, frames, pitch_route);
+    else
+#endif
     for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
         s1_dry_begin_block(&part->voice[i]);
         if (part->voice[i].started)

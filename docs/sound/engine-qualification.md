@@ -8,9 +8,24 @@ The optional `X0X_TANH_BOOT_TABLE=1` profile uses shared pool storage for one bo
 
 The opt-in Synth One patch editor now saves the original lowpass, bandpass and highpass selector in the existing sound-cell adjunct. The original-program comparison gained one stereo pass, from 7 to 8 of 694, at the unchanged 1 dB level and 3 dB spectral limits. All seven previous passes, all 694 original hashes and all 598 lowpass firmware renders were preserved. The state-variable filter passed 5,512,500 samples of extreme live retuning. Save, restore, held voices, panic and note locks passed on the host. [Factory replay](../../experiments/sound-hardware-v1/synthone-alternate-filter/) · [Integrated host receipt](../../evidence/sound-resume/synthone-alternate-filter/focused.txt).
 
+The saved Synth One pitch LFO applies the original positive modulation gain to oscillator 1 and the sub oscillator. It adds original control ID 57 to the projected factory checks, bringing the stereo pass count from 8 to 10 of 694. The original PCM hashes and existing panel readbacks matched for all 694 programs. All 517 programs with the pitch route off stayed bit-exact, and both new passes meet the existing 1 dB level and 3 dB spectral limits. Host tests passed inactive routing, retriggers, save and restore, and note locks. The stock software builds retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with 732 bytes of pool margin each. All eight standard strict scenes passed on the changed source. [Factory results, host tests and board build logs](../../evidence/sound-resume/synthone-pitch-lfo/).
+
 The opt-in SuperJ6 factory loader now follows authenticated build-9 chorus version and switch routing. It selects the new independent stereo path for 294 J60V2 factory programs, the existing legacy chorus for 46, and the bit-exact dry path for 300. The three independent wet modes passed the archived component tests at the unchanged 1 dB RMS and 3 dB spectral limits, with 2.064 dB worst spectral error. Both bypass cases stayed bit-exact. All six longer impulse trains passed across 44.1 and 48 kHz. Six of twelve sustained chord cases passed, so broader wet parity remains open. [Original routing, integrated loader checks and component results](../../evidence/sound-resume/superj6-factory-chorus/). The shipped path uses independent 16-bit per-owner delay histories in pool storage. The packed histories preserved every archived and impulse-train score and kept six sustained passes. Panic clears the active histories and the focused factory suite verified silence afterward. [Packed-history comparison](../../evidence/sound-resume/superj6-factory-chorus/compact-comparison.json).
 
-## Current software qualification — source `0ac65800`
+## Current standard software qualification — source `630c4d96`
+
+The two stock packages retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with 732 bytes of pool margin each. All eight strict scenes used the exact Sound ELF and firmware package at 360 MHz, populated both basses, both drum kits and BREAK, and recorded zero late callbacks, zero xruns and no new guest fault. The alternate-filter scenes retain the full-level sub setting. The pitch route is covered separately by the exact factory replay and host lifecycle tests. [Firmware packages](../../artifacts/sound-qualification/630c4d96/) · [Exact build and strict timing](../../evidence/sound-qualification/630c4d96/).
+
+| Populated software scene | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Chicago and Miami | 8,251 µs | 8,019 µs |
+| Juno and Synth One | 6,922 µs | 7,618 µs |
+| Juno and Synth One bandpass with full sub level | 7,242 µs | 7,727 µs |
+| Juno and Synth One highpass with full sub level | 7,234 µs | 7,710 µs |
+
+Sound and Integration `86e0f63f` diverge from `0b0ff56b`. Integration's previous combined software build retained 1,368 bytes of Elite XIP and 1,380 on Pro with Sound `0ac65800`. The saved pitch route costs 796/800 bytes in the Sound-only links. The combined image needs additional reclaim and a fresh stock build against the 1,024-byte XIP floor. The two emulator images and the render and log archive are verified locally. [Ancestry and budget](../../evidence/sound-qualification/630c4d96/integration-ancestry.json).
+
+## Prior strict software qualification — source `0ac65800`
 
 The exact opt-in packages retain 2,460 bytes of XIP on Elite and 2,472 on Pro. Both retain 732 bytes above the pool reserve. The eight strict 360 MHz populated scenes each completed 648 halves over 922 events, with zero late callbacks, zero xruns and no new guest fault. The alternate-filter scenes use the real saved Synth One ID 115 edit plus full sub level. [Exact receipts](../../evidence/sound-qualification/0ac65800/) · [Both .fwsc packages](../../artifacts/sound-qualification/0ac65800/).
 

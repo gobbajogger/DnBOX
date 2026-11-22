@@ -1,0 +1,23 @@
+{
+  "base_commit": "0ae710bea34d553ec2eb05eb83c7e5f70401ce6a",
+  "base_tree": "a4c8e9624636fe0a04a60300d83ae8c83ee32863",
+  "build_option_patch_sha256": "07000a17710f0580c31f92ff4a3063213c15f1328d12b1a2e63bc7a3b38e9de5",
+  "old_input_manifest_sha256": "27b13d6ca9adc3059c80f69f3734004be872673f70515d1ddf00d9c4933093bc",
+  "old_seed_path": "/tmp/dnbox-sound-pitch-native.GSb1Xg/pro-synthone-juno-highpass-seed/flash.bin",
+  "old_seed_sha256": "85328f6b6e5f825d72251600c1d1822b4dd146157837df1318f96a08374c5da2",
+  "old_package_sha256": "30f8700a1dd65230f2d199d3a2c09328be7834ae38a5e098c0b188935b7d5b3a",
+  "old_prefix_sha256": "5ebf4c1d3554115b0deb4323c2e684ed2bc8ffd1df470223e0032d2ccfbc396f",
+  "new_fwsc": "/tmp/dnbox-pitch-lfo-integration.W1NZwH/source/build/x0x-smk37.fwsc",
+  "new_fwsc_sha256": "990452d0477c8ac624511a5910a9978f0b5cddd234feaed60a97e556c205d544",
+  "new_elf": "/tmp/dnbox-pitch-lfo-integration.W1NZwH/source/build/smk37/x0x.elf",
+  "new_elf_sha256": "dedade8e9f7295ded8b9747d8660bbcc61629c30ea125790992e088c3e0cfd28",
+  "new_prefix_sha256": "eb0f3e06ffcbd621e364e8eb63461576322670d471149e941f82ed29921b1d62",
+  "protected_prefix_bytes": 643072,
+  "new_seed_sha256": "b9aa1db4bff6c37da4bf81b1b7d216b95d0991097206a90e3f867edf077f5d43",
+  "identical_user_tail_sha256": "ea41a5a15c78badeacdace5b60c08112ebec40e222662183d64ceea30afd4f27",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "source_filter": "highpass",
+  "source_sub_enabled": true,
+  "source_sample_sha256": "0ff158e250ab712c651325deec782815c9ebd4fd91dde93f1fee9b834a367c23",
+  "slot_adpcm_sha256": "50cca9b2718d9df3aa86d192673513cf84741432644413e8a6061155ecac7937"
+}

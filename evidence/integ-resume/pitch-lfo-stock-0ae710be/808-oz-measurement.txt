@@ -1,0 +1,24 @@
+Source commit: 0ae710bea34d553ec2eb05eb83c7e5f70401ce6a
+Source tree: a4c8e9624636fe0a04a60300d83ae8c83ee32863
+Integration parent: 1a9199c1fb3bb0f60da555a9cab6ad9d20452aba
+Sound parent: ad86777ebc5554ba577d4623eeb8f806ce1e5121
+Sound behavior source: 630c4d96f8210e0729fb79cfc0d0da3ff90821d3
+Build-option patch: 07000a17710f0580c31f92ff4a3063213c15f1328d12b1a2e63bc7a3b38e9de5
+Only change: add dsp/drum808.c to the already enabled 909/BREAK -Oz option.
+
+Model      Baseline XIP   Experimental XIP  Change     Pool raw  Reserve  Margin
+Elite             216 B             2568 B    2352 B     8924 B   8192 B   732 B
+Pro               228 B             2580 B    2352 B     8924 B   8192 B   732 B
+RAM .data + .bss retained 96004/98304 B. Firmware format/ROM/section checks passed both.
+Baseline logs are elite.log and pro.log. The 808-oz-* logs/patch/hash files record the experiment.
+This check measures memory only. No native playback or timing test ran.
+
+From the source checkout, at the stated commit with the accompanying patch applied:
+export PYTHONDONTWRITEBYTECODE=1
+export JIELI_TOOLCHAIN=/workspace/scratch/857bb2409f82/dnbox-fwui-jieli/toolchain
+export AC79_SDK=/workspace/scratch/857bb2409f82/build-e35/inputs/sdk214
+export X0X_SYNTHONE_PATCH=1 X0X_SUPERJ6_FACTORY=1 X0X_SUPERJ6_STOCK_PRESET=1 X0X_DEV_PADCAL=0
+export X0X_COMPOSE_S1_EFFECTS=1 X0X_DNR2_SCRATCH=1 X0X_DNR2_NATIVE=1 X0X_TANH_BOOT_TABLE=1
+export X0X_INTEG_DRUM_SIZE=1 X0X_INTEG_LATEST_SOUND_FIT=1 BOARD=smk37
+MODEL=elite sh build.sh
+MODEL=pro sh build.sh

@@ -21,7 +21,7 @@ typedef struct {
     float cutoff_hz, resonance, filter_depth;
     float oscillator1_level, balance;
 #if X0X_SYNTHONE_PATCH
-    float sub_level, sub_extra_octave, sub_square, filter_type;
+    float sub_level, sub_extra_octave, sub_square, filter_type, pitch_lfo;
 #endif
 } s1_dry_controls;
 
@@ -69,6 +69,9 @@ void s1_dry_begin_block(s1_dry_voice *voice);
 float s1_dry_sample(s1_dry_voice *voice);
 /* Add one active voice after the caller has applied its block boundary. */
 void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames);
+#if X0X_SYNTHONE_PATCH
+void s1_dry_mix_pitch(s1_dry_voice *voice, float *mix, const float *ratio, unsigned frames);
+#endif
 int s1_dry_render(s1_dry_voice *voice, float *mono, unsigned frames);
 /* Exposed physical control law for numerical validation, not a control ID API. */
 float s1_dry_cutoff(float base_hz, float depth, float envelope);
