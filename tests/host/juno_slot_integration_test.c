@@ -102,8 +102,12 @@ static void check_compact_widgets(int owner)
             }
             if (id == 10 && j != 1) {
                 int crossings = 0;
-                for (int x = 3; x < 3+26; ++x)
-                    crossings += cv_px[(22+9)*240+x] == swap16(SOUND_INK);
+                for (int x = 0; x < 26; ++x) {
+                    uint16_t pixel = cv_px[(22+9)*240+x+3];
+                    /* A sloped trace can cover the midline without an opaque pixel. */
+                    crossings += j ? pixel != low[9][x] : pixel == swap16(SOUND_INK);
+                }
+                printf("PWM midline owner=%d raw=%d crossings=%d\n", owner, positions[j], crossings);
                 CHECK(j ? crossings >= 10 : crossings == 0);
             }
         }
