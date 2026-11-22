@@ -1,0 +1,13 @@
+diff --git a/tools/build.py b/tools/build.py
+index d4a6a6308d47e2ef8e1f716ae1af779b8163f8e7..1d9db784e8862d2df8b65f99027ab5e1ca0bcd65 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -454,6 +454,8 @@ def app_compile_commands(flags, original_synth, wobble):
+             unit_flags = flags
+         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
+             unit_flags = [f for f in unit_flags if f != "-flto"]
++        if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":
++            unit_flags = ["-Os" if flag == "-O2" else flag for flag in unit_flags]
+         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
+         objs.append(o)
+     if original_synth:

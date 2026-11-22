@@ -1,0 +1,80 @@
+diff --git a/firmware/src/dsp/drum909.c b/firmware/src/dsp/drum909.c
+index a4bf225f668bbb81d94317292a7b3c91ab02bc4d..e24ac8af591e6e5f563885a4c08523ceac1f898f 100644
+--- a/firmware/src/dsp/drum909.c
++++ b/firmware/src/dsp/drum909.c
+@@ -459,17 +459,23 @@ float x0x_tanh_raw[X0X_TANH_N + 2u] X0X_POOL;
+ 
+ static X0X_COLD void drum909_expand_tanh(void)
+ {
+-    const uint8_t *src = x0x_tanh_boot_data;
++    /* Three-bit ZigZag codes are followed by the ULEB128 escapes. */
++    const uint8_t *src = x0x_tanh_boot_data + ((X0X_TANH_N + 2u) * 3u + 7u) / 8u;
+     uint32_t word = 0, first = 0, second = 0;
+     for (unsigned i = 0; i < X0X_TANH_N + 2u; ++i) {
+-        uint32_t encoded = 0;
+-        unsigned shift = 0;
+-        uint8_t next;
+-        do {
+-            next = *src++;
+-            encoded |= (uint32_t)(next & 127u) << shift;
+-            shift += 7;
+-        } while (next & 128u);
++        unsigned bit = i * 3u;
++        const uint8_t *token = x0x_tanh_boot_data + (bit >> 3);
++        uint32_t encoded = ((token[0] | (uint32_t)token[1] << 8) >> (bit & 7u)) & 7u;
++        if (encoded == 7u) {
++            encoded = 0;
++            unsigned shift = 0;
++            uint8_t next;
++            do {
++                next = *src++;
++                encoded |= (uint32_t)(next & 127u) << shift;
++                shift += 7;
++            } while (next & 128u);
++        }
+         second += (encoded >> 1) ^ (0u - (encoded & 1u));
+         first += second;
+         word += first;
+diff --git a/tools/gen_drum_samples.py b/tools/gen_drum_samples.py
+index 6a1152daf40a53b35d71eebe02d4546830f13c8f..d8864ad0e7a02894045d28f3c6486c18177fbd24 100644
+--- a/tools/gen_drum_samples.py
++++ b/tools/gen_drum_samples.py
+@@ -95,10 +95,11 @@ def read_wav(path):
+ 
+ 
+ def pack_tanh_boot(table):
+-    """Zigzag/LEB128 third differences of the binary32 words."""
++    """Pack three-bit ZigZag deltas with ULEB128 escapes for values above six."""
+     previous = first = second = 0
+-    packed = []
+-    for sample in table:
++    tokens = bytearray((3 * len(table) + 7) // 8)
++    escapes = []
++    for i, sample in enumerate(table):
+         word, = struct.unpack("<I", struct.pack("<f", sample))
+         next_first = word - previous
+         next_second = next_first - first
+@@ -106,12 +107,18 @@ def pack_tanh_boot(table):
+         if not -(1 << 31) <= delta < (1 << 31):
+             raise ValueError("tanh boot-table delta does not fit signed 32 bits")
+         encoded = (delta << 1) ^ (delta >> 31)
+-        while encoded >= 128:
+-            packed.append((encoded & 127) | 128)
+-            encoded >>= 7
+-        packed.append(encoded)
++        token = min(encoded, 7)
++        offset, shift = divmod(3 * i, 8)
++        tokens[offset] |= (token << shift) & 255
++        if shift > 5:
++            tokens[offset + 1] |= token >> (8 - shift)
++        if token == 7:
++            while encoded >= 128:
++                escapes.append((encoded & 127) | 128)
++                encoded >>= 7
++            escapes.append(encoded)
+         previous, first, second = word, next_first, next_second
+-    return packed
++    return list(tokens) + escapes
+ 
+ 
+ def arr(ctype, name, vals, fmt=str, per=12, shared=False):

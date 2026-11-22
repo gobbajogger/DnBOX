@@ -1,0 +1,92 @@
+{
+  "scope": "exact scratch, software only, bounded 8 s",
+  "integration_firmware": "344fbfe34a1cf644683c2554b9a6c4629c0c2bb5",
+  "integration_nightly": "105fe23af9b9ef7306f2751f878ea35b729b30f5",
+  "sound": "5b1d1c71822ced4e94e5a0a0fcb85e8f6a52bbc1",
+  "fwui": "1ec2d61a825b88d7736371623cb12570e79da864",
+  "retained": {
+    "profile": "drum909.c, drum808.c, breaks.c -Os",
+    "commit": "3fdd05d077b5eb1cb0a50d362e26a955a0e2337e",
+    "tree": "833a2ec86081efd0b89070b434026a9e0289688b",
+    "xip_free": [
+      1036,
+      1044
+    ],
+    "pool_margin": [
+      3804,
+      3804
+    ]
+  },
+  "reserve": {
+    "profile": "all-Os plus boot-only tanh token packing",
+    "commit": "1070a75f3e570f1228e16b36f5ad2f943bbcb1c4",
+    "tree": "fb2026fcfa6e5c8dbba01bfca6fbf4cc8a240435",
+    "xip_free": [
+      1468,
+      1480
+    ],
+    "pool_margin": [
+      3804,
+      3804
+    ],
+    "first_different_mixed_pcm_stereo_frame": [
+      313072,
+      308465
+    ]
+  },
+  "matched_o2_diagnostic_xip_free": [
+    -500,
+    -492
+  ],
+  "floors": {
+    "xip": 1024,
+    "pool": 512
+  },
+  "timings": [
+    {
+      "receipt": "all-os-elite-timing.json",
+      "passed": true,
+      "max_us": 7013,
+      "late": 0,
+      "xruns": 0,
+      "halves": 648
+    },
+    {
+      "receipt": "all-os-pro-timing.json",
+      "passed": true,
+      "max_us": 7841,
+      "late": 0,
+      "xruns": 0,
+      "halves": 648
+    },
+    {
+      "receipt": "boot-token-elite-timing.json",
+      "passed": true,
+      "max_us": 7010,
+      "late": 0,
+      "xruns": 0,
+      "halves": 648
+    },
+    {
+      "receipt": "boot-token-pro-timing.json",
+      "passed": true,
+      "max_us": 7878,
+      "late": 0,
+      "xruns": 0,
+      "halves": 648
+    }
+  ],
+  "producer": "compiled bound editor plus real host Apply/Undo; stock catalog and identity not admitted",
+  "project_sources": {
+    "visible_files": 33,
+    "documented_pro_project_limit": 40,
+    "observed_storage_used_gb": 15.9,
+    "observed_storage_total_gb": 100,
+    "exact_existing_equivalent_verified": false,
+    "usable_slot_verified": false,
+    "existing_original_count": 5,
+    "verified_local_archive_bytes": 59608737,
+    "archive_sha256": "16d0f1284d00422714edd7d2165ed6cda181ef7c26700d9322f739025ce089b5",
+    "upload_count": 0
+  }
+}

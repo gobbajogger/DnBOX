@@ -1,5 +1,11 @@
 # Integration baseline
 
+## Stock XIP deficit closed in scratch — 2026-11-22 (WORKING)
+
+The exact bound composition includes Sound `5b1d1c71` and FWUI `1ec2d61a`. Compiling only the 909, 808 and BREAK translation units at `-Os` leaves 1,036/1,044 B Elite/Pro free XIP and 3,804 B pool margin on both stock packages. Calibrated eight-second populated playback peaked at 7,013/7,841 µs with zero late halves and xruns. Offline package and flashmap checks and the real engine Apply/Undo regression passed. Boot-only token packing is recorded in reserve with extra XIP and a late whole-scene PCM difference. Production connection admission and final gates remain pending. [Exact evidence and replay](../../evidence/integ-resume/stock-size-344fbfe/README.md)
+
+Project Sources quota type and availability remain unverified. A locally checked one-file archive preserves all five original artifacts and their hashes. No new attachment was attempted.
+
 ## Scratch stock composition — 2026-11-22 (WORKING)
 
 Composed Integration `7233317f`, Sound `eeb91398` and the final isolated FWUI source at public `48651ff7`, with the exact `f7104b3f` UI blob. Both plain packages passed offline container and flashmap checks. The plain composition leaves 1,000/1,008 B Elite/Pro XIP free and 7,908 B pool margin. The dual-engine bound Remote build with the lossless boot table leaves 3,804 B pool margin and needs 1,496/1,484 B more XIP to reach the stock floor. Both stock links reject that configuration. No parent paths were deleted. [Reproduction, memory and host receipts](../../evidence/integ-resume/stock-compose-7233317/README.md)

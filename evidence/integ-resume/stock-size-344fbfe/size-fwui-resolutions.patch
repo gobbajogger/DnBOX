@@ -1,0 +1,76 @@
+diff --git a/docs/lanes/fwui.md b/docs/lanes/fwui.md
+index ffab1e340cc09708e9da74576547e7c0dc5b9bf8..04ded368bb801e7877830cf61fed8635b309b441 100644
+--- a/docs/lanes/fwui.md
++++ b/docs/lanes/fwui.md
+@@ -279,8 +279,5 @@ The [canonical comparison and qualification index](fwui/current/reference-026/qu
+ The final [F1–F7 evidence index](fwui/current/reference-026/qualification/README.md) includes independent viewport checks and stock Elite/Pro BREAK motion. F1 stays open on the approved drum MIX difference. The best complete detached renderer leaves 940/948 B of stock Elite/Pro XIP free, below the 1,024 B floor. Its patch and logs are preserved for the next fit pass. Status: WORKING.
+ 
+ The [R22 mixer and readout update](fwui/current/reference-026/qualification/README.md#exact-r22-mix-and-readout-update) restores the filled LEVEL and pending mute cues for both kits, suppresses duplicated FX and Master/Wave readouts, and preserves the confirmed 0.0.26 mute timeline. Exact stock builds leave 1,116 B Elite and 1,124 B Pro XIP free, with 832 B pool margin each. Bass retains its expression lanes pending an independently legible held accent and final-column slide cue. Status: WORKING.
+-<<<<<<< 5a9237697ae86af99cc6123054c08cb666d7a6b5
+-=======
+ 
+ The [shared spatial coverage and Bass qualification](fwui/current/reference-026/qualification/README.md#shared-spatial-coverage-and-bass-cues) covers the framebuffer line change, both SEQ/GEN Bass owners, equivalent Pan and shared glyph controls, and the same 0.0.26 mute timeline. The exact stock packages leave 1,164 B Elite and 1,176 B Pro XIP free with 832 B pool margin each. The 1,538-state framebuffer gate reports zero findings. Status: WORKING pending Project Sources verification and the canonical #987 update.
+->>>>>>> 1ec2d61a825b88d7736371623cb12570e79da864
+diff --git a/docs/lanes/fwui/current/reference-026/qualification/README.md b/docs/lanes/fwui/current/reference-026/qualification/README.md
+index fea9d5a80aaf0cb8b53fd271f2626e6a14428125..00fa5c94340cc93e983ba887d5f719c5e522f13f 100644
+--- a/docs/lanes/fwui/current/reference-026/qualification/README.md
++++ b/docs/lanes/fwui/current/reference-026/qualification/README.md
+@@ -20,15 +20,9 @@ Identical source and archived RGB reuse establishes the corresponding visual wit
+ 
+ | Check | Result and evidence |
+ | --- | --- |
+-<<<<<<< 5a9237697ae86af99cc6123054c08cb666d7a6b5
+-| F1 screens and shared R22 treatment | **Open.** The canonical index covers all mapped roles. The verified MIX and FX changes are recorded above. Bass AC/SL lanes remain while the on-note cue is open, and missing exact motion witnesses are still listed in the motion review. |
+-| F2 geometry and visible text | **Pass in the exercised domains.** The [reached renderer audit](geometry-reached-baseline.json) found zero geometry flags in 1,538 states, 44,082 text audits, zero missing of 19,643 presence checks and zero missing or damaged of 249 glyph-pixel checks. The [independent final BREAK delta review](break-native-review.md) adds 5,602 checks and [72 exact viewport crops](break-viewport-review.json). [Pad Colours independent review](pad-colours-independent-review.json) adds 45 exact viewport crops. |
+-| F3 stock fit | **Pass.** [Final Elite and Pro packages, hashes and build receipts](r22-mix-stock/) retain 1,116 B and 1,124 B of XIP free, with 832 B of pool margin each. |
+-=======
+ | F1 screens and shared R22 treatment | **Verified for the exercised current renderer changes.** The canonical index covers all mapped roles. Some historical exact-state or timed witnesses remain unavailable, as recorded in the qualification map and motion review. |
+ | F2 geometry and visible text | **Pass in the exercised domains.** The [current reached renderer audit](spatial-line-stock/geometry.json) found zero geometry flags in 1,538 states, 43,965 text audits, zero missing of 19,643 presence checks and zero missing or damaged of 249 glyph-pixel checks. The [independent final BREAK delta review](break-native-review.md) adds 5,602 checks and [72 exact viewport crops](break-viewport-review.json). [Pad Colours independent review](pad-colours-independent-review.json) adds 45 exact viewport crops. |
+ | F3 stock fit | **Pass.** [Elite and Pro packages, hashes and build receipts](spatial-line-stock/) retain 1,164 B and 1,176 B of XIP free, with 832 B of pool margin each. |
+->>>>>>> 1ec2d61a825b88d7736371623cb12570e79da864
+ | F4 Pan and battery | **Pass in the mapped replay.** The scoped suite checks the L50/C/R50 formatter and battery layouts. The paired battery replay records four levels, deferred Settings states and exact icon pixels on normal and SMC top bars. |
+ | F5 pads, LEDs and hold-GLOBE | **Pass in host and stock-emulator coverage.** Drum route/held-step receipts, the scoped hold-GLOBE suite and the [stock BREAK playhead GIFs and input receipts](stock-break-motion/) cover the mapped operation and feedback. |
+ | F6 continuous strip and mode selection | **Pass.** The paired [BREAK lane motion](../break-seq/README.md), drum captures and lane edit/transaction suites verify Velocity, Chance, Pitch and Pan and the physical lane selection path. |
+@@ -44,9 +38,6 @@ The production renderer blob is `f7104b3f8a7a87d7f03daaa7845d7f513f9213f4`, base
+ 
+ [Host results](r22-mix-stock/host-results.txt) include 11,624 mixer checks and the focused FX regressions. The timing replay passed 24 checks and [matches shipping for all 20 recorded event rows](r22-mix-stock/mute-events.txt). Both accepted and applied mute masks are recorded at the original engine sample indices. The renderer-local size change preserved all 28 mixer replay frames pixel for pixel. Stock links and package CRCs passed for both models. [Integration measurement](https://github.com/gobbajogger/DnBOX/pull/987#issuecomment-7073368435).
+ 
+-<<<<<<< 5a9237697ae86af99cc6123054c08cb666d7a6b5
+-Bass SEQ and GEN retain AC/SL so a held accent and a slide in visible column 15 remain readable. Shipping and the candidate share the held fill and final-column connector rules. Removing those lanes requires a verified replacement cue on the notes.
+-=======
+ On this historical MIX checkpoint, Bass SEQ and GEN still retained their AC/SL rows. The current on-note cues are verified below.
+ 
+ ## Shared spatial coverage and Bass cues
+@@ -60,4 +51,3 @@ Bass A/B SEQ and GEN use the larger note viewport, part-colored held accent fill
+ [Focused results](spatial-line-stock/host-results.txt) cover native line coverage, equivalent Pan states (L50/C/R50), selected-owner bindings, shared synth and drum glyph bindings and label/value/unit formatting. Unchanged battery, pads, LED, SMC and startup witnesses retain their original pins. The geometry gate resolves the explicit Level-label hook and its runtime negatives. Measurements are stock link, package and host framebuffer evidence. Combined-tree fit belongs to Integration.
+ 
+ The [refreshed raster index](spatial-line-stock/current-renderer-index.json) maps 591 changed roles, 32 Bass cue frames, 20 mute event frames and 88 same-value kit Pan frames. The complete archive contains 3,366 full-page GIFs and retains all original references and still-valid witnesses. Its SHA-256 is `8cea5f20a9f826941c637ca831ac090fba83264f1c2bea162aa2ead24fdcd787`.
+->>>>>>> 1ec2d61a825b88d7736371623cb12570e79da864
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index e5281b2313bd8d43fa24ef0795844ee55c9e88bb..94332e19e67a42ffbc059791eac266ab4e9c834f 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1883,23 +1883,6 @@ static int drum_mix_page(void)
+     if (ui.view != V_MIX) return -1;
+     unsigned kit = (unsigned)ui.page[V_MIX][0] - MIX_FIRST_KIT_PAGE;
+     return kit < NKIT ? (int)kit : -1;
+-<<<<<<< 5a9237697ae86af99cc6123054c08cb666d7a6b5
+-}
+-
+-/* MIX MASTER (peak hist + COMP knobs); not the WAVE sibling */
+-static int master_mix_page(void)
+-{
+-    const char *t = pg.title[cur_page()];
+-    return ui.view == V_MIX && t[0] == 'M' && t[1] == 'A' && t[2] == 'S' && t[3] == 'T';
+-}
+-
+-/* MIX WAVE: live post-master mono scope from eng_scope[] */
+-static int wave_mix_page(void)
+-{
+-    const char *t = pg.title[cur_page()];
+-    return ui.view == V_MIX && t[0] == 'W' && t[1] == 'A' && t[2] == 'V' && t[3] == 'E';
+-=======
+->>>>>>> 1ec2d61a825b88d7736371623cb12570e79da864
+ }
+ 
+ /* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */

@@ -1,0 +1,125 @@
+{
+  "firmware_model": "SMK-37 Pro",
+  "source_parent": "abdd3381b1144fbc20ca6b0e6e3bfdc3cfd79956",
+  "source_parent_tree": "d157b806471186d509d19ae44bcb61c48f070d60",
+  "effective_tree": "d8a08d58ac705b833663cd65c5a2f9f03a6880a5",
+  "changed_build_blob": "61a1751b029ca2b17c0bea0fe99d8a639b3b9614",
+  "profile": {
+    "X0X_DNR2_SCRATCH": 1,
+    "X0X_COMPOSE_S1_EFFECTS": 1,
+    "X0X_SYNTHONE_PATCH": 1,
+    "X0X_SUPERJ6_FACTORY": 1,
+    "X0X_TANH_BOOT_TABLE": 1,
+    "X0X_INTEG_D909_SIZE": 1
+  },
+  "xip_free": 2132,
+  "pool_above_reserve": 3804,
+  "proof_scope": "Two stocked synth owners, both drum kits and one CRC-validated BREAK user-slot zone on three bounded 8s shots. No package publication, device writes or final combined ten-minute timing run.",
+  "seed_artifact": "d5-public-seed-compare.json",
+  "seed_artifact_sha256": "cf58fe6e1e641bb2d31668a680396f433e1b39e90cc6fbb8214c86ebefe54a38",
+  "conclusion": "The matched non-sub package, complete seed and scene are byte-identical across the two emulator paths. Both public v0.5.1 cases passed while the archived raw observer failed; using a different runner/recorder is confounded with differing emulation clocks. The data do not establish real-device timing or isolate the code-generation option.",
+  "cases": {
+    "strict-synthone-juno": {
+      "file": "strict-synthone-juno/results.json",
+      "sha256": "1997c23960c2bdeabc1b4b7ec5b03afb2af231fce3c536284a4c9d43c05ba788",
+      "fwsc_sha256": "825f2eadc298e56d1581da398f9faf2cc6a964650367f7694e31609c39d39382",
+      "elf_sha256": "b3b862bd052b28eb1ebed70be872b07403cf7b987bb5773b4ce302aa1b420bcc",
+      "emulator_sha256": "3063cd6dda355cfc2f3f461efc163a73d2da1ba32cec535a6465cf607ec6b872",
+      "initial_seed_sha256": "52d2afd94725816fd5680ee2bb5219ce08ca9bb1dda9f86cb5920977ace817ee",
+      "heavy_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+      "peak_us": 12366,
+      "guest_halves": 628,
+      "raw_late": 8,
+      "audio_xruns": 8,
+      "triggered_rows_909_808": [
+        11,
+        11
+      ],
+      "meters_909_808_A_B_BREAK": [
+        32767,
+        32382,
+        4322,
+        3742,
+        32767
+      ],
+      "last_playhead_steps": [
+        8,
+        6,
+        8,
+        20,
+        8
+      ],
+      "healthy_capture": true,
+      "passed": false,
+      "terminal_emulator_clock": "5760 MHz"
+    },
+    "public-d5-synthone-juno": {
+      "file": "public-d5-synthone-juno/results.json",
+      "sha256": "815351dee18b5317d2671ebdb1749e7b4bda962a013784e9b7c699ccbda48972",
+      "fwsc_sha256": "825f2eadc298e56d1581da398f9faf2cc6a964650367f7694e31609c39d39382",
+      "elf_sha256": "b3b862bd052b28eb1ebed70be872b07403cf7b987bb5773b4ce302aa1b420bcc",
+      "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+      "initial_seed_sha256": "52d2afd94725816fd5680ee2bb5219ce08ca9bb1dda9f86cb5920977ace817ee",
+      "heavy_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+      "peak_us": 8110,
+      "guest_halves": 648,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "triggered_rows_909_808": [
+        11,
+        11
+      ],
+      "meters_909_808_A_B_BREAK": [
+        32767,
+        19493,
+        8139,
+        1591,
+        30034
+      ],
+      "last_playhead_steps": [
+        9,
+        6,
+        9,
+        27,
+        9
+      ],
+      "healthy_capture": true,
+      "passed": true,
+      "terminal_emulator_clock": "2880 MHz"
+    },
+    "public-d5-synthone-juno-sub": {
+      "file": "public-d5-synthone-juno-sub/results.json",
+      "sha256": "751f689bbbcb1c43ffff872176196b5ce16c00f48ab30fe601c690291911d6b3",
+      "fwsc_sha256": "825f2eadc298e56d1581da398f9faf2cc6a964650367f7694e31609c39d39382",
+      "elf_sha256": "b3b862bd052b28eb1ebed70be872b07403cf7b987bb5773b4ce302aa1b420bcc",
+      "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+      "initial_seed_sha256": "dbf2933e85d909a2045b2874d940f450841338bfc015034140c492b73566c7e6",
+      "heavy_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+      "peak_us": 7999,
+      "guest_halves": 648,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "triggered_rows_909_808": [
+        11,
+        11
+      ],
+      "meters_909_808_A_B_BREAK": [
+        32767,
+        19493,
+        16977,
+        1591,
+        30034
+      ],
+      "last_playhead_steps": [
+        9,
+        6,
+        9,
+        27,
+        9
+      ],
+      "healthy_capture": true,
+      "passed": true,
+      "terminal_emulator_clock": "2880 MHz"
+    }
+  }
+}

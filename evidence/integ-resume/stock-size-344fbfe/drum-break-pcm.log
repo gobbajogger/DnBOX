@@ -1,0 +1,12 @@
+drum808 -O2
+PC=0 instructions=7802319 checks=2474723076 8192 16384 0 stack_base=1c79ff0 depth=1264
+drum808 -Os
+PC=0 instructions=7826756 checks=2474723076 8192 16384 0 stack_base=1c79ff0 depth=1232
+c8469c2dc64c5a8b4c9acc5d6898ab82b8487ce06ca70e704f1378927c1ca913  mini/drum808-O2.pcm
+c8469c2dc64c5a8b4c9acc5d6898ab82b8487ce06ca70e704f1378927c1ca913  mini/drum808-Os.pcm
+breaks -O2
+PC=0 instructions=1802748 checks=1015769392 4084 4096 0 stack_base=1c79fe8 depth=312
+breaks -Os
+PC=0 instructions=1814552 checks=1015769392 4084 4096 0 stack_base=1c79fe8 depth=304
+dfa96a8ac68d1d074fc965636201298845ae0c7e37febcf4c2a312847b193d47  mini/breaks-O2.pcm
+dfa96a8ac68d1d074fc965636201298845ae0c7e37febcf4c2a312847b193d47  mini/breaks-Os.pcm

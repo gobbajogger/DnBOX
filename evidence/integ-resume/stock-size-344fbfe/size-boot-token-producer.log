@@ -1,0 +1,6 @@
+PASS Apply and Undo each queue one real 909 MIX Level message and change audio only on consumption
+PASS real panel A-B-A edits invalidate the stale Undo even when the value returns
+PASS real saturated producer queue rejects Apply before project publication or revision change
+PASS project adoption invalidates the pre-reset addressed revision
+{"softwareOnly":true,"testScalar":true,"stockCatalogAdmitted":false,"hello":{"status":0,"count":1,"crc":1272963953},"addressed":[[2,0,1,75],[3,1,2,76],[2,0,2,76],[2,0,2,76],[3,1,3,75],[2,0,3,75]]}
+project protocol: staging, exact chunks, CRC/capacity, confirmation, timeout and full sample headers ok
