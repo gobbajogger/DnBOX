@@ -14,3 +14,14 @@ cmp NEW_OUTPUT/focused-results.json \
 ```
 
 The [focused receipt](focused-results.json) includes the ordered events, per-channel scores and output digests. Raw audio stays in the local replay output.
+
+## Recycled voice history
+
+The original note allocator changes frequency and gain without clearing the oscillator or filter objects. The firmware resets the selected voice when allocating a new pitch. The focused host replay tests main oscillator phase and filter history separately at that boundary. Voice selection, envelopes, controls and note events stay fixed. Replay the existing nine-program experiment first, then run:
+
+```sh
+python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/voice_history.py \
+  VERIFIED_SEQUENCE_OUTPUT PANEL_TARGETS NEW_OUTPUT
+```
+
+The two variants preserve all nine direct-note PCM hashes. With the exact original events, both change PCM for #664, #10, #221 and #213 while matching the other five rows byte for byte. Neither changes any stereo pass result. The existing #482 result is unchanged. Retaining recycled state alone therefore does not qualify a candidate. [Per-arm PCM digests and scores](voice-history-result.json).
