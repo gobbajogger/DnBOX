@@ -1,5 +1,14 @@
 # Integration baseline
 
+## Integration-resume checkpoint — 2026-11-22T00:41:00Z (WORKING)
+
+Focused BREAK fit proof at lane starting head `d89d26666e6a22eabec8f01c8399e78db864a991`: GitHub blob reads independently parsed the actual five-zone 22,050 Hz bank (109,394 bytes, complete CRC32), and the pinned native-build manifest for the previously measured combined source `bbef756236ddf54cebaf8ccf9071b8975e7e8839`. With the actual SMK code limit 552,672 B, 1,024 B erased reserve and 16-byte alignment, the recorded Elite application 546,468 B permits 5,168 B and Pro 546,460 B permits 5,184 B. Both **reject** this unmodified original bank by 104,226 / 104,210 B. This is a definitive **historical-input capacity failure**, not proof of the current consolidated image. Source blob IDs, application SHA-256 and arithmetic are retained in [the machine-readable finding](../../evidence/integ-resume/starting-breaks-checkpoint.json). The [regression test](../../tests/starting_break_stock_fit_checkpoint_test.py) exercises actual bank validation, both rejection paths and a synthetic exact-capacity control.
+
+Focused execution: **PASS 1/1** metadata-only capacity test using an independent local replica of the immutable GitHub manifest values; live GitHub source/bank CRC read also **PASS**. Full canonical-bank Python test on a reconstructed checkout: **NOT_RUN** (the project bootstrap is the obsolete 7537a46 source, the verified SDK note is not the 309,800,121-byte SDK archive, and direct Git clone from this executor has no network DNS). No fresh firmware build, pool report, emu360 strict gate, 0-late claim, or device run is asserted. The recorded historical pool margin was 832 B per model; new stock pool measurements are pending.
+
+**Next scoped action:** merge (never rebase) consolidated `f1786ebec2616477163b62b029c7e77405a9c3de` into this 106-commits-behind lane, restore exact source plus verified SDK, run this full test and stock Elite/Pro builds, identify an explicit stock flash/pool design that can accommodate all five intact zones without loss or PSRAM, and only then rerun heavy playback with `FM1_STRICT=1` (<11,609 µs; zero late). The Nightly capture/Remote/vote work is tracked separately in the Nightly lane. Do not mark I2/I3/I5/C1-C6 PASS until same-head outputs exist.
+
+
 ## Stock firmware and five-zone BREAK qualification
 
 The five original 22,050 Hz BREAK zones now have a native build and package-composer entry point, `--starting-breaks`. Fixtures for Elite and Pro recovered all 109,394 bytes of the bank through the firmware reader and rejected a one-byte application overrun. The bank retains its original ADPCM and reserves 1,024 erased bytes below Bluetooth. Both current stock applications reject it for lack of space. [Implementation](https://github.com/gobbajogger/DnBOX/commit/c5ca95ec4b040ec1d638f1db0d9be42c609bb386)

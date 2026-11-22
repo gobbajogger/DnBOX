@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source_branch": "lane/integ-resume",
+  "source_head_before_checkpoint": "d89d26666e6a22eabec8f01c8399e78db864a991",
+  "native_source_commit": "bbef756236ddf54cebaf8ccf9071b8975e7e8839",
+  "source_blobs": {
+    "starting_break_pack": "bd530e30827c73eb00d23552311ce329054f759c",
+    "native_builds_manifest": "18df226be6e0eea8b3f728f3ec0b96fe662cde08",
+    "break_pack_py": "46e148198ef7c808ddd60caa7e8571ae9d08105a",
+    "fm1pkg_make_py": "91da73ca63594ce75406d0eb61617439765940a2bf5690a3b5991e9b1a"
+  },
+  "bank_bytes": 109394,
+  "bank_sha256_pinned_by_break_pack_py": "8df1316157fc8ce8dcb87cfd267fea83790702ccd1963ae91c0de60ca255b582",
+  "bank_rate_hz": 22050,
+  "bank_loop_count": 5,
+  "pack_crc32_verified": true,
+  "code_max": 552672,
+  "xip_reserve": 1024,
+  "models": {
+    "elite": {
+      "application_bytes": 546468,
+      "application_sha256": "1bfe6ebdab3250053eb55486663f6af8fa3dd945732d2308201ff1814edfcc65",
+      "free_xip_bytes": 6204,
+      "available_bytes": 5168,
+      "shortfall_bytes": 104226
+    },
+    "pro": {
+      "application_bytes": 546460,
+      "application_sha256": "bd44e4757ad29c16d91c6999fe5208470c205a9fb65dca65cd34db7555003ff7",
+      "free_xip_bytes": 6212,
+      "available_bytes": 5184,
+      "shortfall_bytes": 104210
+    }
+  },
+  "measurement_type": "Direct GitHub blob read of canonical five-zone bank, CRC32, package limits and historic native-build manifest; not a new firmware build",
+  "limitations": "The manifest predates consolidated f1786ebe; rebuild both stock models and remeasure before integration. No new full heavy gate or device qualification performed."
+}
