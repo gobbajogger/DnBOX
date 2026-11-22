@@ -1,0 +1,9 @@
+irq levels at the end: [3], ie true, skipped 0 cycles
+last 40 ms: 69% of instructions in ISRs = 135.2 M ISR instructions per second (clock 2880 MHz)
+LCD: on the wire 7% of the run (39837 ms of 605000 ms)
+LED on-fractions:
+SMK-37 pads (39 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000
+SMK-37 button LEDs: 1:1.00 11:0.83 13:1.00
+work/panel.ppm at 605000 ms; LEDs lit: []; audio peak over the last 0.5 s: 3648
+recorded 37813 frames on stdout + work/audio.raw
+flash: 0 erases / programs

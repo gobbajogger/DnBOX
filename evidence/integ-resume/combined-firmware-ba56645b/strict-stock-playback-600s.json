@@ -1,0 +1,75 @@
+{
+  "tested_firmware": "ba56645b2142b134be3aeee2236406e1c95b2bde",
+  "software_only": true,
+  "strict_deadline_us_exclusive": 11609,
+  "cpu_clock_mhz": 360,
+  "all_four_emulated_scenes_pass": true,
+  "cumulative_timing_boot_to_ms": 605000,
+  "continuous_pcm_seconds_scored_per_case": 600,
+  "scenes": {
+    "elite-wide": {
+      "owners_A_B": [
+        "SuperJ6 WIDE",
+        "Synth One"
+      ],
+      "peak_us": 10893,
+      "late_halves": 0,
+      "xruns": 0,
+      "skipped_cycles": 0,
+      "completed_halves": 52086,
+      "pcm_bytes": 106764704,
+      "pcm_sha256": "05a20c23729b5daba3b4769d064becc06fb5f41c913e6d26ae4d4815367be2ff",
+      "receipt_sha256": "807ba78a67f20a1e4c47ac1d1fdd662be768b12ca3feea095a50f35de1c86d56"
+    },
+    "pro-wide": {
+      "owners_A_B": [
+        "Synth One",
+        "SuperJ6 WIDE"
+      ],
+      "peak_us": 11561,
+      "late_halves": 0,
+      "xruns": 0,
+      "skipped_cycles": 0,
+      "completed_halves": 52086,
+      "pcm_bytes": 106764704,
+      "pcm_sha256": "2a1c3fe609ca1c7a23ccb9c65b306b44fb61d25af4c92468764b41c5bbbbb8de",
+      "receipt_sha256": "f42aec13df198b429cd2bc4b8f3a8a902cd4de857d278769da4bc45e2bc76c1d"
+    },
+    "elite-chicago-miami": {
+      "owners_A_B": [
+        "Chicago",
+        "Miami"
+      ],
+      "peak_us": 9321,
+      "late_halves": 0,
+      "xruns": 0,
+      "skipped_cycles": 0,
+      "completed_halves": 52086,
+      "pcm_bytes": 106764704,
+      "pcm_sha256": "d843c3e0354cbb933a862abe36d48e6b54a126d75a50f006d9a746a88c6037e9",
+      "receipt_sha256": "8d71fb071283f5068d60fe2973c0d1608193955cb8d45a5092ce4365cbfeb498"
+    },
+    "pro-chicago-miami": {
+      "owners_A_B": [
+        "Miami",
+        "Chicago"
+      ],
+      "peak_us": 9024,
+      "late_halves": 0,
+      "xruns": 0,
+      "skipped_cycles": 0,
+      "completed_halves": 52087,
+      "pcm_bytes": 106764704,
+      "pcm_sha256": "38f21e384a0527366057491f0f28d26709115ae88f48f9ee505cabb305fdd8d5",
+      "receipt_sha256": "e7060189582a892f5fc6d75e3351b98018df0355ea993469620206625210ef70"
+    }
+  },
+  "maximum_polyphony_high_water_continuously_instrumented": false,
+  "separate_heavy_host_timing": "FAIL, nine observed CPU and wall deadline misses and one fixed-work control miss",
+  "raw_archive": {
+    "name": "lane-integ-resume-0130-ba56645b-stock-600s-software-only.tar.gz",
+    "bytes": 330719623,
+    "sha256": "d267e8d161db05546aaec1b13824910181827bbb390f377823de3eba75c523d0"
+  },
+  "tracked_emulator_logs": "Trimmed trailing blank after LED on-fractions; raw logs preserved byte-for-byte in the verified archive."
+}

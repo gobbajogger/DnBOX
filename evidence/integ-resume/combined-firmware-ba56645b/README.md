@@ -38,3 +38,16 @@ The [latest branch-only stock Remote catalog and layout](https://github.com/gobb
 Both exact packages passed direct format, stock flash and OTA validation. The Elite package is 651,732 bytes, CRC32 `88e409e7`. The Pro package is 651,730 bytes, CRC32 `c7318ae1`. [Elite package verification](elite-package-validator.json) · [Pro package verification](pro-package-validator.json) · [Full host registration list](canonical-all-529.json)
 
 The separate [direct UI judge](ui-judge-direct.json) rendered and walked 1,824 exact host frames. It exited 1 after reporting 4,680 instrument findings, 315 missing presence checks, 162 missing glyph checks and zero damaged glyph checks. Those are instrument counts. Individual product findings still need triage.
+
+## Strict 600-second firmware playback
+
+All four software runs passed the strict 360 MHz deadline on the exact stock firmware. Each run used 605,000 guest milliseconds and verified nonzero audio in all 600 scored PCM seconds after the saved-project PLAY event. Every timing counter covers the complete boot-to-end window. [Exact receipts and local archive digest](strict-stock-playback-600s.json) · [Emulator tick and firmware timer interpretation](strict-emulator-clock-and-scope.md)
+
+| Stock model and saved-project scene | Peak | Completed halves | Late / XRUN / skipped |
+| --- | ---: | ---: | ---: |
+| [Elite WIDE A, Synth One B](elite-wide-600s.json) | 10,893 µs | 52,086 | 0 / 0 / 0 |
+| [Pro Synth One A, WIDE B](pro-wide-600s.json) | 11,561 µs | 52,086 | 0 / 0 / 0 |
+| [Elite Chicago A, Miami B](elite-chicago-miami-600s.json) | 9,321 µs | 52,086 | 0 / 0 / 0 |
+| [Pro Miami A, Chicago B](pro-chicago-miami-600s.json) | 9,024 µs | 52,087 | 0 / 0 / 0 |
+
+Both paired scenes exercise all 22 909 and 808 rows, both bass owners and the populated BREAK slot. The WIDE scenes exercise real mode-2 chorus and the Synth One highpass/sub controls. The Chicago/Miami terminal readback verifies nonzero cache indices, two Miami lanes with two simultaneous activities at the Pro endpoint, and positive engine activity counts. It does not instrument a continuous voice high-water mark. These four passing emulator runs retain their exact scope. The all-engine maximum-note host workload and both canonical Local gates remain failing.

@@ -1,5 +1,9 @@
 # Integration baseline
 
+## Terminal strict stock playback — 2026-11-22 (WORKING)
+
+All four software-only 600-second scenes on `ba56645b` passed under 11,609 µs: WIDE/Synth One peaked at 10,893 µs Elite and 11,561 µs Pro, and the complementary Chicago/Miami scenes peaked at 9,321 and 9,024 µs. Each recorded zero late halves, xruns and skipped cycles. The separate maximum-note host matrix retains nine missed deadlines, and the canonical gate remains failed. [Final strict receipts and raw archive digest](../../evidence/integ-resume/combined-firmware-ba56645b/strict-stock-playback-600s.json)
+
 ## Exact stock builds, gate and software protocol — 2026-11-22 (WORKING)
 
 Firmware `ba56645b` retains consolidated `1d727e2b` without deleting a consolidated path. Both stock packages match their pinned Elite and Pro bytes and clear XIP and pool floors. The canonical gate exited 1 with 476 host passes, 51 failures, two excluded comparisons and three UI geometry failures. The exact stock firmware pairs in software with composed Nightly `e3053cd7`, with separately approved branch-only stock catalog and TouchOSC selection. Both bounded WIDE and Chicago/Miami scenes pass the strict timing threshold on both stock models. The 600.375-second all-engine host matrix recorded nine deadline misses and the same-CPU control missed once. The longer strict firmware playback receipts are tracked separately. [Exact package and gate evidence](../../evidence/integ-resume/combined-firmware-ba56645b/README.md)
