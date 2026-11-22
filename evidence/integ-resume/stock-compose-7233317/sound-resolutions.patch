@@ -1,0 +1,444 @@
+diff --git a/firmware/src/app/original_runtime.c b/firmware/src/app/original_runtime.c
+index 98736283bf04474754595af1ec4427c282907e51..96d92b66dd390ca800d16fcf58df0385aec83146 100644
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -1,10 +1,7 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+ #include "original_runtime.h"
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+ #include "../dsp/juno6_controls.h"
+-=======
+ #include "chicago_fx2_compact.h"
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+ #include "../x0x_cold.h"
+ #include <string.h>
+ 
+diff --git a/firmware/src/app/smc_mixer.c b/firmware/src/app/smc_mixer.c
+index cb5d1b637562d0ed4d0d742b9a5cd3d852952771..24006c925f2068c1ffaa8b4080b47f6c1bd15e7b 100644
+--- a/firmware/src/app/smc_mixer.c
++++ b/firmware/src/app/smc_mixer.c
+@@ -1169,15 +1169,9 @@ static UI_DRAW void smc_ui_grid(void)
+                 }
+             } else {
+                 const felucca_font_t *font = tw(&FONT_T, caption) <= 20 ? &FONT_T : &FONT_XS;
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+                 const capm_t *cap = caps(font);
+                 int text_y = y + 1 + (9 - (cap->bot - cap->top + 1)) / 2 - cap->top;
+                 text_c(x + 18, text_y, font, caption, c);
+-=======
+-                int top = cap_top(font);
+-                int text_y = y + 1 + (9 - (cap_bottom(font) - top + 1)) / 2 - top;
+-                text_c(x + 19, text_y, font, caption, c);
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+             }
+         }
+         smc_ui_strip_value(f, x + 15, 122, fc);
+diff --git a/firmware/src/app/ui.c b/firmware/src/app/ui.c
+index 90dd337494ec6a138e3980aef2f356bd37141323..3aa903d22f83cace9ca485476439e0c54d23d001 100644
+--- a/firmware/src/app/ui.c
++++ b/firmware/src/app/ui.c
+@@ -1755,8 +1755,8 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
+                 pref_t refs[4];
+                 for (int col = 0; col < 4; col++) refs[col] = rows[row][col] < 0 ? NONE : PR(R_ENG,T_303,b,rows[row][col]);
+ #if X0X_SYNTHONE_PATCH
+-                /* The final EFFECT row uses the engine's independent control slot. */
+-                if (kind == ORIGINAL_SOUND_SYNTHONE && row + 1 < count) {
++                /* The four dry pages use the exact patch storage. Effect pages use engine slots. */
++                if (kind == ORIGINAL_SOUND_SYNTHONE && row < 4) {
+                     for (int col=0; col<4; ++col)
+                         if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
+                 }
+@@ -5317,28 +5317,14 @@ static uint16_t dim(uint16_t c, int t) { return blend(C_BLACK, c, t); }
+ 
+ static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f, s); }
+ 
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+ /* gen_font measures these rows before encoding the bitmap, identically for
+  * all codecs. Reading packed bytes as raw alpha would move the baseline. */
+-=======
+-/* a font's capital line: the first and last rows of 'H' (rounded half coverage), measured
+- * once from the glyph bitmap, so text is centred on what the eye sees rather than on the
+- * font's cell (which differs per face and size) */
+-#ifdef FONT_ENTROPY
+-/* The glyph generator retained the panel's existing vertical alignment. */
+-static int cap_top(const felucca_font_t *f) { return f->data[0]; }
+-static int cap_bottom(const felucca_font_t *f) { return f->data[1]; }
+-#else
+-typedef struct { const felucca_font_t *f; int8_t top, bot; } capm_t;
+-static capm_t capm[6];
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+ static const capm_t *caps(const felucca_font_t *f)
+ {
+     return &f->cap;
+ }
+ static int cap_top(const felucca_font_t *f) { return caps(f)->top; }
+ static int cap_bottom(const felucca_font_t *f) { return caps(f)->bot; }
+-#endif
+ /* parts of a line ("A 909 GR", "B 909 FL") with a real gap between them: a proportional face's
+  * space is too narrow to separate them. A NULL ends the list. */
+ static int32_t segs(int32_t x, int32_t y, const felucca_font_t *f, uint16_t c, int32_t gap, const char *a,
+diff --git a/firmware/src/app/ui_original_controls.h b/firmware/src/app/ui_original_controls.h
+index 7c18838bc4574fff0653aba3a38848225995c253..5a5ec8c3ba20c3911f9926d4b0f3e2ef8e888d96 100644
+--- a/firmware/src/app/ui_original_controls.h
++++ b/firmware/src/app/ui_original_controls.h
+@@ -5,17 +5,18 @@
+ #include <string.h>
+ #endif /* Native unity build supplies the freestanding memory routines. */
+ 
++#ifndef X0X_COMPOSE_S1_EFFECTS
++#define X0X_COMPOSE_S1_EFFECTS 0
++#endif
++
+ /* Control metadata only. The released UI still owns all drawing and cadence. */
+ enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+ #if X0X_SYNTHONE_PATCH
+-       UI_ORIGINAL_SYNTHONE_PAGES = 5, UI_ORIGINAL_JUNO_PAGES = 4 };
++       UI_ORIGINAL_SYNTHONE_PAGES = 5 + (X0X_COMPOSE_S1_EFFECTS ? 5 : 0),
+ #else
+-       UI_ORIGINAL_SYNTHONE_PAGES = 1, UI_ORIGINAL_JUNO_PAGES = 4 };
++       UI_ORIGINAL_SYNTHONE_PAGES = X0X_COMPOSE_S1_EFFECTS ? 6 : 1,
+ #endif
+-=======
+-       UI_ORIGINAL_SYNTHONE_PAGES = 6, UI_ORIGINAL_JUNO_PAGES = 4 };
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++       UI_ORIGINAL_JUNO_PAGES = 4 };
+ static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
+     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
+     {11,12,-1,-1}, {13,15,14,16}, {17,18,19,-1}
+@@ -27,33 +28,31 @@ static const int8_t ui_original_juno_rows[UI_ORIGINAL_JUNO_PAGES][4] = {
+  {0,1,12,15}, {2,3,4,9}, {5,6,7,8}, {10,11,13,14}
+ };
+ static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENVELOPE","LFO/CHORUS"};
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-#if X0X_SYNTHONE_PATCH
+-/* Indices into Sound's stable storage order. Factory IDs belong to the
+- * descriptor and are never passed to the bend/damper performance API. */
+ static const int8_t ui_original_synthone_rows[][4] = {
++#if X0X_SYNTHONE_PATCH
+     {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12},
+-    {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
+-};
+-static const char *const ui_original_synthone_titles[] = {
+-    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT"
+-=======
+-static const int8_t ui_original_synthone_rows[UI_ORIGINAL_SYNTHONE_PAGES][4] = {
++#endif
++#if X0X_COMPOSE_S1_EFFECTS
+     {ORIGINAL_SYNTHONE_CRUSH,ORIGINAL_SYNTHONE_WIDTH,ORIGINAL_SYNTHONE_PAN,ORIGINAL_SYNTHONE_PAN_RATE},
+     {ORIGINAL_SYNTHONE_TREM,ORIGINAL_SYNTHONE_LFO1_SHAPE,ORIGINAL_SYNTHONE_LFO1_LEVEL,ORIGINAL_SYNTHONE_LFO1_RATE},
+     {ORIGINAL_SYNTHONE_CRUSH_LFO,ORIGINAL_SYNTHONE_LFO2_SHAPE,ORIGINAL_SYNTHONE_LFO2_LEVEL,ORIGINAL_SYNTHONE_LFO2_RATE},
+     {ORIGINAL_SYNTHONE_PHASER_MIX,ORIGINAL_SYNTHONE_PHASER_RATE,ORIGINAL_SYNTHONE_PHASER_FEEDBACK,ORIGINAL_SYNTHONE_PHASER_WIDTH},
+     {ORIGINAL_SYNTHONE_MASTER_VOLUME,ORIGINAL_SYNTHONE_MASTER_RATIO,ORIGINAL_SYNTHONE_MASTER_THRESHOLD,ORIGINAL_SYNTHONE_MASTER_MAKEUP},
+     {ORIGINAL_SYNTHONE_MASTER_ATTACK,ORIGINAL_SYNTHONE_MASTER_RELEASE,-1,-1}
++#else
++    {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
++#endif
+ };
+ static const char *const ui_original_synthone_titles[] = {
+-    "SYNTH ONE", "TREMOLO / LFO 1", "CRUSH / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+-};
++#if X0X_SYNTHONE_PATCH
++    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR",
++#endif
++#if X0X_COMPOSE_S1_EFFECTS
++    "EFFECT", "TREMOLO / LFO 1", "CRUSH / LFO 2", "PHASER", "MASTER COMP", "COMP TIMING"
+ #else
+-static const int8_t ui_original_synthone_rows[][4] = {{ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}};
+-static const char *const ui_original_synthone_titles[] = {"EFFECT"};
++    "EFFECT"
+ #endif
++};
+ static const char *const ui_original_chicago_titles[] = {
+     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
+ };
+diff --git a/firmware/src/dsp/breaks.c b/firmware/src/dsp/breaks.c
+index 6995c7fe51773d034f8a3bd5e45396c93cc4c483..d8641b12630f6a0441f15ab1e280a9b245a944fb 100644
+--- a/firmware/src/dsp/breaks.c
++++ b/firmware/src/dsp/breaks.c
+@@ -562,8 +562,6 @@ static int voice_start_on(breaks_t *b, const brk_bank_t *k, int bk, int sl, uint
+     v->gen = k->gen;
+     v->snap = k;
+     v->rev = (uint8_t)rev;
+-    const int programmed_roll = have_state && b->sub_div > 1 && !b->perf.stutter && !b->perf.jungle && !rev;
+-    v->interpolate_mask = programmed_roll ? 0 : -1;
+     v->seek_pos = UINT32_MAX;       /* never reuse state from a prior voice */
+     v->lo = k->start[sl * (32 / k->slices)];
+     v->hi = k->start[(sl + 1) * (32 / k->slices)];
+@@ -1005,15 +1003,7 @@ void breaks_render(breaks_t *b, float *out, int n)
+             k = v->snap;
+             if (!k)
+                 continue;
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+             y += (v->s0 + (v->s1 - v->s0) * v->frac) * (v->g * v->hit_gain);
+-=======
+-            /* BB Gen reads the sample at the integral part of its playhead. */
+-            fm_bits_t fraction = {.f = v->frac};
+-            fraction.u &= (uint32_t)(int32_t)v->interpolate_mask;
+-            float sample = v->s0 + (v->s1 - v->s0) * fraction.f;
+-            y += sample * v->g;
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+             v->g += v->dg;
+             if (v->g >= 1.0f) {
+                 v->g = 1.0f;
+diff --git a/firmware/src/dsp/breaks.h b/firmware/src/dsp/breaks.h
+index 05521c9aebe027d43ce8b14c1c4eb108c327066c..b02e407e87f55e0aaede345c2e37f820d6d03178 100644
+--- a/firmware/src/dsp/breaks.h
++++ b/firmware/src/dsp/breaks.h
+@@ -67,13 +67,7 @@ typedef struct {
+     float g, dg;                      /* crossfade gain and its per-sample slope */
+     uint32_t lo, hi;                  /* reverse: wraps within [lo, hi) (the slice) */
+     uint32_t rbase;                   /* reverse: rbuf holds samples rbase .. rbase + BRK_RCH - 1 */
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+     float hit_gain;                   /* latched strike amplitude, independent of the fade and part level */
+-=======
+-    uint8_t rvalid;
+-    int8_t interpolate_mask;          /* 0 for original programmed rolls, -1 otherwise */
+-    uint8_t rsv[2];
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+     int16_t rbuf[BRK_RCH];
+     int16_t seek_pred;                /* decoder state before previous adjacent reverse-cache block */
+     uint8_t seek_idx, rvalid;
+diff --git a/firmware/src/dsp/original_chicago_backend.c b/firmware/src/dsp/original_chicago_backend.c
+index a130566599c3252c58c6ec1dd10ca0e7dbc71e1e..b2ff6efc625228269e96df33c4919ca53a32ac16 100644
+--- a/firmware/src/dsp/original_chicago_backend.c
++++ b/firmware/src/dsp/original_chicago_backend.c
+@@ -115,13 +115,8 @@ static int initialize(original_chicago_backend *s, unsigned factory,
+     s->program = program;
+     s->coefficient_cache.index = UINT32_MAX;
+     if (!original_chicago_voice_compile(&s->controls, &s->program) ||
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-        !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_lookup,
+-            NULL, original_backend_pitch44100())) return s->status;
+-=======
+         !original_chicago_voice_tables_bind(&s->tables, original_chicago_packed_cached,
+-            &s->coefficient_cache, ORIGINAL_FACTORY_PITCH_44100)) return s->status;
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++            &s->coefficient_cache, original_backend_pitch44100())) return s->status;
+ 
+     original_chicago_voice_seed seed;
+     memset(&seed, 0, sizeof seed);
+diff --git a/firmware/src/dsp/original_miami_backend.c b/firmware/src/dsp/original_miami_backend.c
+index fc6291c638032d2b0029b7d83fba1e7600540732..b3c9c1327deea32f0699746b2423a7d5a26e2cd6 100644
+--- a/firmware/src/dsp/original_miami_backend.c
++++ b/firmware/src/dsp/original_miami_backend.c
+@@ -42,11 +42,7 @@ int original_miami_backend_init(original_miami_backend *s, unsigned factory, flo
+     const original_ms20_tables filter = {
+         original_miami_a44100, original_miami_b44100, original_miami_r, original_miami_cap
+     };
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+     if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, original_backend_pitch44100()) ||
+-=======
+-    if (!original_miami_voice_tables_bind_immutable(&s->tables, &filter, ORIGINAL_FACTORY_PITCH_44100) ||
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+         !original_chicago_allocator_bind(&s->allocator, &s->keys, s->held, s->records,
+             ORIGINAL_MIAMI_BACKEND_VOICES, ORIGINAL_MIAMI_BACKEND_VOICES,
+             ORIGINAL_MIAMI_BACKEND_VOICES, 1, 0, 1)) return 0;
+diff --git a/firmware/src/gfx.c b/firmware/src/gfx.c
+index f275d8a46784304c299a26d21787a76863dc27e3..d940dd017f976ba581c5334f70dabc5cc93bfd37 100644
+--- a/firmware/src/gfx.c
++++ b/firmware/src/gfx.c
+@@ -241,21 +241,19 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
+ #endif
+         const uint8_t *gd;
+         gd = f->data + f->off[gi];
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+ #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
+         uint32_t rectangle = font_crop_read(&gd);
+-=======
+ #ifdef FONT_LZ_CROP
+ #ifdef FONT_ENTROPY
+-        font_stream_t stream = {gd, 0, 0};
++        font_stream_t stream = {f->data + f->off[gi], 0, 0};
++        rectangle = font_byte(&stream);
++        rectangle |= font_byte(&stream) << 8;
++        rectangle |= font_byte(&stream) << 16;
+ #define FONT_BYTE() font_byte(&stream)
+ #else
+ #define FONT_BYTE() (*gd++)
+ #endif
+-        uint32_t rectangle = FONT_BYTE();
+-        rectangle |= FONT_BYTE() << 8;
+-        rectangle |= FONT_BYTE() << 16;
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++#endif
+         crop_x = rectangle & 63u;
+         crop_y = (rectangle >> 6) & 63u;
+         w = (rectangle >> 12) & 63u;
+diff --git a/tests/host/break_retrigger_lut_test.c b/tests/host/break_retrigger_lut_test.c
+index c334f339f6c56e821c3535eef5ab724fde2c428c..86ca0e2ed99b4916389a5228609df87cd7a37194 100644
+--- a/tests/host/break_retrigger_lut_test.c
++++ b/tests/host/break_retrigger_lut_test.c
+@@ -7,12 +7,8 @@
+ #include "../../firmware/src/dsp/break_retrigger_packed.h"
+ #define brk_retrigger_probability brk_retrigger_legacy
+ #include "../../firmware/src/dsp/break_retrigger_lut.h"
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-#endif
+-#include "break_retrigger_reference.inc"
+-=======
+ #undef brk_retrigger_probability
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++#include "break_retrigger_reference.inc"
+ #endif
+ static float old_probability(unsigned l,unsigned p) {
+  static const uint8_t ticks[6]={3,6,12,24,48,96};
+@@ -52,11 +48,20 @@ int main(void) {
+ #endif
+ #else
+  unsigned checks=0;
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+- for(unsigned l=0;l<6;l++)for(unsigned p=0;p<256;p++){float a=reference_probability(l,p),b=brk_retrigger_probability(l,p),c=old_probability(l,p);if(memcmp(&a,&b,4)||memcmp(&a,&c,4)){fprintf(stderr,"PROBABILITY_BITS_MISMATCH %u %u\n",l,p);return 1;}checks++;}
+-=======
+- for(unsigned l=0;l<6;l++)for(unsigned p=0;p<256;p++){float a=old_probability(l,p),b=brk_retrigger_probability(l,p);float legacy=brk_retrigger_legacy(l,p);if(memcmp(&a,&b,4)||memcmp(&legacy,&b,4))return 1;checks++;}
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++ for (unsigned l = 0; l < 6; ++l)
++    for (unsigned p = 0; p < 256; ++p) {
++        float expected = reference_probability(l, p);
++        float packed = brk_retrigger_probability(l, p);
++        float legacy = brk_retrigger_legacy(l, p);
++        float formula = old_probability(l, p);
++        if (memcmp(&expected, &packed, sizeof packed) ||
++            memcmp(&expected, &legacy, sizeof legacy) ||
++            memcmp(&expected, &formula, sizeof formula)) {
++            fprintf(stderr, "PROBABILITY_BITS_MISMATCH %u %u\n", l, p);
++            return 1;
++        }
++        ++checks;
++    }
+  printf("BREAK probability: %u bit-exact comparisons PASS\n",checks);
+ #endif
+  return 0;
+diff --git a/tools/build.py b/tools/build.py
+index b20236297a73a4dd524436f8fc014bab406c43ae..558b215dc595f84f6723bba0255c676823819444 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -417,13 +417,9 @@ def app_compile_commands(flags, original_synth, wobble):
+         flags = [*flags, "-DX0X_ORIGINAL_SYNTH=1",
+                  "-Iexperiments/original_synth", "-Iexperiments/wobble"]
+     if BOARD == "smk37" and MODEL in ("elite", "pro"):
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-        flags = [*flags, "-flto"]
++        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1", "-DX0X_CHICAGO_FULL_HISTORY=1"]
+     synthone_patch = synthone_patch_setting()
+     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
+-=======
+-        flags = [*flags, "-flto", "-DX0X_HIGH_AUDIO_RAM=1", "-DX0X_CHICAGO_FULL_HISTORY=1"]
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+     if SUPERJ6_FACTORY == "1":
+         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+     boot_tanh = os.environ.get("X0X_TANH_BOOT_TABLE", "0")
+@@ -489,14 +485,8 @@ def build_app(starting_breaks=False):
+     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
+     factory_roots = []
+     if SUPERJ6_FACTORY == "1":
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-        names = ["engine_superj6_factory_load"]
+-        if synthone_patch_setting() != "1":
+-            names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+-=======
+         names = ("engine_superj6_factory_load", "engine_superj6_edit",
+                  "engine_superj6_pre_note_wave")
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+         for name in names:
+             factory_roots.extend(("-u", name))
+     # Diagnostic builds must opt in explicitly; never alter release defaults.
+diff --git a/tools/gen_font.py b/tools/gen_font.py
+old mode 100644
+new mode 100755
+index 6c56e1ea3c34c45c1690f474613b568de99bec41..449e77877d0a3b94ab9470ecd9b61525d3afcf14
+--- a/tools/gen_font.py
++++ b/tools/gen_font.py
+@@ -12,7 +12,6 @@ alpha 0..15. Each glyph's packed bytes use lossless PackBits: a control byte
+ 0..127 introduces that many + 1 literal bytes; 128..255 repeats the following
+ byte (control & 127) + 1 times. Glyph metrics and all coverage values are unchanged.
+ """
+-from collections import Counter
+ import sys
+ from collections import Counter
+ from heapq import heapify, heappop, heappush
+@@ -320,11 +319,6 @@ def pack_cropped_alpha(pixels, width, height, models):
+     return prefix
+ 
+ 
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+-def main(out, compressed=True, codec=None):
+-    codec = codec or ("crop-alpha" if FONTSET == "barlow" else "crop-lz")
+-    assert codec in ("crop-alpha", "crop-lz", "packbits")
+-=======
+ def entropy_codes(payloads):
+     """Encode byte ranks in eight prefix groups using four to ten bits each."""
+     counts = Counter(byte for data in payloads for byte in data)
+@@ -359,39 +353,18 @@ def encode_glyphs(data, offsets, codes):
+     return encoded + [0, 0], [new_offsets[start] for start in offsets]
+ 
+ 
+-def cap_alignment(data, offset, width, height):
+-    """Preserve the preceding packed font's observed cap-line alignment.
+-
+-    The panel measured H (or 0 in the numeric face) from the stored bytes.
+-    Record that existing layout before recoding the glyph payload.
+-    """
+-    stride = (width + 1) // 2
+-    rows = []
+-    for y in range(height):
+-        for x in range(width):
+-            index = offset + y * stride + x // 2
+-            if index < len(data) and (data[index] >> (0 if x & 1 else 4)) & 15 >= 8:
+-                rows.append(y)
+-                break
+-    return [rows[0], rows[-1]] if rows else [0, 0]
+-
+-
+-def main(out, compressed=True, codec="crop-lz"):
+-    assert codec in ("crop-lz", "packbits")
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
++def main(out, compressed=True, codec=None):
++    codec = codec or ("crop-alpha" if FONTSET == "barlow" else "crop-lz")
++    assert codec in ("crop-alpha", "crop-lz", "packbits")
+     if not PILFeatures.check("raqm"):
+         print("font renderer: Pillow has no libraqm; using centered tabular-digit metrics")
+     lines = [f"/* generated by tools/gen_font.py: font set {FONTSET} */",
+              "#pragma once", "#include <stdint.h>", f"#define FONT_PAD {PAD}  /* x scale for L, see below */", ""]
+     if compressed:
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+         lines.append({"crop-alpha": "#define FONT_ALPHA_CROP 1", "crop-lz": "#define FONT_LZ_CROP 1",
+                       "packbits": "#define FONT_PACKBITS 1"}[codec])
+     configs = []
+-=======
+-        lines.append("#define FONT_LZ_CROP 1" if codec == "crop-lz" else "#define FONT_PACKBITS 1")
+     roles = []
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+     for name, ttf, px, scale, pixel, first, last in SIZES:
+         h, glyphs = render(ttf, px, scale, pixel, first, last)
+         if name in KEEP:
+@@ -443,15 +416,11 @@ def main(out, compressed=True, codec="crop-lz"):
+                 row = g[y * bw:(y + 1) * bw] + [0]
+                 for x in range(0, bw, 2):
+                     raw.append((row[x] << 4) | row[x + 1])
+-<<<<<<< 5f1e4de7b16e88fdd0c45a9c2a8f7ac6ec6031ff
+             data.extend(pack_cropped_alpha(g, bw, h, models) if models is not None
+                         else pack_cropped_glyph(g, bw, h) if compressed and codec == "crop-lz"
+                         else pack_glyph(raw) if compressed else raw)
+         if models is not None:
+             data.append(0)  # bounded seven-bit lookahead at the final glyph
+-=======
+-            data.extend((pack_cropped_glyph(g, bw, h) if codec == "crop-lz" else pack_glyph(raw))
+-                        if compressed else raw)
+         roles.append((name, ttf, px, h, scale, first, last, glyphs, data, offs))
+     entropy = compressed and codec == "crop-lz"
+     if entropy:
+@@ -460,12 +429,7 @@ def main(out, compressed=True, codec="crop-lz"):
+         lines.append("static const uint8_t font_symbols[256] = {" + ",".join(map(str, symbols)) + "};")
+     for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
+         if entropy:
+-            cap = ord("H" if last >= ord("H") else "0") - first
+-            alignment = cap_alignment(data, offs[cap], glyphs[cap][1], h)
+             data, offs = encode_glyphs(data, offs, codes)
+-            data = alignment + data
+-            offs = [offset + len(alignment) for offset in offs]
+->>>>>>> eeb91398123696771f4aa7bf0adbd8def09929ec
+         assert len(data) < 65536
+         lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
+         for i in range(0, len(data), 24):

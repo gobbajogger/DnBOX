@@ -1,0 +1,77 @@
+{
+  "scope": "software_only_scratch_composition",
+  "production_admitted": false,
+  "inputs": {
+    "integration_firmware": "7233317f5ce5227625a6c65bc70f983de7ee6558",
+    "integration_nightly": "11154e5dea03fc294d681fd500be1dafa1ea463f",
+    "sound": "eeb91398123696771f4aa7bf0adbd8def09929ec",
+    "fwui_base": "22a34d6ecef7b31e62ea6655fddc4920ab30f8e1",
+    "fwui_public": "48651ff773b72ef1fdbb097376dc1b0d90ab3f52",
+    "fwui_local": "d12c86f3b1eabf6acf8edf5654d2b19b54404ff2",
+    "fwui_ui_blob": "f7104b3f8a7a87d7f03daaa7845d7f513f9213f4",
+    "fwui_tree": "26f4b612d176bc837fd1764ec573527b4e82fde2",
+    "remote_client": "995d5493386fad889ca8106758567c9fe80a47d5"
+  },
+  "compose": {
+    "plain_commit": "7d46dd7b6432e4e0ed6c8881c3dee261e0483587",
+    "plain_tree": "fbbbc7a153c8363c3eedc72071686ed82a3f7549",
+    "virtual_sound_tree": "c3ad3a2e64dd90e6b00d44fef16f932093fe935c",
+    "bound_tree": "c1274a2fa4c4075c623444268bad9bfc4a1ea5c7",
+    "bound_tree_with_test_path_fix": "fdd890a65f179ff745e0505f3c895f8bfe862047",
+    "deleted_paths_each_parent": 0
+  },
+  "floors": {
+    "xip_free": 1024,
+    "pool_margin_after_8192_reserve": 512
+  },
+  "profiles": [
+    {
+      "profile": "plain",
+      "stock_links": "both PASS",
+      "xip": {
+        "elite": 1000,
+        "pro": 1008
+      },
+      "pool": {
+        "elite": 7908,
+        "pro": 7908
+      }
+    },
+    {
+      "profile": "bound_dual",
+      "stock_links": "both FAIL",
+      "xip": {
+        "elite": -3432,
+        "pro": -3424
+      },
+      "pool": {
+        "elite": 7908,
+        "pro": 7908
+      },
+      "section_measure": "diagnostic ELF"
+    },
+    {
+      "profile": "bound_dual_tanh_boot",
+      "stock_links": "both FAIL",
+      "xip": {
+        "elite": -472,
+        "pro": -460
+      },
+      "pool": {
+        "elite": 3804,
+        "pro": 3804
+      },
+      "section_measure": "diagnostic ELF",
+      "xip_shortfall_to_floor": {
+        "elite": 1496,
+        "pro": 1484
+      }
+    }
+  ],
+  "remaining": {
+    "full_local_gates": "NOT_RUN on scratch",
+    "strict_ten_minute": "NOT_RUN on scratch",
+    "production_boot_identity_and_catalog": "unqualified",
+    "project_sources": "authorized retry rejected for capacity; 0 of 5 completed"
+  }
+}

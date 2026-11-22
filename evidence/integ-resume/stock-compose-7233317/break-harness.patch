@@ -1,0 +1,13 @@
+diff --git a/tests/host/test_break_retrigger_law.py b/tests/host/test_break_retrigger_law.py
+index e5270e09659b54fcdc08787e01a7e5758a851657..c92afefdee660ccb3b3c672d1b03e8f494b03420 100644
+--- a/tests/host/test_break_retrigger_law.py
++++ b/tests/host/test_break_retrigger_law.py
+@@ -14,6 +14,8 @@ class ProbabilityLaw(unittest.TestCase):
+     def build(self, folder, header=None, generate=False):
+         source = SOURCE.read_text().replace('break_retrigger_reference.inc', str(ROOT / 'tests/host/break_retrigger_reference.inc'))
+         source = source.replace('../../firmware/src/dsp/fastmath.h', str(ROOT / 'firmware/src/dsp/fastmath.h'))
++        source = source.replace('../../firmware/src/dsp/break_retrigger_packed.h',
++                                str(ROOT / 'firmware/src/dsp/break_retrigger_packed.h'))
+         if header is not None:
+             path = folder / 'table.h'
+             path.write_text(header)

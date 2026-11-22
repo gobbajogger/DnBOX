@@ -1,0 +1,4 @@
+PASS Apply and Undo each queue one real 909 MIX Level message and change audio only on consumption
+PASS real panel A-B-A edits invalidate the stale Undo even when the value returns
+PASS real saturated producer queue rejects Apply before project publication or revision change
+PASS project adoption invalidates the pre-reset addressed revision

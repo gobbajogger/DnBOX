@@ -1,5 +1,11 @@
 # Integration baseline
 
+## Scratch stock composition — 2026-11-22 (WORKING)
+
+Composed Integration `7233317f`, Sound `eeb91398` and the final isolated FWUI source at public `48651ff7`, with the exact `f7104b3f` UI blob. Both plain packages passed offline container and flashmap checks. The plain composition leaves 1,000/1,008 B Elite/Pro XIP free and 7,908 B pool margin. The dual-engine bound Remote build with the lossless boot table leaves 3,804 B pool margin and needs 1,496/1,484 B more XIP to reach the stock floor. Both stock links reject that configuration. No parent paths were deleted. [Reproduction, memory and host receipts](../../evidence/integ-resume/stock-compose-7233317/README.md)
+
+The same guarded adapter passed real-engine admission, saturation, panel and project revision invalidation and the Nightly Apply/Undo wire sequence in software. Production admission stays off pending a fitting combined source, its boot identity and catalog policy, and the final gates. Both focused firmware browser checks passed at equivalent exact lane inputs. An authorized Project Sources retry was rejected for project capacity. The five staged files remain local.
+
 ## Scalar Remote producer and shared XIP budget — 2026-11-22 (WORKING)
 
 The branch includes the firmware host-setup repair and a software-only scalar producer candidate. With the production editor and the real host engine, 909 MIX Level Apply and Undo each admit one queue command, change the authoritative project value at admission, and change engine gain at consumption. Replaying Apply adds no command. A full queue preserves the project and revision. An explicit test hook on the normal panel writer preserves conflict detection after an A–B–A edit. The Remote candidate’s Nightly module confirms the addressed fields and fresh readbacks in the software fixture. [Proof and reproduction](../../evidence/integ-resume/dnr2-scalar/README.md)

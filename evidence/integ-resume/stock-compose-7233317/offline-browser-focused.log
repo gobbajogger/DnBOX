@@ -1,0 +1,5 @@
+  skip SMK-37 Pro package tests (needs build/smk37 app/loader and AC79_SDK; run ./build.sh --board smk37)
+  ok   offline-browser-safety
+  ok   offline-sequencer-browser
+all tests passed
+exit=0

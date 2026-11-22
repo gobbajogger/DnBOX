@@ -1,0 +1,18 @@
+f5f495d8936fd00d555e90e53bf840f6a526517a
+TracerPid:	0
+Seccomp:	2
+cc (Debian 14.2.0-19) 14.2.0
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+Traceback (most recent call last):
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/gate-fw/tests/program_values_compact_test.py", line 82, in <module>
+    main()
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/gate-fw/tests/program_values_compact_test.py", line 58, in main
+    require_leak_control(control)
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/gate-fw/tests/program_values_compact_test.py", line 30, in require_leak_control
+    raise RuntimeError('LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; '
+RuntimeError: LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; got exit 23
+==17==LeakSanitizer has encountered a fatal error.
+==17==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==17==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+exit=1
