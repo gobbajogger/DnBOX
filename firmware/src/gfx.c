@@ -145,23 +145,64 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
             cv_px[(uint32_t)y * cv_w + (uint32_t)i] = sc;
 }
 
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
+static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
+{
+    uint16_t *q;
+    uint32_t bg;
+    y += cv_oy;
+    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
+        return;
+    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
+    if (a >= 16u) {
+        *q = swap16(c);
+        return;
+    }
+    bg = swap16(*q);
+    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
+                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
+                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
+}
+
+static int cv_abs(int value) { return value < 0 ? -value : value; }
+
+/* Integer 1 px strokes. Keep axis-aligned pixels solid. On a slope, the
+ * projected filter footprint spans at most three pixels on the minor axis. */
+#if defined(__clang__) && !defined(X0X_HOST)
+__attribute__((minsize, noinline))
+#endif
 static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
 {
-    int32_t dx = x1 > x0 ? x1 - x0 : x0 - x1, sx = x0 < x1 ? 1 : -1;
-    int32_t dy = y1 > y0 ? y0 - y1 : y1 - y0, sy = y0 < y1 ? 1 : -1;
-    int32_t err = dx + dy, guard = 2000;
-    while (guard--) {                       /* bounded: a line is never longer than 480 px */
-        int32_t e2 = 2 * err;               /* both tests use the same error value */
-        cv_pset(x0, y0, c);
-        if (x0 == x1 && y0 == y1)
-            break;
-        if (e2 >= dy) {
-            err += dy;
-            x0 += sx;
-        }
-        if (e2 <= dx) {
-            err += dx;
-            y0 += sy;
+    int dx = x1 - x0, dy = y1 - y0;
+    if (!dx || !dy) {
+        cv_rect(dx < 0 ? x1 : x0, dy < 0 ? y1 : y0,
+                cv_abs(dx) + 1, cv_abs(dy) + 1, c);
+        return;
+    }
+    int steep = cv_abs(dy) > cv_abs(dx);
+    int major = steep ? y0 : x0, end = steep ? y1 : x1;
+    int minor = steep ? x0 : y0, last = steep ? x1 : y1;
+    if (major > end) {
+        int m = major;
+        major = end;
+        end = m;
+        m = minor;
+        minor = last;
+        last = m;
+    }
+    int n = end - major;
+    int advance = ((last - minor) * 65536) / n;
+    int falloff = 16 - cv_abs(advance) / 16384;
+    int p = minor * 65536;
+    for (int i = 0; i <= n && i < 2000; i++, p += advance) {
+        int at = i == n ? last : (p + 32768) >> 16;
+        int delta = i == n ? 0 : p - at * 65536;
+        for (int off = -1; off <= 1; off++) {
+            int alpha = 16 - ((cv_abs(delta - off * 65536) * falloff + 32768) >> 16);
+            if (alpha > 0)
+                px_blend(steep ? at + off : major + i, steep ? major + i : at + off, c, (uint32_t)alpha);
         }
     }
 }
