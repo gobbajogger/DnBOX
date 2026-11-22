@@ -1,5 +1,9 @@
 # Integration baseline
 
+## Firmware gate disposition — 2026-11-22 (WORKING)
+
+The firmware candidate suite retained 245 passes, 22 failures and two NOT_RUN comparisons. The consolidated host stage retained 244 passes, 21 failures and two NOT_RUN comparisons. Their executor sessions ended without a terminal result, so neither completed the Local gate. The failure ledger includes exact registration names and logs, including the observed sanitizer runtime failures and the shared host-setup assertion. The independent stock builds and package checks above retain their focused scope. The next full host and 10-minute strict runs belong on the final integrated source.
+
 ## Software-only BREAK verification and gate disposition — 2026-11-22 (WORKING)
 
 Offline ZIP inspection passed for both pinned stock model packages and the standard sample import. The production SMK slot reader ran in a stock-like host harness, read all five zones from the extracted slot images byte for byte, and made all five available to the normal BREAK engine. The package and its two model-specific partition maps remained unchanged. The passing mock demonstrated byte-exact readback and occupied third-slot preservation. Physical operations are outside the owner’s requested software-only scope.
