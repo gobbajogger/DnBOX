@@ -1,0 +1,298 @@
+diff --git a/docs/remote-scalar-catalog.json b/docs/remote-scalar-catalog.json
+new file mode 100644
+index 000000000..44bded47b
+--- /dev/null
++++ b/docs/remote-scalar-catalog.json
+@@ -0,0 +1,15 @@
++{
++  "controls": [
++    {
++      "id": 1,
++      "kind": 1,
++      "label": "909 MIX Level",
++      "max": 127,
++      "min": 0,
++      "owner": "909",
++      "parameter": "MX_LEVEL",
++      "target": "T_MIX"
++    }
++  ],
++  "protocol": 2
++}
+diff --git a/firmware/hal/fm1_entropy.h b/firmware/hal/fm1_entropy.h
+new file mode 100644
+index 000000000..4c602d9f7
+--- /dev/null
++++ b/firmware/hal/fm1_entropy.h
+@@ -0,0 +1,10 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* AC79 JL_RAND R64L/R64H. The software emulator models both read registers.
++ * This supplies a boot incarnation, never a stable serial or credential. */
++#pragma once
++#include <stdint.h>
++
++static inline uint32_t fm1_entropy_word(unsigned high)
++{
++    return *(volatile uint32_t *)(0x13b00u + 4u * high);
++}
+diff --git a/firmware/src/app/dnr2_native_catalog.h b/firmware/src/app/dnr2_native_catalog.h
+new file mode 100644
+index 000000000..c4dc008ec
+--- /dev/null
++++ b/firmware/src/app/dnr2_native_catalog.h
+@@ -0,0 +1,6 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Exact source-owned declaration in docs/remote-scalar-catalog.json. */
++#pragma once
++#define DNR2_NATIVE_CONTROL 1u
++#define DNR2_NATIVE_MAX 127u
++#define DNR2_NATIVE_CRC 0xecca5979u
+diff --git a/firmware/src/app/dnr2_scalar.h b/firmware/src/app/dnr2_scalar.h
+index 8c4c3fca4..6766fa23f 100644
+--- a/firmware/src/app/dnr2_scalar.h
++++ b/firmware/src/app/dnr2_scalar.h
+@@ -43,6 +43,19 @@ static void dnr2_put(uint8_t *p, unsigned n, uint32_t value)
+     }
+ }
+ 
++/* A fresh address for this boot. Correlation only, not peer authentication.
++ * Obvious missing/stuck entropy holds the endpoint closed. */
++static int dnr2_boot_address(dnr2_scalar *s, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
++{
++    if (a == b && b == c && c == d)
++        return 0;
++    dnr2_put(s->unit, 4, (a & DN_LIMIT) | 1u);
++    dnr2_put(s->unit_high, 5, b);
++    dnr2_put(s->unit_high + 5, 5, c);
++    dnr2_put(s->unit_high + 10, 5, d);
++    return 1;
++}
++
+ static int dnr2_zero(const uint8_t *p, unsigned n)
+ {
+     while (n--)
+diff --git a/firmware/src/app/dnr2_scratch_binding.inc b/firmware/src/app/dnr2_scratch_binding.inc
+index 10d4330d3..e8c80f929 100644
+--- a/firmware/src/app/dnr2_scratch_binding.inc
++++ b/firmware/src/app/dnr2_scratch_binding.inc
+@@ -1,14 +1,28 @@
+ /* SPDX-License-Identifier: GPL-3.0-only */
+-/* Software-only composition input: the real 909 MIX mirror/queue and the
+- * production editor dispatch. The timer identity and catalog are provisional. */
+-static void dnr2_scratch_start(uint32_t ticks)
++/* Bind the real 909 mixer mirror and queue. The native build supplies
++ * hardware entropy and the source-owned catalog. */
++#ifdef DNR2_NATIVE_RANDOM
++#include "dnr2_native_catalog.h"
++#endif
++
++static void dnr2_binding_start(void)
+ {
+     if (dnr2_scratch.revision)
+         return;
++#ifdef DNR2_NATIVE_RANDOM
++    uint32_t a = DNR2_NATIVE_RANDOM(0), b = DNR2_NATIVE_RANDOM(1);
++    uint32_t c = DNR2_NATIVE_RANDOM(0), d = DNR2_NATIVE_RANDOM(1);
++    if (!dnr2_boot_address(&dnr2_scratch, a, b, c, d))
++        return;
++    dnr2_scratch.control = DNR2_NATIVE_CONTROL;
++    dnr2_scratch.catalog_crc = DNR2_NATIVE_CRC;
++#else
++    uint32_t ticks = DNR2_SCRATCH_CLOCK();
+     dnr2_put(dnr2_scratch.unit, 4, (ticks & DN_LIMIT) | 1u);
+     dnr2_put(dnr2_scratch.unit_high, 5, ticks);
+     dnr2_scratch.control = 1;
+     dnr2_scratch.catalog_crc = 0x4bdfe371u;
++#endif
+     dnr2_scratch.revision = 1;
+ }
+ 
+@@ -30,4 +44,4 @@ static int dnr2_scratch_store(uint8_t value)
+ #define ED_DNR2_STATE dnr2_scratch
+ #define ED_DNR2_READ dnr2_scratch_read
+ #define ED_DNR2_WRITE dnr2_scratch_store
+-#define ED_DNR2_START() dnr2_scratch_start(DNR2_SCRATCH_CLOCK())
++#define ED_DNR2_START() dnr2_binding_start()
+diff --git a/firmware/src/x0x.c b/firmware/src/x0x.c
+index 17b594ada..86801d67a 100644
+--- a/firmware/src/x0x.c
++++ b/firmware/src/x0x.c
+@@ -218,7 +218,12 @@ static dnr2_scalar dnr2_scratch;
+ #include "app/smc_mixer.c"
+ #endif
+ #if X0X_DNR2_SCRATCH
++#if X0X_DNR2_NATIVE
++#include "fm1_entropy.h"
++#define DNR2_NATIVE_RANDOM(high) fm1_entropy_word(high)
++#else
+ #define DNR2_SCRATCH_CLOCK() fm1_ticks()
++#endif
+ #include "app/dnr2_scratch_binding.inc"
+ #endif
+ #include "app/editor.c"
+diff --git a/tests/host/dnr2_scalar_engine_test.c b/tests/host/dnr2_scalar_engine_test.c
+index 91063bbb4..44a69e8bc 100644
+--- a/tests/host/dnr2_scalar_engine_test.c
++++ b/tests/host/dnr2_scalar_engine_test.c
+@@ -38,7 +38,21 @@ float probe_gain_for(int value);
+ int probe_909_enqueue(uint8_t value);
+ static uint8_t read_level(void) { return proj.sound.v[T_MIX][PART_909][MX_LEVEL]; }
+ #define remote dnr2_scratch
++#ifdef DNR2_NATIVE_HOST_FIXTURE
++static unsigned entropy_calls;
++static int entropy_stuck;
++static unsigned entropy_boot;
++static uint32_t native_test_entropy(unsigned high)
++{
++    static const uint32_t words[] = {0x6d123456u, 0xf04305ffu, 0x11223344u, 0x55667788u};
++    unsigned i = entropy_calls++ % 4u;
++    assert(high == i % 2u);
++    return entropy_stuck ? 0x11111111u : words[i] ^ entropy_boot;
++}
++#define DNR2_NATIVE_RANDOM(high) native_test_entropy(high)
++#else
+ #define DNR2_SCRATCH_CLOCK() 1234567u
++#endif
+ #include "../../firmware/src/app/dnr2_scratch_binding.inc"
+ #include "../../firmware/src/app/editor.c"
+ 
+@@ -105,8 +119,24 @@ int main(int argc, char **argv)
+     assert(read_level() == 75 && !probe_pending());
+     assert(probe_909_gain() == probe_gain_for(75));
+     command(in, DNR2_HELLO, 42, 0, 1, 0, 0, 0);
++#ifdef DNR2_NATIVE_HOST_FIXTURE
++    entropy_stuck = 1;
++    dispatch(in, 49);
++    assert(reply_n == 0 && remote.revision == 0);
++    entropy_stuck = 0;
++#endif
+     exchange(in, DNR2_OK);
++#ifdef DNR2_NATIVE_HOST_FIXTURE
++    assert(read7(28, 2) == DNR2_NATIVE_CONTROL && read7(30, 5) == DNR2_NATIVE_CRC);
++    assert(read7(8, 4) == 0x0d123457u && read7(35, 5) == 0xf04305ffu);
++    assert(read7(40, 5) == 0x11223344u && read7(45, 5) == 0x55667788u);
++    assert(entropy_calls == 8);
++    exchange(in, DNR2_OK);
++    assert(entropy_calls == 8);
++    puts("PASS source-owned catalog and boot incarnation; stuck RNG leaves HELLO silent");
++#else
+     assert(read7(28, 2) == 1 && read7(30, 5) == 0x4bdfe371u);
++#endif
+     command(in, DNR2_OPEN, 42, 0, 1, 0, 0, 0);
+     exchange(in, DNR2_OK);
+     unsigned epoch = read7(16, 4);
+@@ -149,5 +179,24 @@ int main(int argc, char **argv)
+     exchange(in, DNR2_CONFLICT);
+     assert(read_level() == 75);
+     puts("PASS project adoption invalidates the pre-reset addressed revision");
++
++#ifdef DNR2_NATIVE_HOST_FIXTURE
++    uint8_t prior[49];
++    command(prior, DNR2_SET, 42, epoch, 9, remote.revision, 1, 99);
++    uint8_t previous_unit[4], previous_high[15];
++    memcpy(previous_unit, remote.unit, sizeof previous_unit);
++    memcpy(previous_high, remote.unit_high, sizeof previous_high);
++
++    memset(&remote, 0, sizeof remote);
++    entropy_boot = 0x8cab0120u;
++    command(in, DNR2_HELLO, 42, 0, 1, 0, 0, 0);
++    exchange(in, DNR2_OK);
++    assert(memcmp(previous_unit, remote.unit, sizeof previous_unit) != 0);
++    assert(memcmp(previous_high, remote.unit_high, sizeof previous_high) != 0);
++    assert(read7(30, 5) == DNR2_NATIVE_CRC && read7(24, 4) == 1);
++    dispatch(prior, 49);
++    assert(reply_n == 0 && remote.revision == 1 && read_level() == 75);
++    puts("PASS fresh simulated boot entropy refuses the previous boot's addressed SET");
++#endif
+     return 0;
+ }
+diff --git a/tests/host/test_rom_guard.py b/tests/host/test_rom_guard.py
+index 8f236a75e..5911d62d5 100644
+--- a/tests/host/test_rom_guard.py
++++ b/tests/host/test_rom_guard.py
+@@ -65,6 +65,16 @@ class RomGuardTests(unittest.TestCase):
+         self.rejected("call -4 <rom : ffc00020 >", "rts")
+         self.rejected("goto -4 <rom : ffc00020 >", "rts")
+ 
++    def test_proven_call_displacement_is_not_an_absolute_rom_address(self):
++        row = " 2067a08: a4 ea 06 02 call -3668980 <target : 1ce7e18 >"
++        self.assertEqual(guard.references("test_function:\n" + row), [])
++        self.assertTrue(guard.references("test_function:\n" + row.replace("1ce7e18", "1ce7e1a")))
++        self.assertTrue(guard.references("test_function:\n" + row.split(" <")[0]))
++
++    def test_proven_relative_call_into_rom_remains_rejected(self):
++        row = " ffbffff8: 00 00 00 00 call 4 <target : ffc00000 >"
++        self.assertTrue(guard.references("test_function:\n" + row))
++
+     def test_direct_absolute_rom_load_and_store(self):
+         self.rejected("r0 = [0xffc00100]", "rts")
+         self.rejected("[4290772992] = r1", "rts")
+diff --git a/tools/build.py b/tools/build.py
+index 1d9db784e..8666d908e 100644
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -427,7 +427,9 @@ def app_compile_commands(flags, original_synth, wobble):
+         raise SystemExit("X0X_TANH_BOOT_TABLE: 0 or 1")
+     if boot_tanh == "1":
+         flags = [*flags, "-DX0X_TANH_BOOT_TABLE=1"]
+-    for flag in ("X0X_COMPOSE_S1_EFFECTS", "X0X_DNR2_SCRATCH"):
++    if os.environ.get("X0X_DNR2_NATIVE") == "1" and os.environ.get("X0X_DNR2_SCRATCH") != "1":
++        raise SystemExit("X0X_DNR2_NATIVE requires the guarded DNR2 binding")
++    for flag in ("X0X_COMPOSE_S1_EFFECTS", "X0X_DNR2_SCRATCH", "X0X_DNR2_NATIVE"):
+         if os.environ.get(flag, "0") not in ("0", "1"):
+             raise SystemExit(f"{flag}: 0 or 1")
+         if os.environ.get(flag) == "1":
+@@ -456,6 +458,8 @@ def app_compile_commands(flags, original_synth, wobble):
+             unit_flags = [f for f in unit_flags if f != "-flto"]
+         if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":
+             unit_flags = ["-Os" if flag == "-O2" else flag for flag in unit_flags]
++        if u in {"dsp/drum909.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":
++            unit_flags = ["-Oz" if flag in ("-O2", "-Os") else flag for flag in unit_flags]
+         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
+         objs.append(o)
+     if original_synth:
+diff --git a/tools/rom_guard.py b/tools/rom_guard.py
+index f8e284577..fc48ca6ed 100644
+--- a/tools/rom_guard.py
++++ b/tools/rom_guard.py
+@@ -12,7 +12,7 @@ from dataclasses import dataclass
+ import re
+ 
+ ROM_LO, ROM_HI, U32 = 0xFFC00000, 0xFFD00000, 0xFFFFFFFF
+-INSN = re.compile(r"^\s*([0-9a-fA-F]+):\s+(?:[0-9a-fA-F]{2}\s+)+(.*?)\s*$")
++INSN = re.compile(r"^\s*([0-9a-fA-F]+):\s+((?:[0-9a-fA-F]{2}\s+)+)(.*?)\s*$")
+ LABEL = re.compile(r"^[.$A-Za-z_][\w.$]*:$")
+ ANNOTATION = re.compile(r"\s+<[^<>]*: ([0-9a-fA-F]+) >")
+ REGISTER = r"(?:r(?:1[0-5]|[0-9])|sp)"
+@@ -59,6 +59,7 @@ class Node:
+     address: int | None
+     body: str
+     parallel: bool = False
++    width: int = 0
+ 
+ 
+ def _functions(dis):
+@@ -73,7 +74,7 @@ def _functions(dis):
+         elif match := INSN.match(line):
+             if not labelled and not nodes:
+                 nodes.append(Node(None, "<missing function label>"))
+-            node = Node(int(match[1], 16), match[2])
++            node = Node(int(match[1], 16), match[3], width=len(match[2].split()))
+             if nodes and "#" in nodes[-1].body:
+                 node.parallel = nodes[-1].parallel = True
+             nodes.append(node)
+@@ -303,7 +304,13 @@ def references(dis):
+             # constants can differ in bit zero and are not the operand value.
+             if re.search(r"\b(?:call|goto)\b", body):
+                 targets = [int(m[1], 16) & U32 for m in ANNOTATION.finditer(node.body)]
+-                targets += [_number(m[0]) for m in NUMBERS.finditer(body)]
++                # The native disassembler prints a signed decimal displacement
++                # for a four-byte direct call. Exclude that operand as an
++                # absolute address only when its PC relation proves the target.
++                relative = re.fullmatch(r"call (-?\d+)", body)
++                if not (relative and node.width == 4 and len(targets) == 1 and
++                        ((node.address + node.width + int(relative[1])) & U32) == targets[0]):
++                    targets += [_number(m[0]) for m in NUMBERS.finditer(body)]
+                 for value in targets:
+                     if ROM_LO <= value < ROM_HI:
+                         errors.append(f"reference to ROM address {value:#010x}")

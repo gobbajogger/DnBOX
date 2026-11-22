@@ -65,6 +65,16 @@ class RomGuardTests(unittest.TestCase):
         self.rejected("call -4 <rom : ffc00020 >", "rts")
         self.rejected("goto -4 <rom : ffc00020 >", "rts")
 
+    def test_proven_call_displacement_is_not_an_absolute_rom_address(self):
+        row = " 2067a08: a4 ea 06 02 call -3668980 <target : 1ce7e18 >"
+        self.assertEqual(guard.references("test_function:\n" + row), [])
+        self.assertTrue(guard.references("test_function:\n" + row.replace("1ce7e18", "1ce7e1a")))
+        self.assertTrue(guard.references("test_function:\n" + row.split(" <")[0]))
+
+    def test_proven_relative_call_into_rom_remains_rejected(self):
+        row = " ffbffff8: 00 00 00 00 call 4 <target : ffc00000 >"
+        self.assertTrue(guard.references("test_function:\n" + row))
+
     def test_direct_absolute_rom_load_and_store(self):
         self.rejected("r0 = [0xffc00100]", "rts")
         self.rejected("[4290772992] = r1", "rts")

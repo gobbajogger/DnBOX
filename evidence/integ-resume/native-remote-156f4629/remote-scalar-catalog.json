@@ -1,0 +1,15 @@
+{
+  "controls": [
+    {
+      "id": 1,
+      "kind": 1,
+      "label": "909 MIX Level",
+      "max": 127,
+      "min": 0,
+      "owner": "909",
+      "parameter": "MX_LEVEL",
+      "target": "T_MIX"
+    }
+  ],
+  "protocol": 2
+}

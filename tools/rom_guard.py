@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import re
 
 ROM_LO, ROM_HI, U32 = 0xFFC00000, 0xFFD00000, 0xFFFFFFFF
-INSN = re.compile(r"^\s*([0-9a-fA-F]+):\s+(?:[0-9a-fA-F]{2}\s+)+(.*?)\s*$")
+INSN = re.compile(r"^\s*([0-9a-fA-F]+):\s+((?:[0-9a-fA-F]{2}\s+)+)(.*?)\s*$")
 LABEL = re.compile(r"^[.$A-Za-z_][\w.$]*:$")
 ANNOTATION = re.compile(r"\s+<[^<>]*: ([0-9a-fA-F]+) >")
 REGISTER = r"(?:r(?:1[0-5]|[0-9])|sp)"
@@ -59,6 +59,7 @@ class Node:
     address: int | None
     body: str
     parallel: bool = False
+    width: int = 0
 
 
 def _functions(dis):
@@ -73,7 +74,7 @@ def _functions(dis):
         elif match := INSN.match(line):
             if not labelled and not nodes:
                 nodes.append(Node(None, "<missing function label>"))
-            node = Node(int(match[1], 16), match[2])
+            node = Node(int(match[1], 16), match[3], width=len(match[2].split()))
             if nodes and "#" in nodes[-1].body:
                 node.parallel = nodes[-1].parallel = True
             nodes.append(node)
@@ -303,7 +304,13 @@ def references(dis):
             # constants can differ in bit zero and are not the operand value.
             if re.search(r"\b(?:call|goto)\b", body):
                 targets = [int(m[1], 16) & U32 for m in ANNOTATION.finditer(node.body)]
-                targets += [_number(m[0]) for m in NUMBERS.finditer(body)]
+                # The native disassembler prints a signed decimal displacement
+                # for a four-byte direct call. Exclude that operand as an
+                # absolute address only when its PC relation proves the target.
+                relative = re.fullmatch(r"call (-?\d+)", body)
+                if not (relative and node.width == 4 and len(targets) == 1 and
+                        ((node.address + node.width + int(relative[1])) & U32) == targets[0]):
+                    targets += [_number(m[0]) for m in NUMBERS.finditer(body)]
                 for value in targets:
                     if ROM_LO <= value < ROM_HI:
                         errors.append(f"reference to ROM address {value:#010x}")

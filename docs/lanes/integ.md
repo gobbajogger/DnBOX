@@ -1,5 +1,10 @@
 # Integration baseline
 
+## Stock native Remote and merged FWUI — 2026-11-22 (WORKING)
+
+The [native software packet](../../evidence/integ-resume/native-remote-156f4629/README.md) preserves exact Sound `0ac65800`, consolidated FWUI `86e0f63f`, and current Integration ancestry. Both stock builds fit with 1,368 B Elite and 1,380 B Pro XIP free and 732 B of pool margin each. The native emulated USB exchange passed addressed Apply and Undo on both models. The separate eight-second populated scenes peaked at 7,467 / 8,281 µs with zero late halves or xruns. The merged Juno slot host case passed 8,918 assertions. Both final combined Local gates, strict ten-minute playback and current LeakSanitizer acceptance are open. Existing offline five-sample BREAK verification is retained. The private Project Sources originals and staged archive remain preserved locally.
+
+
 ## Stock XIP deficit closed in scratch — 2026-11-22 (WORKING)
 
 The exact bound composition includes Sound `5b1d1c71` and FWUI `1ec2d61a`. Compiling only the 909, 808 and BREAK translation units at `-Os` leaves 1,036/1,044 B Elite/Pro free XIP and 3,804 B pool margin on both stock packages. Calibrated eight-second populated playback peaked at 7,013/7,841 µs with zero late halves and xruns. Offline package and flashmap checks and the real engine Apply/Undo regression passed. Boot-only token packing is recorded in reserve with extra XIP and a late whole-scene PCM difference. Production connection admission and final gates remain pending. [Exact evidence and replay](../../evidence/integ-resume/stock-size-344fbfe/README.md)

@@ -1,0 +1,17 @@
+TracerPid:	0
+Seccomp:	2
+cc (Debian 14.2.0-19) 14.2.0
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+Traceback (most recent call last):
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/stock-compose-os/../gate-fw/build/gate-repair/lsan-sound-0ac65800/source/tests/program_values_compact_test.py", line 82, in <module>
+    main()
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/stock-compose-os/../gate-fw/build/gate-repair/lsan-sound-0ac65800/source/tests/program_values_compact_test.py", line 58, in main
+    require_leak_control(control)
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/stock-compose-os/../gate-fw/build/gate-repair/lsan-sound-0ac65800/source/tests/program_values_compact_test.py", line 30, in require_leak_control
+    raise RuntimeError('LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; '
+RuntimeError: LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; got exit 23
+==23==LeakSanitizer has encountered a fatal error.
+==23==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==23==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+wrapper_exit=1

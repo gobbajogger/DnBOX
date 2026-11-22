@@ -1,0 +1,25 @@
+{
+  "firmware_source": "4eff776499ca70164e241cdf4faeecca352fc508",
+  "firmware_source_tree": "c746b70b052dc76f7f8e8246506918622ae401a6",
+  "checkout_head": "8eebce529de5ab4f15f2706fcf76527e7266fb35",
+  "checkout_head_tree": "4ac7e50ddae6ff4f2fe5c3aaab4154c8e7dad88b",
+  "checkout_delta_from_firmware_source": [
+    "tests/host/dnr2_scalar_engine_test.c",
+    "tests/host/test_rom_guard.py",
+    "tools/rom_guard.py"
+  ],
+  "model": "SMK-37 Pro",
+  "fwsc_sha256": "23bd1b79c0647323b0e574ba42aec53e30e4565de07f2c8228be8a8f05b8a88e",
+  "elf_sha256": "7622e97773216e2adfe80a1b0d0231416b043447eef179ce73ae57e034c8bcf5",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "old_fwsc_sha256": "54666c9ddd4fee422d962076dd782bfd6f8ba22f379beed96f5fc22ec7865df5",
+  "old_package_protected_prefix_sha256": "7fca1f3b0c09d6abe2c417e765722820bf6cba60d2582c9c46031166bd23f8a4",
+  "old_seed_sha256": "09b5a54245f286fb4cb6d354f82bb9516b3574a6e7ec4de856185f2ca319f5bc",
+  "rebased_seed_sha256": "b697c9def4a491878d86e17c17e90a07e630231fe476aae9f8e2b1109c93624e",
+  "identical_user_tail_sha256": "ea41a5a15c78badeacdace5b60c08112ebec40e222662183d64ceea30afd4f27",
+  "protected_prefix_sha256": "fdd57c646b4fa584ac2fc1e0776301fa704eebfe4e75716e64e12ba7ebc1cb2b",
+  "protected_prefix_bytes": 643072,
+  "kit_scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "source_sound_filter": "highpass",
+  "source_sound_sub_enabled": true
+}

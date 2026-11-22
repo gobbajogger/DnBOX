@@ -1,0 +1,70 @@
+{
+  "elf_sha256": "7622e97773216e2adfe80a1b0d0231416b043447eef179ce73ae57e034c8bcf5",
+  "result_sha256": "ccd15ffbb59da382728450721a895f9f81a408223f83ceecdebd7853d4bf3ebb",
+  "stages": {
+    "boot": {
+      "part": "A",
+      "synthone_filter_type": 2.0,
+      "sub_level": 1.0,
+      "voices": [
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        }
+      ],
+      "ram_sha256": "7d1f160a5c211ea390c956dc5d0d62d1d04262dd4ee8ea15ca067578201c7ee0"
+    },
+    "heavy": {
+      "part": "A",
+      "synthone_filter_type": 2.0,
+      "sub_level": 1.0,
+      "voices": [
+        {
+          "prepared_filter_type": 2,
+          "started": true
+        },
+        {
+          "prepared_filter_type": 2,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 2,
+          "started": true
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        },
+        {
+          "prepared_filter_type": 0,
+          "started": false
+        }
+      ],
+      "ram_sha256": "b5b13239a5955c43a70084a30f07068078bcc2734efe5ce8c3a43d4ec8a064ef"
+    }
+  }
+}

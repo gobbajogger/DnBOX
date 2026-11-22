@@ -1,0 +1,40 @@
+test_annotation_does_not_override_operand_bit_zero (__main__.RomGuardTests.test_annotation_does_not_override_operand_bit_zero) ... ok
+test_braced_alternatives_both_checked (__main__.RomGuardTests.test_braced_alternatives_both_checked) ... ok
+test_braced_no_else_has_live_false_path (__main__.RomGuardTests.test_braced_no_else_has_live_false_path) ... ok
+test_branch_bypassing_kill_is_rejected (__main__.RomGuardTests.test_branch_bypassing_kill_is_rejected) ... ok
+test_carry_escape_remains_live_after_register_kill (__main__.RomGuardTests.test_carry_escape_remains_live_after_register_kill) ... ok
+test_control_register_write_invalidates_incoming_edges (__main__.RomGuardTests.test_control_register_write_invalidates_incoming_edges) ... ok
+test_direct_absolute_rom_load_and_store (__main__.RomGuardTests.test_direct_absolute_rom_load_and_store) ... ok
+test_direct_call_with_live_scalar_is_rejected (__main__.RomGuardTests.test_direct_call_with_live_scalar_is_rejected) ... ok
+test_direct_rom_call_and_branch (__main__.RomGuardTests.test_direct_rom_call_and_branch) ... ok
+test_even_bounded_tainted_address_use_is_rejected (__main__.RomGuardTests.test_even_bounded_tainted_address_use_is_rejected) ... ok
+test_gain_arithmetic_narrows_before_export (__main__.RomGuardTests.test_gain_arithmetic_narrows_before_export) ... ok
+test_indirect_call_and_register_alias (__main__.RomGuardTests.test_indirect_call_and_register_alias) ... ok
+test_join_disagreement_invalidates_divisor (__main__.RomGuardTests.test_join_disagreement_invalidates_divisor) ... ok
+test_live_cycle_fails_closed (__main__.RomGuardTests.test_live_cycle_fails_closed) ... ok
+test_masked_scalar_export (__main__.RomGuardTests.test_masked_scalar_export) ... ok
+test_no_literal_or_function_whitelist (__main__.RomGuardTests.test_no_literal_or_function_whitelist) ... ok
+test_opaque_incoming_jump_invalidates_reaching_constant (__main__.RomGuardTests.test_opaque_incoming_jump_invalidates_reaching_constant) ... ok
+test_original_decimal_negative_and_hex_addresses (__main__.RomGuardTests.test_original_decimal_negative_and_hex_addresses) ... ok
+test_parallel_arithmetic_cannot_hide_old_carry_use (__main__.RomGuardTests.test_parallel_arithmetic_cannot_hide_old_carry_use) ... ok
+test_parallel_candidate_and_alias_hazards_rejected (__main__.RomGuardTests.test_parallel_candidate_and_alias_hazards_rejected) ... ok
+test_pc_relative_memory_annotation_is_a_real_address (__main__.RomGuardTests.test_pc_relative_memory_annotation_is_a_real_address) ... ok
+test_pointer_spill_and_return_are_rejected (__main__.RomGuardTests.test_pointer_spill_and_return_are_rejected) ... ok
+test_prior_auto_update_cannot_supply_stale_divisor (__main__.RomGuardTests.test_prior_auto_update_cannot_supply_stale_divisor) ... ok
+test_prior_unknown_assignment_cannot_supply_constant (__main__.RomGuardTests.test_prior_unknown_assignment_cannot_supply_constant) ... ok
+test_proven_call_displacement_is_not_an_absolute_rom_address (__main__.RomGuardTests.test_proven_call_displacement_is_not_an_absolute_rom_address) ... ok
+test_proven_relative_call_into_rom_remains_rejected (__main__.RomGuardTests.test_proven_relative_call_into_rom_remains_rejected) ... ok
+test_reaching_constant_through_conditional_path (__main__.RomGuardTests.test_reaching_constant_through_conditional_path) ... ok
+test_recreating_rom_after_narrowing_is_rejected (__main__.RomGuardTests.test_recreating_rom_after_narrowing_is_rejected) ... ok
+test_scalar_compare_both_paths_kill_constant (__main__.RomGuardTests.test_scalar_compare_both_paths_kill_constant) ... ok
+test_signed_divide_and_ambiguous_shift_do_not_narrow (__main__.RomGuardTests.test_signed_divide_and_ambiguous_shift_do_not_narrow) ... ok
+test_unknown_and_zero_divisors_do_not_prove_scalar (__main__.RomGuardTests.test_unknown_and_zero_divisors_do_not_prove_scalar) ... ok
+test_unknown_consumer_and_unknown_predicate (__main__.RomGuardTests.test_unknown_consumer_and_unknown_predicate) ... ok
+test_unresolved_branch_and_truncated_context (__main__.RomGuardTests.test_unresolved_branch_and_truncated_context) ... ok
+test_untainted_arithmetic_kills_carry_dependency (__main__.RomGuardTests.test_untainted_arithmetic_kills_carry_dependency) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 0.007s
+
+OK
+Exact Pro disassembly: no ROM references
