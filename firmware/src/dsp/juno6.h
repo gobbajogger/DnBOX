@@ -46,11 +46,27 @@ typedef struct {
  float typed_hp_state[2], typed_hp_input[2];
 #endif
 } juno6_t;
+#if X0X_SUPERJ6_FACTORY
+enum { SJ6_CHORUS_WET_FRAMES = 512, SJ6_CHORUS_DRY_FRAMES = 64, SJ6_CHORUS_ALIGNMENT_TAPS = 12 };
+typedef struct {
+ float dry_history[2][SJ6_CHORUS_DRY_FRAMES];
+ float wet_history[2][SJ6_CHORUS_WET_FRAMES];
+ float alignment[SJ6_CHORUS_ALIGNMENT_TAPS];
+ float last_wet[2], dc[2], rise[2], fall[2];
+ float mix, warm, warm_step, dc_step;
+ uint32_t phase, phase_step;
+ uint16_t write;
+ uint8_t mode, dry_first;
+} juno6_factory_chorus_t;
+#endif
 typedef struct {
  int16_t delay[JUNO6_CHORUS_SAMPLES];
  uint16_t write;
  uint32_t phase;
  float sample_rate,depth_ms,rate_hz,mix;
+#if X0X_SUPERJ6_FACTORY
+ juno6_factory_chorus_t factory;
+#endif
 } juno6_chorus_t;
 void juno6_init(juno6_t*,float);
 int juno6_note_on(juno6_t*,uint8_t,uint8_t);
@@ -60,6 +76,10 @@ void juno6_render(juno6_t*,float*,unsigned);
 void juno6_chorus_init(juno6_chorus_t*,float);
 void juno6_chorus_set(juno6_chorus_t*,float,float,float);
 void juno6_chorus_process(juno6_chorus_t*,float*,float*,unsigned);
+#if X0X_SUPERJ6_FACTORY
+void juno6_chorus_select_factory(juno6_chorus_t *, unsigned mode, float mix);
+void juno6_chorus_clear_factory(juno6_chorus_t *);
+#endif
 /* Slot adapter: normalized patch macros; final two are performance-only. */
 int juno6_set(juno6_t*, unsigned, float);
 int juno6_active(const juno6_t*);

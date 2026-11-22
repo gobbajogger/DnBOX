@@ -36,6 +36,23 @@ python "$ref/compare_chorus_probe.py" /tmp/j60-reference /tmp/j60-reference.json
 
 The full ARM64 engine and effects runner remains a distinct recovery dependency. The documented older bench needs the two pinned November 15 archives to reproduce its seven existing hashes. The private pack retains those hashes as historical receipts. The full factory reference render count and qualifying S4 pair count are both zero. [Recovery inputs and status](../../../../evidence/sound-qualification/superj6-s4/dependencies.json).
 
+## Original chorus routing and extended comparison
+
+The authenticated original routing probe observed all 640 factory selections. Version ID 208 defaults to one. With that version, the two switches select three J60V2 modes and the factory defaults set rate scale, depth scale and mix to one. The older chorus has a separate selector and controls. The candidate applies the independent stereo model to the J60V2 routes. It uses two independent lines, a fractional dry alignment filter, a band-limited modulated wet tap and a DC blocker. Clock slopes, ranges and startup decay were fitted to measured impulse arrival times across repeated cycles. The shipped model uses no original waveform or original instructions. [Original control readbacks](../../../../evidence/sound-resume/superj6-factory-chorus/original-routing.json).
+
+From the repository root, the following program loads the original five cases from the existing private reference pack and renders independent two-rate impulse trains and sustained stereo chords. Set `ORIGINAL_AU` and `REFERENCE_PACK` to the paths of the pinned authorized inputs. Use an environment with NumPy and Unicorn 2.1.4.
+
+```sh
+ref=experiments/sound-hardware-v1/sj6-factory/original
+cc -std=c11 -O2 -DX0X_SUPERJ6_FACTORY=1 -ffp-contract=off \
+  -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src -Ifirmware/src/dsp \
+  "$ref/chorus_factory_candidate.c" firmware/src/dsp/juno6.c -lm -o /tmp/dnbox-factory-chorus
+python "$ref/replay_factory_chorus.py" "$ORIGINAL_AU" "$REFERENCE_PACK" \
+  /tmp/dnbox-factory-chorus /tmp/factory-chorus-replay
+```
+
+All three archived wet component cases and all six held-out impulse trains meet the 1 dB level and 3 dB spectral limits. The two archived dry cases match exactly. Mode 3 passes every sustained case. Modes 1 and 2 retain spectral differences on sustained chords at both rates. These measurements cover chorus component audio. Complete program audio and S4 remain unverified. [Component scores](../../../../evidence/sound-resume/superj6-factory-chorus/component-comparison.json).
+
 ## Factory inputs
 
 The [release matrix selector](../release_matrix.py) takes the build-9 IPA or installed app bundle and emits the 14 complete original bank records, stimulus and audit for the headless host. The [bench commands](../README.md#s4-input-and-scoring) use this input route on both arms. The archived comparison below used an independent bank export. Generate those export records with the sibling `factory.py`, then run the release audit on the original IPA as data only. Each selected UID has 1 unique same-name-bank entry in that release. All 1,926 ordered control values match binary32. The release bank and exported bank have different UUIDs in all 12 banks. Four volume values have alternate decimal spellings with the same float32 words. Two records differ in non-control metadata. The audit retains both bank UUIDs, each input digest, and those differences.

@@ -98,8 +98,17 @@ JUNO6_LEGACY(void, render)(juno6_t *s, float *out, unsigned n)
 }
 void juno6_chorus_init(juno6_chorus_t*c,float sr){memset(c,0,sizeof *c);c->sample_rate=sr>8000?sr:44100;c->rate_hz=.8f;c->depth_ms=3.4f;c->mix=.22f;}
 void juno6_chorus_set(juno6_chorus_t*c,float r,float d,float m){c->rate_hz=clampf(r,.1f,5);c->depth_ms=clampf(d,1.7f,5.4f);c->mix=clampf(m,0,.5f);}
+#if X0X_SUPERJ6_FACTORY
+#include "juno6_chorus_factory.inc"
+#endif
 void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
 {
+#if X0X_SUPERJ6_FACTORY
+ if (c->factory.mode) {
+  render_factory_chorus(c, l, r, n);
+  return;
+ }
+#endif
  const float sr = c->sample_rate;
  const float min_delay = sr * .0017f, max_delay = fm_minf(255, sr * .0054f);
  const float depth = c->depth_ms * .001f - .0017f;

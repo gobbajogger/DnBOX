@@ -279,10 +279,11 @@ static void check_factory_chorus_bypass(void)
         /* No complete factory row is persisted in the legacy project cell. */
         unsigned char saved_sound[sizeof proj.sound];
         memcpy(saved_sound, &proj.sound, sizeof saved_sound);
-        for (unsigned mode = 0; mode < 4; ++mode) {
+        for (unsigned mode = 0; mode < 6; ++mode) {
             sj6_factory_row row = synthetic(15);
-            if (mode >= 1) sj6_factory_add_word(&row, 40, 0x80000000u);
-            if (mode >= 2) sj6_factory_add_word(&row, 41, mode == 3 ? 0x3f800000u : 0u);
+            if (mode >= 1) sj6_factory_add_word(&row, 40, mode >= 4 ? 0x3f800000u : 0x80000000u);
+            if (mode >= 2) sj6_factory_add_word(&row, 41, mode >= 3 ? 0x3f800000u : 0u);
+            if (mode == 5) sj6_factory_add_word(&row, 208, 0u);
             unsigned peer_bypass = owner[v ^ 1u]->factory_chorus_bypass;
             CHECK(engine_superj6_factory_load(v, &row));
             CHECK(owner[v]->factory_chorus_bypass == (mode == 3));
@@ -291,6 +292,7 @@ static void check_factory_chorus_bypass(void)
             const original_runtime_part *part = (const void *)((const unsigned char *)owner[v] -
                 offsetof(original_runtime_part, dsp.juno.synth));
             active = *part;
+            CHECK(active.dsp.juno.chorus.factory.mode == (mode == 3 ? 2u : mode == 4 ? 3u : 0u));
             CHECK(active.dsp.juno.chorus.mix > 0.f);
             CHECK(juno6_note_on(&active.dsp.juno.synth, 60, 100));
             juno6_t dry = active.dsp.juno.synth;
@@ -320,6 +322,9 @@ static void check_factory_chorus_bypass(void)
     for (unsigned v = 0; v < 2; ++v) {
         sj6_factory_row bad = off;
         bad.value[SJ6_ROW_CHORUS_II] = 1.5f;
+        rejected(v, &bad);
+        bad = off;
+        sj6_factory_add_word(&bad, 208, 0x7fc00000u);
         rejected(v, &bad);
         CHECK(engine_superj6_factory_load(v, &off));
         boundary();
@@ -416,6 +421,7 @@ static void check_bank(void)
     unsigned programs = 0, authored = 0, defaulted = 0, register_words = 0;
     unsigned chorus_switch_words = 0, chorus_bypass_programs = 0;
     unsigned authored_sub_levels = 0, muted_sub_programs = 0;
+    unsigned active_modes[4] = {0}, legacy_modes[4] = {0}, authored_chorus_versions = 0;
     const unsigned chorus_mask = (1u << SJ6_ROW_CHORUS_I) | (1u << SJ6_ROW_CHORUS_II);
     for (unsigned b = 0; b < BANK_COUNT; ++b) {
         for (unsigned p = 0; p < bank_start[b+1] - (unsigned)bank_start[b]; ++p) {
@@ -433,6 +439,16 @@ static void check_bank(void)
                 row.value[SJ6_ROW_CHORUS_I] == 0.f && row.value[SJ6_ROW_CHORUS_II] == 0.f;
             CHECK(owner[v]->factory_chorus_bypass == chorus_off);
             chorus_bypass_programs += (unsigned)chorus_off;
+            CHECK((row.present & chorus_mask) == chorus_mask);
+            const unsigned switches = (row.value[SJ6_ROW_CHORUS_I] > 0.f) +
+                2u * (row.value[SJ6_ROW_CHORUS_II] > 0.f);
+            const int version_present = (row.present & (1u << SJ6_ROW_CHORUS_VERSION)) != 0;
+            const int original_v2 = !version_present || row.value[SJ6_ROW_CHORUS_VERSION] >= .5f;
+            const original_runtime_part *part = (const void *)((const unsigned char *)owner[v] -
+                offsetof(original_runtime_part, dsp.juno.synth));
+            CHECK(part->dsp.juno.chorus.factory.mode == (original_v2 ? switches : 0));
+            if (switches) ++(original_v2 ? active_modes : legacy_modes)[switches];
+            authored_chorus_versions += (unsigned)version_present;
             int sub_authored = (row.present & (1u << SJ6_ROW_SUB_VOLUME)) != 0;
             int sub_off = sub_authored && row.value[SJ6_ROW_SUB_VOLUME] == 0.f;
             authored_sub_levels += (unsigned)sub_authored;
@@ -462,6 +478,12 @@ static void check_bank(void)
            chorus_switch_words, chorus_bypass_programs);
     printf("authored_sub_levels=%u muted_sub_programs=%u\n", authored_sub_levels, muted_sub_programs);
     CHECK(authored_sub_levels == 640 && muted_sub_programs == 180);
+    CHECK(authored_chorus_versions == 68);
+    CHECK(active_modes[1] == 199 && active_modes[2] == 95 && active_modes[3] == 0);
+    CHECK(legacy_modes[1] == 1 && legacy_modes[2] == 2 && legacy_modes[3] == 43);
+    printf("J60V2 authored/default routes=%u/%u/%u; legacy=%u/%u/%u; version words=%u\n",
+           active_modes[1], active_modes[2], active_modes[3],
+           legacy_modes[1], legacy_modes[2], legacy_modes[3], authored_chorus_versions);
     CHECK(programs == 640 && authored == 4580 && defaulted == 2460 && register_words == 640);
 }
 #endif

@@ -231,10 +231,17 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
     for (unsigned i = SJ6_ROW_CHORUS_I; i <= SJ6_ROW_CHORUS_II; ++i)
         if ((row->present & (1u << i)) && !(row->value[i] >= 0.f && row->value[i] <= 1.f))
             return 0;
-    /* Both switches must explicitly disable their modes. Active original
-     * chorus modes still lack a qualified DSP binding. */
-    int chorus_off = (row->present & chorus_mask) == chorus_mask &&
-        row->value[SJ6_ROW_CHORUS_I] == 0.f && row->value[SJ6_ROW_CHORUS_II] == 0.f;
+    float chorus_version = row->present & (1u << SJ6_ROW_CHORUS_VERSION)
+        ? row->value[SJ6_ROW_CHORUS_VERSION] : 1.f;
+    if (!(chorus_version >= 0.f && chorus_version <= 1.f)) return 0;
+    unsigned chorus_mode = 0;
+    int chorus_off = 0;
+    if ((row->present & chorus_mask) == chorus_mask) {
+        unsigned switches = (row->value[SJ6_ROW_CHORUS_I] > 0.f) +
+            2u * (row->value[SJ6_ROW_CHORUS_II] > 0.f);
+        chorus_off = switches == 0;
+        if (chorus_version >= .5f) chorus_mode = switches;
+    }
 
     float sub_volume = -1.f;
     if (row->present & (1u << SJ6_ROW_SUB_VOLUME)) {
@@ -257,6 +264,8 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
         pending_factory_range[owner] = range.f;
         /* The grouped factory transaction excludes the direct AMP1 edit. */
         synth->pending_field[SJ6_PENDING_ATTACK] = sub_volume;
+        /* Grouped recall excludes direct LFO-rate edits. */
+        synth->pending_field[SJ6_PENDING_LFO_HZ] = (float)chorus_mode;
         synth->pending_wave_mask = 3u;
         synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u |
             (chorus_off ? SJ6_FACTORY_CHORUS_BYPASS : 0u);
@@ -336,10 +345,11 @@ static X0X_COLD __attribute__((noinline)) void apply_superj6_pending(original_ru
             juno6_apply_factory_waves(synth, synth->pending_wave,
                                       synth->pending_field[SJ6_PENDING_ATTACK]);
             int chorus_off = (synth->pending_field_mask & SJ6_FACTORY_CHORUS_BYPASS) != 0;
+            juno6_chorus_t *chorus = &part->dsp.juno.chorus;
+            unsigned mode = (unsigned)synth->pending_field[SJ6_PENDING_LFO_HZ];
+            juno6_chorus_select_factory(chorus, mode, 1.f);
             if (chorus_off && !synth->factory_chorus_bypass) {
-                /* A later wet program must not inherit delay words from
-                 * before the bypassed program. Keep legacy mix/rate/depth. */
-                juno6_chorus_t *chorus = &part->dsp.juno.chorus;
+                /* Flush legacy history when entering the dry route. */
                 memset(chorus->delay, 0, sizeof chorus->delay);
                 chorus->phase = chorus->write = 0;
             }

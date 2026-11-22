@@ -33,7 +33,7 @@ def word(fmt, value):
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
-def render(binary, stimulus, mode, mix, started):
+def render(binary, stimulus, mode, mix, started, rate=RATE, frequency=1., depth=1.):
     u = Uc(UC_ARCH_ARM64, UC_MODE_ARM)
     u.mem_map(BASE, 0x800000)
     u.mem_write(BASE, binary[:0x7f4000])
@@ -89,17 +89,17 @@ def render(binary, stimulus, mode, mix, started):
         assert u.reg_read(UC_ARM64_REG_PC) == RETURN, hex(u.reg_read(UC_ARM64_REG_PC))
 
     call(0x100004068)
-    call(0x100004460, b=2, double=RATE)
+    call(0x100004460, b=2, double=rate)
     call(0x10000422c, b=0, c=1, single=float(mode))
-    call(0x10000422c, b=1, c=1, single=1.0)
-    call(0x10000422c, b=2, c=1, single=1.0)
+    call(0x10000422c, b=1, c=1, single=frequency)
+    call(0x10000422c, b=2, c=1, single=depth)
     call(0x10000422c, b=3, c=1, single=mix)
     call(0x10000422c, b=4, c=1, single=0.0)
     readback = {}
     for key, param in [('mode', 0), ('frequency_scale', 1), ('depth_scale', 2), ('mix', 3), ('ramp_duration', 4)]:
         call(0x1000043cc, b=param)
         readback[key] = struct.unpack('<f', struct.pack('<I', u.reg_read(UC_ARM64_REG_S0)))[0]
-    assert readback == {'mode': float(mode), 'frequency_scale': 1., 'depth_scale': 1., 'mix': mix,
+    assert readback == {'mode': float(mode), 'frequency_scale': frequency, 'depth_scale': depth, 'mix': mix,
                         'ramp_duration': 0.}
     if started:
         u.mem_write(OBJECT + 0x29, b'\1')
@@ -108,9 +108,17 @@ def render(binary, stimulus, mode, mix, started):
         u.mem_write(list_address, struct.pack('<IIIIQIIQ', 2, 0, 1, FRAMES * 4, channel,
                                                1, FRAMES * 4, channel + FRAMES * 4))
     u.mem_write(OBJECT + 0x18, struct.pack('<QQ', OBJECT + 0x100, OBJECT + 0x200))
-    u.mem_write(CAPTURE, stimulus)
-    call(0x100004730, b=FRAMES)
-    return bytes(u.mem_read(CAPTURE + 0x8000, len(stimulus))), readback
+    total = len(stimulus) // 8
+    assert total % FRAMES == 0
+    channels = [bytearray(), bytearray()]
+    for start in range(0,total,FRAMES):
+        for side in (0,1):
+            offset=(side*total+start)*4
+            u.mem_write(CAPTURE+side*FRAMES*4, stimulus[offset:offset+FRAMES*4])
+        call(0x100004730, b=FRAMES)
+        for side in (0,1):
+            channels[side].extend(u.mem_read(CAPTURE+0x8000+side*FRAMES*4,FRAMES*4))
+    return bytes(channels[0]+channels[1]), readback
 
 def main():
     original = Path(sys.argv[1])

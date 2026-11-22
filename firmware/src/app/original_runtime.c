@@ -259,6 +259,9 @@ int original_runtime_all_off(original_runtime_part *p)
     if(p->kind==ORIGINAL_SOUND_JUNO){
         juno6_all_off(&p->dsp.juno.synth);
         memset(p->dsp.juno.chorus.delay,0,sizeof p->dsp.juno.chorus.delay);
+#if X0X_SUPERJ6_FACTORY
+        juno6_chorus_clear_factory(&p->dsp.juno.chorus);
+#endif
         p->dsp.juno.chorus.write=0;ok=1;
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_all_off(&p->dsp.synthone);
