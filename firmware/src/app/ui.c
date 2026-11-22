@@ -8918,6 +8918,7 @@ static UI_DRAW void draw_knobs(void)
     if(ui.part==PART_BRK && (ui.view==V_PART || ui.view==V_SEQ) && ui.overlay==O_NONE && !ui.help) {
         break_layout_controls();
         if(ui.view==V_SEQ)draw_step_lane();
+        break_layout_footer();
         cv_commit_knobs(3); return;
     }
     /* One shared bounded parameter panel, including its context caption.

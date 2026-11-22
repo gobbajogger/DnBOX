@@ -15,3 +15,14 @@ The physical entry is HOME → turn the part encoder to BREAK → SEQ. The host 
 The shipping comparator passed 81 fixture checks and the branch baseline passed 324 transport and input checks while failing the LCD movement requirement in all four lanes. This confirms the [existing PR #987 finding](https://github.com/gobbajogger/DnBOX/pull/987#issuecomment-7065118335). The remaining route map and final stock builds are open.
 
 Run the capture with `SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_phase.c SMC_UI_OUT=build/host/break-seq sh tests/host/smc_ui_test.sh`. For the shipping checkout use the same fixture with `X0X_HOST_DEFS=-DSHIPPING_026`.
+
+## Corrected 240×240 captures
+
+| Lane | Stopped still | Full-cycle GIF | Consecutive LCD position changes |
+| --- | --- | --- | --- |
+| Velocity | [PNG](branch-after-lane-0-stopped.png) | [GIF](branch-after-lane-0.gif) | 15/15 |
+| Chance | [PNG](branch-after-lane-1-stopped.png) | [GIF](branch-after-lane-1.gif) | 15/15 |
+| Pitch | [PNG](branch-after-lane-2-stopped.png) | [GIF](branch-after-lane-2.gif) | 15/15 |
+| Pan | [PNG](branch-after-lane-3-stopped.png) | [GIF](branch-after-lane-3.gif) | 15/15 |
+
+The active tint uses five pixels above the value bars. Step numbers, slice assignments and amber lock notches align to their corresponding slider. Three independent fixture captures show the [shipping](metadata/shipping-026.gif), [baseline](metadata/branch-before.gif) and [corrected](metadata/branch-after.gif) slice and lock feedback. The selected R22 reference preserves separate roles for step numbers, assignments and lock feedback.

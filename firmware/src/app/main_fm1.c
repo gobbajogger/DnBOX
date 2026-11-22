@@ -2008,7 +2008,7 @@ uint8_t smk_padcal_draw(uint32_t w, uint32_t h)
     uint32_t sig = smk_padcal_word(&padcal, e) ^ (uint32_t)(padcal.sel | padcal.page << 4) << 25 ^
                    (uint32_t)(padcal.tl | padcal.orient << 4 | padcal.real << 5) * 2654435761u;
     char t[32], *q;
-    if (sig == padcal_sig)                        /* only the selected entry, the pad and the page change */
+    if (sig == padcal_sig && blit_hash[1])         /* SMC expiry invalidates the LCD body */
         return 0u;
     padcal_sig = sig;
     cv_begin(w, h, C_BLACK);

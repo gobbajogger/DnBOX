@@ -1,0 +1,17 @@
+# FWUI reference and qualification index
+
+The [coverage Page](https://chatgpt.com/space/page_800ecfd4f2a08191884949bf6bbee920) and [canonical map](canonical-input-index.json) cover 353 screen and renderer groups and 1,944 mapped roles. The [production catalog check](catalog-reuse-index.json) verifies 1,968 native 240×240 RGB captures. The full-page archive retains that catalog, the selected reference animations and paired motion evidence for distinct routes. Catalog GIFs are lossless one-frame copies, and motion GIFs retain the order of actual renderer output at the stated capture cadence.
+
+Shipping behavior comes from `94197fc839b00aff47b98ca02f3c6396e4a6eabf` (0.0.26). The mapped production source is `199f0444a4cf27374112a5fdf48f82005b070bbc`. The assigned baseline is `b995fb7374275e83a345fee45b7afc22d8206970`. Unchanged captures retain their original source pins. The branch changes BREAK cues and an optional developer Pad Colours compositor handoff.
+
+| Area | Evidence |
+| --- | --- |
+| BREAK SEQ rest cue | [Shipping, baseline and corrected stills and motion](../break-seq/README.md). All four corrected lanes change at 15 of 15 consecutive playhead transitions. |
+| BREAK SEQ slice assignments and locks | [Full-page captures](../break-seq/metadata). The corrected populated-step replay changes 36 assignment pixels and six lock pixels. The independent 24-state replay checks each step and two-digit assignments across pages, lanes and themes. [Finding on #987](https://github.com/gobbajogger/DnBOX/pull/987#issuecomment-7072473672) |
+| Pad Colours | [Paired 0.0.26, baseline and corrected renders](../pad-colours/README.md). All 138 body rows restore on timeout and stay restored at +240 ms. |
+| Battery and SMC pickup | Battery has four levels and a verified exact match to the historical icon footprint in all 120 sampled icon states. SMC comparison covers pickup both ways, locked owner/peek, HOME and mixer banks, Settings statuses, Clip and Fill. HOME Live did not exist in 0.0.26. The Clip host body is a stub, with separate native evidence. Step 1 proves queued Fill motion. |
+| 909/808 | Exact-source SOUND/KIT, SEQ, MIX and separate LIST witnesses retain physical primary and alternate entry. The two 909 AMP pages inherit Decay semantics from 0.0.26. Some LIST roles use production or host renders as their only visual witness. |
+| Shared, bass, startup and native routes | Paired HOME, GLOBE, SONG, PERF, FX, overlays, both bass slots and their engine pages. Native startup has 42 paired mocked-board scenarios, plus dedicated normal-loop proofs. External-clock waits and dropout have separate LCD and LED receipts. |
+| Remaining R22 MIX layout | Both current and shipping use the legacy mixer picture. The selected owner reference uses voice glyphs, mute strikes, thin faders and numeric channel levels. The detached bitmap prototype is below the stock XIP floor. See the [guideline audit](extended-guideline-audit.md) and [finding on #987](https://github.com/gobbajogger/DnBOX/pull/987#issuecomment-7072487906). |
+
+Identical source and archived RGB reuse establishes the corresponding visual witness. A historical candidate, static witness or version-only route is recorded as such. Some role-matched visual references are absent in the authority set, including portions of native startup and LIST. Those entries retain the closest verified route evidence and their original coverage status.
