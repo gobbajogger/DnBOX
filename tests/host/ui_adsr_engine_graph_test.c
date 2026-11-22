@@ -41,7 +41,8 @@ static void partial_rows_need_graph(int p) {
     for(int x=xs[k]+1;x<xs[k+1];x++)for(int y=26;y<68;y++)segment_ink+=cv_px[y*240+x]==swap16(matrix_col());
     CHECK(segment_ink>0); /* baseline/text cannot satisfy a missing stage curve */
    } else {
-    for(int x=4+k*59;x<4+(k+1)*59;x++)for(int y=12;y<26;y++)CHECK(cv_px[y*240+x]==swap16(C_BLACK));
+    /* Curve top is y=26, but sloped strokes can antialias into y=25. */
+    for(int x=4+k*59;x<4+(k+1)*59;x++)for(int y=12;y<25;y++)CHECK(cv_px[y*240+x]==swap16(C_BLACK));
    }
   }
  }

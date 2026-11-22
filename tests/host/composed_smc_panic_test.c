@@ -4,7 +4,9 @@
 static unsigned pc, pf;
 #define PTEST(x) do {pc++;if(!(x)){pf++;fprintf(stderr,"FAIL %d %s\n",__LINE__,#x);}}while(0)
 static void audio(void) { static int32_t out[512];engine_render(out,256); }
-static void begin(void) {setup(V_HOME,PART_303A);run_ms(80);smc.part=PART_303A;smc.view=V_HOME;smc_panic_reset();}
+static void begin(void) {setup(V_HOME,PART_303A);
+ /* setup() rewinds the fixture clock; do not inherit a prior DMA deadline. */
+ audio_due_ms=now_ms;run_ms(80);smc.part=PART_303A;smc.view=V_HOME;smc_panic_reset();}
 static void start_note(void){engine_bass_on(0,60,0,0);audio();audio();PTEST(engine_bass_keys_held()&1);}
 static void chord(int first,int second)
 {

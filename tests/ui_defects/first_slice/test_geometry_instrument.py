@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SPEC = importlib.util.spec_from_file_location('geometry_instrument', ROOT / 'tests/ui_geometry/instrument.py')
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
-LABEL = '        text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
+LABEL = '        text_c(cx, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
 
 class InstrumentSourceTests(unittest.TestCase):
     def exercise(self, mutation=None, stage_mutation=None, return_stage=False):

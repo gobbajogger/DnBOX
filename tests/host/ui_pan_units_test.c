@@ -46,7 +46,12 @@ int main(void)
             for(int parameter=0;parameter<count;parameter++)
                 CHECK(pref_get((pref_t){R_ENG,engine,voice,parameter})==state[parameter]);
         }
-    CHECK(drum_pans==22);CHECK(descriptors==197);CHECK(NPARTS==5);
+    CHECK(drum_pans==22);
+    /* The composed 808 KIT exposes 14 additional non-pan effects parameters. */
+    CHECK(engine_nparams(T_909,NDRUM)==2);
+    CHECK(engine_nparams(T_808,NDRUM)==16);
+    CHECK(descriptors==211);
+    CHECK(NPARTS==5);
     printf("PASS production pan L50/C/R50: %u checks\n",checks);
     return 0;
 }
