@@ -1,0 +1,9 @@
+XIP free: 1028 B
+pool raw free: 9436 B
+pool reserve: 8192 B
+pool margin: 1244 B
+  ok    .ram_text: 843 insns, no calls
+  ok    app code area 552672 B, 1028 B free (Bluetooth block at app.bin 0x86ee0)
+  ok    no soft-double routines (single-precision FPU only)
+  ok    image 551644 B; RAM .data+.bss 96004 B of 98304; pool 334628 B of 344064
+  ok    register access: hal/ only (src/, loader/ clean)

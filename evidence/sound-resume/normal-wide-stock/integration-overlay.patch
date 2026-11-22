@@ -1,0 +1,37 @@
+--- a/firmware/src/dsp/dnbx_core.c
++++ b/firmware/src/dsp/dnbx_core.c
+@@ -459,0 +460,7 @@
++    int shared = !DNBX_DIAGNOSTIC_COUNTERS &&
++        s->layer[0].params.oscillator_mode == DNBX_OSC_SUPERJ6 &&
++        s->layer[0].params.waveform == 1.f &&
++        !memcmp(&s->layer[0], &s->layer[1], sizeof s->layer[0]);
++    for (unsigned i=0;shared && i<DNBX_VOICES;i++)
++        shared = !memcmp(&s->voice[i].layer[0], &s->voice[i].layer[1], sizeof s->voice[i].layer[0]);
++    const unsigned layers = DNBX_LAYERS - shared;
+@@ -463 +470 @@
+-        for (unsigned l=0;l<DNBX_LAYERS;l++) {
++        for (unsigned l=0;l<layers;l++) {
+@@ -474 +481,2 @@
+-        float *layer_mix[DNBX_LAYERS]={left+start,right+start};
++        if (shared) s->layer[1].lfo_phase = s->layer[0].lfo_phase;
++        float *layer_mix[DNBX_LAYERS]={left+start,shared ? left+start : right+start};
+@@ -482 +490,4 @@
+-            for (unsigned t=0;t<count && voice_active(v);t++) {
++            for (unsigned t=0;t<count;t++) {
++                if (!v->layer[0].amp.stage && !v->layer[0].filter.stage &&
++                    (shared || (!v->layer[1].amp.stage && !v->layer[1].filter.stage)))
++                    break;
+@@ -484 +495 @@
+-                for (unsigned l=0;l<DNBX_LAYERS;l++) {
++                for (unsigned l=0;l<layers;l++) {
+@@ -505,0 +517 @@
++            if (shared) v->layer[1] = v->layer[0];
+@@ -512 +524 @@
+-            layer_mix[0][t]=mix_l; layer_mix[1][t]=mix_r;
++            left[start+t]=mix_l; right[start+t]=mix_r;
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -467,0 +468,3 @@
++        if (u == "dsp/fxbus.c" and BOARD == "smk37" and MODEL in ("elite", "pro")
++                and SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SUPERJ6_STOCK_PRESET") == "1"):
++            unit_flags = ["-Os" if f == "-O2" else f for f in unit_flags]

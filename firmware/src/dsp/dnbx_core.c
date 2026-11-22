@@ -457,10 +457,17 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
     for (unsigned i=0;i<DNBX_VOICES;i++)
         for (unsigned l=0;l<DNBX_LAYERS;l++) cached_env[i][l]=-1.f;
     enum { TILE = 16 };
+    int shared = !DNBX_DIAGNOSTIC_COUNTERS &&
+        s->layer[0].params.oscillator_mode == DNBX_OSC_SUPERJ6 &&
+        s->layer[0].params.waveform == 1.f &&
+        !memcmp(&s->layer[0], &s->layer[1], sizeof s->layer[0]);
+    for (unsigned i=0;shared && i<DNBX_VOICES;i++)
+        shared = !memcmp(&s->voice[i].layer[0], &s->voice[i].layer[1], sizeof s->voice[i].layer[0]);
+    const unsigned layers = DNBX_LAYERS - shared;
     for (unsigned start=0;start<n;start+=TILE) {
         unsigned count=n-start < TILE ? n-start : TILE;
         float width[DNBX_LAYERS][TILE];
-        for (unsigned l=0;l<DNBX_LAYERS;l++) {
+        for (unsigned l=0;l<layers;l++) {
             dnbx_layer *ls=&s->layer[l];
             for (unsigned t=0;t<count;t++) {
                 float lfo=1-4*fm_fabsf(ls->lfo_phase-.5f);
@@ -471,7 +478,8 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
             COUNT(w,lfo_samples,count);
         }
 
-        float *layer_mix[DNBX_LAYERS]={left+start,right+start};
+        if (shared) s->layer[1].lfo_phase = s->layer[0].lfo_phase;
+        float *layer_mix[DNBX_LAYERS]={left+start,shared ? left+start : right+start};
         memset(layer_mix[0],0,count*sizeof(float));
         memset(layer_mix[1],0,count*sizeof(float));
         COUNT(w,voice_slots,count*DNBX_VOICES);
@@ -479,9 +487,12 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
             dnbx_voice *v=&s->voice[i];
             float velocity=v->velocity;
             if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
-            for (unsigned t=0;t<count && voice_active(v);t++) {
+            for (unsigned t=0;t<count;t++) {
+                if (!v->layer[0].amp.stage && !v->layer[0].filter.stage &&
+                    (shared || (!v->layer[1].amp.stage && !v->layer[1].filter.stage)))
+                    break;
                 COUNT(w,active_voice_samples,1);
-                for (unsigned l=0;l<DNBX_LAYERS;l++) {
+                for (unsigned l=0;l<layers;l++) {
                     dnbx_layer_voice *lv=&v->layer[l];
                     const dnbx_layer_params *p=&s->layer[l].params;
                     float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
@@ -503,13 +514,14 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
                     COUNT(w,layer_samples,1);
                 }
             }
+            if (shared) v->layer[1] = v->layer[0];
         }
         for (unsigned t=0;t<count;t++) {
             float x0=layer_mix[0][t]*gain[0], x1=layer_mix[1][t]*gain[1];
             float mix_l=0.f, mix_r=0.f;
             mix_l+=x0*pan_left[0]; mix_r+=x0*pan_right[0];
             mix_l+=x1*pan_left[1]; mix_r+=x1*pan_right[1];
-            layer_mix[0][t]=mix_l; layer_mix[1][t]=mix_r;
+            left[start+t]=mix_l; right[start+t]=mix_r;
         }
     }
     return DNBX_OK;
