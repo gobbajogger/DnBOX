@@ -6,7 +6,23 @@ The opt-in SuperJ6 editor applies the sourced LFO1 Hz law to the compact PWM LFO
 
 The optional `X0X_TANH_BOOT_TABLE=1` profile uses shared pool storage for one boot-expanded 909 tanh lookup. The isolated dual-engine links at `e3559ad3` recovered 2,960 B of XIP per board at a cost of 4,104 B of pool. Elite and Pro retained 5,376 and 5,388 B of XIP with 3,804 B of pool margin each. All 1,026 lookup words and 23,280 stock PCM/state blocks per optimization level matched. The strict populated Elite precheck peaked at 8,058 µs with zero late callbacks and xruns. Integration's DNR2 baseline has its own resource constraints. A combined build needs an exact measurement before applying this trade. [Isolated memory and timing evidence](../../evidence/sound-resume/boot-table/budget.json).
 
-## Current software qualification — source `3b480381`
+## Current software qualification — source `6302424e`
+
+Both stock-board images were built with the Synth One patch editor, SuperJ6 factory support and the boot-expanded tanh lookup. Elite retains 5,168 bytes of XIP and Pro retains 5,180. Both retain 3,804 bytes above the pool reserve. The ordinary builds reproduce the previous ordinary packages and applications byte for byte. [Build identities, package hashes and Project Sources filenames](../../evidence/sound-qualification/6302424e/native-profile.json).
+
+| Software-only strict scene | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Populated Chicago and Miami | 8,190 µs | 8,008 µs |
+| Populated Juno and Synth One | 7,063 µs | 7,541 µs |
+| Populated Juno and Synth One with full sub level | 6,961 µs | 7,485 µs |
+
+All six runs used the exact opt-in ELF and package, with strict public `fm1-live` v0.5.1 at 360 MHz. Both kits, both synth parts and BREAK were active in each run. Each 922-event run completed 648 audio halves with zero raw late, zero scene late, zero xruns and no active or changed guest fault. [Per-scene receipts](../../evidence/sound-qualification/6302424e/populated/).
+
+The opt-in save-cell and held-chord suites passed. The ordinary panic and pattern recall suites passed 81 and 77 checks, respectively. The scoped tracked scan found zero retired engine names. Both emulator .img files and the six WAV renders with logs are in LoopyX0X37 Project Sources. [Lifecycle evidence](../../evidence/sound-qualification/6302424e/) · [Both .fwsc packages](../../artifacts/sound-qualification/6302424e/).
+
+Integration branch `74d36ac4` and Sound diverge from `0b0ff56b`. The measured Sound margin belongs to the Sound build. Integration reported 1,228 bytes of Elite XIP free before the DNR2 replay producer, which requires another 1,952 bytes of reclaim against the 1,024-byte floor before dispatch and catalog code. [Exact ancestry and budget inputs](../../evidence/sound-qualification/6302424e/integration-ancestry.json).
+
+## Previous software qualification — source `3b480381`
 
 Elite and Pro link with the Synth One editor, sub oscillator and the SuperJ6 factory, direct edit and pre-note waveform entry points enabled. Elite retains 2,416 bytes of XIP and Pro retains 2,424. Both retain 7,908 bytes above the pool reserve. The flash map passed. The ordinary applications and packages from `f185ea2d` match the stock bytes. The subsequent source change only affects the opt-in linker roots. [Firmware packages, native symbols and build identities](../../evidence/sound-qualification/3b480381/native-profile.json).
 
