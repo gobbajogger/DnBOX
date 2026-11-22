@@ -95,7 +95,7 @@ void s1_dry_frozen_controls(s1_dry_controls *p)
         {0.05f, 0.05f, 1.0f, 0.5f},
         2000.0f, 0.9f, 0.0f, 1.0f, 0.5f
 #if X0X_SYNTHONE_PATCH
-        , 0.f, 0.f, 0.f, 0.f
+        , 0.f, 0.f, 0.f, 0.f, 0.f
 #endif
     };
 }
@@ -333,6 +333,21 @@ void s1_dry_mix(s1_dry_voice *voice, float *mix, unsigned frames)
         mix[i] += oscillator_filter(voice, amp, gain);
     }
 }
+
+#if X0X_SYNTHONE_PATCH
+void s1_dry_mix_pitch(s1_dry_voice *voice, float *mix, const float *ratio, unsigned frames)
+{
+    const float increment = voice->phase_increment;
+    const uint32_t sub_step = voice->sub.step;
+    for (unsigned i = 0; i < frames; ++i) {
+        voice->phase_increment = fm_clampf(increment * ratio[i], 0.f, .5f);
+        s1_sub_pitch(&voice->sub, voice->sub_base_hz, ratio[i], voice->prepared.sub_extra_octave);
+        mix[i] += s1_dry_sample(voice);
+    }
+    voice->phase_increment = increment;
+    voice->sub.step = sub_step;
+}
+#endif
 
 int s1_dry_render(s1_dry_voice *voice, float *mono, unsigned frames)
 {

@@ -150,7 +150,7 @@ static void sub_bypass(void)
  * control. Filter envelope parameters need nonzero depth to be audible. */
 static void patch_audio(void)
 {
-    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127,127};
+    const unsigned changed[S1_PATCH_COUNT] = {127,0,0,0,0,127,127,0,0,127,127,0,0,127,127,127,127,127};
     uint8_t cell[32];
     for (unsigned slot = 0; slot < S1_PATCH_COUNT; ++slot) {
         assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, 0));
@@ -158,6 +158,10 @@ static void patch_audio(void)
         assert(original_sound_s1_set(cell, 7, 30)); /* filterSustainLevel */
         assert(original_sound_s1_set(cell, 1, 90)); /* morph1Volume */
         uint8_t ext[S1_MASTER_EXT_SIZE] = {0};
+        if (slot == S1_PATCH_PITCH_LFO) {
+            assert(original_sound_set(cell, ORIGINAL_SYNTHONE_LFO1_LEVEL, 127));
+            assert(original_sound_set(cell, ORIGINAL_SYNTHONE_LFO2_LEVEL, 63));
+        }
         if (slot == S1_PATCH_SUB_OCTAVE || slot == S1_PATCH_SUB_SQUARE)
             assert(original_sound_s1_set_extended(cell, ext, S1_PATCH_SUB_LEVEL, 63));
         assert(original_runtime_init_extended(&part_a, cell, ext, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
@@ -347,6 +351,52 @@ static void width_patch(void)
 
 
 #if X0X_SYNTHONE_PATCH
+static void pitch_lfo_step(void)
+{
+    uint8_t baseline[32], edited[32];
+    assert(original_sound_init(baseline, ORIGINAL_SOUND_SYNTHONE, 0));
+    memcpy(edited, baseline, sizeof edited);
+    assert(original_sound_s1_set_extended(edited, NULL, S1_PATCH_PITCH_LFO, 42));
+    assert(original_sound_valid(edited));
+    assert(original_sound_s1_sub_position(edited, NULL, S1_PATCH_PITCH_LFO) == 42);
+    assert(original_sound_s1_sub_position(baseline, NULL, S1_PATCH_PITCH_LFO) == 0);
+    assert(original_runtime_init(&part_a, baseline, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    assert(original_runtime_init(&part_b, edited, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    float al[64], ar[64], bl[64], br[64];
+    for (unsigned block = 0; block < 128; ++block) {
+        if (block == 0 || block == 32 || block == 96) {
+            key(&part_a, 60, 100); key(&part_b, 60, 100);
+        }
+        if (block == 16 || block == 64) {
+            key(&part_a, 60, 0); key(&part_b, 60, 0);
+        }
+        assert(original_runtime_render(&part_a, &workspace, al, ar, 64) == ORIGINAL_RUNTIME_OK);
+        assert(original_runtime_render(&part_b, &workspace, bl, br, 64) == ORIGINAL_RUNTIME_OK);
+        assert(!memcmp(al, bl, sizeof al) && !memcmp(ar, br, sizeof ar));
+    }
+    assert(original_sound_set(edited, ORIGINAL_SYNTHONE_LFO1_LEVEL, 127));
+    assert(original_runtime_init(&part_a, edited, 120, NULL, NULL) == ORIGINAL_RUNTIME_OK);
+    const unsigned notes[] = {60, 63, 66, 60};
+    for (unsigned i = 0; i < sizeof notes / sizeof notes[0]; ++i) {
+        const unsigned pitch = notes[i];
+        if (i == 3) key(&part_a, pitch, 0);
+        key(&part_a, pitch, 100);
+        s1_dry_voice *voice = &part_a.dsp.synthone.voice[i == 3 ? 0 : i];
+        assert(voice->started);
+        const s1_trem_lfo lfo = part_a.dsp.synthone.lfo[0];
+        const float wave = fm_sin_pi((lfo.phase > .5f ? lfo.phase - 1.f : lfo.phase) * FM_TWO_PI);
+        const float smoothed = 0x1.8338p-9f*wave + 0x1.fe7cc8p-1f*lfo.smooth;
+        const float ratio = 1.f + .0594630944f * (.5f * (1.f + smoothed));
+        const float increment = voice->phase_increment;
+        const uint32_t step = voice->sub.step;
+        float expected = voice->phase + increment * ratio;
+        if (expected >= 1.f) expected -= 1.f;
+        assert(original_runtime_render(&part_a, &workspace, al, ar, 1) == ORIGINAL_RUNTIME_OK);
+        assert(voice->phase == expected && voice->phase_increment == increment && voice->sub.step == step);
+    }
+    puts("Synth One pitch LFO: 8,192 inactive stereo frames bit-identical, stepped and overlapping notes retain base steps.");
+}
+
 static void alternate_filter_live_cutoff(void)
 {
     float peak[2] = {0};
@@ -394,6 +444,7 @@ int main(void)
     sub_bypass();
     patch_audio();
     alternate_filter_live_cutoff();
+    pitch_lfo_step();
 #endif
     uint8_t cell[32], legacy[32];
     assert(original_sound_init(cell, ORIGINAL_SOUND_SYNTHONE, ORIGINAL_SYNTHONE_INIT_FACTORY));

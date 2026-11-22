@@ -39,7 +39,8 @@ X0X_COLD int original_runtime_init_extended(original_runtime_part *p,const uint8
         s1_part_init(&p->dsp.synthone);
         s1_part_bind_width(&p->dsp.synthone, original_chicago_fx2_compact_free_history(fx));
 #if X0X_SYNTHONE_PATCH
-        if ((original_sound_edit_mask(cell) & S1_PATCH_MASK) || cell[26] == 'M')
+        if ((original_sound_edit_mask(cell) & S1_PATCH_MASK) || cell[26] == 'M' ||
+            original_sound_s1_sub_position(cell, ext, S1_PATCH_PITCH_LFO))
             s1_part_apply_cell(&p->dsp.synthone, cell, ext);
 #endif
         rc = ORIGINAL_RUNTIME_OK;

@@ -1,0 +1,93 @@
+{
+  "preimage": "136483b5",
+  "original_hashes_verified": 694,
+  "unchanged_existing_panel_reads": 694,
+  "route_off_bit_exact": 517,
+  "route_on": 177,
+  "control_readbacks": 27760,
+  "baseline_stereo_pass": 8,
+  "final_stereo_pass": 10,
+  "gained": [
+    {
+      "index": 10,
+      "name": "ARP - Kiss Me, You Spy!",
+      "before": [
+        {
+          "level_db": -0.44109844766452166,
+          "spectral_db": 3.0308761959356834,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.5657646554933681,
+          "spectral_db": 3.0437164445628113,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "after": [
+        {
+          "level_db": -0.429231895308326,
+          "spectral_db": 2.684690679059448,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.5245934929174931,
+          "spectral_db": 2.6888131006848988,
+          "active": true,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "index": 221,
+      "name": "ARP - Kiss Me, You Spy!",
+      "before": [
+        {
+          "level_db": -0.44109844766452166,
+          "spectral_db": 3.0308761959356834,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.5657646554933681,
+          "spectral_db": 3.0437164445628113,
+          "active": true,
+          "pass": false
+        }
+      ],
+      "after": [
+        {
+          "level_db": -0.429231895308326,
+          "spectral_db": 2.684690679059448,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.5245934929174931,
+          "spectral_db": 2.6888131006848988,
+          "active": true,
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "lost": [],
+  "exact_row_sha256": "439771cdb7895d760a4173beb34881081432835c17d504c5352f373149f0cef1",
+  "patch_sha256": "3435a2d74dcd17d3c297befeb091bdc395fc00a1b29ef881df853eedb531958f",
+  "native_board_gates": {
+    "software_only": true,
+    "build_fit": {
+      "elite": {
+        "xip_free_bytes": 1664,
+        "pool_margin_bytes": 732
+      },
+      "pro": {
+        "xip_free_bytes": 1672,
+        "pool_margin_bytes": 732
+      }
+    },
+    "timing": "pending on this source"
+  }
+}

@@ -294,6 +294,9 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
         for (unsigned i = 0; i < 22; ++i) {
             if (tag == 2 && (i == 6 || i == 7 || i == 21)) continue;
             unsigned packed = (phaser && i<6) || (tag==2 && (i==8 || i==9));
+#if X0X_SYNTHONE_PATCH
+            packed |= tag==2 && (i==10 || i==11);
+#endif
             unsigned q=packed ? cell[i]&127u : cell[i];
             if (q > 127u || (i >= 2 && !(mask & (1u << i)) && q)) return 0;
         }
@@ -429,6 +432,11 @@ int original_sound_s1_set(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned slot, uns
 
 unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext, unsigned slot)
 {
+    if (slot == S1_PATCH_PITCH_LFO) {
+        if (cell[31] != 2 && !(cell[31] & 128u)) return 0;
+        const unsigned route = (cell[10] >> 7) | ((cell[11] >> 7) << 1);
+        return (route * 127u + 1u) / 3u;
+    }
     if (cell[26] != 'M' || !ext) return 0;
     const unsigned tag = s1_adjunct_tag(ext);
     if (tag != 12u && tag != 11u && tag != 7u) return 0;
@@ -443,6 +451,18 @@ unsigned original_sound_s1_sub_position(const uint8_t *cell, const uint8_t *ext,
 int original_sound_s1_set_extended(uint8_t *cell, uint8_t *ext, unsigned slot, unsigned position)
 {
     if (slot < S1_PATCH_CELL_COUNT) return original_sound_s1_set(cell, slot, position);
+    if (slot == S1_PATCH_PITCH_LFO) {
+        if (position > S1_PATCH_STEPS || !original_sound_valid(cell) ||
+            cell[29] != ORIGINAL_SOUND_SYNTHONE) return 0;
+        const unsigned route = (position * 3u + 63u) / 127u;
+        if (cell[31] != 2 && !(cell[31] & 128u)) {
+            if (!route) return 1;
+            s1_put_lfo(cell, ORIGINAL_SYNTHONE_CRUSH_LFO, 0u);
+        }
+        cell[10] = (cell[10] & 127u) | ((route & 1u) << 7);
+        cell[11] = (cell[11] & 127u) | ((route >> 1) << 7);
+        return 1;
+    }
     if (slot >= S1_PATCH_COUNT || position > S1_PATCH_STEPS || !ext ||
         !original_sound_valid(cell) || cell[29] != ORIGINAL_SOUND_SYNTHONE ||
         !original_master_valid(cell, ext)) return 0;

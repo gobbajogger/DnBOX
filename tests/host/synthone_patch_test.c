@@ -50,16 +50,23 @@ static void note_lock(void)
     assert(engine_s1_patch_set(0,filter_before.revision,115,64) == S1_EDIT_QUEUED);
     block();
     assert(read_patch(0,115).physical == 1.f);
+    s1_patch_value pitch_before = read_patch(0,57);
+    assert(pitch_before.physical == 3.f);
+    assert(engine_s1_patch_set(0,pitch_before.revision,57,85) == S1_EDIT_QUEUED);
+    block();
+    assert(read_patch(0,57).physical == 2.f);
     seq.ppat[TRK_BASS0] = pat;
     seq_start(&seq);
     for (unsigned i=0; i<2000 && !read_patch(0,16).note_locked; ++i) block();
     s1_patch_value locked = read_patch(0,16);
     assert(locked.note_locked && locked.physical == before.physical);
     assert(read_patch(0,115).physical == filter_before.physical);
+    assert(read_patch(0,57).physical == pitch_before.physical);
     assert(engine_s1_patch_set(0,before.revision,16,0) == S1_EDIT_BUSY);
     for (unsigned i=0; i<2000 && read_patch(0,16).note_locked; ++i) block();
     assert(!read_patch(0,16).note_locked && read_patch(0,16).position == 9);
     assert(read_patch(0,115).physical == 1.f);
+    assert(read_patch(0,57).physical == 2.f);
     seq_stop(&seq);
     block();
 }
@@ -139,7 +146,7 @@ int main(void)
     assert(!s1_patch_at(S1_PATCH_COUNT));
     assert(!engine_bass_preset_edited(0) && !engine_bass_preset_edited(1));
 
-    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,7,8,9,115};
+    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,7,8,9,115,57};
     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
         const s1_patch_descriptor *d = s1_patch_at(i);
@@ -158,7 +165,8 @@ int main(void)
             block();
             s1_patch_value actual = read_patch(0, ids[i]);
             unsigned position = (ids[i] == 8u || ids[i] == 9u) ? (q >= 64u ? 127u : 0u) :
-                ids[i] == 115u ? (q <= 31u ? 0u : q >= 96u ? 127u : 64u) : q;
+                ids[i] == 115u ? (q <= 31u ? 0u : q >= 96u ? 127u : 64u) :
+                ids[i] == 57u ? (((q * 3u + 63u) / 127u) * 127u + 1u) / 3u : q;
             assert(actual.physical == s1_patch_physical(d, q) && actual.position == position);
             assert(read_patch(1, ids[i]).physical == other.physical);
             assert(!memcmp(original.v[T_303][1], proj.sound.v[T_303][1], ORIGINAL_SOUND_BYTES));
@@ -195,5 +203,5 @@ int main(void)
     assert(!engine_s1_patch_read(1, 16, &b));
     assert(engine_s1_patch_set(1, b.revision, 16, 127) == S1_EDIT_REJECTED);
     note_lock();
-    puts("Synth One INIT patch: 17 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
+    puts("Synth One INIT patch: 18 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
 }
