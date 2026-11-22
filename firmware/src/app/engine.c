@@ -207,6 +207,8 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
 #if X0X_SUPERJ6_FACTORY
 /* The high bit reserves both existing mailboxes as one factory transaction. */
 #define SJ6_FACTORY_GROUP 0x80u
+#define SJ6_FACTORY_CHORUS_BYPASS 0x40u
+enum { SJ6_PENDING_MASTER = 4, SJ6_PENDING_ATTACK = 5 };
 /* Published and consumed under the factory group flag, one mailbox per synth owner. */
 static float pending_factory_range[NBASS];
 
@@ -224,6 +226,15 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
         if (!(value[i] >= 0 && value[i] <= limit)) return 0;
     }
 
+    const unsigned chorus_mask = (1u << SJ6_ROW_CHORUS_I) | (1u << SJ6_ROW_CHORUS_II);
+    for (unsigned i = SJ6_ROW_CHORUS_I; i <= SJ6_ROW_CHORUS_II; ++i)
+        if ((row->present & (1u << i)) && !(row->value[i] >= 0.f && row->value[i] <= 1.f))
+            return 0;
+    /* Both switches must explicitly disable their modes. Active original
+     * chorus modes still lack a qualified DSP binding. */
+    int chorus_off = (row->present & chorus_mask) == chorus_mask &&
+        row->value[SJ6_ROW_CHORUS_I] == 0.f && row->value[SJ6_ROW_CHORUS_II] == 0.f;
+
     uint32_t flags = plat_cq_lock();
     original_runtime_part *part = &original_bass[owner];
     juno6_t *synth = &part->dsp.juno.synth;
@@ -231,14 +242,15 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
                  !synth->pending_wave_mask && !synth->pending_field_mask &&
                  !juno6_active(synth) && !engine_bass_preset_pending(owner);
     if (accept) {
-        memcpy(synth->pending_field, value, sizeof synth->pending_field);
+        memcpy(synth->pending_field, value, (SJ6_PENDING_MASTER + 1) * sizeof *value);
         for (unsigned layer = 0; layer < 2; ++layer) {
             synth->pending_wave[layer] = (juno6_oscillator_edit){
                 value[SJ6_ROW_WAVE + layer], value[SJ6_ROW_AMOUNT + layer], value[SJ6_ROW_ENABLE + layer]};
         }
         pending_factory_range[owner] = range.f;
         synth->pending_wave_mask = 3u;
-        synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u;
+        synth->pending_field_mask = SJ6_FACTORY_GROUP | 31u |
+            (chorus_off ? SJ6_FACTORY_CHORUS_BYPASS : 0u);
     }
     plat_cq_unlock(flags);
     return accept;
@@ -246,9 +258,12 @@ X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *
 
 X0X_COLD int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
 {
-    unsigned slot = 4;
+    unsigned slot = SJ6_PENDING_MASTER;
     float limit = JUNO6_FACTORY_MASTER_MAX;
-    if (field != ENGINE_SJ6_MASTER_VOLUME) {
+    if (field == ENGINE_SJ6_AMP1_ATTACK) {
+        slot = SJ6_PENDING_ATTACK;
+        limit = 1.f;
+    } else if (field != ENGINE_SJ6_MASTER_VOLUME) {
         slot = (unsigned)field - ENGINE_SJ6_AMP2_ATTACK;
         if (slot >= 4) return 0;
         limit = 1.f;
@@ -256,11 +271,13 @@ X0X_COLD int engine_superj6_edit(unsigned owner, enum engine_superj6_field field
     if (owner >= NBASS || !(unit >= 0 && unit <= limit)) return 0;
     uint32_t flags = plat_cq_lock();
     original_runtime_part *part = &original_bass[owner];
+    juno6_t *synth = &part->dsp.juno.synth;
     int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK &&
-                 !(part->dsp.juno.synth.pending_field_mask & SJ6_FACTORY_GROUP) &&
-                 (slot == 4 || juno6_can_edit_amp2(&part->dsp.juno.synth));
+                 !(synth->pending_field_mask & SJ6_FACTORY_GROUP);
+    if (accept && slot == SJ6_PENDING_ATTACK)
+        accept = !juno6_active(synth) && !engine_bass_preset_pending(owner);
+    if (accept && slot < SJ6_PENDING_MASTER) accept = juno6_can_edit_amp2(synth);
     if (accept) {
-        juno6_t *synth = &part->dsp.juno.synth;
         synth->pending_field[slot] = unit;
         synth->pending_field_mask |= (uint8_t)(1u << slot);
     }
@@ -303,6 +320,15 @@ static X0X_COLD __attribute__((noinline)) void apply_superj6_pending(original_ru
             }
             (void)dnbx_store_raw(&synth->core, 86, pending_factory_range[owner]);
             juno6_apply_factory_waves(synth, synth->pending_wave);
+            int chorus_off = (synth->pending_field_mask & SJ6_FACTORY_CHORUS_BYPASS) != 0;
+            if (chorus_off && !synth->factory_chorus_bypass) {
+                /* A later wet program must not inherit delay words from
+                 * before the bypassed program. Keep legacy mix/rate/depth. */
+                juno6_chorus_t *chorus = &part->dsp.juno.chorus;
+                memset(chorus->delay, 0, sizeof chorus->delay);
+                chorus->phase = chorus->write = 0;
+            }
+            synth->factory_chorus_bypass = (uint8_t)chorus_off;
         } else if (!active)
             for (unsigned layer = 0; layer < 2; ++layer)
                 if (waves & (1u << layer))
@@ -311,9 +337,11 @@ static X0X_COLD __attribute__((noinline)) void apply_superj6_pending(original_ru
     unsigned mask = synth->pending_field_mask;
     if (!mask) return;
     synth->pending_field_mask = 0;
-    if (mask & (1u << 4))
+    if ((mask & (1u << SJ6_PENDING_ATTACK)) && !juno6_active(synth) && !engine_bass_preset_pending(owner))
+        juno6_apply_pre_note_attack(synth, synth->pending_field[SJ6_PENDING_ATTACK]);
+    if (mask & (1u << SJ6_PENDING_MASTER))
         (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
-                                     synth->pending_field[4]);
+                                     synth->pending_field[SJ6_PENDING_MASTER]);
     for (unsigned slot = 0; slot < 4; ++slot)
         if (mask & (1u << slot))
             (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,

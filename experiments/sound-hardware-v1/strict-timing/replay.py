@@ -59,9 +59,19 @@ def run(args, symbols, events, name, duration, offset, seed=None):
                FM1_CORE_LOAD=f"{symbols['_c1_start']:x}-{symbols['_c1_end']:x}")
     command = [str(args.emulator), "--fwsc", str(args.fwsc), "--mhz", "360",
                "--shot", str(duration), "--flash", str(flash)]
+    public_recording = getattr(args, "public_recording", False)
     with (path / "run.log").open("w") as log:
-        subprocess.run(command, env=env, cwd=path, stdout=log, stderr=subprocess.STDOUT,
-                       check=True)
+        if public_recording:
+            # The public recorder streams PPM to stdout and writes boot-padded
+            # DAC PCM in work/audio.raw. Keep its diagnostics on stderr.
+            env["FM1_NO_SKIP"] = "1"
+            subprocess.run([*command, "--record", "-"], env=env, cwd=path,
+                           stdout=subprocess.DEVNULL, stderr=log, check=True)
+        else:
+            subprocess.run(command, env=env, cwd=path, stdout=log,
+                           stderr=subprocess.STDOUT, check=True)
+    if public_recording:
+        shutil.move(path / "work/audio.raw", pcm)
     log_text = (path / "run.log").read_text()
     if f"panel.ppm at {duration} ms" not in log_text or "skipped 0 cycles" not in log_text:
         raise ValueError(f"Incomplete strict emulator window in {path}")
@@ -73,6 +83,7 @@ def run(args, symbols, events, name, duration, offset, seed=None):
                   halves=debug[1], max_us=debug[2], raw_late=debug[5],
                   audio_xruns=struct.unpack_from("<I", memory, symbols["audio_xruns"] - 0x01c00000)[0],
                   pcm_sha256=digest(pcm), pcm_bytes=pcm.stat().st_size, scene_sha256=digest(keys),
+                  pcm_capture="public boot-padded recorder" if public_recording else "raw DAC observer",
                   initial_flash_sha256=initial_hash, final_flash_sha256=digest(flash))
     (path / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result

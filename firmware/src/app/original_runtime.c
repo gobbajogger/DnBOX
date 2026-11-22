@@ -386,7 +386,8 @@ static int render_stereo(original_runtime_part *p, original_runtime_workspace *w
 #if X0X_SUPERJ6_FACTORY
         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
         if(ok){
-            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
+            if (!p->dsp.juno.synth.factory_chorus_bypass)
+                juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
             /* The original master attenuator follows the instrument effects. */
             float gain=p->dsp.juno.synth.master_gain;
             if(gain!=1.f) for(unsigned i=0;i<frames;++i){

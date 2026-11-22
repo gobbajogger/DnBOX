@@ -36,10 +36,10 @@ typedef struct {
 #if X0X_SUPERJ6_FACTORY
  dnbx_part core;
  /* An idle typed wave or AMP2 edit selects the app renderer until cold adoption. */
- uint8_t typed;
+ uint8_t typed, factory_chorus_bypass;
  /* Main writes under the audio-source mask. The block boundary commits each
   * field once. Cold selection clears staged edits with the whole synth. */
- float pending_field[5]; /* slots 0..3 AMP2, slot 4 output attenuation */
+ float pending_field[6]; /* AMP2 ADSR, output attenuation, AMP1 attack */
  float master_gain;
  juno6_oscillator_edit pending_wave[2];
  uint8_t pending_field_mask, pending_wave_mask;
@@ -73,6 +73,7 @@ int juno6_read_envelope(const juno6_t *, juno6_envelope_snapshot *);
 #if X0X_SUPERJ6_FACTORY
 int juno6_render_stereo(juno6_t *, float *, float *, unsigned);
 int juno6_can_edit_amp2(const juno6_t *);
+void juno6_apply_pre_note_attack(juno6_t *, float);
 void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
 void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2]);
 #endif

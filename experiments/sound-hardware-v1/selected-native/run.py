@@ -96,7 +96,7 @@ def run_shot(args, out, flash):
                        cwd=out, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
 
 
-def measure(elf, out, duration_ms=2800):
+def measure(elf, out, duration_ms=2800, capture_rate=44100):
     log = (out / "run.log").read_text()
     if f"panel.ppm at {duration_ms} ms" not in log or "skipped 0 cycles" not in log:
         raise ValueError("Incomplete strict emulator shot")
@@ -122,7 +122,7 @@ def measure(elf, out, duration_ms=2800):
     triggered = [sum(t != 0 for t in last_hit_ms[:11]), sum(t != 0 for t in last_hit_ms[11:])]
     pcm = (out / "stereo.s16le").read_bytes()
     audio = np.frombuffer(pcm, "<i2").astype(np.int32)
-    if len(audio) <= 2 * 44100 or len(audio) % 2:
+    if len(audio) <= 2 * capture_rate or len(audio) % 2:
         raise ValueError("Incomplete stereo DMA capture")
     return {
         "bass_kinds": list(kinds),
@@ -133,10 +133,10 @@ def measure(elf, out, duration_ms=2800):
         "user_zones": list(region("usr_nz")),
         "loop_count": struct.unpack("<I", region("nloops"))[0],
         "first_catalog_slot_zone": [region("loop_slot")[0], region("loop_zone")[0]],
-        "sample_rate": 44100,
+        "sample_rate": capture_rate,
         "stereo_frames": len(audio) // 2,
-        "first_half_second_nonzero_words": int(np.count_nonzero(audio[:44100])),
-        "last_half_second_nonzero_words": int(np.count_nonzero(audio[-44100:])),
+        "first_half_second_nonzero_words": int(np.count_nonzero(audio[:capture_rate])),
+        "last_half_second_nonzero_words": int(np.count_nonzero(audio[-capture_rate:])),
         "peak_pcm16": int(np.abs(audio).max()),
         "pcm_sha256": sha(pcm),
         "observed_halves": dbg[1],

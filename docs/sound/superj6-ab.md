@@ -14,6 +14,12 @@ Call `engine_superj6_factory_load(owner, &row)` after selecting an idle Juno own
 
 The focused test runs from the repo root with `sh tests/host/superj6_factory_load_test.sh`. Passing a directory containing the authenticated export’s compiled `bank_data.inc` also exercises the complete bank through this entry point. The loader covers the original main-pass fields above. Live LFO destination resolution, remaining instrument and FX parameters, and full-preset stereo scoring have separate evidence requirements.
 
+### Layer-one attack and dry chorus routing
+
+The opt-in renderer can stage SuperJ6 Layer 1 attack (ID 36) for an idle owner. Admission and the audio boundary both check ownership before applying the existing physical attack transfer. A held note or arriving preset cancels the staged write. Ten endpoints across the two parts produced 2,560 stereo frames bit-exact against the direct physical setter.
+
+Factory IDs 40 and 41 retain authored presence. The opt-in route bypasses chorus when both switches explicitly contain zero, including signed zero. The two-owner test matched 512 audible stereo frames bit for bit against the same dry render after master gain. A missing switch or active mode still selects the existing Juno chorus. The test verifies independent owners, rejection, and ordinary project save/reload. Active original chorus and complete original factory playback remain unqualified.
+
 ## Verified originals
 
 | Input | Bytes | SHA-256 |

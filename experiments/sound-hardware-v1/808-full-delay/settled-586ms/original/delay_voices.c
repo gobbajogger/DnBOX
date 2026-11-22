@@ -7,17 +7,13 @@
 #include <stdlib.h>
 
 extern void sc808_capture(float *, float *, float *);
-#if !defined(EXPECTED_808_DELAY_FRAMES) || FX_808_DELAY_FRAMES != EXPECTED_808_DELAY_FRAMES
-#error "The private 808 delay does not have the expected ring length"
+#if FX_808_DELAY_FRAMES != 26112
+#error "These comparisons require the 26112-frame private 808 delay"
 #endif
 
 static drum808_t kit;
 static fxbus_t verb;
-#ifdef FX_808_DELAY_WORDS
 static int16_t ring[FX_808_DELAY_WORDS];
-#else
-static int16_t ring[FX_808_DELAY_FRAMES];
-#endif
 
 static void pot(sc808_engine_t *e, const char *key, int value)
 {

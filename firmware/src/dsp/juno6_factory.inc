@@ -61,6 +61,17 @@ static int set_amp2(dnbx_part *core, unsigned id, float raw)
     return dnbx_store_raw(core, id, raw) == DNBX_RAW_STORED_ONLY;
 }
 
+/* Called for an independent layer-one edit on the idle audio owner. */
+void juno6_apply_pre_note_attack(juno6_t *s, float raw)
+{
+    dnbx_layer_params layer;
+    if (dnbx_get_layer(&s->core, 0, &layer) != DNBX_OK ||
+        dnbx_attack_from_unit(raw, &layer.amp.attack_s) != DNBX_OK ||
+        dnbx_set_layer(&s->core, 0, &layer) != DNBX_OK) return;
+    (void)dnbx_store_raw(&s->core, 36, raw);
+    s->typed = 1;
+}
+
 /* Called only for a validated pre-note snapshot. Missing legacy PWM fields
  * are irrelevant for sine/triangle/saw. Square requires an explicit gate. */
 void juno6_apply_pre_note_wave(juno6_t *s, unsigned layer, const juno6_oscillator_edit *edit)

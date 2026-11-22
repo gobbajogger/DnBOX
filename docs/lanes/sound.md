@@ -2,7 +2,7 @@
 
 ### Exact-source qualification checkpoint — 2026-11-22 UTC
 
-Source `49ba51f1` stock Elite and Pro built with 7,796/7,804 B XIP free and 7,908 B pool margin each. In-range original wet 8W8 output passed 230 full mixes, 207 energized returns and 17 sustained tails. Full-range feedback delay remains open. Chicago still has the one boundary-clipped moving-pitch fit, and strict populated timing and SuperJ6 S4 are NOT_RUN. Integration `f1786ebe` diverges from the measured head. A virtual merge found 12 conflicts. [Qualification](../sound/engine-qualification.md#shipping-wet-808-and-two-board-build-checkpoint--2026-11-22-utc) · [Exact build and ancestry evidence](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).
+Original-engine comparisons cover Synth One and SuperJ6. Existing engines enter the populated playback, lifecycle and native resource checks. Source `49ba51f1` stock Elite and Pro built with 7,796/7,804 B XIP free and 7,908 B pool margin each. Integration `f1786ebe` diverges from the measured head. A virtual merge found 12 conflicts. The earlier 808 and Chicago comparison receipts are retained in checkpoint `6e3055e5` history. [Qualification](../sound/engine-qualification.md#active-qualification-scope--2026-11-22-utc) · [Exact build and ancestry evidence](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).
 
 
 ## 2026-11-22 S4 preflight and integration ancestry

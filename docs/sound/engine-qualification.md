@@ -38,11 +38,26 @@ At source `230a73e4ac075f3752926b3a65130181de5c723a`, an independently executed 
 
 **Scope limit:** This test uses a deterministic substitute high-pass to isolate interpolation and history behavior. It **does not** compare against original 8W8 wet output, prove the original 1.994-second range, link a shipping firmware image, establish Elite/Pro memory fit, or qualify strict emulator timing. The earlier original-8W8 257 full and 234 isolated candidate comparisons and their historical timing remain separately pinned evidence, not new branch-head results. Full-length native effects, factory parity, S4, glide pitch and all current exact-head native gates remain open.
 
-## Shipping wet 808 and two-board build checkpoint — 2026-11-22 UTC
+## Active qualification scope — 2026-11-22 UTC
 
-The production wet 808 at source `49ba51f13f76d0e709d7b6c32d12f31972c1d985` passed 230/230 in-range full mixes and 207/207 energized isolated returns at the existing 1 dB level and 3 dB spectral RMS limits. The 19,200-frame ring has a 429.57 ms upper tap. Of 338 standard rows, 108 exceed that range. The eight-second stimulus passed all 17 in-range full mixes, all 16 energized isolated returns and all 17 tails. Another 51 sustained rows use longer taps. The replay preserves those measurements and verifies the exact original 8W8 archive by SHA-256 before compilation. [Standard matrix](../../evidence/sound-qualification/49ba51f1/808-wet-matrix.json) · [Tail matrix](../../evidence/sound-qualification/49ba51f1/808-wet-tails.json).
+Original-engine comparisons cover Synth One and SuperJ6. Existing engines enter the populated playback, lifecycle and native resource checks. The earlier checkpoint's 808 and Chicago comparison results remain in its Git history and are outside current acceptance.
 
-The same source built stock Elite and Pro applications of 544,876 and 544,868 bytes, leaving 7,796 and 7,804 bytes of XIP. Both retained 7,908 bytes of pool above the 8,192-byte reserve. Both original bass engines produced finite, nonzero stereo on all factory presets (Chicago 81, Miami 30). All seven Miami and 28 of 29 Chicago configurations passed. The original and firmware stationary pitch searches for `overlap_glide_mid` hit the boundary. The previous-note anchor comparison passed its 64 onset offsets. Strict populated timing and S4 (0/14) remain pending. [Build and integration identities](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json) · [Bass matrix](../../evidence/sound-qualification/49ba51f1/bass-matrix.json) · [Anchor probe](../../evidence/sound-qualification/49ba51f1/chicago-anchor.json).
+The ordinary Elite and Pro applications built from `49ba51f13f76d0e709d7b6c32d12f31972c1d985` occupy 544,876 and 544,868 bytes, leaving 7,796 and 7,804 bytes of XIP. Both retain 7,908 bytes of pool above the 8,192-byte reserve. [Exact build and integration identities](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).
+
+### Strict populated playback on both stock builds
+
+Public `fm1-live` v0.5.1 ran the 922-event scene at strict 360 MHz with both kits, both selected synth parts and the BREAK sample active. Each run completed 648 halves in 8 seconds with zero raw late, zero scene late and zero xruns. The recorder's stream includes boot silence and its 44,118 Hz capture rate is recorded in the receipts. Timing comes from the guest counters. The historical observer has a different binary identity.
+
+| Routing | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Chicago and Miami | 8,253 µs | 8,147 µs |
+| Juno and Synth One | 6,942 µs | 7,172 µs |
+
+The existing slot migration, held-chord recording, polyphonic sequencer, panic cutover and pattern-preset transition checks passed. The retired-name scan found no matches. The cell and pattern reruns used ASan and UBSan with leak detection disabled after LeakSanitizer rejected the command tracer. [Timing, playback and lifecycle receipts](../../evidence/sound-qualification/49ba51f1/populated-public/).
+
+### Original Synth One and SuperJ6
+
+Synth One's current voice and effect projection verified 35 settings across all 694 programs. All original capture hashes matched, and 0/694 complete pairs met the 1 dB level and 3 dB spectral limits. The engine-only SuperJ6 path adds a guarded Layer 1 attack and bit-exact chorus bypass when both factory switches are off. Active original chorus, the complete factory mapping, and the complete preset audio matrix remain open. The SuperJ6 build-9 host is unavailable and S4 remains 0/14. [Synth One](synthone-ab.md) · [SuperJ6](superj6-ab.md).
 
 ## Full-length effects on stock hardware
 
