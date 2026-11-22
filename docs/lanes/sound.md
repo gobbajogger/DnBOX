@@ -1,5 +1,11 @@
 # Sound lane
 
+### Matched-event host diagnostics and original runner rebuild
+
+Synth One production stays at **10/694**. The rebuilt nine-program fixture reproduces its reference and control digests. Dry-tap observation leaves final PCM unchanged. The active low-pass substitution changes the original spectral score by less than 0.004 dB, while the original cutoff LFO accounts for a large part of #213’s matched-note difference. The two-route host candidate gains #139 and loses #213 in the direct-note bank fixture. The coupled version narrows #213 to 3.038 dB against the 3.000 dB limit. Neither enters production. The qualified stock payload remains applicable. [Replay source and results](../../experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/).
+
+The Linux SuperJ6 rebuild now has a pinned initializer preflight, validating the selected factory identity and admitting only the ARM64 prefix up to the first linked framework call. Five tests cover synthetic fixtures, including actual Unicorn 2.1.4 execution. The current exact original-input attempt exits 2 because the verified private archive could not be materialized from Pages or Library in this session. The prior original receipt stops at Foundation UUID metadata. Complete graph instances, factory audio, S4 pairs and public audio delivery remain at zero. [Initializer source, dependency pins and verification](../../experiments/sound-hardware-v1/sj6-factory/original/engine-entry-rebuild/).
+
 ### Current software-only candidate — `3b480381`
 
 The final combined opt-in packages link on stock Elite and Pro with 2,416 and 2,424 B XIP left and 7,908 B of pool margin on each. The four required populated replays and two active-sub stress runs passed with 0 late, 0 xruns and a maximum of 8,046 µs. The retired-name scan is empty and legacy slot migration passed. The 694-program Synth One projection meets both original audio limits on seven programs. The authenticated SuperJ6 selector passed all 640 source programs and the supported controls applied through the real host firmware loader. Full SuperJ6 controls, active FX, 640-program complete mapping and original S4 pairs remain open. Integration preview remains below the XIP floor. [Exact software qualification and artifacts](../sound/engine-qualification.md#current-software-qualification--source-3b480381).
