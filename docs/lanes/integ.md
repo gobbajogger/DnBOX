@@ -1,5 +1,10 @@
 # Integration baseline
 
+## Shared build-input recovery — limited verification (WORKING)
+
+The personal Library has the exact-name archive `fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13.zip` (309,800,121 B), but this runtime explicitly **denied raw-byte materialization**, so neither its original SHA-256 nor its three SDK build pins was re-verified here. The Library's `LoopyX0X37-shared-inputs-delivery-f1786ebe-583f6229-inputs-only.zip` **is** accessible (49,461,313 B; SHA-256 `0dc74706f2ac6d254d57941a296ab5b47dddb0f90afe76f7e2d4ed5ae410307b`). Local extraction, all eight SHA256SUMS records and `scripts/verify.py` **PASS**, including the JieLi toolchain pin. Its manifest explicitly says `PARTIAL_INPUTS_ONLY_NOT_OFFLINE_COMPLETE`, with **neither source tree nor SDK embedded**, so it is not a build-ready restore. [Exact recovered-inputs receipt](../../evidence/integ-resume/shared-input-recovery.json). Complete source checkout, current build and browser results remain **NOT_RUN**, not inherited from the historical manifest.
+
+
 ## Integration-resume checkpoint — 2026-11-22T00:41:00Z (WORKING)
 
 Focused BREAK fit proof at lane starting head `d89d26666e6a22eabec8f01c8399e78db864a991`: GitHub blob reads independently parsed the actual five-zone 22,050 Hz bank (109,394 bytes, complete CRC32), and the pinned native-build manifest for the previously measured combined source `bbef756236ddf54cebaf8ccf9071b8975e7e8839`. With the actual SMK code limit 552,672 B, 1,024 B erased reserve and 16-byte alignment, the recorded Elite application 546,468 B permits 5,168 B and Pro 546,460 B permits 5,184 B. Both **reject** this unmodified original bank by 104,226 / 104,210 B. This is a definitive **historical-input capacity failure**, not proof of the current consolidated image. Source blob IDs, application SHA-256 and arithmetic are retained in [the machine-readable finding](../../evidence/integ-resume/starting-breaks-checkpoint.json). The [regression test](../../tests/starting_break_stock_fit_checkpoint_test.py) exercises actual bank validation, both rejection paths and a synthetic exact-capacity control.
