@@ -1,0 +1,1734 @@
+{
+  "source": "f6c2f17087dea9de52dc77f88dd271aab6692ef1",
+  "bank_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "rows": [
+    {
+      "index": 139,
+      "events_sha256": "13304829f6909af1bb180dd7d954763179e005d1218461034594865049689955",
+      "arms": {
+        "baseline": {
+          "sha256": "d1e004c61c1a1bc34db2505a40c58ecaa4066fe61f27377043f200886a8424f8",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.702689547243999,
+              "spectral_db": 3.5804624386809802,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.7208757560061496,
+              "spectral_db": 3.579339558568102,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "03cbbda79b5873a5bb7a6abb71c0d7051b5bad7d50b2b10eaf342e02daa296ff",
+          "original_vs_probe": [
+            {
+              "level_db": -1.2179782385136304,
+              "spectral_db": 1.1865036249436018,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.2188166317766356,
+              "spectral_db": 1.1813064001257922,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.9206677857576286,
+              "spectral_db": 3.9378285495179504,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.9396923877827854,
+              "spectral_db": 3.941778304568827,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "e85b25cd5d50fc42cf54a379cc13293afea766536090510f24d80fb06caf5000",
+          "original_vs_probe": [
+            {
+              "level_db": -0.563618835261078,
+              "spectral_db": 1.446954079961637,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.5743223781040273,
+              "spectral_db": 1.44934234383191,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.266308382505077,
+              "spectral_db": 4.786674411416271,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.2951981341101773,
+              "spectral_db": 4.787839437508624,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "8d68abedb1ba252ca8e98b4777476386edc36957bb9ccc0e44a53c9acf43b462",
+          "original_vs_probe": [
+            {
+              "level_db": 0.07514163950654404,
+              "spectral_db": 0.04205836007137558,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.07310927136082637,
+              "spectral_db": 0.04251118843269965,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.6275479077374553,
+              "spectral_db": 3.5765734233662707,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.6477664846453237,
+              "spectral_db": 3.5759827381224936,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "474ca8fc4078bafaac6706acf905b864ce004d974b5d6bb3d7c662304f6bb664",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0668836568600779,
+              "spectral_db": 1.4468366417366707,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.06696638017373863,
+              "spectral_db": 1.4481375891072643,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.6358058903839208,
+              "spectral_db": 2.4742367022396516,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.653909375832411,
+              "spectral_db": 2.4683503807201816,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "d1e004c61c1a1bc34db2505a40c58ecaa4066fe61f27377043f200886a8424f8",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.702689547243999,
+              "spectral_db": 3.5804624386809802,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.7208757560061496,
+              "spectral_db": 3.579339558568102,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 664,
+      "events_sha256": "b90337f410779b4111a4e75046335c744844ec085198adb1ee76010da3cae8ef",
+      "arms": {
+        "baseline": {
+          "sha256": "0e81f0f20405f0e60dda91d44dc5763de9da443fc6e2d51ca1c76e2005c25291",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 6.088980894002518,
+              "spectral_db": 5.54819378928183,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.651655014243149,
+              "spectral_db": 5.550946077630442,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "dfcf0139c7e8f0b4915483f97ff807a062948ec26e249e5ffda28350f8ec1dab",
+          "original_vs_probe": [
+            {
+              "level_db": -0.009323656232962607,
+              "spectral_db": 0.01633374638317318,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.011891079750915171,
+              "spectral_db": 0.011841704255728782,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 6.098304550235481,
+              "spectral_db": 5.541135205080413,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.663546093994064,
+              "spectral_db": 5.546209163129157,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "561ce9f76dae2229636cb53913fe3f7134093c72da034a7329e7b7bdfc59292a",
+          "original_vs_probe": [
+            {
+              "level_db": -1.4942852360351573,
+              "spectral_db": 0.3631230123062047,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.5788554849708978,
+              "spectral_db": 0.40049410323540907,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 7.583266130037675,
+              "spectral_db": 5.757004208485378,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 7.230510499214046,
+              "spectral_db": 5.776371721236354,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "fa7fa673ab400929792d4dad574b87bdec2ae8d881bd6585bdb066aca39ee3af",
+          "original_vs_probe": [
+            {
+              "level_db": -0.31478418431383504,
+              "spectral_db": 5.696542758759845,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.4599287570349483,
+              "spectral_db": 5.9105356519816015,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 6.403765078316352,
+              "spectral_db": 9.981415558856881,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 6.111583771278097,
+              "spectral_db": 10.071827100195103,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "57c659f6aeb11f72f512777c95d6b7df05023049c44cde9e3e30ea91e6bf4f7f",
+          "original_vs_probe": [
+            {
+              "level_db": -0.015327651537665722,
+              "spectral_db": 0.24926969284000916,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.00823301199975554,
+              "spectral_db": 0.2224690459611023,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 6.104308545540183,
+              "spectral_db": 5.406465304445001,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.659888026242904,
+              "spectral_db": 5.443383869204388,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "0e81f0f20405f0e60dda91d44dc5763de9da443fc6e2d51ca1c76e2005c25291",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 6.088980894002518,
+              "spectral_db": 5.54819378928183,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 5.651655014243149,
+              "spectral_db": 5.550946077630442,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 482,
+      "events_sha256": "71f7d66727cfab412c39ee8f8cc088ace78eb48e4ef2cf4c386d029174cd6f65",
+      "arms": {
+        "baseline": {
+          "sha256": "d82fd86273a5341a37d4a0e32109fb3cb65884f301fb075b23cd532d983afb7e",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": -0.3138601481316011,
+              "spectral_db": 1.660892564096051,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25018898356579855,
+              "spectral_db": 1.659336634788748,
+              "active": true,
+              "pass": true
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "c21afeb448ba227cd09056b8d83e6cdf48b896f8486e924630d76b6a13662d1a",
+          "original_vs_probe": [
+            {
+              "level_db": 0.19153761363333538,
+              "spectral_db": 1.4857483891623244,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.23030642320541,
+              "spectral_db": 1.4861641828574963,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": -0.5053977617649368,
+              "spectral_db": 2.860376737191541,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.48049540677120856,
+              "spectral_db": 2.859561912250736,
+              "active": true,
+              "pass": true
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "f791b35a6a1a45d8b777c5880367a296fa56fb097c3a41caeb2696e1c00a5829",
+          "original_vs_probe": [
+            {
+              "level_db": -1.7661183467413488,
+              "spectral_db": 3.055462789228363,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.7523167951469691,
+              "spectral_db": 3.0550209642511357,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.4522581986097474,
+              "spectral_db": 1.944132399238672,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.5021278115811707,
+              "spectral_db": 1.9454514019859293,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "7683995898afbaa82771d68d2bd7a86f8e1c42ba3cc160bc2afb595c86caf083",
+          "original_vs_probe": [
+            {
+              "level_db": -0.31523346919371975,
+              "spectral_db": 0.6900838263245781,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.3072697781358584,
+              "spectral_db": 0.6924146694291453,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 0.0013733210621183897,
+              "spectral_db": 1.4758528646970195,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.05708079457005938,
+              "spectral_db": 1.475313394314762,
+              "active": true,
+              "pass": true
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "d82fd86273a5341a37d4a0e32109fb3cb65884f301fb075b23cd532d983afb7e",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": -0.3138601481316011,
+              "spectral_db": 1.660892564096051,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25018898356579855,
+              "spectral_db": 1.659336634788748,
+              "active": true,
+              "pass": true
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "d82fd86273a5341a37d4a0e32109fb3cb65884f301fb075b23cd532d983afb7e",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": -0.3138601481316011,
+              "spectral_db": 1.660892564096051,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.25018898356579855,
+              "spectral_db": 1.659336634788748,
+              "active": true,
+              "pass": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 410,
+      "events_sha256": "91ea748f7510b849a79214d5b492af92565525e0cf7ba136aa5f05af12fb8d7e",
+      "arms": {
+        "baseline": {
+          "sha256": "7ae12f9f37c7639d3f9f41db2f830917b92ccb9bb7668b22121ef78c3455280b",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 0.906075878098387,
+              "spectral_db": 3.53352827508293,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.1325233540023328,
+              "spectral_db": 3.5840123767474443,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "f4e154350af3748650e63a1c4b028c1d2ffebe43c3d630ad96af84d2b7aac82f",
+          "original_vs_probe": [
+            {
+              "level_db": -0.052772483624156104,
+              "spectral_db": 0.21871056608258183,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.031877193130105994,
+              "spectral_db": 0.2197048555031437,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 0.9588483617225435,
+              "spectral_db": 3.5502563245881396,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.10064616087222715,
+              "spectral_db": 3.5989854115687794,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "7f05d1f2316f6890e9e3bf2fc8221b55e86196f0cbabf8778458c44286afaf56",
+          "original_vs_probe": [
+            {
+              "level_db": -2.494584567183025,
+              "spectral_db": 3.5545236103463997,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -3.5174298708880656,
+              "spectral_db": 3.5967452504391955,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.400660445281412,
+              "spectral_db": 3.6248940036498634,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.384906516885733,
+              "spectral_db": 3.591774486904501,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "49bb5bc3a96c3c8d8d40dc10752c9c24811363c128acb190f829c6f89f748a17",
+          "original_vs_probe": [
+            {
+              "level_db": -0.14576150551176162,
+              "spectral_db": 0.7194086628178872,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.10115943382609041,
+              "spectral_db": 0.7213157980846695,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.0518373836101484,
+              "spectral_db": 3.6665809080545895,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.03136392017624241,
+              "spectral_db": 3.7066055226311994,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "b5f3155c0deca1806cce2fe8cc7d2bc2cbc1f17320883be7adc0cd06ae151d58",
+          "original_vs_probe": [
+            {
+              "level_db": 0.006458418784220873,
+              "spectral_db": 0.09282617919183066,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.005614204040158346,
+              "spectral_db": 0.09278762266629946,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 0.8996174593141669,
+              "spectral_db": 3.5566749007731433,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.13813755804249098,
+              "spectral_db": 3.6086783442501815,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "b48d743e9c5fe0d44000293f9b2b36b14d657dd918eb037ed0b83107e5df928f",
+          "original_vs_probe": [
+            {
+              "level_db": -0.013904804707519654,
+              "spectral_db": 0.0543920302660034,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.008190555922763137,
+              "spectral_db": 0.05442404389631571,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 0.9199806828059067,
+              "spectral_db": 3.5281608242937836,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -0.12433279807956973,
+              "spectral_db": 3.5775138059283242,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 138,
+      "events_sha256": "61c33523fa4909605ba0f84411604d8a400c68926c42192c1d0fe21c50a6c62d",
+      "arms": {
+        "baseline": {
+          "sha256": "b418ebefa64b50207179590f2d505317f6943d4cf8d952f8ffb069ce9b67a3c6",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.1379031741766634,
+              "spectral_db": 3.1763851731757335,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.1700269297754624,
+              "spectral_db": 3.1810651532933165,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "c876cf3d7f50094ded18952cfb68ea04f728c8c7fd51f4d75f7d2668b5d40ad0",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0037578391947206847,
+              "spectral_db": 0.04093151162192742,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0046006361264312404,
+              "spectral_db": 0.041099802631395864,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.134145334981943,
+              "spectral_db": 3.1904995877091884,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.165426293649032,
+              "spectral_db": 3.1864490795366627,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "f6aa53bb4b2a72c1d7c54576d39c0f6b997f15ed3001d4f08468f619b9f036ab",
+          "original_vs_probe": [
+            {
+              "level_db": -0.10564499424999949,
+              "spectral_db": 0.6110669932296697,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.10451856717345283,
+              "spectral_db": 0.6104219819255606,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.2435481684266634,
+              "spectral_db": 3.254182533175967,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.2745454969489156,
+              "spectral_db": 3.2649402731662414,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "4e52ca73bdbb7ed8b966aa7f6de4397cf3410bf5016ab51e4704b096b35294ef",
+          "original_vs_probe": [
+            {
+              "level_db": -0.21532917909636878,
+              "spectral_db": 0.5417103415640779,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.286111987489824,
+              "spectral_db": 0.5798817359075759,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.353232353273032,
+              "spectral_db": 3.267072228460739,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.456138917265287,
+              "spectral_db": 3.2884460639340745,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "0e0190dabae0748e856c53e3415a7392ed88a9b814d02d9185405866397a178b",
+          "original_vs_probe": [
+            {
+              "level_db": 0.16457169972134908,
+              "spectral_db": 1.1752769554484601,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.17269996556949646,
+              "spectral_db": 1.1692039813969342,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.973331474455314,
+              "spectral_db": 2.8463098747562317,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.997326964205967,
+              "spectral_db": 2.8614365227984964,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "b418ebefa64b50207179590f2d505317f6943d4cf8d952f8ffb069ce9b67a3c6",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.1379031741766634,
+              "spectral_db": 3.1763851731757335,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.1700269297754624,
+              "spectral_db": 3.1810651532933165,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 10,
+      "events_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "arms": {
+        "baseline": {
+          "sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "e7daecc786bacf1aad5d5dc6a56ff20b0181212ad0b026c2350e4ff50c7e6c7b",
+          "original_vs_probe": [
+            {
+              "level_db": -0.23866377280001816,
+              "spectral_db": 0.17247408423327382,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.2514769887644103,
+              "spectral_db": 0.17540244519938042,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.85238100750463,
+              "spectral_db": 3.731238176300786,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.656298092317509,
+              "spectral_db": 3.7025545852810278,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "d5bbfbdc914c3dce429c46cd3e900b6caee43454088e239af7877ebf85fb7fd8",
+          "original_vs_probe": [
+            {
+              "level_db": -0.007774623891889904,
+              "spectral_db": 0.022930598458794436,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.011306001901090493,
+              "spectral_db": 0.022525541552956944,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.6214918585965017,
+              "spectral_db": 3.734285441506288,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4161271054541893,
+              "spectral_db": 3.700209907014087,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "067ef3994f8010d01ddbd23e275b1a0db07162a8ef7b74da8c5cc6d2ba40be6a",
+          "original_vs_probe": [
+            {
+              "level_db": -0.7366992800069405,
+              "spectral_db": 0.48098371130491135,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.7007175591996893,
+              "spectral_db": 0.4718798246981988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.350416514711553,
+              "spectral_db": 3.780704200936156,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.105538662752787,
+              "spectral_db": 3.7485271979088717,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "9ac8a82e75b58cffce4644c2a42d7244b95b1d787f45f3a7d3f98ae7743acb3a",
+          "original_vs_probe": [
+            {
+              "level_db": -0.06916601888958865,
+              "spectral_db": 1.0370930626606858,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.07139387218232293,
+              "spectral_db": 1.0646390435234536,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.6828832535942007,
+              "spectral_db": 4.513222003418049,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.476214975735421,
+              "spectral_db": 4.503063144346641,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 221,
+      "events_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "arms": {
+        "baseline": {
+          "sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "e7daecc786bacf1aad5d5dc6a56ff20b0181212ad0b026c2350e4ff50c7e6c7b",
+          "original_vs_probe": [
+            {
+              "level_db": -0.23866377280001816,
+              "spectral_db": 0.17247408423327382,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.2514769887644103,
+              "spectral_db": 0.17540244519938042,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.85238100750463,
+              "spectral_db": 3.731238176300786,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.656298092317509,
+              "spectral_db": 3.7025545852810278,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "d5bbfbdc914c3dce429c46cd3e900b6caee43454088e239af7877ebf85fb7fd8",
+          "original_vs_probe": [
+            {
+              "level_db": -0.007774623891889904,
+              "spectral_db": 0.022930598458794436,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.011306001901090493,
+              "spectral_db": 0.022525541552956944,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.6214918585965017,
+              "spectral_db": 3.734285441506288,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4161271054541893,
+              "spectral_db": 3.700209907014087,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "067ef3994f8010d01ddbd23e275b1a0db07162a8ef7b74da8c5cc6d2ba40be6a",
+          "original_vs_probe": [
+            {
+              "level_db": -0.7366992800069405,
+              "spectral_db": 0.48098371130491135,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.7007175591996893,
+              "spectral_db": 0.4718798246981988,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.350416514711553,
+              "spectral_db": 3.780704200936156,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.105538662752787,
+              "spectral_db": 3.7485271979088717,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "9169289d78eef473dc4f56789505fca1023ec83cb68b2a596332c22a2ba015e1",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.613717234704612,
+              "spectral_db": 3.7365108385827615,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.4048211035530986,
+              "spectral_db": 3.7026824996964645,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "9ac8a82e75b58cffce4644c2a42d7244b95b1d787f45f3a7d3f98ae7743acb3a",
+          "original_vs_probe": [
+            {
+              "level_db": -0.06916601888958865,
+              "spectral_db": 1.0370930626606858,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.07139387218232293,
+              "spectral_db": 1.0646390435234536,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.6828832535942007,
+              "spectral_db": 4.513222003418049,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.476214975735421,
+              "spectral_db": 4.503063144346641,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 213,
+      "events_sha256": "bc54b76b7bd77bb5b129f26787c7a571550cdf2cb8666fccbf258344bed9751d",
+      "arms": {
+        "baseline": {
+          "sha256": "b1641f72aba0cba4803ef66a761fe2d67d4721b067f401344f68ffb5eb55ad42",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.8342253445517231,
+              "spectral_db": 8.812388670303966,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.834224967510318,
+              "spectral_db": 8.812388381464919,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "5e7c1a177ab03e26c5a4e53482976f5f1b5b3d8670e1f2f4fee0ffe2783ce7a8",
+          "original_vs_probe": [
+            {
+              "level_db": -1.4694590398714167,
+              "spectral_db": 0.4229844647555093,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": -1.469459033640814,
+              "spectral_db": 0.42298454609746355,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 3.30368438442314,
+              "spectral_db": 9.060291335289998,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 3.3036840011511326,
+              "spectral_db": 9.060291126637622,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "da23b3e38d8270e18fcebc7fa50e6a2c3397b46f27e3483fc8d7e760cadb5cf2",
+          "original_vs_probe": [
+            {
+              "level_db": -0.6090972305100621,
+              "spectral_db": 1.9198077392613069,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.6090972301867055,
+              "spectral_db": 1.9198073840656211,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 2.443322575061785,
+              "spectral_db": 10.48332206805861,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 2.4433221976970234,
+              "spectral_db": 10.483321235113861,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "c83b921d05740933174c001a8a5582b4b0123c77e13e1c4092990798d52c82e6",
+          "original_vs_probe": [
+            {
+              "level_db": 0.10538162561146829,
+              "spectral_db": 0.049409044147430796,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.10538163073440938,
+              "spectral_db": 0.04940894606037986,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.7288437189402543,
+              "spectral_db": 8.807558209935198,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.7288433367759093,
+              "spectral_db": 8.807558235945443,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "07338de12da760e3f6b8a0a6b2687acf3d686b2a95946ab2899ca34483e45729",
+          "original_vs_probe": [
+            {
+              "level_db": 0.218584605620268,
+              "spectral_db": 6.854462229931883,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 0.21858461150238637,
+              "spectral_db": 6.854462164317709,
+              "active": true,
+              "pass": false
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.615640738931455,
+              "spectral_db": 2.4380634041644353,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.6156403560079315,
+              "spectral_db": 2.4380631438618336,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "029ef8ae1cf9806b52cde7a9a56df2ef09feec56c004050c734683f7df65d947",
+          "original_vs_probe": [
+            {
+              "level_db": -0.0038886686587149954,
+              "spectral_db": 0.22895832500801422,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.0038886624982159257,
+              "spectral_db": 0.22895811574604408,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 1.8381140132104377,
+              "spectral_db": 9.0345082733988,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 1.8381136300085341,
+              "spectral_db": 9.034507699431918,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 481,
+      "events_sha256": "79db110d498589e39394c635f7cf33546b928adffa156a5cbf4af45d9f055cfe",
+      "arms": {
+        "baseline": {
+          "sha256": "f8d474c97009e86fd6567cdb327d5d65472399438c868d16f38368e98830344b",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.323370203606157,
+              "spectral_db": 4.683757913223808,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.473928529584243,
+              "spectral_db": 4.645989759055475,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc1_ramp": {
+          "sha256": "a6f3319e116ca94b75b1c40638fe67b280a645901d6174c5147cbd64b5657900",
+          "original_vs_probe": [
+            {
+              "level_db": -0.003116696893141125,
+              "spectral_db": 0.09087717317779878,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.006282224781565898,
+              "spectral_db": 0.062014558697726846,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.326486900499299,
+              "spectral_db": 4.676569267400769,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.4802107543658085,
+              "spectral_db": 4.631854695611191,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "osc2_silent": {
+          "sha256": "181032a1826c15b3e64472c583b5276332c840e1dd5a75203ac14858a1de9a46",
+          "original_vs_probe": [
+            {
+              "level_db": -0.1451745317457415,
+              "spectral_db": 0.6117729401519925,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.12915995710523304,
+              "spectral_db": 0.5923787800626642,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.4685447353519,
+              "spectral_db": 5.17840812898383,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.603088486689476,
+              "spectral_db": 5.123462317388226,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "fm_silent": {
+          "sha256": "aa52be1e6b7ac5d30eca82459f5d9b4025fb61f138c59808989f0c96afc2f61d",
+          "original_vs_probe": [
+            {
+              "level_db": -0.21189822220334745,
+              "spectral_db": 1.456329417197555,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": -0.1854311257931468,
+              "spectral_db": 1.5393844974765303,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.535268425809505,
+              "spectral_db": 5.9954234280753305,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.65935965537739,
+              "spectral_db": 5.994961295059074,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "cutoff_lfo_off": {
+          "sha256": "50dfb5965f2e06d3d1c15e153cce4ff72110e8d6dddfd9d64cbe8ba72c30b56f",
+          "original_vs_probe": [
+            {
+              "level_db": 0.08919444557703657,
+              "spectral_db": 0.42903822888635046,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.08227217934541842,
+              "spectral_db": 0.4227575253859509,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.234175758029121,
+              "spectral_db": 4.3056732002267015,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.391656350238825,
+              "spectral_db": 4.2707686883536535,
+              "active": true,
+              "pass": false
+            }
+          ]
+        },
+        "env_lfo_off": {
+          "sha256": "f8d474c97009e86fd6567cdb327d5d65472399438c868d16f38368e98830344b",
+          "original_vs_probe": [
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            },
+            {
+              "level_db": 0.0,
+              "spectral_db": 0.0,
+              "active": true,
+              "pass": true
+            }
+          ],
+          "probe_vs_firmware": [
+            {
+              "level_db": 4.323370203606157,
+              "spectral_db": 4.683757913223808,
+              "active": true,
+              "pass": false
+            },
+            {
+              "level_db": 4.473928529584243,
+              "spectral_db": 4.645989759055475,
+              "active": true,
+              "pass": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "source": "f6c2f17087dea9de52dc77f88dd271aab6692ef1",
+  "bank_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "rows": [
+    {
+      "index": 139,
+      "events_sha256": "13304829f6909af1bb180dd7d954763179e005d1218461034594865049689955",
+      "original_dry_sha256": "98a4c0e91c499f1dd1231e498f4672876629fb001377d2ab0c2307d08b0ee931",
+      "firmware_dry_sha256": "2e7c4746bc7c37283c2f544fd6e5175d7923cf181fb103a129cd390af11f4feb",
+      "dry_score": {
+        "level_db": -0.41165111848644653,
+        "spectral_db": 2.107331075636349,
+        "active": true,
+        "pass": true
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 2.702689547243999,
+          "spectral_db": 3.5804624386809802,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 2.7208757560061496,
+          "spectral_db": 3.579339558568102,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 664,
+      "events_sha256": "b90337f410779b4111a4e75046335c744844ec085198adb1ee76010da3cae8ef",
+      "original_dry_sha256": "b114c7a43aedb887a54c488cb1febadfb04ffa90ee7ccf9aa0290d9609d19b9d",
+      "firmware_dry_sha256": "85aec7f4cb33ddef6ba525ed6025cc3c3d59f6ff0392420676a5a682d9940595",
+      "dry_score": {
+        "level_db": 0.4685585828834594,
+        "spectral_db": 12.163124569348632,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 6.088980894002518,
+          "spectral_db": 5.54819378928183,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 5.651655014243149,
+          "spectral_db": 5.550946077630442,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 482,
+      "events_sha256": "71f7d66727cfab412c39ee8f8cc088ace78eb48e4ef2cf4c386d029174cd6f65",
+      "original_dry_sha256": "7fd5f0cf6e88497c41924479c7cf491e6a5ba99f45694b6bfd348d784283d0fd",
+      "firmware_dry_sha256": "472bbbd7732252a61348759f90478b2f637a2544d18333091421f7076b527f85",
+      "dry_score": {
+        "level_db": -0.71052847255902,
+        "spectral_db": 1.8057383308770336,
+        "active": true,
+        "pass": true
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": -0.3138601481316011,
+          "spectral_db": 1.660892564096051,
+          "active": true,
+          "pass": true
+        },
+        {
+          "level_db": -0.25018898356579855,
+          "spectral_db": 1.659336634788748,
+          "active": true,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "index": 410,
+      "events_sha256": "91ea748f7510b849a79214d5b492af92565525e0cf7ba136aa5f05af12fb8d7e",
+      "original_dry_sha256": "cd1046b70a69fab4ba7739352ae346ca7b53d46297b50adb68a70472ecd413da",
+      "firmware_dry_sha256": "595cc3688fa5d5594a603414bc8beb49164558779ea9cd6cc7c1a997d333eac2",
+      "dry_score": {
+        "level_db": 0.6102469660806167,
+        "spectral_db": 5.9816791816724075,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 0.906075878098387,
+          "spectral_db": 3.53352827508293,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": -0.1325233540023328,
+          "spectral_db": 3.5840123767474443,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 138,
+      "events_sha256": "61c33523fa4909605ba0f84411604d8a400c68926c42192c1d0fe21c50a6c62d",
+      "original_dry_sha256": "acd1fd3b0ee432129dc21d79dbdc23b59cba87607a289b0cfd9a96c294af8976",
+      "firmware_dry_sha256": "eb79d4d71e3cdd0d306e3d829598dd9aed88df6aee58953fb745e36315829fdd",
+      "dry_score": {
+        "level_db": 2.659937023296663,
+        "spectral_db": 3.1638219955369618,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 3.1379031741766634,
+          "spectral_db": 3.1763851731757335,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 3.1700269297754624,
+          "spectral_db": 3.1810651532933165,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "events_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "original_dry_sha256": "3c1b591a3dec3d56b574cf9773cce86283805a64be63a5c1d3e64824b42b792f",
+      "firmware_dry_sha256": "80f6f7d00a9ccff830c37149154ebb60d5098fbc3a892df8bda71292018ccf22",
+      "dry_score": {
+        "level_db": 1.417319596065422,
+        "spectral_db": 1.9824527034294717,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 3.613717234704612,
+          "spectral_db": 3.7365108385827615,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 3.4048211035530986,
+          "spectral_db": 3.7026824996964645,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 221,
+      "events_sha256": "13a9b226ee1bbffb2b74e0f6ab64b31bd0e4241d0b4f31ae47005083965924d4",
+      "original_dry_sha256": "3c1b591a3dec3d56b574cf9773cce86283805a64be63a5c1d3e64824b42b792f",
+      "firmware_dry_sha256": "80f6f7d00a9ccff830c37149154ebb60d5098fbc3a892df8bda71292018ccf22",
+      "dry_score": {
+        "level_db": 1.417319596065422,
+        "spectral_db": 1.9824527034294717,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 3.613717234704612,
+          "spectral_db": 3.7365108385827615,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 3.4048211035530986,
+          "spectral_db": 3.7026824996964645,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 213,
+      "events_sha256": "bc54b76b7bd77bb5b129f26787c7a571550cdf2cb8666fccbf258344bed9751d",
+      "original_dry_sha256": "0dcc15c8f2eef3e4ad33f8f05cb671f17df0002ef7b358f51beaae603b4653ea",
+      "firmware_dry_sha256": "93338781108e1faa5b6e33734cde426a0c233f7365b5f7499970c917642fdcb6",
+      "dry_score": {
+        "level_db": 1.9830659906521861,
+        "spectral_db": 9.292996328775514,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 1.8342253445517231,
+          "spectral_db": 8.812388670303966,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 1.834224967510318,
+          "spectral_db": 8.812388381464919,
+          "active": true,
+          "pass": false
+        }
+      ]
+    },
+    {
+      "index": 481,
+      "events_sha256": "79db110d498589e39394c635f7cf33546b928adffa156a5cbf4af45d9f055cfe",
+      "original_dry_sha256": "47149da236eb3fb387faa593f75fd65c72e9c6eada7c3ed0985910e5f5301276",
+      "firmware_dry_sha256": "eb798df5cda8332b1da9d54b7da1c0ba58b8c2859893dfdb72acb4fb64251171",
+      "dry_score": {
+        "level_db": 2.7079576777171726,
+        "spectral_db": 4.432597818179103,
+        "active": true,
+        "pass": false
+      },
+      "untouched_final_channels": [
+        {
+          "level_db": 4.323370203606157,
+          "spectral_db": 4.683757913223808,
+          "active": true,
+          "pass": false
+        },
+        {
+          "level_db": 4.473928529584243,
+          "spectral_db": 4.645989759055475,
+          "active": true,
+          "pass": false
+        }
+      ]
+    }
+  ]
+}

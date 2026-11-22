@@ -36,3 +36,16 @@ python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagn
 ```
 
 The original note-event hashes match in all nine rows. The transfer substitution changes PCM but stays within the existing parity bounds on all nine. The maximum spectral delta is below 0.004 dB, and the firmware comparison retains the same matched-event pass set. This rules out the low-pass approximation as the dominant residual in these nine programs. It does not rule out upstream cutoff or excitation differences. [Per-channel results](ladder-probe-result.json).
+
+## Voice sum and individual excitation controls
+
+The dry tap records each renderer's mono voice sum before effects. The original and firmware final PCM, exact event bytes and panel readbacks still match every corresponding baseline hash. #139 meets both thresholds at the dry tap and fails them after effects. #213 already has 9.293 dB spectral error at the dry tap. These are distinct residuals. [Dry-tap results](dry-tap-result.json).
+
+The original-graph controls replace oscillator 1's waveform with the existing firmware ramp, mute oscillator 2 or FM after clocking it, or separately remove cutoff and filter-envelope LFO multiplication. Each arm preserves the original sequencer event hashes. The untouched control reproduces all original PCM digests. In #213, removing the original cutoff multiplier reduces the matched-event spectral error from 8.812 to 2.438 dB on both channels. None of the oscillator substitutions produces a new stereo pass. Removing the cutoff multiplier also narrows the spectral residual for #139 and #138, though level still fails. This identifies cutoff modulation as a focused voice control to test against the unchanged original. [Per-arm results](excitation-probe-result.json).
+
+```sh
+python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/dry_tap.py \
+  VERIFIED_SEQUENCE_OUTPUT PANEL_TARGETS FACTORY_BUILD NEW_OUTPUT
+python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/excitation_probe.py \
+  VERIFIED_SEQUENCE_OUTPUT FACTORY_BUILD NEW_OUTPUT
+```
