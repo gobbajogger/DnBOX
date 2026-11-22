@@ -1,0 +1,180 @@
+{
+  "sample_rate": 44100,
+  "channels": 2,
+  "capture_frames": 132300,
+  "block_frames": 128,
+  "reset": "new instance per program",
+  "transport": "internal clock at authored preset tempo; no external clock",
+  "gain": 1.0,
+  "events": [
+    {
+      "frame": 0,
+      "note": 48,
+      "velocity": 100,
+      "action": "on"
+    },
+    {
+      "frame": 22050,
+      "note": 48,
+      "velocity": 0,
+      "action": "off"
+    },
+    {
+      "frame": 33075,
+      "note": 60,
+      "velocity": 96,
+      "action": "on"
+    },
+    {
+      "frame": 33075,
+      "note": 64,
+      "velocity": 80,
+      "action": "on"
+    },
+    {
+      "frame": 33075,
+      "note": 67,
+      "velocity": 88,
+      "action": "on"
+    },
+    {
+      "frame": 66150,
+      "note": 60,
+      "velocity": 0,
+      "action": "off"
+    },
+    {
+      "frame": 66150,
+      "note": 64,
+      "velocity": 0,
+      "action": "off"
+    },
+    {
+      "frame": 66150,
+      "note": 67,
+      "velocity": 0,
+      "action": "off"
+    }
+  ],
+  "level_limit_db": 1,
+  "spectral_limit_db": 3,
+  "band_hz": [
+    20,
+    16000
+  ],
+  "archive_sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+  "programs": [
+    {
+      "bank": "Brice Beasley",
+      "bank_uuid": "C9BA0082-A879-46CC-A84F-7F57EC54DC9F",
+      "program": "BB Monster SEQ",
+      "program_uid": "10F71106-934F-43B8-A6B5-136AC923F1E0",
+      "position": 0,
+      "record_sha256": "8f543bf3c16a03608ed234c050eddf92a3bc7ca5e446107526da3231f288d010"
+    },
+    {
+      "bank": "DMT CYMATICS",
+      "bank_uuid": "60C850AA-C450-4DC5-9157-28333AF612EE",
+      "program": "BRAINWAVE MONO BASS",
+      "program_uid": "1E5E5DDF-B5C6-4503-BDBC-CAE9CD1D0A94",
+      "position": 0,
+      "record_sha256": "77237f3947f9a37df74e7e4a0f8e9512ff460fb67937945a88f7b84d947577e6"
+    },
+    {
+      "bank": "Electronisounds",
+      "bank_uuid": "E7AC5CC1-260C-4830-AC0E-4206D674C239",
+      "program": "DelicateCutters-DD",
+      "program_uid": "5F43075B-1052-433F-AFCB-7FBF5E11823D",
+      "position": 0,
+      "record_sha256": "3c8ebdf33f8621204201231afc12db05133545cf327cb66efe9d3e0e889d2266"
+    },
+    {
+      "bank": "Intro Bank",
+      "bank_uuid": "84B1A8EB-BA34-4B8B-B3BE-6FE8CADB40DA",
+      "program": "2025: Space Trip",
+      "program_uid": "B699455E-6E85-42FD-AA6C-D8F992FDB303",
+      "position": 0,
+      "record_sha256": "36a6ea902d1e8525a5c4e8770f9ff370e2770aafc0d493494ed53ffc967f0841"
+    },
+    {
+      "bank": "Intro Bank",
+      "bank_uuid": "84B1A8EB-BA34-4B8B-B3BE-6FE8CADB40DA",
+      "program": "PWM String Pad",
+      "program_uid": "4DBA5169-1A26-45B7-9A8C-BE968BB2EA36",
+      "position": 14,
+      "record_sha256": "49725b518d8bf2a31ae7ba8f340df24e96d74993fc8f7e723a2310bb30fb26ad"
+    },
+    {
+      "bank": "Moby Pixel",
+      "bank_uuid": "9D317FAA-7EE4-4682-BA50-294CEDB3DAC2",
+      "program": "MP Hello J6",
+      "program_uid": "885376B8-806E-4532-8FFF-A3B61D462338",
+      "position": 0,
+      "record_sha256": "17ffb89e841092a4cd7f12f5c000f5a1f1901c7b1e61bda7e5ac1548333c42c6"
+    },
+    {
+      "bank": "Red Sky Lullaby",
+      "bank_uuid": "D9C2AC79-DAFE-456F-AA76-52E4565B77D1",
+      "program": "Faking The Funk",
+      "program_uid": "178217AC-78A0-4238-A0D3-23F188042B69",
+      "position": 0,
+      "record_sha256": "a4c4f610ba1fd1e668fce0073645112f448ba8d68ce7afe4e499f703865c6c1e"
+    },
+    {
+      "bank": "SOi",
+      "bank_uuid": "0D43FA89-B60B-403E-BBB6-BE36EDA5E5D9",
+      "program": "Flying horse",
+      "program_uid": "A0404688-ECAE-480A-8097-4FA82058ACFD",
+      "position": 0,
+      "record_sha256": "5b594eb83489cc1f7206cbc162290950e51d68d3eb571d97156d1704760bef17"
+    },
+    {
+      "bank": "Sander R Wolff",
+      "bank_uuid": "BC152AB4-9391-40F3-BCDC-83207645FCC3",
+      "program": "Flute Toot",
+      "program_uid": "07E33041-92A3-42E2-AD4A-6289169B0BDA",
+      "position": 0,
+      "record_sha256": "5ded328444c5f52fd8fc492f7ea6799d0f6acd14195aa324e331b1c865ca4cad"
+    },
+    {
+      "bank": "Sound Test Room",
+      "bank_uuid": "22F572EB-EDCA-4321-B3C5-ED2B14FDE68B",
+      "program": "Singularity",
+      "program_uid": "82E5394D-06A8-42D9-890D-878F70A9EFD9",
+      "position": 0,
+      "record_sha256": "46858920990ddce24aa5623eec5b655db8542e480107353e014de08b9807e546"
+    },
+    {
+      "bank": "Sound Test Room",
+      "bank_uuid": "22F572EB-EDCA-4321-B3C5-ED2B14FDE68B",
+      "program": "Medieval Sky",
+      "program_uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+      "position": 49,
+      "record_sha256": "d7281f4528a3cfd66ba72784d8b2f1744cfbc5752f7191b69492a29a256dc791"
+    },
+    {
+      "bank": "Stellar Anomalies",
+      "bank_uuid": "682CBBA8-415A-49C6-AD03-EA3DFF17E402",
+      "program": "ARP: Aural Glow [Red]",
+      "program_uid": "BA9B7984-F195-4BF1-AD98-C9AB4488A142",
+      "position": 0,
+      "record_sha256": "8c60543313b6fcc360fb676e48cc636797903adff54b3bede6842baf1d31d3e8"
+    },
+    {
+      "bank": "The GarageBand Guide",
+      "bank_uuid": "822F3C3E-AD43-4CFB-8068-2D3ECB09741A",
+      "program": "Massively Effective",
+      "program_uid": "5BC3209E-2CAC-41A2-9BD1-12A71E27EEB6",
+      "position": 0,
+      "record_sha256": "d52b56f2dc279edd190b79eabaa69c29c9a02088595d90a9ef8faefc54771c0e"
+    },
+    {
+      "bank": "Wabi Sabi Waves",
+      "bank_uuid": "A9A7DAC2-6163-4535-9B88-B0D243401280",
+      "program": "Arp - Accordion Scaleplay",
+      "program_uid": "5E170FFC-81DE-4501-A51B-75094B063EAB",
+      "position": 0,
+      "record_sha256": "bf8e77460a925877a45c9ce87584ef44abdfecef17739f22cb70edf8ff8064a8"
+    }
+  ]
+}

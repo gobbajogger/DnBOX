@@ -1,0 +1,100 @@
+{
+  "status": "INPUTS_VERIFIED_NOT_RUN",
+  "checks": [
+    {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-elite-04/PLAN.json",
+      "sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED"
+    },
+    {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-elite-05/PLAN.json",
+      "sha256": "a8ba4504d514db2160af53fd76db0e2441d63420a92723104d64f70ef0e7c22d",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED"
+    },
+    {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json",
+      "sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED"
+    },
+    {
+      "status": "INPUTS_VERIFIED_NOT_RUN",
+      "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-shared-pro-07/PLAN.json",
+      "sha256": "253510c1009f19be438504be7e8d0a4554f006d321f87a40c3c03d888a4b83e4",
+      "compile_units": 73,
+      "native_execution": "NOT_RUN",
+      "allocation": "REQUIRED"
+    }
+  ],
+  "paired_input_differences": {
+    "elite": [
+      "firmware/src/dsp/fastmath.h"
+    ],
+    "pro": [
+      "firmware/src/dsp/fastmath.h"
+    ]
+  },
+  "frozen_generated_header_source_assets": [
+    {
+      "path": "assets/909/README.txt",
+      "bytes": 428,
+      "baseline_sha256": "cf2cb2a5858587489ddf67802117d456cad42b26fad11cc1ec35ddf8af9ed36c",
+      "current_sha256": "cf2cb2a5858587489ddf67802117d456cad42b26fad11cc1ec35ddf8af9ed36c"
+    },
+    {
+      "path": "assets/909/crash.wav",
+      "bytes": 86644,
+      "baseline_sha256": "4a1b8d8828f9e530e9ae7f1a3cdffbcb1466e633a2b0607b3aac914699bc8400",
+      "current_sha256": "4a1b8d8828f9e530e9ae7f1a3cdffbcb1466e633a2b0607b3aac914699bc8400"
+    },
+    {
+      "path": "assets/909/hh.wav",
+      "bytes": 65536,
+      "baseline_sha256": "8ae963e80b8604bf23733545117d3b115767aa48ecd3013ad5d91506337d289a",
+      "current_sha256": "8ae963e80b8604bf23733545117d3b115767aa48ecd3013ad5d91506337d289a"
+    },
+    {
+      "path": "assets/909/ride.wav",
+      "bytes": 94042,
+      "baseline_sha256": "f1d1cee24a7c91bb2ca9c6eb97badad3841226897ad0daabfc35801371d78182",
+      "current_sha256": "f1d1cee24a7c91bb2ca9c6eb97badad3841226897ad0daabfc35801371d78182"
+    },
+    {
+      "path": "assets/fonts/Barlow-OFL.txt",
+      "bytes": 4377,
+      "baseline_sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f",
+      "current_sha256": "186d750eb496a4c17a76385f82be6aea2ac1cf2de074a811d63786cf374ea73f"
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-Bold.ttf",
+      "bytes": 111772,
+      "baseline_sha256": "5bd6757e459a110da81b44532f0f43058e2dab2401688abca84f2fdbde193cbb",
+      "current_sha256": "5bd6757e459a110da81b44532f0f43058e2dab2401688abca84f2fdbde193cbb"
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-Medium.ttf",
+      "bytes": 105560,
+      "baseline_sha256": "4998b693a190b76f2b11315844345a8546c1e2e6a320905507a9eed04edf8b48",
+      "current_sha256": "4998b693a190b76f2b11315844345a8546c1e2e6a320905507a9eed04edf8b48"
+    },
+    {
+      "path": "assets/fonts/BarlowSemiCondensed-SemiBold.ttf",
+      "bytes": 109772,
+      "baseline_sha256": "bd299f4bc5b44d30be8d42e9bad3a5df7d66af1cd55d0ed72a8b8916360a1424",
+      "current_sha256": "bd299f4bc5b44d30be8d42e9bad3a5df7d66af1cd55d0ed72a8b8916360a1424"
+    }
+  ],
+  "source_assets_equal": true,
+  "generated_headers_regenerated": false,
+  "native_execution": "NOT_RUN",
+  "emulator_execution": "NOT_RUN",
+  "clang_builtin_resource_files": 187
+}

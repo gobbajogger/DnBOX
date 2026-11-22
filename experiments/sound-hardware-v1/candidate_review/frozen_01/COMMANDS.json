@@ -1,0 +1,22 @@
+{
+  "build": [
+    "cc",
+    "-std=c11",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-O2",
+    "-ffp-contract=off",
+    "-DX0X_HOST",
+    "-fPIC",
+    "-shared",
+    "/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_01/snapshot/dnbx_core.c",
+    "-o",
+    "/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_01/libcandidate.so"
+  ],
+  "invocation": [
+    "candidate_review/verify_candidate.py",
+    "--label",
+    "frozen_01"
+  ]
+}

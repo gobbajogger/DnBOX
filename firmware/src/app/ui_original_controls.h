@@ -8,9 +8,9 @@
 /* Control metadata only. The released UI still owns all drawing and cadence. */
 enum { UI_ORIGINAL_CHICAGO_PAGES = 7, UI_ORIGINAL_MIAMI_PAGES = 5,
 #if X0X_SYNTHONE_PATCH
-       UI_ORIGINAL_SYNTHONE_PAGES = 4, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = 5, UI_ORIGINAL_JUNO_PAGES = 4 };
 #else
-       UI_ORIGINAL_SYNTHONE_PAGES = 0, UI_ORIGINAL_JUNO_PAGES = 4 };
+       UI_ORIGINAL_SYNTHONE_PAGES = 1, UI_ORIGINAL_JUNO_PAGES = 4 };
 #endif
 static const int8_t ui_original_chicago_rows[UI_ORIGINAL_CHICAGO_PAGES][4] = {
     {0,1,-1,-1}, {2,3,4,-1}, {5,6,-1,-1}, {7,8,9,10},
@@ -27,15 +27,15 @@ static const char *const ui_original_juno_titles[] = {"OSCILLATOR","FILTER","ENV
 /* Indices into Sound's stable storage order. Factory IDs belong to the
  * descriptor and are never passed to the bend/damper performance API. */
 static const int8_t ui_original_synthone_rows[][4] = {
-    {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12}
+    {0,1,-1,-1}, {2,3,4,-1}, {5,6,7,8}, {9,10,11,12},
+    {ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}
 };
 static const char *const ui_original_synthone_titles[] = {
-    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR"
+    "OSCILLATOR", "FILTER", "FILTER ADSR", "AMP ADSR", "EFFECT"
 };
 #else
-/* No patch descriptors in stock INIT. Its only page is the sound selector. */
-static const int8_t (*const ui_original_synthone_rows)[4] = 0;
-static const char *const *const ui_original_synthone_titles = 0;
+static const int8_t ui_original_synthone_rows[][4] = {{ORIGINAL_SYNTHONE_CRUSH,-1,-1,-1}};
+static const char *const ui_original_synthone_titles[] = {"EFFECT"};
 #endif
 static const char *const ui_original_chicago_titles[] = {
     "OSCILLATOR", "FILTER 1", "FILTER 2", "ENVELOPE", "AMPLIFIER", "ARPEGGIATOR", "EFFECT"
@@ -57,7 +57,7 @@ static const char *ui_original_name(unsigned kind, unsigned id)
     static const char *const juno[] = {"WAVE MIX","SUB","BASE CUTOFF","RESONANCE","ENV DEPTH","ATTACK","DECAY","SUSTAIN","RELEASE","HIGH PASS","LFO RATE","PWM DEPTH","WIDTH","CHORUS RATE","CHORUS MIX","LEVEL"};
     if(kind==ORIGINAL_SOUND_JUNO)return id<16?juno[id]:"";
     if (kind == ORIGINAL_SOUND_CHICAGO && id < 20) return chicago[id];
-    if (kind == ORIGINAL_SOUND_SYNTHONE) return "";
+    if (kind == ORIGINAL_SOUND_SYNTHONE) return id == ORIGINAL_SYNTHONE_CRUSH ? "CRUSH RATE" : "";
     return kind == ORIGINAL_SOUND_MIAMI && id < 16 ? miami[id] : "";
 }
 

@@ -1,0 +1,636 @@
+{
+  "firmware_source": "dea023ce632538621b59bb307ebcaf440805b032",
+  "emulator_source": "ba83317aa55cbcdb2830c5da97d5f64b763499e2",
+  "rust": "1.85.1",
+  "emulator_sha256": "8dca639e2f8b0a992f7e4581563d3497e664c8331ffa86a2e70961e1922076ac",
+  "historical_emulator_sha256": "04c795b1961298cbd10d4bd9881ab97fde5eef7ff179f49a6b953dab78d43dc8",
+  "stock_calibration": {
+    "elite": {
+      "duration_ms": 8000,
+      "shift_ms": 1,
+      "events": 922,
+      "strict": 1,
+      "mhz": 360,
+      "halves": 648,
+      "max_us": 11323,
+      "raw_late": 1,
+      "audio_xruns": 1,
+      "pcm_sha256": "b04e5bbe2f8aeabe55368ed79b1073e6a744dff7e82fc66d7af6dfd94d93f0ec",
+      "pcm_bytes": 1333248,
+      "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+      "initial_flash_sha256": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229",
+      "final_flash_sha256": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229",
+      "scene_late": 0,
+      "limit_margin_us": 286,
+      "stock_half_count_delta": 0,
+      "target_pass": false,
+      "matches_original": {
+        "elf": true,
+        "package": true,
+        "seeded_flash": true,
+        "scene": true,
+        "stereo": true,
+        "halves": true,
+        "max_us": true,
+        "late": true,
+        "project": true
+      },
+      "project_sha256": "4ce3bbb64999d9fffba275feea2b8426aab5c56dea9c9d5dc82f55b8b3fd3b2b",
+      "terminal": [
+        "irq levels at the end: [3], ie true, skipped 0 cycles",
+        "last 40 ms: 67% of instructions in ISRs = 86.8 M ISR instructions per second (clock 5760 MHz)",
+        "LCD: on the wire 13% of the run (1032 ms of 8000 ms)",
+        "LED on-fractions: ",
+        "SMK-37 pads (27 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000",
+        "SMK-37 button LEDs: 11:0.94 13:1.00",
+        "work/panel.ppm at 8000 ms; LEDs lit: []; audio peak over the last 0.5 s: 13132",
+        "flash: 0 erases / programs"
+      ]
+    },
+    "pro": {
+      "duration_ms": 8000,
+      "shift_ms": 1,
+      "events": 922,
+      "strict": 1,
+      "mhz": 360,
+      "halves": 648,
+      "max_us": 11318,
+      "raw_late": 1,
+      "audio_xruns": 1,
+      "pcm_sha256": "fbb89e942354565a5d2964981c0d82016ffcebbedf1300cc605eac1a3923d046",
+      "pcm_bytes": 1333248,
+      "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+      "initial_flash_sha256": "75bd45dadedf397bbd0e7b5f62ffb03651c31c5f50e7c33dd2d4daa5ae48f796",
+      "final_flash_sha256": "75bd45dadedf397bbd0e7b5f62ffb03651c31c5f50e7c33dd2d4daa5ae48f796",
+      "scene_late": 0,
+      "limit_margin_us": 291,
+      "stock_half_count_delta": 0,
+      "target_pass": false,
+      "matches_original": {
+        "elf": true,
+        "package": true,
+        "seeded_flash": true,
+        "scene": true,
+        "stereo": true,
+        "halves": true,
+        "max_us": true,
+        "late": true,
+        "project": true
+      },
+      "project_sha256": "95722f63688abc3deb69269cb3a0d4737e67b6baafb1e60dfd54143114b2fa9f",
+      "terminal": [
+        "irq levels at the end: [3], ie true, skipped 0 cycles",
+        "last 40 ms: 70% of instructions in ISRs = 91.2 M ISR instructions per second (clock 5760 MHz)",
+        "LCD: on the wire 13% of the run (1031 ms of 8000 ms)",
+        "LED on-fractions: ",
+        "SMK-37 pads (29 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000",
+        "SMK-37 button LEDs: 1:1.00 11:1.00 13:1.00 16:0.67",
+        "work/panel.ppm at 8000 ms; LEDs lit: []; audio peak over the last 0.5 s: 2302",
+        "flash: 0 erases / programs"
+      ]
+    }
+  },
+  "builds": {
+    "stock": {
+      "elite": {
+        "application": {
+          "sha256": "4c1fea5eb23ccaa8a5538c994b9552e8164d0fe2ea2b146d4e159ef38387e7cd",
+          "bytes": 546516
+        },
+        "elf": {
+          "sha256": "1130c88adb567502fa55b532a135231f333f9f6c9b93bff17c2196389b455c90",
+          "bytes": 633928
+        },
+        "package": {
+          "sha256": "eaf36dfcbf7c9a763724d847e7df427f52109e8bd477eb46632fb3a373eb829d",
+          "bytes": 651732
+        },
+        "loader": {
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+          "bytes": 7616
+        }
+      },
+      "pro": {
+        "application": {
+          "sha256": "ea33898b9c43c66b62e4bf4e695c9f590ca18ad088554165749b0571ab0ccb8c",
+          "bytes": 546508
+        },
+        "elf": {
+          "sha256": "0c8a8c40940955be88efed10ccd2bb96684eb5f3c7d7c055ec40675f0baceabd",
+          "bytes": 633924
+        },
+        "package": {
+          "sha256": "8c76d2d49f1cec86fa69aecd5c65391688692be3caba8f9ba93b737c7568ea64",
+          "bytes": 651730
+        },
+        "loader": {
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+          "bytes": 7614
+        }
+      }
+    },
+    "foreground": {
+      "elite": {
+        "application": {
+          "sha256": "803dc7f45d541b77e535a20009486e2c72a3d5b8c88bd78be3aa49152a72248c",
+          "bytes": 546564
+        },
+        "elf": {
+          "sha256": "74f8e3034f8295bd77f7355e5dc02b7f25387ed810111e91e355b8a1fb4ee7bb",
+          "bytes": 633928
+        },
+        "package": {
+          "sha256": "d5f7eee6fc2064b7f741752fe7e83eb34f2c7c91c95d139df145375d8e8dab14",
+          "bytes": 651732
+        },
+        "loader": {
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+          "bytes": 7616
+        },
+        "link_checks": [
+          "pool margin: 780 B",
+          "ok    app code area 552672 B, 6108 B free (Bluetooth block at app.bin 0x86ee0)",
+          "ok    image 546564 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064"
+        ]
+      },
+      "pro": {
+        "application": {
+          "sha256": "aa9b83b633e0e83cad8489b4ee6bf435e9de1611de4bf2ef5c91963c332b7577",
+          "bytes": 546556
+        },
+        "elf": {
+          "sha256": "54b1f26cb798db8558de7db586f5aea616e64f77afdfe87f1f12b6c4b65d98e6",
+          "bytes": 633920
+        },
+        "package": {
+          "sha256": "33e75c28eac36e403f219d7fa9505fa09a7967126803f67927fb9293e8629865",
+          "bytes": 651730
+        },
+        "loader": {
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+          "bytes": 7614
+        },
+        "link_checks": [
+          "pool margin: 780 B",
+          "ok    app code area 552672 B, 6116 B free (Bluetooth block at app.bin 0x86ee0)",
+          "ok    image 546556 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064"
+        ]
+      }
+    },
+    "vector": {
+      "elite": {
+        "application": {
+          "sha256": "343e1a76cb2fb9218716af22c430228f2d8cf561ede4a30a54c7a83cabd9be72",
+          "bytes": 546612
+        },
+        "elf": {
+          "sha256": "8c35a85a143cb92b4d3cd987939a937526b756094a7675d900811e4c1e656bc8",
+          "bytes": 633996
+        },
+        "package": {
+          "sha256": "9dd74611c122bdce94da3e73c8d078751431ce4c60693bd559ddfe8941ef9ccd",
+          "bytes": 651732
+        },
+        "loader": {
+          "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+          "bytes": 7616
+        },
+        "link_checks": [
+          "pool margin: 780 B",
+          "ok    app code area 552672 B, 6060 B free (Bluetooth block at app.bin 0x86ee0)",
+          "ok    image 546612 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064"
+        ]
+      },
+      "pro": {
+        "application": {
+          "sha256": "3e2e7f465e281bee8194d9af476853b3803d0d7d0fdc5e9d228f32e0a6b635b1",
+          "bytes": 546604
+        },
+        "elf": {
+          "sha256": "bfb01a9bd823cef8006c7578ab8d1ac8dae62dedf506dc67c627164bbe55e98d",
+          "bytes": 633988
+        },
+        "package": {
+          "sha256": "a449886e4c6b342139c8f97680fbac1341eb437cb9d2be373433db8918487c9f",
+          "bytes": 651730
+        },
+        "loader": {
+          "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+          "bytes": 7614
+        },
+        "link_checks": [
+          "pool margin: 780 B",
+          "ok    app code area 552672 B, 6068 B free (Bluetooth block at app.bin 0x86ee0)",
+          "ok    image 546604 B; RAM .data+.bss 97204 B of 98304; pool 335092 B of 344064"
+        ]
+      }
+    }
+  },
+  "trials": {
+    "foreground": {
+      "elite": {
+        "shift": {
+          "duration_ms": 8000,
+          "shift_ms": 1,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 648,
+          "max_us": 10387,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "d177c3f2d7bb82794a4dd2a00c346b1043533232cceefdb3670e72604ba35057",
+          "pcm_bytes": 1333248,
+          "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+          "initial_flash_sha256": "3f11cae928e8dd2311c6f2c97289dc5012e05970df020797b7aadfe0e1bbe74e",
+          "final_flash_sha256": "3f11cae928e8dd2311c6f2c97289dc5012e05970df020797b7aadfe0e1bbe74e",
+          "scene_late": 0,
+          "limit_margin_us": 1222,
+          "stock_half_count_delta": 0,
+          "target_pass": true
+        },
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3684,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "e88bbed1c8d4f548fd47a40f5be2f2541d8258ba2058230335f2e46e5f185cbc",
+          "pcm_bytes": 274432,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "3f11cae928e8dd2311c6f2c97289dc5012e05970df020797b7aadfe0e1bbe74e",
+          "final_flash_sha256": "3f11cae928e8dd2311c6f2c97289dc5012e05970df020797b7aadfe0e1bbe74e"
+        },
+        "seed": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3678,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "7834ec36e40916d2d54e2a16041c1eca29c9f3adc3aa5c6625eb5fcd76730df5",
+          "pcm_bytes": 272384,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": null,
+          "final_flash_sha256": "3f11cae928e8dd2311c6f2c97289dc5012e05970df020797b7aadfe0e1bbe74e"
+        },
+        "project": {
+          "stock_sha256": "4ce3bbb64999d9fffba275feea2b8426aab5c56dea9c9d5dc82f55b8b3fd3b2b",
+          "candidate_sha256": "4633678e5192965616edafaa9ca0b82256ca11335bcdfbabfe3ed3e1ccbb4bbf",
+          "stock_length": 36420,
+          "candidate_length": 36420,
+          "equal": false,
+          "first_different_unit": 2801
+        },
+        "changed_project_bytes": [
+          {
+            "offset": 2801,
+            "stock": 255,
+            "candidate": 127,
+            "section": "pattern 0 909"
+          },
+          {
+            "offset": 3352,
+            "stock": 35,
+            "candidate": 32,
+            "section": "pattern 0 bass B"
+          }
+        ],
+        "physical_stereo": {
+          "stock_sha256": "b04e5bbe2f8aeabe55368ed79b1073e6a744dff7e82fc66d7af6dfd94d93f0ec",
+          "candidate_sha256": "d177c3f2d7bb82794a4dd2a00c346b1043533232cceefdb3670e72604ba35057",
+          "stock_length": 1333248,
+          "candidate_length": 1333248,
+          "equal": false,
+          "first_different_unit": 97856,
+          "stock_sample": [
+            -28,
+            -28
+          ],
+          "candidate_sample": [
+            -667,
+            -667
+          ]
+        },
+        "saved_startup": {
+          "frames": 30208,
+          "stock_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "candidate_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "all_frames_match": true,
+          "project_matches": true,
+          "first_block_complete_in_original_bank": true,
+          "bank1_sha256": "097a7c7f2209e4d423767c8c6d34aa9a28e0262eba720977c9baf45c7109a2b4",
+          "nonzero_words_on_edge4": 10
+        },
+        "terminal": [
+          "irq levels at the end: [3], ie true, skipped 0 cycles",
+          "last 40 ms: 66% of instructions in ISRs = 68.7 M ISR instructions per second (clock 5760 MHz)",
+          "LCD: on the wire 13% of the run (1040 ms of 8000 ms)",
+          "LED on-fractions: ",
+          "SMK-37 pads (26 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000",
+          "SMK-37 button LEDs: 11:1.00 13:1.00 16:0.67",
+          "work/panel.ppm at 8000 ms; LEDs lit: []; audio peak over the last 0.5 s: 13130",
+          "flash: 0 erases / programs"
+        ]
+      }
+    },
+    "vector": {
+      "elite": {
+        "shift": {
+          "duration_ms": 8000,
+          "shift_ms": 1,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 648,
+          "max_us": 10535,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9575d0a63c4d7968591460c7f00e5e29b36393930ef9b0d4669b55f35ed5e240",
+          "pcm_bytes": 1333248,
+          "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+          "initial_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8",
+          "final_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8",
+          "scene_late": 0,
+          "limit_margin_us": 1074,
+          "stock_half_count_delta": 0,
+          "target_pass": true
+        },
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3664,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "e88bbed1c8d4f548fd47a40f5be2f2541d8258ba2058230335f2e46e5f185cbc",
+          "pcm_bytes": 274432,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8",
+          "final_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8"
+        },
+        "seed": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3661,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "7834ec36e40916d2d54e2a16041c1eca29c9f3adc3aa5c6625eb5fcd76730df5",
+          "pcm_bytes": 272384,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": null,
+          "final_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8"
+        },
+        "project": {
+          "stock_sha256": "4ce3bbb64999d9fffba275feea2b8426aab5c56dea9c9d5dc82f55b8b3fd3b2b",
+          "candidate_sha256": "91b2b71d0731cce7452af1cb07ec307ccdd0e033c367598474ed296448c4d29c",
+          "stock_length": 36420,
+          "candidate_length": 36420,
+          "equal": false,
+          "first_different_unit": 1583
+        },
+        "changed_project_bytes": [
+          {
+            "offset": 1583,
+            "stock": 85,
+            "candidate": 127,
+            "section": "sound"
+          },
+          {
+            "offset": 1587,
+            "stock": 85,
+            "candidate": 127,
+            "section": "sound"
+          },
+          {
+            "offset": 1960,
+            "stock": 127,
+            "candidate": 111,
+            "section": "sound"
+          },
+          {
+            "offset": 1992,
+            "stock": 127,
+            "candidate": 111,
+            "section": "sound"
+          },
+          {
+            "offset": 2024,
+            "stock": 100,
+            "candidate": 127,
+            "section": "sound"
+          },
+          {
+            "offset": 2056,
+            "stock": 127,
+            "candidate": 113,
+            "section": "sound"
+          },
+          {
+            "offset": 2088,
+            "stock": 127,
+            "candidate": 120,
+            "section": "sound"
+          },
+          {
+            "offset": 2352,
+            "stock": 0,
+            "candidate": 3,
+            "section": "sound"
+          },
+          {
+            "offset": 2353,
+            "stock": 127,
+            "candidate": 120,
+            "section": "sound"
+          },
+          {
+            "offset": 2357,
+            "stock": 64,
+            "candidate": 127,
+            "section": "sound"
+          }
+        ],
+        "physical_stereo": {
+          "stock_sha256": "b04e5bbe2f8aeabe55368ed79b1073e6a744dff7e82fc66d7af6dfd94d93f0ec",
+          "candidate_sha256": "9575d0a63c4d7968591460c7f00e5e29b36393930ef9b0d4669b55f35ed5e240",
+          "stock_length": 1333248,
+          "candidate_length": 1333248,
+          "equal": false,
+          "first_different_unit": 97856,
+          "stock_sample": [
+            -28,
+            -28
+          ],
+          "candidate_sample": [
+            -667,
+            -667
+          ]
+        },
+        "saved_startup": {
+          "frames": 30208,
+          "stock_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "candidate_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "all_frames_match": true,
+          "project_matches": true,
+          "first_block_complete_in_original_bank": true,
+          "bank1_sha256": "097a7c7f2209e4d423767c8c6d34aa9a28e0262eba720977c9baf45c7109a2b4",
+          "nonzero_words_on_edge4": 10
+        },
+        "terminal": [
+          "irq levels at the end: [3], ie true, skipped 0 cycles",
+          "last 40 ms: 71% of instructions in ISRs = 73.7 M ISR instructions per second (clock 5760 MHz)",
+          "LCD: on the wire 13% of the run (1040 ms of 8000 ms)",
+          "LED on-fractions: ",
+          "SMK-37 pads (29 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000",
+          "SMK-37 button LEDs: 1:1.00 11:1.00 13:1.00 16:1.00",
+          "work/panel.ppm at 8000 ms; LEDs lit: []; audio peak over the last 0.5 s: 2376",
+          "flash: 0 erases / programs"
+        ]
+      },
+      "pro": {
+        "shift": {
+          "duration_ms": 8000,
+          "shift_ms": 1,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 648,
+          "max_us": 10339,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "9022256dbf502497c9bc176451ac512c81762c3c48b4d68e7ae1969025fc5d4a",
+          "pcm_bytes": 1333248,
+          "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+          "initial_flash_sha256": "f759eeb1ec259c28ea5baee04482192f5f010aacc700111d618c033928e58244",
+          "final_flash_sha256": "f759eeb1ec259c28ea5baee04482192f5f010aacc700111d618c033928e58244",
+          "scene_late": 0,
+          "limit_margin_us": 1270,
+          "stock_half_count_delta": 0,
+          "target_pass": true
+        },
+        "boot": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3660,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "e88bbed1c8d4f548fd47a40f5be2f2541d8258ba2058230335f2e46e5f185cbc",
+          "pcm_bytes": 274432,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": "f759eeb1ec259c28ea5baee04482192f5f010aacc700111d618c033928e58244",
+          "final_flash_sha256": "f759eeb1ec259c28ea5baee04482192f5f010aacc700111d618c033928e58244"
+        },
+        "seed": {
+          "duration_ms": 2000,
+          "shift_ms": 0,
+          "events": 922,
+          "strict": 1,
+          "mhz": 360,
+          "halves": 131,
+          "max_us": 3654,
+          "raw_late": 0,
+          "audio_xruns": 0,
+          "pcm_sha256": "7834ec36e40916d2d54e2a16041c1eca29c9f3adc3aa5c6625eb5fcd76730df5",
+          "pcm_bytes": 272384,
+          "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+          "initial_flash_sha256": null,
+          "final_flash_sha256": "f759eeb1ec259c28ea5baee04482192f5f010aacc700111d618c033928e58244"
+        },
+        "project": {
+          "stock_sha256": "95722f63688abc3deb69269cb3a0d4737e67b6baafb1e60dfd54143114b2fa9f",
+          "candidate_sha256": "2fcf8efef7d6d7b73c20c3e0d800800e0ede5f00a34c72c8a5829a8074d84c33",
+          "stock_length": 36420,
+          "candidate_length": 36420,
+          "equal": false,
+          "first_different_unit": 1960
+        },
+        "changed_project_bytes": [
+          {
+            "offset": 1960,
+            "stock": 105,
+            "candidate": 113,
+            "section": "sound"
+          },
+          {
+            "offset": 1992,
+            "stock": 112,
+            "candidate": 113,
+            "section": "sound"
+          },
+          {
+            "offset": 2056,
+            "stock": 105,
+            "candidate": 113,
+            "section": "sound"
+          },
+          {
+            "offset": 3352,
+            "stock": 35,
+            "candidate": 32,
+            "section": "pattern 0 bass B"
+          }
+        ],
+        "physical_stereo": {
+          "stock_sha256": "fbb89e942354565a5d2964981c0d82016ffcebbedf1300cc605eac1a3923d046",
+          "candidate_sha256": "9022256dbf502497c9bc176451ac512c81762c3c48b4d68e7ae1969025fc5d4a",
+          "stock_length": 1333248,
+          "candidate_length": 1333248,
+          "equal": false,
+          "first_different_unit": 97856,
+          "stock_sample": [
+            -28,
+            -28
+          ],
+          "candidate_sample": [
+            -667,
+            -667
+          ]
+        },
+        "saved_startup": {
+          "frames": 30208,
+          "stock_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "candidate_pcm_sha256": "1927c5c53a70a64d9e38ea53a8005c94c18ff94a27b8f4629ac8305660239d1d",
+          "all_frames_match": true,
+          "project_matches": true,
+          "first_block_complete_in_original_bank": true,
+          "bank1_sha256": "097a7c7f2209e4d423767c8c6d34aa9a28e0262eba720977c9baf45c7109a2b4",
+          "nonzero_words_on_edge4": 10
+        },
+        "terminal": [
+          "irq levels at the end: [3], ie true, skipped 0 cycles",
+          "last 40 ms: 72% of instructions in ISRs = 74.2 M ISR instructions per second (clock 5760 MHz)",
+          "LCD: on the wire 13% of the run (1036 ms of 8000 ms)",
+          "LED on-fractions: ",
+          "SMK-37 pads (29 frames): 000000 000000 000000 000000 08191f 000000 000000 000000 000000 000000 000000 08191f 000000 000000 000000 000000",
+          "SMK-37 button LEDs: 1:1.00 11:1.00 13:1.00",
+          "work/panel.ppm at 8000 ms; LEDs lit: []; audio peak over the last 0.5 s: 4043",
+          "flash: 0 erases / programs"
+        ]
+      }
+    }
+  },
+  "patch_sha256": {
+    "foreground.patch": "122eaf835bf9e584073a840aec4e2b3b01ee6cdf5c429e3f9252f76cf6a61867",
+    "poll-during-draw.patch": "7c0ed00fdaeabaaf4202083c93449a1ed7e59a234c83a758a07cd6e7c2474b40",
+    "vector.patch": "c9b03da0b2fd086541f143d25a87a5493ea52ad98f936111cdab605cd56af96b"
+  }
+}

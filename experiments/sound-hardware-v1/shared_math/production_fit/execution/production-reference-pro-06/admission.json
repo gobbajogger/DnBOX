@@ -1,0 +1,35 @@
+{
+  "utc": "2026-11-19T00:28:06.244076+00:00",
+  "hostname": "024c984ba261",
+  "pid_namespace": "pid:[4026532405]",
+  "process_visibility": "Local PID namespace only; no global process absence inferred",
+  "self_cgroup": "0::/\n",
+  "memory": {
+    "MemTotal": 10451427328,
+    "MemAvailable": 8663662592
+  },
+  "cgroup_memory_files": {
+    "memory.max": null,
+    "memory.current": null,
+    "memory/memory.limit_in_bytes": null,
+    "memory/memory.usage_in_bytes": null
+  },
+  "disk_free_bytes": 39569440768,
+  "minimum_mem_available_bytes": 3200000000,
+  "minimum_disk_free_bytes": 1000000000,
+  "observed_active_local_jobs": [],
+  "label": "production-reference-pro-06",
+  "plan": "/workspace/scratch/e803955aec60/fit_next_plan/native-plans/production-reference-pro-06/PLAN.json",
+  "plan_sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+  "allocation_comment": 6995594729,
+  "allocation_receipt_sha256": "e113e3f8af5d5155615204acdceacfbc723647d9b75393be167ffe0b91b0c111",
+  "root_release_sha256": "5af314ca8b94dd70f38a27f6d1d9ea9e64492f94ae5ace9721c611030bb9b19e",
+  "previous_terminal_sha256": "ee8e841b26f448193a5f4bb46e210bb8c4d799f57719bcf60cca02bf1b667ecf",
+  "guard_pins": {
+    "verify_inputs.py": "38b9676de48bed752d94ffd412248b556f4672507df04d52b544d90422d30b09",
+    "native_fit_replay.py": "f896e0fd8ce2719876271476db261002d0909392e8059158427d80118a3b396e",
+    "PRODUCTION-PREPARATION.json": "417a64624fc0d46ecf98f5f9456d43a652c73023beac67440de5f53b93318e87",
+    "TOOLCHAIN-INPUTS.json": "d1d7f3df116af504437ac8526a142e6e4830ae48039aaaf54ced25383527d40a"
+  },
+  "status": "PREFLIGHT_RECORDED"
+}

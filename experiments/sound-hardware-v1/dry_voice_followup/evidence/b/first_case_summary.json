@@ -1,0 +1,72 @@
+{
+  "scope": "180 static dry note cases only; zero intact preset coverage",
+  "variant": {
+    "id": "ch4_2x_slope4",
+    "filter": "Same DnBOX Chicago recurrence/nonlinearity, E=0, A=DnBOX fm_expf(-2*pi*cutoff/(2*44100)), R=physical resonance*(4/5), two held-input substeps with arithmetic-mean decimation; no tables/postgain",
+    "oscillator": "DnBOX raw saw 2*phase-1, phase0 before first sample, increment exact packet frequency /44100",
+    "routing": "component gain (1-balance)*level times squared velocity times S1 amplitude envelope before one four-pole filter",
+    "mutable_state_bytes": 152,
+    "prepared_bytes": 92,
+    "history_bytes": 60
+  },
+  "case_file_count": 1,
+  "note_case_count": 3,
+  "accepted_note_cases": 2,
+  "accepted_case_files": 0,
+  "nonfinite": 0,
+  "max_rms_db": 1.9348981746235328,
+  "max_spectral_db": 3.099491563393029,
+  "gate": {
+    "metrics_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "comparison_gain": 1,
+    "maximum_rms_db": 1,
+    "maximum_spectral_db": 3,
+    "nonfinite": 0,
+    "time_alignment": "none",
+    "normalization": "none",
+    "metric_code": "unchanged"
+  },
+  "rows": [
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 36,
+      "rms_db": 0.1392130357248819,
+      "spectral_db": 2.2915799192067547,
+      "nonfinite": 0,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 60,
+      "rms_db": 0.8810500689817609,
+      "spectral_db": 2.9502664724974883,
+      "nonfinite": 0,
+      "accepted": true
+    },
+    {
+      "case_id": "physical-gain/100_2000_.9",
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance": 0.8999999761581421,
+      "note": 84,
+      "rms_db": 1.9348981746235328,
+      "spectral_db": 3.099491563393029,
+      "nonfinite": 0,
+      "accepted": false
+    }
+  ],
+  "unqualified": [
+    "72 dynamic filter cases",
+    "all 694 intact presets",
+    "150 control IDs",
+    "target size/link",
+    "callback deadline",
+    "listening approval"
+  ]
+}

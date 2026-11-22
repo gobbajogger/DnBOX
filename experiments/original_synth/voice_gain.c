@@ -54,7 +54,10 @@ int original_voice_gain_prepare(original_voice_gain *s,const original_voice_gain
   float q=c->level[i]+c->mod_level;q=q+c->mod_specific[i];q=clamp(q,0,1);
   if(c->curve==0)q=q*q;
   else if(c->curve==2){float u=1-q;q=ref_fma(-u,u,1);}
-  target(&n.oscillator[i],q*ORIGINAL_OSCILLATOR_GAIN_MAX,inverse);
+  /* Chicago's inverted-quadratic curve reaches unity. The 1.3333
+   * normalization belongs to the other route, including Miami curve 0. */
+  float level=c->curve==2?q:q*ORIGINAL_OSCILLATOR_GAIN_MAX;
+  target(&n.oscillator[i],level,inverse);
  }
  float a=clamp(ref_fma(c->mod_gain,.5f,.5f),0,1),g=c->filter_gain*(a*a);
  g=(c->envelope*c->envelope)*g;g=c->output*g;g=g*(c->velocity*c->velocity);g=clamp(g,0,2);

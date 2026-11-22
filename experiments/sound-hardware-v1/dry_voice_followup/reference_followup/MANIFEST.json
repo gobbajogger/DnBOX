@@ -1,0 +1,124 @@
+{
+  "schema": "scoped reference-input preparation deliverables v1",
+  "created_utc_date": "2026-11-19",
+  "status": "PREPARATION_COMPLETE; HOST_EXECUTION_NOT_RUN",
+  "source_code_copied_to_canonical_git": false,
+  "audio_generated": false,
+  "existing_packet_preservation_checks": [
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/README.md",
+      "bytes": 10582,
+      "sha256": "96706c0d3da9b518ad3330fa67d2b5784bd972a83d0ccd65055253f8013447fd",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_owner_dependency_availability.json",
+      "bytes": 105062,
+      "sha256": "8b6a92d70cba8e1ba31d20f105aae0747ebb584b144b98743472774bd53b8ea1",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_owner_historical_build_commands.json",
+      "bytes": 7177,
+      "sha256": "9bf94f51720be75d6fa20ab82aa571425c5d8449110eb3da8cbb6b7403f8882b",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_owner_historical_dependency_hashes.json",
+      "bytes": 11307,
+      "sha256": "46096e74b955b6cb9e966e5a10f693c7afe8c76c47f8dc2055cc915020823b56",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/case_plan.json",
+      "bytes": 177344,
+      "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm_manifest.json",
+      "bytes": 54671,
+      "sha256": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_recovery.json",
+      "bytes": 7147,
+      "sha256": "ab0f51e94131839a8c5897fb17fc684cfa8e1bbc2ec616a102af28874416f1dd",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/historical_failure_status.json",
+      "bytes": 751,
+      "sha256": "af88985bcdff00135939409cb58ec2f956c63cb0bef7c1d5a194bf023072383a",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/historical_initial_dry_FAIL.json",
+      "bytes": 686,
+      "sha256": "c6c37b42e24a7570a337a8debb4f7296e14f149ba5d6a3aaba09a98436c0f548",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/historical_filter_modulation_range_FAIL.json",
+      "bytes": 12783,
+      "sha256": "aa9406ada07443f3f7d8f0f17041cb276a4aa22a4d06c1123b6ba78b525f9c56",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/historical_filter_modulation_summary.json",
+      "bytes": 12921,
+      "sha256": "dece44e10f6b301296bd8a634ce411c471c26aebab5e3298440d4537e5d402ca",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/historical_physical_gain_summary.json",
+      "bytes": 32912,
+      "sha256": "0aca21ecbbc4a405d48516170f5c3be4497e9bf232515da7285ce1b95f199886",
+      "matches_existing_packet_manifest": true
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/metrics.py",
+      "bytes": 997,
+      "sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+      "matches_existing_packet_manifest": true
+    }
+  ],
+  "files": [
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/REPORT.md",
+      "bytes": 13404,
+      "sha256": "e204eb1433520c25b988dff8c44269e1cb52ec4cfe2bd544826173ed97fc1613"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/bounded_library_lookup.json",
+      "bytes": 1823,
+      "sha256": "053ec15d04f0e307ea515928b61e97d55202f7d4ced9a2ca2687b017496f5165"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/depth_zero_identity_aliases.json",
+      "bytes": 8572,
+      "sha256": "01496b5441c9e43f961a692322fb3e041e0ffc654861ac9bfb3922e90fc6ed1f"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/missing_active_modulation_pcm.json",
+      "bytes": 10980,
+      "sha256": "eb15a8f174cda744babe5c3ec7287d7d6bdb925c03192c813436f3612e26453e"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/observation_contract.json",
+      "bytes": 9734,
+      "sha256": "b0c2bbbe2265fafdda9d9f3c3a11528a19fdb5d93d4c734fe1f138daa1a9f600"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/reference_host_command_plan.json",
+      "bytes": 46996,
+      "sha256": "ad1fb3314783bb7dca4e521dd582899ee8a2b889456dbce5af6a2a4965890594"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/reference_input_closure.json",
+      "bytes": 42332,
+      "sha256": "e888898abd219a158c4b75e2ce4c39c905c2274cab597359457332e7e2e690a5"
+    }
+  ]
+}

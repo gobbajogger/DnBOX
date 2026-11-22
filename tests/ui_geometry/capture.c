@@ -86,8 +86,8 @@ static void required_other_content(const char *screen) {
   if(pg.n >= rows && pg.n-page+row < rows) row=rows-(pg.n-page);
   int y=HDR_H+4+row*step;
 #if !X0X_SYNTHONE_PATCH
-  if(engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE) {
-   CHECK(pg.n==1 && page==0);
+  if(engine_bass_bank(bidx())==ORIGINAL_SOUND_SYNTHONE && pg.r[page][0].kind==R_BENGINE) {
+   CHECK(pg.n==2);
    const char *labels[]={BOARD_SMK37?"K5  ENGINE":"K1  ENGINE",
                          BOARD_SMK37?"K6  PRESET":"K2  PRESET","STATUS"};
    const char *values[]={"SYNTH ONE","INIT","READY"};
@@ -101,9 +101,25 @@ static void required_other_content(const char *screen) {
   }
 #endif
   int width=!X0X_ORIGINAL_SYNTH || pg.r[page][3].kind!=R_NONE ? 59 :
-            pg.r[page][2].kind!=R_NONE ? 78 : 118;
+            pg.r[page][2].kind!=R_NONE ? 78 : pg.r[page][1].kind!=R_NONE ? 118 : 232;
   for(int k=0;k<4;k++) {
    pref_t r=pg.r[page][k];if(!pref_desc(r))continue;char label[64],num[32],unit[8],joined[48];
+#if X0X_SYNTHONE_PATCH
+   if(r.kind==R_S1PATCH && r.c>=5 && r.c<=12){
+    int stage=(r.c-5)%4;
+    CHECK(stage==k);
+    pref_value_of(r,matrix_value(r),num,unit);
+    snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
+             !strcmp(unit,"%") ? "%" : "");
+    expect_region(screen,"synthone-envelope",label,k*width,y,(k+1)*width+4,y+height);
+    synth_presence_checks++;
+    if(unit[0] && strcmp(unit,"%")){
+     expect_region(screen,"synthone-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
+     synth_presence_checks++;
+    }
+    continue;
+   }
+#endif
    if(adsr_row(page)){
     /* Independent owner/control IDs, not the renderer's partial-stage slots.
      * Captions must retain physical knob identity as well as actual stage. */

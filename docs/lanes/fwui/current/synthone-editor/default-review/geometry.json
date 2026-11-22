@@ -1,0 +1,63 @@
+{
+  "baselineProduction": "f8cdbf67a6b70f927a443d79193a54775b7c3a7b",
+  "production": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "priorCenteredEffect": {
+    "frames": 126,
+    "panelAssertions": 684,
+    "failingFrames": 10,
+    "minContentBoundsPercent": 50.844,
+    "maximumEmptyScreenPercent": 6.038
+  },
+  "defaultEditor": {
+    "frames": 132,
+    "panelAssertions": 708,
+    "failingFrames": 0,
+    "minContentBoundsPercent": 78.081,
+    "maximumEmptyScreenPercent": 7.552
+  },
+  "allArchivedConfigurations": {
+    "frames": 296,
+    "panelAssertions": 1590,
+    "failingFrames": 0,
+    "minContentBoundsPercent": 74.192,
+    "maximumEmptyScreenPercent": 8.984
+  },
+  "effect": {
+    "previousMinimumPercent": 50.844,
+    "minimumPercent": 83.969,
+    "largestEmptyScreenPercent": 7.552,
+    "checkedRows": 10
+  },
+  "physicalList": {
+    "rows": 270,
+    "minimumPercent": 80.13,
+    "windows": 30,
+    "maximumUniformScanlines": 13
+  },
+  "edit": {
+    "A": {
+      "editedRGBPixels": 138,
+      "glyphRGBPixels": 20,
+      "readoutRGBPixels": 118,
+      "boundsExclusive": [
+        43,
+        151,
+        213,
+        168
+      ],
+      "touchedMatchesApplied": true
+    },
+    "B": {
+      "editedRGBPixels": 138,
+      "glyphRGBPixels": 20,
+      "readoutRGBPixels": 118,
+      "boundsExclusive": [
+        43,
+        151,
+        213,
+        168
+      ],
+      "touchedMatchesApplied": true
+    }
+  }
+}

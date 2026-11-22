@@ -1,0 +1,25 @@
+{
+  "scope": "Dry single-saw component screen; original FullOracle, not common FX; stock filter is not equivalent, no full-engine acceptance",
+  "frames_per_note": 88192,
+  "calibration": "one global gain from note60 held window",
+  "gain": 6.6328250996609555,
+  "rows": [
+    {
+      "note": 36,
+      "rms_db": 0.07217021080287343,
+      "spectral_db": 18.76395649465355
+    },
+    {
+      "note": 60,
+      "rms_db": 0.0,
+      "spectral_db": 36.94412553983262
+    },
+    {
+      "note": 84,
+      "rms_db": -0.21875463501671133,
+      "spectral_db": 49.37039033482051
+    }
+  ],
+  "nonfinite": 0,
+  "pcm_sha256": "7cc12668866f0c474fc19b342c3a8c600e143e5981fe66f8675f5770d864aa0a"
+}

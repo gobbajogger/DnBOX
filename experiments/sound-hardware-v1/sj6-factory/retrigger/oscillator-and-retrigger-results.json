@@ -1,0 +1,133 @@
+{
+  "control-baseline": {
+    "pass": 48,
+    "total": 48,
+    "max_abs_rms_db": 0.0006708071488163145,
+    "max_spectral_db": 0.2642860712953232,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
+  },
+  "inherited-before": {
+    "pass": 24,
+    "total": 48,
+    "max_abs_rms_db": 0.26043186450925593,
+    "max_spectral_db": 21.134191341989087,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
+  },
+  "corrected-controls": {
+    "pass": 48,
+    "total": 48,
+    "max_abs_rms_db": 0.0006708071488163145,
+    "max_spectral_db": 0.2642860712953232,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
+  },
+  "corrected-range": {
+    "pass": 154,
+    "total": 154,
+    "max_abs_rms_db": 0.0007601068818161951,
+    "max_spectral_db": 0.5325226395094743,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
+  },
+  "corrected-holdout": {
+    "pass": 96,
+    "total": 96,
+    "max_abs_rms_db": 0.00849792032784092,
+    "max_spectral_db": 0.5187378927378563,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3"
+  },
+  "negative-pwm-string-pad": {
+    "pass": 0,
+    "total": 8,
+    "max_abs_rms_db": 0.26043186450925593,
+    "max_spectral_db": 8.21748386385245,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3",
+    "per_layer": [
+      {
+        "layer": 1,
+        "max_spectral_db": 7.829625288407656
+      },
+      {
+        "layer": 2,
+        "max_spectral_db": 8.21748386385245
+      }
+    ]
+  },
+  "corrected-pwm-string-pad": {
+    "pass": 8,
+    "total": 8,
+    "max_abs_rms_db": 9.842000700234469e-05,
+    "max_spectral_db": 0.06695599484477241,
+    "reference_commit": "4ea86b9e869011cae761709d13569b7bc32980a8",
+    "reference_header_sha256": "546c8b94493fd8d22ccc575e7da932b8cc5dca5207385ebdca2e02d4000f8ee3",
+    "per_layer": [
+      {
+        "layer": 1,
+        "max_spectral_db": 0.047694974110965835
+      },
+      {
+        "layer": 2,
+        "max_spectral_db": 0.06695599484477241
+      }
+    ]
+  },
+  "stock_programs": [
+    {
+      "program": "SUPERJ6 POLY",
+      "baseline_vs_factory_enabled_word_identical": true,
+      "frames": 132300,
+      "pcm_sha256": "f213bba86fbf0720a5d614445356f97ea840fd15a485827eeee5feeb69a88963",
+      "rms_dBFS": [
+        -40.08254205108906,
+        -39.72469383683553
+      ]
+    },
+    {
+      "program": "SUPERJ6 PAD",
+      "baseline_vs_factory_enabled_word_identical": true,
+      "frames": 132300,
+      "pcm_sha256": "b184bff78facc31187b20db35c5faeb5ce5cde697514be435d7359f5a62be4c0",
+      "rms_dBFS": [
+        -32.12201344801332,
+        -31.800952490332417
+      ]
+    },
+    {
+      "program": "SUPERJ6 PLUCK",
+      "baseline_vs_factory_enabled_word_identical": true,
+      "frames": 132300,
+      "pcm_sha256": "c1c47c3c48caf80f818229d583bd7090ab175b1a89d1d25a4545d0c626754333",
+      "rms_dBFS": [
+        -39.224813426646925,
+        -38.94464228775581
+      ]
+    },
+    {
+      "program": "SUPERJ6 BRASS",
+      "baseline_vs_factory_enabled_word_identical": true,
+      "frames": 132300,
+      "pcm_sha256": "f7edf670247f95381f7350e232b3675a79a89801abe49587e73258570bf57174",
+      "rms_dBFS": [
+        -37.14367505781257,
+        -36.74766394303176
+      ]
+    }
+  ],
+  "preset_scope": "Four shipping DnBOX program pairs share the same events in both build modes. No complete original AU factory preset is paired. The public partial PWM String Pad field set covers two oscillators only.",
+  "retrigger_reference": [
+    "pedal=0 sounding voices on re-keyed pitch=1; companion retained",
+    "pedal=1 sounding voices on re-keyed pitch=1; companion retained"
+  ],
+  "retrigger_stock_before": [
+    "pedal=0 sounding voices on re-keyed pitch=2, companion=1",
+    "pedal=1 sounding voices on re-keyed pitch=2, companion=1"
+  ],
+  "retrigger_stock_fixed": [
+    "pedal=0 sounding voices on re-keyed pitch=1, companion=1",
+    "pedal=1 sounding voices on re-keyed pitch=1, companion=1"
+  ]
+}

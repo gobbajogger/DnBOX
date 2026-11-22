@@ -1,0 +1,148 @@
+{
+  "scope": "Synthetic scalar behavior targets, not captured original audio and not a complete implementation recipe.",
+  "evidence": "Public-safe SUPERJ6-PARAMETER-PAGE-AUDIT.json; original numeric staging remains a separate reference-test obligation.",
+  "examples": [
+    {
+      "raw_normalized": 0,
+      "attack_seconds": 0.002,
+      "pulse_duty_fraction_when_pwm_active": 0.5,
+      "lfo_hz_mode_frequency": 0.0
+    },
+    {
+      "raw_normalized": 0.25,
+      "attack_seconds": 0.16019979679950416,
+      "pulse_duty_fraction_when_pwm_active": 0.3825,
+      "lfo_hz_mode_frequency": 0.15821957424628497
+    },
+    {
+      "raw_normalized": 0.5,
+      "attack_seconds": 1.5928740833888984,
+      "pulse_duty_fraction_when_pwm_active": 0.265,
+      "lfo_hz_mode_frequency": 1.5910729675098372
+    },
+    {
+      "raw_normalized": 0.75,
+      "attack_seconds": 6.139898459688948,
+      "pulse_duty_fraction_when_pwm_active": 0.14750000000000002,
+      "lfo_hz_mode_frequency": 6.138665792913063
+    },
+    {
+      "raw_normalized": 1,
+      "attack_seconds": 16.0,
+      "pulse_duty_fraction_when_pwm_active": 0.030000000000000027,
+      "lfo_hz_mode_frequency": 16.0
+    }
+  ],
+  "range_mismatches": {
+    "attack": {
+      "original_seconds": [
+        0.002,
+        16
+      ],
+      "stock_seconds": [
+        0.002,
+        3.002
+      ],
+      "largest_original_raw_representable_by_stock_time": 0.6049205899704326
+    },
+    "pwm": {
+      "original_duty_fraction": [
+        0.03,
+        0.5
+      ],
+      "stock_base_duty_fraction": [
+        0.1,
+        0.9
+      ],
+      "largest_original_raw_representable_by_stock_base_width": 0.8510638297872342,
+      "stock_render_modulated_duty_clamp": [
+        0.05,
+        0.95
+      ]
+    },
+    "lfo": {
+      "original_hz_mode": [
+        0,
+        16
+      ],
+      "stock_hz": [
+        0.1,
+        8.1
+      ],
+      "original_raw_band_representable_by_stock_rate": [
+        0.21782218355704408,
+        0.8151184653976012
+      ]
+    }
+  },
+  "waveform_stops": [
+    {
+      "raw": 0,
+      "shape": "Sine"
+    },
+    {
+      "raw": 0.3333333333333333,
+      "shape": "Triangle"
+    },
+    {
+      "raw": 0.6666666666666666,
+      "shape": "Saw"
+    },
+    {
+      "raw": 1,
+      "shape": "Square"
+    }
+  ],
+  "oscillator_range_stops": [
+    {
+      "raw": 0,
+      "feet": 16
+    },
+    {
+      "raw": 0.5,
+      "feet": 8
+    },
+    {
+      "raw": 1,
+      "feet": 4
+    }
+  ],
+  "admission_cases": [
+    {
+      "app_id": 0,
+      "identifier": "neonvolumeControl",
+      "raw": 1.32,
+      "expectation": "Preserve raw value. Stock normalized-level setter cannot represent it; original gain transfer still requires qualification."
+    },
+    {
+      "app_id": 185,
+      "identifier": "neonlfo2Dest1Param",
+      "raw": 70,
+      "expectation": "Preserve as route selector, not normalized gain and not assumed app-global ID70."
+    },
+    {
+      "app_id": 203,
+      "identifier": "neonpad1Destination",
+      "raw": 9,
+      "expectation": "Preserve selector identity; resolve through a separately qualified pad-destination dictionary."
+    },
+    {
+      "app_id": 143,
+      "identifier": "neonseqDivision",
+      "raw": -0.008403362,
+      "expectation": "Preserve incoming raw representation until original boundary/migration policy is tested; do not silently normalize."
+    },
+    {
+      "app_id": 207,
+      "identifier": "neonempty",
+      "raw": 0,
+      "expectation": "Reserved identity, no editable musical control."
+    },
+    {
+      "app_id": 212,
+      "identifier": "neonkeyLockEnable",
+      "raw": 1,
+      "expectation": "Engine preset application preserves globally owned key-lock state."
+    }
+  ]
+}

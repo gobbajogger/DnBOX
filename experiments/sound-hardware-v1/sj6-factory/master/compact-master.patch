@@ -1,0 +1,165 @@
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -89,10 +89,12 @@
+  * Coherent main-loop snapshot under the existing audio-source mask. */
+ int engine_juno_envelope_view(int voice, juno6_envelope_snapshot *out);
+ enum engine_superj6_field {
++    ENGINE_SJ6_MASTER_VOLUME = 0,
+     ENGINE_SJ6_AMP2_ATTACK = 119, ENGINE_SJ6_AMP2_DECAY,
+     ENGINE_SJ6_AMP2_SUSTAIN, ENGINE_SJ6_AMP2_RELEASE
+ };
+-/* Main loop. Stage an original binary32 unit value on the current Juno owner.
++/* Main loop. Stage an original binary32 control value on the current Juno owner.
++ * The master accepts factory values through 1.32. AMP2 accepts 0 through 1.
+  * Repeated edits to a field in one callback interval retain the last value.
+  * Returns zero on an inactive/wrong owner or unsupported field/value. */
+ int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit);
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -205,15 +205,21 @@
+ }
+ int engine_superj6_edit(unsigned owner, enum engine_superj6_field field, float unit)
+ {
+-    unsigned slot = (unsigned)field - ENGINE_SJ6_AMP2_ATTACK;
+-    if (owner >= NBASS || slot >= 4 || !(unit >= 0 && unit <= 1)) return 0;
++    unsigned slot = 4;
++    float limit = JUNO6_FACTORY_MASTER_MAX;
++    if (field != ENGINE_SJ6_MASTER_VOLUME) {
++        slot = (unsigned)field - ENGINE_SJ6_AMP2_ATTACK;
++        if (slot >= 4) return 0;
++        limit = 1.f;
++    }
++    if (owner >= NBASS || !(unit >= 0 && unit <= limit)) return 0;
+     uint32_t flags = plat_cq_lock();
+     original_runtime_part *part = &original_bass[owner];
+     int accept = !project_hold && part->kind == ORIGINAL_SOUND_JUNO && part->status == ORIGINAL_RUNTIME_OK;
+     if (accept) {
+         juno6_t *synth = &part->dsp.juno.synth;
+-        synth->pending_amp2[slot] = unit;
+-        synth->pending_amp2_mask |= (uint8_t)(1u << slot);
++        synth->pending_field[slot] = unit;
++        synth->pending_field_mask |= (uint8_t)(1u << slot);
+     }
+     plat_cq_unlock(flags);
+     return accept;
+@@ -251,13 +257,16 @@
+                     if (waves & (1u << layer))
+                         juno6_apply_pre_note_wave(synth, layer, &synth->pending_wave[layer]);
+         }
+-        unsigned mask = synth->pending_amp2_mask;
++        unsigned mask = synth->pending_field_mask;
+         if (!mask) continue;
+-        synth->pending_amp2_mask = 0;
++        synth->pending_field_mask = 0;
++        if (mask & (1u << 4))
++            (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
++                                         synth->pending_field[4]);
+         for (unsigned slot = 0; slot < 4; ++slot)
+             if (mask & (1u << slot))
+                 (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
+-                                             synth->pending_amp2[slot]);
++                                             synth->pending_field[slot]);
+     }
+ }
+ int engine_bass_motion_view(int v, float *phase, float *bipolar, float *current, float *target, int *active)
+--- a/firmware/src/app/original_runtime.c
++++ b/firmware/src/app/original_runtime.c
+@@ -91,7 +91,7 @@
+     if (!p || p->status != ORIGINAL_RUNTIME_OK) return p ? p->status : 0;
+     if(p->kind==ORIGINAL_SOUND_JUNO){
+         int ok=juno6_set(&p->dsp.juno.synth,parameter,value);
+-        if(ok) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
++        if(ok && parameter < JUNO6_APP_PARAM_BASE) juno6_chorus_set(&p->dsp.juno.chorus,.1f+4.9f*p->dsp.juno.synth.macro[13],5.4f,.5f*p->dsp.juno.synth.macro[14]);
+         return runtime_result(p,ok);
+     }
+     if (p->kind == ORIGINAL_SOUND_SYNTHONE)
+@@ -374,7 +374,15 @@
+     int ok;
+     if(p->kind==ORIGINAL_SOUND_JUNO){
+         ok=juno6_render_stereo(&p->dsp.juno.synth,left,right,frames);
+-        if(ok)juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++        if(ok){
++            juno6_chorus_process(&p->dsp.juno.chorus,left,right,frames);
++            /* The original master attenuator follows the instrument effects. */
++            float gain=p->dsp.juno.synth.master_gain;
++            if(gain!=1.f) for(unsigned i=0;i<frames;++i){
++                left[i]*=gain;
++                right[i]*=gain;
++            }
++        }
+     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+         s1_part_render(&p->dsp.synthone,left,right,frames);
+         ok = 1;
+--- a/firmware/src/dsp/juno6.h
++++ b/firmware/src/dsp/juno6.h
+@@ -7,6 +7,8 @@
+ /* The original app and the 18 legacy macros have different IDs for the
+  * same numbers. Tag a decoded app ID before passing it to the runtime. */
+ #define JUNO6_APP_PARAM_BASE 256u
++/* Qualified raw master-volume domain includes the authored over-unity stops. */
++#define JUNO6_FACTORY_MASTER_MAX 1.32f
+ #define JUNO6_VOICES 6u
+ #define JUNO6_CHORUS_BYTES 512u
+ #define JUNO6_CHORUS_SAMPLES 256u
+@@ -18,9 +20,10 @@
+  float macro[18];
+  /* Main writes under the audio-source mask. The block boundary commits each
+   * field once. Cold selection clears staged edits with the whole synth. */
+- float pending_amp2[4];
++ float pending_field[5]; /* slots 0..3 AMP2, slot 4 output attenuation */
++ float master_gain;
+  juno6_oscillator_edit pending_wave[2];
+- uint8_t pending_amp2_mask, pending_wave_mask;
++ uint8_t pending_field_mask, pending_wave_mask;
+  float hpf, hp_state[2], hp_input[2];
+ } juno6_t;
+ typedef struct {
+--- a/firmware/src/dsp/juno6.c
++++ b/firmware/src/dsp/juno6.c
+@@ -11,6 +11,7 @@
+ {
+  memset(s,0,sizeof *s);
+  (void)dnbx_init_superj6(&s->core,sr>8000?sr:44100);
++ s->master_gain=1.f; /* Preserve legacy patches with no decoded master setting. */
+  s->macro[0]=.35f;s->macro[4]=.35f;s->macro[10]=.12f;
+  s->macro[15]=1;s->macro[16]=.5f;
+ }
+@@ -73,9 +74,37 @@
+     }
+ }
+ 
++/* Setters run at block boundaries on a single-precision target. Scale the
++ * significand by 101/250 and round once, as the original Double setter does.
++ * All factory inputs are zero or normal with exponent at least three. */
++static float master_from_raw(float raw)
++{
++    fm_bits_t value = {.f=raw};
++    unsigned exponent = value.u >> 23;
++    if (raw == 0) return 0.f;
++    if (exponent < 3) return raw * .404f;
++    uint32_t significand = (value.u & 0x7fffffu) | 0x800000u;
++    uint32_t numerator = significand * 101u;
++    unsigned result_exponent = exponent - 2;
++    if (numerator < (125u << 23)) {
++        numerator *= 2;
++        --result_exponent;
++    }
++    /* The normal-result denominator 125 is odd, so a tie is impossible. */
++    value.u = (result_exponent << 23) + (numerator + 62u) / 125u;
++    return value.f;
++}
++
+ int juno6_set(juno6_t *s,unsigned id,float x)
+ {
+- if(!s||!(x>=0&&x<=1))return 0;
++ if(!s)return 0;
++ if(id==JUNO6_APP_PARAM_BASE){
++  if(!(x>=0 && x<=JUNO6_FACTORY_MASTER_MAX))return 0;
++  if(dnbx_store_raw(&s->core,0,x)!=DNBX_RAW_STORED_ONLY)return 0;
++  s->master_gain=master_from_raw(x);
++  return 1;
++ }
++ if(!(x>=0&&x<=1))return 0;
+  if(id>=JUNO6_APP_PARAM_BASE)return set_amp2(&s->core,id-JUNO6_APP_PARAM_BASE,x);
+  if(id>=18)return 0;
+  s->macro[id]=x;

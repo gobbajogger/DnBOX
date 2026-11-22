@@ -1,0 +1,53 @@
+{
+  "base_commit": "dea023ce632538621b59bb307ebcaf440805b032",
+  "compact_tree": "bfd39793b1bf792a0b43b6d635ce3318058717e1",
+  "dual_tree": "27823de5e1f97fc8ac21e7eff62d6bc0014135b1",
+  "models": {
+    "elite": {
+      "xip_free": 1180,
+      "ram_bytes": 97204,
+      "pool_free_bytes": 8972,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "elf": {
+        "size_bytes": 640152,
+        "sha256": "5d4507d2c1ffdd29f5e470e2a84b05f158b63c00afe672ad6a53fd0f1c06be8d"
+      },
+      "app": {
+        "size_bytes": 551492,
+        "sha256": "aa999c7c9c52063b345158406c254be446ca28c6936c905cba4ffbe84e073b0d"
+      },
+      "loader": {
+        "size_bytes": 7616,
+        "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+      },
+      "package": {
+        "size_bytes": 651732,
+        "sha256": "23c6b7f5c327906f4f05477851dde754c29691e6d5f6e58dbf38467a0ed9cacb"
+      }
+    },
+    "pro": {
+      "xip_free": 1192,
+      "ram_bytes": 97204,
+      "pool_free_bytes": 8972,
+      "pool_reserve": 8192,
+      "pool_margin": 780,
+      "elf": {
+        "size_bytes": 640144,
+        "sha256": "a5ded1be7e156f18c6026da08e03ebfbfb64ce42757c9f3bc6349a3dc8c1b2d3"
+      },
+      "app": {
+        "size_bytes": 551480,
+        "sha256": "af38d5bf325dfa9c4040ecc0b4cbc451b8afa580b4da15601d2e93f45fa77b33"
+      },
+      "loader": {
+        "size_bytes": 7614,
+        "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+      },
+      "package": {
+        "size_bytes": 651730,
+        "sha256": "398ba6272aa82cab944e90b6b2e72fad09a833400024a7538f71d07606441e8b"
+      }
+    }
+  }
+}

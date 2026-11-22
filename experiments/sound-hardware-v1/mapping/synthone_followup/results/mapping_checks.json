@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "150 consecutive control IDs",
+    "46 smoothed IDs",
+    "12 exact bank SHA256 matches and694 entries",
+    "694 command sequences each144 unique ordered writes",
+    "Factory build andfrontend binary SHA match original694 receipt; JSON reserialization matches exact binary",
+    "96 public field bindings+48 sequence fields",
+    "180 historical rows complete Cartesian grid andwithin predeclared gates",
+    "72 dynamic filter rows complete Cartesian grid andwithin gates",
+    "0 complete factory programs inhistorical single-saw subset",
+    "264600 finite numeric envelope observations"
+  ],
+  "pre_setter_range_exceptions": 9,
+  "candidate_audio_acceptance": false,
+  "production_files_written": 0
+}

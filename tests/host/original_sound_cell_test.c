@@ -197,7 +197,7 @@ static void verify_pattern_preset_codec(void)
 static void verify_synthone(void)
 {
     uint8_t cell[32], copy[32];
-    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 2);
+    assert(original_sound_count(ORIGINAL_SOUND_SYNTHONE) == 3);
     assert(original_sound_factories(ORIGINAL_SOUND_SYNTHONE) == 1);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) == ORIGINAL_SOUND_SYNTHONE_ID);
     assert(original_sound_engine_id(ORIGINAL_SOUND_SYNTHONE) != ORIGINAL_SOUND_LEGACY_ODR1_ID);
@@ -216,6 +216,36 @@ static void verify_synthone(void)
     assert(!original_sound_set(cell, 0, 100) && !memcmp(cell, copy, 32));
     assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
     uint8_t bad[32] = {0};
+#if X0X_SYNTHONE_PATCH
+    for (unsigned slot=0; slot<13; ++slot) {
+        assert(original_sound_s1_set(cell,slot,0));
+        assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
+        assert(original_sound_s1_set(cell,slot,127));
+        assert(original_sound_valid(cell));
+    }
+    memcpy(copy,cell,sizeof copy);
+    assert(!original_sound_s1_set(cell,0,128) && !memcmp(cell,copy,sizeof copy));
+    assert(!original_sound_s1_set(cell,13,0) && !memcmp(cell,copy,sizeof copy));
+    for(unsigned i=0;i<22;++i) {
+        memcpy(bad,cell,sizeof bad);
+        bad[i]=128;
+        assert(!original_sound_valid(bad));
+    }
+    memcpy(bad,cell,sizeof bad);
+    bad[23] &= (uint8_t)~1u; /* a value without its edit bit */
+    assert(!original_sound_valid(bad));
+    memcpy(bad,cell,sizeof bad);
+    bad[22] |= 4u; /* a crush edit needs its format marker */
+    assert(!original_sound_valid(bad));
+    memset(bad,0,sizeof bad);
+#else
+    /* A project made with the opt-in provider must be refused by the stock
+     * profile. In particular, never reinterpret these edits as legacy INIT. */
+    memcpy(bad,cell,sizeof bad);
+    bad[8] = 127;
+    bad[23] = 1;
+    assert(!original_sound_valid(bad) && !original_sound_adopt_legacy_cell(bad));
+#endif
     assert(!original_sound_init(bad, ORIGINAL_SOUND_SYNTHONE, 1));
     assert(!original_sound_valid(bad));
 }

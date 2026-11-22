@@ -1,0 +1,147 @@
+{
+  "schema": "Independent S1 Variant C pre-audio declaration v1",
+  "written_utc": "2026-11-19T00:01:07.535642+00:00",
+  "status": "READY_FOR_ROOT_REVIEW_COMPILED_SELFTESTED_NOT_AUDIO_RENDERED",
+  "variant": {
+    "id": "c_ch4_centered_feedback",
+    "expected_host_bytes": 160,
+    "source_root_for_root_to_register": "/workspace/scratch/e803955aec60/s1_dry_voice_c",
+    "files": {
+      "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+      "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+      "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+      "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+      "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+      "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+    },
+    "historical_audio_reports": null,
+    "audio_status": "NOT_RENDERED"
+  },
+  "exact_change": "B forward poles/rate/excitation/gain retained. Replace z^-2 feedback with centered(1,4,6,4,1)/16 and six fixed contraction iterations. Preserve complete B r=0 arithmetic.",
+  "prepared_coefficient": "A=fm_expf(-FM_TWO_PI*fc/(2*44100)); R=.8f*physical_resonance",
+  "equation": "d+c*phi(d)=w; w=(q+4*y[-1]+6*y[-2]+4*y[-3]+y[-4])/16; c=(R/16)*(1-A)^4; d0=w; six times d=w-c*phi(d)",
+  "state_bytes": {
+    "total_host": 160,
+    "prepared": 92,
+    "history_and_flags": 68,
+    "added_over_B": 8
+  },
+  "gate": {
+    "comparison_gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0,
+    "alignment": "none",
+    "normalization": "none",
+    "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "source_files_sha256": {
+    "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "tests/scalar_test.c": "41085e1cb0564971f699251c8c45d5cb609d558a3e563fb4520301ee161b7c5f",
+    "tests/scalar_cases.h": "f11c74353772662071372c3ae0f33fb0bd21e6c7ae0424f5acb5c55b62a07e2d",
+    "tests/make_scalar_fixtures.py": "fc861ce13592ce07a64ec060f9eb5cda56c2ecd637fa3561f39ab4f8d7f8edde",
+    "build.sh": "0908bab25841da1c8f379400c369feefcaf56a16cb03b0a94f43638ccd4834ed",
+    "inputs/centered_feedback_proposal.c": "7dae0fb90e85669ce9901e07955fe334e228d328da86cf12b88c9ba8330a4b5e",
+    "inputs/README.md": "faed37f5454f20ec844bb4ab058db4d91b54feb12e6597f9c2f5d46b02fbd1cc",
+    "inputs/scalar_checks.py": "e3df442f546e407e427afc2bd8d110c3db26fb675d952e7607d5f8b6f82601c8",
+    "inputs/scalar_results.json": "9664a074b4c457b5a6d5dc8ea273c43b712455c876b600405ed04799267d7b94",
+    "READY.md": "887980da596cd7bd3219ba04f06b068627fd65cc51c1cd655b3d80cf0f5e338a",
+    "NEXT-COMMAND.txt": "4dbac3962c922215e1d1c2b93664906837b544cbf70c3dc5363984f5fac24fa8",
+    "COMPARATOR-SOURCE.json": "05de37374c94364363845176289e807aa56b501bfe67e0c0d45fc23342b124b1"
+  },
+  "compiled_files_sha256": {
+    "build/s1_dry_voice.o": "1f8fffc1620a41a27ae9003cf73081f755177a385703cec37ec6d74d91f21a60",
+    "build/s1_dry_host": "838c151b0d59f4be8c959a6430499d529a686f5d5f3afaaaaf26749cf26b1e38",
+    "build/scalar_test": "2b6bae03915612247f4b604bdfde4d9372143451ab1756896dcde029c71b95a9"
+  },
+  "source_free_packet_sha256": {
+    "case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931"
+  },
+  "test_results": {
+    "results/describe.json": {
+      "voice_bytes": 160,
+      "prepared_bytes": 92,
+      "history_bytes": 68,
+      "sample_rate_hz": 44100,
+      "coefficient_hex": [
+        "3f7fce7c",
+        "3f7ed775",
+        "3f7fe249",
+        "3f7fce7c",
+        "3f7fe249",
+        "3f7ffd07"
+      ]
+    },
+    "results/host-selftest.json": {
+      "status": "PASS",
+      "checks": [
+        "finite physical input validation",
+        "invalid changes leave state untouched",
+        "full cutoff/depth endpoints",
+        "squared velocity",
+        "independent owners",
+        "zero initialized extra histories",
+        "160 byte object",
+        "explicit unsupported retrigger"
+      ],
+      "note_audio_rendered": false
+    },
+    "results/scalar-selftest.json": {
+      "status": "PASS",
+      "frozen_scalar_points_exact": 38,
+      "zero_resonance_B_substeps_exact": 360,
+      "history_shift_checks": 720,
+      "maximum_selected_float_contraction": 0.0964563638,
+      "voice_bytes": 160,
+      "note_audio_rendered": false,
+      "reference_pcm_read": false,
+      "qualification": "selected scalar/state checks only; no audio gate"
+    }
+  },
+  "test_evidence_sha256": {
+    "results/describe.json": "134e27c66974897ac22aa9bced7c50636795ab25517eb57d2f4e67b9e7ae320a",
+    "results/host-selftest.json": "d46898fc5e9ac262e918b0f8b1ca36261a3ca12464f5192044727b431862254e",
+    "results/scalar-selftest.json": "b43075f119deb805c54b44296c808702c938e46c67ae73532ff0d081d8cfeda8",
+    "logs/describe-attempt01.json": "a0d9d3ca2845f577a145f595e89b234faf77b530a027de8e2c2420465eb747cd",
+    "logs/host-selftest-attempt01.json": "32dec867c79522d0fb628c08994a33b29eeeec10b1833e1b78f799c4f71dae29",
+    "logs/scalar-selftest-attempt01.json": "6b45c05de3b8a9ce33ec1471a3a0af308e1b9d0251ba46106513f39f5cc7e496",
+    "logs/numeric-fixture-generation.json": "fc81b3e97180b95c41fc6b7d0c81af6b72d6475450879bf25445e28735d4c42c",
+    "logs/core-undefined-symbols.txt": "b949cb460b2ebe47b14d0551aff3a0653a7b6e00542ba028792c04d105321b6d",
+    "logs/host-undefined-symbols.txt": "6ccd65c50d33e7cc3087863f0c482501d4e77440d17a6dd3623a851a20fd39a7",
+    "logs/compiler.txt": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc"
+  },
+  "pretest_declaration_sha256": "27dfdcbb8c6344408aad82c71eff5a8330ec4283c6c841339f4b21392fdf80ca",
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "build_flags": "-std=c11 -O2 -ffp-contract=off -fno-fast-math -Wall -Wextra -Werror -Wdouble-promotion -DX0X_HOST=1 -Ivendor -Isrc; no libm",
+  "test_scope": "Only configuration/gate/reset metadata and bounded scalar feedback unit vectors. No note-audio render, no reference-PCM read, no full audio gate, no timing test.",
+  "checks_omitted_until_audio_authorized": [
+    "C note PCM comparison",
+    "C block partition audio identity",
+    "B-to-C whole PCM identity at r=0"
+  ],
+  "pcm_files_present": false,
+  "failed_test_attempts": 0,
+  "A_B_frozen_files_unchanged": true,
+  "candidate_choice_count_in_this_task": 1,
+  "original_source_boundary": "Approved DnBOX primitives, frozen independent B source and independent diagnosis proposal only. No original S1/SJ6 DSP, tables/assets or old source-aware candidate.",
+  "pending_action": "Root review this frozen C, register six source hashes as c in portable check.py manifest, then explicitly authorize/run one serial180-note comparison.",
+  "pending_command": "python /workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/dry_voice_followup/check.py --variant c --reference-root /workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm --output /workspace/scratch/e803955aec60/s1_dry_voice_c/results/audio180 --all",
+  "production_activation": false,
+  "unqualified": [
+    "Nonlinear audio fidelity",
+    "72 dynamic filter cases",
+    "694 intact presets",
+    "150 control IDs",
+    "full FX and note lifecycle",
+    "native size/link",
+    "callback deadline"
+  ]
+}

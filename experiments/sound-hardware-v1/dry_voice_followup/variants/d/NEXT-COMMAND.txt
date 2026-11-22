@@ -1,0 +1,8 @@
+ROOT ONLY, AFTER REVIEW, REGISTRATION AND EXPLICIT AUDIO AUTHORIZATION.
+This command has not been executed by the implementer.
+
+python /workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/dry_voice_followup/check.py --variant d --reference-root /workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm --output /workspace/scratch/e803955aec60/s1_dry_voice_d/results/audio180 --all
+
+The portable checker must register COMPARATOR-SOURCE.json's six hashes first.
+One serial 180-note comparison; gain 1; unchanged RMS 1 dB / spectral 3 dB /
+nonfinite 0 gate; no fit, normalization or alignment. Do not use run_screen.py.

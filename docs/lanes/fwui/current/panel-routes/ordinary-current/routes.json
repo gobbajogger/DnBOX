@@ -1,0 +1,160 @@
+{
+  "production": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "configuration": "Stock SMK-37 Synth One patch enabled",
+  "sourceArchive": "verified-rendered-frames.tar.gz",
+  "sourceArchiveSha256": "7b821d7a08bb3308a9505130c36ad936f54c10bb95f822f8e7859e91ac2da326",
+  "baselineIndexSha256": "3bb90e7312f957d3e05635915c6d8c60a03a7d3dcd27456f317654327ddcb1c5",
+  "comparedFrames": 1538,
+  "identicalFrames": 1514,
+  "changedFrames": 14,
+  "newFrames": 10,
+  "inventoryDigestAlgorithm": "SHA-256 of sorted UTF-8 state_id, TAB, decoded RGB SHA-256, LF",
+  "inventoryRgbSha256": "66002910667fce3d315a251e809085eb4152e9cccce5d807b20b88126f29485b",
+  "archiveSha256": "9c8ebeb23ef6eacff06e4a68e405011108a946d983d75c68ac6d25803928517a",
+  "routes": {
+    "edge-0-view-01-part-04-voice-00-page-00": {
+      "member": "edge-0-view-01-part-04-voice-00-page-00.png",
+      "pngSha256": "702333ba22e0525511a036b5f1240ac4ec924925663b1daf4086058f1509b20a",
+      "rgbSha256": "1ff542e6f87a4e324d665f9aa307495cab3b91ddfe1e24da3f8f637ab5b110a9",
+      "previousRgbSha256": "cff6971ba7c6025e5f25451d614cc1214d79390d1352de2de89026a2e5046f9a"
+    },
+    "edge-0-view-08-part-04-voice-00-page-00": {
+      "member": "edge-0-view-08-part-04-voice-00-page-00.png",
+      "pngSha256": "291a189fa48218bf14b325b0962a140c64a35165549fc0831ebcb057cb3c0262",
+      "rgbSha256": "95ac7165a5bb51a4cb51fc13d2b450c660dd2713842a1aad5192abec447db2f2",
+      "previousRgbSha256": "ba1dee2798788b9bcec3c8f5f470cccaf36c89998566129ecec8bc514c15d1b6"
+    },
+    "edge-0-view-08-part-04-voice-00-page-01": {
+      "member": "edge-0-view-08-part-04-voice-00-page-01.png",
+      "pngSha256": "0b0fcabf4f95aebe2099ac7aae451eb3435603368fc88ccfc0dcca11c54cb0cb",
+      "rgbSha256": "28ff485cc16642f866c162a14ba1b480f9c8ab1719e268317f5292c8b2adcbdd",
+      "previousRgbSha256": "06f3df4d5da6fb5a94d6f4b9dd5cad246e8bf0d484bc15ab35a9e571056accde"
+    },
+    "edge-0-view-08-part-04-voice-00-page-02": {
+      "member": "edge-0-view-08-part-04-voice-00-page-02.png",
+      "pngSha256": "8ac638de344c2b85e955ac30fc22c36f81c3bc48b66abc36ab00e1ca12c6e9c1",
+      "rgbSha256": "ee8c60c03bf578894b5c950147422cf455eb57edc7dd2e0423b1b2b4e2b53e83",
+      "previousRgbSha256": "27ace90481843d898cfdb210d47b47761deaecf9573e437ae58288e8a94c66af"
+    },
+    "edge-1-view-01-part-04-voice-00-page-00": {
+      "member": "edge-1-view-01-part-04-voice-00-page-00.png",
+      "pngSha256": "9f20e0c23ec7d30c14d18a3c4dfbe9dc15d89460e83f50ecf9ce3322d8b64069",
+      "rgbSha256": "e6485c044b1968e54fef382fbd2ec761b438d86a098f9f330acbe37a9fa9035b",
+      "previousRgbSha256": "9dc4e0293bcfe1acf5ceb96aa9972728ba0d82d537a39b89ffcb12a7ae371012"
+    },
+    "edge-1-view-08-part-04-voice-00-page-00": {
+      "member": "edge-1-view-08-part-04-voice-00-page-00.png",
+      "pngSha256": "291a189fa48218bf14b325b0962a140c64a35165549fc0831ebcb057cb3c0262",
+      "rgbSha256": "95ac7165a5bb51a4cb51fc13d2b450c660dd2713842a1aad5192abec447db2f2",
+      "previousRgbSha256": "ba1dee2798788b9bcec3c8f5f470cccaf36c89998566129ecec8bc514c15d1b6"
+    },
+    "edge-1-view-08-part-04-voice-00-page-01": {
+      "member": "edge-1-view-08-part-04-voice-00-page-01.png",
+      "pngSha256": "0b0fcabf4f95aebe2099ac7aae451eb3435603368fc88ccfc0dcca11c54cb0cb",
+      "rgbSha256": "28ff485cc16642f866c162a14ba1b480f9c8ab1719e268317f5292c8b2adcbdd",
+      "previousRgbSha256": "06f3df4d5da6fb5a94d6f4b9dd5cad246e8bf0d484bc15ab35a9e571056accde"
+    },
+    "edge-1-view-08-part-04-voice-00-page-02": {
+      "member": "edge-1-view-08-part-04-voice-00-page-02.png",
+      "pngSha256": "8ac638de344c2b85e955ac30fc22c36f81c3bc48b66abc36ab00e1ca12c6e9c1",
+      "rgbSha256": "ee8c60c03bf578894b5c950147422cf455eb57edc7dd2e0423b1b2b4e2b53e83",
+      "previousRgbSha256": "27ace90481843d898cfdb210d47b47761deaecf9573e437ae58288e8a94c66af"
+    },
+    "engine-2-part-2-page-0": {
+      "member": "engine-2-part-2-page-0.png",
+      "pngSha256": "dc88274ae018ee9a860c83df4b2c4c01b0118f496140d06325d3cfb7a6eee01c",
+      "rgbSha256": "2d6bb8991fca90be171e8fe0d7cf0858a9336380f17e7cf6c0836285a400cb62",
+      "previousRgbSha256": "d32e7494cd1dcc1df5dfbe1276f2a9e649688ff3b10a7083aa4570be72f42a00"
+    },
+    "engine-2-part-2-page-1": {
+      "member": "engine-2-part-2-page-1.png",
+      "pngSha256": "31c0d6094d821fda579fddb68aec1e6ee44ece3525327f0a3ae2b69aa4c933a6",
+      "rgbSha256": "e892afd49d3bbb8ccc43555f8966b8824352ab370e256606a18c10204858283d",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-2-page-2": {
+      "member": "engine-2-part-2-page-2.png",
+      "pngSha256": "48e54795804e995c761c86277d5511627480529d78d83657eb464b769d980167",
+      "rgbSha256": "70acf8bcce92dade29f8cb338442b3cca3c1eba1310d0e9e8b6d2015e0a2b8a2",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-2-page-3": {
+      "member": "engine-2-part-2-page-3.png",
+      "pngSha256": "7fb25557c69993c2da6d1c6853f19634063659b6996439ff2a5a3d30281257ad",
+      "rgbSha256": "87cd95381eeec68ddae1b0f62cfb60224822575984b3e24e9979859f96a884ad",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-2-page-4": {
+      "member": "engine-2-part-2-page-4.png",
+      "pngSha256": "371c7382cd857d8b7dd90431150e32035be1d478dfc559ec7e7216f355d5d5a1",
+      "rgbSha256": "e93c77f0d8dd8ae0686b3c16e231437ee85e9ea2e25b12fcd428eb1ee9a4c297",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-2-page-5": {
+      "member": "engine-2-part-2-page-5.png",
+      "pngSha256": "e50efe35060127c743fae56dcec4020d39523a5e891e57d746f6cf7855133b3e",
+      "rgbSha256": "a5109d93570a4f3e27dca7f7c7bb0795e076bce925f0fe66054d1374dc21558d",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-3-page-0": {
+      "member": "engine-2-part-3-page-0.png",
+      "pngSha256": "a21b707d9d6e42a913e779b0562a92cfb789410de363b411001892cceb40eeef",
+      "rgbSha256": "feca9d83de8f963caf3519acd541e36d7fc76db8fcc4b1049ad70eac2e0c5be6",
+      "previousRgbSha256": "db6488398c74a12b325b2e2e82750ebfb51614593ae1913f0c96eca213653a7e"
+    },
+    "engine-2-part-3-page-1": {
+      "member": "engine-2-part-3-page-1.png",
+      "pngSha256": "b5cff1788d1ce908596e0cedc6f5a1be87ae8fbf6fc897e50201a37314b05597",
+      "rgbSha256": "ac14d63082bfb389d75e2afdb4596d0ecfb266f40c024c40bbb7a6c21a1891e7",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-3-page-2": {
+      "member": "engine-2-part-3-page-2.png",
+      "pngSha256": "408c96cb9790c3fd621a3fca3a12cf957fd87e2d1b42f227bbb097f786577e00",
+      "rgbSha256": "4d64954cb824d643a42d8dc9fe71155e36e6624a96ea6ce114c04e767c14e907",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-3-page-3": {
+      "member": "engine-2-part-3-page-3.png",
+      "pngSha256": "4c106716ccc4354fe3b737125c3f4dc457d0305261e07f7e6363e4e63b697b97",
+      "rgbSha256": "f91e5318440325921fd3cbe55c64689aa47038a43b1f5bb07c19cbca966140a6",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-3-page-4": {
+      "member": "engine-2-part-3-page-4.png",
+      "pngSha256": "f438d1de4d59d9ec77d4fa4b46c52ff0052098f4704d087c948c31b8c4266f8f",
+      "rgbSha256": "6c8cfcf17d0736e9831cfe7afaf496fba9947ca526bcbebf4a3dc81a71ce96a1",
+      "previousRgbSha256": null
+    },
+    "engine-2-part-3-page-5": {
+      "member": "engine-2-part-3-page-5.png",
+      "pngSha256": "6b8df954f95be351ee1ee69163cc8ae99bd6cf8cd1213b39878644d7c557be57",
+      "rgbSha256": "9b5dcb6791ee6f3c74f00e1b18c97825c802338f1a7a873f0d8a3226c6b5d3e7",
+      "previousRgbSha256": null
+    },
+    "view-01-part-04-voice-00-page-00": {
+      "member": "view-01-part-04-voice-00-page-00.png",
+      "pngSha256": "7b1eef6b6659db47073978f61468f0230ad8711869d5edef9f6422e143c8f378",
+      "rgbSha256": "6f8571591d46bbfdf156e8b8a87561410f113f5dcad1d4fa3ab33f78855ddff1",
+      "previousRgbSha256": "9f76bec50d1b59378e7d4ce7fb86826f547cb15d017852cb5507d9ad280021e5"
+    },
+    "view-08-part-04-voice-00-page-00": {
+      "member": "view-08-part-04-voice-00-page-00.png",
+      "pngSha256": "291a189fa48218bf14b325b0962a140c64a35165549fc0831ebcb057cb3c0262",
+      "rgbSha256": "95ac7165a5bb51a4cb51fc13d2b450c660dd2713842a1aad5192abec447db2f2",
+      "previousRgbSha256": "ba1dee2798788b9bcec3c8f5f470cccaf36c89998566129ecec8bc514c15d1b6"
+    },
+    "view-08-part-04-voice-00-page-01": {
+      "member": "view-08-part-04-voice-00-page-01.png",
+      "pngSha256": "0b0fcabf4f95aebe2099ac7aae451eb3435603368fc88ccfc0dcca11c54cb0cb",
+      "rgbSha256": "28ff485cc16642f866c162a14ba1b480f9c8ab1719e268317f5292c8b2adcbdd",
+      "previousRgbSha256": "06f3df4d5da6fb5a94d6f4b9dd5cad246e8bf0d484bc15ab35a9e571056accde"
+    },
+    "view-08-part-04-voice-00-page-02": {
+      "member": "view-08-part-04-voice-00-page-02.png",
+      "pngSha256": "8ac638de344c2b85e955ac30fc22c36f81c3bc48b66abc36ab00e1ca12c6e9c1",
+      "rgbSha256": "ee8c60c03bf578894b5c950147422cf455eb57edc7dd2e0423b1b2b4e2b53e83",
+      "previousRgbSha256": "27ace90481843d898cfdb210d47b47761deaecf9573e437ae58288e8a94c66af"
+    }
+  }
+}

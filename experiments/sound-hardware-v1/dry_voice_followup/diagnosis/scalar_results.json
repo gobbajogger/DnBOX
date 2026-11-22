@@ -1,0 +1,622 @@
+{
+  "scope": "Scalar equations and selected binary32 arithmetic only; no audio render or gate run",
+  "original_gate_unchanged": {
+    "rms_db_max": 1,
+    "spectral_db_max": 3,
+    "comparison_gain": 1,
+    "nonfinite_max": 0
+  },
+  "cutoff_rows": [
+    {
+      "cutoff_hz": 64,
+      "A_binary32": 0.9954511523246765,
+      "old_k_critical": 3.999958427399866,
+      "old_r_critical": 0.9999896068499665,
+      "old_unit_circle_crossing_hz": 63.99974643426316,
+      "selected_radii": [
+        {
+          "resonance": 0.0,
+          "old": 0.9954511523246765,
+          "centered": 0.9954511523246764
+        },
+        {
+          "resonance": 0.25,
+          "old": 0.9986655306476198,
+          "centered": 0.9986655306475866
+        },
+        {
+          "resonance": 0.5,
+          "old": 0.9992748819741807,
+          "centered": 0.9992748778509534
+        },
+        {
+          "resonance": 0.9,
+          "old": 0.9998814953923243,
+          "centered": 0.9998814850394259
+        },
+        {
+          "resonance": 0.98,
+          "old": 0.9999770428518877,
+          "centered": 0.9999770313024563
+        }
+      ]
+    },
+    {
+      "cutoff_hz": 500,
+      "A_binary32": 0.9650079011917114,
+      "old_k_critical": 3.997464317765494,
+      "old_r_critical": 0.9993660794413735,
+      "old_unit_circle_crossing_hz": 499.8946665830124,
+      "selected_radii": [
+        {
+          "resonance": 0.0,
+          "old": 0.9650079011917114,
+          "centered": 0.9650079011917113
+        },
+        {
+          "resonance": 0.25,
+          "old": 0.989624305073178,
+          "centered": 0.9896243042314913
+        },
+        {
+          "resonance": 0.5,
+          "old": 0.9943527196621493,
+          "centered": 0.9943507625810487
+        },
+        {
+          "resonance": 0.9,
+          "old": 0.9990797767169114,
+          "centered": 0.9990748441973687
+        },
+        {
+          "resonance": 0.98,
+          "old": 0.9998261508857571,
+          "centered": 0.9998206449016996
+        }
+      ]
+    },
+    {
+      "cutoff_hz": 2000,
+      "A_binary32": 0.8672084808349609,
+      "old_k_critical": 3.9598431242269063,
+      "old_r_critical": 0.9899607810567266,
+      "old_unit_circle_crossing_hz": 1993.2678403777784,
+      "selected_radii": [
+        {
+          "resonance": 0.0,
+          "old": 0.8672084808349609,
+          "centered": 0.8672084808349609
+        },
+        {
+          "resonance": 0.25,
+          "old": 0.9592920150287216,
+          "centered": 0.9592911840574276
+        },
+        {
+          "resonance": 0.5,
+          "old": 0.9778256893720955,
+          "centered": 0.977701907669631
+        },
+        {
+          "resonance": 0.9,
+          "old": 0.9966415111086658,
+          "centered": 0.9963268294777416
+        },
+        {
+          "resonance": 0.98,
+          "old": 0.9996391187985701,
+          "centered": 0.9992872503925496
+        }
+      ]
+    },
+    {
+      "cutoff_hz": 8000,
+      "A_binary32": 0.5655800700187683,
+      "old_k_critical": 3.4485116967641343,
+      "old_r_critical": 0.8621279241910336,
+      "old_unit_circle_crossing_hz": 7599.098720053704,
+      "selected_radii": [
+        {
+          "resonance": 0.0,
+          "old": 0.5655800700187683,
+          "centered": 0.5655800700187683
+        },
+        {
+          "resonance": 0.25,
+          "old": 0.8555682692056128,
+          "centered": 0.8548726823499052
+        },
+        {
+          "resonance": 0.5,
+          "old": 0.927603608838934,
+          "centered": 0.9196348416713502
+        },
+        {
+          "resonance": 0.9,
+          "old": 1.0064448243706463,
+          "centered": 0.9866449312381325
+        },
+        {
+          "resonance": 0.98,
+          "old": 1.0195662681741717,
+          "centered": 0.9974055102035039
+        }
+      ]
+    },
+    {
+      "cutoff_hz": 22050,
+      "A_binary32": 0.20787960290908813,
+      "old_k_critical": 1.9559053544747376,
+      "old_r_critical": 0.4889763386186844,
+      "old_unit_circle_crossing_hz": 16295.748093825778,
+      "selected_radii": [
+        {
+          "resonance": 0.0,
+          "old": 0.20787960290908813,
+          "centered": 0.20787960290908816
+        },
+        {
+          "resonance": 0.25,
+          "old": 0.7791074361470394,
+          "centered": 0.7282829397148363
+        },
+        {
+          "resonance": 0.5,
+          "old": 1.008877905311187,
+          "centered": 0.8521056802455307
+        },
+        {
+          "resonance": 0.9,
+          "old": 1.287773945198957,
+          "centered": 0.9760748769944496
+        },
+        {
+          "resonance": 0.98,
+          "old": 1.3362587640225174,
+          "centered": 0.9953761556831946
+        }
+      ]
+    }
+  ],
+  "solver_bound": {
+    "A_min_analytic": 0.20787957635076193,
+    "c_max_analytic": 0.01929127465851203,
+    "contraction_max_analytic": 0.09645637329256015,
+    "real_error_after_six_bound": 1.5536260561257194e-08,
+    "loose_A_lower_bound": 0.2,
+    "loose_c_bound": 0.020070400000000006,
+    "loose_contraction_bound": 0.10035200000000002,
+    "loose_real_error_after_six_bound": 2.049803460563828e-08,
+    "qualification": "Real-arithmetic uniform bound; binary32 roundoff is additional"
+  },
+  "selected_solver_checks": {
+    "count": 38,
+    "max_real_error": 1.3790695946314102e-09,
+    "max_binary32_error": 3.3527612686157227e-08,
+    "max_binary32_residual": 3.3527612686157227e-08,
+    "rows": [
+      {
+        "w": 0.0,
+        "c": 0.01929127465851203,
+        "real_six": 0.0,
+        "real_root": -1.595736838895668e-26,
+        "real_error": 1.595736838895668e-26,
+        "binary32_six": 0.0,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.5957368050674263e-26,
+        "binary32_residual": 0.0
+      },
+      {
+        "w": 1e-08,
+        "c": 0.01929127465851203,
+        "real_six": 9.120290628113796e-09,
+        "real_root": 9.120289921332425e-09,
+        "real_error": 7.067813708142762e-16,
+        "binary32_six": 9.99999993922529e-09,
+        "binary32_error_against_real_root_for_rounded_inputs": 8.797100493096744e-10,
+        "binary32_residual": 9.6456368733972e-10
+      },
+      {
+        "w": -1e-08,
+        "c": 0.01929127465851203,
+        "real_six": -9.120290628113796e-09,
+        "real_root": -9.120289921332425e-09,
+        "real_error": 7.067813708142762e-16,
+        "binary32_six": -9.99999993922529e-09,
+        "binary32_error_against_real_root_for_rounded_inputs": 8.797100493096711e-10,
+        "binary32_residual": 9.6456368733972e-10
+      },
+      {
+        "w": 0.001,
+        "c": 0.01929127465851203,
+        "real_six": 0.0009121753218478668,
+        "real_root": 0.0009121752526614561,
+        "real_error": 6.91864107237733e-11,
+        "binary32_six": 0.0009121745242737234,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.734192396767481e-10,
+        "binary32_residual": 8.477486271567941e-10
+      },
+      {
+        "w": -0.001,
+        "c": 0.01929127465851203,
+        "real_six": -0.0009121753218478668,
+        "real_root": -0.0009121752526614563,
+        "real_error": 6.918641050693286e-11,
+        "binary32_six": -0.0009121745242737234,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.734192398935885e-10,
+        "binary32_residual": 8.477486271567941e-10
+      },
+      {
+        "w": 0.05,
+        "c": 0.01929127465851203,
+        "real_six": 0.04595634967952661,
+        "real_root": 0.04595634863484045,
+        "real_error": 1.0446861570256871e-09,
+        "binary32_six": 0.04595635086297989,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.4588349694921732e-09,
+        "binary32_residual": 1.5754112181465274e-09
+      },
+      {
+        "w": -0.05,
+        "c": 0.01929127465851203,
+        "real_six": -0.04595634967952661,
+        "real_root": -0.045956348634840466,
+        "real_error": 1.0446861431478993e-09,
+        "binary32_six": -0.04595635086297989,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.4588349694921732e-09,
+        "binary32_residual": 1.5754112181465274e-09
+      },
+      {
+        "w": 0.25,
+        "c": 0.01929127465851203,
+        "real_six": 0.23573875014914097,
+        "real_root": 0.23573875013167317,
+        "real_error": 1.7467804980242363e-11,
+        "binary32_six": 0.23573875427246094,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.848093510505635e-09,
+        "binary32_residual": 3.974725604205531e-09
+      },
+      {
+        "w": -0.25,
+        "c": 0.01929127465851203,
+        "real_six": -0.23573875014914097,
+        "real_root": -0.23573875013167322,
+        "real_error": 1.7467749469091132e-11,
+        "binary32_six": -0.23573875427246094,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.848093454994483e-09,
+        "binary32_residual": 3.974725604205531e-09
+      },
+      {
+        "w": 0.5,
+        "c": 0.01929127465851203,
+        "real_six": 0.4814321426495106,
+        "real_root": 0.4814321426495086,
+        "real_error": 1.9984014443252818e-15,
+        "binary32_six": 0.48143213987350464,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.1668999644907103e-09,
+        "binary32_residual": 3.188989572411316e-09
+      },
+      {
+        "w": -0.5,
+        "c": 0.01929127465851203,
+        "real_six": -0.4814321426495106,
+        "real_root": -0.48143214264950873,
+        "real_error": 1.887379141862766e-15,
+        "binary32_six": -0.48143213987350464,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.1668999644907103e-09,
+        "binary32_residual": 3.188989572411316e-09
+      },
+      {
+        "w": 0.98,
+        "c": 0.01929127465851203,
+        "real_six": 0.9607087271480023,
+        "real_root": 0.9607087271480022,
+        "real_error": 1.1102230246251565e-16,
+        "binary32_six": 0.960708737373352,
+        "binary32_error_against_real_root_for_rounded_inputs": 9.257090427539083e-09,
+        "binary32_residual": 9.25709253696283e-09
+      },
+      {
+        "w": -0.98,
+        "c": 0.01929127465851203,
+        "real_six": -0.9607087271480023,
+        "real_root": -0.9607087271480024,
+        "real_error": 1.1102230246251565e-16,
+        "binary32_six": -0.960708737373352,
+        "binary32_error_against_real_root_for_rounded_inputs": 9.257090427539083e-09,
+        "binary32_residual": 9.25709253696283e-09
+      },
+      {
+        "w": 1.0,
+        "c": 0.01929127465851203,
+        "real_six": 0.9807087253930304,
+        "real_root": 0.9807087253930304,
+        "real_error": 0.0,
+        "binary32_six": 0.9807087182998657,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.502123144931261e-09,
+        "binary32_residual": 7.502123144931261e-09
+      },
+      {
+        "w": -1.0,
+        "c": 0.01929127465851203,
+        "real_six": -0.9807087253930304,
+        "real_root": -0.9807087253930307,
+        "real_error": 2.220446049250313e-16,
+        "binary32_six": -0.9807087182998657,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.502123144931261e-09,
+        "binary32_residual": 7.502123144931261e-09
+      },
+      {
+        "w": 1.02,
+        "c": 0.01929127465851203,
+        "real_six": 1.000708725341488,
+        "real_root": 1.0007087253414881,
+        "real_error": 2.220446049250313e-16,
+        "binary32_six": 1.0007086992263794,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.450580596923828e-09,
+        "binary32_residual": 7.450580596923828e-09
+      },
+      {
+        "w": -1.02,
+        "c": 0.01929127465851203,
+        "real_six": -1.000708725341488,
+        "real_root": -1.0007087253414881,
+        "real_error": 2.220446049250313e-16,
+        "binary32_six": -1.0007086992263794,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.450580596923828e-09,
+        "binary32_residual": 7.450580596923828e-09
+      },
+      {
+        "w": 1.784,
+        "c": 0.01929127465851203,
+        "real_six": 1.764708725341488,
+        "real_root": 1.764708725341488,
+        "real_error": 0.0,
+        "binary32_six": 1.7647087574005127,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.450580596923828e-09,
+        "binary32_residual": 7.450580596923828e-09
+      },
+      {
+        "w": -1.784,
+        "c": 0.01929127465851203,
+        "real_six": -1.764708725341488,
+        "real_root": -1.764708725341488,
+        "real_error": 0.0,
+        "binary32_six": -1.7647087574005127,
+        "binary32_error_against_real_root_for_rounded_inputs": 7.450580596923828e-09,
+        "binary32_residual": 7.450580596923828e-09
+      },
+      {
+        "w": 0.0,
+        "c": 0.020070400000000006,
+        "real_six": 0.0,
+        "real_root": -1.660184576618429e-26,
+        "real_error": 1.660184576618429e-26,
+        "binary32_six": 0.0,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.6601845839824452e-26,
+        "binary32_residual": 0.0
+      },
+      {
+        "w": 1e-08,
+        "c": 0.020070400000000006,
+        "real_six": 9.088001873269605e-09,
+        "real_root": 9.088000948540865e-09,
+        "real_error": 9.247287400614568e-16,
+        "binary32_six": 9.99999993922529e-09,
+        "binary32_error_against_real_root_for_rounded_inputs": 9.119990555044526e-10,
+        "binary32_residual": 1.0035199782980525e-09
+      },
+      {
+        "w": -1e-08,
+        "c": 0.020070400000000006,
+        "real_six": -9.088001873269605e-09,
+        "real_root": -9.088000948540868e-09,
+        "real_error": 9.247287367527343e-16,
+        "binary32_six": -9.99999993922529e-09,
+        "binary32_error_against_real_root_for_rounded_inputs": 9.119990555044526e-10,
+        "binary32_residual": 1.0035199782980525e-09
+      },
+      {
+        "w": 0.001,
+        "c": 0.020070400000000006,
+        "real_six": 0.0009089507442514068,
+        "real_root": 0.0009089506532846507,
+        "real_error": 9.096675604620963e-11,
+        "binary32_six": 0.0009089480736292899,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.6224681894376073e-09,
+        "binary32_residual": 2.8846825960923694e-09
+      },
+      {
+        "w": -0.001,
+        "c": 0.020070400000000006,
+        "real_six": -0.0009089507442514068,
+        "real_root": -0.0009089506532846512,
+        "real_error": 9.096675561252876e-11,
+        "binary32_six": -0.0009089480736292899,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.6224681896544477e-09,
+        "binary32_residual": 2.8846825960923694e-09
+      },
+      {
+        "w": 0.05,
+        "c": 0.020070400000000006,
+        "real_six": 0.04580557623395254,
+        "real_root": 0.045805574854882944,
+        "real_error": 1.3790695946314102e-09,
+        "binary32_six": 0.04580557718873024,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.6631868521299609e-09,
+        "binary32_residual": 1.8015481190181148e-09
+      },
+      {
+        "w": -0.05,
+        "c": 0.020070400000000006,
+        "real_six": -0.04580557623395254,
+        "real_root": -0.045805574854882944,
+        "real_error": 1.3790695946314102e-09,
+        "binary32_six": -0.04580557718873024,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.663186838252173e-09,
+        "binary32_residual": 1.8015481190181148e-09
+      },
+      {
+        "w": 0.25,
+        "c": 0.020070400000000006,
+        "real_six": 0.23518186834177868,
+        "real_root": 0.23518186831838728,
+        "real_error": 2.3391399928129886e-11,
+        "binary32_six": 0.23518186807632446,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.7851659039891388e-10,
+        "binary32_residual": 1.8464627049574744e-10
+      },
+      {
+        "w": -0.25,
+        "c": 0.020070400000000006,
+        "real_six": -0.23518186834177868,
+        "real_root": -0.23518186831838733,
+        "real_error": 2.3391344416978654e-11,
+        "binary32_six": -0.23518186807632446,
+        "binary32_error_against_real_root_for_rounded_inputs": 1.785166459100651e-10,
+        "binary32_residual": 1.8464627049574744e-10
+      },
+      {
+        "w": 0.5,
+        "c": 0.020070400000000006,
+        "real_six": 0.4806876524784087,
+        "real_root": 0.48068765247840595,
+        "real_error": 2.7755575615628914e-15,
+        "binary32_six": 0.4806876480579376,
+        "binary32_error_against_real_root_for_rounded_inputs": 4.3354260181871496e-09,
+        "binary32_residual": 4.367068706656596e-09
+      },
+      {
+        "w": -0.5,
+        "c": 0.020070400000000006,
+        "real_six": -0.4806876524784087,
+        "real_root": -0.48068765247840606,
+        "real_error": 2.6645352591003757e-15,
+        "binary32_six": -0.4806876480579376,
+        "binary32_error_against_real_root_for_rounded_inputs": 4.335426129209452e-09,
+        "binary32_residual": 4.367068706656596e-09
+      },
+      {
+        "w": 0.98,
+        "c": 0.020070400000000006,
+        "real_six": 0.959929602073358,
+        "real_root": 0.9599296020733579,
+        "real_error": 1.1102230246251565e-16,
+        "binary32_six": 0.9599296450614929,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.4003679044426462e-08,
+        "binary32_residual": 2.4003685150653098e-08
+      },
+      {
+        "w": -0.98,
+        "c": 0.020070400000000006,
+        "real_six": -0.959929602073358,
+        "real_root": -0.9599296020733581,
+        "real_error": 1.1102230246251565e-16,
+        "binary32_six": -0.9599296450614929,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.4003678822381858e-08,
+        "binary32_residual": 2.4003685150653098e-08
+      },
+      {
+        "w": 1.0,
+        "c": 0.020070400000000006,
+        "real_six": 0.9799296000653637,
+        "real_root": 0.9799296000653637,
+        "real_error": 0.0,
+        "binary32_six": 0.9799296259880066,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.6011668596837012e-08,
+        "binary32_residual": 2.6011668818881617e-08
+      },
+      {
+        "w": -1.0,
+        "c": 0.020070400000000006,
+        "real_six": -0.9799296000653637,
+        "real_root": -0.9799296000653637,
+        "real_error": 0.0,
+        "binary32_six": -0.9799296259880066,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.6011668374792407e-08,
+        "binary32_residual": 2.6011668818881617e-08
+      },
+      {
+        "w": 1.02,
+        "c": 0.020070400000000006,
+        "real_six": 0.9999296,
+        "real_root": 0.9999296,
+        "real_error": 0.0,
+        "binary32_six": 0.9999296069145203,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.60770320892334e-08,
+        "binary32_residual": 2.60770320892334e-08
+      },
+      {
+        "w": -1.02,
+        "c": 0.020070400000000006,
+        "real_six": -0.9999296,
+        "real_root": -0.9999296000000002,
+        "real_error": 2.220446049250313e-16,
+        "binary32_six": -0.9999296069145203,
+        "binary32_error_against_real_root_for_rounded_inputs": 2.6077031867188794e-08,
+        "binary32_residual": 2.60770320892334e-08
+      },
+      {
+        "w": 1.784,
+        "c": 0.020070400000000006,
+        "real_six": 1.7639296,
+        "real_root": 1.7639296,
+        "real_error": 0.0,
+        "binary32_six": 1.7639296054840088,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.3527612686157227e-08,
+        "binary32_residual": 3.3527612686157227e-08
+      },
+      {
+        "w": -1.784,
+        "c": 0.020070400000000006,
+        "real_six": -1.7639296,
+        "real_root": -1.7639296,
+        "real_error": 0.0,
+        "binary32_six": -1.7639296054840088,
+        "binary32_error_against_real_root_for_rounded_inputs": 3.3527612686157227e-08,
+        "binary32_residual": 3.3527612686157227e-08
+      }
+    ]
+  },
+  "provenance": [
+    {
+      "path": "/workspace/scratch/e803955aec60/s1_dry_voice_unit/src/s1_dry_voice.c",
+      "sha256": "0e35e0d91d07147a2149ce063c1623f720e6dbe5cf1c0218450dd0f210188bba"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/s1_dry_voice_unit/variant_b/src/s1_dry_voice.c",
+      "sha256": "01227b32191870eee8b74d0638ec16f1f31f36b23dc05bd1ec29a911e19a67cc"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/s1_dry_voice_unit/variant_b/src/s1_dry_voice.h",
+      "sha256": "7d781ffae5c568af2c3ced58009c4474897d2211b10e44dfaec7ed609a7dc7ac"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/s1_dry_voice_unit/results/ch4_exp_e0/all180_summary.json",
+      "sha256": "2693f587aa34907550085e15181be09d2ba680aface382c27751bac7983cd8f9"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/s1_dry_voice_unit/variant_b/results/ch4_2x_slope4/all180_summary.json",
+      "sha256": "e29d79877e5e89f8c8e58b6739709b0c40d03b973e10fc49a84b85318fa8e6ef"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/case_plan.json",
+      "sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/metrics.py",
+      "sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/experiments/original_synth/chicago_mp4.c",
+      "sha256": "0878797b35619a2f92b7f4e80d29e5bbf483cf206474cca0de087f871a90d388"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/juno6.c",
+      "sha256": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/fastmath.h",
+      "sha256": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d"
+    }
+  ]
+}

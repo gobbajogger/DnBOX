@@ -1,0 +1,239 @@
+{
+  "status": "PASS",
+  "production": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "productionTree": "c8032dada12e6fb779f78955d844a4108b36be5c",
+  "branch": "lane/fwui-controls",
+  "integrationAtStart": "468744971720a81a536308e3bd84bd8766a5ed0f",
+  "integrationMerged": "d4bdf88eefd437ecaf21837eba1011f1756bc57a",
+  "soundProvider": "0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e",
+  "buildInputs": "stock-fit.json",
+  "scope": "Focused cloud host scenarios, native 240x240 LCD output, edited project storage and real host DSP. Ordinary Elite and Pro were built. Integration owns the complete combined host run.",
+  "runs": [
+    {
+      "item": "F6 BREAK DSP",
+      "registrations": [
+        "break-hit-gain",
+        "break-retrigger-law"
+      ],
+      "firmware": "f8cdbf67a6b70f927a443d79193a54775b7c3a7b",
+      "results": [
+        "All 128 velocities, 73,297 compared PCM frames, independent gain for overlapping tails, reverse, grain, programmed retrigger and live stutter.",
+        "The stock and alternate retrigger-law configurations passed their exact table comparisons."
+      ]
+    },
+    {
+      "item": "F6 physical controls and save/reload",
+      "registrations": [
+        "break-step-velocity-engine",
+        "ui-step-lane",
+        "ui-step-lane-edit",
+        "ui-step-lane-transaction"
+      ],
+      "results": [
+        "Saved/reloaded Q15 peaks 0, 4644, 9288 and 18430 at velocities 0, 32, 64 and 127. Existing sparse and previous-pattern semantics, a full queue, earlier tails and native readback passed.",
+        "1,427 lane selection and rendering checks. 20 persisted step edits across all five parts passed 1,086 checks.",
+        "586 transaction checks. Moving the BREAK read outside its guard failed at the stale-read marker."
+      ],
+      "firmware": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+      "focusedRunCommit": "5230e3f994aabb17379ed9bc035fb633a82a2fb9",
+      "focusedRunScope": "The registered BREAK physical-input case ran at this evidence commit. The three lane fixtures ran on production 199f0444."
+    },
+    {
+      "item": "F1/F2 normal and recovery entry",
+      "references": [
+        "../native-routes/report.json",
+        "../native-routes/normal-loop/replay-199f0444.json",
+        "../native-routes/recovery-review.json",
+        "../native-routes/j6-function-replay.json",
+        "../native-gaps.json"
+      ],
+      "results": [
+        "42 native captures. Both the omitted-redraw and displaced-retry controls failed at their intended frame.",
+        "7 startup modes and all 16 archived states reproduced their frame mappings and RGB.",
+        "All 28 compact SuperJ6 frames reproduced the previous RGB with 8,918 assertions and direct entries to five previously unobserved helpers."
+      ]
+    },
+    {
+      "item": "F1/F2 stock geometry",
+      "reference": "stock-geometry.json",
+      "results": [
+        "1,538 native 240x240 frames and 44,082 text masks with zero findings; 19,643 content checks and 249 glyph pixel checks passed.",
+        "A missing synth caption, covered text and a skipped per-screen audit were each rejected."
+      ]
+    },
+    {
+      "item": "F7 default controls and provider",
+      "registrations": [
+        "ui-synthone-patch",
+        "ui-synthone-frames",
+        "synthone-slot",
+        "synthone-init-audio"
+      ],
+      "results": [
+        "Default panel: 1,535 checks on the two bass owners. 13 patch parameters plus independent CRUSH RATE, physical matrix, encoder/list, audio application, save/reload and owner isolation.",
+        "All 49,152 filter/caption combinations and 1,664 formatted patch positions passed. Six additional live frames checked owner-specific playback and release. Patch-disabled selector: 2,878 checks.",
+        "Engine/provider coverage included 13 factory IDs by 128 positions, parameter change on rendered audio for every ID, stale/refused writes, queued snapshots and note locks.",
+        "CRUSH RATE matched independent rate-reduced PCM on 128 sweeps of 14,976 frames (1,916,928 total). The build configuration tests passed all 17 cases."
+      ]
+    },
+    {
+      "item": "F7 layout and catalog",
+      "references": [
+        "../synthone-editor/default-review/geometry.json",
+        "../synthone-editor/default-review/review.md",
+        "../panel-routes/ordinary-current/routes.json",
+        "../../screens/screen-index.tsv",
+        "../panel-routes/ordinary-current/review.json"
+      ],
+      "results": [
+        "132 final Synth One frames, 708 measured panels, zero failures. The CRUSH RATE row occupied at least 83.969% across ten reviewed appearances. Its earlier centered version failed at 50.844%.",
+        "1,514 of 1,538 ordinary states matched the prior pixels. Fourteen frames changed and ten were added. Independent reviewers inspected the 24 replacements.",
+        "Independent decoding of the older and current 909 GR loops reproduced every one of 5,328 plotted column heights in the 12 changed BREAK views."
+      ]
+    },
+    {
+      "item": "F4/F5 pan, battery and performance input",
+      "registrations": [
+        "ui-pan-units",
+        "ui-battery-levels",
+        "ui-overlay-battery",
+        "ui-toast-battery",
+        "held-step-release",
+        "pads-in-settings",
+        "copy-semantics",
+        "home-globe-part"
+      ],
+      "results": [
+        "All 10,975 L50/C/R50 pan checks and 9,898 four-level battery/header checks passed. The overlay test visited 505 rows in 57 lists with 4,040 injected level updates and 263,838 checks. The toast test passed 9,747 checks.",
+        "Held-step release passed 144 checks. Pads/LEDs with menus and help passed 7,229 checks. Both part copy and HOME hold-GLOBE passed. Integration independently recorded all four F5 registrations on the #975 merge."
+      ],
+      "directRegistrationRun": "5230e3f994aabb17379ed9bc035fb633a82a2fb9",
+      "otherControlSource": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+      "directRegistrations": [
+        "held-step-release",
+        "pads-in-settings",
+        "ui-pan-units",
+        "ui-battery-levels"
+      ]
+    }
+  ],
+  "independentReview": {
+    "nativeSizes": [
+      "240x240"
+    ],
+    "viewportSizes": [
+      "1440x900",
+      "390x844",
+      "844x390"
+    ],
+    "scope": "Current LCD pixels replayed within previously browser-painted viewport shells. A fresh Chromium session and physical hardware measurements were not obtained.",
+    "catalogEntries": 1968,
+    "entriesByStatus": {
+      "current": 1952,
+      "retiredOrdinary": 2,
+      "archivedSelector": 14
+    },
+    "viewportComparisons": 5904,
+    "viewportReference": "../panel-routes/catalog-viewport-199f0444.json"
+  },
+  "ancestry": {
+    "integration": "d4bdf88eefd437ecaf21837eba1011f1756bc57a",
+    "sound": "0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e",
+    "merge": "a6631760d9d880992f86aedd0d6873eef5895495",
+    "publishedCatalog": "7befa2e8c6fd9069d5c06f5c986545fa0f3ccaba"
+  },
+  "focusedOutput": {
+    "held-step-release": {
+      "logSha256": "49660ca26a453e2f5189ad181d709e5d5e6ff735f6f7fc64b5a039358e2a3e00",
+      "result": "held-step-release: PASS (144 checks, both kits/voices, all four step banks)"
+    },
+    "pads-in-settings": {
+      "logSha256": "3e9439390eb1f76cc36c8e297a031a0cf08ed33ee3b4ec1f62e325adf24e84fe",
+      "result": "PASS 7229 checks: pads x {909 SEQ, drum MIX, BREAK, Chicago/Miami SEQ/EDIT/FREE PLAY} x {closed, settings list, HELP}"
+    },
+    "break-step-velocity-engine": {
+      "logSha256": "4782a39e28ed3e3fec97726083652fc35cc087641f7f077178e8b263511ec264",
+      "result": "PASS sequenced BREAK velocity: saved/reloaded, sparse and pattern restore, lane replacement, motion disable; Q15 peaks 127=18430 64=9288 32=4644 0=0"
+    },
+    "ui-battery-levels": {
+      "logSha256": "2dc504d9d67b857dafff06fc0b317721520e4dee9e9ad19807a99e45f37c939a",
+      "result": "PASS four battery levels and header invalidation: 9898 checks"
+    },
+    "ui-pan-units": {
+      "logSha256": "4cb103235b8f334aa77205b740eb04470898ac6577dd2ff1e7153cd33d01edc7",
+      "result": "PASS production pan L50/C/R50: 10975 checks"
+    },
+    "ui-overlay-battery": {
+      "logSha256": "916fc41789566e3349574aef256be17573502ab3493baff242b1dd2d5fbcd48d",
+      "result": "OVERLAY_BATTERY 505 rows in 57 lists, 4040 injected battery-level updates, 263838 checks; other domains NOT_RUN"
+    },
+    "ui-toast-battery": {
+      "logSha256": "cfe606d499fa4bb64eacf7f7dc386c9e79563a029d010016670fb416c555dfec",
+      "result": "PASS toast battery: 4 states x 4 levels; text/state preserved; 9747 checks"
+    },
+    "ui-step-lane": {
+      "logSha256": "4a93afd5895587c6ff14e338c3b8dd45439968ef7ed1df4753a6e0ee67d4899a",
+      "result": "PASS physical SEQ+SCALE(FM-1 SEL) lane cycle, stored adapter and production/preview renders: 1427 checks; literal touchscreen NOT_RUN"
+    },
+    "ui-step-lane-edit": {
+      "logSha256": "290e78e03cd756fa9e6ec4ae62d90071766296fc8a902edb210c9a06e9e09311",
+      "result": "PASS physical visible-lane edits: 20 scenarios, 1086 checks; all persisted"
+    },
+    "ui-step-lane-transaction": {
+      "logSha256": "65f3a890d0f72cb46dd68b46dac7ab671cf3d75c610409be1f204aaee3748987",
+      "result": "PASS BREAK transaction scopes and current-source stale-read runtime negative"
+    },
+    "copy-semantics": {
+      "logSha256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7",
+      "result": "copy_semantics: ok"
+    },
+    "home-globe-part": {
+      "logSha256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608",
+      "result": "home_globe_part: ok"
+    },
+    "ui-synthone-patch": {
+      "logSha256": "160c5f6067c8d292dc39aba733293069e14885188490e2b059e7d9c024780dbb",
+      "result": "Synth One INIT F7: 1535 checks, two owners, 13 patch controls and CRUSH RATE each, 96 matrix captures"
+    },
+    "ui-synthone-frames": {
+      "logSha256": "33708640de6a498dcb8f261a8f7216158704b3539265eaeaf3e178d082b69c8e",
+      "result": "PASS Synth One F7 frame ownership and geometry"
+    },
+    "synthone-slot-patch-disabled": {
+      "logSha256": "3c5775f145ee5204508a492db59802a6da0f7b2746f39f4181e4e6a7e53e93aa",
+      "result": "Synth One slot integration: 2878 checks PASS"
+    },
+    "break-hit-gain": {
+      "logSha256": "d1f321bb1b53604c84531df6f07be8cbbb5c99bf4793d9f5f38aa8b77278388e",
+      "result": "BREAK per-hit gain PASS: 73297 PCM frames, 128 velocities, generator and pin, two overlapping tails, reverse/grain/stutter/32nd, live and preview"
+    },
+    "synthone-crush-rate-reference": {
+      "logSha256": "85d78b4e2a6ff348de38a28d6e322f9fed2fc73fa976efb7666db8e553631743",
+      "result": "128 control sweeps, 14976 frames per sweep, 0 failures"
+    },
+    "searchable-native-screen-catalog": {
+      "logSha256": "0867876a0a3440e325a31e1293f3a0c9aced7d2fea9884d66013d654f7ee6aa6",
+      "result": "Verified 1968 indexed 240x240 captures"
+    }
+  },
+  "logs": {
+    "file": "host-logs.tar.gz",
+    "entries": 23,
+    "bytes": 7820,
+    "sha256": "39efd7bb0c219645f0d8df527142195a02b515702707c15727e2d0c8d7d30ceb",
+    "normalization": "The archive replaces the absolute checkout root with <workspace>. Individual hashes in focusedOutput describe the original outputs."
+  },
+  "catalogCheck": {
+    "source": "7befa2e8c6fd9069d5c06f5c986545fa0f3ccaba",
+    "base": "d4bdf88eefd437ecaf21837eba1011f1756bc57a",
+    "trackedFiles": 6861,
+    "changedPaths": 1538,
+    "deleted": [],
+    "workflowChanges": [],
+    "changedArchivesIncludingNested": 73,
+    "membersChecked": 3072,
+    "prohibited": [],
+    "largeNonLfs": [],
+    "possibleSecretFiles": []
+  }
+}

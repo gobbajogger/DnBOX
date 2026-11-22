@@ -1,0 +1,28 @@
+{
+  "purpose": "Reproduce the old compact collision, then check the current no-overwrite guard.\n\nImports test-runner Python only. Both calls stop before any compiler or DSP work.\n",
+  "cases": [
+    {
+      "case": "historical",
+      "source": "candidate_review/history/verify_compact_profile.py",
+      "source_sha256": "1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9",
+      "outcome": "FileExistsError",
+      "declaration_before_sha256": "8e552b0e5ebafed229d7b38071e40fadbeb49f34bc5dc1cddee49c3ec62b050c",
+      "declaration_after_sha256": "45f106211d9a30896f67afe49480896b1fad446b87eb4880ea2b0fab028682a1",
+      "shared_declaration_changed": true,
+      "retained_directory_unchanged": true,
+      "pass": true
+    },
+    {
+      "case": "current",
+      "source": "candidate_review/verify_compact_profile.py",
+      "source_sha256": "5010334abd97fb9014cd0365c0fa85a725d21a89485de3d969cde0435fe5eb17",
+      "outcome": "SystemExit:2",
+      "declaration_before_sha256": "8e552b0e5ebafed229d7b38071e40fadbeb49f34bc5dc1cddee49c3ec62b050c",
+      "declaration_after_sha256": "8e552b0e5ebafed229d7b38071e40fadbeb49f34bc5dc1cddee49c3ec62b050c",
+      "shared_declaration_changed": false,
+      "retained_directory_unchanged": true,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

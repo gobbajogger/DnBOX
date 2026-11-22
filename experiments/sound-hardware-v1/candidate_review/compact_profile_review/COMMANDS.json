@@ -1,0 +1,75 @@
+[
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_03/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/accepted.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/diagnostic.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-fPIC",
+      "-shared",
+      "-DDNBX_DIAGNOSTIC_COUNTERS=0",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/compact.so"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-DDNBX_DIAGNOSTIC_COUNTERS=2",
+      "-c",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/compact_profile_review/invalid_profile.o"
+    ],
+    "exit_code": 1
+  }
+]

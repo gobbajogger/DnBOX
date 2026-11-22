@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cc",
+    "-std=c11",
+    "-O2",
+    "-DX0X_HOST",
+    "-I../../sound_lane/experiments/original_synth",
+    "-I../../sound_lane/firmware/src/dsp",
+    "reference_review/sizeof_existing.c",
+    "-lm",
+    "-o",
+    "build/sizeof_existing"
+  ],
+  "returncode": 0,
+  "limits": "D9 table header absent in read-only tree. D9 figure is the declared nine float members, not compiled type. Master include made explicit after same-name header collision."
+}

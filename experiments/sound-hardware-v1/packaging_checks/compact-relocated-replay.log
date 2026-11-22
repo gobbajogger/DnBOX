@@ -1,0 +1,133 @@
+{
+  "candidate_sha256": {
+    "dnbx_core.c": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b",
+    "fastmath.h": "fbe052086010b17d8194b9cd3d61d3cb349cc1def3817ae9651a6683d7850b09",
+    "dnbx_core.h": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+  },
+  "capability_contract": {
+    "cases": [
+      {
+        "name": "profile_query",
+        "diagnostic": 1,
+        "compact": 0,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_0",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_256",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1024",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "nonnull_work_1025",
+        "return_code": -5,
+        "all_unchanged": true,
+        "pass": true
+      },
+      {
+        "name": "uninitialized_precedes_profile_check",
+        "return_code": -3,
+        "pass": true
+      },
+      {
+        "name": "zero_frames_null_work",
+        "return_code": 0,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  },
+  "audio_state_equivalence": {
+    "seed_hex": "D0B0C0DE",
+    "total_frames_over_parts": 262144,
+    "cases": [
+      {
+        "sample_rate": 8000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 169,
+        "event_or_control_calls": 259,
+        "stereo_audio_sha256": {
+          "accepted": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959",
+          "diagnostic": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959",
+          "compact": "b07a95d17a2484b0ee74ee61ae02a87f0b11efc42841e9deb2b78046cac4f959"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 44100,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 157,
+        "event_or_control_calls": 217,
+        "stereo_audio_sha256": {
+          "accepted": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb",
+          "diagnostic": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb",
+          "compact": "559b7b18573d7301726a95f33e981368280b06561eba251da26be76eb519f1cb"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 48000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 183,
+        "event_or_control_calls": 339,
+        "stereo_audio_sha256": {
+          "accepted": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18",
+          "diagnostic": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18",
+          "compact": "995961b434ecb8ae7e8b0897cd82017226578d9d2d4f14f26ff5a79179749d18"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      },
+      {
+        "sample_rate": 192000,
+        "frames_per_part": 32768,
+        "parts": 2,
+        "blocks_per_part": 160,
+        "event_or_control_calls": 286,
+        "stereo_audio_sha256": {
+          "accepted": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1",
+          "diagnostic": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1",
+          "compact": "a4dd075137452d621f354f67672b4631c819b27e003893a4c5f5ea8e0f487fb1"
+        },
+        "bitwise_audio_equal": true,
+        "bitwise_state_equal_after_every_event_and_block": true,
+        "render_counter_equal_when_enabled": true,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  },
+  "invalid_profile_compile_rejected": true,
+  "scoped_equivalence_pass": true,
+  "boundary_cases": 441,
+  "boundaries_pass": true
+}

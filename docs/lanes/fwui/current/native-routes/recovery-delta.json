@@ -1,0 +1,24 @@
+{
+  "safe-after-failed-update": {
+    "beforeRgbSha256": "0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59",
+    "afterRgbSha256": "4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c",
+    "differentPixels": 5520,
+    "differenceBoundsExclusive": [
+      34,
+      20,
+      205,
+      233
+    ]
+  },
+  "safe-retry-after-failed-update": {
+    "beforeRgbSha256": "c57b4746079c77739351b49f13c59be6cdbe6fb01e2c37e09b7ba5205c136d66",
+    "afterRgbSha256": "5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607",
+    "differentPixels": 5103,
+    "differenceBoundsExclusive": [
+      34,
+      20,
+      205,
+      233
+    ]
+  }
+}

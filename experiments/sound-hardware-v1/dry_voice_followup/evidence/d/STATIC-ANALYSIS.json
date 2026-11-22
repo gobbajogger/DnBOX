@@ -1,0 +1,306 @@
+{
+  "status": "D_FULL_STATIC_GATE_FAIL",
+  "accepted_notes": 138,
+  "accepted_files": 45,
+  "new_passes_vs_C": 29,
+  "lost_passes_vs_C": 0,
+  "worst_rms": {
+    "case_id": "physical-gain/20_8000_.9",
+    "velocity": 20,
+    "cutoff_hz": 8000,
+    "resonance": 0.8999999761581421,
+    "note": 84,
+    "rms_db": 4.832778298315766,
+    "spectral_db": 2.8175006910938962,
+    "accepted": false
+  },
+  "worst_spectral": {
+    "case_id": "physical-gain/20_22050_.9",
+    "velocity": 20,
+    "cutoff_hz": 22050,
+    "resonance": 0.8999999761581421,
+    "note": 84,
+    "rms_db": 1.3298342605460554,
+    "spectral_db": 8.991579577623538,
+    "accepted": false
+  },
+  "by_cutoff_resonance": [
+    {
+      "cutoff_hz": 2000,
+      "resonance": 0.9,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.627845234846508,
+      "max_spectral_db": 1.273016979306914
+    },
+    {
+      "cutoff_hz": 2000,
+      "resonance": 0.25,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.3046533446425046,
+      "max_spectral_db": 1.2407714868377147
+    },
+    {
+      "cutoff_hz": 2000,
+      "resonance": 0.5,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.4232656373936379,
+      "max_spectral_db": 1.262966346781341
+    },
+    {
+      "cutoff_hz": 2000,
+      "resonance": 0.0,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.23970808686406564,
+      "max_spectral_db": 1.2436507695105112
+    },
+    {
+      "cutoff_hz": 22050,
+      "resonance": 0.25,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.2763292677745531,
+      "max_spectral_db": 1.976062459393517
+    },
+    {
+      "cutoff_hz": 22050,
+      "resonance": 0.5,
+      "total": 9,
+      "accepted": 0,
+      "failed_notes": [
+        36,
+        60,
+        84
+      ],
+      "max_rms_db": 0.3502630499689758,
+      "max_spectral_db": 3.9874973314239712
+    },
+    {
+      "cutoff_hz": 22050,
+      "resonance": 0.9,
+      "total": 9,
+      "accepted": 0,
+      "failed_notes": [
+        36,
+        60,
+        84
+      ],
+      "max_rms_db": 1.32983430703987,
+      "max_spectral_db": 8.991579577623538
+    },
+    {
+      "cutoff_hz": 22050,
+      "resonance": 0.0,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.015482780292222368,
+      "max_spectral_db": 0.8399629579259393
+    },
+    {
+      "cutoff_hz": 500,
+      "resonance": 0.25,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.21991482200787618,
+      "max_spectral_db": 0.9267241470799719
+    },
+    {
+      "cutoff_hz": 500,
+      "resonance": 0.5,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.22696991651658072,
+      "max_spectral_db": 0.9279105966867042
+    },
+    {
+      "cutoff_hz": 500,
+      "resonance": 0.9,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.2543000402895463,
+      "max_spectral_db": 0.9308431382526506
+    },
+    {
+      "cutoff_hz": 500,
+      "resonance": 0.0,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.19885789752807426,
+      "max_spectral_db": 0.9272736196612952
+    },
+    {
+      "cutoff_hz": 64,
+      "resonance": 0.25,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.5061987526484664,
+      "max_spectral_db": 0.8632325894893056
+    },
+    {
+      "cutoff_hz": 64,
+      "resonance": 0.5,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.8052915209706192,
+      "max_spectral_db": 0.8429374094554661
+    },
+    {
+      "cutoff_hz": 64,
+      "resonance": 0.9,
+      "total": 9,
+      "accepted": 3,
+      "failed_notes": [
+        36,
+        84
+      ],
+      "max_rms_db": 1.3390428485246901,
+      "max_spectral_db": 4.622681080520137
+    },
+    {
+      "cutoff_hz": 64,
+      "resonance": 0.0,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.3138965744961875,
+      "max_spectral_db": 0.7992932023986452
+    },
+    {
+      "cutoff_hz": 8000,
+      "resonance": 0.25,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.8735167933662059,
+      "max_spectral_db": 2.3623475282854396
+    },
+    {
+      "cutoff_hz": 8000,
+      "resonance": 0.5,
+      "total": 9,
+      "accepted": 0,
+      "failed_notes": [
+        36,
+        60,
+        84
+      ],
+      "max_rms_db": 1.2222033283391152,
+      "max_spectral_db": 2.361201797461145
+    },
+    {
+      "cutoff_hz": 8000,
+      "resonance": 0.9,
+      "total": 9,
+      "accepted": 0,
+      "failed_notes": [
+        36,
+        60,
+        84
+      ],
+      "max_rms_db": 4.832778298315766,
+      "max_spectral_db": 2.8175012762340543
+    },
+    {
+      "cutoff_hz": 8000,
+      "resonance": 0.0,
+      "total": 9,
+      "accepted": 9,
+      "failed_notes": [],
+      "max_rms_db": 0.13749106882813414,
+      "max_spectral_db": 2.2837313830095822
+    }
+  ],
+  "zero_resonance_identity": [
+    {
+      "file": "100_2000_0.candidate-mono.f32le",
+      "sha256": "2459fff76d18a197a5598bef9ace35117f89d5ebc37fe774b1e2c3cb97a8fc4d",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "100_22050_0.candidate-mono.f32le",
+      "sha256": "4862bb90a45384b395f3ace185a2137aed74c8d9cbc760425eee7e00a29a2d1c",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "100_500_0.candidate-mono.f32le",
+      "sha256": "54ed1fd20bb2f86e63a1924054e4d2d9425433fb54f7d38d74fd159f16f15390",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "100_64_0.candidate-mono.f32le",
+      "sha256": "c06c1686cca09151bf7ca95ab7cd47c4fce9db47bb8a8ff4cd9b8ed378147a27",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "100_8000_0.candidate-mono.f32le",
+      "sha256": "8328a3a42cac971701d447fec78c7078afd6e37b6d7f01f03c419d186524a14a",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "127_2000_0.candidate-mono.f32le",
+      "sha256": "d890415df2daa2ced296184af71971399f8c6082ab6bb4748191b964ff1eafb9",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "127_22050_0.candidate-mono.f32le",
+      "sha256": "8e86886b696576c14afa32873b047cc0bd27028c942366ac6ac0be011d34faf2",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "127_500_0.candidate-mono.f32le",
+      "sha256": "a1987586e01c3b6fd2196c1b0fafbc1a853e467a2b2ad3ac1b515c809e26172e",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "127_64_0.candidate-mono.f32le",
+      "sha256": "c499de0eb0c5782e1b9bbffb45a98b490e993b0d439cb5425cbbee5a8918a2de",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "127_8000_0.candidate-mono.f32le",
+      "sha256": "975dfc39eba736de8f70a5c86f01cc8a41fef2df8a0582fd1bd5aa9f72882aa4",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "20_2000_0.candidate-mono.f32le",
+      "sha256": "773d120725b619891d45714dd5c445e993631fcd331086be299b5ef1a40c6bc8",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "20_22050_0.candidate-mono.f32le",
+      "sha256": "71c500fe413ffd46baf4483c102295543d5bc06c40af4cb20375d5867f9c41eb",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "20_500_0.candidate-mono.f32le",
+      "sha256": "8f14fe0b6c5c33e2ca6249dff2fe869bc5f57ac9bcdbb2f5979c7803b5c08132",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "20_64_0.candidate-mono.f32le",
+      "sha256": "20d15f17e0a8b617d678e4895100b9f3c5528e341ebf7e48c250596f816cc33b",
+      "byte_identical_to_C": true
+    },
+    {
+      "file": "20_8000_0.candidate-mono.f32le",
+      "sha256": "137d94f7e628aa7981447f13c7b9cb8afb7dd778aac4d63058892369d5a27d68",
+      "byte_identical_to_C": true
+    }
+  ],
+  "analysis_scope": "Read existing immutable PCM/report files; no new render, coefficient, normalization or gain fit"
+}

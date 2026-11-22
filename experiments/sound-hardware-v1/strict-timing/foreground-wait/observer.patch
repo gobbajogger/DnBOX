@@ -1,0 +1,27 @@
+diff --git a/crates/fm1-soc/src/dnbox_observer.rs b/crates/fm1-soc/src/dnbox_observer.rs
+index 9cc09ef0..e6e43a83 100644
+--- a/crates/fm1-soc/src/dnbox_observer.rs
++++ b/crates/fm1-soc/src/dnbox_observer.rs
+@@ -146,4 +146,8 @@ impl Observer {
+             edge.seq, edge.scheduled_cycle, edge.observed_cycle, edge.deadline_cycle, edge.half, edge.address, edge.words));
+     }
++    pub fn foreground_context(&mut self, cycle: u64, interrupted_pc: u32, spi1_done_at: u64) {
++        self.emit(format!("{{\"event\":\"foreground_context\",\"seq\":{},\"cycle\":{cycle},\"interrupted_pc\":{interrupted_pc},\"spi1_done_at\":{spi1_done_at}}}", self.dma_seq));
++    }
++
+     pub fn irq_enter(&mut self, ram: &Ram, cycle: u64, depth: usize) {
+         if self.active.is_some() {
+diff --git a/crates/fm1-soc/src/machine.rs b/crates/fm1-soc/src/machine.rs
+index ef2d7d07..f9072297 100644
+--- a/crates/fm1-soc/src/machine.rs
++++ b/crates/fm1-soc/src/machine.rs
+@@ -546,7 +546,9 @@ pub fn cpu0_between(cpu: &mut Cpu, soc: &mut Soc) {
+             if cpu.irq_ready(prio) {
+                 let handler = soc.read32(VEC_BASE + 4 * irq as u32);
++                let interrupted_pc = cpu.pc;
+                 cpu.interrupt(handler, prio);
+                 if irq == 11 {
+                     if let Some(observer) = &mut soc.dnbox_observer {
++                        observer.foreground_context(soc.periph.cycles, interrupted_pc, soc.periph.spi1_done_at);
+                         observer.irq_enter(&soc.ram, soc.periph.cycles, cpu.irq_levels.len());
+                     }

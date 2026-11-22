@@ -1,0 +1,40 @@
+{
+  "scope": "Summary of exact native replacement receipts reported by independent firmware_resources worker; not an additive-engine fit inference.",
+  "receipts": {
+    "replacement": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/replacement-native/RESULT.json",
+    "compact_variant": "/workspace/scratch/67e685478953/superj6_research/resource_review/dnbx_core_7161c21e6d9d773c/compact-variant-native/RESULT.json"
+  },
+  "native_state_bytes": {
+    "core": 2264,
+    "adapter": 2356,
+    "stock_chorus": 536,
+    "adapter_and_chorus": 2892,
+    "backend_union": 3720,
+    "backend_spare": 828,
+    "existing_part_slot": 5184,
+    "existing_selected_FX": 4252,
+    "existing_workspace": 5120
+  },
+  "required_XIP_free_bytes": 1024,
+  "normal_reachable_strict_Oz": {
+    "baseline_candidate": {
+      "Elite_image_bytes": 553572,
+      "Pro_image_bytes": 553564,
+      "Elite_reserve_shortfall_bytes": 1924,
+      "Pro_reserve_shortfall_bytes": 1916
+    },
+    "compact_table_profile_counters_on_or_off": {
+      "Elite_image_bytes": 553420,
+      "Pro_image_bytes": 553412,
+      "Elite_reserve_shortfall_bytes": 1772,
+      "Pro_reserve_shortfall_bytes": 1764,
+      "Elite_physical_overflow_bytes": 748,
+      "Pro_physical_overflow_bytes": 740
+    }
+  },
+  "compact_image_saving_bytes": 152,
+  "counter_disabled_additional_saving_bytes": 0,
+  "counter_saving_reason": "Native normal closure specializes work=NULL under LTO; diagnostic writes already removed.",
+  "whole_product_fit": false,
+  "native_callback_WCET_measured": false
+}

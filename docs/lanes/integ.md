@@ -1,5 +1,9 @@
 # Integration baseline
 
+## Consolidated merge resolution — 2026-11-22 (WORKING)
+
+Merged consolidated `f1786ebec2616477163b62b029c7e77405a9c3de` with prior lane head `95624daf00fd73e373f4d8cd133de9016c8b7f7c`, preserving both parents. The sole conflict was `docs/LIBRARY-INDEX.md`; kept both independent baseline and Sound recovery sections in full. No source conflict required choosing an implementation. The exact SDK archive was recovered from the existing local project workspace and SHA-256 verified as `929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6`; this supersedes the older missing-byte finding only for this executor. Build and strict playback results remain pending.
+
 ## Resume 0130 substantive checkpoint — 2026-11-22 01:36:50 UTC (WORKING)
 
 Assignment resumed from exact branch head `8505f4e483c306246a443366a0845b0a0dbbc68d` on `lane/integ-resume-0130`. Read current AGENTS, RULES, CHECKLISTS, lane state and consolidated ledger. Public Git transport is available in this executor (firmware consolidated currently `f1786ebec2616477163b62b029c7e77405a9c3de`); isolated full-history, partial-blob checkouts are being acquired so conflict resolution can preserve both parents. Earlier DNS failure is not carried forward as a current blocker. Library list/search currently return an unavailable-tool error; the DnBOX-cloud RDC inventory lists two offline devices. These are scoped capability findings, not evidence of a build or browser failure.

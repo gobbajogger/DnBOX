@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #pragma once
 #include "original_sound.h"
+#include "s1_dry_part.h"
 #include "../dsp/original_chicago_backend.h"
 #include "../dsp/original_miami_backend.h"
 #include "../dsp/juno6.h"
@@ -13,8 +14,7 @@ typedef union {
     original_chicago_backend chicago;
     original_miami_backend miami;
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
-    /* Placeholder until the Synth One renderer is admitted into this slot. */
-    struct { uint8_t down[128]; } synthone;
+    s1_dry_part synthone;
 } original_runtime_backend;
 typedef struct {
     original_runtime_backend dsp;
@@ -27,6 +27,7 @@ typedef struct {
     int8_t status;
 } original_runtime_part;
 typedef union {
+    float metal[4][256]; /* split 808 render, before the owning bass uses this space */
     struct { uint32_t left[256], right[256]; int16_t converted[2][256], scratch[4][256]; } chicago;
     struct { uint32_t left[256], right[256]; int32_t dry[2][256]; int16_t scratch[2][256]; } miami;
 } original_runtime_workspace;

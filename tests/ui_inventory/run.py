@@ -146,7 +146,7 @@ static void f1_native_clip_keys(void) {
     irq=(work/'firmware/hal/fm1_irq.h').read_text()
     a=irq.index('typedef struct {',irq.index('#define FM1_CRASH_MAGIC'));b=irq.index('} fm1_crash_t;',a)+len('} fm1_crash_t;')
     boot_type=irq[a:b]
-    boot=[]
+    boot=[exact_function(main,"static void draw_safe_mode(void)")]
     slices=[]
     for signature,stop in [('static void fm1_fault(const fm1_crash_t *c)','    t0 = fm1_ticks();'),
                            ('static void enter_uboot(const char *why)','    fm1_delay_ms(20);'),

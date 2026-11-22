@@ -1,0 +1,31 @@
+{
+  "scope": "Fixture helpers imported only; no unittest setup, compiler or C invoked.",
+  "old_test_sha256": "0f25a47aa44fabed04327489ffc37bd4f582725d343c1b0ae7a4a88a4d62e7a0",
+  "tampered_metadata_accepted": true,
+  "reported_case_ids": [
+    "static-0",
+    "static-1",
+    "static-2",
+    "live-0",
+    "live-1",
+    "live-2",
+    "live-3",
+    "live-4",
+    "live-5",
+    "live-6"
+  ],
+  "reported_samples": 379288,
+  "unique_live_reference_sha256": [
+    "1afebe5ae785984b834dcc7997dbf6b1fc7f33a790cf21ee2b5c0b65dccb09ff"
+  ],
+  "unique_live_stimuli": 1,
+  "live_reference_words_never_compared": 98304,
+  "empty_retained_file": {
+    "0": {
+      "raised": "AssertionError"
+    },
+    "1": {
+      "returned_exit_status": 0
+    }
+  }
+}

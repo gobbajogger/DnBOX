@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "logical_owners": 2,
+  "frames_per_execution_per_owner": 4096,
+  "executions_per_owner": 2,
+  "total_evaluated_frames_per_logical_owner": 8192,
+  "compared_sample_words": 8192,
+  "finite_output_checks": 16384,
+  "full_state_checkpoint_checks": 310,
+  "untouched_owner_checks": 310,
+  "block_groups": [
+    1,
+    17,
+    64
+  ],
+  "owner_block_counts": [
+    156,
+    154
+  ],
+  "live_control_edits_per_owner": [
+    4,
+    5
+  ],
+  "note_off_frames": [
+    2049,
+    3071
+  ],
+  "maximum_requested_filter_depth": 1.2,
+  "voice_state_bytes_compared": 160,
+  "candidate_source_modified": false,
+  "reference_pcm_read": false,
+  "audio_files_written": false,
+  "scope": "dynamic ownership and block-partition API test; no fidelity gate"
+}

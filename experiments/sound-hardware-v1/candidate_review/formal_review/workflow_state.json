@@ -1,0 +1,115 @@
+{
+  "run_id": "formal_ce_review_20261118",
+  "created_at_utc": "2026-11-18T15:09:28.762393+00:00",
+  "repo": "/workspace/scratch/67e685478953/superj6_research/sound_lane",
+  "base": "b90faafd2de71063448beea67aa5d22938a5c64b",
+  "scope_mode": "local-aligned",
+  "scope_paths": [
+    "experiments/sound-hardware-v1",
+    "docs/lanes/sound.md",
+    "docs/sound/hardware-first-owner-report.md",
+    "docs/LIBRARY-INDEX.md"
+  ],
+  "scoped_files": 342,
+  "docs_root": "docs",
+  "artifact_location_override": "Parent assigned candidate_review as sole writable review directory; project/Git remain read-only.",
+  "untracked_excluded": [],
+  "plan_source": null,
+  "plan_reason": "No explicit plan or unambiguous plan matching isolated sound-hardware research; requirements governed by supplied task intent and repository sound checklist without asserting full-lane completion.",
+  "standards_mapping": {
+    "AGENTS.md": [
+      "experiments/sound-hardware-v1/**",
+      "docs/lanes/sound.md"
+    ]
+  },
+  "criteria_indirections": [
+    "RULES.md",
+    "CHECKLISTS.md",
+    "docs/lanes/sound.md",
+    "CONSOLIDATED-STATE.md"
+  ],
+  "cross_model": {
+    "status": "not_run",
+    "reason": "No different-provider CLI installed (claude,grok,cursor-agent,opencode absent); Codex invocation prohibited by delegated session scope.",
+    "fallback": "local adversarial persona",
+    "job_started": false,
+    "terminal_outcome": "No external job started; local adversarial persona completed."
+  },
+  "roster": [
+    {
+      "reviewer": "correctness",
+      "tier": "session",
+      "reason": "New DSP and control/state logic"
+    },
+    {
+      "reviewer": "testing",
+      "tier": "balanced",
+      "reason": "New tests, fixtures and evidence harnesses"
+    },
+    {
+      "reviewer": "maintainability",
+      "tier": "balanced",
+      "reason": "Large new source/test surface and alternate build profile"
+    },
+    {
+      "reviewer": "performance",
+      "tier": "balanced",
+      "reason": "Real-time loop work, explicit counters and size-driven profile"
+    },
+    {
+      "reviewer": "project-standards",
+      "tier": "balanced",
+      "reason": "Root AGENTS.md fallback criteria govern all scoped files"
+    },
+    {
+      "reviewer": "adversarial",
+      "tier": "session",
+      "reason": "Large runtime change and false-pass risk in evidence harnesses"
+    }
+  ],
+  "skips": {
+    "reliability": "No production I/O, external dependencies, retries or async failure paths; pure DSP errors belong to correctness and test harness fidelity to testing/adversarial.",
+    "api-contract": "Isolated research C API has no changed existing production caller; explicit profile contract reviewed by correctness/testing.",
+    "security": "No auth, permission, external service or wire-format parsing introduced.",
+    "agent-native": "No agent-facing product feature or tool surface in supplied scope.",
+    "learnings": "No matching solutions corpus and no declared packs.",
+    "migration": "No migration artifacts.",
+    "previous-comments": "No PR metadata or previous review-comment scope supplied.",
+    "stack-specific": "No frontend-race or Swift/iOS surface."
+  },
+  "scope_freeze": "scope_manifest.json",
+  "scope_freeze_sha256": "ef28caa0f91078fe466524f0cc5b52d5608b344a33ed813d3f50729bed0aeadd",
+  "reviewer_lifecycle": {
+    "correctness": "terminal_collected_schema_valid",
+    "testing": "terminal_collected_schema_valid",
+    "maintainability": "terminal_collected_schema_valid",
+    "performance": "terminal_collected_schema_valid",
+    "project-standards": "terminal_collected_schema_valid",
+    "adversarial": "terminal_collected_schema_valid"
+  },
+  "status": "complete",
+  "validator": {
+    "batches": 1,
+    "findings": 4,
+    "validated": 4,
+    "dropped": 0,
+    "terminal_collected": true,
+    "cross_model_shortcut_count": 0,
+    "capacity_deferral_before_launch": 1,
+    "infrastructure_failures": 0
+  },
+  "mechanics": {
+    "helper": "findings-mechanics.py",
+    "input": "raw-returns.json",
+    "output": "mechanical-findings.json",
+    "semantic_merges": 0,
+    "suppressed": 0,
+    "malformed_returns": 0,
+    "malformed_findings": 0,
+    "mode_aware_demotions": 0,
+    "quote_gate_demotions": 0,
+    "settlement_suppression": "not evaluated; no unambiguous applicable plan discovered",
+    "owner_fixes_verified": 4,
+    "open_actionable_findings": 0
+  }
+}

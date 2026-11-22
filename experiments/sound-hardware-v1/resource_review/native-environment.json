@@ -1,0 +1,14 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "pillow": "13.0.0",
+  "freetype2": "2.14.3",
+  "gcc": "cc (Debian 14.2.0-19) 14.2.0",
+  "native_compiler": "clang 4.0.1 JieLi pi32v2 r3 mfprev1",
+  "source": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "limits": {
+    "xip_min_free_bytes": 1024,
+    "pool_raw_safety_reserve_bytes": 8192,
+    "pool_additional_margin_min_bytes": 512
+  }
+}

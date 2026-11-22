@@ -1,0 +1,25 @@
+{
+  "source": "Exact current indexed blobs copied into reviewer-owned storage",
+  "boundary_cases": 130,
+  "fresh_boundary_pass": true,
+  "prior_receipts_unchanged": true,
+  "repeat_boundary_rejected_without_mutation": true,
+  "missing_libraries_rejected_without_mutation": true,
+  "compact_and_callback_existing_outputs_rejected_without_execution": true,
+  "live_control_policy_tests": [
+    {
+      "envelope": "amp",
+      "test_sha256": "cc29a14dbc3d0283ab5bec269629510184355eeaba0682feca0ae01c9666f0d1",
+      "pass": true,
+      "stdout": "PASS live controls: cached attack/release, next decay, immediate sustain"
+    },
+    {
+      "envelope": "filter",
+      "test_sha256": "04d444438ff0c6aa3e0586beaaa3d636167ba3574ed449710e504f45dc69cefa",
+      "pass": true,
+      "stdout": "PASS live controls: cached attack/release, next decay, immediate sustain"
+    }
+  ],
+  "native_or_long_timing_repeated": false,
+  "all_pass": true
+}

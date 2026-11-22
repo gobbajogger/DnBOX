@@ -1,0 +1,164 @@
+{
+  "schema": "single original active-filter mono reference capture v1",
+  "status": "TERMINAL_SUCCESS; HOST_RENDER_ALLOCATION_RELEASED",
+  "classification": "NEW_ORIGINAL_REFERENCE_PCM; NOT_MISSING_HISTORICAL_PAIR_RECOVERY",
+  "case_id": "filter-modulation/1.2_2000_0.9",
+  "reference_layout": "mono-capture",
+  "reference": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "bytes": 1058304,
+    "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74"
+  },
+  "sample_rate_hz": 44100,
+  "dtype": "float32 little endian",
+  "channels": 1,
+  "mono_source": "original left",
+  "notes": [
+    {
+      "midi_note": 36,
+      "frequency_hz": 65.4063949584961,
+      "frequency_f32_hex": "4282d013",
+      "note_record_index": 0,
+      "paired_byte_offset": 0,
+      "mono_byte_offset": 0
+    },
+    {
+      "midi_note": 60,
+      "frequency_hz": 261.6255798339844,
+      "frequency_f32_hex": "4382d013",
+      "note_record_index": 1,
+      "paired_byte_offset": 705536,
+      "mono_byte_offset": 352768
+    },
+    {
+      "midi_note": 84,
+      "frequency_hz": 1046.5023193359375,
+      "frequency_f32_hex": "4482d013",
+      "note_record_index": 2,
+      "paired_byte_offset": 1411072,
+      "mono_byte_offset": 705536
+    }
+  ],
+  "frames_per_note": 88192,
+  "retained_frames": 264576,
+  "note_off_frame_per_note": 66112,
+  "fresh_original_per_note": true,
+  "velocity": 100,
+  "cutoff_hz": 2000,
+  "resonance_f32": 0.8999999761581421,
+  "filter_depth_f32": 1.2000000476837158,
+  "filter_ADSR": [
+    0.2,
+    0.3,
+    0.4,
+    0.5
+  ],
+  "parameter_overrides": {
+    "16": 2000.0,
+    "17": 0.8999999761581421,
+    "19": 1.2000000476837158,
+    "22": 0.20000000298023224,
+    "23": 0.30000001192092896,
+    "24": 0.4000000059604645,
+    "25": 0.5
+  },
+  "active_physical_control_vector_sha256": "6f7e9834054579c2d61e7e33072c2651107e3e987a75aa59c1b222d3f5164ff4",
+  "unchanged_other_controls_from_baseline": 146,
+  "successful_baseline_mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+  "proposal_sha256": "088ce262d3bcc3a336b63cf4ad4a3d3914b3ca5235e32b177a3405395a81ec35",
+  "public_wrapper_sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4",
+  "executable_sha256": "edf9f733ff449ecf345f9843952dea5d7cdab00825de88e4d7c3c61e6135f91d",
+  "runtime_files": [
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+      "bytes": 977112,
+      "sha256": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+      "bytes": 1995216,
+      "sha256": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92"
+    },
+    {
+      "path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+      "bytes": 225672,
+      "sha256": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libstdc++.so.6",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+      "bytes": 2497768,
+      "sha256": "972bb2a18b71140dab0240f8a1f68ab3fb1d56bcd4c4f824a91b70888faf5a00"
+    },
+    {
+      "path": "/usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/libgcc_s.so.1",
+      "resolved_path": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "bytes": 182856,
+      "sha256": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af"
+    }
+  ],
+  "input_identities": [
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+      "bytes": 852176,
+      "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+      "bytes": 600,
+      "sha256": "6f7e9834054579c2d61e7e33072c2651107e3e987a75aa59c1b222d3f5164ff4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+      "bytes": 512,
+      "sha256": "c53587ea03c65ee8bd3a7849cca890bdfcc2c5209847ded0c1e1de2a7db4a218"
+    }
+  ],
+  "actual_wrapper_receipt": {
+    "classification": "NEW_RECONSTRUCTED_ORIGINAL_DRY_CAPTURE",
+    "case_id": "filter-modulation/1.2_2000_0.9",
+    "sample_rate_hz": 44100,
+    "mono_channel": "original_left",
+    "notes": [
+      36,
+      60,
+      84
+    ],
+    "velocity": 100,
+    "notes_completed": 3,
+    "fresh_original_per_note": true,
+    "controls_from_pinned_physical_vector": true,
+    "warmup_frames": 529344,
+    "retained_frames": 264576,
+    "total_reference_frames": 793920,
+    "process_calls": 12405,
+    "block_size": 64,
+    "note_off_frame_per_note": 66112,
+    "warmup_nonfinite_count": 0,
+    "output_nonfinite_count": 0,
+    "status": 0
+  },
+  "capture_receipt": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/metadata/active-capture.receipt.json",
+    "sha256": "a068b9ae8802a90546664adb4c44962b5c5ce7892849a9929e153f1f5cef8fc0"
+  },
+  "capture_attempts": 1,
+  "retries": 0,
+  "compiler_or_linker_invocations": 0,
+  "native_target_commands": 0,
+  "nonfinite_output_samples": 0,
+  "full_modulation_matrix_executed": false,
+  "historical_pair_sha256_provenance_only": "f0f95c5ec0e496beaec004602b347bea41be069388e69c42f9f28b69c110e98a",
+  "historical_pair_hash_is_not_mono_identity": true,
+  "candidate_comparison_executed": false,
+  "candidate_gates_unchanged": {
+    "comparison_gain": 1,
+    "rms_error_db_max": 1,
+    "spectral_error_db_max": 3,
+    "nonfinite_max": 0
+  },
+  "protected_filter_and_alias_artifacts_unchanged": true
+}

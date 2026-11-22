@@ -1,0 +1,403 @@
+{
+  "schema": "independent S1 dry-voice pre-render declaration v1",
+  "written_utc": "2026-11-18T23:44:48.086339+00:00",
+  "status": "FROZEN_BEFORE_FIRST_AUDIO_RENDER",
+  "variant": {
+    "id": "ch4_exp_e0",
+    "filter": "DnBOX Chicago four-stage recurrence and its feedback nonlinearity; analytic A=DnBOX fm_expf(-2*pi*cutoff/44100), E=0, R=physical resonance; no tables or stock postgain",
+    "oscillator": "DnBOX raw saw 2*phase-1, phase0 before first sample, increment exact packet frequency /44100",
+    "routing": "component gain (1-balance)*level times squared velocity times S1 amplitude envelope before one four-pole filter",
+    "mutable_state_bytes": 152,
+    "prepared_bytes": 92,
+    "history_bytes": 60
+  },
+  "gate": {
+    "metrics_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "comparison_gain": 1,
+    "maximum_rms_db": 1,
+    "maximum_spectral_db": 3,
+    "nonfinite": 0,
+    "time_alignment": "none",
+    "normalization": "none",
+    "metric_code": "unchanged"
+  },
+  "execution": {
+    "first_case": "physical-gain/100_2000_.9",
+    "then": "all60 physical files/180 notes if finite meaningful filter output",
+    "build_flags": "cc -std=c11 -O2 -ffp-contract=off -fno-fast-math -Wall -Wextra -Werror -Wdouble-promotion -DX0X_HOST=1 -Ivendor -Isrc; no libm link",
+    "only": "serial bounded host C renders; no native toolchain, target link, timing benchmark, emulator or original engine build"
+  },
+  "frozen_files_sha256": {
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/src/s1_dry_voice.c": "0e35e0d91d07147a2149ce063c1623f720e6dbe5cf1c0218450dd0f210188bba",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/src/s1_dry_voice.h": "7d781ffae5c568af2c3ced58009c4474897d2211b10e44dfaec7ed609a7dc7ac",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/src/host.c": "b2247bcd0cd5e0985791e80a0f214d91e99648d783ddf401348c9a28338f0258",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/build.sh": "cdd2ea4c093336e140ab86929218ac0d89cdea57b0dab964a5e4b4a7d535cd4c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/run_screen.py": "c45c38deed9817c968ea87f0cce23f0846aeddc08191780ef4aa5f41103e368f",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_unit/build/s1_dry_host": "d42ba0b70ddfb48ab6f5e9aa539e3cfb3f29a2d6f512c7b0e532e675f82a432b",
+    "/workspace/scratch/e803955aec60/dry_reference_packet/metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "/workspace/scratch/e803955aec60/dry_reference_packet/compare_saved.py": "66911ed9323364cd2627ac98069ffed127b5e0f4d73d3119b09f55ad913ed0e8",
+    "/workspace/scratch/e803955aec60/dry_reference_packet/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm_manifest.json": "27d3531382043f2e918a290083c616939f1cb119618f1ba8da69220fee68c931"
+  },
+  "approved_source_and_contract_sha256": {
+    "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/juno6.c": "286f4f7392ec7250d5f46d0f542775967544b58ae9eb161caf528a25a46cb502",
+    "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "/workspace/scratch/e803955aec60/DnBOX/firmware/src/dsp/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/original_synth/chicago_mp4.c": "0878797b35619a2f92b7f4e80d29e5bbf483cf206474cca0de087f871a90d388",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/hardware_candidate/src/dnbx_core.c": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/BEHAVIOR-BRIEF.md": "0f15c39d7e884987036873a589c71b2f3bf26d228e39e9718520ddcce29077ac",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/behavior_fixtures.json": "f497b22941b9634db4fcca518b1ef4b8f28b4ef6318cbd1f5eddbf86cb18b0d1",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/component_followup/IMPLEMENTER-CONTRACT.md": "652f3c8b75b5d183160ad8e2546f0c37f46c3ede7a767e8967fc3253d70fc70b"
+  },
+  "reference_mono_files": {
+    "physical-gain/20_64_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_0.original-mono.f32le",
+      "sha256": "ca4a55847706466306e4cfc9383f3fe95e649fe1a4c8dbe1e794a7022f825c64",
+      "bytes": 1058304
+    },
+    "physical-gain/20_500_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_0.original-mono.f32le",
+      "sha256": "4d81d0677f68712d86daab122da57981a1b6ea28e1a2bd3532d371e0e4318a89",
+      "bytes": 1058304
+    },
+    "physical-gain/20_2000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_0.original-mono.f32le",
+      "sha256": "e8167a37e2ceae1541f4cce8f0c2b343c01563bd5d6db7d0be704e70acd32c6c",
+      "bytes": 1058304
+    },
+    "physical-gain/20_8000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_0.original-mono.f32le",
+      "sha256": "1cb33951bcc3415e33dc4e71e9c4f40804f396b20a0fb5297c20d52c752063e7",
+      "bytes": 1058304
+    },
+    "physical-gain/20_22050_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_0.original-mono.f32le",
+      "sha256": "3c0115793ab196780347240b32993b4d96f28ea9a67be3cd0fb390824455e7e1",
+      "bytes": 1058304
+    },
+    "physical-gain/20_64_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.25.original-mono.f32le",
+      "sha256": "d2866b01d2f11c9ea9484e47b7762c50f61f0ce9849b20c8afe19791923d9490",
+      "bytes": 1058304
+    },
+    "physical-gain/20_500_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.25.original-mono.f32le",
+      "sha256": "9753d35374e286e8810309aa8cd96054e70f302082dae7b5c8ae09446633ed69",
+      "bytes": 1058304
+    },
+    "physical-gain/20_2000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.25.original-mono.f32le",
+      "sha256": "9159e962e5347b14ce5482602c6d2c1ddc4cfd07afa95c0fd7cd8c7e68496c03",
+      "bytes": 1058304
+    },
+    "physical-gain/20_8000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.25.original-mono.f32le",
+      "sha256": "a9375662b47724893186c4f9af6274aea3ec34ad9e24566475ce1cab87674264",
+      "bytes": 1058304
+    },
+    "physical-gain/20_22050_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.25.original-mono.f32le",
+      "sha256": "33b92a37e46678a6d8f99e916ec21684171c287fa858d2f496f7693709d46d98",
+      "bytes": 1058304
+    },
+    "physical-gain/20_64_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.5.original-mono.f32le",
+      "sha256": "d9980cd20f48693d60dc8eebc41f7572cceebd6d2eaab9bbf88f6a0618413c2d",
+      "bytes": 1058304
+    },
+    "physical-gain/20_500_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.5.original-mono.f32le",
+      "sha256": "d00db794eb1df298e7bfc01248321baa29a5951767841dfd3f2a9071b7209b03",
+      "bytes": 1058304
+    },
+    "physical-gain/20_2000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.5.original-mono.f32le",
+      "sha256": "ca2ec381a1e956114cde3bb12f064bf3659bd7e2e19f3e855e89facb3160022e",
+      "bytes": 1058304
+    },
+    "physical-gain/20_8000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.5.original-mono.f32le",
+      "sha256": "fedbf45e1f19181842694c79a324341e6ed1b0f81c2ed773b14bc90e202b7944",
+      "bytes": 1058304
+    },
+    "physical-gain/20_22050_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.5.original-mono.f32le",
+      "sha256": "4b54a8cbbde1a85c0ed894ef4d7a49772316f3ee281f1378a753a159a486e278",
+      "bytes": 1058304
+    },
+    "physical-gain/20_64_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_64_.9.original-mono.f32le",
+      "sha256": "6861300b526933fb1a6132c4211656f8b7f3c3d3bfa485db043bf598a7e6b2a5",
+      "bytes": 1058304
+    },
+    "physical-gain/20_500_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_500_.9.original-mono.f32le",
+      "sha256": "1fc587f1f61dfa9af219c4b55d283c408948cb606ab42771eabd7630a20e69b0",
+      "bytes": 1058304
+    },
+    "physical-gain/20_2000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_2000_.9.original-mono.f32le",
+      "sha256": "943e3f5b917fb4a68023b05d6f9ae09d4ecd12cdfb3b6db9b06856b62e77e314",
+      "bytes": 1058304
+    },
+    "physical-gain/20_8000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_8000_.9.original-mono.f32le",
+      "sha256": "85d83b6058c2ab92bfc42586b13e04e7532fb27994ba1157284bb023168a4fe3",
+      "bytes": 1058304
+    },
+    "physical-gain/20_22050_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/20_22050_.9.original-mono.f32le",
+      "sha256": "46a140560bda3535f6bae675cac83e5e407125cf8ae1f91799956a6fc78dd5a7",
+      "bytes": 1058304
+    },
+    "physical-gain/100_64_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_0.original-mono.f32le",
+      "sha256": "ac6bd2c66b150bedb56540dab3f91d99ced8567642bb8f4b75e2968a594f3ade",
+      "bytes": 1058304
+    },
+    "physical-gain/100_500_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_0.original-mono.f32le",
+      "sha256": "9c30c21f3e49162eba206e25559f7497d03ebd9eb933f7f669f38f4602104903",
+      "bytes": 1058304
+    },
+    "physical-gain/100_2000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_0.original-mono.f32le",
+      "sha256": "6605cb5c82f41c38b75e9e3598d6e055dd73207a5d8aa5ac71d08748f373e29d",
+      "bytes": 1058304
+    },
+    "physical-gain/100_8000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_0.original-mono.f32le",
+      "sha256": "4890581cf0a79401d54585a9eedfd0f7b26143b36034bd84bebc18a7ee1a698a",
+      "bytes": 1058304
+    },
+    "physical-gain/100_22050_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_0.original-mono.f32le",
+      "sha256": "1e2f4bfc59b9b5c72cad2eec3fc21c55eae87708136276d0be03dff621088c9a",
+      "bytes": 1058304
+    },
+    "physical-gain/100_64_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.25.original-mono.f32le",
+      "sha256": "8b57107c5a077dbe7ead2aa62d2524089c456d8a031e1248da2d74bbe7bf4018",
+      "bytes": 1058304
+    },
+    "physical-gain/100_500_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.25.original-mono.f32le",
+      "sha256": "13662e2351370fb61139725072a87d200c81b71ee2af16eabebefa88bca8f5d0",
+      "bytes": 1058304
+    },
+    "physical-gain/100_2000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.25.original-mono.f32le",
+      "sha256": "282d4bb3e5d37be26a742dbff9d9a655228a81725337216dde637502579ef063",
+      "bytes": 1058304
+    },
+    "physical-gain/100_8000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.25.original-mono.f32le",
+      "sha256": "17d6002121ba383c3355c8fc38a0f21a767ab46c8408555dc3d6ec028871caa5",
+      "bytes": 1058304
+    },
+    "physical-gain/100_22050_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.25.original-mono.f32le",
+      "sha256": "7654ef2c8ccbf9936095e7063cca47da072f8161715ab7bba41b6505c92262fd",
+      "bytes": 1058304
+    },
+    "physical-gain/100_64_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.5.original-mono.f32le",
+      "sha256": "21e79f187f2d9006a58f2e52bca33961d0ea8f452561ca788e875a12972c914c",
+      "bytes": 1058304
+    },
+    "physical-gain/100_500_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.5.original-mono.f32le",
+      "sha256": "9f89c291a7c9c03451d53352ead56e2c70b6a23b59ceb8232604e9694fba93ce",
+      "bytes": 1058304
+    },
+    "physical-gain/100_2000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.5.original-mono.f32le",
+      "sha256": "bd60ecd180c785cd195e89c524d75a2274302fbe11257cfec08f6e285348a266",
+      "bytes": 1058304
+    },
+    "physical-gain/100_8000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.5.original-mono.f32le",
+      "sha256": "22dcb3c829ef8791186b50fc46e3614ffecce15c99464ab7cb0dc510199d221d",
+      "bytes": 1058304
+    },
+    "physical-gain/100_22050_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.5.original-mono.f32le",
+      "sha256": "0037daf98b6d7e339cdc5daecd1eebe3f8d1788355c88834d9d209427490fdb9",
+      "bytes": 1058304
+    },
+    "physical-gain/100_64_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_64_.9.original-mono.f32le",
+      "sha256": "2b2e68b5869b3691c69eefa00590d3b46242a532be10e3b4dc17e113c9b45b68",
+      "bytes": 1058304
+    },
+    "physical-gain/100_500_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.9.original-mono.f32le",
+      "sha256": "05da25def2f5659e2ae9d557897fcd51a29d03d7c72eea526c684d995d503f13",
+      "bytes": 1058304
+    },
+    "physical-gain/100_2000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.9.original-mono.f32le",
+      "sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+      "bytes": 1058304
+    },
+    "physical-gain/100_8000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.9.original-mono.f32le",
+      "sha256": "364cdc86e6d62830377eb26127ee2eee2ea5e1d59204d9b756ccf221b1f46304",
+      "bytes": 1058304
+    },
+    "physical-gain/100_22050_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_22050_.9.original-mono.f32le",
+      "sha256": "83a585e4d45b1f3433f5402c243c3db5b836e97917671d2df7f5b7d88e4221cf",
+      "bytes": 1058304
+    },
+    "physical-gain/127_64_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_0.original-mono.f32le",
+      "sha256": "c2be0ad2c505b65b5bcd843430f0aa2a7d627a5c08d45fbf0f8f1ad8e2df3ef0",
+      "bytes": 1058304
+    },
+    "physical-gain/127_500_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_0.original-mono.f32le",
+      "sha256": "86a66df3b4be7a698aed628b03ce17389df2c2d4d2eb62aad21f68672ad25ea1",
+      "bytes": 1058304
+    },
+    "physical-gain/127_2000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_0.original-mono.f32le",
+      "sha256": "de7dbd6938d4ae3965c4a6cd1f28fef59783d5f83f7d62e3ff931c7025d8c28d",
+      "bytes": 1058304
+    },
+    "physical-gain/127_8000_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_0.original-mono.f32le",
+      "sha256": "423453aef265673164c4718d940322333d1166b23137310943103685e3933be5",
+      "bytes": 1058304
+    },
+    "physical-gain/127_22050_0": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_0.original-mono.f32le",
+      "sha256": "39cae30074a53197a13d4d2d20ed060bd1d49d301ac864a265e539401b9af7ca",
+      "bytes": 1058304
+    },
+    "physical-gain/127_64_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.25.original-mono.f32le",
+      "sha256": "7beab94b1d7b51d722189d99bb5795e70436d02680ccd9f3f937f0273656a29b",
+      "bytes": 1058304
+    },
+    "physical-gain/127_500_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.25.original-mono.f32le",
+      "sha256": "93f16166527b3e282f20b365b9441111dc7eb22bce64c6c6537528d19e7d5be0",
+      "bytes": 1058304
+    },
+    "physical-gain/127_2000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.25.original-mono.f32le",
+      "sha256": "8e2179237c9fd9b3cd7954e33d7872a1749a0482598c4aa26ff29fe99cfcea08",
+      "bytes": 1058304
+    },
+    "physical-gain/127_8000_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.25.original-mono.f32le",
+      "sha256": "0dfed150c6279dce12beb906c49f2f2d7ca1e602cfe5bbfb66e333649989db2d",
+      "bytes": 1058304
+    },
+    "physical-gain/127_22050_.25": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.25.original-mono.f32le",
+      "sha256": "6a8c27cef0dfdd7713fa05b94b05c8d20cf38841fdb8dc19593a0654c4c3718a",
+      "bytes": 1058304
+    },
+    "physical-gain/127_64_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.5.original-mono.f32le",
+      "sha256": "f6a9ee40958f4fc7ae5df5935cb1297579ce58f9b545f9eef8e2d56f8fd830b3",
+      "bytes": 1058304
+    },
+    "physical-gain/127_500_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.5.original-mono.f32le",
+      "sha256": "08c65f53fa8688cf78b62499ebad898ab76039d1fa9ce01fd11f37fcb23bdf13",
+      "bytes": 1058304
+    },
+    "physical-gain/127_2000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.5.original-mono.f32le",
+      "sha256": "e83c3a1361e2451f24e29875cb3a03e64745b2bc101e8d12a08858e3665d5ce8",
+      "bytes": 1058304
+    },
+    "physical-gain/127_8000_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.5.original-mono.f32le",
+      "sha256": "6a7de3d1f594d77b7c9f1aaa2622e7a0d9b839f70b981010040a7ad691aad9fa",
+      "bytes": 1058304
+    },
+    "physical-gain/127_22050_.5": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.5.original-mono.f32le",
+      "sha256": "b55a86228b4f234978ae32acc6c3b9e3532e4f7cd0b3a27e496f01e58fc785b8",
+      "bytes": 1058304
+    },
+    "physical-gain/127_64_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_64_.9.original-mono.f32le",
+      "sha256": "797ce04039ed87b773f5f3c1cee960cec5200326dd2ed2d182256ddabbd6f318",
+      "bytes": 1058304
+    },
+    "physical-gain/127_500_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_500_.9.original-mono.f32le",
+      "sha256": "17faf923c27fa5a1e817175ea780ed983df67a68c729a710d5a46c7ebb505bb1",
+      "bytes": 1058304
+    },
+    "physical-gain/127_2000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_2000_.9.original-mono.f32le",
+      "sha256": "815598254635a480778bb438dee5cacdb1793e9cae0dc4ca31fd1b8d6ac77a2d",
+      "bytes": 1058304
+    },
+    "physical-gain/127_8000_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_8000_.9.original-mono.f32le",
+      "sha256": "443660f087ed311737d287cd16a6fdcea8984d57196099672e42e49ef982608b",
+      "bytes": 1058304
+    },
+    "physical-gain/127_22050_.9": {
+      "path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/127_22050_.9.original-mono.f32le",
+      "sha256": "c74a9ce9a2ef8242f496f353bf8722ca6c186e9de57eba7e49bca8f65559957e",
+      "bytes": 1058304
+    }
+  },
+  "coefficient_evidence": {
+    "voice_bytes": 152,
+    "prepared_bytes": 92,
+    "history_bytes": 60,
+    "sample_rate_hz": 44100,
+    "coefficient_hex": [
+      "3f7fce7c",
+      "3f7ed775",
+      "3f7fe249",
+      "3f7fce7c",
+      "3f7fe249",
+      "3f7ffd07"
+    ],
+    "numeric_contract_expected_coefficient_hex": [
+      "3f7fce7c",
+      "3f7ed775",
+      "3f7fe249",
+      "3f7fce7c",
+      "3f7fe249",
+      "3f7ffd07"
+    ],
+    "frozen_adsr_coefficients_exact": true
+  },
+  "assumptions": [
+    "Settled typed physical controls; no smoothing state. The original packet warmed minimum smoothing for176448frames; this unit also executes176448silent warmup frames.",
+    "Raw phase0 is stock-derived, not fitted or aligned against original PCM.",
+    "Chicago E0/analytic cutoff is a declared independent filter experiment with no original coefficient tables.",
+    "No per-voice gain normalization; mono will need direct duplication to both channels by a future adapter."
+  ],
+  "unsupported": [
+    "All150 control IDs and factory loader",
+    "694 intact presets",
+    "72 dynamic filter recordings unavailable",
+    "second oscillator and morph/interpolation",
+    "bandlimit enabled",
+    "FM/sub/noise",
+    "BP/HP",
+    "full modulation and scheduling",
+    "note allocator/retrigger/voice retirement",
+    "FX/master",
+    "native fit and callback performance"
+  ],
+  "source_boundary": "Only authorized DnBOX components and source-free numeric packets used. No original S1/SJ6 DSP source, tables/assets, source-aware candidate, reference-owner source or old owner-evidence implementation read or copied.",
+  "candidate_count": 1,
+  "no_production_activation": true
+}
