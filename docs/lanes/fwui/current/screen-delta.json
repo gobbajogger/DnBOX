@@ -1,0 +1,45 @@
+{
+  "beforeTree": "956a004d8abc991093318b1d067bfe32e6b914c7",
+  "afterTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "comparedDecodedRGB": 1709,
+  "changed": [
+    "boot-safe-crash-core-0",
+    "boot-safe-crash-core-1",
+    "boot-safe-mode",
+    "hardware-calibration-button-00",
+    "hardware-calibration-button-01",
+    "hardware-calibration-button-02",
+    "hardware-calibration-button-03",
+    "hardware-calibration-button-04",
+    "hardware-calibration-button-05",
+    "hardware-calibration-button-06",
+    "hardware-calibration-button-07",
+    "hardware-calibration-button-08",
+    "hardware-calibration-button-09",
+    "hardware-calibration-button-10",
+    "hardware-calibration-button-11",
+    "hardware-calibration-button-12",
+    "hardware-calibration-button-13",
+    "hardware-calibration-encoder-00",
+    "hardware-calibration-encoder-01",
+    "hardware-calibration-encoder-02",
+    "hardware-calibration-encoder-03",
+    "hardware-calibration-encoder-04",
+    "hardware-calibration-encoder-05",
+    "hardware-calibration-encoder-06",
+    "padcal-orientation",
+    "smc-explicit-peek-pickup"
+  ],
+  "added": [
+    "boot-post-crash-core-0",
+    "boot-post-crash-core-1",
+    "boot-safe-retry"
+  ],
+  "removed": [],
+  "branchHits": {
+    "firmware/src/app/ui.c::draw_adsr_inline::active-playhead": "OBSERVED",
+    "firmware/src/app/smc_mixer.c::smc_ui_draw_peer::pickup-direction": "OBSERVED",
+    "firmware/src/app/smc_mixer.c::smc_ui_draw::peek-pickup": "OBSERVED",
+    "firmware/src/app/ui.c::draw_header::pickup-context": "OBSERVED"
+  }
+}

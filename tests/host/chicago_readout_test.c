@@ -6,7 +6,7 @@
 static const char *output_dir;
 static void check_readout(const char *status,int selected,const char *name)
 {
-    int snd=row(R_BENGINE,0),top=24+(snd%4)*50,v=bidx();
+    int snd=row(R_BENGINE,0),top=24+3*50,v=bidx();
     *page_of(V_PART)=selected?snd:snd-1;
     sound_t before=proj.sound;int page=cur_page(),sw=save_wait;
     uint32_t dirty=ui.dirty,serial=engine_bass_choice_serial(),rev=song_structure_revision;
@@ -26,11 +26,12 @@ static void check_readout(const char *status,int selected,const char *name)
     uint16_t bg=selected?SOUND_SELECT:SOUND_FACE;
     uint16_t ink=selected?SOUND_INK:SOUND_WHITE,label=selected?SOUND_INK:SOUND_GRAY;
     cv_begin(240,49,bg);
-    int x=151-tw(&FONT_T,"STATUS")/2;
+    int center=4+2*78+78/2;
+    int x=center-tw(&FONT_T,"STATUS")/2;
     cv_text(x,11,&FONT_T,"STATUS",label);
     const felucca_font_t *font=!strcmp(status,"FX WAIT")?&FONT_XS:&FONT_B;
-    CHECK(tw(font,status)<=54);cv_text(151-tw(font,status)/2,26,font,status,ink);
-    for(int y=10;y<44;y++)for(int xx=125;xx<177;xx++)
+    CHECK(tw(font,status)<=54);cv_text(center-tw(font,status)/2,26,font,status,ink);
+    for(int y=10;y<44;y++)for(int xx=162;xx<233;xx++)
         CHECK(fb[(top+y)*240+xx]==cv_px[y*240+xx]);
     expect_sound_step_footer();
 }

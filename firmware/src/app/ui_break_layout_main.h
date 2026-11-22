@@ -93,6 +93,7 @@ static void break_layout_footer(void)
     for(int i=0;i<16;i++){
         int x=9+i*14,on=(bp->steps>>i)&1u;char t[4];
         put_i(t,i+1);text_c(x+5,vc(&FONT_T,214-KNOB_Y,9),&FONT_T,t,C_GRAY);
+        if(ui.view==V_SEQ)continue; /* slider lane owns the lower row on SEQ */
         if(bp->slice[i])put_i(t,(bp->slice[i]-1)%count+1);else put_s(t,"-");
         text_c(x+5,vc(&FONT_T,224-KNOB_Y,9),&FONT_T,t,bp->slice[i]?(on?C_HI:C_DIM):C_DIM);
         cv_rect(x,234-KNOB_Y,11,4,i==ph?C_WHITE:on?part_col():C_LINE);

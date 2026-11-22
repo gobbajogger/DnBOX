@@ -22,7 +22,7 @@ p=run('positive')
 if p.returncode or 'GLYPH POLISH PASS' not in p.stdout: raise SystemExit(p.stdout[-4000:])
 s=(root/'firmware/src/app/ui.c').read_text()
 a='text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);'
-mutations=[('missing-caption',a,'(void)label;'),('wrong-slot','UI_FIRST_KNOB+slot','UI_FIRST_KNOB+((slot+1)%4)'),('wrong-stage','"ADSR"[k]','"DASR"[k]'),('wrong-percentage','(raw*100+63)/127','0')]
+mutations=[('missing-caption',a,'(void)label;'),('wrong-slot','UI_FIRST_KNOB+slot','UI_FIRST_KNOB+((slot+1)%4)'),('wrong-stage','physical_stage_label(label,e.slot[k],"ADSR"[k],','physical_stage_label(label,e.slot[k],"DASR"[k],'),('wrong-percentage','(raw*100+63)/127','0')]
 for name,a,b in mutations:
  if s.count(a)!=1: raise SystemExit('missing/duplicate anchor '+name)
  with tempfile.TemporaryDirectory(prefix='glyph-caption-') as d:

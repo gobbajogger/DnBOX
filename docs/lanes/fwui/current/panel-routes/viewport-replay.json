@@ -1,0 +1,243 @@
+{
+  "firmwareCommit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+  "firmwareTree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+  "renderer": "Qt WebKit on the published Nightly emulator shell; each distinct source RGB is painted into the 240\u00d7240 LCD canvas.",
+  "sources": [
+    {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "3669492e6724eacbcf88098c513e5d1a7d781a59d3d3df64626d8cec428cbb16",
+      "ids": 1530,
+      "uniqueNativeRGB": 1412,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1412,
+          "idComparisons": 1530,
+          "mismatches": 0
+        }
+      ],
+      "sourceRevision": "76040daa5b52d686a8b7b544296ba5d79610a95d"
+    },
+    {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "c7bfbea9c3d920ad3ecd6280602525a6b7860b2a61c442e2f1c81610e6e69c46",
+      "ids": 1712,
+      "uniqueNativeRGB": 1558,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1558,
+          "idComparisons": 1712,
+          "mismatches": 0
+        }
+      ],
+      "sourceRevision": "3e67b59c8e4dd3d5994680d857ec4e2ea755ab6d"
+    },
+    {
+      "browser": "Qt WebKit 602.1",
+      "shellSha256": {
+        "index.html": "f71232cecb99b66ef3ae8512f047e27bde4ff4a7a70c40c49614db0b7d6861df",
+        "style.css": "f9d8c09ebe689442f027b038482488a6e02db255db7553127b92b907b68cd5b8"
+      },
+      "source": "Published emulator shell, native PNGs painted into its LCD canvas; script/audio disabled",
+      "catalogSha256": "3bb90e7312f957d3e05635915c6d8c60a03a7d3dcd27456f317654327ddcb1c5",
+      "ids": 1944,
+      "uniqueNativeRGB": 1709,
+      "viewportResults": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "initialLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            263.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            390,
+            844
+          ],
+          "initialLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            75.0,
+            203.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        },
+        {
+          "viewport": [
+            844,
+            390
+          ],
+          "initialLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "visibleLCD": [
+            43.0,
+            142.0,
+            240.0,
+            240.0
+          ],
+          "uniqueScreenshotsCompared": 1709,
+          "idComparisons": 1944,
+          "mismatches": 0
+        }
+      ],
+      "sourceRevision": "ac63b270ed52ef728750afc9edd1f173cb0298db"
+    }
+  ],
+  "screenshots": {
+    "1440x900-synth-one-bass-A-page-5-k0-overview.png": "bc6ccb5c9b4275fdec5bd348d4691314cefee1bbefee3d3b6c81fd16983ab3a4",
+    "390x844-startup-startup-sample-recovered.png": "d0e771b82df7cea632e3aca4cdb412916aa3952c047fd0ce1dea3afd36af7d00",
+    "844x390-superj6-slot-b-matrix-oscillator.png": "09c8820a65ebf2f60f0e12561d351962acee4f78f785b369f83c59b5a976ffb0"
+  }
+}

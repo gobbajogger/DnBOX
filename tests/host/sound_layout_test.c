@@ -38,15 +38,16 @@ static void factory_name_pixels(int selected)
     sound_t before=proj.sound;unsigned writes=store_writes;
     shot(out,selected?"accepted-chicago-sound":"unselected-preset-name");
     CHECK(!memcmp(&before,&proj.sound,sizeof before) && store_writes==writes);
-    /* The current four-row matrix uses the compact one-line 48px factory name.
+    /* The SOUND row has three 78px controls. Its 48px preset name is centered
+     * in the second cell (x=82..159).
      * SOUND is row 4 of the current bank, starting at canvas y=154.
      * Its name is in the real knob-strip blit, below screen y=158. */
     uint16_t bg=selected?RGB(37,59,45):RGB(16,26,31),ink=selected?RGB(224,235,214):RGB(222,231,223);
     CHECK(!matrix_three_rows());
     CHECK(!strcmp(matrix_preset_name(0),"Bite Bass"));
     CHECK(tw(&FONT_XS,"BITE BASS")==48);
-    cv_begin(240,49,bg);text_c(92,26,&FONT_XS,"BITE BASS",ink);
-    for(int y=25;y<43;y++)for(int x=64;x<122;x++)
+    cv_begin(240,49,bg);text_c(121,26,&FONT_XS,"BITE BASS",ink);
+    for(int y=25;y<43;y++)for(int x=83;x<160;x++)
         CHECK(fb[(MAIN_Y+154+y)*240+x]==cv_px[y*240+x]);
     CHECK(fb[(MAIN_Y+154+43)*240+181]==swap16(bg)); /* right-half STATUS has no fourth-cell divider */
 }

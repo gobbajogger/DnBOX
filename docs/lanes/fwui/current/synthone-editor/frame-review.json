@@ -1,0 +1,139 @@
+{
+  "qualification": "Native host framebuffer, real Barlow glyphs and Sound engine in the F7 composition. Source RGB565 framebuffer is 240 x 240.",
+  "sources": {
+    "integration_base": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+    "sound": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+    "fwui_ui_c_git_blob": "2bc3b618f60c1ab1129c0fb403d5ff9023e2c980",
+    "tests/host/ui_synthone_frame_test.c_git_blob": "e04ccc1edf98b8a365e60a839aefdc1404aa6246",
+    "composed_sha256": {
+      "firmware/src/app/ui.c": "0e9082f38f528d53fa36b71a0fe40400b40873af0edf7e2683c717d80a395b7e",
+      "firmware/src/app/ui_original_controls.h": "41c38c122169b0fd9ee0a504dc76f893ba5db848898831578e0d0d2fdbc7dee1",
+      "build/gen/felucca_font.h": "d48e1e2e8bd0f32d2237d6c0f4b714d779c7df176ac7f7a914f2953857afbd20"
+    }
+  },
+  "replay": {
+    "fixture": "tests/host/ui_synthone_frame_test.c",
+    "in_composed_tree": "SMC_UI_TEST_FILE=tests/host/ui_synthone_frame_test.c X0X_SYNTHONE_PATCH=1 X0X_HOST_DEFS=-DX0X_SYNTHONE_PATCH=1 SMC_UI_OUT=\"$PWD/frame-review\" sh tests/host/smc_ui_test.sh",
+    "exit_code": 0,
+    "pass_marker": "PASS Synth One F7 frame ownership and geometry"
+  },
+  "caption_pixels": {
+    "labels": [
+      "CUTOFF",
+      "RESONANCE",
+      "FILTER ENV"
+    ],
+    "cutoff_positions": 128,
+    "resonance_positions": 128,
+    "distinct_widgets_checked": 49152,
+    "damaged_states": 0,
+    "damaged_label_pixels": 0
+  },
+  "negative_control": {
+    "single_change": "Move only the R_S1PATCH filter_glyph vertical origin in draw_param_widget from y+21 to y+16.",
+    "fixture_unchanged": true,
+    "exit_code": 1,
+    "failed_assertion": "!collisions",
+    "damaged_states": 17317,
+    "damaged_label_pixels": 40652
+  },
+  "value_geometry": {
+    "descriptor_count": 13,
+    "positions_per_descriptor": 128,
+    "formatted_values_inside_assigned_cell": 1664
+  },
+  "edits": {
+    "panel_frames": 88,
+    "before_applied_pairs": 26,
+    "pairs_with_changes_confined_to_edited_row": 26
+  },
+  "per_part_note": {
+    "sequence": "Configure identical patches on both parts, play MIDI note 60 on Bass A alone, advance the actual audio engine during attack, hold, and release, and compare each displayed owner to its idle framebuffer.",
+    "frames": [
+      {
+        "phase": "bass-a-attack",
+        "amp": 0.23061222,
+        "filter": 0.23061222,
+        "stage": 0,
+        "held": true,
+        "changed_rgb565_pixels": 200,
+        "changed_pixels_by_matrix_row": [
+          12,
+          138,
+          25,
+          25
+        ]
+      },
+      {
+        "phase": "bass-b-idle-control",
+        "amp": 0.0,
+        "filter": 0.0,
+        "stage": 6,
+        "held": false,
+        "changed_rgb565_pixels": 0,
+        "changed_pixels_by_matrix_row": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "phase": "bass-a-held",
+        "amp": 0.95304352,
+        "filter": 0.95304352,
+        "stage": 0,
+        "held": true,
+        "changed_rgb565_pixels": 362,
+        "changed_pixels_by_matrix_row": [
+          72,
+          240,
+          25,
+          25
+        ]
+      },
+      {
+        "phase": "bass-b-held-control",
+        "amp": 0.0,
+        "filter": 0.0,
+        "stage": 6,
+        "held": false,
+        "changed_rgb565_pixels": 0,
+        "changed_pixels_by_matrix_row": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "phase": "bass-a-released",
+        "amp": 0.0,
+        "filter": 0.0,
+        "stage": 6,
+        "held": false,
+        "changed_rgb565_pixels": 0,
+        "changed_pixels_by_matrix_row": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "previews": {
+    "filter-adsr.png": {
+      "native_capture": "bass-A-page-3-k5-touched.png",
+      "rgb888_sha256": "2f8f1bfb4119c4b3c65beecc1e63608edcc4810dce52e70e4caae36a4878907f"
+    },
+    "sound-selector.png": {
+      "native_capture": "bass-A-page-5-k0-overview.png",
+      "rgb888_sha256": "e5c4d33e5f6e052aae229d77ba9a08be312b8432ba587c2f07266ae219719ca6"
+    },
+    "edit-busy.png": {
+      "native_capture": "simultaneous-editor-busy.png",
+      "rgb888_sha256": "7529b928be7b93198bfdd3a9002b0f7475f01f42d3ff018cf3afe1c805c50c86"
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "status": "PASS",
+  "registeredTest": "ui-startup-loop",
+  "screenIndex": "screen-index.tsv",
+  "sourceSha256": {
+    "firmware/src/app/main_fm1.c": "306e804bad31e5669291176d5085ddd4bed5233c7b5c80687219bf899de72132",
+    "firmware/src/app/ui.c": "27cbf21dde4d75c1676cfa40ff564a31a0b82b851ba73830d9facf4945b67596",
+    "firmware/src/app/engine.c": "5842b1e6e83c7f0312b8557d4dbaf638b2fe9420265f6597eefabd8c8b98b30a",
+    "firmware/src/app/editor.c": "a495c7f1a50366af523e7abcd9c3310fbe75ea376f5df79dc71826e4ac199b66",
+    "firmware/src/app/boot_screen.h": "2ca8a5daa62add5be01c16e138506e25359c2b88fb45f8f4d33321a46e14bdbb",
+    "firmware/src/storage.c": "dcdf60d6ef066574b38d85202b4d53d4f37fc0b4f0c60ebbeeeb41304f319d40",
+    "firmware/src/ota.c": "2ea442e56b6232b2fcffc1b744a79dcc457b3b0da3a4508603f0e63e30a302cd",
+    "firmware/hal/smk_input.h": "054cfaebb766119d6ca41b6632bbae3e2ec6dbb1f1f11387eebec4ae6a7e98d9",
+    "firmware/hal/fm1_irq.h": "9ada88b7bc4981c509bfb9e7bc26f1ab39194653b92a651ac4f54c90edb6d9b1",
+    "firmware/hal/fm1_flash_map.h": "91c1ace65a1b7377f433d6261d01a1861c9cafd3829696557b9538b67b7c5293",
+    "tests/ui_inventory/startup_loop.c": "7509be161f022e7aa3a7902162b8c4a037e33308773fbafdda754746170b91c6",
+    "tests/ui_inventory/startup_loop.py": "b64d50402d27e544669fbb58aececb6d23f27696b21128ea770d3cc14d2cf927",
+    "tests/ui_inventory/run.py": "02bde3c60d81a637668c43a76e4d2998a7b3c824d826d135d5b7a7852a8d32b5",
+    "tests/host/smc_ui_test.c": "4c54611d6b52ae554a44c9bce9a9863421b91f919ae046755f679a2ddfe7a1f7",
+    "tests/host/smc_ui_test.sh": "14eb18e6cfcbae1a4831486258a917c4d6ccc8f1c0cfea8b186b6706f62cb9e2",
+    "host/x0x_host.c": "b3bcf5a880c674db759a414a18680a9cbaba4e66d9ffcac0d66040bc243ba27e",
+    "firmware/src/app/slots.c": "c5909845dca000cebb749eeda8e1a631139942dceb1be3d184c9d6701b0f37ae",
+    "firmware/src/seq/sequencer.c": "d3e770639ac9afad39e0a28d9b5862645981881d0476597bd6b969e9a9460c09"
+  },
+  "extractedInputSha256": {
+    "normal_bodies.inc": "5870a25369d43d53ae68b6c70db84ce2b19936db0f3fea37cb3478e9b487558b",
+    "normal_constants.inc": "3daf2cc04b57a0934681ea26b00eeaadea5adc2c8173e3c075654e4fb7b3466e"
+  },
+  "stateIds": 16,
+  "newPngs": 13,
+  "archivedSplashComparisons": 3,
+  "frameSize": [
+    240,
+    240
+  ],
+  "caseFrames": {
+    "normal": [
+      "boot-default",
+      "startup-notice-expired",
+      "startup-store-cleared",
+      "update-cancel-expired",
+      "update-hold-1",
+      "update-hold-2",
+      "update-hold-3",
+      "update-hold-cancelled"
+    ],
+    "owned": [
+      "boot-custom-text",
+      "startup-store-owned"
+    ],
+    "picture": [
+      "boot-custom-picture",
+      "startup-store-owned"
+    ],
+    "hold": [
+      "boot-default",
+      "startup-notice-expired",
+      "startup-store-cleared",
+      "update-hold-0",
+      "update-hold-1",
+      "update-hold-2",
+      "update-hold-3"
+    ],
+    "last-release": [
+      "boot-default",
+      "startup-notice-expired",
+      "startup-store-cleared",
+      "update-cancel-expired",
+      "update-hold-0",
+      "update-hold-1",
+      "update-hold-2",
+      "update-hold-3",
+      "update-last-tick-release"
+    ],
+    "recover": [
+      "startup-recovered-splash",
+      "startup-sample-recovered"
+    ],
+    "live-shadow": [
+      "boot-custom-text",
+      "startup-sample-already-live"
+    ]
+  },
+  "captionInkPixels": {
+    "startup-store-cleared": 854,
+    "update-hold-3": 845,
+    "update-hold-2": 847,
+    "update-hold-1": 826,
+    "update-hold-cancelled": 522,
+    "update-hold-0": 856,
+    "update-last-tick-release": 522
+  },
+  "captionInkTotal": 5272,
+  "rgbSha256": {
+    "update-hold-1": "989f48ee1bf667044a4c4d3e73e8ec5ac00d3f383d2669f89a8cc7080de74fb6",
+    "startup-store-cleared": "cd1e69536a9a00bb320ad343c22481bf81d3421d2c3f835ec424b98fe56ea03e",
+    "update-hold-cancelled": "8a2e97b7fbf7757ed9b36114f8dd8c821b9b8f4dc4e7a70f1ec77ad96f17017c",
+    "update-hold-2": "404eddb0ab25928113a43cf01f38080f2a461c1958cf450af864cc37a352726b",
+    "update-hold-3": "89a326edcae05a841357a16ee9a08bb6743dc84f5c17b801e7a76f1054eaa0c2",
+    "startup-notice-expired": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+    "boot-default": "88d6ca126bc2ac34871375862893f4673e2aead0ff453d6686ad7fe07447ba1f",
+    "update-cancel-expired": "5e652f91d5c5c196fd91a06bd33239acff366c59f9483da8ce40a996970e0032",
+    "startup-store-owned": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+    "boot-custom-text": "af5f8a788579f1f844d3fcacd34782cb8fb55ae1a5d7c4c8a2efa053e521fb88",
+    "boot-custom-picture": "44fc1b45aa42eae9a7d5b7ca1b84ff8ef17c282337706c5614b7183ae3442cf4",
+    "update-hold-0": "40e92548a710ffc98524a60341e15046a36067bbff7c150b501ecedb42901460",
+    "update-last-tick-release": "8a2e97b7fbf7757ed9b36114f8dd8c821b9b8f4dc4e7a70f1ec77ad96f17017c",
+    "startup-sample-recovered": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc",
+    "startup-recovered-splash": "af5f8a788579f1f844d3fcacd34782cb8fb55ae1a5d7c4c8a2efa053e521fb88",
+    "startup-sample-already-live": "4f9674bf823d7edaba8c1f1a4770d2f9332eeeaae99ac741192e7cbf384916cc"
+  },
+  "bounds": "All seven final caption masks match the native font, including antialiasing, within x3..213 and above the lower edge of the native header.",
+  "cases": {
+    "recover": "Matching owner, erased live sample sector, valid shadow. Sixteen ordered 256-byte writes restore the complete sector before LCD initialization. The archived custom splash is reproduced and the first UI frame matches the already-live sample control after project initialization.",
+    "live-shadow": "Matching owner, valid live sample and a different valid shadow. Startup clears the stale shadow without erasing or programming the live sample.",
+    "normal": "Foreign owner with custom data, no pending sample shadow and stale OTA staging. Native owner reset restores the factory splash. Five OTA sectors clear. OLD DATA CLEARED expires. Releasing both octaves after the 1.. frame requests UPDATE MODE CANCELLED. Ordinary octave input replaces it with STEPS 17-32 before rendering.",
+    "owned": "Matching owner, custom text splash, first ordinary frame without a clear notice.",
+    "picture": "Matching owner, custom picture splash, first ordinary frame without a clear notice.",
+    "hold": "Both octaves stay held. At 5000 ms a due frame displays UPDATE MODE IN 0... At 5001 ms the native loop calls enter_uboot with UBOOT.",
+    "last-release": "At exactly 5000 ms the frame displays UPDATE MODE IN 0.. and shown becomes zero. Both buttons release at 5001 ms. The firmware skips the cancellation notice and renders STEPS 17-32 at the next due frame."
+  },
+  "scope": "Complete production fm1_main on the SMK host with accepted emulated JEDEC, RAM storage, valid and stale sample shadow cases, simulated board interfaces and scripted clocks and buttons. Physical flash, drivers, IRQ/audio timing and actual bootloader execution remain outside this capture."
+}

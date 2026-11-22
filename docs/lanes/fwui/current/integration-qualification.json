@@ -1,0 +1,217 @@
+{
+  "pr": 975,
+  "qualified_head": "9dd6f2df020340f7a82ab241ef07c6ec16195ebc",
+  "integration": {
+    "branch": "integration/dnbox-consolidated",
+    "merge_commit": "3e307cfa455d22dfca5e4ef439080816b4e4f859",
+    "parents": [
+      "1c82772bac9a33f030bf954ec6151987aef2cbb8",
+      "9dd6f2df020340f7a82ab241ef07c6ec16195ebc"
+    ],
+    "merged_at_utc": "2026-11-21T12:38:20Z",
+    "merge_tree": "6702931ce16f7cf0ebada05d95cb1637dc60c5ea",
+    "qualified_head_has_identical_tree": true
+  },
+  "focused_host": {
+    "command": "sh tests/run_tests.sh <registered names>",
+    "status": "PASS",
+    "registrations": [
+      "break-context-label",
+      "break-family-layout",
+      "break-step-velocity-engine",
+      "chicago-presentation",
+      "chicago-readout",
+      "copy-semantics",
+      "held-step-release",
+      "home-globe-part",
+      "juno-slot-integration",
+      "matrix-knob-caption",
+      "pads-in-settings",
+      "preset-navigation-noop",
+      "sound-layout",
+      "sound-matrix",
+      "synthone-slot",
+      "ui-adsr-engine-graph",
+      "ui-battery-levels",
+      "ui-chance-framebuffer",
+      "ui-drum-kit-section",
+      "ui-glyph-polish",
+      "ui-layer-restoration",
+      "ui-list-feedback",
+      "ui-menu-layout",
+      "ui-native-routes",
+      "ui-overlay-battery",
+      "ui-pan-units",
+      "ui-peer-names",
+      "ui-screen-index",
+      "ui-settings-sections",
+      "ui-shared-parameter-panel",
+      "ui-startup-loop",
+      "ui-step-lane",
+      "ui-step-lane-edit",
+      "ui-step-lane-transaction",
+      "ui-synth-layout",
+      "ui-toast-battery",
+      "ui-wave-fallback-frame"
+    ],
+    "count": 37,
+    "first_attempt": "ui-wave-fallback-frame compilation reached 300 seconds amid concurrent suites; the exact registered retry passed with the original deadline.",
+    "registered_waveform_retry": "PASS",
+    "published_result": "https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7061807842",
+    "independent": {
+      "passed": 34,
+      "archive_bytes": 38696,
+      "archive_sha256": "a5d0f0519bc14f8f5f1283adb8f9fd6134ece64c03fbac6944f05140e92386b8",
+      "archive": "https://github.com/gobbajogger/DnBOX/blob/9e7f92fe053f76cd79919dcfafdd974bdd229a73/evidence/fwui-9dd6f2df/qualification.tar.xz",
+      "published_result": "https://github.com/gobbajogger/DnBOX/pull/975#issuecomment-7062263095"
+    },
+    "primary_evidence_archive": {
+      "path": "focused-9dd6f2df.tar.xz",
+      "bytes": 11300,
+      "files": 26,
+      "sha256": "4c682bdbe2fbf9f303af425acff0e5237ac45c170102cb8c8f2001299add779c"
+    }
+  },
+  "stock": {
+    "firmware_tree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+    "reference_commit": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "stock_source_manifest": {
+      "files": 502,
+      "sha256": "0e8741d6b8f71933ce9b26fae4982556c946eef0151d462619853c5f6493ce4a"
+    },
+    "models": {
+      "elite": {
+        "exit": 0,
+        "memory_bytes": {
+          "xip_free": 1148,
+          "pool_raw_free": 8972,
+          "pool_reserve": 8192,
+          "pool_margin": 780
+        },
+        "binary_fingerprints": {
+          "elf": {
+            "bytes": 639388,
+            "sha256": "82c0d03b853bbc71c709fa8148ffef0b51c2ee835a5ee2c2ffd4cfb9cbe7deb3"
+          },
+          "app": {
+            "bytes": 551524,
+            "sha256": "2e0546c84c2abcf2034999150a507cd1703a422010602b57ea2b9d97675d969a"
+          },
+          "loader": {
+            "bytes": 7616,
+            "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03"
+          },
+          "package": {
+            "bytes": 651732,
+            "sha256": "72fc1f85da98047c67d3c4bd26742caa841b3bc7846b2e9f78f2983603e402f0"
+          }
+        }
+      },
+      "pro": {
+        "exit": 0,
+        "memory_bytes": {
+          "xip_free": 1156,
+          "pool_raw_free": 8972,
+          "pool_reserve": 8192,
+          "pool_margin": 780
+        },
+        "binary_fingerprints": {
+          "elf": {
+            "bytes": 639380,
+            "sha256": "678d6a45d2f4f1671d31aae40e530940728a7dab8a2bfe257f5afe382ad67c54"
+          },
+          "app": {
+            "bytes": 551516,
+            "sha256": "9f8165201f46009f351a4b432690654e3fb584a7372b6303eb8df460a36572fb"
+          },
+          "loader": {
+            "bytes": 7614,
+            "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5"
+          },
+          "package": {
+            "bytes": 651730,
+            "sha256": "a4762b11d9f6e894b1ba9272f88d1874655b4824f822232c3274f60c6f5b1797"
+          }
+        }
+      }
+    },
+    "six_configurations_and_link_maps": "route-native/fit.json"
+  },
+  "optional_synth_one": {
+    "fwui": "c7ce868403c1b89fc57cfcff952e5a25d9e33d0f",
+    "sound": "80b7e1db59e5c3eceb2b3530e80c2cedf29c5b7f",
+    "identical_firmware_tree": "3a81c6fea62686041a2959fa06fd5189759d2eef",
+    "panel_assertions": 1161,
+    "controls_per_bass_part": 13,
+    "captures": 122,
+    "archive_sha256": "cb71d87f884aaf420955e5eadc7d36ee1100295dc7632db07cbddfe80f4ffcf9",
+    "capture_archive": "synthone-editor/routes.tar.xz"
+  },
+  "independent_checks": {
+    "no_loss": "PASS",
+    "deleted_paths": 0,
+    "limits": "PASS",
+    "tracked_paths": 5386,
+    "changed_paths": 405,
+    "changed_archives": 48,
+    "archive_members": 2445,
+    "prohibited_file_types": [],
+    "screen_score": "10/10",
+    "catalog_records": 1944,
+    "native_screen": [
+      240,
+      240
+    ],
+    "browser_viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ]
+    ],
+    "visual_review": "panel-routes/independent-review.md"
+  },
+  "combined_host": {
+    "sha": "3e307cfa455d22dfca5e4ef439080816b4e4f859",
+    "registry_blob": "b68169614e4aaaa0fe2fd9443006212ede2860ca",
+    "command": [
+      "sh",
+      "tests/run_tests.sh"
+    ],
+    "started_utc": "2026-11-21T12:39:33.157+00:00",
+    "preflight": {
+      "pass": 16,
+      "fail": 0
+    },
+    "original_input_check": "PASS",
+    "generated_headers": "PASS",
+    "stock_prerequisites": {
+      "source": "9dd6f2df020340f7a82ab241ef07c6ec16195ebc",
+      "source_matches_combined": true,
+      "verified_binary_count": 8,
+      "verified_types_per_model": [
+        "application",
+        "ELF",
+        "loader",
+        "package"
+      ]
+    },
+    "f5_registrations": [
+      "held-step-release",
+      "pads-in-settings",
+      "copy-semantics",
+      "home-globe-part"
+    ],
+    "status_at_ledger_update": "Unfiltered run interrupted after 85 results. Named recovery started and terminal accounting is pending.",
+    "terminal_result": null,
+    "f5_status": "PASS",
+    "f5_and_registry_evidence": "combined-host-results.json"
+  }
+}

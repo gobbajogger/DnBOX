@@ -1,0 +1,124 @@
+{
+  "scope": "Read-only connector/source investigation; no Synth One firmware changes or Sound runtime replay performed",
+  "currentFwuiTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "historicalAnchor": {
+    "sha": "56079bbdcb753c37d65aedd17ce49ba71c261797",
+    "commitMeaning": "No-double exp/exp2(-inf) fix in private direct scheduler experiment, not a UI editor binding",
+    "exactEvidence": [
+      {
+        "path": "firmware/src/dsp/synthone_link.c",
+        "blob": "45fe210e3aae7d9e76906674f9751113536ddd10",
+        "behavior": "X0X_SYNTHONE=1 keeps scheduler/pool closure reachable for flash/pool/RAM measurement; explicitly does not render audio"
+      },
+      {
+        "path": "firmware/src/dsp/synth_engine.h",
+        "blob": "829482f60dd2a807dc086ab6e5dd29f3f047b2fc",
+        "behavior": "Alternate descriptors test-only; native synth_request admits303 and optional Wobble, not Synth One"
+      },
+      {
+        "path": "firmware/src/app/ui.c",
+        "blob": "5c206240c12d791f979d10cb3c0e2fc164d8e026",
+        "behavior": "Existing303/Wobble pages and safe selector; no mapped Synth One editor"
+      }
+    ]
+  },
+  "SoundReadRef": "ca0c00a4e5863132de4a66f5d1c477c14d699be5",
+  "newerSoundRef": "3f00cf7395efd5fe4e9785083334e04387c83484",
+  "inputEquivalence": "Parent independently verified ca0->3f00 changes docs/host experiment artifacts only, no production/port files. Analysis uses connector-fetched ca0 production bytes.",
+  "SoundProduction": {
+    "runtime": "original_runtime_init uses s1_part_init; keys use s1_part_note; render uses s1_part_render; real voice_view observes selected native amp envelope",
+    "evidenceLimit": "Sound stock runtime/log reports audible independent INIT with two owners; this worker did not rerun its audio/native suites",
+    "controls": [
+      "ID0 pitch bend, normalized0..1, neutral0.5",
+      "ID1 damper, normalized0..1, threshold0.5"
+    ],
+    "source": "firmware/src/app/s1_dry_part.c:s1_part_param rejects id>1; s1_part_note configures fresh note from frozen controls",
+    "ui": "ui_original_synthone_rows={-1,-1,-1,-1}; ui_original_name returns empty. Generic pref_read_only treats both public IDs as performance-only; original_sound_set rejects their patch writes. Row-only mapping is not a valid editor."
+  },
+  "boundedGenuineCandidate": {
+    "artifact": "experiments/sound-hardware-v1/band_morph/stock/typed-oscillators.patch.gz",
+    "blob": "7874e859fe678275d192fb180370ada1b5921a5e",
+    "entry": "original_runtime_s1_oscillators(original_runtime_part*,const s1_oscillator_field*,unsigned count)",
+    "implementation": "s1_part_morph validates a complete unique8-field physical group before applying; per-owner/per-voice oscillator phases and controls",
+    "fields": {
+      "0": "oscillator1 morph index0..1",
+      "1": "oscillator2 morph index0..1",
+      "2": "balance0..1",
+      "3": "oscillator1 semitone offset-12..24",
+      "4": "oscillator2 semitone offset-12..24",
+      "5": "oscillator1 level0..1",
+      "6": "oscillator2 level0..1",
+      "146": "bandlimit enable0or1"
+    },
+    "namespaceRisk": "Physical app IDs0/1 are oscillator morphs, while shipping performance API IDs0/1 are bend/damper. Never pass physical IDs through the existing generic performance entry.",
+    "preimageChecks": [
+      {
+        "path": "firmware/src/app/original_runtime.c",
+        "typedPatchPreimage": "6f8b7b3993e56aa27664119d98e298de34c716bf0edfcb85d411f09e2c2958c7",
+        "SoundCa0Sha256": "99558a31054f1bc9e9a7ef98012786ff98f206575edb73ee15affdb50cdc5863",
+        "match": false
+      },
+      {
+        "path": "firmware/src/app/original_runtime.h",
+        "typedPatchPreimage": "f2043a56eed9d1f3771a3c45dff1f0bcd8d37bb498cea53ec8f7b17d1fe86457",
+        "SoundCa0Sha256": "46ba59fc0e69193da659cc2c8ca081db70675419b05da1ae281aeb5092695a24",
+        "match": false
+      },
+      {
+        "path": "firmware/src/app/s1_dry_part.c",
+        "typedPatchPreimage": "8dd3f2c2c981b6329c0866d543ea5981e803435adc5dc4fd0cf170718423f956",
+        "SoundCa0Sha256": "90940d94f326de262bd22df5e5a3ca41f19ebc1db5c95414bb3f9f1606d8c98b",
+        "match": false
+      },
+      {
+        "path": "firmware/src/app/s1_dry_part.h",
+        "typedPatchPreimage": "51b8cbb74379df7b316451dcbc69c69fb87a3498ca53204d27f2c1e5a137ade9",
+        "SoundCa0Sha256": "01496ef452b7ff694e1fa31ae7fca3e777198760892b6bf0b9a5a22f8c7222af",
+        "match": false
+      },
+      {
+        "path": "firmware/src/dsp/s1_dry_voice.h",
+        "typedPatchPreimage": "7d781ffae5c568af2c3ced58009c4474897d2211b10e44dfaec7ed609a7dc7ac",
+        "SoundCa0Sha256": "add622200405ac6b9d5efced39c743b067ad582205b1983e02abaf813d886593",
+        "match": false
+      }
+    ],
+    "status": "Genuine independently authored Sound candidate, not applied/admitted in ca0 production; does not apply directly to that snapshot. No current FWUI caller/getter/patch storage contract provided.",
+    "resourceEvidence": "Sound isolated rooted stock candidate reports+2288B image,1872/1880B XIP free,unchanged pool. Not current FWUI combined/native/timing acceptance.",
+    "needed": "Sound reconciles/adopts the typed physical setter, provides authoritative readback/serialization/audio-boundary ownership, then FWUI can map genuine controls and requalify combined exact image. Full150 controls/694 complete presets still separate."
+  },
+  "conclusion": "No evidence that a genuine port is impossible. There is no safe FWUI-only rows binding to the historical private renderer or current2-performance-ID namespace. Bounded genuine oscillator binding is feasible after Sound candidate admission; current real voice activity observation can support a read-only glyph, not substitute for editable instrument controls.",
+  "connectorManifest": "f7-research/connector-manifest.json",
+  "currentSoundReadback": {
+    "head": "d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9",
+    "comparedFrom": "04db2d778113928c624dec7a96eaa97597afa3e5",
+    "compare": "https://github.com/gobbajogger/DnBOX/compare/04db2d778113928c624dec7a96eaa97597afa3e5...d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9",
+    "delta": {
+      "commits": 1,
+      "laneDocuments": 2,
+      "experiments": 7,
+      "productionPaths": 0
+    },
+    "readSourceBlobs": {
+      "firmware/src/app/original_runtime.c": "7b6a129b47056ea8d0feb16619318a82476df68e",
+      "firmware/src/app/original_runtime.h": "fb3cbd7b567a640e4d25b13cd82b237675f2a965",
+      "firmware/src/app/s1_dry_part.c": "bd58cf61897755920bebdae704f40fd33f78d0de",
+      "firmware/src/app/s1_dry_part.h": "33fdc0fe3a99e2d6d7c2d849b6a4528c204de85e",
+      "firmware/src/app/ui.c": "de3898e639ed8a8bdfcce4c37f40d82c9372b18d",
+      "firmware/src/app/ui_original_controls.h": "d2bac1d0dcddc8ee40f75762123521745f7e81f6"
+    },
+    "runtime": "original_runtime_param dispatches to s1_part_param, which accepts normalized bend (ID 0) and damper (ID 1). The factory oscillator setter, per-part patch readback and serialization are still awaiting Sound admission.",
+    "editorControlsPerPart": {
+      "Synth One": 0,
+      "SuperJ6": 16,
+      "evidence": "Earlier isolated runtime enumeration; current source and control tables verified."
+    },
+    "cutoffExperiment": {
+      "source": "https://github.com/gobbajogger/DnBOX/blob/d1c7205eb9004a5c3ea8a142ac0c93163a1a64d9/docs/lanes/sound.md#L146",
+      "stockComponentCases": "68/75",
+      "candidateComponentCases": "75/75",
+      "candidateImageDeltaEachModelBytes": 160,
+      "status": "Sound reports an isolated component comparison. Production admission remains open."
+    }
+  }
+}

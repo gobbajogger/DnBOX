@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "productionTree": "50122c5d95009e0aacef384efad52f1cf0396f31",
+  "frames": 182,
+  "exactCaptionCases": 50,
+  "expectedReportSHA256": "559859ac16f1b15edc724dff0face39726602dd2ad20ecb2d733a91cb6ece61d",
+  "scope": "Actual committed text provenance + native opaque-mask survival on all source-declared extended and persisted-edit cases. Partial source strings retained separately; no ordinary runtime, no repack, no R22 acceptance. Pad-calibration orientation is positive-only exact-caption coverage, not a claimed runtime mutant.",
+  "sourceTraceSHA256": "c0354a1e454070e464252ceb1521ffc0e9af7a5b8369d5abc7a402fac41f5f32",
+  "validatedScriptSHA256": "64db40ef992bb7f2089b13c6300f1e496f1a676bd1619191bb8e05d82734809c",
+  "fullyVisibleStrings": 323,
+  "scopeOfNegative": "29 selected extended cases and all 20 edited cases for both stale text and missing pixels. Pad-orientation labels have a positive-only raster contract and separate physical wiring tests."
+}
