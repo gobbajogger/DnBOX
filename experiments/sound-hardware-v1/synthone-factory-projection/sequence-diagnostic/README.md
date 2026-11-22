@@ -25,3 +25,14 @@ python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagn
 ```
 
 The two variants preserve all nine direct-note PCM hashes. With the exact original events, both change PCM for #664, #10, #221 and #213 while matching the other five rows byte for byte. Neither changes any stereo pass result. The existing #482 result is unchanged. Retaining recycled state alone therefore does not qualify a candidate. [Per-arm PCM digests and scores](voice-history-result.json).
+
+## Active low-pass transfer
+
+The host link replaces only the original low-pass computation with the firmware's fitted coefficient law and recurrence. The original per-sample cutoff, resonance, excitation, note events, voice state and effects still drive the render. All nine programs select low-pass.
+
+```sh
+python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/ladder_probe.py \
+  VERIFIED_SEQUENCE_OUTPUT FACTORY_BUILD NEW_OUTPUT
+```
+
+The original note-event hashes match in all nine rows. The transfer substitution changes PCM but stays within the existing parity bounds on all nine. The maximum spectral delta is below 0.004 dB, and the firmware comparison retains the same matched-event pass set. This rules out the low-pass approximation as the dominant residual in these nine programs. It does not rule out upstream cutoff or excitation differences. [Per-channel results](ladder-probe-result.json).
