@@ -465,6 +465,9 @@ def app_compile_commands(flags, original_synth, wobble):
         if (SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SYNTHONE_PATCH") == "1"
                 and u in {"dsp/drum808.c", "dsp/drum909.c", "dsp/breaks.c"}):
             unit_flags = flags if u == "dsp/drum808.c" else ["-Oz" if f == "-Os" else f for f in flags]
+        if (u == "dsp/fxbus.c" and BOARD == "smk37" and MODEL in ("elite", "pro")
+                and SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SUPERJ6_STOCK_PRESET") == "1"):
+            unit_flags = ["-Os" if f == "-O2" else f for f in unit_flags]
         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
             unit_flags = [f for f in unit_flags if f != "-flto"]
         if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":
