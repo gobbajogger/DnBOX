@@ -1,0 +1,62 @@
+{
+  "initial-elite": {
+    "peak_us": 12196,
+    "late": 33,
+    "xruns": 33,
+    "passed": false
+  },
+  "initial-pro": {
+    "peak_us": 13712,
+    "late": 15,
+    "xruns": 15,
+    "passed": false
+  },
+  "typed-bypass-pro": {
+    "peak_us": 11266,
+    "late": 0,
+    "xruns": 0,
+    "passed": true
+  },
+  "lane-blocks-elite": {
+    "peak_us": 11203,
+    "late": 0,
+    "xruns": 0,
+    "passed": true
+  },
+  "lane-blocks-pro": {
+    "peak_us": 12570,
+    "late": 5,
+    "xruns": 5,
+    "passed": false
+  },
+  "coefficient-hoist-pro": {
+    "peak_us": 12779,
+    "late": 5,
+    "xruns": 5,
+    "passed": false
+  },
+  "typed-tiles-elite": {
+    "peak_us": 11033,
+    "late": 0,
+    "xruns": 0,
+    "passed": true
+  },
+  "typed-tiles-pro": {
+    "peak_us": 12634,
+    "late": 4,
+    "xruns": 4,
+    "passed": false
+  },
+  "hot-chorus-unit-pro": {
+    "peak_us": 12298,
+    "late": 4,
+    "xruns": 4,
+    "passed": false
+  },
+  "shared-hot-pro": {
+    "peak_us": 12187,
+    "late": 4,
+    "xruns": 4,
+    "passed": false
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "source_preimage": "0ac65800",
+  "baseline_source_sha256": "6687434db89047b3e87b81e5c045fe926ab1cfe03bd6f7da41866241764a1ade",
+  "candidate_source_sha256": "387fc8eb4ba9576e253a4d3ab71eca848711aa913243db73461230949368ea9a",
+  "candidate_patch_sha256": "c39ba2b26fb4ae3b1b67ad14a75e2b04872e8b328be54bac0f11c40d8404945b",
+  "host_harness_sha256": "db8980c95942f8a4311ad2d6b13dce3c082feb8d17f6526633a44803f4ba7c21",
+  "sparse_host_harness_sha256": "e676e059e3ff462d1ebcc74a1de1165a0e172c685f891ffec6ab2bd4b56daf6f",
+  "exact_comparison": {
+    "render_calls": 6048,
+    "stereo_frames": 3173893,
+    "complete_part_state_bytes": "identical after every call",
+    "diagnostic_counters": "identical when present",
+    "sample_rates": [
+      8000,
+      32000,
+      44100,
+      48000,
+      96000,
+      12345.5,
+      192000
+    ],
+    "oscillator_modes": [
+      "raw",
+      "stock BLEP",
+      "factory discrete"
+    ],
+    "controls": [
+      "note on/off",
+      "slot stealing",
+      "damper",
+      "velocity mode",
+      "live layer edits",
+      "panic"
+    ],
+    "also_tested_with_diagnostics_disabled": true
+  },
+  "host_os_no_diagnostics": [
+    {
+      "profile": 0,
+      "base_seconds": 0.429941,
+      "candidate_seconds": 0.348686,
+      "relative_percent": -18.9
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.431719,
+      "candidate_seconds": 0.351134,
+      "relative_percent": -18.67
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.443199,
+      "candidate_seconds": 0.360708,
+      "relative_percent": -18.61
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.372958,
+      "candidate_seconds": 0.348618,
+      "relative_percent": -6.53
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.395828,
+      "candidate_seconds": 0.340597,
+      "relative_percent": -13.95
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.375832,
+      "candidate_seconds": 0.34326,
+      "relative_percent": -8.67
+    }
+  ],
+  "host_os_diagnostics": [
+    {
+      "profile": 0,
+      "base_seconds": 0.42462,
+      "candidate_seconds": 0.439954,
+      "relative_percent": 3.61
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.4286,
+      "candidate_seconds": 0.385951,
+      "relative_percent": -9.95
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.441445,
+      "candidate_seconds": 0.37306,
+      "relative_percent": -15.49
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.490103,
+      "candidate_seconds": 0.447712,
+      "relative_percent": -8.65
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.460448,
+      "candidate_seconds": 0.359308,
+      "relative_percent": -21.97
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.426929,
+      "candidate_seconds": 0.360216,
+      "relative_percent": -15.63
+    }
+  ],
+  "host_os_sparse": [
+    {
+      "profile": 0,
+      "base_seconds": 0.445232,
+      "candidate_seconds": 0.372018,
+      "relative_percent": -16.44
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.381872,
+      "candidate_seconds": 0.346863,
+      "relative_percent": -9.17
+    },
+    {
+      "profile": 0,
+      "base_seconds": 0.429536,
+      "candidate_seconds": 0.348889,
+      "relative_percent": -18.78
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.369491,
+      "candidate_seconds": 0.343567,
+      "relative_percent": -7.02
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.42235,
+      "candidate_seconds": 0.343493,
+      "relative_percent": -18.67
+    },
+    {
+      "profile": 1,
+      "base_seconds": 0.444234,
+      "candidate_seconds": 0.33558,
+      "relative_percent": -24.46
+    },
+    {
+      "profile": 2,
+      "base_seconds": 0.168217,
+      "candidate_seconds": 0.164462,
+      "relative_percent": -2.23
+    },
+    {
+      "profile": 2,
+      "base_seconds": 0.16715,
+      "candidate_seconds": 0.162708,
+      "relative_percent": -2.66
+    },
+    {
+      "profile": 2,
+      "base_seconds": 0.157818,
+      "candidate_seconds": 0.160587,
+      "relative_percent": 1.75
+    }
+  ],
+  "host_counter_off_text_bytes": {
+    "baseline": 8035,
+    "candidate": 8405
+  },
+  "host_counter_off_dnbx_render_stack_bytes": {
+    "baseline": 128,
+    "candidate": 424
+  },
+  "native_timing": "not measured by this comparison"
+}

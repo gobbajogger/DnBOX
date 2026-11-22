@@ -10,7 +10,24 @@ The opt-in Synth One patch editor now saves the original lowpass, bandpass and h
 
 The opt-in SuperJ6 factory loader now follows authenticated build-9 chorus version and switch routing. It selects the new independent stereo path for 294 J60V2 factory programs, the existing legacy chorus for 46, and the bit-exact dry path for 300. The three independent wet modes passed the archived component tests at the unchanged 1 dB RMS and 3 dB spectral limits, with 2.064 dB worst spectral error. Both bypass cases stayed bit-exact. All six longer impulse trains passed across 44.1 and 48 kHz. Six of twelve sustained chord cases passed, so broader wet parity remains open. [Original routing, integrated loader checks and component results](../../evidence/sound-resume/superj6-factory-chorus/). The shipped path uses independent 16-bit per-owner delay histories in pool storage. The packed histories preserved every archived and impulse-train score and kept six sustained passes. Panic clears the active histories and the focused factory suite verified silence afterward. [Packed-history comparison](../../evidence/sound-resume/superj6-factory-chorus/compact-comparison.json).
 
-## Current software qualification — source `d5f5cd70`
+## Current software qualification — source `0ac65800`
+
+The exact opt-in packages retain 2,460 bytes of XIP on Elite and 2,472 on Pro. Both retain 732 bytes above the pool reserve. The eight strict 360 MHz populated scenes each completed 648 halves over 922 events, with zero late callbacks, zero xruns and no new guest fault. The alternate-filter scenes use the real saved Synth One ID 115 edit plus full sub level. [Exact receipts](../../evidence/sound-qualification/0ac65800/) · [Both .fwsc packages](../../artifacts/sound-qualification/0ac65800/).
+
+| Populated software scene | Elite peak | Pro peak |
+| --- | ---: | ---: |
+| Chicago and Miami | 8,299 µs | 8,305 µs |
+| Juno and Synth One | 7,220 µs | 7,711 µs |
+| Juno and Synth One bandpass with full sub level | 6,997 µs | 7,809 µs |
+| Juno and Synth One highpass with full sub level | 7,000 µs | 7,807 µs |
+
+The focused host checks passed the saved-cell migration and validation, held-chord admission, panic, pattern-preset transition and note-lock tests. The tracked firmware, tests and web scan had zero retired-name matches. Integration at `4fa5e29f` diverges from Sound at `0b0ff56b`. The memory figures above apply to the Sound packages. [Lifecycle and ancestry](../../evidence/sound-qualification/0ac65800/).
+
+An instrumented build applies a typed mode-2 factory row at an idle audio boundary and verifies the active lane in the guest RAM capture. That additional wet load missed the callback limit on both initial builds. Pro with the same typed owner and chorus bypass peaked at 11,266 µs with zero xruns. The faster lane-processing experiment passed Elite at 11,203 µs, and the best Pro experiment peaked at 12,187 µs with four xruns. The instrumentation and optimization patch are retained for replay. The eight exact-image results above cover the standard scenes and saved filter variants. Active wet timing on Pro remains open. [Wet timing and cost split](../../evidence/sound-qualification/0ac65800/wet-timing/summary.json).
+
+The hash-verified private reference extension contains 18 new original chorus captures and the 23 comparison receipts. It reuses the five original cases from the previously uploaded canonical pack. Project Sources refused the extension, both emulator images and the matching render and log archive because its source capacity is full. The four pending files and exact hashes are recorded. [Reference extension](../../evidence/sound-qualification/0ac65800/reference-extension.json) · [Upload receipt](../../evidence/sound-qualification/0ac65800/project-upload.json).
+
+## Previous software qualification — source `d5f5cd70`
 
 The exact Elite and Pro packages include the authenticated SuperJ6 sub gain. Elite retains 5,072 bytes of XIP and Pro retains 5,084. Both retain 3,804 bytes above the pool reserve. All six strict 360 MHz software runs completed 648 audio halves across 922 events with zero late callbacks, zero xruns and no new guest fault. [Native build and per-scene receipts](../../evidence/sound-qualification/d5f5cd70/) · [Elite and Pro .fwsc files](../../artifacts/sound-qualification/d5f5cd70/).
 
