@@ -2014,7 +2014,8 @@ uint8_t smk_padcal_draw(uint32_t w, uint32_t h)
     cv_begin(w, h, C_BLACK);
     cv_band(0, (int32_t)h);
     if (padcal.orient) {
-        cv_text(4, 70, &FONT_S, "pad 1 top-left?", C_WHITE);
+        cv_text(4, 70, &FONT_S, "K2: TOP-LEFT PAD", C_WHITE);
+        cv_text(4, 92, &FONT_S, "PLAY: CONFIRM", C_WHITE);
         return 1u;
     }
     for (i = 0; i < SMK_PADCAL_PADS; i++) {
@@ -2281,18 +2282,15 @@ static int capture_maintenance_poll(void)
 /* SAFE MODE: X0X crashed (or hung) twice while starting. Nothing that makes sound runs: no audio,
  * no engine, no UI; USB is on, so the web installer (X0X, or the stock firmware) and M-UPGRADE can
  * reach it. PLAY tries X0X again. The chip's own update mode stays the last resort (fm1_cstart). */
-static void safe_main(void)
+static void draw_safe_mode(void)
 {
     char b[24];
-    uint32_t t0, play;
     lcd_fill(0, 0, 240, 240, C_BLACK);
     draw_text_box(0, 18, 240, &FONT_B, "DnBOX SAFE MODE", C_HI, 1);
-    draw_text_box(0, 52, 240, &FONT_S, "IT CRASHED TWICE", C_WHITE, 1);
-    draw_text_box(0, 72, 240, &FONT_S, "WHILE STARTING.", C_WHITE, 1);
-    draw_text_box(0, 102, 240, &FONT_S, "NO SOUND. USB IS ON:", C_WHITE, 1);
-    draw_text_box(0, 122, 240, &FONT_S, "REINSTALL FROM THE", C_WHITE, 1);
-    draw_text_box(0, 142, 240, &FONT_S, "WEB INSTALLER.", C_WHITE, 1);
-    draw_text_box(0, 172, 240, &FONT_S, "PLAY: TRY AGAIN", C_HI, 1);
+    draw_text_box(0, 52, 240, &FONT_S, "STARTUP CRASHES: 2", C_WHITE, 1);
+    draw_text_box(0, 102, 240, &FONT_S, "AUDIO: OFF    USB: ON", C_WHITE, 1);
+    draw_text_box(0, 142, 240, &FONT_S, "WEB INSTALLER: REINSTALL", C_WHITE, 1);
+    draw_text_box(0, 172, 240, &FONT_S, "PLAY: RETRY", C_HI, 1);
     if (fm1_crash.magic == FM1_CRASH_MAGIC) {
         b[0] = 'P';
         b[1] = 'C';
@@ -2310,6 +2308,12 @@ static void safe_main(void)
         hexs(b + 7, fm1_crash.dbg);
         draw_text_box(0, 220, 240, &FONT_S, b, C_GRAY, 1);
     }
+}
+
+static void safe_main(void)
+{
+    uint32_t t0, play;
+    draw_safe_mode();
     fm1_input_init();
     panel_init();
     usb_start();
@@ -2337,8 +2341,10 @@ static void safe_main(void)
         if (usb.ota_req) {
             usb.ota_req = 0;
             ed_install_forget();
-            if (flash_ok)
-                ota_session();                      /* an install commits and resets; else back here */
+            if (flash_ok) {
+                ota_session();                      /* a committed install resets */
+                draw_safe_mode();                   /* restore controls after the result expires */
+            }
         }
         if (usb.uboot_req) {
             ed_install_forget();
@@ -2387,8 +2393,8 @@ static void fm1_main(void)
         b[1] = 'C';
         b[2] = ' ';
         hexs(b + 3, fm1_crash.pc);
-        draw_text_box(0, 176, 240, &FONT_S, fm1_crash.core == 1 ? "THE SECOND CORE CRASHED"
-                      : "RESTARTED AFTER A CRASH", RGB(255, 80, 60), 1);
+        draw_text_box(0, 176, 240, &FONT_S, fm1_crash.core == 1 ? "CRASH: CORE 2"
+                      : "CRASH: CORE 1", RGB(255, 80, 60), 1);
         draw_text_box(0, 196, 240, &FONT_S, b, C_GRAY, 1);
         fm1_wdt_feed();
         fm1_delay_ms(2500);
