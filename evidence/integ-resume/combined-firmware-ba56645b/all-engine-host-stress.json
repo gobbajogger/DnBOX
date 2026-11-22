@@ -1,0 +1,20 @@
+{
+  "tested_firmware": "ba56645b2142b134be3aeee2236406e1c95b2bde",
+  "software_only": true,
+  "clock_scope": "native host thread CPU and wall per 512 frames, not strict target deadlines",
+  "dsp_pairs": 16,
+  "cases": 32,
+  "halves": 51712,
+  "total_independent_simulated_seconds": 600.3751473922903,
+  "peak_cpu_us": 26096.914,
+  "peak_wall_us": 26102.277,
+  "cpu_misses": 9,
+  "wall_misses": 9,
+  "frames_per_half": 512,
+  "all_five_parts_and_22_drums": true,
+  "maximum_offered_notes_per_channel": 8,
+  "active_voice_high_water_instrumented": false,
+  "matrix_sha256": "5ea25b524b474725fd722c428ab07a8c15f3348cfcd85a0d4c57d953939b0c4f",
+  "muted_b_control_sha256": "cb82f56aae61549050a330a847d9985d3c9f2adea2c708001e59be4a6223bc0e",
+  "strict_threshold_on_host": "FAIL"
+}

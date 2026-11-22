@@ -1,0 +1,162 @@
+{
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "fwsc_sha256": "3291d76d6ee87891525be0338b58ca78acbb6050f74e1f6f4253953a9ece4053",
+  "software_only": true,
+  "transport": "emulated USB MIDI",
+  "fresh_deterministic_boot": true,
+  "replies": [
+    {
+      "op": 0,
+      "status": 0,
+      "kind": 0,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 0,
+      "request": 1,
+      "revision": 1,
+      "control": 1,
+      "value": 3972684153
+    },
+    {
+      "op": 1,
+      "status": 0,
+      "kind": 0,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 2,
+      "revision": 1,
+      "control": 0,
+      "value": 0
+    },
+    {
+      "op": 2,
+      "status": 0,
+      "kind": 1,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 3,
+      "revision": 1,
+      "control": 1,
+      "value": 75
+    },
+    {
+      "op": 3,
+      "status": 1,
+      "kind": 1,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 4,
+      "revision": 2,
+      "control": 1,
+      "value": 76
+    },
+    {
+      "op": 2,
+      "status": 0,
+      "kind": 1,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 5,
+      "revision": 2,
+      "control": 1,
+      "value": 76
+    },
+    {
+      "op": 3,
+      "status": 1,
+      "kind": 1,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 6,
+      "revision": 3,
+      "control": 1,
+      "value": 75
+    },
+    {
+      "op": 2,
+      "status": 0,
+      "kind": 1,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 7,
+      "revision": 3,
+      "control": 1,
+      "value": 75
+    },
+    {
+      "op": 7,
+      "status": 0,
+      "kind": 0,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 8,
+      "revision": 3,
+      "control": 0,
+      "value": 0
+    },
+    {
+      "op": 3,
+      "status": 4,
+      "kind": 0,
+      "unit": 200494509,
+      "high": [
+        1693511353,
+        3851444534,
+        811533580
+      ],
+      "client": 42,
+      "epoch": 1,
+      "request": 9,
+      "revision": 3,
+      "control": 1,
+      "value": 0
+    }
+  ]
+}

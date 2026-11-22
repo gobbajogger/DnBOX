@@ -1,0 +1,19 @@
+{
+  "firmware_candidate": "ba56645b2142b134be3aeee2236406e1c95b2bde",
+  "model": "pro",
+  "fwsc_sha256": "d63ffc362c105d8bcb3a38fce8219c756720602943b3e7ae5ceeef159a5b6c25",
+  "elf_sha256": "f3f40e2820b3f8b221db99c9313ffacc26669b826c84f58cfe5fb6b629617ace",
+  "seed_sha256": "83a6ac262947fa7a3442bf5af3f6b430b75ae785f4747f9b85c1d7ad576b1065",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+  "sample_rate": 44118,
+  "clock_mhz": 360,
+  "strict_no_skip": true,
+  "boot_relative_duration_ms": 605000,
+  "last_play_request_ms": 4934,
+  "playback_tail_seconds": 600,
+  "exact_archived_bounded_receipt_sha256": "6716ebe0e1136c099b50b9927d6eafc632c0636a6b78b229090e756ed81f3653",
+  "exact_archived_bounded_readback_sha256": "e1a0f452c61a97341d8aa78c8ff071b79a6c386e75bc17adab37f1c1e54d263c",
+  "fresh_target_layout_sha256": "78f109adde647a06aaae323d7fb2ec0a99acbb1230a54a4360da10d0a2ac1c2a",
+  "start_utc": "2026-11-22T06:36:03.549735+00:00"
+}

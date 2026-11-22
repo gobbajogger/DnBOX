@@ -1,0 +1,455 @@
+{
+  "worktree": "/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/source",
+  "source": [
+    "ba56645b2142b134be3aeee2236406e1c95b2bde",
+    "3093322cfeea194e4d9b190a989fe9ef4d01e874"
+  ],
+  "registration_counts": {
+    "ok": 476,
+    "FAIL": 51,
+    "not-run": 2
+  },
+  "failures_and_skips": [
+    {
+      "registration": "0012",
+      "name": "composed-smc-panic",
+      "state": "FAIL",
+      "status_line": "FAIL composed-smc-panic (see build/host/composed-smc-panic.log)",
+      "log_sha256": "bc501d5ea58107d0ce640c89b45137623105a6a6eda924d472c067a4dcfe5d8d",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0014",
+      "name": "panic-clear",
+      "state": "FAIL",
+      "status_line": "FAIL panic-clear (see build/host/panic-clear.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0021",
+      "name": "composed-midi-epoch",
+      "state": "FAIL",
+      "status_line": "FAIL composed-midi-epoch (see build/host/composed-midi-epoch.log)",
+      "log_sha256": "bd7a1aa5504779b1a97927bccae3c1fa281ef33e1f6ff1686bfa5ff815a8e448",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0061",
+      "name": "original-release-integration",
+      "state": "FAIL",
+      "status_line": "FAIL original-release-integration (see build/host/original-release-integration.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0062",
+      "name": "chicago-fx2-inserts",
+      "state": "FAIL",
+      "status_line": "FAIL chicago-fx2-inserts (see build/host/chicago-fx2-inserts.log)",
+      "log_sha256": "8b077928b305558258ee611ce203773e3fd54c3af1cfb4a2f632e0a80a2462eb",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0063",
+      "name": "original-sound-cell",
+      "state": "FAIL",
+      "status_line": "FAIL original-sound-cell (see build/host/original-sound-cell.log)",
+      "log_sha256": "6c4ef4405eb2401c736e2728bb3075bc8abed8e52ceb210e999109162902bc44",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0064",
+      "name": "original-release-ui",
+      "state": "FAIL",
+      "status_line": "FAIL original-release-ui (see build/host/original-release-ui.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0065",
+      "name": "original-build",
+      "state": "FAIL",
+      "status_line": "FAIL original-build (see build/host/original-build.log)",
+      "log_sha256": "630148506e2df0d91c8b2898854030085fedd77a047c05ef4e7093cd7a92a546",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0071",
+      "name": "sound-reset",
+      "state": "FAIL",
+      "status_line": "FAIL sound-reset (see build/host/sound-reset.log)",
+      "log_sha256": "8c837824d2d6c41f6bfa238a63d22d629dfbc64fba24166042c8ea6709f7de01",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0075",
+      "name": "panic-notes",
+      "state": "FAIL",
+      "status_line": "FAIL panic-notes (see build/host/panic-notes.log)",
+      "log_sha256": "88a26b60008dbe5daea3630e972051148bb4c532f43468e4adb18275eaed661a",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0076",
+      "name": "drum-fill",
+      "state": "FAIL",
+      "status_line": "FAIL drum-fill (see build/host/drum-fill.log)",
+      "log_sha256": "19d3a7976351da09d8622eebbdae2d096d22cc325223b1f0fd3b2cd29cf6cd45",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0077",
+      "name": "cq-reclaim",
+      "state": "FAIL",
+      "status_line": "FAIL cq-reclaim (see build/host/cq-reclaim.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0079",
+      "name": "panic-order",
+      "state": "FAIL",
+      "status_line": "FAIL panic-order (see build/host/panic-order.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0086",
+      "name": "optimization-equivalence",
+      "state": "FAIL",
+      "status_line": "FAIL optimization-equivalence (see build/host/optimization-equivalence.log)",
+      "log_sha256": "76145cab3f17628b37a6645e5dffd899637366cc832215a4d783d83118e1ca30",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0097",
+      "name": "ui-theme",
+      "state": "FAIL",
+      "status_line": "FAIL ui-theme (see build/host/ui-theme.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0105",
+      "name": "project-stage",
+      "state": "FAIL",
+      "status_line": "FAIL project-stage (see build/host/project-stage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0106",
+      "name": "pattern-preset-notelock",
+      "state": "FAIL",
+      "status_line": "FAIL pattern-preset-notelock (see build/host/pattern-preset-notelock.log)",
+      "log_sha256": "d4b75d41c9607ab091b553b62e61e23840f4ad336319241e5ab75ac2a9caebcb",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0132",
+      "name": "engine-808-scratch-alias",
+      "state": "FAIL",
+      "status_line": "FAIL engine-808-scratch-alias (see build/host/engine-808-scratch-alias.log)",
+      "log_sha256": "1a370d3c21a00bb3b7f30232eae193daec2c309b65112ee712fb99bb547c4ba1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0158",
+      "name": "ble-midi-receive",
+      "state": "FAIL",
+      "status_line": "FAIL ble-midi-receive (see build/host/ble-midi-receive.log)",
+      "log_sha256": "900e51eb1c95a9a284b37141cd9f50ad4a57b9e6bde63e62ac4d4bb6171e3cac",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0159",
+      "name": "ble-capture-replay",
+      "state": "FAIL",
+      "status_line": "FAIL ble-capture-replay (see build/host/ble-capture-replay.log)",
+      "log_sha256": "29b6ad79a27e200e3381af429c3c16aa00d9ce70d0c2f65eda2a39c389ec4c74",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0181",
+      "name": "ble-device-setting-flow",
+      "state": "FAIL",
+      "status_line": "FAIL ble-device-setting-flow (see build/host/ble-device-setting-flow.log)",
+      "log_sha256": "b1f92f718ac2cb3a0acea15c01f65bb086d1f1b25e2aa4b27245cbaea73b0e00",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0182",
+      "name": "ble-toggle-persistence-gate",
+      "state": "FAIL",
+      "status_line": "FAIL ble-toggle-persistence-gate (see build/host/ble-toggle-persistence-gate.log)",
+      "log_sha256": "a74d8d834b8f86a1bb055e6af5c73185d701ab1ebadb5e6d7bdcf3adcfc528ed",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0188",
+      "name": "legacy-303-project",
+      "state": "FAIL",
+      "status_line": "FAIL legacy-303-project (see build/host/legacy-303-project.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0194",
+      "name": "drum-page-contract",
+      "state": "FAIL",
+      "status_line": "FAIL drum-page-contract (see build/host/drum-page-contract.log)",
+      "log_sha256": "9dd089378fdf1afbc0b7036fb1eebb3e40ea168286a224370d1712c49bd44e6f",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0195",
+      "name": "ui-adsr-engine-graph",
+      "state": "FAIL",
+      "status_line": "FAIL ui-adsr-engine-graph (see build/host/ui-adsr-engine-graph.log)",
+      "log_sha256": "0f58ba4d728155018742171a60f9433dcaa1429e0a9cd484d6be75dd0b759563",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0197",
+      "name": "ui-drum-single-lane",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-single-lane (see build/host/ui-drum-single-lane.log)",
+      "log_sha256": "087461fe4e05d78c8c033869866d163d60311e51d2570e9e9402a339e2f88c96",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0198",
+      "name": "ui-drum-kit-section",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-kit-section (see build/host/ui-drum-kit-section.log)",
+      "log_sha256": "2e54c4a3e8aafb5bf61f44499e765459b80728e6eaad891ae649f33429f998a5",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0212",
+      "name": "ui-drum-mix-material",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-mix-material (see build/host/ui-drum-mix-material.log)",
+      "log_sha256": "bbf5b1fdc97f52778ca53c4d4a99dc5a88e4a4f68192492c20d6839b38946de1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0224",
+      "name": "smc-performance-abort",
+      "state": "FAIL",
+      "status_line": "FAIL smc-performance-abort (see build/host/smc-performance-abort.log)",
+      "log_sha256": "a36690cf63d08d60e78a541e556a5a2a165c382aeb554c46abf0f78967dcfb4c",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0235",
+      "name": "drum909",
+      "state": "not-run",
+      "status_line": "not-run drum909 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-9W9/src/dsp/er99_engine.c)",
+      "log_sha256": null,
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0236",
+      "name": "drum808",
+      "state": "not-run",
+      "status_line": "not-run drum808 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-8W8/src/dsp/sc808_engine.cpp)",
+      "log_sha256": null,
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0240",
+      "name": "adaptive-break-controls",
+      "state": "FAIL",
+      "status_line": "FAIL adaptive-break-controls (see build/host/adaptive-break-controls.log)",
+      "log_sha256": "1647f0e77f408aab8b39c1110626008ae6442abcfd52eb5cde89a0253dd833e5",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0241",
+      "name": "adaptive-break-storage",
+      "state": "FAIL",
+      "status_line": "FAIL adaptive-break-storage (see build/host/adaptive-break-storage.log)",
+      "log_sha256": "bca70509e8f5921162f7ecc3997ee226bdd102761d369d8057efe658a21fad89",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0256",
+      "name": "engine-brk-mute",
+      "state": "FAIL",
+      "status_line": "FAIL engine-brk-mute (see build/host/engine-brk-mute.log)",
+      "log_sha256": "7f4114f9bf4ffcfe62fb2bd5ee8139cc7d991165e10f65cdf84b7eb58dc1fdc2",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0283",
+      "name": "dev-validate",
+      "state": "FAIL",
+      "status_line": "FAIL dev-validate (see build/host/dev-validate.log)",
+      "log_sha256": "0c9b3cbaed2f0bf20afe50b318c268784f2fffff51a4793b02034cc5204bc673",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0284",
+      "name": "dev-validate-composed",
+      "state": "FAIL",
+      "status_line": "FAIL dev-validate-composed (see build/host/dev-validate-composed.log)",
+      "log_sha256": "5c415179123bd116ca8c853038f2355030b83ce3f668aa44ac4327f0ecfa3f25",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0309",
+      "name": "smk-clip-chord-display",
+      "state": "FAIL",
+      "status_line": "FAIL smk-clip-chord-display (see build/host/smk-clip-chord-display.log)",
+      "log_sha256": "3b8685dc1cbc09ffb04392d7d0fc0c31be89346015a4bd204227bbf0a84b377b",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0330",
+      "name": "ble-role-switch",
+      "state": "FAIL",
+      "status_line": "FAIL ble-role-switch (see build/host/ble-role-switch.log)",
+      "log_sha256": "7497226e7711f32559b02d5f3742b381409e9ce0513d5e3183bf499f23cbe977",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0359",
+      "name": "compact-programs",
+      "state": "FAIL",
+      "status_line": "FAIL compact-programs (see build/host/compact-programs.log)",
+      "log_sha256": "3d3738296f2992b2b276232c4165d448e0a943f1df1ca1d30f9175b84ee6cb61",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0360",
+      "name": "offline-browser-safety",
+      "state": "FAIL",
+      "status_line": "FAIL offline-browser-safety (see build/host/offline-browser-safety.log)",
+      "log_sha256": "d932c0d9589e358d2c6cb12ae649b1c52595916ebd6b3986de0c165ca49b0e8c",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0361",
+      "name": "offline-sequencer-browser",
+      "state": "FAIL",
+      "status_line": "FAIL offline-sequencer-browser (see build/host/offline-sequencer-browser.log)",
+      "log_sha256": "92ea5820d25c8215224bb1da528e84726fe1442525e3db49d55a9434095b5254",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0364",
+      "name": "offline-touchosc-lua",
+      "state": "FAIL",
+      "status_line": "FAIL offline-touchosc-lua (see build/host/offline-touchosc-lua.log)",
+      "log_sha256": "7c0272dca5c840f474584acdf11de3b17c190da208baf0831fdfcb159366ba12",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0395",
+      "name": "rec-endpoint-storage",
+      "state": "FAIL",
+      "status_line": "FAIL rec-endpoint-storage (see build/host/rec-endpoint-storage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0410",
+      "name": "control-recompile",
+      "state": "FAIL",
+      "status_line": "FAIL control-recompile (see build/host/control-recompile.log)",
+      "log_sha256": "d53c3b0f4fad86bd272b01dc6afdb944138a33f38d085e49f7c7fe982f46f127",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0411",
+      "name": "chicago-span-hold",
+      "state": "FAIL",
+      "status_line": "FAIL chicago-span-hold (see build/host/chicago-span-hold.log)",
+      "log_sha256": "ec4c3257e4bf6c8938d42fb11acc720cc350a7798f38d033c182c176a9269c7a",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0412",
+      "name": "fma-exact-identity",
+      "state": "FAIL",
+      "status_line": "FAIL fma-exact-identity (see build/host/fma-exact-identity.log)",
+      "log_sha256": "353aa7b9d600c1e81f450cd533b2e6e2d85aec7bcddcdd3161a8544e36c5a15d",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0424",
+      "name": "ui-synthone-patch",
+      "state": "FAIL",
+      "status_line": "FAIL ui-synthone-patch (see build/host/ui-synthone-patch.log)",
+      "log_sha256": "7f38355ed9d90c74ac5b56ab4bf4a17984306ed9be9743a42e4b0056ebcca3d1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0426",
+      "name": "ui-drum-glyph",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-glyph (see build/host/ui-drum-glyph.log)",
+      "log_sha256": "d0e99e5d56d4113e30c7ff2eee3654c1845507986f20417fdf57f2100ba0b1a8",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0428",
+      "name": "ui-drum-curve-axes",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-curve-axes (see build/host/ui-drum-curve-axes.log)",
+      "log_sha256": "de52a918c68247a9ce31afcc7bf73262c8387ddce05bf6adbc17e7fb6254f315",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0434",
+      "name": "ui-release-footer-mutants",
+      "state": "FAIL",
+      "status_line": "FAIL ui-release-footer-mutants (see build/host/ui-release-footer-mutants.log)",
+      "log_sha256": "6d534499895cff1f34a0fe07eb3cd72949b1275568ac25e4e144afdfc3093c5a",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0440",
+      "name": "ui-808-accent",
+      "state": "FAIL",
+      "status_line": "FAIL ui-808-accent (see build/host/ui-808-accent.log)",
+      "log_sha256": "f731b1c826441159e36d5cfc1f5e1e3375565c9bd50177446cf58d9220e4a932",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0451",
+      "name": "ui-pan-units",
+      "state": "FAIL",
+      "status_line": "FAIL ui-pan-units (see build/host/ui-pan-units.log)",
+      "log_sha256": "c63221a31f34ff3081311923722e6f95b0e2587e2eefe70d7be21ae00d4bb5a2",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0464",
+      "name": "ui-glyph-polish",
+      "state": "FAIL",
+      "status_line": "FAIL ui-glyph-polish (see build/host/ui-glyph-polish.log)",
+      "log_sha256": "4d4a33578089bb6a9e242c7abd55f1d10cf7fd0da5d64ac5ee46b6dd5d1320e1",
+      "observed_lsan_runtime_failure": false
+    }
+  ],
+  "sequencer_reference_not_run": true,
+  "gate_log_sha256": "fee43050d4e7a21944e5c5612c99d7fdc9fe946ce361230b816acc50bc4a0eb0",
+  "gate_status_lines": [
+    "[PASS] pool-accounting",
+    "[PASS] clean-tree",
+    "[PASS] setup",
+    "[SKIP] fetch-base",
+    "[PASS] no-loss",
+    "[PASS] limits",
+    "[FAIL] host-tests",
+    "[PASS] build-elite-pro",
+    "[PASS] flashmap",
+    "[PASS] budget",
+    "[FAIL] ui-defects"
+  ],
+  "terminal_gate_lines": [],
+  "gate_exit": 1
+}

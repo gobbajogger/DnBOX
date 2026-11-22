@@ -1,0 +1,12 @@
+BEGIN now=1000 audio_due=0.000000
+START_NOTE call=1 ms=1080 off=0 bank=1 status=1 pending=0 held=0/1/1
+START_NOTE call=2 ms=1080 off=0 bank=1 status=1 pending=0 held=0/1/1
+BEGIN now=1000 audio_due=1081.269841
+START_NOTE call=3 ms=1080 off=0 bank=1 status=1 pending=0 held=0/1/1
+START_NOTE call=4 ms=1080 off=0 bank=1 status=1 pending=0 held=0/1/1
+BEGIN now=1000 audio_due=1081.269841
+BEGIN now=1000 audio_due=1081.269841
+BEGIN now=1000 audio_due=1081.269841
+BEGIN now=1000 audio_due=1081.269841
+BEGIN now=1000 audio_due=1081.269841
+SMC real-path PANIC/question: 36 checks, 0 failures

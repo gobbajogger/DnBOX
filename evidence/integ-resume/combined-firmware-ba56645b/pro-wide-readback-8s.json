@@ -1,0 +1,66 @@
+{
+  "boot": {
+    "ram_sha256": "b7d876a717e66ae9ddd2603e22101c362207678a6fd1ee952ce010a58f35f13e",
+    "owner_kinds": [
+      2,
+      3
+    ],
+    "owner_status": [
+      1,
+      1
+    ],
+    "juno_owner": "B",
+    "stock_wide": 1,
+    "typed": 1,
+    "mode": 2,
+    "follow_panel": 1,
+    "mix": 0.25196850299835205,
+    "phase": 1898708992,
+    "synthone_filter": 2.0,
+    "synthone_sub": 1.0,
+    "prepared_voice_filters": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "sequencer_playing": 0,
+    "worker_gave_up": 0
+  },
+  "heavy": {
+    "ram_sha256": "29ed3dd6cf8d0ae507b6dfb8f192681763d275e6d38e2910e480cb8f096858a1",
+    "owner_kinds": [
+      2,
+      3
+    ],
+    "owner_status": [
+      1,
+      1
+    ],
+    "juno_owner": "B",
+    "stock_wide": 1,
+    "typed": 1,
+    "mode": 2,
+    "follow_panel": 1,
+    "mix": 0.25196850299835205,
+    "phase": 1313323008,
+    "synthone_filter": 2.0,
+    "synthone_sub": 1.0,
+    "prepared_voice_filters": [
+      2,
+      2,
+      2,
+      0,
+      0,
+      0
+    ],
+    "sequencer_playing": 1,
+    "worker_gave_up": 0,
+    "waveform": [
+      1.0,
+      1.0
+    ]
+  }
+}

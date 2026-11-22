@@ -1,0 +1,21 @@
+{
+  "tested_firmware": "ba56645b2142b134be3aeee2236406e1c95b2bde",
+  "software_only": true,
+  "canonical_exit": 1,
+  "canonical_result_footer_observed": false,
+  "canonical_log_sha256": "fee43050d4e7a21944e5c5612c99d7fdc9fe946ce361230b816acc50bc4a0eb0",
+  "host_test_counts": {
+    "PASS": 476,
+    "FAIL": 51,
+    "NOT_RUN": 2
+  },
+  "strict_reference_preflight": {
+    "PASS": 13,
+    "excluded_FAIL": 3
+  },
+  "archive": {
+    "name": "lane-integ-resume-0130-ba56645b-firmware-gate-and-host.tar.gz",
+    "bytes": 220088188,
+    "sha256": "77c223dc8ad28b94569aee6a0b6a8d11a1cb0107990d6f4510498a4deb560686"
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "pr": 992,
+  "source_head": "4df0102f742417ad27e7f3510c2d89d0b430b7f4",
+  "source_tree": "5da3307945f5224b671026367520957d3aa0a4e4",
+  "stage_results": [
+    "[PASS] pool-accounting",
+    "[PASS] clean-tree",
+    "[PASS] setup",
+    "[SKIP] fetch-base",
+    "[PASS] no-loss",
+    "[PASS] limits"
+  ],
+  "terminal_gate": [],
+  "host_results": {
+    "ok": 333,
+    "FAIL": 32
+  },
+  "observed_failures": [
+    {
+      "registration": "0020",
+      "status": "FAIL",
+      "name": "composed-midi-epoch",
+      "log_sha256": "bd7a1aa5504779b1a97927bccae3c1fa281ef33e1f6ff1686bfa5ff815a8e448"
+    },
+    {
+      "registration": "0060",
+      "status": "FAIL",
+      "name": "original-release-integration",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0061",
+      "status": "FAIL",
+      "name": "chicago-fx2-inserts",
+      "log_sha256": "d60f137d08053f574b8bb3706f6ae0c099655c2e83e558c7ceb4864aadc597e0"
+    },
+    {
+      "registration": "0062",
+      "status": "FAIL",
+      "name": "original-sound-cell",
+      "log_sha256": "c587546fc354f8c8d97c76d98c6e5d67be6cd32eb4e16914465e529e1bdbd11b"
+    },
+    {
+      "registration": "0063",
+      "status": "FAIL",
+      "name": "original-release-ui",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0070",
+      "status": "FAIL",
+      "name": "sound-reset",
+      "log_sha256": "773fa9d94c6a4a88a3dcff0d6d4677fec6557075c20764abfba21895a34754ac"
+    },
+    {
+      "registration": "0074",
+      "status": "FAIL",
+      "name": "panic-notes",
+      "log_sha256": "36087ab5c21ae8e752adf7cc310927ab1ac7aa8c2a42b1bc666c87f6d20fc496"
+    },
+    {
+      "registration": "0075",
+      "status": "FAIL",
+      "name": "drum-fill",
+      "log_sha256": "9f1263725d0c206d3b08702167b9c61a096eb3252f43dcae8c974c41a9150d98"
+    },
+    {
+      "registration": "0076",
+      "status": "FAIL",
+      "name": "cq-reclaim",
+      "log_sha256": "dca5fedc074ee1853785afca2096f308318884d5b232741c8b7180ec441c9175"
+    },
+    {
+      "registration": "0085",
+      "status": "FAIL",
+      "name": "optimization-equivalence",
+      "log_sha256": "05e603747731352b6edb86ef89af4574f9577420ffc29f352315eed08b7d4d71"
+    },
+    {
+      "registration": "0096",
+      "status": "FAIL",
+      "name": "ui-theme",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0157",
+      "status": "FAIL",
+      "name": "ble-midi-receive",
+      "log_sha256": "709f8d474c862ba5d2f2f4706c83874b4aba5008247ba088979c37a6ca32505b"
+    },
+    {
+      "registration": "0158",
+      "status": "FAIL",
+      "name": "ble-capture-replay",
+      "log_sha256": "d7cd28521d29a4ed0caa08e51c0866b351810f53a2c9774830c1726d1c4b6e4f"
+    },
+    {
+      "registration": "0180",
+      "status": "FAIL",
+      "name": "ble-device-setting-flow",
+      "log_sha256": "4fb3661d6c5bad6cfb149e136afca0e753b73cb8cfb62346e65b4a2c9d7ba38f"
+    },
+    {
+      "registration": "0181",
+      "status": "FAIL",
+      "name": "ble-toggle-persistence-gate",
+      "log_sha256": "c7ca07162d161aa5216988b211cfa6563914cf05ce732a375f6562c1c142b189"
+    },
+    {
+      "registration": "0194",
+      "status": "FAIL",
+      "name": "ui-adsr-engine-graph",
+      "log_sha256": "794b2912ed8876501ae3a873d97994cb31769bd5086a6cf9cc6af808b662d008"
+    },
+    {
+      "registration": "0262",
+      "status": "FAIL",
+      "name": "install-gate-guard",
+      "log_sha256": "871746172ea95e9d8dddaf4c74621f5a2e5d3567a4f2eb4cac6e9acc0b692222"
+    },
+    {
+      "registration": "0274",
+      "status": "FAIL",
+      "name": "host-setup",
+      "log_sha256": "d0d9999589ff383b1f35bc6f623a85fc2ec95d44488f256200bdbf1617648cfd"
+    },
+    {
+      "registration": "0329",
+      "status": "FAIL",
+      "name": "ble-role-switch",
+      "log_sha256": "390ac4e1a39597ef795a0e0db6e85706a94593392ed48bd58240f6a08cbcaa5b"
+    },
+    {
+      "registration": "0358",
+      "status": "FAIL",
+      "name": "compact-programs",
+      "log_sha256": "827b2fce22b378c444fc1d91a6b8f0eb7456f90a132ed56e74ceae35e9f12ed3"
+    },
+    {
+      "registration": "0359",
+      "status": "FAIL",
+      "name": "offline-browser-safety",
+      "log_sha256": "4d51b2fd8d72eb544e0cf7825db428a8fe08d014e0e73535806090942e09e5e0"
+    },
+    {
+      "registration": "0360",
+      "status": "FAIL",
+      "name": "offline-sequencer-browser",
+      "log_sha256": "db4be8c2b26240d35bddc7e67c6b7b404d5504f95f9291bdf033a535ce200e0d"
+    },
+    {
+      "registration": "0363",
+      "status": "FAIL",
+      "name": "offline-touchosc-lua",
+      "log_sha256": "7c0272dca5c840f474584acdf11de3b17c190da208baf0831fdfcb159366ba12"
+    },
+    {
+      "registration": "0410",
+      "status": "FAIL",
+      "name": "chicago-span-hold",
+      "log_sha256": "812a72b074499d461e5c8b1a451a410782350d5345e2d862b6736c9fa42ea9ac"
+    },
+    {
+      "registration": "0411",
+      "status": "FAIL",
+      "name": "fma-exact-identity",
+      "log_sha256": "b7747e150426b2d000d6f05730a24eee9c7d928a62bfa23c7b435c0832a84eca"
+    },
+    {
+      "registration": "0413",
+      "status": "FAIL",
+      "name": "fxbus-coef-cache",
+      "log_sha256": "af768ca2c8b4a54217e0a3cf1683ce48433926876f11dccdd40375862fcfe4e7"
+    },
+    {
+      "registration": "0414",
+      "status": "FAIL",
+      "name": "chicago-peaking-coef-cache",
+      "log_sha256": "61aa9a448a80c1cc7b3adfc629481fd07aac04cc76263cf961dad65ced070b05"
+    },
+    {
+      "registration": "0416",
+      "status": "FAIL",
+      "name": "chicago-ens-hoist",
+      "log_sha256": "ed4fa35d08c15f9caa4bffb2a2c26d52359f9b4b10fa6366f8682a669ba019f5"
+    },
+    {
+      "registration": "0417",
+      "status": "FAIL",
+      "name": "chicago-modulation-hoist",
+      "log_sha256": "cac466b4c388c66cb9bdfd6ae3665661b4ae5c25a46f2de808c0c00df49cf72e"
+    },
+    {
+      "registration": "0433",
+      "status": "FAIL",
+      "name": "ui-release-footer-mutants",
+      "log_sha256": "861ff5c780ce89d292f4f1c6a389a535d4918ad40dd2cc16b0f1e10c561fbda6"
+    },
+    {
+      "registration": "0439",
+      "status": "FAIL",
+      "name": "ui-808-accent",
+      "log_sha256": "b08ab6d848765246081447da667229d846c1f644c4d4d2acb060fc0a37e95dab"
+    },
+    {
+      "registration": "0463",
+      "status": "FAIL",
+      "name": "ui-glyph-polish",
+      "log_sha256": "980b6851238126b5a6e99334ebba3b4f1ee9250b3b3026e4d06db62240c38ac7"
+    }
+  ],
+  "original_gate_log": "/workspace/scratch/857bb2409f82/fwui-gate-4df0102f/build/dnbox-gate/4df0102f-20261122-1546.log",
+  "gate_log_sha256": "17866103a8bd51fd712fe08bb42f97bd4afcd7f61f80da13da38fef295d19009",
+  "interpretation": "Historical separate FWUI run. No terminal result was present."
+}

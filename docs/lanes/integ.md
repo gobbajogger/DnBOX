@@ -1,5 +1,9 @@
 # Integration baseline
 
+## Exact stock builds, gate and software protocol — 2026-11-22 (WORKING)
+
+Firmware `ba56645b` retains consolidated `1d727e2b` without deleting a consolidated path. Both stock packages match their pinned Elite and Pro bytes and clear XIP and pool floors. The canonical gate exited 1 with 476 host passes, 51 failures, two excluded comparisons and three UI geometry failures. The exact stock firmware pairs in software with composed Nightly `e3053cd7`, with separately approved branch-only stock catalog and TouchOSC selection. Both bounded WIDE and Chicago/Miami scenes pass the strict timing threshold on both stock models. The 600.375-second all-engine host matrix recorded nine deadline misses and the same-CPU control missed once. The longer strict firmware playback receipts are tracked separately. [Exact package and gate evidence](../../evidence/integ-resume/combined-firmware-ba56645b/README.md)
+
 ## Real normal WIDE playback on the compact wet payload — 2026-11-22 (WORKING)
 
 The [normal WIDE packet](../../evidence/integ-resume/normal-wide-wet-1c46c6fc/README.md) carries Sound `2e6a69cc` and the actual source-owned WIDE panel controls. Both stock builds pass memory, flashmap, package, native USB and focused WIDE tests. The exact normal saved-project Elite scene passed at 10,930 µs. Pro failed at 14,380 µs with 43 late halves and xruns. Both traversed real mode-2 chorus, with all five parts active. Sound's separately injected row remains a valid separate receipt. The Pro gate, final paired Chromium and strict ten-minute checks remain open.

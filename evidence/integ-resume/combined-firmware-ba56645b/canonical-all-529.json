@@ -1,0 +1,4168 @@
+{
+  "worktree": "/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/source",
+  "source": [
+    "ba56645b2142b134be3aeee2236406e1c95b2bde",
+    "3093322cfeea194e4d9b190a989fe9ef4d01e874"
+  ],
+  "registration_counts": {
+    "ok": 476,
+    "FAIL": 51,
+    "not-run": 2
+  },
+  "failures_and_skips": [
+    {
+      "registration": "0012",
+      "name": "composed-smc-panic",
+      "state": "FAIL",
+      "status_line": "FAIL composed-smc-panic (see build/host/composed-smc-panic.log)",
+      "log_sha256": "bc501d5ea58107d0ce640c89b45137623105a6a6eda924d472c067a4dcfe5d8d",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0014",
+      "name": "panic-clear",
+      "state": "FAIL",
+      "status_line": "FAIL panic-clear (see build/host/panic-clear.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0021",
+      "name": "composed-midi-epoch",
+      "state": "FAIL",
+      "status_line": "FAIL composed-midi-epoch (see build/host/composed-midi-epoch.log)",
+      "log_sha256": "bd7a1aa5504779b1a97927bccae3c1fa281ef33e1f6ff1686bfa5ff815a8e448",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0061",
+      "name": "original-release-integration",
+      "state": "FAIL",
+      "status_line": "FAIL original-release-integration (see build/host/original-release-integration.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0062",
+      "name": "chicago-fx2-inserts",
+      "state": "FAIL",
+      "status_line": "FAIL chicago-fx2-inserts (see build/host/chicago-fx2-inserts.log)",
+      "log_sha256": "8b077928b305558258ee611ce203773e3fd54c3af1cfb4a2f632e0a80a2462eb",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0063",
+      "name": "original-sound-cell",
+      "state": "FAIL",
+      "status_line": "FAIL original-sound-cell (see build/host/original-sound-cell.log)",
+      "log_sha256": "6c4ef4405eb2401c736e2728bb3075bc8abed8e52ceb210e999109162902bc44",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0064",
+      "name": "original-release-ui",
+      "state": "FAIL",
+      "status_line": "FAIL original-release-ui (see build/host/original-release-ui.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0065",
+      "name": "original-build",
+      "state": "FAIL",
+      "status_line": "FAIL original-build (see build/host/original-build.log)",
+      "log_sha256": "630148506e2df0d91c8b2898854030085fedd77a047c05ef4e7093cd7a92a546",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0071",
+      "name": "sound-reset",
+      "state": "FAIL",
+      "status_line": "FAIL sound-reset (see build/host/sound-reset.log)",
+      "log_sha256": "8c837824d2d6c41f6bfa238a63d22d629dfbc64fba24166042c8ea6709f7de01",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0075",
+      "name": "panic-notes",
+      "state": "FAIL",
+      "status_line": "FAIL panic-notes (see build/host/panic-notes.log)",
+      "log_sha256": "88a26b60008dbe5daea3630e972051148bb4c532f43468e4adb18275eaed661a",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0076",
+      "name": "drum-fill",
+      "state": "FAIL",
+      "status_line": "FAIL drum-fill (see build/host/drum-fill.log)",
+      "log_sha256": "19d3a7976351da09d8622eebbdae2d096d22cc325223b1f0fd3b2cd29cf6cd45",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0077",
+      "name": "cq-reclaim",
+      "state": "FAIL",
+      "status_line": "FAIL cq-reclaim (see build/host/cq-reclaim.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0079",
+      "name": "panic-order",
+      "state": "FAIL",
+      "status_line": "FAIL panic-order (see build/host/panic-order.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0086",
+      "name": "optimization-equivalence",
+      "state": "FAIL",
+      "status_line": "FAIL optimization-equivalence (see build/host/optimization-equivalence.log)",
+      "log_sha256": "76145cab3f17628b37a6645e5dffd899637366cc832215a4d783d83118e1ca30",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0097",
+      "name": "ui-theme",
+      "state": "FAIL",
+      "status_line": "FAIL ui-theme (see build/host/ui-theme.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0105",
+      "name": "project-stage",
+      "state": "FAIL",
+      "status_line": "FAIL project-stage (see build/host/project-stage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0106",
+      "name": "pattern-preset-notelock",
+      "state": "FAIL",
+      "status_line": "FAIL pattern-preset-notelock (see build/host/pattern-preset-notelock.log)",
+      "log_sha256": "d4b75d41c9607ab091b553b62e61e23840f4ad336319241e5ab75ac2a9caebcb",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0132",
+      "name": "engine-808-scratch-alias",
+      "state": "FAIL",
+      "status_line": "FAIL engine-808-scratch-alias (see build/host/engine-808-scratch-alias.log)",
+      "log_sha256": "1a370d3c21a00bb3b7f30232eae193daec2c309b65112ee712fb99bb547c4ba1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0158",
+      "name": "ble-midi-receive",
+      "state": "FAIL",
+      "status_line": "FAIL ble-midi-receive (see build/host/ble-midi-receive.log)",
+      "log_sha256": "900e51eb1c95a9a284b37141cd9f50ad4a57b9e6bde63e62ac4d4bb6171e3cac",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0159",
+      "name": "ble-capture-replay",
+      "state": "FAIL",
+      "status_line": "FAIL ble-capture-replay (see build/host/ble-capture-replay.log)",
+      "log_sha256": "29b6ad79a27e200e3381af429c3c16aa00d9ce70d0c2f65eda2a39c389ec4c74",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0181",
+      "name": "ble-device-setting-flow",
+      "state": "FAIL",
+      "status_line": "FAIL ble-device-setting-flow (see build/host/ble-device-setting-flow.log)",
+      "log_sha256": "b1f92f718ac2cb3a0acea15c01f65bb086d1f1b25e2aa4b27245cbaea73b0e00",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0182",
+      "name": "ble-toggle-persistence-gate",
+      "state": "FAIL",
+      "status_line": "FAIL ble-toggle-persistence-gate (see build/host/ble-toggle-persistence-gate.log)",
+      "log_sha256": "a74d8d834b8f86a1bb055e6af5c73185d701ab1ebadb5e6d7bdcf3adcfc528ed",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0188",
+      "name": "legacy-303-project",
+      "state": "FAIL",
+      "status_line": "FAIL legacy-303-project (see build/host/legacy-303-project.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0194",
+      "name": "drum-page-contract",
+      "state": "FAIL",
+      "status_line": "FAIL drum-page-contract (see build/host/drum-page-contract.log)",
+      "log_sha256": "9dd089378fdf1afbc0b7036fb1eebb3e40ea168286a224370d1712c49bd44e6f",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0195",
+      "name": "ui-adsr-engine-graph",
+      "state": "FAIL",
+      "status_line": "FAIL ui-adsr-engine-graph (see build/host/ui-adsr-engine-graph.log)",
+      "log_sha256": "0f58ba4d728155018742171a60f9433dcaa1429e0a9cd484d6be75dd0b759563",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0197",
+      "name": "ui-drum-single-lane",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-single-lane (see build/host/ui-drum-single-lane.log)",
+      "log_sha256": "087461fe4e05d78c8c033869866d163d60311e51d2570e9e9402a339e2f88c96",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0198",
+      "name": "ui-drum-kit-section",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-kit-section (see build/host/ui-drum-kit-section.log)",
+      "log_sha256": "2e54c4a3e8aafb5bf61f44499e765459b80728e6eaad891ae649f33429f998a5",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0212",
+      "name": "ui-drum-mix-material",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-mix-material (see build/host/ui-drum-mix-material.log)",
+      "log_sha256": "bbf5b1fdc97f52778ca53c4d4a99dc5a88e4a4f68192492c20d6839b38946de1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0224",
+      "name": "smc-performance-abort",
+      "state": "FAIL",
+      "status_line": "FAIL smc-performance-abort (see build/host/smc-performance-abort.log)",
+      "log_sha256": "a36690cf63d08d60e78a541e556a5a2a165c382aeb554c46abf0f78967dcfb4c",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0235",
+      "name": "drum909",
+      "state": "not-run",
+      "status_line": "not-run drum909 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-9W9/src/dsp/er99_engine.c)",
+      "log_sha256": null,
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0236",
+      "name": "drum808",
+      "state": "not-run",
+      "status_line": "not-run drum808 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-8W8/src/dsp/sc808_engine.cpp)",
+      "log_sha256": null,
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0240",
+      "name": "adaptive-break-controls",
+      "state": "FAIL",
+      "status_line": "FAIL adaptive-break-controls (see build/host/adaptive-break-controls.log)",
+      "log_sha256": "1647f0e77f408aab8b39c1110626008ae6442abcfd52eb5cde89a0253dd833e5",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0241",
+      "name": "adaptive-break-storage",
+      "state": "FAIL",
+      "status_line": "FAIL adaptive-break-storage (see build/host/adaptive-break-storage.log)",
+      "log_sha256": "bca70509e8f5921162f7ecc3997ee226bdd102761d369d8057efe658a21fad89",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0256",
+      "name": "engine-brk-mute",
+      "state": "FAIL",
+      "status_line": "FAIL engine-brk-mute (see build/host/engine-brk-mute.log)",
+      "log_sha256": "7f4114f9bf4ffcfe62fb2bd5ee8139cc7d991165e10f65cdf84b7eb58dc1fdc2",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0283",
+      "name": "dev-validate",
+      "state": "FAIL",
+      "status_line": "FAIL dev-validate (see build/host/dev-validate.log)",
+      "log_sha256": "0c9b3cbaed2f0bf20afe50b318c268784f2fffff51a4793b02034cc5204bc673",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0284",
+      "name": "dev-validate-composed",
+      "state": "FAIL",
+      "status_line": "FAIL dev-validate-composed (see build/host/dev-validate-composed.log)",
+      "log_sha256": "5c415179123bd116ca8c853038f2355030b83ce3f668aa44ac4327f0ecfa3f25",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0309",
+      "name": "smk-clip-chord-display",
+      "state": "FAIL",
+      "status_line": "FAIL smk-clip-chord-display (see build/host/smk-clip-chord-display.log)",
+      "log_sha256": "3b8685dc1cbc09ffb04392d7d0fc0c31be89346015a4bd204227bbf0a84b377b",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0330",
+      "name": "ble-role-switch",
+      "state": "FAIL",
+      "status_line": "FAIL ble-role-switch (see build/host/ble-role-switch.log)",
+      "log_sha256": "7497226e7711f32559b02d5f3742b381409e9ce0513d5e3183bf499f23cbe977",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0359",
+      "name": "compact-programs",
+      "state": "FAIL",
+      "status_line": "FAIL compact-programs (see build/host/compact-programs.log)",
+      "log_sha256": "3d3738296f2992b2b276232c4165d448e0a943f1df1ca1d30f9175b84ee6cb61",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0360",
+      "name": "offline-browser-safety",
+      "state": "FAIL",
+      "status_line": "FAIL offline-browser-safety (see build/host/offline-browser-safety.log)",
+      "log_sha256": "d932c0d9589e358d2c6cb12ae649b1c52595916ebd6b3986de0c165ca49b0e8c",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0361",
+      "name": "offline-sequencer-browser",
+      "state": "FAIL",
+      "status_line": "FAIL offline-sequencer-browser (see build/host/offline-sequencer-browser.log)",
+      "log_sha256": "92ea5820d25c8215224bb1da528e84726fe1442525e3db49d55a9434095b5254",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0364",
+      "name": "offline-touchosc-lua",
+      "state": "FAIL",
+      "status_line": "FAIL offline-touchosc-lua (see build/host/offline-touchosc-lua.log)",
+      "log_sha256": "7c0272dca5c840f474584acdf11de3b17c190da208baf0831fdfcb159366ba12",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0395",
+      "name": "rec-endpoint-storage",
+      "state": "FAIL",
+      "status_line": "FAIL rec-endpoint-storage (see build/host/rec-endpoint-storage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0410",
+      "name": "control-recompile",
+      "state": "FAIL",
+      "status_line": "FAIL control-recompile (see build/host/control-recompile.log)",
+      "log_sha256": "d53c3b0f4fad86bd272b01dc6afdb944138a33f38d085e49f7c7fe982f46f127",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0411",
+      "name": "chicago-span-hold",
+      "state": "FAIL",
+      "status_line": "FAIL chicago-span-hold (see build/host/chicago-span-hold.log)",
+      "log_sha256": "ec4c3257e4bf6c8938d42fb11acc720cc350a7798f38d033c182c176a9269c7a",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0412",
+      "name": "fma-exact-identity",
+      "state": "FAIL",
+      "status_line": "FAIL fma-exact-identity (see build/host/fma-exact-identity.log)",
+      "log_sha256": "353aa7b9d600c1e81f450cd533b2e6e2d85aec7bcddcdd3161a8544e36c5a15d",
+      "observed_lsan_runtime_failure": true
+    },
+    {
+      "registration": "0424",
+      "name": "ui-synthone-patch",
+      "state": "FAIL",
+      "status_line": "FAIL ui-synthone-patch (see build/host/ui-synthone-patch.log)",
+      "log_sha256": "7f38355ed9d90c74ac5b56ab4bf4a17984306ed9be9743a42e4b0056ebcca3d1",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0426",
+      "name": "ui-drum-glyph",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-glyph (see build/host/ui-drum-glyph.log)",
+      "log_sha256": "d0e99e5d56d4113e30c7ff2eee3654c1845507986f20417fdf57f2100ba0b1a8",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0428",
+      "name": "ui-drum-curve-axes",
+      "state": "FAIL",
+      "status_line": "FAIL ui-drum-curve-axes (see build/host/ui-drum-curve-axes.log)",
+      "log_sha256": "de52a918c68247a9ce31afcc7bf73262c8387ddce05bf6adbc17e7fb6254f315",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0434",
+      "name": "ui-release-footer-mutants",
+      "state": "FAIL",
+      "status_line": "FAIL ui-release-footer-mutants (see build/host/ui-release-footer-mutants.log)",
+      "log_sha256": "6d534499895cff1f34a0fe07eb3cd72949b1275568ac25e4e144afdfc3093c5a",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0440",
+      "name": "ui-808-accent",
+      "state": "FAIL",
+      "status_line": "FAIL ui-808-accent (see build/host/ui-808-accent.log)",
+      "log_sha256": "f731b1c826441159e36d5cfc1f5e1e3375565c9bd50177446cf58d9220e4a932",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0451",
+      "name": "ui-pan-units",
+      "state": "FAIL",
+      "status_line": "FAIL ui-pan-units (see build/host/ui-pan-units.log)",
+      "log_sha256": "c63221a31f34ff3081311923722e6f95b0e2587e2eefe70d7be21ae00d4bb5a2",
+      "observed_lsan_runtime_failure": false
+    },
+    {
+      "registration": "0464",
+      "name": "ui-glyph-polish",
+      "state": "FAIL",
+      "status_line": "FAIL ui-glyph-polish (see build/host/ui-glyph-polish.log)",
+      "log_sha256": "4d4a33578089bb6a9e242c7abd55f1d10cf7fd0da5d64ac5ee46b6dd5d1320e1",
+      "observed_lsan_runtime_failure": false
+    }
+  ],
+  "sequencer_reference_not_run": true,
+  "gate_log_sha256": "fee43050d4e7a21944e5c5612c99d7fdc9fe946ce361230b816acc50bc4a0eb0",
+  "gate_status_lines": [
+    "[PASS] pool-accounting",
+    "[PASS] clean-tree",
+    "[PASS] setup",
+    "[SKIP] fetch-base",
+    "[PASS] no-loss",
+    "[PASS] limits",
+    "[FAIL] host-tests",
+    "[PASS] build-elite-pro",
+    "[PASS] flashmap",
+    "[PASS] budget",
+    "[FAIL] ui-defects"
+  ],
+  "terminal_gate_lines": [],
+  "gate_exit": 1,
+  "reports": [
+    {
+      "registration": "0001",
+      "state": "ok",
+      "test": "composed-features",
+      "status_line": "ok   composed-features",
+      "log_sha256": "5e92b3533c0153fa027b1da90f5cdd7c5d7250c3f094c4f8edc700b76fb2b890"
+    },
+    {
+      "registration": "0002",
+      "state": "ok",
+      "test": "juno6-runtime",
+      "status_line": "ok   juno6-runtime",
+      "log_sha256": "d35cde18b9e2dab60abb52e9f5087325dc6853ffb1bb989d7812b80391510c48"
+    },
+    {
+      "registration": "0003",
+      "state": "ok",
+      "test": "synthone-init-audio",
+      "status_line": "ok   synthone-init-audio",
+      "log_sha256": "28fcf0420a0e7b0f820b5bdb76c7d5a08855a82775ac72ff9ce7440f5697f17a"
+    },
+    {
+      "registration": "0004",
+      "state": "ok",
+      "test": "juno6-slot",
+      "status_line": "ok   juno6-slot",
+      "log_sha256": "2618ab7204e4b2b6e64fd74cb4c0bc58c6d5b45dee06b447725b8d676b874466"
+    },
+    {
+      "registration": "0005",
+      "state": "ok",
+      "test": "legacy-slot2-map",
+      "status_line": "ok   legacy-slot2-map",
+      "log_sha256": "a4e1123d40c96228f961cfd68ce9c70e1fdab674b4b52746344ca8b90516b909"
+    },
+    {
+      "registration": "0006",
+      "state": "ok",
+      "test": "juno6-dsp",
+      "status_line": "ok   juno6-dsp",
+      "log_sha256": "93cde5970292dbe56957a4c3384bbd859b909b6cee59c70e240d398c0257f74b"
+    },
+    {
+      "registration": "0007",
+      "state": "ok",
+      "test": "juno6-factory",
+      "status_line": "ok   juno6-factory",
+      "log_sha256": "baf84e5ced91d2b9d04dd98f1bda3d90cc6fe9178334b804919db92fb9282ed7"
+    },
+    {
+      "registration": "0008",
+      "state": "ok",
+      "test": "superj6-factory-load",
+      "status_line": "ok   superj6-factory-load",
+      "log_sha256": "9498c6d6f70ff37194f8a8e1f30190f7389cf8d42314c90a850a525a33945fc9"
+    },
+    {
+      "registration": "0009",
+      "state": "ok",
+      "test": "superj6-stock-wide",
+      "status_line": "ok   superj6-stock-wide",
+      "log_sha256": "4395ba180bbc2ba61ed32d80c0c31a4e055068fab7f15dd8dfa95f4e687c1f4f"
+    },
+    {
+      "registration": "0010",
+      "state": "ok",
+      "test": "usb-retry",
+      "status_line": "ok   usb-retry",
+      "log_sha256": "ff1cc9cc457b5fa014b10368c4b53bd6dafb5b414b7926e2e698c04b8de1f8a8"
+    },
+    {
+      "registration": "0011",
+      "state": "ok",
+      "test": "drum909-tanh-pair",
+      "status_line": "ok   drum909-tanh-pair",
+      "log_sha256": "a69aabb5ec0df44984caabab6a2cab9485d21cf682f26fd4478d69344539872b"
+    },
+    {
+      "registration": "0012",
+      "state": "FAIL",
+      "test": "composed-smc-panic",
+      "status_line": "FAIL composed-smc-panic (see build/host/composed-smc-panic.log)",
+      "log_sha256": "bc501d5ea58107d0ce640c89b45137623105a6a6eda924d472c067a4dcfe5d8d"
+    },
+    {
+      "registration": "0013",
+      "state": "ok",
+      "test": "composed-panic-cutover",
+      "status_line": "ok   composed-panic-cutover",
+      "log_sha256": "c8b1fae4432c05813e6beff96bfa75b4aa615d518abd3fe8a66fa361f4ead0f1"
+    },
+    {
+      "registration": "0014",
+      "state": "FAIL",
+      "test": "panic-clear",
+      "status_line": "FAIL panic-clear (see build/host/panic-clear.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe"
+    },
+    {
+      "registration": "0015",
+      "state": "ok",
+      "test": "composed-ui-identity",
+      "status_line": "ok   composed-ui-identity",
+      "log_sha256": "9bed56804f03303dc4e2f2833a7a142c1e78fe2057adde5b5363b853ae31cab7"
+    },
+    {
+      "registration": "0016",
+      "state": "ok",
+      "test": "synthone-slot",
+      "status_line": "ok   synthone-slot",
+      "log_sha256": "730e12165d86507a37638fa72b261603beaf5e700e22e6f6b949cb164f955955"
+    },
+    {
+      "registration": "0017",
+      "state": "ok",
+      "test": "synthone-envelope-dnbx",
+      "status_line": "ok   synthone-envelope-dnbx",
+      "log_sha256": "489e0334ae8613a0fb382dd313f1e12109e8226e37755ad7bc304caca50b1e9a"
+    },
+    {
+      "registration": "0018",
+      "state": "ok",
+      "test": "juno-slot-integration",
+      "status_line": "ok   juno-slot-integration",
+      "log_sha256": "6795e5da33e547594283e7a7c8837b5808c3709eaee354dbcdc4876e2e06a49e"
+    },
+    {
+      "registration": "0019",
+      "state": "ok",
+      "test": "poly-chord-integration",
+      "status_line": "ok   poly-chord-integration",
+      "log_sha256": "334f4a3ad178b1ee540253acbfeb3aae1fd0a33b0f39243840cfee6c7e2efdfc"
+    },
+    {
+      "registration": "0020",
+      "state": "ok",
+      "test": "project-rates-companion",
+      "status_line": "ok   project-rates-companion",
+      "log_sha256": "86b6ad92e927276bce4ddb4bd773a72c795c1e707d05bc141a38b5716fb944cc"
+    },
+    {
+      "registration": "0021",
+      "state": "FAIL",
+      "test": "composed-midi-epoch",
+      "status_line": "FAIL composed-midi-epoch (see build/host/composed-midi-epoch.log)",
+      "log_sha256": "bd7a1aa5504779b1a97927bccae3c1fa281ef33e1f6ff1686bfa5ff815a8e448"
+    },
+    {
+      "registration": "0022",
+      "state": "ok",
+      "test": "break-retrigger-lut",
+      "status_line": "ok   break-retrigger-lut",
+      "log_sha256": "7c4c2e6f4c2278938e997a8c0dd7234763b5075f03c82cfc9d424d73f9bf6671"
+    },
+    {
+      "registration": "0023",
+      "state": "ok",
+      "test": "break-retrigger-law",
+      "status_line": "ok   break-retrigger-law",
+      "log_sha256": "a2399aebf3d8062f16af6ea05927fec9d0d6fa2596bf9d27efb8204749a7c62f"
+    },
+    {
+      "registration": "0024",
+      "state": "ok",
+      "test": "dsp-host-linkage",
+      "status_line": "ok   dsp-host-linkage",
+      "log_sha256": "101502d810c58282aa4106461bbe0a2d8ea7b5436b87916aea1d646f8a5ef918"
+    },
+    {
+      "registration": "0025",
+      "state": "ok",
+      "test": "fastmath",
+      "status_line": "ok   fastmath",
+      "log_sha256": "55570686ef73f43fe35e77cedb364005290a572013b8c5d7f5f06a2095ea90f4"
+    },
+    {
+      "registration": "0026",
+      "state": "ok",
+      "test": "fastmath-ubsan",
+      "status_line": "ok   fastmath-ubsan",
+      "log_sha256": "55570686ef73f43fe35e77cedb364005290a572013b8c5d7f5f06a2095ea90f4"
+    },
+    {
+      "registration": "0027",
+      "state": "ok",
+      "test": "home-tie-semantics",
+      "status_line": "ok   home-tie-semantics",
+      "log_sha256": "c93d523e27ba92decce28bba82d9ff354035a1f11c2607cfce48bb500bd196af"
+    },
+    {
+      "registration": "0028",
+      "state": "ok",
+      "test": "sequencer",
+      "status_line": "ok   sequencer",
+      "log_sha256": "9dbb0f0827a1333825b05f6fa5681f820c37b41a77a29fa5a6d31cf5df7b40d9"
+    },
+    {
+      "registration": "0029",
+      "state": "ok",
+      "test": "seq-chain-atomic",
+      "status_line": "ok   seq-chain-atomic",
+      "log_sha256": "47b62964573ac3edb230ddc8786e409455bd912f908dfc535bbb3787bc4c0f04"
+    },
+    {
+      "registration": "0030",
+      "state": "ok",
+      "test": "chain-longest-playing",
+      "status_line": "ok   chain-longest-playing",
+      "log_sha256": "c0483d269d207e24a5c39f69927c7c832a279599ed12c9da153be3ec74bba8bd"
+    },
+    {
+      "registration": "0031",
+      "state": "ok",
+      "test": "bass-prob-midi",
+      "status_line": "ok   bass-prob-midi",
+      "log_sha256": "d29863702f2212647b5e3a6a131c9a5401855c98f3690f25273888f37121f983"
+    },
+    {
+      "registration": "0032",
+      "state": "ok",
+      "test": "bass-303-adapt",
+      "status_line": "ok   bass-303-adapt",
+      "log_sha256": "a66f66485b8e0672e991788cdd4e45365cee23b38f1c2e78ca66e50c7009251a"
+    },
+    {
+      "registration": "0033",
+      "state": "ok",
+      "test": "seq-tb3po-bars",
+      "status_line": "ok   seq-tb3po-bars",
+      "log_sha256": "2be660abaf104ea3aa73cc8b434fe3ec19ed3c8f6ae61bb17600ee38b8218c0b"
+    },
+    {
+      "registration": "0034",
+      "state": "ok",
+      "test": "seq-random-swing",
+      "status_line": "ok   seq-random-swing",
+      "log_sha256": "e19c2844463c843444af95cc67953c39d73f7fa09bf1718f8319974572b35c9a"
+    },
+    {
+      "registration": "0035",
+      "state": "ok",
+      "test": "seq-random-clock-handoff",
+      "status_line": "ok   seq-random-clock-handoff",
+      "log_sha256": "d919639193c9cd08d5ca747a4d90a3f40bbd91416e14a7bb7dce28faa521bc88"
+    },
+    {
+      "registration": "0036",
+      "state": "ok",
+      "test": "seq-eighth-quarter",
+      "status_line": "ok   seq-eighth-quarter",
+      "log_sha256": "718170e7abbbf8127677ce1c72ae10c69f906dda0e67a97a7c84632d94ef44c8"
+    },
+    {
+      "registration": "0037",
+      "state": "ok",
+      "test": "held-chords",
+      "status_line": "ok   held-chords",
+      "log_sha256": "ece1216486c508311655baa1b2843c1c3a22108cfaa562e17f665961af29d894"
+    },
+    {
+      "registration": "0038",
+      "state": "ok",
+      "test": "held-chord-integration",
+      "status_line": "ok   held-chord-integration",
+      "log_sha256": "deb93e3cf7dc4345472496e61147c59244826d9d7dbafd35eb13bc3c085c8b65"
+    },
+    {
+      "registration": "0039",
+      "state": "ok",
+      "test": "queued-mutes",
+      "status_line": "ok   queued-mutes",
+      "log_sha256": "919ec78c2ba4920674b164da753e96f90565876e03ab95c496e935f950704660"
+    },
+    {
+      "registration": "0040",
+      "state": "ok",
+      "test": "break-rate",
+      "status_line": "ok   break-rate",
+      "log_sha256": "5b3faf8a04982d8d03ab60b8347a52801433126bd34730cc33b288e0a3f6fc2e"
+    },
+    {
+      "registration": "0041",
+      "state": "ok",
+      "test": "seq-long-notes",
+      "status_line": "ok   seq-long-notes",
+      "log_sha256": "f62500f129b284ae4c13b5ddd038a3fbce0691946ed01c19ae00418cbeb7709a"
+    },
+    {
+      "registration": "0042",
+      "state": "ok",
+      "test": "seq-pingpong-resize",
+      "status_line": "ok   seq-pingpong-resize",
+      "log_sha256": "6cb47a8fcfd3ad51fdc5a9d43d028b7c5d027a4ade51d19603408043c3bf1c73"
+    },
+    {
+      "registration": "0043",
+      "state": "ok",
+      "test": "clk-lock",
+      "status_line": "ok   clk-lock",
+      "log_sha256": "0f5b892adc95fc5a3e3a957f0142dd684e4c8b1624378ebd0bb3130ae68b4a34"
+    },
+    {
+      "registration": "0044",
+      "state": "ok",
+      "test": "seq-random-tie-preview",
+      "status_line": "ok   seq-random-tie-preview",
+      "log_sha256": "09b8b0f230ecae6633033f1d91677efd669fe552a5c33338947a6625eaf1968a"
+    },
+    {
+      "registration": "0045",
+      "state": "ok",
+      "test": "encoder",
+      "status_line": "ok   encoder",
+      "log_sha256": "782ad031458770b476dd5aca5a2a51a6054c8cae14f4d66cc25b90c637e1b061"
+    },
+    {
+      "registration": "0046",
+      "state": "ok",
+      "test": "bass-midi-pending-native",
+      "status_line": "ok   bass-midi-pending-native",
+      "log_sha256": "60958420490a2ead0d660f23df54e2c1e92e4baa03991f8686a98044e16947fe"
+    },
+    {
+      "registration": "0047",
+      "state": "ok",
+      "test": "usb-product-names",
+      "status_line": "ok   usb-product-names",
+      "log_sha256": "dda20938eee90b5345966689781ed71c5918354672b66b0600ec486e4a9a3432"
+    },
+    {
+      "registration": "0048",
+      "state": "ok",
+      "test": "nightly-version",
+      "status_line": "ok   nightly-version",
+      "log_sha256": "47573b6be2a804a98b743456538636f2db56a99a3776c4b7a7186e028a03eefe"
+    },
+    {
+      "registration": "0049",
+      "state": "ok",
+      "test": "nightly-package",
+      "status_line": "ok   nightly-package",
+      "log_sha256": "9552935f49cf3e76442b2bd2237da6bf672c2805f2bcd4e38dd136ffcc775a59"
+    },
+    {
+      "registration": "0050",
+      "state": "ok",
+      "test": "uac",
+      "status_line": "ok   uac",
+      "log_sha256": "2806b5eeaa9f8f256bedce9fb56d95e56c17256eea97d7012904a48294f62659"
+    },
+    {
+      "registration": "0051",
+      "state": "ok",
+      "test": "uac-out",
+      "status_line": "ok   uac-out",
+      "log_sha256": "29bbc7df1e95ea68fc820570f07466dda9a387a272af721c39683aa5a119955d"
+    },
+    {
+      "registration": "0052",
+      "state": "ok",
+      "test": "uac-out-irq",
+      "status_line": "ok   uac-out-irq",
+      "log_sha256": "2a950e536df373fda14af02920512c065264795467fd3d3a05378b0193df336f"
+    },
+    {
+      "registration": "0053",
+      "state": "ok",
+      "test": "usb-audio-descriptors",
+      "status_line": "ok   usb-audio-descriptors",
+      "log_sha256": "015ac2fc41c763d6d5fbb291d65149334d92bcde65ef5f21840926b33b12cc5a"
+    },
+    {
+      "registration": "0054",
+      "state": "ok",
+      "test": "trs",
+      "status_line": "ok   trs",
+      "log_sha256": "adb7bd0ea7a0c27b38ba4b0dedb94c5806186e704caf3e5dd7e43ec730284fef"
+    },
+    {
+      "registration": "0055",
+      "state": "ok",
+      "test": "undo",
+      "status_line": "ok   undo",
+      "log_sha256": "222d4cf01d17e9e612fc3377fb135fb840ed84d4d1a7c630187accae7de222a9"
+    },
+    {
+      "registration": "0056",
+      "state": "ok",
+      "test": "undo-capacity",
+      "status_line": "ok   undo-capacity",
+      "log_sha256": "a2e88b7e5e998892e06abb79ff75eff4cef991148509e54617a41f5beb856c73"
+    },
+    {
+      "registration": "0057",
+      "state": "ok",
+      "test": "lz",
+      "status_line": "ok   lz",
+      "log_sha256": "c1239ab364cd4182d68ca884e953649f49e841c6768ba10582bb133381cb291e"
+    },
+    {
+      "registration": "0058",
+      "state": "ok",
+      "test": "motion",
+      "status_line": "ok   motion",
+      "log_sha256": "4d91e54dfc9a91a2628759cd5edde76cc8e11e1d9e9ce2c811cac7fd4827a7bb"
+    },
+    {
+      "registration": "0059",
+      "state": "ok",
+      "test": "motion-pattern-handoff",
+      "status_line": "ok   motion-pattern-handoff",
+      "log_sha256": "8184155c9ff38db5c6da86a88a1d0f3e0a755e822eb774c28a801037045b21b8"
+    },
+    {
+      "registration": "0060",
+      "state": "ok",
+      "test": "host-build",
+      "status_line": "ok   host-build",
+      "log_sha256": "48c72693d7c163f11bf47132a7cd56cc5083febf11e96dc6ba17a5df5cb44025"
+    },
+    {
+      "registration": "0061",
+      "state": "FAIL",
+      "test": "original-release-integration",
+      "status_line": "FAIL original-release-integration (see build/host/original-release-integration.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0062",
+      "state": "FAIL",
+      "test": "chicago-fx2-inserts",
+      "status_line": "FAIL chicago-fx2-inserts (see build/host/chicago-fx2-inserts.log)",
+      "log_sha256": "8b077928b305558258ee611ce203773e3fd54c3af1cfb4a2f632e0a80a2462eb"
+    },
+    {
+      "registration": "0063",
+      "state": "FAIL",
+      "test": "original-sound-cell",
+      "status_line": "FAIL original-sound-cell (see build/host/original-sound-cell.log)",
+      "log_sha256": "6c4ef4405eb2401c736e2728bb3075bc8abed8e52ceb210e999109162902bc44"
+    },
+    {
+      "registration": "0064",
+      "state": "FAIL",
+      "test": "original-release-ui",
+      "status_line": "FAIL original-release-ui (see build/host/original-release-ui.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0065",
+      "state": "FAIL",
+      "test": "original-build",
+      "status_line": "FAIL original-build (see build/host/original-build.log)",
+      "log_sha256": "630148506e2df0d91c8b2898854030085fedd77a047c05ef4e7093cd7a92a546"
+    },
+    {
+      "registration": "0066",
+      "state": "ok",
+      "test": "load-guard-diagnostic",
+      "status_line": "ok   load-guard-diagnostic",
+      "log_sha256": "da496216bb2d4b34b909dcfdc7e826dac95128b081d5da651086f5b7190b5984"
+    },
+    {
+      "registration": "0067",
+      "state": "ok",
+      "test": "state-trace-diagnostic",
+      "status_line": "ok   state-trace-diagnostic",
+      "log_sha256": "9c72696b01d9d9ae2d3352c93bfcbe93abf7cc0a7b7046cf543b8d62fc9fa6d6"
+    },
+    {
+      "registration": "0068",
+      "state": "ok",
+      "test": "play-question",
+      "status_line": "ok   play-question",
+      "log_sha256": "2bf436ff0ebbf3f242be93f954e78259d6a8f5ef9c56c8b40a5e3f1a615e3e8f"
+    },
+    {
+      "registration": "0069",
+      "state": "ok",
+      "test": "play-question-ui",
+      "status_line": "ok   play-question-ui",
+      "log_sha256": "fda59bf5c8eea4ad2443e6dbc75ca053457b9c4afc3984e1cec8478edf1f4546"
+    },
+    {
+      "registration": "0070",
+      "state": "ok",
+      "test": "engine-public-header",
+      "status_line": "ok   engine-public-header",
+      "log_sha256": "e7ee6af46072ad11859e8b9eeb62fc60a1f2ae9f17a0bbb94d1588d26bf39bef"
+    },
+    {
+      "registration": "0071",
+      "state": "FAIL",
+      "test": "sound-reset",
+      "status_line": "FAIL sound-reset (see build/host/sound-reset.log)",
+      "log_sha256": "8c837824d2d6c41f6bfa238a63d22d629dfbc64fba24166042c8ea6709f7de01"
+    },
+    {
+      "registration": "0072",
+      "state": "ok",
+      "test": "held-step-release",
+      "status_line": "ok   held-step-release",
+      "log_sha256": "2063cce8b1a282881361507dd01c8b2a68d723bca40306612c30de939985c88b"
+    },
+    {
+      "registration": "0073",
+      "state": "ok",
+      "test": "lz-max-match",
+      "status_line": "ok   lz-max-match",
+      "log_sha256": "0ccf6be526fcb4258284a9534deacba43a09d069d3b3f2661b7dfd5b17240cb1"
+    },
+    {
+      "registration": "0074",
+      "state": "ok",
+      "test": "panic-chord",
+      "status_line": "ok   panic-chord",
+      "log_sha256": "ac9c53524085b6d20b1a0d0c586d7d4154d10d3af2bad13f851a330373b0fcf3"
+    },
+    {
+      "registration": "0075",
+      "state": "FAIL",
+      "test": "panic-notes",
+      "status_line": "FAIL panic-notes (see build/host/panic-notes.log)",
+      "log_sha256": "88a26b60008dbe5daea3630e972051148bb4c532f43468e4adb18275eaed661a"
+    },
+    {
+      "registration": "0076",
+      "state": "FAIL",
+      "test": "drum-fill",
+      "status_line": "FAIL drum-fill (see build/host/drum-fill.log)",
+      "log_sha256": "19d3a7976351da09d8622eebbdae2d096d22cc325223b1f0fd3b2cd29cf6cd45"
+    },
+    {
+      "registration": "0077",
+      "state": "FAIL",
+      "test": "cq-reclaim",
+      "status_line": "FAIL cq-reclaim (see build/host/cq-reclaim.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe"
+    },
+    {
+      "registration": "0078",
+      "state": "ok",
+      "test": "cq-shift-preempt",
+      "status_line": "ok   cq-shift-preempt",
+      "log_sha256": "8c13bcb981846dd03fefa0edc473da2289298aa90647c2fe4e41856d754615c0"
+    },
+    {
+      "registration": "0079",
+      "state": "FAIL",
+      "test": "panic-order",
+      "status_line": "FAIL panic-order (see build/host/panic-order.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe"
+    },
+    {
+      "registration": "0080",
+      "state": "ok",
+      "test": "panic-mutants",
+      "status_line": "ok   panic-mutants",
+      "log_sha256": "eff7c031c16bed836eede39c8c509e5713f322441d0f5bb7bc50cc849421f562"
+    },
+    {
+      "registration": "0081",
+      "state": "ok",
+      "test": "panic-mutants-runner",
+      "status_line": "ok   panic-mutants-runner",
+      "log_sha256": "5348c7b8ebdc76cf5e11442e3f402be60feae318d74ab5f59fdc33b3e3360135"
+    },
+    {
+      "registration": "0082",
+      "state": "ok",
+      "test": "live-key-epoch",
+      "status_line": "ok   live-key-epoch",
+      "log_sha256": "53a2cfb1bace2b6e57dc7f9a8f6bbf172723a830b3caf63700576d6820d59688"
+    },
+    {
+      "registration": "0083",
+      "state": "ok",
+      "test": "midi-epoch-step",
+      "status_line": "ok   midi-epoch-step",
+      "log_sha256": "bbcc55caa476acfa7d748a44a468862ea6af1ac02323367030cbbb3b2fe9b81a"
+    },
+    {
+      "registration": "0084",
+      "state": "ok",
+      "test": "roadmap-generation",
+      "status_line": "ok   roadmap-generation",
+      "log_sha256": "fd28dd67a3b5ce8965de4d6953e87e3029e8c3c2853f7cb9e2950f3509ab6d46"
+    },
+    {
+      "registration": "0085",
+      "state": "ok",
+      "test": "roadmap-current",
+      "status_line": "ok   roadmap-current",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0086",
+      "state": "FAIL",
+      "test": "optimization-equivalence",
+      "status_line": "FAIL optimization-equivalence (see build/host/optimization-equivalence.log)",
+      "log_sha256": "76145cab3f17628b37a6645e5dffd899637366cc832215a4d783d83118e1ca30"
+    },
+    {
+      "registration": "0087",
+      "state": "ok",
+      "test": "sdk-pin",
+      "status_line": "ok   sdk-pin",
+      "log_sha256": "4abfe64afa4f84d01430a615ec6b3d888709f8f03df4f4a83a7fd1b49ae460f4"
+    },
+    {
+      "registration": "0088",
+      "state": "ok",
+      "test": "native-nightly-probe",
+      "status_line": "ok   native-nightly-probe",
+      "log_sha256": "3877d0f1dfcd5b6a1b4a65059b5d8421cd5fb78df5259e785e09c1bf4ccc533c"
+    },
+    {
+      "registration": "0089",
+      "state": "ok",
+      "test": "freeplay-rate-pads",
+      "status_line": "ok   freeplay-rate-pads",
+      "log_sha256": "32507a209990abc539b7156cb47cd7bacdebef45cbaa6499a33da9925dfc41a0"
+    },
+    {
+      "registration": "0090",
+      "state": "ok",
+      "test": "freeplay-live-keys",
+      "status_line": "ok   freeplay-live-keys",
+      "log_sha256": "4630d275aa80ae0cf5600fc30e534e1723a27ef5f4143faee598e39c9659ee4d"
+    },
+    {
+      "registration": "0091",
+      "state": "ok",
+      "test": "synth-bus-mute",
+      "status_line": "ok   synth-bus-mute",
+      "log_sha256": "3daefdabace384186f2c9ef06a2a9cbdd9cec1ef6605fe9e59c05d4daaa641c3"
+    },
+    {
+      "registration": "0092",
+      "state": "ok",
+      "test": "storage-warning",
+      "status_line": "ok   storage-warning",
+      "log_sha256": "0b159988dc1b9b8cdf97d6f2d9abb2a99e7fe9019776a92157d12ff145e0f574"
+    },
+    {
+      "registration": "0093",
+      "state": "ok",
+      "test": "freeplay-latency",
+      "status_line": "ok   freeplay-latency",
+      "log_sha256": "8e567b9cf4aa6c162d84df578621a8fa60d98d083487b0bdf1e7a834e15a9d52"
+    },
+    {
+      "registration": "0094",
+      "state": "ok",
+      "test": "lcd-bounded-tiles",
+      "status_line": "ok   lcd-bounded-tiles",
+      "log_sha256": "caf7321fd92cbd4d4635083b46a0c25dbc970fb557c4591d50587d728762b803"
+    },
+    {
+      "registration": "0095",
+      "state": "ok",
+      "test": "pads-in-settings",
+      "status_line": "ok   pads-in-settings",
+      "log_sha256": "395950637d92104c3cb24e48452250c2184c1ced6f85190c9b7a33ae97ea8f6e"
+    },
+    {
+      "registration": "0096",
+      "state": "ok",
+      "test": "boot-screen",
+      "status_line": "ok   boot-screen",
+      "log_sha256": "d96abf7edbbf8db347c20713230575a78846166b6e6c979a4d736baa22ebace5"
+    },
+    {
+      "registration": "0097",
+      "state": "FAIL",
+      "test": "ui-theme",
+      "status_line": "FAIL ui-theme (see build/host/ui-theme.log)",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0098",
+      "state": "ok",
+      "test": "project-protocol",
+      "status_line": "ok   project-protocol",
+      "log_sha256": "1a9773fc5a168928c7a4fecbd6111a80335e6b6ba03ff75e1fc1d143142b779e"
+    },
+    {
+      "registration": "0099",
+      "state": "ok",
+      "test": "project-save-preflight",
+      "status_line": "ok   project-save-preflight",
+      "log_sha256": "410315ddd38215d173deebd368ff18f825585b33531978f3f1988a8f940c7014"
+    },
+    {
+      "registration": "0100",
+      "state": "ok",
+      "test": "editor-ota-dispatch",
+      "status_line": "ok   editor-ota-dispatch",
+      "log_sha256": "e84444147359ff21eacd0637e2f285835fda0e1220fabe270226fb53c8930d5f"
+    },
+    {
+      "registration": "0101",
+      "state": "ok",
+      "test": "editor-read-area",
+      "status_line": "ok   editor-read-area",
+      "log_sha256": "9863a7d58c9cdd7f9ec3566c5967e0988d7ca24badac183cf9813e8c47b2f7ca"
+    },
+    {
+      "registration": "0102",
+      "state": "ok",
+      "test": "sample-header-alignment",
+      "status_line": "ok   sample-header-alignment",
+      "log_sha256": "8ae10f1ec17ea6e225d97ed7890df7b06b791e031c7dc777d384b8528b72e1ae"
+    },
+    {
+      "registration": "0103",
+      "state": "ok",
+      "test": "editor-diagnostic-count",
+      "status_line": "ok   editor-diagnostic-count",
+      "log_sha256": "4d1154cf7ff8912f91f1f73b30e29710347beb54e51e320dda4b63aec5921f9c"
+    },
+    {
+      "registration": "0104",
+      "state": "ok",
+      "test": "storage-scratch",
+      "status_line": "ok   storage-scratch",
+      "log_sha256": "07c82f340a8a59d540dc10a9259d40152de582b16e41669e8fff00655276334e"
+    },
+    {
+      "registration": "0105",
+      "state": "FAIL",
+      "test": "project-stage",
+      "status_line": "FAIL project-stage (see build/host/project-stage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577"
+    },
+    {
+      "registration": "0106",
+      "state": "FAIL",
+      "test": "pattern-preset-notelock",
+      "status_line": "FAIL pattern-preset-notelock (see build/host/pattern-preset-notelock.log)",
+      "log_sha256": "d4b75d41c9607ab091b553b62e61e23840f4ad336319241e5ab75ac2a9caebcb"
+    },
+    {
+      "registration": "0107",
+      "state": "ok",
+      "test": "project-runtime",
+      "status_line": "ok   project-runtime",
+      "log_sha256": "6c88c4343aa82bd1969ee5a2b92a784053130d25cc72a8b0184c0e11f4a10e01"
+    },
+    {
+      "registration": "0108",
+      "state": "ok",
+      "test": "save-note-quiet",
+      "status_line": "ok   save-note-quiet",
+      "log_sha256": "f3254dcc54528e3042cf46df7a1dd85aa76d03b87bf363b24e7d88485432252d"
+    },
+    {
+      "registration": "0109",
+      "state": "ok",
+      "test": "font-pack",
+      "status_line": "ok   font-pack",
+      "log_sha256": "50d0db6e9cc0192956492e729a193cf40e005d4b2bc68c466e85076ba4049204"
+    },
+    {
+      "registration": "0110",
+      "state": "ok",
+      "test": "font-cap-metrics",
+      "status_line": "ok   font-cap-metrics",
+      "log_sha256": "a4e96b3048dfb6f1c84c195e3d058f0d860277e8c173f88e62c9efc42c33c039"
+    },
+    {
+      "registration": "0111",
+      "state": "ok",
+      "test": "smc-protocol",
+      "status_line": "ok   smc-protocol",
+      "log_sha256": "7dd80227d6127e4d93cd62751cc2242f4123ac82ccaa3e744c9a433c6bce773b"
+    },
+    {
+      "registration": "0112",
+      "state": "ok",
+      "test": "smc-fader",
+      "status_line": "ok   smc-fader",
+      "log_sha256": "d0188c0936de6698d2ac4c58c843bd746bd27d0e986df3f9e104494a708a8fe2"
+    },
+    {
+      "registration": "0113",
+      "state": "ok",
+      "test": "smc-buttons",
+      "status_line": "ok   smc-buttons",
+      "log_sha256": "e880287af13ea82c662e0fd18a7d8f35d426801620a6d60e4867a91b3fa9fb23"
+    },
+    {
+      "registration": "0114",
+      "state": "ok",
+      "test": "smc-select-mode",
+      "status_line": "ok   smc-select-mode",
+      "log_sha256": "8d05c538a7da914f6e454afd4425d3140777de9d1b55476145c0619de7350c6d"
+    },
+    {
+      "registration": "0115",
+      "state": "ok",
+      "test": "smc-fx",
+      "status_line": "ok   smc-fx",
+      "log_sha256": "64c4964dd0cf9b30e880cfcb9f49cf77ebbebfec687c619e35e8176f17f377d4"
+    },
+    {
+      "registration": "0116",
+      "state": "ok",
+      "test": "smc-mixer-edges",
+      "status_line": "ok   smc-mixer-edges",
+      "log_sha256": "77dd7ed4a534bed68abccd844fa74cc71b6f2c788b01c7b5e7e0755c22f4a3a8"
+    },
+    {
+      "registration": "0117",
+      "state": "ok",
+      "test": "smc-action-source",
+      "status_line": "ok   smc-action-source",
+      "log_sha256": "f2c70e61a48bc7da8ada1dd8117e47e90308be0da8d949f23e5a22ffe13ff498"
+    },
+    {
+      "registration": "0118",
+      "state": "ok",
+      "test": "smc-fx-caption",
+      "status_line": "ok   smc-fx-caption",
+      "log_sha256": "5c29d4d87a6f61c21a9a7fb305ad7803663788036f5603dbbaf64667cc2c2768"
+    },
+    {
+      "registration": "0119",
+      "state": "ok",
+      "test": "smc-fx-page-port",
+      "status_line": "ok   smc-fx-page-port",
+      "log_sha256": "8cd523c8c15cc6d0e427dc640ffac12f8eb319838a61f4ae13662136b690f988"
+    },
+    {
+      "registration": "0120",
+      "state": "ok",
+      "test": "smc-fx-two-page-strip",
+      "status_line": "ok   smc-fx-two-page-strip",
+      "log_sha256": "e6a25d91112919cb5e722db096be30004395464ec538a247bd766d08b140919c"
+    },
+    {
+      "registration": "0121",
+      "state": "ok",
+      "test": "smc-fx-echo-page",
+      "status_line": "ok   smc-fx-echo-page",
+      "log_sha256": "4e6177ab8946c4deffe7234c22001e3805f8add4ba40d74809418b44b4054f53"
+    },
+    {
+      "registration": "0122",
+      "state": "ok",
+      "test": "smc-fx-peer-view",
+      "status_line": "ok   smc-fx-peer-view",
+      "log_sha256": "b6d26e4b8ed02e5f4bb7f27af943fb3d4a9806356d50c6d61e2e194c6761b4d4"
+    },
+    {
+      "registration": "0123",
+      "state": "ok",
+      "test": "smc-fx-preset-preserve",
+      "status_line": "ok   smc-fx-preset-preserve",
+      "log_sha256": "1088b2b6a840d73f3d92d6dcc0f474aed387f9ea4bba7ae2987d2c8557add222"
+    },
+    {
+      "registration": "0124",
+      "state": "ok",
+      "test": "smc-queue",
+      "status_line": "ok   smc-queue",
+      "log_sha256": "da6b4dac8ef71a42c86a5719f3c42555d17693de206db28ec95344beabbd26cb"
+    },
+    {
+      "registration": "0125",
+      "state": "ok",
+      "test": "smc-solo-overflow",
+      "status_line": "ok   smc-solo-overflow",
+      "log_sha256": "791b7bb65e19a2e0a8f090b20a639c2b719d8d3c28b6ce691d4b6157c95fc2e9"
+    },
+    {
+      "registration": "0126",
+      "state": "ok",
+      "test": "engine-cq-rec-overflow",
+      "status_line": "ok   engine-cq-rec-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0127",
+      "state": "ok",
+      "test": "engine-cq-isr-preemption",
+      "status_line": "ok   engine-cq-isr-preemption",
+      "log_sha256": "8d2034e8caf68b7e177182c9bf12d93bc9324f1c6291d4cf6416405d2827cf99"
+    },
+    {
+      "registration": "0128",
+      "state": "ok",
+      "test": "engine-cq-boff-overflow",
+      "status_line": "ok   engine-cq-boff-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0129",
+      "state": "ok",
+      "test": "engine-cq-brk-overflow",
+      "status_line": "ok   engine-cq-brk-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0130",
+      "state": "ok",
+      "test": "engine-cq-bon-overflow",
+      "status_line": "ok   engine-cq-bon-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0131",
+      "state": "ok",
+      "test": "engine-cq-drum-overflow",
+      "status_line": "ok   engine-cq-drum-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0132",
+      "state": "FAIL",
+      "test": "engine-808-scratch-alias",
+      "status_line": "FAIL engine-808-scratch-alias (see build/host/engine-808-scratch-alias.log)",
+      "log_sha256": "1a370d3c21a00bb3b7f30232eae193daec2c309b65112ee712fb99bb547c4ba1"
+    },
+    {
+      "registration": "0133",
+      "state": "ok",
+      "test": "midi-mq-noteoff-overflow",
+      "status_line": "ok   midi-mq-noteoff-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0134",
+      "state": "ok",
+      "test": "midi-mq-rt-overflow",
+      "status_line": "ok   midi-mq-rt-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0135",
+      "state": "ok",
+      "test": "midi-overflow-order",
+      "status_line": "ok   midi-overflow-order",
+      "log_sha256": "91458317ae5a7f3be9a3c8146754cd0102e20f25720003a832e762cefa4965b1"
+    },
+    {
+      "registration": "0136",
+      "state": "ok",
+      "test": "midi-out-mq-noteoff-overflow",
+      "status_line": "ok   midi-out-mq-noteoff-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0137",
+      "state": "ok",
+      "test": "ble-out-noteoff-overflow",
+      "status_line": "ok   ble-out-noteoff-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0138",
+      "state": "ok",
+      "test": "ble-out-rt-overflow",
+      "status_line": "ok   ble-out-rt-overflow",
+      "log_sha256": "dc51b8c96c2d745df3bd5590d990230a482fd247123599548e0632fdbf97fc22"
+    },
+    {
+      "registration": "0139",
+      "state": "ok",
+      "test": "usb-sxq-sticky-apc",
+      "status_line": "ok   usb-sxq-sticky-apc",
+      "log_sha256": "36640f43ea2fac676ade7dbaeea2d939b9abd33ae82f4471c9d924141ae712df"
+    },
+    {
+      "registration": "0140",
+      "state": "ok",
+      "test": "usb-live-update",
+      "status_line": "ok   usb-live-update",
+      "log_sha256": "16c42f265e3506a92e671820b841ff2cf2119d7ad3e4f7d946717a6a0dd6b90c"
+    },
+    {
+      "registration": "0141",
+      "state": "ok",
+      "test": "live-a-mix-report",
+      "status_line": "ok   live-a-mix-report",
+      "log_sha256": "60bb849356ffbc091f601e17fc6ae0b2eb5e26d734d433da020c6e775efbf97f"
+    },
+    {
+      "registration": "0142",
+      "state": "ok",
+      "test": "smc-host-data7",
+      "status_line": "ok   smc-host-data7",
+      "log_sha256": "a046ad952b0f503a327f63344e8d9c4774d3e42669bc75535a429de17d10b59f"
+    },
+    {
+      "registration": "0143",
+      "state": "ok",
+      "test": "smc-host-overflow-data7",
+      "status_line": "ok   smc-host-overflow-data7",
+      "log_sha256": "0182e71d3051c47473c593acba6ad5fabacb07ca6b3369544b14f019887fbe44"
+    },
+    {
+      "registration": "0144",
+      "state": "ok",
+      "test": "smc-sender-isolation",
+      "status_line": "ok   smc-sender-isolation",
+      "log_sha256": "15fe5ddaad57091be40b1d9d3e98e8ca71d9f668bdddf0e0e30f36a8e108b3e2"
+    },
+    {
+      "registration": "0145",
+      "state": "ok",
+      "test": "ble-ctl-fail-return",
+      "status_line": "ok   ble-ctl-fail-return",
+      "log_sha256": "f807a6c0ee4eea8c70ed4d1af64c4ba5a6e79f803bd48ff0b234c87ea4fdb27b"
+    },
+    {
+      "registration": "0146",
+      "state": "ok",
+      "test": "smc-ble-payload",
+      "status_line": "ok   smc-ble-payload",
+      "log_sha256": "d4caaa3d6a414be8a30949f0404ae818c00f3e2f5f0cae84ed91efa60f1ff2fb"
+    },
+    {
+      "registration": "0147",
+      "state": "ok",
+      "test": "smc-link",
+      "status_line": "ok   smc-link",
+      "log_sha256": "6acfec670f28c0e602b8233967a67b0032000ab4b7581162950e451bdbca28c9"
+    },
+    {
+      "registration": "0148",
+      "state": "ok",
+      "test": "smc-reconnect-epoch",
+      "status_line": "ok   smc-reconnect-epoch",
+      "log_sha256": "ef568498ffe11daa582e1915912341f32197af975e3e2f43dcf26fd515215837"
+    },
+    {
+      "registration": "0149",
+      "state": "ok",
+      "test": "smc-boot-saved-roles",
+      "status_line": "ok   smc-boot-saved-roles",
+      "log_sha256": "feba0c2e097ccf11fc8f60cf01751d66faa51605a614e797824cb36a7a7075f8"
+    },
+    {
+      "registration": "0150",
+      "state": "ok",
+      "test": "ble-central-first-notification",
+      "status_line": "ok   ble-central-first-notification",
+      "log_sha256": "e389722a0b1d71dda2acf8c0d1c1e1a1416f5de9d55546b4558c86da70cdce54"
+    },
+    {
+      "registration": "0151",
+      "state": "ok",
+      "test": "ble-active-peer-contract",
+      "status_line": "ok   ble-active-peer-contract",
+      "log_sha256": "f6b1192c62976deb44c6d66c9daebd093cad23c6a08c9d7bf0270287530e3b79"
+    },
+    {
+      "registration": "0152",
+      "state": "ok",
+      "test": "ble-smc-outbound-slots",
+      "status_line": "ok   ble-smc-outbound-slots",
+      "log_sha256": "aae28caf9aa82006e8970e718a6cc7f2060ff81db13ed7d1e812598df9c2fe8d"
+    },
+    {
+      "registration": "0153",
+      "state": "ok",
+      "test": "ble-one-peer-command",
+      "status_line": "ok   ble-one-peer-command",
+      "log_sha256": "3861b2a0e5052be618bbb98e015c2dfa76435b3c7f35a20f2b8f1874a5d7894d"
+    },
+    {
+      "registration": "0154",
+      "state": "ok",
+      "test": "ble-single-peer-status",
+      "status_line": "ok   ble-single-peer-status",
+      "log_sha256": "fe8163bfa6cd8e85af2138307e80887b4bc64f1a0f95e431bdaccc5b3079aa83"
+    },
+    {
+      "registration": "0155",
+      "state": "ok",
+      "test": "ble-dual-peer",
+      "status_line": "ok   ble-dual-peer",
+      "log_sha256": "bf3321f020f59b49671644f45a21fe83717bbf70d7a575b0dbb2058ec4acd3ed"
+    },
+    {
+      "registration": "0156",
+      "state": "ok",
+      "test": "ble-command-credit",
+      "status_line": "ok   ble-command-credit",
+      "log_sha256": "5be8c333d10fa91425a6e7ba3d4e3972b012dcc28d17f18dac9868bbbcddaa0b"
+    },
+    {
+      "registration": "0157",
+      "state": "ok",
+      "test": "ble-controller-heap",
+      "status_line": "ok   ble-controller-heap",
+      "log_sha256": "952c158daf50c706c9afc5ba627f6342ab7d43d06dd0cd1dc544ca47cc32259c"
+    },
+    {
+      "registration": "0158",
+      "state": "FAIL",
+      "test": "ble-midi-receive",
+      "status_line": "FAIL ble-midi-receive (see build/host/ble-midi-receive.log)",
+      "log_sha256": "900e51eb1c95a9a284b37141cd9f50ad4a57b9e6bde63e62ac4d4bb6171e3cac"
+    },
+    {
+      "registration": "0159",
+      "state": "FAIL",
+      "test": "ble-capture-replay",
+      "status_line": "FAIL ble-capture-replay (see build/host/ble-capture-replay.log)",
+      "log_sha256": "29b6ad79a27e200e3381af429c3c16aa00d9ce70d0c2f65eda2a39c389ec4c74"
+    },
+    {
+      "registration": "0160",
+      "state": "ok",
+      "test": "ble-acl-start-flags",
+      "status_line": "ok   ble-acl-start-flags",
+      "log_sha256": "6f4d6d07f5d982faece7a525193b6f454acba53735ebbb7772a1424b3e868e47"
+    },
+    {
+      "registration": "0161",
+      "state": "ok",
+      "test": "ble-hci-completed",
+      "status_line": "ok   ble-hci-completed",
+      "log_sha256": "c08b463af8703fe2815c788d6a2a19890dd7ffa43f064f5db69765959481e0b0"
+    },
+    {
+      "registration": "0162",
+      "state": "ok",
+      "test": "ble-acl-zero-credit",
+      "status_line": "ok   ble-acl-zero-credit",
+      "log_sha256": "b97ac9f801858a6730b0c24f58ce77d2097071af36363d211e3b5f7c71fe910f"
+    },
+    {
+      "registration": "0163",
+      "state": "ok",
+      "test": "ble-zero-conn",
+      "status_line": "ok   ble-zero-conn",
+      "log_sha256": "ebe1e2a13b0d1df273578671795fab3c48676cdddd1e27033b965e860240d628"
+    },
+    {
+      "registration": "0164",
+      "state": "ok",
+      "test": "ble-link-epoch-reset",
+      "status_line": "ok   ble-link-epoch-reset",
+      "log_sha256": "6676ebff1d54df92ad612c08b6b1e431d99763aa87b7f082b6d8106f44faefd8"
+    },
+    {
+      "registration": "0165",
+      "state": "ok",
+      "test": "ble-disconnect-status",
+      "status_line": "ok   ble-disconnect-status",
+      "log_sha256": "1375d2c4497e46abf9894c1ae1df4782608d08eba06f07a82ac0cab8e9d179ed"
+    },
+    {
+      "registration": "0166",
+      "state": "ok",
+      "test": "smc-reachability",
+      "status_line": "ok   smc-reachability",
+      "log_sha256": "bd3d9845d8c65a9225257ea1e3a947d7233a4e25365b5664ff23107ba805b921"
+    },
+    {
+      "registration": "0167",
+      "state": "ok",
+      "test": "smc-pickup-acceptance",
+      "status_line": "ok   smc-pickup-acceptance",
+      "log_sha256": "b5ad1e4ee8f20efd2407f419152ff0c089361316ec35c58e391371e535deb0b8"
+    },
+    {
+      "registration": "0168",
+      "state": "ok",
+      "test": "smc-lock",
+      "status_line": "ok   smc-lock",
+      "log_sha256": "c71afac7a5824d071c724d717e1e7ce9dad51de25234b45b56156a030a51b85f"
+    },
+    {
+      "registration": "0169",
+      "state": "ok",
+      "test": "smc-lock-beat",
+      "status_line": "ok   smc-lock-beat",
+      "log_sha256": "e0022880457695c8cbd79e8d923790d55117fd61425e5661cc7ab39cb17a9644"
+    },
+    {
+      "registration": "0170",
+      "state": "ok",
+      "test": "smc-multi-peer",
+      "status_line": "ok   smc-multi-peer",
+      "log_sha256": "a9a3db4100e885b2c8260bdb1dbd31375cc9a723b6347c4297ab8ce5437a15f8"
+    },
+    {
+      "registration": "0171",
+      "state": "ok",
+      "test": "ui-peer-names",
+      "status_line": "ok   ui-peer-names",
+      "log_sha256": "aef580938f4098ab2ca2aad5793de36d66c49057f47fc3aa67c42f0bf1d93158"
+    },
+    {
+      "registration": "0172",
+      "state": "ok",
+      "test": "ble-peer-name-bounds",
+      "status_line": "ok   ble-peer-name-bounds",
+      "log_sha256": "28b2c180ab89e9e9b28b9c0a22bcf8c1abdd56e1a74be042a31a994d92306899"
+    },
+    {
+      "registration": "0173",
+      "state": "ok",
+      "test": "irq-state",
+      "status_line": "ok   irq-state",
+      "log_sha256": "d144ef22e447f48c33531c528829018b8ad4a12528aabdd748a7802b8f340ec2"
+    },
+    {
+      "registration": "0174",
+      "state": "ok",
+      "test": "outer-pack",
+      "status_line": "ok   outer-pack",
+      "log_sha256": "d6089419554d8b664bdd6f52c3c6f508999c056d36b43234ee4f52b39e8b538d"
+    },
+    {
+      "registration": "0175",
+      "state": "ok",
+      "test": "usb-sysex-parser",
+      "status_line": "ok   usb-sysex-parser",
+      "log_sha256": "326f3c6db4bc796cb675f7cd1b2463fc7447f03a6632a0772a6c7d21012972e9"
+    },
+    {
+      "registration": "0176",
+      "state": "ok",
+      "test": "midi-ring-displace",
+      "status_line": "ok   midi-ring-displace",
+      "log_sha256": "e59488b6c40e9030380c44d59a876118fe93b5874684dee1549d36b0f9a05438"
+    },
+    {
+      "registration": "0177",
+      "state": "ok",
+      "test": "midi-ingress-busy",
+      "status_line": "ok   midi-ingress-busy",
+      "log_sha256": "f3c1b9ca9970f4b6e053e657d5882a7a97bfc68df7712f4514a80bbe7683dd42"
+    },
+    {
+      "registration": "0178",
+      "state": "ok",
+      "test": "midi-mq-pb-overflow",
+      "status_line": "ok   midi-mq-pb-overflow",
+      "log_sha256": "7a660a824224791a5d3293f5e5d2ec13f618c644ff9c14eb0b22bb72c6e61b18"
+    },
+    {
+      "registration": "0179",
+      "state": "ok",
+      "test": "midi-out-mq-pb-overflow",
+      "status_line": "ok   midi-out-mq-pb-overflow",
+      "log_sha256": "7a660a824224791a5d3293f5e5d2ec13f618c644ff9c14eb0b22bb72c6e61b18"
+    },
+    {
+      "registration": "0180",
+      "state": "ok",
+      "test": "ble-out-pb-overflow",
+      "status_line": "ok   ble-out-pb-overflow",
+      "log_sha256": "7a660a824224791a5d3293f5e5d2ec13f618c644ff9c14eb0b22bb72c6e61b18"
+    },
+    {
+      "registration": "0181",
+      "state": "FAIL",
+      "test": "ble-device-setting-flow",
+      "status_line": "FAIL ble-device-setting-flow (see build/host/ble-device-setting-flow.log)",
+      "log_sha256": "b1f92f718ac2cb3a0acea15c01f65bb086d1f1b25e2aa4b27245cbaea73b0e00"
+    },
+    {
+      "registration": "0182",
+      "state": "FAIL",
+      "test": "ble-toggle-persistence-gate",
+      "status_line": "FAIL ble-toggle-persistence-gate (see build/host/ble-toggle-persistence-gate.log)",
+      "log_sha256": "a74d8d834b8f86a1bb055e6af5c73185d701ab1ebadb5e6d7bdcf3adcfc528ed"
+    },
+    {
+      "registration": "0183",
+      "state": "ok",
+      "test": "smc-multi-peer-negative",
+      "status_line": "ok   smc-multi-peer-negative",
+      "log_sha256": "5ebee8229c1f72befd7a3f6a4c73a877b49e6df496328491386784b00e6413a8"
+    },
+    {
+      "registration": "0184",
+      "state": "ok",
+      "test": "smc-pause-loss",
+      "status_line": "ok   smc-pause-loss",
+      "log_sha256": "a2e5b7b94bd9c24a3f8e5edc420ab5d074e90823f84bdd1daf371b63699b552c"
+    },
+    {
+      "registration": "0185",
+      "state": "ok",
+      "test": "smk-wheel-mode",
+      "status_line": "ok   smk-wheel-mode",
+      "log_sha256": "cf407b5794ffd06f2a2d6bcc159dd789b459a386dc93cf163db29483f055d44e"
+    },
+    {
+      "registration": "0186",
+      "state": "ok",
+      "test": "miami-table-interpolation",
+      "status_line": "ok   miami-table-interpolation",
+      "log_sha256": "411184785152cfb9972282f761b90176a00ba1913e7852aa948c675c08955729"
+    },
+    {
+      "registration": "0187",
+      "state": "ok",
+      "test": "miami-coef-cache",
+      "status_line": "ok   miami-coef-cache",
+      "log_sha256": "14c18cffa552e4c13deefed7235e93de6644837abc54f9095e0b58a6d86f6012"
+    },
+    {
+      "registration": "0188",
+      "state": "FAIL",
+      "test": "legacy-303-project",
+      "status_line": "FAIL legacy-303-project (see build/host/legacy-303-project.log)",
+      "log_sha256": "e1c93073dc042b7ee76dad11d1198faa6d2b45ac38189d279e4420ba150a0bbe"
+    },
+    {
+      "registration": "0189",
+      "state": "ok",
+      "test": "smc-interaction-negative",
+      "status_line": "ok   smc-interaction-negative",
+      "log_sha256": "d0194f49b0e4d6aa334bbc0d74f248333e81fb59a10c57255a284ef41261c35a"
+    },
+    {
+      "registration": "0190",
+      "state": "ok",
+      "test": "corner-coverage",
+      "status_line": "ok   corner-coverage",
+      "log_sha256": "de38e3c913f23329e8f4b3cad69bec39c6fd4078c30e791c27afe6894d16011e"
+    },
+    {
+      "registration": "0191",
+      "state": "ok",
+      "test": "part-order",
+      "status_line": "ok   part-order",
+      "log_sha256": "4ee0e6ea2873047d4a8867082e2a41d882e6187f7e4accfc1ec87ad5fe21ea54"
+    },
+    {
+      "registration": "0192",
+      "state": "ok",
+      "test": "synthone-short-label",
+      "status_line": "ok   synthone-short-label",
+      "log_sha256": "486ed353a8dfb5e0e4c9414f0039a6b939d111a0aa3aebb105915fbe1445f16a"
+    },
+    {
+      "registration": "0193",
+      "state": "ok",
+      "test": "smc-ui",
+      "status_line": "ok   smc-ui",
+      "log_sha256": "aa22b9d345174bd36f698cdb678392b6d417194b31331f92cb8fe40d1aa3de19"
+    },
+    {
+      "registration": "0194",
+      "state": "FAIL",
+      "test": "drum-page-contract",
+      "status_line": "FAIL drum-page-contract (see build/host/drum-page-contract.log)",
+      "log_sha256": "9dd089378fdf1afbc0b7036fb1eebb3e40ea168286a224370d1712c49bd44e6f"
+    },
+    {
+      "registration": "0195",
+      "state": "FAIL",
+      "test": "ui-adsr-engine-graph",
+      "status_line": "FAIL ui-adsr-engine-graph (see build/host/ui-adsr-engine-graph.log)",
+      "log_sha256": "0f58ba4d728155018742171a60f9433dcaa1429e0a9cd484d6be75dd0b759563"
+    },
+    {
+      "registration": "0196",
+      "state": "ok",
+      "test": "ui-drum-amp-graph",
+      "status_line": "ok   ui-drum-amp-graph",
+      "log_sha256": "2c753cbeedcbc527c4c8bd14033c1cd76f191eec8feb3acb5f5f0671636a33b0"
+    },
+    {
+      "registration": "0197",
+      "state": "FAIL",
+      "test": "ui-drum-single-lane",
+      "status_line": "FAIL ui-drum-single-lane (see build/host/ui-drum-single-lane.log)",
+      "log_sha256": "087461fe4e05d78c8c033869866d163d60311e51d2570e9e9402a339e2f88c96"
+    },
+    {
+      "registration": "0198",
+      "state": "FAIL",
+      "test": "ui-drum-kit-section",
+      "status_line": "FAIL ui-drum-kit-section (see build/host/ui-drum-kit-section.log)",
+      "log_sha256": "2e54c4a3e8aafb5bf61f44499e765459b80728e6eaad891ae649f33429f998a5"
+    },
+    {
+      "registration": "0199",
+      "state": "ok",
+      "test": "smc-ui-popup",
+      "status_line": "ok   smc-ui-popup",
+      "log_sha256": "5bd2c672388b1490be5fc3f945e569f5d3eec3aa681deddf499011430c60edc2"
+    },
+    {
+      "registration": "0200",
+      "state": "ok",
+      "test": "ui-overlay-battery",
+      "status_line": "ok   ui-overlay-battery",
+      "log_sha256": "8d397734a27add24c6a9d3660267ebc338d17d3123710f24c6771c09d9b030c3"
+    },
+    {
+      "registration": "0201",
+      "state": "ok",
+      "test": "ui-toast-battery",
+      "status_line": "ok   ui-toast-battery",
+      "log_sha256": "137eb710153accfb28ea8905a63a392e1583edb64ad2ae7e3b295a9238d4596a"
+    },
+    {
+      "registration": "0202",
+      "state": "ok",
+      "test": "ui-shared-parameter-panel",
+      "status_line": "ok   ui-shared-parameter-panel",
+      "log_sha256": "0a8ac2e4e5cb5a48754ab471160b013ea1c159e3681a35ec0ffd330f427a546a"
+    },
+    {
+      "registration": "0203",
+      "state": "ok",
+      "test": "ui-held-target-visibility",
+      "status_line": "ok   ui-held-target-visibility",
+      "log_sha256": "22bd771045807752e54ce137ff60958ebbebf09d84a2629fd8c1267e2e39eaa1"
+    },
+    {
+      "registration": "0204",
+      "state": "ok",
+      "test": "ui-overlay-battery-registration",
+      "status_line": "ok   ui-overlay-battery-registration",
+      "log_sha256": "dcc69be0b110d181e9f0f0812746e4f130869c1672f1a653644984c849adfbda"
+    },
+    {
+      "registration": "0205",
+      "state": "ok",
+      "test": "smc-remainder",
+      "status_line": "ok   smc-remainder",
+      "log_sha256": "2650bd9e16f94558b6f56a05e0a817bf9f895ab2041c51163e7cb860b95e8e33"
+    },
+    {
+      "registration": "0206",
+      "state": "ok",
+      "test": "smc-popup-engine",
+      "status_line": "ok   smc-popup-engine",
+      "log_sha256": "d0f97f9ab166b3c672397b1b78f4dec7fe716b1aa7a70b2caae0d226e946711f"
+    },
+    {
+      "registration": "0207",
+      "state": "ok",
+      "test": "smc-audit-core",
+      "status_line": "ok   smc-audit-core",
+      "log_sha256": "92c2363a54312ba240a6022e79517f3574382416195e66897eabf3802bc64a08"
+    },
+    {
+      "registration": "0208",
+      "state": "ok",
+      "test": "smc-audit-contract",
+      "status_line": "ok   smc-audit-contract",
+      "log_sha256": "1c3c743de348e8dc258fd22b711661d6952206ba6a075ca427146ef8ef8ccb2a"
+    },
+    {
+      "registration": "0209",
+      "state": "ok",
+      "test": "smc-mode-page",
+      "status_line": "ok   smc-mode-page",
+      "log_sha256": "43d247ef5422ebc81ba01655f03810b3c6eb59f01f79ae9aee6ea8ec651a1cbc"
+    },
+    {
+      "registration": "0210",
+      "state": "ok",
+      "test": "smc-mixer-page",
+      "status_line": "ok   smc-mixer-page",
+      "log_sha256": "1121bf4c972d1ec8650d4aabed1f7fadd2320308905734719d63be1a27c43df5"
+    },
+    {
+      "registration": "0211",
+      "state": "ok",
+      "test": "ui-shared-glyph",
+      "status_line": "ok   ui-shared-glyph",
+      "log_sha256": "be2c377c75aba00a83fe532cc9da708fab9d520716f7dd7e6906dcbc53f123ab"
+    },
+    {
+      "registration": "0212",
+      "state": "FAIL",
+      "test": "ui-drum-mix-material",
+      "status_line": "FAIL ui-drum-mix-material (see build/host/ui-drum-mix-material.log)",
+      "log_sha256": "bbf5b1fdc97f52778ca53c4d4a99dc5a88e4a4f68192492c20d6839b38946de1"
+    },
+    {
+      "registration": "0213",
+      "state": "ok",
+      "test": "ui-waveform-truth",
+      "status_line": "ok   ui-waveform-truth",
+      "log_sha256": "1a8a905cb406dbdcef3e8d340534105cef79e87534f778ccbe99f61eb57e3c19"
+    },
+    {
+      "registration": "0214",
+      "state": "ok",
+      "test": "ui-page-wrap",
+      "status_line": "ok   ui-page-wrap",
+      "log_sha256": "4c65e86720e17b03d9244955a0dd748f5b07955e193e721868c6b10abfdd9699"
+    },
+    {
+      "registration": "0215",
+      "state": "ok",
+      "test": "chicago-adsr-graph",
+      "status_line": "ok   chicago-adsr-graph",
+      "log_sha256": "d5338e44e199109269f1b738a0e5f94fcaf78c5a37de26e6dff14016851fa8c1"
+    },
+    {
+      "registration": "0216",
+      "state": "ok",
+      "test": "ui-settings-sections",
+      "status_line": "ok   ui-settings-sections",
+      "log_sha256": "7ef6f2614cab695be61ec794abc25fc2910281a82bb0158fe9e174951936c68c"
+    },
+    {
+      "registration": "0217",
+      "state": "ok",
+      "test": "ui-list-feedback",
+      "status_line": "ok   ui-list-feedback",
+      "log_sha256": "641fab7fbe9c949e6797aa87119032c96fd52f1b02bf0de52508c39c801111db"
+    },
+    {
+      "registration": "0218",
+      "state": "ok",
+      "test": "ui-reverb-return",
+      "status_line": "ok   ui-reverb-return",
+      "log_sha256": "14db4eb46a588ec72b58c00e38eab3becbeefac8d70040adfce26ae9377bf0ff"
+    },
+    {
+      "registration": "0219",
+      "state": "ok",
+      "test": "smc-ui-bounds",
+      "status_line": "ok   smc-ui-bounds",
+      "log_sha256": "e9950be13d35a0cc312a26e38afcffd70d584abb1bbeec8ae16546478895235e"
+    },
+    {
+      "registration": "0220",
+      "state": "ok",
+      "test": "smc-ui-negative",
+      "status_line": "ok   smc-ui-negative",
+      "log_sha256": "9274ae28927cb12507d31605738d8bf6c1e1154c7a0a5e0afa65b4b31f103880"
+    },
+    {
+      "registration": "0221",
+      "state": "ok",
+      "test": "smc-mapping",
+      "status_line": "ok   smc-mapping",
+      "log_sha256": "39324d034d08f8f8d801a4772456136f688a06fe764a6fb6df6e94456b7e8c99"
+    },
+    {
+      "registration": "0222",
+      "state": "ok",
+      "test": "smc-drum-mutes",
+      "status_line": "ok   smc-drum-mutes",
+      "log_sha256": "0925ea3cbbeb58816ebb81861ab17a16ee9ac63aefccc901127e9e730641c313"
+    },
+    {
+      "registration": "0223",
+      "state": "ok",
+      "test": "smc-drum-rs",
+      "status_line": "ok   smc-drum-rs",
+      "log_sha256": "80ef48a544a85d0941135f38afece71eedfa91b95a76340ae4bd7209790c9485"
+    },
+    {
+      "registration": "0224",
+      "state": "FAIL",
+      "test": "smc-performance-abort",
+      "status_line": "FAIL smc-performance-abort (see build/host/smc-performance-abort.log)",
+      "log_sha256": "a36690cf63d08d60e78a541e556a5a2a165c382aeb554c46abf0f78967dcfb4c"
+    },
+    {
+      "registration": "0225",
+      "state": "ok",
+      "test": "smc-filter",
+      "status_line": "ok   smc-filter",
+      "log_sha256": "4a8e1afdd584ebbb3bc29c9892cedfaa2b2ec76b3c27e45c3b44cc7c5c9c5f92"
+    },
+    {
+      "registration": "0226",
+      "state": "ok",
+      "test": "smc-feedback",
+      "status_line": "ok   smc-feedback",
+      "log_sha256": "becf8d2e15737202ed3c7e778606779c1269103beba29b8d2b2e97e37c5300f7"
+    },
+    {
+      "registration": "0227",
+      "state": "ok",
+      "test": "smc-record-feedback",
+      "status_line": "ok   smc-record-feedback",
+      "log_sha256": "f07073558aa9c32f1f51e31fc8c6e21a5c3467c6e3544d47dbdba30771f824f4"
+    },
+    {
+      "registration": "0228",
+      "state": "ok",
+      "test": "smc-part-select",
+      "status_line": "ok   smc-part-select",
+      "log_sha256": "232941838900ea044e95c2e848228751dd188b6c5441145fc0dc70069c338938"
+    },
+    {
+      "registration": "0229",
+      "state": "ok",
+      "test": "smc-clip-visibility",
+      "status_line": "ok   smc-clip-visibility",
+      "log_sha256": "191fddd27116f603378e029906b7ce68daca9e50b8d760b192e48f1dbec6cb92"
+    },
+    {
+      "registration": "0230",
+      "state": "ok",
+      "test": "drum-pan",
+      "status_line": "ok   drum-pan",
+      "log_sha256": "2417426f1cdde649695950194b32b9eee4ce25df3727ddb50d19d479a044156d"
+    },
+    {
+      "registration": "0231",
+      "state": "ok",
+      "test": "stereo",
+      "status_line": "ok   stereo",
+      "log_sha256": "ba6a8109e1e5f86157e6ec420b1b1d0baca855c9f87342a2cf6e6a89cad5f575"
+    },
+    {
+      "registration": "0232",
+      "state": "ok",
+      "test": "master",
+      "status_line": "ok   master",
+      "log_sha256": "b3151c2114d0afd475ce314026032eda0772877d0cb6ebe76ab1a5ad49b7ce4f"
+    },
+    {
+      "registration": "0233",
+      "state": "ok",
+      "test": "drum-kit-identity",
+      "status_line": "ok   drum-kit-identity",
+      "log_sha256": "cf7509b1c67f3c8ea6de19bed80da4d738376e64a246dae4a17f65009cf7a510"
+    },
+    {
+      "registration": "0234",
+      "state": "ok",
+      "test": "drum909-adpcm",
+      "status_line": "ok   drum909-adpcm",
+      "log_sha256": "cf3c62711dc7cf11c7246f95f70a7ddd021f7dc45f6701e3bde5054b4bffe929"
+    },
+    {
+      "registration": "0235",
+      "state": "not-run",
+      "test": "drum909",
+      "status_line": "not-run drum909 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-9W9/src/dsp/er99_engine.c)",
+      "log_sha256": null
+    },
+    {
+      "registration": "0236",
+      "state": "not-run",
+      "test": "drum808",
+      "status_line": "not-run drum808 (/workspace/scratch/857bb2409f82/integ-recovered/firmware-gate.aNnBbi/unavailable/schwung-8W8/src/dsp/sc808_engine.cpp)",
+      "log_sha256": null
+    },
+    {
+      "registration": "0237",
+      "state": "ok",
+      "test": "breaks",
+      "status_line": "ok   breaks",
+      "log_sha256": "bc2b28324123de3ebf37936f29809e780120a4eaebb203510a1ef21d42190b45"
+    },
+    {
+      "registration": "0238",
+      "state": "ok",
+      "test": "break-suite-registration",
+      "status_line": "ok   break-suite-registration",
+      "log_sha256": "a532c70c777f14de1a3f429cbfc4cc358708088b2bdd862dbd2648900087b523"
+    },
+    {
+      "registration": "0239",
+      "state": "ok",
+      "test": "adaptive-break-dsp",
+      "status_line": "ok   adaptive-break-dsp",
+      "log_sha256": "74ee2009cc86d5b2047f767d9a65055d067edad3675779277ef6fa5a6f17b085"
+    },
+    {
+      "registration": "0240",
+      "state": "FAIL",
+      "test": "adaptive-break-controls",
+      "status_line": "FAIL adaptive-break-controls (see build/host/adaptive-break-controls.log)",
+      "log_sha256": "1647f0e77f408aab8b39c1110626008ae6442abcfd52eb5cde89a0253dd833e5"
+    },
+    {
+      "registration": "0241",
+      "state": "FAIL",
+      "test": "adaptive-break-storage",
+      "status_line": "FAIL adaptive-break-storage (see build/host/adaptive-break-storage.log)",
+      "log_sha256": "bca70509e8f5921162f7ecc3997ee226bdd102761d369d8057efe658a21fad89"
+    },
+    {
+      "registration": "0242",
+      "state": "ok",
+      "test": "adaptive-break-midi-pair",
+      "status_line": "ok   adaptive-break-midi-pair",
+      "log_sha256": "201239e220d939565fc9004403ab7036d864b85dbe3b9ddbf917847a857360ce"
+    },
+    {
+      "registration": "0243",
+      "state": "ok",
+      "test": "break-performance",
+      "status_line": "ok   break-performance",
+      "log_sha256": "2e81538a714de5265120aa4e07c8f1a657ef025097fc9ca4928084ea76352358"
+    },
+    {
+      "registration": "0244",
+      "state": "ok",
+      "test": "break-preview-snapshot",
+      "status_line": "ok   break-preview-snapshot",
+      "log_sha256": "53eba3dd15379d228cfcbfb9f8d3298671d06e9ee0e29bc8805dbfb53f5ce2ba"
+    },
+    {
+      "registration": "0245",
+      "state": "ok",
+      "test": "break-preview-ui",
+      "status_line": "ok   break-preview-ui",
+      "log_sha256": "bb2256561040bb2a834891f2467f2b0ead692c75d73d2f230c84190fc0d1141b"
+    },
+    {
+      "registration": "0246",
+      "state": "ok",
+      "test": "break-preview-visibility",
+      "status_line": "ok   break-preview-visibility",
+      "log_sha256": "c9be2bcba97fa05678f36e7cdc78a4e9b22d08f1be7b6abf83ec487ae4a4d67a"
+    },
+    {
+      "registration": "0247",
+      "state": "ok",
+      "test": "break-held-edit-journey",
+      "status_line": "ok   break-held-edit-journey",
+      "log_sha256": "8533031ed801c11b971651346a5b59735e49ee9e12143d342c000a2675201305"
+    },
+    {
+      "registration": "0248",
+      "state": "ok",
+      "test": "break-family-layout",
+      "status_line": "ok   break-family-layout",
+      "log_sha256": "87c132bfa65897c1d5caed6da87a9795f9ef609dddc829ebd802bc01ed755545"
+    },
+    {
+      "registration": "0249",
+      "state": "ok",
+      "test": "break-context-label",
+      "status_line": "ok   break-context-label",
+      "log_sha256": "b88e346127d86d70612241079d555e4d68978fd9176c149011a8995093409c9a"
+    },
+    {
+      "registration": "0250",
+      "state": "ok",
+      "test": "break-outline-snapshot",
+      "status_line": "ok   break-outline-snapshot",
+      "log_sha256": "39e18fb690147d96e0a0a9d5a9b50a66a711292199df76a102bead2ee03616fd"
+    },
+    {
+      "registration": "0251",
+      "state": "ok",
+      "test": "ui-chance-framebuffer",
+      "status_line": "ok   ui-chance-framebuffer",
+      "log_sha256": "f75389c644ce73264b44067399138353f4fb69a9cd15a0ec6e40b15bedee4340"
+    },
+    {
+      "registration": "0252",
+      "state": "ok",
+      "test": "break-preview-decoder",
+      "status_line": "ok   break-preview-decoder",
+      "log_sha256": "7021c91af0b6a997a9f1d53fcd97e7c4083d79a4de02f5ae6782857d97835e3e"
+    },
+    {
+      "registration": "0253",
+      "state": "ok",
+      "test": "break-preview-integration",
+      "status_line": "ok   break-preview-integration",
+      "log_sha256": "817f4a94a0d45ceb409e0dd74281d7f8ca5a20ad13fff6b589a9b422305d0a17"
+    },
+    {
+      "registration": "0254",
+      "state": "ok",
+      "test": "break-hit-gain",
+      "status_line": "ok   break-hit-gain",
+      "log_sha256": "d1f321bb1b53604c84531df6f07be8cbbb5c99bf4793d9f5f38aa8b77278388e"
+    },
+    {
+      "registration": "0255",
+      "state": "ok",
+      "test": "break-step-velocity-engine",
+      "status_line": "ok   break-step-velocity-engine",
+      "log_sha256": "c1910abbd54be0459d0d14bb085bc6e578d59ddd95bf2fc70fa994b483764ef6"
+    },
+    {
+      "registration": "0256",
+      "state": "FAIL",
+      "test": "engine-brk-mute",
+      "status_line": "FAIL engine-brk-mute (see build/host/engine-brk-mute.log)",
+      "log_sha256": "7f4114f9bf4ffcfe62fb2bd5ee8139cc7d991165e10f65cdf84b7eb58dc1fdc2"
+    },
+    {
+      "registration": "0257",
+      "state": "ok",
+      "test": "brk-loops-seamless",
+      "status_line": "ok   brk-loops-seamless",
+      "log_sha256": "809e1c857b916cadb63fa310c9c496f05c403419a307fcfaca5b59dbaa408f1c"
+    },
+    {
+      "registration": "0258",
+      "state": "ok",
+      "test": "brk-outline",
+      "status_line": "ok   brk-outline",
+      "log_sha256": "83ca7061256d8c40e75e79c2c1526d1c5c890eb80b95a393840212d5e41e8b8f"
+    },
+    {
+      "registration": "0259",
+      "state": "ok",
+      "test": "brk-outline-gate",
+      "status_line": "ok   brk-outline-gate",
+      "log_sha256": "6fbbc0e97030ce61d163e22721a14402be92a49eba5f2a0940d68cc17329e25b"
+    },
+    {
+      "registration": "0260",
+      "state": "ok",
+      "test": "chicago-fx-bridge",
+      "status_line": "ok   chicago-fx-bridge",
+      "log_sha256": "febabcfa5459d4004d55cbe43d92b1aa049845f91c8933910aee1c0d1154cffa"
+    },
+    {
+      "registration": "0261",
+      "state": "ok",
+      "test": "au-compare-align",
+      "status_line": "ok   au-compare-align",
+      "log_sha256": "e90023b28003ab8ebc5491117ef057bd119b822fdf402f8d50bca97d07276a60"
+    },
+    {
+      "registration": "0262",
+      "state": "ok",
+      "test": "au-compare-battery",
+      "status_line": "ok   au-compare-battery",
+      "log_sha256": "dcd2147edfda2291b456dfb6d9f3021f0fed07760d5a1c8869fc5446f30e28fe"
+    },
+    {
+      "registration": "0263",
+      "state": "ok",
+      "test": "install-gate-guard",
+      "status_line": "ok   install-gate-guard",
+      "log_sha256": "0578ff65886a69421b51a35ee79b23c41208b879bc92bf7cc119347e5d3b2033"
+    },
+    {
+      "registration": "0264",
+      "state": "ok",
+      "test": "queue-guard",
+      "status_line": "ok   queue-guard",
+      "log_sha256": "6af98340741f1ce74ea17c0c031ff678856c195b6fb3aef5362df4e34e8a9519"
+    },
+    {
+      "registration": "0265",
+      "state": "ok",
+      "test": "install-guards",
+      "status_line": "ok   install-guards",
+      "log_sha256": "9d7c5193aef9de7549657ec2f70b9daa80ba6bd896757b531eb899291a85b596"
+    },
+    {
+      "registration": "0266",
+      "state": "ok",
+      "test": "install-head",
+      "status_line": "ok   install-head",
+      "log_sha256": "418899fed1326a95ec5f8ef726e7cc5a9ae5d30a8496074bbbd03374e7d417c6"
+    },
+    {
+      "registration": "0267",
+      "state": "ok",
+      "test": "release-tree",
+      "status_line": "ok   release-tree",
+      "log_sha256": "442d20a673dacace239a9bad4d465ba8deb937e95ce18e5552aeeda8983d604b"
+    },
+    {
+      "registration": "0268",
+      "state": "ok",
+      "test": "prepush-trim",
+      "status_line": "ok   prepush-trim",
+      "log_sha256": "44e52177573c340cdf5a6efda5b18800861f8da25efd93955ac874a9d0f96f62"
+    },
+    {
+      "registration": "0269",
+      "state": "ok",
+      "test": "prepush-allow",
+      "status_line": "ok   prepush-allow",
+      "log_sha256": "849fafe6c4892e05f9b143d1b553b81272d93d0c268e2fe3f2f885590dbb432a"
+    },
+    {
+      "registration": "0270",
+      "state": "ok",
+      "test": "gate-configs",
+      "status_line": "ok   gate-configs",
+      "log_sha256": "c32cb3544314176313b8f893a980354544803e8720d42ccb138653c157424811"
+    },
+    {
+      "registration": "0271",
+      "state": "ok",
+      "test": "gate-trap",
+      "status_line": "ok   gate-trap",
+      "log_sha256": "f7d2b1e7c9975dfa0f04d781f2cc4afc9ad80eea90d5b93c7647f124850b891b"
+    },
+    {
+      "registration": "0272",
+      "state": "ok",
+      "test": "quickcheck-plan",
+      "status_line": "ok   quickcheck-plan",
+      "log_sha256": "75018aa952762d3e5d1f0e5d5265e72641610fe153c47735ac12496bd1525704"
+    },
+    {
+      "registration": "0273",
+      "state": "ok",
+      "test": "host-failure-summary",
+      "status_line": "ok   host-failure-summary",
+      "log_sha256": "9a7096d9b8db46fdf6d885089daf4c5667573ad1bbae6495dea3c6687428d0cf"
+    },
+    {
+      "registration": "0274",
+      "state": "ok",
+      "test": "ctl-compile",
+      "status_line": "ok   ctl-compile",
+      "log_sha256": "4f39df6d01ced1c3277c8f1f2ec8b6474a8227472e4fe9203bfec9505b34ac20"
+    },
+    {
+      "registration": "0275",
+      "state": "ok",
+      "test": "host-setup",
+      "status_line": "ok   host-setup",
+      "log_sha256": "57b0026864c4d067e595ffe360dadac190a42950a187a38c0507e116c0c22d56"
+    },
+    {
+      "registration": "0276",
+      "state": "ok",
+      "test": "gen-nonfont-tables",
+      "status_line": "ok   gen-nonfont-tables",
+      "log_sha256": "575e857d2f5b7feb00a68e695e03d1334cbb6e8e0350ed635978e712eee71f93"
+    },
+    {
+      "registration": "0277",
+      "state": "ok",
+      "test": "stereo-alone-gen",
+      "status_line": "ok   stereo-alone-gen",
+      "log_sha256": "99d312de39c2ed6ef60d89d7e8bbfb1aba1ce534346761a5abf1bb7d8e948d65"
+    },
+    {
+      "registration": "0278",
+      "state": "ok",
+      "test": "runner-admission",
+      "status_line": "ok   runner-admission",
+      "log_sha256": "315605575172129189c07380ba55f2cade30b93961a171c012e6173f6fb590da"
+    },
+    {
+      "registration": "0279",
+      "state": "ok",
+      "test": "update-names",
+      "status_line": "ok   update-names",
+      "log_sha256": "1491c81bd4b58dc3a53f2d996070d6ef55697dac885f25cb5995ba78ebc98b7f"
+    },
+    {
+      "registration": "0280",
+      "state": "ok",
+      "test": "gate-reason",
+      "status_line": "ok   gate-reason",
+      "log_sha256": "7cedce54e19b5b7e6f3ca1c0bb47e09b4fb3c0dee614d97eaeab633c15dcae79"
+    },
+    {
+      "registration": "0281",
+      "state": "ok",
+      "test": "validation-inputs",
+      "status_line": "ok   validation-inputs",
+      "log_sha256": "4ff10f7131ea920245bf99c8e9e47d2c4eddd0a89b2bf1525ef18917ae6bcd77"
+    },
+    {
+      "registration": "0282",
+      "state": "ok",
+      "test": "stage-handoff",
+      "status_line": "ok   stage-handoff",
+      "log_sha256": "7c020e811a52468f34b128f4f88543a7260870381c36a7291108027af5e742e2"
+    },
+    {
+      "registration": "0283",
+      "state": "FAIL",
+      "test": "dev-validate",
+      "status_line": "FAIL dev-validate (see build/host/dev-validate.log)",
+      "log_sha256": "0c9b3cbaed2f0bf20afe50b318c268784f2fffff51a4793b02034cc5204bc673"
+    },
+    {
+      "registration": "0284",
+      "state": "FAIL",
+      "test": "dev-validate-composed",
+      "status_line": "FAIL dev-validate-composed (see build/host/dev-validate-composed.log)",
+      "log_sha256": "5c415179123bd116ca8c853038f2355030b83ce3f668aa44ac4327f0ecfa3f25"
+    },
+    {
+      "registration": "0285",
+      "state": "ok",
+      "test": "nightly-publish",
+      "status_line": "ok   nightly-publish",
+      "log_sha256": "397fd65b0321c751b3e0c6b5672dc3f07abc5a9340f8070332beb20cc1d84fc7"
+    },
+    {
+      "registration": "0286",
+      "state": "ok",
+      "test": "scheduler-capacity",
+      "status_line": "ok   scheduler-capacity",
+      "log_sha256": "02c10260fe4cfff5396106e800159121859c73186c5eaebb8cfcf3ca028be3d6"
+    },
+    {
+      "registration": "0287",
+      "state": "ok",
+      "test": "gen-cache",
+      "status_line": "ok   gen-cache",
+      "log_sha256": "5b31d9b9d63228787fa274b549eb3fe8cbce1d8dcd053461c0ad7d9d64a5f3b9"
+    },
+    {
+      "registration": "0288",
+      "state": "ok",
+      "test": "smk-update-contract",
+      "status_line": "ok   smk-update-contract",
+      "log_sha256": "49fb6110df49a413d119418808da851dabcabfc99a1a0bd628d0ec0a3be6cb75"
+    },
+    {
+      "registration": "0289",
+      "state": "ok",
+      "test": "gen-order",
+      "status_line": "ok   gen-order",
+      "log_sha256": "c279e9522b5bdc8cd394ce8c2752825409c2821a9e334a570d93089054fc150e"
+    },
+    {
+      "registration": "0290",
+      "state": "ok",
+      "test": "quickcheck-devbug",
+      "status_line": "ok   quickcheck-devbug",
+      "log_sha256": "6f12161f6495ef7be7066ab05fe4a035ea40d3543986e74f9ccadda4e3eb271f"
+    },
+    {
+      "registration": "0291",
+      "state": "ok",
+      "test": "status-lanes",
+      "status_line": "ok   status-lanes",
+      "log_sha256": "bf6d5eeb732deaba8e96e4e25ed5b124f45d956a35b82f42aab8279a01ed5372"
+    },
+    {
+      "registration": "0292",
+      "state": "ok",
+      "test": "status-isolation",
+      "status_line": "ok   status-isolation",
+      "log_sha256": "17fb4b7bb34ebe64558d5be39a17e49eb6ad37694f8516524cc0a728e6dbfa01"
+    },
+    {
+      "registration": "0293",
+      "state": "ok",
+      "test": "loop-bars",
+      "status_line": "ok   loop-bars",
+      "log_sha256": "1aceccc601b6d5d39096a830778e0b9af0d4b644e90146945bc558ae746a5acd"
+    },
+    {
+      "registration": "0294",
+      "state": "ok",
+      "test": "installer",
+      "status_line": "ok   installer",
+      "log_sha256": "ad8806ec2cc6b2c84a54c13cfaaf245f6892ca5b49221238682962b4e7e73e7e"
+    },
+    {
+      "registration": "0295",
+      "state": "ok",
+      "test": "installer-f02-bind",
+      "status_line": "ok   installer-f02-bind",
+      "log_sha256": "a5442dec04276e9a606f949d35dead79cdd04caca06cffb1b03ce59e5326f4b2"
+    },
+    {
+      "registration": "0296",
+      "state": "ok",
+      "test": "installer-f02-bind-web",
+      "status_line": "ok   installer-f02-bind-web",
+      "log_sha256": "82c0428229e2f279f655094adb10f63f420a46620934d41cb42fa9d09e34d2b9"
+    },
+    {
+      "registration": "0297",
+      "state": "ok",
+      "test": "ota-request-guards-web",
+      "status_line": "ok   ota-request-guards-web",
+      "log_sha256": "4cfb0ed2d369a56ca38964842bc01a1713be076cfcee173e2cd525c3415bb66b"
+    },
+    {
+      "registration": "0298",
+      "state": "ok",
+      "test": "installer-six-stage-web",
+      "status_line": "ok   installer-six-stage-web",
+      "log_sha256": "2f50e8f92b09d7256c0925b1304dbe3d16f5186d30ed7e86bddf02a859372a68"
+    },
+    {
+      "registration": "0299",
+      "state": "ok",
+      "test": "locked-settings",
+      "status_line": "ok   locked-settings",
+      "log_sha256": "82f10fc3f906cea581f2c2717f57bc70e6de5e320a72625ede9b4401e1d38589"
+    },
+    {
+      "registration": "0300",
+      "state": "ok",
+      "test": "smk-update-protection",
+      "status_line": "ok   smk-update-protection",
+      "log_sha256": "07466b836b79439c50ca10bc8646bafcf301843119466fb15d16c035f0079bcd"
+    },
+    {
+      "registration": "0301",
+      "state": "ok",
+      "test": "smk-vendor-update-gate",
+      "status_line": "ok   smk-vendor-update-gate",
+      "log_sha256": "cbcf9fc1e9f11c3497f08d2da6bbcddd73655a4145372dbf7c98359bfa7735f0"
+    },
+    {
+      "registration": "0302",
+      "state": "ok",
+      "test": "smk-flash",
+      "status_line": "ok   smk-flash",
+      "log_sha256": "98171a95f3513570f5a8541c2ce8a0b65f447c8bad97d019964c55a66ce8b176"
+    },
+    {
+      "registration": "0303",
+      "state": "ok",
+      "test": "smk-storage",
+      "status_line": "ok   smk-storage",
+      "log_sha256": "7a64ab0b3132df05a1b95d4054c8d89ef34ada87f036e22d42056d67d2b8d5c0"
+    },
+    {
+      "registration": "0304",
+      "state": "ok",
+      "test": "smk-apc40-map",
+      "status_line": "ok   smk-apc40-map",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "registration": "0305",
+      "state": "ok",
+      "test": "smk-apc40",
+      "status_line": "ok   smk-apc40",
+      "log_sha256": "95b5e844401c4bd42a0b09935309e73cef328271d86117c25a410f63723339d1"
+    },
+    {
+      "registration": "0306",
+      "state": "ok",
+      "test": "smk-clip-ble-clear",
+      "status_line": "ok   smk-clip-ble-clear",
+      "log_sha256": "4e2352f42cc2a43ab06e066b7802b41c96a8bfd672174c6099f560234045704d"
+    },
+    {
+      "registration": "0307",
+      "state": "ok",
+      "test": "smk-clip-keys",
+      "status_line": "ok   smk-clip-keys",
+      "log_sha256": "4d05c672c4540119f6bf8d544dccc44c896c312e174e91c39177efccea8ca6c0"
+    },
+    {
+      "registration": "0308",
+      "state": "ok",
+      "test": "smk-chord-recognize",
+      "status_line": "ok   smk-chord-recognize",
+      "log_sha256": "61fa6736cc7469c15d445159dbc4c1bcb899a47891f2e58fe92ab1d140f3051a"
+    },
+    {
+      "registration": "0309",
+      "state": "FAIL",
+      "test": "smk-clip-chord-display",
+      "status_line": "FAIL smk-clip-chord-display (see build/host/smk-clip-chord-display.log)",
+      "log_sha256": "3b8685dc1cbc09ffb04392d7d0fc0c31be89346015a4bd204227bbf0a84b377b"
+    },
+    {
+      "registration": "0310",
+      "state": "ok",
+      "test": "smk-ck-page-layout",
+      "status_line": "ok   smk-ck-page-layout",
+      "log_sha256": "b2c3e8ce3a56e277282ab46e7ef9b87bb024dba418dcbe76cb546d36a0bd70c7"
+    },
+    {
+      "registration": "0311",
+      "state": "ok",
+      "test": "smk-arrows",
+      "status_line": "ok   smk-arrows",
+      "log_sha256": "69a77e7e7b83031aa59087854e65fa1db0e404a28cbb154a9033e7e164592151"
+    },
+    {
+      "registration": "0312",
+      "state": "ok",
+      "test": "smk-arrows-owner",
+      "status_line": "ok   smk-arrows-owner",
+      "log_sha256": "53ff0f94ed457dcadec856eaaa7f5c7769da2bf9ed46e9727af78af1d13b730d"
+    },
+    {
+      "registration": "0313",
+      "state": "ok",
+      "test": "apc40-tables",
+      "status_line": "ok   apc40-tables",
+      "log_sha256": "8b17ae5399b2c7c3cfe3fdc83b04b4eb6887ec689ce53ba882286c76939fe1dc"
+    },
+    {
+      "registration": "0314",
+      "state": "ok",
+      "test": "smk-clip-idle",
+      "status_line": "ok   smk-clip-idle",
+      "log_sha256": "ef3ef0970fc43c9c5af8b0d4a9327740c28a57cbd604e18f514b79ecb74aed41"
+    },
+    {
+      "registration": "0315",
+      "state": "ok",
+      "test": "smk-clip-idle-pad",
+      "status_line": "ok   smk-clip-idle-pad",
+      "log_sha256": "eacca7b9c11275de722a7ca5fd563523d77b86ffd9e82733f5f105e0c78f99a3"
+    },
+    {
+      "registration": "0316",
+      "state": "ok",
+      "test": "apc40-pad-owner",
+      "status_line": "ok   apc40-pad-owner",
+      "log_sha256": "5b5e6dda36dcbab76397a54338658066d47ff59e39bda6dfee8576baa33f6218"
+    },
+    {
+      "registration": "0317",
+      "state": "ok",
+      "test": "smk-padcal",
+      "status_line": "ok   smk-padcal",
+      "log_sha256": "54533665f631235a6ea73f9329c177f8c5bf9c8a501a57fc5149f09d54cec7bf"
+    },
+    {
+      "registration": "0318",
+      "state": "ok",
+      "test": "padcal-view",
+      "status_line": "ok   padcal-view",
+      "log_sha256": "f637dca5d5059ecad03f1fa9285fcffe3d18a2ded763b7e08db3359e746719ba"
+    },
+    {
+      "registration": "0319",
+      "state": "ok",
+      "test": "smk-padcal-export",
+      "status_line": "ok   smk-padcal-export",
+      "log_sha256": "0b7b19c31427bf3ece7be39f64dd211e4f6e44e63138f04d0d39d9d6a375e8b4"
+    },
+    {
+      "registration": "0320",
+      "state": "ok",
+      "test": "ui-source-extraction",
+      "status_line": "ok   ui-source-extraction",
+      "log_sha256": "5888a642fe2c7540b71769b4ca97457e603cb540c47d75160ac112ee6daa49c4"
+    },
+    {
+      "registration": "0321",
+      "state": "ok",
+      "test": "smk-padcal-wiring",
+      "status_line": "ok   smk-padcal-wiring",
+      "log_sha256": "6a88590ed05266fa0d9392bf0473862fc405476332c69c4d8e2f86bc1adda89f"
+    },
+    {
+      "registration": "0322",
+      "state": "ok",
+      "test": "pad-placement-doc",
+      "status_line": "ok   pad-placement-doc",
+      "log_sha256": "80e0ca2f56c13dc27b19fd15766668b1d769e76de986f51178e7dd2edfeb0378"
+    },
+    {
+      "registration": "0323",
+      "state": "ok",
+      "test": "padcal-flag",
+      "status_line": "ok   padcal-flag",
+      "log_sha256": "8fc3a3b7af77cb22bca5697b42dd0df320be8a7f742a1abca5406669294573eb"
+    },
+    {
+      "registration": "0324",
+      "state": "ok",
+      "test": "apc40-lcd565-csv",
+      "status_line": "ok   apc40-lcd565-csv",
+      "log_sha256": "22bc9ed3e9339881a15983047ce1fda0832ff6e845762aadc06c8086d6df83a1"
+    },
+    {
+      "registration": "0325",
+      "state": "ok",
+      "test": "apc-palette",
+      "status_line": "ok   apc-palette",
+      "log_sha256": "8513b55c01dda88792f39549d474c6db30db682aeda1f1cb5a43efe54c0fd5dd"
+    },
+    {
+      "registration": "0326",
+      "state": "ok",
+      "test": "installer-targets",
+      "status_line": "ok   installer-targets",
+      "log_sha256": "fe0df803be40e8fa132d602d7bd88b8e8cb8b691d8b8da2f7f7a4d48536f5c99"
+    },
+    {
+      "registration": "0327",
+      "state": "ok",
+      "test": "diag-size",
+      "status_line": "ok   diag-size",
+      "log_sha256": "0d2ae93d9d2682218bd98a605b699703641853031f849b8b66c102b51649c31f"
+    },
+    {
+      "registration": "0328",
+      "state": "ok",
+      "test": "smk-inlog",
+      "status_line": "ok   smk-inlog",
+      "log_sha256": "20248e7936291ab12379008d1b15e08896b5ffe51cc7b119be9c528379fed4b2"
+    },
+    {
+      "registration": "0329",
+      "state": "ok",
+      "test": "ble-central-diag",
+      "status_line": "ok   ble-central-diag",
+      "log_sha256": "23e1fda6a358d6abf4bffaa33cc25911565b5858e45ced2e8a1efaf7f250226d"
+    },
+    {
+      "registration": "0330",
+      "state": "FAIL",
+      "test": "ble-role-switch",
+      "status_line": "FAIL ble-role-switch (see build/host/ble-role-switch.log)",
+      "log_sha256": "7497226e7711f32559b02d5f3742b381409e9ce0513d5e3183bf499f23cbe977"
+    },
+    {
+      "registration": "0331",
+      "state": "ok",
+      "test": "inlog-tool",
+      "status_line": "ok   inlog-tool",
+      "log_sha256": "0680a269b46f8e1a5cd203820833d97b4d70b5ebfcd0ec41859f10acacd359ae"
+    },
+    {
+      "registration": "0332",
+      "state": "ok",
+      "test": "smk-pad-inputs",
+      "status_line": "ok   smk-pad-inputs",
+      "log_sha256": "7f5c6a4c86265bfb9179e814a7d93e8d67eb16cb759260ada07662cfb9fc0f89"
+    },
+    {
+      "registration": "0333",
+      "state": "ok",
+      "test": "smk-clip-ble-notify",
+      "status_line": "ok   smk-clip-ble-notify",
+      "log_sha256": "73d23272a62a95c9c73a0d7b0fdee35a07fcba1c87d15c2c155676248c1c2b74"
+    },
+    {
+      "registration": "0334",
+      "state": "ok",
+      "test": "smk-clip-dark",
+      "status_line": "ok   smk-clip-dark",
+      "log_sha256": "be5f2285bd9ffad689e0ef311d7756a579073d178e9b716ebe8bd974e619efdf"
+    },
+    {
+      "registration": "0335",
+      "state": "ok",
+      "test": "smk-clip-usb-clear",
+      "status_line": "ok   smk-clip-usb-clear",
+      "log_sha256": "d154137c6a9eac18505f14167458774a8557506a46d6bc0fced791340689b0ed"
+    },
+    {
+      "registration": "0336",
+      "state": "ok",
+      "test": "smk-clip-isolation",
+      "status_line": "ok   smk-clip-isolation",
+      "log_sha256": "d5b069b9d5ac8ddf244c45d7a5a56f7b930931438ca524f9e552903e8cc6f920"
+    },
+    {
+      "registration": "0337",
+      "state": "ok",
+      "test": "smk-clip-knob",
+      "status_line": "ok   smk-clip-knob",
+      "log_sha256": "e9871a134e82e602958b97e7e639d2a90f4f5a49ae89a3a2e9d3fb2c0df9ecdf"
+    },
+    {
+      "registration": "0338",
+      "state": "ok",
+      "test": "smk-fader-pickup",
+      "status_line": "ok   smk-fader-pickup",
+      "log_sha256": "9a5b9e5479071cd83dc5e3c4eefafeec81026da9da1ae6090fbc1b3659639061"
+    },
+    {
+      "registration": "0339",
+      "state": "ok",
+      "test": "smk-clip-wait",
+      "status_line": "ok   smk-clip-wait",
+      "log_sha256": "e04ed6b94a262a5d1c66751c7af6b7df51c69e87ce7c7b098770e2af675a77b7"
+    },
+    {
+      "registration": "0340",
+      "state": "ok",
+      "test": "smk-apc40-violet",
+      "status_line": "ok   smk-apc40-violet",
+      "log_sha256": "fc36b52cb40ef62997a2616043a5bc943624a4667a8b87ab45af92c1dfc35f5f"
+    },
+    {
+      "registration": "0341",
+      "state": "ok",
+      "test": "smk-package",
+      "status_line": "ok   smk-package",
+      "log_sha256": "a704dd6928ea926bd6a7681aa11831a2acc4959c8a5345a4a02809f98dc96418"
+    },
+    {
+      "registration": "0342",
+      "state": "ok",
+      "test": "smk-ota-entry",
+      "status_line": "ok   smk-ota-entry",
+      "log_sha256": "f4fadd0e69a20b803a5eb1c6ff684d33c52f74da31bbdf54b5a1ffd58622b67f"
+    },
+    {
+      "registration": "0343",
+      "state": "ok",
+      "test": "smk-ota-entry-model1",
+      "status_line": "ok   smk-ota-entry-model1",
+      "log_sha256": "9e86cfe397d00498bdf9d2b2db73b51eeac63a08d679ebe38edf600d2433b354"
+    },
+    {
+      "registration": "0344",
+      "state": "ok",
+      "test": "smk-ota-entry-model2",
+      "status_line": "ok   smk-ota-entry-model2",
+      "log_sha256": "220d43db689d146c54062f674411ba357338f50ac9f00a605e0a6d45e78ec4a3"
+    },
+    {
+      "registration": "0345",
+      "state": "ok",
+      "test": "smk-update-loader",
+      "status_line": "ok   smk-update-loader",
+      "log_sha256": "2b353543476496b6efd7b5727b6d9d51c262e5c51620658ae96a18e8b222c314"
+    },
+    {
+      "registration": "0346",
+      "state": "ok",
+      "test": "ble-sysex-bounds",
+      "status_line": "ok   ble-sysex-bounds",
+      "log_sha256": "a1e62256b4d1c47e15549d13686b94042c2e928a0ef1cf9579f2b5f604f0b5f2"
+    },
+    {
+      "registration": "0347",
+      "state": "ok",
+      "test": "ble",
+      "status_line": "ok   ble",
+      "log_sha256": "996a21325f83140b6480a2410e3766593c86cc8ae69f0fc9dcec9ccef486d0d6"
+    },
+    {
+      "registration": "0348",
+      "state": "ok",
+      "test": "ble-model-identity",
+      "status_line": "ok   ble-model-identity",
+      "log_sha256": "e36875ad54ef0bd654f566368e6673e1a4aea99feb4d37392568c5cc4c2b1031"
+    },
+    {
+      "registration": "0349",
+      "state": "ok",
+      "test": "upload-images",
+      "status_line": "ok   upload-images",
+      "log_sha256": "8c3d366076be48452dbbfd3298c756cf6af597f8b99ccc72a5b79ef279f1160e"
+    },
+    {
+      "registration": "0350",
+      "state": "ok",
+      "test": "upload-tools",
+      "status_line": "ok   upload-tools",
+      "log_sha256": "012fdb7719a8db3cc52533eae16843b5809d3dd33876ee28eb25031c6492b7fa"
+    },
+    {
+      "registration": "0351",
+      "state": "ok",
+      "test": "builtin-break-output",
+      "status_line": "ok   builtin-break-output",
+      "log_sha256": "d6faebe1c3d3b29b40a30185567bcfbde456b7a7c510198198dc64d4cb133338"
+    },
+    {
+      "registration": "0352",
+      "state": "ok",
+      "test": "break-pack",
+      "status_line": "ok   break-pack",
+      "log_sha256": "8ad384c31637fa2ef80120d3c3e108eeccf7e6dc1d61b6f4dd89e13563f310f4"
+    },
+    {
+      "registration": "0353",
+      "state": "ok",
+      "test": "break-pack-web",
+      "status_line": "ok   break-pack-web",
+      "log_sha256": "39db4f771f015883454671e8689a95aef5d466d2cc55de1d08306c5c98a3adc5"
+    },
+    {
+      "registration": "0354",
+      "state": "ok",
+      "test": "breaks-web",
+      "status_line": "ok   breaks-web",
+      "log_sha256": "3820099a1604cbc1c4b21d875f6be308eeda5bcaaf0ed20316dbf29bc4799643"
+    },
+    {
+      "registration": "0355",
+      "state": "ok",
+      "test": "breaks-page",
+      "status_line": "ok   breaks-page",
+      "log_sha256": "4423421e088d592a03f364cc5b6b87d7347da69d358b6a92f07710be08e868f0"
+    },
+    {
+      "registration": "0356",
+      "state": "ok",
+      "test": "project-adoption-identities",
+      "status_line": "ok   project-adoption-identities",
+      "log_sha256": "2f5b7b3dd2b561dd3ad5f7b26a3a5e70672dfd875ca0793ac410f534b4b55d26"
+    },
+    {
+      "registration": "0357",
+      "state": "ok",
+      "test": "offline-sequencer",
+      "status_line": "ok   offline-sequencer",
+      "log_sha256": "dc3136be377873a54329ebe6d64dc54f37a2ddd739a4c0ae6ec8264caa6d46d7"
+    },
+    {
+      "registration": "0358",
+      "state": "ok",
+      "test": "compact-sanitizer-control",
+      "status_line": "ok   compact-sanitizer-control",
+      "log_sha256": "e11bbb630c1a6ea91f4322ac92d7ce2a6c043ad84d3e41ecf0d0f5a73e9c9fd0"
+    },
+    {
+      "registration": "0359",
+      "state": "FAIL",
+      "test": "compact-programs",
+      "status_line": "FAIL compact-programs (see build/host/compact-programs.log)",
+      "log_sha256": "3d3738296f2992b2b276232c4165d448e0a943f1df1ca1d30f9175b84ee6cb61"
+    },
+    {
+      "registration": "0360",
+      "state": "FAIL",
+      "test": "offline-browser-safety",
+      "status_line": "FAIL offline-browser-safety (see build/host/offline-browser-safety.log)",
+      "log_sha256": "d932c0d9589e358d2c6cb12ae649b1c52595916ebd6b3986de0c165ca49b0e8c"
+    },
+    {
+      "registration": "0361",
+      "state": "FAIL",
+      "test": "offline-sequencer-browser",
+      "status_line": "FAIL offline-sequencer-browser (see build/host/offline-sequencer-browser.log)",
+      "log_sha256": "92ea5820d25c8215224bb1da528e84726fe1442525e3db49d55a9434095b5254"
+    },
+    {
+      "registration": "0362",
+      "state": "ok",
+      "test": "offline-touchosc-pack",
+      "status_line": "ok   offline-touchosc-pack",
+      "log_sha256": "1d62b0bd0d17497a59577680447e891c3fb121c723f798ef4918014f10b11632"
+    },
+    {
+      "registration": "0363",
+      "state": "ok",
+      "test": "offline-touchosc-identity",
+      "status_line": "ok   offline-touchosc-identity",
+      "log_sha256": "df38e98fa8f7b2524710a568bf024ee062161c76828f58ddcb11757001982267"
+    },
+    {
+      "registration": "0364",
+      "state": "FAIL",
+      "test": "offline-touchosc-lua",
+      "status_line": "FAIL offline-touchosc-lua (see build/host/offline-touchosc-lua.log)",
+      "log_sha256": "7c0272dca5c840f474584acdf11de3b17c190da208baf0831fdfcb159366ba12"
+    },
+    {
+      "registration": "0365",
+      "state": "ok",
+      "test": "projects-web",
+      "status_line": "ok   projects-web",
+      "log_sha256": "250f62aa3501ddd14e044a0b4f47aae1635886eba52d698c12753c8feedfe269"
+    },
+    {
+      "registration": "0366",
+      "state": "ok",
+      "test": "installer-project-handoff",
+      "status_line": "ok   installer-project-handoff",
+      "log_sha256": "a0004abb0fbfaae32c936b3b5894625d9d17081a53713ec9c0081f12141353d7"
+    },
+    {
+      "registration": "0367",
+      "state": "ok",
+      "test": "projects-page",
+      "status_line": "ok   projects-page",
+      "log_sha256": "ae4048c0a565ec166555dfe87dc1e2e161b62463ffdac969afb23577548e3dc9"
+    },
+    {
+      "registration": "0368",
+      "state": "ok",
+      "test": "site-generation-web",
+      "status_line": "ok   site-generation-web",
+      "log_sha256": "db829270eeb608eab3efb10c30eb0344987eb64bdbc254bfdb5b6ddcf2160cfa"
+    },
+    {
+      "registration": "0369",
+      "state": "ok",
+      "test": "install-slots-web",
+      "status_line": "ok   install-slots-web",
+      "log_sha256": "1d427ae1cce680c38038ccd344c40f26f08f0157d713717e11c7223732047549"
+    },
+    {
+      "registration": "0370",
+      "state": "ok",
+      "test": "installer-backup-selection",
+      "status_line": "ok   installer-backup-selection",
+      "log_sha256": "ebce5d7b86da42456dbd3a5f44151f66b85cf095b6a9cf847b568cb7de61778b"
+    },
+    {
+      "registration": "0371",
+      "state": "ok",
+      "test": "slot-build-safe",
+      "status_line": "ok   slot-build-safe",
+      "log_sha256": "9aa42d9affebf5dd7fbe40519e736e0fefe37def7df63aa08ee447bb02cac459"
+    },
+    {
+      "registration": "0372",
+      "state": "ok",
+      "test": "wav-import-integrity",
+      "status_line": "ok   wav-import-integrity",
+      "log_sha256": "c8bc23035d7bb6cb4ac5aae97e63d00c1f6d1fc46e20f09527d427c04d38c193"
+    },
+    {
+      "registration": "0373",
+      "state": "ok",
+      "test": "slot-backup",
+      "status_line": "ok   slot-backup",
+      "log_sha256": "df22dd668859d95aee034b447b89236bfad96b0c9a96d761f832db1f2f340f0b"
+    },
+    {
+      "registration": "0374",
+      "state": "ok",
+      "test": "slot-begin-cancel",
+      "status_line": "ok   slot-begin-cancel",
+      "log_sha256": "7164520f7c18ab21716a303634c8c59391c2ab064c61257a46ec1f175bfebf0c"
+    },
+    {
+      "registration": "0375",
+      "state": "ok",
+      "test": "smp-begin-cancel",
+      "status_line": "ok   smp-begin-cancel",
+      "log_sha256": "2484dafa98669234950593dbe8f73089a4dba857387c2ba5f0b635d8988c1789"
+    },
+    {
+      "registration": "0376",
+      "state": "ok",
+      "test": "sample-integrity-dispatch",
+      "status_line": "ok   sample-integrity-dispatch",
+      "log_sha256": "d63ad96dc025c0f298ef17c51c6701985e71fa3c4b5d3af5f5ba4e5308036c97"
+    },
+    {
+      "registration": "0377",
+      "state": "ok",
+      "test": "slot-backup-durable",
+      "status_line": "ok   slot-backup-durable",
+      "log_sha256": "4fcd7afc44f608ec5ad4fee56893dab49c812ab9d5fe59b9c490ab9a258873ef"
+    },
+    {
+      "registration": "0378",
+      "state": "ok",
+      "test": "slot-archive-zone",
+      "status_line": "ok   slot-archive-zone",
+      "log_sha256": "8ef22e86f92eae70cba0c41d45e22ee4d041279e9b011bcba35892ffb7307bf0"
+    },
+    {
+      "registration": "0379",
+      "state": "ok",
+      "test": "slot-verify-order",
+      "status_line": "ok   slot-verify-order",
+      "log_sha256": "2bf9411d25983664e883c761f3ff9891944ee8891e7dbec21d9ffd4487bbe4cf"
+    },
+    {
+      "registration": "0380",
+      "state": "ok",
+      "test": "slot-read-reply",
+      "status_line": "ok   slot-read-reply",
+      "log_sha256": "851db3075b70c88ebce10f56df1a7cd78e7bd0af4f302b2e463d4e103f66aecb"
+    },
+    {
+      "registration": "0381",
+      "state": "ok",
+      "test": "slot-ack-integrity",
+      "status_line": "ok   slot-ack-integrity",
+      "log_sha256": "98ff0e15b93d4d5950297f99d321be036b5ddbf54c6a49fa87e88c649040d4ec"
+    },
+    {
+      "registration": "0382",
+      "state": "ok",
+      "test": "slot-echo-7bit",
+      "status_line": "ok   slot-echo-7bit",
+      "log_sha256": "009ebb48843c0126779d10d608c5c33a1e939cbcb4aba8a4125ae0e37cc13e97"
+    },
+    {
+      "registration": "0383",
+      "state": "ok",
+      "test": "slot-migration-matching",
+      "status_line": "ok   slot-migration-matching",
+      "log_sha256": "9e15545bf79dcce2fcae5f62ab567d78fa204a190f5eb4cf4a78c1b2831c5508"
+    },
+    {
+      "registration": "0384",
+      "state": "ok",
+      "test": "slot-break-menu-migration",
+      "status_line": "ok   slot-break-menu-migration",
+      "log_sha256": "a4be65af8f2e3cca4a05a40efdec935bbe22e03e835f8d85844d4e896b1ea855"
+    },
+    {
+      "registration": "0385",
+      "state": "ok",
+      "test": "installer-slots",
+      "status_line": "ok   installer-slots",
+      "log_sha256": "0e537ba897612c97daa0dae24a73e7c4b07109688a9b6094cb8343dbdaaea1d9"
+    },
+    {
+      "registration": "0386",
+      "state": "ok",
+      "test": "installer-restore-status",
+      "status_line": "ok   installer-restore-status",
+      "log_sha256": "1fb0793c40e7ecf70981f76ce0a66e1dba1a34b98cef790c4709c3e26df68f85"
+    },
+    {
+      "registration": "0387",
+      "state": "ok",
+      "test": "installer-ota-finish-ack",
+      "status_line": "ok   installer-ota-finish-ack",
+      "log_sha256": "18a6540e66bec7dba8ad029024840764affdeb48522c4e039ca0620ec6909559"
+    },
+    {
+      "registration": "0388",
+      "state": "ok",
+      "test": "installer-backup-snapshot",
+      "status_line": "ok   installer-backup-snapshot",
+      "log_sha256": "2f30865d3fa5f59514bbad841b4adfba40d6671bb0c82fead219fe3af0c84108"
+    },
+    {
+      "registration": "0389",
+      "state": "ok",
+      "test": "installer-ctl",
+      "status_line": "ok   installer-ctl",
+      "log_sha256": "9b2e60be04b6311e25993c2717697cdac25e47d379e77ee89084089b7342e914"
+    },
+    {
+      "registration": "0390",
+      "state": "ok",
+      "test": "ctl-read-framing",
+      "status_line": "ok   ctl-read-framing",
+      "log_sha256": "553701b7f903d9ea9812b6b01f3dc18ec822e2812a435e2f1af1dc0d3eeafc7b"
+    },
+    {
+      "registration": "0391",
+      "state": "ok",
+      "test": "ctl-publish-atomic",
+      "status_line": "ok   ctl-publish-atomic",
+      "log_sha256": "aeea3e0a18060a244c732e0a51969651b85d5611bc6b3cab6823713c77670e82"
+    },
+    {
+      "registration": "0392",
+      "state": "ok",
+      "test": "rec-held-duration",
+      "status_line": "ok   rec-held-duration",
+      "log_sha256": "03b8d6ec12900da3a5d71f7a3d12678768e90e16535e9351fdf8bf3227cb5a8f"
+    },
+    {
+      "registration": "0393",
+      "state": "ok",
+      "test": "original-stale-release",
+      "status_line": "ok   original-stale-release",
+      "log_sha256": "28738fd484c1a5c01645dff0ca0fd48fdc6a7c989221a97d8b30d7d57ef569fb"
+    },
+    {
+      "registration": "0394",
+      "state": "ok",
+      "test": "rec-endpoint-lifecycle",
+      "status_line": "ok   rec-endpoint-lifecycle",
+      "log_sha256": "6be518cdc8309e3b2e138d7787bb273401b5d1cfcfa71139262a99011c61d2f7"
+    },
+    {
+      "registration": "0395",
+      "state": "FAIL",
+      "test": "rec-endpoint-storage",
+      "status_line": "FAIL rec-endpoint-storage (see build/host/rec-endpoint-storage.log)",
+      "log_sha256": "43f9f37c56cac9fe2302a9786df966c57e7136e0f6cb3fdf0a915c098a528577"
+    },
+    {
+      "registration": "0396",
+      "state": "ok",
+      "test": "rec-nonforward-guard",
+      "status_line": "ok   rec-nonforward-guard",
+      "log_sha256": "9568e3c6589cff46445c63441b497dbc9c8a96d1b14bb64908b45d5af02a184f"
+    },
+    {
+      "registration": "0397",
+      "state": "ok",
+      "test": "rec-live-smk",
+      "status_line": "ok   rec-live-smk",
+      "log_sha256": "3b7e527cedddcd0c47c08db25853dae9aad402a628e9c992e9a17daed13c421b"
+    },
+    {
+      "registration": "0398",
+      "state": "ok",
+      "test": "ext-midi-rec-smk",
+      "status_line": "ok   ext-midi-rec-smk",
+      "log_sha256": "6793ac23517ef51d3baf535767a3e40901fd903e6c8d10f9209385523e6b3590"
+    },
+    {
+      "registration": "0399",
+      "state": "ok",
+      "test": "copy-semantics",
+      "status_line": "ok   copy-semantics",
+      "log_sha256": "ab44688c616ce84b8179ab63abb910b80880305f68be2e6903260efd844005f7"
+    },
+    {
+      "registration": "0400",
+      "state": "ok",
+      "test": "song-actions",
+      "status_line": "ok   song-actions",
+      "log_sha256": "f3cee9bb32f11eee7eebe173c4f1bfc708176b81c8b7d64005ac3f4185ada24d"
+    },
+    {
+      "registration": "0401",
+      "state": "ok",
+      "test": "home-globe-part",
+      "status_line": "ok   home-globe-part",
+      "log_sha256": "9614ce11d29ab9af5f4f71b064660ab54ea361a6821e25687b2c8328ec33c608"
+    },
+    {
+      "registration": "0402",
+      "state": "ok",
+      "test": "ui-feedback",
+      "status_line": "ok   ui-feedback",
+      "log_sha256": "0463108979ed46769570fac6971ae6eb67401425ee427ef61f57a3b93ebd8bdd"
+    },
+    {
+      "registration": "0403",
+      "state": "ok",
+      "test": "remaining-feature-proof-selftest",
+      "status_line": "ok   remaining-feature-proof-selftest",
+      "log_sha256": "f744c82145ce31b4efb899b22264eab0bb02d2cdb11f4324be573b25497abfd0"
+    },
+    {
+      "registration": "0404",
+      "state": "ok",
+      "test": "home-pattern-glyph",
+      "status_line": "ok   home-pattern-glyph",
+      "log_sha256": "7c2f09f20baf792de5c107d8a93da0733e50f2bfd7f1f64382afc72b4affdafe"
+    },
+    {
+      "registration": "0405",
+      "state": "ok",
+      "test": "home-overview",
+      "status_line": "ok   home-overview",
+      "log_sha256": "23703cac6e1e6714ac375a92aa504faee6a56c65feec8e32f1c0ff84dff64856"
+    },
+    {
+      "registration": "0406",
+      "state": "ok",
+      "test": "sound-matrix",
+      "status_line": "ok   sound-matrix",
+      "log_sha256": "b836dae01608426215259596c878a5decf8e09760ef63cb1c6b740bfe215f7ab"
+    },
+    {
+      "registration": "0407",
+      "state": "ok",
+      "test": "sound-layout",
+      "status_line": "ok   sound-layout",
+      "log_sha256": "4b2d5b0eaf9f14785a4793565166f4d16fdc075b71ebdd24a5a736ed9c4b6c2b"
+    },
+    {
+      "registration": "0408",
+      "state": "ok",
+      "test": "perf-wheel-motion",
+      "status_line": "ok   perf-wheel-motion",
+      "log_sha256": "381894ae159604e732040448d09becc37d3732a15dee3d35f0bdcbdc4959ae10"
+    },
+    {
+      "registration": "0409",
+      "state": "ok",
+      "test": "perf-wheel-noise",
+      "status_line": "ok   perf-wheel-noise",
+      "log_sha256": "f55b96ea9847141bb73773c7da60492f9286e38d69f053b4241a02ac888a76ca"
+    },
+    {
+      "registration": "0410",
+      "state": "FAIL",
+      "test": "control-recompile",
+      "status_line": "FAIL control-recompile (see build/host/control-recompile.log)",
+      "log_sha256": "d53c3b0f4fad86bd272b01dc6afdb944138a33f38d085e49f7c7fe982f46f127"
+    },
+    {
+      "registration": "0411",
+      "state": "FAIL",
+      "test": "chicago-span-hold",
+      "status_line": "FAIL chicago-span-hold (see build/host/chicago-span-hold.log)",
+      "log_sha256": "ec4c3257e4bf6c8938d42fb11acc720cc350a7798f38d033c182c176a9269c7a"
+    },
+    {
+      "registration": "0412",
+      "state": "FAIL",
+      "test": "fma-exact-identity",
+      "status_line": "FAIL fma-exact-identity (see build/host/fma-exact-identity.log)",
+      "log_sha256": "353aa7b9d600c1e81f450cd533b2e6e2d85aec7bcddcdd3161a8544e36c5a15d"
+    },
+    {
+      "registration": "0413",
+      "state": "ok",
+      "test": "chicago-coef-cache",
+      "status_line": "ok   chicago-coef-cache",
+      "log_sha256": "ffa482b365b72eb6cde1469f342e5f262847bc36862cddf9d020ec9fe28e747f"
+    },
+    {
+      "registration": "0414",
+      "state": "ok",
+      "test": "fxbus-coef-cache",
+      "status_line": "ok   fxbus-coef-cache",
+      "log_sha256": "45a90e506f571654ca692d7edb2b3a8ec00c8d0f07350dee27926574ec08b37a"
+    },
+    {
+      "registration": "0415",
+      "state": "ok",
+      "test": "chicago-peaking-coef-cache",
+      "status_line": "ok   chicago-peaking-coef-cache",
+      "log_sha256": "63499675db72b4f43f246b280c9628397a6ce54512dc4b575c5b29ccd2759f00"
+    },
+    {
+      "registration": "0416",
+      "state": "ok",
+      "test": "vca-sustain",
+      "status_line": "ok   vca-sustain",
+      "log_sha256": "0200605eba6bc5fab48a3c078c2a1045cb31c0d90a059a876529ac70f10cd834"
+    },
+    {
+      "registration": "0417",
+      "state": "ok",
+      "test": "chicago-ens-hoist",
+      "status_line": "ok   chicago-ens-hoist",
+      "log_sha256": "08d911d4c6bd29e82b35b34079983dbe69f4538f424dc3a0ade18afe6ecc3c3b"
+    },
+    {
+      "registration": "0418",
+      "state": "ok",
+      "test": "chicago-modulation-hoist",
+      "status_line": "ok   chicago-modulation-hoist",
+      "log_sha256": "6eb5d60dd9a7edd8fea3383a09bb3386e2f205231fc7c9136045e2dc1f09f10b"
+    },
+    {
+      "registration": "0419",
+      "state": "ok",
+      "test": "audio-stress",
+      "status_line": "ok   audio-stress",
+      "log_sha256": "3509d4d2088d58b19d6f6129b884b396b6408cdeb556cb5bc5509446904fe8c1"
+    },
+    {
+      "registration": "0420",
+      "state": "ok",
+      "test": "synth-param-jump",
+      "status_line": "ok   synth-param-jump",
+      "log_sha256": "a750edfda49842b55443da7672476769899b00f3cfa061f88bbedcd1d274efff"
+    },
+    {
+      "registration": "0421",
+      "state": "ok",
+      "test": "param-write-sources",
+      "status_line": "ok   param-write-sources",
+      "log_sha256": "2a5286de32b036d0f1545ea655cef76c11c1525e4685d94a5d4899d7aa5f3771"
+    },
+    {
+      "registration": "0422",
+      "state": "ok",
+      "test": "chicago-presentation",
+      "status_line": "ok   chicago-presentation",
+      "log_sha256": "45d63be394af18da7853c8ae5ceff1a3c5c875b535d30f966a4737e7fca61117"
+    },
+    {
+      "registration": "0423",
+      "state": "ok",
+      "test": "chicago-readout",
+      "status_line": "ok   chicago-readout",
+      "log_sha256": "dca5d87bad7748f022e1688aba663bc7c30f5a631155bc71a85296353979ef81"
+    },
+    {
+      "registration": "0424",
+      "state": "FAIL",
+      "test": "ui-synthone-patch",
+      "status_line": "FAIL ui-synthone-patch (see build/host/ui-synthone-patch.log)",
+      "log_sha256": "7f38355ed9d90c74ac5b56ab4bf4a17984306ed9be9743a42e4b0056ebcca3d1"
+    },
+    {
+      "registration": "0425",
+      "state": "ok",
+      "test": "ui-synthone-frames",
+      "status_line": "ok   ui-synthone-frames",
+      "log_sha256": "336d9acd5e2661df90e2e933c39ebf4cf09b49cd455be37dcc2a83050b6d4cfc"
+    },
+    {
+      "registration": "0426",
+      "state": "FAIL",
+      "test": "ui-drum-glyph",
+      "status_line": "FAIL ui-drum-glyph (see build/host/ui-drum-glyph.log)",
+      "log_sha256": "d0e99e5d56d4113e30c7ff2eee3654c1845507986f20417fdf57f2100ba0b1a8"
+    },
+    {
+      "registration": "0427",
+      "state": "ok",
+      "test": "ui-808-stage-rows",
+      "status_line": "ok   ui-808-stage-rows",
+      "log_sha256": "a74a54358c7bf17a4a63e5a66a1135664cb0e9dce25d57be3ef766bc4809cabb"
+    },
+    {
+      "registration": "0428",
+      "state": "FAIL",
+      "test": "ui-drum-curve-axes",
+      "status_line": "FAIL ui-drum-curve-axes (see build/host/ui-drum-curve-axes.log)",
+      "log_sha256": "de52a918c68247a9ce31afcc7bf73262c8387ddce05bf6adbc17e7fb6254f315"
+    },
+    {
+      "registration": "0429",
+      "state": "ok",
+      "test": "ui-no-loss-return",
+      "status_line": "ok   ui-no-loss-return",
+      "log_sha256": "0a499b661118cd956ec2384c8e8710ac241bcdf9aa2fc619b79ace542afa3e7b"
+    },
+    {
+      "registration": "0430",
+      "state": "ok",
+      "test": "ui-song-empty-action",
+      "status_line": "ok   ui-song-empty-action",
+      "log_sha256": "dc8c8086e436894aa9534b7e3a6591371e79c4fb2079b3e1a829155ea2de4d3c"
+    },
+    {
+      "registration": "0431",
+      "state": "ok",
+      "test": "ui-key-sound-state",
+      "status_line": "ok   ui-key-sound-state",
+      "log_sha256": "6e08748d9179cf59a157ea62aab9adf418bf1fcc5bbf0dd225a310e672bbfd19"
+    },
+    {
+      "registration": "0432",
+      "state": "ok",
+      "test": "ui-synth-step-footer",
+      "status_line": "ok   ui-synth-step-footer",
+      "log_sha256": "ff77b89f9549aee7a2d006728f89dce8992596ba41b18d6db8c48f5bfe9bd96f"
+    },
+    {
+      "registration": "0433",
+      "state": "ok",
+      "test": "ui-sound-footer-oracle",
+      "status_line": "ok   ui-sound-footer-oracle",
+      "log_sha256": "9fadb6277ea49dda68a4b27bf98438aa8ca0181d0bf0b035a5ce5c40b613ff81"
+    },
+    {
+      "registration": "0434",
+      "state": "FAIL",
+      "test": "ui-release-footer-mutants",
+      "status_line": "FAIL ui-release-footer-mutants (see build/host/ui-release-footer-mutants.log)",
+      "log_sha256": "6d534499895cff1f34a0fe07eb3cd72949b1275568ac25e4e144afdfc3093c5a"
+    },
+    {
+      "registration": "0435",
+      "state": "ok",
+      "test": "ui-freeplay-state",
+      "status_line": "ok   ui-freeplay-state",
+      "log_sha256": "69ee3fdc53ebc990bff89d502e07d51de3afaa733889e6ea9fd0d2c0c1934202"
+    },
+    {
+      "registration": "0436",
+      "state": "ok",
+      "test": "ui-pattern-sound-identity",
+      "status_line": "ok   ui-pattern-sound-identity",
+      "log_sha256": "559ff5f153d9d6e2f6615c6a27d4aa5e2710eb9a42e8c1badd1d2068ac427add"
+    },
+    {
+      "registration": "0437",
+      "state": "ok",
+      "test": "ui-clock-comp",
+      "status_line": "ok   ui-clock-comp",
+      "log_sha256": "8182f38ea0ef0aabdbd54e1a7c9a160d53e279aaccf4e539afd013255bc7bf4a"
+    },
+    {
+      "registration": "0438",
+      "state": "ok",
+      "test": "smc-caption-geometry",
+      "status_line": "ok   smc-caption-geometry",
+      "log_sha256": "710edd7c30ba019eb7f9e80246ae5ce48f3260470bf170903e37d3baf39d24d2"
+    },
+    {
+      "registration": "0439",
+      "state": "ok",
+      "test": "ui-layer-restoration",
+      "status_line": "ok   ui-layer-restoration",
+      "log_sha256": "4a83f81ea2521e31487acc275fd34f1923e84dbcdde0055599d13ec085756aa7"
+    },
+    {
+      "registration": "0440",
+      "state": "FAIL",
+      "test": "ui-808-accent",
+      "status_line": "FAIL ui-808-accent (see build/host/ui-808-accent.log)",
+      "log_sha256": "f731b1c826441159e36d5cfc1f5e1e3375565c9bd50177446cf58d9220e4a932"
+    },
+    {
+      "registration": "0441",
+      "state": "ok",
+      "test": "ui-drum-tune-role",
+      "status_line": "ok   ui-drum-tune-role",
+      "log_sha256": "232b0f5c9e921d8d2462d088bd5777dd157fb558d24398cb0622cd90b83772f5"
+    },
+    {
+      "registration": "0442",
+      "state": "ok",
+      "test": "ui-snare-tone-law",
+      "status_line": "ok   ui-snare-tone-law",
+      "log_sha256": "06e3b5115c4317aef4c5f9e129e63b106b71df225bef5e9fc3f05a1423231c2f"
+    },
+    {
+      "registration": "0443",
+      "state": "ok",
+      "test": "ui-drum-mix-selected",
+      "status_line": "ok   ui-drum-mix-selected",
+      "log_sha256": "e613423c13c66473abddf02b63e0a9f63bdb6ef53c955650ab24f5ffe24a369d"
+    },
+    {
+      "registration": "0444",
+      "state": "ok",
+      "test": "ui-glyph-storage",
+      "status_line": "ok   ui-glyph-storage",
+      "log_sha256": "c4655bd495247467c3d4b6bee637a96c8aae12aef1c57024082bc988137a98e1"
+    },
+    {
+      "registration": "0445",
+      "state": "ok",
+      "test": "ui-fx-feedback-context",
+      "status_line": "ok   ui-fx-feedback-context",
+      "log_sha256": "242ef656581ef7ce0c3d4bb886cc6bc0b3f5c785d78a7b59e311c785fc6b15b8"
+    },
+    {
+      "registration": "0446",
+      "state": "ok",
+      "test": "ui-owner-copy",
+      "status_line": "ok   ui-owner-copy",
+      "log_sha256": "4c979c0d06f0e9e2109df48cae7f69ac5d403754045b4cfe404fe744e7390b47"
+    },
+    {
+      "registration": "0447",
+      "state": "ok",
+      "test": "ui-home-r22",
+      "status_line": "ok   ui-home-r22",
+      "log_sha256": "ffcc015ff29769def4ba600f82b38549a6ebd66a0f297eb3cde964f2592bf396"
+    },
+    {
+      "registration": "0448",
+      "state": "ok",
+      "test": "ui-owner-units",
+      "status_line": "ok   ui-owner-units",
+      "log_sha256": "0bd690ae62f242fdf0eff4367f2ace0ec51fb2af96a8933188090bc96c34976c"
+    },
+    {
+      "registration": "0449",
+      "state": "ok",
+      "test": "ui-drum-shared-glyph",
+      "status_line": "ok   ui-drum-shared-glyph",
+      "log_sha256": "1015c7e69cd7091cc2847b1670209a9f833e7a0acb9349211d8a7827ce1d18e1"
+    },
+    {
+      "registration": "0450",
+      "state": "ok",
+      "test": "ui-battery-levels",
+      "status_line": "ok   ui-battery-levels",
+      "log_sha256": "418ce73d8f4b54072b9dc56dcb68560b369e6898d300403a52210cd1bc43d421"
+    },
+    {
+      "registration": "0451",
+      "state": "FAIL",
+      "test": "ui-pan-units",
+      "status_line": "FAIL ui-pan-units (see build/host/ui-pan-units.log)",
+      "log_sha256": "c63221a31f34ff3081311923722e6f95b0e2587e2eefe70d7be21ae00d4bb5a2"
+    },
+    {
+      "registration": "0452",
+      "state": "ok",
+      "test": "ui-synth-layout",
+      "status_line": "ok   ui-synth-layout",
+      "log_sha256": "3e2eaabfd02a20815b91387e14647af7ae7c6d5ff164d9ec78465f0dff014fd7"
+    },
+    {
+      "registration": "0453",
+      "state": "ok",
+      "test": "ui-menu-layout",
+      "status_line": "ok   ui-menu-layout",
+      "log_sha256": "f65d275236b7765e055fad3399eeac9f257d34b39282f0b8711ad092fb3c904f"
+    },
+    {
+      "registration": "0454",
+      "state": "ok",
+      "test": "ui-screen-index",
+      "status_line": "ok   ui-screen-index",
+      "log_sha256": "0867876a0a3440e325a31e1293f3a0c9aced7d2fea9884d66013d654f7ee6aa6"
+    },
+    {
+      "registration": "0455",
+      "state": "ok",
+      "test": "ui-native-routes",
+      "status_line": "ok   ui-native-routes",
+      "log_sha256": "03da27856f2e941210b936d02422f10a16e5c8dd62be2b3bab191f2ed63bdc92"
+    },
+    {
+      "registration": "0456",
+      "state": "ok",
+      "test": "ui-startup-loop",
+      "status_line": "ok   ui-startup-loop",
+      "log_sha256": "cb870b4cb06a5ebea2ec06193ec0641796d12183d3e8667570d654c724273ae7"
+    },
+    {
+      "registration": "0457",
+      "state": "ok",
+      "test": "ui-wave-fallback-frame",
+      "status_line": "ok   ui-wave-fallback-frame",
+      "log_sha256": "9da3c49e743d0ed810025914f188b7e972d4ba998493e1cfb2c53427ce87a7d3"
+    },
+    {
+      "registration": "0458",
+      "state": "ok",
+      "test": "ui-step-lane",
+      "status_line": "ok   ui-step-lane",
+      "log_sha256": "11bb4207e0837016808aed8b7eceec2a00c262d54bfb59bb88d3636aefaa4d3e"
+    },
+    {
+      "registration": "0459",
+      "state": "ok",
+      "test": "ui-step-lane-edit",
+      "status_line": "ok   ui-step-lane-edit",
+      "log_sha256": "38ae88c11774f8aa46531fabcf6e629000e1dba555a7e6984ff6f659f2888717"
+    },
+    {
+      "registration": "0460",
+      "state": "ok",
+      "test": "ui-step-lane-transaction",
+      "status_line": "ok   ui-step-lane-transaction",
+      "log_sha256": "65f3a890d0f72cb46dd68b46dac7ab671cf3d75c610409be1f204aaee3748987"
+    },
+    {
+      "registration": "0461",
+      "state": "ok",
+      "test": "ui-break-seq-phase",
+      "status_line": "ok   ui-break-seq-phase",
+      "log_sha256": "7fe9389936b321ba82d24d76a2321d2d64ee4fadf141e0a6539f4443f63ba62c"
+    },
+    {
+      "registration": "0462",
+      "state": "ok",
+      "test": "ui-break-seq-metadata",
+      "status_line": "ok   ui-break-seq-metadata",
+      "log_sha256": "73d174c983884a07a6f6fe991faf535d498caf907c8523e89d2c14f4e20638a9"
+    },
+    {
+      "registration": "0463",
+      "state": "ok",
+      "test": "ui-padcal-render",
+      "status_line": "ok   ui-padcal-render",
+      "log_sha256": "17b53cd72ccc5b403a6655102fc623f3414504c19974dbabf325d9cb96843103"
+    },
+    {
+      "registration": "0464",
+      "state": "FAIL",
+      "test": "ui-glyph-polish",
+      "status_line": "FAIL ui-glyph-polish (see build/host/ui-glyph-polish.log)",
+      "log_sha256": "4d4a33578089bb6a9e242c7abd55f1d10cf7fd0da5d64ac5ee46b6dd5d1320e1"
+    },
+    {
+      "registration": "0465",
+      "state": "ok",
+      "test": "ui-tape-reel",
+      "status_line": "ok   ui-tape-reel",
+      "log_sha256": "2fb3e794c189d4b8d20cdac069c6086f35d600370806603f9c2c2c1e4f4675e3"
+    },
+    {
+      "registration": "0466",
+      "state": "ok",
+      "test": "ui-perf-labels",
+      "status_line": "ok   ui-perf-labels",
+      "log_sha256": "9b8458b626ec08bc17212173c6da7f1ca736ec7245a5e9d72e3dfbb609267470"
+    },
+    {
+      "registration": "0467",
+      "state": "ok",
+      "test": "ui-chicago-env-motion",
+      "status_line": "ok   ui-chicago-env-motion",
+      "log_sha256": "94727c426ca2adbdc6fbfbd090999c69b2b05f4ff9bdbc7578b622759b234d76"
+    },
+    {
+      "registration": "0468",
+      "state": "ok",
+      "test": "matrix-knob-caption",
+      "status_line": "ok   matrix-knob-caption",
+      "log_sha256": "59faef29f596dddaa28b16c67756a3c38622e3816233b9458718db96534ed404"
+    },
+    {
+      "registration": "0469",
+      "state": "ok",
+      "test": "preset-navigation-noop",
+      "status_line": "ok   preset-navigation-noop",
+      "log_sha256": "3f28ae029b415894190d2b2c687a385c06f0db79a7353c9e1c136d4b24af5212"
+    },
+    {
+      "registration": "0470",
+      "state": "ok",
+      "test": "ui-303-entry",
+      "status_line": "ok   ui-303-entry",
+      "log_sha256": "d5af15c1bddeaca58d62ffe6d38d776791be0c6e5afb63ddbadaf5725424adf1"
+    },
+    {
+      "registration": "0471",
+      "state": "ok",
+      "test": "scenario-arrows",
+      "status_line": "ok   scenario-arrows",
+      "log_sha256": "dd2be90844f0e93db3c8b780d5f19004788e9a2d4ca7eb3ef5ea7a338700aab8"
+    },
+    {
+      "registration": "0472",
+      "state": "ok",
+      "test": "scenario-autosave",
+      "status_line": "ok   scenario-autosave",
+      "log_sha256": "a7ece0bfd9cbd077ad94e2d5a1563e1e010c082700423024c585349c856f4590"
+    },
+    {
+      "registration": "0473",
+      "state": "ok",
+      "test": "scenario-bleclock",
+      "status_line": "ok   scenario-bleclock",
+      "log_sha256": "0198824ab6771ca5c1289e09e7fa83e4190d5aec0f405bbdc9a871978462a477"
+    },
+    {
+      "registration": "0474",
+      "state": "ok",
+      "test": "scenario-blenotes",
+      "status_line": "ok   scenario-blenotes",
+      "log_sha256": "da94c74a0d41f4245eae66b99156424514fcb87eebfc1cf59877676cf61b4f96"
+    },
+    {
+      "registration": "0475",
+      "state": "ok",
+      "test": "scenario-brkslice",
+      "status_line": "ok   scenario-brkslice",
+      "log_sha256": "a8f219ad4fc69b20ed5459638ea0cee886089a1cb91d23a34b85bd377ac32831"
+    },
+    {
+      "registration": "0476",
+      "state": "ok",
+      "test": "scenario-brkslice_mode_toggle",
+      "status_line": "ok   scenario-brkslice_mode_toggle",
+      "log_sha256": "a09e25b10e4df9b1aaebb2e780be630b4d5dc03e48e98677fb12fc581c8c6e7f"
+    },
+    {
+      "registration": "0477",
+      "state": "ok",
+      "test": "scenario-brkslice_trs_overlap",
+      "status_line": "ok   scenario-brkslice_trs_overlap",
+      "log_sha256": "8d4381d7f31d9bb1970f530c388d205b5ca17297b2ca730b80a3ab626961e6cd"
+    },
+    {
+      "registration": "0478",
+      "state": "ok",
+      "test": "scenario-clip-arrow-menu",
+      "status_line": "ok   scenario-clip-arrow-menu",
+      "log_sha256": "caccb0f33d5ca1a4bb4fff77200157cef67be854616f11e6c40b12acc365745b"
+    },
+    {
+      "registration": "0479",
+      "state": "ok",
+      "test": "scenario-clklock",
+      "status_line": "ok   scenario-clklock",
+      "log_sha256": "cb87fdf3377d8ca3513589b09268ec4e76f9473da2775586a68b8b2fb424e7e9"
+    },
+    {
+      "registration": "0480",
+      "state": "ok",
+      "test": "scenario-clkmove",
+      "status_line": "ok   scenario-clkmove",
+      "log_sha256": "7458e560e8509c8a8a806618cdfc6955c52d56b25a5e2140300a2bcf24da41a8"
+    },
+    {
+      "registration": "0481",
+      "state": "ok",
+      "test": "scenario-clocksrc",
+      "status_line": "ok   scenario-clocksrc",
+      "log_sha256": "b2e54b203f914f9d98449b578676492e1aadd064dbee45bc59f6e2d78bef6091"
+    },
+    {
+      "registration": "0482",
+      "state": "ok",
+      "test": "scenario-drum_bass_ch_consume",
+      "status_line": "ok   scenario-drum_bass_ch_consume",
+      "log_sha256": "cad5a3f09aec94ce7bc1f76335d094653df1093fcbe1ca6f9ab6045a9ca5bbc3"
+    },
+    {
+      "registration": "0483",
+      "state": "ok",
+      "test": "scenario-edit_midi_rec_guard",
+      "status_line": "ok   scenario-edit_midi_rec_guard",
+      "log_sha256": "f04f7b9686d7dc852e2cb73146055d70b824ee40c875cb05c80cb348257771ea"
+    },
+    {
+      "registration": "0484",
+      "state": "ok",
+      "test": "scenario-edit_oct_no_hidden",
+      "status_line": "ok   scenario-edit_oct_no_hidden",
+      "log_sha256": "08bd6f5bc6fe725029d7dec8d0c164e0e8a89fe9d510eb79eeab1e53c68793d2"
+    },
+    {
+      "registration": "0485",
+      "state": "ok",
+      "test": "scenario-extclock",
+      "status_line": "ok   scenario-extclock",
+      "log_sha256": "9906f525003de1a14c87fd6f6fd8b3f3e65f01eac754275dc7c30d4ed42bbedb"
+    },
+    {
+      "registration": "0486",
+      "state": "ok",
+      "test": "scenario-freeplay",
+      "status_line": "ok   scenario-freeplay",
+      "log_sha256": "dd0ac61225860b25fc683e6a1315eb9f9fae4c8fb81635076a1f943719bf74a1"
+    },
+    {
+      "registration": "0487",
+      "state": "ok",
+      "test": "scenario-getting_started",
+      "status_line": "ok   scenario-getting_started",
+      "log_sha256": "74d4b2e3eb2b2617c49574aa1b4f6cc14cff0afb2d13419a6b3c70aa9cf02701"
+    },
+    {
+      "registration": "0488",
+      "state": "ok",
+      "test": "scenario-groove",
+      "status_line": "ok   scenario-groove",
+      "log_sha256": "6fe18d7102b777b92b6314832ee8b66623b9be66b0f76faa9b7231e34ae89cfc"
+    },
+    {
+      "registration": "0489",
+      "state": "ok",
+      "test": "scenario-guard",
+      "status_line": "ok   scenario-guard",
+      "log_sha256": "459e6b3b1e2d95b29d40620cf3af662bef6fd1fc72a307130527dc1dabe22135"
+    },
+    {
+      "registration": "0490",
+      "state": "ok",
+      "test": "scenario-help",
+      "status_line": "ok   scenario-help",
+      "log_sha256": "a220070a299c4a015852a92aa295d41827eb693d6998a554fc2d6f163a0149f9"
+    },
+    {
+      "registration": "0491",
+      "state": "ok",
+      "test": "scenario-jam",
+      "status_line": "ok   scenario-jam",
+      "log_sha256": "988327ceb1bdab89e1ff9dc45fb6d92bc69fcb2701bc59d4cbe5e7aa9cd65e3c"
+    },
+    {
+      "registration": "0492",
+      "state": "ok",
+      "test": "scenario-keysound",
+      "status_line": "ok   scenario-keysound",
+      "log_sha256": "d46e47f74e3a6a8590470072d4e86a44616b3bd6e88dee72a056016105d22c7c"
+    },
+    {
+      "registration": "0493",
+      "state": "ok",
+      "test": "scenario-knobs",
+      "status_line": "ok   scenario-knobs",
+      "log_sha256": "8599c316b00ae027ae48f72057ddf7e0bad4f176ecec20338d04117c7c855018"
+    },
+    {
+      "registration": "0494",
+      "state": "ok",
+      "test": "scenario-midiowner",
+      "status_line": "ok   scenario-midiowner",
+      "log_sha256": "4bb3bbb41f964a2caedd965441dfd7fa8ac14f736761d1d570027e8f4101d2f9"
+    },
+    {
+      "registration": "0495",
+      "state": "ok",
+      "test": "scenario-migrate",
+      "status_line": "ok   scenario-migrate",
+      "log_sha256": "ce444c85563a12840742e9db7a3256658bb4a9c5998d84901bbf0795d1fce713"
+    },
+    {
+      "registration": "0496",
+      "state": "ok",
+      "test": "scenario-migrate0102",
+      "status_line": "ok   scenario-migrate0102",
+      "log_sha256": "a43df2abca4d259891594e46c842f4b4033cf2eb46819bf88e8bdbd0aa64384e"
+    },
+    {
+      "registration": "0497",
+      "state": "ok",
+      "test": "scenario-patterns",
+      "status_line": "ok   scenario-patterns",
+      "log_sha256": "7d5af4537ccb537bcc126854b1963d72fbfe0453ab7518949c0964cd440c70d0"
+    },
+    {
+      "registration": "0498",
+      "state": "ok",
+      "test": "scenario-perf",
+      "status_line": "ok   scenario-perf",
+      "log_sha256": "9291490d29dad17063a8e9d8ae7756b2ffd74f855fcb10835080af5dfaf30d39"
+    },
+    {
+      "registration": "0499",
+      "state": "ok",
+      "test": "scenario-perfsave",
+      "status_line": "ok   scenario-perfsave",
+      "log_sha256": "e0218f207d491e5c98208d4378ffd809b1b7c44bd34df4d2305897f2c8698e8c"
+    },
+    {
+      "registration": "0500",
+      "state": "ok",
+      "test": "scenario-plock",
+      "status_line": "ok   scenario-plock",
+      "log_sha256": "d18ec04dee153ff72783019c1dd289d9663967f59ee4d417b6b1b146aefc39ad"
+    },
+    {
+      "registration": "0501",
+      "state": "ok",
+      "test": "scenario-prob",
+      "status_line": "ok   scenario-prob",
+      "log_sha256": "4b0c71c99bac9a0473768d9714fb214801d6ef8d0ff4712a3cbc352a6ba5b88f"
+    },
+    {
+      "registration": "0502",
+      "state": "ok",
+      "test": "scenario-probcond",
+      "status_line": "ok   scenario-probcond",
+      "log_sha256": "0760ac7f669bba24e3dcc8e47e2db9eb19ab6f621e899c65656b2672772d68a0"
+    },
+    {
+      "registration": "0503",
+      "state": "ok",
+      "test": "scenario-probreset",
+      "status_line": "ok   scenario-probreset",
+      "log_sha256": "b982c962b7cb710673f845cb2200caf6fb27ecfd907d0f2e5295d80d4ef03aa2"
+    },
+    {
+      "registration": "0504",
+      "state": "ok",
+      "test": "scenario-roll_continuation",
+      "status_line": "ok   scenario-roll_continuation",
+      "log_sha256": "4aaa6345197f54b82e493ec02d5bda79342a96b183174613843f8d0be4cbea01"
+    },
+    {
+      "registration": "0505",
+      "state": "ok",
+      "test": "scenario-roll_short_tie",
+      "status_line": "ok   scenario-roll_short_tie",
+      "log_sha256": "5165b40d26068d7c6f4d450e3cb2740ad08ef0b13c0d6f94f106b8fb70ed89aa"
+    },
+    {
+      "registration": "0506",
+      "state": "ok",
+      "test": "scenario-savefeedback",
+      "status_line": "ok   scenario-savefeedback",
+      "log_sha256": "40458584a0fe52d2f6e19f364de399a3970c65653a96bdfa41aadbb7c676870f"
+    },
+    {
+      "registration": "0507",
+      "state": "ok",
+      "test": "scenario-savewait",
+      "status_line": "ok   scenario-savewait",
+      "log_sha256": "8dbb36dd0db50cbe8ca1ac978f79f2e1fdf2e69e59449a2b87d8f2e38d6c4d6e"
+    },
+    {
+      "registration": "0508",
+      "state": "ok",
+      "test": "scenario-showcase",
+      "status_line": "ok   scenario-showcase",
+      "log_sha256": "583471c209aa6e690e55b424e86b6cff354609549bc28e0b8ed7b4ac3c273294"
+    },
+    {
+      "registration": "0509",
+      "state": "ok",
+      "test": "scenario-slices",
+      "status_line": "ok   scenario-slices",
+      "log_sha256": "fd812d69e1dda290c88779ad4f85d48ae263bad41bf8f092a92958c518ae9cbf"
+    },
+    {
+      "registration": "0510",
+      "state": "ok",
+      "test": "scenario-song",
+      "status_line": "ok   scenario-song",
+      "log_sha256": "a0970cc67edcde41c348689f96dc444806b1e51a2e551be47fc66fb981a88f43"
+    },
+    {
+      "registration": "0511",
+      "state": "ok",
+      "test": "scenario-song_live_mute_save",
+      "status_line": "ok   scenario-song_live_mute_save",
+      "log_sha256": "462418ef29f0d226f7ab6d982f64532578dba456bac941e2796322fc189af04d"
+    },
+    {
+      "registration": "0512",
+      "state": "ok",
+      "test": "scenario-songrep",
+      "status_line": "ok   scenario-songrep",
+      "log_sha256": "b62167f99826e753907495ff85f72419e20dfc8433fbe0cb416eecb56ad81ecf"
+    },
+    {
+      "registration": "0513",
+      "state": "ok",
+      "test": "scenario-sound_matrix_chicago",
+      "status_line": "ok   scenario-sound_matrix_chicago",
+      "log_sha256": "59c8b2e03255bf58c002039e4eb62850866ea5d7bda3c4f34256785e381b939d"
+    },
+    {
+      "registration": "0514",
+      "state": "ok",
+      "test": "scenario-sound_matrix_chicago_idle",
+      "status_line": "ok   scenario-sound_matrix_chicago_idle",
+      "log_sha256": "f538bc55ce3d5bba865f96c10adf857b3168cf3fc7a7aea345c3cf2769b6c47e"
+    },
+    {
+      "registration": "0515",
+      "state": "ok",
+      "test": "scenario-sound_matrix_drum",
+      "status_line": "ok   scenario-sound_matrix_drum",
+      "log_sha256": "558eb88b4a5b9551fb383c90a66b88f2753e8719ccf277814b6a6cf0b98cda9b"
+    },
+    {
+      "registration": "0516",
+      "state": "ok",
+      "test": "scenario-sound_matrix_lock",
+      "status_line": "ok   scenario-sound_matrix_lock",
+      "log_sha256": "4c5540168c3fb76a5dfd3cb0ddfb1b46e2e5b12f0cdfe6d0c734ba0a377c5acf"
+    },
+    {
+      "registration": "0517",
+      "state": "ok",
+      "test": "scenario-sound_matrix_miami",
+      "status_line": "ok   scenario-sound_matrix_miami",
+      "log_sha256": "c9439ae95503d32d9849311224e3146505a47be5d2490036e60e7cfc00a553f1"
+    },
+    {
+      "registration": "0518",
+      "state": "ok",
+      "test": "scenario-sound_page_split",
+      "status_line": "ok   scenario-sound_page_split",
+      "log_sha256": "cb2b5af2faec4b116554f36420d9b420d8b1089ea5ab045aec98b1993ca3ee2f"
+    },
+    {
+      "registration": "0519",
+      "state": "ok",
+      "test": "scenario-step303",
+      "status_line": "ok   scenario-step303",
+      "log_sha256": "33c6e1d7d02a4a984e3a0b63643bdd86f31e37c998595e1dad0a140301371b08"
+    },
+    {
+      "registration": "0520",
+      "state": "ok",
+      "test": "scenario-steps64",
+      "status_line": "ok   scenario-steps64",
+      "log_sha256": "98e03a78859d7266bd64a9b933389f46d09559016be08f2f0de5da33fd0df4c3"
+    },
+    {
+      "registration": "0521",
+      "state": "ok",
+      "test": "scenario-stereo",
+      "status_line": "ok   scenario-stereo",
+      "log_sha256": "135735db0dcdbbe1701663d68b2c66c9cbcec010567c715d6329cf3f69c2e28d"
+    },
+    {
+      "registration": "0522",
+      "state": "ok",
+      "test": "scenario-tb3po",
+      "status_line": "ok   scenario-tb3po",
+      "log_sha256": "e9a8cae9895b3b71be38b68dfac15b6c76fd0ab5b37c3c2ed8e40da77ae79c45"
+    },
+    {
+      "registration": "0523",
+      "state": "ok",
+      "test": "scenario-tour",
+      "status_line": "ok   scenario-tour",
+      "log_sha256": "2f33dfb69a09aff29207ccf81ff870856712ad33deef5fb337abc8c672b4b525"
+    },
+    {
+      "registration": "0524",
+      "state": "ok",
+      "test": "scenario-trackmute",
+      "status_line": "ok   scenario-trackmute",
+      "log_sha256": "c23b96b70bed5a362cf7095a972c90138de6a5ab2a5705292ef4564a14619263"
+    },
+    {
+      "registration": "0525",
+      "state": "ok",
+      "test": "scenario-undo",
+      "status_line": "ok   scenario-undo",
+      "log_sha256": "359f91aef633aba84d8400d45d79b2685477c88ee8e294adc6b723618fac406e"
+    },
+    {
+      "registration": "0526",
+      "state": "ok",
+      "test": "scenario-upload",
+      "status_line": "ok   scenario-upload",
+      "log_sha256": "3692ccab4f22192ad397de1f54576b818efa12d4099eedece083fdcb28688f1e"
+    },
+    {
+      "registration": "0527",
+      "state": "ok",
+      "test": "scenario-upload44",
+      "status_line": "ok   scenario-upload44",
+      "log_sha256": "9e636183e8825468facffd6978ce5ff018a3d5ef3359b01ca51507a78298d96f"
+    },
+    {
+      "registration": "0528",
+      "state": "ok",
+      "test": "scenario-usbnotes",
+      "status_line": "ok   scenario-usbnotes",
+      "log_sha256": "a33705202dd5f302528e7ff5d36b4048f19d8f3fe6f1cc83b3d787f7de56687c"
+    },
+    {
+      "registration": "0529",
+      "state": "ok",
+      "test": "perf-scratch",
+      "status_line": "ok   perf-scratch",
+      "log_sha256": "dd64b5ecc98b6e86357efefe8fd428da868954aadcb402ef5ee273d12cf2cbb4"
+    }
+  ],
+  "excluded_subchecks": [
+    {
+      "parent_registration": "0028",
+      "name": "TB-3PO original A/B",
+      "state": "NOT_RUN",
+      "reason": "Owner scope excludes original-engine comparisons outside Synth One and SuperJ6"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "ram_sha256": "44465aa92a12eaea444fe72340e676b3f2ae9a3db3a4b71f04ee016ee6630ee4",
+  "owner_kinds": [
+    0,
+    1
+  ],
+  "owner_status": [
+    1,
+    1
+  ],
+  "sequencer_playing": 1,
+  "meters_909_808_A_B_BREAK": [
+    32767,
+    23893,
+    11661,
+    8126,
+    32070
+  ],
+  "triggered_rows_909_808": [
+    11,
+    11
+  ],
+  "user_zones": [
+    0,
+    1,
+    0
+  ],
+  "loop_count": 1,
+  "first_catalog_slot_zone": [
+    1,
+    0
+  ],
+  "worker_gave_up": 0,
+  "worker_jobs_completed": 2847,
+  "worker_bad_jobs": 0,
+  "chicago": {
+    "coefficient_cache.index": 11137,
+    "voice.active": 1,
+    "voice.control_updates": 1320,
+    "allocator.capacity": 1,
+    "ready": 1128809009,
+    "owner": "A"
+  },
+  "miami": {
+    "ready": 1296188721,
+    "status": 1,
+    "allocator.capacity": 2,
+    "allocator.unison_count": 2,
+    "allocator.mode": 1,
+    "allocator.hold": 0,
+    "allocator.legato": 1,
+    "keys.committed_enable": 0,
+    "allocator.mg1_key_sync": 1,
+    "allocator.mg2_key_sync": 1,
+    "global_input.tempo_sync1": 1,
+    "global_input.tempo_sync2": 1,
+    "voice_owner.coefficient_cache.duration": 64,
+    "voice_owner.coefficient_cache.mg_valid_mask": 3,
+    "voice_owner.coefficient_cache.glide.duration": 64,
+    "voices[0].active": 0,
+    "voices[1].active": 0,
+    "voices[0].control_updates": 808,
+    "voices[1].control_updates": 808,
+    "voices[0].cache_witness": 1,
+    "voices[1].cache_witness": 1,
+    "owner": "B"
+  }
+}
