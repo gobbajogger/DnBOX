@@ -49,3 +49,14 @@ python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagn
 python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/excitation_probe.py \
   VERIFIED_SEQUENCE_OUTPUT FACTORY_BUILD NEW_OUTPUT
 ```
+
+## Firmware cutoff modulation candidate
+
+The host-only trial uses the existing LFO clock, smoother and inverse gain for authored cutoff routes 1 and 2. It applies the multiplier to the base cutoff before the envelope and retains the existing pitch modulation. Route 3 stays at baseline. The ten established factory guards and nine matched-note cases use the same original hashes, stock PCM and panel readbacks as their checked-in receipts.
+
+With matched events, #213 improves from 8.812 to 3.127 dB spectral error and from +1.834 to +1.600 dB level error on each channel. The direct-note bank fixture gains #139 but loses the previously passing #213, whose spectral error rises from 2.699 to 3.625 dB. The other nine direct pass guards are retained. This candidate is rejected before bank-wide promotion. [Full focused results](cutoff-candidate-result.json).
+
+```sh
+python3 experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/cutoff_candidate.py \
+  VERIFIED_SEQUENCE_OUTPUT PANEL_TARGETS FACTORY_BUILD NEW_OUTPUT
+```
