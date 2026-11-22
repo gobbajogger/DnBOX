@@ -1893,7 +1893,7 @@ static void bass_layout_accept(void)
     bass_layout_pending_mask = bass_layout_on_sound_page = 0;
 }
 
-enum { DRUM_MIX_ACCENT = RGB(255, 179, 55), MIX_FIRST_KIT_PAGE = 1 }; /* PARTS, then the drum kits in kit order. */
+enum { DRUM_MIX_ACCENT = RGB(255, 179, 55), DRUM_MIX_LIGHT_TEXT = RGB(80, 48, 12), MIX_FIRST_KIT_PAGE = 1 }; /* PARTS, then the drum kits in kit order. */
 
 /* MIX's page of a drum machine's tracks: which machine (0 / 1), -1 = not one */
 static int drum_mix_page(void)
@@ -5797,7 +5797,7 @@ static UI_DRAW void draw_header(void)
         if(pickup)name=ui.msg;
         sound_slab(0,0,240,HDR_H,0);
         /* R22 r20 header: engine + voice in the part colour, not a filled badge. */
-        cv_text_clip(4,free_mode&&!pickup&&!clip_mode?4:2,pickup?&FONT_S:free_mode&&!clip_mode?&FONT_T:&FONT_B,name,pickup?C_AMB:mix_kit>=0?DRUM_MIX_ACCENT:part_view()?part_col():SOUND_WHITE,4,125);
+        cv_text_clip(4,free_mode&&!pickup&&!clip_mode?4:2,pickup?&FONT_S:free_mode&&!clip_mode?&FONT_T:&FONT_B,name,pickup?C_AMB:mix_kit>=0?(ui_theme_light?DRUM_MIX_LIGHT_TEXT:DRUM_MIX_ACCENT):part_view()?part_col():SOUND_WHITE,4,125);
         if((pickup || clip_mode) && ss!=SAVE_SAVED) {
             const char *label=header_save_label(ss);
             const felucca_font_t *font=pickup?&FONT_S:&FONT_B;
@@ -6521,7 +6521,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
         if (!band)
             dv_body_pictogram(t,v,x-26,16,.26f,0,ink);
         if(muted)cv_line(x,37-o,x+15,26-o,C_GRAY);
-        if(queued)text_r(x+17,96-o,&FONT_T,"0",DRUM_MIX_ACCENT);
+        if(queued)text_r(x+17,96-o,&FONT_T,"0",ui_theme_light?DRUM_MIX_LIGHT_TEXT:DRUM_MIX_ACCENT);
         cv_rect(x+7,43-o,1,64,C_LINE);
         {
             uint32_t age=0;
