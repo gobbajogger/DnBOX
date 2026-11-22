@@ -1,0 +1,35 @@
+{
+  "au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "factory_entry": "0x10014d89c",
+  "nil_receiver": {
+    "guest_instructions": 31,
+    "imports": [
+      {
+        "stub": "0x1005d99fc",
+        "symbol": "_objc_retain",
+        "call_site": "0x10014d8c0",
+        "nil_noop": true
+      },
+      {
+        "stub": "0x1005d79bc",
+        "symbol": "_$s8Dispatch0A13WorkItemFlagsVMa",
+        "call_site": "0x10014dc60",
+        "nil_noop": false
+      }
+    ]
+  },
+  "nonobject_receiver": {
+    "guest_instructions": 10,
+    "imports": [
+      {
+        "stub": "0x1005d99fc",
+        "symbol": "_objc_retain",
+        "call_site": "0x10014d8c0",
+        "nil_noop": false
+      }
+    ]
+  },
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}

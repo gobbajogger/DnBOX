@@ -1,0 +1,51 @@
+{
+  "host": "Linux x86_64",
+  "runtime_leaves_checked": [
+    "AudioToolbox",
+    "Foundation",
+    "libdispatch.dylib",
+    "libobjc.A.dylib",
+    "libswiftCore.dylib",
+    "libswiftDispatch.dylib",
+    "libswiftFoundation.dylib"
+  ],
+  "archives": [
+    {
+      "archive": "com.audiokitpro.superj6-0.999.8-Decrypted.ipa.zip",
+      "sha256": "3cc86adee1b4b8a0516306f02d6ffeb2e828144565a824e75624212998366592",
+      "members_examined": 474,
+      "matching_apple_runtime_leaves": [],
+      "contains_bundled_disk_framework": true
+    },
+    {
+      "archive": "J6presets.zip",
+      "sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+      "members_examined": 25,
+      "matching_apple_runtime_leaves": [],
+      "contains_bundled_disk_framework": false
+    },
+    {
+      "archive": "SuperJ6-AU-original-extension.private.zip",
+      "sha256": "abe2f2e089306770489fb30c8870f608dc2f2e0804541f624337523679638a28",
+      "members_examined": 220,
+      "matching_apple_runtime_leaves": [],
+      "contains_bundled_disk_framework": false
+    },
+    {
+      "archive": "SuperJ6-bounded-reference-bench-20261115.private.zip",
+      "sha256": "c1b7e99bf4f3054f114557a66c5ad8060525a5f8065e3ff3c7d208dbe2d9bf9c",
+      "members_examined": 40,
+      "matching_apple_runtime_leaves": [],
+      "contains_bundled_disk_framework": false
+    },
+    {
+      "archive": "SuperJ6-real-asset-musical-loop-matrix-20261115.private.zip",
+      "sha256": "08b912309b24edceebb159b8e3b1be1b3befc706201602212885ad73dd6cd3e0",
+      "members_examined": 141,
+      "matching_apple_runtime_leaves": [],
+      "contains_bundled_disk_framework": false
+    }
+  ],
+  "complete_original_renders": 0,
+  "qualified_s4_pairs": 0
+}

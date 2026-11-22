@@ -1,0 +1,23 @@
+{
+  "model": "Conductor",
+  "au_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "factory_prefix": {
+    "entry": "0x1000bd780",
+    "accessor": "0x100256d5c",
+    "descriptor": "0x1006980b4",
+    "call_site": "0x100256d88",
+    "import": "_swift_getSingletonMetadata",
+    "guest_instructions": 19
+  },
+  "initializer_prefix": {
+    "entry": "0x100259e08",
+    "call_site": "0x100259e50",
+    "import": "_$sSo17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyOMa",
+    "guest_instructions": 19,
+    "guard_copy_verified": true
+  },
+  "live_receiver_supplied": false,
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}
