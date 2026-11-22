@@ -467,9 +467,8 @@ def build_app():
     flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
     factory_roots = []
     if SUPERJ6_FACTORY == "1":
-        names = ["engine_superj6_factory_load"]
-        if os.environ.get("X0X_SYNTHONE_PATCH") != "1":
-            names.extend(("engine_superj6_edit", "engine_superj6_pre_note_wave"))
+        names = ("engine_superj6_factory_load", "engine_superj6_edit",
+                 "engine_superj6_pre_note_wave")
         for name in names:
             factory_roots.extend(("-u", name))
     # Diagnostic builds must opt in explicitly; never alter release defaults.
