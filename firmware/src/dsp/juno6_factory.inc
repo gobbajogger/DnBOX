@@ -114,36 +114,47 @@ static float factory_tune(const juno6_t *s)
     return s->bend + 24.f * (s->core.raw[86] - .5f);
 }
 
-void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2], int sub_mute)
+/* The measured sub and master scalar paths use 101/125 and 101/250.
+ * Round the integer significand once, without soft-double calls on target. */
+static float volume_from_raw(float raw, unsigned half)
 {
-    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
-        s->core.layer[layer].params.lfo_pwm_depth = 0.f;
-        /* Only the exact off endpoint has a qualified sub transfer. */
-        s->core.layer[layer].params.sub_gain = sub_mute ? 0.f : s->sub_level;
-        s->core.layer[layer].params.tune_semitones = factory_tune(s);
-        juno6_apply_pre_note_wave(s, layer, &waves[layer]);
-    }
-}
-
-/* Setters run at block boundaries on a single-precision target. Scale the
- * significand by 101/250 and round once, as the original Double setter does.
- * All factory inputs are zero or normal with exponent at least three. */
-static float master_from_raw(float raw)
-{
-    fm_bits_t value = {.f=raw};
+    if (raw == 0.f) return 0.f;
+    fm_bits_t value = {.f = raw};
     unsigned exponent = value.u >> 23;
-    if (raw == 0) return 0.f;
-    if (exponent < 3) return raw * .404f;
-    uint32_t significand = (value.u & 0x7fffffu) | 0x800000u;
+    /* Preserve the previous master behavior for non-factory tiny values. */
+    if (half && exponent < 3) return raw * .404f;
+    uint32_t significand = (value.u & 0x7fffffu) | (exponent ? 0x800000u : 0u);
     uint32_t numerator = significand * 101u;
-    unsigned result_exponent = exponent - 2;
+    if (exponent <= 1) {
+        value.u = (numerator + 62u) / 125u;
+        return value.f;
+    }
+    unsigned result_exponent = exponent - 1 - half;
     if (numerator < (125u << 23)) {
         numerator *= 2;
         --result_exponent;
     }
-    /* The normal-result denominator 125 is odd, so a tie is impossible. */
+    /* The denominator is odd, so there is no tie. */
     value.u = (result_exponent << 23) + (numerator + 62u) / 125u;
     return value.f;
+}
+
+void juno6_apply_factory_waves(juno6_t *s, const juno6_oscillator_edit waves[2], float sub_volume)
+{
+    enum { SUB_VOLUME_ID = 202 };
+    float sub_gain = s->sub_level;
+    if (sub_volume >= 0.f) {
+        sub_gain = volume_from_raw(sub_volume, 0);
+        (void)dnbx_store_raw(&s->core, SUB_VOLUME_ID, sub_volume);
+    } else {
+        s->core.raw_present[SUB_VOLUME_ID / 32] &= ~(1u << (SUB_VOLUME_ID % 32));
+    }
+    for (unsigned layer = 0; layer < DNBX_LAYERS; ++layer) {
+        s->core.layer[layer].params.lfo_pwm_depth = 0.f;
+        s->core.layer[layer].params.sub_gain = sub_gain;
+        s->core.layer[layer].params.tune_semitones = factory_tune(s);
+        juno6_apply_pre_note_wave(s, layer, &waves[layer]);
+    }
 }
 
 int juno6_set(juno6_t *s,unsigned id,float x)
@@ -152,7 +163,7 @@ int juno6_set(juno6_t *s,unsigned id,float x)
  if(id==JUNO6_APP_PARAM_BASE){
   if(!(x>=0 && x<=JUNO6_FACTORY_MASTER_MAX))return 0;
   if(dnbx_store_raw(&s->core,0,x)!=DNBX_RAW_STORED_ONLY)return 0;
-  s->master_gain=master_from_raw(x);
+  s->master_gain=volume_from_raw(x,1);
   return 1;
  }
  if(!(x>=0&&x<=1))return 0;

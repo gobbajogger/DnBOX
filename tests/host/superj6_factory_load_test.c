@@ -340,48 +340,74 @@ static void check_factory_chorus_bypass(void)
     printf("Factory chorus: signed-zero switches bypass bit-exactly over %u audible stereo frames\n",
            exact_frames);
 }
-static void check_factory_sub_off(void)
+static uint32_t sub_word(float value)
 {
-    unsigned muted_frames = 0;
+    fm_bits_t bits = {.f = value};
+    return bits.u;
+}
+
+static void check_factory_sub_gain(void)
+{
+    /* Four nonzero points and both signed zeros from the original setter
+     * receipt, plus representable underflow boundaries for our adapter. */
+    static const uint32_t raw_words[] = {
+        0x00000000u, 0x80000000u, 0x3e800000u, 0x3f000000u,
+        0x3f400000u, 0x3f800000u, 0x00000001u, 0x007fffffu, 0x00800000u
+    };
+    static const uint32_t gain_words[] = {
+        0x00000000u, 0x00000000u, 0x3e4ed917u, 0x3eced917u,
+        0x3f1b22d1u, 0x3f4ed917u, 0x00000001u, 0x00676c8au, 0x00676c8bu
+    };
+    unsigned audio_frames = 0;
     for (unsigned v = 0; v < 2; ++v) {
         juno6_t *s = owner[v];
         juno6_t *peer = owner[v ^ 1u];
         const float peer_gain = peer->core.layer[0].params.sub_gain;
-        sj6_factory_row on = synthetic(15);
-        sj6_factory_add_word(&on, 202, 0x3f800000u);
-        CHECK(engine_superj6_factory_load(v, &on));
-        boundary();
-        const float fallback = s->core.layer[0].params.sub_gain;
+        const float fallback = s->sub_level;
         CHECK(fallback > 0.f);
-        sj6_factory_row off = synthetic(15);
-        sj6_factory_add_word(&off, 202, 0x80000000u);
-        sj6_factory_add_word(&off, 202, 0x3f800000u);
-        sj6_factory_row invalid = off;
-        invalid.value[SJ6_ROW_SUB_VOLUME] = 1.5f;
+        float stopped_left[256], stopped_right[256];
+        for (unsigned k = 0; k < sizeof raw_words / sizeof *raw_words; ++k) {
+            sj6_factory_row row = synthetic(15);
+            sj6_factory_add_word(&row, 202, raw_words[k]);
+            sj6_factory_add_word(&row, 202, 0x3f800000u);
+            float before = s->core.layer[0].params.sub_gain;
+            CHECK(engine_superj6_factory_load(v, &row));
+            CHECK(s->core.layer[0].params.sub_gain == before);
+            boundary();
+            CHECK(peer->core.layer[0].params.sub_gain == peer_gain);
+            for (unsigned l = 0; l < DNBX_LAYERS; ++l)
+                CHECK(sub_word(s->core.layer[l].params.sub_gain) == gain_words[k]);
+            float raw;
+            CHECK(dnbx_read_raw(&s->core, 202, &raw) == DNBX_OK);
+            CHECK(sub_word(raw) == raw_words[k]);
+
+            if (k == 0 || (k >= 2 && k <= 5)) {
+                juno6_t copy = *s;
+                float left[256], right[256];
+                CHECK(juno6_note_on(&copy, 60, 100));
+                CHECK(juno6_render_stereo(&copy, left, right, 256));
+                if (!k) {
+                    memcpy(stopped_left, left, sizeof left);
+                    memcpy(stopped_right, right, sizeof right);
+                } else {
+                    CHECK(memcmp(stopped_left, left, sizeof left) || memcmp(stopped_right, right, sizeof right));
+                }
+                audio_frames += 256;
+            }
+        }
+        sj6_factory_row invalid = synthetic(15);
+        sj6_factory_add_word(&invalid, 202, 0x3fc00000u);
         rejected(v, &invalid);
-        CHECK(engine_superj6_factory_load(v, &off));
-        CHECK(s->core.layer[0].params.sub_gain == fallback);
-        boundary();
-        CHECK(peer->core.layer[0].params.sub_gain == peer_gain);
-        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
-            CHECK(s->core.layer[l].params.sub_gain == 0.f);
 
-        juno6_t muted = *s, baseline = *s;
-        for (unsigned l = 0; l < DNBX_LAYERS; ++l)
-            baseline.core.layer[l].params.sub_gain = fallback;
-        CHECK(juno6_note_on(&muted, 60, 100) && juno6_note_on(&baseline, 60, 100));
-        float ml[256], mr[256], bl[256], br[256];
-        CHECK(juno6_render_stereo(&muted, ml, mr, 256));
-        CHECK(juno6_render_stereo(&baseline, bl, br, 256));
-        CHECK(memcmp(ml, bl, sizeof ml) || memcmp(mr, br, sizeof mr));
-        muted_frames += 256;
-
-        CHECK(engine_superj6_factory_load(v, &on));
+        sj6_factory_row absent = synthetic(15);
+        CHECK(engine_superj6_factory_load(v, &absent));
         boundary();
         for (unsigned l = 0; l < DNBX_LAYERS; ++l)
             CHECK(s->core.layer[l].params.sub_gain == fallback);
+        float raw;
+        CHECK(dnbx_read_raw(&s->core, 202, &raw) == DNBX_E_ABSENT);
     }
-    printf("Factory sub mute: %u audible stereo frames with the inherited sub removed\n", muted_frames);
+    printf("SuperJ6 sub gain: two owners, 18 endpoint checks, %u audible stereo frames\n", audio_frames);
 }
 
 #ifdef SJ6_AUTHORED_BANK
@@ -411,8 +437,12 @@ static void check_bank(void)
             int sub_off = sub_authored && row.value[SJ6_ROW_SUB_VOLUME] == 0.f;
             authored_sub_levels += (unsigned)sub_authored;
             muted_sub_programs += (unsigned)sub_off;
+            float expected_gain = sub_authored ? (float)(.808 * (double)row.value[SJ6_ROW_SUB_VOLUME]) : owner[v]->sub_level;
             for (unsigned l = 0; l < DNBX_LAYERS; ++l)
-                CHECK(owner[v]->core.layer[l].params.sub_gain == (sub_off ? 0.f : owner[v]->sub_level));
+                CHECK(sub_word(owner[v]->core.layer[l].params.sub_gain) == sub_word(expected_gain));
+            float sub_raw;
+            CHECK(dnbx_read_raw(&owner[v]->core, 202, &sub_raw) == DNBX_OK);
+            CHECK(sub_word(sub_raw) == sub_word(row.value[SJ6_ROW_SUB_VOLUME]));
             for (unsigned slot = SJ6_ROW_CHORUS_I; slot <= SJ6_ROW_CHORUS_II; ++slot)
                 if (row.present & (1u << slot)) ++chorus_switch_words;
             for (unsigned i = 0; i < SJ6_ROW_CHORUS_I; ++i) {
@@ -495,7 +525,7 @@ int main(void)
     check_range();
     check_layer_one_attack();
     check_factory_chorus_bypass();
-    check_factory_sub_off();
+    check_factory_sub_gain();
     const char *register_file = getenv("SJ6_REGISTER_WORDS");
     if (register_file) check_register_file(register_file);
     printf("synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS\n");

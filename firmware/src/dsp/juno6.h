@@ -76,5 +76,5 @@ int juno6_can_edit_amp2(const juno6_t *);
 void juno6_apply_pre_note_attack(juno6_t *, float);
 void juno6_apply_lfo1_hz(juno6_t *, float);
 void juno6_apply_pre_note_wave(juno6_t *, unsigned, const juno6_oscillator_edit *);
-void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2], int sub_mute);
+void juno6_apply_factory_waves(juno6_t *, const juno6_oscillator_edit waves[2], float sub_volume);
 #endif

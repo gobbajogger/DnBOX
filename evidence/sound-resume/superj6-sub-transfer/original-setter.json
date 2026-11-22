@@ -1,0 +1,60 @@
+{
+  "result": "PASS",
+  "scope": "Original ARM64 setter to sub-node Objective-C setMasterVolume: dispatch. No synth rendering.",
+  "original_archive_sha256": "abe2f2e089306770489fb30c8870f608dc2f2e0804541f624337523679638a28",
+  "original_executable_sha256": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "factory_archive_sha256": "ab702e00b4cc425c9406b9b2b44e68ba0f40e1125d591fcaa422cc6a8c6272b8",
+  "source": {
+    "control_id": 202,
+    "control_name": "neonsubVolume",
+    "preset_position": 24,
+    "property_descriptor": "0x100809a98",
+    "selected_setter": "0x1000ecf74",
+    "captured_message": "setMasterVolume:",
+    "capture_pc": "0x1005e4a00"
+  },
+  "setup": "Synthetic Swift owner pointers, original sub node offset; objc_retain identity, host libm pow, stop before Objective-C output method.",
+  "factory_programs": 640,
+  "distinct_raw_words": 347,
+  "authored_zero_words": 180,
+  "binary64_matches_0_808_times_binary32_raw": 640,
+  "ordered_factory_input_and_output_sha256": "1552d2fa42b6b683ecc256b1aa700ef52ca95aa93c583d4efcdcc38cf0e55a81",
+  "selected_cases": [
+    {
+      "raw_word": "80000000",
+      "binary64_output_word": "0000000000000000",
+      "output": 0.0,
+      "if_rounded_to_binary32": "00000000"
+    },
+    {
+      "raw_word": "00000000",
+      "binary64_output_word": "0000000000000000",
+      "output": 0.0,
+      "if_rounded_to_binary32": "00000000"
+    },
+    {
+      "raw_word": "3e800000",
+      "binary64_output_word": "3fc9db22d0e56042",
+      "output": 0.202,
+      "if_rounded_to_binary32": "3e4ed917"
+    },
+    {
+      "raw_word": "3f000000",
+      "binary64_output_word": "3fd9db22d0e56042",
+      "output": 0.404,
+      "if_rounded_to_binary32": "3eced917"
+    },
+    {
+      "raw_word": "3f400000",
+      "binary64_output_word": "3fe3645a1cac0832",
+      "output": 0.6060000000000001,
+      "if_rounded_to_binary32": "3f1b22d1"
+    },
+    {
+      "raw_word": "3f800000",
+      "binary64_output_word": "3fe9db22d0e56042",
+      "output": 0.808,
+      "if_rounded_to_binary32": "3f4ed917"
+    }
+  ]
+}
