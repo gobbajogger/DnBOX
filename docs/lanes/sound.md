@@ -1,5 +1,9 @@
 # Sound lane
 
+## 2026-11-22 native-effects checkpoint on sound resume
+
+Branch `lane/sound-engine-qualification-resume` at start `230a73e4ac075f3752926b3a65130181de5c723a`: verified the existing long-delay kernel against its scalar fallback on 8,192 blocks and 1,052,672 frames at each of `-O0` and `-O2`, with zero PCM/ring/state mismatches. See [replay](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/replay-fxbus-edge.py), [receipt](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/edge-result.json), and [qualification scope](../sound/engine-qualification.md#native-808-long-delay-kernel-checkpoint--2026-11-22-utc). This is a focused component comparison only: original 8W8 effects-on parity, 1.994-second tail, Elite/Pro exact-head links and strict timing remain **NOT_RUN**, as does full SuperJ6 S4 (0/14). The provided shared-inputs bundle is toolchain-only, the SDK archive is not available as authorized raw bytes in this runtime, original AU preset renders require a compatible original host, and the connected DnBOX cloud devices are offline. Do not mark the sound lane DONE.
+
 ## Draft #985 populated playback and original effects
 
 The [engine qualification report](../sound/engine-qualification.md) tracks the four populated 360 MHz scenes, effects coverage and the S4 pairs. The Chicago overlap correction passes its level and harmonic checks across the measured transition, and 64 onset offsets select the preceding pitch. Both parts have an independent Synth One rate reducer with 128 original-stage comparisons. The seven-engine effects matrix, final populated deadlines and 14 full original stereo pairs remain open. Use the original build-9 app and its embedded AU for S4. The release banks supply the selections directly.
