@@ -1,0 +1,6 @@
+Canonical bank: 109394 bytes
+zlib level 9: 99420 bytes
+bzip2 level 9: 102688 bytes
+xz preset 9: 97776 bytes
+Generous upper bound with two VM spare sectors and one out-of-map free sector, before descriptors or decoder: 12480 bytes Elite, 12496 bytes Pro.
+Sources: firmware/hal/fm1_flash_map.h, firmware/src/storage.c, native-result bank capacity.

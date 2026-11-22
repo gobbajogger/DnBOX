@@ -1,0 +1,21 @@
+Lane source and tree
+5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7
+8609f75308f10874a7ba4aec1c1fb309023c100b
+parents=95624daf00fd73e373f4d8cd133de9016c8b7f7c f1786ebec2616477163b62b029c7e77405a9c3de
+Consolidated source and tree
+f1786ebec2616477163b62b029c7e77405a9c3de
+a4876790880cae769298f6701e8ab5db1d970b30
+Comparison of gate, runtime harnesses and pinned assets at both heads
+A	assets/starting-breaks/NOTICE.md
+A	assets/starting-breaks/starting-break-pack.bin
+M	tests/run_tests.sh
+M	tools/build.py
+040000 tree d08332fa82a1396bf8665aa34844a8664a6fe282	assets/starting-breaks
+100644 blob 1dd139d955362ae648ac49b937a24132d818b99f	firmware/hal/fm1_flash_map.h
+100644 blob 736ff0e15375c8a7a58f701e0711608c56c3dea5	host/build_host.sh
+100644 blob f620cc4acc9dedf853e6d2ecf33d3b1faf0fad8c	tests/host/engine_break_preview_test.py
+100644 blob 85d7305ca728935755eaae01b9093538121f3d9b	tests/host/ui_break_preview_test.py
+100755 blob 2a0181256f7fddb989c09c075902d8a1b7fce924	tests/run_tests.sh
+100644 blob 6c103281b51e1a676b2c85220f4688483cd35737	tools/build.py
+100755 blob 8fd48cfef5a7a68c623caee1d6569b96cf3735cd	tools/dnbox-gate.sh
+100755 blob 59636b72ca4277d627e3c963cad1df78f75b59dd	tools/gate_flashmap.py

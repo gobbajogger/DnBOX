@@ -1,0 +1,134 @@
+{
+  "local_source_commit": "5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7",
+  "published_commit": "e29c99ec2cc610e5af3de575e85771f666b239f4",
+  "identical_git_tree": "8609f75308f10874a7ba4aec1c1fb309023c100b",
+  "toolchain_archive_sha256": "a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd",
+  "sdk_archive_sha256": "929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6",
+  "stock_build_command": "MODEL=<elite|pro> ./build.sh",
+  "starting_break_command": "MODEL=<elite|pro> ./build.sh --starting-breaks",
+  "package_check_command": "python3 -B tests/smk_pkg_test.py <package> [identity]",
+  "flashmap_command": "python3 -B tools/gate_flashmap.py firmware/hal/fm1_flash_map.h firmware/src/storage.c",
+  "bank": {
+    "bytes": 109394,
+    "crc32": "bd35c04e",
+    "sha256": "8df1316157fc8ce8dcb87cfd267fea83790702ccd1963ae91c0de60ca255b582",
+    "rate_hz": 22050,
+    "zones": [
+      {
+        "name": "BR1 1",
+        "sample_count": 34800,
+        "adpcm_bytes": 17400
+      },
+      {
+        "name": "BR1 2",
+        "sample_count": 41788,
+        "adpcm_bytes": 20894
+      },
+      {
+        "name": "BR1 3",
+        "sample_count": 42862,
+        "adpcm_bytes": 21431
+      },
+      {
+        "name": "BR2 1",
+        "sample_count": 46184,
+        "adpcm_bytes": 23092
+      },
+      {
+        "name": "BR2 2",
+        "sample_count": 52913,
+        "adpcm_bytes": 26457
+      }
+    ]
+  },
+  "models": {
+    "elite": {
+      "xip_free": 1228,
+      "pool_raw_free": 9024,
+      "pool_reserve": 8192,
+      "pool_margin": 832,
+      "xip_floor": 1024,
+      "pool_margin_floor": 512,
+      "stock_build_exit": 0,
+      "stock_package_exit": 0,
+      "stock_flashmap_exit": 0,
+      "starting_break_exit": 1,
+      "starting_break_available": 192,
+      "starting_break_shortfall": 109202,
+      "package": {
+        "file": "x0x-smk37-elite.fwsc",
+        "bytes": 651732,
+        "sha256": "3aaba53459442cdd1f652dedf2c438a30189e4f5d06859270e9b0da1bd9bfecd",
+        "crc32": "4f0ac8ea"
+      },
+      "application": {
+        "file": "x0x.bin",
+        "bytes": 551444,
+        "sha256": "650b8dced69b28dea1f549fb87fc0610e5afc3b9aec66c85bd5cedc56f246f45",
+        "crc32": "9eb4d5f8"
+      },
+      "loader": {
+        "file": "ota.bin",
+        "bytes": 7616,
+        "sha256": "0413ab513ab3bbe9661ec9479fc77b237801b2d2067685c02c78ab5048db2e03",
+        "crc32": "40b91f19"
+      },
+      "elf": {
+        "file": "elite.elf",
+        "bytes": 639024,
+        "sha256": "6253d7d94205f0b578edf7cc9804b5c64744572477fa5eb9e72821f88e3d6332",
+        "crc32": "7ce477f2"
+      },
+      "package_flash_image": {
+        "file": "lane-integ-resume-0130-e29c99ec-stock-elite-package-flash.img",
+        "bytes": 643072,
+        "sha256": "cd027a30231a06241db83d6583dba6f97d1bd0ca60c4d9a4ba96135512075e57",
+        "crc32": "f8d833dd"
+      }
+    },
+    "pro": {
+      "xip_free": 1236,
+      "pool_raw_free": 9024,
+      "pool_reserve": 8192,
+      "pool_margin": 832,
+      "xip_floor": 1024,
+      "pool_margin_floor": 512,
+      "stock_build_exit": 0,
+      "stock_package_exit": 0,
+      "stock_flashmap_exit": 0,
+      "starting_break_exit": 1,
+      "starting_break_available": 208,
+      "starting_break_shortfall": 109186,
+      "package": {
+        "file": "x0x-smk37.fwsc",
+        "bytes": 651730,
+        "sha256": "8f399e350a3af8ded3bee7f05d60f4b01c966b785d7a336c90dcd371178cef92",
+        "crc32": "29443b7e"
+      },
+      "application": {
+        "file": "x0x.bin",
+        "bytes": 551436,
+        "sha256": "9713b37ed8cf4c712de66bbab7c7cdcbd9a5324f2784b7f806eba53f279614ce",
+        "crc32": "dc7e54f1"
+      },
+      "loader": {
+        "file": "ota.bin",
+        "bytes": 7614,
+        "sha256": "d5874d17f139fc231275917a041dd2a2c98434ce80dcae26733fb55aae605bd5",
+        "crc32": "dd5bbc90"
+      },
+      "elf": {
+        "file": "pro.elf",
+        "bytes": 639016,
+        "sha256": "70fc8f2f6cfc6c466a801f55f8cc3515c594cf8e1a2271fba3ca4c51db5f6c81",
+        "crc32": "75817dc7"
+      },
+      "package_flash_image": {
+        "file": "lane-integ-resume-0130-e29c99ec-stock-pro-package-flash.img",
+        "bytes": 643072,
+        "sha256": "146a600fa27644e204061c7f05040afe882606b3f74f690e07dea63c7594399c",
+        "crc32": "35731455"
+      }
+    }
+  }
+}

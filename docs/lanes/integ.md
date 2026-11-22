@@ -1,5 +1,16 @@
 # Integration baseline
 
+## Stock qualification and five-zone BREAK result — 2026-11-22 (WORKING)
+
+- The resolved tree `8609f75308f10874a7ba4aec1c1fb309023c100b` is published at `e29c99ec2cc610e5af3de575e85771f666b239f4`. Checks ran on the identical local tree at `5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7`. Its parents are the previous lane `95624daf00fd73e373f4d8cd133de9016c8b7f7c` and consolidated `f1786ebec2616477163b62b029c7e77405a9c3de`. Consolidated is reachable and no files are deleted relative to it.
+- Stock Elite and Pro builds, package checks and flash maps passed. Elite has 1,228 B free XIP and Pro has 1,236 B versus the 1,024 B floor. Both have 832 B of pool margin above the 8,192 B reserve, against a 512 B margin requirement. The two stock `.fwsc` packages are verification artifacts for this source tree.
+- Both native `--starting-breaks` commands rejected the intact 109,394 B five-zone bank. Available aligned space is 192 B Elite and 208 B Pro, giving shortfalls of 109,202 B and 109,186 B. The stock map has 12 KiB of spare sectors total, split by live or protected regions. Lossless xz still produces 97,776 B before decoder and metadata. User sample storage and rollback resources are preserved.
+- All ten focused host checks passed, including five-zone pack, reader, and preview fixtures. All fifteen deployed WAV and compatibility paths matched the five pinned SHA-256 values and byte sizes after bounded retries. Roadmap regeneration was byte-identical and all seven roadmap controls passed.
+- The current compact-program LeakSanitizer negative control exited 23 with a fatal runtime tracing error, without the required 123-byte leak report. Six source inputs match the earlier untraced Debian receipt byte-for-byte. Current integrated Local and strict timing acceptance remain open. Final strict ten-minute playback belongs on the combined SHA after upstream merges.
+- Project Sources delivery of the two `.img` payloads remains pending after a browser timeout before file selection. Their exact names, bytes and digests are recorded in the native manifest.
+
+[Qualification evidence](../../evidence/integ-resume/qualification-0130/firmware-native-results.json)
+
 ## Consolidated merge resolution — 2026-11-22 (WORKING)
 
 Merged consolidated `f1786ebec2616477163b62b029c7e77405a9c3de` with prior lane head `95624daf00fd73e373f4d8cd133de9016c8b7f7c`, preserving both parents. The sole conflict was `docs/LIBRARY-INDEX.md`; kept both independent baseline and Sound recovery sections in full. No source conflict required choosing an implementation. The exact SDK archive was recovered from the existing local project workspace and SHA-256 verified as `929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6`; this supersedes the older missing-byte finding only for this executor. Build and strict playback results remain pending.

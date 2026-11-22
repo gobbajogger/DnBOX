@@ -1,0 +1,81 @@
+Historical untraced stock Debian source and current local source:
+76040daa5b52d686a8b7b544296ba5d79610a95d
+5b5cb2420077ef8c3559c8a0e0aa4a5d6e8e34d7
+
+Git blob IDs at historical source:
+100644 blob 4f386aa0be5aee61744964bfa0c7214940b0b655	experiments/original_synth/chicago_program_private.h
+100644 blob 0e6589f19b24afee30ea2220f0dca0baee79534d	experiments/original_synth/miami_program_private.h
+100644 blob 2e8862e18076e6fd92211fc5a2b185701f46a53c	experiments/original_synth/program_values_compact.h
+100644 blob fac379241427a2de5054b9252a0db97022abc391	tests/host/program_values_compact_test.c
+100644 blob 3df812480220b65074e76dc7466354e25a288cbc	tests/program_values_compact_test.py
+100644 blob 7932afef273e80b1bf92531e418001cd1665e265	tools/gen_program_values_compact.py
+
+Git blob IDs at current source:
+100644 blob 4f386aa0be5aee61744964bfa0c7214940b0b655	experiments/original_synth/chicago_program_private.h
+100644 blob 0e6589f19b24afee30ea2220f0dca0baee79534d	experiments/original_synth/miami_program_private.h
+100644 blob 2e8862e18076e6fd92211fc5a2b185701f46a53c	experiments/original_synth/program_values_compact.h
+100644 blob fac379241427a2de5054b9252a0db97022abc391	tests/host/program_values_compact_test.c
+100644 blob 3df812480220b65074e76dc7466354e25a288cbc	tests/program_values_compact_test.py
+100644 blob 7932afef273e80b1bf92531e418001cd1665e265	tools/gen_program_values_compact.py
+
+Diff command return code (unchanged = 0): 0
+
+SHA256 of current file bytes:
+f8f3e22e6a9c5606a5952df26c5d8d49cb996af1a35da4d545bfeb38728d68ed  tests/program_values_compact_test.py
+02a46683f7c825236cb8f04563c22dd1c660ba8b46124a976c70643258ce9c4b  tests/host/program_values_compact_test.c
+821eb597ac7cb5da569687325463ede54b5890d578676612a77a1d0b87c6915f  tools/gen_program_values_compact.py
+395710a2a6d180d1bae9a597749743065417c9c6eeada4bb256b1411d404d25a  experiments/original_synth/program_values_compact.h
+5b950f6441f38e68c36d303a55361ce1d1e75c23ec05d7a5314fa2c32c3aa460  experiments/original_synth/miami_program_private.h
+b95ed765e55886ed7d1e52ebb06b43d5026743ec6dd17d9a9cf6cc34e9dcc309  experiments/original_synth/chicago_program_private.h
+
+Historical transcript contents:
+[  103.748219] watchdog: BUG: soft lockup - CPU#0 stuck for 80s! [kworker/u4:0:12]
+Linux (none) 6.12.117+deb13-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.117-1 (2026-11-12) x86_64 GNU/Linux
+firmware commit 7f87de1039538670cf41f39072483ca5ff390f82
+tree 53c9109348f5f71409de4a3eaba47247d1989470
+uid=1000(tester) gid=1000(tester) groups=1000(tester)
+Linux 6.12.117+deb13-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.117-1 (2026-11-12)
+Kernel.TracerPid:	0
+experiments/original_synth/chicago_program_private.h: OK
+experiments/original_synth/miami_program_private.h: OK
+experiments/original_synth/program_values_compact.h: OK
+tests/host/program_values_compact_test.c: OK
+tests/program_values_compact_test.py: OK
+tools/gen_program_values_compact.py: OK
+gcc (Debian 14.2.0-19) 14.2.0
+Python 3.13.5
+
+=================================================================
+==162==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 123 byte(s) in 1 object(s) allocated from:
+    #0 0x7f4290aefc57 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5639210d01aa in allocation <workspace>/breakpack/i4/leak.c:4
+
+SUMMARY: AddressSanitizer: 123 byte(s) leaked in 1 allocation(s).
+INDEPENDENT_CLEAN_EXIT=0 INDEPENDENT_LEAK_EXIT=23
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+PASS genuine 123-byte LeakSanitizer negative control rejected
+PASS compact program metadata: 796 exact binary32/name checks
+PASS compact program metadata: 796 exact binary32/name checks
+PASS metadata corruption negative control rejected
+GUEST_I4_EXIT=0
+[  442.340519] reboot: Power down
+
+Local runner status (includes TracerPid check):
+TracerPid:	0
+Seccomp:	2
+program values: 1614 B + names 399 B; raw values/names3784 B; all words exact
+Traceback (most recent call last):
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/firmware/tests/program_values_compact_test.py", line 82, in <module>
+    main()
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/firmware/tests/program_values_compact_test.py", line 58, in main
+    require_leak_control(control)
+  File "/workspace/scratch/857bb2409f82/integ-resume-0130/firmware/tests/program_values_compact_test.py", line 30, in require_leak_control
+    raise RuntimeError('LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; '
+RuntimeError: LeakSanitizer control failed: expected exit 23 and a real 123-byte leak report; got exit 23
+==56==LeakSanitizer has encountered a fatal error.
+==56==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==56==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+
+exit=1
