@@ -1,5 +1,11 @@
 # Sound lane
 
+## 2026-11-22 S4 preflight and integration ancestry
+
+A read-only comparison of `sj6-factory/s4-inputs.json` and `original/bundled-bank-audit.json` matched all 14 selected UIDs and 12 bank identities, with 1,926 authored controls and the eight-event stereo schedule. [Verifier](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight.mjs) · [receipt](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight-result.json). This is **not original-AU execution** and the S4 gate remains **0/14, NOT_RUN**.
+
+At this check, `integration/dnbox-consolidated` was `53` commits ahead of the sound branch, while the sound branch was `66` ahead of integration (merge base `0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e`). C2 requires a real, no-loss merge; it has **not** been met. Do not synthesize a two-parent commit pointing at the sound-only tree, because that would silently drop concurrent integration changes. Recreate a full current source checkout and perform a verified merge before qualification and integration.
+
 ## 2026-11-22 native-effects checkpoint on sound resume
 
 Branch `lane/sound-engine-qualification-resume` at start `230a73e4ac075f3752926b3a65130181de5c723a`: verified the existing long-delay kernel against its scalar fallback on 8,192 blocks and 1,052,672 frames at each of `-O0` and `-O2`, with zero PCM/ring/state mismatches. See [replay](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/replay-fxbus-edge.py), [receipt](../../experiments/sound-hardware-v1/808-full-delay/settled-586ms/edge-result.json), and [qualification scope](../sound/engine-qualification.md#native-808-long-delay-kernel-checkpoint--2026-11-22-utc). This is a focused component comparison only: original 8W8 effects-on parity, 1.994-second tail, Elite/Pro exact-head links and strict timing remain **NOT_RUN**, as does full SuperJ6 S4 (0/14). The provided shared-inputs bundle is toolchain-only, the SDK archive is not available as authorized raw bytes in this runtime, original AU preset renders require a compatible original host, and the connected DnBOX cloud devices are offline. Do not mark the sound lane DONE.

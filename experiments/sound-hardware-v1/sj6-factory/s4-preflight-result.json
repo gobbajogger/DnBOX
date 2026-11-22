@@ -1,0 +1,27 @@
+{
+  "result": "PASS_STATIC_SOURCE_AUDIT_ONLY",
+  "audit_method": "connector-side original-file JSON invariants; Node verifier syntax checked separately",
+  "source_commit": "ff14ddbb835a67be04c9ce06a52b5606474d262b",
+  "matrix_git_blob_sha1": "3041e0e0c68fed2fe4632bbee5b991996c5dd110",
+  "audited_release_git_blob_sha1": "9bcd16663c063e5c16a1b20904cf200d1cb35e6b",
+  "program_count": 14,
+  "unique_selected_uids": 14,
+  "distinct_supplied_banks": 12,
+  "matched_program_uid_and_bank_pairs": 14,
+  "total_authored_controls": 1926,
+  "original_au_digest_claimed_by_audit": "a5243e50bda6bd44f463c6e63ea3137802142f55f3c1ea25a5a6e046acba81a1",
+  "original_ipa_digest_claimed_by_audit": "dde4992f24f52d4390391069025b27092a2f327e3a53115bdd53a6ede0dffa8e",
+  "differing_decimal_spellings": 4,
+  "records_with_metadata_differences": 2,
+  "event_count": 8,
+  "capture_frames": 132300,
+  "channels": 2,
+  "complete_original_au_stereo_renders_generated_here": 0,
+  "complete_fw_stereo_pairs_scored_here": 0,
+  "not_qualified": [
+    "original AU executable runtime",
+    "14 original stereo PCM captures",
+    "14 firmware render pairs",
+    "original-vs-DnBOX spectral and RMS thresholds"
+  ]
+}
