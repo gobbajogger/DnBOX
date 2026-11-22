@@ -1,0 +1,699 @@
+{
+  "elf_sha256": "7a2282d54ac994bff45b344dce8274d9bb0922ebc1db717f2467097db08b20d9",
+  "window_ms": [
+    5620,
+    5670
+  ],
+  "samples": {
+    "baseline": {
+      "input_sha256": "8aca3e434bf5f4bed046ab1e679fbb493e4d506b444bc96aba547763b8e9399b",
+      "cores": {
+        "0": {
+          "total": 2230198,
+          "top": [
+            [
+              "cv_rect",
+              239411
+            ],
+            [
+              "cv_text_clip",
+              236473
+            ],
+            [
+              "d9_render",
+              183036
+            ],
+            [
+              "plat_cpu2_wait",
+              149879
+            ],
+            [
+              "fm1_lcd_wait",
+              147032
+            ],
+            [
+              "voice_run",
+              89451
+            ],
+            [
+              "x0x_lcd_tile_hash",
+              80415
+            ],
+            [
+              "cy_run",
+              67889
+            ],
+            [
+              "d9_biquad_tick",
+              62118
+            ],
+            [
+              "oscillator_filter",
+              57520
+            ],
+            [
+              "cv_begin",
+              44329
+            ],
+            [
+              "fm1_timer5_irq",
+              40280
+            ],
+            [
+              "px_blend",
+              40122
+            ],
+            [
+              "run_job",
+              39609
+            ],
+            [
+              "memcpy",
+              32687
+            ],
+            [
+              "s1_part_render",
+              32444
+            ],
+            [
+              "fm_tanhf.131",
+              31628
+            ],
+            [
+              "motion_find",
+              30004
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 0,
+            "factory_shape": 0,
+            "shape.1092": 0,
+            "blep": 0,
+            "phase_section": 0,
+            "envelope_sample": 0
+          }
+        },
+        "1": {
+          "total": 2230198,
+          "top": [
+            [
+              "fm1_c1_main",
+              1187436
+            ],
+            [
+              "juno6_render_stereo",
+              332759
+            ],
+            [
+              "shape.1092",
+              134188
+            ],
+            [
+              "factory_shape",
+              117493
+            ],
+            [
+              "blep",
+              116073
+            ],
+            [
+              "envelope_sample",
+              102210
+            ],
+            [
+              "phase_section",
+              99895
+            ],
+            [
+              "chorus_read_tap",
+              34517
+            ],
+            [
+              "fx_reverb",
+              32634
+            ],
+            [
+              "chorus_input",
+              15082
+            ],
+            [
+              "juno6_chorus_render_factory",
+              14807
+            ],
+            [
+              "prepare_tick",
+              10427
+            ],
+            [
+              "voice_active.1090",
+              9471
+            ],
+            [
+              "settle",
+              4928
+            ],
+            [
+              "memcmp",
+              4512
+            ],
+            [
+              "run_job",
+              3152
+            ],
+            [
+              "fxbus_process_st",
+              2965
+            ],
+            [
+              "fx_delay",
+              1865
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 332759,
+            "factory_shape": 117493,
+            "shape.1092": 134188,
+            "blep": 116073,
+            "phase_section": 99895,
+            "envelope_sample": 102210
+          }
+        },
+        "m0": {
+          "total": 5475,
+          "top": [
+            [
+              "d9_render",
+              283
+            ],
+            [
+              "fm1_alnk0_irq",
+              219
+            ],
+            [
+              "fm1_timer5_irq",
+              181
+            ],
+            [
+              "render_sub",
+              179
+            ],
+            [
+              "run_job",
+              146
+            ],
+            [
+              "seq_advance",
+              144
+            ],
+            [
+              "voice_run",
+              142
+            ],
+            [
+              "input",
+              124
+            ],
+            [
+              "draw_param_widget",
+              114
+            ],
+            [
+              "cy_run",
+              107
+            ],
+            [
+              "smc_poll",
+              104
+            ],
+            [
+              "s1_part_render",
+              103
+            ],
+            [
+              "FONT_T_DATA",
+              75
+            ],
+            [
+              "bank_block",
+              74
+            ],
+            [
+              "juno_strip_glyph",
+              69
+            ],
+            [
+              "draw_adsr_inline",
+              67
+            ],
+            [
+              "draw_header",
+              60
+            ],
+            [
+              "ui_frame",
+              56
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 0,
+            "factory_shape": 0,
+            "shape.1092": 0,
+            "blep": 0,
+            "phase_section": 0,
+            "envelope_sample": 0
+          }
+        },
+        "m1": {
+          "total": 412,
+          "top": [
+            [
+              "juno6_render_stereo",
+              82
+            ],
+            [
+              "fx_reverb",
+              68
+            ],
+            [
+              "run_job",
+              39
+            ],
+            [
+              "chorus_input",
+              29
+            ],
+            [
+              "juno6_chorus_render_factory",
+              22
+            ],
+            [
+              "fxbus_process_st",
+              18
+            ],
+            [
+              "chorus_read_tap",
+              15
+            ],
+            [
+              "render_stereo",
+              13
+            ],
+            [
+              "fx_delay",
+              12
+            ],
+            [
+              "factory_shape",
+              11
+            ],
+            [
+              "shape.1092",
+              11
+            ],
+            [
+              "juno6_chorus_process",
+              9
+            ],
+            [
+              "prepare_tick",
+              8
+            ],
+            [
+              "core2_fx",
+              8
+            ],
+            [
+              "envelope_sample",
+              7
+            ],
+            [
+              "blep",
+              6
+            ],
+            [
+              "juno6_chorus_init",
+              5
+            ],
+            [
+              "memcmp",
+              4
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 82,
+            "factory_shape": 11,
+            "shape.1092": 11,
+            "blep": 6,
+            "phase_section": 0,
+            "envelope_sample": 7
+          }
+        }
+      }
+    },
+    "without_wave": {
+      "input_sha256": "b167763003f721342eadb8e7d1d7a3c1e5fba4e8a73a410154265f8e6b9325f1",
+      "cores": {
+        "0": {
+          "total": 2231325,
+          "top": [
+            [
+              "juno6_render_stereo",
+              308328
+            ],
+            [
+              "plat_cpu2_wait",
+              123211
+            ],
+            [
+              "cv_text_clip",
+              109889
+            ],
+            [
+              "cv_rect",
+              102864
+            ],
+            [
+              "d9_render",
+              102704
+            ],
+            [
+              "envelope_sample",
+              95083
+            ],
+            [
+              "factory_shape",
+              91467
+            ],
+            [
+              "phase_section",
+              89154
+            ],
+            [
+              "oscillator_filter",
+              86427
+            ],
+            [
+              "run_job",
+              73550
+            ],
+            [
+              "fm1_lcd_wait",
+              63975
+            ],
+            [
+              "x0x_lcd_tile_hash",
+              58532
+            ],
+            [
+              "s1_part_render",
+              58263
+            ],
+            [
+              "chorus_read_tap",
+              54875
+            ],
+            [
+              "fm1_timer5_irq",
+              43208
+            ],
+            [
+              "d9_biquad_tick",
+              42427
+            ],
+            [
+              "memcpy",
+              40384
+            ],
+            [
+              "render_sub",
+              39879
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 308328,
+            "factory_shape": 91467,
+            "shape.1092": 0,
+            "blep": 0,
+            "phase_section": 89154,
+            "envelope_sample": 95083
+          }
+        },
+        "1": {
+          "total": 2231325,
+          "top": [
+            [
+              "fm1_c1_main",
+              676818
+            ],
+            [
+              "d9_render",
+              272651
+            ],
+            [
+              "voice_run",
+              257496
+            ],
+            [
+              "cy_run",
+              135856
+            ],
+            [
+              "juno6_render_stereo",
+              103769
+            ],
+            [
+              "d9_biquad_tick",
+              84471
+            ],
+            [
+              "fx_reverb",
+              66126
+            ],
+            [
+              "fm_tanhf.131",
+              62626
+            ],
+            [
+              "d8_render",
+              53550
+            ],
+            [
+              "bank_block",
+              41692
+            ],
+            [
+              "cp_run",
+              41677
+            ],
+            [
+              "d9_env_tick",
+              39113
+            ],
+            [
+              "envelope_sample",
+              30619
+            ],
+            [
+              "phase_section",
+              29064
+            ],
+            [
+              "hat_run",
+              28466
+            ],
+            [
+              "ima_decode_code",
+              27594
+            ],
+            [
+              "cb_run",
+              25898
+            ],
+            [
+              "factory_shape",
+              24350
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 103769,
+            "factory_shape": 24350,
+            "shape.1092": 0,
+            "blep": 0,
+            "phase_section": 29064,
+            "envelope_sample": 30619
+          }
+        },
+        "m0": {
+          "total": 6077,
+          "top": [
+            [
+              "fm1_alnk0_irq",
+              410
+            ],
+            [
+              "render_sub",
+              373
+            ],
+            [
+              "run_job",
+              335
+            ],
+            [
+              "fm1_timer5_irq",
+              270
+            ],
+            [
+              "seq_advance",
+              258
+            ],
+            [
+              "s1_part_render",
+              219
+            ],
+            [
+              "juno6_render_stereo",
+              156
+            ],
+            [
+              "d9_render",
+              115
+            ],
+            [
+              "mix_ready_prefix",
+              74
+            ],
+            [
+              "input",
+              72
+            ],
+            [
+              "comp_fixed_st",
+              72
+            ],
+            [
+              "master_process_st",
+              61
+            ],
+            [
+              "draw_adsr_inline",
+              60
+            ],
+            [
+              "draw_param_widget",
+              60
+            ],
+            [
+              "FONT_T_DATA",
+              60
+            ],
+            [
+              "oscillator_filter",
+              59
+            ],
+            [
+              "smc_poll",
+              53
+            ],
+            [
+              "bass_sound_tag_decode",
+              51
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 156,
+            "factory_shape": 24,
+            "shape.1092": 8,
+            "blep": 0,
+            "phase_section": 0,
+            "envelope_sample": 15
+          }
+        },
+        "m1": {
+          "total": 2658,
+          "top": [
+            [
+              "d9_render",
+              450
+            ],
+            [
+              "voice_run",
+              387
+            ],
+            [
+              "cy_run",
+              208
+            ],
+            [
+              "bank_block",
+              169
+            ],
+            [
+              "fx_reverb",
+              156
+            ],
+            [
+              "cp_run",
+              103
+            ],
+            [
+              "prepare_808_mix",
+              100
+            ],
+            [
+              "d8_render",
+              99
+            ],
+            [
+              "hat_run",
+              91
+            ],
+            [
+              "run_job",
+              77
+            ],
+            [
+              "d9_render_clap",
+              47
+            ],
+            [
+              "fxbus_process_st",
+              43
+            ],
+            [
+              "cb_run",
+              42
+            ],
+            [
+              "juno6_render_stereo",
+              39
+            ],
+            [
+              "kit_mix_settled",
+              33
+            ],
+            [
+              "d9_render_st_masked",
+              32
+            ],
+            [
+              "d9_emit_block",
+              32
+            ],
+            [
+              "bp_set",
+              31
+            ]
+          ],
+          "typed_hot_path": {
+            "juno6_render_stereo": 39,
+            "factory_shape": 6,
+            "shape.1092": 2,
+            "blep": 0,
+            "phase_section": 0,
+            "envelope_sample": 2
+          }
+        }
+      }
+    }
+  }
+}
