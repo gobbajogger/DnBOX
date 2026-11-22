@@ -1,18 +1,21 @@
 """Compare the shipping 808 echo to untouched 8W8 processing on every voice."""
-import argparse, hashlib, json, subprocess, sys
+import argparse, hashlib, json, subprocess, sys, zipfile
 from pathlib import Path
 import numpy as np
 HERE=Path(__file__).resolve().parent
 BENCH_REPO=HERE.parents[4]
 REF='94aa2716d4c2e5851fc7c5dbb4c17adfd133c997'
+REF_ARCHIVE_SHA256='5fb86d732d7bc972e74219246fbbd02449bc20146b8c796d2ede9f557843a4df'
 sys.path.insert(0,str(BENCH_REPO/'experiments/sound-hardware-v1/sj6-factory'))
 from compare import channel_score
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('firmware', type=Path, help='checkout with the 26,112-frame private 808 return')
-    parser.add_argument('upstream',type=Path)
+    parser.add_argument('firmware', type=Path, help='firmware checkout providing the private 808 return')
+    parser.add_argument('--ring-frames', type=int, choices=(19200, 26112), default=26112,
+                        help='assert the expected private 808 ring length (default: 26112)')
+    parser.add_argument('upstream',type=Path, help='pinned upstream Git checkout or verified source ZIP')
     parser.add_argument('output',type=Path)
     parser.add_argument('--sustained',action='store_true',
                         help='repeat hits for four seconds, then compare four seconds of feedback tails')
@@ -22,8 +25,22 @@ def main():
     out.mkdir(parents=True,exist_ok=False)
     source=out/'original'
     source.mkdir()
-    for name in subprocess.check_output(['git','-C',args.upstream,'ls-tree','--name-only',REF+':src/dsp'],text=True).splitlines():
-        (source/name).write_bytes(subprocess.check_output(['git','-C',args.upstream,'show',REF+':src/dsp/'+name]))
+    if args.upstream.is_file():
+        if hashlib.sha256(args.upstream.read_bytes()).hexdigest() != REF_ARCHIVE_SHA256:
+            raise ValueError('Original 8W8 archive digest mismatch')
+        with zipfile.ZipFile(args.upstream) as archive:
+            for member in archive.namelist():
+                path = Path(member)
+                if path.parent == Path('src/dsp'):
+                    (source / path.name).write_bytes(archive.read(member))
+    else:
+        upstream_git = ['git', '-C', args.upstream]
+        for name in subprocess.check_output(
+            [*upstream_git, 'ls-tree', '--name-only', REF + ':src/dsp'], text=True
+        ).splitlines():
+            (source / name).write_bytes(subprocess.check_output(
+                [*upstream_git, 'show', REF + ':src/dsp/' + name]
+            ))
     cpp=source/'sc808_engine.cpp'
     text=cpp.read_text()
     marker='void sc808_render(sc808_engine_t *e, float *out, int frames)'
@@ -36,7 +53,7 @@ def main():
     gen=out/'generated'
     gen.mkdir()
     subprocess.run([sys.executable,firmware/'tools/gen_drum_samples.py',gen/'x0x_drum_samples.h'],cwd=firmware,check=True)
-    flags=['-O2','-ffp-contract=off','-fno-fast-math','-I'+str(source),'-I'+str(dsp),'-I'+str(gen)]
+    flags=[f'-DEXPECTED_808_DELAY_FRAMES={args.ring_frames}','-O2','-ffp-contract=off','-fno-fast-math','-I'+str(source),'-I'+str(dsp),'-I'+str(gen)]
     objects=[]
     for i,unit in enumerate((cpp,dsp/'fxbus.c',dsp/'x0x_param.c',dsp/'drum909.c',dsp/'drum808.c',HERE/'delay_voices.c')):
         obj=out/f'{i}.o'
@@ -47,7 +64,7 @@ def main():
     cases=[]
     default=[7,68,60,93,55,120]
     beats=[.125,1/6,.25,1/3,.375,.5,2/3,.75,1,4/3,1.5,2,3]
-    cap=(26112-256)/44100
+    cap=(args.ring_frames-256)/44100
     for voice in [*range(16),-1]:
         for rv,mode,glue,fb in ((0,0,0,68),(0,0,0,127),(1,0,0,68),(1,1,108,68)):
             vals=default.copy();vals[1]=fb
@@ -63,13 +80,15 @@ def main():
                 cases.append((voice,0,0,0,vals,True))
     frames = 352800 if args.sustained else 88200
     if args.sustained:
-        cases = [(voice, rv, mode, glue, value, True)
+        cases = [(voice, rv, mode, glue, value, beats[value[0]]*60/value[5] <= cap + 1e-8)
                  for voice in [*range(16), -1]
                  for rv, mode, glue, value in (
                      (0, 0, 0, [8, 127, 127, 127, 55, 102.336015]),
                      (0, 0, 0, [8, 127, 0, 127, 0, 103]),
                      (0, 0, 0, [0, 127, 127, 127, 55, 240]),
                      (1, 1, 108, [8, 127, 127, 127, 55, 102.336015]))]
+    if not any(case[-1] for case in cases):
+        raise RuntimeError('no in-range settings for the expected ring')
     rows=[]
     for voice,rv,mode,glue,values,within in cases:
         tmp=out/'pair.f32'
@@ -80,7 +99,8 @@ def main():
         x,ref,port,_=pcm.astype('d').T
         level,spec=channel_score(ref,port,44100,[20,16000])
         row={'voice':voice,'division_feedback_tone_level_hpf_bpm':values,'reverb':rv,'drive_mode':mode,'glue':glue,'in_range':within,'level_db':level,'spectral_rms_db':spec,
-             'pass':bool(abs(level)<=1 and spec<=3),'reference_sha256':hashlib.sha256(pcm[:,1].tobytes()).hexdigest()}
+             'pass':bool(abs(level)<=1 and spec<=3),'reference_sha256':hashlib.sha256(pcm[:,1].tobytes()).hexdigest(),
+             'candidate_stereo_sha256':hashlib.sha256(pcm[:,2:].tobytes()).hexdigest()}
         if not(mode or glue) and np.max(np.abs(ref-x))>1e-8:
             level,spec=channel_score(ref-x,port-x,44100,[20,16000])
             row.update(return_level_db=level,return_spectral_rms_db=spec,return_pass=bool(abs(level)<=1 and spec<=3))
@@ -95,7 +115,7 @@ def main():
                 raise RuntimeError('silent tail differs')
         rows.append(row)
     valid=[r for r in rows if r['in_range']]
-    report={'original':REF,'rate':44100,'frames_per_case':frames,'maximum_delay_seconds':cap,'cases':rows,
+    report={'original':REF,'rate':44100,'frames_per_case':frames,'ring_frames':args.ring_frames,'maximum_delay_seconds':cap,'cases':rows,
             'in_range_cases':len(valid),'full_pass':sum(r['pass'] for r in valid),
             'wet_only_pass':sum(r.get('return_pass',False) for r in valid),'wet_only_cases':sum('return_pass' in r for r in valid)}
     if args.sustained:

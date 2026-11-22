@@ -1,5 +1,10 @@
 # Sound lane
 
+### Exact-source qualification checkpoint — 2026-11-22 UTC
+
+Source `49ba51f1` stock Elite and Pro built with 7,796/7,804 B XIP free and 7,908 B pool margin each. In-range original wet 8W8 output passed 230 full mixes, 207 energized returns and 17 sustained tails. Full-range feedback delay remains open. Chicago still has the one boundary-clipped moving-pitch fit, and strict populated timing and SuperJ6 S4 are NOT_RUN. Integration `f1786ebe` diverges from the measured head. A virtual merge found 12 conflicts. [Qualification](../sound/engine-qualification.md#shipping-wet-808-and-two-board-build-checkpoint--2026-11-22-utc) · [Exact build and ancestry evidence](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).
+
+
 ## 2026-11-22 S4 preflight and integration ancestry
 
 A read-only comparison of `sj6-factory/s4-inputs.json` and `original/bundled-bank-audit.json` matched all 14 selected UIDs and 12 bank identities, with 1,926 authored controls and the eight-event stereo schedule. [Verifier](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight.mjs) · [receipt](../../experiments/sound-hardware-v1/sj6-factory/s4-preflight-result.json). This is **not original-AU execution** and the S4 gate remains **0/14, NOT_RUN**.
