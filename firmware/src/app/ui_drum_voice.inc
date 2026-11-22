@@ -734,7 +734,7 @@ static UI_DRAW void draw_drum_voice(int band)
     int t = ui.part == PART_808 ? T_808 : T_909;
     int v = ui.sel[ui.part];
     int page = cur_page();
-    int n = pg.n;
+    int n = pg.n, first = 0, accent = -1;
     int p, y, active;
     uint16_t col = part_col();
     uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
@@ -743,7 +743,16 @@ static UI_DRAW void draw_drum_voice(int band)
     int live;
     int body_y, yb;
     cv_rect(0, 0, 240, bh, SOUND_BASE);
-    if(t==T_808 && v==D8_CP){dv_cp_stage_page(band);return;}
+    if(t==T_808 && n>5){
+        /* The composed 808 has five KIT banks. Render the selected KIT bank
+         * in place, or retain the ordinary SOUND banks; navigation is unchanged. */
+        if(pg.group[page]==GR_KIT){first=page;n=page+1;}
+        else {
+            while(n>page+1 && pg.group[n-1]==GR_KIT)n--;
+            accent=n++; /* retain the ordinary SOUND page's Accent summary */
+        }
+    }
+    if(t==T_808 && v==D8_CP && !first){dv_cp_stage_page(band);return;}
 
     /* body surface + banks: R22 y=24 (screen) => main y=4, height grows with bank count. */
     yb = DV_MAIN(24);
@@ -754,9 +763,9 @@ static UI_DRAW void draw_drum_voice(int band)
         int body_h;
         int used = 0;
         int ah;
-        for (p = 0; p < n; p++) {
+        for (p = first; p < n; p++) {
             int cells = 0, k;
-            for (k = 0; k < 4; k++) if (pg.r[p][k].kind != R_NONE) cells++;
+            for (k = 0; k < (p==accent?1:4); k++) if (pg.r[p][k].kind != R_NONE) cells++;
             ah = (p == page) ? (cells==1?56:72) : (cells>1?42:32);
             used += ah;
         }
@@ -765,9 +774,9 @@ static UI_DRAW void draw_drum_voice(int band)
             rbox(3, by, 234, body_h, UI_PANEL_RADIUS, SOUND_FACE);
         /* banks */
         y = yb + 2;
-        for (p = 0; p < n; p++) {
+        for (p = first; p < n; p++) {
             int cells = 0, k;
-            for (k = 0; k < 4; k++) if (pg.r[p][k].kind != R_NONE) cells++;
+            for (k = 0; k < (p==accent?1:4); k++) if (pg.r[p][k].kind != R_NONE) cells++;
             if (cells < 1) cells = 1;
             active = (p == page);
             ah = active ? (cells==1?56:72) : (cells>1?42:32);
@@ -787,7 +796,8 @@ static UI_DRAW void draw_drum_voice(int band)
                 const x0x_param_t *pd0;
                 a[0] = b[0] = 0;
                 if (pg.r[p][0].kind == R_ENG && pg.r[p][0].b == NDRUM) {
-                    put_s(a, "KIT"); put_s(b, pref_name(pg.r[p][0]));
+                    put_s(a,first?(pg.r[p][0].c==D8_KIT_DL_BUS?"DL BUS":pg.title[p]):"KIT");
+                    if(!first || cells==1)put_s(b,pref_name(pg.r[p][0]));
                 } else {
                     put_s(a, "SOUND");
                     pd0 = pref_desc(pg.r[p][0]);
@@ -820,7 +830,7 @@ static UI_DRAW void draw_drum_voice(int band)
                     cv_text(11, ly + 12, &FONT_T, b, gray);
             }
             /* glyphs + values */
-            for (k = 0; k < 4; k++) {
+            for (k = 0; k < (p==accent?1:4); k++) {
                 pref_t r = pg.r[p][k];
                 int ev_i, vx, gy, gx;
                 float ev;
