@@ -43,7 +43,7 @@ static void tiny_text_fits(const char *text,int row)
     for(const unsigned char *p=(const unsigned char*)text;*p;p++) {
         unsigned gi=glyph(&FONT_T,*p);
 #if defined(FONT_LZ_CROP) || defined(FONT_ALPHA_CROP)
-        const uint8_t *d=FONT_T.data+FONT_T.off[gi];
+        const uint8_t *d=FONT_T.data+font_offset(&FONT_T,gi);
         unsigned r=font_crop_read(&d);
         int left=x-(int)FONT_T.pad+(int)(r&63u),top=y+(int)((r>>6)&63u);
         unsigned width=(r>>12)&63u,height=r>>18;

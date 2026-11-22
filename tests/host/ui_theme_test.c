@@ -68,7 +68,7 @@ static void themes(void)
     CHECK(PROJ_SND_REV==13 && PROJ_STREAM==13 && NPALETTES==6);
     CHECK(UI_FIRST_KNOB==5 && !strcmp(UI_CAP_EDIT,"PARA"));
     CHECK(!strcmp(caps_of("About DnBOX"),"ABOUT DnBOX"));
-    CHECK(FONT_B.last>='n' && FONT_B.off[glyph(&FONT_B,'n')]!=FONT_B.off[glyph(&FONT_B,'N')]);
+    CHECK(FONT_B.last>='n' && font_offset(&FONT_B,glyph(&FONT_B,'n'))!=font_offset(&FONT_B,glyph(&FONT_B,'N')));
     for(unsigned theme=0;theme<6;theme++) {
         proj.set.palette=(uint8_t)theme;palette_set(theme);
         CHECK(project_validate_for(&proj)==0);

@@ -23,7 +23,7 @@ static int32_t raw_text(int32_t x, int32_t y, const felucca_font_t *f, const cha
     uint32_t red = colour >> 11, green = (colour >> 5) & 63u, blue = colour & 31u;
     for (; *s; s++) {
         uint32_t gi = glyph(f, (uint8_t)*s), w = font_bitmap_width(f, gi), stride = (w + 1) / 2, gy, gx;
-        const uint8_t *p = f->data + f->off[gi];
+        const uint8_t *p = f->data + ((const uint16_t *)f->off)[gi];
         for (gy = 0; gy < f->h; gy++)
             for (gx = 0; gx < w; gx++) {
                 uint32_t alpha = p[gy * stride + gx / 2];

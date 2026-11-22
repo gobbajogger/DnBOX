@@ -427,6 +427,9 @@ def main(out, compressed=True, codec=None):
         symbols, codes = entropy_codes(role[-2] for role in roles)
         lines.append("#define FONT_ENTROPY 1")
         lines.append("static const uint8_t font_symbols[256] = {" + ",".join(map(str, symbols)) + "};")
+    pack_offsets = compressed and not entropy and all(max(role[-1]) < 2048 for role in roles)
+    if pack_offsets:
+        lines.append("#define FONT_OFFSET11 1")
     for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
         if entropy:
             data, offs = encode_glyphs(data, offs, codes)
@@ -435,7 +438,14 @@ def main(out, compressed=True, codec=None):
         for i in range(0, len(data), 24):
             lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
         lines.append("};")
-        lines.append(f"static const uint16_t FONT_{name}_OFF[{len(offs)}] = {{" + ", ".join(map(str, offs)) + "};")
+        if pack_offsets:
+            # Absolute 11-bit offsets; retain random access and shared glyphs.
+            # One zero pad permits the painter's bounded three-byte read.
+            bits = sum(offset << (11 * i) for i, offset in enumerate(offs))
+            packed = bits.to_bytes((len(offs) * 11 + 7) // 8 + 1, "little")
+            lines.append(f"static const uint8_t FONT_{name}_OFF[{len(packed)}] = {{" + ", ".join(map(str, packed)) + "};")
+        else:
+            lines.append(f"static const uint16_t FONT_{name}_OFF[{len(offs)}] = {{" + ", ".join(map(str, offs)) + "};")
         lines.append(f"static const uint8_t FONT_{name}_ADV[{len(glyphs)}] = {{" +
                      ", ".join(str(a) for a, _, _ in glyphs) + "};")
         # A packed font may omit a redundant width array, never its metrics.

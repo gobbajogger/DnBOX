@@ -11,11 +11,23 @@ typedef struct {               /* proportional, see tools/gen_font.py */
     uint8_t first, last;
     const uint8_t *adv;        /* advance per glyph */
     const uint8_t *bw;         /* bitmap width per glyph (starts FONT_PAD left of the pen) */
-    const uint16_t *off;       /* byte offset of each glyph */
+    const void *off;           /* byte offset of each glyph */
     const uint8_t *data;
     capm_t cap;                /* rows containing at least half-covered H (or 0) pixels */
 } felucca_font_t;
 #include "felucca_font.h"
+
+static inline uint32_t font_offset(const felucca_font_t *f, uint32_t gi)
+{
+#ifdef FONT_OFFSET11
+    uint32_t i = 11u * gi;
+    const uint8_t *p = (const uint8_t *)f->off + (i >> 3);
+    uint32_t bits = p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16;
+    return (bits >> (i & 7u)) & 2047u;
+#else
+    return ((const uint16_t *)f->off)[gi];
+#endif
+}
 
 /* Null bw denotes a generation-verified advance+padding width. Zero-advance
  * blank glyphs retain zero width. Other font families keep their exact table. */
@@ -281,12 +293,12 @@ static int32_t cv_text_clip(int32_t x, int32_t y, const felucca_font_t *f, const
         uint32_t bpr;
 #endif
         const uint8_t *gd;
-        gd = f->data + f->off[gi];
+        gd = f->data + font_offset(f,gi);
 #if defined(FONT_ALPHA_CROP) || defined(FONT_LZ_CROP)
         uint32_t rectangle = font_crop_read(&gd);
 #ifdef FONT_LZ_CROP
 #ifdef FONT_ENTROPY
-        font_stream_t stream = {f->data + f->off[gi], 0, 0};
+        font_stream_t stream = {f->data + font_offset(f,gi), 0, 0};
         rectangle = font_byte(&stream);
         rectangle |= font_byte(&stream) << 8;
         rectangle |= font_byte(&stream) << 16;
