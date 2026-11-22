@@ -138,10 +138,12 @@ if SUPERJ6_FACTORY not in ("0", "1"):
     raise SystemExit("X0X_SUPERJ6_FACTORY: 0 or 1")
 if SUPERJ6_FACTORY == "1":
     ORIGINAL_SYNTH_BACKENDS.insert(0, "firmware/src/dsp/dnbx_core.c")
+    ORIGINAL_SYNTH_BACKENDS.append("firmware/src/dsp/juno6_chorus_factory.c")
 
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
 ORIGINAL_SYNTH_O2_UNITS = {
+    "juno6_chorus_factory",
     "oscillator_motion", "miami_selected_voice", "miami_ms20", "miami_output", "miami_fx_chain",
     "miami_pitch", "voice_gain", "program_envelope", "fixed_fx", "master",
     "chicago_voice", "chicago_mp4", "chicago_drive", "chicago_dynamics", "chicago_fx2_compact", "chicago_fx2_wrapper",
@@ -459,6 +461,10 @@ def app_compile_commands(flags, original_synth, wobble):
         # flash cache on a busy audio half.
         if u == "seq/sequencer.c":
             unit_flags = flags
+        # Reuse the stock Integration drum size profile when both Sound engines are built.
+        if (SUPERJ6_FACTORY == "1" and os.environ.get("X0X_SYNTHONE_PATCH") == "1"
+                and u in {"dsp/drum808.c", "dsp/drum909.c", "dsp/breaks.c"}):
+            unit_flags = flags if u == "dsp/drum808.c" else ["-Oz" if f == "-Os" else f for f in flags]
         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
             unit_flags = [f for f in unit_flags if f != "-flto"]
         if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":

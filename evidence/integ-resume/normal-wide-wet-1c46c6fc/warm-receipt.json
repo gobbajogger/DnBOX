@@ -1,0 +1,42 @@
+[
+  {
+    "model": "elite",
+    "warm": {
+      "duration_ms": 2000,
+      "shift_ms": 0,
+      "events": 1,
+      "strict": 1,
+      "mhz": 360,
+      "halves": 139,
+      "max_us": 2622,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "pcm_sha256": "45a0650fce9482f94cb54087e52e3aa95ab5d0d2d7ca3dd3115bea7ac0af58c3",
+      "pcm_bytes": 352940,
+      "scene_sha256": "c52ff96c54f7fa43c2539bea707322a54a5c040a94ae147b7f37862a7b26ec87",
+      "pcm_capture": "public boot-padded recorder",
+      "initial_flash_sha256": null,
+      "final_flash_sha256": "d9456d1e2d47f5358f86015eae54de48302d17f520a80ccc966e5c969181d12d"
+    }
+  },
+  {
+    "model": "pro",
+    "warm": {
+      "duration_ms": 2000,
+      "shift_ms": 0,
+      "events": 1,
+      "strict": 1,
+      "mhz": 360,
+      "halves": 139,
+      "max_us": 2625,
+      "raw_late": 0,
+      "audio_xruns": 0,
+      "pcm_sha256": "45a0650fce9482f94cb54087e52e3aa95ab5d0d2d7ca3dd3115bea7ac0af58c3",
+      "pcm_bytes": 352940,
+      "scene_sha256": "c52ff96c54f7fa43c2539bea707322a54a5c040a94ae147b7f37862a7b26ec87",
+      "pcm_capture": "public boot-padded recorder",
+      "initial_flash_sha256": null,
+      "final_flash_sha256": "cb72922ddbc74b6132fe5713a7df5fec801ee8b6be5f3c8dccff11ce494f0832"
+    }
+  }
+]

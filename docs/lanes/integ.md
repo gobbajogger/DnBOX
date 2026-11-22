@@ -1,5 +1,10 @@
 # Integration baseline
 
+## Real normal WIDE playback on the compact wet payload — 2026-11-22 (WORKING)
+
+The [normal WIDE packet](../../evidence/integ-resume/normal-wide-wet-1c46c6fc/README.md) carries Sound `2e6a69cc` and the actual source-owned WIDE panel controls. Both stock builds pass memory, flashmap, package, native USB and focused WIDE tests. The exact normal saved-project Elite scene passed at 10,930 µs. Pro failed at 14,380 µs with 43 late halves and xruns. Both traversed real mode-2 chorus, with all five parts active. Sound's separately injected row remains a valid separate receipt. The Pro gate, final paired Chromium and strict ten-minute checks remain open.
+
+
 ## Newest Sound pitch-LFO stock fit — 2026-11-22 (WORKING)
 
 The [exact stock packet](../../evidence/integ-resume/pitch-lfo-stock-0ae710be/README.md) carries Sound `ad86777e` with the retained WIDE and Remote code and merged #991 UI. The 808 compile option recovered 2,352 B on each model. Elite and Pro retain 2,568 and 2,580 B free XIP plus 732 B pool margin each. Eight-second populated legacy-Juno and highpass Synth One software timing reached 7,822 / 8,222 µs with zero late halves and xruns. Both exact native USB transactions and package checks passed. Active WIDE wet deadline, current one-scalar shipping decision and full final gates remain open.

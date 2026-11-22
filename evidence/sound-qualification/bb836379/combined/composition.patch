@@ -1,0 +1,18 @@
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -2978,5 +2978 @@
+-            (part->kind == ORIGINAL_SOUND_JUNO
+-#if X0X_SUPERJ6_FACTORY
+-             && !part->dsp.juno.synth.typed
+-#endif
+-            ))
++            part->kind == ORIGINAL_SOUND_JUNO)
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -140,0 +141 @@
++    ORIGINAL_SYNTH_BACKENDS.append("firmware/src/dsp/juno6_chorus_factory.c")
+@@ -144,0 +146 @@
++    "juno6_chorus_factory",
+@@ -461 +463 @@
+-        if u in {"dsp/drum909.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":
++        if u in {"dsp/drum909.c", "dsp/breaks.c", "dsp/drum808.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":

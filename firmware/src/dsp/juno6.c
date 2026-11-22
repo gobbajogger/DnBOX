@@ -106,18 +106,19 @@ void juno6_chorus_set(juno6_chorus_t *c, float r, float d, float m)
 #if X0X_SUPERJ6_STOCK_PRESET
     if (c->factory.follow_panel) {
         c->factory.mix = c->mix;
+        c->factory.dry_gain = 1.f + .011f * (1.f - c->factory.mix);
         c->factory.phase_step = (uint32_t)(c->rate_hz * (4294967296.f / c->sample_rate));
     }
 #endif
 }
 #if X0X_SUPERJ6_FACTORY
-#include "juno6_chorus_factory.inc"
+#include "juno6_chorus_factory.h"
 #endif
 void juno6_chorus_process(juno6_chorus_t *c, float *l, float *r, unsigned n)
 {
 #if X0X_SUPERJ6_FACTORY
  if (c->factory.mode) {
-  render_factory_chorus(c, l, r, n);
+  juno6_chorus_render_factory(c, l, r, n);
   return;
  }
 #endif

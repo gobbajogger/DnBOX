@@ -1,0 +1,67 @@
+{
+  "source_sha": "1c46c6fc8d7a550b3308515a3415ea63d86e7486",
+  "result_sha256": "011c57997590a63e2603e432ec2f84ba4e2df3fe5539fe59e880cbf5bd7860f2",
+  "layout_sha256": "78f109adde647a06aaae323d7fb2ec0a99acbb1230a54a4360da10d0a2ac1c2a",
+  "runtime_passed": true,
+  "timing_passed": false,
+  "boot": {
+    "ram_sha256": "4ba6a0b5e9c4e2defba01f2caf1ee525db3d9e473e47d31d2cabc9ef064cf857",
+    "owner_kinds": [
+      2,
+      3
+    ],
+    "owner_status": [
+      1,
+      1
+    ],
+    "juno_owner": "B",
+    "stock_wide": 1,
+    "typed": 1,
+    "mode": 2,
+    "follow_panel": 1,
+    "mix": 0.25196850299835205,
+    "phase": 1898708992,
+    "synthone_filter": 2.0,
+    "synthone_sub": 1.0,
+    "prepared_voice_filters": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "sequencer_playing": 0,
+    "worker_gave_up": 0
+  },
+  "heavy": {
+    "ram_sha256": "8f6b20020bba5a6b7a4154744c38197f3c8dbd278425f0b0f69a2a4de6e8cc6a",
+    "owner_kinds": [
+      2,
+      3
+    ],
+    "owner_status": [
+      1,
+      1
+    ],
+    "juno_owner": "B",
+    "stock_wide": 1,
+    "typed": 1,
+    "mode": 2,
+    "follow_panel": 1,
+    "mix": 0.25196850299835205,
+    "phase": 2084761600,
+    "synthone_filter": 2.0,
+    "synthone_sub": 1.0,
+    "prepared_voice_filters": [
+      2,
+      2,
+      2,
+      0,
+      0,
+      0
+    ],
+    "sequencer_playing": 1,
+    "worker_gave_up": 0
+  }
+}

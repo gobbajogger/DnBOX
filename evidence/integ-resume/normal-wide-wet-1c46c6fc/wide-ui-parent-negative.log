@@ -1,0 +1,4 @@
+LEGACY owner=0 wave=01ff36b5/abc8278b width=01ff36b5/de872675
+LEGACY owner=1 wave=01ff36b5/abc8278b width=01ff36b5/de872675
+WIDE owner=0 raw wave=0 displays 0%
+FAIL /tmp/dnbox-focus-1c46.rvLIRC/wide_ui.c:77: !strcmp(num, names[wave_ids[i]]) && !*unit

@@ -10,9 +10,33 @@ The opt-in Synth One patch editor now saves the original lowpass, bandpass and h
 
 The saved Synth One pitch LFO applies the original positive modulation gain to oscillator 1 and the sub oscillator. It adds original control ID 57 to the projected factory checks, bringing the stereo pass count from 8 to 10 of 694. The original PCM hashes and existing panel readbacks matched for all 694 programs. All 517 programs with the pitch route off stayed bit-exact, and both new passes meet the existing 1 dB level and 3 dB spectral limits. Host tests passed inactive routing, retriggers, save and restore, and note locks. The stock software builds retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with 732 bytes of pool margin each. All eight standard strict scenes passed on the changed source. [Factory results, host tests and board build logs](../../evidence/sound-resume/synthone-pitch-lfo/).
 
+A nine-program Synth One diagnostic substituted the original step-sequencer note schedule after verifying all original and baseline firmware hashes. The callback-partition control stayed bit-exact. The substitution passed one prior failure and regressed four existing passes. The shipping 40-control route retains 10 stereo passes across all 694 original programs. [Sequencer diagnostic](../../experiments/sound-hardware-v1/synthone-factory-projection/sequence-diagnostic/) · [Historical slot-2 migration test](../../evidence/sound-qualification/bb836379/legacy-slot2-map.txt).
+
 The opt-in SuperJ6 factory loader now follows authenticated build-9 chorus version and switch routing. It selects the new independent stereo path for 294 J60V2 factory programs, the existing legacy chorus for 46, and the bit-exact dry path for 300. The three independent wet modes passed the archived component tests at the unchanged 1 dB RMS and 3 dB spectral limits, with 2.064 dB worst spectral error. Both bypass cases stayed bit-exact. All six longer impulse trains passed across 44.1 and 48 kHz. Six of twelve sustained chord cases passed, so broader wet parity remains open. [Original routing, integrated loader checks and component results](../../evidence/sound-resume/superj6-factory-chorus/). The shipped path uses independent 16-bit per-owner delay histories in pool storage. The packed histories preserved every archived and impulse-train score and kept six sustained passes. Panic clears the active histories and the focused factory suite verified silence afterward. [Packed-history comparison](../../evidence/sound-resume/superj6-factory-chorus/compact-comparison.json).
 
-## Current standard software qualification — source `630c4d96`
+## Exact Sound and combined software builds — source `bb836379`
+
+The exact Sound packages retain 4,928 bytes of XIP on Elite and 4,936 on Pro, with 1,244 bytes of pool margin each. All eight strict populated scenes passed below 11,609 µs with zero late callbacks or xruns. The combined composition reuses Integration `156f4629` and qualifies the additional 808 size optimization separately. Chicago, Miami, 808, 909 and BREAK use stock playback regression criteria. Original engine comparisons cover Synth One and SuperJ6. [Sound .fwsc packages](../../artifacts/sound-qualification/bb836379/) · [Exact profile and all recordings](../../evidence/sound-qualification/bb836379/).
+
+| Populated software scene | Sound Elite | Sound Pro | Combined Elite | Combined Pro |
+| --- | ---: | ---: | ---: | ---: |
+| Chicago and Miami | 8,865 µs | 8,783 µs | 8,845 µs | 8,877 µs |
+| Juno and Synth One | 7,754 µs | 8,225 µs | — | — |
+| Juno and Synth One, bandpass with full sub | 7,752 µs | 8,003 µs | — | — |
+| Juno and Synth One, highpass with full sub | 7,697 µs | 7,965 µs | 7,729 µs | 8,281 µs |
+| Instrumented mode-2 wet chorus and highpass Synth One | 11,170 µs | 11,108 µs | 11,345 µs | 11,137 µs |
+
+All six combined captures also had zero late callbacks, zero xruns and no new guest fault. The standard combined images retain 1,740/1,748 bytes of XIP and 1,244 bytes of pool margin. The combined active-wet images retained 1,496/1,504 bytes of XIP. Guest RAM verified that mode 2 was active on the intended Juno owner. This qualifies the pinned software composition. Integration branch `d63620b9` was used for the ancestry check. The additional compiler setting and the software replay are available for Integration to apply on its own branch. [Combined source recipe](../../evidence/sound-qualification/bb836379/combined/).
+
+## Active SuperJ6 software qualification
+
+The independent chorus runs in a separate optimized translation unit. It reuses the inactive legacy delay storage and shares identical input history until the two channels differ. Bounded typed-voice tiling keeps the render order, and owner-local Juno jobs can use the existing worker before the ordered mix. The dual-engine build uses the tested Integration size profile on 808, 909 and BREAK.
+
+Instrumented software playback selected J60V2 mode 2 on opposite owners on the two boards. Elite peaked at 11,170 µs and Pro at 11,108 µs, both below 11,609 µs with zero late callbacks, zero xruns and no new guest fault. Both measured a 2,000-byte worker stack watermark during the heavy scene. The host matched ordered PCM and part meters across thirteen worker masks and both owner assignments, including the disabled worker and note release. All three archived original wet modes, both exact dry cases and all six long impulse trains still pass. Six sustained chord cases remain outside the spectral limits. [Mode readbacks, strict timing, and component replay](../../evidence/sound-resume/active-wet-worker/).
+
+The isolated Integration source at `156f4629` with the new Sound changes initially overflowed XIP by 608 bytes on Elite and 600 on Pro under its pinned flags. Compiling just the existing 808 unit at `-Oz` recovered 2,348 bytes on each board. The combined images retain 1,740/1,748 bytes of XIP and 1,244 bytes of pool margin. An existing native 808 stimulus rendered 65,536 identical PCM bytes at both optimization levels. Combined software playback evidence is tracked separately from the Sound branch packages. [Combined link receipts](../../evidence/sound-resume/active-wet-worker/).
+
+## Previous standard software qualification — source `630c4d96`
 
 The two stock packages retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with 732 bytes of pool margin each. All eight strict scenes used the exact Sound ELF and firmware package at 360 MHz, populated both basses, both drum kits and BREAK, and recorded zero late callbacks, zero xruns and no new guest fault. The alternate-filter scenes retain the full-level sub setting. The pitch route is covered separately by the exact factory replay and host lifecycle tests. [Firmware packages](../../artifacts/sound-qualification/630c4d96/) · [Exact build and strict timing](../../evidence/sound-qualification/630c4d96/).
 
@@ -23,7 +47,7 @@ The two stock packages retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with
 | Juno and Synth One bandpass with full sub level | 7,242 µs | 7,727 µs |
 | Juno and Synth One highpass with full sub level | 7,234 µs | 7,710 µs |
 
-Sound and Integration `86e0f63f` diverge from `0b0ff56b`. Integration's previous combined software build retained 1,368 bytes of Elite XIP and 1,380 on Pro with Sound `0ac65800`. The saved pitch route costs 796/800 bytes in the Sound-only links. The combined image needs additional reclaim and a fresh stock build against the 1,024-byte XIP floor. The two emulator images and the render and log archive are verified locally. [Ancestry and budget](../../evidence/sound-qualification/630c4d96/integration-ancestry.json).
+Sound and Integration `d63620b9` diverge from `0b0ff56b`. Integration's previous combined software build retained 1,368 bytes of Elite XIP and 1,380 on Pro with Sound `0ac65800`. The saved pitch route costs 796/800 bytes in the Sound-only links. The combined image needs additional reclaim and a fresh stock build against the 1,024-byte XIP floor. The two emulator images and the render and log archive are verified locally. [Ancestry and budget](../../evidence/sound-qualification/630c4d96/integration-ancestry.json).
 
 ## Prior strict software qualification — source `0ac65800`
 

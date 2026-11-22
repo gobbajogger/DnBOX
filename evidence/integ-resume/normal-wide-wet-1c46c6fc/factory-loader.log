@@ -1,0 +1,7 @@
+LFO1 Hz: owner 0, five exact-range endpoints and four audible PWM-rate changes
+LFO1 Hz: owner 1, five exact-range endpoints and four audible PWM-rate changes
+range: two owners, three stops, three bend values, 18432 matched stereo frames, 96 changed blocks, max pitch error 0 ULP
+Layer 1 attack: 10 endpoints, 2560 stereo frames bit-exact against direct physical settings
+Factory chorus: signed-zero switches bypass bit-exactly over 512 audible stereo frames
+SuperJ6 sub gain: two owners, 18 endpoint checks, 2560 audible stereo frames
+synthetic applications=32 authored_words=288 defaulted_pwm_words=64; rejection and group ownership PASS

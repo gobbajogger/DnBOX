@@ -1,0 +1,63 @@
+{
+  "software_only": true,
+  "sound_source": "bb836379f561f83c07ecc94ea336f09e00fc96a6",
+  "integration_branch_head": "d63620b9253fc3656c5a9200be3f4936ddb83bc1",
+  "combined_base": "156f4629451457b963c98776715ecf3d97abd5e5",
+  "merge_base": "0b0ff56becc8bbda6e6070dd5649b2ee078f6f7e",
+  "sound_only_commits": 86,
+  "integration_only_commits": 107,
+  "replayed_production_source_matches_recipe": true,
+  "integration_juno_control_helper_preserved": true,
+  "all_four_links_byte_identical": true,
+  "all_six_replays_identical": true,
+  "replays": {
+    "elite-chicago-miami": {
+      "peak_us": 8845,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "c74fc552fba31cc2d4d4c54d63e50d19a79878dc902255a937915d6b8597cf85",
+      "elf_sha256": "7e0ee4f6317925f72ad4a52a2aed56bfe7adf9f24c10417146bab8b12584765d",
+      "fwsc_sha256": "4553027443ec8692c065f17f4978a3680b1a18e093c23225276435437a606f90"
+    },
+    "elite-juno-synthone": {
+      "peak_us": 7729,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "9d9825811d90df51bc2ef985d46145379ac1ec5a511683347be5e398e74dadaa",
+      "elf_sha256": "7e0ee4f6317925f72ad4a52a2aed56bfe7adf9f24c10417146bab8b12584765d",
+      "fwsc_sha256": "4553027443ec8692c065f17f4978a3680b1a18e093c23225276435437a606f90"
+    },
+    "pro-miami-chicago": {
+      "peak_us": 8877,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "816b8c15a33f8d1ce697db7529683e48d0c28c99292ee811ccefbc32b5184b31",
+      "elf_sha256": "5c68a7b539b30c53bc55ef38ec9c9bbd38f14cedf8ae40195762889f237e61e5",
+      "fwsc_sha256": "c556e50ae685114984332b8ef8df3717591936c973c48414e6aaf661933917d7"
+    },
+    "pro-synthone-juno": {
+      "peak_us": 8281,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "68acc9ea1dbcd36e4c9faa30bb3e5d01b9fe10bd7f5354978539e2fb27d52d2a",
+      "elf_sha256": "5c68a7b539b30c53bc55ef38ec9c9bbd38f14cedf8ae40195762889f237e61e5",
+      "fwsc_sha256": "c556e50ae685114984332b8ef8df3717591936c973c48414e6aaf661933917d7"
+    },
+    "elite-active": {
+      "peak_us": 11345,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "db7e5ac5958bd53f0aeaa99958ff3f93545d19d6724aa272578e3f60abdca980",
+      "elf_sha256": "f3c4d76095dbf297bb2165f043aa25f632e91cc722d04d36a96ddc39b0a2f6ba",
+      "fwsc_sha256": "2bc83d316254a4232aed5a130806ec2f5d5b9f439cf70b4455ad8147fffa6c09"
+    },
+    "pro-active": {
+      "peak_us": 11137,
+      "raw_late": 0,
+      "xruns": 0,
+      "pcm_sha256": "d77d65154fd838ad73039aeb8c170ee676b62ca87e1835f96707919a2ecfc3e9",
+      "elf_sha256": "3d1e2c121756351a258805a4eebbc17c946dc5c274c9330a161041a6390dc63e",
+      "fwsc_sha256": "64e09e4dc33e3ec79cf41c1fb4ba69f90dc6208d2fae3260ff7b15ecf17eb240"
+    }
+  }
+}

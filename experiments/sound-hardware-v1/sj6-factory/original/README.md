@@ -29,7 +29,7 @@ python "$ref/probe_chorus_arm64.py" ORIGINAL_AU.zip /tmp/j60-reference > /tmp/j6
 python "$ref/probe_sub_volume.py" ORIGINAL_AU.zip J6presets.zip /tmp/id202-result.json
 cc -std=c11 -O2 -DX0X_SUPERJ6_FACTORY=1 -ffp-contract=off \
   -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src -Ifirmware/src/dsp \
-  "$ref/chorus_candidate.c" firmware/src/dsp/juno6.c -lm -o /tmp/j60-candidate
+  "$ref/chorus_candidate.c" firmware/src/dsp/juno6.c firmware/src/dsp/juno6_chorus_factory.c -lm -o /tmp/j60-candidate
 python "$ref/compare_chorus_probe.py" /tmp/j60-reference /tmp/j60-reference.json \
   /tmp/j60-candidate "$(git rev-parse HEAD)" /tmp/dnbox-chorus
 ```
@@ -46,7 +46,7 @@ From the repository root, the following program loads the original five cases fr
 ref=experiments/sound-hardware-v1/sj6-factory/original
 cc -std=c11 -O2 -DX0X_SUPERJ6_FACTORY=1 -ffp-contract=off \
   -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src -Ifirmware/src/dsp \
-  "$ref/chorus_factory_candidate.c" firmware/src/dsp/juno6.c -lm -o /tmp/dnbox-factory-chorus
+  "$ref/chorus_factory_candidate.c" firmware/src/dsp/juno6.c firmware/src/dsp/juno6_chorus_factory.c -lm -o /tmp/dnbox-factory-chorus
 python "$ref/replay_factory_chorus.py" "$ORIGINAL_AU" "$REFERENCE_PACK" \
   /tmp/dnbox-factory-chorus /tmp/factory-chorus-replay
 ```

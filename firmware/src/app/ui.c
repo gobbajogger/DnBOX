@@ -1171,7 +1171,13 @@ static void unit_value(int u, float x, char *num, char *unit);
 /* Physical readouts for the compact juno6_set/render and chorus controls.
  * BASE CUT and ENV DEPTH describe the requested lowpass coefficient, before
  * the renderer limits its sum. Release is an exponential time constant. */
-static UI_DRAW void juno_value_text(unsigned id, int value, char *num, char *unit)
+#if X0X_SUPERJ6_STOCK_PRESET
+/* At 7-bit panel resolution these stops match the typed DCO thresholds. */
+static unsigned juno_wide_wave(unsigned value)
+{ return (value >= 43u) + (value >= 85u) + (value == 127u); }
+#endif
+
+static UI_DRAW void juno_value_text(int voice, unsigned id, int value, char *num, char *unit)
 {
     float x;
     if (!original_sound_control_value(ORIGINAL_SOUND_JUNO, id, (unsigned)value, &x)) {
@@ -1179,6 +1185,18 @@ static UI_DRAW void juno_value_text(unsigned id, int value, char *num, char *uni
         return;
     }
     float physical = juno6_control_physical(id, x);
+#if X0X_SUPERJ6_STOCK_PRESET
+    if (engine_bass_preset_index(voice) == ORIGINAL_JUNO_WIDE_PRESET) {
+        if (id == 0) {
+            static const char *const wave_names[] = {"SINE", "TRI", "SAW", "PULSE"};
+            put_s(num, wave_names[juno_wide_wave((unsigned)value)]);
+            return;
+        }
+        if (id == 12) physical = fm_minf(physical, .5f);
+    }
+#else
+    (void)voice;
+#endif
     if (id == 9 && !value) put_s(num, "OFF");
     else if (id == 5 || id == 6 || id == 8) unit_value(X0X_U_S, physical, num, unit);
     else if (id == 2 || id == 4 || id == 9) unit_value(X0X_U_HZ, physical, num, unit);
@@ -1261,7 +1279,7 @@ static UI_DRAW int original_value_text(pref_t r, int value, char *num, char *uni
             return 1;
         }
     }
-    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(id, value, num, unit); return 1; }
+    if (kind == ORIGINAL_SOUND_JUNO) { juno_value_text(r.b, id, value, num, unit); return 1; }
     if (kind == ORIGINAL_SOUND_SYNTHONE) { put_i(num,(value*100+63)/127); put_s(unit,"%"); return 1; }
     if (ui_original_states(kind,id) || (kind == ORIGINAL_SOUND_CHICAGO && (id == 0 || id == 4)) ||
         (kind == ORIGINAL_SOUND_MIAMI && id == 7)) {
@@ -8402,10 +8420,23 @@ static UI_DRAW void juno_strip_glyph(pref_t r, float q, int gx, int gy, uint16_t
         float mix = r.c == 0 ? q : 1.f;
         int stored = matrix_value(PR(R_ENG,T_303,r.b,12));
         float duty = juno6_control_physical(12, r.c == 12 ? q : stored / 127.f);
+#if X0X_SUPERJ6_STOCK_PRESET
+        int wave = -1;
+        if (engine_bass_preset_index(r.b) == ORIGINAL_JUNO_WIDE_PRESET) {
+            duty = fm_minf(duty, .5f);
+            if (r.c == 0) wave = (int)juno_wide_wave(matrix_value(PR(R_ENG,T_303,r.b,0)));
+        }
+#endif
         int previous = mid;
         for (int i = 0; i < OG_W; ++i) {
             float t = (float)i / OG_W;
             float signal = (2.f*t - 1.f)*(1.f-mix) + (t < duty ? mix : -mix);
+#if X0X_SUPERJ6_STOCK_PRESET
+            if (wave == 0) signal = og_sin(t, 1.f);
+            else if (wave == 1) signal = og_triangle(t, 1.f);
+            else if (wave == 2) signal = 2.f*t - 1.f;
+            else if (wave == 3) signal = t < duty ? 1.f : -1.f;
+#endif
             int y = mid - (int)(signal * 7.f);
             if (i) cv_line(gx+i-1,previous,gx+i,y,col);
             previous = y;

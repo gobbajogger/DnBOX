@@ -1,0 +1,23 @@
+check_locked_settings: 20 settings ok
+firmware/src/dsp/juno6.c:165:29: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot v={0};
+                            ^
+                            {}
+In file included from firmware/src/dsp/juno6.c:178:
+firmware/src/dsp/juno6_factory.inc:239:33: warning: suggest braces around initialization of subobject [-Wmissing-braces]
+ juno6_envelope_snapshot value={0};
+                                ^
+                                {}
+2 warnings generated.
+In file included from firmware/src/x0x.c:216:
+In file included from firmware/src/app/ui.c:8810:
+firmware/hal/../src/app/ui_drum_voice.inc:740:44: warning: unused variable 'dimc' [-Wunused-variable]
+    uint16_t ink = col, gray = SOUND_GRAY, dimc = SOUND_DIM;
+                                           ^
+1 warning generated.
+/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: build/smk37-elite/x0x.elf section `.c1_text' will not fit in region `XIP'
+/workspace/scratch/857bb2409f82/build025/inputs/jieli-linux-toolchains-20260730.1/pi32v2/bin/ld: region `XIP' overflowed by 608 bytes
+generate: cached font, drums, and break bank
+loader: image 8680 B at 0x1c0a800, bss end 0x1c0f810
+loader: ota.bin 7616 B
+build: pi32v2/bin/ld failed

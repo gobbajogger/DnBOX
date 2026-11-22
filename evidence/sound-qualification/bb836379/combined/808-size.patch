@@ -1,0 +1,11 @@
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -460,7 +460,7 @@
+             unit_flags = [f for f in unit_flags if f != "-flto"]
+         if u in {"dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_DRUM_SIZE") == "1":
+             unit_flags = ["-Os" if flag == "-O2" else flag for flag in unit_flags]
+-        if u in {"dsp/drum909.c", "dsp/breaks.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":
++        if u in {"dsp/drum909.c", "dsp/breaks.c", "dsp/drum808.c"} and os.environ.get("X0X_INTEG_LATEST_SOUND_FIT") == "1":
+             unit_flags = ["-Oz" if flag in ("-O2", "-Os") else flag for flag in unit_flags]
+         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
+         objs.append(o)

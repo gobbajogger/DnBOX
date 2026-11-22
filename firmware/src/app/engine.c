@@ -2985,7 +2985,8 @@ static uint32_t plan_cost(uint32_t mask, const uint32_t *cost)
     }
     return main_ticks > worker_ticks ? main_ticks : worker_ticks;
 }
-/* Keep Chicago and the optional factory or patch renderers on core 0. */
+/* Keep Chicago and the Synth One patch renderer on core 0. Juno owns each lane
+ * and its factory chorus state, so either core can render it before the ordered mix. */
 static uint32_t c1_allowed(void)
 {
     uint32_t m = (1u << JB_909) | (1u << JB_808) | (1u << JB_BRK);
@@ -2995,11 +2996,7 @@ static uint32_t c1_allowed(void)
 #if !X0X_SYNTHONE_PATCH
             part->kind == ORIGINAL_SOUND_SYNTHONE ||
 #endif
-            (part->kind == ORIGINAL_SOUND_JUNO
-#if X0X_SUPERJ6_FACTORY
-             && !part->dsp.juno.synth.typed
-#endif
-            ))
+            part->kind == ORIGINAL_SOUND_JUNO)
             m |= 1u << (JB_A + v);
     }
     return m;
