@@ -133,7 +133,8 @@ class FactoryBatchTests(unittest.TestCase):
         for b in banks.values():
             audit['banks'].append({'name': b['name'], 'release_bank_uuid': b['uuid'],
                                    'release_programs': len(b['presets'])})
-        banks['User Bank'] = {'presets': [{'uid': 'user-only'}]}
+        banks['User Bank'] = {'uuid': 'user-bank', 'presets': [{'uid': 'user-only'}]}
+        audit['banks'].append({'name': 'User Bank', 'release_bank_uuid': 'user-bank', 'release_programs': 1})
         audit['unpaired_programs'].append({'present_only_in': 'release', 'bank': 'User Bank', 'uid': 'user-only'})
         raw, receipt, inputs = batch.factory_matrix(banks, self.spec, audit, 1)
         self.assertEqual(len(inputs), 640)
@@ -141,6 +142,10 @@ class FactoryBatchTests(unittest.TestCase):
         self.assertEqual(sum(r['parameter_count'] for r in receipt['programs']), 90549)
         self.assertEqual(digest(raw), receipt['spec_sha256'])
         self.assertNotIn('user-only', inputs)
+        banks['User Bank']['uuid'] = 'changed-bank'
+        with self.assertRaisesRegex(ValueError, 'release-only bank UUID'):
+            batch.factory_matrix(banks, self.spec, audit, 1)
+        banks['User Bank']['uuid'] = 'user-bank'
         banks['bank-0']['presets'][1]['uid'] = banks['bank-0']['presets'][0]['uid']
         with self.assertRaisesRegex(ValueError, 'duplicate factory UID'):
             batch.factory_matrix(banks, self.spec, audit, 1)

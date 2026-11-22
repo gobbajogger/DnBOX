@@ -212,21 +212,13 @@ def release_container_identity(release_banks, audit):
 
 
 def recovered_release(repo, recovery):
-    outer = require_digest(recovery, IPA_RECOVERY_SHA)
-    with ZipFile(BytesIO(outer)) as archive:
-        entries = [entry for entry in archive.infolist()
-                   if entry.filename.endswith(".ipa") and not entry.filename.startswith("__MACOSX/")]
-        if len(entries) != 1 or entries[0].file_size != 57135325:
-            raise ValueError("Expected one exact-size build-9 IPA member")
-        ipa = archive.read(entries[0])
-    if sha(ipa) != IPA_SHA:
-        raise ValueError("Recovered IPA SHA-256 does not match the build-9 release")
     source = repo / "experiments/sound-hardware-v1/sj6-factory"
     sys.path.insert(0, str(source))
     sys.path.insert(0, str(source / "original"))
     from audit_all_programs import banks
     from audit_bundled_banks import PREFIX
-    from release_matrix import prepare_release
+    from release_matrix import prepare_release, read_recovery_ipa
+    ipa = read_recovery_ipa(recovery)
     with ZipFile(BytesIO(ipa)) as archive:
         image = archive.read(IPA_MEMBER)
         audit_bytes = (source / "original/all-programs.json").read_bytes()

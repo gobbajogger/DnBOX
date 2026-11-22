@@ -47,3 +47,24 @@ and the running original AU bytes against the executable pin. It passes the
 exact Medieval Sky filter-sustain field to the original sampler DSP and
 core setter and checks both readbacks. This covers an individually applied
 component value. Full factory recall and original stereo audio remain pending.
+
+## Original live receiver prerequisite
+
+Run probe_live_receiver_constructor.py with the same --repo and
+--ipa-recovery arguments as the earlier initializer checkpoint. The probe
+supplies the build-9 AudioComponentDescription and executes the original
+Objective-C initializer and Swift body up to the first dereference of
+the actual Mach-O binding for the Darwin stack guard. It executes the
+extension factory up to its first Objective-C retain. The probe supplies no
+stand-in guard or objects. Its internal nil-state test returns without work,
+and its nonnil-state test stops before the first receiver lock access.
+
+The constructor later assigns the receiver lock at +0x138 and model at
++0x68. Those are live runtime objects. The release machine code initializes
+the lock using Objective-C allocation and initializer dispatch. The model
+assignment follows a Darwin block copy/invocation path and Swift retain.
+This static continuation is separate from the measured execution endpoint.
+
+The same constructor probe also runs with the authenticated Darwin stack-guard slot resolved to private process data. The original prologue copies the bound value to its own stack. Two independent runs each executed 37 original instructions and reached a write to the live receiver's `engine` field at `0x1000bc7e4` and offset `0x60`. The probe records the fault before any object exists.
+
+Chained bindings in the original executable identify the next dependencies. The local extension superclass requires `_OBJC_CLASS_$_AUAudioUnit` from AudioToolbox, and its cache and the subclass cache bind to `__objc_empty_cache` from the Darwin Objective-C runtime. The setter then requires a live receiver lock and Swift model. The [measured constructor paths and authenticated bindings](live-receiver-constructor.json) leave complete factory state application and stereo captures open.

@@ -1,0 +1,42 @@
+{
+  "constructor": {
+    "objc_entry": "0x1000bd9c8",
+    "swift_entry": "0x1000bc788",
+    "first_unresolved_dereference": "0x1000bc7cc",
+    "data_slot": "0x1007319f8",
+    "data_import": "___stack_chk_guard",
+    "guest_instructions": 31,
+    "receiver_constructed": false
+  },
+  "constructor_with_guard": {
+    "resolved_import": "___stack_chk_guard",
+    "guard_copy_verified": true,
+    "guest_instructions_before_unmapped_write": 37,
+    "first_receiver_write": "0x1000bc7e4",
+    "receiver_ivar_offset": "0x60",
+    "receiver_constructed": false
+  },
+  "class_realization_bindings": {
+    "0x100784990": "_OBJC_CLASS_$_AUAudioUnit",
+    "0x100784430": "__objc_empty_cache",
+    "0x100784998": "__objc_empty_cache"
+  },
+  "extension_factory": {
+    "entry": "0x10014d89c",
+    "call_site": "0x10014d8c0",
+    "import": "_objc_retain",
+    "guest_instructions": 10
+  },
+  "state_helper": {
+    "entry": "0x1000bf18c",
+    "nil_guest_instructions": 11,
+    "nonnil_guest_instructions": 9,
+    "first_receiver_access": "0x1000bf1b0",
+    "lock_ivar_offset": "0x138"
+  },
+  "authenticated_factory_uid": "87E999B2-447E-4B2E-9EA9-AE53F4DEE44B",
+  "factory_preset_applied": false,
+  "complete_graph_instances": 0,
+  "original_stereo_captures": 0,
+  "qualified_s4_pairs": 0
+}

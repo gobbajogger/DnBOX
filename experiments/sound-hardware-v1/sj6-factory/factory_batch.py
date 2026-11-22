@@ -14,7 +14,7 @@ import numpy as np
 from compare import capture, channel_score, control_words, digest, expect, json_object
 from factory import canonical_bytes
 from original.audit_bundled_banks import AU, IPA, PREFIX
-from release_matrix import EXECUTABLE, HERE, json_bytes, select_bundled
+from release_matrix import EXECUTABLE, HERE, json_bytes, read_recovery_ipa, select_bundled
 
 SUFFIXES = ('.f32le', '.json', '.applied.json')
 UID_RE = re.compile(r'[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}')
@@ -25,11 +25,14 @@ SCHEDULE_KEYS = ('sample_rate', 'channels', 'capture_frames', 'block_frames',
 
 def factory_matrix(banks, schedule, audit, component_version):
     """Create a separate 640-case plan from the release containers, not an export."""
-    factory_banks = audit['banks']
+    user_bank, = (row for row in audit['banks'] if row['name'] == 'User Bank')
+    factory_banks = [row for row in audit['banks'] if row['name'] != 'User Bank']
     expect(len(factory_banks), 12, 'factory bank count')
     expect(len({b['name'] for b in factory_banks}), 12, 'unique factory bank names')
     expect(sorted(banks),
            sorted([b['name'] for b in factory_banks] + ['User Bank']), 'release bank names')
+    expect(banks['User Bank']['uuid'], user_bank['release_bank_uuid'], 'release-only bank UUID')
+    expect(len(banks['User Bank']['presets']), user_bank['release_programs'], 'release-only bank size')
     for extra in audit['unpaired_programs']:
         if extra['present_only_in'] != 'release' or extra['bank'] != 'User Bank':
             raise ValueError('unexpected unpaired release program')
@@ -66,8 +69,8 @@ def factory_matrix(banks, schedule, audit, component_version):
                  'spec_sha256': digest(raw), 'programs': checks}, inputs
 
 
-def prepare(ipa):
-    raw = ipa.read_bytes()
+def prepare(ipa, *, recovery=False):
+    raw = read_recovery_ipa(ipa) if recovery else ipa.read_bytes()
     expect(digest(raw), IPA, 'pinned build-9 IPA')
     banks = {}
     with ZipFile(BytesIO(raw)) as archive:
@@ -248,10 +251,14 @@ def score_batch(batch, original, dnbox, image, commit, start, count, reuse=None)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--ipa', type=Path, help='pinned original build-9 IPA, used as data')
+    release = parser.add_mutually_exclusive_group()
+    release.add_argument('--ipa', type=Path, help='pinned original build-9 IPA, used as data')
+    release.add_argument('--ipa-recovery', type=Path, help='pinned private ZIP containing the build-9 IPA')
     sub = parser.add_subparsers(dest='command', required=True)
     plan = sub.add_parser('plan')
     plan.add_argument('output', type=Path)
+    plan.add_argument('--include-records', action='store_true',
+                      help='write authenticated producer inputs locally under records/')
     build = sub.add_parser('pack')
     build.add_argument('captures', type=Path)
     build.add_argument('output', type=Path)
@@ -273,14 +280,19 @@ def main():
     if args.command == 'verify':
         print(json_bytes(verify_published_archive(args.archive, args.sha256)).decode(), end='')
         return
-    if args.ipa is None:
-        parser.error('--ipa is required to plan, score or package original captures')
-    batch, s4 = prepare(args.ipa)
+    if args.ipa is None and args.ipa_recovery is None:
+        parser.error('--ipa or --ipa-recovery is required to plan, score or package original captures')
+    batch, s4 = prepare(args.ipa or args.ipa_recovery, recovery=args.ipa_recovery is not None)
     if args.command == 'plan':
-        args.output.mkdir()
-        raw, audit, _ = batch
+        args.output.mkdir(mode=0o700)
+        raw, audit, inputs = batch
         (args.output/'factory-inputs.json').write_bytes(raw)
         (args.output/'factory-audit.json').write_bytes(json_bytes(audit))
+        if args.include_records:
+            records = args.output/'records'
+            records.mkdir(mode=0o700)
+            for uid, record in inputs.items():
+                (records/(uid+'.json')).write_bytes(record)
         return
     reuse = (args.reuse_s4, s4) if args.reuse_s4 else None
     if args.command == 'score':

@@ -1,0 +1,48 @@
+{
+  "verified_replay_sha256": "9a99563d0b42a0cff3944599515a43b58462efb8cc24577d652250e0e00df43b",
+  "matches_archived_replay": true,
+  "factory_bank_sha256": "460d0869c7287ab10dc2ac1928e56b899e8dc089df021ab82d8704ab28cfe7af",
+  "passing_stock_guards": [
+    {
+      "index": 10,
+      "stock_pcm_sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94"
+    },
+    {
+      "index": 86,
+      "stock_pcm_sha256": "988539f5fffbb72499084a0e32bcc6ec0775e31ef4d736fb8a164755229ea830"
+    },
+    {
+      "index": 130,
+      "stock_pcm_sha256": "c51ff366b33b91def25c96d54dea9cbecccdc4e3871440bf1465b16a2f912c65"
+    },
+    {
+      "index": 172,
+      "stock_pcm_sha256": "62ca0910ac662d605ffbba73e6c3a83a04350b47bda46dbfa127d140e1baa5b2"
+    },
+    {
+      "index": 213,
+      "stock_pcm_sha256": "73b288f0fd23b88bc17774ff851ef7576d830738b91f5201b0ddfd231163706a"
+    },
+    {
+      "index": 221,
+      "stock_pcm_sha256": "729f3f92d22877a01871dc651ae49a328ca3383b1e5dd586b644e64008171b94"
+    },
+    {
+      "index": 352,
+      "stock_pcm_sha256": "3240a4025fd921691f12d641b1c687186047e68d34aaa35735686fb1ae78a0f2"
+    },
+    {
+      "index": 398,
+      "stock_pcm_sha256": "1b429e77c9bf375523bb85db037c96ae0f8d212f7f31eeb979796f6bb9c52aaa"
+    },
+    {
+      "index": 481,
+      "stock_pcm_sha256": "36375f1ce2f36336c5478a9b4f17a94c90aee348e68daadb0672d94e04a6e182"
+    },
+    {
+      "index": 531,
+      "stock_pcm_sha256": "7115e57078ff88ef850dcb8136d3c248d976ef6a31a60408bef478c7e15752fb"
+    }
+  ],
+  "guard_count": 10
+}

@@ -16,6 +16,25 @@ APP = 'Payload/SuperJ6.app/'
 EXECUTABLE = APP + 'PlugIns/SuperJ6 AU.appex/SuperJ6 AU'
 
 
+IPA_RECOVERY_SHA = '3cc86adee1b4b8a0516306f02d6ffeb2e828144565a824e75624212998366592'
+
+
+def read_recovery_ipa(path):
+    """Authenticate the private outer archive and return its pinned inner IPA."""
+    outer = path.read_bytes()
+    if sha256(outer).hexdigest() != IPA_RECOVERY_SHA:
+        raise ValueError('IPA recovery archive SHA-256 mismatch')
+    with ZipFile(BytesIO(outer)) as archive:
+        entries = [entry for entry in archive.infolist()
+                   if entry.filename.endswith('.ipa') and not entry.filename.startswith('__MACOSX/')]
+        if len(entries) != 1 or entries[0].file_size != 57135325:
+            raise ValueError('Expected one exact-size build-9 IPA member')
+        raw = archive.read(entries[0])
+    if sha256(raw).hexdigest() != IPA:
+        raise ValueError('Recovered IPA SHA-256 does not match build 9')
+    return raw
+
+
 def json_bytes(obj):
     return canonical_bytes(obj) + b'\n'
 
