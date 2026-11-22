@@ -1818,20 +1818,6 @@ static int drum_mix_page(void)
     return kit < NKIT ? (int)kit : -1;
 }
 
-/* MIX MASTER (peak hist + COMP knobs); not the WAVE sibling */
-static int master_mix_page(void)
-{
-    const char *t = pg.title[cur_page()];
-    return ui.view == V_MIX && t[0] == 'M' && t[1] == 'A' && t[2] == 'S' && t[3] == 'T';
-}
-
-/* MIX WAVE: live post-master mono scope from eng_scope[] */
-static int wave_mix_page(void)
-{
-    const char *t = pg.title[cur_page()];
-    return ui.view == V_MIX && t[0] == 'W' && t[1] == 'A' && t[2] == 'V' && t[3] == 'E';
-}
-
 /* a drum machine's page of the selected track's own sound (not the whole kit's: SENDS, PART, KIT) */
 static int track_page(void)
 {
@@ -5293,25 +5279,6 @@ static void text_r(int32_t rx, int32_t y, const felucca_font_t *f, const char *s
     cv_text(rx - tw(f, s), y, f, s, c);
 }
 
-/* ---- anti-aliased shapes. Coverage is 0..16; a pixel is blended over what is there. ---- */
-static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
-{
-    uint16_t *q;
-    uint32_t bg;
-    y += cv_oy;
-    if ((uint32_t)x >= cv_w || y < cv_y0 || y >= cv_y1 || !a)
-        return;
-    q = &cv_px[(uint32_t)y * cv_w + (uint32_t)x];
-    if (a >= 16u) {
-        *q = swap16(c);
-        return;
-    }
-    bg = swap16(*q);
-    *q = swap16((uint32_t)(((((c >> 11) * a + (bg >> 11) * (16u - a)) >> 4) << 11) |
-                           (((((c >> 5) & 63u) * a + ((bg >> 5) & 63u) * (16u - a)) >> 4) << 5) |
-                           (((c & 31u) * a + (bg & 31u) * (16u - a)) >> 4)));
-}
-
 #include "ui_glyph_renderer.h"
 
 /* corner coverage of a radius-r quarter circle, pixel (x, y) of the r x r corner square,
@@ -5850,7 +5817,7 @@ static UI_DRAW void draw_drum(int band)
 }
 
 #define ROLL_TOP 4                                 /* the 303's line: from here (both bands) ... */
-#define ROLL_BOT 92                                /* ... to here; then AC, SL and the step's line */
+#define ROLL_BOT 117                               /* use the space above the step's line */
 static int note_y(int n, int lo, int hi) { return ROLL_BOT - (n - lo) * (ROLL_BOT - ROLL_TOP) / (hi - lo); }
 
 /* A TIE only carries a real NOTE. In particular, an all-TIE/orphan pattern is
@@ -5917,6 +5884,10 @@ static UI_DRAW void draw_303(int band, int gen)
             int end = st->flags >> BS_END_SHIFT;
             int width = end ? (end * 12 + 14) / 15 : 12;
             box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
+            if (s == ui.held_step && (st->flags & BS_ACCENT)) {
+                int inset = width > 2;
+                cv_rect(x + inset, y + 1, width - 2 * inset, 3, col);
+            }
             if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
                 cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
             if (g == G_TIE) {
@@ -5932,16 +5903,15 @@ static UI_DRAW void draw_303(int band, int gen)
                 cv_rect(x + 12, y + 1, 2, 3, fc);
                 cv_rect(x + 14, y + 2, 2, 1, fc);
             }
-            if ((st->flags & BS_SLIDE) && c < 15) {
+            if (st->flags & BS_SLIDE) {
                 int nx = s + 1 < bp->len ? s + 1 : 0, ny = note_y(bp->step[nx].note, lo, hi) - o;
-                cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
+                if (c < 15)
+                    cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
+                else
+                    cv_line(x + 12, y + 2, x + 14, y + 2 + ((ny > y) - (ny < y)) * 2, C_WHITE);
             }
         }
-        box(x + 1, 101 - o, 10, 4, g && (st->flags & BS_ACCENT) ? C_WHITE : C_LINE);   /* its accent, its slide */
-        box(x + 1, 113 - o, 10, 4, g && (st->flags & BS_SLIDE) ? col : C_LINE);
     }
-    cv_text(3, vc(&FONT_XS, 99, 8) - o, &FONT_XS, "AC", C_GRAY);
-    cv_text(3, vc(&FONT_XS, 111, 8) - o, &FONT_XS, "SL", C_GRAY);
     if (ui.held_step >= 0 || ui.rec) {   /* the step held (or being written) */
         int s = ui.held_step >= 0 ? ui.held_step : ui.wpos[b];
         const bstep_t *st = &bp->step[s];
@@ -6528,11 +6498,15 @@ static UI_DRAW void draw_master_wave(void)
 
 static UI_DRAW void draw_mix(int band)
 {
-    int p, master = master_mix_page(), wave = wave_mix_page();
-    if (drum_mix_page() >= 0) {
-        draw_drum_mix(band, drum_mix_page());
+    int p, dm = drum_mix_page();
+    if (dm >= 0) {
+        draw_drum_mix(band, dm);
         return;
     }
+    /* describe_pages() always emits MASTER and WAVE after the kit pages. */
+    int page = ui.page[V_MIX][0];
+    int master = page == MIX_FIRST_KIT_PAGE + NKIT;
+    int wave = page > MIX_FIRST_KIT_PAGE + NKIT;
     /* MASTER peak history: fixed 98 columns. A scrolling ring rewrote every column each
      * frame, so cv_commit_rect sent nearly the whole main band (~18 ms SPI) — panel tear
      * ("broken" hist) and knob-strip lag (draw_knobs waits on that blit). Write-head
