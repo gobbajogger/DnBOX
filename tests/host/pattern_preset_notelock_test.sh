@@ -6,6 +6,13 @@ OUT=${1:-build/pattern-preset-notelock}
 mkdir -p "$OUT"
 DARWIN=
 [ "$(uname -s)" != Darwin ] || DARWIN=-D_DARWIN_C_SOURCE
+SOUND_FLAGS=
+if [ "${X0X_SUPERJ6_FACTORY:-0}" = 1 ]; then
+    SOUND_FLAGS="$SOUND_FLAGS -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0"
+fi
+if [ "${X0X_SYNTHONE_PATCH:-0}" = 1 ]; then
+    SOUND_FLAGS="$SOUND_FLAGS -DX0X_SYNTHONE_PATCH=1"
+fi
 sh host/build_host.sh --generate-only > "$OUT/assets.log" 2>&1
 U=$(python3 - <<'PY'
 import importlib.util
@@ -18,7 +25,7 @@ print(' '.join(u))
 PY
 )
 ${CC:-cc} -std=c99 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
-    -D_POSIX_C_SOURCE=200809L $DARWIN -DX0X_HOST -DX0X_ORIGINAL_SYNTH=1 -DX0X_DEV_WOBBLE=0 -DX0X_WOBBLE=0 \
+    -D_POSIX_C_SOURCE=200809L $DARWIN $SOUND_FLAGS -DX0X_HOST -DX0X_ORIGINAL_SYNTH=1 -DX0X_DEV_WOBBLE=0 -DX0X_WOBBLE=0 \
     -DORIGINAL_USE_SOFT_FMA -DMIAMI_FX_NO_HOST_FENV -fno-fast-math -ffp-contract=off \
     -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -Iexperiments/original_synth -Iexperiments/wobble \
     tests/host/pattern_preset_notelock_test.c $U -lm -o "$OUT/test" > "$OUT/compile.log" 2>&1 || { cat "$OUT/compile.log"; exit 1; }

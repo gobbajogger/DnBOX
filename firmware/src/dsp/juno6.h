@@ -49,21 +49,27 @@ typedef struct {
 #if X0X_SUPERJ6_FACTORY
 enum { SJ6_CHORUS_WET_FRAMES = 320, SJ6_CHORUS_DRY_FRAMES = 64, SJ6_CHORUS_ALIGNMENT_TAPS = 12 };
 typedef struct {
- uint16_t dry[2][SJ6_CHORUS_DRY_FRAMES];
  uint16_t wet[2][SJ6_CHORUS_WET_FRAMES];
 } juno6_chorus_memory;
 typedef struct {
  juno6_chorus_memory *history;
  float alignment[SJ6_CHORUS_ALIGNMENT_TAPS];
- float last_wet[2], dc[2], rise[2], fall[2];
- float mix, warm, warm_step, dc_step;
- uint32_t phase, phase_step;
+ float last_wet[2], dc[2], rise[2], fall[2], minimum[2];
+ float mix, dry_gain, warm, warm_step, dc_step;
+ uint32_t phase, phase_step, phase_offset[2];
  uint16_t write;
- uint8_t mode, dry_first;
+ uint8_t mode, dry_first, shared, short_alignment;
 } juno6_factory_chorus_t;
 #endif
 typedef struct {
+#if X0X_SUPERJ6_FACTORY
+ union {
+  int16_t delay[JUNO6_CHORUS_SAMPLES];
+  float factory_dry[2][SJ6_CHORUS_DRY_FRAMES];
+ };
+#else
  int16_t delay[JUNO6_CHORUS_SAMPLES];
+#endif
  uint16_t write;
  uint32_t phase;
  float sample_rate,depth_ms,rate_hz,mix;

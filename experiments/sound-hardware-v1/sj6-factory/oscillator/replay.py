@@ -64,9 +64,10 @@ def build(compact, repo, out, after_stock_pad=False):
                     "-o", out / "reference.so"], check=True)
     if after_stock_pad:
         flags.append("-DSJ6_PROBE_STOCK_PAD")
+    chorus = [dsp / "juno6_chorus_factory.c"] if (dsp / "juno6_chorus_factory.c").exists() else []
     subprocess.run(["cc", "-std=c11", *flags, "-DX0X_SUPERJ6_FACTORY=1", "-DDNBX_DIAGNOSTIC_COUNTERS=0",
                     "-I", dsp, out / "core_tap.c",
-                    dsp / "juno6.c", HERE / "candidate.c", "-o", out / "candidate.so"], check=True)
+                    dsp / "juno6.c", *chorus, HERE / "candidate.c", "-o", out / "candidate.so"], check=True)
     reference = ct.CDLL(str(out / "reference.so")).reference_oscillator
     reference.argtypes = [ct.c_uint, ct.c_float, ct.c_float, F32, ct.c_size_t]
     library = ct.CDLL(str(out / "candidate.so"))
@@ -85,6 +86,8 @@ def build(compact, repo, out, after_stock_pad=False):
             raise ValueError(f"compact legacy mode {mode} stereo hash differs: {actual}")
         stock_hashes.append(actual)
     inputs = ["dnbx_core.c", "dnbx_core.h", "fastmath.h", "juno6.c", "juno6.h"]
+    if chorus:
+        inputs.extend(("juno6_chorus_factory.c", "juno6_chorus_factory.h"))
     if (dsp / "juno6_factory.inc").exists():
         inputs.append("juno6_factory.inc")
     return reference, candidate, stock_hashes, {name: digest((dsp / name).read_bytes()) for name in inputs}

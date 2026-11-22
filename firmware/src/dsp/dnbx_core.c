@@ -264,6 +264,7 @@ static float envelope_sample(dnbx_envelope_state *e,const dnbx_envelope_params *
 {
     COUNT(w,envelope_samples,1);
     if (!e->tick_left) {
+        if (e->stage==DNBX_ENV_IDLE || e->stage==DNBX_ENV_SUSTAIN) return e->level;
         settle(e,p,sr,w);
         if (e->stage==DNBX_ENV_IDLE || e->stage==DNBX_ENV_SUSTAIN) return e->level;
         prepare_tick(e,0,w);
@@ -441,48 +442,74 @@ int dnbx_render(dnbx_part *s,float *left,float *right,unsigned n,dnbx_work *w)
     if (!n) return DNBX_OK;
     if (!left || !right || left==right) return DNBX_E_ARGUMENT;
     COUNT(w,frames,n);
-    for (unsigned k=0;k<n;k++) {
-        float mix[2]={0,0},width[2];
+    float lfo_step[DNBX_LAYERS], pan_left[DNBX_LAYERS], pan_right[DNBX_LAYERS];
+    float gain[DNBX_LAYERS], resonance[DNBX_LAYERS];
+    float cached_env[DNBX_VOICES][DNBX_LAYERS];
+    float cached_filter[DNBX_VOICES][DNBX_LAYERS];
+    for (unsigned l=0;l<DNBX_LAYERS;l++) {
+        const dnbx_layer_params *p=&s->layer[l].params;
+        lfo_step[l]=p->lfo_hz/s->sample_rate;
+        pan_left[l]=.5f-.5f*p->pan;
+        pan_right[l]=.5f+.5f*p->pan;
+        gain[l]=p->gain/6.0f;
+        resonance[l]=p->resonance*.8f;
+    }
+    for (unsigned i=0;i<DNBX_VOICES;i++)
+        for (unsigned l=0;l<DNBX_LAYERS;l++) cached_env[i][l]=-1.f;
+    enum { TILE = 16 };
+    for (unsigned start=0;start<n;start+=TILE) {
+        unsigned count=n-start < TILE ? n-start : TILE;
+        float width[DNBX_LAYERS][TILE];
         for (unsigned l=0;l<DNBX_LAYERS;l++) {
             dnbx_layer *ls=&s->layer[l];
-            float lfo=1-4*fm_fabsf(ls->lfo_phase-.5f);
-            width[l]=fm_clampf(ls->params.pulse_width+lfo*ls->params.lfo_pwm_depth,.03f,.5f);
-            ls->lfo_phase+=ls->params.lfo_hz/s->sample_rate;
-            if (ls->lfo_phase>=1) ls->lfo_phase-=1;
-            COUNT(w,lfo_samples,1);
+            for (unsigned t=0;t<count;t++) {
+                float lfo=1-4*fm_fabsf(ls->lfo_phase-.5f);
+                width[l][t]=fm_clampf(ls->params.pulse_width+lfo*ls->params.lfo_pwm_depth,.03f,.5f);
+                ls->lfo_phase+=lfo_step[l];
+                if (ls->lfo_phase>=1) ls->lfo_phase-=1;
+            }
+            COUNT(w,lfo_samples,count);
         }
+
+        float *layer_mix[DNBX_LAYERS]={left+start,right+start};
+        memset(layer_mix[0],0,count*sizeof(float));
+        memset(layer_mix[1],0,count*sizeof(float));
+        COUNT(w,voice_slots,count*DNBX_VOICES);
         for (unsigned i=0;i<DNBX_VOICES;i++) {
             dnbx_voice *v=&s->voice[i];
-            COUNT(w,voice_slots,1);
-            if (!voice_active(v)) continue;
-            COUNT(w,active_voice_samples,1);
             float velocity=v->velocity;
             if (s->velocity_mode==DNBX_VELOCITY_SQUARED) velocity*=velocity;
-            for (unsigned l=0;l<DNBX_LAYERS;l++) {
-                dnbx_layer_voice *lv=&v->layer[l];
-                const dnbx_layer_params *p=&s->layer[l].params;
-                float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
-                float env=envelope_sample(&lv->filter,&p->filter,s->sample_rate,w);
-                float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
-                    ? factory_oscillator(lv, p->waveform, width[l], w)
-                    : oscillator(lv->phase,lv->increment,p->waveform,width[l],p->oscillator_mode,w);
-                x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
-                /* Existing DnBOX two-pole recurrence, with explicit saturation
-                 * guards to make a finite bound part of this candidate ABI. */
-                float a=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
-                lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-p->resonance*.8f*lv->filter_second),-4,4);
-                lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
-                mix[l]+=velocity*amp*lv->filter_second;
-                lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
-                lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
-                COUNT(w,layer_samples,1);
+            for (unsigned t=0;t<count && voice_active(v);t++) {
+                COUNT(w,active_voice_samples,1);
+                for (unsigned l=0;l<DNBX_LAYERS;l++) {
+                    dnbx_layer_voice *lv=&v->layer[l];
+                    const dnbx_layer_params *p=&s->layer[l].params;
+                    float amp=envelope_sample(&lv->amp,&p->amp,s->sample_rate,w);
+                    float env=envelope_sample(&lv->filter,&p->filter,s->sample_rate,w);
+                    float x = p->oscillator_mode == DNBX_OSC_SUPERJ6
+                        ? factory_oscillator(lv, p->waveform, width[l][t], w)
+                        : oscillator(lv->phase,lv->increment,p->waveform,width[l][t],p->oscillator_mode,w);
+                    x+=(lv->subphase<.5f?1.0f:-1.0f)*p->sub_gain;
+                    if (env!=cached_env[i][l]) {
+                        cached_env[i][l]=env;
+                        cached_filter[i][l]=fm_clampf(FM_TWO_PI*(p->cutoff_hz+env*p->filter_env_hz)/s->sample_rate,.001f,.75f);
+                    }
+                    float a=cached_filter[i][l];
+                    lv->filter_first=fm_clampf(lv->filter_first+a*(x-lv->filter_first-resonance[l]*lv->filter_second),-4,4);
+                    lv->filter_second=fm_clampf(lv->filter_second+a*(lv->filter_first-lv->filter_second),-4,4);
+                    layer_mix[l][t]+=velocity*amp*lv->filter_second;
+                    lv->phase+=lv->increment; if (lv->phase>=1) lv->phase-=1;
+                    lv->subphase+=lv->increment*.5f; if (lv->subphase>=1) lv->subphase-=1;
+                    COUNT(w,layer_samples,1);
+                }
             }
         }
-        left[k]=0; right[k]=0;
-        for (unsigned l=0;l<DNBX_LAYERS;l++) {
-            const dnbx_layer_params *p=&s->layer[l].params;
-            float x=mix[l]*(p->gain/6.0f);
-            left[k]+=x*(.5f-.5f*p->pan); right[k]+=x*(.5f+.5f*p->pan);
+        for (unsigned t=0;t<count;t++) {
+            float x0=layer_mix[0][t]*gain[0], x1=layer_mix[1][t]*gain[1];
+            float mix_l=0.f, mix_r=0.f;
+            mix_l+=x0*pan_left[0]; mix_r+=x0*pan_right[0];
+            mix_l+=x1*pan_left[1]; mix_r+=x1*pan_right[1];
+            layer_mix[0][t]=mix_l; layer_mix[1][t]=mix_r;
         }
     }
     return DNBX_OK;

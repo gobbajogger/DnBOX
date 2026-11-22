@@ -1,0 +1,141 @@
+{
+  "elf_sha256": "9fbd4566e134b2d7126f4e85f368e8871876c4a740b12368c26d5fb5375d84a8",
+  "fwsc_sha256": "2348a18c0ba327c6775d09a206a7d5511b53e78df321d4105d57e0381d829edf",
+  "emulator_sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab",
+  "seed_sha256": "e54e205b5ff02240241b8c862a42928e7c5add9a2e4ce17e0833253cca3deca9",
+  "boot": {
+    "duration_ms": 2000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 131,
+    "max_us": 3922,
+    "raw_late": 0,
+    "audio_xruns": 0,
+    "pcm_sha256": "45a0650fce9482f94cb54087e52e3aa95ab5d0d2d7ca3dd3115bea7ac0af58c3",
+    "pcm_bytes": 352940,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "e54e205b5ff02240241b8c862a42928e7c5add9a2e4ce17e0833253cca3deca9",
+    "final_flash_sha256": "e54e205b5ff02240241b8c862a42928e7c5add9a2e4ce17e0833253cca3deca9"
+  },
+  "shot": {
+    "duration_ms": 8000,
+    "shift_ms": 0,
+    "events": 922,
+    "strict": 1,
+    "mhz": 360,
+    "halves": 631,
+    "max_us": 12680,
+    "raw_late": 16,
+    "audio_xruns": 16,
+    "pcm_sha256": "e6648c2c54279878b89a7df7bc929850ca4a0407c2072f233f2c07e0bfb1ec50",
+    "pcm_bytes": 1411764,
+    "scene_sha256": "d08718b1521119b252b5cca0c5e1db6981ea25a5a0b31b6ead60dceccb3f6271",
+    "pcm_capture": "public boot-padded recorder",
+    "initial_flash_sha256": "e54e205b5ff02240241b8c862a42928e7c5add9a2e4ce17e0833253cca3deca9",
+    "final_flash_sha256": "e54e205b5ff02240241b8c862a42928e7c5add9a2e4ce17e0833253cca3deca9"
+  },
+  "guest": {
+    "bass_kinds": [
+      2,
+      3
+    ],
+    "runtime_status": [
+      1,
+      1
+    ],
+    "peak_meter_909_808_A_B_BREAK": [
+      32767,
+      22262,
+      21999,
+      113,
+      32625
+    ],
+    "triggered_rows_909_808": [
+      11,
+      11
+    ],
+    "last_playhead_steps": [
+      7,
+      4,
+      7,
+      63,
+      7
+    ],
+    "user_zones": [
+      0,
+      1,
+      0
+    ],
+    "loop_count": 1,
+    "first_catalog_slot_zone": [
+      1,
+      0
+    ],
+    "sample_rate": 44118,
+    "stereo_frames": 352941,
+    "first_half_second_nonzero_words": 0,
+    "last_half_second_nonzero_words": 44057,
+    "peak_pcm16": 13132,
+    "pcm_sha256": "e6648c2c54279878b89a7df7bc929850ca4a0407c2072f233f2c07e0bfb1ec50",
+    "observed_halves": 631,
+    "peak_callback_us": 12680,
+    "raw_late": 16,
+    "audio_xruns": 16
+  },
+  "capture_health": {
+    "expected_post_boot_pcm_bytes": 1058832,
+    "captured_post_boot_pcm_bytes": 1058824,
+    "tolerance_pcm_bytes": 2048,
+    "duration_ok": true,
+    "boot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "shot_fault": {
+      "record": null,
+      "handler_active": false
+    },
+    "fault_record_changed": false,
+    "retained_fault": false,
+    "fault_ok": true,
+    "passed": true
+  },
+  "scene_late": 16,
+  "owners_ok": true,
+  "all_active": true,
+  "timing_ok": false,
+  "passed": false,
+  "guest_instrumentation": {
+    "boot": {
+      "ram_sha256": "f0f260b0c80adf5da150dfc96566a19480d67d7249061fde1e4570b78aa5ea04",
+      "mode_by_owner": [
+        0,
+        2
+      ],
+      "core1_user_stack_bytes_used": 688,
+      "core1_guard_bytes": 256,
+      "core1_mailbox_submitted": 523,
+      "core1_mailbox_finished": 523,
+      "core1_bad_jobs": 0,
+      "core1_gave_up": 0,
+      "final_worker_mask": 8
+    },
+    "heavy": {
+      "ram_sha256": "1bcdcd2e591637946b83860589ef3f6ce1d3384803ce192cf9ba72eb2c2b1096",
+      "mode_by_owner": [
+        0,
+        2
+      ],
+      "core1_user_stack_bytes_used": 2020,
+      "core1_guard_bytes": 256,
+      "core1_mailbox_submitted": 2773,
+      "core1_mailbox_finished": 2773,
+      "core1_bad_jobs": 0,
+      "core1_gave_up": 0,
+      "final_worker_mask": 3
+    }
+  }
+}

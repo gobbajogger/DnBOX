@@ -12,7 +12,15 @@ The saved Synth One pitch LFO applies the original positive modulation gain to o
 
 The opt-in SuperJ6 factory loader now follows authenticated build-9 chorus version and switch routing. It selects the new independent stereo path for 294 J60V2 factory programs, the existing legacy chorus for 46, and the bit-exact dry path for 300. The three independent wet modes passed the archived component tests at the unchanged 1 dB RMS and 3 dB spectral limits, with 2.064 dB worst spectral error. Both bypass cases stayed bit-exact. All six longer impulse trains passed across 44.1 and 48 kHz. Six of twelve sustained chord cases passed, so broader wet parity remains open. [Original routing, integrated loader checks and component results](../../evidence/sound-resume/superj6-factory-chorus/). The shipped path uses independent 16-bit per-owner delay histories in pool storage. The packed histories preserved every archived and impulse-train score and kept six sustained passes. Panic clears the active histories and the focused factory suite verified silence afterward. [Packed-history comparison](../../evidence/sound-resume/superj6-factory-chorus/compact-comparison.json).
 
-## Current standard software qualification — source `630c4d96`
+## Active SuperJ6 software qualification
+
+The independent chorus runs in a separate optimized translation unit. It reuses the inactive legacy delay storage and shares identical input history until the two channels differ. Bounded typed-voice tiling keeps the render order, and owner-local Juno jobs can use the existing worker before the ordered mix. The dual-engine build uses the tested Integration size profile on 808, 909 and BREAK.
+
+Instrumented software playback selected J60V2 mode 2 on opposite owners on the two boards. Elite peaked at 11,170 µs and Pro at 11,108 µs, both below 11,609 µs with zero late callbacks, zero xruns and no new guest fault. Both measured a 2,000-byte worker stack watermark during the heavy scene. The host matched ordered PCM and part meters across thirteen worker masks and both owner assignments, including the disabled worker and note release. All three archived original wet modes, both exact dry cases and all six long impulse trains still pass. Six sustained chord cases remain outside the spectral limits. [Mode readbacks, strict timing, and component replay](../../evidence/sound-resume/active-wet-worker/).
+
+The isolated Integration source at `156f4629` with the new Sound changes initially overflowed XIP by 608 bytes on Elite and 600 on Pro under its pinned flags. Compiling just the existing 808 unit at `-Oz` recovered 2,348 bytes on each board. The combined images retain 1,740/1,748 bytes of XIP and 1,244 bytes of pool margin. An existing native 808 stimulus rendered 65,536 identical PCM bytes at both optimization levels. Combined software playback evidence is tracked separately from the Sound branch packages. [Combined link receipts](../../evidence/sound-resume/active-wet-worker/).
+
+## Previous standard software qualification — source `630c4d96`
 
 The two stock packages retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with 732 bytes of pool margin each. All eight strict scenes used the exact Sound ELF and firmware package at 360 MHz, populated both basses, both drum kits and BREAK, and recorded zero late callbacks, zero xruns and no new guest fault. The alternate-filter scenes retain the full-level sub setting. The pitch route is covered separately by the exact factory replay and host lifecycle tests. [Firmware packages](../../artifacts/sound-qualification/630c4d96/) · [Exact build and strict timing](../../evidence/sound-qualification/630c4d96/).
 
@@ -23,7 +31,7 @@ The two stock packages retain 1,664 bytes of XIP on Elite and 1,672 on Pro, with
 | Juno and Synth One bandpass with full sub level | 7,242 µs | 7,727 µs |
 | Juno and Synth One highpass with full sub level | 7,234 µs | 7,710 µs |
 
-Sound and Integration `86e0f63f` diverge from `0b0ff56b`. Integration's previous combined software build retained 1,368 bytes of Elite XIP and 1,380 on Pro with Sound `0ac65800`. The saved pitch route costs 796/800 bytes in the Sound-only links. The combined image needs additional reclaim and a fresh stock build against the 1,024-byte XIP floor. The two emulator images and the render and log archive are verified locally. [Ancestry and budget](../../evidence/sound-qualification/630c4d96/integration-ancestry.json).
+Sound and Integration `d63620b9` diverge from `0b0ff56b`. Integration's previous combined software build retained 1,368 bytes of Elite XIP and 1,380 on Pro with Sound `0ac65800`. The saved pitch route costs 796/800 bytes in the Sound-only links. The combined image needs additional reclaim and a fresh stock build against the 1,024-byte XIP floor. The two emulator images and the render and log archive are verified locally. [Ancestry and budget](../../evidence/sound-qualification/630c4d96/integration-ancestry.json).
 
 ## Prior strict software qualification — source `0ac65800`
 

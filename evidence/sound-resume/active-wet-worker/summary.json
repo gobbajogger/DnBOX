@@ -1,0 +1,65 @@
+{
+  "elite-wet-fit": {
+    "max_us": 11170,
+    "late": 0,
+    "xruns": 0,
+    "timing_pass": true,
+    "xip_free_bytes": 4716,
+    "pool_margin_bytes": 1244,
+    "stock_flash_floor_pass": true
+  },
+  "pro-wet-fit": {
+    "max_us": 11108,
+    "late": 0,
+    "xruns": 0,
+    "timing_pass": true,
+    "xip_free_bytes": 4724,
+    "pool_margin_bytes": 1244,
+    "stock_flash_floor_pass": true
+  },
+  "elite-full-size": {
+    "max_us": 11136,
+    "late": 0,
+    "xruns": 0,
+    "timing_pass": true,
+    "xip_free_bytes": 300,
+    "pool_margin_bytes": 1244,
+    "stock_flash_floor_pass": false
+  },
+  "pro-worker-stock": {
+    "max_us": 12742,
+    "late": 4,
+    "xruns": 4,
+    "timing_pass": false,
+    "xip_free_bytes": 1476,
+    "pool_margin_bytes": 732,
+    "stock_flash_floor_pass": true
+  },
+  "pro-worker-voice-tile-only": {
+    "max_us": 12792,
+    "late": 4,
+    "xruns": 4,
+    "timing_pass": false,
+    "xip_free_bytes": 1188,
+    "pool_margin_bytes": 732,
+    "stock_flash_floor_pass": true
+  },
+  "pro-worker-compact-shared": {
+    "max_us": 12046,
+    "late": 4,
+    "xruns": 4,
+    "timing_pass": false,
+    "xip_free_bytes": 1364,
+    "pool_margin_bytes": 732,
+    "stock_flash_floor_pass": true
+  },
+  "pro-worker-expanded-quantized-dry": {
+    "max_us": 12680,
+    "late": 16,
+    "xruns": 16,
+    "timing_pass": false,
+    "xip_free_bytes": 1380,
+    "pool_margin_bytes": 1244,
+    "stock_flash_floor_pass": true
+  }
+}

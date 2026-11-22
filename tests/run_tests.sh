@@ -301,7 +301,7 @@ run synthone-init-audio sh tests/host/synthone_init_audio.sh "$OUT/synthone-init
 run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
 run legacy-slot2-map sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Iexperiments/original_synth tests/host/legacy_slot2_map_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/legacy_slot2_map && $OUT/legacy_slot2_map"
 run juno6-dsp sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src/dsp -o $OUT/juno6_test tests/host/juno6_test.c firmware/src/dsp/juno6.c -lm && $OUT/juno6_test"
-run juno6-factory sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0 -Ifirmware/src/dsp -o $OUT/juno6_factory tests/host/juno6_factory_test.c firmware/src/dsp/juno6.c firmware/src/dsp/dnbx_core.c -lm && $OUT/juno6_factory"
+run juno6-factory sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0 -Ifirmware/src/dsp -o $OUT/juno6_factory tests/host/juno6_factory_test.c firmware/src/dsp/juno6.c firmware/src/dsp/juno6_chorus_factory.c firmware/src/dsp/dnbx_core.c -lm && $OUT/juno6_factory"
 run superj6-factory-load sh tests/host/superj6_factory_load_test.sh
 run usb-retry sh tests/host/run_usb_retry.sh
 run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
