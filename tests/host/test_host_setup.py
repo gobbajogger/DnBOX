@@ -29,8 +29,7 @@ if os.environ.get("FAIL_GENERATOR") == name:
     sys.exit(23)
 out = pathlib.Path(sys.argv[-1])
 out.write_text(name)
-# Real gen_drum_samples.py also writes x0x_drum_tables.h beside samples;
-# build_host.sh re-runs when either header is missing.
+# The real drum generator also maintains x0x_drum_tables.h beside samples.
 if name == "gen_drum_samples.py":
     (out.parent / "x0x_drum_tables.h").write_text(name)
 '''
@@ -151,11 +150,20 @@ pathlib.Path(sys.argv[sys.argv.index("-o") + 1]).write_text("simulator")
         self.assertNotIn("builtin", log)
         self.assertFalse((self.root / "compile.json").exists())
 
-    def test_existing_headers_skip_only_font_and_drums(self):
+    def test_existing_headers_revalidate_drums_and_skip_font(self):
         self.assertEqual(self.run_builder("--generate-only").returncode, 0)
-        (self.root / "generators.log").write_text("")
-        self.assertEqual(self.run_builder("--generate-only").returncode, 0)
-        self.assertEqual((self.root / "generators.log").read_text(), "builtin\n")
+        log = self.root / "generators.log"
+        drum_call = "gen_drum_samples.py:['build/gen/x0x_drum_samples.h']\n"
+        log.write_text("")
+        result = self.run_builder("--generate-only")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(log.read_text(), drum_call + "builtin\n")
+
+        log.write_text("")
+        result = self.run_builder(FAIL_GENERATOR="gen_drum_samples.py")
+        self.assertEqual(result.returncode, 23, result.stderr)
+        self.assertEqual(log.read_text(), drum_call)
+        self.assertFalse((self.root / "compile.json").exists())
 
     def test_setup_failures_stop_both_modes(self):
         for mode in ((), ("--generate-only",)):

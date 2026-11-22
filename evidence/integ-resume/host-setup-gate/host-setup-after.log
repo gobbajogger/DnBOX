@@ -1,0 +1,17 @@
+test_compile_failure_propagates (__main__.HostSetupTest.test_compile_failure_propagates) ... ok
+test_custom_bank (__main__.HostSetupTest.test_custom_bank) ... ok
+test_default_build_and_environment (__main__.HostSetupTest.test_default_build_and_environment) ... ok
+test_default_output (__main__.HostSetupTest.test_default_output) ... ok
+test_existing_headers_revalidate_drums_and_skip_font (__main__.HostSetupTest.test_existing_headers_revalidate_drums_and_skip_font) ... ok
+test_explicit_legacy_profile_is_rejected (__main__.HostSetupTest.test_explicit_legacy_profile_is_rejected) ... ok
+test_generate_only_from_empty_headers (__main__.HostSetupTest.test_generate_only_from_empty_headers) ... ok
+test_input_check_failure_stops_compilation (__main__.HostSetupTest.test_input_check_failure_stops_compilation) ... ok
+test_invalid_original_rate_pad_flag_is_rejected (__main__.HostSetupTest.test_invalid_original_rate_pad_flag_is_rejected) ... ok
+test_original_input_failure_stops_compilation (__main__.HostSetupTest.test_original_input_failure_stops_compilation) ... ok
+test_original_miami_rate_pad_flag_can_be_disabled_without_legacy_dsp (__main__.HostSetupTest.test_original_miami_rate_pad_flag_can_be_disabled_without_legacy_dsp) ... ok
+test_setup_failures_stop_both_modes (__main__.HostSetupTest.test_setup_failures_stop_both_modes) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.343s
+
+OK
