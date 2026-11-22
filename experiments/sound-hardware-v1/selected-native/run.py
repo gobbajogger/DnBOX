@@ -76,6 +76,7 @@ def prepare_flash(args, objects):
         "stock_seed_sha256": sha(stock),
         "project_objects_sha256": sha(objects),
         "synthone_sub_seed": args.synthone_sub,
+        "synthone_filter_seed": args.synthone_filter,
         "source_sample_sha256": sha(sample.read_bytes()),
         "slot_adpcm_sha256": sha(data),
         "initial_flash_sha256": sha(flash),
@@ -161,9 +162,11 @@ def main():
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--stage-only", action="store_true", help="emit a fresh seed for another scene")
     action.add_argument("--rescore", action="store_true", help="read a completed shot in OUTPUT")
+    parser.add_argument("--synthone-filter", choices=("bandpass", "highpass"))
     args = parser.parse_args()
-    if args.synthone_sub and (not args.ensemble or 2 not in (args.bass_a, args.bass_b)):
-        parser.error("--synthone-sub requires an ensemble with a Synth One owner")
+    if (args.synthone_sub or args.synthone_filter) and (
+            not args.ensemble or 2 not in (args.bass_a, args.bass_b)):
+        parser.error("Synth One seed edits require an ensemble with a Synth One owner")
     kit = 2 if args.ensemble else {None: -1, "909": 0, "808": 1}[args.kit]
     out = args.output.resolve()
     objects = out / "save-objects.bin"
@@ -173,6 +176,8 @@ def main():
                    str(kit), rebuilt]
         if args.synthone_sub:
             command.append("--synthone-sub")
+        if args.synthone_filter:
+            command.append("--synthone-filter=" + args.synthone_filter)
         subprocess.run(command, check=True)
         project = rebuilt.read_bytes()
     if args.rescore:

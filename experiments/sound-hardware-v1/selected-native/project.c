@@ -10,15 +10,21 @@
 
 int main(int argc, char **argv)
 {
-    assert(argc == 5 || (argc == 6 && !strcmp(argv[5], "--synthone-sub")));
-    const int sub = argc == 6;
+    assert(argc >= 5 && argc <= 7);
+    int sub = 0, filter_position = 0;
+    for (int i = 5; i < argc; ++i) {
+        if (!strcmp(argv[i], "--synthone-sub")) sub = 1;
+        else if (!strcmp(argv[i], "--synthone-filter=bandpass")) filter_position = 64;
+        else if (!strcmp(argv[i], "--synthone-filter=highpass")) filter_position = 127;
+        else assert(0 && "unknown scene argument");
+    }
 #if !X0X_SYNTHONE_PATCH
-    assert(!sub);
+    assert(!sub && !filter_position);
 #endif
     const unsigned kind[2] = {(unsigned)atoi(argv[1]), (unsigned)atoi(argv[2])};
     const int kit = atoi(argv[3]); /* -1 bass/BREAK, 0/1 isolated kit, 2 all parts. */
     assert(kit >= -1 && kit <= 2);
-    assert(!sub || (kit == 2 && (kind[0] == ORIGINAL_SOUND_SYNTHONE ||
+    assert(!(sub || filter_position) || (kit == 2 && (kind[0] == ORIGINAL_SOUND_SYNTHONE ||
                                 kind[1] == ORIGINAL_SOUND_SYNTHONE)));
     const int notes = kit < 0 || kit == 2;
     boot();
@@ -31,16 +37,19 @@ int main(int argc, char **argv)
         assert(!engine_bass_preset_pending(voice));
         assert(engine_bass_bank(voice) == (int)kind[voice]);
 #if X0X_SYNTHONE_PATCH
-        if (sub && kind[voice] == ORIGINAL_SOUND_SYNTHONE) {
-            unsigned id = s1_patch_at(S1_PATCH_SUB_LEVEL)->factory_id;
+        const unsigned slots[] = {S1_PATCH_SUB_LEVEL, S1_PATCH_FILTER_TYPE};
+        const unsigned positions[] = {sub ? S1_PATCH_STEPS : 0, (unsigned)filter_position};
+        if (kind[voice] == ORIGINAL_SOUND_SYNTHONE) for (unsigned edit = 0; edit < 2; ++edit) {
+            if (!positions[edit]) continue;
+            unsigned id = s1_patch_at(slots[edit])->factory_id;
             s1_patch_value value;
             assert(engine_s1_patch_read(voice, id, &value));
-            assert(engine_s1_patch_set(voice, value.revision, id, S1_PATCH_STEPS) == S1_EDIT_QUEUED);
+            assert(engine_s1_patch_set(voice, value.revision, id, positions[edit]) == S1_EDIT_QUEUED);
             for (int i = 0; i < 16 && engine_s1_patch_pending(); ++i)
                 engine_render(buffer, 256);
             assert(!engine_s1_patch_pending());
             assert(engine_s1_patch_read(voice, id, &value) &&
-                   value.position == S1_PATCH_STEPS && value.physical > 0.f);
+                   value.position == positions[edit] && value.physical > 0.f);
         }
 #endif
 

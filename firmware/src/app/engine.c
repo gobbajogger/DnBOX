@@ -212,6 +212,7 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
 enum { SJ6_PENDING_MASTER = 4, SJ6_PENDING_ATTACK = 5, SJ6_PENDING_LFO_HZ = 6 };
 /* Published and consumed under the factory group flag, one mailbox per synth owner. */
 static float pending_factory_range[NBASS];
+static juno6_chorus_memory factory_chorus_history[NBASS] X0X_POOL;
 
 X0X_COLD int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row)
 {
@@ -347,7 +348,7 @@ static X0X_COLD __attribute__((noinline)) void apply_superj6_pending(original_ru
             int chorus_off = (synth->pending_field_mask & SJ6_FACTORY_CHORUS_BYPASS) != 0;
             juno6_chorus_t *chorus = &part->dsp.juno.chorus;
             unsigned mode = (unsigned)synth->pending_field[SJ6_PENDING_LFO_HZ];
-            juno6_chorus_select_factory(chorus, mode, 1.f);
+            juno6_chorus_select_factory(chorus, &factory_chorus_history[owner], mode, 1.f);
             if (chorus_off && !synth->factory_chorus_bypass) {
                 /* Flush legacy history when entering the dry route. */
                 memset(chorus->delay, 0, sizeof chorus->delay);

@@ -39,6 +39,7 @@ def main():
     parser.add_argument("reference_pack", type=Path)
     parser.add_argument("candidate", type=Path)
     parser.add_argument("out", type=Path)
+    parser.add_argument("--reference-cache", type=Path, help="reuse hash-verified original holdouts")
     args = parser.parse_args()
     args.out.mkdir()
     with ZipFile(args.original_au) as archive:
@@ -47,6 +48,21 @@ def main():
         raise ValueError("unexpected original ARM64 executable")
 
     cases = []
+    cached = {}
+    if args.reference_cache:
+        cache = json.loads((args.reference_cache / "comparison.json").read_text())
+        assert cache["original_executable_sha256"] == EXPECTED
+        cached = {row["case"]: row for row in cache["cases"]}
+
+    def reference_for(label, input_raw, mode, mix, rate):
+        if not args.reference_cache:
+            return render(original, input_raw, mode, mix, True, rate)
+        old = cached[label]
+        raw = (args.reference_cache / (label + ".original.f32")).read_bytes()
+        assert sha(raw) == old["reference_sha256"]
+        assert sha(input_raw) == old["stimulus_sha256"]
+        assert (old["mode"], old["mix"], old["rate"]) == (mode, mix, rate)
+        return raw, old["params_readback"]
 
     def evaluate(label, mode, rate, frames, mix, input_raw, reference, readback):
         candidate = subprocess.run([str(args.candidate.resolve()), str(mode), str(rate), str(frames), str(mix)],
@@ -93,11 +109,13 @@ def main():
         (args.out / f"impulses-{rate}.stimulus.f32").write_bytes(impulse_raw)
         (args.out / f"chord-{rate}.stimulus.f32").write_bytes(chord_raw)
         for mode in (1, 2, 3):
-            original_pcm, readback = render(original, impulse_raw, mode, 1., True, rate)
-            evaluate(f"impulses-{rate}-{mode}", mode, rate, frames, 1., impulse_raw, original_pcm, readback)
+            label = f"impulses-{rate}-{mode}"
+            original_pcm, readback = reference_for(label, impulse_raw, mode, 1., rate)
+            evaluate(label, mode, rate, frames, 1., impulse_raw, original_pcm, readback)
             for mix in (1., .5):
-                original_pcm, readback = render(original, chord_raw, mode, mix, True, rate)
-                evaluate(f"chord-{rate}-{mode}-{mix:g}", mode, rate, sustained_frames, mix,
+                label = f"chord-{rate}-{mode}-{mix:g}"
+                original_pcm, readback = reference_for(label, chord_raw, mode, mix, rate)
+                evaluate(label, mode, rate, sustained_frames, mix,
                          chord_raw, original_pcm, readback)
 
     assert len(cases) == 23

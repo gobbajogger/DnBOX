@@ -274,6 +274,7 @@ static void check_factory_chorus_bypass(void)
 {
     static original_runtime_part active;
     static original_runtime_workspace workspace;
+    static juno6_chorus_memory history;
     unsigned exact_frames = 0;
     for (unsigned v = 0; v < 2; ++v) {
         /* No complete factory row is persisted in the legacy project cell. */
@@ -292,6 +293,10 @@ static void check_factory_chorus_bypass(void)
             const original_runtime_part *part = (const void *)((const unsigned char *)owner[v] -
                 offsetof(original_runtime_part, dsp.juno.synth));
             active = *part;
+            if (active.dsp.juno.chorus.factory.mode) {
+                history = *active.dsp.juno.chorus.factory.history;
+                active.dsp.juno.chorus.factory.history = &history;
+            }
             CHECK(active.dsp.juno.chorus.factory.mode == (mode == 3 ? 2u : mode == 4 ? 3u : 0u));
             CHECK(active.dsp.juno.chorus.mix > 0.f);
             CHECK(juno6_note_on(&active.dsp.juno.synth, 60, 100));
@@ -312,6 +317,11 @@ static void check_factory_chorus_bypass(void)
             CHECK(exact == (mode == 2));
             CHECK((!memcmp(&chorus, &active.dsp.juno.chorus, sizeof chorus)) == (mode == 2));
             if (exact) exact_frames += 256;
+            if (active.dsp.juno.chorus.factory.mode) {
+                CHECK(original_runtime_all_off(&active) == ORIGINAL_RUNTIME_OK);
+                CHECK(original_runtime_render(&active, &workspace, al, ar, 256) == ORIGINAL_RUNTIME_OK);
+                for (unsigned i = 0; i < 256; ++i) CHECK(al[i] == 0.f && ar[i] == 0.f);
+            }
             CHECK(!memcmp(saved_sound, &proj.sound, sizeof saved_sound));
         }
     }

@@ -9,6 +9,7 @@ int main(int argc, char **argv)
 {
     static float samples[2 * MAX_FRAMES];
     static juno6_chorus_t chorus;
+    static juno6_chorus_memory history;
     if (argc != 5) return 2;
     unsigned mode = (unsigned)strtoul(argv[1], NULL, 10);
     float rate = strtof(argv[2], NULL);
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
         return 2;
     juno6_chorus_init(&chorus, rate);
     if (mode) {
-        juno6_chorus_select_factory(&chorus, mode, mix);
+        juno6_chorus_select_factory(&chorus, &history, mode, mix);
         for (unsigned first = 0; first < frames; first += 128u) {
             unsigned count = frames - first < 128u ? frames - first : 128u;
             juno6_chorus_process(&chorus, samples + first, samples + frames + first, count);
