@@ -1,0 +1,22 @@
+{
+  "status": "WORKING",
+  "checkpoint_base": "6f6d1ba272fb553085b45879154623eb6cf66233",
+  "checkpoint_branch": "lane/prep-exact-inputs-20261122-0100",
+  "sources": [
+    {
+      "repository": "gobbajogger/DnBOX",
+      "commit": "f1786ebec2616477163b62b029c7e77405a9c3de",
+      "tree": "a4876790880cae769298f6701e8ab5db1d970b30",
+      "working_tree_clean": true
+    },
+    {
+      "repository": "gobbajogger/DnBOX-nightly",
+      "commit": "583f622961fc9975fac746592ce6c483073c4170",
+      "tree": "7c10299ae8ccccb72771cd75b490b67bf2238eac",
+      "working_tree_clean": true
+    }
+  ],
+  "source_recovery": "PASS real authenticated Git clones; clean checkouts",
+  "sdk_test": "PASS actual tests/sdk_pin_test.py with AC79_SDK and no skipped check",
+  "delivery": "PENDING bundle and fresh-worker restore"
+}

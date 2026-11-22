@@ -1,0 +1,27 @@
+{
+  "archive_sha256": "929ec0b652c1e246aa066c5ff4bc6068e1fd145501adce30187b8497b93276b6",
+  "archive_size": 309800121,
+  "consumed_inputs": [
+    {
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/cpu/wl82/tools/uboot.boot",
+      "package_input": "uboot.boot",
+      "size_bytes": 14444,
+      "sha256": "64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e",
+      "result": "PASS"
+    },
+    {
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/cpu/wl82/tools/cfg_tool.bin",
+      "package_input": "cfg_tool.bin",
+      "size_bytes": 383,
+      "sha256": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+      "result": "PASS"
+    },
+    {
+      "member": "fw-AC79_AIoT_SDK-AC79NN_SDK_V1.2.14_2026-10-13/cpu/wl82/tools/cfg/eq_cfg_hw.bin",
+      "package_input": "cfg/eq_cfg_hw.bin",
+      "size_bytes": 1278,
+      "sha256": "179ac9f4501d2cf8c3bdbc06fcda1e46228b7ace7e339342c767bb6568de57d8",
+      "result": "PASS"
+    }
+  ]
+}

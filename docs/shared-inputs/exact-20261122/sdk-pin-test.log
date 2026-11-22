@@ -1,0 +1,6 @@
+PASS SDK tag is V1.2.14
+PASS SDK pins are the V1.2.14 hashes
+PASS a wrong SDK file stops the build: build: SDK uboot.boot sha256 5cb4069ee6d6db16be731e43499086dd377667abd37d877227450c8b453aa263 does not match pinned AC79NN_SDK_V1.2.14_2026-10-13 (64ccc63e4df3238046fadb200f1b134311d8fe6ec6e3ccb8c8b81379231b867e)
+PASS AC79_SDK /workspace/scratch/857bb2409f82/prep-exact-inputs-20261122/SDK matches the pins
+
+exit_code=0
