@@ -1,5 +1,9 @@
 # Sound lane
 
+### Software-only candidate qualification — 2026-11-22 UTC
+
+Source `f405ac99` passed all eight populated SuperJ6-enabled and dual-profile replays with zero late, zero xruns and peaks of 6,920–8,127 µs against 11,609 µs. Both native models meet the stock limits. Synth One's 694-program control projection reproduced the original hashes and passed 0/694 complete audio comparisons. SuperJ6 Layer 1 attack and explicitly disabled chorus passed the focused bit-exact tests. Full FX, preset application and S4 remain open. Integration's isolated conflict resolution stays below the required XIP floor on both boards. [Exact-source qualification](../sound/engine-qualification.md#software-only-native-qualification-at-f405ac99).
+
 ### Exact-source qualification checkpoint — 2026-11-22 UTC
 
 Original-engine comparisons cover Synth One and SuperJ6. Existing engines enter the populated playback, lifecycle and native resource checks. Source `49ba51f1` stock Elite and Pro built with 7,796/7,804 B XIP free and 7,908 B pool margin each. Integration `f1786ebe` diverges from the measured head. A virtual merge found 12 conflicts. The earlier 808 and Chicago comparison receipts are retained in checkpoint `6e3055e5` history. [Qualification](../sound/engine-qualification.md#active-qualification-scope--2026-11-22-utc) · [Exact build and ancestry evidence](../../evidence/sound-qualification/49ba51f1/native-and-ancestry.json).

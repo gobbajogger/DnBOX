@@ -59,6 +59,23 @@ The existing slot migration, held-chord recording, polyphonic sequencer, panic c
 
 Synth One's current voice and effect projection verified 35 settings across all 694 programs. All original capture hashes matched, and 0/694 complete pairs met the 1 dB level and 3 dB spectral limits. The engine-only SuperJ6 path adds a guarded Layer 1 attack and bit-exact chorus bypass when both factory switches are off. Active original chorus, the complete factory mapping, and the complete preset audio matrix remain open. The SuperJ6 build-9 host is unavailable and S4 remains 0/14. [Synth One](synthone-ab.md) · [SuperJ6](superj6-ab.md).
 
+### Software-only native qualification at `f405ac99`
+
+Both opt-in profiles fit stock Elite and Pro memory. The SuperJ6-only profile leaves 3,792 and 3,804 bytes of XIP. The simultaneous SuperJ6 factory and Synth One editor profile leaves 3,796 and 3,804 bytes. Each retains 7,908 bytes of pool margin above reserve. Fresh ordinary applications and update packages matched the `49ba51f1` stock bytes for both boards. [Package, ELF, image and resource identities](../../evidence/sound-qualification/f405ac99/native-profile.json).
+
+| Firmware profile | Populated routing | Elite peak | Pro peak |
+| --- | --- | ---: | ---: |
+| SuperJ6 factory | Chicago and Miami | 8,022 µs | 7,778 µs |
+| SuperJ6 factory | Juno and Synth One | 7,249 µs | 7,428 µs |
+| SuperJ6 factory and Synth One editor | Chicago and Miami | 8,127 µs | 7,896 µs |
+| SuperJ6 factory and Synth One editor | Juno and Synth One | 6,920 µs | 7,510 µs |
+
+All eight runs used the public strict emulator at 360 MHz with both kits and BREAK active. All completed the 922-event, eight-second scene with 648 halves, zero raw late, zero scene late, zero xruns and no active or new guest fault. The direct SuperJ6 edit API is rooted in the SuperJ6-only profile. The dual profile retains the factory loader and omits the standalone edit root, as in the existing build configuration. [SuperJ6 profile](../../evidence/sound-qualification/f405ac99/populated-superj6/) · [Dual profile](../../evidence/sound-qualification/f405ac99/populated-dual/) · [Held-chord](../../evidence/sound-qualification/f405ac99/opt-typed-held.txt) · [Panic cutover](../../evidence/sound-qualification/f405ac99/opt-typed-panic.txt).
+
+The integrated Synth One host bench reproduced the exact 694-row file. The full original programs and the 35-control firmware projections remain at 0/694 pairs within both thresholds. S4 has zero qualifying pairs. The compatible software dependency is an authorized Apple host with the build-9 `aumu/AuPr/jay6` component registered. The available runner also needs the complete factory application path to render corresponding firmware pairs. [Synth One rerun receipt](../../evidence/sound-qualification/f405ac99/synthone-projection-repeat.json) · [SuperJ6 inputs and comparator](superj6-ab.md).
+
+The lane and integration `f1786ebe` remain divergent. The isolated preview using the earlier `6e3055e5` parent resolved 12 conflicts with no tracked file deletions from either parent. Its best measured stock links left 980 bytes of Elite XIP and 992 bytes of Pro XIP against the 1,024-byte minimum. [Integration ancestry and preview](../../evidence/sound-qualification/f405ac99/integration-ancestry.json).
+
 ## Full-length effects on stock hardware
 
 The shipping LFO-controlled bitcrusher matched the original hold clock and tremolo at common panel settings on 694/694 factory controls. The unrounded original versus the nearest saved panel passed 558/694, including 107/114 routed programs. On the shipping losslessly repacked 909 image, all four populated scenes pass and the additional saved two-LFO, phaser and master scenes reach 10,924 µs Elite and 11,520 µs Pro, with zero late and zero xruns. [Six complete production captures](../../experiments/sound-hardware-v1/synthone-crush-mod/shipping-results.json). An earlier upper-SRAM build missed the Elite deadline. The current production allocation and six new captures are recorded below. [Control implementation and original music](../../experiments/sound-hardware-v1/synthone-crush-mod/README.md).

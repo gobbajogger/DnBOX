@@ -1,0 +1,77 @@
+{
+  "source": "f405ac99b0122543627e90df22e1eb05944758fa",
+  "firmware_tree": "9e29ba81ca19dc3910d9db8fbc88aa785dfc7acd",
+  "build_tools_tree": "e3f56a4186518b5f57e53c7ae7b6dfeebcaaa461",
+  "models": {
+    "elite": {
+      "app_bytes": 548880,
+      "app_sha256": "33569b2547b39bda6f4718772232932f9f2822d609b31b53172b438c042fa9d2",
+      "factory_pkg": "artifacts/sound-qualification/f405ac99/lane-sound-engine-qualification-resume-work-f405ac99-elite-superj6.fwsc",
+      "factory_pkg_sha256": "af8e3553459949730b8f3d1e2cd4b7f912ef1149145d7c4a64587e1b61f974ea",
+      "elf_sha256": "94d86d6721cdde5126d660db43788d0b5e6e82a29242ce5088c8c3aee4b66335",
+      "emulator_flash_image_name": "lane-sound-engine-qualification-resume-work-f405ac99-elite-superj6-emulator-flash.img",
+      "emulator_flash_image_sha256": "27078dcea13fc0eba03bafa9a05527ad368252585d86c39a962b498fd4a5644b",
+      "stock_fwsc_sha256": "c8aa3ee2f48cdcf3209443d01c78061c2848ceb193bed89844a151f6f8db0528",
+      "xip_free_bytes": 3792,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908
+    },
+    "pro": {
+      "app_bytes": 548868,
+      "app_sha256": "474e1ba443c26cdb6d327953898a7ab6879948f02bbbc561d293f238caa11247",
+      "factory_pkg": "artifacts/sound-qualification/f405ac99/lane-sound-engine-qualification-resume-work-f405ac99-pro-superj6.fwsc",
+      "factory_pkg_sha256": "2253ecb7ca6d0364f6611ab76bcfd1cfdc6e24dba3d24e6aacb4c4bc1f65ba9b",
+      "elf_sha256": "4d609e49329dcaf87af76b27158f66746341137a698edb01ecd5460834af5109",
+      "emulator_flash_image_name": "lane-sound-engine-qualification-resume-work-f405ac99-pro-superj6-emulator-flash.img",
+      "emulator_flash_image_sha256": "5ecab448d9ec4ff5e688af3b44e41011d6d934ba7e8b1581b93d779895087c4b",
+      "stock_fwsc_sha256": "1f8ef6f97b440d7f93055cf22adf74cf03576bfb9f15210f92186d74bc773bdc",
+      "xip_free_bytes": 3804,
+      "pool_raw_free_bytes": 16100,
+      "pool_reserve_bytes": 8192,
+      "pool_margin_bytes": 7908
+    }
+  },
+  "stock_packages_and_apps_match_49ba51f1": true,
+  "profile": {
+    "X0X_SUPERJ6_FACTORY": 1,
+    "X0X_SYNTHONE_PATCH": 0
+  },
+  "emulator": {
+    "release": "v0.5.1",
+    "source": "c7e47c4fcbdaafb4beffa40493da1b2b07ffa263",
+    "sha256": "47587aba833096a6df95439657e0febd15ba40f4128576cbe9e40660a1eea8ab"
+  },
+  "dual_opt_in": {
+    "profile": {
+      "X0X_SUPERJ6_FACTORY": 1,
+      "X0X_SYNTHONE_PATCH": 1
+    },
+    "models": {
+      "elite": {
+        "app_bytes": 548876,
+        "app_sha256": "2e68d91755021ce93a70aaab8e7e3eaccdd66873e1dfe7df0caa87695ffe1047",
+        "elf_sha256": "be4a376431adae6b3b9771242f3922e2d1ef279a5eb9224c077597f7008e8674",
+        "fwsc": "artifacts/sound-qualification/f405ac99/lane-sound-engine-qualification-resume-work-f405ac99-elite-dual-edit.fwsc",
+        "fwsc_sha256": "4565589b3a3262ab47da356ebc0404643b1b887a8e3206a72f6dac943b37e796",
+        "img": "lane-sound-engine-qualification-resume-work-f405ac99-elite-dual-edit-emulator-flash.img",
+        "img_sha256": "1fe9d56ac4910e4172a488c66867233b57dddd712684bb2f94db931621c11900",
+        "xip_free_bytes": 3796,
+        "raw_pool_bytes": 16100,
+        "pool_margin_bytes": 7908
+      },
+      "pro": {
+        "app_bytes": 548868,
+        "app_sha256": "20a6327c2adec57ec970222fee6cf9a18a5cf0c08565eadf227e321843b40270",
+        "elf_sha256": "920844e16e6581f580c2ff704ce5d1b90b7093005b05c472bc99a5bbde92c93a",
+        "fwsc": "artifacts/sound-qualification/f405ac99/lane-sound-engine-qualification-resume-work-f405ac99-pro-dual-edit.fwsc",
+        "fwsc_sha256": "98bb65768b0bb5f1232c31976b5253655357ae9e20f9ac3b82fb669c4d758737",
+        "img": "lane-sound-engine-qualification-resume-work-f405ac99-pro-dual-edit-emulator-flash.img",
+        "img_sha256": "be2348e3c4a80443026ad0cb1547e5c636a32eaa3505989d5b799cfcac06ddc1",
+        "xip_free_bytes": 3804,
+        "raw_pool_bytes": 16100,
+        "pool_margin_bytes": 7908
+      }
+    }
+  }
+}
