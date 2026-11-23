@@ -31,7 +31,7 @@ Common to every lane (C1–C6)
 - I0 First job: both consolidated branches pass their own Local gate (green baseline). Until then, list every failing test at the consolidated SHA in `docs/lanes/integ.md`; merges are judged by RULES 9 (no test that passes on consolidated may fail after). Nightly today: 43 visual-gate screens have no baseline (generate with `npm run test:visual:update` at the consolidated SHA, then Review them) and `tests/qualified-catalog.test.mjs` needs its output dir outside the repo.
 - I1 `integration/dnbox-consolidated` + `CONSOLIDATED-STATE.md` in both repos, listing every merged branch/PR with SHAs.
 - I2 Combined Elite/Pro firmware (PR #869 work) builds from the consolidated branch with all lanes merged; full host suite 0 FAIL / 0 NOT_RUN (today 426 ok / 28 FAIL).
-- I3 Zero dropouts: heavy-playback host measurement with all engines, 0 dropouts, Chicago coefficient cache and Miami options kept (R013/R014).
+- I3 Zero dropouts: dropped by the user 2026-11-23 23:36 VLAT (the 10-minute heavy-playback host measurement is not a gate or host-suite item). Chicago coefficient cache and Miami options kept (R013/R014).
 - I4 compact-programs run clean under LeakSanitizer (run outside a tracer), log at SHA.
 - I5 BREAK: the User's 5 samples embedded, preview before choosing works, `/private-audio/` 404 on Pages fixed.
 - I6 Roadmap files (Complete/Working/Pending, PR #887) match the consolidated SHA; #120 voting works at runtime (test).

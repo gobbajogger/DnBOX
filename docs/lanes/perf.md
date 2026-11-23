@@ -4,7 +4,7 @@ Reference: /workspace/dnbox-handoff/BOT-RULES.md (finisher bots, 2026-11-23). On
 
 ## Items
 1. All engines fit stock Elite and Pro (no PSRAM): gate budget XIP free >= 1024 B, pool margin >= 512 B; per-engine memory report as a test.
-2. 10 simulated minutes of all-engine heavy playback: dropouts=0, zero late blocks, every block under 11,609 us, both models.
+2. Dropped (user 2026-11-23 23:36 VLAT): the 10-simulated-minute all-engine heavy-playback run is no longer a gate or host-suite item.
 3. The user's 5 BREAK samples in stock firmware, without overwriting user slots or substituting samples.
 4. Combined Elite+Pro builds, flashmap, host suite 0 FAIL / 0 NOT_RUN.
 
@@ -19,18 +19,12 @@ Reference: /workspace/dnbox-handoff/BOT-RULES.md (finisher bots, 2026-11-23). On
 ## Left
 - Item 1: full Synth One (694 programs, FX) and SuperJ6 (640 presets) need far more than the free XIP; packed tables go to FL_FDATA (size set with the synth lane), and code room comes from moving read-only tables out of the app image.
 - Activating a nonzero FL_FDATA needs the nightly installer's slot-map allow-list entry and a slot-2 migration (back up slot 2 when its data runs past the new end).
-- Items 2-4.
+- Item 2 dropped (user 2026-11-23 23:36). Items 3-4.
 
 ## Risks
 1. A nonzero FL_FDATA shortens slot 2; a sample longer than the new slot 2 fails its header check (fail-closed) until it is re-uploaded.
 2. Engine attribution is a lower bound (inlined code stays in callers).
 3. Code room for the synth engines (25-31 KB) is not available in the app image without moving data out.
-
-## Row 2: 10-minute heavy playback
-`tests/host/heavy_playback_10min_test.sh` (suite entry `heavy-playback`, class G) runs 51,680 blocks
-(600.0 s) for Elite and Pro, engine pairs Chicago+Miami (factory 18, Chicago FX 6) and Synth One+SuperJ6,
-all drums, breaks, bus FX, reverb, delay and master on. Each block is timed in thread CPU time against
-11,609 us; it fails on any late block or dropout. Runs at nice 19.
 
 ## Code room for the Synth One reader
 `tools/build.py` OZ_UNITS builds the control-rate units (seq/sequencer, seq/tb3po, seq/pattern,
