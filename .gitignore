@@ -32,3 +32,18 @@ firmware/build/
 !/docs/lanes/fwui/current/panel-routes/
 !/docs/lanes/fwui/current/superj6-slot/
 !/docs/lanes/fwui/current/synthone-editor/
+/docs/bundled-nightly-evidence-*/
+/tests/evidence/
+/experiments/wobble/evidence/
+/experiments/sound-hardware-v1/band_morph/stock/evidence/
+/experiments/sound-hardware-v1/sj6-id36-field-adapter/evidence/
+# Kept inputs: dry_voice_followup/check.py reads evidence/<variant>/all_reports.json.gz; build_evidence.py reads source_provenance.json
+/experiments/sound-hardware-v1/dry_voice_followup/evidence/*
+!/experiments/sound-hardware-v1/dry_voice_followup/evidence/a/
+!/experiments/sound-hardware-v1/dry_voice_followup/evidence/b/
+/experiments/sound-hardware-v1/dry_voice_followup/evidence/a/*
+/experiments/sound-hardware-v1/dry_voice_followup/evidence/b/*
+!/experiments/sound-hardware-v1/dry_voice_followup/evidence/a/all_reports.json.gz
+!/experiments/sound-hardware-v1/dry_voice_followup/evidence/b/all_reports.json.gz
+/experiments/sound-hardware-v1/hardware_candidate/evidence/*
+!/experiments/sound-hardware-v1/hardware_candidate/evidence/source_provenance.json
