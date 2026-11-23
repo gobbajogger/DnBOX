@@ -18,7 +18,7 @@
 #define S1_NUM_MIDI_NOTES 128
 #define S1_SEQ_MAX_HELD 8          /* DnBOX: held keys tracked (source: 128) */
 #define S1_SEQ_STEPS 16
-#define S1_SAMPLE_TICKS 4096u     /* beat-clock ticks per sample (DnBOX) */
+#define S1_SAMPLE_TICKS 256u      /* beat-clock ticks per sample (DnBOX: Q8 samples, as seq_t) */
 
 typedef struct { int noteNumber; int onOff; int velocity; } SeqNoteNumber;
 typedef struct { uint8_t noteNumber, velocity; } NoteNumber;     /* heldNoteNumbersAE entry */
@@ -45,6 +45,7 @@ typedef struct {
     /* SuperJ6 deltas (Synth One: 100, 12) */
     uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+    uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
 } S1SequencerParams;
 
 typedef void (*KeyOnCallback)(void *ctx, int note, int velocity);
@@ -55,6 +56,7 @@ typedef struct {
     uint32_t mBeatTime;                 /* fmod(beatTime, arpSeqTempoMultiplier), ticks */
     int mStepCounter;
     int lastPosition;                   /* DnBOX H3: sequence position that last sounded */
+    int mStepBase;                      /* DnBOX: ARP order restarts here (press / transport start) */
     uint8_t gateOpen;
     uint8_t sequencerLastNotesCount;
     uint8_t sequencerLastNotes[S1_SEQ_MAX_HELD];
@@ -69,3 +71,6 @@ int S1Sequencer_willFire(const S1Sequencer *, const S1SequencerParams *, int hel
 void S1Sequencer_process(S1Sequencer *, const S1SequencerParams *, const NoteNumber *held, int heldCount,
                          void *ctx, KeyOnCallback on, KeyOffCallback off);
 int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+/* DnBOX: follow the transport. step/phase = clock position before this sample's
+ * increment (step -1 just before the first step); force = transport (re)start. */
+void S1Sequencer_clock(S1Sequencer *, const S1SequencerParams *, int step, uint32_t phase, int force);

@@ -10,7 +10,7 @@
  * build with -DX0X_ARP_HOOKS=0/1 to override). 0 compiles the whole arp and
  * its UI pages out (types only). */
 #ifndef X0X_ARP_HOOKS
-#define X0X_ARP_HOOKS 0
+#define X0X_ARP_HOOKS 1
 #endif
 /* Host UI tests swap the hooks for a fake (X0X_ARP_FAKE_H, same types);
  * the engine side then builds as hooks-off (X0X_ARP_ENGINE 0) and ui.c

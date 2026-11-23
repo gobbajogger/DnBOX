@@ -21,7 +21,8 @@
 static uint64_t arp_t_frame;
 static struct { uint64_t at; int key, vel; } ev[4096];
 static unsigned nev;
-static void record(int key, int vel) { if (nev < 4096) { ev[nev].at = arp_t_frame; ev[nev].key = key; ev[nev].vel = vel; ++nev; } }
+static void (*on_hook)(int key, int vel);
+static void record(int key, int vel) { if (on_hook) on_hook(key, vel); if (nev < 4096) { ev[nev].at = arp_t_frame; ev[nev].key = key; ev[nev].vel = vel; ++nev; } }
 int __real_s1_part_note(s1_dry_part *, unsigned, unsigned);
 int __wrap_s1_part_note(s1_dry_part *p, unsigned key, unsigned vel) { record((int)key, (int)vel); return __real_s1_part_note(p, key, vel); }
 int __real_juno6_note_on(juno6_t *, uint8_t, uint8_t);
@@ -437,12 +438,117 @@ static void cutoff_hz(void)
     CHECK(x == s1_part_crush_hz(unit_control(64)));
 }
 
+
+/* ---- Clock sync: arp steps against the DnBOX transport (seq_t metronome). */
+static uint64_t ck_start, ck_ons, ck_bad, ck_last;
+static uint32_t ck_len;          /* Q8 samples per step (1/16 = beat / 4) */
+static int64_t ck_maxerr;
+static void ck_on(int key, int vel)
+{
+    (void)key;
+    if (!vel) return;
+    /* step k sounds on the first frame whose transport position reaches k * len */
+    uint64_t k = ck_ons++, want = ck_start + (k * ck_len + 255u) / 256u;
+    int64_t e = (int64_t)arp_t_frame - (int64_t)want;
+    if (!fine) {                          /* 256-frame calls: the note lies in this call */
+        if (e > 0 || e < -255) ++ck_bad;
+    } else {
+        if (e < 0) e = -e;
+        if (e > ck_maxerr) ck_maxerr = e;
+        if (e > 1) ++ck_bad;
+    }
+    if (getenv("CKDBG") && k < 6) fprintf(stderr, "on k=%llu at %llu want %llu len %u\n", (unsigned long long)k, (unsigned long long)(arp_t_frame - ck_start), (unsigned long long)(want - ck_start), ck_len);
+    ck_last = arp_t_frame;
+}
+static void ck_start_transport(float bpm)
+{
+    seq.bpm = bpm;
+    seq_start(&seq);
+    ck_start = arp_t_frame;               /* the request is taken at the next block's frame 0 */
+    block();
+    ck_len = seq.metro_period / 4u;
+    CHECK(seq.playing && ck_len);
+}
+static void clock_sync(void)
+{
+    const unsigned v = 0;
+    fine = 0;
+    select_bank(v, ORIGINAL_SOUND_SYNTHONE, 0);
+    set(v, ARP_F_ON, 1); set(v, ARP_F_MODE, ARP_UP); set(v, ARP_F_RANGE, 1); set(v, ARP_F_SPEED, ARP_SPEED_1_16);
+    set(v, ARP_F_GATE, 50);
+    engine_bass_on(v, 48, 0, 0); block();
+    static const float bpms[] = {120.f, 90.f, 137.f, 174.5f};
+    for (unsigned b = 0; b < 4; ++b) {
+        const uint64_t steps = b ? 2000u : 10000u;
+        on_hook = 0;
+        ck_ons = ck_bad = 0; ck_maxerr = 0;
+        on_hook = ck_on;
+        ck_start_transport(bpms[b]);
+        render((unsigned)((steps * ck_len) / 256u - (arp_t_frame - ck_start)) - 2048u);
+        fine = 1;                                       /* the last steps frame-exact: no drift */
+        render((unsigned)((steps + 16u) * ck_len / 256u - (arp_t_frame - ck_start)) + 16u);
+        fine = 0;
+        on_hook = 0;
+        if (ck_bad || ck_ons < steps) fprintf(stderr, "bpm %.1f ons %llu bad %llu maxerr %lld\n", bpms[b], (unsigned long long)ck_ons, (unsigned long long)ck_bad, (long long)ck_maxerr);
+        CHECK(!ck_bad && ck_ons >= steps + 16 && ck_ons <= steps + 17);
+        printf("synth-arp: clock %.1f BPM %llu steps on the transport grid, last 16+ frame-exact (max err %lld frame)\n", bpms[b], (unsigned long long)steps + 16, (long long)ck_maxerr);
+        /* stop: the arp free-runs; start again: step 1 lands on the start frame */
+        seq_stop(&seq); render(4096 + 777);       /* Stop releases notes (firmware policy) */
+        engine_bass_on(v, 48, 0, 0); render(777);  /* stopped: free-running Synth One arp */
+    }
+    /* Tempo change mid-run: the next steps follow the new grid, nothing doubles or drops. */
+    ck_ons = ck_bad = 0; ck_maxerr = 0; on_hook = ck_on;
+    ck_start_transport(120.f);
+    render(ck_len * 64u / 256u - 300u);                 /* just before step 64 */
+    on_hook = 0;
+    const uint64_t before = ck_ons;
+    CHECK(before == 64 && !ck_bad);
+    fine = 1;
+    seq.bpm = 150.f;
+    uint64_t prev = ck_last, n = 0; int64_t lo = INT64_MAX, hi = 0;
+    static uint64_t at[64];
+    nev = 0; render(4096 * 24);
+    for (unsigned i = 0; i < nev && n < 64; ++i) if (ev[i].vel) at[n++] = ev[i].at;
+    uint32_t newlen = seq.metro_period / 4u;
+    for (uint64_t i = 1; i < n; ++i) { int64_t d = (int64_t)(at[i] - at[i - 1]); if (d < lo) lo = d; if (d > hi) hi = d; }
+    if (!(n > 20 && at[0] > prev)) fprintf(stderr, "tempo n %llu at0 %llu prev %llu nev %u before %llu\n", (unsigned long long)n, (unsigned long long)at[0], (unsigned long long)prev, nev, (unsigned long long)before);
+    CHECK(n > 20 && at[0] > prev);
+    CHECK(lo >= (int64_t)(newlen / 256u) && hi <= (int64_t)(newlen / 256u) + 1);
+    printf("synth-arp: tempo 120 -> 150 mid-run: steps %lld..%lld frames (grid %.2f), no double/drop\n", (long long)lo, (long long)hi, newlen / 256.0);
+    seq_stop(&seq); render(4096);
+    engine_bass_on(v, 48, 0, 0); render(500);
+    /* SEQ follows the bar: start restarts at step 1 of the pattern. */
+    set(v, ARP_F_MODE, ARP_SEQ); set(v, ARP_F_LENGTH, 4);
+    for (unsigned i = 0; i < 4; ++i) { step_set(v, i, ARP_S_ON, 1); step_set(v, i, ARP_S_OCT, 0); step_set(v, i, ARP_S_OFFSET, (int)i); }
+    block();
+    for (unsigned r = 0; r < 2; ++r) {
+        nev = 0;
+        ck_start_transport(120.f);
+        uint64_t s0 = ck_start;
+        render(ck_len * 9u / 256u + 8u);
+        int got[16]; uint64_t t[16]; unsigned m = ons(0, got, t, 16);
+        CHECK(m >= 9);
+        for (unsigned i = 0; i < 9; ++i) {
+            CHECK(got[i] == 48 + (int)(i % 4));
+            uint64_t want = s0 + ((uint64_t)i * ck_len + 255u) / 256u;
+            CHECK(t[i] + 1 >= want && t[i] <= want + 1);
+        }
+        seq_stop(&seq); render(3000 + r * 1234);
+        engine_bass_on(v, 48, 0, 0); render(300);
+    }
+    puts("synth-arp: SEQ pattern restarts on the bar at transport start (x2), steps on the grid PASS");
+    engine_bass_off(v); render(4096);
+    set(v, ARP_F_ON, 0); set(v, ARP_F_GATE, 100);
+    fine = 1;
+}
+
 int main(void)
 {
     boot();
     s1_arp();
     storage();
     sj6_arp();
+    clock_sync();
     cutoff_hz();
 #if X0X_SUPERJ6_FACTORY
     sj6_amp2();

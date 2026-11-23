@@ -96,8 +96,10 @@ void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteN
 
     // reset arp/seq when user goes from 0 to N, or N to 0 held keys
     if (arpSeqIsOn && (firstTimeNoKeysHeld || firstTimeAnyKeysHeld)) {
-        s->mBeatTime = 0u - p->arpBeatsPerSample; // reset internal beattime (0 after this sample's add)
-        s->mStepCounter = 0;
+        if (!p->clocked) {               // DnBOX: a running transport keeps its grid
+            s->mBeatTime = 0u - p->arpBeatsPerSample; // reset internal beattime (0 after this sample's add)
+            s->mStepCounter = 0;
+        }
         // Turn OFF previous beat's notes
         turnOffLastNotes(s, ctx, off);
     }
@@ -126,7 +128,10 @@ void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteN
                 const int size = sequenceSize(p, heldNoteNumbersAECount);
                 // At least one key is held down, and a non-empty sequence has been created
                 if (size > 0) {
-                    const int seqNotePosition = s->mStepCounter % size;
+                    // DnBOX: SEQ follows the transport grid; ARP order starts on the press
+                    if (firstTimeAnyKeysHeld || s->mStepCounter < s->mStepBase) s->mStepBase = s->mStepCounter;
+                    const int seqNotePosition = (p->arpIsSequencer == 1 ? s->mStepCounter
+                                                 : s->mStepCounter - s->mStepBase) % size;
                     if (p->arpIsSequencer == 1) {
                         // SEQUENCER
                         const int i = seqNotePosition;
@@ -165,3 +170,20 @@ void S1Sequencer_process(S1Sequencer *s, const S1SequencerParams *p, const NoteN
 }
 
 int S1Sequencer_getArpBeatCount(const S1Sequencer *s) { return s->mStepCounter; }
+
+// DnBOX: lock to the transport. The free-running clock above advances at the
+// same rate, so normally only the phase is refreshed; a one-sample lag fires
+// on the next sample, a lead waits, anything else (start, locate) jumps.
+void S1Sequencer_clock(S1Sequencer *s, const S1SequencerParams *p, int step, uint32_t phase, int force)
+{
+    const uint32_t len = p->arpSeqTempoMultiplier;
+    if (force) {
+        s->mStepCounter = step; s->mBeatTime = phase; s->mStepBase = step + 1;
+    } else if (step == s->mStepCounter) {
+        s->mBeatTime = phase;
+    } else if (step == s->mStepCounter + 1) {
+        s->mBeatTime = len - 1u;                            // lag: cross on the next sample
+    } else if (!(step == s->mStepCounter - 1 && s->mBeatTime < len / 2u)) {
+        s->mStepCounter = step; s->mBeatTime = phase;       // jump
+    }
+}

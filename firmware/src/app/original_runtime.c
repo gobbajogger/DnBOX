@@ -341,9 +341,10 @@ static void arp_hold(original_runtime_part *p, unsigned key, unsigned velocity)
     a->nheld = (uint8_t)n;
 }
 /* engine_arp_cfg -> the S1Parameter values the sequencer reads. */
+static const uint8_t arp_ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};   /* 24 PPQN */
 uint32_t engine_arp_step_frames(float bpm, unsigned speed)
 {
-    static const uint8_t ticks[ARP_NSPEED] = {48, 36, 32, 24, 18, 16, 12, 8, 6, 3};
+    const uint8_t *ticks = arp_ticks;
     bpm = bpm < 20.f ? (bpm > 0.f ? 20.f : 120.f) : bpm > 275.f ? 275.f : bpm;
     float f = 44100.f * 60.f * ticks[speed < ARP_NSPEED ? speed : ARP_SPEED_1_16] / (bpm * 24.f);
     return f < 1.f ? 1u : (uint32_t)(f + .5f);
@@ -367,6 +368,33 @@ static void arp_params(original_runtime_part *p)
     q->arpSeqTempoMultiplier = S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed);
     q->seqGate = c->gate ? c->gate : 100;
     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
+    q->clocked = 0;
+}
+void original_runtime_arp_clock(original_runtime_part *p, uint64_t pos_q8, uint32_t beat_q8, int start)
+{
+    if (!p) return;
+    p->arp.clk_pos = pos_q8; p->arp.clk_beat = beat_q8;
+    if (start) p->arp.clk_force = (uint8_t)arp_engaged(p);
+}
+/* Lock the sequencer to the transport: grid = beat * SPEED ticks / 24. */
+static void arp_follow_clock(original_runtime_arp *a)
+{
+    const unsigned sp = a->cfg.speed < ARP_NSPEED ? a->cfg.speed : ARP_SPEED_1_16;
+    uint32_t len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
+    if (len < 2u * S1_SAMPLE_TICKS) len = 2u * S1_SAMPLE_TICKS;
+    a->prm.arpBeatsPerSample = S1_SAMPLE_TICKS;
+    a->prm.arpSeqTempoMultiplier = len;
+    a->prm.clocked = 1;
+    /* position before this sample's increment; step -1 just before the first */
+    int step; uint32_t phase;
+    if (a->clk_pos >= S1_SAMPLE_TICKS) {
+        uint64_t v = a->clk_pos - S1_SAMPLE_TICKS;
+        step = (int)(v / len); phase = (uint32_t)(v % len);
+    } else {
+        step = -1; phase = len - (uint32_t)(S1_SAMPLE_TICKS - a->clk_pos);
+    }
+    S1Sequencer_clock(&a->seq, &a->prm, step, phase, a->clk_force);
+    a->clk_force = 0;
 }
 int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *c)
 {
@@ -672,6 +700,7 @@ int original_runtime_render(original_runtime_part *p, original_runtime_workspace
          * block is split where it turns notes on or off. */
         original_runtime_arp *a = &p->arp;
         unsigned done = 0;
+        if (a->clk_beat) arp_follow_clock(a);
         for (unsigned i = 0; i < frames; ++i) {
             if (S1Sequencer_willFire(&a->seq, &a->prm, a->nheld)) {
                 if (i > done && render_backend(p, w, left + done, right + done, i - done) != ORIGINAL_RUNTIME_OK)

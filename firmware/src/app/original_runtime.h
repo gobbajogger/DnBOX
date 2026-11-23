@@ -32,7 +32,9 @@ typedef struct {
     NoteNumber held[S1_SEQ_MAX_HELD];   /* heldNoteNumbersAE, newest first */
     float bpm;
     uint32_t age;                       /* frames since the last real note-on (H3) */
-    uint8_t nheld, vel, fired;
+    uint64_t clk_pos;                   /* transport position, Q8 samples (clk_beat != 0) */
+    uint32_t clk_beat;                  /* Q8 samples per beat; 0 = transport stopped */
+    uint8_t nheld, vel, fired, clk_force;
 } original_runtime_arp;
 #endif
 typedef struct {
@@ -92,6 +94,9 @@ int original_runtime_env_view(const original_runtime_part *, float adsr[4], floa
 /* Apply an arp block (on/off transitions hand held keys over). 1 = applied. */
 int original_runtime_arp_config(original_runtime_part *, const engine_arp_cfg *);
 /* Display only: 1 while running, the step that last sounded, frames since. */
+/* Per block, before render: the DnBOX transport clock (seq_t metronome).
+ * beat_q8 = 0: stopped, the arp free-runs from the key press (Synth One). */
+void original_runtime_arp_clock(original_runtime_part *, uint64_t pos_q8, uint32_t beat_q8, int start);
 int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
 #endif
 int original_runtime_render(original_runtime_part *, original_runtime_workspace *,

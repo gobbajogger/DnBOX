@@ -49,6 +49,25 @@ static void arp_store_amp2(unsigned v, unsigned slot, float unit)
     arp_store(v, &c);
 }
 #endif
+/* Arp clock = the DnBOX transport (seq_t metronome: Q8 samples per beat,
+ * internal tempo or external MIDI clock). Called before each rendered stretch;
+ * seq_advance() after it moves the metronome to the stretch's end. */
+static uint32_t arp_clk_beats, arp_clk_prev;
+static uint8_t arp_clk_on;
+static void arp_clock(void)
+{
+    const uint32_t per = seq.metro_period, ph = seq.metro_phase;
+    const int run = seq.playing && seq.metro_view && per;
+    int start = 0;
+    if (!run) arp_clk_on = 0;
+    else {
+        if (!arp_clk_on) { arp_clk_beats = 0; start = 1; }
+        else if (ph + per / 2u < arp_clk_prev) ++arp_clk_beats;      /* beat wrap (a tempo rescale is smaller) */
+        arp_clk_on = 1; arp_clk_prev = ph;
+    }
+    for (unsigned v = 0; v < NBASS; ++v)
+        original_runtime_arp_clock(&original_bass[v], run ? (uint64_t)arp_clk_beats * per + ph : 0, run ? per : 0, start);
+}
 static void arp_boundary(void)
 {
     for (unsigned v = 0; v < NBASS; ++v) {
