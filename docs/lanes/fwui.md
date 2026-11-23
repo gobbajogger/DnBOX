@@ -1,5 +1,7 @@
 # Firmware UI lane
 
+FWUI [#998](https://github.com/gobbajogger/DnBOX/pull/998) merged at `ca6c5cb443e6696616dd6d1745b2fdce13617532` after independent 10/10 review and both stock builds; [exact proof](https://github.com/gobbajogger/DnBOX/pull/998#issuecomment-7088568528).
+
 ## Keyboard controls after #975
 
 [Draft PR #987](https://github.com/gobbajogger/DnBOX/pull/987) completes the F1–F7 firmware work. The branch started at consolidated `46874497` and includes the integration F5 closeout at `d4bdf88e`. The Synth One controls use the provider from [Sound #985](https://github.com/gobbajogger/DnBOX/pull/985) through `0b0ff56b`. Production firmware revision `199f0444` contains the final screen layout. The subsequent test and evidence commits preserve all 2,016 tracked build inputs. Integration owns the combined gate and merge.

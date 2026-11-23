@@ -5313,60 +5313,36 @@ static __attribute__((noinline)) uint32_t corner_coverage(uint32_t index)
 #define corner_fill_at(r, j, i) corner_coverage(CORNER_OFF[r] + (uint32_t)(j) * (uint32_t)(r) + (uint32_t)(i))
 #define corner_ring_at(r, j, i) corner_coverage(204u + CORNER_OFF[r] + (uint32_t)(j) * (uint32_t)(r) + (uint32_t)(i))
 
-/* a filled rounded rectangle; r is clamped to fit */
-static void rbox(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint16_t c)
+/* Filled and outlined boxes use the same clamped radius and edge geometry.
+ * The outline still paints its top, bottom and side pixels in that order. */
+static UI_DRAW void rounded_box(int x,int y,int w,int h,int r,uint16_t c,int border)
 {
-    int32_t i, j;
-    if (w <= 0 || h <= 0)
-        return;
-    if (r > w / 2)
-        r = w / 2;
-    if (r > h / 2)
-        r = h / 2;
-    if (r > RMAX)
-        r = RMAX;
-    if (r < 1) {
-        cv_rect(x, y, w, h, c);
-        return;
+    if(!border && (w<=0 || h<=0))return;
+    if(r>w/2)r=w/2;
+    if(r>h/2)r=h/2;
+    if(r>RMAX)r=RMAX;
+    if(r<1){
+        if(!border){cv_rect(x,y,w,h,c);return;}
+        r=1;
     }
-    cv_rect(x + r, y, w - 2 * r, h, c);
-    cv_rect(x, y + r, r, h - 2 * r, c);
-    cv_rect(x + w - r, y + r, r, h - 2 * r, c);
-    for (j = 0; j < r; j++)
-        for (i = 0; i < r; i++) {
-            uint32_t a = corner_fill_at(r, j, i);
-            px_blend(x + i, y + j, c, a);
-            px_blend(x + w - 1 - i, y + j, c, a);
-            px_blend(x + i, y + h - 1 - j, c, a);
-            px_blend(x + w - 1 - i, y + h - 1 - j, c, a);
-        }
+    int span=w-2*r,side=border?1:r;
+    cv_rect(x+r,y,span,border?1:h,c);
+    if(border)cv_rect(x+r,y+h-1,span,1,c);
+    cv_rect(x,y+r,side,h-2*r,c);
+    cv_rect(x+w-side,y+r,side,h-2*r,c);
+    unsigned index=(border?204u:0u)+CORNER_OFF[r];
+    for(int j=0;j<r;j++)for(int i=0;i<r;i++){
+        uint32_t a=corner_coverage(index++);
+        px_blend(x+i,y+j,c,a);
+        px_blend(x+w-1-i,y+j,c,a);
+        px_blend(x+i,y+h-1-j,c,a);
+        px_blend(x+w-1-i,y+h-1-j,c,a);
+    }
 }
-
-/* a 1-px rounded outline */
-static void rframe(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint16_t c)
-{
-    int32_t i, j;
-    if (r > w / 2)
-        r = w / 2;
-    if (r > h / 2)
-        r = h / 2;
-    if (r > RMAX)
-        r = RMAX;
-    if (r < 1)
-        r = 1;
-    cv_rect(x + r, y, w - 2 * r, 1, c);
-    cv_rect(x + r, y + h - 1, w - 2 * r, 1, c);
-    cv_rect(x, y + r, 1, h - 2 * r, c);
-    cv_rect(x + w - 1, y + r, 1, h - 2 * r, c);
-    for (j = 0; j < r; j++)
-        for (i = 0; i < r; i++) {
-            uint32_t a = corner_ring_at(r, j, i);
-            px_blend(x + i, y + j, c, a);
-            px_blend(x + w - 1 - i, y + j, c, a);
-            px_blend(x + i, y + h - 1 - j, c, a);
-            px_blend(x + w - 1 - i, y + h - 1 - j, c, a);
-        }
-}
+static void rbox(int32_t x,int32_t y,int32_t w,int32_t h,int32_t r,uint16_t c)
+{ rounded_box(x,y,w,h,r,c,0); }
+static void rframe(int32_t x,int32_t y,int32_t w,int32_t h,int32_t r,uint16_t c)
+{ rounded_box(x,y,w,h,r,c,1); }
 
 /* the radius that suits a box of height h: soft, never round */
 static int32_t rad_of(int32_t h) { return h >= 30 ? 6 : h >= 18 ? 4 : h >= 9 ? 3 : 2; }
@@ -5692,9 +5668,11 @@ static UI_DRAW void draw_header(void)
         }
         int free_mode=ui.view==V_SEQ && is_303() && ui.freeplay[bidx()] && !ui.rec;
         if(ui.view==V_SEQ || ui.view==V_GEN) {
-            put_s(put_s(put_s(context_title,free_mode?bass_header_name():part_display(ui.part))," "),
-                  free_mode?"FREE PLAY":VIEW_N[ui.view]);
-            name=context_title;
+            name=free_mode?bass_header_name():part_display(ui.part);
+            if(ui.view!=V_GEN || engine_bass_bank(bidx())!=ORIGINAL_SOUND_MIAMI) {
+                put_s(put_s(put_s(context_title,name)," "),free_mode?"FREE PLAY":VIEW_N[ui.view]);
+                name=context_title;
+            }
         }
         int mix_kit=drum_mix_page();
         if(mix_kit>=0)name=pg.title[cur_page()];
@@ -5836,19 +5814,43 @@ static int held_note_of(const bpart_t *bp, int s)
     return bp->step[start >= 0 ? start : s].note;
 }
 
+/* GEN uses the same pitch and step positions as the notes drawn above it. */
+static UI_DRAW void draw_gen_roll(int active, int lo, int hi, int o)
+{
+    if ((unsigned)active < 16)
+        cv_rect(col_x(active), ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(part_col(), 2));
+    for (int c = 0; c <= 16; ++c)
+        cv_rect(col_x(c) - 1, ROLL_TOP - 4 - o, 1, ROLL_BOT + 6,
+                (c & 3) ? C_LINE : C_DIM);
+    int prev_y = ROLL_BOT + 1;
+    cv_rect(5, ROLL_TOP - o, 18, ROLL_BOT + 1 - ROLL_TOP, C_LINE);
+    /* Give adjacent pitch guides a background row for the time rail and
+     * cursor to remain visible. Keys and notes keep their original positions. */
+    int pitch_guides=hi-lo<=(ROLL_BOT-ROLL_TOP)/2;
+    int n = lo;
+    do {
+        int y = note_y(n, lo, hi);
+        int h = prev_y - y;
+        prev_y = y;
+        unsigned pitch = (unsigned)(n + 12) % 12;
+        int inset = (0x54au & (1u << pitch)) ? 12 : 0;
+        cv_rect(5 + inset, y - o, 18 - inset, h - (h > 1), C_GRAY);
+        if(pitch_guides) cv_rect(GX, y + 2 - o, 211, 1, pitch ? C_LINE : C_DIM);
+    } while (n++ < hi);
+}
+
 static UI_DRAW void draw_303(int band, int gen)
 {
     int b = bidx(), c, o = band * BAND_H, n;       /* o: drawn in the screen's rows, minus the band's */
     const bpart_t *bp = &cur_pat()->bass[b];
+    int len = bp->len < NSTEPS ? bp->len : NSTEPS;
     int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
     uint16_t col = part_col();
     uint32_t lmarks = gen ? 0 : lock_marks(-1, -1, ui.spage * 16);
     char t[40], *q = t;
-    (void)gen;
-    for (c = 0; c < bp->len && c < NSTEPS; c++) {
-        int start = note_start_of(bp, c);
-        if (start >= 0) {
-            int pitch = bp->step[start].note;
+    for (c = 0; c < len; c++) {
+        if (bstep_gate(&bp->step[c]) == G_NOTE) {
+            int pitch = bp->step[c].note;
             if (pitch < lo)
                 lo = pitch;
             if (pitch > hi)
@@ -5861,28 +5863,35 @@ static UI_DRAW void draw_303(int band, int gen)
     hi += 2;
     if (hi - lo < 14)
         hi = lo + 14;
-    for (n = lo; n <= hi; n++)                     /* the line: pitch by height, the root's octaves ruled */
-        if ((n - bp->gen.root) % 12 == 0) {
+    if (gen) {
+        draw_gen_roll(ph < len ? ph - step_of(0) : -1, lo, hi, o);
+        ph = -1;
+    } else {
+        /* Eleven octaves keep the root offset positive over the MIDI range. */
+        n = lo + (int)((unsigned)(12 * 11 + bp->gen.root - lo) % 12u);
+        for (; n <= hi; n += 12) {
             int y = note_y(n, lo, hi) - o;
             put_note(t, n);
             cv_rect(GX, y + 2, 213, 1, C_LINE);
             cv_text(1, y - 4, &FONT_XS, t, C_DIM);
         }
-    for (c = 0; c < 16; c++) {
-        int s = step_of(c), x = col_x(c), g;
-        const bstep_t *st = &bp->step[s < NSTEPS ? s : 0];
-        if (s >= bp->len) {
+    }
+    int x = GX;
+    for (c = 0; c < 16; c++, x += 13 + !(c & 3)) {
+        int s = step_of(c);
+        if (s >= len) {
             cv_rect(x + 5, ROLL_BOT + 4 - o, 2, 2, C_LINE);
             continue;
         }
-        g = bstep_gate(st);
+        const bstep_t *st = &bp->step[s];
         if (s == ph)
             cv_rect(x, ROLL_TOP - 4 - o, 12, ROLL_BOT - ROLL_TOP + 10, dim(col, 2));
-        if (g != G_REST && note_start_of(bp, s) >= 0) {
-            int hn = held_note_of(bp, s), y = note_y(hn, lo, hi) - o;
+        int start = note_start_of(bp, s);
+        if (start >= 0) {
+            int y = note_y(bp->step[start].note, lo, hi) - o;
             uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
             int end = st->flags >> BS_END_SHIFT;
-            int width = end ? (end * 12 + 14) / 15 : 12;
+            int width = end ? end - end / 5 : 12; /* ceil(end * 12 / 15) */
             box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
             if (s == ui.held_step && (st->flags & BS_ACCENT)) {
                 int inset = width > 2;
@@ -5890,21 +5899,24 @@ static UI_DRAW void draw_303(int band, int gen)
             }
             if ((lmarks >> c) & 1u)                  /* the step's own values (p-locks): a notch */
                 cv_rect(x + 5, y - 3, 2, 2, C_WHITE);
-            if (g == G_TIE) {
-                if (c > 0)                           /* continued from previous visible step */
-                    cv_rect(col_x(c - 1) + 6, y,
-                            x - (col_x(c - 1) + 6) + (width < 6 ? width : 6), 5, fc);
-                else {                               /* page 16→17 or loop last→first */
-                    cv_rect(x - 4, y + 1, 4, 3, fc);
-                    cv_rect(x - 7, y + 2, 3, 1, fc);
+            if (bstep_gate(st) == G_TIE) {
+                if (c > 0) {                         /* continued from previous visible step */
+                    int lead = 7 + !(c & 3);
+                    cv_rect(x - lead, y, lead + (width < 6 ? width : 6), 5, fc);
+                } else {                               /* page 16→17 or loop last→first */
+                    cv_rect(GX - 4, y + 1 + gen, 4, gen ? 1 : 3, fc);
+                    if (!gen)
+                        cv_rect(GX - 7, y + 2, 3, 1, fc);
                 }
             }
-            if (c == 15 && bstep_gate(&bp->step[s + 1 < bp->len ? s + 1 : 0]) == G_TIE) {
-                cv_rect(x + 12, y + 1, 2, 3, fc);
-                cv_rect(x + 14, y + 2, 2, 1, fc);
+            const bstep_t *next = &bp->step[s + 1 == len ? 0 : s + 1];
+            if (c == 15 && bstep_gate(next) == G_TIE) {
+                cv_rect(237, y + 1, 2, 3, fc);
+                cv_rect(239, y + 2, 1, 1, fc);
             }
             if (st->flags & BS_SLIDE) {
-                int nx = s + 1 < bp->len ? s + 1 : 0, ny = note_y(bp->step[nx].note, lo, hi) - o;
+                /* A rest or tie has no new pitch. Keep the GEN slide cue on its note. */
+                int ny = gen && bstep_gate(next) != G_NOTE ? y : note_y(next->note, lo, hi) - o;
                 if (c < 15)
                     cv_line(x + 11, y + 2, x + 14, ny + 2, C_WHITE);
                 else
@@ -6388,19 +6400,12 @@ static UI_DRAW void draw_fx(int band)
     }
     pref_value(PR(R_ENG,T_FX,0,FX_DL_TYPE),a,u);
     put_s(q,a);cv_text(9,96-off,&FONT_S,t,C_HI);
-    if(!delay) {
-        night_panel(3,116-off,114,20,0);
-        cv_text(9,121-off,&FONT_T,"FEEDBACK",C_GRAY);
-        pref_value(PR(R_ENG,T_FX,0,FX_DL_FDBK),a,u);
-        put_s(put_s(t,a),u);
-        text_r(111,121-off,&FONT_T,t,C_WHITE);
-    } else {
-        night_panel(123,116-off,114,20,0);
-        cv_text(129,121-off,&FONT_T,"RV DECAY",C_GRAY);
-        pref_value(PR(R_ENG,T_FX,0,FX_RV_DECAY),a,u);
-        put_s(put_s(t,a),u);
-        text_r(231,121-off,&FONT_T,t,C_WHITE);
-    }
+    int x = delay ? 123 : 3;
+    night_panel(x,116-off,114,20,0);
+    cv_text(x+6,121-off,&FONT_T,delay ? "RV DECAY" : "FEEDBACK",C_GRAY);
+    pref_value(PR(R_ENG,T_FX,0,delay ? FX_RV_DECAY : FX_DL_FDBK),a,u);
+    put_s(put_s(t,a),u);
+    text_r(x+108,121-off,&FONT_T,t,C_WHITE);
 }
 
 /* MIX, a drum machine's page: its eleven tracks' levels (and pans), the selected one lit */
