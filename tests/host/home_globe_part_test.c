@@ -229,7 +229,9 @@ int main(void)
     pad(5, 1);
     pad(6, 1);
     CHECK(ui.overlay == O_ASK && ui.ask_act == ACT_COPY && ui.ask_arg == 6, "occupied part asks before paste");
-    CHECK(!strcmp(ui.ask_q[1], "THIS PART HAS NOTES"), "the question is about this part");
+    char expected[28];
+    snprintf(expected, sizeof(expected), "%s PART REPLACED", part_name(PART_303A));
+    CHECK(!strncmp(ui.ask_q[1], expected, sizeof(expected)), "paste names the selected bass part and whole-part replacement");
     CHECK(noted(6, 0, 2, 60) && has(6, PART_909, 3), "the question does not paste yet");
     btn(B_HOME, 1);
     btn(B_HOME, 0);
@@ -330,8 +332,8 @@ int main(void)
     ui.list_sel = (uint8_t)row;
     list_enter();
     CHECK(ui.overlay == O_ASK, "CLEAR PATTERN still asks");
-    CHECK(!strcmp(ui.ask_q[0], "CLEAR THIS PATTERN?") && !strcmp(ui.ask_q[1], "ALL FIVE PARTS"),
-          "CLEAR PATTERN still says all five parts");
+    CHECK(!strcmp(ui.ask_q[0], "CLEAR ALL ACTIVE PARTS") && !strcmp(ui.ask_q[1], "NOTES + MOTION LOST"),
+          "CLEAR PATTERN names all active parts and their notes and motion");
     button_tap(B_SEL);
     CHECK(!has(9, PART_909, 1) && !has(9, PART_808, 2), "CLEAR PATTERN clears both drum parts");
     CHECK(!noted(9, 0, 0, 45) && !noted(9, 1, 0, 47), "CLEAR PATTERN clears both bass parts");
