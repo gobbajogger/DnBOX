@@ -117,6 +117,13 @@ int main(int argc,char **argv)
     if(kind_a==ORIGINAL_SOUND_CHICAGO) CHECK(original_sound_set(proj.sound.v[T_303][0],ORIGINAL_CHICAGO_FX_TYPE,choice));
     engine_apply_sound(&proj.sound);audio();
     CHECK(engine_bass_bank(0)==(int)kind_a&&engine_bass_bank(1)==(int)kind_b);
+    /* Stock now starts with empty BREAK slots. Seed the host store exactly
+     * as an installed sample, without embedding audio in native images. */
+    int first_break = engine_brk_nslots();
+    strcpy(slot_name[0], "STRESS");
+    CHECK(load_slot(0, 0, "assets/factory-breaks/909GR.wav") == 0);
+    CHECK(load_slot(0, 1, "assets/factory-breaks/909FL.wav") == 0);
+    CHECK(plat_slot_zones(0) == 2);
     pattern_t *p=&proj.pat[0];
     for(unsigned kit=0;kit<2;kit++) {
         p->drum[kit].len=64; p->drum[kit].rate=RATE_32;
@@ -126,12 +133,16 @@ int main(int argc,char **argv)
         p->bass[v].len=64;p->bass[v].rate=RATE_32;
         for(unsigned s=0;s<64;s++) p->bass[v].step[s]=(bstep_t){(uint8_t)(48+s%24),G_NOTE|BS_ACCENT,127};
     }
+    p->brk.slot_a=(uint8_t)first_break;
+    p->brk.slot_b=(uint8_t)(first_break+1);
     p->brk.steps=UINT32_MAX;p->brk.set[BRK_COMPLEX]=127;p->brk.set[BRK_ROLL]=127;
     for(unsigned part=0;part<NPARTS;part++) {
         seq.ppat[part]=0;
         engine_set(T_MIX,part,MX_LEVEL,110);
         engine_set(T_MIX,part,MX_REV,100);engine_set(T_MIX,part,MX_DLY,100);
     }
+    engine_brk_loops();
+    CHECK(engine_brk_nslots() == first_break + 2);
     engine_set(T_FX,0,FX_RV_LEVEL,100);engine_set(T_FX,0,FX_DL_LEVEL,100);
     engine_set(T_FX,0,FX_DL_FDBK,100);engine_set(T_FX,0,FX_DL_TYPE,1);
     engine_set(T_FX,0,FX_DL_WEAR,100);engine_set(T_FX,0,FX_DIST,6);engine_set(T_FX,0,FX_DRIVE,100);
