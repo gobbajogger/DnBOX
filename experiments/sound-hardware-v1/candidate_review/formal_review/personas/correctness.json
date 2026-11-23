@@ -1,0 +1,31 @@
+{
+  "reviewer": "correctness",
+  "findings": [
+    {
+      "title": "Check output existence before overwriting acceptance metadata",
+      "severity": "P2",
+      "file": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+      "line": 144,
+      "why_it_matters": "Rerunning the compact verifier in the delivered package replaces the shared acceptance declaration, then aborts with FileExistsError because compact_profile_review already exists. The newly generated timestamp changes the declaration hash, so the retained RESULT.json no longer identifies the on-disk declaration even though no replacement verification completed. Reserving a new output directory before any declaration write, and keeping each declaration with its run, preserves the existing evidence when a rerun is rejected.",
+      "autofix_class": "gated_auto",
+      "owner": "downstream-resolver",
+      "requires_verification": true,
+      "suggested_fix": "Reserve or reject the requested output directory before writing the acceptance declaration. Support a distinct run label/output directory as verify_candidate.py does, and write the new declaration inside that run directory so existing declarations and results are never overwritten by a rejected rerun. Verify that an existing-output invocation leaves all retained files unchanged and that a fresh run records the hash of its own declaration.",
+      "confidence": 100,
+      "evidence": [
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:144 --     (HERE/'COMPACT-ACCEPTANCE-DECLARATION.json').write_text(json.dumps(declaration,indent=2)+'\\n')",
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:145 --     libs,invalid=compile_all()",
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:26 --     OUT.mkdir();sources=OUT/'snapshot';sources.mkdir()",
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:8 -- OUT=HERE/'compact_profile_review'; this directory is already present in the reviewed payload.",
+        "The retained experiments/sound-hardware-v1/candidate_review/compact_profile_review/RESULT.json names declaration_sha256 4a88cf8e5e78137999c33d07ba2f41cad368101ae6a60414bac1cb5f14eda8d4, which matched the declaration before rerun. main constructs declared_at content using a fresh created_at_utc timestamp before the unconditional write.",
+        "Reviewed harness SHA-256: 1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9. This finding is pinned to that original independently reviewed revision; the orchestrator is checking subsequent owner changes separately.",
+        "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:254 --     out=HERE/args.label;out.mkdir();snap=out/'snapshot';snap.mkdir(); this related verifier rejects an existing run directory before writing its result artifacts."
+      ],
+      "pre_existing": false
+    }
+  ],
+  "residual_risks": [
+    "Original-behavior agreement remains limited to the two supplied 48 kHz amplitude fixtures also used for fitting. The recorded metadata and current documentation explicitly leave original 44.1 kHz scheduling, active original filter-envelope behavior, and whole-instrument equivalence unqualified; the reviewed core and compact-equivalence results do not close those boundaries."
+  ],
+  "testing_gaps": []
+}

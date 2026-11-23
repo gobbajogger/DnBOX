@@ -1,0 +1,126 @@
+{
+  "schema": "independent frozen variant C review v1",
+  "reviewed_utc": "2026-11-19T00:06:30.501302+00:00",
+  "status": "NO_IMPLEMENTATION_BLOCKER_FOUND_IN_FROZEN_C",
+  "audio_gate": "NOT_ASSESSED_BY_THIS_SOURCE_SCALAR_REVIEW",
+  "gate_admission": false,
+  "variant": "c_ch4_centered_feedback",
+  "declaration_sha256": "adfae90f553d0dc159f8a70b34873cebe4bda3c82fa7f6e4412aa74b97e9a688",
+  "source_sha256": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+  "requested_freeze_unchanged": true,
+  "pretest_source_freeze_matches_final": true,
+  "blocking_findings": [],
+  "implementation_checks": {
+    "centered_proposal_equal_after_six_step_helper_inlining": true,
+    "unchanged_B_function_bodies": {
+      "finite_float": true,
+      "range": true,
+      "valid_adsr": true,
+      "retention": true,
+      "prepare_adsr": true,
+      "prepare_filter": true,
+      "s1_dry_reset": true,
+      "s1_dry_frozen_controls": true,
+      "s1_dry_configure": true,
+      "s1_dry_start": true,
+      "s1_dry_note_off": true,
+      "s1_dry_cutoff": true,
+      "chicago_nonlinear": true,
+      "s1_dry_sample": true,
+      "s1_dry_render": true
+    },
+    "renderer_main_identical_to_B": true,
+    "history_shift_before_overwrite_both_branches": true,
+    "zero_resonance_B_arithmetic_preserved": true,
+    "six_fixed_solver_iterations": true,
+    "forward_state_committed_once_per_substep": true,
+    "new_output_gain_or_tail_retirement": false,
+    "new_physical_domain_clamp": false,
+    "extra_voice_floats": 2,
+    "host_voice_bytes": 160,
+    "prepared_bytes": 92,
+    "production_activation_in_reviewed_unit": false
+  },
+  "saved_test_coverage": {
+    "solver_numeric_points": 38,
+    "zero_resonance_B_substeps": 360,
+    "nonzero_resonance_history_state_iterations": 720,
+    "host_selftest_scope": "configuration/gate/reset and invalid-input behavior only",
+    "host_block_partition_audio_test": false,
+    "whole_note_zero_resonance_pcm_identity_test": "Not assessed in this review",
+    "independent_active_voice_interleaving_test": false,
+    "scalar_fixtures_match_independent_results": true,
+    "attempt_logs_match_saved_results": {
+      "describe": {
+        "matches_result": true,
+        "exit_status": 0,
+        "stderr_empty": true
+      },
+      "host-selftest": {
+        "matches_result": true,
+        "exit_status": 0,
+        "stderr_empty": true
+      },
+      "scalar-selftest": {
+        "matches_result": true,
+        "exit_status": 0,
+        "stderr_empty": true
+      }
+    },
+    "test_results_rerun_by_reviewer": false
+  },
+  "nonblocking_coverage_notes": [
+    {
+      "location": "/workspace/scratch/e803955aec60/s1_dry_voice_c/tests/scalar_test.c:68-70,132",
+      "observation": "The untouched object is never processed, so its unchanged bytes do not establish interleaved active-filter ownership. The720 iterations establish the stated selected history/state checks.",
+      "action": "Keep evidence wording narrow; no source change or additional run required for this review"
+    }
+  ],
+  "hash_audit_counts": {
+    "source_files_sha256": 17,
+    "compiled_files_sha256": 3,
+    "test_evidence_sha256": 10
+  },
+  "diagnosis_copies_identical": {
+    "README.md": true,
+    "centered_feedback_proposal.c": true,
+    "scalar_checks.py": true,
+    "scalar_results.json": true
+  },
+  "vendor_files_identical_to_B": {
+    "fastmath.h": true,
+    "dnbx_s1_envelope.c": true,
+    "dnbx_s1_envelope.h": true
+  },
+  "source_free_packet_hashes_match": {
+    "case_plan.json": true,
+    "metrics.py": true,
+    "reference_pcm_manifest.json": true
+  },
+  "later_audio_artifact_filenames_observed_count": 120,
+  "later_audio_artifact_contents_read": false,
+  "later_audio_outcome_assessed": false,
+  "new_calls": {
+    "compiler": 0,
+    "scalar_executable": 0,
+    "renderer": 0,
+    "metric": 0,
+    "native": 0,
+    "emulator": 0,
+    "whole_engine_gate": 0,
+    "rdc": 0,
+    "github": 0
+  },
+  "original_engine_source_or_tables_read": false,
+  "canonical_or_C_files_edited": false,
+  "artifacts": {
+    "C-REVIEW.md": {
+      "sha256": "f96b02b8f82cf7338a8f196a89ae8bf3fc995a2a196287f92ddc01246aab7fa4",
+      "bytes": 8949
+    },
+    "C-AUDIT.json": {
+      "sha256": "3cd59367c75888e2f39cdeff1abcee560bc0262566ddccf8814e6f6c01884731",
+      "bytes": 13151
+    }
+  }
+}

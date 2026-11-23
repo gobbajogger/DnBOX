@@ -1,0 +1,222 @@
+{
+  "schema": "matched C filter-only pre-execution declaration v1",
+  "written_utc": "2026-11-19T00:15:17.367289+00:00",
+  "status": "COMPILED_BEFORE_FIRST_RESPONSE_RECORD",
+  "build_command": [
+    "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/src",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor",
+    "/workspace/scratch/e803955aec60/s1_c_filter_probe/src/filter_probe.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor/dnbx_s1_envelope.c",
+    "-o",
+    "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe"
+  ],
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "wrapper_source_sha256": "b800e4b8507841f6c30e7a66396607fdfe43eab1fa4d3ae991c6d6e042967e9a",
+  "driver_sha256": "aede94e799830118a9a7cbb33c7af53fd84f10b341f28e82b30ede697d64dcb2",
+  "analysis_source_sha256": "af1d7e2f7f89aa298abdfe1cc81a0d6d45ce120d801652eae9b6be837c3ff45e",
+  "frozen_C_source_files_sha256": {
+    "src/s1_dry_voice.c": "29e04eb07c512bb390bf6f7cc7b9429baf46cf927db126bced2f1fffe1ae1bf9",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "numeric_packet_files_sha256": {
+    "observations.json": "607905ab1441abc2078a076855bc6fd24879f7930dcadb246ffef1e737e0113e",
+    "metadata/input_pcm_manifest.json": "6c3d9644d845a82bea92eda74efd44a77ad1ca731e4b356fd238482d0b7484f9"
+  },
+  "protocol": {
+    "sample_rate_hz": 44100,
+    "cutoff_hz": 2000,
+    "fresh_owner_per_record": true,
+    "resonance_f32_hex": [
+      "00000000",
+      "3f666666"
+    ],
+    "silent_prewarm_frames": 4096,
+    "retained_frames": 32768,
+    "steady_window": [
+      16384,
+      32768
+    ],
+    "response_records": 8,
+    "filter_path": "unchanged frozen C private filter_substep twice with held input, mean of two outputs",
+    "oscillator_VCA_envelope_advance": false,
+    "gain_alignment_fitting_normalization": "none"
+  },
+  "diagnostic_method": {
+    "acceptance_gate": "none; component diagnostic, not historic three-note gate",
+    "rms": "unmodified whole and16384:32768 input/output RMS and20log10 output/input ratio; null when input RMS zero",
+    "sine_spectral": "fixed2000Hz and harmonics2-5 projections in steady Hann window; report transfer ratio/phase and harmonics relative to own fundamental; no fitting or waveform adjustment",
+    "impulse_spectral": "whole unwindowed fixed-frequency response ratios at0,500,1000,2000,4000,8000,16000,22050Hz",
+    "reference_differences": "unshifted direct differences and measured ratio differences only",
+    "feedback_argument": "read-only reconstructed(current output+4old1+6old2+4old3+old4)/16; not exact traced solver d; never fed to DSP"
+  },
+  "source_boundary": "Only frozen independent C and listed source-free numeric observations/manifests/PCM; no original capture source, headers, objects or engine algorithms read",
+  "cases": [
+    {
+      "case_id": "impulse_a38d1b717_r00000000",
+      "input_kind": "impulse",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+      "input_sha256": "315f40d24b918c665d1b28a2cb97d1378c6a6ae2b5b661dc297161e937814799",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/impulse_a38d1b717_r00000000.original-filter.f32le",
+      "reference_sha256": "a359504d52a530642a8d765d0eb63d8e07d8aa6bcb57c4c07ba2b7abadb0d113",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r00000000.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r00000000.C-filter.f32le",
+        "00000000"
+      ]
+    },
+    {
+      "case_id": "impulse_a38d1b717_r3f666666",
+      "input_kind": "impulse",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+      "input_sha256": "315f40d24b918c665d1b28a2cb97d1378c6a6ae2b5b661dc297161e937814799",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/impulse_a38d1b717_r3f666666.original-filter.f32le",
+      "reference_sha256": "03648c81026761549fbb96d8c8caff415e2e04cc2c991423a510a7c2ed0a4311",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r3f666666.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/impulse_a38d1b717.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r3f666666.C-filter.f32le",
+        "3f666666"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+      "input_sha256": "06196f135dcb21162dd08f5db34512b5cb5573027cecf8c00c25868e2fd00e56",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a38d1b717_r00000000.original-filter.f32le",
+      "reference_sha256": "ae61cb21601383930eb057dd43de5b27933369ba68227ff8c3750da777e15b0f",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r00000000.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r00000000.C-filter.f32le",
+        "00000000"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 9.999999747378752e-05,
+      "input_amplitude_f32_hex": "38d1b717",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+      "input_sha256": "06196f135dcb21162dd08f5db34512b5cb5573027cecf8c00c25868e2fd00e56",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a38d1b717_r3f666666.original-filter.f32le",
+      "reference_sha256": "86fe9790b66b3417aded7cbfa0bbcbdea59851736b42f1d2c2067db742a14f72",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r3f666666.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a38d1b717.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r3f666666.C-filter.f32le",
+        "3f666666"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.009999999776482582,
+      "input_amplitude_f32_hex": "3c23d70a",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+      "input_sha256": "333dd9b60d8abe336172af685e602b1b8a37b023c4c3332cf9648e6eebafc9ae",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3c23d70a_r00000000.original-filter.f32le",
+      "reference_sha256": "41037bf8f0a8490c760fdd5cbcb28ecea5da6d917cf10a66b314d6687cc1e81c",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r00000000.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r00000000.C-filter.f32le",
+        "00000000"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.009999999776482582,
+      "input_amplitude_f32_hex": "3c23d70a",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+      "input_sha256": "333dd9b60d8abe336172af685e602b1b8a37b023c4c3332cf9648e6eebafc9ae",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3c23d70a_r3f666666.original-filter.f32le",
+      "reference_sha256": "4f2aaf3d896cf3a6ddddd98783cb7a0bbbd815170d053aa08e15b5f7ae8785fe",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r3f666666.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r3f666666.C-filter.f32le",
+        "3f666666"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r00000000",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.25,
+      "input_amplitude_f32_hex": "3e800000",
+      "resonance_f32": 0.0,
+      "resonance_f32_hex": "00000000",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+      "input_sha256": "49d6d2276f0879b291d15f0dc19e287618113736e804fb8992255cc621bfeba1",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3e800000_r00000000.original-filter.f32le",
+      "reference_sha256": "ccecdfbfab6d86c15cf0d706b63b44e1ab512c1e70d7534c08752a60aa61b1a3",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r00000000.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r00000000.C-filter.f32le",
+        "00000000"
+      ]
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r3f666666",
+      "input_kind": "sine",
+      "input_amplitude_f32": 0.25,
+      "input_amplitude_f32_hex": "3e800000",
+      "resonance_f32": 0.8999999761581421,
+      "resonance_f32_hex": "3f666666",
+      "input_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+      "input_sha256": "49d6d2276f0879b291d15f0dc19e287618113736e804fb8992255cc621bfeba1",
+      "reference_path": "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/outputs/sine_2000_a3e800000_r3f666666.original-filter.f32le",
+      "reference_sha256": "c2ca3c127f65632d618789cf1703e751560bd61308b71b725750a50b223121bb",
+      "candidate_output_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r3f666666.C-filter.f32le",
+      "command": [
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+        "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3e800000.f32le",
+        "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r3f666666.C-filter.f32le",
+        "3f666666"
+      ]
+    }
+  ],
+  "executable_sha256": "463987448eb131459aa8798c391a5a030f10718fce2721c6c1f0d77304689a4e",
+  "build_log_sha256": "6d68e47321c5b947bd2f40124529e766aefa35530e38aa8f2a87c5c64df46da9"
+}

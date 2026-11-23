@@ -8,7 +8,7 @@
         "firmware/src/app/main_fm1.c::fm1_cstart"
       ],
       "notConstructed": "Physical power-on and SPL handoff, IRQ/audio/USB electrical behavior, LCD color and flash power-loss persistence on a board.",
-      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240×240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json. The linked stock Elite and Pro packages also run from the application entry to the splash and ordinary screen in strict emu360. Fresh-process restarts read the recovered sample without a flash write. Final Synth One builds repeated the complete suite in native-routes/stock-final.json."
+      "displayEvidence": "The complete fm1_cstart runs over private linker regions. The seven-case compiled replay follows fm1_main from accepted JEDEC through startup, the first ordinary frame or the update endpoint. It checks foreign and matching owners, stale OTA, stored and default splashes, the full countdown, a recovered valid shadow, and the already-live control. Both sample cases publish the restored loop after project load and have identical 240\u00d7240 ordinary frames. See native-routes/normal-loop/normal-loop.json. The linked target-instruction replay is separately scoped in native-routes/stock-boot.json. The linked stock Elite and Pro packages also run from the application entry to the splash and ordinary screen in strict emu360. Fresh-process restarts read the recovered sample without a flash write. Final Synth One builds repeated the complete suite in native-routes/stock-final.json."
     },
     {
       "ids": [
@@ -22,7 +22,26 @@
         "firmware/src/app/main_fm1.c::safe_main"
       ],
       "notConstructed": "Physical watchdog, key contacts, USB electrical behavior and power/reset circuitry.",
-      "displayEvidence": "The full safe_main function handles held PLAY across its time guard and a modeled USB bootloader request. Both core cases, prompted retry and the resulting endpoints are checked. After the second modeled guard exception both final packages enter safe mode. Their PLAY contacts within the matrix scanner produce the retry frame and PR_PWR reset, then the post-crash notice. All five per-model recorded recovery states match their crash-register-specific 240×240 oracle. See native-routes/stock-guard.json."
+      "displayEvidence": "The full safe_main function handles held PLAY across its time guard and a modeled USB bootloader request. Both core cases, prompted retry and the resulting endpoints are checked. After the second modeled guard exception both final packages enter safe mode. Their PLAY contacts within the matrix scanner produce the retry frame and PR_PWR reset, then the post-crash notice. All five per-model recorded recovery states match their crash-register-specific 240\u00d7240 oracle. See native-routes/stock-guard.json.",
+      "failedUpdateReturn": {
+        "status": "PASS_COMPILED_HOST",
+        "route": "During recovery, a host requests an update but sends no package. Three 5-second attempts expire. The updater shows FAILED for 1.5 seconds and returns to safe_main. The original loop retained that frame while awaiting PLAY.",
+        "change": "Redraw the safe-mode controls and retained crash registers after the updater returns. Reuse the initial safe-mode painter without restarting the input scanner, USB or the bootguard timer.",
+        "focusedTest": "python3 tests/ui_inventory/native_routes.py <output>",
+        "expectedFrames": [
+          "boot-update-step-1",
+          "boot-update-failed",
+          "safe-after-failed-update",
+          "safe-retry-after-failed-update"
+        ],
+        "oracle": "Compare complete 240\u00d7240 RGB frames to the archived PACKAGE, FAILED, core-2 safe-mode and retry frames, and remove the recovery redraw as a negative control.",
+        "boundaries": "The regression fixture uses a simulated clock, unanswered USB requests, modeled staging cleanup and the host RGB565 LCD. Historical linked-image runs did not exercise this sequence.",
+        "receipt": "native-routes/report.json",
+        "comparison": "native-routes/recovery-delta.json",
+        "result": "Each of the four native frames matched all 57,600 archived pixels. The starting composition failed at the first restored frame. Removing only the redraw reproduced the old FAILED screen and misdrawn retry; shifting the retry caption one pixel was detected independently.",
+        "productionCommit": "f8cdbf67a6b70f927a443d79193a54775b7c3a7b",
+        "verifiedUnchangedInputsAt": "199f0444a4cf27374112a5fdf48f82005b070bbc"
+      }
     },
     {
       "ids": [
@@ -50,8 +69,8 @@
         "firmware/src/app/ui.c::strip_value_fit",
         "firmware/src/app/ui.c::dg_tail"
       ],
-      "notConstructed": "The final source has no caller of strip_value_fit. Its only call to drum_strip_glyph supplies DG_LEVEL, outside the DG_DECAY/DG_NTAIL branches that invoke dg_tail.",
-      "displayEvidence": "The earlier dispatch analysis is recorded in stockSourceAudit. See finalStockSource for the revised source and both linked ELF symbols."
+      "notConstructed": "At f8cdbf67, only the decay/tail branches remain excluded here. The compact SuperJ6 matrix now calls strip_value_fit.",
+      "displayEvidence": "Both compact SuperJ6 owners reached strip_value_fit in the native 28-frame integration replay. See native-routes/j6-function-replay.json. Current dispatch still excludes dg_tail."
     },
     {
       "ids": [
@@ -140,5 +159,42 @@
     },
     "scope": "The 11bc3f3a stockSourceAudit and original 98/118 frame inventory above are historical. These final dispositions add no executed frames."
   },
-  "stockFaultEmulator": "native-routes/stock-guard.json"
+  "stockFaultEmulator": "native-routes/stock-guard.json",
+  "currentDiscovery": {
+    "inventoryCommand": "python3 tests/ui_inventory/source_inventory.py --source . --output <inventory.json>",
+    "discoveredIds": 127,
+    "originalIdsRetained": 118,
+    "additionalIds": [
+      "firmware/src/app/main_fm1.c::draw_safe_mode",
+      "firmware/src/app/ui.c::draw_init_selector",
+      "firmware/src/app/ui.c::juno_strip_glyph",
+      "firmware/src/app/ui.c::og_level",
+      "firmware/src/app/ui.c::og_lowpass",
+      "firmware/src/app/ui.c::og_sub",
+      "firmware/src/app/ui.c::og_wave_width",
+      "firmware/src/app/ui.c::s1_envelope_row",
+      "firmware/src/app/ui.c::s1_rate_glyph"
+    ],
+    "scope": "The complete host recovery fixture executes the safe-mode painter at entry and after timeout. On the f8cdbf67 composition, the separate compact SuperJ6 replay directly observed five named helper entries. The 199f0444 discovery is lexical; the counts in sourceCoverage retain their original 1,712-frame scope.",
+    "productionCommit": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+    "identifierReferences": "native-routes/renderer-source-references.json",
+    "noReachableCaller": [
+      "ui_position_badge",
+      "header_pattern_cue",
+      "matrix_row_hint",
+      "matrix_next_hint",
+      "cv_blit_from",
+      "lane",
+      "nav_arrow",
+      "header_pattern_badge",
+      "row_picture"
+    ],
+    "currentDispatchExclusions": {
+      "dg_tail": "The only call to drum_strip_glyph passes DG_LEVEL. Its two dg_tail calls require DG_DECAY or DG_NTAIL.",
+      "original_cell_value": "The generic footer accepts T_303 engine references or the engine/preset/status fields. describe_pages emits those in V_PART. The bass V_PART knob path returns after draw_part_sound, and V_SEQ emits R_BPATSND instead."
+    },
+    "identifierReferencesAt": "f8cdbf67a6b70f927a443d79193a54775b7c3a7b",
+    "compactJ6Replay": "native-routes/j6-function-replay.json",
+    "normalApplicationLoopReplay": "native-routes/normal-loop/replay-199f0444.json"
+  }
 }

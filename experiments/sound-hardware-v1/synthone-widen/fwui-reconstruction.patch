@@ -1,0 +1,563 @@
+diff --git a/firmware/src/app/engine.c b/firmware/src/app/engine.c
+--- a/firmware/src/app/engine.c
++++ b/firmware/src/app/engine.c
+@@ -65,6 +65,9 @@
+ static original_chicago_tuning original_tuning POOL;
+ static original_chicago_fx2_compact original_fx[NBASS] POOL;
+ static original_chicago_fx2_cold_owner original_fx_owner[NBASS];
++#if X0X_SYNTHONE_WIDEN
++#include "s1_selected_widen.inc"
++#endif
+ static uint8_t original_fx_ready;
+ static uint8_t original_key_pitch[NBASS][38]; /* token -> pitch+1; zero is released */
+ static uint8_t original_midi_channel[NBASS];
+@@ -2489,6 +2492,9 @@
+         bass_adapt_pre(bv, (unsigned)n);
+         int status = original_runtime_render(&original_bass[bv], bv ? &original_workspace_b : &original_workspace,
+                                              bb[bv], bb[1-bv], n);
++#if X0X_SYNTHONE_WIDEN
++        if (status == ORIGINAL_RUNTIME_OK) s1_widen_render(bv, bb[1-bv], (unsigned)n);
++#endif
+         bass_adapt_post(bv, bb[bv], bb[1-bv], (unsigned)n);
+         if (!core)
+             PROF_ADD(2 + bv, pb);
+diff --git a/firmware/src/app/engine.h b/firmware/src/app/engine.h
+--- a/firmware/src/app/engine.h
++++ b/firmware/src/app/engine.h
+@@ -31,6 +31,10 @@
+ enum { S1_EDIT_REJECTED, S1_EDIT_QUEUED, S1_EDIT_BUSY };
+ int engine_s1_patch_pending(void);
+ int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
++#if X0X_SYNTHONE_WIDEN
++/* The original snapshot and extra factory field 121 from one audio boundary. */
++int engine_s1_patch_snapshot_widen(unsigned voice, s1_patch_snapshot *out, float *widen_target);
++#endif
+ int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
+ int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
+ #endif
+diff --git a/firmware/src/app/original_presets.inc b/firmware/src/app/original_presets.inc
+--- a/firmware/src/app/original_presets.inc
++++ b/firmware/src/app/original_presets.inc
+@@ -56,7 +56,11 @@
+     ++bass_publish_seq[voice];
+ }
+ #if X0X_SYNTHONE_PATCH
++#if X0X_SYNTHONE_WIDEN
++int engine_s1_patch_snapshot_widen(unsigned voice, s1_patch_snapshot *out, float *widen_target)
++#else
+ int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
++#endif
+ {
+     if (voice >= NBASS || !out) return 0;
+     uint32_t lock = plat_cq_lock();
+@@ -66,23 +70,37 @@
+         out->revision = s1_patch_identity(voice);
+         out->note_locked = note_lock_applied[voice];
+         out->preset = bass_named_preset[voice];
+-        for (unsigned i = 0; i < S1_PATCH_COUNT; ++i)
++#if X0X_SYNTHONE_WIDEN
++        if (widen_target) *widen_target = owner->dsp.synthone.widen_target;
++#endif
++        for (unsigned i = 0; i < S1_PATCH_LEGACY_COUNT; ++i)
+             out->physical[i] = s1_part_patch_value(&owner->dsp.synthone, i);
+     }
+     plat_cq_unlock(lock);
+     return ready;
+ }
+ 
++#if X0X_SYNTHONE_WIDEN
++int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
++{ return engine_s1_patch_snapshot_widen(voice, out, NULL); }
++#endif
++
+ int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
+ {
+     s1_patch_snapshot snapshot;
+     int slot = s1_patch_slot(factory_id);
++#if X0X_SYNTHONE_WIDEN
++    float widen_target;
++    if (slot < 0 || !out || !engine_s1_patch_snapshot_widen(voice, &snapshot, &widen_target)) return 0;
++    out->physical = slot == S1_PATCH_LEGACY_COUNT ? widen_target : snapshot.physical[slot];
++#else
+     if (slot < 0 || !out || !engine_s1_patch_snapshot(voice, &snapshot)) return 0;
++    out->physical = snapshot.physical[slot];
++#endif
+     const s1_patch_descriptor *d = s1_patch_at((unsigned)slot);
+     out->revision = snapshot.revision;
+     out->note_locked = snapshot.note_locked;
+     out->preset = snapshot.preset;
+-    out->physical = snapshot.physical[slot];
+     out->position = (uint8_t)((out->physical - d->minimum) *
+         (S1_PATCH_STEPS / (d->maximum - d->minimum)) + .5f);
+     return 1;
+@@ -322,6 +340,9 @@
+     if (original_runtime_retire(&original_bass[v]) != ORIGINAL_RUNTIME_OK) return 0;
+     int rc = original_runtime_init(&original_bass[v], sound->v[T_303][v], seq_tempo(&seq),
+         &original_tuning, &original_fx_owner[v]);
++#if X0X_SYNTHONE_WIDEN
++    s1_widen_adopt(v, rc);
++#endif
+     original_switch_gain[v] = 512u; original_quiet_samples[v] = 0;
+ #if X0X_SYNTHONE_PATCH
+     s1_patch_replaced(v);
+@@ -449,6 +470,9 @@
+         }
+         int rc = original_runtime_init(&original_bass[v], next, seq_tempo(&seq),
+             &original_tuning, &original_fx_owner[v]);
++#if X0X_SYNTHONE_WIDEN
++        s1_widen_adopt(v, rc);
++#endif
+         if (rc != ORIGINAL_RUNTIME_OK) {
+             /* A failed adoption remains visible and needs a fresh explicit
+              * request; do not rerun expensive initialization every block. */
+diff --git a/firmware/src/app/original_runtime.h b/firmware/src/app/original_runtime.h
+--- a/firmware/src/app/original_runtime.h
++++ b/firmware/src/app/original_runtime.h
+@@ -16,6 +16,12 @@
+     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
+     s1_dry_part synthone;
+ } original_runtime_backend;
++#if X0X_SYNTHONE_WIDEN
++_Static_assert(sizeof(s1_dry_part) <= sizeof(original_chicago_backend) ||
++               sizeof(s1_dry_part) <= sizeof(original_miami_backend) ||
++               sizeof(s1_dry_part) <= sizeof(((original_runtime_backend *)0)->juno),
++               "Synth One widening must fit its original owner");
++#endif
+ typedef struct {
+     original_runtime_backend dsp;
+     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
+diff --git a/firmware/src/app/original_sound.c b/firmware/src/app/original_sound.c
+--- a/firmware/src/app/original_sound.c
++++ b/firmware/src/app/original_sound.c
+@@ -185,7 +185,13 @@
+ #if X0X_SYNTHONE_PATCH
+     uint32_t mask = original_sound_edit_mask(cell);
+     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
++#if X0X_SYNTHONE_WIDEN
++        /* The cell permits performance bits 0..1 and patch bits 8..21.
++         * Check the spare bits in the serialized bytes alongside their data. */
++        if ((cell[22] & 0xfcu) || (cell[24] & 0xc0u) || cell[25]) return 0;
++#else
+         if (mask & ~(S1_PATCH_MASK | 3u)) return 0;
++#endif
+         for (unsigned i = 0; i < 22; ++i) {
+             if (cell[i] > 127u || (i >= 2 && !(mask & (UINT32_C(1) << i)) && cell[i])) return 0;
+         }
+diff --git a/firmware/src/app/original_sound.h b/firmware/src/app/original_sound.h
+--- a/firmware/src/app/original_sound.h
++++ b/firmware/src/app/original_sound.h
+@@ -49,7 +49,8 @@
+  * 0x4F445231 and historical 8-parameter kind-2 cells load as the Synth One
+  * init cell (factory 0); they are never written back. No song-layout change.
+  * With X0X_SYNTHONE_PATCH enabled, bytes/bits 8..20 hold native INIT
+- * edits in descriptor order. Stock refuses these edited cells. Untouched
++ * edits in descriptor order. With the widening option, byte/bit 21 stores
++ * factory ID 121. Stock refuses these edited cells. Untouched
+  * cells retain their historical 32 bytes and exact INIT values.
+  * The original engines still map to their original selectors; schema1 is refused.
+  * Untouched controls come from the immutable binary32 factory data, never
+diff --git a/firmware/src/app/s1_dry_part.c b/firmware/src/app/s1_dry_part.c
+--- a/firmware/src/app/s1_dry_part.c
++++ b/firmware/src/app/s1_dry_part.c
+@@ -45,7 +45,10 @@
+     S1_FIELD(26, "AMP ATTACK", amp.attack_s, .0005f, 2, X0X_U_S),
+     S1_FIELD(27, "AMP DECAY", amp.decay_s, .005f, 2, X0X_U_S),
+     S1_FIELD(28, "AMP SUSTAIN", amp.sustain, 0, 1, X0X_U_PCT),
+-    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S)
++    S1_FIELD(29, "AMP RELEASE", amp.release_s, .004f, 2, X0X_U_S),
++#if X0X_SYNTHONE_WIDEN
++    {{"WIDEN", 0, 1, 121, X0X_U_PCT}, 0},
++#endif
+ #undef S1_FIELD
+ };
+ 
+@@ -67,6 +70,9 @@
+ 
+ float s1_part_patch_value(const s1_dry_part *part, unsigned slot)
+ {
++#if X0X_SYNTHONE_WIDEN
++    if (slot == S1_PATCH_LEGACY_COUNT) return part->widen_target;
++#endif
+     const uint8_t *base = (const uint8_t *)&part->patch;
+     return *(const float *)(base + patch_parameters[slot].offset);
+ }
+@@ -76,7 +82,12 @@
+     s1_dry_controls next;
+     s1_dry_frozen_controls(&next);
+     uint32_t mask = original_sound_edit_mask(cell);
+-    for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
++#if X0X_SYNTHONE_WIDEN
++    unsigned widen_byte = S1_PATCH_FIRST_BYTE + S1_PATCH_LEGACY_COUNT;
++    part->widen_target = (mask & (UINT32_C(1) << widen_byte))
++        ? s1_patch_physical(s1_patch_at(S1_PATCH_LEGACY_COUNT), cell[widen_byte]) : 0.f;
++#endif
++    for (unsigned i = 0; i < S1_PATCH_LEGACY_COUNT; ++i) {
+         unsigned byte = S1_PATCH_FIRST_BYTE + i;
+         if (mask & (UINT32_C(1) << byte)) {
+             float *field = (float *)((uint8_t *)&next + patch_parameters[i].offset);
+diff --git a/firmware/src/app/s1_dry_part.h b/firmware/src/app/s1_dry_part.h
+--- a/firmware/src/app/s1_dry_part.h
++++ b/firmware/src/app/s1_dry_part.h
+@@ -13,6 +13,11 @@
+     float bend;
+ #if X0X_SYNTHONE_PATCH
+     s1_dry_controls patch;
++#if X0X_SYNTHONE_WIDEN
++    uint8_t widen_tail[2520];
++    unsigned widen_frame;
++    float widen_target, widen_current;
++#endif
+ #endif
+ } s1_dry_part;
+ 
+diff --git a/firmware/src/app/s1_patch.h b/firmware/src/app/s1_patch.h
+--- a/firmware/src/app/s1_patch.h
++++ b/firmware/src/app/s1_patch.h
+@@ -8,7 +8,12 @@
+  * Stable Synth One factory IDs; performance wheels belong to a separate API.
+  * Storage slots are in descriptor order and must never be reordered. Existing
+  * OS11 INIT and historical eight-control cells use no bits in this range. */
+-enum { S1_PATCH_FIRST_BYTE = 8, S1_PATCH_COUNT = 13, S1_PATCH_STEPS = 127 };
++enum { S1_PATCH_FIRST_BYTE = 8, S1_PATCH_LEGACY_COUNT = 13, S1_PATCH_STEPS = 127 };
++#if X0X_SYNTHONE_WIDEN
++enum { S1_PATCH_COUNT = S1_PATCH_LEGACY_COUNT + 1 };
++#else
++enum { S1_PATCH_COUNT = S1_PATCH_LEGACY_COUNT };
++#endif
+ #define S1_PATCH_MASK (((UINT32_C(1) << S1_PATCH_COUNT) - 1) << S1_PATCH_FIRST_BYTE)
+ 
+ typedef struct {
+@@ -31,11 +36,15 @@
+     uint32_t revision;
+     unsigned preset;
+     uint8_t note_locked;
+-    float physical[S1_PATCH_COUNT];
++    float physical[S1_PATCH_LEGACY_COUNT]; /* stable 13-field caller ABI */
+ } s1_patch_snapshot;
+ 
+ const s1_patch_descriptor *s1_patch_at(unsigned index);
+ float s1_patch_physical(const s1_patch_descriptor *, unsigned position);
++/* Nominal physical increment for one of the 127 equal edit intervals.
++ * Endpoints are exact; intermediate binary32 values follow s1_patch_physical. */
++static inline float s1_patch_increment(const s1_patch_descriptor *d)
++{ return (d->maximum - d->minimum) / (float)S1_PATCH_STEPS; }
+ /* Value for the firmware's unit_value formatter. Uses real seconds and Hz. */
+ static inline float s1_patch_display(const s1_patch_descriptor *d, float physical)
+ { return d->unit == X0X_U_PCT ? physical * 100.f : physical; }
+diff --git a/firmware/src/app/s1_selected_widen.inc b/firmware/src/app/s1_selected_widen.inc
+new file mode 100644
+--- /dev/null
++++ b/firmware/src/app/s1_selected_widen.inc
+@@ -0,0 +1,49 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++#include "../../../experiments/sound-hardware-v1/synthone-widen/widen.h"
++enum { S1_WIDEN_FIRST = 1365 };
++_Static_assert(sizeof original_fx[0].arena >= 3 * S1_WIDEN_FIRST, "inactive Chicago span");
++_Static_assert(sizeof original_bass[0].dsp.synthone.widen_tail == S1_WIDEN_BYTES - 3 * S1_WIDEN_FIRST,
++               "complete 50 ms history");
++#ifdef X0X_WIDEN_PROBE
++extern void s1_widen_observe(int part, float input, float tail, float target, float applied, float result);
++extern void s1_widen_cold(int part);
++#endif
++
++static int s1_widen_ready(int v)
++{
++    return original_bass[v].kind == ORIGINAL_SOUND_SYNTHONE &&
++           original_bass[v].status == ORIGINAL_RUNTIME_OK && !original_fx[v].selected;
++}
++
++static void s1_widen_adopt(int v, int rc)
++{
++    if (rc != ORIGINAL_RUNTIME_OK || !s1_widen_ready(v)) return;
++    /* Cold runtime init cleared this part's tail, index and smoothed gain. */
++    memset(&original_fx[v].arena, 0, 3u * S1_WIDEN_FIRST);
++#ifdef X0X_WIDEN_PROBE
++    s1_widen_cold(v);
++#endif
++}
++
++static void s1_widen_render(int v, float *right, unsigned frames)
++{
++    if (!s1_widen_ready(v)) return;
++    s1_dry_part *p = &original_bass[v].dsp.synthone;
++    unsigned index = p->widen_frame;
++    float wet = p->widen_current;
++    const float target = p->widen_target;
++    for (unsigned i = 0; i < frames; ++i) {
++        float input = right[i];
++        float delay = s1_widen_tap((uint8_t *)&original_fx[v].arena, S1_WIDEN_FIRST,
++                                   p->widen_tail, &index, input);
++        /* Source Soundpipe port.c, fixed INIT half-time .1 s at 44100 Hz.
++         * c2 = (float)pow(.5, (float)(1/44100.) / .1f), c1 = 1.f-c2. */
++        wet = 0x1.49a000p-13f * target + 0x1.ffeb66p-1f * wet;
++        if (wet != 0.f) right[i] = wet * delay + (1.f - wet) * input;
++#ifdef X0X_WIDEN_PROBE
++        s1_widen_observe(v, input, delay, target, wet, right[i]);
++#endif
++    }
++    p->widen_frame = index;
++    p->widen_current = wet;
++}
+diff --git a/host/build_host.sh b/host/build_host.sh
+--- a/host/build_host.sh
++++ b/host/build_host.sh
+@@ -26,6 +26,10 @@
+     0|1) ;;
+     *) echo 'X0X_SYNTHONE_PATCH: 0 or 1' >&2; exit 2 ;;
+ esac
++case "${X0X_SYNTHONE_WIDEN:-0}:${X0X_SYNTHONE_PATCH:-0}" in
++    0:0|0:1|1:1) ;;
++    *) echo 'X0X_SYNTHONE_WIDEN requires X0X_SYNTHONE_PATCH=1' >&2; exit 2 ;;
++esac
+ U="firmware/src/dsp/drum909.c firmware/src/dsp/drum808.c firmware/src/dsp/x0x_param.c firmware/src/dsp/breaks.c
+    firmware/src/dsp/fxbus.c firmware/src/dsp/master.c firmware/src/seq/sequencer.c firmware/src/seq/tb3po.c
+    firmware/src/seq/pattern.c firmware/src/seq/motion.c firmware/src/app/engine.c
+@@ -55,6 +59,6 @@
+ esac
+ # shellcheck disable=SC2086
+ $CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
+-    -DX0X_HOST -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} $SYNTH_DEFS ${X0X_HOST_DEFS:-} -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
++    -DX0X_HOST -DX0X_SYNTHONE_WIDEN=${X0X_SYNTHONE_WIDEN:-0} -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-0} $SYNTH_DEFS ${X0X_HOST_DEFS:-} -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
+     -o ${X0X_HOST_OUT:-build/host/x0x_host} host/x0x_host.c $U -lm
+ echo "host: build/host/x0x_host"
+diff --git a/tests/host/original_sound_cell_test.c b/tests/host/original_sound_cell_test.c
+--- a/tests/host/original_sound_cell_test.c
++++ b/tests/host/original_sound_cell_test.c
+@@ -2,6 +2,9 @@
+ #include "../../firmware/src/app/original_sound.h"
+ #include "../../firmware/src/app/unit_control.h"
+ #include "../../firmware/src/app/bass_pattern_preset.h"
++#if X0X_SYNTHONE_PATCH
++#include "../../firmware/src/app/s1_patch.h"
++#endif
+ #include <assert.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -217,7 +220,7 @@
+     assert(!original_sound_set(cell, 1, 100) && !memcmp(cell, copy, 32));
+     uint8_t bad[32] = {0};
+ #if X0X_SYNTHONE_PATCH
+-    for (unsigned slot=0; slot<13; ++slot) {
++    for (unsigned slot=0; slot<S1_PATCH_COUNT; ++slot) {
+         assert(original_sound_s1_set(cell,slot,0));
+         assert(original_sound_valid(cell) && !original_sound_is_legacy_slot2_cell(cell));
+         assert(original_sound_s1_set(cell,slot,127));
+@@ -225,7 +228,7 @@
+     }
+     memcpy(copy,cell,sizeof copy);
+     assert(!original_sound_s1_set(cell,0,128) && !memcmp(cell,copy,sizeof copy));
+-    assert(!original_sound_s1_set(cell,13,0) && !memcmp(cell,copy,sizeof copy));
++    assert(!original_sound_s1_set(cell,S1_PATCH_COUNT,0) && !memcmp(cell,copy,sizeof copy));
+     for(unsigned i=0;i<22;++i) {
+         memcpy(bad,cell,sizeof bad);
+         bad[i]=128;
+@@ -235,8 +238,12 @@
+     bad[23] &= (uint8_t)~1u; /* a value without its edit bit */
+     assert(!original_sound_valid(bad));
+     memcpy(bad,cell,sizeof bad);
+-    bad[22] |= 4u; /* reserved edit bit */
+-    assert(!original_sound_valid(bad));
++    for (unsigned bit = 0; bit < 32; ++bit) {
++        if (bit < 2 || (bit >= S1_PATCH_FIRST_BYTE && bit < S1_PATCH_FIRST_BYTE + S1_PATCH_COUNT)) continue;
++        memcpy(bad,cell,sizeof bad);
++        bad[22 + bit/8] |= (uint8_t)(1u << (bit % 8));
++        assert(!original_sound_valid(bad));
++    }
+     memset(bad,0,sizeof bad);
+ #else
+     /* A project made with the opt-in provider must be refused by the stock
+diff --git a/tests/host/s1_widen_probe.inc b/tests/host/s1_widen_probe.inc
+new file mode 100644
+--- /dev/null
++++ b/tests/host/s1_widen_probe.inc
+@@ -0,0 +1,95 @@
++/* SPDX-License-Identifier: GPL-3.0-only */
++/* Test-only observer, linked against the archived original Soundpipe port.c. */
++#include "soundpipe.h"
++static sp_data port_data;
++static sp_port original_port[2];
++static struct {
++    uint32_t samples[2205];
++    unsigned cursor, resets, frames, audible, dry_taps;
++} width_probe[2];
++static uint32_t wbits(float x) { uint32_t b; memcpy(&b, &x, 4); return b; }
++
++void s1_widen_cold(int v)
++{
++    port_data.sr = 44100;
++    assert(sp_port_init(&port_data, &original_port[v], .1f) == SP_OK);
++    memset(width_probe[v].samples, 0, sizeof width_probe[v].samples);
++    width_probe[v].cursor = 0;
++    ++width_probe[v].resets;
++}
++
++void s1_widen_observe(int v, float input, float tap, float target, float applied, float output)
++{
++    float smooth;
++    assert(sp_port_compute(&port_data, &original_port[v], &target, &smooth) == SP_OK);
++    assert(wbits(applied) == wbits(smooth));
++    unsigned i = width_probe[v].cursor;
++    assert(wbits(tap) == (width_probe[v].samples[i] & UINT32_C(0xffffff00)));
++    width_probe[v].samples[i] = wbits(input);
++    width_probe[v].cursor = (i + 1) % 2205;
++    ++width_probe[v].frames;
++    float expected = applied * tap + (1.f - applied) * input;
++    assert(wbits(output) == wbits(applied == 0.f ? input : expected));
++    if (fabsf(tap) > .00001f && wbits(input) != wbits(tap)) {
++        if (applied > 0.f && wbits(output) != wbits(input)) ++width_probe[v].audible;
++        else if (applied == 0.f) ++width_probe[v].dry_taps;
++    }
++}
++static void wnote(int v, int pitch, int velocity)
++{
++    uint32_t g=0,c=0; int arp=0;
++    engine_live_key_state(v,&g,&arp,&c);
++    assert(engine_live_key(v,g,2,pitch,velocity,0,0));
++}
++static void repeat_blocks(unsigned n) { while(n--) block(); }
++
++static void width_scenario(void)
++{
++    select_patch(0, ORIGINAL_SOUND_SYNTHONE); select_patch(1, ORIGINAL_SOUND_SYNTHONE);
++    s1_patch_value a = read_patch(0,121), b = read_patch(1,121);
++    assert(a.physical == 0 && b.physical == 0);
++    /* Create and actually reload a prior 13-slot project cell. */
++    assert(engine_s1_patch_set(0,a.revision,16,3) == S1_EDIT_QUEUED);
++    block();
++    unsigned width_byte = S1_PATCH_FIRST_BYTE + S1_PATCH_LEGACY_COUNT;
++    assert(!(original_sound_edit_mask(proj.sound.v[T_303][0]) & (1u << width_byte)));
++    assert(project_save() == 0 && project_load() == 0);
++    engine_apply_sound(&proj.sound); block();
++    a = read_patch(0,121); b = read_patch(1,121);
++    assert(!a.physical && !b.physical && read_patch(0,16).position == 3);
++    wnote(0,47,99); wnote(1,62,83); repeat_blocks(17);
++    assert(width_probe[0].dry_taps > 512 && width_probe[1].dry_taps > 512);
++    unsigned aw = width_probe[0].audible, bw = width_probe[1].audible;
++    assert(engine_s1_patch_set(0,a.revision,121,127) == S1_EDIT_QUEUED);
++    repeat_blocks(2);
++    assert(width_probe[0].audible - aw > 350 && width_probe[1].audible == bw);
++    assert(engine_s1_patch_set(1,b.revision,121,64) == S1_EDIT_QUEUED);
++    repeat_blocks(10);
++    assert(width_probe[1].audible - bw > 2100 && original_port[1].yt1 < read_patch(1,121).physical);
++    struct { s1_patch_snapshot snapshot; uint32_t canary; } legacy;
++    legacy.canary = UINT32_C(0x0dd57eaf);
++    assert(engine_s1_patch_snapshot(1,&legacy.snapshot));
++    assert(legacy.canary == UINT32_C(0x0dd57eaf));
++    float amount;
++    assert(engine_s1_patch_snapshot_widen(1,&legacy.snapshot,&amount));
++    assert(legacy.canary == UINT32_C(0x0dd57eaf) && amount == read_patch(1,121).physical);
++    assert(project_save() == 0);
++    sound_t saved = proj.sound;
++    unsigned resets_b = width_probe[1].resets;
++    wnote(0,47,0); select_patch(0, ORIGINAL_SOUND_CHICAGO);
++    assert(!engine_s1_patch_read(0,121,&a));
++    unsigned a_frames = width_probe[0].frames, b_frames = width_probe[1].frames;
++    repeat_blocks(16);
++    assert(width_probe[0].frames == a_frames && width_probe[1].frames == b_frames + 4096);
++    select_patch(0, ORIGINAL_SOUND_SYNTHONE);
++    assert(read_patch(0,121).physical == 0.f && read_patch(1,121).position == 64);
++    assert(width_probe[1].resets == resets_b);
++    assert(project_load() == 0);
++    engine_apply_sound(&proj.sound); block();
++    assert(!memcmp(&saved,&proj.sound,sizeof saved));
++    assert(read_patch(0,121).position == 127 && read_patch(1,121).position == 64);
++    assert(!engine_s1_patch_set(1,b.revision,121,3));
++    printf("width words checked A=%u B=%u, audible A=%u B=%u, dry warm A=%u B=%u, resets A=%u B=%u\n",
++           width_probe[0].frames,width_probe[1].frames,width_probe[0].audible,width_probe[1].audible,
++           width_probe[0].dry_taps,width_probe[1].dry_taps,width_probe[0].resets,width_probe[1].resets);
++}
+diff --git a/tests/host/synthone_patch_test.c b/tests/host/synthone_patch_test.c
+--- a/tests/host/synthone_patch_test.c
++++ b/tests/host/synthone_patch_test.c
+@@ -57,6 +57,9 @@
+     block();
+ }
+ 
++#ifdef X0X_WIDEN_PROBE
++#include "s1_widen_probe.inc"
++#endif
+ int main(void)
+ {
+     boot();
+@@ -72,12 +75,17 @@
+     assert(!s1_patch_at(S1_PATCH_COUNT));
+     assert(!engine_bass_preset_edited(0) && !engine_bass_preset_edited(1));
+ 
+-    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29};
++    unsigned ids[] = {2,5,16,17,19,22,23,24,25,26,27,28,29,
++#if X0X_SYNTHONE_WIDEN
++                      121,
++#endif
++    };
+     assert(sizeof ids / sizeof ids[0] == S1_PATCH_COUNT);
+     for (unsigned i = 0; i < S1_PATCH_COUNT; ++i) {
+         const s1_patch_descriptor *d = s1_patch_at(i);
+         assert(d && *d->label && d->factory_id == ids[i] && d->minimum < d->maximum);
+         assert(d->unit == X0X_U_HZ || d->unit == X0X_U_S || d->unit == X0X_U_PCT);
++        assert(s1_patch_increment(d) == (d->maximum - d->minimum) / 127.f);
+         assert(s1_patch_physical(d, 0) == d->minimum && s1_patch_physical(d, 127) == d->maximum);
+         /* Sweep every position on one part, reading the other owner's target
+          * and comparing its entire sound cell and identity after each edit. */
+@@ -117,7 +125,7 @@
+         assert(read_patch(0, ids[i]).physical == s1_patch_at(i)->maximum);
+     s1_patch_snapshot snapshot;
+     assert(engine_s1_patch_snapshot(0, &snapshot) && !snapshot.note_locked);
+-    for (unsigned i=0; i<S1_PATCH_COUNT; ++i) assert(snapshot.physical[i] == s1_patch_at(i)->maximum);
++    for (unsigned i=0; i<S1_PATCH_LEGACY_COUNT; ++i) assert(snapshot.physical[i] == s1_patch_at(i)->maximum);
+     assert(!engine_s1_patch_snapshot(2, &snapshot) && !engine_s1_patch_snapshot(0, NULL));
+     assert(engine_s1_patch_set(1, read_patch(1,16).revision, 16, 1) == S1_EDIT_QUEUED);
+     block();
+@@ -126,5 +134,8 @@
+     assert(!engine_s1_patch_read(1, 16, &b));
+     assert(engine_s1_patch_set(1, b.revision, 16, 127) == S1_EDIT_REJECTED);
+     note_lock();
+-    puts("Synth One INIT patch: 13 factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS");
++#ifdef X0X_WIDEN_PROBE
++    width_scenario();
++#endif
++    printf("Synth One INIT patch: %u factory IDs x 128 positions, separate owners, stale/refused writes, queued readback, project save/load, preset replacement, coherent snapshot and note locks PASS\n", (unsigned)S1_PATCH_COUNT);
+ }
+diff --git a/tests/host/synthone_widen_test.sh b/tests/host/synthone_widen_test.sh
+new file mode 100644
+--- /dev/null
++++ b/tests/host/synthone_widen_test.sh
+@@ -0,0 +1,19 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-3.0-only
++set -eu
++cd "$(dirname "$0")/../.."
++out=${1:-build/host/synthone-widen}
++mkdir -p "$out"
++out=$(cd "$out" && pwd)
++sh host/build_host.sh --generate-only >"$out/assets.log" 2>&1
++if [ -z "${S1_ORIGINAL_INPUTS:-}" ]; then
++    S1_ORIGINAL_INPUTS="$out/inputs"
++    python3 tools/restore-synthone-test-inputs.py --bundle assets/test-inputs/synthone --output "$S1_ORIGINAL_INPUTS"
++fi
++sp="$S1_ORIGINAL_INPUTS/closure/experiment/audiokit-4.9.2/AudioKit/Core/Soundpipe"
++. tests/host/original_build.sh
++${CC:-cc} -std=c11 -O1 -DX0X_HOST -DX0X_SYNTHONE_PATCH=1 -DX0X_SYNTHONE_WIDEN=1 \
++    -DX0X_WIDEN_PROBE -D_POSIX_C_SOURCE=200809L -Ifirmware/src -Ifirmware/src/app \
++    -Ifirmware/src/dsp -Ibuild/gen -I"$sp" -I"$sp/lib/dr_wav" $ORIGINAL_FLAGS ${SAN_FLAGS:-} \
++    tests/host/synthone_patch_test.c "$sp/modules/port.c" $ORIGINAL_SOURCES -lm -o "$out/test"
++"$out/test"
+diff --git a/tools/build.py b/tools/build.py
+--- a/tools/build.py
++++ b/tools/build.py
+@@ -469,13 +469,15 @@
+     # Sound-selector previews use tagged storage but deliberately leave the
+     # separate per-note snapshot lifecycle disabled until it is qualified.
+     sound_flags = ("X0X_BASS_PRESET_PREVIEW", "X0X_BASS_TAGGED_SOUND", "X0X_BASS_NOTE_SOUND",
+-                   "X0X_SYNTHONE_PATCH")
++                   "X0X_SYNTHONE_PATCH", "X0X_SYNTHONE_WIDEN")
+     for flag in sound_flags:
+         v = os.environ.get(flag)
+         if v is not None:
+             if v not in ("0", "1"):
+                 raise SystemExit(f"{flag}: 0 or 1")
+             flags.append(f"-D{flag}={v}")
++    if os.environ.get("X0X_SYNTHONE_WIDEN") == "1" and os.environ.get("X0X_SYNTHONE_PATCH") != "1":
++        raise SystemExit("X0X_SYNTHONE_WIDEN requires X0X_SYNTHONE_PATCH=1")
+     if os.environ.get("X0X_BASS_NOTE_SOUND") == "1" and os.environ.get("X0X_BASS_TAGGED_SOUND") != "1":
+         raise SystemExit("X0X_BASS_NOTE_SOUND requires X0X_BASS_TAGGED_SOUND=1")
+     if os.environ.get("X0X_BASS_TAGGED_SOUND") == "1" and os.environ.get("X0X_BASS_PRESET_PREVIEW") != "1":

@@ -1,0 +1,36 @@
+{
+  "created_utc": "2026-11-18T23:23:28.801626+00:00",
+  "base_head": "9be11840b11d256f22a9af19d290cfe96f31a429",
+  "source_sha256": {
+    "firmware/src/dsp/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "firmware/src/dsp/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278",
+    "tests/host/test_synthone_dnbx_envelope.py": "7a066f0cd56015700422b7543c1c3532fa59bd2b7c18169680cae41c95bddf03",
+    "firmware/src/dsp/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "tests/run_tests.sh": "2177313f629d210978528708e3b50c3f43e292a1846f17cb06406a9b9071f882"
+  },
+  "selected_dispatcher_tests": [
+    "synthone-envelope-dnbx",
+    "fastmath",
+    "fastmath-ubsan"
+  ],
+  "selected_dispatcher_exit": 0,
+  "envelope_cases": 10,
+  "envelope_output_words": 379288,
+  "envelope_bytewise_differences": 0,
+  "component_tests": 7,
+  "component_mutants_rejected": 4,
+  "runtime_activation": false,
+  "full_sound_gate": "NOT_RUN; unqualified",
+  "existing_synthone_production": "SILENT; unresolved",
+  "test_categories": {
+    "api_behavior": 5,
+    "input_integrity": 2
+  },
+  "python_optimization": 1,
+  "fixture_metadata_sha256": {
+    "experiments/sound-hardware-v1/mapping/synthone_followup/implementer_brief/envelope_observations.json": "108f75f3965c95e1d3e2259e9d70f076bea4ca18843ec0af29e1477c0dd6d163",
+    "tests/fixtures/synthone-envelope-live/observations.json": "03bbf96fd3171db6af5854241b7ec3272ecff3f44161dc2caa282070b2882390",
+    "tests/fixtures/synthone-envelope-live/case_plan.json": "336e0313c6b1a4f3fb39a232f6ca74f7a53c2103cdedb225518070740dd3f4a3"
+  },
+  "final_log": "focused-runner-guarded.log"
+}

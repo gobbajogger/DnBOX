@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "logical_owners": 2,
+  "frames_per_execution_per_owner": 4096,
+  "executions_per_owner": 2,
+  "total_evaluated_frames_per_logical_owner": 8192,
+  "compared_sample_words": 8192,
+  "finite_output_checks": 16384,
+  "full_state_checkpoint_checks": 310,
+  "untouched_owner_checks": 310,
+  "block_groups": [
+    1,
+    17,
+    64
+  ],
+  "owner_block_counts": [
+    156,
+    154
+  ],
+  "live_control_edits_per_owner": [
+    4,
+    5
+  ],
+  "note_off_frames": [
+    2049,
+    3071
+  ],
+  "maximum_requested_filter_depth": 1.2,
+  "voice_state_bytes_compared": 160,
+  "candidate_source_modified": false,
+  "reference_pcm_read": false,
+  "audio_files_written": false,
+  "scope": "dynamic ownership and block-partition API test; no fidelity gate",
+  "evidence": {
+    "test_declaration_sha256": "2ddb803bafc02ef53fe7b7d4c68b59da8e5de9d4e6ef2d11c19d00ac5b5ef8c8",
+    "source_sha256": "bf7bba35b180e3291146b7267ccd4c16ec3286126c64478ad73ee72cfa81450e",
+    "binary_sha256": "cc77388cfc9753800f3ed908bc167d4a1a5297961ea195471f1d1b092b271b85",
+    "build_log_sha256": "a41ba35680c74c95e7d882508997d9c239c49c0dffd79a985932335ae27d097f",
+    "test_log_sha256": "a045c35a3a3ca9ef107538e3fd26fd186d604976a6022ba02b57febdb8a5f408",
+    "candidate_files_still_unchanged": true
+  }
+}

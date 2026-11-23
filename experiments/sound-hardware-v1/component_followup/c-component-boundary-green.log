@@ -1,0 +1,10 @@
+test_decay_edit_at_attack_boundary_is_latched_on_the_next_sample (__main__.EnvelopeTest.test_decay_edit_at_attack_boundary_is_latched_on_the_next_sample) ... ok
+test_exact_static_and_live_observations (__main__.EnvelopeTest.test_exact_static_and_live_observations) ... ok
+test_interleaved_owners_reproduce_each_solo_recording (__main__.EnvelopeTest.test_interleaved_owners_reproduce_each_solo_recording) ... ok
+test_invalid_prepared_controls_preserve_the_previous_values (__main__.EnvelopeTest.test_invalid_prepared_controls_preserve_the_previous_values) ... ok
+test_reset_is_local_and_reproduces_initial_attack (__main__.EnvelopeTest.test_reset_is_local_and_reproduces_initial_attack) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.568s
+
+OK

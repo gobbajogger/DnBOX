@@ -1,0 +1,18 @@
+{
+  "command": [
+    "python",
+    "/workspace/scratch/e803955aec60/DnBOX/experiments/sound-hardware-v1/dry_voice_followup/check.py",
+    "--variant",
+    "c",
+    "--reference-root",
+    "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm",
+    "--output",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/results/audio180",
+    "--all"
+  ],
+  "root_authorization": "one centered-feedback candidate, unchanged180-note static comparison; separate bounded host work, no native or production activation",
+  "started_utc": "2026-11-19T00:03:44.328462+00:00",
+  "ended_utc": "2026-11-19T00:04:10.513903+00:00",
+  "exit_status": 1,
+  "log_sha256": "52ac288b9cfbad768156ec99449b77c8f7a239768829835fec7de5e54b88d105"
+}

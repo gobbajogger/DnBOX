@@ -1,10 +1,36 @@
 # Firmware UI lane
 
+## Keyboard controls after #975
+
+[Draft PR #987](https://github.com/gobbajogger/DnBOX/pull/987) completes the F1–F7 firmware work. The branch started at consolidated `46874497` and includes the integration F5 closeout at `d4bdf88e`. The Synth One controls use the provider from [Sound #985](https://github.com/gobbajogger/DnBOX/pull/985) through `0b0ff56b`. Production firmware revision `199f0444` contains the final screen layout. The subsequent test and evidence commits preserve all 2,016 tracked build inputs. Integration owns the combined gate and merge.
+
+| Keyboard route | Controls and verified behavior |
+|---|---|
+| **F6 · BREAK hit velocity** | Hold **SEQ**, tap **SCALE** to select velocity, then hold **SEQ** and the step and turn **K3**. Saving and reloading hits at 0, 32, 64 and 127 produced Q15 peaks of 0, 4,644, 9,288 and 18,430. Edits preserve the other pattern and the gain of a hit already playing. Programmed retriggers and live stutter both retain the triggering hit’s velocity. [Focused evidence](fwui/current/keyboard-controls/qualification.json) |
+| **F7 · Synth One on either bass part** | Press **PARA**. Use **K2** to reach SOUND and **K5** to select SYNTH ONE. **K2** pages through the oscillator, filter, both envelopes, EFFECT and SOUND. **K5–K8** edit the controls shown on the selected row. **SCALE** opens the list, **K2** selects a parameter and **K3** edits it. Each part owns 13 INIT patch controls plus CRUSH RATE. The EFFECT row shows the applied rate in Hz, from 48,000 to 2,048. All 13 patch controls changed the rendered audio, and the rate reducer matched 1,916,928 reference frames. [Native routes](fwui/current/synthone-editor/default-review/routes.json) · [Independent panel review](fwui/current/synthone-editor/default-review/review.md) |
+| **F1/F2 · Startup and recovery** | If an update entered from safe mode times out, the firmware redraws the diagnostic screen. **PLAY** retries boot. The instrumented LCD replay covered 42 frames. Removing the redraw or moving retry text by one pixel failed its respective check. Seven ordinary startup scenarios reproduced all 16 archived states. The compact SuperJ6 replay matched all 28 earlier frames and directly observed five previously unconfirmed renderer functions. [Recovery and limits of host measurement](fwui/current/native-routes/README.md) · [Ordinary startup](fwui/current/native-routes/normal-loop/replay-199f0444.json) · [SuperJ6 entries](fwui/current/native-routes/j6-function-replay.json) |
+| **F4/F5 · Pan, battery and performance gestures** | Focused checks passed for the pan range, four-level battery icon, overlays and toasts, held-step release, pad and LED behavior in settings, part copy and hold-GLOBE. Integration also verified all four F5 registrations on the #975 merge. [Integration results](fwui/current/combined-host-results.json) · [Commands and results](fwui/current/keyboard-controls/qualification.json) · [Focused host logs](fwui/current/keyboard-controls/host-logs.tar.gz) |
+
+### Stock Elite and Pro fit
+
+| Stock model | Application image | XIP free | Pool margin above 8,192 B reserve |
+|---|---:|---:|---:|
+| Elite | 551,444 B | 1,228 B | 832 B |
+| Pro | 551,436 B | 1,236 B | 832 B |
+
+Both ordinary builds linked, packaged and passed the flash map. The minimums are 1,024 B free XIP and 512 B pool margin. The receipt records the toolchain and input hashes plus application, ELF and package hashes for each model. [Build receipt](fwui/current/keyboard-controls/stock-fit.json) · [Elite map](fwui/current/keyboard-controls/stock-elite-link.map.gz) · [Pro map](fwui/current/keyboard-controls/stock-pro-link.map.gz)
+
+### Current screen catalog and geometry
+
+The [screen guide](fwui/screens/README.md) and [searchable screen index](fwui/screens/screen-index.tsv) identify 1,968 captures by their decoded RGB hashes, including 1,952 current records and 16 historical records. A fresh walk of 1,538 stock screens checked 44,082 text masks, 19,643 content assertions and 249 glyphs. All passed, with zero geometry findings or instructional-copy matches. The 132 Synth One editor captures include both owners, list and performance states. Independent review measured 83.969% use of the EFFECT panel after the earlier 50.844% layout failed the 70% minimum. All 1,968 catalog entries retained their native RGB pixels in three archived browser-painted viewport shells, for 5,904 comparisons. The cloud run covered modeled LCD and key inputs. Physical display and electrical measurements require hardware. [Stock geometry and detector controls](fwui/current/keyboard-controls/stock-geometry.json) · [EFFECT review and three sizes](fwui/current/synthone-editor/default-review/review.md) · [5,904 viewport comparisons](fwui/current/panel-routes/catalog-viewport-199f0444.json)
+
+## Qualification of the merged #975
+
 Integ merged [PR #975](https://github.com/gobbajogger/DnBOX/pull/975) into `integration/dnbox-consolidated` on 21 November 2026. The merge and qualified PR head have identical trees. All 37 focused host registrations and both stock builds passed on `9dd6f2df`. All four F5 registrations passed on integration merge `3e307cfa`. The initial unfiltered run recorded 85 outcomes. The remaining registrations were assigned to continuations at the same merge. [Merge](https://github.com/gobbajogger/DnBOX/commit/3e307cfa455d22dfca5e4ef439080816b4e4f859) · [Qualification record](fwui/current/integration-qualification.json)
 
-## Find a screen
+### Screen catalog at the #975 merge
 
-The [screen guide](fwui/screens/README.md) and [searchable catalog](fwui/screens/screen-index.tsv) link 1,944 records and cover normal startup, pending-sample recovery, calibration, updater, safe mode, playing states and both bass editors. The catalog records the source, archive or direct PNG path, and decoded RGB hash for each native 240×240 capture. The two retired stock placeholder pages retain their earlier hashes under `history/`.
+At the #975 merge, the screen guide and searchable catalog linked 1,944 records and cover normal startup, pending-sample recovery, calibration, updater, safe mode, playing states and both bass editors. The catalog records the source, archive or direct PNG path, and decoded RGB hash for each native 240×240 capture. The two retired stock placeholder pages retain their earlier hashes under `history/`.
 
 | Route | Controls and behavior |
 |---|---|
@@ -15,7 +41,7 @@ The [screen guide](fwui/screens/README.md) and [searchable catalog](fwui/screens
 
 The last bank keeps the previous rows visible and editable. Two- and three-control rows use the available width. Drum and bass parameter lists show up to nine real entries and distribute short lists across their available height.
 
-## Stock memory
+### Stock memory at the #975 merge
 
 | Firmware source | Elite XIP free | Pro XIP free | Pool margin on both |
 |---|---:|---:|---:|
@@ -30,7 +56,7 @@ Both strict target models played 132,352 stereo frames with identical PCM to the
 
 The pitch comparison covered standalone and combined linkage and all 128 words. [Native link and pitch-table comparison](fwui/current/panel-routes/shared-pitch.json)
 
-## Finish-line checklist
+### Finish-line checklist at the #975 merge
 
 | Item | Status | Evidence |
 |---|---|---|
@@ -239,3 +265,19 @@ REVERB now exposes existing REV RETURN on K7 and DLY RETURN on K8 while retainin
 Both new tests are registered once in shared-generator classG. No old test oracle or threshold is weakened. The exact KIT+list+REVERB source has stock XIP1060/1068 B free, poolmargin780 B and reserve8192 B; all floors remain1024/512. A separate actual stock measurement of selector+KIT+list+REVERB also gives1060/1068 and780, establishing measured net selector composition cost0 B. All5080 snapshot paths retain exact bytes/modes after build. Five composed positive scenarios pass and render205 frames; independent unit negatives remain separate. These receipts do not establish a whole-call-stack, timing, hardware, complete UI or aggregate gate PASS.
 
 Independent SOUND/BREAK mapping identifies concrete remaining geometry work: generic footer is bypassed; SOUND navigation captions must follow ordinary/held/PATCH/pending input ownership and cannot overwrite CP y28/212. BREAK count/page text shares the PENDING/LIVE/MORE band, and the reference STEP instruction at238 collides with current lock notches238..239. Do not hide existing status, assignments or locks to insert text. HOME simultaneous matrix plus five independent live lanes remains a separate composition. All12 edition2 original/observer/runtime gap groups remain open with exact per-key records; inventory coverage does not mean per-control runtime acceptance. Full reports, native receipts, original failures, exact patches and recovery remain on the existing implementation Page.
+
+## 2026-11-22 — verified-regressions-resume reference checkpoint
+
+On `lane/fwui-verified-regressions-resume` the first still-unmatched area is BREAK SEQ rest-playhead against the 0.0.26 source renderer. [Source-based checkpoint](fwui/current/reference-026/break-seq-rest-cue.md) and [candidate/hash/verification receipt](fwui/current/reference-026/archive-candidates.json) distinguish previously reproduced behavior from unrun exact-head checks. The two already-posted #987 defects remain known; no duplicate PR comment, new fix, completed full-page GIF set, Elite/Pro build or independent review is asserted. **Blocker:** Page-only original/Step 2 ZIP bytes and current build tree/SDK are unavailable in this execution environment. **Fix:** retrieve exact inputs into an authorized build worker, produce paired original-versus-current full-page frames and RED/GREEN, then qualify stock builds and independent review. Status: **WORKING**.
+
+**Archive-input follow-up (2026-11-22):** [Standalone Pillow/ZIP integrity test](../../tests/ui_inventory/fwui_archived_gif_integrity.py) and [exact decoded-frame report](fwui/current/reference-026/archived-gif-audit.json) PASS for the historical 1,880-GIF archive. The battery/SMC/playhead imagery is **not** a revision-matched 0.0.26 reference, and there is still no full-page original-versus-current motion comparison. The renderer contact sheet and report were separately uploaded to `/LoopyX0X37/Project Sources` with `lane/fwui-verified-regressions-resume-70ddd1ac` in their filenames. Firmware focused tests and Elite/Pro builds remain NOT_RUN (no firmware change in these checkpoint commits).
+
+The assigned resume-work branch now has [paired full-page BREAK SEQ stills and motion](fwui/current/reference-026/break-seq/README.md) from exact shipping and resumed host source. The shipping marker moves at every sampled transition, while the resumed LCD lane is stationary in all four modes with working pad LEDs. The renderer fix, stock builds and remaining mapped routes are open.
+
+The [canonical comparison and qualification index](fwui/current/reference-026/qualification/README.md) records shipping and production pins, every mapped role, three confirmed repairs and the open mixer comparison. Scoped BREAK and Pad Colours checks pass. Stock Elite and Pro builds package with 1,100 B and 1,108 B of XIP free and 832 B of pool margin each. The shared-glyph mixer feasibility and final F1–F7 readout remain in progress.
+
+The final [F1–F7 evidence index](fwui/current/reference-026/qualification/README.md) includes independent viewport checks and stock Elite/Pro BREAK motion. F1 stays open on the approved drum MIX difference. The best complete detached renderer leaves 940/948 B of stock Elite/Pro XIP free, below the 1,024 B floor. Its patch and logs are preserved for the next fit pass. Status: WORKING.
+
+The [R22 mixer and readout update](fwui/current/reference-026/qualification/README.md#exact-r22-mix-and-readout-update) restores the filled LEVEL and pending mute cues for both kits, suppresses duplicated FX and Master/Wave readouts, and preserves the confirmed 0.0.26 mute timeline. Exact stock builds leave 1,116 B Elite and 1,124 B Pro XIP free, with 832 B pool margin each. Bass retains its expression lanes pending an independently legible held accent and final-column slide cue. Status: WORKING.
+
+The [shared spatial coverage and Bass qualification](fwui/current/reference-026/qualification/README.md#shared-spatial-coverage-and-bass-cues) covers the framebuffer line change, both SEQ/GEN Bass owners, equivalent Pan and shared glyph controls, and the same 0.0.26 mute timeline. The exact stock packages leave 1,164 B Elite and 1,176 B Pro XIP free with 832 B pool margin each. The 1,538-state framebuffer gate reports zero findings. Status: WORKING pending Project Sources verification and the canonical #987 update.

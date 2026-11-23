@@ -1,0 +1,629 @@
+{
+  "status": "FOUR_STOCK_NATIVE_JOBS_TERMINAL",
+  "created_utc": "2026-11-19T00:30:33.272212+00:00",
+  "allocation_comment": 6995594729,
+  "published_head_at_allocation": "f7f27cde98f7ac7594eb4ad23526652f0fb10130",
+  "plan_source_commit": "e0ef1994a91abef619c755f9428e44c8c9f064c4",
+  "consolidated_head_at_allocation": "76040daa5b52d686a8b7b544296ba5d79610a95d",
+  "allocation_consumed": true,
+  "emulator_execution": "NOT_RUN",
+  "scope": "Allocated four serial stock app links only; no loader/package/timing/fullsuite/gate/production activation.",
+  "jobs": [
+    {
+      "label": "production-reference-elite-04",
+      "model": "elite",
+      "profile": "reference",
+      "plan_sha256": "54b75516b9904283b37ffd9de9a50738a5322de6bfce754ed06265e8a976f2b9",
+      "source_files_verified": 357,
+      "status": "LINK_MEASURED",
+      "physical_link_exit": 0,
+      "outer_exit": 0,
+      "compile_count": 73,
+      "inspection_count": 3,
+      "all_command_exits_zero": true,
+      "commands_match_plan": true,
+      "serial_commands": true,
+      "start_utc": "2026-11-19T00:27:19.725948+00:00",
+      "end_utc": "2026-11-19T00:27:33.827749+00:00",
+      "native_first_command_utc": "2026-11-19T00:27:20.034629+00:00",
+      "native_last_command_utc": "2026-11-19T00:27:33.818324+00:00",
+      "elapsed_seconds": 14.10181348999322,
+      "maxrss_kib": 83056,
+      "admission_mem_available_bytes": 8530751488,
+      "admission_disk_free_bytes": 39593156608,
+      "local_process_group_released": true,
+      "physical_xip_capacity": 552672,
+      "load_sections_extent_before_alignment": 551488,
+      "alignment_padding_bytes": 0,
+      "marker_bytes": 4,
+      "load_image_bytes": 551492,
+      "xip_free_bytes": 1180,
+      "reserve_bytes": 1024,
+      "reserve_margin_bytes": 156,
+      "pool_used_bytes": 335092,
+      "pool_raw_free_bytes": 8972,
+      "pool_margin_after_8192_bytes": 780,
+      "pool_excess_over_required_512_margin": 268,
+      "ordinary_ram_extent_bytes": 97204,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_used_bytes": 9216,
+      "xpool_free_bytes": 0,
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 547572,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34102292
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34105000
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34105608
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3888,
+          "lma": 29869056
+        }
+      },
+      "undefined_symbols": [],
+      "soft_double_symbols": [],
+      "ram_text_call_lines": [],
+      "c1_text_call_lines": [
+        "1c00f6c:    c1 00             \tcall r1",
+        "1c00f96:    c3 00             \tcall r3"
+      ],
+      "helper_symbols": {
+        "fm_exp2_nf": {
+          "count": 1,
+          "symbols": [
+            "02001422 l     F .text\t\t 00000066 fm_exp2_nf"
+          ]
+        },
+        "fm_exp2f": {
+          "count": 2,
+          "symbols": [
+            "02001488 l     F .text\t\t 00000036 fm_exp2f",
+            "0205ea8a l     F .text\t\t 00000092 fm_exp2f"
+          ]
+        },
+        "fm_expf": {
+          "count": 2,
+          "symbols": [
+            "02035460 l     F .text\t\t 0000005c fm_expf",
+            "02059bb8 l     F .text\t\t 000000b8 fm_expf"
+          ]
+        },
+        "fm_log2f": {
+          "count": 1,
+          "symbols": [
+            "0203215a l     F .text\t\t 0000009a fm_log2f"
+          ]
+        },
+        "fm_logf": {
+          "count": 1,
+          "symbols": [
+            "0203544e l     F .text\t\t 00000012 fm_logf"
+          ]
+        },
+        "fm_db2lin": {
+          "count": 1,
+          "symbols": [
+            "0205ec40 l     F .text\t\t 0000009c fm_db2lin"
+          ]
+        }
+      },
+      "elf_sha256": "262aecf1718137d0210f18d6a601e2df977ec8897c35dffa2cf201311f3aba6b",
+      "map_sha256": "e5584fde647d006c8cb8006a2a4eab518d997bf45bd834d84ae02ad25d2a22a5",
+      "commands_sha256": "357f03ec0b0188e338dc4d61414f2bf02438070490870155a3986e3986c3d4de",
+      "result_sha256": "e0d872b5a1eae890872bf23e7009d2d12dc60f370cb7522b2d97ff5446fe2b01",
+      "raw_result_native_execution_field": "NOT_RUN",
+      "qualification": "Resource measurement only; no target sound/state/timing acceptance"
+    },
+    {
+      "label": "production-shared-elite-05",
+      "model": "elite",
+      "profile": "shared",
+      "plan_sha256": "a8ba4504d514db2160af53fd76db0e2441d63420a92723104d64f70ef0e7c22d",
+      "source_files_verified": 357,
+      "status": "LINK_MEASURED",
+      "physical_link_exit": 0,
+      "outer_exit": 0,
+      "compile_count": 73,
+      "inspection_count": 3,
+      "all_command_exits_zero": true,
+      "commands_match_plan": true,
+      "serial_commands": true,
+      "start_utc": "2026-11-19T00:27:43.501373+00:00",
+      "end_utc": "2026-11-19T00:27:57.631484+00:00",
+      "native_first_command_utc": "2026-11-19T00:27:43.802231+00:00",
+      "native_last_command_utc": "2026-11-19T00:27:57.620280+00:00",
+      "elapsed_seconds": 14.13023297599284,
+      "maxrss_kib": 83152,
+      "admission_mem_available_bytes": 8598605824,
+      "admission_disk_free_bytes": 39581536256,
+      "local_process_group_released": true,
+      "physical_xip_capacity": 552672,
+      "load_sections_extent_before_alignment": 544704,
+      "alignment_padding_bytes": 0,
+      "marker_bytes": 4,
+      "load_image_bytes": 544708,
+      "xip_free_bytes": 7964,
+      "reserve_bytes": 1024,
+      "reserve_margin_bytes": 6940,
+      "pool_used_bytes": 335092,
+      "pool_raw_free_bytes": 8972,
+      "pool_margin_after_8192_bytes": 780,
+      "pool_excess_over_required_512_margin": 268,
+      "ordinary_ram_extent_bytes": 97204,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_used_bytes": 9216,
+      "xpool_free_bytes": 0,
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 540788,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34095508
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34098216
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34098824
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3888,
+          "lma": 29869056
+        }
+      },
+      "undefined_symbols": [],
+      "soft_double_symbols": [],
+      "ram_text_call_lines": [],
+      "c1_text_call_lines": [
+        "1c00f6c:    c1 00             \tcall r1",
+        "1c00f96:    c3 00             \tcall r3"
+      ],
+      "helper_symbols": {
+        "fm_exp2_nf": {
+          "count": 1,
+          "symbols": [
+            "02058edc gw    F .text\t\t 00000066 fm_exp2_nf"
+          ]
+        },
+        "fm_exp2f": {
+          "count": 1,
+          "symbols": [
+            "0205a34c gw    F .text\t\t 00000036 fm_exp2f"
+          ]
+        },
+        "fm_expf": {
+          "count": 1,
+          "symbols": [
+            "02058f42 gw    F .text\t\t 0000005c fm_expf"
+          ]
+        },
+        "fm_log2f": {
+          "count": 1,
+          "symbols": [
+            "02059a86 gw    F .text\t\t 0000009a fm_log2f"
+          ]
+        },
+        "fm_logf": {
+          "count": 1,
+          "symbols": [
+            "02034ad0 l     F .text\t\t 00000012 fm_logf"
+          ]
+        },
+        "fm_db2lin": {
+          "count": 1,
+          "symbols": [
+            "0205d11e gw    F .text\t\t 0000000e fm_db2lin"
+          ]
+        }
+      },
+      "elf_sha256": "18fd069d556c6d882e69b42e2c37e0a2deb2cc81274e19160dc5419ea22978a4",
+      "map_sha256": "d9fb6c57669dfcfff0d0d8625ce0b2d02b6446e8aae2a07b501d346b231e21e6",
+      "commands_sha256": "6e232bb0babc54b6e61a3aa07fb27775d05cd9faf5fc3c4f40264ea3a172f77e",
+      "result_sha256": "1c21a921e743640e4e56eb1dad625a03b0cd128d4a25edb1410d1a489b9acded",
+      "raw_result_native_execution_field": "NOT_RUN",
+      "qualification": "Resource measurement only; no target sound/state/timing acceptance"
+    },
+    {
+      "label": "production-reference-pro-06",
+      "model": "pro",
+      "profile": "reference",
+      "plan_sha256": "a9a41f0c31110b5d8af7b17265df1cfed7b94621fc85c83d62d99ea060568650",
+      "source_files_verified": 357,
+      "status": "LINK_MEASURED",
+      "physical_link_exit": 0,
+      "outer_exit": 0,
+      "compile_count": 73,
+      "inspection_count": 3,
+      "all_command_exits_zero": true,
+      "commands_match_plan": true,
+      "serial_commands": true,
+      "start_utc": "2026-11-19T00:28:06.244848+00:00",
+      "end_utc": "2026-11-19T00:28:19.273120+00:00",
+      "native_first_command_utc": "2026-11-19T00:28:06.590549+00:00",
+      "native_last_command_utc": "2026-11-19T00:28:19.262939+00:00",
+      "elapsed_seconds": 13.028348810999887,
+      "maxrss_kib": 82924,
+      "admission_mem_available_bytes": 8663662592,
+      "admission_disk_free_bytes": 39569440768,
+      "local_process_group_released": true,
+      "physical_xip_capacity": 552672,
+      "load_sections_extent_before_alignment": 551480,
+      "alignment_padding_bytes": 0,
+      "marker_bytes": 4,
+      "load_image_bytes": 551484,
+      "xip_free_bytes": 1188,
+      "reserve_bytes": 1024,
+      "reserve_margin_bytes": 164,
+      "pool_used_bytes": 335092,
+      "pool_raw_free_bytes": 8972,
+      "pool_margin_after_8192_bytes": 780,
+      "pool_excess_over_required_512_margin": 268,
+      "ordinary_ram_extent_bytes": 97204,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_used_bytes": 9216,
+      "xpool_free_bytes": 0,
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 547564,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34102284
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34104992
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34105600
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3884,
+          "lma": 29869056
+        }
+      },
+      "undefined_symbols": [],
+      "soft_double_symbols": [],
+      "ram_text_call_lines": [],
+      "c1_text_call_lines": [
+        "1c00f6c:    c1 00             \tcall r1",
+        "1c00f96:    c3 00             \tcall r3"
+      ],
+      "helper_symbols": {
+        "fm_exp2_nf": {
+          "count": 1,
+          "symbols": [
+            "02001422 l     F .text\t\t 00000066 fm_exp2_nf"
+          ]
+        },
+        "fm_exp2f": {
+          "count": 2,
+          "symbols": [
+            "02001488 l     F .text\t\t 00000036 fm_exp2f",
+            "0205ea8a l     F .text\t\t 00000092 fm_exp2f"
+          ]
+        },
+        "fm_expf": {
+          "count": 2,
+          "symbols": [
+            "02035460 l     F .text\t\t 0000005c fm_expf",
+            "02059bb8 l     F .text\t\t 000000b8 fm_expf"
+          ]
+        },
+        "fm_log2f": {
+          "count": 1,
+          "symbols": [
+            "0203215a l     F .text\t\t 0000009a fm_log2f"
+          ]
+        },
+        "fm_logf": {
+          "count": 1,
+          "symbols": [
+            "0203544e l     F .text\t\t 00000012 fm_logf"
+          ]
+        },
+        "fm_db2lin": {
+          "count": 1,
+          "symbols": [
+            "0205ec40 l     F .text\t\t 0000009c fm_db2lin"
+          ]
+        }
+      },
+      "elf_sha256": "1a1e8a569e5a3525fbfbf1ef776b29db764d4b8bc3f203d1831d1bc3ca38063c",
+      "map_sha256": "8b3436853ec25cd4a588a01a42ba072352893d9b3b2f3c0ffd814d9154002f4b",
+      "commands_sha256": "5f0beb9240ddc6ac615e67b5828db0155243a3f2cc11eaca023f47b9c3a9b3f7",
+      "result_sha256": "6e2e2b55fe007f65acbc9a6fda31e291eb7313ac5ae4e767046cc9e344b10c23",
+      "raw_result_native_execution_field": "NOT_RUN",
+      "qualification": "Resource measurement only; no target sound/state/timing acceptance"
+    },
+    {
+      "label": "production-shared-pro-07",
+      "model": "pro",
+      "profile": "shared",
+      "plan_sha256": "253510c1009f19be438504be7e8d0a4554f006d321f87a40c3c03d888a4b83e4",
+      "source_files_verified": 357,
+      "status": "LINK_MEASURED",
+      "physical_link_exit": 0,
+      "outer_exit": 0,
+      "compile_count": 73,
+      "inspection_count": 3,
+      "all_command_exits_zero": true,
+      "commands_match_plan": true,
+      "serial_commands": true,
+      "start_utc": "2026-11-19T00:28:35.692024+00:00",
+      "end_utc": "2026-11-19T00:28:48.945284+00:00",
+      "native_first_command_utc": "2026-11-19T00:28:35.937336+00:00",
+      "native_last_command_utc": "2026-11-19T00:28:48.935613+00:00",
+      "elapsed_seconds": 13.25326691698865,
+      "maxrss_kib": 83172,
+      "admission_mem_available_bytes": 8485285888,
+      "admission_disk_free_bytes": 39557828608,
+      "local_process_group_released": true,
+      "physical_xip_capacity": 552672,
+      "load_sections_extent_before_alignment": 544696,
+      "alignment_padding_bytes": 0,
+      "marker_bytes": 4,
+      "load_image_bytes": 544700,
+      "xip_free_bytes": 7972,
+      "reserve_bytes": 1024,
+      "reserve_margin_bytes": 6948,
+      "pool_used_bytes": 335092,
+      "pool_raw_free_bytes": 8972,
+      "pool_margin_after_8192_bytes": 780,
+      "pool_excess_over_required_512_margin": 268,
+      "ordinary_ram_extent_bytes": 97204,
+      "ordinary_ram_free_bytes": 1100,
+      "xpool_used_bytes": 9216,
+      "xpool_free_bytes": 0,
+      "sections": {
+        ".text": {
+          "vma": 33554720,
+          "bytes": 540780,
+          "lma": 33554720
+        },
+        ".ram_sink": {
+          "vma": 29360128,
+          "bytes": 1024,
+          "lma": 29360128
+        },
+        ".ram_text": {
+          "vma": 29361152,
+          "bytes": 2708,
+          "lma": 34095500
+        },
+        ".c1_text": {
+          "vma": 29363860,
+          "bytes": 608,
+          "lma": 34098208
+        },
+        ".data": {
+          "vma": 29392896,
+          "bytes": 600,
+          "lma": 34098816
+        },
+        ".c1stack": {
+          "vma": 29835264,
+          "bytes": 4608,
+          "lma": 29835264
+        },
+        ".bss": {
+          "vma": 29393504,
+          "bytes": 96596,
+          "lma": 29393504
+        },
+        ".pool": {
+          "vma": 29491200,
+          "bytes": 335092,
+          "lma": 29491200
+        },
+        ".xpool": {
+          "vma": 29839872,
+          "bytes": 9216,
+          "lma": 29839872
+        },
+        ".noinit": {
+          "vma": 29868032,
+          "bytes": 308,
+          "lma": 29868032
+        },
+        ".ble_ram": {
+          "vma": 29869056,
+          "bytes": 3884,
+          "lma": 29869056
+        }
+      },
+      "undefined_symbols": [],
+      "soft_double_symbols": [],
+      "ram_text_call_lines": [],
+      "c1_text_call_lines": [
+        "1c00f6c:    c1 00             \tcall r1",
+        "1c00f96:    c3 00             \tcall r3"
+      ],
+      "helper_symbols": {
+        "fm_exp2_nf": {
+          "count": 1,
+          "symbols": [
+            "02058edc gw    F .text\t\t 00000066 fm_exp2_nf"
+          ]
+        },
+        "fm_exp2f": {
+          "count": 1,
+          "symbols": [
+            "0205a34c gw    F .text\t\t 00000036 fm_exp2f"
+          ]
+        },
+        "fm_expf": {
+          "count": 1,
+          "symbols": [
+            "02058f42 gw    F .text\t\t 0000005c fm_expf"
+          ]
+        },
+        "fm_log2f": {
+          "count": 1,
+          "symbols": [
+            "02059a86 gw    F .text\t\t 0000009a fm_log2f"
+          ]
+        },
+        "fm_logf": {
+          "count": 1,
+          "symbols": [
+            "02034ad0 l     F .text\t\t 00000012 fm_logf"
+          ]
+        },
+        "fm_db2lin": {
+          "count": 1,
+          "symbols": [
+            "0205d11e gw    F .text\t\t 0000000e fm_db2lin"
+          ]
+        }
+      },
+      "elf_sha256": "9738ecf42696a3c4d973c370bcc7d4eeb2ad9f9dd6f15826a82e116053ef6140",
+      "map_sha256": "dcd3286799482c4e4e18b8c531948ac1974a84302dd1d1a06ae5dd32ef63bbc0",
+      "commands_sha256": "5ad75f3471674bd7f5a32e05704ab6ca0eb196113aadbcc188d2f8b7dcea3735",
+      "result_sha256": "bca60796186958c33818dd08096dd97bb363cf427ec3415f58a327bb42cd5fe8",
+      "raw_result_native_execution_field": "NOT_RUN",
+      "qualification": "Resource measurement only; no target sound/state/timing acceptance"
+    }
+  ],
+  "issues": [
+    "Historical RESULT.json keeps native_execution=NOT_RUN after compiler/linker execution. Raw results are preserved unchanged. The 308 timestamped command receipts and outer wait/release receipts prove native build completion. Target code and emulator execution remain NOT_RUN."
+  ],
+  "total_compile_commands": 292,
+  "total_physical_links": 4,
+  "total_post_link_inspections": 12,
+  "serial_job_order_verified": true,
+  "local_process_release_all_four": true,
+  "shared_savings_by_model": {
+    "elite": 6784,
+    "pro": 6784
+  },
+  "nontext_section_changes_by_model": {
+    "elite": [],
+    "pro": []
+  },
+  "process_visibility": "Local PID namespace only; root supplied coordinated release. No absence of unrelated/global processes is inferred. Root may run other allocated work after this sequence release.",
+  "native_build_execution": "COMPLETED_AND_INSPECTED",
+  "target_code_execution": "NOT_RUN",
+  "native_execution_interpretation": "These receipts prove execution of native compiler/linker/inspection tools; no target firmware instructions were executed."
+}

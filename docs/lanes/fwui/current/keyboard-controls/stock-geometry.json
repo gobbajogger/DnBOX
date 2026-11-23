@@ -1,0 +1,40 @@
+{
+  "production": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+  "configuration": "Stock SMK-37 Synth One patch enabled",
+  "inventory": {
+    "screens": 1538,
+    "families": [
+      "engine",
+      "global",
+      "help",
+      "list",
+      "modal",
+      "ordinary"
+    ],
+    "visualApproval": false
+  },
+  "audit": {
+    "screens": 1538,
+    "texts": 44082,
+    "findings": 0
+  },
+  "content": "PRESENCE checks=19643 missing=0",
+  "glyphs": "GLYPH_PIXELS checks=249 missing=0 damaged=0",
+  "screensWithInstructionalCopy": {},
+  "controls": {
+    "PRESENCE_MUTATE_SYNTH": {
+      "rendererExit": 1,
+      "geometryFindings": 0,
+      "missingContent": 462
+    },
+    "GEOMETRY_MUTATE": {
+      "rendererExit": 1,
+      "geometryFindings": 37375,
+      "missingContent": 0
+    },
+    "AUDIT_MUTATE_SKIP": {
+      "rendererExit": 0,
+      "inventoryRejected": true
+    }
+  }
+}

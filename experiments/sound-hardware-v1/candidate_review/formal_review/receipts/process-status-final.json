@@ -1,0 +1,38 @@
+{
+  "source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+  "source_path": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+  "purpose": "Synthetic harness process-status negative/positive controls only; no DSP/compiler execution.",
+  "cases": [
+    {
+      "name": "forced_false",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status/synthetic_gate_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status",
+        "false"
+      ],
+      "exit_code": 1,
+      "scoped_acceptance_pass": false,
+      "receipt_written": true,
+      "expected_exit_code": 1,
+      "pass": true
+    },
+    {
+      "name": "forced_true",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status/synthetic_gate_driver.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status/verify_candidate.py",
+        "/workspace/scratch/67e685478953/superj6_research/candidate_review/formal_ce_review_20261118/validation/final_index_status",
+        "true"
+      ],
+      "exit_code": 0,
+      "scoped_acceptance_pass": true,
+      "receipt_written": true,
+      "expected_exit_code": 0,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

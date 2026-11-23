@@ -7,13 +7,23 @@ static uint32_t graph_hash(int p){
  uint32_t h=2166136261u;for(int y=26;y<68;y++)for(int x=13;x<=227;x++)h=(h^cv_px[y*240+x])*16777619u;
  return h;
 }
-static uint32_t screen_curve(int ep){
- *page_of(V_PART)=ep;draw_main();
- /* First mixed row remains 42px; the isolated active amp row follows it.
-  * Exclude all text, include actual compositor curve pixels only. */
- uint32_t h=2166136261u;int ink=0;
- for(int y=92;y<119;y++)for(int x=13;x<=227;x++){h=(h^fb[y*240+x])*16777619u;ink+=fb[y*240+x]==swap16(matrix_col());}
- CHECK(ink>0);return h;
+static uint32_t screen_curve(int ep,int voice)
+{
+    *page_of(V_PART)=ep;
+    draw_main();draw_knobs();
+    /* BD now draws a full LEVEL/TIME graph in the lower panel; SD keeps
+     * the inline AMP bank. Both regions contain real curve ink, not labels. */
+    int first_y=voice==DR_BD?159:92,last_y=voice==DR_BD?200:119;
+    int first_x=voice==DR_BD?33:13,last_x=voice==DR_BD?226:227;
+    uint32_t hash=2166136261u;
+    int ink=0;
+    for(int y=first_y;y<last_y;y++)for(int x=first_x;x<=last_x;x++) {
+        uint16_t pixel=fb[y*240+x];
+        hash=(hash^pixel)*16777619u;
+        ink+=pixel==swap16(matrix_col());
+    }
+    CHECK(ink>0);
+    return hash;
 }
 static void physical_amp_caption(int ep)
 {
@@ -66,8 +76,8 @@ int main(void){
   int py=68-(int)(v.raw_level*42+.5f);
   (void)graph_hash(ep);CHECK(cv_px[(py-1)*240+px-1]==swap16(SOUND_INK));
 
-  pref_set(r,0);tick_ms(8);uint32_t screen_lo=screen_curve(ep);
-  pref_set(r,127);tick_ms(8);CHECK(screen_curve(ep)!=screen_lo);
+  pref_set(r,0);tick_ms(8);uint32_t screen_lo=screen_curve(ep,voice);
+  pref_set(r,127);tick_ms(8);CHECK(screen_curve(ep,voice)!=screen_lo);
   pref_set(r,64);tick_ms(8);engine_drum(PART_909,voice,1);tick_ms(8);
   *page_of(V_PART)=ep;draw_header();draw_main();draw_knobs();draw_footer();shot(voice==DR_BD?"drum-bd-envelope":"drum-sd-envelope");
  }

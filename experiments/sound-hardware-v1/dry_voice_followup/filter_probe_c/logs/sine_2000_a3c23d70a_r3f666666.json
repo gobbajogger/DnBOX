@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/scratch/e803955aec60/s1_c_filter_probe/build/filter_probe",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/host_observation_20261119/inputs/sine_2000_a3c23d70a.f32le",
+    "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r3f666666.C-filter.f32le",
+    "3f666666"
+  ],
+  "exit_status": 0,
+  "stdout": "{\"scope\":\"frozen C filter only\",\"sample_rate_hz\":44100,\"cutoff_hz\":2000,\"resonance_f32_hex\":\"3f666666\",\"prewarm_frames\":4096,\"retained_frames\":32768,\"filter_substeps\":73728,\"steady_window\":[16384,32768],\"prewarm_nonfinite\":0,\"output_nonfinite\":0,\"prewarm_peak\":0,\"oscillator_envelopes_prepared_controls_unchanged\":true,\"feedback_argument_classification\":\"reconstructed from current output and old lags; NOT exact traced solver d\",\"reconstructed_all\":{\"count\":65536,\"sum_squares\":11.205782087438838,\"peak_abs\":0.020286541781388223},\"reconstructed_steady\":{\"count\":32768,\"sum_squares\":5.609481347922082,\"peak_abs\":0.018504851264879107}}\n",
+  "stderr": ""
+}

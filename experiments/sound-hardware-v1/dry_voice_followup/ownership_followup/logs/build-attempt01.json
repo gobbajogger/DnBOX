@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "-std=c11",
+    "-O2",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wdouble-promotion",
+    "-DX0X_HOST=1",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor",
+    "-I/workspace/scratch/e803955aec60/s1_dry_voice_c/src",
+    "/workspace/scratch/e803955aec60/s1_c_ownership/tests/ownership_test.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/src/s1_dry_voice.c",
+    "/workspace/scratch/e803955aec60/s1_dry_voice_c/vendor/dnbx_s1_envelope.c",
+    "-o",
+    "/workspace/scratch/e803955aec60/s1_c_ownership/build/ownership_test"
+  ],
+  "exit_status": 0,
+  "stdout": "",
+  "stderr": ""
+}

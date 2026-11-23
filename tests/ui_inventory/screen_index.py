@@ -100,6 +100,49 @@ def archived_rows(directory):
     return sorted(current.values())
 
 
+def ordinary_rows(screens, rows):
+    directory = screens.parent / "current/panel-routes/ordinary-current"
+    receipt = json.loads((directory / "routes.json").read_text())
+    updates = receipt["routes"]
+    path = directory / "routes.tar.xz"
+    if sha256(path.read_bytes()) != receipt["archiveSha256"]:
+        raise ValueError("Ordinary route archive differs")
+    indexed = {row[0]: row for row in rows}
+    member_hashes = {}
+    for name, frame in updates.items():
+        member = frame["member"]
+        if "/" in name or member != name + ".png":
+            raise ValueError(f"Unexpected ordinary route: {name}")
+        old = indexed.get(name)
+        if frame["previousRgbSha256"] != (old[4] if old else None):
+            raise ValueError(f"Ordinary predecessor differs: {name}")
+        member_hashes[member] = frame["pngSha256"]
+
+    scope = "Elite and Pro default / ordinary stock host walker / 199f0444"
+    for _, archive, member, _, digest in packed_routes(screens, path, member_hashes,
+                                                       "ordinary", scope):
+        name = Path(member).stem
+        if digest != updates[name]["rgbSha256"]:
+            raise ValueError(f"Ordinary framebuffer differs: {name}")
+        indexed[name] = (name, archive, member, scope, digest)
+    families = {"edge", "engine", "global", "help", "list", "modal", "view"}
+    ordinary = sorted(name for name in indexed if name == "home-playing"
+                      or name.split("-", 1)[0] in families)
+    changed = sum(frame["previousRgbSha256"] is not None for frame in updates.values())
+    counts = [len(ordinary), len(ordinary) - len(updates), changed, len(updates) - changed]
+    if counts != [receipt[key] for key in ("comparedFrames", "identicalFrames",
+                                            "changedFrames", "newFrames")]:
+        raise ValueError("Ordinary replay count differs")
+    digests = "".join(f"{name}\t{indexed[name][4]}\n" for name in ordinary)
+    if sha256(digests.encode()) != receipt["inventoryRgbSha256"]:
+        raise ValueError("Ordinary replay inventory differs")
+    for name in ordinary:
+        if name not in updates:
+            _, archive, member, _, digest = indexed[name]
+            indexed[name] = (name, archive, member, scope + " / matched archived RGB", digest)
+    return list(indexed.values())
+
+
 def image_rgb(source, name):
     with Image.open(source) as image:
         if image.format != "PNG" or image.size != (240, 240):
@@ -171,7 +214,7 @@ def packed_routes(screens, archive_path, manifest, group, scope):
 
 def synthone_rows(screens):
     directory = screens.parent / "current/synthone-editor"
-    scope = "Sound #973 / X0X_SYNTHONE_PATCH=1 / INIT"
+    scope = "historical optional Synth One / X0X_SYNTHONE_PATCH=1 / INIT"
     qualification = json.loads((directory / "qualification.json").read_text())
     for name, key in [("frames.tar.gz", "archive_sha256"), ("frames.json", "frames_manifest_sha256")]:
         if sha256((directory / name).read_bytes()) != qualification[key]:
@@ -194,7 +237,19 @@ def synthone_rows(screens):
         raise ValueError("Incomplete Synth One matrix, parameter list or live route replay")
     for row in packed_routes(screens, directory / "routes.tar.xz", routes, "synth-one", scope):
         rows[row[0]] = row
-    return rows.values()
+    current = directory / "default-review"
+    new_routes = json.loads((current / "routes.json").read_text())
+    comparison = json.loads((current / "comparison.json").read_text())
+    if sha256((current / "routes.tar.xz").read_bytes()) != comparison["archiveSha256"]:
+        raise ValueError("Default Synth One archive differs")
+    additions = {f"bass-{owner}-page-5-k5-{state}.png" for owner in "AB"
+                 for state in ("before", "touched", "applied")}
+    additions.update(f"bass-{owner}-page-6-k0-overview.png" for owner in "AB")
+    additions.update(f"list-{owner}-crush-rate.png" for owner in "AB")
+    if set(new_routes) != set(routes) | additions:
+        raise ValueError("Incomplete default Synth One editor or CRUSH RATE routes")
+    return packed_routes(screens, current / "routes.tar.xz", new_routes, "synth-one",
+                         "Elite and Pro default / X0X_SYNTHONE_PATCH=1 / INIT and CRUSH RATE")
 
 
 def stock_init_rows(screens):
@@ -210,7 +265,7 @@ def stock_init_rows(screens):
         if digest != expected:
             raise ValueError(f"Stock INIT selector pixels differ: {name}")
         yield ("stock-init/" + name.removeprefix("stock-init-"), "", os.path.relpath(path, screens),
-               "stock / X0X_SYNTHONE_PATCH=0 / SMK-37 host", digest)
+               "historical selector / X0X_SYNTHONE_PATCH=0 / three-entry SMK-37 host", digest)
 
 
 def superj6_rows(screens):
@@ -240,6 +295,7 @@ def superj6_rows(screens):
 def build_index(directory, output, check=False):
     rows = archived_rows(directory)
     base = {(archive, member): digest for _, archive, member, _, digest in rows}
+    rows = ordinary_rows(directory, rows)
     rows.extend(native_rows(directory, base))
     rows.extend(stock_init_rows(directory))
     rows.extend(synthone_rows(directory))

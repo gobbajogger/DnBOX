@@ -8,7 +8,7 @@ int main(void)
     static const int raw[]={0,1,52,126,127};
     static const char *const value[]={"0","1","35","84","85"};
     for(int mode=0;mode<2;mode++)for(unsigned k=0;k<sizeof raw/sizeof raw[0];k++) {
-        setup(V_FX,PART_909);*page_of(V_FX)=1;build_pages();
+        setup(V_FX,PART_909);*page_of(V_FX)=0;build_pages();
         pref_t r=PR(R_ENG,T_FX,0,FX_DL_FDBK);
         pref_set(PR(R_ENG,T_FX,0,FX_DL_TYPE),mode);pref_set(r,raw[k]);
         char num[16],unit[8],want[20];pref_value(r,num,unit);

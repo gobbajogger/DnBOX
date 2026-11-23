@@ -1,0 +1,11 @@
+{
+  "reviewer": "performance",
+  "findings": [],
+  "residual_risks": [
+    "The immediate event/control API has bounded work per call but no event-delivery cap. The callback audit exercises a fixed burst, so its 168 direct exp2 calls, 112 log2 calls, 208 stage entries and 160 envelope ticks are workload observations, not a bound for arbitrary caller event traffic. The header, audit receipt and owner report state this limitation correctly; no candidate-source defect is asserted.",
+    "The native linked receipts establish replacement image/resource costs, not runtime speed. The compact reachable image remains physically oversized by 748/740 bytes and misses the existing free-XIP requirement by 1772/1764 bytes. Counter-off saves no additional image bytes in the measured LTO/null-work adapter. Current reports preserve these failures and do not infer native timing or hardware admission from the 152-byte compact reduction."
+  ],
+  "testing_gaps": [
+    "No complete native 512-frame/44100-Hz callback measurement covers the candidate together with its macro facade, preserved chorus/high-pass, global/private effects, drums/BREAK, mixing/USB, event decoding and interrupt/cache interference under a bounded event policy. Existing host measurements exercise the selected two-part engine/event slice only; local native frame bounds also exclude enclosing runtime/interrupt frames and are not stack high-water evidence. This is an explicitly open integration qualification, not a new gate for the research core. No build, timing rerun or device execution was performed in this read-only review."
+  ]
+}

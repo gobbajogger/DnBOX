@@ -1,0 +1,377 @@
+{
+  "clock_hz": 5760000000,
+  "cases": {
+    "450": {
+      "stock": {
+        "release": 450,
+        "guest_callback_us": 11323,
+        "entry_cycle": 32642325835,
+        "scheduled_cycle": 32642325817,
+        "completion_cycle": 32707604083,
+        "completion_ms": 5678.403487,
+        "first_sensitive_read": {
+          "seq": 453,
+          "cycle": 32896173697,
+          "ms": 5711.141267,
+          "name": "scene_read_clock",
+          "offset": 0,
+          "width": 4,
+          "value": 5711
+        },
+        "first_panel_read": {
+          "seq": 453,
+          "cycle": 32896381564,
+          "ms": 5711.177355,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 456,
+          "cycle": 33098461759,
+          "ms": 5746.260722,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 0
+        },
+        "before_first_read": {
+          "spi1_status_polls": 183,
+          "transfers": [
+            {
+              "bytes": 1,
+              "start": 32896109785,
+              "deadline": 32896113625
+            },
+            {
+              "bytes": 4,
+              "start": 32896115281,
+              "deadline": 32896130641
+            },
+            {
+              "bytes": 1,
+              "start": 32896131400,
+              "deadline": 32896135240
+            },
+            {
+              "bytes": 4,
+              "start": 32896136896,
+              "deadline": 32896152256
+            },
+            {
+              "bytes": 1,
+              "start": 32896153057,
+              "deadline": 32896156897
+            },
+            {
+              "bytes": 512,
+              "start": 32896165768,
+              "deadline": 32898131848
+            }
+          ],
+          "completed_blocking_waits": [
+            {
+              "deadline": 32896113625,
+              "first_busy_cycle": 32896110007,
+              "ready_cycle": 32896113712
+            },
+            {
+              "deadline": 32896130641,
+              "first_busy_cycle": 32896123681,
+              "ready_cycle": 32896130701
+            },
+            {
+              "deadline": 32896135240,
+              "first_busy_cycle": 32896131622,
+              "ready_cycle": 32896135327
+            },
+            {
+              "deadline": 32896152256,
+              "first_busy_cycle": 32896137928,
+              "ready_cycle": 32896152358
+            },
+            {
+              "deadline": 32896156897,
+              "first_busy_cycle": 32896153279,
+              "ready_cycle": 32896156984
+            }
+          ]
+        }
+      },
+      "candidate": {
+        "release": 450,
+        "guest_callback_us": 10065,
+        "entry_cycle": 32642234086,
+        "scheduled_cycle": 32642234011,
+        "completion_cycle": 32700266047,
+        "completion_ms": 5677.129522,
+        "first_sensitive_read": {
+          "seq": 451,
+          "cycle": 32770132417,
+          "ms": 5689.2591,
+          "name": "scene_read_clock",
+          "offset": 0,
+          "width": 4,
+          "value": 5689
+        },
+        "first_panel_read": {
+          "seq": 451,
+          "cycle": 32770278982,
+          "ms": 5689.284545,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 452,
+          "cycle": 32835817549,
+          "ms": 5700.662769,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 0
+        },
+        "before_first_read": {
+          "spi1_status_polls": 183,
+          "transfers": [
+            {
+              "bytes": 1,
+              "start": 32770068505,
+              "deadline": 32770072345
+            },
+            {
+              "bytes": 4,
+              "start": 32770074001,
+              "deadline": 32770089361
+            },
+            {
+              "bytes": 1,
+              "start": 32770090120,
+              "deadline": 32770093960
+            },
+            {
+              "bytes": 4,
+              "start": 32770095616,
+              "deadline": 32770110976
+            },
+            {
+              "bytes": 1,
+              "start": 32770111777,
+              "deadline": 32770115617
+            },
+            {
+              "bytes": 1024,
+              "start": 32770124488,
+              "deadline": 32774056648
+            }
+          ],
+          "completed_blocking_waits": [
+            {
+              "deadline": 32770072345,
+              "first_busy_cycle": 32770068727,
+              "ready_cycle": 32770072432
+            },
+            {
+              "deadline": 32770089361,
+              "first_busy_cycle": 32770082401,
+              "ready_cycle": 32770089421
+            },
+            {
+              "deadline": 32770093960,
+              "first_busy_cycle": 32770090342,
+              "ready_cycle": 32770094047
+            },
+            {
+              "deadline": 32770110976,
+              "first_busy_cycle": 32770096648,
+              "ready_cycle": 32770111078
+            },
+            {
+              "deadline": 32770115617,
+              "first_busy_cycle": 32770111999,
+              "ready_cycle": 32770115704
+            }
+          ]
+        }
+      },
+      "first_read_delta_us": -21882.166667,
+      "same_ordered_transfer_lengths": false,
+      "common_completed_spi_deadlines": [],
+      "closest_completed_wait_deadline_us": 21874.654167
+    },
+    "566": {
+      "stock": {
+        "release": 566,
+        "guest_callback_us": 7413,
+        "entry_cycle": 40396545394,
+        "scheduled_cycle": 40396545337,
+        "completion_cycle": 40439300011,
+        "completion_ms": 7020.711807,
+        "first_sensitive_read": {
+          "seq": 566,
+          "cycle": 40454505343,
+          "ms": 7023.351622,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_panel_read": {
+          "seq": 566,
+          "cycle": 40454505343,
+          "ms": 7023.351622,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 566,
+          "cycle": 40454790367,
+          "ms": 7023.401105,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 97
+        },
+        "before_first_read": {
+          "spi1_status_polls": 0,
+          "transfers": [],
+          "completed_blocking_waits": []
+        }
+      },
+      "candidate": {
+        "release": 566,
+        "guest_callback_us": 8099,
+        "entry_cycle": 40396453555,
+        "scheduled_cycle": 40396453531,
+        "completion_cycle": 40443163345,
+        "completion_ms": 7021.382525,
+        "first_sensitive_read": {
+          "seq": 567,
+          "cycle": 40522540507,
+          "ms": 7035.163282,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_panel_read": {
+          "seq": 567,
+          "cycle": 40522540507,
+          "ms": 7035.163282,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 567,
+          "cycle": 40522803931,
+          "ms": 7035.209016,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 107
+        },
+        "before_first_read": {
+          "spi1_status_polls": 0,
+          "transfers": [],
+          "completed_blocking_waits": []
+        }
+      },
+      "first_read_delta_us": 11811.660417,
+      "same_ordered_transfer_lengths": true,
+      "common_completed_spi_deadlines": [],
+      "closest_completed_wait_deadline_us": null
+    },
+    "567": {
+      "stock": {
+        "release": 567,
+        "guest_callback_us": 7940,
+        "entry_cycle": 40463392069,
+        "scheduled_cycle": 40463392057,
+        "completion_cycle": 40509203404,
+        "completion_ms": 7032.847813,
+        "first_sensitive_read": {
+          "seq": 570,
+          "cycle": 40724384353,
+          "ms": 7070.205617,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_panel_read": {
+          "seq": 570,
+          "cycle": 40724384353,
+          "ms": 7070.205617,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 570,
+          "cycle": 40724687425,
+          "ms": 7070.258234,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 121
+        },
+        "before_first_read": {
+          "spi1_status_polls": 0,
+          "transfers": [],
+          "completed_blocking_waits": []
+        }
+      },
+      "candidate": {
+        "release": 567,
+        "guest_callback_us": 8586,
+        "entry_cycle": 40463300341,
+        "scheduled_cycle": 40463300251,
+        "completion_cycle": 40512811702,
+        "completion_ms": 7033.474254,
+        "first_sensitive_read": {
+          "seq": 567,
+          "cycle": 40522540507,
+          "ms": 7035.163282,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_panel_read": {
+          "seq": 567,
+          "cycle": 40522540507,
+          "ms": 7035.163282,
+          "name": "scene_read_input",
+          "offset": 28,
+          "width": 4,
+          "value": 0
+        },
+        "first_fader_read": {
+          "seq": 567,
+          "cycle": 40522803931,
+          "ms": 7035.209016,
+          "name": "scene_read_analog",
+          "offset": 168,
+          "width": 1,
+          "value": 107
+        },
+        "before_first_read": {
+          "spi1_status_polls": 0,
+          "transfers": [],
+          "completed_blocking_waits": []
+        }
+      },
+      "first_read_delta_us": -35042.334375,
+      "same_ordered_transfer_lengths": true,
+      "common_completed_spi_deadlines": [],
+      "closest_completed_wait_deadline_us": null
+    }
+  }
+}

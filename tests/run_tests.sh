@@ -85,7 +85,7 @@ RES="$OUT/.results"
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
-    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer) TEST_CLASS=G ;;
+    drum909-tanh-pair|ui-clock-comp|ui-layer-restoration|smc-caption-geometry|ui-808-accent|ui-step-lane|ui-step-lane-edit|ui-step-lane-transaction|break-step-velocity-engine|ui-overlay-battery|ui-toast-battery|ui-shared-parameter-panel|ui-held-target-visibility|break-preview-integration|break-preview-visibility|break-held-edit-journey|break-family-layout|break-context-label|break-outline-snapshot|ui-chance-framebuffer|ui-break-seq-phase|ui-break-seq-metadata|ui-padcal-render) TEST_CLASS=G ;;
     install-slots-web) TEST_CLASS=W ;;
     installer|installer-f02-bind|installer-f02-bind-web|installer-targets|installer-slots|slot-build-safe|installer-restore-status|slot-backup|slot-backup-durable|slot-archive-zone|slot-verify-order|slot-read-reply|slot-ack-integrity|slot-echo-7bit|ctl-publish-atomic|upload-tools|\
     breaks-page|projects-page|ble-acl-start-flags|ble-hci-completed|ble-acl-zero-credit|ble-zero-conn|ble-link-epoch-reset|smc-reconnect-epoch|smc-boot-saved-roles|smc-ble-payload|ble-central-first-notification|ble-dual-peer|ble-one-peer-command|ble-one-peer-contract|ble-command-credit|ble-controller-heap|ble-ctl-fail-return|ble-disconnect-status|ble-sysex-bounds|ble|ble-package|smk-package|smk-ota-entry*|smk-update-loader|smk-build-package*|\
@@ -298,9 +298,12 @@ W="-O2 -ffp-contract=off -Wall -Wextra -Wdouble-promotion -Werror"
 # Composed 0.0.25 regressions exercise the production UI, engine, storage and MIDI paths.
 run composed-features sh tests/host/composed_features_test.sh
 run juno6-runtime sh tests/host/juno6_runtime_test.sh "$OUT/juno6-runtime"
+run synthone-init-audio sh tests/host/synthone_init_audio.sh "$OUT/synthone-init-audio"
 run juno6-slot sh -c "$CC -std=c99 -O2 -Iexperiments/original_synth tests/host/juno6_slot_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/juno6_slot && $OUT/juno6_slot"
 run legacy-slot2-map sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Iexperiments/original_synth tests/host/legacy_slot2_map_test.c firmware/src/app/original_sound.c experiments/original_synth/miami_program.c experiments/original_synth/chicago_program.c experiments/original_synth/fused_reference.c -lm -o $OUT/legacy_slot2_map && $OUT/legacy_slot2_map"
 run juno6-dsp sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -Ifirmware/src/dsp -o $OUT/juno6_test tests/host/juno6_test.c firmware/src/dsp/juno6.c -lm && $OUT/juno6_test"
+run juno6-factory sh -c "$CC -std=c99 -O2 -Wall -Wextra -Werror -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0 -Ifirmware/src/dsp -o $OUT/juno6_factory tests/host/juno6_factory_test.c firmware/src/dsp/juno6.c firmware/src/dsp/dnbx_core.c -lm && $OUT/juno6_factory"
+run superj6-factory-load sh tests/host/superj6_factory_load_test.sh
 run usb-retry sh tests/host/run_usb_retry.sh
 run drum909-tanh-pair sh tests/host/run_drum909_tanh_pair.sh
 run composed-smc-panic env SMC_UI_TEST_FILE=tests/host/composed_smc_panic_test.c SMC_UI_OUT=build/host/composed-smc-panic sh tests/host/smc_ui_test.sh
@@ -308,6 +311,7 @@ run composed-panic-cutover sh tests/host/panic_cutover_integration_test.sh
 run panic-clear sh tests/host/panic_clear_test.sh
 run composed-ui-identity env SMC_UI_TEST_FILE=tests/host/composed_ui_identity_test.c SMC_UI_OUT=build/host/composed-ui sh tests/host/smc_ui_test.sh
 run synthone-slot env SMC_UI_TEST_FILE=tests/host/synthone_slot_test.c SMC_UI_OUT=build/host/synthone-slot sh tests/host/smc_ui_test.sh
+run synthone-envelope-dnbx python3 -B tests/host/test_synthone_dnbx_envelope.py
 run juno-slot-integration env SMC_UI_TEST_FILE=tests/host/juno_slot_integration_test.c SMC_UI_OUT=build/host/juno-slot sh tests/host/smc_ui_test.sh
 run poly-chord-integration sh tests/host/poly_chord_integration_test.sh
 run project-rates-companion sh tests/host/project_rates_companion_test.sh
@@ -811,6 +815,9 @@ fi
 run ui-step-lane sh tests/host/ui_step_lane_test.sh
 run ui-step-lane-edit sh tests/host/ui_step_lane_edit_test.sh
 run ui-step-lane-transaction python3 tests/host/ui_step_lane_transaction_test.py
+run ui-break-seq-phase env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_phase.c SMC_UI_OUT=build/host/break-seq-phase sh tests/host/smc_ui_test.sh
+run ui-break-seq-metadata env SMC_UI_TEST_FILE=tests/ui_inventory/break_seq_metadata.c SMC_UI_OUT=build/host/break-seq-metadata sh tests/host/smc_ui_test.sh
+run ui-padcal-render sh tests/host/ui_padcal_render_test.sh
 run ui-glyph-polish sh tests/host/ui_glyph_polish_test.sh
 run ui-tape-reel sh tests/host/ui_tape_reel_test.sh
 run ui-perf-labels sh tests/host/ui_perf_labels_test.sh

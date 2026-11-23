@@ -3,16 +3,22 @@
   "scope": "The original packing job supplied status, F1, R22VisualReview, sourceCoverage, frames and stableStateIDs below. Its archive keeps the baseline pixels needed to replay replacements and the retired IDs. See currentCatalog for the reviewed inventory.",
   "currentCatalog": {
     "file": "screen-index.tsv",
-    "firmwareRevision": "ac63b270ed52ef728750afc9edd1f173cb0298db",
-    "frames": 1944,
-    "active": 1942,
-    "historical": 2,
-    "indexSHA256": "3bb90e7312f957d3e05635915c6d8c60a03a7d3dcd27456f317654327ddcb1c5",
+    "firmwareRevision": "199f0444a4cf27374112a5fdf48f82005b070bbc",
+    "frames": 1968,
+    "active": 1952,
+    "historical": 16,
+    "historicalScope": "Two retired ordinary aliases and 14 earlier three-entry INIT selector captures.",
+    "indexSHA256": "9aa3a8b48b82001ffcff065968ca31a429099e943587fb9707de3cf8ca20e9ab",
     "screenGuide": "README.md",
-    "F1": "PASS",
-    "R22IndependentScore": "10/10",
-    "review": "../current/panel-routes/independent-review.json",
-    "viewports": "../current/panel-routes/viewport-replay.json"
+    "ordinaryStates": 1538,
+    "ordinaryReplay": "../current/panel-routes/ordinary-current/routes.json",
+    "defaultSynthOneStates": 132,
+    "defaultSynthOneReview": "../current/synthone-editor/default-review/review.md",
+    "defaultSynthOneViewports": "../current/synthone-editor/default-review/comparison.json",
+    "safeRecoveryReview": "../current/native-routes/recovery-review.json",
+    "ordinaryStartupReplay": "../current/native-routes/normal-loop/replay-199f0444.json",
+    "previousCatalogScope": "Earlier 1,944-state shell run and independent panel review are retained in previousCatalog.",
+    "viewports": "../current/panel-routes/catalog-viewport-199f0444.json"
   },
   "status": "PASS",
   "F1": "UNREVIEWED",
@@ -2092,5 +2098,18 @@
   "retiredStates": {
     "engine-2-part-2-page-1": "55cc349c0e5f193b0db44fd149e49fa1ec3a9af81a43a80d7b08675d210f43bb",
     "engine-2-part-3-page-1": "de6f1b155cd1edbbeabebfb14d74e5c66a3b36b7d9b37d240347d6e2a8ecd9f2"
+  },
+  "previousCatalog": {
+    "file": "screen-index.tsv",
+    "firmwareRevision": "ac63b270ed52ef728750afc9edd1f173cb0298db",
+    "frames": 1944,
+    "active": 1942,
+    "historical": 2,
+    "indexSHA256": "3bb90e7312f957d3e05635915c6d8c60a03a7d3dcd27456f317654327ddcb1c5",
+    "screenGuide": "README.md",
+    "F1": "PASS",
+    "R22IndependentScore": "10/10",
+    "review": "../current/panel-routes/independent-review.json",
+    "viewports": "../current/panel-routes/viewport-replay.json"
   }
 }

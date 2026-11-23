@@ -1,0 +1,4 @@
+suite,points,differing_coefficients,max_ulp,worst_seconds,worst_rate,worst_attack,worst_oracle,worst_candidate
+random_binary32_inputs,600000,0,0,0,0,0,00000000,00000000
+output_midpoint_duration_neighbors,1200000,0,0,0,0,0,00000000,00000000
+subnormal_transition_neighbors,360000,0,0,0,0,0,00000000,00000000

@@ -39,3 +39,7 @@ lcd-init-clear	native-control-flow/host-hardware	lcd-init-clear.png		53853188f83
 safe-retry-without-crash	native-control-flow/host-hardware	safe-retry-without-crash.png		bba9ed5f5655870378f7cb021a66f5e56a6a3f62bafd58cd410777ef3a80eccf
 chicago-wave-valid-lock	full-frame/valid-input	chicago-wave-valid-lock.png		989f7c86e7b4ef60c3f6a8501b15d286eae5768b003ba3a8c4485ef7819a2dc3
 chicago-wave-invalid-lock	full-frame/malformed-RAM-input	chicago-wave-invalid-lock.png		51e623ef6afeb955455cc72f6a821006364ed79c3d9eb160892e6f38ef235782
+boot-update-step-1	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-update-step-1/capture-00.png	b8e39d89b5dc70b9085941b41f61307a7427c8324696b6af5c0ce1724dc70f0f
+boot-update-failed	native-control-flow/host-hardware	../../screens/boot-0.tar.xz	renders/boot-update-failed/capture-00.png	0a7a88f1b68f157048799ecfc7b784278c04f551d9f84e07f1f93518af1f7e59
+safe-after-failed-update	native-control-flow/host-hardware	safe-after-failed-update.png		4e5ffae22f202157ab74626f6d0b5948137713cf958746cb2221df067fa1ff9c
+safe-retry-after-failed-update	native-control-flow/host-hardware	safe-retry-after-failed-update.png		5aceb6eed3258f8f816a9ad9a3e2c6af4b17f5ba53241d6c2fe2960af3702607

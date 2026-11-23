@@ -1,0 +1,147 @@
+{
+  "shipping-026": {
+    "0": {
+      "sampled_phases": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "distinct_adjacent_lane_transitions": 15,
+      "gif_encoded_frames": 16
+    }
+  },
+  "branch-before": {
+    "0": {
+      "sampled_phases": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "distinct_adjacent_lane_transitions": 0,
+      "gif_encoded_frames": 10
+    },
+    "1": {
+      "sampled_phases": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "distinct_adjacent_lane_transitions": 0,
+      "gif_encoded_frames": 12
+    },
+    "2": {
+      "sampled_phases": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "distinct_adjacent_lane_transitions": 0,
+      "gif_encoded_frames": 11
+    },
+    "3": {
+      "sampled_phases": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "distinct_adjacent_lane_transitions": 0,
+      "gif_encoded_frames": 12
+    }
+  },
+  "r22-candidate": {
+    "sha256": "312430eb65b46ec1015dace9cf4652e3d21ca5e6ef5d3eec90de596c1bce8782",
+    "encoded_frames": 162,
+    "role": "BREAK SEQ composition candidate; no live transport provenance"
+  },
+  "branch-after": {
+    "0": {
+      "gif": "branch-after-lane-0.gif",
+      "gif_sha256": "232e166104df832a3195c8eb3549f345df0b066d7228e748a1c1863665bdc1f6",
+      "gif_encoded_frames": 16,
+      "distinct_adjacent_lane_transitions": 15
+    },
+    "1": {
+      "gif": "branch-after-lane-1.gif",
+      "gif_sha256": "55571da51e381dac07a23e6c0ca459316a809bb268c8dcbf0e4c3631661c6d51",
+      "gif_encoded_frames": 16,
+      "distinct_adjacent_lane_transitions": 15
+    },
+    "2": {
+      "gif": "branch-after-lane-2.gif",
+      "gif_sha256": "c2ad15453095145d84def111c67aef79f3a3fcd57fdd77ee54161dd0e330440a",
+      "gif_encoded_frames": 16,
+      "distinct_adjacent_lane_transitions": 15
+    },
+    "3": {
+      "gif": "branch-after-lane-3.gif",
+      "gif_sha256": "1c794b2101882dfe04afc50a67e7f2dc1cb63ecddb1d9f28b92e5aa757be1359",
+      "gif_encoded_frames": 16,
+      "distinct_adjacent_lane_transitions": 15
+    }
+  }
+}

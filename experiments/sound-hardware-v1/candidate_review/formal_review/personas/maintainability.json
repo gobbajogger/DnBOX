@@ -1,0 +1,27 @@
+{
+  "reviewer": "maintainability",
+  "findings": [
+    {
+      "title": "Allow public-boundary checks to consume fresh review outputs",
+      "severity": "P2",
+      "file": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py",
+      "line": 7,
+      "why_it_matters": "A recipient cannot reproduce the additional public-API boundary checks after running the documented compact verifier with a fresh label: this follow-up always loads shared libraries from the retained compact_profile_review directory, while those binaries are absent from the distributed index. The verifier refuses to rebuild into that existing evidence directory. The follow-up also writes its result into the retained directory, so manually restoring the libraries there would overwrite the historical receipt. Selecting the newly generated review directory makes the two runners compose without source edits or alteration of retained evidence.",
+      "autofix_class": "gated_auto",
+      "owner": "downstream-resolver",
+      "requires_verification": true,
+      "suggested_fix": "Add a required --review-dir (or matching --label) argument and resolve all three shared-library inputs from that fresh verifier output directory. Write PUBLIC-BOUNDARIES.json into the selected fresh directory, refusing an existing receipt, or accept an explicit new output path. Document the follow-up command after verify_compact_profile.py and verify it using a new label while confirming the retained compact_profile_review/PUBLIC-BOUNDARIES.json hash is unchanged.",
+      "confidence": 100,
+      "evidence": [
+        "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:7 -- OUT=ROOT/'compact_profile_review'",
+        "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:17 --     apis={k:Api(bind(OUT/(k+'.so'))) for k in ('accepted','diagnostic','compact')};checks=[]",
+        "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:43 --     (OUT/'PUBLIC-BOUNDARIES.json').write_text(json.dumps(result,indent=2)+'\\n')",
+        "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:147-151 -- OUT=HERE/args.label; OUT.mkdir(); an existing directory produces parser.error('evidence directory already exists; select a new label').",
+        "Current index inspection: git ls-files experiments/sound-hardware-v1/candidate_review/compact_profile_review contains retained source/results/logs but zero .so files. The index and worktree checker bytes both have SHA-256 d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18."
+      ],
+      "pre_existing": false
+    }
+  ],
+  "residual_risks": [],
+  "testing_gaps": []
+}

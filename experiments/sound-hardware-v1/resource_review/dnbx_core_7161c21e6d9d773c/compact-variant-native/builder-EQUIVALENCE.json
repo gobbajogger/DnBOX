@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "typed_boundary_admission_cases": 234,
+  "rendered_frames_per_part": 16384,
+  "parts": 2,
+  "irregular_render_calls_per_part": 324,
+  "audio_and_state_bitwise_equal_all_calls": true,
+  "work_null_for_audio_comparison": true,
+  "audio_digest_all_profiles": [
+    "22b78d871946a22905c8a820eb324cd8a919171b216c776115ab37893e9fb549",
+    "22b78d871946a22905c8a820eb324cd8a919171b216c776115ab37893e9fb549",
+    "22b78d871946a22905c8a820eb324cd8a919171b216c776115ab37893e9fb549"
+  ],
+  "diagnostic_capability_on": 1,
+  "diagnostic_capability_off": 0,
+  "nonnull_work_disabled_rejected_atomically": true,
+  "baseline_core_sha256": "9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa",
+  "variant_core_sha256": "3d8f898428b297478abb35692de56952451caed38cc02db53e16a19a54a7408b",
+  "variant_header_sha256": "86acaf17ee9c48dac151919098ab12de3acf457fab2bd9fdf57ac966f36c0962"
+}

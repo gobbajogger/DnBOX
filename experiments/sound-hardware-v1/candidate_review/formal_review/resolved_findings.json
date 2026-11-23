@@ -1,0 +1,204 @@
+[
+  {
+    "#": 1,
+    "autofix_class": "gated_auto",
+    "confidence": 100,
+    "file": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py",
+    "first_evidence": "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:7 -- OUT=ROOT/'compact_profile_review'",
+    "independent_reviewers": [
+      "maintainability"
+    ],
+    "line": 7,
+    "owner": "downstream-resolver",
+    "pre_existing": false,
+    "requires_verification": true,
+    "reviewers": [
+      "maintainability"
+    ],
+    "severity": "P2",
+    "suggested_fix": "Add a required --review-dir (or matching --label) argument and resolve all three shared-library inputs from that fresh verifier output directory. Write PUBLIC-BOUNDARIES.json into the selected fresh directory, refusing an existing receipt, or accept an explicit new output path. Document the follow-up command after verify_compact_profile.py and verify it using a new label while confirming the retained compact_profile_review/PUBLIC-BOUNDARIES.json hash is unchanged.",
+    "title": "Allow public-boundary checks to consume fresh review outputs",
+    "why_it_matters": "A recipient cannot reproduce the additional public-API boundary checks after running the documented compact verifier with a fresh label: this follow-up always loads shared libraries from the retained compact_profile_review directory, while those binaries are absent from the distributed index. The verifier refuses to rebuild into that existing evidence directory. The follow-up also writes its result into the retained directory, so manually restoring the libraries there would overwrite the historical receipt. Selecting the newly generated review directory makes the two runners compose without source edits or alteration of retained evidence.",
+    "evidence": [
+      "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:7 -- OUT=ROOT/'compact_profile_review'",
+      "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:17 --     apis={k:Api(bind(OUT/(k+'.so'))) for k in ('accepted','diagnostic','compact')};checks=[]",
+      "experiments/sound-hardware-v1/candidate_review/check_compact_public_boundaries.py:43 --     (OUT/'PUBLIC-BOUNDARIES.json').write_text(json.dumps(result,indent=2)+'\\n')",
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:147-151 -- OUT=HERE/args.label; OUT.mkdir(); an existing directory produces parser.error('evidence directory already exists; select a new label').",
+      "Current index inspection: git ls-files experiments/sound-hardware-v1/candidate_review/compact_profile_review contains retained source/results/logs but zero .so files. The index and worktree checker bytes both have SHA-256 d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18."
+    ],
+    "resolution": {
+      "reviewer": "maintainability",
+      "title": "Allow public-boundary checks to consume fresh review outputs",
+      "original_source_sha256": "d3214019c267907de261065cadaca0268ee7a9304a54262f5e8cae4340e78b18",
+      "fixed_source_sha256": "49c1ed054174d96fb2c415f975be49a4e307ae808715923a369a175be90e2ae4",
+      "status": "resolved_verified",
+      "resolution": "Root added explicit review directory selection, required three libraries, and exclusive receipt writing. Independent 130-case run passes from the previously compiled private fresh label; repeat and missing-library negatives reject with no prior-result mutation.",
+      "evidence": [
+        "validation/final_test_fixes/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/final_test_fixes/RESULT.json": "720ba7a22d8f7163346280070779080f1211ee0b7f9c3f1679ca65acdfb75e67"
+      }
+    },
+    "status": "resolved_verified_by_owner_fix",
+    "validator": {
+      "#": 1,
+      "validated": true,
+      "reason": "The pinned historical checker hard-coded compact_profile_review and unconditionally overwrote its receipt while the packaged manifest contained no shared libraries; the current --review-dir selection and exclusive receipt creation resolve this, with the inspected final_test_fixes script and receipt confirming 130 passing fresh-directory cases, rejection of repeated or missing-library runs, and preservation of existing evidence."
+    }
+  },
+  {
+    "#": 2,
+    "autofix_class": "gated_auto",
+    "confidence": 100,
+    "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+    "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:263 --     print(json.dumps({k:result[k] for k in ('snapshot_sha256','envelope','velocity','lifecycle','scoped_acceptance_pass')},indent=2))",
+    "independent_reviewers": [
+      "testing"
+    ],
+    "line": 263,
+    "owner": "downstream-resolver",
+    "pre_existing": false,
+    "requires_verification": true,
+    "reviewers": [
+      "testing"
+    ],
+    "severity": "P2",
+    "suggested_fix": "After writing and printing RESULT.json, add `if not result['scoped_acceptance_pass']: raise SystemExit(1)`. Add a focused harness-level check that stubs one acceptance component to false and verifies a failing process status while the failing receipt is still written; also check that an all-pass result exits zero.",
+    "title": "Return failure when candidate acceptance gates fail",
+    "why_it_matters": "The documented verification command exits successfully even when an envelope, allocator, finite-bound or lifecycle acceptance check returns false. These checks generally collect booleans instead of raising assertions, and main only writes and prints the aggregate result; a shell script that uses the command's status can therefore accept a regressed core. Preserve the diagnostic receipt, then return a nonzero status on scoped_acceptance_pass=false, matching the compact-profile verifier.",
+    "evidence": [
+      "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:263 --     print(json.dumps({k:result[k] for k in ('snapshot_sha256','envelope','velocity','lifecycle','scoped_acceptance_pass')},indent=2))",
+      "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:261 computes scoped_acceptance_pass from reported gate booleans; line 262 writes the receipt, and line 265 invokes main without inspecting or returning the aggregate result.",
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:163-164 explicitly raises SystemExit(1) when scoped_equivalence_pass is false, providing an existing parallel implementation.",
+      "experiments/sound-hardware-v1/candidate_review/frozen_01/RESULT.json retains scoped_acceptance_pass=false for a real oldest-held allocation regression, demonstrating that a false reported gate is a supported and consequential outcome rather than an unreachable scenario.",
+      "Checked current verifier SHA-256 0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594, matching the frozen_03 RESULT harness digest. Current accepted core/header SHA-256 are 9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa / a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c. No build, device, native timing or long-duration test was rerun by this reviewer."
+    ],
+    "resolution": {
+      "reviewer": "testing",
+      "title": "Return failure when candidate acceptance gates fail",
+      "original_source_sha256": "0de3cf78e9d8ccb34373f9a3f817514e0002a53f16110b8e3ad828d9ff71b594",
+      "fixed_source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+      "status": "resolved_verified",
+      "resolution": "Root makes the real main exit 1 after writing a false acceptance receipt. Synthetic leaf stubs exercise actual aggregation/output/exit logic: old false exits 0; fixed false exits 1; fixed true exits 0. No DSP or compiler executes in this status control.",
+      "evidence": [
+        "validation/original_status_negative/RESULT.json",
+        "validation/fixed_index_status/RESULT.json",
+        "validation/final_index_status/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/original_status_negative/RESULT.json": "6421a037bc662106f43d6ad4e12c88383c9b0626ebd09325d54a2b1fa804fbde",
+        "validation/fixed_index_status/RESULT.json": "366b5c4f59c3cb7de91c90bb58dc857b552552737cf42f60d21cd556909e7063",
+        "validation/final_index_status/RESULT.json": "f899acb74507abaa092dd0d56b468ebe4094e84c2a4a84357958853f8fb2d5ad"
+      },
+      "verified_current_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774"
+    },
+    "status": "resolved_verified_by_owner_fix",
+    "validator": {
+      "#": 2,
+      "validated": true,
+      "reason": "The pinned historical main wrote and printed a false acceptance result without returning failure, corroborated by the inspected synthetic control exiting zero; the current main raises SystemExit(1) after preserving the receipt, and final_index_status confirms false and true gates exit one and zero respectively with compiler and DSP leaves stubbed."
+    }
+  },
+  {
+    "#": 3,
+    "autofix_class": "manual",
+    "confidence": 100,
+    "file": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py",
+    "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:93 --     rows=list(csv.DictReader((BASE/'mapping/results/implementer_brief/amp_observed_levels.csv').open()))",
+    "independent_reviewers": [
+      "adversarial"
+    ],
+    "line": 93,
+    "owner": "downstream-resolver",
+    "pre_existing": false,
+    "requires_verification": true,
+    "reviewers": [
+      "adversarial"
+    ],
+    "severity": "P2",
+    "suggested_fix": "Load ACCEPTANCE-DECLARATION.json before the tests and fail unless every BASE-relative file in reference_hashes exists and its SHA-256 matches. Record the verified actual reference hashes in RESULT.json. Add a focused replay check that retaining only the first CSV row for each case fails before candidate evaluation, while the unchanged packaged fixtures remain accepted; do not change the existing numeric thresholds or DSP source.",
+    "title": "Truncated fixtures still produce pinned acceptance receipts",
+    "why_it_matters": "A replay can accept a truncated or replaced amplitude fixture while recording the unchanged declaration that promises all 2,560 rows and pins the original reference hashes. Keeping only the first row of each case still passes the amplitude threshold and rejects both negative controls, reducing the original comparison from 5,120 endpoints to four without making scoped_acceptance_pass false. The current packaged fixtures do match the declared hashes, so this finding concerns the reproducible acceptance mechanism rather than invalidating the captured current results. Checking the declaration's reference hashes before evaluation prevents changed fixtures from silently shrinking or redefining the accepted comparison.",
+    "evidence": [
+      "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:93 --     rows=list(csv.DictReader((BASE/'mapping/results/implementer_brief/amp_observed_levels.csv').open()))",
+      "experiments/sound-hardware-v1/candidate_review/ACCEPTANCE-DECLARATION.json:4-8 pins three reference hashes, and its envelope_gate.metric requires all 2560 CSV rows. verify_candidate.py:92-93 reads the live metadata and CSV without comparing those hashes; main:260 records only the declaration file hash, not verified reference-file hashes.",
+      "Constructed trigger: retain the header and the first row of each original case in amp_observed_levels.csv. These rows each select frames 3 and 15. verify_candidate.py:108-117 evaluates whatever rows are present and does not require a row count or endpoint set; main:261 only combines the resulting pass booleans.",
+      "Read-only probe used the current error_stats and linear_contour functions against frozen_03/envelope_case1.csv and envelope_case2.csv, whose source hashes match the current core. For the two retained endpoints of case 1, candidate max error is 4.6954855031922094e-08, shifted-grid error is 0.06371962799002259, and linear error is 0.059104590836985174. For case 2 the corresponding errors are 2.0240079681710377e-08, 0.022476598869431694, and 0.020127805888197507. Thus both positive gates pass and all four negative gates reject with only four total comparisons.",
+      "The candidate audio-ratio cross-check at verify_candidate.py:104-107 and all velocity/lifecycle/error/finite/long-duration gates are independent of the CSV row set, so this reduction leaves the remaining acceptance terms unchanged. The declaration hash is also unchanged, allowing a newly emitted passing receipt to carry the original pinned declaration despite consuming different reference bytes.",
+      "Checked current runner SHA-256 6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0; accepted core C 9cdcea0b90b691d05cd07306433b9b4cf42c023bf419a251d7ff436fa13487fa and H a863f6b04f65202a3ba7f5640b4dc89e0730a15c096894bf9d914caaf7c8671c. All three currently packaged reference hashes match the declaration. The probe did not modify files, execute original engine code, or rerun timing/native builds."
+    ],
+    "resolution": {
+      "reviewer": "adversarial",
+      "title": "Truncated fixtures still produce pinned acceptance receipts",
+      "original_source_sha256": "6935f9507cdd98b0d012d42b58bf886004f3e15871e62db09fffeb3a081706f0",
+      "fixed_source_sha256": "6acb326fa4df8142690cca89d55d1a66e61cd573e6499e75918fb0c2f28cc774",
+      "status": "resolved_verified",
+      "resolution": "Root validates the exact three declared reference SHA256s before reserving output and records actual verified hashes. Unchanged references pass and retain 5120 endpoints. Truncated CSV, one-byte JSON/brief changes, missing CSV, and incomplete declaration all reject before output or compiler; pre-fix truncated control demonstrates four endpoints can otherwise pass. This probes orchestration using retained curves and stubbed nonreference leaves, not a new full DSP acceptance run.",
+      "evidence": [
+        "validation/reference_integrity/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/reference_integrity/RESULT.json": "9d8391057fefaf66afec70b4d6b1e1a62cfeecd65d5b0012078c74cd1af6c673"
+      }
+    },
+    "status": "resolved_verified_by_owner_fix",
+    "validator": {
+      "#": 3,
+      "validated": true,
+      "reason": "The pinned verifier consumed arbitrary CSV rows without checking the declared reference hashes, and the inspected retained-curve control accepted four endpoints under the unchanged declaration; the current preflight verifies all three required reference hashes and records them, with reference_integrity confirming 5,120 unchanged-fixture comparisons and rejection of truncated, altered, missing, or incompletely declared references before output reservation or compiler execution."
+    }
+  },
+  {
+    "#": 4,
+    "autofix_class": "gated_auto",
+    "confidence": 100,
+    "file": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py",
+    "first_evidence": "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:144 --     (HERE/'COMPACT-ACCEPTANCE-DECLARATION.json').write_text(json.dumps(declaration,indent=2)+'\\n')",
+    "independent_reviewers": [
+      "correctness"
+    ],
+    "line": 144,
+    "owner": "downstream-resolver",
+    "pre_existing": false,
+    "requires_verification": true,
+    "reviewers": [
+      "correctness"
+    ],
+    "severity": "P2",
+    "suggested_fix": "Reserve or reject the requested output directory before writing the acceptance declaration. Support a distinct run label/output directory as verify_candidate.py does, and write the new declaration inside that run directory so existing declarations and results are never overwritten by a rejected rerun. Verify that an existing-output invocation leaves all retained files unchanged and that a fresh run records the hash of its own declaration.",
+    "title": "Check output existence before overwriting acceptance metadata",
+    "why_it_matters": "Rerunning the compact verifier in the delivered package replaces the shared acceptance declaration, then aborts with FileExistsError because compact_profile_review already exists. The newly generated timestamp changes the declaration hash, so the retained RESULT.json no longer identifies the on-disk declaration even though no replacement verification completed. Reserving a new output directory before any declaration write, and keeping each declaration with its run, preserves the existing evidence when a rerun is rejected.",
+    "evidence": [
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:144 --     (HERE/'COMPACT-ACCEPTANCE-DECLARATION.json').write_text(json.dumps(declaration,indent=2)+'\\n')",
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:145 --     libs,invalid=compile_all()",
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:26 --     OUT.mkdir();sources=OUT/'snapshot';sources.mkdir()",
+      "experiments/sound-hardware-v1/candidate_review/verify_compact_profile.py:8 -- OUT=HERE/'compact_profile_review'; this directory is already present in the reviewed payload.",
+      "The retained experiments/sound-hardware-v1/candidate_review/compact_profile_review/RESULT.json names declaration_sha256 4a88cf8e5e78137999c33d07ba2f41cad368101ae6a60414bac1cb5f14eda8d4, which matched the declaration before rerun. main constructs declared_at content using a fresh created_at_utc timestamp before the unconditional write.",
+      "Reviewed harness SHA-256: 1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9. This finding is pinned to that original independently reviewed revision; the orchestrator is checking subsequent owner changes separately.",
+      "experiments/sound-hardware-v1/candidate_review/verify_candidate.py:254 --     out=HERE/args.label;out.mkdir();snap=out/'snapshot';snap.mkdir(); this related verifier rejects an existing run directory before writing its result artifacts."
+    ],
+    "resolution": {
+      "reviewer": "correctness",
+      "title": "Check output existence before overwriting acceptance metadata",
+      "original_source_sha256": "1c224ba2eb25030de8427b1aa102d2210fb46f51e3ccd0a32b030cc7c636b7b9",
+      "fixed_source_sha256": "5010334abd97fb9014cd0365c0fa85a725d21a89485de3d969cde0435fe5eb17",
+      "status": "resolved_verified",
+      "resolution": "Root reserved a fresh label before any output, added per-run acceptance declaration, and preserved historical runner. Independent copied-index run rejects existing output without mutation; fresh 441-case / 262144-frame run passes with matching declaration digest.",
+      "evidence": [
+        "validation/RESULT.json",
+        "validation/final_test_fixes/RESULT.json"
+      ],
+      "evidence_sha256": {
+        "validation/RESULT.json": "c8cf606941b69b4014ce1390faf168bd56e648c39ef2cd0f4ea8d2263368782e",
+        "validation/final_test_fixes/RESULT.json": "720ba7a22d8f7163346280070779080f1211ee0b7f9c3f1679ca65acdfb75e67"
+      }
+    },
+    "status": "resolved_verified_by_owner_fix",
+    "validator": {
+      "#": 4,
+      "validated": true,
+      "reason": "The pinned historical compact verifier overwrote the shared timestamped declaration before compile_all attempted to create the already-existing output directory; the current verifier reserves a fresh label first and stores its declaration within that run, while the inspected relocation script and receipts confirm existing-output rejection preserves retained files and a fresh passing result matches its own declaration hash."
+    }
+  }
+]

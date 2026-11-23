@@ -1,0 +1,206 @@
+{
+  "schema": "exact remaining missing active-modulation PCM v1",
+  "files": 18,
+  "notes": 54,
+  "rows": [
+    {
+      "case_id": "filter-modulation/0.5_500_0",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_500_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "c75ed6480d7de37a1db8700f163fdcb0ae82a3a02d5649ffbf3c3219d35cf145",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_500_0.json",
+      "report_sha256": "c3d8a65ddcb50f3fcbbf8889cfb569561daf09279c209ceabb2d0b4b94a6af82",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/0.5_500_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_500_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "8dfe64c105cdc9b9c0c7e42f4508d3fa165555919576d7ccdfcc8e615d86c635",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_500_0.9.json",
+      "report_sha256": "5f0bf4d701f536dc832a021789ee411429767d3194790831c3c711544fb371d0",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/0.5_2000_0",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_2000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "8bc603b3d515871837babb71d5a20d366852f957a4d3633c98a3bbbcf373c06e",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_2000_0.json",
+      "report_sha256": "d3668e866e7692c1d59e7f3af65200815263600cbe1b13915278429480dc85ef",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/0.5_2000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_2000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "70e36e319c7221c6d1e457413bd8f9c4b489c836954ae7587a48dd2d748b65a3",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_2000_0.9.json",
+      "report_sha256": "11348bf0b9489544175e05ee1702cbc96969b66c1eec43e637e4635d8d2b9163",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/0.5_8000_0",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_8000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "02d3bf2df9d7a8f393b38b37f1d809f531591f20ef7396b632e81096c2a4025e",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_8000_0.json",
+      "report_sha256": "f4a6a18986c96252ad08a1453b6a58cf945f2e019ca618a7cb87b1e46890ba9c",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/0.5_8000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/0.5_8000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "d9d502b3bfcb2f704d6a8829693802c7e311dc8cc3b5227707a7d20e1ff49d03",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0.5_8000_0.9.json",
+      "report_sha256": "15d080b99785b800c515d97240613d324c4c2158bd4949b7b060c0122713972d",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_500_0",
+      "documented_path": "/tmp/sound-filter-modulation/1_500_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "c8b5e850a90d44ca74fa3f630503a5181c93d5661f3f3c7205af32d26a9cf95d",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_500_0.json",
+      "report_sha256": "c3b6012ba26f75f5a57a8457f1e6242430d056fc42e5f170173a20161763253c",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_500_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1_500_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "d355a78461c37501ca685de8546eed2738faee7c4d74fb1cec5ee38255e4b63a",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_500_0.9.json",
+      "report_sha256": "90def7cf97385f1281cce2ec72f5c4cdc603bea73de534c8663efd8b656d10e7",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_2000_0",
+      "documented_path": "/tmp/sound-filter-modulation/1_2000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "1788982410689fe49d758dfaa0af5d00a0b1f7897b6f0849107fbcee43642eea",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_2000_0.json",
+      "report_sha256": "6b70c29e900e48e095c6e637db5fd330093bedec9c1dd5bff9ba1cab3141ac56",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_2000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1_2000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "d5cb9531d2984b9a11bb45080b21d9a1758884cef91881243dde13db29981210",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_2000_0.9.json",
+      "report_sha256": "e1e85218101d67ec40ff0977b57957c97738c22ec1c25b6b7be82df40910f50f",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_8000_0",
+      "documented_path": "/tmp/sound-filter-modulation/1_8000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "23440e34f3de87f84d5b4b0757392002b5b8a25ebbf21a0ab43ebe8a0848d5c3",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_8000_0.json",
+      "report_sha256": "eee027d0e6f8a5d1abde69c0f9625568f1826a51ebe43f365bfc0dc97d1109ac",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1_8000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1_8000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "1de9e96b6faa8bb607321110912afc544e0380d32f8c390221c6b7ff84857c1e",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1_8000_0.9.json",
+      "report_sha256": "26ad2cf6441d055646f536be939aaf78cdfc0af6da85a262df475bff413f79c7",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_500_0",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_500_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "6b67605841e767eca14ecca5732c55e848dccf2d5e1609117b6915d25c511b9c",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_500_0.json",
+      "report_sha256": "fb27bd0ccfdf069989176de50e5ab634dad645f5084f9a61ec6e1a7c0b29b043",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_500_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_500_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "3bfb396524ae7358758e336f0eec89ca79a374cd8d49085ef02e0544530df453",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_500_0.9.json",
+      "report_sha256": "a327ebbdd5592e47b5ad98e763dd8a5d9007f7f9a102f25e49fdd3984db25c1f",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_2000_0",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_2000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "836a3ac22fe9e85a5fe40bd587281e9fbfa0bfa7711dbcb5ba0fa46fcad48e93",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_2000_0.json",
+      "report_sha256": "3e4c21fd9acedad33166aeae4ca239d585c25e024e2628cc5c92ebbee94dea34",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_2000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_2000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "f0f95c5ec0e496beaec004602b347bea41be069388e69c42f9f28b69c110e98a",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_2000_0.9.json",
+      "report_sha256": "afefe88e1f563eb299a3f0ba247bd3b22d6e9395dd39343d628605aac12f4af9",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_8000_0",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_8000_0.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "dc3986c9c515ed27a1c883c84b029842b0b58b0d3da33b1505b2d7bc3de6938c",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_8000_0.json",
+      "report_sha256": "0da1b176c5783f4379225b302f849088bfdfaabe784335f9c397952462d15c00",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    },
+    {
+      "case_id": "filter-modulation/1.2_8000_0.9",
+      "documented_path": "/tmp/sound-filter-modulation/1.2_8000_0.9.f32.gz",
+      "gzip_sha256": null,
+      "decompressed_paired_sha256": "5c64f620a57ad269f93816b1cc1c8769637e58b4a85c4c8f66ea0c68501f1d54",
+      "paired_bytes": 2116608,
+      "report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/1.2_8000_0.9.json",
+      "report_sha256": "4a6364595b5436393cf8f0b7f431d78f18a661bd04ab4b6f4e4bc2a98a8eef67",
+      "note_count": 3,
+      "status": "NOT_RECOVERED"
+    }
+  ],
+  "compressed_identity_limitation": "Historical gzip hashes were not recorded; byte recovery is authenticated by the recorded decompressed paired SHA-256."
+}

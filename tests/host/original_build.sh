@@ -3,6 +3,9 @@
 # Source from repository root for whole-app host tests of the supported engines.
 # Keep flags and sources shared with the shipping build composition.
 ORIGINAL_FLAGS='-DX0X_ORIGINAL_SYNTH=1 -DX0X_WOBBLE=0 -DX0X_DEV_WOBBLE=0 -DORIGINAL_USE_SOFT_FMA -DMIAMI_FX_NO_HOST_FENV -fno-fast-math -ffp-contract=off -Iexperiments/original_synth -Iexperiments/wobble -Wno-error=missing-braces'
+if [ "${X0X_SUPERJ6_FACTORY:-0}" = 1 ]; then
+    ORIGINAL_FLAGS="$ORIGINAL_FLAGS -DX0X_SUPERJ6_FACTORY=1 -DDNBX_DIAGNOSTIC_COUNTERS=0"
+fi
 ORIGINAL_SOURCES=$(python3 - <<'PY'
 import importlib.util
 spec = importlib.util.spec_from_file_location('build', 'tools/build.py')

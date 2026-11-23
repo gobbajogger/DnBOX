@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness/metrics.py",
+    "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.paired.f32le",
+    "1"
+  ],
+  "cwd": "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one",
+  "started_utc": "2026-11-19T00:47:10.829886+00:00",
+  "exit_status": 0,
+  "stdout": "{\n  \"scope\": \"dry controlled three-pitch screen, not full engine gate\",\n  \"gain\": 1.0,\n  \"rows\": [\n    {\n      \"note\": 36,\n      \"rms_db\": 0.2322267444441285,\n      \"spectral_db\": 0.6821656102501344\n    },\n    {\n      \"note\": 60,\n      \"rms_db\": 0.23911207195823647,\n      \"spectral_db\": 0.7671471687387921\n    },\n    {\n      \"note\": 84,\n      \"rms_db\": 0.19610544102212382,\n      \"spectral_db\": 2.1061539033521486\n    }\n  ],\n  \"nonfinite\": 0,\n  \"pcm_sha256\": \"338458922ef3861ec77898dfe386328a2ad6fa19897d265a010d106d96269bce\"\n}\n",
+  "stderr": "",
+  "finished_utc": "2026-11-19T00:47:11.076234+00:00"
+}

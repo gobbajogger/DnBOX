@@ -3,9 +3,9 @@
 import os,signal,subprocess,tempfile
 from pathlib import Path
 root=Path(__file__).resolve().parents[2];out=root/'build/host/drum-amp-caption';out.mkdir(parents=True,exist_ok=True)
-s=(root/'firmware/src/app/ui.c').read_text();anchor="physical_stage_label(label,0,'D',matrix_value(r));"
+s=(root/'firmware/src/app/ui.c').read_text();anchor="physical_stage_label(label,0,'D',raw);"
 if s.count(anchor)!=1:raise SystemExit('missing/duplicate AMP caption owner')
-for name,replacement in [('missing-amp-label','label[0]=0;'),('wrong-amp-slot',"physical_stage_label(label,1,'D',matrix_value(r));")]:
+for name,replacement in [('missing-amp-label','label[0]=0;'),('wrong-amp-slot',"physical_stage_label(label,1,'D',raw);")]:
  with tempfile.TemporaryDirectory(prefix='amp-caption-negative-') as d:
   f=Path(d)/'ui.c';f.write_text(s.replace(anchor,replacement))
   env=dict(os.environ,SMC_UI_TEST_FILE='tests/host/ui_drum_amp_graph_test.c',SMC_UI_OUT=str(out/name),X0X_HOST_DEFS=os.environ.get('X0X_HOST_DEFS','')+' -DX0X_HOST_UI_SOURCE="'+str(f)+'"')

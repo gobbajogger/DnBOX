@@ -1,0 +1,34 @@
+{
+  "status": "COMPLETE_ALLOCATION_CONSUMED_LOCAL_PROCESS_GROUPS_RELEASED",
+  "created_utc": "2026-11-19T00:32:11.526158+00:00",
+  "allocation_comment": 6995594729,
+  "native_compile_commands": 292,
+  "physical_links": 4,
+  "post_link_inspections": 12,
+  "all308_command_exits_zero": true,
+  "native_build_execution": "COMPLETED_AND_INSPECTED",
+  "target_code_execution": "NOT_RUN",
+  "emulator_execution": "NOT_RUN",
+  "all_four_local_process_groups_released": true,
+  "no_global_process_absence_inferred": true,
+  "plan_source_commit": "e0ef1994a91abef619c755f9428e44c8c9f064c4",
+  "published_head_at_allocation": "f7f27cde98f7ac7594eb4ad23526652f0fb10130",
+  "shared_savings_by_model": {
+    "elite": 6784,
+    "pro": 6784
+  },
+  "report": {
+    "path": "/workspace/scratch/e803955aec60/stock_fit_execution/STOCK-FIT-REPORT.md",
+    "sha256": "f3c56c4b420711aa62459b4470b8ecfb061880cf386621f8fba29f76810522c9"
+  },
+  "summary": {
+    "path": "/workspace/scratch/e803955aec60/stock_fit_execution/STOCK-FIT-SUMMARY.json",
+    "sha256": "00116911145036c4a4f6a860be30d773dddd7cf4878aabe7b67c99fb0fc5c90c"
+  },
+  "evidence_manifest": {
+    "path": "/workspace/scratch/e803955aec60/stock_fit_execution/EVIDENCE-MANIFEST.json",
+    "sha256": "06183a2b8f00237f132e8792eb81c4ef57b592491a5457a5977428d055499e2c",
+    "files": 351
+  },
+  "further_native_execution": "NOT_AUTHORIZED_BY_CONSUMED_ALLOCATION"
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "public executed active-original capture command v1",
+  "classification": "Executed comparison-only original reference; no source algorithms or original executable bytes included",
+  "case_id": "filter-modulation/1.2_2000_0.9",
+  "argv": [
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/capture_original_dry",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+    "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "filter-modulation/1.2_2000_0.9"
+  ],
+  "working_directory": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "LC_ALL": "C",
+    "LANG": "C",
+    "TZ": "UTC",
+    "TMPDIR": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/build/tmp"
+  },
+  "input_identities": [
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/public-morphs.f32",
+      "bytes": 852176,
+      "sha256": "0d35b5422cb5d3e0e349a66c9e0a50f2980b6287e68f8d94f55640d3f8168bd5"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/active-controls.f32le",
+      "bytes": 600,
+      "sha256": "6f7e9834054579c2d61e7e33072c2651107e3e987a75aa59c1b222d3f5164ff4"
+    },
+    {
+      "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/inputs/tuning128.f32le",
+      "bytes": 512,
+      "sha256": "c53587ea03c65ee8bd3a7849cca890bdfcc2c5209847ded0c1e1de2a7db4a218"
+    }
+  ],
+  "public_wrapper_sha256": "9ddfb70be9b9d26cc7d2b27f20ce228aeab197c3a9f8a65decc5c42a99f5a2b4",
+  "executable_sha256": "edf9f733ff449ecf345f9843952dea5d7cdab00825de88e4d7c3c61e6135f91d",
+  "proposal_sha256": "088ce262d3bcc3a336b63cf4ad4a3d3914b3ca5235e32b177a3405395a81ec35",
+  "timeout_seconds": 15,
+  "attempt": 1,
+  "exit_code": 0,
+  "timed_out": false,
+  "process_terminal": true,
+  "reference_output": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "bytes": 1058304,
+    "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74"
+  },
+  "genuine_receipt": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/metadata/active-capture.receipt.json",
+    "bytes": 2656,
+    "sha256": "a068b9ae8802a90546664adb4c44962b5c5ce7892849a9929e153f1f5cef8fc0"
+  },
+  "stdout": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stdout.log",
+    "bytes": 501,
+    "sha256": "eb6ae1a7b0775ae30a2aaf872adf6a9f6742608970828d920c01b8ba1febc9e1"
+  },
+  "stderr": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/logs/active-capture.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "compiler_or_linker_invocations": 0,
+  "retries": 0
+}

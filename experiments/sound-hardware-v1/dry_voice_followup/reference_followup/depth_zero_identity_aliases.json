@@ -1,0 +1,144 @@
+{
+  "schema": "reference-only depth-zero cross-archive identity aliases v1",
+  "created_utc_date": "2026-11-19",
+  "status": "SIX_DEPTH_ZERO_MATRIX_FILES_AVAILABLE_BY_EXACT_PAIRED_HASH_IDENTITY; EIGHTEEN_ACTIVE_MODULATION_FILES_STILL_MISSING",
+  "rendered": false,
+  "generated_audio": false,
+  "files": 6,
+  "note_slots": 18,
+  "aliases": [
+    {
+      "dynamic_case_id": "filter-modulation/0_500_0",
+      "physical_case_id": "physical-gain/100_500_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_0.f32.gz",
+      "gzip_sha256": "b6f0faf1c570a7d404faa7496429c4beb778ca520550bcf3b9e0712e39d3e915",
+      "gzip_bytes": 1328796,
+      "paired_sha256": "9dc90e6aef5836945cc795585a29baf88a4f5a035352f93a4d71f581797425a0",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_0.original-mono.f32le",
+      "mono_sha256": "9c30c21f3e49162eba206e25559f7497d03ebd9eb933f7f669f38f4602104903",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_500_0.json",
+      "dynamic_report_sha256": "6517423b48f87729b9864ce51b207409c2857f6072137c9dc6e5a4dee4e79091",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    },
+    {
+      "dynamic_case_id": "filter-modulation/0_500_0.9",
+      "physical_case_id": "physical-gain/100_500_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_500_.9.f32.gz",
+      "gzip_sha256": "6db306663f2ad3e0ed00c6ff0265ca0b5b38b8e5cc4e2af141ab5d7bc50fe061",
+      "gzip_bytes": 1424511,
+      "paired_sha256": "11bbbbe34cc0921667a7a1e7fb4a2eea01c176d455c90596ec2ad9e2ba0252df",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_500_.9.original-mono.f32le",
+      "mono_sha256": "05da25def2f5659e2ae9d557897fcd51a29d03d7c72eea526c684d995d503f13",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_500_0.9.json",
+      "dynamic_report_sha256": "e8cc90fd95fd5a6111b629cce4885eb857b235b0e0652966d63d92a8ba24b3cc",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    },
+    {
+      "dynamic_case_id": "filter-modulation/0_2000_0",
+      "physical_case_id": "physical-gain/100_2000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_0.f32.gz",
+      "gzip_sha256": "9644d721a083b23a8fadb4e2560e62d488b2924f147482a0ec34aa3c2640c815",
+      "gzip_bytes": 1247477,
+      "paired_sha256": "86acf3f599d1b793d835f6dba59f913c776dd98051e7647b4d695bab2541bd7a",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_0.original-mono.f32le",
+      "mono_sha256": "6605cb5c82f41c38b75e9e3598d6e055dd73207a5d8aa5ac71d08748f373e29d",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_2000_0.json",
+      "dynamic_report_sha256": "4744ab51ecf44fc27f5d0d5c84261158a8cf49bca74077f1fbcf42cd9e32fdca",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    },
+    {
+      "dynamic_case_id": "filter-modulation/0_2000_0.9",
+      "physical_case_id": "physical-gain/100_2000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_2000_.9.f32.gz",
+      "gzip_sha256": "dadf164aca7355af0a380bc26821935edd7697dd5794d9b14f076622a3502eaf",
+      "gzip_bytes": 1302206,
+      "paired_sha256": "c1fe9f3357ed6dc3c66254f68d9d806e0f94e6c1ceb4303e3518eacef837728c",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_2000_.9.original-mono.f32le",
+      "mono_sha256": "b02703f0893f9e7676e4db03048f9fefe8575ae1b1a1f44da1167253309a6cd2",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_2000_0.9.json",
+      "dynamic_report_sha256": "7d2b672c64077d627d988198ea888e662ddb029b4b0a41b2e4f80c742a224b9b",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    },
+    {
+      "dynamic_case_id": "filter-modulation/0_8000_0",
+      "physical_case_id": "physical-gain/100_8000_0",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_0.f32.gz",
+      "gzip_sha256": "639dae0e6acc8ca46ca4605807053e0a5a07084aa431f67bd1326a12d5d14b58",
+      "gzip_bytes": 1216336,
+      "paired_sha256": "fcf3d874a3ccebf769e55822e908556c2841f5a53caa20553fa47aa5251ae25c",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_0.original-mono.f32le",
+      "mono_sha256": "4890581cf0a79401d54585a9eedfd0f7b26143b36034bd84bebc18a7ee1a698a",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_8000_0.json",
+      "dynamic_report_sha256": "e432d47b006b4103183b71b23a252f64749f10dad347290942a0662c8563c050",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    },
+    {
+      "dynamic_case_id": "filter-modulation/0_8000_0.9",
+      "physical_case_id": "physical-gain/100_8000_.9",
+      "archive_member": "sound-pcm-preservation/physical-gain/100_8000_.9.f32.gz",
+      "gzip_sha256": "4f3c2ff0779394fcb1c77dcad9ac8b190a8309075403fa369535dc7ab677be67",
+      "gzip_bytes": 1340323,
+      "paired_sha256": "e9897c40006a4a62ae7ac61ce5a0b73d9bdaa189ee7acc0d36c0a16d44d52501",
+      "paired_bytes": 2116608,
+      "mono_path": "/workspace/scratch/e803955aec60/dry_reference_packet/reference_pcm/100_8000_.9.original-mono.f32le",
+      "mono_sha256": "364cdc86e6d62830377eb26127ee2eee2ea5e1d59204d9b756ccf221b1f46304",
+      "mono_bytes": 1058304,
+      "dynamic_report_path": "/workspace/scratch/67e685478953/superj6_research/owner_evidence/sound-classic-handoff-delta/filter-modulation/0_8000_0.9.json",
+      "dynamic_report_sha256": "4c7591e9a5943ea45f5f16baf9148b327020d2b9fd57f6c8800762e65ef9dc9d",
+      "verified": {
+        "gzip_sha256": true,
+        "paired_sha256_matches_physical_and_dynamic": true,
+        "paired_bytes": true,
+        "mono_sha256": true,
+        "dynamic_report_sha256": true
+      },
+      "identity_basis": "Recorded final dynamic paired SHA-256 equals independently verified recovered paired bytes; existing original-mono column is reused by pointer, not transformed."
+    }
+  ],
+  "warning": "These are 18 additional labelled matrix slots but no new physical observations; do not count them as new independent captures or active-filter modulation coverage."
+}

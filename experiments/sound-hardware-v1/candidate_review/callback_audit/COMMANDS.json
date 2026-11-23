@@ -1,0 +1,51 @@
+[
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_02/snapshot",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_probe.c",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_02/snapshot/dnbx_core.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/timing_probe"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/timing_probe"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-ffp-contract=off",
+      "-DX0X_HOST",
+      "-I/workspace/scratch/67e685478953/superj6_research/candidate_review/frozen_02/snapshot",
+      "-DREVIEW_TRACE",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_probe.c",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/dnbx_core_trace.c",
+      "-o",
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/counter_probe"
+    ],
+    "exit_code": 0
+  },
+  {
+    "argv": [
+      "/workspace/scratch/67e685478953/superj6_research/candidate_review/callback_audit/counter_probe"
+    ],
+    "exit_code": 0
+  }
+]

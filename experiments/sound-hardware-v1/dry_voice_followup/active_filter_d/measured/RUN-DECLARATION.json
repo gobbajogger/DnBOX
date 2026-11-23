@@ -1,0 +1,195 @@
+{
+  "status": "BEFORE_ONE_HOST_BUILD_OR_RENDER",
+  "written_utc": "2026-11-19T00:47:10.554692+00:00",
+  "source_preparation_declaration_sha256": "373711a1cbfa6d04a5fe40b45abe83cef327e05cb0ac4aa94b761d33190fa862",
+  "source_files_sha256": {
+    "src/active_host.c": "e905c17e104db087a5f8790ff9c1761d29e8e1216d1e3861568a2253cc54fa89",
+    "check_active.py": "f661569877044d9f7c52bfaa02c8cc368818aea6e2fe94e7403972147108b6cc",
+    "metrics.py": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+    "inputs/case_plan.json": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "inputs/PROTOCOL.json": "d4d34f5bb562158cdf88289f791a15d952605ba781d832275f998ae828452cbb",
+    "inputs/reference_capture_manifest.json": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+    "README.md": "c1767652068ab6a600de28cde0c3c59c85e8aa52a249d6fee12b5c195ccf1851",
+    "NEXT-COMMAND.txt": "e29a1d66e62e744eb66e5a85c7d79a5d16d9011f0e9d2bb1d323e339f8201878",
+    "SOURCE-REVIEW.json": "abb037a1e6d15703c45ade582ace4bf1eed4da526eb944babb37bd263037952c"
+  },
+  "D_files_sha256": {
+    "src/s1_dry_voice.c": "dab6afb5374a826bdd696f750709f22eaf658da8d9ddbf959646e95318cb43b1",
+    "src/s1_dry_voice.h": "c18a55d812b5424b80fc611125d67d29b1297b59179ecb24b01f8807c3646ec2",
+    "src/host.c": "068ed60874878844f65d0b90b4ac6b76597de3990962227f5ee74908ad0b7b07",
+    "vendor/fastmath.h": "c82737d5302d77b974d5071c9bc58915aca723a6e6f5f5185cbe43bad962189d",
+    "vendor/dnbx_s1_envelope.c": "4a5037f847f9488e3b44ee6252176ddfe5344380c6f59dc235d72cdf0c69caf9",
+    "vendor/dnbx_s1_envelope.h": "6c949b9f93c7d0f60ee6938903341c10e224eb0857065bdc133892e80e641278"
+  },
+  "D180_summary_sha256": "9f4f5d42595c997c01af70b700c934403d86febacb2bf893745fc4934298f352",
+  "D180_summary_path": "/workspace/scratch/e803955aec60/s1_dry_voice_d/results/audio180/SUMMARY.json",
+  "consumed_source_policy": "Compiler and metric read only staged verified byte snapshots",
+  "staged_D_root": "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d",
+  "staged_harness_root": "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness",
+  "new_original_numeric_manifest_sha256": "ea1a572e0d0b682a938fc83bdb7f7dd535bb645efd4b749576d039af64710044",
+  "D_selected_static_pcm": {
+    "path": "/workspace/scratch/e803955aec60/s1_dry_voice_d/results/audio180/100_2000_.9.candidate-mono.f32le",
+    "sha256": "7aded201280455c1ddaee86abab4d82b6d791953e81d0d9cb40e17946cbfa380"
+  },
+  "new_original_active_pcm": {
+    "path": "/workspace/scratch/e803955aec60/reference_filter_inputs/full_dry_preparation/active_capture_proposal/outputs/filter-modulation_1.2_2000_r0.9.original-mono.f32le",
+    "sha256": "3f7303aa1383c678e4e251c36506a141a0ece419e38d4411e2c0a0447bf0bb74",
+    "bytes": 1058304,
+    "origin": "new capture, not recovered historical active PCM"
+  },
+  "protocol": {
+    "source": "case_plan.json numeric contract only",
+    "case_plan_sha256": "e8049a0247019d211ec9f96636073e6839ee321135fdf16001065dd54b565a9d",
+    "scope": "one new active original capture and one frozen-D active candidate diagnostic; no recovered historical active PCM",
+    "sample_rate_hz": 44100,
+    "notes": [
+      {
+        "midi_note": 36,
+        "frequency_hz": 65.4063949584961,
+        "frequency_f32_hex": "4282d013",
+        "note_record_index": 0
+      },
+      {
+        "midi_note": 60,
+        "frequency_hz": 261.6255798339844,
+        "frequency_f32_hex": "4382d013",
+        "note_record_index": 1
+      },
+      {
+        "midi_note": 84,
+        "frequency_hz": 1046.5023193359375,
+        "frequency_f32_hex": "4482d013",
+        "note_record_index": 2
+      }
+    ],
+    "warmup_frames_per_note": 176448,
+    "frames_per_note": 88192,
+    "block_size": 64,
+    "note_on_frame": 0,
+    "note_off_frame": 66112,
+    "fresh_owner_per_note": true,
+    "phase_at_note_on": 0,
+    "channels": 1,
+    "bytes_per_three_note_mono": 1058304,
+    "amp_ADSR": [
+      0.05,
+      0.005,
+      0.8,
+      0.05
+    ],
+    "modes": {
+      "static": {
+        "case_id": "physical-gain/100_2000_.9",
+        "velocity": 100,
+        "cutoff_hz": 2000,
+        "resonance": 0.8999999761581421,
+        "filter_depth": 0,
+        "filter_ADSR": [
+          0.05,
+          0.05,
+          1,
+          0.5
+        ],
+        "control_hex": {
+          "cutoff": "44fa0000",
+          "resonance": "3f666666",
+          "depth": "00000000",
+          "filter_ADSR": [
+            "3d4ccccd",
+            "3d4ccccd",
+            "3f800000",
+            "3f000000"
+          ],
+          "amp_ADSR": [
+            "3d4ccccd",
+            "3ba3d70a",
+            "3f4ccccd",
+            "3d4ccccd"
+          ]
+        }
+      },
+      "active": {
+        "case_id": "filter-modulation/1.2_2000_0.9",
+        "velocity": 100,
+        "cutoff_hz": 2000,
+        "resonance": 0.8999999761581421,
+        "filter_depth": 1.2000000476837158,
+        "filter_ADSR": [
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "control_hex": {
+          "cutoff": "44fa0000",
+          "resonance": "3f666666",
+          "depth": "3f99999a",
+          "filter_ADSR": [
+            "3e4ccccd",
+            "3e99999a",
+            "3ecccccd",
+            "3f000000"
+          ],
+          "amp_ADSR": [
+            "3d4ccccd",
+            "3ba3d70a",
+            "3f4ccccd",
+            "3d4ccccd"
+          ]
+        }
+      }
+    },
+    "comparison_gain": 1,
+    "normalization": "none",
+    "time_alignment": "none"
+  },
+  "gate": {
+    "comparison_gain": 1,
+    "rms_limit_db": 1,
+    "spectral_limit_db": 3,
+    "nonfinite_limit": 0,
+    "normalization": "none",
+    "alignment": "none",
+    "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1"
+  },
+  "compiler": "/usr/bin/x86_64-linux-gnu-gcc-14",
+  "compiler_sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "numpy_version": "2.3.5",
+  "commands_serial": {
+    "build": [
+      "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "-std=c11",
+      "-O2",
+      "-ffp-contract=off",
+      "-fno-fast-math",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wdouble-promotion",
+      "-DX0X_HOST=1",
+      "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor",
+      "-I/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/src/s1_dry_voice.c",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/d/vendor/dnbx_s1_envelope.c",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/build-inputs/harness/src/active_host.c",
+      "-o",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host"
+    ],
+    "static": [
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+      "static",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/static.candidate-mono.f32le"
+    ],
+    "active": [
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active_host",
+      "active",
+      "/workspace/scratch/e803955aec60/s1_d_active_followup/results/active-one/active.candidate-mono.f32le"
+    ]
+  },
+  "maximum_host_builds": 1,
+  "maximum_static_replays": 1,
+  "maximum_active_captures": 1,
+  "precondition_for_active": "static replay is byte-identical to pinned D selected PCM",
+  "production_activation": false
+}

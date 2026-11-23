@@ -1,0 +1,9 @@
+{
+  "initial_dry": "historical_initial_dry_FAIL.json: 18.76\u201349.37 dB spectral error, fitted gain; not acceptance",
+  "dynamic_range_failure": "historical_filter_modulation_range_FAIL.json: accepted 54/72, failed 18 depth1.2 cases, max RMS 5.383274629847556 dB, spectral 8.895468323672016 dB",
+  "failed_dynamic_pcm": "Original failed PCM was overwritten by the historical final rerun; not recovered and not to be claimed available.",
+  "later_historical_physical": "180/180 history only; maximum RMS 0.00013075611673406606, spectral 0.005425824870207458",
+  "later_historical_dynamic": "72/72 history only; maximum RMS 0.0003255912716613262, spectral 0.02380014809445087",
+  "new_candidate_audio_status": "NOT_RUN",
+  "full_preset_coverage": 0
+}

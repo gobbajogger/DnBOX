@@ -1,0 +1,282 @@
+{
+  "status": "CAPTURE_COMPLETE",
+  "response_records": 8,
+  "wrapper_builds": 1,
+  "serial_execution": true,
+  "candidate_DSP_changed": false,
+  "declaration_sha256": "aa379b545c0515a25e6ee83505b94e1c9b5bd51014f1dd4e5d9ade79db8c8d99",
+  "rows": [
+    {
+      "case_id": "impulse_a38d1b717_r00000000",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r00000000.C-filter.f32le",
+      "candidate_sha256": "0d4fcff004cf87cfcaf64d74bc312db736f1a6638ad3ee833bc3dd7bf8862245",
+      "log_sha256": "35be255089cada89bff7f3a6267d7fe18a8da0ea48bf4f06675c8d5437ba9c5f",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "00000000",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 8.871855110932636e-10,
+          "peak_abs": 6.361730328308113e-06
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 9.265603661042452e-84,
+          "peak_abs": 1.6815581571897805e-44
+        }
+      }
+    },
+    {
+      "case_id": "impulse_a38d1b717_r3f666666",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/impulse_a38d1b717_r3f666666.C-filter.f32le",
+      "candidate_sha256": "1851fa5a2b221d618e6f07c309ca171fb4d6829c43c9942499ec44fd5a93885d",
+      "log_sha256": "a0bfe69ae4e68074cbb2332ddacac4b195d44f226db606e4e8666d5c9bcc266a",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "3f666666",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 2.0282571588825724e-09,
+          "peak_abs": 5.0748832904901064e-06
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 5.765825879605637e-11,
+          "peak_abs": 5.9367075699867655e-08
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r00000000",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r00000000.C-filter.f32le",
+      "candidate_sha256": "aea9398f430505de625f520b4b03dba80db53e342e1c044e3b8cb4ab2d2b350a",
+      "log_sha256": "226ef2f73a04017f56214d734096dbbb8462801a5c71293e0771bf4fc26e8fab",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "00000000",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 2.0110117584512438e-05,
+          "peak_abs": 3.944811419387406e-05
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 1.0050476161203745e-05,
+          "peak_abs": 2.4768021148702246e-05
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a38d1b717_r3f666666",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a38d1b717_r3f666666.C-filter.f32le",
+      "candidate_sha256": "626977ffdcb56415c616a84428c037fc740b83cb531dafef7f809fc574764ed6",
+      "log_sha256": "59bd419d5ff7321ea395ccd9f795c310731acc37154f500e10b26664fe4e2163",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "3f666666",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 0.0017651324617974182,
+          "peak_abs": 0.0002546761734265601
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 0.0008838678606283119,
+          "peak_abs": 0.00023226482062455034
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r00000000",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r00000000.C-filter.f32le",
+      "candidate_sha256": "48fc98757c981802f25ac332c7f3e9f3440ce66c8fd06e521df3302ac01ed5c2",
+      "log_sha256": "28c331f10e85a9b8bad1e6b02434115e515dc4ab43fc68f1dc302cbca648f76c",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "00000000",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 0.2011011787741987,
+          "peak_abs": 0.003944810800021514
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 0.100504763184743,
+          "peak_abs": 0.0024768025759840384
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a3c23d70a_r3f666666",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3c23d70a_r3f666666.C-filter.f32le",
+      "candidate_sha256": "6bd52241bb37e393d76f5852be300e09d2c5ba134073019a7de9c044fdb91f35",
+      "log_sha256": "7166f5e3b8f69ca61a09858f2e3fd052ae0814bebee21ca2598733fb502e25e9",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "3f666666",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 11.205782087438838,
+          "peak_abs": 0.020286541781388223
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 5.609481347922082,
+          "peak_abs": 0.018504851264879107
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r00000000",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r00000000.C-filter.f32le",
+      "candidate_sha256": "277ffd45c0a8f50ae0bbfeb0731c1e90bfe404448c4cfffad62f6ecd65ea3fb4",
+      "log_sha256": "5d82e6f32dda4e21b35c4825d8ac14a7637fabac724e102fe23ef07a7e14b795",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "00000000",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 125.68824644508804,
+          "peak_abs": 0.0986202685162425
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 62.815481826155086,
+          "peak_abs": 0.061920050997287035
+        }
+      }
+    },
+    {
+      "case_id": "sine_2000_a3e800000_r3f666666",
+      "candidate_path": "/workspace/scratch/e803955aec60/s1_c_filter_probe/outputs/sine_2000_a3e800000_r3f666666.C-filter.f32le",
+      "candidate_sha256": "9b634361efd955f2a9870651d3ed3ffbd66be85840fdb304b13b07d020ab60e3",
+      "log_sha256": "6d7a7373032e1a358eeeec2ba257ac3126df9b1352b3f4efe4c50fd1faefa519",
+      "wrapper_result": {
+        "scope": "frozen C filter only",
+        "sample_rate_hz": 44100,
+        "cutoff_hz": 2000,
+        "resonance_f32_hex": "3f666666",
+        "prewarm_frames": 4096,
+        "retained_frames": 32768,
+        "filter_substeps": 73728,
+        "steady_window": [
+          16384,
+          32768
+        ],
+        "prewarm_nonfinite": 0,
+        "output_nonfinite": 0,
+        "prewarm_peak": 0,
+        "oscillator_envelopes_prepared_controls_unchanged": true,
+        "feedback_argument_classification": "reconstructed from current output and old lags; NOT exact traced solver d",
+        "reconstructed_all": {
+          "count": 65536,
+          "sum_squares": 1079.8503771366452,
+          "peak_abs": 0.20093704853206873
+        },
+        "reconstructed_steady": {
+          "count": 32768,
+          "sum_squares": 540.1423767761237,
+          "peak_abs": 0.18166470061987638
+        }
+      }
+    }
+  ]
+}

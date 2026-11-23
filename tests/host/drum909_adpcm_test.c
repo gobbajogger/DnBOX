@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* The 909 cymbals as IMA ADPCM (drum909.c, ima_adpcm.h, tools/gen_drum_samples.py):
- *   1. the firmware decoder gives the reference samples (tests/host/cymbal_ref.py: the approved
- *      A/B study's decode when it is there) within 1 LSB, and the SNR against the original PCM;
+ *   1. the firmware decoder gives the reference samples (tests/host/cymbal_ref.py: the independent production
+ *      decode or the historical A/B arm's decode) within 1 LSB, and the SNR against the original PCM;
  *   2. d9_render_smp's forward streaming decode gives bit-identical output to the old read loop
  *      on a fully decoded int16 buffer, at pitch 0.25 ... 4 (inc up to 4: up to 4 decodes a sample),
  *      and again after a retrigger part way through;

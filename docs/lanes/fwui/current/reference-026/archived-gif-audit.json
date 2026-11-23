@@ -1,0 +1,55 @@
+{
+  "archive_bytes": 14222261,
+  "archive_file": "DnBOX-975-all-GIFs.zip",
+  "archive_sha256": "2c35210da618125088494bf6aac1c1fd21b855970d7cb0fc337df7af4e6e8e2f",
+  "excludes": [
+    "original 0.0.26 pixel parity",
+    "current 199f0444 framebuffer parity",
+    "complete R22 visual reference selection",
+    "target Elite/Pro build"
+  ],
+  "expected_archive_sha256": "2c35210da618125088494bf6aac1c1fd21b855970d7cb0fc337df7af4e6e8e2f",
+  "failures": [],
+  "frame_count_distribution": {
+    "1": 1742,
+    "2": 10,
+    "3": 16,
+    "5": 1,
+    "11": 5,
+    "16": 5,
+    "17": 7,
+    "18": 93,
+    "56": 1
+  },
+  "gif_size_distribution": {
+    "240x240": 1880
+  },
+  "gif_total": 1880,
+  "group_counts": {
+    "01-firmware-checklist": 1712,
+    "02-native-supplement": 40,
+    "03-startup-loop": 16,
+    "04-synth-one-opt-in": 88,
+    "05-linked-stock-guard": 10,
+    "06-renderer-motion": 6,
+    "07-smc-pickup": 8
+  },
+  "group_counts_match_expected": true,
+  "schema": "dnbox-fwui-historical-gif-integrity-v1",
+  "selected_historical_candidates": {
+    "06-renderer-motion/checklist-battery.gif": {
+      "frames": 5,
+      "sha256": "e64295b4fa758f50cdde74784973f14907f3ddc5c74e5a9c7796383dc4df1cbd"
+    },
+    "06-renderer-motion/checklist-play--2.gif": {
+      "frames": 11,
+      "sha256": "26195d6079fbe04c92bff129f56954e3ec1f45a980b8a2c7bade8255908144c1"
+    },
+    "07-smc-pickup/seq.gif": {
+      "frames": 17,
+      "sha256": "644f437be7efe0d39f439546b479b4491aec1337e1d55c3335e0ea2808409e09"
+    }
+  },
+  "status": "PASS_ARCHIVE_ONLY_NOT_ORIGINAL_026_NOT_CURRENT",
+  "zip_crc_failure": null
+}

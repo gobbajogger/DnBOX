@@ -1,0 +1,386 @@
+{
+  "status": "SAVED_C_AUDIO_FAIL",
+  "scope": "Read saved metrics only; no metric repeat",
+  "source_summary": "/workspace/scratch/e803955aec60/s1_dry_voice_c/results/audio180/SUMMARY.json",
+  "source_summary_sha256": "d20dcf4f1279db0b8c727c814be8bb1d4b0a980bc68c54cb27a028cd4df92182",
+  "terminal_reported_by_root": {
+    "start_utc": "2026-11-19 00:03:44 UTC",
+    "end_utc": "2026-11-19 00:04:10 UTC",
+    "exit_status": 1,
+    "meaning": "normal audio-gate FAIL"
+  },
+  "totals": {
+    "case_files": 60,
+    "note_cases": 180,
+    "accepted_files": 30,
+    "accepted_notes": 109,
+    "maximum_rms_db": 7.691473258364919,
+    "maximum_spectral_db": 8.959004990571875,
+    "accepted": false
+  },
+  "nonfinite_from_saved_reports": 0,
+  "saved_case_reports_verified": 60,
+  "groups": {
+    "resonance": [
+      {
+        "resonance": 0.0,
+        "notes": 45,
+        "accepted": 45,
+        "maximum_rms_db": 0.3138965744961875,
+        "maximum_spectral_db": 2.2837313830095822
+      },
+      {
+        "resonance": 0.25,
+        "notes": 45,
+        "accepted": 32,
+        "maximum_rms_db": 2.2333781737160816,
+        "maximum_spectral_db": 2.4883331626205663
+      },
+      {
+        "resonance": 0.5,
+        "notes": 45,
+        "accepted": 18,
+        "maximum_rms_db": 2.41800879605878,
+        "maximum_spectral_db": 4.57193052051439
+      },
+      {
+        "resonance": 0.8999999761581421,
+        "notes": 45,
+        "accepted": 14,
+        "maximum_rms_db": 7.691473258364919,
+        "maximum_spectral_db": 8.959004990571875
+      }
+    ],
+    "velocity": [
+      {
+        "velocity": 20,
+        "notes": 60,
+        "accepted": 46,
+        "maximum_rms_db": 4.64981826668567,
+        "maximum_spectral_db": 8.959004990571875
+      },
+      {
+        "velocity": 100,
+        "notes": 60,
+        "accepted": 37,
+        "maximum_rms_db": 6.314121557581571,
+        "maximum_spectral_db": 8.387221423030374
+      },
+      {
+        "velocity": 127,
+        "notes": 60,
+        "accepted": 26,
+        "maximum_rms_db": 7.691473258364919,
+        "maximum_spectral_db": 8.06244631028034
+      }
+    ],
+    "cutoff_hz": [
+      {
+        "cutoff_hz": 64,
+        "notes": 36,
+        "accepted": 29,
+        "maximum_rms_db": 7.691473258364919,
+        "maximum_spectral_db": 5.093117340706213
+      },
+      {
+        "cutoff_hz": 500,
+        "notes": 36,
+        "accepted": 29,
+        "maximum_rms_db": 2.4462914345599054,
+        "maximum_spectral_db": 5.517961116863918
+      },
+      {
+        "cutoff_hz": 2000,
+        "notes": 36,
+        "accepted": 24,
+        "maximum_rms_db": 2.441217210428704,
+        "maximum_spectral_db": 3.838778220903722
+      },
+      {
+        "cutoff_hz": 8000,
+        "notes": 36,
+        "accepted": 12,
+        "maximum_rms_db": 4.64981826668567,
+        "maximum_spectral_db": 4.509558544462202
+      },
+      {
+        "cutoff_hz": 22050,
+        "notes": 36,
+        "accepted": 15,
+        "maximum_rms_db": 1.2446814175225038,
+        "maximum_spectral_db": 8.959004990571875
+      }
+    ]
+  },
+  "velocity_cutoff_grid": [
+    {
+      "velocity": 20,
+      "cutoff_hz": 64,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.3134347936235278,
+        "maximum_spectral_db": 0.7992932023986452
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 1,
+        "maximum_rms_db": 1.3389031763381034,
+        "maximum_spectral_db": 4.631906114688184
+      }
+    },
+    {
+      "velocity": 20,
+      "cutoff_hz": 500,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.19885745378596137,
+        "maximum_spectral_db": 0.9272690401819955
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.25483926931805784,
+        "maximum_spectral_db": 0.9303690788067925
+      }
+    },
+    {
+      "velocity": 20,
+      "cutoff_hz": 2000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.23970785929783564,
+        "maximum_spectral_db": 1.243640386956058
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.6527220054340808,
+        "maximum_spectral_db": 1.298249066545492
+      }
+    },
+    {
+      "velocity": 20,
+      "cutoff_hz": 8000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.13749106882813414,
+        "maximum_spectral_db": 2.2837302165182645
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 4.64981826668567,
+        "maximum_spectral_db": 2.8515575515602056
+      }
+    },
+    {
+      "velocity": 20,
+      "cutoff_hz": 22050,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.015482691237859194,
+        "maximum_spectral_db": 0.8399623289750743
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 1.2446814175225038,
+        "maximum_spectral_db": 8.959004990571875
+      }
+    },
+    {
+      "velocity": 100,
+      "cutoff_hz": 64,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.3134369366985802,
+        "maximum_spectral_db": 0.7991983191303026
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 1,
+        "maximum_rms_db": 6.314121557581571,
+        "maximum_spectral_db": 4.964920388620424
+      }
+    },
+    {
+      "velocity": 100,
+      "cutoff_hz": 500,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.19885789752807426,
+        "maximum_spectral_db": 0.9272736196612952
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 2,
+        "maximum_rms_db": 2.0023712855849434,
+        "maximum_spectral_db": 4.500828029889537
+      }
+    },
+    {
+      "velocity": 100,
+      "cutoff_hz": 2000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.23970808686406564,
+        "maximum_spectral_db": 1.2436492305695397
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 2,
+        "maximum_rms_db": 2.0292299139830248,
+        "maximum_spectral_db": 3.104424613329723
+      }
+    },
+    {
+      "velocity": 100,
+      "cutoff_hz": 8000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.13749090227334668,
+        "maximum_spectral_db": 2.2837313830095822
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 1.8384154979708134,
+        "maximum_spectral_db": 3.8970125675593077
+      }
+    },
+    {
+      "velocity": 100,
+      "cutoff_hz": 22050,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.015482780292222368,
+        "maximum_spectral_db": 0.8399629579259393
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 0.43835584135312067,
+        "maximum_spectral_db": 8.387221423030374
+      }
+    },
+    {
+      "velocity": 127,
+      "cutoff_hz": 64,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.3138965744961875,
+        "maximum_spectral_db": 0.7991914326210594
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 1,
+        "maximum_rms_db": 7.691473258364919,
+        "maximum_spectral_db": 5.093117340706213
+      }
+    },
+    {
+      "velocity": 127,
+      "cutoff_hz": 500,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.1988578331336121,
+        "maximum_spectral_db": 0.9272641174850251
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 1,
+        "maximum_rms_db": 2.4462914345599054,
+        "maximum_spectral_db": 5.517961116863918
+      }
+    },
+    {
+      "velocity": 127,
+      "cutoff_hz": 2000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.23970804979876092,
+        "maximum_spectral_db": 1.2436507695105112
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 2.441217210428704,
+        "maximum_spectral_db": 3.838778220903722
+      }
+    },
+    {
+      "velocity": 127,
+      "cutoff_hz": 8000,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.13749078589015568,
+        "maximum_spectral_db": 2.2837257389470103
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 1.9794245837415314,
+        "maximum_spectral_db": 4.509558544462202
+      }
+    },
+    {
+      "velocity": 127,
+      "cutoff_hz": 22050,
+      "resonance_0": {
+        "notes": 3,
+        "accepted": 3,
+        "maximum_rms_db": 0.01548274714149254,
+        "maximum_spectral_db": 0.8399625491318127
+      },
+      "resonance_0_9": {
+        "notes": 3,
+        "accepted": 0,
+        "maximum_rms_db": 0.6866364967837263,
+        "maximum_spectral_db": 8.06244631028034
+      }
+    }
+  ],
+  "worst_rms": {
+    "case_id": "physical-gain/127_64_.9",
+    "velocity": 127,
+    "cutoff_hz": 64,
+    "resonance": 0.8999999761581421,
+    "note": 36,
+    "rms_db": 7.691473258364919,
+    "spectral_db": 5.093117340706213,
+    "accepted": false
+  },
+  "worst_spectral": {
+    "case_id": "physical-gain/20_22050_.9",
+    "velocity": 20,
+    "cutoff_hz": 22050,
+    "resonance": 0.8999999761581421,
+    "note": 84,
+    "rms_db": 1.2446814175225038,
+    "spectral_db": 8.959004990571875,
+    "accepted": false
+  },
+  "B_vs_C_pass_sets": {
+    "identical": true,
+    "new_C_passes": [],
+    "lost_B_passes": []
+  },
+  "metric_sha256": "bdb7cb1acab5a450a4f43dada364b78dc116d2bf6a7710ad78f2cfd788af96c1",
+  "gain": 1,
+  "rms_limit_db": 1,
+  "spectral_limit_db": 3
+}

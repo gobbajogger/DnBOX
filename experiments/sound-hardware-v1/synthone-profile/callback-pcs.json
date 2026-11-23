@@ -1,0 +1,200 @@
+{
+  "programs": [
+    523,
+    522,
+    682,
+    511,
+    524,
+    668,
+    671,
+    525
+  ],
+  "repetitions": 8,
+  "callbacks": 48000,
+  "samples": 7416,
+  "pcm_checks": 64,
+  "fixture_sha256": "6cc3407fffc13a8659967b4c92a53988f7d8d6d44dffe79110eb9e431da22170",
+  "log": "benchmark_tracer_pid=0 (-1 means unavailable)\nhost_mxcsr_initial=0x1f80 effective=0x1f80 diagnostic_ftz=0\n{\"programs\":64,\"callbacks\":48000,\"frames\":6144000,\"wall_misses\":1170,\"cpu_misses\":149,\"nonfinite_words\":0,\"scope\":\"host control/render/common FX deadline measurement, fixed fixture tuning; not device XRUN or app qualification\"}\n",
+  "functions": [
+    [
+      "profile / sp_moogladder_compute",
+      1426
+    ],
+    [
+      "libm.so.6 / unresolved",
+      894
+    ],
+    [
+      "profile / physical_word_row",
+      823
+    ],
+    [
+      "profile / s1scheduler_compact::run_note(S1NoteState&, int, float*, float*, s1c_binding const&)",
+      565
+    ],
+    [
+      "profile / s1c_runtime_morph_compute",
+      517
+    ],
+    [
+      "profile / block",
+      458
+    ],
+    [
+      "profile / s1c_read_quad",
+      370
+    ],
+    [
+      "profile / header.part.0",
+      236
+    ],
+    [
+      "profile / sp_compressor_compute",
+      234
+    ],
+    [
+      "profile / sp_buthp_compute",
+      206
+    ],
+    [
+      "profile / getrow",
+      202
+    ],
+    [
+      "profile / sp_revsc_compute",
+      200
+    ],
+    [
+      "profile / SourceFx::frame(float, float*, float*, float, float, float, float)",
+      121
+    ],
+    [
+      "profile / sp_adsr_compute",
+      120
+    ],
+    [
+      "profile / sp_osc_compute",
+      111
+    ],
+    [
+      "profile / sp_vdelay_compute",
+      84
+    ],
+    [
+      "profile / synthone_ports::Ports::tick()",
+      82
+    ],
+    [
+      "profile / __wrap_s1c_read_quad",
+      81
+    ],
+    [
+      "profile / sp_fosc_compute",
+      78
+    ],
+    [
+      "profile / unresolved",
+      72
+    ],
+    [
+      "libm.so.6 / __log10_finite@GLIBC_2.15",
+      67
+    ],
+    [
+      "profile / sp_butbp_compute",
+      58
+    ],
+    [
+      "profile / sp_crossfade_compute",
+      58
+    ],
+    [
+      "libm.so.6 / expf64",
+      47
+    ],
+    [
+      "profile / s1c_binding_valid",
+      39
+    ],
+    [
+      "profile / S1DSPKernel::processLfo()",
+      39
+    ],
+    [
+      "profile / s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*)",
+      36
+    ],
+    [
+      "profile / computephaser",
+      32
+    ],
+    [
+      "libm.so.6 / powf64",
+      25
+    ],
+    [
+      "profile / sp_noise_compute",
+      24
+    ],
+    [
+      "profile / sp_pan2_compute",
+      22
+    ],
+    [
+      "profile / bool s1source_sequence::SerializedSequence::process_static_admitted<s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*)::View, s1scheduler::SourceScheduler::Sink>(float const*, s1scheduler::SourceScheduler::process(unsigned int, unsigned int, float*, float*)::View const&, s1scheduler::SourceScheduler::Sink&) [clone .part.0]",
+      16
+    ],
+    [
+      "profile / sp_port_compute",
+      15
+    ],
+    [
+      "profile / callback_fx(s1scheduler::RuntimeState const&, unsigned int, unsigned int, void*)",
+      13
+    ],
+    [
+      "profile / sp_phasor_compute",
+      11
+    ],
+    [
+      "libc.so.6 / unresolved",
+      11
+    ],
+    [
+      "profile / sp_delay_compute",
+      4
+    ],
+    [
+      "profile / s1scheduler::State::valid_output_span(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const",
+      4
+    ],
+    [
+      "profile / s1source_sequence::SerializedSequence::tuning_valid(float const*, unsigned long, int)",
+      3
+    ],
+    [
+      "libm.so.6 / log10f64",
+      3
+    ],
+    [
+      "libm.so.6 / fabsf64",
+      2
+    ],
+    [
+      "profile / s1scheduler::RuntimeState::valid_runtime_output(float*, float*, unsigned int, unsigned int, s1scheduler::InstanceSpan, bool) const",
+      2
+    ],
+    [
+      "profile / main",
+      2
+    ],
+    [
+      "profile / sp_rand",
+      2
+    ],
+    [
+      "libm.so.6 / fmodf64",
+      1
+    ]
+  ]
+}

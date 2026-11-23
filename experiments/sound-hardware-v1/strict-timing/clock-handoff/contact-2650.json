@@ -1,0 +1,56 @@
+{
+  "offset_ms": 1,
+  "capture_ms": 2650,
+  "rows": [
+    {
+      "build": "stock",
+      "elf": "1130c88adb567502fa55b532a135231f333f9f6c9b93bff17c2196389b455c90",
+      "shot": {
+        "duration_ms": 2650,
+        "shift_ms": 1,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 187,
+        "max_us": 4531,
+        "raw_late": 1,
+        "audio_xruns": 1,
+        "pcm_sha256": "aadfb19fb24e964c0cae106b9496239c086c4c4e588d2194ee57d0733d29c1ad",
+        "pcm_bytes": 389120,
+        "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+        "initial_flash_sha256": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229",
+        "final_flash_sha256": "43d9653916eae7baae13145524155c2252072c269c2deb1a1ea574d4203e2229"
+      },
+      "native_raw_notes": 1024,
+      "ui_key_latch": 1024,
+      "drum4_velocity": 255,
+      "drum4_last_hit_ms": 2649,
+      "physical_pcm_prefix_matches_full_shot": true
+    },
+    {
+      "build": "vector",
+      "elf": "8c35a85a143cb92b4d3cd987939a937526b756094a7675d900811e4c1e656bc8",
+      "shot": {
+        "duration_ms": 2650,
+        "shift_ms": 1,
+        "events": 922,
+        "strict": 1,
+        "mhz": 360,
+        "halves": 187,
+        "max_us": 4542,
+        "raw_late": 0,
+        "audio_xruns": 0,
+        "pcm_sha256": "aadfb19fb24e964c0cae106b9496239c086c4c4e588d2194ee57d0733d29c1ad",
+        "pcm_bytes": 389120,
+        "scene_sha256": "0ed9c92bf5eb72595cf7dcdda5b9a20eec071ee4d8e03ff976c92ec1b3c035f0",
+        "initial_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8",
+        "final_flash_sha256": "edb5f4ab3cb6303b13d617ca8bd1e57648fbb03a6af2e290696989f20c3e6bf8"
+      },
+      "native_raw_notes": 1024,
+      "ui_key_latch": 0,
+      "drum4_velocity": 0,
+      "drum4_last_hit_ms": 0,
+      "physical_pcm_prefix_matches_full_shot": true
+    }
+  ]
+}
