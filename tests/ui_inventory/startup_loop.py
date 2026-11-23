@@ -27,7 +27,7 @@ def headers(root, out):
     editor = (src/"app/editor.c").read_text()
     ota = (src/"ota.c").read_text()
     constants = []
-    for source, prefixes in ((main,["#define DBG_MAGIC "]), (storage,["#define ST_SECTOR ","#define ST_SMK_BASE ","#define ST_OWNER_SECTOR "]),
+    for source, prefixes in ((main,["#define DBG_MAGIC "]), (storage,["#define ST_SECTOR ","#define ST_SMK_BASE ","#define ST_OWNER_SECTOR ","#define ST_CLEAR_HI "]),
                              ((hal/"smk_input.h").read_text(),["enum { FM1_BTN_OCT_DOWN","enum { FM1_ADC_BATT","#define FM1_OCT_BOTH ","#define SMK_TRIM_FLASH "]),
                              ((hal/"fm1_irq.h").read_text(),["#define FM1_CRASH_MAGIC "]),
                              (ota,["#define OTA_AREA ","#define OTA_AREA_LEN ","#define OTA_RES "]),
