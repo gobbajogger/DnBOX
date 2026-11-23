@@ -49,7 +49,11 @@
 /* Printed SMK-37 Pro/Elite legends: panel.c + smk_input.h (unit-confirmed).
  * Simulator commands and logical button/encoder roles do not change. */
 #ifndef X0X_SMK_CAPTIONS
-#define X0X_SMK_CAPTIONS BOARD_SMK37
+#if BOARD_SMK37
+#define X0X_SMK_CAPTIONS 1
+#else
+#define X0X_SMK_CAPTIONS 0
+#endif
 #endif
 #if X0X_SMK_CAPTIONS
 #define UI_CAP_HOME "PATCH"
