@@ -8,7 +8,7 @@
 #include "s1c_part.h"
 #endif
 #include <string.h>
-#include "x0x_cold.h"
+#include "../x0x_cold.h"
 
 static const char *const original_sound_fx_names[ORIGINAL_CHICAGO_FX_CHOICES] = {
     "OFF", "CHO/FLG", "PHASER", "RING MOD", "COMPRESSOR", "DECIMATOR", "EQ",
