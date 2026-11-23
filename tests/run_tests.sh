@@ -728,7 +728,7 @@ command -v node >/dev/null 2>&1 && run breaks-web node web/test_breaks.mjs   # t
 command -v node >/dev/null 2>&1 && run breaks-page node web/test_breaks_page.mjs   # the page against a mocked device
 command -v node >/dev/null 2>&1 && run project-adoption-identities node --test web/test_project_adoption_identities.mjs
 run offline-sequencer node --test web/offline-sequencer/*.test.mjs
-run compact-sanitizer-control python3 tests/test_compact_sanitizer_control.py
+# compact-sanitizer-control (LeakSanitizer qualification) dropped 2026-11-24 00:02 (user, FINAL-GOAL row 11).
 run compact-programs python3 tests/program_values_compact_test.py
 run offline-browser-safety python3 tests/test_offline_browser_safety.py
 # f6b refuses any executable override (safety contract); gate/box environments export
