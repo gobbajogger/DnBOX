@@ -5579,11 +5579,12 @@ static void arc(int32_t cx, int32_t cy, int32_t r, float v, uint16_t track, uint
     if (r == 8) {
         /* Keep original y/x order, exact float t bits and rounded coverage.
          * Caps/handle below and every other radius retain the original path. */
-        for (unsigned i = 0; i < sizeof arc8_geometry / sizeof *arc8_geometry; ++i) {
+        for (unsigned i = 0; i < sizeof arc8_pixels / sizeof *arc8_pixels; ++i) {
+            unsigned pixel = arc8_pixels[i];
             float t;
-            memcpy(&t, &arc8_geometry[i].turns_bits, sizeof t);
-            px_blend(cx + arc8_geometry[i].x, cy + arc8_geometry[i].y,
-                     (t >= lo && t <= hi) ? fill : track, arc8_geometry[i].coverage);
+            memcpy(&t, &arc8_turns[i], sizeof t);
+            px_blend(cx + (int)(pixel & 31u) - 8, cy + (int)((pixel >> 5) & 31u) - 8,
+                     (t >= lo && t <= hi) ? fill : track, pixel >> 10);
         }
     } else for (y = -r - 1; y <= r + 1; y++)
         for (x = -r - 1; x <= r + 1; x++) {
