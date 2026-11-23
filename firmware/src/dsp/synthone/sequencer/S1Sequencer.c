@@ -69,9 +69,11 @@ static int sequenceSize(const S1SequencerParams *p, int heldNotesCount)
     const int m = heldNotesCount * (p->arpOctave + 1);
     return p->arpDirection == ArpeggiatorMode_UpDown && m > 1 ? 2 * m - 2 : m;
 }
-static uint32_t gateLength(const S1SequencerParams *p)
+static uint32_t gateLength(const S1SequencerParams *p) { return p->gateTicks; }
+void S1Sequencer_setStep(S1SequencerParams *p, uint32_t ticks)
 {
-    return p->seqGate >= 100 ? UINT32_MAX : (uint32_t)((uint64_t)p->arpSeqTempoMultiplier * p->seqGate / 100u);
+    p->arpSeqTempoMultiplier = ticks;
+    p->gateTicks = p->seqGate >= 100 ? UINT32_MAX : (uint32_t)((uint64_t)ticks * p->seqGate / 100u);
 }
 
 int S1Sequencer_willFire(const S1Sequencer *s, const S1SequencerParams *p, int heldCount)

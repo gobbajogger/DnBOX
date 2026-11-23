@@ -316,7 +316,7 @@ static int arp_engaged(const original_runtime_part *p)
     return p->arp.cfg.on && (p->kind == ORIGINAL_SOUND_JUNO || p->kind == ORIGINAL_SOUND_SYNTHONE);
 }
 static int live_source(unsigned source) { return source != ORIGINAL_INPUT_SEQUENCE; }
-static int live_held(const original_runtime_part *p, unsigned key)
+__attribute__((noinline)) static int live_held(const original_runtime_part *p, unsigned key)
 {
     for (unsigned s = 0; s < ORIGINAL_INPUT_COUNT; ++s) if (live_source(s) && p->keys[s][key]) return 1;
     return 0;
@@ -328,14 +328,14 @@ static void arp_key_off(void *ctx, int note)
     if (!p->keys[ORIGINAL_INPUT_SEQUENCE][note]) (void)runtime_note(p, (unsigned)note, 0);
 }
 /* heldNoteNumbers: remove the pitch, then (on) insert it at the front. */
-static void arp_hold(original_runtime_part *p, unsigned key, unsigned velocity)
+__attribute__((noinline)) static void arp_hold(original_runtime_part *p, unsigned key, unsigned velocity)
 {
     original_runtime_arp *a = &p->arp;
     unsigned n = 0;
     for (unsigned i = 0; i < a->nheld; ++i) if (a->held[i].noteNumber != key) a->held[n++] = a->held[i];
     if (velocity) {
         if (n == S1_SEQ_MAX_HELD) --n;
-        __builtin_memmove(a->held + 1, a->held, n * sizeof a->held[0]);
+        for (unsigned i = n; i; --i) a->held[i] = a->held[i - 1];   /* no memmove in the firmware libc */
         a->held[0].noteNumber = (uint8_t)key; a->held[0].velocity = (uint8_t)velocity; ++n;
     }
     a->nheld = (uint8_t)n;
@@ -365,8 +365,8 @@ static void arp_params(original_runtime_part *p)
     q->sequencerNoteOn = c->on_mask;
     /* arpRate = project tempo; arpSeqTempoMultiplier = SPEED (exact frames). */
     q->arpBeatsPerSample = S1_SAMPLE_TICKS;
-    q->arpSeqTempoMultiplier = S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed);
     q->seqGate = c->gate ? c->gate : 100;
+    S1Sequencer_setStep(q, S1_SAMPLE_TICKS * engine_arp_step_frames(p->arp.bpm, c->speed));
     q->patternRange = p->kind == ORIGINAL_SOUND_SYNTHONE ? 12 : 24;
     q->clocked = 0;
 }
@@ -383,13 +383,13 @@ static void arp_follow_clock(original_runtime_arp *a)
     uint32_t len = (uint32_t)((uint64_t)a->clk_beat * arp_ticks[sp] / 24u);
     if (len < 2u * S1_SAMPLE_TICKS) len = 2u * S1_SAMPLE_TICKS;
     a->prm.arpBeatsPerSample = S1_SAMPLE_TICKS;
-    a->prm.arpSeqTempoMultiplier = len;
+    if (len != a->prm.arpSeqTempoMultiplier || !a->prm.clocked) S1Sequencer_setStep(&a->prm, len);
     a->prm.clocked = 1;
     /* position before this sample's increment; step -1 just before the first */
     int step; uint32_t phase;
     if (a->clk_pos >= S1_SAMPLE_TICKS) {
         uint64_t v = a->clk_pos - S1_SAMPLE_TICKS;
-        step = (int)(v / len); phase = (uint32_t)(v % len);
+        step = (int)(v / len); phase = (uint32_t)v - (uint32_t)step * len;
     } else {
         step = -1; phase = len - (uint32_t)(S1_SAMPLE_TICKS - a->clk_pos);
     }
@@ -406,20 +406,18 @@ int original_runtime_arp_config(original_runtime_part *p, const engine_arp_cfg *
     if (!ok) return 0;
     arp_params(p);
     int now = arp_engaged(p);
-    if (now && !was) {                 /* direct live notes hand over to the arp */
-        a->nheld = 0;
+    if (now && !was) a->nheld = 0;
+    if (now != was) {                  /* direct live notes <-> the arp */
         for (unsigned key = 0; key < 128; ++key)
             if (live_held(p, key)) {
-                if (!p->keys[ORIGINAL_INPUT_SEQUENCE][key]) (void)runtime_note(p, key, 0);
-                arp_hold(p, key, a->vel ? a->vel : 100u);
+                if (now) {
+                    if (!p->keys[ORIGINAL_INPUT_SEQUENCE][key]) (void)runtime_note(p, key, 0);
+                    arp_hold(p, key, a->vel ? a->vel : 100u);
+                } else (void)runtime_note(p, key, a->vel ? a->vel : 100u);   /* keys still down sound again */
             }
+        if (!now) a->nheld = 0;
         S1Sequencer_init(&a->seq);
         a->fired = 0;
-    } else if (was && !now) {          /* keys still down sound directly again */
-        for (unsigned i = a->nheld; i--;)
-            if (live_held(p, a->held[i].noteNumber)) (void)runtime_note(p, a->held[i].noteNumber, a->held[i].velocity);
-        a->nheld = 0; a->fired = 0;
-        S1Sequencer_init(&a->seq);
     }
     return 1;
 }

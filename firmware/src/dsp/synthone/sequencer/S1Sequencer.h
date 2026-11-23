@@ -45,6 +45,7 @@ typedef struct {
     /* SuperJ6 deltas (Synth One: 100, 12) */
     uint8_t seqGate;                    /* % of a step a note sounds (SJ6 seqGate) */
     uint8_t patternRange;               /* |sequencerPattern| limit: S1 12, SJ6 24 */
+    uint32_t gateTicks;                 /* seqGate % of arpSeqTempoMultiplier (UINT32_MAX = 100 %) */
     uint8_t clocked;                    /* DnBOX: transport clock owns mStepCounter / mBeatTime */
 } S1SequencerParams;
 
@@ -71,6 +72,8 @@ int S1Sequencer_willFire(const S1Sequencer *, const S1SequencerParams *, int hel
 void S1Sequencer_process(S1Sequencer *, const S1SequencerParams *, const NoteNumber *held, int heldCount,
                          void *ctx, KeyOnCallback on, KeyOffCallback off);
 int S1Sequencer_getArpBeatCount(const S1Sequencer *);
+/* Set the step length (and its gate) in ticks. */
+void S1Sequencer_setStep(S1SequencerParams *, uint32_t ticks);
 /* DnBOX: follow the transport. step/phase = clock position before this sample's
  * increment (step -1 just before the first step); force = transport (re)start. */
 void S1Sequencer_clock(S1Sequencer *, const S1SequencerParams *, int step, uint32_t phase, int force);
