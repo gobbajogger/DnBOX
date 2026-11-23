@@ -217,7 +217,7 @@ static void required_drum_pixels(const char *screen) {
   if(ui.part!=PART_808&&ui.sel[ui.part]==DR_BD&&KICK_AMP(r)){x0=3;x1=237;height=240-y;} /* 837530d99 lower LEVEL/TIME panel */
   if(ui.part==PART_808&&ui.sel[PART_808]==D8_CP){
    if(page==1){x0=103;x1=140;y=177;height=20;}
-   else if(k==0||k==2){x0=k?150:40;x1=k?205:88;y=50;height=26;}
+   else if(k==0||k==2){x0=k?128:60;x1=k?183:108;y=50;height=26;}
    else {x0=11;x1=230;if(matrix_value(PR(R_ENG,T_808,D8_CP,4))){y=114;height=52;}else{y=k==1?98:142;height=24;}}
   }
   if(ui.part==PART_909&&ui.sel[PART_909]==DR_BD&&drum_amp_ref(r)&&pg.group[page]!=GR_KIT){
