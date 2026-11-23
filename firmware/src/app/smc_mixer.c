@@ -1283,6 +1283,8 @@ static void smc_ui_draw_peer(void)
     if (smc.locked) ui_pictogram(5,5,UI_G_LOCK,1,C_HI);
     ui_pictogram(smc.locked?18:5,5,UI_G_KNOB,1,C_GRAY);
     cv_text(smc.locked?31:18, vc(&FONT_XS, 0, HDR_H), &FONT_XS, caps_of(tag), C_GRAY);
+    if (fx_note < 0 && cancel_pattern_cue() && lock_step()<0)
+        cv_text_clip(146,4,&FONT_T,ui.msg,C_AMB,144,189);
     if (fx_note >= 0) {
         int bus = smc.fx_strip.key_bus[fx_note];
         ui_pictogram(162,1,smc_fx_symbol(smc.fx_strip.held_fx[bus][fx_note >> 3]),2,C_HI);
@@ -2224,9 +2226,10 @@ static void smc_button_apply(uint8_t note, int mmc)
         else if (next >= 0) seq_cue_part(&seq, part, next);
         char number[12];
         int cue = seq_cue_of(&seq, part);
-        if (cue >= 0) put_i(number, cue + 1);
-        else put_s(number, "--");
-        ui_say("NEXT: PAT ", number);
+        if (cue >= 0) {
+            put_i(number, cue + 1);
+            ui_say("NEXT: PAT ", number);
+        } else ui_say("NEXT --", 0);
         ui.msg_until = plat_ms() + 1000u;
         break;
     }

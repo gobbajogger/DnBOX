@@ -1920,34 +1920,40 @@ static void global_section(int g)
 {
     if(g<0||g>=6)return;
     ui.glo_index=ui.list_sel;ui.glo_section=(int8_t)g;ui.list_n=0;
-    switch(g) {
-    case 0:
-        list_add(PR(R_CLKSRC,0,0,0));list_add(PR(R_CLKOUT,0,0,0));list_add(PR(R_NOTEOUT,0,0,0));
-        for(int p=0;p<NPARTS;p++)list_add(PR(R_MIDICH,part_at(p),0,0));
+    /* Zero-terminated list recipe. Actions carry a following ID; the high
+     * bit expands that kind once per part, in the physical part order. */
+    enum { PER_PART = 0x80 };
+    static const uint8_t rows[6][10] = {
+        {R_CLKSRC,R_CLKOUT,R_NOTEOUT,PER_PART|R_MIDICH,
 #if BOARD_SMK37
-        list_add(PR(R_CKCH,0,0,0));
+         R_CKCH
 #endif
-        break;
-    case 1:
+        },
 #if BOARD_SMK37
-        list_add(PR(R_BT,0,0,0));list_add(PR(R_SMC_ROLE,0,0,0));list_add(PR(R_SMC_MAP,0,0,0));
-        list_add(PR(R_BTSTAT,0,0,0));list_add(PR(R_BTNAME,0,0,0));
+        {R_BT,R_SMC_ROLE,R_SMC_MAP,R_BTSTAT,R_BTNAME},
+#else
+        {0},
 #endif
-        break;
-    case 2:list_add(PR(R_OUTLOUD,0,0,0));list_add(PR(R_USBFULL,0,0,0));list_add(PR(R_FINETUNE,0,0,0));
-        for(int p=0;p<NPARTS;p++)list_add(PR(R_PARTON,part_at(p),0,0));
-        list_add(PR(R_QUEUEMUTE,0,0,0));list_add(PR(R_NOTELOCK,0,0,0));break;
-    case 3:list_add(PR(R_KEYLED,0,0,0));list_add(PR(R_KEYSOUND,0,0,0));list_add(PR(R_PALETTE,0,0,0));break;
-    case 4:
-        list_add(PR(R_ACT,ACT_SAVE,0,0));list_add(PR(R_ACT,ACT_LOAD,0,0));list_add(PR(R_AUTOSAVE,0,0,0));
-        list_add(PR(R_ACT,ACT_CLEAR_PAT,0,0));list_add(PR(R_ACT,ACT_RESET,0,0));break;
-    case 5:
-        list_add(PR(R_ACT,ACT_PERF,0,0));list_add(PR(R_ACT,ACT_ABOUT,0,0));list_add(PR(R_BATT,0,0,0));
-#if BOARD_SMK37 && X0X_DEV_PADCAL
-        {extern uint8_t smk_clip_mode_on(void);if(!smk_clip_mode_on())list_add(PR(R_ACT,ACT_PADCAL,0,0));}
-#endif
-        break;
+        {R_OUTLOUD,R_USBFULL,R_FINETUNE,PER_PART|R_PARTON,R_QUEUEMUTE,R_NOTELOCK},
+        {R_KEYLED,R_KEYSOUND,R_PALETTE},
+        {R_ACT,ACT_SAVE,R_ACT,ACT_LOAD,R_AUTOSAVE,R_ACT,ACT_CLEAR_PAT,R_ACT,ACT_RESET},
+        {R_ACT,ACT_PERF,R_ACT,ACT_ABOUT,R_BATT}
+    };
+    for (const uint8_t *p=rows[g]; *p;) {
+        unsigned kind=*p++;
+        if (kind & PER_PART)
+            for (int part=0;part<NPARTS;part++) list_add(PR(kind & ~PER_PART,part_at(part),0,0));
+        else {
+            unsigned arg=kind==R_ACT?*p++:0;
+            list_add(PR(kind,arg,0,0));
+        }
     }
+#if BOARD_SMK37 && X0X_DEV_PADCAL
+    if(g==5) {
+        extern uint8_t smk_clip_mode_on(void);
+        if(!smk_clip_mode_on()) list_add(PR(R_ACT,ACT_PADCAL,0,0));
+    }
+#endif
     put_s(list_title,GLOBAL_SECTIONS[g]);ui.list_sel=ui.glo_sel[g]<ui.list_n?ui.glo_sel[g]:0;
     ui.list_top=ui.glo_top[g]<=ui.list_sel?ui.glo_top[g]:0;ui.overlay=O_LIST;
 }
@@ -5569,6 +5575,11 @@ static UI_DRAW const char *bass_header_name(void)
         engine_bass_bank(bidx()) == ORIGINAL_SOUND_MIAMI ? (bidx()?"MIAMI B":"MIAMI A") :
         (bidx()?"CHICAGO B":"CHICAGO A");
 }
+/* The MIDI cancellation uses the ordinary context, not a queued-pattern card. */
+static UI_DRAW int cancel_pattern_cue(void)
+{
+    return !memcmp(ui.msg,"NEXT --",sizeof "NEXT --") && (int32_t)(ui.msg_until-plat_ms())>0;
+}
 static UI_DRAW void draw_header(void)
 {
 #if BOARD_SMK37
@@ -5609,17 +5620,16 @@ static UI_DRAW void draw_header(void)
     part_header_snapshot_valid = 0;
     cv_begin(240, HDR_H, C_BLACK);
     night_panel(0,0,240,HDR_H,0);
-    if (ui.msg_until && (int32_t)(ui.msg_until - plat_ms()) > 0 && !pickup) {   /* what a button just did */
+    if (ui.msg_until && (int32_t)(ui.msg_until - plat_ms()) > 0 && !pickup && !cancel_pattern_cue()) {   /* what a button just did */
         box(0, 0, 240, HDR_H - 1, part_col());
         if (!memcmp(ui.msg, "NEXT: PAT ", 10)) {
-            int pattern=0, n=10;
-            while (n<(int)sizeof ui.msg-1 && ui.msg[n]>='0' && ui.msg[n]<='9' && pattern<=NPAT)
-                pattern=pattern*10+ui.msg[n++]-'0';
+            unsigned pattern=(uint8_t)(ui.msg[10]-'0');
+            if (ui.msg[11]) pattern=pattern*10u+(uint8_t)(ui.msg[11]-'0');
             put_s(put_s(b, "> "), ui.msg+10);
             x=(214-tw(&FONT_B,"NEXT")-6-12-6-tw(&FONT_B,b))/2;
             x=cv_text(x,vc(&FONT_B,0,HDR_H-1),&FONT_B,"NEXT",C_BLACK)+6;
             frame(x,1,12,17,C_BLACK);
-            if (!ui.msg[n] && pattern>0 && pattern<=NPAT) {
+            if (pattern && pattern<=NPAT) {
                 for (int pos=0;pos<NPARTS;pos++) {
                     uint8_t strength[8];
                     home_pattern_strength8(&proj.pat[pattern-1],proj.arr.lane,pattern-1,part_at(pos),
@@ -5653,7 +5663,7 @@ static UI_DRAW void draw_header(void)
         cv_commit_header();
         return;
     }
-    if (!pickup || (int32_t)(ui.msg_until - plat_ms()) <= 0)
+    if ((!pickup && !cancel_pattern_cue()) || (int32_t)(ui.msg_until - plat_ms()) <= 0)
         ui.msg_until = pickup = 0;
     { /* All status headers use R22; retain pickup and clip identities below. */
         const char *name=ui.view==V_PART?part_display(ui.part):
@@ -5705,7 +5715,9 @@ static UI_DRAW void draw_header(void)
             cv_text(132,4,&FONT_T,smk_ck_ext()?"EXT":"INT",smk_ck_ext()?C_AMB:SOUND_GRAY);
         } else
 #endif
-        if(pickup || !division_pad_owner()) {
+        if(cancel_pattern_cue() && edit_step<0 && !division_pad_owner())
+            cv_text_clip(128,4,&FONT_T,ui.msg,C_AMB,126,168);
+        else if(pickup || !division_pad_owner()) {
             char pattern[16];
             int header_part=part_view()?ui.part:PART_909;
             int cue=seq_cue_of(&seq,header_part);
