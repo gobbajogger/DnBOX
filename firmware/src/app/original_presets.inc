@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Textually included by engine.c: replacement-only patch publication. */
 static int16_t bass_named_preset[NBASS] = {-1, -1};
+static void arp_adopt(int v, const sound_t *sound, int preset_change); /* engine_arp.inc */
 static volatile uint8_t bass_preview_dirty, bass_wheel_mask, bass_edit_depth;
 #if X0X_SYNTHONE_PATCH
 /* One main-loop edit per part. A new adoption invalidates its predecessor,
@@ -348,6 +349,7 @@ X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
 #if X0X_SYNTHONE_PATCH
     s1_patch_replaced(v);
 #endif
+    arp_adopt(v, sound, 0);
     bass_named_preset[v] = sound->v[T_303][v][30];
     original_seq_note[v] = -1;
     __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
@@ -484,6 +486,7 @@ static void bass_preset_boundary_voice(int v)
 #if X0X_SYNTHONE_PATCH
         s1_patch_replaced(v);
 #endif
+        arp_adopt(v, sound, 1);
         bass_named_preset[v] = (int16_t)preset;
         /* A committed bank/preset replacement, never merely a pending request.
          * parameter -1 identifies the bank; parameter -2 the factory index. */

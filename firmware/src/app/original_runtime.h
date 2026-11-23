@@ -5,6 +5,7 @@
 #include "../dsp/original_chicago_backend.h"
 #include "../dsp/original_miami_backend.h"
 #include "../dsp/juno6.h"
+#include "engine_arp.h"
 
 enum { ORIGINAL_INPUT_USB, ORIGINAL_INPUT_BLE, ORIGINAL_INPUT_TRS,
        ORIGINAL_INPUT_KEYS, ORIGINAL_INPUT_SEQUENCE, ORIGINAL_INPUT_COUNT };
@@ -16,8 +17,22 @@ typedef union {
     struct { juno6_t synth; juno6_chorus_t chorus; } juno;
     s1_dry_part synthone;
 } original_runtime_backend;
+/* Shared live arp / ARP SEQ for SYNTHONE and JUNO owners (engine_arp.h). Live
+ * sources feed held[]; SEQUENCE playback bypasses it. Audio context only. */
+#define ORIGINAL_ARP_HELD 8u
+typedef struct {
+    engine_arp_cfg cfg;
+    float bpm;
+    uint32_t to_next, gate_left, age;   /* frames */
+    uint16_t pos;
+    uint8_t held[ORIGINAL_ARP_HELD], sounding[ORIGINAL_ARP_HELD];
+    uint8_t nheld, nsound, vel, step, fired;
+} original_runtime_arp;
 typedef struct {
     original_runtime_backend dsp;
+#if X0X_ARP_HOOKS
+    original_runtime_arp arp;
+#endif
     uint8_t keys[ORIGINAL_INPUT_COUNT][128];
     uint8_t stale[ORIGINAL_INPUT_KEYS][128]; /* offs still owed by cut external presses */
     uint8_t stale_ttl[ORIGINAL_INPUT_KEYS][128]; /* 256-frame ticks since a canceled pitch is retriggered */
@@ -62,6 +77,12 @@ int original_runtime_motion_view(const original_runtime_part *, float *phase, fl
     float *current, float *target, int *active);
 /* Chicago only: VCA EG controls, live level and state, for the ADSR graph. */
 int original_runtime_env_view(const original_runtime_part *, float adsr[4], float *level, int *state);
+#if X0X_ARP_HOOKS
+/* Apply an arp block (on/off transitions hand held keys over). 1 = applied. */
+int original_runtime_arp_config(original_runtime_part *, const engine_arp_cfg *);
+/* Display only: 1 while running, the step that last sounded, frames since. */
+int original_runtime_arp_view(const original_runtime_part *, unsigned *step, uint32_t *frames);
+#endif
 int original_runtime_render(original_runtime_part *, original_runtime_workspace *,
     float *left, float *right, unsigned frames);
 

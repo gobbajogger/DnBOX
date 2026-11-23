@@ -38,6 +38,7 @@ int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, 
  * 3 release) and key_down. 0 when no voice is started. */
 int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down);
 #endif
+#include "engine_arp.h"
 
 enum { T_909, T_808, T_303, T_BRK, T_FX, T_MIX, T_MST, NTARGETS };
 #define T_PROB NTARGETS                /* a lane's pseudo-target: a step's chance, 5..100 % (not in sound_t);

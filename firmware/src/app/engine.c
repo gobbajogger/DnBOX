@@ -226,6 +226,7 @@ int engine_juno_envelope_view(int v,juno6_envelope_snapshot *out)
 }
 
 #if X0X_SUPERJ6_FACTORY
+static void arp_store_amp2(unsigned owner, unsigned slot, float unit); /* engine_arp.inc */
 /* The high bit reserves both existing mailboxes as one factory transaction. */
 #define SJ6_FACTORY_GROUP 0x80u
 
@@ -330,9 +331,10 @@ static void apply_superj6_edits(void)
             (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_MASTER_VOLUME,
                                          synth->pending_field[4]);
         for (unsigned slot = 0; slot < 4; ++slot)
-            if (mask & (1u << slot))
-                (void)original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
-                                             synth->pending_field[slot]);
+            if ((mask & (1u << slot)) &&
+                original_runtime_param(part, JUNO6_APP_PARAM_BASE + ENGINE_SJ6_AMP2_ATTACK + slot,
+                                       synth->pending_field[slot]) == ORIGINAL_RUNTIME_OK)
+                arp_store_amp2(owner, slot, synth->pending_field[slot]);
     }
 }
 #endif
@@ -2012,6 +2014,7 @@ int engine_midi_held(void)   /* host test: bit k the 303 k gate, bit 8 + s the b
 #endif
 
 #include "original_presets.inc"
+#include "engine_arp.inc"
 
 /* ---------------------------------------------------------------- render --- */
 static void engine_notes_off_apply(void)
@@ -3064,6 +3067,7 @@ void engine_render(int32_t *out_lr, uint32_t n)
 #if X0X_SUPERJ6_FACTORY
     apply_superj6_edits();
 #endif
+    arp_boundary();
     if ((mot_was_on && !mot_on) || mot_release_req) {   /* motion off, or its lanes replaced: knobs back */
         mot_release_req = 0;
         motion_release(&mot);
