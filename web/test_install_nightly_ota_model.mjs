@@ -4,8 +4,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { Script } from "node:vm";
-import { sameKeyboard, xdataReadback } from "./fm1ota.js";
-import { packageXdata } from "./fm1pkg.js";
+import { sameKeyboard, xdataReadback, fittabReadback, fdataReadback } from "./fm1ota.js";
+import { packageXdata, packageFittab, packageFdata } from "./fm1pkg.js";
 
 const path = process.argv[2] || new URL("./fm1ota.js", import.meta.url);
 const text = readFileSync(path, "utf8");
@@ -18,8 +18,8 @@ const install = new Script("({" + method + "}).install").runInNewContext({
   sleep: async () => {},
   IS_OTA: (id) => /^ota-/i.test(id.model),
   sameKeyboard,
-  packageXdata,
-  xdataReadback,
+  packageXdata, packageFittab, packageFdata,
+  xdataReadback, fittabReadback, fdataReadback,
   fail: (code, message, detail = "") => Object.assign(new Error(message), { code, detail }),
 });
 assert.equal(typeof install, "function");
