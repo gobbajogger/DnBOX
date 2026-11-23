@@ -10,12 +10,12 @@ def unapproved_knob_prefix(source):
  signature='static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)\n{'
  start=source.find(signature);end=source.find('\nstatic ',start+1) if start>=0 else -1
  adsr='physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));'
- amp="physical_stage_label(label,0,'D',matrix_value(r));"
+ amp="int raw=matrix_value(r);\n    physical_stage_label(label,0,'D',raw);"
  if start<0 or end<0 or source[start:end].count(line)!=1 or source.count(line)!=1:return True
  if source.count(adsr)!=1 or source.count(amp)!=1 or source.count('physical_stage_label(')!=3:return True
  s1_signature='static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink)\n{'
  s1_line='char *q=put_i(put_s(label,"K"),UI_FIRST_KNOB+k);'
- s1_stage='*q++=\' \'; *q++="ADSR"[k]; *q++=\' \'; put_s(q,num);'
+ s1_stage='*q++=\' \'; *q++="ADSR"[k]; *q++=\' \';\n        int selected = page == cur_page();\n        put_s(q, selected ? "" : num);'
  start=source.find(s1_signature)
  end=source.find('\n}',start) if start>=0 else -1
  s1=source[start:end] if end>=0 else ''
