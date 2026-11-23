@@ -563,6 +563,7 @@ run ui-list-feedback python3 tests/host/ui_list_feedback_test.py
 run ui-reverb-return python3 tests/host/ui_reverb_return_test.py
 run ui-text-units sh tests/host/ui_text_units_test.sh
 run ui-arp-seq sh tests/host/ui_arp_seq_test.sh
+run ui-arp-engine sh tests/host/ui_arp_engine_test.sh
 run smc-ui-bounds sh tests/host/smc_ui_bounds_test.sh
 run smc-ui-negative python3 tests/host/smc_ui_negative_test.py
 run smc-mapping python3 tests/host/smc_mapping_test.py
