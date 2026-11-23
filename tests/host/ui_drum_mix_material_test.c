@@ -47,23 +47,23 @@ int main(void)
    CHECK(envelope>.99f);
   }
   seq.vmute=muted?(1u<<(kit*NDRUM)):0;
+  /* 48651ff77/44a9cfee6 (approved R22 drum MIX): one 1 px fader rail at x+7 from
+   * y=43 to 106, the live hit fills it in the part colour from the bottom
+   * (never while muted), a white cap for the selected strip at 107-level/2,
+   * a grey mute slash, and blank columns between strips. */
+  uint16_t col=PART_COL[kit];
   cv_begin(240,BAND_H,C_BLACK);draw_drum_mix(0,kit);
-  uint16_t ink=muted?C_DIM:hit?C_WHITE:dim(PART_COL[kit],6);
-  CHECK(cv_px[20*240+13]==swap16(ink));
-  CHECK(cv_px[60*240+13]==swap16(ink));
-  /* Twelve 6px segments retain the two-pixel dim level gaps. A solid
-   * hit-filled rail or a missing live overlay must fail this fixture. */
-  uint16_t level_ink=muted?C_DIM:dim(PART_COL[kit],6);
-  for(int y=16;y<BAND_H;y++)
-   CHECK(cv_px[y*240+13]==swap16((111-y)%8<6?ink:level_ink));
-  CHECK(cv_px[2*240+7]==swap16(PART_COL[kit])); /* selected caption face */
-  for(int y=0;y<BAND_H;y++)for(int v=0;v<NDRUM-1;v++)
-   CHECK(cv_px[y*240+4+v*21+19]==swap16(C_BLACK));
+  for(int y=44;y<BAND_H;y++)CHECK(cv_px[y*240+15]==swap16(hit&&!muted?col:C_LINE));   /* y=43 is under the cap */
+  CHECK(cv_px[43*240+12]==swap16(C_WHITE)&&cv_px[43*240+20]==swap16(C_WHITE)); /* level 127: cap at the top */
+  /* the blended slash (1ec2d61a8) changes the strip's top when muted */
+  uint32_t slash=2166136261u;for(int y=26;y<=37;y++)for(int x=8;x<=23;x++)slash=(slash^cv_px[y*240+x])*16777619u;
+  static uint32_t unmuted_slash[2][2];if(!muted)unmuted_slash[kit][hit]=slash;else CHECK(slash!=unmuted_slash[kit][hit]);
+  for(int y=43;y<BAND_H;y++)for(int v=0;v<NDRUM-1;v++)
+   CHECK(cv_px[y*240+8+v*21+16]==swap16(SOUND_FACE));
   cv_begin(240,BAND_H,C_BLACK);draw_drum_mix(1,kit);
-  for(int y=BAND_H;y<112;y++)
-   CHECK(cv_px[(y-BAND_H)*240+13]==swap16((111-y)%8<6?ink:level_ink));
-  CHECK(cv_px[(111-BAND_H)*240+13]==swap16(ink));
-  CHECK(cv_px[(113-BAND_H)*240+13]!=swap16(ink));
+  for(int y=BAND_H;y<107;y++)
+   CHECK(cv_px[(y-BAND_H)*240+15]==swap16(hit&&!muted?col:C_LINE));       /* the rail continues */
+  CHECK(cv_px[(107-BAND_H)*240+15]!=swap16(col));                            /* and ends at 106 */
  }
  test_distinct_maps(); /* Both kits, both banks: level and pan mapping unchanged. */
  printf("drum_mix_material PASS (%u checks)\n",checks);return 0;

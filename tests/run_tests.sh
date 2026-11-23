@@ -69,6 +69,19 @@ PIL_SKIP=0          # tests_body sets 1 when python3 cannot import PIL
 ASAN_SKIP=0         # tests_body sets 1 when the ASan runtime does not link
 ASAN_CHECKED=0
 OUT=build/host
+# Browser fixtures refuse a TMPDIR inside the checkout or /tmp, but each parallel test gets
+# TMPDIR=build/host/iso/<test>/tmp. Give them one dedicated root outside both (the runner's own
+# HOME cache) unless the caller already chose one.
+if [ -z "${DNBOX_BROWSER_TMPDIR:-}" ] && [ -n "${HOME:-}" ]; then
+    DNBOX_BROWSER_TMPDIR="$HOME/.cache/dnbox-browser-tmp"
+    mkdir -p "$DNBOX_BROWSER_TMPDIR" 2>/dev/null || unset DNBOX_BROWSER_TMPDIR
+fi
+[ -z "${DNBOX_BROWSER_TMPDIR:-}" ] || export DNBOX_BROWSER_TMPDIR
+# Each test gets a private HOME, which hides Playwright's managed browsers in the real one.
+# Point Playwright at that cache (a browser root, not an executable override).
+if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d "${HOME:-/nonexistent}/.cache/ms-playwright" ]; then
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+fi
 mkdir -p "$OUT"
 JOBS="${X0X_TEST_JOBS:-8}"
 export X0X_TEST_TIME_SCALE="${X0X_TEST_TIME_SCALE:-20}"
@@ -701,7 +714,9 @@ run offline-sequencer node --test web/offline-sequencer/*.test.mjs
 run compact-sanitizer-control python3 tests/test_compact_sanitizer_control.py
 run compact-programs python3 tests/program_values_compact_test.py
 run offline-browser-safety python3 tests/test_offline_browser_safety.py
-run offline-sequencer-browser python3 web/offline-sequencer/f6b-browser.test.py
+# f6b refuses any executable override (safety contract); gate/box environments export
+# CHROMIUM_EXECUTABLE for other tools, so this one runs with Playwright's own managed Chromium.
+run offline-sequencer-browser env -u DNBOX_CHROMIUM_EXECUTABLE -u CHROMIUM_EXECUTABLE -u PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH python3 web/offline-sequencer/f6b-browser.test.py
 run offline-touchosc-pack python3 web/offline-sequencer/touchosc/pack.test.py
 run offline-touchosc-identity python3 tests/host/test_touchosc_identity.py
 run offline-touchosc-lua lua5.1 web/offline-sequencer/touchosc/controller.test.lua

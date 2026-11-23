@@ -174,6 +174,14 @@ static void pattern_notice(const char *value)
     CHECK(ui.msg_until==now_ms+1000);
 }
 
+/* A cancelled cue says NEXT -- without replacing the header context (ccf451a6). */
+static void cancel_notice(void)
+{
+    CHECK(!strcmp(ui.msg,"NEXT --"));
+    CHECK(cancel_pattern_cue());
+    CHECK(ui.msg_until==now_ms+1000);
+}
+
 static void test_pattern_notice(void)
 {
     for(int route=0;route<5;route++) for(int locked=0;locked<2;locked++)
@@ -210,11 +218,14 @@ static void test_pattern_notice(void)
         transport_event(route,0x5b,1);CHECK(seq_cue_of(&seq,PART_909)==4);
         pattern_notice("5");transport_event(route,0x5b,0);
         transport_event(route,0x5b,1);CHECK(seq_cue_of(&seq,PART_909)==-1);
-        pattern_notice("--");transport_event(route,0x5b,0);
+        cancel_notice();transport_event(route,0x5b,0);
         seq.ppat[PART_909]=0;transport_event(route,0x5b,1);
-        CHECK(seq_cue_of(&seq,PART_909)==-1);pattern_notice("--");
+        CHECK(seq_cue_of(&seq,PART_909)==-1);cancel_notice();
         transport_event(route,0x5b,0);keyboard_unchanged(keyboard);
         CHECK(!seq.playing && !seq.req_start && !seq.req_stop);
+        /* Cue a pattern card again so its expiry can be observed. */
+        seq.ppat[PART_909]=3;transport_event(route,0x5c,1);CHECK(seq_cue_of(&seq,PART_909)==4);
+        pattern_notice("5");transport_event(route,0x5c,0);keyboard_unchanged(keyboard);
         /* Keep an existing popup alive while its notification alone expires. */
         now_ms+=999;
         if(open) smc_ui.until=now_ms+SMC_UI_MS;
