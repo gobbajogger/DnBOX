@@ -699,7 +699,7 @@ static UI_DRAW void dv_cp_stage_page(int band)
     text_r(232,28-off,&FONT_T,label,SOUND_GRAY);
     const int slots[2]={0,2};
     for(int i=0;i<2;i++) {
-        pref_t r=pg.r[0][slots[i]];int center=i?177:63,value=matrix_value(r);
+        pref_t r=pg.r[0][slots[i]];int center=i?155:83,value=matrix_value(r);
         text_c(center,40-off,&FONT_T,i?"TYPE":"TUNE",SOUND_GRAY);   /* the bank title above is SOUND */
         dv_glyph(r,ui_ease_float(r,value),center-22,53-off,1.375f,1.f,col);
         dv_value_text(r,value,center,72-off,SOUND_WHITE,1);
@@ -720,7 +720,7 @@ static UI_DRAW void dv_cp_stage_page(int band)
         dv_bound_stage(&decay,0,116,off,col);
     } else {
         if(have_a)dv_bound_stage(&attack,1,100,off,col);
-        cv_text(13,132-off,&FONT_T,"CLAP DECAY",SOUND_GRAY);
+        text_c(120,132-off,&FONT_T,"CLAP DECAY",SOUND_GRAY);
         dv_stage_value(label,'D',0,decay_owner==D8S_CP+1,decay.fall*4.60517f,matrix_value(pg.r[0][3]));
         text_r(227,132-off,&FONT_T,label,ink);
         if(decay_owner==D8S_CP+1)dv_bound_stage(&decay,2,144,off,col);
@@ -950,10 +950,10 @@ static UI_DRAW void draw_drum_voice(int band)
                 cv_text(133,body_y+3-off,&FONT_T,role,gray);
                 dv_curve_row(&curve,kick_kit,body_y+17-off,step_top-4-off,col);
             } else if(ph>44) {
-                /* Authored body paths plus the live 6% pulse fit in 44px per
-                 * scale unit. Leave the identity and step lane unobstructed. */
-                float scale=fm_minf(3.f,(float)(ph-44)/44.f);
-                dv_body_pictogram(t,v,87,py+(ph-11)/2-16,scale,env,col);
+                /* Reserve 28 px for the identity and step lane; keep the
+                 * larger icon and its live pulse in the remaining body. */
+                float scale=fm_minf(3.f,(float)(ph-28)/44.f);
+                dv_body_pictogram(t,v,89,py+(ph-11)/2-16,scale,env,col);
             }
             dv_voice_steps(t,v,body_y+3-off,step_top-off,0);
         }
