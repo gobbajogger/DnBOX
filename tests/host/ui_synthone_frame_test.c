@@ -135,7 +135,7 @@ static void value_bounds(void)
             else
                 put_s(label,number);
             cv_begin(240,CELL_H,C_BLACK);
-            strip_value(center,envelope ? 11 : 36,label,unit,C_WHITE);
+            strip_value(center,envelope ? 11 : 36,label,unit,C_WHITE,0);
             for (int y=0; y<CELL_H; ++y) for (int x=0; x<240; ++x)
                 if (cv_px[y*240+x] != swap16(C_BLACK)) {
                     if (x<xmin) xmin=x;

@@ -10,7 +10,7 @@ def unapproved_knob_prefix(source):
  signature='static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)\n{'
  start=source.find(signature);end=source.find('\nstatic ',start+1) if start>=0 else -1
  adsr='physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));'
- amp="physical_stage_label(label,0,'D',matrix_value(r));"
+ amp="int raw=matrix_value(r);\n    physical_stage_label(label,0,'D',raw);"
  if start<0 or end<0 or source[start:end].count(line)!=1 or source.count(line)!=1:return True
  if source.count(adsr)!=1 or source.count(amp)!=1 or source.count('physical_stage_label(')!=3:return True
  # Synth One and SuperJ6 physical-unit stages share draw_adsr_inline's
