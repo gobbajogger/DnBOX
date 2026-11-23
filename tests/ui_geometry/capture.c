@@ -49,6 +49,16 @@ static void required_drum_content(const char *screen) {
    if(page==0)snprintf(caption,sizeof caption,"K%d %s",UI_FIRST_KNOB+k,k==0?"TUNE":"SOUND");
    else strcpy(caption,"KIT ACCENT");
   }
+  if(ui.part==PART_909 && ui.sel[PART_909]==DR_BD) {
+   /* Approved 909 Kick layout (837530d9): the AMP bank is one physical-knob
+    * caption with its value, and the kick KIT row names velocity depth. */
+   if(drum_amp_ref(r)) {
+    char joined[64];snprintf(joined,sizeof joined,"K%d DECAY %s",X0X_SMK_CAPTIONS?5:1,value);
+    presence_checks++;if(!seen_text(joined)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=kick-amp-caption expected=[%s]\n",screen,joined);}
+    continue;
+   }
+   if(r.kind==R_ENG && r.b==NDRUM && k==0)strcpy(caption,"VELOCITY DEPTH");
+  }
   const char *expected[2]={caption,value};
   for(int n=0;n<2;n++){presence_checks++;if(!seen_text(expected[n])){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s]\n",screen,n?"value+unit":"label",expected[n]);}}
  }
@@ -60,6 +70,14 @@ static int seen_region(const char *text,int x0,int y0,int x1,int y1) {
 }
 static void expect_region(const char *screen,const char *kind,const char *text,int x0,int y0,int x1,int y1) {
  presence_checks++;if(!seen_region(text,x0,y0,x1,y1)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s] region=%d,%d..%d,%d\n",screen,kind,text,x0,y0,x1,y1);}
+}
+/* Envelope stage readout: either one "K5 A 50" run, or (selected row, #1004)
+ * the full-size physical caption "K5 A " followed by its smaller value run. */
+static void expect_stage(const char *screen,const char *kind,int knob,char stage,const char *value,int x0,int y0,int x1,int y1) {
+ char joined[48],caption[16];
+ snprintf(caption,sizeof caption,"K%d %c ",knob,stage);snprintf(joined,sizeof joined,"%s%s",caption,value);
+ presence_checks++;
+ if(!seen_region(joined,x0,y0,x1,y1)&&!(seen_region(caption,x0,y0,x1,y1)&&seen_region(value,x0,y0,x1,y1))){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s] region=%d,%d..%d,%d\n",screen,kind,joined,x0,y0,x1,y1);}
 }
 static void required_other_content(const char *screen) {
  if(ui.help)return;
@@ -109,9 +127,8 @@ static void required_other_content(const char *screen) {
     int stage=(r.c-5)%4;
     CHECK(stage==k);
     pref_value_of(r,matrix_value(r),num,unit);
-    snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
-             !strcmp(unit,"%") ? "%" : "");
-    expect_region(screen,"synthone-envelope",label,k*width,y,(k+1)*width+4,y+height);
+    snprintf(label,sizeof label,"%s%s",num,!strcmp(unit,"%") ? "%" : "");
+    expect_stage(screen,"synthone-envelope",UI_FIRST_KNOB+k,"ADSR"[stage],label,k*width,y,(k+1)*width+4,y+height);
     synth_presence_checks++;
     if(unit[0] && strcmp(unit,"%")){
      expect_region(screen,"synthone-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
@@ -129,14 +146,13 @@ static void required_other_content(const char *screen) {
     if(first<0 || stage<0 || stage>3){presence_missing++;printf("MISSING_CONTENT screen=%s kind=synth-envelope invalid-owner-or-stage\n",screen);continue;}
     if(bank==ORIGINAL_SOUND_JUNO) {
      pref_value_of(r,matrix_value(r),num,unit);
-     snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
-              !strcmp(unit,"%") ? "%" : "");
+     snprintf(label,sizeof label,"%s%s",num,!strcmp(unit,"%") ? "%" : "");
      if(strcmp(unit,"%")) {
       expect_region(screen,"synth-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
       synth_presence_checks++;
      }
-    } else snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
-    expect_region(screen,"synth-envelope",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
+    } else snprintf(label,sizeof label,"%d%%",(matrix_value(r)*100+63)/127);
+    expect_stage(screen,"synth-envelope",UI_FIRST_KNOB+k,"ADSR"[stage],label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
    }
    snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;
    if(r.kind==R_BPRESET)continue; /* wrapped preset names have their own tested formatter */
@@ -179,20 +195,26 @@ static void required_drum_pixels(const char *screen) {
  for(int k=0;k<4;k++) {
   pref_t r=pg.r[page][k];if(r.kind==R_NONE)continue;
   uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
-  unsigned pixels=0,missing=0,outside=0;
+  unsigned pixels=0,missing=0,outside=0;int bx0=240,by0=240,bx1=-1,by1=-1;
   int x0=cells==1?6:6+228*k/cells,x1=cells==1?234:6+228*(k+1)/cells;
   if(ui.part==PART_808&&ui.sel[PART_808]==D8_CP){
    if(page==1){x0=103;x1=140;y=177;height=20;}
    else if(k==0||k==2){x0=k?150:40;x1=k?205:88;y=50;height=26;}
    else {x0=11;x1=230;if(matrix_value(PR(R_ENG,T_808,D8_CP,4))){y=114;height=52;}else{y=k==1?98:142;height=24;}}
   }
+  if(ui.part==PART_909&&ui.sel[PART_909]==DR_BD&&drum_amp_ref(r)&&pg.group[page]!=GR_KIT){
+   /* Approved 909 Kick AMP: a 32 px K5 DECAY summary bank; its LEVEL/TIME
+    * curve fills the lower panel below that bank, inside the screen. */
+   x0=6;x1=234;y+=32;height=237-y;
+  }
   for(int sy=0;sy<240;sy++)for(int sx=0;sx<240;sx++)if(pixel_frame_owner[sy*240+sx]==owner){
    pixels++;if(fb[sy*240+sx]!=pixel_frame_color[sy*240+sx])missing++;
+   if(sx<bx0)bx0=sx;if(sx>bx1)bx1=sx;if(sy<by0)by0=sy;if(sy>by1)by1=sy;
    if(sx<x0||sx>=x1||sy<y||sy>=y+height)outside++;
   }
   pixel_checks++;
   if(!pixels){pixel_missing++;printf("GLYPH_PIXEL_MISSING screen=%s ref=%u:%u:%u:%u\n",screen,r.kind,r.a,r.b,r.c);}
-  if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height);}
+  if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d drawn=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height,bx0,by0,bx1+1,by1+1);}
  }
 }
 static unsigned audit_frames;
