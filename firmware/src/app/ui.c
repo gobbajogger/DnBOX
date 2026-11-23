@@ -2164,7 +2164,6 @@ static int help_lines(int b, const char *l[HELP_LINES])
         break;
     case B_SEQ:
         L("STEP LENGTH / RATE"); L("TAP: NEXT PAGE"); L("STEP + " UI_CAP_SELECT ": CHANCE");
-        if (ui.view == V_SEQ) L("SEQ + " UI_CAP_SEL ": SLIDER LANE");
         if (is_303()) L("STEP + " UI_CAP_ALGO ": VELOCITY");
         break;
     case B_PLAY: L("START / STOP"); L(UI_CAP_HOME " + " UI_CAP_PLAY ": REDO"); break;
@@ -3894,15 +3893,16 @@ static void globe_part_reset(void)
 static int globe_paste_part(int src, int dst)
 {
     int p;
-    char q[28];
+    char q[28], warning[28];
     if ((unsigned)src >= NPAT || (unsigned)dst >= NPAT || (unsigned)ui.part >= NPARTS || src == dst)
         return 0;
     for (p = 0; p < NPARTS; p++)
         ui.paste_src[p] = (uint8_t)dst;          /* ACT_COPY skips a part already on dst */
     ui.paste_src[ui.part] = (uint8_t)src;
     if (part_used(&proj.pat[dst], ui.part)) {
-        put_s(put_i(put_s(q, "PASTE OVER P"), dst + 1), "?");
-        ask(ACT_COPY, dst, q, "THIS PART HAS NOTES");
+        put_i(put_s(q, "PASTE OVER P"), dst + 1);
+        put_s(put_s(warning, part_name(ui.part)), " PART REPLACED");
+        ask(ACT_COPY, dst, q, warning);
     } else
         run_action(ACT_COPY, dst);
     return 1;
@@ -3989,8 +3989,8 @@ static UI_DRAW void key_event(int k, int down)
             ui.paste_src[p] = seq.ppat[p];
         if (pattern_used(&proj.pat[wp])) {
             char t[24];
-            put_s(put_i(put_s(t, "PASTE OVER P"), wp + 1), "?");
-            ask(ACT_COPY, wp, t, "IT HAS NOTES");
+            put_i(put_s(t, "PASTE OVER P"), wp + 1);
+            ask(ACT_COPY, wp, t, "PART DATA REPLACED");
         } else
             run_action(ACT_COPY, wp);
         return;
@@ -4202,13 +4202,13 @@ static void list_enter(void)
     if (r.kind != R_ACT)
         return;
     if (r.a == ACT_CLEAR_PAT)
-        ask(ACT_CLEAR_PAT, 0, "CLEAR THIS PATTERN?", "ALL FIVE PARTS");
+        ask(ACT_CLEAR_PAT, 0, "CLEAR ALL ACTIVE PARTS", "NOTES + MOTION LOST");
     else if (r.a == ACT_RESET)
-        ask(ACT_RESET, 0, "RESET PROJECT?", "SAMPLES ARE KEPT");
+        ask(ACT_RESET, 0, "RESET PROJECT", "SAMPLES KEPT; EDITS LOST");
     else if (r.a == ACT_LOAD && ui.dirty)
-        ask(ACT_LOAD, 0, "LOAD SAVED PROJECT?", "DISCARD UNSAVED EDITS");
+        ask(ACT_LOAD, 0, "LOAD SAVED PROJECT", "DISCARD UNSAVED EDITS");
     else if (r.a == ACT_SONG_CLR)
-        ask(ACT_SONG_CLR, 0, "CLEAR THE SONG?", 0);
+        ask(ACT_SONG_CLR, 0, "CLEAR SONG", "BARS REMOVED; PATTERNS KEPT");
     else
         run_action(r.a, 0);
 }
@@ -4356,10 +4356,11 @@ X0X_COLD static void button_tap(int b)
             break;
         }
         if (ui.btn & (1u << B_SAVE)) {               /* SAVE + REC: clear this part (asks) */
-            char t[24];
+            char t[24], target[12];
             ui.btn_used |= 1u << B_SAVE;
             put_s(put_s(t, "CLEAR "), part_name(ui.part));
-            ask(ACT_CLEAR_PART, ui.part, t, "IN THIS PATTERN?");
+            put_i(put_s(target, "PATTERN "), seq.ppat[ui.part] + 1);
+            ask(ACT_CLEAR_PART, ui.part, t, target);
             break;
         }
         record_finish();
@@ -4407,7 +4408,7 @@ X0X_COLD static void button_tap(int b)
         break;
     case B_ARP:
         if (!is_303()) {
-            say("TB-3PO: PICK CHICAGO OR MIAMI", 0);
+            say("TB-3PO UNAVAILABLE", 0);
             break;
         }
         if (ui.view == V_GEN && ui.overlay == O_NONE)  /* the generator; again: its next page */
