@@ -151,11 +151,14 @@ pathlib.Path(sys.argv[sys.argv.index("-o") + 1]).write_text("simulator")
         self.assertNotIn("builtin", log)
         self.assertFalse((self.root / "compile.json").exists())
 
-    def test_existing_headers_skip_only_font_and_drums(self):
+    def test_existing_headers_skip_only_font(self):
+        # e12a63c6: the drum generator validates its WAVs and payloads on every entry
+        # (it keeps unchanged headers' mtimes), so only the font is skipped.
         self.assertEqual(self.run_builder("--generate-only").returncode, 0)
         (self.root / "generators.log").write_text("")
         self.assertEqual(self.run_builder("--generate-only").returncode, 0)
-        self.assertEqual((self.root / "generators.log").read_text(), "builtin\n")
+        self.assertEqual((self.root / "generators.log").read_text(),
+                         "gen_drum_samples.py:['build/gen/x0x_drum_samples.h']\nbuiltin\n")
 
     def test_setup_failures_stop_both_modes(self):
         for mode in ((), ("--generate-only",)):

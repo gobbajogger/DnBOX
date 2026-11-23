@@ -142,7 +142,7 @@ int main(void) {
     smc.part=0; seq.ppat[0]=3; seq.pcue[0]=0xff;
     smc_button(0x5c,0); assert(seq_cue_of(&seq,0)==4 && !strcmp(notice,"NEXT: PAT 5"));
     assert(ui.msg_until==plat_ms()+1000u);
-    smc_button(0x5b,0); assert(seq_cue_of(&seq,0)==-1 && !strcmp(notice,"NEXT: PAT --"));
+    smc_button(0x5b,0); assert(seq_cue_of(&seq,0)==-1 && !strcmp(notice,"NEXT --"));  /* ccf451a6: cancel keeps the SMC context */
     assert(ui.msg_until==plat_ms()+1000u);
     return 0;
 }

@@ -503,6 +503,7 @@ run corner-coverage python3 tests/host/corner_coverage_test.py
 run part-order sh tests/host/part_order_test.sh
 run synthone-short-label python3 tests/host/test_synthone_short_label.py
 run synthone-pack python3 tests/host/test_s1pack.py   # 694 packed factory programs decode bit for bit, fit 15 sectors
+run superj6-presets python3 tests/host/test_superj6_presets.py   # 640 private factory presets, 12 banks, unmapped=0; SKIP without the private export
 run smc-ui sh tests/host/smc_ui_test.sh
 run drum-page-contract sh tests/host/drum_page_contract_test.sh
 run ui-adsr-engine-graph sh tests/host/ui_adsr_engine_graph_test.sh
