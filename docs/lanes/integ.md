@@ -621,3 +621,5 @@ In the firmware host UI, the full archive exposed three BR1 zones and two BR2 zo
 
 The full gate at `523d486e` passed the firmware builds, flash map, budget and UI checks. Its sole failed host test was `ext-midi-rec-smk`: a concurrent missing-header probe removed the shared drum tables during compilation. The negative probe now runs the real test runner in a private build directory, and the external MIDI test uses the generated-header lock. Both cases pass together with eight runner jobs. Re-running the negative probe preserved the hashes of all three parent drum and BREAK headers.
 - 2026-11-23 · [#996](https://github.com/gobbajogger/DnBOX/pull/996) merged as `5a9b1998`: firmware optimization comparison bench; 10/10 focused tests and six archived receipt self-comparisons passed at `1faf8ca7` (no runner, firmware, or release-gate change).
+
+Historical execution-output cleanup: removed 92 audited generated logs/status files from the current tree only; exact originals remain recoverable in [`245a4e83`](https://github.com/gobbajogger/DnBOX/tree/245a4e8372fc7e893bbb54d57193cc7d778bf6b7); no source, test, release input, golden asset, or recovery index removed.
