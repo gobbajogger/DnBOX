@@ -3,6 +3,7 @@
 #ifndef S1C_H
 #define S1C_H
 #include <stdint.h>
+#include "s1u.h"
 #ifdef X0X_S1C
 #include "s1c_config.h"     /* device build: fixed sizes */
 #endif
@@ -64,7 +65,7 @@
 #define S1C_RVB 0
 #endif
 #define S1C_RV_TOTAL ((26124 * 48 / 44 + 480) / (S1C_RV_SCALE * S1C_RV_DEC) + 8 * 5 + 64)
-typedef struct { float y, a, prev; uint8_t mode, pad[3]; } s1c_env;
+typedef s1u_env s1c_env;
 #ifndef RVB_DEPTH
 #define RVB_DEPTH 4
 #endif
@@ -131,7 +132,8 @@ typedef struct {
     float c[150];             /* current (smoothed where the instrument glides) */
 #endif
     float t[150];             /* targets */
-    float sr, port_c2, l1raw, l2raw, l1s, l2s, l1ph, l2ph, l1[2], l0[2];
+    float sr, port_c2;
+    s1u_lfo lfo[2];           /* LFO 1, LFO 2 */
     float monof, monos, glide_c2, glide_h;
     s1c_voice v[S1C_VOICES];
     int8_t held[8][2]; uint8_t nheld, prev_held, mono_prev, play_idx;
@@ -143,7 +145,7 @@ typedef struct {
 #endif
     uint32_t rnd;
     /* fx */
-    float bc_idx, bc_n, bc_v, pan_ph, ph_ph, ph_rec[2][4][3], ph_out[2][2];
+    s1u_crush crush; s1u_phaser ph; float pan_ph;
     float dlp[2][5], hp_y[2][2], cmp[3][2][4];
 #if !S1C_RVB
     float rv_fs[8], rv_g, rv_damp;
@@ -151,26 +153,14 @@ typedef struct {
     float rv_del[8], rv_inc[8], rv_acc[2], rv_o0[2], rv_o1[2];
     int32_t rv_k;
 #endif
-    float send_dly, send_rev, lfo_c2, bc_inc, hpk[3], dl_fc, hg[2];
+    float send_dly, send_rev, lfo_c2, hpk[3], dl_fc, hg[2];
 #if S1C_RVB
-#if defined S1C_RVB_BFP
-    int8_t *rvm, *rve; int16_t *rvs; uint8_t rvbn[4];   /* 8-bit block-float lines, exponents, staging */
-#if !S1C_EXT
-    int8_t rvm_s[S1C_RVA_WORDS], rve_s[S1C_RVA_WORDS / 16]; int16_t rvs_s[64];
-#endif
-#elif S1C_EXT && defined S1C_RVB_MU
-    uint8_t *rvb;             /* S1C_RVB_WORDS 8-bit companded samples, caller-owned */
-#elif S1C_EXT
-    uint16_t *rvb;            /* S1C_RVB_WORDS, caller-owned */
-#else
-    uint16_t rvb[RVB_L0 + RVB_L1 + RVB_L2 + RVB_L3 + 4 * (2 * RVB_DEPTH + 4)];
-#endif
-    int32_t rvb_ln[4], rvb_w[4];
-    float rvb_g[4], rvb_d[4], rvb_lp[4], rvb_ph[4], rvb_fb, ra[2], r0[2], r1[2]; int32_t rk;
+    s1u_rvb rv;               /* lines lent by s1c_attach */
+    float ra[2], r0[2], r1[2]; int32_t rk;
 #endif
     int32_t wpos, wlen;
 #if WAP_L0 && S1C_EXT
-    uint16_t *wbuf; int32_t wap_w[3];
+    s1u_widen wid;
 #elif WAP_L0
     uint16_t wbuf[WAP_L0 + WAP_L1 + WAP_L2]; int32_t wap_w[3];
 #elif defined S1C_WIDEN_FLOAT
@@ -183,7 +173,7 @@ typedef struct {
     float da[2], d0[2], d1[2];
     int32_t dk, ddec, dmono;
 #if S1C_EXT
-    uint8_t *pool; int32_t pool_bytes, dfmt; float rfit[3];
+    uint8_t *pool; int32_t pool_bytes, dfmt;
 #else
     S1C_SAMPLE dbuf[4][S1C_DLY_LEN];
 #endif
@@ -208,6 +198,16 @@ typedef struct {
 #endif
 #endif
 } s1c;
+/* Public parameter ids (S1 parameter order) for the effects and master: set with s1c_set in
+ * physical units. Bit-crush, auto-pan, widen, phaser, delay and reverb are all reachable here. */
+enum {
+    S1C_P_MVOL = 32, S1C_P_BCD = 33, S1C_P_BCSR = 34,                 /* volume, crush depth, crush clock Hz */
+    S1C_P_PANA = 35, S1C_P_PANF = 36,                                 /* auto-pan amount 0..1, rate Hz */
+    S1C_P_RVON = 37, S1C_P_RVFB = 38, S1C_P_RVHP = 39, S1C_P_RVMIX = 40,
+    S1C_P_DLON = 41, S1C_P_DLFB = 42, S1C_P_DLT = 43, S1C_P_DLMIX = 44,
+    S1C_P_PHMIX = 116, S1C_P_PHRATE = 117, S1C_P_PHFB = 118, S1C_P_PHW = 119,
+    S1C_P_WIDEN = 121
+};
 void s1c_init(s1c *s, float sr, const float init[150]);
 void s1c_set(s1c *s, unsigned id, float v);
 void s1c_start(s1c *s, int note, int vel);

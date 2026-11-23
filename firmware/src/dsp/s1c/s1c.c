@@ -4,6 +4,7 @@
  * Host prototype: libm math; the device build maps these calls to fm_* helpers. */
 #define SDBL_IMPL
 #include "s1c.h"
+#include "s1u.h"
 #include <string.h>
 #ifndef S1C_NO_SEQ
 #define S1C_NO_SEQ 0
@@ -39,21 +40,8 @@
 /* 16-bit float (1 sign, 5 exponent, 10 mantissa; tiny values flush to 0): delay storage whose
  * error follows the signal down into quiet tails, unlike fixed point */
 typedef union { float f; uint32_t u; } s1c_fb;
-static uint16_t h16_put(float x)
-{
-    s1c_fb b; b.f = x;
-    uint32_t a = (b.u & 0x7FFFFFFFu) + 0x1000u;          /* round the dropped 13 bits */
-    uint32_t e = a >> 23;
-    if (e < 113) return 0;
-    if (e > 142) a = 142u << 23 | 0x7FFFFFu;
-    return (uint16_t)((b.u >> 16 & 0x8000u) | ((a >> 13) - (112u << 10)));
-}
-static float h16_get(uint16_t h)
-{
-    s1c_fb b;
-    b.u = h & 0x7FFFu ? (uint32_t)(h & 0x8000u) << 16 | ((uint32_t)(h & 0x7FFFu) + (112u << 10)) << 13 : 0u;
-    return b.f;
-}
+#define h16_put s1u_h16_put
+#define h16_get s1u_h16_get
 /* phase increment in q32 for a cycles-per-sample value (any sign/size: wrapped to [0, 1)) */
 static uint32_t ph_inc(float dt) { dt -= fm_floorf(dt); return (uint32_t)(int32_t)(dt * 2147483520.0f) << 1; }
 
@@ -66,6 +54,8 @@ enum { I1, I2, BAL, SEMI1, SEMI2, VOL1, VOL2, SUBV, SUBOCT, SUBSQ, FMV, FMA, NOI
        CRREL, CWREL, CMG, CRG, CWG, DICT, DIRES, TSYNC, PB, PBMIN, PBMAX, A4, PORT, BLO, BLE, TMULT,
        TRANS, KTRK };
 
+_Static_assert(MVOL == S1C_P_MVOL && BCSR == S1C_P_BCSR && PANA == S1C_P_PANA && RVMIX == S1C_P_RVMIX &&
+               DLMIX == S1C_P_DLMIX && PHMIX == S1C_P_PHMIX && PHW == S1C_P_PHW && WIDEN == S1C_P_WIDEN, "public ids");
 static const uint8_t smooth_bits[19] = {0xe7,0x5c,0xef,0xff,0xfd,0x5f,0,0,0,0,0,0,0,0,0xf0,0x02,0,0x80,0x21};
 static int smoothed(unsigned i) { return (smooth_bits[i >> 3] >> (i & 7)) & 1; }
 #if S1C_FAST
@@ -107,28 +97,18 @@ static float note_hz(int n) { n = n < 0 ? 0 : n > 127 ? 127 : n; return 440.0f *
 static float lfo01(const s1c *s, float sel)
 {
     int k = (int)sel;
-    return k == 1 ? s->l1[0] : k == 2 ? s->l0[0] : k == 3 ? 0.5f * (s->l1[0] + s->l0[0]) : 0.0f;
+    return k == 1 ? s->lfo[0].o01 : k == 2 ? s->lfo[1].o01 : k == 3 ? 0.5f * (s->lfo[0].o01 + s->lfo[1].o01) : 0.0f;
 }
 static float lfo10(const s1c *s, float sel)
 {
     int k = (int)sel;
-    return k == 1 ? s->l1[1] : k == 2 ? s->l0[1] : k == 3 ? 0.5f * (s->l1[1] + s->l0[1]) : 1.0f;
+    return k == 1 ? s->lfo[0].o10 : k == 2 ? s->lfo[1].o10 : k == 3 ? 0.5f * (s->lfo[0].o10 + s->lfo[1].o10) : 1.0f;
 }
 
 /* ---- envelope: one-pole ADSR, attack aims at 1 with tau*0.6 and turns to decay at 0.99 ---- */
-enum { E_CLEAR, E_ATK, E_DEC, E_REL };
+enum { E_CLEAR = S1U_E_CLEAR, E_ATK = S1U_E_ATK, E_DEC = S1U_E_DEC, E_REL = S1U_E_REL };
 static float pole(float t, float sr) { return t <= 0.0f ? 0.0f : expf(-1.0f / (t * sr)); }
-static float env_step(s1c_env *e, float gate, float atk, float dec, float sus, float rel, float sr)
-{
-    if (e->prev < gate && e->mode != E_DEC) { e->mode = E_ATK; e->a = pole(atk * 0.6f, sr); }
-    else if (e->prev > gate) { e->mode = E_REL; e->a = pole(rel, sr); }
-    e->prev = gate;
-    if (e->mode == E_CLEAR) return 0.0f;
-    float x = e->mode == E_ATK ? gate : gate * sus;
-    e->y = (1.0f - e->a) * x + e->a * e->y;
-    if (e->mode == E_ATK && e->y > 0.99f) { e->mode = E_DEC; e->a = pole(dec, sr); }
-    return e->y;
-}
+#define env_step s1u_env_step
 static void voice_release(s1c *s, s1c_voice *v, int step)
 {
     v->stage = 2; v->gate = 0.0f;
@@ -314,6 +294,9 @@ static float bq_norm(s1c *s, const s1c_bq *q)   /* 1 / rms of high-passed unifor
 }
 #endif
 
+#define ladder s1u_ladder
+#define ladder_a s1u_ladder_a
+#define hp2 s1u_hp2
 static float moog(float *h, float in, float cut, float res, float sr)
 {
     /* four one-pole stages with resonance feedback, run twice per sample (2x oversampled) */
@@ -395,30 +378,7 @@ static float voice_run(s1c *s, s1c_voice *v)
 }
 
 #if S1C_KR > 1 || S1C_FAST
-static const float sin_q[65] = {
-    0.0f, 0.024541229f, 0.0490676761f, 0.0735645667f, 0.0980171412f, 0.122410677f, 0.146730468f, 0.170961887f,
-    0.195090324f, 0.219101235f, 0.242980182f, 0.266712755f, 0.290284663f, 0.313681751f, 0.336889863f, 0.359895051f,
-    0.382683426f, 0.405241311f, 0.427555084f, 0.449611336f, 0.471396744f, 0.492898196f, 0.514102757f, 0.534997642f,
-    0.555570245f, 0.575808167f, 0.59569931f, 0.615231574f, 0.634393275f, 0.653172851f, 0.671558976f, 0.689540565f,
-    0.707106769f, 0.724247098f, 0.740951121f, 0.757208824f, 0.773010433f, 0.78834641f, 0.803207517f, 0.817584813f,
-    0.831469595f, 0.84485358f, 0.857728601f, 0.870086968f, 0.881921291f, 0.893224299f, 0.903989315f, 0.914209783f,
-    0.923879504f, 0.932992816f, 0.941544056f, 0.949528158f, 0.956940353f, 0.963776052f, 0.970031261f, 0.975702107f,
-    0.980785251f, 0.985277653f, 0.989176512f, 0.992479563f, 0.99518472f, 0.997290432f, 0.99879545f, 0.999698818f,
-    1.0f
-};
-static float sin_at(uint32_t i)                 /* sin(i * 2 pi / 256) for i in 0..256, from a quarter wave */
-{
-    uint32_t k = i & 127u;
-    float v = sin_q[k <= 64u ? k : 128u - k];
-    return (i & 128u) ? -v : v;
-}
-static float sine_t(uint32_t ph)
-{
-    uint32_t i = ph >> 24;
-    float f = (float)(ph & 0xFFFFFFu) * (1.0f / 16777216.0f);
-    float a = sin_at(i);
-    return a + f * (sin_at(i + 1u) - a);
-}
+#define sine_t s1u_sin
 #endif
 #if S1C_KR > 1
 /* Cheap voice: pitch, LFO, key-tracking and filter coefficients at control rate (every S1C_KR
@@ -448,7 +408,7 @@ static float voice_run_kr(s1c *s, s1c_voice *v)
         float cut = clampf(v->kcut - v->kcut * v->kem * (1.0f - v->fenv), 64.0f, 22050.0f);
         if (ft == 0) {
             float x = cut * (2.0f / s->sr); if (x > 1.0f) x = 1.0f;
-            v->kA = 1.0f - x * (1.56874466f + x * (-1.73140822f + x * (1.55879259f + x * (-0.711601815f + x * 0.118475673f))));
+            v->kA = ladder_a(x);
             v->kfb = v->kres * (3.98720139f + x * (3.68178143f - x * 3.93633599f));
         } else if (ft == 1) {
             float bw = 0.0625f * s->sr * (exp2f(clampf(1.0f - v->kres, 0.0f, 1.0f)) - 1.0f);
@@ -478,17 +438,11 @@ static float voice_run_kr(s1c *s, s1c_voice *v)
     }
     y *= v->amp * v->kkey;
     float fo;
-    if (ft == 0) {
-        float *hh = v->lp, A = v->kA, fb = v->kfb, o = 0.0f;
-        for (int k2 = 0; k2 < 2; k2++) {
-            float tmp = hh[3], vv = y - fb * 0.5f * (hh[3] + hh[4]);
-            float z1 = vv + A * (hh[0] - vv), z2 = z1 + A * (hh[1] - z1), z3 = z2 + A * (hh[2] - z2), z4 = z3 + A * (hh[3] - z3);
-            hh[0] = z1; hh[1] = z2; hh[2] = z3; hh[3] = z4; hh[4] = tmp; o += z4;
-        }
-        fo = 0.5f * o;
-    } else {
+    if (ft == 0) fo = ladder(v->lp, y, v->kA, v->kfb);
+    else if (ft == 2) fo = hp2(v->bq, y, v->ka1, v->ka4, v->ka5);
+    else {
         float t = y - v->ka4 * v->bq[0] - v->ka5 * v->bq[1];
-        fo = ft == 1 ? t * v->ka1 - v->ka1 * v->bq[1] : t * v->ka1 - 2.0f * v->ka1 * v->bq[0] + v->ka1 * v->bq[1];
+        fo = t * v->ka1 - v->ka1 * v->bq[1];
         v->bq[1] = v->bq[0]; v->bq[0] = t;
     }
     return y + P(FMIX) * (fo - y);
@@ -496,54 +450,13 @@ static float voice_run_kr(s1c *s, s1c_voice *v)
 #define voice_run voice_run_kr
 #endif
 /* ---- FX ---- */
-typedef struct { float s1, s2, s3, s4, thr; } s1c_cc;
-static void comp_coef(s1c_cc *k, float ratio, float thr, float atk, float rel, float sr)
-{
-    k->s1 = atk > 0.0f ? expf(-2.0f / (sr * atk)) : 0.0f; k->s3 = atk > 0.0f ? expf(-1.0f / (sr * atk)) : 0.0f;
-    k->s4 = rel > 0.0f ? expf(-1.0f / (sr * rel)) : 0.0f; k->s2 = (1.0f - k->s1) * (1.0f / ratio - 1.0f);
-    k->thr = thr;
-}
+typedef s1u_cc s1c_cc;
+#define comp_coef s1u_comp_coef
 #if S1C_FAST
-static int comp_upd;     /* set on every 4th frame: detector-to-dB and gain law at quarter rate */
-static float comp(float *st, float x, const s1c_cc *k)
-{
-    float ax = fabsf(x), a = st[0] > ax ? k->s4 : k->s3;
-    st[0] = st[0] * a + (1.0f - a) * ax;
-    if (comp_upd) {
-        float over = st[0] > 0.0f ? 6.02059991f * log2f(st[0]) - k->thr : 0.0f;
-        st[2] = over > 0.0f ? over : 0.0f;
-        st[3] = st[1] != 0.0f ? exp2f(0.166096405f * st[1]) : 1.0f;
-    }
-    st[1] = k->s1 * st[1] + k->s2 * st[2];
-    return x * st[3];
-}
+#define comp(st, x, k) s1u_comp(st, x, k, cu)   /* gain law at quarter rate */
 #else
-static float comp(float *st, float x, const s1c_cc *k)
-{
-    float ax = fabsf(x), a = st[0] > ax ? k->s4 : k->s3;
-    st[0] = st[0] * a + (1.0f - a) * ax;
-    float over = st[0] > 0.0f ? 6.02059991f * log2f(st[0]) - k->thr : 0.0f;
-    st[1] = k->s1 * st[1] + k->s2 * (over > 0.0f ? over : 0.0f);
-    return st[1] != 0.0f ? x * exp2f(0.166096405f * st[1]) : x;
-}
+#define comp(st, x, k) s1u_comp(st, x, k, 1)
 #endif
-/* four notch allpass stages with feedback, vibrato (wet-only) mode, notch sweep 100..800 Hz */
-static float phaser_ch(float r[4][3], float *fb, float in, float lfo, float width, float fbk, float sr)
-{
-    float w = 0.5f * (TWO_PI * 800.0f - TWO_PI * 100.0f) * (1.0f - lfo) + TWO_PI * 100.0f;
-    float g = expf(-3.14159f * width / sr), f4 = g * g, f5 = -2.0f * g, m = 1.5f, t[4];
-    int k;
-    for (k = 0; k < 4; k++) { t[k] = r[k][1] * cosf(m * w / sr); m *= 1.5f; }
-    float r40 = -((f5 * t[0] + f4 * r[0][2]) - (in + fbk * *fb));
-    float r30 = f5 * (t[0] - t[1]) + r[0][2] + f4 * (r40 - r[1][2]);
-    float r20 = f5 * (t[1] - t[2]) + r[1][2] + f4 * (r30 - r[2][2]);
-    float r10 = f5 * (t[2] - t[3]) + r[2][2] + f4 * (r20 - r[3][2]);
-    float out = f4 * r10 + f5 * t[3] + r[3][2];
-    float nw[4] = {r40, r30, r20, r10};
-    for (k = 0; k < 4; k++) { r[k][2] = r[k][1]; r[k][1] = nw[k]; }
-    *fb = out;
-    return out;
-}
 #if !S1C_BUSFX
 #ifdef S1C_OPT_A
 #ifndef S1C_DLB
@@ -765,141 +678,14 @@ static void reverb(s1c *s, float il, float ir, float *ol, float *or_)
  * Decay per second and HF loss per second follow the original 8-line network's feedback and
  * damping; output gain, decay scale and colour are fitted per program. */
 static const uint16_t rvb_len48[4] = {RVB_L0, RVB_L1, RVB_L2, RVB_L3};
-
-float s1c_rvb_fit[3] = {1.0f, 1.0f, 1.0f};
-#if S1C_EXT
-#define FITV(s) ((s)->rfit)
-#else
-#define FITV(s) s1c_rvb_fit
+#ifndef S1C_RVB_BFP
+#error "S1C_RVB uses the s1u 8-bit block-float reverb (define S1C_RVB_BFP)"
 #endif
-#ifdef S1C_RVB_MU
-/* 8-bit mu-law-style companding (sign + 7-bit log magnitude, 1/8 full scale = 16) */
-static uint16_t mu_put(float x)
-{
-    float a = fabsf(x) * (1.0f / 16.0f); if (a > 1.0f) a = 1.0f;
-    int q = (int)(127.0f * log2f(1.0f + 255.0f * a) * 0.125f + 0.5f);
-    return (uint16_t)(x < 0.0f ? 128 + q : q);
-}
-static float mu_get(uint16_t c)
-{
-    float m = (exp2f((float)(c & 127) * (8.0f / 127.0f)) - 1.0f) * (16.0f / 255.0f);
-    return c & 128 ? -m : m;
-}
-#define RVB_PUT mu_put
-#define RVB_GET mu_get
-#else
-#define RVB_PUT h16_put
-#define RVB_GET h16_get
-#endif
-#ifndef WAP_G
-#define WAP_G 0.6f
-#endif
-#ifndef RVB_DEPTH
-#define RVB_DEPTH 4
-#endif   /* gain, decay-time scale, damping scale (host fit) */
-
-#ifdef S1C_RVB_BFP
-/* 8-bit block-float reverb lines: one exponent per 16 writes, the block being written kept at
- * 16-bit precision until it completes (the same scheme as the delay lines). */
 static const uint16_t rva_off[5] = {0, S1C_RVA(RVB_L0), S1C_RVA(RVB_L0) + S1C_RVA(RVB_L1),
     S1C_RVA(RVB_L0) + S1C_RVA(RVB_L1) + S1C_RVA(RVB_L2), S1C_RVA_WORDS};
-static float rb_get(const s1c *s, int n, int i, int w)
-{
-    int idx = rva_off[n] + i;
-    if ((i >> 4) == (w >> 4) && (i & 15) < s->rvbn[n]) return (float)s->rvs[n * 16 + (i & 15)] * (1.0f / 2048.0f);
-    int e = s->rve[idx >> 4];
-    if (e == -128) return 0.0f;
-    return (float)s->rvm[idx] * (exp2f((float)e) / 127.0f);
-}
-static void rb_put(s1c *s, int n, int w, float x)
-{
-    int16_t *st = s->rvs + n * 16;
-    float v = x * 2048.0f;
-    st[w & 15] = (int16_t)(v > 32767.0f ? 32767.0f : v < -32768.0f ? -32768.0f : v);
-    if (++s->rvbn[n] == 16) {
-        int base = rva_off[n] + (w & ~15), i; float pk = 0.0f;
-        s->rvbn[n] = 0;
-        for (i = 0; i < 16; i++) { float a = fabsf((float)st[i] * (1.0f / 2048.0f)); if (a > pk) pk = a; }
-        if (pk > 0.0f) {
-            float e = __builtin_ceilf(log2f(pk)), sc = exp2f(e) / 127.0f;
-            for (i = 0; i < 16; i++) s->rvm[base + i] = (int8_t)__builtin_roundf((float)st[i] * (1.0f / 2048.0f) / sc);
-            s->rve[base >> 4] = (int8_t)e;
-        } else s->rve[base >> 4] = -128;
-    }
-}
-#endif
-static void rvb_compact(s1c *s, float il, float ir, float *ol, float *or_)
-{
-#if S1C_FAST
-    float y[4], fb = s->t[RVFB];
-#else
-    float y[4], fb = P(RVFB);
-#endif
-#if defined S1C_RVB_BFP
-#define RLEN(n) (rva_off[(n) + 1] - rva_off[n])
-#define RGET(i) rb_get(s, n, i, w)
-#else
-#if S1C_EXT && defined S1C_RVB_MU
-    uint8_t *b = s->rvb;
-#else
-    uint16_t *b = s->rvb;
-#endif
-#define RLEN(n) (s->rvb_ln[n] + 2 * RVB_DEPTH + 4)
-#define RGET(i) RVB_GET(b[i])
-#endif
-    int n;
-    if (fb != s->rvb_fb) {                    /* per-line gains when feedback changes */
-        float lref = 0.068390f * s->sr / (float)S1C_RVB_DEC, G = 0.70710678f;
-        s->rvb_fb = fb;
-        for (n = 0; n < 4; n++) {
-            float r = (float)s->rvb_ln[n] / lref;
-            s->rvb_g[n] = fb > 0.0f ? powf(fb, r / FITV(s)[1]) : 0.0f;
-            float gn = powf(G, r * FITV(s)[2]);
-            s->rvb_d[n] = (1.0f - gn) / (1.0f + gn);
-        }
-    }
-    for (n = 0; n < 4; n++) {
-        int len = RLEN(n), w = s->rvb_w[n];
-        s->rvb_ph[n] += (0.6f + 0.37f * (float)n) * (float)S1C_RVB_DEC / s->sr; if (s->rvb_ph[n] >= 1.0f) s->rvb_ph[n] -= 1.0f;
-        float tri = s->rvb_ph[n] < 0.5f ? 4.0f * s->rvb_ph[n] - 1.0f : 3.0f - 4.0f * s->rvb_ph[n];
-        float rp = (float)w - (float)s->rvb_ln[n] - (float)RVB_DEPTH * (1.0f + tri) - 1.0f;
-        if (rp < 0.0f) rp += (float)len;
-        int i1 = (int)rp; float fr = rp - (float)i1;
-        int i0 = i1 ? i1 - 1 : len - 1, i2 = i1 + 1 == len ? 0 : i1 + 1, i3 = i2 + 1 == len ? 0 : i2 + 1;
-        float a0 = RGET(i0), a1 = RGET(i1), a2 = RGET(i2), a3 = RGET(i3);
-        float c1 = 0.5f * (a2 - a0), c2 = a0 - 2.5f * a1 + 2.0f * a2 - 0.5f * a3, c3 = 0.5f * (a3 - a0) + 1.5f * (a1 - a2);
-        float v = ((c3 * fr + c2) * fr + c1) * fr + a1;
-        v *= s->rvb_g[n];
-        s->rvb_lp[n] = v + s->rvb_d[n] * (s->rvb_lp[n] - v);
-        y[n] = s->rvb_lp[n];
-#if !defined S1C_RVB_BFP
-        b += len;
-#endif
-    }
-    /* Householder-style orthogonal mix (H4 / 2) back into the lines */
-    float h0 = 0.5f * (y[0] + y[1] + y[2] + y[3]), h1 = 0.5f * (y[0] - y[1] + y[2] - y[3]);
-    float h2 = 0.5f * (y[0] + y[1] - y[2] - y[3]), h3 = 0.5f * (y[0] - y[1] - y[2] + y[3]);
-    float x[4] = {h0 + il, h1 + ir, h2 + il, h3 + ir};
-#if defined S1C_RVB_BFP
-    for (n = 0; n < 4; n++) {
-        int len = RLEN(n), w = s->rvb_w[n];
-        rb_put(s, n, w, x[n]);
-        s->rvb_w[n] = w + 1 == len ? 0 : w + 1;
-    }
-#else
-    b = s->rvb;
-    for (n = 0; n < 4; n++) {
-        int len = RLEN(n), w = s->rvb_w[n];
-        b[w] = RVB_PUT(x[n]);
-        s->rvb_w[n] = w + 1 == len ? 0 : w + 1;
-        b += len;
-    }
-#endif
-#undef RLEN
-#undef RGET
-    *ol = (y[0] + y[2]) * 0.35f * 2.0f * FITV(s)[0];
-    *or_ = (y[1] + y[3]) * 0.35f * 2.0f * FITV(s)[0];
-}
+float s1c_rvb_fit[3] = {1.0f, 1.0f, 1.0f};   /* host tools: fit applied at s1c_init */
+#define FITV(s) ((s)->rv.fit)
+#define rvb_compact(s, il, ir, ol, or_) s1u_rvb_run(&(s)->rv, (s)->t[RVFB], il, ir, ol, or_, (s)->sr / (float)S1C_RVB_DEC)
 #endif
 static void param_dirty(s1c *s)
 {
@@ -940,7 +726,6 @@ void s1c_init(s1c *s, float sr, const float init[150])
     for (i = 0; i < S1C_VOICES; i++) s->v[i].root = -1;
 #if !S1C_BUSFX
 #if S1C_EXT
-    memcpy(s->rfit, s1c_rvb_fit, sizeof s->rfit);
     s->dfmt = s1c_dlfmt == 1 ? 2 : s1c_dlfmt;      /* device lines: h16 or 8-bit block float */
 #else
     for (i = 0; i < 4; i++) { s->dl[i].buf = s->dbuf[i]; s->dl[i].len = S1C_DLY_LEN; }
@@ -966,17 +751,17 @@ void s1c_init(s1c *s, float sr, const float init[150])
 #endif
 #endif
 #if S1C_RVB
-    for (i = 0; i < 4; i++) s->rvb_ln[i] = (int32_t)(rvb_len48[i] * sr / 48000.0f);  /* line lengths given at sr / S1C_RVB_DEC */
-    s->rvb_fb = -1.0f;
-#if defined S1C_RVB_BFP && !S1C_EXT
-    s->rvm = s->rvm_s; s->rve = s->rve_s; s->rvs = s->rvs_s;
-#endif
+    s1u_rvb_init(&s->rv, rvb_len48, rva_off, sr);
+    memcpy(s->rv.fit, s1c_rvb_fit, sizeof s->rv.fit);
 #endif
 #if S1C_KR > 1
 #endif
     s->mono_prev = 0;
     s->lfo_c2 = powf(0.5f, 1.0f / (0.0053125f * sr));
     s->monof = 261.625579833984375f;   /* the mono glide aims at middle C before any note */
+#if WAP_L0
+    { static const int16_t wap_len[3] = {WAP_L0, WAP_L1, WAP_L2}; s->wid.len = wap_len; }
+#endif
     s->wlen = (int32_t)(0.05f * sr);
     if (s->wlen > S1C_WIDEN_MAX) s->wlen = S1C_WIDEN_MAX;
 }
@@ -1035,13 +820,9 @@ static void dly_partition(s1c *s)
 }
 void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes)
 {
-#if defined S1C_RVB_BFP
-    s->rvm = (int8_t *)rvb; s->rve = s->rvm + S1C_RVA_WORDS; s->rvs = (int16_t *)(void *)(s->rve + S1C_RVA_WORDS / 16);
-#else
-    s->rvb = rvb;
-#endif
-    s->wbuf = wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
-    memset(rvb, 0, S1C_RVB_BYTES); memset(wbuf, 0, S1C_WAP_WORDS * 2);
+    s1u_rvb_attach(&s->rv, rvb);
+    s->wid.buf = wbuf; s->pool = pool; s->pool_bytes = pool_bytes & ~3;
+    memset(wbuf, 0, S1C_WAP_WORDS * 2);
     s->ddec = 0;
 }
 #else
@@ -1068,7 +849,7 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
     (void)cr; (void)cw;
     for (f = 0; f < n; f++) {
 #if S1C_FAST
-        comp_upd = (f & 3) == 0;
+        int cu = (f & 3) == 0;
 #if S1C_CSM
         for (i = 0; i < (int)sizeof s1c_smid; i++) s->c[i] = c1 * s->t[s1c_smid[i]] + c2 * s->c[i];
 #else
@@ -1094,22 +875,9 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
         }
         /* LFOs */
         float x;
-        s->l1ph += P(L1R) / s->sr; if (s->l1ph >= 1.0f) s->l1ph -= 1.0f;
-        s->l2ph += P(L2R) / s->sr; if (s->l2ph >= 1.0f) s->l2ph -= 1.0f;
         float lc2 = s->lfo_c2;
-        for (i = 0; i < 2; i++) {
-            float ph = i ? s->l2ph : s->l1ph; int w = (int)(i ? P(L2I) : P(L1I));
-#if S1C_FAST
-            x = w == 0 ? sine_t((uint32_t)(ph * 4294967296.0f)) :
-#else
-            x = w == 0 ? sinf(ph * TWO_PI) :
-#endif
-                w == 1 ? (ph > 0.5f ? 1.0f : -1.0f) : w == 2 ? (ph - 0.5f) * 2.0f : (0.5f - ph) * 2.0f;
-            float *sm = i ? &s->l2s : &s->l1s;
-            *sm = (1.0f - lc2) * x + lc2 * *sm;
-            float a = i ? P(L2A) : P(L1A), *o = i ? s->l0 : s->l1;
-            o[0] = 0.5f * (1.0f + *sm) * a; o[1] = 1.0f - 0.5f * (1.0f - *sm) * a;
-        }
+        s1u_lfo_tick(&s->lfo[0], P(L1R), (int)P(L1I), P(L1A), lc2, s->sr);
+        s1u_lfo_tick(&s->lfo[1], P(L2R), (int)P(L2I), P(L2A), lc2, s->sr);
 #if !S1C_NO_SEQ
         sequencer(s);
 #endif
@@ -1119,41 +887,19 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
 
         /* bitcrush (sample-and-hold), tremolo */
 #if S1C_FAST
-        if ((f & 7) == 0) {
-            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
-            bsr = clampf(exp2f(bsr), 2048.0f, 48000.0f);
-            s->bc_inc = s->sr / bsr; if (s->bc_inc < 1.0f) s->bc_inc = 1.0f;
-        }
-        float inc = s->bc_inc;
-#else
-        float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
-        bsr = clampf(exp2f(bsr), 2048.0f, 48000.0f);
-        float inc = s->sr / bsr; if (inc < 1.0f) inc = 1.0f;
+        if ((f & 7) == 0)
 #endif
-        if (s->bc_idx <= s->bc_n) { s->bc_v = y; s->bc_idx += inc - s->bc_n; s->bc_n = 0.0f; } else y = s->bc_v;
-        s->bc_n += 1.0f;
+        {
+            float bsr = log2f(P(BCSR)) + 4.0f * lfo01(s, P(LBC));
+            s1u_crush_clock(&s->crush, clampf(exp2f(bsr), 2048.0f, 48000.0f), s->sr);
+        }
+        y = s1u_crush_run(&s->crush, y);
         y *= lfo10(s, P(LTREM));
         /* autopan, equal power */
-#if S1C_FAST
-        float pan = sine_t((uint32_t)(s->pan_ph * 4294967296.0f)) * P(PANA);
-        s->pan_ph += P(PANF) / s->sr; if (s->pan_ph >= 1.0f) s->pan_ph -= 1.0f;
-        uint32_t pa = (uint32_t)((1.0f + pan) * 0.125f * 4294967296.0f);   /* angle / 2pi */
-        float L = y * sine_t(pa + 0x40000000u), R = y * sine_t(pa);
-#else
-        float pan = sinf(s->pan_ph * TWO_PI) * P(PANA);
-        s->pan_ph += P(PANF) / s->sr; if (s->pan_ph >= 1.0f) s->pan_ph -= 1.0f;
-        float ang = (1.0f + pan) * 0.785398163f, L = y * cosf(ang), R = y * sinf(ang);
-#endif
+        float L, R;
+        s1u_autopan(&s->pan_ph, y, P(PANF), P(PANA), s->sr, &L, &R);
         /* phaser */
-        float pm = P(PHMIX);
-        if (pm != 0.0f) {
-            float sl = sinf(s->ph_ph), cl = cosf(s->ph_ph);
-            s->ph_ph += 0.10472f * P(PHRATE) / s->sr;
-            if (s->ph_ph > TWO_PI) s->ph_ph -= TWO_PI;
-            float pl = phaser_ch(s->ph_rec[0], &s->ph_out[0][0], L, sl, P(PHW), P(PHFB), s->sr);
-            float pr = phaser_ch(s->ph_rec[1], &s->ph_out[1][0], R, cl, P(PHW), P(PHFB), s->sr);
-            L = (1.0f - pm) * L + pm * pl; R = (1.0f - pm) * R + pm * pr;
-        }
+        s1u_phaser_run(&s->ph, &L, &R, P(PHMIX), P(PHRATE), P(PHW), P(PHFB), s->sr);
 #if !S1C_BUSFX
         /* ping-pong delay with tracking low-pass on its input */
         float dL = L, dR = R;
@@ -1162,15 +908,16 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
             if ((f & 7) == 0) {
                 float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
                 float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
-                s->dl_fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
+                float x = clampf(P(CUT) * pc, 64.0f, 22050.0f) * (2.0f / s->sr);
+                s->dl_fc = ladder_a(x > 1.0f ? 1.0f : x);     /* the ladder coefficient, not Hz */
             }
-            float fc = s->dl_fc;
+            dL = ladder(s->dlp[0], L, s->dl_fc, 0.0f); dR = ladder(s->dlp[1], R, s->dl_fc, 0.0f);
 #else
             float pv = clampf(log2f(P(CUT)), 10.0f, 14.4284f);
             float pc = 1.0f + (pv - 10.0f) * (1.0f / 4.4284f) * (P(DICT) - 1.0f);
             float fc = clampf(P(CUT) * pc, 64.0f, 22050.0f);
-#endif
             dL = moog(s->dlp[0], L, fc, 0.0f, s->sr); dR = moog(s->dlp[1], R, fc, 0.0f, s->sr);
+#endif
         }
 #ifdef S1C_OPT_A
 #if S1C_EXT
@@ -1340,8 +1087,7 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
             s->hpk[0] = a1; s->hpk[1] = 2.0f * (cc * cc - 1.0f) * a1; s->hpk[2] = (1.0f - 1.41421356f * cc + cc * cc) * a1;
         }
         float hl, hr;
-        { float *yy = s->hp_y[0], t = mL - s->hpk[1] * yy[0] - s->hpk[2] * yy[1]; hl = (t - 2.0f * yy[0] + yy[1]) * s->hpk[0] * 2.0f; yy[1] = yy[0]; yy[0] = t; }
-        { float *yy = s->hp_y[1], t = mR - s->hpk[1] * yy[0] - s->hpk[2] * yy[1]; hr = (t - 2.0f * yy[0] + yy[1]) * s->hpk[0] * 2.0f; yy[1] = yy[0]; yy[0] = t; }
+        hl = hp2(s->hp_y[0], mL, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]); hr = hp2(s->hp_y[1], mR, s->hpk[0] * 2.0f, s->hpk[1], s->hpk[2]);
 #else
         float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
 #endif
@@ -1391,26 +1137,20 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
         L *= 2.0f * P(MVOL); R *= 2.0f * P(MVOL);
 #endif
         L = comp(s->cmp[0][0], L, &cm) * P(CMG); R = comp(s->cmp[0][1], R, &cm) * P(CMG);
-        /* widen: the right channel crossfades to itself 50 ms late */
-        {
+        /* widen: the right channel through three allpasses, crossfaded */
 #if WAP_L0
-            static const int16_t wl[3] = {WAP_L0, WAP_L1, WAP_L2};
-            float wd = R; uint16_t *wb = s->wbuf;
-            for (int q = 0; q < 3; q++) {            /* Schroeder allpass, g = WAP_G */
-                int w = s->wap_w[q]; float d = h16_get(wb[w]), v = wd + WAP_G * d;
-                wb[w] = h16_put(v); wd = d - WAP_G * v;
-                s->wap_w[q] = w + 1 == wl[q] ? 0 : w + 1; wb += wl[q];
-            }
-#elif defined S1C_WIDEN_FLOAT
+        R = s1u_widen_run(&s->wid, R, P(WIDEN));
+#else
+        {
+#if defined S1C_WIDEN_FLOAT
             float wd = s->wbuf[s->wpos]; s->wbuf[s->wpos] = R;
 #else
             float wd = h16_get(s->wbuf[s->wpos]); s->wbuf[s->wpos] = h16_put(R);
 #endif
-#if !WAP_L0
             if (++s->wpos >= s->wlen) s->wpos = 0;
-#endif
             R += P(WIDEN) * (wd - R);
         }
+#endif
         outl[f] = L; outr[f] = R;
     }
 }

@@ -151,10 +151,11 @@ if S1C not in ("0", "1"):
 if S1C == "1":
     ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/app/s1_dry_part.c")] = "firmware/src/app/s1c_part.c"
     ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/dsp/s1_dry_voice.c")] = "firmware/src/dsp/s1c/s1c.c"
-    ORIGINAL_SYNTH_BACKENDS += ["firmware/src/dsp/s1c/s1c_front.c", "firmware/src/dsp/s1pack/s1pack.c"]
+    ORIGINAL_SYNTH_BACKENDS += ["firmware/src/dsp/s1c/s1u.c", "firmware/src/dsp/s1c/s1c_front.c", "firmware/src/dsp/s1pack/s1pack.c"]
 
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
+S1C_OZ_UNITS = set(os.environ.get("X0X_S1C_OZ", "s1c s1u s1c_front s1c_part s1pack").split())
 ORIGINAL_SYNTH_O2_UNITS = {
     "oscillator_motion", "miami_selected_voice", "miami_ms20", "miami_output", "miami_fx_chain",
     "miami_pitch", "voice_gain", "program_envelope", "fixed_fx", "master",
@@ -487,6 +488,8 @@ def app_compile_commands(flags, original_synth, wobble):
                 uf = ["-Oz" if flag == "-Os" else flag for flag in original_flags]
             if Path(u).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"}:
                 uf = [f for f in uf if f != "-flto"]
+            if S1C == "1" and Path(u).stem in S1C_OZ_UNITS:
+                uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
             if SUPERJ6_FACTORY == "1" and synthone_patch == "1":

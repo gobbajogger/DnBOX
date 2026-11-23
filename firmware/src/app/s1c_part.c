@@ -24,7 +24,7 @@ _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BY
  * (no per-program table). Delay lines are half floats. */
 static void fit_apply(s1c *e)
 {
-    e->rfit[0] = 0.5f; e->rfit[1] = 1.5f; e->rfit[2] = 1.0f; e->dfmt = 0;
+    e->rv.fit[0] = 0.5f; e->rv.fit[1] = 1.5f; e->rv.fit[2] = 1.0f; e->dfmt = 0;
 }
 
 static void emit(void *context, unsigned id, float physical) { (void)s1c_front_set((s1c *)context, id, physical); }
@@ -198,35 +198,36 @@ int s1_part_active(const s1_dry_part *part)
     return 0;
 }
 
-int s1_part_voice_view(const s1_dry_part *part, float *level, float *modulation, unsigned *state, unsigned *key_down)
-{
-    int sel = -1;
-    for (unsigned i = 0; i < S1C_VOICES; ++i) {
-        const s1c_voice *v = &part->e.v[i];
-        if (v->root != -1 && v->stage && (sel < 0 || v->amp > part->e.v[sel].amp)) sel = (int)i;
-    }
-    if (sel < 0) return 0;
-    const s1c_voice *v = &part->e.v[sel];
-    *level = v->amp;
-    *modulation = v->fenv;
-    *state = v->stage == 2 ? 3u : v->ea.mode == 1 ? 0u : 1u;
-    *key_down = v->stage == 1 && !(part->held & (1u << sel));
-    return 1;
-}
-
-int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+/* Loudest sounding voice (amp envelope), or -1; key_down: gate held and not by the damper. */
+static int loudest(const s1_dry_part *part, unsigned *key_down)
 {
     int sel = -1;
     for (unsigned i = 0; i < S1C_VOICES; ++i) {
         const s1c_voice *v = &part->e.v[i];
         if (v->root != -1 && v->stage && (sel < 0 || v->ea.y > part->e.v[sel].ea.y)) sel = (int)i;
     }
+    if (sel >= 0) *key_down = part->e.v[sel].stage == 1 && !(part->held & (1u << sel));
+    return sel;
+}
+
+int s1_part_voice_view(const s1_dry_part *part, float *level, float *modulation, unsigned *state, unsigned *key_down)
+{
+    int sel = loudest(part, key_down);
     if (sel < 0) return 0;
     const s1c_voice *v = &part->e.v[sel];
-    const s1c_env *e = filter ? &v->ef : &v->ea;
+    *level = v->amp;
+    *modulation = v->fenv;
+    *state = v->stage == 2 ? 3u : v->ea.mode == 1 ? 0u : 1u;
+    return 1;
+}
+
+int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+{
+    int sel = loudest(part, key_down);
+    if (sel < 0) return 0;
+    const s1c_env *e = filter ? &part->e.v[sel].ef : &part->e.v[sel].ea;
     *level = e->y;
     *stage = e->mode;            /* E_CLEAR 0, E_ATK 1, E_DEC 2, E_REL 3 */
-    *key_down = v->stage == 1 && !(part->held & (1u << sel));
     return 1;
 }
 

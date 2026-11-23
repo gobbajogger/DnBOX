@@ -35,5 +35,6 @@
 #define S1C_DL_FBK 0.25f              /* compact delay: feedback trim for decimated lines (by ear vs original 062/032/289) */
 #define S1C_DL_FBMAX 0.98f
 #define S1C_DL_WET 1.6f               /* compact delay: wet trim for decimated lines */
+#define S1C_RVB_NOMOD 1               /* fixed reverb taps (no modulation): -304 B XIP, tail level within 1 dB */
 #define S1C_ARENA_BYTES 4252u         /* sizeof(original_chicago_fx2_compact) on pi32v2 */
 #endif
