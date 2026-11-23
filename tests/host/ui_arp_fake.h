@@ -19,7 +19,7 @@ static struct {
     engine_arp_settings s[2];
     engine_arp_steps st[2];
     unsigned view_step[2]; uint32_t view_age[2]; int view_ok[2];
-    unsigned sets, step_sets, rejected;
+    unsigned sets, step_sets, rejected, reloads[2];
 } arp_fake;
 static void arp_fake_reset(void)
 {
@@ -30,6 +30,7 @@ static void arp_fake_reset(void)
         arp_fake.view_ok[v] = 0;
     }
     arp_fake.sets = arp_fake.step_sets = arp_fake.rejected = 0;
+    arp_fake.reloads[0] = arp_fake.reloads[1] = 0;
 }
 static int arp_fake_clamp(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 int engine_arp_settings_read(unsigned voice, engine_arp_settings *out)
@@ -79,4 +80,10 @@ int engine_arp_view(unsigned voice, unsigned *step, uint32_t *fired_age_ms)
 {
     if (voice > 1 || !arp_fake.view_ok[voice]) return 0;
     *step = arp_fake.view_step[voice]; *fired_age_ms = arp_fake.view_age[voice]; return 1;
+}
+int engine_arp_reload(unsigned voice)
+{
+    if (voice > 1) return S1_EDIT_REJECTED;
+    arp_fake.reloads[voice]++;
+    return S1_EDIT_QUEUED;
 }

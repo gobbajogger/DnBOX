@@ -2447,6 +2447,14 @@ static void undo_changed(uint32_t off, uint32_t len)
         if (k >= s0 && k < s1) {
             uint32_t x = k - s0, t = x / (NVOICES_MAX * NPARAMS_MAX), v = (x / NPARAMS_MAX) % NVOICES_MAX,
                      i = x % NPARAMS_MAX;
+#if X0X_ARP_HOOKS
+            /* The arp block (sound.v[T_303][2 + voice]): the engine re-reads it. */
+            if (t == T_303 && v >= 2 && v < 2 + NBASS) {
+                (void)engine_arp_reload(v - 2);
+                k = s0 + (t * NVOICES_MAX + v + 1) * NPARAMS_MAX - 1;   /* once per block */
+                continue;
+            }
+#endif
 #if X0X_BASS_TAGGED_SOUND
             if((t==T_303 && (undo_bass_mask&(1u<<v))) ||
                (t==T_MIX && v>=PART_303A && v<=PART_303B && (undo_bass_mask&(1u<<(v-PART_303A)))))continue;

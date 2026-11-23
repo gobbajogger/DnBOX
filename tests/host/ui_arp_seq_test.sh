@@ -36,4 +36,5 @@ mutant effect-first '                if (kind == ORIGINAL_SOUND_SYNTHONE && row 
 mutant fake-playhead '        ph = as.on && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;' '        ph = engine_arp_view((unsigned)b, &arp_ph, &age) ? (int)arp_ph : -1;'
 mutant led-playhead '                    if (live && ph == i)' '                    if (ph == i)'
 mutant k8-edits '    }                                            /* K8: nothing on an arp step */' '    } else arp_step_edit((unsigned)arp_held, ARP_S_OCT, 1);'
-echo "PASS ui-arp-seq (base + hooks-off + 5 mutants)"
+mutant undo-no-reload '                (void)engine_arp_reload(v - 2);' '                (void)0;'
+echo "PASS ui-arp-seq (base + hooks-off + 6 mutants)"

@@ -107,6 +107,16 @@ int main(void)
     /* Chicago keeps its own arp; no ARP SEQ page, pads stay on the pattern */
     prime(ORIGINAL_SOUND_CHICAGO);EXPECT(page_named("ARP SEQ")<0);
     *page_of(V_SEQ)=3;EXPECT(!arp_seq_page());
+    /* UNDO over an arp block: the engine re-reads it (undo_changed skips T_303 voices >= 2) */
+    {   const uint32_t base=__builtin_offsetof(project_t,sound)-UNDO_OFF;
+        arp_fake_reset();
+        undo_changed(base+(T_303*NVOICES_MAX+2)*NPARAMS_MAX+3,8);
+        EXPECT(arp_fake.reloads[0]==1&&arp_fake.reloads[1]==0);
+        undo_changed(base+(T_303*NVOICES_MAX+3)*NPARAMS_MAX,NPARAMS_MAX);
+        EXPECT(arp_fake.reloads[1]==1);
+        undo_changed(base+(T_303*NVOICES_MAX+0)*NPARAMS_MAX,4);
+        EXPECT(arp_fake.reloads[0]==1&&arp_fake.reloads[1]==1);   /* the bass cell is not the arp */
+    }
     if(failures){fprintf(stderr,"FAIL %u/%u\n",failures,expectations);return 1;}
     printf("PASS ui-arp-seq %u checks\n",expectations);return 0;
 }
