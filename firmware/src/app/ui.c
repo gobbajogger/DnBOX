@@ -6464,7 +6464,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
         cv_rect(x+1,122-o,13,1,C_LINE);
         cv_rect(x+1+pan*12/127,120-o,2,5,ink);
     }
-    cv_text(8,128-o,&FONT_T,"LEVEL / PAN",C_GRAY);
+    cv_text(8,128-o,&FONT_T,"LEVEL dB / PAN",C_GRAY);
 }
 
 /* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch ≤10 Hz; skip if shape/write

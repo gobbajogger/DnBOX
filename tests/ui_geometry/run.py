@@ -85,6 +85,17 @@ def run(source,output):
         pm=re.findall(r'^R22_ROLL screens=(\d+) missing=(\d+)$',lp.read_text(),re.M)
         report['R22_MUTATE']={'exit':mrun.returncode,'counts':pm}
         if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])!=int(pm[0][0]):report['status']='FAIL'
+    # Row 7: every value drawn on its own carries its unit in the same frame.
+    units=re.findall(r'^UNITS checks=(\d+) missing=(\d+)$',(output/'render.log').read_text(),re.M)
+    report['units']=units
+    if len(units)!=1 or int(units[0][0])==0 or int(units[0][1])!=0:report['status']='FAIL'
+    else:
+        me=dict(env,UNIT_MUTATE='1');me.pop('SMC_UI_SHOTS',None)
+        lp=output/'unit_mutate.log'
+        with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+        pm=re.findall(r'^UNITS checks=(\d+) missing=(\d+)$',lp.read_text(),re.M)
+        report['UNIT_MUTATE']={'exit':mrun.returncode,'counts':pm}
+        if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
     pix=re.findall(r'^GLYPH_PIXELS checks=(\d+) missing=(\d+) damaged=(\d+)$',(output/'render.log').read_text(),re.M)
     report['glyphPixelScope']='active 909/808 controls: positive raster deltas, own bank/cell bounds and final-frame survival'
     report['glyphPixels']=pix

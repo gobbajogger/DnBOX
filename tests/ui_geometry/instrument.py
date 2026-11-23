@@ -113,6 +113,11 @@ def instrument(root):
 {
     first_original_pref_value_of(r,v,num,unit);
     if(!geo_enabled)return;
+    if(unit[0] && num[0] && unit_nseen<512 && strlen(num)<16 && strlen(unit)<8) {
+        unit_fmt *u=&unit_seen[unit_nseen++];strcpy(u->num,num);strcpy(u->unit,unit);
+        u->ref=((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c;
+        if(getenv("UNIT_MUTATE"))unit[0]=0;   /* a formatter that loses its unit */
+    }
     const x0x_param_t *d=r.kind==R_ENG?pref_desc(r):0;
     int named=d&&(d->name[0]=='P'||d->name[0]=='p')&&(d->name[1]=='a'||d->name[1]=='A')&&(d->name[2]=='n'||d->name[2]=='N')&&!d->name[3];
     if(!named&&!is_pan(r))return;

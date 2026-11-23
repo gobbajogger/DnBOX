@@ -29,3 +29,6 @@ static void geo_blit(int x,int y) {
 
 static unsigned pan_format_checks,pan_format_bad;
 static unsigned r22_roll_bands,r22_roll_screens,r22_roll_missing;
+/* Row 7 units: values formatted with a unit during the audited frame. */
+typedef struct { char num[16],unit[8]; unsigned ref; } unit_fmt;
+static unit_fmt unit_seen[512];static unsigned unit_nseen,unit_checks,unit_missing;

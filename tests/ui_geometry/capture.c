@@ -241,6 +241,17 @@ static void required_r22_roll(const char *screen) {
  r22_roll_screens++;
  if(bands!=2||ink<200){r22_roll_missing++;printf("R22_ROLL_MISSING screen=%s bands=%u ink=%u\n",screen,bands,ink);}
 }
+/* Row 7: a value drawn on its own must have its unit drawn in the same frame. */
+static void required_units(const char *screen) {
+ unsigned n=unit_nseen;unit_nseen=0;
+ for(unsigned i=0;i<n;i++) {
+  const unit_fmt *u=&unit_seen[i];int drawn=0,has_unit=0;
+  for(unsigned k=0;k<geo_nframe;k++){if(!strcmp(geo_frame[k].text,u->num))drawn=1;if(strstr(geo_frame[k].text,u->unit))has_unit=1;}
+  if(!drawn)continue;
+  unit_checks++;
+  if(!has_unit){unit_missing++;printf("UNIT_MISSING screen=%s ref=%08x value=[%s] unit=[%s]\n",screen,u->ref,u->num,u->unit);}
+ }
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -252,6 +263,7 @@ static void geo_audit(const char *screen) {
  required_drum_content(screen);
  required_battery(screen);
  required_r22_roll(screen);
+ required_units(screen);
  geo_enabled=0;
  for(unsigned i=0;i<geo_nframe;i++) {
   geo_label e=geo_frame[i];unsigned expected=0,missing=0;
@@ -410,5 +422,6 @@ int main(void)
     printf("BATTERY checks=%u missing=%u levels=%u,%u,%u,%u\n",battery_checks,battery_missing,battery_level_seen[0],battery_level_seen[1],battery_level_seen[2],battery_level_seen[3]);
     printf("PAN_FORMAT checks=%u bad=%u\n",pan_format_checks,pan_format_bad);
     printf("R22_ROLL screens=%u missing=%u\n",r22_roll_screens,r22_roll_missing);
-    return geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
+    printf("UNITS checks=%u missing=%u\n",unit_checks,unit_missing);
+    return unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }
