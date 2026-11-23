@@ -272,8 +272,9 @@ class OriginalBuildCompositionTests(unittest.TestCase):
             with self.subTest(pad=pad, name=name):
                 value = (pad * 127 + 3) // 7
                 self.assertEqual((value * 7 + 63) // 127, pad)
-                self.assertIn('"PADS: RATE ' + name + '"', ui)
-        self.assertIn('say("WOBBLE ", division_pad_label() + 11)', ui)
+                self.assertIn('RATE ' + name, ui)
+        self.assertIn('say("WOBBLE ", division_pad_label())', ui)
+        self.assertIn('cv_text(dx, 6, &FONT_T, division_pad_label(), C_AMB)', ui)
         self.assertNotIn("shape_pad_owner(", ui)
 
     def test_host_build_allows_original_rate_pad_flag_without_legacy_sources(self):

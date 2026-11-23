@@ -4717,21 +4717,27 @@ static int division_pad_owner(void)
     return 0;
 #endif
 }
+/* Both controls use the same rounded 0..127 read-back quantiser. */
+static int division_value_index(int v, int steps)
+{
+    return v < 0 ? 0 : v > 127 ? steps : (v * steps + 63) / 127;
+}
 static int division_pad_index(void)
 {
 #if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    int v = pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_RATE));
-    return v < 0 ? 0 : v > 127 ? 7 : (v * 7 + 63) / 127;
+    return division_value_index(pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_RATE)), 7);
 #else
     return 0;
 #endif
 }
+/* A packed cue saves eight repeated "PADS: " prefixes and a pointer table.
+ * The same "RATE ..." string is spoken and shown after the header's "PADS ". */
 static const char *division_pad_label(void)
 {
-    static const char *const labels[8] = {"PADS: RATE 1/2", "PADS: RATE 1/4",
-        "PADS: RATE 1/8", "PADS: RATE 1/16", "PADS: RATE 1/3", "PADS: RATE 1/6",
-        "PADS: RATE 1/12", "PADS: RATE 1/24"};
-    return labels[division_pad_index()];
+    static const char labels[] = "RATE 1/2\0RATE 1/4\0RATE 1/8\0RATE 1/16\0"
+        "RATE 1/3\0RATE 1/6\0RATE 1/12\0RATE 1/24";
+    static const uint8_t offset[8] = {0, 9, 18, 27, 37, 46, 55, 65};
+    return labels + offset[division_pad_index()];
 }
 /* Free Play bottom row: pads 9-12 pick the wobble SHAPE (control 11: TRI, DOWN,
  * UP, SQR); pads 13-16 are empty: dark, and a press does nothing. */
@@ -4739,11 +4745,16 @@ enum { DIVISION_SHAPE_PADS = 4 };
 static int division_shape_index(void)
 {
 #if BOARD_SMK37 && X0X_DEV_WOBBLE && X0X_ORIGINAL_SYNTH
-    int v = pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_SHAPE));
-    return v < 0 ? 0 : v > 127 ? 3 : (v * 3 + 63) / 127;
+    return division_value_index(pref_get(PR(R_ENG, T_303, bidx(), ORIGINAL_MIAMI_WOBBLE_SHAPE)), 3);
 #else
     return 0;
 #endif
+}
+static const char *division_shape_label(int index)
+{
+    static const char labels[] = "SHAPE TRI\0SHAPE DOWN\0SHAPE UP\0SHAPE SQR";
+    static const uint8_t offset[DIVISION_SHAPE_PADS] = {0, 10, 21, 30};
+    return labels + offset[index];
 }
 static void division_pad_input(void)
 {
@@ -4753,12 +4764,11 @@ static void division_pad_input(void)
     if (owner && pad >= 0 && pad < 8) {
         pref_set(PR(R_ENG, T_303, owner - 1, ORIGINAL_MIAMI_WOBBLE_RATE), (pad * 127 + 3) / 7);
         mark_dirty(); ui.act_t = plat_ms();
-        say("WOBBLE ", division_pad_label() + 11);
+        say("WOBBLE ", division_pad_label());
     } else if (owner && pad >= 8 && pad < 8 + DIVISION_SHAPE_PADS) {
-        static const char *const shape[DIVISION_SHAPE_PADS] = {"SHAPE TRI","SHAPE DOWN","SHAPE UP","SHAPE SQR"};
         pref_set(PR(R_ENG, T_303, owner - 1, ORIGINAL_MIAMI_WOBBLE_SHAPE), ((pad - 8) * 127 + 1) / 3);
         mark_dirty(); ui.act_t = plat_ms();
-        say("WOBBLE ", shape[pad - 8]);
+        say("WOBBLE ", division_shape_label(pad - 8));
     }   /* pads 13-16: empty, nothing */
 #else
     (void)pad;
@@ -5891,7 +5901,7 @@ static UI_DRAW void draw_header(void)
         if (division_pad_owner() && !pickup && !clip_mode) {
             int dx = 4 + tw(&FONT_B, name) + 8;
             dx = cv_text(dx, 6, &FONT_T, "PADS ", C_AMB);
-            cv_text(dx, 6, &FONT_T, division_pad_label() + 11, C_AMB);
+            cv_text(dx, 6, &FONT_T, division_pad_label(), C_AMB);
         }
 #if BOARD_SMK37
         if(clip_mode) {
