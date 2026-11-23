@@ -2,6 +2,10 @@
 /* Production engine, direct native glyphs, and the real cached framebuffer path. */
 #define SMC_UI_MAIN unused_smc_ui_main
 #include "smc_ui_test.c"
+/* 1ec2d61a8 blends sloped 1 px strokes over at most three minor-axis pixels:
+ * a partial-coverage halo may touch the ring just outside the cell, never solid ink. */
+#define GLYPH_IN(x,y,px) (((x)>=10 && (x)<36 && (y)>=10 && (y)<=28) || \
+    ((x)>=9 && (x)<37 && (y)>=9 && (y)<=29 && (px)!=swap16(C_HI)))
 #include "app/original_runtime.h"
 #include "chicago_fx2_compact.h"
 static void drain_ms(int ms){int32_t a[512];for(int i=0;i<ms;i+=6)engine_render(a,256);audio_due_ms=now_ms;run_ms(ms);}
@@ -10,7 +14,7 @@ static uint32_t polish_glyph(pref_t r,int value,int *px,int *py){
  cv_begin(240,KNOB_H,C_BLACK);orig_strip_glyph(r,value,10,10,C_HI);
  *px=*py=-1;
  for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)){
-  if(!(x>=10 && x<36 && y>=10 && y<=28))fprintf(stderr,"glyph bounds target=%d voice=%d control=%d value=%d pixel=%d,%d\n",r.a,r.b,r.c,value,x,y);CHECK(x>=10 && x<36 && y>=10 && y<=28);
+  if(!GLYPH_IN(x,y,cv_px[y*240+x]))fprintf(stderr,"glyph bounds target=%d voice=%d control=%d value=%d pixel=%d,%d\n",r.a,r.b,r.c,value,x,y);CHECK(GLYPH_IN(x,y,cv_px[y*240+x]));
   if(cv_px[y*240+x]!=swap16(C_LINE) && *py<0){*px=x;*py=y;}
  }
  return pixels(cv_px,10,10,26,19);
