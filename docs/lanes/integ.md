@@ -3247,3 +3247,17 @@ Paths named *evidence* that no test, tool, build or hash manifest reads. Kept (r
 
 ## Deletes for the 2026-11-24 00:02 LeakSanitizer cut
 - tests/test_compact_sanitizer_control.py — user dropped FINAL-GOAL rows 10 and 11 (Dot-only LeakSanitizer qualification) at 2026-11-24 00:02 VLAT; compact-programs value checks remain.
+
+## Deletes for the 2026-11-24 pad-colour calibration removal
+Owner 2026-11-24: "Pad color calibration wtf? I never asked for that." CLP-79 (PAD COLOURS mode, X0X_DEV_PADCAL, and its tests) removed entirely. Normal pad colours (APC40_PAD_OWNER, CLP-13) stay.
+
+- `firmware/src/app/apc40_pad_gamma.h` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `firmware/src/app/apc40_pad_names.h` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `firmware/src/app/smk_padcal.h` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/host/ui_padcal_render_test.c` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/host/ui_padcal_render_test.sh` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/padcal_flag_test.py` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/padcal_view_test.py` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/smk_padcal_export_test.py` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/smk_padcal_test.c` — pad-colour calibration (CLP-79) removed; owner never asked for it.
+- `tests/smk_padcal_wiring_test.py` — pad-colour calibration (CLP-79) removed; owner never asked for it.
