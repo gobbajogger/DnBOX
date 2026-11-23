@@ -13,7 +13,9 @@ set -eu
 cd "$(dirname "$0")/../.."
 OUT=${X0X_TIMING_OUT:-build/host/render-timing}
 BLOCKS=${X0X_TIMING_BLOCKS:-256}
-REPS=${X0X_TIMING_REPS:-2}
+# More cold processes give a representative normalized max on shared hosts.
+# The checker still rejects any late block in any repetition.
+REPS=${X0X_TIMING_REPS:-4}
 # A shared runner may have a stable core reserved for the timing probe.
 # Pin only the measured process when requested; keep all samples and limits.
 run_stress() {
