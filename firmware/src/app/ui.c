@@ -7196,12 +7196,6 @@ static int original_wave_slot(unsigned kind,int p)
     if(kind==ORIGINAL_SOUND_MIAMI)return p==6?1:p==11?2:-1;
     return -1;
 }
-static UI_DRAW void draw_original_wave(int cx,int y,const ui_original_wave_cache *v,int slot,uint16_t ink,uint16_t face)
-{
-    cv_rect(cx-14,y+v->zero[slot],UI_ORIGINAL_WAVE_W,1,blend(face,ink,3));
-    for(int i=1;i<UI_ORIGINAL_WAVE_W;i++)
-        cv_line(cx-15+i,y+v->wave[slot][i-1],cx-14+i,y+v->wave[slot][i],ink);
-}
 
 enum { MIAMI_WAVE_HEIGHT=19, MIAMI_WAVE_ZERO=9, MIAMI_WAVE_GAIN=8 };
 /* One affine projection per supported range. The pulse zero is near its low
@@ -7210,47 +7204,6 @@ static float miami_wave_plot_y(int pulse, float v)
 {
     return pulse ? 1.0f+16.0f*(1.0f-v)/(1.0f+1.0f/9.0f) :
                    (float)MIAMI_WAVE_ZERO-(float)MIAMI_WAVE_GAIN*v;
-}
-static UI_DRAW void draw_wave_glyph(int cx, int y, int shape, int mix, uint16_t col, uint16_t face)
-{
-    if(shape==2 || shape==3) {
-        /* Integrate line coverage in four horizontal subcolumns. Sample the
-         * actual periodic function, never blur/average its amplitude or duty.
-         * Tall transitions stay vertical; positive values are above the midline.
-         * Use the free value-cell height: 29x19, one cycle. A single
-         * affine scale preserves DC/asymmetry; never split the two polarities. */
-        int x,j,k,pulse=shape==3 && mix!=0;
-        int zero=(int)(miami_wave_plot_y(pulse,0)+.5f);
-        cv_rect(cx-14,y+zero,29,1,blend(face,col,3)); /* zero-amplitude reference */
-        for(x=0;x<29;x++) {
-            unsigned coverage[MIAMI_WAVE_HEIGHT]={0};
-            for(k=0;k<4;k++) {
-                float p0=((float)x+(float)k*.25f)/29.0f;
-                float p1=((float)x+(float)(k+1)*.25f)/29.0f;
-                float a=miami_wave_plot_y(pulse,ui_miami_wave_value(shape==3,mix!=0,p0));
-                float b=miami_wave_plot_y(pulse,ui_miami_wave_value(shape==3,mix!=0,p1));
-                float lo=fm_minf(a,b)-.5f,hi=fm_maxf(a,b)+.5f;
-                for(j=0;j<MIAMI_WAVE_HEIGHT;j++) {
-                    float overlap=fm_minf(hi,(float)j+.5f)-fm_maxf(lo,(float)j-.5f);
-                    if(overlap>0) coverage[j]+=(unsigned)(fm_minf(overlap,1.0f)*4.0f+.5f);
-                }
-            }
-            for(j=0;j<MIAMI_WAVE_HEIGHT;j++) if(coverage[j])px_blend(cx-14+x,y+j,col,coverage[j]);
-        }
-        return;
-    }
-    int i,prev=0;
-    for(i=0;i<29;i++) {
-        int phase=i%14, saw=15-phase*30/13;
-        int square=phase<7?15:-15;
-        int tri=phase<7?15-phase*30/6:-15+(phase-7)*30/6;
-        int pulse=phase<2?-15:15; /* small cue for Miami's 10% pulse, not an oscilloscope */
-        int a=shape==4?-saw:shape==1?(saw*(127-mix)+square*mix)/127:
-              shape==3?(tri*(127-mix)+pulse*mix)/127:(tri*(127-mix)+square*mix)/127;
-        int py=y+(a+15)*8/30;
-        if(i) cv_line(cx-14+i-1,prev,cx-14+i,py,col);
-        prev=py;
-    }
 }
 
 static UI_DRAW const char *matrix_name(pref_t r)
@@ -7460,6 +7413,8 @@ static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, u
     int e = cv_text(l, f == &FONT_T ? y : base_y(&FONT_T, y, &FONT_XS), f, num, ink);
     if (wu) cv_text(e + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
 }
+static uint8_t tape_glyph_phase, tape_glyph_running, tempo_glyph_view;   /* defined below; read by the live adapters */
+#include "ui_gfinal_cell.h"
 static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)
 {
     const x0x_param_t *d=pref_desc(r);
@@ -7569,8 +7524,8 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         int slot=original_wave_slot((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
         const ui_original_wave_cache *wave=slot>=0?original_wave_view(r,val):0;
         uint16_t face=night?(active?SOUND_SELECT:SOUND_FACE):(active?col:SOUND_FACE);
-        if(wave) draw_original_wave(cx-10,y+25,wave,slot,ink,face);
-        else draw_wave_glyph(cx-10,y+((shape==2 || shape==3)?25:28),shape,mix,ink,face);
+        if(!gf_cell(r,val,cx-13,y+22,ink)) gf_cell_as(r,GF_WAVE,val,cx-13,y+22,ink);
+        (void)wave;(void)face;(void)mix;
         pref_value_of(r,val,num,unit);           /* original readout text */
         strip_value(cx+17,y+28,num,unit,ink,0);
     } else {
@@ -7997,26 +7952,7 @@ static void filter_display(uint8_t *mode,uint8_t *cut,int *res)
     *res=engine_master_get(MST_RESO);
 }
 static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,uint16_t col)
-{
-    int left=cx-19,right=cx+19,pivot=left+7+cutoff*24/127;
-    int pass=y+8,floor=y+18,peak=pass-resonance*7/127;
-#if X0X_SYNTHONE_PATCH
-    /* In the four-row patch matrix the lower line belongs to the unit readout. */
-    if (s1_draw_patch) floor=y+14;
-#endif
-    cv_rect(left,floor,39,1,C_LINE);
-    if(!mode) {cv_rect(left,y+10,39,1,C_DIM);return;}
-    if(mode==1) {
-        cv_line(left,pass,pivot-4,pass,col);cv_line(pivot-4,pass,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6,floor,col);cv_line(pivot+6,floor,right,floor,col);
-    } else if(mode==3) {
-        cv_line(left,floor,pivot-6,floor,col);cv_line(pivot-6,floor,pivot,peak,col);
-        cv_line(pivot,peak,pivot+4,pass,col);cv_line(pivot+4,pass,right,pass,col);
-    } else {
-        cv_line(left,floor,pivot-6,floor,col);cv_line(pivot-6,floor,pivot,peak,col);
-        cv_line(pivot,peak,pivot+6,floor,col);cv_line(pivot+6,floor,right,floor,col);
-    }
-}
+{gf_filt_cell(cx-13,y,mode,cutoff,resonance,col);}
 static uint8_t tape_glyph_phase, tape_glyph_running;
 static uint32_t tape_glyph_at;
 static void tape_glyph_tick(void)
@@ -8031,71 +7967,10 @@ static void tape_glyph_tick(void)
     tape_glyph_running = active;
 }
 static uint8_t tempo_glyph_view; /* latched once for signature + complete knob strip */
-static UI_DRAW int perform_glyph(pref_t r,int val,int cx,uint16_t col)
-{
-    if(r.kind==R_TEMPO) {
-        cv_line(cx-10,47,cx-4,28,col);cv_line(cx-4,28,cx+4,28,col);cv_line(cx+4,28,cx+10,47,col);
-        int phase=tempo_glyph_view?tempo_glyph_view-1:0;
-        int arm=tempo_glyph_view?(phase<16?phase-8:24-phase):0;
-        cv_line(cx-10,47,cx+10,47,col);
-        cv_line(cx,43,cx+arm,30,tempo_glyph_view?C_WHITE:C_GRAY);
-        cv_rect(cx+arm*3/4-2,32,5,3,col);
-        if(tempo_glyph_view && phase<4) cv_rect(cx-2,45,5,2,C_WHITE);
-    } else if(r.kind==R_SWING) {
-        int middle=cx+val*7/127;
-        cv_rect(cx-18,43,37,1,C_LINE);
-        cv_rect(cx-18,30,3,14,col);cv_rect(middle,34,3,10,col);cv_rect(cx+16,30,3,14,col);
-    } else if(r.kind==R_ENG && r.a==T_MST && r.c==MST_DJF) {
-        uint8_t mode,cut;int res;filter_display(&mode,&cut,&res);filter_glyph(cx,28,mode,cut,res,col);
-    } else if(r.kind==R_ENG && r.a==T_MST && r.c==MST_PUMP) {
-        int depth=val*14/127;
-        cv_line(cx-18,31,cx-9,31,col);cv_line(cx-9,31,cx-6,31+depth,col);
-        cv_line(cx-6,31+depth,cx+15,31,col);cv_rect(cx+15,31,4,1,col);
-        cv_rect(cx-18,48,37,1,C_LINE);
-    } else return 0;
-    return 1;
-}
 
 /* Shared parameter schematics from the owner-requested card vocabulary. These
  * show control values, never measured audio; labels/units below stay authoritative.
  * One dispatcher serves every ordinary knob strip. SOUND retains its matrix. */
-static UI_DRAW float comp_glyph_output(float over,float slope,int mix,float input)
-{
- float gr=0;
- if(!mix || !slope) return input;
- if(over>=3)gr=slope*over;
- else if(over>-3)gr=slope*(over+3)*(over+3)/12.0f;
- if(mix==127 || !gr) return input-gr;
- /* Ratio and Blend shape, normalized before Makeup, not measured signal or PUMP. */
- return input+6.0205999f*fm_log2f(1.0f+(fm_db2lin(-gr)-1.0f)*mix/127.0f);
-}
-static UI_DRAW int semantic_amount_glyph(pref_t r,int val,int cx,uint16_t col)
-{
- const x0x_param_t *d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,left=cx-18;
- if(r.kind==R_ENG && r.a==T_MST && r.c==MST_COMP1) {
-  static const float ratios[]={1,1.5f,2,3,4,6,8,12,20,1e6f};
-  int py=48, ratio=engine_master_get(MST_RATIO), mix=engine_master_get(MST_MIX);
-  float t=-48.0f+48.0f*engine_master_get(MST_THRESH)/127.0f, slope=1.0f-1.0f/ratios[(unsigned)ratio<10u?ratio:0];
-  cv_line(left,48,cx+18,28,C_LINE);
-  for(int i=1;i<=36;i++) {
-   float input=-48.0f+48.0f*i/36.0f;
-   int y=48-(int)((comp_glyph_output(input-t,slope,mix,input)+48)*20/48+0.5f);
-   cv_line(left+i-1,py,left+i,y,col);py=y;
-  }
- } else if(r.kind==R_ENG && r.a==T_FX && r.c==FX_DL_FDBK) {
-  float amp=10,feedback=(pref_get(PR(R_ENG,T_FX,0,FX_DL_TYPE))?1.15f:0.85f)*q/127.0f;
-  for(int j=0;j<4;j++) {int h=(int)(amp+0.5f);if(h)cv_rect(left+3+j*10,47-h,2,h,col);amp*=feedback;}
-  cv_rect(left,48,37,1,C_LINE);
- } else if(r.kind==R_SREP) {
-  for(int j=0;j<8;j++)cv_rect(left+j*5,34,3,9,j<=val?col:C_LINE);
- } else if(r.kind==R_ENG && ((r.a==T_FX && (r.c==FX_RV_LEVEL || r.c==FX_DL_LEVEL)) || (r.a==T_MIX && (r.c==MX_REV || r.c==MX_DLY)) || name_is(d,"Rev") || name_is(d,"Dly"))) {
-  int delay=(r.a==T_FX && r.c==FX_DL_LEVEL)||(r.a==T_MIX && r.c==MX_DLY)||name_is(d,"Dly");
-  cv_rect(left,48,37,1,C_LINE);
-  if(delay)for(int j=0;j<4;j++){int h=((16-j*3)*q+126)/127;if(h)cv_rect(left+3+j*10,47-h,2,h,col);}
-  else for(int j=0;j<7;j++){int h=((2+j*2)*q+126)/127;if(h)cv_rect(left+j*6,38-h/2,2,h,col);}
- } else return 0;
- return 1;
-}
 
 static UI_DRAW int glyph_identity_index(int count,int val){if(count<=0)return -1;if(count<=8)return val;return val*7/(count-1);}
 static UI_DRAW void glyph_identity(int count,int val,int l,uint16_t col){int n=count>8?8:count,selected=glyph_identity_index(count,val);for(int j=0;j<n;j++)rbox(l+(j%4)*10,30+j/4*10,7,7,1,j==selected?col:C_LINE);if(!count)cv_rect(l+12,38,13,1,C_LINE);}
@@ -8103,97 +7978,8 @@ static UI_DRAW void glyph_identity(int count,int val,int l,uint16_t col){int n=c
 /* Qualitative parameter schematics: ordinal TIME spacing, not a measured beat/ms axis. */
 /* Fixed-phase sinusoid progressively flattened toward square as stored DRIVE rises.
  * Qualitative amount icon, not measured audio or selected distortion transfer. */
-static UI_DRAW void drive_amount_glyph(int val,int cx,uint16_t col){
- static const int16_t wave[37]={0,5690,11207,16383,21062,25101,28377,30791,32269,32767,32269,30791,28377,25101,21062,16384,11207,5690,0,-5690,-11207,-16384,-21062,-25101,-28377,-30791,-32269,-32767,-32269,-30791,-28377,-25101,-21062,-16383,-11207,-5690,0};
- int py=38,gain=18161/(143-val);
- for(int x=0;x<=36;x++){
-  int a=wave[x]*gain/127;if(a>32767)a=32767;if(a< -32767)a=-32767;
-  int h=((a<0?-a:a)*8+16383)/32767;int y=38+(a<0?h:-h);
-  if(x)cv_line(cx-19+x,py,cx-18+x,y,col);
-  py=y;
- }
-}
-static UI_DRAW void loop_identity_glyph(int count,int val,int cx,uint16_t col){
- int n=count>8?8:count,selected=glyph_identity_index(count,val);
- if(!count){cv_rect(cx-6,38,13,1,C_LINE);return;}
- int rows=(n+3)/4;
- for(int row=0;row<rows;row++){int nr=n-row*4;if(nr>4)nr=4;int left=cx-(nr*10-3)/2,y=rows==1?35:30+10*row;
- for(int k=0;k<nr;k++)rbox(left+k*10,y,7,7,1,row*4+k==selected?col:C_LINE);}
-}
 
-static UI_DRAW int all_glyph_semantics(pref_t r,int val,int cx,uint16_t col){
- const x0x_param_t*d=pref_desc(r);int q=d&&d->max?(val*127+d->max/2)/d->max:0,l=cx-18;
- if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DL_TIME){
-  static const int gap[13]={2,3,4,4,5,5,6,6,7,8,8,9,10};int g=gap[val<13?val:0];
-  cv_rect(l,48,37,1,C_LINE);cv_rect(l,29,2,18,col);
-  for(int x=l+g;x<=cx+18;x+=g)cv_rect(x,35,1,12,col);
-  cv_line(l,50,l+g,50,col);
- }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_RV_DECAY){
-  float a=18,fb=.2f+.73f*q/127;
-  cv_rect(l,48,37,1,C_LINE);
-  for(int j=0;j<7;j++){int h=(int)(a+.5f);if(h)cv_rect(l+j*6,47-h,2,h,col);a*=fb;}
- }else if(r.kind==R_SPAT||r.kind==R_BRKSLOT||r.kind==R_SBAR){
-  if(r.kind==R_BRKSLOT)loop_identity_glyph(engine_brk_nslots(),val,cx,col);
-  else glyph_identity(d->max+1,val,l,col);
- }else if(r.kind==R_TAPE){
-  if(val<16){cv_line(l,43,l+8,43,col);cv_line(l+8,43,l+8,33,col);cv_line(l+8,33,l+18,33,col);cv_line(l+18,33,l+18,43,col);cv_line(l+18,43,l+28,43,col);cv_line(l+28,43,l+28,33,col);cv_line(l+28,33,l+36,33,col);}
-  else{for(int s=-1;s<=1;s+=2){int x=cx+s*10;disc((float)x+0.5f,37.5f,7.0f,C_LINE);disc((float)x+0.5f,37.5f,5.0f,SOUND_FACE);cv_rect(x-1,36,3,3,col);static const int8_t dx[16]={0,2,3,4,4,4,3,2,0,-2,-3,-4,-4,-4,-3,-2};static const int8_t dy[16]={-4,-4,-3,-2,0,2,3,4,4,4,3,2,0,-2,-3,-4};cv_line(x,37,x+dx[tape_glyph_phase],37+dy[tape_glyph_phase],col);}cv_rect(l+2,48,33,1,C_LINE);int wear=(val-16)*32/111;cv_rect(l+2,47,1+wear,2,col);}
- }else if(r.kind==R_ENG&&r.a==T_FX&&r.c==FX_DRIVE){
-  drive_amount_glyph(val,cx,col);
- }else return 0;return 1;
-}
 
-static UI_DRAW int control_glyph(pref_t r,int val,int cx,uint16_t col)
-{
-    const x0x_param_t *d=pref_desc(r);
-    int q=d && d->max?(val*127+d->max/2)/d->max:0, left=cx-18, right=cx+18;
-    if(q<0)q=0;
-    if(q>127)q=127;
-    if(all_glyph_semantics(r,val,cx,col))return 1;
-    if(semantic_amount_glyph(r,val,cx,col))return 1;
-    if(is_pan(r) || r.kind==R_BTRANS ||
-       (r.kind==R_ENG && ((r.a==T_BRK && r.c==1) ||
-                          (r.a==T_MST && r.c==MST_DJF)))) {
-        int at=left+q*36/127;
-        cv_rect(left,38,37,1,C_LINE);cv_rect(cx,32,1,13,C_GRAY);
-        cv_rect(left,35,1,7,C_GRAY);cv_rect(right,35,1,7,C_GRAY);
-        cv_rect(at-1,34,3,9,col);
-    } else if(r.kind==R_DLEN || r.kind==R_BLEN || r.kind==R_SLEN) {
-        for(int j=0;j<8;j++) {
-            int x=left+(j%4)*10,y=30+(j/4)*10;
-            rbox(x,y,7,7,1,j<=q*7/127?col:C_LINE);
-        }
-    } else if(r.kind==R_DRATE || r.kind==R_BRATE) {
-        cv_rect(left,38,37,1,C_LINE);
-        /* Pips show actual step starts within one quarter note (24 clocks). */
-        int ticks=seq_rate_ticks(val);
-        for(int tick=0;tick<24;tick+=ticks)
-            cv_rect(left+1+(tick*36+12)/24,31,2,15,col);
-    } else if(r.kind==R_BDIR) {
-        if(val==3) { /* existing random direction, not an invented trajectory */
-            cv_line(left,43,cx-7,31,col);cv_line(cx-7,31,cx+7,44,col);cv_line(cx+7,44,right,33,col);
-        } else {
-            cv_rect(left,38,37,1,col);
-            if(val!=1){cv_line(right-6,32,right,38,col);cv_line(right,38,right-6,44,col);}
-            if(val!=0){cv_line(left+6,32,left,38,col);cv_line(left,38,left+6,44,col);}
-        }
-    } else if(r.kind==R_ENG && r.a==T_FX && (r.c==FX_RV_TONE || r.c==FX_DL_TONE || r.c==FX_RV_HPF)) {
-        int pivot=left+7+q*20/127;
-        cv_rect(left,47,37,1,C_LINE);cv_line(left,32,pivot,32,col);cv_line(pivot,32,right,46,col);
-    } else if(d && d->names && d->max<12) {
-        return 0; /* Named switches retain exact position pips. */
-    } else {
-        /* Neutral value scale for parameters without a dedicated schematic.
-         * No faux rotary knob, invented response curve, or new control. */
-        for(int j=0;j<7;j++) {
-            int h=3+j*2;
-            cv_rect(left+j*6,47-h,3,h,q && j*127/6<=q?col:C_LINE);
-        }
-        int at=left+q*36/127;
-        cv_rect(left,49,37,1,C_LINE);cv_rect(at,48,1,3,col);
-    }
-    return 1;
-}
 
 /* Original Chicago/Miami controls without a PART glyph reuse the existing
  * knob-strip families: tone-lowpass, DJF filter peak, drive, bipolar, pips
@@ -8216,68 +8002,6 @@ static UI_DRAW int orig_strip_slot(pref_t r)
 
 /* Qualitative effect identities in the existing 26x19 box. The short name
  * beside each picture remains authoritative; these are not measured DSP plots. */
-static UI_DRAW void orig_fx_glyph(int type,int gx,int gy,uint16_t col)
-{
-    int right=gx+OG_W-1,bot=gy+OG_H,mid=gy+OG_H/2;
-    switch(type) {
-    case 0: /* bypass */
-        cv_line(gx,mid,right,mid,col);cv_line(gx+10,gy+2,gx+15,bot-2,col);break;
-    case 1: case 7: { /* chorus pair / ensemble trio */
-        int n=type==7?3:2;
-        for(int row=0;row<n;row++) {
-            int y=gy+(n==3?3+row*5:5+row*7),py=y;
-            for(int k=1;k<=4;k++) {
-                int x=gx+k*6,yy=y+(k&1?2:-2);
-                cv_line(gx+(k-1)*6,py,x,yy,col);py=yy;
-            }
-        }
-        break;
-    }
-    case 2: /* phaser notches */
-        cv_line(gx,gy+5,gx+3,gy+5,col);
-        for(int i=0;i<2;i++) {
-            int x=gx+3+i*10;
-            cv_line(x,gy+5,x+4,bot-2,col);cv_line(x+4,bot-2,x+8,gy+5,col);
-            cv_line(x+8,gy+5,i?right:x+10,gy+5,col);
-        }
-        break;
-    case 3: /* ring modulation: alternating lobes under an amplitude envelope */
-        for(int i=0;i<6;i++) {
-            int x=gx+i*4,h=i<3?2+i*2:12-i*2;
-            cv_line(x,mid,x+2,mid+(i&1?h:-h),col);
-            cv_line(x+2,mid+(i&1?h:-h),x+4,mid,col);
-        }
-        break;
-    case 4: /* compressor knee */
-        cv_line(gx,bot,gx+11,gy+7,col);cv_line(gx+11,gy+7,right,gy+3,col);break;
-    case 5: /* decimator steps */
-        for(int i=0;i<4;i++) {
-            int x=gx+i*6,y=gy+15-i*4;
-            cv_line(x,y,x+6,y,col);if(i<3)cv_line(x+6,y,x+6,y-4,col);
-        }
-        break;
-    case 6: /* EQ peak */
-        cv_line(gx,mid,gx+6,mid,col);cv_line(gx+6,mid,gx+12,gy+2,col);
-        cv_line(gx+12,gy+2,gx+18,mid,col);cv_line(gx+18,mid,right,mid,col);break;
-    case 8: /* short delay taps */
-        for(int i=0;i<3;i++)cv_rect(gx+i*9,bot-12+i*4,2,12-i*4,col);
-        cv_line(gx,bot,right,bot,col);break;
-    case 9: /* BPM delay: clock plus taps */
-        cv_line(gx,gy+3,gx+8,gy+3,col);cv_line(gx+8,gy+3,gx+8,gy+11,col);
-        cv_line(gx+8,gy+11,gx,gy+11,col);cv_line(gx,gy+11,gx,gy+3,col);
-        cv_line(gx+4,gy+5,gx+4,gy+7,col);cv_line(gx+4,gy+7,gx+6,gy+7,col);
-        for(int i=0;i<3;i++)cv_rect(gx+12+i*6,bot-12+i*4,1,12-i*4,col);
-        cv_line(gx,bot,right,bot,col);break;
-    case 10: /* hall: room walls and diffuse reflections */
-        cv_line(gx,bot,gx,gy+2,col);cv_line(gx,gy+2,right,gy+2,col);cv_line(right,gy+2,right,bot,col);
-        for(int i=0;i<5;i++)cv_rect(gx+3+i*4,gy+5+i,1,10-i*2,col);
-        break;
-    case 11: /* reverb cut off at a gate */
-        for(int i=0;i<4;i++)cv_rect(gx+i*5,gy+3+i*2,2,12-i*2,col);
-        cv_rect(gx+20,gy+1,2,17,col);cv_line(gx+22,bot,right,bot,col);break;
-    default: break;
-    }
-}
 static UI_DRAW void og_wave_width(int gx,int gy,int width,float (*f)(float,float),float q,uint16_t col)
 {   /* f returns -1..1 (up positive) over t 0..1 */
     int py=0;
@@ -8300,11 +8024,7 @@ static float og_gnaw(float t,float q){float v=og_sin(t,1.5f)*(1.0f+3.0f*q);
 static float og_rate_hold(float t,float ticks)
 { return og_sin((float)(int)(t*ticks)/ticks,1.5f); }
 static UI_DRAW void s1_rate_glyph(pref_t r,int val,int x,int y,int width,uint16_t ink)
-{
-    float hz;
-    if (engine_param_si(T_303,r.b,r.c,val,&hz) == X0X_U_HZ)
-        og_wave_width(x,y,width,og_rate_hold,hz*.002f,ink); /* two milliseconds */
-}
+{if(!gf_cell(r,val,x+(width-GF_W)/2,y,ink))gf_cell_as(r,GF_LFO_RATE,val,x+(width-GF_W)/2,y,ink);}
 static float og_crush(float t,float q){int n=12-(int)(q*10+.5f);float v=og_sin((float)((int)(t*(26-q*20))) /(26-q*20),1.5f);
     return (float)(int)(v*n+(v<0?-.5f:.5f))/(float)n;}       /* sample-rate + bit reduction */
 static float og_fm(float t,float q){return fm_sinf(6.2831853f*(1.5f*t)+q*1.6f*fm_sinf(6.2831853f*1.5f*t));}
@@ -8367,190 +8087,8 @@ static float og_triangle(float t, float hz)
     return 1.f - 4.f * fm_fabsf(phase - fm_floorf(phase) - .5f);
 }
 
-static UI_DRAW void juno_strip_glyph(pref_t r, float q, int gx, int gy, uint16_t col)
-{
-    int bot = gy + OG_H, right = gx + OG_W - 1, mid = gy + OG_H / 2;
-    float amp, mod; unsigned state, held;
-    int sounding = engine_bass_voice_view(r.b, &amp, &mod, &state, &held) && state != 6;
-    if (!sounding) amp = 0.f;
-    if (r.c == 0 || r.c == 12) {
-        /* A single unfiltered DCO cycle at its configured base duty. */
-        float mix = r.c == 0 ? q : 1.f;
-        int stored = matrix_value(PR(R_ENG,T_303,r.b,12));
-        float duty = juno6_control_physical(12, r.c == 12 ? q : stored / 127.f);
-        int previous = mid;
-        for (int i = 0; i < OG_W; ++i) {
-            float t = (float)i / OG_W;
-            float signal = (2.f*t - 1.f)*(1.f-mix) + (t < duty ? mix : -mix);
-            int y = mid - (int)(signal * 7.f);
-            if (i) cv_line(gx+i-1,previous,gx+i,y,col);
-            previous = y;
-        }
-    } else if (r.c == 1) og_sub(gx, gy, (int)(q*7.f+.5f), col);
-    else if (r.c == 15) og_level(gx, gy, q, sounding, amp, col);
-    else if (r.c == 2 || r.c == 3 || r.c == 4) {
-        float cut = matrix_value(PR(R_ENG,T_303,r.b,2)) / 127.f;
-        float res = matrix_value(PR(R_ENG,T_303,r.b,3)) / 127.f;
-        float depth = matrix_value(PR(R_ENG,T_303,r.b,4)) / 127.f;
-        if (r.c == 2) cut = q;
-        if (r.c == 3) res = q;
-        if (r.c == 4) depth = q;
-        /* Divide by the largest pre-limit coefficient. The tick is the
-         * fully open envelope; the curve follows the sounding envelope. */
-        float base = cut*cut * (12.f/19.f), travel = depth * (7.f/19.f);
-        og_lowpass(gx, gy, base + amp*travel, res, col);
-        if (r.c == 4) cv_rect(gx+4+(int)((base+travel)*14.f+.5f),bot-5,1,5,col);
-    } else if (r.c == 9) {
-        if (q == 0.f) cv_line(gx,mid,right,mid,col);
-        else {
-            int knee = gx + 5 + (int)(q*q*15.f);
-            cv_line(gx,bot,knee-4,bot,col);
-            cv_line(knee-4,bot,knee,gy+4,col);
-            cv_line(knee,gy+4,right,gy+4,col);
-        }
-    } else if (r.c == 10) og_wave(gx, gy, og_triangle, juno6_control_physical(10, q), col);
-    else if (r.c == 13) og_wave(gx, gy, og_sin, juno6_control_physical(13, q), col);
-    else if (r.c == 11) {
-        /* Reachable PWM duties on either side of the slider's base setting. */
-        float duty = juno6_control_physical(12, matrix_value(PR(R_ENG,T_303,r.b,12))/127.f);
-        float depth = juno6_control_physical(11, q);
-        int low = gx + (int)(fm_maxf(.05f, duty-depth) * (OG_W-1));
-        int high = gx + (int)(fm_minf(.95f, duty+depth) * (OG_W-1));
-        cv_line(gx,gy+4,low,gy+4,col); cv_line(low,gy+4,low,bot,col);
-        cv_line(low,bot,right,bot,col);
-        cv_line(low,gy+4,high,gy+4,col); cv_line(high,gy+4,high,bot,col);
-    } else { /* Chorus wet and dry coefficients, complementary in each channel. */
-        int wet = (int)(q*.5f*OG_W+.5f);
-        cv_rect(gx,gy+4,OG_W-wet,3,col);
-        if (wet) cv_rect(gx,bot-4,wet,3,col);
-    }
-}
 static UI_DRAW void orig_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col)
-{
-    const x0x_param_t *d=pref_desc(r);
-    float q=d && d->max?(float)val/(float)d->max:0;
-    int bank=engine_bass_sound_bank(&proj.sound,r.b), c=r.c;
-    if (bank == ORIGINAL_SOUND_SYNTHONE && c == ORIGINAL_SYNTHONE_CRUSH) {
-        s1_rate_glyph(r,val,gx,gy,OG_W,col);
-        return;
-    }
-    if (bank == ORIGINAL_SOUND_JUNO) { juno_strip_glyph(r, q, gx, gy, col); return; }
-    int chi=bank==ORIGINAL_SOUND_CHICAGO;
-    int level_role=c==(chi?12:14) || (!chi && (c==1 || c==5));
-    int top=gy+3,bot=gy+OG_H,mid=gy+OG_H/2,right=gx+OG_W-1;
-    if(q<0)q=0; if(q>1)q=1;
-    float amp=0,mod=0; unsigned state=6,held=0;
-    int sounding=engine_bass_voice_view(r.b,&amp,&mod,&state,&held) && state!=6;
-    if(amp<0)amp=0; if(amp>1)amp=1;
-    if(c==(chi?2:9) || (chi && c==3)) {          /* CUTOFF / PEAK: lowpass response */
-        float cq=q,pq=0;
-        if(chi && c==3){pref_t cr=PR(R_ENG,T_303,r.b,2);const x0x_param_t *dc=pref_desc(cr);
-            cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0;pq=q;}
-        og_lowpass(gx, gy, cq, pq, col);
-    } else if(chi && c==4) {                     /* ENV: the lowpass knee the filter EG sweeps */
-        /* chicago_voice.c mp4_prepare: z = cutoff + vcf.level * env_depth. The knee
-         * and its resonance bump move LEFT/RIGHT only: x = live CUTOFF + EG x ENV.
-         * The bump height is the live PEAK and never follows the EG. A dim tick
-         * marks where a full EG takes the knee. */
-        pref_t cr=PR(R_ENG,T_303,r.b,2),pr=PR(R_ENG,T_303,r.b,3);
-        const x0x_param_t *dc=pref_desc(cr),*dp=pref_desc(pr);
-        float cq=dc&&dc->max?(float)matrix_value(cr)/dc->max:0,pq=dp&&dp->max?(float)matrix_value(pr)/dp->max:0;
-        float depth=2*q-1,eg=0,dd; if(engine_bass_filter_view(r.b,&eg,&dd)) depth=dd;
-        if(eg<0)eg=0; if(eg>1)eg=1; if(pq<0)pq=0; if(pq>1)pq=1;
-        int pivot=env_knee_x(gx,cq+eg*depth),tgt=env_knee_x(gx,cq+depth),pass=top+3;
-        int peak=pass-1-(int)(pq*5+.5f);         /* fixed by PEAK: 1..6 px above the passband */
-        int energy=(int)(eg*(depth<0?-depth:depth)*6.0f+.5f);
-        col=depth<0?blend(C_LINE,col,16-energy):blend(col,C_WHITE,energy);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(tgt!=pivot) cv_rect(tgt,bot-3,1,3,C_LINE);
-        if(pivot-2>gx) cv_line(gx,pass,pivot-2,pass,col);
-        cv_line(pivot-2,pass,pivot,peak,col);
-        cv_line(pivot,peak,pivot+ENV_FALL,bot,col);
-        if(pivot+ENV_FALL<right) cv_line(pivot+ENV_FALL,bot,right,bot,col);
-    } else if(c==(chi?1:4)) {                    /* GLIDE: sloped pitch line, slope widens */
-        /* Live: a dot rides the slope as the oscillator pitch glides to the new
-         * note (current -> target from the engine); the travelled part is lit. */
-        static float from[NBASS],to[NBASS]; static uint8_t seen[NBASS];
-        int w=1+(int)(q*18+.5f),x0=gx+(OG_W-1-w)/2,b=r.b<NBASS?r.b:0,on=0;
-        float ph,bi,cu=0,tg=0,f=1;
-        if(engine_bass_motion_view(b,&ph,&bi,&cu,&tg,&on)) {
-            if(!seen[b] || tg!=to[b]) { from[b]=seen[b]?cu:tg; to[b]=tg; seen[b]=1; }
-            if(to[b]!=from[b]) f=(cu-from[b])/(to[b]-from[b]);
-        }
-        if(f<0)f=0; if(f>1)f=1;
-        int dx=x0+(int)(f*w+.5f),dy=bot-1-(int)(f*(bot-1-top)+.5f);
-        if(f>=1) { cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,x0+w,top,col);cv_line(x0+w,top,right,top,col); }
-        else {
-            cv_line(gx,bot-1,x0,bot-1,col);cv_line(x0,bot-1,dx,dy,col);
-            cv_line(dx,dy,x0+w,top,C_LINE);cv_line(x0+w,top,right,top,C_LINE);
-            ui_curve_cursor(dx,dy,C_WHITE);
-        }
-    } else if(chi && c==5) og_wave(gx,gy,og_bite,q,col);       /* BITE: soft clip */
-    else if(chi && c==6) og_wave(gx,gy,og_gnaw,q,col);         /* GNAW: fold */
-    else if(!chi && c==10) og_wave(gx,gy,og_crush,q,col);      /* CRUSH: bit/rate crush */
-    else if(chi && c==11) {                      /* ENV/GATE toggle */
-        int idx; og_states(r,val,&idx);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(idx){cv_line(gx+2,bot,gx+2,top,col);cv_line(gx+2,top,gx+22,top,col);cv_line(gx+22,top,gx+22,bot,col);}
-        else{cv_line(gx+1,bot,gx+5,top,col);cv_line(gx+5,top,gx+10,mid,col);cv_line(gx+10,mid,gx+18,mid,col);cv_line(gx+18,mid,gx+24,bot,col);}
-    } else if(level_role) {                     /* LEVEL / OUTPUT: live segmented meter */
-        og_level(gx, gy, q, sounding, amp, col);
-    } else if(chi && c==15) {                    /* RANGE: octave stairs */
-        int idx,n=og_states(r,val,&idx),sw=OG_W/(n?n:1);
-        for(int k=0;k<n;k++){int h=3+k*(OG_H-3)/(n>1?n-1:1);cv_rect(gx+k*sw,bot-h+1,sw-2,h,k<=idx?col:C_LINE);}
-    } else if(chi && c==17) {                    /* FX TYPE: recognizable effect picture */
-        orig_fx_glyph(val,gx,gy,col);
-    } else if(!chi && c==2) {                    /* SUB: osc square + sub-octave square */
-        og_sub(gx, gy, 1+(int)(q*6.f+.5f), col);
-    } else if(!chi && (c==3 || c==7)) {          /* PITCH / TUNE: centre needle */
-        float ang=(q*2-1)*1.05f; int px=gx+12,py=bot;
-        cv_rect(px,top-2,1,2,C_LINE);cv_rect(gx+1,bot,OG_W-2,1,C_LINE);
-        cv_line(px,py,px+(int)(fm_sinf(ang)*12),py-(int)(fm_cosf(ang)*14),col);
-    } else if(!chi && c==8) og_wave(gx,gy,og_fm,q,col);        /* XMOD DEPTH: FM wave */
-#if X0X_ORIGINAL_SYNTH
-    else if(!chi && (c==12 || c==13)) {          /* one MG1 cycle; scroll speed is the selected clock */
-        pref_t dep=PR(R_ENG,T_303,r.b,12);
-        float a=(float)(c==12?val:matrix_value(dep))*(6.0f/127.0f);
-        cv_rect(gx,bot,OG_W,1,C_LINE);
-        if(a==0) cv_rect(gx,mid,OG_W,1,col);
-        else {
-            const ui_original_control_view *o=original_text_view(r,val);
-            unsigned shape=o?o->shape[2]:0;
-            float phase=-1,mg=0,cu,tg,b,u;
-            int on=0,py=mid;
-            if(!engine_bass_motion_view(r.b,&phase,&mg,&cu,&tg,&on) || !on || !(phase>=-1 && phase<=1)) phase=-1;
-            for(int i=0;i<OG_W;i++) {
-                float t=phase+2.0f*i/(OG_W-1);
-                if(t>1) t-=2;
-                if(!original_miami_mg_shape(shape,t,&b,&u)) b=0;
-                float y=a*b; int yy=mid-(int)(y+(y<0?-.5f:.5f));
-                if(i) cv_line(gx+i-1,py,gx+i,yy,col);
-                py=yy;
-            }
-            /* Latest cached generator level, not the previous control-tick cutoff or audio. */
-            if(on) {float y=a*mg;int yy=mid-(int)(y+(y<0?-.5f:.5f));
-                cv_rect(right-1,yy-1,2,3,C_WHITE);}
-        }
-    }
-#endif
-    else if(!chi && c==15) {                     /* STEREO: L/R spread */
-        int s=1+(int)(q*10+.5f),cx=gx+12;
-        cv_rect(cx,top,1,OG_H-3,C_LINE);
-        cv_rect(cx-s-1,mid-4,2,9,col);cv_rect(cx+s,mid-4,2,9,col);
-    } else {                                     /* last resort: 7-bar scale */
-        for(int j=0;j<7;j++){int h=3+j*2;cv_rect(gx+j*4,bot-h,2,h,q && j*127/6<=q*127?col:C_LINE);}
-    }
-    if(sounding && !(chi && c==4) && !level_role) {
-        /* Three sparse level pips follow actual VCA; a separate modulator cursor
-         * follows the native MG, never wall-clock phase. */
-        int n=(int)(amp*3.0f+.5f);
-        for(int i=0;i<n;i++) cv_rect(gx+2+i*4,bot-1,2,1,C_WHITE);
-        if(!chi && (c==8 || c==12 || c==13)) {
-            if(mod<0)mod=0; if(mod>1)mod=1;
-            cv_rect(gx+1+(int)(mod*23.0f+.5f),gy+1,1,2,C_WHITE);
-        }
-    }
-}
+{gf_cell(r,val,gx,gy,col);}
 
 /* ---- 909 / 808 part-page glyphs --------------------------------------------
  * Each one pictures what the control does in the engine, follows the value
@@ -8672,20 +8210,6 @@ static UI_DRAW void dg_accent(int gx,int gy,int w,int h,float q,int live,float e
 }
 
 static UI_DRAW void dv_glyph(pref_t r,float ev,float ox,float oy,float sx,float sy,uint16_t col);
-/* The MIX LEVEL glyph shares the track's live envelope with the sound row. */
-static UI_DRAW void drum_mix_level(pref_t r, int val)
-{
-    uint32_t age;
-    float env, q = (float)val / (float)pref_desc(r)->max;
-    int ceiling = (int)(q * 7 + .5f);
-    int lit = drum_live(r, &age, &env) ? (int)(q * env * 7 + .5f) : 0;
-    for (int i = 0; i < 7; i++) {
-        int h = 5 + i * 23 / 6;
-        cv_rect(9 + i * 45 / 6, 47 - h, 3, h,
-                i < lit ? C_WHITE : i < ceiling ? DRUM_MIX_ACCENT : RGB(41,56,57));
-    }
-}
-
 static UI_DRAW void drum_strip_glyph(pref_t r,int val,int gx,int gy,uint16_t col,int role)
 {
     const x0x_param_t *d=pref_desc(r);
@@ -9050,9 +8574,7 @@ static UI_DRAW void draw_knobs(void)
             if (mv >= 0)
                 val = mv;
         }
-        if (mix_kit >= 0 && i == 0) {
-            drum_mix_level(r, val);
-        } else if(perform_glyph(r,val,cx,col) || control_glyph(r,val,cx,col)) {
+        if (gf_cell(r, val, cx - 13, 29, col)) {
             /* Its existing value/motion/lock path is retained below. */
         } else if (d->names && d->max < 12) {           /* a switch: positions as pips */
             int n = d->max + 1, k, pw = n > 6 ? 3 : 6, gap = 2, w0 = n * (pw + gap) - gap;

@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Generate firmware/src/app/ui_gfinal_map.h from tools/gfinal/parameter-map.json.
 
-Only TYPE_MAPPED rows are admitted. HOLD, DYNAMIC and READ_ONLY rows keep their
-0.0.26 glyph. Firmware descriptors are keyed by their normalized name (<= 6 chars).
+TYPE_MAPPED rows win; HOLD/DYNAMIC rows take their candidate type; READ_ONLY rows
+have none. Firmware descriptors are keyed by their normalized name (<= 6 chars).
 The few names whose meaning depends on the engine are resolved in ui_gfinal_glyph_of().
 """
 import json, re, sys
@@ -16,16 +16,22 @@ AMBIG = {'attack', 'tune', 'pitch', 'tone', 'filter'}   # resolved in C
 def key(n): return re.sub('[^a-z0-9]', '', n.lower())[:6]
 m = json.load(open(HERE / 'parameter-map.json'))
 names, kinds, gen = {}, {}, {}
-for x in m:
-    if x['status'] != 'TYPE_MAPPED' or not x['glyph']: continue
+# TYPE_MAPPED first; HOLD/DYNAMIC rows then take their candidate type, because
+# their 0.0.26 bodies are gone (XIP). READ_ONLY rows draw no glyph.
+rows = [x for x in m if x['status'] == 'TYPE_MAPPED'] + [x for x in m if x['status'] in ('HOLD', 'DYNAMIC')]
+for x in rows:
+    if not x['glyph'] or x['glyph'] not in ids: continue
+    held = x['status'] != 'TYPE_MAPPED'
     g = ids.index(x['glyph'])
     if x['engine'] in ENG:
         k = key(x['name'])
         if k in AMBIG: continue
+        if held: names.setdefault(k, g); continue
         if names.get(k, g) != g: raise SystemExit(f'ambiguous name {k}: {ids[names[k]]} vs {x["glyph"]}')
         names[k] = g
     elif x['engine'] == 'Common UI':
         kind = int(x['group'].split()[1]); c = int(x['id'].split(':')[2])
+        if held: (gen.setdefault(c, g) if kind == 9 else kinds.setdefault(kind, g)); continue
         if kind == 9: gen[c] = g
         elif kinds.get(kind, g) != g: raise SystemExit(f'kind {kind} ambiguous')
         else: kinds[kind] = g
