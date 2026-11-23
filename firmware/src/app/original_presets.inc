@@ -170,6 +170,23 @@ static void s1_patch_boundary(void)
     }
 }
 #endif
+/* Compact Synth One uses the cell's extension bytes for its 10-bit preset.
+ * Other engines and stock INIT retain the legacy byte and project encoding. */
+static unsigned bass_cell_preset(const uint8_t *cell)
+{
+#if X0X_S1C
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) return original_sound_s1_program(cell);
+#endif
+    return cell[30];
+}
+#if X0X_S1C
+enum { BASS_REQ_PRESET_BITS = 10 };
+#else
+enum { BASS_REQ_PRESET_BITS = 7 };
+#endif
+#define BASS_REQ_PRESET_MASK ((1u << BASS_REQ_PRESET_BITS) - 1u)
+#define BASS_REQ_SERIAL_SHIFT (BASS_REQ_PRESET_BITS + 2)
+#define BASS_REQ_SERIAL_MASK ((1u << (31 - BASS_REQ_SERIAL_SHIFT)) - 1u)
 static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *bank)
 {
     bass_sound_info_t info;
@@ -186,7 +203,7 @@ static int bass_tagged_cell_validate(uint8_t *cell, bass_sound_tag_t *tag, int *
     }
     *bank = cell[29];
     if (info.identity.engine != original_sound_engine_id((unsigned)*bank) ||
-        info.preset != cell[30] || info.flags != (original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)) return -9;
+        info.preset != bass_cell_preset(cell) || info.flags != (original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)) return -9;
     return 0;
 }
 int engine_bass_sound_bank(const sound_t *sound, int voice)
@@ -258,7 +275,7 @@ static int bass_note_capture(lane_t *lanes,int pat,int voice,int step,const soun
         const uint8_t *cell=next.val;
         bass_sound_info_t info = {{original_sound_engine_id((unsigned)cell[29]), ORIGINAL_SOUND_SCHEMA,
             (uint8_t)original_sound_count((unsigned)cell[29]), BASS_IDENTITY_KNOWN},
-            (uint16_t)cell[30], (uint8_t)(original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)};
+            (uint16_t)bass_cell_preset(cell), (uint8_t)(original_sound_edit_mask(cell) ? BASS_SOUND_EDITED : 0)};
         if(bass_sound_tag_encode((bass_sound_tag_t *)(next.val+BASS_NOTE_TAG),&info,
                                 BASS_SOUND_REGISTRY,4)!=BASS_IDENTITY_READY)return -1;
     }
@@ -342,7 +359,7 @@ void engine_bass_sound_refresh(sound_t *sound, int v)
 {
     if (!sound || (unsigned)v >= NBASS || !original_sound_valid(sound->v[T_303][v])) return;
     const uint8_t *cell = sound->v[T_303][v];
-    bass_tag_set(sound, v, cell[29], cell[30], original_sound_edit_mask(cell) != 0);
+    bass_tag_set(sound, v, cell[29], bass_cell_preset(cell), original_sound_edit_mask(cell) != 0);
 }
 X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
 {
@@ -355,7 +372,7 @@ X0X_COLD static int bass_restore_part(const sound_t *sound, int v)
     s1_patch_replaced(v);
 #endif
     arp_adopt(v, sound, 0);
-    bass_named_preset[v] = sound->v[T_303][v][30];
+    bass_named_preset[v] = (int16_t)bass_cell_preset(sound->v[T_303][v]);
     original_seq_note[v] = -1;
     __builtin_memset(original_key_pitch[v], 0, sizeof original_key_pitch[v]);
     bass_held[v] = bass_held_count[v] = 0;
@@ -400,9 +417,9 @@ int engine_bass_preset_pending(int v)
     return 1;
 }
 X0X_COLD int engine_bass_requested_bank(int v)
-{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)((r.token >> 7) & 3u) : engine_bass_bank(v); }
+{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)((r.token >> BASS_REQ_PRESET_BITS) & 3u) : engine_bass_bank(v); }
 X0X_COLD int engine_bass_requested_preset(int v)
-{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)(r.token & 127) : engine_bass_preset_index(v); }
+{ bass_request_t r; return (unsigned)v < NBASS && bass_request_snapshot(v, &r) && engine_bass_preset_pending(v) ? (int)(r.token & BASS_REQ_PRESET_MASK) : engine_bass_preset_index(v); }
 X0X_COLD void engine_bass_cancel_preset(int v)
 { if ((unsigned)v < NBASS) bass_publish_request(v, 0x40000000u | ((++bass_request_serial & 0x3fffffu) << 8)); }
 void engine_bass_edit_hold(int hold)
@@ -446,8 +463,8 @@ X0X_COLD int engine_bass_select_preset_at(int v, int bank, int preset, sound_t *
     if (bass_has_locks(v)) return -4;
     bass_gate_pat[v] = (uint8_t)((unsigned)pat < NPAT ? pat : 0xFF);
     __asm__ volatile("" ::: "memory");
-    uint32_t token = 0x80000000u | ((++bass_request_serial & 0x3fffffu) << 9) |
-        ((uint32_t)bank << 7) | (uint32_t)preset;
+    uint32_t token = 0x80000000u | ((++bass_request_serial & BASS_REQ_SERIAL_MASK) << BASS_REQ_SERIAL_SHIFT) |
+        ((uint32_t)bank << BASS_REQ_PRESET_BITS) | (uint32_t)preset;
 #if X0X_SYNTHONE_PATCH
     s1_edit[v].pending = 0;
 #endif
@@ -468,7 +485,7 @@ static void bass_preset_boundary_voice(int v)
         if (engine_bass_preset_pending(v) != 1) return;
         /* A pattern preset waits until its pattern plays (the bar switch). */
         if (bass_gate_pat[v] < NPAT && seq.ppat[TRK_BASS0 + v] != bass_gate_pat[v]) return;
-        int bank = (int)((token >> 7) & 3u), preset = (int)(token & 127);
+        int bank = (int)((token >> BASS_REQ_PRESET_BITS) & 3u), preset = (int)(token & BASS_REQ_PRESET_MASK);
         uint8_t next[32];
         if (!engine_bass_bank_available(v, bank) || !original_sound_init(next, bank, preset)) return;
         live_key_context_retire(v, 1);

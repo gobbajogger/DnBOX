@@ -623,7 +623,10 @@ static const x0x_param_t *pref_desc(pref_t r)
 #endif
     case R_BENGINE: return &BENGINE_P;
     case R_BPRESET:
-        BPRESET_P.max = (uint8_t)(original_sound_factories((unsigned)engine_bass_requested_bank(r.b))-1);
+        {
+            unsigned max = original_sound_factories((unsigned)engine_bass_requested_bank(r.b));
+            BPRESET_P.max = max > 256u ? 255u : (uint8_t)(max ? max - 1u : 0u);
+        }
         return &BPRESET_P;
     case R_BSTATUS: return &BSTATUS_P;
     case R_BPATSND:
@@ -841,7 +844,12 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 #endif
         return;
     }
-    v = v < 0 ? 0 : v > d->max ? d->max : v;
+    int vmax = d->max;
+#if X0X_S1C
+    if (r.kind == R_BPRESET)
+        vmax = (int)original_sound_factories((unsigned)engine_bass_requested_bank(r.b)) - 1;
+#endif
+    v = v < 0 ? 0 : v > vmax ? vmax : v;
     if (r.kind == R_BENGINE || r.kind == R_BPRESET) {
         if (v == pref_get(r)) return;
         int bank = r.kind == R_BENGINE ? v : engine_bass_requested_bank(r.b);

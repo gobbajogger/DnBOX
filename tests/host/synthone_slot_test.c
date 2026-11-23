@@ -231,5 +231,27 @@ int main(void)
         CHECK(!engine_bass_preset_pending(voice));
         CHECK(engine_bass_bank(voice)==ORIGINAL_SOUND_CHICAGO);
     }
+#if X0X_S1C
+    /* High presets must not alias to low ones, switch engine, or lose their
+     * exact ID when the project and typed undo restore the saved cell. */
+    for (int voice = 0; voice < 2; ++voice) {
+        ui.part = (uint8_t)(PART_303A + voice);
+        CHECK(engine_bass_select_preset(voice, ORIGINAL_SOUND_SYNTHONE, 0, &proj.sound) == 0);
+        for (int n=0;n<1024 && engine_bass_preset_pending(voice);n++) render_blocks(1);
+        CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
+        for (int preset = 128; preset <= 694; preset += 566) {
+            pref_t r = PR(R_BPRESET,0,voice,0);
+            pref_set(r, preset);
+            CHECK(engine_bass_requested_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
+            CHECK(engine_bass_requested_preset(voice) == preset);
+            for (int n=0;n<1024 && engine_bass_preset_pending(voice);n++) render_blocks(1);
+            CHECK(engine_bass_preset_index(voice) == preset);
+            CHECK(original_sound_s1_program(proj.sound.v[T_303][voice]) == (unsigned)preset);
+            CHECK(engine_bass_sound_validate(&proj.sound) == 0);
+            engine_bass_base_restore(1u << voice);
+            CHECK(engine_bass_preset_index(voice) == preset);
+        }
+    }
+#endif
     printf("Synth One slot integration: %u checks PASS\n",checks);return 0;
 }
