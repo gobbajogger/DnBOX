@@ -692,6 +692,7 @@ run upload-images sh -c "python3 tests/host/make_test_loops.py build/test_loops 
     python3 tools/upload_breaks.py --rate 22050 --nslots 2 --dry-run build/test_upload build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --dry-run build/test_upload44 --slot-kb 80,120 build/test_loops/loop*.wav && \
     python3 tools/upload_breaks.py --rate 22050 --slots 3 --slot-kb 80,120,32 --dry-run build/test_upload44s3 build/test_loops/loop1.wav"   # 22.05 kHz (2 x 80), the 44.1 kHz default (80/120), slot 3 (32 KiB)
+run default-breaks python3 -B tests/host/default_breaks_test.py   # perf row 3: the 5 owner BREAK zones as default slot 1/2 contents (scenario default_breaks plays them)
 run upload-tools python3 tests/upload_tools_test.py   # upload_breaks.py on a mocked device; one-shot trim
 run builtin-break-output python3 tests/host/test_builtin_break_output.py
 run break-pack python3 tests/break_pack_test.py   # optional factory-loop pack: full ADPCM, free tail, C parser

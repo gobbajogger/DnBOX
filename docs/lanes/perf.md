@@ -37,3 +37,14 @@ all drums, breaks, bus FX, reverb, delay and master on. Each block is timed in t
 seq/motion, dsp/x0x_param) at -Oz instead of -O2. XIP free: Elite 1,452 -> 4,072 B, Pro 1,460 -> 4,080 B
 (+2,620 B each); pool and RAM unchanged. Host heavy stress (4,096 blocks, Elite) -O2 vs -Oz for these
 units: Chicago+Miami mean 536.3 vs 525.9 us, Synth One+SuperJ6 481.2 vs 490.9 us (noise), late 0.
+
+## Row 3: the owner's 5 BREAK zones as default slot contents (owner choice 18:29: "2 is better")
+`assets/default-breaks/` holds the 5 original encoded zones (pinned sha256, same bytes as DnBOX-nightly
+web/product-site/assets/starting-breaks). `tools/default_breaks.py` builds the default slot images:
+slot 1 (0xC2000, 80 KiB) "BR1" = BR1 zones 1-3, 60,237 B (512 header + 59,725 ADPCM), 21,683 B left;
+slot 2 (0xD6000, 60 KiB with FL_FDATA 0xF000) "BR2" = BR2 zones 1-2, 50,061 B (512 + 49,549), 11,379 B left;
+slot 3 (0xB3000, 32 KiB) empty. 22,050 Hz, no re-encode, decoded PCM is the pinned PCM sample for sample.
+They are defaults, not a reserved area: an installer may write them only into a slot with no valid
+FSMP header (empty slot or fresh install), never over a slot that holds data. Tests:
+`default-breaks` (pins, bit-exact decode, fit for FL_FDATA 0..0xF000) and `scenario-default_breaks`
+(the firmware's slots.c parses both images, 5 loops listed, BREAK plays them).
