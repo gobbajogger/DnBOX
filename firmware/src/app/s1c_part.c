@@ -14,8 +14,8 @@
 /* Synth One factory parameter ids (s1c uses the same numbering). */
 enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34 };
 
-const uint8_t *s1_part_pack;
-uint32_t s1_part_pack_bytes;
+static const uint8_t *s1_part_pack;
+static uint16_t s1_part_pack_count;
 
 _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BYTES,
                "reverb lines leave at least 1 KiB of delay pool in the Chicago FX2 arena");
@@ -35,14 +35,18 @@ static void load_init(s1c *e)
     for (unsigned i = 0; i < 150u; ++i) (void)s1c_front_set(e, i, s1c_front_init(i));
 }
 
-unsigned s1_part_programs(void)
+unsigned s1_part_set_pack(const uint8_t *p, uint32_t bytes)
 {
-    const uint8_t *p = s1_part_pack;
-    if (!p || s1_part_pack_bytes < S1PACK_HEADER) return 0;
-    unsigned n = s1pack_programs(p, s1_part_pack_bytes);
+    s1_part_pack = NULL;
+    s1_part_pack_count = 0;
+    if (!p || bytes < S1PACK_HEADER) return 0;
+    unsigned n = s1pack_programs(p, bytes);
     if (!n || x0x_crc32(p + S1PACK_HEADER, s1pack_total(p) - S1PACK_HEADER) != s1pack_crc(p)) return 0;
-    return n;
+    s1_part_pack = p;
+    return s1_part_pack_count = (uint16_t)n;
 }
+
+unsigned s1_part_programs(void) { return s1_part_pack_count; }
 
 const char *s1_part_program_name(unsigned program)
 {

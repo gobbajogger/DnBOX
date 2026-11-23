@@ -263,13 +263,14 @@ def package_damage(image):
         typ = int.from_bytes(e[0:2], "little")
         # flash.bin (0) and ota.bin (100), what the device installs, carry the CRC of their bytes as
         # served. The stock packer's other entries store a CRC of something else: bounds only.
-        if typ in (0, 100, XDATA_TYPE, FITTAB_TYPE) and _crc16(image[off:off + size]) != dcrc:
+        if typ in (0, 100, XDATA_TYPE, FITTAB_TYPE, FDATA_TYPE) and _crc16(image[off:off + size]) != dcrc:
             return f"{name}: CRC"
     return None
 
 
 XDATA_TYPE = 101                                    # SMK: xdata.bin, the font region the loader writes at 0xAD000
 FITTAB_TYPE = 102                                   # SMK: fittab.bin, the fit-table sector the loader writes at 0xFE000
+FDATA_TYPE = 103                                    # SMK: fdata.bin, the Synth One factory pack (end of sample slot 2)
 
 
 def package_xdata(image):
@@ -298,8 +299,23 @@ def package_fittab(image):
     return None
 
 
+def package_fdata(image):
+    """the SMK FDATA region image (FL_FDATA_SIZE B: the Synth One factory pack) the package's loader installs,
+    or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == FDATA_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
 ED_XDATA = 50                                       # editor.c: XDATA in use + the region header as read now
 ED_FITTAB = 51                                      # editor.c: FITTAB present + the region header as read now
+ED_FDATA = 52                                       # editor.c: FDATA present + the region's first 32 B as read now
 
 
 def xdata_readback(link, xdata, timeout=2.0):
@@ -331,6 +347,23 @@ def fittab_readback(link, fittab, timeout=2.0):
     if hdr != bytes(fittab[:16]) or r[0] != 1:
         raise InstallError("fittab", f"the fit table reads back {hdr.hex()} (present: {r[0]}), "
                                     f"expected {bytes(fittab[:16]).hex()}: reinstall")
+    return hdr
+
+
+def fdata_readback(link, fdata, timeout=2.0):
+    """after the reboot: the running firmware reads its FDATA region back. Raises InstallError unless it
+    reports the region present and its first 32 B (the pack header: magic, counts, total, CRC-32) are the
+    package's. The loader already verified every sector it wrote."""
+    try:
+        r = EditorLink(link).req(ED_FDATA, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("fdata", "written, but the firmware did not report its Synth One pack: reinstall") from e
+    if len(r) != 65:
+        raise InstallError("fdata", f"malformed Synth One pack reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(32))
+    if hdr != bytes(fdata[:32]) or r[0] != 1:
+        raise InstallError("fdata", f"the Synth One pack reads back {hdr.hex()} (present: {r[0]}), "
+                                    f"expected {bytes(fdata[:32]).hex()}: reinstall")
     return hdr
 
 
@@ -632,7 +665,7 @@ class Updater:
                                "if already in update mode, use --no-slots only with a verified backup or no X0X samples")
         step("write", 100)
 
-    def verify(self, product, step, xdata=None, fittab=None):
+    def verify(self, product, step, xdata=None, fittab=None, fdata=None):
         before_running = self._before_running if self._before_running is not None else []
         step("reboot")
         time.sleep(DELAY["reboot"])
@@ -648,6 +681,9 @@ class Updater:
             if fittab is not None:
                 step("fittab")
                 fittab_readback(back.link, fittab)
+            if fdata is not None:
+                step("fdata")
+                fdata_readback(back.link, fdata)
         finally:
             back.link.close()
         step("done", back.id.text)
@@ -661,7 +697,7 @@ class Updater:
             raise InstallError("model", f"the device is {dev.id.text}, the package is for {product}")
         ota = dev if dev.id.loader else self.check(dev, image, step)
         self.write(ota, image, step)
-        return self.verify(product, step, package_xdata(image), package_fittab(image))
+        return self.verify(product, step, package_xdata(image), package_fittab(image), package_fdata(image))
 
 
 # ---------------------------------------------------------- sample slots ---
@@ -906,6 +942,7 @@ class Progress:
             msg = {"start": f"starting the update on {a}", "loader": "switching to update mode",
                    "reboot": "restarting", "xdata": "reading the font region back",
                    "fittab": "reading the fit table back",
+                   "fdata": "reading the Synth One factory pack back",
                    "done": f"done: the FM-1 runs {a}"}[k]
             print(msg, file=self.out, flush=True)
 

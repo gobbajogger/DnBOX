@@ -2285,6 +2285,10 @@ static void fm1_main(void)
     panel_init();
     led_pos_init();
     plat_perf_init();
+#if BOARD_SMK37 && X0X_S1C && FL_FDATA_SIZE
+    if (flash_ok)
+        (void)s1_part_set_pack(fm1_xip_ptr(FL_FDATA_LO), FL_FDATA_SIZE);
+#endif
     engine_init(proj.pat, &proj.arr.song, proj.arr.lane, &proj.sound);
     if (project_load() != 0)
         project_defaults();                         /* nothing saved yet (or another format) */

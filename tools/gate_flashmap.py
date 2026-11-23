@@ -68,6 +68,10 @@ slot2 = (slot1[1], fdata_lo)
 regions += [("sample slot 1", *slot1), ("sample slot 2", *slot2)]
 if fdata:
     regions += [("factory synth data (FL_FDATA)", fdata_lo, d["FL_SMP_HI"])]
+    if "(FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI))" not in smk:
+        errors.append("FL_LDR_RANGE_OK does not allow FL_FDATA (the loader installs the pack there)")
+    if "FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO)" not in smk:
+        errors.append("FL_STORE_OK does not stop the sample slots at FL_FDATA")
 if (slot1[0], slot2[0]) != (0xC2000, 0xD6000):
     errors.append("sample slots 1/2 moved: they must stay at 0xC2000 / 0xD6000")
 if "FL_CTL2_LO" in d:

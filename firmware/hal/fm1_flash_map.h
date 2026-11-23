@@ -40,8 +40,10 @@
  *   0xBB000-0xBFFFF  VM: M-UPGRADE loader staging + update record (ota.c)          FL_OTA
  *   0xC0000-0xC0FFF  BTIF (BT pairing)              NEVER
  *   0xC1000-0xC1FFF  USRTRIM (key/pad/wheel calibration, "trimdat")   NEVER
- *   0xC2000-0xF3FFF  user sample slots 1 (80 KiB) and 2 (120 KiB; app/slots.c): stock USRFLASH
+ *   0xC2000-0xF3FFF  user sample slots 1 (80 KiB) and 2 (60 KiB; app/slots.c): stock USRFLASH
  *                    0xC2000-0xEAFFF and the unlisted 0xEB000-0xF3FFF                FL_SMP
+ *   0xE5000-0xF3FFF  of it: FDATA, the Synth One factory pack (60 KiB, the end of slot 2), written by
+ *                    the update loader only (fdata.bin)                              FL_FDATA
  *   0xF4000-0xFDFFF  USR (stock resources; kept for a rollback)   NEVER
  *   0xFE000-0xFEFFF  FITTAB: Synth One option-B per-program fit table
  *                    (16 B header + blob, tools/build.py), written by the
@@ -92,12 +94,19 @@
  * through the plain XIP window (>= FL_PLAIN_LO). Set it once, here (tools/fm1pkg_make.py and
  * tools/gate_flashmap.py read this line). */
 #ifndef FL_FDATA_SIZE
-#define FL_FDATA_SIZE   0x00000000u
+#define FL_FDATA_SIZE   0x0000F000u                /* 60 KiB: the Synth One factory pack (S1PK, 61,208 B) */
 #endif
 #define FL_FDATA_HI     FL_SMP_HI
 #define FL_FDATA_LO     (FL_SMP_HI - FL_FDATA_SIZE)
 _Static_assert(FL_FDATA_SIZE % 0x1000u == 0u && FL_FDATA_SIZE <= 0x1E000u - 0x1000u,
                "SMK: FL_FDATA is whole sectors and leaves slot 2 at least one sector");
+/* FDATA is written only by the update loader, from the package's "fdata.bin" entry (type 103, exactly
+ * FL_FDATA_SIZE bytes: tools/build.py fdata_image). The stock vendor loader and mask-ROM rescue never write it;
+ * after them the app finds no pack there (first word erased) and Synth One falls back to INIT. */
+#define FL_FDATA_HDR    32u                        /* the installers read back the first 32 B (the pack header) */
+_Static_assert(FL_FDATA_SIZE == 0 || (FL_FDATA_LO >= FL_PLAIN_LO && FL_FDATA_LO > FL_SMP_LO &&
+               FL_FDATA_HI <= FL_USRRES_LO && FL_FDATA_LO >= FL_CAL_HI),
+               "SMK: FDATA is plain, inside FL_SMP and clear of every protected range");
 /* the Bluetooth controller block (step 5): one 64 KiB piece of the encrypted app area, at the top of the
  * stock app slot (0x4120 + APP_SLOT 0x97400 = 0x9B520), sector aligned. The app code ends below it. */
 #define FL_APP_SLOT_END 0x0009B520u
@@ -133,19 +142,21 @@ _Static_assert(FL_FITTAB_LO == 0xFE000u && FL_FITTAB_HI == 0xFF000u &&
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || \
                                FL_IN(off, n, FL_REC_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_REC_HI) || \
-                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI))
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI) || \
+                               (FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI)))
 #else
 #define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || FL_IN(off, n, FL_REC_LO, FL_REC_HI) || \
-                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI))
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI) || \
+                               (FL_FDATA_SIZE && FL_IN(off, n, FL_FDATA_LO, FL_FDATA_HI)))
 #endif
 /* TEST profile's external data stay protected independently of BLE state. */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_DATA_HI) || \
-                             FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
+                             FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #else
-/* X0X's own store: FL_DATA less XDATA, and the sample slots */
+/* X0X's own store: FL_DATA less XDATA, and the sample slots up to FDATA (the loader's only) */
 #define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, FL_XDATA_LO) || FL_IN(off, n, FL_XDATA_HI, FL_DATA_HI) || \
-                             FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
+                             FL_IN(off, n, FL_SMP_LO, FL_FDATA_LO) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #endif
 #ifndef FL_RANGE_OK
 #define FL_RANGE_OK(off, n) (FL_STORE_OK(off, n) || FL_IN(off, n, FL_OTA_LO, FL_OTA_HI))

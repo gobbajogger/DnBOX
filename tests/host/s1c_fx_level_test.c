@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     uint32_t n = 0;
     uint8_t *pack = slurp(argc > 1 ? argv[1] : getenv("S1_PACK"), &n);
     if (!pack) { printf("SKIP s1c fx level: no pack (set S1_PACK)\n"); return 0; }
-    s1_part_pack = pack; s1_part_pack_bytes = n;
+    (void)s1_part_set_pack(pack, n);
     const unsigned sr = 44100, gate = sr * 3 / 4, play = 6 * gate, total = play + sr * 3 / 2;
     static const unsigned note[6] = {48, 55, 60, 64, 67, 72};
     int fail = 0;

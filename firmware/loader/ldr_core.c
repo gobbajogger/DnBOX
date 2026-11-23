@@ -13,7 +13,8 @@
  *      sectors that are already equal, and verifies each one; the flash head
  *      (SPL, isd_config) is never written; SMK: then the XDATA region
  *      0xAD000..0xAEFFF from the package's xdata.bin entry, if it has one,
- *      then the FITTAB sector 0xFE000..0xFEFFF from fittab.bin, if it has one;
+ *      then the FITTAB sector 0xFE000..0xFEFFF from fittab.bin, then FDATA (the Synth One
+ *      factory pack, the end of sample slot 2) from fdata.bin, each if it has one;
  *   4. asks 0xF0000000 ("success"), then invalidates the update record (RAM
  *      and flash) so the SPL boots the new app, and resets.
  * Power loss during 3: the record is still there, the SPL runs the loader
@@ -26,6 +27,7 @@
  * plus the ota.c hooks (frames, time, idle). */
 #define LDR_APP_LO 0x4000u
 #if BOARD_SMK37
+#include "../hal/fm1_flash_map.h"
 /* SMK-37 Pro: app area up to the stock PRCT end; records only in the VM, so ldr_records_drop can never
  * erase BTIF / USRTRIM (0xC0000..0xC1FFF, the key calibration) or anything above */
 #define LDR_APP_HI 0x9D000u
@@ -164,13 +166,18 @@ static int ldr_xdata(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t wr
 #define LDR_FT_TYPE 102u
 _Static_assert(LDR_FT_LO == 0xFE000u && LDR_FT_HI == 0xFF000u && LDR_FT_HI - LDR_FT_LO == 0x1000u,
                "FITTAB is exactly one sector, immediately below key_mac");
-static int ldr_fittab(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t write)
+/* One loader-written region [lo, hi) from the package's UFW entry of type typ (exactly hi - lo bytes):
+ * write 0 checks the entry's CRC16 only (before the app area's first erase), write 1 puts it in place,
+ * sector by sector (ldr_put skips equal sectors and verifies). No entry: 0, the region is left as it is.
+ * A wrong length returns elen, a wrong CRC elen - 1. */
+static int ldr_region(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t write,
+                      uint32_t typ, uint32_t lo, uint32_t hi, int elen)
 {
     uint32_t i, k, s, off = 0, len = 0, want = 0, crc = 0, nent = ota_rd16(hdr + 8);
     int rc;
     for (i = 0; i < nent; i++) {
         const uint8_t *e = hdr + 0x40 + i * 0x50u;
-        if (ota_rd16(e) == LDR_FT_TYPE) {
+        if (ota_rd16(e) == typ) {
             want = ota_rd16(e + 4);
             off = ota_rd32(e + 8);
             len = ota_rd32(e + 12);
@@ -178,26 +185,41 @@ static int ldr_fittab(const uint8_t *hdr, uint8_t *sec, uint8_t *cur, uint32_t w
     }
     if (!off)
         return 0;
-    if (len != LDR_FT_HI - LDR_FT_LO)
-        return -14;
+    if (len != hi - lo)
+        return elen;
     for (k = 0; k < len; k += 512u) {
         if (ota_read(off + k, sec, 512))
             return -7;
         crc = ota_crc16(sec, 512, crc);
     }
     if (crc != want)
-        return -15;
-    for (s = LDR_FT_LO; write && s < LDR_FT_HI; s += 0x1000u) {
+        return elen - 1;
+    for (s = lo; write && s < hi; s += 0x1000u) {
         for (k = 0; k < 0x1000u; k += 512u)
-            if (ota_read(off + (s - LDR_FT_LO) + k, sec + k, 512))
+            if (ota_read(off + (s - lo) + k, sec + k, 512))
                 return -7;
         if ((rc = ldr_put(s, sec, cur)) != 0)
             return rc;
     }
     return 0;
 }
+#define ldr_fittab(hdr, sec, cur, write) ldr_region(hdr, sec, cur, write, LDR_FT_TYPE, LDR_FT_LO, LDR_FT_HI, -14)
+/* FDATA (fm1_flash_map.h FL_FDATA, plain, the end of sample slot 2): the Synth One factory pack from the
+ * package's "fdata.bin" entry (type 103, exactly FL_FDATA_SIZE bytes: tools/build.py fdata_image). Same
+ * rules as FITTAB: a wrong length -16, a wrong CRC -17, no entry leaves the region (the app then finds no
+ * pack and Synth One plays INIT). Slot 2 ends at FL_FDATA_LO (app/slots.c); the installers back up and
+ * restore a slot-2 sample that the shorter slot no longer holds before this runs. */
+#define LDR_FD_TYPE 103u
+#if FL_FDATA_SIZE
+_Static_assert(FL_FDATA_LO % 0x1000u == 0u && FL_FDATA_HI == 0xF4000u && FL_FDATA_LO >= 0xC2000u,
+               "FDATA is whole sectors at the end of the sample slots, below the stock USR resources");
+#define ldr_fdata(hdr, sec, cur, write) ldr_region(hdr, sec, cur, write, LDR_FD_TYPE, FL_FDATA_LO, FL_FDATA_HI, -16)
+#else
+#define ldr_fdata(hdr, sec, cur, write) 0
+#endif
 #else
 #define ldr_fittab(hdr, sec, cur, write) 0
+#define ldr_fdata(hdr, sec, cur, write) 0
 #endif
 
 static int ldr_session(void)
@@ -218,10 +240,12 @@ static int ldr_session(void)
     ldr_sfc(sec, 32, 0, key);
     if (ota_crc16(sec + 2, 30, 0) != ota_rd16(sec))
         return -6;                                       /* package for another chip key */
-    /* the XDATA and FITTAB entries, if any, must be whole before anything is erased */
+    /* the XDATA, FITTAB and FDATA entries, if any, must be whole before anything is erased */
     if ((rc = ldr_xdata(hdr, sec, cur, 0)) != 0)
         return rc;
     if ((rc = ldr_fittab(hdr, sec, cur, 0)) != 0)
+        return rc;
+    if ((rc = ldr_fdata(hdr, sec, cur, 0)) != 0)
         return rc;
     /* 3. app area, sector by sector */
     for (s = LDR_APP_LO; s < LDR_APP_HI; s += 0x1000u) {
@@ -233,10 +257,12 @@ static int ldr_session(void)
         done += 0x1000u;
         ldr_progress(done, LDR_APP_HI - LDR_APP_LO);
     }
-    /* 3b. XDATA then FITTAB after the app: power loss here resumes from the record like the app area */
+    /* 3b. XDATA, FITTAB then FDATA after the app: power loss here resumes from the record like the app area */
     if ((rc = ldr_xdata(hdr, sec, cur, 1)) != 0)
         return rc;
     if ((rc = ldr_fittab(hdr, sec, cur, 1)) != 0)
+        return rc;
+    if ((rc = ldr_fdata(hdr, sec, cur, 1)) != 0)
         return rc;
     /* 4. finish: the host confirms, the record goes, the SPL boots the app */
     for (i = 0; i < 4u; i++)

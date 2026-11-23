@@ -23,6 +23,7 @@ FL_BLE_LO): APP_CODE_MAX 0x86EE0. The SMK package also carries its sample slot m
 bytes at flash.bin 0x9CF00, after the cfg: the installers read it to see if an install keeps the slots.
 """
 import argparse
+import zlib
 import os
 import struct
 from pathlib import Path
@@ -247,12 +248,25 @@ def flash_image(app, key):
     return bytes(f)
 
 
-def ufw(flash, ota, product, xdata=None, fittab=None):
+def valid_fdata(data, size=FDATA_SIZE):
+    """The factory pack occupies exactly its reserved partition, with an erased tail."""
+    if not size or len(data) != size or len(data) < 32 or data[:4] != b"S1PK":
+        return False
+    version, programs = struct.unpack_from("<HH", data, 4)
+    total, crc = struct.unpack_from("<II", data, 12)
+    return (version == 1 and programs == 694 and 32 <= total <= len(data)
+            and zlib.crc32(data[32:total]) == crc and all(x == 0xff for x in data[total:]))
+
+
+def ufw(flash, ota, product, xdata=None, fittab=None, fdata=None):
     """xdata: the SMK XDATA region (8 KiB, tools/build.py xdata_image) as a type-101 entry, that the
     update loader writes to flash 0xAD000 (loader/ldr_core.c ldr_xdata).
     fittab: the SMK FITTAB region (4 KiB, tools/build.py fittab_image) as a type-102 entry, that the
-    update loader writes to flash 0xFE000 (ldr_fittab). Neither is part of flash.bin: a mask-ROM
-    rescue of flash.bin and the stock vendor loader never touch them."""
+    update loader writes to flash 0xFE000 (ldr_fittab).
+    fdata: the SMK FDATA region (FDATA_SIZE B, tools/build.py fdata_image: the Synth One factory pack) as a
+    type-103 entry, that the update loader writes to the end of sample slot 2 (ldr_fdata).
+    None of them is part of flash.bin: a mask-ROM rescue of flash.bin and the stock vendor loader never
+    touch them."""
     files = [(0, "flash.bin", flash), (100, "ota.bin", ota)]
     if xdata is not None:
         if len(xdata) != 0x2000:
@@ -262,6 +276,10 @@ def ufw(flash, ota, product, xdata=None, fittab=None):
         if len(fittab) != 0x1000:
             raise SystemExit(f"fittab is {len(fittab)} B, the region is 4096 B")
         files.append((102, "fittab.bin", fittab))
+    if fdata is not None:
+        if not FDATA_SIZE or len(fdata) != FDATA_SIZE:
+            raise SystemExit(f"fdata is {len(fdata)} B, the region (FL_FDATA_SIZE) is {FDATA_SIZE} B")
+        files.append((103, "fdata.bin", fdata))
     off, ents, data = 0x400, [], bytearray()
     for i, (typ, name, d) in enumerate(files):
         off = (off + 0xFF) & ~0xFF
@@ -311,6 +329,7 @@ def main():
     ap.add_argument("--sdk", type=Path, help="JieLi AC79 SDK checkout (default: $AC79_SDK)")
     ap.add_argument("--xdata", type=Path, help="SMK: the 8 KiB XDATA region image (build/<board>/xdata.img)")
     ap.add_argument("--fittab", type=Path, help="SMK: the 4 KiB FITTAB region image (build/<board>/fittab.img)")
+    ap.add_argument("--fdata", type=Path, help="SMK: the FDATA region image (build/<board>/fdata.img)")
     a = ap.parse_args()
     global SDK
     SDK = a.sdk
@@ -318,7 +337,8 @@ def main():
     a.product = a.product or BOARDS[a.board][2]
     pkg = ufw(flash_image(a.app.read_bytes(), a.key), a.ota.read_bytes(), a.product,
               xdata=a.xdata.read_bytes() if a.xdata else None,
-              fittab=a.fittab.read_bytes() if a.fittab else None)
+              fittab=a.fittab.read_bytes() if a.fittab else None,
+              fdata=a.fdata.read_bytes() if a.fdata else None)
     a.out.write_bytes(pkg)
     print(f"package {a.out}: {len(pkg)} B, identity {a.product}, chip key {a.key:#06x}")
 

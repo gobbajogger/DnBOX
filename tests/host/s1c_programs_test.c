@@ -85,7 +85,7 @@ int main(int argc, char **argv)
            (unsigned)S1C_RVB_BYTES, (unsigned)(S1C_ARENA_BYTES - S1C_RVB_BYTES));
     assert(original_chicago_fx2_compact_init(&fx));
     owner = original_chicago_fx2_compact_owner(&fx);
-    s1_part_pack = pack; s1_part_pack_bytes = n;
+    (void)s1_part_set_pack(pack, n);
     play(0);
     unsigned programs = s1_part_programs();
     if (!pack || !programs) {

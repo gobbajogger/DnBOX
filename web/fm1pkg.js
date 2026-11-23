@@ -75,6 +75,31 @@ export function packageFittab(logical) {
   return null;
 }
 
+// ---- SMK FDATA: the Synth One factory pack (the end of sample slot 2, FL_FDATA_SIZE) the package's update
+// loader writes from its "fdata.bin" entry (type 103; tools/fm1pkg_make.py ufw, loader/ldr_core.c ldr_fdata). null: none.
+export const FDATA_TYPE = 103;
+export function packageFdata(logical) {
+  if (logical.length < 0x40) return null;
+  const hdr = logical.slice(0, 0x40);
+  pkEnc(hdr, 0, 0x40);
+  if (pkCrc16(hdr, 2, 0x40) !== pkU16(hdr, 0)) return null;
+  const count = pkU16(hdr, 8);
+  if (count < 1 || count > 8 || logical.length < 0x40 + 0x50 * count) return null;
+  const lst = logical.slice(0x40, 0x40 + 0x50 * count);
+  if (pkCrc16(lst) !== pkU16(hdr, 2)) return null;
+  for (let i = 0; i < count; i++) {
+    const e = lst.slice(i * 0x50, (i + 1) * 0x50);
+    pkEnc(e, 0, 0x50);
+    if (pkU16(e, 0) !== FDATA_TYPE) continue;
+    const off = pkU32(e, 8), size = pkU32(e, 12);
+    if (off + size > logical.length) throw new Error("fdata.bin: cut short");
+    const d = logical.slice(off, off + size);
+    if (pkCrc16(d) !== pkU16(e, 4)) throw new Error("fdata.bin: CRC");
+    return d;
+  }
+  return null;
+}
+
 // ---- the SMK-37 Bluetooth controller image (ctl.img, built by the user: ble/ctl) ----
 // insertCtl puts it into the Bluetooth block of a package's logical image (flash 0x8B000, inside
 // the encrypted app area) and writes the checksums again, as tools/add_ctl.py does (the same bytes:

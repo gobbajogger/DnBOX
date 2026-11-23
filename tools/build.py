@@ -31,6 +31,7 @@ import re
 import struct
 import subprocess
 import sys
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -145,13 +146,30 @@ if SUPERJ6_FACTORY == "1":
 
 # X0X_S1C=1: Synth One plays the compact engine (dsp/s1c) with its own delay and
 # reverb and the 694-program factory pack, instead of the dry INIT voice.
-S1C = os.environ.get("X0X_S1C", "0")
-if S1C not in ("0", "1"):
+S1C_OVERRIDE = os.environ.get("X0X_S1C")
+if S1C_OVERRIDE not in (None, "0", "1"):
     raise SystemExit("X0X_S1C: 0 or 1")
-if S1C == "1":
+S1C = "0"  # unrelated host imports keep the dry baseline unless explicitly enabled
+
+
+def enable_compact_synthone():
+    global S1C
+    if S1C == "1":
+        return
+    S1C = "1"
     ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/app/s1_dry_part.c")] = "firmware/src/app/s1c_part.c"
     ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/dsp/s1_dry_voice.c")] = "firmware/src/dsp/s1c/s1c.c"
-    ORIGINAL_SYNTH_BACKENDS += ["firmware/src/dsp/s1c/s1u.c", "firmware/src/dsp/s1c/s1c_front.c", "firmware/src/dsp/s1pack/s1pack.c"]
+    ORIGINAL_SYNTH_BACKENDS.extend(["firmware/src/dsp/s1c/s1u.c", "firmware/src/dsp/s1c/s1c_front.c",
+                                    "firmware/src/dsp/s1pack/s1pack.c"])
+
+
+def native_compact_synthone(board, model, region_size, override):
+    """Default compact mode for native SMK Elite/Pro with FDATA, not host imports."""
+    return override == "1" or (override is None and board == "smk37" and model in ("elite", "pro") and bool(region_size))
+
+
+if S1C_OVERRIDE == "1":
+    enable_compact_synthone()
 
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
@@ -733,6 +751,65 @@ def write_fittab_id():
         f"#define FITTAB_CRC32 0x{crc:08X}u\n")
 
 
+FDATA_TYPE = 103                                # the package's fdata.bin UFW entry (loader/ldr_core.c LDR_FD_TYPE)
+FDATA_HDR = 32                                  # fm1_flash_map.h FL_FDATA_HDR: the header the installers read back
+FDATA_PACK_TOOL = SRC / "tools" / "pack_synthone_factory.py"   # the Synth One factory pack (Synths lane)
+
+
+def fdata_region():
+    """(lo, hi) of FL_FDATA, from fm1_flash_map.h (FL_SMP_HI 0xF4000 - FL_FDATA_SIZE); (hi, hi) without one"""
+    return 0xF4000 - fm1pkg_make.FDATA_SIZE, 0xF4000
+
+
+def fdata_payload():
+    """Always regenerate from the tracked authenticated JSON banks; no private input override."""
+    if not FDATA_PACK_TOOL.exists():
+        return None
+    GEN.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="s1-pack-", dir=GEN) as d:
+        pack = Path(d) / "s1pack.bin"
+        subprocess.run([sys.executable, str(FDATA_PACK_TOOL), str(pack)], check=True, stdout=subprocess.DEVNULL)
+        return pack.read_bytes()
+
+
+def fdata_image():
+    """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+    when the flash map has no FDATA or there is no payload."""
+    lo, hi = fdata_region()
+    if BOARD != "smk37" or lo == hi:
+        return None
+    raw = fdata_payload()
+    if raw is None:
+        raise SystemExit("FDATA flash map requires the tracked Synth One pack generator")
+    if len(raw) > hi - lo:
+        raise SystemExit(f"FDATA payload is {len(raw)} B, the region is {hi - lo} B (FL_FDATA_SIZE)")
+    return raw + b"\xff" * (hi - lo - len(raw))
+
+
+def fdata_problems(region):
+    """what is wrong with an FDATA region image: size, an erased first word, or a Synth One pack (S1PK)
+    whose total or zlib CRC-32 (bytes 32..total) does not match its header"""
+    import zlib
+    lo, hi = fdata_region()
+    if len(region) != hi - lo:
+        return [f"FDATA image is {len(region)} B, not the {hi - lo} B region"]
+    if region[:4] == b"\xff\xff\xff\xff":
+        return ["FDATA image starts erased: the app would read no data"]
+    if region[:4] != b"S1PK":
+        return ["FDATA image is not a Synth One factory pack"]
+    if struct.unpack_from("<HH", region, 4) != (1, 694):
+        return ["FDATA pack version/count mismatch"]
+    total, crc = struct.unpack_from("<II", region, 12)
+    if not FDATA_HDR <= total <= len(region):
+        return [f"FDATA pack total {total} B outside the region"]
+    if zlib.crc32(region[FDATA_HDR:total]) != crc:
+        return [f"FDATA pack CRC {zlib.crc32(region[FDATA_HDR:total]):#x}, header {crc:#x}"]
+    if any(b != 0xFF for b in region[total:]):
+        return ["FDATA tail after the pack is not erased"]
+
+    return []
+
+
 def check(img, syms, dis, rt):
     errors, notes = [], []
     m = re.search(r"^([0-9a-f]+) .*\s_start$", syms, re.M)
@@ -916,6 +993,8 @@ def main():
     if model not in MODELS or (model != "pro" and BOARD != "smk37"):
         raise SystemExit(f"MODEL={model}: pro, elite or mke, with BOARD=smk37")
     MODEL = model
+    if native_compact_synthone(BOARD, MODEL, fm1pkg_make.FDATA_SIZE, S1C_OVERRIDE):
+        enable_compact_synthone()
     fm1pkg_make.set_board(BOARD)
     APP_SLOT = fm1pkg_make.APP_SLOT
     APP_CODE_MAX = fm1pkg_make.APP_CODE_MAX
@@ -988,9 +1067,18 @@ def main():
         print(f"FITTAB: {16 + n} B of {FITTAB_HI - FITTAB_LO} (flash {FITTAB_LO:#x}), "
               f"{FITTAB_HI - FITTAB_LO - 16 - n} B spare")
         (OUT / "fittab.img").write_bytes(fittab)
+    fdata = fdata_image()
+    if fdata is not None:
+        errors += fdata_problems(fdata)
+        used = struct.unpack_from("<I", fdata, 12)[0] if fdata[:4] == b"S1PK" else len(fdata.rstrip(b"\xff"))
+        print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+        (OUT / "fdata.img").write_bytes(fdata)
+    elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
+        print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
     if errors:
         raise SystemExit("build: checks failed")
-    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT, xdata=xdata, fittab=fittab)
+    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT, xdata=xdata, fittab=fittab,
+                          fdata=fdata)
     (pkg_dir / name).write_bytes(pkg)
     print(f"app      {OUT / 'x0x.bin'}  {len(img)} B")
     print(f"loader   {LDR / 'ota.bin'}  {len(ota)} B")

@@ -27,10 +27,9 @@ typedef struct {
  * amount lowers the clock from the INIT value to the minimum. */
 static inline float s1_part_crush_hz(float amount) { return 48000.f - 45952.f * amount; }
 
-/* Factory pack (tools/pack_synthone_factory.py image) and its size; NULL until the
- * board maps it. Set once at boot (device) or by a host test. */
-extern const uint8_t *s1_part_pack;
-extern uint32_t s1_part_pack_bytes;
+/* Validate and bind immutable memory; return the mapped program count or zero.
+ * The device calls this once, before the engine can access any factory program. */
+unsigned s1_part_set_pack(const uint8_t *, uint32_t);
 
 void s1_part_init(s1_dry_part *part);                    /* INIT program, no effects arena */
 void s1_part_bind(s1_dry_part *part, void *arena);       /* lend S1C_ARENA_BYTES (or NULL) */

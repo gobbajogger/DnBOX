@@ -19,7 +19,7 @@
 enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
-       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, ED_FITTAB = 51 };
+       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50, ED_FITTAB = 51, ED_FDATA = 52 };
 #include "../../../tools/mboot/session_wire.h"
 #include "boot_screen.h"
 #if BOARD_SMK37
@@ -27,6 +27,7 @@ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END,
 #include "fittab_id.h"
 #endif
 #include "app/fittab.h"
+#include "app/fdata.h"
 #endif
 #include "app/smk_inlog_profile.h"
 #if X0X_SMK_INLOG
@@ -919,6 +920,25 @@ static void ed_handle(const uint8_t *f, uint32_t n)
         for (k = 0; k < FITTAB_HDR; k++) {
             ed_b(h[k]);
             ed_b(h[k] >> 7);
+        }
+        break;
+    }
+#endif
+#if BOARD_SMK37
+    case ED_FDATA: {                                  /* read only: FDATA valid and bound (1) or absent (0), then its first
+                                                       * 32 B as read now, each byte 2 x 7 bits, low first: the
+                                                       * installers compare them with the package (read back) */
+        uint32_t k;
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_FDATA_LO);
+#if X0X_S1C
+        ed_b(s1_part_programs() != 0);
+#else
+        ed_b(0);
+#endif
+        for (k = 0; k < FL_FDATA_HDR; k++) {
+            uint32_t v = FL_FDATA_SIZE ? h[k] : 0xFFu;
+            ed_b(v);
+            ed_b(v >> 7);
         }
         break;
     }
