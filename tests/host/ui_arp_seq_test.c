@@ -28,10 +28,10 @@ static void engine_case(int kind,const char *tag)
 {
     char name[64];
     prime(kind);
-    /* SEQ: SEQUENCE -> PRESET -> KEYS -> ARP SEQ; K5 STEPS, K6 INTERVAL, K7/K8 empty. */
+    /* SEQ: SEQUENCE -> PRESET -> KEYS -> ARP SEQ; K5 STEPS, K6 INTERVAL, K7 GATE, K8 empty. */
     EXPECT(pg.n==4&&page_named("ARP SEQ")==3);
     EXPECT(pg.r[3][0].kind==R_ARP&&pg.r[3][0].a==ARP_F_LENGTH&&pg.r[3][1].a==ARP_F_INTERVAL);
-    EXPECT(pg.r[3][2].kind==R_NONE&&pg.r[3][3].kind==R_NONE);
+    EXPECT(pg.r[3][2].kind==R_ARP && pg.r[3][2].a==ARP_F_GATE && pg.r[3][3].kind==R_NONE);
     *page_of(V_SEQ)=3;build_pages();ui_frame();EXPECT(arp_seq_page());
     uint8_t pattern_before[sizeof cur_pat()->bass[0]];memcpy(pattern_before,&cur_pat()->bass[0],sizeof pattern_before);
     /* tap: step off, tap again: on (never the pattern's step) */
@@ -53,6 +53,10 @@ static void engine_case(int kind,const char *tag)
     for(int n=0;n<4;n++){turn(0,-1);}
     EXPECT(arp_fake.s[0].length==12);EXPECT(!lit(13));
     turn(1,-1);turn(1,-1);EXPECT(arp_fake.s[0].interval==10);
+    char gate_num[16], gate_unit[8];
+    pref_value(pg.r[3][2],gate_num,gate_unit);
+    EXPECT(!strcmp(gate_num,"50") && !strcmp(gate_unit,"%"));
+    turn(2,1);EXPECT(arp_fake.s[0].gate>50 && arp_fake.s[0].gate<=100);
     snprintf(name,sizeof name,"arp-seq-%s",tag);ui.msg_until=0;ui.touched=-1;now_ms+=3000;ui_frame();shot(name);
     EXPECT(!on_screen("VELOCITY"));                         /* the pattern's lane is not the arp's */
     /* playhead: only the step that really sounded, only while the arp is on */

@@ -1372,6 +1372,11 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
     *num = *unit = 0;
     if (!d || r.kind == R_ACT)
         return;
+#if X0X_ARP_HOOKS
+    if (r.kind == R_ARP && r.a == ARP_F_GATE) {
+        put_i(num, v + 1); put_s(unit, "%"); return;
+    }
+#endif
 #if X0X_SYNTHONE_PATCH
     if (r.kind == R_S1PATCH) {
         const s1_patch_descriptor *patch = s1_patch_at(r.c);
@@ -1704,14 +1709,14 @@ static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
 static const char *const ARP_SPEED_N[] = {"1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/32"};
 static const char *const ARP_STEPS_N[] = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"};
 static const char *const ARP_INTERVAL_N[] = {"0st","1st","2st","3st","4st","5st","6st","7st","8st","9st","10st","11st","12st"};
-static const x0x_param_t ARP_P[ARP_F_GATE] = {
+static const x0x_param_t ARP_P[ARP_NF] = {
     {"ON", 1, 0, ONOFF_N}, {"MODE", 3, 0, ARP_MODE_N}, {"RANGE", 3, 0, ARP_RANGE_N},
-    {"SPEED", 9, 8, ARP_SPEED_N}, {"STEPS", 15, 15, ARP_STEPS_N}, {"INTERVAL", 12, 12, ARP_INTERVAL_N}};
+    {"SPEED", 9, 8, ARP_SPEED_N}, {"STEPS", 15, 15, ARP_STEPS_N}, {"INTERVAL", 12, 12, ARP_INTERVAL_N}, {"GATE", 99, 49, 0}};
 #define STEP_TAP_MS 300u                     /* (same as the pattern steps) */
 static int8_t arp_held = -1;                 /* the ARP SEQ pad held (0..15), or -1 */
 static uint8_t arp_edited;
 static uint32_t arp_t0;
-static const x0x_param_t *arp_desc(unsigned field) { return field < ARP_F_GATE ? &ARP_P[field] : 0; }
+static const x0x_param_t *arp_desc(unsigned field) { return field < ARP_NF ? &ARP_P[field] : 0; }
 /* The voice's engine has the arp (SuperJ6 or Synth One, hooks answering). */
 static int arp_engine(int b)
 {
@@ -1730,6 +1735,7 @@ static int arp_get(unsigned voice, unsigned field)
     case ARP_F_SPEED: return s.speed;
     case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
     case ARP_F_INTERVAL: return s.interval;
+    case ARP_F_GATE: return s.gate ? s.gate - 1 : 0;
     }
     return 0;
 }
@@ -1737,7 +1743,7 @@ static void arp_set(unsigned voice, unsigned field, int v)
 {
     engine_arp_settings s;
     if (!engine_arp_settings_read(voice, &s)) return;
-    if (field == ARP_F_RANGE || field == ARP_F_LENGTH) v++;
+    if (field == ARP_F_RANGE || field == ARP_F_LENGTH || field == ARP_F_GATE) v++;
     if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
 }
 /* SEQ page 4: SEQUENCE, PRESET, KEYS, ARP SEQ. */
@@ -1847,7 +1853,7 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
 #if X0X_ARP_HOOKS
             if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads; K7/K8 stay empty */
                 emit->group = GR_PAT;
-                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), NONE, NONE);
+                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), PR(R_ARP, ARP_F_GATE, b, 0), NONE);
                 emit->group = GR_NONE;
             }
 #endif
@@ -6377,7 +6383,7 @@ static UI_DRAW void draw_part_sound(int band)
         engine_s1_patch_snapshot(bidx(), &patch)) s1_draw_patch = &patch;
 #endif
 #if !X0X_SYNTHONE_PATCH
-    if (pg.n == 2 && pg.r[cur_page()][0].kind == R_BENGINE &&
+    if (pg.r[cur_page()][0].kind == R_BENGINE &&
         engine_bass_bank(bidx()) == ORIGINAL_SOUND_SYNTHONE) {
         draw_init_selector(band);
         return;

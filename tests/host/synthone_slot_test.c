@@ -112,15 +112,21 @@ static void short_list(int voice)
     const char *const names[] = {"crush", "engine", "preset", "status"};
     const int kinds[] = {R_ENG, R_BENGINE, R_BPRESET, R_BSTATUS};
     button_tap(B_SEL);
-    CHECK(ui.overlay == O_LIST && ui.list_n == 4);
+    const int arp_rows = X0X_ARP_HOOKS ? 4 : 0;
+    CHECK(ui.overlay == O_LIST && ui.list_n == 4 + arp_rows);
+#if X0X_ARP_HOOKS
+    for (int row = 0; row < arp_rows; ++row)
+        CHECK(list_rows[row].kind == R_ARP && list_rows[row].b == voice);
+#endif
     for (int row = 0; row < 4; ++row) {
-        if (row) {
+        while (ui.list_sel < row + arp_rows) {
             now_ms += 128;
             enc_acc[EN_SELECT] = 1;
             ui_input_only();
         }
-        pref_t r = list_rows[row];
-        CHECK(ui.list_top == 0 && ui.list_sel == row && r.kind == kinds[row] && r.b == voice);
+        pref_t r = list_rows[row + arp_rows];
+        CHECK(ui.list_sel == row + arp_rows && ui.list_top <= ui.list_sel &&
+              ui.list_sel < ui.list_top + visible_list_rows() && r.kind == kinds[row] && r.b == voice);
         if (row == 0) {
             CHECK(r.c == ORIGINAL_SYNTHONE_CRUSH && !strcmp(pref_name(r), "CRUSH RATE"));
             char number[16], unit[8];
@@ -135,18 +141,19 @@ static void short_list(int voice)
         }
     }
     button_tap(B_HOME);
-    CHECK(ui.overlay == O_NONE && ui.view == V_PART && bidx() == voice && cur_page() == 1);
+    CHECK(ui.overlay == O_NONE && ui.view == V_PART && bidx() == voice && cur_page() == pg.n - 1);
     selector_frame("SYNTH ONE", "INIT", "READY", 1);
 }
 
 static void stock_selector(int voice)
 {
-    CHECK(pg.n == 2 && !strcmp(pg.title[0], "EFFECT") && !strcmp(pg.title[1], "SOUND"));
-    *page_of(V_PART) = 1;
-    for (int col = 0; col < 3; ++col) CHECK(pg.r[1][col].b == voice);
-    CHECK(pg.r[1][0].kind == R_BENGINE && pg.r[1][1].kind == R_BPRESET);
-    CHECK(pg.r[1][2].kind == R_BSTATUS && pg.r[1][3].kind == R_NONE);
-    CHECK(!pref_read_only(pg.r[1][0]) && pref_read_only(pg.r[1][1]) && pref_read_only(pg.r[1][2]));
+    const int sound = X0X_ARP_HOOKS ? 2 : 1;
+    CHECK(pg.n == sound + 1 && !strcmp(pg.title[sound - 1], "EFFECT") && !strcmp(pg.title[sound], "SOUND"));
+    *page_of(V_PART) = (uint8_t)sound;
+    for (int col = 0; col < 3; ++col) CHECK(pg.r[sound][col].b == voice);
+    CHECK(pg.r[sound][0].kind == R_BENGINE && pg.r[sound][1].kind == R_BPRESET);
+    CHECK(pg.r[sound][2].kind == R_BSTATUS && pg.r[sound][3].kind == R_NONE);
+    CHECK(!pref_read_only(pg.r[sound][0]) && pref_read_only(pg.r[sound][1]) && pref_read_only(pg.r[sound][2]));
     uint32_t serial = engine_bass_choice_serial();
     for (int col = 1; col < 4; ++col) physical_detent(col, 1);
     CHECK(engine_bass_choice_serial() == serial && !engine_bass_preset_pending(voice));
@@ -183,7 +190,7 @@ static void stock_selector(int voice)
     for (int n = 0; n < 1024 && engine_bass_preset_pending(voice); ++n) render_blocks(1);
     ui_input_only();
     CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
-    CHECK(pg.n == 2 && *page_of(V_PART) == 1 && cur_page() == 1);
+    CHECK(pg.n == sound + 1 && *page_of(V_PART) == sound && cur_page() == sound);
     selector_frame("SYNTH ONE", "INIT", "READY", 1);
 }
 #endif
