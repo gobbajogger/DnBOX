@@ -25,3 +25,9 @@ Reference: /workspace/dnbox-handoff/BOT-RULES.md (finisher bots, 2026-11-23). On
 1. A nonzero FL_FDATA shortens slot 2; a sample longer than the new slot 2 fails its header check (fail-closed) until it is re-uploaded.
 2. Engine attribution is a lower bound (inlined code stays in callers).
 3. Code room for the synth engines (25-31 KB) is not available in the app image without moving data out.
+
+## Row 2: 10-minute heavy playback
+`tests/host/heavy_playback_10min_test.sh` (suite entry `heavy-playback`, class G) runs 51,680 blocks
+(600.0 s) for Elite and Pro, engine pairs Chicago+Miami (factory 18, Chicago FX 6) and Synth One+SuperJ6,
+all drums, breaks, bus FX, reverb, delay and master on. Each block is timed in thread CPU time against
+11,609 us; it fails on any late block or dropout. Runs at nice 19.
