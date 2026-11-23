@@ -3,24 +3,25 @@
 #define SMC_UI_MAIN retained_smc_main
 #include "smc_ui_test.c"
 
-/* RGB565 signatures from reviewed native captures. Only the active value
- * band is pinned; the four inactive controls must retain their entire frame.
+/* RGB565 signatures from reviewed native captures. The active value
+ * band and inactive frames are pinned. Synth One and SuperJ6 rows are the
+ * same draw_adsr_inline graph, so both bands sit at the same offset.
  * Stage values and owner selection below are production bindings. */
 static const struct { const char *name; uint32_t hash; } expected[] = {
-    {"s1-filter-dark-0", 0x712687ceu},
-    {"s1-amp-dark-0", 0xbba27759u},
+    {"s1-filter-dark-0", 0x3860e9d1u},
+    {"s1-amp-dark-0", 0xdb2adb2fu},
     {"sj6-amp-dark-0", 0xc3ae88d7u},
-    {"s1-filter-dark-1", 0x32eef481u},
-    {"s1-amp-dark-1", 0x21e4ce62u},
+    {"s1-filter-dark-1", 0x62deaf2eu},
+    {"s1-amp-dark-1", 0xc2bde261u},
     {"sj6-amp-dark-1", 0xfc3f84e4u},
-    {"s1-filter-light-0", 0xe4743e55u},
-    {"s1-amp-light-0", 0x1c1a22ebu},
+    {"s1-filter-light-0", 0x54ef6a8bu},
+    {"s1-amp-light-0", 0xa52f70c9u},
     {"sj6-amp-light-0", 0x2720ce7du},
-    {"s1-filter-light-1", 0x00a0bfeau},
-    {"s1-amp-light-1", 0x0e3824b8u},
+    {"s1-filter-light-1", 0x81ded33fu},
+    {"s1-amp-light-1", 0x2b9d062du},
     {"sj6-amp-light-1", 0xeed824d6u},
-    {"s1-dark-inactive", 0xc3a1ebf7u},
-    {"s1-light-inactive", 0x5cb7b03bu},
+    {"s1-dark-inactive", 0x4d5bc4adu},
+    {"s1-light-inactive", 0xce662dccu},
     {"sj6-dark-inactive", 0x1178f356u},
     {"sj6-light-inactive", 0xd63d4051u},
 };
@@ -92,7 +93,7 @@ static void captured(const char *owner,int light,int p,int endpoint,int synth)
     snprintf(name,sizeof name,"%s-%s-%d",owner,light?"light":"dark",endpoint);
     rows=matrix_three_rows()?3:4; step=matrix_three_rows()?67:50;
     first=p/4*4; if(pg.n>=rows && first+rows>pg.n) first=pg.n-rows;
-    int y=HDR_H+4+(p-first)*step+(synth?11:8);
+    int y=HDR_H+4+(p-first)*step+8; /* one shared envelope graph */
     check_pixels(name,3,237,y-2,y+13);
 }
 static void inactive(int engine,int light)
@@ -121,6 +122,6 @@ int main(void)
         inactive(ORIGINAL_SOUND_JUNO,light);
     }
     CHECK(witnessed==16);
-    printf("Selected ADSR RGB565: 12 active value bands, 4 unchanged inactive frames, %u mismatches\n",failures);
+    printf("Selected ADSR RGB565: 12 active value bands, 4 inactive frames, %u mismatches\n",failures);
     return failures?1:0;
 }

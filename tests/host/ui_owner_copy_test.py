@@ -13,14 +13,16 @@ def unapproved_knob_prefix(source):
  amp="int raw=matrix_value(r);\n    physical_stage_label(label,0,'D',raw);"
  if start<0 or end<0 or source[start:end].count(line)!=1 or source.count(line)!=1:return True
  if source.count(adsr)!=1 or source.count(amp)!=1 or source.count('physical_stage_label(')!=3:return True
- s1_signature='static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink)\n{'
- s1_line='char *q=put_i(put_s(label,"K"),UI_FIRST_KNOB+k);'
- s1_stage='*q++=\' \'; *q++="ADSR"[k]; *q++=\' \';\n        int selected = page == cur_page();\n        put_s(q, selected ? "" : num);'
+ # Synth One and SuperJ6 physical-unit stages share draw_adsr_inline's
+ # stage-unit branch; it must bind each stage's own knob slot and value.
+ s1_signature='static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)\n{'
+ s1_line='char *end = put_i(put_s(label, "K"), UI_FIRST_KNOB + e.slot[k]);'
+ s1_stage='*end++ = \' \'; *end++ = "ADSR"[k]; *end++ = \' \';'
  start=source.find(s1_signature)
  end=source.find('\n}',start) if start>=0 else -1
  s1=source[start:end] if end>=0 else ''
  if (s1.count(s1_line)!=1 or source.count(s1_line)!=1 or s1.count(s1_stage)!=1 or
-     s1.count('pref_t r=pg.r[page][k];')!=1 or s1.count('pref_value_of(r, 0, num, unit);')!=1):
+     s1.count('pref_t r = pg.r[p][e.slot[k]];')!=1 or s1.count('pref_value_of(r, matrix_value(r), num, unit);')!=1):
   return True
  return 'put_s(label,"K")' in source.replace(line,'',1).replace(s1_line,'',1)
 class Copy(unittest.TestCase):
@@ -37,9 +39,9 @@ class Copy(unittest.TestCase):
   self.assertTrue(unapproved_knob_prefix(S.replace('physical_stage_label(label,e.slot[k]', 'physical_stage_label(label,k')))
   self.assertTrue(unapproved_knob_prefix(S.replace('put_s(label,"K")','put_s(label,"")')))
  def test_synthone_requires_own_stage_slot_and_value(self):
-  for old,new in (('UI_FIRST_KNOB+k);','UI_FIRST_KNOB);'),
-                  ('*q++="ADSR"[k]','*q++="ADSR"[0]'),
-                  ('pref_t r=pg.r[page][k];','pref_t r=pg.r[page][0];'),
-                  ('pref_value_of(r, 0, num, unit);','put_s(num,"0");')):
+  for old,new in (('UI_FIRST_KNOB + e.slot[k]);','UI_FIRST_KNOB);'),
+                  ('*end++ = "ADSR"[k]','*end++ = "ADSR"[0]'),
+                  ('pref_t r = pg.r[p][e.slot[k]];','pref_t r = pg.r[p][0];'),
+                  ('pref_value_of(r, matrix_value(r), num, unit);','put_s(num,"0");')):
    with self.subTest(old=old):self.assertTrue(unapproved_knob_prefix(S.replace(old,new)))
 if __name__=='__main__':unittest.main()

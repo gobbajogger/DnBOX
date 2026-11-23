@@ -6044,7 +6044,6 @@ static UI_DRAW void sound_step_footer(void)
 }
 
 #if X0X_SYNTHONE_PATCH
-static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink);
 #endif
 #if !X0X_SYNTHONE_PATCH
 static const char *matrix_preset_name(int voice);
@@ -6113,13 +6112,6 @@ static UI_DRAW void draw_part_sound(int band)
                            active?blend(col,C_WHITE,5):SOUND_EDGE,active?dim(col,8):SOUND_SIDE);
         put_s(put_s(put_i(t,(tail ? p : row)+1),"  "),matrix_group(p));
         cv_text(8,y,&FONT_T,t,label);
-#if X0X_SYNTHONE_PATCH
-        if (s1_draw_patch && pg.r[p][0].kind == R_S1PATCH &&
-            (pg.r[p][0].c == 5 || pg.r[p][0].c == 9)) {
-            s1_envelope_row(p, y, height, active ? SOUND_INK : SOUND_WHITE);
-            continue;
-        }
-#endif
         if (adsr_row(p)) { draw_adsr_inline(p,active,y+off,height,off); continue; } /* graph replaces A/D/S/R, any row */
         if (active) {
             char knobs[20];matrix_knob_caption(knobs,p);
@@ -7616,12 +7608,16 @@ static unsigned adsr_stage_slots(int p,int slot[4])
     if(slot)for(int i=0;i<4;i++)slot[i]=-1;
     if(ui.view!=V_PART || !is_303() || p<0 || p>=pg.n)return 0;
     int bank=engine_bass_sound_bank(&proj.sound,bidx());
-    int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1;
+    int first=bank==ORIGINAL_SOUND_CHICAGO?7:bank==ORIGINAL_SOUND_JUNO?5:-1,kind=R_ENG;
+#if X0X_SYNTHONE_PATCH
+    /* Synth One FILTER ADSR slots 5..8 and AMP ADSR slots 9..12. */
+    if(bank==ORIGINAL_SOUND_SYNTHONE){kind=R_S1PATCH;first=pg.r[p][0].c<9?5:9;}
+#endif
     if(first<0)return 0;
     unsigned present=0;
     for(int k=0;k<4;k++) {
         pref_t r=pg.r[p][k];if(r.kind==R_NONE)continue;
-        if(r.kind!=R_ENG || r.a!=T_303 || r.b!=bidx() || r.c<first || r.c>first+3)return 0;
+        if(r.kind!=kind || r.a!=T_303 || r.b!=bidx() || r.c<first || r.c>first+3)return 0;
         unsigned stage=(unsigned)(r.c-first);
         if(present&(1u<<stage))return 0;
         present|=1u<<stage;if(slot)slot[stage]=k;
@@ -7669,6 +7665,24 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
         e->enabled=2; /* 2: original exponential laws */
         return;
     }
+#if X0X_SYNTHONE_PATCH
+    if(engine_bass_sound_bank(&proj.sound,bidx())==ORIGINAL_SOUND_SYNTHONE) {
+        /* Applied physical seconds/level of this ADSR; the live gauge reads
+         * the loudest started voice's own amp or filter envelope. */
+        s1_patch_snapshot v;float lv=0;unsigned st=0,held=0;
+        int first=-1;
+        for(i=0;i<4;i++)if(e->slot[i]>=0){first=pg.r[p][e->slot[i]].c-i;break;}
+        if(first<0 || !engine_s1_patch_snapshot(bidx(),&v)){e->enabled=0;return;}
+        e->attack=v.physical[first];e->decay=v.physical[first+1];
+        e->sustain=v.physical[first+2];e->release=fm_maxf(v.physical[first+3],1e-4f);
+        e->live_active=engine_s1_envelope_view(bidx(),first==5,&lv,&st,&held)&&st;
+        /* Juno stage codes: 1 A, 2 D, 3 S (held at sustain), 4 R. */
+        e->live_stage=st==1?1:st==3?4:held&&lv-e->sustain<=.01f?3:2;
+        e->live_level=lv;e->live_gate=held;
+        e->enabled=4; /* 4: Synth One exponential recurrences */
+        return;
+    }
+#endif
     /* An owner change after stage recognition cannot enable the retired
      * positional bass303 fallback. No unavailable/foreign graph is invented. */
     e->enabled=0;
@@ -7677,7 +7691,8 @@ static UI_DRAW void adsr_values(ui_adsr_t *e,int p)
 /* Every admitted A/D/S/R tuple gets the full-row graph, active or not.
  * Chicago7..10 is the original macro set. Compact Juno5..8 controls one
  * shared amplitude/filter envelope; it is not two independent envelopes.
- * Miami has no A/D/S/R row; Synth One/full SuperJ6 roles remain unadmitted. */
+ * Synth One FILTER/AMP ADSR rows (slots 5..8, 9..12) use the same graph.
+ * Miami has no A/D/S/R row. */
 static UI_DRAW int adsr_row(int p)
 { return adsr_stage_slots(p,0)!=0 || (p>=0 && p<pg.n && drum_amp_ref(pg.r[p][0]) &&
     pg.r[p][1].kind==R_NONE && pg.r[p][2].kind==R_NONE && pg.r[p][3].kind==R_NONE); }
@@ -7692,6 +7707,9 @@ static UI_DRAW float adsr_original_level(const ui_adsr_t *e,int stage,float t)
         float level=e->sustain*fm_powf(step,t*BASS303_SR);
         return level<.00001f?0:level;
     }
+#if X0X_SYNTHONE_PATCH
+    if(e->enabled==4 && stage==0) return 1.0f-fm_expf(-t/(.6f*e->attack));
+#endif
     if(stage==0) return fm_minf(1.0f,1.3f-1.3f*fm_expf(-t/e->attack));
     if(stage==1) return e->sustain+(1.0f-e->sustain)*fm_expf(-t/e->decay);
     return e->sustain*fm_expf(-t/e->release);
@@ -7737,58 +7755,6 @@ static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],fl
     if(w[1]<3) { w[2]-=3-w[1]; w[1]=3; }
     xs[0]=x0; xs[1]=x0+w[0]; xs[2]=xs[1]+w[1]; xs[3]=xs[2]+hold; xs[4]=x0+width;
 }
-#if X0X_SYNTHONE_PATCH
-/* The original S1 recurrences approach 1, sustain and 0 respectively.
- * Attack switches at .99; decay and release are shown to 1% of their span.
- * The live meter uses the observed filter/amp level of this part. The filter
- * observer does not expose its stage, so no stage or time cursor is inferred. */
-static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink)
-{
-    pref_t first = pg.r[page][0];
-    const float *a = &s1_draw_patch->physical[first.c];
-    ui_adsr_t e = {0};
-    int xs[5]; float duration[3];
-    e.present = 15;
-    e.attack=a[0]; e.decay=a[1]; e.sustain=a[2]; e.release=a[3]; e.enabled=4;
-    adsr_layout(&e, 13, 214, xs, duration);
-    int top=y+24, bottom=y+height-5, scale=bottom-top;
-    if (page == cur_page() && adsr_touch_active()) {
-        const s1_patch_descriptor *selected=s1_patch_at(pg.r[page][ui.touched].c);
-        text_r(232,y,&FONT_T,selected->label,ink);
-    }
-    for (int k=0; k<4; ++k) {
-        pref_t r=pg.r[page][k];
-        char num[16], unit[8], label[24];
-        pref_value_of(r, 0, num, unit);
-        char *q=put_i(put_s(label,"K"),UI_FIRST_KNOB+k);
-        *q++=' '; *q++="ADSR"[k]; *q++=' ';
-        int selected = page == cur_page();
-        put_s(q, selected ? "" : num);
-        strip_value(31+59*k,y+11,selected ? num : label,unit,ink,selected ? label : 0);
-        int span=xs[k+1]-xs[k], prev=0;
-        float tail=1.f, retention=fm_expf(-4.6051702f / span);
-        if (k==3 && a[3]==0.f) {
-            cv_line(xs[k],bottom-(int)(a[2]*scale+.5f),xs[k],bottom,ink);
-            cv_line(xs[k],bottom,xs[k+1],bottom,ink);
-            continue;
-        }
-        for (int i=0; i<=span; ++i) {
-            float v=k==0 ? 1.f-tail : k==1 ? a[2]+(.99f-a[2])*tail :
-                    k==2 ? a[2] : a[2]*tail;
-            int py=bottom-(int)(v*scale+.5f);
-            if (i) cv_line(xs[k]+i-1,prev,xs[k]+i,py,ink);
-            prev=py; tail*=retention;
-        }
-    }
-    float amp, filter; unsigned stage, held;
-    if (engine_bass_voice_view(first.b, &amp, &filter, &stage, &held) && stage!=6) {
-        float level=first.c==5 ? filter : amp;
-        int py=bottom-(int)(fm_maxf(0.f,fm_minf(1.f,level))*scale+.5f);
-        cv_rect(8,top,1,scale+1,SOUND_DIM);
-        cv_rect(6,py,5,1,ink);
-    }
-}
-#endif
 /* Same full-row visual component for a real finite exponential drum decay.
  * Fixed time domain (the parameter maximum) makes decay edits visible in the
  * curve, not merely its label. The live cursor uses actual hold/ramp counters,
@@ -7916,7 +7882,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
          * turns. Same quantisation as the native Chicago value readout. */
         if(!(e.present&(1u<<k)))continue;
         char label[20];
-        if (e.enabled == 3) {
+        if (e.enabled >= 3) {
             char num[16], unit[8];
             pref_t r = pg.r[p][e.slot[k]];
             pref_value_of(r, matrix_value(r), num, unit);
@@ -7933,11 +7899,11 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
          * Cursor level is always the live EG; the horizontal axis names stages. */
         float level=0,mod=0; unsigned state=6,held=0;
         int observed;
-        if(e.enabled==3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+        if(e.enabled>=3) {level=e.live_level;held=e.live_gate;state=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
         else observed=engine_bass_voice_view(bidx(),&level,&mod,&state,&held);
         if(observed && state!=6) {
             if(level<0)level=0; if(level>1)level=1;
-            int stage=e.enabled==3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
+            int stage=e.enabled>=3?(e.live_stage==1?0:e.live_stage==2?1:e.live_stage==3?2:3):
                 state==0?0:state==3?3:((e.gate && held) ||
                 (level-e.sustain<=.01f && e.sustain-level<=.01f))?2:1;
             /* A stage/level gauge, separate from the preview's time curve:
@@ -7962,17 +7928,23 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
     {   /* playhead: where the live VCA EG is now, on this graph's own time axis */
         float adsr[4],lv=0; int st=6,px=-1;
         int observed;
-        if(e.enabled==3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
+        if(e.enabled>=3){lv=e.live_level;st=!e.live_active?6:e.live_stage==1?0:e.live_stage==4?3:1;observed=1;}
         else observed=engine_bass_env_view(bidx(),adsr,&lv,&st);
         if(observed && st!=6) {
             if(lv<0)lv=0; if(lv>1)lv=1;
-            if(e.enabled==3) {
+            if(e.enabled>=3) {
                 /* Position on the canonical curve at the actual sampled level,
                  * not invented DSP elapsed time (release can begin before S). */
                 float u=0;int stage=st==0?0:st==3?3:e.live_stage==3?2:1;
-                if(stage==0)u=lv;
+                if(stage==2)u=.5f;
+#if X0X_SYNTHONE_PATCH
+                else if(e.enabled==4) { /* invert the drawn RC stage, 1% span */
+                    float x=stage==0?1.0f-lv:stage==1?(lv-e.sustain)/fm_maxf(1e-6f,1.0f-e.sustain):lv/fm_maxf(1e-6f,e.sustain);
+                    u=x>1e-6f?-fm_logf(x)/4.6051702f:1;
+                }
+#endif
+                else if(stage==0)u=lv;
                 else if(stage==1)u=(1.0f-lv)/fm_maxf(1e-6f,1.0f-e.sustain);
-                else if(stage==2)u=.5f;
                 else if(e.sustain>.00001f && lv>.00001f)
                     u=fm_logf(lv/e.sustain)/fm_logf(.00001f/e.sustain);
                 else u=1;
@@ -7988,7 +7960,7 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
                 float t=e.sustain>1e-6f&&lv>1e-6f?-e.release*fm_logf(lv/e.sustain):dur[2];
                 px=xs[3]+(int)((xs[4]-xs[3])*fm_minf(1.0f,fm_maxf(0.0f,t)/fm_maxf(dur[2],1e-6f))+.5f);
             } else px=xs[4];
-            if(e.enabled!=3){int stage=st==0?0:st==3?3:lv-e.sustain>.01f*(1-e.sustain)?1:2;
+            if(e.enabled<3){int stage=st==0?0:st==3?3:lv-e.sustain>.01f*(1-e.sustain)?1:2;
                 if(!(e.present&(1u<<stage)))px=-1;}
             if(px>=0){int py=y0-(int)(lv*(y0-top)+.5f);
             cv_rect(px,top-off,1,y0-top,SOUND_DIM);

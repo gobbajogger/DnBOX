@@ -73,6 +73,28 @@ int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out)
     return ready;
 }
 
+int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+{
+    if (voice >= NBASS || !level || !stage || !key_down) return 0;
+    uint32_t lock = plat_cq_lock();
+    const original_runtime_part *owner = &original_bass[voice];
+    int selected = -1;
+    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK) {
+        const s1_dry_part *part = &owner->dsp.synthone;
+        /* Same voice as engine_bass_voice_view: the loudest started one. */
+        for (unsigned i = 0; i < S1_CORE_VOICES; ++i)
+            if (part->voice[i].started &&
+                (selected < 0 || part->voice[i].amp.level > part->voice[selected].amp.level))
+                selected = (int)i;
+        if (selected >= 0) {
+            const dnbx_s1_envelope_state *e = filter ? &part->voice[selected].filter : &part->voice[selected].amp;
+            *level = e->level; *stage = e->stage; *key_down = part->down[selected];
+        }
+    }
+    plat_cq_unlock(lock);
+    return selected >= 0;
+}
+
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out)
 {
     s1_patch_snapshot snapshot;
