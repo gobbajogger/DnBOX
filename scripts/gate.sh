@@ -30,7 +30,7 @@
 #   JIELI_TOOLCHAIN, AC79_SDK, CHROMIUM_EXECUTABLE, TMPDIR, DNBOX_GATE_ONLINE
 set -u
 
-FW_REQUIRED="clean-tree setup no-loss limits host-tests build-elite-pro flashmap budget ui-defects drone"
+FW_REQUIRED="clean-tree setup no-loss limits host-tests build-elite-pro flashmap budget ui-defects retired-engine"
 NT_REQUIRED="clean-tree setup no-loss limits build unit-tests browser-tests"
 SKIPPABLE="fetch-base"
 
@@ -209,8 +209,8 @@ DNBOX-GATE repo=firmware lane=integ sha=0123456789abcdef0123456789abcdef01234567
 [PASS] budget
 == ui-defects
 [PASS] ui-defects
-== drone
-[PASS] drone
+== retired-engine
+[PASS] retired-engine
 DNBOX-GATE RESULT PASS sha=0123456789abcdef0123456789abcdef01234567 lane=integ log=build/dnbox-gate/01234567-test.log
 LOG
     if [ -n "$missing" ]; then
@@ -283,8 +283,8 @@ DNBOX-GATE repo=firmware lane=integ sha=0123456789abcdef0123456789abcdef01234567
 [FAIL] budget
 == ui-defects
 [PASS] ui-defects
-== drone
-[PASS] drone
+== retired-engine
+[PASS] retired-engine
 DNBOX-GATE RESULT FAIL sha=0123456789abcdef0123456789abcdef01234567 lane=integ log=x
 LOG
   expect inner-fail "$tmp/fail.log" 1 "DNBOX-GATE: FAIL"

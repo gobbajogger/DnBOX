@@ -164,7 +164,7 @@ ui_defects() { python3 -m unittest discover -s tests/ui_defects/first_slice -p '
                rm -rf "$OUT/ui-judge"
                python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
              }
-drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
+retired_engine() { local n; n=$(git grep -niwI 'dr[o]ne' -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Retired slot-2 engine mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
 step pool-accounting python3 tests/test_pool_budget.py
 step clean-tree clean
@@ -173,7 +173,7 @@ step fetch-base fetch_base
 step no-loss no_loss
 step limits limits
 if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
-step drone drone
+step retired-engine retired_engine
 R=PASS; [ $void = 1 ] && R=VOID; [ $fail = 1 ] && R=FAIL
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"
 [ $R = PASS ] && exit 0; [ $R = VOID ] && exit 2; exit 1

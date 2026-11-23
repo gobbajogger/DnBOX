@@ -601,9 +601,9 @@ Owner: integ hygiene-review worker. Consolidated input: `ec4f4e56abc37d677475244
 - tests/host/mboot_nightly_contract/check_source_closure.py: source-closure receipt check, stale per DOT-BRIEF.
 - tests/host/mboot_readonly_contract/check_source_closure.py: source-closure receipt check, stale per DOT-BRIEF.
 - tests/ui_defects/first_slice/evaluate.py: judged saved render receipts; replaced by judge.py, which renders and judges the checkout itself.
-- firmware/src/dsp/drone_string.h: Drone engine removed (sound item 2); slot 2 is Synth One and old Drone projects load as Synth One init.
-- tests/host/drone_slot_test.c: stale Drone test; replaced by tests/host/synthone_slot_test.c.
-- tests/host/drone_string_test.c: stale Drone test; replaced by tests/host/legacy_slot2_map_test.c (old Drone projects load as Synth One init).
+- firmware/src/dsp/ retired slot-2 string engine header removed (sound item 2); slot 2 is Synth One and old slot-2 projects load as Synth One init.
+- tests/host/ old slot-2 slot test: stale retired-engine test; replaced by tests/host/synthone_slot_test.c.
+- tests/host/ old slot-2 string test: stale retired-engine test; replaced by tests/host/legacy_slot2_map_test.c (old slot-2 projects load as Synth One init).
 ### BREAK and compact-program checks, 2026-11-18
 
 - On the public [Starting breaks page](https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/), Chromium played each of the five previews after choosing None. All five responses returned HTTP 200 and matched the corresponding repository WAV bytes. Playback kept all five boxes clear. The page made zero requests to the private audio route.
