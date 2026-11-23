@@ -1699,7 +1699,7 @@ typedef struct { uint8_t kind, slot, snd; } d8_pmap_t;
 static const char *const k_dist_names[7] = {"DIODE", "CLIP", "SAT", "BFZ", "PDIST", "FOLD", "CRUSH"};
 static const char *const k_tom_names[2] = {"TOM", "CONGA"};
 static const char *const k_rim_names[2] = {"RIM", "CLAVE"};
-static const char *const k_clap_names[2] = {"CLAP", "MARAC"};
+static const char *const k_clap_names[2] = {"CLAP", "MARACAS"};
 
 #define PP(name, def) {name, 127, def, 0}
 #define P_DRIVE {"Drive", 127, 0, 0}

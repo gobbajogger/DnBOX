@@ -51,6 +51,8 @@ def instrument(root):
     p=root/'firmware/src/app/ui.c';s=p.read_text()
     a='        text_c(cx, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
     s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
+    a='            text_r(pickup?215:200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);'
+    s=once(s,a,'            if(!getenv("HEADER_MUTATE"))'+a.strip());p.write_text(s)
 
     # Full-row drum envelopes are audited as real curve pixels, never exempted
     # from the glyph contract. Snapshot only the curve: baseline/text cannot
@@ -113,6 +115,17 @@ def instrument(root):
 {
     first_original_pref_value_of(r,v,num,unit);
     if(!geo_enabled)return;
+    {   /* never a raw 0..127 pot readout: a unitless number equal to the stored value */
+        const x0x_param_t *dd=pref_desc(r);
+        if(getenv("RAW_MUTATE") && r.kind==R_ENG && r.a==T_909 && unit[0] && !is_pan(r)){put_i(num,v);unit[0]=0;}
+        if(getenv("UNITNAME_MUTATE") && !strcmp(unit,"ms"))strcpy(unit,"msec");
+        if(dd && !dd->names && dd->max==127 && num[0] && raw_nseen<512) {
+            const char *q=num;int digits=*q!=0&&!unit[0];for(;*q;q++)if(*q<'0'||*q>'9')digits=0;
+            raw_fmt *w=&raw_seen[raw_nseen++];snprintf(w->num,sizeof w->num,"%s",num);snprintf(w->name,sizeof w->name,"%s",dd->name);
+            w->ref=((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c;
+            w->raw=digits && atoi(num)==v;
+        }
+    }
     if(unit[0] && num[0] && unit_nseen<512 && strlen(num)<16 && strlen(unit)<8) {
         unit_fmt *u=&unit_seen[unit_nseen++];strcpy(u->num,num);strcpy(u->unit,unit);
         u->ref=((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c;

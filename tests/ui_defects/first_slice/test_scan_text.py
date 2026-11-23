@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'ui_geometry'))
-from scan_text import is_instruction, scan  # noqa: E402
+from scan_text import CRYPTIC, is_instruction, scan, truncated_words  # noqa: E402
 
 
 def log(screens):
@@ -40,6 +40,26 @@ class ScanText(unittest.TestCase):
                          ["EMPTY   WHITE KEY: ADD BAR", "RESET PROJECT?"])
         clean = scan(log({"view-06-page-00": ["SONG", "EMPTY"], "help-05": ["TAP: NEXT PAGE"]}))
         self.assertEqual(clean["known_instructional_copy"], {})
+
+    def test_truncated_words_flagged(self):
+        # RELEAS (master list) and MARAC (808 clap selector) were clipped to six/five letters.
+        self.assertEqual(sorted(truncated_words({"a": {"RELEAS"}, "b": {"RELEASE"}, "c": {"MARAC", "MARACAS"}})),
+                         ["MARAC", "RELEAS"])
+        result = scan(log({"list-04": ["RELEAS"], "view-01": ["RELEASE", "SONG"]}))
+        self.assertIn("TRUNCATED RELEAS", result["known_instructional_copy"])
+
+    def test_plurals_and_abbreviations_pass(self):
+        self.assertEqual(truncated_words({"a": {"LOOP", "STALL", "PATTERN", "REV", "ENV"},
+                                          "b": {"LOOPS", "STALLS", "PATTERNS", "REVERB", "ENVELOPE", "SAVED", "SAVE"}}), {})
+
+    def test_cryptic_navigation_flagged(self):
+        for caption in ("<> \u2191\u2193 PARA \u2192", "PARA", "\u2190 BACK"):
+            with self.subTest(caption=caption):
+                self.assertTrue(CRYPTIC.search(caption))
+        for caption in ("PARAMETER", "PAN", "1/16", "L50"):
+            with self.subTest(caption=caption):
+                self.assertFalse(CRYPTIC.search(caption))
+        self.assertIn("PARA", scan(log({"view-02": ["PARA", "SONG"]}))["known_instructional_copy"])
 
 
 if __name__ == "__main__":

@@ -1388,6 +1388,11 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
         }
         { float x = 0.0f; int u = engine_param_si(r.a, r.b, r.c, v, &x);
           if (u != X0X_U_NONE) { unit_value(u, x, num, unit); return; } }
+        if (d->max == 127) {                             /* no raw 0..127 pot on screen */
+            put_i(num, (v * 100 + 63) / 127);
+            put_s(unit, "%");
+            return;
+        }
         put_i(num, v);
         return;
     case R_DLEN:

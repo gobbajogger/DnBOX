@@ -96,6 +96,18 @@ def run(source,output):
         pm=re.findall(r'^UNITS checks=(\d+) missing=(\d+)$',lp.read_text(),re.M)
         report['UNIT_MUTATE']={'exit':mrun.returncode,'counts':pm}
         if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
+    # Page compliance: no raw 0..127 readouts, canonical unit names, one header contract.
+    for name,key in (('RAW_VALUES','RAW_MUTATE'),('UNIT_NAMES','UNITNAME_MUTATE'),('HEADERS','HEADER_MUTATE')):
+        pat=r'^'+name+r' checks=(\d+) bad=(\d+)$'
+        got=re.findall(pat,(output/'render.log').read_text(),re.M)
+        report[name.lower()]=got
+        if len(got)!=1 or int(got[0][0])==0 or int(got[0][1])!=0:report['status']='FAIL';continue
+        me=dict(env,**{key:'1'});me.pop('SMC_UI_SHOTS',None)
+        lp=output/(key.lower()+'.log')
+        with lp.open('w') as log:mrun=subprocess.run([str(output/'host/test')],cwd=work,env=me,stdout=log,stderr=subprocess.STDOUT,timeout=600)
+        pm=re.findall(pat,lp.read_text(),re.M)
+        report[key]={'exit':mrun.returncode,'counts':pm}
+        if mrun.returncode==0 or len(pm)!=1 or int(pm[0][1])==0:report['status']='FAIL'
     pix=re.findall(r'^GLYPH_PIXELS checks=(\d+) missing=(\d+) damaged=(\d+)$',(output/'render.log').read_text(),re.M)
     report['glyphPixelScope']='active 909/808 controls: positive raster deltas, own bank/cell bounds and final-frame survival'
     report['glyphPixels']=pix
@@ -135,6 +147,15 @@ def run(source,output):
     (output / 'screen-text.json').write_text(json.dumps(visible, indent=2) + '\n')
     report['screenText'] = {key: value for key, value in visible.items() if key != 'screen_text'}
     if visible['known_instructional_copy']:
+        report['status'] = 'FAIL'
+    # Negative fixtures for the text rules: each must be caught.
+    from scan_text import truncated_words, CRYPTIC, is_instruction
+    fixtures = {'truncated': 'RELEAS' in truncated_words({'a': {'RELEAS'}, 'b': {'RELEASE'}}),
+                'plural_ok': not truncated_words({'a': {'LOOP'}, 'b': {'LOOPS', 'STALLS', 'STALL'}}),
+                'cryptic': bool(CRYPTIC.search('<> \u2191\u2193 PARA \u2192')),
+                'instruction': is_instruction('SEQ + SEL: SLIDER LANE')}
+    report['textFixtures'] = fixtures
+    if not all(fixtures.values()):
         report['status'] = 'FAIL'
     (output/'result.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report));return 0 if report['status']=='PASS' else 1
 

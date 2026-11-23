@@ -32,3 +32,7 @@ static unsigned r22_roll_bands,r22_roll_screens,r22_roll_missing;
 /* Row 7 units: values formatted with a unit during the audited frame. */
 typedef struct { char num[16],unit[8]; unsigned ref; } unit_fmt;
 static unit_fmt unit_seen[512];static unsigned unit_nseen,unit_checks,unit_missing;
+/* Page compliance: raw 0..127 readouts, unit spelling, header contract. */
+typedef struct { char num[16],name[16]; unsigned ref; int raw; } raw_fmt;
+static raw_fmt raw_seen[512];static unsigned raw_nseen,raw_checks,raw_bad;
+static unsigned unitname_checks,unitname_bad,header_checks,header_bad;

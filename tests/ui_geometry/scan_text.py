@@ -45,6 +45,32 @@ def is_instruction(caption):
     return bool(INSTRUCTION.search(caption))
 
 
+# UI-SOURCE-OF-TRUTH: no cryptic footer/navigation glyph strings ("<> ↑↓ PARA →").
+CRYPTIC = re.compile(r"<>|[\u2190-\u2193]|\bPARA\b")
+
+
+def truncated_words(screens):
+    """Words clipped by a character budget (RELEAS for RELEASE, MARAC for MARACAS):
+    a word of five or more letters that is another visible word minus its last one
+    or two letters. Plurals and past tenses are real words, not clipping."""
+    words = defaultdict(set)
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            for word in re.findall(r"[A-Za-z]+", caption):
+                words[word.upper()].add(screen)
+    found = {}
+    for word in words:
+        if len(word) < 5:
+            continue
+        for longer in words:
+            tail = longer[len(word):]
+            if longer.startswith(word) and 1 <= len(tail) <= 2 and tail not in ("S", "D", "ED", "ES", "ER", "R"):
+                found[word] = sorted(words[word])
+    return found
+
+
 def scan(log):
     screens = defaultdict(set)
     traced = defaultdict(int)
@@ -73,6 +99,14 @@ def scan(log):
         for caption in captions:
             if is_instruction(caption) and screen not in findings.get(caption, []):
                 findings.setdefault(caption, []).append(screen)
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            if CRYPTIC.search(caption) and screen not in findings.get(caption, []):
+                findings.setdefault(caption, []).append(screen)
+    for word, ids in truncated_words(screens).items():
+        findings.setdefault("TRUNCATED " + word, []).extend(ids)
     for suffix in (": THIS TRACK", ": THE PATTERN", ": THE SOUND"):
         for screen, captions in screens.items():
             for caption in captions:

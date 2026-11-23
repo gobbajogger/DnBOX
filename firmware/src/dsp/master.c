@@ -27,7 +27,7 @@ static const x0x_param_t MST_P[MST_NPARAMS] = {
     {"THRESH", 127, 95, 0},           /* -48 .. 0 dB: 95 = -12 dB */
     {"RATIO", 9, 0, RATIO_N},         /* 1:1 = off */
     {"ATTACK", 127, 60, 0},           /* 0.1 .. 100 ms, exponential: 60 = ~2.6 ms */
-    {"RELEAS", 127, 60, 0},           /* 10 .. 1500 ms, exponential: 60 = ~110 ms */
+    {"RELEASE", 127, 60, 0},          /* 10 .. 1500 ms, exponential: 60 = ~110 ms */
     {"MAKEUP", 127, 0, 0},            /* 0 .. 24 dB */
     {"MIX", 127, 127, 0},             /* dry .. wet */
     {"PUMP", 127, 0, 0},              /* 0 .. 24 dB of kick-keyed ducking */
@@ -480,11 +480,12 @@ X0X_COLD void master_format(const master_t *m, int i, char *b)
     case MST_CUTOFF: {
         float fc = 30.0f * fm_exp2f((float)p * (9.23f / 127.0f));
         if (fc >= 1000.0f)
-            put_num(b, fc / 1000.0f, 1, "k");
+            put_num(b, fc / 1000.0f, 1, "kHz");
         else
             put_num(b, fc, 0, "Hz");
         return;
     }
+    case MST_RESO: put_num(b, (float)p * (100.0f / 127.0f), 0, "%"); return;
     default: {
         const x0x_param_t *d = &MST_P[i];
         if (d->names) {

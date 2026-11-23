@@ -268,6 +268,33 @@ static void required_units(const char *screen) {
   if(!has_unit){unit_missing++;printf("UNIT_MISSING screen=%s ref=%08x value=[%s] unit=[%s]\n",screen,u->ref,u->num,u->unit);}
  }
 }
+/* Page compliance (UI-SOURCE-OF-TRUTH "Pan/units", "Keep a consistent header"). */
+static void required_no_raw(const char *screen) {
+ unsigned n=raw_nseen;raw_nseen=0;
+ for(unsigned i=0;i<n;i++){int drawn=0;for(unsigned k=0;k<geo_nframe;k++)if(!strcmp(geo_frame[k].text,raw_seen[i].num))drawn=1;
+  if(!drawn)continue;raw_checks++;
+  if(!raw_seen[i].raw)continue;
+  if(strstr(raw_seen[i].name,"VEL")||strstr(raw_seen[i].name,"Vel"))continue;   /* genuine MIDI velocity */
+  raw_bad++;printf("RAW_VALUE screen=%s ref=%08x name=%s value=[%s]\n",screen,raw_seen[i].ref,raw_seen[i].name,raw_seen[i].num);}
+}
+static void required_unit_names(const char *screen) {
+ static const char *const ok[]={"st","ms","s","Hz","kHz","dB","%","bpm","bar","steps","ct","oct","x"};
+ for(unsigned i=0;i<unit_nseen;i++){const char *u=unit_seen[i].unit;int good=0;
+  for(unsigned k=0;k<sizeof ok/sizeof*ok;k++)if(!strcmp(u,ok[k]))good=1;
+  unitname_checks++;if(!good){unitname_bad++;printf("UNIT_NAME screen=%s ref=%08x value=[%s] unit=[%s]\n",screen,unit_seen[i].ref,unit_seen[i].num,u);}}
+}
+static void required_header(const char *screen) {
+ /* Overlays (hold-button help, modals) may use the context slot; partial edge
+  * redraws do not repaint the bar. Every other page: NAME, context, BPM, battery. */
+ if(!strncmp(screen,"help-",5)||!strncmp(screen,"modal-",6)||!strncmp(screen,"edge-",5))return;
+ int name=0,ctx=0,bpm=0;
+ for(unsigned k=0;k<geo_nframe;k++){const geo_label *e=&geo_frame[k];if(e->y>=HDR_H)continue;
+  if(e->x<=8&&e->f==&FONT_B)name=1;
+  else if(e->x>=120&&e->x<180&&(e->text[0]=='P'||e->text[0]=='S'||!strncmp(e->text,"STEP",4)))ctx=1;
+  else if(e->x>=150){const char *q=e->text;int d=*q!=0;for(;*q;q++)if(*q<'0'||*q>'9')d=0;if(d)bpm=1;}}
+ header_checks++;
+ if(!name||!ctx||!bpm){header_bad++;printf("HEADER_MISSING screen=%s name=%d context=%d bpm=%d\n",screen,name,ctx,bpm);}
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -279,6 +306,9 @@ static void geo_audit(const char *screen) {
  required_drum_content(screen);
  required_battery(screen);
  required_r22_roll(screen);
+ required_no_raw(screen);
+ required_unit_names(screen);
+ required_header(screen);
  required_units(screen);
  geo_enabled=0;
  for(unsigned i=0;i<geo_nframe;i++) {
@@ -439,5 +469,8 @@ int main(void)
     printf("PAN_FORMAT checks=%u bad=%u\n",pan_format_checks,pan_format_bad);
     printf("R22_ROLL screens=%u missing=%u\n",r22_roll_screens,r22_roll_missing);
     printf("UNITS checks=%u missing=%u\n",unit_checks,unit_missing);
-    return unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
+    printf("RAW_VALUES checks=%u bad=%u\n",raw_checks,raw_bad);
+    printf("UNIT_NAMES checks=%u bad=%u\n",unitname_checks,unitname_bad);
+    printf("HEADERS checks=%u bad=%u\n",header_checks,header_bad);
+    return raw_bad||unitname_bad||!unitname_checks||header_bad||!header_checks||unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }
