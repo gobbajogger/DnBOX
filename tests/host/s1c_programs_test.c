@@ -3,8 +3,7 @@
  * six voices with its own delay and reverb, and stays finite. Also checks the RAM rules:
  * the part does not grow the backend union and the effects fit the Chicago FX2 arena,
  * which is re-initialised when the part retires.
- * Usage: test [pack]. Without a pack (it is built by tools/pack_synthone_factory.py,
- * not committed) the program walk prints SKIP and only INIT is checked.
+ * Usage: test pack. A missing or invalid pack is a failure, not an INIT-only pass.
  * Deadline overruns: host wall time per 256-frame block against its 5.8 ms period; this is a
  * coarse host check, the device figure comes from fm1-live. */
 #define _POSIX_C_SOURCE 199309L
@@ -90,8 +89,9 @@ int main(int argc, char **argv)
     play(0);
     unsigned programs = s1_part_programs();
     if (!pack || !programs) {
-        printf("SKIP s1c programs: no pack (set S1_PACK); INIT nonfinite=%u\n", nonfinite);
-        return nonfinite != 0;
+        fprintf(stderr, "Required Synth One pack missing or invalid; INIT nonfinite=%u\n", nonfinite);
+        free(pack);
+        return 1;
     }
     assert(programs == ORIGINAL_SYNTHONE_PROGRAMS);
     for (unsigned k = 1; k <= programs; ++k) play(k);
