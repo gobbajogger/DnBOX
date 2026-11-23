@@ -104,3 +104,47 @@ def instrument(root):
     sig='static UI_DRAW void dv_glyph(pref_t r, float ev, float ox, float oy, float sx, float sy, uint16_t col)'
     wrapper=sig+'\n{\n    uint16_t before[CV_MAX];pixel_snapshot(before);\n    first_original_dv_glyph(r,ev,ox+(getenv("PIXEL_MUTATE_SHIFT")?80:0),oy,sx,sy,col);\n    uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;\n    if(geo_enabled&&getenv("PIXEL_MUTATE_BLANK"))memcpy(cv_px,before,cv_w*cv_h*sizeof *before);\n    pixel_finish(before,owner);\n    if(geo_enabled&&getenv("PIXEL_MUTATE_OVERPAINT"))memcpy(cv_px,before,cv_w*cv_h*sizeof *before);\n}\n'
     s=module.wrap(s,sig,'dv_glyph',wrapper);p.write_text(s)
+
+    # L11 pan: every pan the walk formats (is_pan or any control named Pan)
+    # must read L50..L1, C, R1..R50 with no unit. PAN_MUTATE emits raw numbers.
+    p=root/'firmware/src/app/ui.c';s=p.read_text()
+    sig='X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)'
+    wrapper=sig+"""
+{
+    first_original_pref_value_of(r,v,num,unit);
+    if(!geo_enabled)return;
+    if(unit[0] && num[0] && unit_nseen<512 && strlen(num)<16 && strlen(unit)<8) {
+        unit_fmt *u=&unit_seen[unit_nseen++];strcpy(u->num,num);strcpy(u->unit,unit);
+        u->ref=((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c;
+        if(getenv("UNIT_MUTATE"))unit[0]=0;   /* a formatter that loses its unit */
+    }
+    const x0x_param_t *d=r.kind==R_ENG?pref_desc(r):0;
+    int named=d&&(d->name[0]=='P'||d->name[0]=='p')&&(d->name[1]=='a'||d->name[1]=='A')&&(d->name[2]=='n'||d->name[2]=='N')&&!d->name[3];
+    if(!named&&!is_pan(r))return;
+    if(getenv("PAN_MUTATE")){put_i(num,v);unit[0]=0;}
+    char want[8];
+    if(v==64)strcpy(want,"C");
+    else snprintf(want,sizeof want,"%c%d",v<64?'L':'R',v<64?((64-v)*50+32)/64:((v-64)*50+31)/63);
+    pan_format_checks++;
+    if(strcmp(num,want)||unit[0]||v<0||v>127){pan_format_bad++;printf("PAN_FORMAT_BAD ref=%u:%u:%u:%u v=%d got=[%s%s] want=[%s]\\n",r.kind,r.a,r.b,r.c,v,num,unit,want);}
+}
+"""
+    s=module.wrap(s,sig,'pref_value_of',wrapper)
+    p.write_text(s)
+    p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
+    a='static void dv_header_battery(int x, int y)\n{'
+    s=once(s,a,a+'\n    if(getenv("BATTERY_MUTATE"))return;');p.write_text(s)
+    # Row 7: the synth sequencer (303A/303B, every engine) stays on the R22
+    # piano roll. R22_MUTATE drops the roll from SEQ, as an R23 step page would.
+    p=root/'firmware/src/app/ui.c';s=p.read_text()
+    sig='static UI_DRAW void draw_303(int band, int gen)'
+    wrapper=sig+"""
+{
+    if(geo_enabled && !gen && ui.view==V_SEQ) {
+        if(getenv("R22_MUTATE"))return;
+        r22_roll_bands++;
+    }
+    first_original_draw_303(band,gen);
+}
+"""
+    s=module.wrap(s,sig,'draw_303',wrapper);p.write_text(s)

@@ -61,6 +61,16 @@ static void required_drum_content(const char *screen) {
    if(page==0)snprintf(caption,sizeof caption,"K%d %s",UI_FIRST_KNOB+k,k==0?"TUNE":"SOUND");
    else strcpy(caption,"KIT ACCENT");
   }
+  if(ui.part==PART_909 && ui.sel[PART_909]==DR_BD) {
+   /* Approved 909 Kick layout (837530d9): the AMP bank is one physical-knob
+    * caption with its value, and the kick KIT row names velocity depth. */
+   if(drum_amp_ref(r)) {
+    char joined[64];snprintf(joined,sizeof joined,"K%d DECAY %s",X0X_SMK_CAPTIONS?5:1,value);
+    presence_checks++;if(!seen_text(joined)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=kick-amp-caption expected=[%s]\n",screen,joined);}
+    continue;
+   }
+   if(r.kind==R_ENG && r.b==NDRUM && k==0)strcpy(caption,"VELOCITY DEPTH");
+  }
   const char *expected[2]={caption,value};
   for(int n=0;n<2;n++){presence_checks++;if(!seen_text(expected[n])){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s]\n",screen,n?"value+unit":"label",expected[n]);}}
  }
@@ -151,8 +161,7 @@ static void required_other_content(const char *screen) {
     if(first<0 || stage<0 || stage>3){presence_missing++;printf("MISSING_CONTENT screen=%s kind=synth-envelope invalid-owner-or-stage\n",screen);continue;}
     if(bank==ORIGINAL_SOUND_JUNO) {
      pref_value_of(r,matrix_value(r),num,unit);
-     snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
-              !strcmp(unit,"%") ? "%" : "");
+     snprintf(label,sizeof label,"%s%s",num,!strcmp(unit,"%") ? "%" : "");
      if(strcmp(unit,"%")) {
       expect_region(screen,"synth-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
       synth_presence_checks++;
@@ -201,7 +210,7 @@ static void required_drum_pixels(const char *screen) {
  for(int k=0;k<4;k++) {
   pref_t r=pg.r[page][k];if(r.kind==R_NONE)continue;
   uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
-  unsigned pixels=0,missing=0,outside=0;
+  unsigned pixels=0,missing=0,outside=0;int bx0=240,by0=240,bx1=-1,by1=-1;
   int x0=cells==1?6:6+228*k/cells,x1=cells==1?234:6+228*(k+1)/cells;
   if(ui.part!=PART_808&&ui.sel[ui.part]==DR_BD&&KICK_AMP(r)){x0=3;x1=237;height=240-y;} /* 837530d99 lower LEVEL/TIME panel */
   if(ui.part==PART_808&&ui.sel[PART_808]==D8_CP){
@@ -209,13 +218,54 @@ static void required_drum_pixels(const char *screen) {
    else if(k==0||k==2){x0=k?150:40;x1=k?205:88;y=50;height=26;}
    else {x0=11;x1=230;if(matrix_value(PR(R_ENG,T_808,D8_CP,4))){y=114;height=52;}else{y=k==1?98:142;height=24;}}
   }
+  if(ui.part==PART_909&&ui.sel[PART_909]==DR_BD&&drum_amp_ref(r)&&pg.group[page]!=GR_KIT){
+   /* Approved 909 Kick AMP: a 32 px K5 DECAY summary bank; its LEVEL/TIME
+    * curve fills the lower panel below that bank, inside the screen. */
+   x0=6;x1=234;y+=32;height=237-y;
+  }
   for(int sy=0;sy<240;sy++)for(int sx=0;sx<240;sx++)if(pixel_frame_owner[sy*240+sx]==owner){
    pixels++;if(fb[sy*240+sx]!=pixel_frame_color[sy*240+sx])missing++;
+   if(sx<bx0)bx0=sx;if(sx>bx1)bx1=sx;if(sy<by0)by0=sy;if(sy>by1)by1=sy;
    if(sx<x0||sx>=x1||sy<y||sy>=y+height)outside++;
   }
   pixel_checks++;
   if(!pixels){pixel_missing++;printf("GLYPH_PIXEL_MISSING screen=%s ref=%u:%u:%u:%u\n",screen,r.kind,r.a,r.b,r.c);}
-  if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height);}
+  if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d drawn=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height,bx0,by0,bx1+1,by1+1);}
+ }
+}
+/* L11: every reached top bar draws the 4-level battery (outline, tip, three
+ * cells: level 0..3) in the final frame; the walk rotates the level. */
+static unsigned battery_checks,battery_missing,battery_level_seen[4];
+static void required_battery(const char *screen) {
+ int level=plat_battery(),bars=level<0?0:level>3?3:level,bad=0;
+ uint16_t ink=swap16(SOUND_GRAY),off=swap16(SOUND_LINE);
+ for(int x=219;x<233;x++)bad+=fb[5*240+x]!=ink||fb[12*240+x]!=ink;
+ for(int y=5;y<13;y++)bad+=fb[y*240+219]!=ink||fb[y*240+232]!=ink;
+ for(int y=7;y<11;y++)for(int x=233;x<235;x++)bad+=fb[y*240+x]!=ink;
+ for(int cell=0;cell<3;cell++)for(int y=7;y<11;y++)for(int x=221+cell*4;x<224+cell*4;x++)
+  bad+=fb[y*240+x]!=(cell<bars?ink:off);
+ battery_checks++;battery_level_seen[bars]++;
+ if(bad){battery_missing++;printf("BATTERY_MISSING screen=%s level=%d pixels=%d\n",screen,level,bad);}
+}
+/* Row 7: every reached synth-sequencer screen is the R22 piano roll: both
+ * main bands drawn by the roll and its note area inked in the final frame. */
+static void required_r22_roll(const char *screen) {
+ unsigned bands=r22_roll_bands;r22_roll_bands=0;
+ if(ui.view!=V_SEQ||!is_303()||ui.overlay!=O_NONE||ui.help)return;
+ unsigned ink=0;
+ for(int y=HDR_H+4;y<HDR_H+2*BAND_H-4;y++)for(int x=0;x<240;x++)ink+=fb[y*240+x]!=swap16(C_BLACK);
+ r22_roll_screens++;
+ if(bands!=2||ink<200){r22_roll_missing++;printf("R22_ROLL_MISSING screen=%s bands=%u ink=%u\n",screen,bands,ink);}
+}
+/* Row 7: a value drawn on its own must have its unit drawn in the same frame. */
+static void required_units(const char *screen) {
+ unsigned n=unit_nseen;unit_nseen=0;
+ for(unsigned i=0;i<n;i++) {
+  const unit_fmt *u=&unit_seen[i];int drawn=0,has_unit=0;
+  for(unsigned k=0;k<geo_nframe;k++){if(!strcmp(geo_frame[k].text,u->num))drawn=1;if(strstr(geo_frame[k].text,u->unit))has_unit=1;}
+  if(!drawn)continue;
+  unit_checks++;
+  if(!has_unit){unit_missing++;printf("UNIT_MISSING screen=%s ref=%08x value=[%s] unit=[%s]\n",screen,u->ref,u->num,u->unit);}
  }
 }
 static unsigned audit_frames;
@@ -227,6 +277,9 @@ static void geo_audit(const char *screen) {
  required_strip_content(screen);
  required_other_content(screen);
  required_drum_content(screen);
+ required_battery(screen);
+ required_r22_roll(screen);
+ required_units(screen);
  geo_enabled=0;
  for(unsigned i=0;i<geo_nframe;i++) {
   geo_label e=geo_frame[i];unsigned expected=0,missing=0;
@@ -244,6 +297,7 @@ static void geo_audit(const char *screen) {
  if(audit_frames==0 && getenv("AUDIT_MUTATE_ZERO"))audited=0;
  printf("AUDIT {\"kind\":\"screen\",\"id\":\"%s\",\"texts\":%u,\"findings\":%u}\n",screen,audited,geo_findings-before);
  audit_frames++;
+ host_battery_level=(int)(audit_frames%4u); /* next reached screen shows the next level */
 }
 
 int main(void)
@@ -367,7 +421,7 @@ int main(void)
     }
     for(int modal=0;modal<4;modal++) {
       setup(V_HOME,PART_909);
-      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT?","SAMPLES ARE KEPT");
+      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT","SAMPLES KEPT; EDITS LOST");
       if(modal==1)say("SAVED",0);
       if(modal==2)say("NEXT: PAT 16",0);
       if(modal==3)run_action(ACT_ABOUT,0);
@@ -380,5 +434,10 @@ int main(void)
     printf("WALK {\"kind\":\"complete\",\"screens\":%u}\n",total);
     printf("AUDIT {\"kind\":\"complete\",\"screens\":%u}\n",audit_frames);
     printf("GEOMETRY findings=%u screens=%u\n",geo_findings,total);
-    printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);return geo_findings||presence_missing||pixel_missing||pixel_damaged?1:0;
+    printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);
+    printf("BATTERY checks=%u missing=%u levels=%u,%u,%u,%u\n",battery_checks,battery_missing,battery_level_seen[0],battery_level_seen[1],battery_level_seen[2],battery_level_seen[3]);
+    printf("PAN_FORMAT checks=%u bad=%u\n",pan_format_checks,pan_format_bad);
+    printf("R22_ROLL screens=%u missing=%u\n",r22_roll_screens,r22_roll_missing);
+    printf("UNITS checks=%u missing=%u\n",unit_checks,unit_missing);
+    return unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }

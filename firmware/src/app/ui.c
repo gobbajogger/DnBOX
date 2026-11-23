@@ -173,7 +173,7 @@ static const char *part_s(int i)
     if (part_is_303(i)) {
         int v=i-PART_303A,b=engine_bass_bank(v);
 #if X0X_BASS_TAGGED_SOUND
-        if(engine_bass_sound_bank(&proj.sound,v)<0)return "?";
+        if(engine_bass_sound_bank(&proj.sound,v)<0)return PART_N[i];
 #endif
         if (b == ORIGINAL_SOUND_JUNO) return b == engine_bass_bank(1-v)?(v?"SJ6B":"SJ6A"):"SJ6";
         if (b == ORIGINAL_SOUND_SYNTHONE) return b == engine_bass_bank(1-v) ?
@@ -6367,7 +6367,7 @@ static UI_DRAW void draw_song(int band)
         if (seq.song_on && seq.playing && k == seq.song_pos)
             play_icon(26, y + 1, seq.song_rec ? RGB(255, 80, 70) : C_WHITE);
         if (k == sg->len) {                            /* one past the end: where the song grows */
-            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY   WHITE KEY: ADD BAR", k == ui.song_sel ? C_WHITE : C_DIM);
+            cv_text(50, vc(&FONT_XS, y, 11), &FONT_XS, k ? "END" : "EMPTY", k == ui.song_sel ? C_WHITE : C_DIM);
             continue;
         }
         for (int pos = 0; pos < NPARTS; pos++) {
@@ -6464,7 +6464,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
         cv_rect(x+1,122-o,13,1,C_LINE);
         cv_rect(x+1+pan*12/127,120-o,2,5,ink);
     }
-    cv_text(8,128-o,&FONT_T,"LEVEL / PAN",C_GRAY);
+    cv_text(8,128-o,&FONT_T,"LEVEL dB / PAN",C_GRAY);
 }
 
 /* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch ≤10 Hz; skip if shape/write

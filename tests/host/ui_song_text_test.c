@@ -14,10 +14,10 @@ static double status_luminance(uint16_t color)
 }
 static int32_t observed_song_text(int32_t x,int32_t y,const felucca_font_t *f,const char *s,uint16_t c)
 {
-    empty_text+=!strcmp(s,"EMPTY   WHITE KEY: ADD BAR");end_text+=!strcmp(s,"END");
-    if(!strcmp(s,"EMPTY   WHITE KEY: ADD BAR"))empty_color=c;if(!strcmp(s,"END"))end_color=c;
-    explanatory_text+=strstr(s,"WHITE KEYS ADD BARS")!=0;
-    int status=!strcmp(s,"EMPTY   WHITE KEY: ADD BAR")||!strcmp(s,"END");
+    empty_text+=!strcmp(s,"EMPTY");end_text+=!strcmp(s,"END");
+    if(!strcmp(s,"EMPTY"))empty_color=c;if(!strcmp(s,"END"))end_color=c;
+    explanatory_text+=strstr(s,"WHITE KEY")!=0;
+    int status=!strcmp(s,"EMPTY")||!strcmp(s,"END");
     if(status){CHECK(cv_w*cv_h<=240*69);memcpy(status_background,cv_px,cv_w*cv_h*2);}
     int32_t result=cv_text(x,y,f,s,c);
     if(status)for(unsigned i=0;i<cv_w*cv_h;i++)if(cv_px[i]!=status_background[i] && cv_px[i]==swap16(c)){
