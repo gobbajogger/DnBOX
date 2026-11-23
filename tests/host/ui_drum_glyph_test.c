@@ -48,7 +48,7 @@ static void test_dispatch(void)
     setup(V_PART, PART_808); ui.sel[PART_808] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 1, "Tone") == DG_LPF);
     ui.sel[PART_808] = 1; build_pages(); CHECK(role_of(0, 1, "Tone") == DG_SHELLS);
-    ui.sel[PART_808] = 2; build_pages(); int found = 0; for (int k = 0; k < 4; k++) if (pg.r[0][k].kind != R_NONE && !strcmp(matrix_name(pg.r[0][k]), "SOUND")) { found = 1; CHECK(drum_strip_role(pg.r[0][k]) == DG_SOUND); } CHECK(found);
+    ui.sel[PART_808] = 2; build_pages(); int found = 0; for (int k = 0; k < 4; k++) if (pg.r[0][k].kind != R_NONE && !strcmp(matrix_name(pg.r[0][k]), "TYPE")) { found = 1; CHECK(drum_strip_role(pg.r[0][k]) == DG_SOUND); } CHECK(found);
     /* every drawn control on every 909/808 voice page has a glyph */
     for (int part = PART_909; part <= PART_808; part++) for (int v = 0; v < 11; v++) {
         setup(V_PART, part); ui.sel[part] = (uint8_t)v; *page_of(V_PART) = 0; build_pages();

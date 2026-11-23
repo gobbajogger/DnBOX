@@ -1,3 +1,4 @@
+#include <ctype.h>
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Semantic-caption geometry on real production frames reached by this walker.
  * Does not substitute for component/panel/glyph geometry or native fit. */
@@ -44,28 +45,29 @@ static void required_drum_content(const char *screen) {
   }
   if(ui.part==PART_808 && ui.sel[PART_808]==D8_CP){
    if(page==0 && (k==1||k==3)){
-    char physical[32];snprintf(physical,sizeof physical,"K%d %c %d%%",UI_FIRST_KNOB+k,k==1?'A':'D',(matrix_value(r)*100+63)/127);
-    const char *title=matrix_value(PR(R_ENG,T_808,D8_CP,4))?"MARACAS AD":k==1?"MARACAS ATTACK":"CLAP DECAY";
+    /* one readout per stage (FINAL-REFERENCES): the physical 99% duration, lettered only in the
+     * shared MARACAS AD row; the knob % only where the owner has no curve */
+    int ma=matrix_value(PR(R_ENG,T_808,D8_CP,4))!=0;
+    const char *title=ma?"MARACAS AD":k==1?"MARACAS ATTACK":"CLAP DECAY";
+    drum_curve_t c;double ms=-1;
+    if(k==1){float m;engine_param_si(T_808,D8_CP,3,matrix_value(r),&m);ms=m;}
+    else if(ma){if(engine_drum808_param_curve_preview(D8_CP,2,1,matrix_value(r),&c)==D8S_MA+1)ms=c.fall*4.60517f;}
+    else ms=350.*pow(8.,matrix_value(r)/127.)*.0385*log(100.);
+    char physical[40],t[24];
+    if(ms<0)snprintf(t,sizeof t,"%d%%",(matrix_value(r)*100+63)/127);
+    else{char *q=t;q=put_d1(q,(float)ms,0);put_s(q,"ms");}
+    if(ma)snprintf(physical,sizeof physical,"%c %s",k==1?'A':'D',t);else snprintf(physical,sizeof physical,"%s",t);
     const char *required[2]={title,physical};for(int n=0;n<2;n++){presence_checks++;if(!seen_text(required[n])){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-stage expected=[%s]\n",screen,required[n]);}}
-    if(k==1){float ms;engine_param_si(T_808,D8_CP,3,matrix_value(r),&ms);int tenth=(int)(ms*10+.5f);char time[32];if(tenth<100)snprintf(time,sizeof time,"99%% %d.%dms",tenth/10,tenth%10);else snprintf(time,sizeof time,"99%% %dms",(tenth+5)/10);presence_checks++;if(!seen_text(time)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-rise-time expected=[%s]\n",screen,time);}}
-    if(k==3&&!matrix_value(PR(R_ENG,T_808,D8_CP,4))){
-     /* Independent admitted CP pot law and nominal 99% fall, not view window. */
-     double ms=350.*pow(8.,matrix_value(r)/127.)*.0385*log(100.);
-     int tenth=(int)(ms*10+.5);char time[32];
-     if(tenth<100)snprintf(time,sizeof time,"99%% %d.%dms",tenth/10,tenth%10);
-     else snprintf(time,sizeof time,"99%% %dms",(tenth+5)/10);
-     presence_checks++;if(!seen_text(time)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=bound-fall-time expected=[%s]\n",screen,time);}
-    }
     continue;
    }
-   if(page==0)snprintf(caption,sizeof caption,"K%d %s",UI_FIRST_KNOB+k,k==0?"TUNE":"SOUND");
+   if(page==0)snprintf(caption,sizeof caption,"%s",k==0?"TUNE":"TYPE");
    else strcpy(caption,"KIT ACCENT");
   }
   if(ui.part==PART_909 && ui.sel[PART_909]==DR_BD) {
    /* Approved 909 Kick layout (837530d9): the AMP bank is one physical-knob
     * caption with its value, and the kick KIT row names velocity depth. */
    if(drum_amp_ref(r)) {
-    char joined[64];snprintf(joined,sizeof joined,"K%d DECAY %s",X0X_SMK_CAPTIONS?5:1,value);
+    char joined[64];snprintf(joined,sizeof joined,"DECAY %s",value);
     presence_checks++;if(!seen_text(joined)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=kick-amp-caption expected=[%s]\n",screen,joined);}
     continue;
    }
@@ -83,11 +85,11 @@ static int seen_region(const char *text,int x0,int y0,int x1,int y1) {
 static void expect_region(const char *screen,const char *kind,const char *text,int x0,int y0,int x1,int y1) {
  presence_checks++;if(!seen_region(text,x0,y0,x1,y1)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s] region=%d,%d..%d,%d\n",screen,kind,text,x0,y0,x1,y1);}
 }
-/* 03c8daba6: a selected envelope row draws "K5 A " and its value as separate runs;
- * any other row keeps the joined "K5 A 50" caption. */
+/* A selected envelope row draws the stage caption "A " and its value as separate runs;
+ * any other row keeps the joined "A 50" caption (no knob-number prefix). */
 static void expect_envelope(const char *screen,const char *kind,const char *label,int x0,int y0,int x1,int y1) {
  char prefix[64];const char *v=label;int spaces=0;
- while(*v&&spaces<2){if(*v==' ')spaces++;v++;}
+ while(*v&&spaces<1){if(*v==' ')spaces++;v++;}
  snprintf(prefix,sizeof prefix,"%.*s",(int)(v-label),label);
  presence_checks++;
  if(seen_region(label,x0,y0,x1,y1)||(*v&&seen_region(prefix,x0,y0,x1,y1)&&seen_region(v,x0,y0,x1,y1)))return;
@@ -102,7 +104,7 @@ static void required_other_content(const char *screen) {
   for(int row=ui.list_top;row<ui.list_n&&row<ui.list_top+visible;row++) {
    pref_t r=list_rows[row];char label[64],num[64],unit[8];int y=HDR_H+(row-ui.list_top)*pitch+(pitch-23-extra)/2;
    if(r.kind==R_HDR){hdr_name(r.a,label);expect_region(screen,"list-section",label,0,y,240,y+23+extra);list_presence_checks++;continue;}
-   snprintf(label,sizeof label,"%s",caps_of(pref_name(r)));expect_region(screen,"list-label",label,0,y,240,y+23+extra);list_presence_checks++;
+   list_naming=1;snprintf(label,sizeof label,"%s",caps_of(pref_name(r)));list_naming=0;expect_region(screen,"list-label",label,0,y,240,y+23+extra);list_presence_checks++;
    if(r.kind==R_SECTION||r.kind==R_ACT||r.kind==R_BTNAME||r.kind==R_PARTON)continue;
    pref_value(r,num,unit);
    if(visible==9 && r.kind==R_ENG && pref_desc(r) && pref_desc(r)->names)
@@ -141,7 +143,7 @@ static void required_other_content(const char *screen) {
     int stage=(r.c-5)%4;
     CHECK(stage==k);
     pref_value_of(r,matrix_value(r),num,unit);
-    snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
+    snprintf(label,sizeof label,"%c %s%s","ADSR"[stage],num,
              !strcmp(unit,"%") ? "%" : "");
     expect_envelope(screen,"synthone-envelope",label,k*width,y,(k+1)*width+4,y+height);
     synth_presence_checks++;
@@ -166,7 +168,7 @@ static void required_other_content(const char *screen) {
       expect_region(screen,"synth-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
       synth_presence_checks++;
      }
-    } else snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
+    } else snprintf(label,sizeof label,"%c %d%%","ADSR"[stage],(matrix_value(r)*100+63)/127);
     expect_envelope(screen,"synth-envelope",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
    }
    snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;
@@ -295,6 +297,82 @@ static void required_header(const char *screen) {
  header_checks++;
  if(!name||!ctx||!bpm){header_bad++;printf("HEADER_MISSING screen=%s name=%d context=%d bpm=%d\n",screen,name,ctx,bpm);}
 }
+/* #62 type scale at 240x240 (UI-DEFECT-TESTS-SPEC): a label's cap height >= 8 px, a value's
+ * (a number the walk formatted through pref_value) >= 11 px. Cap = measured ink rows of "0H". */
+static unsigned type_checks,type_bad,type_census[5][32];
+static int font_cap(const felucca_font_t *f) {
+ static const felucca_font_t *seen[16];static int cap[16];static unsigned n;
+ for(unsigned i=0;i<n;i++)if(seen[i]==f)return cap[i];
+ unsigned was=geo_enabled;geo_enabled=0;cv_begin(240,40,0);cv_text(2,2,f,"0H",65535);
+ int top=-1,bot=-1;for(int y=0;y<40;y++)for(int x=0;x<60;x++)if(cv_px[y*240+x]){if(top<0)top=y;bot=y;}
+ geo_enabled=was;int c=top<0?0:bot-top+1;if(n<16){seen[n]=f;cap[n++]=c;}return c;
+}
+static void required_type_scale(const char *screen) {
+ if(!strncmp(screen,"help-",5))return;     /* hold-button help sheets: documented exception */
+ for(unsigned k=0;k<geo_nframe;k++){const geo_label *e=&geo_frame[k];if(e->y<HDR_H||!e->text[0])continue;
+  int cap=font_cap(e->f),fn=e->value;
+  /* primary knob readouts (cell_value) and large drum readouts are values: >= 11 px. Compact
+   * strip/cell readouts (fn 2..4, small drum) are secondary context in approved layouts and
+   * share the label floor; they are counted separately in the census. */
+  int primary=fn==1||(fn==4&&e->f!=&FONT_T),need=primary?11:8;
+  type_census[fn][cap<32?cap:31]++;type_checks++;
+  if(cap<need){type_bad++;if(type_bad<=40)printf("TYPE_SCALE_BAD screen=%s fn=%d text=[%s] cap=%d need=%d x=%d y=%d\n",screen,fn,e->text,cap,need,e->x,e->y);}}
+}
+/* Calm pages (FINAL-REFERENCES 23 Nov, MASTER-level): the selected value shown once, no filler
+ * values repeated for uniformity, no label printed twice, no knob-number prefix, no listed
+ * abbreviation. Text below the header bar only; help sheets are exempt. */
+static unsigned dupread_checks,dupread_bad,duplabel_checks,duplabel_bad,kprefix_checks,kprefix_bad,abbrev_checks,abbrev_bad;
+static int letters(const char *t){int n=0;for(;*t;t++)n+=(*t>='A'&&*t<='Z')||(*t>='a'&&*t<='z');return n;}
+static int has_word(const char *t,const char *w){size_t n=strlen(w);
+ for(const char *q=t;(q=strstr(q,w));q++){int l=q==t||!isalnum((unsigned char)q[-1]),r=!isalnum((unsigned char)q[n]);if(l&&r)return 1;}return 0;}
+static void required_calm_text(const char *screen) {
+ if(!strncmp(screen,"help-",5))return;
+ static const char *const abbrev[]={"BRK","CHI","MIA","CMPLX","Cmplx","RTG2X","Rtg2x","RELEAS","TRANSP","A LEN","B LEN","BChnc","LEN","DIR","FDBK"};
+ for(unsigned k=0;k<geo_nframe;k++){const geo_label *e=&geo_frame[k];if(e->y<HDR_H||!e->text[0])continue;
+  const char *t=e->text;
+  kprefix_checks++;
+  for(const char *q=t;*q;q++)if(*q=='K'&&q[1]>='1'&&q[1]<='8'&&(q==t||!isalnum((unsigned char)q[-1]))&&(q[2]==' '||isalpha((unsigned char)q[2]))){
+   kprefix_bad++;printf("KNOB_PREFIX screen=%s text=[%s]\n",screen,t);break;}
+  abbrev_checks++;
+  for(unsigned i=0;i<sizeof abbrev/sizeof*abbrev;i++)if(has_word(t,abbrev[i])){abbrev_bad++;printf("ABBREV screen=%s word=%s text=[%s]\n",screen,abbrev[i],t);break;}
+  for(unsigned j=0;j<k;j++){const geo_label *o=&geo_frame[j];if(o->y<HDR_H||strcmp(o->text,t)||(o->x==e->x&&o->y==e->y))continue;
+   if(e->value&&o->value&&e->ref&&e->ref==o->ref){dupread_bad++;printf("DUP_READOUT screen=%s ref=%08x text=[%s]\n",screen,e->ref,t);break;}
+   /* a repeated name inside one section/row band (24 px); group-scoped names under different
+    * titled groups (Miami CARRIER WAVE vs XMOD WAVE) are separate controls */
+   static const char *const benign[]={"kHz","Hz","ms","dB","bpm","steps","oct","ON","OFF"};   /* units and list values */
+   int ok=0;for(unsigned i=0;i<sizeof benign/sizeof*benign;i++)if(!strcmp(t,benign[i]))ok=1;
+   if(!ok&&!e->value&&!o->value&&letters(t)>=3&&abs(o->y-e->y)<=24){duplabel_bad++;printf("DUP_LABEL screen=%s text=[%s]\n",screen,t);break;}}
+  if(e->value)dupread_checks++;else duplabel_checks++;}
+/* uniformity filler: one value text drawn by strip readouts on 6+ strips (edge walks set
+  * every control to its min/max on purpose, so they are exempt) */
+ if(!strncmp(screen,"edge-",5))return;
+ for(unsigned k=0;k<geo_nframe;k++){const geo_label *e=&geo_frame[k];if(e->y<HDR_H||(e->value!=2&&e->value!=3))continue;
+  unsigned n=0,first=1;for(unsigned j=0;j<geo_nframe;j++){const geo_label *o=&geo_frame[j];if((o->value==2||o->value==3)&&o->y>=HDR_H&&!strcmp(o->text,e->text)){n++;if(j<k)first=0;}}
+  if(first&&n>=6){dupread_bad++;printf("DUP_UNIFORM screen=%s text=[%s] strips=%u\n",screen,e->text,n);}}
+}
+/* Row 63 dead space: the largest rectangle of background (the frame's two most common colours)
+ * inside the main area stays under 25% of the 240x240 screen. Data canvases that are empty only
+ * because the walk has no data are exempt and listed: SONG rows (empty song), synth SEQ rolls (no
+ * notes), the MASTER scope (silence); help sheets and partial edge redraws too. */
+static unsigned dead_checks,dead_bad;
+static int u16cmp(const void *a,const void *b){return (int)*(const uint16_t*)a-(int)*(const uint16_t*)b;}
+static void required_dead_space(const char *screen) {
+ static const char *const exempt[]={"help-","edge-","view-06-","list-view-06-","engine-seq-","view-08-part-02-","view-08-part-03-","home-"};
+ for(unsigned i=0;i<sizeof exempt/sizeof*exempt;i++)if(!strncmp(screen,exempt[i],strlen(exempt[i])))return;
+ if(ui.view==V_MIX&&cur_page()==3)return;                       /* MASTER scope */
+ enum{Y0=HDR_H,H=240-HDR_H};static uint16_t px[240*H];memcpy(px,fb+Y0*240,sizeof px);
+ qsort(px,240*H,2,u16cmp);uint16_t c1=0,c2=0;int n1=0,n2=0;
+ for(int i=0;i<240*H;){int j=i;while(j<240*H&&px[j]==px[i])j++;int n=j-i;
+  if(n>n1){c2=c1;n2=n1;c1=px[i];n1=n;}else if(n>n2){c2=px[i];n2=n;}i=j;}
+ static int hist[240];memset(hist,0,sizeof hist);int best=0,bx=0,by=0,bw=0,bh=0;
+ for(int y=0;y<H;y++){for(int x=0;x<240;x++){uint16_t c=fb[(Y0+y)*240+x];hist[x]=(c==c1||c==c2)?hist[x]+1:0;}
+  int st[241],sh[241],top=0;
+  for(int x=0;x<=240;x++){int cur=x<240?hist[x]:0,start=x;
+   while(top&&sh[top-1]>=cur){top--;int a=sh[top]*(x-st[top]);if(a>best){best=a;bx=st[top];bw=x-st[top];bh=sh[top];by=y-bh+1;}start=st[top];}
+   st[top]=start;sh[top]=cur;top++;}}
+ dead_checks++;
+ if(best*4>240*240){dead_bad++;printf("DEAD_SPACE screen=%s area=%.3f box=%d,%d %dx%d\n",screen,best/(240.*240.),bx,by+Y0,bw,bh);}
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -306,6 +384,9 @@ static void geo_audit(const char *screen) {
  required_drum_content(screen);
  required_battery(screen);
  required_r22_roll(screen);
+ required_type_scale(screen);
+ required_calm_text(screen);
+ required_dead_space(screen);
  required_no_raw(screen);
  required_unit_names(screen);
  required_header(screen);
@@ -470,7 +551,14 @@ int main(void)
     printf("R22_ROLL screens=%u missing=%u\n",r22_roll_screens,r22_roll_missing);
     printf("UNITS checks=%u missing=%u\n",unit_checks,unit_missing);
     printf("RAW_VALUES checks=%u bad=%u\n",raw_checks,raw_bad);
+    for(int v=0;v<5;v++){static const char *const N[5]={"label","cell_value","strip_value","strip_value_fit","dv_value_text"};printf("TYPE_CENSUS %s:",N[v]);for(int c=0;c<32;c++)if(type_census[v][c])printf(" cap%d=%u",c,type_census[v][c]);printf("\n");}
+    printf("TYPE_SCALE checks=%u bad=%u\n",type_checks,type_bad);
+    printf("DUP_READOUT checks=%u bad=%u\n",dupread_checks,dupread_bad);
+    printf("DUP_LABEL checks=%u bad=%u\n",duplabel_checks,duplabel_bad);
+    printf("KNOB_PREFIX checks=%u bad=%u\n",kprefix_checks,kprefix_bad);
+    printf("ABBREV checks=%u bad=%u\n",abbrev_checks,abbrev_bad);
+    printf("DEAD_SPACE checks=%u bad=%u\n",dead_checks,dead_bad);
     printf("UNIT_NAMES checks=%u bad=%u\n",unitname_checks,unitname_bad);
     printf("HEADERS checks=%u bad=%u\n",header_checks,header_bad);
-    return raw_bad||unitname_bad||!unitname_checks||header_bad||!header_checks||unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
+    return type_bad||dupread_bad||duplabel_bad||kprefix_bad||abbrev_bad||dead_bad||raw_bad||unitname_bad||!unitname_checks||header_bad||!header_checks||unit_missing||!unit_checks||geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks||r22_roll_missing||r22_roll_screens<8?1:0;
 }

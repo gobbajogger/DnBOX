@@ -500,7 +500,7 @@ static const char *const KEYSOUND_N[] = {"STOPPED", "ALWAYS"};
 static const char *const LIGHTS_N[] = {"OFF", "ON", "KEYS"};   /* ON: the keys, and the unlit buttons glow */
 static const x0x_param_t SEQ_P[NSQ] = {
     {"SWING", 100, 0, 0}, {"LENGTH", NSTEPS - 1, 15, 0}, {"RATE", NRATES - 1, 0, RATE_N}, {"LENGTH", NSTEPS - 1, 15, 0},
-    {"RATE", NRATES - 1, 0, RATE_N}, {"DIR", 3, 0, DIR_N}, {"TRANSP", 48, 24, 0}, {"TEMPO", 255, 105, 0},
+    {"RATE", NRATES - 1, 0, RATE_N}, {"DIRECTION", 3, 0, DIR_N}, {"TRANSPOSE", 48, 24, 0}, {"TEMPO", 255, 105, 0},
     {"ACCENT", 127, 88, 0}, {"CLOCK OUT", 1, 1, ONOFF_N}, {"NOTES OUT", 1, 0, ONOFF_N}, {"THEME", 5, 1, THEME_N},
     {"LIGHTS", 2, 1, LIGHTS_N}, {"KEY SOUND", 1, 0, KEYSOUND_N},
     {"AUTOSAVE", 1, 1, ONOFF_N},
@@ -1051,6 +1051,18 @@ static int in_pattern(pref_t r)
 
 /* a knob's label: mixer refs name their part */
 static int name_is(const x0x_param_t *d, const char *n);
+/* "SUPERJ6 POLY" beside ENGINE SUPERJ6 reads POLY: the engine is named once (calm SOUND rows) */
+static const char *preset_shown(const char *name)
+{
+    static const char *const engines[] = {"SUPERJ6 ", "SYNTH ONE ", "CHICAGO ", "MIAMI "};
+    for (unsigned i = 0; name && i < sizeof engines / sizeof *engines; i++) {
+        size_t n = 0;
+        while (engines[i][n] && (name[n] == engines[i][n] || name[n] - 32 == engines[i][n])) n++;
+        if (!engines[i][n] && name[n]) return name + n;
+    }
+    return name;
+}
+static int list_naming;   /* set while a SEL list row is named: full names there */
 static const char *pref_name(pref_t r)
 {
     if(r.kind==R_SECTION)return GLOBAL_SECTIONS[r.a<6?r.a:0];
@@ -1061,18 +1073,26 @@ static const char *pref_name(pref_t r)
         put_s(put_s(t, part_name(r.a % NPARTS)), " MIDI CH");
         return t;
     }
-    static const char *const MIXN[NPARTS][MX_NPARAMS] = {{"909", "909 RV", "909 DL", "909 PAN", "909 CUT"},
-                                                         {"808", "808 RV", "808 DL", "808 PAN", "808 CUT"},
+    static const char *const MIXN[NPARTS][MX_NPARAMS] = {{"909", "909 REV", "909 DLY", "909 PAN", "909 CUT"},
+                                                         {"808", "808 REV", "808 DLY", "808 PAN", "808 CUT"},
                                                          {"BASS A", "A REV", "A DLY", "A PAN", "A CUT"},
                                                          {"BASS B", "B REV", "B DLY", "B PAN", "B CUT"},
-                                                         {"BREAK", "BRK RV", "BRK DL", "BRK PAN", "BRK CUT"}};
-    static const char *const PATN[6][2] = {{"909 LEN", "808 LEN"}, {"909 RATE", "808 RATE"}, {"A LEN", "B LEN"},
-                                           {"A RATE", "B RATE"}, {"A DIR", "B DIR"}, {"A TRANSP", "B TRANSP"}};
+                                                         {"BREAK", "BREAK REV", "BREAK DLY", "BREAK PAN", "BREAK CUT"}};
+    static const char *const PATN[6][2] = {{"909 LENGTH", "808 LENGTH"}, {"909 RATE", "808 RATE"}, {"A LENGTH", "B LENGTH"},
+                                           {"A RATE", "B RATE"}, {"A DIRECTION", "B DIRECTION"}, {"A TRANSPOSE", "B TRANSPOSE"}};
     static const char *const CHN[MX_NPARAMS] = {"LEVEL", "REV", "DLY", "PAN", "CUT"};
     const x0x_param_t *d = pref_desc(r);
+    /* a drum's variant selector (TOM/CONGA, CLAP/MARACAS) reads TYPE: the bank above it is SOUND */
+    if (r.kind == R_ENG && (r.a == T_808 || r.a == T_909) && d && d->names && name_is(d, "Sound")) return "TYPE";
     /* Presentation only: retain the native P.Dpth identity and pitch-sweep glyph. */
     if(r.kind==R_ENG && r.a==T_909 && name_is(d,"P.Dpth"))return "Depth";
-    static const char *const SEQN[6] = {"LENGTH", "RATE", "LENGTH", "RATE", "DIRECTION", "TRANSP"};
+    /* Presentation only: breaks.c keeps BB Gen's short ids (find_ref keys); the page spells them out. */
+    if(((r.kind==R_ENG && r.a==T_BRK) || r.kind==R_BRKSET) && d) {
+        static const char *const BRK_ID[]={"Cmplx","Rtg2x","Rtg3x","Rtg4x","Rtg8x","BChnc","A Len","B Len"};
+        static const char *const BRK_SHOW[]={"Complexity","Retrig 2x","Retrig 3x","Retrig 4x","Retrig 8x","B Chance","A Length","B Length"};
+        for(unsigned i=0;i<sizeof BRK_ID/sizeof *BRK_ID;i++)if(name_is(d,BRK_ID[i]))return BRK_SHOW[i];
+    }
+    static const char *const SEQN[6] = {"LENGTH", "RATE", "LENGTH", "RATE", "DIRECTION", "TRANSPOSE"};
     if (r.kind == R_ENG && r.a == T_303)
         return ui_original_name((unsigned)engine_bass_sound_bank(&proj.sound,r.b),r.c);
     if (r.kind >= R_DLEN && r.kind <= R_BTRANS)       /* SEQ: the part's own; a list elsewhere: whose */
@@ -1091,10 +1111,13 @@ static const char *pref_name(pref_t r)
         case FX_RV_TONE: case FX_DL_TONE: return "TONE";
         case FX_DL_TIME: return "TIME";
         case FX_DL_FDBK: return "FEEDBACK";
-        case FX_RV_HPF: return "REV LOW CUT";
-        case FX_DL_HPF: return "DLY LOW CUT";
-        case FX_RV_LEVEL: return "REV RETURN";
-        case FX_DL_LEVEL: return "DLY RETURN";
+        /* on the FX page the panel title names the effect, so its 60 px strips drop REV/DLY
+         * ("REV LOW CUT" overran its strip); the SEL list keeps the full names (both have a LOW CUT) */
+#define FX_STRIP (ui.view == V_FX && !list_naming)
+        case FX_RV_HPF: return FX_STRIP ? "LOW CUT" : "REV LOW CUT";
+        case FX_DL_HPF: return FX_STRIP ? "LOW CUT" : "DLY LOW CUT";
+        case FX_RV_LEVEL: return FX_STRIP ? "RETURN" : "REV RETURN";
+        case FX_DL_LEVEL: return FX_STRIP ? "RETURN" : "DLY RETURN";
         case FX_DL_PING: return "PING-PONG";
         case FX_COMP: return "GLUE";
         default: break;
@@ -1385,6 +1408,17 @@ X0X_COLD static void pref_value_of(pref_t r, int v, char *num, char *unit)
             put_i(num, v * 100 / 127);
             put_s(unit, "%");
             return;
+        }
+        /* 808 CB/CY/OH/CH DECAY: a time, not a % (FINAL-REFERENCES). drum808_param_si keeps a
+         * normalized amount for these models, so read the engine's own fall curve for this pot
+         * value and show its nominal 99% decay, the convention the clap's "99% ..ms" uses. */
+        if (r.kind == R_ENG && r.a == T_808 && (r.b == D8_CB || r.b == D8_CY || r.b == D8_OH || r.b == D8_CH) &&
+            name_is(pref_desc(r), "Decay")) {
+            drum_curve_t c;
+            if (engine_drum808_param_curve_preview(r.b, r.c, -1, v, &c) && c.fall > 0.f) {
+                unit_value(X0X_U_MS, c.hold + c.fall * 4.6051702f, num, unit);
+                return;
+            }
         }
         { float x = 0.0f; int u = engine_param_si(r.a, r.b, r.c, v, &x);
           if (u != X0X_U_NONE) { unit_value(u, x, num, unit); return; } }
@@ -5255,6 +5289,23 @@ static int matrix_three_rows(void)
 static uint16_t dim(uint16_t c, int t) { return blend(C_BLACK, c, t); }
 
 static int32_t tw(const felucca_font_t *f, const char *s) { return text_w(f, s); }
+/* MIX strip names (38 px pitch): full words unless two neighbours would collide */
+static UI_DRAW void mix_strip_names(const char *nm[NPARTS])
+{
+    for (int pos = 0; pos < NPARTS; pos++) nm[pos] = part_display(part_at(pos));
+    for (int pos = 0; pos + 1 < NPARTS; pos++)
+        if (tw(&FONT_XS, nm[pos]) / 2 + tw(&FONT_XS, nm[pos + 1]) / 2 + 1 > 38) {   /* >= 1 px apart, different inks */
+            int wide = tw(&FONT_XS, nm[pos]) >= tw(&FONT_XS, nm[pos + 1]) ? pos : pos + 1;
+            nm[wide] = part_s(part_at(wide));
+        }
+}
+/* a part's full name where its column fits it (BREAK, CHICAGO, MIAMI); the short form only
+ * where it does not (FINAL-REFERENCES: BRK/CHI/MIA read as cryptic) */
+static UI_DRAW const char *part_fit(int p, const felucca_font_t *f, int width)
+{
+    const char *n = part_display(p);
+    return tw(f, n) <= width ? n : part_s(p);
+}
 
 /* gen_font measures these rows before encoding the bitmap, identically for
  * all codecs. Reading packed bytes as raw alpha would move the baseline. */
@@ -6062,13 +6113,12 @@ static UI_DRAW void draw_init_selector(int band)
         pref_t r = pg.r[cur_page()][k];
         char label[24], num[36], unit[8];
         char *end = label;
-        if (k < 2 && ui.overlay != O_LIST) end = put_s(put_i(put_s(end, "K"), UI_FIRST_KNOB + k), "  ");
         put_s(end, caps_of(pref_name(r)));
         pref_value(r, num, unit);
         const char *value = num;
         int glyph = UI_G_SOUND;
         if (k == 1) {
-            value = caps_of(matrix_preset_name(r.b));
+            value = caps_of(preset_shown(matrix_preset_name(r.b)));
             glyph = pref_read_only(r) ? UI_G_LOCK : UI_G_LIST;
         } else if (k == 2) {
             glyph = !strcmp_s(num, "READY") ? UI_G_CHECK : UI_G_HOLD;
@@ -6302,6 +6352,7 @@ static UI_DRAW void draw_home_live(int band)
     }
 }
 
+#define HOME_X0 45   /* first pattern cell; its last ends at 235, inside the 3..236 panel */
 static UI_DRAW void draw_home(int band)
 {
     if(ui.home_live){draw_home_live(band);return;}
@@ -6316,13 +6367,17 @@ static UI_DRAW void draw_home(int band)
     rbox(3,20-off,234,112,UI_PANEL_RADIUS,SOUND_FACE);
     for(int c=0;c<16;c++) {
         char n[4];put_i(n,c0+c+1);
-        text_c(43+c*12,24-off,&FONT_T,n,SOUND_GRAY);
+        text_c(HOME_X0+5+c*12,24-off,&FONT_T,n,SOUND_GRAY);
     }
     for(int pos=0;pos<NPARTS;pos++) {
         int p=part_at(pos),y=38+pos*18-off;
-        cv_text(9,y+1,&FONT_T,part_s(p),PART_COL[p]);
+        /* full names (BREAK/CHICAGO/MIAMI, FINAL-REFERENCES: no BRK/CHI/MIA) where they fit the
+         * 35 px column; same-engine A/B and the longer synth names keep the stable short names */
+        const char *name=part_display(p);
+        if(tw(&FONT_T,name)>HOME_X0-11)name=part_s(p);
+        cv_text(9,y+1,&FONT_T,name,PART_COL[p]);
         for(int c=0;c<16;c++) {
-            int pattern=c0+c,x=38+c*12,current=seq.ppat[p]==pattern;
+            int pattern=c0+c,x=HOME_X0+c*12,current=seq.ppat[p]==pattern;
             int cue=seq_cue_of(&seq,p),queued=cue==pattern&&cue!=seq.ppat[p];
             rbox(x,y,10,12,2,UI_N_SIDE);
             if(current)rframe(x,y,10,12,2,PART_COL[p]);
@@ -6351,7 +6406,7 @@ static UI_DRAW void draw_song(int band)
             cv_text(4, vc(&FONT_XS, y, 11), &FONT_XS, "BAR", C_GRAY);
             for (int pos = 0; pos < NPARTS; pos++) {
                 p = part_at(pos);
-                text_c(58 + pos * 36, vc(&FONT_XS, y, 11), &FONT_XS, part_s(p), PART_COL[p]);
+                text_c(58 + pos * 36, vc(&FONT_XS, y, 11), &FONT_XS, part_fit(p, &FONT_XS, 35), PART_COL[p]);
             }
             continue;
         }
@@ -6430,7 +6485,7 @@ static UI_DRAW void draw_drum_mix(int band, int k)
     uint16_t col=PART_COL[k];
     if(!band) {
         int saved=save_state();
-        cv_text(8,6,&FONT_T,engine_voice_name(t,selected),C_GRAY);
+        /* the edited voice is named once, in the panel title below (calm MIX, FINAL-REFERENCES) */
         text_r(232,6,&FONT_T,saved==SAVE_SAVED?"SAVED":header_save_label(saved),C_GRAY);
     }
     rbox(4,21-o,232,126,UI_PANEL_RADIUS,SOUND_FACE);
@@ -6455,13 +6510,11 @@ static UI_DRAW void draw_drum_mix(int band, int k)
             if(hit)cv_rect(x+7,107-hit-o,1,hit,col);
         }
         cv_rect(x+2,107-f-o,11,1,sel?C_WHITE:C_GRAY);
-        char number[16],unit[8];
-        pref_value_of(lv,level,number,unit);
-        text_c(x+7,107-o,&FONT_T,number,ink);
+        /* no per-strip number: the fader cap is the level, and the edited voice's value is
+         * printed once in the panel below (11 identical readouts were uniformity filler) */
         cv_rect(x+1,122-o,13,1,C_LINE);
         cv_rect(x+1+pan*12/127,120-o,2,5,ink);
     }
-    cv_text(8,128-o,&FONT_T,"LEVEL dB / PAN",C_GRAY);
 }
 
 /* WAVE page: mid-line plot of eng_scope (post-master L+R). Latch ≤10 Hz; skip if shape/write
@@ -6591,9 +6644,13 @@ static UI_DRAW void draw_mix(int band)
             if(engine_guard_active())text_r(229,49,&FONT_XS,"GUARD",C_AMB);
             return;
         }
-        for (int pos = 0; pos < NPARTS && !master && !wave; pos++) { /* strip names */
-            p = part_at(pos);
-            text_c(6 + pos * 38 + 13, 0, &FONT_XS, part_s(p), part_muted(p) ? C_LINE : PART_COL[p]);
+        if (!master && !wave) {                        /* strip names: full words unless two neighbours collide */
+            const char *nm[NPARTS];
+            mix_strip_names(nm);
+            for (int pos = 0; pos < NPARTS; pos++) {
+                p = part_at(pos);
+                text_c(6 + pos * 38 + 13, 0, &FONT_XS, nm[pos], part_muted(p) ? C_LINE : PART_COL[p]);
+            }
         }
         night_panel(0,14,118,31,0);
         night_panel(0,46,240,22,0);
@@ -6737,7 +6794,7 @@ static UI_DRAW void draw_perf(int band)
     for (k = 0; k < ENG_PROF_N; k++) {                /* each stage's share of the CPU */
         int x = (k & 1) * 118 + 4, y = (k >> 1) * 12;
         int stage = k < NPARTS ? part_at(k) : k;
-        cv_text(x, y, &FONT_XS, k < NPARTS ? part_s(stage) : SN_TAIL[k - NPARTS], C_GRAY);
+        cv_text(x, y, &FONT_XS, k < NPARTS ? part_display(stage) : SN_TAIL[k - NPARTS], C_GRAY);
         put_pct10(t, perf.stage[stage]);
         text_r(x + 108, y, &FONT_XS, t, C_WHITE);
     }
@@ -6908,7 +6965,10 @@ static UI_DRAW void draw_list(int band)
         int inset = has_bar ? 0 : 3;
         surface_panel(3,y+1,229,21+extra,sel,sel?dim(part_col(),6):SOUND_FACE,
                       sel?part_col():SOUND_EDGE,SOUND_SIDE);
-        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);
+        list_naming = 1;
+        const char *row_name = caps_of(pref_name(r));
+        list_naming = 0;
+        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, row_name, sel ? C_WHITE : C_GRAY);
         y += extra;
         if (r.kind == R_SECTION) {                     /* a GLOBAL category: its chevron */
             cv_line(221,y+8,225,y+11,sel?C_AMB:C_DIM);cv_line(225,y+11,221,y+14,sel?C_AMB:C_DIM);
@@ -6920,7 +6980,8 @@ static UI_DRAW void draw_list(int band)
                 if (release_label_box(X0X_RELEASE_LABEL, sel, &lx, &lw))
                     cv_text(lx, vc(&FONT_XS, y + 1 + inset, 18), &FONT_XS, X0X_RELEASE_LABEL, sel ? C_WHITE : C_HI);
             }
-            text_r(r.kind==R_SECTION?213:226,vc(&FONT_XS,y+1+inset,18),&FONT_XS,action_key_cue(),ac);
+            /* the SCALE cue on the selected row only: six identical cues were filler (calm lists) */
+            if (sel) text_r(r.kind==R_SECTION?213:226,vc(&FONT_XS,y+1+inset,18),&FONT_XS,action_key_cue(),ac);
             continue;
         }
         if(r.kind==R_BTNAME) {                       /* connected peers: one line, scrolls when long */
@@ -7417,7 +7478,7 @@ static UI_DRAW void preset_text(preset_text_t *out,const char *name,int tall)
 
 static UI_DRAW void draw_preset_name(int voice,int cx,int y,int height,uint16_t ink)
 {
-    preset_text_t text;preset_text(&text,matrix_preset_name(voice),height>49);
+    preset_text_t text;preset_text(&text,preset_shown(matrix_preset_name(voice)),height>49);
     int top=height>49?(text.lines==2?28:35):(text.lines==2?21:26);
     for(int i=0;i<text.lines;i++) text_c(cx,y+top+i*text.font->h,text.font,text.line[i],ink);
 }
@@ -7768,8 +7829,8 @@ static UI_DRAW void adsr_layout(const ui_adsr_t *e,int x0,int width,int xs[5],fl
 /* One physical slot/stage/percentage format for every full-row envelope. */
 static UI_DRAW void physical_stage_label(char *label,int slot,char stage,int raw)
 {
-    char *end=put_i(put_s(label,"K"),UI_FIRST_KNOB+slot);
-    *end++=' ';*end++=stage;*end++=' ';
+    char *end=label;(void)slot;   /* stage letter, no knob-number prefix (FINAL-REFERENCES) */
+    *end++=stage;*end++=' ';
     put_s(put_i(end,(raw*100+63)/127),"%");
 }
 /* The drum readouts all use the same unspaced physical number and unit. */
@@ -7891,8 +7952,8 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
             char num[16], unit[8];
             pref_t r = pg.r[p][e.slot[k]];
             pref_value_of(r, matrix_value(r), num, unit);
-            char *end = put_i(put_s(label, "K"), UI_FIRST_KNOB + e.slot[k]);
-            *end++ = ' '; *end++ = "ADSR"[k]; *end++ = ' ';
+            char *end = label;
+            *end++ = "ADSR"[k]; *end++ = ' ';
             put_s(end, active ? "" : num);
             /* The selected run's taller value font rises 1 px above the caption;
              * keep it clear of the row header's last ink row. */

@@ -8,7 +8,7 @@ static uint16_t captured[240*240];
 static void return_raster(void){
  if(cur_page()!=0 || ui.overlay!=O_NONE)return;
  memcpy(captured,fb,sizeof captured);
- const char *labels[1]={"REV RETURN"};
+ const char *labels[1]={"RETURN"};   /* FX strip: the REVERB panel title names the effect */
  for(int j=0;j<1;j++){
   int cell=3,cx=cell*60+30,ink=0,match=0,glyph=0;
   pref_t ref=PR(R_ENG,T_FX,0,j?FX_DL_LEVEL:FX_RV_LEVEL);

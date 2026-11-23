@@ -20,7 +20,7 @@ def instrument(root):
     a='    return x;\n}\n\nstatic int32_t cv_text('
     s=once(s,a,'''    if(geo_enabled) {
      if(geo_ntile>=256 || strlen(geo_text)>=128){fprintf(stderr,"geometry text overflow\\n");exit(1);}
-     geo_label *e=&geo_tile[geo_ntile++];e->f=f;e->x=geo_x;e->y=geo_y;e->col=c;strcpy(e->text,geo_text);
+     geo_label *e=&geo_tile[geo_ntile++];e->f=f;e->x=geo_x;e->y=geo_y;e->col=c;strcpy(e->text,geo_text);e->value=geo_value_fn&&!(geo_skip_a&&!strcmp(geo_text,geo_skip_a))&&!(geo_skip_b&&!strcmp(geo_text,geo_skip_b))?geo_value_fn:0;e->ref=e->value?geo_value_ref:0;
     }
 '''+a);p.write_text(s)
     p=root/'firmware/src/app/ui.c';s=p.read_text()
@@ -36,21 +36,22 @@ def instrument(root):
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_VALUE"))return;');p.write_text(s)
 
     p=root/'firmware/src/app/ui.c';s=p.read_text()
-    a='        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, caps_of(pref_name(r)), sel ? C_WHITE : C_GRAY);'
+    a='        cv_text(8, vc(sel ? &FONT_B : &FONT_S, y + 1 - inset, 18), sel ? &FONT_B : &FONT_S, row_name, sel ? C_WHITE : C_GRAY);'
     s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_LIST"))'+a.strip())
     a='static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int active, uint16_t col, int height, int night)\n{'
     s=once(s,a,a+'\n    if(getenv("PRESENCE_MUTATE_SYNTH"))return;');p.write_text(s)
     a='        text_c(31+e.slot[k]*59,y+8-off,&FONT_T,label,edited==k?hi:SOUND_GRAY);'
+    # caption "A 27%" (stage letter, value; no knob number since FINAL-REFERENCES 23 Nov)
     s=once(s,a,'''        if(getenv("PRESENCE_MUTATE_ENV_KNOB"))label[1]='0';
-        if(getenv("PRESENCE_MUTATE_ENV_STAGE"))label[3]='X';
-        if(getenv("PRESENCE_MUTATE_ENV_PERCENT"))label[5]='X';
+        if(getenv("PRESENCE_MUTATE_ENV_STAGE"))label[0]='X';
+        if(getenv("PRESENCE_MUTATE_ENV_PERCENT"))label[2]='X';
         if(!getenv("PRESENCE_MUTATE_ENV_MISSING"))
 '''+a);p.write_text(s)
 
 
     p=root/'firmware/src/app/ui.c';s=p.read_text()
     a='        text_c(cx, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), touched ? C_WHITE : C_GRAY);'
-    s=once(s,a,'        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
+    s=once(s,a,'        if(getenv("DUPLABEL_MUTATE"))text_c(cx+30, vc(&FONT_XS, mix_kit >= 0 && i == 0 ? 66 : 13, 10), &FONT_XS, caps_of(pref_name(r)), C_GRAY);\n        if(!getenv("PRESENCE_MUTATE_STRIP"))'+a.strip());p.write_text(s)
     a='            text_r(pickup?215:200, 3, &FONT_T, b, seq.ext ? C_AMB : C_HI);'
     s=once(s,a,'            if(!getenv("HEADER_MUTATE"))'+a.strip());p.write_text(s)
 
@@ -114,6 +115,7 @@ def instrument(root):
     wrapper=sig+"""
 {
     first_original_pref_value_of(r,v,num,unit);
+    geo_last_ref=1u+(((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c);
     if(!geo_enabled)return;
     {   /* never a raw 0..127 pot readout: a unitless number equal to the stored value */
         const x0x_param_t *dd=pref_desc(r);
@@ -143,6 +145,32 @@ def instrument(root):
 }
 """
     s=module.wrap(s,sig,'pref_value_of',wrapper)
+    p.write_text(s)
+
+    # #62 type scale: tag the text a value formatter draws (not its unit or caption).
+    # TYPESCALE_MUTATE draws the primary knob value (cell_value) in FONT_T, a compact face.
+    for path,sig,call,fn,skips in (
+        ('firmware/src/app/ui.c','static void cell_value(int cx, int y, const char *num, const char *unit, uint16_t c)','cx,y,num,unit,c',1,'unit,0'),
+        ('firmware/src/app/ui.c','static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink, const char *caption)','cx,y,num,unit,ink,caption',2,'unit,caption'),
+        ('firmware/src/app/ui.c','static UI_DRAW void strip_value_fit(int x, int y, char *num, const char *unit, uint16_t ink)','x,y,num,unit,ink',3,'unit,0'),
+        ('firmware/src/app/ui_drum_voice.inc','static UI_DRAW void dv_value_text(pref_t r, int ev_i, int cx, int y, uint16_t col, int large)','r,ev_i,cx,y,col,large',4,'0,0')):
+        p=root/path;s=p.read_text();name=sig.split('(')[0].split()[-1]
+        a,b=skips.split(',')
+        ref='1u+(((unsigned)r.kind<<24)|((unsigned)r.a<<16)|((unsigned)r.b<<8)|r.c)' if fn==4 else 'geo_last_ref'
+        # DUPREAD_MUTATE draws every primary knob readout a second time 20 px lower.
+        twice='    if(getenv("DUPREAD_MUTATE"))first_original_%s(cx,y+20,num,unit,c);\n'%name if fn==1 else ''
+        w=sig+'\n{\n    int was=geo_value_fn;unsigned wr=geo_value_ref;const char *sa=geo_skip_a,*sb=geo_skip_b;geo_value_fn=%d;geo_value_ref=%s;geo_skip_a=%s;geo_skip_b=%s;\n    first_original_%s(%s);\n%s    geo_value_fn=was;geo_value_ref=wr;geo_skip_a=sa;geo_skip_b=sb;\n}\n'%(fn,ref,a,b,name,call,twice)
+        s=module.wrap(s,sig,name,w)
+        if fn==1:
+            s=once(s,'    x = cv_text(x, y, &FONT_B, num, c);','    x = cv_text(x, y, getenv("TYPESCALE_MUTATE")?&FONT_T:&FONT_B, num, c);')
+        p.write_text(s)
+    # Calm-page text mutants: a knob-number prefix, a listed abbreviation, a repeated label.
+    p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
+    s=once(s,'put_s(caption,"DECAY ")','put_s(caption,getenv("KPREFIX_MUTATE")?"K5 DECAY ":"DECAY ")');p.write_text(s)
+    p=root/'firmware/src/app/ui.c';s=p.read_text()
+    # DEADSPACE_MUTATE leaves the 808/909 MIX strip panel undrawn.
+    s=once(s,'static UI_DRAW void draw_drum_mix(int band, int k)\n{','static UI_DRAW void draw_drum_mix(int band, int k)\n{\n    if(getenv("DEADSPACE_MUTATE"))return;')
+    s=once(s,'    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)','    if(getenv("ABBREV_MUTATE")&&ui.view==V_SEQ&&r.kind==R_DLEN+5)return "TRANSP";\n    if (r.kind >= R_DLEN && r.kind <= R_BTRANS)')
     p.write_text(s)
     p=root/'firmware/src/app/ui_drum_voice.inc';s=p.read_text()
     a='static void dv_header_battery(int x, int y)\n{'

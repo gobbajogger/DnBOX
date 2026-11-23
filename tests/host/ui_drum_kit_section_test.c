@@ -22,8 +22,8 @@ static void render_check(int choice,int state)
  cv_begin(240,FONT_T.h,SOUND_FACE);text_r(232,0,&FONT_T,page?"2/2":"1/2",SOUND_GRAY);
  for(int y=28;y<28+FONT_T.h;y++)for(int x=214;x<232;x++)CHECK(fb[y*240+x]==cv_px[(y-28)*240+x]);
  text_region("KEY SOUND OFF",91,28,80,SOUND_GRAY,"KIT_KEY_SOUND_CUE_LOST");
- text_region("K5 TUNE",63-text_w(&FONT_T,"K5 TUNE")/2,40,text_w(&FONT_T,"K5 TUNE"),SOUND_GRAY,"KIT_TUNE_CONTROL_LOST");
- text_region("K7 SOUND",177-text_w(&FONT_T,"K7 SOUND")/2,40,text_w(&FONT_T,"K7 SOUND"),SOUND_GRAY,"KIT_SOUND_CONTROL_LOST");
+ text_region("TUNE",63-text_w(&FONT_T,"TUNE")/2,40,text_w(&FONT_T,"TUNE"),SOUND_GRAY,"KIT_TUNE_CONTROL_LOST");
+ text_region("TYPE",177-text_w(&FONT_T,"TYPE")/2,40,text_w(&FONT_T,"TYPE"),SOUND_GRAY,"KIT_SOUND_CONTROL_LOST");
  text_region("KIT ACCENT",11,180,text_w(&FONT_T,"KIT ACCENT"),page?SOUND_INK:SOUND_GRAY,"KIT_ACCENT_CONTROL_LOST");
  /* Independently composed complete sixteen-step lane, including absolute labels. */
  cv_begin(240,16,SOUND_BASE);cv_rect(3,0,234,16,SOUND_FACE);

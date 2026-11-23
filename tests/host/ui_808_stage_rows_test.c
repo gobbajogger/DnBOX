@@ -86,11 +86,12 @@ int main(void){
   pref_set(PR(R_PALETTE,0,0,0),light?5:0);draw_header();draw_main();draw_knobs();draw_footer();
   expect_ink(13,88,"MARACAS ATTACK",SOUND_GRAY);
   expect_ink(13,132,"CLAP DECAY",SOUND_GRAY);
-  expect_ink(112,88,"99% 5.5ms",SOUND_GRAY);
+  /* one readout per stage: the physical 99% duration, right-aligned, no % beside it */
+  expect_ink(227-tw(&FONT_T,"5.5ms"),88,"5.5ms",SOUND_INK);
   /* Independent CP law: raw64 maps .35*8^(64/127) seconds;
    * its decay coefficient uses .0385 of that, 99% fall takes ln(100). */
   CHECK((int)(350.*pow(8.,64./127.)*.0385*log(100.)+.5)==177);
-  expect_ink(112,132,"99% 177ms",SOUND_GRAY);
+  expect_ink(227-tw(&FONT_T,"177ms"),132,"177ms",SOUND_INK);
   expect_ink(11,200,"HANDCLAP 808/7",part_col());
   char name[64];snprintf(name,sizeof name,"clap-two-real-owners-theme%d",light);shot(name);
  }
@@ -100,8 +101,10 @@ int main(void){
  for(int light=0;light<2;light++){
   pref_set(PR(R_PALETTE,0,0,0),light?5:0);draw_header();draw_main();draw_knobs();draw_footer();
   expect_ink(13,88,"MARACAS AD",SOUND_GRAY);
-  expect_ink(13,100,"K6 A 25%",SOUND_INK);
-  expect_ink(227-tw(&FONT_T,"K8 D 50%"),100,"K8 D 50%",SOUND_INK);
+  expect_ink(13,100,"A 5.5ms",SOUND_INK);
+  {drum_curve_t d;CHECK(engine_drum808_param_curve_preview(D8_CP,2,1,matrix_value(pg.r[0][3]),&d)==D8S_MA+1);
+   char want[24]="D ";put_s(put_d1(want+2,d.fall*4.60517f,0),"ms");
+   expect_ink(227-tw(&FONT_T,want),100,want,SOUND_INK);}
   char name[64];snprintf(name,sizeof name,"maracas-shared-ad-theme%d",light);shot(name);
  }
  test_cp_fall_geometry();

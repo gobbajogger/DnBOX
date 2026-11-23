@@ -7,7 +7,7 @@ base=root/'build/host/808-stage-row-mutants';base.mkdir(parents=True,exist_ok=Tr
 out=Path(tempfile.mkdtemp(prefix='run-',dir=base));(base/'latest-path.txt').write_text(str(out)+'\n')
 source=(root/'firmware/src/app/ui.c').read_bytes();inc=(root/'firmware/src/app/ui_drum_voice.inc').read_text()
 for name,old,new,marker in [
- ('missing-fall-time','if(decay_owner==D8S_CP+1)dv_nominal_stage_time(decay.fall*4.60517f,132-off);','/* negative: omit nominal CP fall duration */','FIXED_OWNER_STAGE_LABEL_MISSING'),
+ ('missing-fall-time',"dv_stage_value(label,'D',0,decay_owner==D8S_CP+1,","dv_stage_value(label,'D',0,0,",'FIXED_OWNER_STAGE_LABEL_MISSING'),
  ('missing-tick','cv_rect(230,y,3,1,SOUND_INK);','(void)y; /* negative: omit actual owner tick */','ACTUAL_OWNER_LEVEL_TICK_MISSING'),
  ('missing-preview','engine_drum808_param_curve_preview(D8_CP,3,choice,matrix_value(pg.r[0][1]),&attack)','engine_drum808_param_curve(D8_CP,3,&attack)','HELD_MA_TARGET_CURVE_MISMATCH'),
  ('wrong-owner','int selected=decay_owner==D8S_MA+1;','int selected=decay_owner==D8S_CP+1;','FIXED_OWNER_STAGE_LABEL_MISSING')]:

@@ -17,8 +17,16 @@ int main(void) {
   ui.pbank=bank;draw_main();
   for(int pos=0;pos<NPARTS;pos++)for(int c=0;c<16;c++) {
    int part=part_at(pos),current=seq.ppat[part]==bank*16+c;
-   CHECK(fb[(MAIN_Y+38+pos*18)*240+43+c*12]==swap16(current?PART_COL[part]:UI_N_SIDE));
+   CHECK(fb[(MAIN_Y+38+pos*18)*240+HOME_X0+5+c*12]==swap16(current?PART_COL[part]:UI_N_SIDE));
   }
  }
+ /* full part names in the row column, never BRK/CHI/MIA (FINAL-REFERENCES HOME-PATTERNS) */
+ static uint16_t name_mask[240*140];ui.pbank=0;
+ for(int pos=0;pos<NPARTS;pos++){int part=part_at(pos),y0=38+pos*18;const char *n=part_display(part);
+  if(tw(&FONT_T,n)>HOME_X0-11)n=part_s(part);
+  CHECK(strcmp(n,"BRK")&&strcmp(n,"CHI")&&strcmp(n,"MIA"));
+  cv_begin(240,140,SOUND_FACE);cv_text(9,y0+1,&FONT_T,n,PART_COL[part]);memcpy(name_mask,cv_px,sizeof name_mask);
+  draw_main();
+  for(int y=y0;y<y0+14;y++)for(int x=9;x<HOME_X0-1;x++)if(name_mask[y*240+x]!=swap16(SOUND_FACE))CHECK(fb[(MAIN_Y+y)*240+x]==name_mask[y*240+x]);}
  printf("HOME R22 grid/saved PASS %u checks\n",checks);return 0;
 }

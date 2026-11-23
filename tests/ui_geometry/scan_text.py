@@ -46,7 +46,13 @@ def is_instruction(caption):
 
 
 # UI-SOURCE-OF-TRUTH: no cryptic footer/navigation glyph strings ("<> ↑↓ PARA →").
-CRYPTIC = re.compile(r"<>|[\u2190-\u2193]|\bPARA\b")
+CRYPTIC = re.compile(r"<>|[\u2190-\u2193]|\bPARA\b|"
+                     # FINAL-REFERENCES: a knob number fused onto a label ("K5DECAY", "K5 DECAY 1.0s")
+                     r"\bK[1-8] ?DECAY\b")
+
+# Clipped words found on device that the prefix rule cannot see when the full word is
+# not drawn anywhere else (TRANSP had no TRANSPOSE on screen). Always findings.
+KNOWN_CLIPPED = {"TRANSP", "RELEAS", "MARAC"}
 
 
 def truncated_words(screens):
@@ -68,6 +74,8 @@ def truncated_words(screens):
             tail = longer[len(word):]
             if longer.startswith(word) and 1 <= len(tail) <= 2 and tail not in ("S", "D", "ED", "ES", "ER", "R"):
                 found[word] = sorted(words[word])
+        if word in KNOWN_CLIPPED:
+            found[word] = sorted(words[word])
     return found
 
 

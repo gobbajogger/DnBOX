@@ -46,8 +46,8 @@ static void selector_row(int row, const char *label, const char *value, int glyp
 static void selector_frame(const char *bank, const char *preset, const char *status, int locked)
 {
     ui_frame();
-    selector_row(0, BOARD_SMK37 ? "K5  ENGINE" : "K1  ENGINE", bank, UI_G_SOUND, 1);
-    selector_row(1, BOARD_SMK37 ? "K6  PRESET" : "K2  PRESET", preset, locked ? UI_G_LOCK : UI_G_LIST, 0);
+    selector_row(0, "ENGINE", bank, UI_G_SOUND, 1);
+    selector_row(1, "PRESET", preset, locked ? UI_G_LOCK : UI_G_LIST, 0);
     selector_row(2, "STATUS", status, !strcmp(status,"READY") ? UI_G_CHECK : UI_G_HOLD, 0);
     /* Number positions follow the sixteen physical white-key steps in bank 1. */
     uint16_t background = fb[230 * 240 + 239];
@@ -166,10 +166,10 @@ static void stock_selector(int voice)
     CHECK(engine_bass_bank(voice) == ORIGINAL_SOUND_SYNTHONE);
     CHECK(engine_bass_requested_bank(voice) == ORIGINAL_SOUND_JUNO);
     CHECK(engine_bass_preset_pending(voice) == 2);
-    selector_frame("SUPERJ6", "SUPERJ6 POLY", "HELD", 0);
+    selector_frame("SUPERJ6", "POLY", "HELD", 0);
     physical_detent(1, 1);
     CHECK(engine_bass_requested_preset(voice) == 1);
-    selector_frame("SUPERJ6", "SUPERJ6 PAD", "HELD", 0);
+    selector_frame("SUPERJ6", "PAD", "HELD", 0);
     shot(voice ? "stock-init-pending-b" : "stock-init-pending-a");
     engine_bass_off(voice);
     for (int n = 0; n < 1024 && engine_bass_preset_pending(voice); ++n) render_blocks(1);

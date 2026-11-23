@@ -28,7 +28,7 @@ class ScanText(unittest.TestCase):
 
     def test_labels_values_and_headers_pass(self):
         for caption in ("EMPTY", "RESET PROJECT", "SAMPLES KEPT; EDITS LOST", "BD: TRACK", "909: ALL TRACKS",
-                        "P1: PATTERN", "K5 DECAY 1.0S", "HOLD", "KEY SOUND", "KEYS + SCREEN", "PAD COLOURS",
+                        "P1: PATTERN", "DECAY 1.0S", "HOLD", "KEY SOUND", "KEYS + SCREEN", "PAD COLOURS",
                         "STEP LENGTH", "L50", "C", "R50", "+0.1st"):
             with self.subTest(caption=caption):
                 self.assertFalse(is_instruction(caption))
@@ -47,6 +47,19 @@ class ScanText(unittest.TestCase):
                          ["MARAC", "RELEAS"])
         result = scan(log({"list-04": ["RELEAS"], "view-01": ["RELEASE", "SONG"]}))
         self.assertIn("TRUNCATED RELEAS", result["known_instructional_copy"])
+
+    def test_known_clipped_flagged_without_full_word(self):
+        # TRANSP (synth SEQ) was clipped from TRANSPOSE, which no screen drew in full.
+        self.assertEqual(sorted(truncated_words({"a": {"TRANSP", "LENGTH"}})), ["TRANSP"])
+        self.assertEqual(truncated_words({"a": {"TRANSPOSE", "A TRANSPOSE"}}), {})
+
+    def test_knob_number_fused_label_flagged(self):
+        for caption in ("K5DECAY 1.0S", "K5 DECAY 1.0s", "K1 DECAY"):
+            with self.subTest(caption=caption):
+                self.assertTrue(CRYPTIC.search(caption))
+        for caption in ("DECAY 1.0s", "DECAY", "K5 A 27%"):
+            with self.subTest(caption=caption):
+                self.assertFalse(CRYPTIC.search(caption))
 
     def test_plurals_and_abbreviations_pass(self):
         self.assertEqual(truncated_words({"a": {"LOOP", "STALL", "PATTERN", "REV", "ENV"},
