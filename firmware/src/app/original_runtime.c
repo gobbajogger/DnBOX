@@ -2,6 +2,9 @@
 #include "original_runtime.h"
 #include "../dsp/juno6_controls.h"
 #include "../x0x_cold.h"
+#if X0X_S1C
+#include "chicago_fx2_compact.h"
+#endif
 #include <string.h>
 
 static int runtime_result(original_runtime_part *p, int ok)
@@ -29,6 +32,17 @@ X0X_COLD int original_runtime_init(original_runtime_part *p, const uint8_t cell[
         rc=ORIGINAL_RUNTIME_OK;
     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
         s1_part_init(&p->dsp.synthone);
+#if X0X_S1C
+        /* The part's Chicago FX2 object is idle while it plays Synth One: its
+         * reverb lines and delay pool live there (retire re-initialises it). */
+        if (!fx || !fx->context) return p->status = ORIGINAL_RUNTIME_NEEDS_FX;
+        s1_part_bind(&p->dsp.synthone, fx->context);
+        {
+            unsigned program = original_sound_s1_program(cell);
+            /* A missing pack or program plays INIT: still a valid, selectable sound. */
+            if (program) (void)s1_part_program(&p->dsp.synthone, program - 1u);
+        }
+#endif
 #if X0X_SYNTHONE_PATCH
         if (original_sound_edit_mask(cell) & S1_PATCH_MASK) s1_part_apply_cell(&p->dsp.synthone, cell);
 #endif
@@ -89,9 +103,25 @@ int original_runtime_retire(original_runtime_part *p)
         int rc = original_chicago_backend_retire(&p->dsp.chicago);
         if (rc != ORIGINAL_CHICAGO_BACKEND_OK) return rc;
     }
+#if X0X_S1C
+    if (p->kind == ORIGINAL_SOUND_SYNTHONE && p->dsp.synthone.arena) {
+        (void)original_chicago_fx2_compact_init((original_chicago_fx2_compact *)(void *)p->dsp.synthone.arena);
+        p->dsp.synthone.arena = NULL;
+    }
+#endif
     p->status = ORIGINAL_RUNTIME_INVALID;
     return ORIGINAL_RUNTIME_OK;
 }
+#if X0X_S1C
+_Static_assert(sizeof(original_chicago_fx2_compact) >= S1C_ARENA_BYTES, "Synth One effects fit the Chicago FX2 arena");
+_Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "Synth One part does not grow the backend union");
+
+int original_runtime_s1_program(original_runtime_part *p, unsigned program)
+{
+    if (!p || p->status != ORIGINAL_RUNTIME_OK || p->kind != ORIGINAL_SOUND_SYNTHONE) return ORIGINAL_RUNTIME_INVALID;
+    return s1_part_program(&p->dsp.synthone, program) ? ORIGINAL_RUNTIME_OK : ORIGINAL_RUNTIME_INVALID;
+}
+#endif
 
 int original_runtime_param(original_runtime_part *p, unsigned parameter, float value)
 {
@@ -605,6 +635,9 @@ X0X_COLD int original_runtime_voice_view(const original_runtime_part *p, float *
         }
 #endif
     } else if (p->kind == ORIGINAL_SOUND_SYNTHONE) {
+#if X0X_S1C
+        (void)s1_part_voice_view(&p->dsp.synthone, level, modulation, state, key_down);
+#else
         const s1_dry_part *part = &p->dsp.synthone;
         int selected = -1;
         for (unsigned i = 0; i < S1_CORE_VOICES; ++i) {
@@ -620,6 +653,7 @@ X0X_COLD int original_runtime_voice_view(const original_runtime_part *p, float *
                      voice->amp.stage == DNBX_S1_ENVELOPE_RELEASE ? 3u : 1u;
             *key_down = part->down[selected];
         }
+#endif
     } else return 0;
     return 1;
 }

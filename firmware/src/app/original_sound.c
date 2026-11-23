@@ -4,6 +4,9 @@
 #if X0X_SYNTHONE_PATCH
 #include "s1_patch.h"
 #endif
+#if X0X_S1C
+#include "s1c_part.h"
+#endif
 #include <string.h>
 #include "x0x_cold.h"
 
@@ -83,9 +86,22 @@ static uint8_t original_sound_display_byte(unsigned kind, unsigned parameter, fl
 unsigned original_sound_count(unsigned kind)
 { return kind == ORIGINAL_SOUND_CHICAGO ? 22u : kind == ORIGINAL_SOUND_MIAMI ? 18u :
     kind == ORIGINAL_SOUND_JUNO ? ORIGINAL_JUNO_NPARAMS : kind == ORIGINAL_SOUND_SYNTHONE ? ORIGINAL_SYNTHONE_NPARAMS : 0u; }
+#if X0X_S1C
+#define S1_FACTORIES (1u + ORIGINAL_SYNTHONE_PROGRAMS)
+static unsigned s1_cell_program(const uint8_t *cell)
+{
+    return cell[21] ? (unsigned)(cell[21] & 0x3fu) << 7 | (cell[7] & 127u) : 0u;
+}
+unsigned original_sound_s1_program(const uint8_t cell[ORIGINAL_SOUND_BYTES])
+{
+    return cell && cell[29] == ORIGINAL_SOUND_SYNTHONE ? s1_cell_program(cell) : 0u;
+}
+#else
+#define S1_FACTORIES ORIGINAL_SYNTHONE_FACTORIES
+#endif
 unsigned original_sound_factories(unsigned kind)
 { return kind == ORIGINAL_SOUND_CHICAGO ? ORIGINAL_CHICAGO_FACTORIES : kind == ORIGINAL_SOUND_MIAMI ? 30u :
-    kind == ORIGINAL_SOUND_JUNO ? ORIGINAL_JUNO_FACTORIES : kind == ORIGINAL_SOUND_SYNTHONE ? ORIGINAL_SYNTHONE_FACTORIES : 0u; }
+    kind == ORIGINAL_SOUND_JUNO ? ORIGINAL_JUNO_FACTORIES : kind == ORIGINAL_SOUND_SYNTHONE ? S1_FACTORIES : 0u; }
 int original_sound_factory_source(unsigned kind, unsigned factory)
 {
     if (factory >= original_sound_factories(kind)) return -1;
@@ -139,7 +155,11 @@ X0X_COLD const char *original_sound_name(unsigned kind, unsigned factory)
     if (source < 0) return 0;
     return kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_program_name((unsigned)source) :
     kind == ORIGINAL_SOUND_MIAMI ? original_miami_program_name((unsigned)source) :
-    kind == ORIGINAL_SOUND_JUNO ? original_sound_juno_names[factory] : original_sound_synthone_names[factory];
+    kind == ORIGINAL_SOUND_JUNO ? original_sound_juno_names[factory] :
+#if X0X_S1C
+    factory ? s1_part_program_name(factory - 1u) :
+#endif
+    original_sound_synthone_names[0];
 }
 const x0x_param_t *original_sound_param(unsigned kind, unsigned parameter)
 {
@@ -187,6 +207,17 @@ int original_sound_valid(const uint8_t cell[ORIGINAL_SOUND_BYTES])
         (cell[29] == ORIGINAL_SOUND_SYNTHONE && !crush_edit && cell[ORIGINAL_SYNTHONE_CRUSH])) return 0;
     unsigned count = original_sound_count(cell[29]);
     if (!count || cell[30] >= original_sound_factories(cell[29])) return 0;
+#if X0X_S1C
+    /* Synth One program bytes [7] and [21]: checked here, then masked for the zero checks. */
+    uint8_t s1c_copy[ORIGINAL_SOUND_BYTES];
+    if (cell[29] == ORIGINAL_SOUND_SYNTHONE) {
+        if (cell[30] || (cell[21] && ((cell[21] & 0xc0u) != 0x40u || cell[7] > 127u)) || (!cell[21] && cell[7]) ||
+            s1_cell_program(cell) > ORIGINAL_SYNTHONE_PROGRAMS) return 0;
+        for (unsigned i = 0; i < ORIGINAL_SOUND_BYTES; ++i) s1c_copy[i] = cell[i];
+        s1c_copy[7] = s1c_copy[21] = 0;
+        cell = s1c_copy;
+    }
+#endif
 #if X0X_SYNTHONE_PATCH
     uint32_t mask = original_sound_edit_mask(cell);
     if (cell[29] == ORIGINAL_SOUND_SYNTHONE && (mask & S1_PATCH_MASK)) {
@@ -227,9 +258,12 @@ int original_sound_init(uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned kind, unsig
     } else if (kind == ORIGINAL_SOUND_SYNTHONE) {
         /* Init cell: performance defaults only. Full 150-parameter packing is not admitted. */
         next[0] = 64;
+#if X0X_S1C
+        if (factory) { next[7] = (uint8_t)(factory & 127u); next[21] = (uint8_t)(0x40u | factory >> 7); }
+#endif
     } else return 0;
     next[26] = 'O'; next[27] = 'S'; next[28] = ORIGINAL_SOUND_SCHEMA;
-    next[29] = (uint8_t)kind; next[30] = (uint8_t)factory;
+    next[29] = (uint8_t)kind; next[30] = (uint8_t)(kind == ORIGINAL_SOUND_SYNTHONE ? 0u : factory);
     memcpy(cell, next, sizeof next);
     return 1;
 }

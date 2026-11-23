@@ -143,6 +143,16 @@ if SUPERJ6_FACTORY not in ("0", "1"):
 if SUPERJ6_FACTORY == "1":
     ORIGINAL_SYNTH_BACKENDS.insert(0, "firmware/src/dsp/dnbx_core.c")
 
+# X0X_S1C=1: Synth One plays the compact engine (dsp/s1c) with its own delay and
+# reverb and the 694-program factory pack, instead of the dry INIT voice.
+S1C = os.environ.get("X0X_S1C", "0")
+if S1C not in ("0", "1"):
+    raise SystemExit("X0X_S1C: 0 or 1")
+if S1C == "1":
+    ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/app/s1_dry_part.c")] = "firmware/src/app/s1c_part.c"
+    ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/dsp/s1_dry_voice.c")] = "firmware/src/dsp/s1c/s1c.c"
+    ORIGINAL_SYNTH_BACKENDS += ["firmware/src/dsp/s1c/s1c_front.c", "firmware/src/dsp/s1pack/s1pack.c"]
+
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
 ORIGINAL_SYNTH_O2_UNITS = {
@@ -443,6 +453,8 @@ def app_compile_commands(flags, original_synth, wobble):
     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+    if S1C == "1":
+        flags = [*flags, "-DX0X_S1C=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
     if chance_probe not in ("0", "1"):
         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")

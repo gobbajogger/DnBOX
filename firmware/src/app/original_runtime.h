@@ -1,7 +1,11 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #pragma once
 #include "original_sound.h"
+#if X0X_S1C
+#include "s1c_part.h"         /* compact Synth One engine with its own delay/reverb */
+#else
 #include "s1_dry_part.h"
+#endif
 #include "../dsp/original_chicago_backend.h"
 #include "../dsp/original_miami_backend.h"
 #include "../dsp/juno6.h"
@@ -63,6 +67,10 @@ int original_runtime_key(original_runtime_part *, unsigned source, unsigned key,
 int original_runtime_release_source(original_runtime_part *, unsigned source);
 int original_runtime_cut_source(original_runtime_part *p, unsigned source);
 int original_runtime_all_off(original_runtime_part *);
+#if X0X_S1C
+/* Synth One only: load factory program n (pack order) or S1_PART_INIT. Cold path. */
+int original_runtime_s1_program(original_runtime_part *, unsigned program);
+#endif
 /* Source/voice ownership excludes residual insert output; selector fades that output separately. */
 int original_runtime_owned(const original_runtime_part *);
 int original_runtime_active(const original_runtime_part *);
