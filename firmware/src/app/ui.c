@@ -105,7 +105,17 @@ static const uint8_t WHITE_KEY[16] = {0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 
 static const uint8_t BLACK_KEY[11] = {1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25};
 
 enum { V_HOME, V_PART, V_GEN, V_FX, V_MIX, V_GLO, V_SONG, V_PERF, V_SEQ, NVIEWS };
-static const char *const VIEW_N[NVIEWS] = {"HOME", "", "TB-3PO", "FX", "MIX", "GLOBAL", "SONG", "PERF", "SEQ"};
+/* The SMK build fits the playable engines first. Keep the benchmark for
+ * host/FM-1 tests and explicitly enabled diagnostic builds only. */
+#ifndef X0X_UI_PERF
+#if BOARD_SMK37 && !defined(X0X_HOST) && !X0X_LCD_TRACE
+#define X0X_UI_PERF 0
+#else
+#define X0X_UI_PERF 1
+#endif
+#endif
+static const char *const VIEW_N[NVIEWS] = {"HOME", "", "TB-3PO", "FX", "MIX", "GLOBAL", "SONG",
+                                         X0X_UI_PERF ? "PERF" : "", "SEQ"};
 static const uint16_t PART_COLOURS[2][NPARTS] = {
     {RGB(255,150,40),RGB(255,72,64),RGB(130,240,90),RGB(70,205,255),RGB(214,120,255)},
     {RGB(139,69,0),RGB(172,35,29),RGB(40,104,30),RGB(0,96,132),RGB(117,49,148)}
@@ -335,6 +345,7 @@ static int32_t enc(int role)
     return v;
 }
 
+#if X0X_UI_PERF
 /* PERF (the performance screen and its test; see "performance" below) */
 enum { PT_IDLE = -1, PT_DONE = 3 };
 static struct {
@@ -354,6 +365,7 @@ static struct {
     uint32_t mute;
     float bpm;
 } perf = {.test = PT_IDLE};
+#endif
 
 static pattern_t *pat_of(int part) { return &proj.pat[seq.ppat[part]]; }
 static pattern_t *cur_pat(void) { return pat_of(ui.part); }    /* the pattern the part on screen plays */
@@ -513,11 +525,17 @@ static const x0x_param_t ACT_P[] = {
     {"", 0, 0, 0}, {"SAVE PROJECT", 0, 0, 0}, {"LOAD SAVED", 0, 0, 0},
     {"CLEAR THIS PART", 0, 0, 0}, {"CLEAR PATTERN", 0, 0, 0},
     {"COPY PATTERN", 0, 0, 0}, {"RESET PROJECT", 0, 0, 0}, {"ABOUT DnBOX", 0, 0, 0}, {"INSERT BAR", 0, 0, 0},
-    {"DELETE BAR", 0, 0, 0}, {"CLEAR SONG", 0, 0, 0}, {"PERFORMANCE", 0, 0, 0}, {"RUN PERF TEST", 0, 0, 0},
+    {"DELETE BAR", 0, 0, 0}, {"CLEAR SONG", 0, 0, 0},
+#if X0X_UI_PERF
+    [ACT_PERF] = {"PERFORMANCE", 0, 0, 0},
+    [ACT_PERF_TEST] = {"RUN PERF TEST", 0, 0, 0},
+#endif
     [ACT_HOME_LIVE] = {"LIVE OVERVIEW", 0, 0, 0},
     [ACT_HOME_PATTERNS] = {"PATTERNS", 0, 0, 0},
 };
+#if X0X_UI_PERF
 static const x0x_param_t STALLS_P = {"STALLS", 1, 0, ONOFF_N};
+#endif
 static const x0x_param_t MIDICH_P[NPARTS] = {   /* 0 = OFF (no notes in or out), 1-16 */
     {"909 MIDI CH", 16, 10, 0}, {"808 MIDI CH", 16, 11, 0}, {"BASS A MIDI CH", 16, 2, 0}, {"BASS B MIDI CH", 16, 3, 0},
     {"BREAK MIDI CH", 16, 4, 0}};
@@ -639,7 +657,12 @@ static const x0x_param_t *pref_desc(pref_t r)
     case R_KEYLED: return &SEQ_P[SQ_KEYLED];
     case R_KEYSOUND: return &SEQ_P[SQ_KEYSOUND];
     case R_AUTOSAVE: return &SEQ_P[SQ_AUTOSAVE];
-    case R_ACT: return &ACT_P[r.a];
+    case R_ACT:
+#if !X0X_UI_PERF
+        if (r.a == ACT_PERF || r.a == ACT_PERF_TEST)
+            return 0;
+#endif
+        return &ACT_P[r.a];
     case R_SBAR: {
         static x0x_param_t d = {"BAR", 0, 0, 0};
         d.max = (uint8_t)(song()->len < NSONG ? song()->len : NSONG - 1);
@@ -669,7 +692,9 @@ static const x0x_param_t *pref_desc(pref_t r)
         return &d;
     }
     case R_SLEN: return &SONG_P[5];
+#if X0X_UI_PERF
     case R_STALLS: return &STALLS_P;
+#endif
     case R_TAPE: {
         static const x0x_param_t d = {"TAPE", 127, 72, 0};
         return &d;
@@ -776,7 +801,9 @@ static UI_DRAW int pref_get(pref_t r)
     case R_CLKSRC: return PROJ_CLK_SRC(proj.set.bt);
     case R_BTSTAT: return plat_ble_state();
     case R_SLEN: return song()->len;
+#if X0X_UI_PERF
     case R_STALLS: return perf.stalls_on;
+#endif
     case R_TAPE: return proj.sound.v[T_FX][1][0];       /* (kept in an engine slot nothing reads) */
     default: return 0;
     }
@@ -969,11 +996,13 @@ X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
         engine_set(T_FX, 0, FX_DL_WEAR, we);
         break;
     }
+#if X0X_UI_PERF
     case R_STALLS:
         perf.stalls_on = (uint8_t)v;
         plat_stalls_enable(v);
         perf.have = 0;                                /* the next window starts the counts again */
         break;
+#endif
     case R_SLEN:
         if (v != song()->len) song_structure_revision++;
         if (v > song()->len)
@@ -1913,10 +1942,12 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DRIVE), PR(R_ENG, T_MST, 0, MST_COMP1), PR(R_ENG, T_MST, 0, MST_PUMP), PR(R_ENG, T_MST, 0, MST_DJF)};
             add_page_refs(emit, "WAVE", refs, 0, 0); } while (0);
         break;
+#if X0X_UI_PERF
     case V_PERF:
         do { static const pref_t refs[4] = {PR(R_STALLS, 0, 0, 0), NONE, NONE, NONE};
             add_page_refs(emit, "PERF", refs, 0, 0); } while (0);
         break;
+#endif
     case V_SONG:
         do { static const pref_t refs[4] = {PR(R_SBAR, 0, 0, 0), PR(R_SPAT, PART_909, 0, 0), PR(R_SPAT, PART_808, 0, 0), PR(R_SPAT, PART_BRK, 0, 0)};
             add_page_refs(emit, "BAR", refs, 0, 0); } while (0);
@@ -2055,8 +2086,10 @@ static void open_list_of_pages(void)
         list_add(pg.more[k]);
     if (ui.view == V_HOME)
         list_add(PR(R_ACT, ui.home_live ? ACT_HOME_PATTERNS : ACT_HOME_LIVE, 0, 0));
+#if X0X_UI_PERF
     if (ui.view == V_PERF)
         list_add(PR(R_ACT, ACT_PERF_TEST, 0, 0));
+#endif
     if (ui.view == V_SONG) {
         list_add(PR(R_SLEN, 0, 0, 0));
         list_add(PR(R_ACT, ACT_SONG_INS, 0, 0));
@@ -2105,7 +2138,11 @@ static void global_section(int g)
         {R_OUTLOUD,R_USBFULL,R_FINETUNE,PER_PART|R_PARTON,R_QUEUEMUTE,R_NOTELOCK},
         {R_KEYLED,R_KEYSOUND,R_PALETTE},
         {R_ACT,ACT_SAVE,R_ACT,ACT_LOAD,R_AUTOSAVE,R_ACT,ACT_CLEAR_PAT,R_ACT,ACT_RESET},
-        {R_ACT,ACT_PERF,R_ACT,ACT_ABOUT,R_BATT}
+        {
+#if X0X_UI_PERF
+         R_ACT,ACT_PERF,
+#endif
+         R_ACT,ACT_ABOUT,R_BATT}
     };
     for (const uint8_t *p=rows[g]; *p;) {
         unsigned kind=*p++;
@@ -2285,7 +2322,9 @@ static int help_lines(int b, const char *l[HELP_LINES])
     case B_EDIT: L("PART SOUND"); L("TAP: NEXT PAGE"); L("STEP + KNOB: PARAMETER LOCK");
         L("STEP + " UI_CAP_SELECT ": CHANCE"); break;
     case B_GLO:
-        L("SETTINGS / SAVE / LOAD"); L("RESET / CLEAR / PERFORMANCE"); L("TAP: CLOSE");
+        L("SETTINGS / SAVE / LOAD");
+        L(X0X_UI_PERF ? "RESET / CLEAR / PERFORMANCE" : "RESET / CLEAR");
+        L("TAP: CLOSE");
         /* HOME only: the same card, no new screen. A pad tap clears the selected
          * part of that pattern. Hold one pad and press another to copy that part. */
         if (ui.view == V_HOME) { L("+ PAD: CLEAR PART"); L("+ HOLD PAD + PAD: COPY PART"); }
@@ -2648,6 +2687,7 @@ static void save_project(void)
     say(queued_save_message(), 0);
 }
 
+#if X0X_UI_PERF
 /* ============================================================ performance === */
 /* PERF: what the FM-1 measures of itself, a window a second: the clock (the core's cycle counter
  * against the 24 MHz timer), the audio load and its peak, dropouts, stall cycles (when switched on),
@@ -2870,6 +2910,7 @@ static void perf_test_tick(void)
         break;
     }
 }
+#endif
 
 static int saved_sound_present(int part)
 {
@@ -3044,6 +3085,7 @@ X0X_COLD static void run_action(int act, int arg)
     case ACT_RESET:
         (void)ui_project_reset();
         break;
+#if X0X_UI_PERF
     case ACT_PERF:
         set_view(V_PERF);
         break;
@@ -3052,6 +3094,7 @@ X0X_COLD static void run_action(int act, int arg)
         perf_test_start();
         say("PERF TEST: 15 SECONDS", 0);
         break;
+#endif
     case ACT_ABOUT: {
         char full[64], *e;
         /* The long line alone carries the diagnostic SHA. The header uses a smaller
@@ -3876,10 +3919,16 @@ static const uint32_t MUTE_MASK[NPARTS] = {(1u << NDRUM) - 1u, ((1u << NDRUM) - 
                                            1u << (MUTE_BASS0 + 1), 1u << MUTE_BRK};
 static int part_muted(int p) { return (seq.mute & MUTE_MASK[p]) == MUTE_MASK[p]; }
 
+#if X0X_UI_PERF
 static int perf_testing(void) { return perf.test >= 0 && perf.phase != 4; }
 /* A queued SAVE runs in phase 0, before perf_build borrows the save scratch and runtime state.
  * From phase 1 through restoration, neither the scratch nor the live settings may be saved. */
 static int perf_save_busy(void) { return perf_testing() && perf.phase != 0; }
+#else
+static void perf_test_abort(void) {}
+static int perf_testing(void) { return 0; }
+static int perf_save_busy(void) { return 0; }
+#endif
 
 /* the held 303 step's note, moved by `by` semitones (KNOB 1: one; OCT: twelve); a rest or a tie
  * becomes a note of its own */
@@ -4135,7 +4184,7 @@ static UI_DRAW void key_event(int k, int down)
         return;   /* clip mode: the pads launch clips, the keybed plays MIDI to Loopy (main_fm1.c clip keys) */
 #endif
     int bl = KEY_BLACK[k], wp = w >= 0 ? ui.pbank * 16 + w : -1;   /* wp: a white key's pattern */
-    if (ui.overlay == O_ASK || ui.view == V_PERF || perf_testing())
+    if (ui.overlay == O_ASK || (X0X_UI_PERF && ui.view == V_PERF) || perf_testing())
         return;
     if (down && w >= 0 && (ui.btn & (1u << B_SAVE))) {     /* SAVE held + white key: paste the pattern here */
         int p;
@@ -4476,11 +4525,13 @@ X0X_COLD static void button_tap(int b)
         brk_choice_cancel();
         if (b == B_HOME) return;
     }
+#if X0X_UI_PERF
     if (perf_testing()) {                             /* the test owns the transport: HOME or PLAY stop it */
         if ((b == B_HOME || b == B_PLAY) && perf.phase != 3)
             perf_test_abort();
         return;
     }
+#endif
     if (ui.overlay == O_ASK && b == B_PLAY &&
         play_answer_question(ui.btn & (1u << B_HOME))) return;
     if (ui.overlay == O_ASK) {                        /* SEL confirms; HOME answers NO */
@@ -6850,6 +6901,7 @@ static UI_DRAW void draw_mix(int band)
     }
 }
 
+#if X0X_UI_PERF
 /* PERF: the live window, or the test's progress and table */
 static char *put_pct10(char *q, int v)                /* 123 -> "12.3%" */
 {
@@ -6985,6 +7037,7 @@ static UI_DRAW void draw_perf(int band)
     text_r(236, 55, &FONT_XS, t, engine_guard_active() ? C_AMB : C_DIM);
     cv_text(4, 55, &FONT_XS, "", C_DIM);
 }
+#endif
 
 /* the readout: the knob being turned, large, across the bottom band */
 static UI_DRAW void draw_readout(void)
@@ -7363,8 +7416,10 @@ static UI_DRAW void draw_main(void)
             draw_mix(band);
         else if (ui.view == V_SONG)
             draw_song(band);
+#if X0X_UI_PERF
         else if (ui.view == V_PERF)
             draw_perf(band);
+#endif
         else if (ui.view == V_PART && is_drum())
             draw_drum_voice(band);
         else if (ui.view == V_PART && is_303())
@@ -9786,10 +9841,12 @@ UI_DRAW void ui_frame(void)
     device_bt_save();
     ui_ease_tick();
     autosave();
+#if X0X_UI_PERF
     if (!project_busy)
         perf_test_tick();
     if (ui.view == V_PERF && !perf_testing())
         perf_window(0);
+#endif
     for (i = 0; i < NPARTS; i++)
         eng_peak[i] = (uint16_t)(eng_peak[i] - (eng_peak[i] >> 3));
     for (i = 0; i < NKIT * NDRUM; i++) {              /* the drum tracks' hits fall as the part meters do */
