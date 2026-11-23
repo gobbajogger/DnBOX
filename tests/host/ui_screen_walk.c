@@ -133,7 +133,7 @@ int main(void)
     }
     for(int modal=0;modal<4;modal++) {
       setup(V_HOME,PART_909);
-      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT?","SAMPLES ARE KEPT");
+      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT","SAMPLES KEPT; EDITS LOST");
       if(modal==1)say("SAVED",0);
       if(modal==2)say("NEXT: PAT 16",0);
       if(modal==3)run_action(ACT_ABOUT,0);

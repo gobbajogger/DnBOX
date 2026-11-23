@@ -217,6 +217,20 @@ static void required_drum_pixels(const char *screen) {
   if(missing||outside){pixel_damaged++;printf("GLYPH_PIXEL_DAMAGED screen=%s ref=%u:%u:%u:%u pixels=%u overpaint=%u outside=%u region=%d,%d..%d,%d drawn=%d,%d..%d,%d\n",screen,r.kind,r.a,r.b,r.c,pixels,missing,outside,x0,y,x1,y+height,bx0,by0,bx1+1,by1+1);}
  }
 }
+/* L11: every reached top bar draws the 4-level battery (outline, tip, three
+ * cells: level 0..3) in the final frame; the walk rotates the level. */
+static unsigned battery_checks,battery_missing,battery_level_seen[4];
+static void required_battery(const char *screen) {
+ int level=plat_battery(),bars=level<0?0:level>3?3:level,bad=0;
+ uint16_t ink=swap16(SOUND_GRAY),off=swap16(SOUND_LINE);
+ for(int x=219;x<233;x++)bad+=fb[5*240+x]!=ink||fb[12*240+x]!=ink;
+ for(int y=5;y<13;y++)bad+=fb[y*240+219]!=ink||fb[y*240+232]!=ink;
+ for(int y=7;y<11;y++)for(int x=233;x<235;x++)bad+=fb[y*240+x]!=ink;
+ for(int cell=0;cell<3;cell++)for(int y=7;y<11;y++)for(int x=221+cell*4;x<224+cell*4;x++)
+  bad+=fb[y*240+x]!=(cell<bars?ink:off);
+ battery_checks++;battery_level_seen[bars]++;
+ if(bad){battery_missing++;printf("BATTERY_MISSING screen=%s level=%d pixels=%d\n",screen,level,bad);}
+}
 static unsigned audit_frames;
 static void geo_audit(const char *screen) {
  static unsigned calls;
@@ -226,6 +240,7 @@ static void geo_audit(const char *screen) {
  required_strip_content(screen);
  required_other_content(screen);
  required_drum_content(screen);
+ required_battery(screen);
  geo_enabled=0;
  for(unsigned i=0;i<geo_nframe;i++) {
   geo_label e=geo_frame[i];unsigned expected=0,missing=0;
@@ -243,6 +258,7 @@ static void geo_audit(const char *screen) {
  if(audit_frames==0 && getenv("AUDIT_MUTATE_ZERO"))audited=0;
  printf("AUDIT {\"kind\":\"screen\",\"id\":\"%s\",\"texts\":%u,\"findings\":%u}\n",screen,audited,geo_findings-before);
  audit_frames++;
+ host_battery_level=(int)(audit_frames%4u); /* next reached screen shows the next level */
 }
 
 int main(void)
@@ -366,7 +382,7 @@ int main(void)
     }
     for(int modal=0;modal<4;modal++) {
       setup(V_HOME,PART_909);
-      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT?","SAMPLES ARE KEPT");
+      if(modal==0)ask(ACT_RESET,0,"RESET PROJECT","SAMPLES KEPT; EDITS LOST");
       if(modal==1)say("SAVED",0);
       if(modal==2)say("NEXT: PAT 16",0);
       if(modal==3)run_action(ACT_ABOUT,0);
@@ -379,5 +395,8 @@ int main(void)
     printf("WALK {\"kind\":\"complete\",\"screens\":%u}\n",total);
     printf("AUDIT {\"kind\":\"complete\",\"screens\":%u}\n",audit_frames);
     printf("GEOMETRY findings=%u screens=%u\n",geo_findings,total);
-    printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);return geo_findings||presence_missing||pixel_missing||pixel_damaged?1:0;
+    printf("STRIP_PRESENCE checks=%u\n",strip_presence_checks);printf("FAMILY_PRESENCE list=%u synth=%u\n",list_presence_checks,synth_presence_checks);printf("PRESENCE checks=%u missing=%u\n",presence_checks,presence_missing);printf("GLYPH_PIXELS checks=%u missing=%u damaged=%u\n",pixel_checks,pixel_missing,pixel_damaged);
+    printf("BATTERY checks=%u missing=%u levels=%u,%u,%u,%u\n",battery_checks,battery_missing,battery_level_seen[0],battery_level_seen[1],battery_level_seen[2],battery_level_seen[3]);
+    printf("PAN_FORMAT checks=%u bad=%u\n",pan_format_checks,pan_format_bad);
+    return geo_findings||presence_missing||pixel_missing||pixel_damaged||battery_missing||pan_format_bad||!pan_format_checks?1:0;
 }
