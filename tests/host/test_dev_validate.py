@@ -77,6 +77,15 @@ echo 'RAM .data+.bss 40 B of 100; pool 100 B of 10000'
         self.tc.mkdir(); self.sdk.mkdir()
         (self.tc/'compiler').write_text('fixture compiler')
         (self.sdk/'library').write_text('fixture SDK')
+        # These tests use fake builds. Fingerprint their own reference input,
+        # rather than inheriting an operator's box-only path or hashing its
+        # full production sources. The validator still hashes real inputs.
+        refs = self.root/'references'
+        refs.mkdir()
+        (refs/'fixture.txt').write_text('fixture references')
+        for key in ('NINEW9_DIR', 'EIGHTW8_DIR', 'SCHWUNG303', 'TB3PO_REF'):
+            self.env.pop(key, None)
+        self.env['X0X_REFS'] = str(refs)
         self.env.update(JIELI_TOOLCHAIN=str(self.tc), AC79_SDK=str(self.sdk))
         self.env.update(X0X_REPO=str(self.repo), X0X_QUEUE_FILE=str(self.queue),
                         X0X_GATE_LOCK=str(self.root/'gate.lock'),
