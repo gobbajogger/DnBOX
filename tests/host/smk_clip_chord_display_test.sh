@@ -22,7 +22,8 @@ def fn(s,name):
   level += (s[e]=='{')-(s[e]=='}');e+=1
  return s[a:e]+'\n'
 (out/'chord_font_types.inc').write_text(g[g.index('typedef struct {'):g.index('#include "felucca_font.h"')])
-(out/'chord_metrics.inc').write_text(fn(g,'static inline uint32_t font_bitmap_width(')+
+(out/'chord_metrics.inc').write_text(fn(g,'static inline uint32_t font_advance(')+
+ fn(g,'static inline uint32_t font_bitmap_width(')+
  fn(g,'static uint32_t glyph(')+fn(g,'static int32_t text_w(')+
  fn(u,'static const capm_t *caps(')+fn(u,'static int32_t vc('))
 PY
