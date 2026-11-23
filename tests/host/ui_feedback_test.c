@@ -90,6 +90,10 @@ static void readout_does_not_cover_help(void)
     set_view(V_MIX);
     *page_of(V_MIX) = 0;
     build_pages(); /* Use a view whose controls actually show the transient readout. */
+    /* MIX LEVEL is a bound strip that already shows its value (draw_readout skips it). */
+    int knob = 0;
+    while (knob < 3 && pg.r[cur_page()][knob].kind == R_ENG && pg.r[cur_page()][knob].a == T_MIX &&
+           pg.r[cur_page()][knob].c == MX_LEVEL) knob++;
     /* LCD chunks poll input. Keep the real help-button hold throughout
      * painting rather than presenting an orphaned help flag. */
     held_btn = ui.btn = 1u << B_SAVE;
@@ -99,7 +103,7 @@ static void readout_does_not_cover_help(void)
     ui.touched = -1;
     help_only = main_hash();
 
-    ui.touched = 0;
+    ui.touched = knob;
     ui.touch_until = now_ms + 900u;
     help_with_pending_readout = main_hash();
     assert(help_with_pending_readout == help_only);
@@ -108,7 +112,7 @@ static void readout_does_not_cover_help(void)
     ui.help = 0;
     ui.touched = -1;
     normal = main_hash();
-    ui.touched = 0;
+    ui.touched = knob;
     ui.touch_until = now_ms + 900u;
     readout = main_hash();
     assert(readout != normal);
