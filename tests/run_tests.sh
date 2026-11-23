@@ -540,6 +540,7 @@ run smc-pause-loss sh tests/host/smc_pause_loss_test.sh
 run smk-wheel-mode sh tests/host/smk_wheel_mode_test.sh
 run miami-table-interpolation sh tests/host/run_miami_table_interpolation.sh
 run miami-coef-cache sh tests/host/run_miami_coef_cache.sh
+run drum909-tune-pitch sh tests/host/drum909_tune_pitch_test.sh
 run legacy-303-project sh tests/host/legacy_303_project_test.sh   # old bass303 projects load as the Chicago default, no crash, no save
 run_on_demand smc-interaction-negative python3 tests/host/smc_interaction_negative_test.py
 run corner-coverage python3 tests/host/corner_coverage_test.py
