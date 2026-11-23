@@ -116,7 +116,7 @@ static void owner_switches(int bank)
         case 8: ui.overlay=O_ASK;break;
         case 9: ui.rec=1;break;
         case 10: test_clip_mode=1;break;
-        case 11: test_padcal=1;break;
+        case 11: test_clip_mode=1;break;   /* (was the pad calibration, removed) */
         case 12: test_smcui=1;break;
         case 13: held_btn=1u<<B_HOME;break;
         case 14: held_btn=1u<<B_SAVE;break;

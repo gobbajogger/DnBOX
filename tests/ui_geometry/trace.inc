@@ -1,5 +1,9 @@
 static unsigned presence_nglyph,presence_glyph[256][4];
-typedef struct { const felucca_font_t *f; char text[128]; int x,y; unsigned col; } geo_label;
+typedef struct { const felucca_font_t *f; char text[128]; int x,y; unsigned col; int value; unsigned ref; } geo_label;
+/* #62: text drawn inside a value formatter (1 cell_value, 2 strip_value, 3 strip_value_fit, 4 dv_value_text), minus its unit/caption */
+static int geo_value_fn;static const char *geo_skip_a,*geo_skip_b;
+/* the control a value formatter is drawing (1+kind/a/b/c), from the last pref_value_of */
+static unsigned geo_last_ref,geo_value_ref;
 static geo_label geo_tile[256],geo_frame[1024];
 static unsigned geo_enabled,geo_findings,geo_ntile,geo_nframe;
 /* Raster delta technique reused from tests/ui_defects/first_slice/trace_gfx.inc.
@@ -26,3 +30,13 @@ static void geo_blit(int x,int y) {
  }
 }
 
+
+static unsigned pan_format_checks,pan_format_bad;
+static unsigned r22_roll_bands,r22_roll_screens,r22_roll_missing;
+/* Row 7 units: values formatted with a unit during the audited frame. */
+typedef struct { char num[16],unit[8]; unsigned ref; } unit_fmt;
+static unit_fmt unit_seen[512];static unsigned unit_nseen,unit_checks,unit_missing;
+/* Page compliance: raw 0..127 readouts, unit spelling, header contract. */
+typedef struct { char num[16],name[16]; unsigned ref; int raw; } raw_fmt;
+static raw_fmt raw_seen[512];static unsigned raw_nseen,raw_checks,raw_bad;
+static unsigned unitname_checks,unitname_bad,header_checks,header_bad;

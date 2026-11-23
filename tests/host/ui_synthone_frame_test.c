@@ -46,26 +46,26 @@ static void show(unsigned part)
 static void selector_window(unsigned owner)
 {
     static const char *const titles[] = {
-        "3  FILTER ENVELOPE", "4  AMP ENVELOPE", "5  EFFECT", "6  SOUND"
+        "4  AMP ENVELOPE", "5  ARPEGGIATOR", "6  EFFECT", "7  SOUND"
     };
     show(owner);
-    *page_of(V_PART) = 4;
+    *page_of(V_PART) = 5;
     draw_main(); draw_knobs();
     for (int direction = 1; direction >= -1; direction -= 2) {
         enc_acc[EN_SELECT] = direction;
         now_ms += 100;
         ui_frame();
-        CHECK(cur_page() == (direction == 1 ? 5 : 4));
+        CHECK(cur_page() == (direction == 1 ? 6 : 5));
         memcpy(baseline[owner], fb, sizeof fb);
         memset(blit_hash, 0, sizeof blit_hash);
         memset(cv_tile_valid, 0, sizeof cv_tile_valid);
         draw_header(); draw_main(); draw_knobs();
         CHECK(!memcmp(baseline[owner], fb, sizeof fb));
         if (direction < 0) continue;
-        CHECK(pg.r[5][0].kind == R_BENGINE && pg.r[5][0].b == owner);
-        CHECK(pg.r[5][1].kind == R_BPRESET && pref_read_only(pg.r[5][1]));
-        CHECK(pg.r[5][2].kind == R_BSTATUS && pref_read_only(pg.r[5][2]));
-        CHECK(pg.r[5][3].kind == R_NONE);
+        CHECK(pg.r[6][0].kind == R_BENGINE && pg.r[6][0].b == owner);
+        CHECK(pg.r[6][1].kind == R_BPRESET && pref_read_only(pg.r[6][1]));
+        CHECK(pg.r[6][2].kind == R_BSTATUS && pref_read_only(pg.r[6][2]));
+        CHECK(pg.r[6][3].kind == R_NONE);
         for (int row = 0; row < 4; ++row) {
             uint16_t ink = swap16(row == 3 ? SOUND_INK : SOUND_GRAY);
             cv_begin(240, 14, C_BLACK);

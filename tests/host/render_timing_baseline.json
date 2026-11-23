@@ -1,0 +1,16 @@
+{
+ "note": "render_timing_check.py ratios (engine mean / rest mean, block max / rest mean); best of the repetitions",
+ "runtime_opt": "O2",
+ "pairs": {
+  "0,1": {
+   "a_ratio": 0.0942,
+   "b_ratio": 0.1394,
+   "max_ratio": 1.9868
+  },
+  "2,3": {
+   "a_ratio": 0.1034,
+   "b_ratio": 0.0945,
+   "max_ratio": 1.7887
+  }
+ }
+}

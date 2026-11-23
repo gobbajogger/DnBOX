@@ -46,7 +46,11 @@ static char events[16];
 static void smc_ble_link_slot(unsigned slot,int up) { (void)slot; events[count++] = up ? 'U' : 'D'; ++link_events; }
 static void smc_ble_midi_slot(unsigned slot,const uint8_t *p, uint8_t n)
 { (void)slot; if (!p || !n) abort(); events[count++]='M'; ++midi_events; }
-static void smk_inlog(uint8_t src, uint32_t value)
+#define X0X_SMK_INLOG 1
+#if __has_include("smk_inlog_profile.h")
+#include "smk_inlog_profile.h"
+#endif
+void smk_inlog(uint32_t src, uint32_t value)
 { (void)src; (void)value; ++inlogs; }
 static void ble_central_link_notify_slot(unsigned slot,int up);
 """
@@ -96,7 +100,7 @@ with tempfile.TemporaryDirectory(prefix="ble-first-notification-") as tmp:
     cmd = [*shlex.split(os.environ.get("CC", "gcc")),
            "-std=c11", "-O1", "-g", "-Wall", "-Wextra", "-Werror",
            *shlex.split(os.environ.get("SAN_FLAGS", "")),
-           str(code), "-o", str(exe)]
+           "-I", str(BLE_SOURCE.parent / "app"), str(code), "-o", str(exe)]
     print("SOURCE", BLE_SOURCE, flush=True)
     print("COMMAND", " ".join(cmd), flush=True)
     subprocess.run(cmd, check=True)

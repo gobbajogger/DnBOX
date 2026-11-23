@@ -48,7 +48,9 @@ static unsigned fm1_c1_on = 1;
 static ble_guard_t ble_guard;
 #define RING_PUBLISH() ((void)0)
 static void ble_record(void) { assert(0); }
-static void smk_inlog(unsigned src, uint32_t data) { (void)src; (void)data; }
+#define X0X_SMK_INLOG 1
+#include "../../firmware/src/app/smk_inlog_profile.h"
+void smk_inlog(uint32_t src, uint32_t data) { (void)src; (void)data; }
 static unsigned smk_apc_ble_event(uint32_t p, uint8_t notify) { (void)p; (void)notify; return 0; }
 static void ble_sx_answer(bleh_t *h) { (void)h; }
 static void midi_link_check(uint8_t *st, uint32_t up, uint32_t src)

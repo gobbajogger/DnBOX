@@ -191,35 +191,6 @@ def pad_inputs_text(d):
     return out
 
 
-PADCAL_ARGS = (2, 3, 4, 5)   # CLP-79: the pad calibration export, 32 entries each
-
-
-def parse_padcal(r, arg):
-    """Reply to INLOG arg 2-5: the argument, then R, G, B of 32 entries and 4 bytes of ok bits, each
-    2 x 7 bits. Return 32 (velocity, R, G, B, ok) tuples, or None."""
-    if not r or r[0] != arg or len(r) < 1 + 2 * (96 + 4):
-        return None
-    b = [r[1 + 2 * k] | r[2 + 2 * k] << 7 for k in range(100)]
-    if max(b) > 255:
-        return None
-    return [((arg - 2) * 32 + k, b[3 * k], b[3 * k + 1], b[3 * k + 2], (b[96 + k // 8] >> (k % 8)) & 1)
-            for k in range(32)]
-
-
-def parse_padcal_tl(r):
-    """The orientation correction after the ok bits (CLP-79): the pad index found top-left, or None."""
-    if not r or len(r) < 1 + 2 * 101:
-        return None
-    return r[201] | r[202] << 7
-
-
-def padcal_lines(entries, tl=None):
-    """The export file for tools/apc_pad_colors.py --pad-override: one line for each entry, then the
-    orientation correction ("padcal_orient TL", 0 = the pad order as assumed)."""
-    out = [f"padcal {v} {r} {g} {b} {'ok' if ok else '-'}" for v, r, g, b, ok in entries]
-    return out + ([] if tl is None else [f"padcal_orient {tl}"])
-
-
 def rgb_of_grb(v):
     return ((v >> 8) & 0xFF) << 16 | ((v >> 16) & 0xFF) << 8 | (v & 0xFF)
 

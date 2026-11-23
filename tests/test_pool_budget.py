@@ -53,7 +53,7 @@ class PoolBudget(unittest.TestCase):
                     for model in ('elite','pro'):
                         _, output=build_check(symbols(raw if model == bad_model else 8704))
                         (p/f'{model}.log').write_text(output)
-                    cmd=f'OUT={d};XIP_MIN=1024;POOL_MIN=512;'+gate_functions()+'\nbudget_from_log "$OUT/elite.log" elite && budget_from_log "$OUT/pro.log" pro && budget'
+                    cmd=f'OUT={d};XIP_MIN=0;POOL_MIN=512;'+gate_functions()+'\nbudget_from_log "$OUT/elite.log" elite && budget_from_log "$OUT/pro.log" pro && budget'
                     result=subprocess.run(['bash','-c',cmd],capture_output=True,text=True)
                     self.assertEqual(result.returncode==0,raw>=8704,result.stdout+result.stderr)
 
@@ -63,12 +63,12 @@ class PoolBudget(unittest.TestCase):
                 with self.subTest(model=model,value=value), tempfile.TemporaryDirectory() as d:
                     p=Path(d)
                     for m in ('elite','pro'):
-                        (p/f'{m}-xip.txt').write_text('1024')
+                        (p/f'{m}-xip.txt').write_text('0')
                         (p/f'{m}-pool.txt').write_text('512')
                     target=p/f'{model}-pool.txt'
                     if value is None: target.unlink()
                     else: target.write_text(value)
-                    result=subprocess.run(['bash','-c',f'OUT={d};XIP_MIN=1024;POOL_MIN=512;'+gate_functions()+'\nbudget'],capture_output=True,text=True)
+                    result=subprocess.run(['bash','-c',f'OUT={d};XIP_MIN=0;POOL_MIN=512;'+gate_functions()+'\nbudget'],capture_output=True,text=True)
                     self.assertNotEqual(result.returncode,0)
 
 if __name__=='__main__': unittest.main()

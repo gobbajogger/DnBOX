@@ -16,6 +16,11 @@ cat > "$OUT/src/app/engine.h" <<'EOF2'
 static struct { volatile uint8_t playing, req_start, req_stop, req_cont; } seq;
 static int engine_project_notes(void) { return 0; }
 EOF2
+# Optional input logging is compiled out of stock; use the selected source's
+# real profile header instead of replacing its stock/trace selection.
+if [ -f "${SRC:-firmware/src}/app/smk_inlog_profile.h" ]; then
+    cp "${SRC:-firmware/src}/app/smk_inlog_profile.h" "$OUT/src/app/smk_inlog_profile.h"
+fi
 # Keep optional USB identity headers from the same source selected for RED runs.
 if [ -f "${SRC:-firmware/src}/usb_product_name.h" ]; then
     cp "${SRC:-firmware/src}/usb_product_name.h" "$OUT/src/usb_product_name.h"

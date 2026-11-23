@@ -52,9 +52,13 @@ static const int ref_trig[DR_NUM] = { 0, 1, 2, 3, 4, 5, 6, 8, 7, 10, 9 };
 static const char *const vname[DR_NUM + 1] = { "BD", "SD", "LT", "MT", "HT", "RS", "CP", "CH", "OH", "CR", "RD", "KIT" };
 
 /* 9W9 keys for each port parameter, in the port's order; 0: X0X's own (the BD's sends, the SD's
- * DECAY), which 9W9 does not have (the PANs are skipped by name) */
+ * DECAY), which 9W9 does not have (the PANs are skipped by name).
+ * BD Pitch is X0X's own since FINAL-GOAL row 16 ("909 pitch and tune shouldn't be doing the
+ * same thing"): 9W9 scales it by P.Dpth (inert at the default 0); X0X makes it a base-pitch
+ * offset at any depth, so it has no 9W9 reference (tests/host/drum909_tune_pitch_test.c gates
+ * it). Every default, and the demo pattern, still match 9W9. */
 static const char *const dkeys[DR_NUM + 1][DR_MAX_PARAMS] = {
-    { "bd_c_tune", "bd_c_attack", "bd_c_decay", "bd_c_level", "bd_c_sweep_depth", "bd_c_pitch_mod", "bd_c_drive", "bd_c_dist_type", 0, 0 },
+    { "bd_c_tune", "bd_c_attack", "bd_c_decay", "bd_c_level", "bd_c_sweep_depth", 0, "bd_c_drive", "bd_c_dist_type", 0, 0 },
     { "sd_c_tune", "sd_c_noise_decay", "sd_c_snappy", 0, "sd_c_level", "sd_c_drive", "sd_c_dist_type", "sd_c_rev", "sd_c_dly" },
     { "lt_c_tune", "lt_c_decay", "lt_c_level", "lt_c_attack", "lt_c_drive", "lt_c_dist_type", "lt_c_rev", "lt_c_dly" },
     { "mt_c_tune", "mt_c_decay", "mt_c_level", "mt_c_attack", "mt_c_drive", "mt_c_dist_type", "mt_c_rev", "mt_c_dly" },

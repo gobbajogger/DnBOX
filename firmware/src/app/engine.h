@@ -33,7 +33,12 @@ int engine_s1_patch_pending(void);
 int engine_s1_patch_snapshot(unsigned voice, s1_patch_snapshot *out);
 int engine_s1_patch_read(unsigned voice, unsigned factory_id, s1_patch_value *out);
 int engine_s1_patch_set(unsigned voice, uint32_t revision, unsigned factory_id, unsigned position);
+/* Loudest started voice's amplitude (filter=0) or filter (filter=1) envelope:
+ * level, stage (DNBX_S1_ENVELOPE_*: 0 idle, 1 attack, 2 decay/sustain,
+ * 3 release) and key_down. 0 when no voice is started. */
+int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsigned *stage, unsigned *key_down);
 #endif
+#include "engine_arp.h"
 
 enum { T_909, T_808, T_303, T_BRK, T_FX, T_MIX, T_MST, NTARGETS };
 #define T_PROB NTARGETS                /* a lane's pseudo-target: a step's chance, 5..100 % (not in sound_t);
@@ -129,6 +134,7 @@ int engine_superj6_factory_load(unsigned owner, const sj6_factory_row *row);
 int engine_bass_voice_view(int voice, float *level, float *modulation, unsigned *state, unsigned *key_down);
 /* drums, UI: ms since the track's last hit, its live amp envelope 0..1; 0 when silent */
 int engine_drum_view(int kit, int voice, uint32_t *age_ms, float *env);
+int engine_drum_fired(int kit, int voice, int step, uint32_t window_ms);  /* the step lit only on a real hit */
 /* UI: the 909 kick's pitch t ms after a hit for these engine values (drum909_bd_hz) */
 int engine_bd909_pitch_view(float *ms,float *hz); /* sounding kick position, sampled atomically */
 float engine_bd909_hz(float tau, float depth, float pitch, float t_ms);

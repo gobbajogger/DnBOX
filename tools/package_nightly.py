@@ -109,22 +109,37 @@ def _package(raw, model, expected_version=None, ledger=None):
     if struct.unpack_from("<I", hdr, 4)[0] != len(logical):
         raise add_ctl.PkgError("package declared length does not match its bytes")
     count = struct.unpack_from("<H", hdr, 8)[0]
-    if count != 2:
-        raise add_ctl.PkgError("NIGHTLY package must contain exactly flash.bin and ota.bin")
+    if not 2 <= count <= 5:
+        raise add_ctl.PkgError("NIGHTLY package must contain flash.bin, ota.bin, and only reviewed optional regions")
     previous_end = 0x40 + count * 0x50
     flash = None
-    for i, (typ, name) in enumerate(((0, b"flash.bin"), (100, b"ota.bin"))):
+    extras = {}
+    specs = {0: (b"flash.bin", None), 100: (b"ota.bin", None),
+             101: (b"xdata.bin", 0x2000), 102: (b"fittab.bin", 0x1000),
+             103: (b"fdata.bin", pm.FDATA_SIZE)}
+    previous_type = -1
+    for i in range(count):
         entry = add_ctl._dec(logical[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
-        if struct.unpack_from("<H", entry, 0)[0] != typ or entry[0x40:0x50].split(b"\0")[0] != name:
-            raise add_ctl.PkgError("NIGHTLY package file layout is not flash.bin followed by ota.bin")
+        typ = struct.unpack_from("<H", entry, 0)[0]
+        if typ not in specs or typ <= previous_type or (i < 2 and typ != (0, 100)[i]):
+            raise add_ctl.PkgError("NIGHTLY package file layout is not flash.bin, ota.bin, ordered optional regions")
+        name, fixed_size = specs[typ]
+        if entry[0x40:0x50].split(b"\0")[0] != name:
+            raise add_ctl.PkgError("NIGHTLY package file identity mismatch")
         off, size = struct.unpack_from("<II", entry, 8)
-        if off < previous_end or off % 0x100 or size == 0:
+        if off < previous_end or off % 0x100 or size == 0 or off + size > len(logical):
             raise add_ctl.PkgError("NIGHTLY package file range is invalid")
-        previous_end = off + size
+        if fixed_size is not None and size != fixed_size:
+            raise add_ctl.PkgError("NIGHTLY optional-region package size is invalid")
+        previous_end, previous_type = off + size, typ
+        payload = logical[off:off + size]
         if typ == 0:
-            flash = logical[off:off + size]
-        if typ == 100 and fm1_install.LOADER_MARK not in logical[off:off + size]:
-            raise add_ctl.PkgError("NIGHTLY package has no Felucca update loader")
+            flash = payload
+        elif typ == 100:
+            if fm1_install.LOADER_MARK not in payload:
+                raise add_ctl.PkgError("NIGHTLY package has no Felucca update loader")
+        else:
+            extras[typ] = payload
     # Bound the legacy decoder's pointers before calling it. An otherwise CRC-consistent
     # malformed package must produce a package refusal, not index beyond a sliced buffer.
     if len(flash) != pm.BOARDS["smk37"][0]:
@@ -154,14 +169,17 @@ def _package(raw, model, expected_version=None, ledger=None):
         raise add_ctl.PkgError("app.bin entry CRC")
     if pm.crc16(area[0x120:0x120 + add_ctl.SMK_SLOT]) != struct.unpack_from("<H", area, 34)[0]:
         raise add_ctl.PkgError("app.bin data CRC")
-    if tuple(pm.SLOTMAP["smk37"]) not in pm.SLOTMAP_ALLOWED:
-        raise add_ctl.PkgError("current SMK-37 sample slot map is not in the installer allow list")
-    expected_map = pm.slotmap_blob(pm.SLOTMAP["smk37"])
-    if st["flash"][pm.SLOTMAP_OFF:pm.SLOTMAP_OFF + len(expected_map)] != expected_map:
-        raise add_ctl.PkgError("NIGHTLY package has no matching current SMK-37 sample slot map")
-    if not any(st["flash"][pm.SLOTMAP_OFF:pm.SLOTMAP_OFF + len(blob)] == blob
-               for blob in (pm.slotmap_blob(m) for m in pm.SLOTMAP_ALLOWED)):
+    selected_map = None
+    for slots in pm.SLOTMAP_ALLOWED:
+        blob = pm.slotmap_blob(slots)
+        if st["flash"][pm.SLOTMAP_OFF:pm.SLOTMAP_OFF + len(blob)] == blob:
+            selected_map = slots
+            break
+    if selected_map is None:
         raise add_ctl.PkgError("NIGHTLY package has no supported SMK-37 sample slot map")
+    has_fdata = pm.FDATA_SIZE != 0 and selected_map == tuple(pm.SLOTMAP["smk37"])
+    if has_fdata != (103 in extras) or has_fdata and not pm.valid_fdata(extras[103]):
+        raise add_ctl.PkgError("NIGHTLY FDATA requires the reserved slot map and checked pack structure")
     app_version = _app_version(st)
     if version is not None and version != app_version:
         raise add_ctl.PkgError("package identity does not match app firmware version")

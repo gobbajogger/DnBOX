@@ -11,7 +11,7 @@ DnBOX is firmware for the SMK-37 keyboard (Elite and Pro builds; this repo, `gob
 ## Lanes and agents (6 in parallel)
 | Agent | Owns | Branch prefix |
 |---|---|---|
-| sound | Synth One (replaces Drone), SuperJ6, Chicago, Miami, presets, A/B benches, memory fit | `lane/sound-*` |
+| sound | Synth One (slot-2 engine), SuperJ6, Chicago, Miami, presets, A/B benches, memory fit | `lane/sound-*` |
 | fwui | every firmware screen in R22, battery, pan, pads/LEDs, hold-GLOBE, firmware slider lane, code-space fit | `lane/fwui-*` |
 | integ | consolidated branch (both repos), combined Elite/Pro firmware, zero dropouts, BREAK samples, roadmap, #120 voting, cleanup + rename | `lane/integ-*`, writes `integration/dnbox-consolidated` |
 | remote | (nightly repo) FunkyBeats port, Remote slider lane, browser Remote, TouchOSC, landscape | `lane/remote-*` |
@@ -28,7 +28,7 @@ DnBOX is firmware for the SMK-37 keyboard (Elite and Pro builds; this repo, `gob
 ```
 tools/dnbox-gate.sh <lane>          # firmware repo, at the commit you want to gate
 ```
-Needs: JieLi toolchain (`~/.jieli/toolchain`) and AC79 SDK (`~/fw-AC79_AIoT_SDK`) and the original synth inputs (`python3 tools/check_original_inputs.py`); if missing, get them from Git or the Library using `docs/LIBRARY-INDEX.md`. Steps: clean-tree, setup, no-loss, limits, host-tests (`host/build_host.sh` + `tests/run_tests.sh`), build-elite-pro (`MODEL=elite|pro ./build.sh`), flashmap, budget (XIP free ≥ 1024 B, pool margin ≥ 512 B), ui-defects, drone. Last line: `DNBOX-GATE RESULT PASS|FAIL|VOID sha=<sha>`; log in `build/dnbox-gate/`. Post the log as a PR comment naming the SHA. NOT_RUN = FAIL for the full gate before a `gh-pages` fast-forward or `main`.
+Needs: JieLi toolchain (`~/.jieli/toolchain`) and AC79 SDK (`~/fw-AC79_AIoT_SDK`) and the original synth inputs (`python3 tools/check_original_inputs.py`); if missing, get them from Git or the Library using `docs/LIBRARY-INDEX.md`. Steps: clean-tree, setup, no-loss, limits, host-tests (`host/build_host.sh` + `tests/run_tests.sh`), build-elite-pro (`MODEL=elite|pro ./build.sh`), flashmap, budget (XIP free ≥ 1024 B, pool margin ≥ 512 B), ui-defects, retired-engine. Last line: `DNBOX-GATE RESULT PASS|FAIL|VOID sha=<sha>`; log in `build/dnbox-gate/`. Post the log as a PR comment naming the SHA. NOT_RUN = FAIL for the full gate before a `gh-pages` fast-forward or `main`.
 When the full gate is required (RULES 9): once on the combined branch after the final lane merge, before any `gh-pages` fast-forward that is not site-only, and before firmware or code goes to `main`. A site-only `gh-pages` change (site, installer, catalog or test files only) uses the RULES 16 gate instead: the site's own tests, a byte-for-byte match of every listed firmware package with its GitHub release asset, and an independent review. A lane PR into `integration/dnbox-consolidated` needs only its focused tests (plus Elite/Pro builds for firmware), no-loss and, when it changes screens, the independent Review; a missing `dnbox-gate` status flag does not block it.
 
 ## Where everything lives

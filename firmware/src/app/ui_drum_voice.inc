@@ -660,8 +660,9 @@ static UI_DRAW void dv_voice_steps(int t,int v,int identity_y,int step_y,int str
     char label[32];
     put_i(put_s(put_s(label,dv_voice_name(t,v)),t==T_808?" 808/":" 909/"),v+1);
     cv_text(11,identity_y,&FONT_T,label,col);
-    put_i(put_s(put_i(put_s(label,"P"),seq.ppat[ui.part]+1)," / "),shown_len);
-    text_r(226,identity_y,&FONT_T,label,SOUND_GRAY);
+    /* no "P# / length" here: the header carries P#, the step ruler shows the window, and
+     * LENGTH is its own control (FINAL-REFERENCES: "1-16 / 17" restates LENGTH) */
+    (void)shown_len;
     for(int s=0;s<16;s++) {
         int absolute=(int)first+s,sx=9+s*14;
         int valid=absolute<NSTEPS && absolute<len;
@@ -674,10 +675,12 @@ static UI_DRAW void dv_voice_steps(int t,int v,int identity_y,int step_y,int str
 }
 
 /* Nominal target 99% stage duration, never an observed transition time. */
-static UI_DRAW void dv_nominal_stage_time(float ms,int y)
+/* One readout per stage: its physical 99% duration where the owner has a curve, else the knob
+ * percentage. Never both (FINAL-REFERENCES 808-HANDCLAP: "% alongside ms"). */
+static UI_DRAW void dv_stage_value(char *out,char stage,int lettered,int have,float ms,int raw)
 {
-    char value[32];put_s(put_d1(put_s(value,"99% "),ms,0),"ms");
-    cv_text(112,y,&FONT_T,value,SOUND_GRAY);
+    char *q=out;if(lettered){*q++=stage;*q++=' ';}
+    if(have)put_s(put_d1(q,ms,0),"ms");else put_s(put_i(q,(raw*100+63)/127),"%");
 }
 
 static UI_DRAW void dv_cp_stage_page(int band)
@@ -696,31 +699,29 @@ static UI_DRAW void dv_cp_stage_page(int band)
     text_r(232,28-off,&FONT_T,label,SOUND_GRAY);
     const int slots[2]={0,2};
     for(int i=0;i<2;i++) {
-        pref_t r=pg.r[0][slots[i]];int center=i?177:63,value=matrix_value(r);
-        text_c(center,40-off,&FONT_T,i?"K7 SOUND":"K5 TUNE",SOUND_GRAY);
+        pref_t r=pg.r[0][slots[i]];int center=i?155:83,value=matrix_value(r);
+        text_c(center,40-off,&FONT_T,i?"TYPE":"TUNE",SOUND_GRAY);   /* the bank title above is SOUND */
         dv_glyph(r,ui_ease_float(r,value),center-22,53-off,1.375f,1.f,col);
         dv_value_text(r,value,center,72-off,SOUND_WHITE,1);
     }
     cv_text(13,88-off,&FONT_T,selected?"MARACAS AD":"MARACAS ATTACK",SOUND_GRAY);
-    physical_stage_label(label,1,'A',matrix_value(pg.r[0][1]));
+    int have_a=attack_owner==D8S_MA+1;
+    dv_stage_value(label,'A',selected,have_a,attack.rise_end,matrix_value(pg.r[0][1]));
     if(selected)cv_text(13,100-off,&FONT_T,label,ink);
     else text_r(227,88-off,&FONT_T,label,ink);
-    /* Physical nominal 99% rise readout, distinct from the fixed view window. */
-    if(attack_owner==D8S_MA+1)dv_nominal_stage_time(attack.rise_end,88-off);
     if(selected) {
         /* Both editable stages belong to MA: one AD graph, never two owners. */
-        physical_stage_label(label,3,'D',matrix_value(pg.r[0][3]));
+        dv_stage_value(label,'D',1,decay_owner==D8S_MA+1,decay.fall*4.60517f,matrix_value(pg.r[0][3]));
         text_r(227,100-off,&FONT_T,label,ink);
-        if(attack_owner==D8S_MA+1) {
+        if(have_a) {
             decay.rise_tau=attack.rise_tau;decay.rise_end=attack.rise_end;
             if(attack.elapsed>=0){decay.elapsed=attack.elapsed;decay.level=attack.level;}
         }
         dv_bound_stage(&decay,0,116,off,col);
     } else {
-        if(attack_owner==D8S_MA+1)dv_bound_stage(&attack,1,100,off,col);
-        cv_text(13,132-off,&FONT_T,"CLAP DECAY",SOUND_GRAY);
-        if(decay_owner==D8S_CP+1)dv_nominal_stage_time(decay.fall*4.60517f,132-off);
-        physical_stage_label(label,3,'D',matrix_value(pg.r[0][3]));
+        if(have_a)dv_bound_stage(&attack,1,100,off,col);
+        text_c(120,132-off,&FONT_T,"CLAP DECAY",SOUND_GRAY);
+        dv_stage_value(label,'D',0,decay_owner==D8S_CP+1,decay.fall*4.60517f,matrix_value(pg.r[0][3]));
         text_r(227,132-off,&FONT_T,label,ink);
         if(decay_owner==D8S_CP+1)dv_bound_stage(&decay,2,144,off,col);
     }
@@ -744,8 +745,10 @@ static UI_DRAW void dv_upper_caption(char *caption,const x0x_param_t *d,int max)
 
 static UI_DRAW void dv_control_caption(pref_t r,int cx,int y)
 {
-    char caption[16];
-    dv_upper_caption(caption,pref_desc(r),14);
+    char caption[16];   /* the presentation name (TYPE, Depth), not the raw DSP id */
+    const char *n=pref_name(r);int j=0;
+    for(;j<14 && n && n[j];j++)caption[j]=n[j]>='a' && n[j]<='z'?n[j]-32:n[j];
+    caption[j]=0;
     text_c(cx,y,&FONT_T,caption,SOUND_GRAY);
 }
 
@@ -768,7 +771,7 @@ static const dv_bank_slot_t dv_bank_slots[2][2] = {
 static UI_DRAW __attribute__((noinline)) void dv_kick_decay_caption(int page,int x,int y,uint16_t col)
 {
     char caption[32];
-    char *value=put_s(caption,X0X_SMK_CAPTIONS?"K5 DECAY ":"K1 DECAY ");
+    char *value=put_s(caption,"DECAY ")   /* no K-number prefix: "K5DECAY" read as one cryptic word */;
     pref_t r=pg.r[page][0];
     dv_readout(value,r,matrix_value(r));
     text_r(x,y,&FONT_T,caption,col);
@@ -947,10 +950,10 @@ static UI_DRAW void draw_drum_voice(int band)
                 cv_text(133,body_y+3-off,&FONT_T,role,gray);
                 dv_curve_row(&curve,kick_kit,body_y+17-off,step_top-4-off,col);
             } else if(ph>44) {
-                /* Authored body paths plus the live 6% pulse fit in 44px per
-                 * scale unit. Leave the identity and step lane unobstructed. */
-                float scale=fm_minf(3.f,(float)(ph-44)/44.f);
-                dv_body_pictogram(t,v,87,py+(ph-11)/2-16,scale,env,col);
+                /* Reserve 28 px for the identity and step lane; keep the
+                 * larger icon and its live pulse in the remaining body. */
+                float scale=fm_minf(3.f,(float)(ph-28)/44.f);
+                dv_body_pictogram(t,v,89,py+(ph-11)/2-16,scale,env,col);
             }
             dv_voice_steps(t,v,body_y+3-off,step_top-off,0);
         }

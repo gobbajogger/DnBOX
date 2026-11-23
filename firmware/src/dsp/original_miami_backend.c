@@ -5,7 +5,9 @@
 #include "../../../experiments/original_synth/miami_idle_clock.h"
 #include "../../../experiments/original_synth/miami_zero.h"
 #include "original_backend_pitch.h"
+#include "fastmath.h"
 #include <string.h>
+#include "x0x_cold.h"
 
 #define BACKEND_READY UINT32_C(0x4d424531)
 
@@ -574,7 +576,7 @@ int original_miami_backend_render_stereo(original_miami_backend *s, original_mia
     return original_miami_backend_render_events(s, w, left, right, frames, NULL, 0);
 }
 
-int original_miami_backend_motion_view(const original_miami_backend *s, float *phase, float *bipolar,
+X0X_COLD int original_miami_backend_motion_view(const original_miami_backend *s, float *phase, float *bipolar,
     float *current, float *target, int *active)
 {
     unsigned i, k = 0;
@@ -615,4 +617,26 @@ int original_miami_backend_voice_active(const original_miami_backend *s)
 int original_miami_backend_idle(const original_miami_backend *s)
 {
     return original_miami_backend_status(s) && !original_miami_backend_active(s);
+}
+
+/* Display only (main loop): base cutoff of public control 9 in Hz from the
+ * real law: control -> native 24 -> MS-20 q = cutoff * 128 (no envelope or
+ * modulation) -> linearly interpolated 44.1 kHz A table -> the corner of the
+ * two one-pole low-pass stages a += g(a' - a): fc = -ln(g) * 44100 / (2 pi). */
+int original_miami_backend_cutoff_hz(float control, float *hz)
+{
+    original_miami_program p;
+    float c;
+    memset(&p, 0, sizeof p);
+    if (!hz || !original_miami_program_set(&p, 9u, control) || !original_miami_program_native(&p, 24u, &c))
+        return 0;
+    float q = c * 128.0f;
+    q = q < 0.0f ? 0.0f : q > 128.0f ? 128.0f : q;
+    unsigned j = (unsigned)q;
+    float g = j >= 128u ? original_miami_a44100[128] :
+        original_miami_a44100[j] + (q - (float)j) * (original_miami_a44100[j + 1] - original_miami_a44100[j]);
+    if (!(g >= 0.0f && g <= 1.0f)) return 0;
+    float f = g > 0.0f ? -fm_logf(g) * (44100.0f / FM_TWO_PI) : 22050.0f;
+    *hz = f > 22050.0f ? 22050.0f : f < 0.0f ? 0.0f : f;
+    return 1;
 }

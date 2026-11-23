@@ -3,7 +3,7 @@
 ## Physical pad placement
 
 Status: CONFIRMED 2026-10-17, build 89f680e (x0x.bin sha256 87ce8dd35daef5f3), for the row order and the column order.
-- The owner did the check with the PAD COLOURS orientation page (BEHAVIOR.md CLP-79). The owner confirmed that pad index 0 is top-left. The correction is 0 (export tools/padcal/pads-owner-20261017.txt).
+- The owner did the check with the PAD COLOURS orientation page (BEHAVIOR.md CLP-79, since removed). The owner confirmed that pad index 0 is top-left. The correction is 0 (export tools/padcal/pads-owner-20261017.txt).
 - Limit: the orientation page lights one pad only. The check shows that pad index 0 is top-left. In the model of step 1 below, it thus excludes the corrections 8, 7 and 15.
 - The check does not examine each of the other 15 pads. It does not examine the sensor order (SMK_PADMUX).
 
@@ -54,9 +54,9 @@ If the orientation page gives a correction N other than 0:
 4. Change the three tables above to the new map. Run tests/pad_placement_doc_test.py and the pad tests.
 5. Set the status to CONFIRMED, with the date and the build hash (x0x.bin sha256).
 
-## Pad calibration entry names
+## Pad colour entry names
 
-docs/padcal-names.csv lists the 128 pad calibration entries: the velocity, the Akai colour, the name and the owner value (R, G, B of APC40_PAD_OWNER). The calibration mode shows the name of the selected entry (BEHAVIOR.md CLP-79).
+docs/padcal-names.csv lists the 128 pad colour entries: the velocity, the Akai colour, the name and the owner value (R, G, B of APC40_PAD_OWNER). (The calibration mode that showed these names is removed, BEHAVIOR.md CLP-79.)
 - tools/apc_pad_colors.py makes the names from the Akai reference colour: a hue family and a shade. The groups 4-59 have 4 shades (LIGHT, FULL, DIM, DARK) and use the hue of their full shade.
 - The Akai CSV has no colour names. These names are not Akai names and not Loopy Pro colour names.
 - To make the list again, use `tools/apc_pad_colors.py --names-csv docs/padcal-names.csv`.

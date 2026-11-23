@@ -6,7 +6,7 @@
 2. The header is the generator output for the export (tools/apc_pad_colors.py --pad-override), byte for byte.
 3. The 89 entries marked ok are the export values. The 39 other entries are the start values of 89f680e:
    the export values (89f680e wrote them), APC40_PAD_DEFAULT and the generator rule. The start-value
-   inputs (apc40_pad_gamma.h, apc40_lcd565.h, smk_padcal_default) are the same as at 89f680e (sha256).
+   input apc40_lcd565.h is the same as at 89f680e (sha256). (The pad calibration is removed.)
 4. Render: a lit clip pad of velocity v (main_fm1.c smk_pads, brightness 255) sends the same R, G, B bytes,
    in the same order, as PAD COLOURS sent for entry v on 89f680e (level / 2, c[0] >> 1, c[1] >> 1, c[2] >> 1).
    Exception (owner 2026-10-17 01:19): the idle shades 7-59 (v % 4 == 3) send the full level (CLP-13).
@@ -71,12 +71,7 @@ check(len(others) == 39 and all(owner[v] == exp[v][0] == start[v] == rule[v] for
       "the 39 other entries == the 89f680e start values (export, APC40_PAD_DEFAULT, generator rule)")
 
 # The start-value inputs at 89f680e (git show 89f680e:firmware/src/app/...): unchanged.
-padcal = (APP / "smk_padcal.h").read_text()
-i = padcal.index("static inline void smk_padcal_default")
-fn = padcal[i:padcal.index("\n}\n", i) + 3]
-for name, data, want in (("apc40_pad_gamma.h", (APP / "apc40_pad_gamma.h").read_bytes(), "c4dce93ddbe5cb34"),
-                         ("apc40_lcd565.h", (APP / "apc40_lcd565.h").read_bytes(), "269e1b3aa2aeeea2"),
-                         ("smk_padcal_default", fn.encode(), "40a61ddf5a5c515a")):
+for name, data, want in (("apc40_lcd565.h", (APP / "apc40_lcd565.h").read_bytes(), "269e1b3aa2aeeea2"),):
     check(sha(data).startswith(want), f"{name} is the same as at 89f680e (sha256 {want})")
 
 # Render: the clip pad path and the PAD COLOURS path of the firmware source.
@@ -94,8 +89,6 @@ b0 = main.index("static uint8_t smk_apc_led_brightness")
 bright = main[b0:main.index("\n}\n", b0)]
 levels = set(re.findall(r"\b(\d+)u;", bright)) | set(re.findall(r"\?\s*(\d+)u\s*:\s*(\d+)u", bright)[0])
 check(levels <= {"0", "255"}, f"smk_apc_led_brightness returns 0 or 255 only ({sorted(levels)})")
-check("padled_set(ph, c[0] >> 1, c[1] >> 1, c[2] >> 1);" in main,
-      "PAD COLOURS sends c[0] >> 1, c[1] >> 1, c[2] >> 1 (as on 89f680e)")
 IDLE = set(range(7, 60, 4))   # CLP-13 idle shades (owner 2026-10-17 01:19): 2 x, tests/smk_clip_idle_pad_test.py
 bad = [v for v in range(128) if v not in IDLE for k in range(3) if owner[v][k] * 255 // 510 != exp[v][0][k] >> 1]
 check(not bad, "render: lit clip pad of velocity v == the bytes the owner saw for entry v (114 non-idle v x R, G, B)")

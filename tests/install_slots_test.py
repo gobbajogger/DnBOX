@@ -346,7 +346,10 @@ def maps():
     p = ROOT / "build/x0x-smk37.fwsc"
     if p.exists():
         prod, img = I.load_package(str(p), False)
-        ok(I.package_slot_map(img, prod) == fm1pkg_make.SLOTMAP["smk37"] == SMK_NOW,
+        # The real package must carry the layout for its build profile. The
+        # historical fixture remains fixed to the larger pre-FDATA slot.
+        expected = [(0xC2000, 0x14000), (0xD6000, 0xF000), (0xB3000, 0x8000)] if fm1pkg_make.FDATA_SIZE else SMK_NOW
+        ok(I.package_slot_map(img, prod) == fm1pkg_make.SLOTMAP["smk37"] == expected,
            "build/x0x-smk37.fwsc carries this firmware's slot map")
 
 

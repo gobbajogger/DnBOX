@@ -27,7 +27,7 @@
 
 /* Public control positions used by the physical performance wheels. */
 enum { ORIGINAL_CHICAGO_CUTOFF = 2, ORIGINAL_CHICAGO_FX_TYPE = 17, ORIGINAL_CHICAGO_PITCH_BEND = 20,
-       ORIGINAL_MIAMI_WOBBLE_SHAPE = 11, ORIGINAL_MIAMI_WOBBLE_DEPTH = 12, ORIGINAL_MIAMI_WOBBLE_RATE = 13,
+       ORIGINAL_MIAMI_CUTOFF = 9, ORIGINAL_MIAMI_WOBBLE_SHAPE = 11, ORIGINAL_MIAMI_WOBBLE_DEPTH = 12, ORIGINAL_MIAMI_WOBBLE_RATE = 13,
        ORIGINAL_MIAMI_PITCH_BEND = 16 };
 
 /* Performance macro IDs remain stable across patch-control additions. */
@@ -102,4 +102,12 @@ uint32_t original_sound_edit_mask(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_miami(original_miami_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_restore_chicago(original_chicago_program *, const uint8_t cell[ORIGINAL_SOUND_BYTES]);
 int original_sound_value(const uint8_t cell[ORIGINAL_SOUND_BYTES], unsigned parameter, float *value);
+#if X0X_S1C
+/* Synth One factory programs from the pack (X0X_S1C): factory 0 is INIT and factory
+ * n (1..694) is pack program n - 1. A Synth One cell keeps [30] = 0 and stores n in
+ * [7] (low 7 bits) and [21] (0x40 | high bits); both stay 7-bit and [21] != 0 keeps
+ * the cell from matching the historical 8-parameter layout. Cold path only. */
+#define ORIGINAL_SYNTHONE_PROGRAMS 694u
+unsigned original_sound_s1_program(const uint8_t cell[ORIGINAL_SOUND_BYTES]);
+#endif
 

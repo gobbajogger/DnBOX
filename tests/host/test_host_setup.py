@@ -79,7 +79,7 @@ pathlib.Path(sys.argv[sys.argv.index("-o") + 1]).write_text("simulator")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual({p.name for p in (self.root / "build/gen").iterdir()},
                          {"felucca_font.h", "x0x_drum_samples.h", "x0x_drum_tables.h",
-                          "x0x_break_bank.h"})
+                          "x0x_break_bank.h", ".generate.lock"})
         self.assertFalse((self.root / "compile.json").exists())
         self.assertFalse((self.root / "build/host/x0x_host").exists())
 
@@ -151,11 +151,14 @@ pathlib.Path(sys.argv[sys.argv.index("-o") + 1]).write_text("simulator")
         self.assertNotIn("builtin", log)
         self.assertFalse((self.root / "compile.json").exists())
 
-    def test_existing_headers_skip_only_font_and_drums(self):
+    def test_existing_headers_skip_only_font(self):
+        # e12a63c6: drum WAVs/payloads are validated on every entry (the
+        # generator keeps an unchanged header's mtime); only the font is skipped.
         self.assertEqual(self.run_builder("--generate-only").returncode, 0)
         (self.root / "generators.log").write_text("")
         self.assertEqual(self.run_builder("--generate-only").returncode, 0)
-        self.assertEqual((self.root / "generators.log").read_text(), "builtin\n")
+        self.assertEqual((self.root / "generators.log").read_text(),
+                         "gen_drum_samples.py:['build/gen/x0x_drum_samples.h']\nbuiltin\n")
 
     def test_setup_failures_stop_both_modes(self):
         for mode in ((), ("--generate-only",)):

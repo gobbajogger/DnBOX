@@ -5,7 +5,7 @@ static uint16_t rendered[240*82];
 static void audio_ms(unsigned ms){int32_t a[512];for(unsigned n=0;n<ms;n++)engine_render(a,44);}
 static void caption(int slot,int stage,int pct)
 {
- char s[24];snprintf(s,sizeof s,"K%d %c %d%%",UI_FIRST_KNOB+slot,"ADSR"[stage],pct);
+ char s[24];snprintf(s,sizeof s,"%c %d%%","ADSR"[stage],pct);   /* stage letter, no K-number prefix */
  int width=tw(&FONT_T,s),left=31+slot*59-width/2;CHECK(left>=slot*59&&left+width<=(slot+1)*59+4);
  cv_begin(240,82,C_BLACK);cv_text(0,0,&FONT_T,s,SOUND_GRAY);int ink=0;
  for(int y=0;y<FONT_T.h;y++)for(int x=0;x<width;x++)if(cv_px[y*240+x]==swap16(SOUND_GRAY)){

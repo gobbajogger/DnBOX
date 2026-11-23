@@ -23,6 +23,7 @@ FL_BLE_LO): APP_CODE_MAX 0x86EE0. The SMK package also carries its sample slot m
 bytes at flash.bin 0x9CF00, after the cfg: the installers read it to see if an install keeps the slots.
 """
 import argparse
+import zlib
 import os
 import struct
 from pathlib import Path
@@ -52,7 +53,21 @@ BOARDS = {"fm1": (0x93000, 0x8DFBC, "FM-1_900", 0x8DFBC),
           "smk37": (0x9D000, 0x97400, "SMK-37 Pro_900", 0x86EE0)}   # SMK: the stock app is 0x974B8; build.py sets app.ld XIP
 BLE_LO, BLE_HI = 0x8B000, 0x9B000              # SMK: flash range of the Bluetooth block (FL_BLE_LO / FL_BLE_HI)
 # SMK sample slot map (firmware/src/app/slots.c SMP_USER_OFF / SMP_USER_SIZE): (flash offset, size) per slot
-SLOTMAP = {"smk37": [(0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)],
+def fdata_size(header=None):
+    """FL_FDATA_SIZE from firmware/hal/fm1_flash_map.h: the factory synth data taken from the end of slot 2"""
+    import re
+    header = header or Path(__file__).resolve().parents[1] / "firmware" / "hal" / "fm1_flash_map.h"
+    m = re.search(r"#define FL_FDATA_SIZE\s+0x([0-9A-Fa-f]+)u", Path(header).read_text())
+    if not m:
+        raise SystemExit(f"{header}: no FL_FDATA_SIZE")
+    n = int(m.group(1), 16)
+    if n % 0x1000 or n > 0x1E000 - 0x1000:
+        raise SystemExit(f"FL_FDATA_SIZE {n:#x}: whole 4 KiB sectors, at most 0x1D000")
+    return n
+
+
+FDATA_SIZE = fdata_size()
+SLOTMAP = {"smk37": [(0xC2000, 0x14000), (0xD6000, 0x1E000 - FDATA_SIZE), (0xB3000, 0x8000)],
            "fm1": [(0xA0000, 0x14000), (0xB4000, 0x14000)]}
 # Complete maps the live installer pkHasSlotMap allow-list accepts (flash 0x9CF00, CRC required).
 # Two-slot; older 44 KiB slot 3 at 0xB0000; current 32 KiB slot 3 at 0xB3000 after the shadows.
@@ -61,6 +76,10 @@ SLOTMAP_ALLOWED = (
     ((0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB0000, 0xB000)),
     ((0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)),
 )
+if FDATA_SIZE:
+    # Slot 2 shortened by the factory synth data. The live installer's pkHasSlotMap allow-list
+    # (nightly repo) must list this same map before such a package is published.
+    SLOTMAP_ALLOWED += (tuple(SLOTMAP["smk37"]),)
 # Plain bytes after the encrypted cfg, scanned by the installers. SMK: just below 0x9D000.
 # FM-1: in the gap at the end of the 0x93000 image. Older packages have no record and stay on the
 # three-slot fallback.
@@ -229,8 +248,38 @@ def flash_image(app, key):
     return bytes(f)
 
 
-def ufw(flash, ota, product):
+def valid_fdata(data, size=FDATA_SIZE):
+    """The factory pack occupies exactly its reserved partition, with an erased tail."""
+    if not size or len(data) != size or len(data) < 32 or data[:4] != b"S1PK":
+        return False
+    version, programs = struct.unpack_from("<HH", data, 4)
+    total, crc = struct.unpack_from("<II", data, 12)
+    return (version == 1 and programs == 694 and 32 <= total <= len(data)
+            and zlib.crc32(data[32:total]) == crc and all(x == 0xff for x in data[total:]))
+
+
+def ufw(flash, ota, product, xdata=None, fittab=None, fdata=None):
+    """xdata: the SMK XDATA region (8 KiB, tools/build.py xdata_image) as a type-101 entry, that the
+    update loader writes to flash 0xAD000 (loader/ldr_core.c ldr_xdata).
+    fittab: the SMK FITTAB region (4 KiB, tools/build.py fittab_image) as a type-102 entry, that the
+    update loader writes to flash 0xFE000 (ldr_fittab).
+    fdata: the SMK FDATA region (FDATA_SIZE B, tools/build.py fdata_image: the Synth One factory pack) as a
+    type-103 entry, that the update loader writes to the end of sample slot 2 (ldr_fdata).
+    None of them is part of flash.bin: a mask-ROM rescue of flash.bin and the stock vendor loader never
+    touch them."""
     files = [(0, "flash.bin", flash), (100, "ota.bin", ota)]
+    if xdata is not None:
+        if len(xdata) != 0x2000:
+            raise SystemExit(f"xdata is {len(xdata)} B, the region is 8192 B")
+        files.append((101, "xdata.bin", xdata))
+    if fittab is not None:
+        if len(fittab) != 0x1000:
+            raise SystemExit(f"fittab is {len(fittab)} B, the region is 4096 B")
+        files.append((102, "fittab.bin", fittab))
+    if fdata is not None:
+        if not FDATA_SIZE or len(fdata) != FDATA_SIZE:
+            raise SystemExit(f"fdata is {len(fdata)} B, the region (FL_FDATA_SIZE) is {FDATA_SIZE} B")
+        files.append((103, "fdata.bin", fdata))
     off, ents, data = 0x400, [], bytearray()
     for i, (typ, name, d) in enumerate(files):
         off = (off + 0xFF) & ~0xFF
@@ -278,12 +327,18 @@ def main():
     ap.add_argument("--product", help="package identity (default: FM-1_900; smk37: SMK-37 Pro_900)")
     ap.add_argument("--key", type=lambda s: int(s, 0), default=KEY)
     ap.add_argument("--sdk", type=Path, help="JieLi AC79 SDK checkout (default: $AC79_SDK)")
+    ap.add_argument("--xdata", type=Path, help="SMK: the 8 KiB XDATA region image (build/<board>/xdata.img)")
+    ap.add_argument("--fittab", type=Path, help="SMK: the 4 KiB FITTAB region image (build/<board>/fittab.img)")
+    ap.add_argument("--fdata", type=Path, help="SMK: the FDATA region image (build/<board>/fdata.img)")
     a = ap.parse_args()
     global SDK
     SDK = a.sdk
     set_board(a.board)
     a.product = a.product or BOARDS[a.board][2]
-    pkg = ufw(flash_image(a.app.read_bytes(), a.key), a.ota.read_bytes(), a.product)
+    pkg = ufw(flash_image(a.app.read_bytes(), a.key), a.ota.read_bytes(), a.product,
+              xdata=a.xdata.read_bytes() if a.xdata else None,
+              fittab=a.fittab.read_bytes() if a.fittab else None,
+              fdata=a.fdata.read_bytes() if a.fdata else None)
     a.out.write_bytes(pkg)
     print(f"package {a.out}: {len(pkg)} B, identity {a.product}, chip key {a.key:#06x}")
 

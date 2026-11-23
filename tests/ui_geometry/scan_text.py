@@ -5,6 +5,7 @@ import argparse
 from collections import defaultdict
 import json
 from pathlib import Path
+import re
 
 # Confirmed instructional sentences from the existing renderers. Keep a complete
 # register of observed strings, including new words requiring editorial review.
@@ -31,7 +32,51 @@ INSTRUCTIONAL = {
     "THE PART'S SOUND",
     "IN A LIST: RUN THE ACTION",
     "EMPTY: WHITE KEYS ADD BARS",
+    "EMPTY   WHITE KEY: ADD BAR",
 }
+
+# L14: outside the on-demand hold-a-button help screens, no visible caption may
+# be a question or an instruction ("CONTROL: ACTION", "TAP: ...", "+ KNOB: ...").
+INSTRUCTION = re.compile(r"\?|^\+ |\b(TAP|HOLD|PRESS|TURN)\b.*[:+]|"
+                         r"\b(KEYS?|KNOBS?|PADS?|STEP|BUTTONS?|SEQ|SCALE|SEL|HOME|PATCH|GLOBE)\b[^:]*: ")
+
+
+def is_instruction(caption):
+    return bool(INSTRUCTION.search(caption))
+
+
+# UI-SOURCE-OF-TRUTH: no cryptic footer/navigation glyph strings ("<> ↑↓ PARA →").
+CRYPTIC = re.compile(r"<>|[\u2190-\u2193]|\bPARA\b|"
+                     # FINAL-REFERENCES: a knob number fused onto a label ("K5DECAY", "K5 DECAY 1.0s")
+                     r"\bK[1-8] ?DECAY\b")
+
+# Clipped words found on device that the prefix rule cannot see when the full word is
+# not drawn anywhere else (TRANSP had no TRANSPOSE on screen). Always findings.
+KNOWN_CLIPPED = {"TRANSP", "RELEAS", "MARAC"}
+
+
+def truncated_words(screens):
+    """Words clipped by a character budget (RELEAS for RELEASE, MARAC for MARACAS):
+    a word of five or more letters that is another visible word minus its last one
+    or two letters. Plurals and past tenses are real words, not clipping."""
+    words = defaultdict(set)
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            for word in re.findall(r"[A-Za-z]+", caption):
+                words[word.upper()].add(screen)
+    found = {}
+    for word in words:
+        if len(word) < 5:
+            continue
+        for longer in words:
+            tail = longer[len(word):]
+            if longer.startswith(word) and 1 <= len(tail) <= 2 and tail not in ("S", "D", "ED", "ES", "ER", "R"):
+                found[word] = sorted(words[word])
+        if word in KNOWN_CLIPPED:
+            found[word] = sorted(words[word])
+    return found
 
 
 def scan(log):
@@ -56,6 +101,20 @@ def scan(log):
         raise ValueError("Missing final-frame text trace or incomplete geometry walk")
     findings = {caption: sorted(screen for screen in screens if caption in screens[screen])
                 for caption in sorted(INSTRUCTIONAL)}
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            if is_instruction(caption) and screen not in findings.get(caption, []):
+                findings.setdefault(caption, []).append(screen)
+    for screen, captions in screens.items():
+        if screen.startswith("help-"):
+            continue
+        for caption in captions:
+            if CRYPTIC.search(caption) and screen not in findings.get(caption, []):
+                findings.setdefault(caption, []).append(screen)
+    for word, ids in truncated_words(screens).items():
+        findings.setdefault("TRUNCATED " + word, []).extend(ids)
     for suffix in (": THIS TRACK", ": THE PATTERN", ": THE SOUND"):
         for screen, captions in screens.items():
             for caption in captions:

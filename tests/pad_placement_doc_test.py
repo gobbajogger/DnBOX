@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parent.parent
 doc = (ROOT / "PAD_MAP.md").read_text()
 lcd = (ROOT / "firmware/src/lcd.c").read_text()
 inp = (ROOT / "firmware/hal/smk_input.h").read_text()
-cal = (ROOT / "firmware/src/app/smk_padcal.h").read_text()
 fails = 0
 
 
@@ -45,8 +44,8 @@ check(bool(st) and (st.group(1) == "ASSUMED" or re.search(r"\d{4}-\d\d-\d\d", st
 
 idx, led, mux = table("index"), table("led-slot"), table("mux-address")
 check(idx == [list(range(8)), list(range(8, 16))], f"index table: 0-7 top row, 8-15 bottom row ({idx})")
-check("smk_pad_grid ? (w)" in inp and "(i ^ tl) & 15u" in cal,
-      "firmware: the step grid puts white key w on pad w, the orientation rule is i XOR tl")
+check("smk_pad_grid ? (w)" in inp,
+      "firmware: the step grid puts white key w on pad w")
 slot = carray(lcd, "PADLED_SLOT")
 check(led is not None and len(slot) == 16 and all(led[p >> 3][p & 7] == slot[idx[p >> 3][p & 7]] for p in range(16)),
       f"LED slot table = PADLED_SLOT {slot}")

@@ -5,8 +5,9 @@
 #include "app/original_runtime.h"
 #include "dsp/busfx.h"
 
-static uint64_t synth_cpu[2];
-static unsigned max_active[2], note_events[2][2][2], measured, runtime_faults, drop_one;
+static uint64_t synth_cpu[4];
+static unsigned max_active[4], note_events[4][2][2], measured, runtime_faults, drop_one;
+static unsigned kind_a = ORIGINAL_SOUND_CHICAGO, kind_b = ORIGINAL_SOUND_MIAMI;
 static uint64_t cpu_ns(void)
 {
     struct timespec t;
@@ -16,7 +17,7 @@ static uint64_t cpu_ns(void)
 static void charge(original_runtime_part *p, uint64_t start, int rc)
 {
     if (!measured) return;
-    if (p->kind < 2) synth_cpu[p->kind] += cpu_ns() - start;
+    if (p->kind < 4) synth_cpu[p->kind] += cpu_ns() - start;
     if (rc != ORIGINAL_RUNTIME_OK) runtime_faults++;
 }
 int stress_real_original_runtime_prepare(original_runtime_part *, float);
@@ -29,7 +30,7 @@ int stress_real_original_runtime_key(original_runtime_part *, unsigned, unsigned
 int original_runtime_key(original_runtime_part *p,unsigned source,unsigned key,unsigned velocity)
 {
     uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_key(p,source,key,velocity); charge(p,t,rc);
-    if(measured&&rc==ORIGINAL_RUNTIME_OK&&source<2)note_events[p->kind][source][velocity!=0]++;
+    if(measured&&rc==ORIGINAL_RUNTIME_OK&&source<2&&p->kind<4)note_events[p->kind][source][velocity!=0]++;
     return rc;
 }
 int stress_real_original_runtime_init(original_runtime_part *,const uint8_t *,float,original_chicago_tuning *,const original_chicago_fx2_cold_owner *);
@@ -53,7 +54,7 @@ int original_runtime_render(original_runtime_part *p,original_runtime_workspace 
     uint64_t t=cpu_ns(); int rc=stress_real_original_runtime_render(p,w,l,r,n); charge(p,t,rc);
     unsigned active=0;
     if(p->kind==ORIGINAL_SOUND_CHICAGO) active=p->dsp.chicago.voice.active!=0;
-    else for(unsigned i=0;i<ORIGINAL_MIAMI_BACKEND_VOICES;i++) active+=p->dsp.miami.voices[i].active!=0;
+    else if(p->kind==ORIGINAL_SOUND_MIAMI) for(unsigned i=0;i<ORIGINAL_MIAMI_BACKEND_VOICES;i++) active+=p->dsp.miami.voices[i].active!=0;
     if(measured&&active>max_active[p->kind]) max_active[p->kind]=active;
     return rc;
 }
@@ -99,14 +100,30 @@ int main(int argc,char **argv)
     unsigned blocks=(unsigned)strtoul(argv[3],NULL,10); CHECK(blocks>=64);
     unsigned factory=(unsigned)strtoul(argv[4],NULL,10),choice=(unsigned)strtoul(argv[5],NULL,10);
     CHECK(factory<30&&choice<7);
+    /* X0X_STRESS_KINDS=a,b: the engines of the two synth parts (original_sound.h kinds 0-3). */
+    const char *kinds=getenv("X0X_STRESS_KINDS");
+    if(kinds) { CHECK(sscanf(kinds,"%u,%u",&kind_a,&kind_b)==2); CHECK(kind_a<4&&kind_b<4); }
+    /* X0X_STRESS_DEADLINE_NS: a block whose render CPU time exceeds it is late (0 = do not judge). */
+    const char *dl=getenv("X0X_STRESS_DEADLINE_NS");
+    uint64_t deadline=dl?strtoull(dl,NULL,10):0,max_block=0; unsigned late=0;
     FILE *csv=fopen(argv[1],"w"),*pcm=fopen(argv[2],"wb"); CHECK(csv&&pcm);
     boot(); run_ms(50);
-    fixture(0,0); fixture(1,1);
-    CHECK(original_sound_init(proj.sound.v[T_303][0],ORIGINAL_SOUND_CHICAGO,0));
-    CHECK(original_sound_init(proj.sound.v[T_303][1],ORIGINAL_SOUND_MIAMI,factory));
-    CHECK(original_sound_set(proj.sound.v[T_303][0],ORIGINAL_CHICAGO_FX_TYPE,choice));
+    fixture(0,0); fixture(1,(int)kind_b);
+    if(kind_a) { int32_t tmp[512]; CHECK(engine_bass_select_preset(0,(int)kind_a,0,&proj.sound)==0);
+        for(int n=0;n<1024&&engine_bass_preset_pending(0);n++)engine_render(tmp,256);
+        CHECK(!engine_bass_preset_pending(0)); }
+    CHECK(original_sound_init(proj.sound.v[T_303][0],kind_a,kind_a==ORIGINAL_SOUND_MIAMI?factory:0));
+    CHECK(original_sound_init(proj.sound.v[T_303][1],kind_b,kind_b==ORIGINAL_SOUND_MIAMI?factory:0));
+    if(kind_a==ORIGINAL_SOUND_CHICAGO) CHECK(original_sound_set(proj.sound.v[T_303][0],ORIGINAL_CHICAGO_FX_TYPE,choice));
     engine_apply_sound(&proj.sound);audio();
-    CHECK(engine_bass_bank(0)==0&&engine_bass_bank(1)==1);
+    CHECK(engine_bass_bank(0)==(int)kind_a&&engine_bass_bank(1)==(int)kind_b);
+    /* Stock now starts with empty BREAK slots. Seed the host store exactly
+     * as an installed sample, without embedding audio in native images. */
+    int first_break = engine_brk_nslots();
+    strcpy(slot_name[0], "STRESS");
+    CHECK(load_slot(0, 0, "assets/factory-breaks/909GR.wav") == 0);
+    CHECK(load_slot(0, 1, "assets/factory-breaks/909FL.wav") == 0);
+    CHECK(plat_slot_zones(0) == 2);
     pattern_t *p=&proj.pat[0];
     for(unsigned kit=0;kit<2;kit++) {
         p->drum[kit].len=64; p->drum[kit].rate=RATE_32;
@@ -116,12 +133,16 @@ int main(int argc,char **argv)
         p->bass[v].len=64;p->bass[v].rate=RATE_32;
         for(unsigned s=0;s<64;s++) p->bass[v].step[s]=(bstep_t){(uint8_t)(48+s%24),G_NOTE|BS_ACCENT,127};
     }
+    p->brk.slot_a=(uint8_t)first_break;
+    p->brk.slot_b=(uint8_t)(first_break+1);
     p->brk.steps=UINT32_MAX;p->brk.set[BRK_COMPLEX]=127;p->brk.set[BRK_ROLL]=127;
     for(unsigned part=0;part<NPARTS;part++) {
         seq.ppat[part]=0;
         engine_set(T_MIX,part,MX_LEVEL,110);
         engine_set(T_MIX,part,MX_REV,100);engine_set(T_MIX,part,MX_DLY,100);
     }
+    engine_brk_loops();
+    CHECK(engine_brk_nslots() == first_break + 2);
     engine_set(T_FX,0,FX_RV_LEVEL,100);engine_set(T_FX,0,FX_DL_LEVEL,100);
     engine_set(T_FX,0,FX_DL_FDBK,100);engine_set(T_FX,0,FX_DL_TYPE,1);
     engine_set(T_FX,0,FX_DL_WEAR,100);engine_set(T_FX,0,FX_DIST,6);engine_set(T_FX,0,FX_DRIVE,100);
@@ -133,19 +154,22 @@ int main(int argc,char **argv)
     for(unsigned b=0;b<blocks;b++) {
         stress_inputs(b);
         uint32_t before[ENG_PROF_N];for(unsigned k=0;k<ENG_PROF_N;k++)before[k]=eng_prof[k];
-        int32_t output[1024];synth_cpu[0]=synth_cpu[1]=0;memset(note_events,0,sizeof note_events);measured=1;
+        int32_t output[1024];memset(synth_cpu,0,sizeof synth_cpu);memset(note_events,0,sizeof note_events);measured=1;
         uint64_t start=cpu_ns();double wall=now_ns();
         /* The native ISR uses exactly these two 256-frame stretches per half. */
         engine_render(output,256);engine_volume(output,256);
         engine_render(output+512,256);engine_volume(output+512,256);
         uint64_t elapsed=cpu_ns()-start;wall=now_ns()-wall;measured=0;
+        if(elapsed>max_block)max_block=elapsed;
+        if(deadline&&elapsed>deadline)late++;
         uint32_t delta[ENG_PROF_N];for(unsigned k=0;k<ENG_PROF_N;k++){delta[k]=eng_prof[k]-before[k];stages[k]+=delta[k];}
         CHECK(mi_r==mi_w);CHECK(!runtime_faults);CHECK(seq.playing);
-        for(unsigned kind=0;kind<2;kind++)for(unsigned source=0;source<2;source++)for(unsigned edge=0;edge<2;edge++)
-            if(note_events[kind][source][edge]!=4) {
-                fprintf(stderr,"external note accounting failed: engine=%u source=%u edge=%u expected=4 got=%u\n",kind,source,edge,note_events[kind][source][edge]);
+        for(unsigned part=0;part<2;part++)for(unsigned source=0;source<2;source++)for(unsigned edge=0;edge<2;edge++) {
+            unsigned kind=part?kind_b:kind_a, want=kind_a==kind_b?8u:4u;
+            if(note_events[kind][source][edge]!=want) {
+                fprintf(stderr,"external note accounting failed: engine=%u source=%u edge=%u expected=%u got=%u\n",kind,source,edge,want,note_events[kind][source][edge]);
                 exit(3);
-            }
+            }}
         for(unsigned p=0;p<NPARTS;p++)if(eng_peak[p])audible|=1u<<p;
         for(unsigned kit=0;kit<2;kit++)for(unsigned v=0;v<NDRUM;v++)if(eng_hit[kit][v])drums[kit]|=1u<<v;
         for(unsigned k=0;k<1024;k++)nonzero+=output[k]!=0;
@@ -155,14 +179,20 @@ int main(int argc,char **argv)
         start=cpu_ns();enc_acc[EN_ALGO]=1;ui_frame();smc_frame();uint64_t ui_cpu=cpu_ns()-start;
         redraws+=blits!=before_blits;
         fprintf(csv,"%u,%llu,%.0f,%llu,%llu,%llu,%u,%u,%u,%u\n",b,(unsigned long long)elapsed,wall,
-            (unsigned long long)synth_cpu[0],(unsigned long long)synth_cpu[1],(unsigned long long)ui_cpu,
+            (unsigned long long)synth_cpu[kind_a],(unsigned long long)synth_cpu[kind_b],(unsigned long long)ui_cpu,
             delta[PR_909],delta[PR_808],delta[PR_BRK],delta[PR_FX]);
     }
     printf("coverage: redraws=%u/%u audible=%u drum_masks=%u/%u max_voices=%u/%u\n",redraws,blocks,audible,drums[0],drums[1],max_active[0],max_active[1]);
-    CHECK(nonzero&&redraws>blocks/4);CHECK(max_active[0]==1&&max_active[1]==2);
+    CHECK(nonzero&&redraws>blocks/4);
+    if(kind_a==ORIGINAL_SOUND_CHICAGO&&kind_b==ORIGINAL_SOUND_MIAMI) CHECK(max_active[0]==1&&max_active[1]==2);
     CHECK(audible==31&&drums[0]==2047&&drums[1]==2047);
     CHECK(stages[PR_909]&&stages[PR_808]&&stages[PR_BRK]&&stages[PR_FX]);
     CHECK(!fclose(csv)&&!fclose(pcm));
+    /* Dropouts: a lost MIDI/SMC input, a runtime fault or a late block (checked per block above). */
+    printf("heavy: kinds=%u,%u blocks=%u frames=%u seconds=%.1f dropouts=%u late=%u max_block_us=%.1f deadline_us=%.1f\n",
+        kind_a,kind_b,blocks,blocks*512,blocks*512/44100.0,runtime_faults+(unsigned)smc_inputs[0].dropped,late,
+        max_block/1000.0,deadline/1000.0);
+    if(deadline&&late) { fprintf(stderr,"FAIL: %u late blocks over %.1f us\n",late,deadline/1000.0); return 4; }
     printf("PASS stress coverage: blocks=%u frames=%u Chicago=%u Miami=%u redraws=%u nonzero=%u factory=%u FX=%u; host transport substitutes, no DMA/xrun proof\n",
         blocks,blocks*512,max_active[0],max_active[1],redraws,nonzero,factory,choice);
     return 0;

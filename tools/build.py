@@ -24,12 +24,14 @@ seven-type Chicago FX policy. Explicit0 retains only a reference build lane.
 """
 import argparse
 import hashlib
+import fcntl
 import os
 import platform
 import re
 import struct
 import subprocess
 import sys
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -64,6 +66,10 @@ def clang_std_inc():
 # the DSP, the sequencer and the audio engine: separate units at -O2
 O2_UNITS = ["dsp/drum909.c", "dsp/drum808.c", "dsp/breaks.c", "dsp/fxbus.c", "dsp/master.c",
             "dsp/x0x_param.c", "seq/sequencer.c", "seq/tb3po.c", "seq/pattern.c", "seq/motion.c", "app/engine.c"]
+# Control-rate units (step/tick sequencing, pattern edits, motion lanes, pan/glide helpers): -Oz,
+# not -O2. They run once per tick or per block, not per sample; this frees about 2.5 KB of XIP
+# (perf lane, measured 1,452 -> 4,028 B free on Elite) for the Synth One reader.
+OZ_UNITS = {"dsp/x0x_param.c", "seq/sequencer.c", "seq/tb3po.c", "seq/pattern.c", "seq/motion.c"}
 # Explicit compilation superset. The app's backend calls, not forced export roots,
 # decide which function/data sections survive the link. master_unmuted.c is an old
 # component reference; the original graph uses master.c and its real lifecycle.
@@ -138,8 +144,36 @@ if SUPERJ6_FACTORY not in ("0", "1"):
 if SUPERJ6_FACTORY == "1":
     ORIGINAL_SYNTH_BACKENDS.insert(0, "firmware/src/dsp/dnbx_core.c")
 
+# X0X_S1C=1: Synth One plays the compact engine (dsp/s1c) with its own delay and
+# reverb and the 694-program factory pack, instead of the dry INIT voice.
+S1C_OVERRIDE = os.environ.get("X0X_S1C")
+if S1C_OVERRIDE not in (None, "0", "1"):
+    raise SystemExit("X0X_S1C: 0 or 1")
+S1C = "0"  # unrelated host imports keep the dry baseline unless explicitly enabled
+
+
+def enable_compact_synthone():
+    global S1C
+    if S1C == "1":
+        return
+    S1C = "1"
+    ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/app/s1_dry_part.c")] = "firmware/src/app/s1c_part.c"
+    ORIGINAL_SYNTH_BACKENDS[ORIGINAL_SYNTH_BACKENDS.index("firmware/src/dsp/s1_dry_voice.c")] = "firmware/src/dsp/s1c/s1c.c"
+    ORIGINAL_SYNTH_BACKENDS.extend(["firmware/src/dsp/s1c/s1u.c", "firmware/src/dsp/s1c/s1c_front.c",
+                                    "firmware/src/dsp/s1pack/s1pack.c"])
+
+
+def native_compact_synthone(board, model, region_size, override):
+    """Default compact mode for native SMK Elite/Pro with FDATA, not host imports."""
+    return override == "1" or (override is None and board == "smk37" and model in ("elite", "pro") and bool(region_size))
+
+
+if S1C_OVERRIDE == "1":
+    enable_compact_synthone()
+
 # Per-sample Chicago/Miami DSP units: -O2 like O2_UNITS (the rest stays -Os for flash).
 # -ffp-contract=off and -fno-fast-math keep every float result the same at either level.
+S1C_OZ_UNITS = set(os.environ.get("X0X_S1C_OZ", "s1c s1u s1c_front s1c_part s1pack").split())
 ORIGINAL_SYNTH_O2_UNITS = {
     "oscillator_motion", "miami_selected_voice", "miami_ms20", "miami_output", "miami_fx_chain",
     "miami_pitch", "voice_gain", "program_envelope", "fixed_fx", "master",
@@ -147,10 +181,14 @@ ORIGINAL_SYNTH_O2_UNITS = {
     "chicago_smallfx", "chicago_output", "chicago_engine_output", "chicago_full_mg", "chicago_global_mg",
     "chicago_global_stage", "chicago_modulation",
     "miami_decimator_component", "miami_decimator_adapter", "miami_fx_conversion",
-    "original_chicago_backend", "original_miami_backend", "original_runtime",
+    "original_chicago_backend", "original_miami_backend",
     "fused_reference", "chicago_selector", "miami_geometry",
     "chicago_scheduler", "chicago_voice_owner", "chicago_packed", "lossless_table", "chicago_arp_control", "chicago_note_context", "control_math",
 }
+# Per-block dispatch, preset/arp control and views (no per-sample loop): -Oz, like OZ_UNITS.
+# The per-sample DSP stays in the backends at -O2. Perf lane: +864 B XIP with the arp hooks on;
+# tests/host/render_timing_regression_test.sh pins the per-block render timing.
+ORIGINAL_SYNTH_OZ_UNITS = {"original_runtime"}
 ORIGINAL_SYNTH_FLAGS = ["-fno-fast-math", "-ffp-contract=off", "-DNDEBUG",
                         "-DORIGINAL_USE_SOFT_FMA", "-DMIAMI_FX_NO_HOST_FENV",
                         "-DX0X_FAST_FMA"]   # device: mul+add for the soft FMA (docs/perf/engine-load-20261031.md)
@@ -264,12 +302,24 @@ def tc_all(*cmds):
 def generate():
     """generated headers: the font (Felucca's), the 909's samples and tables, the break bank"""
     GEN.mkdir(parents=True, exist_ok=True)
+    # Guard simultaneous generation of the same native target; host files live elsewhere.
+    _gen_lock = open(GEN / ".generate.lock", "a+")
+    fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_EX)
+    try:
+        _generate_locked()
+    finally:
+        fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_UN)
+        _gen_lock.close()
+
+def _generate_locked():
+    """Body of generate(), called with GEN/.generate.lock held."""
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         import gen_chicago_compact
         gen_chicago_compact.generate(SRC / "experiments/original_synth/chicago_packed_private.h",
                                      GEN / "chicago_compact_private.h")
     if gen_cache.restore(GEN):
         print("generate: cached font, drums, and break bank")
+        write_fittab_id()
         return
     tools = SRC / "tools"
     cmds = [[tools / "gen_font.py", GEN / "felucca_font.h"],
@@ -301,6 +351,7 @@ def generate():
         break_pack.write_empty_header(GEN / "x0x_break_bank.h")
         print("break bank: none (factory loops are an optional install)")
     gen_cache.store(GEN)
+    write_fittab_id()
 
 
 # ---- update loader
@@ -421,6 +472,8 @@ def app_compile_commands(flags, original_synth, wobble):
     flags = [*flags, "-DX0X_SYNTHONE_PATCH=" + synthone_patch]
     if SUPERJ6_FACTORY == "1":
         flags = [*flags, "-DX0X_SUPERJ6_FACTORY=1"]
+    if S1C == "1":
+        flags = [*flags, "-DX0X_S1C=1"]
     chance_probe = os.environ.get("X0X_GFINAL_CHANCE_PROBE", "1")
     if chance_probe not in ("0", "1"):
         raise SystemExit("X0X_GFINAL_CHANCE_PROBE: 0 or 1")
@@ -437,6 +490,8 @@ def app_compile_commands(flags, original_synth, wobble):
     for u in O2_UNITS:
         o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
         unit_flags = [*o2, *ORIGINAL_SYNTH_FLAGS] if u == "app/engine.c" else o2
+        if u in OZ_UNITS:
+            unit_flags = [f if f != "-Os" else "-Oz" for f in flags]
         if u in {"dsp/drum909.c", "dsp/master.c", "dsp/fxbus.c"}:
             unit_flags = [f for f in unit_flags if f != "-flto"]
         units.append(("cc", *unit_flags, "-c", FW / "src" / u, "-o", o))
@@ -447,8 +502,12 @@ def app_compile_commands(flags, original_synth, wobble):
         for u in (*ORIGINAL_SYNTH_UNITS, *ORIGINAL_SYNTH_BACKENDS):
             o = OUT / "original" / (Path(u).stem + ".o")
             uf = original_o2 if Path(u).stem in ORIGINAL_SYNTH_O2_UNITS else original_flags
+            if Path(u).stem in ORIGINAL_SYNTH_OZ_UNITS:
+                uf = ["-Oz" if flag == "-Os" else flag for flag in original_flags]
             if Path(u).stem in {"chicago_dynamics", "chicago_modulation", "original_runtime"}:
                 uf = [f for f in uf if f != "-flto"]
+            if S1C == "1" and Path(u).stem in S1C_OZ_UNITS:
+                uf = ["-Oz" if flag == "-Os" else flag for flag in uf]
             if BOARD == "smk37" and MODEL in ("elite", "pro") and Path(u).stem == "chicago_packed":
                 uf = [*uf, "-DX0X_CHICAGO_COMPACT_HEADERS=1"]
             if SUPERJ6_FACTORY == "1" and synthone_patch == "1":
@@ -472,7 +531,8 @@ def build_app():
     original_synth, wobble = synth_build_config()
     if original_synth:
         require_original_synth_sources()
-    flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
+    flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
+             f"-I{GEN.relative_to(SRC)}"]
     factory_roots = []
     if SUPERJ6_FACTORY == "1":
         names = ["engine_superj6_factory_load"]
@@ -496,7 +556,7 @@ def build_app():
         flags.append(usb_name)  # app only: loader, VID/PID and package identity unchanged
     if VERSION and os.environ.get("X0X_DEBUG") == "1":
         raise SystemExit("X0X_DEBUG=1 (register peek / poke over USB) is for development builds only")
-    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_PADCAL", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE"):
+    for flag in ("X0X_CDC", "X0X_DEBUG", "X0X_DEV_WOBBLE", "X0X_WOBBLE", "X0X_LCD_TRACE"):
         v = os.environ.get(flag)    # unset: the default in firmware headers / below
         if v in ("0", "1"):
             flags.append(f"-D{flag}={v}")
@@ -560,9 +620,10 @@ def build_app():
                     "-plugin-opt=-function-sections", "-plugin-opt=-data-sections",
                     "-plugin-opt=-fp-contract=off", "--sort-section=alignment"]
     tc("pi32v2/bin/ld", *lto_link, "--gc-sections", *factory_roots, "-e", "_start", "-T", ld, *objs, "-o", elf)
-    for sect in ("text.bin", "data.bin", "ramtext.bin", "c1text.bin"):
+    for sect in ("text.bin", "data.bin", "ramtext.bin", "c1text.bin", "xdata.bin"):
         (OUT / sect).unlink(missing_ok=True)
-    *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),
+    *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".xdata", elf, OUT / "xdata.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".data", elf, OUT / "data.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".ram_text", elf, OUT / "ramtext.bin"),
                                ("common/bin/objcopy", "-O", "binary", "-j", ".c1_text", elf, OUT / "c1text.bin"),
@@ -592,6 +653,161 @@ def build_app():
     img += b"\x00\xff\xff\xff"
     (OUT / "x0x.bin").write_bytes(img)
     return bytes(img), syms, dis, rt
+
+
+XDATA_LO, XDATA_HI = 0xAD000, 0xAF000         # fm1_flash_map.h FL_XDATA_LO / FL_XDATA_HI
+XDATA_MAGIC = 0x31445858                       # "XXD1", app/xdata.h XDATA_MAGIC
+XDATA_TYPE = 101                               # the package's xdata.bin UFW entry (loader/ldr_core.c LDR_XD_TYPE)
+
+
+def record_like(r):
+    """the update loader's flash-record test (loader/ldr_core.c, step 4): 80 B at a sector's last 256 B"""
+    rd16 = lambda o: r[o] | (r[o + 1] << 8)    # noqa: E731
+    return rd16(6) == 0x5441 and rd16(0) != 0 and rd16(0) == fm1pkg_make.crc16(r[2:80])
+
+
+def xdata_problems(region, lo=XDATA_LO):
+    """what is wrong with an XDATA region image (16 B header + blob, 0xFF up to the region end)"""
+    import zlib
+    errors = []
+    if len(region) != XDATA_HI - XDATA_LO:
+        return [f"XDATA image is {len(region)} B, not the {XDATA_HI - XDATA_LO} B region"]
+    magic, n, crc, ident = struct.unpack_from("<IIII", region, 0)
+    if magic != XDATA_MAGIC:
+        errors.append(f"XDATA magic {magic:#x}")
+    elif 16 + n > len(region):
+        errors.append(f"XDATA blob {n} B does not fit")
+    elif zlib.crc32(region[16:16 + n]) != crc or crc != ident:
+        errors.append(f"XDATA CRC {zlib.crc32(region[16:16 + n]):#x}, header {crc:#x} / build id {ident:#x}")
+    elif any(b != 0xFF for b in region[16 + n:]):
+        errors.append("XDATA tail after the blob is not erased")
+    # the loader erases a sector whose last 256 B look like an update record: never one of ours
+    for s in range(lo + 0x1000, lo + len(region) + 1, 0x1000):
+        if record_like(region[s - 0x100 - lo:s - 0x100 - lo + 80]):
+            errors.append(f"XDATA at {s - 0x100:#x} looks like an update record (the loader would erase it)")
+    return errors
+
+
+def xdata_image():
+    """the linked .xdata section as the 8 KiB region the loader writes, or None (none in this build)"""
+    raw = (OUT / "xdata.bin").read_bytes() if (OUT / "xdata.bin").exists() else b""
+    if not raw:
+        return None
+    if len(raw) > XDATA_HI - XDATA_LO:
+        raise SystemExit(f"XDATA {len(raw)} B exceeds the region ({XDATA_HI - XDATA_LO} B)")
+    return raw + b"\xff" * (XDATA_HI - XDATA_LO - len(raw))
+
+
+FITTAB_LO, FITTAB_HI = 0xFE000, 0xFF000        # fm1_flash_map.h FL_FITTAB_LO / FL_FITTAB_HI
+FITTAB_MAGIC = 0x31425446                       # "FTB1", app/fittab.h FITTAB_MAGIC
+FITTAB_TYPE = 102                               # the package's fittab.bin UFW entry (loader/ldr_core.c LDR_FT_TYPE)
+FITTAB_BYTES = 1388                             # 694 programs x 2 B
+FITTAB_BLOB = FW / "src" / "app" / "fittab_blob.bin"
+
+
+def fittab_image():
+    """the 4 KiB FITTAB region the loader writes (16 B header + 1,388 B blob, 0xFF tail). SMK only."""
+    import zlib
+    raw = FITTAB_BLOB.read_bytes()
+    if len(raw) != FITTAB_BYTES:
+        raise SystemExit(f"FITTAB blob is {len(raw)} B, expected {FITTAB_BYTES} B (694 programs x 2)")
+    crc = zlib.crc32(raw) & 0xFFFFFFFF
+    img = struct.pack("<IIII", FITTAB_MAGIC, len(raw), crc, crc) + raw
+    return img + b"\xff" * (FITTAB_HI - FITTAB_LO - len(img))
+
+
+def fittab_problems(region):
+    """what is wrong with a FITTAB region image (16 B header + 1,388 B blob, 0xFF tail)"""
+    import zlib
+    errors = []
+    if len(region) != FITTAB_HI - FITTAB_LO:
+        return [f"FITTAB image is {len(region)} B, not the {FITTAB_HI - FITTAB_LO} B region"]
+    magic, n, crc, ident = struct.unpack_from("<IIII", region, 0)
+    if magic != FITTAB_MAGIC:
+        errors.append(f"FITTAB magic {magic:#x}")
+    elif n != FITTAB_BYTES or 16 + n > len(region):
+        errors.append(f"FITTAB blob {n} B, expected {FITTAB_BYTES}")
+    elif zlib.crc32(region[16:16 + n]) != crc or crc != ident:
+        errors.append(f"FITTAB CRC {zlib.crc32(region[16:16 + n]):#x}, header {crc:#x} / build id {ident:#x}")
+    elif any(b != 0xFF for b in region[16 + n:]):
+        errors.append("FITTAB tail after the blob is not erased")
+    return errors
+
+
+def write_fittab_id():
+    """Generated FITTAB_LEN / FITTAB_CRC32 for the app's fittab_load / ED_FITTAB."""
+    GEN.mkdir(parents=True, exist_ok=True)
+    if BOARD != "smk37":
+        (GEN / "fittab_id.h").write_text("/* FITTAB is an SMK-37 region; this board has none */\n")
+        return
+    img = fittab_image()
+    errs = fittab_problems(img)
+    if errs:
+        raise SystemExit("build: " + "; ".join(errs))
+    n, crc = struct.unpack_from("<I", img, 4)[0], struct.unpack_from("<I", img, 8)[0]
+    (GEN / "fittab_id.h").write_text(
+        "/* generated by tools/build.py write_fittab_id from firmware/src/app/fittab_blob.bin */\n"
+        f"#define FITTAB_LEN {n}u\n"
+        f"#define FITTAB_CRC32 0x{crc:08X}u\n")
+
+
+FDATA_TYPE = 103                                # the package's fdata.bin UFW entry (loader/ldr_core.c LDR_FD_TYPE)
+FDATA_HDR = 32                                  # fm1_flash_map.h FL_FDATA_HDR: the header the installers read back
+FDATA_PACK_TOOL = SRC / "tools" / "pack_synthone_factory.py"   # the Synth One factory pack (Synths lane)
+
+
+def fdata_region():
+    """(lo, hi) of FL_FDATA, from fm1_flash_map.h (FL_SMP_HI 0xF4000 - FL_FDATA_SIZE); (hi, hi) without one"""
+    return 0xF4000 - fm1pkg_make.FDATA_SIZE, 0xF4000
+
+
+def fdata_payload():
+    """Always regenerate from the tracked authenticated JSON banks; no private input override."""
+    if not FDATA_PACK_TOOL.exists():
+        return None
+    GEN.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="s1-pack-", dir=GEN) as d:
+        pack = Path(d) / "s1pack.bin"
+        subprocess.run([sys.executable, str(FDATA_PACK_TOOL), str(pack)], check=True, stdout=subprocess.DEVNULL)
+        return pack.read_bytes()
+
+
+def fdata_image():
+    """the FL_FDATA region the loader writes (the payload, then 0xFF to FL_FDATA_SIZE). SMK only; None
+    when the flash map has no FDATA or there is no payload."""
+    lo, hi = fdata_region()
+    if BOARD != "smk37" or lo == hi:
+        return None
+    raw = fdata_payload()
+    if raw is None:
+        raise SystemExit("FDATA flash map requires the tracked Synth One pack generator")
+    if len(raw) > hi - lo:
+        raise SystemExit(f"FDATA payload is {len(raw)} B, the region is {hi - lo} B (FL_FDATA_SIZE)")
+    return raw + b"\xff" * (hi - lo - len(raw))
+
+
+def fdata_problems(region):
+    """what is wrong with an FDATA region image: size, an erased first word, or a Synth One pack (S1PK)
+    whose total or zlib CRC-32 (bytes 32..total) does not match its header"""
+    import zlib
+    lo, hi = fdata_region()
+    if len(region) != hi - lo:
+        return [f"FDATA image is {len(region)} B, not the {hi - lo} B region"]
+    if region[:4] == b"\xff\xff\xff\xff":
+        return ["FDATA image starts erased: the app would read no data"]
+    if region[:4] != b"S1PK":
+        return ["FDATA image is not a Synth One factory pack"]
+    if struct.unpack_from("<HH", region, 4) != (1, 694):
+        return ["FDATA pack version/count mismatch"]
+    total, crc = struct.unpack_from("<II", region, 12)
+    if not FDATA_HDR <= total <= len(region):
+        return [f"FDATA pack total {total} B outside the region"]
+    if zlib.crc32(region[FDATA_HDR:total]) != crc:
+        return [f"FDATA pack CRC {zlib.crc32(region[FDATA_HDR:total]):#x}, header {crc:#x}"]
+    if any(b != 0xFF for b in region[total:]):
+        return ["FDATA tail after the pack is not erased"]
+
+    return []
 
 
 def check(img, syms, dis, rt):
@@ -737,7 +953,7 @@ def version_defines(version, release_label, git_sha):
 
 
 def main():
-    global PRODUCT, VERSION, GIT_SHA, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, LDR
+    global PRODUCT, VERSION, GIT_SHA, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, GEN, LDR
     ap = argparse.ArgumentParser()
     versions = ap.add_mutually_exclusive_group()
     versions.add_argument("--release", metavar="X.Y[.Z]", help="release build: numeric package identity and version string")
@@ -777,6 +993,8 @@ def main():
     if model not in MODELS or (model != "pro" and BOARD != "smk37"):
         raise SystemExit(f"MODEL={model}: pro, elite or mke, with BOARD=smk37")
     MODEL = model
+    if native_compact_synthone(BOARD, MODEL, fm1pkg_make.FDATA_SIZE, S1C_OVERRIDE):
+        enable_compact_synthone()
     fm1pkg_make.set_board(BOARD)
     APP_SLOT = fm1pkg_make.APP_SLOT
     APP_CODE_MAX = fm1pkg_make.APP_CODE_MAX
@@ -793,6 +1011,9 @@ def main():
         stem += "-" + model
         OUT = OUT.parent / f"{BOARD}-{model}"     # its own objects: the Pro build's stay as they are
         LDR = OUT / "loader"
+    # The host writes a simulator BREAK bank to build/gen. Never compile the native
+    # image from that directory, even if a host test is generating it concurrently.
+    GEN = OUT / ("native-gen" if BOARD == "fm1" else "gen")
     name = f"{stem}.fwsc"
     VERSION = GIT_SHA = None
     RELEASE_LABEL = None
@@ -831,9 +1052,33 @@ def main():
         print("  ok   ", n)
     for e in errors:
         print("  FAIL ", e)
+    xdata = xdata_image()
+    if xdata is not None:
+        if BOARD != "smk37":
+            errors.append("XDATA is an SMK-37 region: this board keeps its fonts in the app")
+        errors += xdata_problems(xdata)
+        n = struct.unpack_from("<I", xdata, 4)[0]
+        print(f"XDATA: {16 + n} B of {XDATA_HI - XDATA_LO} (flash {XDATA_LO:#x}), {XDATA_HI - XDATA_LO - 16 - n} B spare")
+        (OUT / "xdata.img").write_bytes(xdata)
+    fittab = fittab_image() if BOARD == "smk37" else None
+    if fittab is not None:
+        errors += fittab_problems(fittab)
+        n = struct.unpack_from("<I", fittab, 4)[0]
+        print(f"FITTAB: {16 + n} B of {FITTAB_HI - FITTAB_LO} (flash {FITTAB_LO:#x}), "
+              f"{FITTAB_HI - FITTAB_LO - 16 - n} B spare")
+        (OUT / "fittab.img").write_bytes(fittab)
+    fdata = fdata_image()
+    if fdata is not None:
+        errors += fdata_problems(fdata)
+        used = struct.unpack_from("<I", fdata, 12)[0] if fdata[:4] == b"S1PK" else len(fdata.rstrip(b"\xff"))
+        print(f"FDATA: {used} B of {len(fdata)} (flash {fdata_region()[0]:#x}), {len(fdata) - used} B spare")
+        (OUT / "fdata.img").write_bytes(fdata)
+    elif fm1pkg_make.FDATA_SIZE and BOARD == "smk37":
+        print(f"FDATA: {fm1pkg_make.FDATA_SIZE} B region, no payload in this tree (no fdata.bin entry)")
     if errors:
         raise SystemExit("build: checks failed")
-    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT)
+    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT, xdata=xdata, fittab=fittab,
+                          fdata=fdata)
     (pkg_dir / name).write_bytes(pkg)
     print(f"app      {OUT / 'x0x.bin'}  {len(img)} B")
     print(f"loader   {LDR / 'ota.bin'}  {len(ota)} B")

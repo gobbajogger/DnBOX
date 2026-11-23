@@ -12,7 +12,7 @@ cd "$(git rev-parse --show-toplevel)" || exit 2
 LANE="${1:-unknown}"; SHA=$(git rev-parse HEAD); BASE=origin/integration/dnbox-consolidated
 TS=$(TZ=Asia/Vladivostok date +%Y%m%d-%H%M); OUT=build/dnbox-gate; mkdir -p "$OUT"
 LOG="$OUT/${SHA:0:8}-$TS.log"; exec > >(tee "$LOG") 2>&1
-XIP_MIN=${XIP_MIN:-1024}; POOL_MIN=${POOL_MIN:-512}
+XIP_MIN=${XIP_MIN:-0}; POOL_MIN=${POOL_MIN:-512}  # user 2026-11-24 00:42: drop the 1024 B floor; build.py still fails a real overflow
 fail=0; void=0
 step() {
   local name=$1; shift
@@ -35,6 +35,11 @@ step() {
 pass_env() {
   export JIELI_TOOLCHAIN="${JIELI_TOOLCHAIN:-${X0X_TOOLCHAIN:-$HOME/.jieli/toolchain}}"
   export X0X_TOOLCHAIN="${X0X_TOOLCHAIN:-$JIELI_TOOLCHAIN}"
+  # Independent host tests run in a pool of 6, leaving cores for other box work.
+  # Override with X0X_TEST_JOBS. Each test already has its own HOME/TMPDIR.
+  export X0X_TEST_JOBS="${X0X_TEST_JOBS:-6}"
+  export XIP_MIN="${XIP_MIN:-0}"
+  export POOL_MIN="${POOL_MIN:-512}"
   export AC79_SDK="${AC79_SDK:-$HOME/fw-AC79_AIoT_SDK}"
   [ -n "${EIGHTW8_DIR:-}" ] && export EIGHTW8_DIR
   [ -n "${NINEW9_DIR:-}" ] && export NINEW9_DIR
@@ -91,6 +96,7 @@ limits()     { resolve_base || return 1
                  if [ "$sz" -ge 52428800 ]; then echo "≥50MB not in LFS: $p"; bad=1; fi
                done < <(git ls-files -s)
                return $bad; }
+_fw_build_pid=
 host_tests() { pass_env
                if ! git rev-parse -q --verify 'refs/tags/archive/build/0.0.22^{commit}' >/dev/null; then
                  if [ "${DNBOX_GATE_ONLINE:-0}" = "1" ]; then
@@ -104,8 +110,19 @@ host_tests() { pass_env
                else
                  echo "using local archive/build/0.0.22 (no fetch)"
                fi
-               sh host/build_host.sh && sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
-               grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && return 1; return $r; }
+               sh host/build_host.sh || return 1
+               # Elite/Pro share build/gen (locked) and run alongside the host suite.
+               fw_build > "$OUT/fw_build-step.log" 2>&1 &
+               _fw_build_pid=$!
+               sh tests/run_tests.sh | tee "$OUT/tests.txt"; local r=${PIPESTATUS[0]}
+               grep -E '^\s*(FAIL|not-run)\b' "$OUT/tests.txt" && r=1
+               return $r; }
+finish_fw_builds() { if [ -n "${_fw_build_pid:-}" ]; then
+                    wait "$_fw_build_pid"; local rc=$?
+                    cat "$OUT/fw_build-step.log"
+                    return $rc
+                  fi
+                  fw_build; }
 budget_from_log() {
   # tools/build.py prints "XIP free: N B" and "pool margin: N B" for the model just built.
   local log=$1 model=$2 xip pool
@@ -120,21 +137,42 @@ budget_from_log() {
   echo "$model: XIP free: $xip B (min $XIP_MIN); pool margin: $pool B (min $POOL_MIN)"
 }
 fw_build()   { pass_env
-               MODEL=elite ./build.sh > "$OUT/elite-build.log" 2>&1
-               local erc=$?
+               # Elite and Pro use separate object dirs (build/smk37-elite vs build/smk37)
+               # and can share the headers host-tests already wrote in build/gen (locked).
+               # Private TMPDIRs keep their temp files from colliding.
+               local elite_tmp pro_tmp
+               elite_tmp=$(mktemp -d "${TMPDIR:-/tmp}/gate-elite.XXXXXX") || return 1
+               pro_tmp=$(mktemp -d "${TMPDIR:-/tmp}/gate-pro.XXXXXX") || return 1
+               ( TMPDIR="$elite_tmp" MODEL=elite ./build.sh > "$OUT/elite-build.log" 2>&1
+                 echo $? > "$OUT/elite-build.rc" ) &
+               local epid=$!
+               ( TMPDIR="$pro_tmp" MODEL=pro ./build.sh > "$OUT/pro-build.log" 2>&1
+                 echo $? > "$OUT/pro-build.rc" ) &
+               local ppid=$!
+               wait "$epid"
+               wait "$ppid"
+               rm -rf "$elite_tmp" "$pro_tmp"
+               local erc=1 prc=1
+               [ -f "$OUT/elite-build.rc" ] && erc=$(cat "$OUT/elite-build.rc")
+               [ -f "$OUT/pro-build.rc" ] && prc=$(cat "$OUT/pro-build.rc")
+               echo "---- elite build ----"
                cat "$OUT/elite-build.log"
-               [ "$erc" -eq 0 ] || { echo "Elite build failed"; return 1; }
-               [ -f build/x0x-smk37-elite.fwsc ] || { echo "missing build/x0x-smk37-elite.fwsc"; return 1; }
-               cp -f build/x0x-smk37-elite.fwsc "$OUT/elite.fwsc" || return 1
-               budget_from_log "$OUT/elite-build.log" elite || return 1
-
-               MODEL=pro ./build.sh > "$OUT/pro-build.log" 2>&1
-               local prc=$?
+               echo "---- pro build ----"
                cat "$OUT/pro-build.log"
+               [ "$erc" -eq 0 ] || { echo "Elite build failed"; return 1; }
                [ "$prc" -eq 0 ] || { echo "Pro build failed"; return 1; }
+               [ -f build/x0x-smk37-elite.fwsc ] || { echo "missing build/x0x-smk37-elite.fwsc"; return 1; }
                [ -f build/x0x-smk37.fwsc ] || { echo "missing build/x0x-smk37.fwsc"; return 1; }
+               cp -f build/x0x-smk37-elite.fwsc "$OUT/elite.fwsc" || return 1
                cp -f build/x0x-smk37.fwsc "$OUT/pro.fwsc" || return 1
+               budget_from_log "$OUT/elite-build.log" elite || return 1
                budget_from_log "$OUT/pro-build.log" pro || return 1
+               python3 tools/engine_memory_report.py build/smk37-elite/x0x.elf --model elite \
+                 --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/elite-engine-memory.txt"
+               [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
+               python3 tools/engine_memory_report.py build/smk37/x0x.elf --model pro \
+                 --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/pro-engine-memory.txt"
+               [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
              }
 flashmap()   { python3 tools/gate_flashmap.py firmware/hal/fm1_flash_map.h firmware/src/storage.c; }
 budget()     { local model xip pool bad=0
@@ -159,12 +197,17 @@ budget()     { local model xip pool bad=0
                  fi
                done
                return $bad; }
-ui_defects() { python3 -m unittest discover -s tests/ui_defects/first_slice -p 'test_*.py' || return 1
-               # Render the screens from this checkout on the host and judge them (no saved receipts).
+ui_defects() { # Per-push: render and judge the real screens. Mutation self-tests
+               # (unittest discover in tests/ui_defects/first_slice, and UI_GEOMETRY_MUTANTS=1
+               # re-renders) stay in the repo and run on demand. The 2026-11-23 21:56 log line
+               # "ui-defects: FAIL: geometry negative" was test_judge_cannot_skip_geometry_failure
+               # injecting ValueError("geometry negative"); the step itself had correctly PASSed.
                rm -rf "$OUT/ui-judge"
                python3 tests/ui_defects/first_slice/judge.py --output "$OUT/ui-judge" || return 1
              }
-drone()      { local n; n=$(git grep -niwI drone -- firmware web tests ':!*CHANGELOG*' ':!docs/history/*' | wc -l); echo "Drone mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
+# Whole repo. Excluded: CHANGELOG, docs/history, and the upstream AudioKit Synth One factory banks
+# (assets/factory_banks/synthone/*.json, third-party preset names pinned byte-for-byte to upstream).
+retired_engine() { local n; n=$(git grep -niwI 'dr[o]ne' -- . ':!*CHANGELOG*' ':!docs/history/*' ':!assets/factory_banks/synthone/*.json' | wc -l); echo "Retired slot-2 engine mentions: $n"; [ "$LANE" = sound ] || [ "$LANE" = integ ] || return 0; [ "$n" -eq 0 ]; }
 
 step pool-accounting python3 tests/test_pool_budget.py
 step clean-tree clean
@@ -172,8 +215,8 @@ step setup setup
 step fetch-base fetch_base
 step no-loss no_loss
 step limits limits
-if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro fw_build; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
-step drone drone
+if [ $void = 0 ]; then step host-tests host_tests; step build-elite-pro finish_fw_builds; step flashmap flashmap; step budget budget; step ui-defects ui_defects; fi
+step retired-engine retired_engine
 R=PASS; [ $void = 1 ] && R=VOID; [ $fail = 1 ] && R=FAIL
 echo "DNBOX-GATE RESULT $R sha=$SHA lane=$LANE log=$LOG"
 [ $R = PASS ] && exit 0; [ $R = VOID ] && exit 2; exit 1

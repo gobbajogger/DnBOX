@@ -290,7 +290,7 @@ int main(int argc,char **argv)
     CHECK(flash_ok && reads>=3 && !memcmp(flash_memory+ST_OWNER_SECTOR,"SMK37DATAX0X",12));
     if(branch==OWNED) CHECK(exit_code==1 && !captions && !erases && !prog_count && frame_count==1);
     else {
-        CHECK(erases==(ST_OWNER_SECTOR-ST_SMK_BASE)/ST_SECTOR+1 && prog_count==1);
+        CHECK(erases==(ST_CLEAR_HI-ST_SMK_BASE)/ST_SECTOR+1 && prog_count==1);
         CHECK(branch==HOLD_TO_END ? exit_code==2 && captions==5 :
               exit_code==1 && captions==(branch==NORMAL?5u:6u));
     }

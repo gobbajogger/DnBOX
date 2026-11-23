@@ -15,7 +15,9 @@
  *        (section .xpool, zeroed at boot). Core 1 may not write core 0's stacks (fm1_guard.h).
  * STACKS with 256-byte guard bands; NOINIT survives resets and UBOOT entry.
  * BLERAM: the Bluetooth mailbox and the app's BLE host (section .ble_ram, not cleared).
- * 0x01C7FD50.. is reserved: boot_info, boot-state mailbox, vector table. */
+ * 0x01C7FD50.. is reserved: boot_info, boot-state mailbox, vector table.
+ * XDATA: flash 0xAD000..0xAEFFF (FL_XDATA, plain XIP window): a 16 B header, then the FONT_S/M/XS/B
+ *        bitmaps. Not part of app.bin: tools/build.py writes it as xdata.bin, installed by the loader. */
 MEMORY
 {
     XIP    (rx)  : ORIGIN = 0x02000120, LENGTH = 0x8DFBC
@@ -26,6 +28,7 @@ MEMORY
     XPOOL  (rw)  : ORIGIN = 0x01C75200, LENGTH = 0x2400
     NOINIT (rw)  : ORIGIN = 0x01C7C000, LENGTH = 0x400
     BLERAM (rw)  : ORIGIN = 0x01C7C400, LENGTH = 0x1000
+    XDATA  (r)   : ORIGIN = 0x020A9000, LENGTH = 0x2000
 }
 SECTIONS
 {
@@ -53,5 +56,7 @@ SECTIONS
     ASSERT(_c1_sstack_top <= ORIGIN(XPOOL), "core 1's stacks reach XPOOL")
     ASSERT(_xpool_end <= _guard0, "XPOOL reaches core 0's stack guard")
     _guard1 = 0x01C7A000; _sstack_lo = 0x01C7A100; _sstack_top = 0x01C7C000;
+    .xdata : { _xdata_start = .; KEEP(*(.xdata.0hdr)) KEEP(*(.xdata.font)) _xdata_end = .; } > XDATA
+    ASSERT(_xdata_start == 0x020A9000, "XDATA must start at flash 0xAD000 (fm1_flash_map.h FL_XDATA_LO)")
     /DISCARD/ : { *(.comment) *(.note*) }
 }

@@ -1,7 +1,0 @@
-{
-  "compiler": "cc (Debian 14.2.0-19) 14.2.0",
-  "flags": "-std=c11 -O2 -ffp-contract=off -fno-fast-math -DX0X_HOST -Wall -Wextra -Werror",
-  "machine": "x86_64",
-  "sanitizer_note": "ASan+UBSan pass with ASAN_OPTIONS=detect_leaks=0; LeakSanitizer unsupported under container ptrace. No heap references in core object.",
-  "system": "Linux-6.18.57-x86_64-with-glibc2.41"
-}

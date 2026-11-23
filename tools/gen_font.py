@@ -13,9 +13,12 @@ alpha 0..15. Each glyph's packed bytes use lossless PackBits: a control byte
 byte (control & 127) + 1 times. Glyph metrics and all coverage values are unchanged.
 """
 import sys
+import zlib
 from collections import Counter
 from heapq import heapify, heappop, heappush
 from pathlib import Path
+
+XDATA_FONTS = ("S", "M", "XS", "B")   # bitmaps in the XDATA flash region, in blob order
 
 from PIL import Image, ImageDraw, ImageFont, features as PILFeatures
 
@@ -403,12 +406,30 @@ def main(out, compressed=True, codec=None):
     pack_index = compressed and all(index is not None for index in packed_indexes.values())
     if pack_index:
         lines.append("#define FONT_INDEX16 1")
+    # FONT_S/M/XS/B bitmaps: one blob, in this order, that the firmware places in the XDATA flash region
+    # (0xAD000, tools/build.py); FONT_T stays in the app as the fallback face (gfx.c font_live)
+    xdata = [r for n in XDATA_FONTS for r in roles if r[0] == n] if all(
+        any(r[0] == n for r in roles) for n in XDATA_FONTS) else []
+    if xdata:
+        blob = b"".join(bytes(r[8]) for r in xdata)
+        lines += ["#ifndef FONT_XDATA_SECTION", "#define FONT_XDATA_SECTION", "#endif",
+                  f"#define FONT_XDATA_LEN {len(blob)}u",
+                  f"#define FONT_XDATA_CRC32 0x{zlib.crc32(blob):08X}u",
+                  f"static const uint8_t FONT_XDATA_BLOB[{len(blob)}] FONT_XDATA_SECTION = {{"]
+        for i in range(0, len(blob), 24):
+            lines.append("    " + ", ".join(f"0x{b:02x}" for b in blob[i:i + 24]) + ",")
+        lines.append("};")
+        at = 0
+        for r in xdata:
+            lines.append(f"#define FONT_{r[0]}_DATA (FONT_XDATA_BLOB + {at})")
+            at += len(r[8])
     for name, ttf, px, h, scale, first, last, glyphs, data, offs in roles:
         assert len(data) < 65536
-        lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
-        for i in range(0, len(data), 24):
-            lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
-        lines.append("};")
+        if not any(r[0] == name for r in xdata):
+            lines.append(f"static const uint8_t FONT_{name}_DATA[{len(data)}] = {{")
+            for i in range(0, len(data), 24):
+                lines.append("    " + ", ".join(f"0x{b:02x}" for b in data[i:i + 24]) + ",")
+            lines.append("};")
         advances = [a for a, _, _ in glyphs]
         advance_table = f"FONT_{name}_ADV"
         if pack_index:

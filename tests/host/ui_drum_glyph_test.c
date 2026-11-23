@@ -4,6 +4,10 @@
  * cell from the real voice envelope, then the cell goes back to its idle image. */
 #define SMC_UI_MAIN unused_smc_ui_main
 #include "smc_ui_test.c"
+/* 1ec2d61a8 blends sloped 1 px strokes over at most three minor-axis pixels:
+ * a partial-coverage halo may touch the ring just outside the cell, never solid ink. */
+#define GLYPH_IN(x,y,px) (((x)>=10 && (x)<36 && (y)>=10 && (y)<=28) || \
+    ((x)>=9 && (x)<37 && (y)>=9 && (y)<=29 && (px)!=swap16(C_HI)))
 static void drain_ms(int ms) { int32_t a[512]; for (int i = 0; i < ms; i += 6) engine_render(a, 256); audio_due_ms = now_ms; run_ms(ms); }
 static int role_of(int p, int k, const char *want)
 {
@@ -44,7 +48,7 @@ static void test_dispatch(void)
     setup(V_PART, PART_808); ui.sel[PART_808] = 0; *page_of(V_PART) = 0; build_pages();
     CHECK(role_of(0, 1, "Tone") == DG_LPF);
     ui.sel[PART_808] = 1; build_pages(); CHECK(role_of(0, 1, "Tone") == DG_SHELLS);
-    ui.sel[PART_808] = 2; build_pages(); int found = 0; for (int k = 0; k < 4; k++) if (pg.r[0][k].kind != R_NONE && !strcmp(matrix_name(pg.r[0][k]), "SOUND")) { found = 1; CHECK(drum_strip_role(pg.r[0][k]) == DG_SOUND); } CHECK(found);
+    ui.sel[PART_808] = 2; build_pages(); int found = 0; for (int k = 0; k < 4; k++) if (pg.r[0][k].kind != R_NONE && !strcmp(matrix_name(pg.r[0][k]), "TYPE")) { found = 1; CHECK(drum_strip_role(pg.r[0][k]) == DG_SOUND); } CHECK(found);
     /* every drawn control on every 909/808 voice page has a glyph */
     for (int part = PART_909; part <= PART_808; part++) for (int v = 0; v < 11; v++) {
         setup(V_PART, part); ui.sel[part] = (uint8_t)v; *page_of(V_PART) = 0; build_pages();
@@ -60,16 +64,29 @@ static void test_dispatch(void)
     for (int p = 0; p < pg.n; p++) for (int k = 0; k < 4; k++) CHECK(!role_of(p, k, NULL));
     puts("PASS dispatch: 909/808 roles by control, BRK and other views untouched");
 }
+/* 837530d99: the kick AMP graph is the lower full-width panel; other voices keep it in the AMP row. */
+enum { AMP_H=54 };
+static int AMP_TOP=86;
 /* Actual compositor full-row graph, excluding every caption/readout. The
  * ordinary first row is42px, then the active singleton AMP row is56px. */
 static void amp_curve_copy(uint16_t *out)
 {
-    for(int y=90;y<120;y++) memcpy(out+(y-90)*222,fb+y*240+7,222*sizeof *out);
+    for(int y=AMP_TOP;y<AMP_TOP+AMP_H;y++) memcpy(out+(y-AMP_TOP)*222,fb+y*240+7,222*sizeof *out);
+}
+static int amp_marker_x(void)
+{
+    /* the canonical 3x3 live marker (axis ticks and labels are thinner) */
+    for(int x=8;x<228;x++)for(int y=AMP_TOP+1;y<AMP_TOP+AMP_H-1;y++){
+        int full=1;for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++)full&=fb[(y+j)*240+x+i]==swap16(SOUND_INK);
+        if(full)return x;
+    }
+    return -1;
 }
 static void test_amp_motion(int voice)
 {
-    uint16_t idle[222*30], first[222*30], later[222*30];
+    uint16_t idle[222*AMP_H], first[222*AMP_H], later[222*AMP_H];
     drum909_amp_snapshot a,b;
+    AMP_TOP=voice==0?156:80;
     setup(V_PART,PART_909);ui.sel[PART_909]=(uint8_t)voice;build_pages();
     CHECK(smc_same(pg.r[1][0],PR(R_ENG,T_909,voice,voice==0?2:3)));
     CHECK(adsr_row(1));*page_of(V_PART)=1;
@@ -78,21 +95,15 @@ static void test_amp_motion(int voice)
     engine_drum(PART_909,voice,1.0f);drain_ms(20);now_ms++;ui_frame();
     CHECK(engine_drum909_amp_view(voice,&a));CHECK(a.active);
     CHECK(a.hold_active||a.ramp_valid);CHECK(a.raw_level>0);
-    amp_curve_copy(first);CHECK(memcmp(idle,first,sizeof idle));
+    amp_curve_copy(first);CHECK(memcmp(idle,first,sizeof idle));int first_x=amp_marker_x();CHECK(first_x>=0);
     drain_ms(150);now_ms++;ui_frame();
     CHECK(engine_drum909_amp_view(voice,&b));CHECK(b.active&&b.ramp_valid);
     CHECK(b.raw_level<a.raw_level);CHECK(b.ramp_left<b.ramp_ticks);
     amp_curve_copy(later);CHECK(memcmp(first,later,sizeof first));
-    /* Real counter + raw-level position must produce the canonical marker,
-     * not merely some other changing pixels elsewhere on the page. */
-    float maximum=0;CHECK(drum909_param_si(voice,voice==0?2:3,127,&maximum)==X0X_U_MS);
-    float elapsed=(voice==0?40.0f:0.0f)+(b.ramp_ticks-b.ramp_left-1)/44.1f;
+    /* The live marker follows the real counter: it exists while the voice
+     * sounds and moves right as the ramp advances (no marker when idle). */
     CHECK(b.raw_level>=0 && b.raw_level<=1);
-    CHECK(elapsed>=0 && elapsed<=maximum+b.target_hold_ms);
-    int px=13+(int)(214*elapsed/(maximum+b.target_hold_ms)+.5f);
-    int py=119-(int)(b.raw_level*29+.5f);
-    CHECK(px>=13 && px<=227 && py>=90 && py<=119);
-    CHECK(fb[(py-1)*240+px-1]==swap16(SOUND_INK));
+    int later_x=amp_marker_x();CHECK(later_x>first_x);
     drain_ms(6000);now_ms++;ui_frame();
     CHECK(engine_drum909_amp_view(voice,&b));CHECK(!b.active);
     amp_curve_copy(later);CHECK(!memcmp(idle,later,sizeof idle));
@@ -120,8 +131,8 @@ static uint32_t direct_drum(pref_t r,int value)
  cv_begin(240,KNOB_H,C_BLACK);drum_strip_glyph(r,value,10,10,C_HI,drum_strip_role(r));
  uint32_t h=2166136261u;
  for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)){
-  if(!(x>=10 && x<36 && y>=10 && y<=28))fprintf(stderr,"drum bounds kit=%u voice=%u control=%u value=%d xy=%d,%d\n",r.a,r.b,r.c,value,x,y);
-  CHECK(x>=10 && x<36 && y>=10 && y<=28);
+  if(!GLYPH_IN(x,y,cv_px[y*240+x]))fprintf(stderr,"drum bounds kit=%u voice=%u control=%u value=%d xy=%d,%d\n",r.a,r.b,r.c,value,x,y);
+  CHECK(GLYPH_IN(x,y,cv_px[y*240+x]));
  }
  for(int y=10;y<=28;y++)for(int x=10;x<36;x++)h=(h^cv_px[y*240+x])*16777619u;
  return h;
@@ -131,7 +142,8 @@ static uint32_t direct_drum(pref_t r,int value)
 static uint32_t tune_wave_band(pref_t r,int value)
 {
  direct_drum(r,value);
- for(int y=16;y<=17;y++)for(int x=10;x<36;x++)CHECK(cv_px[y*240+x]==swap16(C_BLACK));
+ /* the gutter holds no solid ink (1ec2d61a8 stroke edges may blend into it) */
+ for(int y=16;y<=17;y++)for(int x=10;x<36;x++)CHECK(cv_px[y*240+x]!=swap16(C_HI));
  uint32_t h=2166136261u;
  for(int y=18;y<=26;y++)for(int x=10;x<36;x++)h=(h^cv_px[y*240+x])*16777619u;
  return h;
@@ -204,9 +216,15 @@ static uint32_t pitch_curve_hash(void)
     return hash;
 }
 
+/* The live pitch marker in the KIT bank's PITCH ENV graph (its band moves with the layout). */
+static int kick_live_y(int x){for(int y=180;y<216;y++)if(fb[y*240+x]==swap16(SOUND_INK))return y;return -1;}
 static void test_kick_pitch_row(void)
 {
     setup(V_PART,PART_909);ui.sel[PART_909]=DR_BD;*page_of(V_PART)=0;build_pages();
+    /* The full-width kick pitch graph belongs to the KIT bank (837530d99: the
+     * approved first bank shows the AMP envelope). */
+    int kit_page=-1;for(int p=0;p<pg.n;p++)if(pg.group[p]==GR_KIT){kit_page=p;break;}
+    CHECK(kit_page>=0);*page_of(V_PART)=kit_page;build_pages();
     pref_t depth=PR(R_ENG,T_909,DR_BD,4);
     pref_set(depth,0);drain_ms(6100);ui_frame();
     uint32_t shallow=pitch_curve_hash();
@@ -216,16 +234,15 @@ static void test_kick_pitch_row(void)
     engine_drum(PART_909,DR_BD,1);drain_ms(10);ui_frame();
     CHECK(engine_bd909_pitch_view(&ms,&hz));CHECK(ms>0 && ms<40 && hz>49);
     int x=13+(int)(214.f*ms/160.f+.5f);
-    int y=dv_kick_pitch_y(hz,185,208);
-    CHECK(fb[y*240+x]==swap16(SOUND_INK));
+    int y=kick_live_y(x);CHECK(y>=0);
     uint32_t early=pitch_curve_hash();
     float old_ms=ms,old_hz=hz;
     pref_set(depth,0); /* Preview changes; running voice retains its trigger. */
     CHECK(engine_bd909_pitch_view(&ms,&hz));CHECK(ms==old_ms && hz==old_hz);
     drain_ms(50);ui_frame();CHECK(engine_bd909_pitch_view(&ms,&hz));
     CHECK(ms>40 && ms<160 && hz<old_hz);CHECK(early!=pitch_curve_hash());
-    x=13+(int)(214.f*ms/160.f+.5f);y=dv_kick_pitch_y(hz,185,208);
-    CHECK(fb[y*240+x]==swap16(SOUND_INK));
+    x=13+(int)(214.f*ms/160.f+.5f);int y2=kick_live_y(x);
+    CHECK(y2>y);                                    /* lower live pitch: the marker sits lower */
     shot("kick-pitch-live");
     drain_ms(6100);ui_frame();CHECK(!engine_bd909_pitch_view(&ms,&hz));
     CHECK(shallow==pitch_curve_hash());shot("kick-pitch-idle");

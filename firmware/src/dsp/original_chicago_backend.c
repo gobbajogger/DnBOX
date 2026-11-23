@@ -4,7 +4,9 @@
 #include "binary32_math.h"
 #include "chicago_packed.h"
 #include "original_backend_pitch.h"
+#include "fastmath.h"
 #include <string.h>
+#include "x0x_cold.h"
 
 #define BACKEND_READY UINT32_C(0x43484231)
 
@@ -275,7 +277,7 @@ int original_chicago_backend_all_off(original_chicago_backend *s)
     return healthy(s);
 }
 
-int original_chicago_backend_filter_view(const original_chicago_backend *s, float *eg, float *depth)
+X0X_COLD int original_chicago_backend_filter_view(const original_chicago_backend *s, float *eg, float *depth)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     *eg = s->voice.active ? s->voice.vcf.level : 0.0f;
@@ -283,7 +285,7 @@ int original_chicago_backend_filter_view(const original_chicago_backend *s, floa
     return 1;
 }
 
-int original_chicago_backend_env_view(const original_chicago_backend *s, float adsr[4], float *level, int *state)
+X0X_COLD int original_chicago_backend_env_view(const original_chicago_backend *s, float adsr[4], float *level, int *state)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     for (unsigned i = 0; i < 4; i++) adsr[i] = s->controls.vca[i];
@@ -292,7 +294,7 @@ int original_chicago_backend_env_view(const original_chicago_backend *s, float a
     return 1;
 }
 
-int original_chicago_backend_pitch_view(const original_chicago_backend *s, float *current, float *target, int *active)
+X0X_COLD int original_chicago_backend_pitch_view(const original_chicago_backend *s, float *current, float *target, int *active)
 {
     if (!s || s->ready != BACKEND_READY) return 0;
     *current = s->voice.pitch.current[0]; *target = s->voice.pitch.target[0];
@@ -544,4 +546,24 @@ int original_chicago_backend_render(original_chicago_backend *s,
         if (result != ORIGINAL_CHICAGO_BACKEND_OK) return result;
     }
     return end_admitted(s, left, right, 0);
+}
+
+/* Display only (main loop): base cutoff of public macro 2 in Hz from the real
+ * law: macro -> native 24 (program mapping) -> MP4 index q = cutoff * 16384
+ * (no envelope, key 48 so no tracking, no modulation) -> the exact 44.1 kHz
+ * A coefficient -> the corner of each one-pole stage z += A(z' - z):
+ * fc = -ln(A) * 44100 / (2 pi), clamped to 0..22050. */
+int original_chicago_backend_cutoff_hz(float macro, float *hz)
+{
+    original_chicago_program p;
+    float c, a, e;
+    memset(&p, 0, sizeof p);
+    if (!hz || !original_chicago_program_set(&p, 2u, macro) || !original_chicago_program_native(&p, 24u, &c))
+        return 0;
+    float q = c * 16384.0f;
+    q = q < 0.0f ? 0.0f : q > 16384.0f ? 16384.0f : q;
+    if (!original_chicago_packed_lookup(0, (uint32_t)q, &a, &e) || !(a >= 0.0f && a <= 1.0f)) return 0;
+    float f = a > 0.0f ? -fm_logf(a) * (44100.0f / FM_TWO_PI) : 22050.0f;
+    *hz = f > 22050.0f ? 22050.0f : f < 0.0f ? 0.0f : f;
+    return 1;
 }

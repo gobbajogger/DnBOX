@@ -263,9 +263,108 @@ def package_damage(image):
         typ = int.from_bytes(e[0:2], "little")
         # flash.bin (0) and ota.bin (100), what the device installs, carry the CRC of their bytes as
         # served. The stock packer's other entries store a CRC of something else: bounds only.
-        if typ in (0, 100) and _crc16(image[off:off + size]) != dcrc:
+        if typ in (0, 100, XDATA_TYPE, FITTAB_TYPE, FDATA_TYPE) and _crc16(image[off:off + size]) != dcrc:
             return f"{name}: CRC"
     return None
+
+
+XDATA_TYPE = 101                                    # SMK: xdata.bin, the font region the loader writes at 0xAD000
+FITTAB_TYPE = 102                                   # SMK: fittab.bin, the fit-table sector the loader writes at 0xFE000
+FDATA_TYPE = 103                                    # SMK: fdata.bin, the Synth One factory pack (end of sample slot 2)
+
+
+def package_xdata(image):
+    """the SMK XDATA region image (8 KiB: 16 B header + font bitmaps) the package's loader installs, or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == XDATA_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
+def package_fittab(image):
+    """the SMK FITTAB region image (4 KiB: 16 B header + fit table) the package's loader installs, or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == FITTAB_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
+def package_fdata(image):
+    """the SMK FDATA region image (FL_FDATA_SIZE B: the Synth One factory pack) the package's loader installs,
+    or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == FDATA_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
+ED_XDATA = 50                                       # editor.c: XDATA in use + the region header as read now
+ED_FITTAB = 51                                      # editor.c: FITTAB present + the region header as read now
+ED_FDATA = 52                                       # editor.c: FDATA present + the region's first 32 B as read now
+
+
+def xdata_readback(link, xdata, timeout=2.0):
+    """after the reboot: the running firmware reads its XDATA region back. Raises InstallError unless it uses
+    the region and the header there is the package's (magic, length, CRC-32, build id)."""
+    try:
+        r = EditorLink(link).req(ED_XDATA, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("xdata", "written, but the firmware did not report its font region: reinstall") from e
+    if len(r) != 33:
+        raise InstallError("xdata", f"malformed font region reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(16))
+    if hdr != bytes(xdata[:16]) or r[0] != 1:
+        raise InstallError("xdata", f"the font region reads back {hdr.hex()} (in use: {r[0]}), "
+                                    f"expected {bytes(xdata[:16]).hex()}: reinstall")
+    return hdr
+
+
+def fittab_readback(link, fittab, timeout=2.0):
+    """after the reboot: the running firmware reads its FITTAB region back. Raises InstallError unless it
+    reports the region present and the header there is the package's (magic, length, CRC-32, build id)."""
+    try:
+        r = EditorLink(link).req(ED_FITTAB, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("fittab", "written, but the firmware did not report its fit table: reinstall") from e
+    if len(r) != 33:
+        raise InstallError("fittab", f"malformed fit table reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(16))
+    if hdr != bytes(fittab[:16]) or r[0] != 1:
+        raise InstallError("fittab", f"the fit table reads back {hdr.hex()} (present: {r[0]}), "
+                                    f"expected {bytes(fittab[:16]).hex()}: reinstall")
+    return hdr
+
+
+def fdata_readback(link, fdata, timeout=2.0):
+    """after the reboot: the running firmware reads its FDATA region back. Raises InstallError unless it
+    reports the region present and its first 32 B (the pack header: magic, counts, total, CRC-32) are the
+    package's. The loader already verified every sector it wrote."""
+    try:
+        r = EditorLink(link).req(ED_FDATA, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("fdata", "written, but the firmware did not report its Synth One pack: reinstall") from e
+    if len(r) != 65:
+        raise InstallError("fdata", f"malformed Synth One pack reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(32))
+    if hdr != bytes(fdata[:32]) or r[0] != 1:
+        raise InstallError("fdata", f"the Synth One pack reads back {hdr.hex()} (present: {r[0]}), "
+                                    f"expected {bytes(fdata[:32]).hex()}: reinstall")
+    return hdr
 
 
 def model_of(text):
@@ -566,16 +665,27 @@ class Updater:
                                "if already in update mode, use --no-slots only with a verified backup or no X0X samples")
         step("write", 100)
 
-    def verify(self, product, step):
+    def verify(self, product, step, xdata=None, fittab=None, fdata=None):
         before_running = self._before_running if self._before_running is not None else []
         step("reboot")
         time.sleep(DELAY["reboot"])
         back = self.wait_for(lambda i: not i.loader, DELAY["wait_reboot"], before_running)
         if not back:
             raise InstallError("noreturn", "the FM-1 did not come back: power-cycle it")
-        back.link.close()
-        if back.id.text != product:
-            raise InstallError("mismatch", f"written, but the FM-1 reports {back.id.text} (expected {product})")
+        try:
+            if back.id.text != product:
+                raise InstallError("mismatch", f"written, but the FM-1 reports {back.id.text} (expected {product})")
+            if xdata is not None:
+                step("xdata")
+                xdata_readback(back.link, xdata)
+            if fittab is not None:
+                step("fittab")
+                fittab_readback(back.link, fittab)
+            if fdata is not None:
+                step("fdata")
+                fdata_readback(back.link, fdata)
+        finally:
+            back.link.close()
         step("done", back.id.text)
         return back.id.text
 
@@ -587,7 +697,7 @@ class Updater:
             raise InstallError("model", f"the device is {dev.id.text}, the package is for {product}")
         ota = dev if dev.id.loader else self.check(dev, image, step)
         self.write(ota, image, step)
-        return self.verify(product, step)
+        return self.verify(product, step, package_xdata(image), package_fittab(image), package_fdata(image))
 
 
 # ---------------------------------------------------------- sample slots ---
@@ -706,6 +816,28 @@ def plan_slots(dev, image, product, require_backup=False):
     return SlotMove(lay, old_map, new_map, risk, board_of(dev.id.text)) if risk or require_backup else None
 
 
+def preload_defaults(up, out, select=None):
+    """--fresh-install [--default-breaks WHICH]: selected default BREAK loops into blank slots."""
+    import default_breaks
+    ids = default_breaks.parse_selection(select)
+    if not ids:
+        print("default BREAK loops: none selected", file=out)
+        return []
+    back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
+    if not back:
+        raise InstallError("slots", "installed, but the device did not answer for the default BREAK loops")
+    try:
+        filled = default_breaks.fill_fresh(EditorLink(back.link), fresh_install=True, select=ids)
+    except (xs.SlotError, TimeoutError) as e:
+        raise InstallError("slots", f"installed, but the default BREAK loops were not written ({e})")
+    finally:
+        back.link.close()
+    which = ", ".join(ids)
+    print(f"default BREAK loops: slot(s) {', '.join(map(str, filled))} written and read back ({which})" if filled else
+          "default BREAK loops: not written (a slot is not blank)", file=out)
+    return filled
+
+
 # ------------------------------------------------------------------- CLI ---
 
 def load_package(path, force):
@@ -808,7 +940,10 @@ class Progress:
         else:
             self.end()
             msg = {"start": f"starting the update on {a}", "loader": "switching to update mode",
-                   "reboot": "restarting", "done": f"done: the FM-1 runs {a}"}[k]
+                   "reboot": "restarting", "xdata": "reading the font region back",
+                   "fittab": "reading the fit table back",
+                   "fdata": "reading the Synth One factory pack back",
+                   "done": f"done: the FM-1 runs {a}"}[k]
             print(msg, file=self.out, flush=True)
 
     def put(self, s):
@@ -943,6 +1078,18 @@ def run(a, backend, out, ask):
                   file=out)
             print("They are saved to a file first and written back after the install." if move.new_map else
                   "They are saved to a file first. This firmware has no X0X slots: restore them later in X0X.", file=out)
+    if getattr(a, "fresh_install", False):
+        fresh_lay = None
+        if not dev.id.loader:
+            try:
+                fresh_lay = slot_probe(dev.link)
+            except (xs.SlotError, TimeoutError) as e:
+                dev.link.close()
+                raise InstallError("slots", f"--fresh-install: the sample layout cannot be read ({e}); nothing was written")
+        if fresh_lay is None or any(sl["nz"] or sl["used"] for sl in fresh_lay["slots"]):
+            dev.link.close()
+            raise InstallError("slots", "--fresh-install: this keyboard already has samples or no readable sample layout; "
+                                        "it is not a fresh install. Nothing was written. Install without --fresh-install")
     if not a.yes and not ask("Install? Do not unplug the FM-1 while writing. [y/N] "):
         dev.link.close()
         print("cancelled", file=out)
@@ -976,6 +1123,8 @@ def run(a, backend, out, ask):
     elif move and move.risk:
         raise InstallError("slots", f"installed, but this firmware has no X0X sample slots for restoration. "
                                     f"The backed-up slots were not written back. {move.help()}")
+    if getattr(a, "fresh_install", False):
+        preload_defaults(up, out, getattr(a, "default_break_ids", None))
     ctl = getattr(a, "ctl_bytes", None)
     if ctl:
         back = up.reconnect_after(lambda i: not i.loader, DELAY["wait_reboot"])
@@ -1079,11 +1228,34 @@ def main(argv=None, backend=None, out=sys.stdout, ask=ask_tty):
     ap.add_argument("--dev-record", metavar="FILE", help="scoped development validation record; requires config dev and explicit --ctl or --no-ctl")
     ap.add_argument("--head-ref", metavar="FILE", help="a flash read-back of this unit (raw, from flash 0): the bootloader guard reference")
     ap.add_argument("--head-check", action="store_true", help="compare the package head with the reference only (no device)")
+    ap.add_argument("--fresh-install", action="store_true",
+                    help="SMK-37, first X0X install on this keyboard: after the install, preload the owner's default "
+                         "BREAK loops into slots 1 and 2 (only if every slot is blank; never on a later install). "
+                         "Choose which of the 5 with --default-breaks (default all). Listen first: "
+                         "https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/")
+    ap.add_argument("--default-breaks", metavar="WHICH", default=None,
+                    help="with --fresh-install, which of the 5 default BREAK zones to preload: all (the default), "
+                         "none, or a comma-separated list (personal-br1-zone1 or short br1-1, br1-2, br1-3, "
+                         "br2-1, br2-2). Listen first at https://gobbajogger.github.io/DnBOX-nightly/starting-breaks/ "
+                         "(WAV: .../private-audio/<id>.wav). Nightly tests: "
+                         "tests/product-starting-break-preview.test.mjs, tests/product-break-http.test.mjs")
     ap.add_argument("--config", choices=("dev", "rel"), default="dev",
                     help="the build config of the package for the gate guard: dev (X0X_DEV_PADCAL=1, default) or rel (0)")
     a = ap.parse_args(argv)
     if a.backup and a.no_slots:
         ap.error("--backup and --no-slots cannot be used together")
+    if a.fresh_install and a.no_slots:
+        ap.error("--fresh-install needs the sample layout check (not --no-slots)")
+    if a.default_breaks is not None and not a.fresh_install:
+        ap.error("--default-breaks needs --fresh-install")
+    if a.fresh_install:
+        import default_breaks
+        try:
+            a.default_break_ids = default_breaks.parse_selection(a.default_breaks)
+        except ValueError as e:
+            ap.error(str(e))
+    else:
+        a.default_break_ids = None
     if bool(a.info) == bool(a.package):
         ap.error("give a PACKAGE.fwsc or --info")
     if a.head_check:                        # no device: only the bootloader guard
