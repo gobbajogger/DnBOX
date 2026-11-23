@@ -19,7 +19,7 @@
 enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END, ED_SMP_ERASE, ED_SMP_INFO, ED_SMP_READ, ED_PING = 25,
        ED_DIAG = 33, ED_BT_TEST = 34, ED_CTL_READ = 37, ED_INLOG = 38, ED_BOOT_INFO = 39,
        ED_BOOT_BEGIN = 43, ED_BOOT_WRITE, ED_BOOT_READ, ED_BOOT_END, ED_BOOT_ABORT,
-       ED_INSTALL = 48, ED_CAPTURE = 49 };
+       ED_INSTALL = 48, ED_CAPTURE = 49, ED_XDATA = 50 };
 #include "../../../tools/mboot/session_wire.h"
 #include "boot_screen.h"
 #if BOARD_SMK37
@@ -887,6 +887,20 @@ static void ed_handle(const uint8_t *f, uint32_t n)
     case ED_PING:
         ed_b(0);
         break;
+#if defined(FONT_XDATA_LEN) && BOARD_SMK37
+    case ED_XDATA: {                                  /* read only: XDATA in use (1) or FONT_T fallback (0), then the
+                                                       * region's 16 B header as read now, each byte 2 x 7 bits, low
+                                                       * first: the installers compare it with the package (read back) */
+        const uint8_t *h = (const uint8_t *)FL_XIP(FL_XDATA_LO);
+        uint32_t k;
+        ed_b(gfx_xdata_ok);
+        for (k = 0; k < XDATA_HDR; k++) {
+            ed_b(h[k]);
+            ed_b(h[k] >> 7);
+        }
+        break;
+    }
+#endif
     case ED_DIAG: {                                   /* read only: the crash record and the Bluetooth start */
         uint32_t w[77], nw = 0, k;            /* 77 x 5 B fit ed_out (tests/diag_size_test.py) */
         const uint32_t *c = (const uint32_t *)&fm1_crash;

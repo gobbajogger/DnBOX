@@ -263,9 +263,44 @@ def package_damage(image):
         typ = int.from_bytes(e[0:2], "little")
         # flash.bin (0) and ota.bin (100), what the device installs, carry the CRC of their bytes as
         # served. The stock packer's other entries store a CRC of something else: bounds only.
-        if typ in (0, 100) and _crc16(image[off:off + size]) != dcrc:
+        if typ in (0, 100, XDATA_TYPE) and _crc16(image[off:off + size]) != dcrc:
             return f"{name}: CRC"
     return None
+
+
+XDATA_TYPE = 101                                    # SMK: xdata.bin, the font region the loader writes at 0xAD000
+
+
+def package_xdata(image):
+    """the SMK XDATA region image (8 KiB: 16 B header + font bitmaps) the package's loader installs, or None"""
+    if package_damage(image):
+        return None
+    hdr = _dec(image[0:0x40])
+    for i in range(int.from_bytes(hdr[8:10], "little")):
+        e = _dec(image[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
+        if int.from_bytes(e[0:2], "little") == XDATA_TYPE:
+            off, size = int.from_bytes(e[8:12], "little"), int.from_bytes(e[12:16], "little")
+            return bytes(image[off:off + size])
+    return None
+
+
+ED_XDATA = 50                                       # editor.c: XDATA in use + the region header as read now
+
+
+def xdata_readback(link, xdata, timeout=2.0):
+    """after the reboot: the running firmware reads its XDATA region back. Raises InstallError unless it uses
+    the region and the header there is the package's (magic, length, CRC-32, build id)."""
+    try:
+        r = EditorLink(link).req(ED_XDATA, [], timeout)
+    except TimeoutError as e:
+        raise InstallError("xdata", "written, but the firmware did not report its font region: reinstall") from e
+    if len(r) != 33:
+        raise InstallError("xdata", f"malformed font region reply ({len(r)} B): reinstall")
+    hdr = bytes((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF for i in range(16))
+    if hdr != bytes(xdata[:16]) or r[0] != 1:
+        raise InstallError("xdata", f"the font region reads back {hdr.hex()} (in use: {r[0]}), "
+                                    f"expected {bytes(xdata[:16]).hex()}: reinstall")
+    return hdr
 
 
 def model_of(text):
@@ -566,16 +601,21 @@ class Updater:
                                "if already in update mode, use --no-slots only with a verified backup or no X0X samples")
         step("write", 100)
 
-    def verify(self, product, step):
+    def verify(self, product, step, xdata=None):
         before_running = self._before_running if self._before_running is not None else []
         step("reboot")
         time.sleep(DELAY["reboot"])
         back = self.wait_for(lambda i: not i.loader, DELAY["wait_reboot"], before_running)
         if not back:
             raise InstallError("noreturn", "the FM-1 did not come back: power-cycle it")
-        back.link.close()
-        if back.id.text != product:
-            raise InstallError("mismatch", f"written, but the FM-1 reports {back.id.text} (expected {product})")
+        try:
+            if back.id.text != product:
+                raise InstallError("mismatch", f"written, but the FM-1 reports {back.id.text} (expected {product})")
+            if xdata is not None:
+                step("xdata")
+                xdata_readback(back.link, xdata)
+        finally:
+            back.link.close()
         step("done", back.id.text)
         return back.id.text
 
@@ -587,7 +627,7 @@ class Updater:
             raise InstallError("model", f"the device is {dev.id.text}, the package is for {product}")
         ota = dev if dev.id.loader else self.check(dev, image, step)
         self.write(ota, image, step)
-        return self.verify(product, step)
+        return self.verify(product, step, package_xdata(image))
 
 
 # ---------------------------------------------------------- sample slots ---
@@ -825,7 +865,8 @@ class Progress:
         else:
             self.end()
             msg = {"start": f"starting the update on {a}", "loader": "switching to update mode",
-                   "reboot": "restarting", "done": f"done: the FM-1 runs {a}"}[k]
+                   "reboot": "restarting", "xdata": "reading the font region back",
+                   "done": f"done: the FM-1 runs {a}"}[k]
             print(msg, file=self.out, flush=True)
 
     def put(self, s):

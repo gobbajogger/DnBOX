@@ -6,6 +6,8 @@
 // loader. Step 2: the loader reads the whole image and writes it. In both steps
 // the device sends cmd 0x30 read requests on the logical image and we answer.
 
+import { packageXdata } from "./fm1pkg.js";
+
 const HS_QUERY = [0xF0, 0x00, 0x32, 0x45, 0x00, 0x00, 0x00, 0x40, 0x7F, 0xF7];
 const UPGRADE = [0xF0, 0x22, 0x24, 0x35, 0x7F, 0xF7];
 const MAXDATA = 512;
@@ -17,8 +19,36 @@ const SMK_FAMILY = /^(ota-)?(SMK-37[ +].*|MKE-P37|STARRYKEY-37.*)$/i;
 export const sameKeyboard = (a, b) => a === b || (SMK_FAMILY.test(a) && SMK_FAMILY.test(b));   // two models
 
 // errors carry a code the pages translate: notfound, model, stopped, noloader, lost, noreturn,
-// mismatch (detail: the identity the device reports), badreq
+// mismatch (detail: the identity the device reports), badreq, xdata (the font region did not read back)
 function fail(code, msg, detail = "") { const e = new Error(msg); e.code = code; e.detail = detail; return e; }
+
+// SMK XDATA read back (editor.c ED_XDATA 50): after the reboot the running firmware reports whether it uses
+// its font region and the region's 16 B header as read now; it must be the package's (tools/fm1_install.py
+// xdata_readback does the same).
+const ED_HDR = [0xF0, 0x7D, 0x46, 0x4C], ED_XDATA = 50;
+export async function xdataReadback(link, xdata, ms = 2000, tries = 2) {
+  let r = null;
+  for (let t = 0; t < tries && !r; t++) {
+    if (link.drain) link.drain();
+    if (!link.send([...ED_HDR, ED_XDATA, 0xF7])) throw fail("xdata", "the USB connection was lost before the font region read back");
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+      const p = await link.read(end - Date.now());
+      if (!p) break;
+      if (p.length > 5 && p[0] === 0xF0 && p[p.length - 1] === 0xF7 && ED_HDR.every((v, i) => p[i] === v) && p[4] === ED_XDATA) {
+        r = Array.from(p.slice(5, -1));
+        break;
+      }
+    }
+  }
+  if (!r) throw fail("xdata", "installed, but the firmware did not report its font region: install again");
+  if (r.length !== 33) throw fail("xdata", `malformed font region reply (${r.length} B): install again`);
+  const hdr = [];
+  for (let i = 0; i < 16; i++) hdr.push((r[1 + 2 * i] | (r[2 + 2 * i] << 7)) & 0xFF);
+  if (r[0] !== 1 || hdr.some((v, i) => v !== xdata[i]))
+    throw fail("xdata", "installed, but the font region did not read back as the package's: install again");
+  return hdr;
+}
 
 export function pack7(data) {
   const out = []; let acc = 0, nb = 0;
@@ -329,8 +359,11 @@ export class Updater {
     const back = await this.waitFor((id) => !IS_OTA(id) && sameKeyboard(id.model, model), 40000, beforeRunning);
     if (!back || !sameKeyboard(back.id.model, model))
       throw fail("noreturn", "the target keyboard did not come back: power-cycle it");
-    back.link.close();
-    if (back.id.text !== product) throw fail("mismatch", `installed, but the device reports ${back.id.text}`, back.id.text);
+    try {
+      if (back.id.text !== product) throw fail("mismatch", `installed, but the device reports ${back.id.text}`, back.id.text);
+      const xd = packageXdata(image);
+      if (xd) { step("xdata"); await xdataReadback(back.link, xd); }
+    } finally { back.link.close(); }
     step("done", back.id.text);
     return back.id.text;
   }
