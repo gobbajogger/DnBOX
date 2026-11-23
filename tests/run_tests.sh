@@ -797,6 +797,7 @@ run chicago-span-hold sh tests/host/chicago_span_hold_test.sh
 run fma-exact-identity sh tests/host/fma_exact_identity_test.sh
 run chicago-coef-cache sh tests/host/chicago_coef_cache_test.sh
 run fxbus-coef-cache sh tests/host/fxbus_coef_cache_test.sh   # zl-coefcache eb93c3ba/b5be0b83
+run reverb-bank-mapping sh tests/host/reverb_bank_mapping_test.sh
 run chicago-peaking-coef-cache sh tests/host/chicago_peaking_coef_cache_test.sh   # 527059a5
 run vca-sustain sh tests/host/vca_sustain_test.sh   # 3c2ad0ec
 run chicago-ens-hoist python3 tests/host/run_chicago_ens_hoist.py   # 5b158ba2

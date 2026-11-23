@@ -8,9 +8,9 @@ static uint16_t captured[240*240];
 static void return_raster(void){
  if(cur_page()!=0 || ui.overlay!=O_NONE)return;
  memcpy(captured,fb,sizeof captured);
- const char *labels[2]={"REV RETURN","DLY RETURN"};
- for(int j=0;j<2;j++){
-  int cell=j+2,cx=cell*60+30,ink=0,match=0,glyph=0;
+ const char *labels[1]={"REV RETURN"};
+ for(int j=0;j<1;j++){
+  int cell=3,cx=cell*60+30,ink=0,match=0,glyph=0;
   pref_t ref=PR(R_ENG,T_FX,0,j?FX_DL_LEVEL:FX_RV_LEVEL);
   if(!ref_eq(pg.r[0][cell],ref))continue; /* baseline reports the missing owner below */
   cv_begin(240,KNOB_H,C_BLACK);text_c(cx,vc(&FONT_XS,13,10),&FONT_XS,labels[j],ui.touched==cell?C_WHITE:C_GRAY);
@@ -39,7 +39,7 @@ static void list_contract(void){
 int main(void){
  for(int theme=0;theme<2;theme++)for(int page=0;page<2;page++){
   setup(V_FX,PART_909);*page_of(V_FX)=page;build_pages();pref_set(PR(R_PALETTE,0,0,0),theme?5:0);CHECK(pg.n==2);
-  const pref_t expected[2][4]={{PR(R_ENG,T_FX,0,FX_RV_DECAY),PR(R_ENG,T_FX,0,FX_RV_TONE),PR(R_ENG,T_FX,0,FX_RV_LEVEL),PR(R_ENG,T_FX,0,FX_DL_LEVEL)},{PR(R_ENG,T_FX,0,FX_DL_TIME),PR(R_ENG,T_FX,0,FX_DL_FDBK),PR(R_ENG,T_FX,0,FX_DL_TONE),PR(R_TAPE,0,0,0)}};
+  const pref_t expected[2][4]={{PR(R_ENG,T_FX,0,FX_RV_DECAY),PR(R_ENG,T_FX,0,FX_RV_TONE),PR(R_ENG,T_FX,0,FX_RV_HPF),PR(R_ENG,T_FX,0,FX_RV_LEVEL)},{PR(R_ENG,T_FX,0,FX_DL_TIME),PR(R_ENG,T_FX,0,FX_DL_FDBK),PR(R_ENG,T_FX,0,FX_DL_TONE),PR(R_TAPE,0,0,0)}};
   CHECK(!strcmp(pg.title[page],page?"DELAY":"REVERB"));list_contract();
   for(int focus=-1;focus<4;focus++){ui.touched=focus;ui.touch_until=now_ms+900;char name[80];snprintf(name,sizeof name,"page-theme%d-bank%d-focus%d",theme,page,focus);render(name);}
   for(int cell=0;cell<4;cell++){
@@ -47,7 +47,7 @@ int main(void){
    pref_set(r,pref_desc(r)->max/2);int before=pref_get(r);sound_t saved=proj.sound;
    char name[80];snprintf(name,sizeof name,"event-before-theme%d-bank%d-K%d",theme,page,cell+5);render(name);
    enc_acc[EN_K1+cell]=1;ui_input_only();
-   int after=pref_get(r);printf("EVENT theme=%d bank=%d K%d before=%d after=%d\n",theme,page,cell+5,before,after);EXPECT(after!=before,cell==2&&!page?"K7_MISSING_REV_RETURN":cell==3&&!page?"K8_MISSING_DLY_RETURN":"PHYSICAL_KNOB_OWNER");
+   int after=pref_get(r);printf("EVENT theme=%d bank=%d K%d before=%d after=%d\n",theme,page,cell+5,before,after);EXPECT(after!=before,cell==2&&!page?"K7_MISSING_REV_LOW_CUT":cell==3&&!page?"K8_MISSING_REV_RETURN":"PHYSICAL_KNOB_OWNER");
    snprintf(name,sizeof name,"event-after-theme%d-bank%d-K%d",theme,page,cell+5);render(name);
    pref_set(r,before);CHECK(!memcmp(&saved,&proj.sound,sizeof saved));pref_set(r,after);
   }

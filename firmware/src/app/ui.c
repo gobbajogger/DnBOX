@@ -1731,7 +1731,7 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
         break;
     }
     case V_FX:                                         /* (each part's sends: MIX's PARTS) */
-        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_LEVEL), PR(R_ENG, T_FX, 0, FX_DL_LEVEL)};
+        do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_RV_DECAY), PR(R_ENG, T_FX, 0, FX_RV_TONE), PR(R_ENG, T_FX, 0, FX_RV_HPF), PR(R_ENG, T_FX, 0, FX_RV_LEVEL)};
             add_page_refs(emit, "REVERB", refs, 0, 0); } while (0);
         do { static const pref_t refs[4] = {PR(R_ENG, T_FX, 0, FX_DL_TIME), PR(R_ENG, T_FX, 0, FX_DL_FDBK), PR(R_ENG, T_FX, 0, FX_DL_TONE), PR(R_TAPE, 0, 0, 0)};
             add_page_refs(emit, "DELAY", refs, 0, 0); } while (0);
@@ -1887,7 +1887,7 @@ static void open_list_of_pages(void)
             list_rows[ui.list_n++] = PR(R_HDR, pg.group[p], 0, 0);
         last = pg.group[p];
         for (k = 0; k < 4; k++)
-            if (ui.view != V_FX || p || k < 2)         /* return shortcuts keep their existing MORE positions */
+            if (ui.view != V_FX || p || k < 2)         /* low cut / return shortcuts keep their MORE rows */
                 list_add(pg.r[p][k]);
     }
     if (pg.nmore && ui.list_n < LIST_MAX)              /* the knobs no page has */
