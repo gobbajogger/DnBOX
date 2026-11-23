@@ -17,6 +17,8 @@ static void walkshot(const char *name) {
 }
 
 static unsigned presence_checks,presence_missing;
+/* Independent retained ID of the 909 Kick main-AMP decay (not production drum_amp_ref()). */
+#define KICK_AMP(r) ((r).kind==R_ENG&&(r).a==T_909&&(r).b==DR_BD&&(r).c==2)
 static int seen_text(const char *text) {for(unsigned i=0;i<geo_nframe;i++)if(!strcmp(text,geo_frame[i].text))return 1;return 0;}
 static void required_drum_content(const char *screen) {
  if(ui.view!=V_PART || ui.part>PART_808 || ui.overlay!=O_NONE || ui.help)return;
@@ -30,6 +32,16 @@ static void required_drum_content(const char *screen) {
   pref_value_of(r,matrix_value(r),num,unit);snprintf(value,sizeof value,"%s%s",num,unit);
   unsigned glyph=0;for(unsigned z=0;z<presence_nglyph;z++)if(presence_glyph[z][0]==r.kind&&presence_glyph[z][1]==r.a&&presence_glyph[z][2]==r.b&&presence_glyph[z][3]==r.c)glyph++;
   presence_checks++;if(!glyph){presence_missing++;printf("MISSING_CONTENT screen=%s kind=glyph expected=[%s]\n",screen,caption);}
+  /* 837530d99: the 909 Kick AMP bank is one "K5 DECAY <value>" caption over the
+   * lower LEVEL/TIME graph, and its KIT bank names the velocity depth. */
+  if(ui.part!=PART_808 && ui.sel[ui.part]==DR_BD){
+   if(KICK_AMP(r)){
+    char physical[48];snprintf(physical,sizeof physical,"%s%s",X0X_SMK_CAPTIONS?"K5 DECAY ":"K1 DECAY ",value);
+    presence_checks++;if(!seen_text(physical)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=kick-decay expected=[%s]\n",screen,physical);}
+    continue;
+   }
+   if(pg.group[page]==GR_KIT && r.kind==R_ENG && r.b==NDRUM)strcpy(caption,"VELOCITY DEPTH");
+  }
   if(ui.part==PART_808 && ui.sel[PART_808]==D8_CP){
    if(page==0 && (k==1||k==3)){
     char physical[32];snprintf(physical,sizeof physical,"K%d %c %d%%",UI_FIRST_KNOB+k,k==1?'A':'D',(matrix_value(r)*100+63)/127);
@@ -60,6 +72,16 @@ static int seen_region(const char *text,int x0,int y0,int x1,int y1) {
 }
 static void expect_region(const char *screen,const char *kind,const char *text,int x0,int y0,int x1,int y1) {
  presence_checks++;if(!seen_region(text,x0,y0,x1,y1)){presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s] region=%d,%d..%d,%d\n",screen,kind,text,x0,y0,x1,y1);}
+}
+/* 03c8daba6: a selected envelope row draws "K5 A " and its value as separate runs;
+ * any other row keeps the joined "K5 A 50" caption. */
+static void expect_envelope(const char *screen,const char *kind,const char *label,int x0,int y0,int x1,int y1) {
+ char prefix[64];const char *v=label;int spaces=0;
+ while(*v&&spaces<2){if(*v==' ')spaces++;v++;}
+ snprintf(prefix,sizeof prefix,"%.*s",(int)(v-label),label);
+ presence_checks++;
+ if(seen_region(label,x0,y0,x1,y1)||(*v&&seen_region(prefix,x0,y0,x1,y1)&&seen_region(v,x0,y0,x1,y1)))return;
+ presence_missing++;printf("MISSING_CONTENT screen=%s kind=%s expected=[%s] region=%d,%d..%d,%d\n",screen,kind,label,x0,y0,x1,y1);
 }
 static void required_other_content(const char *screen) {
  if(ui.help)return;
@@ -111,7 +133,7 @@ static void required_other_content(const char *screen) {
     pref_value_of(r,matrix_value(r),num,unit);
     snprintf(label,sizeof label,"K%d %c %s%s",UI_FIRST_KNOB+k,"ADSR"[stage],num,
              !strcmp(unit,"%") ? "%" : "");
-    expect_region(screen,"synthone-envelope",label,k*width,y,(k+1)*width+4,y+height);
+    expect_envelope(screen,"synthone-envelope",label,k*width,y,(k+1)*width+4,y+height);
     synth_presence_checks++;
     if(unit[0] && strcmp(unit,"%")){
      expect_region(screen,"synthone-envelope-unit",unit,k*width,y,(k+1)*width+4,y+height);
@@ -136,7 +158,7 @@ static void required_other_content(const char *screen) {
       synth_presence_checks++;
      }
     } else snprintf(label,sizeof label,"K%d %c %d%%",UI_FIRST_KNOB+k,"ADSR"[stage],(matrix_value(r)*100+63)/127);
-    expect_region(screen,"synth-envelope",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
+    expect_envelope(screen,"synth-envelope",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;continue;
    }
    snprintf(label,sizeof label,"%s",matrix_name(r));expect_region(screen,"synth-label",label,k*width,y,(k+1)*width+4,y+height);synth_presence_checks++;
    if(r.kind==R_BPRESET)continue; /* wrapped preset names have their own tested formatter */
@@ -181,6 +203,7 @@ static void required_drum_pixels(const char *screen) {
   uint32_t owner=1u+((uint32_t)r.kind<<24)+((uint32_t)r.a<<16)+((uint32_t)r.b<<8)+r.c;
   unsigned pixels=0,missing=0,outside=0;
   int x0=cells==1?6:6+228*k/cells,x1=cells==1?234:6+228*(k+1)/cells;
+  if(ui.part!=PART_808&&ui.sel[ui.part]==DR_BD&&KICK_AMP(r)){x0=3;x1=237;height=240-y;} /* 837530d99 lower LEVEL/TIME panel */
   if(ui.part==PART_808&&ui.sel[PART_808]==D8_CP){
    if(page==1){x0=103;x1=140;y=177;height=20;}
    else if(k==0||k==2){x0=k?150:40;x1=k?205:88;y=50;height=26;}

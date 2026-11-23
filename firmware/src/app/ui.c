@@ -7923,7 +7923,9 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
             char *end = put_i(put_s(label, "K"), UI_FIRST_KNOB + e.slot[k]);
             *end++ = ' '; *end++ = "ADSR"[k]; *end++ = ' ';
             put_s(end, active ? "" : num);
-            strip_value(31+e.slot[k]*59,y+8-off,active ? num : label,unit,edited==k?hi:SOUND_GRAY,active ? label : 0);
+            /* The selected run's taller value font rises 1 px above the caption;
+             * keep it clear of the row header's last ink row. */
+            strip_value(31+e.slot[k]*59,y+(active?9:8)-off,active ? num : label,unit,edited==k?hi:SOUND_GRAY,active ? label : 0);
             continue;
         }
         physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));

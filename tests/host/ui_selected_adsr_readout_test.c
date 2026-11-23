@@ -3,22 +3,23 @@
 #define SMC_UI_MAIN retained_smc_main
 #include "smc_ui_test.c"
 
-/* RGB565 signatures from reviewed native captures. Only the active value
+/* RGB565 signatures from reviewed native captures (SuperJ6 re-reviewed after its
+ * selected run moved 1 px clear of the row header). Only the active value
  * band is pinned; the four inactive controls must retain their entire frame.
  * Stage values and owner selection below are production bindings. */
 static const struct { const char *name; uint32_t hash; } expected[] = {
     {"s1-filter-dark-0", 0x712687ceu},
     {"s1-amp-dark-0", 0xbba27759u},
-    {"sj6-amp-dark-0", 0xc3ae88d7u},
+    {"sj6-amp-dark-0", 0x35ea44a0u},
     {"s1-filter-dark-1", 0x32eef481u},
     {"s1-amp-dark-1", 0x21e4ce62u},
-    {"sj6-amp-dark-1", 0xfc3f84e4u},
+    {"sj6-amp-dark-1", 0xaa1c3315u},
     {"s1-filter-light-0", 0xe4743e55u},
     {"s1-amp-light-0", 0x1c1a22ebu},
-    {"sj6-amp-light-0", 0x2720ce7du},
+    {"sj6-amp-light-0", 0x2915e2d3u},
     {"s1-filter-light-1", 0x00a0bfeau},
     {"s1-amp-light-1", 0x0e3824b8u},
-    {"sj6-amp-light-1", 0xeed824d6u},
+    {"sj6-amp-light-1", 0x90465464u},
     {"s1-dark-inactive", 0xc3a1ebf7u},
     {"s1-light-inactive", 0x5cb7b03bu},
     {"sj6-dark-inactive", 0x1178f356u},
@@ -92,7 +93,7 @@ static void captured(const char *owner,int light,int p,int endpoint,int synth)
     snprintf(name,sizeof name,"%s-%s-%d",owner,light?"light":"dark",endpoint);
     rows=matrix_three_rows()?3:4; step=matrix_three_rows()?67:50;
     first=p/4*4; if(pg.n>=rows && first+rows>pg.n) first=pg.n-rows;
-    int y=HDR_H+4+(p-first)*step+(synth?11:8);
+    int y=HDR_H+4+(p-first)*step+(synth?11:9); /* SuperJ6 selected run sits 1 px below the row header */
     check_pixels(name,3,237,y-2,y+13);
 }
 static void inactive(int engine,int light)
