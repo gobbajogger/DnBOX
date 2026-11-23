@@ -59,3 +59,29 @@ free = sizes[0] - len(imgs[1]) + sizes[1] - len(imgs[2]) + sizes[2]
 print(f"default-breaks: slot1 BR1 {len(imgs[1])} B of {sizes[0]}, slot2 BR2 {len(imgs[2])} B of {sizes[1]} "
       f"(FL_FDATA 0xF000), slot3 empty {sizes[2]}; user capacity {sum(sizes)} B, defaults {used} B, free {free} B")
 print("default-breaks: PASS 5 original zones, bit-exact PCM, fit")
+
+# The install path: fill only empty slots (mocked device, no hardware).
+sys.path.insert(0, str(ROOT / "tests"))
+from slot_mock import MockDevice, Flash  # noqa: E402
+import x0x_slots as xs  # noqa: E402
+AGREED = [(0xC2000, 0x14000), (0xD6000, 0x1E000 - 0xF000), (0xB3000, 0x8000)]
+NOW = [(0xC2000, 0x14000), (0xD6000, 0x1E000), (0xB3000, 0x8000)]
+for slots in (AGREED, NOW):
+    dev = MockDevice(slots=slots)                        # fresh install: every slot empty
+    assert db.fill_empty(dev) == [1, 2], "fresh install gets both defaults"
+    lay = xs.layout(dev)
+    assert [s["nz"] for s in lay["slots"]] == [3, 2, 0]
+    assert bytes(dev.fl.mem[0xC2000:0xC2000 + len(imgs[1])]) == imgs[1]
+    assert bytes(dev.fl.mem[0xD6000:0xD6000 + len(imgs[2])]) == imgs[2]
+    assert db.fill_empty(dev) == [], "a second install changes nothing"
+# A user's own loop in slot 2 is never touched; only the empty slot 1 is filled.
+dev = MockDevice(slots=AGREED)
+own = db.slot_image("MINE", [(bytes(range(256)) * 8, 4096)])
+xs.write_slot(dev, 1, own)
+before = bytes(dev.fl.mem[0xD6000:0xD6000 + 0xF000])
+assert db.fill_empty(dev) == [1]
+assert bytes(dev.fl.mem[0xD6000:0xD6000 + 0xF000]) == before, "user slot 2 unchanged"
+# A different slot map (slot 1 elsewhere): nothing is written there.
+dev = MockDevice(slots=[(0xA0000, 0x14000), (0xB4000, 0x14000)])
+assert db.fill_empty(dev) == []
+print("default-breaks: PASS fill-empty-only install path (fresh, repeat, user slot kept, foreign map)")

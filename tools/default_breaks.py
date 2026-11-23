@@ -9,6 +9,10 @@ They are defaults: an installer may write a slot image only into a slot with no 
 (an empty slot or a fresh install), never over a slot that holds data.
 
   tools/default_breaks.py OUTDIR      writes slot1.img and slot2.img (header at 0, ADPCM at +512)
+
+fill_empty(link) is the install-path step: it writes a default image only into a slot that SMP_INFO
+reports empty (0 zones, 0 KiB used), at the expected flash offset, and that still reads back as no
+valid header just before the write; it never erases or overwrites a slot holding data.
 """
 import hashlib
 import json
@@ -16,6 +20,8 @@ import struct
 import sys
 import zlib
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets" / "default-breaks"
@@ -64,6 +70,46 @@ def images():
         mine = [(z["adpcm"], z["frames"]) for z in zones if z["slot"] == s["slot"]]
         out[s["slot"]] = slot_image(s["name"], mine)
     return out
+
+
+# where each default goes: slot index -> the flash offset it was laid out for (slots.c SMP_USER_OFF)
+HOME = {1: 0xC2000, 2: 0xD6000}
+
+
+def plan_fill(lay, imgs=None):
+    """SMP_INFO layout (x0x_slots.parse_info) -> [(slot index k, image)] for the empty slots only"""
+    imgs = images() if imgs is None else imgs
+    todo = []
+    for slot, img in sorted(imgs.items()):
+        k = slot - 1
+        if k >= lay["count"]:
+            continue
+        sl = lay["slots"][k]
+        if sl["nz"] or sl["used"]:
+            continue                                     # holds data: never touched
+        if lay["ext"] and sl["off"] != HOME[slot]:
+            continue                                     # another map: not where the default belongs
+        if len(img) > sl["size"]:
+            continue
+        todo.append((k, img))
+    return todo
+
+
+def fill_empty(link, progress=None):
+    """write the defaults into empty slots; -> list of slot numbers filled (1-based)"""
+    import x0x_slots as xs
+    filled = []
+    for k, img in plan_fill(xs.layout(link)):
+        lay = xs.layout(link)                            # again, just before the write
+        if lay["slots"][k]["nz"] or lay["slots"][k]["used"]:
+            continue
+        if xs.parse_header(bytes(xs.read_bytes(link, k, 0, xs.HDR_LEN))) is not None:
+            continue                                     # a header is there (SMP_INFO said empty): leave it
+        xs.write_slot(link, k, img, progress)
+        if bytes(xs.read_bytes(link, k, 0, len(img))) != img:
+            raise xs.SlotError(f"slot {k + 1}: default image did not read back")
+        filled.append(k + 1)
+    return filled
 
 
 def main(argv):
