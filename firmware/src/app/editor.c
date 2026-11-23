@@ -27,7 +27,9 @@ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END,
 #include "fittab_id.h"
 #endif
 #include "app/fittab.h"
-#include "app/fdata.h"
+#if X0X_S1C
+#include "app/s1c_part.h"
+#endif
 #endif
 #include "app/smk_inlog_profile.h"
 #if X0X_SMK_INLOG
