@@ -7,6 +7,8 @@ It also compares the map with the layout that the owner approved (a65 and later)
 one Bluetooth block of 64 KiB at 0x8B000, the store at 0x9D000-0xAFFFF (with the owner tag at 0xAF000),
 the 44 KiB VM spare at 0xB0000-0xBAFFF (sector-0 shadows, then sample slot 3 from 0xB3000), no piece 2 (FL_CTL2) and no FL_BOND.
 The owner tag (ST_OWNER_SECTOR in firmware/src/storage.c) must be at 0xAF000, in the last sector of the store.
+XDATA (FL_XDATA, the font bitmaps the update loader installs) must be exactly 0xAD000-0xAEFFF, between the boot
+screens and the owner tag, and the owner check's foreign-store clear (ST_CLEAR_HI) must stop at its start.
   tools/gate_flashmap.py firmware/hal/fm1_flash_map.h [firmware/src/storage.c]
 The last line is "flashmap: PASS" or "flashmap: FAIL <reason>". The exit code is 0 or 1."""
 import os
@@ -20,10 +22,22 @@ d = {k: int(v, 16) for k, v in re.findall(r"#define (FL_\w+)\s+0x([0-9A-Fa-f]+)u
 errors = []
 regions = [("head", 0, d["FL_HEAD_HI"]), ("app code", 0x4120, d["FL_BLE_LO"]),
            ("Bluetooth block", d["FL_BLE_LO"], d["FL_BLE_HI"]), ("app slot end and cfg", d["FL_BLE_HI"], d["FL_APP_HI"]),
-           ("store", d["FL_DATA_LO"], d["FL_DATA_HI"]), ("VM spare", d["FL_SMPV_LO"], d["FL_SMPV_HI"]),
+           ("VM spare", d["FL_SMPV_LO"], d["FL_SMPV_HI"]),
            ("OTA", d["FL_OTA_LO"], d["FL_OTA_HI"]), ("BTIF and USRTRIM", d["FL_CAL_LO"], d["FL_CAL_HI"]),
            ("USR", d["FL_USRRES_LO"], d["FL_USRRES_HI"]),
            ("key_mac", d["FL_KEYMAC_LO"], 0x100000)]
+# the store, less XDATA (0xAD000-0xAEFFF, installed with the image, never a store write)
+if "FL_XDATA_LO" in d and "FL_XDATA_HI" in d:
+    regions += [("store objects and boot screens", d["FL_DATA_LO"], d["FL_XDATA_LO"]),
+                ("XDATA (font bitmaps)", d["FL_XDATA_LO"], d["FL_XDATA_HI"]),
+                ("store owner tag", d["FL_XDATA_HI"], d["FL_DATA_HI"])]
+    if (d["FL_XDATA_LO"], d["FL_XDATA_HI"]) != (0xAD000, 0xAF000):
+        errors.append(f"FL_XDATA is {d['FL_XDATA_LO']:#x}-{d['FL_XDATA_HI']:#x}, expected 0xad000-0xaf000")
+    if "FL_IN(off, n, FL_DATA_LO, FL_XDATA_LO) || FL_IN(off, n, FL_XDATA_HI, FL_DATA_HI)" not in smk:
+        errors.append("FL_STORE_OK does not leave XDATA out of the store")
+else:
+    regions += [("store", d["FL_DATA_LO"], d["FL_DATA_HI"])]
+    errors.append("no FL_XDATA_LO / FL_XDATA_HI")
 # Factory synth data (FL_FDATA): the top FL_FDATA_SIZE bytes of FL_SMP, cut from the end of slot 2.
 # Slots 1, 2 and 3 keep their start offsets; slot 1 (80 KiB) and slot 3 (32 KiB) keep their sizes.
 fdata = d.get("FL_FDATA_SIZE")
@@ -58,7 +72,11 @@ for k, v in expect.items():
     if d.get(k) != v:
         errors.append(f"{k} is {d.get(k, 0):#x}, expected {v:#x}")
 st_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(sys.argv[1]), "..", "src", "storage.c")
-m = re.search(r"#define ST_OWNER_SECTOR\s+0x([0-9A-Fa-f]+)u?", open(st_path).read()) if os.path.exists(st_path) else None
+st_src = open(st_path).read() if os.path.exists(st_path) else ""
+m = re.search(r"#define ST_OWNER_SECTOR\s+0x([0-9A-Fa-f]+)u?", st_src)
+c = re.search(r"#define ST_CLEAR_HI\s+0x([0-9A-Fa-f]+)u?", st_src)
+if not c or int(c.group(1), 16) != d.get("FL_XDATA_LO"):
+    errors.append(f"ST_CLEAR_HI in {st_path} is not FL_XDATA_LO: the owner check would erase XDATA")
 if not m:
     errors.append(f"no ST_OWNER_SECTOR in {st_path}")
 else:

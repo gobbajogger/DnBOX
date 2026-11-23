@@ -44,7 +44,7 @@ static int st_prog(uint32_t off, const void *src, uint32_t n);
  * neighbours in plat.h order: settings 0x9D000, sound 0x9F000, patterns 1-8 0xA1000, patterns 9-16 0xA3000,
  * panel 0xA5000, song 0xA7000, motion 0xA9000 (..0xAAFFF); boot screen A/B at 0xAB000 and
  * 0xAC000 (app/boot_screen.h). A foreign-store clear erases those two with the
- * rest of the store. 0xAD000..0xAEFFF stays spare. The owner tag is at
+ * rest of the store. 0xAD000..0xAEFFF is XDATA (font bitmaps, FL_XDATA): never cleared. The owner tag is at
  * 0xAF000 (st_owner_check). 0xB0000..0xBAFFF holds the slot shadows and sample slot 3 (app/slots.c), not the store: the
  * owner check never clears it. Never near BTIF / USRTRIM (0xC0000..0xC1FFF) or key_mac (0xFF000). */
 #define ST_SMK_BASE 0x9D000u
@@ -59,7 +59,7 @@ static uint32_t st_sector(uint32_t obj, uint32_t copy)  /* flash offset of copy 
  * this same store area, each with its own object formats: a firmware must never parse another's data. The
  * sector 0xAF000 holds "SMK37DATA" + the firmware family (FELUCCA_DATA_FAMILY, build.py: X0X). Ours: load as
  * ever. None (erased): data of unknown origin, kept only if FELUCCA_DATA_UNTAGGED_OK (X0X: 0, cleared).
- * Another family's: clear the whole store area below the tag (0x9D000..0xAEFFF, the other firmware's objects
+ * Another family's: clear the whole store area below XDATA (0x9D000..0xACFFF, the other firmware's objects
  * included) and take it. Samples (FL_SMP) validate themselves. Calibration, BT pairing and key_mac are outside
  * FL_DATA: never touched. Called once at boot, before the first store read (app/main_fm1.c). */
 #ifndef FELUCCA_DATA_FAMILY
@@ -69,6 +69,8 @@ static uint32_t st_sector(uint32_t obj, uint32_t copy)  /* flash offset of copy 
 #define FELUCCA_DATA_UNTAGGED_OK 0
 #endif
 #define ST_OWNER_SECTOR 0xAF000u
+#define ST_CLEAR_HI     0xAD000u                /* the foreign-store clear stops here: FL_XDATA_LO */
+_Static_assert(ST_CLEAR_HI == FL_XDATA_LO && FL_XDATA_HI == ST_OWNER_SECTOR, "SMK: owner clear must stop at XDATA");
 #ifndef ST_IDLE
 #define ST_IDLE() ((void)0)                     /* (x0x.c: feed the watchdog between erases) */
 #endif
@@ -94,7 +96,7 @@ static void st_owner_check(void)
 #if X0X_SMC_VENDOR_TEST
              0xAB000u /* external app/vendor immutable data are never store objects */
 #else
-             ST_OWNER_SECTOR
+             ST_CLEAR_HI   /* XDATA (0xAD000, installed with the image) survives */
 #endif
              ; s += ST_SECTOR) {
             st_erase(s);

@@ -29,7 +29,9 @@
  *     0x8B000-0x9AFFF  Bluetooth controller block, 64 KiB, one piece (FL_BLE; XIP 0x02087000), in app.bin
  *     0x9B000-0x9CFFF  app slot end (0x9B520, APP_SLOT 0x97400 as stock), cfg_tool, region table, cfg
  *   0x9D000-0xAFFFF  VM: X0X store (storage.c: 7 objects, A/B, 0x9D000-0xAAFFF; boot screen
- *                    copies 0xAB000 and 0xAC000; spare 0xAD000-0xAEFFF; owner tag 0xAF000)  FL_DATA
+ *                    copies 0xAB000 and 0xAC000; owner tag 0xAF000)                  FL_DATA
+ *     0xAD000-0xAEFFF  XDATA: the FONT_S/M/XS/B bitmaps (16 B header + blob, tools/build.py),
+ *                      written by the update loader / installer only; never a store write   FL_XDATA
  *   0xB0000-0xBAFFF  VM spare, 44 KiB, not linker code: the sector-0 shadows of the three sample
  *                    slots (0xB0000-0xB2FFF) and user sample slot 3 (0xB3000-0xBAFFF, 32 KiB;
  *                    app/slots.c). The app code region ends at the Bluetooth block (0x8B000).
@@ -58,6 +60,14 @@
 #define FL_PLAIN_LO     0x0009D000u                /* plain XIP window from the VM start */
 #define FL_DATA_LO      0x0009D000u                /* X0X store */
 #define FL_DATA_HI      0x000B0000u
+/* XDATA (app/rodata moved out of the app code area): written only through the update loader with the
+ * image, read in place through the plain XIP window. Not a store window (FL_STORE_OK), and the owner
+ * check's foreign-store clear stops below it (storage.c). Layout: 16 B header {magic FL_XDATA_MAGIC,
+ * blob length, zlib CRC-32 of the blob, build id = FONT_XDATA_CRC32 the app was built with}, then the blob. */
+#define FL_XDATA_LO     0x000AD000u
+#define FL_XDATA_HI     0x000AF000u
+#define FL_XDATA_MAGIC  0x31445858u                /* "XXD1" little endian */
+#define FL_XDATA_HDR    16u
 #define FL_SMPV_LO      0x000B0000u                /* VM spare: slot shadows + sample slot 3 (app/slots.c) */
 #define FL_SMPV_HI      0x000BB000u
 #define FL_OTA_LO       0x000BB000u                /* M-UPGRADE loader staging, ota.c */
@@ -101,6 +111,9 @@ _Static_assert(FL_WIN_SAFE(FL_REC_LO, FL_REC_HI), "SMK: FL_REC overlaps a protec
 _Static_assert(FL_REC_HI == FL_CAL_LO && FL_OTA_HI <= FL_REC_HI && FL_OTA_LO >= FL_REC_LO,
                "SMK: the update record (OTA area) must lie in the loader's record window, below BTIF");
 _Static_assert(FL_DATA_HI <= FL_OTA_LO && FL_APP_HI <= FL_DATA_LO, "SMK: windows overlap");
+_Static_assert(FL_XDATA_LO == 0xAD000u && FL_XDATA_HI == 0xAF000u && FL_XDATA_LO >= FL_PLAIN_LO &&
+               FL_XDATA_LO >= FL_REC_LO && FL_XDATA_HI <= FL_DATA_HI,
+               "SMK: XDATA is the spare above the boot screens, below the owner tag, plain and loader-writable");
 /* the update loader (loader.c): the app area, and records only in the VM below BTIF */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || \
@@ -113,9 +126,9 @@ _Static_assert(FL_DATA_HI <= FL_OTA_LO && FL_APP_HI <= FL_DATA_LO, "SMK: windows
 #define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_DATA_HI) || \
                              FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #else
-/* X0X's own store: FL_DATA and the sample slots */
-#define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, FL_DATA_HI) || FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || \
-                             FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
+/* X0X's own store: FL_DATA less XDATA, and the sample slots */
+#define FL_STORE_OK(off, n) (FL_IN(off, n, FL_DATA_LO, FL_XDATA_LO) || FL_IN(off, n, FL_XDATA_HI, FL_DATA_HI) || \
+                             FL_IN(off, n, FL_SMP_LO, FL_SMP_HI) || FL_IN(off, n, FL_SMPV_LO, FL_SMPV_HI))
 #endif
 #ifndef FL_RANGE_OK
 #define FL_RANGE_OK(off, n) (FL_STORE_OK(off, n) || FL_IN(off, n, FL_OTA_LO, FL_OTA_HI))
