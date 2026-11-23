@@ -28,7 +28,8 @@ static uint32_t screen_curve(int ep,int voice)
 static void physical_amp_caption(int ep)
 {
  static const int raw[3]={0,64,127};
- static const char *const expected[3]={"K5 D 0%","K5 D 50%","K5 D 100%"};
+ /* guidelines (calm pass): no K-number prefix; the stage letter names the ADSR slot */
+ static const char *const expected[3]={"D 0%","D 50%","D 100%"};
  uint16_t saved[120*12];CHECK(UI_FIRST_KNOB==5);
  for(int theme=0;theme<2;theme++)for(int i=0;i<3;i++){
   proj.set.palette=theme?5:0;palette_set(proj.set.palette);CHECK(ui_theme_light==(unsigned)theme);ui.touched=-1;pref_set(pg.r[ep][0],raw[i]);

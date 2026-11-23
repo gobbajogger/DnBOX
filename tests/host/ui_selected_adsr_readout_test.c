@@ -3,27 +3,28 @@
 #define SMC_UI_MAIN retained_smc_main
 #include "smc_ui_test.c"
 
-/* RGB565 signatures from reviewed native captures. The active value
+/* RGB565 signatures from reviewed native captures, re-pinned for the
+ * prefix-free "A/D/S/R value" captions (calm pass: no K-number prefix). The active value
  * band and inactive frames are pinned. Synth One and SuperJ6 rows are the
  * same draw_adsr_inline graph, so both bands sit at the same offset.
  * Stage values and owner selection below are production bindings. */
 static const struct { const char *name; uint32_t hash; } expected[] = {
-    {"s1-filter-dark-0", 0x3b29aff1u},
-    {"s1-amp-dark-0", 0x34d53c03u},
-    {"sj6-amp-dark-0", 0x35ea44a0u},
-    {"s1-filter-dark-1", 0x6a7d0209u},
-    {"s1-amp-dark-1", 0xfc1551cbu},
-    {"sj6-amp-dark-1", 0xaa1c3315u},
-    {"s1-filter-light-0", 0xed2f289eu},
-    {"s1-amp-light-0", 0x7344693bu},
-    {"sj6-amp-light-0", 0x2915e2d3u},
-    {"s1-filter-light-1", 0xd4551d6eu},
-    {"s1-amp-light-1", 0x5ca0ccf7u},
-    {"sj6-amp-light-1", 0x90465464u},
-    {"s1-dark-inactive", 0x4d5bc4adu},
-    {"s1-light-inactive", 0xce662dccu},
-    {"sj6-dark-inactive", 0x1178f356u},
-    {"sj6-light-inactive", 0xd63d4051u},
+    {"s1-filter-dark-0", 0xb6858f71u},
+    {"s1-amp-dark-0", 0x2f0693e3u},
+    {"sj6-amp-dark-0", 0x4976872cu},
+    {"s1-filter-dark-1", 0xdc671ad9u},
+    {"s1-amp-dark-1", 0xbef38583u},
+    {"sj6-amp-dark-1", 0x63296615u},
+    {"s1-filter-light-0", 0x7979c14bu},
+    {"s1-amp-light-0", 0xbcf0d0d2u},
+    {"sj6-amp-light-0", 0x42452f32u},
+    {"s1-filter-light-1", 0xcc0ce4b1u},
+    {"s1-amp-light-1", 0x11bd3d60u},
+    {"sj6-amp-light-1", 0xca26bd1bu},
+    {"s1-dark-inactive", 0x673b8165u},
+    {"s1-light-inactive", 0xed24a140u},
+    {"sj6-dark-inactive", 0x79b4944au},
+    {"sj6-light-inactive", 0x9833f8acu},
 };
 static unsigned failures, witnessed;
 
