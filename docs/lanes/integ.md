@@ -3088,3 +3088,5 @@ Rule: no evidence-only files in Git. These receipts, evidence JSON, logs, link m
 - `evidence/stop-stage4/stage5-contribution.txt` — evidence-only; retained in Git history.
 - `evidence/stop-stage4/successor.json` — evidence-only; retained in Git history.
 - `evidence/stop-stage4/verify-artifacts.py` — evidence-only; retained in Git history.
+- `experiments/sound-hardware-v1/factory-admission/programs.csv` — evidence-only result list (regenerable via report.py/summarize.py); retained in Git history.
+- `experiments/sound-hardware-v1/synthone-delay/programs.csv` — evidence-only result list (regenerable via report.py/summarize.py); retained in Git history.
