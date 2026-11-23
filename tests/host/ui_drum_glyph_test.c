@@ -4,6 +4,10 @@
  * cell from the real voice envelope, then the cell goes back to its idle image. */
 #define SMC_UI_MAIN unused_smc_ui_main
 #include "smc_ui_test.c"
+/* 1ec2d61a8 blends sloped 1 px strokes over at most three minor-axis pixels:
+ * a partial-coverage halo may touch the ring just outside the cell, never solid ink. */
+#define GLYPH_IN(x,y,px) (((x)>=10 && (x)<36 && (y)>=10 && (y)<=28) || \
+    ((x)>=9 && (x)<37 && (y)>=9 && (y)<=29 && (px)!=swap16(C_HI)))
 static void drain_ms(int ms) { int32_t a[512]; for (int i = 0; i < ms; i += 6) engine_render(a, 256); audio_due_ms = now_ms; run_ms(ms); }
 static int role_of(int p, int k, const char *want)
 {
@@ -127,8 +131,8 @@ static uint32_t direct_drum(pref_t r,int value)
  cv_begin(240,KNOB_H,C_BLACK);drum_strip_glyph(r,value,10,10,C_HI,drum_strip_role(r));
  uint32_t h=2166136261u;
  for(int y=0;y<KNOB_H;y++)for(int x=0;x<240;x++)if(cv_px[y*240+x]!=swap16(C_BLACK)){
-  if(!(x>=10 && x<36 && y>=10 && y<=28))fprintf(stderr,"drum bounds kit=%u voice=%u control=%u value=%d xy=%d,%d\n",r.a,r.b,r.c,value,x,y);
-  CHECK(x>=10 && x<36 && y>=10 && y<=28);
+  if(!GLYPH_IN(x,y,cv_px[y*240+x]))fprintf(stderr,"drum bounds kit=%u voice=%u control=%u value=%d xy=%d,%d\n",r.a,r.b,r.c,value,x,y);
+  CHECK(GLYPH_IN(x,y,cv_px[y*240+x]));
  }
  for(int y=10;y<=28;y++)for(int x=10;x<36;x++)h=(h^cv_px[y*240+x])*16777619u;
  return h;
