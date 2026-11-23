@@ -242,7 +242,13 @@ int main(void)
             CHECK(engine_bass_preset_index(voice)==preset);
             CHECK(engine_bass_sound_bank(&proj.sound,voice)==ORIGINAL_SOUND_JUNO);
             ui.part=(uint8_t)(PART_303A+voice);build_pages();
-            CHECK(pg.n==UI_ORIGINAL_JUNO_PAGES+1);
+#if X0X_ARP_HOOKS
+            CHECK(pg.n == UI_ORIGINAL_JUNO_PAGES + 2);
+            CHECK(!strcmp(pg.title[UI_ORIGINAL_JUNO_PAGES], "ARPEGGIATOR"));
+#else
+            CHECK(pg.n == UI_ORIGINAL_JUNO_PAGES + 1);
+#endif
+            CHECK(!strcmp(pg.title[pg.n - 1], "SOUND"));
             engine_bass_on_velocity(voice,60,0,0,100);
             render_blocks(32);
             float level,mod;unsigned state,down;

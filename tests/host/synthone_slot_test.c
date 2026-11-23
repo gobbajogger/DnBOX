@@ -202,7 +202,13 @@ int main(void)
         CHECK(engine_bass_preset_index(voice)==0);
         CHECK(engine_bass_sound_bank(&proj.sound,voice)==ORIGINAL_SOUND_SYNTHONE);
         ui.part=(uint8_t)(PART_303A+voice);build_pages();
-        CHECK(pg.n==UI_ORIGINAL_SYNTHONE_PAGES+1);
+#if X0X_ARP_HOOKS
+        CHECK(pg.n == UI_ORIGINAL_SYNTHONE_PAGES + 2);
+        CHECK(!strcmp(pg.title[UI_ORIGINAL_SYNTHONE_PAGES - 1], "ARPEGGIATOR"));
+#else
+        CHECK(pg.n == UI_ORIGINAL_SYNTHONE_PAGES + 1);
+#endif
+        CHECK(!strcmp(pg.title[pg.n - 1], "SOUND"));
 #if !X0X_SYNTHONE_PATCH
         stock_selector(voice);
         CHECK(engine_bass_bank(1-voice)==other);
