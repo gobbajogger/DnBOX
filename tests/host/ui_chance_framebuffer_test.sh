@@ -16,5 +16,5 @@ with open(sys.argv[2],'wb') as out:
   for r,gg,b in image.get_flattened_data():out.write(struct.pack('<H',(r>>3)<<11|(gg>>2)<<5|b>>3))
 assert pathlib.Path(sys.argv[2]).stat().st_size==101*40*24*2
 PY
-CHANCE_ORACLE="$PWD/$OUT/oracle.rgb565" SMC_UI_OUT="$OUT" \
+CHANCE_ORACLE="$(cd "$OUT" && pwd)/oracle.rgb565" SMC_UI_OUT="$OUT" \
 SMC_UI_TEST_FILE=tests/host/ui_chance_framebuffer_test.c sh tests/host/smc_ui_test.sh

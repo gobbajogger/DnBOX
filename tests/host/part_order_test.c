@@ -148,7 +148,7 @@ static void visual_order(void)
     /* R22 numbered pattern grid keeps the stable display order in both bands.
      * Compare each part's actual content pixels, not assignment outlines. */
     for(int pos=0;pos<NPARTS;pos++) {
-        int p=expected[pos],x=39+(p+1)*12,y=42+pos*18;
+        int p=expected[pos],x=46+(p+1)*12,y=42+pos*18;
         int band=y/BAND_H,by=y%BAND_H;
         cv_begin(240,BAND_H,C_BLACK);draw_home(band);
         uint16_t pixels[240*BAND_H];memcpy(pixels,cv_px,sizeof pixels);

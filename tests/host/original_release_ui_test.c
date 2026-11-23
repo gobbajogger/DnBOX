@@ -385,7 +385,7 @@ static void picture_rule_cases(void)
         for(int slot=14;slot<16;slot++)for(int i=0;i<8;i++)for(int row=0;row<3;row++){
             unsigned mask=slot==15?0x11u:0x02u;
             uint16_t ink=(mask&(1u<<i))?dim(PART_COL[PART_909],slot==15?16:9):UI_N_SIDE;
-            CHECK(fb[(MAIN_Y+42+pos*18+row)*240+39+slot*12+i]==swap16(ink));
+            CHECK(fb[(MAIN_Y+42+pos*18+row)*240+46+slot*12+i]==swap16(ink));
         }
         ui.view=V_PART; build_pages(); draw_header();
         char pending[16],current[16];snprintf(current,sizeof current,"P%d",NPAT);
