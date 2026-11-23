@@ -3,7 +3,7 @@
 #include "../dsp/s1c/s1c_front.h"
 #include "../dsp/s1pack/s1pack.h"
 #include "../dsp/fastmath.h"
-#include "fittab.h"
+#include "../crc32_nibble.h"
 #if X0X_SYNTHONE_PATCH
 #include "original_sound.h"
 #endif
@@ -16,32 +16,15 @@ enum { P_MONO = 20, P_DETM = 31, P_BCSR = 34 };
 
 const uint8_t *s1_part_pack;
 uint32_t s1_part_pack_bytes;
-#ifdef X0X_HOST
-const uint8_t *s1_part_host_fittab;   /* host tests: the 1,388 B table, or NULL (absent) */
-#endif
 
 _Static_assert(S1C_RVB_BYTES % 4u == 0u && S1C_RVB_BYTES + 1024u <= S1C_ARENA_BYTES,
                "reverb lines leave at least 1 KiB of delay pool in the Chicago FX2 arena");
 
-/* Per-program fit word (FITTAB, pack order), read at program load only:
- * bits 0-7 reverb gain, log 0.005..4; bits 8-11 reverb decay index;
- * bits 12-13 delay storage (0 h16, else 8-bit block float).
- * Absent table, or the INIT program: safe defaults. */
-static const float fit_decay[9] = {0.15f, 0.2f, 0.3f, 0.4f, 0.5f, 0.7f, 1.0f, 1.4f, 2.0f};
-static void fit_apply(s1c *e, unsigned program)
+/* Effects need the same behaviour, not an exact match: one fixed reverb fit for every program
+ * (no per-program table). Delay lines are half floats. */
+static void fit_apply(s1c *e)
 {
-    const uint8_t *t = 0;
-#if defined(FITTAB_LEN) && defined(FL_XIP) && BOARD_SMK37
-    t = fittab_load();
-#elif defined(X0X_HOST)
-    t = s1_part_host_fittab;
-#endif
-    e->rfit[0] = 0.27f; e->rfit[1] = 1.0f; e->rfit[2] = 1.0f; e->dfmt = 2;
-    if (!t || program >= FITTAB_PROGRAMS) return;
-    unsigned w = t[2u * program] | (unsigned)t[2u * program + 1u] << 8, d = (w >> 8) & 15u;
-    e->rfit[0] = 0.005f * fm_expf((float)(w & 255u) * (6.684611728f / 255.0f));   /* ln(4 / 0.005) */
-    e->rfit[1] = fit_decay[d < 9u ? d : 6u];
-    e->dfmt = ((w >> 12) & 3u) ? 2 : 0;
+    e->rfit[0] = 0.5f; e->rfit[1] = 1.5f; e->rfit[2] = 1.0f; e->dfmt = 0;
 }
 
 static void emit(void *context, unsigned id, float physical) { (void)s1c_front_set((s1c *)context, id, physical); }
@@ -85,7 +68,7 @@ int s1_part_program(s1_dry_part *part, unsigned program)
         char name[S1PACK_NAME_MAX];
         if (s1pack_read(s1_part_pack, program, name, emit, e) < 0) { load_init(e); program = S1_PART_INIT; ok = 0; }
     }
-    fit_apply(e, program);
+    fit_apply(e);
     /* The engine clears its voices when mono changes; a program load is not a change. */
     e->mono_prev = (uint8_t)e->t[P_MONO];
     part->program = (uint16_t)program;
@@ -227,6 +210,22 @@ int s1_part_voice_view(const s1_dry_part *part, float *level, float *modulation,
     *level = v->amp;
     *modulation = v->fenv;
     *state = v->stage == 2 ? 3u : v->ea.mode == 1 ? 0u : 1u;
+    *key_down = v->stage == 1 && !(part->held & (1u << sel));
+    return 1;
+}
+
+int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, unsigned *stage, unsigned *key_down)
+{
+    int sel = -1;
+    for (unsigned i = 0; i < S1C_VOICES; ++i) {
+        const s1c_voice *v = &part->e.v[i];
+        if (v->root != -1 && v->stage && (sel < 0 || v->ea.y > part->e.v[sel].ea.y)) sel = (int)i;
+    }
+    if (sel < 0) return 0;
+    const s1c_voice *v = &part->e.v[sel];
+    const s1c_env *e = filter ? &v->ef : &v->ea;
+    *level = e->y;
+    *stage = e->mode;            /* E_CLEAR 0, E_ATK 1, E_DEC 2, E_REL 3 */
     *key_down = v->stage == 1 && !(part->held & (1u << sel));
     return 1;
 }

@@ -5,9 +5,23 @@
 #define SDBL_IMPL
 #include "s1c.h"
 #include <string.h>
+#ifndef S1C_NO_SEQ
+#define S1C_NO_SEQ 0
+#endif
+#if !S1C_NO_SEQ
 #include "sdbl.h"
+#endif
+#if S1C_NO_SEQ
+#define ARP_ON(s) 0      /* the shared firmware arp (engine_arp) plays the notes */
+#else
+#define ARP_ON(s) ((s)->t[ARPON] == 1.0f)
+#endif
 #ifdef S1C_FASTMATH
-#include "fastmath.h"     /* firmware single-precision helpers: the device links no libm */
+#if __has_include("../fastmath.h")
+#include "../fastmath.h"  /* firmware single-precision helpers (not newlib's fastmath.h): the device links no libm */
+#else
+#include "fastmath.h"
+#endif
 #define expf fm_expf
 #define exp2f fm_exp2f
 #define log2f fm_log2f
@@ -70,9 +84,9 @@ static float rv_target(const s1c *s, int n)
 static void rv_next(s1c *s, int n)
 {
     int32_t v = s->rv_seed[n];
-    if (v < 0) v += 0x10000;
+    if (v < 0) v += 65536;
     v = (v * 15625 + 1) & 0xFFFF;
-    if (v >= 0x8000) v -= 0x10000;
+    if (v >= 32768) v -= 65536;   /* 16-bit LCG */
     s->rv_seed[n] = v;
     s->rv_cnt[n] = (int32_t)(s->sr / S1C_RV_DEC / rv_hz[n] + 0.5f);
     s->rv_inc[n] = (rv_target(s, n) - s->rv_del[n]) / (float)s->rv_cnt[n];
@@ -160,7 +174,7 @@ static void key_off(s1c *s, int note)
 {
     int i;
     if (s->t[MONO] > 0.0f) {
-        if (s->t[ARPON] == 1.0f || !s->nheld) { if (s->v[0].stage) voice_release(s, &s->v[0], 0); }
+        if (ARP_ON(s) || !s->nheld) { if (s->v[0].stage) voice_release(s, &s->v[0], 0); }
         else {
             s1c_voice *v = &s->v[0];
             int h = s->held[0][0], vel = s->held[0][1];
@@ -178,17 +192,17 @@ void s1c_start(s1c *s, int note, int vel)
 {
     int i, n = s->nheld;
     if (note < 0 || note > 127) return;
-    for (i = 0; i < n; i++) if (s->held[i][0] == note) { memmove(s->held[i], s->held[i + 1], (size_t)(n - i - 1) * 2); n--; break; }
+    for (i = 0; i < n; i++) if (s->held[i][0] == note) { for (int j = i; j < n - 1; j++) { s->held[j][0] = s->held[j + 1][0]; s->held[j][1] = s->held[j + 1][1]; } n--; break; }
     if (n == 8) n--;
-    memmove(s->held[1], s->held[0], (size_t)n * 2);
+    for (i = n; i > 0; i--) { s->held[i][0] = s->held[i - 1][0]; s->held[i][1] = s->held[i - 1][1]; }  /* no memmove on the device */
     s->held[0][0] = (int8_t)note; s->held[0][1] = (int8_t)vel; s->nheld = (uint8_t)(n + 1);
-    if (s->t[ARPON] != 1.0f) key_on(s, note, vel);
+    if (!ARP_ON(s)) key_on(s, note, vel);
 }
 void s1c_stop(s1c *s, int note)
 {
     int i, n = s->nheld;
-    for (i = 0; i < n; i++) if (s->held[i][0] == note) { memmove(s->held[i], s->held[i + 1], (size_t)(n - i - 1) * 2); s->nheld--; break; }
-    if (s->t[ARPON] != 1.0f) key_off(s, note);
+    for (i = 0; i < n; i++) if (s->held[i][0] == note) { for (int j = i; j < n - 1; j++) { s->held[j][0] = s->held[j + 1][0]; s->held[j][1] = s->held[j + 1][1]; } s->nheld--; break; }
+    if (!ARP_ON(s)) key_off(s, note);
 }
 void s1c_stop_all(s1c *s)
 {
@@ -200,6 +214,7 @@ void s1c_stop_all(s1c *s)
 void s1c_reset_seq(s1c *s) { s->nlast = 0; }
 
 /* ---- arpeggiator / step sequencer ---- */
+#if !S1C_NO_SEQ
 static void seq_off_all(s1c *s) { while (s->nlast) key_off(s, s->last[--s->nlast]); }
 static void sequencer(s1c *s)
 {
@@ -240,6 +255,8 @@ static void sequencer(s1c *s)
 }
 
 /* ---- oscillators ---- */
+#endif
+
 static float blep(float t, float dt)
 {
     if (t < dt) { t /= dt; return t + t - t * t - 1.0f; }
@@ -630,7 +647,27 @@ static float dl_tick_c(s1c_dline *d, float in, float del, float fb, float c)
     return o;
 }
 
-#if S1C_EXT
+#if S1C_EXT && S1C_DL_H16
+/* Device memory model (smallest): exact-size half-float lines carved from a caller-owned pool. */
+static float xl_read(const s1c_dline *d, float del)
+{
+    float pos = (float)d->w - del;
+    while (pos < 0.0f) pos += (float)d->len;
+    int i = (int)pos; float f = pos - (float)i;
+    int j = i + 1 == d->len ? 0 : i + 1;
+    const uint16_t *b = (const uint16_t *)d->buf;
+    return h16_get(b[i]) * (1.0f - f) + h16_get(b[j]) * f;
+}
+static float xl_tick(s1c_dline *d, float in, float del, float fb)
+{
+    ((uint16_t *)d->buf)[d->w] = h16_put(in + d->prev * fb);
+    float o = xl_read(d, del);
+    if (++d->w == d->len) d->w = 0;
+    d->prev = o;
+    return o;
+}
+#define DL_TICK(d, in, del, fb) xl_tick(d, in, del, fb)
+#elif S1C_EXT
 /* Device memory model: exact-size lines carved from a caller-owned pool. h16 lines keep the host's
  * 16-bit fixed storage; 8-bit block-float lines keep a mantissa per sample and an exponent per 16
  * writes, the block being written stays full precision in stg (same values the host sim produces). */
@@ -881,7 +918,7 @@ void s1c_set(s1c *s, unsigned id, float v)
 #if !S1C_CSM
     if (!smoothed(id)) s->c[id] = v;
 #endif
-    if (id == PORT) s->port_c2 = powf(0.5f, 1.0f / (s->sr * v));
+    if (id == PORT) s->port_c2 = exp2f(-1.0f / (s->sr * v));   /* 0.5^(1 / (sr v)) */
 }
 void s1c_init(s1c *s, float sr, const float init[150])
 {
@@ -954,7 +991,11 @@ void s1c_init(s1c *s, float sr, const float init[150])
  * lengths (2T, 2T unless mono, T; +3, block-aligned) and rings fit. Clears every line. */
 static void dly_partition(s1c *s)
 {
+#if S1C_DL_H16
+    const int fmt = 0; int nl, dd, i;
+#else
     int fmt = s->dfmt, nl, dd, i;
+#endif
     float dt = s->t[DLT] > P(DLT) ? s->t[DLT] : P(DLT);
     float Tt = dt * s->sr * s->t[DLON];
     s->dmono = s->t[PANA] == 0.0f && s->t[PHMIX] == 0.0f;
@@ -962,13 +1003,19 @@ static void dly_partition(s1c *s)
     for (dd = 1; dd < 4096; dd++) {
         float T = Tt / (float)dd;
         int la = ((int)(2.0f * T) + 3 + 15) & ~15, lc = ((int)T + 3 + 15) & ~15;
+#if S1C_HFR
         int el = (int)(2.0f * T) / S1C_EXT_EB + 6;
+#else
+        int el = 0;
+#endif
         int samples = la * (nl - 1) + lc;
         int bytes = (fmt == 2 ? samples + samples / 16 : 2 * samples) + 3 * el * 2;
         if (bytes <= s->pool_bytes || dd == 4095) {
             uint8_t *p = s->pool; int lens[4] = {la, nl == 3 ? la : 0, 0, lc};
             memset(s->pool, 0, (size_t)s->pool_bytes);
+#if S1C_HFR
             s->env = (uint16_t *)p; s->e_cap = el; s->e_len = el; p += 3 * el * 2;
+#endif
             for (i = 0; i < 4; i++) {
                 s1c_dline *d = &s->dl[i];
                 memset(d, 0, sizeof *d);
@@ -981,8 +1028,10 @@ static void dly_partition(s1c *s)
         }
     }
     s->ddec = dd; s->dk = 0; s->da[0] = s->da[1] = s->d0[0] = s->d0[1] = s->d1[0] = s->d1[1] = 0.0f;
+#if S1C_HFR
     s->dd_set = 0; s->e_w = s->e_bn = 0;
     for (i = 0; i < 3; i++) s->e_bacc[i] = s->e_out[i] = 0.0f;
+#endif
 }
 void s1c_attach(s1c *s, void *rvb, uint16_t *wbuf, uint8_t *pool, int pool_bytes)
 {
@@ -1011,8 +1060,10 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
     s1c_cc cm, cr, cw;   /* compressor parameters are not smoothed: coefficients once per block */
     comp_coef(&cm, P(CMR), P(CMT), P(CMA), P(CMREL), s->sr);
 #if !S1C_BUSFX
+#if !S1C_NO_RVCOMP
     comp_coef(&cr, P(CRR), P(CRT), P(CRA), P(CRREL), s->sr);
     comp_coef(&cw, P(CWR), P(CWT), P(CWA), P(CWREL), s->sr);
+#endif
 #endif
     (void)cr; (void)cw;
     for (f = 0; f < n; f++) {
@@ -1059,7 +1110,9 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
             float a = i ? P(L2A) : P(L1A), *o = i ? s->l0 : s->l1;
             o[0] = 0.5f * (1.0f + *sm) * a; o[1] = 1.0f - 0.5f * (1.0f - *sm) * a;
         }
+#if !S1C_NO_SEQ
         sequencer(s);
+#endif
         float y = 0.0f;
         if (P(MONO) > 0.0f) { if (s->v[0].root != -1 && s->v[0].stage) y = voice_run(s, &s->v[0]); }
         else for (i = 0; i < S1C_VOICES; i++) if (s->v[i].root != -1 && s->v[i].stage) y += voice_run(s, &s->v[i]);
@@ -1145,7 +1198,18 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
         }
 #endif
         int dd = s->ddec;
-        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB), oL, oRR;
+#ifndef S1C_DL_FBK
+#define S1C_DL_FBK 0.0f
+#endif
+#ifndef S1C_DL_FBMAX
+#define S1C_DL_FBMAX 0.97f
+#endif
+#ifndef S1C_DL_WET
+#define S1C_DL_WET 1.0f
+#endif
+        /* compact lines lose level per repeat (decimation, interpolation): feedback and wet trim, by ear */
+        float T = P(DLT) * s->sr / (float)dd, fbk = P(DLFB) * (1.0f + S1C_DL_FBK * (float)(dd > 1)), oL, oRR;
+        if (fbk > S1C_DL_FBMAX) fbk = S1C_DL_FBMAX;
         if (dd > 1) {
         /* lines run at sr / S1C_DLY_DEC: box-filtered input, linearly interpolated output */
 #if S1C_DLAA
@@ -1267,6 +1331,7 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
 #endif
         }
         float dm = P(DLMIX) * P(DLON);
+        if (dd > 1) { oL *= S1C_DL_WET; oRR *= S1C_DL_WET; }
         float mL = (1.0f - dm) * L + dm * oL, mR = (1.0f - dm) * R + dm * oRR;
         /* reverb: high-pass, pre-gain, input compressor, network, wet compressor */
 #if S1C_FAST
@@ -1280,7 +1345,9 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
 #else
         float hl = buthp(s->hp_y[0], mL, P(RVHP), s->sr) * 2.0f, hr = buthp(s->hp_y[1], mR, P(RVHP), s->sr) * 2.0f;
 #endif
+#if !S1C_NO_RVCOMP
         hl = comp(s->cmp[1][0], hl, &cr) * P(CRG); hr = comp(s->cmp[1][1], hr, &cr) * P(CRG);
+#endif
         float wl, wr;
 #if S1C_RVB
 #if S1C_RVB_DEC > 1
@@ -1311,7 +1378,9 @@ void s1c_render(s1c *s, float *outl, float *outr, unsigned n)
           float g = s->rt_in > 1e-20f ? sqrtf(s->rt_out / s->rt_in * s->rt_hfin) * s->hr_norm * S1C_HFR_RG : 0.0f;
           wl += g * bq_run(&s->hr, s->zrs[0], hfr_noise(s)); wr += g * bq_run(&s->hr, s->zrs[1], hfr_noise(s)); }
 #endif
+#if !S1C_NO_RVCOMP
         wl = comp(s->cmp[2][0], wl, &cw) * P(CWG); wr = comp(s->cmp[2][1], wr, &cw) * P(CWG);
+#endif
         float rm = P(RVMIX) * P(RVON) * lfo10(s, P(LRVMIX));
         L = ((1.0f - rm) * mL + rm * wl) * 2.0f * P(MVOL);
         R = ((1.0f - rm) * mR + rm * wr) * 2.0f * P(MVOL);

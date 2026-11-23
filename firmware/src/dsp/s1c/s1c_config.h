@@ -18,7 +18,7 @@
 #define WAP_L2 131
 #define S1C_DLN 5                     /* C_T(R) + C_T(C_2T(R)) == C_T(R + C_2T(R)) */
 #define S1C_DLMONO 1                  /* no auto-pan and no phaser: one line serves L and R */
-#define S1C_HFR 2                     /* HF regeneration for the decimated delay */
+#define S1C_HFR 0                     /* no HF regeneration: decimated long delays just get darker */
 #define S1C_HFR_ATT 0.0005f
 #define S1C_HFR_REL 0.0005f
 #define S1C_FAST 1                    /* per-block coefficients, table sines */
@@ -28,5 +28,12 @@
 #define S1C_OPT_A 1
 #define S1C_ADPCM 1                   /* per-program delay format; the device uses h16 or 8-bit block float */
 #define S1C_FASTMATH 1
+#ifndef S1C_NO_SEQ
+#define S1C_NO_SEQ 1                  /* the shared firmware arp (engine_arp) plays S1 arps */
+#endif
+#define S1C_DL_H16 1                  /* delay lines: half floats only */
+#define S1C_DL_FBK 0.25f              /* compact delay: feedback trim for decimated lines (by ear vs original 062/032/289) */
+#define S1C_DL_FBMAX 0.98f
+#define S1C_DL_WET 1.6f               /* compact delay: wet trim for decimated lines */
 #define S1C_ARENA_BYTES 4252u         /* sizeof(original_chicago_fx2_compact) on pi32v2 */
 #endif

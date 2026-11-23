@@ -6,7 +6,9 @@
 #ifdef X0X_S1C
 #include "s1c_config.h"     /* device build: fixed sizes */
 #endif
+#if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
 #include "sdbl.h"
+#endif
 #ifndef S1C_DLY_LEN
 #define S1C_DLY_LEN 4096      /* samples per delay line, at sr / S1C_DLY_DEC */
 #endif
@@ -134,9 +136,11 @@ typedef struct {
     s1c_voice v[S1C_VOICES];
     int8_t held[8][2]; uint8_t nheld, prev_held, mono_prev, play_idx;
     int8_t last[8]; uint8_t nlast, pad[3];
+#if !defined(S1C_NO_SEQ) || !S1C_NO_SEQ
     sdbl beat, beat_inc;
     float beat_rate;
     uint32_t beat_step;
+#endif
     uint32_t rnd;
     /* fx */
     float bc_idx, bc_n, bc_v, pan_ph, ph_ph, ph_rec[2][4][3], ph_out[2][2];

@@ -49,5 +49,7 @@ int s1_part_note(s1_dry_part *part, unsigned key, unsigned velocity);
 int s1_part_active(const s1_dry_part *part);
 /* UI observation: loudest voice's amp envelope, filter envelope, stage (0 attack,
  * 1 decay/sustain, 3 release) and gate. 0 when silent. */
+/* Loudest started voice's amp (filter=0) or filter envelope: level, stage 0 idle 1 attack 2 decay 3 release. */
+int s1_part_env_view(const s1_dry_part *part, unsigned filter, float *level, unsigned *stage, unsigned *key_down);
 int s1_part_voice_view(const s1_dry_part *part, float *level, float *modulation, unsigned *state, unsigned *key_down);
 void s1_part_render(s1_dry_part *part, float *left, float *right, unsigned frames);

@@ -3,7 +3,7 @@
  * six voices with its own delay and reverb, and stays finite. Also checks the RAM rules:
  * the part does not grow the backend union and the effects fit the Chicago FX2 arena,
  * which is re-initialised when the part retires.
- * Usage: test [pack] [fittab]. Without a pack (it is built by tools/pack_synthone_factory.py,
+ * Usage: test [pack]. Without a pack (it is built by tools/pack_synthone_factory.py,
  * not committed) the program walk prints SKIP and only INIT is checked.
  * Deadline overruns: host wall time per 256-frame block against its 5.8 ms period; this is a
  * coarse host check, the device figure comes from fm1-live. */
@@ -17,7 +17,6 @@
 #include <string.h>
 #include <time.h>
 
-extern const uint8_t *s1_part_host_fittab;
 static original_runtime_part part;
 static original_runtime_workspace workspace;
 static original_chicago_fx2_compact fx;
@@ -77,9 +76,8 @@ static void play(unsigned factory)
 
 int main(int argc, char **argv)
 {
-    uint32_t n = 0, fn = 0;
+    uint32_t n = 0;
     uint8_t *pack = slurp(argc > 1 ? argv[1] : getenv("S1_PACK"), &n);
-    uint8_t *fit = slurp(argc > 2 ? argv[2] : getenv("S1_FITTAB"), &fn);
     _Static_assert(sizeof(s1_dry_part) <= sizeof(original_miami_backend), "union");
     _Static_assert(sizeof(original_chicago_fx2_compact) >= S1C_ARENA_BYTES, "arena");
     printf("s1c part %u B (union %u B), arena use %u of %u B (reverb %u, delay pool %u)\n",
@@ -89,7 +87,6 @@ int main(int argc, char **argv)
     assert(original_chicago_fx2_compact_init(&fx));
     owner = original_chicago_fx2_compact_owner(&fx);
     s1_part_pack = pack; s1_part_pack_bytes = n;
-    s1_part_host_fittab = fn == 1388u ? fit : NULL;
     play(0);
     unsigned programs = s1_part_programs();
     if (!pack || !programs) {
@@ -103,7 +100,7 @@ int main(int argc, char **argv)
     original_chicago_fx2_compact clean;
     assert(original_chicago_fx2_compact_init(&clean));
     assert(fx.ready == clean.ready && fx.selected == clean.selected);
-    printf("programs=%u nonfinite=%u silent=%u host_overruns=%u worst_block_ms=%.3f fittab=%s\n",
-           programs, nonfinite, silent, overruns, worst_ms, s1_part_host_fittab ? "yes" : "absent");
+    printf("programs=%u nonfinite=%u silent=%u host_overruns=%u worst_block_ms=%.3f \n",
+           programs, nonfinite, silent, overruns, worst_ms);
     return nonfinite != 0 || silent != 0;
 }

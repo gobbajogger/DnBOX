@@ -10,4 +10,4 @@ backends=$(X0X_S1C=1 python3 -c 'import tools.build as b; print(" ".join(b.ORIGI
 ${CC:-cc} -std=c11 -O2 -ffunction-sections -fdata-sections -DX0X_HOST -DX0X_S1C=1 -DX0X_SYNTHONE_PATCH=${X0X_SYNTHONE_PATCH:-1} $ORIGINAL_FLAGS \
     ${SAN_FLAGS:-} -Ifirmware/src -Ifirmware/src/app -Ifirmware/src/dsp -Ibuild/gen \
     tests/host/s1c_programs_test.c $backends -Wl,--gc-sections -lm -o "$out/test"
-"$out/test" ${S1_PACK:-} ${S1_FITTAB:-}
+"$out/test" ${S1_PACK:-}

@@ -80,6 +80,10 @@ int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsig
     uint32_t lock = plat_cq_lock();
     const original_runtime_part *owner = &original_bass[voice];
     int selected = -1;
+#if X0X_S1C
+    if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK)
+        selected = s1_part_env_view(&owner->dsp.synthone, filter, level, stage, key_down) ? 0 : -1;
+#else
     if (owner->kind == ORIGINAL_SOUND_SYNTHONE && owner->status == ORIGINAL_RUNTIME_OK) {
         const s1_dry_part *part = &owner->dsp.synthone;
         /* Same voice as engine_bass_voice_view: the loudest started one. */
@@ -92,6 +96,7 @@ int engine_s1_envelope_view(unsigned voice, unsigned filter, float *level, unsig
             *level = e->level; *stage = e->stage; *key_down = part->down[selected];
         }
     }
+#endif
     plat_cq_unlock(lock);
     return selected >= 0;
 }
