@@ -94,7 +94,8 @@ RES="$OUT/.results"
 # The class of a test. S: serial and alone (install, update, package, BLE, mocked device).
 # W: install-slots-web (a long node test with a temp folder and a mocked keyboard, no port): it starts with
 # phase 1 and runs beside the class P and G tests only. It ends before phase 2 starts.
-# G: host-only, shares build/gen (one at a time). C: scenario (needs host-build; serial, because the
+# G: host-only, needs build/gen. host-build and gen-nonfont-tables write the shared tree and stay
+#     locked; the rest run in the job pool with per-test HOME/TMPDIR/SMC_UI_OUT. C: scenario (needs host-build; serial, because the
 # simulator's CPU guard uses the host time, so a busy host changes the result). P: host-only, parallel.
 test_class() {
     case "$1" in
@@ -271,11 +272,13 @@ run() {
         return
     fi
     gw=0; gen_wait "$name" && gw=1
-    [ "$cls" = W ] || [ "$cls" = G ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W does not use one)
+    [ "$cls" = W ] || [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ] || [ $gw = 1 ] || read -r _ <&3       # wait for a free job slot (class W and gen writers do not use one yet)
     (                                       # xtrace goes to the file on the next line so sh -x lines do not tear
         export HOME="$PWD/$OUT/iso/$name/home" TMPDIR="$PWD/$OUT/iso/$name/tmp"
         export PYTHONUSERBASE="$X0X_PYTHONUSERBASE"   # pip --user Pillow must survive the private HOME
-        mkdir -p "$HOME" "$TMPDIR"
+        # Unique compiler/UI output so parallel G tests do not share build/host/smc-ui.
+        export SMC_UI_OUT="$PWD/$OUT/iso/$name/smc-ui"
+        mkdir -p "$HOME" "$TMPDIR" "$SMC_UI_OUT"
         if [ $gw = 1 ]; then      # wait for generation without a job slot, then take a slot
             until [ -e "$OUT/iso/.gen-done" ] || [ -e "$OUT/iso/.gen-fail" ]; do sleep 0.1; done
             if [ -e "$OUT/iso/.gen-fail" ]; then
@@ -284,11 +287,19 @@ run() {
                 echo "0 s $name" > "$RES/$key.time"
                 exit 0            # no job-slot read: the pool must not deadlock on a failed generation
             fi
-            [ "$cls" = W ] || [ "$cls" = G ] || read -r _ <&3
+            [ "$cls" = W ] || [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ] || read -r _ <&3
         fi
-        if [ "$cls" = G ]; then gen_lock; read -r _ <&3; fi
+        # Only the writers of the shared build/gen tree take gen_lock.
+        # Other class G tests already took a job slot outside, or just above after
+        # waiting for .gen-done; do not take a second slot.
+        if [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ]; then
+            gen_lock
+            read -r _ <&3
+        fi
         run_one "$key" "$name" "$@"
-        [ "$cls" = G ] && gen_unlock
+        if [ "$name" = host-build ] || [ "$name" = gen-nonfont-tables ]; then
+            gen_unlock
+        fi
         [ "$name" = host-build ] && : > "$OUT/iso/.gen-done"   # also after a FAIL: the waiting tests then start and report
         [ "$cls" = W ] || echo >&3
     ) 2>>"$OUT/$name.xtrace" &

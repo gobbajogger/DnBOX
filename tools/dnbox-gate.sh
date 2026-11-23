@@ -35,6 +35,9 @@ step() {
 pass_env() {
   export JIELI_TOOLCHAIN="${JIELI_TOOLCHAIN:-${X0X_TOOLCHAIN:-$HOME/.jieli/toolchain}}"
   export X0X_TOOLCHAIN="${X0X_TOOLCHAIN:-$JIELI_TOOLCHAIN}"
+  # Independent host tests run in a pool of 6, leaving cores for other box work.
+  # Override with X0X_TEST_JOBS. Each test already has its own HOME/TMPDIR.
+  export X0X_TEST_JOBS="${X0X_TEST_JOBS:-6}"
   export AC79_SDK="${AC79_SDK:-$HOME/fw-AC79_AIoT_SDK}"
   [ -n "${EIGHTW8_DIR:-}" ] && export EIGHTW8_DIR
   [ -n "${NINEW9_DIR:-}" ] && export NINEW9_DIR
@@ -120,24 +123,39 @@ budget_from_log() {
   echo "$model: XIP free: $xip B (min $XIP_MIN); pool margin: $pool B (min $POOL_MIN)"
 }
 fw_build()   { pass_env
-               MODEL=elite ./build.sh > "$OUT/elite-build.log" 2>&1
-               local erc=$?
+               # Elite and Pro use separate object dirs (build/smk37-elite vs build/smk37)
+               # and can share the headers host-tests already wrote in build/gen (locked).
+               # Private TMPDIRs keep their temp files from colliding.
+               local elite_tmp pro_tmp
+               elite_tmp=$(mktemp -d "${TMPDIR:-/tmp}/gate-elite.XXXXXX") || return 1
+               pro_tmp=$(mktemp -d "${TMPDIR:-/tmp}/gate-pro.XXXXXX") || return 1
+               ( TMPDIR="$elite_tmp" MODEL=elite ./build.sh > "$OUT/elite-build.log" 2>&1
+                 echo $? > "$OUT/elite-build.rc" ) &
+               local epid=$!
+               ( TMPDIR="$pro_tmp" MODEL=pro ./build.sh > "$OUT/pro-build.log" 2>&1
+                 echo $? > "$OUT/pro-build.rc" ) &
+               local ppid=$!
+               wait "$epid"
+               wait "$ppid"
+               rm -rf "$elite_tmp" "$pro_tmp"
+               local erc=1 prc=1
+               [ -f "$OUT/elite-build.rc" ] && erc=$(cat "$OUT/elite-build.rc")
+               [ -f "$OUT/pro-build.rc" ] && prc=$(cat "$OUT/pro-build.rc")
+               echo "---- elite build ----"
                cat "$OUT/elite-build.log"
+               echo "---- pro build ----"
+               cat "$OUT/pro-build.log"
                [ "$erc" -eq 0 ] || { echo "Elite build failed"; return 1; }
+               [ "$prc" -eq 0 ] || { echo "Pro build failed"; return 1; }
                [ -f build/x0x-smk37-elite.fwsc ] || { echo "missing build/x0x-smk37-elite.fwsc"; return 1; }
+               [ -f build/x0x-smk37.fwsc ] || { echo "missing build/x0x-smk37.fwsc"; return 1; }
                cp -f build/x0x-smk37-elite.fwsc "$OUT/elite.fwsc" || return 1
+               cp -f build/x0x-smk37.fwsc "$OUT/pro.fwsc" || return 1
                budget_from_log "$OUT/elite-build.log" elite || return 1
+               budget_from_log "$OUT/pro-build.log" pro || return 1
                python3 tools/engine_memory_report.py build/smk37-elite/x0x.elf --model elite \
                  --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/elite-engine-memory.txt"
                [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
-
-               MODEL=pro ./build.sh > "$OUT/pro-build.log" 2>&1
-               local prc=$?
-               cat "$OUT/pro-build.log"
-               [ "$prc" -eq 0 ] || { echo "Pro build failed"; return 1; }
-               [ -f build/x0x-smk37.fwsc ] || { echo "missing build/x0x-smk37.fwsc"; return 1; }
-               cp -f build/x0x-smk37.fwsc "$OUT/pro.fwsc" || return 1
-               budget_from_log "$OUT/pro-build.log" pro || return 1
                python3 tools/engine_memory_report.py build/smk37/x0x.elf --model pro \
                  --nm "$JIELI_TOOLCHAIN/pi32v2/bin/nm" | tee "$OUT/pro-engine-memory.txt"
                [ "${PIPESTATUS[0]}" -eq 0 ] || return 1

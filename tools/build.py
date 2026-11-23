@@ -24,6 +24,7 @@ seven-type Chicago FX policy. Explicit0 retains only a reference build lane.
 """
 import argparse
 import hashlib
+import fcntl
 import os
 import platform
 import re
@@ -268,6 +269,17 @@ def tc_all(*cmds):
 def generate():
     """generated headers: the font (Felucca's), the 909's samples and tables, the break bank"""
     GEN.mkdir(parents=True, exist_ok=True)
+    # Elite and Pro (and host tests) may refresh GEN together; lock so headers are not torn.
+    _gen_lock = open(GEN / ".generate.lock", "a+")
+    fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_EX)
+    try:
+        _generate_locked()
+    finally:
+        fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_UN)
+        _gen_lock.close()
+
+def _generate_locked():
+    """Body of generate(), called with GEN/.generate.lock held."""
     if BOARD == "smk37" and MODEL in ("elite", "pro"):
         import gen_chicago_compact
         gen_chicago_compact.generate(SRC / "experiments/original_synth/chicago_packed_private.h",

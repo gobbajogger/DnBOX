@@ -11,12 +11,17 @@ case "${1:-}" in
 esac
 CC="${CC:-cc}"
 mkdir -p build/gen build/host
-[ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
-# Validate the source WAVs and encoded payloads on every entry, including restored
-# files with preserved mtimes. Unchanged generated headers keep their mtimes.
-python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null
-if [ -n "${X0X_BREAK_BANK:-}" ]; then python3 tools/gen_break_bank.py "$X0X_BREAK_BANK" build/gen/x0x_break_bank.h >/dev/null
-else sh tools/gen_builtin_break.sh build/gen >/dev/null; fi
+# Parallel host tests may refresh these headers together. Hold a file lock so
+# two generate-only runs cannot tear a header another compiler is reading.
+{
+  flock 9
+  [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
+  # Validate the source WAVs and encoded payloads on every entry, including restored
+  # files with preserved mtimes. Unchanged generated headers keep their mtimes.
+  python3 tools/gen_drum_samples.py build/gen/x0x_drum_samples.h >/dev/null
+  if [ -n "${X0X_BREAK_BANK:-}" ]; then python3 tools/gen_break_bank.py "$X0X_BREAK_BANK" build/gen/x0x_break_bank.h >/dev/null
+  else sh tools/gen_builtin_break.sh build/gen >/dev/null; fi
+} 9>build/gen/.generate.lock
 [ "${1:-}" != --generate-only ] || exit 0
 case "${X0X_SYNTHONE_PATCH:-0}" in
     0|1) ;;
