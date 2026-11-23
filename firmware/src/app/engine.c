@@ -756,6 +756,17 @@ X0X_COLD int engine_param_si(int t, int v, int i, int pot, float *val)
             *val = s1_part_crush_hz(unit_control((unsigned)pot));
             return X0X_U_HZ;
         }
+        {   /* Chicago / Miami cutoff: Hz from each engine's own filter law. */
+            unsigned kind = (unsigned)engine_bass_bank(v);
+            float u;
+            if ((unsigned)pot < 128u &&
+                ((kind == ORIGINAL_SOUND_CHICAGO && i == (int)ORIGINAL_CHICAGO_CUTOFF) ||
+                 (kind == ORIGINAL_SOUND_MIAMI && i == (int)ORIGINAL_MIAMI_CUTOFF)) &&
+                original_sound_control_value(kind, (unsigned)i, (unsigned)pot, &u) &&
+                (kind == ORIGINAL_SOUND_CHICAGO ? original_chicago_backend_cutoff_hz(u, val) :
+                                                  original_miami_backend_cutoff_hz(u, val)))
+                return X0X_U_HZ;
+        }
         return X0X_U_NONE;
     case T_FX: return fxbus_param_si(i, pot, val);
     case T_BRK:                                      /* breaks.c: lvl = set/127 */

@@ -3,13 +3,18 @@
  * arp on/off with held keys, UP/DOWN/UP+DN/SEQ order and timing, step API
  * round trip and stale revisions, H3 view, project storage incl. old projects,
  * SJ6 preset SEQ order vs the private reference bank (skips when absent) and
- * AMP2 119-122 storage. */
+ * AMP2 119-122 storage. Also FW Core's extra: engine_param_si cutoff in Hz for
+ * Chicago id 2 and Miami id 9 from each engine's own filter law. */
 #define main simulator_main
 #include "../../host/x0x_host.c"
 #undef main
 #include <assert.h>
 #include <dirent.h>
 #include "app/original_runtime.h"
+#include <math.h>
+#include "chicago_packed.h"
+#include "motion_tables_private.h"   /* original_miami_a44100 (static, read-only) */
+#include "app/unit_control.h"
 
 #define CHECK(x) do { if (!(x)) { fprintf(stderr, "%s:%d: CHECK(%s)\n", __FILE__, __LINE__, #x); exit(1); } } while (0)
 
@@ -364,12 +369,64 @@ static void sj6_amp2(void)
     puts("synth-arp: SJ6 AMP2 119-122 edit -> block, project reload re-stages, preset change clears PASS");
 }
 
+/* One-pole z += A(z' - z): |H(w)| = (1-A) / |1 - A e^-jw| (libm, double). */
+static double pole_gain(double a, double hz)
+{
+    double w = 2.0 * M_PI * hz / 44100.0;
+    return (1.0 - a) / sqrt(1.0 - 2.0 * a * cos(w) + a * a);
+}
+static void cutoff_hz(void)
+{
+    static const struct { unsigned kind, id; const char *name; } e[2] = {
+        {ORIGINAL_SOUND_CHICAGO, ORIGINAL_CHICAGO_CUTOFF, "Chicago"}, {ORIGINAL_SOUND_MIAMI, ORIGINAL_MIAMI_CUTOFF, "Miami"}};
+    for (unsigned k = 0; k < 2; ++k) {
+        select_bank(0, e[k].kind, 0);
+        float hz[128], u;
+        for (unsigned pot = 0; pot < 128; ++pot) {
+            CHECK(engine_param_si(T_303, 0, (int)e[k].id, (int)pot, &hz[pot]) == X0X_U_HZ);
+            CHECK(hz[pot] >= 0.0f && hz[pot] <= 22050.0f && (!pot || hz[pot] >= hz[pot - 1]));
+            /* The real law, independently: program mapping -> native 24 ->
+             * the engine's own A coefficient; the reported Hz is that pole's
+             * corner (|H| = -3 dB within 2 % below 4 kHz) and -ln(A) fs/2pi in libm. */
+            CHECK(original_sound_control_value(e[k].kind, e[k].id, pot, &u));
+            float c, a, ee;
+            if (e[k].kind == ORIGINAL_SOUND_CHICAGO) {
+                original_chicago_program pr; memset(&pr, 0, sizeof pr);
+                CHECK(original_chicago_program_set(&pr, 2, u) && original_chicago_program_native(&pr, 24, &c));
+                CHECK(original_chicago_packed_lookup(0, (uint32_t)(c * 16384.0f), &a, &ee));
+            } else {
+                original_miami_program pr; memset(&pr, 0, sizeof pr);
+                CHECK(original_miami_program_set(&pr, 9, u) && original_miami_program_native(&pr, 24, &c));
+                float q = c * 128.0f; unsigned j = (unsigned)q;
+                a = j >= 128 ? original_miami_a44100[128] :
+                    original_miami_a44100[j] + (q - (float)j) * (original_miami_a44100[j + 1] - original_miami_a44100[j]);
+            }
+            double want = a > 0 ? -log((double)a) * 44100.0 / (2.0 * M_PI) : 22050.0;
+            if (want > 22050.0) want = 22050.0;
+            CHECK(fabs(hz[pot] - want) <= 0.002 * want + 0.01);
+            if (want > 20.0 && want < 4000.0) CHECK(fabs(pole_gain(a, hz[pot]) - M_SQRT1_2) < 0.02 * M_SQRT1_2);
+        }
+        CHECK(hz[127] > 4.0f * hz[32]);
+        /* Other controls keep their old (unitless) display. */
+        float x;
+        CHECK(engine_param_si(T_303, 0, (int)e[k].id + 1, 64, &x) == X0X_U_NONE);
+        CHECK(engine_param_si(T_303, 0, (int)e[k].id, 128, &x) == X0X_U_NONE);
+        printf("synth-arp: %s cutoff id %u pot 0/32/64/96/127 = %.1f/%.1f/%.1f/%.1f/%.1f Hz PASS\n",
+               e[k].name, e[k].id, hz[0], hz[32], hz[64], hz[96], hz[127]);
+    }
+    select_bank(0, ORIGINAL_SOUND_SYNTHONE, 0);
+    float x;
+    CHECK(engine_param_si(T_303, 0, ORIGINAL_CHICAGO_CUTOFF, 64, &x) == X0X_U_HZ);   /* S1 id 2 = Crush rate, unchanged */
+    CHECK(x == s1_part_crush_hz(unit_control(64)));
+}
+
 int main(void)
 {
     boot();
     s1_arp();
     storage();
     sj6_arp();
+    cutoff_hz();
 #if X0X_SUPERJ6_FACTORY
     sj6_amp2();
 #endif

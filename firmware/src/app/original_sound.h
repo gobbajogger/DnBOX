@@ -27,7 +27,7 @@
 
 /* Public control positions used by the physical performance wheels. */
 enum { ORIGINAL_CHICAGO_CUTOFF = 2, ORIGINAL_CHICAGO_FX_TYPE = 17, ORIGINAL_CHICAGO_PITCH_BEND = 20,
-       ORIGINAL_MIAMI_WOBBLE_SHAPE = 11, ORIGINAL_MIAMI_WOBBLE_DEPTH = 12, ORIGINAL_MIAMI_WOBBLE_RATE = 13,
+       ORIGINAL_MIAMI_CUTOFF = 9, ORIGINAL_MIAMI_WOBBLE_SHAPE = 11, ORIGINAL_MIAMI_WOBBLE_DEPTH = 12, ORIGINAL_MIAMI_WOBBLE_RATE = 13,
        ORIGINAL_MIAMI_PITCH_BEND = 16 };
 
 /* Performance macro IDs remain stable across patch-control additions. */
