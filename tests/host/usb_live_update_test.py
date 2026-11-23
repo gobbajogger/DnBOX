@@ -502,6 +502,9 @@ def main():
         # boundary double instead of importing DSP/platform dependencies.
         (out / "app").mkdir()
         (out / "seq").mkdir()
+        input_log = args.root / "firmware/src/app/smk_inlog_profile.h"
+        if input_log.is_file():
+            (out / "app/smk_inlog_profile.h").write_bytes(input_log.read_bytes())
         (out / "app/engine.h").write_text('#include "../engine_boundary.h"\n')
         (out / "seq/sequencer.h").write_text('#include "../engine_boundary.h"\n')
         cpath = out / "test.c"

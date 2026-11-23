@@ -21,7 +21,9 @@ static uint32_t sie_rd(unsigned reg)
 }
 static void sie_wr(unsigned reg, uint32_t value) { (void)reg; (void)value; }
 static void fm1_usb_rx_sync(void) {}
-static void smk_inlog(unsigned src, uint32_t pkt) { (void)src; (void)pkt; }
+#define X0X_SMK_INLOG 1
+#include "../../firmware/src/app/smk_inlog_profile.h"
+void smk_inlog(uint32_t src, uint32_t pkt) { (void)src; (void)pkt; }
 static int smk_apc_usb_event(uint32_t pkt) { (void)pkt; return 0; }
 static int midi_in_put(uint32_t pkt) { (void)pkt; midi_packets++; return 1; }
 static void apc40_device_inquiry(uint8_t id) { assert(id == 0x7f); inquiries++; }

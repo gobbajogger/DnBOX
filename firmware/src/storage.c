@@ -40,6 +40,7 @@ static int st_prog(uint32_t off, const void *src, uint32_t n);
 #define st_crc32 x0x_crc32             /* zlib CRC-32, 4 bits per step */
 
 #if BOARD_SMK37
+#include "../hal/fm1_flash_map.h"  /* storage limits use the shared layout */
 /* SMK-37 Pro: every object in FL_DATA 0x9D000..0xAFFFF (the stock VM), A/B
  * neighbours in plat.h order: settings 0x9D000, sound 0x9F000, patterns 1-8 0xA1000, patterns 9-16 0xA3000,
  * panel 0xA5000, song 0xA7000, motion 0xA9000 (..0xAAFFF); boot screen A/B at 0xAB000 and

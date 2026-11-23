@@ -31,7 +31,7 @@ enum { ED_INFO = 1, ED_PROJECT = 9, ED_SMP_BEGIN = 11, ED_SMP_WRITE, ED_SMP_END,
 #include "app/s1c_part.h"
 #endif
 #endif
-#include "app/smk_inlog_profile.h"
+#include "smk_inlog_profile.h"
 #if X0X_SMK_INLOG
 /* ED_INLOG (SMK-37, read only, a76): the inbound recorder (app/smk_inlog.h). No arg or arg 0: the entry
  * count, fm1_ms now, then 2 words for each entry (the oldest first), each word 5 x 7 bits, low bits

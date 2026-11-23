@@ -19,7 +19,9 @@ static uint32_t sie_rd(unsigned reg)
 { return reg == S_RXCSR1 ? 1u : reg == S_RXCOUNT1 ? 4u : 0u; }
 static void sie_wr(unsigned reg, uint32_t value) { (void)reg; (void)value; }
 static void fm1_usb_rx_sync(void) {}
-static void smk_inlog(unsigned src, uint32_t pkt) { (void)src; (void)pkt; }
+#define X0X_SMK_INLOG 1
+#include "../../firmware/src/app/smk_inlog_profile.h"
+void smk_inlog(uint32_t src, uint32_t pkt) { (void)src; (void)pkt; }
 static int smk_apc_usb_event(uint32_t pkt) { (void)pkt; return 0; }
 static void sysex_byte(uint8_t byte) { (void)byte; assert(!"unexpected SysEx"); }
 #include "midi_ingress_production.h"
