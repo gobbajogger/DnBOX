@@ -20,3 +20,15 @@ releases/openbeta/*.json.tmp
 *.img
 *.log
 firmware/build/
+
+# Evidence-only files stay out of Git (kept in history and the Library)
+/evidence/
+/docs/roadmap-evidence/
+/docs/evidence/
+/docs/lanes/fwui/*
+!/docs/lanes/fwui/screens/
+/docs/lanes/fwui/current/*
+!/docs/lanes/fwui/current/native-routes/
+!/docs/lanes/fwui/current/panel-routes/
+!/docs/lanes/fwui/current/superj6-slot/
+!/docs/lanes/fwui/current/synthone-editor/
