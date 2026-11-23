@@ -43,7 +43,10 @@
  *   0xC2000-0xF3FFF  user sample slots 1 (80 KiB) and 2 (120 KiB; app/slots.c): stock USRFLASH
  *                    0xC2000-0xEAFFF and the unlisted 0xEB000-0xF3FFF                FL_SMP
  *   0xF4000-0xFDFFF  USR (stock resources; kept for a rollback)   NEVER
- *   0xFE000-0xFEFFF  free, unused (4 KiB: too small for a slot)
+ *   0xFE000-0xFEFFF  FITTAB: Synth One option-B per-program fit table
+ *                    (16 B header + blob, tools/build.py), written by the
+ *                    update loader / installer only; never a store write;
+ *                    stock vendor loader / mask-ROM rescue never write it   FL_FITTAB
  *   0xFF000-0xFFFFF  key_mac                        NEVER
  * Everything below is an explicit allow-list; the asserts keep each allowed window out of the
  * protected ranges at compile time. */
@@ -68,6 +71,14 @@
 #define FL_XDATA_HI     0x000AF000u
 #define FL_XDATA_MAGIC  0x31445858u                /* "XXD1" little endian */
 #define FL_XDATA_HDR    16u
+/* FITTAB: the 4 KiB spare between stock USR (ends at 0xFE000) and key_mac (starts at
+ * 0xFF000). Layout matches XDATA: 16 B header {magic FL_FITTAB_MAGIC, blob length,
+ * zlib CRC-32 of the blob, build id}, then the blob. Read in place through the plain
+ * XIP window (fl_plain_window_init maps [FL_PLAIN_LO, 0x100000)). */
+#define FL_FITTAB_LO    0x000FE000u
+#define FL_FITTAB_HI    0x000FF000u
+#define FL_FITTAB_MAGIC 0x31425446u                /* "FTB1" little endian */
+#define FL_FITTAB_HDR   16u
 #define FL_SMPV_LO      0x000B0000u                /* VM spare: slot shadows + sample slot 3 (app/slots.c) */
 #define FL_SMPV_HI      0x000BB000u
 #define FL_OTA_LO       0x000BB000u                /* M-UPGRADE loader staging, ota.c */
@@ -114,12 +125,18 @@ _Static_assert(FL_DATA_HI <= FL_OTA_LO && FL_APP_HI <= FL_DATA_LO, "SMK: windows
 _Static_assert(FL_XDATA_LO == 0xAD000u && FL_XDATA_HI == 0xAF000u && FL_XDATA_LO >= FL_PLAIN_LO &&
                FL_XDATA_LO >= FL_REC_LO && FL_XDATA_HI <= FL_DATA_HI,
                "SMK: XDATA is the spare above the boot screens, below the owner tag, plain and loader-writable");
+_Static_assert(FL_FITTAB_LO == 0xFE000u && FL_FITTAB_HI == 0xFF000u &&
+               FL_FITTAB_LO == FL_USRRES_HI && FL_FITTAB_HI == FL_KEYMAC_LO &&
+               FL_WIN_SAFE(FL_FITTAB_LO, FL_FITTAB_HI) && FL_FITTAB_HDR == 16u,
+               "SMK: FITTAB is the 4 KiB spare between USR and key_mac; never key_mac");
 /* the update loader (loader.c): the app area, and records only in the VM below BTIF */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
 #define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || \
-                               FL_IN(off, n, FL_REC_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_REC_HI))
+                               FL_IN(off, n, FL_REC_LO, 0xAB000u) || FL_IN(off, n, 0xAF000u, FL_REC_HI) || \
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI))
 #else
-#define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || FL_IN(off, n, FL_REC_LO, FL_REC_HI))
+#define FL_LDR_RANGE_OK(off, n) (FL_IN(off, n, FL_APP_LO, FL_APP_HI) || FL_IN(off, n, FL_REC_LO, FL_REC_HI) || \
+                               FL_IN(off, n, FL_FITTAB_LO, FL_FITTAB_HI))
 #endif
 /* TEST profile's external data stay protected independently of BLE state. */
 #if defined(X0X_SMC_VENDOR_TEST) && X0X_SMC_VENDOR_TEST
