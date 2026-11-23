@@ -7856,7 +7856,15 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
             orig_strip_glyph(r,val,x+3,y+22,ink);
             if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
                 strip_value_fit(x, y+28, num, unit, ink);
-            else strip_value(x+width-14,y+28,num,unit,ink,0);
+            else {
+                int inset=14;
+                if (unit[0] && unit[0]!='%') {
+                    int pixels=tw(&FONT_T,num)+tw(&FONT_XS,unit)+1;
+                    int right=(pixels+1)/2+2;          /* clear the next cell divider */
+                    if (right>inset) inset=right;
+                }
+                strip_value(x+width-inset,y+28,num,unit,ink,0);
+            }
         }
     } else
     if(shape) {

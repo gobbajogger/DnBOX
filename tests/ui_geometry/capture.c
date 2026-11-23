@@ -519,7 +519,15 @@ int main(void)
       CHECK(engine_bass_select_preset(part-PART_303A,kind,0,&proj.sound)==0);
       for(int block=0;block<12;block++){int32_t audio[512];engine_render(audio,256);}
       CHECK(!engine_bass_preset_pending(part-PART_303A));build_pages();int pages=pg.n;
-      CHECK(pages==3);
+      int has_arp=X0X_ARP_HOOKS &&
+          (kind==ORIGINAL_SOUND_SYNTHONE || kind==ORIGINAL_SOUND_JUNO);
+      CHECK(pages==3+has_arp);
+      if(has_arp) {
+       CHECK(!strcmp(pg.title[3],"ARP SEQ"));
+       CHECK(pg.r[3][0].kind==R_ARP && pg.r[3][0].a==ARP_F_LENGTH);
+       CHECK(pg.r[3][1].kind==R_ARP && pg.r[3][1].a==ARP_F_INTERVAL);
+       CHECK(pg.r[3][2].kind==R_ARP && pg.r[3][2].a==ARP_F_GATE);
+      }
       for(int page=0;page<pages;page++) {
        *page_of(V_SEQ)=(uint8_t)page;build_pages();geo_nframe=0;memset(pixel_frame_owner,0,sizeof pixel_frame_owner);presence_nglyph=0;geo_enabled=1;
        memset(blit_hash,0,sizeof blit_hash);memset(cv_tile_valid,0,sizeof cv_tile_valid);ui_frame();
