@@ -7427,14 +7427,20 @@ static UI_DRAW void s1_rate_glyph(pref_t r,int val,int x,int y,int width,uint16_
 static UI_DRAW void filter_glyph(int cx,int y,int mode,int cutoff,int resonance,uint16_t col);
 #endif
 static UI_DRAW int orig_strip_slot(pref_t r);
-/* glyph-strip readout: "%" stays in the caps FONT_T run; a letter unit (st, ms,
- * Hz) is drawn lowercase in FONT_XS grey after it, as cell_value does */
-static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink)
+/* Selected envelope readouts pass the physical caption separately. Keep the
+ * original small summary ink and baseline; letter units stay separate. */
+static UI_DRAW void strip_value(int cx, int y, char *num, const char *unit, uint16_t ink, const char *caption)
 {
-    if (!unit[0] || unit[0] == '%') { char *q = num; while (*q) q++; put_s(q, unit); text_c(cx, y, &FONT_T, num, ink); return; }
-    int w = tw(&FONT_T, num) + tw(&FONT_XS, unit) + 1;
-    int x = cv_text(cx - w / 2, y, &FONT_T, num, ink);
-    cv_text(x + 1, base_y(&FONT_T, y, &FONT_XS), &FONT_XS, unit, C_GRAY);
+    const felucca_font_t *value = caption ? &FONT_XS : &FONT_T;
+    int letters = unit[0] && unit[0] != '%';
+    int uy = base_y(&FONT_T, y, &FONT_XS);
+    if (!letters) { char *q = num; while (*q) q++; put_s(q, unit); }
+    int w = tw(value, num) + (letters ? tw(&FONT_XS, unit) + 1 : 0);
+    if (caption) w += tw(&FONT_T, caption);
+    int x = cx - w / 2;
+    if (caption) x = cv_text(x, y, &FONT_T, caption, ink);
+    x = cv_text(x, caption ? uy : y, value, num, ink);
+    if (letters) cv_text(x + 1, uy, &FONT_XS, unit, C_GRAY);
 }
 /* drum cells: the readout must sit in x+30..x+57 (glyph left, divider right);
  * a wider one ("1.2kHz") narrows its number to FONT_XS instead of clipping */
@@ -7531,7 +7537,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
             cv_rect(cx-3*pitch+pitch*i,y+31-2*i,pitch-2,2,color);
         }
         pref_value_of(r, val, num, unit);
-        strip_value(cx, y+35, num, unit, ink);
+        strip_value(cx, y+35, num, unit, ink,0);
         return;
     }
     if (r.kind == R_S1PATCH && s1_draw_patch && r.c >= 2 && r.c <= 4) {
@@ -7544,7 +7550,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         int knee = (int)((hz-64.f) * (127.f / (22050.f-64.f)) + .5f);
         filter_glyph(cx, y+21, 1, knee, (int)(params[3]*(127.f/.98f)+.5f), ink);
         pref_value_of(r, val, num, unit);
-        strip_value(cx, y+36, num, unit, ink);
+        strip_value(cx, y+36, num, unit, ink,0);
         return;
     }
 #endif
@@ -7554,12 +7560,12 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         pref_value_of(r,val,num,unit);
         if (rate_row) {
             s1_rate_glyph(r,val,x+34,y+23,108,ink);
-            strip_value(x+width-29,y+34,num,unit,ink);
+            strip_value(x+width-29,y+34,num,unit,ink,0);
         } else {
             orig_strip_glyph(r,val,x+3,y+22,ink);
             if (engine_bass_sound_bank(&proj.sound, r.b) == ORIGINAL_SOUND_JUNO)
                 strip_value_fit(x, y+28, num, unit, ink);
-            else strip_value(x+width-14,y+28,num,unit,ink);
+            else strip_value(x+width-14,y+28,num,unit,ink,0);
         }
     } else
     if(shape) {
@@ -7569,7 +7575,7 @@ static UI_DRAW void draw_param_widget(pref_t r, int x, int y, int width, int act
         if(wave) draw_original_wave(cx-10,y+25,wave,slot,ink,face);
         else draw_wave_glyph(cx-10,y+((shape==2 || shape==3)?25:28),shape,mix,ink,face);
         pref_value_of(r,val,num,unit);           /* original readout text */
-        strip_value(cx+17,y+28,num,unit,ink);
+        strip_value(cx+17,y+28,num,unit,ink,0);
     } else {
         pref_value_of(r,val,num,unit);
         if(unused) {put_s(num,"--");unit[0]=0;}
@@ -7750,8 +7756,10 @@ static UI_DRAW void s1_envelope_row(int page, int y, int height, uint16_t ink)
         char num[16], unit[8], label[24];
         pref_value_of(r, 0, num, unit);
         char *q=put_i(put_s(label,"K"),UI_FIRST_KNOB+k);
-        *q++=' '; *q++="ADSR"[k]; *q++=' '; put_s(q,num);
-        strip_value(31+59*k,y+11,label,unit,ink);
+        *q++=' '; *q++="ADSR"[k]; *q++=' ';
+        int selected = page == cur_page();
+        put_s(q, selected ? "" : num);
+        strip_value(31+59*k,y+11,selected ? num : label,unit,ink,selected ? label : 0);
         int span=xs[k+1]-xs[k], prev=0;
         float tail=1.f, retention=fm_expf(-4.6051702f / span);
         if (k==3 && a[3]==0.f) {
@@ -7908,8 +7916,9 @@ static UI_DRAW void draw_adsr_inline(int p,int active,int y,int h,int off)
             pref_t r = pg.r[p][e.slot[k]];
             pref_value_of(r, matrix_value(r), num, unit);
             char *end = put_i(put_s(label, "K"), UI_FIRST_KNOB + e.slot[k]);
-            *end++ = ' '; *end++ = "ADSR"[k]; *end++ = ' '; put_s(end, num);
-            strip_value(31+e.slot[k]*59,y+8-off,label,unit,edited==k?hi:SOUND_GRAY);
+            *end++ = ' '; *end++ = "ADSR"[k]; *end++ = ' ';
+            put_s(end, active ? "" : num);
+            strip_value(31+e.slot[k]*59,y+8-off,active ? num : label,unit,edited==k?hi:SOUND_GRAY,active ? label : 0);
             continue;
         }
         physical_stage_label(label,e.slot[k],"ADSR"[k],matrix_value(pg.r[p][e.slot[k]]));
