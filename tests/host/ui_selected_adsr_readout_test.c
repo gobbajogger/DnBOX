@@ -8,18 +8,18 @@
  * same draw_adsr_inline graph, so both bands sit at the same offset.
  * Stage values and owner selection below are production bindings. */
 static const struct { const char *name; uint32_t hash; } expected[] = {
-    {"s1-filter-dark-0", 0x3860e9d1u},
-    {"s1-amp-dark-0", 0xdb2adb2fu},
-    {"sj6-amp-dark-0", 0xc3ae88d7u},
-    {"s1-filter-dark-1", 0x62deaf2eu},
-    {"s1-amp-dark-1", 0xc2bde261u},
-    {"sj6-amp-dark-1", 0xfc3f84e4u},
-    {"s1-filter-light-0", 0x54ef6a8bu},
-    {"s1-amp-light-0", 0xa52f70c9u},
-    {"sj6-amp-light-0", 0x2720ce7du},
-    {"s1-filter-light-1", 0x81ded33fu},
-    {"s1-amp-light-1", 0x2b9d062du},
-    {"sj6-amp-light-1", 0xeed824d6u},
+    {"s1-filter-dark-0", 0x3b29aff1u},
+    {"s1-amp-dark-0", 0x34d53c03u},
+    {"sj6-amp-dark-0", 0x35ea44a0u},
+    {"s1-filter-dark-1", 0x6a7d0209u},
+    {"s1-amp-dark-1", 0xfc1551cbu},
+    {"sj6-amp-dark-1", 0xaa1c3315u},
+    {"s1-filter-light-0", 0xed2f289eu},
+    {"s1-amp-light-0", 0x7344693bu},
+    {"sj6-amp-light-0", 0x2915e2d3u},
+    {"s1-filter-light-1", 0xd4551d6eu},
+    {"s1-amp-light-1", 0x5ca0ccf7u},
+    {"sj6-amp-light-1", 0x90465464u},
     {"s1-dark-inactive", 0x4d5bc4adu},
     {"s1-light-inactive", 0xce662dccu},
     {"sj6-dark-inactive", 0x1178f356u},
@@ -93,7 +93,7 @@ static void captured(const char *owner,int light,int p,int endpoint,int synth)
     snprintf(name,sizeof name,"%s-%s-%d",owner,light?"light":"dark",endpoint);
     rows=matrix_three_rows()?3:4; step=matrix_three_rows()?67:50;
     first=p/4*4; if(pg.n>=rows && first+rows>pg.n) first=pg.n-rows;
-    int y=HDR_H+4+(p-first)*step+8; /* one shared envelope graph */
+    int y=HDR_H+4+(p-first)*step+9; /* one shared envelope graph; selected run 1 px below the row header */
     check_pixels(name,3,237,y-2,y+13);
 }
 static void inactive(int engine,int light)
