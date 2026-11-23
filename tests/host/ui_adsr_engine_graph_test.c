@@ -41,8 +41,7 @@ static void partial_rows_need_graph(int p) {
     for(int x=xs[k]+1;x<xs[k+1];x++)for(int y=26;y<68;y++)segment_ink+=cv_px[y*240+x]==swap16(matrix_col());
     CHECK(segment_ink>0); /* baseline/text cannot satisfy a missing stage curve */
    } else {
-    /* No label/value for an absent stage. Row 25 is the plot's top edge: the
-     * anti-aliased curve at full level may tint it, so it is not label ink. */
+    /* Label band only: y=25 is the anti-aliased halo of a curve drawn at top=26. */
     for(int x=4+k*59;x<4+(k+1)*59;x++)for(int y=12;y<25;y++)CHECK(cv_px[y*240+x]==swap16(C_BLACK));
    }
   }
