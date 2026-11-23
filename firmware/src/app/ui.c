@@ -39,6 +39,7 @@
 #include "ui_original_wave.h"
 #include "../dsp/bass_param_ids.h"                    /* BASS303_* (the 303's pages) */
 #include "chicago_arp.h"                       /* CHI_ARP_* (Chicago live arp page) */
+#include "ui_arp_hooks.h"                      /* SJ6/S1 arp + ARP SEQ (X0X_ARP_HOOKS) */
 #include "chicago_fx.h"                        /* CHI_FX_* SEND FX + Crush/Ring/EQ/Cho/Ens/Phaser/SDly/BPM/Hall/GateRev insert */
 #include "chicago_aux.h"                       /* CHI_PBEND / CHI_DAMPER */
 #include "../dsp/fxbus.h"                      /* FX_* indices for SEND FX commit */
@@ -439,6 +440,12 @@ enum { R_NONE, R_ENG, R_SWING, R_DLEN, R_DRATE, R_BLEN, R_BRATE, R_BDIR, R_BTRAN
 #if X0X_SYNTHONE_PATCH
 enum { R_S1PATCH = R_NOTELOCK + 1 };
 #endif
+#if X0X_ARP_HOOKS
+enum { R_ARP = R_NOTELOCK + 2 };          /* a: ARP_F_* field, b: bass voice */
+static const x0x_param_t *arp_desc(unsigned field);
+static int arp_get(unsigned voice, unsigned field);
+static void arp_set(unsigned voice, unsigned field, int v);
+#endif
 typedef struct { uint8_t kind, a, b, c; } pref_t;
 #define PR(k, a, b, c) ((pref_t){(k), (a), (b), (c)})
 #define NONE PR(R_NONE, 0, 0, 0)
@@ -590,6 +597,9 @@ static void song_fill(int k)
 static const x0x_param_t *pref_desc(pref_t r)
 {
     switch (r.kind) {
+#if X0X_ARP_HOOKS
+    case R_ARP: return arp_desc(r.a);
+#endif
 #if X0X_SYNTHONE_PATCH
     case R_S1PATCH: {
         const s1_patch_descriptor *d = s1_patch_at(r.c);
@@ -691,6 +701,9 @@ static UI_DRAW int pref_get(pref_t r)
         seq.ppat[PART_BRK] == ui.brk_choice_pat) return ui.brk_choice_slot;
     pattern_t *p = pref_pattern(r);
     switch (r.kind) {
+#if X0X_ARP_HOOKS
+    case R_ARP: return arp_get(r.b, r.a);
+#endif
 #if X0X_SYNTHONE_PATCH
     case R_S1PATCH: {
         const s1_patch_descriptor *d = s1_patch_at(r.c);
@@ -787,6 +800,9 @@ static void ui_restore_base(int target, int voice, int parameter)
 
 X0X_COLD static void pref_set_impl(pref_t r, int v, int from_keyboard)
 {
+#if X0X_ARP_HOOKS
+    if (r.kind == R_ARP) { arp_set(r.b, r.a, v); return; }
+#endif
 #if X0X_SYNTHONE_PATCH
     if (r.kind == R_S1PATCH) { s1_edit(r, v, 0); return; }
 #endif
@@ -1645,6 +1661,99 @@ static uint8_t *page_of(int view)
     return &ui.page[view][view == V_PART || view == V_SEQ || view == V_GEN ? ui.part : 0];
 }
 
+#if X0X_ARP_HOOKS
+/* SJ6 / Synth One arp (UX-PROPOSAL.md, approved 23 Nov 2026). The engine owns
+ * every value; the UI reads it each frame and queues edits with the revision. */
+static const char *const ARP_MODE_N[] = {"UP", "DOWN", "UP+DN", "SEQ"};
+static const char *const ARP_RANGE_N[] = {"1 OCT", "2 OCT", "3 OCT", "4 OCT"};
+static const char *const ARP_SPEED_N[] = {"1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "1/12", "1/16", "1/32"};
+static const char *const ARP_STEPS_N[] = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"};
+static const char *const ARP_INTERVAL_N[] = {"0st","1st","2st","3st","4st","5st","6st","7st","8st","9st","10st","11st","12st"};
+static const x0x_param_t ARP_P[ARP_F_GATE] = {
+    {"ON", 1, 0, ONOFF_N}, {"MODE", 3, 0, ARP_MODE_N}, {"RANGE", 3, 0, ARP_RANGE_N},
+    {"SPEED", 9, 8, ARP_SPEED_N}, {"STEPS", 15, 15, ARP_STEPS_N}, {"INTERVAL", 12, 12, ARP_INTERVAL_N}};
+#define STEP_TAP_MS 300u                     /* (same as the pattern steps) */
+static int8_t arp_held = -1;                 /* the ARP SEQ pad held (0..15), or -1 */
+static uint8_t arp_edited;
+static uint32_t arp_t0;
+static const x0x_param_t *arp_desc(unsigned field) { return field < ARP_F_GATE ? &ARP_P[field] : 0; }
+/* The voice's engine has the arp (SuperJ6 or Synth One, hooks answering). */
+static int arp_engine(int b)
+{
+    engine_arp_settings s;
+    int kind = engine_bass_bank(b);
+    return (kind == ORIGINAL_SOUND_JUNO || kind == ORIGINAL_SOUND_SYNTHONE) && engine_arp_settings_read((unsigned)b, &s);
+}
+static int arp_get(unsigned voice, unsigned field)
+{
+    engine_arp_settings s;
+    if (!engine_arp_settings_read(voice, &s)) return 0;
+    switch (field) {
+    case ARP_F_ON: return s.on;
+    case ARP_F_MODE: return s.mode;
+    case ARP_F_RANGE: return s.range ? s.range - 1 : 0;
+    case ARP_F_SPEED: return s.speed;
+    case ARP_F_LENGTH: return s.length ? s.length - 1 : 0;
+    case ARP_F_INTERVAL: return s.interval;
+    }
+    return 0;
+}
+static void arp_set(unsigned voice, unsigned field, int v)
+{
+    engine_arp_settings s;
+    if (!engine_arp_settings_read(voice, &s)) return;
+    if (field == ARP_F_RANGE || field == ARP_F_LENGTH) v++;
+    if (engine_arp_set(voice, s.revision, field, v) == S1_EDIT_REJECTED) say("ARP NOT CHANGED", 0);
+}
+/* SEQ page 4: SEQUENCE, PRESET, KEYS, ARP SEQ. */
+static int arp_seq_page(void)
+{
+    return ui.view == V_SEQ && is_303() && *page_of(V_SEQ) == 3 && arp_engine(bidx());
+}
+static void arp_step_edit(unsigned step, unsigned field, int v)
+{
+    engine_arp_settings s;
+    if (engine_arp_settings_read((unsigned)bidx(), &s) &&
+        engine_arp_step_set((unsigned)bidx(), s.revision, step, field, v) == S1_EDIT_REJECTED)
+        say("ARP NOT CHANGED", 0);
+}
+static void arp_step_by(int by)                /* K5: one semitone; OCT: twelve */
+{
+    engine_arp_steps st;
+    if (arp_held < 0 || !engine_arp_steps_read((unsigned)bidx(), &st)) return;
+    int v = st.offset[arp_held] + by;
+    v = v < UI_ARP_OFFSET_MIN ? UI_ARP_OFFSET_MIN : v > UI_ARP_OFFSET_MAX ? UI_ARP_OFFSET_MAX : v;
+    arp_edited = 1;
+    arp_step_edit((unsigned)arp_held, ARP_S_OFFSET, v);
+}
+/* Pads on ARP SEQ: tap = step on/off; hold = that step's editor (K5 offset, K6 on, K7 OCT+). */
+static void arp_step_key(int white, int down)
+{
+    engine_arp_steps st;
+    if (white < 0 || white >= ARP_STEPS) return;
+    if (down) {
+        arp_held = (int8_t)white;
+        arp_edited = 0;
+        arp_t0 = plat_ms();
+    } else if (arp_held == white) {
+        if (!arp_edited && plat_ms() - arp_t0 < STEP_TAP_MS && engine_arp_steps_read((unsigned)bidx(), &st))
+            arp_step_edit((unsigned)white, ARP_S_ON, !((st.on_mask >> white) & 1u));
+        arp_held = -1;
+    }
+}
+static void arp_step_knob(int knob, int e)
+{
+    engine_arp_steps st;
+    if (!engine_arp_steps_read((unsigned)bidx(), &st)) return;
+    if (knob == 0) arp_step_by(e);
+    else if (knob == 1 || knob == 2) {
+        unsigned m = knob == 1 ? st.on_mask : st.oct_mask;
+        arp_edited = 1;
+        arp_step_edit((unsigned)arp_held, knob == 1 ? ARP_S_ON : ARP_S_OCT, !((m >> arp_held) & 1u));
+    }                                            /* K8: nothing on an arp step */
+}
+#endif
+
 /* Immutable page descriptions avoid rebuilding four constant preference records at
  * every call site. The only patched byte is the current part/voice/channel;
  * NONE retains its all-zero record. This runs only during UI page construction. */
@@ -1700,6 +1809,13 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
             emit->group = GR_NONE;                          /* (not the pattern's: no P1 in its name) */
             do { static const pref_t refs[4] = {PR(R_FREEPLAY, 0, 0, 0), NONE, NONE, NONE};
             add_page_refs(emit, "KEYS", refs, 1, b); } while (0);
+#if X0X_ARP_HOOKS
+            if (arp_engine(b)) {                       /* 4: the 16 arp steps on the pads; K7/K8 stay empty */
+                emit->group = GR_PAT;
+                add_page(emit, "ARP SEQ", PR(R_ARP, ARP_F_LENGTH, b, 0), PR(R_ARP, ARP_F_INTERVAL, b, 0), NONE, NONE);
+                emit->group = GR_NONE;
+            }
+#endif
         }
         else {
             do { static const pref_t refs[4] = {PR(R_BRKRATE, 0, 0, 0), NONE, NONE, NONE};
@@ -1743,8 +1859,19 @@ static void describe_pages(pages_t *out, page_query_t *query, int view, int p, i
                         if (refs[col].kind != R_NONE) refs[col].kind = R_S1PATCH;
                 }
 #endif
+#if X0X_ARP_HOOKS
+                /* ARPEGGIATOR before EFFECT (Chicago order); SJ6 has no EFFECT group. */
+                if (kind == ORIGINAL_SOUND_SYNTHONE && row == count - 1 && arp_engine(b))
+                    add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                             PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+#endif
                 add_page_refs(emit, titles[row],refs,0,0);
             }
+#if X0X_ARP_HOOKS
+            if (kind == ORIGINAL_SOUND_JUNO && arp_engine(b))
+                add_page(emit, "ARPEGGIATOR", PR(R_ARP, ARP_F_ON, b, 0), PR(R_ARP, ARP_F_RANGE, b, 0),
+                         PR(R_ARP, ARP_F_MODE, b, 0), PR(R_ARP, ARP_F_SPEED, b, 0));
+#endif
             add_page(emit, "SOUND",PR(R_BENGINE,0,b,0),PR(R_BPRESET,0,b,0),PR(R_BSTATUS,0,b,0),NONE);
         } else {
             emit->group = GR_PAT;                           /* (its groove and retrigs: SEQ) */
@@ -3278,6 +3405,9 @@ static void lock_release(void)                        /* the held step let go: s
  * to the part that was down, even if a queued pattern switch has changed the screen meanwhile. */
 static void bass_step_cancel(void)
 {
+#if X0X_ARP_HOOKS
+    arp_held = -1;                                 /* (a part/page change lets the arp step go too) */
+#endif
     if (ui.held_step < 0)
         return;
     if (ui.step_preview)
@@ -4146,6 +4276,10 @@ static UI_DRAW void key_event(int k, int down)
             if (down)
                 bass_kbd(k, ui.view == V_SEQ);
         }
+#if X0X_ARP_HOOKS
+        else if (w >= 0 && arp_seq_page())
+            arp_step_key(w, down);
+#endif
         else if (w >= 0 && ui.view == V_SEQ)
             bass_step_key(w, down);
     } else {
@@ -4490,6 +4624,10 @@ X0X_COLD static void button_tap(int b)
             ui.pbank = (uint8_t)up;
             say(up ? "COPY TO P17-32" : "COPY TO P1-16", 0);
             ui.help = 0;
+#if X0X_ARP_HOOKS
+        } else if (arp_seq_page() && arp_held >= 0) {   /* a held arp step: +-12 */
+            arp_step_by(up ? 12 : -12);
+#endif
         } else if (steps_view() && is_303() && !ui.rec && ui.held_step >= 0) {   /* a held step: its octave */
             held_note_by(up ? 12 : -12);
         } else if (ui.view == V_GEN) {
@@ -5036,6 +5174,9 @@ X0X_COLD static void input_body(void)
 #endif
             continue;
         }
+#if X0X_ARP_HOOKS
+        if (arp_held >= 0 && arp_seq_page()) { arp_step_knob(i, e); continue; }
+#endif
         if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {     /* SEQ, a held step's knobs edit it */
             bpart_t *bp = &cur_pat()->bass[bidx()];
             bstep_t *st = &bp->step[ui.held_step];
@@ -5916,10 +6057,35 @@ static UI_DRAW void draw_303(int band, int gen)
 {
     int b = bidx(), c, o = band * BAND_H, n;       /* o: drawn in the screen's rows, minus the band's */
     const bpart_t *bp = &cur_pat()->bass[b];
+    int held = ui.held_step, arp = 0;
+#if X0X_ARP_HOOKS
+    static bpart_t arp_bp;                         /* ARP SEQ: the same roll, drawn from the engine's arp steps */
+    engine_arp_settings as;
+    engine_arp_steps ast;
+    unsigned arp_ph = 0;
+    uint32_t age = 0;
+    if (!gen && arp_seq_page() && engine_arp_settings_read((unsigned)b, &as) && engine_arp_steps_read((unsigned)b, &ast)) {
+        memset(&arp_bp, 0, sizeof arp_bp);
+        arp_bp.len = as.length ? as.length : 16;
+        arp_bp.gen.root = UI_ARP_ROOT % 12;            /* offsets from the held root (C3 when none is held) */
+        arp_bp.gen.base_oct = (uint8_t)(UI_ARP_ROOT / 12 - 1);
+        for (c = 0; c < ARP_STEPS; c++) {
+            arp_bp.step[c].note = (uint8_t)(UI_ARP_ROOT + ast.offset[c] + ((ast.oct_mask >> c) & 1u) * 12);
+            arp_bp.step[c].flags = (ast.on_mask >> c) & 1u ? G_NOTE : G_REST;
+        }
+        bp = &arp_bp;
+        held = arp_held;
+        arp = 1;
+    }
+#endif
     int len = bp->len < NSTEPS ? bp->len : NSTEPS;
     int ph = seq.playing ? eng_step[TRK_BASS0 + b] : -1, lo = 127, hi = 0;
+#if X0X_ARP_HOOKS
+    if (arp)                                       /* only the step that really sounded (row 60 rule) */
+        ph = as.on && engine_arp_view((unsigned)b, &arp_ph, &age) && age < 250u ? (int)arp_ph : -1;
+#endif
     uint16_t col = part_col();
-    uint32_t lmarks = gen ? 0 : lock_marks(-1, -1, ui.spage * 16);
+    uint32_t lmarks = gen || arp ? 0 : lock_marks(-1, -1, ui.spage * 16);
     char t[40], *q = t;
     for (c = 0; c < len; c++) {
         if (bstep_gate(&bp->step[c]) == G_NOTE) {
@@ -5962,11 +6128,11 @@ static UI_DRAW void draw_303(int band, int gen)
         int start = note_start_of(bp, s);
         if (start >= 0) {
             int y = note_y(bp->step[start].note, lo, hi) - o;
-            uint16_t fc = s == ui.held_step ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
+            uint16_t fc = s == held ? C_WHITE : (st->flags & BS_ACCENT) ? col : dim(col, 9);
             int end = st->flags >> BS_END_SHIFT;
             int width = end ? end - end / 5 : 12; /* ceil(end * 12 / 15) */
             box(x, y, width, 5, fc); /* captured 1..15 release fraction of this step */
-            if (s == ui.held_step && (st->flags & BS_ACCENT)) {
+            if (s == held && (st->flags & BS_ACCENT)) {
                 int inset = width > 2;
                 cv_rect(x + inset, y + 1, width - 2 * inset, 3, col);
             }
@@ -5997,6 +6163,23 @@ static UI_DRAW void draw_303(int band, int gen)
             }
         }
     }
+#if X0X_ARP_HOOKS
+    if (arp) {                                     /* ARP SEQ: the held step, else the arp's state */
+        if (held >= 0) {
+            int off = bp->step[held].note - UI_ARP_ROOT;
+            q = put_s(q, "ARP STEP ");
+            q = put_i(q, held + 1);
+            q = put_s(q, off < 0 ? "  -" : "  +");
+            q = put_i(q, off < 0 ? -off : off);
+            put_s(q, "st");
+        } else {
+            q = put_s(q, "ARP ");
+            q = put_s(q, ARP_MODE_N[as.mode % ARP_NMODES]);
+            put_s(q, as.on ? "" : " OFF");
+        }
+        cv_text(4, vc(&FONT_B, 122, 16) - o, &FONT_B, t, C_WHITE);
+    } else
+#endif
     if (ui.held_step >= 0 || ui.rec) {   /* the step held (or being written) */
         int s = ui.held_step >= 0 ? ui.held_step : ui.wpos[b];
         const bstep_t *st = &bp->step[s];
@@ -8882,6 +9065,13 @@ static UI_DRAW uint32_t knobs_sig(void)
         MIXIN(track|(queued<<1)|((unsigned)part_muted(mix_kit)<<2));
     }
     MIXIN(ui.view);
+#if X0X_ARP_HOOKS
+    if (is_303() && arp_engine(bidx())) {             /* the arp's values and the held arp step */
+        engine_arp_settings as;
+        if (engine_arp_settings_read((unsigned)bidx(), &as)) MIXIN(as.revision);
+        MIXIN(arp_held);
+    }
+#endif
     if(ui.view==V_SEQ) {
         step_lane_snapshot_t lane;
         step_lane_snapshot(&lane,ui_step_lane);
@@ -9073,6 +9263,24 @@ static UI_DRAW void draw_knobs(void)
         }
     }
     if(mix_kit<0)draw_footer();
+#if X0X_ARP_HOOKS
+    engine_arp_steps held_arp;
+    if (arp_held >= 0 && arp_seq_page() && engine_arp_steps_read((unsigned)bidx(), &held_arp)) {
+        static const char *const AN[3] = {"OFFSET", "STEP", "OCT+"};   /* K8: nothing on an arp step */
+        for (i = 0; i < 3; i++) {
+            char v[12];
+            int cx = i * 60 + 30, off = held_arp.offset[arp_held];
+            if (i == 0)
+                put_s(put_i(put_s(v, off < 0 ? "-" : "+"), off < 0 ? -off : off), "st");
+            else
+                put_s(v, (((i == 1 ? held_arp.on_mask : held_arp.oct_mask) >> arp_held) & 1u) ? "ON" : "OFF");
+            text_c(cx, vc(&FONT_XS, 13, 10), &FONT_XS, AN[i], C_GRAY);
+            text_c(cx, vc(&FONT_M, 30, 34), &FONT_M, v, C_WHITE);
+        }
+        cv_commit_knobs(3);
+        return;
+    }
+#endif
     if (ui.view == V_SEQ && is_303() && ui.held_step >= 0) {     /* SEQ: the held step's own knobs */
         static const char *const SN[4] = {"NOTE", "GATE", "ACCENT", "SLIDE"};
         static const char *const G[3] = {"REST", "NOTE", "TIE"};
@@ -9243,6 +9451,23 @@ static UI_DRAW void leds(void)
                 else if ((int)i != ui.sel[ui.part] && sm_any(d0->hit[i]) && !mu)
                     d |= 1u << BLACK_KEY[i];
             }
+#if X0X_ARP_HOOKS
+        } else if (is_303() && !kbd_on() && arp_seq_page()) {   /* ARP SEQ: steps on lit; the arp's real step inverted */
+            engine_arp_settings as;
+            engine_arp_steps ast;
+            unsigned ph = 0;
+            uint32_t age = 0;
+            int live = engine_arp_settings_read((unsigned)bidx(), &as) && as.on &&
+                       engine_arp_view((unsigned)bidx(), &ph, &age) && age < 250u;
+            if (engine_arp_steps_read((unsigned)bidx(), &ast))
+                for (i = 0; i < 16; i++) {
+                    int on = i < as.length && ((ast.on_mask >> i) & 1u);
+                    if (live && ph == i)
+                        on = !on;
+                    if (on)
+                        k |= 1u << WHITE_KEY[i];
+                }
+#endif
         } else if (is_303() && !kbd_on()) {           /* notes bright, ties dim */
             const bpart_t *bp = &cur_pat()->bass[bidx()];
             int ph = eng_step[TRK_BASS0 + bidx()];

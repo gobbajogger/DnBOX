@@ -153,6 +153,9 @@ static void step_lane_snapshot(step_lane_snapshot_t *snapshot,int kind)
 
 static UI_DRAW void draw_step_lane(void)
 {
+#if X0X_ARP_HOOKS
+    if(arp_seq_page())return;   /* ARP SEQ: the pattern's lane is not the arp's */
+#endif
     static const char *const labels[UI_LANE_COUNT]={"VELOCITY","CHANCE","PITCH","PAN"};
     int kind=ui_step_lane<UI_LANE_COUNT?ui_step_lane:UI_LANE_VELOCITY;
     step_lane_snapshot_t snapshot;step_lane_snapshot(&snapshot,kind);
