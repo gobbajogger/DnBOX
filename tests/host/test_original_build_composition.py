@@ -33,6 +33,57 @@ def compile_plan(env):
 
 
 class OriginalBuildCompositionTests(unittest.TestCase):
+    def test_smk_generation_and_compile_isolated_from_host_headers(self):
+        class StopBeforeLink(Exception):
+            pass
+
+        for model, outname in (("elite", "smk37-elite"), ("pro", "smk37")):
+            with self.subTest(model=model), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp).resolve()
+                out = root / "build"
+                host_gen = out / "gen"
+                host_gen.mkdir(parents=True)
+                host_bank = host_gen / "x0x_break_bank.h"
+                host_bank.write_text("#define X0X_NBREAKS 2\n")
+                native_gen = out / outname / "gen"
+                captured = []
+
+                def simulate_generation():
+                    build.GEN.mkdir(parents=True, exist_ok=True)
+                    (build.GEN / "x0x_break_bank.h").write_text("#define X0X_NBREAKS 0\n")
+
+                def stop_before_link(*units):
+                    captured.extend(units)
+                    raise StopBeforeLink
+
+                with mock.patch.multiple(build, SRC=root, OUT=out, GEN=host_gen,
+                                         LDR=out / "loader", MODEL=None, PRODUCT=None,
+                                         BOARD=None, VERSION=None, GIT_SHA=None,
+                                         RELEASE_LABEL=None, BOARD_DEFS=dict(build.BOARD_DEFS),
+                                         BOARD_PREFIX=dict(build.BOARD_PREFIX),
+                                         APP_SLOT=build.APP_SLOT, APP_CODE_MAX=build.APP_CODE_MAX), \
+                     mock.patch.dict(os.environ, {}, clear=True), \
+                     mock.patch.object(sys, "argv", ["build.py", "--board", "smk37", "--model", model]), \
+                     mock.patch.object(build, "require_original_synth_sources"), \
+                     mock.patch.object(build.subprocess, "run"), \
+                     mock.patch.object(build.fm1pkg_make, "set_board"), \
+                     mock.patch.object(build.fm1pkg_make, "SDK", None), \
+                     mock.patch.object(build, "check_sdk"), \
+                     mock.patch.object(build, "generate", side_effect=simulate_generation), \
+                     mock.patch.object(build, "build_loader"), \
+                     mock.patch.object(build, "clang_std_inc", return_value=[]), \
+                     mock.patch.object(build, "tc_all", side_effect=stop_before_link):
+                    build.subprocess.run.return_value.returncode = 0
+                    with self.assertRaises(StopBeforeLink):
+                        build.main()
+                self.assertEqual(host_bank.read_text(), "#define X0X_NBREAKS 2\n")
+                self.assertEqual((native_gen / host_bank.name).read_text(), "#define X0X_NBREAKS 0\n")
+                c_units = [cmd for cmd in captured if str(cmd[cmd.index("-c") + 1]).endswith(".c")]
+                self.assertTrue(c_units)
+                for cmd in c_units:
+                    self.assertIn("-I" + str(native_gen.relative_to(root)), cmd)
+                    self.assertNotIn("-Ibuild/gen", cmd)
+
     def test_synthone_editor_and_provider_use_the_same_model_default(self):
         targets = (("smk37", "elite", "0", "1"), ("smk37", "pro", "0", "1"),
                    ("smk37", "mke", "0", "0"), ("fm1", "pro", "0", "0"),

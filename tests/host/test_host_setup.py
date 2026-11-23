@@ -79,7 +79,7 @@ pathlib.Path(sys.argv[sys.argv.index("-o") + 1]).write_text("simulator")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual({p.name for p in (self.root / "build/gen").iterdir()},
                          {"felucca_font.h", "x0x_drum_samples.h", "x0x_drum_tables.h",
-                          "x0x_break_bank.h"})
+                          "x0x_break_bank.h", ".generate.lock"})
         self.assertFalse((self.root / "compile.json").exists())
         self.assertFalse((self.root / "build/host/x0x_host").exists())
 

@@ -79,11 +79,11 @@ class Tail(unittest.TestCase):
         imgs = sorted((ROOT / "build").glob("smk37*/xdata.img"))
         if not imgs:
             self.skipTest("no build/smk37*/xdata.img (MODEL=pro|elite ./build.sh)")
-        hdr = (ROOT / "build/gen/felucca_font.h").read_text()
-        want_len = int(re.search(r"#define FONT_XDATA_LEN (\d+)u", hdr).group(1))
-        want_id = int(re.search(r"#define FONT_XDATA_CRC32 0x([0-9A-F]+)u", hdr).group(1), 16)
         for p in imgs:
             with self.subTest(img=str(p.relative_to(ROOT))):
+                hdr = (p.parent / "gen/felucca_font.h").read_text()
+                want_len = int(re.search(r"#define FONT_XDATA_LEN (\d+)u", hdr).group(1))
+                want_id = int(re.search(r"#define FONT_XDATA_CRC32 0x([0-9A-F]+)u", hdr).group(1), 16)
                 r = p.read_bytes()
                 self.assertEqual(build.xdata_problems(r), [])
                 magic, n, crc, ident = struct.unpack_from("<IIII", r, 0)

@@ -284,7 +284,7 @@ def tc_all(*cmds):
 def generate():
     """generated headers: the font (Felucca's), the 909's samples and tables, the break bank"""
     GEN.mkdir(parents=True, exist_ok=True)
-    # Elite and Pro (and host tests) may refresh GEN together; lock so headers are not torn.
+    # Guard simultaneous generation of the same native target; host files live elsewhere.
     _gen_lock = open(GEN / ".generate.lock", "a+")
     fcntl.flock(_gen_lock.fileno(), fcntl.LOCK_EX)
     try:
@@ -513,7 +513,8 @@ def build_app():
     original_synth, wobble = synth_build_config()
     if original_synth:
         require_original_synth_sources()
-    flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
+    flags = [*CFLAGS, *FPU, *BOARD_DEFS[BOARD], "-Ifirmware/hal", "-Ifirmware/src",
+             f"-I{GEN.relative_to(SRC)}"]
     factory_roots = []
     if SUPERJ6_FACTORY == "1":
         names = ["engine_superj6_factory_load"]
@@ -716,7 +717,7 @@ def fittab_problems(region):
 
 
 def write_fittab_id():
-    """build/gen/fittab_id.h: FITTAB_LEN / FITTAB_CRC32 for the app's fittab_load / ED_FITTAB."""
+    """Generated FITTAB_LEN / FITTAB_CRC32 for the app's fittab_load / ED_FITTAB."""
     GEN.mkdir(parents=True, exist_ok=True)
     if BOARD != "smk37":
         (GEN / "fittab_id.h").write_text("/* FITTAB is an SMK-37 region; this board has none */\n")
@@ -875,7 +876,7 @@ def version_defines(version, release_label, git_sha):
 
 
 def main():
-    global PRODUCT, VERSION, GIT_SHA, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, LDR
+    global PRODUCT, VERSION, GIT_SHA, RELEASE_LABEL, BOARD, MODEL, APP_SLOT, APP_CODE_MAX, OUT, GEN, LDR
     ap = argparse.ArgumentParser()
     versions = ap.add_mutually_exclusive_group()
     versions.add_argument("--release", metavar="X.Y[.Z]", help="release build: numeric package identity and version string")
@@ -931,6 +932,9 @@ def main():
         stem += "-" + model
         OUT = OUT.parent / f"{BOARD}-{model}"     # its own objects: the Pro build's stay as they are
         LDR = OUT / "loader"
+    # The host writes a simulator BREAK bank to build/gen. Never compile the native
+    # image from that directory, even if a host test is generating it concurrently.
+    GEN = OUT / ("native-gen" if BOARD == "fm1" else "gen")
     name = f"{stem}.fwsc"
     VERSION = GIT_SHA = None
     RELEASE_LABEL = None
