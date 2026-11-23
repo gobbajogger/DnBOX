@@ -2368,6 +2368,7 @@ static void fm1_main(void)
 #if BOARD_SMK37
             st_owner_check();                       /* SMK: never parse another ported firmware's store (storage.c) */
 #endif
+            xdata_check();                          /* font bitmaps in XDATA: else FONT_T (gfx.c font_live) */
             for (k = 0; k < SMP_USER_SLOTS; k++)
                 smp_user_scan(k);
             ed_smp_recover();                       /* mid-WRITE power loss: put sector 0 back from FL_SMPV */
@@ -2466,6 +2467,8 @@ static void fm1_main(void)
     if (st_owner_cleared)
         ui_say("OLD DATA CLEARED", 0);          /* another firmware's store (storage.c st_owner_check); say() has 27 chars */
 #endif
+    if (!gfx_xdata_ok)
+        ui_say("FONTS MISSING: REINSTALL", 0);  /* XDATA bad CRC / build id (gfx.c xdata_check) */
 
     for (;;) {
         fm1_wdt_feed();

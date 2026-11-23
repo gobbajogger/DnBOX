@@ -70,7 +70,7 @@ def main():
             gen_font.main(path / "font_raw.h", compressed=False)
             original = (path / "font_raw.h").read_text()
             packed = (path / "felucca_font.h").read_text()
-            size = lambda text: sum(map(int, re.findall(r"_DATA\[(\d+)\]", text)))
+            size = lambda text: sum(map(int, re.findall(r"_(?:DATA|BLOB)\[(\d+)\]", text)))
             assert size(packed) < size(original)
             if fontset == "barlow":
                 assert size(original) - size(packed) >= 16000
